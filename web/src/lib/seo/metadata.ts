@@ -1,4 +1,5 @@
-import { Metadata } from 'next';
+import { Metadata } from "next";
+import siteEnv from "./siteConfig";
 
 interface SeoConfig {
   title: string;
@@ -9,8 +10,8 @@ interface SeoConfig {
 
 export function constructMetadata({
   title,
-  description = 'Sunny Diamond - Premium Jewelry and Diamonds',
-  image = '/og-image.jpg',
+  description = "Sunny Diamond - Premium Jewelry and Diamonds",
+  image = "/og-image.jpg",
   noIndex = false,
 }: SeoConfig): Metadata {
   return {
@@ -26,18 +27,18 @@ export function constructMetadata({
       ],
     },
     twitter: {
-      card: 'summary_large_image',
+      card: "summary_large_image",
       title,
       description,
       images: [image],
-      creator: '@sunnydiamond',
+      creator: "@sunnydiamond",
     },
     icons: {
-      icon: '/favicon.ico',
-      shortcut: '/favicon-16x16.png',
-      apple: '/apple-touch-icon.png',
+      icon: "/favicon.ico",
+      shortcut: "/favicon-16x16.png",
+      apple: "/apple-touch-icon.png",
     },
-    metadataBase: new URL('https://sunnydiamond.com'),
+    metadataBase: new URL(siteEnv.baseUrl),
     ...(noIndex && {
       robots: {
         index: false,

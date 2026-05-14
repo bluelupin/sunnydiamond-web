@@ -1,11 +1,32 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-heading: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-heading: "Larken", "Playfair Display", Georgia, serif;
+  --font-display: "Larken", "Playfair Display", Georgia, serif;
+  --font-gill: "Gill Sans", "Gill Sans MT", Calibri, system-ui, sans-serif;
+  --font-larken: "Larken", "Playfair Display", Georgia, serif;
+  --font-satoshi: "Satoshi", "Inter", system-ui, sans-serif;
 
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
+  --color-darkMagenta: #722257;
+  --color-gray100: #efece6;
+  --color-gray200: #fbfaf6;
+  --color-gray300: #f4f3ee;
+  --color-nuetral200: #a2a1a1;
+  --color-blackdark: #292727;
+  --color-darkblack: #0a0a0a;
+  --color-gray500: #555555;
+  --color-gray600: #999999;
+  --color-creamColor: #9a3a96;
+  --color-gold: hsl(var(--gold));
+  --color-gold-light: hsl(var(--gold-light));
+  --color-gold-dark: hsl(var(--gold-dark));
+  --color-charcoal: hsl(var(--charcoal));
+  --color-ivory: hsl(var(--ivory));
+  --color-warm-gray: hsl(var(--warm-gray));
 
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
@@ -35,60 +56,247 @@
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
+
+  --text-11: 11px;
+  --text-13: 13px;
+  --text-15: 15px;
+  --text-32: 32px;
+
+  --spacing-26: 26px;
+  --spacing-30: 120px;
+  --spacing-40: 40px;
+  --spacing-50: 50px;
+  --spacing-65: 65px;
+  --spacing-74: 74px;
+  --spacing-75: 75px;
+  --spacing-76: 76px;
+  --spacing-240: 240px;
+  --spacing-260: 260px;
+  --spacing-290: 290px;
+  --spacing-350: 350px;
+  --spacing-405: 405px;
+  --spacing-420: 420px;
+  --spacing-433: 433px;
+  --spacing-509: 509px;
+  --spacing-550: 550px;
+  --spacing-560: 560px;
+  --spacing-620: 620px;
+  --spacing-700: 700px;
+  --spacing-780: 780px;
+
+  --container-196: 196px;
+  --container-394: 394px;
+  --container-560: 560px;
+  --container-570: 570px;
+  --container-1400: 1400px;
+  --container-1440: 1440px;
+
+  --background-image-giftingBg: url("../assets/giftingBg.png");
 }
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 224 71.4% 4.1%;
+    --background: 40 20% 98%;
+    --foreground: 30 10% 15%;
     --card: 0 0% 100%;
-    --card-foreground: 224 71.4% 4.1%;
+    --card-foreground: 30 10% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 224 71.4% 4.1%;
-    --primary: 220.9 39.3% 11%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 220 14.3% 95.9%;
-    --secondary-foreground: 220.9 39.3% 11%;
-    --muted: 220 14.3% 95.9%;
-    --muted-foreground: 220 8.9% 46.1%;
-    --accent: 220 14.3% 95.9%;
-    --accent-foreground: 220.9 39.3% 11%;
+    --popover-foreground: 30 10% 15%;
+    --primary: 36 40% 62%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 15% 94%;
+    --secondary-foreground: 30 10% 25%;
+    --muted: 30 10% 94%;
+    --muted-foreground: 30 5% 50%;
+    --accent: 36 40% 62%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 20% 98%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 224 71.4% 4.1%;
-    --radius: 0.5rem;
+    --border: 30 15% 88%;
+    --input: 30 15% 88%;
+    --ring: 36 40% 62%;
+    --radius: 0.25rem;
+
+    --gold: 36 40% 62%;
+    --gold-light: 36 50% 85%;
+    --gold-dark: 36 35% 42%;
+    --charcoal: 30 10% 15%;
+    --ivory: 40 30% 96%;
+    --warm-gray: 30 5% 50%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 224 71.4% 4.1%;
-    --foreground: 210 20% 98%;
-    --card: 224 71.4% 4.1%;
-    --card-foreground: 210 20% 98%;
-    --popover: 224 71.4% 4.1%;
-    --popover-foreground: 210 20% 98%;
-    --primary: 210 20% 98%;
-    --primary-foreground: 220.9 39.3% 11%;
-    --secondary: 215 27.9% 16.9%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 215 27.9% 16.9%;
-    --muted-foreground: 217.9 10.6% 64.9%;
-    --accent: 215 27.9% 16.9%;
-    --accent-foreground: 210 20% 98%;
+    --background: 30 10% 15%;
+    --foreground: 40 20% 98%;
+    --card: 30 10% 15%;
+    --card-foreground: 40 20% 98%;
+    --popover: 30 10% 15%;
+    --popover-foreground: 40 20% 98%;
+    --primary: 36 40% 62%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 10% 20%;
+    --secondary-foreground: 40 20% 98%;
+    --muted: 30 10% 20%;
+    --muted-foreground: 30 5% 70%;
+    --accent: 36 40% 62%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 20% 98%;
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
-    --ring: 216 12.2% 83.9%;
+    --border: 30 10% 25%;
+    --input: 30 10% 25%;
+    --ring: 36 40% 62%;
   }
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-body antialiased;
   }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 300;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 300;
+  }
+}
+
+@layer utilities {
+  .font-heading {
+    font-family: var(--font-heading);
+  }
+
+  .font-display,
+  .font-larken {
+    font-family: var(--font-display);
+  }
+
+  .font-body {
+    font-family: var(--font-body);
+  }
+
+  .font-gill {
+    font-family: var(--font-gill);
+  }
+
+  .font-satoshi {
+    font-family: var(--font-satoshi);
+  }
+
+  .text-h1 {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: 54px;
+    line-height: 100%;
+    letter-spacing: 0%;
+  }
+
+  .text-h2 {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: 48px;
+    line-height: 100%;
+    letter-spacing: 0%;
+  }
+
+  .btn-slide-up {
+    transform: translateY(0);
+    transition:
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 0.35s ease,
+      color 0.35s ease,
+      opacity 0.35s ease;
+    will-change: transform;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .btn-slide-up:hover {
+      transform: translateY(-3px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn-slide-up {
+      transition: none;
+    }
+
+    .btn-slide-up:hover {
+      transform: none;
+    }
+  }
+}
+
+.neckLaceArcContainer {
+  background-image: url("../assets/diamond-necklace-arc.svg");
+  background-position: 100% 0%;
+  background-size: 50%;
+  background-repeat: no-repeat;
+}
+
+@media screen and (max-width: 768px) {
+  .neckLaceArcContainer {
+    background-size: 70%;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  .neckLaceArcContainer {
+    background-size: 107%;
+  }
+}
+
+.necklaceArcImage {
+  width: 180%;
+  max-width: none;
+  top: -30%;
+  left: -15%;
+  transform: rotate(-8deg);
+}
+
+@media screen and (max-width: 768px) {
+  .necklaceArcImage {
+    width: 60%;
+    max-width: none;
+    top: 0%;
+    right: 0%;
+    left: auto;
+    transform: rotate(1deg);
+  }
+}
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 40s linear infinite;
 }

@@ -1,47 +1,40 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import AppProvider from "@/lib/providers/AppProvider";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
-const outfit = Outfit({
-  subsets: ["latin"],
-  variable: "--font-outfit",
-  display: "swap",
-});
+import siteEnv, { getAbsoluteUrl } from "@/lib/seo/siteConfig";
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#000000",
+  themeColor: "#C6A87D",
 };
 
+const TITLE = {
+  default: "Sunny Diamonds - Premium Diamond Jewellery",
+  template: "%s | Sunny Diamonds",
+} as const;
+
+const DESCRIPTION =
+  "Handcrafted premium and custom diamond jewellery. Explore GIA-certified diamonds, bespoke designs, and timeless elegance.";
+
 export const metadata: Metadata = {
-  title: {
-    default: "Sunny Diamond | Premium Jewelry",
-    template: "%s | Sunny Diamond",
-  },
-  description: "Experience the finest collection of diamonds and premium jewelry at Sunny Diamond.",
-  keywords: ["diamond", "jewelry", "premium", "luxury", "sunny diamond"],
-  authors: [{ name: "Sunny Diamond" }],
-  creator: "Sunny Diamond",
-  metadataBase: new URL("https://sunnydiamond.com"), // Placeholder
+  title: TITLE,
+  description: DESCRIPTION,
+  keywords: ["diamond", "jewelry", "premium", "luxury", "sunny diamonds"],
+  authors: [{ name: "Sunny Diamonds" }],
+  creator: "Sunny Diamonds",
+  metadataBase: new URL(siteEnv.baseUrl),
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://sunnydiamond.com",
-    siteName: "Sunny Diamond",
-    title: "Sunny Diamond | Premium Jewelry",
-    description: "Experience the finest collection of diamonds and premium jewelry at Sunny Diamond.",
+    url: siteEnv.baseUrl,
+    siteName: "Sunny Diamonds",
+    title: TITLE.default,
+    description: DESCRIPTION,
     images: [
       {
-        url: "/og-image.jpg",
+        url: getAbsoluteUrl("/og-image.jpg"),
         width: 1200,
         height: 630,
         alt: "Sunny Diamond",
@@ -50,13 +43,16 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Sunny Diamond | Premium Jewelry",
-    description: "Experience the finest collection of diamonds and premium jewelry at Sunny Diamond.",
-    images: ["/og-image.jpg"],
+    title: TITLE.default,
+    description: DESCRIPTION,
+    images: [getAbsoluteUrl("/og-image.jpg")],
   },
   robots: {
-    index: true,
+    index: siteEnv.indexing,
     follow: true,
+  },
+  alternates: {
+    canonical: siteEnv.baseUrl,
   },
 };
 
@@ -66,8 +62,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${outfit.variable} antialiased`}>
-      <body className="min-h-screen bg-background font-sans">
+    <html lang="en" className="antialiased">
+      <body className="min-h-screen bg-background font-body">
         <AppProvider>
           <div className="relative flex min-h-screen flex-col">
             {children}
