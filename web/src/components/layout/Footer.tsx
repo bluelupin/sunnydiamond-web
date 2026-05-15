@@ -110,9 +110,9 @@ const Footer = () => {
         {/* Nav columns */}
         {columns.map((col) => (
           <div key={col.heading}>
-            <h4 className="md:text-lg sm:text-base text-sm font-medium font-satoshi uppercase text-blackdark md:mb-8 sm-6 mb-4">
+            <h3 className="md:text-lg sm:text-base text-sm font-medium font-satoshi uppercase text-blackdark md:mb-8 sm-6 mb-4">
               {col.heading}
-            </h4>
+            </h3>
             <ul className="sm:space-y-4 space-y-3">
               {col.links.map((link, idx) => (
                 <li key={`${col.heading}-${idx}`} className="max-w-[14rem]">

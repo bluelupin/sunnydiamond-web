@@ -35,8 +35,8 @@ export function constructMetadata({
     },
     icons: {
       icon: "/favicon.ico",
-      shortcut: "/favicon-16x16.png",
-      apple: "/apple-touch-icon.png",
+      shortcut: "/favicon.ico",
+      apple: "/favicon.ico",
     },
     metadataBase: new URL(siteEnv.baseUrl),
     ...(noIndex && {
