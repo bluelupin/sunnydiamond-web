@@ -34,7 +34,7 @@ const CraftingRaritySection = ({ id }: { id?: string }) => {
   return (
     <section id={id} ref={ref} className="bg-white pb-3 flex flex-col gap-6 md:gap-8 lg:gap-10">
       <div className="relative overflow-hidden neckLaceArcContainer">
-        <div className="relative container px-5 md:h-433 sm:h-96 h-[465px] py-6 sm:py-10 md:py-16 lg:py-20 flex md:items-center items-end">
+        <div className="relative max-w-[1440px] mx-auto w-full md:h-433 sm:h-465 h-465 py-6 sm:py-10 md:py-16 lg:py-20 px-6 md:px-10 lg:px-16 flex lg:items-center items-end">
           <div className="relative z-10 max-w-560">
             <h2 className="font-larken font-light text-[32px] md:text-[40px] lg:text-[48px] text-darkblack mb-40 leading-[100%] tracking-[0%]">
               Crafting rarity into timeless brilliance

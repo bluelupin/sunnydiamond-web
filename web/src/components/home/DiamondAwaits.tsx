@@ -159,8 +159,8 @@ const DiamondAwaits = ({ id }: { id?: string }) => {
       aria-label="Featured diamond carousel"
     >
       {/* Heading */}
-      <div className="text-center md:max-w-3xl sm:max-w-xl max-w-[350px] mx-auto md:mb-10 sm:mb-8 mb-6 px-5">
-        <h2 className="md:mb-5 mb-3 text-foreground lg:text-5xl md:text-4xl text-32 font-larken font-light tracking-[0%] leading-[100%] text-darkblack text-center">
+      <div className="text-center md:max-w-2xl sm:max-w-xl max-w-[420px] mx-auto md:mb-10 sm:mb-8 mb-6 px-5">
+        <h2 className="md:mb-5 mb-3 text-foreground lg:text-5xl md:text-4xl text-[32px] font-larken font-light tracking-[0%] leading-[100%] text-darkblack text-center whitespace-nowrap">
           {diamondAwaits.title}
         </h2>
 
@@ -198,7 +198,7 @@ const DiamondAwaits = ({ id }: { id?: string }) => {
 
             if (absDist > 2.2) return null;
 
-            const translateXVw = dist * 50;
+            const translateXVw = dist * 38;
             const scale = Math.max(0.7, 1 - absDist * 0.18);
             const opacity = Math.max(0, 1 - absDist * 0.55);
 
@@ -211,9 +211,9 @@ const DiamondAwaits = ({ id }: { id?: string }) => {
                 key={p.id}
                 aria-roledescription="slide"
                 aria-hidden={!isActive}
-                className="absolute top-0 left-1/2 h-full w-[72vw] sm:w-[52vw] md:w-[40vw] lg:w-[30vw] -translate-x-1/2 translate-x-4 flex flex-col items-center justify-start"
+                className="absolute top-0 left-1/2 h-full w-[80vw] sm:w-[55vw] md:w-[42vw] lg:w-[36vw] flex flex-col items-center justify-start"
                 style={{
-                  transform: `translate3d(calc(-50% + ${translateXVw}vw), 0, 0) scale(${scale})`,
+                  transform: `translateX(-50%) translateX(${translateXVw}vw) scale(${scale})`,
                   opacity,
                   zIndex,
                   transition: isDragging

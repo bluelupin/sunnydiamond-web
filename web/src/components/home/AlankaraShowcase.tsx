@@ -129,7 +129,7 @@ const AlankaraShowcase = ({ id }: { id?: string }) => {
     >
       <div className="grid grid-cols-1 md:grid-cols-2 p-4 md:p-0">
         {/* TL: Alankara Collection */}
-        <div className="relative lg:h-700 md:h-550 h-80 overflow-hidden group">
+        <div className="relative lg:h-700 md:h-550 h-auto overflow-hidden group">
           <OptimizedImage
             src={alankaraImg}
             alt={alankara.collection.title}
@@ -151,7 +151,7 @@ const AlankaraShowcase = ({ id }: { id?: string }) => {
           </div>
         </div>
         {/* TR: Draggable transparent ring carousel with scroll parallax */}
-        <div className="md:bg-white bg-gray100 flex flex-col items-center justify-end text-center px-6 py-10 sm:py-12 md:py-14 lg:py-65 lg:h-700 md:h-550 h-405 overflow-hidden">
+        <div className="md:bg-white bg-gray100 flex flex-col items-center justify-end text-center px-6 py-10 sm:py-12 md:py-14 lg:py-65 lg:h-700 md:h-550 h-auto overflow-hidden">
           <div
             ref={parallaxRef}
             className="w-full flex flex-col items-center"
@@ -251,9 +251,9 @@ const AlankaraShowcase = ({ id }: { id?: string }) => {
         </div>
 
         {/* BL: Gifting */}
-        <div className="md:bg-giftingBg md:bg-white bg-right w-full bg-[length:100%] bg-gray100 bg-no-repeat flex flex-col items-center justify-center text-center py-6 sm:py-14 md:py-20 md:min-h-560 md:h-auto h-80 order-4 md:order-3">
+        <div className="md:bg-giftingBg md:bg-white bg-right w-full bg-[length:100%] bg-gray100 bg-no-repeat flex flex-col items-center justify-center text-center py-16 sm:py-14 md:py-20 md:min-h-560 md:h-auto h-auto order-4 md:order-3">
           <GiftIcon className="text-creamColor w-24 md:flex hidden" />
-          <h2 className="md:mt-12 md:mb-10 mb-6 lg:text-5xl md:text-4xl text-32 text-darkblack font-light font-gill tracking-[0%] leading-[100%] md:max-w-394 max-w-196">
+          <h2 className="md:mt-12 md:mb-10 mb-6 lg:text-5xl md:text-4xl text-32 text-darkblack font-light font-gill tracking-[0%] leading-[100%] md:max-w-394 max-w-196 px-5">
             {alankara.gifting.title}
           </h2>
           <Link

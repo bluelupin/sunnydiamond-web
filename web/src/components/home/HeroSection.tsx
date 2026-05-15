@@ -46,7 +46,7 @@ const HeroSection = ({ id }: { id?: string }) => {
           {/* Left/bottom gradient for legibility */}
           <div className="absolute inset-0 bg-gradient-to-r from-charcoal/55 via-charcoal/15 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-charcoal/40 to-transparent md:hidden" />
-          <div className="container relative h-full flex items-end pb-12 md:pb-20 lg:pb-24">
+         <div className="relative h-full max-w-[1440px] mx-auto w-full flex items-end pb-12 md:pb-20 lg:pb-24 px-6 md:px-10 lg:px-16">
             <div className="md:max-w-[742px] animate-fade-in">
               <div className="mb-6 inline-flex items-center gap-2 text-white font-gill font-normal lg:text-xl md:text-lg text-base tracking-[1.8%] uppercase">
                 <DiamondIcon className="text-white" />

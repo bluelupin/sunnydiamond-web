@@ -66,7 +66,7 @@ const CheckoutPage = () => {
           <p className="font-body text-sm text-muted-foreground max-w-md mx-auto">
             Your order has been placed successfully. We'll send you a confirmation email shortly.
           </p>
-          <PrimaryLink to="/products" className="mt-4">Continue Shopping</PrimaryLink>
+          <PrimaryLink href="/products" className="mt-4">Continue Shopping</PrimaryLink>
         </div>
       </Layout>
     );

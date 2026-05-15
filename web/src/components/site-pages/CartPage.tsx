@@ -23,7 +23,7 @@ const CartPage = () => {
           <p className="font-body text-sm text-muted-foreground">
             Discover our exquisite diamond collection
           </p>
-          <PrimaryLink to="/products" className="mt-4">Shop Now</PrimaryLink>
+          <PrimaryLink href="/products" className="mt-4">Shop Now</PrimaryLink>
         </div>
       </Layout>
     );

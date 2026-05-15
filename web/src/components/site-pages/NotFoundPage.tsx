@@ -10,7 +10,7 @@ const NotFoundPage = () => {
           <p className="font-body text-lg text-muted-foreground mb-6">
             The page you're looking for doesn't exist.
           </p>
-          <PrimaryLink to="/">Return to Home</PrimaryLink>
+          <PrimaryLink href="/">Return to Home</PrimaryLink>
         </div>
       </div>
     </Layout>

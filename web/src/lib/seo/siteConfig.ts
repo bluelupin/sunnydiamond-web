@@ -21,7 +21,7 @@ const configs: Record<AppEnv, SiteEnvConfig> = {
   qa: {
     env: "qa",
     baseUrl: "https://qa.sunnydiamonds.com",
-    indexing: false,
+    indexing: true,
     label: "QA",
   },
   production: {

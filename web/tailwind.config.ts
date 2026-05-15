@@ -106,6 +106,7 @@ export default {
         290: "290px",
          311: "311px",
         350: "350px",
+        465: "465px",
         405: "405px",
         420: "420px",
         433: "433px",
@@ -142,6 +143,7 @@ export default {
         420: "420px",
         433: "433px",
          478: "478px",  
+        465: "465px",
         509: "509px",
         550: "550px",
         560: "560px",
@@ -207,5 +209,4 @@ export default {
     require("tailwindcss-animate"),
   ],
 } satisfies Config;
-
 

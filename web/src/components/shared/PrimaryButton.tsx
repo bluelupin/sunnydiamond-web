@@ -19,13 +19,13 @@ const PrimaryButton = ({ children, className, ...props }: PrimaryButtonProps) =>
 
 interface PrimaryLinkProps {
   children: React.ReactNode;
-  to: string;
+  href: string;
   className?: string;
 }
 
-const PrimaryLink = ({ children, to, className }: PrimaryLinkProps) => (
+const PrimaryLink = ({ children, href, className }: PrimaryLinkProps) => (
   <Link
-    href={to}
+    href={href}
     className={cn(
       "btn-slide-up inline-flex items-center justify-center gap-2 bg-primary hover:bg-gold-dark text-primary-foreground px-8 py-3 text-sm tracking-widest uppercase font-body transition-colors",
       className
@@ -35,9 +35,9 @@ const PrimaryLink = ({ children, to, className }: PrimaryLinkProps) => (
   </Link>
 );
 
-const OutlineLink = ({ children, to, className }: PrimaryLinkProps) => (
+const OutlineLink = ({ children, href, className }: PrimaryLinkProps) => (
   <Link
-    href={to}
+    href={href}
     className={cn(
       "btn-slide-up inline-flex items-center justify-center gap-2 border border-foreground text-foreground hover:bg-foreground hover:text-background px-8 py-3 text-sm tracking-widest uppercase font-body transition-colors",
       className
