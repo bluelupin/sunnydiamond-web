@@ -6,7 +6,8 @@ import siteEnv, { getAbsoluteUrl } from "@/lib/seo/siteConfig";
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
+  maximumScale: 5,
+  userScalable: true,
   themeColor: "#C6A87D",
 };
 
