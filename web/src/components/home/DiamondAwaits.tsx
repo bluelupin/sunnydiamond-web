@@ -155,7 +155,7 @@ const DiamondAwaits = ({ id }: { id?: string }) => {
     <section
       id={id}
       ref={ref}
-      className="bg-gray200 py-12 md:py-16 overflow-hidden md:h-780 h-509 flex flex-col items-center justify-center"
+      className="bg-gray200 py-6 sm:py-10 md:py-16 lg:py-20 overflow-hidden h-auto flex flex-col items-center justify-center"
       aria-label="Featured diamond carousel"
     >
       {/* Heading */}
