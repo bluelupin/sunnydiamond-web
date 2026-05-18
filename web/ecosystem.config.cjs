@@ -6,6 +6,7 @@ module.exports = {
       args: 'start',
       instances: 'max',
       exec_mode: 'cluster',
+      cwd: '/home/forge/sunnydiamond-web-dev.on-forge.com/current/web',
       env: {
         NODE_ENV: 'production',
         PORT: 3000,
