@@ -11,7 +11,6 @@ import promiseHero from "@/assets/promise-hero.jpg";
  * Drop optimised files at the paths below — webm preferred, mp4 fallback.
  * The poster image keeps LCP fast while the video lazy-loads.
  */
-const PROMISE_VIDEO_WEBM = "/videos/promise-bg.webm";
 const PROMISE_VIDEO_MP4 = "/videos/promise-bg.mp4";
 
 const BrandPromises = ({ id }: { id?: string }) => {
@@ -23,7 +22,7 @@ const BrandPromises = ({ id }: { id?: string }) => {
     <section
       id={id}
       ref={sectionRef as React.RefObject<HTMLElement>}
-      className="relative w-full overflow-hidden bg-black h-[650px] md:h-[800px]"
+      className="relative w-full overflow-hidden bg-black h-650 md:h-804 lg:py-14 md:py-12 py-10"
     >
       {/* Background video — autoplay, muted, looped, no controls */}
       <video
@@ -37,7 +36,6 @@ const BrandPromises = ({ id }: { id?: string }) => {
         aria-hidden="true"
         tabIndex={-1}
       >
-        <source src={PROMISE_VIDEO_WEBM} type="video/webm" />
         <source src={PROMISE_VIDEO_MP4} type="video/mp4" />
       </video>
 
@@ -50,17 +48,17 @@ const BrandPromises = ({ id }: { id?: string }) => {
       {/* Content — vertically aligned to the bottom with responsive padding */}
       <div
         ref={contentRef as React.RefObject<HTMLDivElement>}
-        className="relative z-10 h-full flex flex-col items-center justify-end text-center px-6 pb-12 md:px-10 md:pb-20 lg:pb-24"
+        className="relative z-10 h-full flex flex-col items-center justify-end text-center px-6 md:px-10"
       >
-        <h2 className="text-h2 text-white mb-5 md:mb-6">
+        <h2 className="lg:text-5xl md:text-4xl text-32 text-gray200 font-normal font-larken tracking-[0%] leading-[100%] text-center">
           {promise.title}
         </h2>
-        <p className="text-white/80 font-light text-sm md:text-base max-w-md md:max-w-2xl leading-relaxed mb-8 md:mb-10">
+        <p className="md:mt-5 mt-3 text-base md:text-lg lg:text-xl text-gray200 tracking-[1%] leading-[100%] font-light font-gill">
           {promise.description}
         </p>
         <Link
           href={promise.cta.to}
-          className="mt-10 group relative overflow-hidden inline-flex items-center justify-center border-[0.8px] border-white text-white md:text-base text-sm px-8 md:h-50 h-12 tracking-[1.8%] uppercase font-gill transition-colors duration-500"
+          className="md:mt-10 mt-6 group relative overflow-hidden inline-flex items-center justify-center border-[0.8px] border-white text-white md:text-base text-sm px-8 md:h-50 h-12 md:tracking-[1.8%] tracking-[4%] uppercase font-gill transition-colors duration-500"
         >
           <span className="absolute inset-0 bg-white origin-bottom scale-y-0 transition-transform duration-500 ease-out group-hover:scale-y-100"></span>
           <span className="relative z-10 group-hover:text-black transition-colors duration-500">

@@ -35,7 +35,7 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
   return (
     <section
       id={id}
-      className="bg-gray200 py-10 sm:py-12 md:py-16 lg:py-20 lg:h-[846px] md:h-auto h-auto"
+      className="bg-gray200 py-10 sm:py-12 md:py-16 lg:py-20 lg:h-846 md:h-auto h-auto"
     >
       <div className="2xl:pl-24 lg:pl-20 pl-5 lg:pr-0 pr-5">
         <h2 className="lg:text-5xl md:text-4xl text-32 text-black font-larken font-light tracking-[0%] leading-[100%] mb-4 sm:mb-6 md:mb-8 lg:mb-10 lg:text-left text-center">
@@ -67,8 +67,8 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
                   type="button"
                   aria-pressed={isActive}
                   onClick={() => setActiveId(location.id)}
-                  className={cn(
-                    "w-full lg:h-[73px] h-[50px] lg:px-0 px-6 flex items-center lg:justify-start justify-center lg:text-left text-center font-larken text-base md:text-xl lg:text-2xl text-left text-black tracking-[0%] leading-[100%] uppercase transition-all duration-300",
+                className={cn(
+                  "w-full lg:h-73 h-50 lg:px-0 px-6 flex items-center lg:justify-start justify-center lg:text-left text-center font-larken text-base md:text-xl lg:text-2xl text-left text-black tracking-[0%] leading-[100%] uppercase transition-all duration-300",
                     isActive
                       ? "font-normal border-b border-gray50"
                       : "font-light"
@@ -78,7 +78,7 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
                 </button>
 
                 {isActive && (
-                  <div className="lg:py-4 py-5 lg:px-0 px-5 lg:w-full sm:w-[311px] w-[80%] animate-in fade-in duration-300 lg:static absolute bottom-3 left-8 z-10 bg-gray300">
+                  <div className="lg:py-4 py-5 lg:px-0 px-5 lg:w-full sm:w-311 w-[80%] animate-in fade-in duration-300 lg:static absolute bottom-3 left-8 z-10 bg-gray300">
                     <div className="flex lg:gap-6 gap-3 items-start">
                       <svg
                         width="29"
@@ -117,17 +117,16 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
         </div>
 
         {/* Right: Image with fade + zoom animation */}
-        <div className="relative lg:h-[595px] h-[478px] max-h-[595px] overflow-hidden lg:px-0 px-5">
-          <div key={activeLocation.id} className="w-full h-full animate-fadeZoom">
-            <OptimizedImage
-              src={showroomImages[activeLocation.id]}
-              alt={`Sunny Diamonds showroom in ${activeLocation.name}`}
-              width={1280}
-              height={896}
-              className="!w-full !h-full !object-cover"
-              sizes="(max-width: 1024px) 100vw, 50vw"
-            />
-          </div>
+        <div className="relative aspect-auto lg:aspect-auto lg:h-595 h-478 overflow-hidden lg:px-0 px-5">
+          <OptimizedImage
+            key={activeLocation.id}
+            src={showroomImages[activeLocation.id]}
+            alt={`Sunny Diamonds showroom in ${activeLocation.name}`}
+            width={1280}
+            height={896}
+            className="w-full h-full object-cover animate-in fade-in zoom-in-105 duration-700 ease-out"
+            sizes="(max-width: 1024px) 100vw, 50vw"
+          />
         </div>
       </div>
     </section>

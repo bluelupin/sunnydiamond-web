@@ -11,16 +11,15 @@ export function useStepScroll(stepCount: number) {
 
     let raf = 0;
     let inView = false;
-    // Cache scrollHeight; only refresh on resize.
     let sectionHeight = Math.max(1, container.scrollHeight - window.innerHeight);
 
     const refreshGeom = () => {
       sectionHeight = Math.max(1, container.scrollHeight - window.innerHeight);
+      compute(); //  recompute after geometry changes
     };
 
     const compute = () => {
       raf = 0;
-      if (!inView) return;
       const rect = container.getBoundingClientRect();
       const scrolled = -rect.top;
       const p = Math.max(0, Math.min(1, scrolled / sectionHeight));
@@ -48,13 +47,20 @@ export function useStepScroll(stepCount: number) {
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", refreshGeom, { passive: true });
+    //  Recalculate after all resources load (images, fonts)
+    window.addEventListener("load", refreshGeom);
+
+    //  Initial measurement after layout settles
+    const initialTimer = setTimeout(refreshGeom, 100);
 
     return () => {
       cancelAnimationFrame(raf);
+      clearTimeout(initialTimer);
       io.disconnect();
       ro.disconnect();
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", refreshGeom);
+      window.removeEventListener("load", refreshGeom);
     };
   }, [stepCount]);
 

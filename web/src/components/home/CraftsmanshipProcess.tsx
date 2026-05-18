@@ -26,8 +26,8 @@ const CraftsmanshipProcess = ({ id }: { id?: string }) => {
       aria-label={craftsmanship.title}
       className="bg-gray200 bg-gray200 pt-10 sm:pt-16 md:pt-20"
     >
-      <div className="sticky top-0 h-screen overflow-hidden bg-gray200">
-       <div className="w-full max-w-[1440px] mx-auto h-full px-5 md:px-8 lg:px-12">
+      <div className="sticky top-24 h-screen overflow-hidden bg-gray200">
+        <div className="container h-full">
           <div className="grid h-full grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-12">
             {/* Left column: title + steps */}
             <div className="lg:col-span-5 flex flex-col xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20">

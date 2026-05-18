@@ -6,7 +6,7 @@ import FlawlessDiamonds from "@/components/home/FlawlessDiamonds";
 import AlankaraShowcase from "@/components/home/AlankaraShowcase";
 import DiamondAwaits from "@/components/home/DiamondAwaits";
 import CategoryGrid from "../home/CategoryGrid";
-import CraftsmanshipProcess from "../home/CraftsmanshipProcess";
+import CraftsmanshipProcess from "../home/CraftsmanshipProcessLazy";
 import BrandPromises from "../home/BrandPromises";
 import ForYouForever from "../home/ForYouForever";
 import ShowroomsSection from "../home/ShowroomsSection";
@@ -23,9 +23,9 @@ const HomePage = () => {
 
 <DiamondAwaits id="diamond-awaits" />
 
-<CategoryGrid id="categories" />
+      <CategoryGrid id="categories" />
 
-<CraftsmanshipProcess id="craftsmanship" />
+      <CraftsmanshipProcess id="craftsmanship" />
 
 <BrandPromises id="promise" />
 

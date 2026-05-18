@@ -21,22 +21,22 @@ const CategoryGrid = ({ id }: { id?: string }) => {
   const ref = useFadeIn();
 
   return (
-    <section id={id} ref={ref} className="bg-gray200 py-10 sm:py-16 md:py-20">
-      <div className="md:px-3">
+    <section id={id} ref={ref} className="bg-gray200 py-6 sm:py-10 md:py-16 lg:py-20">
+      <div className="md:px-3 pl-3">
         <h2 className="md:mb-10 mb-8 lg:text-5xl md:text-4xl text-32 font-larken font-light tracking-[0%] leading-[100%] text-black text-center">
           {categories.title}
         </h2>
 
         {/* Mobile: horizontal scroll | Desktop: 3-column full-width grid */}
         <div
-          className="flex md:gap-4 gap-3 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 pb-2 md:mx-0 md:px-0 md:pb-0 md:overflow-visible md:grid md:grid-cols-3 md:gap-4"
+          className="flex md:gap-4 gap-3 overflow-x-auto snap-x snap-mandatory px-4 pb-2 md:mx-0 md:px-0 md:pb-0 md:overflow-visible md:grid md:grid-cols-3 md:gap-4"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
         >
           {categories.items.map((cat) => (
             <Link
               key={cat.slug}
               href={`/products?occasion=${cat.slug}`}
-              className="group relative overflow-hidden flex-shrink-0 w-[78%] snap-start md:w-auto h-350 md:h-auto lg:h-620 transition-shadow duration-500 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="group relative overflow-hidden flex-shrink-0 w-[78%] snap-start md:w-auto h-auto transition-shadow duration-500 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               <OptimizedImage
                 src={imageMap[cat.slug]}
@@ -47,7 +47,7 @@ const CategoryGrid = ({ id }: { id?: string }) => {
               />
               <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0A0A0A] to-transparent pointer-events-none" />
               <div className="absolute inset-x-0 bottom-5 md:bottom-6 flex items-center justify-center">
-                <span className="text-base sm:text-lg md:text-xl tracking-[0.3em] uppercase text-gray200 font-gill font-normal tracking-[1.8%] text-center leading-[100%]">
+                <span className="text-base sm:text-lg md:text-xl uppercase text-gray200 font-gill font-normal tracking-[1.8%] text-center leading-[100%]">
                   {cat.label}
                 </span>
               </div>

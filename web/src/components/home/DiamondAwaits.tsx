@@ -159,7 +159,7 @@ const DiamondAwaits = ({ id }: { id?: string }) => {
       aria-label="Featured diamond carousel"
     >
       {/* Heading */}
-      <div className="text-center md:max-w-2xl sm:max-w-xl max-w-[420px] mx-auto md:mb-10 sm:mb-8 mb-6 px-5">
+      <div className="text-center md:max-w-2xl sm:max-w-xl max-w-[350px] mx-auto md:mb-10 sm:mb-8 mb-6 px-5">
         <h2 className="md:mb-5 mb-3 text-foreground lg:text-5xl md:text-4xl text-[32px] font-larken font-light tracking-[0%] leading-[100%] text-darkblack text-center whitespace-nowrap">
           {diamondAwaits.title}
         </h2>
@@ -181,7 +181,7 @@ const DiamondAwaits = ({ id }: { id?: string }) => {
           onPointerMove={onPointerMove}
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
-          className={`relative mx-auto w-full max-w-[1500px] select-none touch-pan-y outline-none h-[250px] sm:h-[310px] md:h-[350px] lg:h-[336px] ${isDragging ? "cursor-grabbing" : "cursor-grab"
+          className={`relative w-full mx-auto select-none touch-pan-y outline-none h-[250px] sm:h-[310px] md:h-[350px] lg:h-[336px] ${isDragging ? "cursor-grabbing" : "cursor-grab"
             }`}
           style={{ WebkitUserSelect: "none" }}
         >
@@ -198,7 +198,7 @@ const DiamondAwaits = ({ id }: { id?: string }) => {
 
             if (absDist > 2.2) return null;
 
-            const translateXVw = dist * 38;
+            const translateXVw = dist * 47;
             const scale = Math.max(0.7, 1 - absDist * 0.18);
             const opacity = Math.max(0, 1 - absDist * 0.55);
 
@@ -211,9 +211,9 @@ const DiamondAwaits = ({ id }: { id?: string }) => {
                 key={p.id}
                 aria-roledescription="slide"
                 aria-hidden={!isActive}
-                className="absolute top-0 left-1/2 h-full w-[80vw] sm:w-[55vw] md:w-[42vw] lg:w-[36vw] flex flex-col items-center justify-start"
+                className="absolute top-0 left-1/2 h-full w-[80vw] sm:w-[55vw] md:w-[42vw] lg:w-[36vw] -translate-x-1/2 flex flex-col items-center justify-start"
                 style={{
-                  transform: `translateX(-50%) translateX(${translateXVw}vw) scale(${scale})`,
+                  transform: `translate3d(calc(-50% + ${translateXVw}vw), 0, 0) scale(${scale})`,
                   opacity,
                   zIndex,
                   transition: isDragging
@@ -286,7 +286,7 @@ const DiamondAwaits = ({ id }: { id?: string }) => {
         </div>
 
         {/* Controls */}
-        <div className="md:mt-12 mt-8 flex items-center justify-center gap-6 translate-x-4">
+        <div className="md:mt-12 mt-8 flex items-center justify-center gap-6">
           <button
             type="button"
             onClick={() => go(-1)}

@@ -25,22 +25,22 @@ const ForYouForever = ({ id }: ForYouForeverProps) => {
   const cardRefs = [card1Ref, card2Ref];
 
   return (
-    <section id={id} className="py-20 md:py-28 bg-background">
+    <section id={id} className="md:px-0 px-4 py-10 sm:py-12 md:py-16 lg:py-20 bg-gray200 lg:min-h-948">
       <h2
         ref={headingRef as React.RefObject<HTMLHeadingElement>}
-        className="text-h2 text-center text-foreground mb-16 md:mb-20 px-4"
+        className="lg:text-5xl md:text-4xl text-32 text-center text-darkblack font-larken font-light tracking-[0%] leading-[100%] mb-4 sm:mb-6 md:mb-8 lg:mb-10"
       >
         {forYouForever.title}
       </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+      <div className="grid grid-cols-1 md:grid-cols-2 md:gap-0 gap-12">
         {forYouForever.cards.map((card, idx) => (
           <figure
             key={card.title}
             ref={cardRefs[idx] as React.RefObject<HTMLElement>}
             className="flex flex-col"
           >
-            <div className="aspect-square md:aspect-auto md:h-[620px] overflow-hidden">
+            <div className="aspect-square md:aspect-auto h-357 md:h-auto lg:h-620 overflow-hidden">
               <OptimizedImage
                 src={imageMap[card.image]}
                 alt={card.title}
@@ -50,11 +50,11 @@ const ForYouForever = ({ id }: ForYouForeverProps) => {
                 className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
               />
             </div>
-            <figcaption className="text-center px-6 py-10 md:py-14 max-w-md mx-auto">
-              <h3 className="text-sm md:text-base font-sans font-medium tracking-[0.25em] text-foreground mb-4">
+            <figcaption className="mt-4 text-center md:px-4 px-2">
+              <h3 className="mb-2 text-base md:text-lg lg:text-xl tracking-[1.8%] font-normal leading-[150%] text-black font-gill">
                 {card.title}
               </h3>
-              <p className="text-base md:text-lg text-muted-foreground leading-relaxed font-light">
+              <p className="text-base md:text-lg lg:text-xl text-darkblack leading-[100%] tracking-[1%] font-light font-gill">
                 {card.subtitle}
               </p>
             </figcaption>
