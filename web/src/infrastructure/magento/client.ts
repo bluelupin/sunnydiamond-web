@@ -2,7 +2,10 @@
  * Magento Headless GraphQL API Client
  */
 
-const MAGENTO_API_URL = process.env.NEXT_PUBLIC_MAGENTO_URL || "https://magento.example.com/graphql";
+const MAGENTO_API_URL: string =
+  process.env.NEXT_PUBLIC_MAGENTO_URL ?? (() => {
+    throw new Error("NEXT_PUBLIC_MAGENTO_URL is not set");
+  })();
 
 export interface GraphQLRequest {
   query: string;

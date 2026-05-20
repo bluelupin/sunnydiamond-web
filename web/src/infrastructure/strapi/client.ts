@@ -2,7 +2,10 @@
  * Strapi headless CMS client wrapper
  */
 
-const STRAPI_API_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "https://strapi.example.com/api";
+const STRAPI_API_URL: string =
+  process.env.NEXT_PUBLIC_STRAPI_URL ?? (() => {
+    throw new Error("NEXT_PUBLIC_STRAPI_URL is not set");
+  })();
 
 export async function strapiFetch<T>(
   endpoint: string,

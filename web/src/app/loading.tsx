@@ -19,7 +19,7 @@ export default function Loading() {
             Sunny Diamonds
           </span>
           <span className="text-[10px] font-gill tracking-[0.3em] uppercase text-muted-foreground">
-            Crafting Brilliance Since 1987
+            Crafting Brilliance Since 1997
           </span>
         </div>
       </div>
