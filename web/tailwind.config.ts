@@ -25,7 +25,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        heading: ["Playfair Display", "Georgia", "serif"],
+        heading: ["Larken","Playfair Display", "Georgia", "serif"],
         body: ["Inter", "system-ui", "sans-serif"],
         satoshi: ["Satoshi", "Inter", "system-ui", "sans-serif"],
         gill: ["Gill Sans", "Gill Sans MT", "Cabin", "system-ui", "sans-serif"],

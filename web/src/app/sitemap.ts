@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
-import { blogs } from "@/data/blogs";
-import { products } from "@/data/products";
-import { siteEnv } from "@/lib/seo/siteConfig";
+import { blogs } from "@/features/cms/data/blogs";
+import { products } from "@/features/products/data/products";
+import { siteEnv } from "@/shared/lib/seo/siteConfig";
 
 const staticRoutes = [
   { url: "/", changeFrequency: "weekly" as const, priority: 1 },

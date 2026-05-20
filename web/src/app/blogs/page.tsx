@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { constructMetadata } from "@/lib/seo/metadata";
-import { blogs } from "@/data/blogs";
-import BlogListingPage from "@/components/site-pages/BlogListingPage";
+import { constructMetadata } from "@/shared/lib/seo/metadata";
+import { blogs } from "@/features/cms/data/blogs";
+import BlogListingPage from "@/features/cms/components/BlogListingPage";
 
 export const metadata: Metadata = constructMetadata({
   title: "Blogs",

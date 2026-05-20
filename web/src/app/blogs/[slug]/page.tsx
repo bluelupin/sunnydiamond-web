@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { constructMetadata } from "@/lib/seo/metadata";
-import { blogs } from "@/data/blogs";
-import BlogDetailPage from "@/components/site-pages/BlogDetailPage";
+import { constructMetadata } from "@/shared/lib/seo/metadata";
+import { blogs } from "@/features/cms/data/blogs";
+import BlogDetailPage from "@/features/cms/components/BlogDetailPage";
 
 export function generateStaticParams() {
   return blogs.map((post) => ({ slug: post.slug }));
@@ -22,6 +22,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   return constructMetadata({
     title: post.title,
     description: post.excerpt,
+    canonicalPath: `/blogs/${params.slug}`,
   });
 }
 

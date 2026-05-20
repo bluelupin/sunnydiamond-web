@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import AppProvider from "@/lib/providers/AppProvider";
-import siteEnv, { getAbsoluteUrl } from "@/lib/seo/siteConfig";
+import AppProvider from "@/shared/lib/providers/AppProvider";
+import siteEnv, { getAbsoluteUrl } from "@/shared/lib/seo/siteConfig";
 
 export const viewport: Viewport = {
   width: "device-width",
