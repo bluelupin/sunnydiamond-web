@@ -1,15 +1,15 @@
-  module.exports = {
-    apps: [
-      {
-        name: 'sunnydiamond-web',
-        script: 'node_modules/next/dist/bin/next',
-        instances: 1,
-        exec_mode: 'fork',
-        autorestart: true,
-        max_memory_restart: '1G',
-        env: {
-          NODE_ENV: 'production',
-        },
-      },
-    ],
-  };
+module.exports = {
+  apps: [{
+    name: 'sunnydiamond-web',
+    script: 'node_modules/next/dist/bin/next',
+    args: 'start',
+    instances: 1,
+    exec_mode: 'fork',
+    autorestart: true,
+    max_memory_restart: '1G',
+    env: {
+      NODE_ENV: 'production',
+      PORT: 3000
+    },
+  }],
+};
