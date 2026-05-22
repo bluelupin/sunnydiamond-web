@@ -1,121 +1,37 @@
-@import "tailwindcss";
-
-@theme {
-  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
-  --font-body: "Inter", system-ui, sans-serif;
-  --font-heading: "Larken", "Playfair Display", Georgia, serif;
-  --font-display: "Larken", "Playfair Display", Georgia, serif;
-  --font-gill: "Gill Sans", "Gill Sans MT", Calibri, system-ui, sans-serif;
-  --font-larken: "Larken", "Playfair Display", Georgia, serif;
-  --font-satoshi: "Satoshi", "Inter", system-ui, sans-serif;
-
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-darkMagenta: #722257;
-  --color-gray100: #efece6;
-  --color-gray200: #fbfaf6;
-  --color-gray300: #f4f3ee;
-  --color-nuetral200: #a2a1a1;
-  --color-blackdark: #292727;
-  --color-darkblack: #0a0a0a;
-  --color-gray500: #555555;
-  --color-gray600: #999999;
-  --color-creamColor: #9a3a96;
-  --color-gold: hsl(var(--gold));
-  --color-gold-light: hsl(var(--gold-light));
-  --color-gold-dark: hsl(var(--gold-dark));
-  --color-charcoal: hsl(var(--charcoal));
-  --color-ivory: hsl(var(--ivory));
-  --color-warm-gray: hsl(var(--warm-gray));
-
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
-
-  --text-11: 11px;
-  --text-13: 13px;
-  --text-15: 15px;
-  --text-32: 32px;
-
-  --spacing-26: 26px;
-  --spacing-30: 120px;
-  --spacing-40: 40px;
-  --spacing-50: 50px;
-  --spacing-65: 65px;
-  --spacing-74: 74px;
-  --spacing-75: 75px;
-  --spacing-76: 76px;
-  --spacing-240: 240px;
-  --spacing-260: 260px;
-  --spacing-290: 290px;
-  --spacing-350: 350px;
-  --spacing-465: 465px;
-  --spacing-405: 405px;
-  --spacing-420: 420px;
-  --spacing-433: 433px;
-  --spacing-509: 509px;
-  --spacing-550: 550px;
-  --spacing-560: 560px;
-  --spacing-620: 620px;
-  --spacing-700: 700px;
-  --spacing-780: 780px;
-
-  --container-196: 196px;
-  --container-394: 394px;
-  --container-560: 560px;
-  --container-570: 570px;
-  --container-1400: 1400px;
-  --container-1440: 1440px;
-
-  --background-image-giftingBg: url("../assets/giftingBg.png");
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
   :root {
     --background: 40 20% 98%;
     --foreground: 30 10% 15%;
+
     --card: 0 0% 100%;
     --card-foreground: 30 10% 15%;
+
     --popover: 0 0% 100%;
     --popover-foreground: 30 10% 15%;
+
     --primary: 36 40% 62%;
     --primary-foreground: 0 0% 100%;
+
     --secondary: 30 15% 94%;
     --secondary-foreground: 30 10% 25%;
+
     --muted: 30 10% 94%;
     --muted-foreground: 30 5% 50%;
+
     --accent: 36 40% 62%;
     --accent-foreground: 0 0% 100%;
+
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 20% 98%;
+    --destructive-foreground: 210 40% 98%;
+
     --border: 30 15% 88%;
     --input: 30 15% 88%;
     --ring: 36 40% 62%;
+
     --radius: 0.25rem;
 
     --gold: 36 40% 62%;
@@ -133,35 +49,69 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    --font-body: "Inter", system-ui, sans-serif;
+    --font-heading: "Larken", "Playfair Display", Georgia, serif;
+    --font-display: "Larken", "Playfair Display", Georgia, serif;
+    --font-gill: "Gill Sans", "Gill Sans MT", Calibri, system-ui, sans-serif;
+    --font-larken: "Larken", "Playfair Display", Georgia, serif;
+    --font-satoshi: "Satoshi", "Inter", system-ui, sans-serif;
+
+    --h1-font-size: 32px;
+    --h1-line-height: 100%;
+    --h1-letter-spacing: 0%;
+    --h1-font-weight: 300;
+
+    --h2-font-size: 28px;
+    --h2-line-height: 100%;
+    --h2-letter-spacing: 0%;
+    --h2-font-weight: 300;
   }
 
-  .dark {
-    --background: 30 10% 15%;
-    --foreground: 40 20% 98%;
-    --card: 30 10% 15%;
-    --card-foreground: 40 20% 98%;
-    --popover: 30 10% 15%;
-    --popover-foreground: 40 20% 98%;
-    --primary: 36 40% 62%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 30 10% 20%;
-    --secondary-foreground: 40 20% 98%;
-    --muted: 30 10% 20%;
-    --muted-foreground: 30 5% 70%;
-    --accent: 36 40% 62%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 30 10% 25%;
-    --input: 30 10% 25%;
-    --ring: 36 40% 62%;
+  @media (min-width: 768px) {
+    :root {
+      --h1-font-size: 44px;
+      --h2-font-size: 40px;
+    }
   }
+
+  @media (min-width: 1024px) {
+    :root {
+      --h1-font-size: 54px;
+      --h2-font-size: 48px;
+    }
+  }
+}
+
+@font-face {
+  font-family: "Larken";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: local("Larken Light"), local("Larken-Light");
+}
+
+@font-face {
+  font-family: "Larken";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local("Larken"), local("Larken-Regular");
 }
 
 @layer base {
   * {
     @apply border-border;
   }
+
+  html{
+
+  }
+  body {
+   @apply bg-background text-foreground font-body antialiased;
+    overflow-x: clip; 
+  }
+
   body {
     @apply bg-background text-foreground font-body antialiased;
   }
@@ -177,12 +127,18 @@
 
   h1 {
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: var(--h1-font-weight);
+    font-size: var(--h1-font-size);
+    line-height: var(--h1-line-height);
+    letter-spacing: var(--h1-letter-spacing);
   }
 
   h2 {
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: var(--h2-font-weight);
+    font-size: var(--h2-font-size);
+    line-height: var(--h2-line-height);
+    letter-spacing: var(--h2-letter-spacing);
   }
 }
 
@@ -210,18 +166,18 @@
 
   .text-h1 {
     font-family: var(--font-display);
-    font-weight: 300;
-    font-size: 54px;
-    line-height: 100%;
-    letter-spacing: 0%;
+    font-weight: var(--h1-font-weight);
+    font-size: var(--h1-font-size);
+    line-height: var(--h1-line-height);
+    letter-spacing: var(--h1-letter-spacing);
   }
 
   .text-h2 {
     font-family: var(--font-display);
-    font-weight: 300;
-    font-size: 48px;
-    line-height: 100%;
-    letter-spacing: 0%;
+    font-weight: var(--h2-font-weight);
+    font-size: var(--h2-font-size);
+    line-height: var(--h2-line-height);
+    letter-spacing: var(--h2-letter-spacing);
   }
 
   .btn-slide-up {
@@ -289,6 +245,7 @@
     transform: rotate(1deg);
   }
 }
+
 @keyframes marquee {
   0% {
     transform: translateX(0);

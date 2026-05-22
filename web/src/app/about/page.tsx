@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { constructMetadata } from "@/lib/seo/metadata";
-import { seoContent } from "@/data/content";
-import AboutPageView from "@/components/site-pages/AboutPage";
+import { constructMetadata } from "@/shared/lib/seo/metadata";
+import { seoContent } from "@/features/cms/data/content";
+import AboutPageView from "@/features/cms/components/AboutPage";
 
 export const metadata: Metadata = constructMetadata({
   title: seoContent.about.title,

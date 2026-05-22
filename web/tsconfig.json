@@ -20,6 +20,9 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
+      "@features/*": ["./src/features/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@infra/*": ["./src/infrastructure/*"],
       "react-router-dom": ["./src/lib/router-dom"]
     }
   },
@@ -31,5 +34,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "src/components/ui/**/*"]
+  "exclude": ["node_modules", "src/shared/ui/**/*"]
 }

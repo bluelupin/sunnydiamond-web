@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { constructMetadata } from "@/lib/seo/metadata";
-import { getProductById, products } from "@/data/products";
-import { getImageSrc } from "@/lib/utils/image";
-import ProductDetailPageView from "@/components/site-pages/ProductDetailPage";
+import { constructMetadata } from "@/shared/lib/seo/metadata";
+import { getProductById, products } from "@/features/products/data/products";
+import JsonLd from "@/shared/lib/seo/JsonLd";
+import { buildProductJsonLd } from "@/shared/lib/seo/schema/product";
+import ProductDetailPageView from "@/features/products/components/ProductDetailPage";
 
 type Params = {
   id: string;
@@ -26,10 +27,18 @@ export function generateMetadata({ params }: { params: Params }): Metadata {
   return constructMetadata({
     title: product.name,
     description: product.shortDescription,
-    image: getImageSrc(product.image),
+    image: typeof product.image === "string" ? product.image : product.image.src,
+    canonicalPath: `/product/${params.id}`,
   });
 }
 
-export default function ProductPage() {
-  return <ProductDetailPageView />;
+export default function ProductPage({ params }: { params: Params }) {
+  const product = getProductById(params.id);
+
+  return (
+    <>
+      {product ? <JsonLd data={buildProductJsonLd(product)} id={`product-jsonld-${product.id}`} /> : null}
+      <ProductDetailPageView />
+    </>
+  );
 }
