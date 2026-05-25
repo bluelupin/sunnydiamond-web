@@ -25,6 +25,13 @@ export const metadata: Metadata = {
   keywords: ["diamond", "jewelry", "premium", "luxury", "sunny diamonds"],
   authors: [{ name: "Sunny Diamonds" }],
   creator: "Sunny Diamonds",
+  applicationName: "Sunny Diamonds",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    title: "Sunny Diamonds",
+    statusBarStyle: "default",
+  },
   metadataBase: new URL(siteEnv.baseUrl),
   openGraph: {
     type: "website",

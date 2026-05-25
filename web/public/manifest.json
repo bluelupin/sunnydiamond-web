@@ -1,0 +1,25 @@
+﻿{
+    "name":  "Sunny Diamonds â€” Premium Diamond Jewellery",
+    "short_name":  "Sunny Diamonds",
+    "description":  "Handcrafted premium and custom diamond jewellery. GIA-certified diamonds, bespoke designs, and timeless elegance.",
+    "start_url":  "/",
+    "scope":  "/",
+    "display":  "standalone",
+    "orientation":  "portrait",
+    "background_color":  "#FFFDF7",
+    "theme_color":  "#C6A87D",
+    "icons":  [
+                  {
+                      "src":  "/icons/icon-192.png",
+                      "sizes":  "192x192",
+                      "type":  "image/png",
+                      "purpose":  "any maskable"
+                  },
+                  {
+                      "src":  "/icons/icon-512.png",
+                      "sizes":  "512x512",
+                      "type":  "image/png",
+                      "purpose":  "any maskable"
+                  }
+              ]
+}
