@@ -5,6 +5,11 @@ import { useFadeIn } from "@/shared/hooks/use-fade-in";
 import { homeContent } from "@/features/cms/data/content";
 import type { StaticImageData } from "next/image";
 import bespokeImg from "@/assets/section9-card1.webp";
+
+interface ForYouForeverProps {
+  id?: string;
+  homeData?: Record<string, any>;
+}
 import diamondsImg from "@/assets/section9-card2.webp";
 
 interface ForYouForeverProps {
@@ -16,8 +21,8 @@ const imageMap: Record<string, string | StaticImageData> = {
   "foryou-diamonds": diamondsImg,
 };
 
-const ForYouForever = ({ id }: ForYouForeverProps) => {
-  const { forYouForever } = homeContent;
+const ForYouForever = ({ id, homeData }: ForYouForeverProps) => {
+  const forYouForever = homeData?.forYouForever ?? homeContent.forYouForever;
   const headingRef = useFadeIn(0);
   const card1Ref = useFadeIn(150);
   const card2Ref = useFadeIn(300);
@@ -34,7 +39,7 @@ const ForYouForever = ({ id }: ForYouForeverProps) => {
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 md:gap-0 gap-12">
-        {forYouForever.cards.map((card, idx) => (
+        {((forYouForever.cards as Array<{ image: string; title: string; subtitle: string }>) ?? []).map((card, idx) => (
           <figure
             key={card.title}
             ref={cardRefs[idx] as React.RefObject<HTMLElement>}

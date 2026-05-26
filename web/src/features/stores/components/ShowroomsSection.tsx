@@ -22,14 +22,15 @@ const showroomImages: Record<string, string | StaticImageData> = {
 
 interface ShowroomsSectionProps {
   id?: string;
+  homeData?: Record<string, any>;
 }
 
-const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
-  const { showrooms } = homeContent;
+const ShowroomsSection = ({ id, homeData }: ShowroomsSectionProps) => {
+  const showrooms = homeData?.showrooms ?? homeContent.showrooms;
   const [activeId, setActiveId] = useState<string>(showrooms.locations[1].id);
 
   const activeLocation =
-    showrooms.locations.find((l) => l.id === activeId) ??
+    ((showrooms.locations as Array<{ id: string; name: string; address: string; phone: string; directionsUrl: string }>) ?? []).find((l) => l.id === activeId) ??
     showrooms.locations[0];
 
   return (
@@ -53,7 +54,7 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
           aria-label="Showroom locations"
           className="lg:px-0 px-5 lg:mb-0 mb-[14px] flex lg:flex-col flex-row lg:border-r lg:border-b-0 border-b border-gray600 overflow-x-auto"
         >
-          {showrooms.locations.map((location) => {
+          {((showrooms.locations as Array<{ id: string; name: string; address: string; phone: string; directionsUrl: string }>) ?? []).map((location) => {
             const isActive = location.id === activeId;
             return (
               <div

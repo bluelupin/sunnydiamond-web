@@ -24,14 +24,19 @@ const ringImages = [ring1, ring2, ring3, ring4];
 const formatPrice = (price: number) =>
   new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(price);
 
-const AlankaraShowcase = ({ id }: { id?: string }) => {
-  const { alankara } = homeContent;
+interface AlankaraShowcaseProps {
+  id?: string;
+  homeData?: Record<string, any>;
+}
+
+const AlankaraShowcase = ({ id, homeData }: AlankaraShowcaseProps) => {
+  const alankara = homeData?.alankara ?? homeContent.alankara;
   const ref = useFadeIn();
   const parallaxRef = useParallax<HTMLDivElement>(0.18);
 
   const items: Product[] = useMemo(
     () =>
-      alankara.productIds
+      ((alankara.productIds as string[]) ?? [])
         .map((pid) => allProducts.find((p) => p.id === pid))
         .filter((p): p is Product => Boolean(p)),
     [alankara.productIds]
@@ -143,10 +148,10 @@ const AlankaraShowcase = ({ id }: { id?: string }) => {
               {alankara.collection.title}
             </h2>
             <Link
-              href={alankara.collection.cta.to}
+              href={alankara.collection?.cta?.to ?? homeContent.alankara.collection.cta.to}
               className="inline-block text-white md:text-base text-sm font-gill tracking-[1.8%] uppercase font-normal border-b border-white/80 pb-2 hover:border-white"
             >
-              {alankara.collection.cta.label}
+              {alankara.collection?.cta?.label ?? homeContent.alankara.collection.cta.label}
             </Link>
           </div>
         </div>
@@ -220,7 +225,7 @@ const AlankaraShowcase = ({ id }: { id?: string }) => {
                 >
                   <span className="absolute inset-0 bg-darkblack origin-bottom scale-y-0 transition-transform duration-500 ease-out group-hover:scale-y-100"></span>
                   <span className="relative z-10 group-hover:text-white transition-colors duration-500">
-                    {alankara.product.cta.label}
+                    {alankara.product?.cta?.label ?? homeContent.alankara.product.cta.label}
                   </span>
                 </Link>
                 <div className="mt-6 flex items-center justify-center gap-6">
@@ -255,19 +260,19 @@ const AlankaraShowcase = ({ id }: { id?: string }) => {
             {alankara.gifting.title}
           </h2>
           <Link
-            href={alankara.gifting.cta.to}
+            href={alankara.gifting?.cta?.to ?? homeContent.alankara.gifting.cta.to}
             className="group relative overflow-hidden inline-flex items-center justify-center border-[0.8px] border-darkblack text-darkblack md:text-base text-sm px-8 md:h-50 h-12 tracking-[1.8%] uppercase font-gill transition-colors duration-500"
           >
             <span className="absolute inset-0 bg-darkblack origin-bottom scale-y-0 transition-transform duration-500 ease-out group-hover:scale-y-100"></span>
             <span className="relative z-10 group-hover:text-white transition-colors duration-500">
-              {alankara.gifting.cta.label}
+              {alankara.gifting?.cta?.label ?? homeContent.alankara.gifting.cta.label}
             </span>
           </Link>
           <Link
-            href={alankara.gifting.secondary.to}
+            href={alankara.gifting?.secondary?.to ?? homeContent.alankara.gifting.secondary.to}
             className="md:mt-8 mt-6 inline-block text-darkblack md:text-base text-sm font-gill tracking-[1.8%] uppercase font-normal border-b border-darkblack pb-2"
           >
-            {alankara.gifting.secondary.label}
+            {alankara.gifting?.secondary?.label ?? homeContent.alankara.gifting.secondary.label}
           </Link>
         </div>
 

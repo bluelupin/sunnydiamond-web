@@ -8,12 +8,14 @@ const CraftsmanshipProcess = lazy(
 
 export default function CraftsmanshipProcessLazy({
   id,
+  homeData,
 }: {
   id?: string;
+  homeData?: Record<string, any>;
 }) {
   return (
     <Suspense fallback={<div className="py-16" />}>
-      <CraftsmanshipProcess id={id} />
+      <CraftsmanshipProcess id={id} homeData={homeData} />
     </Suspense>
   );
 }

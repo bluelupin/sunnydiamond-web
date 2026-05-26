@@ -13,7 +13,11 @@ import ringsModel from "@/assets/category-rings-model.jpg";
 import earringsModel from "@/assets/category-earrings-model.jpg";
 import braceletsModel from "@/assets/category-bracelets-model.jpg";
 import necklacesModel from "@/assets/category-necklaces-model.jpg";
-
+import { homeContent } from "../../data/content";
+interface CraftingRaritySectionProps {
+  id?: string;
+  homeData?: Record<string, any>;
+}
 const categories = [
   { label: "RINGS", slug: "Rings", product: ringsProduct, model: ringsModel },
   { label: "EARRINGS", slug: "Earrings", product: earringsProduct, model: earringsModel },
@@ -28,16 +32,18 @@ if (typeof window !== "undefined") {
   });
 }
 
-const CraftingRaritySection = ({ id }: { id?: string }) => {
+const CraftingRaritySection = ({ id, homeData }: CraftingRaritySectionProps) => {
   const ref = useFadeIn();
+  const craftingRarity = homeData?.hero ?? homeContent.craftingRarity;
+  const craftRarityCtaLabel = homeData?.hero.cta?.label ?? homeContent.craftingRarity.cta.label;
 
   return (
     <section id={id} ref={ref} className="bg-white pb-3 flex flex-col gap-6 md:gap-8 lg:gap-10">
       <div className="relative overflow-hidden neckLaceArcContainer">
-        <div className="relative max-w-[1440px] mx-auto w-full md:h-433 sm:h-465 h-465 py-6 sm:py-10 md:py-16 lg:py-20 px-6 md:px-10 lg:px-16 flex lg:items-center items-end">
+        <div className="container relative md:h-433 sm:h-465 h-465 py-6 sm:py-10 md:py-16 lg:py-20 flex lg:items-center items-end">
           <div className="relative z-10 max-w-560">
             <h2 className="font-larken font-light text-[32px] md:text-[40px] lg:text-[48px] text-darkblack mb-40 leading-[100%] tracking-[0%]">
-              Crafting rarity into timeless brilliance
+              {craftingRarity.subtitle}
             </h2>
             <Link
               href="/products"
@@ -45,7 +51,7 @@ const CraftingRaritySection = ({ id }: { id?: string }) => {
             >
               <span className="absolute inset-0 bg-darkblack origin-bottom scale-y-0 transition-transform duration-500 ease-out group-hover:scale-y-100"></span>
               <span className="relative z-10 group-hover:text-white transition-colors duration-500">
-                Explore Products
+                {craftRarityCtaLabel}
               </span>
             </Link>
           </div>
@@ -69,8 +75,7 @@ const CraftingRaritySection = ({ id }: { id?: string }) => {
                 height={800}
                 className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-out"
               />
-              <div
-                aria-hidden
+              <div aria-hidden
                 className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0A0A0A] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
               />
               <div className="relative flex-1 flex items-center justify-center overflow-hidden p-6 md:p-10 transition-opacity duration-500 group-hover:opacity-0">

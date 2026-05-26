@@ -10,30 +10,30 @@ import CraftsmanshipProcess from "./home/CraftsmanshipProcessLazy";
 import BrandPromises from "./home/BrandPromises";
 import ForYouForever from "./home/ForYouForever";
 import ShowroomsSection from "@/features/stores/components/ShowroomsSection";
+import ApiDebugLogger from "@/shared/ui/ApiDebugLogger";
+import type { HomepageResponse } from "@/services/homepage.service";
 
-const HomePage = () => {
+type HomePageProps = {
+  homeData: HomepageResponse;
+};
+
+const showApiDebug = process.env.NEXT_PUBLIC_API_DEBUG === "true";
+
+const HomePage = ({ homeData }: HomePageProps) => {
   return (
     <Layout>
       <SectionNav />
-
-      <HeroSection id="hero" />
-      <CraftingRaritySection id="crafting-rarity" />
+      {showApiDebug ? <ApiDebugLogger /> : null}
+      <HeroSection id="hero" homeData={homeData} />
+      <CraftingRaritySection id="crafting-rarity" homeData={homeData} />
       <FlawlessDiamonds id="flawless" />
-      <AlankaraShowcase id="alankara" />
-
-<DiamondAwaits id="diamond-awaits" />
-
-      <CategoryGrid id="categories" />
-
-      <CraftsmanshipProcess id="craftsmanship" />
-
-<BrandPromises id="promise" />
-
-<ForYouForever id="for-you" />
-
-<ShowroomsSection id="showrooms" />
-
-
+      <AlankaraShowcase id="alankara" homeData={homeData} />
+      <DiamondAwaits id="diamond-awaits" homeData={homeData} />
+      <CategoryGrid id="categories" homeData={homeData} />
+      <CraftsmanshipProcess id="craftsmanship" homeData={homeData} />
+      <BrandPromises id="promise" homeData={homeData} />
+      <ForYouForever id="for-you" homeData={homeData} />
+      <ShowroomsSection id="showrooms" homeData={homeData} />
     </Layout>
   );
 };

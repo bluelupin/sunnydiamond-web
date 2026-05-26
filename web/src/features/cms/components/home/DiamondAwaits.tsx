@@ -28,13 +28,18 @@ const getTransparent = (p: Product) =>
 const formatPrice = (price: number) =>
   new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(price);
 
-const DiamondAwaits = ({ id }: { id?: string }) => {
-  const { diamondAwaits } = homeContent;
+interface DiamondAwaitsProps {
+  id?: string;
+  homeData?: Record<string, any>;
+}
+
+const DiamondAwaits = ({ id, homeData }: DiamondAwaitsProps) => {
+  const diamondAwaits = homeData?.diamondAwaits ?? homeContent.diamondAwaits;
   const ref = useFadeIn();
 
   const items: Product[] = useMemo(
     () =>
-      diamondAwaits.productIds
+      (diamondAwaits.productIds as string[] | undefined ?? [])
         .map((pid) => allProducts.find((p) => p.id === pid))
         .filter((p): p is Product => Boolean(p)),
     [diamondAwaits.productIds]

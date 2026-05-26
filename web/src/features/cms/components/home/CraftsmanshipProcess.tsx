@@ -6,10 +6,15 @@ import { homeContent } from "@/features/cms/data/content";
 import { useStepScroll } from "@/shared/hooks/use-step-scroll";
 import craftsmanshipDiamond from "@/assets/craftsmanship-diamond-3d.png";
 
+interface CraftsmanshipProcessProps {
+  id?: string;
+  homeData?: Record<string, any>;
+}
+
 const stepIcons: LucideIcon[] = [PencilLine, Gem, Hammer, PackageCheck];
 
-const CraftsmanshipProcess = ({ id }: { id?: string }) => {
-  const { craftsmanship } = homeContent;
+const CraftsmanshipProcess = ({ id, homeData }: CraftsmanshipProcessProps) => {
+  const craftsmanship = homeData?.craftsmanship ?? homeContent.craftsmanship;
   const stepCount = craftsmanship.steps.length;
   const { activeIndex, progress, containerRef } = useStepScroll(stepCount);
 
@@ -37,7 +42,7 @@ const CraftsmanshipProcess = ({ id }: { id?: string }) => {
 
               {/* Active + next upcoming step (faded) */}
               <ol className="space-y-12 md:space-y-16 relative">
-                {craftsmanship.steps.map((step, i) => {
+                {((craftsmanship.steps as Array<{ number: string; title: string; description: string }>) ?? []).map((step, i) => {
                   const Icon = stepIcons[i] ?? PencilLine;
                   const isActive = i === activeIndex;
                   const isNext = i === activeIndex + 1;

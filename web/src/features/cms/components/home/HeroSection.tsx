@@ -5,13 +5,27 @@ import { getImageSrc } from "@/shared/utils/image";
 import hero640 from "@/assets/hero-banner-640.webp";
 import hero1024 from "@/assets/hero-banner-1024.webp";
 import hero1440 from "@/assets/hero-banner-1440.webp";
+
+interface HeroSectionProps {
+  id?: string;
+  homeData?: Record<string, any>;
+}
 import DiamondIcon from "@/assets/Icons/Diamond";
 
 const heroSrcSet = `${getImageSrc(hero640)} 640w, ${getImageSrc(hero1024)} 1024w, ${getImageSrc(hero1440)} 1440w`;
 
-const HeroSection = ({ id }: { id?: string }) => {
-  const { hero } = homeContent;
-  const marqueeItems = [...hero.trustSignals, ...hero.trustSignals];
+const HeroSection = ({ id, homeData }: HeroSectionProps) => {
+  const hero = homeData?.hero ?? homeContent.hero;
+  const heroCtaTo = hero.cta?.to ?? homeContent.hero.cta.to;
+  const heroCtaLabel = hero.cta?.label ?? homeContent.hero.cta.label;
+  const trustSource = homeData?.trustBadges ?? homeData?.trustBadges ?? homeContent.hero.trustSignals ?? [];
+  const normalizedTrust = Array.isArray(trustSource)
+    ? [...trustSource].sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
+    : [];
+  const marqueeItems = [
+    ...normalizedTrust.map((t: any) => (typeof t === "string" ? t : t?.label ?? "")),
+    ...normalizedTrust.map((t: any) => (typeof t === "string" ? t : t?.label ?? "")),
+  ].filter(Boolean);
 
   return (
     <>
@@ -46,25 +60,24 @@ const HeroSection = ({ id }: { id?: string }) => {
           {/* Left/bottom gradient for legibility */}
           <div className="absolute inset-0 bg-gradient-to-r from-charcoal/55 via-charcoal/15 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-charcoal/40 to-transparent md:hidden" />
-         <div className="relative h-full max-w-[1440px] mx-auto w-full flex items-end pb-12 md:pb-20 lg:pb-24 px-6 md:px-10 lg:px-16">
+          <div className="container relative h-full flex items-end pb-12 md:pb-20 lg:pb-24">
             <div className="md:max-w-[742px] animate-fade-in">
               <div className="mb-6 inline-flex items-center gap-2 text-white font-gill font-normal lg:text-xl md:text-lg text-base tracking-[1.8%] uppercase">
                 <DiamondIcon className="text-white" />
                 <span className="tracking-[1.8%]">
-                  {hero.badge}
+                  {hero.eyebrow}
                 </span>
               </div>
-
               <h1 className="mb-40 lg:text-[54px] md:text-[42px] text-[32px] text-white">
                 {hero.title}
               </h1>
               <Link
-                href={hero.cta.to}
+                href={heroCtaTo}
                 className="group relative overflow-hidden inline-flex items-center justify-center border-[0.8px] border-white text-white  md:text-base text-sm px-8 md:h-50 h-12 tracking-[0%] uppercase font-gill transition-colors duration-500"
               >
                 <span className="absolute inset-0 bg-white origin-bottom scale-y-0 transition-transform duration-500 ease-out group-hover:scale-y-100"></span>
                 <span className="relative z-10 group-hover:text-charcoal transition-colors duration-500">
-                  {hero.cta.label}
+                  {heroCtaLabel}
                 </span>
               </Link>
             </div>

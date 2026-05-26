@@ -10,15 +10,19 @@ export const homeSections = [
 
 export const homeContent = {
   hero: {
-    badge: "20 Years of Legacy",
-    title: "Fine jewellery designed with a tradition of excellence",
+    badge: "20 Years of Legacy (s)",
+    title: "Fine jewellery designed with a tradition of excellence (s)",
     cta: { label: "Shop Now", to: "/products" },
     trustSignals: [
-      "BIS Halmark for Jewellery",
-      "Cash on Delivery",
-      "Internally Flawless Diamonds",
-      "100% Moneyback Guarantee",
+      "BIS Halmark for Jewellery (s)",
+      "Cash on Delivery (s)",
+      "Internally Flawless Diamonds (s)",
+      "100% Moneyback Guarantee (s)",
     ],
+  },
+  craftingRarity: {
+    title: "Crafting rarity into timeless brilliance (s)",
+    cta: { label: " Explore Products", to: "/products" },
   },
   featured: {
     subtitle: "Curated for You",

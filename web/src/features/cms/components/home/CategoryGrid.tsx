@@ -6,6 +6,11 @@ import { homeContent } from "@/features/cms/data/content";
 import { useFadeIn } from "@/shared/hooks/use-fade-in";
 import type { StaticImageData } from "next/image";
 
+interface CategoryGridProps {
+  id?: string;
+  homeData?: Record<string, any>;
+}
+
 import occasionFestival from "@/assets/section6-card1.webp";
 import occasionCocktail from "@/assets/section6-card2.webp";
 import occasionWedding from "@/assets/section6-card3.webp";
@@ -16,8 +21,8 @@ const imageMap: Record<string, string | StaticImageData> = {
   wedding: occasionWedding,
 };
 
-const CategoryGrid = ({ id }: { id?: string }) => {
-  const { categories } = homeContent;
+const CategoryGrid = ({ id, homeData }: CategoryGridProps) => {
+  const categories = homeData?.categories ?? homeContent.categories;
   const ref = useFadeIn();
 
   return (
@@ -32,7 +37,7 @@ const CategoryGrid = ({ id }: { id?: string }) => {
           className="flex md:gap-4 gap-3 overflow-x-auto snap-x snap-mandatory px-4 pb-2 md:mx-0 md:px-0 md:pb-0 md:overflow-visible md:grid md:grid-cols-3 md:gap-4"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
         >
-          {categories.items.map((cat) => (
+          {((categories.items as Array<{ slug: string; label: string }> ) ?? []).map((cat) => (
             <Link
               key={cat.slug}
               href={`/products?occasion=${cat.slug}`}

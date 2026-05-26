@@ -6,6 +6,11 @@ import { useFadeIn } from "@/shared/hooks/use-fade-in";
 import { getImageSrc } from "@/shared/utils/image";
 import promiseHero from "@/assets/promise-hero.jpg";
 
+interface BrandPromisesProps {
+  id?: string;
+  homeData?: Record<string, any>;
+}
+
 /**
  * Background video assets live in /public/videos/.
  * Drop optimised files at the paths below — webm preferred, mp4 fallback.
@@ -13,10 +18,12 @@ import promiseHero from "@/assets/promise-hero.jpg";
  */
 const PROMISE_VIDEO_MP4 = "/videos/promise-bg.mp4";
 
-const BrandPromises = ({ id }: { id?: string }) => {
+const BrandPromises = ({ id, homeData }: BrandPromisesProps) => {
   const sectionRef = useFadeIn(0);
   const contentRef = useFadeIn(200);
-  const { promise } = homeContent;
+  const promise = homeData?.promise ?? homeContent.promise;
+  const promiseCtaTo = promise.cta?.to ?? homeContent.promise.cta.to;
+  const promiseCtaLabel = promise.cta?.label ?? homeContent.promise.cta.label;
 
   return (
     <section
@@ -57,12 +64,12 @@ const BrandPromises = ({ id }: { id?: string }) => {
           {promise.description}
         </p>
         <Link
-          href={promise.cta.to}
+          href={promiseCtaTo}
           className="md:mt-10 mt-6 group relative overflow-hidden inline-flex items-center justify-center border-[0.8px] border-white text-white md:text-base text-sm px-8 md:h-50 h-12 md:tracking-[1.8%] tracking-[4%] uppercase font-gill transition-colors duration-500"
         >
           <span className="absolute inset-0 bg-white origin-bottom scale-y-0 transition-transform duration-500 ease-out group-hover:scale-y-100"></span>
           <span className="relative z-10 group-hover:text-black transition-colors duration-500">
-            {promise.cta.label}
+            {promiseCtaLabel}
           </span>
         </Link>
       </div>
