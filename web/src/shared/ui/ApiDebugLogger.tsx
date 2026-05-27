@@ -1,16 +1,13 @@
 "use client";
 
 import { useEffect } from "react";
-import { apiFetch } from "@/api/fetchClient";
-import { STRAPI_ENDPOINTS } from "@/api/endpoints";
+import { getHomepageContent } from "@/services/homepage.service";
 
 const ApiDebugLogger = () => {
   useEffect(() => {
     const fetchDebug = async () => {
       try {
-        const data = await apiFetch(STRAPI_ENDPOINTS.homepage, {
-          params: { populate: "*" },
-        });
+        const data = await getHomepageContent();
 
         if (typeof window !== "undefined") {
           console.group("[API Debug] Homepage response");

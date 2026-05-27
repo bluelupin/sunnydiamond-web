@@ -43,7 +43,7 @@ const HeroSection = ({ id, homeData }: HeroSectionProps) => {
             aria-hidden="true"
             tabIndex={-1}
           >
-            <source src="/videos/hero-bg.mp4" type="video/mp4" />
+            <source src="/videos/hero-banner-video.mp4" type="video/mp4" />
             {/* Fallback image for browsers without video support */}
             <img
               src={getImageSrc(hero1024)}

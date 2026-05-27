@@ -7,13 +7,8 @@ import { useParallax } from "@/shared/hooks/use-parallax";
 import diamondsImg from "@/assets/section3-bg.webp";
 import diamondSourcingImage from "@/assets/flawless-diamond-transparent.webp";
 import diamondGif from "@/assets/diamond-gif.gif";
+import type { DiamondSourcingSectionData } from "@/types/homepage";
 
-type DiamondSourcingSectionData = {
-  id?: number;
-  sectionTitle?: string;
-  description?: string;
-  isActive?: boolean;
-};
 interface DiamondSourcingSectionProps {
   id?: string;
   diamondSourcingSection?: DiamondSourcingSectionData | null;
