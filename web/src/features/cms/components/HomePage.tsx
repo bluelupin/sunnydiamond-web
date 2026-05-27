@@ -2,7 +2,7 @@ import Layout from "@/shared/ui/layout/Layout";
 import HeroSection from "@/features/cms/components/home/HeroSection";
 import SectionNav from "@/features/cms/components/home/SectionNav";
 import CraftingRaritySection from "@/features/cms/components/home/CraftingRaritySection";
-import FlawlessDiamonds from "@/features/cms/components/home/FlawlessDiamonds";
+import DiamondSourcingSection from "@/features/cms/components/home/DiamondSourcingSection";
 import AlankaraShowcase from "@/features/cms/components/home/AlankaraShowcase";
 import DiamondAwaits from "@/features/cms/components/home/DiamondAwaits";
 import CategoryGrid from "./home/CategoryGrid";
@@ -26,7 +26,7 @@ const HomePage = ({ homeData }: HomePageProps) => {
       {showApiDebug ? <ApiDebugLogger /> : null}
       <HeroSection id="hero" homeData={homeData} />
       <CraftingRaritySection id="crafting-rarity" homeData={homeData} />
-      <FlawlessDiamonds id="flawless" />
+      <DiamondSourcingSection id="flawless" diamondSourcingSection={homeData?.diamondSourcingSection} />
       <AlankaraShowcase id="alankara" homeData={homeData} />
       <DiamondAwaits id="diamond-awaits" homeData={homeData} />
       <CategoryGrid id="categories" homeData={homeData} />

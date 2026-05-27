@@ -18,11 +18,11 @@ interface CraftingRaritySectionProps {
   id?: string;
   homeData?: Record<string, any>;
 }
-const categories = [
-  { label: "RINGS", slug: "Rings", product: ringsProduct, model: ringsModel },
-  { label: "EARRINGS", slug: "Earrings", product: earringsProduct, model: earringsModel },
-  { label: "BRACELETS", slug: "Bracelets", product: braceletsProduct, model: braceletsModel },
-  { label: "NECKLACE", slug: "Necklaces", product: necklacesProduct, model: necklacesModel },
+const fallbackCategories = [
+  { id: "rings", label: "RINGS", title: "RINGS(s)", slug: "rings", product: ringsProduct, model: ringsModel },
+  { id: "earrings", label: "EARRINGS", title: "EARRINGS", slug: "earrings", product: earringsProduct, model: earringsModel },
+  { id: "bracelets", label: "BRACELETS", title: "BRACELETS", slug: "bracelets", product: braceletsProduct, model: braceletsModel },
+  { id: "necklace", label: "NECKLACE", title: "NECKLACE", slug: "necklace", product: necklacesProduct, model: necklacesModel },
 ];
 
 if (typeof window !== "undefined") {
@@ -36,6 +36,24 @@ const CraftingRaritySection = ({ id, homeData }: CraftingRaritySectionProps) => 
   const ref = useFadeIn();
   const craftingRarity = homeData?.hero ?? homeContent.craftingRarity;
   const craftRarityCtaLabel = homeData?.hero.cta?.label ?? homeContent.craftingRarity.cta.label;
+
+  const rawCategoryNavigation = Array.isArray(homeData?.categoryNavigation) ? homeData.categoryNavigation : [];
+  const categoryNavigation = rawCategoryNavigation.length > 0
+    ? rawCategoryNavigation
+      .filter((item: any) => item?.isActive !== false)
+      .sort((a: any, b: any) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
+      .map((item: any, index: number) => {
+        const title = item?.title ?? item?.label ?? fallbackCategories[index]?.title ?? `Category ${index + 1}`;
+        const slug = item?.slug ?? title.toLowerCase().replace(/\s+/g, "-");
+        return {
+          id: item?.id ?? slug,
+          title,
+          label: title,
+          slug,
+          product: item?.product ?? fallbackCategories[index]?.product,
+          model: item?.model ?? fallbackCategories[index]?.model,
+        };
+      }) : fallbackCategories;
 
   return (
     <section id={id} ref={ref} className="bg-white pb-3 flex flex-col gap-6 md:gap-8 lg:gap-10">
@@ -62,10 +80,10 @@ const CraftingRaritySection = ({ id, homeData }: CraftingRaritySectionProps) => 
           className="flex gap-4 overflow-x-auto snap-x snap-mandatory md:overflow-visible md:grid md:grid-cols-4"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
         >
-          {categories.map((cat) => (
+          {categoryNavigation.map((cat: any) => (
             <Link
-              key={cat.slug}
-              href={`/products?category=${cat.slug}`}
+              key={cat.id}
+              href="/products"
               className="group relative bg-gray300 flex flex-col flex-shrink-0 w-240 md:w-auto h-60 lg:h-260 xl:h-420 snap-start overflow-hidden"
             >
               <OptimizedImage
@@ -75,7 +93,7 @@ const CraftingRaritySection = ({ id, homeData }: CraftingRaritySectionProps) => 
                 height={800}
                 className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-out"
               />
-              <div aria-hidden
+              <div aria-hidden="true"
                 className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0A0A0A] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
               />
               <div className="relative flex-1 flex items-center justify-center overflow-hidden p-6 md:p-10 transition-opacity duration-500 group-hover:opacity-0">
@@ -89,7 +107,7 @@ const CraftingRaritySection = ({ id, homeData }: CraftingRaritySectionProps) => 
               </div>
               <div className="relative pb-6 md:pb-8 text-center z-10">
                 <span className="font-gill text-base lg:text-xl tracking-[1.8%] uppercase text-darkblack font-normal opacity-60 group-hover:opacity-100 group-hover:text-white transition-colors duration-500">
-                  {cat.label}
+                  {cat.title}
                 </span>
               </div>
             </Link>
