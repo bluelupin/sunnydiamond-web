@@ -9,26 +9,26 @@ export const homeSections = [
 ] as const;
 
 export const homeContent = {
-  hero: {
-    badge: "20 Years of Legacy (s)",
-    title: "Fine jewellery designed with a tradition of excellence (s)",
-    cta: { label: "Shop Now", to: "/products" },
-    trustSignals: [
-      "BIS Halmark for Jewellery (s)",
-      "Cash on Delivery (s)",
-      "Internally Flawless Diamonds (s)",
-      "100% Moneyback Guarantee (s)",
-    ],
-  },
-  craftingRarity: {
-    title: "Crafting rarity into timeless brilliance (s)",
-    cta: { label: " Explore Products", to: "/products" },
-  },
-  featured: {
-    subtitle: "Curated for You",
-    title: "Featured Collections",
-    cta: { label: "View All", to: "/products" },
-  },
+  // hero: {
+  //   badge: "20 Years of Legacy (s)",
+  //   title: "Fine jewellery designed with a tradition of excellence (s)",
+  //   cta: { label: "Shop Now", to: "/products" },
+  //   trustSignals: [
+  //     "BIS Halmark for Jewellery (s)",
+  //     "Cash on Delivery (s)",
+  //     "Internally Flawless Diamonds (s)",
+  //     "100% Moneyback Guarantee (s)",
+  //   ],
+  // },
+  // craftingRarity: {
+  //   title: "Crafting rarity into timeless brilliance (s)",
+  //   cta: { label: " Explore Products", to: "/products" },
+  // },
+  // featured: {
+  //   subtitle: "Curated for You",
+  //   title: "Featured Collections",
+  //   cta: { label: "View All", to: "/products" },
+  // },
   whyUs: {
     subtitle: "Why Sunny Diamonds",
     title: "What Sets Us Apart",

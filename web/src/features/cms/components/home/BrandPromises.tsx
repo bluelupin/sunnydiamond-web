@@ -1,14 +1,13 @@
  "use client";
 
 import Link from "next/link";
-import { homeContent } from "@/features/cms/data/content";
 import { useFadeIn } from "@/shared/hooks/use-fade-in";
 import { getImageSrc } from "@/shared/utils/image";
-import promiseHero from "@/assets/promise-hero.jpg";
+import { useSunnyPromiseSection } from "@/hooks/homepage/useSunnyPromiseSection";
+import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 
 interface BrandPromisesProps {
   id?: string;
-  homeData?: Record<string, any>;
 }
 
 /**
@@ -18,12 +17,42 @@ interface BrandPromisesProps {
  */
 const PROMISE_VIDEO_MP4 = "/videos/promise-bg.mp4";
 
-const BrandPromises = ({ id, homeData }: BrandPromisesProps) => {
+const BrandPromises = ({ id }: BrandPromisesProps) => {
   const sectionRef = useFadeIn(0);
   const contentRef = useFadeIn(200);
-  const promise = homeData?.promise ?? homeContent.promise;
-  const promiseCtaTo = promise.cta?.to ?? homeContent.promise.cta.to;
-  const promiseCtaLabel = promise.cta?.label ?? homeContent.promise.cta.label;
+  const { data, isLoading } = useSunnyPromiseSection();
+  const promise = data?.sunnyPromiseSection ?? null;
+
+  const title = promise?.title?.trim();
+  const description = promise?.description?.trim();
+  const promiseCtaTo = promise?.cta?.to ?? "";
+  const promiseCtaLabel = promise?.cta?.label ?? "";
+  const posterUrl = getCmsAssetUrl(promise?.posterImage?.data?.attributes?.url);
+
+  if (isLoading) {
+    return (
+      <section
+        id={id}
+        ref={sectionRef as React.RefObject<HTMLElement>}
+        className="relative w-full overflow-hidden bg-black h-650 md:h-804 lg:py-14 md:py-12 py-10"
+        aria-busy="true"
+      >
+        <div aria-hidden className="absolute inset-0 bg-black/60" />
+        <div
+          ref={contentRef as React.RefObject<HTMLDivElement>}
+          className="relative z-10 h-full flex flex-col items-center justify-end text-center px-6 md:px-10"
+        >
+          <div className="h-10 w-80 bg-white/15 rounded" aria-hidden />
+          <div className="md:mt-5 mt-3 h-5 w-[min(520px,90%)] bg-white/15 rounded" aria-hidden />
+          <div className="md:mt-10 mt-6 h-12 w-44 bg-white/15 rounded" aria-hidden />
+        </div>
+      </section>
+    );
+  }
+
+  if (!title || !description || !promiseCtaTo || !promiseCtaLabel || !posterUrl) {
+    return null;
+  }
 
   return (
     <section
@@ -39,7 +68,7 @@ const BrandPromises = ({ id, homeData }: BrandPromisesProps) => {
         muted
         playsInline
         preload="metadata"
-        poster={getImageSrc(promiseHero)}
+        poster={getImageSrc(posterUrl)}
         aria-hidden="true"
         tabIndex={-1}
       >
@@ -58,10 +87,10 @@ const BrandPromises = ({ id, homeData }: BrandPromisesProps) => {
         className="relative z-10 h-full flex flex-col items-center justify-end text-center px-6 md:px-10"
       >
         <h2 className="lg:text-5xl md:text-4xl text-32 text-gray200 font-normal font-larken tracking-[0%] leading-[100%] text-center">
-          {promise.title}
+          {title}
         </h2>
         <p className="md:mt-5 mt-3 text-base md:text-lg lg:text-xl text-gray200 tracking-[1%] leading-[100%] font-light font-gill">
-          {promise.description}
+          {description}
         </p>
         <Link
           href={promiseCtaTo}

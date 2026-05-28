@@ -2,20 +2,26 @@
 
 import { PencilLine, Gem, Hammer, PackageCheck, type LucideIcon } from "lucide-react";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
-import { homeContent } from "@/features/cms/data/content";
 import { useStepScroll } from "@/shared/hooks/use-step-scroll";
-import craftsmanshipDiamond from "@/assets/craftsmanship-diamond-3d.png";
+import { useCraftsmanshipSteps } from "@/hooks/homepage/useCraftsmanshipSteps";
+import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 
 interface CraftsmanshipProcessProps {
   id?: string;
-  homeData?: Record<string, any>;
 }
 
 const stepIcons: LucideIcon[] = [PencilLine, Gem, Hammer, PackageCheck];
 
-const CraftsmanshipProcess = ({ id, homeData }: CraftsmanshipProcessProps) => {
-  const craftsmanship = homeData?.craftsmanship ?? homeContent.craftsmanship;
-  const stepCount = craftsmanship.steps.length;
+const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
+  const { data, isLoading } = useCraftsmanshipSteps();
+  const craftsmanship = data?.craftsmanshipSteps ?? null;
+  const steps = Array.isArray(craftsmanship?.steps)
+    ? [...craftsmanship.steps]
+      .filter((s) => s?.isActive !== false)
+      .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
+    : [];
+
+  const stepCount = steps.length;
   const { activeIndex, progress, containerRef } = useStepScroll(stepCount);
 
   // Scroll-driven 3D rotation: combines tilt (X), spin (Y), and a touch of Z roll
@@ -23,12 +29,47 @@ const CraftsmanshipProcess = ({ id, homeData }: CraftsmanshipProcessProps) => {
   const rotateX = 18 - progress * 36; // subtle tilt from +18 to -18
   const rotateZ = Math.sin(progress * Math.PI * 2) * 8; // gentle wobble
 
+  if (isLoading) {
+    return (
+      <section
+        id={id}
+        ref={containerRef}
+        style={{ height: `${2 * 100}vh` }}
+        aria-label="Craftsmanship"
+        className="bg-gray200 bg-gray200 pt-10 sm:pt-16 md:pt-20"
+        aria-busy="true"
+      >
+        <div className="sticky top-24 h-screen overflow-hidden bg-gray200">
+          <div className="container h-full">
+            <div className="grid h-full grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-12">
+              <div className="lg:col-span-5 flex flex-col xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20">
+                <div className="h-10 w-72 bg-gray300 rounded mx-auto lg:mx-0" aria-hidden />
+                <div className="space-y-12 md:space-y-16 relative">
+                  <div className="h-24 w-full bg-gray300/70 rounded" aria-hidden />
+                  <div className="h-24 w-full bg-gray300/50 rounded" aria-hidden />
+                </div>
+              </div>
+              <div className="lg:col-span-7 relative h-auto flex items-center justify-center">
+                <div className="w-[80%] aspect-square bg-gray300/70 rounded-full" aria-hidden />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const title = craftsmanship?.title?.trim();
+  const diamondUrl = getCmsAssetUrl(craftsmanship?.diamondImage?.data?.attributes?.url);
+
+  if (!title || steps.length === 0 || !diamondUrl) return null;
+
   return (
     <section
       id={id}
       ref={containerRef}
       style={{ height: `${(stepCount + 1) * 100}vh` }}
-      aria-label={craftsmanship.title}
+      aria-label={title}
       className="bg-gray200 bg-gray200 pt-10 sm:pt-16 md:pt-20"
     >
       <div className="sticky top-24 h-screen overflow-hidden bg-gray200">
@@ -37,19 +78,19 @@ const CraftsmanshipProcess = ({ id, homeData }: CraftsmanshipProcessProps) => {
             {/* Left column: title + steps */}
             <div className="lg:col-span-5 flex flex-col xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20">
               <h2 className="lg:text-5xl md:text-4xl text-32 text-black font-normal font-larken tracking-[0%] lg:text-left text-center">
-                {craftsmanship.title}
+                {title}
               </h2>
 
               {/* Active + next upcoming step (faded) */}
               <ol className="space-y-12 md:space-y-16 relative">
-                {((craftsmanship.steps as Array<{ number: string; title: string; description: string }>) ?? []).map((step, i) => {
+                {steps.map((step, i) => {
                   const Icon = stepIcons[i] ?? PencilLine;
                   const isActive = i === activeIndex;
                   const isNext = i === activeIndex + 1;
                   const isVisible = isActive || isNext;
                   return (
                     <li
-                      key={step.number}
+                      key={step?.id ?? step?.number ?? `${i}`}
                       className="transition-all duration-700 ease-out lg:max-w-auto max-w-420 lg:mx-0 mx-auto mx-auto lg:px-0 px-3 flex flex-col lg:items-start items-center lg:justify-start justify-center gap-4"
                       style={{
                         opacity: isActive ? 1 : isNext ? 0.1 : 0,
@@ -76,11 +117,11 @@ const CraftsmanshipProcess = ({ id, homeData }: CraftsmanshipProcessProps) => {
                         aria-hidden
                       />
                       <h3 className="text-base sm:text-xl md:text-2xl lg:text-28 font-normal tracking-[0%] leading-[100%] text-darkblack font-gill lg:text-left text-center">
-                        {step.title}
+                        {step?.title ?? ""}
                       </h3>
                       {isActive && (
                         <p className="text-base md:text-lg lg:text-xl font-light text-darkblack tracking-[1%] leading-[100%] font-gill animate-fade-in lg:text-left text-center">
-                          {step.description}
+                          {step?.description ?? ""}
                         </p>
                       )}
                     </li>
@@ -104,7 +145,7 @@ const CraftsmanshipProcess = ({ id, homeData }: CraftsmanshipProcessProps) => {
                 }}
               >
                 <OptimizedImage
-                  src={craftsmanshipDiamond}
+                  src={diamondUrl}
                   alt="Brilliant cut diamond rendered in 3D"
                   width={1280}
                   height={1280}

@@ -1,31 +1,28 @@
 "use client";
 
-import Image from "next/image";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { useFadeIn } from "@/shared/hooks/use-fade-in";
 import { useParallax } from "@/shared/hooks/use-parallax";
-import diamondsImg from "@/assets/section3-bg.webp";
-import diamondSourcingImage from "@/assets/flawless-diamond-transparent.webp";
+import { useDiamondSourcingSection } from "@/hooks/homepage/useDiamondSourcingSection";
+import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 import diamondGif from "@/assets/diamond-gif.gif";
-import type { DiamondSourcingSectionData } from "@/types/homepage";
-
+import diamondSourcingBg from "@/assets/section3-bg.webp";
+import DiamondsImg from "@/assets/flawless-diamond-transparent.webp";
 interface DiamondSourcingSectionProps {
   id?: string;
-  diamondSourcingSection?: DiamondSourcingSectionData | null;
-  isLoading?: boolean;
 }
 
-const DiamondSourcingSection = ({
-  id,
-  diamondSourcingSection,
-  isLoading,
-}: DiamondSourcingSectionProps) => {
+const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
   const ref = useFadeIn();
   const bgParallax = useParallax<HTMLDivElement>(0.25);
   const diamondParallax = useParallax<HTMLDivElement>(-0.45);
 
-  const sectionTitle = diamondSourcingSection?.sectionTitle?.trim();
-  const isActive = diamondSourcingSection?.isActive === true;
+  const { data, isLoading } = useDiamondSourcingSection();
+  const section = data?.diamondSourcingSection ?? null;
+  const sectionTitle = section?.sectionTitle?.trim();
+  const isActive = section?.isActive === true;
+
+  // const diamondUrl = getCmsAssetUrl(section?.diamondImage?.data?.attributes?.url);
 
   if (isLoading) {
     return (
@@ -48,9 +45,13 @@ const DiamondSourcingSection = ({
     );
   }
 
-  if (!isActive || !sectionTitle) {
+  if (!isActive) {
     return null;
   }
+
+  // if (!diamondUrl) {
+  //   return null;
+  // }
 
   return (
     <section
@@ -59,22 +60,20 @@ const DiamondSourcingSection = ({
       aria-label="Internally flawless diamonds"
       className="relative h-700 overflow-hidden"
     >
-      {/* Background image (slow parallax) */}
       <div className="absolute inset-0 -z-0 will-change-transform" ref={bgParallax}>
         <OptimizedImage
-          src={diamondsImg}
+          src={diamondSourcingBg}
           alt=""
           width={1920}
           height={1080}
           className="w-full h-full object-cover opacity-90 scale-110"
         />
-        {/* subtle white wash for text legibility */}
         <div className="absolute inset-0 bg-background/40" aria-hidden />
       </div>
       <div className="relative container h-full py-12 md:py-16 flex flex-col items-center justify-center text-center">
-        <Image
+        <OptimizedImage
           src={diamondGif}
-          alt="Diamond Gif Icon"
+          alt=""
           width={64}
           height={64}
           className="w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 opacity-80"
@@ -84,7 +83,7 @@ const DiamondSourcingSection = ({
         </h2>
         <div ref={diamondParallax} className="will-change-transform md:mt-26 mt-76">
           <OptimizedImage
-            src={diamondSourcingImage}
+            src={DiamondsImg}
             alt="Brilliant round-cut diamond sourced from Belgium"
             width={1024}
             height={1024}
