@@ -3,12 +3,12 @@ import HeroSection from "@/features/cms/components/home/HeroSection";
 import SectionNav from "@/features/cms/components/home/SectionNav";
 import CraftingRaritySection from "@/features/cms/components/home/CraftingRaritySection";
 import DiamondSourcingSection from "@/features/cms/components/home/DiamondSourcingSection";
-import AlankaraShowcase from "@/features/cms/components/home/AlankaraShowcase";
-import DiamondAwaits from "@/features/cms/components/home/DiamondAwaits";
-import CategoryGrid from "./home/CategoryGrid";
+import FeaturedCollectionSection from "@/features/cms/components/home/FeaturedCollectionSection";
+import FeaturedProductsSection from "@/features/cms/components/home/FeaturedProductsSection";
+import ForYouForever from "@/features/cms/components/home/ForYouForever";
 import CraftsmanshipProcess from "./home/CraftsmanshipProcessLazy";
-import BrandPromises from "./home/BrandPromises";
-import ForYouForever from "./home/ForYouForever";
+import SunnyPromiseSection from "@/features/cms/components/home/SunnyPromiseSection";
+import OccasionsTeaserSection from "@/features/cms/components//home/OccasionsTeaserSection";
 import ShowroomsSection from "@/features/stores/components/ShowroomsSection";
 import ApiDebugLogger from "@/shared/ui/ApiDebugLogger";
 
@@ -22,12 +22,12 @@ const HomePage = () => {
       <HeroSection id="hero" />
       <CraftingRaritySection id="crafting-rarity" />
       <DiamondSourcingSection id="flawless" />
-      <AlankaraShowcase id="alankara" />
-      <DiamondAwaits id="diamond-awaits" />
-      <CategoryGrid id="categories" />
+      <FeaturedCollectionSection id="alankara" />
+      <FeaturedProductsSection id="diamond-awaits" />
+      <OccasionsTeaserSection id="for-you" />
       <CraftsmanshipProcess id="craftsmanship" />
-      <BrandPromises id="promise" />
-      <ForYouForever id="for-you" />
+      <SunnyPromiseSection id="promise" />
+      <ForYouForever id="categories" />
       <ShowroomsSection id="showrooms" />
     </Layout>
   );

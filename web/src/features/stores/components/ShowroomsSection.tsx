@@ -6,12 +6,19 @@ import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { cn } from "@/shared/utils/cn";
 import { useShowroomTeaser } from "@/hooks/homepage/useShowroomTeaser";
 import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
+import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 
 interface ShowroomsSectionProps {
   id?: string;
 }
 
 const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
+
+  const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
+  const showroomData = editorialData?.homepage?.showroomTeaser || editorialData?.showroomTeaser;
+  const sectionTitle = showroomData?.sectionTitle?.trim();
+  const description = showroomData?.description?.trim();
+  const isActive = showroomData?.isActive === true;
   const { data, isLoading } = useShowroomTeaser();
   const showrooms = data?.showroomTeaser ?? null;
 
@@ -52,9 +59,9 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
     );
   }
 
-  if (!showrooms?.title || !showrooms?.subtitle || locations.length === 0 || !activeLocation) {
-    return null;
-  }
+  // if (!showrooms?.title || !showrooms?.subtitle || locations.length === 0 || !activeLocation) {
+  //   return null;
+  // }
 
   return (
     <section
@@ -63,17 +70,17 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
     >
       <div className="2xl:pl-24 lg:pl-20 pl-5 lg:pr-0 pr-5">
         <h2 className="lg:text-5xl md:text-4xl text-32 text-black font-larken font-light tracking-[0%] leading-[100%] mb-4 sm:mb-6 md:mb-8 lg:mb-10 lg:text-left text-center">
-          {showrooms.title}
+          {sectionTitle || "Visit Our Showrooms (F)"}
         </h2>
         <p className="lg:hidden font-body text-base text-muted-foreground leading-relaxed max-w-350 mx-auto lg:text-left text-center mb-4">
-          {showrooms.subtitle}
+          {description || "Step into our atelier to discover the Belgian-sourced mastery behind every stone. Located across Kochi, Calicut, Thrissur, Trivandrum, and Coimbatore."}
         </p>
       </div>
 
       <div className="lg:grid grid-cols-1 lg:grid-cols-2 gap-[14px] md:gap-5 lg:gap-6 items-start lg:static relative">
-        
+
         {/* Left: Tabs */}
-        <div
+        {/* <div
           aria-label="Showroom locations"
           className="lg:px-0 px-5 lg:mb-0 mb-[14px] flex lg:flex-col flex-row lg:border-r lg:border-b-0 border-b border-gray600 overflow-x-auto"
         >
@@ -91,8 +98,8 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
                   type="button"
                   aria-pressed={isActive}
                   onClick={() => setActiveId(location?.id ?? "")}
-                className={cn(
-                  "w-full lg:h-73 h-50 lg:px-0 px-6 flex items-center lg:justify-start justify-center lg:text-left text-center font-larken text-base md:text-xl lg:text-2xl text-left text-black tracking-[0%] leading-[100%] uppercase transition-all duration-300",
+                  className={cn(
+                    "w-full lg:h-73 h-50 lg:px-0 px-6 flex items-center lg:justify-start justify-center lg:text-left text-center font-larken text-base md:text-xl lg:text-2xl text-left text-black tracking-[0%] leading-[100%] uppercase transition-all duration-300",
                     isActive
                       ? "font-normal border-b border-gray50"
                       : "font-light"
@@ -138,7 +145,7 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
               </div>
             );
           })}
-        </div>
+        </div> */}
 
         {/* Right: Image with fade + zoom animation */}
         <div className="relative aspect-auto lg:aspect-auto lg:h-595 h-478 overflow-hidden lg:px-0 px-5">

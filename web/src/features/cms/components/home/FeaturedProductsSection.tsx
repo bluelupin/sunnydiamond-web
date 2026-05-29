@@ -4,34 +4,36 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { useFadeIn } from "@/shared/hooks/use-fade-in";
-import { useFeaturedProductsSection } from "@/hooks/homepage/useFeaturedProductsSection";
 import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 import LeftArrow from "@/assets/Icons/LeftArrow";
 import RightArrow from "@/assets/Icons/RightArrow";
+import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
 
 const formatPrice = (price: number) =>
   new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(price);
 
-interface DiamondAwaitsProps {
+interface FeaturedProductsSectionProps {
   id?: string;
 }
 
-const DiamondAwaits = ({ id }: DiamondAwaitsProps) => {
-  const { data, isLoading } = useFeaturedProductsSection();
-  const section = data?.featuredProductsSection ?? null;
-  const ref = useFadeIn();
+const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
+  const { data: shoppingData, isLoading: isShoppingLoading } = useHomepageShoppingBlocks();
+  const featuredProductsData = shoppingData?.homepage?.featuredProductsSection || shoppingData?.featuredProductsSection;
+  const sectionTitle = featuredProductsData?.sectionTitle ?? "";
+  const description = featuredProductsData?.description ?? "";
 
+  const ref = useFadeIn();
   const items = useMemo(() => {
-    const products = Array.isArray(section?.products) ? section?.products : [];
+    const products = Array.isArray(featuredProductsData?.products) ? featuredProductsData?.products : [];
     return products
-      .map((p) => ({
+      .map((p: any) => ({
         id: p?.id,
         name: p?.name ?? "",
         price: typeof p?.price === "number" ? p?.price : null,
         imageUrl: getCmsAssetUrl(p?.image?.data?.attributes?.url),
       }))
-      .filter((p) => Boolean(p.id) && Boolean(p.name) && Boolean(p.imageUrl));
-  }, [section?.products]);
+      .filter((p: any) => Boolean(p.id) && Boolean(p.name) && Boolean(p.imageUrl));
+  }, [featuredProductsData?.products]);
 
   const total = items.length;
 
@@ -138,7 +140,7 @@ const DiamondAwaits = ({ id }: DiamondAwaitsProps) => {
     else if (deltaX >= threshold) go(-1);
   };
 
-  if (isLoading) {
+  if (isShoppingLoading) {
     return (
       <section
         id={id}
@@ -180,11 +182,11 @@ const DiamondAwaits = ({ id }: DiamondAwaitsProps) => {
       {/* Heading */}
       <div className="text-center md:max-w-2xl sm:max-w-xl max-w-[350px] mx-auto md:mb-10 sm:mb-8 mb-6 px-5">
         <h2 className="md:mb-5 mb-3 text-foreground lg:text-5xl md:text-4xl text-[32px] font-larken font-light tracking-[0%] leading-[100%] text-darkblack text-center whitespace-nowrap">
-          {section?.sectionTitle ?? ""}
+          {sectionTitle || "Your Diamond Awaits (F)"}
         </h2>
 
         <p className="text-base md:text-lg lg:text-xl text-darkblack font-light font-gill tracking-[1%] leading-[100%] text-center">
-          {section?.description ?? ""}
+          {description || "Traditional mastery bringing every diamond to radiant, eternal life. (F)"}
         </p>
       </div>
 
@@ -327,4 +329,4 @@ const DiamondAwaits = ({ id }: DiamondAwaitsProps) => {
   );
 };
 
-export default DiamondAwaits;
+export default FeaturedProductsSection;

@@ -9,36 +9,33 @@ import { useParallax } from "@/shared/hooks/use-parallax";
 import RightArrow from "@/assets/Icons/RightArrow";
 import LeftArrow from "@/assets/Icons/LeftArrow";
 import GiftIcon from "@/assets/Icons/GiftIcon";
-import { useFeaturedCollectionSection } from "@/hooks/homepage/useFeaturedCollectionSection";
-import { useGiftingBanner } from "@/hooks/homepage/useGiftingBanner";
 import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 import alankaraImg from "@/assets/section4-card1.webp";
 import giftingImg from "@/assets/section4-card2.webp";
+import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
 const formatPrice = (price: number) =>
   new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(price);
 
-interface AlankaraShowcaseProps {
+interface FeaturedCollectionSectionProps {
   id?: string;
 }
 
-const AlankaraShowcase = ({ id }: AlankaraShowcaseProps) => {
-  const { data: featuredData, isLoading: isFeaturedLoading } = useFeaturedCollectionSection();
-  const { data: giftingData, isLoading: isGiftingLoading } = useGiftingBanner();
+const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
+  const { data: shoppingData, isLoading: isShoppingLoading } = useHomepageShoppingBlocks();
+  const featuredCollectionData = shoppingData?.homepage?.featuredCollectionSection || shoppingData?.featuredCollectionSection;
+  const sectionTitle = featuredCollectionData?.sectionTitle ?? "";
+  const ctaUrl = featuredCollectionData?.cta?.url ?? "";
+  const ctaLabel = featuredCollectionData?.label?.label ?? "";
 
-  const featured = featuredData?.featuredCollectionSection ?? null;
-  const sectionTitle = featured?.sectionTitle?.trim();
+  const giftingBannerData = shoppingData?.homepage?.giftingBanner || shoppingData?.giftingBanner;
+  const title = giftingBannerData?.title ?? "";
+  const primaryCtaUrl = giftingBannerData?.primaryCta?.url ?? "";
+  const primaryCtaLabel = giftingBannerData?.primaryCta?.label ?? "";
+  const secondaryCtaUrl = giftingBannerData?.secondaryCta?.url ?? "";
+  const secondaryCtaLabel = giftingBannerData?.secondaryCta?.label ?? "";
 
-  const gifting = giftingData?.giftingBanner ?? null;
-  const giftingTitle = gifting?.title?.trim();
 
-  // const featuredCtaTo = featured?.cta?.to ?? "";
-  // const featuredCtaLabel = featured?.cta?.label ?? "";
-
-  // const giftingCtaTo = gifting?.cta?.to ?? "";
-  // const giftingCtaLabel = gifting?.cta?.label ?? "";
-  // const giftingSecondaryTo = gifting?.secondary?.to ?? "";
-  // const giftingSecondaryLabel = gifting?.secondary?.label ?? "";
-
+  const featured = shoppingData?.featuredCollectionSection ?? null;
   // const featuredBgUrl = getCmsAssetUrl(featured?.backgroundImage?.data?.attributes?.url);
   // const giftingBgUrl = getCmsAssetUrl(gifting?.backgroundImage?.data?.attributes?.url);
   // const giftingSideUrl = getCmsAssetUrl(gifting?.sideImage?.data?.attributes?.url);
@@ -48,13 +45,13 @@ const AlankaraShowcase = ({ id }: AlankaraShowcaseProps) => {
   const items = useMemo(() => {
     const products = Array.isArray(featured?.products) ? featured?.products : [];
     return products
-      .map((p) => ({
+      .map((p: any) => ({
         id: p?.id,
         name: p?.name ?? "",
         price: typeof p?.price === "number" ? p?.price : null,
         imageUrl: getCmsAssetUrl(p?.image?.data?.attributes?.url),
       }))
-      .filter((p) => Boolean(p.id) && Boolean(p.name) && Boolean(p.imageUrl));
+      .filter((p: any) => Boolean(p.id) && Boolean(p.name) && Boolean(p.imageUrl));
   }, [featured?.products]);
 
   const total = items.length;
@@ -140,7 +137,7 @@ const AlankaraShowcase = ({ id }: AlankaraShowcaseProps) => {
     return () => window.removeEventListener("keydown", onKey);
   }, [go, index, total]);
 
-  if (isFeaturedLoading || isGiftingLoading) {
+  if (isShoppingLoading) {
     return (
       <section id={id} ref={ref} aria-label="Alankara Collection and Gifting" className="bg-white" aria-busy="true">
         <div className="grid grid-cols-1 md:grid-cols-2 p-4 md:p-0">
@@ -164,9 +161,9 @@ const AlankaraShowcase = ({ id }: AlankaraShowcaseProps) => {
   // if (!sectionTitle || !featuredBgUrl || items.length === 0 || !giftingTitle) {
   //   return null;
   // }
-  if (!sectionTitle) {
-    return null;
-  }
+  // if (!sectionTitle) {
+  //   return null;
+  // }
   return (
     <section
       id={id}
@@ -190,12 +187,10 @@ const AlankaraShowcase = ({ id }: AlankaraShowcaseProps) => {
               {sectionTitle}
             </h2>
             <Link
-              href={"/products"}
-              // href={featuredCtaTo ? featuredCtaTo : "/products"}
+              href={ctaUrl ? ctaUrl : "/products (F)"}
               className="inline-block text-white md:text-base text-sm font-gill tracking-[1.8%] uppercase font-normal border-b border-white/80 pb-2 hover:border-white"
             >
-              {"Explore Collection"}
-              {/* {featuredCtaLabel ? featuredCtaLabel : "Explore Collection"} */}
+              {ctaLabel ? ctaLabel : "Explore Collection (F)"}
             </Link>
           </div>
         </div>
@@ -304,26 +299,24 @@ const AlankaraShowcase = ({ id }: AlankaraShowcaseProps) => {
         <div className="md:bg-giftingBg md:bg-white bg-right w-full bg-[length:100%] bg-gray100 bg-no-repeat flex flex-col items-center justify-center text-center py-16 sm:py-14 md:py-20 md:min-h-560 md:h-auto h-auto order-4 md:order-3">
           <GiftIcon className="text-creamColor w-24 md:flex hidden" />
           <h2 className="md:mt-12 md:mb-10 mb-6 lg:text-5xl md:text-4xl text-32 text-darkblack font-light font-gill tracking-[0%] leading-[100%] md:max-w-394 max-w-196 px-5">
-            {giftingTitle}
+            {title || "Gifting For Your Valentine (F)"}
           </h2>
           <Link
             // href={giftingCtaTo}
-            href={'/products'}
+            href={primaryCtaUrl}
             className="group relative overflow-hidden inline-flex items-center justify-center border-[0.8px] border-darkblack text-darkblack md:text-base text-sm px-8 md:h-50 h-12 tracking-[1.8%] uppercase font-gill transition-colors duration-500"
           >
             <span className="absolute inset-0 bg-darkblack origin-bottom scale-y-0 transition-transform duration-500 ease-out group-hover:scale-y-100"></span>
             <span className="relative z-10 group-hover:text-white transition-colors duration-500">
               {/* {giftingCtaLabel} */}
-              {'Shop Now'}
+              {primaryCtaLabel || 'Shop Now (F)'}
             </span>
           </Link>
           <Link
-            // href={giftingSecondaryTo}
-            href={'/products'}
+            href={secondaryCtaUrl}
             className="md:mt-8 mt-6 inline-block text-darkblack md:text-base text-sm font-gill tracking-[1.8%] uppercase font-normal border-b border-darkblack pb-2"
           >
-            {/* {giftingSecondaryLabel} */}
-            {'Send a Gift Card Instead'}
+            {secondaryCtaLabel || 'Send a Gift Card Instead (F)'}
           </Link>
         </div>
 
@@ -359,4 +352,4 @@ const AlankaraShowcase = ({ id }: AlankaraShowcaseProps) => {
   );
 };
 
-export default AlankaraShowcase;
+export default FeaturedCollectionSection;

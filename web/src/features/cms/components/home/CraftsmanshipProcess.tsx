@@ -1,11 +1,11 @@
- "use client";
+"use client";
 
 import { PencilLine, Gem, Hammer, PackageCheck, type LucideIcon } from "lucide-react";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { useStepScroll } from "@/shared/hooks/use-step-scroll";
-import { useCraftsmanshipSteps } from "@/hooks/homepage/useCraftsmanshipSteps";
 import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
-
+import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
+import diamondImgUrl from "@/assets/craftsmanship-diamond-3d.png"
 interface CraftsmanshipProcessProps {
   id?: string;
 }
@@ -13,10 +13,15 @@ interface CraftsmanshipProcessProps {
 const stepIcons: LucideIcon[] = [PencilLine, Gem, Hammer, PackageCheck];
 
 const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
-  const { data, isLoading } = useCraftsmanshipSteps();
-  const craftsmanship = data?.craftsmanshipSteps ?? null;
-  const steps = Array.isArray(craftsmanship?.steps)
-    ? [...craftsmanship.steps]
+  const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
+  const craftsmanshipSteps = editorialData?.homepage?.craftsmanshipSteps || editorialData?.craftsmanshipSteps;
+  const sectionTitle = craftsmanshipSteps?.sectionTitle?.trim();
+  const title = craftsmanshipSteps?.title?.trim();
+  const isActive = craftsmanshipSteps?.isActive === true;
+  // const diamondUrl = getCmsAssetUrl(craftsmanshipSteps?.diamondImage?.data?.attributes?.url);
+
+  const steps = Array.isArray(craftsmanshipSteps)
+    ? [...craftsmanshipSteps]
       .filter((s) => s?.isActive !== false)
       .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
     : [];
@@ -29,7 +34,7 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
   const rotateX = 18 - progress * 36; // subtle tilt from +18 to -18
   const rotateZ = Math.sin(progress * Math.PI * 2) * 8; // gentle wobble
 
-  if (isLoading) {
+  if (isEditorialLoading) {
     return (
       <section
         id={id}
@@ -59,17 +64,12 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
     );
   }
 
-  const title = craftsmanship?.title?.trim();
-  const diamondUrl = getCmsAssetUrl(craftsmanship?.diamondImage?.data?.attributes?.url);
-
-  if (!title || steps.length === 0 || !diamondUrl) return null;
-
   return (
     <section
       id={id}
       ref={containerRef}
       style={{ height: `${(stepCount + 1) * 100}vh` }}
-      aria-label={title}
+      aria-label={sectionTitle || "Craftsmanship Process (F)"}
       className="bg-gray200 bg-gray200 pt-10 sm:pt-16 md:pt-20"
     >
       <div className="sticky top-24 h-screen overflow-hidden bg-gray200">
@@ -78,7 +78,7 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
             {/* Left column: title + steps */}
             <div className="lg:col-span-5 flex flex-col xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20">
               <h2 className="lg:text-5xl md:text-4xl text-32 text-black font-normal font-larken tracking-[0%] lg:text-left text-center">
-                {title}
+                {sectionTitle || "From Vision to Masterpiece (F)"}
               </h2>
 
               {/* Active + next upcoming step (faded) */}
@@ -132,7 +132,7 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
 
             {/* Right column: 3D scroll-driven diamond */}
             <div
-             className="lg:col-span-7 relative h-auto flex items-center justify-center"
+              className="lg:col-span-7 relative h-auto flex items-center justify-center"
               style={{ perspective: "1200px", perspectiveOrigin: "center center" }}
             >
               <div
@@ -145,12 +145,11 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
                 }}
               >
                 <OptimizedImage
-                  src={diamondUrl}
+                  src={diamondImgUrl}
                   alt="Brilliant cut diamond rendered in 3D"
                   width={1280}
                   height={1280}
                   className="w-full h-auto object-contain"
-
                 />
               </div>
             </div>

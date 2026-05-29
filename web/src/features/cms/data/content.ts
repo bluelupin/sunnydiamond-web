@@ -70,12 +70,12 @@ export const homeContent = {
       secondary: { label: "Send a Gift Card Instead", to: "/contact" },
     },
   },
-  diamondAwaits: {
-    title: "Your Diamond Awaits",
-    subtitle: "Traditional mastery bringing every diamond to radiant, eternal life.",
-    productIds: ["1", "2", "3", "4", "5", "6"],
-    cta: { label: "Discover" },
-  },
+  // featuredProductsSection: {
+  //   title: "Your Diamond Awaits",
+  //   subtitle: "Traditional mastery bringing every diamond to radiant, eternal life.",
+  //   productIds: ["1", "2", "3", "4", "5", "6"],
+  //   cta: { label: "Discover" },
+  // },
   categories: {
     title: "Timeless Pieces for Every Occasion",
     items: [
