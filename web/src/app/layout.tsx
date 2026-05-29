@@ -92,7 +92,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="antialiased">
-      <body className="min-h-screen bg-background font-body">
+      <body className="min-h-screen bg-background font-body" suppressHydrationWarning>
         <AppProvider>
           <div className="relative flex min-h-screen flex-col">
             {children}

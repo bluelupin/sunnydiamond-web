@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Phone } from "lucide-react";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { cn } from "@/shared/utils/cn";
-import { useShowroomTeaser } from "@/hooks/homepage/useShowroomTeaser";
 import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 
@@ -19,11 +18,9 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
   const sectionTitle = showroomData?.sectionTitle?.trim();
   const description = showroomData?.description?.trim();
   const isActive = showroomData?.isActive === true;
-  const { data, isLoading } = useShowroomTeaser();
-  const showrooms = data?.showroomTeaser ?? null;
 
-  const locations = Array.isArray(showrooms?.locations)
-    ? [...showrooms.locations]
+  const locations = Array.isArray(showroomData?.locations)
+    ? [...showroomData.locations]
       .filter((l) => l?.isActive !== false)
       .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
     : [];
@@ -34,7 +31,7 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
     locations.find((l) => l?.id === activeId) ??
     locations[0];
 
-  if (isLoading) {
+  if (isEditorialLoading) {
     return (
       <section
         id={id}

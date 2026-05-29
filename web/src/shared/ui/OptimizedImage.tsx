@@ -33,17 +33,19 @@ const OptimizedImage = ({
     <picture>
       {/* Future: add <source type="image/avif" srcSet="..."> */}
       {/* Future: add <source type="image/webp" srcSet="..."> */}
-      <img
-        src={imageSrc}
-        alt={alt}
-        width={width}
-        height={height}
-        loading={priority ? "eager" : "lazy"}
-        decoding={priority ? "sync" : "async"}
-        fetchPriority={priority ? "high" : undefined}
-        sizes={sizes}
-        className={cn("w-full h-full object-cover", className)}
-      />
+      {imageSrc ?
+        <img
+          src={imageSrc}
+          alt={alt}
+          width={width}
+          height={height}
+          loading={priority ? "eager" : "lazy"}
+          decoding={priority ? "sync" : "async"}
+          fetchPriority={priority ? "high" : undefined}
+          sizes={sizes}
+          className={cn("w-full h-full object-cover", className)}
+        />
+        : null}
     </picture>
   );
 };
