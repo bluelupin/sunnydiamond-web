@@ -4,12 +4,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
+import { resolveCmsMediaUrl, resolveCmsAltText } from "@/shared/utils/strapiMedia";
 import { useFadeIn } from "@/shared/hooks/use-fade-in";
 import { useParallax } from "@/shared/hooks/use-parallax";
 import RightArrow from "@/assets/Icons/RightArrow";
 import LeftArrow from "@/assets/Icons/LeftArrow";
 import GiftIcon from "@/assets/Icons/GiftIcon";
-import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
+// import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 import alankaraImg from "@/assets/section4-card1.webp";
 import giftingImg from "@/assets/section4-card2.webp";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
@@ -48,6 +49,31 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
     "";
 
   const featured = shoppingData?.featuredCollectionSection ?? null;
+
+  const desktopBgUrl = useMemo(
+    () =>
+      resolveCmsMediaUrl(
+        (featuredCollectionData as any)?.backgroundImage?.desktopImage ?? (featuredCollectionData as any)?.backgroundImage
+      ),
+    [featuredCollectionData]
+  );
+
+  const mobileBgUrl = useMemo(
+    () =>
+      resolveCmsMediaUrl(
+        (featuredCollectionData as any)?.backgroundImage?.mobileImage ?? (featuredCollectionData as any)?.backgroundImage
+      ),
+    [featuredCollectionData]
+  );
+
+  const bgAlt = useMemo(
+    () =>
+      resolveCmsAltText((featuredCollectionData as any)?.backgroundImage?.desktopImage ?? (featuredCollectionData as any)?.backgroundImage) ||
+      resolveCmsAltText((featuredCollectionData as any)?.backgroundImage?.mobileImage ?? (featuredCollectionData as any)?.backgroundImage) ||
+      sectionTitle ||
+      "",
+    [featuredCollectionData, sectionTitle]
+  );
   // const featuredBgUrl = getCmsAssetUrl(featured?.backgroundImage?.data?.attributes?.url);
   // const giftingBgUrl = getCmsAssetUrl(gifting?.backgroundImage?.data?.attributes?.url);
   // const giftingSideUrl = getCmsAssetUrl(gifting?.sideImage?.data?.attributes?.url);
@@ -61,7 +87,7 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
         id: p?.id,
         name: p?.name ?? "",
         price: typeof p?.price === "number" ? p?.price : null,
-        imageUrl: getCmsAssetUrl(p?.image?.data?.attributes?.url),
+        imageUrl: resolveCmsMediaUrl(p?.image ?? p?.image?.data?.attributes ?? p?.image),
       }))
       .filter((p: any) => Boolean(p.id) && Boolean(p.name) && Boolean(p.imageUrl));
   }, [featured?.products]);
@@ -169,13 +195,6 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
       </section>
     );
   }
-
-  // if (!sectionTitle || !featuredBgUrl || items.length === 0 || !giftingTitle) {
-  //   return null;
-  // }
-  // if (!sectionTitle) {
-  //   return null;
-  // }
   return (
     <section
       id={id}
@@ -186,13 +205,35 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
       <div className="grid grid-cols-1 md:grid-cols-2 p-4 md:p-0">
         {/* TL: Alankara Collection */}
         <div className="relative lg:h-700 md:h-550 h-auto overflow-hidden group">
-          <OptimizedImage
-            src={alankaraImg}
-            alt={sectionTitle}
-            width={1024}
-            height={1024}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-          />
+          {mobileBgUrl && (
+            <OptimizedImage
+              src={mobileBgUrl}
+              alt={bgAlt}
+              width={1024}
+              height={1024}
+              className="absolute inset-0 h-full w-full object-cover md:hidden"
+            />
+          )}
+
+          {desktopBgUrl && (
+            <OptimizedImage
+              src={desktopBgUrl}
+              alt={bgAlt}
+              width={1024}
+              height={1024}
+              className={`absolute inset-0 h-full w-full object-cover ${mobileBgUrl ? "hidden md:block" : ""}`}
+            />
+          )}
+
+          {!desktopBgUrl && !mobileBgUrl && (
+            <OptimizedImage
+              src={alankaraImg}
+              alt={sectionTitle}
+              width={1024}
+              height={1024}
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+            />
+          )}
           <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0A0A0A] to-transparent pointer-events-none" aria-hidden />
           <div className="absolute inset-0 flex flex-col items-center justify-end md:gap-10 gap-8 px-6 md:px-10 lg:pb-74 md:pb-16 pb-10">
             <h2 className="lg:text-5xl md:text-4xl text-32 text-white font-normal font-larken tracking-[0%] text-center">

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import OptimizedImage from "@/shared/ui/OptimizedImage";
+import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { useFadeIn } from "@/shared/hooks/use-fade-in";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
@@ -51,10 +51,6 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
       </section>
     );
   }
-  // if (!hero?.subtitle || categories.length === 0) {
-  //   return null;
-  // }
-
   return (
     <section id={id} ref={ref} className="bg-white pb-3 flex flex-col gap-6 md:gap-8 lg:gap-10">
       <div className="relative overflow-hidden neckLaceArcContainer">
@@ -122,51 +118,26 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
                     className="group relative bg-gray300 flex flex-col flex-shrink-0 w-240 md:w-auto h-60 lg:h-260 xl:h-420 snap-start overflow-hidden"
                   >
                     {(desktopImageUrl || mobileImageUrl) && (
-                      <>
-                        {mobileImageUrl && (
-                          <OptimizedImage
-                            src={mobileImageUrl}
-                            alt={imageAlt}
-                            width={800}
-                            height={800}
-                            className="absolute inset-0 w-full h-full object-cover md:hidden"
-                          />
-                        )}
-
-                        {desktopImageUrl && (
-                          <OptimizedImage
-                            src={desktopImageUrl}
-                            alt={imageAlt}
-                            width={800}
-                            height={800}
-                            className={`absolute inset-0 w-full h-full object-cover ${mobileImageUrl ? "hidden md:block" : ""}`}
-                          />
-                        )}
-                      </>
-                    )}
+                      <ResponsiveImage
+                        desktopSrc={desktopImageUrl || ""}
+                        mobileSrc={mobileImageUrl}
+                        alt={imageAlt}
+                        priority
+                        width={512}
+                        height={512}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />)}
 
                     {(hoverDesktopImageUrl || hoverMobileImageUrl) && (
-                      <>
-                        {hoverMobileImageUrl && (
-                          <OptimizedImage
-                            src={hoverMobileImageUrl}
-                            alt={hoverAlt}
-                            width={800}
-                            height={800}
-                            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700 md:hidden"
-                          />
-                        )}
-
-                        {hoverDesktopImageUrl && (
-                          <OptimizedImage
-                            src={hoverDesktopImageUrl}
-                            alt={hoverAlt}
-                            width={800}
-                            height={800}
-                            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700 hidden md:block"
-                          />
-                        )}
-                      </>
+                      <ResponsiveImage
+                        desktopSrc={hoverDesktopImageUrl || ""}
+                        mobileSrc={hoverMobileImageUrl}
+                        alt={hoverAlt}
+                        priority
+                        width={512}
+                        height={512}
+                        className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+                      />
                     )}
 
                     <div

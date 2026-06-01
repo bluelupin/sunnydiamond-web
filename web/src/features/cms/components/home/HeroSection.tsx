@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import Image from "next/image";
 import Link from "next/link";
+import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
@@ -17,12 +17,12 @@ const HeroSection = ({ id }: HeroSectionProps) => {
   const { data: shellData, isLoading: isShellLoading } = useHomepageShell();
   const { data: shoppingData, isLoading: isShoppingLoading } = useHomepageShoppingBlocks();
 
-  const hero = useMemo(() => shellData?.homepage?.hero || shellData?.hero, [shellData]);
+  const hero = shellData?.homepage?.hero || shellData?.hero;
 
-  const eyebrow = useMemo(() => hero?.eyebrow ?? "", [hero]);
-  const title = useMemo(() => hero?.title ?? "", [hero]);
-  const primaryCta = useMemo(() => hero?.primaryCta?.url ?? "", [hero]);
-  const primaryCtaLabel = useMemo(() => hero?.primaryCta?.label ?? "", [hero]);
+  const eyebrow = hero?.eyebrow ?? "";
+  const title = hero?.title ?? "";
+  const primaryCta = hero?.primaryCta?.url ?? "";
+  const primaryCtaLabel = hero?.primaryCta?.label ?? "";
 
   const desktopImageUrl = useMemo(
     () => resolveCmsMediaUrl(hero?.image?.desktopImage ?? hero?.image?.data?.attributes ?? hero?.image),
@@ -83,34 +83,16 @@ const HeroSection = ({ id }: HeroSectionProps) => {
             {isShellLoading ? (
               <div className="absolute inset-0 h-full w-full animate-pulse bg-gray200" />
             ) : hasHeroImage ? (
-              <>
-                {mobileImageUrl && (
-                  <Image
-                    src={mobileImageUrl}
-                    alt={heroAlt}
-                    fill
-                    priority
-                    quality={85}
-                    fetchPriority="high"
-                    sizes="100vw"
-                    className="absolute inset-0 h-full w-full object-cover md:hidden"
-                  />
-                )}
-
-                {desktopImageUrl && (
-                  <Image
-                    src={desktopImageUrl}
-                    alt={heroAlt}
-                    fill
-                    priority
-                    quality={90}
-                    fetchPriority="high"
-                    sizes="100vw"
-                    className={`absolute inset-0 h-full w-full object-cover ${mobileImageUrl ? "hidden md:block" : ""
-                      }`}
-                  />
-                )}
-              </>
+              <ResponsiveImage
+                desktopSrc={desktopImageUrl || ""}
+                mobileSrc={mobileImageUrl}
+                alt={heroAlt}
+                priority
+                width={512}
+                height={512}
+                quality={desktopImageUrl ? 90 : 85}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
             ) : (
               <div
                 className="absolute inset-0 h-full w-full bg-gray200"
@@ -124,7 +106,6 @@ const HeroSection = ({ id }: HeroSectionProps) => {
             <div className="md:max-w-[742px] animate-fade-in">
               <div className="mb-6 inline-flex items-center gap-2 text-white font-gill font-normal lg:text-xl md:text-lg text-base tracking-[1.8%] uppercase">
                 <DiamondIcon className="text-white" />
-
                 <span className="tracking-[1.8%]">
                   {isShellLoading ? (
                     <span
@@ -134,16 +115,14 @@ const HeroSection = ({ id }: HeroSectionProps) => {
                   ) : (eyebrow || "20 Years of Legacy (F)")}
                 </span>
               </div>
-
               <h1 className="mb-40 lg:text-[54px] md:text-[42px] text-[32px] text-white">
                 {isShellLoading ? (
                   <span
                     className="block h-12 w-[min(680px,90vw)] bg-white/20 rounded animate-pulse"
                     aria-hidden
                   />
-                ) : (title || "Fines jewellery designed with a tradition of excellence")}
+                ) : (title || "Fines jewellery designed with a tradition of excellence (F)")}
               </h1>
-
               {!isShellLoading && primaryCta ? (
                 <Link
                   href={primaryCta}
@@ -151,7 +130,7 @@ const HeroSection = ({ id }: HeroSectionProps) => {
                 >
                   <span className="absolute inset-0 bg-white origin-bottom scale-y-0 transition-transform duration-500 ease-out group-hover:scale-y-100"></span>
                   <span className="relative z-10 group-hover:text-charcoal transition-colors duration-500">
-                    {primaryCtaLabel}
+                    {primaryCtaLabel || "Shop Now (F)"}
                   </span>
                 </Link>
               ) : (
@@ -161,7 +140,6 @@ const HeroSection = ({ id }: HeroSectionProps) => {
           </div>
         </div>
       </section>
-
       <div className="bg-gray300 text-ivory border-t border-ivory/10 overflow-hidden shrink-0">
         <div className="relative flex overflow-hidden md:h-16 h-12">
           <div className="flex shrink-0 animate-marquee items-center gap-12 pr-12 whitespace-nowrap">

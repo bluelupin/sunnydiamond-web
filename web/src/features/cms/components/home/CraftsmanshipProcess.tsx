@@ -135,8 +135,7 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
               className="lg:col-span-7 relative h-auto flex items-center justify-center"
               style={{ perspective: "1200px", perspectiveOrigin: "center center" }}
             >
-              <div
-                className="w-[80%] h-auto will-change-transform"
+              <div className="w-[80%] h-auto will-change-transform"
                 style={{
                   transformStyle: "preserve-3d",
                   transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`,

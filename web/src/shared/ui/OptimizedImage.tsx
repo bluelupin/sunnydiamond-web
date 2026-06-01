@@ -1,6 +1,7 @@
 import { cn } from "@/shared/utils/cn";
 import { getImageSrc } from "@/shared/utils/image";
 import type { StaticImageData } from "next/image";
+import Image from "next/image";
 
 interface OptimizedImageProps {
   src: string | StaticImageData;
@@ -34,7 +35,7 @@ const OptimizedImage = ({
       {/* Future: add <source type="image/avif" srcSet="..."> */}
       {/* Future: add <source type="image/webp" srcSet="..."> */}
       {imageSrc ?
-        <img
+        <Image
           src={imageSrc}
           alt={alt}
           width={width}
