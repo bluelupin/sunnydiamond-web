@@ -12,12 +12,11 @@ export const viewport: Viewport = {
 };
 
 const TITLE = {
-  default: "Sunny Diamonds - Premium Diamond Jewellery",
-  template: "%s | Sunny Diamonds",
+  default: "Sunny Diamonds - Premium Diamond Jewellery (F)",
+  template: "%s | Sunny Diamonds (F)",
 } as const;
 
-const DESCRIPTION =
-  "Handcrafted premium and custom diamond jewellery. Explore GIA-certified diamonds, bespoke designs, and timeless elegance.";
+const DESCRIPTION = "Handcrafted premium and custom diamond jewellery. Explore GIA-certified diamonds, bespoke designs, and timeless elegance. (F)";
 
 export const metadata: Metadata = {
   title: TITLE,

@@ -15,20 +15,18 @@ import DiamondIcon from "@/assets/Icons/Diamond";
 const HeroSection = ({ id }: HeroSectionProps) => {
   const { data: shellData, isLoading: isShellLoading } = useHomepageShell();
   const { data: shoppingData, isLoading: isShoppingLoading } = useHomepageShoppingBlocks();
-
   const hero = shellData?.homepage?.hero || shellData?.hero;
-
+  const eyebrow = hero?.eyebrow || "";
+  const title = hero?.title || "";
+  const primaryCta = hero?.primaryCta?.url ?? "";
+  const primaryCtaLabel = hero?.primaryCta?.label ?? "";
   const desktopImage = hero?.image?.desktopImage || hero?.image?.data?.attributes;
   const mobileImage = hero?.image?.mobileImage;
 
   const desktopImageUrl = desktopImage?.url ? getImageSrc(desktopImage.url) : "";
 
-  const mobileImageUrl = mobileImage?.url
-    ? getImageSrc(mobileImage.url)
-    : desktopImageUrl;
+  const mobileImageUrl = mobileImage?.url ? getImageSrc(mobileImage.url) : desktopImageUrl;
 
-  const primaryCta = hero?.primaryCta?.url ?? "";
-  const heroCtaLabel = hero?.primaryCta?.label ?? "";
 
   const trustSource =
     shoppingData?.trustBadges || shoppingData?.homepage?.trustBadges || [];
@@ -114,9 +112,7 @@ const HeroSection = ({ id }: HeroSectionProps) => {
                       className="inline-block h-5 w-56 bg-white/20 rounded animate-pulse"
                       aria-hidden
                     />
-                  ) : (
-                    hero?.eyebrow
-                  )}
+                  ) : (eyebrow || "20 Years of Legacy (F)")}
                 </span>
               </div>
 
@@ -126,9 +122,7 @@ const HeroSection = ({ id }: HeroSectionProps) => {
                     className="block h-12 w-[min(680px,90vw)] bg-white/20 rounded animate-pulse"
                     aria-hidden
                   />
-                ) : (
-                  hero?.title
-                )}
+                ) : (title || "Fines jewellery designed with a tradition of excellence")}
               </h1>
 
               {!isShellLoading && primaryCta ? (
@@ -137,9 +131,8 @@ const HeroSection = ({ id }: HeroSectionProps) => {
                   className="group relative overflow-hidden inline-flex items-center justify-center border-[0.8px] border-white text-white md:text-base text-sm px-8 md:h-50 h-12 tracking-[0%] uppercase font-gill transition-colors duration-500"
                 >
                   <span className="absolute inset-0 bg-white origin-bottom scale-y-0 transition-transform duration-500 ease-out group-hover:scale-y-100"></span>
-
                   <span className="relative z-10 group-hover:text-charcoal transition-colors duration-500">
-                    {heroCtaLabel}
+                    {primaryCtaLabel}
                   </span>
                 </Link>
               ) : (
