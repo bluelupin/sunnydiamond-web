@@ -1,4 +1,4 @@
- "use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -8,6 +8,7 @@ import { useCart } from "@/features/cart/context/CartContext";
 import { siteConfig } from "@/shared/lib/siteConfig";
 import { cn } from "@/shared/utils/cn";
 import SDLogo from "@/assets/Icons/SDLogo";
+import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -17,6 +18,9 @@ const Header = () => {
   const isHome = pathname === "/";
   const overlay = isHome && !scrolled && !mobileMenuOpen;
 
+  const { data: shellData, isLoading: isShellLoading } = useHomepageShell();
+  const headerNavigationLinks = shellData?.global?.headerNavigationLinks || shellData?.headerNavigationLinks;
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
@@ -24,8 +28,8 @@ const Header = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
- const textClass = overlay ? "text-white" : "text-darkblack";
-const hoverClass = overlay ? "hover:text-ivory/70" : "hover:text-primary";
+  const textClass = overlay ? "text-white" : "text-darkblack";
+  const hoverClass = overlay ? "hover:text-ivory/70" : "hover:text-primary";
   const Logo = (
     <Link
       href="/"
@@ -51,7 +55,7 @@ const hoverClass = overlay ? "hover:text-ivory/70" : "hover:text-primary";
     >
       <div className="container relative flex items-center justify-between h-16 md:h-20">
         {/* Left: mobile hamburger | Desktop: logo + nav */}
-       <div className="flex items-center gap-6 md:gap-4 lg:gap-6 xl:gap-10">
+        <div className="flex items-center gap-6 md:gap-4 lg:gap-6 xl:gap-10">
           <button
             className={cn("md:hidden p-2 -ml-2", textClass)}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -65,16 +69,16 @@ const hoverClass = overlay ? "hover:text-ivory/70" : "hover:text-primary";
           <div className="hidden md:block">{Logo}</div>
 
           {/* Desktop nav inline next to logo */}
-         <nav className="hidden md:flex items-center gap-7 md:gap-4 lg:gap-9" aria-label="Main navigation">
-            {siteConfig.navigation.main.map((link) => (
+          <nav className="hidden md:flex items-center gap-7 md:gap-4 lg:gap-9" aria-label="Main navigation">
+            {headerNavigationLinks?.map((link: any) => (
               <Link
                 key={link.label}
-                href={link.to}
-               className={cn(
-  "lg:text-base md:text-15 text-sm font-gill font-normal leading-[130%] tracking-[-0.02em] uppercase transition-colors",
-  textClass,
-  hoverClass,
-)}
+                href={link.url}
+                className={cn(
+                  "lg:text-base md:text-15 text-sm font-gill font-normal leading-[130%] tracking-[-0.02em] uppercase transition-colors",
+                  textClass,
+                  hoverClass,
+                )}
               >
                 {link.label}
               </Link>
@@ -129,10 +133,10 @@ const hoverClass = overlay ? "hover:text-ivory/70" : "hover:text-primary";
           className="md:hidden border-t border-border bg-background px-6 py-6 space-y-4 animate-fade-in"
           aria-label="Mobile navigation"
         >
-          {siteConfig.navigation.main.map((link) => (
+          {headerNavigationLinks?.map((link: any) => (
             <Link
               key={link.label}
-              href={link.to}
+              href={link.url}
               onClick={() => setMobileMenuOpen(false)}
               className="block font-body text-sm tracking-[0.25em] uppercase text-muted-foreground hover:text-foreground transition-colors"
             >
