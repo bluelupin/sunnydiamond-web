@@ -84,9 +84,6 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
       "",
     [giftingBannerData, sectionTitle]
   );
-  // const featuredBgUrl = getCmsAssetUrl(featured?.backgroundImage?.data?.attributes?.url);
-  // const giftingBgUrl = getCmsAssetUrl(gifting?.backgroundImage?.data?.attributes?.url);
-  // const giftingSideUrl = getCmsAssetUrl(gifting?.sideImage?.data?.attributes?.url);
   const ref = useFadeIn();
   const parallaxRef = useParallax<HTMLDivElement>(0.18);
 
