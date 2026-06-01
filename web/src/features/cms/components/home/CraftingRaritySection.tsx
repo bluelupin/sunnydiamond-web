@@ -5,7 +5,9 @@ import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { useFadeIn } from "@/shared/hooks/use-fade-in";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
-import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
+import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import type { CategoryNavigationImage, CategoryNavigationItem } from "@/types/homepage/categoryNavigation";
+
 interface CraftingRaritySectionProps {
   id?: string;
 }
@@ -90,35 +92,93 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
             >
               {categories.map((cat) => {
-                const title = cat?.title ?? cat?.label ?? "";
+                const title = cat?.title ?? cat?.label ?? cat?.cta?.label ?? "";
                 const slug = cat?.slug ?? "";
-                const modelUrl = getCmsAssetUrl(cat?.model?.data?.attributes?.url);
-                const productUrl = getCmsAssetUrl(cat?.product?.data?.attributes?.url);
-                // if (!title || !modelUrl || !productUrl) return null;
+                const categoryLink =
+                  cat?.cta?.url ?? cat?.cta?.to ??
+                  (slug ? `/products?category=${encodeURIComponent(slug)}` : "/products");
+
+                const categoryImage = cat?.image as CategoryNavigationImage | undefined;
+                const hoverImage = cat?.hoverImage as CategoryNavigationImage | undefined;
+
+                const desktopImageUrl = resolveCmsMediaUrl(categoryImage?.desktopImage ?? categoryImage);
+                const mobileImageUrl = resolveCmsMediaUrl(categoryImage?.mobileImage ?? categoryImage);
+                const hoverDesktopImageUrl = resolveCmsMediaUrl(hoverImage?.desktopImage ?? hoverImage);
+                const hoverMobileImageUrl = resolveCmsMediaUrl(hoverImage?.mobileImage ?? hoverImage);
+
+                const imageAlt =
+                  resolveCmsAltText(categoryImage?.desktopImage ?? categoryImage) ??
+                  resolveCmsAltText(categoryImage?.mobileImage ?? categoryImage) ??
+                  title;
+                const hoverAlt =
+                  resolveCmsAltText(hoverImage?.desktopImage ?? hoverImage) ??
+                  resolveCmsAltText(hoverImage?.mobileImage ?? hoverImage) ??
+                  imageAlt;
+
                 return (
                   <Link
                     key={cat?.id ?? slug ?? title}
-                    href={slug ? `/products?category=${encodeURIComponent(slug)}` : "/products"}
+                    href={categoryLink}
                     className="group relative bg-gray300 flex flex-col flex-shrink-0 w-240 md:w-auto h-60 lg:h-260 xl:h-420 snap-start overflow-hidden"
                   >
-                    {/* <OptimizedImage
-                  src={modelUrl}
-                  alt=""
-                  width={640}
-                  height={800}
-                  className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-out"
-                /> */}
-                    <div aria-hidden="true"
+                    {(desktopImageUrl || mobileImageUrl) && (
+                      <>
+                        {mobileImageUrl && (
+                          <OptimizedImage
+                            src={mobileImageUrl}
+                            alt={imageAlt}
+                            width={800}
+                            height={800}
+                            className="absolute inset-0 w-full h-full object-cover md:hidden"
+                          />
+                        )}
+
+                        {desktopImageUrl && (
+                          <OptimizedImage
+                            src={desktopImageUrl}
+                            alt={imageAlt}
+                            width={800}
+                            height={800}
+                            className={`absolute inset-0 w-full h-full object-cover ${mobileImageUrl ? "hidden md:block" : ""}`}
+                          />
+                        )}
+                      </>
+                    )}
+
+                    {(hoverDesktopImageUrl || hoverMobileImageUrl) && (
+                      <>
+                        {hoverMobileImageUrl && (
+                          <OptimizedImage
+                            src={hoverMobileImageUrl}
+                            alt={hoverAlt}
+                            width={800}
+                            height={800}
+                            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700 md:hidden"
+                          />
+                        )}
+
+                        {hoverDesktopImageUrl && (
+                          <OptimizedImage
+                            src={hoverDesktopImageUrl}
+                            alt={hoverAlt}
+                            width={800}
+                            height={800}
+                            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700 hidden md:block"
+                          />
+                        )}
+                      </>
+                    )}
+
+                    <div
+                      aria-hidden="true"
                       className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0A0A0A] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
                     />
                     <div className="relative flex-1 flex items-center justify-center overflow-hidden p-6 md:p-10 transition-opacity duration-500 group-hover:opacity-0">
-                      {/* <OptimizedImage
-                    src={productUrl}
-                    alt={`${title.toLowerCase()} collection`}
-                    width={600}
-                    height={600}
-                    className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
-                  /> */}
+                      {!(desktopImageUrl || mobileImageUrl) && (
+                        <span className="text-center text-base lg:text-xl tracking-[1.8%] uppercase text-darkblack font-normal opacity-60 group-hover:opacity-100 group-hover:text-white transition-colors duration-500">
+                          {title}
+                        </span>
+                      )}
                     </div>
                     <div className="relative pb-6 md:pb-8 text-center z-10">
                       <span className="font-gill text-base lg:text-xl tracking-[1.8%] uppercase text-darkblack font-normal opacity-60 group-hover:opacity-100 group-hover:text-white transition-colors duration-500">
@@ -126,7 +186,7 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
                       </span>
                     </div>
                   </Link>
-                )
+                );
               })}
             </div>
           </div>

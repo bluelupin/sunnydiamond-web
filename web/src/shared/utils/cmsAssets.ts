@@ -1,4 +1,5 @@
 const CMS_BASE_URL: string =
+  process.env.NEXT_PUBLIC_STRAPI_MEDIA_URL ??
   process.env.NEXT_PUBLIC_API_URL ??
   process.env.NEXT_PUBLIC_STRAPI_URL ??
   "";
