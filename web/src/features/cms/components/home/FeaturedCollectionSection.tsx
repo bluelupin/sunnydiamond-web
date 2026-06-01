@@ -10,10 +10,8 @@ import { useParallax } from "@/shared/hooks/use-parallax";
 import RightArrow from "@/assets/Icons/RightArrow";
 import LeftArrow from "@/assets/Icons/LeftArrow";
 import GiftIcon from "@/assets/Icons/GiftIcon";
-// import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
-import alankaraImg from "@/assets/section4-card1.webp";
-import giftingImg from "@/assets/section4-card2.webp";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
+import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 const formatPrice = (price: number) =>
   new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(price);
 
@@ -27,6 +25,24 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
   const sectionTitle = featuredCollectionData?.sectionTitle ?? "";
   const ctaUrl = featuredCollectionData?.cta?.url ?? featuredCollectionData?.cta?.to ?? "";
   const ctaLabel = featuredCollectionData?.cta?.label ?? featuredCollectionData?.label?.label ?? "";
+  const collectionDesktopBgUrl = useMemo(
+    () => resolveCmsMediaUrl((featuredCollectionData as any)?.image?.desktopImage ?? (featuredCollectionData as any)?.image),
+    [featuredCollectionData]
+  );
+
+  const collectionMobileBgUrl = useMemo(
+    () => resolveCmsMediaUrl((featuredCollectionData as any)?.image?.mobileImage ?? (featuredCollectionData as any)?.image),
+    [featuredCollectionData]
+  );
+
+  const bgAlt = useMemo(
+    () =>
+      resolveCmsAltText((featuredCollectionData as any)?.image?.desktopImage ?? (featuredCollectionData as any)?.image) ||
+      resolveCmsAltText((featuredCollectionData as any)?.image?.mobileImage ?? (featuredCollectionData as any)?.image) ||
+      sectionTitle ||
+      "",
+    [featuredCollectionData, sectionTitle]
+  );
 
   const giftingBannerData = shoppingData?.homepage?.giftingBanner || shoppingData?.giftingBanner;
   const title = giftingBannerData?.title ?? "";
@@ -50,29 +66,23 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
 
   const featured = shoppingData?.featuredCollectionSection ?? null;
 
-  const desktopBgUrl = useMemo(
-    () =>
-      resolveCmsMediaUrl(
-        (featuredCollectionData as any)?.backgroundImage?.desktopImage ?? (featuredCollectionData as any)?.backgroundImage
-      ),
-    [featuredCollectionData]
+  const giftDesktopUrl = useMemo(
+    () => resolveCmsMediaUrl((giftingBannerData as any)?.image?.desktopImage ?? (giftingBannerData as any)?.image),
+    [giftingBannerData]
   );
 
-  const mobileBgUrl = useMemo(
-    () =>
-      resolveCmsMediaUrl(
-        (featuredCollectionData as any)?.backgroundImage?.mobileImage ?? (featuredCollectionData as any)?.backgroundImage
-      ),
-    [featuredCollectionData]
+  const giftMobileUrl = useMemo(
+    () => resolveCmsMediaUrl((giftingBannerData as any)?.image?.mobileImage ?? (giftingBannerData as any)?.image),
+    [giftingBannerData]
   );
 
-  const bgAlt = useMemo(
+  const giftImageAlt = useMemo(
     () =>
-      resolveCmsAltText((featuredCollectionData as any)?.backgroundImage?.desktopImage ?? (featuredCollectionData as any)?.backgroundImage) ||
-      resolveCmsAltText((featuredCollectionData as any)?.backgroundImage?.mobileImage ?? (featuredCollectionData as any)?.backgroundImage) ||
+      resolveCmsAltText((giftingBannerData as any)?.image?.desktopImage ?? (giftingBannerData as any)?.image) ||
+      resolveCmsAltText((giftingBannerData as any)?.image?.mobileImage ?? (giftingBannerData as any)?.image) ||
       sectionTitle ||
       "",
-    [featuredCollectionData, sectionTitle]
+    [giftingBannerData, sectionTitle]
   );
   // const featuredBgUrl = getCmsAssetUrl(featured?.backgroundImage?.data?.attributes?.url);
   // const giftingBgUrl = getCmsAssetUrl(gifting?.backgroundImage?.data?.attributes?.url);
@@ -205,35 +215,16 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
       <div className="grid grid-cols-1 md:grid-cols-2 p-4 md:p-0">
         {/* TL: Alankara Collection */}
         <div className="relative lg:h-700 md:h-550 h-auto overflow-hidden group">
-          {mobileBgUrl && (
-            <OptimizedImage
-              src={mobileBgUrl}
-              alt={bgAlt}
-              width={1024}
-              height={1024}
-              className="absolute inset-0 h-full w-full object-cover md:hidden"
-            />
-          )}
-
-          {desktopBgUrl && (
-            <OptimizedImage
-              src={desktopBgUrl}
-              alt={bgAlt}
-              width={1024}
-              height={1024}
-              className={`absolute inset-0 h-full w-full object-cover ${mobileBgUrl ? "hidden md:block" : ""}`}
-            />
-          )}
-
-          {!desktopBgUrl && !mobileBgUrl && (
-            <OptimizedImage
-              src={alankaraImg}
-              alt={sectionTitle}
-              width={1024}
-              height={1024}
-              className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-            />
-          )}
+          <ResponsiveImage
+            desktopSrc={collectionDesktopBgUrl || ""}
+            mobileSrc={collectionMobileBgUrl}
+            alt={bgAlt}
+            priority
+            width={1024}
+            height={1024}
+            quality={collectionDesktopBgUrl ? 90 : 85}
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+          />
           <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0A0A0A] to-transparent pointer-events-none" aria-hidden />
           <div className="absolute inset-0 flex flex-col items-center justify-end md:gap-10 gap-8 px-6 md:px-10 lg:pb-74 md:pb-16 pb-10">
             <h2 className="lg:text-5xl md:text-4xl text-32 text-white font-normal font-larken tracking-[0%] text-center">
@@ -247,6 +238,7 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
             </Link>
           </div>
         </div>
+
         {/* TR: Draggable transparent ring carousel with scroll parallax */}
         {/* <div className="md:bg-white bg-gray100 flex flex-col items-center justify-end text-center px-6 py-10 sm:py-12 md:py-14 lg:py-65 lg:h-700 md:h-550 h-auto overflow-hidden">
           <div
@@ -355,13 +347,11 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
             {title || "Gifting For Your Valentine (F)"}
           </h2>
           <Link
-            // href={giftingCtaTo}
             href={primaryCtaUrl}
             className="group relative overflow-hidden inline-flex items-center justify-center border-[0.8px] border-darkblack text-darkblack md:text-base text-sm px-8 md:h-50 h-12 tracking-[1.8%] uppercase font-gill transition-colors duration-500"
           >
             <span className="absolute inset-0 bg-darkblack origin-bottom scale-y-0 transition-transform duration-500 ease-out group-hover:scale-y-100"></span>
             <span className="relative z-10 group-hover:text-white transition-colors duration-500">
-              {/* {giftingCtaLabel} */}
               {primaryCtaLabel || 'Shop Now (F)'}
             </span>
           </Link>
@@ -375,28 +365,14 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
 
         {/* BR: Couple holding hands */}
         <div className="relative lg:h-700 md:h-auto h-80 overflow-hidden order-3 md:order-4 md:mt-0 mt-4">
-          {/* {giftingSideUrl ? (
-            <OptimizedImage
-              src={giftingSideUrl}
-              alt="Couple holding hands wearing diamond rings"
-              width={1024}
-              height={1024}
-              className="w-full h-full object-cover"
-            />
-          ) : giftingBgUrl ? (
-            <OptimizedImage
-              src={giftingBgUrl}
-              alt="Couple holding hands wearing diamond rings"
-              width={1024}
-              height={1024}
-              className="w-full h-full object-cover"
-            />
-          ) : null} */}
-          <OptimizedImage
-            src={giftingImg}
-            alt="Couple holding hands wearing diamond rings"
+          <ResponsiveImage
+            desktopSrc={giftDesktopUrl || ""}
+            mobileSrc={giftMobileUrl}
+            alt={giftImageAlt}
+            priority
             width={1024}
             height={1024}
+            quality={giftDesktopUrl ? 90 : 85}
             className="w-full h-full object-cover"
           />
         </div>
