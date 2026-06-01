@@ -24,16 +24,28 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
   const { data: shoppingData, isLoading: isShoppingLoading } = useHomepageShoppingBlocks();
   const featuredCollectionData = shoppingData?.homepage?.featuredCollectionSection || shoppingData?.featuredCollectionSection;
   const sectionTitle = featuredCollectionData?.sectionTitle ?? "";
-  const ctaUrl = featuredCollectionData?.cta?.url ?? "";
-  const ctaLabel = featuredCollectionData?.label?.label ?? "";
+  const ctaUrl = featuredCollectionData?.cta?.url ?? featuredCollectionData?.cta?.to ?? "";
+  const ctaLabel = featuredCollectionData?.cta?.label ?? featuredCollectionData?.label?.label ?? "";
 
   const giftingBannerData = shoppingData?.homepage?.giftingBanner || shoppingData?.giftingBanner;
   const title = giftingBannerData?.title ?? "";
-  const primaryCtaUrl = giftingBannerData?.primaryCta?.url ?? "";
-  const primaryCtaLabel = giftingBannerData?.primaryCta?.label ?? "";
-  const secondaryCtaUrl = giftingBannerData?.secondaryCta?.url ?? "";
-  const secondaryCtaLabel = giftingBannerData?.secondaryCta?.label ?? "";
-
+  const primaryCtaUrl =
+    giftingBannerData?.primaryCta?.url ??
+    giftingBannerData?.primaryCta?.to ??
+    giftingBannerData?.cta?.url ??
+    giftingBannerData?.cta?.to ??
+    "";
+  const primaryCtaLabel = giftingBannerData?.primaryCta?.label ?? giftingBannerData?.cta?.label ?? "";
+  const secondaryCtaUrl =
+    giftingBannerData?.secondaryCta?.url ??
+    giftingBannerData?.secondaryCta?.to ??
+    giftingBannerData?.secondary?.url ??
+    giftingBannerData?.secondary?.to ??
+    "";
+  const secondaryCtaLabel =
+    giftingBannerData?.secondaryCta?.label ??
+    giftingBannerData?.secondary?.label ??
+    "";
 
   const featured = shoppingData?.featuredCollectionSection ?? null;
   // const featuredBgUrl = getCmsAssetUrl(featured?.backgroundImage?.data?.attributes?.url);
