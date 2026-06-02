@@ -340,7 +340,7 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
         {/* BL: Gifting */}
         <div className="md:bg-giftingBg md:bg-white bg-right w-full bg-[length:100%] bg-gray100 bg-no-repeat flex flex-col items-center justify-center text-center py-16 sm:py-14 md:py-20 md:min-h-560 md:h-auto h-auto order-4 md:order-3">
           <GiftIcon className="text-creamColor w-24 md:flex hidden" />
-          <h2 className="md:mt-12 md:mb-10 mb-6 lg:text-5xl md:text-4xl text-32 text-darkblack font-light font-gill tracking-[0%] leading-[100%] md:max-w-394 max-w-196 px-5">
+          <h2 className="md:mt-12 md:mb-10 mb-6 lg:text-5xl md:text-4xl text-32 text-darkblack font-light font-gill tracking-[0%] leading-[100%] md:max-w-394 max-w-60 px-5">
             {title || "Gifting For Your Valentine (F)"}
           </h2>
           <Link
