@@ -3,22 +3,18 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
-
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
-import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
 import DiamondIcon from "@/assets/Icons/Diamond";
 import { getImageSrc } from "@/shared/utils/image";
+import TrustBadgeSection from "../common/TrustBadges";
 interface HeroSectionProps {
   id?: string;
 }
 
 const HeroSection = ({ id }: HeroSectionProps) => {
   const { data: shellData, isLoading: isShellLoading } = useHomepageShell();
-  const { data: shoppingData, isLoading: isShoppingLoading } = useHomepageShoppingBlocks();
-
   const hero = shellData?.homepage?.hero || shellData?.hero;
-
   const eyebrow = hero?.eyebrow ?? "";
   const title = hero?.title ?? "";
   const primaryCta = hero?.primaryCta?.url ?? "";
@@ -47,21 +43,6 @@ const HeroSection = ({ id }: HeroSectionProps) => {
   const hasHeroImage = useMemo(
     () => Boolean(desktopImageUrl || mobileImageUrl),
     [desktopImageUrl, mobileImageUrl]
-  );
-
-  const normalizedTrust = useMemo(() => {
-    const trustSource = shoppingData?.trustBadges || shoppingData?.homepage?.trustBadges || [];
-    return [...trustSource]
-      .filter((t) => t?.isActive !== false)
-      .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0));
-  }, [shoppingData]);
-
-  const marqueeItems = useMemo(
-    () => [
-      ...normalizedTrust.map((t) => t?.label ?? ""),
-      ...normalizedTrust.map((t) => t?.label ?? ""),
-    ].filter(Boolean),
-    [normalizedTrust]
   );
 
   return (
@@ -140,50 +121,7 @@ const HeroSection = ({ id }: HeroSectionProps) => {
           </div>
         </div>
       </section>
-      <div className="bg-gray300 text-ivory border-t border-ivory/10 overflow-hidden shrink-0">
-        <div className="relative flex overflow-hidden md:h-16 h-12">
-          <div className="flex shrink-0 animate-marquee items-center gap-12 pr-12 whitespace-nowrap">
-            {isShoppingLoading ? (
-              <div className="flex items-center gap-12 pr-12 whitespace-nowrap">
-                <div className="h-3 w-40 bg-gray500/20 rounded animate-pulse" />
-                <div className="h-3 w-32 bg-gray500/20 rounded animate-pulse" />
-                <div className="h-3 w-44 bg-gray500/20 rounded animate-pulse" />
-              </div>
-            ) : (
-              marqueeItems.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-12 font-light text-xs md:text-sm tracking-[1.8%] uppercase font-gill"
-                >
-                  <span className="text-gray500">{item}</span>
-                  <span className="text-gray600" aria-hidden>
-                    •
-                  </span>
-                </div>
-              ))
-            )}
-          </div>
-          <div
-            aria-hidden
-            className="flex shrink-0 animate-marquee items-center gap-12 pr-12 whitespace-nowrap"
-          >
-            {isShoppingLoading
-              ? null
-              : marqueeItems.map((item, idx) => (
-                <div
-                  key={`dup-${idx}`}
-                  className="flex items-center gap-12 font-light text-xs md:text-sm tracking-[1.8%] uppercase font-gill"
-                >
-                  <span className="text-gray500">{item}</span>
-
-                  <span className="text-gray600" aria-hidden>
-                    •
-                  </span>
-                </div>
-              ))}
-          </div>
-        </div>
-      </div>
+      <TrustBadgeSection />
     </>
   );
 };

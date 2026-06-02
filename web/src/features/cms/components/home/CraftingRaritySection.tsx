@@ -117,17 +117,18 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
                     href={categoryLink}
                     className="group relative bg-gray300 flex flex-col flex-shrink-0 w-240 md:w-auto h-60 lg:h-260 xl:h-420 snap-start overflow-hidden"
                   >
-                    {(desktopImageUrl || mobileImageUrl) && (
-                      <ResponsiveImage
-                        desktopSrc={desktopImageUrl || ""}
-                        mobileSrc={mobileImageUrl}
-                        alt={imageAlt}
-                        priority
-                        width={512}
-                        height={512}
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />)}
-
+                    <div className="relative flex-1 flex items-center justify-center overflow-hidden p-6 md:p-10 transition-opacity duration-500 group-hover:opacity-0">
+                      {(desktopImageUrl || mobileImageUrl) && (
+                        <ResponsiveImage
+                          desktopSrc={desktopImageUrl || ""}
+                          mobileSrc={mobileImageUrl}
+                          alt={imageAlt}
+                          priority
+                          width={512}
+                          height={512}
+                          className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+                        />)}
+                    </div>
                     {(hoverDesktopImageUrl || hoverMobileImageUrl) && (
                       <ResponsiveImage
                         desktopSrc={hoverDesktopImageUrl || ""}
@@ -136,7 +137,7 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
                         priority
                         width={512}
                         height={512}
-                        className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+                        className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-out"
                       />
                     )}
 
@@ -144,13 +145,14 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
                       aria-hidden="true"
                       className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0A0A0A] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
                     />
-                    <div className="relative flex-1 flex items-center justify-center overflow-hidden p-6 md:p-10 transition-opacity duration-500 group-hover:opacity-0">
-                      {!(desktopImageUrl || mobileImageUrl) && (
+                    {!(desktopImageUrl || mobileImageUrl) && (
+                      <div className="relative flex-1 flex items-center justify-center overflow-hidden p-6 md:p-10 transition-opacity duration-500 group-hover:opacity-0">
+
                         <span className="text-center text-base lg:text-xl tracking-[1.8%] uppercase text-darkblack font-normal opacity-60 group-hover:opacity-100 group-hover:text-white transition-colors duration-500">
                           {title}
                         </span>
-                      )}
-                    </div>
+                      </div>
+                    )}
                     <div className="relative pb-6 md:pb-8 text-center z-10">
                       <span className="font-gill text-base lg:text-xl tracking-[1.8%] uppercase text-darkblack font-normal opacity-60 group-hover:opacity-100 group-hover:text-white transition-colors duration-500">
                         {title}

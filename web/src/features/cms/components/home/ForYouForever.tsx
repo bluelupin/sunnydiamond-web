@@ -1,89 +1,190 @@
 "use client";
 
 import Link from "next/link";
-import OptimizedImage from "@/shared/ui/OptimizedImage";
+import { useMemo } from "react";
+
+import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { useFadeIn } from "@/shared/hooks/use-fade-in";
-// import { useOccasionsTeaser } from "@/hooks/homepage/useOccasionsTeaser";
-import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
+import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
+import {
+  resolveCmsAltText,
+  resolveCmsMediaUrl,
+} from "@/shared/utils/strapiMedia";
 
 interface ForYouForeverProps {
   id?: string;
 }
 
+interface BespokeForYouCard {
+  id: number;
+  title: string;
+  description: string;
+  sortOrder: number;
+  isActive: boolean;
+  image?: any;
+  cta?: {
+    id: number;
+    label: string;
+    url: string;
+    targetType?: "internal" | "external";
+    openInNewTab?: boolean;
+  };
+}
+
 const ForYouForever = ({ id }: ForYouForeverProps) => {
-  // const { data, isLoading } = useOccasionsTeaser();
-  // const occasions = data?.occasionsTeaser ?? null;
-  const ref = useFadeIn();
+  const { data: editorialData, isLoading } = useHomepageEditorialBlocks();
 
-  // if (isLoading) {
-  //   return (
-  //     <section id={id} ref={ref} className="bg-gray200 py-6 sm:py-10 md:py-16 lg:py-20" aria-busy="true">
-  //       <div className="md:px-3 pl-3">
-  //         <div className="md:mb-10 mb-8 h-10 w-80 bg-gray300 rounded mx-auto" aria-hidden />
-  //         <div
-  //           className="flex md:gap-4 gap-3 overflow-x-auto snap-x snap-mandatory px-4 pb-2 md:mx-0 md:px-0 md:pb-0 md:overflow-visible md:grid md:grid-cols-3 md:gap-4"
-  //           style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
-  //         >
-  //           {[0, 1, 2].map((i) => (
-  //             <div key={i} className="relative overflow-hidden flex-shrink-0 w-[78%] snap-start md:w-auto h-[320px] bg-gray300/70 rounded" aria-hidden />
-  //           ))}
-  //         </div>
-  //       </div>
-  //     </section>
-  //   );
-  // }
+  const headingRef = useFadeIn(0);
 
-  // const title = occasions?.title?.trim();
-  // const items = Array.isArray(occasions?.items)
-  //   ? [...occasions.items]
-  //     .filter((i) => i?.isActive !== false)
-  //     .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
-  //   : [];
+  const cardRefs = [
+    useFadeIn(150),
+    useFadeIn(300),
+    useFadeIn(450),
+    useFadeIn(600),
+  ];
 
-  // if (!title || items.length === 0) return null;
+  const cards = useMemo(
+    () =>
+      (editorialData?.bespokeForYouCards ?? [])
+        .filter((item: BespokeForYouCard) => item?.isActive)
+        .sort(
+          (a: BespokeForYouCard, b: BespokeForYouCard) =>
+            (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0)
+        )
+        .map((card: BespokeForYouCard) => {
+          const desktopImageUrl = resolveCmsMediaUrl(
+            card?.image?.desktopImage ??
+            card?.image?.data?.attributes ??
+            card?.image
+          );
+
+          const mobileImageUrl = resolveCmsMediaUrl(
+            card?.image?.mobileImage ??
+            card?.image?.data?.attributes ??
+            card?.image
+          );
+
+          const imageAlt =
+            card?.image?.altText ||
+            resolveCmsAltText(
+              card?.image?.desktopImage ??
+              card?.image?.data?.attributes ??
+              card?.image
+            ) ||
+            resolveCmsAltText(
+              card?.image?.mobileImage ??
+              card?.image?.data?.attributes ??
+              card?.image
+            ) ||
+            card?.title ||
+            "";
+
+          return {
+            ...card,
+            desktopImageUrl,
+            mobileImageUrl,
+            imageAlt,
+          };
+        }),
+    [editorialData]
+  );
 
   return (
-    <section id={id} ref={ref} className="bg-gray200 py-6 sm:py-10 md:py-16 lg:py-20">
-      <div className="md:px-3 pl-3">
-        <h2 className="md:mb-10 mb-8 lg:text-5xl md:text-4xl text-32 font-larken font-light tracking-[0%] leading-[100%] text-black text-center">
+    !isLoading ? (
+      <section
+        id={id}
+        className="md:px-0 px-4 py-10 sm:py-12 md:py-16 lg:py-20 bg-gray200 lg:min-h-[948px]"
+      >
+        <h2
+          ref={headingRef as React.RefObject<HTMLHeadingElement>}
+          className="lg:text-5xl md:text-4xl text-32 text-center text-darkblack font-larken font-light tracking-[0%] leading-[100%] mb-4 sm:mb-6 md:mb-8 lg:mb-10"
+        >
           For you, Forever
         </h2>
 
-        {/* Mobile: horizontal scroll | Desktop: 3-column full-width grid */}
-        {/* <div
-          className="flex md:gap-4 gap-3 overflow-x-auto snap-x snap-mandatory px-4 pb-2 md:mx-0 md:px-0 md:pb-0 md:overflow-visible md:grid md:grid-cols-3 md:gap-4"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
-        >
-          {items.map((cat) => {
-            const slug = cat?.slug ?? "";
-            const label = cat?.label?.trim() ?? "";
-            const imgUrl = getCmsAssetUrl(cat?.image?.data?.attributes?.url);
-            if (!slug || !label || !imgUrl) return null;
-            return (
+        <div className="grid grid-cols-1 md:grid-cols-2 md:gap-0 gap-12">
+          {cards.map((card: any, idx: any) => (
+            <figure
+              key={card.id}
+              ref={cardRefs[idx] as React.RefObject<HTMLElement>}
+              className="flex flex-col"
+            >
               <Link
-                key={cat?.id ?? slug}
-                href={`/products?occasion=${encodeURIComponent(slug)}`}
-                className="group relative overflow-hidden flex-shrink-0 w-[78%] snap-start md:w-auto h-auto transition-shadow duration-500 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                href={card?.cta?.url || "#"}
+                target={card?.cta?.openInNewTab ? "_blank" : undefined}
+                rel={
+                  card?.cta?.openInNewTab
+                    ? "noopener noreferrer"
+                    : undefined
+                }
+                className="group block"
               >
-                <OptimizedImage
-                  src={imgUrl}
-                  alt={`${label.toLowerCase()} jewellery collection`}
-                  width={800}
-                  height={1024}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0A0A0A] to-transparent pointer-events-none" />
-                <div className="absolute inset-x-0 bottom-5 md:bottom-6 flex items-center justify-center">
-                  <span className="text-base sm:text-lg md:text-xl uppercase text-gray200 font-gill font-normal tracking-[1.8%] text-center leading-[100%]">
-                    {label}
-                  </span>
+                <div className="aspect-square md:aspect-auto h-[357px] md:h-auto lg:h-[620px] overflow-hidden">
+                  {card.desktopImageUrl ? (
+                    <ResponsiveImage
+                      desktopSrc={card.desktopImageUrl}
+                      mobileSrc={card.mobileImageUrl}
+                      alt={card.imageAlt}
+                      width={1280}
+                      height={1280}
+                      quality={90}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray300 flex items-center justify-center">
+                      <span className="text-sm text-gray500">
+                        No Image Available
+                      </span>
+                    </div>
+                  )}
                 </div>
+
+                <figcaption className="mt-4 text-center md:px-4 px-2">
+                  <h3 className="mb-2 text-base md:text-lg lg:text-xl tracking-[1.8%] font-normal leading-[150%] text-black font-gill">
+                    {card.title}
+                  </h3>
+
+                  <p className="text-base md:text-lg lg:text-xl text-darkblack leading-[100%] tracking-[1%] font-light font-gill">
+                    {card.description}
+                  </p>
+
+                  {/* {card?.cta?.label && (
+                  <div className="mt-4">
+                    <span className="text-sm uppercase tracking-[1.5px] border-b border-current pb-1">
+                      {card.cta.label}
+                    </span>
+                  </div>
+                )} */}
+                </figcaption>
               </Link>
-            );
-          })}
-        </div> */}
-      </div>
-    </section>
+            </figure>
+          ))}
+        </div>
+      </section>
+    ) : (
+      <section
+        id={id}
+        className="md:px-0 px-4 py-10 sm:py-12 md:py-16 lg:py-20 bg-gray200"
+        aria-busy="true"
+      >
+        <div
+          ref={headingRef as React.RefObject<HTMLDivElement>}
+          className="h-10 w-64 bg-gray300 rounded mx-auto mb-10"
+        />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 md:gap-0 gap-12">
+          {[1, 2].map((item) => (
+            <div key={item}>
+              <div className="aspect-square md:aspect-auto h-[357px] lg:h-[620px] bg-gray300 rounded" />
+
+              <div className="mt-4 h-6 bg-gray300 rounded w-3/4 mx-auto" />
+
+              <div className="mt-2 h-5 bg-gray300 rounded w-5/6 mx-auto" />
+            </div>
+          ))}
+        </div>
+      </section>
+    )
   );
 };
 

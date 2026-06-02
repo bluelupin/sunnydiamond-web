@@ -30,6 +30,7 @@ export default {
         satoshi: ["Satoshi", "Inter", "system-ui", "sans-serif"],
         gill: ["Gill Sans", "Gill Sans MT", "Cabin", "system-ui", "sans-serif"],
         larken: ["Larken", "Playfair Display", "Georgia", "serif"],
+        systemUi: ["system-ui", "sans-serif"],
       },
       colors: {
         darkMagenta: "#722257",

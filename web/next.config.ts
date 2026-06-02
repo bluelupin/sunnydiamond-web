@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
         hostname: '**', // Placeholder for Magento and other image sources
       },
     ],
+     qualities: [70, 75, 85, 90],
   },
 };
 

@@ -24,10 +24,10 @@ const HomePage = () => {
       <DiamondSourcingSection id="flawless" />
       <FeaturedCollectionSection id="alankara" />
       <FeaturedProductsSection id="diamond-awaits" />
-      <OccasionsTeaserSection id="for-you" />
+      <OccasionsTeaserSection id="categories" />
       <CraftsmanshipProcess id="craftsmanship" />
       <SunnyPromiseSection id="promise" />
-      <ForYouForever id="categories" />
+      <ForYouForever id="for-you" />
       <ShowroomsSection id="showrooms" />
     </Layout>
   );
