@@ -2,7 +2,7 @@
 
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { useFadeIn } from "@/shared/hooks/use-fade-in";
-import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
+import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import SectionImage from "@/assets/section6-card1.webp";
 import Link from "next/link";
@@ -68,29 +68,35 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
           className="flex md:gap-4 gap-3 overflow-x-auto snap-x snap-mandatory  px-4 pb-2 md:mx-0 md:px-0 md:pb-0 md:overflow-visible md:grid md:grid-cols-3 md:gap-4"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
         >
-          {occasionSection.occasions?.map((card: any, idx: any) => (
-            <Link
-              key={card.id}
-              href={`/products?occasion=${card.slug}`}
-              className="group relative overflow-hidden flex-shrink-0 w-[78%] snap-start md:w-auto h-auto transition-shadow duration-500 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            >
-              <ResponsiveImage
-                desktopSrc={SectionImage || ""}
-                alt={card.title}
-                priority
-                width={800}
-                height={1024}
-                quality={90}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0A0A0A] to-transparent pointer-events-none" />
-              <div className="absolute inset-x-0 bottom-5 md:bottom-6 flex items-center justify-center">
-                <span className="text-base sm:text-lg md:text-xl tracking-[0.3em] uppercase text-gray200 font-gill font-normal tracking-[1.8%] text-center leading-[100%]">
-                  {card.title}
-                </span>
-              </div>
-            </Link>
-          ))}
+          {occasionSection.occasions?.map((card: any, idx: any) => {
+            const desktopImageUrl = resolveCmsMediaUrl(card?.image?.desktopImage ?? card?.image);
+            const mobileImageUrl = resolveCmsMediaUrl(card?.image?.mobileImage ?? card?.image);
+
+            return (
+              <Link
+                key={card.id}
+                href={`/products?occasion=${card.slug}`}
+                className="group relative overflow-hidden flex-shrink-0 w-[78%] snap-start md:w-auto h-auto transition-shadow duration-500 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              >
+                <ResponsiveImage
+                  desktopSrc={desktopImageUrl || SectionImage}
+                  mobileSrc={mobileImageUrl}
+                  alt={card.title}
+                  priority
+                  width={800}
+                  height={1024}
+                  quality={90}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0A0A0A] to-transparent pointer-events-none" />
+                <div className="absolute inset-x-0 bottom-5 md:bottom-6 flex items-center justify-center">
+                  <span className="text-base sm:text-lg md:text-xl tracking-[0.3em] uppercase text-gray200 font-gill font-normal tracking-[1.8%] text-center leading-[100%]">
+                    {card.title}
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
         {/* <div className="grid grid-cols-1 md:grid-cols-2 md:gap-0 gap-12">
           {occasionSection.occasions?.map((card: any, idx: any) => {
