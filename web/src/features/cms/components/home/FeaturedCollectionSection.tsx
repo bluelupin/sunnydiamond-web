@@ -211,7 +211,7 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
     >
       <div className="grid grid-cols-1 md:grid-cols-2 p-4 md:p-0">
         {/* TL: Alankara Collection */}
-        <div className="relative lg:h-700 md:h-550 min-h-[400px] overflow-hidden group">
+        <div className="relative lg:h-700 md:h-550 h-auto overflow-hidden group">
           <ResponsiveImage
             desktopSrc={collectionDesktopBgUrl || ""}
             mobileSrc={collectionMobileBgUrl || ""}
@@ -220,9 +220,9 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
             width={collectionDesktopBgUrl ? 720 : 360}
             height={collectionDesktopBgUrl ? 700 : 320}
             quality={collectionDesktopBgUrl ? 90 : 85}
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
           />
-          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0A0A0A] to-transparent pointer-events-none" aria-hidden />
+          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0A0A0A] to-transparent pointer-events-none" aria-hidden="true" />
           <div className="absolute inset-0 flex flex-col items-center justify-end md:gap-10 gap-8 px-6 md:px-10 lg:pb-74 md:pb-16 pb-10">
             <h2 className="lg:text-5xl md:text-4xl text-32 text-white font-normal font-larken tracking-[0%] text-center">
               {sectionTitle}
@@ -235,7 +235,7 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
             </Link>
           </div>
         </div>
-
+        <div className="md:bg-white bg-gray100 flex flex-col items-center justify-end text-center px-6 py-10 sm:py-12 md:py-14 lg:py-65 lg:h-700 md:h-550 h-auto overflow-hidden"></div>
         {/* TR: Draggable transparent ring carousel with scroll parallax */}
         {/* <div className="md:bg-white bg-gray100 flex flex-col items-center justify-end text-center px-6 py-10 sm:py-12 md:py-14 lg:py-65 lg:h-700 md:h-550 h-auto overflow-hidden">
           <div
@@ -340,8 +340,8 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
         {/* BL: Gifting */}
         <div className="md:bg-giftingBg md:bg-white bg-right w-full bg-[length:100%] bg-gray100 bg-no-repeat flex flex-col items-center justify-center text-center py-16 sm:py-14 md:py-20 md:min-h-560 md:h-auto h-auto order-4 md:order-3">
           <GiftIcon className="text-creamColor w-24 md:flex hidden" />
-          <h2 className="md:mt-12 md:mb-10 mb-6 lg:text-5xl md:text-4xl text-32 text-darkblack font-light font-gill tracking-[0%] leading-[100%] md:max-w-394 max-w-60 px-5">
-            {title || "Gifting For Your Valentine (F)"}
+          <h2 className="md:mt-12 md:mb-10 mb-6 lg:text-5xl md:text-4xl text-32 text-darkblack font-light font-gill tracking-[0%] leading-[100%] md:max-w-394 max-w-196 px-5">
+            {title}
           </h2>
           <Link
             href={primaryCtaUrl}
@@ -349,14 +349,14 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
           >
             <span className="absolute inset-0 bg-darkblack origin-bottom scale-y-0 transition-transform duration-500 ease-out group-hover:scale-y-100"></span>
             <span className="relative z-10 group-hover:text-white transition-colors duration-500">
-              {primaryCtaLabel || 'Shop Now (F)'}
+              {primaryCtaLabel}
             </span>
           </Link>
           <Link
             href={secondaryCtaUrl}
             className="md:mt-8 mt-6 inline-block text-darkblack md:text-base text-sm font-gill tracking-[1.8%] uppercase font-normal border-b border-darkblack pb-2"
           >
-            {secondaryCtaLabel || 'Send a Gift Card Instead (F)'}
+            {secondaryCtaLabel}
           </Link>
         </div>
 

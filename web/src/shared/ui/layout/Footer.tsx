@@ -9,30 +9,39 @@ import XIcon from "@/assets/Icons/XIcon";
 import LinkedInIcon from "@/assets/Icons/LinkedInIcon";
 import TrustBadgeSection from "@/features/cms/components/common/TrustBadges";
 
+export const SOCIAL_ICON_MAP = {
+  instagram: InstagramIcon,
+  facebook: FacebookIcon,
+  x: XIcon,
+  twitter: XIcon,
+  linkedin: LinkedInIcon,
+};
+
 const Footer = () => {
   const { data: shellData, isLoading: isShellLoading } = useHomepageShell();
   const footerLinkGroups = shellData?.global?.footerLinkGroups || shellData?.footerLinkGroups;
   const footerCopyright = shellData?.global?.footerCopyright || shellData?.footerCopyright;
-  const { brand, navigation, social } = siteConfig;
-  const { columns, paymentMethods } = navigation.footer;
+  const cmsSocialLinks = shellData?.global?.socialLinks || shellData?.socialLinks || [];
+  const socialLinks = [...cmsSocialLinks]
+    .filter((item) => item?.isActive !== false)
+    .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
+    .map((item) => ({
+      id: item.id,
+      label: item.label,
+      href: item.url,
+      targetType: item.targetType,
+    }));
 
-  const socialLinks = [
-    { icon: InstagramIcon, href: social.instagram, label: "Instagram" },
-    { icon: FacebookIcon, href: social.facebook, label: "Facebook" },
-    { icon: XIcon, href: "#", label: "Twitter" },
-    { icon: LinkedInIcon, href: "#", label: "LinkedIn" },
-  ];
-
+  const { navigation } = siteConfig;
+  const { paymentMethods } = navigation.footer;
   return (
     <footer className="bg-gray300">
       {/* Top trust-signals marquee */}
       <TrustBadgeSection itemClassName="tracking-[0.25em] font-systemUi" />
-
       {/* Main grid */}
       <div className="max-w-1440 xl:px-20 lg:px-16 md:px-14 sm:px-10 px-5 mx-auto lg:py-30 md:py-24 sm:py-20 py-16 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:gap-x-10 lg:gap-x-8 md:gap-x-6 sm:gap-x-4 gap-x-3 xl:gap-y-16 lg:gap-y-14 md:gap-y-12 sm:gap-y-10 gap-y-9">
-        {/* Brand */}
         <div className="col-span-2 md:col-span-3 lg:col-span-1 flex flex-col lg:items-start items-center">
-          <Link href="/" aria-label={brand.name} className="inline-flex flex-col items-center">
+          <Link href="/" aria-label="Sunny Diamonds" className="inline-flex flex-col items-center">
             <SDTextLogo className="sm:text-darkMagenta text-darkblack" />
           </Link>
         </div>
@@ -56,25 +65,34 @@ const Footer = () => {
               </ul>
             </div>
           ))) : (
-          <p className="text-center">Not Getting Response from API</p>
+          <p className="text-center">API Not Responding!</p>
         )}
       </div>
 
       {/* Bottom bar: social, payment, copyright */}
       <div className="max-w-1440 xl:px-20 lg:px-16 md:px-14 sm:px-10 px-5 lg:pb-30 md:pb-24 sm:pb-20 pb-16 mx-auto flex items-center xl:justify-between justify-center md:gap-8 sm:gap-6 gap-6 flex-wrap">
         <div className="flex items-center md:gap-7 sm:gap-5 gap-4">
-          {socialLinks.map(({ icon: Icon, href, label }) => (
-            <a
-              key={label}
-              href={href}
-              aria-label={label}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:scale-110 duration-500 transition-all"
-            >
-              <Icon className="w-6 h-6 sm:text-darkMagenta text-darkblack" />
-            </a>
-          ))}
+          {socialLinks.map((social) => {
+            const Icon =
+              SOCIAL_ICON_MAP[
+              social.label.toLowerCase() as keyof typeof SOCIAL_ICON_MAP
+              ];
+
+            if (!Icon || !social.href) return null;
+
+            return (
+              <a
+                key={social.id}
+                href={social.href}
+                aria-label={social.label}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:scale-110 duration-500 transition-all"
+              >
+                <Icon className="w-6 h-6 sm:text-darkMagenta text-darkblack" />
+              </a>
+            );
+          })}
         </div>
         <div className="flex items-center justify-center flex-wrap gap-2">
           {paymentMethods.map((method) => {
