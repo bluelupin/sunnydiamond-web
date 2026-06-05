@@ -80,91 +80,90 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
           </div>
         </div>
       </div>
-      {
-        categories.length > 0 ?
-          <div className="md:px-3 pl-3">
-            <div
-              className="flex gap-4 overflow-x-auto snap-x snap-mandatory md:overflow-visible md:grid md:grid-cols-4"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
-            >
-              {categories.map((cat) => {
-                const title = cat?.title ?? cat?.label ?? cat?.cta?.label ?? "";
-                const slug = cat?.slug ?? "";
-                const categoryLink =
-                  cat?.cta?.url ?? cat?.cta?.to ??
-                  (slug ? `/products?category=${encodeURIComponent(slug)}` : "/products");
+      {categories.length > 0 ?
+        <div className="md:px-3 pl-3">
+          <div
+            className="flex gap-4 overflow-x-auto snap-x snap-mandatory md:overflow-visible md:grid md:grid-cols-4"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
+          >
+            {categories.map((cat) => {
+              const title = cat?.title ?? cat?.label ?? cat?.cta?.label ?? "";
+              const slug = cat?.slug ?? "";
+              const categoryLink =
+                cat?.cta?.url ?? cat?.cta?.to ??
+                (slug ? `/products?category=${encodeURIComponent(slug)}` : "/products");
 
-                const categoryImage = cat?.image as CategoryNavigationImage | undefined;
-                const hoverImage = cat?.hoverImage as CategoryNavigationImage | undefined;
+              const categoryImage = cat?.image as CategoryNavigationImage | undefined;
+              const hoverImage = cat?.hoverImage as CategoryNavigationImage | undefined;
 
-                const desktopImageUrl = resolveCmsMediaUrl(categoryImage?.desktopImage ?? categoryImage);
-                const mobileImageUrl = resolveCmsMediaUrl(categoryImage?.mobileImage ?? categoryImage);
-                const hoverDesktopImageUrl = resolveCmsMediaUrl(hoverImage?.desktopImage ?? hoverImage);
-                const hoverMobileImageUrl = resolveCmsMediaUrl(hoverImage?.mobileImage ?? hoverImage);
+              const desktopImageUrl = resolveCmsMediaUrl(categoryImage?.desktopImage ?? categoryImage);
+              const mobileImageUrl = resolveCmsMediaUrl(categoryImage?.mobileImage ?? categoryImage);
+              const hoverDesktopImageUrl = resolveCmsMediaUrl(hoverImage?.desktopImage ?? hoverImage);
+              const hoverMobileImageUrl = resolveCmsMediaUrl(hoverImage?.mobileImage ?? hoverImage);
 
-                const imageAlt =
-                  resolveCmsAltText(categoryImage?.desktopImage ?? categoryImage) ??
-                  resolveCmsAltText(categoryImage?.mobileImage ?? categoryImage) ??
-                  title;
-                const hoverAlt =
-                  resolveCmsAltText(hoverImage?.desktopImage ?? hoverImage) ??
-                  resolveCmsAltText(hoverImage?.mobileImage ?? hoverImage) ??
-                  imageAlt;
+              const imageAlt =
+                resolveCmsAltText(categoryImage?.desktopImage ?? categoryImage) ??
+                resolveCmsAltText(categoryImage?.mobileImage ?? categoryImage) ??
+                title;
+              const hoverAlt =
+                resolveCmsAltText(hoverImage?.desktopImage ?? hoverImage) ??
+                resolveCmsAltText(hoverImage?.mobileImage ?? hoverImage) ??
+                imageAlt;
 
-                return (
-                  <Link
-                    key={cat?.id ?? slug ?? title}
-                    href={categoryLink}
-                    className="group relative bg-gray300 flex flex-col flex-shrink-0 w-240 md:w-auto h-60 lg:h-260 xl:h-420 snap-start overflow-hidden"
-                  >
-                    <div className="relative flex-1 flex items-center justify-center overflow-hidden p-6 md:p-10 transition-opacity duration-500 group-hover:opacity-0">
-                      {(desktopImageUrl || mobileImageUrl) && (
-                        <ResponsiveImage
-                          desktopSrc={desktopImageUrl || ""}
-                          mobileSrc={mobileImageUrl}
-                          alt={imageAlt}
-                          priority
-                          width={512}
-                          height={512}
-                          className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
-                        />)}
-                    </div>
-                    {(hoverDesktopImageUrl || hoverMobileImageUrl) && (
+              return (
+                <Link
+                  key={cat?.id ?? slug ?? title}
+                  href={categoryLink}
+                  className="group relative bg-gray300 flex flex-col flex-shrink-0 w-240 md:w-auto h-60 lg:h-260 xl:h-420 snap-start overflow-hidden"
+                >
+                  <div className="relative flex-1 flex items-center justify-center overflow-hidden p-6 md:p-10 transition-opacity duration-500 group-hover:opacity-0">
+                    {(desktopImageUrl || mobileImageUrl) && (
                       <ResponsiveImage
-                        desktopSrc={hoverDesktopImageUrl || ""}
-                        mobileSrc={hoverMobileImageUrl}
-                        alt={hoverAlt}
+                        desktopSrc={desktopImageUrl || ""}
+                        mobileSrc={mobileImageUrl}
+                        alt={imageAlt}
                         priority
-                        width={512}
-                        height={512}
-                        className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-out"
-                      />
-                    )}
-
-                    <div
-                      aria-hidden="true"
-                      className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0A0A0A] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
+                        width={280}
+                        height={280}
+                        className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+                      />)}
+                  </div>
+                  {(hoverDesktopImageUrl || hoverMobileImageUrl) && (
+                    <ResponsiveImage
+                      desktopSrc={hoverDesktopImageUrl || ""}
+                      mobileSrc={hoverMobileImageUrl}
+                      alt={hoverAlt}
+                      priority
+                      width={360}
+                      height={420}
+                      className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-out"
                     />
-                    {!(desktopImageUrl || mobileImageUrl) && (
-                      <div className="relative flex-1 flex items-center justify-center overflow-hidden p-6 md:p-10 transition-opacity duration-500 group-hover:opacity-0">
+                  )}
 
-                        <span className="text-center text-base lg:text-xl tracking-[1.8%] uppercase text-darkblack font-normal opacity-60 group-hover:opacity-100 group-hover:text-white transition-colors duration-500">
-                          {title}
-                        </span>
-                      </div>
-                    )}
-                    <div className="relative pb-6 md:pb-8 text-center z-10">
-                      <span className="font-gill text-base lg:text-xl tracking-[1.8%] uppercase text-darkblack font-normal opacity-60 group-hover:opacity-100 group-hover:text-white transition-colors duration-500">
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0A0A0A] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
+                  />
+                  {!(desktopImageUrl || mobileImageUrl) && (
+                    <div className="relative flex-1 flex items-center justify-center overflow-hidden p-6 md:p-10 transition-opacity duration-500 group-hover:opacity-0">
+
+                      <span className="text-center text-base lg:text-xl tracking-[1.8%] uppercase text-darkblack font-normal opacity-60 group-hover:opacity-100 group-hover:text-white transition-colors duration-500">
                         {title}
                       </span>
                     </div>
-                  </Link>
-                );
-              })}
-            </div>
+                  )}
+                  <div className="relative pb-6 md:pb-8 text-center z-10">
+                    <span className="font-gill text-base lg:text-xl tracking-[1.8%] uppercase text-darkblack font-normal opacity-60 group-hover:opacity-100 group-hover:text-white transition-colors duration-500">
+                      {title}
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
-          :
-          <p className="text-center p-20">NO Categories Yet!</p>
+        </div>
+        :
+        <p className="text-center p-20">NO Categories Yet!</p>
       }
     </section>
   );

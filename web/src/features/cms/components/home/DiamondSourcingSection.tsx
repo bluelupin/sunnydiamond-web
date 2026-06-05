@@ -53,7 +53,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
             id={id}
             ref={ref}
             aria-label="Internally flawless diamonds"
-            className="relative h-700 overflow-hidden"
+            className="relative h-auto overflow-hidden"
           >
             <div className="absolute inset-0 -z-0 will-change-transform" ref={bgParallax}>
               <ResponsiveImage
@@ -80,7 +80,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
               <h2 className="mt-6 lg:text-5xl md:text-4xl text-32 font-light text-darkblack font-larken max-w-2xl leading-tight tracking-[0%]">
                 {sectionTitle}
               </h2>
-              <div ref={diamondParallax} className="will-change-transform md:mt-26 mt-76">
+              <div ref={diamondParallax} className="will-change-transform md:mt-26 mt-76 md:w-290 md:h-290 w-[243px] h-[293px]">
                 <ResponsiveImage
                   desktopSrc={desktopImageUrl || ""}
                   mobileSrc={mobileImageUrl}
@@ -89,7 +89,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
                   width={1024}
                   height={1024}
                   quality={desktopImageUrl ? 90 : 85}
-                  className="md:w-290 md:h-290 w-[243px] h-[293px]"
+                  className="w-full h-full object-cover"
                 />
               </div>
             </div>
@@ -100,7 +100,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
             ref={ref}
             aria-label="Internally flawless diamonds"
             aria-busy="true"
-            className="relative h-700 overflow-hidden"
+            className="relative h-auto overflow-hidden"
           >
             <div className="absolute inset-0 -z-0">
               <div className="w-full h-full bg-gray100" />

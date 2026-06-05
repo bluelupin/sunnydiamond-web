@@ -28,6 +28,9 @@ const ResponsiveImage = ({
     sizes = "100vw",
 }: ResponsiveImageProps) => {
     const desktopImage = getImageSrc(desktopSrc);
+    if (!desktopImage) {
+        return null;
+    }
     const mobileImage = mobileSrc
         ? getImageSrc(mobileSrc)
         : desktopImage;

@@ -9,6 +9,47 @@ export const homeSections = [
 ] as const;
 
 export const homeContent = {
+  //  showrooms: {
+  //   title: "Visit Our Showrooms",
+  //   subtitle: "Step into our atelier to discover the Belgian-sourced mastery behind every stone",
+  //   locations: [
+  //     {
+  //       id: "calicut",
+  //       name: "CALICUT",
+  //       address: "Sunny Diamonds Calicut, Mavoor Road, Arayidathupalam, Kozhikode, Kerala 673004",
+  //       phone: "+91 97443 11111",
+  //       directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Calicut",
+  //     },
+  //     {
+  //       id: "kochi",
+  //       name: "KOCHI",
+  //       address: "Sunny Diamonds Kochi 40/9134 B & C, Rajaji Rd, Ernakulam, Kerala 682035",
+  //       phone: "+91 97443 55555",
+  //       directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Kochi",
+  //     },
+  //     {
+  //       id: "thrissur",
+  //       name: "THRISSUR",
+  //       address: "Sunny Diamonds Thrissur, Round West, Thrissur, Kerala 680001",
+  //       phone: "+91 97443 22222",
+  //       directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Thrissur",
+  //     },
+  //     {
+  //       id: "coimbatore",
+  //       name: "COIMBATORE",
+  //       address: "Sunny Diamonds Coimbatore, Avinashi Road, Coimbatore, Tamil Nadu 641018",
+  //       phone: "+91 97443 33333",
+  //       directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Coimbatore",
+  //     },
+  //     {
+  //       id: "trivandrum",
+  //       name: "TRIVANDRUM",
+  //       address: "Sunny Diamonds Trivandrum, MG Road, Thiruvananthapuram, Kerala 695001",
+  //       phone: "+91 97443 44444",
+  //       directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Trivandrum",
+  //     },
+  //   ],
+  // },
   // hero: {
   //   badge: "20 Years of Legacy (s)",
   //   title: "Fine jewellery designed with a tradition of excellence (s)",
@@ -76,14 +117,14 @@ export const homeContent = {
   //   productIds: ["1", "2", "3", "4", "5", "6"],
   //   cta: { label: "Discover" },
   // },
-  categories: {
-    title: "Timeless Pieces for Every Occasion",
-    items: [
-      { label: "FESTIVAL", slug: "festival" },
-      { label: "COCKTAIL", slug: "cocktail" },
-      { label: "WEDDING", slug: "wedding" },
-    ],
-  },
+  // categories: {
+  //   title: "Timeless Pieces for Every Occasion",
+  //   items: [
+  //     { label: "FESTIVAL", slug: "festival" },
+  //     { label: "COCKTAIL", slug: "cocktail" },
+  //     { label: "WEDDING", slug: "wedding" },
+  //   ],
+  // },
   craftsmanship: {
     subtitle: "Our Process",
     title: "From Vision to Masterpiece",
@@ -174,47 +215,47 @@ export const homeContent = {
       },
     ],
   },
-  showrooms: {
-    title: "Visit Our Showrooms",
-    subtitle: "Step into our atelier to discover the Belgian-sourced mastery behind every stone",
-    locations: [
-      {
-        id: "calicut",
-        name: "CALICUT",
-        address: "Sunny Diamonds Calicut, Mavoor Road, Arayidathupalam, Kozhikode, Kerala 673004",
-        phone: "+91 97443 11111",
-        directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Calicut",
-      },
-      {
-        id: "kochi",
-        name: "KOCHI",
-        address: "Sunny Diamonds Kochi 40/9134 B & C, Rajaji Rd, Ernakulam, Kerala 682035",
-        phone: "+91 97443 55555",
-        directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Kochi",
-      },
-      {
-        id: "thrissur",
-        name: "THRISSUR",
-        address: "Sunny Diamonds Thrissur, Round West, Thrissur, Kerala 680001",
-        phone: "+91 97443 22222",
-        directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Thrissur",
-      },
-      {
-        id: "coimbatore",
-        name: "COIMBATORE",
-        address: "Sunny Diamonds Coimbatore, Avinashi Road, Coimbatore, Tamil Nadu 641018",
-        phone: "+91 97443 33333",
-        directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Coimbatore",
-      },
-      {
-        id: "trivandrum",
-        name: "TRIVANDRUM",
-        address: "Sunny Diamonds Trivandrum, MG Road, Thiruvananthapuram, Kerala 695001",
-        phone: "+91 97443 44444",
-        directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Trivandrum",
-      },
-    ],
-  },
+  // showrooms: {
+  //   title: "Visit Our Showrooms",
+  //   subtitle: "Step into our atelier to discover the Belgian-sourced mastery behind every stone",
+  //   locations: [
+  //     {
+  //       id: "calicut",
+  //       name: "CALICUT",
+  //       address: "Sunny Diamonds Calicut, Mavoor Road, Arayidathupalam, Kozhikode, Kerala 673004",
+  //       phone: "+91 97443 11111",
+  //       directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Calicut",
+  //     },
+  //     {
+  //       id: "kochi",
+  //       name: "KOCHI",
+  //       address: "Sunny Diamonds Kochi 40/9134 B & C, Rajaji Rd, Ernakulam, Kerala 682035",
+  //       phone: "+91 97443 55555",
+  //       directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Kochi",
+  //     },
+  //     {
+  //       id: "thrissur",
+  //       name: "THRISSUR",
+  //       address: "Sunny Diamonds Thrissur, Round West, Thrissur, Kerala 680001",
+  //       phone: "+91 97443 22222",
+  //       directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Thrissur",
+  //     },
+  //     {
+  //       id: "coimbatore",
+  //       name: "COIMBATORE",
+  //       address: "Sunny Diamonds Coimbatore, Avinashi Road, Coimbatore, Tamil Nadu 641018",
+  //       phone: "+91 97443 33333",
+  //       directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Coimbatore",
+  //     },
+  //     {
+  //       id: "trivandrum",
+  //       name: "TRIVANDRUM",
+  //       address: "Sunny Diamonds Trivandrum, MG Road, Thiruvananthapuram, Kerala 695001",
+  //       phone: "+91 97443 44444",
+  //       directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Trivandrum",
+  //     },
+  //   ],
+  // },
   promise: {
     title: "THE SUNNY PROMISE",
     description:

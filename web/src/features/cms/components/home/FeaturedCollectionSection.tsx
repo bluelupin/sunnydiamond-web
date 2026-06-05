@@ -26,19 +26,19 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
   const ctaUrl = featuredCollectionData?.cta?.url ?? featuredCollectionData?.cta?.to ?? "";
   const ctaLabel = featuredCollectionData?.cta?.label ?? featuredCollectionData?.label?.label ?? "";
   const collectionDesktopBgUrl = useMemo(
-    () => resolveCmsMediaUrl((featuredCollectionData as any)?.image?.desktopImage ?? (featuredCollectionData as any)?.image),
+    () => resolveCmsMediaUrl((featuredCollectionData as any)?.primaryImage?.desktopImage ?? (featuredCollectionData as any)?.image),
     [featuredCollectionData]
   );
 
   const collectionMobileBgUrl = useMemo(
-    () => resolveCmsMediaUrl((featuredCollectionData as any)?.image?.mobileImage ?? (featuredCollectionData as any)?.image),
+    () => resolveCmsMediaUrl((featuredCollectionData as any)?.primaryImage?.mobileImage ?? (featuredCollectionData as any)?.image),
     [featuredCollectionData]
   );
 
   const bgAlt = useMemo(
     () =>
-      resolveCmsAltText((featuredCollectionData as any)?.image?.desktopImage ?? (featuredCollectionData as any)?.image) ||
-      resolveCmsAltText((featuredCollectionData as any)?.image?.mobileImage ?? (featuredCollectionData as any)?.image) ||
+      resolveCmsAltText((featuredCollectionData as any)?.primaryImage?.desktopImage ?? (featuredCollectionData as any)?.image) ||
+      resolveCmsAltText((featuredCollectionData as any)?.primaryImage?.mobileImage ?? (featuredCollectionData as any)?.image) ||
       sectionTitle ||
       "",
     [featuredCollectionData, sectionTitle]
@@ -211,14 +211,14 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
     >
       <div className="grid grid-cols-1 md:grid-cols-2 p-4 md:p-0">
         {/* TL: Alankara Collection */}
-        <div className="relative lg:h-700 md:h-550 h-auto overflow-hidden group">
+        <div className="relative lg:h-700 md:h-550 min-h-[400px] overflow-hidden group">
           <ResponsiveImage
             desktopSrc={collectionDesktopBgUrl || ""}
-            mobileSrc={collectionMobileBgUrl}
+            mobileSrc={collectionMobileBgUrl || ""}
             alt={bgAlt}
             priority
-            width={1024}
-            height={1024}
+            width={collectionDesktopBgUrl ? 720 : 360}
+            height={collectionDesktopBgUrl ? 700 : 320}
             quality={collectionDesktopBgUrl ? 90 : 85}
             className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
           />
@@ -228,10 +228,10 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
               {sectionTitle}
             </h2>
             <Link
-              href={ctaUrl ? ctaUrl : "/products (F)"}
+              href={ctaUrl}
               className="inline-block text-white md:text-base text-sm font-gill tracking-[1.8%] uppercase font-normal border-b border-white/80 pb-2 hover:border-white"
             >
-              {ctaLabel ? ctaLabel : "Explore Collection (F)"}
+              {ctaLabel}
             </Link>
           </div>
         </div>

@@ -38,15 +38,15 @@ const Footer = () => {
         </div>
         {footerLinkGroups ? (
           footerLinkGroups.map((column: any) => (
-            <div key={column.heading}>
+            <div key={column.id}>
               <h3 className="md:text-lg sm:text-base text-sm font-medium font-satoshi uppercase text-blackdark md:mb-8 sm-6 mb-4">
                 {column.title}
               </h3>
               <ul className="sm:space-y-4 space-y-3">
                 {column.links.map((link: any, idx: any) => (
-                  <li key={`${column.heading}-${idx}`} className="max-w-[14rem]">
+                  <li key={link.id} className="max-w-[14rem]">
                     <Link
-                      href={link.to}
+                      href={link.url}
                       className="inline-block max-w-full break-words hyphens-auto text-sm leading-relaxed sm:leading-relaxed lg:leading-6 font-normal font-satoshi text-blackdark transition-all duration-500 transform hover:text-darkMagenta hover:underline underline-offset-4 hover:translate-x-2 focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkMagenta focus-visible:ring-offset-2 focus-visible:ring-offset-gray300 focus-visible:text-darkMagenta"
                     >
                       {link.label}
@@ -56,25 +56,7 @@ const Footer = () => {
               </ul>
             </div>
           ))) : (
-          columns.map((col) => (
-            <div key={col.heading}>
-              <h3 className="md:text-lg sm:text-base text-sm font-medium font-satoshi uppercase text-blackdark md:mb-8 sm-6 mb-4">
-                {col.heading} (F)
-              </h3>
-              <ul className="sm:space-y-4 space-y-3">
-                {col.links.map((link, idx) => (
-                  <li key={`${col.heading}-${idx}`} className="max-w-[14rem]">
-                    <Link
-                      href={link.to}
-                      className="inline-block max-w-full break-words hyphens-auto text-sm leading-relaxed sm:leading-relaxed lg:leading-6 font-normal font-satoshi text-blackdark transition-all duration-500 transform hover:text-darkMagenta hover:underline underline-offset-4 hover:translate-x-2 focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkMagenta focus-visible:ring-offset-2 focus-visible:ring-offset-gray300 focus-visible:text-darkMagenta"
-                    >
-                      {link.label} (F)
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))
+          <p className="text-center">Not Getting Response from API</p>
         )}
       </div>
 

@@ -93,7 +93,7 @@ const HeroSection = ({ id }: HeroSectionProps) => {
                       className="inline-block h-5 w-56 bg-white/20 rounded animate-pulse"
                       aria-hidden
                     />
-                  ) : (eyebrow || "20 Years of Legacy (F)")}
+                  ) : (eyebrow)}
                 </span>
               </div>
               <h1 className="mb-40 lg:text-[54px] md:text-[42px] text-[32px] text-white">
@@ -102,7 +102,7 @@ const HeroSection = ({ id }: HeroSectionProps) => {
                     className="block h-12 w-[min(680px,90vw)] bg-white/20 rounded animate-pulse"
                     aria-hidden
                   />
-                ) : (title || "Fines jewellery designed with a tradition of excellence (F)")}
+                ) : (title)}
               </h1>
               {!isShellLoading && primaryCta ? (
                 <Link
@@ -111,7 +111,7 @@ const HeroSection = ({ id }: HeroSectionProps) => {
                 >
                   <span className="absolute inset-0 bg-white origin-bottom scale-y-0 transition-transform duration-500 ease-out group-hover:scale-y-100"></span>
                   <span className="relative z-10 group-hover:text-charcoal transition-colors duration-500">
-                    {primaryCtaLabel || "Shop Now (F)"}
+                    {primaryCtaLabel}
                   </span>
                 </Link>
               ) : (

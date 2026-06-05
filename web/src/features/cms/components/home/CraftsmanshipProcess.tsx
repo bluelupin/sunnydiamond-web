@@ -6,6 +6,7 @@ import { useStepScroll } from "@/shared/hooks/use-step-scroll";
 import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import diamondImgUrl from "@/assets/craftsmanship-diamond-3d.png"
+import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 interface CraftsmanshipProcessProps {
   id?: string;
 }
@@ -13,17 +14,30 @@ interface CraftsmanshipProcessProps {
 const stepIcons: LucideIcon[] = [PencilLine, Gem, Hammer, PackageCheck];
 
 const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
-  const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
-  const craftsmanshipSteps = editorialData?.homepage?.craftsmanshipSteps || editorialData?.craftsmanshipSteps;
-  const sectionTitle = craftsmanshipSteps?.sectionTitle?.trim();
-  const title = craftsmanshipSteps?.title?.trim();
-  const isActive = craftsmanshipSteps?.isActive === true;
-  // const diamondUrl = getCmsAssetUrl(craftsmanshipSteps?.diamondImage?.data?.attributes?.url);
+  // const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
+  // const craftsmanshipSection = editorialData?.homepage?.craftsmanshipSection || editorialData?.craftsmanshipSection;
+  // const sectionTitle = craftsmanshipSection?.sectionTitle?.trim();
+  // const title = craftsmanshipSection?.title?.trim();
+  // const isActive = craftsmanshipSection?.isActive === true;
+  // // const diamondUrl = getCmsAssetUrl(craftsmanshipSection?.diamondImage?.data?.attributes?.url);
 
-  const steps = Array.isArray(craftsmanshipSteps)
-    ? [...craftsmanshipSteps]
-      .filter((s) => s?.isActive !== false)
-      .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
+  // const steps = Array.isArray(craftsmanshipSection)
+  //   ? [...craftsmanshipSection]
+  //     .filter((s) => s?.isActive !== false)
+  //     .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
+  //   : [];
+  const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
+  const craftsmanshipSection =
+    editorialData?.craftsmanshipSection ||
+    editorialData?.homepage?.craftsmanshipSection;
+  const sectionTitle = craftsmanshipSection?.sectionTitle?.trim() ?? "";
+  const isActive = craftsmanshipSection?.isActive === true;
+  const steps = Array.isArray(craftsmanshipSection?.steps)
+    ? [...craftsmanshipSection.steps]
+      .filter((step) => step?.isActive)
+      .sort(
+        (a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0)
+      )
     : [];
 
   const stepCount = steps.length;
@@ -69,7 +83,7 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
       id={id}
       ref={containerRef}
       style={{ height: `${(stepCount + 1) * 100}vh` }}
-      aria-label={sectionTitle || "Craftsmanship Process (F)"}
+      aria-label={sectionTitle}
       className="bg-gray200 bg-gray200 pt-10 sm:pt-16 md:pt-20"
     >
       <div className="sticky top-24 h-screen overflow-hidden bg-gray200">
@@ -78,19 +92,19 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
             {/* Left column: title + steps */}
             <div className="lg:col-span-5 flex flex-col xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20">
               <h2 className="lg:text-5xl md:text-4xl text-32 text-black font-normal font-larken tracking-[0%] lg:text-left text-center">
-                {sectionTitle || "From Vision to Masterpiece (F)"}
+                {sectionTitle}
               </h2>
 
               {/* Active + next upcoming step (faded) */}
               <ol className="space-y-12 md:space-y-16 relative">
-                {steps.map((step, i) => {
+                {steps.map((step: any, i: any) => {
                   const Icon = stepIcons[i] ?? PencilLine;
                   const isActive = i === activeIndex;
                   const isNext = i === activeIndex + 1;
                   const isVisible = isActive || isNext;
                   return (
                     <li
-                      key={step?.id ?? step?.number ?? `${i}`}
+                      key={step.id}
                       className="transition-all duration-700 ease-out lg:max-w-auto max-w-420 lg:mx-0 mx-auto mx-auto lg:px-0 px-3 flex flex-col lg:items-start items-center lg:justify-start justify-center gap-4"
                       style={{
                         opacity: isActive ? 1 : isNext ? 0.1 : 0,
@@ -117,11 +131,11 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
                         aria-hidden
                       />
                       <h3 className="text-base sm:text-xl md:text-2xl lg:text-28 font-normal tracking-[0%] leading-[100%] text-darkblack font-gill lg:text-left text-center">
-                        {step?.title ?? ""}
+                        {step.title || ""}
                       </h3>
                       {isActive && (
                         <p className="text-base md:text-lg lg:text-xl font-light text-darkblack tracking-[1%] leading-[100%] font-gill animate-fade-in lg:text-left text-center">
-                          {step?.description ?? ""}
+                          {step.description || ""}
                         </p>
                       )}
                     </li>
@@ -143,11 +157,13 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
                   filter: "drop-shadow(0 30px 50px hsl(var(--foreground) / 0.18))",
                 }}
               >
-                <OptimizedImage
-                  src={diamondImgUrl}
+                <ResponsiveImage
+                  desktopSrc={diamondImgUrl || ""}
                   alt="Brilliant cut diamond rendered in 3D"
+                  priority
                   width={1280}
                   height={1280}
+                  quality={90}
                   className="w-full h-auto object-contain"
                 />
               </div>
