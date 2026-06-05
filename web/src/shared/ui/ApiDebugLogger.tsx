@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { getHomepageShell } from "@/services/homepage/homepageShell.service";
 import { getHomepageShoppingBlocks } from "@/services/homepage/homepageShoppingBlocks.service";
 import { getHomepageEditorialBlocks } from "@/services/homepage/homepageEditorialBlocks.service";
+import { getHomepageOccasions } from "@/services/homepage/homepageOccasions.service";
 
 const ApiDebugLogger = () => {
   useEffect(() => {
@@ -15,15 +16,18 @@ const ApiDebugLogger = () => {
             homePageShell,
             homepageShoppingBlocks,
             homepageEditorialBlocks,
+            homepageOccasions,
           ] = await Promise.all([
             getHomepageShell(),
             getHomepageEditorialBlocks(),
             getHomepageShoppingBlocks(),
+            getHomepageOccasions(),
           ]);
 
           console.log("homepageShell:", homePageShell);
           console.log("homepageShoppingBlocks:", homepageShoppingBlocks);
           console.log("homepageEditorialBlocks:", homepageEditorialBlocks);
+          console.log("homepageOccasions:", homepageOccasions);
           console.groupEnd();
         }
       } catch (error) {
