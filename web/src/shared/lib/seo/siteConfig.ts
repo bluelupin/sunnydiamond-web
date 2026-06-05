@@ -11,6 +11,9 @@ const ENV =
   (process.env.NEXT_PUBLIC_APP_ENV as AppEnv) ||
   (process.env.NODE_ENV === "development" ? "local" : "production");
 
+const envSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+const effectiveBaseUrl = envSiteUrl ? envSiteUrl.replace(/\/$/, "") : undefined;
+
 const configs: Record<AppEnv, SiteEnvConfig> = {
   local: {
     env: "local",
@@ -20,19 +23,24 @@ const configs: Record<AppEnv, SiteEnvConfig> = {
   },
   qa: {
     env: "qa",
-    baseUrl: "https://qa.sunnydiamonds.com",
+    baseUrl: "https://sunnydiamonds-web-dev.on-forge.com/",
     indexing: true,
     label: "QA",
   },
   production: {
     env: "production",
-    baseUrl: "https://sunnydiamonds.com",
+    baseUrl:
+      process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+      "https://sunnydiamonds.com",
     indexing: true,
     label: "Production",
   },
 };
 
-export const siteEnv = configs[ENV] ?? configs.production;
+export const siteEnv: SiteEnvConfig = {
+  ...(configs[ENV] ?? configs.production),
+  baseUrl: effectiveBaseUrl ?? configs[ENV]?.baseUrl ?? configs.production.baseUrl,
+};
 
 export const getAbsoluteUrl = (path = "/") => {
   try {

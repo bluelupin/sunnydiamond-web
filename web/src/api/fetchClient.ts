@@ -3,9 +3,9 @@ import { buildQueryString } from "./queryBuilder";
 
 const API_BASE_URL: string =
   process.env.NEXT_PUBLIC_API_URL ??
-  process.env.NEXT_PUBLIC_STRAPI_URL ??
+  process.env.NEXT_PUBLIC_SITE_URL ??
   (() => {
-    throw new Error("Missing NEXT_PUBLIC_API_URL or NEXT_PUBLIC_STRAPI_URL");
+    throw new Error("Missing NEXT_PUBLIC_API_URL or NEXT_PUBLIC_SITE_URL");
   })();
 
 const API_DEBUG = process.env.NEXT_PUBLIC_API_DEBUG === "true";
