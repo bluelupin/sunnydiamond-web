@@ -119,7 +119,7 @@ const ForYouForever = ({ id }: ForYouForeverProps) => {
                 }
                 className="group block"
               >
-                <div className="aspect-square md:aspect-auto h-[357px] md:h-auto lg:h-[620px] overflow-hidden">
+                <div className="aspect-square md:aspect-auto h-[357px] md:h-auto lg:h-[620px] overflow-hidden w-full">
                   {card.desktopImageUrl ? (
                     <ResponsiveImage
                       desktopSrc={card.desktopImageUrl}
