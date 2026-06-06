@@ -6,6 +6,7 @@ import { useFadeIn } from "@/shared/hooks/use-fade-in";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import fallBackImage from "@/assets/fallBackImage.png";
 import type { CategoryNavigationImage, CategoryNavigationItem } from "@/types/homepage/categoryNavigation";
 
 interface CraftingRaritySectionProps {
@@ -116,42 +117,40 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
                   href={categoryLink}
                   className="group relative bg-gray300 flex flex-col flex-shrink-0 w-240 md:w-auto h-60 lg:h-260 xl:h-420 snap-start overflow-hidden"
                 >
-                  <div className="relative flex-1 flex items-center justify-center overflow-hidden p-6 md:p-10 transition-opacity duration-500 group-hover:opacity-0">
+                  <div className="lg:aspect-[350/360] aspect-[260/230] h-500 relative top-[70px] flex items-center justify-center overflow-hidden transition-opacity duration-500 group-hover:opacity-0">
                     {(desktopImageUrl || mobileImageUrl) && (
                       <ResponsiveImage
-                        desktopSrc={desktopImageUrl || ""}
-                        mobileSrc={mobileImageUrl}
+                        desktopSrc={desktopImageUrl || fallBackImage}
+                        mobileSrc={mobileImageUrl || fallBackImage}
                         alt={imageAlt}
                         priority
-                        width={280}
-                        height={280}
+                        width={desktopImageUrl ? 350 : 260}
+                        height={desktopImageUrl ? 360 : 230}
                         className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
                       />)}
                   </div>
                   {(hoverDesktopImageUrl || hoverMobileImageUrl) && (
                     <ResponsiveImage
-                      desktopSrc={hoverDesktopImageUrl || ""}
-                      mobileSrc={hoverMobileImageUrl}
+                      desktopSrc={hoverDesktopImageUrl || fallBackImage}
+                      mobileSrc={hoverMobileImageUrl || fallBackImage}
                       alt={hoverAlt}
                       priority
-                      width={360}
-                      height={420}
+                      width={desktopImageUrl ? 360 : 240}
+                      height={desktopImageUrl ? 420 : 260}
                       className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-out"
                     />
                   )}
-
-                  <div
-                    aria-hidden="true"
+                  <div aria-hidden="true"
                     className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0A0A0A] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
                   />
-                  {!(desktopImageUrl || mobileImageUrl) && (
+                  {/* {!(desktopImageUrl || mobileImageUrl) && (
                     <div className="relative flex-1 flex items-center justify-center overflow-hidden p-6 md:p-10 transition-opacity duration-500 group-hover:opacity-0">
 
                       <span className="text-center text-base lg:text-xl tracking-[1.8%] uppercase text-darkblack font-normal opacity-60 group-hover:opacity-100 group-hover:text-white transition-colors duration-500">
                         {title}
                       </span>
                     </div>
-                  )}
+                  )} */}
                   <div className="relative pb-6 md:pb-8 text-center z-10">
                     <span className="font-gill text-base lg:text-xl tracking-[1.8%] uppercase text-darkblack font-normal opacity-60 group-hover:opacity-100 group-hover:text-white transition-colors duration-500">
                       {title}

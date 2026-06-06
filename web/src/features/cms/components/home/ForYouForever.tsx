@@ -5,6 +5,7 @@ import { useMemo } from "react";
 
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { useFadeIn } from "@/shared/hooks/use-fade-in";
+import fallBackImage from "@/assets/fallBackImage.png";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import {
   resolveCmsAltText,
@@ -102,59 +103,41 @@ const ForYouForever = ({ id }: ForYouForeverProps) => {
           For you, Forever
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 md:gap-0 gap-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 sm:gap-0 gap-12">
           {cards.map((card: any, idx: any) => (
             <figure
               key={card.id}
               ref={cardRefs[idx] as React.RefObject<HTMLElement>}
               className="flex flex-col"
             >
-              <Link
+              <Link className="group block"
                 href={card?.cta?.url || "#"}
                 target={card?.cta?.openInNewTab ? "_blank" : undefined}
                 rel={
                   card?.cta?.openInNewTab
                     ? "noopener noreferrer"
                     : undefined
-                }
-                className="group block"
-              >
-                <div className="aspect-square md:aspect-auto h-[357px] md:h-auto lg:h-[620px] overflow-hidden w-full">
-                  {card.desktopImageUrl ? (
-                    <ResponsiveImage
-                      desktopSrc={card.desktopImageUrl}
-                      mobileSrc={card.mobileImageUrl}
-                      alt={card.imageAlt}
-                      width={1280}
-                      height={1280}
-                      quality={90}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gray300 flex items-center justify-center">
-                      <span className="text-sm text-gray500">
-                        No Image Available
-                      </span>
-                    </div>
-                  )}
+                }>
+                <div className="lg:aspect-[720/620] aspect-[360/360] h-auto lg:h-620 overflow-hidden w-full">
+                  <ResponsiveImage
+                    desktopSrc={card.desktopImageUrl || fallBackImage}
+                    mobileSrc={card.mobileImageUrl || fallBackImage}
+                    alt={card.imageAlt}
+                    width={card.desktopImageUrl ? 720 : 360}
+                    height={card.desktopImageUrl ? 620 : 360}
+                    quality={90}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
                 </div>
 
                 <figcaption className="mt-4 text-center md:px-4 px-2">
-                  <h3 className="mb-2 text-base md:text-lg lg:text-xl tracking-[1.8%] font-normal leading-[150%] text-black font-gill">
+                  <h3 className="mb-2 text-base md:text-lg lg:text-xl tracking-[1.8%] font-normal leading-[150%] text-black group-hover:underline transition-all duration-500 font-gill">
                     {card.title}
                   </h3>
 
                   <p className="text-base md:text-lg lg:text-xl text-darkblack leading-[100%] tracking-[1%] font-light font-gill">
                     {card.description}
                   </p>
-
-                  {/* {card?.cta?.label && (
-                  <div className="mt-4">
-                    <span className="text-sm uppercase tracking-[1.5px] border-b border-current pb-1">
-                      {card.cta.label}
-                    </span>
-                  </div>
-                )} */}
                 </figcaption>
               </Link>
             </figure>

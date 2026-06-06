@@ -5,8 +5,10 @@ import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { useStepScroll } from "@/shared/hooks/use-step-scroll";
 import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
-import diamondImgUrl from "@/assets/craftsmanship-diamond-3d.png"
+import fallBackImage from "@/assets/fallBackImage.png";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
+import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { useMemo } from "react";
 interface CraftsmanshipProcessProps {
   id?: string;
 }
@@ -14,23 +16,30 @@ interface CraftsmanshipProcessProps {
 const stepIcons: LucideIcon[] = [PencilLine, Gem, Hammer, PackageCheck];
 
 const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
-  // const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
-  // const craftsmanshipSection = editorialData?.homepage?.craftsmanshipSection || editorialData?.craftsmanshipSection;
-  // const sectionTitle = craftsmanshipSection?.sectionTitle?.trim();
-  // const title = craftsmanshipSection?.title?.trim();
-  // const isActive = craftsmanshipSection?.isActive === true;
-  // // const diamondUrl = getCmsAssetUrl(craftsmanshipSection?.diamondImage?.data?.attributes?.url);
-
-  // const steps = Array.isArray(craftsmanshipSection)
-  //   ? [...craftsmanshipSection]
-  //     .filter((s) => s?.isActive !== false)
-  //     .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
-  //   : [];
   const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
   const craftsmanshipSection =
     editorialData?.craftsmanshipSection ||
     editorialData?.homepage?.craftsmanshipSection;
   const sectionTitle = craftsmanshipSection?.sectionTitle?.trim() ?? "";
+  const desktopImageUrl = useMemo(
+    () => resolveCmsMediaUrl(craftsmanshipSection?.image?.desktopImage ?? craftsmanshipSection?.image?.data?.attributes ?? craftsmanshipSection?.image),
+    [craftsmanshipSection]
+  );
+
+  const mobileImageUrl = useMemo(
+    () => resolveCmsMediaUrl(craftsmanshipSection?.image?.mobileImage ?? craftsmanshipSection?.image?.data?.attributes ?? craftsmanshipSection?.image),
+    [craftsmanshipSection]
+  );
+
+  const craftsmanshipSectionAlt = useMemo(
+    () =>
+      craftsmanshipSection?.image?.altText ||
+      resolveCmsAltText(craftsmanshipSection?.image?.desktopImage ?? craftsmanshipSection?.image?.data?.attributes ?? craftsmanshipSection?.image) ||
+      resolveCmsAltText(craftsmanshipSection?.image?.mobileImage ?? craftsmanshipSection?.image?.data?.attributes ?? craftsmanshipSection?.image) ||
+      craftsmanshipSection?.title ||
+      "",
+    [craftsmanshipSection]
+  );
   const isActive = craftsmanshipSection?.isActive === true;
   const steps = Array.isArray(craftsmanshipSection?.steps)
     ? [...craftsmanshipSection.steps]
@@ -143,13 +152,12 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
                 })}
               </ol>
             </div>
-
             {/* Right column: 3D scroll-driven diamond */}
             <div
               className="lg:col-span-7 relative h-auto flex items-center justify-center"
               style={{ perspective: "1200px", perspectiveOrigin: "center center" }}
             >
-              <div className="w-[80%] h-auto will-change-transform"
+              <div className="w-[80%] lg:aspect-[750/470] aspect-[390/350] h-auto will-change-transform"
                 style={{
                   transformStyle: "preserve-3d",
                   transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`,
@@ -158,13 +166,14 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
                 }}
               >
                 <ResponsiveImage
-                  desktopSrc={diamondImgUrl || ""}
-                  alt="Brilliant cut diamond rendered in 3D"
+                  desktopSrc={desktopImageUrl || fallBackImage}
+                  mobileSrc={mobileImageUrl || fallBackImage}
+                  alt={craftsmanshipSectionAlt}
                   priority
-                  width={1280}
-                  height={1280}
+                  width={desktopImageUrl ? 750 : 390}
+                  height={desktopImageUrl ? 470 : 350}
                   quality={90}
-                  className="w-full h-auto object-contain"
+                  className="w-full h-h-full object-cover"
                 />
               </div>
             </div>

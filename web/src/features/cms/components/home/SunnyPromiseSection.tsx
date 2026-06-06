@@ -4,17 +4,13 @@ import Link from "next/link";
 import { useFadeIn } from "@/shared/hooks/use-fade-in";
 import { getImageSrc } from "@/shared/utils/image";
 import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
+import fallBackImage from "@/assets/fallBackImage.png";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 
 interface SunnyPromiseSectionProps {
   id?: string;
 }
 
-/**
- * Background video assets live in /public/videos/.
- * Drop optimised files at the paths below — webm preferred, mp4 fallback.
- * The poster image keeps LCP fast while the video lazy-loads.
- */
 const PROMISE_VIDEO_MP4 = "/videos/promise-bg.mp4";
 
 const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {

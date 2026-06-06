@@ -149,7 +149,7 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
         aria-label="Featured diamond carousel"
         aria-busy="true"
       >
-        <div className="text-center md:max-w-2xl sm:max-w-xl max-w-[350px] mx-auto md:mb-10 sm:mb-8 mb-6 px-5">
+        <div className="text-center md:max-w-2xl sm:max-w-xl max-w-full mx-auto md:mb-10 sm:mb-8 mb-6 px-5">
           <div className="md:mb-5 mb-3 h-10 w-72 bg-gray300 rounded mx-auto" aria-hidden />
           <div className="h-5 w-80 bg-gray300 rounded mx-auto" aria-hidden />
         </div>
@@ -180,8 +180,8 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
       aria-label="Featured diamond carousel"
     >
       {/* Heading */}
-      <div className="text-center md:max-w-2xl sm:max-w-xl max-w-[350px] mx-auto md:mb-10 sm:mb-8 mb-6 px-5">
-        <h2 className="md:mb-5 mb-3 text-foreground lg:text-5xl md:text-4xl text-[32px] font-larken font-light tracking-[0%] leading-[100%] text-darkblack text-center whitespace-nowrap">
+      <div className="text-center md:max-w-2xl sm:max-w-xl max-w-full sm:mx-auto md:mb-10 sm:mb-8 mb-6 px-5">
+        <h2 className="md:mb-5 mb-3 text-foreground lg:text-5xl md:text-4xl text-[32px] font-larken font-light tracking-[0%] leading-[100%] text-darkblack text-center">
           {sectionTitle || "Your Diamond Awaits (F)"}
         </h2>
 

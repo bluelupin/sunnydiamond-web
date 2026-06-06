@@ -8,7 +8,7 @@ import Link from "next/link";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import ShowroomSectionSkeleton from "@/features/cms/components/SkeletonLoader/ShowroomSectionSkeleton";
 
-import fallBackImage from "@/assets/showroom-calicut.jpg";
+import fallBackImage from "@/assets/fallBackImage.png";
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 
 interface ShowroomsSectionProps {
@@ -39,14 +39,6 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
   const activeLocation =
     locations.find((location) => location.id === activeId) ??
     locations[0];
-
-  // const activeImage =
-  //   activeLocation?.slug &&
-  //     activeLocation.slug in showroomImages
-  //     ? showroomImages[
-  //     activeLocation.slug as keyof typeof showroomImages
-  //     ]
-  //     : showroomCalicut;
   const desktopImage = activeLocation?.image?.desktopImage
     ? resolveCmsMediaUrl(activeLocation.image.desktopImage)
     : fallBackImage;
@@ -146,16 +138,16 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
         </div>
 
         {/* Right Side Image */}
-        <div className="relative aspect-auto lg:aspect-auto lg:h-595 h-478 overflow-hidden lg:px-0 px-5">
+        <div className="relative lg:aspect-[850/600] aspect-[350/480] lg:h-595 h-478 w-full overflow-hidden lg:px-0 px-5">
           {activeLocation && (
             <ResponsiveImage
               key={activeLocation.id}
               desktopSrc={desktopImage || fallBackImage}
-              mobileSrc={mobileImage}
+              mobileSrc={mobileImage || fallBackImage}
               alt={imageAlt}
               priority
-              width={850}
-              height={600}
+              width={desktopImage ? 850 : 350}
+              height={desktopImage ? 600 : 480}
               quality={90}
               className="w-full h-full object-cover animate-in fade-in zoom-in-105 duration-700 ease-out"
             />

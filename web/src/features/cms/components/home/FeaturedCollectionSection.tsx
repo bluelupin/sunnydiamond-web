@@ -10,6 +10,7 @@ import { useParallax } from "@/shared/hooks/use-parallax";
 import RightArrow from "@/assets/Icons/RightArrow";
 import LeftArrow from "@/assets/Icons/LeftArrow";
 import GiftIcon from "@/assets/Icons/GiftIcon";
+import fallBackImage from "@/assets/fallBackImage.png";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 const formatPrice = (price: number) =>
@@ -211,10 +212,10 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
     >
       <div className="grid grid-cols-1 md:grid-cols-2 p-4 md:p-0">
         {/* TL: Alankara Collection */}
-        <div className="relative lg:h-700 md:h-550 h-auto overflow-hidden group">
+        <div className="relative lg:aspect-[720/700] aspect-[360/320] lg:h-700 md:h-550 h-auto w-full overflow-hidden group">
           <ResponsiveImage
-            desktopSrc={collectionDesktopBgUrl || ""}
-            mobileSrc={collectionMobileBgUrl || ""}
+            desktopSrc={collectionDesktopBgUrl || fallBackImage}
+            mobileSrc={collectionMobileBgUrl || fallBackImage}
             alt={bgAlt}
             priority
             width={collectionDesktopBgUrl ? 720 : 360}
@@ -338,9 +339,9 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
         </div> */}
 
         {/* BL: Gifting */}
-        <div className="md:bg-giftingBg md:bg-white bg-right w-full bg-[length:100%] bg-gray100 bg-no-repeat flex flex-col items-center justify-center text-center py-16 sm:py-14 md:py-20 md:min-h-560 md:h-auto h-auto order-4 md:order-3">
+        <div className="md:bg-giftingBg md:bg-white bg-right w-full bg-[length:100%] bg-gray100 bg-no-repeat flex flex-col items-center justify-center text-center px-4 py-16 sm:py-14 md:py-20 md:min-h-560 md:h-auto h-auto order-4 md:order-3">
           <GiftIcon className="text-creamColor w-24 md:flex hidden" />
-          <h2 className="md:mt-12 md:mb-10 mb-6 lg:text-5xl md:text-4xl text-32 text-darkblack font-light font-gill tracking-[0%] leading-[100%] md:max-w-394 max-w-196 px-5">
+          <h2 className="md:mt-12 md:mb-10 mb-6 lg:text-5xl md:text-4xl text-32 text-darkblack font-light font-gill tracking-[0%] leading-[100%] sm:max-w-394 max-w-full px-5">
             {title}
           </h2>
           <Link
@@ -361,14 +362,14 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
         </div>
 
         {/* BR: Couple holding hands */}
-        <div className="relative lg:h-700 md:h-auto h-80 overflow-hidden order-3 md:order-4 md:mt-0 mt-4">
+        <div className="relative lg:aspect-[720/700] aspect-[360/320] lg:h-700 md:h-550 h-auto w-full overflow-hidden order-3 md:order-4 md:mt-0 mt-4">
           <ResponsiveImage
-            desktopSrc={giftDesktopUrl || ""}
-            mobileSrc={giftMobileUrl}
+            desktopSrc={giftDesktopUrl || fallBackImage}
+            mobileSrc={giftMobileUrl || fallBackImage}
             alt={giftImageAlt}
             priority
-            width={1024}
-            height={1024}
+            width={collectionDesktopBgUrl ? 720 : 360}
+            height={collectionDesktopBgUrl ? 700 : 320}
             quality={giftDesktopUrl ? 90 : 85}
             className="w-full h-full object-cover"
           />

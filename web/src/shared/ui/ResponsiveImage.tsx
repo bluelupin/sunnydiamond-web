@@ -40,7 +40,7 @@ const ResponsiveImage = ({
         : desktopImage;
 
     return (
-        <picture>
+        <picture className="block w-full h-full">
             {/* Mobile Image */}
             {mobileImage && (
                 <source

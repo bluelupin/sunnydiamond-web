@@ -4,7 +4,7 @@ import { useFadeIn } from "@/shared/hooks/use-fade-in";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import Link from "next/link";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
-import {resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 
 interface OccasionsTeaserSectionProps {
   id?: string;
@@ -57,15 +57,15 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
               <Link
                 key={card.id}
                 href={`/products?occasion=${card.slug}`}
-                className="group relative overflow-hidden flex-shrink-0 w-[78%] snap-start md:w-auto h-auto transition-shadow duration-500 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="group relative overflow-hidden flex-shrink-0 w-[78%] lg:aspect-[460/620] aspect-[260/350] snap-start md:w-auto h-auto transition-shadow duration-500 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
                 <ResponsiveImage
                   desktopSrc={desktopImageUrl || ""}
                   mobileSrc={mobileImageUrl}
                   alt={card.title}
                   priority
-                  width={800}
-                  height={1024}
+                  width={desktopImageUrl ? 460 : 260}
+                  height={desktopImageUrl ? 620 : 350}
                   quality={90}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
