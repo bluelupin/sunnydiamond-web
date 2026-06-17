@@ -1,29 +1,23 @@
 import Layout from "@/shared/ui/layout/Layout";
-import SectionHeader from "@/shared/ui/SectionHeader";
-import StatGrid from "@/shared/ui/StatGrid";
-import { aboutContent } from "@/features/cms/data/content";
+import AboutHeroSection from "@/features/cms/components/about/AboutHeroSection";
+import AboutHistorySection from "@/features/cms/components/about/AboutHistorySection";
+import AboutLeadershipSection from "@/features/cms/components/about/AboutLeadershipSection";
+import AboutCraftsmanshipSection from "@/features/cms/components/about/AboutCraftsmanshipSection";
+import AboutStoreSection from "@/features/cms/components/about/AboutStoreSection";
+import AboutTrustSection from "@/features/cms/components/about/AboutTrustSection";
+import AboutTaglineSection from "@/features/cms/components/about/AboutTaglineSection";
+import { aboutPageContent } from "@/features/cms/data/aboutContent";
 
 const AboutPage = () => {
   return (
     <Layout>
-      <article className="container py-10 md:py-16 max-w-3xl mx-auto">
-        <SectionHeader
-          subtitle={aboutContent.header.subtitle}
-          title={aboutContent.header.title}
-          as="h1"
-          className="mb-12"
-        />
-
-        <div className="space-y-6 font-body text-sm leading-relaxed text-muted-foreground">
-          {aboutContent.paragraphs.map((paragraph, i) => (
-            <p key={i}>{paragraph}</p>
-          ))}
-
-          <StatGrid items={aboutContent.stats} />
-
-          <p>{aboutContent.closingParagraph}</p>
-        </div>
-      </article>
+      <AboutHeroSection id="hero" content={aboutPageContent.hero} />
+      <AboutHistorySection id="history" content={aboutPageContent.history} />
+      <AboutLeadershipSection id="leadership" content={aboutPageContent.leadership} />
+      <AboutCraftsmanshipSection id="craftsmanship" content={aboutPageContent.craftsmanship} />
+      <AboutStoreSection id="store" content={aboutPageContent.store} />
+      <AboutTrustSection id="trust" badges={aboutPageContent.trustBadges} />
+      <AboutTaglineSection id="tagline" content={aboutPageContent.tagline} />
     </Layout>
   );
 };

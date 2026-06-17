@@ -9,14 +9,16 @@ import { siteConfig } from "@/shared/lib/siteConfig";
 import { cn } from "@/shared/utils/cn";
 import SDLogo from "@/assets/Icons/SDLogo";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
+import { isHeroOverlayRoute } from "@/shared/lib/heroOverlayRoutes";
+
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { totalItems } = useCart();
   const pathname = usePathname() ?? "/";
 
-  const isHome = pathname === "/";
-  const overlay = isHome && !scrolled && !mobileMenuOpen;
+  const hasHeroOverlay = isHeroOverlayRoute(pathname);
+  const overlay = hasHeroOverlay && !scrolled && !mobileMenuOpen;
 
   const { data: shellData, isLoading: isShellLoading } = useHomepageShell();
   const headerNavigationLinks = shellData?.global?.headerNavigationLinks || shellData?.headerNavigationLinks;
