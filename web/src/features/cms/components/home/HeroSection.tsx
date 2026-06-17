@@ -83,9 +83,9 @@ const HeroSection = ({ id }: HeroSectionProps) => {
           </video>
           <div className="absolute inset-0 bg-gradient-to-r from-charcoal/55 via-charcoal/15 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-charcoal/40 to-transparent md:hidden" />
-          <div className="container relative h-full flex items-end pb-12 md:pb-20 lg:pb-24">
-            <div className="md:max-w-[742px] animate-fade-in">
-              <div className="mb-6 inline-flex items-center gap-2 text-white font-gill font-normal lg:text-xl md:text-lg text-base tracking-[1.8%] uppercase">
+          <div className="container relative h-full flex items-end justify-center pb-12 md:pb-20 lg:pb-24">
+            <div className="md:max-w-[742px] animate-fade-in flex flex-col items-center text-center w-full">
+              <div className="mb-6 flex items-center justify-center gap-2 text-white font-gill font-normal lg:text-xl md:text-lg text-base tracking-[1.8%] uppercase">
                 <DiamondIcon className="text-white" />
                 <span className="tracking-[1.8%]">
                   {isShellLoading ? (
@@ -99,7 +99,7 @@ const HeroSection = ({ id }: HeroSectionProps) => {
               <h1 className="mb-40 lg:text-[54px] md:text-[42px] text-[32px] text-white">
                 {isShellLoading ? (
                   <span
-                    className="block h-12 w-[min(680px,90vw)] bg-white/20 rounded animate-pulse"
+                    className="block h-12 w-[min(680px,90vw)] bg-white/20 rounded animate-pulse mx-auto"
                     aria-hidden
                   />
                 ) : (title)}
@@ -115,7 +115,7 @@ const HeroSection = ({ id }: HeroSectionProps) => {
                   </span>
                 </Link>
               ) : (
-                <div className="h-12 w-40 bg-white/20 rounded animate-pulse" />
+                <div className="h-12 w-40 bg-white/20 rounded animate-pulse mx-auto" />
               )}
             </div>
           </div>
