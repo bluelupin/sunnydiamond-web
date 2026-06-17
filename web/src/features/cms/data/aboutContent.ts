@@ -38,7 +38,7 @@ export const aboutPageContent: AboutPageContent = {
     members: [
       {
         id: "leader-1",
-        name: "Managing Director",
+        name: "Suresh Kumar",
         role: "Managing Director",
         image: {
           desktopSrc: ph("sunny-leader-1", 600, 800),
@@ -47,7 +47,7 @@ export const aboutPageContent: AboutPageContent = {
       },
       {
         id: "leader-2",
-        name: "Creative Director",
+        name: "Arjun Nair",
         role: "Creative Director",
         image: {
           desktopSrc: ph("sunny-leader-2", 600, 800),
@@ -56,7 +56,7 @@ export const aboutPageContent: AboutPageContent = {
       },
       {
         id: "leader-3",
-        name: "Operations Director",
+        name: "Vivek Pillai",
         role: "Operations Director",
         image: {
           desktopSrc: ph("sunny-leader-3", 600, 800),
