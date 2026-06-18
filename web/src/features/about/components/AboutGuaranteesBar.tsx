@@ -51,7 +51,7 @@ const AboutGuaranteeItem = ({ label, icon }: GuaranteeItemProps) => {
   const iconDimensions = guaranteeIconDimensions[icon];
 
   return (
-    <li className="flex h-136 w-full max-w-260 list-none flex-col items-center justify-center gap-3 rounded-figma p-3 text-center desktop:w-260 desktop:shrink-0">
+    <li className="flex lg:h-136 h-98 w-full max-w-260 list-none flex-col items-center justify-center gap-3 rounded-figma text-center desktop:w-260 desktop:shrink-0">
       <Image
         src={iconSrc}
         alt=""
@@ -70,7 +70,7 @@ const AboutGuaranteeItem = ({ label, icon }: GuaranteeItemProps) => {
 const AboutGuaranteesBar = () => {
   return (
     <section aria-label="Shopping guarantees" className="bg-gray200">
-      <PageContainer className="py-10 md:py-12 desktop:py-16">
+      <PageContainer className="py-16">
         <ul className="m-0 flex w-full list-none flex-col items-center p-0 lg:hidden">
           {aboutGuarantees.map((guarantee, index) => (
             <Fragment key={guarantee.label}>
@@ -81,7 +81,7 @@ const AboutGuaranteesBar = () => {
         </ul>
 
         <div className="scrollbar-none -mx-5 hidden overflow-x-auto px-5 md:-mx-8 md:px-8 lg:-mx-10 lg:block lg:px-10 desktop:mx-0 desktop:overflow-visible desktop:px-0">
-          <ul className="m-0 flex w-1360 shrink-0 list-none items-stretch p-0 desktop:w-full desktop:shrink">
+          <ul className="m-0 flex lg:gap-2 gap-6 w-1360 shrink-0 list-none items-stretch p-0 desktop:w-full desktop:shrink">
             {aboutGuarantees.map((guarantee, index) => (
               <Fragment key={guarantee.label}>
                 {index > 0 ? <AboutGuaranteeDivider orientation="vertical" /> : null}
