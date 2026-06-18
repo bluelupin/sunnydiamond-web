@@ -1,5 +1,12 @@
+import type { CSSProperties } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
+import { cn } from "@/shared/utils/cn";
 import { aboutFacesContent } from "../data/content";
+
+const hideScrollbarStyle = {
+  scrollbarWidth: "none",
+  msOverflowStyle: "none",
+} as CSSProperties;
 
 const AboutFacesSection = () => {
   return (
@@ -19,28 +26,48 @@ const AboutFacesSection = () => {
             {aboutFacesContent.description}
           </p>
         </div>
+      </div>
 
-        <div className="mt-10 lg:mt-10 w-full overflow-x-auto">
-          <div className="flex gap-1 min-w-max lg:min-w-0 lg:grid lg:grid-cols-3 lg:gap-1 mx-auto max-w-[1440px]">
-            {aboutFacesContent.members.map((member, index) => (
-              <figure
-                key={member.image}
-                className="relative w-[280px] sm:w-[360px] lg:w-full h-[360px] sm:h-[480px] lg:h-[600px] shrink-0 overflow-hidden"
-              >
-                <ResponsiveImage
-                  desktopSrc={member.image}
-                  alt={member.alt}
-                  width={member.width}
-                  height={member.height}
-                  quality={90}
-                  sizes="(max-width: 1024px) 360px, 478px"
-                  className="object-cover"
-                  priority={index === 0}
-                />
-              </figure>
-            ))}
-          </div>
-        </div>
+      <div
+        className="mt-10 flex w-full gap-1 overflow-x-auto snap-x snap-mandatory pl-4 lg:h-[600px] lg:overflow-visible lg:pl-0 [&::-webkit-scrollbar]:hidden"
+        style={hideScrollbarStyle}
+      >
+        {aboutFacesContent.members.map((member, index) => (
+          <figure
+            key={member.image}
+            className={cn(
+              "group relative shrink-0 snap-start overflow-hidden",
+              "h-[560px] w-[calc(100vw-24px)]",
+              "lg:h-full lg:w-auto lg:basis-0 lg:flex-1",
+              "transition-[flex-grow] duration-500 ease-in-out lg:hover:grow-[2.4]",
+            )}
+          >
+            <ResponsiveImage
+              desktopSrc={member.image}
+              alt={member.alt}
+              width={member.width}
+              height={member.height}
+              quality={90}
+              sizes="(max-width: 1023px) calc(100vw - 24px), 33vw"
+              className="h-full w-full object-cover transition-transform duration-700 lg:group-hover:scale-[1.03]"
+              priority={index === 0}
+            />
+
+            <div
+              aria-hidden
+              className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/70 via-black/25 to-transparent opacity-0 transition-opacity duration-500 lg:group-hover:opacity-100"
+            />
+
+            <figcaption className="absolute bottom-0 left-0 p-5 md:p-6 lg:p-8 text-left opacity-0 translate-y-2 transition-all duration-500 lg:group-hover:opacity-100 lg:group-hover:translate-y-0">
+              <p className="font-larken font-light text-xl md:text-2xl text-white leading-[110%]">
+                {member.name}
+              </p>
+              <p className="mt-1 font-gill font-light text-xs md:text-sm text-white/80 tracking-[0.12em] uppercase leading-[130%]">
+                {member.role}
+              </p>
+            </figcaption>
+          </figure>
+        ))}
       </div>
     </section>
   );

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Layout from "@/shared/ui/layout/Layout";
 import CartItem from "@/features/cart/components/CartItem";
 import OrderSummary from "@/shared/ui/OrderSummary";
 import { PrimaryLink } from "@/shared/ui/PrimaryButton";
@@ -13,22 +12,19 @@ const CartPage = () => {
 
   if (items.length === 0) {
     return (
-      <Layout>
-        <div className="container py-20 text-center space-y-4">
-          <ShoppingBag size={48} className="mx-auto text-muted-foreground" />
-          <h1 className="font-heading text-2xl text-foreground">Your bag is empty</h1>
-          <p className="font-body text-sm text-muted-foreground">
-            Discover our exquisite diamond collection
-          </p>
-          <PrimaryLink href="/products" className="mt-4">Shop Now</PrimaryLink>
-        </div>
-      </Layout>
+      <div className="container py-20 text-center space-y-4">
+        <ShoppingBag size={48} className="mx-auto text-muted-foreground" />
+        <h1 className="font-heading text-2xl text-foreground">Your bag is empty</h1>
+        <p className="font-body text-sm text-muted-foreground">
+          Discover our exquisite diamond collection
+        </p>
+        <PrimaryLink href="/products" className="mt-4">Shop Now</PrimaryLink>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <section className="container py-10 md:py-16">
+    <section className="container py-10 md:py-16">
         <h1 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-8">
           Shopping Bag
         </h1>
@@ -55,8 +51,7 @@ const CartPage = () => {
             </Link>
           </OrderSummary>
         </div>
-      </section>
-    </Layout>
+    </section>
   );
 };
 

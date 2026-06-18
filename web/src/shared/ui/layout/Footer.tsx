@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useMemo } from "react";
 import { siteConfig } from "@/shared/lib/siteConfig";
 import SDTextLogo from "@/assets/Icons/SDTextLogo";
 import { paymentLogoMap } from "@/shared/ui/PaymentLogos";
@@ -8,6 +11,7 @@ import FacebookIcon from "@/assets/Icons/FacebookIcon";
 import XIcon from "@/assets/Icons/XIcon";
 import LinkedInIcon from "@/assets/Icons/LinkedInIcon";
 import TrustBadgeSection from "@/features/cms/components/common/TrustBadges";
+import { resolveShellFooterLinkGroups } from "@/shared/lib/shellNavigation";
 
 export const SOCIAL_ICON_MAP = {
   instagram: InstagramIcon,
@@ -18,9 +22,16 @@ export const SOCIAL_ICON_MAP = {
 };
 
 const Footer = () => {
-  const { data: shellData, isLoading: isShellLoading } = useHomepageShell();
-  const footerLinkGroups = shellData?.global?.footerLinkGroups || shellData?.footerLinkGroups;
-  const footerCopyright = shellData?.global?.footerCopyright || shellData?.footerCopyright;
+  const { data: shellData } = useHomepageShell();
+  const cmsFooterLinkGroups = shellData?.global?.footerLinkGroups || shellData?.footerLinkGroups;
+  const footerLinkGroups = useMemo(
+    () => resolveShellFooterLinkGroups(cmsFooterLinkGroups),
+    [cmsFooterLinkGroups],
+  );
+  const footerCopyright =
+    shellData?.global?.footerCopyright ||
+    shellData?.footerCopyright ||
+    `© ${new Date().getFullYear()} ${siteConfig.brand.displayName}. All Rights Reserved.`;
   const cmsSocialLinks = shellData?.global?.socialLinks || shellData?.socialLinks || [];
   const socialLinks = [...cmsSocialLinks]
     .filter((item) => item?.isActive !== false)
@@ -34,42 +45,37 @@ const Footer = () => {
 
   const { navigation } = siteConfig;
   const { paymentMethods } = navigation.footer;
+
   return (
     <footer className="bg-gray300">
-      {/* Top trust-signals marquee */}
       <TrustBadgeSection itemClassName="tracking-[0.25em] font-systemUi" />
-      {/* Main grid */}
       <div className="max-w-1440 xl:px-20 lg:px-16 md:px-14 sm:px-10 px-5 mx-auto lg:py-30 md:py-24 sm:py-20 py-16 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:gap-x-10 lg:gap-x-8 md:gap-x-6 sm:gap-x-4 gap-x-3 xl:gap-y-16 lg:gap-y-14 md:gap-y-12 sm:gap-y-10 gap-y-9">
         <div className="col-span-2 md:col-span-3 lg:col-span-1 flex flex-col lg:items-start items-center">
           <Link href="/" aria-label="Sunny Diamonds" className="inline-flex flex-col items-center">
             <SDTextLogo className="sm:text-darkMagenta text-darkblack" />
           </Link>
         </div>
-        {footerLinkGroups ? (
-          footerLinkGroups.map((column: any) => (
-            <div key={column.id}>
-              <h3 className="md:text-lg sm:text-base text-sm font-medium font-satoshi uppercase text-blackdark md:mb-8 sm-6 mb-4">
-                {column.title}
-              </h3>
-              <ul className="sm:space-y-4 space-y-3">
-                {column.links.map((link: any, idx: any) => (
-                  <li key={link.id} className="max-w-[14rem]">
-                    <Link
-                      href={link.url}
-                      className="inline-block max-w-full break-words hyphens-auto text-sm leading-relaxed sm:leading-relaxed lg:leading-6 font-normal font-satoshi text-blackdark transition-all duration-500 transform hover:text-darkMagenta hover:underline underline-offset-4 hover:translate-x-2 focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkMagenta focus-visible:ring-offset-2 focus-visible:ring-offset-gray300 focus-visible:text-darkMagenta"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))) : (
-          <p className="text-center">API Not Responding!</p>
-        )}
+        {footerLinkGroups.map((column) => (
+          <div key={column.id}>
+            <h3 className="md:text-lg sm:text-base text-sm font-medium font-satoshi uppercase text-blackdark md:mb-8 sm:6 mb-4">
+              {column.title}
+            </h3>
+            <ul className="sm:space-y-4 space-y-3">
+              {column.links.map((link) => (
+                <li key={link.id} className="max-w-[14rem]">
+                  <Link
+                    href={link.url}
+                    className="inline-block max-w-full break-words hyphens-auto text-sm leading-relaxed sm:leading-relaxed lg:leading-6 font-normal font-satoshi text-blackdark transition-all duration-500 transform hover:text-darkMagenta hover:underline underline-offset-4 hover:translate-x-2 focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkMagenta focus-visible:ring-offset-2 focus-visible:ring-offset-gray300 focus-visible:text-darkMagenta"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
 
-      {/* Bottom bar: social, payment, copyright */}
       <div className="max-w-1440 xl:px-20 lg:px-16 md:px-14 sm:px-10 px-5 lg:pb-30 md:pb-24 sm:pb-20 pb-16 mx-auto flex items-center xl:justify-between justify-center md:gap-8 sm:gap-6 gap-6 flex-wrap">
         <div className="flex items-center md:gap-7 sm:gap-5 gap-4">
           {socialLinks.map((social) => {

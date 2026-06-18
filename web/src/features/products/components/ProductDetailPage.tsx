@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import Layout from "@/shared/ui/layout/Layout";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { PrimaryButton } from "@/shared/ui/PrimaryButton";
 import { getProductById } from "@/features/products/data/products";
@@ -19,14 +18,12 @@ const ProductDetailPage = () => {
 
   if (!product) {
     return (
-      <Layout>
-        <div className="container py-20 text-center">
-          <h1 className="font-heading text-2xl text-foreground">Product not found</h1>
-          <Link href="/products" className="text-primary underline mt-4 inline-block font-body text-sm">
-            Back to Collections
-          </Link>
-        </div>
-      </Layout>
+      <div className="container py-20 text-center">
+        <h1 className="font-heading text-2xl text-foreground">Product not found</h1>
+        <Link href="/products" className="text-primary underline mt-4 inline-block font-body text-sm">
+          Back to Collections
+        </Link>
+      </div>
     );
   }
 
@@ -36,8 +33,7 @@ const ProductDetailPage = () => {
   };
 
   return (
-    <Layout>
-      <article className="container py-6 md:py-12">
+    <article className="container py-6 md:py-12">
         <Link
           href="/products"
           className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground text-sm font-body mb-6 transition-colors"
@@ -114,8 +110,7 @@ const ProductDetailPage = () => {
             </PrimaryButton>
           </div>
         </div>
-      </article>
-    </Layout>
+    </article>
   );
 };
 

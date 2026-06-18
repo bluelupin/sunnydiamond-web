@@ -28,11 +28,8 @@ export function useCmsSection<T>(
 
   const initial = useMemo(() => {
     const entry = cache.get(key) as CacheEntry<T> | undefined;
-    if (!entry) return undefined;
-    const isFresh = Date.now() - entry.updatedAt < staleTimeMs;
-    if (isFresh && entry.value !== undefined) return entry.value;
-    return undefined;
-  }, [key, staleTimeMs]);
+    return entry?.value;
+  }, [key]);
 
   const [state, setState] = useState<CmsSectionState<T>>(() => ({
     data: initial,
@@ -52,26 +49,28 @@ export function useCmsSection<T>(
     const controller = new AbortController();
 
     const existing = cache.get(key) as CacheEntry<T> | undefined;
+    const staleValue = existing?.value;
     const isFresh = existing ? Date.now() - existing.updatedAt < staleTimeMs : false;
 
-    if (existing?.value !== undefined && isFresh) {
-      setState({ data: existing.value, isLoading: false, error: existing.error });
+    if (staleValue !== undefined && isFresh) {
+      setState({ data: staleValue, isLoading: false, error: undefined });
       return () => controller.abort();
     }
 
     const run = async () => {
       try {
-        setState((prev) => ({ ...prev, isLoading: prev.data === undefined, error: undefined }));
+        setState((prev) => ({
+          data: prev.data ?? staleValue,
+          isLoading: prev.data === undefined && staleValue === undefined,
+          error: undefined,
+        }));
 
-        const sharedPromise = existing?.promise;
-        const promise =
-          sharedPromise ??
-          fetcher(controller.signal);
+        const promise = fetcher(controller.signal);
 
         cache.set(key, {
-          value: existing?.value,
+          value: staleValue,
           promise,
-          error: existing?.error,
+          error: undefined,
           updatedAt: existing?.updatedAt ?? 0,
         });
 
@@ -89,26 +88,39 @@ export function useCmsSection<T>(
         }
       } catch (e) {
         if (controller.signal.aborted) return;
+
         const message = e instanceof Error ? e.message : "Failed to load section";
 
         cache.set(key, {
-          value: undefined,
+          value: staleValue,
           promise: undefined,
           error: message,
-          updatedAt: Date.now(),
+          updatedAt: existing?.updatedAt ?? 0,
         });
 
         if (mountedRef.current) {
-          setState({ data: undefined, isLoading: false, error: message });
+          setState({
+            data: staleValue,
+            isLoading: false,
+            error: staleValue === undefined ? message : undefined,
+          });
         }
       }
     };
 
     run();
 
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+      const entry = cache.get(key) as CacheEntry<T> | undefined;
+      if (entry?.promise) {
+        cache.set(key, {
+          ...entry,
+          promise: undefined,
+        });
+      }
+    };
   }, [key, staleTimeMs, fetcher]);
 
   return state;
 }
-

@@ -1,4 +1,3 @@
-import Layout from "@/shared/ui/layout/Layout";
 import HeroSection from "@/features/cms/components/home/HeroSection";
 import SectionNav from "@/features/cms/components/home/SectionNav";
 import CraftingRaritySection from "@/features/cms/components/home/CraftingRaritySection";
@@ -16,7 +15,7 @@ const showApiDebug = process.env.NEXT_PUBLIC_API_DEBUG === "true";
 
 const HomePage = () => {
   return (
-    <Layout>
+    <>
       <SectionNav />
       {showApiDebug ? <ApiDebugLogger /> : null}
       <HeroSection id="hero" />
@@ -29,7 +28,7 @@ const HomePage = () => {
       <SunnyPromiseSection id="promise" />
       <ForYouForever id="for-you" />
       <ShowroomsSection id="showrooms" />
-    </Layout>
+    </>
   );
 };
 

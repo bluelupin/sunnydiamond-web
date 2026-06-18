@@ -10,6 +10,9 @@ import { cn } from "@/shared/utils/cn";
 import SDLogo from "@/assets/Icons/SDLogo";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
 import { resolveHeaderNavHref, isHeroOverlayRoute } from "@/shared/utils/navigation";
+import { resolveShellHeaderLinks } from "@/shared/lib/shellNavigation";
+import { useMemo } from "react";
+
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -19,8 +22,11 @@ const Header = () => {
   const heroOverlayRoute = isHeroOverlayRoute(pathname);
   const overlay = heroOverlayRoute && !scrolled && !mobileMenuOpen;
 
-  const { data: shellData, isLoading: isShellLoading } = useHomepageShell();
-  const headerNavigationLinks = shellData?.global?.headerNavigationLinks || shellData?.headerNavigationLinks;
+  const { data: shellData } = useHomepageShell();
+  const headerNavigationLinks = useMemo(() => {
+    const cmsLinks = shellData?.global?.headerNavigationLinks || shellData?.headerNavigationLinks;
+    return resolveShellHeaderLinks(cmsLinks);
+  }, [shellData]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -71,7 +77,7 @@ const Header = () => {
 
           {/* Desktop nav inline next to logo */}
           <nav className="hidden md:flex items-center gap-7 md:gap-4 lg:gap-9" aria-label="Main navigation">
-            {headerNavigationLinks?.map((link: any) => (
+            {headerNavigationLinks.map((link) => (
               <Link
                 key={link.label}
                 href={resolveHeaderNavHref(link.label, link.url)}
@@ -134,7 +140,7 @@ const Header = () => {
           className="md:hidden border-t border-border bg-background px-6 py-6 space-y-4 animate-fade-in"
           aria-label="Mobile navigation"
         >
-          {headerNavigationLinks?.map((link: any) => (
+          {headerNavigationLinks.map((link) => (
             <Link
               key={link.label}
               href={resolveHeaderNavHref(link.label, link.url)}

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Layout from "@/shared/ui/layout/Layout";
 import OrderSummary from "@/shared/ui/OrderSummary";
 import { FormInput } from "@/shared/ui/FormInput";
 import { PrimaryButton, PrimaryLink } from "@/shared/ui/PrimaryButton";
@@ -42,29 +41,25 @@ const CheckoutPage = () => {
 
   if (items.length === 0 && !orderPlaced) {
     return (
-      <Layout>
-        <div className="container py-20 text-center">
-          <h1 className="font-heading text-2xl text-foreground">No items to checkout</h1>
-          <Link href="/products" className="text-primary underline mt-4 inline-block font-body text-sm">
-            Continue Shopping
-          </Link>
-        </div>
-      </Layout>
+      <div className="container py-20 text-center">
+        <h1 className="font-heading text-2xl text-foreground">No items to checkout</h1>
+        <Link href="/products" className="text-primary underline mt-4 inline-block font-body text-sm">
+          Continue Shopping
+        </Link>
+      </div>
     );
   }
 
   if (orderPlaced) {
     return (
-      <Layout>
-        <div className="container py-20 text-center space-y-4 animate-fade-in">
-          <CheckCircle size={56} className="mx-auto text-primary" />
-          <h1 className="font-heading text-2xl md:text-3xl text-foreground">Thank You!</h1>
-          <p className="font-body text-sm text-muted-foreground max-w-md mx-auto">
-            Your order has been placed successfully. We'll send you a confirmation email shortly.
-          </p>
-          <PrimaryLink href="/products" className="mt-4">Continue Shopping</PrimaryLink>
-        </div>
-      </Layout>
+      <div className="container py-20 text-center space-y-4 animate-fade-in">
+        <CheckCircle size={56} className="mx-auto text-primary" />
+        <h1 className="font-heading text-2xl md:text-3xl text-foreground">Thank You!</h1>
+        <p className="font-body text-sm text-muted-foreground max-w-md mx-auto">
+          Your order has been placed successfully. We'll send you a confirmation email shortly.
+        </p>
+        <PrimaryLink href="/products" className="mt-4">Continue Shopping</PrimaryLink>
+      </div>
     );
   }
 
@@ -86,8 +81,7 @@ const CheckoutPage = () => {
   };
 
   return (
-    <Layout>
-      <section className="container py-10 md:py-16">
+    <section className="container py-10 md:py-16">
         <h1 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-8">
           Checkout
         </h1>
@@ -124,8 +118,7 @@ const CheckoutPage = () => {
             </PrimaryButton>
           </OrderSummary>
         </form>
-      </section>
-    </Layout>
+    </section>
   );
 };
 

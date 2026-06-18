@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Layout from "@/shared/ui/layout/Layout";
 import SectionHeader from "@/shared/ui/SectionHeader";
 import ProductGrid from "@/features/products/components/ProductGrid";
 import { categories, getProductsByCategory } from "@/features/products/data/products";
@@ -12,8 +11,7 @@ const ProductsPage = () => {
   const filtered = getProductsByCategory(activeCategory);
 
   return (
-    <Layout>
-      <section className="container py-10 md:py-16">
+    <section className="container py-10 md:py-16">
         <SectionHeader
           subtitle={productsContent.header.subtitle}
           title={productsContent.header.title}
@@ -38,8 +36,7 @@ const ProductsPage = () => {
         </nav>
 
         <ProductGrid products={filtered} columns={3} />
-      </section>
-    </Layout>
+    </section>
   );
 };
 

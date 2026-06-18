@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Layout from "@/shared/ui/layout/Layout";
 import TrustBadgeSection from "@/features/cms/components/common/TrustBadges";
 import JewelleryHeroSection from "./JewelleryHeroSection";
 import JewelleryCategoryNav from "./JewelleryCategoryNav";
@@ -53,7 +52,7 @@ const JewelleryProductPage = () => {
   };
 
   return (
-    <Layout>
+    <>
       <JewelleryHeroSection />
       <JewelleryCategoryNav activeCategory={activeCategory} onCategoryChange={handleCategoryChange} />
 
@@ -91,7 +90,7 @@ const JewelleryProductPage = () => {
         onClose={() => setIsFilterOpen(false)}
         onApply={handleApplyFilters}
       />
-    </Layout>
+    </>
   );
 };
 

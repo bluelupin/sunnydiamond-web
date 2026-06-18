@@ -1,6 +1,5 @@
 "use client";
 
-import Layout from "@/shared/ui/layout/Layout";
 import SectionHeader from "@/shared/ui/SectionHeader";
 import { FormInput, FormTextarea } from "@/shared/ui/FormInput";
 import { PrimaryButton } from "@/shared/ui/PrimaryButton";
@@ -24,8 +23,7 @@ const ContactPage = () => {
   };
 
   return (
-    <Layout>
-      <div className="container py-10 md:py-16">
+    <div className="container py-10 md:py-16">
         <SectionHeader
           subtitle={contactContent.header.subtitle}
           title={contactContent.header.title}
@@ -60,8 +58,7 @@ const ContactPage = () => {
             </PrimaryButton>
           </form>
         </div>
-      </div>
-    </Layout>
+    </div>
   );
 };
 
