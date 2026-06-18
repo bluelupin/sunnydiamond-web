@@ -46,11 +46,13 @@ const AboutFacesSection = () => {
 
             <div
               aria-hidden
-              className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/70 via-black/25 to-transparent opacity-0 transition-opacity duration-500 lg:group-hover:opacity-100"
+              className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/70 via-black/25 to-transparent opacity-100 transition-opacity duration-500 lg:opacity-0 lg:group-hover:opacity-100"
             />
 
             <figcaption className="absolute bottom-0 left-0 translate-y-2 p-5 text-left opacity-0 transition-all duration-500 md:p-6 lg:p-8 lg:group-hover:translate-y-0 lg:group-hover:opacity-100">
               <p className="font-larken text-xl font-light leading-110 text-white md:text-2xl">
+            <figcaption className="absolute bottom-0 left-0 p-5 md:p-6 lg:p-8 text-left opacity-100 translate-y-0 transition-all duration-500 lg:opacity-0 lg:translate-y-2 lg:group-hover:opacity-100 lg:group-hover:translate-y-0">
+              <p className="font-larken font-light text-xl md:text-2xl text-white leading-[110%]">
                 {member.name}
               </p>
               <p className="mt-1 font-gill text-xs font-light uppercase leading-130 tracking-caption text-white/80 md:text-sm">
