@@ -1,6 +1,7 @@
 import Image from "next/image";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import PageContainer from "@/shared/ui/layout/PageContainer";
+import AboutHandcraftedHeroMedia from "./AboutHandcraftedHeroMedia";
 import VerticalScrollLine from "./VerticalScrollLine";
 import { cn } from "@/shared/utils/cn";
 import {
@@ -10,7 +11,7 @@ import {
   aboutPageImages,
 } from "../data/content";
 
-const { hero, card: cardSpec, centerImage } = aboutHandcraftedFigmaSpec;
+const { card: cardSpec, centerImage } = aboutHandcraftedFigmaSpec;
 
 /** Figma node 692:27332 — card positions within 1160.45 × 693.45 group */
 const handcraftedCards = [
@@ -38,15 +39,7 @@ const AboutHandcraftedSection = () => {
         <PageContainer>
           <div className="relative h-420 overflow-hidden sm:h-520 md:h-560 lg:h-700">
             <div className="absolute inset-0">
-              <ResponsiveImage
-                desktopSrc={aboutPageImages.handcraftedBg}
-                alt="Handcrafted diamond jewellery"
-                width={hero.width}
-                height={hero.height}
-                quality={90}
-                sizes="100vw"
-                className="object-cover object-center"
-              />
+              <AboutHandcraftedHeroMedia />
             </div>
             <div className="absolute inset-0 bg-black/30" aria-hidden />
             <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-4 px-5 lg:top-315 lg:translate-y-0">

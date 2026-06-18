@@ -210,6 +210,8 @@ export const aboutHandcraftedFigmaSpec = {
 export const aboutHandcraftedAssets = {
   gridMask: "/images/about/handcrafted-grid-mask.svg",
   flourish: "/images/about/handcrafted-flourish.svg",
+  /** Placeholder hero video — falls back to handcraftedBg image if missing or broken */
+  heroVideo: "/videos/handcrafted-bg.mp4",
 } as const;
 
 /** Figma node 692:27386 — vertical divider below Handcrafted (Line 1512) */

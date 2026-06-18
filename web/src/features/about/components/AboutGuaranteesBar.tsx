@@ -11,15 +11,15 @@ import {
 const { icon: iconSpec } = aboutGuaranteesFigmaSpec;
 
 const guaranteeIconDimensions = {
-  diamond: { width: iconSpec.defaultSize, height: iconSpec.defaultSize, className: "h-16 w-16" },
-  moneyback: { width: iconSpec.defaultSize, height: iconSpec.defaultSize, className: "h-16 w-16" },
+  diamond: { width: iconSpec.defaultSize, height: iconSpec.defaultSize, className: "md:h-16 md:w-16 h-[40px] w-[40px]" },
+  moneyback: { width: iconSpec.defaultSize, height: iconSpec.defaultSize, className: "md:h-16 md:w-16 h-[40px] w-[40px]" },
   hallmark: {
     width: iconSpec.hallmarkWidth,
     height: iconSpec.hallmarkHeight,
-    className: "h-16 w-hallmark",
+    className: "md:h-16 md:w-16 h-[40px] w-[40px]",
   },
-  return: { width: iconSpec.defaultSize, height: iconSpec.defaultSize, className: "h-16 w-16" },
-  cod: { width: iconSpec.defaultSize, height: iconSpec.defaultSize, className: "h-16 w-16" },
+  return: { width: iconSpec.defaultSize, height: iconSpec.defaultSize, className: "md:h-16 md:w-16 h-[40px] w-[40px]" },
+  cod: { width: iconSpec.defaultSize, height: iconSpec.defaultSize, className: "md:h-16 md:w-16 h-[40px] w-[40px]" },
 } as const;
 
 const AboutGuaranteeDivider = ({ orientation = "vertical" }: { orientation?: "vertical" | "horizontal" }) => (

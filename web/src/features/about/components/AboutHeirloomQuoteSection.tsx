@@ -19,12 +19,12 @@ const AboutHeirloomQuoteSection = () => {
             width={flourishSpec.width}
             height={flourishSpec.height}
             aria-hidden
-            className="h-19 w-5 shrink-0"
+            className="sm:h-19 sm:w-5 w-4 h-4 shrink-0"
           />
 
           <h2
             id="about-heirloom-quote"
-            className="max-w-screen-gutter text-center font-larken text-28 font-light leading-110 text-darkblack sm:max-w-640 sm:text-36 md:max-w-760 md:text-42 lg:max-w-760 desktop:max-w-none desktop:text-48"
+            className="text-center font-larken text-32 font-light leading-110 text-darkblack sm:text-36 md:text-42 desktop:text-48"
           >
             {aboutHeirloomContent.quote}
           </h2>
