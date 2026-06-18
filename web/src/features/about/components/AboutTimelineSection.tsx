@@ -23,7 +23,7 @@ const AboutTimelineSection = () => {
 
   return (
     <section ref={sectionRef} aria-label="Company timeline" className="relative">
-      <div className="sticky top-0 z-10 h-screen overflow-hidden">
+      <div className="sticky top-20 z-10 h-[calc(100vh-80px)] overflow-hidden">
         <div className="absolute inset-0">
           <ResponsiveImage
             desktopSrc={aboutPageImages.store}
@@ -37,7 +37,7 @@ const AboutTimelineSection = () => {
         </div>
         <div className="absolute inset-0 bg-black/40" aria-hidden />
 
-        <PageContainer className="relative flex h-full flex-col lg:block">
+        <PageContainer className="relative flex h-full flex-col lg:block lg:px-0 lg:max-w-full">
           <div className="flex h-full flex-col lg:flex-row lg:justify-between">
             <AboutTimelineNav activeYear={activeYear} onYearSelect={scrollToYear} />
 
@@ -45,7 +45,7 @@ const AboutTimelineSection = () => {
               <div
                 aria-live="polite"
                 aria-atomic="true"
-                className="mt-auto px-5 pb-8 lg:mt-351 lg:px-0 lg:pb-0 lg:self-start"
+                className="mt-auto lg:px-5 pb-8 lg:mt-351 lg:px-0 lg:pb-0 lg:self-start"
               >
                 <AboutTimelineContent
                   activeYear={activeYear}

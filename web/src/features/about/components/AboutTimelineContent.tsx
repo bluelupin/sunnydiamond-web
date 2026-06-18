@@ -22,7 +22,7 @@ const AboutTimelineContent = ({
 }: AboutTimelineContentProps) => (
   <article
     aria-labelledby="about-timeline-title"
-    className="w-full max-w-445 bg-white py-6 pl-6 pr-8 lg:py-8 lg:pl-8 lg:pr-20"
+    className="w-full lg:max-w-445 max-w-full bg-white py-6 pl-6 pr-8 lg:py-8 lg:pl-8 lg:pr-20"
   >
     <div
       key={activeYear}

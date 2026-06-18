@@ -30,7 +30,7 @@ const AboutTimelineNav = ({ activeYear, onYearSelect }: AboutTimelineNavProps) =
                   type="button"
                   onClick={() => onYearSelect(year)}
                   className={cn(
-                    "flex w-full items-center justify-end gap-2 text-right transition-opacity duration-500 ease-out motion-reduce:transition-none",
+                    "flex w-full items-center lg:justify-start justify-end gap-2 text-right transition-opacity duration-500 ease-out motion-reduce:transition-none",
                     !isActive && "opacity-40 hover:opacity-70",
                   )}
                   aria-current={isActive ? "step" : undefined}

@@ -61,7 +61,7 @@ const AboutHandcraftedSection = () => {
           </div>
         </PageContainer>
 
-        <PageContainer className="relative z-10 mt-6 lg:-mt-6">
+        <PageContainer className="relative z-10 mt-6">
           <div className="relative mx-auto w-full max-w-1160 pt-[59.74%] lg:pt-0 lg:h-693">
             <div className="absolute inset-0">
               <Image
@@ -73,7 +73,7 @@ const AboutHandcraftedSection = () => {
                 className="pointer-events-none absolute inset-0 h-full w-full"
               />
 
-              <div className="handcrafted-grid-mask absolute inset-0 shadow-aboutImage">
+              <div className="handcrafted-grid-mask absolute inset-0 shadow-aboutImage overflow-hidden">
                 <div className="about-handcrafted-photo absolute max-w-none">
                   <ResponsiveImage
                     desktopSrc={aboutPageImages.craftsmanship}
