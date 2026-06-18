@@ -171,13 +171,80 @@ export const aboutTimelineYears = [
   "2025",
 ] as const;
 
+/** Figma node 692:27191 — Timeline section */
+export const aboutTimelineFigmaSpec = {
+  section: {
+    width: 1440,
+    height: 700,
+    imageHeight: 810,
+    imageOffsetY: -86,
+  },
+  overlayOpacity: 0.4,
+  nav: {
+    gap: 32,
+    itemGap: 8,
+    lineWidth: 64,
+    offsetTop: 148,
+  },
+  year: {
+    activeFontSize: 24,
+    inactiveFontSize: 20,
+    activeColor: "#FFFFFF",
+    inactiveColor: "#F2F2F2",
+    inactiveOpacity: 0.4,
+  },
+  content: {
+    width: 445,
+    paddingTop: 32,
+    paddingRight: 80,
+    paddingBottom: 32,
+    paddingLeft: 32,
+    gap: 24,
+    titleFontSize: 32,
+    bodyFontSize: 20,
+  },
+  animation: {
+    durationMs: 500,
+  },
+} as const;
+
+const timelineDescription =
+  "We source and transform the rarest Internally Flawless diamonds into timeless masterpieces, crafted with uncompromising precision for those for those who seek the truly exceptional.";
+
 export const aboutTimelineContent = {
   defaultYear: "2008",
   milestones: {
+    "1997": {
+      title: "Since 1997",
+      description: timelineDescription,
+    },
+    "2006": {
+      title: "Growing the Legacy",
+      description: timelineDescription,
+    },
     "2008": {
       title: "Found in Chalakkudy",
-      description:
-        "We source and transform the rarest Internally Flawless diamonds into timeless masterpieces, crafted with uncompromising precision for those for those who seek the truly exceptional.",
+      description: timelineDescription,
+    },
+    "2010": {
+      title: "Crafting Brilliance",
+      description: timelineDescription,
+    },
+    "2012": {
+      title: "Expanding Horizons",
+      description: timelineDescription,
+    },
+    "2016": {
+      title: "Elevating Excellence",
+      description: timelineDescription,
+    },
+    "2022": {
+      title: "A New Era",
+      description: timelineDescription,
+    },
+    "2025": {
+      title: "Looking Ahead",
+      description: timelineDescription,
     },
   },
 } as const;
