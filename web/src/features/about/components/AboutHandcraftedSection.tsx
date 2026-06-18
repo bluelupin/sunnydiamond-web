@@ -1,68 +1,112 @@
+import Image from "next/image";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
-import AboutDecorativeFlourish from "./AboutDecorativeFlourish";
+import PageContainer from "@/shared/ui/layout/PageContainer";
 import { cn } from "@/shared/utils/cn";
-import { aboutHandcraftedContent, aboutPageImages } from "../data/content";
+import {
+  aboutHandcraftedAssets,
+  aboutHandcraftedContent,
+  aboutHandcraftedFigmaSpec,
+  aboutPageImages,
+} from "../data/content";
 
-const cardGridClassNames = [
-  "lg:col-start-2 lg:row-start-2",
-  "lg:col-start-3 lg:row-start-1",
-  "lg:col-start-1 lg:row-start-1",
+const { hero, card: cardSpec, centerImage } = aboutHandcraftedFigmaSpec;
+
+/** Figma node 692:27332 — card positions within 1160.45 × 693.45 group */
+const handcraftedCards = [
+  {
+    title: aboutHandcraftedContent.cards[0].title,
+    className: "left-[20.17%] top-0",
+    gapClassName: "gap-3",
+  },
+  {
+    title: aboutHandcraftedContent.cards[1].title,
+    className: "left-[40.43%] top-[34.04%]",
+    gapClassName: "gap-3",
+  },
+  {
+    title: aboutHandcraftedContent.cards[2].title,
+    className: "left-[20.09%] top-[67.97%]",
+    gapClassName: "gap-2.5",
+  },
 ] as const;
 
 const AboutHandcraftedSection = () => {
   return (
     <section aria-labelledby="about-handcrafted-title" className="bg-white">
-      <div className="relative h-420 overflow-hidden sm:h-560 lg:h-700">
-        <ResponsiveImage
-          desktopSrc={aboutPageImages.handcraftedBg}
-          alt="Handcrafted diamond jewellery"
-          width={1360}
-          height={700}
-          quality={90}
-          sizes="100vw"
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-black/30" aria-hidden />
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-6">
-          <h2
-            id="about-handcrafted-title"
-            className="text-center font-larken text-32 font-light leading-110 text-white md:text-40 lg:text-48"
-          >
-            {aboutHandcraftedContent.title}
-          </h2>
-          <div className="h-px w-full max-w-440 bg-gray300" aria-hidden />
+      <PageContainer>
+        <div className="relative h-420 overflow-hidden sm:h-560 lg:h-700">
+          <div className="absolute inset-0">
+            <ResponsiveImage
+              desktopSrc={aboutPageImages.handcraftedBg}
+              alt="Handcrafted diamond jewellery"
+              width={hero.width}
+              height={hero.height}
+              quality={90}
+              sizes="(max-width: 1024px) 100vw, 1360px"
+              className="object-cover object-center"
+            />
+          </div>
+          <div className="absolute inset-0 bg-black/30" aria-hidden />
+          <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-4 lg:top-315 lg:translate-y-0">
+            <h2
+              id="about-handcrafted-title"
+              className="text-center font-larken text-32 font-light leading-110 text-white md:text-40 lg:text-48"
+            >
+              {aboutHandcraftedContent.title}
+            </h2>
+            <span className="h-px w-full max-w-440 bg-neutral300" aria-hidden />
+          </div>
         </div>
-      </div>
+      </PageContainer>
 
-      <div className="container py-16 md:py-20 lg:py-24">
-        <div className="relative mx-auto max-w-1160">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-0">
-            {aboutHandcraftedContent.cards.map((card, index) => (
+      <div className="relative z-10 mt-6">
+        <div className="overflow-x-auto scrollbar-none">
+          <div className="relative mx-auto h-693 w-1160 min-w-1160 max-w-1160">
+            <Image
+              src={aboutHandcraftedAssets.gridMask}
+              alt=""
+              width={1161}
+              height={694}
+              aria-hidden
+              className="pointer-events-none absolute inset-0 h-full w-full"
+            />
+
+            <div className="handcrafted-grid-mask absolute inset-0 shadow-aboutImage">
+              <div className="about-handcrafted-photo absolute max-w-none">
+                <ResponsiveImage
+                  desktopSrc={aboutPageImages.craftsmanship}
+                  alt="Diamond craftsmanship detail"
+                  width={centerImage.width}
+                  height={centerImage.height}
+                  quality={90}
+                  sizes={`${centerImage.width}px`}
+                  className="h-full w-full object-cover object-center"
+                />
+              </div>
+            </div>
+
+            {handcraftedCards.map((item) => (
               <article
-                key={card.title}
+                key={item.title}
                 className={cn(
-                  "flex min-h-180 flex-col items-center justify-center gap-3 bg-chalkCard p-8 lg:min-h-222",
-                  cardGridClassNames[index],
+                  "absolute z-10 flex h-[32.08%] w-[19.17%] flex-col items-center justify-center bg-chalkCard",
+                  item.gapClassName,
+                  item.className,
                 )}
               >
-                <AboutDecorativeFlourish className="h-4 w-4 text-darkblack" />
-                <h3 className="max-w-200 text-center font-larken text-lg font-light leading-110 text-darkblack md:text-xl lg:text-2xl">
-                  {card.title}
+                <Image
+                  src={aboutHandcraftedAssets.flourish}
+                  alt=""
+                  width={cardSpec.iconWidth}
+                  height={cardSpec.iconHeight}
+                  aria-hidden
+                  className="h-15 w-16 shrink-0"
+                />
+                <h3 className="max-w-177 text-center font-larken text-24 font-light leading-110 text-darkblack">
+                  {item.title}
                 </h3>
               </article>
             ))}
-          </div>
-
-          <div className="mx-auto mt-8 w-full max-w-736 lg:absolute lg:left-1/2 lg:top-58p lg:mt-0 lg:-translate-x-1/2">
-            <ResponsiveImage
-              desktopSrc={aboutPageImages.craftsmanship}
-              alt="Diamond craftsmanship detail"
-              width={736}
-              height={446}
-              quality={90}
-              sizes="(max-width: 768px) 100vw, 736px"
-              className="object-cover shadow-aboutImage"
-            />
           </div>
         </div>
       </div>

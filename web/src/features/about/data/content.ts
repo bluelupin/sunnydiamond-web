@@ -149,15 +149,67 @@ export const aboutHandcraftedContent = {
   title: "Handcrafted Brilliance",
   cards: [
     {
+      title: "Ethically Sourced, conflict free diamonds",
+      position: { x: 234, y: 0 },
+    },
+    {
       title: "Pinnacle of Craftsmanship and Artistry",
+      position: { x: 469, y: 236 },
     },
     {
       title: "Highest Level of Quality Checks",
-    },
-    {
-      title: "Ethically Sourced, conflict free diamonds",
+      position: { x: 233, y: 471 },
     },
   ],
+} as const;
+
+/** Figma node 692:27322 — Handcrafted Brilliance */
+export const aboutHandcraftedFigmaSpec = {
+  section: {
+    width: 1440,
+    height: 1417,
+    background: "#FFFFFF",
+  },
+  hero: {
+    width: 1360,
+    height: 700,
+    paddingX: 40,
+    overlayOpacity: 0.3,
+    titleOffsetY: 315,
+    titleGap: 16,
+    lineWidth: 440,
+    titleFontSize: 48,
+    titleColor: "#FFFFFF",
+    lineColor: "#CCCCCC",
+  },
+  cardsGroup: {
+    width: 1160,
+    height: 693,
+    overlapHero: 24,
+  },
+  card: {
+    width: 222,
+    height: 222,
+    gap: 12,
+    background: "#F8F4EC",
+    iconWidth: 16,
+    iconHeight: 15,
+    textWidth: 177,
+    fontSize: 24,
+    textColor: "#0A0A0A",
+  },
+  centerImage: {
+    width: 1440,
+    height: 873,
+    offsetX: -140,
+    offsetY: -89,
+    shadow: "0px 4px 4px 0px rgba(0, 0, 0, 0.25)",
+  },
+} as const;
+
+export const aboutHandcraftedAssets = {
+  gridMask: "/images/about/handcrafted-grid-mask.svg",
+  flourish: "/images/about/handcrafted-flourish.svg",
 } as const;
 
 export const aboutTimelineYears = [
