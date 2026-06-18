@@ -30,8 +30,15 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Page() {
-  const shellData = await getHomepageShell();
-  const { title, description, canonicalUrl, imageUrl } = resolveHomepageSeoMetadata(shellData);
+  let shellData: Awaited<ReturnType<typeof getHomepageShell>> | null = null;
+
+  try {
+    shellData = await getHomepageShell();
+  } catch {
+    shellData = null;
+  }
+
+  const { title, description, canonicalUrl, imageUrl } = resolveHomepageSeoMetadata(shellData ?? {});
 
   return (
     <>
