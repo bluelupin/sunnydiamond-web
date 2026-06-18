@@ -22,7 +22,7 @@ const AboutTimelineContent = ({
 }: AboutTimelineContentProps) => (
   <article
     aria-labelledby="about-timeline-title"
-    className="w-full max-w-445 bg-white py-8 pl-8 pr-20"
+    className="w-full max-w-445 bg-white py-6 pl-6 pr-8 lg:py-8 lg:pl-8 lg:pr-20"
   >
     <div
       key={activeYear}
@@ -42,10 +42,10 @@ const AboutTimelineContent = ({
       </div>
 
       <div className="flex w-full max-w-445 flex-col gap-4">
-        <h2 id="about-timeline-title" className="font-larken text-32 font-light leading-110 text-darkblack">
+        <h2 id="about-timeline-title" className="font-larken text-28 font-light leading-110 text-darkblack lg:text-32">
           {milestone.title}
         </h2>
-        <p className="font-gill text-xl font-light leading-110 text-neutral500">
+        <p className="font-gill text-base font-light leading-110 text-neutral500 lg:text-xl">
           {milestone.description}
         </p>
       </div>

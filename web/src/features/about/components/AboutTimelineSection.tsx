@@ -37,7 +37,7 @@ const AboutTimelineSection = () => {
         </div>
         <div className="absolute inset-0 bg-black/40" aria-hidden />
 
-        <PageContainer className="relative h-full w-full max-w-full !px-0">
+        <PageContainer className="relative flex h-full flex-col lg:block">
           <div className="flex h-full flex-col lg:flex-row lg:justify-between">
             <AboutTimelineNav activeYear={activeYear} onYearSelect={scrollToYear} />
 
@@ -45,7 +45,7 @@ const AboutTimelineSection = () => {
               <div
                 aria-live="polite"
                 aria-atomic="true"
-                className="mt-10 shrink-0 lg:mt-351 lg:self-start"
+                className="mt-auto px-5 pb-8 lg:mt-351 lg:px-0 lg:pb-0 lg:self-start"
               >
                 <AboutTimelineContent
                   activeYear={activeYear}

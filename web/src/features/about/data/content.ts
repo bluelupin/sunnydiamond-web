@@ -306,6 +306,16 @@ export const aboutTimelineContent = {
   },
 } as const;
 
+/** Figma node 692:27431 — Mobile About page (375px artboard) */
+export const aboutResponsiveFigmaSpec = {
+  frameWidth: 375,
+  breakpoints: {
+    mobile: 375,
+    tablet: 768,
+    desktop: 1440,
+  },
+} as const;
+
 export const aboutHeirloomContent = {
   quote: "Crafting family heirlooms at the pinnacle of diamond clarity",
 } as const;

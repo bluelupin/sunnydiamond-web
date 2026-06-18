@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
+import PageContainer from "@/shared/ui/layout/PageContainer";
 import { cn } from "@/shared/utils/cn";
 import {
   aboutCraftingRarityContent,
@@ -11,13 +12,13 @@ import {
 import { useCraftingRarityScrollReveal } from "../hooks/useCraftingRarityScrollReveal";
 import VerticalScrollLine from "./VerticalScrollLine";
 
-const { image: imageSpec, line: lineSpec } = aboutCraftingRarityFigmaSpec;
+const { image: imageSpec } = aboutCraftingRarityFigmaSpec;
 
 const revealEase = "duration-700 ease-reveal";
 
 const AboutCraftingRaritySection = () => {
   const sectionRef = useRef<HTMLElement>(null);
-  const { headingActive, imageActive, lineFill, descriptionActive, reducedMotion } =
+  const { headingActive, imageActive, descriptionActive } =
     useCraftingRarityScrollReveal(sectionRef);
 
   return (
@@ -26,7 +27,7 @@ const AboutCraftingRaritySection = () => {
       aria-labelledby="about-crafting-rarity-title"
       className="bg-white py-16 md:py-20 lg:py-100"
     >
-      <div className="container flex justify-center">
+      <PageContainer className="flex justify-center">
         <div className="flex w-full flex-col items-center text-center lg:min-h-745">
           <div
             className={cn(
@@ -83,7 +84,7 @@ const AboutCraftingRaritySection = () => {
             {aboutCraftingRarityContent.description}
           </p>
         </div>
-      </div>
+      </PageContainer>
     </section>
   );
 };

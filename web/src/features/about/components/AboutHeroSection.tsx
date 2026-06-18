@@ -8,7 +8,7 @@ const AboutHeroSection = () => {
     <section
       id="about-hero"
       aria-labelledby="about-hero-title"
-      className="relative flex h-640 flex-col overflow-hidden bg-gray200"
+      className="relative flex h-520 flex-col overflow-hidden bg-gray200 sm:h-580 lg:h-640"
     >
       <div className="relative flex-1 overflow-hidden">
         <ResponsiveImage
