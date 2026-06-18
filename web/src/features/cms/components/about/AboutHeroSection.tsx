@@ -10,7 +10,7 @@ const AboutHeroSection = ({ id, content }: AboutHeroSectionProps) => {
   const { title, image } = content;
 
   return (
-    <section id={id} className="relative h-screen flex flex-col overflow-hidden">
+    <section id={id} className="relative h-[640px] flex flex-col overflow-hidden">
       <div className="relative flex-1 overflow-hidden">
         <ResponsiveImage
           desktopSrc={image.desktopSrc}
