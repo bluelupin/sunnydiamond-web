@@ -19,7 +19,7 @@ const AboutPage = () => {
       <AboutTimelineSection />
       <AboutGuaranteesBar />
       <AboutHeirloomQuoteSection />
-      <TrustBadgeSection />
+      {/* <TrustBadgeSection /> */}
     </>
   );
 };

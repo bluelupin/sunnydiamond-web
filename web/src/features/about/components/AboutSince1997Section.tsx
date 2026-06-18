@@ -9,21 +9,21 @@ const AboutSince1997Section = () => {
   return (
     <section
       aria-labelledby="about-since-1997-title"
-      className="bg-white py-16 md:py-20 lg:py-[104px]"
+      className="bg-white py-16 md:py-20 lg:py-104"
     >
       <div className="container">
         <h2
           id="about-since-1997-title"
-          className="font-larken font-light text-[32px] md:text-[40px] lg:text-[48px] leading-[110%] text-darkblack"
+          className="font-larken text-32 font-light leading-110 text-darkblack md:text-40 lg:text-48"
         >
           {aboutSince1997Content.title}
         </h2>
 
-        <div className="mt-10 lg:mt-10 overflow-x-auto pb-2">
-          <div className="flex items-center gap-8 lg:gap-20 min-w-max lg:min-w-0">
-            <article className="flex items-center gap-6 lg:gap-8 shrink-0">
+        <div className="mt-10 overflow-x-auto pb-2 lg:mt-10">
+          <div className="flex min-w-max items-center gap-8 lg:min-w-0 lg:gap-20">
+            <article className="flex shrink-0 items-center gap-6 lg:gap-8">
               <figure className="flex flex-col gap-3">
-                <div className="w-[280px] sm:w-[420px] lg:w-[549px] h-[320px] sm:h-[480px] lg:h-[600px] overflow-hidden">
+                <div className="h-320 w-280 overflow-hidden sm:h-480 sm:w-420 lg:h-600 lg:w-549">
                   <ResponsiveImage
                     desktopSrc={founder.image}
                     alt={founder.alt}
@@ -34,19 +34,19 @@ const AboutSince1997Section = () => {
                     className="object-cover"
                   />
                 </div>
-                <figcaption className="font-gill text-sm md:text-base text-darkblack leading-[110%]">
+                <figcaption className="font-gill text-sm leading-110 text-darkblack md:text-base">
                   {founder.caption}
                 </figcaption>
               </figure>
 
-              <p className="font-gill font-light text-base md:text-lg lg:text-xl leading-[110%] text-gray500 max-w-[358px]">
+              <p className="max-w-358 font-gill text-base font-light leading-110 text-gray500 md:text-lg lg:text-xl">
                 {aboutSince1997Content.story}
               </p>
             </article>
 
-            <div className="flex items-center gap-5 shrink-0">
-              <figure className="flex flex-col gap-3 w-[240px] sm:w-[280px] lg:w-[320px]">
-                <div className="h-[280px] sm:h-[360px] lg:h-[417px] overflow-hidden">
+            <div className="flex shrink-0 items-center gap-5">
+              <figure className="flex w-240 flex-col gap-3 sm:w-280 lg:w-320">
+                <div className="h-280 overflow-hidden sm:h-360 lg:h-417">
                   <ResponsiveImage
                     desktopSrc={event.image}
                     alt={event.alt}
@@ -57,13 +57,13 @@ const AboutSince1997Section = () => {
                     className="object-cover"
                   />
                 </div>
-                <figcaption className="font-gill text-sm md:text-base text-darkblack leading-[110%]">
+                <figcaption className="font-gill text-sm leading-110 text-darkblack md:text-base">
                   {event.caption}
                 </figcaption>
               </figure>
 
-              <figure className="flex flex-col gap-3 w-[280px] sm:w-[360px] lg:w-[463px]">
-                <div className="h-[360px] sm:h-[480px] lg:h-[600px] overflow-hidden">
+              <figure className="flex w-280 flex-col gap-3 sm:w-360 lg:w-463">
+                <div className="h-360 overflow-hidden sm:h-480 lg:h-600">
                   <ResponsiveImage
                     desktopSrc={attending.image}
                     alt={attending.alt}
@@ -74,7 +74,7 @@ const AboutSince1997Section = () => {
                     className="object-cover"
                   />
                 </div>
-                <figcaption className="font-gill text-sm md:text-base text-darkblack leading-[110%]">
+                <figcaption className="font-gill text-sm leading-110 text-darkblack md:text-base">
                   {attending.caption}
                 </figcaption>
               </figure>

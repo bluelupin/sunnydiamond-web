@@ -8,7 +8,7 @@ const AboutHeroSection = () => {
     <section
       id="about-hero"
       aria-labelledby="about-hero-title"
-      className="relative h-[640px] flex flex-col overflow-hidden bg-gray200"
+      className="relative flex h-640 flex-col overflow-hidden bg-gray200"
     >
       <div className="relative flex-1 overflow-hidden">
         <ResponsiveImage
@@ -22,10 +22,10 @@ const AboutHeroSection = () => {
           className="absolute inset-0 h-full w-full object-cover object-center"
         />
 
-        <div className="absolute inset-x-0 bottom-0 flex justify-center px-5 pb-12 md:pb-20 lg:pb-[75px]">
+        <div className="absolute inset-x-0 bottom-0 flex justify-center px-5 pb-12 md:pb-20 lg:pb-75">
           <h1
             id="about-hero-title"
-            className="font-larken font-light text-[32px] sm:text-[40px] lg:text-[48px] leading-[110%] text-white text-center w-full max-w-[886px]"
+            className="w-full max-w-886 text-center font-larken text-32 font-light leading-110 text-white sm:text-40 lg:text-48"
           >
             {aboutHeroContent.title}
           </h1>

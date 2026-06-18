@@ -253,6 +253,89 @@ export const aboutHeirloomContent = {
   quote: "Crafting family heirlooms at the pinnacle of diamond clarity",
 } as const;
 
+/** Figma node 692:27229 — Heirloom quote */
+export const aboutHeirloomFigmaSpec = {
+  section: {
+    width: 1440,
+    background: "#FFFFFF",
+    paddingY: 104,
+    paddingX: 10,
+  },
+  row: {
+    gap: 16,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  flourish: {
+    width: 20,
+    height: 19,
+  },
+  quote: {
+    fontFamily: "Larken",
+    fontSize: 48,
+    fontWeight: 300,
+    lineHeight: "110%",
+    letterSpacing: "0%",
+    color: "#0A0A0A",
+    textAlign: "center",
+  },
+} as const;
+
+export const aboutHeirloomAssets = {
+  flourishLeft: "/images/about/heirloom-flourish-left.svg",
+  flourishRight: "/images/about/heirloom-flourish-right.svg",
+} as const;
+
+export const aboutGuaranteesFigmaSpec = {
+  section: {
+    width: 1440,
+    contentWidth: 1360,
+    paddingY: 64,
+    paddingX: 40,
+    background: "#FBFAF6",
+  },
+  item: {
+    width: 260,
+    height: 136,
+    gap: 12,
+    padding: 12,
+    borderRadius: 2,
+  },
+  icon: {
+    defaultSize: 64,
+    hallmarkWidth: 60,
+    hallmarkHeight: 64,
+  },
+  divider: {
+    height: 136,
+    strokeWidth: 0.5,
+    color: "#999999",
+  },
+  label: {
+    fontFamily: "Gill Sans",
+    fontSize: 20,
+    fontWeight: 400,
+    lineHeight: "110%",
+    letterSpacing: "0%",
+    color: "#0A0A0A",
+    textAlign: "center",
+  },
+  responsive: {
+    /** Desktop artboard — preserve exact row below this viewport via horizontal scroll */
+    desktopMinWidth: 1440,
+    paddingYMobile: 40,
+    paddingYTablet: 48,
+  },
+} as const;
+
+export const aboutGuaranteeIconPaths = {
+  diamond: "/images/about/guarantees/diamond.svg",
+  moneyback: "/images/about/guarantees/moneyback.svg",
+  hallmark: "/images/about/guarantees/hallmark.svg",
+  return: "/images/about/guarantees/return.svg",
+  cod: "/images/about/guarantees/cod.svg",
+} as const;
+
 export const aboutGuarantees = [
   { label: "Eternally Flawless Diamonds", icon: "diamond" },
   { label: "100% Moneyback Guarantee", icon: "moneyback" },
