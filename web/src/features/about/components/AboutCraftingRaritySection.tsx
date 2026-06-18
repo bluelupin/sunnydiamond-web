@@ -9,6 +9,7 @@ import {
   aboutPageImages,
 } from "../data/content";
 import { useCraftingRarityScrollReveal } from "../hooks/useCraftingRarityScrollReveal";
+import VerticalScrollLine from "./VerticalScrollLine";
 
 const { image: imageSpec, line: lineSpec } = aboutCraftingRarityFigmaSpec;
 
@@ -71,27 +72,7 @@ const AboutCraftingRaritySection = () => {
               />
             </div>
           </div>
-
-          <div
-            className={cn(
-              "mt-3.5 h-79 w-px overflow-hidden sm:mt-18 lg:mt-23",
-              imageActive ? "opacity-100" : "opacity-0",
-              `transition-opacity ${revealEase}`,
-            )}
-            aria-hidden
-          >
-            <div
-              className={cn(
-                "w-px origin-top bg-gradient-to-b from-darkMagenta to-goldAccent",
-                reducedMotion ? "" : "transition-transform duration-500 ease-out",
-              )}
-              style={{
-                height: `${lineSpec.height}px`,
-                transform: `scaleY(${lineFill})`,
-              }}
-            />
-          </div>
-
+          <VerticalScrollLine className="pt-5" />
           <p
             className={cn(
               "mt-2.5 w-full max-w-523 font-gill text-base font-light leading-110 text-darkblack sm:mt-3 md:text-lg lg:mt-13 lg:text-20",

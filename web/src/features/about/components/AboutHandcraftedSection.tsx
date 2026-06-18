@@ -1,6 +1,7 @@
 import Image from "next/image";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import PageContainer from "@/shared/ui/layout/PageContainer";
+import VerticalScrollLine from "./VerticalScrollLine";
 import { cn } from "@/shared/utils/cn";
 import {
   aboutHandcraftedAssets,
@@ -32,6 +33,7 @@ const handcraftedCards = [
 
 const AboutHandcraftedSection = () => {
   return (
+    <>
     <section aria-labelledby="about-handcrafted-title" className="bg-white">
       <PageContainer>
         <div className="relative h-420 overflow-hidden sm:h-560 lg:h-700">
@@ -60,7 +62,7 @@ const AboutHandcraftedSection = () => {
       </PageContainer>
 
       <div className="relative z-10 mt-6">
-        <div className="overflow-x-auto scrollbar-none">
+        <div className="scrollbar-none">
           <div className="relative mx-auto h-693 w-1160 min-w-1160 max-w-1160">
             <Image
               src={aboutHandcraftedAssets.gridMask}
@@ -111,6 +113,8 @@ const AboutHandcraftedSection = () => {
         </div>
       </div>
     </section>
+    <VerticalScrollLine className="pt-5 pb-16 md:pb-20 lg:pb-100" />
+    </>
   );
 };
 

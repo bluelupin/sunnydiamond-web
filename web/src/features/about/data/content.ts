@@ -212,6 +212,11 @@ export const aboutHandcraftedAssets = {
   flourish: "/images/about/handcrafted-flourish.svg",
 } as const;
 
+/** Figma node 692:27386 — vertical divider below Handcrafted (Line 1512) */
+export const aboutHandcraftedProgressLineSpec = {
+  height: 105,
+} as const;
+
 export const aboutTimelineYears = [
   "1997",
   "2006",
