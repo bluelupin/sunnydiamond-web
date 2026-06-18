@@ -9,11 +9,11 @@ export default {
       center: true,
       padding: {
         DEFAULT: "20px",
-        sm: "30px",
+        sm: "20px",
         md: "24px",
-        lg: "60px",
-        xl: "88px",
-        "2xl": "88px",
+        lg: "40px",
+        xl: "40px",
+        "2xl": "40px",
       },
       screens: {
         sm: "640px",

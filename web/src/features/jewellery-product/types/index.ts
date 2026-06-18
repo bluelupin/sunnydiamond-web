@@ -1,0 +1,51 @@
+import type { StaticImageData } from "next/image";
+
+export type JewelleryCategorySlug =
+  | "all"
+  | "rings"
+  | "earrings"
+  | "necklace"
+  | "pendants"
+  | "bracelets"
+  | "bangles"
+  | "nosepins";
+
+export interface JewelleryCategory {
+  slug: JewelleryCategorySlug;
+  label: string;
+}
+
+export interface JewelleryFilterState {
+  minPrice: number;
+  maxPrice: number;
+  categories: string[];
+  metalTypes: string[];
+  metalPurities: string[];
+}
+
+export interface JewellerySortOption {
+  value: string;
+  label: string;
+}
+
+export interface JewelleryListingProduct {
+  id: string;
+  name: string;
+  price: number;
+  primaryImage: string | StaticImageData;
+  hoverImage: string | StaticImageData;
+  category: string;
+  isBestseller?: boolean;
+}
+
+export interface ProductCardProps {
+  title: string;
+  category: string;
+  price: number;
+  primaryImage: string | StaticImageData;
+  hoverImage: string | StaticImageData;
+  href: string;
+  isBestseller?: boolean;
+  isWishlisted?: boolean;
+  onToggleWishlist?: () => void;
+}

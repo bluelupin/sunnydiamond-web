@@ -9,14 +9,15 @@ import { siteConfig } from "@/shared/lib/siteConfig";
 import { cn } from "@/shared/utils/cn";
 import SDLogo from "@/assets/Icons/SDLogo";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
+import { resolveHeaderNavHref, isHeroOverlayRoute } from "@/shared/utils/navigation";
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { totalItems } = useCart();
   const pathname = usePathname() ?? "/";
 
-  const isHome = pathname === "/";
-  const overlay = isHome && !scrolled && !mobileMenuOpen;
+  const heroOverlayRoute = isHeroOverlayRoute(pathname);
+  const overlay = heroOverlayRoute && !scrolled && !mobileMenuOpen;
 
   const { data: shellData, isLoading: isShellLoading } = useHomepageShell();
   const headerNavigationLinks = shellData?.global?.headerNavigationLinks || shellData?.headerNavigationLinks;
@@ -73,7 +74,7 @@ const Header = () => {
             {headerNavigationLinks?.map((link: any) => (
               <Link
                 key={link.label}
-                href={link.url}
+                href={resolveHeaderNavHref(link.label, link.url)}
                 className={cn(
                   "lg:text-base md:text-15 text-sm font-gill font-normal leading-[130%] tracking-[-0.02em] uppercase transition-colors",
                   textClass,
@@ -136,7 +137,7 @@ const Header = () => {
           {headerNavigationLinks?.map((link: any) => (
             <Link
               key={link.label}
-              href={link.url}
+              href={resolveHeaderNavHref(link.label, link.url)}
               onClick={() => setMobileMenuOpen(false)}
               className="block font-body text-sm tracking-[0.25em] uppercase text-muted-foreground hover:text-foreground transition-colors"
             >

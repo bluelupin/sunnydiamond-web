@@ -28,7 +28,7 @@ export const siteConfig = {
   },
   navigation: {
     main: [
-      { to: "/products", label: "Jewellery" },
+      { to: "/jewellery-product", label: "Jewellery" },
       { to: "/products", label: "Collection" },
       { to: "/products", label: "Gifting" },
       { to: "/contact", label: "Bespoke" },

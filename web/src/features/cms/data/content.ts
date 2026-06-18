@@ -197,7 +197,7 @@ export const seoContent = {
   about: {
     title: "Our Story",
     description:
-      "Learn about Sunny Diamonds' 35+ year legacy of crafting premium diamond jewellery with master artisans.",
+      "Discover Sunny Diamonds' legacy since 1997 — three generations of internally flawless diamonds, master craftsmanship, and timeless jewellery from Chalakkudy to the world.",
   },
   contact: {
     title: "Contact Us",
