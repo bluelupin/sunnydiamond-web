@@ -1,0 +1,43 @@
+import type { StaticImageData } from "next/image";
+
+export type MetalColorOption = {
+  id: string;
+  label: string;
+  color: string;
+};
+
+export type ProductDetailAccordion = {
+  id: string;
+  title: string;
+  content: string;
+};
+
+export type PairWithItem = {
+  id: string;
+  name: string;
+  image: string | StaticImageData;
+  href: string;
+};
+
+export type ProductDetailContent = {
+  attributes: string[];
+  metalColors: MetalColorOption[];
+  ringSizes: string[];
+  engravingOptions: string[];
+  benefits: { label: string; lines: [string, string] }[];
+  accordions: ProductDetailAccordion[];
+  pairWith: {
+    collectionTitle: string;
+    collectionDescription: string;
+    collectionImage: string;
+    items: PairWithItem[];
+  };
+  heroBannerImage: string;
+  visitUsImage: string;
+  personaliseImage: string;
+};
+
+export type ProductDetailPricing = {
+  price: number;
+  originalPrice: number;
+};
