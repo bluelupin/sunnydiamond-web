@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ShoppingBag, Menu, Search, Heart, User } from "lucide-react";
@@ -12,10 +12,13 @@ import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
 import { resolveHeaderNavHref, isHeroOverlayRoute } from "@/shared/utils/navigation";
 import { resolveShellHeaderLinks } from "@/shared/lib/shellNavigation";
 import MobileNavigation from "@/shared/ui/layout/MobileNavigation";
+import { JewelleryMegaMenu } from "@/shared/ui/layout/JewelleryMegaMenu";
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [jewelleryMenuOpen, setJewelleryMenuOpen] = useState(false);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { totalItems } = useCart();
   const pathname = usePathname() ?? "/";
 
@@ -37,7 +40,22 @@ const Header = () => {
 
   useEffect(() => {
     setMobileMenuOpen(false);
+    setJewelleryMenuOpen(false);
   }, [pathname]);
+
+  const openJewelleryMenu = useCallback(() => {
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    setJewelleryMenuOpen(true);
+  }, []);
+
+  const scheduleCloseJewelleryMenu = useCallback(() => {
+    closeTimerRef.current = setTimeout(() => setJewelleryMenuOpen(false), 150);
+  }, []);
+
+  const closeJewelleryMenuNow = useCallback(() => {
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    setJewelleryMenuOpen(false);
+  }, []);
 
   const textClass = overlay ? "text-white" : "text-darkblack";
   const hoverClass = overlay ? "hover:text-ivory/70" : "hover:text-primary";
@@ -59,7 +77,7 @@ const Header = () => {
     <>
       <header
         className={cn(
-          "fixed top-0 inset-x-0 z-50 transition-colors duration-300",
+          "fixed top-0 inset-x-0 z-50 transition-colors duration-300 relative",
           mobileMenuOpen ? "pointer-events-none opacity-0" : "",
           overlay
             ? "bg-transparent"
@@ -81,19 +99,42 @@ const Header = () => {
             <div className="hidden md:block">{Logo}</div>
 
             <nav className="hidden md:flex items-center gap-7 md:gap-4 lg:gap-9" aria-label="Main navigation">
-              {headerNavigationLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  href={resolveHeaderNavHref(link.label, link.url)}
-                  className={cn(
-                    "lg:text-base md:text-15 text-sm font-gill font-normal leading-[130%] tracking-[-0.02em] uppercase transition-colors",
-                    textClass,
-                    hoverClass,
-                  )}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {headerNavigationLinks.map((link) => {
+                const isJewellery = link.label.trim().toLowerCase() === "jewellery";
+                if (isJewellery) {
+                  return (
+                    <div
+                      key={link.label}
+                      onMouseEnter={openJewelleryMenu}
+                      onMouseLeave={scheduleCloseJewelleryMenu}
+                    >
+                      <Link
+                        href={resolveHeaderNavHref(link.label, link.url)}
+                        className={cn(
+                          "lg:text-base md:text-15 text-sm font-gill font-normal leading-[130%] tracking-[-0.02em] uppercase transition-colors",
+                          jewelleryMenuOpen ? "text-primary" : textClass,
+                          !jewelleryMenuOpen ? hoverClass : "",
+                        )}
+                      >
+                        {link.label}
+                      </Link>
+                    </div>
+                  );
+                }
+                return (
+                  <Link
+                    key={link.label}
+                    href={resolveHeaderNavHref(link.label, link.url)}
+                    className={cn(
+                      "lg:text-base md:text-15 text-sm font-gill font-normal leading-[130%] tracking-[-0.02em] uppercase transition-colors",
+                      textClass,
+                      hoverClass,
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
             </nav>
           </div>
 
@@ -131,6 +172,14 @@ const Header = () => {
             </Link>
           </div>
         </div>
+
+        {jewelleryMenuOpen && (
+          <JewelleryMegaMenu
+            onMouseEnter={openJewelleryMenu}
+            onMouseLeave={scheduleCloseJewelleryMenu}
+            onClose={closeJewelleryMenuNow}
+          />
+        )}
       </header>
 
       <MobileNavigation

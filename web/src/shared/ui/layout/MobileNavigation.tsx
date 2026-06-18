@@ -266,6 +266,122 @@ const AppointmentPanel = ({ onBack, onClose }: AppointmentPanelProps) => {
   );
 };
 
+type JewelleryPanelProps = {
+  onBack: () => void;
+  onClose: () => void;
+};
+
+type MobileJewelleryCategory = {
+  label: string;
+  href: string;
+  image: string | null;
+};
+
+const MOBILE_JEWELLERY_ROWS: MobileJewelleryCategory[][] = [
+  [
+    { label: "Bangles", href: "/jewellery/bangles", image: "/images/navigation/jewellery/bangles.png" },
+    { label: "Necklaces", href: "/jewellery/necklaces", image: "/images/navigation/jewellery/necklaces-2.png" },
+  ],
+  [
+    { label: "Nose pins", href: "/jewellery/nose-pins", image: "/images/navigation/jewellery/nose-pins.png" },
+    { label: "Earrings", href: "/jewellery/earrings", image: "/images/navigation/jewellery/earrings.png" },
+  ],
+  [
+    { label: "Rings", href: "/jewellery/rings", image: "/images/navigation/jewellery/rings-1.png" },
+    { label: "Pendants", href: "/jewellery/pendants", image: "/images/navigation/jewellery/pendants.png" },
+  ],
+  [
+    { label: "Bracelets", href: "/jewellery/bracelets", image: "/images/navigation/jewellery/bracelets.png" },
+    { label: "All Products", href: "/jewellery", image: null },
+  ],
+];
+
+const JewelleryPanel = ({ onBack, onClose }: JewelleryPanelProps) => (
+  <div
+    className="absolute inset-0 flex flex-col bg-white"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Jewellery categories"
+  >
+    <div className="flex shrink-0 items-center justify-between px-4 pt-6">
+      <button
+        type="button"
+        onClick={onBack}
+        aria-label="Go back"
+        className="flex items-center gap-2"
+      >
+        <span className="inline-flex size-6 shrink-0 items-center justify-center">
+          <Image
+            src="/images/navigation/chevron-right.svg"
+            alt=""
+            width={7}
+            height={15}
+            aria-hidden
+            className="-scale-x-100"
+          />
+        </span>
+        <span className="font-gill text-sm font-semibold uppercase leading-110 text-darkblack">
+          Jewellery
+        </span>
+      </button>
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close menu"
+        className="inline-flex size-6 items-center justify-center"
+      >
+        <Image
+          src="/images/navigation/menu-close.svg"
+          alt=""
+          width={24}
+          height={24}
+          aria-hidden
+        />
+      </button>
+    </div>
+
+    <div className="mx-4 mt-4 h-px shrink-0 bg-[#ECE9E9]" aria-hidden />
+
+    <div className="flex min-h-0 flex-1 flex-col gap-[12px] overflow-y-auto px-4 pt-4 pb-6">
+      {MOBILE_JEWELLERY_ROWS.map((row, rowIdx) => (
+        <div key={rowIdx} className="flex gap-[12px]">
+          {row.map((cat) => (
+            <Link
+              key={cat.label}
+              href={cat.href}
+              onClick={onClose}
+              className="flex min-w-0 flex-[1_0_0] flex-col gap-1"
+            >
+              <div className="relative h-[104px] w-full shrink-0 overflow-hidden">
+                {cat.image ? (
+                  <Image
+                    src={cat.image}
+                    alt={cat.label}
+                    fill
+                    className="object-cover"
+                    sizes="50vw"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-[#F8F1F6]">
+                    <span className="font-gill text-[14px] leading-[110%] text-[#0a0a0a]">
+                      All Products
+                    </span>
+                  </div>
+                )}
+              </div>
+              {cat.image && (
+                <span className="font-gill text-[14px] leading-[110%] text-[#0a0a0a]">
+                  {cat.label}
+                </span>
+              )}
+            </Link>
+          ))}
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 const NavChevron = () => (
   <span className="inline-flex size-6 shrink-0 items-center justify-center">
     <Image
@@ -285,18 +401,33 @@ type MobileNavRowProps = {
   label: string;
   href: string;
   onNavigate: () => void;
+  onOpenPanel?: () => void;
 };
 
-const MobileNavRow = ({ label, href, onNavigate }: MobileNavRowProps) => (
-  <Link
-    href={href}
-    onClick={onNavigate}
-    className="flex h-6 w-full items-center justify-between"
-  >
-    <span className="font-gill text-sm uppercase leading-110 text-darkblack">{label}</span>
-    <NavChevron />
-  </Link>
-);
+const MobileNavRow = ({ label, href, onNavigate, onOpenPanel }: MobileNavRowProps) => {
+  if (onOpenPanel) {
+    return (
+      <button
+        type="button"
+        onClick={onOpenPanel}
+        className="flex h-6 w-full items-center justify-between"
+      >
+        <span className="font-gill text-sm uppercase leading-110 text-darkblack">{label}</span>
+        <NavChevron />
+      </button>
+    );
+  }
+  return (
+    <Link
+      href={href}
+      onClick={onNavigate}
+      className="flex h-6 w-full items-center justify-between"
+    >
+      <span className="font-gill text-sm uppercase leading-110 text-darkblack">{label}</span>
+      <NavChevron />
+    </Link>
+  );
+};
 
 type UtilityRowProps = {
   iconSrc: string;
@@ -534,7 +665,7 @@ const CurrencyPanel = ({ selected, onBack, onClose, onApply }: CurrencyPanelProp
 };
 
 const MobileNavigation = ({ isOpen, onClose, navLinks, cartCount }: MobileNavigationProps) => {
-  const [subPanel, setSubPanel] = useState<"language" | "currency" | "appointment" | null>(null);
+  const [subPanel, setSubPanel] = useState<"language" | "currency" | "appointment" | "jewellery" | null>(null);
   const [language, setLanguage] = useState<LanguageCode>("en");
   const [currency, setCurrency] = useState<CurrencyCode>("INR");
 
@@ -637,16 +768,20 @@ const MobileNavigation = ({ isOpen, onClose, navLinks, cartCount }: MobileNaviga
         </div>
 
         <nav aria-label="Main navigation" className="mt-6 flex w-full flex-col gap-4">
-          {mobileNavLinks.map((link, index) => (
-            <Fragment key={link.label}>
-              <MobileNavRow
-                label={link.label}
-                href={resolveHeaderNavHref(link.label, link.url)}
-                onNavigate={handleClose}
-              />
-              {index < mobileNavLinks.length - 1 ? <NavDivider /> : null}
-            </Fragment>
-          ))}
+          {mobileNavLinks.map((link, index) => {
+            const isJewellery = link.label.trim().toLowerCase() === "jewellery";
+            return (
+              <Fragment key={link.label}>
+                <MobileNavRow
+                  label={link.label}
+                  href={resolveHeaderNavHref(link.label, link.url)}
+                  onNavigate={handleClose}
+                  onOpenPanel={isJewellery ? () => setSubPanel("jewellery") : undefined}
+                />
+                {index < mobileNavLinks.length - 1 ? <NavDivider /> : null}
+              </Fragment>
+            );
+          })}
         </nav>
       </div>
 
@@ -723,6 +858,13 @@ const MobileNavigation = ({ isOpen, onClose, navLinks, cartCount }: MobileNaviga
 
       {subPanel === "appointment" && (
         <AppointmentPanel
+          onBack={() => setSubPanel(null)}
+          onClose={handleClose}
+        />
+      )}
+
+      {subPanel === "jewellery" && (
+        <JewelleryPanel
           onBack={() => setSubPanel(null)}
           onClose={handleClose}
         />

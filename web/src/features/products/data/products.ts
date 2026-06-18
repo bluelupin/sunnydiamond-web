@@ -14,10 +14,12 @@ export interface Product {
   category: string;
   image: string | StaticImageData;
   images: Array<string | StaticImageData>;
+  lifestyleImage?: string | StaticImageData;
   carat: string;
   metal: string;
   inStock: boolean;
   featured: boolean;
+  bestseller?: boolean;
   rating: number;
   reviews: number;
 }
@@ -122,7 +124,16 @@ export const products: Product[] = [
   },
 ];
 
-export const categories = ["All", "Rings", "Necklaces", "Earrings", "Bracelets"];
+export const categories = [
+  { label: "All", value: "All", icon: "/images/products/categories/all.svg" },
+  { label: "Rings", value: "Rings", icon: "/images/products/categories/rings.svg" },
+  { label: "Earrings", value: "Earrings", icon: "/images/products/categories/earrings.svg" },
+  { label: "Necklace", value: "Necklaces", icon: "/images/products/categories/necklace.svg" },
+  { label: "Pendants", value: "Pendants", icon: "/images/products/categories/pendants.svg" },
+  { label: "Bracelets", value: "Bracelets", icon: "/images/products/categories/bracelets.svg" },
+  { label: "Bangles", value: "Bangles", icon: "/images/products/categories/bangles.svg" },
+  { label: "Nosepins", value: "Nosepins", icon: "/images/products/categories/nosepins.svg" },
+];
 
 export function getProductById(id: string): Product | undefined {
   return products.find((p) => p.id === id);
