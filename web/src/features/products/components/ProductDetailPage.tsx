@@ -5,10 +5,10 @@ import { useParams } from "next/navigation";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import { getProductById } from "@/features/products/data/products";
 import {
-  getMoreForYouProducts,
   getProductDetailContent,
   getProductDetailPricing,
 } from "@/features/products/data/productDetailContent";
+import { getMoreForYouCarouselItems } from "@/features/products/data/moreForYouContent";
 import { useCart } from "@/features/cart/context/CartContext";
 import { useToast } from "@/shared/hooks/use-toast";
 import { ChevronLeft } from "lucide-react";
@@ -39,7 +39,7 @@ const ProductDetailPage = () => {
 
   const content = getProductDetailContent(product);
   const pricing = getProductDetailPricing(product.id);
-  const moreForYou = getMoreForYouProducts(product.id);
+  const moreForYou = getMoreForYouCarouselItems(product.id);
 
   const handleAddToCart = () => {
     addItem(product);
@@ -70,7 +70,7 @@ const ProductDetailPage = () => {
 
       <ProductDetailHeroBanner imageSrc={content.heroBannerImage} alt={`${product.name} lifestyle`} />
       <ProductDetailPairWithSection pairWith={content.pairWith} />
-      <ProductDetailMoreForYouSection products={moreForYou} />
+      <ProductDetailMoreForYouSection items={moreForYou} />
       <ProductDetailVisitUsSection imageSrc={content.visitUsImage} />
     </article>
   );

@@ -33,7 +33,7 @@ const ProductDetailVisitUsSection = ({ imageSrc }: ProductDetailVisitUsSectionPr
 
     <div className="absolute inset-x-0 bottom-[64px] flex justify-center px-5 md:px-8 lg:px-10">
       <div className="flex w-full max-w-1360 flex-col items-center gap-40">
-        <div className="flex max-w-[425px] flex-col items-center gap-4 text-center text-white">
+        <div className="flex flex-col items-center gap-4 text-center text-white">
           <h2 id="visit-us-heading" className="font-larken text-48 font-light leading-110">
             Visit Us
           </h2>

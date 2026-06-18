@@ -92,7 +92,3 @@ export function getProductDetailContent(product: Product): ProductDetailContent 
     personaliseImage: "/images/about/crafting-diamond.png",
   };
 }
-
-export function getMoreForYouProducts(currentProductId: string) {
-  return products.filter((item) => item.id !== currentProductId).slice(0, 5);
-}
