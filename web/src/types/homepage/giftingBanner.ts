@@ -3,10 +3,18 @@ import type { StrapiMedia } from "./hero";
 export type GiftingBanner = {
   id?: number;
   title?: string;
-  cta?: { label?: string; to?: string };
-  secondary?: { label?: string; to?: string };
+  description?: string;
+  subtitle?: string;
+  mobileDescription?: string;
+  mobileSubtitle?: string;
+  isActive?: boolean;
+  primaryCta?: { label?: string; url?: string; to?: string };
+  secondaryCta?: { label?: string; url?: string; to?: string };
+  cta?: { label?: string; url?: string; to?: string };
+  secondary?: { label?: string; url?: string; to?: string };
   backgroundImage?: StrapiMedia;
   sideImage?: StrapiMedia;
+  image?: StrapiMedia | { desktopImage?: StrapiMedia; mobileImage?: StrapiMedia };
 };
 
 export type GiftingBannerData = {

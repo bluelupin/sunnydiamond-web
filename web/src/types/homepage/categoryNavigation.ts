@@ -46,12 +46,18 @@ export type FeaturedCollectionSection = {
 export type GiftingBanner = {
   id?: number | null;
   title?: string | null;
+  description?: string | null;
+  subtitle?: string | null;
+  mobileDescription?: string | null;
+  mobileSubtitle?: string | null;
+  isActive?: boolean | null;
   primaryCta?: CategoryNavigationCta | null;
   secondaryCta?: CategoryNavigationCta | null;
   cta?: CategoryNavigationCta | null;
   secondary?: CategoryNavigationCta | null;
   backgroundImage?: StrapiMedia | null;
   sideImage?: StrapiMedia | null;
+  image?: CategoryNavigationImage | StrapiMedia | null;
 };
 
 export type HomepageShoppingBlocksData = {

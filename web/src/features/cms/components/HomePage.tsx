@@ -6,7 +6,10 @@ import FeaturedCollectionSection from "@/features/cms/components/home/FeaturedCo
 import FeaturedProductsSection from "@/features/cms/components/home/FeaturedProductsSection";
 import ForYouForever from "@/features/cms/components/home/ForYouForever";
 import CraftsmanshipProcess from "./home/CraftsmanshipProcessLazy";
+import ForYourValentineSection from "@/features/cms/components/home/ForYourValentineSection";
 import SunnyPromiseSection from "@/features/cms/components/home/SunnyPromiseSection";
+import BespokeForYouSection from "@/features/cms/components/home/BespokeForYouSection";
+import DiamondsForEveryoneSection from "@/features/cms/components/home/DiamondsForEveryoneSection";
 import OccasionsTeaserSection from "@/features/cms/components//home/OccasionsTeaserSection";
 import ShowroomsSection from "@/features/stores/components/ShowroomsSection";
 import ApiDebugLogger from "@/shared/ui/ApiDebugLogger";
@@ -25,7 +28,10 @@ const HomePage = () => {
       <FeaturedProductsSection id="diamond-awaits" />
       <OccasionsTeaserSection id="categories" />
       <CraftsmanshipProcess id="craftsmanship" />
+      <ForYourValentineSection id="valentine" />
       <SunnyPromiseSection id="promise" />
+      <BespokeForYouSection id="bespoke-for-you" />
+      <DiamondsForEveryoneSection id="diamonds-for-everyone" />
       <ForYouForever id="for-you" />
       <ShowroomsSection id="showrooms" />
     </>

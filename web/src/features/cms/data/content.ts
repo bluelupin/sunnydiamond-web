@@ -45,9 +45,13 @@ export const homeContent = {
       cta: { label: "Discover" },
     },
     gifting: {
-      title: "Gifting For Your Valentine",
+      title: "For Your Valentine",
+      description:
+        "Honoring a lifetime of connection through rare, masterfully crafted jewelry designed for the moments that matter.",
+      mobileDescription:
+        "Traditional mastery bringing every diamond to radiant, eternal life.",
       cta: { label: "Shop Now", to: "/products" },
-      secondary: { label: "Send a Gift Card Instead", to: "/contact" },
+      secondary: { label: "Send a Gift Card Instead", to: "/gift-card" },
     },
   },
   craftsmanship: {
