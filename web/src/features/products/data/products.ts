@@ -15,6 +15,7 @@ export interface Product {
   image: string | StaticImageData;
   images: Array<string | StaticImageData>;
   lifestyleImage?: string | StaticImageData;
+  cardVariant?: "lifestyle";
   carat: string;
   metal: string;
   inStock: boolean;
