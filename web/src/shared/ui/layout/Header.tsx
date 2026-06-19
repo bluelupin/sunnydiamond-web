@@ -23,7 +23,8 @@ const Header = () => {
   const pathname = usePathname() ?? "/";
 
   const heroOverlayRoute = isHeroOverlayRoute(pathname);
-  const overlay = heroOverlayRoute && !scrolled && !mobileMenuOpen;
+  const overlay =
+    heroOverlayRoute && !scrolled && !mobileMenuOpen && !jewelleryMenuOpen;
 
   const { data: shellData } = useHomepageShell();
   const headerNavigationLinks = useMemo(() => {
@@ -77,7 +78,7 @@ const Header = () => {
     <>
       <header
         className={cn(
-          "fixed top-0 inset-x-0 z-50 transition-colors duration-300 relative",
+          "fixed top-0 inset-x-0 z-50 transition-colors duration-300",
           mobileMenuOpen ? "pointer-events-none opacity-0" : "",
           overlay
             ? "bg-transparent"
