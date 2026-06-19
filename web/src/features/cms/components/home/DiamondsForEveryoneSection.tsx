@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import { useFadeIn } from "@/shared/hooks/use-fade-in";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import type { SavingsPlanStep } from "@/types/homepage/diamondsForEveryoneSection";
+import { isSectionActive } from "@/shared/utils/cmsSection";
 
 interface DiamondsForEveryoneSectionProps {
   id?: string;
@@ -67,7 +68,6 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
     "Save monthly towards fine jewellery within reach";
   const ctaUrl = sectionData?.cta?.url || sectionData?.cta?.to || "/monthly-plans";
   const ctaLabel = sectionData?.cta?.label?.trim() || "Explore Plans";
-  const isActive = sectionData?.isActive;
 
   const steps = useMemo(() => {
     const cmsSteps = (sectionData?.steps ?? []) as SavingsPlanStep[];
@@ -83,7 +83,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
     }));
   }, [sectionData?.steps]);
 
-  if (isActive === false) return null;
+  if (!isSectionActive(sectionData?.isActive)) return null;
 
   if (isLoading) {
     return (
@@ -180,7 +180,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
         {ctaUrl ? (
           <Link
             href={ctaUrl}
-            className="inline-flex items-center justify-center border-b-[1.5px] border-[#0a0a0a] pb-1 font-gill text-sm font-normal uppercase leading-[110%] text-[#0a0a0a] transition-opacity hover:opacity-70"
+            className="inline-flex items-center justify-center border-b-[1.5px] border-[#0a0a0a] pb-1 font-gill text-sm font-normal uppercase leading-[110%] text-[#0a0a0a] transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2"
           >
             {ctaLabel}
           </Link>

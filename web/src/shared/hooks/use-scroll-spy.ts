@@ -6,7 +6,7 @@ interface UseScrollSpyOptions {
 }
 
 export function useScrollSpy({ sectionIds, visibilityThresholdIndex = 3 }: UseScrollSpyOptions) {
-  const [activeId, setActiveId] = useState<string>(sectionIds[0]);
+  const [activeId, setActiveId] = useState<string>(sectionIds[0] ?? "");
   const [isVisible, setIsVisible] = useState(false);
   const [progress, setProgress] = useState<Record<string, number>>({});
   const visibleSections = useRef<Set<string>>(new Set());
@@ -36,7 +36,7 @@ export function useScrollSpy({ sectionIds, visibilityThresholdIndex = 3 }: UseSc
 
       // ---- COMPUTE ----
       const next: Record<string, number> = {};
-      let active = sectionIds[0];
+      let active = sectionIds[0] ?? "";
       for (let i = 0; i < elements.length; i++) {
         const el = elements[i];
         const rect = rects[i];

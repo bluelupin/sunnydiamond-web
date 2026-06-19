@@ -1,10 +1,11 @@
 export const homeSections = [
+  { id: "hero", label: "Home" },
   { id: "alankara", label: "Alankara" },
   { id: "diamond-awaits", label: "Your Diamond" },
-  { id: "categories", label: "Categories" },
+  { id: "categories", label: "Occasions" },
   { id: "craftsmanship", label: "Craftsmanship" },
   { id: "promise", label: "Promise" },
-  { id: "for-you", label: "For You" },
+  { id: "bespoke-for-you", label: "Bespoke" },
   { id: "showrooms", label: "Showrooms" },
 ] as const;
 
@@ -38,7 +39,9 @@ export const homeContent = {
   alankara: {
     collection: {
       title: "Alankara Collection",
-      cta: { label: "Explore Collection", to: "/products" },
+      description:
+        "Guided by tradition and perfected by expertise, our craftsmen bring every diamond to life with meticulous attention to detail.",
+      cta: { label: "View Collection", to: "/products" },
     },
     productIds: ["1", "5", "2", "4"],
     product: {
@@ -127,24 +130,7 @@ export const homeContent = {
       "For over 35 years, Sunny Diamonds has been transforming the world's finest diamonds into wearable works of art. Our atelier combines centuries-old techniques with contemporary design to create pieces that transcend time.",
     cta: { label: "Read Our Story", to: "/about" },
   },
-  forYouForever: {
-    title: "For you, Forever",
-    cards: [
-      {
-        image: "foryou-bespoke",
-        title: "BESPOKE JEWELLERY",
-        subtitle:
-          "Designs thoughtfully crafted to bring your vision to life",
-      },
-      {
-        image: "foryou-diamonds",
-        title: "DIAMONDS FOR EVERYONE",
-        subtitle:
-          "Save monthly towards your timeless diamond",
-      },
-    ],
-  },
- promise: {
+  promise: {
     title: "THE SUNNY PROMISE",
     description:
       "Guided by heritage and perfected by pride every setting a masterpiece of expert precision.",

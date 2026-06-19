@@ -79,7 +79,7 @@ export function getProductDetailContent(product: Product): ProductDetailContent 
       collectionTitle: "Alankara Collection",
       collectionDescription:
         "Guided by tradition and perfected by expertise, our craftsmen bring every diamond to life with meticulous attention to detail.",
-      collectionImage: "/images/about/hero.png",
+      collectionImage: "/images/collection/hero-desktop.png",
       items: pairProducts.map((item) => ({
         id: item.id,
         name: item.name,

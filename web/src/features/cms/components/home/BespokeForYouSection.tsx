@@ -4,29 +4,29 @@ import Link from "next/link";
 import { useMemo } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { useFadeIn } from "@/shared/hooks/use-fade-in";
-import { homeContent } from "@/features/cms/data/content";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { isSectionActive } from "@/shared/utils/cmsSection";
 
 interface BespokeForYouSectionProps {
   id?: string;
 }
 
 const FALLBACK_BG = "/images/home/bespoke-for-you-bg.png";
+const FALLBACK_SUBTITLE =
+  "Designs thoughtfully crafted to bring your vision to life";
 
 const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
   const contentRef = useFadeIn(200);
   const { data: editorialData, isLoading } = useHomepageEditorialBlocks();
 
   const sectionData = editorialData?.bespokeForYouSection ?? null;
-  const fallbackCard = homeContent.forYouForever.cards[0];
-
   const sectionTitle =
     sectionData?.sectionTitle?.trim() || "Bespoke For You";
   const subtitle =
     sectionData?.subtitle?.trim() ||
     sectionData?.description?.trim() ||
-    fallbackCard.subtitle;
+    FALLBACK_SUBTITLE;
   const primaryCtaUrl =
     sectionData?.primaryCta?.url ||
     sectionData?.primaryCta?.to ||
@@ -39,7 +39,6 @@ const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
     "/products";
   const secondaryCtaLabel =
     sectionData?.secondaryCta?.label?.trim() || "View Past Work";
-  const isActive = sectionData?.isActive;
 
   const desktopImageUrl = useMemo(
     () =>
@@ -73,7 +72,7 @@ const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
     [sectionData, sectionTitle],
   );
 
-  if (isActive === false) return null;
+  if (!isSectionActive(sectionData?.isActive)) return null;
 
   if (isLoading) {
     return (

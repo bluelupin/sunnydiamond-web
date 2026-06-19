@@ -37,10 +37,13 @@ export type FeaturedCollectionImage = {
 export type FeaturedCollectionSection = {
   id?: number | null;
   sectionTitle?: string | null;
+  description?: string | null;
   cta?: CategoryNavigationCta | null;
   label?: { label?: string | null } | null;
   products?: FeaturedCollectionImage[] | null;
   backgroundImage?: StrapiMedia | null;
+  primaryImage?: CategoryNavigationImage | StrapiMedia | null;
+  image?: CategoryNavigationImage | StrapiMedia | null;
 };
 
 export type GiftingBanner = {

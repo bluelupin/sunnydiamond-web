@@ -6,6 +6,7 @@ import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { useFadeIn } from "@/shared/hooks/use-fade-in";
 import { homeContent } from "@/features/cms/data/content";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
+import { isSectionActive } from "@/shared/utils/cmsSection";
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 
 interface ForYourValentineSectionProps {
@@ -15,6 +16,9 @@ interface ForYourValentineSectionProps {
 const FALLBACK_RINGS = "/images/home/valentine-rings.png";
 const FALLBACK_BG_DESKTOP = "/images/home/valentine-bg-desktop.svg";
 const FALLBACK_BG_MOBILE = "/images/home/valentine-bg-mobile.svg";
+
+const ctaFocusClass =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2";
 
 const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
   const contentRef = useFadeIn(200);
@@ -98,8 +102,9 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
     [giftingData, sectionTitle],
   );
 
-  const isActive = giftingData?.isActive;
-  if (isActive === false) return null;
+  if (!isSectionActive(giftingData?.isActive)) {
+    return null;
+  }
 
   if (isLoading) {
     return (
@@ -130,16 +135,20 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
       aria-label={sectionTitle}
       className="relative overflow-hidden bg-[#F3E6E2]"
     >
-      <img
+      <OptimizedImage
         src={FALLBACK_BG_DESKTOP}
         alt=""
         aria-hidden
+        width={1440}
+        height={750}
         className="pointer-events-none absolute inset-0 hidden size-full object-cover opacity-30 lg:block"
       />
-      <img
+      <OptimizedImage
         src={FALLBACK_BG_MOBILE}
         alt=""
         aria-hidden
+        width={360}
+        height={400}
         className="pointer-events-none absolute inset-x-0 top-0 mx-auto w-full max-w-[360px] opacity-30 lg:hidden"
       />
 
@@ -147,7 +156,6 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
         ref={contentRef as React.RefObject<HTMLDivElement>}
         className="relative mx-auto w-full max-w-[1440px]"
       >
-        {/* Mobile */}
         <div className="flex flex-col items-center gap-6 px-4 py-16 lg:hidden">
           <div className="relative h-[336px] w-[305px] shrink-0">
             <OptimizedImage
@@ -171,7 +179,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
             {primaryCtaUrl ? (
               <Link
                 href={primaryCtaUrl}
-                className="inline-flex h-14 items-center justify-center bg-white px-8 font-gill text-sm font-normal uppercase leading-[110%] text-[#0a0a0a] transition-opacity hover:opacity-90"
+                className={`inline-flex h-14 items-center justify-center bg-white px-8 font-gill text-sm font-normal uppercase leading-[110%] text-[#0a0a0a] transition-opacity hover:opacity-90 ${ctaFocusClass}`}
               >
                 {primaryCtaLabel}
               </Link>
@@ -180,7 +188,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
             {secondaryCtaUrl ? (
               <Link
                 href={secondaryCtaUrl}
-                className="inline-flex items-center justify-center border-b-[1.5px] border-[#0a0a0a] pb-1 font-gill text-sm font-normal uppercase leading-[110%] text-[#0a0a0a] transition-opacity hover:opacity-70"
+                className={`inline-flex items-center justify-center border-b-[1.5px] border-[#0a0a0a] pb-1 text-center font-gill text-sm font-normal uppercase leading-[110%] text-[#0a0a0a] transition-opacity hover:opacity-70 ${ctaFocusClass}`}
               >
                 {secondaryCtaLabel}
               </Link>
@@ -188,9 +196,8 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
           </div>
         </div>
 
-        {/* Desktop */}
-        <div className="hidden lg:flex lg:h-[750px] lg:items-center lg:justify-between lg:px-10">
-          <div className="flex max-w-[437px] flex-col gap-8">
+        <div className="hidden lg:flex lg:h-[750px] lg:items-center lg:justify-between lg:gap-8 lg:px-10">
+          <div className="flex max-w-[437px] shrink-0 flex-col gap-8">
             <div className="flex flex-col gap-4">
               <h2 className="font-larken text-[48px] font-light leading-[110%] text-[#0a0a0a]">
                 {sectionTitle}
@@ -200,11 +207,11 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
               </p>
             </div>
 
-            <div className="flex items-center gap-8">
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
               {primaryCtaUrl ? (
                 <Link
                   href={primaryCtaUrl}
-                  className="inline-flex h-14 items-center justify-center bg-white px-8 font-gill text-sm font-normal uppercase leading-[110%] text-[#0a0a0a] transition-opacity hover:opacity-90"
+                  className={`inline-flex h-14 items-center justify-center bg-white px-8 font-gill text-sm font-normal uppercase leading-[110%] text-[#0a0a0a] transition-opacity hover:opacity-90 ${ctaFocusClass}`}
                 >
                   {primaryCtaLabel}
                 </Link>
@@ -213,7 +220,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
               {secondaryCtaUrl ? (
                 <Link
                   href={secondaryCtaUrl}
-                  className="inline-flex items-center justify-center border-b-[1.5px] border-[#0a0a0a] pb-1 font-gill text-sm font-normal uppercase leading-[110%] text-[#0a0a0a] transition-opacity hover:opacity-70"
+                  className={`inline-flex items-center justify-center whitespace-nowrap border-b-[1.5px] border-[#0a0a0a] pb-1 font-gill text-sm font-normal uppercase leading-[110%] text-[#0a0a0a] transition-opacity hover:opacity-70 ${ctaFocusClass}`}
                 >
                   {secondaryCtaLabel}
                 </Link>

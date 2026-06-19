@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { HomepageQueryKey } from "./queryKeys";
 
 type CmsSectionState<T> = {
@@ -26,14 +26,12 @@ export function useCmsSection<T>(
   const staleTimeMs = options?.staleTimeMs ?? 60_000;
   const key = queryKey;
 
-  const initial = useMemo(() => {
-    const entry = cache.get(key) as CacheEntry<T> | undefined;
-    return entry?.value;
-  }, [key]);
-
+  // Always start in a loading state so SSR and the client hydration pass match.
+  // Module-level cache may hold data from a prior server request; reading it here
+  // would render CMS text on the server while the client still shows fallbacks.
   const [state, setState] = useState<CmsSectionState<T>>(() => ({
-    data: initial,
-    isLoading: initial === undefined,
+    data: undefined,
+    isLoading: true,
     error: undefined,
   }));
 

@@ -6,6 +6,7 @@ import { getImageSrc } from "@/shared/utils/image";
 import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 import { homeContent } from "@/features/cms/data/content";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
+import { isSectionActive } from "@/shared/utils/cmsSection";
 
 interface SunnyPromiseSectionProps {
   id?: string;
@@ -28,9 +29,8 @@ const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
   const ctaUrl = sunnyPromiseData?.cta?.url || sunnyPromiseData?.cta?.to || fallback.cta.to;
   const ctaLabel = sunnyPromiseData?.cta?.label?.trim() || fallback.cta.label;
   const posterUrl = getCmsAssetUrl(sunnyPromiseData?.posterImage?.data?.attributes?.url);
-  const isActive = sunnyPromiseData?.isActive;
 
-  if (isActive === false) return null;
+  if (!isSectionActive(sunnyPromiseData?.isActive)) return null;
 
   if (isEditorialLoading) {
     return (
@@ -89,7 +89,7 @@ const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
         {ctaUrl ? (
           <Link
             href={ctaUrl}
-            className="inline-flex items-center justify-center border-b-[1.5px] border-[#0a0a0a] pb-1 font-gill text-sm font-normal uppercase leading-[110%] text-[#0a0a0a] transition-opacity hover:opacity-70"
+            className="inline-flex items-center justify-center border-b-[1.5px] border-[#0a0a0a] pb-1 font-gill text-sm font-normal uppercase leading-[110%] text-[#0a0a0a] transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2"
           >
             {ctaLabel}
           </Link>

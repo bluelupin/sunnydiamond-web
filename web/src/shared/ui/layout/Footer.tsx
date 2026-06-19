@@ -37,7 +37,7 @@ const Footer = () => {
   const footerCopyright =
     shellData?.global?.footerCopyright ||
     shellData?.footerCopyright ||
-    `© ${new Date().getFullYear()} Sunny Diamonds. All Rights Reserved.`;
+    "© Sunny Diamonds. All Rights Reserved.";
 
   /* Social links — always show all 4 icons; override URLs with CMS data where present */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
