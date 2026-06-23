@@ -103,7 +103,7 @@ const AboutCraftingRaritySection = () => {
                 withScale
                 className="mx-auto w-full sm:mt-4 lg:mt-6 md:mt-5 mt-4"
               >
-                <div className="mx-auto h-220 w-220 sm:h-280 sm:w-280 lg:h-354 lg:w-354">
+                <div className="mx-auto h-auto w-220 sm:h-280 sm:w-280 lg:h-354 lg:w-354">
                   <ResponsiveImage
                     desktopSrc={aboutPageImages.craftingDiamond}
                     alt="Internally flawless diamond"

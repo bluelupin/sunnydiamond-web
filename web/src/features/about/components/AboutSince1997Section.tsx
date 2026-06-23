@@ -12,7 +12,7 @@ const AboutSince1997Section = () => {
       aria-labelledby="about-since-1997-title"
       className="bg-white pb-16 md:py-20 lg:py-104"
     >
-      <PageContainer>
+      <PageContainer className="pr-0">
         <div className="space-y-3 lg:mb-[40px] mb-8">
           <h2
             id="about-since-1997-title"
@@ -24,66 +24,11 @@ const AboutSince1997Section = () => {
             {aboutSince1997Content.story}
           </p>
         </div>
-        <div className="mt-8 flex flex-col gap-8 lg:hidden">
-          <figure className="flex flex-col gap-3">
-            <div className="aspect-[549/600] w-full overflow-hidden">
-              <ResponsiveImage
-                desktopSrc={founder.image}
-                alt={founder.alt}
-                width={founder.width}
-                height={founder.height}
-                quality={90}
-                sizes="100vw"
-                className="h-full w-full object-cover"
-              />
-            </div>
-            <figcaption className="font-gill text-sm leading-110 text-darkblack md:text-base">
-              {founder.caption}
-            </figcaption>
-          </figure>
-
-          <div className="grid grid-cols-2 gap-4">
-            <figure className="flex flex-col gap-3">
-              <div className="aspect-[320/417] overflow-hidden">
-                <ResponsiveImage
-                  desktopSrc={event.image}
-                  alt={event.alt}
-                  width={event.width}
-                  height={event.height}
-                  quality={90}
-                  sizes="50vw"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <figcaption className="font-gill text-sm leading-110 text-darkblack md:text-base">
-                {event.caption}
-              </figcaption>
-            </figure>
-
-            <figure className="flex flex-col gap-3">
-              <div className="aspect-[463/600] overflow-hidden">
-                <ResponsiveImage
-                  desktopSrc={attending.image}
-                  alt={attending.alt}
-                  width={attending.width}
-                  height={attending.height}
-                  quality={90}
-                  sizes="50vw"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <figcaption className="font-gill text-sm leading-110 text-darkblack md:text-base">
-                {attending.caption}
-              </figcaption>
-            </figure>
-          </div>
-        </div>
-
-        <div className="mt-10 hidden overflow-x-auto pb-2 lg:block">
-          <div className="flex min-w-max items-center gap-20">
-            <article className="flex shrink-0 items-center gap-8">
-              <figure className="flex flex-col gap-3">
-                <div className="h-600 w-549 overflow-hidden">
+        <div className="mt-10 md:overflow-x-auto pb-2">
+          <div className="flex md:flex-row flex-col md:min-w-max min-w-full items-center lg:gap-20 md:gap-16 sm:gap-12 gap-11">
+            <article className="flex shrink-0 items-center gap-8 md:w-auto w-full">
+              <figure className="flex flex-col gap-3 md:w-auto w-full">
+                <div className="h-600 md:w-549 w-full">
                   <ResponsiveImage
                     desktopSrc={founder.image}
                     alt={founder.alt}
@@ -99,13 +44,12 @@ const AboutSince1997Section = () => {
                 </figcaption>
               </figure>
 
-              <p className="max-w-358 font-gill lg:text-xl text-lg font-light leading-110 text-neutral500">
+              <p className="lg:flex hidden max-w-358 font-gill lg:text-xl text-lg font-light leading-110 text-neutral500">
                 {aboutSince1997Content.story}
               </p>
             </article>
-
-            <div className="flex shrink-0 items-center gap-5">
-              <figure className="flex w-320 flex-col gap-3">
+            <div className="flex shrink-0 items-center gap-5 overflow-x-auto md:overflow-x-visible">
+              <figure className="flex md:w-320 w-[90%] md:min-w-0 min-w-[80%] flex-col gap-3">
                 <div className="h-417 overflow-hidden">
                   <ResponsiveImage
                     desktopSrc={event.image}
@@ -121,8 +65,7 @@ const AboutSince1997Section = () => {
                   {event.caption}
                 </figcaption>
               </figure>
-
-              <figure className="flex w-463 flex-col gap-3">
+              <figure className="flex md:w-463 w-[90%] md:min-w-0 min-w-[80%] flex-col gap-3">
                 <div className="h-600 overflow-hidden">
                   <ResponsiveImage
                     desktopSrc={attending.image}
