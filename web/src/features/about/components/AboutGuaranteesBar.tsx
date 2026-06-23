@@ -29,7 +29,7 @@ const AboutGuaranteeDivider = ({ orientation = "vertical" }: { orientation?: "ve
       "flex list-none items-center justify-center",
       orientation === "vertical"
         ? "min-w-0 flex-1 self-stretch"
-        : "w-full max-w-260 shrink-0 py-6",
+        : "lg:w-260 w-full shrink-0 lg:py-6 py-4",
     )}
   >
     <span
@@ -51,7 +51,7 @@ const AboutGuaranteeItem = ({ label, icon }: GuaranteeItemProps) => {
   const iconDimensions = guaranteeIconDimensions[icon];
 
   return (
-    <li className="flex lg:h-136 h-98 w-full max-w-260 list-none flex-col items-center justify-center gap-3 rounded-figma text-center desktop:w-260 desktop:shrink-0">
+    <li className="flex lg:h-136 h-98 lg:w-260 w-full list-none flex-col items-center justify-center gap-3 rounded-figma text-center desktop:w-260 desktop:shrink-0">
       <Image
         src={iconSrc}
         alt=""
