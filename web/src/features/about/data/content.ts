@@ -150,15 +150,18 @@ export const aboutHandcraftedContent = {
   cards: [
     {
       title: "Ethically Sourced, conflict free diamonds",
-      position: { x: 234, y: 0 },
+      position: { left: "20.17%", top: "0" },
+      gap: 12,
     },
     {
       title: "Pinnacle of Craftsmanship and Artistry",
-      position: { x: 469, y: 236 },
+      position: { left: "40.43%", top: "34.04%" },
+      gap: 12,
     },
     {
       title: "Highest Level of Quality Checks",
-      position: { x: 233, y: 471 },
+      position: { left: "20.09%", top: "67.97%" },
+      gap: 10,
     },
   ],
 } as const;
@@ -187,6 +190,17 @@ export const aboutHandcraftedFigmaSpec = {
     height: 693,
     overlapHero: 24,
   },
+  /** Figma node 692:27493 — mobile 3-2-3 tile grid (375px artboard) */
+  mobileGrid: {
+    frameWidth: 375,
+    gap: 2,
+    gutterColor: "#EFE7D4",
+    cardBackground: "#F8F4EC",
+    cardFontSize: 14,
+    cardIconGap: 10,
+    mosaicCols: 5,
+    mosaicRows: 3,
+  },
   card: {
     width: 222,
     height: 222,
@@ -210,8 +224,28 @@ export const aboutHandcraftedFigmaSpec = {
 export const aboutHandcraftedAssets = {
   gridMask: "/images/about/handcrafted-grid-mask.svg",
   flourish: "/images/about/handcrafted-flourish.svg",
-  /** Placeholder hero video — falls back to handcraftedBg image if missing or broken */
+  /** Mosaic photo grid for mobile tiles (Figma 692:27493) */
+  intersect: "/images/about/handcrafted-intersect.png",
+  /** Handcrafted hero background video */
   heroVideo: "/videos/handcrafted-bg.mp4",
+} as const;
+
+/** Mobile tile layout — Figma 692:27493 (3-2-3 rows, mosaic sprite positions) */
+export const aboutHandcraftedMobileLayout = {
+  row1: [
+    { type: "photo" as const, mosaicCol: 0, mosaicRow: 0 },
+    { type: "card" as const, cardIndex: 1 },
+    { type: "photo" as const, mosaicCol: 4, mosaicRow: 0 },
+  ],
+  row2: [
+    { type: "photo" as const, mosaicCol: 1, mosaicRow: 1 },
+    { type: "photo" as const, mosaicCol: 3, mosaicRow: 1 },
+  ],
+  row3: [
+    { type: "card" as const, cardIndex: 0 },
+    { type: "photo" as const, mosaicCol: 3, mosaicRow: 2 },
+    { type: "card" as const, cardIndex: 2 },
+  ],
 } as const;
 
 /** Figma node 692:27386 — vertical divider below Handcrafted (Line 1512) */
