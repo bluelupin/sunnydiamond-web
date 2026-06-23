@@ -58,7 +58,7 @@ const ProductDetailSidebar = ({
   };
 
   return (
-    <aside className="flex flex-col gap-10 lg:sticky lg:top-28 lg:self-start">
+    <aside className="flex flex-col gap-10 lg:sticky lg:top-8 lg:self-start">
       <div className="flex flex-col gap-6">
         <header className="flex flex-col gap-4">
           <ul className="m-0 flex list-none flex-wrap items-center gap-3 p-0">

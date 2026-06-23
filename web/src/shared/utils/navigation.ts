@@ -8,7 +8,7 @@ export function resolveHeaderNavHref(label: string, url: string): string {
   return url;
 }
 
-/** Routes where the hero sits beneath a transparent fixed header (homepage-style overlay). */
+/** Routes where the hero uses a transparent header treatment at the top of the page. */
 export function isHeroOverlayRoute(pathname: string): boolean {
   return pathname === "/" || pathname === "/about";
 }

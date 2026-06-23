@@ -336,7 +336,7 @@ const ProductAppointmentPanel = ({
       <button
         type="button"
         aria-label={config.closeAriaLabel}
-        className="absolute inset-0 bg-[rgba(30,30,30,0.3)] backdrop-blur-[10px] animate-in fade-in duration-300"
+        className="absolute inset-0 bg-[#1E1E1E]/25 backdrop-blur-[10px] animate-in fade-in duration-300"
         onClick={onClose}
       />
 

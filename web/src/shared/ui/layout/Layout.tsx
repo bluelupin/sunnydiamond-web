@@ -1,19 +1,14 @@
 "use client";
 
 import { ReactNode } from "react";
-import { usePathname } from "next/navigation";
 import Header from "./Header";
 import Footer from "./Footer";
-import { isHeroOverlayRoute } from "@/shared/utils/navigation";
 
 const Layout = ({ children }: { children: ReactNode }) => {
-  const pathname = usePathname() ?? "/";
-  const heroOverlay = isHeroOverlayRoute(pathname);
-
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className={heroOverlay ? "flex-1" : "flex-1 pt-16 md:pt-20"}>
+      <main className="flex-1">
         {children}
       </main>
       <Footer />
