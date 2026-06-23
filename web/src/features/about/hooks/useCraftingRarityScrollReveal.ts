@@ -1,31 +1,41 @@
 "use client";
 
 import { useEffect, useRef, useState, type RefObject } from "react";
+import { aboutCraftingRarityFigmaSpec } from "../data/content";
 
 export interface CraftingRarityRevealState {
   progress: number;
-  headingActive: boolean;
-  imageActive: boolean;
+  headingReveal: number;
+  imageReveal: number;
+  lineReveal: number;
   lineFill: number;
-  descriptionActive: boolean;
+  descriptionReveal: number;
   reducedMotion: boolean;
 }
 
+const { animation: animationSpec } = aboutCraftingRarityFigmaSpec;
+const { segments } = animationSpec;
+
 const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 
+const segmentReveal = (progress: number, start: number, end: number) =>
+  clamp((progress - start) / (end - start));
+
 /**
- * Scroll reveal sequence aligned with Figma "Crafting Rarity — Reveal V2":
- * Heading → Image → Line (0→79px gradient) → Body
+ * Sticky scroll-track progress for Figma "Crafting Rarity — Reveal V2":
+ * Heading mask → Image mask → Line mask + fill → Body fade.
+ * Progress begins as soon as the section enters the viewport.
  */
 export function useCraftingRarityScrollReveal(
   sectionRef: RefObject<HTMLElement | null>,
 ): CraftingRarityRevealState {
   const [state, setState] = useState<CraftingRarityRevealState>({
     progress: 0,
-    headingActive: false,
-    imageActive: false,
+    headingReveal: 0,
+    imageReveal: 0,
+    lineReveal: 0,
     lineFill: 0,
-    descriptionActive: false,
+    descriptionReveal: 0,
     reducedMotion: false,
   });
 
@@ -37,24 +47,21 @@ export function useCraftingRarityScrollReveal(
 
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-    const setReducedMotionState = () => {
+    const setReducedMotionState = (revealed: boolean) => {
       setState({
-        progress: 1,
-        headingActive: true,
-        imageActive: true,
-        lineFill: 1,
-        descriptionActive: true,
+        progress: revealed ? 1 : 0,
+        headingReveal: revealed ? 1 : 0,
+        imageReveal: revealed ? 1 : 0,
+        lineReveal: revealed ? 1 : 0,
+        lineFill: revealed ? 1 : 0,
+        descriptionReveal: revealed ? 1 : 0,
         reducedMotion: true,
       });
     };
 
     if (motionQuery.matches) {
       const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (!entry.isIntersecting) return;
-          setReducedMotionState();
-          observer.disconnect();
-        },
+        ([entry]) => setReducedMotionState(entry.isIntersecting),
         { threshold: 0.12 },
       );
       observer.observe(section);
@@ -65,16 +72,26 @@ export function useCraftingRarityScrollReveal(
       rafRef.current = null;
       const rect = section.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
-      const start = viewportHeight * 0.9;
-      const scrollRange = viewportHeight * 0.75 + rect.height * 0.4;
-      const progress = clamp((start - rect.top) / scrollRange);
+      const trackHeight = Math.max(section.offsetHeight - viewportHeight, 1);
+
+      // Start at 0 when the section first enters the viewport (top at bottom edge),
+      // reach 1 when the sticky scroll track is fully consumed.
+      const enterStart = viewportHeight;
+      const enterEnd = -trackHeight;
+      const scrollRange = enterStart - enterEnd;
+      const progress = clamp((enterStart - rect.top) / scrollRange);
 
       setState({
         progress,
-        headingActive: progress >= 0.06,
-        imageActive: progress >= 0.24,
-        lineFill: clamp((progress - 0.4) / 0.3),
-        descriptionActive: progress >= 0.76,
+        headingReveal: segmentReveal(progress, segments.heading.start, segments.heading.end),
+        imageReveal: segmentReveal(progress, segments.image.start, segments.image.end),
+        lineReveal: segmentReveal(progress, segments.line.start, segments.line.end),
+        lineFill: segmentReveal(progress, segments.lineFill.start, segments.lineFill.end),
+        descriptionReveal: segmentReveal(
+          progress,
+          segments.description.start,
+          segments.description.end,
+        ),
         reducedMotion: false,
       });
     };
@@ -90,9 +107,9 @@ export function useCraftingRarityScrollReveal(
 
     const onMotionChange = () => {
       if (motionQuery.matches) {
-        setReducedMotionState();
         window.removeEventListener("scroll", onScroll);
         window.removeEventListener("resize", onScroll);
+        setReducedMotionState(true);
       }
     };
 

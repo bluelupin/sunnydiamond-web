@@ -13,18 +13,18 @@ const AboutSince1997Section = () => {
       className="bg-white py-16 md:py-20 lg:py-104"
     >
       <PageContainer>
-        <h2
-          id="about-since-1997-title"
-          className="font-larken text-32 font-light leading-110 text-darkblack md:text-40 lg:text-48"
-        >
-          {aboutSince1997Content.title}
-        </h2>
-
-        <div className="mt-8 flex flex-col gap-8 lg:hidden">
-          <p className="font-gill text-base font-light leading-110 text-gray500 md:text-lg">
+        <div className="space-y-3 lg:mb-[40px] mb-8">
+          <h2
+            id="about-since-1997-title"
+            className="font-larken font-light leading-110 text-darkblack lg:text-48 md:text-40 text-32"
+          >
+            {aboutSince1997Content.title}
+          </h2>
+          <p className="lg:hidden font-gill font-light leading-110 text-neutral500 md:text-lg text-base">
             {aboutSince1997Content.story}
           </p>
-
+        </div>
+        <div className="mt-8 flex flex-col gap-8 lg:hidden">
           <figure className="flex flex-col gap-3">
             <div className="aspect-[549/600] w-full overflow-hidden">
               <ResponsiveImage
