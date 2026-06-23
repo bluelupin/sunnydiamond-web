@@ -34,7 +34,7 @@ const MediaContentOverlay = ({
         <div
           aria-hidden
           className={cn(
-            "pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent",
+            "pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent",
             className,
           )}
         />
