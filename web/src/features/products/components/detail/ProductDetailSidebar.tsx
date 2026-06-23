@@ -20,6 +20,7 @@ import {
   DetailOutlineButton,
   DetailTextLink,
 } from "./shared";
+import ScheduleVideoCallPanel from "./ScheduleVideoCallPanel";
 
 type ProductDetailSidebarProps = {
   product: Product;
@@ -41,6 +42,7 @@ const ProductDetailSidebar = ({
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [zipCode, setZipCode] = useState("122002");
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
+  const [isVideoCallOpen, setIsVideoCallOpen] = useState(false);
 
   const activeMetal = content.metalColors.find((color) => color.id === selectedMetal);
 
@@ -224,11 +226,19 @@ const ProductDetailSidebar = ({
             </p>
           </div>
           <div className="flex flex-col gap-3">
-            <DetailDarkButton>Schedule a Video Call</DetailDarkButton>
+            <DetailDarkButton onClick={() => setIsVideoCallOpen(true)}>
+              Schedule a Video Call
+            </DetailDarkButton>
             <DetailTextLink href="/contact">Try at Home</DetailTextLink>
           </div>
         </div>
       </section>
+
+      <ScheduleVideoCallPanel
+        open={isVideoCallOpen}
+        onClose={() => setIsVideoCallOpen(false)}
+        product={product}
+      />
 
       <section aria-label="Product information" className="flex flex-col gap-3">
         {content.accordions.map((accordion) => {
