@@ -25,6 +25,10 @@ export const aboutHeroFigmaSpec = {
     color: "#FFFFFF",
     textAlign: "center" as const,
   },
+  /** Bottom gradient for title legibility over hero image */
+  overlay: {
+    gradient: "bottom" as const,
+  },
 } as const;
 
 export const aboutPageImages = {
@@ -128,6 +132,13 @@ export const aboutSince1997Content = {
       height: 600,
     },
   ],
+} as const;
+
+/** Figma Component 228 — team card hover overlay */
+export const aboutFacesFigmaSpec = {
+  overlay: {
+    gradient: "bottom-strong" as const,
+  },
 } as const;
 
 export const aboutFacesContent = {

@@ -1,14 +1,19 @@
 "use client";
 
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
-import { aboutHeroContent, aboutPageImages } from "../data/content";
+import MediaContentOverlay from "@/shared/ui/MediaContentOverlay";
+import {
+  aboutHeroContent,
+  aboutHeroFigmaSpec,
+  aboutPageImages,
+} from "../data/content";
 
 const AboutHeroSection = () => {
   return (
     <section
       id="about-hero"
       aria-labelledby="about-hero-title"
-      className="relative flex h-520 flex-col overflow-hidden bg-gray200 sm:h-580 lg:h-640"
+      className="relative flex h-screen flex-col overflow-hidden bg-gray200 sm:h-580 lg:h-640"
     >
       <div className="relative flex-1 overflow-hidden">
         <ResponsiveImage
@@ -22,7 +27,9 @@ const AboutHeroSection = () => {
           className="absolute inset-0 h-full w-full object-cover object-center"
         />
 
-        <div className="absolute inset-x-0 bottom-0 flex justify-center px-5 pb-12 md:pb-20 lg:pb-75">
+        <MediaContentOverlay gradient={aboutHeroFigmaSpec.overlay.gradient} />
+
+        <div className="absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-12 md:pb-20 lg:pb-75">
           <h1
             id="about-hero-title"
             className="w-full max-w-886 text-center font-larken text-36 font-light leading-110 text-white sm:text-40 lg:text-48"

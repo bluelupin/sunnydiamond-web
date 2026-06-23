@@ -1,7 +1,8 @@
 import type { CSSProperties } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
+import MediaContentOverlay from "@/shared/ui/MediaContentOverlay";
 import { cn } from "@/shared/utils/cn";
-import { aboutFacesContent } from "../data/content";
+import { aboutFacesContent, aboutFacesFigmaSpec } from "../data/content";
 
 const hideScrollbarStyle: CSSProperties = {
   scrollbarWidth: "none",
@@ -53,11 +54,13 @@ const AboutFacesSection = () => {
                 priority={index === 0}
               />
 
-              <div
-                aria-hidden
-                className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/70 via-black/25 to-transparent opacity-100 transition-opacity duration-500 lg:opacity-0 lg:group-hover:opacity-100"
+              <MediaContentOverlay
+                gradient={aboutFacesFigmaSpec.overlay.gradient}
+                className={cn(
+                  "opacity-100 transition-opacity duration-500 lg:opacity-0 lg:group-hover:opacity-100",
+                )}
               />
-              <figcaption className="absolute bottom-0 left-0 lg:px-6 px-4 lg:py-12 py-8 text-left opacity-100 transition-all duration-500 md:p-6 lg:p-8 lg:translate-y-2 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100 w-full">
+              <figcaption className="absolute bottom-0 left-0 z-10 w-full px-4 py-8 text-left opacity-100 transition-all duration-500 md:p-6 lg:translate-y-2 lg:px-6 lg:py-12 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100 lg:p-8">
                 <p className="font-larken font-light md:text-2xl text-xl text-white leading-[110%]">
                   {member.name}
                 </p>

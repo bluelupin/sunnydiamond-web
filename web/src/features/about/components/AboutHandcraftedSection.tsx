@@ -1,5 +1,6 @@
 import Image from "next/image";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
+import MediaContentOverlay from "@/shared/ui/MediaContentOverlay";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import AboutHandcraftedHeroMedia from "./AboutHandcraftedHeroMedia";
 import AboutHandcraftedMobileGrid from "./AboutHandcraftedMobileGrid";
@@ -76,8 +77,10 @@ const AboutHandcraftedSection = () => {
             <div className="absolute inset-0">
               <AboutHandcraftedHeroMedia />
             </div>
-            <div className="absolute inset-0 bg-black/30" aria-hidden />
-            <div className="absolute inset-x-0 bottom-0 top-16 flex flex-col items-center justify-center gap-4 px-5 md:top-20">
+            <MediaContentOverlay
+              solidOpacity={aboutHandcraftedFigmaSpec.hero.overlayOpacity}
+            />
+            <div className="absolute inset-x-0 bottom-0 top-16 z-10 flex flex-col items-center justify-center gap-4 px-5 md:top-20">
               <h2
                 id="about-handcrafted-title"
                 className="text-center font-larken text-[32px] font-light leading-[110%] text-white md:text-[40px] lg:text-5xl"

@@ -2,10 +2,12 @@
 
 import { useRef } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
+import MediaContentOverlay from "@/shared/ui/MediaContentOverlay";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import {
   aboutPageImages,
   aboutTimelineContent,
+  aboutTimelineFigmaSpec,
   aboutTimelineYears,
 } from "../data/content";
 import { useAboutTimelineScroll } from "../hooks/useAboutTimelineScroll";
@@ -35,9 +37,11 @@ const AboutTimelineSection = () => {
             className="object-cover object-center"
           />
         </div>
-        <div className="absolute inset-0 bg-black/40" aria-hidden />
+        <MediaContentOverlay
+          solidOpacity={aboutTimelineFigmaSpec.overlayOpacity}
+        />
 
-        <PageContainer className="relative flex h-full flex-col lg:block lg:px-0 lg:max-w-full px-4">
+        <PageContainer className="relative z-10 flex h-full flex-col lg:block lg:px-0 lg:max-w-full px-4">
           <div className="flex h-full flex-col lg:flex-row lg:justify-between">
             <AboutTimelineNav activeYear={activeYear} onYearSelect={scrollToYear} />
 

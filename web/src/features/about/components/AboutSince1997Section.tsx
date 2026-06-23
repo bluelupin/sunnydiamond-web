@@ -10,7 +10,7 @@ const AboutSince1997Section = () => {
   return (
     <section
       aria-labelledby="about-since-1997-title"
-      className="bg-white py-16 md:py-20 lg:py-104"
+      className="bg-white pb-16 md:py-20 lg:py-104"
     >
       <PageContainer>
         <div className="space-y-3 lg:mb-[40px] mb-8">
@@ -94,12 +94,12 @@ const AboutSince1997Section = () => {
                     className="object-cover"
                   />
                 </div>
-                <figcaption className="font-gill text-base leading-110 text-darkblack">
+                <figcaption className="font-gill md:text-base text-sm leading-110 text-darkblack">
                   {founder.caption}
                 </figcaption>
               </figure>
 
-              <p className="max-w-358 font-gill text-xl font-light leading-110 text-gray500">
+              <p className="max-w-358 font-gill lg:text-xl text-lg font-light leading-110 text-neutral500">
                 {aboutSince1997Content.story}
               </p>
             </article>
