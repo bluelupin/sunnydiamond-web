@@ -1,3 +1,4 @@
+import type { StaticImageData } from "next/image";
 import { jewelleryListingProducts } from "@/features/jewellery-product/data/products";
 import { products, type Product } from "@/features/products/data/products";
 import type { ProductDetailContent, ProductDetailPricing } from "../types/productDetail";
@@ -10,7 +11,7 @@ const metalColors = [
   { id: "silver", label: "Silver", color: "#CCCCCC" },
 ] as const;
 
-const engravingOptions = ["None", "Initials (2 letters)", "Date", "Custom message"];
+const engravingPreviewImage = "/images/about/crafting-diamond.png";
 
 const benefits = [
   { label: "Cash on Delivery", lines: ["Cash on", "Delivery"] as [string, string] },
@@ -72,7 +73,7 @@ export function getProductDetailContent(product: Product): ProductDetailContent 
     attributes: ["IF Grade", metalShort, `${product.carat} Diamond`],
     metalColors: [...metalColors],
     ringSizes,
-    engravingOptions,
+    engravingPreviewImage,
     benefits,
     accordions: buildAccordions(product),
     pairWith: {
