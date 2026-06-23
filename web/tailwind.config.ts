@@ -236,6 +236,7 @@ export default {
       height: {
         15: "15px",
         19: "19px",
+        25: "25px",
         50: "50px",
         73: "73px",
         79: "79px",
@@ -297,6 +298,7 @@ export default {
       },
       maxHeight: {
         "100vh": "100vh",
+        25: "25px",
         206: "206px",
         260: "260px",
         278: "278px",

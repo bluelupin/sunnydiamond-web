@@ -27,7 +27,7 @@ const AboutTimelineNav = ({ activeYear, onYearSelect }: AboutTimelineNavProps) =
   return (
     <nav
       aria-label="Company timeline"
-      className="relative w-full shrink-0 lg:w-143 lg:pt-148"
+      className="relative w-full shrink-0 lg:w-143 lg:flex items-center"
     >
       <div className="flex flex-col gap-4 lg:hidden">
         <button

@@ -3,7 +3,7 @@ import { cn } from "@/shared/utils/cn";
 
 /** Figma 1440px frame with 40px horizontal safe area — see cursor/rules/project.mdc */
 export const pageContainerClassName =
-  "mx-auto w-full max-w-1440 px-5 md:px-8 lg:px-10";
+  "mx-auto w-full max-w-1440 px-5 md:px-8 lg:px-[40px]";
 
 type PageContainerProps = ComponentPropsWithoutRef<"div">;
 
