@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import TrustBadgeSection from "@/features/cms/components/common/TrustBadges";
+import PageContainer from "@/shared/ui/layout/PageContainer";
 import JewelleryHeroSection from "./JewelleryHeroSection";
 import JewelleryCategoryNav from "./JewelleryCategoryNav";
 import JewelleryProductToolbar from "./JewelleryProductToolbar";
@@ -66,12 +67,14 @@ const JewelleryProductPage = () => {
         }}
       />
 
-      <section className="pb-0 md:container md:pb-10">
-        <JewelleryProductGrid
-          products={visibleProducts}
-          wishlistedIds={wishlistedIds}
-          onToggleWishlist={handleToggleWishlist}
-        />
+      <section className="bg-gray200 pb-0 md:pb-10">
+        <PageContainer>
+          <JewelleryProductGrid
+            products={visibleProducts}
+            wishlistedIds={wishlistedIds}
+            onToggleWishlist={handleToggleWishlist}
+          />
+        </PageContainer>
       </section>
 
       <JewelleryLoadMoreSection

@@ -2,130 +2,301 @@
 
 import Link from "next/link";
 import { Heart } from "lucide-react";
-import ResponsiveImage from "@/shared/ui/ResponsiveImage";
+import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { cn } from "@/shared/utils/cn";
 import { formatJewelleryPrice } from "../utils/formatPrice";
-import type { ProductCardProps } from "../types";
+import type { BestsellerBadgeStyle, CardVariant } from "../utils/cardLayout";
+import type { StaticImageData } from "next/image";
 
-const JewelleryProductCard = ({
+export interface JewelleryProductCardProps {
+  title: string;
+  price: number;
+  primaryImage: string | StaticImageData;
+  hoverImage: string | StaticImageData;
+  href: string;
+  variant: CardVariant;
+  viewport?: "responsive" | "mobile" | "desktop";
+  isBestseller?: boolean;
+  isWishlisted?: boolean;
+  badgeStyle?: BestsellerBadgeStyle;
+  onToggleWishlist?: () => void;
+}
+
+type WishlistButtonProps = {
+  isWishlisted: boolean;
+  onToggleWishlist?: () => void;
+  white?: boolean;
+  viewport: NonNullable<JewelleryProductCardProps["viewport"]>;
+};
+
+const wishlistPositionClass = {
+  responsive: "right-2 top-2 md:right-6 md:top-6 md:size-8",
+  mobile: "right-2 top-2 size-6",
+  desktop: "right-6 top-6 size-8",
+} as const;
+
+const WishlistButton = ({ isWishlisted, onToggleWishlist, white = false, viewport }: WishlistButtonProps) => (
+  <button
+    type="button"
+    aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+    aria-pressed={isWishlisted}
+    onClick={(event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      onToggleWishlist?.();
+    }}
+    className={cn(
+      "absolute z-20 flex items-center justify-center",
+      wishlistPositionClass[viewport],
+    )}
+  >
+    <Heart
+      size={20}
+      strokeWidth={1.5}
+      className={cn(
+        "transition-colors duration-200",
+        isWishlisted
+          ? "fill-[#AB863B] text-[#AB863B]"
+          : white
+            ? "text-white"
+            : "text-darkblack",
+      )}
+    />
+  </button>
+);
+
+type ProductCopyProps = {
+  title: string;
+  price: number;
+  href: string;
+  white?: boolean;
+  viewport: NonNullable<JewelleryProductCardProps["viewport"]>;
+};
+
+const ProductCopy = ({ title, price, href, white = false, viewport }: ProductCopyProps) => (
+  <div
+    className={cn(
+      "relative z-10 flex w-full flex-col items-center justify-center text-center leading-110",
+      viewport === "responsive" && "gap-2 px-[4.747px] text-sm md:gap-3 md:px-3 md:text-20",
+      viewport === "mobile" && "gap-2 px-[4.747px] text-sm",
+      viewport === "desktop" && "gap-3 px-3 text-20",
+      white ? "text-white" : "text-darkblack",
+    )}
+  >
+    <Link href={href}>
+      <p
+        className={cn(
+          "font-gill",
+          white
+            ? viewport === "mobile" || viewport === "responsive"
+              ? "font-normal md:font-normal"
+              : "font-normal"
+            : viewport === "mobile" || viewport === "responsive"
+              ? "font-light md:font-light"
+              : "font-light",
+        )}
+      >
+        {title}
+      </p>
+    </Link>
+    <p className="font-gill font-semibold">
+      <span aria-hidden>₹ </span>
+      {formatJewelleryPrice(price)}
+    </p>
+  </div>
+);
+
+type CardBodyProps = Omit<JewelleryProductCardProps, "viewport"> & {
+  viewport: NonNullable<JewelleryProductCardProps["viewport"]>;
+};
+
+const LifestyleCard = ({
   title,
-  category,
+  price,
+  hoverImage,
+  href,
+  isWishlisted,
+  onToggleWishlist,
+  viewport,
+}: CardBodyProps) => (
+  <article
+    className={cn(
+      "group relative flex flex-col overflow-hidden",
+      viewport === "responsive" &&
+        "min-h-0 justify-end gap-4 self-stretch px-4 py-6 md:h-[496px] md:items-center md:gap-6 md:px-6 md:py-10",
+      viewport === "mobile" && "min-h-0 justify-end gap-4 self-stretch px-4 py-6",
+      viewport === "desktop" && "h-[496px] items-center gap-6 px-6 py-10",
+    )}
+  >
+    <Link href={href} className="absolute inset-0 z-0" aria-label={`View ${title}`} />
+    <div className="absolute inset-0 overflow-hidden" aria-hidden>
+      <OptimizedImage
+        src={hoverImage}
+        alt=""
+        className={cn(
+          "size-full object-cover",
+          (viewport === "desktop" || viewport === "responsive") &&
+            "transition-transform duration-700 group-hover:scale-105",
+        )}
+        sizes="(max-width: 768px) 50vw, 33vw"
+      />
+      <div
+        className={cn(
+          "absolute inset-0",
+          viewport === "mobile" && "bg-black/20",
+          viewport === "desktop" &&
+            "bg-gradient-to-t from-[rgba(0,0,0,0.4)] from-[14%] to-[rgba(0,0,0,0)] to-[50%]",
+          viewport === "responsive" &&
+            "bg-black/20 md:bg-gradient-to-t md:from-[rgba(0,0,0,0.4)] md:from-[14%] md:to-[rgba(0,0,0,0)] md:to-[50%]",
+        )}
+      />
+    </div>
+
+    {(viewport === "desktop" || viewport === "responsive") && (
+      <div
+        className={cn(
+          "w-full shrink-0",
+          viewport === "responsive" ? "hidden md:block md:h-[303px]" : "h-[303px]",
+        )}
+        aria-hidden
+      />
+    )}
+
+    <ProductCopy title={title} price={price} href={href} white viewport={viewport} />
+    <WishlistButton
+      isWishlisted={!!isWishlisted}
+      onToggleWishlist={onToggleWishlist}
+      white
+      viewport={viewport}
+    />
+  </article>
+);
+
+const DefaultCard = ({
+  title,
   price,
   primaryImage,
   hoverImage,
   href,
   isBestseller = false,
-  isWishlisted = false,
+  isWishlisted,
   onToggleWishlist,
-}: ProductCardProps) => {
-  return (
-    <article
-      className={cn(
-        "group relative flex flex-col bg-white",
-        "transition-all duration-500 ease-out",
-        "hover:shadow-[0_10px_30px_rgba(0,0,0,0.12)]",
-      )}
-    >
-      <div className="relative aspect-square overflow-hidden bg-gray200">
-        {isBestseller ? (
-          <span className="absolute top-4 left-4 z-20 bg-[#C8A96A] text-white text-[10px] md:text-xs font-gill uppercase tracking-[1.8%] px-3 py-1">
-            Bestseller
-          </span>
-        ) : null}
-
-        <button
-          type="button"
-          aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-          aria-pressed={isWishlisted}
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            onToggleWishlist?.();
-          }}
-          className="absolute top-4 right-4 z-20 p-1 text-darkblack/70 hover:text-darkblack transition-colors duration-300"
-        >
-          <Heart
-            size={20}
-            strokeWidth={1.5}
-            className={cn(isWishlisted && "fill-primary text-primary")}
-          />
-        </button>
-
-        <Link href={href} className="absolute inset-0 block" aria-label={`View ${title}`}>
-          <div
-            className={cn(
-              "absolute inset-0",
-              "opacity-100 group-hover:opacity-0",
-              "transition-opacity duration-500 ease-out",
-            )}
-          >
-            <ResponsiveImage
-              desktopSrc={primaryImage}
-              alt={title}
-              width={640}
-              height={640}
-            />
-          </div>
-          <div
-            aria-hidden
-            className={cn(
-              "absolute inset-0",
-              "opacity-0 group-hover:opacity-100",
-              "transition-opacity duration-500 ease-out",
-            )}
-          >
-            <ResponsiveImage
-              desktopSrc={hoverImage}
-              alt=""
-              width={640}
-              height={640}
-            />
-          </div>
-        </Link>
-      </div>
-
-      <div
+  badgeStyle = "top-gold",
+  viewport,
+}: CardBodyProps) => (
+  <article
+    className={cn(
+      "group relative flex flex-col items-center bg-gray200",
+      viewport === "responsive" &&
+        "gap-4 px-4 py-6 md:h-[496px] md:gap-6 md:px-6 md:py-10",
+      viewport === "mobile" && "gap-4 px-4 py-6",
+      viewport === "desktop" && "h-[496px] gap-6 px-6 py-10",
+    )}
+  >
+    {isBestseller && badgeStyle === "top-gold" && (
+      <span
         className={cn(
-          "relative z-10 bg-white px-3 pt-4 pb-5 text-center",
-          "transition-all duration-500 ease-out",
-          "translate-y-0 group-hover:-translate-y-14 md:group-hover:-translate-y-16",
-          "group-hover:shadow-[0_-8px_24px_rgba(0,0,0,0.06)]",
+          "absolute z-20 flex items-center justify-center bg-[#C5A156] font-gill text-xs leading-110 text-darkblack",
+          viewport === "responsive" &&
+            "left-[calc(50%-53px)] top-0 h-7 -translate-x-1/2 p-2 md:hidden",
+          viewport === "mobile" && "left-[calc(50%-53px)] top-0 h-7 -translate-x-1/2 p-2",
         )}
       >
-        <p className="font-gill text-[10px] md:text-xs uppercase tracking-[1.8%] text-darkblack/60 mb-2">
-          {category}
-        </p>
+        BESTSELLER
+      </span>
+    )}
 
-        <Link href={href}>
-          <h3 className="font-gill text-sm md:text-base text-darkblack font-light tracking-[1%] leading-[130%] hover:text-primary transition-colors duration-300">
-            {title}
-          </h3>
-        </Link>
+    <WishlistButton
+      isWishlisted={!!isWishlisted}
+      onToggleWishlist={onToggleWishlist}
+      viewport={viewport}
+    />
 
-        <p className="mt-2 font-gill text-base md:text-lg text-darkblack font-normal tracking-[1%]">
-          <span aria-hidden className="mr-0.5">
-            ₹
-          </span>
-          {formatJewelleryPrice(price)}
-        </p>
-
-        <Link
-          href={href}
+    <Link
+      href={href}
+      className={cn(
+        "relative shrink-0 overflow-hidden",
+        viewport === "responsive" && "h-[110px] w-[155px] md:h-[303px] md:w-full",
+        viewport === "mobile" && "h-[110px] w-[155px]",
+        viewport === "desktop" && "h-[303px] w-full",
+      )}
+      aria-label={`View ${title}`}
+    >
+      <div
+        className={cn(
+          "absolute inset-0",
+          (viewport === "desktop" || viewport === "responsive") &&
+            "opacity-100 transition-opacity duration-500 group-hover:opacity-0",
+        )}
+      >
+        <OptimizedImage
+          src={primaryImage}
+          alt={title}
           className={cn(
-            "mt-4 inline-flex items-center justify-center",
-            "border-[0.8px] border-darkblack text-darkblack",
-            "md:text-sm text-xs px-6 h-10 tracking-[1.8%] uppercase font-gill",
-            "opacity-0 translate-y-2 pointer-events-none",
-            "group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto",
-            "transition-all duration-500 ease-out",
-            "hover:bg-darkblack hover:text-white",
+            "size-full",
+            viewport === "mobile" ? "object-contain" : "object-cover",
+            viewport === "responsive" && "object-contain md:object-cover",
           )}
-        >
-          Discover
-        </Link>
+          sizes="(max-width: 768px) 50vw, 33vw"
+        />
       </div>
-    </article>
-  );
+      {(viewport === "desktop" || viewport === "responsive") && (
+        <div className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+          <OptimizedImage
+            src={hoverImage}
+            alt=""
+            className="size-full object-cover"
+            sizes="(max-width: 768px) 50vw, 33vw"
+          />
+        </div>
+      )}
+    </Link>
+
+    {isBestseller && badgeStyle === "center-white" && (
+      <span
+        className={cn(
+          "absolute z-20 flex items-center justify-center bg-white font-gill font-semibold leading-110 text-darkblack shadow-[0px_2px_2px_#C5A156]",
+          viewport === "responsive" &&
+            "left-[51.75px] top-[116px] p-1.5 text-xs md:left-1/2 md:top-[331px] md:h-9 md:-translate-x-1/2 md:px-3 md:text-sm",
+          viewport === "mobile" && "left-[51.75px] top-[116px] p-1.5 text-xs",
+          viewport === "desktop" &&
+            "left-1/2 top-[331px] h-9 -translate-x-1/2 px-3 text-sm",
+        )}
+      >
+        BESTSELLER
+      </span>
+    )}
+
+    {isBestseller && badgeStyle === "top-gold" && (
+      <span
+        className={cn(
+          "absolute z-20 flex items-center justify-center bg-white font-gill font-semibold leading-110 text-darkblack shadow-[0px_2px_2px_#C5A156]",
+          viewport === "responsive" &&
+            "hidden md:flex left-1/2 top-[331px] h-9 -translate-x-1/2 px-3 text-sm",
+          viewport === "desktop" &&
+            "left-1/2 top-[331px] h-9 -translate-x-1/2 px-3 text-sm",
+        )}
+      >
+        BESTSELLER
+      </span>
+    )}
+
+    <ProductCopy title={title} price={price} href={href} viewport={viewport} />
+  </article>
+);
+
+const JewelleryProductCard = ({
+  viewport = "responsive",
+  variant,
+  ...props
+}: JewelleryProductCardProps) => {
+  const bodyProps = { ...props, variant, viewport };
+
+  if (variant === "lifestyle") {
+    return <LifestyleCard {...bodyProps} />;
+  }
+
+  return <DefaultCard {...bodyProps} />;
 };
 
 export default JewelleryProductCard;
