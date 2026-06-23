@@ -21,6 +21,7 @@ import {
   DetailTextLink,
 } from "./shared";
 import ScheduleVideoCallPanel from "./ScheduleVideoCallPanel";
+import TryAtHomePanel from "./TryAtHomePanel";
 
 type ProductDetailSidebarProps = {
   product: Product;
@@ -43,6 +44,7 @@ const ProductDetailSidebar = ({
   const [zipCode, setZipCode] = useState("122002");
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
   const [isVideoCallOpen, setIsVideoCallOpen] = useState(false);
+  const [isTryAtHomeOpen, setIsTryAtHomeOpen] = useState(false);
 
   const activeMetal = content.metalColors.find((color) => color.id === selectedMetal);
 
@@ -229,7 +231,7 @@ const ProductDetailSidebar = ({
             <DetailDarkButton onClick={() => setIsVideoCallOpen(true)}>
               Schedule a Video Call
             </DetailDarkButton>
-            <DetailTextLink href="/contact">Try at Home</DetailTextLink>
+            <DetailTextLink onClick={() => setIsTryAtHomeOpen(true)}>Try at Home</DetailTextLink>
           </div>
         </div>
       </section>
@@ -237,6 +239,12 @@ const ProductDetailSidebar = ({
       <ScheduleVideoCallPanel
         open={isVideoCallOpen}
         onClose={() => setIsVideoCallOpen(false)}
+        product={product}
+      />
+
+      <TryAtHomePanel
+        open={isTryAtHomeOpen}
+        onClose={() => setIsTryAtHomeOpen(false)}
         product={product}
       />
 
