@@ -16,6 +16,20 @@ export const filterCategoryOptions = [
 export const filterMetalTypeOptions = ["Silver", "Gold"];
 export const filterMetalPurityOptions = ["18k", "22k"];
 
+export const filterCategoryRows = [
+  ["Bangles", "Necklaces", "Rings"],
+  ["Pendants", "Nose Pins", "Earrings"],
+] as const;
+
+export const filterGemstoneOptions = [
+  { value: "", label: "-Select-" },
+  { value: "diamond", label: "Diamond" },
+  { value: "ruby", label: "Ruby" },
+  { value: "emerald", label: "Emerald" },
+  { value: "sapphire", label: "Sapphire" },
+  { value: "pearl", label: "Pearl" },
+] as const;
+
 export const sortOptions: JewellerySortOption[] = [
   { value: "featured", label: "Featured" },
   { value: "price-asc", label: "Price: Low to High" },
@@ -29,4 +43,5 @@ export const defaultFilterState: JewelleryFilterState = {
   categories: [],
   metalTypes: [],
   metalPurities: [],
+  gemstoneType: "",
 };

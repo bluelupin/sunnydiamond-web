@@ -21,6 +21,7 @@ export interface JewelleryFilterState {
   categories: string[];
   metalTypes: string[];
   metalPurities: string[];
+  gemstoneType: string;
 }
 
 export interface JewellerySortOption {
