@@ -23,7 +23,7 @@ export type ProductDetailContent = {
   attributes: string[];
   metalColors: MetalColorOption[];
   ringSizes: string[];
-  engravingOptions: string[];
+  engravingPreviewImage: string | StaticImageData;
   benefits: { label: string; lines: [string, string] }[];
   accordions: ProductDetailAccordion[];
   pairWith: {

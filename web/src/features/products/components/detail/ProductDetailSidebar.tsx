@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ChevronDown, ChevronUp, Heart, Store, Truck } from "lucide-react";
+import { ChevronDown, ChevronUp, Heart, Plus, Store, Truck } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -23,6 +23,8 @@ import {
 import ScheduleVideoCallPanel from "./ScheduleVideoCallPanel";
 import TryAtHomePanel from "./TryAtHomePanel";
 import PersonaliseProductPanel from "./PersonaliseProductPanel";
+import MetalEngravingPanel from "./MetalEngravingPanel";
+import type { EngravingSelection } from "@/features/products/constants/engraving";
 
 type ProductDetailSidebarProps = {
   product: Product;
@@ -39,7 +41,8 @@ const ProductDetailSidebar = ({
 }: ProductDetailSidebarProps) => {
   const [selectedMetal, setSelectedMetal] = useState(content.metalColors[0]?.id ?? "gold");
   const [ringSize, setRingSize] = useState<string>("");
-  const [engraving, setEngraving] = useState<string>("");
+  const [engravingSelection, setEngravingSelection] = useState<EngravingSelection | null>(null);
+  const [isEngravingOpen, setIsEngravingOpen] = useState(false);
   const [isGift, setIsGift] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [zipCode, setZipCode] = useState("122002");
@@ -112,20 +115,26 @@ const ProductDetailSidebar = ({
             </Select>
           </div>
 
-          <Select value={engraving} onValueChange={setEngraving}>
-            <SelectTrigger className="h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0">
-              <SelectValue placeholder="Metal Engraving (Optional)" />
-            </SelectTrigger>
-            <SelectContent>
-              {content.engravingOptions.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <button
+            type="button"
+            onClick={() => setIsEngravingOpen(true)}
+            className="flex h-14 w-full items-center justify-between bg-aboutInactive px-3 text-left"
+          >
+            <span className="font-gill text-base leading-110 text-darkblack">
+              {engravingSelection?.text ?? "Metal Engraving (Optional)"}
+            </span>
+            <Plus size={20} strokeWidth={1.5} aria-hidden className="shrink-0 text-darkblack" />
+          </button>
         </div>
       </div>
+
+      <MetalEngravingPanel
+        open={isEngravingOpen}
+        onClose={() => setIsEngravingOpen(false)}
+        previewImage={content.engravingPreviewImage}
+        initialValue={engravingSelection}
+        onSave={setEngravingSelection}
+      />
 
       <div className="flex flex-col gap-4">
         <div className="flex items-end justify-between gap-4">
