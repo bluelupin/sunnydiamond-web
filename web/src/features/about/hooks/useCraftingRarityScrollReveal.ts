@@ -14,7 +14,7 @@ export interface CraftingRarityRevealState {
 }
 
 const { animation: animationSpec } = aboutCraftingRarityFigmaSpec;
-const { segments } = animationSpec;
+const { segments, viewportVisibleThreshold } = animationSpec;
 
 const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 
@@ -24,7 +24,7 @@ const segmentReveal = (progress: number, start: number, end: number) =>
 /**
  * Sticky scroll-track progress for Figma "Crafting Rarity — Reveal V2":
  * Heading mask → Image mask → Line mask + fill → Body fade.
- * Progress begins as soon as the section enters the viewport.
+ * Progress begins once the section is 40% visible in the viewport.
  */
 export function useCraftingRarityScrollReveal(
   sectionRef: RefObject<HTMLElement | null>,
@@ -62,7 +62,7 @@ export function useCraftingRarityScrollReveal(
     if (motionQuery.matches) {
       const observer = new IntersectionObserver(
         ([entry]) => setReducedMotionState(entry.isIntersecting),
-        { threshold: 0.12 },
+        { threshold: viewportVisibleThreshold },
       );
       observer.observe(section);
       return () => observer.disconnect();
@@ -72,14 +72,14 @@ export function useCraftingRarityScrollReveal(
       rafRef.current = null;
       const rect = section.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
-      const trackHeight = Math.max(section.offsetHeight - viewportHeight, 1);
+      const sectionHeight = section.offsetHeight;
+      const trackHeight = Math.max(sectionHeight - viewportHeight, 1);
 
-      // Start at 0 when the section first enters the viewport (top at bottom edge),
-      // reach 1 when the sticky scroll track is fully consumed.
-      const enterStart = viewportHeight;
-      const enterEnd = -trackHeight;
-      const scrollRange = enterStart - enterEnd;
-      const progress = clamp((enterStart - rect.top) / scrollRange);
+      // Hold at 0 until the section is 40% visible, then reveal through the sticky track.
+      const revealStartTop = viewportHeight - sectionHeight * viewportVisibleThreshold;
+      const revealEndTop = -trackHeight;
+      const scrollRange = revealStartTop - revealEndTop;
+      const progress = clamp((revealStartTop - rect.top) / scrollRange);
 
       setState({
         progress,

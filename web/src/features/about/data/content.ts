@@ -85,9 +85,12 @@ export const aboutCraftingRarityFigmaSpec = {
   /** Figma prototype scroll storytelling — Crafting Rarity Reveal V2 */
   animation: {
     scrollTrackVh: 200,
+    /** Reveal begins once this fraction of the section is visible in the viewport */
+    viewportVisibleThreshold: 0.2,
     headingMaskHeight: 218,
     imageMaskHeight: 354,
     lineMaskHeight: 79,
+    bodyMaskHeight: 88,
     segments: {
       heading: { start: 0.05, end: 0.28 },
       image: { start: 0.24, end: 0.44 },

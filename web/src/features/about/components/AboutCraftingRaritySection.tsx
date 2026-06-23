@@ -81,7 +81,7 @@ const AboutCraftingRaritySection = () => {
       <div style={{ height: `${animationSpec.scrollTrackVh}vh` }}>
         <div className="sticky top-0 flex min-h-screen items-center py-16 md:py-20 lg:py-100">
           <PageContainer className="flex w-full justify-center">
-            <div className="flex w-full max-w-[817px] flex-col items-center text-center lg:min-h-745">
+            <div className="flex w-full flex-col items-center text-center lg:min-h-745">
               <MaskReveal
                 reveal={headingReveal}
                 maxHeight={animationSpec.headingMaskHeight}
@@ -90,7 +90,7 @@ const AboutCraftingRaritySection = () => {
               >
                 <h2
                   id="about-crafting-rarity-title"
-                  className="whitespace-pre-line font-larken text-40 font-light leading-110 text-darkblack sm:text-56 md:text-72 lg:text-90"
+                  className="whitespace-pre-line font-larken font-light leading-110 text-darkblack lg:text-90 md:text-72 sm:text-56 text-40"
                 >
                   {aboutCraftingRarityContent.heading}
                 </h2>
@@ -101,7 +101,7 @@ const AboutCraftingRaritySection = () => {
                 maxHeight={animationSpec.imageMaskHeight}
                 reducedMotion={reducedMotion}
                 withScale
-                className="mx-auto mt-3 w-full sm:mt-4 lg:mt-1"
+                className="mx-auto w-full sm:mt-4 lg:mt-6 md:mt-5 mt-4"
               >
                 <div className="mx-auto h-220 w-220 sm:h-280 sm:w-280 lg:h-354 lg:w-354">
                   <ResponsiveImage
@@ -115,39 +115,24 @@ const AboutCraftingRaritySection = () => {
                   />
                 </div>
               </MaskReveal>
-
               <MaskReveal
                 reveal={lineReveal}
                 maxHeight={animationSpec.lineMaskHeight}
                 reducedMotion={reducedMotion}
                 className="mt-5 lg:mt-[23px]"
               >
-                <VerticalScrollLine
-                  lineFill={lineFill}
-                  reducedMotion={reducedMotion}
-                  visible={lineReveal > 0.02}
-                  lineHeight={lineSpec.height}
-                />
+                <VerticalScrollLine className="pt-5 pb-8 md:pb-11 lg:pb-[40px]" />
               </MaskReveal>
-
-              <div
-                className={cn(
-                  "mt-2.5 w-full sm:mt-3 lg:mt-[13px]",
-                  !reducedMotion && "will-change-[opacity,transform]",
-                )}
-                style={
-                  reducedMotion
-                    ? undefined
-                    : {
-                        opacity: descriptionReveal,
-                        transform: `translateY(${(1 - descriptionReveal) * 16}px)`,
-                      }
-                }
+              <MaskReveal
+                reveal={descriptionReveal}
+                maxHeight={animationSpec.bodyMaskHeight}
+                reducedMotion={reducedMotion}
+                className="mt-2.5 w-full sm:mt-3 lg:mt-[13px]"
               >
                 <p className="mx-auto w-full max-w-523 font-gill text-base font-light leading-110 text-darkblack md:text-lg lg:text-20">
                   {aboutCraftingRarityContent.description}
                 </p>
-              </div>
+              </MaskReveal>
             </div>
           </PageContainer>
         </div>
