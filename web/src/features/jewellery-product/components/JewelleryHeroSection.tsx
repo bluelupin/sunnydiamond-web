@@ -3,7 +3,7 @@ import fallBackImage from "@/assets/fallBackImage.png";
 
 const JewelleryHeroSection = () => {
   return (
-    <section aria-label="Handcrafted Brilliance" className="relative h-[220px] md:h-[280px] lg:h-[320px] overflow-hidden bg-charcoal">
+    <section aria-label="Handcrafted Brilliance" className="relative h-[240px] overflow-hidden bg-charcoal md:h-[280px] lg:h-[320px]">
       <div className="absolute inset-0">
         <ResponsiveImage
           desktopSrc={fallBackImage}
@@ -12,12 +12,15 @@ const JewelleryHeroSection = () => {
           width={1440}
           height={320}
           priority
-          className="opacity-70"
+          className="opacity-70 md:opacity-70"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/40" aria-hidden />
+        <div
+          className="absolute inset-0 bg-black/60 md:bg-gradient-to-b md:from-black/30 md:via-black/20 md:to-black/40"
+          aria-hidden
+        />
       </div>
-      <div className="relative container h-full flex items-center justify-center">
-        <h1 className="font-larken font-light text-white text-[32px] md:text-[44px] lg:text-[54px] leading-[100%] tracking-[0%] text-center">
+      <div className="relative flex h-full flex-col items-center justify-end pb-10 md:container md:justify-center md:pb-0">
+        <h1 className="font-larken text-[32px] font-light leading-110 text-white md:text-[44px] md:leading-[100%] lg:text-[54px]">
           Handcrafted Brilliance
         </h1>
       </div>

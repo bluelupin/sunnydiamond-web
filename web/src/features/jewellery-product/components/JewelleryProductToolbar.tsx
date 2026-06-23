@@ -17,7 +17,7 @@ const JewelleryProductToolbar = ({
   onFilterOpen,
 }: JewelleryProductToolbarProps) => {
   return (
-    <div className="container flex flex-col gap-4 md:flex-row md:items-center md:justify-between py-6 md:py-8">
+    <div className="container hidden flex-col gap-4 py-6 md:flex md:flex-row md:items-center md:justify-between md:py-8">
       <p className="font-gill text-sm md:text-base text-darkblack/80 tracking-[1%]">
         {productCount.toLocaleString("en-IN")} Products
       </p>

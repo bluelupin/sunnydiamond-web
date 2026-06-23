@@ -1,38 +1,38 @@
-import { HandCoins, PackageCheck, Banknote } from "lucide-react";
+import Image from "next/image";
 
 const guarantees = [
   {
-    icon: HandCoins,
+    iconSrc: "/images/about/guarantees/moneyback.svg",
     label: "100% Moneyback Guarantee",
   },
   {
-    icon: PackageCheck,
+    iconSrc: "/images/about/guarantees/return.svg",
     label: "15 Days Return Policy",
   },
   {
-    icon: Banknote,
+    iconSrc: "/images/about/guarantees/cod.svg",
     label: "Cash on Delivery",
   },
 ] as const;
 
 const JewelleryGuaranteesSection = () => {
   return (
-    <section aria-label="Shopping guarantees" className="border-y border-gray600/30 bg-white">
-      <div className="container py-10 md:py-14">
-        <ul className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray600/30">
-          {guarantees.map(({ icon: Icon, label }) => (
-            <li
-              key={label}
-              className="flex flex-col items-center justify-center gap-4 px-6 py-6 md:py-0 text-center"
-            >
-              <Icon size={28} strokeWidth={1.25} className="text-darkblack" aria-hidden />
-              <p className="font-gill text-sm md:text-base text-darkblack font-light tracking-[1%] leading-[130%] max-w-[220px]">
+    <section aria-label="Shopping guarantees" className="bg-gray200 md:border-y md:border-gray600/30 md:bg-white">
+      <ul className="flex flex-col gap-6 px-4 py-10 md:container md:grid md:grid-cols-3 md:gap-0 md:py-14 md:divide-x md:divide-gray600/30">
+        {guarantees.map(({ iconSrc, label }, index) => (
+          <li key={label} className="flex flex-col gap-6 md:gap-0">
+            {index > 0 ? <div className="h-px w-full bg-neutral300 md:hidden" aria-hidden /> : null}
+            <div className="flex flex-col items-center justify-center gap-2 rounded-sm px-3 py-4 text-center md:gap-4 md:px-6 md:py-0">
+              <div className="relative size-10 shrink-0">
+                <Image src={iconSrc} alt="" fill className="object-contain" aria-hidden />
+              </div>
+              <p className="max-w-[220px] font-gill text-base font-normal leading-110 text-darkblack md:text-sm md:font-light md:tracking-[1%]">
                 {label}
               </p>
-            </li>
-          ))}
-        </ul>
-      </div>
+            </div>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 };

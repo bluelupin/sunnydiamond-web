@@ -66,7 +66,7 @@ const JewelleryProductPage = () => {
         }}
       />
 
-      <section className="container pb-6 md:pb-10">
+      <section className="pb-0 md:container md:pb-10">
         <JewelleryProductGrid
           products={visibleProducts}
           wishlistedIds={wishlistedIds}
