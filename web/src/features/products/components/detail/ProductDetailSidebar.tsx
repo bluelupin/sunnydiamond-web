@@ -22,6 +22,7 @@ import {
 } from "./shared";
 import ScheduleVideoCallPanel from "./ScheduleVideoCallPanel";
 import TryAtHomePanel from "./TryAtHomePanel";
+import PersonaliseProductPanel from "./PersonaliseProductPanel";
 
 type ProductDetailSidebarProps = {
   product: Product;
@@ -45,6 +46,7 @@ const ProductDetailSidebar = ({
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
   const [isVideoCallOpen, setIsVideoCallOpen] = useState(false);
   const [isTryAtHomeOpen, setIsTryAtHomeOpen] = useState(false);
+  const [isPersonaliseOpen, setIsPersonaliseOpen] = useState(false);
 
   const activeMetal = content.metalColors.find((color) => color.id === selectedMetal);
 
@@ -248,6 +250,12 @@ const ProductDetailSidebar = ({
         product={product}
       />
 
+      <PersonaliseProductPanel
+        open={isPersonaliseOpen}
+        onClose={() => setIsPersonaliseOpen(false)}
+        product={product}
+      />
+
       <section aria-label="Product information" className="flex flex-col gap-3">
         {content.accordions.map((accordion) => {
           const isOpen = openAccordion === accordion.id;
@@ -288,7 +296,9 @@ const ProductDetailSidebar = ({
               Change the gemstone and much more to make it truly yours!
             </p>
           </div>
-          <DetailOutlineButton className="w-fit">Get in Touch</DetailOutlineButton>
+          <DetailOutlineButton className="w-fit" onClick={() => setIsPersonaliseOpen(true)}>
+            Get in Touch
+          </DetailOutlineButton>
         </div>
         <div className="relative hidden h-[213px] w-[322px] shrink-0 overflow-hidden lg:block">
           <Image

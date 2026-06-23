@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import type { StaticImageData } from "next/image";
-import { Calendar, ChevronDown } from "lucide-react";
+import { Calendar, ChevronDown, Info } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { useToast } from "@/shared/hooks/use-toast";
 import {
@@ -47,12 +47,22 @@ const ProductAppointmentForm = ({
   const [date, setDate] = useState("");
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [note, setNote] = useState("");
+  const [referenceImageName, setReferenceImageName] = useState<string | null>(null);
+  const referenceImageInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = () => {
     if (!name.trim() || !phone.trim()) {
       return;
     }
+    if (config.noteRequired && !note.trim()) {
+      return;
+    }
     onSubmit();
+  };
+
+  const handleReferenceImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    setReferenceImageName(file?.name ?? null);
   };
 
   return (
@@ -183,36 +193,38 @@ const ProductAppointmentForm = ({
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <span className={appointmentLabelClassName}>Time Slots</span>
-              <div className="flex flex-col gap-3">
-                {Array.from({ length: APPOINTMENT_TIME_SLOTS.length / 2 }, (_, row) => (
-                  <div key={row} className="flex gap-2">
-                    {[APPOINTMENT_TIME_SLOTS[row * 2], APPOINTMENT_TIME_SLOTS[row * 2 + 1]].map(
-                      (slot) => {
-                        const isSelected = selectedSlot === slot;
+            {config.showTimeSlots ? (
+              <div className="flex flex-col gap-2">
+                <span className={appointmentLabelClassName}>Time Slots</span>
+                <div className="flex flex-col gap-3">
+                  {Array.from({ length: APPOINTMENT_TIME_SLOTS.length / 2 }, (_, row) => (
+                    <div key={row} className="flex gap-2">
+                      {[APPOINTMENT_TIME_SLOTS[row * 2], APPOINTMENT_TIME_SLOTS[row * 2 + 1]].map(
+                        (slot) => {
+                          const isSelected = selectedSlot === slot;
 
-                        return (
-                          <button
-                            key={slot}
-                            type="button"
-                            onClick={() => setSelectedSlot(isSelected ? null : slot)}
-                            className={cn(
-                              "flex h-14 min-w-0 flex-1 items-center justify-center px-3 font-gill text-base leading-110",
-                              isSelected
-                                ? "bg-darkblack font-normal text-white"
-                                : "bg-[#F2F2F2] font-light text-darkblack",
-                            )}
-                          >
-                            {slot}
-                          </button>
-                        );
-                      },
-                    )}
-                  </div>
-                ))}
+                          return (
+                            <button
+                              key={slot}
+                              type="button"
+                              onClick={() => setSelectedSlot(isSelected ? null : slot)}
+                              className={cn(
+                                "flex h-14 min-w-0 flex-1 items-center justify-center px-3 font-gill text-base leading-110",
+                                isSelected
+                                  ? "bg-darkblack font-normal text-white"
+                                  : "bg-[#F2F2F2] font-light text-darkblack",
+                              )}
+                            >
+                              {slot}
+                            </button>
+                          );
+                        },
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            ) : null}
 
             <div className="flex flex-col gap-2">
               <label htmlFor={`${config.idPrefix}-note`} className={config.noteLabelClassName}>
@@ -230,6 +242,32 @@ const ProductAppointmentForm = ({
                 )}
               />
             </div>
+
+            {config.showReferenceImage ? (
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-1">
+                  <Info size={24} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
+                  <p className="font-gill text-base font-light leading-110 text-darkblack">
+                    Do you have any reference image? (Optional)
+                  </p>
+                </div>
+                <input
+                  ref={referenceImageInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleReferenceImageChange}
+                  className="sr-only"
+                  aria-label="Attach reference image"
+                />
+                <button
+                  type="button"
+                  onClick={() => referenceImageInputRef.current?.click()}
+                  className="inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
+                >
+                  {referenceImageName ?? "Attach Image"}
+                </button>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
@@ -243,7 +281,9 @@ const ProductAppointmentForm = ({
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={!name.trim() || !phone.trim()}
+            disabled={
+              !name.trim() || !phone.trim() || (config.noteRequired && !note.trim())
+            }
             className="btn-slide-up inline-flex h-14 w-full items-center justify-center bg-darkblack px-7 font-gill text-sm uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
             {config.submitLabel}
