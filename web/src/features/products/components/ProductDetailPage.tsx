@@ -48,7 +48,7 @@ const ProductDetailPage = () => {
 
   return (
     <article>
-      <PageContainer className="pb-16 pt-6 lg:pb-24 lg:pt-8">
+      <PageContainer className="max-w-1360 px-4 pb-16 pt-6 lg:px-0 lg:pb-24 lg:pt-8">
         <Link
           href="/jewellery-product"
           className="mb-6 inline-flex items-center gap-1 font-gill text-sm text-neutral500 transition-colors hover:text-darkblack lg:mb-8"
