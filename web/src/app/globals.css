@@ -104,12 +104,11 @@
     @apply border-border;
   }
 
-  html{
+  html {}
 
-  }
   body {
-   @apply bg-background text-foreground font-body antialiased;
-    overflow-x: clip; 
+    @apply bg-background text-foreground font-body antialiased;
+    overflow-x: clip;
   }
 
   body {
@@ -279,6 +278,7 @@
   0% {
     transform: translateX(0);
   }
+
   100% {
     transform: translateX(-100%);
   }
@@ -286,4 +286,23 @@
 
 .animate-marquee {
   animation: marquee 40s linear infinite;
+}
+
+
+
+
+
+/* For horizontal scroll inside .tabScroll */
+.horizontalScroll::-webkit-scrollbar {
+  height: 0px !important;
+  /* Thin horizontal scrollbar */
+}
+
+.horizontalScroll::-webkit-scrollbar-thumb {
+  background: #cccccc;
+  border-radius: 4px;
+}
+
+.horizontalScroll::-webkit-scrollbar-thumb:hover {
+  background: #cccccc;
 }

@@ -24,7 +24,7 @@ const AboutSince1997Section = () => {
             {aboutSince1997Content.story}
           </p>
         </div>
-        <div className="mt-10 md:overflow-x-auto pb-2">
+        <div className="mt-10 md:overflow-x-auto pb-2 horizontalScroll">
           <div className="flex md:flex-row flex-col md:min-w-max min-w-full items-center lg:gap-20 md:gap-16 sm:gap-12 gap-11">
             <article className="flex shrink-0 items-center gap-8 md:w-auto w-full">
               <figure className="flex flex-col gap-3 md:w-auto w-full">
