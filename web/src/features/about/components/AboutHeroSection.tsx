@@ -25,7 +25,7 @@ const AboutHeroSection = () => {
         <div className="absolute inset-x-0 bottom-0 flex justify-center px-5 pb-12 md:pb-20 lg:pb-75">
           <h1
             id="about-hero-title"
-            className="w-full max-w-886 text-center font-larken text-32 font-light leading-110 text-white sm:text-40 lg:text-48"
+            className="w-full max-w-886 text-center font-larken text-36 font-light leading-110 text-white sm:text-40 lg:text-48"
           >
             {aboutHeroContent.title}
           </h1>

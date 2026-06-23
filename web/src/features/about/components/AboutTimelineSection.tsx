@@ -18,12 +18,12 @@ const AboutTimelineSection = () => {
 
   const milestone =
     aboutTimelineContent.milestones[
-      activeYear as keyof typeof aboutTimelineContent.milestones
+    activeYear as keyof typeof aboutTimelineContent.milestones
     ];
 
   return (
     <section ref={sectionRef} aria-label="Company timeline" className="relative">
-      <div className="sticky top-20 z-10 h-[calc(100vh-80px)] overflow-hidden">
+      <div className="sticky md:top-20 top-16 z-10 md:h-[calc(100vh-80px)] h-[calc(100vh-64px)] overflow-hidden">
         <div className="absolute inset-0">
           <ResponsiveImage
             desktopSrc={aboutPageImages.store}
@@ -37,7 +37,7 @@ const AboutTimelineSection = () => {
         </div>
         <div className="absolute inset-0 bg-black/40" aria-hidden />
 
-        <PageContainer className="relative flex h-full flex-col lg:block lg:px-0 lg:max-w-full">
+        <PageContainer className="relative flex h-full flex-col lg:block lg:px-0 lg:max-w-full px-4">
           <div className="flex h-full flex-col lg:flex-row lg:justify-between">
             <AboutTimelineNav activeYear={activeYear} onYearSelect={scrollToYear} />
 
@@ -45,7 +45,7 @@ const AboutTimelineSection = () => {
               <div
                 aria-live="polite"
                 aria-atomic="true"
-                className="mt-auto lg:px-5 pb-8 lg:mt-351 lg:px-0 lg:pb-0 lg:self-start"
+                className="mt-auto lg:mb-104 mb-16 lg:mt-auto lg:self-end"
               >
                 <AboutTimelineContent
                   activeYear={activeYear}
@@ -60,13 +60,13 @@ const AboutTimelineSection = () => {
 
       {!reducedMotion
         ? aboutTimelineYears.map((year) => (
-            <div
-              key={year}
-              data-timeline-step={year}
-              className="h-screen"
-              aria-hidden
-            />
-          ))
+          <div
+            key={year}
+            data-timeline-step={year}
+            className="h-screen"
+            aria-hidden
+          />
+        ))
         : null}
     </section>
   );
