@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
@@ -14,6 +15,51 @@ import type {
 } from "./alankaraCollection.types";
 
 const DEFAULT_PRODUCT_CTA = "Shop Now";
+
+const alankaraThumbnailCropStyle = {
+  height: "109.62%",
+  width: "110%",
+  left: "-5%",
+  top: "-5.53%",
+} as const;
+
+function AlankaraProductThumbnail({
+  src,
+  productName,
+  isActive,
+  onClick,
+}: {
+  src: string;
+  productName: string;
+  isActive: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={`View ${productName}`}
+      aria-current={isActive}
+      onClick={onClick}
+      className={cn(
+        "bg-[#F4F3EE] px-4 py-6 transition-opacity",
+        isActive ? "opacity-100" : "opacity-70 hover:opacity-100",
+      )}
+    >
+      <div className="relative size-[98px] overflow-hidden">
+        <div className="absolute left-1/2 top-1/2 size-[121px] -translate-x-1/2 -translate-y-1/2">
+          <Image
+            src={src}
+            alt=""
+            fill
+            sizes="98px"
+            className="max-w-none object-cover"
+            style={alankaraThumbnailCropStyle}
+          />
+        </div>
+      </div>
+    </button>
+  );
+}
 
 function CollectionHeroPanel({
   title,
@@ -272,30 +318,16 @@ function ProductCarouselPanel({
       {!isMobile && total > 1 ? (
         <div className="absolute inset-x-0 bottom-0 flex justify-center gap-[5.6px] overflow-x-auto px-6">
           {products.map((product, index) => {
-            const thumbSrc = getImageSrc(product.image) || "";
+            const thumbSrc = getImageSrc(product.thumbnailImage ?? product.image) || "";
             const isActive = index === activeIndex;
             return (
-              <button
+              <AlankaraProductThumbnail
                 key={String(product.id)}
-                type="button"
-                aria-label={`View ${product.name}`}
-                aria-current={isActive}
+                src={thumbSrc}
+                productName={product.name}
+                isActive={isActive}
                 onClick={() => setActiveIndex(index)}
-                className={cn(
-                  "bg-[#F4F3EE] px-4 py-6 transition-opacity",
-                  isActive ? "opacity-100" : "opacity-70 hover:opacity-100",
-                )}
-              >
-                <div className="relative size-[98px] overflow-hidden">
-                  <OptimizedImage
-                    src={thumbSrc}
-                    alt=""
-                    width={98}
-                    height={98}
-                    className="size-full object-cover"
-                  />
-                </div>
-              </button>
+              />
             );
           })}
         </div>

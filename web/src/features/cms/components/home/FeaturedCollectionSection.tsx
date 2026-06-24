@@ -19,13 +19,14 @@ interface FeaturedCollectionSectionProps {
 }
 
 function getFallbackProducts(): AlankaraCollectionProduct[] {
-  return homeContent.alankara.productIds.map((productId) => {
+  return homeContent.alankara.productIds.map((productId, index) => {
     const product = products.find((item) => item.id === productId);
 
     return {
       id: productId,
       name: product?.name ?? "Saptam Diamond Ring",
       image: product?.image ?? ALANKARA_FALLBACKS.product,
+      ...(index === 0 ? { thumbnailImage: ALANKARA_FALLBACKS.firstThumbnail } : {}),
       href: `/product/${productId}`,
       ctaLabel: homeContent.alankara.product.cta.label,
     };
@@ -65,10 +66,11 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
       : [];
 
     const mappedProducts: AlankaraCollectionProduct[] = cmsProducts
-      .map((product: FeaturedCollectionImage) => ({
+      .map((product: FeaturedCollectionImage, index: number) => ({
         id: product.id ?? product.name ?? "",
         name: product.name?.trim() ?? "",
         image: resolveCmsMediaUrl(product.image) || ALANKARA_FALLBACKS.product,
+        ...(index === 0 ? { thumbnailImage: ALANKARA_FALLBACKS.firstThumbnail } : {}),
         href: `/product/${product.id ?? ""}`,
         ctaLabel: ctaLabel === fallback.cta.label ? "Shop Now" : ctaLabel,
       }))

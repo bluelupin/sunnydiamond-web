@@ -4,6 +4,7 @@ export type AlankaraCollectionProduct = {
   id: string | number;
   name: string;
   image: string | StaticImageData;
+  thumbnailImage?: string | StaticImageData;
   href: string;
   ctaLabel?: string;
 };
@@ -31,4 +32,5 @@ export const ALANKARA_FALLBACKS = {
   heroDesktop: "/images/collection/hero-desktop.png",
   heroMobile: "/images/collection/hero-mobile.png",
   product: "/images/collection/product-showcase.png",
+  firstThumbnail: "/images/collection/thumb-1.png",
 } as const;
