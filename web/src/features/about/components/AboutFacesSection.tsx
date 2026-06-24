@@ -51,7 +51,6 @@ const AboutFacesSection = () => {
                 quality={90}
                 sizes="(max-width: 1023px) calc(100vw - 24px), 33vw"
                 className={`h-full w-full object-cover transition-transform duration-700 lg:group-hover:scale-[0.8] ${index === 0 ? "lg:group-hover:scale-[1]" : "lg:group-hover:scale-[1.1]"}`}
-                priority={index === 0}
               />
 
               <MediaContentOverlay

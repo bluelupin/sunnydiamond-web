@@ -24,6 +24,7 @@ import ScheduleVideoCallPanel from "./ScheduleVideoCallPanel";
 import TryAtHomePanel from "./TryAtHomePanel";
 import PersonaliseProductPanel from "./PersonaliseProductPanel";
 import MetalEngravingPanel from "./MetalEngravingPanel";
+import RingSizeChartPanel from "./RingSizeChartPanel";
 import type { EngravingSelection } from "@/features/products/constants/engraving";
 
 type ProductDetailSidebarProps = {
@@ -43,6 +44,7 @@ const ProductDetailSidebar = ({
   const [ringSize, setRingSize] = useState<string>("");
   const [engravingSelection, setEngravingSelection] = useState<EngravingSelection | null>(null);
   const [isEngravingOpen, setIsEngravingOpen] = useState(false);
+  const [isRingSizeChartOpen, setIsRingSizeChartOpen] = useState(false);
   const [isGift, setIsGift] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [zipCode, setZipCode] = useState("122002");
@@ -99,7 +101,7 @@ const ProductDetailSidebar = ({
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <p className="font-gill text-base leading-[1.45] tracking-[0.16px] text-darkblack">Ring Size</p>
-              <DetailTextLink href="/contact">Find your size</DetailTextLink>
+              <DetailTextLink onClick={() => setIsRingSizeChartOpen(true)}>Find your size</DetailTextLink>
             </div>
             <Select value={ringSize} onValueChange={setRingSize}>
               <SelectTrigger className="h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0">
@@ -135,6 +137,8 @@ const ProductDetailSidebar = ({
         initialValue={engravingSelection}
         onSave={setEngravingSelection}
       />
+
+      <RingSizeChartPanel open={isRingSizeChartOpen} onClose={() => setIsRingSizeChartOpen(false)} />
 
       <div className="flex flex-col gap-4">
         <div className="flex items-end justify-between gap-4">
