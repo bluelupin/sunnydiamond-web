@@ -10,7 +10,7 @@ const AboutSince1997Section = () => {
   return (
     <section
       aria-labelledby="about-since-1997-title"
-      className="bg-white pb-16 md:py-20 lg:py-100"
+      className="bg-white py-16 md:py-20 lg:py-100"
     >
       <PageContainer className="pb-0">
         <div className="space-y-3 lg:mb-[40px] mb-8">
