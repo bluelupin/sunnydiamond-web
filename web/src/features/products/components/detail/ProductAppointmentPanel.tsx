@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import type { StaticImageData } from "next/image";
-import { Calendar, ChevronDown, Info } from "lucide-react";
+import { Info } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { useToast } from "@/shared/hooks/use-toast";
+import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
+import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
 import {
-  APPOINTMENT_COUNTRY_CODES,
-  APPOINTMENT_TIME_SLOTS,
   appointmentFieldClassName,
   appointmentLabelClassName,
 } from "@/shared/constants/appointmentForm";
@@ -50,14 +50,21 @@ const ProductAppointmentForm = ({
   const [referenceImageName, setReferenceImageName] = useState<string | null>(null);
   const referenceImageInputRef = useRef<HTMLInputElement>(null);
 
+  const formValues = useMemo(
+    () => ({ name, countryCode, phone, email, date, note }),
+    [name, countryCode, phone, email, date, note],
+  );
+
+  const validationOptions = useMemo(
+    () => ({ noteRequired: config.noteRequired }),
+    [config.noteRequired],
+  );
+
+  const { isValid, submitted, errors, markTouched, showError, validateSubmit } =
+    useAppointmentFormValidation(formValues, validationOptions);
+
   const handleSubmit = () => {
-    if (!name.trim() || !phone.trim()) {
-      return;
-    }
-    if (config.noteRequired && !note.trim()) {
-      return;
-    }
-    onSubmit();
+    validateSubmit(onSubmit);
   };
 
   const handleReferenceImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,142 +113,33 @@ const ProductAppointmentForm = ({
           </div>
 
           <div className="flex flex-col gap-6 pb-6">
-            <div className="flex flex-col gap-2">
-              <label htmlFor={`${config.idPrefix}-name`} className={appointmentLabelClassName}>
-                Your Name*
-              </label>
-              <input
-                id={`${config.idPrefix}-name`}
-                type="text"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                autoComplete="name"
-                className={cn(
-                  appointmentFieldClassName,
-                  "border border-transparent focus:border-darkblack",
-                )}
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label htmlFor={`${config.idPrefix}-phone`} className={appointmentLabelClassName}>
-                Phone No.*
-              </label>
-              <div className="flex h-14 w-full items-center gap-2 bg-[#F2F2F2] px-3">
-                <div className="relative flex shrink-0 items-center">
-                  <select
-                    value={countryCode}
-                    onChange={(event) => setCountryCode(event.target.value)}
-                    aria-label="Country code"
-                    className="appearance-none bg-transparent pr-5 font-gill text-base leading-110 text-darkblack outline-none"
-                  >
-                    {APPOINTMENT_COUNTRY_CODES.map((entry) => (
-                      <option key={entry.code} value={entry.code}>
-                        {entry.code}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown
-                    size={16}
-                    strokeWidth={1.5}
-                    aria-hidden
-                    className="pointer-events-none absolute right-0 text-darkblack"
-                  />
-                </div>
-                <input
-                  id={`${config.idPrefix}-phone`}
-                  type="tel"
-                  value={phone}
-                  onChange={(event) => setPhone(event.target.value)}
-                  autoComplete="tel-national"
-                  className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label htmlFor={`${config.idPrefix}-email`} className={appointmentLabelClassName}>
-                Email
-              </label>
-              <input
-                id={`${config.idPrefix}-email`}
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="Enter"
-                autoComplete="email"
-                className={appointmentFieldClassName}
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label htmlFor={`${config.idPrefix}-date`} className={appointmentLabelClassName}>
-                Date
-              </label>
-              <div className="relative flex h-14 w-full items-center bg-[#F2F2F2] px-3">
-                <input
-                  id={`${config.idPrefix}-date`}
-                  type="date"
-                  value={date}
-                  onChange={(event) => setDate(event.target.value)}
-                  className={cn(
-                    "min-w-0 flex-1 bg-transparent font-gill text-base leading-110 outline-none [color-scheme:light]",
-                    date ? "text-darkblack" : "text-neutral400",
-                  )}
-                />
-                <Calendar size={20} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
-              </div>
-            </div>
-
-            {config.showTimeSlots ? (
-              <div className="flex flex-col gap-2">
-                <span className={appointmentLabelClassName}>Time Slots</span>
-                <div className="flex flex-col gap-3">
-                  {Array.from({ length: APPOINTMENT_TIME_SLOTS.length / 2 }, (_, row) => (
-                    <div key={row} className="flex gap-2">
-                      {[APPOINTMENT_TIME_SLOTS[row * 2], APPOINTMENT_TIME_SLOTS[row * 2 + 1]].map(
-                        (slot) => {
-                          const isSelected = selectedSlot === slot;
-
-                          return (
-                            <button
-                              key={slot}
-                              type="button"
-                              onClick={() => setSelectedSlot(isSelected ? null : slot)}
-                              className={cn(
-                                "flex h-14 min-w-0 flex-1 items-center justify-center px-3 font-gill text-base leading-110",
-                                isSelected
-                                  ? "bg-darkblack font-normal text-white"
-                                  : "bg-[#F2F2F2] font-light text-darkblack",
-                              )}
-                            >
-                              {slot}
-                            </button>
-                          );
-                        },
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
-            <div className="flex flex-col gap-2">
-              <label htmlFor={`${config.idPrefix}-note`} className={config.noteLabelClassName}>
-                {config.noteLabel}
-              </label>
-              <textarea
-                id={`${config.idPrefix}-note`}
-                value={note}
-                onChange={(event) => setNote(event.target.value)}
-                placeholder={config.notePlaceholder}
-                rows={4}
-                className={cn(
-                  "h-[100px] w-full resize-none bg-[#F2F2F2] p-3 text-darkblack placeholder:text-[#999999] outline-none",
-                  config.noteTextareaClassName,
-                )}
-              />
-            </div>
+            <AppointmentContactFields
+              idPrefix={config.idPrefix}
+              name={name}
+              countryCode={countryCode}
+              phone={phone}
+              email={email}
+              date={date}
+              note={note}
+              selectedSlot={selectedSlot}
+              onNameChange={setName}
+              onCountryCodeChange={setCountryCode}
+              onPhoneChange={setPhone}
+              onEmailChange={setEmail}
+              onDateChange={setDate}
+              onNoteChange={setNote}
+              onSelectedSlotChange={config.showTimeSlots ? setSelectedSlot : undefined}
+              errors={errors}
+              showError={showError}
+              markTouched={markTouched}
+              showTimeSlots={config.showTimeSlots}
+              noteLabel={config.noteLabel}
+              notePlaceholder={config.notePlaceholder}
+              noteLabelClassName={config.noteLabelClassName}
+              noteTextareaClassName={config.noteTextareaClassName}
+              labelClassName={appointmentLabelClassName}
+              fieldClassName={appointmentFieldClassName}
+            />
 
             {config.showReferenceImage ? (
               <div className="flex flex-col gap-2">
@@ -281,9 +179,7 @@ const ProductAppointmentForm = ({
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={
-              !name.trim() || !phone.trim() || (config.noteRequired && !note.trim())
-            }
+            disabled={submitted && !isValid}
             className="btn-slide-up inline-flex h-14 w-full items-center justify-center bg-darkblack px-7 font-gill text-sm uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
             {config.submitLabel}

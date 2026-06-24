@@ -1,14 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { Calendar, ChevronDown, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { useToast } from "@/shared/hooks/use-toast";
-import {
-  APPOINTMENT_COUNTRY_CODES,
-  APPOINTMENT_TIME_SLOTS,
-} from "@/shared/constants/appointmentForm";
+import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
+import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
 
 const labelClassName = "font-gill text-sm leading-110 text-darkblack";
 const fieldClassName =
@@ -40,6 +38,14 @@ const BookAnAppointmentPanel = ({
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [note, setNote] = useState("");
 
+  const formValues = useMemo(
+    () => ({ name, countryCode, phone, email, date, note }),
+    [name, countryCode, phone, email, date, note],
+  );
+
+  const { isValid, submitted, errors, markTouched, showError, validateSubmit, resetValidation } =
+    useAppointmentFormValidation(formValues);
+
   useEffect(() => {
     if (variant !== "modal" || !open) return;
 
@@ -65,18 +71,17 @@ const BookAnAppointmentPanel = ({
     setDate("");
     setSelectedSlot(null);
     setNote("");
+    resetValidation();
   };
 
   const handleSubmit = () => {
-    if (!name.trim() || !phone.trim()) {
-      return;
-    }
-
-    toast({
-      title: "Appointment requested",
-      description: "Our representative will get in touch with you soon.",
+    validateSubmit(() => {
+      toast({
+        title: "Appointment requested",
+        description: "Our representative will get in touch with you soon.",
+      });
+      onClose?.();
     });
-    onClose?.();
   };
 
   if (variant === "modal" && !open) {
@@ -125,132 +130,30 @@ const BookAnAppointmentPanel = ({
           </div>
 
           <div className="mt-[22px] flex flex-col gap-6 pb-6">
-            <div className="flex flex-col gap-2">
-              <label htmlFor="appointment-name" className={labelClassName}>
-                Your Name*
-              </label>
-              <input
-                id="appointment-name"
-                type="text"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                autoComplete="name"
-                className={fieldClassName}
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label htmlFor="appointment-phone" className={labelClassName}>
-                Phone No.*
-              </label>
-              <div className="flex h-14 w-full items-center gap-3 bg-[#F2F2F2] px-3">
-                <div className="relative flex shrink-0 items-center gap-2">
-                  <select
-                    value={countryCode}
-                    onChange={(event) => setCountryCode(event.target.value)}
-                    aria-label="Country code"
-                    className="appearance-none bg-transparent pr-5 font-gill text-sm leading-110 text-darkblack outline-none"
-                  >
-                    {APPOINTMENT_COUNTRY_CODES.map((entry) => (
-                      <option key={entry.code} value={entry.code}>
-                        {entry.code}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown
-                    size={20}
-                    strokeWidth={1.5}
-                    aria-hidden
-                    className="pointer-events-none absolute right-0 text-darkblack"
-                  />
-                </div>
-                <input
-                  id="appointment-phone"
-                  type="tel"
-                  value={phone}
-                  onChange={(event) => setPhone(event.target.value)}
-                  autoComplete="tel-national"
-                  className="min-w-0 flex-1 bg-transparent font-gill text-sm leading-110 text-darkblack outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label htmlFor="appointment-email" className={labelClassName}>
-                Email
-              </label>
-              <input
-                id="appointment-email"
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="Enter"
-                autoComplete="email"
-                className={fieldClassName}
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label htmlFor="appointment-date" className={labelClassName}>
-                Date
-              </label>
-              <div className="relative flex h-14 w-full items-center bg-[#F2F2F2] px-3">
-                <input
-                  id="appointment-date"
-                  type="date"
-                  value={date}
-                  onChange={(event) => setDate(event.target.value)}
-                  className={cn(
-                    "min-w-0 flex-1 bg-transparent font-gill text-sm leading-110 outline-none [color-scheme:light]",
-                    date ? "text-darkblack" : "text-neutral400",
-                  )}
-                />
-                <Calendar size={24} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <span className={labelClassName}>Time Slots</span>
-              <div className="flex flex-col gap-3">
-                {Array.from({ length: APPOINTMENT_TIME_SLOTS.length / 2 }, (_, row) => (
-                  <div key={row} className="flex gap-2">
-                    {[APPOINTMENT_TIME_SLOTS[row * 2], APPOINTMENT_TIME_SLOTS[row * 2 + 1]].map((slot) => {
-                      const isSelected = selectedSlot === slot;
-
-                      return (
-                        <button
-                          key={slot}
-                          type="button"
-                          onClick={() => setSelectedSlot(isSelected ? null : slot)}
-                          className={cn(
-                            "flex h-14 min-w-0 flex-1 items-center justify-center px-6 py-3 font-gill text-base leading-110",
-                            isSelected
-                              ? "bg-[#DECAA0] font-normal text-darkblack"
-                              : "bg-[#F2F2F2] font-light text-darkblack",
-                          )}
-                        >
-                          {slot}
-                        </button>
-                      );
-                    })}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label htmlFor="appointment-note" className={labelClassName}>
-                Describe more about your visit
-              </label>
-              <textarea
-                id="appointment-note"
-                value={note}
-                onChange={(event) => setNote(event.target.value)}
-                placeholder="Enter"
-                rows={4}
-                className="h-[100px] w-full resize-none bg-[#F2F2F2] p-3 font-gill text-sm leading-110 text-darkblack placeholder:text-[#999999] outline-none"
-              />
-            </div>
+            <AppointmentContactFields
+              idPrefix="appointment"
+              name={name}
+              countryCode={countryCode}
+              phone={phone}
+              email={email}
+              date={date}
+              note={note}
+              selectedSlot={selectedSlot}
+              onNameChange={setName}
+              onCountryCodeChange={setCountryCode}
+              onPhoneChange={setPhone}
+              onEmailChange={setEmail}
+              onDateChange={setDate}
+              onNoteChange={setNote}
+              onSelectedSlotChange={setSelectedSlot}
+              errors={errors}
+              showError={showError}
+              markTouched={markTouched}
+              labelClassName={labelClassName}
+              fieldClassName={fieldClassName}
+              selectedSlotStyle="gold"
+              noteTextareaClassName="font-gill text-sm leading-110"
+            />
           </div>
         </div>
       </div>
@@ -277,7 +180,7 @@ const BookAnAppointmentPanel = ({
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={!name.trim() || !phone.trim()}
+              disabled={submitted && !isValid}
               className="flex h-14 flex-1 items-center justify-center bg-darkblack font-gill text-sm uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               Apply Filters
