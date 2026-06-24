@@ -97,7 +97,7 @@ export const aboutCraftingRarityFigmaSpec = {
   animation: {
     scrollTrackVh: 200,
     /** Reveal begins once this fraction of the section is visible in the viewport */
-    viewportVisibleThreshold: 0.2,
+    viewportVisibleThreshold: 0.1,
     headingMaskHeight: 218,
     imageMaskHeight: 354,
     lineMaskHeight: 79,

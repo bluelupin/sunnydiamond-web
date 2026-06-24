@@ -79,7 +79,7 @@ const AboutCraftingRaritySection = () => {
   return (
     <section ref={sectionRef} aria-labelledby="about-crafting-rarity-title" className="bg-white">
       <div style={{ height: `${animationSpec.scrollTrackVh}vh` }}>
-        <div className="sticky top-0 flex min-h-screen items-center py-16 md:py-20 lg:py-100">
+        <div className="sticky top-0 flex min-h-screen items-center pt-16 md:pt-20 lg:pt-100">
           <PageContainer className="flex w-full justify-center">
             <div className="flex w-full flex-col items-center text-center lg:min-h-745">
               <MaskReveal
