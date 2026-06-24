@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import {
-  Calendar,
-  ChevronDown,
   ChevronLeft,
   ExternalLink,
   Phone,
@@ -13,9 +11,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { useToast } from "@/shared/hooks/use-toast";
+import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
+import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
 import {
-  APPOINTMENT_COUNTRY_CODES,
-  APPOINTMENT_TIME_SLOTS,
   appointmentFieldClassName,
   appointmentLabelClassName,
 } from "@/shared/constants/appointmentForm";
@@ -102,10 +100,6 @@ const BookStoreVisitPanel = ({
   const showCloseButton = variant === "embedded";
 
   const handleSubmit = () => {
-    if (!name.trim() || !phone.trim()) {
-      return;
-    }
-
     toast({
       title: "Visit booked",
       description: "Our representative will get in touch with you soon.",
@@ -388,7 +382,16 @@ const BookingFormStep = ({
   onPurposeChange,
   onNoteChange,
   onSubmit,
-}: BookingFormStepProps) => (
+}: BookingFormStepProps) => {
+  const formValues = useMemo(
+    () => ({ name, countryCode, phone, email, date, note, purpose }),
+    [name, countryCode, phone, email, date, note, purpose],
+  );
+
+  const { isValid, submitted, errors, markTouched, showError, validateSubmit } =
+    useAppointmentFormValidation(formValues, { validatePurpose: true });
+
+  return (
   <>
     <div className="min-h-0 flex-1 overflow-y-auto">
       <div className="px-4 pt-6 lg:px-8">
@@ -463,162 +466,33 @@ const BookingFormStep = ({
           </div>
 
           <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-2">
-              <label htmlFor="book-visit-name" className={appointmentLabelClassName}>
-                Your Name*
-              </label>
-              <input
-                id="book-visit-name"
-                type="text"
-                value={name}
-                onChange={(event) => onNameChange(event.target.value)}
-                autoComplete="name"
-                className={appointmentFieldClassName}
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label htmlFor="book-visit-phone" className={appointmentLabelClassName}>
-                Phone No.*
-              </label>
-              <div className="flex h-14 w-full items-center gap-3 bg-[#F2F2F2] px-3">
-                <div className="relative flex shrink-0 items-center gap-2">
-                  <select
-                    value={countryCode}
-                    onChange={(event) => onCountryCodeChange(event.target.value)}
-                    aria-label="Country code"
-                    className="appearance-none bg-transparent pr-5 font-gill text-base leading-110 text-darkblack outline-none"
-                  >
-                    {APPOINTMENT_COUNTRY_CODES.map((entry) => (
-                      <option key={entry.code} value={entry.code}>
-                        {entry.code}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown
-                    size={20}
-                    strokeWidth={1.5}
-                    aria-hidden
-                    className="pointer-events-none absolute right-0 text-darkblack"
-                  />
-                </div>
-                <input
-                  id="book-visit-phone"
-                  type="tel"
-                  value={phone}
-                  onChange={(event) => onPhoneChange(event.target.value)}
-                  autoComplete="tel-national"
-                  className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label htmlFor="book-visit-email" className={appointmentLabelClassName}>
-                Email
-              </label>
-              <input
-                id="book-visit-email"
-                type="email"
-                value={email}
-                onChange={(event) => onEmailChange(event.target.value)}
-                placeholder="Enter"
-                autoComplete="email"
-                className={appointmentFieldClassName}
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label htmlFor="book-visit-date" className={appointmentLabelClassName}>
-                Date
-              </label>
-              <div className="relative flex h-14 w-full items-center bg-[#F2F2F2] px-3">
-                <input
-                  id="book-visit-date"
-                  type="date"
-                  value={date}
-                  onChange={(event) => onDateChange(event.target.value)}
-                  className={cn(
-                    "min-w-0 flex-1 bg-transparent font-gill text-base leading-110 outline-none [color-scheme:light]",
-                    date ? "text-darkblack" : "text-neutral400",
-                  )}
-                />
-                <Calendar size={24} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <span className={appointmentLabelClassName}>Time Slots</span>
-              <div className="flex flex-col gap-3">
-                {Array.from({ length: APPOINTMENT_TIME_SLOTS.length / 2 }, (_, row) => (
-                  <div key={row} className="flex gap-2">
-                    {[APPOINTMENT_TIME_SLOTS[row * 2], APPOINTMENT_TIME_SLOTS[row * 2 + 1]].map((slot) => {
-                      const isSelected = selectedSlot === slot;
-
-                      return (
-                        <button
-                          key={slot}
-                          type="button"
-                          onClick={() => onSelectedSlotChange(isSelected ? null : slot)}
-                          className={cn(
-                            "flex h-14 min-w-0 flex-1 items-center justify-center px-6 py-3 font-gill text-base leading-110",
-                            isSelected
-                              ? "bg-[#DECAA0] font-normal text-darkblack"
-                              : "bg-[#F2F2F2] font-light text-darkblack",
-                          )}
-                        >
-                          {slot}
-                        </button>
-                      );
-                    })}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label htmlFor="book-visit-purpose" className={appointmentLabelClassName}>
-                Purpose of Visit
-              </label>
-              <div className="relative flex h-14 w-full items-center bg-[#F2F2F2] px-3">
-                <select
-                  id="book-visit-purpose"
-                  value={purpose}
-                  onChange={(event) => onPurposeChange(event.target.value)}
-                  className={cn(
-                    "min-w-0 flex-1 appearance-none bg-transparent font-gill text-base leading-110 outline-none",
-                    purpose ? "text-darkblack" : "text-neutral400",
-                  )}
-                >
-                  <option value="">-select-</option>
-                  {BOOK_STORE_VISIT_PURPOSES.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown
-                  size={20}
-                  strokeWidth={1.5}
-                  aria-hidden
-                  className="pointer-events-none shrink-0 text-darkblack"
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label htmlFor="book-visit-note" className={appointmentLabelClassName}>
-                Describe more about your visit
-              </label>
-              <textarea
-                id="book-visit-note"
-                value={note}
-                onChange={(event) => onNoteChange(event.target.value)}
-                placeholder="Enter"
-                rows={4}
-                className="h-[100px] w-full resize-none bg-[#F2F2F2] p-3 font-gill text-base leading-110 text-darkblack placeholder:text-[#999999] outline-none"
-              />
-            </div>
+            <AppointmentContactFields
+              idPrefix="book-visit"
+              name={name}
+              countryCode={countryCode}
+              phone={phone}
+              email={email}
+              date={date}
+              note={note}
+              purpose={purpose}
+              selectedSlot={selectedSlot}
+              onNameChange={onNameChange}
+              onCountryCodeChange={onCountryCodeChange}
+              onPhoneChange={onPhoneChange}
+              onEmailChange={onEmailChange}
+              onDateChange={onDateChange}
+              onNoteChange={onNoteChange}
+              onSelectedSlotChange={onSelectedSlotChange}
+              onPurposeChange={onPurposeChange}
+              errors={errors}
+              showError={showError}
+              markTouched={markTouched}
+              labelClassName={appointmentLabelClassName}
+              fieldClassName={appointmentFieldClassName}
+              selectedSlotStyle="gold"
+              showPurpose
+              purposeOptions={BOOK_STORE_VISIT_PURPOSES}
+            />
           </div>
         </div>
       </div>
@@ -631,8 +505,8 @@ const BookingFormStep = ({
           Our representative will get in touch with you soon
         </p>
         <DetailDarkButton
-          onClick={onSubmit}
-          disabled={!name.trim() || !phone.trim()}
+          onClick={() => validateSubmit(onSubmit)}
+          disabled={submitted && !isValid}
           className="disabled:cursor-not-allowed disabled:opacity-50"
         >
           BOOK A VISIT
@@ -640,6 +514,7 @@ const BookingFormStep = ({
       </div>
     </div>
   </>
-);
+  );
+};
 
 export default BookStoreVisitPanel;

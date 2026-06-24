@@ -1,21 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import type { StaticImageData } from "next/image";
-import { Calendar, ChevronDown, ChevronLeft, SlidersHorizontal } from "lucide-react";
+import { ChevronLeft, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { useToast } from "@/shared/hooks/use-toast";
+import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
+import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
+import FormFieldError from "@/shared/ui/FormFieldError";
 import {
-  APPOINTMENT_COUNTRY_CODES,
-  APPOINTMENT_TIME_SLOTS,
   appointmentFieldClassName,
   appointmentLabelClassName,
 } from "@/shared/constants/appointmentForm";
 import type { Product } from "@/features/products/data/products";
 import { TRY_AT_HOME_INDIAN_STATES } from "@/features/products/data/tryAtHomeContent";
 import { useCurrentLocationAddress } from "@/shared/hooks/use-current-location-address";
+import {
+  invalidFieldClassName,
+  sanitizePincodeInput,
+  validateAddressLine1,
+  validateCity,
+  validateIndianPincode,
+  validateIndianState,
+  validateOptionalAddressLine2,
+  shouldShowFieldError,
+} from "@/shared/utils/formValidation";
 import { DetailDarkButton } from "./shared";
+import { ChevronDown } from "lucide-react";
 
 type TryAtHomePanelProps = {
   open: boolean;
@@ -46,12 +58,13 @@ const TryAtHomeDetailsStep = ({
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [note, setNote] = useState("");
 
-  const handleProceed = () => {
-    if (!name.trim() || !phone.trim()) {
-      return;
-    }
-    onProceed();
-  };
+  const formValues = useMemo(
+    () => ({ name, countryCode, phone, email, date, note }),
+    [name, countryCode, phone, email, date, note],
+  );
+
+  const { errors, isValid, submitted, markTouched, showError, validateSubmit } =
+    useAppointmentFormValidation(formValues);
 
   return (
     <>
@@ -92,137 +105,28 @@ const TryAtHomeDetailsStep = ({
           </div>
 
           <div className="flex flex-col gap-6 pb-6">
-            <div className="flex flex-col gap-2">
-              <label htmlFor="try-at-home-name" className={appointmentLabelClassName}>
-                Your Name*
-              </label>
-              <input
-                id="try-at-home-name"
-                type="text"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                autoComplete="name"
-                className={cn(
-                  appointmentFieldClassName,
-                  "border border-transparent focus:border-darkblack",
-                )}
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label htmlFor="try-at-home-phone" className={appointmentLabelClassName}>
-                Phone No.*
-              </label>
-              <div className="flex h-14 w-full items-center gap-2 bg-[#F2F2F2] px-3">
-                <div className="relative flex shrink-0 items-center">
-                  <select
-                    value={countryCode}
-                    onChange={(event) => setCountryCode(event.target.value)}
-                    aria-label="Country code"
-                    className="appearance-none bg-transparent pr-5 font-gill text-base leading-110 text-darkblack outline-none"
-                  >
-                    {APPOINTMENT_COUNTRY_CODES.map((entry) => (
-                      <option key={entry.code} value={entry.code}>
-                        {entry.code}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown
-                    size={16}
-                    strokeWidth={1.5}
-                    aria-hidden
-                    className="pointer-events-none absolute right-0 text-darkblack"
-                  />
-                </div>
-                <input
-                  id="try-at-home-phone"
-                  type="tel"
-                  value={phone}
-                  onChange={(event) => setPhone(event.target.value)}
-                  autoComplete="tel-national"
-                  className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label htmlFor="try-at-home-email" className={appointmentLabelClassName}>
-                Email
-              </label>
-              <input
-                id="try-at-home-email"
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="Enter"
-                autoComplete="email"
-                className={appointmentFieldClassName}
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label htmlFor="try-at-home-date" className={appointmentLabelClassName}>
-                Date
-              </label>
-              <div className="relative flex h-14 w-full items-center bg-[#F2F2F2] px-3">
-                <input
-                  id="try-at-home-date"
-                  type="date"
-                  value={date}
-                  onChange={(event) => setDate(event.target.value)}
-                  className={cn(
-                    "min-w-0 flex-1 bg-transparent font-gill text-base leading-110 outline-none [color-scheme:light]",
-                    date ? "text-darkblack" : "text-neutral400",
-                  )}
-                />
-                <Calendar size={20} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <span className={appointmentLabelClassName}>Time Slots</span>
-              <div className="flex flex-col gap-3">
-                {Array.from({ length: APPOINTMENT_TIME_SLOTS.length / 2 }, (_, row) => (
-                  <div key={row} className="flex gap-2">
-                    {[APPOINTMENT_TIME_SLOTS[row * 2], APPOINTMENT_TIME_SLOTS[row * 2 + 1]].map(
-                      (slot) => {
-                        const isSelected = selectedSlot === slot;
-
-                        return (
-                          <button
-                            key={slot}
-                            type="button"
-                            onClick={() => setSelectedSlot(isSelected ? null : slot)}
-                            className={cn(
-                              "flex h-14 min-w-0 flex-1 items-center justify-center px-3 font-gill text-base leading-110",
-                              isSelected
-                                ? "bg-darkblack font-normal text-white"
-                                : "bg-[#F2F2F2] font-light text-darkblack",
-                            )}
-                          >
-                            {slot}
-                          </button>
-                        );
-                      },
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label htmlFor="try-at-home-note" className={appointmentLabelClassName}>
-                What are you looking for?
-              </label>
-              <textarea
-                id="try-at-home-note"
-                value={note}
-                onChange={(event) => setNote(event.target.value)}
-                placeholder="Eg: I am looking for an engagement ring"
-                rows={4}
-                className="h-[100px] w-full resize-none bg-[#F2F2F2] p-3 font-gill text-base leading-110 text-darkblack placeholder:text-[#999999] outline-none"
-              />
-            </div>
+            <AppointmentContactFields
+              idPrefix="try-at-home"
+              name={name}
+              countryCode={countryCode}
+              phone={phone}
+              email={email}
+              date={date}
+              note={note}
+              selectedSlot={selectedSlot}
+              onNameChange={setName}
+              onCountryCodeChange={setCountryCode}
+              onPhoneChange={setPhone}
+              onEmailChange={setEmail}
+              onDateChange={setDate}
+              onNoteChange={setNote}
+              onSelectedSlotChange={setSelectedSlot}
+              errors={errors}
+              showError={showError}
+              markTouched={markTouched}
+              noteLabel="What are you looking for?"
+              notePlaceholder="Eg: I am looking for an engagement ring"
+            />
           </div>
         </div>
       </div>
@@ -233,7 +137,7 @@ const TryAtHomeDetailsStep = ({
           <p className="text-center font-gill text-sm font-light leading-normal tracking-[0.252px] text-[#4D4D4D]">
             Our representative will get in touch with you soon
           </p>
-          <DetailDarkButton onClick={handleProceed} disabled={!name.trim() || !phone.trim()}>
+          <DetailDarkButton onClick={() => validateSubmit(onProceed)} disabled={submitted && !isValid}>
             Add Address
           </DetailDarkButton>
         </div>
@@ -247,6 +151,8 @@ type TryAtHomeAddressStepProps = {
   onSubmit: () => void;
 };
 
+type AddressField = "addressLine1" | "addressLine2" | "pincode" | "city" | "state";
+
 const TryAtHomeAddressStep = ({ onBack, onSubmit }: TryAtHomeAddressStepProps) => {
   const { detectAddress, isLocating } = useCurrentLocationAddress();
   const [addressLine1, setAddressLine1] = useState("");
@@ -254,6 +160,28 @@ const TryAtHomeAddressStep = ({ onBack, onSubmit }: TryAtHomeAddressStepProps) =
   const [pincode, setPincode] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [touched, setTouched] = useState<Partial<Record<AddressField, boolean>>>({});
+
+  const errors = useMemo(
+    () => ({
+      addressLine1: validateAddressLine1(addressLine1).error,
+      addressLine2: validateOptionalAddressLine2(addressLine2).error,
+      pincode: validateIndianPincode(pincode).error,
+      city: validateCity(city).error,
+      state: validateIndianState(state, TRY_AT_HOME_INDIAN_STATES).error,
+    }),
+    [addressLine1, addressLine2, pincode, city, state],
+  );
+
+  const isValid = Object.values(errors).every((error) => !error);
+
+  const markTouched = (field: AddressField) => {
+    setTouched((current) => ({ ...current, [field]: true }));
+  };
+
+  const showError = (field: AddressField) =>
+    shouldShowFieldError(Boolean(touched[field]), submitted, errors[field]);
 
   const handleUseCurrentLocation = async () => {
     const address = await detectAddress();
@@ -266,20 +194,22 @@ const TryAtHomeAddressStep = ({ onBack, onSubmit }: TryAtHomeAddressStepProps) =
     setPincode(address.pincode);
     setCity(address.city);
     setState(address.state);
+    setTouched({
+      addressLine1: true,
+      addressLine2: true,
+      pincode: true,
+      city: true,
+      state: true,
+    });
   };
 
   const handleSubmit = () => {
-    if (!addressLine1.trim() || !pincode.trim() || !city.trim() || !state) {
+    setSubmitted(true);
+    if (!isValid) {
       return;
     }
     onSubmit();
   };
-
-  const isValid =
-    addressLine1.trim().length > 0 &&
-    pincode.trim().length > 0 &&
-    city.trim().length > 0 &&
-    state.length > 0;
 
   return (
     <>
@@ -324,9 +254,22 @@ const TryAtHomeAddressStep = ({ onBack, onSubmit }: TryAtHomeAddressStepProps) =
                 type="text"
                 value={addressLine1}
                 onChange={(event) => setAddressLine1(event.target.value)}
+                onBlur={() => markTouched("addressLine1")}
                 placeholder="Enter"
                 autoComplete="address-line1"
-                className={appointmentFieldClassName}
+                maxLength={120}
+                aria-invalid={showError("addressLine1") || undefined}
+                aria-describedby={
+                  showError("addressLine1") ? "try-at-home-address-line-1-error" : undefined
+                }
+                className={cn(
+                  appointmentFieldClassName,
+                  showError("addressLine1") && invalidFieldClassName,
+                )}
+              />
+              <FormFieldError
+                id="try-at-home-address-line-1-error"
+                message={showError("addressLine1") ? errors.addressLine1 : undefined}
               />
             </div>
 
@@ -339,9 +282,22 @@ const TryAtHomeAddressStep = ({ onBack, onSubmit }: TryAtHomeAddressStepProps) =
                 type="text"
                 value={addressLine2}
                 onChange={(event) => setAddressLine2(event.target.value)}
+                onBlur={() => markTouched("addressLine2")}
                 placeholder="Enter"
                 autoComplete="address-line2"
-                className={appointmentFieldClassName}
+                maxLength={120}
+                aria-invalid={showError("addressLine2") || undefined}
+                aria-describedby={
+                  showError("addressLine2") ? "try-at-home-address-line-2-error" : undefined
+                }
+                className={cn(
+                  appointmentFieldClassName,
+                  showError("addressLine2") && invalidFieldClassName,
+                )}
+              />
+              <FormFieldError
+                id="try-at-home-address-line-2-error"
+                message={showError("addressLine2") ? errors.addressLine2 : undefined}
               />
             </div>
 
@@ -355,10 +311,21 @@ const TryAtHomeAddressStep = ({ onBack, onSubmit }: TryAtHomeAddressStepProps) =
                   type="text"
                   inputMode="numeric"
                   value={pincode}
-                  onChange={(event) => setPincode(event.target.value)}
+                  onChange={(event) => setPincode(sanitizePincodeInput(event.target.value))}
+                  onBlur={() => markTouched("pincode")}
                   placeholder="Enter"
                   autoComplete="postal-code"
-                  className={appointmentFieldClassName}
+                  maxLength={6}
+                  aria-invalid={showError("pincode") || undefined}
+                  aria-describedby={showError("pincode") ? "try-at-home-pincode-error" : undefined}
+                  className={cn(
+                    appointmentFieldClassName,
+                    showError("pincode") && invalidFieldClassName,
+                  )}
+                />
+                <FormFieldError
+                  id="try-at-home-pincode-error"
+                  message={showError("pincode") ? errors.pincode : undefined}
                 />
               </div>
               <div className="flex min-w-0 flex-1 flex-col gap-2">
@@ -370,9 +337,17 @@ const TryAtHomeAddressStep = ({ onBack, onSubmit }: TryAtHomeAddressStepProps) =
                   type="text"
                   value={city}
                   onChange={(event) => setCity(event.target.value)}
+                  onBlur={() => markTouched("city")}
                   placeholder="Enter"
                   autoComplete="address-level2"
-                  className={appointmentFieldClassName}
+                  maxLength={80}
+                  aria-invalid={showError("city") || undefined}
+                  aria-describedby={showError("city") ? "try-at-home-city-error" : undefined}
+                  className={cn(appointmentFieldClassName, showError("city") && invalidFieldClassName)}
+                />
+                <FormFieldError
+                  id="try-at-home-city-error"
+                  message={showError("city") ? errors.city : undefined}
                 />
               </div>
             </div>
@@ -381,11 +356,19 @@ const TryAtHomeAddressStep = ({ onBack, onSubmit }: TryAtHomeAddressStepProps) =
               <label htmlFor="try-at-home-state" className={appointmentLabelClassName}>
                 State
               </label>
-              <div className="relative flex h-14 w-full items-center bg-[#F2F2F2] px-3">
+              <div
+                className={cn(
+                  "relative flex h-14 w-full items-center bg-[#F2F2F2] px-3",
+                  showError("state") && "ring-1 ring-[#B42318]",
+                )}
+              >
                 <select
                   id="try-at-home-state"
                   value={state}
                   onChange={(event) => setState(event.target.value)}
+                  onBlur={() => markTouched("state")}
+                  aria-invalid={showError("state") || undefined}
+                  aria-describedby={showError("state") ? "try-at-home-state-error" : undefined}
                   className={cn(
                     "min-w-0 flex-1 appearance-none bg-transparent font-gill text-base leading-110 outline-none",
                     state ? "text-darkblack" : "text-neutral400",
@@ -405,6 +388,10 @@ const TryAtHomeAddressStep = ({ onBack, onSubmit }: TryAtHomeAddressStepProps) =
                   className="pointer-events-none shrink-0 text-darkblack"
                 />
               </div>
+              <FormFieldError
+                id="try-at-home-state-error"
+                message={showError("state") ? errors.state : undefined}
+              />
             </div>
           </div>
         </div>
@@ -416,7 +403,7 @@ const TryAtHomeAddressStep = ({ onBack, onSubmit }: TryAtHomeAddressStepProps) =
           <p className="text-center font-gill text-sm font-light leading-normal tracking-[0.252px] text-[#4D4D4D]">
             Our representative will get in touch with you soon
           </p>
-          <DetailDarkButton onClick={handleSubmit} disabled={!isValid}>
+          <DetailDarkButton onClick={handleSubmit} disabled={submitted && !isValid}>
             Schedule Try At Home
           </DetailDarkButton>
         </div>
