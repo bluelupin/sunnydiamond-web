@@ -17,7 +17,7 @@ type MosaicPhotoTileProps = {
 };
 
 const MosaicPhotoTile = ({ mosaicCol, mosaicRow, className }: MosaicPhotoTileProps) => (
-  <div className={cn("relative overflow-hidden bg-[#EFE7D4]", className)}>
+  <div className={cn("relative overflow-hidden", className)}>
     <div
       className="absolute inset-0 bg-no-repeat"
       style={{
@@ -42,7 +42,7 @@ const MobileCardTile = ({ cardIndex, className }: MobileCardTileProps) => {
   return (
     <article
       className={cn(
-        "flex flex-col items-center justify-center bg-[#F8F4EC] px-2",
+        "flex flex-col items-center justify-center bg-chalkCard px-2",
         className,
       )}
       style={{ gap: `${card.gap}px` }}
@@ -63,7 +63,7 @@ const MobileCardTile = ({ cardIndex, className }: MobileCardTileProps) => {
 };
 
 const AboutHandcraftedMobileGrid = () => (
-  <div className="flex w-full flex-col gap-[2px] bg-[#EFE7D4]">
+  <div className="flex w-full flex-col gap-[2px]">
     <div className="grid grid-cols-3 gap-[2px]">
       {aboutHandcraftedMobileLayout.row1.map((tile, index) =>
         tile.type === "photo" ? (
