@@ -3,7 +3,12 @@ import productNecklace from "@/assets/product-necklace.jpg";
 import productEarrings from "@/assets/product-earrings.jpg";
 import productBracelet from "@/assets/product-bracelet.jpg";
 import type { StaticImageData } from "next/image";
-import { PRODUCT_DETAIL_GALLERY_THIRD_IMAGE } from "@/features/products/data/productGalleryContent";
+import {
+  PRODUCT_DETAIL_GALLERY_HERO_IMAGE,
+  PRODUCT_DETAIL_GALLERY_LIFESTYLE_IMAGE,
+  PRODUCT_DETAIL_GALLERY_SECOND_IMAGE,
+  PRODUCT_DETAIL_GALLERY_THIRD_IMAGE,
+} from "@/features/products/data/productGalleryContent";
 
 export interface Product {
   id: string;
@@ -36,8 +41,12 @@ export const products: Product[] = [
     shortDescription: "1.5ct round brilliant diamond in 18K rose gold",
     category: "Rings",
     image: productRing,
-    images: [productRing, productRing, PRODUCT_DETAIL_GALLERY_THIRD_IMAGE],
-    lifestyleImage: productRing,
+    images: [
+      PRODUCT_DETAIL_GALLERY_HERO_IMAGE,
+      PRODUCT_DETAIL_GALLERY_SECOND_IMAGE,
+      PRODUCT_DETAIL_GALLERY_THIRD_IMAGE,
+    ],
+    lifestyleImage: PRODUCT_DETAIL_GALLERY_LIFESTYLE_IMAGE,
     carat: "1.5 ct",
     metal: "18K Rose Gold",
     inStock: true,
