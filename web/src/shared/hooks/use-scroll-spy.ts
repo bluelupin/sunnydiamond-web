@@ -31,7 +31,6 @@ export function useScrollSpy({ sectionIds, visibilityThresholdIndex = 3 }: UseSc
       const mid = viewportH * 0.4;
 
       // ---- READ phase: collect all geometry first ----
-      const thresholdTop = thresholdEl ? thresholdEl.getBoundingClientRect().top : Infinity;
       const rects = elements.map((el) => el.getBoundingClientRect());
 
       // ---- COMPUTE ----
@@ -48,7 +47,12 @@ export function useScrollSpy({ sectionIds, visibilityThresholdIndex = 3 }: UseSc
       }
 
       // ---- WRITE phase: batch state updates last ----
-      setIsVisible(thresholdTop < viewportH * 0.6);
+      // Show once the first nav section (Alankara) enters the viewport.
+      const thresholdRect = thresholdEl?.getBoundingClientRect();
+      const hasReachedThreshold = thresholdRect
+        ? thresholdRect.top <= viewportH * 0.95 && thresholdRect.bottom > 0
+        : false;
+      setIsVisible(hasReachedThreshold);
       setProgress(next);
       setActiveId(active);
     };

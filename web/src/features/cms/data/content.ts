@@ -1,11 +1,11 @@
 export const homeSections = [
-  { id: "hero", label: "Home" },
-  { id: "alankara", label: "Alankara" },
-  { id: "categories", label: "Occasions" },
-  { id: "diamond-awaits", label: "Your Diamond" },
-  { id: "craftsmanship", label: "Craftsmanship" },
-  { id: "promise", label: "Promise" },
-  { id: "bespoke-for-you", label: "Bespoke" },
+  { id: "alankara", label: "Collections" },
+  { id: "categories", label: "By Occasions" },
+  { id: "diamond-awaits", label: "Category" },
+  { id: "valentine", label: "Gifting" },
+  { id: "craftsmanship", label: "Know Your Diamonds" },
+  { id: "promise", label: "The Sunny Promise" },
+  { id: "bespoke-for-you", label: "For You" },
   { id: "showrooms", label: "Showrooms" },
 ] as const;
 
