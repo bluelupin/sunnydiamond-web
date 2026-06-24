@@ -47,7 +47,7 @@ const VerticalScrollLine = ({
         <div
           className={cn(
             "w-px origin-top bg-gradient-to-b from-darkMagenta to-goldAccent",
-            reducedMotion || externalLineFill
+            reducedMotion
               ? ""
               : "transition-transform duration-500 ease-out motion-reduce:transition-none",
           )}
