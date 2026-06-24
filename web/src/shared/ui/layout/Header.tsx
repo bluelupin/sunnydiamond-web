@@ -14,6 +14,7 @@ import { resolveShellHeaderLinks } from "@/shared/lib/shellNavigation";
 import MobileNavigation from "@/shared/ui/layout/MobileNavigation";
 import { JewelleryMegaMenu } from "@/shared/ui/layout/JewelleryMegaMenu";
 import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
+import MenuIcon from "@/assets/Icons/MenuIcon";
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -88,16 +89,16 @@ const Header = () => {
         aria-hidden={mobileMenuOpen}
       >
         <div className="container relative flex items-center justify-between h-16 md:h-20 lg:px-[40px] md:px-6 px-4">
-          <div className="flex items-center gap-4 md:gap-4 lg:gap-6 xl:gap-10">
+          <div className="flex items-center gap-6 md:gap-4 lg:gap-6 xl:gap-10">
             <button
-              className={cn("md:hidden p-2", textClass)}
+              className={cn("md:hidden md:p-2 p-0 w-6 h-6", textClass)}
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Open menu"
               aria-expanded={mobileMenuOpen}
             >
-              <Menu size={22} />
+              <MenuIcon />
             </button>
-            <button className={cn("md:hidden flex p-2 transition-colors", textClass, hoverClass)} aria-label="Search">
+            <button className={cn("md:hidden flex items-center justify-center w-6 h-6 transition-colors", textClass, hoverClass)} aria-label="Search">
               <Search size={20} strokeWidth={1.5} />
             </button>
 
@@ -145,20 +146,20 @@ const Header = () => {
 
           <div className="md:hidden absolute left-1/2 -translate-x-1/2">{Logo}</div>
 
-          <div className={cn("flex items-center gap-1 lg:gap-2", textClass)}>
-            <button className={cn("md:flex hidden p-2 transition-colors", hoverClass)} aria-label="Search">
+          <div className={cn("flex items-center lg:gap-6 md:gap-4 gap-6", textClass)}>
+            <button className={cn("md:flex hidden items-center justify-center w-6 h-6 transition-colors", hoverClass)} aria-label="Search">
               <Search size={20} strokeWidth={1.5} />
             </button>
             <Link
               href="/products"
-              className={cn("p-2 transition-colors", hoverClass)}
+              className={cn("flex items-center justify-center w-6 h-6 transition-colors", hoverClass)}
               aria-label="Wishlist"
             >
               <Heart size={20} strokeWidth={1.5} />
             </Link>
             <Link
               href="/cart"
-              className={cn("p-2 transition-colors relative", hoverClass)}
+              className={cn("items-center justify-center w-6 h-6 transition-colors relative", hoverClass)}
               aria-label="Cart"
             >
               <ShoppingBagIcon />
@@ -170,7 +171,7 @@ const Header = () => {
             </Link>
             <Link
               href="/contact"
-              className={cn("p-2 transition-colors hidden md:inline-flex", hoverClass)}
+              className={cn("items-center justify-center w-6 h-6 transition-colors hidden md:inline-flex", hoverClass)}
               aria-label="Account"
             >
               <User size={20} strokeWidth={1.5} />
