@@ -40,17 +40,17 @@ function AlankaraProductThumbnail({
       aria-current={isActive}
       onClick={onClick}
       className={cn(
-        "bg-[#F4F3EE] px-4 py-6 transition-opacity",
+        "box-border size-[140px] bg-[#F4F3EE] p-3 transition-opacity",
         isActive ? "opacity-100" : "opacity-70 hover:opacity-100",
       )}
     >
-      <div className="relative size-[140px] overflow-hidden">
-        <div className="absolute left-1/2 top-1/2 size-[173px] -translate-x-1/2 -translate-y-1/2">
+      <div className="relative size-full overflow-hidden">
+        <div className="absolute left-1/2 top-1/2 size-[143px] -translate-x-1/2 -translate-y-1/2">
           <Image
             src={src}
             alt=""
             fill
-            sizes="140px"
+            sizes="116px"
             className="max-w-none object-cover"
             style={cropStyle}
           />
