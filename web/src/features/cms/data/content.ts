@@ -1,10 +1,11 @@
 export const homeSections = [
+  { id: "hero", label: "Home" },
   { id: "alankara", label: "Alankara" },
   { id: "diamond-awaits", label: "Your Diamond" },
-  { id: "categories", label: "Categories" },
+  { id: "categories", label: "Occasions" },
   { id: "craftsmanship", label: "Craftsmanship" },
   { id: "promise", label: "Promise" },
-  { id: "for-you", label: "For You" },
+  { id: "bespoke-for-you", label: "Bespoke" },
   { id: "showrooms", label: "Showrooms" },
 ] as const;
 
@@ -38,16 +39,22 @@ export const homeContent = {
   alankara: {
     collection: {
       title: "Alankara Collection",
-      cta: { label: "Explore Collection", to: "/products" },
+      description:
+        "Guided by tradition and perfected by expertise, our craftsmen bring every diamond to life with meticulous attention to detail.",
+      cta: { label: "View Collection", to: "/products" },
     },
     productIds: ["1", "5", "2", "4"],
     product: {
       cta: { label: "Discover" },
     },
     gifting: {
-      title: "Gifting For Your Valentine",
+      title: "For Your Valentine",
+      description:
+        "Honoring a lifetime of connection through rare, masterfully crafted jewelry designed for the moments that matter.",
+      mobileDescription:
+        "Traditional mastery bringing every diamond to radiant, eternal life.",
       cta: { label: "Shop Now", to: "/products" },
-      secondary: { label: "Send a Gift Card Instead", to: "/contact" },
+      secondary: { label: "Send a Gift Card Instead", to: "/gift-card" },
     },
   },
   craftsmanship: {
@@ -123,24 +130,7 @@ export const homeContent = {
       "For over 35 years, Sunny Diamonds has been transforming the world's finest diamonds into wearable works of art. Our atelier combines centuries-old techniques with contemporary design to create pieces that transcend time.",
     cta: { label: "Read Our Story", to: "/about" },
   },
-  forYouForever: {
-    title: "For you, Forever",
-    cards: [
-      {
-        image: "foryou-bespoke",
-        title: "BESPOKE JEWELLERY",
-        subtitle:
-          "Designs thoughtfully crafted to bring your vision to life",
-      },
-      {
-        image: "foryou-diamonds",
-        title: "DIAMONDS FOR EVERYONE",
-        subtitle:
-          "Save monthly towards your timeless diamond",
-      },
-    ],
-  },
- promise: {
+  promise: {
     title: "THE SUNNY PROMISE",
     description:
       "Guided by heritage and perfected by pride every setting a masterpiece of expert precision.",
@@ -197,7 +187,7 @@ export const seoContent = {
   about: {
     title: "Our Story",
     description:
-      "Learn about Sunny Diamonds' 35+ year legacy of crafting premium diamond jewellery with master artisans.",
+      "Discover Sunny Diamonds' legacy since 1997 — three generations of internally flawless diamonds, master craftsmanship, and timeless jewellery from Chalakkudy to the world.",
   },
   contact: {
     title: "Contact Us",

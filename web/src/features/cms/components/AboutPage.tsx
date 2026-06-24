@@ -1,12 +1,10 @@
-import Layout from "@/shared/ui/layout/Layout";
 import SectionHeader from "@/shared/ui/SectionHeader";
 import StatGrid from "@/shared/ui/StatGrid";
 import { aboutContent } from "@/features/cms/data/content";
 
 const AboutPage = () => {
   return (
-    <Layout>
-      <article className="container py-10 md:py-16 max-w-3xl mx-auto">
+    <article className="container py-10 md:py-16 max-w-3xl mx-auto">
         <SectionHeader
           subtitle={aboutContent.header.subtitle}
           title={aboutContent.header.title}
@@ -23,8 +21,7 @@ const AboutPage = () => {
 
           <p>{aboutContent.closingParagraph}</p>
         </div>
-      </article>
-    </Layout>
+    </article>
   );
 };
 

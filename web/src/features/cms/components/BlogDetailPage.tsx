@@ -1,4 +1,3 @@
-import Layout from "@/shared/ui/layout/Layout";
 import { PrimaryLink } from "@/shared/ui/PrimaryButton";
 import type { BlogPost } from "@/features/cms/data/blogs";
 
@@ -8,8 +7,7 @@ interface BlogDetailPageProps {
 
 const BlogDetailPage = ({ post }: BlogDetailPageProps) => {
   return (
-    <Layout>
-      <article className="container py-14 md:py-20 lg:py-24">
+    <article className="container py-14 md:py-20 lg:py-24">
         <div className="mx-auto max-w-3xl">
           <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
             Blog Detail
@@ -30,8 +28,7 @@ const BlogDetailPage = ({ post }: BlogDetailPageProps) => {
             <PrimaryLink href="/blogs">Back to Blogs</PrimaryLink>
           </div>
         </div>
-      </article>
-    </Layout>
+    </article>
   );
 };
 

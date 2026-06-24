@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import AppProvider from "@/shared/lib/providers/AppProvider";
+import Layout from "@/shared/ui/layout/Layout";
 import siteEnv, { getAbsoluteUrl } from "@/shared/lib/seo/siteConfig";
 
 export const viewport: Viewport = {
@@ -93,9 +94,7 @@ export default function RootLayout({
     <html lang="en" className="antialiased">
       <body className="min-h-screen bg-background font-body" suppressHydrationWarning>
         <AppProvider>
-          <div className="relative flex min-h-screen flex-col">
-            {children}
-          </div>
+          <Layout>{children}</Layout>
         </AppProvider>
       </body>
     </html>

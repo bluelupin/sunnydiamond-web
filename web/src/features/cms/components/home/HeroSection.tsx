@@ -47,7 +47,7 @@ const HeroSection = ({ id }: HeroSectionProps) => {
 
   return (
     <>
-      <section id={id} className="relative h-screen flex flex-col overflow-hidden">
+      <section id={id} className="relative h-[640px] flex flex-col overflow-hidden">
         <div className="relative flex-1 overflow-hidden">
           <video
             className="absolute inset-0 w-full h-full object-cover"

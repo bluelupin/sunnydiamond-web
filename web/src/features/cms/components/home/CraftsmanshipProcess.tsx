@@ -6,6 +6,7 @@ import { useStepScroll } from "@/shared/hooks/use-step-scroll";
 import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import fallBackImage from "@/assets/fallBackImage.png";
+import { isSectionActive } from "@/shared/utils/cmsSection";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import { useMemo } from "react";
@@ -40,10 +41,10 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
       "",
     [craftsmanshipSection]
   );
-  const isActive = craftsmanshipSection?.isActive === true;
+  const isActive = isSectionActive(craftsmanshipSection?.isActive);
   const steps = Array.isArray(craftsmanshipSection?.steps)
     ? [...craftsmanshipSection.steps]
-      .filter((step) => step?.isActive)
+      .filter((step) => step?.isActive !== false)
       .sort(
         (a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0)
       )
@@ -56,6 +57,10 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
   const rotateY = progress * 540; // strong horizontal spin
   const rotateX = 18 - progress * 36; // subtle tilt from +18 to -18
   const rotateZ = Math.sin(progress * Math.PI * 2) * 8; // gentle wobble
+
+  if (!isActive) {
+    return null;
+  }
 
   if (isEditorialLoading) {
     return (

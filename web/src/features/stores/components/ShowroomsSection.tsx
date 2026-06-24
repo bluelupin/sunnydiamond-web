@@ -10,6 +10,7 @@ import ShowroomSectionSkeleton from "@/features/cms/components/SkeletonLoader/Sh
 
 import fallBackImage from "@/assets/fallBackImage.png";
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { isSectionActive } from "@/shared/utils/cmsSection";
 
 interface ShowroomsSectionProps {
   id?: string;
@@ -32,7 +33,7 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
 
   useEffect(() => {
     if (locations.length > 0 && activeId === null) {
-      setActiveId(locations[0].id);
+      setActiveId(locations[0].id ?? null);
     }
   }, [locations, activeId]);
 
@@ -48,7 +49,6 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
     : desktopImage;
 
   const imageAlt =
-    activeLocation?.image?.altText ||
     resolveCmsAltText(activeLocation?.image?.desktopImage) ||
     resolveCmsAltText(activeLocation?.image?.mobileImage) ||
     `Sunny Diamonds showroom in ${activeLocation?.name}`;
@@ -56,7 +56,7 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
     return <ShowroomSectionSkeleton />;
   }
 
-  if (!showroomSection?.isActive) {
+  if (!isSectionActive(showroomSection?.isActive) || !showroomSection) {
     return null;
   }
 
@@ -93,7 +93,7 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
                 <button
                   type="button"
                   aria-pressed={isSelected}
-                  onClick={() => setActiveId(location.id)}
+                  onClick={() => setActiveId(location.id ?? null)}
                   className={cn(
                     "w-full lg:h-73 h-50 lg:px-0 px-6 flex items-center lg:justify-start justify-center lg:text-left text-center font-larken text-base md:text-xl lg:text-2xl text-black uppercase transition-all duration-300",
                     isSelected
@@ -123,7 +123,7 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
                     </div>
 
                     <Link
-                      href={location.mapUrl}
+                      href={location.mapUrl ?? location.directionsUrl ?? "#"}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="block w-fit md:text-base text-xs pb-1 tracking-[1.8%] leading-[100%] uppercase text-darkblack border-b border-foreground font-gill"

@@ -1,130 +1,143 @@
-import Link from "next/link";
-import { siteConfig } from "@/shared/lib/siteConfig";
-import SDTextLogo from "@/assets/Icons/SDTextLogo";
-import { paymentLogoMap } from "@/shared/ui/PaymentLogos";
-import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
-import InstagramIcon from "@/assets/Icons/InstagramIcon";
-import FacebookIcon from "@/assets/Icons/FacebookIcon";
-import XIcon from "@/assets/Icons/XIcon";
-import LinkedInIcon from "@/assets/Icons/LinkedInIcon";
-import TrustBadgeSection from "@/features/cms/components/common/TrustBadges";
+"use client";
 
-export const SOCIAL_ICON_MAP = {
-  instagram: InstagramIcon,
-  facebook: FacebookIcon,
-  x: XIcon,
-  twitter: XIcon,
-  linkedin: LinkedInIcon,
+import Image from "next/image";
+import Link from "next/link";
+import { useMemo } from "react";
+import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
+import { siteConfig } from "@/shared/lib/siteConfig";
+import { resolveShellFooterLinkGroups } from "@/shared/lib/shellNavigation";
+import PageContainer from "@/shared/ui/layout/PageContainer";
+
+const SOCIAL_ICON_MAP: Record<string, string> = {
+  instagram: "/images/navigation/social-instagram.svg",
+  facebook: "/images/navigation/social-facebook.svg",
+  x: "/images/navigation/social-x.svg",
+  twitter: "/images/navigation/social-x.svg",
+  linkedin: "/images/navigation/social-linkedin.svg",
 };
 
-const Footer = () => {
-  const { data: shellData, isLoading: isShellLoading } = useHomepageShell();
-  const footerLinkGroups = shellData?.global?.footerLinkGroups || shellData?.footerLinkGroups;
-  const footerCopyright = shellData?.global?.footerCopyright || shellData?.footerCopyright;
-  const cmsSocialLinks = shellData?.global?.socialLinks || shellData?.socialLinks || [];
-  const socialLinks = [...cmsSocialLinks]
-    .filter((item) => item?.isActive !== false)
-    .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
-    .map((item) => ({
-      id: item.id,
-      label: item.label,
-      href: item.url,
-      targetType: item.targetType,
-    }));
+const SOCIAL_FALLBACK = [
+  { id: "instagram", label: "Instagram", href: siteConfig.social.instagram, icon: SOCIAL_ICON_MAP.instagram },
+  { id: "facebook", label: "Facebook", href: siteConfig.social.facebook, icon: SOCIAL_ICON_MAP.facebook },
+  { id: "x", label: "X", href: "https://x.com/sunnydiamonds", icon: SOCIAL_ICON_MAP.x },
+  { id: "linkedin", label: "LinkedIn", href: "https://linkedin.com/company/sunnydiamonds", icon: SOCIAL_ICON_MAP.linkedin },
+] satisfies { id: string; label: string; href: string; icon: string }[];
 
-  const { navigation } = siteConfig;
-  const { paymentMethods } = navigation.footer;
+const DEFAULT_COPYRIGHT = "© 2026 Sunny Diamonds. All Rights Reserved.";
+
+const Footer = () => {
+  const { data: shellData } = useHomepageShell();
+
+  const cmsFooterLinkGroups = shellData?.global?.footerLinkGroups || shellData?.footerLinkGroups;
+  const footerLinkGroups = useMemo(
+    () => resolveShellFooterLinkGroups(cmsFooterLinkGroups),
+    [cmsFooterLinkGroups],
+  );
+
+  const footerCopyright =
+    shellData?.global?.footerCopyright ||
+    shellData?.footerCopyright ||
+    DEFAULT_COPYRIGHT;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const cmsSocialLinks: any[] = shellData?.global?.socialLinks || shellData?.socialLinks || [];
+  const socialLinks = useMemo(() => {
+    if (!cmsSocialLinks.length) return SOCIAL_FALLBACK;
+
+    const cmsMap = new Map<string, string>(
+      (cmsSocialLinks as Array<{ label: string; url: string; isActive?: boolean }>)
+        .filter((item) => item?.isActive !== false && item?.url)
+        .map((item) => [item.label.toLowerCase(), item.url]),
+    );
+
+    return SOCIAL_FALLBACK.map((item) => ({
+      ...item,
+      href: cmsMap.get(item.id) ?? cmsMap.get(item.label.toLowerCase()) ?? item.href,
+    }));
+  }, [cmsSocialLinks]);
+
   return (
     <footer className="bg-gray300">
-      {/* Top trust-signals marquee */}
-      <TrustBadgeSection itemClassName="tracking-[0.25em] font-systemUi" />
-      {/* Main grid */}
-      <div className="max-w-1440 xl:px-20 lg:px-16 md:px-14 sm:px-10 px-5 mx-auto lg:py-30 md:py-24 sm:py-20 py-16 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:gap-x-10 lg:gap-x-8 md:gap-x-6 sm:gap-x-4 gap-x-3 xl:gap-y-16 lg:gap-y-14 md:gap-y-12 sm:gap-y-10 gap-y-9">
-        <div className="col-span-2 md:col-span-3 lg:col-span-1 flex flex-col lg:items-start items-center">
-          <Link href="/" aria-label="Sunny Diamonds" className="inline-flex flex-col items-center">
-            <SDTextLogo className="sm:text-darkMagenta text-darkblack" />
-          </Link>
+      <PageContainer className="flex flex-col gap-20 py-16 lg:gap-[120px] lg:py-100">
+        <div className="flex flex-col items-center xl:gap-12 md:gap-[40px] gap-8 lg:flex-row lg:items-start lg:justify-start">
+          <div className="shrink-0">
+            <Link href="/" aria-label="Sunny Diamonds">
+              <Image
+                src="/images/brand/logo-desktop.svg"
+                alt="Sunny Diamonds"
+                width={336}
+                height={142}
+                className="h-auto w-[200px] xl:w-[336px]"
+                priority
+              />
+            </Link>
+          </div>
+
+          <nav
+            aria-label="Footer navigation"
+            className="grid md:grid-cols-4 grid-cols-2 lg:flex lg:w-full xl:max-w-[923px] w-full justify-between lg:gap-4 gap-8"
+          >
+            {footerLinkGroups.map((column) => (
+              <div
+                key={column.id}
+                className="flex w-full flex-col gap-6"
+              >
+                <p className="font-gill lg:text-xl md:text-lg text-base font-normal leading-[110%] text-darkblack">
+                  {column.title.toUpperCase()}
+                </p>
+                <ul className="flex flex-col gap-3">
+                  {column.links.map((link) => (
+                    <li key={link.id}>
+                      <Link
+                        href={link.url}
+                        className="font-gill text-sm font-light leading-[110%] text-neutral500 transition-colors hover:text-darkMagenta"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </nav>
         </div>
-        {footerLinkGroups ? (
-          footerLinkGroups.map((column: any) => (
-            <div key={column.id}>
-              <h3 className="md:text-lg sm:text-base text-sm font-medium font-satoshi uppercase text-blackdark md:mb-8 sm-6 mb-4">
-                {column.title}
-              </h3>
-              <ul className="sm:space-y-4 space-y-3">
-                {column.links.map((link: any, idx: any) => (
-                  <li key={link.id} className="max-w-[14rem]">
-                    <Link
-                      href={link.url}
-                      className="inline-block max-w-full break-words hyphens-auto text-sm leading-relaxed sm:leading-relaxed lg:leading-6 font-normal font-satoshi text-blackdark transition-all duration-500 transform hover:text-darkMagenta hover:underline underline-offset-4 hover:translate-x-2 focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkMagenta focus-visible:ring-offset-2 focus-visible:ring-offset-gray300 focus-visible:text-darkMagenta"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))) : (
-          <p className="text-center">API Not Responding!</p>
-        )}
-      </div>
 
-      {/* Bottom bar: social, payment, copyright */}
-      <div className="max-w-1440 xl:px-20 lg:px-16 md:px-14 sm:px-10 px-5 lg:pb-30 md:pb-24 sm:pb-20 pb-16 mx-auto flex items-center xl:justify-between justify-center md:gap-8 sm:gap-6 gap-6 flex-wrap">
-        <div className="flex items-center md:gap-7 sm:gap-5 gap-4">
-          {socialLinks.map((social) => {
-            const Icon =
-              SOCIAL_ICON_MAP[
-              social.label.toLowerCase() as keyof typeof SOCIAL_ICON_MAP
-              ];
-
-            if (!Icon || !social.href) return null;
-
-            return (
+        <div className="relative flex flex-col items-center gap-8 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-7">
+            {socialLinks.map((social) => (
               <a
                 key={social.id}
                 href={social.href}
                 aria-label={social.label}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:scale-110 duration-500 transition-all"
+                className="transition-opacity hover:opacity-60"
               >
-                <Icon className="w-6 h-6 sm:text-darkMagenta text-darkblack" />
+                <Image
+                  src={social.icon}
+                  alt=""
+                  width={24}
+                  height={24}
+                  aria-hidden
+                  className="size-6"
+                />
               </a>
-            );
-          })}
+            ))}
+          </div>
+
+          <Image
+            src="/images/navigation/payment-methods.png"
+            alt="Accepted payment methods: Visa, Mastercard, Amex, Maestro, PayTM, RuPay"
+            width={380}
+            height={25}
+            className="h-25 max-h-25 w-auto max-w-[320px] lg:max-w-[380px]"
+          />
+
+          <p className="text-center font-gill text-sm font-light leading-[110%] text-neutral500 lg:absolute lg:left-1/2 lg:-translate-x-1/2 lg:whitespace-nowrap">
+            {footerCopyright}
+          </p>
         </div>
-        <div className="flex items-center justify-center flex-wrap gap-2">
-          {paymentMethods.map((method) => {
-            const entry = paymentLogoMap[method];
-            if (!entry) {
-              return (
-                <span
-                  key={method}
-                  className="inline-flex items-center justify-center h-7 px-2.5 rounded-sm bg-card border border-border text-[10px] font-semibold tracking-wider uppercase text-foreground/80"
-                >
-                  {method}
-                </span>
-              );
-            }
-            const { Logo, label } = entry;
-            return (
-              <span
-                key={method}
-                role="img"
-                aria-label={label}
-                title={label}
-                className="inline-flex items-center justify-center h-7 w-12 px-1.5 rounded-sm bg-white border border-border"
-              >
-                <Logo className="h-full w-auto max-w-full" />
-              </span>
-            );
-          })}
-        </div>
-        <p className="sm:text-sm text-xs text-nuetral200 font-normal font-satoshi">
-          {footerCopyright}
-        </p>
-      </div>
+      </PageContainer>
     </footer>
   );
 };

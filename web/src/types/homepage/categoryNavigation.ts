@@ -37,21 +37,30 @@ export type FeaturedCollectionImage = {
 export type FeaturedCollectionSection = {
   id?: number | null;
   sectionTitle?: string | null;
+  description?: string | null;
   cta?: CategoryNavigationCta | null;
   label?: { label?: string | null } | null;
   products?: FeaturedCollectionImage[] | null;
   backgroundImage?: StrapiMedia | null;
+  primaryImage?: CategoryNavigationImage | StrapiMedia | null;
+  image?: CategoryNavigationImage | StrapiMedia | null;
 };
 
 export type GiftingBanner = {
   id?: number | null;
   title?: string | null;
+  description?: string | null;
+  subtitle?: string | null;
+  mobileDescription?: string | null;
+  mobileSubtitle?: string | null;
+  isActive?: boolean | null;
   primaryCta?: CategoryNavigationCta | null;
   secondaryCta?: CategoryNavigationCta | null;
   cta?: CategoryNavigationCta | null;
   secondary?: CategoryNavigationCta | null;
   backgroundImage?: StrapiMedia | null;
   sideImage?: StrapiMedia | null;
+  image?: CategoryNavigationImage | StrapiMedia | null;
 };
 
 export type HomepageShoppingBlocksData = {

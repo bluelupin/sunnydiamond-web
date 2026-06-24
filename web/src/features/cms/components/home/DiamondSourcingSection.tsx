@@ -7,6 +7,7 @@ import diamondSourcingBg from "@/assets/section3-bg.webp";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import { useMemo } from "react";
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { isSectionActive } from "@/shared/utils/cmsSection";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 interface DiamondSourcingSectionProps {
   id?: string;
@@ -20,7 +21,6 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
   const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
   const diamondSourcedDataSection = editorialData?.diamondSourcingSection ?? null;
   const sectionTitle = diamondSourcedDataSection?.sectionTitle?.trim();
-  const isActive = diamondSourcedDataSection?.isActive === true;
   const desktopImageUrl = useMemo(
     () => resolveCmsMediaUrl(diamondSourcedDataSection?.image?.desktopImage ?? diamondSourcedDataSection?.image?.data?.attributes ?? diamondSourcedDataSection?.image),
     [diamondSourcedDataSection]
@@ -41,7 +41,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
     [diamondSourcedDataSection]
   );
 
-  if (!isActive) {
+  if (!isSectionActive(diamondSourcedDataSection?.isActive)) {
     return null;
   }
 

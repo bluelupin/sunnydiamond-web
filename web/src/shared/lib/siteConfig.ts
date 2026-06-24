@@ -28,7 +28,7 @@ export const siteConfig = {
   },
   navigation: {
     main: [
-      { to: "/products", label: "Jewellery" },
+      { to: "/jewellery-product", label: "Jewellery" },
       { to: "/products", label: "Collection" },
       { to: "/products", label: "Gifting" },
       { to: "/contact", label: "Bespoke" },
@@ -40,11 +40,10 @@ export const siteConfig = {
           heading: "Our Company",
           links: [
             { to: "/about", label: "About Us" },
-            { to: "/education", label: "Learn About Diamonds" },
+            { to: "/learn-about-diamonds", label: "Learn About Diamonds" },
             { to: "/diamonds-for-everyone", label: "Diamonds For Everyone" },
             { to: "/careers", label: "Careers" },
             { to: "/news", label: "News" },
-            { to: "/blogs", label: "Blog" },
           ],
         },
         {
@@ -53,7 +52,6 @@ export const siteConfig = {
             { to: "/contact", label: "Contact Us" },
             { to: "/store-locator", label: "Store Locator" },
             { to: "/faqs", label: "FAQs" },
-            { to: "/help-and-support", label: "Help and Support" },
           ],
         },
         {
@@ -61,9 +59,6 @@ export const siteConfig = {
           links: [
             { to: "/book-an-appointment", label: "Book an Appointment" },
             { to: "/bespoke-jewellery", label: "Bespoke Jewellery" },
-            { to: "/monthly-plans", label: "Monthly Plans" },
-            { to: "/gift-card", label: "Gift Card" },
-            { to: "/finance-options", label: "Finance Options" },
           ],
         },
         {
@@ -76,7 +71,6 @@ export const siteConfig = {
             { to: "/old-gold-purchase-policy-kerala-only", label: "Old Gold Purchase Policy (Kerala Only)" },
             { to: "/privacy-policy", label: "Privacy Policy" },
             { to: "/terms-and-conditions", label: "Terms & Conditions" },
-            { to: "/policy-and-certification", label: "Policy and Certification" },
           ],
         },
       ],

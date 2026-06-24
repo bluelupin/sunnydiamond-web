@@ -2,13 +2,22 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import Layout from "@/shared/ui/layout/Layout";
-import OptimizedImage from "@/shared/ui/OptimizedImage";
-import { PrimaryButton } from "@/shared/ui/PrimaryButton";
+import PageContainer from "@/shared/ui/layout/PageContainer";
 import { getProductById } from "@/features/products/data/products";
+import {
+  getProductDetailContent,
+  getProductDetailPricing,
+} from "@/features/products/data/productDetailContent";
+import { getMoreForYouCarouselItems } from "@/features/products/data/moreForYouContent";
 import { useCart } from "@/features/cart/context/CartContext";
-import { ShoppingBag, Star, ChevronLeft } from "lucide-react";
 import { useToast } from "@/shared/hooks/use-toast";
+import { ChevronLeft } from "lucide-react";
+import ProductDetailGallery from "./detail/ProductDetailGallery";
+import ProductDetailSidebar from "./detail/ProductDetailSidebar";
+import ProductDetailHeroBanner from "./detail/ProductDetailHeroBanner";
+import ProductDetailPairWithSection from "./detail/ProductDetailPairWithSection";
+import ProductDetailMoreForYouSection from "./detail/ProductDetailMoreForYouSection";
+import ProductDetailVisitUsSection from "./detail/ProductDetailVisitUsSection";
 
 const ProductDetailPage = () => {
   const params = useParams() as { id?: string | string[] };
@@ -19,16 +28,18 @@ const ProductDetailPage = () => {
 
   if (!product) {
     return (
-      <Layout>
-        <div className="container py-20 text-center">
-          <h1 className="font-heading text-2xl text-foreground">Product not found</h1>
-          <Link href="/products" className="text-primary underline mt-4 inline-block font-body text-sm">
-            Back to Collections
-          </Link>
-        </div>
-      </Layout>
+      <div className="container py-20 text-center">
+        <h1 className="font-larken text-2xl text-darkblack">Product not found</h1>
+        <Link href="/jewellery-product" className="mt-4 inline-block font-gill text-sm text-darkblack underline">
+          Back to Jewellery
+        </Link>
+      </div>
     );
   }
+
+  const content = getProductDetailContent(product);
+  const pricing = getProductDetailPricing(product.id);
+  const moreForYou = getMoreForYouCarouselItems(product.id);
 
   const handleAddToCart = () => {
     addItem(product);
@@ -36,86 +47,32 @@ const ProductDetailPage = () => {
   };
 
   return (
-    <Layout>
-      <article className="container py-6 md:py-12">
+    <article>
+      <PageContainer className="max-w-1360 px-4 pb-16 pt-6 lg:px-0 lg:pb-24 lg:pt-8">
         <Link
-          href="/products"
-          className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground text-sm font-body mb-6 transition-colors"
+          href="/jewellery-product"
+          className="mb-6 inline-flex items-center gap-1 font-gill text-sm text-neutral500 transition-colors hover:text-darkblack lg:mb-8"
         >
-          <ChevronLeft size={16} /> Back to Collections
+          <ChevronLeft size={16} aria-hidden />
+          Back to Jewellery
         </Link>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-          <div className="aspect-square overflow-hidden bg-secondary rounded-sm">
-            <OptimizedImage
-              src={product.image}
-              alt={`${product.name} - ${product.shortDescription}`}
-              priority
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
-          </div>
-
-          <div className="flex flex-col justify-center space-y-6">
-            <header>
-              <p className="font-body text-xs tracking-[0.3em] uppercase text-muted-foreground mb-1">
-                {product.category}
-              </p>
-              <h1 className="font-heading text-2xl md:text-3xl font-semibold text-foreground">
-                {product.name}
-              </h1>
-            </header>
-
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 text-primary">
-                <Star size={14} fill="currentColor" />
-                <span className="font-body text-sm font-medium">{product.rating}</span>
-              </div>
-              <span className="text-sm text-muted-foreground font-body">
-                ({product.reviews} reviews)
-              </span>
-            </div>
-
-            <div className="flex items-baseline gap-3">
-              <span className="font-heading text-2xl font-semibold text-foreground">
-                ${product.price.toLocaleString()}
-              </span>
-              {product.originalPrice && (
-                <span className="font-body text-lg text-muted-foreground line-through">
-                  ${product.originalPrice.toLocaleString()}
-                </span>
-              )}
-            </div>
-
-            <p className="font-body text-sm leading-relaxed text-muted-foreground">
-              {product.description}
-            </p>
-
-            <dl className="grid grid-cols-2 gap-4 py-4 border-t border-b border-border">
-              <div>
-                <dt className="font-body text-xs tracking-widest uppercase text-muted-foreground">
-                  Carat
-                </dt>
-                <dd className="font-body text-sm font-medium text-foreground mt-1">
-                  {product.carat}
-                </dd>
-              </div>
-              <div>
-                <dt className="font-body text-xs tracking-widest uppercase text-muted-foreground">
-                  Metal
-                </dt>
-                <dd className="font-body text-sm font-medium text-foreground mt-1">
-                  {product.metal}
-                </dd>
-              </div>
-            </dl>
-
-            <PrimaryButton onClick={handleAddToCart} className="w-full py-4">
-              <ShoppingBag size={18} /> Add to Bag
-            </PrimaryButton>
-          </div>
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,783fr)_minmax(0,553fr)] lg:gap-6 xl:gap-6">
+          <ProductDetailGallery product={product} />
+          <ProductDetailSidebar
+            product={product}
+            content={content}
+            pricing={pricing}
+            onAddToBag={handleAddToCart}
+          />
         </div>
-      </article>
-    </Layout>
+      </PageContainer>
+
+      <ProductDetailHeroBanner imageSrc={content.heroBannerImage} alt={`${product.name} lifestyle`} />
+      <ProductDetailPairWithSection pairWith={content.pairWith} />
+      <ProductDetailMoreForYouSection items={moreForYou} />
+      <ProductDetailVisitUsSection imageSrc={content.visitUsImage} />
+    </article>
   );
 };
 

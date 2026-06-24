@@ -4,14 +4,16 @@ import Link from "next/link";
 import { useFadeIn } from "@/shared/hooks/use-fade-in";
 import { getImageSrc } from "@/shared/utils/image";
 import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
-import fallBackImage from "@/assets/fallBackImage.png";
+import { homeContent } from "@/features/cms/data/content";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
+import { isSectionActive } from "@/shared/utils/cmsSection";
 
 interface SunnyPromiseSectionProps {
   id?: string;
 }
 
-const PROMISE_VIDEO_MP4 = "/videos/promise-bg.mp4";
+const PROMISE_VIDEO_MP4 = "/videos/handcrafted-bg.mp4";
+const PROMISE_POSTER = "/images/about/handcrafted-bg.png";
 
 const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
   const sectionRef = useFadeIn(0);
@@ -19,29 +21,31 @@ const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
 
   const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
   const sunnyPromiseData = editorialData?.sunnyPromiseSection ?? null;
-  const sectionTitle = sunnyPromiseData?.sectionTitle?.trim();
-  const description = sunnyPromiseData?.description?.trim();
-  const ctaUrl = sunnyPromiseData?.cta?.url ?? "";
-  const ctaLabel = sunnyPromiseData?.cta?.label ?? "";
+  const fallback = homeContent.promise;
+
+  const sectionTitle = sunnyPromiseData?.sectionTitle?.trim() || "The Sunny Promise";
+  const description =
+    sunnyPromiseData?.description?.trim() || fallback.description;
+  const ctaUrl = sunnyPromiseData?.cta?.url || sunnyPromiseData?.cta?.to || fallback.cta.to;
+  const ctaLabel = sunnyPromiseData?.cta?.label?.trim() || fallback.cta.label;
   const posterUrl = getCmsAssetUrl(sunnyPromiseData?.posterImage?.data?.attributes?.url);
-  const isActive = sunnyPromiseData?.isActive === true;
+
+  if (!isSectionActive(sunnyPromiseData?.isActive)) return null;
 
   if (isEditorialLoading) {
     return (
       <section
         id={id}
         ref={sectionRef as React.RefObject<HTMLElement>}
-        className="relative w-full overflow-hidden bg-black h-650 md:h-804 lg:py-14 md:py-12 py-10"
+        className="flex flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 lg:gap-[40px] lg:px-[40px] lg:py-100"
         aria-busy="true"
+        aria-label="The Sunny Promise"
       >
-        <div aria-hidden className="absolute inset-0 bg-black/60" />
-        <div
-          ref={contentRef as React.RefObject<HTMLDivElement>}
-          className="relative z-10 h-full flex flex-col items-center justify-end text-center px-6 md:px-10"
-        >
-          <div className="h-10 w-80 bg-white/15 rounded" aria-hidden />
-          <div className="md:mt-5 mt-3 h-5 w-[min(520px,90%)] bg-white/15 rounded" aria-hidden />
-          <div className="md:mt-10 mt-6 h-12 w-44 bg-white/15 rounded" aria-hidden />
+        <div className="h-10 w-[min(320px,80%)] rounded bg-gray200" aria-hidden />
+        <div className="h-[670px] w-full max-w-[1360px] bg-gray200 md:h-[700px]" aria-hidden />
+        <div className="flex flex-col items-center gap-6">
+          <div className="h-5 w-[min(384px,90%)] rounded bg-gray200" aria-hidden />
+          <div className="h-5 w-36 rounded bg-gray200" aria-hidden />
         </div>
       </section>
     );
@@ -51,49 +55,45 @@ const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
     <section
       id={id}
       ref={sectionRef as React.RefObject<HTMLElement>}
-      className="relative w-full overflow-hidden bg-black h-650 md:h-804 lg:py-14 md:py-12 py-10"
+      aria-label={sectionTitle}
+      className="flex flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 lg:gap-[40px] lg:px-[40px] lg:py-100"
     >
-      {/* Background video — autoplay, muted, looped, no controls */}
-      <video
-        className="absolute inset-0 w-full h-full object-cover"
-        autoPlay
-        loop
-        muted
-        playsInline
-        preload="metadata"
-        // poster={getImageSrc(posterUrl)}
-        aria-hidden="true"
-        tabIndex={-1}
-      >
-        <source src={PROMISE_VIDEO_MP4} type="video/mp4" />
-      </video>
+      <h2 className="text-center font-larken text-[32px] font-light leading-[110%] darkblack lg:text-[48px] lg:whitespace-nowrap">
+        {sectionTitle}
+      </h2>
 
-      {/* Dark gradient overlay for text legibility */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/80 md:from-black/20 md:via-black/30 md:to-black/70"
-      />
+      <div className="relative h-[670px] w-full max-w-[1360px] shrink-0 overflow-hidden md:h-[700px]">
+        <video
+          className="absolute inset-0 size-full object-cover object-center"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          poster={getImageSrc(posterUrl || PROMISE_POSTER)}
+          aria-hidden
+          tabIndex={-1}
+        >
+          <source src={PROMISE_VIDEO_MP4} type="video/mp4" />
+        </video>
+      </div>
 
-      {/* Content — vertically aligned to the bottom with responsive padding */}
       <div
         ref={contentRef as React.RefObject<HTMLDivElement>}
-        className="relative z-10 h-full flex flex-col items-center justify-end text-center px-6 md:px-10"
+        className="flex w-full flex-col items-center gap-6 lg:gap-[24px]"
       >
-        <h2 className="lg:text-5xl md:text-4xl text-32 text-gray200 font-normal font-larken tracking-[0%] leading-[100%] text-center">
-          {sectionTitle}
-        </h2>
-        <p className="md:mt-5 mt-3 text-base md:text-lg lg:text-xl text-gray200 tracking-[1%] leading-[100%] font-light font-gill">
+        <p className="max-w-[384px] text-center font-gill text-base font-light leading-[110%] text-[#4D4D4D] md:text-[20px]">
           {description}
         </p>
-        <Link
-          href={ctaUrl}
-          className="md:mt-10 mt-6 group relative overflow-hidden inline-flex items-center justify-center border-[0.8px] border-white text-white md:text-base text-sm px-8 md:h-50 h-12 md:tracking-[1.8%] tracking-[4%] uppercase font-gill transition-colors duration-500"
-        >
-          <span className="absolute inset-0 bg-white origin-bottom scale-y-0 transition-transform duration-500 ease-out group-hover:scale-y-100"></span>
-          <span className="relative z-10 group-hover:text-black transition-colors duration-500">
+
+        {ctaUrl ? (
+          <Link
+            href={ctaUrl}
+            className="inline-flex items-center justify-center border-b-[1.5px] border-[#0a0a0a] pb-1 font-gill text-sm font-normal uppercase leading-[110%] darkblack transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2"
+          >
             {ctaLabel}
-          </span>
-        </Link>
+          </Link>
+        ) : null}
       </div>
     </section>
   );
