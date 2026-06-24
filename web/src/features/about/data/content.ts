@@ -120,22 +120,18 @@ export const aboutCraftingRarityFigmaSpec = {
     lineHeight: 110,
     color: "#0A0A0A",
   },
-  /** Figma prototype scroll storytelling — Crafting Rarity Reveal V2 */
+  /**
+   * Figma prototype — Crafting Rarity Reveal V2 (692:26945).
+   * Smart Animate: mask 0.5px → full height, then body opacity 0 → 1.
+   */
   animation: {
-    scrollTrackVh: 200,
-    /** Reveal begins once this fraction of the section is visible in the viewport */
-    viewportVisibleThreshold: 0.1,
-    headingMaskHeight: 218,
-    imageMaskHeight: 354,
-    lineMaskHeight: 79,
-    bodyMaskHeight: 88,
-    segments: {
-      heading: { start: 0.05, end: 0.28 },
-      image: { start: 0.24, end: 0.44 },
-      line: { start: 0.4, end: 0.72 },
-      lineFill: { start: 0.44, end: 0.68 },
-      description: { start: 0.66, end: 0.94 },
-    },
+    viewportVisibleThreshold: 0.25,
+    /** Figma "After Delay" before first step */
+    initialDelayMs: 400,
+    /** Smart Animate duration per mask */
+    stepDurationMs: 800,
+    /** Delay between sequential steps */
+    stepGapMs: 400,
   },
 } as const;
 
