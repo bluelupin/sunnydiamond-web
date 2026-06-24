@@ -24,7 +24,12 @@ export type ProductDetailContent = {
   metalColors: MetalColorOption[];
   ringSizes: string[];
   engravingPreviewImage: string | StaticImageData;
-  benefits: { label: string; lines: [string, string] }[];
+  benefits: {
+    label: string;
+    mobileLabel: string;
+    lines: [string, string];
+    icon: string | null;
+  }[];
   accordions: ProductDetailAccordion[];
   pairWith: {
     collectionTitle: string;

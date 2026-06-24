@@ -11,8 +11,8 @@ const ProductDetailPairWithSection = ({ pairWith }: ProductDetailPairWithSection
   if (pairWith.items.length === 0) return null;
 
   return (
-    <div className="py-16 lg:py-100">
-      <h2 className="mb-11 px-5 font-larken text-[40px] font-light leading-[110%] text-darkblack md:px-8 lg:px-10 lg:text-[48px]">
+    <div className="pt-16 lg:py-100">
+      <h2 className="mb-0 px-4 text-center font-larken text-32 font-light leading-110 text-darkblack lg:mb-11 lg:px-10 lg:text-left lg:text-48">
         Pair it With
       </h2>
 

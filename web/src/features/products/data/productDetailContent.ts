@@ -14,9 +14,24 @@ const metalColors = [
 const engravingPreviewImage = "/images/about/crafting-diamond.png";
 
 const benefits = [
-  { label: "Cash on Delivery", lines: ["Cash on", "Delivery"] as [string, string] },
-  { label: "15 Days Return Policy", lines: ["15 Days", "Return Policy"] as [string, string] },
-  { label: "Pan India Free Shipping", lines: ["Pan India", "Free Shipping"] as [string, string] },
+  {
+    label: "Cash on Delivery",
+    mobileLabel: "Cash on Delivery*",
+    lines: ["Cash on", "Delivery"] as [string, string],
+    icon: "/images/products/pdp/benefit-cod.svg",
+  },
+  {
+    label: "15 Days Return Policy",
+    mobileLabel: "15 Days Return Policy",
+    lines: ["15 Days", "Return Policy"] as [string, string],
+    icon: "/images/products/pdp/benefit-return.svg",
+  },
+  {
+    label: "Pan India Free Shipping",
+    mobileLabel: "Pan India Free Shipping",
+    lines: ["Pan India", "Free Shipping"] as [string, string],
+    icon: null,
+  },
 ];
 
 function buildAccordions(product: Product) {

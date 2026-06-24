@@ -48,17 +48,19 @@ const ProductDetailPage = () => {
 
   return (
     <article>
-      <PageContainer className="max-w-1360 px-4 pb-16 pt-6 lg:px-0 lg:pb-24 lg:pt-8">
+      <ProductDetailGallery product={product} variant="mobile" />
+
+      <PageContainer className="max-w-1360 px-0 pb-16 pt-0 lg:px-0 lg:pb-24 lg:pt-8">
         <Link
           href="/jewellery-product"
-          className="mb-6 inline-flex items-center gap-1 font-gill text-sm text-neutral500 transition-colors hover:text-darkblack lg:mb-8"
+          className="mb-6 hidden items-center gap-1 px-4 font-gill text-sm text-neutral500 transition-colors hover:text-darkblack lg:mb-8 lg:inline-flex lg:px-0"
         >
           <ChevronLeft size={16} aria-hidden />
           Back to Jewellery
         </Link>
 
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,783fr)_minmax(0,553fr)] lg:gap-6 xl:gap-6">
-          <ProductDetailGallery product={product} />
+        <div className="flex flex-col lg:grid lg:grid-cols-[minmax(0,783fr)_minmax(0,553fr)] lg:gap-6 xl:gap-6">
+          <ProductDetailGallery product={product} variant="desktop" />
           <ProductDetailSidebar
             product={product}
             content={content}

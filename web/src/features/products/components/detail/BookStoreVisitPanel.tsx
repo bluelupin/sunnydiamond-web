@@ -1,0 +1,558 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import {
+  Calendar,
+  ChevronDown,
+  ChevronLeft,
+  ExternalLink,
+  Phone,
+  SlidersHorizontal,
+} from "lucide-react";
+import { cn } from "@/shared/utils/cn";
+import { useToast } from "@/shared/hooks/use-toast";
+import {
+  APPOINTMENT_COUNTRY_CODES,
+  APPOINTMENT_TIME_SLOTS,
+  appointmentFieldClassName,
+  appointmentLabelClassName,
+} from "@/shared/constants/appointmentForm";
+import {
+  BOOK_STORE_VISIT_PURPOSES,
+  BOOK_STORE_VISIT_STORES,
+  type BookStoreVisitStore,
+} from "@/features/products/data/bookStoreVisitContent";
+import { DELIVERY_STORE_MAP_IMAGES } from "@/features/products/data/deliveryStoreContent";
+import { DetailDarkButton } from "./shared";
+
+type BookStoreVisitPanelProps = {
+  open: boolean;
+  onClose: () => void;
+};
+
+type BookVisitStep = "select-store" | "form";
+
+const BookStoreVisitPanel = ({ open, onClose }: BookStoreVisitPanelProps) => {
+  const { toast } = useToast();
+  const [step, setStep] = useState<BookVisitStep>("select-store");
+  const [selectedStoreId, setSelectedStoreId] = useState(BOOK_STORE_VISIT_STORES[0].id);
+  const [name, setName] = useState("");
+  const [countryCode, setCountryCode] = useState("+91");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [date, setDate] = useState("");
+  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [purpose, setPurpose] = useState("");
+  const [note, setNote] = useState("");
+
+  const selectedStore =
+    BOOK_STORE_VISIT_STORES.find((store) => store.id === selectedStoreId) ?? BOOK_STORE_VISIT_STORES[0];
+
+  useEffect(() => {
+    if (!open) {
+      setStep("select-store");
+      return;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open, onClose]);
+
+  const handleClose = () => {
+    setStep("select-store");
+    onClose();
+  };
+
+  const handleSubmit = () => {
+    if (!name.trim() || !phone.trim()) {
+      return;
+    }
+
+    toast({
+      title: "Visit booked",
+      description: "Our representative will get in touch with you soon.",
+    });
+    handleClose();
+  };
+
+  if (!open) {
+    return null;
+  }
+
+  return (
+    <div className="fixed inset-0 z-[70]">
+      <button
+        type="button"
+        aria-label="Close book a visit"
+        className="absolute inset-0 bg-[rgba(30,30,30,0.3)] backdrop-blur-[10px] animate-in fade-in duration-300"
+        onClick={handleClose}
+      />
+
+      <aside
+        role="dialog"
+        aria-modal="true"
+        aria-label="Book your store visit"
+        className={cn(
+          "absolute flex flex-col overflow-hidden bg-white shadow-2xl",
+          "inset-x-0 bottom-0 top-12 max-lg:animate-in max-lg:slide-in-from-bottom max-lg:duration-300",
+          "lg:inset-x-auto lg:inset-y-0 lg:right-0 lg:top-0 lg:w-full lg:max-w-[480px] lg:animate-in lg:slide-in-from-right lg:duration-300",
+        )}
+      >
+        {step === "select-store" ? (
+          <StoreSelectionStep
+            selectedStoreId={selectedStoreId}
+            selectedStore={selectedStore}
+            onSelectStore={setSelectedStoreId}
+            onProceed={() => setStep("form")}
+          />
+        ) : (
+          <BookingFormStep
+            selectedStore={selectedStore}
+            name={name}
+            countryCode={countryCode}
+            phone={phone}
+            email={email}
+            date={date}
+            selectedSlot={selectedSlot}
+            purpose={purpose}
+            note={note}
+            onBack={() => setStep("select-store")}
+            onNameChange={setName}
+            onCountryCodeChange={setCountryCode}
+            onPhoneChange={setPhone}
+            onEmailChange={setEmail}
+            onDateChange={setDate}
+            onSelectedSlotChange={setSelectedSlot}
+            onPurposeChange={setPurpose}
+            onNoteChange={setNote}
+            onSubmit={handleSubmit}
+          />
+        )}
+      </aside>
+    </div>
+  );
+};
+
+type StoreSelectionStepProps = {
+  selectedStoreId: string;
+  selectedStore: BookStoreVisitStore;
+  onSelectStore: (storeId: string) => void;
+  onProceed: () => void;
+};
+
+const StoreSelectionStep = ({
+  selectedStoreId,
+  selectedStore,
+  onSelectStore,
+  onProceed,
+}: StoreSelectionStepProps) => (
+  <>
+    <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="px-4 pt-6 lg:px-8">
+        <div className="flex flex-col gap-7">
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="font-larken text-24 font-light leading-110 text-darkblack">
+              Book Your Store Visit
+            </h2>
+            <SlidersHorizontal size={32} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
+          </div>
+          <div className="h-px w-full bg-neutral300" aria-hidden />
+        </div>
+
+        <div className="mt-[22px] flex flex-col gap-4 pb-6">
+          <div className="-mx-4 flex gap-10 overflow-x-auto px-4 lg:-mx-8 lg:px-8">
+            {BOOK_STORE_VISIT_STORES.map((store) => {
+              const isSelected = store.id === selectedStoreId;
+
+              return (
+                <button
+                  key={store.id}
+                  type="button"
+                  onClick={() => onSelectStore(store.id)}
+                  className={cn(
+                    "shrink-0 py-2 font-gill text-base leading-110",
+                    isSelected
+                      ? "border-b border-[#AB863B] text-[#AB863B]"
+                      : "text-darkblack",
+                  )}
+                >
+                  {store.tabLabel}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="relative h-[400px] w-full shrink-0 overflow-hidden">
+            <div className="absolute left-[calc(50%+55.5px)] top-[calc(50%+13.76px)] h-[518px] w-[720px] -translate-x-1/2 -translate-y-1/2">
+              <div className="relative size-full">
+                <Image
+                  src={DELIVERY_STORE_MAP_IMAGES.base}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="720px"
+                />
+                <Image
+                  src={DELIVERY_STORE_MAP_IMAGES.overlay1}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="720px"
+                />
+                <Image
+                  src={DELIVERY_STORE_MAP_IMAGES.overlay2}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="720px"
+                />
+              </div>
+            </div>
+
+            <div className="absolute left-1/2 top-[163px] flex w-[311px] -translate-x-1/2 flex-col gap-4 bg-gray300 px-4 py-6">
+              <p className="font-larken text-20 font-light leading-110 text-darkblack">
+                {selectedStore.storeName}
+              </p>
+              <div className="h-px w-full bg-neutral300" aria-hidden />
+              <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-4">
+                  <div className="flex gap-3">
+                    <ExternalLink
+                      size={24}
+                      strokeWidth={1.25}
+                      aria-hidden
+                      className="mt-0.5 shrink-0 text-darkblack"
+                    />
+                    <p className="font-gill text-base font-light leading-110 text-darkblack">
+                      {selectedStore.address}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Phone size={24} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
+                    <p className="font-gill text-base font-light leading-110 text-darkblack">
+                      {selectedStore.phone}
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href={selectedStore.directionsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
+                >
+                  GET DIRECTIONS
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div className="shrink-0">
+      <div className="pointer-events-none h-[71px] bg-gradient-to-b from-transparent to-white" aria-hidden />
+      <div className="border-t border-neutral300/50 bg-white px-4 py-6 lg:px-8">
+        <DetailDarkButton onClick={onProceed}>PROCEED WITH THIS STORE</DetailDarkButton>
+      </div>
+    </div>
+  </>
+);
+
+type BookingFormStepProps = {
+  selectedStore: BookStoreVisitStore;
+  name: string;
+  countryCode: string;
+  phone: string;
+  email: string;
+  date: string;
+  selectedSlot: string | null;
+  purpose: string;
+  note: string;
+  onBack: () => void;
+  onNameChange: (value: string) => void;
+  onCountryCodeChange: (value: string) => void;
+  onPhoneChange: (value: string) => void;
+  onEmailChange: (value: string) => void;
+  onDateChange: (value: string) => void;
+  onSelectedSlotChange: (value: string | null) => void;
+  onPurposeChange: (value: string) => void;
+  onNoteChange: (value: string) => void;
+  onSubmit: () => void;
+};
+
+const BookingFormStep = ({
+  selectedStore,
+  name,
+  countryCode,
+  phone,
+  email,
+  date,
+  selectedSlot,
+  purpose,
+  note,
+  onBack,
+  onNameChange,
+  onCountryCodeChange,
+  onPhoneChange,
+  onEmailChange,
+  onDateChange,
+  onSelectedSlotChange,
+  onPurposeChange,
+  onNoteChange,
+  onSubmit,
+}: BookingFormStepProps) => (
+  <>
+    <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="px-4 pt-6 lg:px-8">
+        <div className="flex flex-col gap-7">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-2">
+              <button
+                type="button"
+                onClick={onBack}
+                aria-label="Back to store selection"
+                className="inline-flex size-6 shrink-0 items-center justify-center"
+              >
+                <ChevronLeft size={24} strokeWidth={1.25} aria-hidden className="text-darkblack" />
+              </button>
+              <h2 className="font-larken text-24 font-light leading-110 text-darkblack">
+                Book Your Store Visit
+              </h2>
+            </div>
+            <SlidersHorizontal size={32} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
+          </div>
+          <div className="h-px w-full bg-neutral300" aria-hidden />
+        </div>
+
+        <div className="mt-[22px] flex flex-col gap-6 pb-6">
+          <div className="relative h-[400px] w-full shrink-0 overflow-hidden">
+            <div className="absolute inset-0 overflow-hidden">
+              <div className="absolute left-[-53.51%] top-[-13.32%] h-[118.92%] w-[209.18%]">
+                <Image
+                  src={selectedStore.heroImage}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 480px) 100vw, 480px"
+                  aria-hidden
+                />
+              </div>
+            </div>
+
+            <div className="absolute left-1/2 top-[246px] flex w-[311px] -translate-x-1/2 flex-col gap-4 bg-gray300 px-4 py-6">
+              <p className="font-larken text-20 font-light leading-110 text-darkblack">
+                {selectedStore.storeName}
+              </p>
+              <div className="h-px w-full bg-neutral300" aria-hidden />
+              <div className="flex gap-3">
+                <ExternalLink
+                  size={24}
+                  strokeWidth={1.25}
+                  aria-hidden
+                  className="mt-0.5 shrink-0 text-darkblack"
+                />
+                <a
+                  href={selectedStore.directionsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-gill text-base font-light leading-110 text-darkblack"
+                >
+                  {selectedStore.address}
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-2">
+              <label htmlFor="book-visit-name" className={appointmentLabelClassName}>
+                Your Name*
+              </label>
+              <input
+                id="book-visit-name"
+                type="text"
+                value={name}
+                onChange={(event) => onNameChange(event.target.value)}
+                autoComplete="name"
+                className={appointmentFieldClassName}
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label htmlFor="book-visit-phone" className={appointmentLabelClassName}>
+                Phone No.*
+              </label>
+              <div className="flex h-14 w-full items-center gap-3 bg-[#F2F2F2] px-3">
+                <div className="relative flex shrink-0 items-center gap-2">
+                  <select
+                    value={countryCode}
+                    onChange={(event) => onCountryCodeChange(event.target.value)}
+                    aria-label="Country code"
+                    className="appearance-none bg-transparent pr-5 font-gill text-base leading-110 text-darkblack outline-none"
+                  >
+                    {APPOINTMENT_COUNTRY_CODES.map((entry) => (
+                      <option key={entry.code} value={entry.code}>
+                        {entry.code}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown
+                    size={20}
+                    strokeWidth={1.5}
+                    aria-hidden
+                    className="pointer-events-none absolute right-0 text-darkblack"
+                  />
+                </div>
+                <input
+                  id="book-visit-phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(event) => onPhoneChange(event.target.value)}
+                  autoComplete="tel-national"
+                  className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label htmlFor="book-visit-email" className={appointmentLabelClassName}>
+                Email
+              </label>
+              <input
+                id="book-visit-email"
+                type="email"
+                value={email}
+                onChange={(event) => onEmailChange(event.target.value)}
+                placeholder="Enter"
+                autoComplete="email"
+                className={appointmentFieldClassName}
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label htmlFor="book-visit-date" className={appointmentLabelClassName}>
+                Date
+              </label>
+              <div className="relative flex h-14 w-full items-center bg-[#F2F2F2] px-3">
+                <input
+                  id="book-visit-date"
+                  type="date"
+                  value={date}
+                  onChange={(event) => onDateChange(event.target.value)}
+                  className={cn(
+                    "min-w-0 flex-1 bg-transparent font-gill text-base leading-110 outline-none [color-scheme:light]",
+                    date ? "text-darkblack" : "text-neutral400",
+                  )}
+                />
+                <Calendar size={24} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <span className={appointmentLabelClassName}>Time Slots</span>
+              <div className="flex flex-col gap-3">
+                {Array.from({ length: APPOINTMENT_TIME_SLOTS.length / 2 }, (_, row) => (
+                  <div key={row} className="flex gap-2">
+                    {[APPOINTMENT_TIME_SLOTS[row * 2], APPOINTMENT_TIME_SLOTS[row * 2 + 1]].map((slot) => {
+                      const isSelected = selectedSlot === slot;
+
+                      return (
+                        <button
+                          key={slot}
+                          type="button"
+                          onClick={() => onSelectedSlotChange(isSelected ? null : slot)}
+                          className={cn(
+                            "flex h-14 min-w-0 flex-1 items-center justify-center px-6 py-3 font-gill text-base leading-110",
+                            isSelected
+                              ? "bg-[#DECAA0] font-normal text-darkblack"
+                              : "bg-[#F2F2F2] font-light text-darkblack",
+                          )}
+                        >
+                          {slot}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label htmlFor="book-visit-purpose" className={appointmentLabelClassName}>
+                Purpose of Visit
+              </label>
+              <div className="relative flex h-14 w-full items-center bg-[#F2F2F2] px-3">
+                <select
+                  id="book-visit-purpose"
+                  value={purpose}
+                  onChange={(event) => onPurposeChange(event.target.value)}
+                  className={cn(
+                    "min-w-0 flex-1 appearance-none bg-transparent font-gill text-base leading-110 outline-none",
+                    purpose ? "text-darkblack" : "text-neutral400",
+                  )}
+                >
+                  <option value="">-select-</option>
+                  {BOOK_STORE_VISIT_PURPOSES.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  size={20}
+                  strokeWidth={1.5}
+                  aria-hidden
+                  className="pointer-events-none shrink-0 text-darkblack"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label htmlFor="book-visit-note" className={appointmentLabelClassName}>
+                Describe more about your visit
+              </label>
+              <textarea
+                id="book-visit-note"
+                value={note}
+                onChange={(event) => onNoteChange(event.target.value)}
+                placeholder="Enter"
+                rows={4}
+                className="h-[100px] w-full resize-none bg-[#F2F2F2] p-3 font-gill text-base leading-110 text-darkblack placeholder:text-[#999999] outline-none"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div className="shrink-0">
+      <div className="pointer-events-none h-[71px] bg-gradient-to-b from-transparent to-white" aria-hidden />
+      <div className="flex flex-col items-center gap-4 border-t border-neutral300/50 bg-white px-4 py-6 lg:px-8">
+        <p className="text-center font-gill text-sm font-light leading-normal tracking-[0.252px] text-neutral500">
+          Our representative will get in touch with you soon
+        </p>
+        <DetailDarkButton
+          onClick={onSubmit}
+          disabled={!name.trim() || !phone.trim()}
+          className="disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          BOOK A VISIT
+        </DetailDarkButton>
+      </div>
+    </div>
+  </>
+);
+
+export default BookStoreVisitPanel;
