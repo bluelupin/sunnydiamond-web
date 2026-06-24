@@ -62,7 +62,7 @@ export const footerPages = {
   bookAnAppointment: {
     title: "Book an Appointment",
     description:
-      "Schedule a showroom visit or design consultation. The full page UI will be added here later.",
+      "Schedule a showroom visit or design consultation with Sunny Diamonds.",
   },
   bespokeJewellery: {
     title: "Bespoke Jewellery",
