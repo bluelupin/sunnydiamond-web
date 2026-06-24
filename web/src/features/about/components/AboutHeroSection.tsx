@@ -17,7 +17,8 @@ const AboutHeroSection = () => {
     >
       <div className="relative flex-1 overflow-hidden">
         <ResponsiveImage
-          desktopSrc={aboutPageImages.hero}
+          desktopSrc={aboutPageImages.heroDesktop}
+          mobileSrc={aboutPageImages.heroMobile}
           alt="Sunny Diamonds craftsmanship"
           priority
           width={1802}

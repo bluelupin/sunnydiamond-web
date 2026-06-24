@@ -32,7 +32,8 @@ export const aboutHeroFigmaSpec = {
 } as const;
 
 export const aboutPageImages = {
-  hero: "/images/about/hero.png",
+  heroDesktop: "/images/about/hero-desktop.png",
+  heroMobile: "/images/about/hero-mobile.png",
   craftingDiamond: "/images/about/crafting-diamond.png",
   teamMemberDesktop1: "/images/about/team-member-desktop-1.png",
   teamMemberMobile1: "/images/about/team-member-mobile-1.png",
@@ -425,7 +426,7 @@ export const aboutHeirloomFigmaSpec = {
 } as const;
 
 export const aboutHeirloomAssets = {
-  flourishIcon: "/images/about/heirloom-flourish-left.svg"
+  flourishIcon: "/images/about/flourishIcon.svg"
 } as const;
 
 export const aboutGuaranteesFigmaSpec = {
