@@ -24,10 +24,37 @@ export const aboutHeroFigmaSpec = {
     lineHeight: 110,
     color: "#FFFFFF",
     textAlign: "center" as const,
+    /** Figma 692:27431 — mobile title */
+    mobile: {
+      fontSize: 32,
+      paddingBottom: 64,
+    },
   },
   /** Bottom gradient for title legibility over hero image */
   overlay: {
     gradient: "bottom" as const,
+  },
+  /**
+   * Figma component 692:26924 — Hero Scroll Collapse.
+   * Collapsed → Expanded on initial load (Smart Animate: width + Y together).
+   * Desktop expanded: full width, hero_inner top 100px (chalk band under nav).
+   * Mobile expanded: full width, flush top — image swipe only.
+   */
+  animation: {
+    collapsedWidthRatio: 1360 / 1440,
+    expandedOffsetY: 100,
+    durationMs: 500,
+    titleDelayMs: 300,
+    titleDurationMs: 500,
+    mobile: {
+      sectionHeight: 580,
+      imageSwipeY: 32,
+    },
+  },
+  /** Figma 692:27431 mobile artboard hero height */
+  mobileSection: {
+    width: 375,
+    height: 520,
   },
 } as const;
 
