@@ -34,12 +34,18 @@ export const aboutHeroFigmaSpec = {
 export const aboutPageImages = {
   hero: "/images/about/hero.png",
   craftingDiamond: "/images/about/crafting-diamond.png",
-  teamMember1: "/images/about/team-member-1-276bea.png",
-  teamMember2: "/images/about/team-member-2.png",
-  teamMember3: "/images/about/team-member-3.png",
-  storyFounder: "/images/about/story-founder-61ad79.png",
-  storyEvent: "/images/about/story-event-399795.png",
-  storyAttending: "/images/about/story-attending-12c26b.png",
+  teamMemberDesktop1: "/images/about/team-member-desktop-1.png",
+  teamMemberMobile1: "/images/about/team-member-mobile-1.png",
+  teamMemberDesktop2: "/images/about/team-member-desktop-2.png",
+  teamMemberMobile2: "/images/about/team-member-mobile-2.png",
+  teamMemberDesktop3: "/images/about/team-member-desktop-3.png",
+  teamMemberMobile3: "/images/about/team-member-mobile-3.png",
+  storyFounderDesktop: "/images/about/story-founder-desktop.png",
+  storyFounderMobile: "/images/about/story-founder-mobile.png",
+  storyEventDesktop: "/images/about/story-event-desktop.png",
+  storyEventMobile: "/images/about/story-event-mobile.png",
+  storyAttendingDesktop: "/images/about/story-attending-desktop.png",
+  storyAttendingMobile: "/images/about/story-attending-mobile.png",
   handcraftedBg: "/images/about/handcrafted-bg.png",
   craftsmanship: "/images/about/craftsmanship-764d7a.png",
   store: "/images/about/store.png",
@@ -111,21 +117,24 @@ export const aboutSince1997Content = {
     "The story dates back to 3 generations where Sunny Diamonds has exemplified the singular refinement of rare, original, exclusive jewellery. The flag continued to fly high and proud primarily because we the fine craftsmanship, goodwill and love.",
   gallery: [
     {
-      image: aboutPageImages.storyFounder,
+      desktopImage: aboutPageImages.storyFounderDesktop,
+      mobileImage: aboutPageImages.storyFounderMobile,
       alt: "Mr. P.P. Sunny with his sons",
       caption: "Mr. P.P. Sunny with his sons",
       width: 549,
-      height: 600,
+      height: 600, 
     },
     {
-      image: aboutPageImages.storyEvent,
+      desktopImage: aboutPageImages.storyEventDesktop,
+      mobileImage: aboutPageImages.storyEventMobile,
       alt: "At an event hosted by Webandcrafts",
       caption: "At an event hosted by Webandcrafts",
       width: 320,
       height: 417,
     },
     {
-      image: aboutPageImages.storyAttending,
+      desktopImage: aboutPageImages.storyAttendingDesktop,
+      mobileImage: aboutPageImages.storyAttendingMobile,
       alt: "P.P. Sunny attending",
       caption: "P.P. Sunny attending",
       width: 463,
@@ -147,7 +156,8 @@ export const aboutFacesContent = {
     "We source Internally Flawless Diamonds from Belgium and craft them into timeless masterpieces, creating jewellery that resonates with you.",
   members: [
     {
-      image: aboutPageImages.teamMember1,
+      desktopImage: aboutPageImages.teamMemberDesktop1,
+      mobileImage: aboutPageImages.teamMemberMobile1,
       alt: "Sunny Diamonds team member",
       name: "P.P. Sunny",
       role: "Founder",
@@ -155,7 +165,8 @@ export const aboutFacesContent = {
       height: 600,
     },
     {
-      image: aboutPageImages.teamMember2,
+      desktopImage: aboutPageImages.teamMemberDesktop2,
+      mobileImage: aboutPageImages.teamMemberMobile2,
       alt: "Sunny Diamonds team member",
       name: "Suresh Kumar",
       role: "Managing Director",
@@ -163,7 +174,8 @@ export const aboutFacesContent = {
       height: 600,
     },
     {
-      image: aboutPageImages.teamMember3,
+      desktopImage: aboutPageImages.teamMemberDesktop3,
+      mobileImage: aboutPageImages.teamMemberMobile3,
       alt: "Sunny Diamonds team member",
       name: "Arjun Nair",
       role: "Creative Director",
@@ -413,7 +425,7 @@ export const aboutHeirloomFigmaSpec = {
 } as const;
 
 export const aboutHeirloomAssets = {
-  flourishIcon: "/images/about/flourishIcon.svg"
+  flourishIcon: "/images/about/heirloom-flourish-left.svg"
 } as const;
 
 export const aboutGuaranteesFigmaSpec = {

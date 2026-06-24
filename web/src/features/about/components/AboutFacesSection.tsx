@@ -35,16 +35,17 @@ const AboutFacesSection = () => {
         >
           {aboutFacesContent.members.map((member, index) => (
             <figure
-              key={member.image}
+              key={index}
               className={cn(
                 "group relative shrink-0 snap-start overflow-hidden",
-                "h-[560px] lg:w-[calc(100vw-24px)] md:w-[90%] w-[98%]",
+                "h-[560px] lg:w-[calc(100vw-24px)] md:w-[400PX] w-[343px]",
                 "lg:h-full lg:w-auto lg:basis-0 lg:flex-1",
                 "transition-[flex-grow] duration-500 ease-in-out lg:hover:grow-[1.6]"
               )}
             >
               <ResponsiveImage
-                desktopSrc={member.image}
+                desktopSrc={member.desktopImage}
+                mobileSrc={member.mobileImage}
                 alt={member.alt}
                 width={member.width}
                 height={member.height}

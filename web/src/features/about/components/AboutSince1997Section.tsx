@@ -25,14 +25,15 @@ const AboutSince1997Section = () => {
           </p>
         </div>
       </PageContainer>
-      <PageContainer className="pt-0 !pr-0">
+      <PageContainer className="pt-0 !pr-0 pl-5">
         <div className="md:overflow-x-auto pb-2 horizontalScroll overflow-x-visible">
-          <div className="flex md:flex-row flex-col md:min-w-max min-w-full items-center lg:gap-20 md:gap-16 sm:gap-12 gap-11">
-            <article className="flex shrink-0 items-center lg:gap-8 gap-6 md:w-auto w-full">
+          <div className="flex md:flex-row flex-col md:min-w-max min-w-full items-center lg:gap-20 md:gap-16 sm:gap-12 gap-6">
+            <article className="flex shrink-0 items-center lg:gap-8 gap-6 md:w-auto w-full md:pr-0 pr-4">
               <figure className="flex flex-col gap-3 md:w-auto w-full">
                 <div className="h-600 md:w-549 w-full">
                   <ResponsiveImage
-                    desktopSrc={founder.image}
+                    desktopSrc={founder.desktopImage}
+                    mobileSrc={founder.mobileImage}
                     alt={founder.alt}
                     width={founder.width}
                     height={founder.height}
@@ -50,11 +51,12 @@ const AboutSince1997Section = () => {
                 {aboutSince1997Content.story}
               </p>
             </article>
-            <div className="flex shrink-0 items-center gap-5 overflow-x-auto md:overflow-x-visible">
-              <figure className="flex md:w-320 w-[90%] md:min-w-0 min-w-[80%] flex-col gap-3">
-                <div className="h-417 overflow-hidden">
+            <div className="md:w-auto w-full flex shrink-0 items-center md:gap-5 gap-3 overflow-y-hidden overflow-x-auto md:overflow-x-visible">
+              <figure className="flex md:w-320 md:min-w-0 min-w-[256px] w-[256px] flex-col gap-3">
+                <div className="md:h-417 h-[240px] overflow-hidden">
                   <ResponsiveImage
-                    desktopSrc={event.image}
+                    desktopSrc={event.desktopImage}
+                    mobileSrc={event.mobileImage}
                     alt={event.alt}
                     width={event.width}
                     height={event.height}
@@ -67,10 +69,11 @@ const AboutSince1997Section = () => {
                   {event.caption}
                 </figcaption>
               </figure>
-              <figure className="flex md:w-463 w-[90%] md:min-w-0 min-w-[80%] flex-col gap-3">
-                <div className="h-600 overflow-hidden">
+              <figure className="flex md:w-463 md:min-w-0 min-w-[256px] w-[256px] flex-col gap-3">
+                <div className="md:h-600 h-[277px] overflow-hidden">
                   <ResponsiveImage
-                    desktopSrc={attending.image}
+                    desktopSrc={attending.desktopImage}
+                    mobileSrc={attending.mobileImage}
                     alt={attending.alt}
                     width={attending.width}
                     height={attending.height}
