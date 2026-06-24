@@ -9,6 +9,7 @@ import { cn } from "@/shared/utils/cn";
 import { resolveHeaderNavHref } from "@/shared/utils/navigation";
 import type { HeaderNavLink } from "@/shared/lib/shellNavigation";
 import BookAnAppointmentPanel from "@/features/appointment/components/BookAnAppointmentPanel";
+import BookStoreVisitPanel from "@/features/products/components/detail/BookStoreVisitPanel";
 
 type MobileNavigationProps = {
   isOpen: boolean;
@@ -436,7 +437,9 @@ const CurrencyPanel = ({ selected, onBack, onClose, onApply }: CurrencyPanelProp
 };
 
 const MobileNavigation = ({ isOpen, onClose, navLinks, cartCount }: MobileNavigationProps) => {
-  const [subPanel, setSubPanel] = useState<"language" | "currency" | "appointment" | "jewellery" | null>(null);
+  const [subPanel, setSubPanel] = useState<
+    "language" | "currency" | "appointment" | "jewellery" | "store-visit" | null
+  >(null);
   const [language, setLanguage] = useState<LanguageCode>("en");
   const [currency, setCurrency] = useState<CurrencyCode>("INR");
 
@@ -589,8 +592,7 @@ const MobileNavigation = ({ isOpen, onClose, navLinks, cartCount }: MobileNaviga
             iconW={12}
             iconH={16}
             label="Find a Store"
-            href="/store-locator"
-            onNavigate={handleClose}
+            onClick={() => setSubPanel("store-visit")}
           />
         </div>
 
@@ -637,6 +639,14 @@ const MobileNavigation = ({ isOpen, onClose, navLinks, cartCount }: MobileNaviga
 
       {subPanel === "jewellery" && (
         <JewelleryPanel
+          onBack={() => setSubPanel(null)}
+          onClose={handleClose}
+        />
+      )}
+
+      {subPanel === "store-visit" && (
+        <BookStoreVisitPanel
+          variant="embedded"
           onBack={() => setSubPanel(null)}
           onClose={handleClose}
         />

@@ -52,7 +52,7 @@ export const footerPages = {
   storeLocator: {
     title: "Store Locator",
     description:
-      "Find Sunny Diamonds showrooms and studio locations. The full page UI will be added here later.",
+      "Find Sunny Diamonds showrooms and book a store visit at your nearest location.",
   },
   faqs: {
     title: "FAQs",

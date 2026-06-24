@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { constructMetadata } from "@/shared/lib/seo/metadata";
 import { footerPages } from "@/features/cms/data/footerPages";
-import StaticRoutePage from "@/features/cms/components/StaticRoutePage";
+import BookStoreVisitPageContent from "@/features/stores/components/BookStoreVisitPageContent";
 
 const page = footerPages.storeLocator;
 
@@ -11,5 +11,5 @@ export const metadata: Metadata = constructMetadata({
 });
 
 export default function Page() {
-  return <StaticRoutePage title={page.title} description={page.description} />;
+  return <BookStoreVisitPageContent />;
 }
