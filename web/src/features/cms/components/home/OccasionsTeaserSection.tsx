@@ -52,7 +52,7 @@ function OccasionCardItem({
 
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[199px] bg-gradient-to-b from-transparent via-[rgba(0,0,0,0.69)] to-black backdrop-blur-[5px] md:h-[342px] md:from-transparent md:via-transparent md:to-black"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent to-black backdrop-blur-[5px]"
       />
 
       <div className="absolute bottom-8 left-4 flex w-[calc(100%-32px)] max-w-[296px] flex-col gap-4 md:bottom-16 md:left-10 md:w-[418px] md:max-w-none md:gap-6">
@@ -67,9 +67,11 @@ function OccasionCardItem({
           ) : null}
         </div>
 
-        <span className="inline-flex w-fit items-center justify-center border-b-[1.5px] border-white pb-1.5 font-gill text-sm font-normal uppercase tracking-[0.28px] text-white">
-          {ctaLabel}
-        </span>
+        <div className="md:overflow-hidden">
+          <span className="inline-flex w-fit translate-y-0 items-center justify-center border-b-[1.5px] border-white pb-1.5 font-gill text-sm font-normal uppercase tracking-[0.28px] text-white opacity-100 motion-safe:transition-[transform,opacity] motion-safe:duration-500 motion-safe:ease-out md:translate-y-full md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:group-focus-visible:translate-y-0 md:group-focus-visible:opacity-100">
+            {ctaLabel}
+          </span>
+        </div>
       </div>
     </Link>
   );
