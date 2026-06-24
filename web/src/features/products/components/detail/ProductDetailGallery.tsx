@@ -6,6 +6,7 @@ import OptimizedImage from "@/shared/ui/OptimizedImage";
 import type { Product } from "@/features/products/data/products";
 import type { StaticImageData } from "next/image";
 import { cn } from "@/shared/utils/cn";
+import { PRODUCT_DETAIL_GALLERY_THIRD_IMAGE } from "@/features/products/data/productGalleryContent";
 
 type ProductDetailGalleryProps = {
   product: Product;
@@ -46,8 +47,9 @@ function GalleryImage({
 
 const ProductDetailGallery = ({ product, variant = "all" }: ProductDetailGalleryProps) => {
   const [activeSlide, setActiveSlide] = useState(0);
-  const [heroImage, thumbOne, thumbTwo] = product.images;
-  const lifestyleImage = product.images[2] ?? product.image;
+  const [heroImage, thumbOne, productThumbTwo] = product.images;
+  const thumbTwo = productThumbTwo ?? PRODUCT_DETAIL_GALLERY_THIRD_IMAGE;
+  const lifestyleImage = product.lifestyleImage ?? product.images[3] ?? product.image;
 
   const carouselImages = [
     heroImage ?? product.image,
