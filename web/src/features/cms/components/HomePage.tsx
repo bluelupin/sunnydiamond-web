@@ -24,10 +24,10 @@ const HomePage = () => {
       <CraftingRaritySection id="crafting-rarity" />
       <DiamondSourcingSection id="flawless" />
       <FeaturedCollectionSection id="alankara" />
-      <FeaturedProductsSection id="diamond-awaits" />
       <OccasionsTeaserSection id="categories" />
-      <CraftsmanshipProcess id="craftsmanship" />
+      <FeaturedProductsSection id="diamond-awaits" />
       <ForYourValentineSection id="valentine" />
+      <CraftsmanshipProcess id="craftsmanship" />
       <SunnyPromiseSection id="promise" />
       <BespokeForYouSection id="bespoke-for-you" />
       <DiamondsForEveryoneSection id="diamonds-for-everyone" />

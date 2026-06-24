@@ -1,8 +1,8 @@
 export const homeSections = [
   { id: "hero", label: "Home" },
   { id: "alankara", label: "Alankara" },
-  { id: "diamond-awaits", label: "Your Diamond" },
   { id: "categories", label: "Occasions" },
+  { id: "diamond-awaits", label: "Your Diamond" },
   { id: "craftsmanship", label: "Craftsmanship" },
   { id: "promise", label: "Promise" },
   { id: "bespoke-for-you", label: "Bespoke" },
