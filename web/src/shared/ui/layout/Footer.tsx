@@ -58,7 +58,7 @@ const Footer = () => {
 
   return (
     <footer className="bg-gray300">
-      <PageContainer className="flex flex-col gap-20 py-16 lg:gap-[120px] lg:py-[104px]">
+      <PageContainer className="flex flex-col gap-20 py-16 lg:gap-[120px] lg:py-100">
         <div className="flex flex-col items-center xl:gap-12 md:gap-[40px] gap-8 lg:flex-row lg:items-start lg:justify-start">
           <div className="shrink-0">
             <Link href="/" aria-label="Sunny Diamonds">

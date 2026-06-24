@@ -115,7 +115,7 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
     return (
       <section
         id={id}
-        className="flex flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 md:px-0 md:py-[104px]"
+        className="flex flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 md:px-0 md:py-100"
         aria-busy="true"
         aria-label="Occasions"
       >
@@ -146,7 +146,7 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
       id={id}
       ref={headingRef as React.RefObject<HTMLElement>}
       aria-label={sectionTitle}
-      className="flex flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 md:px-0 md:py-[104px]"
+      className="flex flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 md:px-0 md:py-100"
     >
       <h2 className="max-w-[332px] text-center font-larken text-[32px] font-light leading-[110%] text-[#0a0a0a] md:max-w-none md:text-[48px] lg:whitespace-nowrap">
         {sectionTitle}

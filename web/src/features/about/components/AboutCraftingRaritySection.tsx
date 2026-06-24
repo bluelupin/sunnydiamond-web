@@ -129,7 +129,7 @@ const AboutCraftingRaritySection = () => {
                 reducedMotion={reducedMotion}
                 className="mt-2.5 w-full sm:mt-3 lg:mt-[13px]"
               >
-                <p className="mx-auto w-full max-w-523 font-gill text-base font-light leading-110 text-darkblack md:text-lg lg:text-20">
+                <p className="mx-auto w-full max-w-557 font-gill text-base font-light leading-110 text-darkblack md:text-lg lg:text-20">
                   {aboutCraftingRarityContent.description}
                 </p>
               </MaskReveal>

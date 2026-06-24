@@ -352,7 +352,7 @@ const JewelleryPanel = ({ onBack, onClose }: JewelleryPanelProps) => (
               onClick={onClose}
               className="flex min-w-0 flex-[1_0_0] flex-col gap-1"
             >
-              <div className="relative h-[104px] w-full shrink-0 overflow-hidden">
+              <div className="relative h-100 w-full shrink-0 overflow-hidden">
                 {cat.image ? (
                   <Image
                     src={cat.image}
