@@ -9,25 +9,22 @@ import {
   aboutCraftingRarityFigmaSpec,
   aboutPageImages,
 } from "../data/content";
-import { useCraftingRarityLoadReveal } from "../hooks/useCraftingRarityLoadReveal";
+import { useCraftingRarityScrollReveal } from "../hooks/useCraftingRarityScrollReveal";
 import VerticalScrollLine from "./VerticalScrollLine";
 
-const { image: imageSpec, line: lineSpec, animation: animationSpec } =
-  aboutCraftingRarityFigmaSpec;
+const { image: imageSpec, line: lineSpec } = aboutCraftingRarityFigmaSpec;
 
 type FigmaMaskRevealProps = {
-  revealed: boolean;
+  /** 0–1 scroll-scrubbed mask progress */
+  reveal: number;
   reducedMotion: boolean;
   className?: string;
   children: ReactNode;
 };
 
-/**
- * Figma heading_mask / image_mask / line_mask — 0.5px → full height (top-down wipe).
- * Content keeps layout space; clip-path matches Smart Animate mask expand.
- */
+/** Figma heading_mask / image_mask / line_mask — height expands with scroll progress */
 const FigmaMaskReveal = ({
-  revealed,
+  reveal,
   reducedMotion,
   className,
   children,
@@ -36,14 +33,24 @@ const FigmaMaskReveal = ({
     return <div className={className}>{children}</div>;
   }
 
+  const clampedReveal = Math.min(1, Math.max(0, reveal));
+  const maskHeight = `${clampedReveal * 100}%`;
+
   return (
     <div
-      className={cn(
-        "overflow-hidden transition-[clip-path] ease-in-out motion-reduce:transition-none",
-        revealed ? "[clip-path:inset(0_0_0_0)]" : "[clip-path:inset(0_0_100%_0)]",
-        className,
-      )}
-      style={{ transitionDuration: `${animationSpec.stepDurationMs}ms` }}
+      className={cn("overflow-hidden", className)}
+      style={{
+        clipPath: `inset(0 0 ${(1 - clampedReveal) * 100}% 0 round 0)`,
+        WebkitClipPath: `inset(0 0 ${(1 - clampedReveal) * 100}% 0 round 0)`,
+        maskImage: "linear-gradient(black, black)",
+        WebkitMaskImage: "linear-gradient(black, black)",
+        maskSize: `100% ${maskHeight}`,
+        WebkitMaskSize: `100% ${maskHeight}`,
+        maskRepeat: "no-repeat",
+        WebkitMaskRepeat: "no-repeat",
+        maskPosition: "top",
+        WebkitMaskPosition: "top",
+      }}
     >
       {children}
     </div>
@@ -52,8 +59,14 @@ const FigmaMaskReveal = ({
 
 const AboutCraftingRaritySection = () => {
   const sectionRef = useRef<HTMLElement>(null);
-  const { heading, image, line, body, lineFill, reducedMotion } =
-    useCraftingRarityLoadReveal(sectionRef);
+  const {
+    headingReveal,
+    imageReveal,
+    lineReveal,
+    lineFill,
+    bodyReveal,
+    reducedMotion,
+  } = useCraftingRarityScrollReveal(sectionRef);
 
   return (
     <section
@@ -64,7 +77,7 @@ const AboutCraftingRaritySection = () => {
       <PageContainer className="flex w-full justify-center">
         <div className="flex w-full max-w-[950px] flex-col items-center text-center">
           <FigmaMaskReveal
-            revealed={heading}
+            reveal={headingReveal}
             reducedMotion={reducedMotion}
             className="w-full pt-0 lg:mb-12 md:mb-9 mb-8"
           >
@@ -77,7 +90,7 @@ const AboutCraftingRaritySection = () => {
           </FigmaMaskReveal>
 
           <FigmaMaskReveal
-            revealed={image}
+            reveal={imageReveal}
             reducedMotion={reducedMotion}
             className="mx-auto w-full"
           >
@@ -95,32 +108,21 @@ const AboutCraftingRaritySection = () => {
           </FigmaMaskReveal>
 
           <FigmaMaskReveal
-            revealed={line}
+            reveal={lineReveal}
             reducedMotion={reducedMotion}
             className="mt-5 lg:mt-[23px]"
           >
             <VerticalScrollLine
               lineFill={lineFill}
               reducedMotion={reducedMotion}
-              visible={line || reducedMotion}
+              visible={lineReveal > 0.02 || reducedMotion}
               lineHeight={lineSpec.height}
             />
           </FigmaMaskReveal>
 
           <p
-            className={cn(
-              "mx-auto mt-2.5 w-full max-w-557 font-gill text-base font-light leading-110 text-gray600 sm:mt-3 lg:mt-[13px] lg:text-20",
-              !reducedMotion &&
-              "transition-[opacity,transform] ease-in-out motion-reduce:transition-none",
-              reducedMotion || body
-                ? "translate-y-0 opacity-100"
-                : "translate-y-0 opacity-0",
-            )}
-            style={
-              reducedMotion
-                ? undefined
-                : { transitionDuration: `${animationSpec.stepDurationMs}ms` }
-            }
+            className="mx-auto mt-2.5 w-full max-w-557 font-gill text-base font-light leading-110 text-gray600 sm:mt-3 lg:mt-[13px] lg:text-20"
+            style={reducedMotion ? undefined : { opacity: bodyReveal }}
           >
             {aboutCraftingRarityContent.description}
           </p>

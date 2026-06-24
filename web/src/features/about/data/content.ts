@@ -121,17 +121,18 @@ export const aboutCraftingRarityFigmaSpec = {
     color: "#0A0A0A",
   },
   /**
-   * Figma prototype — Crafting Rarity Reveal V2 (692:26945).
-   * Smart Animate: mask 0.5px → full height, then body opacity 0 → 1.
+   * Scroll-scrubbed Reveal V2 — progress 0→1 as the section travels through
+   * the viewport (top at bottom edge → bottom at top edge).
    */
   animation: {
     viewportVisibleThreshold: 0.25,
-    /** Figma "After Delay" before first step */
-    initialDelayMs: 400,
-    /** Smart Animate duration per mask */
-    stepDurationMs: 800,
-    /** Delay between sequential steps */
-    stepGapMs: 400,
+    segments: {
+      heading: { start: 0, end: 0.25 },
+      image: { start: 0.2, end: 0.45 },
+      line: { start: 0.4, end: 0.65 },
+      lineFill: { start: 0.45, end: 0.7 },
+      body: { start: 0.65, end: 1 },
+    },
   },
 } as const;
 

@@ -42,7 +42,7 @@ const MobileCardTile = ({ cardIndex, className }: MobileCardTileProps) => {
   return (
     <article
       className={cn(
-        "flex flex-col items-center justify-center bg-chalkCard px-2",
+        "flex flex-col items-center justify-center bg-chalkCard px-2 h-[111px]",
         className,
       )}
       style={{ gap: `${card.gap}px` }}

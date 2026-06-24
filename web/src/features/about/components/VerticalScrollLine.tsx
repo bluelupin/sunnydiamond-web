@@ -40,14 +40,15 @@ const VerticalScrollLine = ({
         className={cn(
           "w-px overflow-hidden",
           visible ? "opacity-100" : "opacity-0",
-          `transition-opacity ${revealEase} motion-reduce:transition-none`,
+          !externalLineFill && !reducedMotion &&
+            `transition-opacity ${revealEase} motion-reduce:transition-none`,
         )}
         style={{ height: lineHeight }}
       >
         <div
           className={cn(
             "w-px origin-top bg-gradient-to-b from-darkMagenta to-goldAccent",
-            reducedMotion
+            reducedMotion || externalLineFill
               ? ""
               : "transition-transform duration-500 ease-out motion-reduce:transition-none",
           )}
