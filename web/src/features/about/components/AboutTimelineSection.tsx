@@ -25,7 +25,7 @@ const AboutTimelineSection = () => {
 
   return (
     <section ref={sectionRef} aria-label="Company timeline" className="relative">
-      <div className="sticky md:top-20 top-16 z-10 md:h-[calc(100vh-80px)] h-[calc(100vh-64px)] overflow-hidden">
+      <div className="sticky top-0 z-10 h-screen overflow-hidden">
         <div className="absolute inset-0">
           <ResponsiveImage
             desktopSrc={aboutPageImages.store}

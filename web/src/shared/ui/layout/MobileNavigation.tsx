@@ -10,6 +10,7 @@ import { resolveHeaderNavHref } from "@/shared/utils/navigation";
 import type { HeaderNavLink } from "@/shared/lib/shellNavigation";
 import BookAnAppointmentPanel from "@/features/appointment/components/BookAnAppointmentPanel";
 import BookStoreVisitPanel from "@/features/products/components/detail/BookStoreVisitPanel";
+import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
 
 type MobileNavigationProps = {
   isOpen: boolean;
@@ -112,7 +113,7 @@ const JewelleryPanel = ({ onBack, onClose }: JewelleryPanelProps) => (
       </button>
     </div>
 
-    <div className="mx-4 mt-4 h-px shrink-0 bg-[#ECE9E9]" aria-hidden />
+    <div className="mx-4 mt-4 h-px shrink-0 bg-aboutInactive" aria-hidden />
 
     <div className="flex min-h-0 flex-1 flex-col gap-[12px] overflow-y-auto px-4 pt-4 pb-6">
       {MOBILE_JEWELLERY_ROWS.map((row, rowIdx) => (
@@ -166,8 +167,16 @@ const NavChevron = () => (
     />
   </span>
 );
+type NavDividerProps = {
+  className?: string;
+};
 
-const NavDivider = () => <div className="h-px w-full bg-[#ECE9E9]" aria-hidden />;
+const NavDivider = ({ className = "" }: NavDividerProps) => (
+  <div
+    className={`h-px w-full bg-aboutInactive ${className}`}
+    aria-hidden
+  />
+);
 
 type MobileNavRowProps = {
   label: string;
@@ -182,7 +191,7 @@ const MobileNavRow = ({ label, href, onNavigate, onOpenPanel }: MobileNavRowProp
       <button
         type="button"
         onClick={onOpenPanel}
-        className="flex h-6 w-full items-center justify-between"
+        className="flex h-4 font-normal w-full items-center justify-between"
       >
         <span className="font-gill text-sm uppercase leading-110 text-darkblack">{label}</span>
         <NavChevron />
@@ -193,7 +202,7 @@ const MobileNavRow = ({ label, href, onNavigate, onOpenPanel }: MobileNavRowProp
     <Link
       href={href}
       onClick={onNavigate}
-      className="flex h-6 w-full items-center justify-between"
+      className="flex h-4 font-normal w-full items-center justify-between"
     >
       <span className="font-gill text-sm uppercase leading-110 text-darkblack">{label}</span>
       <NavChevron />
@@ -230,7 +239,7 @@ const UtilityRow = ({ iconSrc, iconW, iconH, label, href, value, onNavigate, onC
 
   if (href) {
     return (
-      <Link href={href} onClick={onNavigate} className="flex h-6 w-full items-center justify-between">
+      <Link href={href} onClick={onNavigate} className="flex h-4 font-normal w-full items-center justify-between">
         {content}
       </Link>
     );
@@ -238,13 +247,13 @@ const UtilityRow = ({ iconSrc, iconW, iconH, label, href, value, onNavigate, onC
 
   if (onClick) {
     return (
-      <button type="button" onClick={onClick} className="flex h-6 w-full items-center justify-between">
+      <button type="button" onClick={onClick} className="flex h-4 font-normal w-full items-center justify-between">
         {content}
       </button>
     );
   }
 
-  return <div className="flex h-6 w-full items-center justify-between">{content}</div>;
+  return <div className="flex h-4 font-normal w-full items-center justify-between">{content}</div>;
 };
 
 type LanguagePanelProps = {
@@ -303,7 +312,7 @@ const LanguagePanel = ({ selected, onBack, onClose, onApply }: LanguagePanelProp
           </button>
         </div>
 
-        <div className="mt-6 h-px w-full bg-[#ECE9E9]" aria-hidden />
+        <div className="mt-6 h-px w-full bg-aboutInactive" aria-hidden />
 
         <div className="mt-6 flex flex-col">
           {LANGUAGES.map((lang) => {
@@ -397,7 +406,7 @@ const CurrencyPanel = ({ selected, onBack, onClose, onApply }: CurrencyPanelProp
           </button>
         </div>
 
-        <div className="mt-6 h-px w-full bg-[#ECE9E9]" aria-hidden />
+        <div className="mt-6 h-px w-full bg-aboutInactive" aria-hidden />
 
         <div className="mt-6 flex flex-col">
           {CURRENCIES.map((currency) => {
@@ -523,7 +532,7 @@ const MobileNavigation = ({ isOpen, onClose, navLinks, cartCount }: MobileNaviga
             onClick={handleClose}
             className="relative inline-flex size-6 items-center justify-center"
           >
-            <ShoppingBag size={24} strokeWidth={1.5} />
+            <ShoppingBagIcon />
             {cartCount > 0 ? (
               <span className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-primary text-[9px] font-semibold text-primary-foreground">
                 {cartCount}
@@ -563,34 +572,34 @@ const MobileNavigation = ({ isOpen, onClose, navLinks, cartCount }: MobileNaviga
         <div className="flex flex-col gap-3">
           <UtilityRow
             iconSrc="/images/navigation/appointment.svg"
-            iconW={11}
-            iconH={19}
+            iconW={20}
+            iconH={20}
             label="Book an Appointment"
             onClick={() => setSubPanel("appointment")}
           />
-          <NavDivider />
+          <NavDivider className="bg-chalk300" />
           <UtilityRow
             iconSrc="/images/navigation/currency.svg"
-            iconW={14}
-            iconH={10}
+            iconW={20}
+            iconH={20}
             label="Currency"
             value={currentCurrencyDisplay}
             onClick={() => setSubPanel("currency")}
           />
-          <NavDivider />
+          <NavDivider className="bg-chalk300" />
           <UtilityRow
             iconSrc="/images/navigation/globe.svg"
-            iconW={15}
-            iconH={15}
+            iconW={24}
+            iconH={24}
             label="Language"
             value={currentLangDisplay}
             onClick={() => setSubPanel("language")}
           />
-          <NavDivider />
+          <NavDivider className="bg-chalk300" />
           <UtilityRow
             iconSrc="/images/navigation/map.svg"
-            iconW={12}
-            iconH={16}
+            iconW={24}
+            iconH={24}
             label="Find a Store"
             onClick={() => setSubPanel("store-visit")}
           />

@@ -52,6 +52,7 @@ export default {
         goldAccent: "#DDA957",
         goldGrid: "#EFE7D4",
         chalkCard: "#F8F4EC",
+        chalk300: "#ECE9E9",
         creamColor: "#9A3A96",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
