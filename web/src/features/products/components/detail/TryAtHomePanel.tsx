@@ -3,9 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import type { StaticImageData } from "next/image";
+import { useRouter } from "next/navigation";
 import { ChevronLeft, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
-import { useToast } from "@/shared/hooks/use-toast";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
 import FormFieldError from "@/shared/ui/FormFieldError";
@@ -28,6 +28,8 @@ import {
 } from "@/shared/utils/formValidation";
 import { DetailDarkButton } from "./shared";
 import { ChevronDown } from "lucide-react";
+import TryAtHomeSuccessStep from "./TryAtHomeSuccessStep";
+import type { TryAtHomeBookingSummary } from "@/features/products/utils/tryAtHomeBooking";
 
 type TryAtHomePanelProps = {
   open: boolean;
@@ -35,13 +37,13 @@ type TryAtHomePanelProps = {
   product: Product;
 };
 
-type TryAtHomeStep = "details" | "address";
+type TryAtHomeStep = "details" | "address" | "success";
 
 type TryAtHomeDetailsStepProps = {
   productName: string;
   productImage: string | StaticImageData;
   onClose: () => void;
-  onProceed: () => void;
+  onProceed: (booking: TryAtHomeBookingSummary) => void;
 };
 
 const TryAtHomeDetailsStep = ({
@@ -137,7 +139,12 @@ const TryAtHomeDetailsStep = ({
           <p className="text-center font-gill text-sm font-light leading-normal tracking-[0.252px] text-[#4D4D4D]">
             Our representative will get in touch with you soon
           </p>
-          <DetailDarkButton onClick={() => validateSubmit(onProceed)} disabled={submitted && !isValid}>
+          <DetailDarkButton
+            onClick={() =>
+              validateSubmit(() => onProceed({ date, selectedSlot }))
+            }
+            disabled={submitted && !isValid}
+          >
             Add Address
           </DetailDarkButton>
         </div>
@@ -413,13 +420,18 @@ const TryAtHomeAddressStep = ({ onBack, onSubmit }: TryAtHomeAddressStepProps) =
 };
 
 const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
-  const { toast } = useToast();
+  const router = useRouter();
   const [step, setStep] = useState<TryAtHomeStep>("details");
+  const [bookingSummary, setBookingSummary] = useState<TryAtHomeBookingSummary>({
+    date: "",
+    selectedSlot: null,
+  });
   const productImage = product.images[0] ?? product.image;
 
   useEffect(() => {
     if (!open) {
       setStep("details");
+      setBookingSummary({ date: "", selectedSlot: null });
       return;
     }
 
@@ -440,15 +452,21 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
 
   const handleClose = () => {
     setStep("details");
+    setBookingSummary({ date: "", selectedSlot: null });
     onClose();
   };
 
   const handleSubmit = () => {
-    toast({
-      title: "Try at home request received",
-      description: "Our representative will get in touch with you soon.",
-    });
+    setStep("success");
+  };
+
+  const handleViewBooking = () => {
     handleClose();
+  };
+
+  const handleContinueShopping = () => {
+    handleClose();
+    router.push("/products");
   };
 
   if (!open) {
@@ -479,10 +497,22 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
             productName={product.name}
             productImage={productImage}
             onClose={handleClose}
-            onProceed={() => setStep("address")}
+            onProceed={(booking) => {
+              setBookingSummary(booking);
+              setStep("address");
+            }}
           />
-        ) : (
+        ) : step === "address" ? (
           <TryAtHomeAddressStep onBack={() => setStep("details")} onSubmit={handleSubmit} />
+        ) : (
+          <TryAtHomeSuccessStep
+            product={product}
+            productImage={productImage}
+            booking={bookingSummary}
+            onClose={handleClose}
+            onViewBooking={handleViewBooking}
+            onContinueShopping={handleContinueShopping}
+          />
         )}
       </aside>
     </div>
