@@ -33,7 +33,7 @@ const DEFAULT_STEPS: SavingsPlanStep[] = [
 
 const StepCircle = ({ number }: { number: number }) => (
   <div className="relative z-10 flex size-10 shrink-0 items-center justify-center rounded-full border border-[#0a0a0a] bg-[#EBDFC6]">
-    <span className="font-gill text-xl font-light leading-none tracking-[0.2px] text-[#0a0a0a]">
+    <span className="font-gill text-xl font-light leading-none tracking-[0.2px] darkblack">
       {number}
     </span>
   </div>
@@ -131,7 +131,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
             {eyebrow}
           </p>
           <div className="flex w-full flex-col items-center gap-3 md:gap-4">
-            <h2 className="w-full font-larken text-[32px] font-light leading-[110%] text-[#0a0a0a] md:text-[48px]">
+            <h2 className="w-full font-larken text-[32px] font-light leading-[110%] darkblack md:text-[48px]">
               {sectionTitle}
             </h2>
             <p className="w-full font-gill text-base font-light leading-[110%] text-[#4D4D4D] md:text-[20px]">
@@ -158,7 +158,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
               <StepDescription
                 key={step.stepNumber}
                 step={step}
-                className="w-[250px] text-center font-gill text-[20px] leading-[110%] text-[#0a0a0a]"
+                className="w-[250px] text-center font-gill text-[20px] leading-[110%] darkblack"
               />
             ))}
           </div>
@@ -171,7 +171,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
               <StepCircle number={step.stepNumber ?? 0} />
               <StepDescription
                 step={step}
-                className="max-w-[250px] text-center font-gill text-base leading-[110%] text-[#0a0a0a]"
+                className="max-w-[250px] text-center font-gill text-base leading-[110%] darkblack"
               />
             </div>
           ))}
@@ -180,7 +180,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
         {ctaUrl ? (
           <Link
             href={ctaUrl}
-            className="inline-flex items-center justify-center border-b-[1.5px] border-[#0a0a0a] pb-1 font-gill text-sm font-normal uppercase leading-[110%] text-[#0a0a0a] transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2"
+            className="inline-flex items-center justify-center border-b-[1.5px] border-[#0a0a0a] pb-1 font-gill text-sm font-normal uppercase leading-[110%] darkblack transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2"
           >
             {ctaLabel}
           </Link>

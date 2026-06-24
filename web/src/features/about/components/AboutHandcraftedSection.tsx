@@ -73,7 +73,7 @@ const AboutHandcraftedSection = () => {
         className="overflow-x-hidden bg-white"
       >
         <PageContainer className="px-0 md:px-0">
-          <div className="relative h-screen w-full overflow-hidden">
+          <div className="relative h-700 w-full overflow-hidden">
             <div className="absolute inset-0">
               <AboutHandcraftedHeroMedia />
             </div>

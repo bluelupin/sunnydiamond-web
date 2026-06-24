@@ -58,7 +58,7 @@ const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
       aria-label={sectionTitle}
       className="flex flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 lg:gap-[40px] lg:px-[40px] lg:py-100"
     >
-      <h2 className="text-center font-larken text-[32px] font-light leading-[110%] text-[#0a0a0a] lg:text-[48px] lg:whitespace-nowrap">
+      <h2 className="text-center font-larken text-[32px] font-light leading-[110%] darkblack lg:text-[48px] lg:whitespace-nowrap">
         {sectionTitle}
       </h2>
 
@@ -89,7 +89,7 @@ const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
         {ctaUrl ? (
           <Link
             href={ctaUrl}
-            className="inline-flex items-center justify-center border-b-[1.5px] border-[#0a0a0a] pb-1 font-gill text-sm font-normal uppercase leading-[110%] text-[#0a0a0a] transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2"
+            className="inline-flex items-center justify-center border-b-[1.5px] border-[#0a0a0a] pb-1 font-gill text-sm font-normal uppercase leading-[110%] darkblack transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2"
           >
             {ctaLabel}
           </Link>

@@ -10,9 +10,9 @@ const AboutSince1997Section = () => {
   return (
     <section
       aria-labelledby="about-since-1997-title"
-      className="bg-white pb-16 md:py-20 lg:py-104"
+      className="bg-white pb-16 md:py-20 lg:py-100"
     >
-      <PageContainer className="pr-0">
+      <PageContainer className="pb-0">
         <div className="space-y-3 lg:mb-[40px] mb-8">
           <h2
             id="about-since-1997-title"
@@ -24,9 +24,11 @@ const AboutSince1997Section = () => {
             {aboutSince1997Content.story}
           </p>
         </div>
-        <div className="mt-10 md:overflow-x-auto pb-2 horizontalScroll">
+      </PageContainer>
+      <PageContainer className="pt-0 !pr-0">
+        <div className="md:overflow-x-auto pb-2 horizontalScroll overflow-x-visible">
           <div className="flex md:flex-row flex-col md:min-w-max min-w-full items-center lg:gap-20 md:gap-16 sm:gap-12 gap-11">
-            <article className="flex shrink-0 items-center gap-8 md:w-auto w-full">
+            <article className="flex shrink-0 items-center lg:gap-8 gap-6 md:w-auto w-full">
               <figure className="flex flex-col gap-3 md:w-auto w-full">
                 <div className="h-600 md:w-549 w-full">
                   <ResponsiveImage

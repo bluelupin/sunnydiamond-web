@@ -55,7 +55,7 @@ const ProductsPage = () => {
                 <span
                   className={cn(
                     "whitespace-nowrap font-gill text-base leading-[110%] transition-colors",
-                    isActive ? "font-semibold text-[#0a0a0a]" : "font-normal text-[#999999]",
+                    isActive ? "font-semibold darkblack" : "font-normal text-[#999999]",
                   )}
                 >
                   {cat.label}

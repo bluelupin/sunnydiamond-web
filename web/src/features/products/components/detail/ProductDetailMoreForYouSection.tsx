@@ -32,7 +32,7 @@ const ProductDetailMoreForYouSection = ({ items }: ProductDetailMoreForYouSectio
   const nextItem = items[nextIndex];
 
   return (
-    <section aria-labelledby="more-for-you-heading" className="py-104">
+    <section aria-labelledby="more-for-you-heading" className="py-100">
       <PageContainer>
         <div className="mx-auto flex w-full max-w-1360 flex-col items-center gap-40">
           <h2

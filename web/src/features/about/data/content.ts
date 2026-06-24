@@ -389,7 +389,7 @@ export const aboutHeirloomFigmaSpec = {
   section: {
     width: 1440,
     background: "#FFFFFF",
-    paddingY: 104,
+    paddingY: 100,
     paddingX: 10,
   },
   row: {
@@ -413,8 +413,7 @@ export const aboutHeirloomFigmaSpec = {
 } as const;
 
 export const aboutHeirloomAssets = {
-  flourishLeft: "/images/about/heirloom-flourish-left.svg",
-  flourishRight: "/images/about/heirloom-flourish-right.svg",
+  flourishIcon: "/images/about/flourishIcon.svg"
 } as const;
 
 export const aboutGuaranteesFigmaSpec = {

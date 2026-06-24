@@ -55,7 +55,7 @@ const MobileCardTile = ({ cardIndex, className }: MobileCardTileProps) => {
         aria-hidden
         className="h-[10px] w-[10px] shrink-0"
       />
-      <h3 className="text-center font-larken text-sm font-light leading-[110%] text-[#0A0A0A]">
+      <h3 className="text-center font-larken text-sm font-light leading-[110%] darkblack">
         {card.title}
       </h3>
     </article>

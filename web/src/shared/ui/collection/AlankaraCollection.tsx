@@ -224,7 +224,7 @@ function ProductCarouselPanel({
             aria-label="Previous product"
             onClick={() => go(-1)}
             disabled={total <= 1}
-            className="inline-flex size-6 items-center justify-center text-[#0a0a0a] disabled:opacity-30 md:size-10"
+            className="inline-flex size-6 items-center justify-center darkblack disabled:opacity-30 md:size-10"
           >
             <LeftArrow className="size-6 md:size-[25px]" />
           </button>
@@ -233,7 +233,7 @@ function ProductCarouselPanel({
             aria-label="Next product"
             onClick={() => go(+1)}
             disabled={total <= 1}
-            className="inline-flex size-6 items-center justify-center text-[#0a0a0a] disabled:opacity-30 md:size-10"
+            className="inline-flex size-6 items-center justify-center darkblack disabled:opacity-30 md:size-10"
           >
             <RightArrow className="size-6 md:size-[25px]" />
           </button>
@@ -254,7 +254,7 @@ function ProductCarouselPanel({
         <div className="flex flex-col items-center gap-4 text-center">
           <p
             className={cn(
-              "font-gill leading-[110%] text-[#0a0a0a]",
+              "font-gill leading-[110%] darkblack",
               isMobile ? "text-base" : "text-[20px]",
             )}
           >
@@ -262,7 +262,7 @@ function ProductCarouselPanel({
           </p>
           <Link
             href={activeProduct.href}
-            className="btn-slide-up relative inline-flex h-14 items-center justify-center overflow-hidden border border-[#ccc] px-7 font-gill text-sm uppercase leading-[110%] text-[#0a0a0a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2"
+            className="btn-slide-up relative inline-flex h-14 items-center justify-center overflow-hidden border border-[#ccc] px-7 font-gill text-sm uppercase leading-[110%] darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2"
           >
             {activeProduct.ctaLabel || defaultProductCtaLabel}
           </Link>

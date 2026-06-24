@@ -167,7 +167,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
             />
           </div>
 
-          <h2 className="max-w-[306px] text-center font-larken text-[32px] font-light leading-[110%] text-[#0a0a0a]">
+          <h2 className="max-w-[306px] text-center font-larken text-[32px] font-light leading-[110%] darkblack">
             {sectionTitle}
           </h2>
 
@@ -179,7 +179,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
             {primaryCtaUrl ? (
               <Link
                 href={primaryCtaUrl}
-                className={`inline-flex h-14 items-center justify-center bg-white px-8 font-gill text-sm font-normal uppercase leading-[110%] text-[#0a0a0a] transition-opacity hover:opacity-90 ${ctaFocusClass}`}
+                className={`inline-flex h-14 items-center justify-center bg-white px-8 font-gill text-sm font-normal uppercase leading-[110%] darkblack transition-opacity hover:opacity-90 ${ctaFocusClass}`}
               >
                 {primaryCtaLabel}
               </Link>
@@ -188,7 +188,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
             {secondaryCtaUrl ? (
               <Link
                 href={secondaryCtaUrl}
-                className={`inline-flex items-center justify-center border-b-[1.5px] border-[#0a0a0a] pb-1 text-center font-gill text-sm font-normal uppercase leading-[110%] text-[#0a0a0a] transition-opacity hover:opacity-70 ${ctaFocusClass}`}
+                className={`inline-flex items-center justify-center border-b-[1.5px] border-[#0a0a0a] pb-1 text-center font-gill text-sm font-normal uppercase leading-[110%] darkblack transition-opacity hover:opacity-70 ${ctaFocusClass}`}
               >
                 {secondaryCtaLabel}
               </Link>
@@ -199,7 +199,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
         <div className="hidden lg:flex lg:h-[750px] lg:items-center lg:justify-between lg:gap-8 lg:px-10">
           <div className="flex max-w-[437px] shrink-0 flex-col gap-8">
             <div className="flex flex-col gap-4">
-              <h2 className="font-larken text-[48px] font-light leading-[110%] text-[#0a0a0a]">
+              <h2 className="font-larken text-[48px] font-light leading-[110%] darkblack">
                 {sectionTitle}
               </h2>
               <p className="font-gill text-[20px] font-light leading-[110%] text-[#4D4D4D]">
@@ -211,7 +211,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
               {primaryCtaUrl ? (
                 <Link
                   href={primaryCtaUrl}
-                  className={`inline-flex h-14 items-center justify-center bg-white px-8 font-gill text-sm font-normal uppercase leading-[110%] text-[#0a0a0a] transition-opacity hover:opacity-90 ${ctaFocusClass}`}
+                  className={`inline-flex h-14 items-center justify-center bg-white px-8 font-gill text-sm font-normal uppercase leading-[110%] darkblack transition-opacity hover:opacity-90 ${ctaFocusClass}`}
                 >
                   {primaryCtaLabel}
                 </Link>
@@ -220,7 +220,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
               {secondaryCtaUrl ? (
                 <Link
                   href={secondaryCtaUrl}
-                  className={`inline-flex items-center justify-center whitespace-nowrap border-b-[1.5px] border-[#0a0a0a] pb-1 font-gill text-sm font-normal uppercase leading-[110%] text-[#0a0a0a] transition-opacity hover:opacity-70 ${ctaFocusClass}`}
+                  className={`inline-flex items-center justify-center whitespace-nowrap border-b-[1.5px] border-[#0a0a0a] pb-1 font-gill text-sm font-normal uppercase leading-[110%] darkblack transition-opacity hover:opacity-70 ${ctaFocusClass}`}
                 >
                   {secondaryCtaLabel}
                 </Link>

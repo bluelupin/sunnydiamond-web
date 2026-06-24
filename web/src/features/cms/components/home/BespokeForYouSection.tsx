@@ -131,7 +131,7 @@ const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
           {primaryCtaUrl ? (
             <Link
               href={primaryCtaUrl}
-              className="relative inline-flex h-14 items-center justify-center overflow-hidden bg-white px-7 font-gill text-sm font-normal uppercase leading-[110%] text-[#0a0a0a] transition-opacity hover:opacity-90"
+              className="relative inline-flex h-14 items-center justify-center overflow-hidden bg-white px-7 font-gill text-sm font-normal uppercase leading-[110%] darkblack transition-opacity hover:opacity-90"
             >
               {primaryCtaLabel}
             </Link>

@@ -11,10 +11,10 @@ const { flourish: flourishSpec } = aboutHeirloomFigmaSpec;
 const AboutHeirloomQuoteSection = () => {
   return (
     <section aria-labelledby="about-heirloom-quote" className="bg-white">
-      <PageContainer className="py-16 md:py-20 desktop:py-104">
+      <PageContainer className="py-16 md:py-20 desktop:py-100">
         <div className="flex flex-col items-center justify-center gap-4 lg:flex-row">
           <Image
-            src={aboutHeirloomAssets.flourishLeft}
+            src={aboutHeirloomAssets.flourishIcon}
             alt=""
             width={flourishSpec.width}
             height={flourishSpec.height}
@@ -30,7 +30,7 @@ const AboutHeirloomQuoteSection = () => {
           </h2>
 
           <Image
-            src={aboutHeirloomAssets.flourishRight}
+            src={aboutHeirloomAssets.flourishIcon}
             alt=""
             width={flourishSpec.width}
             height={flourishSpec.height}

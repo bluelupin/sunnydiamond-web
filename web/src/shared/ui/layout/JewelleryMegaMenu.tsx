@@ -57,14 +57,14 @@ export const JewelleryMegaMenu = ({ onMouseEnter, onMouseLeave, onClose }: Jewel
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center bg-[#F8F1F6]">
-                      <span className="font-gill text-[20px] leading-[110%] text-[#0a0a0a]">
+                      <span className="font-gill text-[20px] leading-[110%] darkblack">
                         All Products
                       </span>
                     </div>
                   )}
                 </div>
                 {cat.image && (
-                  <span className="font-gill text-[20px] leading-[110%] text-[#0a0a0a] transition-opacity group-hover:opacity-70">
+                  <span className="font-gill text-[20px] leading-[110%] darkblack transition-opacity group-hover:opacity-70">
                     {cat.label}
                   </span>
                 )}
