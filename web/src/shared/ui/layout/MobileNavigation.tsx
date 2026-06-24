@@ -488,7 +488,7 @@ const MobileNavigation = ({ isOpen, onClose, navLinks, cartCount }: MobileNaviga
       aria-modal="true"
       aria-label="Mobile navigation"
     >
-      <div className="flex h-16 shrink-0 items-center justify-between px-4">
+      <div className="flex h-16 shrink-0 items-center justify-between px-4 gap-4">
         <div className="flex w-[120px] items-center">
           <button
             type="button"

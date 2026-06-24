@@ -13,6 +13,7 @@ import { resolveHeaderNavHref, isHeroOverlayRoute } from "@/shared/utils/navigat
 import { resolveShellHeaderLinks } from "@/shared/lib/shellNavigation";
 import MobileNavigation from "@/shared/ui/layout/MobileNavigation";
 import { JewelleryMegaMenu } from "@/shared/ui/layout/JewelleryMegaMenu";
+import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -86,15 +87,18 @@ const Header = () => {
         )}
         aria-hidden={mobileMenuOpen}
       >
-        <div className="container relative flex items-center justify-between h-16 md:h-20">
-          <div className="flex items-center gap-6 md:gap-4 lg:gap-6 xl:gap-10">
+        <div className="container relative flex items-center justify-between h-16 md:h-20 lg:px-[40px] md:px-6 px-4">
+          <div className="flex items-center gap-4 md:gap-4 lg:gap-6 xl:gap-10">
             <button
-              className={cn("md:hidden p-2 -ml-2", textClass)}
+              className={cn("md:hidden p-2", textClass)}
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Open menu"
               aria-expanded={mobileMenuOpen}
             >
               <Menu size={22} />
+            </button>
+            <button className={cn("md:hidden flex p-2 transition-colors", textClass, hoverClass)} aria-label="Search">
+              <Search size={20} strokeWidth={1.5} />
             </button>
 
             <div className="hidden md:block">{Logo}</div>
@@ -142,7 +146,7 @@ const Header = () => {
           <div className="md:hidden absolute left-1/2 -translate-x-1/2">{Logo}</div>
 
           <div className={cn("flex items-center gap-1 lg:gap-2", textClass)}>
-            <button className={cn("p-2 transition-colors", hoverClass)} aria-label="Search">
+            <button className={cn("md:flex hidden p-2 transition-colors", hoverClass)} aria-label="Search">
               <Search size={20} strokeWidth={1.5} />
             </button>
             <Link
@@ -157,7 +161,7 @@ const Header = () => {
               className={cn("p-2 transition-colors relative", hoverClass)}
               aria-label="Cart"
             >
-              <ShoppingBag size={20} strokeWidth={1.5} />
+              <ShoppingBagIcon />
               {totalItems > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-semibold rounded-full w-5 h-5 flex items-center justify-center">
                   {totalItems}

@@ -52,7 +52,7 @@ const AboutSince1997Section = () => {
               </p>
             </article>
             <div className="md:w-auto w-full flex shrink-0 items-center md:gap-5 gap-3 overflow-y-hidden overflow-x-auto md:overflow-x-visible">
-              <figure className="flex md:w-320 md:min-w-0 min-w-[256px] w-[256px] flex-col gap-3">
+              <figure className="flex md:w-320 md:min-w-0 sm:min-w-[400px] min-w-[256px] sm:w-[400px] w-[256px] flex-col gap-3">
                 <div className="md:h-417 h-[240px] overflow-hidden">
                   <ResponsiveImage
                     desktopSrc={event.desktopImage}
@@ -69,7 +69,7 @@ const AboutSince1997Section = () => {
                   {event.caption}
                 </figcaption>
               </figure>
-              <figure className="flex md:w-463 md:min-w-0 min-w-[256px] w-[256px] flex-col gap-3">
+              <figure className="flex md:w-463 md:min-w-0 sm:min-w-[400px] min-w-[256px] sm:w-[400px] w-[256px] flex-col gap-3">
                 <div className="md:h-600 h-[277px] overflow-hidden">
                   <ResponsiveImage
                     desktopSrc={attending.desktopImage}
