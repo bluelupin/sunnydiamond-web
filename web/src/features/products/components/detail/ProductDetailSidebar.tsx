@@ -25,6 +25,7 @@ import TryAtHomePanel from "./TryAtHomePanel";
 import PersonaliseProductPanel from "./PersonaliseProductPanel";
 import MetalEngravingPanel from "./MetalEngravingPanel";
 import RingSizeChartPanel from "./RingSizeChartPanel";
+import DeliveryStoreJourneyPanel from "./DeliveryStoreJourneyPanel";
 import type { EngravingSelection } from "@/features/products/constants/engraving";
 
 type ProductDetailSidebarProps = {
@@ -45,6 +46,7 @@ const ProductDetailSidebar = ({
   const [engravingSelection, setEngravingSelection] = useState<EngravingSelection | null>(null);
   const [isEngravingOpen, setIsEngravingOpen] = useState(false);
   const [isRingSizeChartOpen, setIsRingSizeChartOpen] = useState(false);
+  const [isDeliveryStoreOpen, setIsDeliveryStoreOpen] = useState(false);
   const [isGift, setIsGift] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [zipCode, setZipCode] = useState("122002");
@@ -140,6 +142,12 @@ const ProductDetailSidebar = ({
 
       <RingSizeChartPanel open={isRingSizeChartOpen} onClose={() => setIsRingSizeChartOpen(false)} />
 
+      <DeliveryStoreJourneyPanel
+        open={isDeliveryStoreOpen}
+        onClose={() => setIsDeliveryStoreOpen(false)}
+        city="Coimbatore"
+      />
+
       <div className="flex flex-col gap-4">
         <div className="flex items-end justify-between gap-4">
           <div className="flex items-center gap-3 font-gill text-24 leading-110 text-darkblack">
@@ -208,7 +216,7 @@ const ProductDetailSidebar = ({
             <p className="font-gill text-base font-light leading-110 text-darkblack">
               Available now at nearest store
             </p>
-            <DetailTextLink href="/contact">Coimbatore</DetailTextLink>
+            <DetailTextLink onClick={() => setIsDeliveryStoreOpen(true)}>Coimbatore</DetailTextLink>
           </div>
         </div>
       </div>
