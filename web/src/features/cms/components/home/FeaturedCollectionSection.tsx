@@ -8,6 +8,7 @@ import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingB
 import { AlankaraCollection } from "@/shared/ui/collection/AlankaraCollection";
 import {
   ALANKARA_FALLBACKS,
+  ALANKARA_THUMBNAIL_CROPS,
   type AlankaraCollectionProduct,
 } from "@/shared/ui/collection/alankaraCollection.types";
 import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
@@ -18,15 +19,36 @@ interface FeaturedCollectionSectionProps {
   id?: string;
 }
 
+function resolveAlankaraProduct(index: number, product?: (typeof products)[number]) {
+  if (index === 0) {
+    return {
+      image: ALANKARA_FALLBACKS.firstThumbnail,
+      thumbnailCrop: ALANKARA_THUMBNAIL_CROPS.first,
+    };
+  }
+
+  if (index === 1) {
+    return {
+      image: ALANKARA_FALLBACKS.secondThumbnail,
+      thumbnailCrop: ALANKARA_THUMBNAIL_CROPS.second,
+    };
+  }
+
+  return {
+    image: product?.image ?? ALANKARA_FALLBACKS.product,
+  };
+}
+
 function getFallbackProducts(): AlankaraCollectionProduct[] {
   return homeContent.alankara.productIds.map((productId, index) => {
     const product = products.find((item) => item.id === productId);
+    const resolved = resolveAlankaraProduct(index, product);
 
     return {
       id: productId,
       name: product?.name ?? "Saptam Diamond Ring",
-      image: product?.image ?? ALANKARA_FALLBACKS.product,
-      ...(index === 0 ? { thumbnailImage: ALANKARA_FALLBACKS.firstThumbnail } : {}),
+      image: resolved.image,
+      thumbnailCrop: resolved.thumbnailCrop,
       href: `/product/${productId}`,
       ctaLabel: homeContent.alankara.product.cta.label,
     };
@@ -66,14 +88,23 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
       : [];
 
     const mappedProducts: AlankaraCollectionProduct[] = cmsProducts
-      .map((product: FeaturedCollectionImage, index: number) => ({
-        id: product.id ?? product.name ?? "",
-        name: product.name?.trim() ?? "",
-        image: resolveCmsMediaUrl(product.image) || ALANKARA_FALLBACKS.product,
-        ...(index === 0 ? { thumbnailImage: ALANKARA_FALLBACKS.firstThumbnail } : {}),
-        href: `/product/${product.id ?? ""}`,
-        ctaLabel: ctaLabel === fallback.cta.label ? "Shop Now" : ctaLabel,
-      }))
+      .map((product: FeaturedCollectionImage, index: number) => {
+        const resolved =
+          index === 0 || index === 1
+            ? resolveAlankaraProduct(index)
+            : {
+                image: resolveCmsMediaUrl(product.image) || ALANKARA_FALLBACKS.product,
+              };
+
+        return {
+          id: product.id ?? product.name ?? "",
+          name: product.name?.trim() ?? "",
+          image: resolved.image,
+          thumbnailCrop: resolved.thumbnailCrop,
+          href: `/product/${product.id ?? ""}`,
+          ctaLabel: ctaLabel === fallback.cta.label ? "Shop Now" : ctaLabel,
+        };
+      })
       .filter((product) => Boolean(product.id) && Boolean(product.name));
 
     return {

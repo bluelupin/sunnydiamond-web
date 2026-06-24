@@ -9,30 +9,29 @@ import LeftArrow from "@/assets/Icons/LeftArrow";
 import RightArrow from "@/assets/Icons/RightArrow";
 import { cn } from "@/shared/utils/cn";
 import { getImageSrc } from "@/shared/utils/image";
-import type {
-  AlankaraCollectionProduct,
-  AlankaraCollectionProps,
+import {
+  ALANKARA_THUMBNAIL_CROPS,
+  type AlankaraCollectionProduct,
+  type AlankaraCollectionProps,
+  type AlankaraThumbnailCrop,
 } from "./alankaraCollection.types";
 
 const DEFAULT_PRODUCT_CTA = "Shop Now";
 
-const alankaraThumbnailCropStyle = {
-  height: "109.62%",
-  width: "110%",
-  left: "-5%",
-  top: "-5.53%",
-} as const;
+const defaultThumbnailCrop = ALANKARA_THUMBNAIL_CROPS.first;
 
 function AlankaraProductThumbnail({
   src,
   productName,
   isActive,
   onClick,
+  cropStyle = defaultThumbnailCrop,
 }: {
   src: string;
   productName: string;
   isActive: boolean;
   onClick: () => void;
+  cropStyle?: AlankaraThumbnailCrop;
 }) {
   return (
     <button
@@ -45,15 +44,15 @@ function AlankaraProductThumbnail({
         isActive ? "opacity-100" : "opacity-70 hover:opacity-100",
       )}
     >
-      <div className="relative size-[98px] overflow-hidden">
-        <div className="absolute left-1/2 top-1/2 size-[121px] -translate-x-1/2 -translate-y-1/2">
+      <div className="relative size-[140px] overflow-hidden">
+        <div className="absolute left-1/2 top-1/2 size-[173px] -translate-x-1/2 -translate-y-1/2">
           <Image
             src={src}
             alt=""
             fill
-            sizes="98px"
+            sizes="140px"
             className="max-w-none object-cover"
-            style={alankaraThumbnailCropStyle}
+            style={cropStyle}
           />
         </div>
       </div>
@@ -326,6 +325,7 @@ function ProductCarouselPanel({
                 src={thumbSrc}
                 productName={product.name}
                 isActive={isActive}
+                cropStyle={product.thumbnailCrop}
                 onClick={() => setActiveIndex(index)}
               />
             );
