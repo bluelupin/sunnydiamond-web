@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import OptimizedImage from "@/shared/ui/OptimizedImage";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import CarouselChevronLeft from "@/assets/Icons/CarouselChevronLeft";
 import CarouselChevronRight from "@/assets/Icons/CarouselChevronRight";
@@ -11,6 +10,8 @@ import { cn } from "@/shared/utils/cn";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { getImageSrc } from "@/shared/utils/image";
 import {
+  ALANKARA_DESKTOP_PRODUCT_CROP,
+  ALANKARA_HERO_DESKTOP_CROP,
   ALANKARA_MOBILE_PRODUCT_CROP,
   ALANKARA_THUMBNAIL_CROPS,
   type AlankaraCollectionProduct,
@@ -67,29 +68,20 @@ function ProductSlideImage({
   priority?: boolean;
 }) {
   const imageSrc = getImageSrc(product.image) || "";
-
-  if (variant === "mobile") {
-    return (
-      <Image
-        src={imageSrc}
-        alt={product.name}
-        fill
-        sizes="271px"
-        priority={priority}
-        className="max-w-none object-cover"
-        style={ALANKARA_MOBILE_PRODUCT_CROP}
-      />
-    );
-  }
+  const cropStyle =
+    variant === "mobile"
+      ? ALANKARA_MOBILE_PRODUCT_CROP
+      : product.desktopCrop ?? ALANKARA_DESKTOP_PRODUCT_CROP;
 
   return (
-    <OptimizedImage
+    <Image
       src={imageSrc}
       alt={product.name}
-      width={720}
-      height={800}
+      fill
+      sizes={variant === "mobile" ? "271px" : "720px"}
       priority={priority}
-      className="size-full object-cover"
+      className="max-w-none object-cover"
+      style={cropStyle}
     />
   );
 }
@@ -116,12 +108,12 @@ function AlankaraProductThumbnail({
       aria-current={isActive}
       onClick={onClick}
       className={cn(
-        "box-border size-[140px] bg-[#F4F3EE] p-3 transition-opacity",
+        "box-border shrink-0 bg-gray300 px-4 py-6 transition-opacity",
         isActive ? "opacity-100" : "opacity-70 hover:opacity-100",
       )}
     >
-      <div className="relative size-full overflow-hidden">
-        <div className="absolute left-1/2 top-1/2 size-[143px] -translate-x-1/2 -translate-y-1/2">
+      <div className="relative size-[98px] overflow-hidden">
+        <div className="absolute left-1/2 top-1/2 size-[121px] -translate-x-1/2 -translate-y-1/2">
           <Image
             src={src}
             alt=""
@@ -164,16 +156,30 @@ function CollectionHeroPanel({
         isMobile ? "h-[540px] w-full" : "h-[800px] w-full",
       )}
     >
-      <ResponsiveImage
-        desktopSrc={desktopImage}
-        mobileSrc={mobileImage}
-        alt={imageAlt}
-        priority={priority}
-        width={isMobile ? 375 : 720}
-        height={isMobile ? 540 : 800}
-        quality={90}
-        className="size-full object-cover"
-      />
+      <div className="absolute inset-0 overflow-hidden">
+        {isMobile ? (
+          <ResponsiveImage
+            desktopSrc={desktopImage}
+            mobileSrc={mobileImage}
+            alt={imageAlt}
+            priority={priority}
+            width={375}
+            height={540}
+            quality={90}
+            className="size-full object-cover"
+          />
+        ) : (
+          <Image
+            src={desktopImage}
+            alt={imageAlt}
+            fill
+            priority={priority}
+            sizes="720px"
+            className="max-w-none object-cover"
+            style={ALANKARA_HERO_DESKTOP_CROP}
+          />
+        )}
+      </div>
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(0,0,0,0.7)] from-0% to-[rgba(0,0,0,0)] to-[53.563%]"
@@ -184,36 +190,33 @@ function CollectionHeroPanel({
           "absolute text-white",
           isMobile
             ? "inset-x-0 top-[323px] flex flex-col items-center gap-6 px-4 text-center"
-            : "bottom-10 left-10 flex max-w-[418px] flex-col gap-5",
+            : "bottom-40 left-40 flex max-w-[418px] flex-col gap-5",
         )}
       >
-        <div className={cn("flex flex-col", isMobile ? "items-center gap-3" : "gap-5")}>
-          <h2
-            className={cn(
-              "font-larken font-light leading-[110%]",
-              isMobile ? "text-[32px]" : "text-[48px] leading-none",
-            )}
-          >
-            {title}
-          </h2>
-          {description ? (
-            <p
-              className={cn(
-                "font-gill font-light text-white",
-                isMobile
-                  ? "max-w-[343px] text-base leading-[110%]"
-                  : "text-[20px] leading-[1.2] tracking-[0.2px]",
-              )}
-            >
-              {description}
-            </p>
-          ) : null}
-        </div>
+        {isMobile ? (
+          <div className="flex flex-col items-center gap-3">
+            <h2 className="font-larken text-[32px] font-light leading-110">{title}</h2>
+            {description ? (
+              <p className="max-w-[343px] font-gill text-base font-light leading-110">
+                {description}
+              </p>
+            ) : null}
+          </div>
+        ) : (
+          <>
+            <h2 className="font-larken text-5xl font-light leading-normal">{title}</h2>
+            {description ? (
+              <p className="font-gill text-xl font-light leading-[1.2] tracking-[0.2px]">
+                {description}
+              </p>
+            ) : null}
+          </>
+        )}
 
         {isMobile && collectionCta ? (
           <Link
             href={collectionCta.href}
-            className="inline-flex items-center justify-center border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-[110%] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
+            className="inline-flex items-center justify-center border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
           >
             {collectionCta.label}
           </Link>
@@ -314,8 +317,8 @@ function ProductCarouselPanel({
   return (
     <div
       className={cn(
-        "relative overflow-hidden bg-gray300",
-        isMobile ? "mx-auto size-[343px] px-9 py-[40px]" : "h-[800px] w-full",
+        "relative overflow-hidden",
+        isMobile ? "mx-auto size-[343px] bg-gray300 px-9 py-[40px]" : "h-[800px] w-full bg-white",
       )}
     >
       {!isMobile ? (
@@ -384,8 +387,8 @@ function ProductCarouselPanel({
         )}
       >
         {!isMobile ? (
-          <div className="absolute left-40 top-[380px] z-10 flex w-[640px] flex-col gap-[92px]">
-            <div className="relative h-10 w-full shrink-0">
+          <div className="absolute left-40 top-[380px] z-10 flex w-[640px] flex-col items-center gap-[92px]">
+            <div className="relative h-10 w-full shrink-0 p-2.5">
               <div className="absolute left-0 top-1/2 -translate-y-1/2">
                 <CarouselNavButton
                   direction="prev"
@@ -404,13 +407,13 @@ function ProductCarouselPanel({
               </div>
             </div>
 
-            <div className="flex w-[180px] flex-col items-center gap-4 text-center">
-              <p className="font-gill text-[20px] font-normal leading-110 text-darkblack">
+            <div className="relative h-[94px] w-[180px] shrink-0 p-2.5">
+              <p className="absolute left-1/2 top-0 -translate-x-1/2 whitespace-nowrap font-gill text-xl font-normal leading-110 text-darkblack">
                 {activeProduct.name}
               </p>
               <Link
                 href={activeProduct.href}
-                className="btn-slide-up relative inline-flex h-14 w-full items-center justify-center overflow-hidden border-[0.8px] border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2"
+                className="btn-slide-up absolute left-[23.5px] top-[38px] inline-flex h-14 items-center justify-center overflow-hidden border-[0.8px] border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
               >
                 {activeProduct.ctaLabel || defaultProductCtaLabel}
               </Link>
@@ -468,7 +471,7 @@ function ProductCarouselPanel({
       </div>
 
       {!isMobile && total > 1 ? (
-        <div className="absolute inset-x-0 bottom-0 z-10 flex justify-center gap-[5.6px] overflow-x-auto px-6">
+        <div className="absolute bottom-0 left-1/2 z-10 flex -translate-x-1/2 gap-[5.6px]">
           {products.map((product, index) => {
             const thumbSrc = getImageSrc(product.thumbnailImage ?? product.image) || "";
             const isActive = index === activeIndex;
