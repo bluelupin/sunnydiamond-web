@@ -2,39 +2,26 @@ import PageContainer from "@/shared/ui/layout/PageContainer";
 import { Skeleton } from "@/shared/ui/skeleton";
 
 const AboutSince1997Skeleton = () => (
-  <>
-    <section
-      aria-busy="true"
-      aria-label="Loading legacy section"
-      className="relative hidden bg-white lg:block"
-    >
-      <div className="sticky top-0 flex h-screen flex-col overflow-hidden bg-white pt-100">
-        <PageContainer className="shrink-0 pb-10">
-          <Skeleton className="h-12 w-48 rounded-md bg-gray200" aria-hidden />
-        </PageContainer>
-        <PageContainer className="flex min-h-0 flex-1 flex-col pb-100 pt-0">
-          <div className="flex min-h-0 flex-1 items-center gap-20 overflow-hidden">
-            <Skeleton className="h-600 w-[549px] shrink-0 rounded-md bg-gray200" aria-hidden />
-            <Skeleton className="hidden h-600 w-358 shrink-0 rounded-md bg-gray200 lg:block" aria-hidden />
-            <Skeleton className="h-417 w-320 shrink-0 rounded-md bg-gray200" aria-hidden />
-          </div>
-        </PageContainer>
-      </div>
-    </section>
-
-    <section aria-busy="true" aria-hidden className="bg-white py-16 md:py-20 lg:hidden">
-      <PageContainer className="pb-0">
-        <Skeleton className="h-10 w-48 rounded-md bg-gray200" aria-hidden />
-        <Skeleton className="mt-3 h-6 w-full max-w-xl rounded-md bg-gray200" aria-hidden />
+  <section
+    aria-busy="true"
+    aria-label="Loading legacy section"
+    className="relative bg-white"
+  >
+    <div className="sticky top-0 flex h-screen flex-col overflow-hidden bg-white pt-16 md:pt-20 lg:pt-100">
+      <PageContainer className="shrink-0 pb-8 lg:pb-10">
+        <Skeleton className="h-10 w-48 rounded-md bg-gray200 md:h-12" aria-hidden />
+        <Skeleton className="mt-3 h-6 w-full max-w-xl rounded-md bg-gray200 lg:hidden" aria-hidden />
       </PageContainer>
-      <PageContainer className="pt-0 !pr-0 pl-5">
-        <div className="mt-8 flex gap-6 overflow-hidden md:gap-16">
-          <Skeleton className="h-600 w-full max-w-[549px] shrink-0 rounded-md bg-gray200" aria-hidden />
-          <Skeleton className="hidden h-600 w-463 shrink-0 rounded-md bg-gray200 md:block" aria-hidden />
+      <PageContainer className="flex min-h-0 flex-1 flex-col pb-16 pt-0 md:pb-20 lg:pb-100 max-lg:!pr-0 max-lg:pl-5">
+        <div className="flex min-h-0 flex-1 items-center gap-3 overflow-hidden md:gap-5 lg:gap-20">
+          <Skeleton className="h-600 w-full shrink-0 rounded-md bg-gray200 lg:w-[549px]" aria-hidden />
+          <Skeleton className="hidden h-600 w-358 shrink-0 rounded-md bg-gray200 lg:block" aria-hidden />
+          <Skeleton className="h-[240px] w-[256px] shrink-0 rounded-md bg-gray200 lg:h-417 lg:w-320" aria-hidden />
+          <Skeleton className="h-[277px] w-[256px] shrink-0 rounded-md bg-gray200 md:h-600 lg:h-600 lg:w-463" aria-hidden />
         </div>
       </PageContainer>
-    </section>
-  </>
+    </div>
+  </section>
 );
 
 export default AboutSince1997Skeleton;

@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import PageContainer from "@/shared/ui/layout/PageContainer";
+import { cn } from "@/shared/utils/cn";
 import type { NormalizedAboutLegacy } from "@/services/about/about-page.types";
 import { aboutSince1997Content } from "../data/content";
 import { useSince1997HorizontalScroll } from "../hooks/useSince1997HorizontalScroll";
@@ -14,11 +15,13 @@ type GalleryItemProps = {
   mobileUrl: string;
   alt: string;
   caption?: string;
-  width: number;
-  height: number;
   imageWidth: number;
   imageHeight: number;
   sizes: string;
+  figureClassName?: string;
+  frameClassName?: string;
+  captionClassName?: string;
+  dataSince1997Last?: boolean;
 };
 
 function GalleryImage({
@@ -26,15 +29,20 @@ function GalleryImage({
   mobileUrl,
   alt,
   caption,
-  width,
-  height,
   imageWidth,
   imageHeight,
   sizes,
+  figureClassName,
+  frameClassName,
+  captionClassName,
+  dataSince1997Last,
 }: GalleryItemProps) {
   return (
-    <figure className="flex shrink-0 flex-col gap-3" style={{ width }}>
-      <div className="overflow-hidden" style={{ width, height }}>
+    <figure
+      className={cn("flex shrink-0 flex-col gap-3", figureClassName)}
+      {...(dataSince1997Last ? { "data-since1997-last-image": true } : {})}
+    >
+      <div className={cn("overflow-hidden", frameClassName)}>
         <ResponsiveImage
           desktopSrc={desktopUrl}
           mobileSrc={mobileUrl}
@@ -47,7 +55,7 @@ function GalleryImage({
         />
       </div>
       {caption ? (
-        <figcaption className="font-gill text-base leading-110 text-darkblack">
+        <figcaption className={cn("font-gill leading-110 text-darkblack", captionClassName)}>
           {caption}
         </figcaption>
       ) : null}
@@ -78,164 +86,84 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
       aria-labelledby="about-since-1997-title"
       className="relative bg-white"
     >
-      {/* Desktop — sticky viewport + scroll-driven horizontal slide */}
-      <div className="hidden lg:block">
-        <div className="sticky top-0 flex h-screen flex-col overflow-hidden bg-white pt-100">
-          <PageContainer className="shrink-0 pb-10">
-            <h2
-              id="about-since-1997-title"
-              className="font-larken text-48 font-light leading-110 text-darkblack"
-            >
-              {title}
-            </h2>
-          </PageContainer>
-
-          <PageContainer className="flex min-h-0 flex-1 flex-col pb-100 pt-0">
-            <div ref={viewportRef} className="min-h-0 flex-1 overflow-hidden">
-              <div
-                ref={trackRef}
-                className="flex h-full items-center gap-20 will-change-transform motion-reduce:transform-none"
-              >
-                <article className="flex shrink-0 items-center gap-8">
-                  <GalleryImage
-                    desktopUrl={founder.image.desktopUrl}
-                    mobileUrl={founder.image.mobileUrl}
-                    alt={founder.image.alt}
-                    caption={founder.caption}
-                    width={549}
-                    height={600}
-                    imageWidth={founderWidth}
-                    imageHeight={founderHeight}
-                    sizes="549px"
-                  />
-                  {story ? (
-                    <p className="max-w-358 font-gill text-xl font-light leading-110 text-neutral500">
-                      {story}
-                    </p>
-                  ) : null}
-                </article>
-
-                {hasHorizontalGallery ? (
-                  <>
-                    <GalleryImage
-                      desktopUrl={event!.image.desktopUrl}
-                      mobileUrl={event!.image.mobileUrl}
-                      alt={event!.image.alt}
-                      caption={event!.caption}
-                      width={320}
-                      height={417}
-                      imageWidth={eventWidth}
-                      imageHeight={eventHeight}
-                      sizes="320px"
-                    />
-                    <GalleryImage
-                      desktopUrl={attending!.image.desktopUrl}
-                      mobileUrl={attending!.image.mobileUrl}
-                      alt={attending!.image.alt}
-                      caption={attending!.caption}
-                      width={463}
-                      height={600}
-                      imageWidth={attendingWidth}
-                      imageHeight={attendingHeight}
-                      sizes="463px"
-                    />
-                  </>
-                ) : null}
-              </div>
-            </div>
-          </PageContainer>
-        </div>
-
-        {hasHorizontalGallery ? (
-          <div data-since1997-scroll-spacer aria-hidden className="h-[85vh]" />
-        ) : null}
-      </div>
-
-      {/* Mobile / tablet — existing layout */}
-      <div className="lg:hidden py-16 md:py-20">
-        <PageContainer className="pb-0">
-          <div className="mb-8 space-y-3">
-            <h2 className="font-larken text-32 font-light leading-110 text-darkblack md:text-40">
-              {title}
-            </h2>
-            {story ? (
-              <p className="font-gill text-base font-light leading-110 text-neutral500 md:text-lg">
-                {story}
-              </p>
-            ) : null}
-          </div>
+      <div className="sticky top-0 flex h-screen flex-col overflow-hidden bg-white pt-16 md:pt-20 lg:pt-100">
+        <PageContainer className="shrink-0 pb-8 lg:pb-10">
+          <h2
+            id="about-since-1997-title"
+            className="font-larken text-32 font-light leading-110 text-darkblack md:text-40 lg:text-48"
+          >
+            {title}
+          </h2>
+          {story ? (
+            <p className="mt-3 font-gill text-base font-light leading-110 text-neutral500 md:text-lg lg:hidden">
+              {story}
+            </p>
+          ) : null}
         </PageContainer>
-        <PageContainer className="!pr-0 pl-5 pt-0">
-          <div className="horizontalScroll overflow-x-auto pb-2 md:overflow-x-visible">
-            <div className="flex min-w-full flex-col items-center gap-6 sm:gap-12 md:min-w-max md:flex-row md:gap-16">
-              <article className="flex w-full shrink-0 items-center gap-6 pr-4 md:w-auto md:pr-0">
-                <figure className="flex w-full flex-col gap-3 md:w-auto">
-                  <div className="h-600 w-full md:w-549">
-                    <ResponsiveImage
-                      desktopSrc={founder.image.desktopUrl}
-                      mobileSrc={founder.image.mobileUrl}
-                      alt={founder.image.alt}
-                      width={founderWidth}
-                      height={founderHeight}
-                      quality={80}
-                      sizes="549px"
-                      className="object-cover"
-                    />
-                  </div>
-                  {founder.caption ? (
-                    <figcaption className="font-gill text-sm leading-110 text-darkblack md:text-base">
-                      {founder.caption}
-                    </figcaption>
-                  ) : null}
-                </figure>
+
+        <div className="flex min-h-0 flex-1 flex-col pb-16 pt-0 md:pb-20 lg:pb-100 lg:pl-[40px] lg:pr-0 max-lg:pl-5 max-lg:pr-0">
+          <div ref={viewportRef} className="min-h-0 flex-1 overflow-hidden">
+            <div
+              ref={trackRef}
+              className="flex h-full items-center gap-3 will-change-transform motion-reduce:transform-none md:gap-5 lg:gap-20"
+            >
+              <article className="flex w-full min-w-full shrink-0 items-center gap-6 pr-4 lg:w-auto lg:min-w-0 lg:gap-8 lg:pr-0">
+                <GalleryImage
+                  desktopUrl={founder.image.desktopUrl}
+                  mobileUrl={founder.image.mobileUrl}
+                  alt={founder.image.alt}
+                  caption={founder.caption}
+                  imageWidth={founderWidth}
+                  imageHeight={founderHeight}
+                  sizes="549px"
+                  figureClassName="w-full lg:w-[549px]"
+                  frameClassName="h-600 w-full lg:w-[549px]"
+                  captionClassName="text-sm md:text-base"
+                />
+                {story ? (
+                  <p className="hidden max-w-358 shrink-0 font-gill text-xl font-light leading-110 text-neutral500 lg:block">
+                    {story}
+                  </p>
+                ) : null}
               </article>
 
               {hasHorizontalGallery ? (
-                <div className="flex w-full shrink-0 items-center gap-3 overflow-x-auto overflow-y-hidden md:w-auto md:gap-5 md:overflow-x-visible">
-                  <figure className="flex w-[256px] min-w-[256px] flex-col gap-3 sm:w-[400px] sm:min-w-[400px] md:w-320 md:min-w-0">
-                    <div className="h-[240px] overflow-hidden md:h-417">
-                      <ResponsiveImage
-                        desktopSrc={event!.image.desktopUrl}
-                        mobileSrc={event!.image.mobileUrl}
-                        alt={event!.image.alt}
-                        width={eventWidth}
-                        height={eventHeight}
-                        quality={80}
-                        sizes="320px"
-                        className="object-cover"
-                      />
-                    </div>
-                    {event!.caption ? (
-                      <figcaption className="font-gill text-base leading-110 text-darkblack">
-                        {event!.caption}
-                      </figcaption>
-                    ) : null}
-                  </figure>
-                  <figure className="flex w-[256px] min-w-[256px] flex-col gap-3 sm:w-[400px] sm:min-w-[400px] md:w-463 md:min-w-0">
-                    <div className="h-[277px] overflow-hidden md:h-600">
-                      <ResponsiveImage
-                        desktopSrc={attending!.image.desktopUrl}
-                        mobileSrc={attending!.image.mobileUrl}
-                        alt={attending!.image.alt}
-                        width={attendingWidth}
-                        height={attendingHeight}
-                        quality={80}
-                        sizes="463px"
-                        className="object-cover"
-                      />
-                    </div>
-                    {attending!.caption ? (
-                      <figcaption className="font-gill text-base leading-110 text-darkblack">
-                        {attending!.caption}
-                      </figcaption>
-                    ) : null}
-                  </figure>
-                </div>
+                <>
+                  <GalleryImage
+                    desktopUrl={event!.image.desktopUrl}
+                    mobileUrl={event!.image.mobileUrl}
+                    alt={event!.image.alt}
+                    caption={event!.caption}
+                    imageWidth={eventWidth}
+                    imageHeight={eventHeight}
+                    sizes="320px"
+                    figureClassName="w-[256px] min-w-[256px] sm:w-[400px] sm:min-w-[400px] lg:w-[320px] lg:min-w-0"
+                    frameClassName="h-[240px] lg:h-[417px]"
+                    captionClassName="text-base"
+                  />
+                  <GalleryImage
+                    desktopUrl={attending!.image.desktopUrl}
+                    mobileUrl={attending!.image.mobileUrl}
+                    alt={attending!.image.alt}
+                    caption={attending!.caption}
+                    imageWidth={attendingWidth}
+                    imageHeight={attendingHeight}
+                    sizes="463px"
+                    figureClassName="w-[256px] min-w-[256px] sm:w-[400px] sm:min-w-[400px] lg:w-[463px] lg:min-w-0"
+                    frameClassName="h-[277px] md:h-600 lg:h-600"
+                    captionClassName="text-base"
+                    dataSince1997Last
+                  />
+                </>
               ) : null}
             </div>
           </div>
-        </PageContainer>
+        </div>
       </div>
+
+      {hasHorizontalGallery ? (
+        <div data-since1997-scroll-spacer aria-hidden className="h-[85vh]" />
+      ) : null}
     </section>
   );
 };
