@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
-import { useFadeIn } from "@/shared/hooks/use-fade-in";
+import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { homeContent } from "@/features/cms/data/content";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
 import { isSectionActive } from "@/shared/utils/cmsSection";
@@ -21,7 +21,6 @@ const ctaFocusClass =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2";
 
 const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
-  const contentRef = useFadeIn(200);
   const { data: shoppingData, isLoading } = useHomepageShoppingBlocks();
 
   const giftingData =
@@ -110,17 +109,17 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
     return (
       <section
         id={id}
-        className="relative overflow-hidden bg-[#F3E6E2] py-16 lg:h-[750px] lg:py-0"
+        className="relative w-full overflow-hidden bg-[#F3E6E2] py-16 lg:h-[750px] lg:py-0"
         aria-busy="true"
         aria-label="For Your Valentine"
       >
-        <div className="mx-auto flex max-w-[1440px] flex-col items-center gap-6 px-4 lg:h-full lg:flex-row lg:items-center lg:justify-between lg:px-10">
+        <div className="relative flex w-full flex-col items-center gap-6 px-4 lg:h-full lg:flex-row lg:items-center lg:justify-between lg:px-40">
           <div className="flex w-full max-w-[437px] flex-col gap-4">
             <div className="h-10 w-64 rounded bg-[#E4C7BE]/40" aria-hidden />
             <div className="h-16 w-full rounded bg-[#E4C7BE]/40" aria-hidden />
             <div className="h-14 w-40 rounded bg-[#E4C7BE]/40" aria-hidden />
           </div>
-          <div className="h-[336px] w-[305px] rounded bg-[#E4C7BE]/40 lg:h-[600px] lg:w-[746px]" aria-hidden />
+          <div className="h-[336px] w-[305px] rounded bg-[#E4C7BE]/40 lg:h-[600px] lg:w-full lg:max-w-[746px]" aria-hidden />
         </div>
       </section>
     );
@@ -130,18 +129,14 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
   const ringsMobile = mobileImageUrl || desktopImageUrl || FALLBACK_RINGS;
 
   return (
-    <section
-      id={id}
-      aria-label={sectionTitle}
-      className="relative overflow-hidden bg-[#F3E6E2]"
-    >
+    <section id={id} aria-label={sectionTitle} className="relative w-full overflow-hidden bg-[#F3E6E2]">
       <OptimizedImage
         src={FALLBACK_BG_DESKTOP}
         alt=""
         aria-hidden
-        width={1440}
+        width={1920}
         height={750}
-        className="pointer-events-none absolute inset-0 hidden size-full object-cover opacity-30 lg:block"
+        className="pointer-events-none absolute inset-0 hidden size-full object-cover object-center opacity-30 lg:block"
       />
       <OptimizedImage
         src={FALLBACK_BG_MOBILE}
@@ -152,34 +147,33 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
         className="pointer-events-none absolute inset-x-0 top-0 mx-auto w-full max-w-[360px] opacity-30 lg:hidden"
       />
 
-      <div
-        ref={contentRef as React.RefObject<HTMLDivElement>}
-        className="relative mx-auto w-full max-w-[1440px]"
-      >
+      <div className="relative w-full">
         <div className="flex flex-col items-center gap-6 px-4 py-16 lg:hidden">
-          <div className="relative h-[336px] w-[305px] shrink-0">
-            <OptimizedImage
-              src={ringsMobile}
-              alt={imageAlt}
-              width={305}
-              height={336}
-              className="size-full object-contain"
-            />
-          </div>
+          <ScrollReveal delayMs={0}>
+            <div className="relative h-[336px] w-[305px] shrink-0">
+              <OptimizedImage
+                src={ringsMobile}
+                alt={imageAlt}
+                width={305}
+                height={336}
+                className="size-full object-contain"
+              />
+            </div>
+          </ScrollReveal>
 
-          <h2 className="max-w-[306px] text-center font-larken text-[32px] font-light leading-[110%] darkblack">
+          <ScrollReveal as="h2" delayMs={80} className="max-w-[306px] text-center font-larken text-[32px] font-light leading-110 text-darkblack">
             {sectionTitle}
-          </h2>
+          </ScrollReveal>
 
-          <p className="max-w-[306px] text-center font-gill text-base font-light leading-[110%] text-[#4D4D4D]">
+          <ScrollReveal delayMs={160} className="max-w-[306px] text-center font-gill text-base font-light leading-110 text-[#4D4D4D]">
             {mobileDescription}
-          </p>
+          </ScrollReveal>
 
-          <div className="flex flex-col items-center gap-6">
+          <ScrollReveal delayMs={240} className="flex flex-col items-center gap-6">
             {primaryCtaUrl ? (
               <Link
                 href={primaryCtaUrl}
-                className={`inline-flex h-14 items-center justify-center bg-white px-8 font-gill text-sm font-normal uppercase leading-[110%] darkblack transition-opacity hover:opacity-90 ${ctaFocusClass}`}
+                className={`inline-flex h-14 items-center justify-center bg-white px-8 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-90 ${ctaFocusClass}`}
               >
                 {primaryCtaLabel}
               </Link>
@@ -188,47 +182,51 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
             {secondaryCtaUrl ? (
               <Link
                 href={secondaryCtaUrl}
-                className={`inline-flex items-center justify-center border-b-[1.5px] border-[#0a0a0a] pb-1 text-center font-gill text-sm font-normal uppercase leading-[110%] darkblack transition-opacity hover:opacity-70 ${ctaFocusClass}`}
+                className={`inline-flex items-center justify-center border-b-[1.5px] border-[#0a0a0a] pb-1 text-center font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-70 ${ctaFocusClass}`}
               >
                 {secondaryCtaLabel}
               </Link>
             ) : null}
-          </div>
+          </ScrollReveal>
         </div>
 
-        <div className="hidden lg:flex lg:h-[750px] lg:items-center lg:justify-between lg:gap-8 lg:px-10">
+        <div className="hidden lg:flex lg:min-h-[750px] lg:items-center lg:justify-between lg:gap-8 lg:px-40 lg:py-100">
           <div className="flex max-w-[437px] shrink-0 flex-col gap-8">
-            <div className="flex flex-col gap-4">
-              <h2 className="font-larken text-[48px] font-light leading-[110%] darkblack">
-                {sectionTitle}
-              </h2>
-              <p className="font-gill text-[20px] font-light leading-[110%] text-[#4D4D4D]">
-                {description}
-              </p>
-            </div>
+            <ScrollReveal delayMs={0}>
+              <div className="flex flex-col gap-4">
+                <h2 className="font-larken text-[48px] font-light leading-110 text-darkblack">
+                  {sectionTitle}
+                </h2>
+                <p className="font-gill text-xl font-light leading-110 text-[#4D4D4D]">
+                  {description}
+                </p>
+              </div>
+            </ScrollReveal>
 
-            <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
-              {primaryCtaUrl ? (
-                <Link
-                  href={primaryCtaUrl}
-                  className={`inline-flex h-14 items-center justify-center bg-white px-8 font-gill text-sm font-normal uppercase leading-[110%] darkblack transition-opacity hover:opacity-90 ${ctaFocusClass}`}
-                >
-                  {primaryCtaLabel}
-                </Link>
-              ) : null}
+            <ScrollReveal delayMs={120}>
+              <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
+                {primaryCtaUrl ? (
+                  <Link
+                    href={primaryCtaUrl}
+                    className={`inline-flex h-14 items-center justify-center bg-white px-8 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-90 ${ctaFocusClass}`}
+                  >
+                    {primaryCtaLabel}
+                  </Link>
+                ) : null}
 
-              {secondaryCtaUrl ? (
-                <Link
-                  href={secondaryCtaUrl}
-                  className={`inline-flex items-center justify-center whitespace-nowrap border-b-[1.5px] border-[#0a0a0a] pb-1 font-gill text-sm font-normal uppercase leading-[110%] darkblack transition-opacity hover:opacity-70 ${ctaFocusClass}`}
-                >
-                  {secondaryCtaLabel}
-                </Link>
-              ) : null}
-            </div>
+                {secondaryCtaUrl ? (
+                  <Link
+                    href={secondaryCtaUrl}
+                    className={`inline-flex items-center justify-center whitespace-nowrap border-b-[1.5px] border-[#0a0a0a] pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-70 ${ctaFocusClass}`}
+                  >
+                    {secondaryCtaLabel}
+                  </Link>
+                ) : null}
+              </div>
+            </ScrollReveal>
           </div>
 
-          <div className="relative h-[600px] w-[746px] shrink-0">
+          <ScrollReveal delayMs={180} className="relative h-[600px] w-full max-w-[746px] flex-1">
             <OptimizedImage
               src={ringsDesktop}
               alt={imageAlt}
@@ -236,7 +234,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
               height={600}
               className="size-full object-contain object-right"
             />
-          </div>
+          </ScrollReveal>
         </div>
       </div>
     </section>
