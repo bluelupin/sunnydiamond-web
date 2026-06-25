@@ -21,6 +21,7 @@ export type CategoryNavigationItem = {
   isActive?: boolean | null;
   sortOrder?: number | null;
   image?: CategoryNavigationImage | StrapiMedia | null;
+  cutoutImage?: CategoryNavigationImage | StrapiMedia | null;
   hoverImage?: CategoryNavigationImage | StrapiMedia | null;
   cta?: CategoryNavigationCta | null;
   model?: unknown;

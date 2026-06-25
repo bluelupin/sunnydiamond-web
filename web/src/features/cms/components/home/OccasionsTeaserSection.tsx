@@ -52,23 +52,23 @@ function OccasionCardItem({
 
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent to-black backdrop-blur-[5px]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black to-transparent"
       />
 
-      <div className="absolute bottom-8 left-4 flex w-[calc(100%-32px)] max-w-[296px] flex-col gap-4 md:bottom-16 md:left-10 md:w-[418px] md:max-w-none md:gap-6">
-        <div className="flex flex-col gap-2 text-white md:gap-3">
-          <h3 className="font-larken text-2xl font-light leading-[110%] md:text-[32px]">
-            {card.title}
-          </h3>
-          {description ? (
-            <p className="font-gill text-base font-light leading-[110%] md:text-[20px]">
-              {description}
-            </p>
-          ) : null}
-        </div>
+      <div className="absolute bottom-15 left-40 w-[calc(100%-80px)] max-w-[418px] translate-y-0 motion-safe:transition-transform motion-safe:duration-500 motion-safe:ease-out md:translate-y-12 md:group-hover:translate-y-0 md:group-focus-visible:translate-y-0">
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-3 text-white">
+            <h3 className="font-larken text-2xl font-light leading-110 md:text-[32px]">
+              {card.title}
+            </h3>
+            {description ? (
+              <p className="font-gill text-base font-light leading-110 md:text-xl">
+                {description}
+              </p>
+            ) : null}
+          </div>
 
-        <div className="md:overflow-hidden">
-          <span className="inline-flex w-fit translate-y-0 items-center justify-center border-b-[1.5px] border-white pb-1.5 font-gill text-sm font-normal uppercase tracking-[0.28px] text-white opacity-100 motion-safe:transition-[transform,opacity] motion-safe:duration-500 motion-safe:ease-out md:translate-y-full md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:group-focus-visible:translate-y-0 md:group-focus-visible:opacity-100">
+          <span className="inline-flex w-fit items-center justify-center border-b-[1.5px] border-white pb-1.5 font-gill text-sm font-normal uppercase tracking-[0.28px] text-white">
             {ctaLabel}
           </span>
         </div>
