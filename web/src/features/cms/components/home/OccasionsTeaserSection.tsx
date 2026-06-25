@@ -55,8 +55,8 @@ function OccasionCardItem({
         className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-1/2 bg-gradient-to-t from-black to-transparent"
       />
 
-      <div className="absolute bottom-[60px] left-40 z-10 w-[calc(100%-80px)] max-w-[418px]">
-        <div className="flex flex-col gap-6 motion-safe:transition-transform motion-safe:duration-500 motion-safe:ease-out md:translate-y-14 md:group-hover:translate-y-0 md:group-focus-visible:translate-y-0">
+      <div className="absolute bottom-60 left-40 right-40 z-10 max-w-[418px] md:right-auto">
+        <div className="flex flex-col gap-6 motion-safe:transition-transform motion-safe:duration-500 motion-safe:ease-out md:group-hover:-translate-y-12 md:group-focus-visible:-translate-y-12">
           <div className="flex flex-col gap-3 text-white">
             <h3 className="font-larken text-2xl font-light leading-110 md:text-[32px]">
               {card.title}
@@ -68,7 +68,7 @@ function OccasionCardItem({
             ) : null}
           </div>
 
-          <span className="inline-flex w-fit items-center justify-center border-b-[1.5px] border-white pb-1.5 font-gill text-sm font-normal uppercase tracking-[0.28px] text-white">
+          <span className="inline-flex w-fit items-center justify-center border-b-[1.5px] border-white pb-1.5 font-gill text-sm font-normal uppercase tracking-[0.28px] text-white md:max-h-0 md:overflow-hidden md:opacity-0 md:transition-all md:duration-500 md:ease-out md:group-hover:max-h-12 md:group-hover:opacity-100 md:group-focus-visible:max-h-12 md:group-focus-visible:opacity-100">
             {ctaLabel}
           </span>
         </div>
@@ -117,12 +117,12 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
     return (
       <section
         id={id}
-        className="flex w-full flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 md:py-100"
+        className="flex w-full flex-col items-center gap-8 bg-white py-16 md:gap-10 md:py-100"
         aria-busy="true"
         aria-label="Occasions"
       >
-        <div className="h-10 w-80 rounded bg-gray200" aria-hidden />
-        <div className="grid w-full grid-cols-2 gap-1 overflow-hidden md:grid-cols-2">
+        <div className="h-10 w-80 rounded bg-gray200 px-4" aria-hidden />
+        <div className="relative left-1/2 grid w-screen max-w-none -translate-x-1/2 grid-cols-2 gap-1 overflow-hidden md:grid-cols-2">
           {[0, 1, 2, 3].map((i) => (
             <div key={i} className="aspect-[328/400] bg-gray200 md:aspect-auto md:h-[700px]" aria-hidden />
           ))}
@@ -144,9 +144,9 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
       id={id}
       ref={headingRef as React.RefObject<HTMLElement>}
       aria-label={sectionTitle}
-      className="flex w-full flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 md:py-100"
+      className="flex w-full flex-col items-center gap-8 bg-white py-16 md:gap-10 md:py-100"
     >
-      <h2 className="max-w-[332px] text-center font-larken text-[32px] font-light leading-110 text-darkblack md:max-w-none md:text-[48px] lg:whitespace-nowrap">
+      <h2 className="max-w-[332px] px-4 text-center font-larken text-[32px] font-light leading-110 text-darkblack md:max-w-none md:text-[48px] lg:whitespace-nowrap">
         {sectionTitle}
       </h2>
 
@@ -157,7 +157,7 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
         aria-label={sectionTitle}
         tabIndex={-1}
         onKeyDownCapture={handleCarouselKeyDown}
-        className="scrollbar-none -mx-4 flex w-[calc(100%+32px)] snap-x snap-mandatory gap-3 overflow-x-auto scroll-pl-4 scroll-pr-4 px-4 pb-2 md:mx-0 md:grid md:w-full md:grid-cols-2 md:gap-1 md:overflow-visible md:px-0 md:pb-0 md:snap-none md:outline-none"
+        className="scrollbar-none relative left-1/2 flex w-screen max-w-none -translate-x-1/2 snap-x snap-mandatory gap-3 overflow-x-auto scroll-pl-4 scroll-pr-4 px-4 pb-2 md:grid md:grid-cols-2 md:gap-1 md:overflow-visible md:px-0 md:pb-0 md:snap-none md:outline-none"
       >
         {occasions.map((card, index) => (
           <OccasionCardItem
@@ -169,7 +169,7 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
         ))}
       </div>
 
-      <p className="font-gill text-sm font-light text-[#4D4D4D] md:hidden">
+      <p className="px-4 font-gill text-sm font-light text-[#4D4D4D] md:hidden">
         Swipe to explore more occasions
       </p>
     </section>
