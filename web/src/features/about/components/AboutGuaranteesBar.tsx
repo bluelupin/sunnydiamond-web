@@ -14,7 +14,7 @@ const AboutGuaranteeDivider = ({ orientation = "vertical" }: { orientation?: "ve
       "flex list-none items-center justify-center",
       orientation === "vertical"
         ? "min-w-0 flex-1 self-stretch"
-        : "w-full shrink-0 py-4 lg:w-260 lg:py-6",
+        : "lg:w-260 w-full shrink-0 lg:py-6 py-4",
     )}
   >
     <span
@@ -31,10 +31,7 @@ type GuaranteeIconProps = {
 };
 
 const GuaranteeIcon = ({ icon }: GuaranteeIconProps) => (
-  <div
-    className="flex shrink-0 items-center justify-center md:h-16 md:w-16 h-[40px] w-[40px]"
-    aria-hidden
-  >
+  <div className="md:h-16 md:w-16 h-[40px] w-[40px]">
     <ResponsiveImage
       desktopSrc={icon.desktopUrl}
       mobileSrc={icon.mobileUrl}
@@ -50,7 +47,7 @@ type GuaranteeItemProps = {
 };
 
 const AboutGuaranteeItem = ({ badge }: GuaranteeItemProps) => (
-  <li className="flex h-98 w-full list-none flex-col items-center justify-center gap-3 rounded-figma text-center lg:h-136 lg:w-260 desktop:w-260 desktop:shrink-0">
+  <li className="flex lg:h-136 h-98 lg:w-260 w-full list-none flex-col items-center justify-center gap-3 rounded-figma text-center desktop:w-260 desktop:shrink-0">
     <GuaranteeIcon icon={badge.icon} />
     <p className="max-w-236 font-gill text-base font-normal leading-110 text-darkblack desktop:text-20">
       {badge.label}
@@ -72,7 +69,7 @@ const AboutGuaranteesBar = ({ badges }: AboutGuaranteesBarProps) => {
         </ul>
 
         <div className="scrollbar-none -mx-5 hidden overflow-x-auto px-5 md:-mx-8 md:px-8 lg:-mx-10 lg:block lg:px-10 desktop:mx-0 desktop:overflow-visible desktop:px-0">
-          <ul className="m-0 flex w-1360 shrink-0 list-none items-stretch gap-6 p-0 lg:gap-2 desktop:w-full desktop:shrink">
+          <ul className="m-0 flex lg:gap-2 gap-6 w-1360 shrink-0 list-none items-stretch p-0 desktop:w-full desktop:shrink">
             {badges.map((badge, index) => (
               <Fragment key={`${badge.label}-${index}`}>
                 {index > 0 ? <AboutGuaranteeDivider orientation="vertical" /> : null}
