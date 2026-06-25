@@ -8,26 +8,31 @@ const clamp = (value: number, min = 0, max = 1) =>
 /** Visible sliver of the third image before horizontal scroll begins (desktop). */
 const DESKTOP_PEEK_PX = 56;
 
+type ScrollLayout = "desktop" | "mobile";
+
+function getActiveLayout(desktopQuery: MediaQueryList): ScrollLayout {
+  return desktopQuery.matches ? "desktop" : "mobile";
+}
+
+function getLayoutRoot(section: HTMLElement, layout: ScrollLayout) {
+  return section.querySelector<HTMLElement>(`[data-since1997-mode="${layout}"]`);
+}
+
 /**
  * Pins the Since 1997 gallery while scrolling, scrubbing horizontal translate on the track.
- * On desktop the third image peeks at the screen edge initially and ends flush to it.
+ * Desktop: full track slides; third image peeks then ends flush to the screen edge.
+ * Mobile: founder stays static; only images 2+3 slide in the original vertical layout.
  */
 export function useSince1997HorizontalScroll(
   sectionRef: RefObject<HTMLElement | null>,
-  trackRef: RefObject<HTMLElement | null>,
-  viewportRef: RefObject<HTMLElement | null>,
   enabled = true,
 ) {
   useLayoutEffect(() => {
     if (!enabled) return;
 
     const section = sectionRef.current;
-    const track = trackRef.current;
-    const viewport = viewportRef.current;
-    if (!section || !track || !viewport) return;
+    if (!section) return;
 
-    const spacer = section.querySelector<HTMLElement>("[data-since1997-scroll-spacer]");
-    const lastImage = track.querySelector<HTMLElement>("[data-since1997-last-image]");
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     const desktopQuery = window.matchMedia("(min-width: 1024px)");
 
@@ -36,13 +41,50 @@ export function useSince1997HorizontalScroll(
     let startTranslate = 0;
     let endTranslate = 0;
     let useDesktopPeek = false;
+    let activeLayout: ScrollLayout = getActiveLayout(desktopQuery);
+    let track: HTMLElement | null = null;
+    let viewport: HTMLElement | null = null;
+    let scrollRoot: HTMLElement | null = null;
+    let spacer: HTMLElement | null = null;
+    let lastImage: HTMLElement | null = null;
+
+    const bindActiveElements = () => {
+      activeLayout = getActiveLayout(desktopQuery);
+      const root = getLayoutRoot(section, activeLayout);
+      track = root?.querySelector<HTMLElement>("[data-since1997-track]") ?? null;
+      viewport = root?.querySelector<HTMLElement>("[data-since1997-viewport]") ?? null;
+      spacer = root?.querySelector<HTMLElement>("[data-since1997-scroll-spacer]") ?? null;
+      lastImage = track?.querySelector<HTMLElement>("[data-since1997-last-image]") ?? null;
+      scrollRoot =
+        activeLayout === "mobile"
+          ? (root?.querySelector<HTMLElement>("[data-since1997-scroll-zone]") ?? root)
+          : root;
+    };
 
     const clearViewportSizing = () => {
-      viewport.style.width = "";
+      section
+        .querySelectorAll<HTMLElement>("[data-since1997-viewport]")
+        .forEach((node) => {
+          node.style.width = "";
+        });
+    };
+
+    const resetInactiveTracks = () => {
+      section.querySelectorAll<HTMLElement>("[data-since1997-track]").forEach((node) => {
+        if (node !== track) node.style.transform = "";
+      });
     };
 
     const remeasure = () => {
-      useDesktopPeek = desktopQuery.matches && Boolean(lastImage);
+      bindActiveElements();
+      resetInactiveTracks();
+
+      if (!track || !viewport) {
+        scrollRange = 0;
+        return;
+      }
+
+      useDesktopPeek = activeLayout === "desktop" && Boolean(lastImage);
 
       if (useDesktopPeek && lastImage) {
         const viewportLeft = viewport.getBoundingClientRect().left;
@@ -57,20 +99,26 @@ export function useSince1997HorizontalScroll(
           viewportWidth - attendingRight + attendingWidth - DESKTOP_PEEK_PX;
         scrollRange = Math.max(0, startTranslate - endTranslate);
       } else {
-        clearViewportSizing();
+        viewport.style.width = "";
         scrollRange = Math.max(0, track.scrollWidth - viewport.clientWidth);
         startTranslate = 0;
         endTranslate = -scrollRange;
       }
 
       const scrollDistance = Math.max(
-        window.innerHeight * 0.85,
+        window.innerHeight * (activeLayout === "mobile" ? 0.7 : 0.85),
         scrollRange + 160,
       );
 
       if (spacer) {
         spacer.style.height = scrollRange > 0 ? `${scrollDistance}px` : "0px";
       }
+
+      section
+        .querySelectorAll<HTMLElement>("[data-since1997-scroll-spacer]")
+        .forEach((node) => {
+          if (node !== spacer) node.style.height = "0px";
+        });
 
       if (scrollRange <= 0) {
         track.style.transform = "";
@@ -79,6 +127,8 @@ export function useSince1997HorizontalScroll(
 
     const update = () => {
       rafRef = null;
+
+      if (!track) return;
 
       if (motionQuery.matches) {
         track.style.transform = "";
@@ -93,15 +143,15 @@ export function useSince1997HorizontalScroll(
         return;
       }
 
-      const sectionTop = section.getBoundingClientRect().top;
-      if (sectionTop > 0) {
+      const rootTop = (scrollRoot ?? section).getBoundingClientRect().top;
+      if (rootTop > 0) {
         track.style.transform = useDesktopPeek
           ? `translate3d(${startTranslate.toFixed(2)}px, 0, 0)`
           : "";
         return;
       }
 
-      const progress = clamp(-sectionTop / spacerHeight);
+      const progress = clamp(-rootTop / spacerHeight);
       const translate = startTranslate + progress * (endTranslate - startTranslate);
       track.style.transform = `translate3d(${translate.toFixed(2)}px, 0, 0)`;
     };
@@ -116,6 +166,7 @@ export function useSince1997HorizontalScroll(
       scheduleUpdate();
     };
 
+    bindActiveElements();
     remeasure();
     scheduleUpdate();
 
@@ -124,11 +175,18 @@ export function useSince1997HorizontalScroll(
     );
 
     const resizeObserver = new ResizeObserver(() => scheduleRemeasure());
-    resizeObserver.observe(track);
-    resizeObserver.observe(viewport);
-    if (spacer) resizeObserver.observe(spacer);
 
-    const images = track.querySelectorAll("img");
+    const observeLayoutNodes = () => {
+      resizeObserver.disconnect();
+      bindActiveElements();
+      if (track) resizeObserver.observe(track);
+      if (viewport) resizeObserver.observe(viewport);
+      if (spacer) resizeObserver.observe(spacer);
+    };
+
+    observeLayoutNodes();
+
+    const images = section.querySelectorAll<HTMLImageElement>("[data-since1997-track] img");
     images.forEach((img) => {
       if (!img.complete) {
         img.addEventListener("load", scheduleRemeasure, { once: true });
@@ -140,6 +198,7 @@ export function useSince1997HorizontalScroll(
     window.addEventListener("load", scheduleRemeasure);
 
     const onPreferenceChange = () => {
+      observeLayoutNodes();
       remeasure();
       scheduleUpdate();
     };
@@ -158,7 +217,9 @@ export function useSince1997HorizontalScroll(
       if (rafRef !== null) window.cancelAnimationFrame(rafRef);
       delayedRemeasureTimers.forEach((timer) => window.clearTimeout(timer));
       clearViewportSizing();
-      track.style.transform = "";
+      section.querySelectorAll<HTMLElement>("[data-since1997-track]").forEach((node) => {
+        node.style.transform = "";
+      });
     };
-  }, [enabled, sectionRef, trackRef, viewportRef]);
+  }, [enabled, sectionRef]);
 }
