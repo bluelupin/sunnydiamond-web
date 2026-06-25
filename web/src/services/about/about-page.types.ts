@@ -30,7 +30,18 @@ export type StrapiAboutHero = {
   image?: StrapiAboutResponsiveImage | null;
 };
 
+export type StrapiAboutFeatureSlide = {
+  id?: number;
+  heading?: string | null;
+  body?: string | null;
+  description?: string | null;
+  image?: StrapiAboutResponsiveImage | null;
+};
+
 export type StrapiAboutBrillianceSection = {
+  pinnedImage?: StrapiAboutResponsiveImage | null;
+  featureSlide?: StrapiAboutFeatureSlide[] | null;
+  /** @deprecated legacy flat fields */
   heading?: string | null;
   description?: string | null;
   image?: StrapiAboutResponsiveImage | null;

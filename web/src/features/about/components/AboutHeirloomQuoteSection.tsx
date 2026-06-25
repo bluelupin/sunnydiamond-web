@@ -2,7 +2,6 @@ import Image from "next/image";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import type { NormalizedBrandTagline } from "@/services/about/about-page.types";
 import {
-  aboutHeirloomAssets,
   aboutHeirloomFigmaSpec,
 } from "../data/content";
 
@@ -11,14 +10,14 @@ const { flourish: flourishSpec } = aboutHeirloomFigmaSpec;
 type AboutHeirloomQuoteSectionProps = NormalizedBrandTagline;
 
 const AboutHeirloomQuoteSection = ({ quote, iconUrl }: AboutHeirloomQuoteSectionProps) => {
-  const flourishSrc = iconUrl ?? aboutHeirloomAssets.flourishIcon;
+  // const flourishSrc = iconUrl ?? aboutHeirloomAssets.flourishIcon;
 
   return (
     <section aria-labelledby="about-heirloom-quote" className="bg-white">
       <PageContainer className="py-16 md:py-20 desktop:py-100">
         <div className="flex flex-col items-center justify-center gap-4 lg:flex-row">
           <Image
-            src={flourishSrc}
+            src="/images/about/flourishIcon.svg"
             alt={quote}
             width={flourishSpec.width}
             height={flourishSpec.height}
@@ -35,7 +34,7 @@ const AboutHeirloomQuoteSection = ({ quote, iconUrl }: AboutHeirloomQuoteSection
           </h2>
 
           <Image
-            src={flourishSrc}
+            src="/images/about/flourishIcon.svg"
             alt={quote}
             width={flourishSpec.width}
             height={flourishSpec.height}

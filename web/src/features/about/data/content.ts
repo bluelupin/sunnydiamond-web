@@ -83,12 +83,6 @@ export const aboutHeroContent = {
   title: aboutHeroFigmaSpec.title.text,
 } as const;
 
-export const aboutCraftingRarityContent = {
-  heading: "Crafting rarity\ninto timeless brilliance",
-  description:
-    "We source Internally Flawless Diamonds from Belgium and craft them into timeless masterpieces, creating jewellery that resonates with you.",
-} as const;
-
 /** Figma node 692:27430 — Crafting Rarity — Reveal V2 */
 export const aboutCraftingRarityFigmaSpec = {
   container: { width: 817, height: 745 },
@@ -173,41 +167,6 @@ export const aboutFacesFigmaSpec = {
   overlay: {
     gradient: "bottom-strong" as const,
   },
-} as const;
-
-export const aboutFacesContent = {
-  title: "Faces Behind the Brilliance",
-  description:
-    "We source Internally Flawless Diamonds from Belgium and craft them into timeless masterpieces, creating jewellery that resonates with you.",
-  members: [
-    {
-      desktopImage: aboutPageImages.teamMemberDesktop1,
-      mobileImage: aboutPageImages.teamMemberMobile1,
-      alt: "Sunny Diamonds team member",
-      name: "P.P. Sunny",
-      role: "Founder",
-      width: 478,
-      height: 600,
-    },
-    {
-      desktopImage: aboutPageImages.teamMemberDesktop2,
-      mobileImage: aboutPageImages.teamMemberMobile2,
-      alt: "Sunny Diamonds team member",
-      name: "Suresh Kumar",
-      role: "Managing Director",
-      width: 478,
-      height: 600,
-    },
-    {
-      desktopImage: aboutPageImages.teamMemberDesktop3,
-      mobileImage: aboutPageImages.teamMemberMobile3,
-      alt: "Sunny Diamonds team member",
-      name: "Arjun Nair",
-      role: "Creative Director",
-      width: 478,
-      height: 600,
-    },
-  ],
 } as const;
 
 export const aboutHandcraftedContent = {
@@ -318,17 +277,6 @@ export const aboutHandcraftedProgressLineSpec = {
   height: 105,
 } as const;
 
-export const aboutTimelineYears = [
-  "1997",
-  "2006",
-  "2008",
-  "2010",
-  "2012",
-  "2016",
-  "2022",
-  "2025",
-] as const;
-
 /** Figma node 692:27191 — Timeline section */
 export const aboutTimelineFigmaSpec = {
   section: {
@@ -366,60 +314,8 @@ export const aboutTimelineFigmaSpec = {
   },
 } as const;
 
-const timelineDescription =
-  "We source and transform the rarest Internally Flawless diamonds into timeless masterpieces, crafted with uncompromising precision for those for those who seek the truly exceptional.";
-
-export const aboutTimelineContent = {
-  defaultYear: "2008",
-  milestones: {
-    "1997": {
-      title: "Since 1997",
-      description: timelineDescription,
-    },
-    "2006": {
-      title: "Growing the Legacy",
-      description: timelineDescription,
-    },
-    "2008": {
-      title: "Found in Chalakkudy",
-      description: timelineDescription,
-    },
-    "2010": {
-      title: "Crafting Brilliance",
-      description: timelineDescription,
-    },
-    "2012": {
-      title: "Expanding Horizons",
-      description: timelineDescription,
-    },
-    "2016": {
-      title: "Elevating Excellence",
-      description: timelineDescription,
-    },
-    "2022": {
-      title: "A New Era",
-      description: timelineDescription,
-    },
-    "2025": {
-      title: "Looking Ahead",
-      description: timelineDescription,
-    },
-  },
-} as const;
-
-/** Figma node 692:27431 — Mobile About page (375px artboard) */
-export const aboutResponsiveFigmaSpec = {
-  frameWidth: 375,
-  breakpoints: {
-    mobile: 375,
-    tablet: 768,
-    desktop: 1440,
-  },
-} as const;
-
-export const aboutHeirloomContent = {
-  quote: "Crafting family heirlooms at the pinnacle of diamond clarity",
-} as const;
+// const timelineDescription =
+//   "We source and transform the rarest Internally Flawless diamonds into timeless masterpieces, crafted with uncompromising precision for those for those who seek the truly exceptional.";
 
 /** Figma node 692:27229 — Heirloom quote */
 export const aboutHeirloomFigmaSpec = {
@@ -448,65 +344,3 @@ export const aboutHeirloomFigmaSpec = {
     textAlign: "center",
   },
 } as const;
-
-export const aboutHeirloomAssets = {
-  flourishIcon: "/images/about/flourishIcon.svg"
-} as const;
-
-export const aboutGuaranteesFigmaSpec = {
-  section: {
-    width: 1440,
-    contentWidth: 1360,
-    paddingY: 64,
-    paddingX: 40,
-    background: "#FBFAF6",
-  },
-  item: {
-    width: 260,
-    height: 136,
-    gap: 12,
-    padding: 12,
-    borderRadius: 2,
-  },
-  icon: {
-    defaultSize: 64,
-    hallmarkWidth: 60,
-    hallmarkHeight: 64,
-  },
-  divider: {
-    height: 136,
-    strokeWidth: 0.5,
-    color: "#999999",
-  },
-  label: {
-    fontFamily: "Gill Sans",
-    fontSize: 20,
-    fontWeight: 400,
-    lineHeight: "110%",
-    letterSpacing: "0%",
-    color: "#0A0A0A",
-    textAlign: "center",
-  },
-  responsive: {
-    /** Desktop artboard — preserve exact row below this viewport via horizontal scroll */
-    desktopMinWidth: 1440,
-    paddingYMobile: 40,
-    paddingYTablet: 48,
-  },
-} as const;
-
-export const aboutGuaranteeIconPaths = {
-  diamond: "/images/about/guarantees/diamond.svg",
-  moneyback: "/images/about/guarantees/moneyback.svg",
-  hallmark: "/images/about/guarantees/hallmark.svg",
-  return: "/images/about/guarantees/return.svg",
-  cod: "/images/about/guarantees/cod.svg",
-} as const;
-
-export const aboutGuarantees = [
-  { label: "Eternally Flawless Diamonds", icon: "diamond" },
-  { label: "100% Moneyback Guarantee", icon: "moneyback" },
-  { label: "BIS Halmark for Jewellery", icon: "hallmark" },
-  { label: "15 Days Return Policy", icon: "return" },
-  { label: "Cash on Delivery", icon: "cod" },
-] as const;
