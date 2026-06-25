@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
+import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { educationLearnTabs } from "../data/content";
 
 const EducationLearnMoreSection = () => {
@@ -34,45 +35,51 @@ const EducationLearnMoreSection = () => {
     >
       <div className="mx-auto flex max-w-[1360px] flex-col items-center gap-6 lg:gap-16">
         <div className="flex w-full flex-col items-center gap-6 lg:gap-10">
-          <h2
-            id="education-learn-more-title"
-            className="text-center font-larken text-[32px] font-light leading-110 text-darkblack lg:text-[48px]"
-          >
-            Learn more about Diamonds
-          </h2>
+          <ScrollReveal as="h2" delayMs={0} className="w-full">
+            <span
+              id="education-learn-more-title"
+              className="block text-center font-larken text-[32px] font-light leading-110 text-darkblack lg:text-[48px]"
+            >
+              Learn more about Diamonds
+            </span>
+          </ScrollReveal>
 
-          <div className="w-full overflow-x-auto border-y border-black/30 lg:max-w-[1200px]">
-            <div className="flex min-w-max items-center gap-10 px-0 py-6 lg:w-full lg:justify-center lg:gap-0 lg:py-6">
-              {educationLearnTabs.map((tab, index) => {
-                const isActive = index === activeTabIndex;
+          <ScrollReveal delayMs={100} className="w-full">
+            <div className="w-full overflow-x-auto border-y border-black/30 lg:max-w-[1200px] lg:mx-auto">
+              <div className="flex min-w-max items-center gap-10 px-0 py-6 lg:w-full lg:justify-center lg:gap-0 lg:py-6">
+                {educationLearnTabs.map((tab, index) => {
+                  const isActive = index === activeTabIndex;
 
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => handleTabChange(index)}
-                    className={cn(
-                      "shrink-0 px-0 py-2 font-gill text-base leading-110 lg:flex-1 lg:py-2 lg:text-[20px]",
-                      isActive
-                        ? "border-b border-[#ab863b] text-[#ab863b]"
-                        : "text-darkblack",
-                    )}
-                  >
-                    {tab.label}
-                  </button>
-                );
-              })}
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => handleTabChange(index)}
+                      className={cn(
+                        "shrink-0 px-0 py-2 font-gill text-base leading-110 lg:flex-1 lg:py-2 lg:text-[20px]",
+                        isActive
+                          ? "border-b border-[#ab863b] text-[#ab863b]"
+                          : "text-darkblack",
+                      )}
+                    >
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          </ScrollReveal>
 
-          <div className="max-w-[700px] text-center font-gill text-base font-light leading-110 text-neutral500 lg:text-[20px]">
-            {activeTab.description.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
-          </div>
+          <ScrollReveal delayMs={180}>
+            <div className="max-w-[700px] text-center font-gill text-base font-light leading-110 text-neutral500 lg:text-[20px]">
+              {activeTab.description.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+            </div>
+          </ScrollReveal>
         </div>
 
-        <div className="flex w-full flex-col items-center gap-6 lg:gap-3">
+        <ScrollReveal delayMs={260} className="flex w-full flex-col items-center gap-6 lg:gap-3">
           <div className="relative flex w-full items-center justify-center lg:gap-[250px]">
             <div className="relative hidden h-[328px] w-[350px] mix-blend-darken lg:block">
               <Image
@@ -133,7 +140,7 @@ const EducationLearnMoreSection = () => {
               />
             </div>
           </div>
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

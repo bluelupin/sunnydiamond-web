@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
+import ScrollReveal from "@/shared/ui/ScrollReveal";
 import {
   educationFourCsPanels,
   educationPageImages,
@@ -22,11 +23,11 @@ const PanelTexture = () => (
   </div>
 );
 
-const PanelMedia = ({ panel }: { panel: EducationFourCsPanelContent }) => {
+const PanelMedia = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent; delayMs?: number }) => {
   const { slider } = panel;
 
   return (
-    <div className="relative flex h-[370px] w-full items-center justify-center lg:h-full lg:min-h-[633px]">
+    <ScrollReveal delayMs={delayMs} className="relative flex h-[370px] w-full items-center justify-center lg:h-full lg:min-h-[633px]">
       <PanelTexture />
 
       <div className="relative z-10 flex w-full max-w-[94.14%] flex-col items-center gap-8 px-4 lg:max-w-[528px] lg:gap-10">
@@ -83,12 +84,12 @@ const PanelMedia = ({ panel }: { panel: EducationFourCsPanelContent }) => {
           </div>
         ) : null}
       </div>
-    </div>
+    </ScrollReveal>
   );
 };
 
-const PanelCopy = ({ panel }: { panel: EducationFourCsPanelContent }) => (
-  <div className="flex flex-col items-center justify-center gap-6 px-5 py-10 text-center lg:gap-8 lg:px-10 lg:py-0">
+const PanelCopy = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent; delayMs?: number }) => (
+  <ScrollReveal delayMs={delayMs} className="flex flex-col items-center justify-center gap-6 px-5 py-10 text-center lg:gap-8 lg:px-10 lg:py-0">
     <p className="font-larken text-[60px] font-light leading-110 text-[#ab863b] opacity-50 lg:text-[110px]">
       {panel.code}
     </p>
@@ -100,11 +101,19 @@ const PanelCopy = ({ panel }: { panel: EducationFourCsPanelContent }) => (
         {panel.description}
       </p>
     </div>
-  </div>
+  </ScrollReveal>
 );
 
-const EducationFourCsPanel = ({ panel }: { panel: EducationFourCsPanelContent }) => {
+const EducationFourCsPanel = ({
+  panel,
+  index,
+}: {
+  panel: EducationFourCsPanelContent;
+  index: number;
+}) => {
   const isChalk = panel.background === "chalk";
+  const copyDelay = index * 40;
+  const mediaDelay = 100 + index * 40;
 
   return (
     <section
@@ -118,13 +127,13 @@ const EducationFourCsPanel = ({ panel }: { panel: EducationFourCsPanelContent })
       <div className="flex flex-col lg:grid lg:h-full lg:grid-cols-2">
         {panel.mediaPosition === "left" ? (
           <>
-            <PanelMedia panel={panel} />
-            <PanelCopy panel={panel} />
+            <PanelMedia panel={panel} delayMs={mediaDelay} />
+            <PanelCopy panel={panel} delayMs={copyDelay} />
           </>
         ) : (
           <>
-            <PanelCopy panel={panel} />
-            <PanelMedia panel={panel} />
+            <PanelCopy panel={panel} delayMs={copyDelay} />
+            <PanelMedia panel={panel} delayMs={mediaDelay} />
           </>
         )}
       </div>
@@ -135,8 +144,8 @@ const EducationFourCsPanel = ({ panel }: { panel: EducationFourCsPanelContent })
 const EducationFourCsPanelsSection = () => {
   return (
     <div className="flex flex-col">
-      {educationFourCsPanels.map((panel) => (
-        <EducationFourCsPanel key={panel.id} panel={panel} />
+      {educationFourCsPanels.map((panel, index) => (
+        <EducationFourCsPanel key={panel.id} panel={panel} index={index} />
       ))}
     </div>
   );
