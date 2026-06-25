@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
-import { useFadeIn } from "@/shared/hooks/use-fade-in";
+import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
@@ -13,157 +14,196 @@ interface CraftingRaritySectionProps {
   id?: string;
 }
 
-const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
-  const ref = useFadeIn();
+const CRAFTING_RARITY_NECKLACE = "/images/home/crafting-rarity-necklace.png";
 
+const resolveCategoryImages = (cat: CategoryNavigationItem) => {
+  const categoryImage = cat?.image as CategoryNavigationImage | undefined;
+  const hoverImage = cat?.hoverImage as CategoryNavigationImage | undefined;
+
+  const desktopImageUrl = resolveCmsMediaUrl(categoryImage?.desktopImage ?? categoryImage);
+  const mobileImageUrl = resolveCmsMediaUrl(categoryImage?.mobileImage ?? categoryImage);
+  const hoverDesktopImageUrl = resolveCmsMediaUrl(hoverImage?.desktopImage ?? hoverImage);
+  const hoverMobileImageUrl = resolveCmsMediaUrl(hoverImage?.mobileImage ?? hoverImage);
+
+  const title = cat?.title ?? cat?.label ?? cat?.cta?.label ?? "";
+  const imageAlt =
+    resolveCmsAltText(categoryImage?.desktopImage ?? categoryImage) ??
+    resolveCmsAltText(categoryImage?.mobileImage ?? categoryImage) ??
+    title;
+  const hoverAlt =
+    resolveCmsAltText(hoverImage?.desktopImage ?? hoverImage) ??
+    resolveCmsAltText(hoverImage?.mobileImage ?? hoverImage) ??
+    imageAlt;
+
+  return {
+    title,
+    desktopImageUrl,
+    mobileImageUrl,
+    hoverDesktopImageUrl,
+    hoverMobileImageUrl,
+    imageAlt,
+    hoverAlt,
+  };
+};
+
+const CategoryCard = ({ cat }: { cat: CategoryNavigationItem }) => {
+  const slug = cat?.slug ?? "";
+  const categoryLink =
+    cat?.cta?.url ??
+    cat?.cta?.to ??
+    (slug ? `/products?category=${encodeURIComponent(slug)}` : "/products");
+
+  const {
+    title,
+    desktopImageUrl,
+    mobileImageUrl,
+    hoverDesktopImageUrl,
+    hoverMobileImageUrl,
+    imageAlt,
+    hoverAlt,
+  } = resolveCategoryImages(cat);
+
+  const hasHoverImage = Boolean(hoverDesktopImageUrl || hoverMobileImageUrl);
+  const hasProductImage = Boolean(desktopImageUrl || mobileImageUrl);
+
+  return (
+    <Link
+      href={categoryLink}
+      className="group relative flex h-full w-full flex-col items-center overflow-hidden bg-[#F4F3EE] p-4 lg:h-[424px] lg:px-6 lg:py-12"
+    >
+      {hasHoverImage ? (
+        <ResponsiveImage
+          desktopSrc={hoverDesktopImageUrl || fallBackImage}
+          mobileSrc={hoverMobileImageUrl || hoverDesktopImageUrl || fallBackImage}
+          alt={hoverAlt}
+          width={351}
+          height={424}
+          className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        />
+      ) : null}
+
+      <div className="relative z-10 flex h-[176px] w-full items-center justify-center overflow-hidden lg:h-[303px]">
+        {hasProductImage ? (
+          <ResponsiveImage
+            desktopSrc={desktopImageUrl || fallBackImage}
+            mobileSrc={mobileImageUrl || desktopImageUrl || fallBackImage}
+            alt={imageAlt}
+            width={303}
+            height={303}
+            className="max-h-full max-w-full object-contain transition-opacity duration-500 group-hover:opacity-0"
+          />
+        ) : null}
+      </div>
+
+      <div className="relative z-10 flex w-full items-center justify-center">
+        <span className="text-center font-gill text-base font-normal leading-110 text-darkblack lg:text-xl">
+          {title}
+        </span>
+      </div>
+    </Link>
+  );
+};
+
+const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
   const { data: shellData, isLoading: isShellLoading } = useHomepageShell();
   const hero = shellData?.homepage?.hero || shellData?.hero;
-  const subtitle = hero?.subtitle ?? "";
-  const secondaryCtaUrl = hero?.secondaryCta?.url ?? "";
-  const secondaryCtaLabel = hero?.secondaryCta?.label ?? "";
+  const subtitle = String(hero?.subtitle ?? "");
+  const secondaryCtaUrl = hero?.secondaryCta?.url ?? hero?.secondaryCta?.to ?? "/products";
+  const secondaryCtaLabel = hero?.secondaryCta?.label ?? "Explore Products";
 
   const { data: shoppingData, isLoading: isShoppingLoading } = useHomepageShoppingBlocks();
   const categories = Array.isArray(shoppingData?.categoryNavigation)
     ? [...shoppingData.categoryNavigation]
-      .filter((item) => item?.isActive !== false)
-      .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
+        .filter((item) => item?.isActive !== false)
+        .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
     : [];
 
-  if (isShellLoading || isShoppingLoading) {
+  const isLoading = isShellLoading || isShoppingLoading;
+
+  if (isLoading) {
     return (
-      <section id={id} ref={ref} className="bg-white pb-3 flex flex-col gap-6 md:gap-8 lg:gap-10" aria-busy="true">
-        <div className="relative overflow-hidden neckLaceArcContainer">
-          <div className="container relative md:h-433 sm:h-465 h-465 py-6 sm:py-10 md:py-16 lg:py-20 flex lg:items-center items-end">
-            <div className="relative z-10 max-w-560">
-              <div className="h-10 w-[min(520px,90%)] bg-gray200 rounded mb-10" aria-hidden />
-              <div className="h-12 w-44 bg-gray200 rounded" aria-hidden />
+      <section
+        id={id}
+        className="bg-white pb-16 lg:pb-0"
+        aria-busy="true"
+        aria-label="Crafting rarity section loading"
+      >
+        <div className="mx-auto flex max-w-[1440px] flex-col gap-8 px-4 lg:gap-12 lg:px-10">
+          <div className="relative h-[389px] overflow-hidden lg:h-[432px]">
+            <div className="absolute bottom-0 left-0 flex max-w-[549px] flex-col gap-6 lg:bottom-auto lg:top-[132px] lg:gap-10">
+              <div className="h-24 w-[min(420px,90vw)] animate-pulse rounded bg-gray200" aria-hidden />
+              <div className="h-5 w-40 animate-pulse rounded bg-gray200" aria-hidden />
             </div>
           </div>
-        </div>
-        <div className="md:px-3 pl-3">
-          <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory md:overflow-visible md:grid md:grid-cols-4" style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="bg-gray300 flex flex-col flex-shrink-0 w-240 md:w-auto h-60 lg:h-260 xl:h-420 snap-start overflow-hidden">
-                <div className="w-full h-full bg-gray200/70" aria-hidden />
-              </div>
+              <div
+                key={i}
+                className="h-[226px] animate-pulse bg-gray200 lg:h-[424px]"
+                aria-hidden
+              />
             ))}
           </div>
         </div>
       </section>
     );
   }
+
   return (
-    <section id={id} ref={ref} className="bg-white pb-3 flex flex-col gap-6 md:gap-8 lg:gap-10">
-      <div className="relative overflow-hidden neckLaceArcContainer">
-        <div className="container relative md:h-433 sm:h-465 h-465 py-6 sm:py-10 md:py-16 lg:py-20 flex lg:items-center items-end">
-          <div className="relative z-10 max-w-560">
-            <h2 className="font-larken font-light text-[32px] md:text-[40px] lg:text-[48px] text-darkblack mb-40 leading-[100%] tracking-[0%]">
-              {isShellLoading ? (
-                <span className="inline-block h-5 w-56 bg-white/20 rounded" aria-hidden />
-              ) : (
-                subtitle
-              )}
-            </h2>
-            {!isShellLoading ? (
-              <Link
-                href={secondaryCtaUrl}
-                className="group relative overflow-hidden inline-flex items-center justify-center border-[0.8px] border-darkblack text-darkblack md:text-base text-sm px-8 h-50 tracking-[1.8%] uppercase font-gill transition-colors duration-500"
-              >
-                <span className="absolute inset-0 bg-darkblack origin-bottom scale-y-0 transition-transform duration-500 ease-out group-hover:scale-y-100"></span>
-                <span className="relative z-10 group-hover:text-white transition-colors duration-500">
-                  {secondaryCtaLabel}
-                </span>
-              </Link>
-            ) : (
-              <div className="h-12 w-40 bg-white/20 rounded animate-pulse" />
-            )}
-
-          </div>
-        </div>
-      </div>
-      {categories.length > 0 ?
-        <div className="md:px-3 pl-3">
-          <div
-            className="flex gap-4 overflow-x-auto snap-x snap-mandatory md:overflow-visible md:grid md:grid-cols-4"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
+    <section id={id} className="bg-white pb-16 lg:pb-0">
+      <div className="mx-auto flex max-w-[1440px] flex-col gap-8 px-4 lg:gap-12 lg:px-10">
+        <div className="relative h-[389px] overflow-hidden lg:h-[432px]">
+          <ScrollReveal
+            delayMs={60}
+            className="pointer-events-none absolute right-[-29px] top-[-83px] size-[419px] lg:right-[2%] lg:top-[-204px] lg:size-[664px]"
           >
-            {categories.map((cat) => {
-              const title = cat?.title ?? cat?.label ?? cat?.cta?.label ?? "";
-              const slug = cat?.slug ?? "";
-              const categoryLink =
-                cat?.cta?.url ?? cat?.cta?.to ??
-                (slug ? `/products?category=${encodeURIComponent(slug)}` : "/products");
+            <div className="relative h-full w-full rotate-[-13.91deg]">
+              <Image
+                src={CRAFTING_RARITY_NECKLACE}
+                alt=""
+                fill
+                className="object-contain"
+                sizes="(max-width: 1024px) 346px, 664px"
+              />
+            </div>
+          </ScrollReveal>
 
-              const categoryImage = cat?.image as CategoryNavigationImage | undefined;
-              const hoverImage = cat?.hoverImage as CategoryNavigationImage | undefined;
+          <div className="absolute bottom-0 left-0 z-10 flex w-full max-w-[640px] flex-col items-start gap-6 lg:bottom-auto lg:top-[132px] lg:gap-10">
+            <ScrollReveal as="h2" delayMs={0} className="max-w-[549px] font-larken text-[32px] font-light leading-110 text-darkblack lg:text-[48px]">
+              {subtitle.split("\n").map((line, index) => (
+                <span key={`${line}-${index}`} className="block">
+                  {line}
+                </span>
+              ))}
+            </ScrollReveal>
 
-              const desktopImageUrl = resolveCmsMediaUrl(categoryImage?.desktopImage ?? categoryImage);
-              const mobileImageUrl = resolveCmsMediaUrl(categoryImage?.mobileImage ?? categoryImage);
-              const hoverDesktopImageUrl = resolveCmsMediaUrl(hoverImage?.desktopImage ?? hoverImage);
-              const hoverMobileImageUrl = resolveCmsMediaUrl(hoverImage?.mobileImage ?? hoverImage);
-
-              const imageAlt =
-                resolveCmsAltText(categoryImage?.desktopImage ?? categoryImage) ??
-                resolveCmsAltText(categoryImage?.mobileImage ?? categoryImage) ??
-                title;
-              const hoverAlt =
-                resolveCmsAltText(hoverImage?.desktopImage ?? hoverImage) ??
-                resolveCmsAltText(hoverImage?.mobileImage ?? hoverImage) ??
-                imageAlt;
-
-              return (
+            {secondaryCtaUrl ? (
+              <ScrollReveal delayMs={100}>
                 <Link
-                  key={cat?.id ?? slug ?? title}
-                  href={categoryLink}
-                  className="group relative bg-gray300 flex flex-col flex-shrink-0 w-240 md:w-auto h-60 lg:h-260 xl:h-420 snap-start overflow-hidden"
+                  href={secondaryCtaUrl}
+                  className="border-b-[1.5px] border-darkblack pb-1 font-gill text-sm uppercase leading-110 text-darkblack"
                 >
-                  <div className="lg:aspect-[350/360] aspect-[260/230] h-500 relative top-[70px] flex items-center justify-center overflow-hidden transition-opacity duration-500 group-hover:opacity-0">
-                    {(desktopImageUrl || mobileImageUrl) && (
-                      <ResponsiveImage
-                        desktopSrc={desktopImageUrl || fallBackImage}
-                        mobileSrc={mobileImageUrl || fallBackImage}
-                        alt={imageAlt}
-                        priority
-                        width={desktopImageUrl ? 350 : 260}
-                        height={desktopImageUrl ? 360 : 230}
-                        className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
-                      />)}
-                  </div>
-                  {(hoverDesktopImageUrl || hoverMobileImageUrl) && (
-                    <ResponsiveImage
-                      desktopSrc={hoverDesktopImageUrl || fallBackImage}
-                      mobileSrc={hoverMobileImageUrl || fallBackImage}
-                      alt={hoverAlt}
-                      priority
-                      width={desktopImageUrl ? 360 : 240}
-                      height={desktopImageUrl ? 420 : 260}
-                      className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-out"
-                    />
-                  )}
-                  <div aria-hidden="true"
-                    className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0A0A0A] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
-                  />
-                  {/* {!(desktopImageUrl || mobileImageUrl) && (
-                    <div className="relative flex-1 flex items-center justify-center overflow-hidden p-6 md:p-10 transition-opacity duration-500 group-hover:opacity-0">
-
-                      <span className="text-center text-base lg:text-xl tracking-[1.8%] uppercase text-darkblack font-normal opacity-60 group-hover:opacity-100 group-hover:text-white transition-colors duration-500">
-                        {title}
-                      </span>
-                    </div>
-                  )} */}
-                  <div className="relative pb-6 md:pb-8 text-center z-10">
-                    <span className="font-gill text-base lg:text-xl tracking-[1.8%] uppercase text-darkblack font-normal opacity-60 group-hover:opacity-100 group-hover:text-white transition-colors duration-500">
-                      {title}
-                    </span>
-                  </div>
+                  {secondaryCtaLabel}
                 </Link>
-              );
-            })}
+              </ScrollReveal>
+            ) : null}
           </div>
         </div>
-        :
-        <p className="text-center p-20">NO Categories Yet!</p>
-      }
+
+        {categories.length > 0 ? (
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-3">
+            {categories.map((cat, index) => (
+              <ScrollReveal key={cat?.id ?? cat?.slug ?? cat?.title} delayMs={120 + index * 80} className="h-full">
+                <CategoryCard cat={cat} />
+              </ScrollReveal>
+            ))}
+          </div>
+        ) : (
+          <ScrollReveal delayMs={120}>
+            <p className="py-20 text-center font-gill text-base text-neutral500">NO Categories Yet!</p>
+          </ScrollReveal>
+        )}
+      </div>
     </section>
   );
 };
