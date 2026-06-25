@@ -24,7 +24,7 @@ export function SectionNavProgressIndicator({
     return (
       <span
         aria-hidden
-        className="size-1.5 rounded-full bg-darkblack transition-colors duration-300 group-hover:bg-[#ab863b]"
+        className="box-border size-4 rounded-full border border-[#DECAA0] bg-transparent transition-colors duration-300 group-hover:border-[#ab863b]"
       />
     );
   }
@@ -43,6 +43,7 @@ export function SectionNavProgressIndicator({
         cx={CENTER}
         cy={CENTER}
         r={RADIUS}
+        fill="none"
         stroke={TRACK_COLOR}
         strokeWidth={1}
       />
@@ -50,13 +51,13 @@ export function SectionNavProgressIndicator({
         cx={CENTER}
         cy={CENTER}
         r={RADIUS}
+        fill="none"
         stroke={ACTIVE_COLOR}
         strokeWidth={1.5}
         strokeLinecap="round"
         strokeDasharray={CIRCUMFERENCE}
         strokeDashoffset={dashOffset}
         transform={`rotate(-90 ${CENTER} ${CENTER})`}
-        className="motion-safe:transition-[stroke-dashoffset] motion-safe:duration-150 motion-safe:ease-linear"
       />
       <circle cx={CENTER} cy={CENTER} r={3} fill={ACTIVE_COLOR} />
     </svg>

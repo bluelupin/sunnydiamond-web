@@ -12,8 +12,11 @@ export function useSince1997HorizontalScroll(
   sectionRef: RefObject<HTMLElement | null>,
   trackRef: RefObject<HTMLElement | null>,
   viewportRef: RefObject<HTMLElement | null>,
+  enabled = true,
 ) {
   useLayoutEffect(() => {
+    if (!enabled) return;
+
     const section = sectionRef.current;
     const track = trackRef.current;
     const viewport = viewportRef.current;
@@ -35,7 +38,7 @@ export function useSince1997HorizontalScroll(
       }
 
       maxOffset = Math.max(0, track.scrollWidth - viewport.clientWidth);
-      const scrollDistance = Math.max(window.innerHeight * 0.85, maxOffset + 120);
+      const scrollDistance = Math.max(window.innerHeight, maxOffset + 160);
       if (spacer) spacer.style.height = `${scrollDistance}px`;
     };
 
@@ -47,8 +50,19 @@ export function useSince1997HorizontalScroll(
         return;
       }
 
-      const scrollTrack = Math.max(1, section.offsetHeight - window.innerHeight);
-      const progress = clamp(-section.getBoundingClientRect().top / scrollTrack);
+      const spacerHeight = spacer?.offsetHeight ?? 0;
+      if (spacerHeight <= 0 || maxOffset <= 0) {
+        track.style.transform = "";
+        return;
+      }
+
+      const sectionTop = section.getBoundingClientRect().top;
+      if (sectionTop > 0) {
+        track.style.transform = "";
+        return;
+      }
+
+      const progress = clamp(-sectionTop / spacerHeight);
       track.style.transform = `translate3d(${(-progress * maxOffset).toFixed(2)}px, 0, 0)`;
     };
 
@@ -65,12 +79,25 @@ export function useSince1997HorizontalScroll(
     remeasure();
     scheduleUpdate();
 
+    const delayedRemeasureTimers = [150, 600, 1500].map((delay) =>
+      window.setTimeout(scheduleRemeasure, delay),
+    );
+
     const resizeObserver = new ResizeObserver(() => scheduleRemeasure());
     resizeObserver.observe(track);
     resizeObserver.observe(viewport);
+    if (spacer) resizeObserver.observe(spacer);
+
+    const images = track.querySelectorAll("img");
+    images.forEach((img) => {
+      if (!img.complete) {
+        img.addEventListener("load", scheduleRemeasure, { once: true });
+      }
+    });
 
     window.addEventListener("scroll", scheduleUpdate, { passive: true });
     window.addEventListener("resize", scheduleRemeasure);
+    window.addEventListener("load", scheduleRemeasure);
 
     const onPreferenceChange = () => {
       remeasure();
@@ -82,12 +109,15 @@ export function useSince1997HorizontalScroll(
 
     return () => {
       resizeObserver.disconnect();
+      images.forEach((img) => img.removeEventListener("load", scheduleRemeasure));
       window.removeEventListener("scroll", scheduleUpdate);
-      window.removeEventListener("resize", scheduleUpdate);
+      window.removeEventListener("resize", scheduleRemeasure);
+      window.removeEventListener("load", scheduleRemeasure);
       motionQuery.removeEventListener("change", onPreferenceChange);
       desktopQuery.removeEventListener("change", onPreferenceChange);
       if (rafRef !== null) window.cancelAnimationFrame(rafRef);
+      delayedRemeasureTimers.forEach((timer) => window.clearTimeout(timer));
       track.style.transform = "";
     };
-  }, [sectionRef, trackRef, viewportRef]);
+  }, [enabled, sectionRef, trackRef, viewportRef]);
 }
