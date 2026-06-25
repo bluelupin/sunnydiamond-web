@@ -37,7 +37,7 @@ function OccasionCardItem({
   return (
     <Link
       href={href}
-      className="group relative block h-[400px] w-[min(328px,85vw)] shrink-0 snap-start overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2 md:h-[700px] md:w-auto"
+      className="group relative block h-[400px] w-[min(328px,85vw)] shrink-0 snap-start overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2 md:h-[700px] md:w-full md:min-w-0 md:shrink"
     >
       <ResponsiveImage
         desktopSrc={desktopUrl || fallBackImage}
@@ -52,11 +52,11 @@ function OccasionCardItem({
 
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black to-transparent"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-1/2 bg-gradient-to-t from-black to-transparent"
       />
 
-      <div className="absolute bottom-15 left-40 w-[calc(100%-80px)] max-w-[418px] translate-y-0 motion-safe:transition-transform motion-safe:duration-500 motion-safe:ease-out md:translate-y-12 md:group-hover:translate-y-0 md:group-focus-visible:translate-y-0">
-        <div className="flex flex-col gap-6">
+      <div className="absolute bottom-[60px] left-40 z-10 w-[calc(100%-80px)] max-w-[418px]">
+        <div className="flex flex-col gap-6 motion-safe:transition-transform motion-safe:duration-500 motion-safe:ease-out md:translate-y-14 md:group-hover:translate-y-0 md:group-focus-visible:translate-y-0">
           <div className="flex flex-col gap-3 text-white">
             <h3 className="font-larken text-2xl font-light leading-110 md:text-[32px]">
               {card.title}
@@ -117,18 +117,14 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
     return (
       <section
         id={id}
-        className="flex flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 md:px-0 md:py-100"
+        className="flex w-full flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 md:py-100"
         aria-busy="true"
         aria-label="Occasions"
       >
         <div className="h-10 w-80 rounded bg-gray200" aria-hidden />
-        <div className="flex w-full gap-3 overflow-hidden md:grid md:max-w-[1440px] md:grid-cols-2 md:gap-1">
+        <div className="grid w-full grid-cols-2 gap-1 overflow-hidden md:grid-cols-2">
           {[0, 1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="h-[400px] w-[min(328px,85vw)] shrink-0 bg-gray200 md:h-[700px] md:w-auto"
-              aria-hidden
-            />
+            <div key={i} className="aspect-[328/400] bg-gray200 md:aspect-auto md:h-[700px]" aria-hidden />
           ))}
         </div>
       </section>
@@ -148,9 +144,9 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
       id={id}
       ref={headingRef as React.RefObject<HTMLElement>}
       aria-label={sectionTitle}
-      className="flex flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 md:px-0 md:py-100"
+      className="flex w-full flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 md:py-100"
     >
-      <h2 className="max-w-[332px] text-center font-larken text-[32px] font-light leading-[110%] darkblack md:max-w-none md:text-[48px] lg:whitespace-nowrap">
+      <h2 className="max-w-[332px] text-center font-larken text-[32px] font-light leading-110 text-darkblack md:max-w-none md:text-[48px] lg:whitespace-nowrap">
         {sectionTitle}
       </h2>
 
@@ -161,7 +157,7 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
         aria-label={sectionTitle}
         tabIndex={-1}
         onKeyDownCapture={handleCarouselKeyDown}
-        className="scrollbar-none -mx-4 flex w-[calc(100%+32px)] snap-x snap-mandatory gap-3 overflow-x-auto scroll-pl-4 scroll-pr-4 px-4 pb-2 md:mx-0 md:grid md:w-full md:max-w-[1440px] md:grid-cols-2 md:gap-1 md:overflow-visible md:px-0 md:pb-0 md:snap-none md:outline-none"
+        className="scrollbar-none -mx-4 flex w-[calc(100%+32px)] snap-x snap-mandatory gap-3 overflow-x-auto scroll-pl-4 scroll-pr-4 px-4 pb-2 md:mx-0 md:grid md:w-full md:grid-cols-2 md:gap-1 md:overflow-visible md:px-0 md:pb-0 md:snap-none md:outline-none"
       >
         {occasions.map((card, index) => (
           <OccasionCardItem
