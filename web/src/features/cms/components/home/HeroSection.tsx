@@ -46,6 +46,8 @@ const HeroSection = ({ id }: HeroSectionProps) => {
     [desktopImageUrl, mobileImageUrl],
   );
 
+  const heroTitle = String(title ?? "");
+
   return (
     <section
       id={id}
@@ -83,43 +85,46 @@ const HeroSection = ({ id }: HeroSectionProps) => {
         </video>
         <div className="absolute inset-0 bg-gradient-to-r from-charcoal/55 via-charcoal/15 to-transparent" />
         <div className="absolute inset-0 bg-charcoal/20" />
-        <div className="container relative flex h-full items-center justify-center px-4 md:px-6">
-          <div className="flex w-full max-w-[742px] animate-fade-in flex-col items-center text-center">
-            <div className="mb-6 inline-flex items-center gap-2 font-gill text-base font-normal uppercase tracking-[1.8%] text-white md:text-lg lg:text-xl">
-              <DiamondIcon className="text-white" />
-              <span className="tracking-[1.8%]">
+        <div className="container relative flex h-full items-end justify-center px-4 pb-[60px] md:px-6">
+          <div className="flex w-full max-w-886 animate-fade-in flex-col items-center gap-8 text-center">
+            <div className="flex flex-col items-center gap-4">
+              <div className="inline-flex items-center gap-1 font-gill text-base font-normal leading-110 text-white">
+                <DiamondIcon className="size-5 shrink-0 text-white" />
+                <span>
+                  {isShellLoading ? (
+                    <span
+                      className="inline-block h-4 w-40 animate-pulse rounded bg-white/20"
+                      aria-hidden
+                    />
+                  ) : (
+                    eyebrow
+                  )}
+                </span>
+              </div>
+              <h1 className="max-w-886 font-larken text-[32px] font-light leading-110 text-white lg:text-[60px]">
                 {isShellLoading ? (
                   <span
-                    className="inline-block h-5 w-56 animate-pulse rounded bg-white/20"
+                    className="mx-auto block h-12 w-[min(680px,90vw)] animate-pulse rounded bg-white/20"
                     aria-hidden
                   />
                 ) : (
-                  eyebrow
+                  heroTitle.split("\n").map((line, index) => (
+                    <span key={`${line}-${index}`} className="block">
+                      {line}
+                    </span>
+                  ))
                 )}
-              </span>
+              </h1>
             </div>
-            <h1 className="mb-8 text-[32px] text-white md:mb-10 md:text-[42px] lg:text-[54px]">
-              {isShellLoading ? (
-                <span
-                  className="mx-auto block h-12 w-[min(680px,90vw)] animate-pulse rounded bg-white/20"
-                  aria-hidden
-                />
-              ) : (
-                title
-              )}
-            </h1>
             {!isShellLoading && primaryCta ? (
               <Link
                 href={primaryCta}
-                className="group relative inline-flex h-12 items-center justify-center overflow-hidden border-[0.8px] border-white px-8 font-gill text-sm uppercase tracking-[0%] text-white transition-colors duration-500 md:h-50 md:text-base"
+                className="btn-slide-up relative inline-flex h-14 items-center justify-center overflow-hidden bg-white px-7 font-gill text-sm uppercase leading-110 text-darkblack"
               >
-                <span className="absolute inset-0 origin-bottom scale-y-0 bg-white transition-transform duration-500 ease-out group-hover:scale-y-100" />
-                <span className="relative z-10 transition-colors duration-500 group-hover:text-charcoal">
-                  {primaryCtaLabel}
-                </span>
+                {primaryCtaLabel}
               </Link>
             ) : (
-              <div className="h-12 w-40 animate-pulse rounded bg-white/20" />
+              <div className="h-14 w-40 animate-pulse rounded bg-white/20" />
             )}
           </div>
         </div>
