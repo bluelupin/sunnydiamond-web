@@ -4,7 +4,6 @@ import AboutBelowFoldLazy from "./AboutBelowFoldLazy";
 import AboutHeroSection from "./AboutHeroSection";
 import AboutGuaranteesBar from "./AboutGuaranteesBar";
 import AboutHeirloomQuoteSection from "./AboutHeirloomQuoteSection";
-import AboutBrillianceSection from "./AboutBrillianceSection";
 
 type AboutPageProps = {
   page: NormalizedAboutPage;
@@ -14,10 +13,8 @@ const AboutPage = ({ page }: AboutPageProps) => {
   return (
     <>
       {page.hero ? <AboutHeroSection {...page.hero} /> : null}
-      {page.craftingRarity ? (
-        <AboutBrillianceSection {...page.craftingRarity} />
-      ) : null}
       <AboutBelowFoldLazy
+        craftingRarity={page.craftingRarity}
         legacy={page.legacy}
         team={page.team}
         craft={page.craft}

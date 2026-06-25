@@ -48,7 +48,7 @@ const AboutHeroSection = ({ title, image }: AboutHeroSectionProps) => {
             priority
             width={image.width ?? 1802}
             height={image.height ?? 1802}
-            quality={90}
+            quality={85}
             sizes="100vw"
             className={cn(
               "absolute inset-0 h-full w-full object-cover object-center",

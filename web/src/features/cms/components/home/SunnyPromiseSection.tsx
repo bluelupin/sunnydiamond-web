@@ -13,7 +13,7 @@ interface SunnyPromiseSectionProps {
 }
 
 const PROMISE_VIDEO_MP4 = "/videos/handcrafted-bg.mp4";
-const PROMISE_POSTER = "/images/about/handcrafted-bg.png";
+const PROMISE_POSTER = "/images/about/handcrafted-bg.webp";
 
 const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
   const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();

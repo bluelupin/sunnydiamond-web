@@ -4,9 +4,9 @@ import { useMemo } from "react";
 import Image from "next/image";
 import { useScrollSpy } from "@/shared/hooks/use-scroll-spy";
 import { useVisibleHomeSections } from "@/shared/hooks/use-visible-home-sections";
+import { SectionNavProgressIndicator } from "@/features/cms/components/home/SectionNavProgressIndicator";
 import { cn } from "@/shared/utils/cn";
 
-const ACTIVE_INDICATOR = "/images/navigation/section-nav-active.svg";
 const NAV_GRADIENT = "/images/navigation/section-nav-gradient.svg";
 
 const SectionNav = () => {
@@ -16,10 +16,15 @@ const SectionNav = () => {
     [visibleSections],
   );
 
-  const { activeId, isVisible } = useScrollSpy({
+  const { activeId, isVisible, progress } = useScrollSpy({
     sectionIds,
     visibilityThresholdIndex: 0,
   });
+
+  const activeIndex = useMemo(
+    () => visibleSections.findIndex((section) => section.id === activeId),
+    [activeId, visibleSections],
+  );
 
   const handleClick = (id: string) => {
     document.getElementById(id)?.scrollIntoView({
@@ -57,8 +62,9 @@ const SectionNav = () => {
       </div>
 
       <nav aria-label="Page sections" className="relative flex flex-col gap-5 py-10 pl-10">
-        {visibleSections.map((section) => {
+        {visibleSections.map((section, index) => {
           const isActive = activeId === section.id;
+          const isComplete = activeIndex >= 0 && index < activeIndex;
 
           return (
             <button
@@ -70,21 +76,11 @@ const SectionNav = () => {
               className="group flex items-center gap-3 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ab863b] focus-visible:ring-offset-2"
             >
               <span className="relative inline-flex size-4 shrink-0 items-center justify-center">
-                {isActive ? (
-                  <Image
-                    src={ACTIVE_INDICATOR}
-                    alt=""
-                    width={16}
-                    height={16}
-                    aria-hidden
-                    className="size-4"
-                  />
-                ) : (
-                  <span
-                    aria-hidden
-                    className="size-1.5 rounded-full bg-darkblack transition-colors duration-300 group-hover:bg-[#ab863b]"
-                  />
-                )}
+                <SectionNavProgressIndicator
+                  progress={progress[section.id] ?? 0}
+                  isActive={isActive}
+                  isComplete={isComplete}
+                />
               </span>
 
               <span

@@ -1,56 +1,16 @@
 "use client";
 
-import { type ReactNode, useRef } from "react";
+import { useRef } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import PageContainer from "@/shared/ui/layout/PageContainer";
-import { cn } from "@/shared/utils/cn";
 import { aboutCraftingRarityFigmaSpec } from "../data/content";
-import { useCraftingRarityScrollReveal } from "../hooks/useCraftingRarityScrollReveal";
+import {
+  craftingRarityLineSpec,
+  useCraftingRarityScrollReveal,
+} from "../hooks/useCraftingRarityScrollReveal";
 import type { NormalizedCraftingRarity } from "@/services/about/about-page.types";
-import VerticalScrollLine from "./VerticalScrollLine";
 
-const { image: imageSpec, line: lineSpec } = aboutCraftingRarityFigmaSpec;
-
-type FigmaMaskRevealProps = {
-  reveal: number;
-  reducedMotion: boolean;
-  className?: string;
-  children: ReactNode;
-};
-
-const FigmaMaskReveal = ({
-  reveal,
-  reducedMotion,
-  className,
-  children,
-}: FigmaMaskRevealProps) => {
-  if (reducedMotion) {
-    return <div className={className}>{children}</div>;
-  }
-
-  const clampedReveal = Math.min(1, Math.max(0, reveal));
-  const maskHeight = `${clampedReveal * 100}%`;
-
-  return (
-    <div
-      className={cn("overflow-hidden", className)}
-      style={{
-        clipPath: `inset(0 0 ${(1 - clampedReveal) * 100}% 0 round 0)`,
-        WebkitClipPath: `inset(0 0 ${(1 - clampedReveal) * 100}% 0 round 0)`,
-        maskImage: "linear-gradient(black, black)",
-        WebkitMaskImage: "linear-gradient(black, black)",
-        maskSize: `100% ${maskHeight}`,
-        WebkitMaskSize: `100% ${maskHeight}`,
-        maskRepeat: "no-repeat",
-        WebkitMaskRepeat: "no-repeat",
-        maskPosition: "top",
-        WebkitMaskPosition: "top",
-      }}
-    >
-      {children}
-    </div>
-  );
-};
+const { image: imageSpec } = aboutCraftingRarityFigmaSpec;
 
 type AboutBrillianceSectionProps = NormalizedCraftingRarity;
 
@@ -60,14 +20,7 @@ const AboutBrillianceSection = ({
   image,
 }: AboutBrillianceSectionProps) => {
   const sectionRef = useRef<HTMLElement>(null);
-  const {
-    headingReveal,
-    imageReveal,
-    lineReveal,
-    lineFill,
-    bodyReveal,
-    reducedMotion,
-  } = useCraftingRarityScrollReveal(sectionRef);
+  useCraftingRarityScrollReveal(sectionRef);
 
   return (
     <section
@@ -77,10 +30,9 @@ const AboutBrillianceSection = ({
     >
       <PageContainer className="flex w-full justify-center">
         <div className="flex w-full max-w-[950px] flex-col items-center text-center">
-          <FigmaMaskReveal
-            reveal={headingReveal}
-            reducedMotion={reducedMotion}
-            className="w-full pt-0 lg:mb-12 md:mb-9 mb-8"
+          <div
+            data-reveal-mask="heading"
+            className="w-full overflow-hidden pt-0 lg:mb-12 md:mb-9 mb-8"
           >
             <h2
               id="about-crafting-rarity-title"
@@ -88,13 +40,9 @@ const AboutBrillianceSection = ({
             >
               {heading}
             </h2>
-          </FigmaMaskReveal>
+          </div>
 
-          <FigmaMaskReveal
-            reveal={imageReveal}
-            reducedMotion={reducedMotion}
-            className="mx-auto w-full"
-          >
+          <div data-reveal-mask="image" className="mx-auto w-full overflow-hidden">
             <div className="mx-auto h-auto w-220 sm:h-280 sm:w-280 lg:h-354 lg:w-354">
               <ResponsiveImage
                 desktopSrc={image.desktopUrl}
@@ -102,37 +50,46 @@ const AboutBrillianceSection = ({
                 alt={image.alt}
                 width={image.width ?? imageSpec.width}
                 height={image.height ?? imageSpec.height}
-                quality={90}
+                quality={80}
                 sizes="(max-width: 768px) 220px, 354px"
                 className="object-cover"
               />
             </div>
-          </FigmaMaskReveal>
+          </div>
 
-          <FigmaMaskReveal
-            reveal={lineReveal}
-            reducedMotion={reducedMotion}
-            className="mt-5 lg:mt-[23px]"
+          <div
+            data-reveal-mask="line"
+            className="mt-5 overflow-hidden lg:mt-[23px]"
           >
-            <VerticalScrollLine
-              lineFill={lineFill}
-              reducedMotion={reducedMotion}
-              visible={lineReveal > 0.02 || reducedMotion}
-              lineHeight={lineSpec.height}
-            />
-          </FigmaMaskReveal>
-          <FigmaMaskReveal
-            reveal={imageReveal}
-            reducedMotion={reducedMotion}
-            className="mx-auto mt-2.5 w-full max-w-557 "
-          >
-            <p
-              className="font-gill text-base font-light leading-110 text-gray600 sm:mt-3 lg:mt-[13px] lg:text-20"
-            // style={reducedMotion ? undefined : { opacity: bodyReveal }}
+            <div
+              data-reveal-line="wrapper"
+              className="flex w-full justify-center bg-white opacity-0"
+              aria-hidden
             >
+              <div
+                className="w-px overflow-hidden opacity-100"
+                style={{ height: craftingRarityLineSpec.height }}
+              >
+                <div
+                  data-reveal-line="fill"
+                  className="w-px origin-top bg-gradient-to-b from-darkMagenta to-goldAccent"
+                  style={{
+                    height: craftingRarityLineSpec.height,
+                    transform: "scaleY(0)",
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div
+            data-reveal-mask="body"
+            className="mx-auto mt-2.5 w-full max-w-557 overflow-hidden"
+          >
+            <p className="font-gill text-base font-light leading-110 text-gray600 sm:mt-3 lg:mt-[13px] lg:text-20">
               {description}
             </p>
-          </FigmaMaskReveal>
+          </div>
         </div>
       </PageContainer>
     </section>

@@ -42,8 +42,8 @@ const AboutTimelineSection = ({
             alt={backgroundImage.alt}
             width={backgroundImage.width ?? 1440}
             height={backgroundImage.height ?? 810}
-            quality={90}
-            sizes="100vw"
+            quality={80}
+            sizes="(max-width: 1024px) 100vw, 1440px"
             className="object-cover object-center"
           />
         </div>

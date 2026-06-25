@@ -56,8 +56,8 @@ const AboutFacesSection = ({ title, description, members }: AboutFacesSectionPro
                 alt={member.image.alt || member.name}
                 width={member.image.width ?? 478}
                 height={member.image.height ?? 600}
-                quality={90}
-                // sizes="(max-width: 1023px) calc(100vw - 24px), 33vw"
+                quality={80}
+                sizes="(max-width: 1023px) 343px, 33vw"
                 className={`h-full w-full object-cover transition-transform duration-700 lg:group-hover:scale-[0.8] ${index === 0 ? "lg:group-hover:scale-[1]" : "lg:group-hover:scale-[1.1]"}`}
               />
 

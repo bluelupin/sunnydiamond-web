@@ -61,7 +61,7 @@ export const aboutHeroFigmaSpec = {
 export const aboutPageImages = {
   heroDesktop: "/images/about/hero-desktop.png",
   heroMobile: "/images/about/hero-mobile.png",
-  craftingDiamond: "/images/about/crafting-diamond.png",
+  craftingDiamond: "/images/about/crafting-diamond.webp",
   teamMemberDesktop1: "/images/about/team-member-desktop-1.png",
   teamMemberMobile1: "/images/about/team-member-mobile-1.png",
   teamMemberDesktop2: "/images/about/team-member-desktop-2.png",
@@ -74,8 +74,8 @@ export const aboutPageImages = {
   storyEventMobile: "/images/about/story-event-mobile.png",
   storyAttendingDesktop: "/images/about/story-attending-desktop.png",
   storyAttendingMobile: "/images/about/story-attending-mobile.png",
-  handcraftedBg: "/images/about/handcrafted-bg.png",
-  craftsmanship: "/images/about/craftsmanship-764d7a.png",
+  handcraftedBg: "/images/about/handcrafted-bg.webp",
+  craftsmanship: "/images/about/craftsmanship-764d7a.webp",
   store: "/images/about/store.png",
 } as const;
 
@@ -249,7 +249,7 @@ export const aboutHandcraftedAssets = {
   gridMask: "/images/about/handcrafted-grid-mask.svg",
   flourish: "/images/about/handcrafted-flourish.svg",
   /** Mosaic photo grid for mobile tiles (Figma 692:27493) */
-  intersect: "/images/about/handcrafted-intersect.png",
+  intersect: "/images/about/handcrafted-intersect.webp",
   /** Handcrafted hero background video */
   heroVideo: "/videos/handcrafted-bg.mp4",
 } as const;

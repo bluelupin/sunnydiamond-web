@@ -1,15 +1,70 @@
 "use client";
 
+import Image from "next/image";
 import MediaContentOverlay from "@/shared/ui/MediaContentOverlay";
 import PageContainer from "@/shared/ui/layout/PageContainer";
+import { cn } from "@/shared/utils/cn";
 import type { NormalizedAboutCraft } from "@/services/about/about-page.types";
 import AboutHandcraftedHeroMedia from "./AboutHandcraftedHeroMedia";
 import VerticalScrollLine from "./VerticalScrollLine";
-import Image from "next/image";
 import {
   aboutHandcraftedAssets,
+  aboutPageImages,
 } from "../data/content";
+
 type AboutHandcraftedSectionProps = NormalizedAboutCraft;
+
+const craftPhotoClass =
+  "h-full w-full bg-cover bg-center";
+const craftPhotoStyle = {
+  backgroundImage: `url(${aboutPageImages.craftsmanship})`,
+} as const;
+
+function CraftPhotoTile({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn(craftPhotoClass, className)}
+      style={craftPhotoStyle}
+      aria-hidden
+    />
+  );
+}
+
+function CraftTextTile({
+  className,
+  compact,
+}: {
+  className?: string;
+  compact?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center gap-3 bg-chalkCard",
+        className,
+      )}
+    >
+      <Image
+        src={aboutHandcraftedAssets.flourish}
+        alt=""
+        width={16}
+        height={15}
+        aria-hidden
+        className="h-[15px] w-4 shrink-0"
+      />
+      <h3
+        className={cn(
+          "text-center font-larken font-light leading-[110%] text-darkblack",
+          compact
+            ? "max-w-[79.73%] text-2xl"
+            : "text-base sm:text-lg md:text-xl lg:text-2xl",
+        )}
+      >
+        Ethically Sourced, conflict free diamonds
+      </h3>
+    </div>
+  );
+}
 
 const AboutHandcraftedSection = ({
   title,
@@ -42,136 +97,46 @@ const AboutHandcraftedSection = ({
       <PageContainer className="mt-6">
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-center gap-3">
-            <div className="sm:w-[222px] sm:h-[222px] w-[111px] h-[132px]">
-              <Image
-                src="/images/about/craftsmanship-764d7a.png"
-                alt=""
-                width={1161}
-                height={694}
-                aria-hidden
-                className="h-full w-full object-cover object-center"
-              />
+            <div className="h-[132px] w-[111px] sm:h-[222px] sm:w-[222px]">
+              <CraftPhotoTile className="size-full" />
             </div>
-            <div className="sm:w-[222px] sm:h-[222px] w-[111px] h-[132px] bg-chalkCard flex flex-col items-center justify-center gap-3">
-              <Image
-                src={aboutHandcraftedAssets.flourish}
-                alt=""
-                width="222"
-                height="222"
-                aria-hidden
-                className="h-[15px] w-4 shrink-0"
-              />
-              <h3 className="text-center font-larken lg:text-2xl sm:text-xl sm:text-lg text-base font-light leading-[110%] text-darkblack">
-                Ethically Sourced, conflict free diamonds
-              </h3>
+            <div className="h-[132px] w-[111px] sm:h-[222px] sm:w-[222px]">
+              <CraftTextTile className="size-full" />
             </div>
-            <div className="sm:w-[222px] sm:h-[222px] w-[111px] h-[132px]">
-              <Image
-                src="/images/about/craftsmanship-764d7a.png"
-                alt=""
-                width={1161}
-                height={694}
-                aria-hidden
-                className="h-full w-full object-cover object-center"
-              />
+            <div className="h-[132px] w-[111px] sm:h-[222px] sm:w-[222px]">
+              <CraftPhotoTile className="size-full" />
             </div>
-            <div className="sm:w-[222px] sm:h-[222px] w-[111px] h-[132px] sm:block hidden">
-              <Image
-                src="/images/about/craftsmanship-764d7a.png"
-                alt=""
-                width={1161}
-                height={694}
-                aria-hidden
-                className="h-full w-full object-cover object-center"
-              />
+            <div className="hidden h-[222px] w-[222px] sm:block">
+              <CraftPhotoTile className="size-full" />
             </div>
-            <div className="sm:w-[222px] sm:h-[222px] w-[111px] h-[132px] sm:block hidden">
-              <Image
-                src="/images/about/craftsmanship-764d7a.png"
-                alt=""
-                width={1161}
-                height={694}
-                aria-hidden
-                className="h-full w-full object-cover object-center"
-              />
+            <div className="hidden h-[222px] w-[222px] sm:block">
+              <CraftPhotoTile className="size-full" />
             </div>
           </div>
           <div className="flex items-center justify-center gap-3">
-            <div className="sm:w-[222px] sm:h-[222px] w-[173px] h-[132px]">
-              <Image
-                src="/images/about/craftsmanship-764d7a.png"
-                alt=""
-                width={1161}
-                height={694}
-                aria-hidden
-                className="h-full w-full object-cover object-center"
-              />
+            <div className="h-[132px] w-[173px] sm:h-[222px] sm:w-[222px]">
+              <CraftPhotoTile className="size-full" />
             </div>
-            <div className="sm:w-[222px] sm:h-[222px] w-[111px] h-[132px] bg-chalkCard sm:flex hidden flex-col items-center justify-center gap-3">
-              <Image
-                src={aboutHandcraftedAssets.flourish}
-                alt=""
-                width="222"
-                height="222"
-                aria-hidden
-                className="h-[15px] w-4 shrink-0"
-              />
-              <h3 className="max-w-[79.73%] text-center font-larken text-2xl font-light leading-[110%] text-darkblack">
-                Ethically Sourced, conflict free diamonds
-              </h3>
+            <div className="hidden h-[222px] w-[222px] sm:flex">
+              <CraftTextTile className="size-full" compact />
             </div>
-            <div className="sm:w-[222px] sm:h-[222px] w-[173px] h-[132px]">
-              <Image
-                src="/images/about/craftsmanship-764d7a.png"
-                alt=""
-                width={1161}
-                height={694}
-                aria-hidden
-                className="h-full w-full object-cover object-center"
-              />
+            <div className="h-[132px] w-[173px] sm:h-[222px] sm:w-[222px]">
+              <CraftPhotoTile className="size-full" />
             </div>
           </div>
           <div className="flex items-center justify-center gap-3">
-            <div className="sm:w-[222px] sm:h-[222px] w-[111px] h-[132px] bg-chalkCard flex flex-col items-center justify-center gap-3">
-              <Image
-                src={aboutHandcraftedAssets.flourish}
-                alt=""
-                width="222"
-                height="222"
-                aria-hidden
-                className="h-[15px] w-4 shrink-0"
-              />
-              <h3 className="text-center font-larken lg:text-2xl sm:text-xl sm:text-lg text-base font-light leading-[110%] text-darkblack">
-                Ethically Sourced, conflict free diamonds
-              </h3>
+            <div className="h-[132px] w-[111px] sm:h-[222px] sm:w-[222px]">
+              <CraftTextTile className="size-full" />
             </div>
-            <div className="sm:w-[222px] sm:h-[222px] w-[111px] h-[132px]">
-              <Image
-                src="/images/about/craftsmanship-764d7a.png"
-                alt=""
-                width={1161}
-                height={694}
-                aria-hidden
-                className="h-full w-full object-cover object-center"
-              />
+            <div className="h-[132px] w-[111px] sm:h-[222px] sm:w-[222px]">
+              <CraftPhotoTile className="size-full" />
             </div>
-            <div className="sm:w-[222px] sm:h-[222px] w-[111px] h-[132px] bg-chalkCard flex flex-col items-center justify-center gap-3">
-              <Image
-                src={aboutHandcraftedAssets.flourish}
-                alt=""
-                width="222"
-                height="222"
-                aria-hidden
-                className="h-[15px] w-4 shrink-0"
-              />
-              <h3 className="text-center font-larken lg:text-2xl sm:text-xl sm:text-lg text-base font-light leading-[110%] text-darkblack">
-                Ethically Sourced, conflict free diamonds
-              </h3>
+            <div className="h-[132px] w-[111px] sm:h-[222px] sm:w-[222px]">
+              <CraftTextTile className="size-full" />
             </div>
           </div>
         </div>
       </PageContainer>
-
     </section>
     <VerticalScrollLine className="pb-16 pt-5 md:pb-20 lg:pb-[100px]" />
   </>

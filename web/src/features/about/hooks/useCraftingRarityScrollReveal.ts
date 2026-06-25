@@ -1,25 +1,9 @@
 "use client";
 
-import {
-  useCallback,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type RefObject,
-} from "react";
+import { useLayoutEffect, type RefObject } from "react";
 import { aboutCraftingRarityFigmaSpec } from "../data/content";
 
-export interface CraftingRarityRevealState {
-  progress: number;
-  headingReveal: number;
-  imageReveal: number;
-  lineReveal: number;
-  lineFill: number;
-  bodyReveal: number;
-  reducedMotion: boolean;
-}
-
-const { animation: animationSpec } = aboutCraftingRarityFigmaSpec;
+const { animation: animationSpec, line: lineSpec } = aboutCraftingRarityFigmaSpec;
 const { segments } = animationSpec;
 
 const clamp = (value: number, min = 0, max = 1) =>
@@ -28,109 +12,130 @@ const clamp = (value: number, min = 0, max = 1) =>
 const segmentReveal = (progress: number, start: number, end: number) =>
   clamp((progress - start) / (end - start));
 
-const fullRevealed = (reducedMotion: boolean): CraftingRarityRevealState => ({
-  progress: 1,
-  headingReveal: 1,
-  imageReveal: 1,
-  lineReveal: 1,
-  lineFill: 1,
-  bodyReveal: 1,
-  reducedMotion,
-});
+const applyMaskReveal = (element: HTMLElement, reveal: number) => {
+  const value = clamp(reveal);
+  const maskHeight = `${value * 100}%`;
+  const clip = `inset(0 0 ${(1 - value) * 100}% 0 round 0)`;
 
-const hidden: CraftingRarityRevealState = {
-  progress: 0,
-  headingReveal: 0,
-  imageReveal: 0,
-  lineReveal: 0,
-  lineFill: 0,
-  bodyReveal: 0,
-  reducedMotion: false,
+  element.style.clipPath = clip;
+  element.style.setProperty("-webkit-clip-path", clip);
+  element.style.maskImage = "linear-gradient(black, black)";
+  element.style.setProperty("-webkit-mask-image", "linear-gradient(black, black)");
+  element.style.maskSize = `100% ${maskHeight}`;
+  element.style.setProperty("-webkit-mask-size", `100% ${maskHeight}`);
+  element.style.maskRepeat = "no-repeat";
+  element.style.setProperty("-webkit-mask-repeat", "no-repeat");
+  element.style.maskPosition = "top";
+  element.style.setProperty("-webkit-mask-position", "top");
+};
+
+const clearMaskReveal = (element: HTMLElement) => {
+  element.style.clipPath = "";
+  element.style.removeProperty("-webkit-clip-path");
+  element.style.maskImage = "";
+  element.style.removeProperty("-webkit-mask-image");
+  element.style.maskSize = "";
+  element.style.removeProperty("-webkit-mask-size");
+  element.style.maskRepeat = "";
+  element.style.removeProperty("-webkit-mask-repeat");
+  element.style.maskPosition = "";
+  element.style.removeProperty("-webkit-mask-position");
 };
 
 /**
- * Scroll-scrubbed Reveal V2 — progress 0→1 as the section travels through
- * the viewport (top at viewport bottom → bottom at viewport top).
+ * Scroll-scrubbed Reveal V2 — updates mask styles directly on DOM nodes (no per-frame React state).
  */
 export function useCraftingRarityScrollReveal(
   sectionRef: RefObject<HTMLElement | null>,
-): CraftingRarityRevealState {
-  const [state, setState] = useState<CraftingRarityRevealState>(hidden);
-  const rafRef = useRef<number | null>(null);
-  const sectionNodeRef = useRef<HTMLElement | null>(null);
-
-  const applyProgress = useCallback((progress: number, reducedMotion: boolean) => {
-    setState({
-      progress,
-      headingReveal: segmentReveal(
-        progress,
-        segments.heading.start,
-        segments.heading.end,
-      ),
-      imageReveal: segmentReveal(
-        progress,
-        segments.image.start,
-        segments.image.end,
-      ),
-      lineReveal: segmentReveal(
-        progress,
-        segments.line.start,
-        segments.line.end,
-      ),
-      lineFill: segmentReveal(
-        progress,
-        segments.lineFill.start,
-        segments.lineFill.end,
-      ),
-      bodyReveal: segmentReveal(
-        progress,
-        segments.body.start,
-        segments.body.end,
-      ),
-      reducedMotion,
-    });
-  }, []);
-
+) {
   useLayoutEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
 
-    sectionNodeRef.current = section;
+    const headingMask = section.querySelector<HTMLElement>('[data-reveal-mask="heading"]');
+    const imageMask = section.querySelector<HTMLElement>('[data-reveal-mask="image"]');
+    const lineMask = section.querySelector<HTMLElement>('[data-reveal-mask="line"]');
+    const bodyMask = section.querySelector<HTMLElement>('[data-reveal-mask="body"]');
+    const lineWrapper = section.querySelector<HTMLElement>('[data-reveal-line="wrapper"]');
+    const lineFill = section.querySelector<HTMLElement>('[data-reveal-line="fill"]');
 
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let rafRef: number | null = null;
 
     const computeProgress = () => {
-      const node = sectionNodeRef.current;
-      if (!node) return 0;
-
-      const rect = node.getBoundingClientRect();
+      const rect = section.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
       const sectionHeight = Math.max(rect.height, 1);
-
-      // 0 when section top meets viewport bottom; 1 when section bottom meets viewport top
       const scrollSpan = viewportHeight + sectionHeight;
       return clamp((viewportHeight - rect.top) / scrollSpan);
     };
 
+    const applyFullReveal = () => {
+      for (const mask of [headingMask, imageMask, lineMask, bodyMask]) {
+        if (mask) clearMaskReveal(mask);
+      }
+      if (lineWrapper) lineWrapper.style.opacity = "1";
+      if (lineFill) lineFill.style.transform = "scaleY(1)";
+    };
+
+    const applyHidden = () => {
+      for (const mask of [headingMask, imageMask, lineMask, bodyMask]) {
+        if (mask) applyMaskReveal(mask, 0);
+      }
+      if (lineWrapper) lineWrapper.style.opacity = "0";
+      if (lineFill) lineFill.style.transform = "scaleY(0)";
+    };
+
     const update = () => {
-      rafRef.current = null;
-      const progress = computeProgress();
+      rafRef = null;
 
       if (motionQuery.matches) {
-        if (progress >= animationSpec.viewportVisibleThreshold) {
-          setState(fullRevealed(true));
+        if (computeProgress() >= animationSpec.viewportVisibleThreshold) {
+          applyFullReveal();
         } else {
-          setState({ ...hidden, reducedMotion: true });
+          applyHidden();
         }
         return;
       }
 
-      applyProgress(progress, false);
+      const progress = computeProgress();
+      if (headingMask) {
+        applyMaskReveal(
+          headingMask,
+          segmentReveal(progress, segments.heading.start, segments.heading.end),
+        );
+      }
+      if (imageMask) {
+        applyMaskReveal(
+          imageMask,
+          segmentReveal(progress, segments.image.start, segments.image.end),
+        );
+      }
+      if (lineMask) {
+        const lineReveal = segmentReveal(progress, segments.line.start, segments.line.end);
+        applyMaskReveal(lineMask, lineReveal);
+        if (lineWrapper) {
+          lineWrapper.style.opacity = lineReveal > 0.02 ? "1" : "0";
+        }
+      }
+      if (bodyMask) {
+        applyMaskReveal(
+          bodyMask,
+          segmentReveal(progress, segments.image.start, segments.image.end),
+        );
+      }
+      if (lineFill) {
+        lineFill.style.transform = `scaleY(${segmentReveal(
+          progress,
+          segments.lineFill.start,
+          segments.lineFill.end,
+        )})`;
+      }
     };
 
     const scheduleUpdate = () => {
-      if (rafRef.current !== null) return;
-      rafRef.current = window.requestAnimationFrame(update);
+      if (rafRef !== null) return;
+      rafRef = window.requestAnimationFrame(update);
     };
 
     scheduleUpdate();
@@ -151,11 +156,9 @@ export function useCraftingRarityScrollReveal(
       document.removeEventListener("scroll", scheduleUpdate);
       window.removeEventListener("resize", scheduleUpdate);
       motionQuery.removeEventListener("change", onMotionChange);
-      if (rafRef.current !== null) {
-        window.cancelAnimationFrame(rafRef.current);
-      }
+      if (rafRef !== null) window.cancelAnimationFrame(rafRef);
     };
-  }, [applyProgress, sectionRef]);
-
-  return state;
+  }, [sectionRef]);
 }
+
+export { lineSpec as craftingRarityLineSpec };

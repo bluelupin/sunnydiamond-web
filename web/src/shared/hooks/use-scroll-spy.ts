@@ -41,12 +41,12 @@ export function useScrollSpy({ sectionIds, visibilityThresholdIndex = 3 }: UseSc
       // ---- COMPUTE ----
       const next: Record<string, number> = {};
       let active = sectionIds[0] ?? "";
+      // Progress 0→1 as the section scrolls through the viewport (enter → exit).
       for (let i = 0; i < elements.length; i++) {
         const el = elements[i];
         const rect = rects[i];
-        const total = rect.height;
-        const scrolled = -rect.top;
-        const p = Math.max(0, Math.min(1, scrolled / Math.max(1, total - viewportH * 0.25)));
+        const scrollSpan = Math.max(1, rect.height + viewportH);
+        const p = Math.max(0, Math.min(1, (viewportH - rect.top) / scrollSpan));
         next[el.id] = p;
         if (rect.top <= mid) active = el.id;
       }
