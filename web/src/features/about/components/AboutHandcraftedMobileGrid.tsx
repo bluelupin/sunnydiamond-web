@@ -1,14 +1,18 @@
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
+import type { NormalizedCraftCard } from "@/services/about/about-page.types";
 import {
   aboutHandcraftedAssets,
-  aboutHandcraftedContent,
   aboutHandcraftedFigmaSpec,
   aboutHandcraftedMobileLayout,
 } from "../data/content";
 
 const { card: cardSpec, mobileGrid } = aboutHandcraftedFigmaSpec;
 const { mosaicCols, mosaicRows } = mobileGrid;
+
+type AboutHandcraftedMobileGridProps = {
+  cards: NormalizedCraftCard[];
+};
 
 type MosaicPhotoTileProps = {
   mosaicCol: number;
@@ -32,79 +36,96 @@ const MosaicPhotoTile = ({ mosaicCol, mosaicRow, className }: MosaicPhotoTilePro
 );
 
 type MobileCardTileProps = {
-  cardIndex: number;
+  card: NormalizedCraftCard;
   className?: string;
 };
 
-const MobileCardTile = ({ cardIndex, className }: MobileCardTileProps) => {
-  const card = aboutHandcraftedContent.cards[cardIndex];
+const MobileCardTile = ({ card, className }: MobileCardTileProps) => (
+  <article
+    className={cn(
+      "flex h-[111px] flex-col items-center justify-center bg-chalkCard px-2",
+      className,
+    )}
+    style={{ gap: `${card.gap}px` }}
+  >
+    <Image
+      src={aboutHandcraftedAssets.flourish}
+      alt=""
+      width={cardSpec.iconWidth}
+      height={cardSpec.iconHeight}
+      aria-hidden
+      className="h-[10px] w-[10px] shrink-0"
+    />
+    <h3 className="darkblack text-center font-larken text-sm font-light leading-[110%]">
+      {card.title}
+    </h3>
+  </article>
+);
 
-  return (
-    <article
-      className={cn(
-        "flex flex-col items-center justify-center bg-chalkCard px-2 h-[111px]",
-        className,
-      )}
-      style={{ gap: `${card.gap}px` }}
-    >
-      <Image
-        src={aboutHandcraftedAssets.flourish}
-        alt=""
-        width={cardSpec.iconWidth}
-        height={cardSpec.iconHeight}
-        aria-hidden
-        className="h-[10px] w-[10px] shrink-0"
-      />
-      <h3 className="text-center font-larken text-sm font-light leading-[110%] darkblack">
-        {card.title}
-      </h3>
-    </article>
-  );
-};
+const AboutHandcraftedMobileGrid = ({ cards }: AboutHandcraftedMobileGridProps) => {
+  const cardByIndex = new Map(cards.map((card) => [card.layoutIndex, card]));
 
-const AboutHandcraftedMobileGrid = () => (
-  <div className="flex w-full flex-col gap-[2px]">
-    <div className="grid grid-cols-3 gap-[2px]">
-      {aboutHandcraftedMobileLayout.row1.map((tile, index) =>
-        tile.type === "photo" ? (
-          <MosaicPhotoTile
-            key={`r1-${index}`}
-            mosaicCol={tile.mosaicCol}
-            mosaicRow={tile.mosaicRow}
-            className="aspect-square"
-          />
-        ) : (
-          <MobileCardTile key={`r1-${index}`} cardIndex={tile.cardIndex} className="aspect-square" />
-        ),
-      )}
-    </div>
+  type MobileLayoutTile =
+    | (typeof aboutHandcraftedMobileLayout.row1)[number]
+    | (typeof aboutHandcraftedMobileLayout.row3)[number];
 
-    <div className="grid grid-cols-2 gap-[2px]">
-      {aboutHandcraftedMobileLayout.row2.map((tile, index) => (
+  const renderTile = (
+    tile: MobileLayoutTile,
+    key: string,
+    photoClassName: string,
+  ) => {
+    if (tile.type === "photo") {
+      return (
         <MosaicPhotoTile
-          key={`r2-${index}`}
+          key={key}
           mosaicCol={tile.mosaicCol}
           mosaicRow={tile.mosaicRow}
-          className="aspect-[3/2]"
+          className={photoClassName}
         />
-      ))}
-    </div>
+      );
+    }
 
-    <div className="grid grid-cols-3 gap-[2px]">
-      {aboutHandcraftedMobileLayout.row3.map((tile, index) =>
-        tile.type === "photo" ? (
+    const card = cardByIndex.get(tile.cardIndex);
+    if (!card) {
+      return (
+        <MosaicPhotoTile
+          key={key}
+          mosaicCol={tile.cardIndex === 1 ? 2 : tile.cardIndex === 0 ? 0 : 4}
+          mosaicRow={tile.cardIndex === 1 ? 1 : tile.cardIndex === 0 ? 2 : 2}
+          className={photoClassName}
+        />
+      );
+    }
+
+    return <MobileCardTile key={key} card={card} className={photoClassName} />;
+  };
+
+  return (
+    <div className="flex w-full flex-col gap-[2px]">
+      <div className="grid grid-cols-3 gap-[2px]">
+        {aboutHandcraftedMobileLayout.row1.map((tile, index) =>
+          renderTile(tile, `r1-${index}`, "aspect-square"),
+        )}
+      </div>
+
+      <div className="grid grid-cols-2 gap-[2px]">
+        {aboutHandcraftedMobileLayout.row2.map((tile, index) => (
           <MosaicPhotoTile
-            key={`r3-${index}`}
+            key={`r2-${index}`}
             mosaicCol={tile.mosaicCol}
             mosaicRow={tile.mosaicRow}
-            className="aspect-square"
+            className="aspect-[3/2]"
           />
-        ) : (
-          <MobileCardTile key={`r3-${index}`} cardIndex={tile.cardIndex} className="aspect-square" />
-        ),
-      )}
+        ))}
+      </div>
+
+      <div className="grid grid-cols-3 gap-[2px]">
+        {aboutHandcraftedMobileLayout.row3.map((tile, index) =>
+          renderTile(tile, `r3-${index}`, "aspect-square"),
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default AboutHandcraftedMobileGrid;

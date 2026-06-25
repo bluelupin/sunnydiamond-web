@@ -1,26 +1,11 @@
-import Image from "next/image";
 import { Fragment } from "react";
 import PageContainer from "@/shared/ui/layout/PageContainer";
+import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { cn } from "@/shared/utils/cn";
-import {
-  aboutGuaranteeIconPaths,
-  aboutGuarantees,
-  aboutGuaranteesFigmaSpec,
-} from "../data/content";
-
-const { icon: iconSpec } = aboutGuaranteesFigmaSpec;
-
-const guaranteeIconDimensions = {
-  diamond: { width: iconSpec.defaultSize, height: iconSpec.defaultSize, className: "md:h-16 md:w-16 h-[40px] w-[40px]" },
-  moneyback: { width: iconSpec.defaultSize, height: iconSpec.defaultSize, className: "md:h-16 md:w-16 h-[40px] w-[40px]" },
-  hallmark: {
-    width: iconSpec.hallmarkWidth,
-    height: iconSpec.hallmarkHeight,
-    className: "md:h-16 md:w-16 h-[40px] w-[40px]",
-  },
-  return: { width: iconSpec.defaultSize, height: iconSpec.defaultSize, className: "md:h-16 md:w-16 h-[40px] w-[40px]" },
-  cod: { width: iconSpec.defaultSize, height: iconSpec.defaultSize, className: "md:h-16 md:w-16 h-[40px] w-[40px]" },
-} as const;
+import type { NormalizedTrustBadge } from "@/services/about/about-page.types";
+type AboutGuaranteesBarProps = {
+  badges: NormalizedTrustBadge[];
+};
 
 const AboutGuaranteeDivider = ({ orientation = "vertical" }: { orientation?: "vertical" | "horizontal" }) => (
   <li
@@ -29,7 +14,7 @@ const AboutGuaranteeDivider = ({ orientation = "vertical" }: { orientation?: "ve
       "flex list-none items-center justify-center",
       orientation === "vertical"
         ? "min-w-0 flex-1 self-stretch"
-        : "lg:w-260 w-full shrink-0 lg:py-6 py-4",
+        : "w-full shrink-0 py-4 lg:w-260 lg:py-6",
     )}
   >
     <span
@@ -41,51 +26,57 @@ const AboutGuaranteeDivider = ({ orientation = "vertical" }: { orientation?: "ve
   </li>
 );
 
+type GuaranteeIconProps = {
+  icon: NormalizedTrustBadge["icon"];
+};
+
+const GuaranteeIcon = ({ icon }: GuaranteeIconProps) => (
+  <div
+    className="flex shrink-0 items-center justify-center md:h-16 md:w-16 h-[40px] w-[40px]"
+    aria-hidden
+  >
+    <ResponsiveImage
+      desktopSrc={icon.desktopUrl}
+      mobileSrc={icon.mobileUrl}
+      alt=""
+      width={icon.desktopUrl ? 64 : 40}
+      height={icon.desktopUrl ? 64 : 40}
+      className="shrink-0 object-contain md:h-16 md:w-16 h-[40px] w-[40px]"
+    />
+  </div>
+);
 type GuaranteeItemProps = {
-  label: string;
-  icon: keyof typeof aboutGuaranteeIconPaths;
+  badge: NormalizedTrustBadge;
 };
 
-const AboutGuaranteeItem = ({ label, icon }: GuaranteeItemProps) => {
-  const iconSrc = aboutGuaranteeIconPaths[icon];
-  const iconDimensions = guaranteeIconDimensions[icon];
+const AboutGuaranteeItem = ({ badge }: GuaranteeItemProps) => (
+  <li className="flex h-98 w-full list-none flex-col items-center justify-center gap-3 rounded-figma text-center lg:h-136 lg:w-260 desktop:w-260 desktop:shrink-0">
+    <GuaranteeIcon icon={badge.icon} />
+    <p className="max-w-236 font-gill text-base font-normal leading-110 text-darkblack desktop:text-20">
+      {badge.label}
+    </p>
+  </li>
+);
 
-  return (
-    <li className="flex lg:h-136 h-98 lg:w-260 w-full list-none flex-col items-center justify-center gap-3 rounded-figma text-center desktop:w-260 desktop:shrink-0">
-      <Image
-        src={iconSrc}
-        alt=""
-        width={iconDimensions.width}
-        height={iconDimensions.height}
-        aria-hidden
-        className={cn("shrink-0 object-contain", iconDimensions.className)}
-      />
-      <p className="max-w-236 font-gill text-base font-normal leading-110 text-darkblack desktop:text-20">
-        {label}
-      </p>
-    </li>
-  );
-};
-
-const AboutGuaranteesBar = () => {
+const AboutGuaranteesBar = ({ badges }: AboutGuaranteesBarProps) => {
   return (
     <section aria-label="Shopping guarantees" className="bg-gray200">
       <PageContainer className="py-16">
         <ul className="m-0 flex w-full list-none flex-col items-center p-0 lg:hidden">
-          {aboutGuarantees.map((guarantee, index) => (
-            <Fragment key={guarantee.label}>
+          {badges.map((badge, index) => (
+            <Fragment key={`${badge.label}-${index}`}>
               {index > 0 ? <AboutGuaranteeDivider orientation="horizontal" /> : null}
-              <AboutGuaranteeItem label={guarantee.label} icon={guarantee.icon} />
+              <AboutGuaranteeItem badge={badge} />
             </Fragment>
           ))}
         </ul>
 
         <div className="scrollbar-none -mx-5 hidden overflow-x-auto px-5 md:-mx-8 md:px-8 lg:-mx-10 lg:block lg:px-10 desktop:mx-0 desktop:overflow-visible desktop:px-0">
-          <ul className="m-0 flex lg:gap-2 gap-6 w-1360 shrink-0 list-none items-stretch p-0 desktop:w-full desktop:shrink">
-            {aboutGuarantees.map((guarantee, index) => (
-              <Fragment key={guarantee.label}>
+          <ul className="m-0 flex w-1360 shrink-0 list-none items-stretch gap-6 p-0 lg:gap-2 desktop:w-full desktop:shrink">
+            {badges.map((badge, index) => (
+              <Fragment key={`${badge.label}-${index}`}>
                 {index > 0 ? <AboutGuaranteeDivider orientation="vertical" /> : null}
-                <AboutGuaranteeItem label={guarantee.label} icon={guarantee.icon} />
+                <AboutGuaranteeItem badge={badge} />
               </Fragment>
             ))}
           </ul>

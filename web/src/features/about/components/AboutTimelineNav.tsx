@@ -3,15 +3,19 @@
 import { useEffect, useId, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
-import { aboutTimelineYears } from "../data/content";
 import type { TimelineYear } from "../hooks/useAboutTimelineScroll";
 
 type AboutTimelineNavProps = {
+  years: readonly string[];
   activeYear: TimelineYear;
   onYearSelect: (year: TimelineYear) => void;
 };
 
-const AboutTimelineNav = ({ activeYear, onYearSelect }: AboutTimelineNavProps) => {
+const AboutTimelineNav = ({
+  years,
+  activeYear,
+  onYearSelect,
+}: AboutTimelineNavProps) => {
   const listId = useId();
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -27,7 +31,7 @@ const AboutTimelineNav = ({ activeYear, onYearSelect }: AboutTimelineNavProps) =
   return (
     <nav
       aria-label="Company timeline"
-      className="relative w-full shrink-0 lg:w-143 lg:flex items-center"
+      className="relative w-full shrink-0 items-center lg:flex lg:w-143"
     >
       <div className="flex flex-col gap-4 lg:hidden">
         <button
@@ -62,12 +66,12 @@ const AboutTimelineNav = ({ activeYear, onYearSelect }: AboutTimelineNavProps) =
       <ol
         id={listId}
         className={cn(
-          "flex flex-col lg:items-end items-start gap-8",
+          "flex flex-col items-start gap-8 lg:items-end",
           isExpanded ? "mt-4 flex" : "hidden",
           "lg:mt-0 lg:flex lg:items-start",
         )}
       >
-        {aboutTimelineYears.map((year) => {
+        {years.map((year) => {
           const isActive = year === activeYear;
 
           return (

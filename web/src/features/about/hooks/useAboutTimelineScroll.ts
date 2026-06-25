@@ -7,9 +7,8 @@ import {
   useState,
   type RefObject,
 } from "react";
-import { aboutTimelineYears } from "../data/content";
 
-export type TimelineYear = (typeof aboutTimelineYears)[number];
+export type TimelineYear = string;
 
 const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 
@@ -22,8 +21,10 @@ export interface AboutTimelineScrollState {
 
 export function useAboutTimelineScroll(
   sectionRef: RefObject<HTMLElement | null>,
+  years: readonly string[],
+  defaultYear: string,
 ): AboutTimelineScrollState {
-  const [activeYear, setActiveYear] = useState<TimelineYear>("2008");
+  const [activeYear, setActiveYear] = useState<TimelineYear>(defaultYear);
   const [progress, setProgress] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
   const clickLockRef = useRef(false);
@@ -45,36 +46,43 @@ export function useAboutTimelineScroll(
     setProgress(clamp(-rect.top / scrollTrack));
   }, [sectionRef]);
 
-  const scrollToYear = useCallback((year: TimelineYear) => {
-    const section = sectionRef.current;
-    if (!section) return;
+  const scrollToYear = useCallback(
+    (year: TimelineYear) => {
+      const section = sectionRef.current;
+      if (!section) return;
 
-    const step = section.querySelector<HTMLElement>(`[data-timeline-step="${year}"]`);
-    if (!step) return;
+      const step = section.querySelector<HTMLElement>(`[data-timeline-step="${year}"]`);
+      if (!step) return;
 
-    clickLockRef.current = true;
-    setActiveYear(year);
+      clickLockRef.current = true;
+      setActiveYear(year);
 
-    if (clickLockTimerRef.current !== null) {
-      window.clearTimeout(clickLockTimerRef.current);
-    }
+      if (clickLockTimerRef.current !== null) {
+        window.clearTimeout(clickLockTimerRef.current);
+      }
 
-    step.scrollIntoView({ behavior: "smooth", block: "center" });
-    clickLockTimerRef.current = window.setTimeout(() => {
-      clickLockRef.current = false;
-      clickLockTimerRef.current = null;
-    }, 700);
-  }, [sectionRef]);
+      step.scrollIntoView({ behavior: "smooth", block: "center" });
+      clickLockTimerRef.current = window.setTimeout(() => {
+        clickLockRef.current = false;
+        clickLockTimerRef.current = null;
+      }, 700);
+    },
+    [sectionRef],
+  );
+
+  useEffect(() => {
+    setActiveYear(defaultYear);
+  }, [defaultYear]);
 
   useEffect(() => {
     const section = sectionRef.current;
-    if (!section) return;
+    if (!section || years.length === 0) return;
 
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     setReducedMotion(motionQuery.matches);
 
     if (motionQuery.matches) {
-      setActiveYear("2008");
+      setActiveYear(defaultYear);
       setProgress(1);
       return;
     }
@@ -95,8 +103,8 @@ export function useAboutTimelineScroll(
       const best = visible[0];
       if (!best?.target) return;
 
-      const year = best.target.getAttribute("data-timeline-step") as TimelineYear | null;
-      if (year) {
+      const year = best.target.getAttribute("data-timeline-step");
+      if (year && years.includes(year)) {
         setActiveYear(year);
       }
     };
@@ -120,6 +128,7 @@ export function useAboutTimelineScroll(
         observer.disconnect();
         window.removeEventListener("scroll", onScroll);
         window.removeEventListener("resize", onScroll);
+        setActiveYear(defaultYear);
         setProgress(1);
       }
     };
@@ -135,7 +144,7 @@ export function useAboutTimelineScroll(
         window.clearTimeout(clickLockTimerRef.current);
       }
     };
-  }, [sectionRef, updateProgress]);
+  }, [sectionRef, updateProgress, years, defaultYear]);
 
   return {
     activeYear,

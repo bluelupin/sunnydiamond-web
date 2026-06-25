@@ -2,10 +2,21 @@
 
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import PageContainer from "@/shared/ui/layout/PageContainer";
-import { aboutSince1997Content } from "../data/content";
+import type { NormalizedAboutLegacy } from "@/services/about/about-page.types";
+import {
+  aboutSince1997Content,
+} from "../data/content";
 
-const AboutSince1997Section = () => {
-  const [founder, event, attending] = aboutSince1997Content.gallery;
+type AboutSince1997SectionProps = NormalizedAboutLegacy;
+
+const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionProps) => {
+  const [founder, event, attending] = gallery;
+  const founderWidth = founder.image.width ?? aboutSince1997Content.gallery[0]?.width ?? 549;
+  const founderHeight = founder.image.height ?? aboutSince1997Content.gallery[0]?.height ?? 600;
+  const eventWidth = event?.image.width ?? aboutSince1997Content.gallery[1]?.width ?? 320;
+  const eventHeight = event?.image.height ?? aboutSince1997Content.gallery[1]?.height ?? 417;
+  const attendingWidth = attending?.image.width ?? aboutSince1997Content.gallery[2]?.width ?? 463;
+  const attendingHeight = attending?.image.height ?? aboutSince1997Content.gallery[2]?.height ?? 600;
 
   return (
     <section
@@ -18,11 +29,13 @@ const AboutSince1997Section = () => {
             id="about-since-1997-title"
             className="font-larken font-light leading-110 text-darkblack lg:text-48 md:text-40 text-32"
           >
-            {aboutSince1997Content.title}
+            {title}
           </h2>
-          <p className="lg:hidden font-gill font-light leading-110 text-neutral500 md:text-lg text-base">
-            {aboutSince1997Content.story}
-          </p>
+          {story ? (
+            <p className="lg:hidden font-gill font-light leading-110 text-neutral500 md:text-lg text-base">
+              {story}
+            </p>
+          ) : null}
         </div>
       </PageContainer>
       <PageContainer className="pt-0 !pr-0 pl-5">
@@ -32,61 +45,71 @@ const AboutSince1997Section = () => {
               <figure className="flex flex-col gap-3 md:w-auto w-full">
                 <div className="h-600 md:w-549 w-full">
                   <ResponsiveImage
-                    desktopSrc={founder.desktopImage}
-                    mobileSrc={founder.mobileImage}
-                    alt={founder.alt}
-                    width={founder.width}
-                    height={founder.height}
+                    desktopSrc={founder.image.desktopUrl}
+                    mobileSrc={founder.image.mobileUrl}
+                    alt={founder.image.alt}
+                    width={founderWidth}
+                    height={founderHeight}
                     quality={90}
                     sizes="549px"
                     className="object-cover"
                   />
                 </div>
-                <figcaption className="font-gill md:text-base text-sm leading-110 text-darkblack">
-                  {founder.caption}
-                </figcaption>
+                {founder.caption ? (
+                  <figcaption className="font-gill md:text-base text-sm leading-110 text-darkblack">
+                    {founder.caption}
+                  </figcaption>
+                ) : null}
               </figure>
 
-              <p className="lg:flex hidden max-w-358 font-gill lg:text-xl text-lg font-light leading-110 text-neutral500">
-                {aboutSince1997Content.story}
-              </p>
+              {story ? (
+                <p className="lg:flex hidden max-w-358 font-gill lg:text-xl text-lg font-light leading-110 text-neutral500">
+                  {story}
+                </p>
+              ) : null}
             </article>
-            <div className="md:w-auto w-full flex shrink-0 items-center md:gap-5 gap-3 overflow-y-hidden overflow-x-auto md:overflow-x-visible">
-              <figure className="flex md:w-320 md:min-w-0 sm:min-w-[400px] min-w-[256px] sm:w-[400px] w-[256px] flex-col gap-3">
-                <div className="md:h-417 h-[240px] overflow-hidden">
-                  <ResponsiveImage
-                    desktopSrc={event.desktopImage}
-                    mobileSrc={event.mobileImage}
-                    alt={event.alt}
-                    width={event.width}
-                    height={event.height}
-                    quality={90}
-                    sizes="320px"
-                    className="object-cover"
-                  />
-                </div>
-                <figcaption className="font-gill text-base leading-110 text-darkblack">
-                  {event.caption}
-                </figcaption>
-              </figure>
-              <figure className="flex md:w-463 md:min-w-0 sm:min-w-[400px] min-w-[256px] sm:w-[400px] w-[256px] flex-col gap-3">
-                <div className="md:h-600 h-[277px] overflow-hidden">
-                  <ResponsiveImage
-                    desktopSrc={attending.desktopImage}
-                    mobileSrc={attending.mobileImage}
-                    alt={attending.alt}
-                    width={attending.width}
-                    height={attending.height}
-                    quality={90}
-                    sizes="463px"
-                    className="object-cover"
-                  />
-                </div>
-                <figcaption className="font-gill text-base leading-110 text-darkblack">
-                  {attending.caption}
-                </figcaption>
-              </figure>
-            </div>
+            {event && attending ? (
+              <div className="md:w-auto w-full flex shrink-0 items-center md:gap-5 gap-3 overflow-y-hidden overflow-x-auto md:overflow-x-visible">
+                <figure className="flex md:w-320 md:min-w-0 sm:min-w-[400px] min-w-[256px] sm:w-[400px] w-[256px] flex-col gap-3">
+                  <div className="md:h-417 h-[240px] overflow-hidden">
+                    <ResponsiveImage
+                      desktopSrc={event.image.desktopUrl}
+                      mobileSrc={event.image.mobileUrl}
+                      alt={event.image.alt}
+                      width={eventWidth}
+                      height={eventHeight}
+                      quality={90}
+                      sizes="320px"
+                      className="object-cover"
+                    />
+                  </div>
+                  {event.caption ? (
+                    <figcaption className="font-gill text-base leading-110 text-darkblack">
+                      {event.caption}
+                    </figcaption>
+                  ) : null}
+                </figure>
+                <figure className="flex md:w-463 md:min-w-0 sm:min-w-[400px] min-w-[256px] sm:w-[400px] w-[256px] flex-col gap-3">
+                  <div className="md:h-600 h-[277px] overflow-hidden">
+                    <ResponsiveImage
+                      desktopSrc={attending.image.desktopUrl}
+                      mobileSrc={attending.image.mobileUrl}
+                      alt={attending.image.alt}
+                      width={attendingWidth}
+                      height={attendingHeight}
+                      quality={90}
+                      sizes="463px"
+                      className="object-cover"
+                    />
+                  </div>
+                  {attending.caption ? (
+                    <figcaption className="font-gill text-base leading-110 text-darkblack">
+                      {attending.caption}
+                    </figcaption>
+                  ) : null}
+                </figure>
+              </div>
+            ) : null}
           </div>
         </div>
       </PageContainer>

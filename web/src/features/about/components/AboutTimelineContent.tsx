@@ -2,16 +2,12 @@
 
 import { cn } from "@/shared/utils/cn";
 import DiamondIcon from "@/assets/Icons/Diamond";
+import type { NormalizedTimelineMilestone } from "@/services/about/about-page.types";
 import type { TimelineYear } from "../hooks/useAboutTimelineScroll";
-
-type Milestone = {
-  title: string;
-  description: string;
-};
 
 type AboutTimelineContentProps = {
   activeYear: TimelineYear;
-  milestone: Milestone;
+  milestone: NormalizedTimelineMilestone;
   reducedMotion: boolean;
 };
 
@@ -42,10 +38,13 @@ const AboutTimelineContent = ({
       </div>
 
       <div className="flex w-full flex-col gap-4">
-        <h2 id="about-timeline-title" className="font-larken font-light leading-110 text-darkblack text-32">
+        <h2
+          id="about-timeline-title"
+          className="font-larken text-32 font-light leading-110 text-darkblack"
+        >
           {milestone.title}
         </h2>
-        <p className="font-gill text-base font-light leading-110 text-neutral500 lg:text-xl">
+        <p className="whitespace-pre-line font-gill text-base font-light leading-110 text-neutral500 lg:text-xl">
           {milestone.description}
         </p>
       </div>

@@ -3,17 +3,15 @@
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import MediaContentOverlay from "@/shared/ui/MediaContentOverlay";
 import { cn } from "@/shared/utils/cn";
-import {
-  aboutHeroContent,
-  aboutHeroFigmaSpec,
-  aboutPageImages,
-} from "../data/content";
+import { aboutHeroFigmaSpec } from "../data/content";
 import { useAboutHeroLoadAnimation } from "../hooks/useAboutHeroLoadAnimation";
+import type { NormalizedAboutHero } from "@/services/about/about-page.types";
 
 const { animation: heroAnimation } = aboutHeroFigmaSpec;
 const collapsedWidthPercent = `100%`;
+type AboutHeroSectionProps = NormalizedAboutHero;
 
-const AboutHeroSection = () => {
+const AboutHeroSection = ({ title, image }: AboutHeroSectionProps) => {
   const { expanded, titleVisible, reducedMotion } = useAboutHeroLoadAnimation();
 
   const heroTransition = reducedMotion
@@ -44,12 +42,12 @@ const AboutHeroSection = () => {
           style={{ width: !expanded ? collapsedWidthPercent : undefined }}
         >
           <ResponsiveImage
-            desktopSrc={aboutPageImages.heroDesktop}
-            mobileSrc={aboutPageImages.heroMobile}
-            alt="Sunny Diamonds craftsmanship"
+            desktopSrc={image.desktopUrl}
+            mobileSrc={image.mobileUrl}
+            alt={image.alt}
             priority
-            width={1802}
-            height={1802}
+            width={image.width ?? 1802}
+            height={image.height ?? 1802}
             quality={90}
             sizes="100vw"
             className={cn(
@@ -60,21 +58,21 @@ const AboutHeroSection = () => {
           />
 
           <MediaContentOverlay gradient={aboutHeroFigmaSpec.overlay.gradient} />
-        </div>
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-16 lg:pb-75">
-          <h1
-            id="about-hero-title"
-            className={cn(
-              "w-full max-w-886 text-center font-larken text-32 font-light leading-110 text-white sm:text-36 lg:text-48",
-              titleTransition,
-              titleVisible
-                ? "translate-y-0 opacity-100"
-                : "translate-y-3 opacity-0",
-            )}
-          >
-            {aboutHeroContent.title}
-          </h1>
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-16 lg:pb-75">
+            <h1
+              id="about-hero-title"
+              className={cn(
+                "w-full max-w-886 text-center font-larken text-32 font-light leading-110 text-white sm:text-36 lg:text-48",
+                titleTransition,
+                titleVisible
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-3 opacity-0",
+              )}
+            >
+              {title}
+            </h1>
+          </div>
         </div>
       </div>
     </section>

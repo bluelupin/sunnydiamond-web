@@ -4,25 +4,20 @@ import { type ReactNode, useRef } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import { cn } from "@/shared/utils/cn";
-import {
-  aboutCraftingRarityContent,
-  aboutCraftingRarityFigmaSpec,
-  aboutPageImages,
-} from "../data/content";
+import { aboutCraftingRarityFigmaSpec } from "../data/content";
 import { useCraftingRarityScrollReveal } from "../hooks/useCraftingRarityScrollReveal";
+import type { NormalizedCraftingRarity } from "@/services/about/about-page.types";
 import VerticalScrollLine from "./VerticalScrollLine";
 
 const { image: imageSpec, line: lineSpec } = aboutCraftingRarityFigmaSpec;
 
 type FigmaMaskRevealProps = {
-  /** 0–1 scroll-scrubbed mask progress */
   reveal: number;
   reducedMotion: boolean;
   className?: string;
   children: ReactNode;
 };
 
-/** Figma heading_mask / image_mask / line_mask — height expands with scroll progress */
 const FigmaMaskReveal = ({
   reveal,
   reducedMotion,
@@ -57,7 +52,13 @@ const FigmaMaskReveal = ({
   );
 };
 
-const AboutCraftingRaritySection = () => {
+type AboutCraftingRaritySectionProps = NormalizedCraftingRarity;
+
+const AboutCraftingRaritySection = ({
+  heading,
+  description,
+  image,
+}: AboutCraftingRaritySectionProps) => {
   const sectionRef = useRef<HTMLElement>(null);
   const {
     headingReveal,
@@ -85,7 +86,7 @@ const AboutCraftingRaritySection = () => {
               id="about-crafting-rarity-title"
               className="whitespace-pre-line font-larken text-40 font-light leading-110 text-darkblack sm:text-56 md:text-72 lg:text-90"
             >
-              {aboutCraftingRarityContent.heading}
+              {heading}
             </h2>
           </FigmaMaskReveal>
 
@@ -96,10 +97,11 @@ const AboutCraftingRaritySection = () => {
           >
             <div className="mx-auto h-auto w-220 sm:h-280 sm:w-280 lg:h-354 lg:w-354">
               <ResponsiveImage
-                desktopSrc={aboutPageImages.craftingDiamond}
-                alt="Internally flawless diamond"
-                width={imageSpec.width}
-                height={imageSpec.height}
+                desktopSrc={image.desktopUrl}
+                mobileSrc={image.mobileUrl}
+                alt={image.alt}
+                width={image.width ?? imageSpec.width}
+                height={image.height ?? imageSpec.height}
                 quality={90}
                 sizes="(max-width: 768px) 220px, 354px"
                 className="object-cover"
@@ -124,7 +126,7 @@ const AboutCraftingRaritySection = () => {
             className="mx-auto mt-2.5 w-full max-w-557 font-gill text-base font-light leading-110 text-gray600 sm:mt-3 lg:mt-[13px] lg:text-20"
             style={reducedMotion ? undefined : { opacity: bodyReveal }}
           >
-            {aboutCraftingRarityContent.description}
+            {description}
           </p>
         </div>
       </PageContainer>

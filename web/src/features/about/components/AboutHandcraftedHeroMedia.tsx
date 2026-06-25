@@ -2,26 +2,32 @@
 
 import { useCallback, useState } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
-import {
-  aboutHandcraftedAssets,
-  aboutHandcraftedFigmaSpec,
-  aboutPageImages,
-} from "../data/content";
+import { aboutHandcraftedFigmaSpec } from "../data/content";
 
 const { hero } = aboutHandcraftedFigmaSpec;
 
-const AboutHandcraftedHeroMedia = () => {
-  const [useFallback, setUseFallback] = useState(false);
+type AboutHandcraftedHeroMediaProps = {
+  videoUrl?: string;
+  posterUrl?: string;
+};
+
+const AboutHandcraftedHeroMedia = ({
+  videoUrl,
+  posterUrl,
+}: AboutHandcraftedHeroMediaProps) => {
+  const [useFallback, setUseFallback] = useState(!videoUrl);
 
   const showImageFallback = useCallback(() => {
     setUseFallback(true);
   }, []);
 
-  if (useFallback) {
+  if (useFallback || !videoUrl) {
+    if (!posterUrl) return null;
+
     return (
       <ResponsiveImage
-        desktopSrc={aboutPageImages.handcraftedBg}
-        alt="Handcrafted diamond jewellery"
+        desktopSrc={posterUrl}
+        alt=""
         width={hero.width}
         height={hero.height}
         quality={90}
@@ -39,12 +45,12 @@ const AboutHandcraftedHeroMedia = () => {
       muted
       playsInline
       preload="metadata"
-      poster={aboutPageImages.handcraftedBg}
+      poster={posterUrl}
       aria-hidden
       tabIndex={-1}
       onError={showImageFallback}
     >
-      <source src={aboutHandcraftedAssets.heroVideo} type="video/mp4" />
+      <source src={videoUrl} type="video/webm" />
     </video>
   );
 };

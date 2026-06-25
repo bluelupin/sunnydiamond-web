@@ -2,34 +2,42 @@ import type { Metadata } from "next";
 import { constructMetadata } from "@/shared/lib/seo/metadata";
 import JsonLd from "@/shared/lib/seo/JsonLd";
 import { seoContent } from "@/features/cms/data/content";
-import { siteConfig } from "@/shared/lib/siteConfig";
 import AboutPageView from "@/features/about/components/AboutPage";
+import { getAboutPage, EMPTY_ABOUT_PAGE } from "@/services/about/about-page.service";
+import { buildAboutJsonLd, resolveAboutSeoMetadata } from "@/shared/lib/seo/aboutSeo";
 
-export const metadata: Metadata = constructMetadata({
-  title: seoContent.about.title,
-  description: seoContent.about.description,
-  canonicalPath: "/about",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const page = await getAboutPage();
+    const { title, description, canonicalPath } = resolveAboutSeoMetadata(page);
 
-const aboutJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "AboutPage",
-  name: seoContent.about.title,
-  description: seoContent.about.description,
-  url: `${siteConfig.seo.siteUrl}/about`,
-  mainEntity: {
-    "@type": "Organization",
-    name: siteConfig.brand.name,
-    description: seoContent.about.description,
-    foundingDate: "1997",
-  },
-};
+    return constructMetadata({
+      title,
+      description,
+      canonicalPath,
+    });
+  } catch {
+    return constructMetadata({
+      title: seoContent.about.title,
+      description: seoContent.about.description,
+      canonicalPath: "/about",
+    });
+  }
+}
 
-export default function Page() {
+export default async function Page() {
+  let page = EMPTY_ABOUT_PAGE;
+
+  try {
+    page = await getAboutPage();
+  } catch {
+    page = EMPTY_ABOUT_PAGE;
+  }
+
   return (
     <>
-      <JsonLd data={aboutJsonLd} />
-      <AboutPageView />
+      <JsonLd data={buildAboutJsonLd(page)} />
+      <AboutPageView page={page} />
     </>
   );
 }
