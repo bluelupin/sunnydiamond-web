@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import { useFadeIn } from "@/shared/hooks/use-fade-in";
 import { homeContent } from "@/features/cms/data/content";
 import { products } from "@/features/products/data/products";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
@@ -61,7 +60,6 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
     shoppingData?.homepage?.featuredCollectionSection || shoppingData?.featuredCollectionSection;
 
   const fallback = homeContent.alankara.collection;
-  const ref = useFadeIn();
 
   const collectionProps = useMemo(() => {
     const sectionTitle = featuredCollectionData?.sectionTitle?.trim() || fallback.title;
@@ -126,7 +124,6 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
     return (
       <section
         id={id}
-        ref={ref}
         aria-label="Alankara Collection"
         className="bg-white"
         aria-busy="true"

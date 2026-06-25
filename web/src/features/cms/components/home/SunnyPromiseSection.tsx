@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useFadeIn } from "@/shared/hooks/use-fade-in";
+import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { getImageSrc } from "@/shared/utils/image";
 import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 import { homeContent } from "@/features/cms/data/content";
@@ -16,9 +16,6 @@ const PROMISE_VIDEO_MP4 = "/videos/handcrafted-bg.mp4";
 const PROMISE_POSTER = "/images/about/handcrafted-bg.png";
 
 const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
-  const sectionRef = useFadeIn(0);
-  const contentRef = useFadeIn(200);
-
   const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
   const sunnyPromiseData = editorialData?.sunnyPromiseSection ?? null;
   const fallback = homeContent.promise;
@@ -36,8 +33,7 @@ const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
     return (
       <section
         id={id}
-        ref={sectionRef as React.RefObject<HTMLElement>}
-        className="flex flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 lg:gap-[40px] lg:px-[40px] lg:py-100"
+        className="flex flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 lg:gap-40 lg:px-40 lg:py-100"
         aria-busy="true"
         aria-label="The Sunny Promise"
       >
@@ -54,15 +50,14 @@ const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
   return (
     <section
       id={id}
-      ref={sectionRef as React.RefObject<HTMLElement>}
       aria-label={sectionTitle}
-      className="flex flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 lg:gap-[40px] lg:px-[40px] lg:py-100"
+      className="flex flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 lg:gap-40 lg:px-40 lg:py-100"
     >
-      <h2 className="text-center font-larken text-[32px] font-light leading-[110%] darkblack lg:text-[48px] lg:whitespace-nowrap">
+      <ScrollReveal as="h2" delayMs={0} className="text-center font-larken text-[32px] font-light leading-110 text-darkblack lg:text-[48px] lg:whitespace-nowrap">
         {sectionTitle}
-      </h2>
+      </ScrollReveal>
 
-      <div className="relative h-[670px] w-full max-w-[1360px] shrink-0 overflow-hidden md:h-[700px]">
+      <ScrollReveal delayMs={100} className="relative h-[670px] w-full max-w-[1360px] shrink-0 overflow-hidden md:h-[700px]">
         <video
           className="absolute inset-0 size-full object-cover object-center"
           autoPlay
@@ -76,23 +71,22 @@ const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
         >
           <source src={PROMISE_VIDEO_MP4} type="video/mp4" />
         </video>
-      </div>
+      </ScrollReveal>
 
-      <div
-        ref={contentRef as React.RefObject<HTMLDivElement>}
-        className="flex w-full flex-col items-center gap-6 lg:gap-[24px]"
-      >
-        <p className="max-w-[384px] text-center font-gill text-base font-light leading-[110%] text-[#4D4D4D] md:text-[20px]">
+      <div className="flex w-full flex-col items-center gap-6 lg:gap-6">
+        <ScrollReveal delayMs={180} className="max-w-[384px] text-center font-gill text-base font-light leading-110 text-[#4D4D4D] md:text-xl">
           {description}
-        </p>
+        </ScrollReveal>
 
         {ctaUrl ? (
-          <Link
-            href={ctaUrl}
-            className="inline-flex items-center justify-center border-b-[1.5px] border-[#0a0a0a] pb-1 font-gill text-sm font-normal uppercase leading-[110%] darkblack transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2"
-          >
-            {ctaLabel}
-          </Link>
+          <ScrollReveal delayMs={260}>
+            <Link
+              href={ctaUrl}
+              className="inline-flex items-center justify-center border-b-[1.5px] border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
+            >
+              {ctaLabel}
+            </Link>
+          </ScrollReveal>
         ) : null}
       </div>
     </section>

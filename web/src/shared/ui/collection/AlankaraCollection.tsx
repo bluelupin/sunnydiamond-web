@@ -8,6 +8,7 @@ import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import LeftArrow from "@/assets/Icons/LeftArrow";
 import RightArrow from "@/assets/Icons/RightArrow";
 import { cn } from "@/shared/utils/cn";
+import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { getImageSrc } from "@/shared/utils/image";
 import {
   ALANKARA_THUMBNAIL_CROPS,
@@ -362,40 +363,46 @@ export function AlankaraCollection({
       className={cn("w-full bg-white", className)}
     >
       <div className="hidden lg:grid lg:grid-cols-2 lg:max-w-[1440px] lg:mx-auto">
-        <CollectionHeroPanel
-          title={title}
-          description={description}
-          desktopImage={desktopHero}
-          mobileImage={mobileHero}
-          imageAlt={title}
-          priority={priority}
-          variant="desktop"
-        />
-        <ProductCarouselPanel
-          products={products}
-          defaultProductCtaLabel={defaultProductCtaLabel}
-          variant="desktop"
-        />
+        <ScrollReveal delayMs={0}>
+          <CollectionHeroPanel
+            title={title}
+            description={description}
+            desktopImage={desktopHero}
+            mobileImage={mobileHero}
+            imageAlt={title}
+            priority={priority}
+            variant="desktop"
+          />
+        </ScrollReveal>
+        <ScrollReveal delayMs={100}>
+          <ProductCarouselPanel
+            products={products}
+            defaultProductCtaLabel={defaultProductCtaLabel}
+            variant="desktop"
+          />
+        </ScrollReveal>
       </div>
 
       <div className="relative mx-auto w-full max-w-[375px] pb-10 lg:hidden">
-        <CollectionHeroPanel
-          title={title}
-          description={description}
-          desktopImage={desktopHero}
-          mobileImage={mobileHero}
-          imageAlt={title}
-          collectionCta={collectionCta}
-          priority={priority}
-          variant="mobile"
-        />
-        <div className="relative z-10 -mt-[51px] flex justify-center">
+        <ScrollReveal delayMs={0}>
+          <CollectionHeroPanel
+            title={title}
+            description={description}
+            desktopImage={desktopHero}
+            mobileImage={mobileHero}
+            imageAlt={title}
+            collectionCta={collectionCta}
+            priority={priority}
+            variant="mobile"
+          />
+        </ScrollReveal>
+        <ScrollReveal delayMs={100} className="relative z-10 -mt-[51px] flex justify-center">
           <ProductCarouselPanel
             products={products}
             defaultProductCtaLabel={defaultProductCtaLabel}
             variant="mobile"
           />
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

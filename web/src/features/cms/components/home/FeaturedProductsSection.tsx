@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
-import { useFadeIn } from "@/shared/hooks/use-fade-in";
+import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 import LeftArrow from "@/assets/Icons/LeftArrow";
 import RightArrow from "@/assets/Icons/RightArrow";
@@ -22,7 +22,6 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
   const sectionTitle = featuredProductsData?.sectionTitle ?? "";
   const description = featuredProductsData?.description ?? "";
 
-  const ref = useFadeIn();
   const items = useMemo(() => {
     const products = Array.isArray(featuredProductsData?.products) ? featuredProductsData?.products : [];
     return products
@@ -144,7 +143,6 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
     return (
       <section
         id={id}
-        ref={ref}
         className="bg-gray200 py-6 sm:py-10 md:py-16 lg:py-20 overflow-hidden h-auto flex flex-col items-center justify-center"
         aria-label="Featured diamond carousel"
         aria-busy="true"
@@ -175,19 +173,18 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
   return (
     <section
       id={id}
-      ref={ref}
       className="bg-gray200 py-6 sm:py-10 md:py-16 lg:py-20 overflow-hidden h-auto flex flex-col items-center justify-center"
       aria-label="Featured diamond carousel"
     >
       {/* Heading */}
       <div className="text-center md:max-w-2xl sm:max-w-xl max-w-full sm:mx-auto md:mb-10 sm:mb-8 mb-6 px-5">
-        <h2 className="md:mb-5 mb-3 text-foreground lg:text-5xl md:text-4xl text-[32px] font-larken font-light tracking-[0%] leading-[100%] text-darkblack text-center">
+        <ScrollReveal as="h2" delayMs={0} className="md:mb-5 mb-3 text-foreground lg:text-5xl md:text-4xl text-[32px] font-larken font-light tracking-[0%] leading-[100%] text-darkblack text-center">
           {sectionTitle || "Your Diamond Awaits (F)"}
-        </h2>
+        </ScrollReveal>
 
-        <p className="text-base md:text-lg lg:text-xl text-darkblack font-light font-gill tracking-[1%] leading-[100%] text-center">
+        <ScrollReveal delayMs={80} className="text-base md:text-lg lg:text-xl text-darkblack font-light font-gill tracking-[1%] leading-[100%] text-center">
           {description || "Traditional mastery bringing every diamond to radiant, eternal life. (F)"}
-        </p>
+        </ScrollReveal>
       </div>
 
       {/* Slider */}

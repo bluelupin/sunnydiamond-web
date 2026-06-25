@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
-import { useFadeIn } from "@/shared/hooks/use-fade-in";
+import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import type { SavingsPlanStep } from "@/types/homepage/diamondsForEveryoneSection";
 import { isSectionActive } from "@/shared/utils/cmsSection";
@@ -18,8 +18,8 @@ const STEPS_LINE = "/images/home/savings-plan-line.svg";
 const DEFAULT_STEPS: SavingsPlanStep[] = [
   {
     stepNumber: 1,
-    description: "Save at your own pace, starting ",
-    highlightedText: "from ₹1000/ month",
+    description: "Save at your own pace, ",
+    highlightedText: "starting from ₹1000/ month",
   },
   {
     stepNumber: 2,
@@ -32,8 +32,8 @@ const DEFAULT_STEPS: SavingsPlanStep[] = [
 ];
 
 const StepCircle = ({ number }: { number: number }) => (
-  <div className="relative z-10 flex size-10 shrink-0 items-center justify-center rounded-full border border-[#0a0a0a] bg-[#EBDFC6]">
-    <span className="font-gill text-xl font-light leading-none tracking-[0.2px] darkblack">
+  <div className="relative z-10 flex size-10 shrink-0 items-center justify-center rounded-full border border-darkblack bg-[#EBDFC6]">
+    <span className="font-gill text-xl font-light leading-none tracking-[0.2px] text-darkblack">
       {number}
     </span>
   </div>
@@ -47,15 +47,18 @@ const StepDescription = ({
   className?: string;
 }) => (
   <p className={className}>
-    <span className="font-light">{step.description}</span>
     {step.highlightedText ? (
-      <span className="font-normal">{step.highlightedText}</span>
-    ) : null}
+      <>
+        <span className="font-light">{step.description}</span>
+        <span className="font-normal">{step.highlightedText}</span>
+      </>
+    ) : (
+      <span className="font-light">{step.description}</span>
+    )}
   </p>
 );
 
 const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => {
-  const contentRef = useFadeIn(200);
   const { data: editorialData, isLoading } = useHomepageEditorialBlocks();
 
   const sectionData = editorialData?.diamondsForEveryoneSection ?? null;
@@ -89,14 +92,18 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
     return (
       <section
         id={id}
-        className="relative overflow-hidden bg-chalkCard px-4 py-16 md:bg-[#F4F3EE] md:px-10 md:py-100"
+        className="relative overflow-hidden bg-chalkCard px-4 py-16 md:bg-gray300 md:px-40 md:py-104"
         aria-busy="true"
         aria-label="Diamonds for Everyone"
       >
-        <div className="mx-auto flex max-w-[510px] flex-col items-center gap-6">
-          <div className="h-4 w-40 rounded bg-black/10" aria-hidden />
-          <div className="h-10 w-72 rounded bg-black/10" aria-hidden />
-          <div className="h-5 w-64 rounded bg-black/10" aria-hidden />
+        <div className="mx-auto flex w-full max-w-[1360px] flex-col items-center gap-8 md:gap-40">
+          <div className="flex w-full flex-col items-center gap-6 md:max-w-[510px]">
+            <div className="h-4 w-40 rounded bg-black/10" aria-hidden />
+            <div className="flex w-full flex-col items-center gap-3 md:gap-4">
+              <div className="h-10 w-full max-w-[320px] rounded bg-black/10" aria-hidden />
+              <div className="h-5 w-full max-w-[280px] rounded bg-black/10" aria-hidden />
+            </div>
+          </div>
         </div>
       </section>
     );
@@ -106,7 +113,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
     <section
       id={id}
       aria-label={sectionTitle}
-      className="relative overflow-hidden bg-chalkCard px-4 py-16 md:bg-[#F4F3EE] md:px-10 md:py-100"
+      className="relative overflow-hidden bg-chalkCard px-4 py-16 md:bg-gray300 md:px-40 md:py-104"
     >
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-1/2 top-0 flex h-[651px] w-[1339px] -translate-x-1/2 items-center justify-center mix-blend-color-burn md:top-1/2 md:h-[700px] md:w-[1440px] md:-translate-y-1/2">
@@ -122,68 +129,76 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
         </div>
       </div>
 
-      <div
-        ref={contentRef as React.RefObject<HTMLDivElement>}
-        className="relative mx-auto flex w-full max-w-[1360px] flex-col items-center gap-8 md:gap-10"
-      >
-        <div className="flex w-full max-w-[510px] flex-col items-center gap-6 text-center md:gap-6">
-          <p className="font-gill text-sm font-semibold uppercase leading-[110%] text-[#AB863B] md:text-base md:font-normal">
-            {eyebrow}
-          </p>
-          <div className="flex w-full flex-col items-center gap-3 md:gap-4">
-            <h2 className="w-full font-larken text-[32px] font-light leading-[110%] darkblack md:text-[48px]">
-              {sectionTitle}
-            </h2>
-            <p className="w-full font-gill text-base font-light leading-[110%] text-[#4D4D4D] md:text-[20px]">
-              {subtitle}
+      <div className="relative mx-auto flex w-full max-w-[1360px] flex-col items-center gap-8 md:gap-40">
+        <div className="flex w-full flex-col items-center gap-6 text-center md:max-w-[510px]">
+          <ScrollReveal delayMs={0}>
+            <p className="font-gill text-sm font-semibold leading-110 text-[#AB863B] md:text-base md:font-normal">
+              {eyebrow}
             </p>
+          </ScrollReveal>
+
+          <div className="flex w-full flex-col items-center gap-3 md:gap-4">
+            <ScrollReveal as="h2" delayMs={80} className="w-full font-larken text-[32px] font-light leading-110 text-darkblack md:text-[48px]">
+              {sectionTitle}
+            </ScrollReveal>
+
+            <ScrollReveal delayMs={160} className="w-full font-gill text-base font-light leading-110 text-[#4D4D4D] md:text-xl">
+              {subtitle}
+            </ScrollReveal>
           </div>
         </div>
 
         {/* Desktop steps */}
         <div className="hidden w-full flex-col items-center gap-6 md:flex">
-          <div className="relative h-10 w-full max-w-[784px]">
-            <div className="absolute left-1/2 top-1/2 h-px w-full max-w-[784px] -translate-x-1/2 -translate-y-1/2">
-              <Image src={STEPS_LINE} alt="" width={784} height={1} className="w-full" aria-hidden />
+          <ScrollReveal delayMs={200} className="relative h-10 w-full">
+            <div className="absolute left-1/2 top-1/2 w-full max-w-[784px] -translate-x-1/2 -translate-y-1/2">
+              <Image src={STEPS_LINE} alt="" width={784} height={1} className="h-px w-full" aria-hidden />
             </div>
-            <div className="relative flex items-center justify-between">
+            <div className="relative flex items-center justify-between px-[19.85%]">
               {steps.map((step) => (
                 <StepCircle key={step.stepNumber} number={step.stepNumber ?? 0} />
               ))}
             </div>
-          </div>
+          </ScrollReveal>
 
-          <div className="flex w-full max-w-[920px] justify-center gap-[140px]">
-            {steps.map((step) => (
-              <StepDescription
-                key={step.stepNumber}
-                step={step}
-                className="w-[250px] text-center font-gill text-[20px] leading-[110%] darkblack"
-              />
+          <div className="flex w-full justify-center gap-[140px]">
+            {steps.map((step, index) => (
+              <ScrollReveal key={step.stepNumber} delayMs={280 + index * 80} className="w-[250px]">
+                <StepDescription
+                  step={step}
+                  className="text-center font-gill text-xl font-light leading-110 text-darkblack"
+                />
+              </ScrollReveal>
             ))}
           </div>
         </div>
 
-        {/* Mobile steps */}
+        {/* Mobile steps — Figma 684:3316 */}
         <div className="flex w-full flex-col items-center gap-12 md:hidden">
-          {steps.map((step) => (
-            <div key={step.stepNumber} className="flex flex-col items-center gap-4">
+          {steps.map((step, index) => (
+            <ScrollReveal
+              key={step.stepNumber}
+              delayMs={240 + index * 80}
+              className="flex flex-col items-center gap-4"
+            >
               <StepCircle number={step.stepNumber ?? 0} />
               <StepDescription
                 step={step}
-                className="max-w-[250px] text-center font-gill text-base leading-[110%] darkblack"
+                className="w-[250px] text-center font-gill text-base font-light leading-110 text-darkblack"
               />
-            </div>
+            </ScrollReveal>
           ))}
         </div>
 
         {ctaUrl ? (
-          <Link
-            href={ctaUrl}
-            className="inline-flex items-center justify-center border-b-[1.5px] border-[#0a0a0a] pb-1 font-gill text-sm font-normal uppercase leading-[110%] darkblack transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2"
-          >
-            {ctaLabel}
-          </Link>
+          <ScrollReveal delayMs={480}>
+            <Link
+              href={ctaUrl}
+              className="inline-flex items-center justify-center border-b-[1.5px] border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
+            >
+              {ctaLabel}
+            </Link>
+          </ScrollReveal>
         ) : null}
       </div>
     </section>

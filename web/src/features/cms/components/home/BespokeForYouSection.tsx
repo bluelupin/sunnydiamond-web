@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
-import { useFadeIn } from "@/shared/hooks/use-fade-in";
+import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import { isSectionActive } from "@/shared/utils/cmsSection";
@@ -17,7 +17,6 @@ const FALLBACK_SUBTITLE =
   "Designs thoughtfully crafted to bring your vision to life";
 
 const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
-  const contentRef = useFadeIn(200);
   const { data: editorialData, isLoading } = useHomepageEditorialBlocks();
 
   const sectionData = editorialData?.bespokeForYouSection ?? null;
@@ -114,36 +113,38 @@ const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
         className="absolute inset-x-0 bottom-0 h-[409px] bg-gradient-to-b from-transparent to-black/80 backdrop-blur-[5px] md:h-[400px]"
       />
 
-      <div
-        ref={contentRef as React.RefObject<HTMLDivElement>}
-        className="absolute inset-x-0 bottom-16 flex w-full flex-col items-center gap-6 px-4 md:bottom-16 md:gap-10 md:px-10"
-      >
+      <div className="absolute inset-x-0 bottom-16 flex w-full flex-col items-center gap-6 px-4 md:bottom-16 md:gap-10 md:px-10">
         <div className="flex w-full max-w-[1360px] flex-col items-center gap-3 text-center text-white md:gap-4">
-          <h2 className="font-larken text-[32px] font-light leading-[110%] md:text-[48px] md:whitespace-nowrap">
+          <ScrollReveal as="h2" delayMs={0} className="font-larken text-[32px] font-light leading-110 md:text-[48px] md:whitespace-nowrap">
             {sectionTitle}
-          </h2>
-          <p className="max-w-[257px] font-gill text-base font-light leading-[110%] md:max-w-none md:text-[20px]">
+          </ScrollReveal>
+
+          <ScrollReveal delayMs={100} className="max-w-[257px] font-gill text-base font-light leading-110 md:max-w-none md:text-xl">
             {subtitle}
-          </p>
+          </ScrollReveal>
         </div>
 
         <div className="flex flex-col items-center gap-6 md:gap-8">
           {primaryCtaUrl ? (
-            <Link
-              href={primaryCtaUrl}
-              className="relative inline-flex h-14 items-center justify-center overflow-hidden bg-white px-7 font-gill text-sm font-normal uppercase leading-[110%] darkblack transition-opacity hover:opacity-90"
-            >
-              {primaryCtaLabel}
-            </Link>
+            <ScrollReveal delayMs={180}>
+              <Link
+                href={primaryCtaUrl}
+                className="relative inline-flex h-14 items-center justify-center overflow-hidden bg-white px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-90"
+              >
+                {primaryCtaLabel}
+              </Link>
+            </ScrollReveal>
           ) : null}
 
           {secondaryCtaUrl ? (
-            <Link
-              href={secondaryCtaUrl}
-              className="inline-flex items-center justify-center border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-[110%] text-white transition-opacity hover:opacity-70"
-            >
-              {secondaryCtaLabel}
-            </Link>
+            <ScrollReveal delayMs={260}>
+              <Link
+                href={secondaryCtaUrl}
+                className="inline-flex items-center justify-center border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-70"
+              >
+                {secondaryCtaLabel}
+              </Link>
+            </ScrollReveal>
           ) : null}
         </div>
       </div>

@@ -2,7 +2,7 @@
 
 import { useCallback, useRef } from "react";
 import Link from "next/link";
-import { useFadeIn } from "@/shared/hooks/use-fade-in";
+import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import fallBackImage from "@/assets/fallBackImage.png";
@@ -83,7 +83,6 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
   const sectionTitle =
     occasionSection?.sectionTitle?.trim() || "Timeless Pieces for Every Occasion";
 
-  const headingRef = useFadeIn(0);
   const carouselRef = useRef<HTMLDivElement>(null);
 
   const scrollCarousel = useCallback((direction: -1 | 1) => {
@@ -142,13 +141,12 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
   return (
     <section
       id={id}
-      ref={headingRef as React.RefObject<HTMLElement>}
       aria-label={sectionTitle}
       className="flex w-full flex-col items-center gap-8 bg-white py-16 md:gap-10 md:py-100"
     >
-      <h2 className="max-w-[332px] px-4 text-center font-larken text-[32px] font-light leading-110 text-darkblack md:max-w-none md:text-[48px] lg:whitespace-nowrap">
+      <ScrollReveal as="h2" delayMs={0} className="max-w-[332px] px-4 text-center font-larken text-[32px] font-light leading-110 text-darkblack md:max-w-none md:text-[48px] lg:whitespace-nowrap">
         {sectionTitle}
-      </h2>
+      </ScrollReveal>
 
       <div
         ref={carouselRef}
@@ -160,18 +158,23 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
         className="scrollbar-none relative left-1/2 flex w-screen max-w-none -translate-x-1/2 snap-x snap-mandatory gap-3 overflow-x-auto scroll-pl-4 scroll-pr-4 px-4 pb-2 md:grid md:grid-cols-2 md:gap-1 md:overflow-visible md:px-0 md:pb-0 md:snap-none md:outline-none"
       >
         {occasions.map((card, index) => (
-          <OccasionCardItem
+          <ScrollReveal
             key={String(card.id ?? card.slug ?? card.title ?? index)}
-            card={card}
-            index={index}
-            sectionTitle={sectionTitle}
-          />
+            delayMs={80 + index * 80}
+            className="contents"
+          >
+            <OccasionCardItem
+              card={card}
+              index={index}
+              sectionTitle={sectionTitle}
+            />
+          </ScrollReveal>
         ))}
       </div>
 
-      <p className="px-4 font-gill text-sm font-light text-[#4D4D4D] md:hidden">
+      <ScrollReveal delayMs={160} className="px-4 font-gill text-sm font-light text-[#4D4D4D] md:hidden">
         Swipe to explore more occasions
-      </p>
+      </ScrollReveal>
     </section>
   );
 };
