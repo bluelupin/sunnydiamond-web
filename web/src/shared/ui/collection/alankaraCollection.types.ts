@@ -51,6 +51,14 @@ export const ALANKARA_THUMBNAIL_CROPS = {
   },
 } as const satisfies Record<string, AlankaraThumbnailCrop>;
 
+/** Mobile carousel hero product image crop (Figma 684:3210). */
+export const ALANKARA_MOBILE_PRODUCT_CROP = {
+  height: "256.9%",
+  width: "220.47%",
+  left: "-60.29%",
+  top: "-83.31%",
+} as const satisfies AlankaraThumbnailCrop;
+
 export const ALANKARA_FALLBACKS = {
   heroDesktop: "/images/collection/hero-desktop.png",
   heroMobile: "/images/collection/hero-mobile.png",

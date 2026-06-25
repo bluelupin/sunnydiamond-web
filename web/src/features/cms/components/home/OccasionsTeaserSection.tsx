@@ -52,13 +52,13 @@ function OccasionCardItem({
 
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-1/2 bg-gradient-to-t from-black to-transparent"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[199px] bg-gradient-to-t from-black via-black/[0.69] via-[53%] to-transparent backdrop-blur-[5px] md:h-1/2 md:bg-gradient-to-t md:from-black md:to-transparent md:via-transparent md:backdrop-blur-none"
       />
 
-      <div className="absolute bottom-60 left-40 right-40 z-10 max-w-[418px] md:right-auto">
-        <div className="flex flex-col gap-6 motion-safe:transition-transform motion-safe:duration-500 motion-safe:ease-out md:group-hover:-translate-y-12 md:group-focus-visible:-translate-y-12">
-          <div className="flex flex-col gap-3 text-white">
-            <h3 className="font-larken text-2xl font-light leading-110 md:text-[32px]">
+      <div className="absolute bottom-8 left-4 z-10 max-w-[296px] md:bottom-60 md:left-40 md:right-40 md:max-w-[418px] md:right-auto">
+        <div className="flex flex-col gap-4 motion-safe:transition-transform motion-safe:duration-500 motion-safe:ease-out md:gap-6 md:group-hover:-translate-y-12 md:group-focus-visible:-translate-y-12">
+          <div className="flex flex-col gap-2 text-white md:gap-3">
+            <h3 className="font-larken text-24 font-light leading-110 md:text-[32px]">
               {card.title}
             </h3>
             {description ? (
@@ -116,7 +116,7 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
     return (
       <section
         id={id}
-        className="flex w-full flex-col items-center gap-8 bg-white py-16 md:gap-10 md:py-100"
+        className="flex w-full flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 md:px-0 md:py-100"
         aria-busy="true"
         aria-label="Occasions"
       >
@@ -142,9 +142,9 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
     <section
       id={id}
       aria-label={sectionTitle}
-      className="flex w-full flex-col items-center gap-8 bg-white py-16 md:gap-10 md:py-100"
+      className="flex w-full flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 md:px-0 md:py-100"
     >
-      <ScrollReveal as="h2" delayMs={0} className="max-w-[332px] px-4 text-center font-larken text-[32px] font-light leading-110 text-darkblack md:max-w-none md:text-[48px] lg:whitespace-nowrap">
+      <ScrollReveal as="h2" delayMs={0} className="max-w-[332px] text-center font-larken text-[32px] font-light leading-110 text-darkblack md:max-w-none md:text-[48px] lg:whitespace-nowrap">
         {sectionTitle}
       </ScrollReveal>
 

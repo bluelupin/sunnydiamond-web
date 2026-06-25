@@ -11,6 +11,7 @@ import { cn } from "@/shared/utils/cn";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { getImageSrc } from "@/shared/utils/image";
 import {
+  ALANKARA_MOBILE_PRODUCT_CROP,
   ALANKARA_THUMBNAIL_CROPS,
   type AlankaraCollectionProduct,
   type AlankaraCollectionProps,
@@ -223,8 +224,8 @@ function ProductCarouselPanel({
   return (
     <div
       className={cn(
-        "relative overflow-hidden bg-[#F4F3EE]",
-        isMobile ? "mx-auto size-[343px] px-9 py-10" : "h-[800px] w-full",
+        "relative overflow-hidden bg-gray300",
+        isMobile ? "mx-auto size-[343px] px-9 py-[40px]" : "h-[800px] w-full",
       )}
     >
       {!isMobile ? (
@@ -251,7 +252,7 @@ function ProductCarouselPanel({
         className={cn(
           "relative flex h-full flex-col items-center justify-center",
           total > 1 ? (isDragging ? "cursor-grabbing" : "cursor-grab") : "",
-          isMobile ? "gap-4" : "gap-[92px] pt-[380px]",
+          isMobile ? "gap-6" : "gap-[92px] pt-[380px]",
         )}
         style={
           isMobile && isDragging
@@ -261,8 +262,8 @@ function ProductCarouselPanel({
       >
         <div
           className={cn(
-            "flex w-full items-center justify-between",
-            isMobile ? "absolute inset-x-4 top-[251px]" : "max-w-[640px] px-2.5",
+            "flex items-center justify-between",
+            isMobile ? "absolute left-4 top-[251px] w-[311px]" : "w-full max-w-[640px] px-2.5",
           )}
         >
           <button
@@ -270,7 +271,7 @@ function ProductCarouselPanel({
             aria-label="Previous product"
             onClick={() => go(-1)}
             disabled={total <= 1}
-            className="inline-flex size-6 items-center justify-center darkblack disabled:opacity-30 md:size-10"
+            className="inline-flex size-6 items-center justify-center text-darkblack disabled:opacity-30 md:size-10"
           >
             <LeftArrow className="size-6 md:size-[25px]" />
           </button>
@@ -279,36 +280,37 @@ function ProductCarouselPanel({
             aria-label="Next product"
             onClick={() => go(+1)}
             disabled={total <= 1}
-            className="inline-flex size-6 items-center justify-center darkblack disabled:opacity-30 md:size-10"
+            className="inline-flex size-6 items-center justify-center text-darkblack disabled:opacity-30 md:size-10"
           >
             <RightArrow className="size-6 md:size-[25px]" />
           </button>
         </div>
 
         {isMobile ? (
-          <div className="relative aspect-[134/115] w-full max-w-[271px] flex-1 overflow-hidden">
-            <OptimizedImage
+          <div className="relative aspect-[134/115] min-h-0 w-full flex-[1_0_0] overflow-hidden">
+            <Image
               src={activeImage}
               alt={activeProduct.name}
-              width={271}
-              height={232}
-              className="size-full object-contain"
+              fill
+              sizes="271px"
+              className="max-w-none object-cover"
+              style={ALANKARA_MOBILE_PRODUCT_CROP}
             />
           </div>
         ) : null}
 
-        <div className="flex flex-col items-center gap-4 text-center">
+        <div className="flex shrink-0 flex-col items-center gap-4 text-center">
           <p
             className={cn(
-              "font-gill leading-[110%] darkblack",
-              isMobile ? "text-base" : "text-[20px]",
+              "font-gill leading-110 text-darkblack",
+              isMobile ? "text-base font-normal" : "text-[20px]",
             )}
           >
             {activeProduct.name}
           </p>
           <Link
             href={activeProduct.href}
-            className="btn-slide-up relative inline-flex h-14 items-center justify-center overflow-hidden border border-[#ccc] px-7 font-gill text-sm uppercase leading-[110%] darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2"
+            className="btn-slide-up relative inline-flex h-14 items-center justify-center overflow-hidden border-[0.8px] border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2"
           >
             {activeProduct.ctaLabel || defaultProductCtaLabel}
           </Link>

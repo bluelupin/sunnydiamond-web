@@ -109,17 +109,23 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
     return (
       <section
         id={id}
-        className="relative w-full overflow-hidden bg-[#F3E6E2] py-16 lg:h-[750px] lg:py-0"
+        className="relative w-full overflow-hidden bg-[#F3E6E2] lg:h-[750px] lg:py-0"
         aria-busy="true"
         aria-label="For Your Valentine"
       >
-        <div className="relative flex w-full flex-col items-center gap-6 px-4 lg:h-full lg:flex-row lg:items-center lg:justify-between lg:px-40">
-          <div className="flex w-full max-w-[437px] flex-col gap-4">
-            <div className="h-10 w-64 rounded bg-[#E4C7BE]/40" aria-hidden />
-            <div className="h-16 w-full rounded bg-[#E4C7BE]/40" aria-hidden />
-            <div className="h-14 w-40 rounded bg-[#E4C7BE]/40" aria-hidden />
+        <div className="relative flex w-full flex-col items-center py-16 lg:h-full lg:flex-row lg:items-center lg:justify-between lg:px-40 lg:py-100">
+          <div className="flex w-full max-w-[375px] flex-col items-center gap-6 px-4 lg:max-w-[437px] lg:items-start lg:gap-8 lg:px-0">
+            <div className="h-[336px] w-[305px] rounded bg-[#E4C7BE]/40 lg:hidden" aria-hidden />
+            <div className="flex w-full flex-col items-center gap-3 lg:items-start lg:gap-4">
+              <div className="h-9 w-56 rounded bg-[#E4C7BE]/40" aria-hidden />
+              <div className="h-9 w-[306px] max-w-full rounded bg-[#E4C7BE]/40" aria-hidden />
+            </div>
+            <div className="flex flex-col items-center gap-6 lg:items-start">
+              <div className="h-14 w-[132px] rounded bg-[#E4C7BE]/40" aria-hidden />
+              <div className="h-5 w-44 rounded bg-[#E4C7BE]/40" aria-hidden />
+            </div>
           </div>
-          <div className="h-[336px] w-[305px] rounded bg-[#E4C7BE]/40 lg:h-[600px] lg:w-full lg:max-w-[746px]" aria-hidden />
+          <div className="hidden h-[600px] w-full max-w-[746px] rounded bg-[#E4C7BE]/40 lg:block" aria-hidden />
         </div>
       </section>
     );
@@ -138,56 +144,71 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
         height={750}
         className="pointer-events-none absolute inset-0 hidden size-full object-cover object-center opacity-30 lg:block"
       />
-      <OptimizedImage
-        src={FALLBACK_BG_MOBILE}
-        alt=""
-        aria-hidden
-        width={360}
-        height={400}
-        className="pointer-events-none absolute inset-x-0 top-0 mx-auto w-full max-w-[360px] opacity-30 lg:hidden"
-      />
 
       <div className="relative w-full">
-        <div className="flex flex-col items-center gap-6 px-4 py-16 lg:hidden">
-          <ScrollReveal delayMs={0}>
-            <div className="relative h-[336px] w-[305px] shrink-0">
-              <OptimizedImage
-                src={ringsMobile}
-                alt={imageAlt}
-                width={305}
-                height={336}
-                className="size-full object-contain"
-              />
+        {/* Mobile — Figma 684:3264 / 684:3280 */}
+        <div className="relative flex flex-col items-center py-16 lg:hidden">
+          <OptimizedImage
+            src={FALLBACK_BG_MOBILE}
+            alt=""
+            aria-hidden
+            width={714}
+            height={684}
+            className="pointer-events-none absolute bottom-0 left-1/2 h-[684px] w-[714px] max-w-none -translate-x-1/2 opacity-30"
+          />
+
+          <ScrollReveal delayMs={0} className="relative h-[336px] w-[305px] shrink-0 overflow-hidden">
+            <OptimizedImage
+              src={ringsMobile}
+              alt={imageAlt}
+              width={305}
+              height={336}
+              className="absolute left-[-4.8%] top-[-2.66%] h-[102.66%] w-[113.07%] max-w-none object-contain"
+            />
+          </ScrollReveal>
+
+          <div className="relative flex w-full max-w-[375px] flex-col items-center gap-6 px-4">
+            <div className="flex w-full flex-col items-center gap-3 text-center">
+              <ScrollReveal
+                as="h2"
+                delayMs={80}
+                className="w-full font-larken text-[32px] font-light leading-110 text-darkblack"
+              >
+                {sectionTitle}
+              </ScrollReveal>
+
+              <ScrollReveal
+                delayMs={160}
+                className="w-[306px] max-w-full text-center font-gill text-base font-light leading-110 text-[#4D4D4D]"
+              >
+                {mobileDescription}
+              </ScrollReveal>
             </div>
-          </ScrollReveal>
 
-          <ScrollReveal as="h2" delayMs={80} className="max-w-[306px] text-center font-larken text-[32px] font-light leading-110 text-darkblack">
-            {sectionTitle}
-          </ScrollReveal>
+            <div className="flex flex-col items-center gap-6">
+              {primaryCtaUrl ? (
+                <ScrollReveal delayMs={240}>
+                  <Link
+                    href={primaryCtaUrl}
+                    className={`inline-flex h-14 items-center justify-center bg-white px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-90 ${ctaFocusClass}`}
+                  >
+                    {primaryCtaLabel}
+                  </Link>
+                </ScrollReveal>
+              ) : null}
 
-          <ScrollReveal delayMs={160} className="max-w-[306px] text-center font-gill text-base font-light leading-110 text-[#4D4D4D]">
-            {mobileDescription}
-          </ScrollReveal>
-
-          <ScrollReveal delayMs={240} className="flex flex-col items-center gap-6">
-            {primaryCtaUrl ? (
-              <Link
-                href={primaryCtaUrl}
-                className={`inline-flex h-14 items-center justify-center bg-white px-8 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-90 ${ctaFocusClass}`}
-              >
-                {primaryCtaLabel}
-              </Link>
-            ) : null}
-
-            {secondaryCtaUrl ? (
-              <Link
-                href={secondaryCtaUrl}
-                className={`inline-flex items-center justify-center border-b-[1.5px] border-[#0a0a0a] pb-1 text-center font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-70 ${ctaFocusClass}`}
-              >
-                {secondaryCtaLabel}
-              </Link>
-            ) : null}
-          </ScrollReveal>
+              {secondaryCtaUrl ? (
+                <ScrollReveal delayMs={320}>
+                  <Link
+                    href={secondaryCtaUrl}
+                    className={`inline-flex items-center justify-center border-b-[1.5px] border-darkblack pb-1 text-center font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-70 ${ctaFocusClass}`}
+                  >
+                    {secondaryCtaLabel}
+                  </Link>
+                </ScrollReveal>
+              ) : null}
+            </div>
+          </div>
         </div>
 
         <div className="hidden lg:flex lg:min-h-[750px] lg:items-center lg:justify-between lg:gap-8 lg:px-40 lg:py-100">
