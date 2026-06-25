@@ -38,8 +38,10 @@ export type CraftsmanshipSectionData = CraftsmanshipStepsSection & {
 
 export type BespokeForYouCard = {
   id?: number;
+  eyebrow?: string;
   title?: string;
   description?: string;
+  subtitle?: string;
   sortOrder?: number;
   isActive?: boolean;
   image?: StrapiMedia & {

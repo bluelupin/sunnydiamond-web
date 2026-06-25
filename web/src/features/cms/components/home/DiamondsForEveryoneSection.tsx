@@ -33,8 +33,8 @@ const DEFAULT_STEPS: SavingsPlanStep[] = [
 ];
 
 const StepCircle = ({ number }: { number: number }) => (
-  <div className="relative z-10 flex size-10 shrink-0 items-center justify-center rounded-full border border-darkblack bg-[#EBDFC6]">
-    <span className="font-gill text-xl font-light leading-none tracking-[0.2px] text-darkblack">
+  <div className="relative z-10 box-border flex size-10 shrink-0 flex-col items-center justify-center rounded-full border-[0.571px] border-solid border-darkblack bg-[#EBDFC6]">
+    <span className="font-gill text-20 font-light leading-normal tracking-[0.2px] text-darkblack">
       {number}
     </span>
   </div>
@@ -59,6 +59,8 @@ const StepDescription = ({
   </p>
 );
 
+const FALLBACK_EYEBROW = "Flexible Savings Plan";
+
 const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => {
   const { data: editorialData, isLoading } = useHomepageEditorialBlocks();
 
@@ -67,7 +69,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
     [editorialData],
   );
 
-  const eyebrow = sectionData.eyebrow?.trim() || "Flexible Savings Plan";
+  const eyebrow = sectionData.eyebrow?.trim() || FALLBACK_EYEBROW;
   const sectionTitle = sectionData.sectionTitle?.trim() || "Diamonds for Everyone";
   const subtitle =
     sectionData.subtitle?.trim() ||
@@ -151,13 +153,13 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
           </div>
         </div>
 
-        {/* Desktop steps */}
+        {/* Desktop steps — Figma 684:3008 / 684:3012 */}
         <div className="hidden w-full flex-col items-center gap-6 md:flex">
-          <ScrollReveal delayMs={200} className="relative h-10 w-full">
-            <div className="absolute left-1/2 top-1/2 w-full max-w-[784px] -translate-x-1/2 -translate-y-1/2">
+          <ScrollReveal delayMs={200} className="relative h-10 w-full max-w-[1360px]">
+            <div className="pointer-events-none absolute left-1/2 top-[calc(50%+1px)] w-full max-w-[784px] -translate-x-1/2 -translate-y-1/2">
               <Image src={STEPS_LINE} alt="" width={784} height={1} className="h-px w-full" aria-hidden />
             </div>
-            <div className="relative flex items-center justify-between px-[19.85%]">
+            <div className="relative flex h-10 items-center justify-between px-[19.85%]">
               {steps.map((step) => (
                 <StepCircle key={step.stepNumber} number={step.stepNumber ?? 0} />
               ))}

@@ -15,6 +15,7 @@ export type ResolvedDiamondsForEveryoneSection = {
   subtitle?: string;
   steps?: SavingsPlanStep[];
   cta?: DiamondsForEveryoneSectionCta;
+  fromCms: boolean;
 };
 
 const DIAMONDS_FOR_EVERYONE_TITLE = "diamonds for everyone";
@@ -57,10 +58,11 @@ export function resolveDiamondsForEveryoneSection(
   const dedicated: DiamondsForEveryoneSectionData | null =
     editorialData?.diamondsForEveryoneSection ?? null;
   const card = findDiamondsForEveryoneCard(editorialData?.bespokeForYouCards);
+  const fromCms = Boolean(dedicated || card);
 
   return {
     isActive: dedicated?.isActive ?? card?.isActive,
-    eyebrow: dedicated?.eyebrow,
+    eyebrow: dedicated?.eyebrow ?? card?.eyebrow ?? card?.subtitle,
     sectionTitle: dedicated?.sectionTitle ?? card?.title,
     subtitle:
       dedicated?.subtitle ??
@@ -68,5 +70,6 @@ export function resolveDiamondsForEveryoneSection(
       card?.description,
     steps: dedicated?.steps,
     cta: dedicated?.cta ?? mapCardCta(card ?? {}),
+    fromCms,
   };
 }
