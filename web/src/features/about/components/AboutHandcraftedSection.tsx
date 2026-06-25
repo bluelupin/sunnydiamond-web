@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import MediaContentOverlay from "@/shared/ui/MediaContentOverlay";

@@ -1,3 +1,5 @@
+"use client";
+
 import type { CSSProperties } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import MediaContentOverlay from "@/shared/ui/MediaContentOverlay";

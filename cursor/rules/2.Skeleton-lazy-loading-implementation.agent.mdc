@@ -1,0 +1,367 @@
+---
+description: Sunny Diamonds About Page – Implement Skeleton Loading + Lazy Loading for API-integrated sections without breaking existing UI/UX
+globs:
+  - "app/**/*.tsx"
+  - "components/**/*.tsx"
+alwaysApply: false
+---
+
+# Sunny Diamonds About Page – Skeleton + Lazy Loading Agent Rules
+
+You are working on the **Sunny Diamonds About page** in a **Next.js App Router + TypeScript** codebase.
+
+## Primary Goal
+Implement a **production-grade loading strategy** for the About page using:
+
+- **Skeleton Loading** → when API/CMS data for a section/page is still loading
+- **Lazy Loading** → when components, sections, images, or heavy modules should be loaded only when needed
+
+The implementation must:
+- **preserve the existing UI exactly**
+- **not break any current styling, spacing, layout, animations, responsiveness, or SEO**
+- **not use dummy/static fake content as fallback**
+- **follow clean, scalable, reusable architecture**
+
+---
+
+# Core Loading Strategy
+
+## 1) Use Skeleton Loading for API Data States
+Use **Skeleton loaders** whenever a page or section depends on API/CMS data and that data is not yet available.
+
+### Apply skeletons to:
+- About Hero section content
+- Intro / handcrafted content
+- Timeline section content
+- Faces / team / founder / card-based content
+- Stats / info blocks
+- Any text/image/card section rendered from CMS API response
+
+### Skeleton rules:
+- Skeleton must **match the final UI structure closely**
+- Preserve:
+  - section spacing
+  - card dimensions
+  - image aspect ratios
+  - heading / paragraph blocks
+  - CTA/button placeholders if required by layout
+- Avoid layout shift (CLS)
+- Do **not** use a generic spinner in place of full section content
+- Do **not** render hardcoded dummy text/images as temporary data
+- Keep skeletons **section-specific**, not one giant page-level block unless the whole page depends on one request
+
+---
+
+## 2) Use Lazy Loading for Heavy / Non-Critical Sections
+Use **lazy loading** to defer rendering/loading of sections that are not needed immediately on first paint.
+
+### Lazy-load candidates on About page:
+- below-the-fold sections
+- large media/image-heavy sections
+- timeline section if it is not above the fold
+- faces/team/interactive card sections
+- sliders, carousels, tabbed sections, video/media blocks
+- heavy animation-based sections
+- large decorative/secondary sections
+
+### Lazy loading goals:
+- reduce initial JS payload
+- improve first load performance
+- keep above-the-fold content fast
+- avoid blocking LCP-critical content
+
+---
+
+# Architecture Rules
+
+## 3) Keep Above-the-Fold Content Priority High
+The top visible section(s) of the About page should be optimized for first render.
+
+### Rules:
+- Above-the-fold sections should **not be unnecessarily lazy-loaded**
+- If above-the-fold data is waiting on API, show **Skeleton**
+- If data is server-fetched and already available at render time, do not add unnecessary client loading logic
+- Keep LCP-related content stable and fast
+
+---
+
+## 4) Section-Level Loading, Not Monolithic Loading
+Implement loading at the **section level** wherever possible.
+
+### Good:
+- `AboutHeroSkeleton`
+- `AboutTimelineSkeleton`
+- `AboutFacesSkeleton`
+
+### Avoid:
+- One generic full-page grey box for all content
+- Replacing the entire page with one global loader when only one section is waiting for data
+
+---
+
+# Next.js Implementation Rules
+
+## 5) Prefer Next.js-Appropriate Lazy Loading
+In a Next.js App Router project, prefer **`next/dynamic`** for lazy loading components.
+
+### Use `dynamic()` for:
+- heavy client components
+- below-the-fold sections
+- interactive components
+- components with sliders, hover-heavy logic, animations, or large media
+
+### Pattern:
+- provide a proper `loading` fallback
+- fallback should usually be the matching **section skeleton**
+- keep SSR enabled/disabled intentionally depending on component need
+- do not disable SSR unless the component truly depends on browser-only APIs or heavy client-only logic
+
+---
+
+## 6) Use Skeleton as Lazy-Load Fallback Where Appropriate
+If a section is lazy-loaded and also API-driven, the lazy-loaded component fallback should be its **section skeleton**, not a spinner.
+
+### Example strategy:
+- lazy import `AboutTimelineSection`
+- show `AboutTimelineSkeleton` while section bundle is loading
+- inside the section, if CMS data is still pending on client side, keep using the same skeleton until data is ready
+
+This creates a smooth and consistent loading experience.
+
+---
+
+# Data & UI Safety Rules
+
+## 7) Never Break Existing UI Implementation
+Do not redesign the About page while adding loading states.
+
+### Must preserve:
+- existing HTML structure where possible
+- typography scale
+- spacing / padding / margin
+- image proportions
+- hover behavior
+- card width / height / alignment
+- mobile and desktop responsiveness
+- visual hierarchy from the current implementation / Figma
+
+If a skeleton is introduced, it should visually reserve the same space as the final component.
+
+---
+
+## 8) Do Not Replace Real API Architecture With Fake Client State
+If the page already uses server-side fetching / CMS data utilities, integrate loading in a way that respects the existing architecture.
+
+### Important:
+- do not convert stable server-rendered sections into unnecessary client-side fetches just to show skeletons
+- do not duplicate API calls
+- do not introduce redundant state management
+- do not fetch the same CMS endpoint multiple times from different sections unless the architecture explicitly requires it
+
+---
+
+## 9) Reuse Existing API Data Flow
+If the About page already has:
+- a page-level API fetch
+- shared CMS mapping utilities
+- existing transformation functions
+- common media helpers
+- section props flow
+
+then loading implementation must align with that existing structure rather than creating parallel patterns.
+
+---
+
+# Skeleton Design Rules
+
+## 10) Skeleton Components Must Be Reusable and Named Clearly
+Create dedicated skeleton components for About page sections.
+
+### Recommended naming:
+- `AboutHeroSkeleton`
+- `AboutIntroSkeleton`
+- `AboutHandcraftedSkeleton`
+- `AboutTimelineSkeleton`
+- `AboutFacesSkeleton`
+- `AboutStatsSkeleton`
+
+### File naming:
+- colocate near the section when appropriate, or keep in a section-level `skeletons/` or `loaders/` folder if the project already follows a pattern
+- follow the existing project naming convention
+
+---
+
+## 11) Skeleton Components Should Be Presentation-Only
+Skeleton components should:
+- accept minimal props only if needed
+- avoid business logic
+- avoid API calls
+- avoid data transformation logic
+- be pure loading placeholders
+
+---
+
+## 12) Match Real Layout Dimensions
+For each skeleton:
+- reserve image height/width/aspect ratio similar to final UI
+- use rounded corners matching final cards/images
+- mimic heading width, paragraph line count, and CTA size
+- preserve grid columns and gap structure
+- preserve section container width and padding
+
+---
+
+# Lazy Loading Rules for Images and Media
+
+## 13) Lazy Load Non-Critical Images Responsibly
+For below-the-fold images:
+- use proper image optimization strategy
+- do not eagerly load all About page media
+- prioritize only above-the-fold critical images
+
+### Important:
+- preserve aspect ratio to prevent CLS
+- ensure placeholders/skeletons match image dimensions
+- do not degrade image quality or responsiveness
+- if using `next/image`, keep width/height or `fill` + stable container sizing correctly configured
+
+---
+
+## 14) Do Not Lazy Load Everything Blindly
+Avoid overusing lazy loading.
+
+### Do NOT lazy-load:
+- critical above-the-fold headline/content if it harms UX
+- tiny lightweight presentational components with no real performance gain
+- SEO-critical server content without reason
+
+Lazy loading should be applied intentionally, not everywhere.
+
+---
+
+# Accessibility Rules
+
+## 15) Skeletons Must Remain Accessible
+- Skeleton placeholders must not create noisy screen-reader output
+- use `aria-hidden="true"` for decorative skeleton blocks where appropriate
+- if a section is loading important content, ensure loading state handling does not confuse keyboard/screen-reader users
+- preserve semantic section/headings structure in final rendered content
+
+---
+
+# Performance Rules
+
+## 16) Optimize for Perceived and Actual Performance
+The final implementation should improve:
+- perceived loading experience
+- bundle efficiency
+- layout stability
+- responsiveness
+
+### Avoid:
+- excessive client-side state for purely server-rendered content
+- hydration mismatch
+- duplicated heavy imports
+- unnecessary re-renders caused by poorly placed loading state logic
+
+---
+
+# SEO Rules
+
+## 17) Do Not Harm SEO for the About Page
+The About page is a content/brand page and should remain SEO-safe.
+
+### Rules:
+- preserve server-rendered content where possible
+- do not move all About page content behind client-only rendering
+- do not lazy-load critical SEO text content without a valid reason
+- maintain metadata and semantic headings
+
+---
+
+# Code Quality Rules
+
+## 18) Keep the Codebase Clean and Scalable
+Implementation must be:
+- TypeScript-safe
+- readable
+- modular
+- consistent with existing code style
+- easy for future CMS/API sections to reuse
+
+### Prefer:
+- clear section boundaries
+- shared loading helpers only when truly reusable
+- no dead code
+- no duplicated skeleton markup if it can be abstracted cleanly without hurting readability
+
+---
+
+# Required Implementation Checklist
+
+When implementing the About page loading strategy, do the following:
+
+## A. Audit the About page and identify:
+1. Which sections are **above the fold**
+2. Which sections are **below the fold**
+3. Which sections are **API-driven**
+4. Which sections are **heavy / interactive / image-heavy**
+5. Which sections should use **Skeleton only**
+6. Which sections should use **Lazy Loading + Skeleton fallback**
+
+## B. Then implement:
+- section-specific skeleton components for API-driven sections
+- dynamic lazy imports for below-the-fold/heavy sections
+- skeleton fallback for lazy-loaded sections
+- stable layout-preserving loading states
+- no UI regression
+
+## C. While implementing, explicitly avoid:
+- dummy hardcoded temporary content
+- generic page spinners for section loading
+- unnecessary conversion of server components to client components
+- duplicate API calls
+- breaking existing About page styling
+
+---
+
+# Expected Decision Rules
+
+## Use Skeleton Only when:
+- section is visible early
+- section depends on API data
+- lazy loading provides little value
+- keeping immediate layout visibility is more important
+
+## Use Lazy Loading + Skeleton when:
+- section is below the fold
+- section is heavy or interactive
+- section is not required for first paint
+- section still needs a proper placeholder while loading
+
+## Use Neither only when:
+- content is already server-rendered instantly and lightweight
+- no meaningful loading state is needed
+- no performance benefit exists
+
+---
+
+# Final Output Requirements for Any About Page Task
+Whenever you implement or modify the About page:
+1. Explain which sections are using skeleton loading
+2. Explain which sections are lazy-loaded
+3. Mention why each choice was made
+4. Confirm whether SSR behavior was preserved or intentionally changed
+5. Ensure the final code is production-safe and UI-safe
+
+---
+
+# Non-Negotiable Rule
+For the Sunny Diamonds About page:
+
+- **Skeleton is mandatory for API/CMS loading states**
+- **Lazy loading is mandatory for suitable below-the-fold/heavy sections**
+- **No dummy data placeholders**
+- **No UI breakage**
+- **No SEO regression**
+- **No unnecessary client-side rewrites**
