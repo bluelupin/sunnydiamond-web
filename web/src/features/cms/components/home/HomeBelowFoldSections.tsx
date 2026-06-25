@@ -1,6 +1,8 @@
 "use client";
 
 import { Suspense, lazy } from "react";
+import { LazyAnimatedSection } from "@/shared/ui/LazyAnimatedSection";
+import { cn } from "@/shared/utils/cn";
 
 const DiamondSourcingSection = lazy(
   () => import("@/features/cms/components/home/DiamondSourcingSection"),
@@ -34,42 +36,74 @@ const ShowroomsSection = lazy(
 );
 
 function SectionFallback({ minHeight = "min-h-24" }: { minHeight?: string }) {
-  return <div className={minHeight} aria-hidden />;
+  return (
+    <div
+      className={cn(minHeight, "w-full animate-pulse bg-transparent")}
+      aria-hidden
+    />
+  );
+}
+
+type LazyHomeSectionProps = {
+  minHeight: string;
+  animate?: boolean;
+  children: React.ReactNode;
+};
+
+function LazyHomeSection({ minHeight, animate = false, children }: LazyHomeSectionProps) {
+  return (
+    <LazyAnimatedSection
+      animate={animate}
+      fallback={<SectionFallback minHeight={minHeight} />}
+      className={minHeight}
+    >
+      <Suspense fallback={<SectionFallback minHeight={minHeight} />}>{children}</Suspense>
+    </LazyAnimatedSection>
+  );
 }
 
 export default function HomeBelowFoldSections() {
   return (
     <>
-      <Suspense fallback={<SectionFallback minHeight="min-h-[520px]" />}>
+      <LazyHomeSection minHeight="min-h-[520px]">
         <DiamondSourcingSection id="flawless" />
-      </Suspense>
-      <Suspense fallback={<SectionFallback minHeight="min-h-[800px]" />}>
+      </LazyHomeSection>
+
+      <LazyHomeSection minHeight="min-h-[800px]">
         <FeaturedCollectionSection id="alankara" />
-      </Suspense>
-      <Suspense fallback={<SectionFallback minHeight="min-h-[700px]" />}>
+      </LazyHomeSection>
+
+      <LazyHomeSection minHeight="min-h-[700px]">
         <OccasionsTeaserSection id="categories" />
-      </Suspense>
-      <Suspense fallback={<SectionFallback minHeight="min-h-[600px]" />}>
+      </LazyHomeSection>
+
+      <LazyHomeSection minHeight="min-h-[600px]">
         <FeaturedProductsSection id="diamond-awaits" />
-      </Suspense>
-      <Suspense fallback={<SectionFallback minHeight="min-h-[700px]" />}>
+      </LazyHomeSection>
+
+      <LazyHomeSection minHeight="min-h-[700px]">
         <ForYourValentineSection id="valentine" />
-      </Suspense>
-      <Suspense fallback={<SectionFallback minHeight="min-h-[480px]" />}>
+      </LazyHomeSection>
+
+      <LazyHomeSection minHeight="min-h-[480px]">
         <SunnyPromiseSection id="promise" />
-      </Suspense>
-      <Suspense fallback={<SectionFallback minHeight="min-h-[700px]" />}>
+      </LazyHomeSection>
+
+      <LazyHomeSection minHeight="min-h-[700px]">
         <BespokeForYouSection id="bespoke-for-you" />
-      </Suspense>
-      <Suspense fallback={<SectionFallback minHeight="min-h-[600px]" />}>
+      </LazyHomeSection>
+
+      <LazyHomeSection minHeight="min-h-[600px]">
         <DiamondsForEveryoneSection id="diamonds-for-everyone" />
-      </Suspense>
-      <Suspense fallback={<SectionFallback minHeight="min-h-[520px]" />}>
+      </LazyHomeSection>
+
+      <LazyHomeSection minHeight="min-h-[520px]">
         <CraftsmanshipProcess id="craftsmanship" />
-      </Suspense>
-      <Suspense fallback={<SectionFallback minHeight="min-h-[480px]" />}>
+      </LazyHomeSection>
+
+      <LazyHomeSection minHeight="min-h-[480px]">
         <ShowroomsSection id="showrooms" />
-      </Suspense>
+      </LazyHomeSection>
     </>
   );
 }

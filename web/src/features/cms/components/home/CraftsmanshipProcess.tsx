@@ -8,6 +8,7 @@ import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditoria
 import fallBackImage from "@/assets/fallBackImage.png";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
+import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import { useMemo } from "react";
 interface CraftsmanshipProcessProps {
@@ -105,9 +106,9 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
           <div className="grid h-full grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-12">
             {/* Left column: title + steps */}
             <div className="lg:col-span-5 flex flex-col xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20">
-              <h2 className="lg:text-5xl md:text-4xl text-32 text-black font-normal font-larken tracking-[0%] lg:text-left text-center">
+              <ScrollReveal as="h2" delayMs={0} className="lg:text-5xl md:text-4xl text-32 text-black font-normal font-larken tracking-[0%] lg:text-left text-center">
                 {sectionTitle}
-              </h2>
+              </ScrollReveal>
 
               {/* Active + next upcoming step (faded) */}
               <ol className="space-y-12 md:space-y-16 relative">

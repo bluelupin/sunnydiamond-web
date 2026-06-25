@@ -6,6 +6,7 @@ import { cn } from "@/shared/utils/cn";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import Link from "next/link";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
+import ScrollReveal from "@/shared/ui/ScrollReveal";
 import ShowroomSectionSkeleton from "@/features/cms/components/SkeletonLoader/ShowroomSectionSkeleton";
 
 import fallBackImage from "@/assets/fallBackImage.png";
@@ -66,18 +67,21 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
       className="bg-gray200 py-10 sm:py-12 md:py-16 lg:py-20 lg:h-846 md:h-auto h-auto"
     >
       <div className="2xl:pl-24 lg:pl-20 pl-5 lg:pr-0 pr-5">
-        <h2 className="lg:text-5xl md:text-4xl text-32 text-black font-larken font-light tracking-[0%] leading-[100%] mb-4 sm:mb-6 md:mb-8 lg:mb-10 lg:text-left text-center">
+        <ScrollReveal as="h2" delayMs={0} className="lg:text-5xl md:text-4xl text-32 text-black font-larken font-light tracking-[0%] leading-[100%] mb-4 sm:mb-6 md:mb-8 lg:mb-10 lg:text-left text-center">
           {showroomSection.sectionTitle}
-        </h2>
-        <p className="lg:hidden font-body text-base text-muted-foreground leading-relaxed max-w-350 mx-auto lg:text-left text-center mb-4">
-          {showroomSection.description}
-        </p>
+        </ScrollReveal>
+        {showroomSection.description ? (
+          <ScrollReveal delayMs={80} className="lg:hidden font-body text-base text-muted-foreground leading-relaxed max-w-350 mx-auto lg:text-left text-center mb-4">
+            {showroomSection.description}
+          </ScrollReveal>
+        ) : null}
       </div>
       <div className="lg:grid grid-cols-1 lg:grid-cols-2 gap-[14px] md:gap-5 lg:gap-6 items-start lg:static relative">
-        <div
-          aria-label="Showroom locations"
-          className="lg:px-0 px-5 lg:mb-0 mb-[14px] flex lg:flex-col flex-row lg:border-r lg:border-b-0 border-b border-gray600 overflow-x-auto"
-        >
+        <ScrollReveal delayMs={120} className="lg:px-0 px-5 lg:mb-0 mb-[14px]">
+          <div
+            aria-label="Showroom locations"
+            className="flex lg:flex-col flex-row lg:border-r lg:border-b-0 border-b border-gray600 overflow-x-auto"
+          >
           {locations.map((location) => {
             const isSelected = location.id === activeId;
             return (
@@ -135,10 +139,10 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
               </div>
             );
           })}
-        </div>
+          </div>
+        </ScrollReveal>
 
-        {/* Right Side Image */}
-        <div className="relative lg:aspect-[850/600] aspect-[350/480] lg:h-595 h-478 w-full overflow-hidden lg:px-0 px-5">
+        <ScrollReveal delayMs={200} className="relative lg:aspect-[850/600] aspect-[350/480] lg:h-595 h-478 w-full overflow-hidden lg:px-0 px-5">
           {activeLocation && (
             <ResponsiveImage
               key={activeLocation.id}
@@ -151,7 +155,7 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
               className="w-full h-full object-cover animate-in fade-in zoom-in-105 duration-700 ease-out"
             />
           )}
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );
