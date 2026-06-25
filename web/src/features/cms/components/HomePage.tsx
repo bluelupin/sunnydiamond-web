@@ -27,10 +27,10 @@ const HomePage = () => {
       <OccasionsTeaserSection id="categories" />
       <FeaturedProductsSection id="diamond-awaits" />
       <ForYourValentineSection id="valentine" />
-      <CraftsmanshipProcess id="craftsmanship" />
       <SunnyPromiseSection id="promise" />
       <BespokeForYouSection id="bespoke-for-you" />
       <DiamondsForEveryoneSection id="diamonds-for-everyone" />
+      <CraftsmanshipProcess id="craftsmanship" />
       <ShowroomsSection id="showrooms" />
     </>
   );

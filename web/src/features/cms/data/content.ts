@@ -3,9 +3,10 @@ export const homeSections = [
   { id: "categories", label: "By Occasions" },
   { id: "diamond-awaits", label: "Category" },
   { id: "valentine", label: "Gifting" },
-  { id: "craftsmanship", label: "Know Your Diamonds" },
   { id: "promise", label: "The Sunny Promise" },
   { id: "bespoke-for-you", label: "For You" },
+  { id: "diamonds-for-everyone", label: "Diamonds for Everyone" },
+  { id: "craftsmanship", label: "Know Your Diamonds" },
   { id: "showrooms", label: "Showrooms" },
 ] as const;
 
