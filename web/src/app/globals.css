@@ -50,12 +50,12 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
 
-    --font-body: "Inter", system-ui, sans-serif;
-    --font-heading: "Larken", "Playfair Display", Georgia, serif;
-    --font-display: "Larken", "Playfair Display", Georgia, serif;
+    --font-body: var(--font-inter), system-ui, sans-serif;
+    --font-heading: "Larken", var(--font-playfair), Georgia, serif;
+    --font-display: "Larken", var(--font-playfair), Georgia, serif;
     --font-gill: "Gill Sans", "Gill Sans MT", Calibri, system-ui, sans-serif;
-    --font-larken: "Larken", "Playfair Display", Georgia, serif;
-    --font-satoshi: "Satoshi", "Inter", system-ui, sans-serif;
+    --font-larken: "Larken", var(--font-playfair), Georgia, serif;
+    --font-satoshi: var(--font-inter), system-ui, sans-serif;
 
     --h1-font-size: 32px;
     --h1-line-height: 100%;

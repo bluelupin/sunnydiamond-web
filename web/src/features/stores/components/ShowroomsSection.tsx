@@ -145,7 +145,6 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
               desktopSrc={desktopImage || fallBackImage}
               mobileSrc={mobileImage || fallBackImage}
               alt={imageAlt}
-              priority
               width={desktopImage ? 850 : 350}
               height={desktopImage ? 600 : 480}
               quality={90}

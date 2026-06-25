@@ -1,6 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import {
+  getCmsCacheEntry,
+  isCmsCacheFresh,
+  setCmsCacheEntry,
+  type CmsCacheEntry,
+} from "@/lib/homepage/cmsCache";
 import type { HomepageQueryKey } from "./queryKeys";
 
 type CmsSectionState<T> = {
@@ -9,31 +15,25 @@ type CmsSectionState<T> = {
   error?: string;
 };
 
-type CacheEntry<T> = {
-  value?: T;
-  promise?: Promise<T>;
-  error?: string;
-  updatedAt: number;
-};
-
-const cache = new Map<string, CacheEntry<unknown>>();
+function readCachedState<T>(key: HomepageQueryKey): CmsSectionState<T> | null {
+  const entry = getCmsCacheEntry<T>(key);
+  if (entry?.value === undefined) return null;
+  return { data: entry.value, isLoading: false, error: undefined };
+}
 
 export function useCmsSection<T>(
   queryKey: HomepageQueryKey,
   fetcher: (signal: AbortSignal) => Promise<T>,
-  options?: { staleTimeMs?: number }
+  options?: { staleTimeMs?: number },
 ): CmsSectionState<T> {
   const staleTimeMs = options?.staleTimeMs ?? 60_000;
   const key = queryKey;
 
-  // Always start in a loading state so SSR and the client hydration pass match.
-  // Module-level cache may hold data from a prior server request; reading it here
-  // would render CMS text on the server while the client still shows fallbacks.
-  const [state, setState] = useState<CmsSectionState<T>>(() => ({
-    data: undefined,
-    isLoading: true,
-    error: undefined,
-  }));
+  const [state, setState] = useState<CmsSectionState<T>>(() => {
+    const cached = readCachedState<T>(key);
+    if (cached) return cached;
+    return { data: undefined, isLoading: true, error: undefined };
+  });
 
   const mountedRef = useRef(true);
   useEffect(() => {
@@ -46,9 +46,9 @@ export function useCmsSection<T>(
   useEffect(() => {
     const controller = new AbortController();
 
-    const existing = cache.get(key) as CacheEntry<T> | undefined;
+    const existing = getCmsCacheEntry<T>(key);
     const staleValue = existing?.value;
-    const isFresh = existing ? Date.now() - existing.updatedAt < staleTimeMs : false;
+    const isFresh = isCmsCacheFresh(key, staleTimeMs);
 
     if (staleValue !== undefined && isFresh) {
       setState({ data: staleValue, isLoading: false, error: undefined });
@@ -65,7 +65,7 @@ export function useCmsSection<T>(
 
         const promise = fetcher(controller.signal);
 
-        cache.set(key, {
+        setCmsCacheEntry<T>(key, {
           value: staleValue,
           promise,
           error: undefined,
@@ -74,7 +74,7 @@ export function useCmsSection<T>(
 
         const data = await promise;
 
-        cache.set(key, {
+        setCmsCacheEntry<T>(key, {
           value: data,
           promise: undefined,
           error: undefined,
@@ -89,7 +89,7 @@ export function useCmsSection<T>(
 
         const message = e instanceof Error ? e.message : "Failed to load section";
 
-        cache.set(key, {
+        setCmsCacheEntry<T>(key, {
           value: staleValue,
           promise: undefined,
           error: message,
@@ -110,9 +110,9 @@ export function useCmsSection<T>(
 
     return () => {
       controller.abort();
-      const entry = cache.get(key) as CacheEntry<T> | undefined;
+      const entry = getCmsCacheEntry<T>(key);
       if (entry?.promise) {
-        cache.set(key, {
+        setCmsCacheEntry<T>(key, {
           ...entry,
           promise: undefined,
         });
@@ -122,3 +122,5 @@ export function useCmsSection<T>(
 
   return state;
 }
+
+export type { CmsCacheEntry };

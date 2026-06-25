@@ -28,11 +28,11 @@ export default {
         desktop: "1440px",
       },
       fontFamily: {
-        heading: ["Larken","Playfair Display", "Georgia", "serif"],
-        body: ["Inter", "system-ui", "sans-serif"],
-        satoshi: ["Satoshi", "Inter", "system-ui", "sans-serif"],
+        heading: ["Larken", "var(--font-playfair)", "Georgia", "serif"],
+        body: ["var(--font-inter)", "system-ui", "sans-serif"],
+        satoshi: ["var(--font-inter)", "system-ui", "sans-serif"],
         gill: ["Gill Sans", "Gill Sans MT", "Cabin", "system-ui", "sans-serif"],
-        larken: ["Larken", "Playfair Display", "Georgia", "serif"],
+        larken: ["Larken", "var(--font-playfair)", "Georgia", "serif"],
         systemUi: ["system-ui", "sans-serif"],
       },
       colors: {

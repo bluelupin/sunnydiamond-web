@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ShoppingBag, Menu, Search, Heart, User } from "lucide-react";
@@ -12,9 +13,20 @@ import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
 import { resolveHeaderNavHref, isHeroOverlayRoute } from "@/shared/utils/navigation";
 import { resolveShellHeaderLinks } from "@/shared/lib/shellNavigation";
 import MobileNavigation from "@/shared/ui/layout/MobileNavigation";
-import { JewelleryMegaMenu } from "@/shared/ui/layout/JewelleryMegaMenu";
 import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
 import MenuIcon from "@/assets/Icons/MenuIcon";
+
+const JewelleryMegaMenu = dynamic(
+  () =>
+    import("@/shared/ui/layout/JewelleryMegaMenu").then((mod) => ({
+      default: mod.JewelleryMegaMenu,
+    })),
+  { ssr: false, loading: () => null },
+);
+
+const preloadJewelleryMegaMenu = () => {
+  void import("@/shared/ui/layout/JewelleryMegaMenu");
+};
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -48,6 +60,7 @@ const Header = () => {
 
   const openJewelleryMenu = useCallback(() => {
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    preloadJewelleryMegaMenu();
     setJewelleryMenuOpen(true);
   }, []);
 

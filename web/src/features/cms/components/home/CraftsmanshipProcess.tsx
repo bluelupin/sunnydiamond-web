@@ -170,14 +170,13 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
                   filter: "drop-shadow(0 30px 50px hsl(var(--foreground) / 0.18))",
                 }}
               >
-                <ResponsiveImage
+                  <ResponsiveImage
                   desktopSrc={desktopImageUrl || fallBackImage}
                   mobileSrc={mobileImageUrl || fallBackImage}
                   alt={craftsmanshipSectionAlt}
-                  priority
                   width={desktopImageUrl ? 750 : 390}
                   height={desktopImageUrl ? 470 : 350}
-                  quality={90}
+                  quality={80}
                   className="w-full h-h-full object-cover"
                 />
               </div>

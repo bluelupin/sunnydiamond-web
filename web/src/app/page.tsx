@@ -2,13 +2,17 @@ import type { Metadata } from "next";
 import { constructMetadata } from "@/shared/lib/seo/metadata";
 import JsonLd from "@/shared/lib/seo/JsonLd";
 import HomePageView from "@/features/cms/components/HomePage";
-import { getHomepageShell } from "@/services/homepage/homepageShell.service";
+import HomepageCmsSeeder from "@/shared/lib/providers/HomepageCmsSeeder";
+import {
+  getCachedHomepageShell,
+  prefetchHomepageCms,
+} from "@/lib/homepage/prefetchHomepageCms";
 import { buildHomepageJsonLd, resolveHomepageSeoMetadata } from "@/shared/lib/seo/homepageSeo";
 import { siteConfig } from "@/shared/lib/siteConfig";
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    const shellData = await getHomepageShell();
+    const shellData = await getCachedHomepageShell();
     const { title, description, canonicalUrl, imageUrl, noIndex } = resolveHomepageSeoMetadata(shellData);
 
     return constructMetadata({
@@ -30,18 +34,17 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Page() {
-  let shellData: Awaited<ReturnType<typeof getHomepageShell>> | null = null;
-
-  try {
-    shellData = await getHomepageShell();
-  } catch {
-    shellData = null;
-  }
-
-  const { title, description, canonicalUrl, imageUrl } = resolveHomepageSeoMetadata(shellData ?? {});
+  const prefetchedCms = await prefetchHomepageCms();
+  const { title, description, canonicalUrl, imageUrl } = resolveHomepageSeoMetadata(
+    prefetchedCms.shell ?? {},
+  );
 
   return (
     <>
+      <HomepageCmsSeeder
+        editorial={prefetchedCms.editorial}
+        shopping={prefetchedCms.shopping}
+      />
       <JsonLd data={buildHomepageJsonLd({ title, description, url: canonicalUrl, image: imageUrl })} />
       <HomePageView />
     </>

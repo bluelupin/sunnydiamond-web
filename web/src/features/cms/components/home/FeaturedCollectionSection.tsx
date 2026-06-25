@@ -139,7 +139,6 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
   return (
     <AlankaraCollection
       id={id}
-      priority
       defaultProductCtaLabel="Shop Now"
       {...collectionProps}
     />

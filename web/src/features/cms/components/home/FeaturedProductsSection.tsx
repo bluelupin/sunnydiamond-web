@@ -260,7 +260,6 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
                     alt={p.name}
                     width={1200}
                     height={1200}
-                    priority={isActive}
                     className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-[1.02] pointer-events-none"
                   />
                 </Link>

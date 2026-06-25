@@ -7,6 +7,7 @@ import {
   type ElementType,
   type ReactNode,
 } from "react";
+import { observeScrollReveal } from "@/shared/lib/scrollRevealObserver";
 import { cn } from "@/shared/utils/cn";
 
 type ScrollRevealProps = {
@@ -40,18 +41,10 @@ const ScrollReveal = ({
       return;
     }
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setVisible(true);
-          observer.unobserve(node);
-        }
-      },
-      { threshold, rootMargin },
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
+    return observeScrollReveal(node, () => setVisible(true), {
+      threshold,
+      rootMargin,
+    });
   }, [rootMargin, threshold]);
 
   return (

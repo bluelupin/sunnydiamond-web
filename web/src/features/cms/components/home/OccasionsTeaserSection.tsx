@@ -43,10 +43,9 @@ function OccasionCardItem({
         desktopSrc={desktopUrl || fallBackImage}
         mobileSrc={mobileUrl || desktopUrl || fallBackImage}
         alt={imageAlt}
-        priority={index === 0}
         width={desktopUrl ? 718 : 328}
         height={desktopUrl ? 700 : 400}
-        quality={90}
+        quality={80}
         className="size-full object-cover motion-safe:transition-transform motion-safe:duration-700 motion-safe:group-hover:scale-[1.02]"
       />
 

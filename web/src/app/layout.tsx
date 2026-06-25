@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import AppProvider from "@/shared/lib/providers/AppProvider";
-import Layout from "@/shared/ui/layout/Layout";
+import ServerAppShell from "@/shared/ui/layout/ServerAppShell";
 import siteEnv, { getAbsoluteUrl } from "@/shared/lib/seo/siteConfig";
+import { inter, playfairDisplay } from "@/shared/lib/fonts";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -91,11 +91,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="antialiased">
+    <html lang="en" className={`${inter.variable} ${playfairDisplay.variable} antialiased`}>
       <body className="min-h-screen bg-background font-body" suppressHydrationWarning>
-        <AppProvider>
-          <Layout>{children}</Layout>
-        </AppProvider>
+        <ServerAppShell>{children}</ServerAppShell>
       </body>
     </html>
   );

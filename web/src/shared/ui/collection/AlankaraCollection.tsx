@@ -230,10 +230,12 @@ function ProductCarouselPanel({
   products,
   defaultProductCtaLabel,
   variant,
+  imagePriority = false,
 }: {
   products: AlankaraCollectionProduct[];
   defaultProductCtaLabel: string;
   variant: "desktop" | "mobile";
+  imagePriority?: boolean;
 }) {
   const isMobile = variant === "mobile";
   const [activeIndex, setActiveIndex] = useState(0);
@@ -342,7 +344,7 @@ function ProductCarouselPanel({
                 <ProductSlideImage
                   product={product}
                   variant="desktop"
-                  priority={index === 0}
+                  priority={imagePriority && index === 0}
                 />
               </div>
             ))}
@@ -447,7 +449,7 @@ function ProductCarouselPanel({
                   <ProductSlideImage
                     product={product}
                     variant="mobile"
-                    priority={index === 0}
+                    priority={imagePriority && index === 0}
                   />
                 </div>
               ))}
@@ -542,6 +544,7 @@ export function AlankaraCollection({
             products={products}
             defaultProductCtaLabel={defaultProductCtaLabel}
             variant="desktop"
+            imagePriority={priority}
           />
         </ScrollReveal>
       </div>
@@ -564,6 +567,7 @@ export function AlankaraCollection({
             products={products}
             defaultProductCtaLabel={defaultProductCtaLabel}
             variant="mobile"
+            imagePriority={priority}
           />
         </ScrollReveal>
       </div>

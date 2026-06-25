@@ -77,9 +77,9 @@ export const ALANKARA_MOBILE_PRODUCT_CROP = {
 } as const satisfies AlankaraThumbnailCrop;
 
 export const ALANKARA_FALLBACKS = {
-  heroDesktop: "/images/collection/hero-desktop.png",
-  heroMobile: "/images/collection/hero-mobile.png",
-  product: "/images/collection/product-showcase.png",
-  firstThumbnail: "/images/collection/thumb-1.png",
-  secondThumbnail: "/images/collection/thumb-2.png",
+  heroDesktop: "/images/collection/hero-desktop.webp",
+  heroMobile: "/images/collection/hero-mobile.webp",
+  product: "/images/collection/product-showcase.webp",
+  firstThumbnail: "/images/collection/thumb-1.webp",
+  secondThumbnail: "/images/collection/thumb-2.webp",
 } as const;

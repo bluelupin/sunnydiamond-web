@@ -68,7 +68,6 @@ const Footer = () => {
                 width={336}
                 height={142}
                 className="h-auto w-[200px] xl:w-[336px]"
-                priority
               />
             </Link>
           </div>

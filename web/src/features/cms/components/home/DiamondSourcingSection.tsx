@@ -57,10 +57,9 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
               <ResponsiveImage
                 desktopSrc={diamondSourcingBg || ""}
                 alt={imageAlt}
-                priority
                 width={1920}
                 height={1080}
-                quality={desktopImageUrl ? 90 : 85}
+                quality={80}
                 className="w-full h-full object-cover opacity-90 scale-110"
               />
               <div className="absolute inset-0 bg-background/40" aria-hidden />
@@ -70,10 +69,9 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
                 <ResponsiveImage
                   desktopSrc={diamondGif || ""}
                   alt={imageAlt}
-                  priority
                   width={64}
                   height={64}
-                  quality={90}
+                  quality={80}
                   className="w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 opacity-80 mx-auto"
                 />
               </ScrollReveal>
@@ -86,10 +84,9 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
                     desktopSrc={desktopImageUrl || ""}
                     mobileSrc={mobileImageUrl}
                     alt={imageAlt}
-                    priority
                     width={1024}
                     height={1024}
-                    quality={desktopImageUrl ? 90 : 85}
+                    quality={80}
                     className="w-full h-full object-cover"
                   />
                 </div>

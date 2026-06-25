@@ -2,12 +2,11 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
 import DiamondIcon from "@/assets/Icons/Diamond";
-import { getImageSrc } from "@/shared/utils/image";
 import TrustBadgeSection from "../common/TrustBadges";
+import HeroBackgroundMedia from "./HeroBackgroundMedia";
 
 interface HeroSectionProps {
   id?: string;
@@ -41,11 +40,6 @@ const HeroSection = ({ id }: HeroSectionProps) => {
     [hero],
   );
 
-  const hasHeroImage = useMemo(
-    () => Boolean(desktopImageUrl || mobileImageUrl),
-    [desktopImageUrl, mobileImageUrl],
-  );
-
   const heroTitle = String(title ?? "");
 
   return (
@@ -54,35 +48,12 @@ const HeroSection = ({ id }: HeroSectionProps) => {
       className="relative flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden"
     >
       <div className="relative min-h-0 flex-1 overflow-hidden">
-        <video
-          className="absolute inset-0 h-full w-full object-cover"
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="metadata"
-          poster={getImageSrc(desktopImageUrl || mobileImageUrl || "")}
-          aria-hidden="true"
-          tabIndex={-1}
-        >
-          <source src="/videos/hero-banner-video.mp4" type="video/mp4" />
-          {isShellLoading ? (
-            <div className="absolute inset-0 h-full w-full animate-pulse bg-gray200" />
-          ) : hasHeroImage ? (
-            <ResponsiveImage
-              desktopSrc={desktopImageUrl || ""}
-              mobileSrc={mobileImageUrl}
-              alt={heroAlt}
-              priority
-              width={512}
-              height={512}
-              quality={desktopImageUrl ? 90 : 85}
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-          ) : (
-            <div className="absolute inset-0 h-full w-full bg-gray200" aria-hidden="true" />
-          )}
-        </video>
+        <HeroBackgroundMedia
+          desktopImageUrl={desktopImageUrl || ""}
+          mobileImageUrl={mobileImageUrl}
+          alt={heroAlt}
+          isLoading={isShellLoading}
+        />
         <div className="absolute inset-0 bg-gradient-to-r from-charcoal/55 via-charcoal/15 to-transparent" />
         <div className="absolute inset-0 bg-charcoal/20" />
         <div className="container relative flex h-full items-end justify-center px-4 pb-[60px] md:px-6">
