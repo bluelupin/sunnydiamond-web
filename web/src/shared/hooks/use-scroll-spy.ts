@@ -11,6 +11,8 @@ export function useScrollSpy({ sectionIds, visibilityThresholdIndex = 3 }: UseSc
   const [progress, setProgress] = useState<Record<string, number>>({});
   const visibleSections = useRef<Set<string>>(new Set());
   const rafRef = useRef<number | null>(null);
+  const navUnlockedRef = useRef(false);
+  const lastScrollYRef = useRef(0);
 
   useEffect(() => {
     const elements = sectionIds
@@ -20,12 +22,15 @@ export function useScrollSpy({ sectionIds, visibilityThresholdIndex = 3 }: UseSc
     if (!elements.length) return;
 
     const thresholdEl = document.getElementById(sectionIds[visibilityThresholdIndex]);
+    navUnlockedRef.current = false;
+    lastScrollYRef.current = window.scrollY;
 
     const compute = () => {
       rafRef.current = null;
 
-      // Skip when nothing is on screen.
-      if (visibleSections.current.size === 0 && !thresholdEl) return;
+      const scrollY = window.scrollY;
+      const scrollingUp = scrollY < lastScrollYRef.current;
+      lastScrollYRef.current = scrollY;
 
       const viewportH = window.innerHeight;
       const mid = viewportH * 0.4;
@@ -47,12 +52,18 @@ export function useScrollSpy({ sectionIds, visibilityThresholdIndex = 3 }: UseSc
       }
 
       // ---- WRITE phase: batch state updates last ----
-      // Show once the first nav section (Alankara) enters the viewport.
+      // Unlock after passing Alankara; stay visible through all sections below.
+      // Hide again only when scrolling back up into Alankara (or above it).
       const thresholdRect = thresholdEl?.getBoundingClientRect();
-      const hasReachedThreshold = thresholdRect
-        ? thresholdRect.top <= viewportH * 0.95 && thresholdRect.bottom > 0
-        : false;
-      setIsVisible(hasReachedThreshold);
+      if (thresholdRect) {
+        if (thresholdRect.bottom <= 0) {
+          navUnlockedRef.current = true;
+        } else if (scrollingUp) {
+          navUnlockedRef.current = false;
+        }
+      }
+
+      setIsVisible(navUnlockedRef.current);
       setProgress(next);
       setActiveId(active);
     };
