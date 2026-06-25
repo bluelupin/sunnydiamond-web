@@ -5,8 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
-import LeftArrow from "@/assets/Icons/LeftArrow";
-import RightArrow from "@/assets/Icons/RightArrow";
+import CarouselChevronLeft from "@/assets/Icons/CarouselChevronLeft";
+import CarouselChevronRight from "@/assets/Icons/CarouselChevronRight";
 import { cn } from "@/shared/utils/cn";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { getImageSrc } from "@/shared/utils/image";
@@ -19,6 +19,80 @@ import {
 } from "./alankaraCollection.types";
 
 const DEFAULT_PRODUCT_CTA = "Shop Now";
+const SLIDE_DURATION_MS = 500;
+
+function CarouselNavButton({
+  direction,
+  disabled,
+  onClick,
+  variant,
+}: {
+  direction: "prev" | "next";
+  disabled: boolean;
+  onClick: () => void;
+  variant: "desktop" | "mobile";
+}) {
+  const isMobile = variant === "mobile";
+  const label = direction === "prev" ? "Previous product" : "Next product";
+  const Icon = direction === "prev" ? CarouselChevronLeft : CarouselChevronRight;
+
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      onClick={onClick}
+      disabled={disabled}
+      className={cn(
+        "inline-flex items-center justify-center transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2",
+        isMobile ? "size-6" : "size-[25px] px-[3px] py-1",
+        disabled ? "cursor-not-allowed opacity-100" : "hover:opacity-70",
+      )}
+    >
+      <Icon
+        disabled={disabled}
+        strokeWidth={isMobile ? 1 : 1.5}
+        className={isMobile ? "size-6" : "h-[17px] w-[18px]"}
+      />
+    </button>
+  );
+}
+
+function ProductSlideImage({
+  product,
+  variant,
+  priority,
+}: {
+  product: AlankaraCollectionProduct;
+  variant: "desktop" | "mobile";
+  priority?: boolean;
+}) {
+  const imageSrc = getImageSrc(product.image) || "";
+
+  if (variant === "mobile") {
+    return (
+      <Image
+        src={imageSrc}
+        alt={product.name}
+        fill
+        sizes="271px"
+        priority={priority}
+        className="max-w-none object-cover"
+        style={ALANKARA_MOBILE_PRODUCT_CROP}
+      />
+    );
+  }
+
+  return (
+    <OptimizedImage
+      src={imageSrc}
+      alt={product.name}
+      width={720}
+      height={800}
+      priority={priority}
+      className="size-full object-cover"
+    />
+  );
+}
 
 const defaultThumbnailCrop = ALANKARA_THUMBNAIL_CROPS.first;
 
@@ -164,25 +238,38 @@ function ProductCarouselPanel({
   const dragState = useRef({ active: false, startX: 0, deltaX: 0, pointerId: 0 });
   const [dragOffset, setDragOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const total = products.length;
+  const canGoPrev = activeIndex > 0;
+  const canGoNext = activeIndex < total - 1;
 
   useEffect(() => {
     if (activeIndex >= total) {
-      setActiveIndex(0);
+      setActiveIndex(Math.max(0, total - 1));
     }
   }, [activeIndex, total]);
 
   const go = useCallback(
     (direction: -1 | 1) => {
-      if (total <= 1) return;
-      setActiveIndex((prev) => (prev + direction + total) % total);
+      if (isAnimating || total <= 1) return;
+
+      const next = activeIndex + direction;
+      if (next < 0 || next >= total) return;
+
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!reduceMotion) {
+        setIsAnimating(true);
+        window.setTimeout(() => setIsAnimating(false), SLIDE_DURATION_MS);
+      }
+
+      setActiveIndex(next);
     },
-    [total],
+    [activeIndex, isAnimating, total],
   );
 
   const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!trackRef.current || total <= 1) return;
+    if (!trackRef.current || total <= 1 || isAnimating) return;
     trackRef.current.setPointerCapture(event.pointerId);
     dragState.current = {
       active: true,
@@ -195,7 +282,9 @@ function ProductCarouselPanel({
 
   const onPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!dragState.current.active) return;
-    const deltaX = event.clientX - dragState.current.startX;
+    let deltaX = event.clientX - dragState.current.startX;
+    if (activeIndex === 0 && deltaX > 0) deltaX = 0;
+    if (activeIndex === total - 1 && deltaX < 0) deltaX = 0;
     dragState.current.deltaX = deltaX;
     setDragOffset(deltaX);
   };
@@ -212,14 +301,15 @@ function ProductCarouselPanel({
     setIsDragging(false);
     setDragOffset(0);
     const threshold = 48;
-    if (deltaX <= -threshold) go(1);
-    else if (deltaX >= threshold) go(-1);
+    if (deltaX <= -threshold && canGoNext) go(1);
+    else if (deltaX >= threshold && canGoPrev) go(-1);
   };
 
   if (!total) return null;
 
   const activeProduct = products[activeIndex];
-  const activeImage = getImageSrc(activeProduct.image) || "";
+  const slideOffsetPercent = total > 0 ? (activeIndex * 100) / total : 0;
+  const slideTransform = `translateX(calc(-${slideOffsetPercent}% + ${isDragging ? dragOffset : 0}px))`;
 
   return (
     <div
@@ -230,12 +320,46 @@ function ProductCarouselPanel({
     >
       {!isMobile ? (
         <div className="absolute inset-0 overflow-hidden">
-          <OptimizedImage
-            src={activeImage}
-            alt={activeProduct.name}
-            width={720}
-            height={800}
-            className="size-full object-cover transition-opacity duration-500"
+          <div
+            className={cn(
+              "flex h-full will-change-transform motion-reduce:transition-none",
+              !isDragging && "transition-transform duration-500 ease-in-out",
+            )}
+            style={{
+              width: `${total * 100}%`,
+              transform: slideTransform,
+            }}
+          >
+            {products.map((product, index) => (
+              <div
+                key={String(product.id)}
+                className="relative h-full shrink-0"
+                style={{ width: `${100 / total}%` }}
+              >
+                <ProductSlideImage
+                  product={product}
+                  variant="desktop"
+                  priority={index === 0}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {isMobile ? (
+        <div className="absolute inset-x-4 top-[251px] z-20 flex items-center justify-between">
+          <CarouselNavButton
+            direction="prev"
+            variant="mobile"
+            disabled={!canGoPrev}
+            onClick={() => go(-1)}
+          />
+          <CarouselNavButton
+            direction="next"
+            variant="mobile"
+            disabled={!canGoNext}
+            onClick={() => go(1)}
           />
         </div>
       ) : null}
@@ -251,74 +375,100 @@ function ProductCarouselPanel({
         onPointerCancel={endDrag}
         className={cn(
           "relative flex h-full flex-col items-center justify-center",
-          total > 1 ? (isDragging ? "cursor-grabbing" : "cursor-grab") : "",
-          isMobile ? "gap-6" : "gap-[92px] pt-[380px]",
+          total > 1 && !isAnimating
+            ? isDragging
+              ? "cursor-grabbing"
+              : "cursor-grab"
+            : "",
+          isMobile ? "gap-6" : "",
         )}
-        style={
-          isMobile && isDragging
-            ? { transform: `translateX(${dragOffset}px)` }
-            : undefined
-        }
       >
-        <div
-          className={cn(
-            "flex items-center justify-between",
-            isMobile ? "absolute left-4 top-[251px] w-[311px]" : "w-full max-w-[640px] px-2.5",
-          )}
-        >
-          <button
-            type="button"
-            aria-label="Previous product"
-            onClick={() => go(-1)}
-            disabled={total <= 1}
-            className="inline-flex size-6 items-center justify-center text-darkblack disabled:opacity-30 md:size-10"
-          >
-            <LeftArrow className="size-6 md:size-[25px]" />
-          </button>
-          <button
-            type="button"
-            aria-label="Next product"
-            onClick={() => go(+1)}
-            disabled={total <= 1}
-            className="inline-flex size-6 items-center justify-center text-darkblack disabled:opacity-30 md:size-10"
-          >
-            <RightArrow className="size-6 md:size-[25px]" />
-          </button>
-        </div>
+        {!isMobile ? (
+          <div className="absolute left-40 top-[380px] z-10 flex w-[640px] flex-col gap-[92px]">
+            <div className="relative h-10 w-full shrink-0">
+              <div className="absolute left-0 top-1/2 -translate-y-1/2">
+                <CarouselNavButton
+                  direction="prev"
+                  variant="desktop"
+                  disabled={!canGoPrev}
+                  onClick={() => go(-1)}
+                />
+              </div>
+              <div className="absolute right-0 top-1/2 -translate-y-1/2">
+                <CarouselNavButton
+                  direction="next"
+                  variant="desktop"
+                  disabled={!canGoNext}
+                  onClick={() => go(1)}
+                />
+              </div>
+            </div>
 
-        {isMobile ? (
-          <div className="relative aspect-[134/115] min-h-0 w-full flex-[1_0_0] overflow-hidden">
-            <Image
-              src={activeImage}
-              alt={activeProduct.name}
-              fill
-              sizes="271px"
-              className="max-w-none object-cover"
-              style={ALANKARA_MOBILE_PRODUCT_CROP}
-            />
+            <div className="flex w-[180px] flex-col items-center gap-4 text-center">
+              <p className="font-gill text-[20px] font-normal leading-110 text-darkblack">
+                {activeProduct.name}
+              </p>
+              <Link
+                href={activeProduct.href}
+                className="btn-slide-up relative inline-flex h-14 w-full items-center justify-center overflow-hidden border-[0.8px] border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2"
+              >
+                {activeProduct.ctaLabel || defaultProductCtaLabel}
+              </Link>
+            </div>
           </div>
         ) : null}
 
-        <div className="flex shrink-0 flex-col items-center gap-4 text-center">
-          <p
+        {isMobile ? (
+          <div
             className={cn(
-              "font-gill leading-110 text-darkblack",
-              isMobile ? "text-base font-normal" : "text-[20px]",
+              "relative aspect-[134/115] min-h-0 w-full flex-[1_0_0] overflow-hidden",
+              total > 1 ? "touch-pan-y" : "",
             )}
           >
-            {activeProduct.name}
-          </p>
-          <Link
-            href={activeProduct.href}
-            className="btn-slide-up relative inline-flex h-14 items-center justify-center overflow-hidden border-[0.8px] border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2"
-          >
-            {activeProduct.ctaLabel || defaultProductCtaLabel}
-          </Link>
-        </div>
+            <div
+              className={cn(
+                "flex h-full will-change-transform motion-reduce:transition-none",
+                !isDragging && "transition-transform duration-500 ease-in-out",
+              )}
+              style={{
+                width: `${total * 100}%`,
+                transform: slideTransform,
+              }}
+            >
+              {products.map((product, index) => (
+                <div
+                  key={String(product.id)}
+                  className="relative h-full shrink-0"
+                  style={{ width: `${100 / total}%` }}
+                >
+                  <ProductSlideImage
+                    product={product}
+                    variant="mobile"
+                    priority={index === 0}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {isMobile ? (
+          <div className="flex shrink-0 flex-col items-center gap-4 text-center">
+            <p className="font-gill text-base font-normal leading-110 text-darkblack">
+              {activeProduct.name}
+            </p>
+            <Link
+              href={activeProduct.href}
+              className="btn-slide-up relative inline-flex h-14 items-center justify-center overflow-hidden border-[0.8px] border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2"
+            >
+              {activeProduct.ctaLabel || defaultProductCtaLabel}
+            </Link>
+          </div>
+        ) : null}
       </div>
 
       {!isMobile && total > 1 ? (
-        <div className="absolute inset-x-0 bottom-0 flex justify-center gap-[5.6px] overflow-x-auto px-6">
+        <div className="absolute inset-x-0 bottom-0 z-10 flex justify-center gap-[5.6px] overflow-x-auto px-6">
           {products.map((product, index) => {
             const thumbSrc = getImageSrc(product.thumbnailImage ?? product.image) || "";
             const isActive = index === activeIndex;
@@ -329,7 +479,15 @@ function ProductCarouselPanel({
                 productName={product.name}
                 isActive={isActive}
                 cropStyle={product.thumbnailCrop}
-                onClick={() => setActiveIndex(index)}
+                onClick={() => {
+                  if (index === activeIndex || isAnimating) return;
+                  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+                  if (!reduceMotion) {
+                    setIsAnimating(true);
+                    window.setTimeout(() => setIsAnimating(false), SLIDE_DURATION_MS);
+                  }
+                  setActiveIndex(index);
+                }}
               />
             );
           })}
