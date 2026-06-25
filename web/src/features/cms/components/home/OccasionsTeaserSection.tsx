@@ -54,8 +54,8 @@ function OccasionCardItem({
         className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-1/2 bg-gradient-to-t from-black to-transparent"
       />
 
-      <div className="absolute bottom-8 left-4 z-10 max-w-[296px] md:bottom-60 md:left-40 md:right-40 md:max-w-[418px] md:right-auto">
-        <div className="flex flex-col gap-4 motion-safe:transition-transform motion-safe:duration-500 motion-safe:ease-out md:gap-6 md:group-hover:-translate-y-12 md:group-focus-visible:-translate-y-12">
+      <div className="absolute inset-x-0 bottom-0 z-10 px-4 pb-60 md:px-40">
+        <div className="flex max-w-[296px] flex-col gap-4 md:max-w-[418px] md:gap-6">
           <div className="flex flex-col gap-2 text-white md:gap-3">
             <h3 className="font-larken text-2xl font-light leading-110 md:text-32">
               {card.title}
@@ -67,7 +67,7 @@ function OccasionCardItem({
             ) : null}
           </div>
 
-          <span className="inline-flex w-fit items-center justify-center border-b-[1.5px] border-white pb-1.5 font-gill text-sm font-normal uppercase tracking-[0.28px] text-white md:max-h-0 md:overflow-hidden md:opacity-0 md:transition-all md:duration-500 md:ease-out md:group-hover:max-h-12 md:group-hover:opacity-100 md:group-focus-visible:max-h-12 md:group-focus-visible:opacity-100">
+          <span className="inline-flex w-fit translate-y-0 items-center justify-center border-b-[1.5px] border-white pb-1.5 font-gill text-sm font-normal uppercase tracking-[0.28px] text-white opacity-100 motion-safe:transition-[transform,opacity] motion-safe:duration-500 motion-safe:ease-out md:translate-y-[calc(100%+24px)] md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:group-focus-visible:translate-y-0 md:group-focus-visible:opacity-100">
             {ctaLabel}
           </span>
         </div>
