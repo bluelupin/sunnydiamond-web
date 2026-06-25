@@ -2,7 +2,7 @@ export const footerPages = {
   education: {
     title: "Education",
     description:
-      "Explore how Sunny Diamonds sources, grades, and crafts each diamond. The full page UI will be added here later.",
+      "Explore diamond expertise at Sunny Diamonds — learn the 4Cs, certifications, shapes, and care to choose your perfect stone with confidence.",
   },
   diamondsForEveryone: {
     title: "Diamonds For Everyone",
