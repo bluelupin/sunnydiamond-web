@@ -7,6 +7,7 @@ import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import type { SavingsPlanStep } from "@/types/homepage/diamondsForEveryoneSection";
 import { isSectionActive } from "@/shared/utils/cmsSection";
+import { resolveDiamondsForEveryoneSection } from "@/shared/utils/resolveDiamondsForEveryoneSection";
 
 interface DiamondsForEveryoneSectionProps {
   id?: string;
@@ -61,19 +62,21 @@ const StepDescription = ({
 const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => {
   const { data: editorialData, isLoading } = useHomepageEditorialBlocks();
 
-  const sectionData = editorialData?.diamondsForEveryoneSection ?? null;
+  const sectionData = useMemo(
+    () => resolveDiamondsForEveryoneSection(editorialData),
+    [editorialData],
+  );
 
-  const eyebrow = sectionData?.eyebrow?.trim() || "Flexible Savings Plan";
-  const sectionTitle = sectionData?.sectionTitle?.trim() || "Diamonds for Everyone";
+  const eyebrow = sectionData.eyebrow?.trim() || "Flexible Savings Plan";
+  const sectionTitle = sectionData.sectionTitle?.trim() || "Diamonds for Everyone";
   const subtitle =
-    sectionData?.subtitle?.trim() ||
-    sectionData?.description?.trim() ||
+    sectionData.subtitle?.trim() ||
     "Save monthly towards fine jewellery within reach";
-  const ctaUrl = sectionData?.cta?.url || sectionData?.cta?.to || "/monthly-plans";
-  const ctaLabel = sectionData?.cta?.label?.trim() || "Explore Plans";
+  const ctaUrl = sectionData.cta?.url || sectionData.cta?.to || "/diamonds-for-everyone";
+  const ctaLabel = sectionData.cta?.label?.trim() || "Explore Plans";
 
   const steps = useMemo(() => {
-    const cmsSteps = (sectionData?.steps ?? []) as SavingsPlanStep[];
+    const cmsSteps = (sectionData.steps ?? []) as SavingsPlanStep[];
     const activeSteps = cmsSteps
       .filter((step) => step?.isActive !== false)
       .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0));
@@ -84,9 +87,9 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
       ...step,
       stepNumber: step.stepNumber ?? index + 1,
     }));
-  }, [sectionData?.steps]);
+  }, [sectionData.steps]);
 
-  if (!isSectionActive(sectionData?.isActive)) return null;
+  if (!isSectionActive(sectionData.isActive)) return null;
 
   if (isLoading) {
     return (
