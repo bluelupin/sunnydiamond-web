@@ -12,7 +12,7 @@ const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, v
 
 /**
  * Bidirectional scroll progress for a centered vertical line (0 → 1 fill on scroll down,
- * reverses smoothly on scroll up). Matches AboutCraftingRaritySection line behavior.
+ * reverses smoothly on scroll up). Matches AboutBrillianceSection line behavior.
  */
 export function useScrollProgressLine(
   sectionRef: RefObject<HTMLElement | null>,

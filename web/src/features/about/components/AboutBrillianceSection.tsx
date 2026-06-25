@@ -52,13 +52,13 @@ const FigmaMaskReveal = ({
   );
 };
 
-type AboutCraftingRaritySectionProps = NormalizedCraftingRarity;
+type AboutBrillianceSectionProps = NormalizedCraftingRarity;
 
-const AboutCraftingRaritySection = ({
+const AboutBrillianceSection = ({
   heading,
   description,
   image,
-}: AboutCraftingRaritySectionProps) => {
+}: AboutBrillianceSectionProps) => {
   const sectionRef = useRef<HTMLElement>(null);
   const {
     headingReveal,
@@ -121,17 +121,22 @@ const AboutCraftingRaritySection = ({
               lineHeight={lineSpec.height}
             />
           </FigmaMaskReveal>
-
-          <p
-            className="mx-auto mt-2.5 w-full max-w-557 font-gill text-base font-light leading-110 text-gray600 sm:mt-3 lg:mt-[13px] lg:text-20"
-            style={reducedMotion ? undefined : { opacity: bodyReveal }}
+          <FigmaMaskReveal
+            reveal={imageReveal}
+            reducedMotion={reducedMotion}
+            className="mx-auto mt-2.5 w-full max-w-557 "
           >
-            {description}
-          </p>
+            <p
+              className="font-gill text-base font-light leading-110 text-gray600 sm:mt-3 lg:mt-[13px] lg:text-20"
+            // style={reducedMotion ? undefined : { opacity: bodyReveal }}
+            >
+              {description}
+            </p>
+          </FigmaMaskReveal>
         </div>
       </PageContainer>
     </section>
   );
 };
 
-export default AboutCraftingRaritySection;
+export default AboutBrillianceSection;

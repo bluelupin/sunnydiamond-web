@@ -18,6 +18,7 @@ import type {
   NormalizedTrustBadge,
   StrapiAboutCraftMosaicSection,
   StrapiAboutCraftSection,
+  StrapiAboutFeatureSlide,
   StrapiAboutHero,
   StrapiAboutLegacyImageBlock,
   StrapiAboutPageEntity,
@@ -98,14 +99,37 @@ const mapHero = (hero?: StrapiAboutHero | null): NormalizedAboutHero | null => {
   return { title, image };
 };
 
+const mapFeatureSlide = (
+  slide?: StrapiAboutFeatureSlide | null,
+): NormalizedCraftingRarity | null => {
+  if (!slide) return null;
+
+  const heading = cleanText(slide.heading);
+  const description =
+    cleanText(slide.body) ?? cleanText(slide.description);
+  const image = mapResponsiveImage(slide.image);
+
+  if (!heading || !description || !image) return null;
+  if (!isUsableDescription(description)) return null;
+
+  return { heading, description, image };
+};
+
 const mapCraftingRarity = (
   section: StrapiAboutPageEntity["brillianceSection"],
 ): NormalizedCraftingRarity | null => {
   if (!section) return null;
 
+  const slides = section.featureSlide ?? [];
+  for (const slide of slides) {
+    const mapped = mapFeatureSlide(slide);
+    if (mapped) return mapped;
+  }
+
+  const pinnedImage = mapResponsiveImage(section.pinnedImage);
   const heading = cleanText(section.heading);
   const description = cleanText(section.description);
-  const image = mapResponsiveImage(section.image);
+  const image = mapResponsiveImage(section.image) ?? pinnedImage ?? undefined;
 
   if (!heading || !description || !image) return null;
 
