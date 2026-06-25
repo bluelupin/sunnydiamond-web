@@ -1,0 +1,249 @@
+"use client";
+
+import { useEffect, useState, type ReactNode } from "react";
+import Image from "next/image";
+import { LazyInView } from "@/shared/ui/LazyInView";
+import { cn } from "@/shared/utils/cn";
+import type { NormalizedCraftCard } from "@/services/about/about-page.types";
+import {
+  aboutHandcraftedAssets,
+  aboutHandcraftedContent,
+  aboutPageImages,
+} from "../data/content";
+
+type AboutHandcraftedTileGridProps = {
+  cards: NormalizedCraftCard[];
+};
+
+const craftPhotoClass = "h-full w-full bg-cover bg-center";
+const craftPhotoStyle = {
+  backgroundImage: `url(${aboutPageImages.craftsmanship})`,
+} as const;
+
+const STAGGER_MS = 75;
+const REVEAL_DURATION = "duration-700 ease-reveal";
+
+/** Diagonal sweep: top-left → bottom-right for a cohesive grid formation. */
+function revealDelay(row: number, col: number, colsInRow: number) {
+  return (row * colsInRow + col) * STAGGER_MS;
+}
+
+type AnimatedTileProps = {
+  revealed: boolean;
+  reducedMotion: boolean;
+  delayMs: number;
+  className?: string;
+  children: ReactNode;
+};
+
+function AnimatedTile({
+  revealed,
+  reducedMotion,
+  delayMs,
+  className,
+  children,
+}: AnimatedTileProps) {
+  return (
+    <div
+      className={cn(
+        className,
+        !reducedMotion &&
+          "motion-safe:transition-[opacity,transform] motion-safe:will-change-[opacity,transform]",
+        !reducedMotion && REVEAL_DURATION,
+        revealed || reducedMotion
+          ? "translate-y-0 scale-100 opacity-100"
+          : "translate-y-5 scale-[0.94] opacity-0",
+      )}
+      style={
+        !reducedMotion && delayMs > 0
+          ? { transitionDelay: `${delayMs}ms` }
+          : undefined
+      }
+    >
+      {children}
+    </div>
+  );
+}
+
+function CraftPhotoTile({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn(craftPhotoClass, className)}
+      style={craftPhotoStyle}
+      aria-hidden
+    />
+  );
+}
+
+function CraftTextTile({
+  title,
+  className,
+  compact,
+}: {
+  title: string;
+  className?: string;
+  compact?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center gap-3 bg-chalkCard",
+        className,
+      )}
+    >
+      <Image
+        src={aboutHandcraftedAssets.flourish}
+        alt=""
+        width={16}
+        height={15}
+        aria-hidden
+        className="h-[15px] w-4 shrink-0"
+      />
+      <h3
+        className={cn(
+          "text-center font-larken font-light leading-[110%] text-darkblack",
+          compact
+            ? "max-w-[79.73%] text-2xl"
+            : "text-base sm:text-lg md:text-xl lg:text-2xl",
+        )}
+      >
+        {title}
+      </h3>
+    </div>
+  );
+}
+
+function GridFallback() {
+  return (
+    <div
+      className="min-h-[460px] w-full animate-pulse bg-transparent sm:min-h-[520px]"
+      aria-hidden
+    />
+  );
+}
+
+function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps) {
+  const [revealed, setRevealed] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  const fallbackCards = aboutHandcraftedContent.cards;
+  const cardByIndex = (index: number) =>
+    cards.find((card) => card.layoutIndex === index)?.title ??
+    fallbackCards[index]?.title ??
+    fallbackCards[0]?.title ??
+    "";
+
+  useEffect(() => {
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(motionQuery.matches);
+
+    if (motionQuery.matches) {
+      setRevealed(true);
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => setRevealed(true));
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
+  const tileProps = (row: number, col: number, colsInRow: number) => ({
+    revealed,
+    reducedMotion,
+    delayMs: revealDelay(row, col, colsInRow),
+  });
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-center gap-3">
+        <AnimatedTile
+          {...tileProps(0, 0, 5)}
+          className="h-[132px] w-[111px] sm:h-[222px] sm:w-[222px]"
+        >
+          <CraftPhotoTile className="size-full" />
+        </AnimatedTile>
+        <AnimatedTile
+          {...tileProps(0, 1, 5)}
+          className="h-[132px] w-[111px] sm:h-[222px] sm:w-[222px]"
+        >
+          <CraftTextTile title={cardByIndex(1)} className="size-full" />
+        </AnimatedTile>
+        <AnimatedTile
+          {...tileProps(0, 2, 5)}
+          className="h-[132px] w-[111px] sm:h-[222px] sm:w-[222px]"
+        >
+          <CraftPhotoTile className="size-full" />
+        </AnimatedTile>
+        <AnimatedTile
+          {...tileProps(0, 3, 5)}
+          className="hidden h-[222px] w-[222px] sm:block"
+        >
+          <CraftPhotoTile className="size-full" />
+        </AnimatedTile>
+        <AnimatedTile
+          {...tileProps(0, 4, 5)}
+          className="hidden h-[222px] w-[222px] sm:block"
+        >
+          <CraftPhotoTile className="size-full" />
+        </AnimatedTile>
+      </div>
+
+      <div className="flex items-center justify-center gap-3">
+        <AnimatedTile
+          {...tileProps(1, 0, 3)}
+          className="h-[132px] w-[173px] sm:h-[222px] sm:w-[222px]"
+        >
+          <CraftPhotoTile className="size-full" />
+        </AnimatedTile>
+        <AnimatedTile
+          {...tileProps(1, 1, 3)}
+          className="hidden h-[222px] w-[222px] sm:flex"
+        >
+          <CraftTextTile
+            title={cardByIndex(1)}
+            className="size-full"
+            compact
+          />
+        </AnimatedTile>
+        <AnimatedTile
+          {...tileProps(1, 2, 3)}
+          className="h-[132px] w-[173px] sm:h-[222px] sm:w-[222px]"
+        >
+          <CraftPhotoTile className="size-full" />
+        </AnimatedTile>
+      </div>
+
+      <div className="flex items-center justify-center gap-3">
+        <AnimatedTile
+          {...tileProps(2, 0, 3)}
+          className="h-[132px] w-[111px] sm:h-[222px] sm:w-[222px]"
+        >
+          <CraftTextTile title={cardByIndex(0)} className="size-full" />
+        </AnimatedTile>
+        <AnimatedTile
+          {...tileProps(2, 1, 3)}
+          className="h-[132px] w-[111px] sm:h-[222px] sm:w-[222px]"
+        >
+          <CraftPhotoTile className="size-full" />
+        </AnimatedTile>
+        <AnimatedTile
+          {...tileProps(2, 2, 3)}
+          className="h-[132px] w-[111px] sm:h-[222px] sm:w-[222px]"
+        >
+          <CraftTextTile title={cardByIndex(2)} className="size-full" />
+        </AnimatedTile>
+      </div>
+    </div>
+  );
+}
+
+const AboutHandcraftedTileGrid = ({ cards }: AboutHandcraftedTileGridProps) => (
+  <LazyInView
+    fallback={<GridFallback />}
+    className="min-h-[460px] sm:min-h-[520px]"
+    rootMargin="200px 0px 120px 0px"
+  >
+    <AboutHandcraftedTileGridInner cards={cards} />
+  </LazyInView>
+);
+
+export default AboutHandcraftedTileGrid;

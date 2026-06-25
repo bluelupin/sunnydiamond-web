@@ -1,76 +1,18 @@
-"use client";
-
-import Image from "next/image";
 import MediaContentOverlay from "@/shared/ui/MediaContentOverlay";
 import PageContainer from "@/shared/ui/layout/PageContainer";
-import { cn } from "@/shared/utils/cn";
 import type { NormalizedAboutCraft } from "@/services/about/about-page.types";
 import AboutHandcraftedHeroMedia from "./AboutHandcraftedHeroMedia";
+import AboutHandcraftedTileGrid from "./AboutHandcraftedTileGrid";
 import VerticalScrollLine from "./VerticalScrollLine";
-import {
-  aboutHandcraftedAssets,
-  aboutPageImages,
-} from "../data/content";
 
 type AboutHandcraftedSectionProps = NormalizedAboutCraft;
-
-const craftPhotoClass =
-  "h-full w-full bg-cover bg-center";
-const craftPhotoStyle = {
-  backgroundImage: `url(${aboutPageImages.craftsmanship})`,
-} as const;
-
-function CraftPhotoTile({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn(craftPhotoClass, className)}
-      style={craftPhotoStyle}
-      aria-hidden
-    />
-  );
-}
-
-function CraftTextTile({
-  className,
-  compact,
-}: {
-  className?: string;
-  compact?: boolean;
-}) {
-  return (
-    <div
-      className={cn(
-        "flex flex-col items-center justify-center gap-3 bg-chalkCard",
-        className,
-      )}
-    >
-      <Image
-        src={aboutHandcraftedAssets.flourish}
-        alt=""
-        width={16}
-        height={15}
-        aria-hidden
-        className="h-[15px] w-4 shrink-0"
-      />
-      <h3
-        className={cn(
-          "text-center font-larken font-light leading-[110%] text-darkblack",
-          compact
-            ? "max-w-[79.73%] text-2xl"
-            : "text-base sm:text-lg md:text-xl lg:text-2xl",
-        )}
-      >
-        Ethically Sourced, conflict free diamonds
-      </h3>
-    </div>
-  );
-}
 
 const AboutHandcraftedSection = ({
   title,
   videoUrl,
   posterUrl,
   overlayOpacity,
+  cards,
 }: AboutHandcraftedSectionProps) => (
   <>
     <section
@@ -95,47 +37,7 @@ const AboutHandcraftedSection = ({
         </div>
       </PageContainer>
       <PageContainer className="mt-6">
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-center gap-3">
-            <div className="h-[132px] w-[111px] sm:h-[222px] sm:w-[222px]">
-              <CraftPhotoTile className="size-full" />
-            </div>
-            <div className="h-[132px] w-[111px] sm:h-[222px] sm:w-[222px]">
-              <CraftTextTile className="size-full" />
-            </div>
-            <div className="h-[132px] w-[111px] sm:h-[222px] sm:w-[222px]">
-              <CraftPhotoTile className="size-full" />
-            </div>
-            <div className="hidden h-[222px] w-[222px] sm:block">
-              <CraftPhotoTile className="size-full" />
-            </div>
-            <div className="hidden h-[222px] w-[222px] sm:block">
-              <CraftPhotoTile className="size-full" />
-            </div>
-          </div>
-          <div className="flex items-center justify-center gap-3">
-            <div className="h-[132px] w-[173px] sm:h-[222px] sm:w-[222px]">
-              <CraftPhotoTile className="size-full" />
-            </div>
-            <div className="hidden h-[222px] w-[222px] sm:flex">
-              <CraftTextTile className="size-full" compact />
-            </div>
-            <div className="h-[132px] w-[173px] sm:h-[222px] sm:w-[222px]">
-              <CraftPhotoTile className="size-full" />
-            </div>
-          </div>
-          <div className="flex items-center justify-center gap-3">
-            <div className="h-[132px] w-[111px] sm:h-[222px] sm:w-[222px]">
-              <CraftTextTile className="size-full" />
-            </div>
-            <div className="h-[132px] w-[111px] sm:h-[222px] sm:w-[222px]">
-              <CraftPhotoTile className="size-full" />
-            </div>
-            <div className="h-[132px] w-[111px] sm:h-[222px] sm:w-[222px]">
-              <CraftTextTile className="size-full" />
-            </div>
-          </div>
-        </div>
+        <AboutHandcraftedTileGrid cards={cards} />
       </PageContainer>
     </section>
     <VerticalScrollLine className="pb-16 pt-5 md:pb-20 lg:pb-[100px]" />
