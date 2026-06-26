@@ -13,6 +13,17 @@ import { moreForYouTransparentImages } from "@/features/products/data/moreForYou
 
 const IMAGE_QUALITY = 90;
 
+/** Recommended transparent product PNG/WebP for CMS + fallbacks. */
+export const FEATURED_PRODUCTS_IMAGE_SPEC = {
+  /** Primary center slide — Figma display ~774px; upload 2× for retina. */
+  width: 1600,
+  height: 1600,
+  aspectRatio: "1:1" as const,
+  format: "PNG or WebP with transparent background",
+  notes:
+    "Center the product with ~12–15% padding on all sides so side peeks and object-contain crops stay clean.",
+} as const;
+
 const FALLBACK_TITLE = "Your Diamond Awaits";
 const FALLBACK_DESCRIPTION =
   "Traditional mastery bringing every diamond to radiant, eternal life.";
@@ -147,24 +158,26 @@ function FeaturedProductsCarousel({
       </div>
 
       <div className="absolute left-1/2 top-0 flex w-full max-w-[260px] -translate-x-1/2 flex-col items-center lg:w-[600px] lg:max-w-[600px]">
-        <div className="relative h-[170px] w-full overflow-hidden lg:h-[259px]">
-          <div className="absolute left-1/2 top-1/2 size-[min(489px,120vw)] -translate-x-1/2 -translate-y-1/2 lg:size-[774px]">
-            <Image
-              src={activeItem.image}
-              alt={activeItem.name}
-              fill
-              quality={IMAGE_QUALITY}
-              className="object-contain"
-              sizes="(max-width: 1024px) 90vw, 774px"
-            />
+        <div className="relative w-full">
+          <div className="relative h-[170px] w-full overflow-hidden lg:h-[259px]">
+            <div className="absolute left-1/2 top-1/2 size-[min(489px,120vw)] -translate-x-1/2 -translate-y-1/2 lg:size-[774px]">
+              <Image
+                src={activeItem.image}
+                alt={activeItem.name}
+                fill
+                quality={IMAGE_QUALITY}
+                className="object-contain"
+                sizes="(max-width: 1024px) 489px, 774px"
+              />
+            </div>
           </div>
 
-          <div className="absolute left-1/2 top-1/2 flex w-[min(487px,calc(100%-48px))] -translate-x-1/2 -translate-y-1/2 items-center justify-between max-lg:top-[calc(50%+89px)] max-lg:w-full max-lg:max-w-[311px] max-lg:gap-[255px]">
+          <div className="relative z-20 mx-auto mt-2 flex w-full max-w-[303px] items-center justify-between lg:absolute lg:inset-x-0 lg:top-1/2 lg:mt-0 lg:w-[487px] lg:max-w-[calc(100%-48px)] lg:-translate-y-1/2">
             <button
               type="button"
               aria-label="Previous product"
               onClick={() => scrollTo(activeIndex - 1)}
-              className="pointer-events-auto inline-flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70"
+              className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
             >
               <LeftArrow className="h-[17px] w-[18px]" />
             </button>
@@ -172,7 +185,7 @@ function FeaturedProductsCarousel({
               type="button"
               aria-label="Next product"
               onClick={() => scrollTo(activeIndex + 1)}
-              className="pointer-events-auto inline-flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70"
+              className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
             >
               <RightArrow className="h-[17px] w-[18px]" />
             </button>
