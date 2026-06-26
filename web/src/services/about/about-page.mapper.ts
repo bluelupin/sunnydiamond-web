@@ -121,14 +121,13 @@ const mapFeatureSlide = (
   if (!slide) return null;
 
   const heading = cleanText(slide.heading);
-  const description =
-    cleanText(slide.body) ?? cleanText(slide.description);
+  const body = cleanText(slide.body) ?? cleanText(slide.description);
   const image = mapResponsiveImage(slide.image);
 
-  if (!heading || !description || !image) return null;
-  if (!isUsableDescription(description)) return null;
+  if (!heading || !body || !image) return null;
+  if (!isUsableDescription(body)) return null;
 
-  return { heading, description, image };
+  return { heading, body, image };
 };
 
 const mapBrillianceSection = (
@@ -142,14 +141,7 @@ const mapBrillianceSection = (
     if (mapped) return mapped;
   }
 
-  const pinnedImage = mapResponsiveImage(section.pinnedImage);
-  const heading = cleanText(section.heading);
-  const description = cleanText(section.description);
-  const image = mapResponsiveImage(section.image) ?? pinnedImage ?? undefined;
-
-  if (!heading || !description || !image) return null;
-
-  return { heading, description, image };
+  return null;
 };
 
 const mapLegacyBlock = (

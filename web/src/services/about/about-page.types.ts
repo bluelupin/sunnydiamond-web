@@ -165,7 +165,7 @@ export type NormalizedAboutHero = {
 
 export type NormalizedBrillianceSection = {
   heading: string;
-  description: string;
+  body: string;
   image: NormalizedResponsiveImage;
 };
 
