@@ -11,6 +11,9 @@ import {
 } from "@/services/about/about-page.service";
 import { buildAboutJsonLd, resolveAboutSeoMetadata } from "@/shared/lib/seo/aboutSeo";
 
+/** Refresh CMS-driven about content without a full redeploy. */
+// export const revalidate = 300;
+
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const page = await getAboutPage();
