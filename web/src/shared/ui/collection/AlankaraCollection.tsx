@@ -61,6 +61,40 @@ function CarouselNavButton({
 
 const DEFAULT_IMAGE_QUALITY = 90;
 
+function CroppedFillImage({
+  src,
+  alt,
+  cropStyle,
+  sizes,
+  priority,
+  className,
+}: {
+  src: string;
+  alt: string;
+  cropStyle: AlankaraThumbnailCrop;
+  sizes: string;
+  priority?: boolean;
+  className?: string;
+}) {
+  return (
+    <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute" style={cropStyle}>
+        <div className="relative size-full">
+          <Image
+            src={src}
+            alt={alt}
+            fill
+            sizes={sizes}
+            priority={priority}
+            quality={DEFAULT_IMAGE_QUALITY}
+            className={cn("object-cover", className)}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ProductSlideImage({
   product,
   variant,
@@ -77,15 +111,13 @@ function ProductSlideImage({
       : product.desktopCrop ?? ALANKARA_DESKTOP_PRODUCT_CROP;
 
   return (
-    <Image
+    <CroppedFillImage
       src={imageSrc}
       alt={product.name}
-      fill
+      cropStyle={cropStyle}
       sizes={variant === "mobile" ? "271px" : "(min-width: 1920px) 50vw, 720px"}
       priority={priority}
-      quality={DEFAULT_IMAGE_QUALITY}
-      className="max-w-none object-cover"
-      style={cropStyle}
+      className="max-w-none"
     />
   );
 }
@@ -118,14 +150,12 @@ function AlankaraProductThumbnail({
     >
       <div className="relative size-[98px] overflow-hidden">
         <div className="absolute left-1/2 top-1/2 size-[121px] -translate-x-1/2 -translate-y-1/2">
-          <Image
+          <CroppedFillImage
             src={src}
             alt=""
-            fill
+            cropStyle={cropStyle}
             sizes="116px"
-            quality={DEFAULT_IMAGE_QUALITY}
-            className="max-w-none object-cover"
-            style={cropStyle}
+            className="max-w-none"
           />
         </div>
       </div>
@@ -174,15 +204,13 @@ function CollectionHeroPanel({
             className="size-full object-cover"
           />
         ) : (
-          <Image
+          <CroppedFillImage
             src={desktopImage}
             alt={imageAlt}
-            fill
-            priority={priority}
-            quality={DEFAULT_IMAGE_QUALITY}
+            cropStyle={ALANKARA_HERO_DESKTOP_CROP}
             sizes="(min-width: 1920px) 50vw, 720px"
-            className="max-w-none object-cover"
-            style={ALANKARA_HERO_DESKTOP_CROP}
+            priority={priority}
+            className="max-w-none"
           />
         )}
       </div>

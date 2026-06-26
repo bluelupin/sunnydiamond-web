@@ -90,7 +90,7 @@ const HeroSection = ({ id }: HeroSectionProps) => {
             {!isShellLoading && primaryCta ? (
               <Link
                 href={primaryCta}
-                className="btn-slide-up relative inline-flex h-14 items-center justify-center overflow-hidden bg-white px-7 font-gill text-sm uppercase leading-110 text-darkblack"
+                className="btn-slide-up relative inline-flex h-14 items-center justify-center overflow-hidden bg-white w-[132px] flex items-center justify-center font-gill text-sm uppercase leading-110 text-darkblack"
               >
                 {primaryCtaLabel}
               </Link>

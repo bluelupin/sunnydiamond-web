@@ -25,11 +25,13 @@ const TrustBadgeSection = ({ id, itemClassName = "text-gray500", }: TrustBadgeSe
         [normalizedTrust]
     );
 
+    const showSkeleton = isShoppingLoading && marqueeItems.length === 0;
+
     return (
         <section className="bg-gray300 text-ivory border-t border-ivory/10 overflow-hidden shrink-0">
             <div className="relative flex overflow-hidden md:h-16 h-12">
                 <div className="flex shrink-0 animate-marquee items-center gap-12 pr-12 whitespace-nowrap">
-                    {isShoppingLoading ? (
+                    {showSkeleton ? (
                         <div className="flex items-center gap-12 pr-12 whitespace-nowrap">
                             <div className="h-3 w-40 bg-gray500/20 rounded animate-pulse" />
                             <div className="h-3 w-32 bg-gray500/20 rounded animate-pulse" />
@@ -53,7 +55,7 @@ const TrustBadgeSection = ({ id, itemClassName = "text-gray500", }: TrustBadgeSe
                     aria-hidden
                     className="flex shrink-0 animate-marquee items-center gap-12 pr-12 whitespace-nowrap"
                 >
-                    {isShoppingLoading
+                    {showSkeleton
                         ? null
                         : marqueeItems.map((item, idx) => (
                             <div

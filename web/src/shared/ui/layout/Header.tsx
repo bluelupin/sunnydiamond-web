@@ -111,7 +111,7 @@ const Header = () => {
         aria-hidden={mobileMenuOpen}
       >
         {/* Figma 692:4845 — mobile: 64px bar, 16px padding, 24px icon gaps */}
-        <div className="relative mx-auto flex h-16 w-full max-w-1440 items-center justify-between px-4 md:h-20 md:px-6 lg:h-auto lg:px-[40px] lg:py-[24px]">
+        <div className="relative flex h-16 md:h-[104px] items-center justify-between mx-auto w-full 2xl:max-w-1920 max-w-1440 px-5 md:px-8 lg:px-[40px] 2xl:px-[60px]">
           <div className="flex w-[120px] items-center gap-6 md:hidden">
             <button
               type="button"
