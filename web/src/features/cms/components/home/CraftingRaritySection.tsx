@@ -9,12 +9,17 @@ import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingB
 import { resolveCategoryNavImages } from "@/shared/utils/responsiveCmsImage";
 import fallBackImage from "@/assets/fallBackImage.png";
 import type { CategoryNavigationItem } from "@/types/homepage/categoryNavigation";
+import { cn } from "@/shared/utils/cn";
 
 interface CraftingRaritySectionProps {
   id?: string;
 }
 
 const CRAFTING_RARITY_NECKLACE = "/images/home/crafting-rarity-necklace.png";
+
+/** Figma 684:2822 — 40px from left at 1440px, scales proportionally on wider viewports. */
+const CRAFTING_RARITY_DESKTOP_INSET =
+  "lg:left-[max(40px,calc(100vw*40/1440))]";
 
 const CategoryCard = ({ cat }: { cat: CategoryNavigationItem }) => {
   const slug = cat?.slug ?? "";
@@ -74,6 +79,52 @@ const CategoryCard = ({ cat }: { cat: CategoryNavigationItem }) => {
   );
 };
 
+function CraftingRarityCopyBlock({
+  subtitle,
+  secondaryCtaUrl,
+  secondaryCtaLabel,
+  className,
+}: {
+  subtitle: string;
+  secondaryCtaUrl: string;
+  secondaryCtaLabel: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "absolute bottom-0 z-10 flex w-full max-w-[640px] flex-col items-start gap-[24px]",
+        "left-[16px] lg:bottom-auto lg:top-[132px] lg:gap-[40px]",
+        CRAFTING_RARITY_DESKTOP_INSET,
+        className,
+      )}
+    >
+      <ScrollReveal
+        as="h2"
+        delayMs={0}
+        className="max-w-[549px] font-larken text-[32px] font-light leading-110 text-darkblack lg:text-48"
+      >
+        {subtitle.split("\n").map((line, index) => (
+          <span key={`${line}-${index}`} className="block">
+            {line}
+          </span>
+        ))}
+      </ScrollReveal>
+
+      {secondaryCtaUrl ? (
+        <ScrollReveal delayMs={100}>
+          <Link
+            href={secondaryCtaUrl}
+            className="text-link-underline inline-flex items-center border-b-[1.5px] border-darkblack pb-[4px] font-gill text-[14px] font-normal uppercase leading-110 text-darkblack"
+          >
+            {secondaryCtaLabel}
+          </Link>
+        </ScrollReveal>
+      ) : null}
+    </div>
+  );
+}
+
 const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
   const { data: shellData, isLoading: isShellLoading } = useHomepageShell();
   const hero = shellData?.homepage?.hero || shellData?.hero;
@@ -98,15 +149,18 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
         aria-busy="true"
         aria-label="Crafting rarity section loading"
       >
-        <div className="px-4 lg:px-10">
-          <div className="relative h-[389px] overflow-hidden lg:h-[432px]">
-            <div className="absolute bottom-0 left-0 flex max-w-[549px] flex-col gap-6 lg:bottom-auto lg:top-[132px] lg:gap-10">
-              <div className="h-24 w-[min(420px,90vw)] animate-pulse rounded bg-gray200" aria-hidden />
-              <div className="h-5 w-40 animate-pulse rounded bg-gray200" aria-hidden />
-            </div>
+        <div className="relative h-[389px] overflow-hidden lg:h-[432px]">
+          <div
+            className={cn(
+              "absolute bottom-0 flex max-w-[549px] flex-col gap-[24px] left-[16px] lg:bottom-auto lg:top-[132px] lg:gap-[40px]",
+              CRAFTING_RARITY_DESKTOP_INSET,
+            )}
+          >
+            <div className="h-[106px] w-[min(549px,90vw)] animate-pulse rounded bg-gray200" aria-hidden />
+            <div className="h-[19px] w-[134px] animate-pulse rounded bg-gray200" aria-hidden />
           </div>
         </div>
-        <div className="mt-8 grid w-full grid-cols-2 gap-3 lg:mt-12 lg:grid-cols-4">
+        <div className="mt-8 grid w-full grid-cols-2 gap-3 px-4 lg:mt-12 lg:grid-cols-4 lg:gap-3 lg:px-0">
           {[0, 1, 2, 3].map((i) => (
             <div key={i} className="aspect-square animate-pulse bg-gray200" aria-hidden />
           ))}
@@ -117,48 +171,31 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
 
   return (
     <section id={id} className="w-full bg-white pb-16 lg:pb-0">
-      <div className="px-4 lg:px-10">
-        <div className="relative h-[389px] overflow-hidden lg:h-[432px]">
-          <ScrollReveal
-            delayMs={60}
-            className="pointer-events-none absolute right-[-29px] top-[-83px] size-[419px] lg:right-[2%] lg:top-[-204px] lg:size-[664px]"
-          >
-            <div className="relative h-full w-full rotate-[-13.91deg]">
-              <Image
-                src={CRAFTING_RARITY_NECKLACE}
-                alt=""
-                fill
-                className="object-contain"
-                sizes="(max-width: 1024px) 346px, 664px"
-              />
-            </div>
-          </ScrollReveal>
-
-          <div className="absolute bottom-0 left-0 z-10 flex w-full max-w-[640px] flex-col items-start gap-6 lg:bottom-auto lg:top-[132px] lg:gap-10">
-            <ScrollReveal as="h2" delayMs={0} className="max-w-[549px] font-larken text-[32px] font-light leading-110 text-darkblack lg:text-[48px]">
-              {subtitle.split("\n").map((line, index) => (
-                <span key={`${line}-${index}`} className="block">
-                  {line}
-                </span>
-              ))}
-            </ScrollReveal>
-
-            {secondaryCtaUrl ? (
-              <ScrollReveal delayMs={100}>
-                <Link
-                  href={secondaryCtaUrl}
-                  className="text-link-underline border-b-[1.5px] border-darkblack pb-1 font-gill text-sm uppercase leading-110 text-darkblack"
-                >
-                  {secondaryCtaLabel}
-                </Link>
-              </ScrollReveal>
-            ) : null}
+      <div className="relative h-[389px] overflow-hidden lg:h-[432px]">
+        <ScrollReveal
+          delayMs={60}
+          className="pointer-events-none absolute right-[-29px] top-[-83px] size-[419px] lg:right-[2%] lg:top-[-204px] lg:size-[664px]"
+        >
+          <div className="relative h-full w-full rotate-[-13.91deg]">
+            <Image
+              src={CRAFTING_RARITY_NECKLACE}
+              alt=""
+              fill
+              className="object-contain"
+              sizes="(max-width: 1024px) 346px, 664px"
+            />
           </div>
-        </div>
+        </ScrollReveal>
+
+        <CraftingRarityCopyBlock
+          subtitle={subtitle}
+          secondaryCtaUrl={secondaryCtaUrl}
+          secondaryCtaLabel={secondaryCtaLabel}
+        />
       </div>
 
       {categories.length > 0 ? (
-        <div className="mt-8 grid w-full grid-cols-2 gap-3 lg:mt-12 lg:grid-cols-4">
+        <div className="mt-8 grid w-full grid-cols-2 gap-3 px-4 lg:mt-12 lg:grid-cols-4 lg:gap-3 lg:px-0">
           {categories.map((cat, index) => (
             <ScrollReveal
               key={cat?.id ?? cat?.slug ?? cat?.title}
@@ -170,7 +207,7 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
           ))}
         </div>
       ) : (
-        <ScrollReveal delayMs={120} className="px-4 lg:px-10">
+        <ScrollReveal delayMs={120} className="px-4 lg:px-[40px]">
           <p className="py-20 text-center font-gill text-base text-neutral500">NO Categories Yet!</p>
         </ScrollReveal>
       )}
