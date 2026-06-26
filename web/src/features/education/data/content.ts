@@ -24,9 +24,10 @@ export const educationPageImages = {
   claritySliderThumb: "/images/education/clarity-slider-thumb.svg",
 } as const;
 
-/** Figma node 692:28896 — C1 clarity slider + media stack */
-export const educationClarityPanelSpec = {
+/** Shared 4Cs panel layout — Figma 692:28887+ */
+export const educationFourCsPanelLayoutSpec = {
   height: 633,
+  caratHeight: 610,
   background: "#F4F3EE",
   mediaContentWidth: 528,
   diamondSize: 200,
@@ -36,34 +37,111 @@ export const educationClarityPanelSpec = {
   footnoteGap: 24,
   footnoteFontSize: 16,
   footnoteColor: "#4D4D4D",
-  /** Figma 692:28899 — slider grid width */
-  sliderWidth: 521.21,
-  sliderHeight: 50.5,
-  sliderTrackWidth: 501,
-  sliderTrackHeight: 1.5,
-  sliderTrackLeft: 10.61,
-  sliderTrackTop: 8.75,
+  copyMaxWidth: 441,
+  copyCodeGap: 32,
+  copyTitleGap: 16,
+  codeFontSize: 110,
+  titleFontSize: 32,
+  descriptionFontSize: 20,
+  sliderActiveColor: "#AB863B",
+} as const;
+
+export type EducationSliderSpec = {
+  width: number;
+  height: number;
+  trackLeft: number;
+  trackTop: number;
+  trackWidth: number;
+  trackHeight: number;
+  thumbSize: number;
+  labelTop: number;
+  dotCenters: readonly number[];
+  labelLeft: readonly number[];
+  sublabelTop?: number;
+  sublabelLeft?: readonly number[];
+  ariaLabel: string;
+};
+
+/** Figma slider positions per panel */
+export const educationSliderSpecs: Record<string, EducationSliderSpec> = {
+  clarity: {
+    width: 521.21,
+    height: 50.5,
+    trackLeft: 10.61,
+    trackTop: 8.75,
+    trackWidth: 501,
+    trackHeight: 1.5,
+    thumbSize: 18,
+    labelTop: 32.5,
+    dotCenters: [10.61, 82.61, 154.61, 226.61, 298.61, 370.61, 442.61, 514.61],
+    labelLeft: [0, 72.31, 141.87, 213.73, 280.59, 352.45, 436.05, 505.21],
+    ariaLabel: "Diamond clarity grade",
+  },
+  cut: {
+    width: 593.04,
+    height: 50,
+    trackLeft: 19,
+    trackTop: 8,
+    trackWidth: 544,
+    trackHeight: 1.5,
+    thumbSize: 18,
+    labelTop: 32,
+    dotCenters: [17, 153, 290, 427, 564],
+    labelLeft: [0, 141.03, 270.42, 390.66, 534.04],
+    ariaLabel: "Diamond cut grade",
+  },
+  colour: {
+    width: 528,
+    height: 114.88,
+    trackLeft: 21,
+    trackTop: 8.19,
+    trackWidth: 475,
+    trackHeight: 1.5,
+    thumbSize: 18,
+    labelTop: 32.25,
+    dotCenters: [19, 139, 260, 381, 502],
+    labelLeft: [7.04, 125.05, 245.2, 368.37, 481.5],
+    sublabelTop: 68.38,
+    sublabelLeft: [0, 109, 242, 343, 464],
+    ariaLabel: "Diamond colour grade",
+  },
+  carat: {
+    width: 517.84,
+    height: 50.51,
+    trackLeft: 21,
+    trackTop: 8,
+    trackWidth: 482,
+    trackHeight: 1.5,
+    thumbSize: 18,
+    labelTop: 32.51,
+    dotCenters: [18, 384, 505],
+    labelLeft: [0, 364.91, 492.84],
+    ariaLabel: "Diamond carat weight",
+  },
+};
+
+/** @deprecated Use educationFourCsPanelLayoutSpec + educationSliderSpecs */
+export const educationClarityPanelSpec = {
+  ...educationFourCsPanelLayoutSpec,
+  sliderWidth: educationSliderSpecs.clarity.width,
+  sliderHeight: educationSliderSpecs.clarity.height,
+  sliderTrackWidth: educationSliderSpecs.clarity.trackWidth,
+  sliderTrackHeight: educationSliderSpecs.clarity.trackHeight,
+  sliderTrackLeft: educationSliderSpecs.clarity.trackLeft,
+  sliderTrackTop: educationSliderSpecs.clarity.trackTop,
   sliderDotsLeft: 7.61,
   sliderDotsTop: 6,
   sliderDotsWidth: 510,
   sliderDotsHeight: 6,
-  sliderThumbSize: 18,
-  sliderLabelTop: 32.5,
+  sliderThumbSize: educationSliderSpecs.clarity.thumbSize,
+  sliderLabelTop: educationSliderSpecs.clarity.labelTop,
   sliderLabelFontSize: 16,
   sliderActiveColor: "#AB863B",
-  /** Dot / thumb center x from Figma 692:28908 + 692:28916 */
-  sliderDotCenters: [10.61, 82.61, 154.61, 226.61, 298.61, 370.61, 442.61, 514.61] as const,
-  /** Label left x from Figma 692:28917 (text bbox origin) */
-  sliderLabelLeft: [0, 72.31, 141.87, 213.73, 280.59, 352.45, 436.05, 505.21] as const,
+  sliderDotCenters: educationSliderSpecs.clarity.dotCenters,
+  sliderLabelLeft: educationSliderSpecs.clarity.labelLeft,
   copyWidth: 716,
-  copyCodeGap: 32,
-  copyTitleGap: 16,
-  copyMaxWidth: 441,
-  codeFontSize: 110,
   codeColor: "#AB863B",
   codeOpacity: 0.5,
-  titleFontSize: 32,
-  descriptionFontSize: 20,
   textColor: "#0A0A0A",
 } as const;
 

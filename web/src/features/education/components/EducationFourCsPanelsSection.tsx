@@ -7,6 +7,7 @@ import ScrollReveal from "@/shared/ui/ScrollReveal";
 import {
   educationFourCsPanels,
   educationPageImages,
+  educationSliderSpecs,
   type EducationFourCsPanelContent,
 } from "../data/content";
 import EducationMetricSlider from "./EducationMetricSlider";
@@ -14,11 +15,7 @@ import EducationMetricSlider from "./EducationMetricSlider";
 const PanelTexture = ({ panelId }: { panelId: string }) => (
   <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
     <Image
-      src={
-        panelId === "clarity"
-          ? educationPageImages.panelTexture
-          : educationPageImages.panelTexture
-      }
+      src={educationPageImages.panelTexture}
       alt=""
       fill
       className={cn(
@@ -50,7 +47,7 @@ const resolveActiveImage = (
 const PanelMedia = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent; delayMs?: number }) => {
   const { slider } = panel;
   const [activeIndex, setActiveIndex] = useState(slider.defaultIndex);
-  const isClarity = panel.id === "clarity";
+  const sliderSpec = educationSliderSpecs[panel.id];
 
   const activeImage = useMemo(
     () => resolveActiveImage(panel, activeIndex),
@@ -62,23 +59,13 @@ const PanelMedia = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent
       delayMs={delayMs}
       className={cn(
         "relative flex w-full items-center justify-center",
-        isClarity ? "h-[370px] lg:h-[633px]" : "h-[370px] lg:min-h-[633px] lg:h-full",
+        panel.id === "carat" ? "h-[370px] lg:h-[610px]" : "h-[370px] lg:h-[633px]",
       )}
     >
       <PanelTexture panelId={panel.id} />
 
-      <div
-        className={cn(
-          "relative z-10 flex w-full flex-col items-center",
-          isClarity ? "max-w-[528px] px-4" : "max-w-[94.14%] gap-8 px-4 lg:max-w-[528px] lg:gap-10",
-        )}
-      >
-        <div
-          className={cn(
-            "flex w-full flex-col items-center",
-            isClarity ? "gap-10 lg:gap-[40px]" : "gap-8 lg:gap-10",
-          )}
-        >
+      <div className="relative z-10 flex w-full max-w-[528px] flex-col items-center px-4">
+        <div className="flex w-full flex-col items-center gap-10 lg:gap-[40px]">
           {slider.showDecorativeDiamond ? (
             <>
               <div className="relative size-10 lg:absolute lg:left-1/2 lg:top-[calc(50%-118.5px)] lg:size-10 lg:-translate-x-1/2">
@@ -100,13 +87,29 @@ const PanelMedia = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent
                 />
               </div>
             </>
+          ) : panel.id === "cut" ? (
+            <div className="flex items-center gap-6 lg:gap-[24px]">
+              <div className="relative size-[120px] shrink-0 overflow-hidden lg:size-[200px]">
+                <Image
+                  src={educationPageImages.cutDiamondGood}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="200px"
+                />
+              </div>
+              <div className="relative size-[120px] shrink-0 overflow-hidden lg:size-[200px]">
+                <Image
+                  src={educationPageImages.cutDiamondExcellent}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="200px"
+                />
+              </div>
+            </div>
           ) : activeImage ? (
-            <div
-              className={cn(
-                "relative shrink-0 overflow-hidden transition-opacity duration-300",
-                isClarity ? "size-[120px] lg:size-[200px]" : "size-[120px] lg:size-[200px]",
-              )}
-            >
+            <div className="relative size-[120px] shrink-0 overflow-hidden transition-opacity duration-300 lg:size-[200px]">
               <Image
                 key={`${panel.id}-${activeIndex}-${activeImage}`}
                 src={activeImage}
@@ -118,32 +121,20 @@ const PanelMedia = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent
             </div>
           ) : null}
 
-          <EducationMetricSlider
-            options={slider.options}
-            defaultIndex={slider.defaultIndex}
-            activeIndex={activeIndex}
-            onChange={setActiveIndex}
-            variant={isClarity ? "clarity" : "default"}
-          />
+          {sliderSpec ? (
+            <EducationMetricSlider
+              options={slider.options}
+              defaultIndex={slider.defaultIndex}
+              activeIndex={activeIndex}
+              onChange={setActiveIndex}
+              spec={sliderSpec}
+            />
+          ) : null}
         </div>
 
         {panel.footnote ? (
-          <div
-            className={cn(
-              "flex flex-col items-center",
-              isClarity
-                ? "mt-10 w-full max-w-[481px] gap-6 lg:mt-[64px] lg:gap-[24px]"
-                : "gap-4 lg:max-w-[481px] lg:gap-6",
-            )}
-          >
-            <p
-              className={cn(
-                "text-center font-gill font-light leading-110",
-                isClarity
-                  ? "text-[14px] text-neutral500 lg:text-[16px] lg:text-[#4D4D4D]"
-                  : "text-base text-neutral500 lg:text-base",
-              )}
-            >
+          <div className="mt-10 flex w-full max-w-[481px] flex-col items-center gap-6 lg:mt-[64px] lg:gap-[24px]">
+            <p className="text-center font-gill text-[14px] font-light leading-110 text-neutral500 lg:text-[16px] lg:text-[#4D4D4D]">
               {panel.footnote}
             </p>
             <Image
@@ -161,47 +152,22 @@ const PanelMedia = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent
 };
 
 const PanelCopy = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent; delayMs?: number }) => {
-  const isClarity = panel.id === "clarity";
-
   return (
     <ScrollReveal
       delayMs={delayMs}
-      className={cn(
-        "flex flex-col items-center justify-center text-center",
-        isClarity
-          ? "gap-8 px-5 py-10 lg:gap-[32px] lg:px-10 lg:py-0"
-          : "gap-6 px-5 py-10 lg:gap-8 lg:px-10 lg:py-0",
-      )}
+      className="flex flex-col items-center justify-center gap-8 px-5 py-10 text-center lg:h-full lg:gap-[32px] lg:px-10 lg:py-0"
     >
-      <p
-        className={cn(
-          "font-larken font-light leading-110 text-[#ab863b] opacity-50",
-          isClarity ? "text-[60px] lg:text-[110px]" : "text-[60px] lg:text-[110px]",
-        )}
-      >
+      <p className="font-larken text-[60px] font-light leading-110 text-[#ab863b] opacity-50 lg:text-[110px]">
         {panel.code}
       </p>
-      <div
-        className={cn(
-          "flex max-w-[441px] flex-col",
-          isClarity ? "gap-3 lg:gap-[16px]" : "gap-3 lg:gap-4",
-        )}
-      >
+      <div className="flex max-w-[441px] flex-col gap-3 lg:gap-[16px]">
         <h3
           id={`education-panel-${panel.id}`}
-          className={cn(
-            "font-larken font-light leading-110 text-darkblack",
-            isClarity ? "text-[20px] lg:text-[32px]" : "text-[20px] lg:text-[32px]",
-          )}
+          className="font-larken text-[20px] font-light leading-110 text-darkblack lg:text-[32px]"
         >
           {panel.title}
         </h3>
-        <p
-          className={cn(
-            "font-gill font-light leading-110 text-darkblack",
-            isClarity ? "text-base lg:text-[20px]" : "text-base lg:text-[20px]",
-          )}
-        >
+        <p className="font-gill text-base font-light leading-110 text-darkblack lg:text-[20px]">
           {panel.description}
         </p>
       </div>
@@ -230,10 +196,10 @@ const EducationFourCsPanel = ({
       )}
     >
       <div className="flex flex-col lg:grid lg:h-full lg:grid-cols-2">
-        <div className={cn(panel.mediaPosition === "left" && "lg:order-2")}>
+        <div className={cn("lg:h-full", panel.mediaPosition === "left" && "lg:order-2")}>
           <PanelCopy panel={panel} delayMs={copyDelay} />
         </div>
-        <div className={cn(panel.mediaPosition === "left" && "lg:order-1")}>
+        <div className={cn("lg:h-full", panel.mediaPosition === "left" && "lg:order-1")}>
           <PanelMedia panel={panel} delayMs={mediaDelay} />
         </div>
       </div>
