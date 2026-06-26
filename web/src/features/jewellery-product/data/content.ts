@@ -71,6 +71,18 @@ export const jewelleryListingToolbarAssets = {
   chevronDownIcon: "/images/jewellery/chevron-down.svg",
 } as const;
 
+/** Figma node 1279:1015 — mobile sticky filter / sort footer bar */
+export const jewelleryListingMobileFooterSpec = {
+  height: 64,
+  paddingX: 16,
+  controlHeight: 32,
+  controlGap: 8,
+  fontSize: 16,
+  iconSize: 20,
+  textColor: "#0A0A0A",
+  backgroundColor: "#FFFFFF",
+} as const;
+
 /** Figma node 692:4876 — jewellery product list card (mobile default) */
 export const jewelleryListingProductCardMobileSpec = {
   height: 227,

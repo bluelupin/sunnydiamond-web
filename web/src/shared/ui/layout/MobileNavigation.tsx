@@ -12,7 +12,6 @@ import BookAnAppointmentPanel from "@/features/appointment/components/BookAnAppo
 import BookStoreVisitPanel from "@/features/products/components/detail/BookStoreVisitPanel";
 import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
 import HeaderIconBadge from "@/shared/ui/layout/HeaderIconBadge";
-import HeaderIconBadge from "@/shared/ui/layout/HeaderIconBadge";
 
 type MobileNavigationProps = {
   isOpen: boolean;

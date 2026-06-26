@@ -26,32 +26,24 @@ type ProductCopyProps = {
   price: number;
   href: string;
   white?: boolean;
-  mobile?: boolean;
   className?: string;
 };
 
-const ProductCopy = ({
-  title,
-  price,
-  href,
-  white = false,
-  mobile = false,
-  className,
-}: ProductCopyProps) => (
+const ProductCopy = ({ title, price, href, white = false, className }: ProductCopyProps) => (
   <div
     className={cn(
       "flex w-full flex-col items-center text-center leading-110",
-      mobile ? "gap-[8px] px-[5px] text-[14px]" : "gap-[12px] px-[12px] text-sm md:text-[20px]",
+      "gap-[8px] px-[5px] text-[14px] md:gap-[12px] md:px-[12px] md:text-[20px]",
       white ? "text-white" : "text-darkblack",
+      white && "md:text-white",
       className,
     )}
   >
     <Link
       href={href}
       className={cn(
-        "font-gill whitespace-nowrap",
-        mobile ? "font-light" : "font-light md:text-[20px]",
-        white && mobile && "font-normal",
+        "font-gill whitespace-nowrap font-light md:text-[20px]",
+        white && "font-normal md:font-light",
       )}
     >
       {title}
@@ -123,7 +115,7 @@ const JewelleryProductCard = ({
         aria-label={`View ${title}`}
       />
 
-      {/* Desktop hover — full-card lifestyle */}
+      {/* Desktop hover — full-card lifestyle (lazy: only in DOM on md+) */}
       <div
         className="pointer-events-none absolute inset-0 z-0 hidden opacity-0 transition-opacity duration-500 md:block md:group-hover:opacity-100"
         aria-hidden
@@ -132,28 +124,26 @@ const JewelleryProductCard = ({
           src={hoverImage}
           alt=""
           className="size-full object-cover"
-          sizes="(max-width: 768px) 50vw, 33vw"
+          sizes="33vw"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[rgba(0,0,0,0.4)] from-[14%] to-transparent to-[50%]" />
       </div>
 
-      {/* Mobile lifestyle — full-card modal after swipe */}
-      <div
-        className={cn(
-          "pointer-events-none absolute inset-0 z-0 md:hidden",
-          isMobileLifestyle ? "opacity-100" : "opacity-0",
-          !isDragging && "transition-opacity duration-500",
-        )}
-        aria-hidden
-      >
-        <OptimizedImage
-          src={modalImage}
-          alt=""
-          className="size-full object-cover"
-          sizes="50vw"
-        />
-        <div className="absolute inset-0 bg-black/20" />
-      </div>
+      {/* Mobile lifestyle — loaded only after swipe to avoid ~3.5MB upfront download */}
+      {isMobileLifestyle ? (
+        <div
+          className="pointer-events-none absolute inset-0 z-0 md:hidden"
+          aria-hidden
+        >
+          <OptimizedImage
+            src={modalImage}
+            alt=""
+            className="size-full object-cover"
+            sizes="50vw"
+          />
+          <div className="absolute inset-0 bg-black/20" />
+        </div>
+      ) : null}
 
       {/* Default product view */}
       <div
@@ -182,8 +172,7 @@ const JewelleryProductCard = ({
           />
         </div>
 
-        <ProductCopy title={title} price={price} href={href} mobile className="md:hidden" />
-        <ProductCopy title={title} price={price} href={href} className="hidden md:flex" />
+        <ProductCopy title={title} price={price} href={href} />
       </div>
 
       {/* Desktop hover copy overlay */}
@@ -199,7 +188,7 @@ const JewelleryProductCard = ({
           !isDragging && "transition-opacity duration-500",
         )}
       >
-        <ProductCopy title={title} price={price} href={href} white mobile />
+        <ProductCopy title={title} price={price} href={href} white />
       </div>
 
       {isBestseller ? (

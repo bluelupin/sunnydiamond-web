@@ -16,20 +16,14 @@ const JewelleryProductGrid = ({
   onToggleWishlist,
 }: JewelleryProductGridProps) => {
   return (
-    <div className="grid w-full grid-cols-2 gap-[8px] md:grid-cols-3">
-      {products.map((product, index) => {
-        const productId = product.id.split("-")[0];
-        const columnIndex = index % 2;
-        const rowIndex = Math.floor(index / 2);
+    <ScrollReveal threshold={0.06} rootMargin="0px 0px -4% 0px">
+      <div className="grid w-full grid-cols-2 gap-[8px] md:grid-cols-3">
+        {products.map((product) => {
+          const productId = product.id.split("-")[0];
 
-        return (
-          <ScrollReveal
-            key={product.id}
-            delayMs={Math.min(rowIndex * 60 + columnIndex * 40, 360)}
-            threshold={0.08}
-            rootMargin="0px 0px -4% 0px"
-          >
+          return (
             <JewelleryProductCard
+              key={product.id}
               title={product.name}
               price={product.price}
               primaryImage={product.primaryImage}
@@ -42,10 +36,10 @@ const JewelleryProductGrid = ({
                 onToggleWishlist ? () => onToggleWishlist(product.id) : undefined
               }
             />
-          </ScrollReveal>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+    </ScrollReveal>
   );
 };
 

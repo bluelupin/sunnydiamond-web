@@ -46,12 +46,17 @@ const JewelleryProductPage = () => {
     setIsFilterOpen(false);
   };
 
+  const handleOpenFilters = () => {
+    setDraftFilters(filters);
+    setIsFilterOpen(true);
+  };
+
   const handleToggleWishlist = (productId: string) => {
     toggleWishlist(productId);
   };
 
   return (
-    <>
+    <div className="pb-[calc(64px+env(safe-area-inset-bottom,0px))] md:pb-0">
       <JewelleryHeroSection />
       <JewelleryCategoryNav activeCategory={activeCategory} onCategoryChange={handleCategoryChange} />
 
@@ -59,10 +64,8 @@ const JewelleryProductPage = () => {
         productCount={filteredProducts.length}
         sortValue={sortValue}
         onSortChange={setSortValue}
-        onFilterOpen={() => {
-          setDraftFilters(filters);
-          setIsFilterOpen(true);
-        }}
+        onFilterOpen={handleOpenFilters}
+        isFilterOpen={isFilterOpen}
       />
 
       <section className="w-full bg-gray200 pb-0 md:pb-10">
@@ -96,7 +99,7 @@ const JewelleryProductPage = () => {
         onClose={() => setIsFilterOpen(false)}
         onApply={handleApplyFilters}
       />
-    </>
+    </div>
   );
 };
 
