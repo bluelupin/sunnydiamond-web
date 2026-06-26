@@ -12,7 +12,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className={heroOverlay ? "flex-1" : "flex-1 pt-16 md:pt-20"}>
+      <main className={heroOverlay ? "flex-1" : "flex-1 pt-16 md:pt-20 lg:pt-[110px]"}>
         {children}
       </main>
       <Footer />

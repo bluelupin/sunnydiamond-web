@@ -525,10 +525,14 @@ export function AlankaraCollection({
     <section
       id={id}
       aria-label={ariaLabel || title}
-      className={cn("w-full bg-white", className)}
+      className={cn(
+        "w-full bg-white",
+        "min-[1920px]:relative min-[1920px]:left-1/2 min-[1920px]:w-screen min-[1920px]:max-w-none min-[1920px]:-translate-x-1/2",
+        className,
+      )}
     >
-      <div className="hidden w-full lg:grid lg:grid-cols-2 lg:mx-auto lg:max-w-1440 min-[1920px]:max-w-none min-[1920px]:w-full">
-        <ScrollReveal delayMs={0}>
+      <div className="hidden w-full lg:grid lg:grid-cols-2 lg:mx-auto lg:max-w-1440 min-[1920px]:mx-0 min-[1920px]:!max-w-none min-[1920px]:w-full">
+        <ScrollReveal delayMs={0} className="min-w-0 w-full">
           <CollectionHeroPanel
             title={title}
             description={description}
@@ -539,7 +543,7 @@ export function AlankaraCollection({
             variant="desktop"
           />
         </ScrollReveal>
-        <ScrollReveal delayMs={100}>
+        <ScrollReveal delayMs={100} className="min-w-0 w-full">
           <ProductCarouselPanel
             products={products}
             defaultProductCtaLabel={defaultProductCtaLabel}

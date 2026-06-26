@@ -125,10 +125,10 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
       <section
         id={id}
         aria-label="Alankara Collection"
-        className="bg-white"
+        className="bg-white min-[1920px]:relative min-[1920px]:left-1/2 min-[1920px]:w-screen min-[1920px]:max-w-none min-[1920px]:-translate-x-1/2"
         aria-busy="true"
       >
-        <div className="mx-auto grid w-full max-w-1440 grid-cols-1 lg:grid-cols-2 min-[1920px]:max-w-none">
+        <div className="mx-auto grid w-full max-w-1440 grid-cols-1 lg:grid-cols-2 min-[1920px]:mx-0 min-[1920px]:!max-w-none min-[1920px]:w-full">
           <div className="h-[540px] bg-gray200 lg:h-[800px]" />
           <div className="hidden h-[800px] bg-gray200/80 lg:block" />
         </div>

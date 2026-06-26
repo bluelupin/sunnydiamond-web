@@ -75,15 +75,19 @@ const Header = () => {
 
   const textClass = overlay ? "text-white" : "text-darkblack";
   const hoverClass = overlay ? "hover:text-ivory/70" : "hover:text-primary";
+  const navLinkClass = (active = false) =>
+    cn(
+      "font-gill uppercase transition-colors",
+      "text-sm font-normal leading-[130%] tracking-[-0.02em]",
+      "lg:text-sm lg:font-semibold lg:leading-110 lg:tracking-normal",
+      active ? "text-primary" : textClass,
+      !active ? hoverClass : "",
+    );
   const Logo = (
     <Link
       href="/"
       aria-label={siteConfig.brand.name}
-      className={cn(
-        "flex items-center justify-center font-heading italic font-semibold leading-none",
-        "text-3xl md:text-4xl",
-        textClass,
-      )}
+      className={cn("flex shrink-0 items-center justify-center leading-none", textClass)}
     >
       <SDLogo />
     </Link>
@@ -101,8 +105,8 @@ const Header = () => {
         )}
         aria-hidden={mobileMenuOpen}
       >
-        <div className="container relative flex items-center justify-between h-16 md:h-20 lg:px-[40px] md:px-6 px-4">
-          <div className="flex items-center gap-6 md:gap-4 lg:gap-6 xl:gap-10">
+        <div className="relative mx-auto flex h-16 w-full max-w-1440 items-center justify-between px-4 md:h-20 md:px-6 lg:h-auto lg:px-[40px] lg:py-[24px]">
+          <div className="flex items-center gap-6 md:gap-4 lg:gap-[40px]">
             <button
               className={cn("md:hidden md:p-2 p-0 w-6 h-6", textClass)}
               onClick={() => setMobileMenuOpen(true)}
@@ -117,7 +121,7 @@ const Header = () => {
 
             <div className="hidden md:block">{Logo}</div>
 
-            <nav className="hidden md:flex items-center gap-7 md:gap-4 lg:gap-9" aria-label="Main navigation">
+            <nav className="hidden md:flex items-center gap-7 md:gap-4 lg:gap-[40px]" aria-label="Main navigation">
               {headerNavigationLinks.map((link) => {
                 const isJewellery = link.label.trim().toLowerCase() === "jewellery";
                 if (isJewellery) {
@@ -129,11 +133,7 @@ const Header = () => {
                     >
                       <Link
                         href={resolveHeaderNavHref(link.label, link.url)}
-                        className={cn(
-                          "lg:text-base md:text-15 text-sm font-gill font-normal leading-[130%] tracking-[-0.02em] uppercase transition-colors",
-                          jewelleryMenuOpen ? "text-primary" : textClass,
-                          !jewelleryMenuOpen ? hoverClass : "",
-                        )}
+                        className={navLinkClass(jewelleryMenuOpen)}
                       >
                         {link.label}
                       </Link>
@@ -144,11 +144,7 @@ const Header = () => {
                   <Link
                     key={link.label}
                     href={resolveHeaderNavHref(link.label, link.url)}
-                    className={cn(
-                      "lg:text-base md:text-15 text-sm font-gill font-normal leading-[130%] tracking-[-0.02em] uppercase transition-colors",
-                      textClass,
-                      hoverClass,
-                    )}
+                    className={navLinkClass()}
                   >
                     {link.label}
                   </Link>
@@ -159,16 +155,16 @@ const Header = () => {
 
           <div className="md:hidden absolute left-1/2 -translate-x-1/2">{Logo}</div>
 
-          <div className={cn("flex items-center lg:gap-6 md:gap-4 gap-6", textClass)}>
+          <div className={cn("flex items-center gap-6 md:gap-4 lg:gap-[24px]", textClass)}>
             <button className={cn("md:flex hidden items-center justify-center w-6 h-6 transition-colors", hoverClass)} aria-label="Search">
-              <Search size={20} strokeWidth={1.5} />
+              <Search size={24} strokeWidth={1.5} />
             </button>
             <Link
               href="/products"
               className={cn("flex items-center justify-center w-6 h-6 transition-colors", hoverClass)}
               aria-label="Wishlist"
             >
-              <Heart size={20} strokeWidth={1.5} />
+              <Heart size={24} strokeWidth={1.5} />
             </Link>
             <Link
               href="/cart"
@@ -187,7 +183,7 @@ const Header = () => {
               className={cn("items-center justify-center w-6 h-6 transition-colors hidden md:inline-flex", hoverClass)}
               aria-label="Account"
             >
-              <User size={20} strokeWidth={1.5} />
+              <User size={24} strokeWidth={1.5} />
             </Link>
           </div>
         </div>
