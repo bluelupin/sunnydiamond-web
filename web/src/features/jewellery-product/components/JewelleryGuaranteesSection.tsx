@@ -1,44 +1,104 @@
+import { Fragment } from "react";
 import Image from "next/image";
-import PageContainer from "@/shared/ui/layout/PageContainer";
+import { cn } from "@/shared/utils/cn";
+import {
+  jewelleryListingGuarantees,
+  jewelleryListingGuaranteesSpec,
+} from "../data/content";
 
-const guarantees = [
-  {
-    iconSrc: "/images/about/guarantees/moneyback.svg",
-    label: "100% Moneyback Guarantee",
-  },
-  {
-    iconSrc: "/images/about/guarantees/return.svg",
-    label: "15 Days Return Policy",
-  },
-  {
-    iconSrc: "/images/about/guarantees/cod.svg",
-    label: "Cash on Delivery",
-  },
-] as const;
+const {
+  paddingX,
+  paddingY,
+  itemWidth,
+  itemHeight,
+  itemPadding,
+  itemGap,
+  iconSize,
+  labelFontSize,
+  dividerColor,
+} = jewelleryListingGuaranteesSpec;
+
+const GuaranteeDivider = ({ orientation }: { orientation: "vertical" | "horizontal" }) => (
+  <li
+    aria-hidden
+    className={cn(
+      "flex list-none items-center justify-center",
+      orientation === "vertical"
+        ? "min-w-0 flex-1 self-stretch"
+        : "w-full shrink-0 py-4",
+    )}
+  >
+    <span
+      className={cn(
+        "shrink-0",
+        orientation === "vertical" ? "h-[136px] w-hairline" : "h-px w-full",
+      )}
+      style={{ backgroundColor: dividerColor }}
+    />
+  </li>
+);
+
+const GuaranteeItem = ({ iconSrc, label }: { iconSrc: string; label: string }) => (
+  <li
+    className="list-none flex flex-col items-center justify-center text-center"
+    style={{
+      width: `${itemWidth}px`,
+      height: `${itemHeight}px`,
+      gap: `${itemGap}px`,
+      padding: `${itemPadding}px`,
+    }}
+  >
+    <div
+      className="relative shrink-0"
+      style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
+    >
+      <Image src={iconSrc} alt="" fill className="object-contain" aria-hidden />
+    </div>
+    <p
+      className="font-gill font-normal leading-110 text-darkblack"
+      style={{ fontSize: `${labelFontSize}px` }}
+    >
+      {label}
+    </p>
+  </li>
+);
 
 const JewelleryGuaranteesSection = () => {
   return (
     <section aria-label="Shopping guarantees" className="bg-gray200">
-      <PageContainer className="py-10 md:py-16">
-        <ul className="flex flex-col gap-6 md:flex-row md:items-stretch md:justify-center md:gap-0">
-          {guarantees.map(({ iconSrc, label }, index) => (
-            <li key={label} className="flex flex-1 flex-col items-center md:flex-row md:justify-center">
-              {index > 0 ? (
-                <div className="hidden h-136 w-hairline shrink-0 bg-neutral300 md:block" aria-hidden />
-              ) : null}
-              {index > 0 ? <div className="h-px w-full bg-neutral300 md:hidden" aria-hidden /> : null}
-              <div className="flex w-full flex-col items-center justify-center gap-2 px-3 py-4 text-center md:gap-4 md:px-6 md:py-0">
-                <div className="relative size-10 shrink-0 md:size-16">
-                  <Image src={iconSrc} alt="" fill className="object-contain" aria-hidden />
-                </div>
-                <p className="max-w-[236px] font-gill text-base font-normal leading-110 text-darkblack md:text-20">
-                  {label}
-                </p>
+      <ul className="m-0 flex list-none flex-col items-center p-0 px-4 py-10 lg:hidden">
+        {jewelleryListingGuarantees.map(({ iconSrc, label }, index) => (
+          <Fragment key={label}>
+            {index > 0 ? <GuaranteeDivider orientation="horizontal" /> : null}
+            <li
+              className="list-none flex w-full flex-col items-center justify-center text-center"
+              style={{ gap: `${itemGap}px`, padding: `${itemPadding}px` }}
+            >
+              <div className="relative h-[40px] w-[40px] shrink-0">
+                <Image src={iconSrc} alt="" fill className="object-contain" aria-hidden />
               </div>
+              <p className="font-gill text-base font-normal leading-110 text-darkblack">{label}</p>
             </li>
-          ))}
-        </ul>
-      </PageContainer>
+          </Fragment>
+        ))}
+      </ul>
+
+      <ul
+        className="m-0 hidden list-none items-start justify-between p-0 lg:flex"
+        style={{
+          paddingLeft: `${paddingX}px`,
+          paddingRight: `${paddingX}px`,
+          paddingTop: `${paddingY}px`,
+          paddingBottom: `${paddingY}px`,
+        }}
+      >
+        {jewelleryListingGuarantees.map(({ iconSrc, label }, index) => (
+          <Fragment key={label}>
+            {index > 0 ? <GuaranteeDivider orientation="vertical" /> : null}
+            <GuaranteeItem iconSrc={iconSrc} label={label} />
+          </Fragment>
+        ))}
+      </ul>
     </section>
   );
 };

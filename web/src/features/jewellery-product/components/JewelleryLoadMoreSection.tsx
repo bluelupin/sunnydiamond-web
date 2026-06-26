@@ -1,6 +1,6 @@
 "use client";
 
-import PageContainer from "@/shared/ui/layout/PageContainer";
+import { jewelleryListingPaginationSpec } from "../data/content";
 
 interface JewelleryLoadMoreSectionProps {
   visibleCount: number;
@@ -8,6 +8,19 @@ interface JewelleryLoadMoreSectionProps {
   onLoadMore: () => void;
   hasMore: boolean;
 }
+
+const {
+  width,
+  sectionGap,
+  statusGap,
+  countFontSize,
+  progressTrackHeight,
+  progressFillHeight,
+  buttonHeight,
+  buttonPaddingX,
+  buttonPaddingY,
+  buttonFontSize,
+} = jewelleryListingPaginationSpec;
 
 const JewelleryLoadMoreSection = ({
   visibleCount,
@@ -18,33 +31,59 @@ const JewelleryLoadMoreSection = ({
   const progress = totalCount > 0 ? Math.min(100, (visibleCount / totalCount) * 100) : 0;
 
   return (
-    <section className="px-4 py-16 md:px-0 md:py-24">
-      <PageContainer className="flex justify-center">
-        <div className="flex w-full max-w-[360px] flex-col items-center gap-6">
-          <div className="flex w-full flex-col items-center gap-3">
-            <p className="text-center font-gill text-sm font-light leading-110 text-darkblack md:text-base md:leading-110">
-              {visibleCount} out of {totalCount} Products
-            </p>
+    <section className="flex w-full px-4 py-16 md:py-16">
+      <div
+        className="mx-auto flex w-full flex-col items-center"
+        style={{
+          maxWidth: `${width}px`,
+          gap: `${sectionGap}px`,
+        }}
+      >
+        <div
+          className="flex w-full flex-col items-center"
+          style={{ gap: `${statusGap}px` }}
+        >
+          <p
+            className="w-full text-center font-gill font-light leading-110 text-darkblack"
+            style={{ fontSize: `${countFontSize}px` }}
+          >
+            {visibleCount} out of {totalCount} Products
+          </p>
 
-            <div className="relative h-0.5 w-full overflow-visible bg-neutral300" aria-hidden>
-              <div
-                className="absolute left-0 top-0 h-[3px] bg-darkblack transition-all duration-500"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
+          <div
+            className="relative w-full overflow-hidden bg-neutral300"
+            style={{ height: `${progressTrackHeight}px` }}
+            aria-hidden
+          >
+            <div
+              className="absolute left-0 top-1/2 bg-darkblack transition-all duration-500"
+              style={{
+                width: `${progress}%`,
+                height: `${progressFillHeight}px`,
+                transform: "translateY(-50%)",
+              }}
+            />
           </div>
-
-          {hasMore ? (
-            <button
-              type="button"
-              onClick={onLoadMore}
-              className="btn-border-slide inline-flex h-14 w-full items-center justify-center border-[0.8px] border-neutral300 px-7 py-5 font-gill text-sm uppercase leading-110 text-darkblack md:h-14"
-            >
-              Load More
-            </button>
-          ) : null}
         </div>
-      </PageContainer>
+
+        {hasMore ? (
+          <button
+            type="button"
+            onClick={onLoadMore}
+            className="btn-border-slide inline-flex w-full items-center justify-center border-[0.8px] border-neutral300 font-gill font-normal uppercase leading-110 text-darkblack transition-colors hover:text-white"
+            style={{
+              height: `${buttonHeight}px`,
+              paddingLeft: `${buttonPaddingX}px`,
+              paddingRight: `${buttonPaddingX}px`,
+              paddingTop: `${buttonPaddingY}px`,
+              paddingBottom: `${buttonPaddingY}px`,
+              fontSize: `${buttonFontSize}px`,
+            }}
+          >
+            <span>Load More</span>
+          </button>
+        ) : null}
+      </div>
     </section>
   );
 };

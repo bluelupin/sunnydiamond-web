@@ -72,3 +72,53 @@ export const jewelleryListingProductCardSpec = {
   wishlistSize: 32,
   wishlistInset: 24,
 } as const;
+
+/** Figma node 692:4242 — jewellery product list pagination / load more */
+export const jewelleryListingPaginationSpec = {
+  width: 360,
+  sectionGap: 24,
+  statusGap: 12,
+  countFontSize: 16,
+  countColor: "#0A0A0A",
+  progressTrackHeight: 2,
+  progressFillHeight: 3,
+  progressTrackColor: "#CCCCCC",
+  progressFillColor: "#0A0A0A",
+  buttonHeight: 56,
+  buttonPaddingX: 28,
+  buttonPaddingY: 20,
+  buttonFontSize: 14,
+  buttonColor: "#0A0A0A",
+  buttonBorderColor: "#CCCCCC",
+} as const;
+
+/** Figma node 692:4249 — jewellery product list guarantees bar */
+export const jewelleryListingGuaranteesSpec = {
+  height: 264,
+  paddingX: 180,
+  paddingY: 64,
+  itemWidth: 260,
+  itemHeight: 136,
+  itemPadding: 12,
+  itemGap: 12,
+  iconSize: 64,
+  labelFontSize: 20,
+  labelColor: "#0A0A0A",
+  dividerColor: "#999999",
+  backgroundColor: "#FBFAF6",
+} as const;
+
+export const jewelleryListingGuarantees = [
+  {
+    iconSrc: "/images/about/guarantees/moneyback.svg",
+    label: "100% Moneyback Guarantee",
+  },
+  {
+    iconSrc: "/images/about/guarantees/return.svg",
+    label: "15 Days Return Policy",
+  },
+  {
+    iconSrc: "/images/about/guarantees/cod.svg",
+    label: "Cash on Delivery",
+  },
+] as const;
