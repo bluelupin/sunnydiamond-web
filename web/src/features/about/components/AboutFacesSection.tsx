@@ -6,6 +6,7 @@ import MediaContentOverlay from "@/shared/ui/MediaContentOverlay";
 import { cn } from "@/shared/utils/cn";
 import type { NormalizedAboutTeam } from "@/services/about/about-page.types";
 import { aboutFacesFigmaSpec } from "../data/content";
+import Reveal from "@/shared/Animation/Reveal";
 
 const hideScrollbarStyle: CSSProperties = {
   scrollbarWidth: "none",
@@ -22,21 +23,21 @@ const AboutFacesSection = ({ title, description, members }: AboutFacesSectionPro
     >
       <div className="container flex flex-col items-center text-center lg:mb-[40px] mb-8">
         <div className="flex max-w-full flex-col items-center lg:gap-4 gap-3">
-          <h2
+          <Reveal as="h2" direction="up"
             id="about-faces-title"
             className="font-larken font-light leading-110 text-darkblack lg:text-[48px] md:text-[40px] text-[32px]"
           >
             {title}
-          </h2>
+          </Reveal>
           {description ? (
-            <p className="font-gill font-light leading-110 text-neutral500 lg:text-xl md:text-lg text-base ">
+            <Reveal as="p" direction="up" className="font-gill font-light leading-110 text-neutral500 lg:text-xl md:text-lg text-base ">
               {description}
-            </p>
+            </Reveal>
           ) : null}
         </div>
       </div>
       <div className="lg:pl-0 pl-4">
-        <div
+        <Reveal direction="up"
           className="mt-10 flex w-full snap-x snap-mandatory lg:gap-1 gap-2 overflow-x-auto pl-4 lg:h-[600px] lg:overflow-visible lg:pl-0 [&::-webkit-scrollbar]:hidden"
           style={hideScrollbarStyle}
         >
@@ -68,18 +69,18 @@ const AboutFacesSection = ({ title, description, members }: AboutFacesSectionPro
                 )}
               />
               <figcaption className="absolute bottom-0 left-0 z-10 w-full text-left opacity-100 transition-all duration-500 lg:translate-y-2 lg:px-[40px] md:px-9 px-8 lg:py-20 md:py-16 py-12 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100">
-                <p className="font-larken font-light xl:text-2xl lg:text-xl text-xl text-white leading-110">
+                <Reveal as="p" direction="up" className="font-larken font-light xl:text-2xl lg:text-xl text-xl text-white leading-110">
                   {member.name}
-                </p>
+                </Reveal>
                 {member.role ? (
-                  <p className="lg:mt-1 mt-2 font-gill font-light leading-[130%] tracking-[0.12em] text-white/80 xl:text-xl lg:text-lg md:text-base text-sm">
+                  <Reveal as="p" direction="up" className="lg:mt-1 mt-2 font-gill font-light leading-[130%] tracking-[0.12em] text-white/80 xl:text-xl lg:text-lg md:text-base text-sm">
                     {member.role}
-                  </p>
+                  </Reveal>
                 ) : null}
               </figcaption>
             </figure>
           ))}
-        </div>
+        </Reveal>
       </div>
     </section>
   );

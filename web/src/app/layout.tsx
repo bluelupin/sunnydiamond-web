@@ -3,7 +3,6 @@ import "./globals.css";
 import ServerAppShell from "@/shared/ui/layout/ServerAppShell";
 import siteEnv, { getAbsoluteUrl } from "@/shared/lib/seo/siteConfig";
 import { inter, playfairDisplay } from "@/shared/lib/fonts";
-import AosProvider from "@/shared/providers/AosProvider";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -94,7 +93,6 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${playfairDisplay.variable} antialiased`}>
       <body className="min-h-screen bg-background font-body" suppressHydrationWarning>
-        <AosProvider />
         <ServerAppShell>{children}</ServerAppShell>
       </body>
     </html>

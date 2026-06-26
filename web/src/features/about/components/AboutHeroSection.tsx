@@ -6,7 +6,6 @@ import { cn } from "@/shared/utils/cn";
 import { aboutHeroFigmaSpec } from "../data/content";
 import { useAboutHeroLoadAnimation } from "../hooks/useAboutHeroLoadAnimation";
 import type { NormalizedAboutHero } from "@/services/about/about-page.types";
-
 const { animation: heroAnimation } = aboutHeroFigmaSpec;
 const collapsedWidthPercent = `100%`;
 type AboutHeroSectionProps = NormalizedAboutHero;
@@ -56,16 +55,10 @@ const AboutHeroSection = ({ title, image }: AboutHeroSectionProps) => {
               expanded ? "md:translate-y-0 -translate-y-1 md:h-full -h-[0px]" : "",
             )}
           />
-
           <MediaContentOverlay gradient={aboutHeroFigmaSpec.overlay.gradient} />
-
-          <div data-aos="fade-up" className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-16 lg:pb-75">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-16 lg:pb-75">
             <h1
-              id="about-hero-title"
-              className={cn(
-                "w-full max-w-886 text-center font-larken text-32 font-light leading-110 text-white sm:text-36 lg:text-48 2xl:text-5xl",
-              )}
-            >
+              className="w-full max-w-886 text-center font-larken text-32 font-light leading-110 text-white sm:text-36 lg:text-48 2xl:text-5xl">
               {title}
             </h1>
           </div>

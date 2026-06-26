@@ -10,6 +10,7 @@ import {
   aboutHandcraftedContent,
   aboutPageImages,
 } from "../data/content";
+import Reveal from "@/shared/Animation/Reveal";
 
 type AboutHandcraftedTileGridProps = {
   cards: NormalizedCraftCard[];
@@ -99,7 +100,7 @@ function CraftTextTile({
         aria-hidden
         className="md:h-[15px] md:w-[15px] w-3 h-3 shrink-0"
       />
-      <h3
+      <Reveal as="h3" direction="up"
         className={cn(
           "text-center font-larken font-light leading-110 text-darkblack",
           compact
@@ -108,7 +109,7 @@ function CraftTextTile({
         )}
       >
         {title}
-      </h3>
+      </Reveal>
     </div>
   );
 }

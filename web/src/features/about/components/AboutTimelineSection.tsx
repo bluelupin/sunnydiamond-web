@@ -9,6 +9,7 @@ import { aboutTimelineFigmaSpec } from "../data/content";
 import { useAboutTimelineScroll } from "../hooks/useAboutTimelineScroll";
 import AboutTimelineContent from "./AboutTimelineContent";
 import AboutTimelineNav from "./AboutTimelineNav";
+import Reveal from "@/shared/Animation/Reveal";
 
 type AboutTimelineSectionProps = NormalizedAboutTimeline;
 
@@ -75,16 +76,15 @@ const AboutTimelineSection = ({
           </div>
         </PageContainer>
       </div>
-
       {!reducedMotion
         ? years.map((year) => (
-            <div
-              key={year}
-              data-timeline-step={year}
-              className="h-screen"
-              aria-hidden
-            />
-          ))
+          <div
+            key={year}
+            data-timeline-step={year}
+            className="h-screen"
+            aria-hidden
+          />
+        ))
         : null}
     </section>
   );

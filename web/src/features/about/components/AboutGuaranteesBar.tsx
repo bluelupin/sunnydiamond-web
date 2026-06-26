@@ -3,12 +3,13 @@ import PageContainer from "@/shared/ui/layout/PageContainer";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { cn } from "@/shared/utils/cn";
 import type { NormalizedTrustBadge } from "@/services/about/about-page.types";
+import Reveal from "@/shared/Animation/Reveal";
 type AboutGuaranteesBarProps = {
   badges: NormalizedTrustBadge[];
 };
 
 const AboutGuaranteeDivider = ({ orientation = "vertical" }: { orientation?: "vertical" | "horizontal" }) => (
-  <li
+  <Reveal as="li" direction="up"
     aria-hidden
     className={cn(
       "flex list-none items-center justify-center",
@@ -23,7 +24,7 @@ const AboutGuaranteeDivider = ({ orientation = "vertical" }: { orientation?: "ve
         orientation === "vertical" ? "h-136 w-hairline" : "h-px w-full",
       )}
     />
-  </li>
+  </Reveal>
 );
 
 type GuaranteeIconProps = {
@@ -47,12 +48,12 @@ type GuaranteeItemProps = {
 };
 
 const AboutGuaranteeItem = ({ badge }: GuaranteeItemProps) => (
-  <li className="flex lg:h-136 h-98 lg:w-260 w-full list-none flex-col items-center justify-center gap-3 rounded-figma text-center desktop:w-260 desktop:shrink-0">
+  <Reveal as="li" direction="up" className="flex lg:h-136 h-98 lg:w-260 w-full list-none flex-col items-center justify-center gap-3 rounded-figma text-center desktop:w-260 desktop:shrink-0">
     <GuaranteeIcon icon={badge.icon} />
     <p className="max-w-236 font-gill text-base font-normal leading-110 text-darkblack desktop:text-20">
       {badge.label}
     </p>
-  </li>
+  </Reveal>
 );
 
 const AboutGuaranteesBar = ({ badges }: AboutGuaranteesBarProps) => {

@@ -7,6 +7,7 @@ import { cn } from "@/shared/utils/cn";
 import type { NormalizedAboutLegacy } from "@/services/about/about-page.types";
 import { aboutSince1997Content } from "../data/content";
 import { useSince1997HorizontalScroll } from "../hooks/useSince1997HorizontalScroll";
+import Reveal from "@/shared/Animation/Reveal";
 
 type AboutSince1997SectionProps = NormalizedAboutLegacy;
 
@@ -42,7 +43,7 @@ function GalleryImage({
       className={cn("flex shrink-0 flex-col gap-3", figureClassName)}
       {...(dataSince1997Last ? { "data-since1997-last-image": true } : {})}
     >
-      <div data-aos="fade-up" className={cn("overflow-hidden", frameClassName)}>
+      <div className={cn("overflow-hidden", frameClassName)}>
         <ResponsiveImage
           desktopSrc={desktopUrl}
           mobileSrc={mobileUrl}
@@ -55,7 +56,7 @@ function GalleryImage({
         />
       </div>
       {caption ? (
-        <figcaption data-aos="fade-up" className={cn("font-gill leading-110 text-darkblack", captionClassName)}>
+        <figcaption className={cn("font-gill leading-110 text-darkblack", captionClassName)}>
           {caption}
         </figcaption>
       ) : null}
@@ -88,15 +89,14 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
       <div data-since1997-mode="desktop" className="hidden lg:block">
         <div className="sticky top-8 flex flex-col overflow-hidden bg-white pt-100">
           <PageContainer className="shrink-0 2xl:pb-11 lg:pb-[40px] pb-8">
-            <h2 data-aos="fade-up"
+            <Reveal as="h2" direction="up"
               id="about-since-1997-title"
-              className="font-larken text-3xl lg:text-48 text-56 font-light leading-110 text-darkblack"
-            >
+              className="font-larken text-3xl lg:text-48 text-56 font-light leading-110 text-darkblack">
               {title}
-            </h2>
+            </Reveal>
           </PageContainer>
           <PageContainer className="pb-100 pr-0">
-            <div className="flex min-h-0 flex-1 flex-col">
+            <Reveal direction="up" className="flex min-h-0 flex-1 flex-col">
               <div data-since1997-viewport className="min-h-0 flex-1 overflow-hidden w-full">
                 <div
                   data-since1997-track
@@ -153,7 +153,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                   ) : null}
                 </div>
               </div>
-            </div>
+            </Reveal>
           </PageContainer>
         </div>
 
@@ -167,19 +167,20 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
         <div className="py-16 md:py-20">
           <PageContainer className="pb-0">
             <div className="mb-8 space-y-3">
-              <h2 data-aos="fade-up" className="font-larken text-32 font-light leading-110 text-darkblack md:text-40">
+              <Reveal as="h2" direction="up" className="font-larken text-32 font-light leading-110 text-darkblack md:text-40">
                 {title}
-              </h2>
+              </Reveal>
               {story ? (
-                <p data-aos="fade-up" className="font-gill text-base font-light leading-110 text-neutral500 md:text-lg">
+                <Reveal as="p" direction="up" className="font-gill text-base font-light leading-110 text-neutral500 md:text-lg">
                   {story}
-                </p>
+                </Reveal>
               ) : null}
             </div>
           </PageContainer>
 
-          <PageContainer className="!pr-0 pl-5 pt-0">
-            <article className="flex w-full shrink-0 items-center gap-6 md:pr-8 pr-4">
+          {/* <PageContainer className="!pr-0 pl-5 pt-0"> */}
+          <Reveal direction="up" className="md:px-8 px-4">
+            <article className="flex w-full shrink-0 items-center gap-6">
               <GalleryImage
                 desktopUrl={founder.image.desktopUrl}
                 mobileUrl={founder.image.mobileUrl}
@@ -193,11 +194,12 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                 captionClassName="text-sm md:text-base"
               />
             </article>
-          </PageContainer>
+          </Reveal>
+          {/* </PageContainer> */}
         </div>
 
         {hasHorizontalGallery ? (
-          <div data-since1997-scroll-zone className="relative">
+          <Reveal direction="up" data-since1997-scroll-zone className="relative">
             <div className="sticky sm:top-0 top-[120px] bg-white pb-16 md:pb-20">
               <PageContainer className="!pr-0 pl-5 pt-0">
                 <div data-since1997-viewport className="overflow-hidden">
@@ -235,7 +237,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
               </PageContainer>
             </div>
             <div data-since1997-scroll-spacer aria-hidden className="h-[70vh]" />
-          </div>
+          </Reveal>
         ) : null}
       </div>
     </section>

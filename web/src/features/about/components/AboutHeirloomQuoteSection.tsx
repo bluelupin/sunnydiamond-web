@@ -4,6 +4,7 @@ import type { NormalizedBrandTagline } from "@/services/about/about-page.types";
 import {
   aboutHeirloomFigmaSpec,
 } from "../data/content";
+import Reveal from "@/shared/Animation/Reveal";
 
 const { flourish: flourishSpec } = aboutHeirloomFigmaSpec;
 
@@ -15,7 +16,7 @@ const AboutHeirloomQuoteSection = ({ quote, iconUrl }: AboutHeirloomQuoteSection
   return (
     <section aria-labelledby="about-heirloom-quote" className="bg-white">
       <PageContainer className="py-16 md:py-20 desktop:py-100">
-        <div className="flex flex-col items-center justify-center gap-4 lg:flex-row">
+        <Reveal direction="up" className="flex flex-col items-center justify-center gap-4 lg:flex-row">
           <Image
             src="/images/about/flourishIcon.svg"
             alt={quote}
@@ -42,7 +43,7 @@ const AboutHeirloomQuoteSection = ({ quote, iconUrl }: AboutHeirloomQuoteSection
             unoptimized={Boolean(iconUrl)}
             className="h-19 w-5 shrink-0 -scale-x-100"
           />
-        </div>
+        </Reveal>
       </PageContainer>
     </section>
   );
