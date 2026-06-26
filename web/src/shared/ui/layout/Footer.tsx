@@ -8,6 +8,7 @@ import { siteConfig } from "@/shared/lib/siteConfig";
 import { resolveShellFooterLinkGroups } from "@/shared/lib/shellNavigation";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import TrustBadgeSection from "@/features/cms/components/common/TrustBadges";
+import Reveal from "@/shared/Animation/Reveal";
 
 const SOCIAL_ICON_MAP: Record<string, string> = {
   instagram: "/images/navigation/social-instagram.svg",
@@ -62,7 +63,7 @@ const Footer = () => {
       <TrustBadgeSection />
       <PageContainer className="flex flex-col gap-20 lg:gap-[120px] lg:py-100 py-16">
         <div className="flex flex-col items-center xl:gap-12 md:gap-[40px] gap-8 lg:flex-row lg:items-start lg:justify-start">
-          <div className="shrink-0">
+          <Reveal direction="up" className="shrink-0">
             <Link href="/" aria-label="Sunny Diamonds">
               <Image
                 src="/images/brand/logo-desktop.svg"
@@ -72,8 +73,7 @@ const Footer = () => {
                 className="h-auto w-[200px] xl:w-[336px]"
               />
             </Link>
-          </div>
-
+          </Reveal>
           <nav
             aria-label="Footer navigation"
             className="grid md:grid-cols-4 grid-cols-2 lg:flex lg:w-full xl:max-w-[923px] w-full justify-between lg:gap-4 gap-8"
@@ -83,26 +83,25 @@ const Footer = () => {
                 key={column.id}
                 className="flex w-full flex-col gap-6"
               >
-                <p className="font-gill lg:text-xl md:text-lg text-base font-normal leading-110 text-darkblack">
+                <Reveal as="p" direction="up" className="font-gill lg:text-xl md:text-lg text-base font-normal leading-110 text-darkblack">
                   {column.title.toUpperCase()}
-                </p>
+                </Reveal>
                 <ul className="flex flex-col gap-3">
                   {column.links.map((link) => (
-                    <li key={link.id}>
+                    <Reveal as="li" direction="up" key={link.id}>
                       <Link
                         href={link.url}
                         className="font-gill text-sm font-light leading-110 text-neutral500 transition-colors hover:text-darkMagenta"
                       >
                         {link.label}
                       </Link>
-                    </li>
+                    </Reveal>
                   ))}
                 </ul>
               </div>
             ))}
           </nav>
         </div>
-
         <div className="relative flex flex-col items-center gap-8 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-7">
             {socialLinks.map((social) => (
@@ -125,7 +124,6 @@ const Footer = () => {
               </a>
             ))}
           </div>
-
           <Image
             src="/images/navigation/payment-methods.png"
             alt="Accepted payment methods: Visa, Mastercard, Amex, Maestro, PayTM, RuPay"
