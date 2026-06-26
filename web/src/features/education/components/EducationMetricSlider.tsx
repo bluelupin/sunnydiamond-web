@@ -19,6 +19,30 @@ type EducationMetricSliderProps = {
 
 const toPercent = (value: number, width: number) => `${(value / width) * 100}%`;
 
+const TRACK_DOT_GAP = 10;
+
+/** Segmented track: ~10px gap on each side of interior dots; first/last flush to track ends. */
+const buildTrackSegments = (
+  dotCenters: readonly number[],
+  trackLeft: number,
+  trackWidth: number,
+  gap = TRACK_DOT_GAP,
+) => {
+  const trackEnd = trackLeft + trackWidth;
+  const segments: { left: number; width: number }[] = [];
+
+  for (let i = 0; i < dotCenters.length - 1; i++) {
+    const start = i === 0 ? trackLeft : dotCenters[i] + gap;
+    const end = i === dotCenters.length - 2 ? trackEnd : dotCenters[i + 1] - gap;
+
+    if (end > start) {
+      segments.push({ left: start, width: end - start });
+    }
+  }
+
+  return segments;
+};
+
 const EducationMetricSlider = ({
   options,
   defaultIndex,
@@ -33,6 +57,11 @@ const EducationMetricSlider = ({
   const activeDotCenter = spec.dotCenters[activeIndex] ?? spec.dotCenters[0];
   const activeThumbLeft = activeDotCenter - thumbHalf;
   const hasSublabels = Boolean(spec.sublabelTop);
+  const trackSegments = buildTrackSegments(
+    spec.dotCenters,
+    spec.trackLeft,
+    spec.trackWidth,
+  );
 
   const setActiveIndex = useCallback(
     (index: number) => {
@@ -52,16 +81,19 @@ const EducationMetricSlider = ({
       role="group"
       aria-label={spec.ariaLabel}
     >
-      <div
-        className="absolute bg-[#D1B57A]"
-        style={{
-          left: toPercent(spec.trackLeft, spec.width),
-          top: spec.trackTop,
-          width: toPercent(spec.trackWidth, spec.width),
-          height: spec.trackHeight,
-        }}
-        aria-hidden
-      />
+      {trackSegments.map((segment, index) => (
+        <div
+          key={`track-${index}`}
+          className="absolute bg-[#D1B57A]"
+          style={{
+            left: toPercent(segment.left, spec.width),
+            top: spec.trackTop,
+            width: toPercent(segment.width, spec.width),
+            height: spec.trackHeight,
+          }}
+          aria-hidden
+        />
+      ))}
 
       {spec.dotCenters.map((dotCenter, index) => (
         <span

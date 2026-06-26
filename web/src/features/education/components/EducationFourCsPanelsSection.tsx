@@ -11,6 +11,7 @@ import {
   type EducationFourCsPanelContent,
 } from "../data/content";
 import EducationMetricSlider from "./EducationMetricSlider";
+import EducationCaratHandVisual from "./EducationCaratHandVisual";
 
 const PanelTexture = ({ panelId }: { panelId: string }) => (
   <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
@@ -54,6 +55,8 @@ const PanelMedia = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent
     [panel, activeIndex],
   );
 
+  const activeCarat = slider.options[activeIndex]?.caratWeight ?? 3.2;
+
   return (
     <ScrollReveal
       delayMs={delayMs}
@@ -66,27 +69,8 @@ const PanelMedia = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent
 
       <div className="relative z-10 flex w-full max-w-[528px] flex-col items-center px-4">
         <div className="flex w-full flex-col items-center gap-10 lg:gap-[40px]">
-          {slider.showDecorativeDiamond ? (
-            <>
-              <div className="relative size-10 lg:absolute lg:left-1/2 lg:top-[calc(50%-118.5px)] lg:size-10 lg:-translate-x-1/2">
-                <Image
-                  src={educationPageImages.decorativeDiamond}
-                  alt=""
-                  fill
-                  className="object-contain"
-                  sizes="40px"
-                />
-              </div>
-              <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-20" aria-hidden>
-                <Image
-                  src={educationPageImages.panelTexture}
-                  alt=""
-                  fill
-                  className="scale-150 object-cover"
-                  sizes="50vw"
-                />
-              </div>
-            </>
+          {panel.id === "carat" ? (
+            <EducationCaratHandVisual activeCarat={activeCarat} />
           ) : panel.id === "cut" ? (
             <div className="flex items-center gap-6 lg:gap-[24px]">
               <div className="relative size-[120px] shrink-0 overflow-hidden lg:size-[200px]">

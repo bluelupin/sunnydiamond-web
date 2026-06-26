@@ -22,6 +22,21 @@ export const educationPageImages = {
   claritySliderTrack: "/images/education/clarity-slider-track.svg",
   claritySliderDots: "/images/education/clarity-slider-dots.svg",
   claritySliderThumb: "/images/education/clarity-slider-thumb.svg",
+  caratHand: "/images/education/carat-hand.png",
+  caratDiamond: "/images/education/carat-diamond.png",
+} as const;
+
+/** Figma 692:29026 / 692:29042 / 692:29044 — C4 carat hand + diamond */
+export const educationCaratVisualSpec = {
+  frameWidth: 718,
+  handAreaHeight: 403,
+  diamondLeft: 305,
+  diamondTop: 178,
+  diamondBaseSize: 40,
+  diamondMinSize: 10,
+  referenceCarat: 3.2,
+  handOpacity: 0.35,
+  caratValues: [0.5, 3.2, 4] as const,
 } as const;
 
 /** Shared 4Cs panel layout — Figma 692:28887+ */
@@ -194,6 +209,7 @@ export type EducationSliderOption = {
   highlight?: boolean;
   sublabel?: string | string[];
   image?: string;
+  caratWeight?: number;
 };
 
 export type EducationFourCsPanelContent = {
@@ -209,7 +225,6 @@ export type EducationFourCsPanelContent = {
     options: EducationSliderOption[];
     image?: string;
     dualImages?: [string, string];
-    showDecorativeDiamond?: boolean;
   };
 };
 
@@ -292,11 +307,10 @@ export const educationFourCsPanels: EducationFourCsPanelContent[] = [
     background: "white",
     slider: {
       defaultIndex: 1,
-      showDecorativeDiamond: true,
       options: [
-        { label: "0.5 ct" },
-        { label: "3.2 ct", highlight: true },
-        { label: "4 ct" },
+        { label: "0.5 ct", caratWeight: 0.5 },
+        { label: "3.2 ct", highlight: true, caratWeight: 3.2 },
+        { label: "4 ct", caratWeight: 4 },
       ],
     },
   },
