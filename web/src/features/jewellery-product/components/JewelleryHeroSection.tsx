@@ -1,29 +1,38 @@
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
-import fallBackImage from "@/assets/fallBackImage.png";
+import {
+  jewelleryListingHeroAssets,
+  jewelleryListingHeroSpec,
+} from "../data/content";
 
 const JewelleryHeroSection = () => {
+  const { title } = jewelleryListingHeroSpec;
+
   return (
-    <section aria-label="Handcrafted Brilliance" className="relative h-[240px] overflow-hidden bg-charcoal md:h-[320px]">
+    <section
+      aria-labelledby="jewellery-listing-hero-title"
+      className="relative h-[240px] w-full overflow-hidden md:h-320"
+    >
       <div className="absolute inset-0">
         <ResponsiveImage
-          desktopSrc={fallBackImage}
-          mobileSrc={fallBackImage}
-          alt=""
+          desktopSrc={jewelleryListingHeroAssets.desktop}
+          mobileSrc={jewelleryListingHeroAssets.mobile}
+          alt={jewelleryListingHeroAssets.alt}
           width={1440}
           height={320}
           priority
-          className="opacity-70"
+          quality={90}
+          sizes="100vw"
+          className="object-cover object-[62%_38%] md:object-[58%_42%]"
         />
-        <div
-          className="absolute inset-0 bg-black/60 md:bg-gradient-to-b md:from-black/30 md:via-black/20 md:to-black/40"
-          aria-hidden
-        />
+        <div className="absolute inset-0 bg-black/40" aria-hidden />
       </div>
-      <div className="relative flex h-full flex-col items-center justify-end pb-10 md:justify-center md:pb-0">
-        <h1 className="font-larken text-[32px] font-light leading-110 text-white md:text-[54px] md:leading-110">
-          Handcrafted Brilliance
-        </h1>
-      </div>
+
+      <h1
+        id="jewellery-listing-hero-title"
+        className="absolute left-1/2 top-[152px] z-10 w-full max-w-440 -translate-x-1/2 whitespace-nowrap text-center font-larken text-32 font-light leading-110 text-white md:top-[203px] md:text-48"
+      >
+        {title}
+      </h1>
     </section>
   );
 };

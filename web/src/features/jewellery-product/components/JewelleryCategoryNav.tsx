@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
-import PageContainer from "@/shared/ui/layout/PageContainer";
 import { jewelleryCategories } from "../data/categories";
 import { categoryIconSrc } from "../data/categoryIcons";
 import type { JewelleryCategorySlug } from "../types";
@@ -14,9 +13,12 @@ interface JewelleryCategoryNavProps {
 
 const JewelleryCategoryNav = ({ activeCategory, onCategoryChange }: JewelleryCategoryNavProps) => {
   return (
-    <nav aria-label="Jewellery categories" className="border-b-[0.5px] border-neutral300 bg-white">
-      <PageContainer className="overflow-x-auto py-6 scrollbar-none md:py-10">
-        <ul className="mx-auto flex w-max items-center gap-3 md:w-full md:justify-center md:gap-8">
+    <nav
+      aria-label="Jewellery categories"
+      className="border-b-[0.5px] border-neutral300 bg-white"
+    >
+      <div className="overflow-x-auto scrollbar-none">
+        <ul className="mx-auto flex w-max min-w-full items-center justify-center gap-[32px] p-40">
           {jewelleryCategories.map((category) => {
             const isActive = activeCategory === category.slug;
 
@@ -26,24 +28,23 @@ const JewelleryCategoryNav = ({ activeCategory, onCategoryChange }: JewelleryCat
                   type="button"
                   onClick={() => onCategoryChange(category.slug)}
                   aria-pressed={isActive}
-                  className="flex w-14 flex-col items-center justify-center gap-2 md:w-86 md:gap-2"
+                  className="flex w-86 flex-col items-center justify-center gap-[8px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
                 >
-                  <span className="relative size-6 md:size-10">
+                  <span className="relative size-10 shrink-0 overflow-hidden">
                     <Image
                       src={categoryIconSrc[category.slug]}
                       alt=""
-                      fill
-                      className={cn("object-contain", !isActive && "opacity-60 md:opacity-100")}
+                      width={40}
+                      height={40}
+                      className="size-full object-contain"
                       aria-hidden
                     />
                   </span>
 
                   <span
                     className={cn(
-                      "whitespace-nowrap font-gill text-sm leading-110 md:text-base",
-                      isActive
-                        ? "font-semibold text-neutral500 md:font-semibold md:text-darkblack"
-                        : "font-normal text-gray600 md:font-normal md:text-gray600",
+                      "whitespace-nowrap font-gill text-base leading-110",
+                      isActive ? "font-semibold text-darkblack" : "font-normal text-gray600",
                     )}
                   >
                     {category.label}
@@ -53,7 +54,7 @@ const JewelleryCategoryNav = ({ activeCategory, onCategoryChange }: JewelleryCat
             );
           })}
         </ul>
-      </PageContainer>
+      </div>
     </nav>
   );
 };

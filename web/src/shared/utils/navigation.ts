@@ -10,5 +10,10 @@ export function resolveHeaderNavHref(label: string, url: string): string {
 
 /** Routes where the hero uses a transparent header treatment at the top of the page. */
 export function isHeroOverlayRoute(pathname: string): boolean {
-  return pathname === "/" || pathname === "/about" || pathname === "/education";
+  return (
+    pathname === "/" ||
+    pathname === "/about" ||
+    pathname === "/education" ||
+    pathname === "/jewellery-product"
+  );
 }
