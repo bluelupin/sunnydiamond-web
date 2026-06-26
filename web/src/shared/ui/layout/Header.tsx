@@ -105,7 +105,7 @@ const Header = () => {
         )}
         aria-hidden={mobileMenuOpen}
       >
-        <div className="relative mx-auto flex h-16 w-full max-w-1440 items-center justify-between px-4 md:h-20 md:px-6 lg:h-auto lg:px-[40px] lg:py-[24px]">
+        <div className="relative mx-auto flex h-16 w-full max-w-1440 2xl:max-w-1920 items-center justify-between px-4 md:h-20 md:px-6 lg:h-auto lg:px-[40px] lg:py-[24px]">
           <div className="flex items-center gap-6 md:gap-4 lg:gap-[40px]">
             <button
               className={cn("md:hidden md:p-2 p-0 w-6 h-6", textClass)}

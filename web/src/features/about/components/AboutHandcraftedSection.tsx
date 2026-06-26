@@ -17,7 +17,7 @@ const AboutHandcraftedSection = ({
   <>
     <section
       aria-labelledby="about-handcrafted-title"
-      className="overflow-x-hidden bg-white"
+      className="bg-white"
     >
       <PageContainer className="px-0 md:px-0">
         <div className="relative h-700 w-full overflow-hidden">
@@ -36,11 +36,11 @@ const AboutHandcraftedSection = ({
           </div>
         </div>
       </PageContainer>
-      <PageContainer className="mt-6">
+      <PageContainer className="mt-6 sm:px-5 px-3">
         <AboutHandcraftedTileGrid cards={cards} />
       </PageContainer>
     </section>
-    <VerticalScrollLine className="pb-16 pt-5 md:pb-20 lg:pb-[100px]" />
+    <VerticalScrollLine className="!py-5" />
   </>
 );
 

@@ -48,7 +48,7 @@ function AnimatedTile({
       className={cn(
         className,
         !reducedMotion &&
-          "motion-safe:transition-[opacity,transform] motion-safe:will-change-[opacity,transform]",
+        "motion-safe:transition-[opacity,transform] motion-safe:will-change-[opacity,transform]",
         !reducedMotion && REVEAL_DURATION,
         revealed || reducedMotion
           ? "translate-y-0 scale-100 opacity-100"
@@ -97,14 +97,14 @@ function CraftTextTile({
         width={16}
         height={15}
         aria-hidden
-        className="h-[15px] w-4 shrink-0"
+        className="md:h-[15px] md:w-[15px] w-3 h-3 shrink-0"
       />
       <h3
         className={cn(
           "text-center font-larken font-light leading-[110%] text-darkblack",
           compact
-            ? "max-w-[79.73%] text-2xl"
-            : "text-base sm:text-lg md:text-xl lg:text-2xl",
+            ? "max-w-[79.73%] text-sm text-base md:text-base lg:text-xl xl:text-2xl"
+            : "text-sm text-base md:text-base lg:text-xl xl:text-2xl",
         )}
       >
         {title}
@@ -157,31 +157,31 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
       <div className="flex items-center justify-center gap-3">
         <AnimatedTile
           {...tileProps(0, 0, 5)}
-          className="h-[132px] w-[111px] sm:h-[222px] sm:w-[222px]"
+          className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
           <CraftPhotoTile className="size-full" />
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(0, 1, 5)}
-          className="h-[132px] w-[111px] sm:h-[222px] sm:w-[222px]"
+          className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
           <CraftTextTile title={cardByIndex(1)} className="size-full" />
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(0, 2, 5)}
-          className="h-[132px] w-[111px] sm:h-[222px] sm:w-[222px]"
+          className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
           <CraftPhotoTile className="size-full" />
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(0, 3, 5)}
-          className="hidden h-[222px] w-[222px] sm:block"
+          className="md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px] md:block hidden"
         >
           <CraftPhotoTile className="size-full" />
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(0, 4, 5)}
-          className="hidden h-[222px] w-[222px] sm:block"
+          className="md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px] md:block hidden"
         >
           <CraftPhotoTile className="size-full" />
         </AnimatedTile>
@@ -190,13 +190,13 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
       <div className="flex items-center justify-center gap-3">
         <AnimatedTile
           {...tileProps(1, 0, 3)}
-          className="h-[132px] w-[173px] sm:h-[222px] sm:w-[222px]"
+          className="h-[111px] w-[172px] sm:h-[132px] sm:w-[200px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
           <CraftPhotoTile className="size-full" />
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(1, 1, 3)}
-          className="hidden h-[222px] w-[222px] sm:flex"
+          className="md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px] md:block hidden"
         >
           <CraftTextTile
             title={cardByIndex(1)}
@@ -206,7 +206,7 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(1, 2, 3)}
-          className="h-[132px] w-[173px] sm:h-[222px] sm:w-[222px]"
+          className="h-[111px] w-[172px] sm:h-[132px] sm:w-[200px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
           <CraftPhotoTile className="size-full" />
         </AnimatedTile>
@@ -215,19 +215,19 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
       <div className="flex items-center justify-center gap-3">
         <AnimatedTile
           {...tileProps(2, 0, 3)}
-          className="h-[132px] w-[111px] sm:h-[222px] sm:w-[222px]"
+          className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
           <CraftTextTile title={cardByIndex(0)} className="size-full" />
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(2, 1, 3)}
-          className="h-[132px] w-[111px] sm:h-[222px] sm:w-[222px]"
+          className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
           <CraftPhotoTile className="size-full" />
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(2, 2, 3)}
-          className="h-[132px] w-[111px] sm:h-[222px] sm:w-[222px]"
+          className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
           <CraftTextTile title={cardByIndex(2)} className="size-full" />
         </AnimatedTile>
@@ -239,7 +239,7 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
 const AboutHandcraftedTileGrid = ({ cards }: AboutHandcraftedTileGridProps) => (
   <LazyInView
     fallback={<GridFallback />}
-    className="min-h-[460px] sm:min-h-[520px]"
+    className="min-h-[400px] sm:min-h-[520px]"
     rootMargin="200px 0px 120px 0px"
   >
     <AboutHandcraftedTileGridInner cards={cards} />

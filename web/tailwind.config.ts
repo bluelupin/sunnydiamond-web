@@ -14,6 +14,7 @@ export default {
         lg: "40px",
         xl: "40px",
         "2xl": "40px",
+        "3xl": "60px",
       },
       screens: {
         sm: "640px",
@@ -21,6 +22,7 @@ export default {
         lg: "1024px",
         xl: "1280px",
         "2xl": "1440px",
+        "3xl": "1920px",
       },
     },
     extend: {
@@ -111,7 +113,8 @@ export default {
         11: "11px",
         13: "13px",
         15: "15px",
-        20: "20px",
+        // 20: "20px",
+        22: "22px",
         24: "24px",
         28: "28px",
         32: "32px",
@@ -234,6 +237,7 @@ export default {
         1360: "1360px",
         1400: "1400px",
         1440: "1440px",
+        1920: "1920px",
         "screen-gutter": "calc(100vw - 72px)",
         "screen-card": "calc(100vw - 24px)",
       },

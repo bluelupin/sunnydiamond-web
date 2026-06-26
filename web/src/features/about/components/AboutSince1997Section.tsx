@@ -86,74 +86,75 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
     >
       {/* Desktop — sticky viewport + scroll-driven horizontal slide */}
       <div data-since1997-mode="desktop" className="hidden lg:block">
-        <div className="sticky top-0 flex h-screen flex-col overflow-hidden bg-white pt-100">
-          <PageContainer className="shrink-0 pb-10">
+        <div className="sticky top-8 flex flex-col overflow-hidden bg-white pt-100">
+          <PageContainer className="shrink-0 2xl:pb-11 lg:pb-[40px] pb-8">
             <h2
               id="about-since-1997-title"
-              className="font-larken text-48 font-light leading-110 text-darkblack"
+              className="font-larken text-3xl lg:text-48 text-56 font-light leading-110 text-darkblack"
             >
               {title}
             </h2>
           </PageContainer>
+          <PageContainer className="pb-100 pr-0">
+            <div className="flex min-h-0 flex-1 flex-col">
+              <div data-since1997-viewport className="min-h-0 flex-1 overflow-hidden w-full">
+                <div
+                  data-since1997-track
+                  className="flex h-full items-center xl:gap-20 gap-16 will-change-transform motion-reduce:transform-none"
+                >
+                  <article className="flex shrink-0 items-center lg:gap-8 gap-[40px]">
+                    <GalleryImage
+                      desktopUrl={founder.image.desktopUrl}
+                      mobileUrl={founder.image.mobileUrl}
+                      alt={founder.image.alt}
+                      caption={founder.caption}
+                      imageWidth={founderWidth}
+                      imageHeight={founderHeight}
+                      sizes="549px"
+                      figureClassName="w-[549px]"
+                      frameClassName="h-600 w-[549px]"
+                      captionClassName="text-base"
+                    />
+                    {story ? (
+                      <p className="max-w-358 font-gill text-xl font-light leading-110 text-neutral500">
+                        {story}
+                      </p>
+                    ) : null}
+                  </article>
 
-          <div className="flex min-h-0 flex-1 flex-col pb-100 pl-[40px] pr-0">
-            <div data-since1997-viewport className="min-h-0 flex-1 overflow-hidden">
-              <div
-                data-since1997-track
-                className="flex h-full items-center gap-20 will-change-transform motion-reduce:transform-none"
-              >
-                <article className="flex shrink-0 items-center gap-8">
-                  <GalleryImage
-                    desktopUrl={founder.image.desktopUrl}
-                    mobileUrl={founder.image.mobileUrl}
-                    alt={founder.image.alt}
-                    caption={founder.caption}
-                    imageWidth={founderWidth}
-                    imageHeight={founderHeight}
-                    sizes="549px"
-                    figureClassName="w-[549px]"
-                    frameClassName="h-600 w-[549px]"
-                    captionClassName="text-base"
-                  />
-                  {story ? (
-                    <p className="max-w-358 font-gill text-xl font-light leading-110 text-neutral500">
-                      {story}
-                    </p>
+                  {hasHorizontalGallery ? (
+                    <div className="flex items-center justify-center lg:gap-5 2xl:gap-8">
+                      <GalleryImage
+                        desktopUrl={event!.image.desktopUrl}
+                        mobileUrl={event!.image.mobileUrl}
+                        alt={event!.image.alt}
+                        caption={event!.caption}
+                        imageWidth={eventWidth}
+                        imageHeight={eventHeight}
+                        sizes="320px"
+                        figureClassName="w-[320px]"
+                        frameClassName="h-[417px]"
+                        captionClassName="text-base"
+                      />
+                      <GalleryImage
+                        desktopUrl={attending!.image.desktopUrl}
+                        mobileUrl={attending!.image.mobileUrl}
+                        alt={attending!.image.alt}
+                        caption={attending!.caption}
+                        imageWidth={attendingWidth}
+                        imageHeight={attendingHeight}
+                        sizes="463px"
+                        figureClassName="w-[463px]"
+                        frameClassName="h-600"
+                        captionClassName="text-base"
+                        dataSince1997Last
+                      />
+                    </div>
                   ) : null}
-                </article>
-
-                {hasHorizontalGallery ? (
-                  <>
-                    <GalleryImage
-                      desktopUrl={event!.image.desktopUrl}
-                      mobileUrl={event!.image.mobileUrl}
-                      alt={event!.image.alt}
-                      caption={event!.caption}
-                      imageWidth={eventWidth}
-                      imageHeight={eventHeight}
-                      sizes="320px"
-                      figureClassName="w-[320px]"
-                      frameClassName="h-[417px]"
-                      captionClassName="text-base"
-                    />
-                    <GalleryImage
-                      desktopUrl={attending!.image.desktopUrl}
-                      mobileUrl={attending!.image.mobileUrl}
-                      alt={attending!.image.alt}
-                      caption={attending!.caption}
-                      imageWidth={attendingWidth}
-                      imageHeight={attendingHeight}
-                      sizes="463px"
-                      figureClassName="w-[463px]"
-                      frameClassName="h-600"
-                      captionClassName="text-base"
-                      dataSince1997Last
-                    />
-                  </>
-                ) : null}
+                </div>
               </div>
             </div>
-          </div>
+          </PageContainer>
         </div>
 
         {hasHorizontalGallery ? (
@@ -178,7 +179,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
           </PageContainer>
 
           <PageContainer className="!pr-0 pl-5 pt-0">
-            <article className="flex w-full shrink-0 items-center gap-6 pr-4">
+            <article className="flex w-full shrink-0 items-center gap-6 md:pr-8 pr-4">
               <GalleryImage
                 desktopUrl={founder.image.desktopUrl}
                 mobileUrl={founder.image.mobileUrl}
@@ -197,7 +198,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
 
         {hasHorizontalGallery ? (
           <div data-since1997-scroll-zone className="relative">
-            <div className="sticky top-0 bg-white pb-16 md:pb-20">
+            <div className="sticky sm:top-0 top-[120px] bg-white pb-16 md:pb-20">
               <PageContainer className="!pr-0 pl-5 pt-0">
                 <div data-since1997-viewport className="overflow-hidden">
                   <div
@@ -212,8 +213,8 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                       imageWidth={eventWidth}
                       imageHeight={eventHeight}
                       sizes="320px"
-                      figureClassName="w-[256px] min-w-[256px] sm:w-[400px] sm:min-w-[400px]"
-                      frameClassName="h-[240px]"
+                      figureClassName="w-[256px] min-w-[256px] sm:w-[550px] lg:w-[400px] lg:min-w-[400px]"
+                      frameClassName="lg:h-[240px] md:h-[500px] sm:h-[400px] h-[240px]"
                       captionClassName="text-base"
                     />
                     <GalleryImage
@@ -224,8 +225,8 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                       imageWidth={attendingWidth}
                       imageHeight={attendingHeight}
                       sizes="463px"
-                      figureClassName="w-[256px] min-w-[256px] sm:w-[400px] sm:min-w-[400px]"
-                      frameClassName="h-[277px]"
+                      figureClassName="w-[256px] min-w-[256px] sm:w-[550px] lg:w-[400px] lg:min-w-[400px]"
+                      frameClassName="lg:h-[277px] md:h-[560px] sm:h-[520px] h-[277px]"
                       captionClassName="text-base"
                       dataSince1997Last
                     />

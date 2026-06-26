@@ -11,13 +11,18 @@ type AboutHandcraftedHeroMediaProps = {
   posterUrl?: string;
 };
 
+const getVideoMimeType = (url: string) => {
+  if (url.endsWith(".webm")) return "video/webm";
+  if (url.endsWith(".mp4")) return "video/mp4";
+  return undefined;
+};
+
 const AboutHandcraftedHeroMedia = ({
   videoUrl,
   posterUrl,
 }: AboutHandcraftedHeroMediaProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
   const [useFallback, setUseFallback] = useState(!videoUrl);
 
   const showImageFallback = useCallback(() => {
@@ -25,15 +30,7 @@ const AboutHandcraftedHeroMedia = ({
   }, []);
 
   useEffect(() => {
-    const media = window.matchMedia("(min-width: 1024px)");
-    const update = () => setIsDesktop(media.matches);
-    update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
-  }, []);
-
-  useEffect(() => {
-    if (!isDesktop || !videoUrl || useFallback) return;
+    if (!videoUrl || useFallback) return;
 
     const start = () => setShouldLoadVideo(true);
 
@@ -44,7 +41,7 @@ const AboutHandcraftedHeroMedia = ({
 
     const timeoutId = window.setTimeout(start, 1500);
     return () => window.clearTimeout(timeoutId);
-  }, [isDesktop, useFallback, videoUrl]);
+  }, [useFallback, videoUrl]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -77,6 +74,8 @@ const AboutHandcraftedHeroMedia = ({
     return null;
   }
 
+  const videoMimeType = videoUrl ? getVideoMimeType(videoUrl) : undefined;
+
   return (
     <>
       {posterUrl ? (
@@ -91,7 +90,7 @@ const AboutHandcraftedHeroMedia = ({
         />
       ) : null}
 
-      {isDesktop && shouldLoadVideo && videoUrl ? (
+      {shouldLoadVideo && videoUrl ? (
         <video
           ref={videoRef}
           className="absolute inset-0 h-full w-full object-cover object-center"
@@ -105,7 +104,7 @@ const AboutHandcraftedHeroMedia = ({
           tabIndex={-1}
           onError={showImageFallback}
         >
-          <source src={videoUrl} type="video/webm" />
+          <source src={videoUrl} type={videoMimeType} />
         </video>
       ) : null}
     </>
