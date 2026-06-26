@@ -33,8 +33,8 @@ const DEFAULT_STEPS: SavingsPlanStep[] = [
 ];
 
 const StepCircle = ({ number }: { number: number }) => (
-  <div className="relative z-10 box-border flex size-10 shrink-0 flex-col items-center justify-center rounded-full border-[0.571px] border-solid border-darkblack bg-[#EBDFC6]">
-    <span className="font-gill text-20 font-light leading-normal tracking-[0.2px] text-darkblack">
+  <div className="relative z-10 box-border flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#C4B49A] bg-[#EBDFC6]">
+    <span className="font-larken text-base italic font-light leading-none text-darkblack">
       {number}
     </span>
   </div>
@@ -143,7 +143,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
           </ScrollReveal>
 
           <div className="flex w-full flex-col items-center gap-3 md:gap-4">
-            <ScrollReveal as="h2" delayMs={80} className="w-full font-larken text-[32px] font-light leading-110 text-darkblack md:text-[48px]">
+            <ScrollReveal as="h2" delayMs={80} className="w-full whitespace-nowrap font-larken text-[32px] font-light leading-110 text-darkblack md:text-[48px]">
               {sectionTitle}
             </ScrollReveal>
 
