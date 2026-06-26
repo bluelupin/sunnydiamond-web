@@ -69,13 +69,13 @@ const PanelMedia = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent
 
       <div
         className={cn(
-          "relative z-10 flex w-full flex-col items-center px-4",
-          isClarity ? "max-w-[528px] gap-10 lg:gap-16" : "max-w-[94.14%] gap-8 lg:max-w-[528px] lg:gap-10",
+          "relative z-10 flex w-full flex-col items-center",
+          isClarity ? "max-w-[528px] px-4" : "max-w-[94.14%] gap-8 px-4 lg:max-w-[528px] lg:gap-10",
         )}
       >
         <div
           className={cn(
-            "flex flex-col items-center",
+            "flex w-full flex-col items-center",
             isClarity ? "gap-10 lg:gap-[40px]" : "gap-8 lg:gap-10",
           )}
         >
@@ -103,7 +103,7 @@ const PanelMedia = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent
           ) : activeImage ? (
             <div
               className={cn(
-                "relative overflow-hidden transition-opacity duration-300",
+                "relative shrink-0 overflow-hidden transition-opacity duration-300",
                 isClarity ? "size-[120px] lg:size-[200px]" : "size-[120px] lg:size-[200px]",
               )}
             >
@@ -131,7 +131,9 @@ const PanelMedia = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent
           <div
             className={cn(
               "flex flex-col items-center",
-              isClarity ? "gap-6 lg:max-w-[481px] lg:gap-[24px]" : "gap-4 lg:max-w-[481px] lg:gap-6",
+              isClarity
+                ? "mt-10 w-full max-w-[481px] gap-6 lg:mt-[64px] lg:gap-[24px]"
+                : "gap-4 lg:max-w-[481px] lg:gap-6",
             )}
           >
             <p
@@ -228,17 +230,12 @@ const EducationFourCsPanel = ({
       )}
     >
       <div className="flex flex-col lg:grid lg:h-full lg:grid-cols-2">
-        {panel.mediaPosition === "left" ? (
-          <>
-            <PanelMedia panel={panel} delayMs={mediaDelay} />
-            <PanelCopy panel={panel} delayMs={copyDelay} />
-          </>
-        ) : (
-          <>
-            <PanelCopy panel={panel} delayMs={copyDelay} />
-            <PanelMedia panel={panel} delayMs={mediaDelay} />
-          </>
-        )}
+        <div className={cn(panel.mediaPosition === "left" && "lg:order-2")}>
+          <PanelCopy panel={panel} delayMs={copyDelay} />
+        </div>
+        <div className={cn(panel.mediaPosition === "left" && "lg:order-1")}>
+          <PanelMedia panel={panel} delayMs={mediaDelay} />
+        </div>
       </div>
     </section>
   );

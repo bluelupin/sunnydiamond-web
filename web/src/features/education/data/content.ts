@@ -20,10 +20,11 @@ export const educationPageImages = {
   shapeRight: "/images/education/shape-right.png",
   scrollArrow: "/images/education/scroll-arrow.svg",
   claritySliderTrack: "/images/education/clarity-slider-track.svg",
+  claritySliderDots: "/images/education/clarity-slider-dots.svg",
   claritySliderThumb: "/images/education/clarity-slider-thumb.svg",
 } as const;
 
-/** Figma node 692:28887 — C1 Clarity panel */
+/** Figma node 692:28896 — C1 clarity slider + media stack */
 export const educationClarityPanelSpec = {
   height: 633,
   background: "#F4F3EE",
@@ -31,20 +32,29 @@ export const educationClarityPanelSpec = {
   diamondSize: 200,
   diamondToSliderGap: 40,
   sliderToFootnoteGap: 64,
+  footnoteWidth: 481,
   footnoteGap: 24,
   footnoteFontSize: 16,
   footnoteColor: "#4D4D4D",
-  sliderWidth: 521,
+  /** Figma 692:28899 — slider grid width */
+  sliderWidth: 521.21,
+  sliderHeight: 50.5,
   sliderTrackWidth: 501,
   sliderTrackHeight: 1.5,
-  sliderTrackInsetLeft: 10.61,
+  sliderTrackLeft: 10.61,
   sliderTrackTop: 8.75,
-  sliderDotSize: 6,
+  sliderDotsLeft: 7.61,
+  sliderDotsTop: 6,
+  sliderDotsWidth: 510,
+  sliderDotsHeight: 6,
   sliderThumbSize: 18,
   sliderLabelTop: 32.5,
   sliderLabelFontSize: 16,
   sliderActiveColor: "#AB863B",
-  sliderDotColor: "#D1B57A",
+  /** Dot / thumb center x from Figma 692:28908 + 692:28916 */
+  sliderDotCenters: [10.61, 82.61, 154.61, 226.61, 298.61, 370.61, 442.61, 514.61] as const,
+  /** Label left x from Figma 692:28917 (text bbox origin) */
+  sliderLabelLeft: [0, 72.31, 141.87, 213.73, 280.59, 352.45, 436.05, 505.21] as const,
   copyWidth: 716,
   copyCodeGap: 32,
   copyTitleGap: 16,

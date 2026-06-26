@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
 import {
@@ -19,12 +19,7 @@ type EducationMetricSliderProps = {
 
 const claritySpec = educationClarityPanelSpec;
 
-const getTouchpointLeft = (index: number, count: number, width: number) => {
-  if (count <= 1) return width / 2;
-  const inset = claritySpec.sliderTrackInsetLeft;
-  const trackWidth = claritySpec.sliderTrackWidth;
-  return inset + (trackWidth * index) / (count - 1);
-};
+const toPercent = (value: number) => `${(value / claritySpec.sliderWidth) * 100}%`;
 
 const EducationMetricSlider = ({
   options,
@@ -49,107 +44,113 @@ const EducationMetricSlider = ({
     [controlledIndex, maxIndex, onChange],
   );
 
-  const touchpointPositions = useMemo(
-    () =>
-      options.map((_, index) =>
-        getTouchpointLeft(index, options.length, claritySpec.sliderWidth),
-      ),
-    [options],
-  );
-
   if (isClarity) {
+    const dotCenters = claritySpec.sliderDotCenters;
+    const labelLefts = claritySpec.sliderLabelLeft;
+    const thumbHalf = claritySpec.sliderThumbSize / 2;
+    const activeDotCenter = dotCenters[activeIndex] ?? dotCenters[0];
+    const activeThumbLeft = activeDotCenter - thumbHalf;
+
     return (
       <div
-        className="relative w-full"
-        style={{ maxWidth: claritySpec.sliderWidth, height: claritySpec.sliderLabelTop + 18 }}
+        className="relative mx-auto w-full max-w-[521.21px]"
+        style={{ height: claritySpec.sliderHeight }}
         role="group"
         aria-label="Diamond clarity grade"
       >
-        <div className="relative h-[18px] w-full">
-          <div
-            className="absolute"
-            style={{
-              left: claritySpec.sliderTrackInsetLeft,
-              top: claritySpec.sliderTrackTop,
-              width: claritySpec.sliderTrackWidth,
-              height: claritySpec.sliderTrackHeight,
-            }}
-            aria-hidden
-          >
-            <Image
-              src={educationPageImages.claritySliderTrack}
-              alt=""
-              width={501}
-              height={2}
-              className="h-full w-full"
-            />
-          </div>
-
-          {options.map((option, index) => {
-            const left = touchpointPositions[index];
-            const isActive = index === activeIndex;
-
-            return (
-              <button
-                key={option.label}
-                type="button"
-                aria-label={`Select ${option.label} clarity`}
-                aria-pressed={isActive}
-                onClick={() => setActiveIndex(index)}
-                className={cn(
-                  "absolute flex -translate-x-1/2 items-center justify-center",
-                  isActive ? "top-0 size-[24px]" : "top-[6px] size-[24px]",
-                )}
-                style={{ left }}
-              >
-                {isActive ? (
-                  <Image
-                    src={educationPageImages.claritySliderThumb}
-                    alt=""
-                    width={claritySpec.sliderThumbSize}
-                    height={claritySpec.sliderThumbSize}
-                    className="size-[18px]"
-                    aria-hidden
-                  />
-                ) : (
-                  <span
-                    className="rounded-full"
-                    style={{
-                      width: claritySpec.sliderDotSize,
-                      height: claritySpec.sliderDotSize,
-                      backgroundColor: claritySpec.sliderDotColor,
-                    }}
-                    aria-hidden
-                  />
-                )}
-              </button>
-            );
-          })}
+        <div
+          className="absolute"
+          style={{
+            left: toPercent(claritySpec.sliderTrackLeft),
+            top: claritySpec.sliderTrackTop,
+            width: toPercent(claritySpec.sliderTrackWidth),
+            height: claritySpec.sliderTrackHeight,
+          }}
+          aria-hidden
+        >
+          <Image
+            src={educationPageImages.claritySliderTrack}
+            alt=""
+            width={501}
+            height={2}
+            className="h-full w-full"
+          />
         </div>
 
         <div
-          className="absolute inset-x-0 flex justify-between font-gill text-[11px] leading-110 sm:text-[14px] lg:text-[16px]"
-          style={{ top: claritySpec.sliderLabelTop }}
+          className="pointer-events-none absolute"
+          style={{
+            left: toPercent(claritySpec.sliderDotsLeft),
+            top: claritySpec.sliderDotsTop,
+            width: toPercent(claritySpec.sliderDotsWidth),
+            height: claritySpec.sliderDotsHeight,
+          }}
+          aria-hidden
         >
-          {options.map((option, index) => {
-            const isActive = index === activeIndex;
-            const isGold = isActive && (option.highlight || isActive);
-
-            return (
-              <button
-                key={option.label}
-                type="button"
-                onClick={() => setActiveIndex(index)}
-                className={cn(
-                  "min-w-0 shrink-0 text-center font-normal transition-colors",
-                  isGold ? "text-[#AB863B]" : "text-darkblack",
-                )}
-              >
-                {option.label}
-              </button>
-            );
-          })}
+          <Image
+            src={educationPageImages.claritySliderDots}
+            alt=""
+            width={510}
+            height={6}
+            className="h-full w-full"
+          />
         </div>
+
+        <div
+          className="pointer-events-none absolute top-0 transition-[left] duration-200 ease-out"
+          style={{ left: toPercent(activeThumbLeft) }}
+          aria-hidden
+        >
+          <Image
+            src={educationPageImages.claritySliderThumb}
+            alt=""
+            width={claritySpec.sliderThumbSize}
+            height={claritySpec.sliderThumbSize}
+            className="size-[18px]"
+          />
+        </div>
+
+        {options.map((option, index) => {
+          const dotCenter = dotCenters[index] ?? dotCenters[0];
+          const isActive = index === activeIndex;
+
+          return (
+            <button
+              key={option.label}
+              type="button"
+              aria-label={`Select ${option.label} clarity`}
+              aria-pressed={isActive}
+              onClick={() => setActiveIndex(index)}
+              className="absolute top-0 -translate-x-1/2 p-0"
+              style={{
+                left: toPercent(dotCenter),
+                width: 28,
+                height: claritySpec.sliderHeight,
+              }}
+            />
+          );
+        })}
+
+        {options.map((option, index) => {
+          const labelLeft = labelLefts[index] ?? labelLefts[0];
+          const isActive = index === activeIndex;
+
+          return (
+            <span
+              key={`${option.label}-label`}
+              className={cn(
+                "pointer-events-none absolute whitespace-nowrap font-gill text-[16px] font-normal leading-110 transition-colors",
+                isActive ? "text-[#AB863B]" : "text-darkblack",
+              )}
+              style={{
+                left: toPercent(labelLeft),
+                top: claritySpec.sliderLabelTop,
+              }}
+            >
+              {option.label}
+            </span>
+          );
+        })}
       </div>
     );
   }
@@ -202,7 +203,6 @@ const EducationMetricSlider = ({
       <div className="flex justify-between font-gill text-[14px] leading-110 lg:text-base">
         {options.map((option, index) => {
           const isActive = index === activeIndex;
-          const isHighlight = option.highlight && isActive;
 
           return (
             <button
@@ -211,7 +211,7 @@ const EducationMetricSlider = ({
               onClick={() => setActiveIndex(index)}
               className={cn(
                 "flex flex-col items-center text-center",
-                isHighlight || isActive ? "text-[#ab863b]" : "text-darkblack",
+                isActive ? "text-[#ab863b]" : "text-darkblack",
               )}
             >
               <span>{option.label}</span>
