@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
@@ -10,68 +11,137 @@ import {
 } from "../data/content";
 import EducationMetricSlider from "./EducationMetricSlider";
 
-const PanelTexture = () => (
+const PanelTexture = ({ panelId }: { panelId: string }) => (
   <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
     <Image
-      src={educationPageImages.panelTexture}
+      src={
+        panelId === "clarity"
+          ? educationPageImages.panelTexture
+          : educationPageImages.panelTexture
+      }
       alt=""
       fill
-      className="object-cover opacity-90"
+      className={cn(
+        "object-cover opacity-90",
+        panelId === "clarity" && "lg:scale-[1.14] lg:object-[center_49%]",
+      )}
       sizes="50vw"
     />
     <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,252,0)_0%,rgba(255,255,252,1)_100%)]" />
   </div>
 );
 
+const resolveActiveImage = (
+  panel: EducationFourCsPanelContent,
+  activeIndex: number,
+): string | null => {
+  const { slider } = panel;
+  const optionImage = slider.options[activeIndex]?.image;
+  if (optionImage) return optionImage;
+
+  if (slider.dualImages) {
+    const midpoint = Math.floor(slider.options.length / 2);
+    return activeIndex >= midpoint ? slider.dualImages[1] : slider.dualImages[0];
+  }
+
+  return slider.image ?? null;
+};
+
 const PanelMedia = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent; delayMs?: number }) => {
   const { slider } = panel;
+  const [activeIndex, setActiveIndex] = useState(slider.defaultIndex);
+  const isClarity = panel.id === "clarity";
+
+  const activeImage = useMemo(
+    () => resolveActiveImage(panel, activeIndex),
+    [panel, activeIndex],
+  );
 
   return (
-    <ScrollReveal delayMs={delayMs} className="relative flex h-[370px] w-full items-center justify-center lg:h-full lg:min-h-[633px]">
-      <PanelTexture />
+    <ScrollReveal
+      delayMs={delayMs}
+      className={cn(
+        "relative flex w-full items-center justify-center",
+        isClarity ? "h-[370px] lg:h-[633px]" : "h-[370px] lg:min-h-[633px] lg:h-full",
+      )}
+    >
+      <PanelTexture panelId={panel.id} />
 
-      <div className="relative z-10 flex w-full max-w-[94.14%] flex-col items-center gap-8 px-4 lg:max-w-[528px] lg:gap-10">
-        {slider.dualImages ? (
-          <div className="flex items-center gap-4 lg:gap-6">
-            {slider.dualImages.map((src) => (
-              <div key={src} className="relative size-[120px] lg:size-[200px]">
-                <Image src={src} alt="" fill className="object-cover" sizes="200px" />
+      <div
+        className={cn(
+          "relative z-10 flex w-full flex-col items-center px-4",
+          isClarity ? "max-w-[528px] gap-10 lg:gap-16" : "max-w-[94.14%] gap-8 lg:max-w-[528px] lg:gap-10",
+        )}
+      >
+        <div
+          className={cn(
+            "flex flex-col items-center",
+            isClarity ? "gap-10 lg:gap-[40px]" : "gap-8 lg:gap-10",
+          )}
+        >
+          {slider.showDecorativeDiamond ? (
+            <>
+              <div className="relative size-10 lg:absolute lg:left-1/2 lg:top-[calc(50%-118.5px)] lg:size-10 lg:-translate-x-1/2">
+                <Image
+                  src={educationPageImages.decorativeDiamond}
+                  alt=""
+                  fill
+                  className="object-contain"
+                  sizes="40px"
+                />
               </div>
-            ))}
-          </div>
-        ) : slider.showDecorativeDiamond ? (
-          <div className="relative size-10 lg:absolute lg:left-1/2 lg:top-[calc(50%-118.5px)] lg:size-10 lg:-translate-x-1/2">
-            <Image
-              src={educationPageImages.decorativeDiamond}
-              alt=""
-              fill
-              className="object-contain"
-              sizes="40px"
-            />
-          </div>
-        ) : slider.image ? (
-          <div className="relative size-[120px] lg:size-[200px]">
-            <Image src={slider.image} alt="" fill className="object-cover" sizes="200px" />
-          </div>
-        ) : null}
+              <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-20" aria-hidden>
+                <Image
+                  src={educationPageImages.panelTexture}
+                  alt=""
+                  fill
+                  className="scale-150 object-cover"
+                  sizes="50vw"
+                />
+              </div>
+            </>
+          ) : activeImage ? (
+            <div
+              className={cn(
+                "relative overflow-hidden transition-opacity duration-300",
+                isClarity ? "size-[120px] lg:size-[200px]" : "size-[120px] lg:size-[200px]",
+              )}
+            >
+              <Image
+                key={`${panel.id}-${activeIndex}-${activeImage}`}
+                src={activeImage}
+                alt=""
+                fill
+                className="object-cover"
+                sizes="200px"
+              />
+            </div>
+          ) : null}
 
-        {slider.showDecorativeDiamond ? (
-          <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-20" aria-hidden>
-            <Image
-              src={educationPageImages.panelTexture}
-              alt=""
-              fill
-              className="scale-150 object-cover"
-              sizes="50vw"
-            />
-          </div>
-        ) : null}
-
-        <EducationMetricSlider options={slider.options} defaultIndex={slider.defaultIndex} />
+          <EducationMetricSlider
+            options={slider.options}
+            defaultIndex={slider.defaultIndex}
+            activeIndex={activeIndex}
+            onChange={setActiveIndex}
+            variant={isClarity ? "clarity" : "default"}
+          />
+        </div>
 
         {panel.footnote ? (
-          <div className="flex flex-col items-center gap-4 lg:max-w-[481px] lg:gap-6">
-            <p className="text-center font-gill text-base font-light leading-110 text-neutral500 lg:text-base">
+          <div
+            className={cn(
+              "flex flex-col items-center",
+              isClarity ? "gap-6 lg:max-w-[481px] lg:gap-[24px]" : "gap-4 lg:max-w-[481px] lg:gap-6",
+            )}
+          >
+            <p
+              className={cn(
+                "text-center font-gill font-light leading-110",
+                isClarity
+                  ? "text-[14px] text-neutral500 lg:text-[16px] lg:text-[#4D4D4D]"
+                  : "text-base text-neutral500 lg:text-base",
+              )}
+            >
               {panel.footnote}
             </p>
             <Image
@@ -88,21 +158,54 @@ const PanelMedia = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent
   );
 };
 
-const PanelCopy = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent; delayMs?: number }) => (
-  <ScrollReveal delayMs={delayMs} className="flex flex-col items-center justify-center gap-6 px-5 py-10 text-center lg:gap-8 lg:px-10 lg:py-0">
-    <p className="font-larken text-[60px] font-light leading-110 text-[#ab863b] opacity-50 lg:text-[110px]">
-      {panel.code}
-    </p>
-    <div className="flex max-w-[441px] flex-col gap-3 lg:gap-4">
-      <h3 className="font-larken text-[20px] font-light leading-110 text-darkblack lg:text-[32px]">
-        {panel.title}
-      </h3>
-      <p className="font-gill text-base font-light leading-110 text-darkblack lg:text-[20px]">
-        {panel.description}
+const PanelCopy = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent; delayMs?: number }) => {
+  const isClarity = panel.id === "clarity";
+
+  return (
+    <ScrollReveal
+      delayMs={delayMs}
+      className={cn(
+        "flex flex-col items-center justify-center text-center",
+        isClarity
+          ? "gap-8 px-5 py-10 lg:gap-[32px] lg:px-10 lg:py-0"
+          : "gap-6 px-5 py-10 lg:gap-8 lg:px-10 lg:py-0",
+      )}
+    >
+      <p
+        className={cn(
+          "font-larken font-light leading-110 text-[#ab863b] opacity-50",
+          isClarity ? "text-[60px] lg:text-[110px]" : "text-[60px] lg:text-[110px]",
+        )}
+      >
+        {panel.code}
       </p>
-    </div>
-  </ScrollReveal>
-);
+      <div
+        className={cn(
+          "flex max-w-[441px] flex-col",
+          isClarity ? "gap-3 lg:gap-[16px]" : "gap-3 lg:gap-4",
+        )}
+      >
+        <h3
+          id={`education-panel-${panel.id}`}
+          className={cn(
+            "font-larken font-light leading-110 text-darkblack",
+            isClarity ? "text-[20px] lg:text-[32px]" : "text-[20px] lg:text-[32px]",
+          )}
+        >
+          {panel.title}
+        </h3>
+        <p
+          className={cn(
+            "font-gill font-light leading-110 text-darkblack",
+            isClarity ? "text-base lg:text-[20px]" : "text-base lg:text-[20px]",
+          )}
+        >
+          {panel.description}
+        </p>
+      </div>
+    </ScrollReveal>
+  );
+};
 
 const EducationFourCsPanel = ({
   panel,

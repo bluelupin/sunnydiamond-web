@@ -1,5 +1,6 @@
 export const educationPageImages = {
-  heroPoster: "/images/about/hero-desktop.png",
+  heroDesktop: "/images/education/hero-desktop.webp",
+  heroMobile: "/images/education/hero-desktop.webp",
   diamondOval: "/images/education/diamond-oval.png",
   star: "/images/education/star.svg",
   panelTexture: "/images/education/panel-texture.png",
@@ -18,11 +19,78 @@ export const educationPageImages = {
   shapeCenter: "/images/education/shape-center.png",
   shapeRight: "/images/education/shape-right.png",
   scrollArrow: "/images/education/scroll-arrow.svg",
+  claritySliderTrack: "/images/education/clarity-slider-track.svg",
+  claritySliderThumb: "/images/education/clarity-slider-thumb.svg",
+} as const;
+
+/** Figma node 692:28887 — C1 Clarity panel */
+export const educationClarityPanelSpec = {
+  height: 633,
+  background: "#F4F3EE",
+  mediaContentWidth: 528,
+  diamondSize: 200,
+  diamondToSliderGap: 40,
+  sliderToFootnoteGap: 64,
+  footnoteGap: 24,
+  footnoteFontSize: 16,
+  footnoteColor: "#4D4D4D",
+  sliderWidth: 521,
+  sliderTrackWidth: 501,
+  sliderTrackHeight: 1.5,
+  sliderTrackInsetLeft: 10.61,
+  sliderTrackTop: 8.75,
+  sliderDotSize: 6,
+  sliderThumbSize: 18,
+  sliderLabelTop: 32.5,
+  sliderLabelFontSize: 16,
+  sliderActiveColor: "#AB863B",
+  sliderDotColor: "#D1B57A",
+  copyWidth: 716,
+  copyCodeGap: 32,
+  copyTitleGap: 16,
+  copyMaxWidth: 441,
+  codeFontSize: 110,
+  codeColor: "#AB863B",
+  codeOpacity: 0.5,
+  titleFontSize: 32,
+  descriptionFontSize: 20,
+  textColor: "#0A0A0A",
+} as const;
+
+/** Figma node 692:29131 — education hero scroll collapse (desktop) */
+export const educationHeroFigmaSpec = {
+  section: {
+    height: 640,
+    background: "#FFFFFF",
+  },
+  image: {
+    width: 1498,
+    height: 659,
+    alt: "Hands presenting a brilliant-cut diamond on black velvet",
+  },
+  title: {
+    text: "Diamond Expertise",
+    bottom: 128,
+    fontSize: 60,
+    mobileFontSize: 32,
+    color: "#FFFFFF",
+    lineHeight: 100,
+  },
+  overlay: {
+    gradient: "bottom-strong" as const,
+  },
+  /** Figma component 692:28386 — collapsed on load, expands on scroll */
+  animation: {
+    collapsedWidthRatio: 1360 / 1440,
+    collapsedOffsetY: 100,
+    collapsedInsetX: 40,
+    durationMs: 500,
+    titleDelayMs: 300,
+  },
 } as const;
 
 export const educationHeroContent = {
-  title: "Diamond Expertise",
-  videoSrc: "/videos/hero-banner-video.mp4",
+  title: educationHeroFigmaSpec.title.text,
 } as const;
 
 export const educationFourCsIntroContent = {
@@ -37,6 +105,7 @@ export type EducationSliderOption = {
   label: string;
   highlight?: boolean;
   sublabel?: string | string[];
+  image?: string;
 };
 
 export type EducationFourCsPanelContent = {
@@ -71,14 +140,14 @@ export const educationFourCsPanels: EducationFourCsPanelContent[] = [
       defaultIndex: 6,
       image: educationPageImages.diamondRating,
       options: [
-        { label: "SI2" },
-        { label: "SI1" },
-        { label: "VS2" },
-        { label: "VS1" },
-        { label: "VVS2" },
-        { label: "VVS1" },
-        { label: "IF", highlight: true },
-        { label: "FL" },
+        { label: "SI2", image: educationPageImages.cutDiamondGood },
+        { label: "SI1", image: educationPageImages.cutDiamondGood },
+        { label: "VS2", image: educationPageImages.cutDiamondGood },
+        { label: "VS1", image: educationPageImages.diamondRating },
+        { label: "VVS2", image: educationPageImages.diamondRating },
+        { label: "VVS1", image: educationPageImages.diamondRating },
+        { label: "IF", highlight: true, image: educationPageImages.diamondRating },
+        { label: "FL", image: educationPageImages.cutDiamondExcellent },
       ],
     },
   },
@@ -94,13 +163,12 @@ export const educationFourCsPanels: EducationFourCsPanelContent[] = [
     background: "chalk",
     slider: {
       defaultIndex: 4,
-      dualImages: [educationPageImages.cutDiamondGood, educationPageImages.cutDiamondExcellent],
       options: [
-        { label: "Poor" },
-        { label: "Fair" },
-        { label: "Good" },
-        { label: "Very Good" },
-        { label: "Excellent", highlight: true },
+        { label: "Poor", image: educationPageImages.cutDiamondGood },
+        { label: "Fair", image: educationPageImages.cutDiamondGood },
+        { label: "Good", image: educationPageImages.cutDiamondGood },
+        { label: "Very Good", image: educationPageImages.cutDiamondGood },
+        { label: "Excellent", highlight: true, image: educationPageImages.cutDiamondExcellent },
       ],
     },
   },

@@ -1,18 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { educationHeroFigmaSpec } from "../data/content";
 
 export interface EducationHeroLoadAnimationState {
   expanded: boolean;
-  titleVisible: boolean;
   reducedMotion: boolean;
 }
 
-const TITLE_DELAY_MS = 400;
+const { animation } = educationHeroFigmaSpec;
 
+/**
+ * Figma 692:28386 — Hero Diamond Expertise Scroll Collapse.
+ * Collapsed on load → expanded on first scroll.
+ */
 export function useEducationHeroLoadAnimation(): EducationHeroLoadAnimationState {
   const [expanded, setExpanded] = useState(false);
-  const [titleVisible, setTitleVisible] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
@@ -21,21 +24,38 @@ export function useEducationHeroLoadAnimation(): EducationHeroLoadAnimationState
     if (motionQuery.matches) {
       setReducedMotion(true);
       setExpanded(true);
-      setTitleVisible(true);
       return;
     }
 
-    const expandFrame = requestAnimationFrame(() => {
-      requestAnimationFrame(() => setExpanded(true));
-    });
+    let expandFrame = 0;
+    let triggered = false;
 
-    const titleTimer = window.setTimeout(() => setTitleVisible(true), TITLE_DELAY_MS);
+    const triggerExpand = () => {
+      if (triggered) return;
+      triggered = true;
+
+      expandFrame = requestAnimationFrame(() => {
+        expandFrame = requestAnimationFrame(() => setExpanded(true));
+      });
+    };
+
+    if (window.scrollY > 0) {
+      triggerExpand();
+      return () => cancelAnimationFrame(expandFrame);
+    }
+
+    const onScroll = () => {
+      triggerExpand();
+      window.removeEventListener("scroll", onScroll);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
 
     return () => {
+      window.removeEventListener("scroll", onScroll);
       cancelAnimationFrame(expandFrame);
-      window.clearTimeout(titleTimer);
     };
   }, []);
 
-  return { expanded, titleVisible, reducedMotion };
+  return { expanded, reducedMotion };
 }
