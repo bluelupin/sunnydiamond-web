@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { LazyInView } from "@/shared/ui/LazyInView";
 import { cn } from "@/shared/utils/cn";
@@ -123,6 +123,7 @@ function GridFallback() {
 }
 
 function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps) {
+  const gridRef = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
 
@@ -142,8 +143,20 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
       return;
     }
 
-    const frame = window.requestAnimationFrame(() => setRevealed(true));
-    return () => window.cancelAnimationFrame(frame);
+    const node = gridRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        setRevealed(true);
+        observer.disconnect();
+      },
+      { threshold: 0.15, rootMargin: "0px" },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
   }, []);
 
   const tileProps = (row: number, col: number, colsInRow: number) => ({
@@ -153,7 +166,7 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
   });
 
   return (
-    <div className="flex flex-col gap-3">
+    <div ref={gridRef} className="flex flex-col gap-3">
       <div className="flex items-center justify-center gap-3">
         <AnimatedTile
           {...tileProps(0, 0, 5)}
@@ -240,7 +253,8 @@ const AboutHandcraftedTileGrid = ({ cards }: AboutHandcraftedTileGridProps) => (
   <LazyInView
     fallback={<GridFallback />}
     className="min-h-[400px] sm:min-h-[520px]"
-    rootMargin="200px 0px 120px 0px"
+    rootMargin="120px 0px 80px 0px"
+    threshold={0.01}
   >
     <AboutHandcraftedTileGridInner cards={cards} />
   </LazyInView>

@@ -101,7 +101,7 @@ const Header = () => {
           mobileMenuOpen ? "pointer-events-none opacity-0" : "",
           overlay
             ? "bg-transparent"
-            : "bg-background/95 backdrop-blur-sm border-b border-border",
+            : "bg-transparent backdrop-blur-sm",
         )}
         aria-hidden={mobileMenuOpen}
       >
