@@ -51,6 +51,8 @@ export default {
         gray500: "#555555",
         gray600: "#999999",
         aboutInactive: "#F2F2F2",
+        benefitSurface: "#F8F1F6",
+        supportSurface: "#F2E3ED",
         goldAccent: "#DDA957",
         goldGrid: "#EFE7D4",
         chalkCard: "#F8F4EC",

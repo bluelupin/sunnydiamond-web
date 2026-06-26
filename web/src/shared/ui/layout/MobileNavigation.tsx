@@ -137,7 +137,7 @@ const JewelleryPanel = ({ onBack, onClose }: JewelleryPanelProps) => (
                     sizes="50vw"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-[#F8F1F6]">
+                  <div className="flex h-full w-full items-center justify-center bg-benefitSurface">
                     <span className="font-gill text-[14px] leading-110 darkblack">
                       All Products
                     </span>
