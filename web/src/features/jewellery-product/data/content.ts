@@ -68,7 +68,8 @@ export const jewelleryListingToolbarSpec = {
 
 export const jewelleryListingToolbarAssets = {
   filterIcon: "/images/jewellery/filter-icon.svg",
-  chevronDownIcon: "/images/jewellery/chevron-down.svg",
+  chevronDownIcon: "/images/jewellery/chevron-down-24.svg",
+  chevronDownMobileIcon: "/images/jewellery/chevron-down-20.svg",
 } as const;
 
 /** Figma node 1279:1015 — mobile sticky filter / sort footer bar */
@@ -83,14 +84,15 @@ export const jewelleryListingMobileFooterSpec = {
   backgroundColor: "#FFFFFF",
 } as const;
 
-/** Figma node 692:4876 — jewellery product list card (mobile default) */
+/** Figma node 692:4876 / 692:4174 — mobile product image frame */
 export const jewelleryListingProductCardMobileSpec = {
   height: 227,
   paddingX: 16,
   paddingY: 24,
   sectionGap: 16,
-  imageWidth: 155,
-  imageHeight: 110,
+  imageClipHeight: 110,
+  /** Figma 692:4901 — ring image frame (133.596px) */
+  imageInnerSize: 134,
   copyGap: 8,
   copyFontSize: 14,
   bestsellerHeight: 28,
@@ -106,7 +108,14 @@ export const jewelleryListingProductCardSpec = {
   paddingX: 24,
   paddingY: 40,
   sectionGap: 24,
-  imageHeight: 303,
+  imageClipHeight: 303,
+  /** Figma 692:4146 — inner image frame */
+  imageInnerHeight: 319,
+  imageInnerWidth: 413,
+  imageScaleHeight: 214.8,
+  imageScaleWidth: 128.01,
+  imageOffsetLeft: -13.92,
+  imageOffsetTop: -57.12,
   copyGap: 12,
   copyPaddingX: 12,
   fontSize: 20,
@@ -133,6 +142,56 @@ export const jewelleryListingPaginationSpec = {
   buttonFontSize: 14,
   buttonColor: "#0A0A0A",
   buttonBorderColor: "#CCCCCC",
+} as const;
+
+/** Figma node 692:4740 — jewellery product list filter drawer */
+export const jewelleryListingFilterDrawerSpec = {
+  panelWidth: 474,
+  contentWidth: 424,
+  contentInset: 24,
+  headerTop: 40,
+  headerHeight: 32,
+  dividerTop: 94,
+  contentTop: 116,
+  sectionGap: 24,
+  titleGap: 16,
+  chipRowGap: 12,
+  chipGap: 7,
+  chipCheckGap: 4,
+  chipHeight: 56,
+  chipPaddingX: 24,
+  chipPaddingY: 12,
+  chipFontSize: 16,
+  checkIconSize: 18,
+  closeIconSize: 32,
+  titleFontSize: 24,
+  sectionTitleFontSize: 16,
+  bodyFontSize: 14,
+  selectFontSize: 16,
+  inputHeight: 56,
+  inputPadding: 12,
+  labelInputGap: 8,
+  sliderTrackHeight: 4,
+  sliderFillHeight: 3,
+  sliderThumbSize: 12,
+  sliderLabelGap: 12,
+  minMaxColumnGap: 24,
+  footerGradientHeight: 71,
+  footerPaddingX: 40,
+  footerPaddingY: 24,
+  footerButtonGap: 24,
+  buttonHeight: 56,
+  buttonPaddingX: 28,
+  buttonPaddingY: 20,
+  buttonFontSize: 14,
+  footerBorderWidth: 0.5,
+  clearButtonBorderWidth: 0.8,
+  inputBackground: "#F2F2F2",
+  trackColor: "#CCCCCC",
+  fillColor: "#0A0A0A",
+  focusedBorderColor: "#4D4D4D",
+  placeholderColor: "#999999",
+  scrollbarWidth: 2,
 } as const;
 
 /** Figma node 692:4249 — jewellery product list guarantees bar */

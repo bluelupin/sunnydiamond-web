@@ -1,4 +1,3 @@
-import TrustBadgeSection from "@/features/cms/components/common/TrustBadges";
 import type { NormalizedAboutPage } from "@/services/about/about-page.types";
 import AboutBelowFoldLazy from "./AboutBelowFoldLazy";
 import AboutHeroSection from "./AboutHeroSection";
@@ -24,7 +23,6 @@ const AboutPage = ({ page }: AboutPageProps) => {
       {page.brandTagline ? (
         <AboutHeirloomQuoteSection {...page.brandTagline} />
       ) : null}
-      <TrustBadgeSection />
     </>
   );
 };

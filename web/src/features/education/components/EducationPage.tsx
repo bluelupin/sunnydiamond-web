@@ -1,5 +1,3 @@
-import TrustBadgeSection from "@/features/cms/components/common/TrustBadges";
-import ScrollReveal from "@/shared/ui/ScrollReveal";
 import EducationHeroSection from "./EducationHeroSection";
 import EducationFourCsIntroSection from "./EducationFourCsIntroSection";
 import EducationFourCsPanelsSection from "./EducationFourCsPanelsSection";
@@ -18,9 +16,6 @@ const EducationPage = () => {
       <EducationLearnMoreSection />
       <EducationDiscoverSection />
       <EducationFaqSection />
-      <ScrollReveal delayMs={0}>
-        <TrustBadgeSection />
-      </ScrollReveal>
     </>
   );
 };

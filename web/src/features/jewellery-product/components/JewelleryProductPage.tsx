@@ -1,9 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import TrustBadgeSection from "@/features/cms/components/common/TrustBadges";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
-import { LazyAnimatedSection } from "@/shared/ui/LazyAnimatedSection";
 import JewelleryHeroSection from "./JewelleryHeroSection";
 import JewelleryCategoryNav from "./JewelleryCategoryNav";
 import JewelleryProductToolbar from "./JewelleryProductToolbar";
@@ -88,10 +86,6 @@ const JewelleryProductPage = () => {
       <ScrollReveal delayMs={0}>
         <JewelleryGuaranteesSection />
       </ScrollReveal>
-
-      <LazyAnimatedSection animate revealDelayMs={80} rootMargin="120px 0px 120px 0px">
-        <TrustBadgeSection />
-      </LazyAnimatedSection>
 
       <JewelleryFilterDrawer
         open={isFilterOpen}

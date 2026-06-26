@@ -266,6 +266,25 @@
     display: none;
   }
 
+  .filter-drawer-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #999999 #cccccc;
+  }
+
+  .filter-drawer-scroll::-webkit-scrollbar {
+    width: 2px;
+  }
+
+  .filter-drawer-scroll::-webkit-scrollbar-track {
+    background: #cccccc;
+    border-radius: 70px;
+  }
+
+  .filter-drawer-scroll::-webkit-scrollbar-thumb {
+    background: #999999;
+    border-radius: 70px;
+  }
+
   .h-timeline-connector {
     height: calc(100% + 2rem);
   }
