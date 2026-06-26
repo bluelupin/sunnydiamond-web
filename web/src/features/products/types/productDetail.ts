@@ -12,13 +12,6 @@ export type ProductDetailAccordion = {
   content: string;
 };
 
-export type PairWithItem = {
-  id: string;
-  name: string;
-  image: string | StaticImageData;
-  href: string;
-};
-
 export type ProductDetailContent = {
   attributes: string[];
   metalColors: MetalColorOption[];
@@ -31,12 +24,6 @@ export type ProductDetailContent = {
     icon: string | null;
   }[];
   accordions: ProductDetailAccordion[];
-  pairWith: {
-    collectionTitle: string;
-    collectionDescription: string;
-    collectionImage: string;
-    items: PairWithItem[];
-  };
   heroBannerImage: string;
   visitUsImage: string;
   personaliseImage: string;

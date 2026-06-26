@@ -15,7 +15,7 @@ import { ChevronLeft } from "lucide-react";
 import ProductDetailGallery from "./detail/ProductDetailGallery";
 import ProductDetailSidebar from "./detail/ProductDetailSidebar";
 import ProductDetailHeroBanner from "./detail/ProductDetailHeroBanner";
-import ProductDetailPairWithSection from "./detail/ProductDetailPairWithSection";
+import FeaturedCollectionSection from "@/features/cms/components/home/FeaturedCollectionSection";
 import ProductDetailMoreForYouSection from "./detail/ProductDetailMoreForYouSection";
 import ProductDetailVisitUsSection from "./detail/ProductDetailVisitUsSection";
 
@@ -71,7 +71,7 @@ const ProductDetailPage = () => {
       </PageContainer>
 
       <ProductDetailHeroBanner imageSrc={content.heroBannerImage} alt={`${product.name} lifestyle`} />
-      <ProductDetailPairWithSection pairWith={content.pairWith} />
+      <FeaturedCollectionSection id="alankara" />
       <ProductDetailMoreForYouSection items={moreForYou} />
       <ProductDetailVisitUsSection imageSrc={content.visitUsImage} />
     </article>

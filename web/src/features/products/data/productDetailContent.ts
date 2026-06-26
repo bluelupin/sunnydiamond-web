@@ -1,6 +1,6 @@
 import type { StaticImageData } from "next/image";
 import { jewelleryListingProducts } from "@/features/jewellery-product/data/products";
-import { products, type Product } from "@/features/products/data/products";
+import type { Product } from "@/features/products/data/products";
 import type { ProductDetailContent, ProductDetailPricing } from "../types/productDetail";
 
 const ringSizes = ["4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"];
@@ -82,7 +82,6 @@ export function getProductDetailPricing(productId: string): ProductDetailPricing
 
 export function getProductDetailContent(product: Product): ProductDetailContent {
   const metalShort = product.metal.includes("18K") ? "18K Metal" : product.metal;
-  const pairProducts = products.filter((item) => item.id !== product.id).slice(0, 5);
 
   return {
     attributes: ["IF Grade", metalShort, `${product.carat} Diamond`],
@@ -91,18 +90,6 @@ export function getProductDetailContent(product: Product): ProductDetailContent 
     engravingPreviewImage,
     benefits,
     accordions: buildAccordions(product),
-    pairWith: {
-      collectionTitle: "Alankara Collection",
-      collectionDescription:
-        "Guided by tradition and perfected by expertise, our craftsmen bring every diamond to life with meticulous attention to detail.",
-      collectionImage: "/images/collection/hero-desktop.webp",
-      items: pairProducts.map((item) => ({
-        id: item.id,
-        name: item.name,
-        image: item.image,
-        href: `/product/${item.id}`,
-      })),
-    },
     heroBannerImage: "/images/about/craftsmanship-764d7a.png",
     visitUsImage: "/images/about/store.png",
     personaliseImage: "/images/about/crafting-diamond.png",
