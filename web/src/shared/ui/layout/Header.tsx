@@ -217,6 +217,13 @@ const Header = () => {
         )}
       </header>
 
+      {jewelleryMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50"
+          onMouseEnter={scheduleCloseJewelleryMenu}
+        />
+      )}
+
       <MobileNavigation
         isOpen={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
