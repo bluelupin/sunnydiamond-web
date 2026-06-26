@@ -16,7 +16,7 @@ type AboutBrillianceSectionProps = NormalizedBrillianceSection;
 
 const AboutBrillianceSection = ({
   heading,
-  description,
+  body,
   image,
 }: AboutBrillianceSectionProps) => {
   const sectionRef = useRef<HTMLElement>(null);
@@ -87,7 +87,7 @@ const AboutBrillianceSection = ({
             className="mx-auto mt-2.5 max-w-full md:max-w-[450px] lg:max-w-557 2xl:max-w-[620px] overflow-hidden"
           >
             <p className="font-gill text-base font-light leading-110 text-gray600 sm:mt-3 lg:mt-[13px] lg:text-20 2xl:text-22">
-              {description}
+              {body}
             </p>
           </div>
         </div>
