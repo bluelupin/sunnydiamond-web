@@ -5,10 +5,14 @@ import type { NormalizedAboutPage, StrapiAboutPageEntity } from "./about-page.ty
 
 export const getAboutPage = cache(
   async (signal?: AbortSignal): Promise<NormalizedAboutPage> => {
-    const raw = await apiFetch<StrapiAboutPageEntity>("api/about-page", {
-      params: { populate: "*" },
-      signal,
-    });
+    // const raw = await apiFetch<StrapiAboutPageEntity>("api/about-page", {
+    //   params: { populate: "*" },
+    //   signal,
+    // });
+    const raw = await apiFetch<StrapiAboutPageEntity>(
+      "api/about-page?populate=*&populate[brillianceSection][populate][featureSlide][populate][image][populate][desktopImage]=true&populate[brillianceSection][populate][featureSlide][populate][image][populate][mobileImage]=true",
+      { signal },
+    );
 
     return mapAboutPageData(raw);
   },
