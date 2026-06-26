@@ -55,81 +55,82 @@ const PanelMedia = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent
     [panel, activeIndex],
   );
 
-  const activeCarat = slider.options[activeIndex]?.caratWeight ?? 3.2;
+  const activeCarat = slider.options[activeIndex]?.caratWeight ?? 3.0;
 
   return (
     <ScrollReveal
       delayMs={delayMs}
       className={cn(
-        "relative flex w-full items-center justify-center",
-        panel.id === "carat" ? "h-[370px] lg:h-[610px]" : "h-[370px] lg:h-[633px]",
+        "relative flex w-full shrink-0 items-center justify-center",
+        "max-lg:h-[370px]",
+        panel.id === "carat" ? "lg:h-[610px]" : "lg:h-[633px]",
       )}
     >
       <PanelTexture panelId={panel.id} />
 
-      <div className="relative z-10 flex w-full max-w-[528px] flex-col items-center px-4">
-        <div className="flex w-full flex-col items-center gap-10 lg:gap-[40px]">
-          {panel.id === "carat" ? (
-            <EducationCaratHandVisual activeCarat={activeCarat} />
-          ) : panel.id === "cut" ? (
-            <div className="flex items-center gap-6 lg:gap-[24px]">
-              <div className="relative size-[120px] shrink-0 overflow-hidden lg:size-[200px]">
+      <div className="relative z-10 flex w-full max-w-[323px] flex-col items-center px-5 lg:max-w-[528px] lg:px-4">
+          <div className="flex w-full flex-col items-center gap-10 lg:gap-[40px]">
+            {panel.id === "carat" ? (
+              <EducationCaratHandVisual activeCarat={activeCarat} />
+            ) : panel.id === "cut" ? (
+              <div className="flex items-center gap-6 lg:gap-[24px]">
+                <div className="relative size-[120px] shrink-0 overflow-hidden lg:size-[200px]">
+                  <Image
+                    src={educationPageImages.cutDiamondGood}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="200px"
+                  />
+                </div>
+                <div className="relative size-[120px] shrink-0 overflow-hidden lg:size-[200px]">
+                  <Image
+                    src={educationPageImages.cutDiamondExcellent}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="200px"
+                  />
+                </div>
+              </div>
+            ) : activeImage ? (
+              <div className="relative size-[120px] shrink-0 overflow-hidden transition-opacity duration-300 lg:size-[200px]">
                 <Image
-                  src={educationPageImages.cutDiamondGood}
+                  key={`${panel.id}-${activeIndex}-${activeImage}`}
+                  src={activeImage}
                   alt=""
                   fill
                   className="object-cover"
                   sizes="200px"
                 />
               </div>
-              <div className="relative size-[120px] shrink-0 overflow-hidden lg:size-[200px]">
-                <Image
-                  src={educationPageImages.cutDiamondExcellent}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="200px"
-                />
-              </div>
-            </div>
-          ) : activeImage ? (
-            <div className="relative size-[120px] shrink-0 overflow-hidden transition-opacity duration-300 lg:size-[200px]">
+            ) : null}
+
+            {sliderSpec ? (
+              <EducationMetricSlider
+                options={slider.options}
+                defaultIndex={slider.defaultIndex}
+                activeIndex={activeIndex}
+                onChange={setActiveIndex}
+                spec={sliderSpec}
+              />
+            ) : null}
+          </div>
+
+          {panel.footnote ? (
+            <div className="mt-10 flex w-full max-w-[481px] flex-col items-center gap-6 max-lg:mt-10 max-lg:max-w-[317px] max-lg:gap-6 lg:mt-[64px] lg:gap-[24px]">
+              <p className="text-center font-gill text-[14px] font-light leading-110 text-neutral500 lg:text-[16px] lg:text-[#4D4D4D]">
+                {panel.footnote}
+              </p>
               <Image
-                key={`${panel.id}-${activeIndex}-${activeImage}`}
-                src={activeImage}
+                src={educationPageImages.scrollArrow}
                 alt=""
-                fill
-                className="object-cover"
-                sizes="200px"
+                width={24}
+                height={23}
+                className="h-4 w-4 lg:h-[23px] lg:w-6"
               />
             </div>
           ) : null}
-
-          {sliderSpec ? (
-            <EducationMetricSlider
-              options={slider.options}
-              defaultIndex={slider.defaultIndex}
-              activeIndex={activeIndex}
-              onChange={setActiveIndex}
-              spec={sliderSpec}
-            />
-          ) : null}
-        </div>
-
-        {panel.footnote ? (
-          <div className="mt-10 flex w-full max-w-[481px] flex-col items-center gap-6 lg:mt-[64px] lg:gap-[24px]">
-            <p className="text-center font-gill text-[14px] font-light leading-110 text-neutral500 lg:text-[16px] lg:text-[#4D4D4D]">
-              {panel.footnote}
-            </p>
-            <Image
-              src={educationPageImages.scrollArrow}
-              alt=""
-              width={24}
-              height={23}
-              className="h-[16px] w-4 lg:h-[23px] lg:w-6"
-            />
-          </div>
-        ) : null}
       </div>
     </ScrollReveal>
   );
@@ -139,19 +140,23 @@ const PanelCopy = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent;
   return (
     <ScrollReveal
       delayMs={delayMs}
-      className="flex flex-col items-center justify-center gap-8 px-5 py-10 text-center lg:h-full lg:gap-[32px] lg:px-10 lg:py-0"
+      className={cn(
+        "flex w-full shrink-0 flex-col items-center justify-center text-center",
+        "max-lg:h-[355px] max-lg:gap-6 max-lg:px-5 max-lg:pt-10 max-lg:pb-6",
+        "lg:h-full lg:gap-[32px] lg:px-10 lg:py-0",
+      )}
     >
       <p className="font-larken text-[60px] font-light leading-110 text-[#ab863b] opacity-50 lg:text-[110px]">
         {panel.code}
       </p>
-      <div className="flex max-w-[441px] flex-col gap-3 lg:gap-[16px]">
+      <div className="flex max-w-[303px] flex-col gap-3 lg:max-w-[441px] lg:gap-[16px]">
         <h3
           id={`education-panel-${panel.id}`}
           className="font-larken text-[20px] font-light leading-110 text-darkblack lg:text-[32px]"
         >
           {panel.title}
         </h3>
-        <p className="font-gill text-base font-light leading-110 text-darkblack lg:text-[20px]">
+        <p className="font-gill text-[16px] font-light leading-110 text-darkblack lg:text-[20px]">
           {panel.description}
         </p>
       </div>
@@ -176,14 +181,15 @@ const EducationFourCsPanel = ({
       className={cn(
         "overflow-hidden",
         isChalk ? "bg-[#F4F3EE]" : "bg-white",
+        "max-lg:h-[725px]",
         panel.id === "carat" ? "lg:h-[610px]" : "lg:h-[633px]",
       )}
     >
-      <div className="flex flex-col lg:grid lg:h-full lg:grid-cols-2">
-        <div className={cn("lg:h-full", panel.mediaPosition === "left" && "lg:order-2")}>
+      <div className="flex h-full flex-col lg:grid lg:grid-cols-2">
+        <div className={cn("shrink-0 lg:h-full", panel.mediaPosition === "left" && "lg:order-2")}>
           <PanelCopy panel={panel} delayMs={copyDelay} />
         </div>
-        <div className={cn("lg:h-full", panel.mediaPosition === "left" && "lg:order-1")}>
+        <div className={cn("shrink-0 lg:h-full", panel.mediaPosition === "left" && "lg:order-1")}>
           <PanelMedia panel={panel} delayMs={mediaDelay} />
         </div>
       </div>

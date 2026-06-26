@@ -6,7 +6,7 @@ const EducationFourCsIntroSection = () => {
   return (
     <section
       aria-labelledby="education-four-cs-intro-title"
-      className="bg-white px-4 py-16 max-lg:min-h-[561px] max-lg:justify-center lg:h-[694px] lg:px-0 lg:py-0"
+      className="flex flex-col bg-white px-4 py-16 max-lg:min-h-[561px] max-lg:justify-center lg:h-[694px] lg:px-0 lg:py-0"
     >
       <div className="mx-auto flex h-full max-w-[677px] flex-col items-center justify-center gap-6 lg:gap-10 lg:pt-16">
         <ScrollReveal as="h2" delayMs={0} className="w-full">

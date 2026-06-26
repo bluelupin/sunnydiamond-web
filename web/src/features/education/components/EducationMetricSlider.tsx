@@ -57,10 +57,13 @@ const EducationMetricSlider = ({
   const activeDotCenter = spec.dotCenters[activeIndex] ?? spec.dotCenters[0];
   const activeThumbLeft = activeDotCenter - thumbHalf;
   const hasSublabels = Boolean(spec.sublabelTop);
+  const showActiveLabelOnly = spec.labelDisplay === "active";
+  const activeOption = options[activeIndex];
   const trackSegments = buildTrackSegments(
     spec.dotCenters,
     spec.trackLeft,
     spec.trackWidth,
+    spec.trackDotGap ?? TRACK_DOT_GAP,
   );
 
   const setActiveIndex = useCallback(
@@ -141,26 +144,40 @@ const EducationMetricSlider = ({
         );
       })}
 
-      {options.map((option, index) => {
-        const labelLeft = spec.labelLeft[index] ?? spec.labelLeft[0];
-        const isActive = index === activeIndex;
-
-        return (
+      {showActiveLabelOnly ? (
+        activeOption ? (
           <span
-            key={`${option.label}-label`}
-            className={cn(
-              "pointer-events-none absolute whitespace-nowrap font-gill text-[16px] font-normal leading-110 transition-colors",
-              isActive ? "text-[#AB863B]" : "text-darkblack",
-            )}
+            className="pointer-events-none absolute -translate-x-1/2 whitespace-nowrap font-gill text-[16px] font-normal leading-110 text-[#AB863B] transition-[left] duration-200 ease-out"
             style={{
-              left: toPercent(labelLeft, spec.width),
+              left: toPercent(activeDotCenter, spec.width),
               top: spec.labelTop,
             }}
           >
-            {option.label}
+            {activeOption.label}
           </span>
-        );
-      })}
+        ) : null
+      ) : (
+        options.map((option, index) => {
+          const labelLeft = spec.labelLeft[index] ?? spec.labelLeft[0];
+          const isActive = index === activeIndex;
+
+          return (
+            <span
+              key={`${option.label}-label`}
+              className={cn(
+                "pointer-events-none absolute whitespace-nowrap font-gill text-[16px] font-normal leading-110 transition-colors",
+                isActive ? "text-[#AB863B]" : "text-darkblack",
+              )}
+              style={{
+                left: toPercent(labelLeft, spec.width),
+                top: spec.labelTop,
+              }}
+            >
+              {option.label}
+            </span>
+          );
+        })
+      )}
 
       {hasSublabels
         ? options.map((option, index) => {

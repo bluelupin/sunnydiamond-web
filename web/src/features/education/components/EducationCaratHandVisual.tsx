@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import {
   educationCaratVisualSpec,
@@ -11,21 +12,35 @@ type EducationCaratHandVisualProps = {
 };
 
 const EducationCaratHandVisual = ({ activeCarat }: EducationCaratHandVisualProps) => {
-  const spec = educationCaratVisualSpec;
-  const diamondScale = activeCarat / spec.referenceCarat;
-  const diamondPx = Math.max(spec.diamondBaseSize * diamondScale, spec.diamondMinSize);
-  const diamondWidthPercent = (diamondPx / spec.frameWidth) * 100;
+  const [useMobileLayout, setUseMobileLayout] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 1023px)");
+    const update = () => setUseMobileLayout(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  const layout = useMobileLayout
+    ? educationCaratVisualSpec.mobile
+    : educationCaratVisualSpec.desktop;
+  const scaledSize = layout.diamondBaseSize * (activeCarat / educationCaratVisualSpec.referenceCarat);
+  const diamondPx = Math.min(
+    Math.max(scaledSize, layout.diamondMinSize),
+    layout.diamondMaxSize,
+  );
+  const diamondWidthPercent = (diamondPx / layout.frameWidth) * 100;
 
   return (
     <div
-      className="relative mx-auto w-full max-w-[528px] overflow-visible"
-      style={{ aspectRatio: `${spec.frameWidth} / ${spec.handAreaHeight}` }}
+      className="relative mx-auto w-full max-w-[311px] overflow-visible lg:max-w-[528px]"
+      style={{ aspectRatio: `${layout.frameWidth} / ${layout.handAreaHeight}` }}
       aria-hidden
     >
-      {/* Figma 692:29043 / 692:29044 — hand illustration */}
       <div
         className="pointer-events-none absolute inset-0 overflow-hidden"
-        style={{ opacity: spec.handOpacity }}
+        style={{ opacity: educationCaratVisualSpec.handOpacity }}
       >
         <div
           className="absolute left-1/2 top-1/2 h-[248%] w-[172%] origin-center"
@@ -44,19 +59,18 @@ const EducationCaratHandVisual = ({ activeCarat }: EducationCaratHandVisualProps
                 alt=""
                 fill
                 className="object-cover"
-                sizes="528px"
+                sizes="(max-width: 1023px) 311px, 528px"
               />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Figma 692:29042 — diamond on ring finger, scales with carat */}
       <div
         className="pointer-events-none absolute z-10 transition-[width] duration-300 ease-out"
         style={{
-          left: `${(spec.diamondLeft / spec.frameWidth) * 100}%`,
-          top: `${(spec.diamondTop / spec.handAreaHeight) * 100}%`,
+          left: `${(layout.diamondLeft / layout.frameWidth) * 100}%`,
+          top: `${(layout.diamondTop / layout.handAreaHeight) * 100}%`,
           width: `${diamondWidthPercent}%`,
           aspectRatio: "1",
         }}
