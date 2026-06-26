@@ -56,3 +56,19 @@ export const jewelleryListingToolbarAssets = {
   filterIcon: "/images/jewellery/filter-icon.svg",
   chevronDownIcon: "/images/jewellery/chevron-down.svg",
 } as const;
+
+/** Figma node 692:4144 — jewellery product list card (default state) */
+export const jewelleryListingProductCardSpec = {
+  height: 496,
+  paddingX: 24,
+  paddingY: 40,
+  sectionGap: 24,
+  imageHeight: 303,
+  copyGap: 12,
+  copyPaddingX: 12,
+  fontSize: 20,
+  textColor: "#0A0A0A",
+  backgroundColor: "#FBFAF6",
+  wishlistSize: 32,
+  wishlistInset: 24,
+} as const;
