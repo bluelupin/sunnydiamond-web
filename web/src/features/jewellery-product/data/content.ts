@@ -22,7 +22,7 @@ export const jewelleryListingHeroAssets = {
   alt: "Handcrafted Brilliance — diamond jewellery collection",
 } as const;
 
-/** Figma node 692:4117 — jewellery product list category nav */
+/** Figma node 692:4117 — jewellery product list category nav (desktop) */
 export const jewelleryListingCategoryNavSpec = {
   padding: 40,
   itemWidth: 86,
@@ -34,6 +34,20 @@ export const jewelleryListingCategoryNavSpec = {
   activeLabelColor: "#0A0A0A",
   inactiveLabelColor: "#999999",
   borderColor: "#CCCCCC",
+} as const;
+
+/** Figma node 692:4847 — jewellery product list category nav (mobile) */
+export const jewelleryListingCategoryNavMobileSpec = {
+  paddingX: 16,
+  paddingY: 24,
+  navGap: 12,
+  itemWidth: 56,
+  itemGap: 8,
+  iconSize: 24,
+  labelFontSize: 14,
+  labelLineHeight: 1.1,
+  activeLabelColor: "#4D4D4D",
+  inactiveLabelColor: "#999999",
 } as const;
 
 /** Figma node 692:4232 — jewellery product list toolbar (sticky) */
@@ -55,6 +69,23 @@ export const jewelleryListingToolbarSpec = {
 export const jewelleryListingToolbarAssets = {
   filterIcon: "/images/jewellery/filter-icon.svg",
   chevronDownIcon: "/images/jewellery/chevron-down.svg",
+} as const;
+
+/** Figma node 692:4876 — jewellery product list card (mobile default) */
+export const jewelleryListingProductCardMobileSpec = {
+  height: 227,
+  paddingX: 16,
+  paddingY: 24,
+  sectionGap: 16,
+  imageWidth: 155,
+  imageHeight: 110,
+  copyGap: 8,
+  copyFontSize: 14,
+  bestsellerHeight: 28,
+  bestsellerPadding: 8,
+  bestsellerFontSize: 12,
+  wishlistSize: 20,
+  wishlistInset: 8,
 } as const;
 
 /** Figma node 692:4144 — jewellery product list card (default state) */

@@ -34,6 +34,8 @@ export interface JewelleryListingProduct {
   name: string;
   price: number;
   primaryImage: string | StaticImageData;
+  /** Model / lifestyle image — mobile swipe & desktop hover */
+  modalImage: string | StaticImageData;
   hoverImage: string | StaticImageData;
   category: string;
   isBestseller?: boolean;

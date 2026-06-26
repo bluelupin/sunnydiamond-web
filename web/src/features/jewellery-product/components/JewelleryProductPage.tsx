@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import TrustBadgeSection from "@/features/cms/components/common/TrustBadges";
+import ScrollReveal from "@/shared/ui/ScrollReveal";
+import { LazyAnimatedSection } from "@/shared/ui/LazyAnimatedSection";
 import JewelleryHeroSection from "./JewelleryHeroSection";
 import JewelleryCategoryNav from "./JewelleryCategoryNav";
 import JewelleryProductToolbar from "./JewelleryProductToolbar";
@@ -12,6 +14,7 @@ import JewelleryFilterDrawer from "./JewelleryFilterDrawer";
 import { jewelleryListingProducts } from "../data/products";
 import { defaultFilterState, PAGE_SIZE } from "../data/filters";
 import { filterJewelleryProducts, sortJewelleryProducts } from "../utils/productFilters";
+import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import type { JewelleryCategorySlug, JewelleryFilterState } from "../types";
 
 const JewelleryProductPage = () => {
@@ -21,7 +24,7 @@ const JewelleryProductPage = () => {
   const [draftFilters, setDraftFilters] = useState<JewelleryFilterState>(defaultFilterState);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const [wishlistedIds, setWishlistedIds] = useState<string[]>([]);
+  const { isWishlisted, toggleWishlist } = useWishlist();
 
   const filteredProducts = useMemo(
     () => sortJewelleryProducts(filterJewelleryProducts(jewelleryListingProducts, activeCategory, filters), sortValue),
@@ -44,11 +47,7 @@ const JewelleryProductPage = () => {
   };
 
   const handleToggleWishlist = (productId: string) => {
-    setWishlistedIds((current) =>
-      current.includes(productId)
-        ? current.filter((id) => id !== productId)
-        : [...current, productId],
-    );
+    toggleWishlist(productId);
   };
 
   return (
@@ -69,20 +68,27 @@ const JewelleryProductPage = () => {
       <section className="w-full bg-gray200 pb-0 md:pb-10">
         <JewelleryProductGrid
           products={visibleProducts}
-          wishlistedIds={wishlistedIds}
+          isWishlisted={isWishlisted}
           onToggleWishlist={handleToggleWishlist}
         />
       </section>
 
-      <JewelleryLoadMoreSection
-        visibleCount={visibleProducts.length}
-        totalCount={filteredProducts.length}
-        hasMore={hasMore}
-        onLoadMore={() => setVisibleCount((count) => count + PAGE_SIZE)}
-      />
+      <ScrollReveal delayMs={40}>
+        <JewelleryLoadMoreSection
+          visibleCount={visibleProducts.length}
+          totalCount={filteredProducts.length}
+          hasMore={hasMore}
+          onLoadMore={() => setVisibleCount((count) => count + PAGE_SIZE)}
+        />
+      </ScrollReveal>
 
-      <JewelleryGuaranteesSection />
-      <TrustBadgeSection />
+      <ScrollReveal delayMs={0}>
+        <JewelleryGuaranteesSection />
+      </ScrollReveal>
+
+      <LazyAnimatedSection animate revealDelayMs={80} rootMargin="120px 0px 120px 0px">
+        <TrustBadgeSection />
+      </LazyAnimatedSection>
 
       <JewelleryFilterDrawer
         open={isFilterOpen}

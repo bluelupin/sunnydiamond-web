@@ -11,12 +11,15 @@ import type { HeaderNavLink } from "@/shared/lib/shellNavigation";
 import BookAnAppointmentPanel from "@/features/appointment/components/BookAnAppointmentPanel";
 import BookStoreVisitPanel from "@/features/products/components/detail/BookStoreVisitPanel";
 import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
+import HeaderIconBadge from "@/shared/ui/layout/HeaderIconBadge";
+import HeaderIconBadge from "@/shared/ui/layout/HeaderIconBadge";
 
 type MobileNavigationProps = {
   isOpen: boolean;
   onClose: () => void;
   navLinks: HeaderNavLink[];
   cartCount: number;
+  wishlistCount: number;
 };
 
 const EXCLUDED_MOBILE_NAV_LABELS = new Set(["collection"]);
@@ -445,7 +448,13 @@ const CurrencyPanel = ({ selected, onBack, onClose, onApply }: CurrencyPanelProp
   );
 };
 
-const MobileNavigation = ({ isOpen, onClose, navLinks, cartCount }: MobileNavigationProps) => {
+const MobileNavigation = ({
+  isOpen,
+  onClose,
+  navLinks,
+  cartCount,
+  wishlistCount,
+}: MobileNavigationProps) => {
   const [subPanel, setSubPanel] = useState<
     "language" | "currency" | "appointment" | "jewellery" | "store-visit" | null
   >(null);
@@ -519,25 +528,27 @@ const MobileNavigation = ({ isOpen, onClose, navLinks, cartCount }: MobileNaviga
           <SDLogo className="!h-16 !w-20 text-darkMagenta" />
         </Link>
 
-        <div className="flex w-[112px] items-center justify-end gap-5">
-          <Link href="/products" aria-label="Wishlist" onClick={handleClose} className="inline-flex size-6 items-center justify-center">
+        <div className="flex w-[112px] items-center justify-end gap-6">
+          <Link
+            href="/products"
+            aria-label={wishlistCount > 0 ? `Wishlist, ${wishlistCount} items` : "Wishlist"}
+            onClick={handleClose}
+            className="relative inline-flex size-6 items-center justify-center"
+          >
             <Heart size={24} strokeWidth={1.5} />
+            <HeaderIconBadge count={wishlistCount} />
           </Link>
           <Link href="/contact" aria-label="Account" onClick={handleClose} className="inline-flex size-6 items-center justify-center">
             <User size={24} strokeWidth={1.5} />
           </Link>
           <Link
             href="/cart"
-            aria-label="Cart"
+            aria-label={cartCount > 0 ? `Cart, ${cartCount} items` : "Cart"}
             onClick={handleClose}
             className="relative inline-flex size-6 items-center justify-center"
           >
             <ShoppingBagIcon />
-            {cartCount > 0 ? (
-              <span className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-primary text-[9px] font-semibold text-primary-foreground">
-                {cartCount}
-              </span>
-            ) : null}
+            <HeaderIconBadge count={cartCount} />
           </Link>
         </div>
       </div>

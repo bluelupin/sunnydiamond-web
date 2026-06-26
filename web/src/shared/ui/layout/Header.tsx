@@ -4,8 +4,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ShoppingBag, Menu, Search, Heart, User } from "lucide-react";
+import { Search, Heart, User } from "lucide-react";
 import { useCart } from "@/features/cart/context/CartContext";
+import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import { siteConfig } from "@/shared/lib/siteConfig";
 import { cn } from "@/shared/utils/cn";
 import SDLogo from "@/assets/Icons/SDLogo";
@@ -15,6 +16,7 @@ import { resolveShellHeaderLinks } from "@/shared/lib/shellNavigation";
 import MobileNavigation from "@/shared/ui/layout/MobileNavigation";
 import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
 import MenuIcon from "@/assets/Icons/MenuIcon";
+import HeaderIconBadge from "@/shared/ui/layout/HeaderIconBadge";
 
 const JewelleryMegaMenu = dynamic(
   () =>
@@ -28,12 +30,16 @@ const preloadJewelleryMegaMenu = () => {
   void import("@/shared/ui/layout/JewelleryMegaMenu");
 };
 
+const iconButtonClass =
+  "inline-flex size-6 items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2";
+
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [jewelleryMenuOpen, setJewelleryMenuOpen] = useState(false);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const { totalItems } = useCart();
+  const { totalItems: cartCount } = useCart();
+  const { totalItems: wishlistCount } = useWishlist();
   const pathname = usePathname() ?? "/";
 
   const heroOverlayRoute = isHeroOverlayRoute(pathname);
@@ -83,13 +89,14 @@ const Header = () => {
       active ? "text-primary" : textClass,
       !active ? hoverClass : "",
     );
+
   const Logo = (
     <Link
       href="/"
       aria-label={siteConfig.brand.name}
-      className={cn("flex shrink-0 items-center justify-center leading-none", textClass)}
+      className={cn("inline-flex shrink-0 items-center justify-center leading-none", textClass)}
     >
-      <SDLogo />
+      <SDLogo className="!h-16 !w-20 md:!h-14 md:!w-14 lg:!h-[62px] lg:!w-[62px]" />
     </Link>
   );
 
@@ -99,28 +106,33 @@ const Header = () => {
         className={cn(
           "absolute top-0 inset-x-0 z-50 transition-colors duration-300",
           mobileMenuOpen ? "pointer-events-none opacity-0" : "",
-          overlay
-            ? "bg-transparent"
-            : "bg-transparent backdrop-blur-sm",
+          overlay ? "bg-transparent" : "bg-transparent backdrop-blur-sm",
         )}
         aria-hidden={mobileMenuOpen}
       >
-        <div className="relative mx-auto flex h-16 w-full max-w-1440 2xl:max-w-1920 items-center justify-between px-4 md:h-20 md:px-6 lg:h-auto lg:px-[40px] lg:py-[24px]">
-          <div className="flex items-center gap-6 md:gap-4 lg:gap-[40px]">
+        {/* Figma 692:4845 — mobile: 64px bar, 16px padding, 24px icon gaps */}
+        <div className="relative mx-auto flex h-16 w-full max-w-1440 items-center justify-between px-4 md:h-20 md:px-6 lg:h-auto lg:px-[40px] lg:py-[24px]">
+          <div className="flex w-[120px] items-center gap-6 md:hidden">
             <button
-              className={cn("md:hidden md:p-2 p-0 w-6 h-6", textClass)}
+              type="button"
+              className={cn(iconButtonClass, textClass, hoverClass)}
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Open menu"
               aria-expanded={mobileMenuOpen}
             >
-              <MenuIcon />
+              <MenuIcon className="size-6" />
             </button>
-            <button className={cn("md:hidden flex items-center justify-center w-6 h-6 transition-colors", textClass, hoverClass)} aria-label="Search">
-              <Search size={20} strokeWidth={1.5} />
+            <button
+              type="button"
+              className={cn(iconButtonClass, textClass, hoverClass)}
+              aria-label="Search"
+            >
+              <Search size={24} strokeWidth={1.5} />
             </button>
+          </div>
 
-            <div className="hidden md:block">{Logo}</div>
-
+          <div className="hidden md:flex md:items-center md:gap-4 lg:gap-[40px]">
+            {Logo}
             <nav className="hidden md:flex items-center gap-7 md:gap-4 lg:gap-[40px]" aria-label="Main navigation">
               {headerNavigationLinks.map((link) => {
                 const isJewellery = link.label.trim().toLowerCase() === "jewellery";
@@ -153,37 +165,45 @@ const Header = () => {
             </nav>
           </div>
 
-          <div className="md:hidden absolute left-1/2 -translate-x-1/2">{Logo}</div>
+          <div className="pointer-events-none absolute inset-x-0 flex justify-center md:hidden">
+            <div className="pointer-events-auto">{Logo}</div>
+          </div>
 
-          <div className={cn("flex items-center gap-6 md:gap-4 lg:gap-[24px]", textClass)}>
-            <button className={cn("md:flex hidden items-center justify-center w-6 h-6 transition-colors", hoverClass)} aria-label="Search">
+          <div className={cn("relative z-10 flex items-center gap-6 lg:gap-[24px]", textClass)}>
+            <button
+              type="button"
+              className={cn("hidden md:inline-flex", iconButtonClass, hoverClass)}
+              aria-label="Search"
+            >
               <Search size={24} strokeWidth={1.5} />
             </button>
+
             <Link
               href="/products"
-              className={cn("flex items-center justify-center w-6 h-6 transition-colors", hoverClass)}
-              aria-label="Wishlist"
+              className={cn("relative inline-flex", iconButtonClass, hoverClass)}
+              aria-label={
+                wishlistCount > 0 ? `Wishlist, ${wishlistCount} items` : "Wishlist"
+              }
             >
               <Heart size={24} strokeWidth={1.5} />
+              <HeaderIconBadge count={wishlistCount} />
             </Link>
-            <Link
-              href="/cart"
-              className={cn("items-center justify-center w-6 h-6 transition-colors relative", hoverClass)}
-              aria-label="Cart"
-            >
-              <ShoppingBagIcon />
-              {totalItems > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-semibold rounded-full w-5 h-5 flex items-center justify-center">
-                  {totalItems}
-                </span>
-              )}
-            </Link>
+
             <Link
               href="/contact"
-              className={cn("items-center justify-center w-6 h-6 transition-colors hidden md:inline-flex", hoverClass)}
+              className={cn("inline-flex", iconButtonClass, hoverClass)}
               aria-label="Account"
             >
               <User size={24} strokeWidth={1.5} />
+            </Link>
+
+            <Link
+              href="/cart"
+              className={cn("relative inline-flex", iconButtonClass, hoverClass)}
+              aria-label={cartCount > 0 ? `Cart, ${cartCount} items` : "Cart"}
+            >
+              <ShoppingBagIcon className="size-6" />
+              <HeaderIconBadge count={cartCount} />
             </Link>
           </div>
         </div>
@@ -201,7 +221,8 @@ const Header = () => {
         isOpen={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
         navLinks={headerNavigationLinks}
-        cartCount={totalItems}
+        cartCount={cartCount}
+        wishlistCount={wishlistCount}
       />
     </>
   );
