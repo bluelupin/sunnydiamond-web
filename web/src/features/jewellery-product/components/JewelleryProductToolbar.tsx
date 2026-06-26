@@ -35,14 +35,23 @@ const FilterIcon = ({ size }: { size: number }) => (
   </span>
 );
 
-const SortChevron = ({ size }: { size: number }) => (
-  <span className="relative shrink-0" style={{ width: size, height: size }}>
+const SortChevron = ({ size, mobile = false }: { size: number; mobile?: boolean }) => (
+  <span
+    className={cn(
+      "relative inline-flex shrink-0 items-center justify-center overflow-hidden",
+      mobile && "rotate-180",
+    )}
+    style={{ width: size, height: size }}
+  >
     <Image
-      src={jewelleryListingToolbarAssets.chevronDownIcon}
+      src={mobile ? jewelleryListingToolbarAssets.chevronDownMobileIcon : jewelleryListingToolbarAssets.chevronDownIcon}
       alt=""
       width={size}
       height={size}
-      className="size-full object-contain"
+      className={cn(
+        "object-contain",
+        mobile ? "h-[6.67px] w-[13.33px]" : "h-[7.5px] w-[13.5px]",
+      )}
       aria-hidden
     />
   </span>
@@ -60,7 +69,7 @@ const FilterControl = ({ iconSize, fontSize, gap, color, onClick }: FilterContro
   <button
     type="button"
     onClick={onClick}
-    className="inline-flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
+    className="inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 md:py-[6px]"
     style={{ gap, color }}
     aria-label="Open filters"
   >
@@ -94,10 +103,17 @@ const SortControl = ({
   onMobileOpen,
 }: SortControlProps) => (
   <>
-    {/* Desktop — native select overlay */}
+    {/* Desktop — native select overlay (Figma 692:4239) */}
     <div
-      className="relative hidden items-center md:inline-flex"
-      style={{ gap, color }}
+      className="relative hidden items-center justify-center md:inline-flex"
+      style={{
+        gap,
+        color,
+        paddingLeft: desktopSpec.sortPaddingX,
+        paddingRight: desktopSpec.sortPaddingX,
+        paddingTop: desktopSpec.sortPaddingY,
+        paddingBottom: desktopSpec.sortPaddingY,
+      }}
     >
       <span
         className="pointer-events-none whitespace-nowrap font-gill font-normal uppercase leading-110"
@@ -120,11 +136,11 @@ const SortControl = ({
       </select>
     </div>
 
-    {/* Mobile — opens sort drawer */}
+    {/* Mobile — opens sort drawer (Figma 1279:1020) */}
     <button
       type="button"
       onClick={onMobileOpen}
-      className="inline-flex items-center md:hidden"
+      className="inline-flex h-8 items-center md:hidden"
       style={{ gap, color }}
       aria-label="Open sort options"
     >
@@ -134,7 +150,7 @@ const SortControl = ({
       >
         Sort By
       </span>
-      <SortChevron size={iconSize} />
+      <SortChevron size={iconSize} mobile />
     </button>
   </>
 );

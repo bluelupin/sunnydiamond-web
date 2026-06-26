@@ -6,7 +6,10 @@ import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { cn } from "@/shared/utils/cn";
 import { formatJewelleryPrice } from "../utils/formatPrice";
 import { useCardImageSwipe } from "../hooks/useCardImageSwipe";
-import { jewelleryListingProductCardMobileSpec } from "../data/content";
+import {
+  jewelleryListingProductCardMobileSpec,
+  jewelleryListingProductCardSpec,
+} from "../data/content";
 import type { StaticImageData } from "next/image";
 
 export interface JewelleryProductCardProps {
@@ -52,6 +55,52 @@ const ProductCopy = ({ title, price, href, white = false, className }: ProductCo
       <span aria-hidden>₹ </span>
       {formatJewelleryPrice(price)}
     </p>
+  </div>
+);
+
+const ProductImage = ({ src, alt }: { src: string | StaticImageData; alt: string }) => (
+  <div className="relative h-[110px] w-full shrink-0 overflow-hidden md:h-[303px]">
+    {/* Mobile — Figma 692:4174 / 692:4901: ~134px product frame in 110px clip */}
+    <div
+      className="absolute left-1/2 top-[calc(50%-10px)] -translate-x-1/2 -translate-y-1/2 md:hidden"
+      style={{
+        width: `${jewelleryListingProductCardMobileSpec.imageInnerSize}px`,
+        height: `${jewelleryListingProductCardMobileSpec.imageInnerSize}px`,
+      }}
+    >
+      <OptimizedImage
+        src={src}
+        alt={alt}
+        className="pointer-events-none size-full object-cover"
+        sizes="50vw"
+      />
+    </div>
+
+    {/* Desktop — Figma 692:4146: scaled product in 303px clip */}
+    <div
+      className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:block"
+      style={{
+        height: `${jewelleryListingProductCardSpec.imageInnerHeight}px`,
+        width: `${jewelleryListingProductCardSpec.imageInnerWidth}px`,
+      }}
+    >
+      <div
+        className="pointer-events-none absolute max-w-none"
+        style={{
+          height: `${jewelleryListingProductCardSpec.imageScaleHeight}%`,
+          width: `${jewelleryListingProductCardSpec.imageScaleWidth}%`,
+          left: `${jewelleryListingProductCardSpec.imageOffsetLeft}%`,
+          top: `${jewelleryListingProductCardSpec.imageOffsetTop}%`,
+        }}
+      >
+        <OptimizedImage
+          src={src}
+          alt={alt}
+          className="size-full object-cover"
+          sizes="33vw"
+        />
+      </div>
+    </div>
   </div>
 );
 
@@ -157,20 +206,7 @@ const JewelleryProductCard = ({
             : undefined
         }
       >
-        <div
-          className="relative shrink-0 overflow-hidden md:h-[303px] md:w-full"
-          style={{
-            width: `${jewelleryListingProductCardMobileSpec.imageWidth}px`,
-            height: `${jewelleryListingProductCardMobileSpec.imageHeight}px`,
-          }}
-        >
-          <OptimizedImage
-            src={primaryImage}
-            alt={title}
-            className="size-full object-contain"
-            sizes="(max-width: 768px) 50vw, 33vw"
-          />
-        </div>
+        <ProductImage src={primaryImage} alt={title} />
 
         <ProductCopy title={title} price={price} href={href} />
       </div>

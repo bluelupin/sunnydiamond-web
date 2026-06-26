@@ -7,6 +7,7 @@ import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
 import { siteConfig } from "@/shared/lib/siteConfig";
 import { resolveShellFooterLinkGroups } from "@/shared/lib/shellNavigation";
 import PageContainer from "@/shared/ui/layout/PageContainer";
+import TrustBadgeSection from "@/features/cms/components/common/TrustBadges";
 
 const SOCIAL_ICON_MAP: Record<string, string> = {
   instagram: "/images/navigation/social-instagram.svg",
@@ -58,7 +59,8 @@ const Footer = () => {
 
   return (
     <footer className="bg-gray300">
-      <PageContainer className="flex flex-col gap-20 py-16 lg:gap-[120px] lg:py-100">
+      <TrustBadgeSection />
+      <PageContainer className="flex flex-col gap-20 pb-16 lg:gap-[120px] lg:pb-100">
         <div className="flex flex-col items-center xl:gap-12 md:gap-[40px] gap-8 lg:flex-row lg:items-start lg:justify-start">
           <div className="shrink-0">
             <Link href="/" aria-label="Sunny Diamonds">

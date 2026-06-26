@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
+import { jewelleryListingFilterDrawerSpec as spec } from "../data/content";
 import {
   DEFAULT_MAX_PRICE,
   DEFAULT_MIN_PRICE,
@@ -31,6 +31,43 @@ const parseAmount = (value: string) => {
 
 const rangeThumbClassName =
   "pointer-events-none absolute h-[12px] w-full appearance-none bg-transparent [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:size-[12px] [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-darkblack [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:size-[12px] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-darkblack";
+
+const footerButtonBarHeight = spec.footerPaddingY * 2 + spec.buttonHeight;
+const scrollPaddingBottom = footerButtonBarHeight + spec.footerGradientHeight;
+
+const FilterChip = ({
+  label,
+  selected,
+  showCheck,
+  onClick,
+}: {
+  label: string;
+  selected: boolean;
+  showCheck?: boolean;
+  onClick: () => void;
+}) => (
+  <button
+    type="button"
+    aria-pressed={selected}
+    onClick={onClick}
+    className={cn(
+      "flex h-[56px] items-center justify-center bg-[#F2F2F2] px-[24px] py-[12px] font-gill text-[16px] leading-110 text-darkblack",
+      showCheck && selected && "gap-[4px]",
+    )}
+  >
+    {showCheck && selected ? (
+      <Image
+        src="/images/jewellery/filter-check.svg"
+        alt=""
+        width={18}
+        height={18}
+        aria-hidden
+        className="shrink-0"
+      />
+    ) : null}
+    <span className={selected ? "font-normal" : "font-light"}>{label}</span>
+  </button>
+);
 
 const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFilterDrawerProps) => {
   const [draft, setDraft] = useState<JewelleryFilterState>(filters);
@@ -110,18 +147,18 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
           "lg:inset-x-auto lg:inset-y-0 lg:right-0 lg:top-0 lg:w-full lg:max-w-[474px] lg:animate-in lg:slide-in-from-right lg:duration-300",
         )}
       >
-        <div className="flex min-h-0 flex-1 flex-col">
-          <div className="px-6 pt-10">
-            <div className="flex w-full items-center justify-between">
-              <h2 className="font-larken text-24 font-light leading-110 text-darkblack">FILTERS</h2>
+        <div className="relative flex min-h-0 flex-1 flex-col">
+          <div className="px-[24px] pt-[40px]">
+            <div className="mx-auto flex h-[32px] w-full max-w-[424px] items-center justify-between">
+              <h2 className="font-larken text-[24px] font-light leading-110 text-darkblack">FILTERS</h2>
               <button
                 type="button"
                 onClick={onClose}
                 aria-label="Close filter panel"
-                className="inline-flex size-8 shrink-0 items-center justify-center"
+                className="inline-flex size-[32px] shrink-0 items-center justify-center"
               >
                 <Image
-                  src="/images/navigation/menu-close.svg"
+                  src="/images/jewellery/filter-drawer-close.svg"
                   alt=""
                   width={32}
                   height={32}
@@ -129,17 +166,20 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
                 />
               </button>
             </div>
-            <div className="mt-7 h-px w-full bg-neutral300" aria-hidden />
+            <div className="mx-auto mt-[22px] h-px w-full max-w-[424px] bg-neutral300" aria-hidden />
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 pt-[22px]">
-            <div className="flex w-full max-w-[424px] flex-col gap-6">
-              <section className="flex flex-col gap-4">
-                <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
+          <div className="filter-drawer-scroll flex min-h-0 flex-1 flex-col overflow-y-auto px-[24px] pt-[22px]">
+            <div
+              className="mx-auto flex w-full max-w-[424px] flex-col gap-[24px]"
+              style={{ paddingBottom: scrollPaddingBottom }}
+            >
+              <section className="flex flex-col gap-[16px]">
+                <h3 className="font-gill text-[16px] font-normal leading-110 text-darkblack">
                   By Price Range
                 </h3>
-                <div className="flex flex-col gap-3">
-                  <div className="relative flex h-3 items-center">
+                <div className="flex flex-col gap-[12px]">
+                  <div className="relative flex h-[12px] items-center">
                     <div className="absolute inset-x-0 h-[4px] rounded-[70px] bg-neutral300" aria-hidden />
                     <div
                       className="absolute h-[3px] rounded-[70px] bg-darkblack"
@@ -180,16 +220,16 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
                       aria-label="Maximum price"
                     />
                   </div>
-                  <div className="flex items-center justify-between font-gill text-sm font-light leading-110 text-darkblack">
+                  <div className="flex items-center justify-between font-gill text-[14px] font-light leading-110 text-darkblack">
                     <span>₹ {formatCurrency(draft.minPrice)}</span>
                     <span>₹ {formatCurrency(draft.maxPrice)}</span>
                   </div>
                 </div>
               </section>
 
-              <section className="flex gap-6">
-                <label className="flex min-w-0 flex-1 flex-col gap-2">
-                  <span className="font-gill text-sm font-normal leading-110 text-darkblack">
+              <section className="flex gap-[24px]">
+                <label className="flex min-w-0 flex-1 flex-col gap-[8px]">
+                  <span className="font-gill text-[14px] font-normal leading-110 text-darkblack">
                     Min Amount
                   </span>
                   <input
@@ -208,13 +248,13 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
                       }))
                     }
                     className={cn(
-                      "h-14 w-full bg-[#F2F2F2] p-3 font-gill text-sm font-normal leading-110 text-darkblack outline-none",
+                      "h-[56px] w-full bg-[#F2F2F2] p-[12px] font-gill text-[14px] font-normal leading-110 text-darkblack outline-none",
                       minInputFocused && "border border-neutral500",
                     )}
                   />
                 </label>
-                <label className="flex min-w-0 flex-1 flex-col gap-2">
-                  <span className="font-gill text-sm font-normal leading-110 text-darkblack">
+                <label className="flex min-w-0 flex-1 flex-col gap-[8px]">
+                  <span className="font-gill text-[14px] font-normal leading-110 text-darkblack">
                     Max Amount
                   </span>
                   <input
@@ -233,98 +273,72 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
                         ),
                       }))
                     }
-                    className="h-14 w-full bg-[#F2F2F2] p-3 font-gill text-sm font-normal leading-110 text-darkblack placeholder:text-neutral400 outline-none"
+                    className="h-[56px] w-full bg-[#F2F2F2] p-[12px] font-gill text-[14px] font-normal leading-110 text-darkblack placeholder:text-neutral400 outline-none"
                   />
                 </label>
               </section>
 
-              <section className="flex flex-col gap-4">
-                <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
+              <section className="flex flex-col gap-[16px]">
+                <h3 className="font-gill text-[16px] font-normal leading-110 text-darkblack">
                   By Categories:
                 </h3>
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-[12px]">
                   {filterCategoryRows.map((row, rowIndex) => (
                     <div key={rowIndex} className="flex flex-wrap gap-[7px]">
-                      {row.map((category) => {
-                        const selected = draft.categories.includes(category);
-
-                        return (
-                          <button
-                            key={category}
-                            type="button"
-                            aria-pressed={selected}
-                            onClick={() => toggleListValue("categories", category)}
-                            className="flex h-14 items-center justify-center gap-1 bg-[#F2F2F2] px-6 py-3 font-gill text-base leading-110 text-darkblack"
-                          >
-                            {selected ? (
-                              <Check size={18} strokeWidth={1.5} aria-hidden className="shrink-0" />
-                            ) : null}
-                            <span className={selected ? "font-normal" : "font-light"}>{category}</span>
-                          </button>
-                        );
-                      })}
+                      {row.map((category) => (
+                        <FilterChip
+                          key={category}
+                          label={category}
+                          selected={draft.categories.includes(category)}
+                          showCheck
+                          onClick={() => toggleListValue("categories", category)}
+                        />
+                      ))}
                     </div>
                   ))}
                 </div>
               </section>
 
-              <section className="flex flex-col gap-4">
-                <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
+              <section className="flex flex-col gap-[16px]">
+                <h3 className="font-gill text-[16px] font-normal leading-110 text-darkblack">
                   Metal Type:
                 </h3>
                 <div className="flex flex-wrap gap-[7px]">
-                  {filterMetalTypeOptions.map((metalType) => {
-                    const selected = draft.metalTypes.includes(metalType);
-
-                    return (
-                      <button
-                        key={metalType}
-                        type="button"
-                        aria-pressed={selected}
-                        onClick={() => toggleListValue("metalTypes", metalType)}
-                        className={cn(
-                          "flex h-14 items-center justify-center bg-[#F2F2F2] px-6 py-3 font-gill text-base leading-110 text-darkblack",
-                          selected ? "font-normal" : "font-light",
-                        )}
-                      >
-                        {metalType}
-                      </button>
-                    );
-                  })}
+                  {filterMetalTypeOptions.map((metalType) => (
+                    <FilterChip
+                      key={metalType}
+                      label={metalType}
+                      selected={draft.metalTypes.includes(metalType)}
+                      onClick={() => toggleListValue("metalTypes", metalType)}
+                    />
+                  ))}
                 </div>
               </section>
 
-              <section className="flex flex-col gap-4">
-                <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
+              <section className="flex flex-col gap-[16px]">
+                <h3 className="font-gill text-[16px] font-normal leading-110 text-darkblack">
                   Metal Purity:
                 </h3>
                 <div className="flex flex-wrap gap-[7px]">
-                  {filterMetalPurityOptions.map((purity) => {
-                    const selected = draft.metalPurities.includes(purity);
-
-                    return (
-                      <button
-                        key={purity}
-                        type="button"
-                        aria-pressed={selected}
-                        onClick={() => toggleListValue("metalPurities", purity)}
-                        className={cn(
-                          "flex h-14 items-center justify-center bg-[#F2F2F2] px-6 py-3 font-gill text-base leading-110 text-darkblack",
-                          selected ? "font-normal" : "font-light",
-                        )}
-                      >
-                        {purity}
-                      </button>
-                    );
-                  })}
+                  {filterMetalPurityOptions.map((purity) => (
+                    <FilterChip
+                      key={purity}
+                      label={purity}
+                      selected={draft.metalPurities.includes(purity)}
+                      onClick={() => toggleListValue("metalPurities", purity)}
+                    />
+                  ))}
                 </div>
               </section>
 
-              <section className="flex flex-col gap-2 pb-6">
-                <label htmlFor="filter-gemstone-type" className="font-gill text-base font-normal leading-110 text-darkblack">
+              <section className="flex flex-col gap-[8px]">
+                <label
+                  htmlFor="filter-gemstone-type"
+                  className="font-gill text-[16px] font-normal leading-110 text-darkblack"
+                >
                   Gemstone Type:
                 </label>
-                <div className="relative flex h-14 w-full items-center bg-[#F2F2F2] p-3">
+                <div className="relative flex h-[56px] w-full items-center bg-[#F2F2F2] p-[12px]">
                   <select
                     id="filter-gemstone-type"
                     value={draft.gemstoneType}
@@ -332,8 +346,8 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
                       setDraft((current) => ({ ...current, gemstoneType: event.target.value }))
                     }
                     className={cn(
-                      "min-w-0 flex-1 appearance-none bg-transparent font-gill text-base leading-110 outline-none",
-                      draft.gemstoneType ? "text-darkblack" : "text-neutral400",
+                      "min-w-0 flex-1 appearance-none bg-transparent font-gill text-[16px] leading-110 outline-none",
+                      draft.gemstoneType ? "font-normal text-darkblack" : "font-normal text-neutral400",
                     )}
                   >
                     {filterGemstoneOptions.map((option) => (
@@ -342,31 +356,41 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
                       </option>
                     ))}
                   </select>
-                  <ChevronDown
-                    size={24}
-                    strokeWidth={1.5}
+                  <Image
+                    src="/images/jewellery/chevron-down.svg"
+                    alt=""
+                    width={24}
+                    height={24}
                     aria-hidden
-                    className="pointer-events-none shrink-0 text-darkblack"
+                    className="pointer-events-none shrink-0"
                   />
                 </div>
               </section>
             </div>
           </div>
 
-          <div className="shrink-0">
-            <div className="pointer-events-none h-[71px] bg-gradient-to-b from-transparent to-white" aria-hidden />
-            <div className="flex gap-6 border-t border-neutral300/50 px-10 py-6">
+          <div
+            className="pointer-events-none absolute inset-x-0 z-10 bg-gradient-to-b from-white/0 to-white"
+            style={{
+              height: spec.footerGradientHeight,
+              bottom: footerButtonBarHeight,
+            }}
+            aria-hidden
+          />
+
+          <div className="absolute inset-x-0 bottom-0 z-20 shrink-0 bg-white">
+            <div className="flex gap-[24px] border-t-[0.5px] border-neutral300 px-[40px] py-[24px]">
               <button
                 type="button"
                 onClick={handleClearAll}
-                className="btn-border-slide inline-flex h-14 min-w-0 flex-1 items-center justify-center border-[0.8px] border-neutral300 px-7 font-gill text-sm uppercase leading-110 text-darkblack"
+                className="btn-border-slide inline-flex h-[56px] min-w-0 flex-1 items-center justify-center border-[0.8px] border-neutral300 px-[28px] py-[20px] font-gill text-[14px] font-normal uppercase leading-110 text-darkblack"
               >
                 Clear All
               </button>
               <button
                 type="button"
                 onClick={() => onApply(draft)}
-                className="btn-slide-up inline-flex h-14 min-w-0 flex-1 items-center justify-center bg-darkblack px-7 font-gill text-sm uppercase leading-110 text-white"
+                className="btn-slide-up inline-flex h-[56px] min-w-0 flex-1 items-center justify-center bg-darkblack px-[28px] py-[20px] font-gill text-[14px] font-normal uppercase leading-110 text-white"
               >
                 Apply Filters
               </button>
