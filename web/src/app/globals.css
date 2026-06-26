@@ -226,8 +226,9 @@
       transform: translateY(0);
     }
 
-    .btn-border-slide:hover {
-      color: var(--btn-border-slide-text);
+    .btn-border-slide:hover,
+    .btn-border-slide:hover > * {
+      color: #ffffff !important;
       border-color: var(--btn-border-slide-fill);
     }
   }
@@ -247,6 +248,12 @@
 
     .btn-border-slide:hover::before {
       transform: translateY(0);
+    }
+
+    .btn-border-slide:hover,
+    .btn-border-slide:hover > * {
+      color: #ffffff !important;
+      border-color: var(--btn-border-slide-fill);
     }
   }
 
