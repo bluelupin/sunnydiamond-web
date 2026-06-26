@@ -59,6 +59,8 @@ function CarouselNavButton({
   );
 }
 
+const DEFAULT_IMAGE_QUALITY = 90;
+
 function ProductSlideImage({
   product,
   variant,
@@ -81,6 +83,7 @@ function ProductSlideImage({
       fill
       sizes={variant === "mobile" ? "271px" : "(min-width: 1920px) 50vw, 720px"}
       priority={priority}
+      quality={DEFAULT_IMAGE_QUALITY}
       className="max-w-none object-cover"
       style={cropStyle}
     />
@@ -120,6 +123,7 @@ function AlankaraProductThumbnail({
             alt=""
             fill
             sizes="116px"
+            quality={DEFAULT_IMAGE_QUALITY}
             className="max-w-none object-cover"
             style={cropStyle}
           />
@@ -166,7 +170,7 @@ function CollectionHeroPanel({
             priority={priority}
             width={375}
             height={540}
-            quality={90}
+            quality={DEFAULT_IMAGE_QUALITY}
             className="size-full object-cover"
           />
         ) : (
@@ -175,6 +179,7 @@ function CollectionHeroPanel({
             alt={imageAlt}
             fill
             priority={priority}
+            quality={DEFAULT_IMAGE_QUALITY}
             sizes="(min-width: 1920px) 50vw, 720px"
             className="max-w-none object-cover"
             style={ALANKARA_HERO_DESKTOP_CROP}

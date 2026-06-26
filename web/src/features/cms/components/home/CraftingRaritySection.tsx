@@ -16,6 +16,7 @@ interface CraftingRaritySectionProps {
 }
 
 const CRAFTING_RARITY_NECKLACE = "/images/home/crafting-rarity-necklace.png";
+const IMAGE_QUALITY = 90;
 
 /** Figma 684:2822 — 40px from left at 1440px, scales proportionally on wider viewports. */
 const CRAFTING_RARITY_DESKTOP_INSET =
@@ -53,6 +54,7 @@ const CategoryCard = ({ cat }: { cat: CategoryNavigationItem }) => {
           alt={hoverAlt}
           width={600}
           height={600}
+          quality={IMAGE_QUALITY}
           className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
         />
       ) : null}
@@ -65,6 +67,7 @@ const CategoryCard = ({ cat }: { cat: CategoryNavigationItem }) => {
             alt={imageAlt}
             width={600}
             height={600}
+            quality={IMAGE_QUALITY}
             className={`max-h-full max-w-full object-contain transition-opacity duration-500${hasDistinctHover ? " group-hover:opacity-0" : ""}`}
           />
         ) : null}
@@ -181,6 +184,7 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
               src={CRAFTING_RARITY_NECKLACE}
               alt=""
               fill
+              quality={IMAGE_QUALITY}
               className="object-contain"
               sizes="(max-width: 1024px) 346px, 664px"
             />

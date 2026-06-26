@@ -15,6 +15,7 @@ const files = [
   "thumb-2.png",
   "thumb-3.png",
   "thumb-4.png",
+  "thumb-5.png",
 ];
 
 for (const file of files) {
@@ -26,7 +27,7 @@ for (const file of files) {
 
   const output = input.replace(/\.png$/i, ".webp");
   await sharp(input)
-    .webp({ quality: 82, effort: 4 })
+    .webp({ quality: 90, effort: 4 })
     .toFile(output);
 
   const before = fs.statSync(input).size;

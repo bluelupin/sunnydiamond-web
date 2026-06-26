@@ -103,7 +103,7 @@ export const ALANKARA_FALLBACKS = {
     "/images/collection/thumb-2.webp",
     "/images/collection/product-showcase.webp",
     "/images/collection/thumb-4.webp",
-    "/images/collection/thumb-5.png",
+    "/images/collection/thumb-5.webp",
   ],
   /** @deprecated Use ALANKARA_FALLBACKS.thumbnails */
   firstThumbnail: "/images/collection/thumb-1.webp",
