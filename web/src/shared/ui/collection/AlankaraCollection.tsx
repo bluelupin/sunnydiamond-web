@@ -443,15 +443,13 @@ function ProductCarouselPanel({
               </div>
             </div>
 
-            <div className="relative h-[94px] w-[180px] shrink-0 p-2.5">
-              <p className="absolute left-1/2 top-0 -translate-x-1/2 whitespace-nowrap font-gill text-xl font-normal leading-110 text-darkblack">
+            <div className="relative shrink-0 p-2.5 flex flex-col items-center justify-center gap-4">
+              <p className="whitespace-nowrap font-gill lg:text-xl md:text-lg text-base font-normal leading-110 text-darkblack text-center">
                 {activeProduct.name}
               </p>
-              <Link
-                href={activeProduct.href}
-                className="btn-border-slide absolute left-[23.5px] top-[38px] inline-flex h-14 items-center justify-center border-[0.8px] border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
-              >
-                {activeProduct.ctaLabel || defaultProductCtaLabel}
+              <Link href={activeProduct.href} className="bg-white relative flex items-center justify-center px-7 h-14 overflow-hidden font-gill text-sm font-normal uppercase leading-110 border-2 border-neutral300 hover:border-darkblack group w-fit">
+                <div className="absolute left-0 w-full h-14 transition-all duration-300 bg-darkblack top-full group-hover:top-0"></div>
+                <span className="relative transition-all duration-300 text-darkblack group-hover:text-white">{activeProduct.ctaLabel || defaultProductCtaLabel}</span>
               </Link>
             </div>
           </div>

@@ -130,7 +130,6 @@ const Header = () => {
               <Search size={24} strokeWidth={1.5} />
             </button>
           </div>
-
           <div className="hidden md:flex md:items-center md:gap-4 lg:gap-[40px]">
             {Logo}
             <nav className="hidden md:flex items-center gap-7 md:gap-4 lg:gap-[40px]" aria-label="Main navigation">
@@ -164,15 +163,13 @@ const Header = () => {
               })}
             </nav>
           </div>
-
           <div className="pointer-events-none absolute inset-x-0 flex justify-center md:hidden">
             <div className="pointer-events-auto">{Logo}</div>
           </div>
-
           <div className={cn("relative z-10 flex items-center gap-6 lg:gap-[24px]", textClass)}>
             <button
               type="button"
-              className={cn("hidden md:inline-flex", iconButtonClass, hoverClass)}
+              className={cn("!hidden md:!flex", iconButtonClass, hoverClass)}
               aria-label="Search"
             >
               <Search size={24} strokeWidth={1.5} />

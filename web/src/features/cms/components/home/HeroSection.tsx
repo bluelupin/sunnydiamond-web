@@ -56,8 +56,8 @@ const HeroSection = ({ id }: HeroSectionProps) => {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-charcoal/55 via-charcoal/15 to-transparent" />
         <div className="absolute inset-0 bg-charcoal/20" />
-        <div className="container relative flex h-full items-end justify-center px-4 pb-[60px] md:px-6">
-          <div className="flex w-full max-w-886 animate-fade-in flex-col items-center gap-8 text-center">
+        <div className="container relative flex h-full items-end justify-center px-4 py-16 md:px-6">
+          <div className="flex w-full max-w-886 animate-fade-in flex-col items-center md:gap-8 gap-6 text-center">
             <div className="flex flex-col items-center gap-4">
               <div className="inline-flex items-center gap-1 font-gill md:text-base text-sm font-normal leading-110 text-white">
                 <DiamondIcon className="size-5 shrink-0 text-white" />
@@ -72,7 +72,7 @@ const HeroSection = ({ id }: HeroSectionProps) => {
                   )}
                 </span>
               </div>
-              <h1 className="max-w-886 font-larken text-[32px] font-light leading-110 text-white lg:text-[60px]">
+              <h1 className="max-w-886 font-larken xl:text-6xl md:text-5xl sm:text-4xl text-32 font-light leading-110 text-white">
                 {isShellLoading ? (
                   <span
                     className="mx-auto block h-12 w-[min(680px,90vw)] animate-pulse rounded bg-white/20"
@@ -88,11 +88,9 @@ const HeroSection = ({ id }: HeroSectionProps) => {
               </h1>
             </div>
             {!isShellLoading && primaryCta ? (
-              <Link
-                href={primaryCta}
-                className="btn-slide-up relative inline-flex h-14 items-center justify-center overflow-hidden bg-white w-[132px] flex items-center justify-center font-gill text-sm uppercase leading-110 text-darkblack"
-              >
-                {primaryCtaLabel}
+              <Link href={primaryCta} className="bg-white relative flex items-center justify-center px-7 h-14 overflow-hidden font-gill text-sm font-normal uppercase leading-110 border-2 border-white group w-fit">
+                <div className="absolute left-0 w-full h-14 transition-all duration-300 bg-white top-full group-hover:top-0"></div>
+                <span className="relative transition-all duration-300 text-darkblack group-hover:text-"> {primaryCtaLabel}</span>
               </Link>
             ) : (
               <div className="h-14 w-40 animate-pulse rounded bg-white/20" />
