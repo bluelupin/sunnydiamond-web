@@ -4,12 +4,15 @@ import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
 import { jewelleryCategories } from "../data/categories";
 import { categoryIconSrc } from "../data/categoryIcons";
+import { jewelleryListingCategoryNavSpec } from "../data/content";
 import type { JewelleryCategorySlug } from "../types";
 
 interface JewelleryCategoryNavProps {
   activeCategory: JewelleryCategorySlug;
   onCategoryChange: (slug: JewelleryCategorySlug) => void;
 }
+
+const { padding, itemWidth, itemGap, navGap, iconSize } = jewelleryListingCategoryNavSpec;
 
 const JewelleryCategoryNav = ({ activeCategory, onCategoryChange }: JewelleryCategoryNavProps) => {
   return (
@@ -18,7 +21,13 @@ const JewelleryCategoryNav = ({ activeCategory, onCategoryChange }: JewelleryCat
       className="border-b-[0.5px] border-neutral300 bg-white"
     >
       <div className="overflow-x-auto scrollbar-none">
-        <ul className="mx-auto flex w-max min-w-full items-center justify-center gap-[32px] p-40">
+        <ul
+          className="mx-auto flex w-max min-w-full items-center justify-center"
+          style={{
+            gap: `${navGap}px`,
+            padding: `${padding}px`,
+          }}
+        >
           {jewelleryCategories.map((category) => {
             const isActive = activeCategory === category.slug;
 
@@ -28,14 +37,24 @@ const JewelleryCategoryNav = ({ activeCategory, onCategoryChange }: JewelleryCat
                   type="button"
                   onClick={() => onCategoryChange(category.slug)}
                   aria-pressed={isActive}
-                  className="flex w-86 flex-col items-center justify-center gap-[8px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
+                  className="flex flex-col items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
+                  style={{
+                    width: `${itemWidth}px`,
+                    gap: `${itemGap}px`,
+                  }}
                 >
-                  <span className="relative size-10 shrink-0 overflow-hidden">
+                  <span
+                    className="relative shrink-0 overflow-hidden"
+                    style={{
+                      width: `${iconSize}px`,
+                      height: `${iconSize}px`,
+                    }}
+                  >
                     <Image
                       src={categoryIconSrc[category.slug]}
                       alt=""
-                      width={40}
-                      height={40}
+                      width={iconSize}
+                      height={iconSize}
                       className="size-full object-contain"
                       aria-hidden
                     />

@@ -1,8 +1,11 @@
 "use client";
 
-import { SlidersHorizontal, ChevronDown } from "lucide-react";
-import PageContainer from "@/shared/ui/layout/PageContainer";
+import Image from "next/image";
 import { sortOptions } from "../data/filters";
+import {
+  jewelleryListingToolbarAssets,
+  jewelleryListingToolbarSpec,
+} from "../data/content";
 
 interface JewelleryProductToolbarProps {
   productCount: number;
@@ -10,6 +13,21 @@ interface JewelleryProductToolbarProps {
   onSortChange: (value: string) => void;
   onFilterOpen: () => void;
 }
+
+const {
+  height,
+  paddingX,
+  productCountColor,
+  productCountFontSize,
+  controlFontSize,
+  controlColor,
+  controlsGap,
+  controlInnerGap,
+  filterPaddingY,
+  sortPaddingX,
+  sortPaddingY,
+  iconSize,
+} = jewelleryListingToolbarSpec;
 
 const JewelleryProductToolbar = ({
   productCount,
@@ -19,42 +37,110 @@ const JewelleryProductToolbar = ({
 }: JewelleryProductToolbarProps) => {
   return (
     <div className="sticky top-0 z-20 hidden bg-white md:block">
-      <PageContainer className="flex h-[94px] items-center justify-between">
-        <p className="font-gill text-20 font-light leading-110 text-neutral500">
+      <div
+        className="flex w-full items-center justify-between bg-white"
+        style={{
+          height: `${height}px`,
+          paddingLeft: `${paddingX}px`,
+          paddingRight: `${paddingX}px`,
+        }}
+      >
+        <p
+          className="shrink-0 whitespace-nowrap font-gill font-light leading-110"
+          style={{
+            fontSize: `${productCountFontSize}px`,
+            color: productCountColor,
+          }}
+        >
           {productCount.toLocaleString("en-IN")} Products
         </p>
 
-        <div className="flex items-center gap-[56px]">
+        <div
+          className="flex shrink-0 items-center"
+          style={{ gap: `${controlsGap}px` }}
+        >
           <button
             type="button"
             onClick={onFilterOpen}
-            className="inline-flex items-center gap-3 py-1.5 font-gill text-20 uppercase leading-110 text-darkblack transition-colors hover:text-primary"
+            className="inline-flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
+            style={{
+              gap: `${controlInnerGap}px`,
+              paddingTop: `${filterPaddingY}px`,
+              paddingBottom: `${filterPaddingY}px`,
+            }}
             aria-label="Open filters"
           >
-            <SlidersHorizontal size={24} strokeWidth={1.5} />
-            Filter
+            <span
+              className="relative shrink-0"
+              style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
+            >
+              <Image
+                src={jewelleryListingToolbarAssets.filterIcon}
+                alt=""
+                width={iconSize}
+                height={iconSize}
+                className="size-full object-contain"
+                aria-hidden
+              />
+            </span>
+            <span
+              className="whitespace-nowrap font-gill font-normal uppercase leading-110"
+              style={{
+                fontSize: `${controlFontSize}px`,
+                color: controlColor,
+              }}
+            >
+              Filter
+            </span>
           </button>
 
-          <label className="inline-flex items-center gap-3 px-3 py-2 font-gill text-20 uppercase leading-110 text-darkblack">
-            <span>Sort By</span>
-            <span className="relative inline-flex items-center">
-              <select
-                value={sortValue}
-                onChange={(event) => onSortChange(event.target.value)}
-                className="cursor-pointer appearance-none bg-transparent pr-8 font-gill text-20 uppercase leading-110 text-darkblack focus:outline-none"
-                aria-label="Sort products"
-              >
-                {sortOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown size={24} className="pointer-events-none absolute right-0" aria-hidden />
+          <div
+            className="relative inline-flex items-center"
+            style={{
+              gap: `${controlInnerGap}px`,
+              paddingLeft: `${sortPaddingX}px`,
+              paddingRight: `${sortPaddingX}px`,
+              paddingTop: `${sortPaddingY}px`,
+              paddingBottom: `${sortPaddingY}px`,
+            }}
+          >
+            <span
+              className="pointer-events-none whitespace-nowrap font-gill font-normal uppercase leading-110"
+              style={{
+                fontSize: `${controlFontSize}px`,
+                color: controlColor,
+              }}
+            >
+              Sort By
             </span>
-          </label>
+            <span
+              className="pointer-events-none relative shrink-0"
+              style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
+            >
+              <Image
+                src={jewelleryListingToolbarAssets.chevronDownIcon}
+                alt=""
+                width={iconSize}
+                height={iconSize}
+                className="size-full object-contain"
+                aria-hidden
+              />
+            </span>
+            <select
+              value={sortValue}
+              onChange={(event) => onSortChange(event.target.value)}
+              className="absolute inset-0 cursor-pointer appearance-none bg-transparent opacity-0"
+              aria-label="Sort products"
+            >
+              {sortOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-      </PageContainer>
+      </div>
     </div>
   );
 };

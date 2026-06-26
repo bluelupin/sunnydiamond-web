@@ -35,3 +35,24 @@ export const jewelleryListingCategoryNavSpec = {
   inactiveLabelColor: "#999999",
   borderColor: "#CCCCCC",
 } as const;
+
+/** Figma node 692:4232 — jewellery product list toolbar (sticky) */
+export const jewelleryListingToolbarSpec = {
+  height: 94,
+  paddingX: 40,
+  productCountColor: "#4D4D4D",
+  productCountFontSize: 20,
+  controlFontSize: 20,
+  controlColor: "#0A0A0A",
+  controlsGap: 56,
+  controlInnerGap: 12,
+  filterPaddingY: 6,
+  sortPaddingX: 12,
+  sortPaddingY: 8,
+  iconSize: 24,
+} as const;
+
+export const jewelleryListingToolbarAssets = {
+  filterIcon: "/images/jewellery/filter-icon.svg",
+  chevronDownIcon: "/images/jewellery/chevron-down.svg",
+} as const;
