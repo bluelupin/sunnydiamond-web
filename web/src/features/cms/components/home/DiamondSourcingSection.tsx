@@ -51,7 +51,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
           <section
             id={id}
             aria-label="Internally flawless diamonds"
-            className="relative h-auto overflow-hidden py-50"
+            className="relative my-50 h-auto overflow-hidden"
           >
             <div className="absolute inset-0 -z-0 will-change-transform" ref={bgParallax}>
               <ResponsiveImage
@@ -98,7 +98,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
             id={id}
             aria-label="Internally flawless diamonds"
             aria-busy="true"
-            className="relative h-auto overflow-hidden py-50"
+            className="relative my-50 h-auto overflow-hidden"
           >
             <div className="absolute inset-0 -z-0">
               <div className="w-full h-full bg-gray100" />
