@@ -5,9 +5,6 @@ import { useLayoutEffect, type RefObject } from "react";
 const clamp = (value: number, min = 0, max = 1) =>
   Math.min(max, Math.max(min, value));
 
-/** Visible sliver of the third image before horizontal scroll begins (desktop). */
-const DESKTOP_PEEK_PX = 56;
-
 type ScrollLayout = "desktop" | "mobile";
 
 function getActiveLayout(desktopQuery: MediaQueryList): ScrollLayout {
@@ -20,7 +17,7 @@ function getLayoutRoot(section: HTMLElement, layout: ScrollLayout) {
 
 /**
  * Pins the Since 1997 gallery while scrolling, scrubbing horizontal translate on the track.
- * Desktop: full track slides; third image peeks then ends flush to the screen edge.
+ * Desktop: full track slides from rest (translate 0) until the last image is flush to the screen edge.
  * Mobile: founder stays static; only images 2+3 slide in the original vertical layout.
  */
 export function useSince1997HorizontalScroll(
@@ -38,9 +35,8 @@ export function useSince1997HorizontalScroll(
 
     let rafRef: number | null = null;
     let scrollRange = 0;
-    let startTranslate = 0;
     let endTranslate = 0;
-    let useDesktopPeek = false;
+    let useDesktopLayout = false;
     let activeLayout: ScrollLayout = getActiveLayout(desktopQuery);
     let track: HTMLElement | null = null;
     let viewport: HTMLElement | null = null;
@@ -84,24 +80,19 @@ export function useSince1997HorizontalScroll(
         return;
       }
 
-      useDesktopPeek = activeLayout === "desktop" && Boolean(lastImage);
+      useDesktopLayout = activeLayout === "desktop" && Boolean(lastImage);
 
-      if (useDesktopPeek && lastImage) {
+      if (useDesktopLayout && lastImage) {
         const viewportLeft = viewport.getBoundingClientRect().left;
         const viewportWidth = window.innerWidth - viewportLeft;
         viewport.style.width = `${viewportWidth}px`;
 
         const attendingRight = lastImage.offsetLeft + lastImage.offsetWidth;
-        const attendingWidth = lastImage.offsetWidth;
-
         endTranslate = viewportWidth - attendingRight;
-        startTranslate =
-          viewportWidth - attendingRight + attendingWidth - DESKTOP_PEEK_PX;
-        scrollRange = Math.max(0, startTranslate - endTranslate);
+        scrollRange = Math.max(0, -endTranslate);
       } else {
         viewport.style.width = "";
         scrollRange = Math.max(0, track.scrollWidth - viewport.clientWidth);
-        startTranslate = 0;
         endTranslate = -scrollRange;
       }
 
@@ -137,22 +128,18 @@ export function useSince1997HorizontalScroll(
 
       const spacerHeight = spacer?.offsetHeight ?? 0;
       if (spacerHeight <= 0 || scrollRange <= 0) {
-        track.style.transform = useDesktopPeek
-          ? `translate3d(${startTranslate.toFixed(2)}px, 0, 0)`
-          : "";
+        track.style.transform = "";
         return;
       }
 
       const rootTop = (scrollRoot ?? section).getBoundingClientRect().top;
       if (rootTop > 0) {
-        track.style.transform = useDesktopPeek
-          ? `translate3d(${startTranslate.toFixed(2)}px, 0, 0)`
-          : "";
+        track.style.transform = "";
         return;
       }
 
       const progress = clamp(-rootTop / spacerHeight);
-      const translate = startTranslate + progress * (endTranslate - startTranslate);
+      const translate = progress * endTranslate;
       track.style.transform = `translate3d(${translate.toFixed(2)}px, 0, 0)`;
     };
 
