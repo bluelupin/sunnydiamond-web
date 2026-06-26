@@ -84,7 +84,7 @@ const AboutBrillianceSection = ({
 
           <div
             data-reveal-mask="body"
-            className="mx-auto mt-2.5 w-full md:w-[450px] lg:max-w-557 2xl:max-w-[620px] overflow-hidden"
+            className="mx-auto mt-2.5 max-w-full md:max-w-[450px] lg:max-w-557 2xl:max-w-[620px] overflow-hidden"
           >
             <p className="font-gill text-base font-light leading-110 text-gray600 sm:mt-3 lg:mt-[13px] lg:text-20 2xl:text-22">
               {description}

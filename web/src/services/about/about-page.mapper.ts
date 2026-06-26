@@ -1,5 +1,5 @@
 import { aboutHandcraftedContent } from "@/features/about/data/content";
-import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { extractStrapiImage, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import type {
   NormalizedAboutCraft,
   NormalizedAboutHero,
@@ -38,10 +38,26 @@ const cleanText = (value?: string | null): string | undefined => {
 const isUsableDescription = (value?: string): boolean =>
   Boolean(value && value.toLowerCase() !== "to be added");
 
+const coerceComponentArray = <T>(value: unknown): T[] => {
+  if (!value) return [];
+  if (Array.isArray(value)) return value as T[];
+
+  if (typeof value === "object" && value !== null && "data" in value) {
+    const data = (value as { data?: unknown }).data;
+    if (Array.isArray(data)) return data as T[];
+    if (data && typeof data === "object") return [data as T];
+  }
+
+  return [value as T];
+};
+
 const mapResponsiveImage = (
   media?: StrapiAboutResponsiveImage | null,
 ): NormalizedResponsiveImage | null => {
   if (!media) return null;
+
+  const desktopFile = extractStrapiImage(media.desktopImage);
+  const mobileFile = extractStrapiImage(media.mobileImage);
 
   const desktopUrl =
     resolveCmsMediaUrl(media.desktopImage) ??
@@ -58,16 +74,16 @@ const mapResponsiveImage = (
   const alt =
     cleanText(media.altText) ??
     cleanText(media.caption) ??
-    cleanText(media.desktopImage?.alternativeText) ??
-    cleanText(media.mobileImage?.alternativeText) ??
+    cleanText(desktopFile?.alternativeText) ??
+    cleanText(mobileFile?.alternativeText) ??
     "";
 
   return {
     desktopUrl: resolvedDesktop,
     mobileUrl: resolvedMobile,
     alt,
-    width: media.desktopImage?.width ?? media.mobileImage?.width ?? undefined,
-    height: media.desktopImage?.height ?? media.mobileImage?.height ?? undefined,
+    width: desktopFile?.width ?? mobileFile?.width ?? undefined,
+    height: desktopFile?.height ?? mobileFile?.height ?? undefined,
   };
 };
 
@@ -120,7 +136,7 @@ const mapCraftingRarity = (
 ): NormalizedCraftingRarity | null => {
   if (!section) return null;
 
-  const slides = section.featureSlide ?? [];
+  const slides = coerceComponentArray<StrapiAboutFeatureSlide>(section.featureSlide);
   for (const slide of slides) {
     const mapped = mapFeatureSlide(slide);
     if (mapped) return mapped;
