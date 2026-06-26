@@ -173,7 +173,7 @@ const BookAnAppointmentPanel = ({
             <button
               type="button"
               onClick={handleClear}
-              className="flex h-14 flex-1 items-center justify-center border border-neutral300 font-gill text-sm uppercase leading-110 text-darkblack"
+              className="btn-border-slide flex h-14 flex-1 items-center justify-center border border-neutral300 font-gill text-sm uppercase leading-110 text-darkblack"
             >
               Clear All
             </button>

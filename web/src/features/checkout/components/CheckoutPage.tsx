@@ -43,7 +43,7 @@ const CheckoutPage = () => {
     return (
       <div className="container py-20 text-center">
         <h1 className="font-heading text-2xl text-foreground">No items to checkout</h1>
-        <Link href="/products" className="text-primary underline mt-4 inline-block font-body text-sm">
+        <Link href="/products" className="text-link-underline text-primary underline mt-4 inline-block font-body text-sm">
           Continue Shopping
         </Link>
       </div>

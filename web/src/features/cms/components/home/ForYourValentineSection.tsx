@@ -201,7 +201,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
                 <ScrollReveal delayMs={320}>
                   <Link
                     href={secondaryCtaUrl}
-                    className={`inline-flex items-center justify-center border-b-[1.5px] border-darkblack pb-1 text-center font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-70 ${ctaFocusClass}`}
+                    className={`text-link-underline inline-flex items-center justify-center border-b-[1.5px] border-darkblack pb-1 text-center font-gill text-sm font-normal uppercase leading-110 text-darkblack ${ctaFocusClass}`}
                   >
                     {secondaryCtaLabel}
                   </Link>
@@ -238,7 +238,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
                 {secondaryCtaUrl ? (
                   <Link
                     href={secondaryCtaUrl}
-                    className={`inline-flex items-center justify-center whitespace-nowrap border-b-[1.5px] border-[#0a0a0a] pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-70 ${ctaFocusClass}`}
+                    className={`text-link-underline inline-flex items-center justify-center whitespace-nowrap border-b-[1.5px] border-[#0a0a0a] pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack ${ctaFocusClass}`}
                   >
                     {secondaryCtaLabel}
                   </Link>

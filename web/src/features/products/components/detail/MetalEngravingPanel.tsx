@@ -176,7 +176,7 @@ const MetalEngravingPanel = ({
                 </div>
                 <Link
                   href="/contact"
-                  className="inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
+                  className="text-link-underline inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
                 >
                   Contact Our Team
                 </Link>

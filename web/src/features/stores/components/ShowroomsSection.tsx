@@ -130,7 +130,7 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
                       href={location.mapUrl ?? location.directionsUrl ?? "#"}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block w-fit md:text-base text-xs pb-1 tracking-[1.8%] leading-[100%] uppercase text-darkblack border-b border-foreground font-gill"
+                      className="text-link-underline block w-fit pb-1 font-gill text-xs uppercase leading-[100%] tracking-[1.8%] text-darkblack border-b border-foreground md:text-base"
                     >
                       Get Directions
                     </Link>

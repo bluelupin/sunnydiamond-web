@@ -67,7 +67,7 @@ function OccasionCardItem({
             ) : null}
           </div>
 
-          <span className="inline-flex w-fit translate-y-0 items-center justify-center border-b-[1.5px] border-white pb-1.5 font-gill text-sm font-normal uppercase tracking-[0.28px] text-white opacity-100 motion-safe:transition-[transform,opacity] motion-safe:duration-500 motion-safe:ease-out md:translate-y-[calc(100%+24px)] md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:group-focus-visible:translate-y-0 md:group-focus-visible:opacity-100">
+          <span className="text-link-underline inline-flex w-fit translate-y-0 items-center justify-center border-b-[1.5px] border-white pb-1.5 font-gill text-sm font-normal uppercase tracking-[0.28px] text-white opacity-100 motion-safe:transition-[transform,opacity] motion-safe:duration-500 motion-safe:ease-out md:translate-y-[calc(100%+24px)] md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:group-focus-visible:translate-y-0 md:group-focus-visible:opacity-100">
             {ctaLabel}
           </span>
         </div>

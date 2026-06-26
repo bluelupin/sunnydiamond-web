@@ -34,7 +34,7 @@ const BlogListingPage = ({ posts }: BlogListingPageProps) => {
                 <div className="mt-6">
                   <Link
                     href={`/blogs/${post.slug}`}
-                    className="inline-flex items-center text-sm font-semibold uppercase tracking-widest text-foreground underline-offset-4 transition-colors hover:text-primary hover:underline"
+                    className="text-link-underline inline-flex items-center text-sm font-semibold uppercase tracking-widest text-foreground underline underline-offset-4 transition-colors hover:text-linkGold"
                   >
                     Read more
                   </Link>

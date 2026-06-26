@@ -250,8 +250,8 @@ const StoreSelectionStep = ({
                   className={cn(
                     "shrink-0 py-2 font-gill text-base leading-110",
                     isSelected
-                      ? "border-b border-[#AB863B] text-[#AB863B]"
-                      : "text-darkblack",
+                      ? "border-b border-linkGold text-linkGold"
+                      : "text-darkblack hover:text-linkGold",
                   )}
                 >
                   {store.tabLabel}
@@ -316,7 +316,7 @@ const StoreSelectionStep = ({
                   href={selectedStore.directionsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
+                  className="text-link-underline inline-flex border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
                 >
                   GET DIRECTIONS
                 </a>

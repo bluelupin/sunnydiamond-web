@@ -245,7 +245,7 @@ const TryAtHomeAddressStep = ({ onBack, onSubmit }: TryAtHomeAddressStepProps) =
               type="button"
               onClick={handleUseCurrentLocation}
               disabled={isLocating}
-              className="inline-flex border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack disabled:cursor-not-allowed disabled:opacity-50"
+              className="text-link-underline inline-flex border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isLocating ? "DETECTING LOCATION..." : "USE CURRENT LOCATION"}
             </button>

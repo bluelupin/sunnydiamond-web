@@ -147,7 +147,7 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
               <ScrollReveal delayMs={100}>
                 <Link
                   href={secondaryCtaUrl}
-                  className="border-b-[1.5px] border-darkblack pb-1 font-gill text-sm uppercase leading-110 text-darkblack"
+                  className="text-link-underline border-b-[1.5px] border-darkblack pb-1 font-gill text-sm uppercase leading-110 text-darkblack"
                 >
                   {secondaryCtaLabel}
                 </Link>

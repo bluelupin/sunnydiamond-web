@@ -78,7 +78,7 @@ function ProductSlideImage({
       src={imageSrc}
       alt={product.name}
       fill
-      sizes={variant === "mobile" ? "271px" : "720px"}
+      sizes={variant === "mobile" ? "271px" : "(min-width: 1920px) 50vw, 720px"}
       priority={priority}
       className="max-w-none object-cover"
       style={cropStyle}
@@ -174,7 +174,7 @@ function CollectionHeroPanel({
             alt={imageAlt}
             fill
             priority={priority}
-            sizes="720px"
+            sizes="(min-width: 1920px) 50vw, 720px"
             className="max-w-none object-cover"
             style={ALANKARA_HERO_DESKTOP_CROP}
           />
@@ -216,7 +216,7 @@ function CollectionHeroPanel({
         {isMobile && collectionCta ? (
           <Link
             href={collectionCta.href}
-            className="inline-flex items-center justify-center border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
+            className="text-link-underline inline-flex items-center justify-center border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
           >
             {collectionCta.label}
           </Link>
@@ -415,7 +415,7 @@ function ProductCarouselPanel({
               </p>
               <Link
                 href={activeProduct.href}
-                className="btn-slide-up absolute left-[23.5px] top-[38px] inline-flex h-14 items-center justify-center overflow-hidden border-[0.8px] border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
+                className="btn-border-slide absolute left-[23.5px] top-[38px] inline-flex h-14 items-center justify-center border-[0.8px] border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
               >
                 {activeProduct.ctaLabel || defaultProductCtaLabel}
               </Link>
@@ -464,7 +464,7 @@ function ProductCarouselPanel({
             </p>
             <Link
               href={activeProduct.href}
-              className="btn-slide-up relative inline-flex h-14 items-center justify-center overflow-hidden border-[0.8px] border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2"
+              className="btn-border-slide relative inline-flex h-14 items-center justify-center border-[0.8px] border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2"
             >
               {activeProduct.ctaLabel || defaultProductCtaLabel}
             </Link>
@@ -527,7 +527,7 @@ export function AlankaraCollection({
       aria-label={ariaLabel || title}
       className={cn("w-full bg-white", className)}
     >
-      <div className="hidden lg:grid lg:grid-cols-2 lg:max-w-[1440px] lg:mx-auto">
+      <div className="hidden w-full lg:grid lg:grid-cols-2 lg:mx-auto lg:max-w-1440 min-[1920px]:max-w-none min-[1920px]:w-full">
         <ScrollReveal delayMs={0}>
           <CollectionHeroPanel
             title={title}

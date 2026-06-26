@@ -58,8 +58,8 @@ const EducationLearnMoreSection = () => {
                       className={cn(
                         "shrink-0 px-0 py-2 font-gill text-base leading-110 lg:flex-1 lg:py-2 lg:text-[20px]",
                         isActive
-                          ? "border-b border-[#ab863b] text-[#ab863b]"
-                          : "text-darkblack",
+                          ? "border-b border-linkGold text-linkGold"
+                          : "text-darkblack hover:text-linkGold",
                       )}
                     >
                       {tab.label}
@@ -124,7 +124,7 @@ const EducationLearnMoreSection = () => {
 
               <Link
                 href={activeTab.ctaHref}
-                className="btn-slide-up inline-flex h-14 items-center justify-center border border-neutral300 px-7 font-gill text-sm uppercase leading-110 text-darkblack"
+                className="btn-border-slide inline-flex h-14 items-center justify-center border border-neutral300 px-7 font-gill text-sm uppercase leading-110 text-darkblack"
               >
                 {activeTab.ctaLabel}
               </Link>

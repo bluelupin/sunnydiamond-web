@@ -288,13 +288,9 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
                   <Link
                     href={`/product/${p.id ?? ""}`}
                     tabIndex={isActive ? 0 : -1}
-                    className="group relative overflow-hidden inline-flex items-center justify-center border-[0.8px] border-darkblack text-darkblack md:text-base text-sm px-8 md:h-50 h-12 tracking-[1.8%] uppercase font-gill transition-colors duration-500"
+                    className="btn-border-slide inline-flex h-12 items-center justify-center border-[0.8px] border-darkblack px-8 font-gill text-sm uppercase tracking-[1.8%] text-darkblack md:h-50 md:text-base"
                   >
-                    <span className="absolute inset-0 bg-darkblack origin-bottom scale-y-0 transition-transform duration-500 ease-out group-hover:scale-y-100"></span>
-
-                    <span className="relative z-10 group-hover:text-white transition-colors duration-500">
-                      {section?.cta?.label ?? ""}
-                    </span>
+                    {section?.cta?.label ?? ""}
                   </Link>
                 </div>
               </div>

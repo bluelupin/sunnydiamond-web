@@ -38,7 +38,7 @@ const JewelleryLoadMoreSection = ({
             <button
               type="button"
               onClick={onLoadMore}
-              className="inline-flex h-14 w-full items-center justify-center border-[0.8px] border-neutral300 px-7 py-5 font-gill text-sm uppercase leading-110 text-darkblack transition-colors hover:border-darkblack hover:bg-darkblack hover:text-white md:h-14"
+              className="btn-border-slide inline-flex h-14 w-full items-center justify-center border-[0.8px] border-neutral300 px-7 py-5 font-gill text-sm uppercase leading-110 text-darkblack md:h-14"
             >
               Load More
             </button>

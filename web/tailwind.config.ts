@@ -92,6 +92,7 @@ export default {
           light: "hsl(var(--gold-light))",
           dark: "hsl(var(--gold-dark))",
         },
+        linkGold: "#AB863B",
         charcoal: "hsl(var(--charcoal))",
         ivory: "hsl(var(--ivory))",
         "warm-gray": "hsl(var(--warm-gray))",

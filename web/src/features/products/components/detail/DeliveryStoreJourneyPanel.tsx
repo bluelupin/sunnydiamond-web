@@ -129,7 +129,7 @@ const DeliveryStoreJourneyPanel = ({
                     <p className="font-gill text-base font-light leading-110 text-darkblack">
                       Available now at nearest store
                     </p>
-                    <span className="inline-flex border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack">
+                    <span className="text-link-underline inline-flex border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack">
                       {store.cityLabel}
                     </span>
                   </div>

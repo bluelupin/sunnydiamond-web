@@ -128,7 +128,7 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
         className="bg-white"
         aria-busy="true"
       >
-        <div className="mx-auto grid max-w-[1440px] grid-cols-1 lg:grid-cols-2">
+        <div className="mx-auto grid w-full max-w-1440 grid-cols-1 lg:grid-cols-2 min-[1920px]:max-w-none">
           <div className="h-[540px] bg-gray200 lg:h-[800px]" />
           <div className="hidden h-[800px] bg-gray200/80 lg:block" />
         </div>

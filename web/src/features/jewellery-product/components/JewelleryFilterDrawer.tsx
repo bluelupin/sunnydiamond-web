@@ -359,7 +359,7 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
               <button
                 type="button"
                 onClick={handleClearAll}
-                className="btn-slide-up inline-flex h-14 min-w-0 flex-1 items-center justify-center border-[0.8px] border-neutral300 px-7 font-gill text-sm uppercase leading-110 text-darkblack"
+                className="btn-border-slide inline-flex h-14 min-w-0 flex-1 items-center justify-center border-[0.8px] border-neutral300 px-7 font-gill text-sm uppercase leading-110 text-darkblack"
               >
                 Clear All
               </button>

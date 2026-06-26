@@ -39,7 +39,7 @@ const OutlineLink = ({ children, href, className }: PrimaryLinkProps) => (
   <Link
     href={href}
     className={cn(
-      "btn-slide-up inline-flex items-center justify-center gap-2 border border-foreground text-foreground hover:bg-foreground hover:text-background px-8 py-3 text-sm tracking-widest uppercase font-body transition-colors",
+      "btn-border-slide inline-flex items-center justify-center gap-2 border border-foreground text-foreground [--btn-border-slide-fill:hsl(var(--foreground))] [--btn-border-slide-text:hsl(var(--background))] px-8 py-3 text-sm tracking-widest uppercase font-body",
       className
     )}
   >

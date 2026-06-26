@@ -68,7 +68,7 @@ const EducationDiscoverSection = () => {
         <ScrollReveal delayMs={220}>
           <Link
             href={educationDiscoverContent.ctaHref}
-            className="btn-slide-up inline-flex h-14 w-fit items-center justify-center border border-neutral300 px-7 font-gill text-sm uppercase leading-110 text-darkblack"
+            className="btn-border-slide inline-flex h-14 w-fit items-center justify-center border border-neutral300 px-7 font-gill text-sm uppercase leading-110 text-darkblack"
           >
             {educationDiscoverContent.ctaLabel}
           </Link>

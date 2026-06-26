@@ -37,6 +37,7 @@
     --gold: 36 40% 62%;
     --gold-light: 36 50% 85%;
     --gold-dark: 36 35% 42%;
+    --link-underline-hover: #AB863B;
     --charcoal: 30 10% 15%;
     --ivory: 40 30% 96%;
     --warm-gray: 30 5% 50%;
@@ -190,9 +191,44 @@
     will-change: transform;
   }
 
+  .btn-border-slide {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    --btn-border-slide-fill: #0a0a0a;
+    --btn-border-slide-text: #ffffff;
+    transition:
+      color 0.35s ease,
+      border-color 0.35s ease;
+  }
+
+  .btn-border-slide::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-color: var(--btn-border-slide-fill);
+    transform: translateY(100%);
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .btn-border-slide > * {
+    position: relative;
+    z-index: 1;
+  }
+
   @media (hover: hover) and (pointer: fine) {
     .btn-slide-up:hover {
       transform: translateY(-3px);
+    }
+
+    .btn-border-slide:hover::before {
+      transform: translateY(0);
+    }
+
+    .btn-border-slide:hover {
+      color: var(--btn-border-slide-text);
+      border-color: var(--btn-border-slide-fill);
     }
   }
 
@@ -203,6 +239,14 @@
 
     .btn-slide-up:hover {
       transform: none;
+    }
+
+    .btn-border-slide::before {
+      transition: none;
+    }
+
+    .btn-border-slide:hover::before {
+      transform: translateY(0);
     }
   }
 
@@ -233,6 +277,31 @@
     top: -12.844%;
     width: 124.138%;
     height: 125.973%;
+  }
+
+  .text-link-underline {
+    transition:
+      color 0.2s ease,
+      border-color 0.2s ease,
+      opacity 0.2s ease,
+      text-decoration-color 0.2s ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    :is(a, button).text-link-underline:hover:not(:disabled),
+    :is(a, button):hover:not(:disabled) > .text-link-underline,
+    :is(a, button):hover:not(:disabled) .text-link-underline {
+      color: var(--link-underline-hover) !important;
+      border-color: var(--link-underline-hover) !important;
+      opacity: 1 !important;
+    }
+
+    a.underline:hover,
+    a.hover\:underline:hover,
+    button.hover\:underline:hover {
+      color: var(--link-underline-hover);
+      text-decoration-color: var(--link-underline-hover);
+    }
   }
 }
 

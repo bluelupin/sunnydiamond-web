@@ -57,7 +57,7 @@ const ProductDetailVisitUsSection = ({ imageSrc }: ProductDetailVisitUsSectionPr
             <button
               type="button"
               onClick={() => setIsBookVisitOpen(true)}
-              className="inline-flex border-b-[1.5px] border-white pb-2 font-gill text-sm uppercase leading-normal tracking-[0.252px] text-white max-lg:pb-2 lg:pb-1 lg:leading-110"
+              className="text-link-underline inline-flex border-b-[1.5px] border-white pb-2 font-gill text-sm uppercase leading-normal tracking-[0.252px] text-white max-lg:pb-2 lg:pb-1 lg:leading-110"
             >
               Book a Visit
             </button>

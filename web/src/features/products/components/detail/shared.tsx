@@ -11,7 +11,7 @@ type DetailTextLinkProps = {
 
 export const DetailTextLink = ({ children, href, onClick, className, light }: DetailTextLinkProps) => {
   const classes = cn(
-    "inline-flex border-b-[1.5px] pb-1 font-gill text-sm leading-110",
+    "text-link-underline inline-flex border-b-[1.5px] pb-1 font-gill text-sm leading-110",
     light ? "border-white text-white" : "border-darkblack text-darkblack",
     className,
   );
@@ -56,7 +56,7 @@ export const DetailOutlineButton = ({ children, className, ...props }: DetailOut
   <button
     type="button"
     className={cn(
-      "btn-slide-up inline-flex h-14 items-center justify-center border border-neutral300 px-7 font-gill text-sm uppercase leading-110 text-darkblack",
+      "btn-border-slide inline-flex h-14 items-center justify-center border border-neutral300 px-7 font-gill text-sm uppercase leading-110 text-darkblack",
       className,
     )}
     {...props}
@@ -66,7 +66,7 @@ export const DetailOutlineButton = ({ children, className, ...props }: DetailOut
 );
 
 const outlineLinkClassName =
-  "btn-slide-up inline-flex h-14 items-center justify-center border border-neutral300 px-7 font-gill text-sm uppercase leading-110 text-darkblack";
+  "btn-border-slide inline-flex h-14 items-center justify-center border border-neutral300 px-7 font-gill text-sm uppercase leading-110 text-darkblack";
 
 type DetailOutlineLinkProps = {
   children: React.ReactNode;

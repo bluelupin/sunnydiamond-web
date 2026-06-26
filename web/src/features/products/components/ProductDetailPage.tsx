@@ -30,7 +30,7 @@ const ProductDetailPage = () => {
     return (
       <div className="container py-20 text-center">
         <h1 className="font-larken text-2xl text-darkblack">Product not found</h1>
-        <Link href="/jewellery-product" className="mt-4 inline-block font-gill text-sm text-darkblack underline">
+        <Link href="/jewellery-product" className="text-link-underline mt-4 inline-block font-gill text-sm text-darkblack underline">
           Back to Jewellery
         </Link>
       </div>

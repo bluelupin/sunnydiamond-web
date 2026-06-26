@@ -160,7 +160,7 @@ const ProductAppointmentForm = ({
                 <button
                   type="button"
                   onClick={() => referenceImageInputRef.current?.click()}
-                  className="inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
+                  className="text-link-underline inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
                 >
                   {referenceImageName ?? "Attach Image"}
                 </button>

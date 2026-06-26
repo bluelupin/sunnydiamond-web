@@ -199,7 +199,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
           <ScrollReveal delayMs={480}>
             <Link
               href={ctaUrl}
-              className="inline-flex items-center justify-center border-b-[1.5px] border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
+              className="text-link-underline inline-flex items-center justify-center border-b-[1.5px] border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
             >
               {ctaLabel}
             </Link>

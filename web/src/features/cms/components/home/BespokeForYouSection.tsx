@@ -155,7 +155,7 @@ const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
             <ScrollReveal delayMs={320}>
               <Link
                 href={secondaryCtaUrl}
-                className="inline-flex items-center justify-center border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
+                className="text-link-underline inline-flex items-center justify-center border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
               >
                 {secondaryCtaLabel}
               </Link>
