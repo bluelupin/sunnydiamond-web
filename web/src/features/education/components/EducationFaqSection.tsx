@@ -1,9 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronDown, ChevronUp, Plus } from "lucide-react";
+import { Fragment, useState } from "react";
+import Image from "next/image";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
-import { educationFaqItems } from "../data/content";
+import { educationFaqItems, educationPageImages } from "../data/content";
+
+const FaqToggleIcon = ({ isOpen }: { isOpen: boolean }) => (
+  <Image
+    src={isOpen ? educationPageImages.faqIconMinus : educationPageImages.faqIconPlus}
+    alt=""
+    width={24}
+    height={24}
+    aria-hidden
+    className="shrink-0"
+  />
+);
 
 const EducationFaqSection = () => {
   const [openId, setOpenId] = useState<string | null>("authenticity");
@@ -13,11 +24,11 @@ const EducationFaqSection = () => {
       aria-labelledby="education-faq-title"
       className="bg-white px-4 py-16 lg:px-10 lg:py-[104px]"
     >
-      <div className="mx-auto flex max-w-[910px] flex-col items-center gap-10">
-        <ScrollReveal as="h2" delayMs={0}>
+      <div className="mx-auto flex max-w-[910px] flex-col items-center gap-8 lg:gap-10">
+        <ScrollReveal as="h2" delayMs={0} className="w-full">
           <span
             id="education-faq-title"
-            className="block text-center font-larken text-[32px] font-light leading-110 text-darkblack lg:text-[48px]"
+            className="block w-full text-left font-larken text-[32px] font-light leading-110 text-darkblack lg:text-center lg:text-[48px]"
           >
             Frequently Asked Questions
           </span>
@@ -28,38 +39,39 @@ const EducationFaqSection = () => {
             const isOpen = openId === item.id;
 
             return (
-              <ScrollReveal key={item.id} delayMs={80 + index * 70}>
-                <div className="flex flex-col gap-4">
-                  <button
-                    type="button"
-                    aria-expanded={isOpen}
-                    onClick={() => setOpenId(isOpen ? null : item.id)}
-                    className="flex min-h-14 w-full items-center justify-between gap-2 py-6 text-left lg:py-6"
+              <Fragment key={item.id}>
+                <ScrollReveal delayMs={80 + index * 70}>
+                  <div
+                    className={
+                      isOpen
+                        ? "flex flex-col gap-4 overflow-hidden rounded"
+                        : "flex flex-col overflow-hidden rounded lg:h-14 lg:justify-center"
+                    }
                   >
-                    <span className="flex-1 font-gill text-base leading-110 text-darkblack lg:text-[20px]">
-                      {item.question}
-                    </span>
-                    {isOpen ? (
-                      <ChevronUp size={24} strokeWidth={1.25} aria-hidden className="shrink-0 lg:hidden" />
-                    ) : (
-                      <Plus size={24} strokeWidth={1.5} aria-hidden className="shrink-0 lg:hidden" />
-                    )}
-                    {isOpen ? (
-                      <ChevronUp size={24} strokeWidth={1.25} aria-hidden className="hidden shrink-0 lg:block" />
-                    ) : (
-                      <ChevronDown size={24} strokeWidth={1.25} aria-hidden className="hidden shrink-0 lg:block" />
-                    )}
-                  </button>
+                    <button
+                      type="button"
+                      aria-expanded={isOpen}
+                      onClick={() => setOpenId(isOpen ? null : item.id)}
+                      className="flex w-full items-start gap-2 text-left lg:items-center"
+                    >
+                      <span className="min-w-0 flex-1 font-gill text-base font-normal leading-110 text-darkblack lg:text-[20px]">
+                        {item.question}
+                      </span>
+                      <FaqToggleIcon isOpen={isOpen} />
+                    </button>
 
-                  {isOpen && item.answer ? (
-                    <p className="pb-2 font-gill text-base font-light leading-110 text-neutral500 lg:text-[20px]">
-                      {item.answer}
-                    </p>
-                  ) : null}
+                    {isOpen && item.answer ? (
+                      <p className="font-gill text-sm font-light leading-110 text-neutral500 lg:text-[20px]">
+                        {item.answer}
+                      </p>
+                    ) : null}
+                  </div>
+                </ScrollReveal>
 
-                  <div className="h-px bg-neutral300" aria-hidden />
-                </div>
-              </ScrollReveal>
+                {index < educationFaqItems.length - 1 ? (
+                  <div className="h-[0.5px] bg-neutral300" aria-hidden />
+                ) : null}
+              </Fragment>
             );
           })}
         </div>

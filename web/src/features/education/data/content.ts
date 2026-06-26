@@ -9,7 +9,14 @@ export const educationPageImages = {
   cutDiamondGood: "/images/education/cut-diamond-good.png",
   decorativeDiamond: "/images/education/decorative-diamond.png",
   discoverImage: "/images/education/discover-image.png",
+  faqIconPlus: "/images/education/faq-icon-plus.svg",
+  faqIconMinus: "/images/education/faq-icon-minus.svg",
   certifiedBg: "/images/education/certified-bg.png",
+  certifiedHandBg: "/images/education/certified-hand-bg.png",
+  certifiedDivider: "/images/education/certified-divider.svg",
+  certifiedCalloutLine: "/images/education/certified-callout-line.svg",
+  certifiedDividerMobile: "/images/education/certified-divider-mobile.svg",
+  certifiedCalloutLineMobile: "/images/education/certified-callout-line-mobile.svg",
   giaLogo: "/images/education/gia-logo.png",
   agsLogo: "/images/education/ags-logo.png",
   hrdLogo: "/images/education/hrd-logo.png",
@@ -18,6 +25,10 @@ export const educationPageImages = {
   shapeLeft: "/images/education/shape-left.png",
   shapeCenter: "/images/education/shape-center.png",
   shapeRight: "/images/education/shape-right.png",
+  learnArrowLeft: "/images/education/learn-arrow-left.svg",
+  learnArrowRight: "/images/education/learn-arrow-right.svg",
+  learnArrowLeftMobile: "/images/education/learn-arrow-left-mobile.svg",
+  learnArrowRightMobile: "/images/education/learn-arrow-right-mobile.svg",
   scrollArrow: "/images/education/scroll-arrow.svg",
   claritySliderTrack: "/images/education/clarity-slider-track.svg",
   claritySliderDots: "/images/education/clarity-slider-dots.svg",
@@ -387,6 +398,112 @@ export type EducationLearnTab = {
   slides: { src: string; alt: string }[];
 };
 
+/** Figma nodes 692:29130 (desktop) + 692:28766 (mobile) */
+export const educationLearnMoreSpec = {
+  section: {
+    desktop: {
+      height: 957,
+      paddingY: 104,
+      paddingX: 40,
+      blockGap: 64,
+    },
+    mobile: {
+      height: 681,
+      paddingY: 64,
+      paddingX: 16,
+      blockGap: 24,
+    },
+  },
+  header: {
+    desktop: {
+      maxWidth: 1360,
+      titleTabGap: 40,
+      titleDescriptionGap: 64,
+      titleSize: 48,
+      descriptionMaxWidth: 700,
+      descriptionSize: 20,
+      descriptionColor: "#4D4D4D",
+    },
+    mobile: {
+      titleSize: 32,
+      descriptionSize: 16,
+      descriptionColor: "#0A0A0A",
+      descriptionCarouselGap: 49,
+    },
+  },
+  tabs: {
+    desktop: {
+      maxWidth: 1200,
+      paddingY: 24,
+      fontSize: 20,
+      gap: 0,
+    },
+    mobile: {
+      height: 75,
+      paddingY: 24,
+      fontSize: 16,
+      gap: 40,
+    },
+    borderWidth: 0.4,
+    activePaddingY: 8,
+    activeColor: "#AB863B",
+  },
+  carousel: {
+    desktop: {
+      columnGap: 250,
+      centerColumnWidth: 526,
+      centerControlsGap: 64,
+      centerButtonGap: 12,
+    },
+    mobile: {
+      height: 252,
+      imageWidth: 196.457,
+      imageHeight: 172,
+      buttonGap: 24,
+      arrowTop: 74,
+      arrowLeft: 16,
+      arrowRowWidth: 311,
+    },
+    navIconWidth: 24,
+    slots: {
+      left: {
+        width: 350,
+        height: 328,
+        cropHeight: "128.74%",
+        cropWidth: "125.89%",
+        cropLeft: "-11.31%",
+        cropTop: "-15.03%",
+        flip: false,
+      },
+      center: {
+        width: 350,
+        height: 330,
+        cropHeight: "116.26%",
+        cropWidth: "125.34%",
+        cropLeft: "-11.54%",
+        cropTop: "-3.98%",
+        flip: false,
+      },
+      right: {
+        width: 350,
+        height: 314,
+        cropHeight: "127.2%",
+        cropWidth: "122.36%",
+        cropLeft: "-7.99%",
+        cropTop: "-12.99%",
+        flip: true,
+      },
+    },
+  },
+  cta: {
+    height: 56,
+    paddingX: 28,
+    paddingY: 20,
+    fontSize: 14,
+    borderWidth: 0.8,
+  },
+} as const;
+
 export const educationLearnTabs: EducationLearnTab[] = [
   {
     id: "shape",
@@ -454,30 +571,42 @@ export const educationCertifiedContent = {
   title: "Certified Brilliance",
   certifications: [
     {
+      id: "gia",
       logo: educationPageImages.giaLogo,
       label: "THE GEMOLOGICAL INSTITUTE OF AMERICA",
       logoClassName: "h-[74px] w-[76px]",
+      mobileLogoClassName: "h-[59.297px] w-[60.868px]",
       imageClassName: "h-full w-[297%] max-w-none object-cover object-left",
     },
     {
+      id: "ags",
       logo: educationPageImages.agsLogo,
       label: "AMERICAN GEM SOCIETY",
       logoClassName: "h-[74px] w-[76px]",
-      imageClassName: "h-full w-[177%] max-w-none object-cover object-left",
+      mobileLogoClassName: "h-[59.294px] w-[60.882px]",
+      imageClassName: "h-full w-[177%] max-w-none object-cover object-left -left-[38%]",
     },
     {
+      id: "hrd",
       logo: educationPageImages.hrdLogo,
-      label: "HRD ANTWERP",
-      logoClassName: "h-[51px] w-[101px]",
-      imageClassName: "h-[165%] w-[136%] max-w-none object-cover object-left -top-[28%] -left-[15%]",
+      label: "THE HOGE RAADVOOR DIAMANT",
+      mobileLabelLines: ["THE HOGE RAADVOOR", "DIAMANT"] as const,
+      logoClassName: "h-16 w-[127px]",
+      mobileLogoClassName: "h-[51.2px] w-[101.262px]",
+      imageClassName: "h-[165%] w-[136%] max-w-none object-cover object-left -left-[15%] -top-[28%]",
+      logoWrapClassName: "flex h-[90px] w-[142px] items-center justify-center",
     },
     {
+      id: "kimberley",
       logo: educationPageImages.kimberleyLogo,
       label: "THE KIMBERLY PROCESS",
-      logoClassName: "h-[74px] w-[76px]",
-      imageClassName: "size-full object-contain",
+      mobileLabelLines: ["THE KIMBERLY ", "PROCESS"] as const,
+      logoClassName: "size-[79px]",
+      mobileLogoClassName: "size-[59.286px]",
+      imageClassName: "size-full object-cover",
     },
   ],
+  mobileLogoOrder: ["ags", "gia", "hrd", "kimberley"] as const,
   whyTitle: "Why Certifications Matter?",
   whyDescription:
     "Certification gives you confidence about what you’re investing in. It ensures the quality of the diamond is graded fairly.",
@@ -486,8 +615,114 @@ export const educationCertifiedContent = {
     "Each Solitaire carries a laser inscription on its girdle, linking it directly to its report.",
 } as const;
 
+/** Figma nodes 692:29096 (desktop) + 692:28735 (mobile) */
+export const educationCertifiedSpec = {
+  section: {
+    desktop: {
+      background: "#F4F3EE",
+      paddingX: 40,
+      paddingY: 104,
+      blockGap: 40,
+      height: 791,
+    },
+    mobile: {
+      background: "#FFFFFF",
+      paddingX: 16,
+      paddingY: 64,
+      blockGap: 32,
+      height: 900,
+    },
+  },
+  title: {
+    desktopSize: 48,
+    mobileSize: 32,
+  },
+  logos: {
+    desktop: {
+      maxWidth: 1360,
+      columnMinHeight: 122,
+      labelSize: 16,
+    },
+    mobile: {
+      rowGap: 24,
+      labelSize: 14,
+      rowMinHeight: 101,
+    },
+  },
+  copy: {
+    desktop: {
+      width: 647,
+      blockGap: 40,
+      itemGap: 12,
+      titleSize: 24,
+      bodySize: 20,
+      bodyMaxWidth: 546,
+      bodyColor: "#4D4D4D",
+    },
+    mobile: {
+      blockGap: 24,
+      itemGap: 12,
+      titleSize: 16,
+      bodySize: 14,
+      bodyColor: "#0A0A0A",
+      dividerWidth: 350,
+    },
+  },
+  visual: {
+    desktop: {
+      width: 641,
+      height: 548,
+      left: 700,
+      top: -189,
+      calloutSize: 133.567,
+      calloutLeft: 66,
+      calloutTop: 262,
+      calloutBorder: 1.91,
+      calloutBorderColor: "#999999",
+      calloutCropHeight: "123.85%",
+      calloutCropWidth: "124.29%",
+      calloutCropLeft: "-13.53%",
+      calloutCropTop: "-10.91%",
+      lineLeft: 133,
+      lineTop: 396,
+      lineWidth: 209,
+      lineHeight: 109,
+    },
+    mobile: {
+      calloutLeft: 85,
+      calloutTop: 666,
+      calloutSize: 96,
+      calloutBorder: 1.373,
+      lineLeft: 130,
+      lineTop: 698,
+      lineWidth: 141,
+      lineHeight: 78,
+    },
+    calloutCropHeight: "123.85%",
+    calloutCropWidth: "124.29%",
+    calloutCropLeft: "-13.53%",
+    calloutCropTop: "-10.91%",
+  },
+  background: {
+    desktop: {
+      handRotate: -12.62,
+      handWidth: 1830,
+      handHeight: 1530,
+      handLeft: -393,
+      handTop: -443,
+    },
+    mobile: {
+      handLeft: -495,
+      handTop: 151,
+      handWidth: 1091,
+      handHeight: 912,
+    },
+  },
+} as const;
+
 export const educationDiscoverContent = {
   title: "Discover What Speaks to You",
+  mobileTitleLines: ["Discover What Speaks ", "to You"] as const,
   description:
     "Tell us what you’re looking for, and we’ll curate a selection tailored to your style, occasion, and preferences.",
   steps: [
@@ -499,11 +734,142 @@ export const educationDiscoverContent = {
   ctaHref: "/book-an-appointment",
 } as const;
 
+/** Figma nodes 692:29075 (desktop) + 692:28767 (mobile) */
+export const educationDiscoverSpec = {
+  section: {
+    desktopHeight: 615,
+    mobileMinHeight: 743,
+    background: "#F4F3EE",
+  },
+  image: {
+    desktop: {
+      width: 621,
+      height: 585,
+      cropHeight: "100.24%",
+      cropWidth: "178.53%",
+      cropLeft: "0.05%",
+      cropTop: "-0.04%",
+    },
+    mobile: {
+      width: 326,
+      height: 307,
+      left: 114,
+      top: 436,
+      cropHeight: "100.24%",
+      cropWidth: "178.53%",
+      cropLeft: "0.05%",
+      cropTop: "-0.04%",
+    },
+  },
+  content: {
+    desktop: {
+      width: 585,
+      offsetX: 294.5,
+    },
+    mobile: {
+      paddingX: 16,
+      paddingY: 64,
+      gap: 32,
+    },
+    blockGap: 40,
+  },
+  header: {
+    desktop: {
+      titleSize: 48,
+      descriptionSize: 20,
+      descriptionMaxWidth: 531,
+      descriptionColor: "#4D4D4D",
+      gap: 16,
+    },
+    mobile: {
+      titleSize: 32,
+      descriptionSize: 16,
+      descriptionColor: "#0A0A0A",
+      gap: 12,
+    },
+  },
+  steps: {
+    columnGap: 16,
+    desktop: {
+      pillWidth: 16,
+      pillHeight: 26,
+      pillGap: 40,
+      lineHeight: 158,
+      lineLeft: 8,
+      textSize: 20,
+      numberSize: 14,
+    },
+    mobile: {
+      pillGap: 48,
+      lineHeight: 125.86,
+      textSize: 16,
+      numberSize: 12,
+    },
+  },
+  cta: {
+    height: 56,
+    paddingX: 28,
+    paddingY: 20,
+    fontSize: 14,
+    minWidth: 199,
+  },
+} as const;
+
 export type EducationFaqItem = {
   id: string;
   question: string;
   answer?: string;
 };
+
+/** Figma nodes 692:29045 (desktop) + 692:28787 (mobile) */
+export const educationFaqSpec = {
+  section: {
+    desktop: {
+      paddingX: 40,
+      paddingY: 104,
+      titleGap: 40,
+    },
+    mobile: {
+      paddingX: 16,
+      paddingY: 64,
+      titleGap: 32,
+    },
+    background: "#FFFFFF",
+  },
+  title: {
+    desktop: {
+      fontSize: 48,
+      align: "center" as const,
+    },
+    mobile: {
+      fontSize: 32,
+      align: "left" as const,
+    },
+    color: "#0A0A0A",
+  },
+  list: {
+    desktopWidth: 910,
+    itemGap: 16,
+  },
+  item: {
+    desktop: {
+      closedHeight: 56,
+      questionSize: 20,
+      answerSize: 20,
+      rowAlign: "center" as const,
+    },
+    mobile: {
+      questionSize: 16,
+      answerSize: 14,
+      rowAlign: "start" as const,
+    },
+    questionAnswerGap: 16,
+    questionIconGap: 8,
+    iconSize: 24,
+    dividerHeight: 0.5,
+    dividerColor: "#CCCCCC",
+  },
+} as const;
 
 export const educationFaqItems: EducationFaqItem[] = [
   {
