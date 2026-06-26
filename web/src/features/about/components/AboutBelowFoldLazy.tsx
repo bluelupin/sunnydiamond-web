@@ -6,7 +6,7 @@ import type {
   NormalizedAboutLegacy,
   NormalizedAboutTeam,
   NormalizedAboutTimeline,
-  NormalizedCraftingRarity,
+  NormalizedBrillianceSection,
 } from "@/services/about/about-page.types";
 import AboutBrillianceSkeleton from "./skeletons/AboutBrillianceSkeleton";
 import AboutFacesSkeleton from "./skeletons/AboutFacesSkeleton";
@@ -38,7 +38,7 @@ const AboutTimelineSection = dynamic(
 );
 
 type AboutBelowFoldLazyProps = {
-  craftingRarity: NormalizedCraftingRarity | null;
+  brillianceSection: NormalizedBrillianceSection | null;
   legacy: NormalizedAboutLegacy | null;
   team: NormalizedAboutTeam | null;
   craft: NormalizedAboutCraft | null;
@@ -46,14 +46,14 @@ type AboutBelowFoldLazyProps = {
 };
 
 const AboutBelowFoldLazy = ({
-  craftingRarity,
+  brillianceSection,
   legacy,
   team,
   craft,
   timeline,
 }: AboutBelowFoldLazyProps) => (
   <>
-    {craftingRarity ? <AboutBrillianceSection {...craftingRarity} /> : null}
+    {brillianceSection ? <AboutBrillianceSection {...brillianceSection} /> : null}
     {legacy ? <AboutSince1997Section {...legacy} /> : null}
     {team ? <AboutFacesSection {...team} /> : null}
     {craft ? <AboutHandcraftedSection {...craft} /> : null}

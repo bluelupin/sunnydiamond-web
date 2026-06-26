@@ -10,7 +10,7 @@ import type {
   NormalizedAboutTimeline,
   NormalizedBrandTagline,
   NormalizedCraftCard,
-  NormalizedCraftingRarity,
+  NormalizedBrillianceSection,
   NormalizedLegacyGalleryItem,
   NormalizedResponsiveImage,
   NormalizedTeamMember,
@@ -117,7 +117,7 @@ const mapHero = (hero?: StrapiAboutHero | null): NormalizedAboutHero | null => {
 
 const mapFeatureSlide = (
   slide?: StrapiAboutFeatureSlide | null,
-): NormalizedCraftingRarity | null => {
+): NormalizedBrillianceSection | null => {
   if (!slide) return null;
 
   const heading = cleanText(slide.heading);
@@ -131,9 +131,9 @@ const mapFeatureSlide = (
   return { heading, description, image };
 };
 
-const mapCraftingRarity = (
+const mapBrillianceSection = (
   section: StrapiAboutPageEntity["brillianceSection"],
-): NormalizedCraftingRarity | null => {
+): NormalizedBrillianceSection | null => {
   if (!section) return null;
 
   const slides = coerceComponentArray<StrapiAboutFeatureSlide>(section.featureSlide);
@@ -411,7 +411,7 @@ export function mapAboutPageData(
   return {
     seo: mapSeo(raw.seo),
     hero: mapHero(raw.hero),
-    craftingRarity: mapCraftingRarity(raw.brillianceSection),
+    brillianceSection: mapBrillianceSection(raw.brillianceSection),
     legacy: mapLegacy(raw.legacySection),
     team: mapTeam(raw.teamSection),
     craft: mapCraft(raw.craftSection, raw.craftMosaicSection),

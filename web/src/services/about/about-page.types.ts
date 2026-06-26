@@ -163,7 +163,7 @@ export type NormalizedAboutHero = {
   image: NormalizedResponsiveImage;
 };
 
-export type NormalizedCraftingRarity = {
+export type NormalizedBrillianceSection = {
   heading: string;
   description: string;
   image: NormalizedResponsiveImage;
@@ -235,7 +235,7 @@ export type NormalizedAboutTimeline = {
 export type NormalizedAboutPage = {
   seo: NormalizedAboutSeo | null;
   hero: NormalizedAboutHero | null;
-  craftingRarity: NormalizedCraftingRarity | null;
+  brillianceSection: NormalizedBrillianceSection | null;
   legacy: NormalizedAboutLegacy | null;
   team: NormalizedAboutTeam | null;
   craft: NormalizedAboutCraft | null;
@@ -247,7 +247,7 @@ export type NormalizedAboutPage = {
 export const EMPTY_ABOUT_PAGE: NormalizedAboutPage = {
   seo: null,
   hero: null,
-  craftingRarity: null,
+  brillianceSection: null,
   legacy: null,
   team: null,
   craft: null,

@@ -79,7 +79,7 @@ const Header = () => {
     setJewelleryMenuOpen(false);
   }, []);
 
-  const textClass = overlay ? "text-white" : "text-darkblack";
+  const textClass = overlay ? "text-white" : "text-white";
   const hoverClass = overlay ? "hover:text-ivory/70" : "hover:text-primary";
   const navLinkClass = (active = false) =>
     cn(

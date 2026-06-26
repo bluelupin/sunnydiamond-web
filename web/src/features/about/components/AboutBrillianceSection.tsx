@@ -8,11 +8,11 @@ import {
   craftingRarityLineSpec,
   useCraftingRarityScrollReveal,
 } from "../hooks/useCraftingRarityScrollReveal";
-import type { NormalizedCraftingRarity } from "@/services/about/about-page.types";
+import type { NormalizedBrillianceSection } from "@/services/about/about-page.types";
 
 const { image: imageSpec } = aboutCraftingRarityFigmaSpec;
 
-type AboutBrillianceSectionProps = NormalizedCraftingRarity;
+type AboutBrillianceSectionProps = NormalizedBrillianceSection;
 
 const AboutBrillianceSection = ({
   heading,

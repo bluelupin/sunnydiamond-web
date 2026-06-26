@@ -14,7 +14,7 @@ const AboutPage = ({ page }: AboutPageProps) => {
     <>
       {page.hero ? <AboutHeroSection {...page.hero} /> : null}
       <AboutBelowFoldLazy
-        craftingRarity={page.craftingRarity}
+        brillianceSection={page.brillianceSection}
         legacy={page.legacy}
         team={page.team}
         craft={page.craft}
