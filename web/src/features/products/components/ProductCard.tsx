@@ -68,10 +68,10 @@ const ProductCard = ({ product }: { product: Product }) => {
 
         {/* Name + price — white text */}
         <div className="relative z-10 flex w-full flex-col items-center justify-center gap-[12px] px-[12px]">
-          <p className="text-center font-gill text-[20px] font-normal leading-[110%] text-white">
+          <p className="text-center font-gill text-[20px] font-normal leading-110 text-white">
             {product.name}
           </p>
-          <p className="text-center font-gill text-[20px] font-semibold leading-[110%] text-white">
+          <p className="text-center font-gill text-[20px] font-semibold leading-110 text-white">
             ₹ {product.price.toLocaleString("en-IN")}
           </p>
         </div>
@@ -121,10 +121,10 @@ const ProductCard = ({ product }: { product: Product }) => {
 
       {/* Name + price */}
       <div className="flex w-full flex-col items-center justify-center gap-[12px] px-[12px]">
-        <p className="text-center font-gill text-[20px] font-light leading-[110%] darkblack">
+        <p className="text-center font-gill text-[20px] font-light leading-110 darkblack">
           {product.name}
         </p>
-        <p className="text-center font-gill text-[20px] font-semibold leading-[110%] darkblack">
+        <p className="text-center font-gill text-[20px] font-semibold leading-110 darkblack">
           ₹ {product.price.toLocaleString("en-IN")}
         </p>
       </div>
@@ -134,7 +134,7 @@ const ProductCard = ({ product }: { product: Product }) => {
       {/* Bestseller badge — straddles image / text boundary */}
       {product.bestseller && (
         <div className="absolute left-1/2 top-[331px] z-10 flex h-[36px] -translate-x-1/2 items-center justify-center bg-white px-[12px] drop-shadow-[0px_2px_2px_#c5a156]">
-          <span className="font-gill text-[14px] font-semibold leading-[110%] darkblack">
+          <span className="font-gill text-[14px] font-semibold leading-110 darkblack">
             BESTSELLER
           </span>
         </div>

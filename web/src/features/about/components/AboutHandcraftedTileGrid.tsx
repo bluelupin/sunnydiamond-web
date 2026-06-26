@@ -101,7 +101,7 @@ function CraftTextTile({
       />
       <h3
         className={cn(
-          "text-center font-larken font-light leading-[110%] text-darkblack",
+          "text-center font-larken font-light leading-110 text-darkblack",
           compact
             ? "max-w-[79.73%] text-sm text-base md:text-base lg:text-xl xl:text-2xl"
             : "text-sm text-base md:text-base lg:text-xl xl:text-2xl",

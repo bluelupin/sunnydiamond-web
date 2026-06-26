@@ -138,14 +138,14 @@ const JewelleryPanel = ({ onBack, onClose }: JewelleryPanelProps) => (
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center bg-[#F8F1F6]">
-                    <span className="font-gill text-[14px] leading-[110%] darkblack">
+                    <span className="font-gill text-[14px] leading-110 darkblack">
                       All Products
                     </span>
                   </div>
                 )}
               </div>
               {cat.image && (
-                <span className="font-gill text-[14px] leading-[110%] darkblack">
+                <span className="font-gill text-[14px] leading-110 darkblack">
                   {cat.label}
                 </span>
               )}

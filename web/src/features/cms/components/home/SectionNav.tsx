@@ -85,7 +85,7 @@ const SectionNav = () => {
 
               <span
                 className={cn(
-                  "whitespace-nowrap font-gill text-base font-normal uppercase leading-[110%] transition-colors duration-300",
+                  "whitespace-nowrap font-gill text-base font-normal uppercase leading-110 transition-colors duration-300",
                   isActive ? "text-[#ab863b]" : "text-darkblack group-hover:text-[#ab863b]",
                 )}
               >

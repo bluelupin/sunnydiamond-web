@@ -59,7 +59,7 @@ const HeroSection = ({ id }: HeroSectionProps) => {
         <div className="container relative flex h-full items-end justify-center px-4 pb-[60px] md:px-6">
           <div className="flex w-full max-w-886 animate-fade-in flex-col items-center gap-8 text-center">
             <div className="flex flex-col items-center gap-4">
-              <div className="inline-flex items-center gap-1 font-gill text-base font-normal leading-110 text-white">
+              <div className="inline-flex items-center gap-1 font-gill md:text-base text-sm font-normal leading-110 text-white">
                 <DiamondIcon className="size-5 shrink-0 text-white" />
                 <span>
                   {isShellLoading ? (

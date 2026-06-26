@@ -83,7 +83,7 @@ const Footer = () => {
                 key={column.id}
                 className="flex w-full flex-col gap-6"
               >
-                <p className="font-gill lg:text-xl md:text-lg text-base font-normal leading-[110%] text-darkblack">
+                <p className="font-gill lg:text-xl md:text-lg text-base font-normal leading-110 text-darkblack">
                   {column.title.toUpperCase()}
                 </p>
                 <ul className="flex flex-col gap-3">
@@ -91,7 +91,7 @@ const Footer = () => {
                     <li key={link.id}>
                       <Link
                         href={link.url}
-                        className="font-gill text-sm font-light leading-[110%] text-neutral500 transition-colors hover:text-darkMagenta"
+                        className="font-gill text-sm font-light leading-110 text-neutral500 transition-colors hover:text-darkMagenta"
                       >
                         {link.label}
                       </Link>
@@ -134,7 +134,7 @@ const Footer = () => {
             className="h-25 max-h-25 w-auto max-w-[320px] lg:max-w-[380px]"
           />
 
-          <p className="text-center font-gill text-sm font-light leading-[110%] text-neutral500 lg:absolute lg:left-1/2 lg:-translate-x-1/2 lg:whitespace-nowrap">
+          <p className="text-center font-gill text-sm font-light leading-110 text-neutral500 lg:absolute lg:left-1/2 lg:-translate-x-1/2 lg:whitespace-nowrap">
             {footerCopyright}
           </p>
         </div>

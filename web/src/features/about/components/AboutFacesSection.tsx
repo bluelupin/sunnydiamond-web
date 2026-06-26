@@ -24,12 +24,12 @@ const AboutFacesSection = ({ title, description, members }: AboutFacesSectionPro
         <div className="flex max-w-full flex-col items-center lg:gap-4 gap-3">
           <h2
             id="about-faces-title"
-            className="font-larken font-light leading-[110%] text-darkblack lg:text-[48px] md:text-[40px] text-[32px]"
+            className="font-larken font-light leading-110 text-darkblack lg:text-[48px] md:text-[40px] text-[32px]"
           >
             {title}
           </h2>
           {description ? (
-            <p className="font-gill font-light leading-[110%] text-neutral500 lg:text-xl md:text-lg text-base ">
+            <p className="font-gill font-light leading-110 text-neutral500 lg:text-xl md:text-lg text-base ">
               {description}
             </p>
           ) : null}
@@ -68,7 +68,7 @@ const AboutFacesSection = ({ title, description, members }: AboutFacesSectionPro
                 )}
               />
               <figcaption className="absolute bottom-0 left-0 z-10 w-full text-left opacity-100 transition-all duration-500 lg:translate-y-2 lg:px-[40px] md:px-9 px-8 lg:py-20 md:py-16 py-12 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100">
-                <p className="font-larken font-light xl:text-2xl lg:text-xl text-xl text-white leading-[110%]">
+                <p className="font-larken font-light xl:text-2xl lg:text-xl text-xl text-white leading-110">
                   {member.name}
                 </p>
                 {member.role ? (
