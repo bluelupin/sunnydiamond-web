@@ -36,7 +36,7 @@ export const aboutHeroFigmaSpec = {
   },
   /**
    * Figma component 692:26924 — Hero Scroll Collapse.
-   * Collapsed → Expanded on initial load (Smart Animate: width + Y together).
+   * Collapsed (static on load) → Expanded on first user scroll (Smart Animate: width + Y together).
    * Desktop expanded: full width, hero_inner top 100px (chalk band under nav).
    * Mobile expanded: full width, flush top — image swipe only.
    */

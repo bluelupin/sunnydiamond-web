@@ -30,7 +30,7 @@ const AboutHeroSection = ({ title, image }: AboutHeroSectionProps) => {
     <section
       id="about-hero"
       aria-labelledby="about-hero-title"
-      className="relative flex flex-col overflow-hidden bg-gray200 h-580 sm:h-580 lg:h-640 2xl:h-[85vh]"
+      className="relative flex flex-col overflow-hidden bg-white h-580 sm:h-580 lg:h-640 2xl:h-[85vh]"
     >
       <div className="relative flex-1 overflow-hidden p-0">
         <div
@@ -64,10 +64,6 @@ const AboutHeroSection = ({ title, image }: AboutHeroSectionProps) => {
               id="about-hero-title"
               className={cn(
                 "w-full max-w-886 text-center font-larken text-32 font-light leading-110 text-white sm:text-36 lg:text-48 2xl:text-5xl",
-                titleTransition,
-                titleVisible
-                  ? "translate-y-0 opacity-100"
-                  : "translate-y-3 opacity-0",
               )}
             >
               {title}

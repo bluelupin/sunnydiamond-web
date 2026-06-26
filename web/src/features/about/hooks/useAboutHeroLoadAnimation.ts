@@ -12,8 +12,8 @@ export interface AboutHeroLoadAnimationState {
 const { animation } = aboutHeroFigmaSpec;
 
 /**
- * Figma "Hero — Scroll Collapse" (692:26924) initial load:
- * State=2-Collapsed → State=1-Expanded via Smart Animate (width + Y).
+ * Figma "Hero — Scroll Collapse" (692:26924):
+ * State=2-Collapsed (static on load) → State=1-Expanded on first user scroll.
  */
 export function useAboutHeroLoadAnimation(): AboutHeroLoadAnimationState {
   const [expanded, setExpanded] = useState(false);
@@ -30,16 +30,41 @@ export function useAboutHeroLoadAnimation(): AboutHeroLoadAnimationState {
       return;
     }
 
-    const expandFrame = requestAnimationFrame(() => {
-      requestAnimationFrame(() => setExpanded(true));
-    });
+    let expandFrame = 0;
+    let titleTimer = 0;
+    let triggered = false;
 
-    const titleTimer = window.setTimeout(
-      () => setTitleVisible(true),
-      animation.titleDelayMs,
-    );
+    const triggerExpand = () => {
+      if (triggered) return;
+      triggered = true;
+
+      expandFrame = requestAnimationFrame(() => {
+        expandFrame = requestAnimationFrame(() => setExpanded(true));
+      });
+
+      titleTimer = window.setTimeout(
+        () => setTitleVisible(true),
+        animation.titleDelayMs,
+      );
+    };
+
+    if (window.scrollY > 0) {
+      triggerExpand();
+      return () => {
+        cancelAnimationFrame(expandFrame);
+        window.clearTimeout(titleTimer);
+      };
+    }
+
+    const onScroll = () => {
+      triggerExpand();
+      window.removeEventListener("scroll", onScroll);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
 
     return () => {
+      window.removeEventListener("scroll", onScroll);
       cancelAnimationFrame(expandFrame);
       window.clearTimeout(titleTimer);
     };
