@@ -6,8 +6,9 @@ import { products } from "@/features/products/data/products";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
 import { AlankaraCollection } from "@/shared/ui/collection/AlankaraCollection";
 import {
+  ALANKARA_FALLBACK_PRODUCTS,
   ALANKARA_FALLBACKS,
-  ALANKARA_THUMBNAIL_CROPS,
+  ALANKARA_PRODUCT_COUNT,
   type AlankaraCollectionProduct,
 } from "@/shared/ui/collection/alankaraCollection.types";
 import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
@@ -18,40 +19,33 @@ interface FeaturedCollectionSectionProps {
   id?: string;
 }
 
-function resolveAlankaraProduct(index: number, product?: (typeof products)[number]) {
-  if (index === 0) {
-    return {
-      image: ALANKARA_FALLBACKS.firstThumbnail,
-      thumbnailCrop: ALANKARA_THUMBNAIL_CROPS.first,
-    };
-  }
+function buildAlankaraProduct(
+  index: number,
+  productId: string,
+  cmsProduct?: FeaturedCollectionImage,
+): AlankaraCollectionProduct {
+  const catalogProduct = products.find((item) => item.id === productId);
+  const figmaFallback = ALANKARA_FALLBACK_PRODUCTS[index];
 
-  if (index === 1) {
-    return {
-      image: ALANKARA_FALLBACKS.secondThumbnail,
-      thumbnailCrop: ALANKARA_THUMBNAIL_CROPS.second,
-    };
-  }
+  const cmsImage = cmsProduct?.image ? resolveCmsMediaUrl(cmsProduct.image) : "";
+  const image = cmsImage || figmaFallback.image;
 
   return {
-    image: product?.image ?? ALANKARA_FALLBACKS.product,
+    id: productId,
+    name: cmsProduct?.name?.trim() || catalogProduct?.name || figmaFallback.name,
+    image,
+    thumbnailImage: figmaFallback.image,
+    thumbnailCrop: figmaFallback.thumbnailCrop,
+    desktopCrop: figmaFallback.desktopCrop,
+    href: `/product/${productId}`,
+    ctaLabel: homeContent.alankara.product.cta.label,
   };
 }
 
 function getFallbackProducts(): AlankaraCollectionProduct[] {
-  return homeContent.alankara.productIds.map((productId, index) => {
-    const product = products.find((item) => item.id === productId);
-    const resolved = resolveAlankaraProduct(index, product);
-
-    return {
-      id: productId,
-      name: product?.name ?? "Saptam Diamond Ring",
-      image: resolved.image,
-      thumbnailCrop: resolved.thumbnailCrop,
-      href: `/product/${productId}`,
-      ctaLabel: homeContent.alankara.product.cta.label,
-    };
-  });
+  return homeContent.alankara.productIds.map((productId, index) =>
+    buildAlankaraProduct(index, productId),
+  );
 }
 
 const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
@@ -85,25 +79,11 @@ const FeaturedCollectionSection = ({ id }: FeaturedCollectionSectionProps) => {
       ? featuredCollectionData.products
       : [];
 
-    const mappedProducts: AlankaraCollectionProduct[] = cmsProducts
-      .map((product: FeaturedCollectionImage, index: number) => {
-        const resolved =
-          index === 0 || index === 1
-            ? resolveAlankaraProduct(index)
-            : {
-                image: resolveCmsMediaUrl(product.image) || ALANKARA_FALLBACKS.product,
-              };
-
-        return {
-          id: product.id ?? product.name ?? "",
-          name: product.name?.trim() ?? "",
-          image: resolved.image,
-          thumbnailCrop: resolved.thumbnailCrop,
-          href: `/product/${product.id ?? ""}`,
-          ctaLabel: ctaLabel === fallback.cta.label ? "Shop Now" : ctaLabel,
-        };
-      })
-      .filter((product) => Boolean(product.id) && Boolean(product.name));
+    const productIds = homeContent.alankara.productIds.slice(0, ALANKARA_PRODUCT_COUNT);
+    const mappedProducts: AlankaraCollectionProduct[] = productIds.map((productId, index) => {
+      const cmsProduct = cmsProducts[index] as FeaturedCollectionImage | undefined;
+      return buildAlankaraProduct(index, productId, cmsProduct);
+    });
 
     return {
       title: sectionTitle,

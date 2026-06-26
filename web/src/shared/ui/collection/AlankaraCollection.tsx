@@ -13,6 +13,7 @@ import {
   ALANKARA_DESKTOP_PRODUCT_CROP,
   ALANKARA_HERO_DESKTOP_CROP,
   ALANKARA_MOBILE_PRODUCT_CROP,
+  ALANKARA_DEFAULT_ACTIVE_INDEX,
   ALANKARA_THUMBNAIL_CROPS,
   type AlankaraCollectionProduct,
   type AlankaraCollectionProps,
@@ -238,7 +239,7 @@ function ProductCarouselPanel({
   imagePriority?: boolean;
 }) {
   const isMobile = variant === "mobile";
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(ALANKARA_DEFAULT_ACTIVE_INDEX);
   const trackRef = useRef<HTMLDivElement>(null);
   const dragState = useRef({ active: false, startX: 0, deltaX: 0, pointerId: 0 });
   const [dragOffset, setDragOffset] = useState(0);

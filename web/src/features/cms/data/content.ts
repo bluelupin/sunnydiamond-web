@@ -44,7 +44,7 @@ export const homeContent = {
         "Guided by tradition and perfected by expertise, our craftsmen bring every diamond to life with meticulous attention to detail.",
       cta: { label: "View Collection", to: "/products" },
     },
-    productIds: ["1", "5", "2", "4"],
+    productIds: ["1", "3", "5", "6", "2"],
     product: {
       cta: { label: "Discover" },
     },
