@@ -87,7 +87,7 @@ function CraftTextTile({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center gap-3 bg-chalkCard",
+        "flex flex-col items-center justify-center sm:gap-3 gap-2 bg-chalkCard p-2",
         className,
       )}
     >
@@ -178,7 +178,7 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
           {...tileProps(0, 1, 5)}
           className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
-          <CraftTextTile title={cardByIndex(1)} className="size-full" />
+          <CraftTextTile title={cardByIndex(0)} className="size-full" />
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(0, 2, 5)}
@@ -230,7 +230,7 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
           {...tileProps(2, 0, 3)}
           className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
-          <CraftTextTile title={cardByIndex(0)} className="size-full" />
+          <CraftTextTile title={cardByIndex(2)} className="size-full" />
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(2, 1, 3)}
@@ -242,7 +242,7 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
           {...tileProps(2, 2, 3)}
           className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
-          <CraftTextTile title={cardByIndex(2)} className="size-full" />
+          <CraftPhotoTile className="size-full" />
         </AnimatedTile>
       </div>
     </div>
