@@ -1,322 +1,286 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import OptimizedImage from "@/shared/ui/OptimizedImage";
-import ScrollReveal from "@/shared/ui/ScrollReveal";
-import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 import LeftArrow from "@/assets/Icons/LeftArrow";
 import RightArrow from "@/assets/Icons/RightArrow";
+import ScrollReveal from "@/shared/ui/ScrollReveal";
+import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
+import { getFeaturedProducts } from "@/features/products/data/products";
+import { moreForYouTransparentImages } from "@/features/products/data/moreForYouContent";
+
+const IMAGE_QUALITY = 90;
+
+const FALLBACK_TITLE = "Your Diamond Awaits";
+const FALLBACK_DESCRIPTION =
+  "Traditional mastery bringing every diamond to radiant, eternal life.";
 
 const formatPrice = (price: number) =>
   new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(price);
+
+type FeaturedCarouselItem = {
+  id: string | number;
+  name: string;
+  price: number | null;
+  image: string;
+  href: string;
+};
 
 interface FeaturedProductsSectionProps {
   id?: string;
 }
 
-const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
-  const { data: shoppingData, isLoading: isShoppingLoading } = useHomepageShoppingBlocks();
-  const featuredProductsData = shoppingData?.homepage?.featuredProductsSection || shoppingData?.featuredProductsSection;
-  const sectionTitle = featuredProductsData?.sectionTitle ?? "";
-  const description = featuredProductsData?.description ?? "";
+function getFallbackItems(): FeaturedCarouselItem[] {
+  return getFeaturedProducts().slice(0, 6).map((product, index) => ({
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    href: `/product/${product.id}`,
+    image: moreForYouTransparentImages[index % moreForYouTransparentImages.length],
+  }));
+}
 
-  const items = useMemo(() => {
-    const products = Array.isArray(featuredProductsData?.products) ? featuredProductsData?.products : [];
-    return products
-      .map((p: any) => ({
-        id: p?.id,
-        name: p?.name ?? "",
-        price: typeof p?.price === "number" ? p?.price : null,
-        imageUrl: getCmsAssetUrl(p?.image?.data?.attributes?.url),
-      }))
-      .filter((p: any) => Boolean(p.id) && Boolean(p.name) && Boolean(p.imageUrl));
-  }, [featuredProductsData?.products]);
+function FeaturedProductsHeader({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="flex w-full flex-col items-center gap-3 text-center lg:gap-4">
+      <ScrollReveal
+        as="h2"
+        delayMs={0}
+        className="font-larken text-32 font-light leading-110 text-darkblack lg:text-48"
+      >
+        {title}
+      </ScrollReveal>
+      <ScrollReveal
+        delayMs={80}
+        className="max-w-[306px] font-gill text-base font-light leading-110 text-neutral500 lg:max-w-none lg:text-20"
+      >
+        {description}
+      </ScrollReveal>
+    </div>
+  );
+}
 
-  const total = items.length;
+function FeaturedProductsCarousel({
+  items,
+  ctaLabel,
+  sectionLabel,
+}: {
+  items: FeaturedCarouselItem[];
+  ctaLabel: string;
+  sectionLabel: string;
+}) {
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  // Start from second item
-  const [index, setIndex] = useState(1);
-
-  const trackRef = useRef<HTMLDivElement>(null);
-  const trackWidthRef = useRef(1);
-
-  const dragState = useRef({
-    active: false,
-    startX: 0,
-    deltaX: 0,
-    pointerId: 0,
-    width: 0,
-  });
-
-  const [dragOffset, setDragOffset] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-
-  useEffect(() => {
-    if (total <= 1) {
-      setIndex(0);
-    }
-  }, [total]);
-
-  useEffect(() => {
-    const el = trackRef.current;
-    if (!el) return;
-
-    trackWidthRef.current = el.clientWidth || 1;
-
-    const ro = new ResizeObserver((entries) => {
-      const w = entries[0]?.contentRect.width;
-
-      if (w) trackWidthRef.current = w;
-    });
-
-    ro.observe(el);
-
-    return () => ro.disconnect();
-  }, []);
-
-  // Infinite slider
-  const go = useCallback(
-    (dir: -1 | 1) => {
-      setIndex((prev) => {
-        if (dir === 1) {
-          return (prev + 1) % total;
-        }
-
-        return (prev - 1 + total) % total;
-      });
+  const scrollTo = useCallback(
+    (index: number) => {
+      if (items.length === 0) return;
+      setActiveIndex((index + items.length) % items.length);
     },
-    [total]
+    [items.length],
   );
 
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!trackRef.current) return;
+  if (items.length === 0) return null;
 
-    trackRef.current.setPointerCapture(e.pointerId);
+  const prevIndex = (activeIndex - 1 + items.length) % items.length;
+  const nextIndex = (activeIndex + 1) % items.length;
+  const activeItem = items[activeIndex];
+  const prevItem = items[prevIndex];
+  const nextItem = items[nextIndex];
 
-    dragState.current = {
-      active: true,
-      startX: e.clientX,
-      deltaX: 0,
-      pointerId: e.pointerId,
-      width: trackWidthRef.current || trackRef.current.clientWidth || 1,
-    };
+  return (
+    <div
+      role="region"
+      aria-roledescription="carousel"
+      aria-label={sectionLabel}
+      className="relative h-[303px] w-full overflow-hidden lg:h-[411px]"
+    >
+      <div className="absolute left-0 top-0 h-[237px] w-[160px] overflow-hidden opacity-60 lg:hidden">
+        <div className="relative mx-auto size-[262px] translate-x-[28px] -translate-y-[72px]">
+          <Image
+            src={prevItem.image}
+            alt=""
+            fill
+            quality={IMAGE_QUALITY}
+            className="object-contain"
+            sizes="262px"
+            aria-hidden
+          />
+        </div>
+      </div>
 
-    setIsDragging(true);
-  };
+      <div className="absolute right-0 top-0 h-[237px] w-[160px] overflow-hidden opacity-60 lg:hidden">
+        <div className="relative mx-auto size-[262px] translate-x-[28px] -translate-y-[72px]">
+          <Image
+            src={nextItem.image}
+            alt=""
+            fill
+            quality={IMAGE_QUALITY}
+            className="object-contain"
+            sizes="262px"
+            aria-hidden
+          />
+        </div>
+      </div>
 
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragState.current.active) return;
+      <div className="pointer-events-none absolute left-[-220px] top-0 hidden h-[259px] w-[600px] overflow-hidden lg:block">
+        <div className="relative h-[410px] w-full mix-blend-luminosity">
+          <div className="absolute left-[calc(50%-61px)] top-[calc(50%-71px)] size-[434px]">
+            <Image
+              src={prevItem.image}
+              alt=""
+              fill
+              quality={IMAGE_QUALITY}
+              className="object-contain"
+              sizes="434px"
+              aria-hidden
+            />
+          </div>
+        </div>
+      </div>
 
-    const dx = e.clientX - dragState.current.startX;
+      <div className="absolute left-1/2 top-0 flex w-full max-w-[260px] -translate-x-1/2 flex-col items-center lg:w-[600px] lg:max-w-[600px]">
+        <div className="relative h-[170px] w-full overflow-hidden lg:h-[259px]">
+          <div className="absolute left-1/2 top-1/2 size-[min(489px,120vw)] -translate-x-1/2 -translate-y-1/2 lg:size-[774px]">
+            <Image
+              src={activeItem.image}
+              alt={activeItem.name}
+              fill
+              quality={IMAGE_QUALITY}
+              className="object-contain"
+              sizes="(max-width: 1024px) 90vw, 774px"
+            />
+          </div>
 
-    dragState.current.deltaX = dx;
+          <div className="absolute left-1/2 top-1/2 flex w-[min(487px,calc(100%-48px))] -translate-x-1/2 -translate-y-1/2 items-center justify-between max-lg:top-[calc(50%+89px)] max-lg:w-full max-lg:max-w-[311px] max-lg:gap-[255px]">
+            <button
+              type="button"
+              aria-label="Previous product"
+              onClick={() => scrollTo(activeIndex - 1)}
+              className="pointer-events-auto inline-flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70"
+            >
+              <LeftArrow className="h-[17px] w-[18px]" />
+            </button>
+            <button
+              type="button"
+              aria-label="Next product"
+              onClick={() => scrollTo(activeIndex + 1)}
+              className="pointer-events-auto inline-flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70"
+            >
+              <RightArrow className="h-[17px] w-[18px]" />
+            </button>
+          </div>
+        </div>
 
-    setDragOffset(dx);
-  };
+        <div className="mt-3 flex flex-col items-center gap-4 lg:mt-3 lg:gap-6">
+          <div className="flex flex-col items-center gap-4 lg:gap-4">
+            <p className="font-gill text-base leading-110 text-darkblack lg:text-20">
+              {activeItem.name}
+            </p>
+            {typeof activeItem.price === "number" ? (
+              <p className="font-gill text-base font-normal leading-110 text-darkblack lg:text-20">
+                <span aria-hidden>₹ </span>
+                {formatPrice(activeItem.price)}
+              </p>
+            ) : null}
+          </div>
+          <Link
+            href={activeItem.href}
+            className="btn-border-slide inline-flex h-14 min-w-[122px] items-center justify-center border-[0.8px] border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack lg:h-14"
+          >
+            {ctaLabel}
+          </Link>
+        </div>
+      </div>
 
-  const endDrag = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragState.current.active) return;
+      <div className="pointer-events-none absolute right-[-220px] top-0 hidden h-[259px] w-[600px] overflow-hidden lg:block">
+        <div className="relative h-[240px] w-full">
+          <div className="absolute left-[calc(50%+75px)] top-[calc(50%+15px)] size-[426px] -translate-x-1/2 -translate-y-1/2">
+            <Image
+              src={nextItem.image}
+              alt=""
+              fill
+              quality={IMAGE_QUALITY}
+              className="object-contain"
+              sizes="426px"
+              aria-hidden
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-    const { deltaX, width } = dragState.current;
+const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
+  const { data: shoppingData, isLoading: isShoppingLoading } = useHomepageShoppingBlocks();
+  const featuredProductsData =
+    shoppingData?.homepage?.featuredProductsSection || shoppingData?.featuredProductsSection;
 
-    dragState.current.active = false;
+  const sectionTitle = featuredProductsData?.sectionTitle?.trim() || FALLBACK_TITLE;
+  const description = featuredProductsData?.description?.trim() || FALLBACK_DESCRIPTION;
+  const ctaLabel = featuredProductsData?.cta?.label?.trim() || "Discover";
 
-    try {
-      trackRef.current?.releasePointerCapture(e.pointerId);
-    } catch {
-      //
-    }
+  const items = useMemo(() => {
+    const products = Array.isArray(featuredProductsData?.products)
+      ? featuredProductsData.products
+      : [];
 
-    setIsDragging(false);
-    setDragOffset(0);
+    const mapped: FeaturedCarouselItem[] = products
+      .map((product, index) => ({
+        id: product?.id ?? index,
+        name: product?.name ?? "",
+        price: typeof product?.price === "number" ? product.price : null,
+        image: getCmsAssetUrl(product?.image?.data?.attributes?.url) || "",
+        href: `/product/${product?.id ?? ""}`,
+      }))
+      .filter((product) => Boolean(product.name) && Boolean(product.image));
 
-    const threshold = Math.max(40, width * 0.15);
-
-    // Infinite swipe
-    if (deltaX <= -threshold) go(1);
-    else if (deltaX >= threshold) go(-1);
-  };
+    return mapped.length ? mapped : getFallbackItems();
+  }, [featuredProductsData?.products]);
 
   if (isShoppingLoading) {
     return (
       <section
         id={id}
-        className="bg-gray200 py-6 sm:py-10 md:py-16 lg:py-20 overflow-hidden h-auto flex flex-col items-center justify-center"
+        className="overflow-hidden bg-white px-4 py-16 lg:px-40 lg:py-104"
         aria-label="Featured diamond carousel"
         aria-busy="true"
       >
-        <div className="text-center md:max-w-2xl sm:max-w-xl max-w-full mx-auto md:mb-10 sm:mb-8 mb-6 px-5">
-          <div className="md:mb-5 mb-3 h-10 w-72 bg-gray300 rounded mx-auto" aria-hidden />
-          <div className="h-5 w-80 bg-gray300 rounded mx-auto" aria-hidden />
-        </div>
-        <div className="relative w-full">
-          <div className="relative w-full mx-auto h-[250px] sm:h-[310px] md:h-[350px] lg:h-[336px]">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 h-full w-[80vw] sm:w-[55vw] md:w-[42vw] lg:w-[36vw] bg-gray300/70 rounded" aria-hidden />
+        <div className="mx-auto flex w-full max-w-1360 flex-col items-center gap-6 lg:gap-40">
+          <div className="flex w-full flex-col items-center gap-3 text-center lg:gap-4">
+            <div className="h-[35px] w-[283px] animate-pulse rounded bg-gray200 lg:h-[53px] lg:w-[424px]" aria-hidden />
+            <div className="h-[36px] w-[306px] animate-pulse rounded bg-gray200 lg:h-[22px] lg:w-[517px]" aria-hidden />
           </div>
-          <div className="md:mt-12 mt-8 flex items-center justify-center gap-6">
-            <div className="h-10 w-10 bg-gray300 rounded-full" aria-hidden />
-            <div className="h-10 w-10 bg-gray300 rounded-full" aria-hidden />
+          <div className="relative h-[303px] w-full lg:h-[411px]">
+            <div className="absolute left-1/2 top-0 h-[170px] w-[260px] -translate-x-1/2 animate-pulse rounded bg-gray200 lg:h-[259px] lg:w-[600px]" aria-hidden />
           </div>
         </div>
       </section>
     );
   }
 
-  // if (!section?.sectionTitle || !section?.description || total === 0) return null;
-
-  const dragPct = trackWidthRef.current
-    ? dragOffset / trackWidthRef.current
-    : 0;
-
   return (
     <section
       id={id}
-      className="bg-gray200 py-6 sm:py-10 md:py-16 lg:py-20 overflow-hidden h-auto flex flex-col items-center justify-center"
+      className="overflow-hidden bg-white px-4 py-16 lg:px-40 lg:py-104"
       aria-label="Featured diamond carousel"
     >
-      {/* Heading */}
-      <div className="text-center md:max-w-2xl sm:max-w-xl max-w-full sm:mx-auto md:mb-10 sm:mb-8 mb-6 px-5">
-        <ScrollReveal as="h2" delayMs={0} className="md:mb-5 mb-3 text-foreground lg:text-5xl md:text-4xl text-[32px] font-larken font-light tracking-[0%] leading-[100%] text-darkblack text-center">
-          {sectionTitle || "Your Diamond Awaits (F)"}
-        </ScrollReveal>
-
-        <ScrollReveal delayMs={80} className="text-base md:text-lg lg:text-xl text-darkblack font-light font-gill tracking-[1%] leading-[100%] text-center">
-          {description || "Traditional mastery bringing every diamond to radiant, eternal life. (F)"}
-        </ScrollReveal>
+      <div className="mx-auto flex w-full max-w-1360 flex-col items-center gap-6 lg:gap-40">
+        <FeaturedProductsHeader title={sectionTitle} description={description} />
+        <FeaturedProductsCarousel
+          items={items}
+          ctaLabel={ctaLabel}
+          sectionLabel={sectionTitle}
+        />
       </div>
-
-      {/* Slider */}
-      {/* <div className="relative w-full">
-        <div
-          ref={trackRef}
-          role="region"
-          aria-roledescription="carousel"
-          aria-label={section?.sectionTitle ?? "Featured products"}
-          tabIndex={0}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={endDrag}
-          onPointerCancel={endDrag}
-          className={`relative w-full mx-auto select-none touch-pan-y outline-none h-[250px] sm:h-[310px] md:h-[350px] lg:h-[336px] ${isDragging ? "cursor-grabbing" : "cursor-grab"
-            }`}
-          style={{ WebkitUserSelect: "none" }}
-        >
-          {items.map((p, i) => {
-            // Infinite distance calculation
-            let dist = i - index;
-
-            if (dist > total / 2) dist -= total;
-            if (dist < -total / 2) dist += total;
-
-            dist -= dragPct;
-
-            const absDist = Math.abs(dist);
-
-            if (absDist > 2.2) return null;
-
-            const translateXVw = dist * 47;
-            const scale = Math.max(0.7, 1 - absDist * 0.18);
-            const opacity = Math.max(0, 1 - absDist * 0.55);
-
-            const isActive = i === index;
-
-            const zIndex = 100 - Math.round(absDist * 10);
-
-            return (
-              <div
-                key={p.id}
-                aria-roledescription="slide"
-                aria-hidden={!isActive}
-                className="absolute top-0 left-1/2 h-full w-[80vw] sm:w-[55vw] md:w-[42vw] lg:w-[36vw] -translate-x-1/2 flex flex-col items-center justify-start"
-                style={{
-                  transform: `translate3d(calc(-50% + ${translateXVw}vw), 0, 0) scale(${scale})`,
-                  opacity,
-                  zIndex,
-                  transition: isDragging
-                    ? "none"
-                    : "transform 0.65s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease",
-                  pointerEvents: isActive ? "auto" : "none",
-                  willChange: "transform, opacity",
-                  filter: isActive ? "none" : "blur(2px)",
-                }}
-              >
-                <Link
-                  href={`/product/${p.id ?? ""}`}
-                  className="block w-full overflow-hidden group md:h-278 h-206"
-                  aria-label={`View ${p.name}`}
-                  draggable={false}
-                  onClick={(e) => {
-                    if (Math.abs(dragState.current.deltaX) > 5)
-                      e.preventDefault();
-
-                    if (!isActive) e.preventDefault();
-                  }}
-                  tabIndex={isActive ? 0 : -1}
-                >
-                  <OptimizedImage
-                    src={p.imageUrl ?? ""}
-                    alt={p.name}
-                    width={1200}
-                    height={1200}
-                    className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-[1.02] pointer-events-none"
-                  />
-                </Link>
-
-                <div
-                  className="mt-4 flex flex-col items-center text-center"
-                  style={{
-                    opacity: isActive ? 1 : 0,
-                    transition: "opacity 0.4s ease",
-                  }}
-                >
-                  <h3 className="md:mb-4 sm:mb-3 mb-2 text-base md:text-lg lg:text-xl text-darkblack font-light font-gill tracking-[1%] leading-[100%]">
-                    {p.name}
-                  </h3>
-
-                  <p className="md:mb-6 sm:mb-5 mb-4 text-base md:text-lg lg:text-xl text-darkblack font-normal tracking-[1%] font-gill">
-                    <span aria-hidden className="mr-0.5">
-                      ₹
-                    </span>
-
-                    <span className="font-medium">
-                      {typeof p.price === "number" ? formatPrice(p.price) : ""}
-                    </span>
-                  </p>
-
-                  <Link
-                    href={`/product/${p.id ?? ""}`}
-                    tabIndex={isActive ? 0 : -1}
-                    className="btn-border-slide inline-flex h-12 items-center justify-center border-[0.8px] border-darkblack px-8 font-gill text-sm uppercase tracking-[1.8%] text-darkblack md:h-50 md:text-base"
-                  >
-                    {section?.cta?.label ?? ""}
-                  </Link>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        <div className="md:mt-12 mt-8 flex items-center justify-center gap-6">
-          <button
-            type="button"
-            onClick={() => go(-1)}
-            aria-label="Previous"
-            className="text-black transition-opacity hover:opacity-70"
-          >
-            <LeftArrow className="md:w-8 md:h-8 w-6 h-6" />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => go(1)}
-            aria-label="Next"
-            className="text-black transition-opacity hover:opacity-70"
-          >
-            <RightArrow className="md:w-8 md:h-8 w-6 h-6" />
-          </button>
-        </div>
-      </div> */}
     </section>
   );
 };
