@@ -59,7 +59,7 @@ const AboutHeroSection = ({ title, image }: AboutHeroSectionProps) => {
 
           <MediaContentOverlay gradient={aboutHeroFigmaSpec.overlay.gradient} />
 
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-16 lg:pb-75">
+          <div data-aos="fade-up" className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-16 lg:pb-75">
             <h1
               id="about-hero-title"
               className={cn(

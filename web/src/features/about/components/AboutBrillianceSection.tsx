@@ -34,7 +34,7 @@ const AboutBrillianceSection = ({
             data-reveal-mask="heading"
             className="w-full overflow-hidden pt-0 lg:mb-12 md:mb-9 mb-8"
           >
-            <h2
+            <h2 data-aos="fade-up"
               id="about-crafting-rarity-title"
               className="whitespace-pre-line font-larken text-40 font-light leading-110 text-darkblack sm:text-56 md:text-72 lg:text-90"
             >
@@ -43,7 +43,7 @@ const AboutBrillianceSection = ({
           </div>
 
           <div data-reveal-mask="image" className="mx-auto w-full overflow-hidden">
-            <div className="mx-auto h-auto w-220 sm:h-280 sm:w-280 lg:h-354 lg:w-354 2xl:w-400 2xl:h-400">
+            <div data-aos="fade-up" className="mx-auto h-auto w-220 sm:h-280 sm:w-280 lg:h-354 lg:w-354 2xl:w-400 2xl:h-400">
               <ResponsiveImage
                 desktopSrc={image.desktopUrl}
                 mobileSrc={image.mobileUrl}
@@ -82,7 +82,7 @@ const AboutBrillianceSection = ({
             </div>
           </div>
 
-          <div
+          <div data-aos="fade-up"
             data-reveal-mask="body"
             className="mx-auto mt-2.5 max-w-full md:max-w-[450px] lg:max-w-557 2xl:max-w-[620px] overflow-hidden"
           >

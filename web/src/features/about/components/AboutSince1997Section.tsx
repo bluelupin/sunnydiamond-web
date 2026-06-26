@@ -42,7 +42,7 @@ function GalleryImage({
       className={cn("flex shrink-0 flex-col gap-3", figureClassName)}
       {...(dataSince1997Last ? { "data-since1997-last-image": true } : {})}
     >
-      <div className={cn("overflow-hidden", frameClassName)}>
+      <div data-aos="fade-up" className={cn("overflow-hidden", frameClassName)}>
         <ResponsiveImage
           desktopSrc={desktopUrl}
           mobileSrc={mobileUrl}
@@ -55,7 +55,7 @@ function GalleryImage({
         />
       </div>
       {caption ? (
-        <figcaption className={cn("font-gill leading-110 text-darkblack", captionClassName)}>
+        <figcaption data-aos="fade-up" className={cn("font-gill leading-110 text-darkblack", captionClassName)}>
           {caption}
         </figcaption>
       ) : null}
@@ -88,7 +88,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
       <div data-since1997-mode="desktop" className="hidden lg:block">
         <div className="sticky top-8 flex flex-col overflow-hidden bg-white pt-100">
           <PageContainer className="shrink-0 2xl:pb-11 lg:pb-[40px] pb-8">
-            <h2
+            <h2 data-aos="fade-up"
               id="about-since-1997-title"
               className="font-larken text-3xl lg:text-48 text-56 font-light leading-110 text-darkblack"
             >
@@ -167,11 +167,11 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
         <div className="py-16 md:py-20">
           <PageContainer className="pb-0">
             <div className="mb-8 space-y-3">
-              <h2 className="font-larken text-32 font-light leading-110 text-darkblack md:text-40">
+              <h2 data-aos="fade-up" className="font-larken text-32 font-light leading-110 text-darkblack md:text-40">
                 {title}
               </h2>
               {story ? (
-                <p className="font-gill text-base font-light leading-110 text-neutral500 md:text-lg">
+                <p data-aos="fade-up" className="font-gill text-base font-light leading-110 text-neutral500 md:text-lg">
                   {story}
                 </p>
               ) : null}
