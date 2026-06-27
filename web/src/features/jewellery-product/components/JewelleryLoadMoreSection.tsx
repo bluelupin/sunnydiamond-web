@@ -51,16 +51,15 @@ const JewelleryLoadMoreSection = ({
           </p>
 
           <div
-            className="relative w-full overflow-hidden bg-neutral300"
+            className="flex w-full items-center overflow-hidden bg-neutral300"
             style={{ height: `${progressTrackHeight}px` }}
             aria-hidden
           >
             <div
-              className="absolute left-0 top-1/2 bg-darkblack transition-all duration-500"
+              className="bg-darkblack transition-all duration-500"
               style={{
                 width: `${progress}%`,
                 height: `${progressFillHeight}px`,
-                transform: "translateY(-50%)",
               }}
             />
           </div>

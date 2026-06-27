@@ -49,10 +49,10 @@ const GuaranteeItem = ({ iconSrc, label }: { iconSrc: string; label: string }) =
     }}
   >
     <div
-      className="relative shrink-0"
+      className="shrink-0"
       style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
     >
-      <Image src={iconSrc} alt="" fill className="object-contain" aria-hidden />
+      <Image src={iconSrc} alt="" width={iconSize} height={iconSize} className="size-full object-contain" aria-hidden />
     </div>
     <p
       className="font-gill font-normal leading-110 text-darkblack"
@@ -74,8 +74,8 @@ const JewelleryGuaranteesSection = () => {
               className="list-none flex w-full flex-col items-center justify-center text-center"
               style={{ gap: `${itemGap}px`, padding: `${itemPadding}px` }}
             >
-              <div className="relative h-[40px] w-[40px] shrink-0">
-                <Image src={iconSrc} alt="" fill className="object-contain" aria-hidden />
+              <div className="flex size-10 shrink-0 items-center justify-center">
+                <Image src={iconSrc} alt="" width={40} height={40} className="size-full object-contain" aria-hidden />
               </div>
               <p className="font-gill text-base font-normal leading-110 text-darkblack">{label}</p>
             </li>

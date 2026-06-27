@@ -23,7 +23,7 @@ const desktopSpec = jewelleryListingToolbarSpec;
 const mobileSpec = jewelleryListingMobileFooterSpec;
 
 const FilterIcon = ({ size }: { size: number }) => (
-  <span className="relative shrink-0" style={{ width: size, height: size }}>
+  <span className="inline-flex shrink-0 items-center justify-center" style={{ width: size, height: size }}>
     <Image
       src={jewelleryListingToolbarAssets.filterIcon}
       alt=""
@@ -38,7 +38,7 @@ const FilterIcon = ({ size }: { size: number }) => (
 const SortChevron = ({ size, mobile = false }: { size: number; mobile?: boolean }) => (
   <span
     className={cn(
-      "relative inline-flex shrink-0 items-center justify-center overflow-hidden",
+      "inline-flex shrink-0 items-center justify-center overflow-hidden",
       mobile && "rotate-180",
     )}
     style={{ width: size, height: size }}
@@ -105,7 +105,7 @@ const SortControl = ({
   <>
     {/* Desktop — native select overlay (Figma 692:4239) */}
     <div
-      className="relative hidden items-center justify-center md:inline-flex"
+      className="hidden grid-cols-1 grid-rows-1 items-center justify-center md:grid"
       style={{
         gap,
         color,
@@ -116,16 +116,16 @@ const SortControl = ({
       }}
     >
       <span
-        className="pointer-events-none whitespace-nowrap font-gill font-normal uppercase leading-110"
+        className="pointer-events-none col-start-1 row-start-1 inline-flex items-center gap-3 whitespace-nowrap font-gill font-normal uppercase leading-110"
         style={{ fontSize }}
       >
         Sort By
+        <SortChevron size={iconSize} />
       </span>
-      <SortChevron size={iconSize} />
       <select
         value={sortValue}
         onChange={(event) => onSortChange(event.target.value)}
-        className="absolute inset-0 cursor-pointer appearance-none bg-transparent opacity-0"
+        className="col-start-1 row-start-1 z-10 size-full cursor-pointer appearance-none bg-transparent opacity-0"
         aria-label="Sort products"
       >
         {sortOptions.map((option) => (
@@ -182,18 +182,18 @@ const SortDrawer = ({ open, sortValue, onClose, onSelect }: SortDrawerProps) => 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[70] md:hidden">
+    <div className="fixed inset-0 z-[70] flex flex-col md:hidden">
       <button
         type="button"
         aria-label="Close sort options"
-        className="absolute inset-0 bg-[#1E1E1E]/25 backdrop-blur-[10px] animate-in fade-in duration-300"
+        className="min-h-0 flex-1 bg-[#1E1E1E]/25 backdrop-blur-[10px] animate-in fade-in duration-300"
         onClick={onClose}
       />
       <aside
         role="dialog"
         aria-modal="true"
         aria-label="Sort products"
-        className="absolute inset-x-0 bottom-0 animate-in slide-in-from-bottom duration-300"
+        className="shrink-0 animate-in slide-in-from-bottom duration-300"
       >
         <div className="bg-white shadow-2xl">
           <div className="flex items-center justify-between border-b border-neutral300/50 px-6 py-6">

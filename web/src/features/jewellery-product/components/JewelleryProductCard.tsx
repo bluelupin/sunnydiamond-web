@@ -8,7 +8,6 @@ import { formatJewelleryPrice } from "../utils/formatPrice";
 import { useCardImageSwipe } from "../hooks/useCardImageSwipe";
 import {
   jewelleryListingProductCardMobileSpec,
-  jewelleryListingProductCardSpec,
 } from "../data/content";
 import type { StaticImageData } from "next/image";
 
@@ -59,48 +58,13 @@ const ProductCopy = ({ title, price, href, white = false, className }: ProductCo
 );
 
 const ProductImage = ({ src, alt }: { src: string | StaticImageData; alt: string }) => (
-  <div className="relative h-[110px] w-full shrink-0 overflow-hidden md:h-[303px]">
-    {/* Mobile — Figma 692:4174 / 692:4901: product frame in 110px clip */}
-    <div
-      className="absolute left-1/2 top-[calc(50%-10px)] -translate-x-1/2 -translate-y-1/2 md:hidden"
-      style={{
-        width: `${jewelleryListingProductCardMobileSpec.imageInnerSize}px`,
-        height: `${jewelleryListingProductCardMobileSpec.imageInnerSize}px`,
-      }}
-    >
-      <OptimizedImage
-        src={src}
-        alt={alt}
-        className="pointer-events-none size-full object-cover"
-        sizes="50vw"
-      />
-    </div>
-
-    {/* Desktop — Figma 692:4146: scaled product in 303px clip */}
-    <div
-      className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:block"
-      style={{
-        height: `${jewelleryListingProductCardSpec.imageInnerHeight}px`,
-        width: `${jewelleryListingProductCardSpec.imageInnerWidth}px`,
-      }}
-    >
-      <div
-        className="pointer-events-none absolute max-w-none"
-        style={{
-          height: `${jewelleryListingProductCardSpec.imageScaleHeight}%`,
-          width: `${jewelleryListingProductCardSpec.imageScaleWidth}%`,
-          left: `${jewelleryListingProductCardSpec.imageOffsetLeft}%`,
-          top: `${jewelleryListingProductCardSpec.imageOffsetTop}%`,
-        }}
-      >
-        <OptimizedImage
-          src={src}
-          alt={alt}
-          className="size-full object-cover"
-          sizes="33vw"
-        />
-      </div>
-    </div>
+  <div className="flex h-[110px] w-full shrink-0 items-center justify-center overflow-hidden md:h-[303px]">
+    <OptimizedImage
+      src={src}
+      alt={alt}
+      className="pointer-events-none shrink-0 object-cover max-md:size-[121px] md:h-[287px] md:w-[372px]"
+      sizes="(max-width: 768px) 50vw, 33vw"
+    />
   </div>
 );
 
@@ -150,54 +114,47 @@ const JewelleryProductCard = ({
   return (
     <article
       className={cn(
-        "group relative flex h-[227px] flex-col items-center overflow-hidden bg-gray200 md:h-[496px]",
-        "gap-[16px] px-[16px] py-[24px] md:gap-[24px] md:px-[24px] md:py-[40px]",
+        "group grid h-[227px] grid-cols-1 grid-rows-1 overflow-hidden bg-gray200 md:h-[496px]",
         hasModalImage && "touch-pan-y select-none md:touch-auto md:select-auto",
         isDragging && "cursor-grabbing md:cursor-auto",
       )}
       {...swipeSurfaceProps}
     >
-      <Link
-        href={href}
-        onClick={handleLinkClick}
-        className="absolute inset-0 z-30"
-        aria-label={`View ${title}`}
-      />
-
-      {/* Desktop hover — full-card lifestyle (lazy: only in DOM on md+) */}
+      {/* Desktop hover — full-card lifestyle */}
       <div
-        className="pointer-events-none absolute inset-0 z-0 hidden opacity-0 transition-opacity duration-500 md:block md:group-hover:opacity-100"
+        className="col-start-1 row-start-1 hidden size-full grid opacity-0 transition-opacity duration-500 md:grid md:group-hover:opacity-100"
         aria-hidden
       >
         <OptimizedImage
           src={hoverImage}
           alt=""
-          className="size-full object-cover"
+          className="col-start-1 row-start-1 size-full object-cover"
           sizes="33vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(0,0,0,0.4)] from-[14%] to-transparent to-[50%]" />
+        <div
+          className="col-start-1 row-start-1 size-full bg-gradient-to-t from-[rgba(0,0,0,0.4)] from-[14%] to-transparent to-[50%]"
+          aria-hidden
+        />
       </div>
 
-      {/* Mobile lifestyle — loaded only after swipe to avoid ~3.5MB upfront download */}
+      {/* Mobile lifestyle — loaded only after swipe */}
       {isMobileLifestyle ? (
-        <div
-          className="pointer-events-none absolute inset-0 z-0 md:hidden"
-          aria-hidden
-        >
+        <div className="col-start-1 row-start-1 grid size-full md:hidden" aria-hidden>
           <OptimizedImage
             src={modalImage}
             alt=""
-            className="size-full object-cover"
+            className="col-start-1 row-start-1 size-full object-cover"
             sizes="50vw"
           />
-          <div className="absolute inset-0 bg-black/20" />
+          <div className="col-start-1 row-start-1 size-full bg-black/20" aria-hidden />
         </div>
       ) : null}
 
       {/* Default product view */}
       <div
         className={cn(
-          "relative z-10 flex w-full flex-col items-center transition-opacity duration-500 md:h-full md:gap-[24px] md:group-hover:opacity-0",
+          "col-start-1 row-start-1 z-10 flex flex-col items-center transition-opacity duration-500",
+          "gap-[16px] px-[16px] py-[24px] md:h-full md:gap-[24px] md:px-[24px] md:py-[40px] md:group-hover:opacity-0",
           isMobileLifestyle ? "pointer-events-none opacity-0 md:opacity-100" : "opacity-100",
         )}
         style={
@@ -206,20 +163,40 @@ const JewelleryProductCard = ({
             : undefined
         }
       >
-        <ProductImage src={primaryImage} alt={title} />
+        <div className="flex w-full items-start justify-between">
+          {isBestseller ? (
+            <span
+              className={cn(
+                "flex items-center bg-[#C5A156] font-gill leading-110 text-darkblack md:hidden",
+                isMobileLifestyle && "opacity-0",
+              )}
+              style={{
+                height: `${jewelleryListingProductCardMobileSpec.bestsellerHeight}px`,
+                padding: `${jewelleryListingProductCardMobileSpec.bestsellerPadding}px`,
+                fontSize: `${jewelleryListingProductCardMobileSpec.bestsellerFontSize}px`,
+              }}
+            >
+              BESTSELLER
+            </span>
+          ) : (
+            <span className="md:hidden" aria-hidden />
+          )}
+          <span className="hidden md:block" aria-hidden />
+        </div>
 
-        <ProductCopy title={title} price={price} href={href} />
+        <ProductImage src={primaryImage} alt={title} />
+        <ProductCopy title={title} price={price} href={href} className="md:group-hover:hidden" />
       </div>
 
-      {/* Desktop hover copy overlay */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 hidden px-[24px] pb-[40px] opacity-0 transition-opacity duration-500 md:block md:group-hover:opacity-100">
+      {/* Desktop hover copy */}
+      <div className="pointer-events-none col-start-1 row-start-1 z-20 hidden flex-col justify-end px-[24px] pb-[40px] opacity-0 transition-opacity duration-500 md:flex md:group-hover:opacity-100">
         <ProductCopy title={title} price={price} href={href} white />
       </div>
 
-      {/* Mobile lifestyle copy overlay */}
+      {/* Mobile lifestyle copy */}
       <div
         className={cn(
-          "pointer-events-none absolute inset-x-0 bottom-0 z-20 px-[16px] pb-[24px] md:hidden",
+          "pointer-events-none col-start-1 row-start-1 z-20 flex flex-col justify-end px-[16px] pb-[24px] md:hidden",
           isMobileLifestyle ? "opacity-100" : "opacity-0",
           !isDragging && "transition-opacity duration-500",
         )}
@@ -227,52 +204,48 @@ const JewelleryProductCard = ({
         <ProductCopy title={title} price={price} href={href} white />
       </div>
 
+      {/* Desktop bestseller badge at image / copy boundary */}
       {isBestseller ? (
-        <span
-          className={cn(
-            "absolute left-0 top-0 z-20 flex items-center bg-[#C5A156] font-gill leading-110 text-darkblack md:hidden",
-            isMobileLifestyle && "opacity-0",
-          )}
-          style={{
-            height: `${jewelleryListingProductCardMobileSpec.bestsellerHeight}px`,
-            padding: `${jewelleryListingProductCardMobileSpec.bestsellerPadding}px`,
-            fontSize: `${jewelleryListingProductCardMobileSpec.bestsellerFontSize}px`,
+        <div className="pointer-events-none col-start-1 row-start-1 z-20 hidden justify-center self-start pt-[331px] md:flex">
+          <span className="flex h-9 items-center justify-center bg-white px-3 font-gill text-sm font-semibold leading-110 text-darkblack shadow-[0px_2px_2px_#C5A156]">
+            BESTSELLER
+          </span>
+        </div>
+      ) : null}
+
+      <Link
+        href={href}
+        onClick={handleLinkClick}
+        className="col-start-1 row-start-1 z-30 size-full"
+        aria-label={`View ${title}`}
+      />
+
+      <div className="pointer-events-none col-start-1 row-start-1 z-40 flex justify-end self-start px-[16px] pt-[24px] md:px-[24px] md:pt-[40px]">
+        <button
+          type="button"
+          aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          aria-pressed={isWishlisted}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onToggleWishlist?.();
           }}
+          className="pointer-events-auto flex size-6 items-center justify-center md:size-[32px]"
         >
-          BESTSELLER
-        </span>
-      ) : null}
-
-      {isBestseller ? (
-        <span className="absolute left-1/2 top-[331px] z-20 hidden h-9 -translate-x-1/2 items-center justify-center bg-white px-3 font-gill text-sm font-semibold leading-110 text-darkblack shadow-[0px_2px_2px_#C5A156] md:flex">
-          BESTSELLER
-        </span>
-      ) : null}
-
-      <button
-        type="button"
-        aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-        aria-pressed={isWishlisted}
-        onClick={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          onToggleWishlist?.();
-        }}
-        className="absolute right-2 top-2 z-40 flex size-6 items-center justify-center md:right-[24px] md:top-[24px] md:size-[32px]"
-      >
-        <Heart
-          size={20}
-          strokeWidth={1.5}
-          className={cn(
-            "transition-colors duration-200",
-            isWishlisted
-              ? "fill-[#AB863B] text-[#AB863B]"
-              : isMobileLifestyle
-                ? "text-white"
-                : "text-darkblack md:group-hover:text-white",
-          )}
-        />
-      </button>
+          <Heart
+            size={20}
+            strokeWidth={1.5}
+            className={cn(
+              "transition-colors duration-200",
+              isWishlisted
+                ? "fill-[#AB863B] text-[#AB863B]"
+                : isMobileLifestyle
+                  ? "text-white"
+                  : "text-darkblack md:group-hover:text-white",
+            )}
+          />
+        </button>
+      </div>
     </article>
   );
 };
