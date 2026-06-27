@@ -264,7 +264,7 @@ const EducationCertifiedSection = () => {
               className="absolute left-[700px] top-[-189px] h-[548px] w-[641px]"
             >
               <div
-                className="absolute overflow-hidden rounded-full border-[#999999]"
+                className="absolute relative overflow-hidden rounded-full border-[#999999]"
                 style={{
                   left: desktopVisual.calloutLeft,
                   top: desktopVisual.calloutTop,
@@ -276,8 +276,9 @@ const EducationCertifiedSection = () => {
                 <Image
                   src={educationPageImages.girdleScreenshot}
                   alt="Diamond girdle laser inscription"
-                  fill
-                  className="max-w-none object-cover"
+                  width={440}
+                  height={448}
+                  className="absolute max-w-none object-cover"
                   sizes="134px"
                   style={{
                     height: spec.visual.calloutCropHeight,
@@ -307,7 +308,7 @@ const EducationCertifiedSection = () => {
 
       <ScrollReveal delayMs={520}>
         <div
-          className="absolute overflow-hidden rounded-full border-[#999999] lg:hidden"
+          className="absolute relative overflow-hidden rounded-full border-[#999999] lg:hidden"
           style={{
             left: mobileVisual.calloutLeft,
             top: mobileVisual.calloutTop,
@@ -319,8 +320,9 @@ const EducationCertifiedSection = () => {
           <Image
             src={educationPageImages.girdleScreenshot}
             alt="Diamond girdle laser inscription"
-            fill
-            className="max-w-none object-cover"
+            width={440}
+            height={448}
+            className="absolute max-w-none object-cover"
             sizes="96px"
             style={{
               height: spec.visual.calloutCropHeight,

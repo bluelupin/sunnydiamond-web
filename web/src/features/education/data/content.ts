@@ -9,6 +9,8 @@ export const educationPageImages = {
   cutDiamondGood: "/images/education/cut-diamond-good.png",
   decorativeDiamond: "/images/education/decorative-diamond.png",
   discoverImage: "/images/education/discover-image.png",
+  discoverStepLine: "/images/education/discover-step-line.svg",
+  discoverStepLineMobile: "/images/education/discover-step-line-mobile.svg",
   faqIconPlus: "/images/education/faq-icon-plus.svg",
   faqIconMinus: "/images/education/faq-icon-minus.svg",
   certifiedBg: "/images/education/certified-bg.png",
@@ -55,25 +57,25 @@ export const educationFourCsMobileSpec = {
 
 /** Figma 692:29026 / 692:29042 / 692:29044 — C4 carat hand + diamond */
 export const educationCaratVisualSpec = {
-  referenceCarat: 3.0,
-  minCarat: 0.1,
-  maxCarat: 5.0,
+  referenceCarat: 1.0,
+  minCarat: 0.5,
+  maxCarat: 4.0,
   handOpacity: 0.35,
   desktop: {
-    frameWidth: 718,
-    handAreaHeight: 403,
-    diamondLeft: 305,
-    diamondTop: 178,
+    frameWidth: 528,
+    handAreaHeight: 296,
+    diamondLeft: 230,
+    diamondTop: 72,
     diamondBaseSize: 40,
     diamondMinSize: 8,
     diamondMaxSize: 66,
   },
   /** Figma mweb 692:28716 / 692:28720 */
   mobile: {
-    frameWidth: 343,
+    frameWidth: 311,
     handAreaHeight: 220,
-    diamondLeft: 175,
-    diamondTop: 97,
+    diamondLeft: 168,
+    diamondTop: 58,
     diamondBaseSize: 26,
     diamondMinSize: 6,
     diamondMaxSize: 43,
@@ -117,41 +119,56 @@ export type EducationSliderSpec = {
   sublabelLeft?: readonly number[];
   /** Gap between track segments at interior dots (default 10) */
   trackDotGap?: number;
-  /** "active" shows only the selected carat label under the thumb */
-  labelDisplay?: "all" | "active";
+  /** "active" shows only the selected label under the thumb; "endpoints" pins start/end labels */
+  labelDisplay?: "all" | "active" | "endpoints";
+  /** When false, renders a continuous track without dot markers */
+  showDots?: boolean;
+  /** When true, only the first and last dot markers are rendered */
+  endpointDotsOnly?: boolean;
   ariaLabel: string;
 };
 
-/** C4 carat slider stops — evenly spaced on track, diamond scales with weight */
-export const educationCaratWeights = [
-  0.1, 0.15, 0.2, 0.25, 0.3, 0.33, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9, 1.0, 1.25, 1.5,
-  1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 3.5, 4.0, 4.5, 5.0,
-] as const;
+/** C4 carat slider — 0.5 ct to 4.0 ct in 1 ct steps (0.5, 1, 2, 3, 4) */
+export const educationCaratWeights = [0.5, 1.0, 2.0, 3.0, 4.0] as const;
 
-const formatCaratLabel = (weight: number) => `${weight.toFixed(2)} ct`;
+const formatCaratLabel = (weight: number) =>
+  `${Number.isInteger(weight) ? weight : weight.toFixed(1).replace(/\.0$/, "")} ct`;
 
-const buildEvenDotCenters = (count: number, start: number, end: number) =>
-  Array.from({ length: count }, (_, index) =>
-    count <= 1 ? start : start + (index / (count - 1)) * (end - start),
-  );
+const buildCaratDotCenters = (
+  weights: readonly number[],
+  start: number,
+  end: number,
+  minWeight: number,
+  maxWeight: number,
+) =>
+  weights.map((weight) => {
+    const range = maxWeight - minWeight;
+    if (range <= 0) return start;
+    return start + ((weight - minWeight) / range) * (end - start);
+  });
 
-const caratSliderDotStart = 18;
-const caratSliderDotEnd = 505;
-const caratSliderDotCenters = buildEvenDotCenters(
-  educationCaratWeights.length,
+const caratSliderTrackLeft = 21;
+const caratSliderTrackWidth = 482;
+/** Inset snap range so thumb/dots have breathing room like clarity/cut/colour sliders */
+const caratSliderDotStart = 19;
+const caratSliderDotEnd = 502;
+const caratSliderDotCenters = buildCaratDotCenters(
+  educationCaratWeights,
   caratSliderDotStart,
   caratSliderDotEnd,
+  educationCaratWeights[0],
+  educationCaratWeights[educationCaratWeights.length - 1],
 );
 
 export const educationCaratSliderOptions: EducationSliderOption[] = educationCaratWeights.map(
   (weight) => ({
     label: formatCaratLabel(weight),
     caratWeight: weight,
-    highlight: weight === 3.0,
+    highlight: weight === 1.0,
   }),
 );
 
-export const educationCaratDefaultIndex = educationCaratWeights.indexOf(3.0);
+export const educationCaratDefaultIndex = educationCaratWeights.indexOf(1.0);
 
 export const educationSliderSpecs: Record<string, EducationSliderSpec> = {
   clarity: {
@@ -198,14 +215,15 @@ export const educationSliderSpecs: Record<string, EducationSliderSpec> = {
   carat: {
     width: 517.84,
     height: 50.51,
-    trackLeft: 21,
+    trackLeft: caratSliderTrackLeft,
     trackTop: 8,
-    trackWidth: 482,
+    trackWidth: caratSliderTrackWidth,
     trackHeight: 1.5,
     thumbSize: 18,
     labelTop: 32.51,
-    trackDotGap: 4,
-    labelDisplay: "active",
+    labelDisplay: "endpoints",
+    showDots: true,
+    endpointDotsOnly: true,
     dotCenters: caratSliderDotCenters,
     labelLeft: caratSliderDotCenters.map((center) => center - 20),
     ariaLabel: "Diamond carat weight",

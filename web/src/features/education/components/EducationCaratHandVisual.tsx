@@ -25,52 +25,42 @@ const EducationCaratHandVisual = ({ activeCarat }: EducationCaratHandVisualProps
   const layout = useMobileLayout
     ? educationCaratVisualSpec.mobile
     : educationCaratVisualSpec.desktop;
-  const scaledSize = layout.diamondBaseSize * (activeCarat / educationCaratVisualSpec.referenceCarat);
-  const diamondPx = Math.min(
-    Math.max(scaledSize, layout.diamondMinSize),
-    layout.diamondMaxSize,
-  );
+  const { minCarat, maxCarat } = educationCaratVisualSpec;
+  const caratRange = maxCarat - minCarat;
+  const normalizedCarat =
+    caratRange > 0 ? Math.min(Math.max((activeCarat - minCarat) / caratRange, 0), 1) : 0;
+  const diamondPx =
+    layout.diamondMinSize + normalizedCarat * (layout.diamondMaxSize - layout.diamondMinSize);
+  const frameHeight = 300;
   const diamondWidthPercent = (diamondPx / layout.frameWidth) * 100;
+  const diamondLeftPercent =
+    ((layout.frameWidth - layout.diamondLeft - diamondPx) / layout.frameWidth) * 100;
 
   return (
     <div
-      className="relative mx-auto w-full max-w-[311px] overflow-visible lg:max-w-[528px]"
-      style={{ aspectRatio: `${layout.frameWidth} / ${layout.handAreaHeight}` }}
+      className="pointer-events-none relative h-[300px] w-full shrink-0 self-start overflow-hidden"
       aria-hidden
     >
       <div
         className="pointer-events-none absolute inset-0 overflow-hidden"
         style={{ opacity: educationCaratVisualSpec.handOpacity }}
       >
-        <div
-          className="absolute left-1/2 top-1/2 h-[248%] w-[172%] origin-center"
-          style={{ transform: "translate(-58%, -46%) rotate(-124.75deg) scaleY(-1)" }}
-        >
-          <div className="relative h-full w-full overflow-hidden">
-            <div
-              className="absolute inset-0"
-              style={{
-                transform: "scale(2.06) translate(-51%, -10.5%)",
-                transformOrigin: "center center",
-              }}
-            >
-              <Image
-                src={educationPageImages.caratHand}
-                alt=""
-                fill
-                className="object-cover"
-                sizes="(max-width: 1023px) 311px, 528px"
-              />
-            </div>
-          </div>
+        <div className="absolute left-0 top-[5%] h-[259%] w-[259%] origin-left-top -scale-x-100 rotate-[60deg] scale-[1.4]">
+          <Image
+            src={educationPageImages.caratHand}
+            alt=""
+            fill
+            className="object-cover object-left-top"
+            sizes="100vw"
+          />
         </div>
       </div>
 
       <div
-        className="pointer-events-none absolute z-10 transition-[width] duration-300 ease-out"
+        className="pointer-events-none absolute z-10 transition-[width,left] duration-300 ease-out"
         style={{
-          left: `${(layout.diamondLeft / layout.frameWidth) * 100}%`,
-          top: `${(layout.diamondTop / layout.handAreaHeight) * 100}%`,
+          left: `${diamondLeftPercent}%`,
+          top: `${(layout.diamondTop / frameHeight) * 100}%`,
           width: `${diamondWidthPercent}%`,
           aspectRatio: "1",
         }}

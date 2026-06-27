@@ -36,8 +36,9 @@ const LearnCarouselImage = ({
       <Image
         src={src}
         alt={alt}
-        fill
-        className="max-w-none object-cover"
+        width={spec.width}
+        height={spec.height}
+        className="absolute max-w-none object-cover"
         sizes={sizes}
         style={{
           height: spec.cropHeight,

@@ -55,24 +55,54 @@ const PanelMedia = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent
     [panel, activeIndex],
   );
 
-  const activeCarat = slider.options[activeIndex]?.caratWeight ?? 3.0;
+  const activeCarat = slider.options[activeIndex]?.caratWeight ?? 1.0;
 
   return (
     <ScrollReveal
       delayMs={delayMs}
       className={cn(
-        "relative flex w-full shrink-0 items-center justify-center",
-        "max-lg:h-[370px]",
-        panel.id === "carat" ? "lg:h-[610px]" : "lg:h-[633px]",
+        "relative flex w-full shrink-0",
+        panel.id === "carat"
+          ? "items-start justify-start max-lg:h-[370px] lg:h-[610px]"
+          : "items-center justify-center max-lg:h-[370px] lg:h-[633px]",
       )}
     >
       <PanelTexture panelId={panel.id} />
 
-      <div className="relative z-10 flex w-full max-w-[323px] flex-col items-center px-5 lg:max-w-[528px] lg:px-4">
-          <div className="flex w-full flex-col items-center gap-10 lg:gap-[40px]">
-            {panel.id === "carat" ? (
-              <EducationCaratHandVisual activeCarat={activeCarat} />
-            ) : panel.id === "cut" ? (
+      <div
+        className={cn(
+          "relative z-10 flex w-full flex-col",
+          panel.id === "carat"
+            ? "items-start px-0"
+            : "max-w-[323px] items-center px-5 lg:max-w-[528px] lg:px-4",
+        )}
+      >
+          {panel.id === "carat" ? (
+            <div className="flex w-full flex-col items-start gap-10 lg:gap-[40px]">
+              <div className="w-full shrink-0 self-start overflow-hidden">
+                <EducationCaratHandVisual activeCarat={activeCarat} />
+              </div>
+              {sliderSpec ? (
+                <div className="flex w-full shrink-0 justify-center">
+                  <EducationMetricSlider
+                    className="relative z-20 shrink-0"
+                    options={slider.options}
+                    defaultIndex={slider.defaultIndex}
+                    activeIndex={activeIndex}
+                    onChange={setActiveIndex}
+                    spec={sliderSpec}
+                  />
+                </div>
+              ) : null}
+            </div>
+          ) : (
+          <div
+            className={cn(
+              "flex w-full flex-col gap-10 lg:gap-[40px]",
+              "items-center",
+            )}
+          >
+            {panel.id === "cut" ? (
               <div className="flex items-center gap-6 lg:gap-[24px]">
                 <div className="relative size-[120px] shrink-0 overflow-hidden lg:size-[200px]">
                   <Image
@@ -107,15 +137,19 @@ const PanelMedia = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent
             ) : null}
 
             {sliderSpec ? (
-              <EducationMetricSlider
-                options={slider.options}
-                defaultIndex={slider.defaultIndex}
-                activeIndex={activeIndex}
-                onChange={setActiveIndex}
-                spec={sliderSpec}
-              />
+              <div className="flex w-full justify-center">
+                <EducationMetricSlider
+                  className="relative z-20 shrink-0"
+                  options={slider.options}
+                  defaultIndex={slider.defaultIndex}
+                  activeIndex={activeIndex}
+                  onChange={setActiveIndex}
+                  spec={sliderSpec}
+                />
+              </div>
             ) : null}
           </div>
+          )}
 
           {panel.footnote ? (
             <div className="mt-10 flex w-full max-w-[481px] flex-col items-center gap-6 max-lg:mt-10 max-lg:max-w-[317px] max-lg:gap-6 lg:mt-[64px] lg:gap-[24px]">
