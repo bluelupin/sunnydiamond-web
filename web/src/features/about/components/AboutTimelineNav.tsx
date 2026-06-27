@@ -66,7 +66,7 @@ const AboutTimelineNav = ({
       <ol
         id={listId}
         className={cn(
-          "flex flex-col items-start gap-8 lg:items-end",
+          "flex flex-col items-start md:gap-8 sm:gap-6 gap-4 lg:items-end",
           isExpanded ? "mt-4 flex" : "hidden",
           "lg:mt-0 lg:flex lg:items-start",
         )}

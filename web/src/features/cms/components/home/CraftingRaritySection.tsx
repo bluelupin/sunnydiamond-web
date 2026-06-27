@@ -10,18 +10,14 @@ import { resolveCategoryNavImages } from "@/shared/utils/responsiveCmsImage";
 import fallBackImage from "@/assets/fallBackImage.png";
 import type { CategoryNavigationItem } from "@/types/homepage/categoryNavigation";
 import { cn } from "@/shared/utils/cn";
+import PageContainer from "@/shared/ui/layout/PageContainer";
+import { useMemo } from "react";
 
 interface CraftingRaritySectionProps {
   id?: string;
 }
-
 const CRAFTING_RARITY_NECKLACE = "/images/home/crafting-rarity-necklace.png";
 const IMAGE_QUALITY = 90;
-
-/** Figma 684:2822 — 40px from left at 1440px, scales proportionally on wider viewports. */
-const CRAFTING_RARITY_DESKTOP_INSET =
-  "lg:left-[max(40px,calc(100vw*40/1440))]";
-
 const CategoryCard = ({ cat }: { cat: CategoryNavigationItem }) => {
   const slug = cat?.slug ?? "";
   const categoryLink =
@@ -83,48 +79,39 @@ const CategoryCard = ({ cat }: { cat: CategoryNavigationItem }) => {
 };
 
 function CraftingRarityCopyBlock({
-  subtitle,
+  subtitleLines,
   secondaryCtaUrl,
   secondaryCtaLabel,
-  className,
 }: {
-  subtitle: string;
+  subtitleLines: string[];
   secondaryCtaUrl: string;
   secondaryCtaLabel: string;
-  className?: string;
 }) {
   return (
-    <div
-      className={cn(
-        "absolute bottom-0 z-10 flex w-full max-w-[640px] flex-col items-start gap-[24px]",
-        "left-[16px] lg:bottom-auto lg:top-[132px] lg:gap-[40px]",
-        CRAFTING_RARITY_DESKTOP_INSET,
-        className,
-      )}
-    >
-      <ScrollReveal
-        as="h2"
-        delayMs={0}
-        className="max-w-[549px] font-larken text-[32px] font-light leading-110 text-darkblack lg:text-48"
-      >
-        {subtitle.split("\n").map((line, index) => (
-          <span key={`${line}-${index}`} className="block">
-            {line}
-          </span>
-        ))}
-      </ScrollReveal>
-
-      {secondaryCtaUrl ? (
-        <ScrollReveal delayMs={100}>
-          <Link
-            href={secondaryCtaUrl}
-            className="text-link-underline inline-flex items-center border-b-[1.5px] border-darkblack pb-[4px] font-gill text-[14px] font-normal uppercase leading-110 text-darkblack"
-          >
-            {secondaryCtaLabel}
-          </Link>
+    <PageContainer className="px-4 md:px-8 lg:px-[40px] 2xl:px-[60px]">
+      <div className="lg:h-432 h-390 w-full max-w-640 flex flex-col items-start sm:justify-center justify-end lg:gap-[40px] md:gap-8 gap-6">
+        <ScrollReveal
+          delayMs={0}
+          className="lg:text-5xl sm:text-4xl !text-32 font-larken font-light leading-110 text-darkblack"
+        >
+          {subtitleLines.map((line, index) => (
+            <span
+              key={`${line}-${index}`}
+              className="block"
+            >
+              {line}
+            </span>
+          ))}
         </ScrollReveal>
-      ) : null}
-    </div>
+        {secondaryCtaUrl &&
+          <ScrollReveal delayMs={100}>
+            <Link href={secondaryCtaUrl} className="relative after:bg-darkMagenta after:absolute after:h-0.5 after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-darkblack hover:border-darkMagenta sm:pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack hover:text-darkMagenta">
+              {secondaryCtaLabel}
+            </Link>
+          </ScrollReveal>
+        }
+      </div>
+    </PageContainer>
   );
 }
 
@@ -132,14 +119,38 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
   const { data: shellData, isLoading: isShellLoading } = useHomepageShell();
   const hero = shellData?.homepage?.hero || shellData?.hero;
   const subtitle = String(hero?.subtitle ?? "");
+
+  const subtitleLines = useMemo(() => {
+    if (!subtitle.trim()) return [];
+
+    // Preferred: allow editors to control line breaks from CMS
+    if (subtitle.includes("\n")) {
+      return subtitle
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean);
+    }
+
+    // Fallback for current content
+    const breakAfter = "Crafting rarity";
+
+    if (subtitle.startsWith(breakAfter)) {
+      return [
+        breakAfter,
+        subtitle.slice(breakAfter.length).trim(),
+      ];
+    }
+
+    return [subtitle];
+  }, [subtitle]);
   const secondaryCtaUrl = hero?.secondaryCta?.url ?? hero?.secondaryCta?.to ?? "/products";
   const secondaryCtaLabel = hero?.secondaryCta?.label ?? "Explore Products";
 
   const { data: shoppingData, isLoading: isShoppingLoading } = useHomepageShoppingBlocks();
   const categories = Array.isArray(shoppingData?.categoryNavigation)
     ? [...shoppingData.categoryNavigation]
-        .filter((item) => item?.isActive !== false)
-        .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
+      .filter((item) => item?.isActive !== false)
+      .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
     : [];
 
   const isLoading = isShellLoading || isShoppingLoading;
@@ -152,11 +163,11 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
         aria-busy="true"
         aria-label="Crafting rarity section loading"
       >
-        <div className="relative h-[389px] overflow-hidden lg:h-[432px]">
+        <div className="relative overflow-hidden lg:h-432 h-390">
           <div
             className={cn(
               "absolute bottom-0 flex max-w-[549px] flex-col gap-[24px] left-[16px] lg:bottom-auto lg:top-[132px] lg:gap-[40px]",
-              CRAFTING_RARITY_DESKTOP_INSET,
+              "lg:left-[max(40px,calc(100vw*40/1440))]",
             )}
           >
             <div className="h-[106px] w-[min(549px,90vw)] animate-pulse rounded bg-gray200" aria-hidden />
@@ -173,8 +184,8 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
   }
 
   return (
-    <section id={id} className="w-full bg-white pb-16 lg:pb-0">
-      <div className="relative h-[389px] overflow-hidden lg:h-[432px]">
+    <section id={id} className="w-full bg-white md:pb-12 pb-16">
+      <div className="relative overflow-hidden lg:h-432 h-390">
         <ScrollReveal
           delayMs={60}
           className="pointer-events-none absolute right-[-29px] top-[-83px] size-[419px] lg:right-[2%] lg:top-[-204px] lg:size-[664px]"
@@ -190,9 +201,8 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
             />
           </div>
         </ScrollReveal>
-
         <CraftingRarityCopyBlock
-          subtitle={subtitle}
+          subtitleLines={subtitleLines}
           secondaryCtaUrl={secondaryCtaUrl}
           secondaryCtaLabel={secondaryCtaLabel}
         />

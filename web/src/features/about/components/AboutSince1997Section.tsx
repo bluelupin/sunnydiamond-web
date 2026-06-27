@@ -91,7 +91,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
           <PageContainer className="shrink-0 2xl:pb-11 lg:pb-[40px] pb-8">
             <Reveal as="h2" direction="up"
               id="about-since-1997-title"
-              className="font-larken text-3xl lg:text-48 text-56 font-light leading-110 text-darkblack">
+              className="font-larken text-3xl lg:text-5xl text-56 font-light leading-110 text-darkblack">
               {title}
             </Reveal>
           </PageContainer>

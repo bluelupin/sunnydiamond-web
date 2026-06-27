@@ -90,7 +90,7 @@ function FeaturedProductsHeader({
       <ScrollReveal
         as="h2"
         delayMs={0}
-        className="font-larken text-32 font-light leading-110 text-darkblack lg:text-48"
+        className="font-larken text-32 font-light leading-110 text-darkblack lg:text-5xl"
       >
         {title}
       </ScrollReveal>

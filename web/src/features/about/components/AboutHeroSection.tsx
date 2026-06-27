@@ -58,7 +58,7 @@ const AboutHeroSection = ({ title, image }: AboutHeroSectionProps) => {
           <MediaContentOverlay gradient={aboutHeroFigmaSpec.overlay.gradient} />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-16 lg:pb-75">
             <h1
-              className="w-full max-w-886 text-center font-larken text-32 font-light leading-110 text-white sm:text-36 lg:text-48 2xl:text-5xl">
+              className="w-full max-w-886 text-center font-larken text-32 font-light leading-110 text-white sm:text-36 lg:text-5xl 2xl:text-5xl">
               {title}
             </h1>
           </div>

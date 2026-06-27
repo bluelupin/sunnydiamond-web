@@ -41,7 +41,26 @@ const HeroSection = ({ id }: HeroSectionProps) => {
   );
 
   const heroTitle = String(title ?? "");
+  const heroTitleLines = useMemo(() => {
+    if (!heroTitle) return [];
 
+    // CMS-controlled line breaks
+    if (heroTitle.includes("\n")) {
+      return heroTitle.split("\n");
+    }
+
+    // Fallback for current content
+    const breakAfter = "Fine jewellery designed";
+
+    if (heroTitle.startsWith(breakAfter)) {
+      return [
+        breakAfter,
+        heroTitle.slice(breakAfter.length).trim(),
+      ];
+    }
+
+    return [heroTitle];
+  }, [heroTitle]);
   return (
     <section
       id={id}
@@ -56,7 +75,7 @@ const HeroSection = ({ id }: HeroSectionProps) => {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-charcoal/55 via-charcoal/15 to-transparent" />
         <div className="absolute inset-0 bg-charcoal/20" />
-        <div className="container relative flex h-full items-end justify-center px-4 py-16 md:px-6">
+        <div className="container relative flex h-full items-end justify-center md:py-16 sm:py-12 py-11 md:px-6 px-4">
           <div className="flex w-full max-w-886 animate-fade-in flex-col items-center md:gap-8 gap-6 text-center">
             <div className="flex flex-col items-center gap-4">
               <div className="inline-flex items-center gap-1 font-gill md:text-base text-sm font-normal leading-110 text-white">
@@ -79,8 +98,11 @@ const HeroSection = ({ id }: HeroSectionProps) => {
                     aria-hidden
                   />
                 ) : (
-                  heroTitle.split("\n").map((line, index) => (
-                    <span key={`${line}-${index}`} className="block">
+                  heroTitleLines.map((line, index) => (
+                    <span
+                      key={`${line}-${index}`}
+                      className="block"
+                    >
                       {line}
                     </span>
                   ))

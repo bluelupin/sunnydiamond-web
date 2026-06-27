@@ -38,7 +38,7 @@ const ProductDetailMoreForYouSection = ({ items }: ProductDetailMoreForYouSectio
           <div className="flex flex-col items-center gap-3 text-center lg:gap-0">
             <h2
               id="more-for-you-heading"
-              className="w-full font-larken text-32 font-light leading-110 text-darkblack lg:text-48"
+              className="w-full font-larken text-32 font-light leading-110 text-darkblack lg:text-5xl"
             >
               <span className="lg:hidden">Your Diamond Awaits</span>
               <span className="hidden lg:inline">More for You</span>

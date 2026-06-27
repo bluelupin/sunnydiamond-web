@@ -29,7 +29,7 @@ const AboutHeirloomQuoteSection = ({ quote, iconUrl }: AboutHeirloomQuoteSection
 
           <h2
             id="about-heirloom-quote"
-            className="text-center font-larken text-32 font-light leading-110 text-darkblack sm:text-36 md:text-42 desktop:text-48"
+            className="text-center font-larken text-32 font-light leading-110 text-darkblack sm:text-36 md:text-42 desktop:text-5xl"
           >
             {quote}
           </h2>
