@@ -180,7 +180,7 @@ const EducationFourCsPanel = ({
       aria-labelledby={`education-panel-${panel.id}`}
       className={cn(
         "overflow-hidden",
-        isChalk ? "bg-[#F4F3EE]" : "bg-white",
+        isChalk ? "bg-gray300" : "bg-white",
         "max-lg:h-[725px]",
         panel.id === "carat" ? "lg:h-[610px]" : "lg:h-[633px]",
       )}

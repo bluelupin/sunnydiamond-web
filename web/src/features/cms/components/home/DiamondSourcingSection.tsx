@@ -9,6 +9,7 @@ import { useMemo } from "react";
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
+import Reveal from "@/shared/Animation/Reveal";
 interface DiamondSourcingSectionProps {
   id?: string;
 }
@@ -51,7 +52,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
           <section
             id={id}
             aria-label="Internally flawless diamonds"
-            className="relative my-50 h-auto overflow-hidden"
+            className="relative md:mb-12 h-auto overflow-hidden"
           >
             <div className="absolute inset-0 -z-0 will-change-transform" ref={bgParallax}>
               <ResponsiveImage
@@ -64,8 +65,8 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
               />
               <div className="absolute inset-0 bg-background/40" aria-hidden />
             </div>
-            <div className="relative container h-full py-12 md:py-16 flex flex-col items-center justify-center text-center">
-              <ScrollReveal delayMs={0}>
+            <div className="relative container h-full py-16 md:py-100 flex flex-col items-center justify-center text-center">
+              <Reveal direction="up">
                 <ResponsiveImage
                   desktopSrc={diamondGif || ""}
                   alt={imageAlt}
@@ -74,10 +75,10 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
                   quality={80}
                   className="w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 opacity-80 mx-auto"
                 />
-              </ScrollReveal>
-              <ScrollReveal as="h2" delayMs={80} className="mt-6 lg:text-5xl md:text-4xl text-32 font-light text-darkblack font-larken max-w-2xl leading-tight tracking-[0%]">
+              </Reveal>
+              <Reveal as="h2" direction="up" className="mt-6 lg:text-5xl md:text-4xl text-32 font-light text-darkblack font-larken max-w-2xl leading-tight tracking-[0%]">
                 {sectionTitle}
-              </ScrollReveal>
+              </Reveal>
               <ScrollReveal delayMs={160} className="will-change-transform md:mt-26 mt-76 md:w-290 md:h-290 w-[243px] h-[293px]">
                 <div ref={diamondParallax} className="size-full">
                   <ResponsiveImage
@@ -98,12 +99,12 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
             id={id}
             aria-label="Internally flawless diamonds"
             aria-busy="true"
-            className="relative my-50 h-auto overflow-hidden"
+            className="relative md:mb-12 h-auto overflow-hidden"
           >
             <div className="absolute inset-0 -z-0">
               <div className="w-full h-full bg-gray100" />
             </div>
-            <div className="relative container h-full py-12 md:py-16 flex flex-col items-center justify-center text-center">
+            <div className="relative container h-full py-16 md:py-100 flex flex-col items-center justify-center text-center">
               <div className="w-16 h-16 bg-gray200 rounded-full" />
               <div className="mt-6 h-10 w-[min(520px,90%)] bg-gray200 rounded" />
               <div className="mt-10 h-72 w-72 bg-gray200 rounded-full" />

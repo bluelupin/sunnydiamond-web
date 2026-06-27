@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
-import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
 import { resolveCategoryNavImages } from "@/shared/utils/responsiveCmsImage";
@@ -12,6 +11,7 @@ import type { CategoryNavigationItem } from "@/types/homepage/categoryNavigation
 import { cn } from "@/shared/utils/cn";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import { useMemo } from "react";
+import Reveal from "@/shared/Animation/Reveal";
 
 interface CraftingRaritySectionProps {
   id?: string;
@@ -41,7 +41,7 @@ const CategoryCard = ({ cat }: { cat: CategoryNavigationItem }) => {
   return (
     <Link
       href={categoryLink}
-      className="group relative flex aspect-square h-full w-full flex-col overflow-hidden bg-[#F4F3EE] p-4 lg:p-6"
+      className="group relative flex aspect-square h-full w-full flex-col overflow-hidden bg-gray300 p-4 lg:p-6"
     >
       {hasDistinctHover ? (
         <ResponsiveImage
@@ -68,9 +68,8 @@ const CategoryCard = ({ cat }: { cat: CategoryNavigationItem }) => {
           />
         ) : null}
       </div>
-
       <div className="relative z-10 shrink-0 pt-2">
-        <span className="block text-center font-gill text-base font-normal leading-110 text-darkblack lg:text-xl">
+        <span className="block text-center font-gill font-normal leading-110 text-darkblack lg:text-xl text-base">
           {title}
         </span>
       </div>
@@ -90,9 +89,8 @@ function CraftingRarityCopyBlock({
   return (
     <PageContainer className="px-4 md:px-8 lg:px-[40px] 2xl:px-[60px]">
       <div className="lg:h-432 h-390 w-full max-w-640 flex flex-col items-start sm:justify-center justify-end lg:gap-[40px] md:gap-8 gap-6">
-        <ScrollReveal
-          delayMs={0}
-          className="lg:!text-5xl sm:!text-4xl !text-32 font-larken font-light leading-110 text-darkblack"
+        <Reveal as="h2" direction="up"
+          className="lg:text-5xl sm:text-4xl text-32 font-larken font-light leading-110 text-darkblack"
         >
           {subtitleLines.map((line, index) => (
             <span
@@ -102,13 +100,13 @@ function CraftingRarityCopyBlock({
               {line}
             </span>
           ))}
-        </ScrollReveal>
+        </Reveal>
         {secondaryCtaUrl &&
-          <ScrollReveal delayMs={100}>
+          <Reveal direction="up">
             <Link href={secondaryCtaUrl} className="relative after:bg-darkMagenta after:absolute after:h-0.5 after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-darkblack hover:border-darkMagenta sm:pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack hover:text-darkMagenta">
               {secondaryCtaLabel}
             </Link>
-          </ScrollReveal>
+          </Reveal>
         }
       </div>
     </PageContainer>
@@ -186,8 +184,7 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
   return (
     <section id={id} className="w-full bg-white md:pb-12 pb-16">
       <div className="relative overflow-hidden lg:h-432 h-390">
-        <ScrollReveal
-          delayMs={60}
+        <Reveal direction="up"
           className="pointer-events-none absolute right-[-29px] top-[-83px] size-[419px] lg:right-[2%] lg:top-[-204px] lg:size-[664px]"
         >
           <div className="relative h-full w-full rotate-[-13.91deg]">
@@ -200,7 +197,7 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
               sizes="(max-width: 1024px) 346px, 664px"
             />
           </div>
-        </ScrollReveal>
+        </Reveal>
         <CraftingRarityCopyBlock
           subtitleLines={subtitleLines}
           secondaryCtaUrl={secondaryCtaUrl}
@@ -211,19 +208,18 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
       {categories.length > 0 ? (
         <div className="mt-8 grid w-full grid-cols-2 gap-3 px-4 lg:mt-12 lg:grid-cols-4 lg:gap-3 lg:px-0">
           {categories.map((cat, index) => (
-            <ScrollReveal
+            <Reveal direction="up"
               key={cat?.id ?? cat?.slug ?? cat?.title}
-              delayMs={120 + index * 80}
               className="aspect-square w-full"
             >
               <CategoryCard cat={cat} />
-            </ScrollReveal>
+            </Reveal>
           ))}
         </div>
       ) : (
-        <ScrollReveal delayMs={120} className="px-4 lg:px-[40px]">
-          <p className="py-20 text-center font-gill text-base text-neutral500">NO Categories Yet!</p>
-        </ScrollReveal>
+        <Reveal as="p" direction="up" className="px-4 lg:px-[40px] py-20 text-center font-gill text-base text-neutral500">
+          NO Categories Yet!
+        </Reveal>
       )}
     </section>
   );

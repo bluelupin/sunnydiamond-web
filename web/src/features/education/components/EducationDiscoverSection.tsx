@@ -49,7 +49,7 @@ const EducationDiscoverSection = () => {
   return (
     <section
       aria-labelledby="education-discover-title"
-      className="relative h-[743px] overflow-hidden bg-[#F4F3EE] lg:h-[615px]"
+      className="relative h-[743px] overflow-hidden bg-gray300 lg:h-[615px]"
     >
       <div
         className="absolute bottom-0 left-0 hidden mix-blend-darken lg:block"

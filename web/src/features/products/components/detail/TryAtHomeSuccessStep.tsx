@@ -82,7 +82,7 @@ const TryAtHomeSuccessStep = ({
 
             <div className="h-px w-full bg-neutral300" aria-hidden />
 
-            <div className="flex items-center bg-[#F4F3EE] p-3">
+            <div className="flex items-center bg-gray300 p-3">
               <div className="relative h-[71px] w-[143px] shrink-0">
                 <Image
                   src={productImage}
