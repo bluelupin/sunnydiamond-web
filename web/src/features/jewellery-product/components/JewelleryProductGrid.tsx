@@ -17,7 +17,7 @@ const JewelleryProductGrid = ({
 }: JewelleryProductGridProps) => {
   return (
     <ScrollReveal threshold={0.06} rootMargin="0px 0px -4% 0px">
-      <div className="grid w-full grid-cols-2 gap-[8px] md:grid-cols-3">
+      <div className="grid w-full grid-cols-2 md:grid-cols-3">
         {products.map((product) => {
           const productId = product.id.split("-")[0];
 
