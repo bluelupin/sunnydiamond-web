@@ -91,8 +91,8 @@ export const jewelleryListingProductCardMobileSpec = {
   paddingY: 24,
   sectionGap: 16,
   imageClipHeight: 110,
-  /** Figma 692:4901 — ring image frame (133.596px) */
-  imageInnerSize: 134,
+  /** Figma 692:4901 — ring image frame, reduced 10% from 134px */
+  imageInnerSize: 121,
   copyGap: 8,
   copyFontSize: 14,
   bestsellerHeight: 28,
@@ -109,9 +109,9 @@ export const jewelleryListingProductCardSpec = {
   paddingY: 40,
   sectionGap: 24,
   imageClipHeight: 303,
-  /** Figma 692:4146 — inner image frame */
-  imageInnerHeight: 319,
-  imageInnerWidth: 413,
+  /** Figma 692:4146 — inner image frame, reduced 10% from 319×413 */
+  imageInnerHeight: 287,
+  imageInnerWidth: 372,
   imageScaleHeight: 214.8,
   imageScaleWidth: 128.01,
   imageOffsetLeft: -13.92,

@@ -94,7 +94,7 @@ const ProductCard = ({ product }: { product: Product }) => {
         {/* Product-on-white photo */}
         <div
           className={cn(
-            "absolute inset-0 transition-opacity duration-500",
+            "absolute inset-0 origin-center scale-90 transition-opacity duration-500",
             hasLifestyleHover ? "group-hover:opacity-0" : "",
           )}
         >
@@ -108,7 +108,7 @@ const ProductCard = ({ product }: { product: Product }) => {
 
         {/* Lifestyle / model photo — fades in on hover */}
         {hasLifestyleHover && (
-          <div className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+          <div className="absolute inset-0 origin-center scale-90 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
             <OptimizedImage
               src={product.lifestyleImage!}
               alt=""
