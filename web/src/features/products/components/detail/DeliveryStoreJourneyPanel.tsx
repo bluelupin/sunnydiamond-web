@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { ChevronLeft, MapPin, Phone, Store } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { useToast } from "@/shared/hooks/use-toast";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
@@ -11,6 +11,7 @@ import {
   appointmentLabelClassName,
 } from "@/shared/constants/appointmentForm";
 import {
+  DELIVERY_STORE_ICONS,
   DELIVERY_STORE_LOCATIONS,
 } from "@/features/products/data/deliveryStoreContent";
 import { DetailDarkButton, DetailTextLink } from "./shared";
@@ -106,9 +107,16 @@ const DeliveryStoreJourneyPanel = ({
                   <div className="h-px w-full bg-neutral300" aria-hidden />
                 </div>
 
-                <div className="mt-6 flex flex-col gap-3 pb-6">
+                <div className="mt-6 flex flex-col gap-3 pb-72">
                   <div className="flex flex-wrap items-center gap-2">
-                    <Store size={24} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
+                    <Image
+                      src={DELIVERY_STORE_ICONS.store}
+                      alt=""
+                      width={24}
+                      height={24}
+                      aria-hidden
+                      className="shrink-0"
+                    />
                     <p className="font-gill text-base font-light leading-110 text-darkblack">
                       Available now at nearest store
                     </p>
@@ -118,17 +126,35 @@ const DeliveryStoreJourneyPanel = ({
                   </div>
 
                   <StoreVisitMapBlock variant="availability">
-                      <div className="flex flex-col gap-4">
-                        <div className="flex gap-3">
-                          <MapPin size={20} strokeWidth={1.25} aria-hidden className="mt-0.5 shrink-0 text-darkblack" />
-                          <p className="font-gill text-base font-light leading-110 text-darkblack">{store.address}</p>
-                        </div>
-                        <div className="flex gap-3">
-                          <Phone size={20} strokeWidth={1.25} aria-hidden className="mt-0.5 shrink-0 text-darkblack" />
-                          <p className="font-gill text-base font-light leading-110 text-darkblack">{store.phone}</p>
-                        </div>
+                    <div className="flex flex-col gap-4">
+                      <div className="flex gap-3">
+                        <Image
+                          src={DELIVERY_STORE_ICONS.address}
+                          alt=""
+                          width={20}
+                          height={20}
+                          aria-hidden
+                          className="mt-0.5 shrink-0"
+                        />
+                        <p className="min-w-0 flex-1 font-gill text-base font-light leading-110 text-darkblack">
+                          {store.address}
+                        </p>
                       </div>
-                      <DetailTextLink href={store.collectionHref}>VIEW COLLECTION</DetailTextLink>
+                      <div className="flex gap-3">
+                        <Image
+                          src={DELIVERY_STORE_ICONS.phone}
+                          alt=""
+                          width={20}
+                          height={20}
+                          aria-hidden
+                          className="mt-0.5 shrink-0"
+                        />
+                        <p className="min-w-0 flex-1 font-gill text-base font-light leading-110 text-darkblack">
+                          {store.phone}
+                        </p>
+                      </div>
+                    </div>
+                    <DetailTextLink href={store.collectionHref}>VIEW COLLECTION</DetailTextLink>
                   </StoreVisitMapBlock>
                 </div>
               </div>
@@ -175,7 +201,7 @@ const DeliveryStoreJourneyPanel = ({
                   <div className="h-px w-full bg-neutral300" aria-hidden />
                 </div>
 
-                <div className="mt-6 flex flex-col gap-6 pb-6">
+                <div className="mt-6 flex flex-col gap-6 pb-72">
                   <AppointmentContactFields
                     idPrefix="store-visit"
                     name={name}

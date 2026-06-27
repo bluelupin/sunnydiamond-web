@@ -116,7 +116,9 @@ const RingSizeChartPanel = ({ open, onClose }: RingSizeChartPanelProps) => {
           </div>
         </div>
 
-        <PanelFooterGradient className="-mt-72" />
+        <div className="relative shrink-0">
+          <PanelFooterGradient overlay />
+        </div>
       </div>
     </ProductDetailSidePanelShell>
   );

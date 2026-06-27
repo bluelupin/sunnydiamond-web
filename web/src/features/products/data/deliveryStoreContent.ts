@@ -4,6 +4,12 @@ export const DELIVERY_STORE_MAP_IMAGES = {
   overlay2: "/images/products/delivery-store/map-overlay-2.png",
 } as const;
 
+export const DELIVERY_STORE_ICONS = {
+  store: "/images/products/delivery-store/store-icon.svg",
+  address: "/images/products/delivery-store/address-icon.svg",
+  phone: "/images/products/delivery-store/phone-icon.svg",
+} as const;
+
 export type DeliveryStoreLocation = {
   cityLabel: string;
   address: string;

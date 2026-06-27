@@ -238,7 +238,7 @@ const StoreSelectionStep = ({
           <div className="h-px w-full bg-neutral300" aria-hidden />
         </div>
 
-        <div className="mt-6 flex flex-col gap-4 pb-6">
+        <div className="mt-6 flex flex-col gap-4 pb-72">
           <div className="-mx-4 flex gap-10 overflow-x-auto px-4 lg:-mx-8 lg:px-8">
             {BOOK_STORE_VISIT_STORES.map((store) => {
               const isSelected = store.id === selectedStoreId;
@@ -398,7 +398,7 @@ const BookingFormStep = ({
           <div className="h-px w-full bg-neutral300" aria-hidden />
         </div>
 
-        <div className="mt-6 flex flex-col gap-6 pb-6">
+        <div className="mt-6 flex flex-col gap-6 pb-72">
           <StoreVisitMapBlock variant="booking-hero" heroImage={selectedStore.heroImage}>
               <p className="font-larken text-20 font-light leading-110 text-darkblack">
                 {selectedStore.storeName}

@@ -107,7 +107,7 @@ const TryAtHomeDetailsStep = ({
             <p className="font-gill text-base leading-110 text-darkblack">{productName}</p>
           </div>
 
-          <div className="flex flex-col gap-6 pb-6">
+          <div className="flex flex-col gap-6 pb-72">
             <AppointmentContactFields
               idPrefix="try-at-home"
               name={name}
@@ -263,7 +263,7 @@ const TryAtHomeAddressStep = ({ onBack, onClose, onSubmit }: TryAtHomeAddressSte
             </button>
           </div>
 
-          <div className="flex flex-col gap-6 pb-6">
+          <div className="flex flex-col gap-6 pb-72">
             <div className="flex flex-col gap-2">
               <label htmlFor="try-at-home-address-line-1" className={appointmentLabelClassName}>
                 Address Line 1

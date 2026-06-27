@@ -34,19 +34,13 @@ const nestedImageCropStyle = {
   marginLeft: "-17.72%",
 } as const;
 
-const lifestyleImageCropStyle = {
-  width: "100%",
-  height: "145.38%",
-  marginTop: "-12.23%",
-} as const;
-
 type CroppedGalleryImageProps = {
   src: string | StaticImageData;
   alt: string;
   sizes: string;
   maxWidthClass: string;
   minHeightClass?: string;
-  cropStyle: typeof nestedImageCropStyle | typeof lifestyleImageCropStyle;
+  cropStyle: typeof nestedImageCropStyle;
   priority?: boolean;
 };
 
@@ -177,14 +171,12 @@ const ProductDetailGallery = ({ product, variant = "all" }: ProductDetailGallery
             </div>
           </div>
 
-          <div className="flex h-420 w-full overflow-hidden lg:h-680">
-            <CroppedGalleryImage
+          <div className="relative flex h-420 w-full overflow-hidden lg:h-680">
+            <OptimizedImage
               src={lifestyleImage}
               alt={`${product.name} — lifestyle`}
               sizes="(max-width: 1024px) 100vw, 783px"
-              maxWidthClass="w-full"
-              minHeightClass="min-h-full"
-              cropStyle={lifestyleImageCropStyle}
+              className="size-full object-cover object-center"
             />
           </div>
         </div>

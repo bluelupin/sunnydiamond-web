@@ -161,7 +161,7 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
         </div>
 
         <div className="filter-drawer-scroll flex min-h-0 flex-1 flex-col overflow-y-auto px-[24px] pt-[22px]">
-          <div className="mx-auto flex w-full max-w-[424px] flex-col gap-[24px] pb-[24px]">
+          <div className="mx-auto flex w-full max-w-[424px] flex-col gap-[24px] pb-72">
             <section className="flex flex-col gap-[16px]">
               <h3 className="font-gill text-[16px] font-normal leading-110 text-darkblack">
                 By Price Range

@@ -37,7 +37,7 @@ const TryAtHomeSuccessStep = ({
   return (
     <>
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-        <div className="flex flex-col gap-6 px-4 pt-6 lg:px-8 lg:pt-8">
+        <div className="flex flex-col gap-6 px-4 pb-72 pt-6 lg:px-8 lg:pt-8">
           <div className="flex flex-col gap-6">
             <div className="grid w-full [&>*]:col-start-1 [&>*]:row-start-1">
               <div className="flex justify-center">

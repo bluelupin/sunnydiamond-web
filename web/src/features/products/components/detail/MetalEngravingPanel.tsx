@@ -95,7 +95,7 @@ const MetalEngravingPanel = ({
               />
             </div>
 
-            <div className="flex flex-col gap-6 pb-6">
+            <div className="flex flex-col gap-6 pb-72">
               <div className="flex flex-col gap-2">
                 <label htmlFor="engraving-text" className={appointmentLabelClassName}>
                   What do you want engraved?

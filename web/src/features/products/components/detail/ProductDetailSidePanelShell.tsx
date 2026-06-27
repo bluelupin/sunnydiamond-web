@@ -7,7 +7,7 @@ export const productDetailSidePanelOverlayClassName =
   "min-h-0 flex-1 bg-[#1E1E1E]/75 animate-in fade-in duration-300 max-lg:min-h-12";
 
 export const productDetailSidePanelAsideClassName =
-  "flex h-full w-full max-w-480 shrink-0 flex-col overflow-hidden bg-white shadow-2xl animate-in slide-in-from-right duration-300 max-lg:max-h-[calc(100vh-4rem)]";
+  "flex min-h-0 w-full max-w-480 shrink-0 flex-col overflow-hidden bg-white shadow-2xl max-lg:max-h-[calc(100vh-4rem)] max-lg:animate-in max-lg:slide-in-from-bottom max-lg:duration-300 lg:h-full lg:animate-in lg:slide-in-from-right lg:duration-300";
 
 type ProductDetailSidePanelShellProps = {
   open: boolean;

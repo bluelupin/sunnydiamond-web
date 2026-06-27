@@ -10,6 +10,35 @@ type StoreVisitMapBlockProps = {
   cardClassName?: string;
 };
 
+const mapLayers = (
+  <div className="grid shrink-0 [&>*]:col-start-1 [&>*]:row-start-1">
+    <Image
+      src={DELIVERY_STORE_MAP_IMAGES.base}
+      alt=""
+      width={720}
+      height={518}
+      className="max-w-none object-cover"
+      sizes="720px"
+    />
+    <Image
+      src={DELIVERY_STORE_MAP_IMAGES.overlay1}
+      alt=""
+      width={720}
+      height={518}
+      className="max-w-none object-cover"
+      sizes="720px"
+    />
+    <Image
+      src={DELIVERY_STORE_MAP_IMAGES.overlay2}
+      alt=""
+      width={720}
+      height={518}
+      className="max-w-none object-cover"
+      sizes="720px"
+    />
+  </div>
+);
+
 const StoreVisitMapBlock = ({
   variant,
   heroImage,
@@ -48,35 +77,28 @@ const StoreVisitMapBlock = ({
     );
   }
 
+  if (variant === "availability") {
+    return (
+      <div className="relative h-400 w-full shrink-0 overflow-hidden">
+        <div className="absolute left-[calc(50%+55.5px)] top-[calc(50%+13.76px)] -translate-x-1/2 -translate-y-1/2">
+          {mapLayers}
+        </div>
+        <div
+          className={cn(
+            "absolute bottom-4 left-1/2 flex w-311 -translate-x-1/2 flex-col gap-6 bg-gray300 px-4 py-6",
+            cardClassName,
+          )}
+        >
+          {children}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-400 w-full shrink-0 flex-col justify-end overflow-hidden">
       <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden">
-        <div className="grid shrink-0 [&>*]:col-start-1 [&>*]:row-start-1">
-          <Image
-            src={DELIVERY_STORE_MAP_IMAGES.base}
-            alt=""
-            width={720}
-            height={518}
-            className="object-cover"
-            sizes="720px"
-          />
-          <Image
-            src={DELIVERY_STORE_MAP_IMAGES.overlay1}
-            alt=""
-            width={720}
-            height={518}
-            className="object-cover"
-            sizes="720px"
-          />
-          <Image
-            src={DELIVERY_STORE_MAP_IMAGES.overlay2}
-            alt=""
-            width={720}
-            height={518}
-            className="object-cover"
-            sizes="720px"
-          />
-        </div>
+        {mapLayers}
       </div>
       <div
         className={cn(

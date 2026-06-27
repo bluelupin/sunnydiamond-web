@@ -112,7 +112,7 @@ const ProductAppointmentForm = ({
             <p className="font-gill text-base leading-110 text-darkblack">{productName}</p>
           </div>
 
-          <div className="flex flex-col gap-6 pb-6">
+          <div className="flex flex-col gap-6 pb-72">
             <AppointmentContactFields
               idPrefix={config.idPrefix}
               name={name}

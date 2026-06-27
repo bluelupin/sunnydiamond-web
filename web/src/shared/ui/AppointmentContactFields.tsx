@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import {
   APPOINTMENT_COUNTRY_CODES,
@@ -9,6 +9,7 @@ import {
   appointmentLabelClassName,
 } from "@/shared/constants/appointmentForm";
 import FormFieldError from "@/shared/ui/FormFieldError";
+import AppointmentDateField from "@/shared/ui/AppointmentDateField";
 import {
   getMinSelectableDate,
   invalidFieldClassName,
@@ -180,28 +181,16 @@ const AppointmentContactFields = ({
         <label htmlFor={`${idPrefix}-date`} className={labelClassName}>
           Date
         </label>
-        <div
-          className={cn(
-            "relative flex h-14 w-full items-center bg-[#F2F2F2] px-3",
-            showError("date") && "ring-1 ring-[#B42318]",
-          )}
-        >
-          <input
-            id={`${idPrefix}-date`}
-            type="date"
-            value={date}
-            min={minDate}
-            onChange={(event) => onDateChange(event.target.value)}
-            onBlur={() => markTouched("date")}
-            aria-invalid={showError("date") || undefined}
-            aria-describedby={showError("date") ? `${idPrefix}-date-error` : undefined}
-            className={cn(
-              "min-w-0 flex-1 bg-transparent font-gill text-base leading-110 outline-none [color-scheme:light]",
-              date ? "text-darkblack" : "text-neutral400",
-            )}
-          />
-          <Calendar size={20} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
-        </div>
+        <AppointmentDateField
+          id={`${idPrefix}-date`}
+          value={date}
+          minDate={minDate}
+          onChange={onDateChange}
+          onBlur={() => markTouched("date")}
+          hasError={showError("date")}
+          aria-invalid={showError("date") || undefined}
+          aria-describedby={showError("date") ? `${idPrefix}-date-error` : undefined}
+        />
         <FormFieldError id={`${idPrefix}-date-error`} message={showError("date") ? errors.date : undefined} />
       </div>
 
