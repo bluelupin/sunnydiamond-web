@@ -5,11 +5,11 @@ import Image from "next/image";
 import type { StaticImageData } from "next/image";
 import { ChevronDown, Info } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/shared/utils/cn";
 import { useToast } from "@/shared/hooks/use-toast";
 import { appointmentFieldClassName, appointmentLabelClassName } from "@/shared/constants/appointmentForm";
 import { ENGRAVING_FONTS, type EngravingSelection } from "@/features/products/constants/engraving";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 
 type MetalEngravingPanelProps = {
   open: boolean;
@@ -37,24 +37,6 @@ const MetalEngravingPanel = ({
     setFont(initialValue?.font ?? ENGRAVING_FONTS[0]);
   }, [open, initialValue]);
 
-  useEffect(() => {
-    if (!open) return;
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open, onClose]);
-
   const handleSave = () => {
     if (!font.trim()) {
       return;
@@ -71,30 +53,15 @@ const MetalEngravingPanel = ({
     onClose();
   };
 
-  if (!open) {
-    return null;
-  }
-
   return (
-    <div className="fixed inset-0 z-[70]">
-      <button
-        type="button"
-        aria-label="Close engraving panel"
-        className="absolute inset-0 bg-[#1E1E1E]/25 backdrop-blur-[10px] animate-in fade-in duration-300"
-        onClick={onClose}
-      />
-
-      <aside
-        role="dialog"
-        aria-modal="true"
-        aria-label="Engraving"
-        className={cn(
-          "absolute flex flex-col bg-white shadow-2xl",
-          "inset-x-0 bottom-0 top-12 max-lg:animate-in max-lg:slide-in-from-bottom max-lg:duration-300",
-          "lg:inset-x-auto lg:inset-y-0 lg:right-0 lg:top-0 lg:w-full lg:max-w-[480px] lg:animate-in lg:slide-in-from-right lg:duration-300",
-        )}
-      >
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+    <ProductDetailSidePanelShell
+      open={open}
+      onClose={onClose}
+      overlayAriaLabel="Close engraving panel"
+      dialogAriaLabel="Engraving"
+    >
+      <div className="flex min-h-0 flex-1 flex-col">
+      <div className="min-h-0 flex-1 overflow-y-auto">
           <div className="flex flex-col gap-6 px-4 pt-6 lg:px-8 lg:pt-8">
             <div className="flex flex-col gap-6">
               <div className="flex items-center justify-between gap-4">
@@ -117,12 +84,13 @@ const MetalEngravingPanel = ({
               <div className="h-px w-full bg-neutral300" aria-hidden />
             </div>
 
-            <div className="relative h-[214px] w-full overflow-hidden bg-[#F2F2F2]">
+            <div className="h-214 w-full overflow-hidden bg-aboutInactive">
               <Image
                 src={previewImage}
                 alt="Engraving preview"
-                fill
-                className="object-cover object-center"
+                width={480}
+                height={214}
+                className="h-full w-full object-cover object-center"
                 sizes="(max-width: 1024px) 100vw, 480px"
               />
             </div>
@@ -146,7 +114,7 @@ const MetalEngravingPanel = ({
                 <label htmlFor="engraving-font" className={appointmentLabelClassName}>
                   Font*
                 </label>
-                <div className="relative flex h-14 w-full items-center bg-[#F2F2F2] px-3">
+                <div className="flex h-14 w-full items-center bg-aboutInactive px-3">
                   <select
                     id="engraving-font"
                     value={font}
@@ -191,13 +159,13 @@ const MetalEngravingPanel = ({
             type="button"
             onClick={handleSave}
             disabled={!font.trim()}
-            className="btn-slide-up inline-flex h-14 w-full items-center justify-center bg-darkblack px-7 font-gill text-sm uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="btn-dark-slide inline-flex h-14 w-full items-center justify-center px-7 font-gill text-sm uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
             Save
           </button>
         </PanelFooter>
-      </aside>
-    </div>
+      </div>
+    </ProductDetailSidePanelShell>
   );
 };
 

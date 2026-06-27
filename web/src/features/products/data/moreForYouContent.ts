@@ -2,6 +2,12 @@ import { jewelleryListingProducts } from "@/features/jewellery-product/data/prod
 import { products } from "@/features/products/data/products";
 
 export const moreForYouTransparentImages = [
+  "/images/products/more-for-you/sample-left.png",
+  "/images/products/more-for-you/sample-center.png",
+  "/images/products/more-for-you/sample-right.png",
+] as const;
+
+export const moreForYouProductImages = [
   "/images/products/more-for-you/bracelet-left.png",
   "/images/products/more-for-you/ring-center.png",
   "/images/products/more-for-you/bracelet-right.png",
@@ -24,7 +30,7 @@ export function getMoreForYouCarouselItems(currentProductId: string): MoreForYou
       id: product.id,
       name: listing?.name ?? product.name,
       href: `/product/${product.id}`,
-      image: moreForYouTransparentImages[index % moreForYouTransparentImages.length],
+      image: moreForYouProductImages[index % moreForYouProductImages.length],
     };
   });
 }

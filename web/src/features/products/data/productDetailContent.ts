@@ -30,7 +30,7 @@ const benefits = [
     label: "Pan India Free Shipping",
     mobileLabel: "Pan India Free Shipping",
     lines: ["Pan India", "Free Shipping"] as [string, string],
-    icon: null,
+    icon: "/images/products/pdp/delivery-truck.svg",
   },
 ];
 
@@ -90,8 +90,9 @@ export function getProductDetailContent(product: Product): ProductDetailContent 
     engravingPreviewImage,
     benefits,
     accordions: buildAccordions(product),
-    heroBannerImage: "/images/about/craftsmanship-764d7a.png",
-    visitUsImage: "/images/about/store.png",
-    personaliseImage: "/images/about/crafting-diamond.png",
+    heroBannerImage: "/images/products/pdp/hero-banner-poster.png",
+    heroBannerVideo: "/videos/pdp-lifestyle-banner.mp4",
+    visitUsImage: "/images/products/pdp/visit-us-hero.png",
+    personaliseImage: "/images/products/pdp/personalise-support.png",
   };
 }

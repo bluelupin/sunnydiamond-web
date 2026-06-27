@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import type { StaticImageData } from "next/image";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, SlidersHorizontal } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
@@ -28,6 +28,7 @@ import {
 } from "@/shared/utils/formValidation";
 import { DetailDarkButton } from "./shared";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 import { ChevronDown } from "lucide-react";
 import TryAtHomeSuccessStep from "./TryAtHomeSuccessStep";
 import type { TryAtHomeBookingSummary } from "@/features/products/utils/tryAtHomeBooking";
@@ -95,15 +96,14 @@ const TryAtHomeDetailsStep = ({
           </div>
 
           <div className="flex flex-col items-center gap-2 pb-4">
-            <div className="relative h-[133px] w-[206px]">
-              <Image
-                src={productImage}
-                alt={productName}
-                fill
-                className="object-contain"
-                sizes="206px"
-              />
-            </div>
+            <Image
+              src={productImage}
+              alt={productName}
+              width={206}
+              height={133}
+              className="h-133 w-206 object-contain"
+              sizes="206px"
+            />
             <p className="font-gill text-base leading-110 text-darkblack">{productName}</p>
           </div>
 
@@ -135,7 +135,7 @@ const TryAtHomeDetailsStep = ({
       </div>
 
       <PanelFooter contentClassName="flex flex-col items-center gap-4">
-        <p className="text-center font-gill text-sm font-light leading-normal tracking-[0.252px] text-[#4D4D4D]">
+        <p className="text-center font-gill text-sm font-light leading-normal tracking-normal text-neutral500">
           Our representative will get in touch with you soon
         </p>
         <DetailDarkButton
@@ -153,12 +153,13 @@ const TryAtHomeDetailsStep = ({
 
 type TryAtHomeAddressStepProps = {
   onBack: () => void;
+  onClose: () => void;
   onSubmit: () => void;
 };
 
 type AddressField = "addressLine1" | "addressLine2" | "pincode" | "city" | "state";
 
-const TryAtHomeAddressStep = ({ onBack, onSubmit }: TryAtHomeAddressStepProps) => {
+const TryAtHomeAddressStep = ({ onBack, onClose, onSubmit }: TryAtHomeAddressStepProps) => {
   const { detectAddress, isLocating } = useCurrentLocationAddress();
   const [addressLine1, setAddressLine1] = useState("");
   const [addressLine2, setAddressLine2] = useState("");
@@ -233,7 +234,20 @@ const TryAtHomeAddressStep = ({ onBack, onSubmit }: TryAtHomeAddressStepProps) =
                 </button>
                 <h2 className="font-larken text-24 font-light leading-110 text-darkblack">Try At Home</h2>
               </div>
-              <SlidersHorizontal size={32} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close try at home panel"
+                className="inline-flex size-6 shrink-0 items-center justify-center"
+              >
+                <Image
+                  src="/images/navigation/menu-close.svg"
+                  alt=""
+                  width={24}
+                  height={24}
+                  aria-hidden
+                />
+              </button>
             </div>
             <div className="h-px w-full bg-neutral300" aria-hidden />
           </div>
@@ -363,8 +377,8 @@ const TryAtHomeAddressStep = ({ onBack, onSubmit }: TryAtHomeAddressStepProps) =
               </label>
               <div
                 className={cn(
-                  "relative flex h-14 w-full items-center bg-[#F2F2F2] px-3",
-                  showError("state") && "ring-1 ring-[#B42318]",
+                  "flex h-14 w-full items-center bg-aboutInactive px-3",
+                  showError("state") && "ring-1 ring-destructive",
                 )}
               >
                 <select
@@ -403,7 +417,7 @@ const TryAtHomeAddressStep = ({ onBack, onSubmit }: TryAtHomeAddressStepProps) =
       </div>
 
       <PanelFooter contentClassName="flex flex-col items-center gap-4">
-        <p className="text-center font-gill text-sm font-light leading-normal tracking-[0.252px] text-[#4D4D4D]">
+        <p className="text-center font-gill text-sm font-light leading-normal tracking-normal text-neutral500">
           Our representative will get in touch with you soon
         </p>
         <DetailDarkButton onClick={handleSubmit} disabled={submitted && !isValid}>
@@ -427,23 +441,8 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
     if (!open) {
       setStep("details");
       setBookingSummary({ date: "", selectedSlot: null });
-      return;
     }
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open, onClose]);
+  }, [open]);
 
   const handleClose = () => {
     setStep("details");
@@ -464,53 +463,40 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
     router.push("/products");
   };
 
-  if (!open) {
-    return null;
-  }
-
   return (
-    <div className="fixed inset-0 z-[70]">
-      <button
-        type="button"
-        aria-label="Close try at home panel"
-        className="absolute inset-0 bg-[rgba(30,30,30,0.3)] backdrop-blur-[10px] animate-in fade-in duration-300"
-        onClick={handleClose}
-      />
-
-      <aside
-        role="dialog"
-        aria-modal="true"
-        aria-label="Try At Home"
-        className={cn(
-          "absolute flex flex-col overflow-hidden bg-white shadow-2xl",
-          "inset-x-0 bottom-0 top-12 max-lg:animate-in max-lg:slide-in-from-bottom max-lg:duration-300",
-          "lg:inset-x-auto lg:inset-y-0 lg:right-0 lg:top-0 lg:w-full lg:max-w-[480px] lg:animate-in lg:slide-in-from-right lg:duration-300",
-        )}
-      >
-        {step === "details" ? (
-          <TryAtHomeDetailsStep
-            productName={product.name}
-            productImage={productImage}
-            onClose={handleClose}
-            onProceed={(booking) => {
-              setBookingSummary(booking);
-              setStep("address");
-            }}
-          />
-        ) : step === "address" ? (
-          <TryAtHomeAddressStep onBack={() => setStep("details")} onSubmit={handleSubmit} />
-        ) : (
-          <TryAtHomeSuccessStep
-            product={product}
-            productImage={productImage}
-            booking={bookingSummary}
-            onClose={handleClose}
-            onViewBooking={handleViewBooking}
-            onContinueShopping={handleContinueShopping}
-          />
-        )}
-      </aside>
-    </div>
+    <ProductDetailSidePanelShell
+      open={open}
+      onClose={handleClose}
+      overlayAriaLabel="Close try at home panel"
+      dialogAriaLabel="Try At Home"
+    >
+      {step === "details" ? (
+        <TryAtHomeDetailsStep
+          productName={product.name}
+          productImage={productImage}
+          onClose={handleClose}
+          onProceed={(booking) => {
+            setBookingSummary(booking);
+            setStep("address");
+          }}
+        />
+      ) : step === "address" ? (
+        <TryAtHomeAddressStep
+          onBack={() => setStep("details")}
+          onClose={handleClose}
+          onSubmit={handleSubmit}
+        />
+      ) : (
+        <TryAtHomeSuccessStep
+          product={product}
+          productImage={productImage}
+          booking={bookingSummary}
+          onClose={handleClose}
+          onViewBooking={handleViewBooking}
+          onContinueShopping={handleContinueShopping}
+        />
+      )}
+    </ProductDetailSidePanelShell>
   );
 };
 

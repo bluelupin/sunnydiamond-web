@@ -41,7 +41,7 @@ export const homeContent = {
     collection: {
       title: "Alankara Collection",
       description:
-        "Guided by tradition and perfected by expertise, our craftsmen bring every diamond to life with meticulous attention to detail.",
+        "Guided by tradition and perfected by expertise, our craftsmen bring every diamond to life with",
       cta: { label: "View Collection", to: "/products" },
     },
     productIds: ["1", "3", "5", "6", "2"],

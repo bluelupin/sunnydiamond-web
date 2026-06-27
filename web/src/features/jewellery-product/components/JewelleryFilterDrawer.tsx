@@ -370,7 +370,7 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
             <button
               type="button"
               onClick={() => onApply(draft)}
-              className="btn-slide-up inline-flex h-[56px] min-w-0 flex-1 items-center justify-center bg-darkblack px-[28px] py-[20px] font-gill text-[14px] font-normal uppercase leading-110 text-white"
+              className="btn-dark-slide inline-flex h-[56px] min-w-0 flex-1 items-center justify-center px-[28px] py-[20px] font-gill text-[14px] font-normal uppercase leading-110 text-white"
             >
               Apply Filters
             </button>

@@ -11,7 +11,7 @@ type DetailTextLinkProps = {
 
 export const DetailTextLink = ({ children, href, onClick, className, light }: DetailTextLinkProps) => {
   const classes = cn(
-    "text-link-underline inline-flex border-b-[1.5px] pb-1 font-gill text-sm leading-110",
+    "text-link-underline inline-flex w-fit cursor-pointer border-b-[1.5px] pb-1 font-gill text-sm leading-110",
     light ? "border-white text-white" : "border-darkblack text-darkblack",
     className,
   );
@@ -39,12 +39,12 @@ export const DetailDarkButton = ({ children, className, ...props }: DetailDarkBu
   <button
     type="button"
     className={cn(
-      "btn-slide-up inline-flex h-14 w-full items-center justify-center bg-darkblack px-7 font-gill text-sm uppercase leading-110 text-white",
+      "btn-dark-slide inline-flex h-14 w-full items-center justify-center px-7 font-gill text-sm uppercase leading-110 text-white",
       className,
     )}
     {...props}
   >
-    {children}
+    <span className="relative z-10">{children}</span>
   </button>
 );
 
@@ -61,7 +61,7 @@ export const DetailOutlineButton = ({ children, className, ...props }: DetailOut
     )}
     {...props}
   >
-    {children}
+    <span className="relative z-10">{children}</span>
   </button>
 );
 
@@ -76,7 +76,7 @@ type DetailOutlineLinkProps = {
 
 export const DetailOutlineLink = ({ children, href, className }: DetailOutlineLinkProps) => (
   <Link href={href} className={cn(outlineLinkClassName, className)}>
-    {children}
+    <span className="relative z-10">{children}</span>
   </Link>
 );
 

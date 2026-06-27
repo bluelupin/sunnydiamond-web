@@ -14,8 +14,10 @@ import { useToast } from "@/shared/hooks/use-toast";
 import { ChevronLeft } from "lucide-react";
 import ProductDetailGallery from "./detail/ProductDetailGallery";
 import ProductDetailSidebar from "./detail/ProductDetailSidebar";
+import ProductDetailHeroLayout from "./detail/ProductDetailHeroLayout";
 import ProductDetailHeroBanner from "./detail/ProductDetailHeroBanner";
 import FeaturedCollectionSection from "@/features/cms/components/home/FeaturedCollectionSection";
+import { homeContent } from "@/features/cms/data/content";
 import ProductDetailMoreForYouSection from "./detail/ProductDetailMoreForYouSection";
 import ProductDetailVisitUsSection from "./detail/ProductDetailVisitUsSection";
 
@@ -46,6 +48,13 @@ const ProductDetailPage = () => {
     toast({ title: "Added to cart", description: `${product.name} has been added to your bag.` });
   };
 
+  const sidebarProps = {
+    product,
+    content,
+    pricing,
+    onAddToBag: handleAddToCart,
+  };
+
   return (
     <article>
       <ProductDetailGallery product={product} variant="mobile" />
@@ -59,19 +68,27 @@ const ProductDetailPage = () => {
           Back to Jewellery
         </Link>
 
-        <div className="flex flex-col lg:grid lg:grid-cols-[minmax(0,783fr)_minmax(0,553fr)] lg:gap-6 xl:gap-6">
-          <ProductDetailGallery product={product} variant="desktop" />
-          <ProductDetailSidebar
-            product={product}
-            content={content}
-            pricing={pricing}
-            onAddToBag={handleAddToCart}
-          />
-        </div>
+        <ProductDetailSidebar {...sidebarProps}>
+          {({ purchase, details }) => (
+            <ProductDetailHeroLayout
+              gallery={<ProductDetailGallery product={product} variant="desktop" />}
+              purchase={purchase}
+              details={details}
+            />
+          )}
+        </ProductDetailSidebar>
       </PageContainer>
 
-      <ProductDetailHeroBanner imageSrc={content.heroBannerImage} alt={`${product.name} lifestyle`} />
-      <FeaturedCollectionSection id="alankara" />
+      <ProductDetailHeroBanner
+        imageSrc={content.heroBannerImage}
+        videoSrc={content.heroBannerVideo}
+        alt={`${product.name} lifestyle`}
+      />
+      <FeaturedCollectionSection
+        id="alankara"
+        sectionHeading="Pair it With"
+        description={homeContent.alankara.collection.description}
+      />
       <ProductDetailMoreForYouSection items={moreForYou} />
       <ProductDetailVisitUsSection imageSrc={content.visitUsImage} />
     </article>

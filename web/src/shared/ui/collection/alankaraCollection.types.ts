@@ -25,6 +25,7 @@ export type AlankaraCollectionCta = {
 
 export type AlankaraCollectionProps = {
   id?: string;
+  sectionHeading?: string;
   title: string;
   description?: string;
   collectionImage: string | StaticImageData;

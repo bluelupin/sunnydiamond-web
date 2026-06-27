@@ -6,8 +6,6 @@ import {
   ChevronLeft,
   ExternalLink,
   Phone,
-  SlidersHorizontal,
-  X,
 } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { useToast } from "@/shared/hooks/use-toast";
@@ -22,9 +20,13 @@ import {
   BOOK_STORE_VISIT_STORES,
   type BookStoreVisitStore,
 } from "@/features/products/data/bookStoreVisitContent";
-import { DELIVERY_STORE_MAP_IMAGES } from "@/features/products/data/deliveryStoreContent";
 import { DetailDarkButton } from "./shared";
+import StoreVisitMapBlock from "./StoreVisitMapBlock";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import {
+  productDetailSidePanelAsideClassName,
+  productDetailSidePanelOverlayClassName,
+} from "./ProductDetailSidePanelShell";
 
 type BookStoreVisitPanelProps = {
   variant?: "embedded" | "page" | "modal";
@@ -98,7 +100,6 @@ const BookStoreVisitPanel = ({
   };
 
   const showStoreSelectionBack = variant === "embedded" || variant === "page";
-  const showCloseButton = variant === "embedded";
 
   const handleSubmit = () => {
     toast({
@@ -119,10 +120,9 @@ const BookStoreVisitPanel = ({
       aria-label="Book your store visit"
       className={cn(
         "flex flex-col overflow-hidden bg-white",
-        variant === "embedded" && "absolute inset-0",
-        variant === "page" && "mx-auto min-h-[calc(100vh-64px)] w-full max-w-[480px]",
-        variant === "modal" &&
-          "absolute shadow-2xl inset-x-0 bottom-0 top-12 max-lg:animate-in max-lg:slide-in-from-bottom max-lg:duration-300 lg:inset-x-auto lg:inset-y-0 lg:right-0 lg:top-0 lg:w-full lg:max-w-[480px] lg:animate-in lg:slide-in-from-right lg:duration-300",
+        variant === "embedded" && "h-full w-full",
+        variant === "page" && "mx-auto min-h-[calc(100vh-4rem)] w-full max-w-480",
+        variant === "modal" && cn("shadow-2xl", productDetailSidePanelAsideClassName),
       )}
     >
       {step === "select-store" ? (
@@ -132,9 +132,8 @@ const BookStoreVisitPanel = ({
           onSelectStore={setSelectedStoreId}
           onProceed={() => setStep("form")}
           onBack={showStoreSelectionBack ? handleStoreSelectionBack : undefined}
-          onClose={showCloseButton ? handleClose : undefined}
+          onClose={variant !== "page" ? handleClose : undefined}
           showBack={showStoreSelectionBack}
-          showClose={showCloseButton}
         />
       ) : (
         <BookingFormStep
@@ -148,8 +147,7 @@ const BookStoreVisitPanel = ({
           purpose={purpose}
           note={note}
           onBack={() => setStep("select-store")}
-          onClose={showCloseButton ? handleClose : undefined}
-          showClose={showCloseButton}
+          onClose={variant !== "page" ? handleClose : undefined}
           onNameChange={setName}
           onCountryCodeChange={setCountryCode}
           onPhoneChange={setPhone}
@@ -169,11 +167,11 @@ const BookStoreVisitPanel = ({
   }
 
   return (
-    <div className="fixed inset-0 z-[70]">
+    <div className="fixed inset-0 z-[70] flex max-lg:flex-col lg:justify-end">
       <button
         type="button"
         aria-label="Close book a visit"
-        className="absolute inset-0 bg-[rgba(30,30,30,0.3)] backdrop-blur-[10px] animate-in fade-in duration-300"
+        className={productDetailSidePanelOverlayClassName}
         onClick={handleClose}
       />
       {panelContent}
@@ -189,7 +187,6 @@ type StoreSelectionStepProps = {
   onBack?: () => void;
   onClose?: () => void;
   showBack?: boolean;
-  showClose?: boolean;
 };
 
 const StoreSelectionStep = ({
@@ -200,7 +197,6 @@ const StoreSelectionStep = ({
   onBack,
   onClose,
   showBack = false,
-  showClose = false,
 }: StoreSelectionStepProps) => (
   <>
     <div className="min-h-0 flex-1 overflow-y-auto">
@@ -222,23 +218,27 @@ const StoreSelectionStep = ({
                 Book Your Store Visit
               </h2>
             </div>
-            {showClose ? (
+            {onClose ? (
               <button
                 type="button"
                 onClick={onClose}
                 aria-label="Close"
                 className="inline-flex size-6 shrink-0 items-center justify-center"
               >
-                <X size={24} strokeWidth={1.25} aria-hidden className="text-darkblack" />
+                <Image
+                  src="/images/navigation/menu-close.svg"
+                  alt=""
+                  width={24}
+                  height={24}
+                  aria-hidden
+                />
               </button>
-            ) : (
-              <SlidersHorizontal size={32} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
-            )}
+            ) : null}
           </div>
           <div className="h-px w-full bg-neutral300" aria-hidden />
         </div>
 
-        <div className="mt-[22px] flex flex-col gap-4 pb-6">
+        <div className="mt-6 flex flex-col gap-4 pb-6">
           <div className="-mx-4 flex gap-10 overflow-x-auto px-4 lg:-mx-8 lg:px-8">
             {BOOK_STORE_VISIT_STORES.map((store) => {
               const isSelected = store.id === selectedStoreId;
@@ -261,34 +261,7 @@ const StoreSelectionStep = ({
             })}
           </div>
 
-          <div className="relative h-[400px] w-full shrink-0 overflow-hidden">
-            <div className="absolute left-[calc(50%+55.5px)] top-[calc(50%+13.76px)] h-[518px] w-[720px] -translate-x-1/2 -translate-y-1/2">
-              <div className="relative size-full">
-                <Image
-                  src={DELIVERY_STORE_MAP_IMAGES.base}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="720px"
-                />
-                <Image
-                  src={DELIVERY_STORE_MAP_IMAGES.overlay1}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="720px"
-                />
-                <Image
-                  src={DELIVERY_STORE_MAP_IMAGES.overlay2}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="720px"
-                />
-              </div>
-            </div>
-
-            <div className="absolute left-1/2 top-[163px] flex w-[311px] -translate-x-1/2 flex-col gap-4 bg-gray300 px-4 py-6">
+          <StoreVisitMapBlock variant="store-select">
               <p className="font-larken text-20 font-light leading-110 text-darkblack">
                 {selectedStore.storeName}
               </p>
@@ -322,8 +295,7 @@ const StoreSelectionStep = ({
                   GET DIRECTIONS
                 </a>
               </div>
-            </div>
-          </div>
+          </StoreVisitMapBlock>
         </div>
       </div>
     </div>
@@ -346,7 +318,6 @@ type BookingFormStepProps = {
   note: string;
   onBack: () => void;
   onClose?: () => void;
-  showClose?: boolean;
   onNameChange: (value: string) => void;
   onCountryCodeChange: (value: string) => void;
   onPhoneChange: (value: string) => void;
@@ -370,7 +341,6 @@ const BookingFormStep = ({
   note,
   onBack,
   onClose,
-  showClose = false,
   onNameChange,
   onCountryCodeChange,
   onPhoneChange,
@@ -408,38 +378,28 @@ const BookingFormStep = ({
                 Book Your Store Visit
               </h2>
             </div>
-            {showClose ? (
+            {onClose ? (
               <button
                 type="button"
                 onClick={onClose}
                 aria-label="Close"
                 className="inline-flex size-6 shrink-0 items-center justify-center"
               >
-                <X size={24} strokeWidth={1.25} aria-hidden className="text-darkblack" />
+                <Image
+                  src="/images/navigation/menu-close.svg"
+                  alt=""
+                  width={24}
+                  height={24}
+                  aria-hidden
+                />
               </button>
-            ) : (
-              <SlidersHorizontal size={32} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
-            )}
+            ) : null}
           </div>
           <div className="h-px w-full bg-neutral300" aria-hidden />
         </div>
 
-        <div className="mt-[22px] flex flex-col gap-6 pb-6">
-          <div className="relative h-[400px] w-full shrink-0 overflow-hidden">
-            <div className="absolute inset-0 overflow-hidden">
-              <div className="absolute left-[-53.51%] top-[-13.32%] h-[118.92%] w-[209.18%]">
-                <Image
-                  src={selectedStore.heroImage}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 480px) 100vw, 480px"
-                  aria-hidden
-                />
-              </div>
-            </div>
-
-            <div className="absolute left-1/2 top-[246px] flex w-[311px] -translate-x-1/2 flex-col gap-4 bg-gray300 px-4 py-6">
+        <div className="mt-6 flex flex-col gap-6 pb-6">
+          <StoreVisitMapBlock variant="booking-hero" heroImage={selectedStore.heroImage}>
               <p className="font-larken text-20 font-light leading-110 text-darkblack">
                 {selectedStore.storeName}
               </p>
@@ -460,8 +420,7 @@ const BookingFormStep = ({
                   {selectedStore.address}
                 </a>
               </div>
-            </div>
-          </div>
+          </StoreVisitMapBlock>
 
           <div className="flex flex-col gap-6">
             <AppointmentContactFields
@@ -497,7 +456,7 @@ const BookingFormStep = ({
     </div>
 
     <PanelFooter contentClassName="flex flex-col items-center gap-4">
-      <p className="text-center font-gill text-sm font-light leading-normal tracking-[0.252px] text-neutral500">
+        <p className="text-center font-gill text-sm font-light leading-normal tracking-normal text-neutral500">
         Our representative will get in touch with you soon
       </p>
       <DetailDarkButton

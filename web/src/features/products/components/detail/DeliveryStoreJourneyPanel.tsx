@@ -2,8 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { ChevronLeft, MapPin, Phone, SlidersHorizontal, Store } from "lucide-react";
-import { cn } from "@/shared/utils/cn";
+import { ChevronLeft, MapPin, Phone, Store } from "lucide-react";
 import { useToast } from "@/shared/hooks/use-toast";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
@@ -13,10 +12,11 @@ import {
 } from "@/shared/constants/appointmentForm";
 import {
   DELIVERY_STORE_LOCATIONS,
-  DELIVERY_STORE_MAP_IMAGES,
 } from "@/features/products/data/deliveryStoreContent";
 import { DetailDarkButton, DetailTextLink } from "./shared";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
+import StoreVisitMapBlock from "./StoreVisitMapBlock";
 
 type DeliveryStoreJourneyPanelProps = {
   open: boolean;
@@ -46,23 +46,8 @@ const DeliveryStoreJourneyPanel = ({
   useEffect(() => {
     if (!open) {
       setStep("availability");
-      return;
     }
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open, onClose]);
+  }, [open]);
 
   const formValues = useMemo(
     () => ({ name, countryCode, phone, email, date, note }),
@@ -87,30 +72,14 @@ const DeliveryStoreJourneyPanel = ({
     });
   };
 
-  if (!open) {
-    return null;
-  }
-
   return (
-    <div className="fixed inset-0 z-[70]">
-      <button
-        type="button"
-        aria-label="Close store availability"
-        className="absolute inset-0 bg-[rgba(30,30,30,0.3)] backdrop-blur-[10px] animate-in fade-in duration-300"
-        onClick={handleClose}
-      />
-
-      <aside
-        role="dialog"
-        aria-modal="true"
-        aria-label={step === "availability" ? "In store availability" : "Book your store visit"}
-        className={cn(
-          "absolute flex flex-col overflow-hidden bg-white shadow-2xl",
-          "inset-x-0 bottom-0 top-12 max-lg:animate-in max-lg:slide-in-from-bottom max-lg:duration-300",
-          "lg:inset-x-auto lg:inset-y-0 lg:right-0 lg:top-0 lg:w-full lg:max-w-[480px] lg:animate-in lg:slide-in-from-right lg:duration-300",
-        )}
-      >
-        {step === "availability" ? (
+    <ProductDetailSidePanelShell
+      open={open}
+      onClose={handleClose}
+      overlayAriaLabel="Close store availability"
+      dialogAriaLabel={step === "availability" ? "In store availability" : "Book your store visit"}
+    >
+      {step === "availability" ? (
           <>
             <div className="min-h-0 flex-1 overflow-y-auto">
               <div className="px-4 pt-6 lg:px-8">
@@ -119,12 +88,25 @@ const DeliveryStoreJourneyPanel = ({
                     <h2 className="font-larken text-24 font-light leading-110 text-darkblack">
                       In Store Availabilty
                     </h2>
-                    <SlidersHorizontal size={32} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
+                    <button
+                      type="button"
+                      onClick={handleClose}
+                      aria-label="Close store availability"
+                      className="inline-flex size-6 shrink-0 items-center justify-center"
+                    >
+                      <Image
+                        src="/images/navigation/menu-close.svg"
+                        alt=""
+                        width={24}
+                        height={24}
+                        aria-hidden
+                      />
+                    </button>
                   </div>
                   <div className="h-px w-full bg-neutral300" aria-hidden />
                 </div>
 
-                <div className="mt-[22px] flex flex-col gap-3 pb-6">
+                <div className="mt-6 flex flex-col gap-3 pb-6">
                   <div className="flex flex-wrap items-center gap-2">
                     <Store size={24} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
                     <p className="font-gill text-base font-light leading-110 text-darkblack">
@@ -135,34 +117,7 @@ const DeliveryStoreJourneyPanel = ({
                     </span>
                   </div>
 
-                  <div className="relative h-[400px] w-full shrink-0 overflow-hidden">
-                    <div className="absolute left-[calc(50%+55.5px)] top-[calc(50%+13.76px)] h-[518px] w-[720px] -translate-x-1/2 -translate-y-1/2">
-                      <div className="relative size-full">
-                      <Image
-                        src={DELIVERY_STORE_MAP_IMAGES.base}
-                        alt=""
-                        fill
-                        className="object-cover"
-                        sizes="720px"
-                      />
-                      <Image
-                        src={DELIVERY_STORE_MAP_IMAGES.overlay1}
-                        alt=""
-                        fill
-                        className="object-cover"
-                        sizes="720px"
-                      />
-                      <Image
-                        src={DELIVERY_STORE_MAP_IMAGES.overlay2}
-                        alt=""
-                        fill
-                        className="object-cover"
-                        sizes="720px"
-                      />
-                      </div>
-                    </div>
-
-                    <div className="absolute bottom-4 left-1/2 flex w-[311px] -translate-x-1/2 flex-col gap-6 bg-gray300 px-4 py-6">
+                  <StoreVisitMapBlock variant="availability">
                       <div className="flex flex-col gap-4">
                         <div className="flex gap-3">
                           <MapPin size={20} strokeWidth={1.25} aria-hidden className="mt-0.5 shrink-0 text-darkblack" />
@@ -174,8 +129,7 @@ const DeliveryStoreJourneyPanel = ({
                         </div>
                       </div>
                       <DetailTextLink href={store.collectionHref}>VIEW COLLECTION</DetailTextLink>
-                    </div>
-                  </div>
+                  </StoreVisitMapBlock>
                 </div>
               </div>
             </div>
@@ -203,12 +157,25 @@ const DeliveryStoreJourneyPanel = ({
                         Book Your Store Visit
                       </h2>
                     </div>
-                    <SlidersHorizontal size={32} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
+                    <button
+                      type="button"
+                      onClick={handleClose}
+                      aria-label="Close book your store visit"
+                      className="inline-flex size-6 shrink-0 items-center justify-center"
+                    >
+                      <Image
+                        src="/images/navigation/menu-close.svg"
+                        alt=""
+                        width={24}
+                        height={24}
+                        aria-hidden
+                      />
+                    </button>
                   </div>
                   <div className="h-px w-full bg-neutral300" aria-hidden />
                 </div>
 
-                <div className="mt-[22px] flex flex-col gap-6 pb-6">
+                <div className="mt-6 flex flex-col gap-6 pb-6">
                   <AppointmentContactFields
                     idPrefix="store-visit"
                     name={name}
@@ -237,7 +204,7 @@ const DeliveryStoreJourneyPanel = ({
             </div>
 
             <PanelFooter contentClassName="flex flex-col items-center gap-4">
-              <p className="text-center font-gill text-sm font-light leading-normal tracking-[0.252px] text-neutral500">
+              <p className="text-center font-gill text-sm font-light leading-normal tracking-normal text-neutral500">
                 Our representative will get in touch with you soon
               </p>
               <DetailDarkButton
@@ -250,8 +217,7 @@ const DeliveryStoreJourneyPanel = ({
             </PanelFooter>
           </>
         )}
-      </aside>
-    </div>
+    </ProductDetailSidePanelShell>
   );
 };
 

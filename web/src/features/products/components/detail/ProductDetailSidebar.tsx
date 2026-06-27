@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Image from "next/image";
-import { ChevronDown, Plus, Store, Truck } from "lucide-react";
+import { ChevronDown, Heart, Plus } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -27,12 +27,18 @@ import MetalEngravingPanel from "./MetalEngravingPanel";
 import RingSizeChartPanel from "./RingSizeChartPanel";
 import DeliveryStoreJourneyPanel from "./DeliveryStoreJourneyPanel";
 import type { EngravingSelection } from "@/features/products/constants/engraving";
+import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 
 type ProductDetailSidebarProps = {
   product: Product;
   content: ProductDetailContent;
   pricing: ProductDetailPricing;
   onAddToBag: () => void;
+  children?: (sections: {
+    purchase: ReactNode;
+    details: ReactNode;
+    panels: ReactNode;
+  }) => ReactNode;
 };
 
 const ProductDetailSidebar = ({
@@ -40,6 +46,7 @@ const ProductDetailSidebar = ({
   content,
   pricing,
   onAddToBag,
+  children,
 }: ProductDetailSidebarProps) => {
   const [selectedMetal, setSelectedMetal] = useState(content.metalColors[0]?.id ?? "gold");
   const [ringSize, setRingSize] = useState<string>("");
@@ -48,12 +55,13 @@ const ProductDetailSidebar = ({
   const [isRingSizeChartOpen, setIsRingSizeChartOpen] = useState(false);
   const [isDeliveryStoreOpen, setIsDeliveryStoreOpen] = useState(false);
   const [isGift, setIsGift] = useState(false);
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const [zipCode, setZipCode] = useState("122002");
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
   const [isVideoCallOpen, setIsVideoCallOpen] = useState(false);
   const [isTryAtHomeOpen, setIsTryAtHomeOpen] = useState(false);
   const [isPersonaliseOpen, setIsPersonaliseOpen] = useState(false);
+  const { isWishlisted, toggleWishlist } = useWishlist();
+  const wishlisted = isWishlisted(product.id);
 
   const activeMetal = content.metalColors.find((color) => color.id === selectedMetal);
 
@@ -61,8 +69,8 @@ const ProductDetailSidebar = ({
     setOpenAccordion((current) => (current === id ? null : id));
   };
 
-  return (
-    <aside className="flex flex-col gap-40 px-4 pb-16 pt-8 lg:sticky lg:top-8 lg:self-start lg:px-0 lg:pb-0 lg:pt-0">
+  const purchaseSection = (
+    <div className="flex flex-col gap-40 px-4 pt-8 lg:px-0 lg:pt-0">
       <div className="flex flex-col gap-40">
         <div className="flex flex-col gap-6">
           <header className="flex flex-col gap-4">
@@ -154,19 +162,20 @@ const ProductDetailSidebar = ({
             </DetailDarkButton>
             <button
               type="button"
-              aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-              aria-pressed={isWishlisted}
-              onClick={() => setIsWishlisted((value) => !value)}
+              aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+              aria-pressed={wishlisted}
+              onClick={() => toggleWishlist(product.id)}
               className="inline-flex size-14 shrink-0 items-center justify-center bg-aboutInactive"
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden className="text-darkblack">
-                <path
-                  d="M12 21C12 21 4 14.5 4 9.5C4 6.46243 6.46243 4 9.5 4C11.1566 4 12.6448 4.79455 13.5 6.02079C14.3552 4.79455 15.8434 4 17.5 4C20.5376 4 23 6.46243 23 9.5C23 14.5 15 21 12 21Z"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  fill={isWishlisted ? "currentColor" : "none"}
-                />
-              </svg>
+              <Heart
+                size={24}
+                strokeWidth={1.5}
+                aria-hidden
+                className={cn(
+                  "transition-colors duration-200",
+                  wishlisted ? "fill-linkGold text-linkGold" : "text-darkblack",
+                )}
+              />
             </button>
           </div>
         </div>
@@ -200,13 +209,27 @@ const ProductDetailSidebar = ({
           </div>
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2">
-              <Truck size={32} strokeWidth={1.25} aria-hidden className="shrink-0" />
+              <Image
+                src="/images/products/pdp/delivery-truck.svg"
+                alt=""
+                width={32}
+                height={32}
+                aria-hidden
+                className="size-8 shrink-0 object-contain"
+              />
               <p className="font-gill text-base font-light leading-110 text-darkblack">
                 Estimated delivery May 12 2026
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Store size={32} strokeWidth={1.25} aria-hidden className="shrink-0" />
+              <Image
+                src="/images/products/pdp/store.svg"
+                alt=""
+                width={32}
+                height={32}
+                aria-hidden
+                className="size-8 shrink-0 object-contain"
+              />
               <p className="font-gill text-base font-light leading-110 text-darkblack">
                 Available now at nearest store
               </p>
@@ -215,38 +238,61 @@ const ProductDetailSidebar = ({
           </div>
         </div>
       </div>
+    </div>
+  );
 
+  const detailsSection = (
+    <div className="flex flex-col gap-40 px-4 pb-16 lg:px-0 lg:pb-0">
       <section aria-label="Shopping benefits" className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <h2 className="font-gill text-24 leading-110 text-darkblack">With Sunny, you get</h2>
           <DetailTextLink href="/about">T&amp;C Apply</DetailTextLink>
         </div>
-        <ul className="m-0 flex list-none flex-col gap-0 bg-benefitSurface p-0 lg:flex-row lg:items-stretch lg:gap-4 lg:p-6">
-          {content.benefits.map((benefit, index) => (
-            <li
-              key={benefit.label}
-              className={cn(
-                "flex flex-1 flex-col items-center justify-center gap-2 p-3 text-center lg:h-136",
-                index > 0 && "border-t border-neutral300 lg:border-t-0 lg:border-l",
-              )}
-            >
-              <div className="flex size-10 items-center justify-center">
-                {benefit.icon ? (
-                  <Image src={benefit.icon} alt="" width={40} height={40} aria-hidden />
-                ) : (
-                  <Truck size={40} strokeWidth={1.25} aria-hidden className="text-darkblack" />
+        <ul className="m-0 flex list-none flex-col bg-benefitSurface p-0 max-lg:-mx-4 max-lg:gap-6 max-lg:px-4 max-lg:py-40 lg:flex-row lg:items-stretch lg:gap-4 lg:p-6">
+          {content.benefits.flatMap((benefit, index) => {
+            const item = (
+              <li
+                key={benefit.label}
+                className={cn(
+                  "flex w-full shrink-0 flex-col items-center justify-center text-center",
+                  "max-lg:gap-2 max-lg:px-3 max-lg:py-4",
+                  "lg:h-136 lg:flex-1 lg:gap-2 lg:p-3",
+                  index > 0 && "lg:border-l lg:border-gray600",
                 )}
-              </div>
-              <span className="font-gill text-base leading-110 text-darkblack lg:hidden">
-                {benefit.mobileLabel}
-              </span>
-              <span className="hidden font-gill text-base leading-110 text-darkblack lg:block">
-                {benefit.lines[0]}
-                <br />
-                {benefit.lines[1]}
-              </span>
-            </li>
-          ))}
+              >
+                <div className="flex size-40 shrink-0 items-center justify-center">
+                  <Image
+                    src={benefit.icon}
+                    alt=""
+                    width={40}
+                    height={40}
+                    aria-hidden
+                    className="size-40 object-contain"
+                  />
+                </div>
+                <span className="font-gill text-base leading-110 text-darkblack lg:hidden">
+                  {benefit.mobileLabel}
+                </span>
+                <span className="hidden font-gill text-base leading-110 text-darkblack lg:block">
+                  {benefit.lines[0]}
+                  <br />
+                  {benefit.lines[1]}
+                </span>
+              </li>
+            );
+
+            if (index === 0) return [item];
+
+            return [
+              <li
+                key={`${benefit.label}-divider`}
+                role="presentation"
+                aria-hidden
+                className="block h-[1px] min-h-px w-full shrink-0 bg-[#999999] p-0 lg:hidden"
+              />,
+              item,
+            ];
+          })}
         </ul>
       </section>
 
@@ -267,7 +313,9 @@ const ProductDetailSidebar = ({
             <DetailDarkButton onClick={() => setIsVideoCallOpen(true)} className="uppercase">
               Schedule a Video Call
             </DetailDarkButton>
-            <DetailTextLink onClick={() => setIsTryAtHomeOpen(true)}>Try at Home</DetailTextLink>
+            <DetailTextLink onClick={() => setIsTryAtHomeOpen(true)} className="self-start uppercase">
+              Try At Home
+            </DetailTextLink>
           </div>
         </div>
       </section>
@@ -304,14 +352,14 @@ const ProductDetailSidebar = ({
 
       <section
         aria-label="Personalisation"
-        className="flex min-h-260 items-center justify-between overflow-hidden bg-chalkCard py-6 pl-6 pr-0"
+        className="flex items-end justify-between overflow-hidden bg-chalkCard pl-4 py-6 lg:min-h-260 lg:pl-6"
       >
-        <div className="flex w-280 flex-col gap-40">
+        <div className="flex max-w-[172px] shrink-0 flex-col gap-6 max-lg:-mr-[22px] lg:max-w-280 lg:gap-40">
           <div className="flex flex-col gap-3">
-            <h2 className="font-larken text-24 font-light leading-110 text-darkblack">
+            <h2 className="font-larken text-xl font-light leading-110 text-darkblack lg:text-24">
               Personalise this for you
             </h2>
-            <p className="font-gill text-base font-light leading-110 text-darkblack">
+            <p className="font-gill text-sm font-light leading-110 text-darkblack lg:text-base">
               Change the gemstone and much more to make it truly yours!
             </p>
           </div>
@@ -319,22 +367,23 @@ const ProductDetailSidebar = ({
             Get in Touch
           </DetailOutlineButton>
         </div>
-        <Image
-          src={content.personaliseImage}
-          alt=""
-          width={322}
-          height={213}
-          className="hidden h-220 w-320 shrink-0 object-cover lg:block"
-        />
-        <Image
-          src={content.personaliseImage}
-          alt=""
-          width={177}
-          height={118}
-          className="h-100 max-w-177 shrink-0 object-cover lg:hidden"
-        />
+        <div className="relative h-[118px] w-177 shrink-0 overflow-hidden lg:h-[213px] lg:w-[322px]">
+          <Image
+            src={content.personaliseImage}
+            alt=""
+            width={322}
+            height={213}
+            aria-hidden
+            className="size-full object-cover object-[center_-4%]"
+            sizes="(max-width: 1023px) 177px, 322px"
+          />
+        </div>
       </section>
+    </div>
+  );
 
+  const panels = (
+    <>
       <MetalEngravingPanel
         open={isEngravingOpen}
         onClose={() => setIsEngravingOpen(false)}
@@ -364,6 +413,23 @@ const ProductDetailSidebar = ({
         onClose={() => setIsPersonaliseOpen(false)}
         product={product}
       />
+    </>
+  );
+
+  if (children) {
+    return (
+      <>
+        {children({ purchase: purchaseSection, details: detailsSection, panels })}
+        {panels}
+      </>
+    );
+  }
+
+  return (
+    <aside className="flex flex-col gap-40">
+      {purchaseSection}
+      {detailsSection}
+      {panels}
     </aside>
   );
 };

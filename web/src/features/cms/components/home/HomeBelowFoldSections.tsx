@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, lazy } from "react";
+import { homeContent } from "@/features/cms/data/content";
 import { LazyAnimatedSection } from "@/shared/ui/LazyAnimatedSection";
 import { cn } from "@/shared/utils/cn";
 
@@ -70,7 +71,10 @@ export default function HomeBelowFoldSections() {
       </LazyHomeSection>
 
       <LazyHomeSection minHeight="min-h-[800px]">
-        <FeaturedCollectionSection id="alankara" />
+        <FeaturedCollectionSection
+          id="alankara"
+          description={homeContent.alankara.collection.description}
+        />
       </LazyHomeSection>
 
       <LazyHomeSection minHeight="min-h-[700px]">

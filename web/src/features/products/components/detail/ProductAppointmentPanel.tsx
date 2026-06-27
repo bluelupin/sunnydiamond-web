@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import type { StaticImageData } from "next/image";
 import { Info } from "lucide-react";
-import { cn } from "@/shared/utils/cn";
 import { useToast } from "@/shared/hooks/use-toast";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
@@ -18,6 +17,7 @@ import {
   type ProductAppointmentVariant,
 } from "./productAppointmentPanel.config";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 
 type ProductAppointmentPanelProps = {
   open: boolean;
@@ -101,15 +101,14 @@ const ProductAppointmentForm = ({
           </div>
 
           <div className="flex flex-col items-center gap-2 pb-4">
-            <div className="relative h-[133px] w-[206px]">
-              <Image
-                src={productImage}
-                alt={productName}
-                fill
-                className="object-contain"
-                sizes="206px"
-              />
-            </div>
+            <Image
+              src={productImage}
+              alt={productName}
+              width={206}
+              height={133}
+              className="h-133 w-206 object-contain"
+              sizes="206px"
+            />
             <p className="font-gill text-base leading-110 text-darkblack">{productName}</p>
           </div>
 
@@ -172,14 +171,14 @@ const ProductAppointmentForm = ({
       </div>
 
       <PanelFooter contentClassName="flex flex-col items-center gap-4">
-        <p className="text-center font-gill text-sm font-light leading-110 tracking-[0.252px] text-neutral500">
+        <p className="text-center font-gill text-sm font-light leading-normal tracking-normal text-neutral500">
           Our representative will get in touch with you soon
         </p>
         <button
           type="button"
           onClick={handleSubmit}
           disabled={submitted && !isValid}
-          className="btn-slide-up inline-flex h-14 w-full items-center justify-center bg-darkblack px-7 font-gill text-sm uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
+          className="btn-dark-slide inline-flex h-14 w-full items-center justify-center px-7 font-gill text-sm uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
         >
           {config.submitLabel}
         </button>
@@ -198,61 +197,26 @@ const ProductAppointmentPanel = ({
   const config = PRODUCT_APPOINTMENT_PANEL_CONFIG[variant];
   const productImage = product.images[0] ?? product.image;
 
-  useEffect(() => {
-    if (!open) return;
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open, onClose]);
-
   const handleSubmit = () => {
     toast(config.successToast);
     onClose();
   };
 
-  if (!open) {
-    return null;
-  }
-
   return (
-    <div className="fixed inset-0 z-[70]">
-      <button
-        type="button"
-        aria-label={config.closeAriaLabel}
-        className="absolute inset-0 bg-[#1E1E1E]/25 backdrop-blur-[10px] animate-in fade-in duration-300"
-        onClick={onClose}
+    <ProductDetailSidePanelShell
+      open={open}
+      onClose={onClose}
+      overlayAriaLabel={config.closeAriaLabel}
+      dialogAriaLabel={config.dialogAriaLabel}
+    >
+      <ProductAppointmentForm
+        config={config}
+        productName={product.name}
+        productImage={productImage}
+        onClose={onClose}
+        onSubmit={handleSubmit}
       />
-
-      <aside
-        role="dialog"
-        aria-modal="true"
-        aria-label={config.dialogAriaLabel}
-        className={cn(
-          "absolute flex flex-col bg-white shadow-2xl",
-          "inset-x-0 bottom-0 top-12 max-lg:animate-in max-lg:slide-in-from-bottom max-lg:duration-300",
-          "lg:inset-x-auto lg:inset-y-0 lg:right-0 lg:top-0 lg:w-full lg:max-w-[480px] lg:animate-in lg:slide-in-from-right lg:duration-300",
-        )}
-      >
-        <ProductAppointmentForm
-          config={config}
-          productName={product.name}
-          productImage={productImage}
-          onClose={onClose}
-          onSubmit={handleSubmit}
-        />
-      </aside>
-    </div>
+    </ProductDetailSidePanelShell>
   );
 };
 

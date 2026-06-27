@@ -39,8 +39,8 @@ const TryAtHomeSuccessStep = ({
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
         <div className="flex flex-col gap-6 px-4 pt-6 lg:px-8 lg:pt-8">
           <div className="flex flex-col gap-6">
-            <div className="relative flex w-full items-start justify-end">
-              <div className="absolute inset-x-0 top-0 flex justify-center">
+            <div className="grid w-full [&>*]:col-start-1 [&>*]:row-start-1">
+              <div className="flex justify-center">
                 <span className="inline-flex size-10 items-center justify-center rounded-full bg-[#47CB6C]">
                   <Check size={22} strokeWidth={2} aria-hidden className="text-white" />
                 </span>
@@ -49,7 +49,7 @@ const TryAtHomeSuccessStep = ({
                 type="button"
                 onClick={onClose}
                 aria-label="Close try at home success panel"
-                className="relative inline-flex size-6 shrink-0 items-center justify-center"
+                className="inline-flex size-6 shrink-0 items-center justify-self-end"
               >
                 <Image
                   src="/images/navigation/menu-close.svg"
@@ -70,7 +70,7 @@ const TryAtHomeSuccessStep = ({
 
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-2">
-              <p className="font-gill text-base leading-110 text-[#4D4D4D]">
+              <p className="font-gill text-base leading-110 text-neutral500">
                 {formatTryAtHomeBookingLabel(booking)}
               </p>
               {addItemsDeadline ? (

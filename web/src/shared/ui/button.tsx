@@ -11,7 +11,7 @@ const buttonVariants = cva(
       variant: {
         default: "btn-slide-up bg-primary text-primary-foreground hover:bg-primary/90",
         destructive: "btn-slide-up bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline: "btn-border-slide border border-input bg-background text-foreground",
+        outline: "btn-border-slide border border-input bg-background text-foreground hover:text-white",
         secondary: "btn-slide-up bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline hover:text-linkGold hover:decoration-linkGold",

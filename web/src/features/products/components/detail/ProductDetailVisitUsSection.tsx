@@ -15,31 +15,26 @@ const ProductDetailVisitUsSection = ({ imageSrc }: ProductDetailVisitUsSectionPr
     <>
       <section
         aria-labelledby="visit-us-heading"
-        className="relative h-[800px] w-full overflow-hidden"
+        className="grid h-804 w-full overflow-hidden [&>*]:col-start-1 [&>*]:row-start-1"
       >
-        <div className="absolute inset-x-0 top-0 mx-auto h-804 w-full max-w-1440">
-          <Image
-            src={imageSrc}
-            alt=""
-            fill
-            priority={false}
-            className="object-cover object-center"
-            sizes="100vw"
-            aria-hidden
-          />
-        </div>
+        <Image
+          src={imageSrc}
+          alt=""
+          width={1440}
+          height={804}
+          priority={false}
+          className="mx-auto h-full w-full max-w-1440 object-cover object-center"
+          sizes="100vw"
+          aria-hidden
+        />
 
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 bottom-0 mx-auto h-400 w-full max-w-1440 bg-gradient-to-b from-transparent to-black/60 lg:backdrop-blur-[5px] lg:to-black/80"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-[387px] mx-auto hidden h-417 w-full max-w-1440 backdrop-blur-[16px] lg:block"
+          className="pointer-events-none mx-auto h-400 w-full max-w-1440 self-end bg-gradient-to-t from-black/80 to-transparent"
         />
 
-        <div className="absolute inset-x-0 bottom-[64px] flex justify-center px-4 md:px-8 lg:px-10">
-          <div className="flex w-full max-w-[312px] flex-col items-center gap-6 lg:max-w-1360 lg:gap-40">
+        <div className="z-10 flex self-end justify-center px-4 pb-16 md:px-8 lg:px-10">
+          <div className="flex w-full max-w-311 flex-col items-center gap-6 lg:max-w-1360 lg:gap-40">
             <div className="flex flex-col items-center gap-3 text-center text-white lg:gap-4">
               <h2 id="visit-us-heading" className="font-larken text-32 font-light leading-110 lg:text-5xl">
                 Visit Us
@@ -57,7 +52,7 @@ const ProductDetailVisitUsSection = ({ imageSrc }: ProductDetailVisitUsSectionPr
             <button
               type="button"
               onClick={() => setIsBookVisitOpen(true)}
-              className="text-link-underline inline-flex border-b-[1.5px] border-white pb-2 font-gill text-sm uppercase leading-normal tracking-[0.252px] text-white max-lg:pb-2 lg:pb-1 lg:leading-110"
+              className="text-link-underline inline-flex border-b-[1.5px] border-white pb-2 font-gill text-sm uppercase leading-normal tracking-caption text-white max-lg:pb-2 lg:pb-1 lg:leading-110"
             >
               Book a Visit
             </button>

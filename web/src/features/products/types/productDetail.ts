@@ -21,10 +21,11 @@ export type ProductDetailContent = {
     label: string;
     mobileLabel: string;
     lines: [string, string];
-    icon: string | null;
+    icon: string;
   }[];
   accordions: ProductDetailAccordion[];
   heroBannerImage: string;
+  heroBannerVideo?: string;
   visitUsImage: string;
   personaliseImage: string;
 };
