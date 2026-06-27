@@ -38,6 +38,9 @@ export interface JewelleryListingProduct {
   modalImage: string | StaticImageData;
   hoverImage: string | StaticImageData;
   category: string;
+  metalType?: string;
+  metalPurity?: string;
+  gemstoneType?: string;
   isBestseller?: boolean;
 }
 

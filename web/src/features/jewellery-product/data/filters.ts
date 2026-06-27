@@ -37,11 +37,27 @@ export const sortOptions: JewellerySortOption[] = [
   { value: "name-asc", label: "Name: A to Z" },
 ];
 
-export const defaultFilterState: JewelleryFilterState = {
-  minPrice: DEFAULT_MIN_PRICE,
-  maxPrice: DEFAULT_MAX_PRICE,
-  categories: [],
-  metalTypes: [],
-  metalPurities: [],
-  gemstoneType: "",
-};
+export function createDefaultFilterState(): JewelleryFilterState {
+  return {
+    minPrice: DEFAULT_MIN_PRICE,
+    maxPrice: DEFAULT_MAX_PRICE,
+    categories: [...filterCategoryOptions],
+    metalTypes: [...filterMetalTypeOptions],
+    metalPurities: [...filterMetalPurityOptions],
+    gemstoneType: "",
+  };
+}
+
+export const defaultFilterState: JewelleryFilterState = createDefaultFilterState();
+
+export function isAllCategoriesSelected(categories: string[]): boolean {
+  return categories.length === 0 || categories.length >= filterCategoryOptions.length;
+}
+
+export function isAllMetalTypesSelected(metalTypes: string[]): boolean {
+  return metalTypes.length === 0 || metalTypes.length >= filterMetalTypeOptions.length;
+}
+
+export function isAllMetalPuritiesSelected(metalPurities: string[]): boolean {
+  return metalPurities.length === 0 || metalPurities.length >= filterMetalPurityOptions.length;
+}

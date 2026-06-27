@@ -15,8 +15,8 @@ export const categorySlugToProductCategory: Record<string, string> = {
   rings: "Rings",
   earrings: "Earrings",
   necklace: "Necklaces",
-  pendants: "Necklaces",
+  pendants: "Pendants",
   bracelets: "Bracelets",
-  bangles: "Bracelets",
-  nosepins: "Earrings",
+  bangles: "Bangles",
+  nosepins: "Nose Pins",
 };

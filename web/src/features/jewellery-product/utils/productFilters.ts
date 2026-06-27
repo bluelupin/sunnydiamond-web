@@ -1,6 +1,11 @@
 import type { JewelleryFilterState, JewelleryListingProduct } from "../types";
 import { categorySlugToProductCategory } from "../data/categories";
 import type { JewelleryCategorySlug } from "../types";
+import {
+  isAllCategoriesSelected,
+  isAllMetalPuritiesSelected,
+  isAllMetalTypesSelected,
+} from "../data/filters";
 
 export function filterJewelleryProducts(
   products: JewelleryListingProduct[],
@@ -19,8 +24,34 @@ export function filterJewelleryProducts(
       return false;
     }
 
-    if (filters.categories.length > 0 && !filters.categories.includes(product.category)) {
+    if (
+      !isAllCategoriesSelected(filters.categories) &&
+      !filters.categories.includes(product.category)
+    ) {
       return false;
+    }
+
+    if (!isAllMetalTypesSelected(filters.metalTypes)) {
+      const metal = product.metalType?.toLowerCase() ?? "";
+      const matchesMetal = filters.metalTypes.some((type) => metal.includes(type.toLowerCase()));
+      if (!matchesMetal) {
+        return false;
+      }
+    }
+
+    if (!isAllMetalPuritiesSelected(filters.metalPurities)) {
+      const metal = product.metalPurity?.toLowerCase() ?? "";
+      const matchesPurity = filters.metalPurities.some((purity) => metal.includes(purity.toLowerCase()));
+      if (!matchesPurity) {
+        return false;
+      }
+    }
+
+    if (filters.gemstoneType) {
+      const gemstone = product.gemstoneType?.toLowerCase() ?? "";
+      if (gemstone !== filters.gemstoneType.toLowerCase()) {
+        return false;
+      }
     }
 
     return true;

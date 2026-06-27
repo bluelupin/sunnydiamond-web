@@ -11,7 +11,7 @@ import { siteConfig } from "@/shared/lib/siteConfig";
 import { cn } from "@/shared/utils/cn";
 import SDLogo from "@/assets/Icons/SDLogo";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
-import { resolveHeaderNavHref, isHeroOverlayRoute } from "@/shared/utils/navigation";
+import { resolveHeaderNavHref, getHeaderVariant, isJewelleryNavLink } from "@/shared/utils/navigation";
 import { resolveShellHeaderLinks } from "@/shared/lib/shellNavigation";
 import MobileNavigation from "@/shared/ui/layout/MobileNavigation";
 import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
@@ -42,9 +42,9 @@ const Header = () => {
   const { totalItems: wishlistCount } = useWishlist();
   const pathname = usePathname() ?? "/";
 
-  const heroOverlayRoute = isHeroOverlayRoute(pathname);
-  const overlay =
-    heroOverlayRoute && !scrolled && !mobileMenuOpen && !jewelleryMenuOpen;
+  const menuOpen = mobileMenuOpen || jewelleryMenuOpen;
+  const headerVariant = getHeaderVariant(pathname, { scrolled, menuOpen });
+  const isOverlay = headerVariant === "overlay";
 
   const { data: shellData } = useHomepageShell();
   const headerNavigationLinks = useMemo(() => {
@@ -79,14 +79,15 @@ const Header = () => {
     setJewelleryMenuOpen(false);
   }, []);
 
-  const textClass = overlay ? "text-white" : "text-white";
-  const hoverClass = overlay ? "hover:text-ivory/70" : "hover:text-primary";
+  const textClass = isOverlay ? "text-white" : "text-darkblack";
+  const logoClass = isOverlay ? "text-white" : "text-darkMagenta";
+  const hoverClass = isOverlay ? "hover:text-ivory/70" : "hover:text-neutral500";
   const navLinkClass = (active = false) =>
     cn(
       "font-gill uppercase transition-colors",
       "text-sm font-normal leading-[130%] tracking-[-0.02em]",
       "lg:text-sm lg:font-semibold lg:leading-110 lg:tracking-normal",
-      active ? "text-primary" : textClass,
+      active ? (isOverlay ? "text-primary" : "text-darkblack") : textClass,
       !active ? hoverClass : "",
     );
 
@@ -94,7 +95,7 @@ const Header = () => {
     <Link
       href="/"
       aria-label={siteConfig.brand.name}
-      className={cn("inline-flex shrink-0 items-center justify-center leading-none", textClass)}
+      className={cn("inline-flex shrink-0 items-center justify-center leading-none", logoClass)}
     >
       <SDLogo className="!h-16 !w-20 md:!h-14 md:!w-14 lg:!h-[62px] lg:!w-[62px]" />
     </Link>
@@ -106,12 +107,12 @@ const Header = () => {
         className={cn(
           "absolute top-0 inset-x-0 z-50 transition-colors duration-300",
           mobileMenuOpen ? "pointer-events-none opacity-0" : "",
-          overlay ? "bg-transparent" : "bg-transparent backdrop-blur-sm",
+          isOverlay ? "bg-transparent" : "bg-white",
         )}
         aria-hidden={mobileMenuOpen}
       >
-        {/* Figma 692:4845 — mobile: 64px bar, 16px padding, 24px icon gaps */}
-        <div className="relative flex h-16 md:h-[104px] items-center justify-between mx-auto w-full 2xl:max-w-1920 max-w-1440 px-5 md:px-8 lg:px-[40px] 2xl:px-[60px]">
+        {/* Figma 692:6742 — solid PDP header: white bg, py-24, dark nav; mobile bar 64px */}
+        <div className="relative mx-auto flex h-16 w-full max-w-1440 items-center justify-between px-5 md:h-[104px] md:px-8 lg:px-[40px] lg:py-6 2xl:max-w-1920 2xl:px-[60px]">
           <div className="flex w-[120px] items-center gap-6 md:hidden">
             <button
               type="button"
@@ -134,7 +135,7 @@ const Header = () => {
             {Logo}
             <nav className="hidden md:flex items-center gap-7 md:gap-4 lg:gap-[40px]" aria-label="Main navigation">
               {headerNavigationLinks.map((link) => {
-                const isJewellery = link.label.trim().toLowerCase() === "jewellery";
+                const isJewellery = isJewelleryNavLink(link.label);
                 if (isJewellery) {
                   return (
                     <div

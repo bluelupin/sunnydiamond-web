@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import JewelleryHeroSection from "./JewelleryHeroSection";
 import JewelleryCategoryNav from "./JewelleryCategoryNav";
@@ -10,19 +11,29 @@ import JewelleryLoadMoreSection from "./JewelleryLoadMoreSection";
 import JewelleryGuaranteesSection from "./JewelleryGuaranteesSection";
 import JewelleryFilterDrawer from "./JewelleryFilterDrawer";
 import { jewelleryListingProducts } from "../data/products";
-import { defaultFilterState, PAGE_SIZE } from "../data/filters";
+import { createDefaultFilterState, PAGE_SIZE } from "../data/filters";
 import { filterJewelleryProducts, sortJewelleryProducts } from "../utils/productFilters";
+import { buildJewelleryHref, parseJewelleryCategorySlug } from "../utils/jewelleryRoutes";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import type { JewelleryCategorySlug, JewelleryFilterState } from "../types";
 
 const JewelleryProductPage = () => {
-  const [activeCategory, setActiveCategory] = useState<JewelleryCategorySlug>("rings");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const categoryFromUrl = parseJewelleryCategorySlug(searchParams.get("category")) ?? "all";
+
+  const [activeCategory, setActiveCategory] = useState<JewelleryCategorySlug>(categoryFromUrl);
   const [sortValue, setSortValue] = useState("featured");
-  const [filters, setFilters] = useState<JewelleryFilterState>(defaultFilterState);
-  const [draftFilters, setDraftFilters] = useState<JewelleryFilterState>(defaultFilterState);
+  const [filters, setFilters] = useState<JewelleryFilterState>(() => createDefaultFilterState());
+  const [draftFilters, setDraftFilters] = useState<JewelleryFilterState>(() => createDefaultFilterState());
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const { isWishlisted, toggleWishlist } = useWishlist();
+
+  useEffect(() => {
+    setActiveCategory(categoryFromUrl);
+    setVisibleCount(PAGE_SIZE);
+  }, [categoryFromUrl]);
 
   const filteredProducts = useMemo(
     () => sortJewelleryProducts(filterJewelleryProducts(jewelleryListingProducts, activeCategory, filters), sortValue),
@@ -32,10 +43,14 @@ const JewelleryProductPage = () => {
   const visibleProducts = filteredProducts.slice(0, visibleCount);
   const hasMore = visibleCount < filteredProducts.length;
 
-  const handleCategoryChange = (slug: JewelleryCategorySlug) => {
-    setActiveCategory(slug);
-    setVisibleCount(PAGE_SIZE);
-  };
+  const handleCategoryChange = useCallback(
+    (slug: JewelleryCategorySlug) => {
+      setActiveCategory(slug);
+      setVisibleCount(PAGE_SIZE);
+      router.replace(buildJewelleryHref(slug), { scroll: false });
+    },
+    [router],
+  );
 
   const handleApplyFilters = (nextFilters: JewelleryFilterState) => {
     setFilters(nextFilters);

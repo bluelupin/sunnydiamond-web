@@ -7,6 +7,7 @@ import { jewelleryListingFilterDrawerSpec as spec } from "../data/content";
 import {
   DEFAULT_MAX_PRICE,
   DEFAULT_MIN_PRICE,
+  createDefaultFilterState,
   filterCategoryRows,
   filterGemstoneOptions,
   filterMetalPurityOptions,
@@ -106,14 +107,7 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
   };
 
   const handleClearAll = () => {
-    setDraft({
-      minPrice: DEFAULT_MIN_PRICE,
-      maxPrice: DEFAULT_MAX_PRICE,
-      categories: [],
-      metalTypes: [],
-      metalPurities: [],
-      gemstoneType: "",
-    });
+    setDraft(createDefaultFilterState());
   };
 
   const minPercent =

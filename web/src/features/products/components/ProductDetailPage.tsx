@@ -30,7 +30,7 @@ const ProductDetailPage = () => {
     return (
       <div className="container py-20 text-center">
         <h1 className="font-larken text-2xl text-darkblack">Product not found</h1>
-        <Link href="/jewellery-product" className="text-link-underline mt-4 inline-block font-gill text-sm text-darkblack underline">
+        <Link href="/jewellery" className="text-link-underline mt-4 inline-block font-gill text-sm text-darkblack underline">
           Back to Jewellery
         </Link>
       </div>
@@ -52,7 +52,7 @@ const ProductDetailPage = () => {
 
       <PageContainer className="max-w-1360 px-0 pb-16 pt-0 lg:px-0 lg:pb-24 lg:pt-8">
         <Link
-          href="/jewellery-product"
+          href="/jewellery"
           className="mb-6 hidden items-center gap-1 px-4 font-gill text-sm text-neutral500 transition-colors hover:text-darkblack lg:mb-8 lg:inline-flex lg:px-0"
         >
           <ChevronLeft size={16} aria-hidden />

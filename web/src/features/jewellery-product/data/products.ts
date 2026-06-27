@@ -19,6 +19,8 @@ export const jewelleryListingProducts: JewelleryListingProduct[] = products.flat
     const assetIndex = index + duplicateIndex;
     const modalImage = jewelleryPlpModalImages[assetIndex % jewelleryPlpModalImages.length];
 
+    const metalLower = product.metal.toLowerCase();
+
     return {
       id: `${product.id}-${duplicateIndex}`,
       name: displayNames[assetIndex % displayNames.length],
@@ -27,6 +29,9 @@ export const jewelleryListingProducts: JewelleryListingProduct[] = products.flat
       modalImage,
       hoverImage: modalImage,
       category: product.category,
+      metalType: metalLower.includes("silver") ? "Silver" : "Gold",
+      metalPurity: metalLower.includes("22k") ? "22k" : "18k",
+      gemstoneType: "diamond",
       isBestseller: index === 0 && duplicateIndex === 0,
     };
   }),

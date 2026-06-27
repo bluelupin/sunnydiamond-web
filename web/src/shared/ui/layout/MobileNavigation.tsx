@@ -6,12 +6,13 @@ import Link from "next/link";
 import { Heart, Search, ShoppingBag, User } from "lucide-react";
 import SDLogo from "@/assets/Icons/SDLogo";
 import { cn } from "@/shared/utils/cn";
-import { resolveHeaderNavHref } from "@/shared/utils/navigation";
+import { resolveHeaderNavHref, isJewelleryNavLink } from "@/shared/utils/navigation";
 import type { HeaderNavLink } from "@/shared/lib/shellNavigation";
 import BookAnAppointmentPanel from "@/features/appointment/components/BookAnAppointmentPanel";
 import BookStoreVisitPanel from "@/features/products/components/detail/BookStoreVisitPanel";
 import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
 import HeaderIconBadge from "@/shared/ui/layout/HeaderIconBadge";
+import { JewelleryCategoryMenu } from "@/shared/ui/layout/JewelleryCategoryMenu";
 
 type MobileNavigationProps = {
   isOpen: boolean;
@@ -45,31 +46,6 @@ type JewelleryPanelProps = {
   onBack: () => void;
   onClose: () => void;
 };
-
-type MobileJewelleryCategory = {
-  label: string;
-  href: string;
-  image: string | null;
-};
-
-const MOBILE_JEWELLERY_ROWS: MobileJewelleryCategory[][] = [
-  [
-    { label: "Bangles", href: "/jewellery/bangles", image: "/images/navigation/jewellery/bangles.png" },
-    { label: "Necklaces", href: "/jewellery/necklaces", image: "/images/navigation/jewellery/necklaces-2.png" },
-  ],
-  [
-    { label: "Nose pins", href: "/jewellery/nose-pins", image: "/images/navigation/jewellery/nose-pins.png" },
-    { label: "Earrings", href: "/jewellery/earrings", image: "/images/navigation/jewellery/earrings.png" },
-  ],
-  [
-    { label: "Rings", href: "/jewellery/rings", image: "/images/navigation/jewellery/rings-1.png" },
-    { label: "Pendants", href: "/jewellery/pendants", image: "/images/navigation/jewellery/pendants.png" },
-  ],
-  [
-    { label: "Bracelets", href: "/jewellery/bracelets", image: "/images/navigation/jewellery/bracelets.png" },
-    { label: "All Products", href: "/jewellery", image: null },
-  ],
-];
 
 const JewelleryPanel = ({ onBack, onClose }: JewelleryPanelProps) => (
   <div
@@ -117,42 +93,8 @@ const JewelleryPanel = ({ onBack, onClose }: JewelleryPanelProps) => (
 
     <div className="mx-4 mt-4 h-px shrink-0 bg-aboutInactive" aria-hidden />
 
-    <div className="flex min-h-0 flex-1 flex-col gap-[12px] overflow-y-auto px-4 pt-4 pb-6">
-      {MOBILE_JEWELLERY_ROWS.map((row, rowIdx) => (
-        <div key={rowIdx} className="flex gap-[12px]">
-          {row.map((cat) => (
-            <Link
-              key={cat.label}
-              href={cat.href}
-              onClick={onClose}
-              className="flex min-w-0 flex-[1_0_0] flex-col gap-1"
-            >
-              <div className="relative h-100 w-full shrink-0 overflow-hidden">
-                {cat.image ? (
-                  <Image
-                    src={cat.image}
-                    alt={cat.label}
-                    fill
-                    className="object-cover"
-                    sizes="50vw"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-benefitSurface">
-                    <span className="font-gill text-[14px] leading-110 darkblack">
-                      All Products
-                    </span>
-                  </div>
-                )}
-              </div>
-              {cat.image && (
-                <span className="font-gill text-[14px] leading-110 darkblack">
-                  {cat.label}
-                </span>
-              )}
-            </Link>
-          ))}
-        </div>
-      ))}
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-6 pt-4">
+      <JewelleryCategoryMenu variant="mobile" onClose={onClose} />
     </div>
   </div>
 );
@@ -562,7 +504,7 @@ const MobileNavigation = ({
 
         <nav aria-label="Main navigation" className="mt-6 flex w-full flex-col gap-4">
           {mobileNavLinks.map((link, index) => {
-            const isJewellery = link.label.trim().toLowerCase() === "jewellery";
+            const isJewellery = isJewelleryNavLink(link.label);
             return (
               <Fragment key={link.label}>
                 <MobileNavRow
