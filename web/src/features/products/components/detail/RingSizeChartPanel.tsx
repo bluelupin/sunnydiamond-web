@@ -8,6 +8,7 @@ import {
   RING_SIZE_CHART_IMAGES,
   RING_SIZE_CHART_ROWS,
 } from "@/features/products/data/ringSizeChartContent";
+import { PanelFooterGradient } from "@/shared/ui/PanelFooter";
 
 type RingSizeChartPanelProps = {
   open: boolean;
@@ -71,8 +72,9 @@ const RingSizeChartPanel = ({ open, onClose }: RingSizeChartPanelProps) => {
           />
         </button>
 
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <div className="flex flex-col gap-6">
+        <div className="relative min-h-0 flex-1">
+          <div className="h-full overflow-y-auto">
+            <div className="flex flex-col gap-6 pb-[71px]">
             <div className="relative h-[400px] w-full shrink-0 overflow-hidden">
               <Image
                 src={RING_SIZE_CHART_IMAGES.videoPoster}
@@ -168,6 +170,8 @@ const RingSizeChartPanel = ({ open, onClose }: RingSizeChartPanelProps) => {
               </div>
             </div>
           </div>
+          </div>
+          <PanelFooterGradient position="overlay" />
         </div>
       </aside>
     </div>

@@ -11,6 +11,7 @@ import {
   type TryAtHomeBookingSummary,
 } from "@/features/products/utils/tryAtHomeBooking";
 import { DetailDarkButton, DetailOutlineButton } from "./shared";
+import { PanelFooter } from "@/shared/ui/PanelFooter";
 
 type TryAtHomeSuccessStepProps = {
   product: Product;
@@ -112,15 +113,12 @@ const TryAtHomeSuccessStep = ({
         </div>
       </div>
 
-      <div className="shrink-0">
-        <div className="pointer-events-none h-[71px] bg-gradient-to-b from-transparent to-white" aria-hidden />
-        <div className="flex flex-col items-center gap-4 border-t border-neutral300/50 bg-white px-4 py-6 lg:px-8">
-          <DetailDarkButton onClick={onViewBooking}>View Booking</DetailDarkButton>
-          <DetailOutlineButton onClick={onContinueShopping} className="w-full">
-            Continue Shopping
-          </DetailOutlineButton>
-        </div>
-      </div>
+      <PanelFooter contentClassName="flex flex-col items-center gap-4">
+        <DetailDarkButton onClick={onViewBooking}>View Booking</DetailDarkButton>
+        <DetailOutlineButton onClick={onContinueShopping} className="w-full">
+          Continue Shopping
+        </DetailOutlineButton>
+      </PanelFooter>
     </>
   );
 };

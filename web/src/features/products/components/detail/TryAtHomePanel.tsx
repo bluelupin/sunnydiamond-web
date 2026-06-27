@@ -27,6 +27,7 @@ import {
   shouldShowFieldError,
 } from "@/shared/utils/formValidation";
 import { DetailDarkButton } from "./shared";
+import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { ChevronDown } from "lucide-react";
 import TryAtHomeSuccessStep from "./TryAtHomeSuccessStep";
 import type { TryAtHomeBookingSummary } from "@/features/products/utils/tryAtHomeBooking";
@@ -133,22 +134,19 @@ const TryAtHomeDetailsStep = ({
         </div>
       </div>
 
-      <div className="shrink-0">
-        <div className="pointer-events-none h-[71px] bg-gradient-to-b from-transparent to-white" aria-hidden />
-        <div className="flex flex-col items-center gap-4 border-t border-neutral300/50 bg-white px-4 py-6 lg:px-8">
-          <p className="text-center font-gill text-sm font-light leading-normal tracking-[0.252px] text-[#4D4D4D]">
-            Our representative will get in touch with you soon
-          </p>
-          <DetailDarkButton
-            onClick={() =>
-              validateSubmit(() => onProceed({ date, selectedSlot }))
-            }
-            disabled={submitted && !isValid}
-          >
-            Add Address
-          </DetailDarkButton>
-        </div>
-      </div>
+      <PanelFooter contentClassName="flex flex-col items-center gap-4">
+        <p className="text-center font-gill text-sm font-light leading-normal tracking-[0.252px] text-[#4D4D4D]">
+          Our representative will get in touch with you soon
+        </p>
+        <DetailDarkButton
+          onClick={() =>
+            validateSubmit(() => onProceed({ date, selectedSlot }))
+          }
+          disabled={submitted && !isValid}
+        >
+          Add Address
+        </DetailDarkButton>
+      </PanelFooter>
     </>
   );
 };
@@ -404,17 +402,14 @@ const TryAtHomeAddressStep = ({ onBack, onSubmit }: TryAtHomeAddressStepProps) =
         </div>
       </div>
 
-      <div className="shrink-0">
-        <div className="pointer-events-none h-[71px] bg-gradient-to-b from-transparent to-white" aria-hidden />
-        <div className="flex flex-col items-center gap-4 border-t border-neutral300/50 bg-white px-4 py-6 lg:px-8">
-          <p className="text-center font-gill text-sm font-light leading-normal tracking-[0.252px] text-[#4D4D4D]">
-            Our representative will get in touch with you soon
-          </p>
-          <DetailDarkButton onClick={handleSubmit} disabled={submitted && !isValid}>
-            Schedule Try At Home
-          </DetailDarkButton>
-        </div>
-      </div>
+      <PanelFooter contentClassName="flex flex-col items-center gap-4">
+        <p className="text-center font-gill text-sm font-light leading-normal tracking-[0.252px] text-[#4D4D4D]">
+          Our representative will get in touch with you soon
+        </p>
+        <DetailDarkButton onClick={handleSubmit} disabled={submitted && !isValid}>
+          Schedule Try At Home
+        </DetailDarkButton>
+      </PanelFooter>
     </>
   );
 };

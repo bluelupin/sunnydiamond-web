@@ -16,6 +16,7 @@ import {
   DELIVERY_STORE_MAP_IMAGES,
 } from "@/features/products/data/deliveryStoreContent";
 import { DetailDarkButton, DetailTextLink } from "./shared";
+import { PanelFooter } from "@/shared/ui/PanelFooter";
 
 type DeliveryStoreJourneyPanelProps = {
   open: boolean;
@@ -179,12 +180,9 @@ const DeliveryStoreJourneyPanel = ({
               </div>
             </div>
 
-            <div className="shrink-0">
-              <div className="pointer-events-none h-[71px] bg-gradient-to-b from-transparent to-white" aria-hidden />
-              <div className="border-t border-neutral300/50 bg-white px-4 py-6 lg:px-8">
-                <DetailDarkButton onClick={() => setStep("booking")}>BOOK YOUR VISIT</DetailDarkButton>
-              </div>
-            </div>
+            <PanelFooter>
+              <DetailDarkButton onClick={() => setStep("booking")}>BOOK YOUR VISIT</DetailDarkButton>
+            </PanelFooter>
           </>
         ) : (
           <>
@@ -238,21 +236,18 @@ const DeliveryStoreJourneyPanel = ({
               </div>
             </div>
 
-            <div className="shrink-0">
-              <div className="pointer-events-none h-[71px] bg-gradient-to-b from-transparent to-white" aria-hidden />
-              <div className="flex flex-col items-center gap-4 border-t border-neutral300/50 bg-white px-4 py-6 lg:px-8">
-                <p className="text-center font-gill text-sm font-light leading-normal tracking-[0.252px] text-neutral500">
-                  Our representative will get in touch with you soon
-                </p>
-                <DetailDarkButton
-                  onClick={handleConfirmVisit}
-                  disabled={submitted && !isValid}
-                  className="disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  CONFIRM VISIT
-                </DetailDarkButton>
-              </div>
-            </div>
+            <PanelFooter contentClassName="flex flex-col items-center gap-4">
+              <p className="text-center font-gill text-sm font-light leading-normal tracking-[0.252px] text-neutral500">
+                Our representative will get in touch with you soon
+              </p>
+              <DetailDarkButton
+                onClick={handleConfirmVisit}
+                disabled={submitted && !isValid}
+                className="disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                CONFIRM VISIT
+              </DetailDarkButton>
+            </PanelFooter>
           </>
         )}
       </aside>

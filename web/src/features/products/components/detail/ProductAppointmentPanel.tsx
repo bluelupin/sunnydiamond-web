@@ -17,6 +17,7 @@ import {
   PRODUCT_APPOINTMENT_PANEL_CONFIG,
   type ProductAppointmentVariant,
 } from "./productAppointmentPanel.config";
+import { PanelFooter } from "@/shared/ui/PanelFooter";
 
 type ProductAppointmentPanelProps = {
   open: boolean;
@@ -170,22 +171,19 @@ const ProductAppointmentForm = ({
         </div>
       </div>
 
-      <div className="shrink-0">
-        <div className="pointer-events-none h-[71px] bg-gradient-to-b from-transparent to-white" aria-hidden />
-        <div className="flex flex-col items-center gap-4 border-t border-neutral300/50 bg-white px-4 py-6 lg:px-8">
-          <p className="text-center font-gill text-sm font-light leading-110 tracking-[0.252px] text-neutral500">
-            Our representative will get in touch with you soon
-          </p>
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={submitted && !isValid}
-            className="btn-slide-up inline-flex h-14 w-full items-center justify-center bg-darkblack px-7 font-gill text-sm uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {config.submitLabel}
-          </button>
-        </div>
-      </div>
+      <PanelFooter contentClassName="flex flex-col items-center gap-4">
+        <p className="text-center font-gill text-sm font-light leading-110 tracking-[0.252px] text-neutral500">
+          Our representative will get in touch with you soon
+        </p>
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={submitted && !isValid}
+          className="btn-slide-up inline-flex h-14 w-full items-center justify-center bg-darkblack px-7 font-gill text-sm uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {config.submitLabel}
+        </button>
+      </PanelFooter>
     </>
   );
 };

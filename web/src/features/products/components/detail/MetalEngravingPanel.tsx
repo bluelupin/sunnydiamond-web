@@ -9,6 +9,7 @@ import { cn } from "@/shared/utils/cn";
 import { useToast } from "@/shared/hooks/use-toast";
 import { appointmentFieldClassName, appointmentLabelClassName } from "@/shared/constants/appointmentForm";
 import { ENGRAVING_FONTS, type EngravingSelection } from "@/features/products/constants/engraving";
+import { PanelFooter } from "@/shared/ui/PanelFooter";
 
 type MetalEngravingPanelProps = {
   open: boolean;
@@ -185,19 +186,16 @@ const MetalEngravingPanel = ({
           </div>
         </div>
 
-        <div className="shrink-0">
-          <div className="pointer-events-none h-[71px] bg-gradient-to-b from-transparent to-white" aria-hidden />
-          <div className="border-t border-neutral300/50 bg-white px-4 py-6 lg:px-8">
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={!font.trim()}
-              className="btn-slide-up inline-flex h-14 w-full items-center justify-center bg-darkblack px-7 font-gill text-sm uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Save
-            </button>
-          </div>
-        </div>
+        <PanelFooter>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={!font.trim()}
+            className="btn-slide-up inline-flex h-14 w-full items-center justify-center bg-darkblack px-7 font-gill text-sm uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Save
+          </button>
+        </PanelFooter>
       </aside>
     </div>
   );
