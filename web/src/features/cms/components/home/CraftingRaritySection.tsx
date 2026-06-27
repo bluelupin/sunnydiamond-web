@@ -92,7 +92,7 @@ function CraftingRarityCopyBlock({
       <div className="lg:h-432 h-390 w-full max-w-640 flex flex-col items-start sm:justify-center justify-end lg:gap-[40px] md:gap-8 gap-6">
         <ScrollReveal
           delayMs={0}
-          className="lg:text-5xl sm:text-4xl !text-32 font-larken font-light leading-110 text-darkblack"
+          className="lg:!text-5xl sm:!text-4xl !text-32 font-larken font-light leading-110 text-darkblack"
         >
           {subtitleLines.map((line, index) => (
             <span
