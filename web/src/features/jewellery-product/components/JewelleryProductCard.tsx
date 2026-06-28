@@ -166,27 +166,6 @@ const JewelleryProductCard = ({
             : undefined
         }
       >
-        <div className="flex w-full items-start justify-between">
-          {isBestseller ? (
-            <span
-              className={cn(
-                "flex items-center bg-[#C5A156] font-gill leading-110 text-darkblack md:hidden",
-                isMobileLifestyle && "opacity-0",
-              )}
-              style={{
-                height: `${jewelleryListingProductCardMobileSpec.bestsellerHeight}px`,
-                padding: `${jewelleryListingProductCardMobileSpec.bestsellerPadding}px`,
-                fontSize: `${jewelleryListingProductCardMobileSpec.bestsellerFontSize}px`,
-              }}
-            >
-              BESTSELLER
-            </span>
-          ) : (
-            <span className="md:hidden" aria-hidden />
-          )}
-          <span className="hidden md:block" aria-hidden />
-        </div>
-
         <ProductImage src={primaryImage} alt={title} />
         <ProductCopy title={title} price={price} href={href} className="md:group-hover:hidden" />
       </div>
@@ -206,6 +185,27 @@ const JewelleryProductCard = ({
       >
         <ProductCopy title={title} price={price} href={href} white />
       </div>
+
+      {/* Mobile bestseller badge — overlaid top-left, out of card flow */}
+      {isBestseller ? (
+        <div
+          className={cn(
+            "pointer-events-none col-start-1 row-start-1 z-20 flex justify-start self-start md:hidden",
+            isMobileLifestyle && "opacity-0 transition-opacity duration-500",
+          )}
+        >
+          <span
+            className="flex items-center bg-[#C5A156] font-gill leading-110 text-darkblack"
+            style={{
+              height: `${jewelleryListingProductCardMobileSpec.bestsellerHeight}px`,
+              padding: `${jewelleryListingProductCardMobileSpec.bestsellerPadding}px`,
+              fontSize: `${jewelleryListingProductCardMobileSpec.bestsellerFontSize}px`,
+            }}
+          >
+            BESTSELLER
+          </span>
+        </div>
+      ) : null}
 
       {/* Desktop bestseller badge at image / copy boundary */}
       {isBestseller ? (
