@@ -43,9 +43,36 @@ export function resolveShellHeaderLinks(
   return getFallbackHeaderLinks();
 }
 
+const REMOVED_FOOTER_PATHS = new Set([
+  "/blogs",
+  "/help-and-support",
+  "/monthly-plans",
+  "/gift-card",
+  "/finance-options",
+  "/policy-and-certification",
+]);
+
+function isRemovedFooterLink(link: FooterLink): boolean {
+  const normalized = link.url.replace(/\/$/, "") || "/";
+  if (REMOVED_FOOTER_PATHS.has(normalized) || normalized.startsWith("/blogs")) {
+    return true;
+  }
+
+  return /\bblog(s)?\b/i.test(link.label);
+}
+
+function filterFooterLinks(groups: readonly FooterLinkGroup[]): FooterLinkGroup[] {
+  return groups
+    .map((group) => ({
+      ...group,
+      links: group.links.filter((link) => !isRemovedFooterLink(link)),
+    }))
+    .filter((group) => group.links.length > 0);
+}
+
 export function resolveShellFooterLinkGroups(
   cmsGroups: readonly FooterLinkGroup[] | null | undefined,
 ): FooterLinkGroup[] {
-  if (cmsGroups?.length) return [...cmsGroups];
-  return getFallbackFooterLinkGroups();
+  if (cmsGroups?.length) return filterFooterLinks(cmsGroups);
+  return filterFooterLinks(getFallbackFooterLinkGroups());
 }

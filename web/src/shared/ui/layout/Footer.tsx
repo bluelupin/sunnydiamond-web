@@ -59,7 +59,7 @@ const Footer = () => {
   }, [cmsSocialLinks]);
 
   return (
-    <footer className="bg-gray300">
+    <footer className="bg-chalk-beige">
       <TrustBadgeSection />
       <PageContainer className="flex flex-col gap-20 lg:gap-[120px] lg:py-100 py-16">
         <div className="flex flex-col items-center xl:gap-12 md:gap-[40px] gap-8 lg:flex-row lg:items-start lg:justify-start">
@@ -86,7 +86,7 @@ const Footer = () => {
                 <Reveal as="p" direction="up" className="font-gill lg:text-xl md:text-lg text-base font-normal leading-110 text-darkblack">
                   {column.title.toUpperCase()}
                 </Reveal>
-                <ul className="flex flex-col gap-3">
+                <ul className="flex flex-col gap-12">
                   {column.links.map((link) => (
                     <Reveal as="li" direction="up" key={link.id}>
                       <Link

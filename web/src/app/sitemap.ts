@@ -1,5 +1,4 @@
 import type { MetadataRoute } from "next";
-import { blogs } from "@/features/cms/data/blogs";
 import { products } from "@/features/products/data/products";
 import { siteEnv } from "@/shared/lib/seo/siteConfig";
 
@@ -13,17 +12,11 @@ const staticRoutes = [
   { url: "/diamonds-for-everyone", changeFrequency: "monthly" as const, priority: 0.5 },
   { url: "/careers", changeFrequency: "monthly" as const, priority: 0.5 },
   { url: "/news", changeFrequency: "monthly" as const, priority: 0.5 },
-  { url: "/blogs", changeFrequency: "monthly" as const, priority: 0.5 },
   { url: "/store-locator", changeFrequency: "monthly" as const, priority: 0.5 },
   { url: "/faqs", changeFrequency: "monthly" as const, priority: 0.5 },
   { url: "/book-an-appointment", changeFrequency: "monthly" as const, priority: 0.5 },
   { url: "/bespoke-jewellery", changeFrequency: "monthly" as const, priority: 0.5 },
   { url: "/order-tracking", changeFrequency: "monthly" as const, priority: 0.5 },
-  { url: "/help-and-support", changeFrequency: "monthly" as const, priority: 0.5 },
-  { url: "/monthly-plans", changeFrequency: "monthly" as const, priority: 0.5 },
-  { url: "/gift-card", changeFrequency: "monthly" as const, priority: 0.5 },
-  { url: "/finance-options", changeFrequency: "monthly" as const, priority: 0.5 },
-  { url: "/policy-and-certification", changeFrequency: "monthly" as const, priority: 0.5 },
   { url: "/returns-and-cancellations", changeFrequency: "monthly" as const, priority: 0.5 },
   { url: "/exchange-and-resizing", changeFrequency: "monthly" as const, priority: 0.5 },
   { url: "/shipping-delivery", changeFrequency: "monthly" as const, priority: 0.5 },
@@ -43,14 +36,8 @@ const productRoutes = products.map((product) => ({
   priority: 0.7,
 }));
 
-const blogRoutes = blogs.map((post) => ({
-  url: `/blogs/${post.slug}`,
-  changeFrequency: "monthly" as const,
-  priority: 0.4,
-}));
-
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [...staticRoutes, ...productRoutes, ...blogRoutes].map((route) => ({
+  return [...staticRoutes, ...productRoutes].map((route) => ({
     url: new URL(route.url, siteEnv.baseUrl).toString(),
     changeFrequency: route.changeFrequency,
     priority: route.priority,

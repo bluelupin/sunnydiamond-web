@@ -46,27 +46,18 @@ const ProductDetailHeroLayout = ({ gallery, purchase, details }: ProductDetailHe
   }, []);
 
   return (
-    <>
-      <div className="flex flex-col gap-8 lg:hidden">
-        {purchase}
-        {details}
+    <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,783fr)_minmax(0,553fr)] lg:items-start lg:gap-6 xl:gap-6">
+      <div ref={galleryRef} className="min-w-0">
+        {gallery}
       </div>
 
-      <div className="hidden lg:grid lg:grid-cols-[minmax(0,783fr)_minmax(0,553fr)] lg:items-start lg:gap-6 xl:gap-6">
-        <div ref={galleryRef} className="min-w-0">
-          {gallery}
+      <div className="flex min-w-0 flex-col gap-8 lg:gap-0">
+        <div style={galleryHeight ? { height: `${galleryHeight}px` } : undefined}>
+          <div className={cn("lg:sticky", PDP_STICKY_TOP_CLASS)}>{purchase}</div>
         </div>
-
-        <div className="min-w-0">
-          <div style={galleryHeight ? { height: `${galleryHeight}px` } : undefined}>
-            <div className={cn("sticky", PDP_STICKY_TOP_CLASS)}>
-              {purchase}
-            </div>
-          </div>
-          <div className="pt-6">{details}</div>
-        </div>
+        <div className="lg:pt-6">{details}</div>
       </div>
-    </>
+    </div>
   );
 };
 

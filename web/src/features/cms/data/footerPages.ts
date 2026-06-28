@@ -24,31 +24,6 @@ export const footerPages = {
     description:
       "Track your order status, shipping progress, and delivery milestones. The full page UI will be added here later.",
   },
-  helpAndSupport: {
-    title: "Help and Support",
-    description:
-      "Find support resources, service help, and customer care details. The full page UI will be added here later.",
-  },
-  monthlyPlans: {
-    title: "Monthly Plans",
-    description:
-      "Explore monthly purchase plans and savings options. The full page UI will be added here later.",
-  },
-  giftCard: {
-    title: "Gift Card",
-    description:
-      "Discover Sunny Diamonds gift card options and gifting details. The full page UI will be added here later.",
-  },
-  financeOptions: {
-    title: "Finance Options",
-    description:
-      "Review available finance and payment options. The full page UI will be added here later.",
-  },
-  policyAndCertification: {
-    title: "Policy and Certification",
-    description:
-      "Review certification details and policy information in one place. The full page UI will be added here later.",
-  },
   storeLocator: {
     title: "Store Locator",
     description:

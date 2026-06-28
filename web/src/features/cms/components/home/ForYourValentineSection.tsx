@@ -51,19 +51,6 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
     giftingData?.cta?.label ||
     fallback.cta.label;
 
-  const secondaryCtaUrl =
-    giftingData?.secondaryCta?.url ||
-    giftingData?.secondaryCta?.to ||
-    giftingData?.secondary?.url ||
-    giftingData?.secondary?.to ||
-    fallback.secondary?.to ||
-    "/gift-card";
-  const secondaryCtaLabel =
-    giftingData?.secondaryCta?.label ||
-    giftingData?.secondary?.label ||
-    fallback.secondary?.label ||
-    "Send a Gift Card Instead";
-
   const desktopImageUrl = useMemo(
     () =>
       resolveCmsMediaUrl(
@@ -122,7 +109,6 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
             </div>
             <div className="flex flex-col items-center gap-6 lg:items-start">
               <div className="h-14 w-[132px] rounded bg-[#E4C7BE]/40" aria-hidden />
-              <div className="h-5 w-44 rounded bg-[#E4C7BE]/40" aria-hidden />
             </div>
           </div>
           <div className="hidden h-[600px] w-full max-w-[746px] rounded bg-[#E4C7BE]/40 lg:block" aria-hidden />
@@ -196,17 +182,6 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
                   </Link>
                 </ScrollReveal>
               ) : null}
-
-              {secondaryCtaUrl ? (
-                <ScrollReveal delayMs={320}>
-                  <Link
-                    href={secondaryCtaUrl}
-                    className={`text-link-underline inline-flex items-center justify-center border-b-[1.5px] border-darkblack pb-1 text-center font-gill text-sm font-normal uppercase leading-110 text-darkblack ${ctaFocusClass}`}
-                  >
-                    {secondaryCtaLabel}
-                  </Link>
-                </ScrollReveal>
-              ) : null}
             </div>
           </div>
         </div>
@@ -232,15 +207,6 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
                     className={`inline-flex h-14 items-center justify-center bg-white px-8 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-90 ${ctaFocusClass}`}
                   >
                     {primaryCtaLabel}
-                  </Link>
-                ) : null}
-
-                {secondaryCtaUrl ? (
-                  <Link
-                    href={secondaryCtaUrl}
-                    className={`text-link-underline inline-flex items-center justify-center whitespace-nowrap border-b-[1.5px] border-[#0a0a0a] pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack ${ctaFocusClass}`}
-                  >
-                    {secondaryCtaLabel}
                   </Link>
                 ) : null}
               </div>

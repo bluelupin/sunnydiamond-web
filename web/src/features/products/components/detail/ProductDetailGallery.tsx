@@ -17,7 +17,6 @@ import {
 
 type ProductDetailGalleryProps = {
   product: Product;
-  variant?: "mobile" | "desktop" | "all";
 };
 
 const GALLERY_SLIDE_COUNT = 5;
@@ -73,7 +72,7 @@ const CroppedGalleryImage = ({
   </div>
 );
 
-const ProductDetailGallery = ({ product, variant = "all" }: ProductDetailGalleryProps) => {
+const ProductDetailGallery = ({ product }: ProductDetailGalleryProps) => {
   const [activeSlide, setActiveSlide] = useState(0);
   const [productHeroImage, productThumbOne, productThumbTwo] = product.images;
   const heroImage = productHeroImage ?? PRODUCT_DETAIL_GALLERY_HERO_IMAGE;
@@ -96,91 +95,87 @@ const ProductDetailGallery = ({ product, variant = "all" }: ProductDetailGallery
 
   return (
     <>
-      {(variant === "all" || variant === "mobile") && (
-        <div className="grid h-500 w-full shrink-0 grid-rows-[1fr_auto] overflow-hidden lg:hidden">
-          <div className="grid min-h-0 [&>*]:col-start-1 [&>*]:row-start-1">
-            <div className="flex items-center justify-center bg-gray300">
-              <div className="flex h-500 w-full max-w-375 items-center justify-center overflow-hidden">
-                <OptimizedImage
-                  src={carouselImages[activeSlide]}
-                  alt={`${product.name} — view ${activeSlide + 1}`}
-                  priority
-                  sizes="375px"
-                  className="object-contain object-center"
-                />
-              </div>
-            </div>
-            <div className="flex items-center justify-end px-4">
-              <button
-                type="button"
-                onClick={goToNextSlide}
-                aria-label="Next product image"
-                className="inline-flex size-6 items-center justify-center text-darkblack"
-              >
-                <ChevronRight size={24} strokeWidth={1.25} aria-hidden />
-              </button>
-            </div>
-          </div>
-
-          <div className="flex h-0.5">
-            {Array.from({ length: GALLERY_SLIDE_COUNT }, (_, index) => (
-              <div
-                key={index}
-                className={cn(
-                  "h-0.5 min-w-0 flex-1",
-                  index === activeSlide ? "bg-darkblack" : "bg-neutral300",
-                )}
-                aria-hidden
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {(variant === "all" || variant === "desktop") && (
-        <div className="hidden flex-col gap-3 lg:flex lg:gap-3">
-          <div className={galleryFrameClass}>
-            <CroppedGalleryImage
-              src={heroImage ?? product.image}
-              alt={`${product.name} — primary view`}
-              sizes="504px"
-              maxWidthClass="max-w-504"
-              minHeightClass="min-h-320"
-              cropStyle={nestedImageCropStyle}
-              priority
-            />
-          </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row lg:gap-3">
-            <div className={thumbFrameClass}>
-              <CroppedGalleryImage
-                src={thumbOne ?? product.image}
-                alt={`${product.name} — detail view`}
-                sizes="312px"
-                maxWidthClass="max-w-311"
-                cropStyle={nestedImageCropStyle}
-              />
-            </div>
-            <div className="flex min-h-280 w-full overflow-hidden sm:min-h-360 lg:h-465 lg:w-96 lg:shrink-0">
+      <div className="grid h-500 w-full shrink-0 grid-rows-[1fr_auto] overflow-hidden lg:hidden">
+        <div className="grid min-h-0 [&>*]:col-start-1 [&>*]:row-start-1">
+          <div className="flex items-center justify-center bg-gray300">
+            <div className="flex h-500 w-full max-w-375 items-center justify-center overflow-hidden">
               <OptimizedImage
-                src={thumbTwo ?? product.image}
-                alt={`${product.name} — alternate view`}
-                sizes="(max-width: 1024px) 50vw, 385px"
-                className="object-cover"
+                src={carouselImages[activeSlide]}
+                alt={`${product.name} — view ${activeSlide + 1}`}
+                priority
+                sizes="375px"
+                className="object-contain object-center"
               />
             </div>
           </div>
+          <div className="flex items-center justify-end px-4">
+            <button
+              type="button"
+              onClick={goToNextSlide}
+              aria-label="Next product image"
+              className="inline-flex size-6 items-center justify-center text-darkblack"
+            >
+              <ChevronRight size={24} strokeWidth={1.25} aria-hidden />
+            </button>
+          </div>
+        </div>
 
-          <div className="relative flex h-420 w-full overflow-hidden lg:h-680">
+        <div className="flex h-0.5">
+          {Array.from({ length: GALLERY_SLIDE_COUNT }, (_, index) => (
+            <div
+              key={index}
+              className={cn(
+                "h-0.5 min-w-0 flex-1",
+                index === activeSlide ? "bg-darkblack" : "bg-neutral300",
+              )}
+              aria-hidden
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="hidden flex-col gap-3 lg:flex lg:gap-3">
+        <div className={galleryFrameClass}>
+          <CroppedGalleryImage
+            src={heroImage ?? product.image}
+            alt={`${product.name} — primary view`}
+            sizes="504px"
+            maxWidthClass="max-w-504"
+            minHeightClass="min-h-320"
+            cropStyle={nestedImageCropStyle}
+            priority
+          />
+        </div>
+
+        <div className="flex flex-col gap-3 sm:flex-row lg:gap-3">
+          <div className={thumbFrameClass}>
+            <CroppedGalleryImage
+              src={thumbOne ?? product.image}
+              alt={`${product.name} — detail view`}
+              sizes="312px"
+              maxWidthClass="max-w-311"
+              cropStyle={nestedImageCropStyle}
+            />
+          </div>
+          <div className="flex min-h-280 w-full overflow-hidden sm:min-h-360 lg:h-465 lg:w-96 lg:shrink-0">
             <OptimizedImage
-              src={lifestyleImage}
-              alt={`${product.name} — lifestyle`}
-              sizes="(max-width: 1024px) 100vw, 783px"
-              className="size-full object-cover object-center"
+              src={thumbTwo ?? product.image}
+              alt={`${product.name} — alternate view`}
+              sizes="(max-width: 1024px) 50vw, 385px"
+              className="object-cover"
             />
           </div>
         </div>
-      )}
+
+        <div className="relative flex h-420 w-full overflow-hidden lg:h-680">
+          <OptimizedImage
+            src={lifestyleImage}
+            alt={`${product.name} — lifestyle`}
+            sizes="(max-width: 1024px) 100vw, 783px"
+            className="size-full object-cover object-center"
+          />
+        </div>
+      </div>
     </>
   );
 };

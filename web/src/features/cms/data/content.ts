@@ -55,7 +55,6 @@ export const homeContent = {
       mobileDescription:
         "Traditional mastery bringing every diamond to radiant, eternal life.",
       cta: { label: "Shop Now", to: "/products" },
-      secondary: { label: "Send a Gift Card Instead", to: "/gift-card" },
     },
   },
   craftsmanship: {

@@ -146,7 +146,10 @@ const JewelleryProductCard = ({
             className="col-start-1 row-start-1 size-full object-cover"
             sizes="50vw"
           />
-          <div className="col-start-1 row-start-1 size-full bg-black/20" aria-hidden />
+          <div
+            className="col-start-1 row-start-1 size-full bg-gradient-to-t from-black/60 to-transparent"
+            aria-hidden
+          />
         </div>
       ) : null}
 

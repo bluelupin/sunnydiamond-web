@@ -57,8 +57,6 @@ const ProductDetailPage = () => {
 
   return (
     <article>
-      <ProductDetailGallery product={product} variant="mobile" />
-
       <PageContainer className="max-w-1360 px-0 pb-16 pt-0 lg:px-0 lg:pb-24 lg:pt-8">
         <Link
           href="/jewellery"
@@ -71,7 +69,7 @@ const ProductDetailPage = () => {
         <ProductDetailSidebar {...sidebarProps}>
           {({ purchase, details }) => (
             <ProductDetailHeroLayout
-              gallery={<ProductDetailGallery product={product} variant="desktop" />}
+              gallery={<ProductDetailGallery product={product} />}
               purchase={purchase}
               details={details}
             />

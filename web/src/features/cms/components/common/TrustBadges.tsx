@@ -28,7 +28,7 @@ const TrustBadgeSection = ({ id, itemClassName = "text-gray500", }: TrustBadgeSe
     const showSkeleton = isShoppingLoading && marqueeItems.length === 0;
 
     return (
-        <section className="bg-gray200 text-ivory border-t border-ivory/10 overflow-hidden shrink-0">
+        <section className="shrink-0 overflow-hidden border-t border-ivory/10 bg-chalk-beige text-ivory">
             <div className="relative flex overflow-hidden md:h-16 h-12">
                 <div className="flex shrink-0 animate-marquee items-center gap-12 pr-12 whitespace-nowrap">
                     {showSkeleton ? (
