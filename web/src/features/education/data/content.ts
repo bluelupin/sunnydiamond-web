@@ -125,6 +125,11 @@ export type EducationSliderSpec = {
   showDots?: boolean;
   /** When true, only the first and last dot markers are rendered */
   endpointDotsOnly?: boolean;
+  /** Taller slider area on mobile when labels wrap to multiple lines */
+  mobileHeight?: number;
+  /** Mobile content width — labels align to dots below this breakpoint */
+  mobileWidth?: number;
+  mobileLabelFontSize?: number;
   ariaLabel: string;
 };
 
@@ -170,10 +175,14 @@ export const educationCaratSliderOptions: EducationSliderOption[] = educationCar
 
 export const educationCaratDefaultIndex = educationCaratWeights.indexOf(1.0);
 
+const MOBILE_SLIDER_WIDTH = 323;
+
 export const educationSliderSpecs: Record<string, EducationSliderSpec> = {
   clarity: {
     width: 521.21,
     height: 50.5,
+    mobileWidth: MOBILE_SLIDER_WIDTH,
+    mobileLabelFontSize: 12,
     trackLeft: 10.61,
     trackTop: 8.75,
     trackWidth: 501,
@@ -187,6 +196,9 @@ export const educationSliderSpecs: Record<string, EducationSliderSpec> = {
   cut: {
     width: 593.04,
     height: 50,
+    mobileHeight: 64,
+    mobileWidth: MOBILE_SLIDER_WIDTH,
+    mobileLabelFontSize: 12,
     trackLeft: 19,
     trackTop: 8,
     trackWidth: 544,
@@ -200,6 +212,8 @@ export const educationSliderSpecs: Record<string, EducationSliderSpec> = {
   colour: {
     width: 528,
     height: 114.88,
+    mobileWidth: MOBILE_SLIDER_WIDTH,
+    mobileLabelFontSize: 12,
     trackLeft: 21,
     trackTop: 8.19,
     trackWidth: 475,
@@ -215,6 +229,8 @@ export const educationSliderSpecs: Record<string, EducationSliderSpec> = {
   carat: {
     width: 517.84,
     height: 50.51,
+    mobileWidth: MOBILE_SLIDER_WIDTH,
+    mobileLabelFontSize: 12,
     trackLeft: caratSliderTrackLeft,
     trackTop: 8,
     trackWidth: caratSliderTrackWidth,
@@ -301,6 +317,8 @@ export const educationFourCsIntroContent = {
 
 export type EducationSliderOption = {
   label: string;
+  /** Renders as stacked lines on mobile only (desktop uses `label`) */
+  mobileLabelLines?: readonly [string, string];
   highlight?: boolean;
   sublabel?: string | string[];
   image?: string;
@@ -365,7 +383,7 @@ export const educationFourCsPanels: EducationFourCsPanelContent[] = [
         { label: "Poor", image: educationPageImages.cutDiamondGood },
         { label: "Fair", image: educationPageImages.cutDiamondGood },
         { label: "Good", image: educationPageImages.cutDiamondGood },
-        { label: "Very Good", image: educationPageImages.cutDiamondGood },
+        { label: "Very Good", mobileLabelLines: ["Very", "Good"], image: educationPageImages.cutDiamondGood },
         { label: "Excellent", highlight: true, image: educationPageImages.cutDiamondExcellent },
       ],
     },
@@ -399,7 +417,7 @@ export const educationFourCsPanels: EducationFourCsPanelContent[] = [
       "Carat is the measure of a diamond's weight. Carat does not directly equal a visually bigger diamond, because shape and cut proportions influence perceived size.",
     footnote: "",
     mediaPosition: "right",
-    background: "white",
+    background: "chalk",
     slider: {
       defaultIndex: educationCaratDefaultIndex,
       options: educationCaratSliderOptions,
@@ -818,8 +836,8 @@ export const educationDiscoverSpec = {
       numberSize: 14,
     },
     mobile: {
-      pillGap: 48,
-      lineHeight: 125.86,
+      pillGap: 40,
+      lineHeight: 158,
       textSize: 16,
       numberSize: 12,
     },

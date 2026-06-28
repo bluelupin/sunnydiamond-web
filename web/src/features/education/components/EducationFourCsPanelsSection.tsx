@@ -61,7 +61,8 @@ const PanelMedia = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent
     <ScrollReveal
       delayMs={delayMs}
       className={cn(
-        "relative flex w-full shrink-0",
+        "relative box-border flex w-full shrink-0 lg:mx-0",
+        "max-lg:mx-4 max-lg:w-[calc(100%-32px)]",
         panel.id === "carat"
           ? "items-start justify-start max-lg:h-[370px] lg:h-[610px]"
           : "items-center justify-center max-lg:h-[370px] lg:h-[633px]",
@@ -71,10 +72,10 @@ const PanelMedia = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent
 
       <div
         className={cn(
-          "relative z-10 flex w-full flex-col",
+          "relative z-10 flex w-full min-w-0 flex-col",
           panel.id === "carat"
-            ? "items-start px-0"
-            : "max-w-[323px] items-center px-5 lg:max-w-[528px] lg:px-4",
+            ? "items-start lg:px-0"
+            : "max-w-[323px] items-center lg:max-w-[528px] lg:px-4",
         )}
       >
           {panel.id === "carat" ? (

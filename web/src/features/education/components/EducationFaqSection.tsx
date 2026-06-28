@@ -1,20 +1,36 @@
 "use client";
 
 import { Fragment, useState } from "react";
-import Image from "next/image";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
-import { educationFaqItems, educationPageImages } from "../data/content";
+import { educationFaqItems } from "../data/content";
 
-const FaqToggleIcon = ({ isOpen }: { isOpen: boolean }) => (
-  <Image
-    src={isOpen ? educationPageImages.faqIconMinus : educationPageImages.faqIconPlus}
-    alt=""
-    width={24}
-    height={24}
-    aria-hidden
-    className="shrink-0"
-  />
+const FaqPlusIcon = () => (
+  <span className="relative size-6 shrink-0 overflow-hidden" aria-hidden>
+    <span className="absolute inset-1/4">
+      <svg viewBox="0 0 12 12" fill="none" className="size-full" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M5.5 6.5H0V5.5H5.5V0H6.5V5.5H12V6.5H6.5V12H5.5V6.5Z"
+          fill="#0A0A0A"
+        />
+      </svg>
+    </span>
+  </span>
 );
+
+const FaqMinusIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    className="size-6 shrink-0"
+    aria-hidden
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M17 12H5V11H17V12Z" fill="#0A0A0A" />
+  </svg>
+);
+
+const FaqToggleIcon = ({ isOpen }: { isOpen: boolean }) =>
+  isOpen ? <FaqMinusIcon /> : <FaqPlusIcon />;
 
 const EducationFaqSection = () => {
   const [openId, setOpenId] = useState<string | null>("authenticity");

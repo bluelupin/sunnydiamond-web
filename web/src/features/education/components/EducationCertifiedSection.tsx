@@ -306,9 +306,21 @@ const EducationCertifiedSection = () => {
         </div>
       </div>
 
-      <ScrollReveal delayMs={520}>
+      <div className="pointer-events-none absolute inset-0 lg:hidden" aria-hidden>
+        <Image
+          src={educationPageImages.certifiedCalloutLineMobile}
+          alt=""
+          width={mobileVisual.lineWidth}
+          height={mobileVisual.lineHeight}
+          className="absolute"
+          style={{
+            left: mobileVisual.lineLeft,
+            top: mobileVisual.lineTop,
+          }}
+        />
+
         <div
-          className="absolute relative overflow-hidden rounded-full border-[#999999] lg:hidden"
+          className="absolute z-10 overflow-hidden rounded-full border-[#999999]"
           style={{
             left: mobileVisual.calloutLeft,
             top: mobileVisual.calloutTop,
@@ -319,7 +331,7 @@ const EducationCertifiedSection = () => {
         >
           <Image
             src={educationPageImages.girdleScreenshot}
-            alt="Diamond girdle laser inscription"
+            alt=""
             width={440}
             height={448}
             className="absolute max-w-none object-cover"
@@ -332,20 +344,7 @@ const EducationCertifiedSection = () => {
             }}
           />
         </div>
-      </ScrollReveal>
-
-      <Image
-        src={educationPageImages.certifiedCalloutLineMobile}
-        alt=""
-        width={mobileVisual.lineWidth}
-        height={mobileVisual.lineHeight}
-        aria-hidden
-        className="absolute lg:hidden"
-        style={{
-          left: mobileVisual.lineLeft,
-          top: mobileVisual.lineTop,
-        }}
-      />
+      </div>
     </section>
   );
 };

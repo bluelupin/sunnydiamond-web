@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
 import {
@@ -19,6 +19,19 @@ type EducationMetricSliderProps = {
 };
 
 const toPercent = (value: number, width: number) => `${(value / width) * 100}%`;
+
+const mobileLabelAlignClass = (index: number, total: number) => {
+  if (index === 0) return "-translate-x-0 text-left";
+  if (index === total - 1) return "-translate-x-full text-right";
+  return "-translate-x-1/2 text-center";
+};
+
+const MOBILE_THUMB_SIZE = 14;
+
+const labelFontProps = (useMobileLayout: boolean, mobileFontSize?: number) =>
+  useMobileLayout
+    ? { className: undefined as string | undefined, style: { fontSize: mobileFontSize ?? 12 } }
+    : { className: "text-[16px]", style: undefined as CSSProperties | undefined };
 
 const TRACK_DOT_GAP = 10;
 
@@ -44,6 +57,109 @@ const buildTrackSegments = (
   return segments;
 };
 
+const SliderLabel = ({
+  option,
+  isActive,
+  labelLeft,
+  dotCenter,
+  labelTop,
+  specWidth,
+  index,
+  total,
+  useMobileLayout,
+  mobileLabelFontSize,
+}: {
+  option: EducationSliderOption;
+  isActive: boolean;
+  labelLeft: number;
+  dotCenter: number;
+  labelTop: number;
+  specWidth: number;
+  index: number;
+  total: number;
+  useMobileLayout: boolean;
+  mobileLabelFontSize?: number;
+}) => {
+  const colorClass = isActive ? "text-[#AB863B]" : "text-darkblack";
+  const font = labelFontProps(useMobileLayout, mobileLabelFontSize);
+
+  if (useMobileLayout) {
+    if (option.mobileLabelLines) {
+      return (
+        <span
+          className={cn(
+            "pointer-events-none absolute font-gill font-normal leading-110 transition-colors",
+            font.className,
+            mobileLabelAlignClass(index, total),
+            colorClass,
+          )}
+          style={{
+            left: toPercent(dotCenter, specWidth),
+            top: labelTop,
+            ...font.style,
+          }}
+        >
+          {option.mobileLabelLines.map((line) => (
+            <span key={line} className="block">
+              {line}
+            </span>
+          ))}
+        </span>
+      );
+    }
+
+    return (
+      <span
+        className={cn(
+          "pointer-events-none absolute font-gill font-normal leading-110 transition-colors",
+          font.className,
+          mobileLabelAlignClass(index, total),
+          colorClass,
+        )}
+        style={{
+          left: toPercent(dotCenter, specWidth),
+          top: labelTop,
+          ...font.style,
+        }}
+      >
+        {option.label}
+      </span>
+    );
+  }
+
+  if (option.mobileLabelLines) {
+    return (
+      <span
+        className={cn(
+          "pointer-events-none absolute whitespace-nowrap font-gill text-[16px] font-normal leading-110 transition-colors",
+          colorClass,
+        )}
+        style={{
+          left: toPercent(labelLeft, specWidth),
+          top: labelTop,
+        }}
+      >
+        {option.label}
+      </span>
+    );
+  }
+
+  return (
+    <span
+      className={cn(
+        "pointer-events-none absolute whitespace-nowrap font-gill text-[16px] font-normal leading-110 transition-colors",
+        colorClass,
+      )}
+      style={{
+        left: toPercent(labelLeft, specWidth),
+        top: labelTop,
+      }}
+    >
+      {option.label}
+    </span>
+  );
+};
+
 const EducationMetricSlider = ({
   options,
   defaultIndex,
@@ -54,9 +170,25 @@ const EducationMetricSlider = ({
 }: EducationMetricSliderProps) => {
   const sliderRef = useRef<HTMLDivElement>(null);
   const [internalIndex, setInternalIndex] = useState(defaultIndex);
+  const [useMobileLayout, setUseMobileLayout] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 1023px)");
+    const update = () => setUseMobileLayout(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
   const activeIndex = controlledIndex ?? internalIndex;
+  const sliderHeight =
+    useMobileLayout && spec.mobileHeight ? spec.mobileHeight : spec.height;
+  const sliderMaxWidth =
+    useMobileLayout && spec.mobileWidth ? spec.mobileWidth : spec.width;
+  const thumbSize = useMobileLayout ? MOBILE_THUMB_SIZE : spec.thumbSize;
   const maxIndex = Math.max(options.length - 1, 0);
-  const thumbHalf = spec.thumbSize / 2;
+  const thumbHalf = thumbSize / 2;
+  const labelFont = labelFontProps(useMobileLayout, spec.mobileLabelFontSize);
   const activeDotCenter = spec.dotCenters[activeIndex] ?? spec.dotCenters[0];
   const activeThumbLeft = activeDotCenter - thumbHalf;
   const hasSublabels = Boolean(spec.sublabelTop);
@@ -157,8 +289,8 @@ const EducationMetricSlider = ({
   return (
     <div
       ref={sliderRef}
-      className={cn("relative z-20 mx-auto w-full cursor-pointer touch-none", className)}
-      style={{ maxWidth: spec.width, height: spec.height }}
+      className={cn("relative z-20 mx-auto w-full max-w-full cursor-pointer touch-none", className)}
+      style={{ maxWidth: sliderMaxWidth, height: sliderHeight }}
       role="group"
       aria-label={spec.ariaLabel}
       onPointerDown={handlePointerDown}
@@ -208,9 +340,9 @@ const EducationMetricSlider = ({
         <Image
           src={educationPageImages.claritySliderThumb}
           alt=""
-          width={spec.thumbSize}
-          height={spec.thumbSize}
-          className="size-[18px]"
+          width={thumbSize}
+          height={thumbSize}
+          className={useMobileLayout ? "size-[14px]" : "size-[18px]"}
         />
       </div>
 
@@ -228,7 +360,7 @@ const EducationMetricSlider = ({
             style={{
               left: toPercent(dotCenter, spec.width),
               width: 44,
-              height: spec.height,
+              height: sliderHeight,
             }}
           />
         );
@@ -239,12 +371,17 @@ const EducationMetricSlider = ({
           {options[0] ? (
             <span
               className={cn(
-                "pointer-events-none absolute -translate-x-1/2 whitespace-nowrap font-gill text-[16px] font-normal leading-110 transition-colors",
+                "pointer-events-none absolute whitespace-nowrap font-gill font-normal leading-110 transition-colors",
+                labelFont.className,
+                useMobileLayout
+                  ? mobileLabelAlignClass(0, options.length)
+                  : "-translate-x-1/2",
                 activeIndex === 0 ? "text-[#AB863B]" : "text-darkblack",
               )}
               style={{
                 left: toPercent(spec.dotCenters[0], spec.width),
                 top: spec.labelTop,
+                ...labelFont.style,
               }}
             >
               {options[0].label}
@@ -253,12 +390,17 @@ const EducationMetricSlider = ({
           {options[lastDotIndex] ? (
             <span
               className={cn(
-                "pointer-events-none absolute -translate-x-1/2 whitespace-nowrap font-gill text-[16px] font-normal leading-110 transition-colors",
+                "pointer-events-none absolute whitespace-nowrap font-gill font-normal leading-110 transition-colors",
+                labelFont.className,
+                useMobileLayout
+                  ? mobileLabelAlignClass(lastDotIndex, options.length)
+                  : "-translate-x-1/2",
                 activeIndex === lastDotIndex ? "text-[#AB863B]" : "text-darkblack",
               )}
               style={{
                 left: toPercent(spec.dotCenters[lastDotIndex], spec.width),
                 top: spec.labelTop,
+                ...labelFont.style,
               }}
             >
               {options[lastDotIndex].label}
@@ -266,10 +408,17 @@ const EducationMetricSlider = ({
           ) : null}
           {activeOption && activeIndex > 0 && activeIndex < lastDotIndex ? (
             <span
-              className="pointer-events-none absolute -translate-x-1/2 whitespace-nowrap font-gill text-[16px] font-normal leading-110 text-[#AB863B] transition-[left] duration-200 ease-out"
+              className={cn(
+                "pointer-events-none absolute whitespace-nowrap font-gill font-normal leading-110 text-[#AB863B] transition-[left] duration-200 ease-out",
+                labelFont.className,
+                useMobileLayout
+                  ? mobileLabelAlignClass(activeIndex, options.length)
+                  : "-translate-x-1/2",
+              )}
               style={{
                 left: toPercent(activeDotCenter, spec.width),
                 top: spec.labelTop,
+                ...labelFont.style,
               }}
             >
               {activeOption.label}
@@ -279,10 +428,17 @@ const EducationMetricSlider = ({
       ) : showActiveLabelOnly ? (
         activeOption ? (
           <span
-            className="pointer-events-none absolute -translate-x-1/2 whitespace-nowrap font-gill text-[16px] font-normal leading-110 text-[#AB863B] transition-[left] duration-200 ease-out"
+            className={cn(
+              "pointer-events-none absolute whitespace-nowrap font-gill font-normal leading-110 text-[#AB863B] transition-[left] duration-200 ease-out",
+              labelFont.className,
+              useMobileLayout
+                ? mobileLabelAlignClass(activeIndex, options.length)
+                : "-translate-x-1/2",
+            )}
             style={{
               left: toPercent(activeDotCenter, spec.width),
               top: spec.labelTop,
+              ...labelFont.style,
             }}
           >
             {activeOption.label}
@@ -291,22 +447,23 @@ const EducationMetricSlider = ({
       ) : (
         options.map((option, index) => {
           const labelLeft = spec.labelLeft[index] ?? spec.labelLeft[0];
+          const dotCenter = spec.dotCenters[index] ?? spec.dotCenters[0];
           const isActive = index === activeIndex;
 
           return (
-            <span
+            <SliderLabel
               key={`${option.label}-label`}
-              className={cn(
-                "pointer-events-none absolute whitespace-nowrap font-gill text-[16px] font-normal leading-110 transition-colors",
-                isActive ? "text-[#AB863B]" : "text-darkblack",
-              )}
-              style={{
-                left: toPercent(labelLeft, spec.width),
-                top: spec.labelTop,
-              }}
-            >
-              {option.label}
-            </span>
+              option={option}
+              isActive={isActive}
+              labelLeft={labelLeft}
+              dotCenter={dotCenter}
+              labelTop={spec.labelTop}
+              specWidth={spec.width}
+              index={index}
+              total={options.length}
+              useMobileLayout={useMobileLayout}
+              mobileLabelFontSize={spec.mobileLabelFontSize}
+            />
           );
         })
       )}
@@ -314,6 +471,7 @@ const EducationMetricSlider = ({
       {hasSublabels
         ? options.map((option, index) => {
             const sublabelLeft = spec.sublabelLeft?.[index] ?? spec.sublabelLeft?.[0] ?? 0;
+            const dotCenter = spec.dotCenters[index] ?? spec.dotCenters[0];
             const isActive = index === activeIndex;
 
             if (!option.sublabel) return null;
@@ -322,11 +480,17 @@ const EducationMetricSlider = ({
               <span
                 key={`${option.label}-sublabel`}
                 className={cn(
-                  "pointer-events-none absolute max-w-[80px] text-center font-gill text-[14px] font-light leading-110",
+                  "pointer-events-none absolute max-w-[80px] font-gill font-light leading-110",
+                  useMobileLayout
+                    ? cn(
+                        "text-[12px]",
+                        mobileLabelAlignClass(index, options.length),
+                      )
+                    : "text-center text-[14px]",
                   isActive ? "text-[#AB863B]" : "text-darkblack",
                 )}
                 style={{
-                  left: toPercent(sublabelLeft, spec.width),
+                  left: toPercent(useMobileLayout ? dotCenter : sublabelLeft, spec.width),
                   top: spec.sublabelTop,
                 }}
               >

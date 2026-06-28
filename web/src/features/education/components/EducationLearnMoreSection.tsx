@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
+import { cn } from "@/shared/utils/cn";
 import {
   educationLearnMoreSpec,
   educationLearnTabs,
@@ -141,33 +142,35 @@ const EducationLearnMoreSection = () => {
 
           <ScrollReveal delayMs={100} className="w-full lg:max-w-[1200px]">
             <div className="w-full overflow-x-auto border-y-[0.4px] border-black/30 lg:overflow-visible">
-              <div className="flex h-[75px] min-w-max items-center gap-10 px-0 py-6 lg:h-auto lg:w-full lg:min-w-0 lg:gap-0 lg:py-6">
+              <div
+                className="flex h-[75px] min-w-max items-center max-lg:gap-40 max-lg:py-6 lg:h-auto lg:w-full lg:min-w-0 lg:gap-0 lg:py-6"
+                role="tablist"
+                aria-label="Learn more topics"
+              >
                 {educationLearnTabs.map((tab, index) => {
                   const isActive = index === activeTabIndex;
 
-                  if (isActive) {
-                    return (
-                      <div key={tab.id} className="flex shrink-0 flex-col items-center lg:flex-1">
-                        <button
-                          type="button"
-                          onClick={() => handleTabChange(index)}
-                          className="border-b border-linkGold py-2 font-gill text-base font-normal leading-110 text-linkGold lg:text-[20px]"
-                        >
-                          {tab.label}
-                        </button>
-                      </div>
-                    );
-                  }
-
                   return (
-                    <button
+                    <div
                       key={tab.id}
-                      type="button"
-                      onClick={() => handleTabChange(index)}
-                      className="shrink-0 py-2 font-gill text-base font-normal leading-110 text-darkblack hover:text-linkGold lg:flex-1 lg:py-0 lg:text-center lg:text-[20px]"
+                      className="flex shrink-0 flex-col items-center lg:flex-1"
+                      role="presentation"
                     >
-                      {tab.label}
-                    </button>
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={isActive}
+                        onClick={() => handleTabChange(index)}
+                        className={cn(
+                          "flex items-center justify-center whitespace-nowrap py-2 font-gill font-normal leading-110 max-lg:text-base lg:w-full lg:py-0 lg:text-center lg:text-[20px]",
+                          isActive
+                            ? "border-b border-linkGold text-linkGold"
+                            : "text-darkblack hover:text-linkGold",
+                        )}
+                      >
+                        {tab.label}
+                      </button>
+                    </div>
                   );
                 })}
               </div>

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
+import { cn } from "@/shared/utils/cn";
 import {
   educationDiscoverContent,
   educationDiscoverSpec,
@@ -44,35 +45,36 @@ const DiscoverImage = ({
   </div>
 );
 
+const StepConnectorLine = ({ className }: { className?: string }) => (
+  <div
+    aria-hidden
+    className={cn(
+      "pointer-events-none absolute top-1/2 w-px -translate-y-1/2 bg-neutral500",
+      className,
+    )}
+    style={{ height: stepsSpec.desktop.lineHeight }}
+  />
+);
+
 /** Figma 692:29082 (desktop) + 692:28772 (mobile) */
 const DiscoverSteps = () => {
   const { steps: stepLabels } = educationDiscoverContent;
-  const desktopPillStackHeight =
+  const pillGap = stepsSpec.desktop.pillGap;
+  const pillStackHeight =
     stepsSpec.desktop.pillHeight * stepLabels.length +
-    stepsSpec.desktop.pillGap * (stepLabels.length - 1);
+    pillGap * (stepLabels.length - 1);
 
   return (
     <>
       {/* Mobile — items-center per Figma 692:28772 */}
       <div className="flex items-center gap-4 lg:hidden">
-        <div className="relative flex shrink-0 flex-col items-start gap-12">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center"
-          >
-            <Image
-              src={educationPageImages.discoverStepLineMobile}
-              alt=""
-              width={126}
-              height={1}
-              className="block h-[125.86px] w-px -rotate-90"
-            />
-          </div>
+        <div className="relative flex shrink-0 flex-col items-start gap-40">
+          <StepConnectorLine className="left-1/2 -translate-x-1/2" />
 
           {stepLabels.map((_, index) => (
             <div
               key={index}
-              className="relative z-10 flex shrink-0 items-center justify-center rounded-full border-[0.4px] border-darkblack bg-white p-1"
+              className="relative z-10 flex h-[26px] w-4 shrink-0 items-center justify-center rounded-full border-[0.4px] border-darkblack bg-white p-1"
             >
               <span className="font-gill text-xs font-light leading-none tracking-[0.12px] text-darkblack">
                 {index + 1}
@@ -81,7 +83,10 @@ const DiscoverSteps = () => {
           ))}
         </div>
 
-        <div className="flex min-h-[162px] flex-1 items-center self-stretch">
+        <div
+          className="flex flex-1 items-center self-stretch"
+          style={{ minHeight: pillStackHeight }}
+        >
           <ol className="flex h-full w-full flex-col justify-between font-gill text-base font-light leading-110 text-darkblack">
             {stepLabels.map((step) => (
               <li key={step} className="whitespace-nowrap">
@@ -94,19 +99,8 @@ const DiscoverSteps = () => {
 
       {/* Desktop — items-start per Figma 692:29082 */}
       <div className="hidden w-full items-start gap-4 lg:flex">
-        <div className="relative flex shrink-0 flex-col items-start gap-10">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute left-2 top-1/2 flex -translate-y-1/2 items-center justify-center"
-          >
-            <Image
-              src={educationPageImages.discoverStepLine}
-              alt=""
-              width={stepsSpec.desktop.lineHeight}
-              height={1}
-              className="block h-[158px] w-px -rotate-90"
-            />
-          </div>
+        <div className="relative flex shrink-0 flex-col items-start gap-40">
+          <StepConnectorLine className="left-2" />
 
           {stepLabels.map((_, index) => (
             <div
@@ -122,7 +116,7 @@ const DiscoverSteps = () => {
 
         <ol
           className="flex flex-col justify-between self-stretch font-gill text-[20px] font-light leading-110 text-darkblack"
-          style={{ minHeight: desktopPillStackHeight }}
+          style={{ minHeight: pillStackHeight }}
         >
           {stepLabels.map((step) => (
             <li key={step} className="whitespace-nowrap">
@@ -137,8 +131,8 @@ const DiscoverSteps = () => {
 
 /** Figma 692:29077 (desktop) + 692:28767 (mobile) content stack */
 const DiscoverContent = () => (
-  <div className="flex w-full flex-col items-start gap-8 lg:gap-10">
-    <div className="flex w-full flex-col items-start gap-8 lg:gap-10">
+  <div className="flex w-full flex-col items-start gap-8 lg:gap-40">
+    <div className="flex w-full flex-col items-start gap-8 lg:gap-40">
       <div className="flex w-full flex-col items-start gap-3 lg:gap-4">
         <h2
           id="education-discover-title"
@@ -163,8 +157,7 @@ const DiscoverContent = () => (
 
     <Link
       href={educationDiscoverContent.ctaHref}
-      className="btn-border-slide inline-flex h-14 shrink-0 items-center justify-center border border-neutral300 px-7 py-5 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
-      style={{ minWidth: spec.cta.minWidth }}
+      className="btn-border-slide inline-flex h-14 min-w-[199px] shrink-0 items-center justify-center whitespace-nowrap border border-neutral300 px-7 py-5 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
     >
       {educationDiscoverContent.ctaLabel}
     </Link>
