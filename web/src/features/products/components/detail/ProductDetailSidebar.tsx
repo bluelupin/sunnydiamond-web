@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import Image from "next/image";
-import { ChevronDown, Heart, Plus } from "lucide-react";
+import { Heart, Plus } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -332,11 +332,29 @@ const ProductDetailSidebar = ({
                 onClick={() => toggleAccordion(accordion.id)}
                 className="flex h-14 items-center justify-between text-left"
               >
-                <span className="font-gill text-24 leading-110 text-darkblack">{accordion.title}</span>
+                <span className="font-gill text-[20px] font-normal leading-110 text-darkblack">
+                  {accordion.title}
+                </span>
                 {isOpen ? (
-                  <ChevronDown size={32} strokeWidth={1.25} aria-hidden className="rotate-180" />
+                  <span className="inline-flex size-[24px] shrink-0 items-center justify-center p-[6px]" aria-hidden>
+                    <Image
+                      src="/images/products/pdp/accordion-minus.svg"
+                      alt=""
+                      width={12}
+                      height={12}
+                      className="size-[12px] object-contain"
+                    />
+                  </span>
                 ) : (
-                  <Plus size={32} strokeWidth={1.5} aria-hidden className="shrink-0 text-darkblack" />
+                  <span className="inline-flex size-[24px] shrink-0 items-center justify-center p-[6px]" aria-hidden>
+                    <Image
+                      src="/images/products/pdp/accordion-plus.svg"
+                      alt=""
+                      width={12}
+                      height={12}
+                      className="size-[12px] object-contain"
+                    />
+                  </span>
                 )}
               </button>
               {isOpen ? (
@@ -356,7 +374,7 @@ const ProductDetailSidebar = ({
       >
         <div className="flex max-w-[172px] shrink-0 flex-col gap-6 max-lg:-mr-[22px] lg:max-w-280 lg:gap-40">
           <div className="flex flex-col gap-3">
-            <h2 className="font-larken text-xl font-light leading-110 text-darkblack lg:text-24">
+            <h2 className="w-max whitespace-nowrap font-larken text-xl font-light leading-110 text-darkblack lg:text-24">
               Personalise this for you
             </h2>
             <p className="font-gill text-sm font-light leading-110 text-darkblack lg:text-base">
