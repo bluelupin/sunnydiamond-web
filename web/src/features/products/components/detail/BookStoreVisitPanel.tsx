@@ -113,6 +113,55 @@ const BookStoreVisitPanel = ({
     return null;
   }
 
+  const panelBody =
+    step === "select-store" ? (
+      <StoreSelectionStep
+        selectedStoreId={selectedStoreId}
+        selectedStore={selectedStore}
+        onSelectStore={setSelectedStoreId}
+        onProceed={() => setStep("form")}
+        onBack={showStoreSelectionBack ? handleStoreSelectionBack : undefined}
+        onClose={variant !== "page" ? handleClose : undefined}
+        showBack={showStoreSelectionBack}
+      />
+    ) : (
+      <BookingFormStep
+        selectedStore={selectedStore}
+        name={name}
+        countryCode={countryCode}
+        phone={phone}
+        email={email}
+        date={date}
+        selectedSlot={selectedSlot}
+        purpose={purpose}
+        note={note}
+        onBack={() => setStep("select-store")}
+        onClose={variant !== "page" ? handleClose : undefined}
+        onNameChange={setName}
+        onCountryCodeChange={setCountryCode}
+        onPhoneChange={setPhone}
+        onEmailChange={setEmail}
+        onDateChange={setDate}
+        onSelectedSlotChange={setSelectedSlot}
+        onPurposeChange={setPurpose}
+        onNoteChange={setNote}
+        onSubmit={handleSubmit}
+      />
+    );
+
+  if (variant === "embedded") {
+    return (
+      <div
+        className="absolute inset-0 flex flex-col bg-white"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Book your store visit"
+      >
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{panelBody}</div>
+      </div>
+    );
+  }
+
   const panelContent = (
     <aside
       role="dialog"
@@ -120,49 +169,15 @@ const BookStoreVisitPanel = ({
       aria-label="Book your store visit"
       className={cn(
         "flex flex-col overflow-hidden bg-white",
-        variant === "embedded" && "h-full w-full",
         variant === "page" && "mx-auto min-h-[calc(100vh-4rem)] w-full max-w-480",
         variant === "modal" && cn("shadow-2xl", productDetailSidePanelAsideClassName),
       )}
     >
-      {step === "select-store" ? (
-        <StoreSelectionStep
-          selectedStoreId={selectedStoreId}
-          selectedStore={selectedStore}
-          onSelectStore={setSelectedStoreId}
-          onProceed={() => setStep("form")}
-          onBack={showStoreSelectionBack ? handleStoreSelectionBack : undefined}
-          onClose={variant !== "page" ? handleClose : undefined}
-          showBack={showStoreSelectionBack}
-        />
-      ) : (
-        <BookingFormStep
-          selectedStore={selectedStore}
-          name={name}
-          countryCode={countryCode}
-          phone={phone}
-          email={email}
-          date={date}
-          selectedSlot={selectedSlot}
-          purpose={purpose}
-          note={note}
-          onBack={() => setStep("select-store")}
-          onClose={variant !== "page" ? handleClose : undefined}
-          onNameChange={setName}
-          onCountryCodeChange={setCountryCode}
-          onPhoneChange={setPhone}
-          onEmailChange={setEmail}
-          onDateChange={setDate}
-          onSelectedSlotChange={setSelectedSlot}
-          onPurposeChange={setPurpose}
-          onNoteChange={setNote}
-          onSubmit={handleSubmit}
-        />
-      )}
+      {panelBody}
     </aside>
   );
 
-  if (variant === "embedded" || variant === "page") {
+  if (variant === "page") {
     return panelContent;
   }
 
@@ -239,7 +254,7 @@ const StoreSelectionStep = ({
         </div>
 
         <div className="mt-6 flex flex-col gap-4 pb-72">
-          <div className="-mx-4 flex gap-10 overflow-x-auto px-4 lg:-mx-8 lg:px-8">
+          <div className="-mx-4 flex gap-40 overflow-x-auto px-4 lg:-mx-8 lg:px-8">
             {BOOK_STORE_VISIT_STORES.map((store) => {
               const isSelected = store.id === selectedStoreId;
 
@@ -399,27 +414,40 @@ const BookingFormStep = ({
         </div>
 
         <div className="mt-6 flex flex-col gap-6 pb-72">
-          <StoreVisitMapBlock variant="booking-hero" heroImage={selectedStore.heroImage}>
-              <p className="font-larken text-20 font-light leading-110 text-darkblack">
-                {selectedStore.storeName}
-              </p>
-              <div className="h-px w-full bg-neutral300" aria-hidden />
-              <div className="flex gap-3">
-                <ExternalLink
-                  size={24}
-                  strokeWidth={1.25}
-                  aria-hidden
-                  className="mt-0.5 shrink-0 text-darkblack"
-                />
-                <a
-                  href={selectedStore.directionsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-gill text-base font-light leading-110 text-darkblack"
-                >
-                  {selectedStore.address}
-                </a>
+          <StoreVisitMapBlock variant="store-select">
+            <p className="font-larken text-20 font-light leading-110 text-darkblack">
+              {selectedStore.storeName}
+            </p>
+            <div className="h-px w-full bg-neutral300" aria-hidden />
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-4">
+                <div className="flex gap-3">
+                  <ExternalLink
+                    size={24}
+                    strokeWidth={1.25}
+                    aria-hidden
+                    className="mt-0.5 shrink-0 text-darkblack"
+                  />
+                  <p className="font-gill text-base font-light leading-110 text-darkblack">
+                    {selectedStore.address}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Phone size={24} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
+                  <p className="font-gill text-base font-light leading-110 text-darkblack">
+                    {selectedStore.phone}
+                  </p>
+                </div>
               </div>
+              <a
+                href={selectedStore.directionsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-link-underline inline-flex border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
+              >
+                GET DIRECTIONS
+              </a>
+            </div>
           </StoreVisitMapBlock>
 
           <div className="flex flex-col gap-6">

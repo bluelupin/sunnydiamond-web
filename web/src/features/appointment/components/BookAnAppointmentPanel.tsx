@@ -7,6 +7,7 @@ import { cn } from "@/shared/utils/cn";
 import { useToast } from "@/shared/hooks/use-toast";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
+import { PanelFooter, PanelFooterDualActions } from "@/shared/ui/PanelFooter";
 
 const labelClassName = "font-gill text-sm leading-110 text-darkblack";
 const fieldClassName =
@@ -129,7 +130,7 @@ const BookAnAppointmentPanel = ({
             <div className="h-px w-full bg-neutral300" aria-hidden />
           </div>
 
-          <div className="mt-[22px] flex flex-col gap-6 pb-6">
+          <div className="mt-[22px] flex flex-col gap-6 pb-72">
             <AppointmentContactFields
               idPrefix="appointment"
               name={name}
@@ -158,36 +159,33 @@ const BookAnAppointmentPanel = ({
         </div>
       </div>
 
-      <div className="shrink-0">
-        <div className="pointer-events-none h-[71px] bg-gradient-to-b from-transparent to-white" aria-hidden />
-        <div
-          className={cn(
-            "flex flex-col items-center gap-4 border-t border-neutral300/50 bg-white px-4 py-6",
-            variant === "page" && "mx-auto w-full max-w-[480px] lg:px-8",
-          )}
-        >
-          <p className="text-center font-gill text-sm font-light leading-normal tracking-[0.252px] text-[#4D4D4D]">
-            Our representative will get in touch with you soon
-          </p>
-          <div className="flex w-full items-center gap-0">
-            <button
-              type="button"
-              onClick={handleClear}
-              className="btn-border-slide flex h-14 flex-1 items-center justify-center border border-neutral300 font-gill text-sm uppercase leading-110 text-darkblack"
-            >
-              Clear All
-            </button>
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={submitted && !isValid}
-              className="flex h-14 flex-1 items-center justify-center bg-darkblack font-gill text-sm uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Apply Filters
-            </button>
-          </div>
-        </div>
-      </div>
+      <PanelFooter
+        contentClassName={cn(
+          "flex flex-col items-center gap-4",
+          variant === "page" && "mx-auto w-full max-w-[480px]",
+        )}
+      >
+        <p className="text-center font-gill text-sm font-light leading-normal tracking-[0.252px] text-[#4D4D4D]">
+          Our representative will get in touch with you soon
+        </p>
+        <PanelFooterDualActions>
+          <button
+            type="button"
+            onClick={handleClear}
+            className="btn-border-slide flex h-14 min-w-0 flex-1 items-center justify-center border border-neutral300 font-gill text-sm uppercase leading-110 text-darkblack"
+          >
+            Clear All
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={submitted && !isValid}
+            className="flex h-14 min-w-0 flex-1 items-center justify-center bg-darkblack font-gill text-sm uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Apply Filters
+          </button>
+        </PanelFooterDualActions>
+      </PanelFooter>
     </>
   );
 

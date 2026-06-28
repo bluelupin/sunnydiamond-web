@@ -10,32 +10,34 @@ type StoreVisitMapBlockProps = {
   cardClassName?: string;
 };
 
-const mapLayers = (
-  <div className="grid shrink-0 [&>*]:col-start-1 [&>*]:row-start-1">
-    <Image
-      src={DELIVERY_STORE_MAP_IMAGES.base}
-      alt=""
-      width={720}
-      height={518}
-      className="max-w-none object-cover"
-      sizes="720px"
-    />
-    <Image
-      src={DELIVERY_STORE_MAP_IMAGES.overlay1}
-      alt=""
-      width={720}
-      height={518}
-      className="max-w-none object-cover"
-      sizes="720px"
-    />
-    <Image
-      src={DELIVERY_STORE_MAP_IMAGES.overlay2}
-      alt=""
-      width={720}
-      height={518}
-      className="max-w-none object-cover"
-      sizes="720px"
-    />
+const MAP_LAYER_POSITION_CLASSNAME =
+  "absolute left-[calc(50%+55.5px)] top-[calc(50%+13.76px)] h-[518px] w-[720px] -translate-x-1/2 -translate-y-1/2";
+
+const MapLayersStack = () => (
+  <div className={MAP_LAYER_POSITION_CLASSNAME}>
+    <div className="relative size-full" aria-hidden>
+      <Image
+        src={DELIVERY_STORE_MAP_IMAGES.base}
+        alt=""
+        fill
+        className="object-cover"
+        sizes="720px"
+      />
+      <Image
+        src={DELIVERY_STORE_MAP_IMAGES.overlay1}
+        alt=""
+        fill
+        className="object-cover"
+        sizes="720px"
+      />
+      <Image
+        src={DELIVERY_STORE_MAP_IMAGES.overlay2}
+        alt=""
+        fill
+        className="object-cover"
+        sizes="720px"
+      />
+    </div>
   </div>
 );
 
@@ -80,9 +82,7 @@ const StoreVisitMapBlock = ({
   if (variant === "availability") {
     return (
       <div className="relative h-400 w-full shrink-0 overflow-hidden">
-        <div className="absolute left-[calc(50%+55.5px)] top-[calc(50%+13.76px)] -translate-x-1/2 -translate-y-1/2">
-          {mapLayers}
-        </div>
+        <MapLayersStack />
         <div
           className={cn(
             "absolute bottom-4 left-1/2 flex w-311 -translate-x-1/2 flex-col gap-6 bg-gray300 px-4 py-6",
@@ -96,14 +96,11 @@ const StoreVisitMapBlock = ({
   }
 
   return (
-    <div className="flex h-400 w-full shrink-0 flex-col justify-end overflow-hidden">
-      <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden">
-        {mapLayers}
-      </div>
+    <div className="relative h-400 w-full shrink-0 overflow-hidden">
+      <MapLayersStack />
       <div
         className={cn(
-          "mx-auto flex w-311 flex-col bg-gray300 px-4 py-6",
-          variant === "store-select" ? "-mt-60 gap-4" : "mb-4 gap-6",
+          "absolute left-1/2 top-[163px] flex w-311 -translate-x-1/2 flex-col gap-4 bg-gray300 px-4 py-6",
           cardClassName,
         )}
       >

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
-import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { PanelFooter, PanelFooterDualActions } from "@/shared/ui/PanelFooter";
 import {
   jewelleryListingFilterDrawerAssets,
   jewelleryListingFilterDrawerSpec as spec,
@@ -475,7 +475,7 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
         </div>
 
         <PanelFooter contentClassName="border-t-[0.5px] border-neutral300 px-[40px] py-[24px]">
-          <div className="flex gap-[24px]">
+          <PanelFooterDualActions>
             <button
               type="button"
               onClick={handleClearAll}
@@ -490,7 +490,7 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
             >
               Apply Filters
             </button>
-          </div>
+          </PanelFooterDualActions>
         </PanelFooter>
       </aside>
     </div>

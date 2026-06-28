@@ -9,6 +9,7 @@ import {
   appointmentLabelClassName,
 } from "@/shared/constants/appointmentForm";
 import FormFieldError from "@/shared/ui/FormFieldError";
+import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
 import AppointmentDateField from "@/shared/ui/AppointmentDateField";
 import {
   getMinSelectableDate,
@@ -229,41 +230,17 @@ const AppointmentContactFields = ({
 
       {showPurpose && onPurposeChange ? (
         <div className="flex flex-col gap-2">
-          <label htmlFor={`${idPrefix}-purpose`} className={labelClassName}>
-            Purpose of Visit
-          </label>
-          <div
-            className={cn(
-              "relative flex h-14 w-full items-center bg-[#F2F2F2] px-3",
-              showError("purpose") && "ring-1 ring-[#B42318]",
-            )}
-          >
-            <select
-              id={`${idPrefix}-purpose`}
-              value={purpose}
-              onChange={(event) => onPurposeChange(event.target.value)}
-              onBlur={() => markTouched("purpose")}
-              aria-invalid={showError("purpose") || undefined}
-              aria-describedby={showError("purpose") ? `${idPrefix}-purpose-error` : undefined}
-              className={cn(
-                "min-w-0 flex-1 appearance-none bg-transparent font-gill text-base leading-110 outline-none",
-                purpose ? "text-darkblack" : "text-neutral400",
-              )}
-            >
-              <option value="">-select-</option>
-              {purposeOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-            <ChevronDown
-              size={20}
-              strokeWidth={1.5}
-              aria-hidden
-              className="pointer-events-none shrink-0 text-darkblack"
-            />
-          </div>
+          <InlineCustomSelect
+            id={`${idPrefix}-purpose`}
+            label="Purpose of Visit"
+            value={purpose}
+            options={purposeOptions}
+            placeholder="-select-"
+            onChange={onPurposeChange}
+            onBlur={() => markTouched("purpose")}
+            invalid={showError("purpose")}
+            errorId={showError("purpose") ? `${idPrefix}-purpose-error` : undefined}
+          />
           <FormFieldError
             id={`${idPrefix}-purpose-error`}
             message={showError("purpose") ? errors.purpose : undefined}
