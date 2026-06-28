@@ -46,30 +46,51 @@ function OccasionCardItem({
         width={desktopUrl ? 718 : 328}
         height={desktopUrl ? 700 : 400}
         quality={80}
-        className="size-full object-cover motion-safe:transition-transform motion-safe:duration-700 motion-safe:group-hover:scale-[1.02]"
+        className="size-full object-cover"
       />
 
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-1/2 bg-gradient-to-t from-black to-transparent"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(0,0,0,0.7)] from-0% to-[rgba(0,0,0,0)] to-[53.563%]"
       />
 
-      <div className="absolute inset-x-0 bottom-0 z-10 px-4 pb-60 md:px-40">
-        <div className="flex max-w-[296px] flex-col gap-4 md:max-w-[418px] md:gap-6">
-          <div className="flex flex-col gap-2 text-white md:gap-3">
-            <h3 className="font-larken text-2xl font-light leading-110 md:text-32">
+      {/* Mobile — title, description, and CTA always visible */}
+      <div className="absolute inset-x-0 bottom-0 z-10 px-4 pb-60 md:hidden">
+        <div className="flex max-w-[296px] flex-col gap-4">
+          <div className="flex flex-col gap-2 text-white">
+            <h3 className="font-larken text-2xl font-light leading-110">
               {card.title}
             </h3>
             {description ? (
-              <p className="font-gill text-base font-light leading-110 md:text-xl">
+              <p className="font-gill text-base font-light leading-110">
                 {description}
               </p>
             ) : null}
           </div>
 
-          <span className="text-link-underline inline-flex w-fit translate-y-0 items-center justify-center border-b-[1.5px] border-white pb-1.5 font-gill text-sm font-normal uppercase tracking-[0.28px] text-white opacity-100 motion-safe:transition-[transform,opacity] motion-safe:duration-500 motion-safe:ease-out md:translate-y-[calc(100%+24px)] md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:group-focus-visible:translate-y-0 md:group-focus-visible:opacity-100">
+          <span className="text-link-underline inline-flex w-fit items-center justify-center border-b-[1.5px] border-white pb-1.5 font-gill text-sm font-normal uppercase tracking-[0.28px] text-white">
             {ctaLabel}
           </span>
+        </div>
+      </div>
+
+      {/* Desktop — same hover reveal as CollectionHeroPanel */}
+      <div className="absolute bottom-40 left-40 z-10 hidden max-w-[418px] flex-col-reverse items-start text-white md:flex">
+        <span className="inline-flex max-h-0 w-fit flex-col items-start overflow-hidden pb-0 pt-0 opacity-0 motion-safe:transition-[max-height,padding,opacity] motion-safe:duration-500 motion-safe:ease-out group-hover:max-h-[72px] group-hover:pt-40 group-hover:opacity-100 group-focus-visible:max-h-[72px] group-focus-visible:pt-40 group-focus-visible:opacity-100">
+          <span className="text-link-underline inline-flex w-fit items-center border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white">
+            {ctaLabel}
+          </span>
+        </span>
+
+        <div className="flex w-full max-w-[418px] flex-col items-start gap-3 md:gap-4 lg:gap-5">
+          <h3 className="font-larken text-32 font-light leading-none md:text-4xl lg:text-5xl">
+            {card.title}
+          </h3>
+          {description ? (
+            <p className="font-gill text-base font-light leading-[120%] tracking-[1%] md:text-lg lg:text-xl">
+              {description}
+            </p>
+          ) : null}
         </div>
       </div>
     </Link>

@@ -17,6 +17,8 @@ import {
   type AlankaraCollectionProps,
   type AlankaraThumbnailCrop,
 } from "./alankaraCollection.types";
+import PageContainer from "../layout/PageContainer";
+import Reveal from "@/shared/Animation/Reveal";
 
 const DEFAULT_PRODUCT_CTA = "Shop Now";
 const SLIDE_DURATION_MS = 500;
@@ -249,7 +251,7 @@ function CollectionHeroPanel({
           </div>
         ) : (
           <>
-            {collectionCta ? (
+            {collectionCta &&
               <Link
                 href={collectionCta.href}
                 className="pointer-events-none inline-flex max-h-0 w-fit flex-col items-start overflow-hidden pb-0 pt-0 opacity-0 motion-safe:transition-[max-height,padding,opacity] motion-safe:duration-500 motion-safe:ease-out group-hover:pointer-events-auto group-hover:max-h-[72px] group-hover:pt-40 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:max-h-[72px] group-focus-within:pt-40 group-focus-within:opacity-100"
@@ -258,26 +260,25 @@ function CollectionHeroPanel({
                   {collectionCta.label}
                 </span>
               </Link>
-            ) : null}
-            <div className="flex flex-col items-start gap-5">
-              <h2 className="whitespace-nowrap font-larken text-48 font-light leading-none">{title}</h2>
-              {description ? (
-                <p className="w-full max-w-[418px] font-gill text-xl font-light leading-[1.2] tracking-[0.2px]">
+            }
+            <div className="w-full max-w-[418px] flex flex-col items-start lg:gap-5 md:gap-4 gap-3">
+              <h2 className="whitespace-nowrap font-larken lg:text-5xl md:text-4xl text-32 font-light leading-none">{title}</h2>
+              {description &&
+                <p className="font-gill lg:text-xl md:text-lg text-base font-light leading-[120%] tracking-[1%]">
                   {description}
                 </p>
-              ) : null}
+              }
             </div>
           </>
         )}
-
-        {isMobile && collectionCta ? (
+        {isMobile && collectionCta &&
           <Link
             href={collectionCta.href}
             className="text-link-underline inline-flex items-center justify-center border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
           >
             {collectionCta.label}
           </Link>
-        ) : null}
+        }
       </div>
     </div>
   );
@@ -590,69 +591,63 @@ export function AlankaraCollection({
   if (!products.length) return null;
 
   return (
-    <section
-      id={id}
-      aria-label={ariaLabel || title}
-      className={cn(
-        "w-full bg-white",
-        "min-[1920px]:relative min-[1920px]:left-1/2 min-[1920px]:w-screen min-[1920px]:max-w-none min-[1920px]:-translate-x-1/2",
-        className,
-      )}
-    >
-      {sectionHeading ? (
-        <div className="mx-auto w-full max-w-1440 px-4 pt-16 lg:px-8 lg:pt-104">
-          <h2 className="mb-40 text-center font-larken text-32 font-light leading-110 text-darkblack lg:text-left lg:text-48">
+    <PageContainer className="!px-0">
+      <section
+        id={id}
+        aria-label={ariaLabel || title}
+        className={cn("w-full bg-white", className,)} >
+        {sectionHeading &&
+          <Reveal as="h2" direction="up" className="mb-[38px] text-center font-larken text-32 font-light leading-110 text-darkblack lg:text-left lg:text-48">
             {sectionHeading}
-          </h2>
+          </Reveal>
+        }
+        <div className="hidden w-full lg:grid lg:grid-cols-2">
+          <ScrollReveal delayMs={0} className="min-w-0 w-full">
+            <CollectionHeroPanel
+              title={title}
+              description={description}
+              desktopImage={desktopHero}
+              mobileImage={mobileHero}
+              imageAlt={title}
+              collectionCta={collectionCta}
+              priority={priority}
+              variant="desktop"
+            />
+          </ScrollReveal>
+          <ScrollReveal delayMs={100} className="min-w-0 w-full">
+            <ProductCarouselPanel
+              products={products}
+              defaultProductCtaLabel={defaultProductCtaLabel}
+              variant="desktop"
+              imagePriority={priority}
+            />
+          </ScrollReveal>
         </div>
-      ) : null}
 
-      <div className="hidden w-full lg:grid lg:grid-cols-2 lg:mx-auto lg:max-w-1440 min-[1920px]:mx-0 min-[1920px]:!max-w-none min-[1920px]:w-full">
-        <ScrollReveal delayMs={0} className="min-w-0 w-full">
-          <CollectionHeroPanel
-            title={title}
-            description={description}
-            desktopImage={desktopHero}
-            mobileImage={mobileHero}
-            imageAlt={title}
-            collectionCta={collectionCta}
-            priority={priority}
-            variant="desktop"
-          />
-        </ScrollReveal>
-        <ScrollReveal delayMs={100} className="min-w-0 w-full">
-          <ProductCarouselPanel
-            products={products}
-            defaultProductCtaLabel={defaultProductCtaLabel}
-            variant="desktop"
-            imagePriority={priority}
-          />
-        </ScrollReveal>
-      </div>
-
-      <div className="relative mx-auto w-full max-w-[375px] pb-10 lg:hidden">
-        <ScrollReveal delayMs={0}>
-          <CollectionHeroPanel
-            title={title}
-            description={description}
-            desktopImage={desktopHero}
-            mobileImage={mobileHero}
-            imageAlt={title}
-            collectionCta={collectionCta}
-            priority={priority}
-            variant="mobile"
-          />
-        </ScrollReveal>
-        <ScrollReveal delayMs={100} className="relative z-10 -mt-[51px] w-full">
-          <ProductCarouselPanel
-            products={products}
-            defaultProductCtaLabel={defaultProductCtaLabel}
-            variant="mobile"
-            imagePriority={priority}
-          />
-        </ScrollReveal>
-      </div>
-    </section>
+        <div className="relative mx-auto w-full max-w-[375px] pb-10 lg:hidden">
+          <ScrollReveal delayMs={0}>
+            <CollectionHeroPanel
+              title={title}
+              description={description}
+              desktopImage={desktopHero}
+              mobileImage={mobileHero}
+              imageAlt={title}
+              collectionCta={collectionCta}
+              priority={priority}
+              variant="mobile"
+            />
+          </ScrollReveal>
+          <ScrollReveal delayMs={100} className="relative z-10 -mt-[51px] w-full">
+            <ProductCarouselPanel
+              products={products}
+              defaultProductCtaLabel={defaultProductCtaLabel}
+              variant="mobile"
+              imagePriority={priority}
+            />
+          </ScrollReveal>
+        </div>
+      </section>
+    </PageContainer>
   );
 }
 

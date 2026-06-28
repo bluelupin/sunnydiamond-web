@@ -52,7 +52,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
           <section
             id={id}
             aria-label="Internally flawless diamonds"
-            className="relative md:mb-12 h-auto overflow-hidden"
+            className="relative h-auto overflow-hidden"
           >
             <div className="absolute inset-0 -z-0 will-change-transform" ref={bgParallax}>
               <ResponsiveImage
@@ -73,13 +73,13 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
                   width={64}
                   height={64}
                   quality={80}
-                  className="w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 opacity-80 mx-auto"
+                  className="w-[40px] h-[40px] md:w-12 md:h-12 lg:w-16 lg:h-16 opacity-80 mx-auto"
                 />
               </Reveal>
               <Reveal as="h2" direction="up" className="mt-6 lg:text-5xl md:text-4xl text-32 font-light text-darkblack font-larken max-w-2xl leading-tight tracking-[0%]">
                 {sectionTitle}
               </Reveal>
-              <ScrollReveal delayMs={160} className="will-change-transform md:mt-26 mt-76 md:w-290 md:h-290 w-[243px] h-[293px]">
+              <Reveal direction="up" className="md:mt-26 mt-76 md:w-290 md:h-290 w-[243px] h-[293px]">
                 <div ref={diamondParallax} className="size-full">
                   <ResponsiveImage
                     desktopSrc={desktopImageUrl || ""}
@@ -91,7 +91,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
                     className="w-full h-full object-cover"
                   />
                 </div>
-              </ScrollReveal>
+              </Reveal>
             </div>
           </section>
           :
@@ -99,7 +99,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
             id={id}
             aria-label="Internally flawless diamonds"
             aria-busy="true"
-            className="relative md:mb-12 h-auto overflow-hidden"
+            className="relative h-auto overflow-hidden"
           >
             <div className="absolute inset-0 -z-0">
               <div className="w-full h-full bg-gray100" />
