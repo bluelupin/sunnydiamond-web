@@ -35,27 +35,34 @@ const FilterIcon = ({ size }: { size: number }) => (
   </span>
 );
 
-const SortChevron = ({ size, mobile = false }: { size: number; mobile?: boolean }) => (
-  <span
-    className={cn(
-      "inline-flex shrink-0 items-center justify-center overflow-hidden",
-      mobile && "rotate-180",
-    )}
-    style={{ width: size, height: size }}
-  >
-    <Image
-      src={mobile ? jewelleryListingToolbarAssets.chevronDownMobileIcon : jewelleryListingToolbarAssets.chevronDownIcon}
-      alt=""
-      width={size}
-      height={size}
+const SortChevron = ({ size, mobile = false }: { size: number; mobile?: boolean }) => {
+  const chevronWidth = mobile ? 13.33 : 13.5;
+  const chevronHeight = mobile ? 6.67 : 7.5;
+
+  return (
+    <span
       className={cn(
-        "object-contain",
-        mobile ? "h-[6.67px] w-[13.33px]" : "h-[7.5px] w-[13.5px]",
+        "inline-flex shrink-0 items-center justify-center overflow-hidden",
+        mobile && "rotate-180",
       )}
-      aria-hidden
-    />
-  </span>
-);
+      style={{ width: size, height: size }}
+    >
+      <Image
+        src={
+          mobile
+            ? jewelleryListingToolbarAssets.chevronDownMobileIcon
+            : jewelleryListingToolbarAssets.chevronDownIcon
+        }
+        alt=""
+        width={chevronWidth}
+        height={chevronHeight}
+        className="object-contain"
+        style={{ width: chevronWidth, height: chevronHeight }}
+        aria-hidden
+      />
+    </span>
+  );
+};
 
 type FilterControlProps = {
   iconSize: number;

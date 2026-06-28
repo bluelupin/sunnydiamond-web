@@ -124,13 +124,15 @@ const Footer = () => {
               </a>
             ))}
           </div>
-          <Image
-            src="/images/navigation/payment-methods.png"
-            alt="Accepted payment methods: Visa, Mastercard, Amex, Maestro, PayTM, RuPay"
-            width={380}
-            height={25}
-            className="h-25 max-h-25 w-auto max-w-[320px] lg:max-w-[380px]"
-          />
+          <div className="relative h-[25px] w-[320px] lg:w-[380px]">
+            <Image
+              src="/images/navigation/payment-methods.png"
+              alt="Accepted payment methods: Visa, Mastercard, Amex, Maestro, PayTM, RuPay"
+              fill
+              sizes="(max-width: 1024px) 320px, 380px"
+              className="object-contain object-left"
+            />
+          </div>
 
           <p className="text-center font-gill text-sm font-light leading-110 text-neutral500 lg:absolute lg:left-1/2 lg:-translate-x-1/2 lg:whitespace-nowrap">
             {footerCopyright}

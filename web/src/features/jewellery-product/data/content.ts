@@ -168,6 +168,8 @@ export const jewelleryListingFilterDrawerSpec = {
   sectionTitleFontSize: 16,
   bodyFontSize: 14,
   selectFontSize: 16,
+  gemstoneSelectFontSize: 14,
+  gemstoneSelectedBackground: "#DECAA0",
   inputHeight: 56,
   inputPadding: 12,
   labelInputGap: 8,
@@ -197,9 +199,11 @@ export const jewelleryListingFilterDrawerSpec = {
   scrollbarWidth: 2,
 } as const;
 
-/** Figma node 692:4805 — filter drawer gemstone select chevron */
+/** Figma nodes 692:4805 / 692:4813 — filter drawer gemstone select */
 export const jewelleryListingFilterDrawerAssets = {
   selectChevronIcon: "/images/jewellery/chevron-down-filter.svg",
+  gemstoneRadioDefaultIcon: "/images/jewellery/filter-radio-default.svg",
+  gemstoneRadioSelectedIcon: "/images/jewellery/filter-radio-selected.svg",
 } as const;
 
 /** Figma node 692:4249 — jewellery product list guarantees bar */

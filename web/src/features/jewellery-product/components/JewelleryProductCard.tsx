@@ -62,6 +62,8 @@ const ProductImage = ({ src, alt }: { src: string | StaticImageData; alt: string
     <OptimizedImage
       src={src}
       alt={alt}
+      width={372}
+      height={287}
       className="pointer-events-none shrink-0 object-cover max-md:size-[121px] md:h-[287px] md:w-[372px]"
       sizes="(max-width: 768px) 50vw, 33vw"
     />

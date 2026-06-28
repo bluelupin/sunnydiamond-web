@@ -22,7 +22,7 @@ export const filterCategoryRows = [
 ] as const;
 
 export const filterGemstoneOptions = [
-  { value: "", label: "-Select-" },
+  { value: "", label: "Select" },
   { value: "diamond", label: "Diamond" },
   { value: "ruby", label: "Ruby" },
   { value: "emerald", label: "Emerald" },

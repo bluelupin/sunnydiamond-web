@@ -36,7 +36,7 @@ const OptimizedImage = ({
   quality = 90,
 }: OptimizedImageProps) => {
   const imageSrc = getImageSrc(src);
-  const imageClassName = cn("size-full object-cover", className);
+  const imageClassName = cn(className ? "object-cover" : "size-full object-cover", className);
 
   if (imageSrc) {
     const modernPair = getAvifWebpPair(imageSrc);

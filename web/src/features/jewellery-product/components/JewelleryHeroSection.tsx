@@ -1,4 +1,4 @@
-import ResponsiveImage from "@/shared/ui/ResponsiveImage";
+import Image from "next/image";
 import {
   jewelleryListingHeroAssets,
   jewelleryListingHeroSpec,
@@ -10,19 +10,19 @@ const JewelleryHeroSection = () => {
   return (
     <section
       aria-labelledby="jewellery-listing-hero-title"
-      className="grid h-[240px] w-full overflow-hidden md:h-320"
+      className="relative grid h-[240px] w-full overflow-hidden md:h-320"
     >
-      <ResponsiveImage
-        desktopSrc={jewelleryListingHeroAssets.desktop}
-        mobileSrc={jewelleryListingHeroAssets.mobile}
-        alt={jewelleryListingHeroAssets.alt}
-        width={1440}
-        height={320}
-        priority
-        quality={90}
-        sizes="100vw"
-        className="col-start-1 row-start-1 size-full object-cover object-[62%_38%] md:object-[58%_42%]"
-      />
+      <div className="relative col-start-1 row-start-1 size-full">
+        <Image
+          src={jewelleryListingHeroAssets.desktop}
+          alt={jewelleryListingHeroAssets.alt}
+          fill
+          priority
+          quality={90}
+          sizes="100vw"
+          className="object-cover object-[62%_38%] md:object-[58%_42%]"
+        />
+      </div>
       <div className="col-start-1 row-start-1 size-full bg-black/40" aria-hidden />
       <h1
         id="jewellery-listing-hero-title"

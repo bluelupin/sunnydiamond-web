@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
@@ -64,16 +64,16 @@ const FilterChip = ({
         width={18}
         height={18}
         aria-hidden
-        className="shrink-0"
+        className="size-[18px] shrink-0 object-contain"
       />
     ) : null}
     <span className={selected ? "font-normal" : "font-light"}>{label}</span>
   </button>
 );
 
-const FilterSelectChevron = () => (
+const FilterSelectChevron = ({ open = false }: { open?: boolean }) => (
   <span
-    className="pointer-events-none absolute inset-y-0 right-[12px] inline-flex w-[24px] items-center justify-center"
+    className="pointer-events-none inline-flex size-[24px] shrink-0 items-center justify-center"
     aria-hidden
   >
     <Image
@@ -81,7 +81,10 @@ const FilterSelectChevron = () => (
       alt=""
       width={spec.selectChevronIconWidth}
       height={spec.selectChevronIconHeight}
-      className="rotate-90 object-contain"
+      className={cn(
+        "shrink-0 object-contain transition-transform duration-200",
+        open ? "-rotate-90" : "rotate-90",
+      )}
       style={{
         width: spec.selectChevronIconWidth,
         height: spec.selectChevronIconHeight,
@@ -89,6 +92,124 @@ const FilterSelectChevron = () => (
     />
   </span>
 );
+
+const gemstoneChoices = filterGemstoneOptions.filter((option) => option.value);
+
+const GemstoneTypeSelect = ({
+  value,
+  onChange,
+  drawerOpen,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  drawerOpen: boolean;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!drawerOpen) {
+      setIsOpen(false);
+    }
+  }, [drawerOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+    };
+  }, [isOpen]);
+
+  const selectedOption = gemstoneChoices.find((option) => option.value === value);
+  const triggerLabel = selectedOption?.label ?? "Select";
+  const showPlaceholder = !selectedOption;
+
+  return (
+    <div ref={rootRef} className="flex flex-col gap-[8px]">
+      <span
+        id="filter-gemstone-type-label"
+        className="font-gill text-[14px] font-normal leading-110 text-darkblack"
+      >
+        Gemstone Type:
+      </span>
+      <button
+        type="button"
+        id="filter-gemstone-type"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-controls={isOpen ? "filter-gemstone-type-listbox" : undefined}
+        aria-labelledby="filter-gemstone-type-label filter-gemstone-type-value"
+        onClick={() => setIsOpen((current) => !current)}
+        className={cn(
+          "flex h-[56px] w-full items-center justify-between bg-[#F2F2F2] p-[12px] font-gill text-[14px] leading-110 outline-none",
+          isOpen ? "border border-darkblack" : "border border-transparent",
+          showPlaceholder && !isOpen ? "font-light text-neutral400" : "font-normal text-darkblack",
+        )}
+      >
+        <span id="filter-gemstone-type-value">{triggerLabel}</span>
+        <FilterSelectChevron open={isOpen} />
+      </button>
+      {isOpen ? (
+        <div
+          id="filter-gemstone-type-listbox"
+          role="listbox"
+          aria-labelledby="filter-gemstone-type-label"
+          className="flex w-full flex-col bg-[#F2F2F2]"
+        >
+          {gemstoneChoices.map((option) => {
+            const selected = value === option.value;
+
+            return (
+              <button
+                key={option.value}
+                type="button"
+                role="option"
+                aria-selected={selected}
+                onClick={() => {
+                  onChange(option.value);
+                  setIsOpen(false);
+                }}
+                className={cn(
+                  "flex h-[56px] w-full items-center p-[12px] text-left font-gill text-[14px] leading-110 transition-colors",
+                  selected
+                    ? "bg-[#DECAA0] font-normal text-darkblack"
+                    : "font-normal text-neutral400 hover:bg-white",
+                )}
+              >
+                <span className="flex items-center gap-[8px]">
+                  <Image
+                    src={
+                      selected
+                        ? jewelleryListingFilterDrawerAssets.gemstoneRadioSelectedIcon
+                        : jewelleryListingFilterDrawerAssets.gemstoneRadioDefaultIcon
+                    }
+                    alt=""
+                    width={24}
+                    height={24}
+                    aria-hidden
+                    className="size-[24px] shrink-0 object-contain"
+                  />
+                  <span>{option.label}</span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
+  );
+};
 
 const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFilterDrawerProps) => {
   const [draft, setDraft] = useState<JewelleryFilterState>(filters);
@@ -176,6 +297,7 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
                 width={32}
                 height={32}
                 aria-hidden
+                className="size-[32px] object-contain"
               />
             </button>
           </div>
@@ -342,35 +464,12 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
               </div>
             </section>
 
-            <section className="flex flex-col gap-[8px]">
-              <label
-                htmlFor="filter-gemstone-type"
-                className="font-gill text-[16px] font-normal leading-110 text-darkblack"
-              >
-                Gemstone Type:
-              </label>
-              <div className="relative h-[56px] w-full bg-[#F2F2F2]">
-                <select
-                  id="filter-gemstone-type"
-                  value={draft.gemstoneType}
-                  onChange={(event) =>
-                    setDraft((current) => ({ ...current, gemstoneType: event.target.value }))
-                  }
-                  className={cn(
-                    "h-full w-full appearance-none bg-transparent py-[12px] pl-[12px] pr-[44px] font-gill text-[16px] leading-110 outline-none",
-                    draft.gemstoneType
-                      ? "font-normal text-darkblack"
-                      : "font-light text-neutral400",
-                  )}
-                >
-                  {filterGemstoneOptions.map((option) => (
-                    <option key={option.value || "empty"} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-                <FilterSelectChevron />
-              </div>
+            <section>
+              <GemstoneTypeSelect
+                drawerOpen={open}
+                value={draft.gemstoneType}
+                onChange={(gemstoneType) => setDraft((current) => ({ ...current, gemstoneType }))}
+              />
             </section>
           </div>
         </div>

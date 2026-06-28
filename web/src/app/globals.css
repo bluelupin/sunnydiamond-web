@@ -366,22 +366,21 @@
       opacity 0.2s ease,
       text-decoration-color 0.2s ease;
   }
+}
 
-  @media (hover: hover) and (pointer: fine) {
+@media (hover: hover) and (pointer: fine) {
+  :is(a, button).text-link-underline:hover:not(:disabled),
+  :is(a, button):hover:not(:disabled) > .text-link-underline,
+  :is(a, button):hover:not(:disabled) .text-link-underline {
+    color: var(--link-underline-hover) !important;
+    border-color: var(--link-underline-hover) !important;
+    opacity: 1 !important;
+  }
 
-    :is(a, button).text-link-underline:hover:not(:disabled),
-    :is(a, button):hover:not(:disabled)>.text-link-underline,
-    :is(a, button):hover:not(:disabled) .text-link-underline {
-      color: var(--link-underline-hover) !important;
-      border-color: var(--link-underline-hover) !important;
-      opacity: 1 !important;
-    }
-
-    :is(a, button).underline:hover:not(:disabled),
-    :is(a, button).hover\:underline:hover:not(:disabled) {
-      color: var(--link-underline-hover);
-      text-decoration-color: var(--link-underline-hover);
-    }
+  a.underline:hover:not(:disabled),
+  button.underline:hover:not(:disabled) {
+    color: var(--link-underline-hover);
+    text-decoration-color: var(--link-underline-hover);
   }
 }
 
