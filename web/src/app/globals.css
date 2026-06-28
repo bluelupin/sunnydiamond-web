@@ -377,9 +377,8 @@
       opacity: 1 !important;
     }
 
-    a.underline:hover,
-    a.hover\:underline:hover,
-    button.hover\:underline:hover {
+    :is(a, button).underline:hover:not(:disabled),
+    :is(a, button).hover\:underline:hover:not(:disabled) {
       color: var(--link-underline-hover);
       text-decoration-color: var(--link-underline-hover);
     }

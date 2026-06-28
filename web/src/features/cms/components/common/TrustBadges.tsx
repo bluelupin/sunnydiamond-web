@@ -29,8 +29,8 @@ const TrustBadgeSection = ({ id, itemClassName = "text-gray500", }: TrustBadgeSe
 
     return (
         <section className="shrink-0 overflow-hidden border-t border-ivory/10 bg-chalk-beige text-ivory">
-            <div className="relative flex overflow-hidden md:h-16 h-12">
-                <div className="flex shrink-0 animate-marquee items-center gap-12 pr-12 whitespace-nowrap">
+            <div className="relative flex h-[64px] overflow-hidden">
+                <div className="flex shrink-0 animate-marquee items-center whitespace-nowrap">
                     {showSkeleton ? (
                         <div className="flex items-center gap-12 pr-12 whitespace-nowrap">
                             <div className="h-3 w-40 bg-gray500/20 rounded animate-pulse" />
@@ -41,10 +41,10 @@ const TrustBadgeSection = ({ id, itemClassName = "text-gray500", }: TrustBadgeSe
                         marqueeItems.map((item, idx) => (
                             <div
                                 key={idx}
-                                className="flex items-center gap-12 font-light text-xs md:text-sm tracking-[1.8%] uppercase font-gill"
+                                className="flex items-center font-light text-xs md:text-sm tracking-[1.8%] uppercase font-gill"
                             >
                                 <span className={cn("text-gray500", itemClassName)}>{item}</span>
-                                <span className="text-gray600" aria-hidden>
+                                <span className="px-60 text-gray600" aria-hidden>
                                     •
                                 </span>
                             </div>
@@ -53,18 +53,18 @@ const TrustBadgeSection = ({ id, itemClassName = "text-gray500", }: TrustBadgeSe
                 </div>
                 <div
                     aria-hidden
-                    className="flex shrink-0 animate-marquee items-center gap-12 pr-12 whitespace-nowrap"
+                    className="flex shrink-0 animate-marquee items-center whitespace-nowrap"
                 >
                     {showSkeleton
                         ? null
                         : marqueeItems.map((item, idx) => (
                             <div
                                 key={`dup-${idx}`}
-                                className="flex items-center gap-12 font-light text-xs md:text-sm tracking-[1.8%] uppercase font-gill"
+                                className="flex items-center font-light text-xs md:text-sm tracking-[1.8%] uppercase font-gill"
                             >
                                 <span className={cn("text-gray500", itemClassName)}>{item}</span>
 
-                                <span className="text-gray600" aria-hidden>
+                                <span className="px-60 text-gray600" aria-hidden>
                                     •
                                 </span>
                             </div>

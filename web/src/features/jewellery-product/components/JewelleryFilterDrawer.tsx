@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
-import { jewelleryListingFilterDrawerSpec as spec } from "../data/content";
+import {
+  jewelleryListingFilterDrawerAssets,
+  jewelleryListingFilterDrawerSpec as spec,
+} from "../data/content";
 import {
   DEFAULT_MAX_PRICE,
   DEFAULT_MIN_PRICE,
@@ -66,6 +69,25 @@ const FilterChip = ({
     ) : null}
     <span className={selected ? "font-normal" : "font-light"}>{label}</span>
   </button>
+);
+
+const FilterSelectChevron = () => (
+  <span
+    className="pointer-events-none absolute inset-y-0 right-[12px] inline-flex w-[24px] items-center justify-center"
+    aria-hidden
+  >
+    <Image
+      src={jewelleryListingFilterDrawerAssets.selectChevronIcon}
+      alt=""
+      width={spec.selectChevronIconWidth}
+      height={spec.selectChevronIconHeight}
+      className="rotate-90 object-contain"
+      style={{
+        width: spec.selectChevronIconWidth,
+        height: spec.selectChevronIconHeight,
+      }}
+    />
+  </span>
 );
 
 const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFilterDrawerProps) => {
@@ -327,7 +349,7 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
               >
                 Gemstone Type:
               </label>
-              <div className="flex h-[56px] w-full items-center gap-2 bg-[#F2F2F2] p-[12px]">
+              <div className="relative h-[56px] w-full bg-[#F2F2F2]">
                 <select
                   id="filter-gemstone-type"
                   value={draft.gemstoneType}
@@ -335,8 +357,10 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
                     setDraft((current) => ({ ...current, gemstoneType: event.target.value }))
                   }
                   className={cn(
-                    "min-w-0 flex-1 appearance-none bg-transparent font-gill text-[16px] leading-110 outline-none",
-                    draft.gemstoneType ? "font-normal text-darkblack" : "font-normal text-neutral400",
+                    "h-full w-full appearance-none bg-transparent py-[12px] pl-[12px] pr-[44px] font-gill text-[16px] leading-110 outline-none",
+                    draft.gemstoneType
+                      ? "font-normal text-darkblack"
+                      : "font-light text-neutral400",
                   )}
                 >
                   {filterGemstoneOptions.map((option) => (
@@ -345,14 +369,7 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
                     </option>
                   ))}
                 </select>
-                <Image
-                  src="/images/jewellery/chevron-down.svg"
-                  alt=""
-                  width={24}
-                  height={24}
-                  aria-hidden
-                  className="pointer-events-none shrink-0"
-                />
+                <FilterSelectChevron />
               </div>
             </section>
           </div>

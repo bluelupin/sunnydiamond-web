@@ -86,7 +86,7 @@ const Footer = () => {
                 <Reveal as="p" direction="up" className="font-gill lg:text-xl md:text-lg text-base font-normal leading-110 text-darkblack">
                   {column.title.toUpperCase()}
                 </Reveal>
-                <ul className="flex flex-col gap-12">
+                <ul className="flex flex-col gap-[12px]">
                   {column.links.map((link) => (
                     <Reveal as="li" direction="up" key={link.id}>
                       <Link

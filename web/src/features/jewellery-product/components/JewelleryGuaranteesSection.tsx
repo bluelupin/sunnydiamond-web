@@ -14,9 +14,26 @@ const {
   itemPadding,
   itemGap,
   iconSize,
+  mobileIconSize,
   labelFontSize,
   dividerColor,
 } = jewelleryListingGuaranteesSpec;
+
+const GuaranteeIcon = ({ iconSrc, size }: { iconSrc: string; size: number }) => (
+  <div
+    className="flex shrink-0 items-center justify-center"
+    style={{ width: `${size}px`, height: `${size}px` }}
+  >
+    <Image
+      src={iconSrc}
+      alt=""
+      width={size}
+      height={size}
+      className="size-full object-contain"
+      aria-hidden
+    />
+  </div>
+);
 
 const GuaranteeDivider = ({ orientation }: { orientation: "vertical" | "horizontal" }) => (
   <li
@@ -48,12 +65,7 @@ const GuaranteeItem = ({ iconSrc, label }: { iconSrc: string; label: string }) =
       padding: `${itemPadding}px`,
     }}
   >
-    <div
-      className="shrink-0"
-      style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
-    >
-      <Image src={iconSrc} alt="" width={iconSize} height={iconSize} className="size-full object-contain" aria-hidden />
-    </div>
+    <GuaranteeIcon iconSrc={iconSrc} size={iconSize} />
     <p
       className="font-gill font-normal leading-110 text-darkblack"
       style={{ fontSize: `${labelFontSize}px` }}
@@ -74,9 +86,7 @@ const JewelleryGuaranteesSection = () => {
               className="list-none flex w-full flex-col items-center justify-center text-center"
               style={{ gap: `${itemGap}px`, padding: `${itemPadding}px` }}
             >
-              <div className="flex size-10 shrink-0 items-center justify-center">
-                <Image src={iconSrc} alt="" width={40} height={40} className="size-full object-contain" aria-hidden />
-              </div>
+              <GuaranteeIcon iconSrc={iconSrc} size={mobileIconSize} />
               <p className="font-gill text-base font-normal leading-110 text-darkblack">{label}</p>
             </li>
           </Fragment>
