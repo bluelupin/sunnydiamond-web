@@ -78,7 +78,7 @@ const GuaranteeItem = ({ iconSrc, label }: { iconSrc: string; label: string }) =
 const JewelleryGuaranteesSection = () => {
   return (
     <section aria-label="Shopping guarantees" className="bg-gray200">
-      <ul className="m-0 flex list-none flex-col items-center p-0 px-4 py-10 lg:hidden">
+      <ul className="m-0 flex list-none flex-col items-center p-0 px-4 py-10 md:hidden">
         {jewelleryListingGuarantees.map(({ iconSrc, label }, index) => (
           <Fragment key={label}>
             {index > 0 ? <GuaranteeDivider orientation="horizontal" /> : null}
@@ -94,7 +94,7 @@ const JewelleryGuaranteesSection = () => {
       </ul>
 
       <ul
-        className="m-0 hidden list-none items-start justify-between p-0 lg:flex"
+        className="m-0 hidden list-none items-start justify-between p-0 md:flex"
         style={{
           paddingLeft: `${paddingX}px`,
           paddingRight: `${paddingX}px`,

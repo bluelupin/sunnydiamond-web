@@ -67,7 +67,7 @@ const DiscoverSteps = () => {
   return (
     <>
       {/* Mobile — items-center per Figma 692:28772 */}
-      <div className="flex items-center gap-4 lg:hidden">
+      <div className="flex items-center gap-4 md:hidden">
         <div className="relative flex shrink-0 flex-col items-start gap-40">
           <StepConnectorLine className="left-1/2 -translate-x-1/2" />
 
@@ -98,7 +98,7 @@ const DiscoverSteps = () => {
       </div>
 
       {/* Desktop — items-start per Figma 692:29082 */}
-      <div className="hidden w-full items-start gap-4 lg:flex">
+      <div className="hidden w-full items-start gap-4 md:flex">
         <div className="relative flex shrink-0 flex-col items-start gap-40">
           <StepConnectorLine className="left-2" />
 
@@ -138,14 +138,14 @@ const DiscoverContent = () => (
           id="education-discover-title"
           className="w-full font-larken text-[32px] font-light leading-110 text-darkblack lg:text-[48px]"
         >
-          <span className="lg:hidden">
+          <span className="md:hidden">
             {educationDiscoverContent.mobileTitleLines.map((line) => (
               <span key={line} className="block">
                 {line}
               </span>
             ))}
           </span>
-          <span className="hidden lg:inline">{educationDiscoverContent.title}</span>
+          <span className="hidden md:inline">{educationDiscoverContent.title}</span>
         </h2>
         <p className="w-full font-gill text-base font-light leading-110 text-darkblack lg:max-w-[531px] lg:text-[20px] lg:text-neutral500">
           {educationDiscoverContent.description}
@@ -171,10 +171,10 @@ const EducationDiscoverSection = () => {
   return (
     <section
       aria-labelledby="education-discover-title"
-      className="relative h-[743px] overflow-hidden bg-gray300 lg:h-[615px]"
+      className="relative h-[743px] overflow-hidden bg-gray300 md:h-[615px]"
     >
       <div
-        className="absolute bottom-0 left-0 hidden mix-blend-darken lg:block"
+        className="absolute bottom-0 left-0 hidden mix-blend-darken md:block"
         style={{ width: desktopImage.width, height: desktopImage.height }}
       >
         <ScrollReveal delayMs={180} className="relative h-full w-full">
@@ -188,7 +188,7 @@ const EducationDiscoverSection = () => {
       </div>
 
       <div
-        className="pointer-events-none absolute mix-blend-darken lg:hidden"
+        className="pointer-events-none absolute mix-blend-darken md:hidden"
         style={{
           left: mobileImage.left,
           top: mobileImage.top,

@@ -6,7 +6,7 @@ const AboutSince1997Skeleton = () => (
     <section
       aria-busy="true"
       aria-label="Loading legacy section"
-      className="relative hidden bg-white lg:block"
+      className="relative hidden bg-white md:block"
     >
       <div className="sticky top-0 flex h-screen flex-col overflow-hidden bg-white pt-100">
         <PageContainer className="shrink-0 pb-10">
@@ -15,14 +15,14 @@ const AboutSince1997Skeleton = () => (
         <PageContainer className="flex min-h-0 flex-1 flex-col pb-100 pt-0">
           <div className="flex min-h-0 flex-1 items-center gap-20 overflow-hidden">
             <Skeleton className="h-600 w-[549px] shrink-0 rounded-md bg-gray200" aria-hidden />
-            <Skeleton className="hidden h-600 w-358 shrink-0 rounded-md bg-gray200 lg:block" aria-hidden />
+            <Skeleton className="hidden h-600 w-358 shrink-0 rounded-md bg-gray200 md:block" aria-hidden />
             <Skeleton className="h-417 w-320 shrink-0 rounded-md bg-gray200" aria-hidden />
           </div>
         </PageContainer>
       </div>
     </section>
 
-    <section aria-busy="true" aria-hidden className="bg-white py-16 md:py-20 lg:hidden">
+    <section aria-busy="true" aria-hidden className="bg-white py-16 md:py-20 md:hidden">
       <PageContainer className="pb-0">
         <Skeleton className="h-10 w-48 rounded-md bg-gray200" aria-hidden />
         <Skeleton className="mt-3 h-6 w-full max-w-xl rounded-md bg-gray200" aria-hidden />

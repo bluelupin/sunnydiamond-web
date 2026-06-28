@@ -182,7 +182,7 @@ const BookStoreVisitPanel = ({
   }
 
   return (
-    <div className="fixed inset-0 z-[70] flex max-lg:flex-col lg:justify-end">
+    <div className="fixed inset-0 z-[70] flex max-md:flex-col md:justify-end">
       <button
         type="button"
         aria-label="Close book a visit"

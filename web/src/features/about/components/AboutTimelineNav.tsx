@@ -31,9 +31,9 @@ const AboutTimelineNav = ({
   return (
     <nav
       aria-label="Company timeline"
-      className="relative w-full shrink-0 items-center lg:flex lg:w-143"
+      className="relative w-full shrink-0 items-center md:flex md:w-143"
     >
-      <div className="flex flex-col gap-4 lg:hidden">
+      <div className="flex flex-col gap-4 md:hidden">
         <button
           type="button"
           onClick={() => setIsExpanded((prev) => !prev)}
@@ -87,7 +87,7 @@ const AboutTimelineNav = ({
               >
                 <span
                   className={cn(
-                    "hidden h-px w-16 shrink-0 transition-colors duration-500 ease-out motion-reduce:transition-none lg:block",
+                    "hidden h-px w-16 shrink-0 transition-colors duration-500 ease-out motion-reduce:transition-none md:block",
                     isActive ? "bg-white" : "bg-aboutInactive",
                   )}
                   aria-hidden

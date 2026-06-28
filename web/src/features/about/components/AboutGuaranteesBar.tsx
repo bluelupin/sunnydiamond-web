@@ -60,7 +60,7 @@ const AboutGuaranteesBar = ({ badges }: AboutGuaranteesBarProps) => {
   return (
     <section aria-label="Shopping guarantees" className="bg-gray200">
       <PageContainer className="py-16">
-        <ul className="m-0 flex w-full list-none flex-col items-center p-0 lg:hidden">
+        <ul className="m-0 flex w-full list-none flex-col items-center p-0 md:hidden">
           {badges.map((badge, index) => (
             <Fragment key={`${badge.label}-${index}`}>
               {index > 0 ? <AboutGuaranteeDivider orientation="horizontal" /> : null}
@@ -69,7 +69,7 @@ const AboutGuaranteesBar = ({ badges }: AboutGuaranteesBarProps) => {
           ))}
         </ul>
 
-        <div className="scrollbar-none -mx-5 hidden overflow-x-auto px-5 md:-mx-8 md:px-8 lg:-mx-10 lg:block lg:px-10 desktop:mx-0 desktop:overflow-visible desktop:px-0">
+        <div className="scrollbar-none -mx-5 hidden overflow-x-auto px-5 md:-mx-8 md:block md:px-8 lg:-mx-10 lg:px-10 desktop:mx-0 desktop:overflow-visible desktop:px-0">
           <ul className="m-0 flex lg:gap-2 gap-6 w-1360 shrink-0 list-none items-stretch p-0 desktop:w-full desktop:shrink">
             {badges.map((badge, index) => (
               <Fragment key={`${badge.label}-${index}`}>

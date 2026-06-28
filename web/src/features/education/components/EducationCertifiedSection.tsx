@@ -80,11 +80,11 @@ const EducationCertifiedSection = () => {
   return (
     <section
       aria-labelledby="education-certified-title"
-      className="relative overflow-hidden bg-white px-4 py-16 max-lg:h-[900px] lg:bg-gray300 lg:px-10 lg:py-[104px]"
+      className="relative overflow-hidden bg-white px-4 py-16 max-md:h-[900px] md:bg-gray300 md:px-8 md:py-20 lg:px-10 lg:py-[104px]"
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute lg:hidden"
+        className="pointer-events-none absolute md:hidden"
         style={{
           left: spec.background.mobile.handLeft,
           top: spec.background.mobile.handTop,
@@ -103,12 +103,12 @@ const EducationCertifiedSection = () => {
 
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_78%_62%,rgba(251,250,246,0)_0%,rgba(251,250,246,0.65)_50%,rgba(251,250,246,1)_82%)] lg:hidden"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_78%_62%,rgba(251,250,246,0)_0%,rgba(251,250,246,0.65)_50%,rgba(251,250,246,1)_82%)] md:hidden"
       />
 
       <div
         aria-hidden
-        className="pointer-events-none absolute hidden lg:block"
+        className="pointer-events-none absolute hidden md:block"
         style={{
           left: spec.background.desktop.handLeft,
           top: spec.background.desktop.handTop,
@@ -140,7 +140,7 @@ const EducationCertifiedSection = () => {
 
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 hidden bg-[radial-gradient(ellipse_at_72%_58%,rgba(244,243,238,0)_0%,rgba(244,243,238,0.55)_45%,rgba(244,243,238,1)_78%)] lg:block"
+        className="pointer-events-none absolute inset-0 hidden bg-[radial-gradient(ellipse_at_72%_58%,rgba(244,243,238,0)_0%,rgba(244,243,238,0.55)_45%,rgba(244,243,238,1)_78%)] md:block"
       />
 
       <div className="relative mx-auto flex max-w-[1360px] flex-col items-center gap-8 lg:gap-10">
@@ -153,7 +153,7 @@ const EducationCertifiedSection = () => {
           </span>
         </ScrollReveal>
 
-        <div className="flex w-full flex-col gap-6 lg:hidden">
+        <div className="flex w-full flex-col gap-6 md:hidden">
           <div className="grid grid-cols-2">
             {mobileCertifications.slice(0, 2).map((cert, index) => (
               <ScrollReveal key={cert.id} delayMs={80 + index * 80}>
@@ -176,7 +176,7 @@ const EducationCertifiedSection = () => {
           </div>
         </div>
 
-        <div className="hidden w-full grid-cols-4 lg:grid">
+        <div className="hidden w-full grid-cols-4 md:grid">
           {educationCertifiedContent.certifications.map((cert, index) => (
             <ScrollReveal key={cert.id} delayMs={80 + index * 80}>
               <div className="flex flex-col items-center justify-between gap-2 lg:min-h-[122px]">
@@ -187,7 +187,7 @@ const EducationCertifiedSection = () => {
           ))}
         </div>
 
-        <div className="flex w-full flex-col gap-8 lg:hidden">
+        <div className="flex w-full flex-col gap-8 md:hidden">
           <ScrollReveal delayMs={400}>
             <Image
               src={educationPageImages.certifiedDividerMobile}
@@ -222,7 +222,7 @@ const EducationCertifiedSection = () => {
           </ScrollReveal>
         </div>
 
-        <div className="relative mt-4 hidden w-full lg:mt-0 lg:block lg:h-[330px]">
+        <div className="relative mt-4 hidden w-full md:mt-0 md:block md:h-[330px] lg:h-[330px]">
           <ScrollReveal
             delayMs={120}
             className="lg:absolute lg:left-0 lg:top-1/2 lg:w-[647px] lg:-translate-y-[calc(50%+42px)]"
@@ -306,7 +306,7 @@ const EducationCertifiedSection = () => {
         </div>
       </div>
 
-      <div className="pointer-events-none absolute inset-0 lg:hidden" aria-hidden>
+      <div className="pointer-events-none absolute inset-0 md:hidden" aria-hidden>
         <Image
           src={educationPageImages.certifiedCalloutLineMobile}
           alt=""

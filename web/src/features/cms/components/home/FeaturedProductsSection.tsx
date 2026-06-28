@@ -240,12 +240,12 @@ function FeaturedProductsCarousel({
       onKeyDown={onCarouselKeyDown}
       {...dragSurfaceProps}
       className={cn(
-        "relative w-full overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 lg:overflow-visible",
+        "relative w-full overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 md:overflow-visible",
         dragSurfaceClassName,
       )}
     >
       {/* Desktop — Figma 684:2930: center card + left/right peeks */}
-      <div className="relative mx-auto hidden w-full max-w-1360 lg:block lg:min-h-[411px]">
+      <div className="relative mx-auto hidden w-full max-w-1360 md:block md:min-h-[411px]">
         {showSidePeeks ? (
           <div className="pointer-events-none absolute left-[-220px] top-0 h-[259px] w-[600px] overflow-hidden opacity-60">
             <div className="relative h-[410px] w-full">
@@ -343,7 +343,7 @@ function FeaturedProductsCarousel({
       </div>
 
       {/* Mobile — Figma 684:3238 */}
-      <div className="relative h-[303px] w-full lg:hidden">
+      <div className="relative h-[303px] w-full md:hidden">
         {showSidePeeks ? (
           <>
             <div className="absolute left-0 top-0 h-[237px] w-[160px] overflow-hidden opacity-60">

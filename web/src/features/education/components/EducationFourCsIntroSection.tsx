@@ -6,7 +6,7 @@ const EducationFourCsIntroSection = () => {
   return (
     <section
       aria-labelledby="education-four-cs-intro-title"
-      className="flex flex-col bg-white px-4 py-16 max-lg:min-h-[561px] max-lg:justify-center lg:h-[694px] lg:px-0 lg:py-0"
+      className="flex flex-col bg-white px-4 py-16 max-md:min-h-[561px] max-md:justify-center md:h-620 md:px-8 md:py-12 lg:h-[694px] lg:px-0 lg:py-0"
     >
       <div className="mx-auto flex h-full max-w-[677px] flex-col items-center justify-center gap-6 lg:gap-10 lg:pt-16">
         <ScrollReveal as="h2" delayMs={0} className="w-full">
@@ -14,8 +14,8 @@ const EducationFourCsIntroSection = () => {
             id="education-four-cs-intro-title"
             className="block text-center font-larken text-[32px] font-light leading-110 text-darkblack lg:text-[48px]"
           >
-            <span className="lg:hidden">{educationFourCsIntroContent.mobileTitle}</span>
-            <span className="hidden lg:inline">{educationFourCsIntroContent.desktopTitle}</span>
+            <span className="md:hidden">{educationFourCsIntroContent.mobileTitle}</span>
+            <span className="hidden md:inline">{educationFourCsIntroContent.desktopTitle}</span>
           </span>
         </ScrollReveal>
 
@@ -32,7 +32,7 @@ const EducationFourCsIntroSection = () => {
             </div>
           </ScrollReveal>
 
-          <ScrollReveal delayMs={180} className="max-lg:hidden">
+          <ScrollReveal delayMs={180} className="max-md:hidden">
             <div className="h-[55px] w-px bg-[rgba(10,10,10,0.4)]" aria-hidden />
           </ScrollReveal>
 

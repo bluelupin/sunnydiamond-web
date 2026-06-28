@@ -161,7 +161,7 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
         aria-busy="true"
         aria-label="Crafting rarity section loading"
       >
-        <div className="relative overflow-hidden lg:h-432 h-390">
+        <div className="relative overflow-hidden h-390 md:h-420 lg:h-432">
           <div
             className={cn(
               "absolute bottom-0 flex max-w-[549px] flex-col gap-[24px] left-[16px] lg:bottom-auto lg:top-[132px] lg:gap-[40px]",
@@ -172,7 +172,7 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
             <div className="h-[19px] w-[134px] animate-pulse rounded bg-gray200" aria-hidden />
           </div>
         </div>
-        <div className="mt-8 grid w-full grid-cols-2 gap-3 px-4 lg:mt-12 lg:grid-cols-4 lg:gap-3 lg:px-0">
+        <div className="mt-8 grid w-full grid-cols-2 gap-3 px-4 md:mt-10 md:grid-cols-4 md:gap-3 md:px-0 lg:mt-12">
           {[0, 1, 2, 3].map((i) => (
             <div key={i} className="aspect-square animate-pulse bg-gray200" aria-hidden />
           ))}
@@ -183,7 +183,7 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
 
   return (
     <section id={id} className="w-full bg-white md:pb-12 pb-16">
-      <div className="relative overflow-hidden lg:h-432 h-390">
+      <div className="relative overflow-hidden h-390 md:h-420 lg:h-432">
         <Reveal direction="up"
           className="pointer-events-none absolute right-[-29px] top-[-83px] size-[419px] lg:right-[2%] lg:top-[-204px] lg:size-[664px]"
         >
@@ -206,7 +206,7 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
       </div>
 
       {categories.length > 0 ? (
-        <div className="mt-8 grid w-full grid-cols-2 gap-3 px-4 lg:mt-12 lg:grid-cols-4 lg:gap-3 lg:px-0">
+        <div className="mt-8 grid w-full grid-cols-2 gap-3 px-4 md:mt-10 md:grid-cols-4 md:gap-3 md:px-0 lg:mt-12">
           {categories.map((cat, index) => (
             <Reveal direction="up"
               key={cat?.id ?? cat?.slug ?? cat?.title}

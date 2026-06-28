@@ -1,9 +1,9 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { TABLET_UP_MEDIA_QUERY } from "@/shared/lib/breakpoints";
 import { cn } from "@/shared/utils/cn";
 
-const DESKTOP_MEDIA_QUERY = "(min-width: 1024px)";
 const PDP_STICKY_TOP_CLASS = "top-104";
 
 type ProductDetailHeroLayoutProps = {
@@ -20,7 +20,7 @@ const ProductDetailHeroLayout = ({ gallery, purchase, details }: ProductDetailHe
     const galleryNode = galleryRef.current;
     if (!galleryNode) return;
 
-    const mediaQuery = window.matchMedia(DESKTOP_MEDIA_QUERY);
+    const mediaQuery = window.matchMedia(TABLET_UP_MEDIA_QUERY);
 
     const updateGalleryHeight = () => {
       if (!mediaQuery.matches) {
@@ -46,16 +46,16 @@ const ProductDetailHeroLayout = ({ gallery, purchase, details }: ProductDetailHe
   }, []);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,783fr)_minmax(0,553fr)] lg:items-start lg:gap-6 xl:gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-[minmax(0,783fr)_minmax(0,553fr)] md:items-start md:gap-4 lg:gap-6 xl:gap-6">
       <div ref={galleryRef} className="min-w-0">
         {gallery}
       </div>
 
-      <div className="flex min-w-0 flex-col gap-8 lg:gap-0">
+      <div className="flex min-w-0 flex-col gap-8 md:gap-0">
         <div style={galleryHeight ? { height: `${galleryHeight}px` } : undefined}>
-          <div className={cn("lg:sticky", PDP_STICKY_TOP_CLASS)}>{purchase}</div>
+          <div className={cn("md:sticky", PDP_STICKY_TOP_CLASS)}>{purchase}</div>
         </div>
-        <div className="lg:pt-6">{details}</div>
+        <div className="md:pt-4 lg:pt-6">{details}</div>
       </div>
     </div>
   );

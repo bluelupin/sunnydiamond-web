@@ -53,7 +53,7 @@ const AboutTimelineSection = ({
         />
 
         <PageContainer className="relative z-10 flex h-full flex-col px-4 lg:block lg:max-w-full lg:px-0 2xl:px-0">
-          <div className="flex h-full flex-col lg:flex-row lg:justify-between">
+          <div className="flex h-full flex-col md:flex-row lg:justify-between">
             <AboutTimelineNav
               years={years}
               activeYear={activeYear}

@@ -70,7 +70,7 @@ const ProductDetailSidebar = ({
   };
 
   const purchaseSection = (
-    <div className="flex flex-col gap-40 px-4 pt-8 lg:px-0 lg:pt-0">
+    <div className="flex flex-col gap-40 px-4 pt-8 md:px-6 md:pt-6 lg:px-0 lg:pt-0">
       <div className="flex flex-col gap-40">
         <div className="flex flex-col gap-6">
           <header className="flex flex-col gap-4">
@@ -242,22 +242,22 @@ const ProductDetailSidebar = ({
   );
 
   const detailsSection = (
-    <div className="flex flex-col gap-40 px-4 pb-16 lg:px-0 lg:pb-0">
+    <div className="flex flex-col gap-40 px-4 pb-16 md:px-6 md:pb-12 lg:px-0 lg:pb-0">
       <section aria-label="Shopping benefits" className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <h2 className="font-gill text-24 leading-110 text-darkblack">With Sunny, you get</h2>
           <DetailTextLink href="/about">T&amp;C Apply</DetailTextLink>
         </div>
-        <ul className="m-0 flex list-none flex-col bg-benefitSurface p-0 max-lg:-mx-4 max-lg:gap-6 max-lg:px-4 max-lg:py-40 lg:flex-row lg:items-stretch lg:gap-4 lg:p-6">
+        <ul className="m-0 flex list-none flex-col bg-benefitSurface p-0 max-md:-mx-4 max-md:gap-6 max-md:px-4 max-md:py-40 md:flex-row md:items-stretch md:gap-4 md:p-6 lg:gap-4">
           {content.benefits.flatMap((benefit, index) => {
             const item = (
               <li
                 key={benefit.label}
                 className={cn(
                   "flex w-full shrink-0 flex-col items-center justify-center text-center",
-                  "max-lg:gap-2 max-lg:px-3 max-lg:py-4",
-                  "lg:h-136 lg:flex-1 lg:gap-2 lg:p-3",
-                  index > 0 && "lg:border-l lg:border-gray600",
+                  "max-md:gap-2 max-md:px-3 max-md:py-4",
+                  "md:h-136 md:flex-1 md:gap-2 md:p-3",
+                  index > 0 && "md:border-l md:border-gray600",
                 )}
               >
                 <div className="flex size-40 shrink-0 items-center justify-center">
@@ -270,10 +270,10 @@ const ProductDetailSidebar = ({
                     className="size-40 object-contain"
                   />
                 </div>
-                <span className="font-gill text-base leading-110 text-darkblack lg:hidden">
+                <span className="font-gill text-base leading-110 text-darkblack md:hidden">
                   {benefit.mobileLabel}
                 </span>
-                <span className="hidden font-gill text-base leading-110 text-darkblack lg:block">
+                <span className="hidden font-gill text-base leading-110 text-darkblack md:block">
                   {benefit.lines[0]}
                   <br />
                   {benefit.lines[1]}
@@ -288,7 +288,7 @@ const ProductDetailSidebar = ({
                 key={`${benefit.label}-divider`}
                 role="presentation"
                 aria-hidden
-                className="block h-[1px] min-h-px w-full shrink-0 bg-[#999999] p-0 lg:hidden"
+                className="block h-[1px] min-h-px w-full shrink-0 bg-[#999999] p-0 md:hidden"
               />,
               item,
             ];
@@ -372,7 +372,7 @@ const ProductDetailSidebar = ({
         aria-label="Personalisation"
         className="flex items-end justify-between overflow-hidden bg-chalkCard pl-4 py-6 lg:min-h-260 lg:pl-6"
       >
-        <div className="flex max-w-[172px] shrink-0 flex-col gap-6 max-lg:-mr-[22px] lg:max-w-280 lg:gap-40">
+        <div className="flex max-w-[172px] shrink-0 flex-col gap-6 max-md:-mr-[22px] md:max-w-240 lg:max-w-280 lg:gap-40">
           <div className="flex flex-col gap-3">
             <h2 className="w-max whitespace-nowrap font-larken text-xl font-light leading-110 text-darkblack lg:text-24">
               Personalise this for you
@@ -385,7 +385,7 @@ const ProductDetailSidebar = ({
             Get in Touch
           </DetailOutlineButton>
         </div>
-        <div className="relative h-[118px] w-177 shrink-0 overflow-hidden lg:h-[213px] lg:w-[322px]">
+        <div className="relative h-[118px] w-177 shrink-0 overflow-hidden md:h-220 md:w-280 lg:h-[213px] lg:w-[322px]">
           <Image
             src={content.personaliseImage}
             alt=""

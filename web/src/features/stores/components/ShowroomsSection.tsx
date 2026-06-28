@@ -71,12 +71,12 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
           {showroomSection.sectionTitle}
         </ScrollReveal>
         {showroomSection.description ? (
-          <ScrollReveal delayMs={80} className="lg:hidden font-body text-base text-muted-foreground leading-relaxed max-w-350 mx-auto lg:text-left text-center mb-4">
+          <ScrollReveal delayMs={80} className="md:hidden font-body text-base text-muted-foreground leading-relaxed max-w-350 mx-auto lg:text-left text-center mb-4">
             {showroomSection.description}
           </ScrollReveal>
         ) : null}
       </div>
-      <div className="lg:grid grid-cols-1 lg:grid-cols-2 gap-[14px] md:gap-5 lg:gap-6 items-start lg:static relative">
+      <div className="lg:grid grid-cols-1 md:grid-cols-2 gap-[14px] md:gap-5 lg:gap-6 items-start lg:static relative">
         <ScrollReveal delayMs={120} className="lg:px-0 px-5 lg:mb-0 mb-[14px]">
           <div
             aria-label="Showroom locations"
@@ -142,7 +142,7 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
           </div>
         </ScrollReveal>
 
-        <ScrollReveal delayMs={200} className="relative lg:aspect-[850/600] aspect-[350/480] lg:h-595 h-478 w-full overflow-hidden lg:px-0 px-5">
+        <ScrollReveal delayMs={200} className="relative aspect-[350/480] h-478 w-full overflow-hidden px-5 md:aspect-[850/600] md:h-595 md:px-0 lg:aspect-[850/600]">
           {activeLocation && (
             <ResponsiveImage
               key={activeLocation.id}

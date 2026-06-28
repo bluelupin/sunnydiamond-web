@@ -63,7 +63,7 @@ const ProductDetailHeroBanner = ({
     <section
       ref={sectionRef}
       aria-label="Lifestyle showcase"
-      className="grid h-361 w-full overflow-hidden lg:h-804 [&>*]:col-start-1 [&>*]:row-start-1"
+      className="grid h-361 w-full overflow-hidden md:h-600 lg:h-804 [&>*]:col-start-1 [&>*]:row-start-1"
     >
       <Image
         src={imageSrc}

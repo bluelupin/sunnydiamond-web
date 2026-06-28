@@ -120,9 +120,9 @@ const FeaturedCollectionSection = ({ id, sectionHeading, description: descriptio
             </h2>
           </div>
         ) : null}
-        <div className="mx-auto grid w-full max-w-1440 grid-cols-1 lg:grid-cols-2 min-[1920px]:mx-0 min-[1920px]:!max-w-none min-[1920px]:w-full">
+        <div className="mx-auto grid w-full max-w-1440 grid-cols-1 md:grid-cols-2 min-[1920px]:mx-0 min-[1920px]:!max-w-none min-[1920px]:w-full">
           <div className="h-[540px] bg-gray200 lg:h-[800px]" />
-          <div className="hidden h-[800px] bg-gray200/80 lg:block" />
+          <div className="hidden h-[800px] bg-gray200/80 md:block" />
         </div>
       </section>
     );

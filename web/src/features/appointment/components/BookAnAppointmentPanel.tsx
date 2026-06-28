@@ -224,8 +224,8 @@ const BookAnAppointmentPanel = ({
         aria-label="Book an appointment"
         className={cn(
           "absolute flex flex-col overflow-hidden bg-white shadow-2xl",
-          "inset-x-0 bottom-0 top-12 max-lg:animate-in max-lg:slide-in-from-bottom max-lg:duration-300",
-          "lg:inset-x-auto lg:inset-y-0 lg:right-0 lg:top-0 lg:w-full lg:max-w-[480px] lg:animate-in lg:slide-in-from-right lg:duration-300",
+          "inset-x-0 bottom-0 top-12 max-md:animate-in max-md:slide-in-from-bottom max-md:duration-300",
+          "md:inset-x-auto md:inset-y-0 md:right-0 md:top-0 md:w-full md:max-w-[480px] md:animate-in md:slide-in-from-right md:duration-300",
         )}
       >
         {formContent}

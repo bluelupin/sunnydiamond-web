@@ -4,10 +4,10 @@ import { useEffect, type ReactNode } from "react";
 import { cn } from "@/shared/utils/cn";
 
 export const productDetailSidePanelOverlayClassName =
-  "min-h-0 flex-1 bg-[#1E1E1E]/75 animate-in fade-in duration-300 max-lg:min-h-12";
+  "min-h-0 flex-1 bg-[#1E1E1E]/75 animate-in fade-in duration-300 max-md:min-h-12";
 
 export const productDetailSidePanelAsideClassName =
-  "flex min-h-0 w-full max-w-480 shrink-0 flex-col overflow-hidden bg-white shadow-2xl max-lg:max-h-[calc(100vh-4rem)] max-lg:animate-in max-lg:slide-in-from-bottom max-lg:duration-300 lg:h-full lg:animate-in lg:slide-in-from-right lg:duration-300";
+  "flex min-h-0 w-full max-w-480 shrink-0 flex-col overflow-hidden bg-white shadow-2xl max-md:max-h-[calc(100vh-4rem)] max-md:animate-in max-md:slide-in-from-bottom max-md:duration-300 md:h-full md:animate-in md:slide-in-from-right md:duration-300";
 
 type ProductDetailSidePanelShellProps = {
   open: boolean;
@@ -49,7 +49,7 @@ export function ProductDetailSidePanelShell({
   }
 
   return (
-    <div className="fixed inset-0 z-[70] flex max-lg:flex-col lg:justify-end">
+    <div className="fixed inset-0 z-[70] flex max-md:flex-col md:justify-end">
       <button
         type="button"
         aria-label={overlayAriaLabel}

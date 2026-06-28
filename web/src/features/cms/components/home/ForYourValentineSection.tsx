@@ -102,7 +102,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
       >
         <div className="relative flex w-full flex-col items-center py-16 lg:h-full lg:flex-row lg:items-center lg:justify-between lg:px-40 lg:py-100">
           <div className="flex w-full max-w-[375px] flex-col items-center gap-6 px-4 lg:max-w-[437px] lg:items-start lg:gap-8 lg:px-0">
-            <div className="h-[336px] w-[305px] rounded bg-[#E4C7BE]/40 lg:hidden" aria-hidden />
+            <div className="h-[336px] w-[305px] rounded bg-[#E4C7BE]/40 md:hidden" aria-hidden />
             <div className="flex w-full flex-col items-center gap-3 lg:items-start lg:gap-4">
               <div className="h-9 w-56 rounded bg-[#E4C7BE]/40" aria-hidden />
               <div className="h-9 w-[306px] max-w-full rounded bg-[#E4C7BE]/40" aria-hidden />
@@ -111,7 +111,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
               <div className="h-14 w-[132px] rounded bg-[#E4C7BE]/40" aria-hidden />
             </div>
           </div>
-          <div className="hidden h-[600px] w-full max-w-[746px] rounded bg-[#E4C7BE]/40 lg:block" aria-hidden />
+          <div className="hidden h-[600px] w-full max-w-[746px] rounded bg-[#E4C7BE]/40 md:block" aria-hidden />
         </div>
       </section>
     );
@@ -128,12 +128,12 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
         aria-hidden
         width={1920}
         height={750}
-        className="pointer-events-none absolute inset-0 hidden size-full object-cover object-center opacity-30 lg:block"
+        className="pointer-events-none absolute inset-0 hidden size-full object-cover object-center opacity-30 md:block"
       />
 
       <div className="relative w-full">
         {/* Mobile — Figma 684:3264 / 684:3280 */}
-        <div className="relative flex flex-col items-center py-16 lg:hidden">
+        <div className="relative flex flex-col items-center py-16 md:hidden">
           <OptimizedImage
             src={FALLBACK_BG_MOBILE}
             alt=""
@@ -186,7 +186,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
           </div>
         </div>
 
-        <div className="hidden lg:flex lg:min-h-[750px] lg:items-center lg:justify-between lg:gap-8 lg:px-40 lg:py-100">
+        <div className="hidden md:flex lg:min-h-[750px] lg:items-center lg:justify-between lg:gap-8 lg:px-40 lg:py-100">
           <div className="flex max-w-[437px] shrink-0 flex-col gap-8">
             <ScrollReveal delayMs={0}>
               <div className="flex flex-col gap-4">

@@ -1,6 +1,5 @@
-"use client";
-
 import { useLayoutEffect, type RefObject } from "react";
+import { TABLET_UP_MEDIA_QUERY } from "@/shared/lib/breakpoints";
 
 const clamp = (value: number, min = 0, max = 1) =>
   Math.min(max, Math.max(min, value));
@@ -31,7 +30,7 @@ export function useSince1997HorizontalScroll(
     if (!section) return;
 
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const desktopQuery = window.matchMedia("(min-width: 1024px)");
+    const desktopQuery = window.matchMedia(TABLET_UP_MEDIA_QUERY);
 
     let rafRef: number | null = null;
     let scrollRange = 0;

@@ -7,10 +7,10 @@ const AboutFacesSkeleton = () => (
       <Skeleton className="h-5 w-full max-w-lg rounded-md bg-gray200" aria-hidden />
     </div>
     <div className="pl-4 lg:pl-0">
-      <div className="flex gap-2 overflow-hidden lg:h-[600px] lg:gap-1">
-        <Skeleton className="h-[560px] w-[343px] shrink-0 rounded-none bg-gray200 md:w-[400px] lg:h-full lg:flex-1" aria-hidden />
-        <Skeleton className="hidden h-[560px] w-[343px] shrink-0 rounded-none bg-gray200 md:block md:w-[400px] lg:h-full lg:flex-1" aria-hidden />
-        <Skeleton className="hidden h-[560px] w-[343px] shrink-0 rounded-none bg-gray200 lg:block lg:h-full lg:flex-1" aria-hidden />
+      <div className="flex gap-2 overflow-hidden md:h-[600px] md:gap-1 lg:h-[600px]">
+        <Skeleton className="h-[560px] w-[343px] shrink-0 rounded-none bg-gray200 md:h-full md:w-[400px] md:flex-1" aria-hidden />
+        <Skeleton className="hidden h-[560px] w-[343px] shrink-0 rounded-none bg-gray200 md:block md:h-full md:w-[400px] md:flex-1" aria-hidden />
+        <Skeleton className="hidden h-[560px] w-[343px] shrink-0 rounded-none bg-gray200 md:block md:h-full md:flex-1 lg:w-[400px]" aria-hidden />
       </div>
     </div>
   </section>

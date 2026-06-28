@@ -86,7 +86,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
       className="relative bg-white"
     >
       {/* Desktop — sticky viewport + scroll-driven horizontal slide */}
-      <div data-since1997-mode="desktop" className="hidden lg:block">
+      <div data-since1997-mode="desktop" className="hidden md:block">
         <div className="sticky top-8 flex flex-col overflow-hidden bg-white pt-100">
           <PageContainer className="shrink-0 2xl:pb-11 lg:pb-[40px] pb-8">
             <Reveal as="h2" direction="up"
@@ -163,7 +163,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
       </div>
 
       {/* Mobile / tablet — original vertical layout; images 2+3 slide on scroll */}
-      <div data-since1997-mode="mobile" className="lg:hidden">
+      <div data-since1997-mode="mobile" className="md:hidden">
         <div className="py-16 md:py-20">
           <PageContainer className="pb-0">
             <div className="mb-8 space-y-3">

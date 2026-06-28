@@ -83,7 +83,7 @@ const LearnNavArrow = ({
       width={24}
       height={24}
       aria-hidden
-      className="lg:hidden"
+      className="md:hidden"
     />
     <Image
       src={
@@ -95,7 +95,7 @@ const LearnNavArrow = ({
       width={24}
       height={24}
       aria-hidden
-      className="hidden lg:block"
+      className="hidden md:block"
     />
   </button>
 );
@@ -127,7 +127,7 @@ const EducationLearnMoreSection = () => {
   return (
     <section
       aria-labelledby="education-learn-more-title"
-      className="bg-white px-4 py-16 max-lg:h-[681px] lg:px-10 lg:py-[104px]"
+      className="bg-white px-4 py-16 max-md:h-[681px] md:px-8 md:py-20 lg:px-10 lg:py-[104px]"
     >
       <div className="mx-auto flex max-w-[1360px] flex-col items-center gap-6 lg:gap-16">
         <div className="flex w-full flex-col items-center gap-6 lg:gap-10">
@@ -141,9 +141,9 @@ const EducationLearnMoreSection = () => {
           </ScrollReveal>
 
           <ScrollReveal delayMs={100} className="w-full lg:max-w-[1200px]">
-            <div className="w-full overflow-x-auto border-y-[0.4px] border-black/30 lg:overflow-visible">
+            <div className="w-full overflow-x-auto border-y-[0.4px] border-black/30 md:overflow-visible">
               <div
-                className="flex h-[75px] min-w-max items-center max-lg:gap-40 max-lg:py-6 lg:h-auto lg:w-full lg:min-w-0 lg:gap-0 lg:py-6"
+                className="flex h-[75px] min-w-max items-center max-md:gap-40 max-md:py-6 md:h-auto md:w-full md:min-w-0 md:gap-0 md:py-6 lg:gap-0 lg:py-6"
                 role="tablist"
                 aria-label="Learn more topics"
               >
@@ -162,7 +162,7 @@ const EducationLearnMoreSection = () => {
                         aria-selected={isActive}
                         onClick={() => handleTabChange(index)}
                         className={cn(
-                          "flex items-center justify-center whitespace-nowrap py-2 font-gill font-normal leading-110 max-lg:text-base lg:w-full lg:py-0 lg:text-center lg:text-[20px]",
+                          "flex items-center justify-center whitespace-nowrap py-2 font-gill font-normal leading-110 max-md:text-base md:w-full md:py-0 md:text-center md:text-base lg:text-[20px]",
                           isActive
                             ? "border-b border-linkGold text-linkGold"
                             : "text-darkblack hover:text-linkGold",
@@ -181,8 +181,8 @@ const EducationLearnMoreSection = () => {
         <div className="flex w-full flex-col items-center gap-[49px] lg:gap-16">
           <ScrollReveal delayMs={180}>
             <div className="max-w-[700px] text-center font-gill text-base font-light leading-110 text-darkblack lg:text-[20px] lg:text-neutral500">
-              <p className="lg:hidden">{activeTab.description.join(" ")}</p>
-              <div className="hidden lg:block">
+              <p className="md:hidden">{activeTab.description.join(" ")}</p>
+              <div className="hidden md:block">
                 {activeTab.description.map((paragraph) => (
                   <p key={paragraph}>{paragraph}</p>
                 ))}
@@ -192,7 +192,7 @@ const EducationLearnMoreSection = () => {
 
           <ScrollReveal delayMs={260} className="flex w-full flex-col items-center">
             <div className="relative flex w-full items-start justify-center lg:gap-[250px]">
-              <div className="hidden shrink-0 lg:block">
+              <div className="hidden shrink-0 md:block">
                 <LearnCarouselImage
                   src={prevSlide.src}
                   alt=""
@@ -201,8 +201,8 @@ const EducationLearnMoreSection = () => {
                 />
               </div>
 
-              <div className="relative flex w-full flex-col items-center justify-between max-lg:h-[252px] lg:w-[526px] lg:justify-start lg:gap-3">
-                <div className="relative mx-auto h-[172px] w-[196px] mix-blend-darken lg:hidden">
+              <div className="relative flex w-full flex-col items-center justify-between max-md:h-[252px] md:w-full md:justify-start md:gap-3 lg:w-[526px] lg:gap-3">
+                <div className="relative mx-auto h-[172px] w-[196px] mix-blend-darken md:hidden">
                   <Image
                     src={currentSlide.src}
                     alt={currentSlide.alt}
@@ -213,7 +213,7 @@ const EducationLearnMoreSection = () => {
                 </div>
 
                 <div
-                  className="pointer-events-none absolute flex items-center justify-between lg:hidden"
+                  className="pointer-events-none absolute flex items-center justify-between md:hidden"
                   style={{
                     top: mobileCarousel.arrowTop,
                     left: mobileCarousel.arrowLeft,
@@ -232,7 +232,7 @@ const EducationLearnMoreSection = () => {
                   />
                 </div>
 
-                <div className="relative hidden w-full items-center justify-center gap-16 lg:flex">
+                <div className="relative hidden w-full items-center justify-center gap-16 md:flex">
                   <LearnNavArrow
                     direction="left"
                     onClick={goToPrevSlide}
@@ -259,7 +259,7 @@ const EducationLearnMoreSection = () => {
                 </Link>
               </div>
 
-              <div className="hidden shrink-0 lg:block">
+              <div className="hidden shrink-0 md:block">
                 <LearnCarouselImage
                   src={nextSlide.src}
                   alt=""

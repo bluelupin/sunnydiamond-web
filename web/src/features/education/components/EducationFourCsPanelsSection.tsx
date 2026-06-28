@@ -62,10 +62,10 @@ const PanelMedia = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent
       delayMs={delayMs}
       className={cn(
         "relative box-border flex w-full shrink-0 lg:mx-0",
-        "max-lg:mx-4 max-lg:w-[calc(100%-32px)]",
+        "max-md:mx-4 max-md:w-[calc(100%-32px)]",
         panel.id === "carat"
-          ? "items-start justify-start max-lg:h-[370px] lg:h-[610px]"
-          : "items-center justify-center max-lg:h-[370px] lg:h-[633px]",
+          ? "items-start justify-start max-md:h-[370px] md:h-500 lg:h-[610px]"
+          : "items-center justify-center max-md:h-[370px] md:h-500 lg:h-[633px]",
       )}
     >
       <PanelTexture panelId={panel.id} />
@@ -105,7 +105,7 @@ const PanelMedia = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent
           >
             {panel.id === "cut" ? (
               <div className="flex items-center gap-6 lg:gap-[24px]">
-                <div className="relative size-[120px] shrink-0 overflow-hidden lg:size-[200px]">
+                <div className="relative size-[120px] shrink-0 overflow-hidden md:size-[160px] lg:size-[200px]">
                   <Image
                     src={educationPageImages.cutDiamondGood}
                     alt=""
@@ -114,7 +114,7 @@ const PanelMedia = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent
                     sizes="200px"
                   />
                 </div>
-                <div className="relative size-[120px] shrink-0 overflow-hidden lg:size-[200px]">
+                <div className="relative size-[120px] shrink-0 overflow-hidden md:size-[160px] lg:size-[200px]">
                   <Image
                     src={educationPageImages.cutDiamondExcellent}
                     alt=""
@@ -153,7 +153,7 @@ const PanelMedia = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent
           )}
 
           {panel.footnote ? (
-            <div className="mt-10 flex w-full max-w-[481px] flex-col items-center gap-6 max-lg:mt-10 max-lg:max-w-[317px] max-lg:gap-6 lg:mt-[64px] lg:gap-[24px]">
+            <div className="mt-10 flex w-full max-w-[481px] flex-col items-center gap-6 max-md:mt-10 max-md:max-w-[317px] max-md:gap-6 lg:mt-[64px] lg:gap-[24px]">
               <p className="text-center font-gill text-[14px] font-light leading-110 text-neutral500 lg:text-[16px] lg:text-[#4D4D4D]">
                 {panel.footnote}
               </p>
@@ -177,7 +177,7 @@ const PanelCopy = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent;
       delayMs={delayMs}
       className={cn(
         "flex w-full shrink-0 flex-col items-center justify-center text-center",
-        "max-lg:h-[355px] max-lg:gap-6 max-lg:px-5 max-lg:pt-10 max-lg:pb-6",
+        "max-md:h-[355px] max-md:gap-6 max-md:px-5 max-md:pt-10 max-md:pb-6",
         "lg:h-full lg:gap-[32px] lg:px-10 lg:py-0",
       )}
     >
@@ -216,7 +216,7 @@ const EducationFourCsPanel = ({
       className={cn(
         "overflow-hidden",
         isChalk ? "bg-gray300" : "bg-white",
-        "max-lg:h-[725px]",
+        "max-md:h-[725px]",
         panel.id === "carat" ? "lg:h-[610px]" : "lg:h-[633px]",
       )}
     >

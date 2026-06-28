@@ -232,17 +232,17 @@ const ProductDetailMoreForYouSection = ({ items }: ProductDetailMoreForYouSectio
                 id="more-for-you-heading"
                 className="w-full font-larken text-32 font-light leading-110 text-darkblack lg:text-center lg:text-48"
               >
-                <span className="lg:hidden">Your Diamond Awaits</span>
-                <span className="hidden lg:inline">More for You</span>
+                <span className="md:hidden">Your Diamond Awaits</span>
+                <span className="hidden md:inline">More for You</span>
               </h2>
-              <p className="max-w-[306px] font-gill text-base font-light leading-110 text-neutral500 lg:hidden">
+              <p className="max-w-[306px] font-gill text-base font-light leading-110 text-neutral500 md:hidden">
                 Traditional mastery bringing every diamond to radiant, eternal life.
               </p>
             </div>
 
             <div
               ref={mobileTrackRef}
-              className={cn("relative w-full max-w-[343px] overflow-hidden lg:hidden", carouselInteractionClassName)}
+              className={cn("relative w-full max-w-[343px] overflow-hidden md:hidden", carouselInteractionClassName)}
               role="region"
               aria-roledescription="carousel"
               aria-label="Product recommendations"
@@ -337,7 +337,7 @@ const ProductDetailMoreForYouSection = ({ items }: ProductDetailMoreForYouSectio
       <div
         ref={desktopTrackRef}
         className={cn(
-          "hidden w-full overflow-x-hidden lg:grid lg:grid-cols-[minmax(0,1fr)_600px_minmax(0,1fr)] lg:items-start",
+          "hidden w-full overflow-x-hidden md:grid md:grid-cols-[minmax(0,1fr)_600px_minmax(0,1fr)] md:items-start lg:items-start",
           carouselInteractionClassName,
         )}
         role="region"

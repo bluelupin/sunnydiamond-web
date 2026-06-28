@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { getImageSrc } from "@/shared/utils/image";
+import { TABLET_UP_MEDIA_QUERY } from "@/shared/lib/breakpoints";
 
 const HERO_VIDEO_WEBM_SRC = "/videos/hero-banner-video.webm";
 const HERO_VIDEO_MP4_SRC = "/videos/hero-banner-video.mp4";
@@ -22,21 +23,21 @@ const HeroBackgroundMedia = ({
 }: HeroBackgroundMediaProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
+  const [isTabletUp, setIsTabletUp] = useState(false);
 
   const posterSrc = getImageSrc(desktopImageUrl || mobileImageUrl || "");
   const hasHeroImage = Boolean(desktopImageUrl || mobileImageUrl);
 
   useEffect(() => {
-    const media = window.matchMedia("(min-width: 1024px)");
-    const update = () => setIsDesktop(media.matches);
+    const media = window.matchMedia(TABLET_UP_MEDIA_QUERY);
+    const update = () => setIsTabletUp(media.matches);
     update();
     media.addEventListener("change", update);
     return () => media.removeEventListener("change", update);
   }, []);
 
   useEffect(() => {
-    if (!isDesktop) return;
+    if (!isTabletUp) return;
 
     const start = () => setShouldLoadVideo(true);
 
@@ -47,7 +48,7 @@ const HeroBackgroundMedia = ({
 
     const timeoutId = window.setTimeout(start, 1500);
     return () => window.clearTimeout(timeoutId);
-  }, [isDesktop]);
+  }, [isTabletUp]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -84,7 +85,7 @@ const HeroBackgroundMedia = ({
         className="absolute inset-0 h-full w-full object-cover"
       />
 
-      {isDesktop && shouldLoadVideo ? (
+      {isTabletUp && shouldLoadVideo ? (
         <video
           ref={videoRef}
           className="absolute inset-0 h-full w-full object-cover"

@@ -17,29 +17,30 @@ const JewelleryCategoryNav = ({ activeCategory, onCategoryChange }: JewelleryCat
       aria-label="Jewellery categories"
       className="border-b-[0.5px] border-neutral300 bg-white"
     >
-      <div className="overflow-x-auto scrollbar-none lg:overflow-visible">
+      <div className="overflow-x-auto scrollbar-none md:overflow-visible">
         <ul
           className={cn(
             "flex w-max items-center",
             "gap-[12px] px-[16px] py-[24px]",
-            "lg:mx-auto lg:min-w-full lg:justify-center lg:gap-[32px] lg:p-[40px]",
+            "md:w-full md:max-w-full md:justify-between md:gap-0 md:px-8 md:py-8",
+            "lg:justify-center lg:gap-[32px] lg:p-[40px]",
           )}
         >
           {jewelleryCategories.map((category) => {
             const isActive = activeCategory === category.slug;
 
             return (
-              <li key={category.slug} className="shrink-0">
+              <li key={category.slug} className="shrink-0 md:flex md:flex-1 md:justify-center lg:flex-none">
                 <button
                   type="button"
                   onClick={() => onCategoryChange(category.slug)}
                   aria-pressed={isActive}
                   className={cn(
-                    "flex w-[56px] flex-col items-center justify-center gap-[8px] lg:w-[86px]",
+                    "flex w-[56px] flex-col items-center justify-center gap-[8px] md:w-full md:max-w-[86px] lg:w-[86px]",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2",
                   )}
                 >
-                  <span className="flex size-[24px] shrink-0 items-center justify-center overflow-hidden lg:size-[40px]">
+                  <span className="flex size-6 shrink-0 items-center justify-center overflow-hidden md:size-40">
                     <Image
                       src={categoryIconSrc[category.slug]}
                       alt=""

@@ -40,10 +40,10 @@ const ProductDetailVisitUsSection = ({ imageSrc }: ProductDetailVisitUsSectionPr
                 Visit Us
               </h2>
               <p className="font-gill text-base font-light leading-110 lg:text-20">
-                <span className="lg:hidden">
+                <span className="md:hidden">
                   Schedule your store visit and we&apos;ll be ready to welcome you.
                 </span>
-                <span className="hidden lg:inline">
+                <span className="hidden md:inline">
                   Designs thoughtfully crafted to bring your vision to life
                 </span>
               </p>
@@ -52,7 +52,7 @@ const ProductDetailVisitUsSection = ({ imageSrc }: ProductDetailVisitUsSectionPr
             <button
               type="button"
               onClick={() => setIsBookVisitOpen(true)}
-              className="text-link-underline inline-flex border-b-[1.5px] border-white pb-2 font-gill text-sm uppercase leading-normal tracking-caption text-white max-lg:pb-2 lg:pb-1 lg:leading-110"
+              className="text-link-underline inline-flex border-b-[1.5px] border-white pb-2 font-gill text-sm uppercase leading-normal tracking-caption text-white max-md:pb-2 lg:pb-1 lg:leading-110"
             >
               Book a Visit
             </button>

@@ -264,11 +264,11 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
   }
 
   return (
-    <div className="fixed inset-0 z-[70] flex max-lg:flex-col lg:justify-end">
+    <div className="fixed inset-0 z-[70] flex max-md:flex-col md:justify-end">
       <button
         type="button"
         aria-label="Close filters"
-        className="min-h-0 flex-1 bg-[#1E1E1E]/25 backdrop-blur-[10px] animate-in fade-in duration-300 max-lg:min-h-12"
+        className="min-h-0 flex-1 bg-[#1E1E1E]/25 backdrop-blur-[10px] animate-in fade-in duration-300 max-md:min-h-12"
         onClick={onClose}
       />
 
@@ -278,8 +278,8 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
         aria-label="Filters"
         className={cn(
           "flex max-h-full min-h-0 shrink-0 flex-col bg-white shadow-2xl",
-          "max-lg:w-full max-lg:animate-in max-lg:slide-in-from-bottom max-lg:duration-300",
-          "lg:h-full lg:w-full lg:max-w-[474px] lg:animate-in lg:slide-in-from-right lg:duration-300",
+          "max-md:w-full max-md:animate-in max-md:slide-in-from-bottom max-md:duration-300",
+          "md:h-full md:w-full md:max-w-[474px] md:animate-in md:slide-in-from-right md:duration-300",
         )}
       >
         <div className="px-[24px] pt-[40px]">

@@ -6,10 +6,10 @@ const AboutTimelineSkeleton = () => (
     <div className="sticky top-0 z-10 h-screen overflow-hidden">
       <Skeleton className="absolute inset-0 rounded-none bg-gray200" aria-hidden />
       <PageContainer className="relative z-10 flex h-full flex-col px-4 lg:px-0">
-        <div className="flex h-full flex-col lg:flex-row lg:justify-between">
-          <div className="w-full shrink-0 pt-5 lg:w-143 lg:pt-0">
-            <Skeleton className="mb-4 h-8 w-24 rounded-md bg-gray300/80 lg:hidden" aria-hidden />
-            <div className="hidden flex-col gap-8 lg:flex">
+        <div className="flex h-full flex-col md:flex-row lg:justify-between">
+          <div className="w-full shrink-0 pt-5 md:w-143 md:pt-0">
+            <Skeleton className="mb-4 h-8 w-24 rounded-md bg-gray300/80 md:hidden" aria-hidden />
+            <div className="hidden flex-col gap-8 md:flex">
               {Array.from({ length: 6 }).map((_, index) => (
                 <Skeleton
                   key={index}

@@ -22,10 +22,10 @@ type ProductDetailGalleryProps = {
 const GALLERY_SLIDE_COUNT = 5;
 
 const galleryFrameClass =
-  "flex w-full overflow-hidden bg-gray300 px-6 py-12 lg:h-680 lg:px-6 lg:py-12";
+  "flex w-full overflow-hidden bg-gray300 px-6 py-12 md:h-520 md:px-6 md:py-10 lg:h-680 lg:py-12";
 
 const thumbFrameClass =
-  "flex min-h-280 flex-1 overflow-hidden bg-gray300 px-4 py-8 sm:min-h-360 lg:h-465 lg:px-6 lg:py-12";
+  "flex min-h-280 flex-1 overflow-hidden bg-gray300 px-4 py-8 sm:min-h-360 md:h-380 md:px-5 md:py-10 lg:h-465 lg:px-6 lg:py-12";
 
 const nestedImageCropStyle = {
   width: "140.04%",
@@ -95,7 +95,7 @@ const ProductDetailGallery = ({ product }: ProductDetailGalleryProps) => {
 
   return (
     <>
-      <div className="grid h-500 w-full shrink-0 grid-rows-[1fr_auto] overflow-hidden lg:hidden">
+      <div className="grid h-500 w-full shrink-0 grid-rows-[1fr_auto] overflow-hidden md:hidden">
         <div className="grid min-h-0 [&>*]:col-start-1 [&>*]:row-start-1">
           <div className="flex items-center justify-center bg-gray300">
             <div className="flex h-500 w-full max-w-375 items-center justify-center overflow-hidden">
@@ -134,7 +134,7 @@ const ProductDetailGallery = ({ product }: ProductDetailGalleryProps) => {
         </div>
       </div>
 
-      <div className="hidden flex-col gap-3 lg:flex lg:gap-3">
+      <div className="hidden flex-col gap-3 md:flex md:gap-3">
         <div className={galleryFrameClass}>
           <CroppedGalleryImage
             src={heroImage ?? product.image}
@@ -147,7 +147,7 @@ const ProductDetailGallery = ({ product }: ProductDetailGalleryProps) => {
           />
         </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row lg:gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row md:gap-3">
           <div className={thumbFrameClass}>
             <CroppedGalleryImage
               src={thumbOne ?? product.image}
@@ -157,7 +157,7 @@ const ProductDetailGallery = ({ product }: ProductDetailGalleryProps) => {
               cropStyle={nestedImageCropStyle}
             />
           </div>
-          <div className="flex min-h-280 w-full overflow-hidden sm:min-h-360 lg:h-465 lg:w-96 lg:shrink-0">
+          <div className="flex min-h-280 w-full overflow-hidden sm:min-h-360 md:h-400 md:w-80 md:shrink-0 lg:h-465 lg:w-96">
             <OptimizedImage
               src={thumbTwo ?? product.image}
               alt={`${product.name} — alternate view`}
@@ -167,7 +167,7 @@ const ProductDetailGallery = ({ product }: ProductDetailGalleryProps) => {
           </div>
         </div>
 
-        <div className="relative flex h-420 w-full overflow-hidden lg:h-680">
+        <div className="relative flex h-420 w-full overflow-hidden md:h-520 lg:h-680">
           <OptimizedImage
             src={lifestyleImage}
             alt={`${product.name} — lifestyle`}

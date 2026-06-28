@@ -36,9 +36,9 @@ const AboutFacesSection = ({ title, description, members }: AboutFacesSectionPro
           ) : null}
         </div>
       </div>
-      <div className="lg:pl-0 pl-4">
+      <div className="pl-4 md:pl-0">
         <Reveal direction="up"
-          className="mt-10 flex w-full snap-x snap-mandatory lg:gap-1 gap-2 overflow-x-auto pl-4 lg:h-[600px] lg:overflow-visible lg:pl-0 [&::-webkit-scrollbar]:hidden"
+          className="mt-10 flex w-full snap-x snap-mandatory gap-2 overflow-x-auto pl-4 md:h-[600px] md:gap-1 md:overflow-visible md:pl-0 [&::-webkit-scrollbar]:hidden"
           style={hideScrollbarStyle}
         >
           {members.map((member, index) => (
@@ -46,9 +46,8 @@ const AboutFacesSection = ({ title, description, members }: AboutFacesSectionPro
               key={`${member.name}-${index}`}
               className={cn(
                 "group relative shrink-0 snap-start overflow-hidden",
-                "h-[560px] lg:w-[calc(100vw-24px)] md:w-[400PX] w-[343px]",
-                "lg:h-full lg:w-auto lg:basis-0 lg:flex-1",
-                "transition-[flex-grow] duration-500 ease-in-out lg:hover:grow-[1.6]",
+                "h-[560px] w-[343px] md:h-full md:w-auto md:basis-0 md:flex-1",
+                "lg:hover:grow-[1.6] transition-[flex-grow] duration-500 ease-in-out",
               )}
             >
               <ResponsiveImage
