@@ -64,6 +64,14 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
                 className="w-full h-full object-cover opacity-90 scale-110"
               />
               <div className="absolute inset-0 bg-background/40" aria-hidden />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 top-0 h-1/4 bg-gradient-to-b from-white to-transparent"
+              />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-white to-transparent"
+              />
             </div>
             <div className="relative container h-full py-16 md:py-100 flex flex-col items-center justify-center text-center">
               <Reveal direction="up">
@@ -103,6 +111,14 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
           >
             <div className="absolute inset-0 -z-0">
               <div className="w-full h-full bg-gray100" />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 top-0 h-1/4 bg-gradient-to-b from-white to-transparent"
+              />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-white to-transparent"
+              />
             </div>
             <div className="relative container h-full py-16 md:py-100 flex flex-col items-center justify-center text-center">
               <div className="w-16 h-16 bg-gray200 rounded-full" />
