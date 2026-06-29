@@ -405,7 +405,7 @@ function ProductCarouselPanel({
       onPointerCancel={endDrag}
       className={cn(
         "relative overflow-hidden",
-        isMobile ? "mx-4 bg-gray300 py-[40px]" : "h-[800px] w-full bg-white",
+        isMobile ? "mx-4 bg-gray300 py-[40px]" : "h-[800px] w-full bg-white px-4",
         total > 1 && !isAnimating && (isDragging ? "cursor-grabbing" : "cursor-grab"),
         total > 1 && "touch-none select-none",
       )}
@@ -459,7 +459,7 @@ function ProductCarouselPanel({
           </div>
 
           <div className="flex shrink-0 flex-col items-center gap-4">
-            <p className="whitespace-nowrap font-gill text-xl font-normal leading-110 text-darkblack text-center">
+            <p className="whitespace-nowrap font-gill lg:text-xl md:text-lg text-base font-normal leading-110 text-darkblack text-center">
               {activeProduct.name}
             </p>
             <Link
@@ -475,8 +475,8 @@ function ProductCarouselPanel({
 
           {total > 1 ? (
             <>
-              <div aria-hidden className="h-[45px] shrink-0" />
-              <div className="flex shrink-0 gap-[5.6px]">
+              {/* <div aria-hidden className="h-[45px] shrink-0" /> */}
+              <div className="pt-12 flex shrink-0 gap-[5.6px] w-full overflow-x-auto">
                 {products.map((product, index) => {
                   const thumbSrc = getImageSrc(product.thumbnailImage ?? product.image) || "";
                   const isActive = index === activeIndex;
@@ -595,13 +595,13 @@ export function AlankaraCollection({
       id={id}
       aria-label={ariaLabel || title}
       className={cn("w-full bg-white", className,)} >
-      <PageContainer className="mt-[40px]">
-        {sectionHeading &&
+      {sectionHeading &&
+        <PageContainer className="mt-[40px]">
           <Reveal as="h2" direction="up" className="mb-[38px] text-center font-larken text-32 font-light leading-110 text-darkblack lg:text-left lg:text-48">
             {sectionHeading}
           </Reveal>
-        }
-      </PageContainer>
+        </PageContainer>
+      }
       <div className="hidden w-full md:grid md:grid-cols-2">
         <ScrollReveal delayMs={0} className="min-w-0 w-full">
           <CollectionHeroPanel

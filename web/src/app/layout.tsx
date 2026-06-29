@@ -92,7 +92,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${playfairDisplay.variable} antialiased`}>
-      <body className="min-h-screen bg-background font-body" suppressHydrationWarning>
+      <body className="min-h-screen bg-white font-body" suppressHydrationWarning>
         <ServerAppShell>{children}</ServerAppShell>
       </body>
     </html>

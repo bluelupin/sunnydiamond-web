@@ -37,7 +37,7 @@ function OccasionCardItem({
   return (
     <Link
       href={href}
-      className="group relative block h-[400px] w-[min(328px,85vw)] shrink-0 snap-start overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2 md:h-[700px] md:w-full md:min-w-0 md:shrink"
+      className="group relative block h-[400px] w-[328px] shrink-0 snap-start overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2 md:h-[700px] md:w-full md:min-w-0 md:shrink"
     >
       <ResponsiveImage
         desktopSrc={desktopUrl || fallBackImage}
@@ -57,17 +57,16 @@ function OccasionCardItem({
       {/* Mobile — title, description, and CTA always visible */}
       <div className="absolute inset-x-0 bottom-0 z-10 px-4 pb-60 md:hidden">
         <div className="flex max-w-[296px] flex-col gap-4">
-          <div className="flex flex-col gap-2 text-white">
-            <h3 className="font-larken text-2xl font-light leading-110">
+          <div className="flex flex-col md:gap-3 gap-2 text-white">
+            <h3 className="font-larken font-light leading-110 lg:text-32 md:text-3xl text-2xl">
               {card.title}
             </h3>
             {description ? (
-              <p className="font-gill text-base font-light leading-110">
+              <p className="font-gill font-light leading-[120%] tracking-[0%] lg:text-xl md:text-lg text-base">
                 {description}
               </p>
             ) : null}
           </div>
-
           <span className="text-link-underline inline-flex w-fit items-center justify-center border-b-[1.5px] border-white pb-1.5 font-gill text-sm font-normal uppercase tracking-[0.28px] text-white">
             {ctaLabel}
           </span>
@@ -75,19 +74,18 @@ function OccasionCardItem({
       </div>
 
       {/* Desktop — same hover reveal as CollectionHeroPanel */}
-      <div className="absolute bottom-40 left-40 z-10 hidden max-w-[418px] flex-col-reverse items-start text-white md:flex">
+      <div className="absolute bottom-16 left-[40px] z-10 hidden max-w-[418px] flex-col-reverse items-start text-white md:flex">
         <span className="inline-flex max-h-0 w-fit flex-col items-start overflow-hidden pb-0 pt-0 opacity-0 motion-safe:transition-[max-height,padding,opacity] motion-safe:duration-500 motion-safe:ease-out group-hover:max-h-[72px] group-hover:pt-40 group-hover:opacity-100 group-focus-visible:max-h-[72px] group-focus-visible:pt-40 group-focus-visible:opacity-100">
-          <span className="text-link-underline inline-flex w-fit items-center border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white">
+          <span className="relative after:bg-white after:absolute after:h-0.5 after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-white hover:border-white sm:pb-1 font-gill text-sm font-normal uppercase leading-110 text-white hover:text-white">
             {ctaLabel}
           </span>
         </span>
-
-        <div className="flex w-full max-w-[418px] flex-col items-start gap-3 md:gap-4 lg:gap-5">
-          <h3 className="font-larken text-32 font-light leading-none md:text-4xl lg:text-5xl">
+        <div className="flex w-full max-w-[418px] flex-col items-start md:gap-3 gap-2">
+          <h3 className="font-larken font-light leading-none lg:text-32 md:text-3xl text-2xl">
             {card.title}
           </h3>
           {description ? (
-            <p className="font-gill text-base font-light leading-[120%] tracking-[1%] md:text-lg lg:text-xl">
+            <p className="font-gill font-light leading-[120%] tracking-[0%] lg:text-xl md:text-lg text-base">
               {description}
             </p>
           ) : null}
@@ -162,7 +160,7 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
     <section
       id={id}
       aria-label={sectionTitle}
-      className="flex w-full flex-col items-center gap-8 bg-white px-4 py-16 md:gap-40 md:px-0 md:py-100"
+      className="flex w-full flex-col items-center gap-8 bg-white py-16 md:gap-40 px-0 md:py-100"
     >
       <ScrollReveal as="h2" delayMs={0} className="max-w-sm text-center font-larken text-32 font-light leading-110 text-darkblack md:max-w-none md:text-5xl lg:whitespace-nowrap">
         {sectionTitle}
@@ -175,7 +173,7 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
         aria-label={sectionTitle}
         tabIndex={-1}
         onKeyDownCapture={handleCarouselKeyDown}
-        className="scrollbar-none relative left-1/2 flex w-screen max-w-none -translate-x-1/2 snap-x snap-mandatory gap-3 overflow-x-auto scroll-pl-4 scroll-pr-4 px-4 pb-2 md:grid md:grid-cols-2 md:gap-1 md:overflow-visible md:px-0 md:pb-0 md:snap-none md:outline-none"
+        className="scrollbar-none relative left-1/2 flex w-screen max-w-none -translate-x-1/2 snap-x snap-mandatory gap-3 overflow-x-auto scroll-pl-4 scroll-pr-4 pb-2 md:grid md:grid-cols-2 md:gap-1 md:overflow-visible md:px-0 pl-4 md:pb-0 md:snap-none md:outline-none"
       >
         {occasions.map((card, index) => (
           <ScrollReveal
