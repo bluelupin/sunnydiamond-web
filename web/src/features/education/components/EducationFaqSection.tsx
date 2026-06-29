@@ -2,7 +2,7 @@
 
 import { Fragment, useState } from "react";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
-import { educationFaqItems } from "../data/content";
+import type { NormalizedEducationFaqSection } from "@/services/education/learn-about-diamonds-page.types";
 
 const FaqPlusIcon = () => (
   <span className="relative size-6 shrink-0 overflow-hidden" aria-hidden>
@@ -32,8 +32,12 @@ const FaqMinusIcon = () => (
 const FaqToggleIcon = ({ isOpen }: { isOpen: boolean }) =>
   isOpen ? <FaqMinusIcon /> : <FaqPlusIcon />;
 
-const EducationFaqSection = () => {
-  const [openId, setOpenId] = useState<string | null>("authenticity");
+type EducationFaqSectionProps = {
+  faq: NormalizedEducationFaqSection;
+};
+
+const EducationFaqSection = ({ faq }: EducationFaqSectionProps) => {
+  const [openId, setOpenId] = useState<string | null>(faq.items[0]?.id ?? null);
 
   return (
     <section
@@ -46,12 +50,12 @@ const EducationFaqSection = () => {
             id="education-faq-title"
             className="block w-full text-left font-larken text-[32px] font-light leading-110 text-darkblack lg:text-center lg:text-[48px]"
           >
-            Frequently Asked Questions
+            {faq.heading}
           </span>
         </ScrollReveal>
 
         <div className="flex w-full flex-col gap-4">
-          {educationFaqItems.map((item, index) => {
+          {faq.items.map((item, index) => {
             const isOpen = openId === item.id;
 
             return (
@@ -84,7 +88,7 @@ const EducationFaqSection = () => {
                   </div>
                 </ScrollReveal>
 
-                {index < educationFaqItems.length - 1 ? (
+                {index < faq.items.length - 1 ? (
                   <div className="h-[0.5px] bg-neutral300" aria-hidden />
                 ) : null}
               </Fragment>

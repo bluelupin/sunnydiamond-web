@@ -1,19 +1,20 @@
 "use client";
 
-import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import MediaContentOverlay from "@/shared/ui/MediaContentOverlay";
 import { cn } from "@/shared/utils/cn";
-import {
-  educationHeroContent,
-  educationHeroFigmaSpec,
-  educationPageImages,
-} from "../data/content";
+import type { NormalizedEducationHero } from "@/services/education/learn-about-diamonds-page.types";
+import { educationHeroFigmaSpec } from "../data/content";
+import EducationHeroMedia from "./EducationHeroMedia";
 import { useEducationHeroLoadAnimation } from "../hooks/useEducationHeroLoadAnimation";
 
-const { section, image, title, overlay, animation } = educationHeroFigmaSpec;
+const { section, title, overlay, animation } = educationHeroFigmaSpec;
 const collapsedWidthPercent = `${animation.collapsedWidthRatio * 100}%`;
 
-const EducationHeroSection = () => {
+type EducationHeroSectionProps = {
+  hero: NormalizedEducationHero;
+};
+
+const EducationHeroSection = ({ hero }: EducationHeroSectionProps) => {
   const { expanded, reducedMotion } = useEducationHeroLoadAnimation();
 
   const heroTransition = reducedMotion
@@ -36,16 +37,11 @@ const EducationHeroSection = () => {
           )}
           style={{ width: expanded ? undefined : collapsedWidthPercent }}
         >
-          <ResponsiveImage
-            desktopSrc={educationPageImages.heroDesktop}
-            mobileSrc={educationPageImages.heroMobile}
-            alt={image.alt}
-            priority
-            width={image.width}
-            height={image.height}
-            quality={90}
-            sizes="100vw"
-            className="absolute inset-0 h-full w-full object-cover object-center"
+          <EducationHeroMedia
+            videoUrl={hero.videoUrl}
+            posterDesktopUrl={hero.posterDesktopUrl}
+            posterMobileUrl={hero.posterMobileUrl}
+            posterAlt={hero.posterAlt}
           />
 
           <MediaContentOverlay gradient={overlay.gradient} />
@@ -59,7 +55,7 @@ const EducationHeroSection = () => {
             id="education-hero-title"
             className="text-center font-larken text-[32px] font-light leading-none text-white lg:text-[60px]"
           >
-            {educationHeroContent.title}
+            {hero.title}
           </h1>
         </div>
       </div>

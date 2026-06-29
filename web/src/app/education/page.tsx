@@ -4,8 +4,15 @@ import JsonLd from "@/shared/lib/seo/JsonLd";
 import { footerPages } from "@/features/cms/data/footerPages";
 import { siteConfig } from "@/shared/lib/siteConfig";
 import EducationPage from "@/features/education/components/EducationPage";
+import {
+  EMPTY_LEARN_ABOUT_DIAMONDS_PAGE,
+  getLearnAboutDiamondsPage,
+} from "@/services/education/learn-about-diamonds-page.service";
 
 const page = footerPages.education;
+
+/** Refresh CMS-driven hero + FAQ without a full redeploy. */
+export const revalidate = 300;
 
 export const metadata: Metadata = constructMetadata({
   title: page.title,
@@ -21,11 +28,19 @@ const educationJsonLd = {
   url: `${siteConfig.seo.siteUrl}/education`,
 };
 
-export default function Page() {
+export default async function Page() {
+  let cmsPage = EMPTY_LEARN_ABOUT_DIAMONDS_PAGE;
+
+  try {
+    cmsPage = await getLearnAboutDiamondsPage();
+  } catch {
+    cmsPage = EMPTY_LEARN_ABOUT_DIAMONDS_PAGE;
+  }
+
   return (
     <>
       <JsonLd data={educationJsonLd} />
-      <EducationPage />
+      <EducationPage hero={cmsPage.hero} faq={cmsPage.faq} />
     </>
   );
 }
