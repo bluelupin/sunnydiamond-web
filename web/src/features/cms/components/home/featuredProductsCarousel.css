@@ -11,6 +11,10 @@
 .featured-products-slider .slick-slide {
   float: none;
   height: auto;
+  /* flex track + variableWidth leaves slides at 0px without explicit width */
+  width: 260px !important;
+  flex: 0 0 260px;
+  min-width: 260px;
   opacity: 0.6;
   transition: opacity 500ms ease;
 }
@@ -32,6 +36,12 @@
 }
 
 @media (min-width: 768px) {
+  .featured-products-slider .slick-slide {
+    width: 600px !important;
+    flex: 0 0 600px;
+    min-width: 600px;
+  }
+
   .featured-products-slide {
     width: 600px;
   }
