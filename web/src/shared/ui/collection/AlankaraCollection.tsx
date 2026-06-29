@@ -405,7 +405,7 @@ function ProductCarouselPanel({
       onPointerCancel={endDrag}
       className={cn(
         "relative overflow-hidden",
-        isMobile ? "mx-4 bg-gray300 py-[40px]" : "h-[800px] w-full bg-white px-4",
+        isMobile ? "mx-4 bg-gray300 py-[40px]" : "h-[800px] w-full bg-white px-6",
         total > 1 && !isAnimating && (isDragging ? "cursor-grabbing" : "cursor-grab"),
         total > 1 && "touch-none select-none",
       )}
@@ -476,7 +476,7 @@ function ProductCarouselPanel({
           {total > 1 ? (
             <>
               {/* <div aria-hidden className="h-[45px] shrink-0" /> */}
-              <div className="pt-12 flex shrink-0 gap-[5.6px] w-full overflow-x-auto">
+              <div className="pt-12 flex justify-between shrink-0 gap-[5.6px] w-full overflow-x-auto">
                 {products.map((product, index) => {
                   const thumbSrc = getImageSrc(product.thumbnailImage ?? product.image) || "";
                   const isActive = index === activeIndex;

@@ -25,7 +25,7 @@ const AboutFacesSection = ({ title, description, members }: AboutFacesSectionPro
         <div className="flex max-w-full flex-col items-center lg:gap-4 gap-3">
           <Reveal as="h2" direction="up"
             id="about-faces-title"
-            className="font-larken font-light leading-110 text-darkblack lg:text-[48px] md:text-[40px] text-[32px]"
+            className="font-larken font-light leading-110 text-darkblack lg:text-[48px] md:text-[40px] text-32"
           >
             {title}
           </Reveal>

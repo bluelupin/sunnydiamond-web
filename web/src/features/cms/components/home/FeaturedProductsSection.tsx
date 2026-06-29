@@ -5,14 +5,14 @@ import Image from "next/image";
 import Link from "next/link";
 import LeftArrow from "@/assets/Icons/LeftArrow";
 import RightArrow from "@/assets/Icons/RightArrow";
-import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { cn } from "@/shared/utils/cn";
-import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
-import { getFeaturedProducts } from "@/features/products/data/products";
-import { moreForYouTransparentImages } from "@/features/products/data/moreForYouContent";
-
-const IMAGE_QUALITY = 90;
+import {
+  featuredProductsCarouselFallbackImages,
+  featuredProductsCarouselFallbackItems,
+} from "@/features/cms/data/featuredProductsFallback";
+import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import Reveal from "@/shared/Animation/Reveal";
 
 /** Recommended transparent product PNG/WebP for CMS + fallbacks. */
 export const FEATURED_PRODUCTS_IMAGE_SPEC = {
@@ -47,13 +47,7 @@ interface FeaturedProductsSectionProps {
 const FEATURED_CAROUSEL_COUNT = 3;
 
 function getFallbackItems(): FeaturedCarouselItem[] {
-  return getFeaturedProducts().slice(0, FEATURED_CAROUSEL_COUNT).map((product, index) => ({
-    id: product.id,
-    name: product.name,
-    price: product.price,
-    href: `/product/${product.id}`,
-    image: moreForYouTransparentImages[index % moreForYouTransparentImages.length],
-  }));
+  return featuredProductsCarouselFallbackItems.slice(0, FEATURED_CAROUSEL_COUNT);
 }
 
 function normalizeCarouselItems(cmsItems: FeaturedCarouselItem[]): FeaturedCarouselItem[] {
@@ -86,20 +80,20 @@ function FeaturedProductsHeader({
   description: string;
 }) {
   return (
-    <div className="flex w-full flex-col items-center gap-3 text-center lg:gap-4">
-      <ScrollReveal
+    <div className="flex w-full flex-col items-center gap-4 text-center">
+      <Reveal
         as="h2"
-        delayMs={0}
-        className="font-larken text-32 font-light leading-110 text-darkblack lg:text-5xl"
+        direction="up"
+        className="font-larken font-light leading-110 text-darkblack lg:text-[48px] md:text-[40px] text-32"
       >
         {title}
-      </ScrollReveal>
-      <ScrollReveal
-        delayMs={80}
+      </Reveal>
+      <Reveal
+        direction="up"
         className="max-w-[306px] font-gill text-base font-light leading-110 text-neutral500 lg:max-w-none lg:text-20"
       >
         {description}
-      </ScrollReveal>
+      </Reveal>
     </div>
   );
 }
@@ -219,15 +213,19 @@ function FeaturedProductsCarousel({
 
   const dragSurfaceProps = showSidePeeks
     ? {
-        ref: dragSurfaceRef,
-        onPointerDown,
-        onPointerMove,
-        onPointerUp: endDrag,
-        onPointerCancel: endDrag,
-      }
+      ref: dragSurfaceRef,
+      onPointerDown,
+      onPointerMove,
+      onPointerUp: endDrag,
+      onPointerCancel: endDrag,
+    }
     : { ref: dragSurfaceRef };
 
-  const centerImageDragStyle = isDragging
+  const desktopCenterDragStyle = isDragging
+    ? { transform: `translateX(${dragOffset}px)` }
+    : undefined;
+
+  const mobileCenterDragStyle = isDragging
     ? { transform: `translate(calc(-50% + ${dragOffset}px), -50%)` }
     : undefined;
 
@@ -240,49 +238,48 @@ function FeaturedProductsCarousel({
       onKeyDown={onCarouselKeyDown}
       {...dragSurfaceProps}
       className={cn(
-        "relative w-full overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 md:overflow-visible",
+        "relative w-full outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2",
         dragSurfaceClassName,
       )}
     >
-      {/* Desktop — Figma 684:2930: center card + left/right peeks */}
-      <div className="relative mx-auto hidden w-full max-w-1360 md:block md:min-h-[411px]">
+      {/* Desktop — Figma 684:2930 row: left peek / center / right peek */}
+      <div className="relative mx-auto hidden w-full justify-center overflow-visible md:flex">
         {showSidePeeks ? (
-          <div className="pointer-events-none absolute left-[-220px] top-0 h-[259px] w-[600px] overflow-hidden opacity-60">
-            <div className="relative h-[410px] w-full">
-              <div className="absolute left-[calc(50%-61px)] top-[calc(50%-71px)] size-[434px]">
-                <Image
-                  src={prevItem.image}
-                  alt=""
-                  fill
-                  quality={IMAGE_QUALITY}
-                  className="object-contain"
-                  sizes="434px"
-                  aria-hidden
-                />
-              </div>
+          <div className="pointer-events-none relative h-[259px] w-[600px] shrink-0 overflow-hidden opacity-60">
+            <div className="absolute left-[22px] top-[-83px] size-[434px]">
+              <Image
+                src={prevItem.image}
+                alt=""
+                fill
+                quality={90}
+                className="object-contain"
+                sizes="434px"
+                aria-hidden
+              />
             </div>
           </div>
         ) : null}
 
-        <div className="relative mx-auto flex w-[600px] flex-col items-center">
-          <div className="relative w-full">
+        <div className="flex w-[600px] shrink-0 flex-col items-center gap-3">
+          <div className="relative h-[259px] w-full">
             <div className="relative h-[259px] w-full overflow-hidden">
               <div
-                className="absolute left-1/2 top-1/2 size-[774px] -translate-x-1/2 -translate-y-1/2"
-                style={centerImageDragStyle}
+                className="h-[260px] will-change-transform"
+                style={desktopCenterDragStyle}
               >
                 <Image
                   src={activeItem.image}
                   alt={activeItem.name}
                   fill
-                  quality={IMAGE_QUALITY}
+                  quality={90}
                   className="object-contain"
                   sizes="774px"
+                  priority
                 />
               </div>
             </div>
 
-            <div className="relative z-20 mx-auto flex w-[487px] max-w-[calc(100%-48px)] items-center justify-between lg:absolute lg:inset-x-0 lg:top-[130px] lg:mx-auto">
+            <div className="pointer-events-auto absolute inset-x-0 top-[117.5px] z-20 mx-auto flex w-[487px] max-w-[calc(100%-48px)] items-center justify-between">
               <button
                 type="button"
                 aria-label="Previous product"
@@ -304,9 +301,11 @@ function FeaturedProductsCarousel({
             </div>
           </div>
 
-          <div className="mt-3 flex flex-col items-center gap-6">
-            <div className="flex flex-col items-center gap-4">
-              <p className="font-gill text-20 leading-110 text-darkblack">{activeItem.name}</p>
+          <div className="flex flex-col items-center gap-6">
+            <div className="flex flex-col items-center gap-4 text-center">
+              <p className="font-gill text-20 font-normal leading-110 text-darkblack">
+                {activeItem.name}
+              </p>
               {typeof activeItem.price === "number" ? (
                 <p className="font-gill text-20 font-normal leading-110 text-darkblack">
                   <span aria-hidden>₹ </span>
@@ -324,26 +323,24 @@ function FeaturedProductsCarousel({
         </div>
 
         {showSidePeeks ? (
-          <div className="pointer-events-none absolute right-[-220px] top-0 h-[259px] w-[600px] overflow-hidden opacity-60">
-            <div className="relative h-[240px] w-full">
-              <div className="absolute left-[calc(50%+75px)] top-[calc(50%+15px)] size-[426px] -translate-x-1/2 -translate-y-1/2">
-                <Image
-                  src={nextItem.image}
-                  alt=""
-                  fill
-                  quality={IMAGE_QUALITY}
-                  className="object-contain"
-                  sizes="426px"
-                  aria-hidden
-                />
-              </div>
+          <div className="pointer-events-none relative h-[259px] w-[600px] shrink-0 overflow-hidden opacity-60">
+            <div className="absolute left-[162px] top-[-78px] size-[426px]">
+              <Image
+                src={nextItem.image}
+                alt=""
+                fill
+                quality={90}
+                className="object-contain"
+                sizes="426px"
+                aria-hidden
+              />
             </div>
           </div>
         ) : null}
       </div>
 
       {/* Mobile — Figma 684:3238 */}
-      <div className="relative h-[303px] w-full md:hidden">
+      <div className="relative h-[303px] w-full overflow-hidden md:hidden">
         {showSidePeeks ? (
           <>
             <div className="absolute left-0 top-0 h-[237px] w-[160px] overflow-hidden opacity-60">
@@ -352,7 +349,7 @@ function FeaturedProductsCarousel({
                   src={prevItem.image}
                   alt=""
                   fill
-                  quality={IMAGE_QUALITY}
+                  quality={90}
                   className="object-contain"
                   sizes="262px"
                   aria-hidden
@@ -366,7 +363,7 @@ function FeaturedProductsCarousel({
                   src={nextItem.image}
                   alt=""
                   fill
-                  quality={IMAGE_QUALITY}
+                  quality={90}
                   className="object-contain"
                   sizes="262px"
                   aria-hidden
@@ -380,14 +377,14 @@ function FeaturedProductsCarousel({
           <div className="relative w-full">
             <div className="relative h-[170px] w-full overflow-hidden">
               <div
-                className="absolute left-1/2 top-1/2 size-[min(489px,120vw)] -translate-x-1/2 -translate-y-1/2"
-                style={centerImageDragStyle}
+                className="absolute left-1/2 top-1/2 size-[min(489px,120vw)] -translate-x-1/2 -translate-y-1/2 will-change-transform"
+                style={mobileCenterDragStyle}
               >
                 <Image
                   src={activeItem.image}
                   alt={activeItem.name}
                   fill
-                  quality={IMAGE_QUALITY}
+                  quality={90}
                   className="object-contain"
                   sizes="489px"
                 />
@@ -454,14 +451,24 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
       : [];
 
     const mapped: FeaturedCarouselItem[] = products
-      .map((product, index) => ({
-        id: product?.id ?? index,
-        name: product?.name ?? "",
-        price: typeof product?.price === "number" ? product.price : null,
-        image: getCmsAssetUrl(product?.image?.data?.attributes?.url) || "",
-        href: `/product/${product?.id ?? ""}`,
-      }))
-      .filter((product) => Boolean(product.name) && Boolean(product.image));
+      .map((product, index) => {
+        const name = product?.name?.trim() ?? "";
+        const cmsImage = resolveCmsMediaUrl(product?.image);
+        const image =
+          cmsImage ||
+          featuredProductsCarouselFallbackImages[
+          index % featuredProductsCarouselFallbackImages.length
+          ];
+
+        return {
+          id: product?.id ?? index,
+          name,
+          price: typeof product?.price === "number" ? product.price : null,
+          image,
+          href: product?.id ? `/product/${product.id}` : "/products",
+        };
+      })
+      .filter((product) => Boolean(product.name));
 
     return normalizeCarouselItems(mapped);
   }, [featuredProductsData?.products]);
@@ -470,17 +477,17 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
     return (
       <section
         id={id}
-        className="px-4 py-100 lg:px-40"
+        className="overflow-visible px-4 py-16 md:px-40 md:py-104"
         aria-label="Featured diamond carousel"
         aria-busy="true"
       >
-        <div className="mx-auto flex w-full max-w-1360 flex-col items-center gap-6 overflow-visible lg:gap-40">
-          <div className="flex w-full flex-col items-center gap-3 text-center lg:gap-4">
-            <div className="h-[35px] w-[283px] animate-pulse rounded bg-gray200 lg:h-[53px] lg:w-[424px]" aria-hidden />
-            <div className="h-[36px] w-[306px] animate-pulse rounded bg-gray200 lg:h-[22px] lg:w-[517px]" aria-hidden />
+        <div className="mx-auto flex w-full max-w-1360 flex-col items-center gap-10 overflow-visible">
+          <div className="flex w-full flex-col items-center gap-4 text-center">
+            <div className="h-[35px] w-[283px] animate-pulse rounded bg-gray200 md:h-[53px] md:w-[424px]" aria-hidden />
+            <div className="h-[36px] w-[306px] animate-pulse rounded bg-gray200 md:h-[22px] md:w-[517px]" aria-hidden />
           </div>
-          <div className="relative h-[303px] w-full lg:h-[411px]">
-            <div className="absolute left-1/2 top-0 h-[170px] w-[260px] -translate-x-1/2 animate-pulse rounded bg-gray200 lg:h-[259px] lg:w-[600px]" aria-hidden />
+          <div className="relative h-[303px] w-full md:h-[411px]">
+            <div className="absolute left-1/2 top-0 h-[170px] w-[260px] -translate-x-1/2 animate-pulse rounded bg-gray200 md:h-[259px] md:w-[600px]" aria-hidden />
           </div>
         </div>
       </section>
@@ -490,10 +497,10 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
   return (
     <section
       id={id}
-      className="px-4 py-100 lg:px-40"
+      className="overflow-visible px-0 py-16 md:px-40 md:py-104"
       aria-label="Featured diamond carousel"
     >
-      <div className="mx-auto flex w-full max-w-1360 flex-col items-center gap-6 overflow-visible lg:gap-40">
+      <div className="mx-auto flex w-full max-w-1360 flex-col items-center gap-10 overflow-visible">
         <FeaturedProductsHeader title={sectionTitle} description={description} />
         <FeaturedProductsCarousel
           items={items}
