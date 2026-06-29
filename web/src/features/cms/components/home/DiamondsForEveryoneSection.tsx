@@ -8,6 +8,7 @@ import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditoria
 import type { SavingsPlanStep } from "@/types/homepage/diamondsForEveryoneSection";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import { resolveDiamondsForEveryoneSection } from "@/shared/utils/resolveDiamondsForEveryoneSection";
+import Reveal from "@/shared/Animation/Reveal";
 
 interface DiamondsForEveryoneSectionProps {
   id?: string;
@@ -136,23 +137,18 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
 
       <div className="relative mx-auto flex w-full max-w-[1360px] flex-col items-center gap-8 md:gap-40">
         <div className="flex w-full flex-col items-center gap-6 text-center md:max-w-[510px]">
-          <ScrollReveal delayMs={0}>
-            <p className="font-gill text-sm font-semibold leading-110 text-[#AB863B] md:text-base md:font-normal">
-              {eyebrow}
-            </p>
-          </ScrollReveal>
-
+          <Reveal as="p" direction="up" className="font-gill text-sm font-semibold leading-110 text-[#AB863B] md:text-base md:font-normal">
+            {eyebrow}
+          </Reveal>
           <div className="flex w-full flex-col items-center gap-3 md:gap-4">
-            <ScrollReveal as="h2" delayMs={80} className="w-full whitespace-nowrap font-larken text-[32px] font-light leading-110 text-darkblack md:text-[48px]">
+            <Reveal as="h2" direction="up" className="w-full whitespace-nowrap font-larken text-[32px] font-light leading-110 text-darkblack md:text-[48px]">
               {sectionTitle}
-            </ScrollReveal>
-
-            <ScrollReveal delayMs={160} className="w-full font-gill text-base font-light leading-110 text-[#4D4D4D] md:text-xl">
+            </Reveal>
+            <Reveal direction="up" className="w-full font-gill text-base font-light leading-110 text-[#4D4D4D] md:text-xl">
               {subtitle}
-            </ScrollReveal>
+            </Reveal>
           </div>
         </div>
-
         {/* Desktop steps — Figma 684:3008 / 684:3012 */}
         <div className="hidden w-full flex-col items-center gap-6 md:flex">
           <ScrollReveal delayMs={200} className="relative h-40 w-full max-w-[1360px]">
