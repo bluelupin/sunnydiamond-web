@@ -70,13 +70,13 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
         ref={containerRef}
         style={{ height: `${2 * 100}vh` }}
         aria-label="Craftsmanship"
-        className="bg-gray200 bg-gray200 pt-10 sm:pt-16 md:pt-20"
+        className="bg-gray200 py-16 md:py-0 md:pt-20"
         aria-busy="true"
       >
         <div className="sticky top-24 h-screen overflow-hidden bg-gray200">
           <div className="container h-full">
             <div className="grid h-full grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-12">
-              <div className="lg:col-span-5 flex flex-col xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20">
+              <div className="lg:col-span-5 flex flex-col gap-8 xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20">
                 <div className="h-10 w-72 bg-gray300 rounded mx-auto lg:mx-0" aria-hidden />
                 <div className="space-y-12 md:space-y-16 relative">
                   <div className="h-24 w-full bg-gray300/70 rounded" aria-hidden />
@@ -99,13 +99,13 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
       ref={containerRef}
       style={{ height: `${(stepCount + 1) * 100}vh` }}
       aria-label={sectionTitle}
-      className="bg-gray200 bg-gray200 pt-10 sm:pt-16 md:pt-20"
+      className="bg-gray200 py-16 md:py-0 md:pt-20"
     >
       <div className="sticky top-24 h-screen overflow-hidden bg-gray200">
         <div className="container h-full">
           <div className="grid h-full grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-12">
             {/* Left column: title + steps */}
-            <div className="lg:col-span-5 flex flex-col xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20">
+            <div className="lg:col-span-5 flex flex-col gap-8 xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20">
               <ScrollReveal as="h2" delayMs={0} className="lg:text-5xl md:text-4xl text-32 text-black font-normal font-larken tracking-[0%] lg:text-left text-center">
                 {sectionTitle}
               </ScrollReveal>

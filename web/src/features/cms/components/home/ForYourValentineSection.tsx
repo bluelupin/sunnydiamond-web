@@ -52,6 +52,17 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
     giftingData?.cta?.label ||
     fallback.cta.label;
 
+  const secondaryCtaUrl =
+    giftingData?.secondaryCta?.url ||
+    giftingData?.secondaryCta?.to ||
+    giftingData?.secondary?.url ||
+    giftingData?.secondary?.to ||
+    "/gift-card";
+  const secondaryCtaLabel =
+    giftingData?.secondaryCta?.label?.trim() ||
+    giftingData?.secondary?.label?.trim() ||
+    "Send a gift card instead";
+
   const desktopImageUrl = useMemo(
     () =>
       resolveCmsMediaUrl(
@@ -141,23 +152,29 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
               {description}
             </Reveal>
           </div>
-          <div className="flex md:flex-row flex-col items-center md:justify-start justify-center md:gap-8 gap-6">
-            <Reveal direction="up" className="flex flex-wrap items-center gap-x-8 gap-y-4">
-              {primaryCtaUrl &&
-                <Link
-                  href={primaryCtaUrl}
-                  className={`inline-flex h-14 items-center justify-center bg-white px-8 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-90 ${ctaFocusClass}`}
-                >
-                  {primaryCtaLabel}
-                </Link>
-              }
-            </Reveal>
-            <Reveal direction="up">
-              <Link href={primaryCtaUrl} className="relative after:bg-darkMagenta after:absolute after:h-0.5 after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-darkblack hover:border-darkMagenta sm:pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack hover:text-darkMagenta">
-                SEND A GIFT CARD INSTEAD
+          <Reveal
+            direction="up"
+            distance={40}
+            amount={0.15}
+            className="flex flex-col items-center gap-6 md:flex-row md:items-center md:justify-start md:gap-8"
+          >
+            {primaryCtaUrl ? (
+              <Link
+                href={primaryCtaUrl}
+                className={`inline-flex h-14 items-center justify-center bg-white px-8 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-90 ${ctaFocusClass}`}
+              >
+                {primaryCtaLabel}
               </Link>
-            </Reveal>
-          </div>
+            ) : null}
+            {secondaryCtaUrl ? (
+              <Link
+                href={secondaryCtaUrl}
+                className={`relative cursor-pointer border-b-[1.5px] border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-darkMagenta after:transition-all after:duration-300 hover:border-darkMagenta hover:text-darkMagenta hover:after:w-full ${ctaFocusClass}`}
+              >
+                {secondaryCtaLabel}
+              </Link>
+            ) : null}
+          </Reveal>
         </div>
         <ScrollReveal delayMs={180} className="relative order-1 m-auto h-[336px] w-full max-w-[305px] flex-1 md:order-2 md:h-[600px] md:max-w-[746px]">
           <OptimizedImage

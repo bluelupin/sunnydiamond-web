@@ -49,13 +49,19 @@ function OccasionCardItem({
         className="size-full object-cover"
       />
 
+      {/* Mobile — black to transparent over bottom 50% */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(0,0,0,0.7)] from-0% to-[rgba(0,0,0,0)] to-[53.563%]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black to-transparent md:hidden"
+      />
+      {/* Desktop */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 hidden bg-gradient-to-t from-[rgba(0,0,0,0.7)] from-0% to-[rgba(0,0,0,0)] to-[53.563%] md:block"
       />
 
       {/* Mobile — title, description, and CTA always visible */}
-      <div className="absolute inset-x-0 bottom-0 z-10 px-4 pb-60 md:hidden">
+      <div className="absolute inset-x-0 bottom-0 z-10 px-4 pb-8 md:hidden">
         <div className="flex max-w-[296px] flex-col gap-4">
           <div className="flex flex-col md:gap-3 gap-2 text-white">
             <h3 className="font-larken font-light leading-110 lg:text-32 md:text-3xl text-2xl">
@@ -189,10 +195,6 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
           </ScrollReveal>
         ))}
       </div>
-
-      <ScrollReveal delayMs={160} className="px-4 font-gill text-sm font-light text-neutral500 md:hidden">
-        Swipe to explore more occasions
-      </ScrollReveal>
     </section>
   );
 };
