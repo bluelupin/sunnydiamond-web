@@ -9,6 +9,26 @@ interface UseScrollSpyOptions {
 
 const NAV_START_VIEWPORT_OFFSET = 110;
 
+function isStartSectionFullyInViewport(
+  rect: DOMRect,
+  viewportH: number,
+): boolean {
+  const availableHeight = viewportH - NAV_START_VIEWPORT_OFFSET;
+  const fitsInViewport = rect.height <= availableHeight;
+
+  if (fitsInViewport) {
+    return (
+      rect.top >= NAV_START_VIEWPORT_OFFSET - 1 &&
+      rect.bottom <= viewportH + 1
+    );
+  }
+
+  return (
+    rect.top <= NAV_START_VIEWPORT_OFFSET + 1 &&
+    rect.bottom >= viewportH - 1
+  );
+}
+
 export function useScrollSpy({
   sectionIds,
   visibilityThresholdIndex = 3,
@@ -17,55 +37,39 @@ export function useScrollSpy({
   const [activeId, setActiveId] = useState<string>(sectionIds[0] ?? "");
   const [isVisible, setIsVisible] = useState(false);
   const [progress, setProgress] = useState<Record<string, number>>({});
-  const visibleSections = useRef<Set<string>>(new Set());
   const rafRef = useRef<number | null>(null);
   const navUnlockedRef = useRef(false);
 
   useEffect(() => {
-    const elements = sectionIds
-      .map((id) => document.getElementById(id))
-      .filter(Boolean) as HTMLElement[];
-
-    if (!elements.length) return;
-
-    const thresholdEl = navStartSectionId
-      ? document.getElementById(navStartSectionId)
-      : document.getElementById(sectionIds[visibilityThresholdIndex] ?? sectionIds[0] ?? "");
-
     const compute = () => {
       rafRef.current = null;
 
       const viewportH = window.innerHeight;
       const mid = viewportH * 0.4;
 
-      // ---- READ phase: collect all geometry first ----
-      const rects = elements.map((el) => el.getBoundingClientRect());
-
-      // ---- COMPUTE ----
       const next: Record<string, number> = {};
       let active = sectionIds[0] ?? "";
-      // Progress 0→1 as the section scrolls through the viewport (enter → exit).
-      for (let i = 0; i < elements.length; i++) {
-        const el = elements[i];
-        const rect = rects[i];
+
+      for (const id of sectionIds) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+
+        const rect = el.getBoundingClientRect();
         const scrollSpan = Math.max(1, rect.height + viewportH);
-        const p = Math.max(0, Math.min(1, (viewportH - rect.top) / scrollSpan));
-        next[el.id] = p;
-        if (rect.top <= mid) active = el.id;
+        next[id] = Math.max(0, Math.min(1, (viewportH - rect.top) / scrollSpan));
+
+        if (rect.top <= mid) {
+          active = id;
+        }
       }
 
-      // ---- WRITE phase: batch state updates last ----
-      // Show nav once Alankara fully fills the viewport (below fixed header).
-      // Stay visible after unlock until the user scrolls back above the section.
+      const thresholdEl = navStartSectionId
+        ? document.getElementById(navStartSectionId)
+        : document.getElementById(sectionIds[visibilityThresholdIndex] ?? sectionIds[0] ?? "");
+
       const thresholdRect = thresholdEl?.getBoundingClientRect();
       if (thresholdRect) {
-        const availableHeight = viewportH - NAV_START_VIEWPORT_OFFSET;
-        const fitsInViewport = thresholdRect.height <= availableHeight;
-        const isFullyInViewport = fitsInViewport
-          ? thresholdRect.top >= NAV_START_VIEWPORT_OFFSET - 1 &&
-            thresholdRect.bottom <= viewportH + 1
-          : thresholdRect.top <= NAV_START_VIEWPORT_OFFSET + 1 &&
-            thresholdRect.bottom >= viewportH - 1;
+        const isFullyInViewport = isStartSectionFullyInViewport(thresholdRect, viewportH);
         const isAboveStartSection = thresholdRect.top >= viewportH;
 
         if (isFullyInViewport) {
@@ -85,26 +89,22 @@ export function useScrollSpy({
       rafRef.current = requestAnimationFrame(compute);
     };
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) visibleSections.current.add(entry.target.id);
-          else visibleSections.current.delete(entry.target.id);
-        });
-        onScroll();
-      },
-      { threshold: [0, 0.15, 0.5, 1], rootMargin: "0px 0px -10% 0px" }
-    );
+    const mutationObserver = new MutationObserver(onScroll);
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
 
-    elements.forEach((el) => observer.observe(el));
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll, { passive: true });
     compute();
 
+    const hydrationTimers = [300, 1000, 2500].map((delay) =>
+      window.setTimeout(onScroll, delay),
+    );
+
     return () => {
-      observer.disconnect();
+      mutationObserver.disconnect();
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
+      hydrationTimers.forEach((timer) => window.clearTimeout(timer));
       if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
     };
   }, [sectionIds, visibilityThresholdIndex, navStartSectionId]);

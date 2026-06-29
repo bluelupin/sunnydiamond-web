@@ -2,8 +2,8 @@
 
 import { useMemo } from "react";
 import Image from "next/image";
+import { homeSections } from "@/features/cms/data/content";
 import { useScrollSpy } from "@/shared/hooks/use-scroll-spy";
-import { useVisibleHomeSections } from "@/shared/hooks/use-visible-home-sections";
 import { SectionNavProgressIndicator } from "@/features/cms/components/home/SectionNavProgressIndicator";
 import { cn } from "@/shared/utils/cn";
 
@@ -11,19 +11,13 @@ const NAV_GRADIENT = "/images/navigation/section-nav-gradient.svg";
 
 const NAV_START_SECTION_ID = "alankara";
 
+const navSections = homeSections.slice(
+  Math.max(0, homeSections.findIndex((section) => section.id === NAV_START_SECTION_ID)),
+);
+
+const sectionIds = navSections.map((section) => section.id);
+
 const SectionNav = () => {
-  const visibleSections = useVisibleHomeSections();
-  const navSections = useMemo(() => {
-    const startIndex = visibleSections.findIndex((section) => section.id === NAV_START_SECTION_ID);
-    if (startIndex === -1) return visibleSections;
-    return visibleSections.slice(startIndex);
-  }, [visibleSections]);
-
-  const sectionIds = useMemo(
-    () => navSections.map((section) => section.id),
-    [navSections],
-  );
-
   const { activeId, isVisible, progress } = useScrollSpy({
     sectionIds,
     navStartSectionId: NAV_START_SECTION_ID,
@@ -41,10 +35,6 @@ const SectionNav = () => {
         : "smooth",
     });
   };
-
-  if (!navSections.length) {
-    return null;
-  }
 
   return (
     <div
