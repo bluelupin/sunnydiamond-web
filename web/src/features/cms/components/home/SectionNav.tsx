@@ -9,21 +9,29 @@ import { cn } from "@/shared/utils/cn";
 
 const NAV_GRADIENT = "/images/navigation/section-nav-gradient.svg";
 
+const NAV_START_SECTION_ID = "alankara";
+
 const SectionNav = () => {
   const visibleSections = useVisibleHomeSections();
+  const navSections = useMemo(() => {
+    const startIndex = visibleSections.findIndex((section) => section.id === NAV_START_SECTION_ID);
+    if (startIndex === -1) return visibleSections;
+    return visibleSections.slice(startIndex);
+  }, [visibleSections]);
+
   const sectionIds = useMemo(
-    () => visibleSections.map((section) => section.id),
-    [visibleSections],
+    () => navSections.map((section) => section.id),
+    [navSections],
   );
 
   const { activeId, isVisible, progress } = useScrollSpy({
     sectionIds,
-    visibilityThresholdIndex: 0,
+    navStartSectionId: NAV_START_SECTION_ID,
   });
 
   const activeIndex = useMemo(
-    () => visibleSections.findIndex((section) => section.id === activeId),
-    [activeId, visibleSections],
+    () => navSections.findIndex((section) => section.id === activeId),
+    [activeId, navSections],
   );
 
   const handleClick = (id: string) => {
@@ -34,14 +42,14 @@ const SectionNav = () => {
     });
   };
 
-  if (!visibleSections.length) {
+  if (!navSections.length) {
     return null;
   }
 
   return (
     <div
       className={cn(
-        "fixed left-0 top-1/2 z-50 hidden -translate-y-1/2 md:block",
+        "group/nav fixed left-0 top-1/2 z-50 hidden -translate-y-1/2 pl-40 md:block",
         "transition-all duration-500 ease-out will-change-transform",
         isVisible
           ? "translate-x-0 opacity-100"
@@ -61,8 +69,8 @@ const SectionNav = () => {
         />
       </div>
 
-      <nav aria-label="Page sections" className="relative flex flex-col gap-5 py-10 pl-10">
-        {visibleSections.map((section, index) => {
+      <nav aria-label="Page sections" className="relative flex flex-col gap-y-5 py-10">
+        {navSections.map((section, index) => {
           const isActive = activeId === section.id;
           const isComplete = activeIndex >= 0 && index < activeIndex;
 
@@ -73,7 +81,11 @@ const SectionNav = () => {
               onClick={() => handleClick(section.id)}
               aria-label={`Scroll to ${section.label}`}
               aria-current={isActive ? "true" : undefined}
-              className="group flex items-center gap-3 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ab863b] focus-visible:ring-offset-2"
+              className={cn(
+                "flex items-center rounded-sm transition-[gap] duration-500 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-linkGold focus-visible:ring-offset-2",
+                isActive ? "gap-5" : "gap-0",
+                "group-hover/nav:gap-5 group-focus-within/nav:gap-5",
+              )}
             >
               <span className="relative inline-flex size-4 shrink-0 items-center justify-center">
                 <SectionNavProgressIndicator
@@ -85,8 +97,13 @@ const SectionNav = () => {
 
               <span
                 className={cn(
-                  "whitespace-nowrap font-gill text-base font-normal uppercase leading-110 transition-colors duration-300",
-                  isActive ? "text-[#ab863b]" : "text-darkblack group-hover:text-[#ab863b]",
+                  "overflow-hidden whitespace-nowrap font-gill text-base font-normal uppercase leading-110",
+                  "transition-[max-width,opacity,transform] duration-500 ease-out motion-reduce:transition-none",
+                  isActive
+                    ? "max-w-xs translate-x-0 opacity-100 text-linkGold"
+                    : "max-w-0 -translate-x-1 opacity-0 text-darkblack",
+                  "group-hover/nav:max-w-xs group-hover/nav:translate-x-0 group-hover/nav:opacity-100",
+                  "group-focus-within/nav:max-w-xs group-focus-within/nav:translate-x-0 group-focus-within/nav:opacity-100",
                 )}
               >
                 {section.label}

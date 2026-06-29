@@ -24,7 +24,7 @@ export function SectionNavProgressIndicator({
     return (
       <span
         aria-hidden
-        className="box-border size-4 rounded-full border border-[#DECAA0] bg-transparent transition-colors duration-300 group-hover:border-[#ab863b]"
+        className="box-border size-4 rounded-full border border-[#DECAA0] bg-transparent transition-colors duration-300 group-hover/nav:border-linkGold"
       />
     );
   }

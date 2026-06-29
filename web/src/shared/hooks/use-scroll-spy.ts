@@ -3,16 +3,23 @@ import { useState, useEffect, useRef } from "react";
 interface UseScrollSpyOptions {
   sectionIds: readonly string[];
   visibilityThresholdIndex?: number;
+  /** Section id that unlocks the nav when it fully fills the viewport (e.g. alankara). */
+  navStartSectionId?: string;
 }
 
-export function useScrollSpy({ sectionIds, visibilityThresholdIndex = 3 }: UseScrollSpyOptions) {
+const NAV_START_VIEWPORT_OFFSET = 110;
+
+export function useScrollSpy({
+  sectionIds,
+  visibilityThresholdIndex = 3,
+  navStartSectionId,
+}: UseScrollSpyOptions) {
   const [activeId, setActiveId] = useState<string>(sectionIds[0] ?? "");
   const [isVisible, setIsVisible] = useState(false);
   const [progress, setProgress] = useState<Record<string, number>>({});
   const visibleSections = useRef<Set<string>>(new Set());
   const rafRef = useRef<number | null>(null);
   const navUnlockedRef = useRef(false);
-  const lastScrollYRef = useRef(0);
 
   useEffect(() => {
     const elements = sectionIds
@@ -21,16 +28,12 @@ export function useScrollSpy({ sectionIds, visibilityThresholdIndex = 3 }: UseSc
 
     if (!elements.length) return;
 
-    const thresholdEl = document.getElementById(sectionIds[visibilityThresholdIndex]);
-    navUnlockedRef.current = false;
-    lastScrollYRef.current = window.scrollY;
+    const thresholdEl = navStartSectionId
+      ? document.getElementById(navStartSectionId)
+      : document.getElementById(sectionIds[visibilityThresholdIndex] ?? sectionIds[0] ?? "");
 
     const compute = () => {
       rafRef.current = null;
-
-      const scrollY = window.scrollY;
-      const scrollingUp = scrollY < lastScrollYRef.current;
-      lastScrollYRef.current = scrollY;
 
       const viewportH = window.innerHeight;
       const mid = viewportH * 0.4;
@@ -52,13 +55,22 @@ export function useScrollSpy({ sectionIds, visibilityThresholdIndex = 3 }: UseSc
       }
 
       // ---- WRITE phase: batch state updates last ----
-      // Unlock after passing Alankara; stay visible through all sections below.
-      // Hide again only when scrolling back up into Alankara (or above it).
+      // Show nav once Alankara fully fills the viewport (below fixed header).
+      // Stay visible after unlock until the user scrolls back above the section.
       const thresholdRect = thresholdEl?.getBoundingClientRect();
       if (thresholdRect) {
-        if (thresholdRect.bottom <= 0) {
+        const availableHeight = viewportH - NAV_START_VIEWPORT_OFFSET;
+        const fitsInViewport = thresholdRect.height <= availableHeight;
+        const isFullyInViewport = fitsInViewport
+          ? thresholdRect.top >= NAV_START_VIEWPORT_OFFSET - 1 &&
+            thresholdRect.bottom <= viewportH + 1
+          : thresholdRect.top <= NAV_START_VIEWPORT_OFFSET + 1 &&
+            thresholdRect.bottom >= viewportH - 1;
+        const isAboveStartSection = thresholdRect.top >= viewportH;
+
+        if (isFullyInViewport) {
           navUnlockedRef.current = true;
-        } else if (scrollingUp) {
+        } else if (isAboveStartSection) {
           navUnlockedRef.current = false;
         }
       }
@@ -95,7 +107,7 @@ export function useScrollSpy({ sectionIds, visibilityThresholdIndex = 3 }: UseSc
       window.removeEventListener("resize", onScroll);
       if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
     };
-  }, [sectionIds, visibilityThresholdIndex]);
+  }, [sectionIds, visibilityThresholdIndex, navStartSectionId]);
 
   return { activeId, isVisible, progress };
 }

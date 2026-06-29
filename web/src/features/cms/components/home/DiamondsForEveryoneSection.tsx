@@ -33,7 +33,7 @@ const DEFAULT_STEPS: SavingsPlanStep[] = [
 ];
 
 const StepCircle = ({ number }: { number: number }) => (
-  <div className="relative z-10 box-border flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-[0.571px] border-solid border-darkblack bg-[#EBDFC6]">
+  <div className="relative z-10 box-border flex size-40 shrink-0 items-center justify-center rounded-full border-[0.571px] border-solid border-darkblack bg-[#EBDFC6]">
     <span className="font-gill text-[20px] font-light leading-none tracking-[0.2px] text-darkblack">
       {number}
     </span>
@@ -155,11 +155,11 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
 
         {/* Desktop steps — Figma 684:3008 / 684:3012 */}
         <div className="hidden w-full flex-col items-center gap-6 md:flex">
-          <ScrollReveal delayMs={200} className="relative h-10 w-full max-w-[1360px]">
+          <ScrollReveal delayMs={200} className="relative h-40 w-full max-w-[1360px]">
             <div className="pointer-events-none absolute left-1/2 top-[calc(50%+1px)] w-full max-w-[784px] -translate-x-1/2 -translate-y-1/2">
               <Image src={STEPS_LINE} alt="" width={784} height={1} className="h-px w-full" aria-hidden />
             </div>
-            <div className="relative flex h-10 items-center justify-between px-[19.85%]">
+            <div className="relative flex h-40 items-center justify-between px-[19.85%]">
               {steps.map((step) => (
                 <StepCircle key={step.stepNumber} number={step.stepNumber ?? 0} />
               ))}
