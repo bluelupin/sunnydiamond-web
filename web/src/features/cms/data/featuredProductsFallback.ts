@@ -1,7 +1,10 @@
 /** Figma 684:2920 — Your Diamond Awaits carousel (left / center / right peeks). */
 export const featuredProductsCarouselFallbackImages = [
+  /** Figma 684:2933 — left peek, 434×434 */
   "/images/home/featured-products/featured-product-left.png",
+  /** Figma 684:2936 — center (Saptam Diamond Ring), 774×774 */
   "/images/home/featured-products/featured-product-center.png",
+  /** Figma 684:2949 — right peek, 426×426 */
   "/images/home/featured-products/featured-product-right.png",
 ] as const;
 

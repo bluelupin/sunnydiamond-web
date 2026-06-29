@@ -8,6 +8,7 @@ import { homeContent } from "@/features/cms/data/content";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import Reveal from "@/shared/Animation/Reveal";
 
 interface ForYourValentineSectionProps {
   id?: string;
@@ -56,10 +57,10 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
       resolveCmsMediaUrl(
         (giftingData as { image?: { desktopImage?: unknown; data?: { attributes?: unknown } } })?.image
           ?.desktopImage ??
-          giftingData?.sideImage?.data?.attributes ??
-          giftingData?.sideImage ??
-          (giftingData as { image?: { data?: { attributes?: unknown } } })?.image?.data?.attributes ??
-          giftingData?.image,
+        giftingData?.sideImage?.data?.attributes ??
+        giftingData?.sideImage ??
+        (giftingData as { image?: { data?: { attributes?: unknown } } })?.image?.data?.attributes ??
+        giftingData?.image,
       ),
     [giftingData],
   );
@@ -69,11 +70,11 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
       resolveCmsMediaUrl(
         (giftingData as { image?: { mobileImage?: unknown; desktopImage?: unknown; data?: { attributes?: unknown } } })
           ?.image?.mobileImage ??
-          (giftingData as { image?: { desktopImage?: unknown } })?.image?.desktopImage ??
-          giftingData?.sideImage?.data?.attributes ??
-          giftingData?.sideImage ??
-          (giftingData as { image?: { data?: { attributes?: unknown } } })?.image?.data?.attributes ??
-          giftingData?.image,
+        (giftingData as { image?: { desktopImage?: unknown } })?.image?.desktopImage ??
+        giftingData?.sideImage?.data?.attributes ??
+        giftingData?.sideImage ??
+        (giftingData as { image?: { data?: { attributes?: unknown } } })?.image?.data?.attributes ??
+        giftingData?.image,
       ),
     [giftingData],
   );
@@ -82,8 +83,8 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
     () =>
       resolveCmsAltText(
         (giftingData as { image?: { desktopImage?: unknown } })?.image?.desktopImage ??
-          giftingData?.sideImage ??
-          giftingData?.image,
+        giftingData?.sideImage ??
+        giftingData?.image,
       ) || sectionTitle,
     [giftingData, sectionTitle],
   );
@@ -132,88 +133,35 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
       />
 
       <div className="relative w-full">
-        {/* Mobile — Figma 684:3264 / 684:3280 */}
-        <div className="relative flex flex-col items-center py-16 md:hidden">
-          <OptimizedImage
-            src={FALLBACK_BG_MOBILE}
-            alt=""
-            aria-hidden
-            width={714}
-            height={684}
-            className="pointer-events-none absolute bottom-0 left-1/2 h-[684px] w-[714px] max-w-none -translate-x-1/2 opacity-30"
-          />
-
-          <ScrollReveal delayMs={0} className="relative h-[336px] w-[305px] shrink-0 overflow-hidden">
-            <OptimizedImage
-              src={ringsMobile}
-              alt={imageAlt}
-              width={305}
-              height={336}
-              className="absolute left-[-4.8%] top-[-2.66%] h-[102.66%] w-[113.07%] max-w-none object-contain"
-            />
-          </ScrollReveal>
-
-          <div className="relative flex w-full max-w-[375px] flex-col items-center gap-6 px-4">
-            <div className="flex w-full flex-col items-center gap-3 text-center">
-              <ScrollReveal
-                as="h2"
-                delayMs={80}
-                className="w-full font-larken text-[32px] font-light leading-110 text-darkblack"
-              >
+        <div className="md:flex lg:min-h-[750px] lg:items-center lg:justify-between lg:gap-8 lg:px-40 lg:py-100">
+          <div className="flex max-w-[437px] shrink-0 flex-col gap-8 md:order-1 order-2">
+            <div className="md:space-y-4 space-y-3">
+              <Reveal as="h2" direction="up" className="font-larken lg:text-5xl md:text-4xl sm:text-3xl text-32 font-light leading-110 text-darkblack">
                 {sectionTitle}
-              </ScrollReveal>
-
-              <ScrollReveal
-                delayMs={160}
-                className="w-[306px] max-w-full text-center font-gill text-base font-light leading-110 text-[#4D4D4D]"
-              >
-                {mobileDescription}
-              </ScrollReveal>
+              </Reveal>
+              <Reveal as="p" direction="up" className="font-gill text-xl font-light leading-110 text-[#4D4D4D]">
+                {description}
+              </Reveal>
             </div>
-
-            <div className="flex flex-col items-center gap-6">
-              {primaryCtaUrl ? (
-                <ScrollReveal delayMs={240}>
-                  <Link
-                    href={primaryCtaUrl}
-                    className={`inline-flex h-14 items-center justify-center bg-white px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-90 ${ctaFocusClass}`}
-                  >
-                    {primaryCtaLabel}
-                  </Link>
-                </ScrollReveal>
-              ) : null}
-            </div>
-          </div>
-        </div>
-
-        <div className="hidden md:flex lg:min-h-[750px] lg:items-center lg:justify-between lg:gap-8 lg:px-40 lg:py-100">
-          <div className="flex max-w-[437px] shrink-0 flex-col gap-8">
-            <ScrollReveal delayMs={0}>
-              <div className="flex flex-col gap-4">
-                <h2 className="font-larken text-[48px] font-light leading-110 text-darkblack">
-                  {sectionTitle}
-                </h2>
-                <p className="font-gill text-xl font-light leading-110 text-[#4D4D4D]">
-                  {description}
-                </p>
-              </div>
-            </ScrollReveal>
-
-            <ScrollReveal delayMs={120}>
-              <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
-                {primaryCtaUrl ? (
+            <div className="flex md:flex-row flex-col items-center md:gap-8 gap-6">
+              <Reveal direction="up" className="flex flex-wrap items-center gap-x-8 gap-y-4">
+                {primaryCtaUrl &&
                   <Link
                     href={primaryCtaUrl}
                     className={`inline-flex h-14 items-center justify-center bg-white px-8 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-90 ${ctaFocusClass}`}
                   >
                     {primaryCtaLabel}
                   </Link>
-                ) : null}
-              </div>
-            </ScrollReveal>
+                }
+              </Reveal>
+              <Reveal direction="up">
+                <Link href={primaryCtaUrl} className="relative after:bg-darkMagenta after:absolute after:h-0.5 after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-darkblack hover:border-darkMagenta sm:pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack hover:text-darkMagenta">
+                  SEND A GIFT CARD INSTEAD
+                </Link>
+              </Reveal>
+            </div>
           </div>
-
-          <ScrollReveal delayMs={180} className="relative h-[600px] w-full max-w-[746px] flex-1">
+          <ScrollReveal delayMs={180} className="relative h-[600px] w-full max-w-[746px] flex-1 md:order-2 order-1">
             <OptimizedImage
               src={ringsDesktop}
               alt={imageAlt}

@@ -1,0 +1,116 @@
+/* Figma 684:2920 / 684:2930 — Featured Products slick overrides */
+.featured-products-slider .slick-list {
+  overflow: visible;
+}
+
+.featured-products-slider .slick-track {
+  display: flex !important;
+  align-items: flex-start;
+}
+
+.featured-products-slider .slick-slide {
+  float: none;
+  height: auto;
+  opacity: 0.6;
+  transition: opacity 500ms ease;
+}
+
+.featured-products-slider .slick-slide.slick-center {
+  opacity: 1;
+}
+
+.featured-products-slider .slick-slide > div {
+  outline: none;
+}
+
+.featured-products-slider--single .slick-slide {
+  opacity: 1;
+}
+
+.featured-products-slide {
+  width: 260px;
+}
+
+@media (min-width: 768px) {
+  .featured-products-slide {
+    width: 600px;
+  }
+}
+
+/* Image viewport — Figma 684:2930 (259px) / 684:3238 mobile (170px) */
+.featured-slide-viewport {
+  position: relative;
+  height: 170px;
+  width: 100%;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .featured-slide-viewport {
+    height: 259px;
+  }
+}
+
+.featured-slide-image {
+  position: absolute;
+}
+
+.featured-slide-image__inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Mobile — Figma 684:3238 side peek (262px) */
+.featured-slide-image {
+  left: 50%;
+  top: 50%;
+  width: 262px;
+  height: 262px;
+  transform: translate(calc(-50% + 28px), calc(-50% + 72px));
+}
+
+/* Mobile — center slide (489px) */
+.featured-products-slider .slick-slide.slick-center .featured-slide-image {
+  left: 50%;
+  top: 50%;
+  width: min(489px, 120vw);
+  height: min(489px, 120vw);
+  transform: translate(-50%, -50%);
+}
+
+/* Desktop — Figma 684:2933 left peek */
+@media (min-width: 768px) {
+  .featured-slide-image {
+    left: 22px;
+    top: -83px;
+    width: 434px;
+    height: 434px;
+    transform: none;
+  }
+
+  /* Figma 684:2936 center */
+  .featured-products-slider .slick-slide.slick-center .featured-slide-image {
+    left: -87px;
+    top: -257.92px;
+    width: 774px;
+    height: 774px;
+    transform: none;
+  }
+
+  /* Figma 684:2949 right peek */
+  .featured-products-slider .slick-slide.slick-center + .slick-slide .featured-slide-image {
+    left: 162px;
+    top: -78px;
+    width: 426px;
+    height: 426px;
+  }
+
+  /* Left peek — slide immediately before center */
+  .featured-products-slider .slick-slide:has(+ .slick-slide.slick-center) .featured-slide-image {
+    left: 22px;
+    top: -83px;
+    width: 434px;
+    height: 434px;
+  }
+}
