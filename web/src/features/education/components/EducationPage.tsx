@@ -9,15 +9,15 @@ import EducationFaqSection from "./EducationFaqSection";
 
 type EducationPageProps = Pick<
   NormalizedLearnAboutDiamondsPage,
-  "hero" | "faq" | "ctaBanner"
+  "hero" | "faq" | "ctaBanner" | "fourCs"
 >;
 
-const EducationPage = ({ hero, faq, ctaBanner }: EducationPageProps) => {
+const EducationPage = ({ hero, faq, ctaBanner, fourCs }: EducationPageProps) => {
   return (
     <>
       <EducationHeroSection hero={hero} />
       <EducationFourCsIntroSection />
-      <EducationFourCsPanelsSection />
+      <EducationFourCsPanelsSection fourCs={fourCs} />
       <EducationCertifiedSection />
       <EducationLearnMoreSection />
       <EducationDiscoverSection ctaBanner={ctaBanner} />

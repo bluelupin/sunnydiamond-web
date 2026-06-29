@@ -1,23 +1,47 @@
 import {
+  buildCaratSliderSpecForWeights,
+  buildSliderSpecForOptionCount,
   educationDiscoverContent,
   educationFaqItems,
+  educationFourCsPanels,
   educationHeroFigmaSpec,
   educationPageImages,
+  educationSliderSpecs,
+  type EducationFourCsPanelContent,
+  type EducationSliderOption,
 } from "@/features/education/data/content";
 import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import type {
   NormalizedEducationCtaBanner,
   NormalizedEducationFaqItem,
   NormalizedEducationFaqSection,
+  NormalizedEducationFourCsPanel,
+  NormalizedEducationFourCsSection,
   NormalizedEducationHero,
   NormalizedLearnAboutDiamondsPage,
   StrapiEducationCtaBanner,
   StrapiEducationFaqItem,
+  StrapiEducationFourCsInfoPanel,
+  StrapiEducationFourCsSection,
+  StrapiEducationFourCsVisualPanel,
+  StrapiEducationGradeStop,
   StrapiEducationHero,
   StrapiEducationResponsiveImage,
   StrapiLearnAboutDiamondsPageEntity,
 } from "./learn-about-diamonds-page.types";
 import { EMPTY_LEARN_ABOUT_DIAMONDS_PAGE } from "./learn-about-diamonds-page.types";
+
+const STATIC_PANEL_BY_ID = Object.fromEntries(
+  educationFourCsPanels.map((panel) => [panel.id, panel]),
+) as Record<string, EducationFourCsPanelContent>;
+
+const PANEL_ID_BY_LABEL: Record<string, EducationFourCsPanelContent["id"]> = {
+  CLARITY: "clarity",
+  CUT: "cut",
+  COLOUR: "colour",
+  COLOR: "colour",
+  CARAT: "carat",
+};
 
 const cleanText = (value?: string | null): string | undefined => {
   const trimmed = value?.trim();
@@ -131,6 +155,196 @@ const mapCtaBanner = (
   };
 };
 
+const normalizeGradeToken = (value: string) =>
+  value.trim().toUpperCase().replace(/\s+/g, "");
+
+const gradesMatch = (left?: string | null, right?: string | null) => {
+  const a = cleanText(left);
+  const b = cleanText(right);
+  if (!a || !b) return false;
+
+  const normalizedA = normalizeGradeToken(a);
+  const normalizedB = normalizeGradeToken(b);
+  return (
+    normalizedA === normalizedB ||
+    normalizedA.startsWith(normalizedB) ||
+    normalizedB.startsWith(normalizedA)
+  );
+};
+
+const resolvePanelId = (
+  fallbackIndex: number,
+  sectionLabel?: string | null,
+): EducationFourCsPanelContent["id"] => {
+  const labelKey = cleanText(sectionLabel)?.toUpperCase();
+  if (labelKey && PANEL_ID_BY_LABEL[labelKey]) {
+    return PANEL_ID_BY_LABEL[labelKey];
+  }
+
+  return educationFourCsPanels[fallbackIndex]?.id ?? "clarity";
+};
+
+const parseCaratWeight = (gradeCode: string): number | undefined => {
+  const match = gradeCode.match(/([\d.]+)/);
+  if (!match) return undefined;
+
+  const weight = Number.parseFloat(match[1]!);
+  return Number.isFinite(weight) ? weight : undefined;
+};
+
+const mapColourSublabel = (longLabel?: string) => {
+  const label = cleanText(longLabel);
+  if (!label) return undefined;
+
+  const words = label.split(/\s+/);
+  if (words.length === 2) {
+    return [words[0]!, words[1]!] as [string, string];
+  }
+
+  return label;
+};
+
+const mapCutOptionImage = (label: string) =>
+  label.trim().toLowerCase() === "excellent"
+    ? educationPageImages.cutDiamondExcellent
+    : educationPageImages.cutDiamondGood;
+
+const mapGradeStopToOption = (
+  stop: StrapiEducationGradeStop,
+  panelId: EducationFourCsPanelContent["id"],
+  activeGradeCode?: string,
+  visualImageUrl?: string,
+): EducationSliderOption | null => {
+  const label = cleanText(stop.gradeCode);
+  if (!label) return null;
+
+  const longLabel = cleanText(stop.gradeLongLabel);
+  const highlight = gradesMatch(label, activeGradeCode);
+  const labelParts = label.split(/\s+/);
+
+  const option: EducationSliderOption = {
+    label,
+    highlight,
+  };
+
+  if (panelId === "colour") {
+    option.sublabel = mapColourSublabel(longLabel);
+  }
+
+  if (panelId === "carat") {
+    option.caratWeight = parseCaratWeight(label);
+  }
+
+  if (panelId === "cut") {
+    option.image = mapCutOptionImage(label);
+  } else if (visualImageUrl) {
+    option.image = visualImageUrl;
+  }
+
+  if (labelParts.length === 2) {
+    option.mobileLabelLines = [labelParts[0]!, labelParts[1]!];
+  }
+
+  return option;
+};
+
+const resolveDefaultIndex = (
+  options: EducationSliderOption[],
+  activeGradeCode?: string,
+  fallbackIndex = 0,
+) => {
+  if (!activeGradeCode) return fallbackIndex;
+
+  const matchedIndex = options.findIndex((option) =>
+    gradesMatch(option.label, activeGradeCode),
+  );
+
+  return matchedIndex >= 0 ? matchedIndex : fallbackIndex;
+};
+
+const resolveSliderSpec = (
+  panelId: EducationFourCsPanelContent["id"],
+  options: EducationSliderOption[],
+): NormalizedEducationFourCsPanel["sliderSpec"] => {
+  const baseSpec = educationSliderSpecs[panelId];
+  if (!baseSpec) return undefined;
+
+  if (panelId === "carat") {
+    const weights = options
+      .map((option) => option.caratWeight)
+      .filter((weight): weight is number => weight != null);
+
+    if (weights.length === options.length && weights.length > 0) {
+      return buildCaratSliderSpecForWeights(weights);
+    }
+  }
+
+  return buildSliderSpecForOptionCount(baseSpec, options.length);
+};
+
+const mapFourCsPanel = (
+  info: StrapiEducationFourCsInfoPanel,
+  visual: StrapiEducationFourCsVisualPanel | null,
+  index: number,
+): NormalizedEducationFourCsPanel => {
+  const panelId = resolvePanelId(index, info.sectionLabel);
+  const staticPanel = STATIC_PANEL_BY_ID[panelId] ?? educationFourCsPanels[index]!;
+  const activeGradeCode = cleanText(info.activeGradeCode);
+  const visualImageUrl =
+    resolveCmsMediaUrl(visual?.visualImage?.desktopImage) ??
+    resolveCmsMediaUrl(visual?.visualImage?.mobileImage);
+
+  const mappedOptions =
+    visual?.gradeStops
+      ?.map((stop) => mapGradeStopToOption(stop, panelId, activeGradeCode, visualImageUrl))
+      .filter((option): option is EducationSliderOption => option != null) ?? [];
+
+  const options = mappedOptions.length ? mappedOptions : staticPanel.slider.options;
+  const defaultIndex = resolveDefaultIndex(
+    options,
+    activeGradeCode,
+    staticPanel.slider.defaultIndex,
+  );
+
+  const slider = {
+    ...staticPanel.slider,
+    defaultIndex,
+    options,
+    ...(visualImageUrl && panelId !== "cut" && panelId !== "carat"
+      ? { image: visualImageUrl }
+      : {}),
+  };
+
+  return {
+    ...staticPanel,
+    id: panelId,
+    code: cleanText(info.displayTag) ?? staticPanel.code,
+    title: cleanText(info.sectionLabel) ?? staticPanel.title,
+    description: cleanText(info.description) ?? staticPanel.description,
+    footnote: cleanText(info.brandNote) ?? staticPanel.footnote,
+    slider,
+    sliderSpec: resolveSliderSpec(panelId, options),
+  };
+};
+
+const mapFourCsSection = (
+  section?: StrapiEducationFourCsSection | null,
+): NormalizedEducationFourCsSection => {
+  const infoPanels = section?.cInfoPanel ?? [];
+  if (!infoPanels.length) {
+    return EMPTY_LEARN_ABOUT_DIAMONDS_PAGE.fourCs;
+  }
+
+  const visualPanels = section?.cVisualPanel ?? [];
+  const panels = infoPanels.map((info, index) =>
+    mapFourCsPanel(info, visualPanels[index] ?? null, index),
+  );
+
+  return panels.length
+    ? { panels }
+    : EMPTY_LEARN_ABOUT_DIAMONDS_PAGE.fourCs;
+};
+
 export function mapLearnAboutDiamondsPage(
   raw?: StrapiLearnAboutDiamondsPageEntity | null,
 ): NormalizedLearnAboutDiamondsPage {
@@ -140,5 +354,6 @@ export function mapLearnAboutDiamondsPage(
     hero: mapHero(raw.hero),
     faq: mapFaqSection(raw.faqSection),
     ctaBanner: mapCtaBanner(raw.ctaBanner),
+    fourCs: mapFourCsSection(raw.fourCsSection),
   };
 }

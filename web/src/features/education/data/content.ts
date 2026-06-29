@@ -246,6 +246,60 @@ export const educationSliderSpecs: Record<string, EducationSliderSpec> = {
   },
 };
 
+const SLIDER_EDGE_PADDING = 10;
+
+/** Evenly space slider dots when CMS grade-stop count differs from the Figma spec. */
+export function buildSliderSpecForOptionCount(
+  baseSpec: EducationSliderSpec,
+  optionCount: number,
+): EducationSliderSpec {
+  if (optionCount <= 0 || optionCount === baseSpec.dotCenters.length) {
+    return baseSpec;
+  }
+
+  const dotCenters =
+    optionCount === 1
+      ? [baseSpec.trackLeft + baseSpec.trackWidth / 2]
+      : Array.from({ length: optionCount }, (_, index) => {
+          const span = baseSpec.trackWidth - SLIDER_EDGE_PADDING * 2;
+          return (
+            baseSpec.trackLeft +
+            SLIDER_EDGE_PADDING +
+            (span * index) / (optionCount - 1)
+          );
+        });
+
+  return {
+    ...baseSpec,
+    dotCenters,
+    labelLeft: dotCenters.map((center) => Math.max(0, center - 20)),
+    ...(baseSpec.sublabelLeft
+      ? { sublabelLeft: dotCenters.map((center) => Math.max(0, center - 10)) }
+      : {}),
+  };
+}
+
+export function buildCaratSliderSpecForWeights(
+  weights: readonly number[],
+): EducationSliderSpec {
+  const baseSpec = educationSliderSpecs.carat;
+  if (weights.length === 0) return baseSpec;
+
+  const dotCenters = buildCaratDotCenters(
+    weights,
+    caratSliderDotStart,
+    caratSliderDotEnd,
+    weights[0]!,
+    weights[weights.length - 1]!,
+  );
+
+  return {
+    ...baseSpec,
+    dotCenters,
+    labelLeft: dotCenters.map((center) => center - 20),
+  };
+}
+
 /** @deprecated Use educationFourCsPanelLayoutSpec + educationSliderSpecs */
 export const educationClarityPanelSpec = {
   ...educationFourCsPanelLayoutSpec,
