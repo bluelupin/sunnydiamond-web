@@ -5,11 +5,11 @@ import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import {
-  educationFourCsPanels,
   educationPageImages,
   educationSliderSpecs,
   type EducationFourCsPanelContent,
 } from "../data/content";
+import type { NormalizedEducationFourCsPanel } from "@/services/education/learn-about-diamonds-page.types";
 import EducationMetricSlider from "./EducationMetricSlider";
 import EducationCaratHandVisual from "./EducationCaratHandVisual";
 
@@ -45,10 +45,16 @@ const resolveActiveImage = (
   return slider.image ?? null;
 };
 
-const PanelMedia = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent; delayMs?: number }) => {
+const PanelMedia = ({
+  panel,
+  delayMs = 0,
+}: {
+  panel: NormalizedEducationFourCsPanel;
+  delayMs?: number;
+}) => {
   const { slider } = panel;
   const [activeIndex, setActiveIndex] = useState(slider.defaultIndex);
-  const sliderSpec = educationSliderSpecs[panel.id];
+  const sliderSpec = panel.sliderSpec ?? educationSliderSpecs[panel.id];
 
   const activeImage = useMemo(
     () => resolveActiveImage(panel, activeIndex),
@@ -203,7 +209,7 @@ const EducationFourCsPanel = ({
   panel,
   index,
 }: {
-  panel: EducationFourCsPanelContent;
+  panel: NormalizedEducationFourCsPanel;
   index: number;
 }) => {
   const isChalk = panel.background === "chalk";
@@ -232,10 +238,16 @@ const EducationFourCsPanel = ({
   );
 };
 
-const EducationFourCsPanelsSection = () => {
+type EducationFourCsPanelsSectionProps = {
+  fourCs: {
+    panels: NormalizedEducationFourCsPanel[];
+  };
+};
+
+const EducationFourCsPanelsSection = ({ fourCs }: EducationFourCsPanelsSectionProps) => {
   return (
     <div className="flex flex-col">
-      {educationFourCsPanels.map((panel, index) => (
+      {fourCs.panels.map((panel, index) => (
         <EducationFourCsPanel key={panel.id} panel={panel} index={index} />
       ))}
     </div>

@@ -44,6 +44,7 @@ export default async function Page() {
         hero={cmsPage.hero}
         faq={cmsPage.faq}
         ctaBanner={cmsPage.ctaBanner}
+        fourCs={cmsPage.fourCs}
       />
     </>
   );

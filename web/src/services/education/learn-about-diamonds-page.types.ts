@@ -1,8 +1,12 @@
 import {
   educationDiscoverContent,
   educationFaqItems,
+  educationFourCsPanels,
   educationHeroFigmaSpec,
   educationPageImages,
+  type EducationFourCsPanelContent,
+  type EducationSliderOption,
+  type EducationSliderSpec,
 } from "@/features/education/data/content";
 
 export type StrapiEducationMediaFile = {
@@ -53,10 +57,36 @@ export type StrapiEducationCtaBanner = {
   backgroundImage?: StrapiEducationResponsiveImage | null;
 };
 
+export type StrapiEducationGradeStop = {
+  id?: number;
+  gradeCode?: string | null;
+  gradeLongLabel?: string | null;
+};
+
+export type StrapiEducationFourCsInfoPanel = {
+  displayTag?: string | null;
+  sectionLabel?: string | null;
+  description?: string | null;
+  activeGradeCode?: string | null;
+  activeGradeFullName?: string | null;
+  brandNote?: string | null;
+};
+
+export type StrapiEducationFourCsVisualPanel = {
+  gradeStops?: StrapiEducationGradeStop[] | null;
+  visualImage?: StrapiEducationResponsiveImage | null;
+};
+
+export type StrapiEducationFourCsSection = {
+  cInfoPanel?: StrapiEducationFourCsInfoPanel[] | null;
+  cVisualPanel?: StrapiEducationFourCsVisualPanel[] | null;
+};
+
 export type StrapiLearnAboutDiamondsPageEntity = {
   hero?: StrapiEducationHero | null;
   faqSection?: StrapiEducationFaqSection | null;
   ctaBanner?: StrapiEducationCtaBanner | null;
+  fourCsSection?: StrapiEducationFourCsSection | null;
 };
 
 export type NormalizedEducationHero = {
@@ -92,10 +122,19 @@ export type NormalizedEducationCtaBanner = {
   hasCmsBackgroundImage: boolean;
 };
 
+export type NormalizedEducationFourCsPanel = EducationFourCsPanelContent & {
+  sliderSpec?: EducationSliderSpec;
+};
+
+export type NormalizedEducationFourCsSection = {
+  panels: NormalizedEducationFourCsPanel[];
+};
+
 export type NormalizedLearnAboutDiamondsPage = {
   hero: NormalizedEducationHero;
   faq: NormalizedEducationFaqSection;
   ctaBanner: NormalizedEducationCtaBanner;
+  fourCs: NormalizedEducationFourCsSection;
 };
 
 export const EMPTY_EDUCATION_HERO: NormalizedEducationHero = {
@@ -125,8 +164,13 @@ export const EMPTY_EDUCATION_CTA_BANNER: NormalizedEducationCtaBanner = {
   hasCmsBackgroundImage: false,
 };
 
+export const EMPTY_EDUCATION_FOUR_CS: NormalizedEducationFourCsSection = {
+  panels: educationFourCsPanels.map((panel) => ({ ...panel })),
+};
+
 export const EMPTY_LEARN_ABOUT_DIAMONDS_PAGE: NormalizedLearnAboutDiamondsPage = {
   hero: EMPTY_EDUCATION_HERO,
   faq: EMPTY_EDUCATION_FAQ,
   ctaBanner: EMPTY_EDUCATION_CTA_BANNER,
+  fourCs: EMPTY_EDUCATION_FOUR_CS,
 };
