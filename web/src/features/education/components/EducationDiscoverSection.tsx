@@ -1,21 +1,23 @@
 import Image from "next/image";
 import Link from "next/link";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
+import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { cn } from "@/shared/utils/cn";
+import type { NormalizedEducationCtaBanner } from "@/services/education/learn-about-diamonds-page.types";
 import {
   educationDiscoverContent,
   educationDiscoverSpec,
-  educationPageImages,
 } from "../data/content";
 
 const spec = educationDiscoverSpec;
 const stepsSpec = spec.steps;
 
-const DiscoverImage = ({
+const DiscoverStaticImage = ({
   width,
   height,
   crop,
   sizes,
+  src,
 }: {
   width: number;
   height: number;
@@ -26,10 +28,11 @@ const DiscoverImage = ({
     cropTop: string;
   };
   sizes: string;
+  src: string;
 }) => (
   <div className="relative overflow-hidden" style={{ width, height }}>
     <Image
-      src={educationPageImages.discoverImage}
+      src={src}
       alt=""
       width={width}
       height={height}
@@ -41,6 +44,35 @@ const DiscoverImage = ({
         left: crop.cropLeft,
         top: crop.cropTop,
       }}
+    />
+  </div>
+);
+
+const DiscoverCmsImage = ({
+  width,
+  height,
+  sizes,
+  desktopSrc,
+  mobileSrc,
+  alt,
+}: {
+  width: number;
+  height: number;
+  sizes: string;
+  desktopSrc: string;
+  mobileSrc: string;
+  alt: string;
+}) => (
+  <div className="relative overflow-hidden" style={{ width, height }}>
+    <ResponsiveImage
+      desktopSrc={desktopSrc}
+      mobileSrc={mobileSrc}
+      alt={alt}
+      width={width}
+      height={height}
+      quality={85}
+      sizes={sizes}
+      className="absolute inset-0 h-full w-full object-cover object-center"
     />
   </div>
 );
@@ -129,8 +161,13 @@ const DiscoverSteps = () => {
   );
 };
 
+type DiscoverContentProps = Pick<
+  NormalizedEducationCtaBanner,
+  "heading" | "subheading" | "ctaLabel" | "ctaHref"
+>;
+
 /** Figma 692:29077 (desktop) + 692:28767 (mobile) content stack */
-const DiscoverContent = () => (
+const DiscoverContent = ({ heading, subheading, ctaLabel, ctaHref }: DiscoverContentProps) => (
   <div className="flex w-full flex-col items-start gap-8 lg:gap-40">
     <div className="flex w-full flex-col items-start gap-8 lg:gap-40">
       <div className="flex w-full flex-col items-start gap-3 lg:gap-4">
@@ -138,17 +175,10 @@ const DiscoverContent = () => (
           id="education-discover-title"
           className="w-full font-larken text-[32px] font-light leading-110 text-darkblack lg:text-[48px]"
         >
-          <span className="md:hidden">
-            {educationDiscoverContent.mobileTitleLines.map((line) => (
-              <span key={line} className="block">
-                {line}
-              </span>
-            ))}
-          </span>
-          <span className="hidden md:inline">{educationDiscoverContent.title}</span>
+          {heading}
         </h2>
         <p className="w-full font-gill text-base font-light leading-110 text-darkblack lg:max-w-[531px] lg:text-[20px] lg:text-neutral500">
-          {educationDiscoverContent.description}
+          {subheading}
         </p>
       </div>
 
@@ -156,17 +186,71 @@ const DiscoverContent = () => (
     </div>
 
     <Link
-      href={educationDiscoverContent.ctaHref}
+      href={ctaHref}
       className="btn-border-slide inline-flex h-14 min-w-[199px] shrink-0 items-center justify-center whitespace-nowrap border border-neutral300 px-7 py-5 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
     >
-      {educationDiscoverContent.ctaLabel}
+      {ctaLabel}
     </Link>
   </div>
 );
 
-const EducationDiscoverSection = () => {
+type EducationDiscoverSectionProps = {
+  ctaBanner: NormalizedEducationCtaBanner;
+};
+
+const EducationDiscoverSection = ({ ctaBanner }: EducationDiscoverSectionProps) => {
   const desktopImage = spec.image.desktop;
   const mobileImage = spec.image.mobile;
+
+  const renderDesktopImage = () => {
+    if (ctaBanner.hasCmsBackgroundImage) {
+      return (
+        <DiscoverCmsImage
+          width={desktopImage.width}
+          height={desktopImage.height}
+          sizes={`${desktopImage.width}px`}
+          desktopSrc={ctaBanner.imageDesktopUrl}
+          mobileSrc={ctaBanner.imageMobileUrl}
+          alt={ctaBanner.imageAlt}
+        />
+      );
+    }
+
+    return (
+      <DiscoverStaticImage
+        width={desktopImage.width}
+        height={desktopImage.height}
+        crop={desktopImage}
+        sizes={`${desktopImage.width}px`}
+        src={ctaBanner.imageDesktopUrl}
+      />
+    );
+  };
+
+  const renderMobileImage = () => {
+    if (ctaBanner.hasCmsBackgroundImage) {
+      return (
+        <DiscoverCmsImage
+          width={mobileImage.width}
+          height={mobileImage.height}
+          sizes={`${mobileImage.width}px`}
+          desktopSrc={ctaBanner.imageDesktopUrl}
+          mobileSrc={ctaBanner.imageMobileUrl}
+          alt={ctaBanner.imageAlt}
+        />
+      );
+    }
+
+    return (
+      <DiscoverStaticImage
+        width={mobileImage.width}
+        height={mobileImage.height}
+        crop={mobileImage}
+        sizes={`${mobileImage.width}px`}
+        src={ctaBanner.imageMobileUrl}
+      />
+    );
+  };
 
   return (
     <section
@@ -178,12 +262,7 @@ const EducationDiscoverSection = () => {
         style={{ width: desktopImage.width, height: desktopImage.height }}
       >
         <ScrollReveal delayMs={180} className="relative h-full w-full">
-          <DiscoverImage
-            width={desktopImage.width}
-            height={desktopImage.height}
-            crop={desktopImage}
-            sizes={`${desktopImage.width}px`}
-          />
+          {renderDesktopImage()}
         </ScrollReveal>
       </div>
 
@@ -197,20 +276,18 @@ const EducationDiscoverSection = () => {
         }}
       >
         <ScrollReveal delayMs={140} className="h-full w-full">
-          <div className="-scale-y-100 rotate-180">
-            <DiscoverImage
-              width={mobileImage.width}
-              height={mobileImage.height}
-              crop={mobileImage}
-              sizes={`${mobileImage.width}px`}
-            />
-          </div>
+          <div className="-scale-y-100 rotate-180">{renderMobileImage()}</div>
         </ScrollReveal>
       </div>
 
       <div className="relative z-10 flex h-full flex-col px-4 py-16 lg:absolute lg:inset-y-0 lg:left-[calc(50%+294.5px)] lg:top-1/2 lg:h-auto lg:w-[585px] lg:-translate-x-1/2 lg:-translate-y-1/2 lg:justify-center lg:px-0 lg:py-0">
         <ScrollReveal delayMs={0} className="w-full">
-          <DiscoverContent />
+          <DiscoverContent
+            heading={ctaBanner.heading}
+            subheading={ctaBanner.subheading}
+            ctaLabel={ctaBanner.ctaLabel}
+            ctaHref={ctaBanner.ctaHref}
+          />
         </ScrollReveal>
       </div>
     </section>

@@ -1,14 +1,17 @@
 import {
+  educationDiscoverContent,
   educationFaqItems,
   educationHeroFigmaSpec,
   educationPageImages,
 } from "@/features/education/data/content";
 import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import type {
+  NormalizedEducationCtaBanner,
   NormalizedEducationFaqItem,
   NormalizedEducationFaqSection,
   NormalizedEducationHero,
   NormalizedLearnAboutDiamondsPage,
+  StrapiEducationCtaBanner,
   StrapiEducationFaqItem,
   StrapiEducationHero,
   StrapiEducationResponsiveImage,
@@ -36,6 +39,24 @@ const mapPosterUrls = (image?: StrapiEducationResponsiveImage | null) => {
       cleanText(image?.altText) ??
       cleanText(image?.caption) ??
       educationHeroFigmaSpec.image.alt,
+  };
+};
+
+const mapBackgroundUrls = (image?: StrapiEducationResponsiveImage | null) => {
+  const desktopUrl =
+    resolveCmsMediaUrl(image?.desktopImage) ??
+    resolveCmsMediaUrl(image?.mobileImage);
+  const mobileUrl =
+    resolveCmsMediaUrl(image?.mobileImage) ??
+    resolveCmsMediaUrl(image?.desktopImage);
+
+  const hasCmsBackgroundImage = Boolean(desktopUrl || mobileUrl);
+
+  return {
+    desktopUrl: desktopUrl ?? educationPageImages.discoverImage,
+    mobileUrl: mobileUrl ?? educationPageImages.discoverImage,
+    alt: cleanText(image?.altText) ?? cleanText(image?.caption) ?? "",
+    hasCmsBackgroundImage,
   };
 };
 
@@ -90,6 +111,26 @@ const mapFaqSection = (
   items: mapFaqItems(faqSection?.faqItems),
 });
 
+const mapCtaBanner = (
+  ctaBanner?: StrapiEducationCtaBanner | null,
+): NormalizedEducationCtaBanner => {
+  const background = mapBackgroundUrls(ctaBanner?.backgroundImage);
+
+  return {
+    heading: cleanText(ctaBanner?.heading) ?? educationDiscoverContent.title,
+    subheading:
+      cleanText(ctaBanner?.subheading) ?? educationDiscoverContent.description,
+    ctaLabel:
+      cleanText(ctaBanner?.ctaButtonLabel) ?? educationDiscoverContent.ctaLabel,
+    ctaHref:
+      cleanText(ctaBanner?.ctaButtonUrl) ?? educationDiscoverContent.ctaHref,
+    imageDesktopUrl: background.desktopUrl,
+    imageMobileUrl: background.mobileUrl,
+    imageAlt: background.alt,
+    hasCmsBackgroundImage: background.hasCmsBackgroundImage,
+  };
+};
+
 export function mapLearnAboutDiamondsPage(
   raw?: StrapiLearnAboutDiamondsPageEntity | null,
 ): NormalizedLearnAboutDiamondsPage {
@@ -98,5 +139,6 @@ export function mapLearnAboutDiamondsPage(
   return {
     hero: mapHero(raw.hero),
     faq: mapFaqSection(raw.faqSection),
+    ctaBanner: mapCtaBanner(raw.ctaBanner),
   };
 }

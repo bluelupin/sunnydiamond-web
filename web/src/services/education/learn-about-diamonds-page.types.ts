@@ -1,4 +1,5 @@
 import {
+  educationDiscoverContent,
   educationFaqItems,
   educationHeroFigmaSpec,
   educationPageImages,
@@ -44,9 +45,18 @@ export type StrapiEducationFaqSection = {
   faqItems?: StrapiEducationFaqItem[] | null;
 };
 
+export type StrapiEducationCtaBanner = {
+  heading?: string | null;
+  subheading?: string | null;
+  ctaButtonLabel?: string | null;
+  ctaButtonUrl?: string | null;
+  backgroundImage?: StrapiEducationResponsiveImage | null;
+};
+
 export type StrapiLearnAboutDiamondsPageEntity = {
   hero?: StrapiEducationHero | null;
   faqSection?: StrapiEducationFaqSection | null;
+  ctaBanner?: StrapiEducationCtaBanner | null;
 };
 
 export type NormalizedEducationHero = {
@@ -70,9 +80,22 @@ export type NormalizedEducationFaqSection = {
   items: NormalizedEducationFaqItem[];
 };
 
+export type NormalizedEducationCtaBanner = {
+  heading: string;
+  subheading: string;
+  ctaLabel: string;
+  ctaHref: string;
+  imageDesktopUrl: string;
+  imageMobileUrl: string;
+  imageAlt: string;
+  /** True when CMS provides a background image (uses cover fit instead of Figma crop). */
+  hasCmsBackgroundImage: boolean;
+};
+
 export type NormalizedLearnAboutDiamondsPage = {
   hero: NormalizedEducationHero;
   faq: NormalizedEducationFaqSection;
+  ctaBanner: NormalizedEducationCtaBanner;
 };
 
 export const EMPTY_EDUCATION_HERO: NormalizedEducationHero = {
@@ -91,7 +114,19 @@ export const EMPTY_EDUCATION_FAQ: NormalizedEducationFaqSection = {
   })),
 };
 
+export const EMPTY_EDUCATION_CTA_BANNER: NormalizedEducationCtaBanner = {
+  heading: educationDiscoverContent.title,
+  subheading: educationDiscoverContent.description,
+  ctaLabel: educationDiscoverContent.ctaLabel,
+  ctaHref: educationDiscoverContent.ctaHref,
+  imageDesktopUrl: educationPageImages.discoverImage,
+  imageMobileUrl: educationPageImages.discoverImage,
+  imageAlt: "",
+  hasCmsBackgroundImage: false,
+};
+
 export const EMPTY_LEARN_ABOUT_DIAMONDS_PAGE: NormalizedLearnAboutDiamondsPage = {
   hero: EMPTY_EDUCATION_HERO,
   faq: EMPTY_EDUCATION_FAQ,
+  ctaBanner: EMPTY_EDUCATION_CTA_BANNER,
 };

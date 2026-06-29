@@ -11,7 +11,7 @@ import {
 
 const page = footerPages.education;
 
-/** Refresh CMS-driven hero + FAQ without a full redeploy. */
+/** Refresh CMS-driven sections without a full redeploy. */
 export const revalidate = 300;
 
 export const metadata: Metadata = constructMetadata({
@@ -40,7 +40,11 @@ export default async function Page() {
   return (
     <>
       <JsonLd data={educationJsonLd} />
-      <EducationPage hero={cmsPage.hero} faq={cmsPage.faq} />
+      <EducationPage
+        hero={cmsPage.hero}
+        faq={cmsPage.faq}
+        ctaBanner={cmsPage.ctaBanner}
+      />
     </>
   );
 }

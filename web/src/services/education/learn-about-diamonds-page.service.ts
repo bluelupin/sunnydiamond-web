@@ -7,17 +7,19 @@ import type {
   StrapiLearnAboutDiamondsPageEntity,
 } from "./learn-about-diamonds-page.types";
 
-/** Targeted populate — hero media + FAQ only (avoids full-page payload). */
-const HERO_FAQ_POPULATE_QUERY =
+/** Targeted populate — hero media, FAQ, and CTA banner only (avoids full-page payload). */
+const LEARN_ABOUT_DIAMONDS_POPULATE_QUERY =
   "populate[hero][populate][heroVideo][populate]=heroVideo" +
   "&populate[hero][populate][image][populate][desktopImage]=true" +
   "&populate[hero][populate][image][populate][mobileImage]=true" +
-  "&populate[faqSection][populate]=faqItems";
+  "&populate[faqSection][populate]=faqItems" +
+  "&populate[ctaBanner][populate][backgroundImage][populate][desktopImage]=true" +
+  "&populate[ctaBanner][populate][backgroundImage][populate][mobileImage]=true";
 
 export const getLearnAboutDiamondsPage = cache(
   async (signal?: AbortSignal): Promise<NormalizedLearnAboutDiamondsPage> => {
     const raw = await apiFetch<StrapiLearnAboutDiamondsPageEntity>(
-      `${STRAPI_ENDPOINTS.learnAboutDiamondsPage}?${HERO_FAQ_POPULATE_QUERY}`,
+      `${STRAPI_ENDPOINTS.learnAboutDiamondsPage}?${LEARN_ABOUT_DIAMONDS_POPULATE_QUERY}`,
       { signal },
     );
 

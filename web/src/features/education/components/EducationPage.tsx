@@ -7,9 +7,12 @@ import EducationLearnMoreSection from "./EducationLearnMoreSection";
 import EducationDiscoverSection from "./EducationDiscoverSection";
 import EducationFaqSection from "./EducationFaqSection";
 
-type EducationPageProps = Pick<NormalizedLearnAboutDiamondsPage, "hero" | "faq">;
+type EducationPageProps = Pick<
+  NormalizedLearnAboutDiamondsPage,
+  "hero" | "faq" | "ctaBanner"
+>;
 
-const EducationPage = ({ hero, faq }: EducationPageProps) => {
+const EducationPage = ({ hero, faq, ctaBanner }: EducationPageProps) => {
   return (
     <>
       <EducationHeroSection hero={hero} />
@@ -17,7 +20,7 @@ const EducationPage = ({ hero, faq }: EducationPageProps) => {
       <EducationFourCsPanelsSection />
       <EducationCertifiedSection />
       <EducationLearnMoreSection />
-      <EducationDiscoverSection />
+      <EducationDiscoverSection ctaBanner={ctaBanner} />
       <EducationFaqSection faq={faq} />
     </>
   );
