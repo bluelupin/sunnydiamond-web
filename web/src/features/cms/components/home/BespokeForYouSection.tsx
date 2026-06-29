@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
-import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import { resolveBespokeForYouSection } from "@/shared/utils/resolveBespokeForYouSection";
+import Reveal from "@/shared/Animation/Reveal";
 
 interface BespokeForYouSectionProps {
   id?: string;
@@ -46,8 +46,8 @@ const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
     () =>
       resolveCmsMediaUrl(
         sectionData.image?.desktopImage ??
-          sectionData.image?.data?.attributes ??
-          sectionData.image,
+        sectionData.image?.data?.attributes ??
+        sectionData.image,
       ),
     [sectionData.image],
   );
@@ -56,8 +56,8 @@ const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
     () =>
       resolveCmsMediaUrl(
         sectionData.image?.mobileImage ??
-          sectionData.image?.data?.attributes ??
-          sectionData.image,
+        sectionData.image?.data?.attributes ??
+        sectionData.image,
       ),
     [sectionData.image],
   );
@@ -67,8 +67,8 @@ const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
       sectionData.image?.altText ||
       resolveCmsAltText(
         sectionData.image?.desktopImage ??
-          sectionData.image?.data?.attributes ??
-          sectionData.image,
+        sectionData.image?.data?.attributes ??
+        sectionData.image,
       ) ||
       sectionTitle,
     [sectionData.image, sectionTitle],
@@ -104,7 +104,7 @@ const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
       aria-label={sectionTitle}
       className="relative h-[100dvh] min-h-[100dvh] w-full overflow-hidden md:h-auto md:min-h-[804px]"
     >
-      <ScrollReveal delayMs={0} className="absolute inset-0">
+      <Reveal direction="up" className="absolute inset-0">
         <ResponsiveImage
           desktopSrc={desktopImageUrl || FALLBACK_BG}
           mobileSrc={mobileImageUrl || desktopImageUrl || FALLBACK_BG}
@@ -115,7 +115,7 @@ const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
           sizes="100vw"
           className="size-full object-cover object-[center_22%] md:object-[center_22%]"
         />
-      </ScrollReveal>
+      </Reveal>
 
       <div
         aria-hidden
@@ -126,41 +126,28 @@ const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
       <div className="absolute inset-x-0 bottom-16 flex w-full justify-center px-4 md:px-40">
         <div className="flex w-full max-w-[375px] flex-col items-center gap-6 md:max-w-[1360px] md:gap-40">
           <div className="flex w-full flex-col items-center gap-3 text-center text-white md:gap-4">
-            <ScrollReveal
-              as="h2"
-              delayMs={80}
+            <Reveal as="h2" direction="up"
               className="shrink-0 whitespace-nowrap font-larken text-[32px] font-light leading-110 md:text-[48px]"
             >
               {sectionTitle}
-            </ScrollReveal>
-
-            <ScrollReveal
-              delayMs={160}
+            </Reveal>
+            <Reveal direction="up"
               className="w-[257px] shrink-0 text-center font-gill text-base font-light leading-110 md:w-auto md:max-w-none md:text-xl"
             >
               {subtitle}
-            </ScrollReveal>
+            </Reveal>
           </div>
-
-          <div className="flex shrink-0 flex-col items-center gap-6 md:gap-8">
-            <ScrollReveal delayMs={240}>
-              <Link
-                href={primaryCtaUrl}
-                className="inline-flex h-14 items-center justify-center bg-white px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
-              >
-                {primaryCtaLabel}
-              </Link>
-            </ScrollReveal>
-
-            <ScrollReveal delayMs={320}>
-              <Link
-                href={secondaryCtaUrl}
-                className="text-link-underline inline-flex items-center justify-center border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
-              >
-                {secondaryCtaLabel}
-              </Link>
-            </ScrollReveal>
-          </div>
+          <Reveal direction="up" className="flex shrink-0 flex-col items-center gap-6 md:gap-8">
+            <Link
+              href={primaryCtaUrl}
+              className="inline-flex h-14 items-center justify-center bg-white px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
+            >
+              {primaryCtaLabel}
+            </Link>
+            <Link href={secondaryCtaUrl} className="relative after:bg-white after:absolute after:h-0.5 after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-white hover:border-white sm:pb-1 font-gill text-sm font-normal uppercase leading-110 text-white hover:text-white">
+              {secondaryCtaLabel}
+            </Link>
+          </Reveal>
         </div>
       </div>
     </section>
