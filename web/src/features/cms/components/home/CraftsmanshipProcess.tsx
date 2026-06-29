@@ -1,7 +1,7 @@
 "use client";
 
 import { PencilLine, Gem, Hammer, PackageCheck, type LucideIcon } from "lucide-react";
-import OptimizedImage from "@/shared/ui/OptimizedImage";
+import Image from "next/image";
 import { useStepScroll } from "@/shared/hooks/use-step-scroll";
 import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
@@ -13,6 +13,44 @@ import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedi
 import { useMemo } from "react";
 interface CraftsmanshipProcessProps {
   id?: string;
+}
+
+/** Figma 684:3024 — silk ripple texture behind the scroll-driven diamond. */
+const CRAFTSMANSHIP_BACKGROUND = "/images/home/craftsmanship-bg.png";
+/** Figma 684:3025 — radial fade overlay on top of the silk texture. */
+const CRAFTSMANSHIP_GRADIENT = "/images/home/craftsmanship-bg-gradient.svg";
+
+function CraftsmanshipBackground() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {/* Figma 684:3024 */}
+      <div className="absolute left-1/2 top-[calc(50%+0.08px)] flex h-[700px] w-full max-w-[1440px] -translate-x-1/2 -translate-y-1/2 items-center justify-center">
+        <div className="rotate-90">
+          <Image
+            src={CRAFTSMANSHIP_BACKGROUND}
+            alt=""
+            width={700}
+            height={1440}
+            className="h-[1440px] w-[700px] max-w-none object-cover"
+            sizes="(min-width: 1440px) 1440px, 100vw"
+          />
+        </div>
+      </div>
+      {/* Figma 684:3025 */}
+      <div className="absolute left-1/2 top-1/2 flex h-[750px] w-full max-w-[1440px] -translate-x-1/2 -translate-y-1/2 items-center justify-center">
+        <div className="rotate-90">
+          <Image
+            src={CRAFTSMANSHIP_GRADIENT}
+            alt=""
+            width={750}
+            height={1440}
+            className="h-[1440px] w-[750px] max-w-none"
+            sizes="(min-width: 1440px) 1440px, 100vw"
+          />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 const stepIcons: LucideIcon[] = [PencilLine, Gem, Hammer, PackageCheck];
@@ -74,7 +112,8 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
         aria-busy="true"
       >
         <div className="sticky top-24 h-screen overflow-hidden bg-gray200">
-          <div className="container h-full">
+          <CraftsmanshipBackground />
+          <div className="container relative z-10 h-full">
             <div className="grid h-full grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-12">
               <div className="lg:col-span-5 flex flex-col gap-8 xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20">
                 <div className="h-10 w-72 bg-gray300 rounded mx-auto lg:mx-0" aria-hidden />
@@ -102,7 +141,8 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
       className="bg-gray200 py-16 md:py-0 md:pt-20"
     >
       <div className="sticky top-24 h-screen overflow-hidden bg-gray200">
-        <div className="container h-full">
+        <CraftsmanshipBackground />
+        <div className="container relative z-10 h-full">
           <div className="grid h-full grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-12">
             {/* Left column: title + steps */}
             <div className="lg:col-span-5 flex flex-col gap-8 xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20">
