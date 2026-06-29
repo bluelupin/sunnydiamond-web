@@ -7,6 +7,7 @@ import type { NormalizedEducationCtaBanner } from "@/services/education/learn-ab
 import {
   educationDiscoverContent,
   educationDiscoverSpec,
+  educationSectionTitleSpacingClassName,
 } from "../data/content";
 
 const spec = educationDiscoverSpec;
@@ -170,7 +171,9 @@ type DiscoverContentProps = Pick<
 const DiscoverContent = ({ heading, subheading, ctaLabel, ctaHref }: DiscoverContentProps) => (
   <div className="flex w-full flex-col items-start gap-8 lg:gap-40">
     <div className="flex w-full flex-col items-start gap-8 lg:gap-40">
-      <div className="flex w-full flex-col items-start gap-3 lg:gap-4">
+      <div
+        className={`flex w-full flex-col items-start gap-3 lg:gap-4 ${educationSectionTitleSpacingClassName}`}
+      >
         <h2
           id="education-discover-title"
           className="w-full font-larken text-[32px] font-light leading-110 text-darkblack lg:text-[48px]"

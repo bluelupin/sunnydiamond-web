@@ -4,6 +4,7 @@ import type { NormalizedEducationCertificateSection } from "@/services/education
 import {
   educationCertifiedSpec,
   educationPageImages,
+  educationSectionTitleSpacingClassName,
 } from "../data/content";
 
 const spec = educationCertifiedSpec;
@@ -152,8 +153,12 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
         className="pointer-events-none absolute inset-0 hidden bg-[radial-gradient(ellipse_at_72%_58%,rgba(244,243,238,0)_0%,rgba(244,243,238,0.55)_45%,rgba(244,243,238,1)_78%)] md:block"
       />
 
-      <div className="relative mx-auto flex max-w-[1360px] flex-col items-center gap-8 lg:gap-10">
-        <ScrollReveal as="h2" delayMs={0} className="w-full">
+      <div className="relative mx-auto flex max-w-[1360px] flex-col items-center">
+        <ScrollReveal
+          as="h2"
+          delayMs={0}
+          className={`w-full ${educationSectionTitleSpacingClassName}`}
+        >
           <span
             id="education-certified-title"
             className="block text-center font-larken text-[32px] font-light leading-110 text-darkblack lg:text-[48px] lg:leading-none"

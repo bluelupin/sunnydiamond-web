@@ -9,6 +9,7 @@ import {
   educationLearnMoreSpec,
   educationLearnTabs,
   educationPageImages,
+  educationSectionTitleSpacingClassName,
 } from "../data/content";
 
 type CarouselSlot = keyof typeof educationLearnMoreSpec.carousel.slots;
@@ -130,8 +131,12 @@ const EducationLearnMoreSection = () => {
       className="bg-white px-4 py-16 max-md:h-[681px] md:px-8 md:py-20 lg:px-10 lg:py-[104px]"
     >
       <div className="mx-auto flex max-w-[1360px] flex-col items-center gap-6 lg:gap-16">
-        <div className="flex w-full flex-col items-center gap-6 lg:gap-10">
-          <ScrollReveal as="h2" delayMs={0} className="w-full">
+        <div className="flex w-full flex-col items-center">
+          <ScrollReveal
+            as="h2"
+            delayMs={0}
+            className={`w-full ${educationSectionTitleSpacingClassName}`}
+          >
             <span
               id="education-learn-more-title"
               className="block text-center font-larken text-[32px] font-light leading-110 text-darkblack lg:text-[48px]"

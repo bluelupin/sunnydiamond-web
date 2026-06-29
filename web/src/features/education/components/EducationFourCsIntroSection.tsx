@@ -1,6 +1,10 @@
 import Image from "next/image";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
-import { educationFourCsIntroContent, educationPageImages } from "../data/content";
+import {
+  educationFourCsIntroContent,
+  educationPageImages,
+  educationSectionTitleSpacingClassName,
+} from "../data/content";
 
 const EducationFourCsIntroSection = () => {
   return (
@@ -8,8 +12,12 @@ const EducationFourCsIntroSection = () => {
       aria-labelledby="education-four-cs-intro-title"
       className="flex flex-col bg-white px-4 py-16 max-md:min-h-[561px] max-md:justify-center md:h-620 md:px-8 md:py-12 lg:h-[694px] lg:px-0 lg:py-0"
     >
-      <div className="mx-auto flex h-full max-w-[677px] flex-col items-center justify-center gap-6 lg:gap-10 lg:pt-16">
-        <ScrollReveal as="h2" delayMs={0} className="w-full">
+      <div className="mx-auto flex h-full max-w-[677px] flex-col items-center justify-center lg:pt-16">
+        <ScrollReveal
+          as="h2"
+          delayMs={0}
+          className={`w-full ${educationSectionTitleSpacingClassName}`}
+        >
           <span
             id="education-four-cs-intro-title"
             className="block text-center font-larken text-[32px] font-light leading-110 text-darkblack lg:text-[48px]"
