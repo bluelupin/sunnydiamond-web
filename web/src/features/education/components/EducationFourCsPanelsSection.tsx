@@ -6,6 +6,7 @@ import { cn } from "@/shared/utils/cn";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import {
   educationPageImages,
+  educationScrollArrowClassName,
   educationSliderSpecs,
   type EducationFourCsPanelContent,
 } from "../data/content";
@@ -168,7 +169,7 @@ const PanelMedia = ({
                 alt=""
                 width={24}
                 height={23}
-                className="h-4 w-4 lg:h-[23px] lg:w-6"
+                className={educationScrollArrowClassName}
               />
             </div>
           ) : null}

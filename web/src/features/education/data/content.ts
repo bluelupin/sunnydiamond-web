@@ -386,9 +386,12 @@ export const educationFourCsIntroSpec = {
   gradientRuleClassName:
     "h-px w-250 bg-gradient-to-r from-darkMagenta to-goldAccent lg:w-420",
   pillarsClassName:
-    "flex flex-wrap items-center justify-center gap-x-3 gap-y-2 font-gill text-20 leading-110 text-darkblack lg:gap-x-4 lg:text-24",
-  pillarItemClassName: "inline-flex items-center gap-3 lg:gap-4",
+    "flex flex-wrap items-center justify-center gap-x-3 gap-y-2 font-gill text-20 leading-110 text-darkblack lg:flex-nowrap lg:gap-x-4 lg:text-24",
+  scrollArrowClassName: "h-4 w-4 lg:h-[23px] lg:w-6",
 } as const;
+
+/** Shared scroll-arrow sizing (intro hint + panel footnotes). */
+export const educationScrollArrowClassName = educationFourCsIntroSpec.scrollArrowClassName;
 
 export type EducationSliderOption = {
   label: string;
