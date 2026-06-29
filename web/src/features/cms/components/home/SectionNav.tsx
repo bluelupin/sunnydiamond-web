@@ -48,7 +48,7 @@ const SectionNav = () => {
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute left-0 top-1/2 h-[min(800px,100vh)] w-[min(720px,50vw)] -translate-y-1/2"
+        className="pointer-events-none absolute left-0 top-1/2 h-[min(800px,100vh)] w-[min(720px,18vw)] -translate-y-1/2"
       >
         <Image
           src={NAV_GRADIENT}

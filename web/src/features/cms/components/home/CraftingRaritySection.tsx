@@ -41,9 +41,9 @@ const CategoryCard = ({ cat }: { cat: CategoryNavigationItem }) => {
   return (
     <Link
       href={categoryLink}
-      className="group relative flex aspect-square h-full w-full flex-col overflow-hidden bg-gray300 p-4 lg:p-6"
+      className="group relative flex aspect-square h-full w-full flex-col items-center justify-between overflow-hidden bg-gray300"
     >
-      {hasDistinctHover ? (
+      {hasDistinctHover &&
         <ResponsiveImage
           desktopSrc={hoverDesktopImageUrl || fallBackImage}
           mobileSrc={hoverMobileImageUrl || hoverDesktopImageUrl || fallBackImage}
@@ -53,10 +53,10 @@ const CategoryCard = ({ cat }: { cat: CategoryNavigationItem }) => {
           quality={IMAGE_QUALITY}
           className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
         />
-      ) : null}
+      }
 
-      <div className="relative z-10 flex min-h-0 flex-1 items-center justify-center overflow-hidden">
-        {hasProductImage ? (
+      <div className="relative z-10 flex min-h-0 flex-1 items-center justify-center overflow-hidden px-4 lg:px-6 lg:pt-6 pt-4 max-w-[303px] max-h-[303px]">
+        {hasProductImage &&
           <ResponsiveImage
             desktopSrc={desktopImageUrl || fallBackImage}
             mobileSrc={mobileImageUrl || desktopImageUrl || fallBackImage}
@@ -66,10 +66,14 @@ const CategoryCard = ({ cat }: { cat: CategoryNavigationItem }) => {
             quality={IMAGE_QUALITY}
             className={`max-h-full max-w-full object-contain transition-opacity duration-500${hasDistinctHover ? " group-hover:opacity-0" : ""}`}
           />
-        ) : null}
+        }
       </div>
-      <div className="relative z-10 shrink-0 pt-2">
-        <span className="block text-center font-gill font-normal leading-110 text-darkblack lg:text-xl text-base">
+      <div className="relative z-10 shrink-0 pt-2 pb-4 lg:pb-12 w-full">
+        <span
+          aria-hidden
+          className="w-full pointer-events-none absolute inset-x-0 -top-3 bottom-0 -z-10 bg-gradient-to-t from-black/80 via-black/45 to-transparent opacity-0 motion-safe:transition-opacity motion-safe:duration-500 group-hover:opacity-100 group-focus-visible:opacity-100"
+        />
+        <span className="relative block text-center font-gill text-base font-normal leading-110 text-darkblack motion-safe:transition-colors motion-safe:duration-500 group-hover:text-white group-focus-visible:text-white lg:text-xl">
           {title}
         </span>
       </div>
@@ -210,7 +214,7 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
           {categories.map((cat, index) => (
             <Reveal direction="up"
               key={cat?.id ?? cat?.slug ?? cat?.title}
-              className="aspect-square w-full"
+              className="aspect-square w-full xl:h-[424px]"
             >
               <CategoryCard cat={cat} />
             </Reveal>
