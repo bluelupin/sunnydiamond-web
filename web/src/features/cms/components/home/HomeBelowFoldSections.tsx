@@ -81,7 +81,7 @@ export default function HomeBelowFoldSections() {
         <OccasionsTeaserSection id="categories" />
       </LazyHomeSection>
 
-      <LazyHomeSection minHeight="min-h-[600px]">
+      <LazyHomeSection minHeight="md:min-h-[600px] min-h-auto">
         <FeaturedProductsSection id="diamond-awaits" />
       </LazyHomeSection>
 
@@ -97,7 +97,7 @@ export default function HomeBelowFoldSections() {
         <BespokeForYouSection id="bespoke-for-you" />
       </LazyHomeSection>
 
-      <LazyHomeSection minHeight="min-h-[600px]">
+      <LazyHomeSection minHeight="md:min-h-[600px] min-h-auto">
         <DiamondsForEveryoneSection id="diamonds-for-everyone" />
       </LazyHomeSection>
 

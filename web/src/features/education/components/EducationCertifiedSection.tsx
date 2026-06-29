@@ -90,7 +90,7 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
   return (
     <section
       aria-labelledby="education-certified-title"
-      className="relative overflow-hidden bg-white px-4 py-16 max-md:h-[900px] md:bg-gray300 md:px-8 md:py-20 lg:px-10 lg:py-[104px]"
+      className="relative overflow-hidden bg-white px-4 py-16 max-md:h-[900px] md:bg-gray300 md:px-8 md:py-20 lg:px-10 lg:py-100"
     >
       <div
         aria-hidden

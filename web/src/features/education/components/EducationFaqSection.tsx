@@ -43,7 +43,7 @@ const EducationFaqSection = ({ faq }: EducationFaqSectionProps) => {
   return (
     <section
       aria-labelledby="education-faq-title"
-      className="bg-white px-4 py-16 lg:px-10 lg:py-[104px]"
+      className="bg-white px-4 py-16 lg:px-10 lg:py-100"
     >
       <div className="mx-auto flex max-w-[910px] flex-col items-center">
         <ScrollReveal

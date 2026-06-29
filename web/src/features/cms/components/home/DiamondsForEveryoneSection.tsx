@@ -97,7 +97,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
     return (
       <section
         id={id}
-        className="relative overflow-hidden bg-chalkCard px-4 py-16 md:bg-gray300 md:px-40 md:py-104"
+        className="relative overflow-hidden bg-chalkCard px-4 py-16 md:bg-gray300 md:px-40 md:py-100"
         aria-busy="true"
         aria-label="Diamonds for Everyone"
       >
@@ -118,7 +118,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
     <section
       id={id}
       aria-label={sectionTitle}
-      className="relative overflow-hidden bg-chalkCard px-4 py-16 md:bg-gray300 md:px-40 md:py-104"
+      className="relative overflow-hidden bg-chalkCard px-4 py-16 md:bg-gray300 md:px-40 md:py-100"
     >
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-1/2 top-0 flex h-[651px] w-[1339px] -translate-x-1/2 items-center justify-center mix-blend-color-burn md:top-1/2 md:h-[700px] md:w-[1440px] md:-translate-y-1/2">

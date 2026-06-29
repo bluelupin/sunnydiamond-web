@@ -223,7 +223,7 @@ const ProductDetailMoreForYouSection = ({ items }: ProductDetailMoreForYouSectio
   );
 
   return (
-    <section aria-labelledby="more-for-you-heading" className="py-16 lg:py-104">
+    <section aria-labelledby="more-for-you-heading" className="py-16 lg:py-100">
       <div className="px-4 lg:px-40">
         <PageContainer className="px-0">
           <div className="mx-auto flex w-full max-w-1360 flex-col items-center gap-6 lg:gap-40">

@@ -243,9 +243,9 @@ function FeaturedProductsCarousel({
       )}
     >
       {/* Desktop — Figma 684:2930 row: left peek / center / right peek */}
-      <div className="relative mx-auto hidden w-full justify-center overflow-visible md:flex">
+      <div className="relative hidden w-full justify-center overflow-visible md:flex">
         {showSidePeeks ? (
-          <div className="pointer-events-none relative h-[259px] w-[600px] shrink-0 overflow-hidden opacity-60">
+          <div className="pointer-events-none relative h-[260px] lg:w-[600px] md:w-[400px] w-[300px] shrink-0 overflow-hidden opacity-60">
             <div className="absolute left-[22px] top-[-83px] size-[434px]">
               <Image
                 src={prevItem.image}
@@ -260,7 +260,7 @@ function FeaturedProductsCarousel({
           </div>
         ) : null}
 
-        <div className="flex w-[600px] shrink-0 flex-col items-center gap-3">
+        <div className="flex lg:w-[600px] md:w-[400px] w-[300px] shrink-0 flex-col items-center gap-3">
           <div className="relative h-[259px] w-full">
             <div className="relative h-[259px] w-full overflow-hidden">
               <div
@@ -323,7 +323,7 @@ function FeaturedProductsCarousel({
         </div>
 
         {showSidePeeks ? (
-          <div className="pointer-events-none relative h-[259px] w-[600px] shrink-0 overflow-hidden opacity-60">
+          <div className="pointer-events-none relative h-[260px] lg:w-[600px] md:w-[400px] w-[300px] shrink-0 overflow-hidden opacity-60">
             <div className="absolute left-[162px] top-[-78px] size-[426px]">
               <Image
                 src={nextItem.image}
@@ -341,7 +341,7 @@ function FeaturedProductsCarousel({
 
       {/* Mobile — Figma 684:3238 */}
       <div className="relative h-[303px] w-full overflow-hidden md:hidden">
-        {showSidePeeks ? (
+        {showSidePeeks &&
           <>
             <div className="absolute left-0 top-0 h-[237px] w-[160px] overflow-hidden opacity-60">
               <div className="relative mx-auto size-[262px] translate-x-[28px] -translate-y-[72px]">
@@ -371,8 +371,7 @@ function FeaturedProductsCarousel({
               </div>
             </div>
           </>
-        ) : null}
-
+        }
         <div className="absolute left-1/2 top-0 flex w-full max-w-[260px] -translate-x-1/2 flex-col items-center">
           <div className="relative w-full">
             <div className="relative h-[170px] w-full overflow-hidden">
@@ -477,11 +476,11 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
     return (
       <section
         id={id}
-        className="overflow-visible px-4 py-16 md:px-40 md:py-104"
+        className="overflow-visible px-4 py-16 md:px-40 md:py-100"
         aria-label="Featured diamond carousel"
         aria-busy="true"
       >
-        <div className="mx-auto flex w-full max-w-1360 flex-col items-center gap-10 overflow-visible">
+        <div className="flex w-full flex-col items-center gap-10 overflow-visible">
           <div className="flex w-full flex-col items-center gap-4 text-center">
             <div className="h-[35px] w-[283px] animate-pulse rounded bg-gray200 md:h-[53px] md:w-[424px]" aria-hidden />
             <div className="h-[36px] w-[306px] animate-pulse rounded bg-gray200 md:h-[22px] md:w-[517px]" aria-hidden />
@@ -497,10 +496,10 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
   return (
     <section
       id={id}
-      className="overflow-visible px-0 py-16 md:px-40 md:py-104"
+      className="overflow-visible px-0 py-16 md:py-100"
       aria-label="Featured diamond carousel"
     >
-      <div className="mx-auto flex w-full max-w-1360 flex-col items-center gap-10 overflow-visible">
+      <div className="flex w-full flex-col items-center gap-10 overflow-visible">
         <FeaturedProductsHeader title={sectionTitle} description={description} />
         <FeaturedProductsCarousel
           items={items}
