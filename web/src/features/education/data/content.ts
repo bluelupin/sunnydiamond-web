@@ -338,7 +338,7 @@ export const educationHeroFigmaSpec = {
   },
   title: {
     text: "Diamond Expertise",
-    bottom: 128,
+    bottom: 70,
     fontSize: 60,
     mobileFontSize: 32,
     color: "#FFFFFF",
@@ -372,7 +372,7 @@ export const educationFourCsIntroContent = {
 /** Figma nodes 692:29024 (desktop) + 692:28579 (mobile intro stack) */
 export const educationFourCsIntroSpec = {
   sectionClassName:
-    "flex flex-col bg-white px-4 pt-16 pb-16 md:px-8 md:pb-20 lg:px-10 lg:pb-104",
+    "flex flex-col bg-white px-4 py-16 md:px-8 lg:px-10 lg:py-25",
   contentClassName: "mx-auto flex w-full max-w-680 flex-col items-center",
   stackClassName: "flex flex-col items-center gap-6 lg:gap-8",
   titleClassName:

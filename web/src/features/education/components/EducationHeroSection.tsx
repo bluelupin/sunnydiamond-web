@@ -7,7 +7,7 @@ import { educationHeroFigmaSpec } from "../data/content";
 import EducationHeroMedia from "./EducationHeroMedia";
 import { useEducationHeroLoadAnimation } from "../hooks/useEducationHeroLoadAnimation";
 
-const { section, title, overlay, animation } = educationHeroFigmaSpec;
+const { section, overlay, animation } = educationHeroFigmaSpec;
 const collapsedWidthPercent = `${animation.collapsedWidthRatio * 100}%`;
 
 type EducationHeroSectionProps = {
@@ -25,10 +25,10 @@ const EducationHeroSection = ({ hero }: EducationHeroSectionProps) => {
     <section
       id="education-hero"
       aria-labelledby="education-hero-title"
-      className="relative flex flex-col overflow-hidden bg-white"
+      className="relative flex flex-col justify-end overflow-hidden bg-white pb-[70px]"
       style={{ height: section.height }}
     >
-      <div className="relative flex-1 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden">
         <div
           className={cn(
             "absolute left-1/2 h-full -translate-x-1/2 overflow-hidden",
@@ -46,19 +46,14 @@ const EducationHeroSection = ({ hero }: EducationHeroSectionProps) => {
 
           <MediaContentOverlay gradient={overlay.gradient} />
         </div>
-
-        <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center"
-          style={{ paddingBottom: title.bottom }}
-        >
-          <h1
-            id="education-hero-title"
-            className="text-center font-larken text-[32px] font-light leading-none text-white lg:text-[60px]"
-          >
-            {hero.title}
-          </h1>
-        </div>
       </div>
+
+      <h1
+        id="education-hero-title"
+        className="relative z-10 text-center font-larken text-[32px] font-light leading-none text-white lg:text-[60px]"
+      >
+        {hero.title}
+      </h1>
     </section>
   );
 };

@@ -31,19 +31,19 @@ const DiscoverStaticImage = ({
   sizes: string;
   src: string;
 }) => (
-  <div className="relative overflow-hidden" style={{ width, height }}>
+  <div className="shrink-0 overflow-hidden" style={{ width, height }}>
     <Image
       src={src}
       alt=""
       width={width}
       height={height}
-      className="absolute max-w-none object-cover"
+      className="max-w-none object-cover"
       sizes={sizes}
       style={{
         height: crop.cropHeight,
         width: crop.cropWidth,
-        left: crop.cropLeft,
-        top: crop.cropTop,
+        marginLeft: crop.cropLeft,
+        marginTop: crop.cropTop,
       }}
     />
   </div>
@@ -64,7 +64,7 @@ const DiscoverCmsImage = ({
   mobileSrc: string;
   alt: string;
 }) => (
-  <div className="relative overflow-hidden" style={{ width, height }}>
+  <div className="shrink-0 overflow-hidden" style={{ width, height }}>
     <ResponsiveImage
       desktopSrc={desktopSrc}
       mobileSrc={mobileSrc}
@@ -73,7 +73,7 @@ const DiscoverCmsImage = ({
       height={height}
       quality={85}
       sizes={sizes}
-      className="absolute inset-0 h-full w-full object-cover object-center"
+      className="h-full w-full object-cover object-center"
     />
   </div>
 );
@@ -258,39 +258,26 @@ const EducationDiscoverSection = ({ ctaBanner }: EducationDiscoverSectionProps) 
   return (
     <section
       aria-labelledby="education-discover-title"
-      className="relative h-[743px] overflow-hidden bg-gray300 md:h-[615px]"
+      className="overflow-hidden bg-gray300 px-4 py-16 md:px-8 lg:px-10 lg:py-25"
     >
-      <div
-        className="absolute bottom-0 left-0 hidden mix-blend-darken md:block"
-        style={{ width: desktopImage.width, height: desktopImage.height }}
-      >
-        <ScrollReveal delayMs={180} className="relative h-full w-full">
-          {renderDesktopImage()}
-        </ScrollReveal>
-      </div>
-
-      <div
-        className="pointer-events-none absolute mix-blend-darken md:hidden"
-        style={{
-          left: mobileImage.left,
-          top: mobileImage.top,
-          width: mobileImage.width,
-          height: mobileImage.height,
-        }}
-      >
-        <ScrollReveal delayMs={140} className="h-full w-full">
-          <div className="-scale-y-100 rotate-180">{renderMobileImage()}</div>
-        </ScrollReveal>
-      </div>
-
-      <div className="relative z-10 flex h-full flex-col px-4 py-16 lg:absolute lg:inset-y-0 lg:left-[calc(50%+294.5px)] lg:top-1/2 lg:h-auto lg:w-[585px] lg:-translate-x-1/2 lg:-translate-y-1/2 lg:justify-center lg:px-0 lg:py-0">
-        <ScrollReveal delayMs={0} className="w-full">
+      <div className="mx-auto flex w-full max-w-1440 flex-col gap-8 lg:grid lg:grid-cols-2 lg:items-center lg:gap-10">
+        <ScrollReveal delayMs={0} className="w-full lg:order-2 lg:max-w-[585px] lg:justify-self-end">
           <DiscoverContent
             heading={ctaBanner.heading}
             subheading={ctaBanner.subheading}
             ctaLabel={ctaBanner.ctaLabel}
             ctaHref={ctaBanner.ctaHref}
           />
+        </ScrollReveal>
+
+        <ScrollReveal
+          delayMs={180}
+          className="flex w-full justify-center mix-blend-darken lg:order-1 lg:justify-start"
+        >
+          <div className="hidden md:block">{renderDesktopImage()}</div>
+          <div className="md:hidden">
+            <div className="-scale-y-100 rotate-180">{renderMobileImage()}</div>
+          </div>
         </ScrollReveal>
       </div>
     </section>

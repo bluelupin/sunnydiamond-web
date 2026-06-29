@@ -3,6 +3,7 @@
 import { Fragment, useState } from "react";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import type { NormalizedEducationFaqSection } from "@/services/education/learn-about-diamonds-page.types";
+import { cn } from "@/shared/utils/cn";
 import { educationSectionTitleSpacingClassName } from "../data/content";
 
 const FaqPlusIcon = () => (
@@ -43,7 +44,9 @@ const EducationFaqSection = ({ faq }: EducationFaqSectionProps) => {
   return (
     <section
       aria-labelledby="education-faq-title"
-      className="bg-white px-4 py-16 lg:px-10 lg:py-100"
+      className={cn(
+        "bg-white px-4 py-16 md:px-8 lg:px-10 lg:py-25",
+      )}
     >
       <div className="mx-auto flex max-w-[910px] flex-col items-center">
         <ScrollReveal

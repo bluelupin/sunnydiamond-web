@@ -1,6 +1,7 @@
 import Image from "next/image";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import type { NormalizedEducationCertificateSection } from "@/services/education/learn-about-diamonds-page.types";
+import { cn } from "@/shared/utils/cn";
 import {
   educationCertifiedSpec,
   educationPageImages,
@@ -90,7 +91,9 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
   return (
     <section
       aria-labelledby="education-certified-title"
-      className="relative overflow-hidden bg-white px-4 py-16 max-md:h-[900px] md:bg-gray300 md:px-8 md:py-20 lg:px-10 lg:py-100"
+      className={cn(
+        "relative overflow-hidden bg-white px-4 py-16 max-md:h-[900px] md:bg-gray300 md:px-8 lg:px-10 lg:py-25",
+      )}
     >
       <div
         aria-hidden

@@ -128,7 +128,9 @@ const EducationLearnMoreSection = () => {
   return (
     <section
       aria-labelledby="education-learn-more-title"
-      className="bg-white px-4 py-16 max-md:h-[681px] md:px-8 md:py-20 lg:px-10 lg:py-100"
+      className={cn(
+        "bg-white px-4 py-16 max-md:h-[681px] md:px-8 lg:px-10 lg:py-25",
+      )}
     >
       <div className="mx-auto flex max-w-[1360px] flex-col items-center gap-6 lg:gap-16">
         <div className="flex w-full flex-col items-center">
