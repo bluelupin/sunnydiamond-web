@@ -3,14 +3,14 @@
 import { PencilLine, Gem, Hammer, PackageCheck, type LucideIcon } from "lucide-react";
 import Image from "next/image";
 import { useStepScroll } from "@/shared/hooks/use-step-scroll";
-import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import fallBackImage from "@/assets/fallBackImage.png";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
-import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { resolveCraftsmanshipSection } from "@/shared/utils/resolveCraftsmanshipSection";
 import { useMemo } from "react";
+
 interface CraftsmanshipProcessProps {
   id?: string;
 }
@@ -57,47 +57,24 @@ const stepIcons: LucideIcon[] = [PencilLine, Gem, Hammer, PackageCheck];
 
 const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
   const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
-  const craftsmanshipSection =
-    editorialData?.craftsmanshipSection ||
-    editorialData?.homepage?.craftsmanshipSection;
-  const sectionTitle = craftsmanshipSection?.sectionTitle?.trim() ?? "";
-  const desktopImageUrl = useMemo(
-    () => resolveCmsMediaUrl(craftsmanshipSection?.image?.desktopImage ?? craftsmanshipSection?.image?.data?.attributes ?? craftsmanshipSection?.image),
-    [craftsmanshipSection]
-  );
 
-  const mobileImageUrl = useMemo(
-    () => resolveCmsMediaUrl(craftsmanshipSection?.image?.mobileImage ?? craftsmanshipSection?.image?.data?.attributes ?? craftsmanshipSection?.image),
-    [craftsmanshipSection]
-  );
+  const craftsmanship = useMemo(() => {
+    const cmsSection =
+      editorialData?.craftsmanshipSection ||
+      editorialData?.homepage?.craftsmanshipSection;
+    return resolveCraftsmanshipSection(cmsSection);
+  }, [editorialData]);
 
-  const craftsmanshipSectionAlt = useMemo(
-    () =>
-      craftsmanshipSection?.image?.altText ||
-      resolveCmsAltText(craftsmanshipSection?.image?.desktopImage ?? craftsmanshipSection?.image?.data?.attributes ?? craftsmanshipSection?.image) ||
-      resolveCmsAltText(craftsmanshipSection?.image?.mobileImage ?? craftsmanshipSection?.image?.data?.attributes ?? craftsmanshipSection?.image) ||
-      craftsmanshipSection?.title ||
-      "",
-    [craftsmanshipSection]
-  );
-  const isActive = isSectionActive(craftsmanshipSection?.isActive);
-  const steps = Array.isArray(craftsmanshipSection?.steps)
-    ? [...craftsmanshipSection.steps]
-      .filter((step) => step?.isActive !== false)
-      .sort(
-        (a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0)
-      )
-    : [];
-
+  const { sectionTitle, steps, desktopImageUrl, mobileImageUrl, imageAlt } = craftsmanship;
   const stepCount = steps.length;
   const { activeIndex, progress, containerRef } = useStepScroll(stepCount);
 
   // Scroll-driven 3D rotation: combines tilt (X), spin (Y), and a touch of Z roll
-  const rotateY = progress * 540; // strong horizontal spin
-  const rotateX = 18 - progress * 36; // subtle tilt from +18 to -18
-  const rotateZ = Math.sin(progress * Math.PI * 2) * 8; // gentle wobble
+  const rotateY = progress * 540;
+  const rotateX = 18 - progress * 36;
+  const rotateZ = Math.sin(progress * Math.PI * 2) * 8;
 
-  if (!isActive) {
+  if (!isSectionActive(craftsmanship.isActive)) {
     return null;
   }
 
@@ -152,33 +129,33 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
 
               {/* Active + next upcoming step (faded) */}
               <ol className="space-y-12 md:space-y-16 relative">
-                {steps.map((step: any, i: any) => {
+                {steps.map((step, i) => {
                   const Icon = stepIcons[i] ?? PencilLine;
-                  const isActive = i === activeIndex;
+                  const isActiveStep = i === activeIndex;
                   const isNext = i === activeIndex + 1;
-                  const isVisible = isActive || isNext;
+                  const isVisible = isActiveStep || isNext;
                   return (
                     <li
-                      key={step.id}
+                      key={String(step.id ?? step.number ?? i)}
                       className="transition-all duration-700 ease-out lg:max-w-auto max-w-420 lg:mx-0 mx-auto mx-auto lg:px-0 px-3 flex flex-col lg:items-start items-center lg:justify-start justify-center gap-4"
                       style={{
-                        opacity: isActive ? 1 : isNext ? 0.1 : 0,
+                        opacity: isActiveStep ? 1 : isNext ? 0.1 : 0,
                         maxHeight: isVisible ? "320px" : "0px",
                         marginTop: isVisible ? undefined : 0,
                         marginBottom: isVisible ? undefined : 0,
                         overflow: "hidden",
-                        transform: isActive
+                        transform: isActiveStep
                           ? "translateY(0)"
                           : isNext
                             ? "translateY(8px)"
                             : "translateY(20px)",
                         pointerEvents: isVisible ? "auto" : "none",
                       }}
-                      aria-current={isActive ? "step" : undefined}
+                      aria-current={isActiveStep ? "step" : undefined}
                       aria-hidden={!isVisible}
                     >
                       <Icon
-                        className={`transition-all duration-500 ${isActive
+                        className={`transition-all duration-500 ${isActiveStep
                           ? "text-foreground md:h-7 md:w-7 h-5 w-5"
                           : "text-foreground h-6 w-6"
                           }`}
@@ -188,7 +165,7 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
                       <h3 className="text-base sm:text-xl md:text-2xl lg:text-28 font-normal tracking-[0%] leading-[100%] text-darkblack font-gill lg:text-left text-center">
                         {step.title || ""}
                       </h3>
-                      {isActive && (
+                      {isActiveStep && (
                         <p className="text-base md:text-lg lg:text-xl font-light text-darkblack tracking-[1%] leading-[100%] font-gill animate-fade-in lg:text-left text-center">
                           {step.description || ""}
                         </p>
@@ -211,10 +188,10 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
                   filter: "drop-shadow(0 30px 50px hsl(var(--foreground) / 0.18))",
                 }}
               >
-                  <ResponsiveImage
+                <ResponsiveImage
                   desktopSrc={desktopImageUrl || fallBackImage}
                   mobileSrc={mobileImageUrl || fallBackImage}
-                  alt={craftsmanshipSectionAlt}
+                  alt={imageAlt}
                   width={desktopImageUrl ? 750 : 390}
                   height={desktopImageUrl ? 470 : 350}
                   quality={80}

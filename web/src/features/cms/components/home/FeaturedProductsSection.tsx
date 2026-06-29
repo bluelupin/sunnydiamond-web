@@ -7,6 +7,7 @@ import {
   featuredProductsCarouselFallbackItems,
 } from "@/features/cms/data/featuredProductsFallback";
 import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { isSectionActive } from "@/shared/utils/cmsSection";
 import Reveal from "@/shared/Animation/Reveal";
 import FeaturedProductsCarousel, {
   type FeaturedCarouselItem,
@@ -121,6 +122,10 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
 
     return normalizeCarouselItems(mapped);
   }, [featuredProductsData?.products]);
+
+  if (!isSectionActive(featuredProductsData?.isActive)) {
+    return null;
+  }
 
   if (isShoppingLoading) {
     return (

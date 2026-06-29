@@ -42,6 +42,7 @@ export default async function Page() {
   return (
     <>
       <HomepageCmsSeeder
+        shell={prefetchedCms.shell}
         editorial={prefetchedCms.editorial}
         shopping={prefetchedCms.shopping}
       />

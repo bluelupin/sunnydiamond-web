@@ -39,6 +39,7 @@ export type FeaturedCollectionSection = {
   id?: number | null;
   sectionTitle?: string | null;
   description?: string | null;
+  isActive?: boolean | null;
   cta?: CategoryNavigationCta | null;
   label?: { label?: string | null } | null;
   products?: FeaturedCollectionImage[] | null;
