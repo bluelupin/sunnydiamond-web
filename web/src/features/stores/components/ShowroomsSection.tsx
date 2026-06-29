@@ -67,7 +67,7 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
       className="bg-gray200 py-10 sm:py-12 md:py-16 lg:py-20 lg:h-846 md:h-auto h-auto"
     >
       <div className="2xl:pl-24 lg:pl-20 pl-5 lg:pr-0 pr-5">
-        <ScrollReveal as="h2" delayMs={0} className="lg:text-5xl md:text-4xl text-32 text-black font-larken font-light tracking-[0%] leading-[100%] mb-4 sm:mb-6 md:mb-8 lg:mb-10 lg:text-left text-center">
+        <ScrollReveal as="h2" delayMs={0} className="mb-8 text-center font-larken text-32 font-light leading-[100%] tracking-[0%] text-black md:text-4xl lg:mb-40 lg:text-left lg:text-5xl">
           {showroomSection.sectionTitle}
         </ScrollReveal>
         {showroomSection.description ? (
@@ -88,7 +88,7 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
               <div
                 key={location.id}
                 className={cn(
-                  "2xl:pl-24 lg:pl-20 lg:w-full w-fit lg:pr-4 lg:border-r-[3px] lg:border-b-0 border-b-[3px] transition-all duration-300",
+                  "2xl:pl-24 lg:pl-20 lg:w-full w-fit lg:pr-4 border-b-[3px] lg:border-b-0 transition-all duration-300",
                   isSelected
                     ? "border-black bg-gray300"
                     : "border-transparent"
