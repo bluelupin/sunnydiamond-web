@@ -7,6 +7,7 @@ import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 import { homeContent } from "@/features/cms/data/content";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import { isSectionActive } from "@/shared/utils/cmsSection";
+import Reveal from "@/shared/Animation/Reveal";
 
 interface SunnyPromiseSectionProps {
   id?: string;
@@ -51,13 +52,12 @@ const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
     <section
       id={id}
       aria-label={sectionTitle}
-      className="flex flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 lg:gap-40 lg:px-40 lg:py-100"
+      className="flex flex-col items-center gap-8 bg-white px-4 py-16 lg:gap-[40px] lg:px-[40px] lg:py-100"
     >
-      <ScrollReveal as="h2" delayMs={0} className="text-center font-larken text-[32px] font-light leading-110 text-darkblack lg:text-[48px] lg:whitespace-nowrap">
+      <Reveal as="h2" direction="up" className="text-center font-larken text-[32px] font-light leading-110 text-darkblack lg:text-[48px] lg:whitespace-nowrap">
         {sectionTitle}
-      </ScrollReveal>
-
-      <ScrollReveal delayMs={100} className="relative h-[670px] w-full max-w-[1360px] shrink-0 overflow-hidden md:h-[700px]">
+      </Reveal>
+      <Reveal direction="up" className="relative h-[670px] w-full max-w-[1360px] shrink-0 overflow-hidden md:h-[700px]">
         <video
           className="absolute inset-0 size-full object-cover object-center"
           autoPlay
@@ -71,23 +71,19 @@ const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
         >
           <source src={PROMISE_VIDEO_MP4} type="video/mp4" />
         </video>
-      </ScrollReveal>
+      </Reveal>
 
       <div className="flex w-full flex-col items-center gap-6 lg:gap-6">
-        <ScrollReveal delayMs={180} className="max-w-[384px] text-center font-gill text-base font-light leading-110 text-[#4D4D4D] md:text-xl">
+        <Reveal direction="up" className="max-w-[384px] text-center font-gill text-base font-light leading-110 text-[#4D4D4D] md:text-xl">
           {description}
-        </ScrollReveal>
-
-        {ctaUrl ? (
-          <ScrollReveal delayMs={260}>
-            <Link
-              href={ctaUrl}
-              className="text-link-underline inline-flex items-center justify-center border-b-[1.5px] border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
-            >
+        </Reveal>
+        {ctaUrl &&
+          <Reveal direction="up">
+            <Link href={ctaUrl} className="relative after:bg-darkMagenta after:absolute after:h-0.5 after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-darkblack hover:border-darkMagenta sm:pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack hover:text-darkMagenta">
               {ctaLabel}
             </Link>
-          </ScrollReveal>
-        ) : null}
+          </Reveal>
+        }
       </div>
     </section>
   );
