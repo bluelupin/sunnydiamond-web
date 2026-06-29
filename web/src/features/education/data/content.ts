@@ -369,6 +369,27 @@ export const educationFourCsIntroContent = {
   pillars: ["Cut", "Colour", "Carat", "Clarity"] as const,
 } as const;
 
+/** Figma nodes 692:29024 (desktop) + 692:28579 (mobile intro stack) */
+export const educationFourCsIntroSpec = {
+  sectionClassName:
+    "flex flex-col bg-white px-4 pt-16 pb-16 md:px-8 md:pb-20 lg:px-10 lg:pb-104",
+  contentClassName: "mx-auto flex w-full max-w-680 flex-col items-center",
+  stackClassName: "flex flex-col items-center gap-6 lg:gap-8",
+  titleClassName:
+    "block w-full text-center font-larken text-32 font-light leading-110 text-darkblack lg:text-48",
+  imageClassName:
+    "relative h-130 w-160 overflow-hidden rounded-full lg:h-202 lg:w-250",
+  imageSizes: "(max-width: 1024px) 160px, 250px",
+  verticalRuleClassName: "h-55 w-px bg-darkblack/40",
+  descriptionClassName:
+    "max-w-350 text-center font-gill text-base font-light leading-110 text-darkblack lg:max-w-523 lg:text-20",
+  gradientRuleClassName:
+    "h-px w-250 bg-gradient-to-r from-darkMagenta to-goldAccent lg:w-420",
+  pillarsClassName:
+    "flex flex-wrap items-center justify-center gap-x-3 gap-y-2 font-gill text-20 leading-110 text-darkblack lg:gap-x-4 lg:text-24",
+  pillarItemClassName: "inline-flex items-center gap-3 lg:gap-4",
+} as const;
+
 export type EducationSliderOption = {
   label: string;
   /** Renders as stacked lines on mobile only (desktop uses `label`) */

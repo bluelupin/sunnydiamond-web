@@ -1,78 +1,61 @@
 import Image from "next/image";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
+import EducationFourCsIntroPillars from "./EducationFourCsIntroPillars";
 import {
   educationFourCsIntroContent,
+  educationFourCsIntroSpec,
   educationPageImages,
   educationSectionTitleSpacingClassName,
 } from "../data/content";
+
+const spec = educationFourCsIntroSpec;
 
 const EducationFourCsIntroSection = () => {
   return (
     <section
       aria-labelledby="education-four-cs-intro-title"
-      className="flex flex-col bg-white px-4 py-16 max-md:min-h-[561px] max-md:justify-center md:h-620 md:px-8 md:py-12 lg:h-[694px] lg:px-0 lg:py-0"
+      className={spec.sectionClassName}
     >
-      <div className="mx-auto flex h-full max-w-[677px] flex-col items-center justify-center lg:pt-16">
+      <div className={spec.contentClassName}>
         <ScrollReveal
           as="h2"
           delayMs={0}
           className={`w-full ${educationSectionTitleSpacingClassName}`}
         >
-          <span
-            id="education-four-cs-intro-title"
-            className="block text-center font-larken text-[32px] font-light leading-110 text-darkblack lg:text-[48px]"
-          >
+          <span id="education-four-cs-intro-title" className={spec.titleClassName}>
             <span className="md:hidden">{educationFourCsIntroContent.mobileTitle}</span>
             <span className="hidden md:inline">{educationFourCsIntroContent.desktopTitle}</span>
           </span>
         </ScrollReveal>
 
-        <div className="flex flex-col items-center gap-6 lg:gap-8">
+        <div className={spec.stackClassName}>
           <ScrollReveal delayMs={100}>
-            <div className="relative h-[130px] w-[160px] overflow-hidden rounded-[110px] lg:h-[202px] lg:w-[250px]">
+            <div className={spec.imageClassName}>
               <Image
                 src={educationPageImages.diamondOval}
                 alt=""
                 fill
                 className="object-cover"
-                sizes="(max-width: 1024px) 160px, 250px"
+                sizes={spec.imageSizes}
               />
             </div>
           </ScrollReveal>
 
           <ScrollReveal delayMs={180} className="max-md:hidden">
-            <div className="h-[55px] w-px bg-[rgba(10,10,10,0.4)]" aria-hidden />
+            <div className={spec.verticalRuleClassName} aria-hidden />
           </ScrollReveal>
 
           <ScrollReveal delayMs={220}>
-            <p className="max-w-[342px] text-center font-gill text-base font-light leading-110 text-darkblack lg:max-w-[523px] lg:text-[20px]">
+            <p className={spec.descriptionClassName}>
               {educationFourCsIntroContent.description}
             </p>
           </ScrollReveal>
 
           <ScrollReveal delayMs={300}>
-            <div className="h-px w-[250px] bg-gradient-to-r from-darkMagenta to-[#dda957] lg:w-[421px]" aria-hidden />
+            <div className={spec.gradientRuleClassName} aria-hidden />
           </ScrollReveal>
 
-          <ScrollReveal delayMs={380}>
-            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 font-gill text-[20px] leading-110 text-darkblack lg:gap-x-4 lg:text-24">
-              {educationFourCsIntroContent.pillars.map((pillar, index) => (
-                <span key={pillar} className="inline-flex items-center gap-3 lg:gap-4">
-                  {index > 0 ? (
-                    <Image
-                      src={educationPageImages.star}
-                      alt=""
-                      width={16}
-                      height={16}
-                      className="size-4"
-                      aria-hidden
-                    />
-                  ) : null}
-                  {pillar}
-                </span>
-              ))}
-            </div>
-          </ScrollReveal>
+          <EducationFourCsIntroPillars pillars={educationFourCsIntroContent.pillars} />
         </div>
       </div>
     </section>
