@@ -1,14 +1,12 @@
-import { Inter, Playfair_Display } from "next/font/google";
+import localFont from "next/font/local";
 
-export const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inter",
-});
+export const inter = {
+  variable: "font-inter-variable",
+} as const;
 
-export const playfairDisplay = Playfair_Display({
-  subsets: ["latin"],
+export const playfairDisplay = localFont({
+  src: "../../assets/fonts/PlayfairDisplay-Regular.ttf",
   display: "swap",
-  weight: ["400"],
+  weight: "400",
   variable: "--font-playfair",
 });
