@@ -18,7 +18,9 @@ const LEARN_ABOUT_DIAMONDS_POPULATE_QUERY =
   "&populate[fourCsSection][populate][cInfoPanel]=true" +
   "&populate[fourCsSection][populate][cVisualPanel][populate][gradeStops]=true" +
   "&populate[fourCsSection][populate][cVisualPanel][populate][visualImage][populate][desktopImage]=true" +
-  "&populate[fourCsSection][populate][cVisualPanel][populate][visualImage][populate][mobileImage]=true";
+  "&populate[fourCsSection][populate][cVisualPanel][populate][visualImage][populate][mobileImage]=true" +
+  "&populate[certificateSection][populate][certificationLabs][populate][labLogo][populate][desktopImage]=true" +
+  "&populate[certificateSection][populate][certificationLabs][populate][labLogo][populate][mobileImage]=true";
 
 export const getLearnAboutDiamondsPage = cache(
   async (signal?: AbortSignal): Promise<NormalizedLearnAboutDiamondsPage> => {

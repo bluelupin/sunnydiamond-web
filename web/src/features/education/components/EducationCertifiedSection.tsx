@@ -1,7 +1,7 @@
 import Image from "next/image";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
+import type { NormalizedEducationCertificateSection } from "@/services/education/learn-about-diamonds-page.types";
 import {
-  educationCertifiedContent,
   educationCertifiedSpec,
   educationPageImages,
 } from "../data/content";
@@ -10,36 +10,33 @@ const spec = educationCertifiedSpec;
 const desktopVisual = spec.visual.desktop;
 const mobileVisual = spec.visual.mobile;
 
-const certificationMap = Object.fromEntries(
-  educationCertifiedContent.certifications.map((cert) => [cert.id, cert]),
-);
-
-const mobileCertifications = educationCertifiedContent.mobileLogoOrder.map(
-  (id) => certificationMap[id],
-);
+type CertificationItem = NormalizedEducationCertificateSection["certifications"][number];
 
 const CertificationLogo = ({
   cert,
   mobile = false,
 }: {
-  cert: (typeof educationCertifiedContent.certifications)[number];
+  cert: CertificationItem;
   mobile?: boolean;
 }) => {
   const logoClassName = mobile ? cert.mobileLogoClassName : cert.logoClassName;
+  const imageClassName = cert.usesCmsLogo
+    ? "size-full object-contain"
+    : cert.imageClassName;
 
   const logoImage = (
     <div className={`relative overflow-hidden ${logoClassName}`}>
       <Image
-        src={cert.logo}
+        src={cert.logoUrl}
         alt=""
         fill
-        className={cert.imageClassName}
+        className={imageClassName}
         sizes="120px"
       />
     </div>
   );
 
-  if (!mobile && "logoWrapClassName" in cert && cert.logoWrapClassName) {
+  if (!mobile && cert.logoWrapClassName) {
     return <div className={cert.logoWrapClassName}>{logoImage}</div>;
   }
 
@@ -50,10 +47,10 @@ const CertificationLabel = ({
   cert,
   mobile = false,
 }: {
-  cert: (typeof educationCertifiedContent.certifications)[number];
+  cert: CertificationItem;
   mobile?: boolean;
 }) => {
-  if (mobile && "mobileLabelLines" in cert && cert.mobileLabelLines) {
+  if (mobile && cert.mobileLabelLines) {
     return (
       <div className="text-center font-gill text-sm font-light leading-110 text-darkblack">
         {cert.mobileLabelLines.map((line) => (
@@ -76,7 +73,19 @@ const CertificationLabel = ({
   );
 };
 
-const EducationCertifiedSection = () => {
+type EducationCertifiedSectionProps = {
+  certificate: NormalizedEducationCertificateSection;
+};
+
+const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionProps) => {
+  const certificationMap = Object.fromEntries(
+    certificate.certifications.map((cert) => [cert.id, cert]),
+  );
+
+  const mobileCertifications = certificate.mobileLogoOrder
+    .map((id) => certificationMap[id])
+    .filter((cert): cert is CertificationItem => cert != null);
+
   return (
     <section
       aria-labelledby="education-certified-title"
@@ -149,7 +158,7 @@ const EducationCertifiedSection = () => {
             id="education-certified-title"
             className="block text-center font-larken text-[32px] font-light leading-110 text-darkblack lg:text-[48px] lg:leading-none"
           >
-            {educationCertifiedContent.title}
+            {certificate.title}
           </span>
         </ScrollReveal>
 
@@ -177,7 +186,7 @@ const EducationCertifiedSection = () => {
         </div>
 
         <div className="hidden w-full grid-cols-4 md:grid">
-          {educationCertifiedContent.certifications.map((cert, index) => (
+          {certificate.certifications.map((cert, index) => (
             <ScrollReveal key={cert.id} delayMs={80 + index * 80}>
               <div className="flex flex-col items-center justify-between gap-2 lg:min-h-[122px]">
                 <CertificationLogo cert={cert} />
@@ -203,19 +212,19 @@ const EducationCertifiedSection = () => {
             <div className="flex w-full flex-col gap-6">
               <div className="flex flex-col gap-3">
                 <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
-                  {educationCertifiedContent.whyTitle}
+                  {certificate.whyTitle}
                 </h3>
                 <p className="font-gill text-sm font-light leading-110 text-darkblack">
-                  {educationCertifiedContent.whyDescription}
+                  {certificate.whyDescription}
                 </p>
               </div>
 
               <div className="flex flex-col gap-3">
                 <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
-                  {educationCertifiedContent.howTitle}
+                  {certificate.howTitle}
                 </h3>
                 <p className="font-gill text-sm font-light leading-110 text-darkblack">
-                  {educationCertifiedContent.howDescription}
+                  {certificate.howDescription}
                 </p>
               </div>
             </div>
@@ -241,28 +250,26 @@ const EducationCertifiedSection = () => {
 
               <div className="flex flex-col gap-3">
                 <h3 className="font-gill text-24 font-normal leading-110 text-darkblack">
-                  {educationCertifiedContent.whyTitle}
+                  {certificate.whyTitle}
                 </h3>
                 <p className="font-gill text-[20px] font-light leading-110 text-neutral500 lg:max-w-[546px]">
-                  {educationCertifiedContent.whyDescription}
+                  {certificate.whyDescription}
                 </p>
               </div>
 
               <div className="flex flex-col gap-3">
                 <h3 className="font-gill text-24 font-normal leading-110 text-darkblack">
-                  {educationCertifiedContent.howTitle}
+                  {certificate.howTitle}
                 </h3>
                 <p className="font-gill text-[20px] font-light leading-110 text-neutral500 lg:max-w-[546px]">
-                  {educationCertifiedContent.howDescription}
+                  {certificate.howDescription}
                 </p>
               </div>
             </div>
           </ScrollReveal>
 
           <ScrollReveal delayMs={220}>
-            <div
-              className="absolute left-[700px] top-[-189px] h-[548px] w-[641px]"
-            >
+            <div className="absolute left-[700px] top-[-189px] h-[548px] w-[641px]">
               <div
                 className="absolute relative overflow-hidden rounded-full border-[#999999]"
                 style={{

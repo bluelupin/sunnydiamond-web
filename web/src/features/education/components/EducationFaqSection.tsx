@@ -44,8 +44,8 @@ const EducationFaqSection = ({ faq }: EducationFaqSectionProps) => {
       aria-labelledby="education-faq-title"
       className="bg-white px-4 py-16 lg:px-10 lg:py-[104px]"
     >
-      <div className="mx-auto flex max-w-[910px] flex-col items-center gap-8 lg:gap-10">
-        <ScrollReveal as="h2" delayMs={0} className="w-full">
+      <div className="mx-auto flex max-w-[910px] flex-col items-center">
+        <ScrollReveal as="h2" delayMs={0} className="mb-8 w-full lg:mb-40">
           <span
             id="education-faq-title"
             className="block w-full text-left font-larken text-[32px] font-light leading-110 text-darkblack lg:text-center lg:text-[48px]"

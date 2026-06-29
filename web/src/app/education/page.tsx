@@ -45,6 +45,7 @@ export default async function Page() {
         faq={cmsPage.faq}
         ctaBanner={cmsPage.ctaBanner}
         fourCs={cmsPage.fourCs}
+        certificate={cmsPage.certificate}
       />
     </>
   );

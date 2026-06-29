@@ -1,4 +1,5 @@
 import {
+  educationCertifiedContent,
   educationDiscoverContent,
   educationFaqItems,
   educationFourCsPanels,
@@ -82,11 +83,30 @@ export type StrapiEducationFourCsSection = {
   cVisualPanel?: StrapiEducationFourCsVisualPanel[] | null;
 };
 
+export type StrapiEducationCertificationLab = {
+  id?: number;
+  labName?: string | null;
+  labCode?: string | null;
+  labDescription?: string | null;
+  labLogo?: StrapiEducationResponsiveImage | null;
+};
+
+export type StrapiEducationCertificateSection = {
+  sectionHeading?: string | null;
+  sectionDescription?: string | null;
+  whyCertificationHeading?: string | null;
+  whyCertificationDescription?: string | null;
+  howToVerifyHeading?: string | null;
+  howToVerifyDescription?: string | null;
+  certificationLabs?: StrapiEducationCertificationLab[] | null;
+};
+
 export type StrapiLearnAboutDiamondsPageEntity = {
   hero?: StrapiEducationHero | null;
   faqSection?: StrapiEducationFaqSection | null;
   ctaBanner?: StrapiEducationCtaBanner | null;
   fourCsSection?: StrapiEducationFourCsSection | null;
+  certificateSection?: StrapiEducationCertificateSection | null;
 };
 
 export type NormalizedEducationHero = {
@@ -130,11 +150,34 @@ export type NormalizedEducationFourCsSection = {
   panels: NormalizedEducationFourCsPanel[];
 };
 
+export type NormalizedEducationCertification = {
+  id: string;
+  logoUrl: string;
+  label: string;
+  mobileLabelLines?: readonly [string, string];
+  logoClassName: string;
+  mobileLogoClassName: string;
+  imageClassName: string;
+  logoWrapClassName?: string;
+  usesCmsLogo: boolean;
+};
+
+export type NormalizedEducationCertificateSection = {
+  title: string;
+  certifications: NormalizedEducationCertification[];
+  mobileLogoOrder: readonly string[];
+  whyTitle: string;
+  whyDescription: string;
+  howTitle: string;
+  howDescription: string;
+};
+
 export type NormalizedLearnAboutDiamondsPage = {
   hero: NormalizedEducationHero;
   faq: NormalizedEducationFaqSection;
   ctaBanner: NormalizedEducationCtaBanner;
   fourCs: NormalizedEducationFourCsSection;
+  certificate: NormalizedEducationCertificateSection;
 };
 
 export const EMPTY_EDUCATION_HERO: NormalizedEducationHero = {
@@ -168,9 +211,30 @@ export const EMPTY_EDUCATION_FOUR_CS: NormalizedEducationFourCsSection = {
   panels: educationFourCsPanels.map((panel) => ({ ...panel })),
 };
 
+export const EMPTY_EDUCATION_CERTIFICATE: NormalizedEducationCertificateSection = {
+  title: educationCertifiedContent.title,
+  certifications: educationCertifiedContent.certifications.map((cert) => ({
+    id: cert.id,
+    logoUrl: cert.logo,
+    label: cert.label,
+    ...("mobileLabelLines" in cert ? { mobileLabelLines: cert.mobileLabelLines } : {}),
+    logoClassName: cert.logoClassName,
+    mobileLogoClassName: cert.mobileLogoClassName,
+    imageClassName: cert.imageClassName,
+    ...("logoWrapClassName" in cert ? { logoWrapClassName: cert.logoWrapClassName } : {}),
+    usesCmsLogo: false,
+  })),
+  mobileLogoOrder: educationCertifiedContent.mobileLogoOrder,
+  whyTitle: educationCertifiedContent.whyTitle,
+  whyDescription: educationCertifiedContent.whyDescription,
+  howTitle: educationCertifiedContent.howTitle,
+  howDescription: educationCertifiedContent.howDescription,
+};
+
 export const EMPTY_LEARN_ABOUT_DIAMONDS_PAGE: NormalizedLearnAboutDiamondsPage = {
   hero: EMPTY_EDUCATION_HERO,
   faq: EMPTY_EDUCATION_FAQ,
   ctaBanner: EMPTY_EDUCATION_CTA_BANNER,
   fourCs: EMPTY_EDUCATION_FOUR_CS,
+  certificate: EMPTY_EDUCATION_CERTIFICATE,
 };

@@ -1,6 +1,7 @@
 import {
   buildCaratSliderSpecForWeights,
   buildSliderSpecForOptionCount,
+  educationCertifiedContent,
   educationDiscoverContent,
   educationFaqItems,
   educationFourCsPanels,
@@ -12,6 +13,8 @@ import {
 } from "@/features/education/data/content";
 import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import type {
+  NormalizedEducationCertificateSection,
+  NormalizedEducationCertification,
   NormalizedEducationCtaBanner,
   NormalizedEducationFaqItem,
   NormalizedEducationFaqSection,
@@ -19,6 +22,8 @@ import type {
   NormalizedEducationFourCsSection,
   NormalizedEducationHero,
   NormalizedLearnAboutDiamondsPage,
+  StrapiEducationCertificateSection,
+  StrapiEducationCertificationLab,
   StrapiEducationCtaBanner,
   StrapiEducationFaqItem,
   StrapiEducationFourCsInfoPanel,
@@ -345,6 +350,105 @@ const mapFourCsSection = (
     : EMPTY_LEARN_ABOUT_DIAMONDS_PAGE.fourCs;
 };
 
+const STATIC_CERTIFICATION_BY_ID = Object.fromEntries(
+  educationCertifiedContent.certifications.map((cert) => [cert.id, cert]),
+) as Record<
+  string,
+  (typeof educationCertifiedContent.certifications)[number]
+>;
+
+const LAB_ID_BY_CODE: Record<string, string> = {
+  GIA: "gia",
+  AGS: "ags",
+  HRD: "hrd",
+  TKP: "kimberley",
+  KIMBERLEY: "kimberley",
+  KPCS: "kimberley",
+  "KIMBERLY PROCESS": "kimberley",
+};
+
+const resolveLabId = (lab: StrapiEducationCertificationLab, index: number) => {
+  const codeKey = cleanText(lab.labCode)?.toUpperCase();
+  if (codeKey && LAB_ID_BY_CODE[codeKey]) {
+    return LAB_ID_BY_CODE[codeKey];
+  }
+
+  const nameKey = cleanText(lab.labName)?.toUpperCase();
+  if (nameKey?.includes("GIA")) return "gia";
+  if (nameKey?.includes("AMERICAN GEM")) return "ags";
+  if (nameKey?.includes("HOGE RAADVOOR") || nameKey?.includes("HRD")) return "hrd";
+  if (nameKey?.includes("KIMBER")) return "kimberley";
+
+  return educationCertifiedContent.certifications[index]?.id ?? `lab-${index}`;
+};
+
+const mapCertificationLab = (
+  lab: StrapiEducationCertificationLab,
+  index: number,
+): NormalizedEducationCertification | null => {
+  const id = resolveLabId(lab, index);
+  const staticCert = STATIC_CERTIFICATION_BY_ID[id];
+  const label =
+    cleanText(lab.labName) ??
+    cleanText(lab.labDescription) ??
+    staticCert?.label;
+  if (!label) return null;
+
+  const logoUrl =
+    resolveCmsMediaUrl(lab.labLogo?.desktopImage) ??
+    resolveCmsMediaUrl(lab.labLogo?.mobileImage) ??
+    staticCert?.logo ??
+    "";
+
+  if (!logoUrl) return null;
+
+  return {
+    id,
+    logoUrl,
+    label,
+    ...(staticCert && "mobileLabelLines" in staticCert
+      ? { mobileLabelLines: staticCert.mobileLabelLines }
+      : {}),
+    logoClassName: staticCert?.logoClassName ?? "size-[79px]",
+    mobileLogoClassName: staticCert?.mobileLogoClassName ?? "size-[59.286px]",
+    imageClassName: staticCert?.imageClassName ?? "size-full object-cover",
+    ...(staticCert && "logoWrapClassName" in staticCert
+      ? { logoWrapClassName: staticCert.logoWrapClassName }
+      : {}),
+    usesCmsLogo: Boolean(
+      resolveCmsMediaUrl(lab.labLogo?.desktopImage) ??
+        resolveCmsMediaUrl(lab.labLogo?.mobileImage),
+    ),
+  };
+};
+
+const mapCertificateSection = (
+  section?: StrapiEducationCertificateSection | null,
+): NormalizedEducationCertificateSection => {
+  const fallback = EMPTY_LEARN_ABOUT_DIAMONDS_PAGE.certificate;
+  const mappedLabs =
+    section?.certificationLabs
+      ?.map((lab, index) => mapCertificationLab(lab, index))
+      .filter((lab): lab is NormalizedEducationCertification => lab != null) ?? [];
+
+  const certifications = mappedLabs.length ? mappedLabs : fallback.certifications;
+
+  return {
+    title: cleanText(section?.sectionHeading) ?? fallback.title,
+    certifications,
+    mobileLogoOrder: fallback.mobileLogoOrder,
+    whyTitle:
+      cleanText(section?.whyCertificationHeading) ?? fallback.whyTitle,
+    whyDescription:
+      cleanText(section?.whyCertificationDescription) ??
+      cleanText(section?.sectionDescription) ??
+      fallback.whyDescription,
+    howTitle: cleanText(section?.howToVerifyHeading) ?? fallback.howTitle,
+    howDescription:
+      cleanText(section?.howToVerifyDescription) ?? fallback.howDescription,
+  };
+};
+
 export function mapLearnAboutDiamondsPage(
   raw?: StrapiLearnAboutDiamondsPageEntity | null,
 ): NormalizedLearnAboutDiamondsPage {
@@ -355,5 +459,6 @@ export function mapLearnAboutDiamondsPage(
     faq: mapFaqSection(raw.faqSection),
     ctaBanner: mapCtaBanner(raw.ctaBanner),
     fourCs: mapFourCsSection(raw.fourCsSection),
+    certificate: mapCertificateSection(raw.certificateSection),
   };
 }
