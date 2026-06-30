@@ -91,7 +91,7 @@ function CraftingRarityCopyBlock({
   secondaryCtaLabel: string;
 }) {
   return (
-    <PageContainer className="px-4 md:px-8 lg:px-[40px] 2xl:px-[60px]">
+    <PageContainer className="relative z-10 px-4 md:px-8 lg:px-[40px] 2xl:px-[60px]">
       <div className="lg:h-432 h-390 w-full max-w-640 flex flex-col items-start sm:justify-center justify-end lg:gap-[40px] md:gap-8 gap-6">
         <Reveal as="h2" direction="up"
           className="lg:text-5xl sm:text-4xl text-32 font-larken font-light leading-110 text-darkblack"
@@ -105,13 +105,14 @@ function CraftingRarityCopyBlock({
             </span>
           ))}
         </Reveal>
-        {secondaryCtaUrl &&
-          <Reveal direction="up">
-            <Link href={secondaryCtaUrl} className="relative after:bg-darkMagenta after:absolute after:h-0.5 after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-darkblack hover:border-darkMagenta sm:pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack hover:text-darkMagenta">
-              {secondaryCtaLabel}
-            </Link>
-          </Reveal>
-        }
+        {secondaryCtaUrl ? (
+          <Link
+            href={secondaryCtaUrl}
+            className="relative shrink-0 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-darkMagenta after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack hover:border-darkMagenta hover:text-darkMagenta sm:pb-1 hover:after:w-full"
+          >
+            {secondaryCtaLabel}
+          </Link>
+        ) : null}
       </div>
     </PageContainer>
   );
@@ -189,7 +190,7 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
     <section id={id} className="w-full bg-white md:pb-12 pb-16">
       <div className="relative overflow-hidden h-390 md:h-420 lg:h-432">
         <Reveal direction="up"
-          className="pointer-events-none absolute right-[-29px] top-[-83px] size-[419px] lg:right-[2%] lg:top-[-204px] lg:size-[664px]"
+          className="pointer-events-none absolute right-[-29px] top-[-83px] z-0 size-[419px] lg:right-[2%] lg:top-[-204px] lg:size-[664px]"
         >
           <div className="relative h-full w-full rotate-[-13.91deg]">
             <Image
