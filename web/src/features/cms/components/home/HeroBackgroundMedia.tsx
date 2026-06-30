@@ -63,7 +63,7 @@ const HeroBackgroundMedia = ({
     }
   }, [shouldLoadVideo]);
 
-  if (isLoading) {
+  if (isLoading && !hasHeroImage) {
     return <div className="absolute inset-0 animate-pulse bg-gray200" aria-hidden />;
   }
 

@@ -9,4 +9,6 @@ export const playfairDisplay = localFont({
   display: "swap",
   weight: "400",
   variable: "--font-playfair",
+  /** Fallback only (behind Larken); headings use font-light (300) so preload is unused. */
+  preload: false,
 });
