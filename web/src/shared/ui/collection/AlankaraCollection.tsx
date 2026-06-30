@@ -237,7 +237,7 @@ function CollectionHeroPanel({
           "absolute z-10 text-white",
           isMobile
             ? "inset-x-0 top-[323px] flex flex-col items-center gap-6 px-4 text-center"
-            : "bottom-40 left-40 flex max-w-[418px] flex-col-reverse items-start",
+            : "bottom-0 left-40 flex max-w-[418px] flex-col-reverse items-start",
         )}
       >
         {isMobile ? (
@@ -254,14 +254,14 @@ function CollectionHeroPanel({
             {collectionCta &&
               <Link
                 href={collectionCta.href}
-                className="pointer-events-none inline-flex max-h-0 w-fit flex-col items-start overflow-hidden pb-0 pt-0 opacity-0 motion-safe:transition-[max-height,padding,opacity] motion-safe:duration-500 motion-safe:ease-out group-hover:pointer-events-auto group-hover:max-h-[72px] group-hover:pt-40 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:max-h-[72px] group-focus-within:pt-40 group-focus-within:opacity-100"
+                className="pointer-events-none inline-flex max-h-0 w-fit flex-col items-start overflow-hidden pb-0 pt-0 opacity-0 motion-safe:transition-[max-height,padding,opacity] motion-safe:duration-500 motion-safe:ease-out group-hover:pointer-events-auto group-hover:max-h-[72px] group-hover:pb-16 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:max-h-[72px] group-focus-within:pt-40 group-focus-within:opacity-100"
               >
                 <span className="text-link-underline inline-flex w-fit items-center border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white">
                   {collectionCta.label}
                 </span>
               </Link>
             }
-            <div className="w-full max-w-[418px] flex flex-col items-start lg:gap-5 md:gap-4 gap-3">
+            <div className="w-full max-w-[418px] flex flex-col items-start lg:gap-5 md:gap-4 gap-3 mb-6">
               <h2 className="whitespace-nowrap font-larken lg:text-5xl md:text-4xl text-32 font-light leading-none">{title}</h2>
               {description &&
                 <p className="font-gill lg:text-xl md:text-lg text-base font-light leading-[120%] tracking-[1%]">
