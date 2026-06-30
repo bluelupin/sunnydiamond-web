@@ -35,7 +35,7 @@ const DEFAULT_STEPS: SavingsPlanStep[] = [
 
 const StepCircle = ({ number }: { number: number }) => (
   <div className="relative z-10 box-border flex size-40 shrink-0 items-center justify-center rounded-full border-[0.571px] border-solid border-darkblack bg-[#EBDFC6]">
-    <span className="font-gill text-[20px] font-light leading-none tracking-[0.2px] text-darkblack">
+    <span className="font-gill text-xl font-light leading-none tracking-[0.2px] text-darkblack">
       {number}
     </span>
   </div>
@@ -98,11 +98,11 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
     return (
       <section
         id={id}
-        className="relative overflow-hidden bg-chalkCard px-4 py-16 md:bg-gray300 md:px-40 md:py-104"
+        className="relative w-full overflow-hidden bg-chalkCard py-16 md:bg-gray300 md:py-104"
         aria-busy="true"
         aria-label="Diamonds for Everyone"
       >
-        <div className="mx-auto flex w-full max-w-[1360px] flex-col items-center gap-8 md:gap-40">
+        <div className="relative mx-auto flex w-full max-w-[1360px] flex-col items-center gap-8 px-4 md:gap-40 md:px-40">
           <div className="flex w-full flex-col items-center gap-6 md:max-w-[510px]">
             <div className="h-4 w-40 rounded bg-black/10" aria-hidden />
             <div className="flex w-full flex-col items-center gap-3 md:gap-4">
@@ -119,23 +119,36 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
     <section
       id={id}
       aria-label={sectionTitle}
-      className="relative overflow-hidden bg-chalkCard px-4 py-16 md:bg-gray300 md:px-40 md:py-104"
+      className="relative w-full overflow-hidden bg-chalkCard py-16 md:bg-gray300 md:py-104"
     >
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute left-1/2 top-0 flex h-[651px] w-[1339px] -translate-x-1/2 items-center justify-center mix-blend-color-burn md:top-1/2 md:h-[700px] md:w-[1440px] md:-translate-y-1/2">
+        {/* Mobile — Figma 684:3316 / texture full-bleed */}
+        <div className="absolute left-1/2 top-0 flex h-[651px] w-[max(100vw,1339px)] -translate-x-1/2 items-center justify-center mix-blend-color-burn md:hidden">
           <div className="rotate-90">
             <Image
               src={BACKGROUND_TEXTURE}
               alt=""
               width={651}
               height={1339}
-              className="h-[1339px] w-[651px] object-bottom md:h-[1440px] md:w-[700px]"
+              className="h-[max(100vw,1339px)] w-[651px] object-bottom"
+            />
+          </div>
+        </div>
+        {/* Desktop — Figma 684:2996 / texture full-bleed */}
+        <div className="absolute left-1/2 top-1/2 hidden h-[700px] w-[max(100vw,1440px)] -translate-x-1/2 -translate-y-1/2 items-center justify-center mix-blend-color-burn md:flex">
+          <div className="rotate-90">
+            <Image
+              src={BACKGROUND_TEXTURE}
+              alt=""
+              width={700}
+              height={1440}
+              className="h-[max(100vw,1440px)] w-[700px] object-bottom"
             />
           </div>
         </div>
       </div>
 
-      <div className="relative mx-auto flex w-full max-w-[1360px] flex-col items-center gap-8 md:gap-40">
+      <div className="relative mx-auto flex w-full max-w-[1360px] flex-col items-center gap-8 px-4 md:gap-40 md:px-40">
         <div className="flex w-full flex-col items-center gap-6 text-center md:max-w-[510px]">
           <Reveal as="p" direction="up" className="font-gill text-sm font-semibold leading-110 text-[#AB863B] md:text-base md:font-normal">
             {eyebrow}
@@ -191,11 +204,11 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
           ))}
         </div>
         {ctaUrl &&
-          <Reveal direction="up">
-            <Link href={ctaUrl} className="relative after:bg-darkMagenta after:absolute after:h-0.5 after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-darkblack hover:border-darkMagenta sm:pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack hover:text-darkMagenta">
-              {ctaLabel}
-            </Link>
-          </Reveal>
+          // <Reveal direction="up">
+          <Link href={ctaUrl} className="relative after:bg-darkMagenta after:absolute after:h-0.5 after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-darkblack hover:border-darkMagenta sm:pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack hover:text-darkMagenta">
+            {ctaLabel}
+          </Link>
+          // </Reveal>
         }
       </div>
     </section>
