@@ -84,7 +84,7 @@ const Header = () => {
   const hoverClass = isOverlay ? "hover:text-ivory/70" : "hover:text-neutral500";
   const navLinkClass = (active = false) =>
     cn(
-      "font-gill uppercase transition-colors",
+      "inline-flex items-center font-gill uppercase transition-colors",
       "text-sm font-normal leading-[130%] tracking-[-0.02em]",
       "lg:text-sm lg:font-semibold lg:leading-110 lg:tracking-normal",
       active ? (isOverlay ? "text-primary" : "text-darkblack") : textClass,
@@ -133,13 +133,14 @@ const Header = () => {
           </div>
           <div className="hidden md:flex md:items-center md:gap-4 lg:gap-[40px]">
             {Logo}
-            <nav className="hidden md:flex items-center gap-7 md:gap-4 lg:gap-[40px]" aria-label="Main navigation">
+            <nav className="hidden items-center md:flex md:gap-4 lg:gap-[40px]" aria-label="Main navigation">
               {headerNavigationLinks.map((link) => {
                 const isJewellery = isJewelleryNavLink(link.label);
                 if (isJewellery) {
                   return (
                     <div
                       key={link.label}
+                      className="inline-flex items-center"
                       onMouseEnter={openJewelleryMenu}
                       onMouseLeave={scheduleCloseJewelleryMenu}
                     >

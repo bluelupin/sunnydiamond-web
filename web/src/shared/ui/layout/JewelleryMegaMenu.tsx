@@ -1,6 +1,8 @@
 "use client";
 
 import { JewelleryCategoryMenu } from "@/shared/ui/layout/JewelleryCategoryMenu";
+import { pageContainerClassName } from "@/shared/ui/layout/PageContainer";
+import { cn } from "@/shared/utils/cn";
 
 type JewelleryMegaMenuProps = {
   onMouseEnter: () => void;
@@ -11,11 +13,11 @@ type JewelleryMegaMenuProps = {
 export const JewelleryMegaMenu = ({ onMouseEnter, onMouseLeave, onClose }: JewelleryMegaMenuProps) => {
   return (
     <div
-      className="absolute left-0 right-0 top-full z-40 border-t border-[#ECE9E9] bg-white shadow-sm"
+      className="absolute inset-x-0 top-full z-40 border-t border-[#ECE9E9] bg-white shadow-sm"
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <div className="px-[120px] py-10">
+      <div className={cn(pageContainerClassName, "py-10")}>
         <JewelleryCategoryMenu variant="desktop" onClose={onClose} />
       </div>
     </div>

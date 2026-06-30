@@ -18,8 +18,8 @@ type JewelleryCategoryMenuProps = {
 const VARIANT_CONFIG = {
   desktop: {
     rowsClassName: "flex flex-col gap-8",
-    rowClassName: "flex items-start gap-[12px]",
-    itemClassName: "group flex min-w-0 flex-[1_0_0] flex-col gap-2",
+    rowClassName: "flex items-stretch gap-3",
+    itemClassName: "group flex min-w-0 flex-1 flex-col gap-2",
     imageClassName: "relative h-[204px] w-full shrink-0 overflow-hidden",
     imageSizes: "(max-width: 1440px) 25vw, 300px",
     imageCoverClassName: "object-cover transition-transform duration-300 group-hover:scale-105",
@@ -28,9 +28,9 @@ const VARIANT_CONFIG = {
     allProductsClassName: "font-gill text-[20px] leading-110 text-darkblack",
   },
   mobile: {
-    rowsClassName: "flex flex-col gap-[12px]",
-    rowClassName: "flex gap-[12px]",
-    itemClassName: "flex min-w-0 flex-[1_0_0] flex-col gap-1",
+    rowsClassName: "flex flex-col gap-3",
+    rowClassName: "flex items-stretch gap-3",
+    itemClassName: "flex min-w-0 flex-1 flex-col gap-1",
     imageClassName: "relative h-100 w-full shrink-0 overflow-hidden",
     imageSizes: "50vw",
     imageCoverClassName: "object-cover",
@@ -72,7 +72,13 @@ export function JewelleryCategoryMenu({ variant, onClose, className }: Jewellery
                     </div>
                   )}
                 </div>
-                {item.image ? <span className={config.labelClassName}>{item.label}</span> : null}
+                {item.image ? (
+                  <span className={config.labelClassName}>{item.label}</span>
+                ) : (
+                  <span className={cn(config.labelClassName, "invisible")} aria-hidden>
+                    {item.label}
+                  </span>
+                )}
               </Link>
             );
           })}
