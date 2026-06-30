@@ -105,7 +105,7 @@ function ShowroomsMobileAccordion({
   sectionTitle?: string | null;
 }) {
   return (
-    <div className="flex flex-col items-center gap-8 py-16 lg:hidden">
+    <div className="flex flex-col items-center gap-8 bg-white py-16 lg:hidden">
       <ScrollReveal
         as="h2"
         delayMs={0}
@@ -335,7 +335,7 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
   return (
     <section
       id={id}
-      className="bg-gray200 lg:py-20 lg:h-846 md:h-auto h-auto"
+      className="bg-white lg:bg-gray200 lg:py-20 lg:h-846 md:h-auto h-auto"
     >
       <ShowroomsMobileAccordion
         locations={locations}

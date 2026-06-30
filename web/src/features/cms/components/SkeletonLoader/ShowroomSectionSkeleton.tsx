@@ -5,10 +5,10 @@ interface props {
 const ShowroomSectionSkeleton = ({ className }: props) => {
   return (
     <section
-      className="bg-gray200 lg:py-20 lg:h-846 md:h-auto h-auto"
+      className="bg-white lg:bg-gray200 lg:py-20 lg:h-846 md:h-auto h-auto"
       aria-busy="true"
     >
-      <div className="flex flex-col items-center gap-8 py-16 lg:hidden">
+      <div className="flex flex-col items-center gap-8 bg-white py-16 lg:hidden">
         <div
           className="mx-auto h-10 w-72 rounded bg-gray300"
           aria-hidden
