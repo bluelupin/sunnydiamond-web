@@ -7,6 +7,7 @@ import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
 import DiamondIcon from "@/assets/Icons/Diamond";
 import TrustBadgeSection from "../common/TrustBadges";
 import HeroBackgroundMedia from "./HeroBackgroundMedia";
+import HeroSectionOverlay from "./HeroSectionOverlay";
 
 interface HeroSectionProps {
   id?: string;
@@ -73,8 +74,7 @@ const HeroSection = ({ id }: HeroSectionProps) => {
           alt={heroAlt}
           isLoading={isShellLoading}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-charcoal/55 via-charcoal/15 to-transparent" />
-        <div className="absolute inset-0 bg-charcoal/20" />
+        <HeroSectionOverlay />
         <div className="container relative flex h-full items-end justify-center md:py-16 sm:py-12 py-11 md:px-6 px-4">
           <div className="flex w-full max-w-886 animate-fade-in flex-col items-center md:gap-8 gap-6 text-center">
             <div className="flex flex-col items-center gap-4">
