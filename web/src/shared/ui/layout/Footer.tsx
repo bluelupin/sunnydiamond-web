@@ -70,6 +70,8 @@ const Footer = () => {
                 alt="Sunny Diamonds"
                 width={336}
                 height={142}
+                loading="lazy"
+                fetchPriority="low"
                 className="h-auto w-[200px] xl:w-[336px]"
               />
             </Link>

@@ -81,10 +81,10 @@ const LearnNavArrow = ({
           : educationPageImages.learnArrowRightMobile
       }
       alt=""
-      width={24}
-      height={24}
+      width={19}
+      height={18}
       aria-hidden
-      className="md:hidden"
+      className="h-6 w-auto md:hidden"
     />
     <Image
       src={
@@ -93,10 +93,10 @@ const LearnNavArrow = ({
           : educationPageImages.learnArrowRight
       }
       alt=""
-      width={24}
-      height={24}
+      width={19}
+      height={18}
       aria-hidden
-      className="hidden md:block"
+      className="hidden h-6 w-auto md:block"
     />
   </button>
 );
