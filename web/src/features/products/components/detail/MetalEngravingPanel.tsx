@@ -3,11 +3,18 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import type { StaticImageData } from "next/image";
-import { ChevronDown, Info } from "lucide-react";
+import { Info } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/shared/hooks/use-toast";
 import { appointmentFieldClassName, appointmentLabelClassName } from "@/shared/constants/appointmentForm";
 import { ENGRAVING_FONTS, type EngravingSelection } from "@/features/products/constants/engraving";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 
@@ -114,26 +121,21 @@ const MetalEngravingPanel = ({
                 <label htmlFor="engraving-font" className={appointmentLabelClassName}>
                   Font*
                 </label>
-                <div className="flex h-14 w-full items-center bg-aboutInactive px-3">
-                  <select
+                <Select value={font} onValueChange={setFont}>
+                  <SelectTrigger
                     id="engraving-font"
-                    value={font}
-                    onChange={(event) => setFont(event.target.value)}
-                    className="min-w-0 flex-1 appearance-none bg-transparent font-gill text-base leading-110 text-darkblack outline-none"
+                    className="h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0"
                   >
+                    <SelectValue placeholder="-select-" />
+                  </SelectTrigger>
+                  <SelectContent className="z-[80]">
                     {ENGRAVING_FONTS.map((option) => (
-                      <option key={option} value={option}>
+                      <SelectItem key={option} value={option}>
                         {option}
-                      </option>
+                      </SelectItem>
                     ))}
-                  </select>
-                  <ChevronDown
-                    size={16}
-                    strokeWidth={1.5}
-                    aria-hidden
-                    className="pointer-events-none shrink-0 text-darkblack"
-                  />
-                </div>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="flex flex-col gap-2">

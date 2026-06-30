@@ -28,6 +28,7 @@ import RingSizeChartPanel from "./RingSizeChartPanel";
 import DeliveryStoreJourneyPanel from "./DeliveryStoreJourneyPanel";
 import type { EngravingSelection } from "@/features/products/constants/engraving";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
+import PlusIcon from "@/assets/Icons/PlusIcon";
 
 type ProductDetailSidebarProps = {
   product: Product;
@@ -70,7 +71,7 @@ const ProductDetailSidebar = ({
   };
 
   const purchaseSection = (
-    <div className="flex flex-col gap-40 px-4 pt-8 md:px-6 md:pt-6 lg:px-0 lg:pt-0">
+    <div className="flex flex-col gap-40 px-4 pt-8 md:pt-6 md:px-0 lg:pt-0">
       <div className="flex flex-col gap-40">
         <div className="flex flex-col gap-6">
           <header className="flex flex-col gap-4">
@@ -142,7 +143,7 @@ const ProductDetailSidebar = ({
               <span className="font-gill text-base leading-110 text-darkblack">
                 {engravingSelection?.text ?? "Metal Engraving (Optional)"}
               </span>
-              <Plus size={24} strokeWidth={1.5} aria-hidden className="shrink-0 text-darkblack" />
+              <PlusIcon aria-hidden className="shrink-0 text-darkblack" />
             </button>
           </div>
         </div>

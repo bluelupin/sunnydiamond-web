@@ -134,7 +134,7 @@ export default {
       },
       spacing: {
         10: "10px",
-        // 12: "12px",
+        15: "15px",
         19: "19px",
         26: "26px",
         40: "40px",

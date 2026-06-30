@@ -8,7 +8,7 @@ export const pageContainerClassName =
 type PageContainerProps = ComponentPropsWithoutRef<"div">;
 
 const PageContainer = ({ className, ...props }: PageContainerProps) => (
-  <div className={cn(pageContainerClassName, className)} {...props} />
+  <div className={cn(className, pageContainerClassName)} {...props} />
 );
 
 export default PageContainer;

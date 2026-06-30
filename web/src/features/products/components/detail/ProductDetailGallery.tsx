@@ -148,7 +148,7 @@ const ProductDetailGallery = ({ product }: ProductDetailGalleryProps) => {
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row md:gap-3">
-          <div className={thumbFrameClass}>
+          <div className="flex min-h-280 flex-1 overflow-hidden bg-gray300 px-4 py-8 sm:min-h-360 md:h-380 md:px-5 md:py-10 lg:h-465 lg:px-6 lg:py-12 sm:w-1/2">
             <CroppedGalleryImage
               src={thumbOne ?? product.image}
               alt={`${product.name} — detail view`}
@@ -157,7 +157,7 @@ const ProductDetailGallery = ({ product }: ProductDetailGalleryProps) => {
               cropStyle={nestedImageCropStyle}
             />
           </div>
-          <div className="flex min-h-280 w-full overflow-hidden sm:min-h-360 md:h-400 md:w-80 md:shrink-0 lg:h-465 lg:w-96">
+          <div className="flex min-h-280 w-full overflow-hidden sm:min-h-360 md:h-400 md:shrink-0 lg:h-465 sm:w-1/2">
             <OptimizedImage
               src={thumbTwo ?? product.image}
               alt={`${product.name} — alternate view`}
