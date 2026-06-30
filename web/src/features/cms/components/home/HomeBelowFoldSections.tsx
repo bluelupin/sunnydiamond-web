@@ -97,7 +97,7 @@ export default function HomeBelowFoldSections() {
         <BespokeForYouSection id="bespoke-for-you" />
       </LazyHomeSection>
 
-      <LazyHomeSection minHeight="md:min-h-[600px] min-h-auto">
+      <LazyHomeSection minHeight="md:min-h-[550px] min-h-auto">
         <DiamondsForEveryoneSection id="diamonds-for-everyone" />
       </LazyHomeSection>
 

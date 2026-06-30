@@ -9,6 +9,10 @@ import { isSectionActive } from "@/shared/utils/cmsSection";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { resolveCraftsmanshipSection } from "@/shared/utils/resolveCraftsmanshipSection";
+import {
+  craftsmanshipProcessFigmaSpec,
+  craftsmanshipRadialGradientStyle,
+} from "@/features/cms/data/craftsmanshipProcessFigmaSpec";
 import { useMemo } from "react";
 
 interface CraftsmanshipProcessProps {
@@ -17,38 +21,70 @@ interface CraftsmanshipProcessProps {
 
 /** Figma 684:3024 — silk ripple texture behind the scroll-driven diamond. */
 const CRAFTSMANSHIP_BACKGROUND = "/images/home/craftsmanship-bg.png";
-/** Figma 684:3025 — radial fade overlay on top of the silk texture. */
-const CRAFTSMANSHIP_GRADIENT = "/images/home/craftsmanship-bg-gradient.svg";
+
+function CraftsmanshipSilkLayer({ variant }: { variant: "desktop" | "mobile" }) {
+  const spec =
+    variant === "desktop"
+      ? craftsmanshipProcessFigmaSpec.desktop.texture
+      : craftsmanshipProcessFigmaSpec.mobile.texture;
+
+  const visibility = variant === "desktop" ? "hidden lg:flex" : "flex lg:hidden";
+
+  return (
+    <div
+      className={`absolute left-1/2 ${visibility} -translate-x-1/2 -translate-y-1/2 items-center justify-center ${variant === "desktop" ? "top-[calc(50%+0.08px)]" : "top-1/2"}`}
+      style={{ height: spec.height, width: `max(100vw, ${spec.minSpan}px)` }}
+    >
+      <div className="rotate-90">
+        <Image
+          src={CRAFTSMANSHIP_BACKGROUND}
+          alt=""
+          width={spec.imageWidth}
+          height={spec.imageHeight}
+          className="max-w-none object-cover"
+          style={{
+            width: spec.imageWidth,
+            height: `max(100vw, ${spec.minSpan}px)`,
+          }}
+          sizes="100vw"
+        />
+      </div>
+    </div>
+  );
+}
+
+function CraftsmanshipRadialLayer({ variant }: { variant: "desktop" | "mobile" }) {
+  const spec =
+    variant === "desktop"
+      ? craftsmanshipProcessFigmaSpec.desktop
+      : craftsmanshipProcessFigmaSpec.mobile;
+
+  const visibility = variant === "desktop" ? "hidden lg:flex" : "flex lg:hidden";
+
+  return (
+    <div
+      className={`absolute left-1/2 top-1/2 ${visibility} -translate-x-1/2 -translate-y-1/2 items-center justify-center`}
+      style={{ height: spec.radial.layerHeight, width: `max(100vw, ${spec.texture.minSpan}px)` }}
+    >
+      <div
+        className="max-w-none rotate-90"
+        style={{
+          width: spec.radial.viewWidth,
+          height: `max(100vw, ${spec.texture.minSpan}px)`,
+          ...craftsmanshipRadialGradientStyle(spec.radial),
+        }}
+      />
+    </div>
+  );
+}
 
 function CraftsmanshipBackground() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      {/* Figma 684:3024 */}
-      <div className="absolute left-1/2 top-[calc(50%+0.08px)] flex h-[700px] w-full max-w-[1440px] -translate-x-1/2 -translate-y-1/2 items-center justify-center">
-        <div className="rotate-90">
-          <Image
-            src={CRAFTSMANSHIP_BACKGROUND}
-            alt=""
-            width={700}
-            height={1440}
-            className="h-[1440px] w-[700px] max-w-none object-cover"
-            sizes="(min-width: 1440px) 1440px, 100vw"
-          />
-        </div>
-      </div>
-      {/* Figma 684:3025 */}
-      <div className="absolute left-1/2 top-1/2 flex h-[750px] w-full max-w-[1440px] -translate-x-1/2 -translate-y-1/2 items-center justify-center">
-        <div className="rotate-90">
-          <Image
-            src={CRAFTSMANSHIP_GRADIENT}
-            alt=""
-            width={750}
-            height={1440}
-            className="h-[1440px] w-[750px] max-w-none"
-            sizes="(min-width: 1440px) 1440px, 100vw"
-          />
-        </div>
-      </div>
+      <CraftsmanshipSilkLayer variant="mobile" />
+      <CraftsmanshipSilkLayer variant="desktop" />
+      <CraftsmanshipRadialLayer variant="mobile" />
+      <CraftsmanshipRadialLayer variant="desktop" />
     </div>
   );
 }

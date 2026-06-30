@@ -61,7 +61,7 @@ function ShowroomLocationDetails({
             width={24}
             height={24}
             aria-hidden
-            className="size-6 shrink-0"
+            className="sm:size-6 w-5 h-5 shrink-0 sm:mt-0 mt-1.5"
           />
           <p className="font-gill text-xl font-light leading-110 text-darkblack">
             {location.address}
@@ -207,10 +207,10 @@ function ShowroomsDesktopLayout({
         ) : null}
       </div>
       <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 gap-[14px] md:gap-5 lg:gap-6 items-start lg:static relative">
-        <ScrollReveal delayMs={120} className="lg:px-0 px-5 lg:mb-0 mb-[14px]">
+        <ScrollReveal delayMs={120} className="lg:px-0 px-5 lg:mb-0 mb-[14px] h-full">
           <div
             aria-label="Showroom locations"
-            className="flex lg:flex-col flex-row lg:border-r lg:border-b-0 border-b border-gray600 overflow-x-auto"
+            className="h-full flex lg:flex-col flex-row lg:border-r lg:border-b-0 border-b border-neutral300 overflow-x-auto"
           >
             {locations.map((location) => {
               const isSelected = location.id === activeId;
@@ -240,14 +240,22 @@ function ShowroomsDesktopLayout({
                   </button>
 
                   {isSelected && (
-                    <div className="lg:py-4 py-5 lg:px-0 px-5 lg:w-full sm:w-311 w-[80%] animate-in fade-in duration-300 lg:static absolute bottom-3 left-8 z-10 bg-gray300">
-                      <div className="flex lg:gap-6 gap-3 items-start">
+                    <div className="lg:pt-4 lg:pb-8 py-5 lg:px-0 px-5 lg:w-full sm:w-311 w-[80%] animate-in fade-in duration-300 lg:static absolute bottom-3 left-8 z-10 bg-gray300">
+                      <div className="flex gap-3 items-start">
+                        <Image
+                          src={ADDRESS_ICON}
+                          alt=""
+                          width={24}
+                          height={24}
+                          aria-hidden
+                          className="sm:size-5 w-5 h-5 shrink-0 sm:mt-0 mt-1.5"
+                        />
                         <p className="lg:text-xl md:text-lg text-base text-darkblack font-light tracking-[2%] leading-130 font-gill">
                           {location.address}
                         </p>
                       </div>
 
-                      <div className="mt-4 lg:mb-6 mb-8 flex lg:gap-6 gap-3 items-center">
+                      <div className="mt-4 lg:mb-6 mb-8 flex gap-3 items-center">
                         <Phone
                           size={16}
                           className="text-black flex-shrink-0"
@@ -256,15 +264,12 @@ function ShowroomsDesktopLayout({
                           {location.phone}
                         </p>
                       </div>
-
-                      <Link
-                        href={
-                          location.mapUrl ?? location.directionsUrl ?? "#"
-                        }
+                      <Link href={
+                        location.mapUrl ?? location.directionsUrl ?? "#"
+                      }
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-link-underline block w-fit pb-1 font-gill text-xs uppercase leading-110 tracking-[1.8%] text-darkblack border-b border-foreground md:text-base"
-                      >
+                        className="relative after:bg-darkMagenta after:absolute after:h-0.5 after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-darkblack hover:border-darkMagenta sm:pb-1 font-gill md:text-base text-xs uppercase leading-110 tracking-[1.8%] hover:text-darkMagenta">
                         GET DIRECTIONS
                       </Link>
                     </div>
@@ -305,8 +310,8 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
   const locations = useMemo(() => {
     return Array.isArray(showroomSection?.showrooms)
       ? [...showroomSection.showrooms]
-          .filter((item) => item?.isActive)
-          .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
+        .filter((item) => item?.isActive)
+        .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
       : [];
   }, [showroomSection?.showrooms]);
 

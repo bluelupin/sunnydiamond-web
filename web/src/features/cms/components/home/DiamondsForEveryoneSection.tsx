@@ -119,7 +119,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
     <section
       id={id}
       aria-label={sectionTitle}
-      className="relative w-full overflow-hidden bg-chalkCard py-16 md:bg-gray300 md:py-104"
+      className="relative w-full overflow-hidden bg-chalkCard py-16 md:bg-gray300 md:py-104 md:min-h-[550px] min-h-auto"
     >
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         {/* Mobile — Figma 684:3316 / texture full-bleed */}
