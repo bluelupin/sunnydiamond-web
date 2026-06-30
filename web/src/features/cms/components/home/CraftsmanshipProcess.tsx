@@ -23,29 +23,46 @@ interface CraftsmanshipProcessProps {
 const CRAFTSMANSHIP_BACKGROUND = "/images/home/craftsmanship-bg.png";
 
 function CraftsmanshipSilkLayer({ variant }: { variant: "desktop" | "mobile" }) {
-  const spec =
-    variant === "desktop"
-      ? craftsmanshipProcessFigmaSpec.desktop.texture
-      : craftsmanshipProcessFigmaSpec.mobile.texture;
+  if (variant === "desktop") {
+    const spec = craftsmanshipProcessFigmaSpec.desktop.texture;
 
-  const visibility = variant === "desktop" ? "hidden lg:flex" : "flex lg:hidden";
+    return (
+      <div
+        className="absolute left-1/2 top-[calc(50%+0.08px)] hidden -translate-x-1/2 -translate-y-1/2 items-center justify-center lg:flex"
+        // style={{ height: spec.height, width: `max(100vw, ${spec.minSpan}px)` }}
+      >
+        <div className="rotate-90">
+          <Image
+            src={CRAFTSMANSHIP_BACKGROUND}
+            alt=""
+            width={spec.imageWidth}
+            height={spec.imageHeight}
+            className="max-w-none object-cover"
+            style={{
+              width: spec.imageWidth,
+              height: `max(100vw, ${spec.minSpan}px)`,
+            }}
+            sizes="100vw"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  const spec = craftsmanshipProcessFigmaSpec.mobile.texture;
 
   return (
     <div
-      className={`absolute left-1/2 ${visibility} -translate-x-1/2 -translate-y-1/2 items-center justify-center ${variant === "desktop" ? "top-[calc(50%+0.08px)]" : "top-1/2"}`}
-      style={{ height: spec.height, width: `max(100vw, ${spec.minSpan}px)` }}
+      className="absolute left-1/2 top-0 flex -translate-x-1/2 items-center justify-center lg:hidden"
+      // style={{ height: spec.height, width: `max(100vw, ${spec.minSpan}px)` }}
     >
-      <div className="rotate-90">
+      <div className="sm:rotate-90 rotate-180 test-2">
         <Image
           src={CRAFTSMANSHIP_BACKGROUND}
           alt=""
           width={spec.imageWidth}
           height={spec.imageHeight}
-          className="max-w-none object-cover"
-          style={{
-            width: spec.imageWidth,
-            height: `max(100vw, ${spec.minSpan}px)`,
-          }}
+          className="h-[max(100vw,1339px)] w-[651px] max-w-none object-bottom"
           sizes="100vw"
         />
       </div>

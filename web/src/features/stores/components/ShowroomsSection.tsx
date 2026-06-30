@@ -105,11 +105,11 @@ function ShowroomsMobileAccordion({
   sectionTitle?: string | null;
 }) {
   return (
-    <div className="flex flex-col items-center gap-8 bg-white py-16 lg:hidden">
+    <div className="flex flex-col items-left gap-8 bg-white py-16 lg:hidden">
       <ScrollReveal
         as="h2"
         delayMs={0}
-        className="w-full px-4 text-center font-larken text-32 font-light leading-110 text-darkblack"
+        className="w-full px-4 font-larken text-32 font-light leading-110 text-darkblack"
       >
         {sectionTitle}
       </ScrollReveal>

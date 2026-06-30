@@ -18,6 +18,15 @@ export type FeaturedCarouselItem = {
   href: string;
 };
 
+type SlideCropVariant = "center" | "left-peek" | "right-peek";
+
+function mobilePeekCropClassName(desktopCropClassName: string) {
+  return cn(
+    desktopCropClassName,
+    "max-md:left-0 max-md:top-0 max-md:size-[230px] max-md:translate-x-0 max-md:translate-y-0",
+  );
+}
+
 const formatPrice = (price: number) =>
   new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(price);
 
@@ -26,26 +35,56 @@ function normalizeIndex(index: number, total: number) {
   return ((index % total) + total) % total;
 }
 
+function getSlideVariant(
+  slideIndex: number,
+  activeIndex: number,
+  total: number,
+): SlideCropVariant {
+  if (total <= 1) return "center";
+
+  const slide = normalizeIndex(slideIndex, total);
+  const active = normalizeIndex(activeIndex, total);
+  if (slide === active) return "center";
+
+  const prev = normalizeIndex(active - 1, total);
+  const next = normalizeIndex(active + 1, total);
+  if (slide === prev) return "left-peek";
+  if (slide === next) return "right-peek";
+  return "center";
+}
+
 function CarouselSlideImage({
   src,
   alt,
+  variant,
   priority,
 }: {
   src: string;
   alt: string;
+  variant: SlideCropVariant;
   priority?: boolean;
 }) {
+  const cropClassName =
+    variant === "center"
+      ? "absolute left-[-87px] top-[-257.92px] size-[774px] max-md:left-0 max-md:top-0 max-md:size-[200px] max-md:translate-x-0 max-md:translate-y-0"
+      : variant === "left-peek"
+        ? mobilePeekCropClassName("absolute left-[22px] top-[-83px] size-[434px]")
+        : mobilePeekCropClassName("absolute left-[162px] top-[-78px] size-[426px]");
+
+  const sizes =
+    variant === "center" ? "(max-width: 767px) 430px, 774px" : "(max-width: 767px) 230px, 434px";
+
   return (
     <div className="featured-slide-viewport">
-      <div className="featured-slide-image">
-        <div className="featured-slide-image__inner">
+      <div className={cropClassName}>
+        <div className="relative size-full">
           <Image
             src={src}
             alt={alt}
             fill
             quality={90}
             className="object-contain"
-            sizes="(max-width: 767px) 489px, 774px"
+            sizes={sizes}
             priority={priority}
           />
         </div>
@@ -101,7 +140,13 @@ export default function FeaturedProductsCarousel({
         {
           breakpoint: 768,
           settings: {
-            centerPadding: "calc((100vw - 260px) / 2 - 40px)",
+            centerPadding: "calc((100vw - 260px) / 2 - 80px)",
+          },
+        },
+        {
+          breakpoint: 640,
+          settings: {
+            centerPadding: "calc((100vw - 200px) / 2 - 60px)",
           },
         },
       ],
@@ -135,44 +180,48 @@ export default function FeaturedProductsCarousel({
       onKeyDown={onKeyDown}
       className="relative w-full outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
     >
-      <Slider ref={sliderRef} {...sliderSettings}>
-        {items.map((item, index) => (
-          <div key={String(item.id)} className="featured-products-slide">
-            <CarouselSlideImage
-              src={item.image}
-              alt={item.name}
-              priority={index === initialIndex}
-            />
-          </div>
-        ))}
-      </Slider>
+      {/* Figma 684:3238 — 303px mobile track; desktop unchanged */}
+      <div className="relative h-auto w-full overflow-hidden md:h-auto">
+        <Slider ref={sliderRef} {...sliderSettings}>
+          {items.map((item, index) => (
+            <div key={String(item.id)} className="featured-products-slide">
+              <CarouselSlideImage
+                src={item.image}
+                alt={item.name}
+                variant={getSlideVariant(index, activeIndex, items.length)}
+                priority={index === initialIndex}
+              />
+            </div>
+          ))}
+        </Slider>
 
-      {/* Desktop arrows — Figma 684:2937 @ top 117.5px, width 487px */}
-      <div className="pointer-events-none absolute inset-x-0 top-[117.5px] z-20 hidden justify-center md:flex">
-        <div className="pointer-events-auto flex w-[487px] max-w-[calc(100%-48px)] items-center justify-between">
-          <button
-            type="button"
-            aria-label="Previous product"
-            disabled={!showInfinite}
-            onClick={goPrev}
-            className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
-          >
-            <LeftArrow className="h-[17px] w-[18px]" />
-          </button>
-          <button
-            type="button"
-            aria-label="Next product"
-            disabled={!showInfinite}
-            onClick={goNext}
-            className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
-          >
-            <RightArrow className="h-[17px] w-[18px]" />
-          </button>
+        {/* Desktop arrows — Figma 684:2937 @ top 117.5px, width 487px */}
+        <div className="pointer-events-none absolute inset-x-0 top-[117.5px] z-20 hidden justify-center md:flex">
+          <div className="pointer-events-auto flex w-[487px] max-w-[calc(100%-48px)] items-center justify-between">
+            <button
+              type="button"
+              aria-label="Previous product"
+              disabled={!showInfinite}
+              onClick={goPrev}
+              className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
+            >
+              <LeftArrow className="h-[17px] w-[18px]" />
+            </button>
+            <button
+              type="button"
+              aria-label="Next product"
+              disabled={!showInfinite}
+              onClick={goNext}
+              className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
+            >
+              <RightArrow className="h-[17px] w-[18px]" />
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Product details + mobile arrows — Figma 684:2940 / 684:3238 */}
-      <div className="mx-auto flex w-[260px] flex-col items-center gap-3 md:w-[600px] md:gap-3">
+      <div className="mx-auto flex w-[200px] flex-col items-center gap-3 sm:w-[260px] md:w-[600px] md:gap-3">
         <div className="relative z-20 flex w-full max-w-[303px] items-center justify-between md:hidden">
           <button
             type="button"
@@ -217,4 +266,3 @@ export default function FeaturedProductsCarousel({
     </div>
   );
 }
-

@@ -140,8 +140,8 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
             <div className="h-[35px] w-[283px] animate-pulse rounded bg-gray200 md:h-[53px] md:w-[424px]" aria-hidden />
             <div className="h-[36px] w-[306px] animate-pulse rounded bg-gray200 md:h-[22px] md:w-[517px]" aria-hidden />
           </div>
-          <div className="relative h-[303px] w-full md:h-[411px]">
-            <div className="absolute left-1/2 top-0 h-[170px] w-[260px] -translate-x-1/2 animate-pulse rounded bg-gray200 md:h-[259px] md:w-[600px]" aria-hidden />
+          <div className="relative h-[275px] w-full sm:h-[303px] md:h-[411px]">
+            <div className="absolute left-1/2 top-0 h-[155px] w-[200px] -translate-x-1/2 animate-pulse rounded bg-gray200 sm:h-[170px] sm:w-[260px] md:h-[259px] md:w-[600px]" aria-hidden />
           </div>
         </div>
       </section>
@@ -151,10 +151,10 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
   return (
     <section
       id={id}
-      className="overflow-visible px-0 py-16 md:px-40 md:py-104"
+      className="overflow-visible px-0 py-16 md:py-104"
       aria-label="Featured diamond carousel"
     >
-      <div className="mx-auto flex w-full max-w-1360 flex-col items-center gap-10 overflow-visible">
+      <div className="flex w-full max-w-full flex-col items-center gap-10 overflow-visible">
         <FeaturedProductsHeader title={sectionTitle} description={description} />
         <FeaturedProductsCarousel
           items={items}

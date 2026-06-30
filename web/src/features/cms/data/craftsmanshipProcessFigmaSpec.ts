@@ -26,12 +26,13 @@ export const craftsmanshipProcessFigmaSpec = {
     },
   },
   mobile: {
-    /** Figma 684:3332 — silk texture (proportional to desktop 684:3024) */
+    /** Figma 684:3332 — silk texture (top-anchored, full-bleed) */
     texture: {
       height: 651,
       imageWidth: 651,
       imageHeight: 1339,
       minSpan: 1339,
+      anchor: "top" as const,
     },
     /** Figma 684:3332 — radial fade (proportional to 684:3025) */
     radial: {

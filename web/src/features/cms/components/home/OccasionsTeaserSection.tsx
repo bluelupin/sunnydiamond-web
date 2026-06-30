@@ -86,7 +86,7 @@ function OccasionCardItem({
             {ctaLabel}
           </div>
         </div>
-        <div className="mb-6 flex w-full max-w-[418px] flex-col items-start gap-2 lg:gap-3">
+        <div className="mb-16 group-hover:mb-6 flex w-full max-w-[418px] flex-col items-start gap-2 lg:gap-3">
           <h3 className="whitespace-nowrap font-larken text-32 font-light leading-none md:text-3xl lg:text-32">
             {card.title}
           </h3>
