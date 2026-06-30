@@ -66,7 +66,7 @@ function LazyHomeSection({ minHeight, animate = false, children }: LazyHomeSecti
 export default function HomeBelowFoldSections() {
   return (
     <>
-      <LazyHomeSection minHeight="min-h-[520px] md:pb-12 pb-16 bg-white">
+      <LazyHomeSection minHeight="min-h-[520px] bg-white">
         <DiamondSourcingSection id="flawless" />
       </LazyHomeSection>
 

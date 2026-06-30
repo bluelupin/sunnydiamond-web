@@ -625,7 +625,7 @@ export function AlankaraCollection({
         </ScrollReveal>
       </div>
 
-      <div className="relative mx-auto w-full max-w-[375px] pb-10 md:hidden">
+      <div className="relative mx-auto w-full max-w-full pb-10 md:hidden">
         <ScrollReveal delayMs={0}>
           <CollectionHeroPanel
             title={title}
