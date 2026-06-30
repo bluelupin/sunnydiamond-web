@@ -39,7 +39,7 @@ export const DetailDarkButton = ({ children, className, ...props }: DetailDarkBu
   <button
     type="button"
     className={cn(
-      "btn-dark-slide inline-flex h-14 w-full items-center justify-center px-7 font-gill text-sm uppercase leading-110 text-white",
+      "btn-dark-slide inline-flex h-14 w-full items-center justify-center px-7 font-gill text-sm uppercase leading-110 text-white border border-black",
       className,
     )}
     {...props}

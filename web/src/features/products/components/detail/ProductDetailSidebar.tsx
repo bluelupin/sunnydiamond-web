@@ -85,7 +85,7 @@ const ProductDetailSidebar = ({
                 </li>
               ))}
             </ul>
-            <h1 className="font-larken text-24 font-light leading-110 text-darkblack lg:text-32">
+            <h1 className="font-larken text-2xl font-light leading-110 text-darkblack lg:text-32">
               {product.name}
             </h1>
           </header>
@@ -150,7 +150,7 @@ const ProductDetailSidebar = ({
 
         <div className="flex flex-col gap-4">
           <div className="flex items-end justify-between gap-4">
-            <div className="flex items-center gap-3 font-gill text-24 leading-110 text-darkblack">
+            <div className="flex items-center gap-3 font-gill text-2xl leading-110 text-darkblack">
               <span>₹{formatJewelleryPrice(pricing.price)}</span>
               <span className="text-gray600 line-through">₹{formatJewelleryPrice(pricing.originalPrice)}</span>
             </div>
@@ -246,7 +246,7 @@ const ProductDetailSidebar = ({
     <div className="flex flex-col gap-40 px-4 pb-16 md:px-6 md:pb-12 lg:px-0 lg:pb-0">
       <section aria-label="Shopping benefits" className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
-          <h2 className="font-gill text-24 leading-110 text-darkblack">With Sunny, you get</h2>
+          <h2 className="font-gill text-2xl leading-110 text-darkblack">With Sunny, you get</h2>
           <DetailTextLink href="/about">T&amp;C Apply</DetailTextLink>
         </div>
         <ul className="m-0 flex list-none flex-col bg-benefitSurface p-0 max-md:-mx-4 max-md:gap-6 max-md:px-4 max-md:py-40 md:flex-row md:items-stretch md:gap-4 md:p-6 lg:gap-4">
@@ -303,7 +303,7 @@ const ProductDetailSidebar = ({
       >
         <div className="flex max-w-358 flex-col gap-40">
           <div className="flex flex-col gap-3">
-            <h2 className="font-larken text-24 font-light leading-110 text-darkblack">
+            <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
               We&apos;re here for you
             </h2>
             <p className="font-gill text-base font-light leading-110 text-darkblack">
@@ -375,7 +375,7 @@ const ProductDetailSidebar = ({
       >
         <div className="flex max-w-[172px] shrink-0 flex-col gap-6 max-md:-mr-[22px] md:max-w-240 lg:max-w-280 lg:gap-40">
           <div className="flex flex-col gap-3">
-            <h2 className="w-max whitespace-nowrap font-larken text-xl font-light leading-110 text-darkblack lg:text-24">
+            <h2 className="w-max whitespace-nowrap font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
               Personalise this for you
             </h2>
             <p className="font-gill text-sm font-light leading-110 text-darkblack lg:text-base">

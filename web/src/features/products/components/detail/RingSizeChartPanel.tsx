@@ -65,7 +65,7 @@ const RingSizeChartPanel = ({ open, onClose }: RingSizeChartPanelProps) => {
 
             <div className="flex flex-col gap-6 pb-8">
               <div className="flex flex-col items-center gap-3 px-4 text-center lg:px-8">
-                <h2 className="w-full font-larken text-24 font-light leading-110 text-darkblack">
+                <h2 className="w-full font-larken text-2xl font-light leading-110 text-darkblack">
                   Ring Size Chart
                 </h2>
                 <p className="w-full font-gill text-base font-light leading-110 text-darkblack">

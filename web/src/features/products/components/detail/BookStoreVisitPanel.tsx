@@ -229,7 +229,7 @@ const StoreSelectionStep = ({
                   <ChevronLeft size={24} strokeWidth={1.25} aria-hidden className="text-darkblack" />
                 </button>
               ) : null}
-              <h2 className="font-larken text-24 font-light leading-110 text-darkblack">
+              <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
                 Book Your Store Visit
               </h2>
             </div>
@@ -389,7 +389,7 @@ const BookingFormStep = ({
               >
                 <ChevronLeft size={24} strokeWidth={1.25} aria-hidden className="text-darkblack" />
               </button>
-              <h2 className="font-larken text-24 font-light leading-110 text-darkblack">
+              <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
                 Book Your Store Visit
               </h2>
             </div>

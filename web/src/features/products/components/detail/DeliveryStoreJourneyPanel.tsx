@@ -86,7 +86,7 @@ const DeliveryStoreJourneyPanel = ({
               <div className="px-4 pt-6 lg:px-8">
                 <div className="flex flex-col gap-7">
                   <div className="flex items-center justify-between gap-4">
-                    <h2 className="font-larken text-24 font-light leading-110 text-darkblack">
+                    <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
                       In Store Availabilty
                     </h2>
                     <button
@@ -179,7 +179,7 @@ const DeliveryStoreJourneyPanel = ({
                       >
                         <ChevronLeft size={24} strokeWidth={1.25} aria-hidden className="text-darkblack" />
                       </button>
-                      <h2 className="font-larken text-24 font-light leading-110 text-darkblack">
+                      <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
                         Book Your Store Visit
                       </h2>
                     </div>

@@ -43,7 +43,7 @@ const OptimizedImage = ({
 
     if (modernPair) {
       return (
-        <picture>
+        <picture className="w-full">
           <source srcSet={modernPair.avif} type="image/avif" />
           <source srcSet={modernPair.webp} type="image/webp" />
           {/* eslint-disable-next-line @next/next/no-img-element */}

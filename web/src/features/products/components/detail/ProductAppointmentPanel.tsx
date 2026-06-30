@@ -79,7 +79,7 @@ const ProductAppointmentForm = ({
         <div className="flex flex-col gap-7 px-4 pt-6 lg:px-8 lg:pt-8">
           <div className="flex flex-col gap-7">
             <div className="flex items-center justify-between gap-4">
-              <h2 className="font-larken text-24 font-light leading-110 text-darkblack">
+              <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
                 {config.title}
               </h2>
               <button

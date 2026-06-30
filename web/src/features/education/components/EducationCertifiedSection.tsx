@@ -257,7 +257,7 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
               </div>
 
               <div className="flex flex-col gap-3">
-                <h3 className="font-gill text-24 font-normal leading-110 text-darkblack">
+                <h3 className="font-gill text-2xl font-normal leading-110 text-darkblack">
                   {certificate.whyTitle}
                 </h3>
                 <p className="font-gill text-[20px] font-light leading-110 text-neutral500 lg:max-w-[546px]">
@@ -266,7 +266,7 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
               </div>
 
               <div className="flex flex-col gap-3">
-                <h3 className="font-gill text-24 font-normal leading-110 text-darkblack">
+                <h3 className="font-gill text-2xl font-normal leading-110 text-darkblack">
                   {certificate.howTitle}
                 </h3>
                 <p className="font-gill text-[20px] font-light leading-110 text-neutral500 lg:max-w-[546px]">

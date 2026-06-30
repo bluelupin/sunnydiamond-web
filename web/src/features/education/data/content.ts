@@ -386,7 +386,7 @@ export const educationFourCsIntroSpec = {
   gradientRuleClassName:
     "h-px w-250 bg-gradient-to-r from-darkMagenta to-goldAccent lg:w-420",
   pillarsClassName:
-    "flex flex-wrap items-center justify-center gap-x-3 gap-y-2 font-gill text-20 leading-110 text-darkblack lg:flex-nowrap lg:gap-x-4 lg:text-24",
+    "flex flex-wrap items-center justify-center gap-x-3 gap-y-2 font-gill text-20 leading-110 text-darkblack lg:flex-nowrap lg:gap-x-4 lg:text-2xl",
   scrollArrowClassName: "h-4 w-4 lg:h-[23px] lg:w-6",
 } as const;
 
