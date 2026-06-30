@@ -82,9 +82,9 @@ function OccasionCardItem({
       {/* Desktop — same hover reveal as CollectionHeroPanel */}
       <div className="absolute bottom-0 left-40 z-10 hidden max-w-[418px] flex-col-reverse items-start text-white md:flex">
         <div className="inline-flex max-h-0 w-fit flex-col items-start overflow-hidden pb-0 pt-0 opacity-0 motion-safe:transition-[max-height,padding,opacity] motion-safe:duration-500 motion-safe:ease-out group-hover:max-h-[72px] group-hover:pb-16 group-hover:opacity-100 group-focus-visible:max-h-[72px] group-focus-visible:pb-16 group-focus-visible:opacity-100">
-          <Link href="/" className="relative after:bg-white after:absolute after:h-0.5 after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-white hover:border-white sm:pb-1 font-gill text-sm font-normal uppercase leading-110 text-white hover:text-white">
+          <div className="relative after:bg-white after:absolute after:h-0.5 after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-white hover:border-white sm:pb-1 font-gill text-sm font-normal uppercase leading-110 text-white hover:text-white">
             {ctaLabel}
-          </Link>
+          </div>
         </div>
         <div className="mb-6 flex w-full max-w-[418px] flex-col items-start gap-2 lg:gap-3">
           <h3 className="whitespace-nowrap font-larken text-32 font-light leading-none md:text-3xl lg:text-32">

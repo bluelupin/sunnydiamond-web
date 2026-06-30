@@ -140,7 +140,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
         aria-hidden
         width={1920}
         height={750}
-        className="pointer-events-none absolute inset-0 hidden size-full object-cover object-center opacity-30 md:block"
+        className="pointer-events-none absolute inset-0 size-full sm:!h-[157%] sm:top-[-300px] top-12 object-cover object-center opacity-80"
       />
       <div className="flex flex-col items-center py-12 md:flex-row md:min-h-[750px] md:py-16 lg:items-center lg:justify-between lg:gap-8 lg:px-40 md:px-8 px-4 lg:py-100">
         <div className="order-2 flex w-full max-w-full shrink-0 flex-col gap-8 md:order-1 md:max-w-[437px]">
