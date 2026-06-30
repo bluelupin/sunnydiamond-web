@@ -46,8 +46,20 @@ export function resolveCraftsmanshipSection(
   section: CraftsmanshipSectionData | null | undefined,
 ): ResolvedCraftsmanshipSection {
   const media = getCraftsmanshipMedia(section);
-  const desktopSource = media?.desktopImage ?? media?.data?.attributes ?? media;
-  const mobileSource = media?.mobileImage ?? media?.data?.attributes ?? media;
+  const responsiveMedia = media as
+    | (CraftsmanshipSectionData["image"] & {
+        data?: { attributes?: unknown };
+      })
+    | null
+    | undefined;
+  const desktopSource =
+    responsiveMedia?.desktopImage ??
+    responsiveMedia?.data?.attributes ??
+    responsiveMedia;
+  const mobileSource =
+    responsiveMedia?.mobileImage ??
+    responsiveMedia?.data?.attributes ??
+    responsiveMedia;
 
   const desktopImageUrl = resolveCmsMediaUrl(desktopSource);
   const mobileImageUrl = resolveCmsMediaUrl(mobileSource);

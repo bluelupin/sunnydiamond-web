@@ -4,6 +4,7 @@ import {
   educationCertifiedContent,
   educationDiscoverContent,
   educationFaqItems,
+  educationFourCsIntroContent,
   educationFourCsPanels,
   educationHeroFigmaSpec,
   educationPageImages,
@@ -18,6 +19,7 @@ import type {
   NormalizedEducationCtaBanner,
   NormalizedEducationFaqItem,
   NormalizedEducationFaqSection,
+  NormalizedEducationFourCsIntro,
   NormalizedEducationFourCsPanel,
   NormalizedEducationFourCsSection,
   NormalizedEducationHero,
@@ -27,6 +29,7 @@ import type {
   StrapiEducationCtaBanner,
   StrapiEducationFaqItem,
   StrapiEducationFourCsInfoPanel,
+  StrapiEducationFourCsIntro,
   StrapiEducationFourCsSection,
   StrapiEducationFourCsVisualPanel,
   StrapiEducationGradeStop,
@@ -332,6 +335,78 @@ const mapFourCsPanel = (
   };
 };
 
+const PILLAR_LABEL_OVERRIDES: Record<string, string> = {
+  CLARITY: "Clarity",
+  CUT: "Cut",
+  COLOUR: "Colour",
+  COLOR: "Colour",
+  CARAT: "Carat",
+};
+
+const formatPillarLabel = (label?: string | null) => {
+  const cleaned = cleanText(label);
+  if (!cleaned) return undefined;
+
+  const key = cleaned.toUpperCase();
+  if (PILLAR_LABEL_OVERRIDES[key]) {
+    return PILLAR_LABEL_OVERRIDES[key];
+  }
+
+  return cleaned
+    .toLowerCase()
+    .split(/\s+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
+const mapFourCsIntroImage = (image?: StrapiEducationFourCsIntro["image"]) => {
+  const desktopUrl =
+    resolveCmsMediaUrl(image?.desktopImage) ??
+    resolveCmsMediaUrl(image?.mobileImage) ??
+    educationPageImages.diamondOval;
+  const mobileUrl =
+    resolveCmsMediaUrl(image?.mobileImage) ??
+    resolveCmsMediaUrl(image?.desktopImage) ??
+    educationPageImages.diamondOval;
+
+  return {
+    desktopUrl,
+    mobileUrl,
+    alt: cleanText(image?.altText) ?? cleanText(image?.caption) ?? "",
+  };
+};
+
+const mapFourCsIntro = (
+  intro?: StrapiEducationFourCsIntro | null,
+  fourCsSection?: StrapiEducationFourCsSection | null,
+): NormalizedEducationFourCsIntro => {
+  const fallback = EMPTY_LEARN_ABOUT_DIAMONDS_PAGE.fourCsIntro;
+  const image = mapFourCsIntroImage(intro?.image);
+
+  const heading = cleanText(intro?.heading) ?? fallback.desktopTitle;
+  const mobileHeading =
+    cleanText(intro?.mobileHeading) ?? heading ?? fallback.mobileTitle;
+  const description = cleanText(intro?.body) ?? fallback.description;
+
+  const pillarsFromPanels =
+    fourCsSection?.cInfoPanel
+      ?.map((panel) => formatPillarLabel(panel.sectionLabel))
+      .filter((label): label is string => Boolean(label)) ?? [];
+
+  const pillars =
+    pillarsFromPanels.length > 0 ? pillarsFromPanels : fallback.pillars;
+
+  return {
+    desktopTitle: heading,
+    mobileTitle: mobileHeading,
+    description,
+    pillars,
+    imageDesktopUrl: image.desktopUrl,
+    imageMobileUrl: image.mobileUrl,
+    imageAlt: image.alt,
+  };
+};
+
 const mapFourCsSection = (
   section?: StrapiEducationFourCsSection | null,
 ): NormalizedEducationFourCsSection => {
@@ -458,6 +533,7 @@ export function mapLearnAboutDiamondsPage(
     hero: mapHero(raw.hero),
     faq: mapFaqSection(raw.faqSection),
     ctaBanner: mapCtaBanner(raw.ctaBanner),
+    fourCsIntro: mapFourCsIntro(raw.fourCsIntro, raw.fourCsSection),
     fourCs: mapFourCsSection(raw.fourCsSection),
     certificate: mapCertificateSection(raw.certificateSection),
   };
