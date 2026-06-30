@@ -119,7 +119,7 @@ const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
 
       <div
         aria-hidden
-        className="absolute inset-x-0 bottom-0 h-[409px] bg-gradient-to-b from-transparent to-black/80 backdrop-blur-[5px] md:h-[400px]"
+        className="absolute inset-x-0 bottom-0 h-[409px] bg-gradient-to-b from-transparent to-black md:h-[400px]"
       />
 
       {/* Content — Figma 684:3301 mobile / 684:2988 desktop */}
