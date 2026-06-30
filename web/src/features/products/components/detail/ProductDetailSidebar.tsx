@@ -29,6 +29,8 @@ import DeliveryStoreJourneyPanel from "./DeliveryStoreJourneyPanel";
 import type { EngravingSelection } from "@/features/products/constants/engraving";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import PlusIcon from "@/assets/Icons/PlusIcon";
+import VanIcon from "@/assets/Icons/VanIcon";
+import StoreIcon from "@/assets/Icons/StoreIcon";
 
 type ProductDetailSidebarProps = {
   product: Product;
@@ -210,27 +212,13 @@ const ProductDetailSidebar = ({
           </div>
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2">
-              <Image
-                src="/images/products/pdp/delivery-truck.svg"
-                alt=""
-                width={32}
-                height={32}
-                aria-hidden
-                className="size-8 shrink-0 object-contain"
-              />
+              <VanIcon className="shrink-0" />
               <p className="font-gill text-base font-light leading-110 text-darkblack">
                 Estimated delivery May 12 2026
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Image
-                src="/images/products/pdp/store.svg"
-                alt=""
-                width={32}
-                height={32}
-                aria-hidden
-                className="size-8 shrink-0 object-contain"
-              />
+              <StoreIcon className="shrink-0" />
               <p className="font-gill text-base font-light leading-110 text-darkblack">
                 Available now at nearest store
               </p>

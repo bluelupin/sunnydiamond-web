@@ -49,9 +49,16 @@ export const craftsmanshipProcessFigmaSpec = {
   },
 } as const;
 
-export function craftsmanshipRadialGradientStyle(
-  radial: (typeof craftsmanshipProcessFigmaSpec)["desktop"]["radial"],
-) {
+type CraftsmanshipRadialGradientInput = {
+  ellipseWidth: number;
+  ellipseHeight: number;
+  centerX: number;
+  centerY: number;
+  from: string;
+  to: string;
+};
+
+export function craftsmanshipRadialGradientStyle(radial: CraftsmanshipRadialGradientInput) {
   const {
     ellipseWidth,
     ellipseHeight,
