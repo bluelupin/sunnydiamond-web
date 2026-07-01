@@ -60,13 +60,13 @@ const EducationCaratHandVisual = ({ activeCarat }: EducationCaratHandVisualProps
       <div
         className="pointer-events-none absolute z-10 transition-transform duration-300 ease-out"
         style={{
-          left: `222px`,
-          top: `150px`,
+          left: `250px`,
+          top: `100px`,
           // left: `${(diamondCenterX / layout.frameWidth) * 100}%`,
           // top: `${(diamondCenterY / frameHeight) * 100}%`,
           width: `${(baseSize / layout.frameWidth) * 100}%`,
           aspectRatio: "1",
-          transform: `translate(-50%, -50%) scale(${diamondScale})`,
+          transform: `scale(${diamondScale})`,
           transformOrigin: "center center",
         }}
       >
