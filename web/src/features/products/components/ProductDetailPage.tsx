@@ -59,7 +59,7 @@ const ProductDetailPage = () => {
       <PageContainer className="!px-0 md:!px-8 lg:!px-[40px] 2xl:!px-[60px] pb-16 pt-0 lg:pb-[60px]">
         <Link
           href="/jewellery"
-          className="mb-6 hidden items-center gap-1 px-4 font-gill text-sm text-neutral500 transition-colors hover:text-darkblack md:inline-flex md:px-0 lg:mb-8"
+          className="mb-6 hidden items-center gap-1 px-4 font-gill text-sm text-neutral500 transition-colors hover:text-darkMagenta md:inline-flex md:px-0 lg:mb-8"
         >
           <ChevronLeft size={16} aria-hidden />
           Back to Jewellery

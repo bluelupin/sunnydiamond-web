@@ -215,8 +215,8 @@ const StoreSelectionStep = ({
 }: StoreSelectionStepProps) => (
   <>
     <div className="min-h-0 flex-1 overflow-y-auto">
-      <div className="px-4 pt-6 lg:px-8">
-        <div className="flex flex-col gap-7">
+      <div className="px-4 pt-6 lg:px-6 lg:pt-[40px]">
+        <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between gap-4">
             <div className="flex min-w-0 items-center gap-2">
               {showBack ? (
@@ -377,8 +377,8 @@ const BookingFormStep = ({
   return (
   <>
     <div className="min-h-0 flex-1 overflow-y-auto">
-      <div className="px-4 pt-6 lg:px-8">
-        <div className="flex flex-col gap-7">
+      <div className="px-4 pt-6 lg:px-6 lg:pt-[40px]">
+        <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between gap-4">
             <div className="flex min-w-0 items-center gap-2">
               <button

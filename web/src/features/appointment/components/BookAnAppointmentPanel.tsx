@@ -93,7 +93,7 @@ const BookAnAppointmentPanel = ({
     <>
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className={cn(variant === "page" ? "mx-auto w-full max-w-[480px] px-4 pt-8 lg:px-8 lg:pt-10" : "px-4 pt-6")}>
-          <div className="flex flex-col gap-7">
+          <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4">
               <div className="flex min-w-0 items-center gap-2">
                 {showBack ? (
