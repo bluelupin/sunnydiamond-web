@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type RefObject } from "react";
 import type { StaticImageData } from "next/image";
 import Image from "next/image";
 import { ChevronRight } from "lucide-react";
@@ -14,9 +14,11 @@ import {
   PRODUCT_DETAIL_GALLERY_SECOND_IMAGE,
   PRODUCT_DETAIL_GALLERY_THIRD_IMAGE,
 } from "@/features/products/data/productGalleryContent";
+import { PDP_STICKY_TOP_CLASS } from "./productDetailLayout";
 
 type ProductDetailGalleryProps = {
   product: Product;
+  topGalleryRef?: RefObject<HTMLDivElement | null>;
 };
 
 const GALLERY_SLIDE_COUNT = 5;
@@ -72,7 +74,7 @@ const CroppedGalleryImage = ({
   </div>
 );
 
-const ProductDetailGallery = ({ product }: ProductDetailGalleryProps) => {
+const ProductDetailGallery = ({ product, topGalleryRef }: ProductDetailGalleryProps) => {
   const [activeSlide, setActiveSlide] = useState(0);
   const [productHeroImage, productThumbOne, productThumbTwo] = product.images;
   const heroImage = productHeroImage ?? PRODUCT_DETAIL_GALLERY_HERO_IMAGE;
@@ -134,46 +136,55 @@ const ProductDetailGallery = ({ product }: ProductDetailGalleryProps) => {
         </div>
       </div>
 
-      <div className="hidden flex-col gap-3 md:flex md:gap-3">
-        <div className={galleryFrameClass}>
-          <CroppedGalleryImage
-            src={heroImage ?? product.image}
-            alt={`${product.name} — primary view`}
-            sizes="504px"
-            maxWidthClass="max-w-504"
-            minHeightClass="min-h-320"
-            cropStyle={nestedImageCropStyle}
-            priority
-          />
-        </div>
-
-        <div className="flex flex-col gap-3 sm:flex-row md:gap-3">
-          <div className="flex min-h-280 flex-1 overflow-hidden bg-gray300 px-4 py-8 sm:min-h-360 md:h-380 md:px-5 md:py-10 lg:h-465 lg:px-6 lg:py-12 sm:w-1/2">
+      <div className="hidden min-h-full flex-1 flex-col gap-3 md:flex">
+        <div ref={topGalleryRef} className="flex shrink-0 flex-col gap-3">
+          <div className={galleryFrameClass}>
             <CroppedGalleryImage
-              src={thumbOne ?? product.image}
-              alt={`${product.name} — detail view`}
-              sizes="312px"
-              maxWidthClass="max-w-311"
+              src={heroImage ?? product.image}
+              alt={`${product.name} — primary view`}
+              sizes="504px"
+              maxWidthClass="max-w-504"
+              minHeightClass="min-h-320"
               cropStyle={nestedImageCropStyle}
+              priority
             />
           </div>
-          <div className="flex min-h-280 w-full overflow-hidden sm:min-h-360 md:h-400 md:shrink-0 lg:h-465 sm:w-1/2">
-            <OptimizedImage
-              src={thumbTwo ?? product.image}
-              alt={`${product.name} — alternate view`}
-              sizes="(max-width: 1024px) 50vw, 385px"
-              className="object-cover"
-            />
+
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex min-h-280 flex-1 overflow-hidden bg-gray300 px-4 py-8 sm:min-h-360 md:h-380 md:px-5 md:py-10 lg:h-465 lg:px-6 lg:py-12 sm:w-1/2">
+              <CroppedGalleryImage
+                src={thumbOne ?? product.image}
+                alt={`${product.name} — detail view`}
+                sizes="312px"
+                maxWidthClass="max-w-311"
+                cropStyle={nestedImageCropStyle}
+              />
+            </div>
+            <div className="flex min-h-280 w-full overflow-hidden sm:min-h-360 md:h-400 md:shrink-0 lg:h-465 sm:w-1/2">
+              <OptimizedImage
+                src={thumbTwo ?? product.image}
+                alt={`${product.name} — alternate view`}
+                sizes="(max-width: 1024px) 50vw, 385px"
+                className="object-cover"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="relative flex h-420 w-full overflow-hidden md:h-520 lg:h-680">
-          <OptimizedImage
-            src={lifestyleImage}
-            alt={`${product.name} — lifestyle`}
-            sizes="(max-width: 1024px) 100vw, 783px"
-            className="size-full object-cover object-center"
-          />
+        <div className="relative min-h-520 flex-1 lg:min-h-680">
+          <div
+            className={cn(
+              "relative flex h-420 w-full md:sticky md:z-10 md:self-start md:h-520 lg:h-680",
+              PDP_STICKY_TOP_CLASS,
+            )}
+          >
+            <OptimizedImage
+              src={lifestyleImage}
+              alt={`${product.name} — lifestyle`}
+              sizes="(max-width: 1024px) 100vw, 783px"
+              className="size-full object-cover object-center"
+            />
+          </div>
         </div>
       </div>
     </>

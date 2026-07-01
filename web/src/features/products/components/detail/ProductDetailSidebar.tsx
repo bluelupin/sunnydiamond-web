@@ -232,7 +232,7 @@ const ProductDetailSidebar = ({
   );
 
   const detailsSection = (
-    <div className="flex flex-col gap-40 px-4 md:px-6 md:pb-12 lg:px-0 !pb-0">
+    <div className="flex flex-col gap-40 px-4 md:px-0 md:pb-12 lg:px-0 !pb-0">
       <section aria-label="Shopping benefits" className="flex flex-col gap-6">
         <Reveal direction="up" className="flex items-center justify-between">
           <h2 className="font-gill text-2xl leading-110 text-darkblack">With Sunny, you get</h2>

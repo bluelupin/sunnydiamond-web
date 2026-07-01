@@ -12,7 +12,6 @@ import { getMoreForYouCarouselItems } from "@/features/products/data/moreForYouC
 import { useCart } from "@/features/cart/context/CartContext";
 import { useToast } from "@/shared/hooks/use-toast";
 import { ChevronLeft } from "lucide-react";
-import ProductDetailGallery from "./detail/ProductDetailGallery";
 import ProductDetailSidebar from "./detail/ProductDetailSidebar";
 import ProductDetailHeroLayout from "./detail/ProductDetailHeroLayout";
 import ProductDetailHeroBanner from "./detail/ProductDetailHeroBanner";
@@ -68,11 +67,7 @@ const ProductDetailPage = () => {
 
         <ProductDetailSidebar {...sidebarProps}>
           {({ purchase, details }) => (
-            <ProductDetailHeroLayout
-              gallery={<ProductDetailGallery product={product} />}
-              purchase={purchase}
-              details={details}
-            />
+            <ProductDetailHeroLayout product={product} purchase={purchase} details={details} />
           )}
         </ProductDetailSidebar>
       </PageContainer>
