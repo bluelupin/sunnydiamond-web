@@ -45,7 +45,7 @@ const EducationFaqSection = ({ faq }: EducationFaqSectionProps) => {
     <section
       aria-labelledby="education-faq-title"
       className={cn(
-        "bg-white px-4 py-16 md:px-8 lg:px-10 lg:py-25",
+        "bg-white px-4 py-16 md:px-8 lg:px-10 lg:py-100",
       )}
     >
       <div className="mx-auto flex max-w-[910px] flex-col items-center">
@@ -56,7 +56,7 @@ const EducationFaqSection = ({ faq }: EducationFaqSectionProps) => {
         >
           <span
             id="education-faq-title"
-            className="block w-full text-left font-larken text-[32px] font-light leading-110 text-darkblack lg:text-center lg:text-[48px]"
+            className="block w-full text-left font-larken font-light leading-110 text-darkblack lg:text-center lg:text-5xl md:text-4xl sm:text-3xl text-32"
           >
             {faq.heading}
           </span>
