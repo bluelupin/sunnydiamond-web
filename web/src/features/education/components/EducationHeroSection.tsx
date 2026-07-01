@@ -25,7 +25,7 @@ const EducationHeroSection = ({ hero }: EducationHeroSectionProps) => {
     <section
       id="education-hero"
       aria-labelledby="education-hero-title"
-      className="relative flex flex-col justify-end overflow-hidden bg-white pb-[70px]"
+      className="relative flex flex-col justify-end overflow-hidden bg-white pb-16"
       style={{ height: section.height }}
     >
       <div className="absolute inset-0 overflow-hidden">
@@ -50,7 +50,8 @@ const EducationHeroSection = ({ hero }: EducationHeroSectionProps) => {
 
       <h1
         id="education-hero-title"
-        className="relative z-10 text-center font-larken text-[32px] font-light leading-none text-white lg:text-[60px]"
+        className={cn("relative z-10 text-center font-larken text-[32px] font-light leading-none text-white lg:text-[60px] transition-all duration-500",
+          expanded ? "" : "top-[-100px]",)}
       >
         {hero.title}
       </h1>

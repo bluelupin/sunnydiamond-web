@@ -85,25 +85,25 @@ const PanelMedia = ({
             : "max-w-[323px] items-center lg:max-w-[528px] lg:px-4",
         )}
       >
-          {panel.id === "carat" ? (
-            <div className="flex w-full flex-col items-start gap-10 lg:gap-[40px]">
-              <div className="w-full shrink-0 self-start overflow-hidden">
-                <EducationCaratHandVisual activeCarat={activeCarat} />
-              </div>
-              {sliderSpec ? (
-                <div className="flex w-full shrink-0 justify-center">
-                  <EducationMetricSlider
-                    className="relative z-20 shrink-0"
-                    options={slider.options}
-                    defaultIndex={slider.defaultIndex}
-                    activeIndex={activeIndex}
-                    onChange={setActiveIndex}
-                    spec={sliderSpec}
-                  />
-                </div>
-              ) : null}
+        {panel.id === "carat" ? (
+          <div className="flex w-full flex-col items-start gap-10 lg:gap-[40px]">
+            <div className="w-full shrink-0 self-start overflow-hidden">
+              <EducationCaratHandVisual activeCarat={activeCarat} />
             </div>
-          ) : (
+            {sliderSpec ? (
+              <div className="flex w-full shrink-0 justify-center">
+                <EducationMetricSlider
+                  className="relative z-20 shrink-0"
+                  options={slider.options}
+                  defaultIndex={slider.defaultIndex}
+                  activeIndex={activeIndex}
+                  onChange={setActiveIndex}
+                  spec={sliderSpec}
+                />
+              </div>
+            ) : null}
+          </div>
+        ) : (
           <div
             className={cn(
               "flex w-full flex-col gap-10 lg:gap-[40px]",
@@ -157,22 +157,22 @@ const PanelMedia = ({
               </div>
             ) : null}
           </div>
-          )}
+        )}
 
-          {panel.footnote ? (
-            <div className="mt-10 flex w-full max-w-[481px] flex-col items-center gap-6 max-md:mt-10 max-md:max-w-[317px] max-md:gap-6 lg:mt-[64px] lg:gap-[24px]">
-              <p className="text-center font-gill text-[14px] font-light leading-110 text-neutral500 lg:text-[16px] lg:text-[#4D4D4D]">
-                {panel.footnote}
-              </p>
-              <Image
-                src={educationPageImages.scrollArrow}
-                alt=""
-                width={24}
-                height={23}
-                className={educationScrollArrowClassName}
-              />
-            </div>
-          ) : null}
+        {panel.footnote ? (
+          <div className="mt-10 flex w-full max-w-[481px] flex-col items-center gap-6 max-md:mt-10 max-md:max-w-[317px] max-md:gap-6 lg:mt-[64px] lg:gap-[24px]">
+            <p className="text-center font-gill text-[14px] font-light leading-110 text-neutral500 lg:text-[16px] lg:text-[#4D4D4D]">
+              {panel.footnote}
+            </p>
+            <Image
+              src={educationPageImages.scrollArrow}
+              alt=""
+              width={24}
+              height={23}
+              className={educationScrollArrowClassName}
+            />
+          </div>
+        ) : null}
       </div>
     </ScrollReveal>
   );
@@ -209,11 +209,14 @@ const PanelCopy = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent;
 const EducationFourCsPanel = ({
   panel,
   index,
+  totalPanels,
 }: {
   panel: NormalizedEducationFourCsPanel;
   index: number;
+  totalPanels: number;
 }) => {
   const isChalk = panel.background === "chalk";
+  const isCopyWhiteBackground = index === totalPanels - 1;
   const copyDelay = index * 40;
   const mediaDelay = 100 + index * 40;
 
@@ -228,7 +231,13 @@ const EducationFourCsPanel = ({
       )}
     >
       <div className="flex h-full flex-col lg:grid lg:grid-cols-2">
-        <div className={cn("shrink-0 lg:h-full", panel.mediaPosition === "left" && "lg:order-2")}>
+        <div
+          className={cn(
+            "shrink-0 lg:h-full",
+            panel.mediaPosition === "left" && "lg:order-2",
+            isCopyWhiteBackground && "bg-white",
+          )}
+        >
           <PanelCopy panel={panel} delayMs={copyDelay} />
         </div>
         <div className={cn("shrink-0 lg:h-full", panel.mediaPosition === "left" && "lg:order-1")}>
@@ -247,9 +256,14 @@ type EducationFourCsPanelsSectionProps = {
 
 const EducationFourCsPanelsSection = ({ fourCs }: EducationFourCsPanelsSectionProps) => {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col mb-16">
       {fourCs.panels.map((panel, index) => (
-        <EducationFourCsPanel key={panel.id} panel={panel} index={index} />
+        <EducationFourCsPanel
+          key={panel.id}
+          panel={panel}
+          index={index}
+          totalPanels={fourCs.panels.length}
+        />
       ))}
     </div>
   );
