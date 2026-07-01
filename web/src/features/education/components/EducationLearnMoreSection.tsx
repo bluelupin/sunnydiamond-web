@@ -169,7 +169,7 @@ const EducationLearnMoreSection = () => {
                         aria-selected={isActive}
                         onClick={() => handleTabChange(index)}
                         className={cn(
-                          "flex items-center justify-center whitespace-nowrap py-2 font-gill font-normal leading-110 max-md:text-base md:w-full md:py-0 md:text-center md:text-base lg:text-[20px]",
+                          "flex items-center justify-center whitespace-nowrap py-2 font-gill font-normal leading-110 max-md:text-base md:w-full md:py-0 md:text-center md:text-base lg:text-xl",
                           isActive
                             ? "border-b border-linkGold text-linkGold"
                             : "text-darkblack hover:text-linkGold",
@@ -187,7 +187,7 @@ const EducationLearnMoreSection = () => {
 
         <div className="flex w-full flex-col items-center gap-[49px] lg:gap-16">
           <ScrollReveal delayMs={180}>
-            <div className="max-w-[700px] text-center font-gill text-base font-light leading-110 text-darkblack lg:text-[20px] lg:text-neutral500">
+            <div className="max-w-[700px] text-center font-gill text-base font-light leading-110 text-darkblack lg:text-xl lg:text-neutral500">
               <p className="md:hidden">{activeTab.description.join(" ")}</p>
               <div className="hidden md:block">
                 {activeTab.description.map((paragraph) => (

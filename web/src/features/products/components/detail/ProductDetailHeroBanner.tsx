@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import Reveal from "@/shared/Animation/Reveal";
 
 type ProductDetailHeroBannerProps = {
   imageSrc: string;
@@ -60,40 +61,42 @@ const ProductDetailHeroBanner = ({
     : undefined;
 
   return (
-    <section
-      ref={sectionRef}
-      aria-label="Lifestyle showcase"
-      className="grid h-361 w-full overflow-hidden md:h-600 lg:h-804 [&>*]:col-start-1 [&>*]:row-start-1"
-    >
-      <Image
-        src={imageSrc}
-        alt={alt}
-        width={1440}
-        height={800}
-        priority={false}
-        className="h-full w-full object-cover object-top"
-        sizes="100vw"
-      />
-
-      {showVideo ? (
-        <video
-          ref={videoRef}
+    <Reveal direction="up">
+      <section
+        ref={sectionRef}
+        aria-label="Lifestyle showcase"
+        className="grid h-361 w-full overflow-hidden md:h-600 lg:h-804 [&>*]:col-start-1 [&>*]:row-start-1"
+      >
+        <Image
+          src={imageSrc}
+          alt={alt}
+          width={1440}
+          height={800}
+          priority={false}
           className="h-full w-full object-cover object-top"
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          poster={imageSrc}
-          aria-hidden
-          tabIndex={-1}
-          onError={showPosterOnly}
-        >
-          {videoWebmSrc ? <source src={videoWebmSrc} type="video/webm" /> : null}
-          <source src={videoSrc} type="video/mp4" />
-        </video>
-      ) : null}
-    </section>
+          sizes="100vw"
+        />
+
+        {showVideo ? (
+          <video
+            ref={videoRef}
+            className="h-full w-full object-cover object-top"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            poster={imageSrc}
+            aria-hidden
+            tabIndex={-1}
+            onError={showPosterOnly}
+          >
+            {videoWebmSrc ? <source src={videoWebmSrc} type="video/webm" /> : null}
+            <source src={videoSrc} type="video/mp4" />
+          </video>
+        ) : null}
+      </section>
+    </Reveal>
   );
 };
 

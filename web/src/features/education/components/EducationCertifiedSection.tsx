@@ -260,7 +260,7 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
                 <h3 className="font-gill text-2xl font-normal leading-110 text-darkblack">
                   {certificate.whyTitle}
                 </h3>
-                <p className="font-gill text-[20px] font-light leading-110 text-neutral500 lg:max-w-[546px]">
+                <p className="font-gill text-xl font-light leading-110 text-neutral500 lg:max-w-[546px]">
                   {certificate.whyDescription}
                 </p>
               </div>
@@ -269,7 +269,7 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
                 <h3 className="font-gill text-2xl font-normal leading-110 text-darkblack">
                   {certificate.howTitle}
                 </h3>
-                <p className="font-gill text-[20px] font-light leading-110 text-neutral500 lg:max-w-[546px]">
+                <p className="font-gill text-xl font-light leading-110 text-neutral500 lg:max-w-[546px]">
                   {certificate.howDescription}
                 </p>
               </div>

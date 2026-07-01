@@ -194,11 +194,11 @@ const PanelCopy = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent;
       <div className="flex max-w-[303px] flex-col gap-3 lg:max-w-[441px] lg:gap-[16px]">
         <h3
           id={`education-panel-${panel.id}`}
-          className="font-larken text-[20px] font-light leading-110 text-darkblack lg:text-[32px]"
+          className="font-larken text-xl font-light leading-110 text-darkblack lg:text-[32px]"
         >
           {panel.title}
         </h3>
-        <p className="font-gill text-[16px] font-light leading-110 text-darkblack lg:text-[20px]">
+        <p className="font-gill text-[16px] font-light leading-110 text-darkblack lg:text-xl">
           {panel.description}
         </p>
       </div>

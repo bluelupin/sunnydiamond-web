@@ -8,6 +8,8 @@ import PageContainer from "@/shared/ui/layout/PageContainer";
 import { cn } from "@/shared/utils/cn";
 import type { MoreForYouCarouselItem } from "@/features/products/data/moreForYouContent";
 import { DetailOutlineLink } from "./shared";
+import Reveal from "@/shared/Animation/Reveal";
+import { DELIVERY_STORE_LOCATIONS } from "../../data/deliveryStoreContent";
 
 type ProductDetailMoreForYouSectionProps = {
   items: MoreForYouCarouselItem[];
@@ -223,7 +225,7 @@ const ProductDetailMoreForYouSection = ({ items }: ProductDetailMoreForYouSectio
   );
 
   return (
-    <section aria-labelledby="more-for-you-heading" className="py-16 lg:py-104">
+    <section aria-labelledby="more-for-you-heading" className="py-16 lg:py-100">
       <div className="px-4 lg:px-40">
         <PageContainer className="px-0">
           <div className="mx-auto flex w-full max-w-1360 flex-col items-center gap-6 lg:gap-40">
@@ -253,87 +255,86 @@ const ProductDetailMoreForYouSection = ({ items }: ProductDetailMoreForYouSectio
               onPointerUp={endDrag(mobileTrackRef)}
               onPointerCancel={endDrag(mobileTrackRef)}
             >
-            <div className="flex items-center justify-center gap-6">
-              <div className="flex w-[160px] shrink-0 items-center justify-center">
-                {prevItem ? <SidePeekImage src={prevItem.image} flip /> : null}
+              <div className="flex items-center justify-center gap-6">
+                <div className="flex w-[160px] shrink-0 items-center justify-center">
+                  {prevItem ? <SidePeekImage src={prevItem.image} flip /> : null}
+                </div>
+
+                <div className="relative h-[150px] w-[180px] shrink-0 overflow-hidden">
+                  <div
+                    className={slideTrackClassName}
+                    style={{
+                      width: `${total * 100}%`,
+                      transform: slideTransform,
+                    }}
+                  >
+                    {items.map((item, index) => (
+                      <div
+                        key={item.id}
+                        className="relative h-full shrink-0"
+                        style={{ width: `${100 / total}%` }}
+                      >
+                        <Image
+                          src={item.image}
+                          alt={index === activeIndex ? item.name : ""}
+                          fill
+                          className="size-full scale-[2] object-contain object-center"
+                          sizes="180px"
+                          priority={index === 0}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex w-[160px] shrink-0 items-center justify-center">
+                  {nextItem ? <SidePeekImage src={nextItem.image} /> : null}
+                </div>
               </div>
 
-              <div className="relative h-[150px] w-[180px] shrink-0 overflow-hidden">
-                <div
-                  className={slideTrackClassName}
-                  style={{
-                    width: `${total * 100}%`,
-                    transform: slideTransform,
-                  }}
-                >
-                  {items.map((item, index) => (
-                    <div
-                      key={item.id}
-                      className="relative h-full shrink-0"
-                      style={{ width: `${100 / total}%` }}
+              <div className="relative mt-[9px] w-full">
+                <div className="mx-auto flex w-[144px] flex-col items-center gap-4">
+                  <p className="whitespace-nowrap font-gill text-base leading-110 text-darkblack">
+                    {activeItem.name}
+                  </p>
+                  <DetailOutlineLink href={activeItem.href} className="h-14 min-w-[132px] uppercase">
+                    Shop Now
+                  </DetailOutlineLink>
+                </div>
+
+                {total > 1 ? (
+                  <div className="pointer-events-none absolute inset-x-4 top-[32px] z-20 flex items-start justify-between">
+                    <button
+                      type="button"
+                      aria-label="Previous recommendation"
+                      disabled={!canGoPrev}
+                      onClick={() => go(-1)}
+                      className={cn(
+                        "pointer-events-auto inline-flex size-6 items-center justify-center px-[3px] py-1 text-darkblack transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2",
+                        canGoPrev ? "hover:opacity-70" : "cursor-not-allowed",
+                      )}
                     >
-                      <Image
-                        src={item.image}
-                        alt={index === activeIndex ? item.name : ""}
-                        fill
-                        className="size-full scale-[2] object-contain object-center"
-                        sizes="180px"
-                        priority={index === 0}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex w-[160px] shrink-0 items-center justify-center">
-                {nextItem ? <SidePeekImage src={nextItem.image} /> : null}
+                      <CarouselChevronLeft className="h-[17px] w-[18px]" disabled={!canGoPrev} strokeWidth={1} />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Next recommendation"
+                      disabled={!canGoNext}
+                      onClick={() => go(1)}
+                      className={cn(
+                        "pointer-events-auto inline-flex size-6 items-center justify-center px-[3px] py-1 text-darkblack transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2",
+                        canGoNext ? "hover:opacity-70" : "cursor-not-allowed",
+                      )}
+                    >
+                      <CarouselChevronRight className="h-[17px] w-[18px]" disabled={!canGoNext} strokeWidth={1} />
+                    </button>
+                  </div>
+                ) : null}
               </div>
             </div>
-
-            <div className="relative mt-[9px] w-full">
-              <div className="mx-auto flex w-[144px] flex-col items-center gap-4">
-                <p className="whitespace-nowrap font-gill text-base leading-110 text-darkblack">
-                  {activeItem.name}
-                </p>
-                <DetailOutlineLink href={activeItem.href} className="h-14 min-w-[132px] uppercase">
-                  Shop Now
-                </DetailOutlineLink>
-              </div>
-
-              {total > 1 ? (
-                <div className="pointer-events-none absolute inset-x-4 top-[32px] z-20 flex items-start justify-between">
-                <button
-                  type="button"
-                  aria-label="Previous recommendation"
-                  disabled={!canGoPrev}
-                  onClick={() => go(-1)}
-                  className={cn(
-                    "pointer-events-auto inline-flex size-6 items-center justify-center px-[3px] py-1 text-darkblack transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2",
-                    canGoPrev ? "hover:opacity-70" : "cursor-not-allowed",
-                  )}
-                >
-                  <CarouselChevronLeft className="h-[17px] w-[18px]" disabled={!canGoPrev} strokeWidth={1} />
-                </button>
-                <button
-                  type="button"
-                  aria-label="Next recommendation"
-                  disabled={!canGoNext}
-                  onClick={() => go(1)}
-                  className={cn(
-                    "pointer-events-auto inline-flex size-6 items-center justify-center px-[3px] py-1 text-darkblack transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2",
-                    canGoNext ? "hover:opacity-70" : "cursor-not-allowed",
-                  )}
-                >
-                  <CarouselChevronRight className="h-[17px] w-[18px]" disabled={!canGoNext} strokeWidth={1} />
-                </button>
-                </div>
-              ) : null}
-            </div>
-          </div>
           </div>
         </PageContainer>
       </div>
-
       <div
         ref={desktopTrackRef}
         className={cn(
@@ -412,7 +413,7 @@ const ProductDetailMoreForYouSection = ({ items }: ProductDetailMoreForYouSectio
 
           <div className="flex flex-col items-center gap-6 text-center">
             <div className="flex flex-col items-center">
-              <p className="whitespace-nowrap font-gill text-[20px] font-normal leading-110 text-darkblack">
+              <p className="whitespace-nowrap font-gill text-xl font-normal leading-110 text-darkblack">
                 {activeItem.name}
               </p>
             </div>

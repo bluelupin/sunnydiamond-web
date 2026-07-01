@@ -148,7 +148,7 @@ const DiscoverSteps = () => {
         </div>
 
         <ol
-          className="flex flex-col justify-between self-stretch font-gill text-[20px] font-light leading-110 text-darkblack"
+          className="flex flex-col justify-between self-stretch font-gill text-xl font-light leading-110 text-darkblack"
           style={{ minHeight: pillStackHeight }}
         >
           {stepLabels.map((step) => (
@@ -180,7 +180,7 @@ const DiscoverContent = ({ heading, subheading, ctaLabel, ctaHref }: DiscoverCon
         >
           {heading}
         </h2>
-        <p className="w-full font-gill text-base font-light leading-110 text-darkblack lg:max-w-[531px] lg:text-[20px] lg:text-neutral500">
+        <p className="w-full font-gill text-base font-light leading-110 text-darkblack lg:max-w-[531px] lg:text-xl lg:text-neutral500">
           {subheading}
         </p>
       </div>

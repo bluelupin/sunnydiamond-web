@@ -31,6 +31,7 @@ import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import PlusIcon from "@/assets/Icons/PlusIcon";
 import VanIcon from "@/assets/Icons/VanIcon";
 import StoreIcon from "@/assets/Icons/StoreIcon";
+import Reveal from "@/shared/Animation/Reveal";
 
 type ProductDetailSidebarProps = {
   product: Product;
@@ -183,7 +184,7 @@ const ProductDetailSidebar = ({
           </div>
         </div>
 
-        <label className="flex cursor-pointer flex-col gap-3 bg-aboutInactive p-4">
+        <Reveal as="label" direction="up" className="flex cursor-pointer flex-col gap-3 bg-aboutInactive p-4">
           <span className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -196,11 +197,11 @@ const ProductDetailSidebar = ({
           <span className="font-gill text-base font-light leading-110 text-darkblack">
             Make this a special with a gift bag and a personalized message.
           </span>
-        </label>
+        </Reveal>
 
         <div className="flex flex-col gap-4">
-          <p className="font-gill text-base leading-110 text-darkblack">Delivery and Stores</p>
-          <div className="flex gap-2">
+          <Reveal as="p" direction="up" className="font-gill text-base leading-110 text-darkblack">Delivery and Stores</Reveal>
+          <Reveal direction="up" className="flex gap-2">
             <input
               type="text"
               value={zipCode}
@@ -209,21 +210,21 @@ const ProductDetailSidebar = ({
               className="h-14 min-w-0 flex-1 border border-neutral500 px-6 font-gill text-base text-darkblack outline-none"
             />
             <DetailDarkButton className="w-auto shrink-0 px-7 uppercase">Check</DetailDarkButton>
-          </div>
+          </Reveal>
           <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2">
+            <Reveal direction="up" className="flex items-center gap-2">
               <VanIcon className="shrink-0" />
               <p className="font-gill text-base font-light leading-110 text-darkblack">
                 Estimated delivery May 12 2026
               </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
+            </Reveal>
+            <Reveal direction="up" className="flex flex-wrap items-center gap-2">
               <StoreIcon className="shrink-0" />
               <p className="font-gill text-base font-light leading-110 text-darkblack">
                 Available now at nearest store
               </p>
               <DetailTextLink onClick={() => setIsDeliveryStoreOpen(true)}>Coimbatore</DetailTextLink>
-            </div>
+            </Reveal>
           </div>
         </div>
       </div>
@@ -231,16 +232,16 @@ const ProductDetailSidebar = ({
   );
 
   const detailsSection = (
-    <div className="flex flex-col gap-40 px-4 pb-16 md:px-6 md:pb-12 lg:px-0 lg:pb-0">
+    <div className="flex flex-col gap-40 px-4 md:px-6 md:pb-12 lg:px-0 !pb-0">
       <section aria-label="Shopping benefits" className="flex flex-col gap-6">
-        <div className="flex items-center justify-between">
+        <Reveal direction="up" className="flex items-center justify-between">
           <h2 className="font-gill text-2xl leading-110 text-darkblack">With Sunny, you get</h2>
           <DetailTextLink href="/about">T&amp;C Apply</DetailTextLink>
-        </div>
+        </Reveal>
         <ul className="m-0 flex list-none flex-col bg-benefitSurface p-0 max-md:-mx-4 max-md:gap-6 max-md:px-4 max-md:py-40 md:flex-row md:items-stretch md:gap-4 md:p-6 lg:gap-4">
           {content.benefits.flatMap((benefit, index) => {
             const item = (
-              <li
+              <Reveal as="li" direction="up"
                 key={benefit.label}
                 className={cn(
                   "flex w-full shrink-0 flex-col items-center justify-center text-center",
@@ -267,13 +268,13 @@ const ProductDetailSidebar = ({
                   <br />
                   {benefit.lines[1]}
                 </span>
-              </li>
+              </Reveal>
             );
 
             if (index === 0) return [item];
 
             return [
-              <li
+              <Reveal as="li" direction="up"
                 key={`${benefit.label}-divider`}
                 role="presentation"
                 aria-hidden
@@ -287,25 +288,25 @@ const ProductDetailSidebar = ({
 
       <section
         aria-label="Customer support"
-        className="flex min-h-260 items-center overflow-hidden bg-supportSurface p-6"
+        className="flex min-h-260 items-center overflow-hidden bg-supportSurface px-6 py-8"
       >
         <div className="flex max-w-358 flex-col gap-40">
           <div className="flex flex-col gap-3">
-            <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
+            <Reveal as="h2" direction="up" className="font-larken text-2xl font-light leading-110 text-darkblack">
               We&apos;re here for you
-            </h2>
-            <p className="font-gill text-base font-light leading-110 text-darkblack">
+            </Reveal>
+            <Reveal as="p" direction="up" className="font-gill text-base font-light leading-110 text-darkblack">
               Our salesperson will personally help you choose the right diamond.
-            </p>
+            </Reveal>
           </div>
-          <div className="flex max-w-220 flex-col gap-3">
+          <Reveal direction="up" className="flex max-w-220 flex-col gap-3">
             <DetailDarkButton onClick={() => setIsVideoCallOpen(true)} className="uppercase">
               Schedule a Video Call
             </DetailDarkButton>
             <DetailTextLink onClick={() => setIsTryAtHomeOpen(true)} className="self-start uppercase">
               Try At Home
             </DetailTextLink>
-          </div>
+          </Reveal>
         </div>
       </section>
 
@@ -314,18 +315,18 @@ const ProductDetailSidebar = ({
           const isOpen = openAccordion === accordion.id;
 
           return (
-            <div key={accordion.id} className="flex flex-col gap-3">
-              <button
+            <div key={accordion.id} className="flex flex-col lg:gap-3 gap-2">
+              <Reveal as="button" direction="up"
                 type="button"
                 aria-expanded={isOpen}
                 onClick={() => toggleAccordion(accordion.id)}
-                className="flex h-14 items-center justify-between text-left"
+                className="flex lg:h-14 h-[40px] items-center justify-between text-left"
               >
-                <span className="font-gill text-[20px] font-normal leading-110 text-darkblack">
+                <span className="font-gill lg:text-2xl text-xl font-normal leading-110 text-darkblack">
                   {accordion.title}
                 </span>
                 {isOpen ? (
-                  <span className="inline-flex size-[24px] shrink-0 items-center justify-center p-[6px]" aria-hidden>
+                  <span className="inline-flex size-[32px] shrink-0 items-center justify-center p-[6px]" aria-hidden>
                     <Image
                       src="/images/products/pdp/accordion-minus.svg"
                       alt=""
@@ -335,7 +336,7 @@ const ProductDetailSidebar = ({
                     />
                   </span>
                 ) : (
-                  <span className="inline-flex size-[24px] shrink-0 items-center justify-center p-[6px]" aria-hidden>
+                  <span className="inline-flex size-[32px] shrink-0 items-center justify-center p-[6px]" aria-hidden>
                     <Image
                       src="/images/products/pdp/accordion-plus.svg"
                       alt=""
@@ -345,13 +346,13 @@ const ProductDetailSidebar = ({
                     />
                   </span>
                 )}
-              </button>
+              </Reveal>
               {isOpen ? (
-                <p className="pb-3 font-gill text-base font-light leading-110 text-neutral500">
+                <Reveal as="p" direction="up" className="pb-3 font-gill text-base font-light leading-110 text-neutral500">
                   {accordion.content}
-                </p>
+                </Reveal>
               ) : null}
-              <div className="h-px bg-neutral300" aria-hidden />
+              <Reveal direction="up" className="h-px bg-neutral300" aria-hidden />
             </div>
           );
         })}
@@ -361,7 +362,7 @@ const ProductDetailSidebar = ({
         aria-label="Personalisation"
         className="flex items-end justify-between overflow-hidden bg-chalkCard pl-4 py-6 lg:min-h-260 lg:pl-6"
       >
-        <div className="flex max-w-[172px] shrink-0 flex-col gap-6 max-md:-mr-[22px] md:max-w-240 lg:max-w-280 lg:gap-40">
+        <Reveal direction="up" className="flex max-w-[172px] shrink-0 flex-col gap-6 max-md:-mr-[22px] md:max-w-240 lg:max-w-280 lg:gap-40">
           <div className="flex flex-col gap-3">
             <h2 className="w-max whitespace-nowrap font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
               Personalise this for you
@@ -373,8 +374,8 @@ const ProductDetailSidebar = ({
           <DetailOutlineButton className="w-fit uppercase" onClick={() => setIsPersonaliseOpen(true)}>
             Get in Touch
           </DetailOutlineButton>
-        </div>
-        <div className="relative h-[118px] w-177 shrink-0 overflow-hidden md:h-220 md:w-280 lg:h-[213px] lg:w-[322px]">
+        </Reveal>
+        <Reveal direction="up" className="relative h-[118px] w-177 shrink-0 overflow-hidden md:h-220 md:w-280 lg:h-[213px] lg:w-[322px]">
           <Image
             src={content.personaliseImage}
             alt=""
@@ -384,7 +385,7 @@ const ProductDetailSidebar = ({
             className="size-full object-cover object-[center_-4%]"
             sizes="(max-width: 1023px) 177px, 322px"
           />
-        </div>
+        </Reveal>
       </section>
     </div>
   );

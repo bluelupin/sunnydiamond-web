@@ -82,14 +82,14 @@ const EducationFaqSection = ({ faq }: EducationFaqSectionProps) => {
                       onClick={() => setOpenId(isOpen ? null : item.id)}
                       className="flex w-full items-start gap-2 text-left lg:items-center"
                     >
-                      <span className="min-w-0 flex-1 font-gill text-base font-normal leading-110 text-darkblack lg:text-[20px]">
+                      <span className="min-w-0 flex-1 font-gill text-base font-normal leading-110 text-darkblack lg:text-xl">
                         {item.question}
                       </span>
                       <FaqToggleIcon isOpen={isOpen} />
                     </button>
 
                     {isOpen && item.answer ? (
-                      <p className="font-gill text-sm font-light leading-110 text-neutral500 lg:text-[20px]">
+                      <p className="font-gill text-sm font-light leading-110 text-neutral500 lg:text-xl">
                         {item.answer}
                       </p>
                     ) : null}

@@ -68,10 +68,10 @@ const ProductCard = ({ product }: { product: Product }) => {
 
         {/* Name + price — white text */}
         <div className="relative z-10 flex w-full flex-col items-center justify-center gap-[12px] px-[12px]">
-          <p className="text-center font-gill text-[20px] font-normal leading-110 text-white">
+          <p className="text-center font-gill text-xl font-normal leading-110 text-white">
             {product.name}
           </p>
-          <p className="text-center font-gill text-[20px] font-semibold leading-110 text-white">
+          <p className="text-center font-gill text-xl font-semibold leading-110 text-white">
             ₹ {product.price.toLocaleString("en-IN")}
           </p>
         </div>
@@ -121,10 +121,10 @@ const ProductCard = ({ product }: { product: Product }) => {
 
       {/* Name + price */}
       <div className="flex w-full flex-col items-center justify-center gap-[12px] px-[12px]">
-        <p className="text-center font-gill text-[20px] font-light leading-110 darkblack">
+        <p className="text-center font-gill text-xl font-light leading-110 darkblack">
           {product.name}
         </p>
-        <p className="text-center font-gill text-[20px] font-semibold leading-110 darkblack">
+        <p className="text-center font-gill text-xl font-semibold leading-110 darkblack">
           ₹ {product.price.toLocaleString("en-IN")}
         </p>
       </div>

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Image from "next/image";
 import BookStoreVisitPanel from "./BookStoreVisitPanel";
+import { DetailTextLink } from "./shared";
+import Reveal from "@/shared/Animation/Reveal";
 
 type ProductDetailVisitUsSectionProps = {
   imageSrc: string;
@@ -23,18 +25,18 @@ const ProductDetailVisitUsSection = ({ imageSrc }: ProductDetailVisitUsSectionPr
           width={1440}
           height={804}
           priority={false}
-          className="mx-auto h-full w-full max-w-1440 object-cover object-center"
+          className="h-full w-full object-cover object-center"
           sizes="100vw"
           aria-hidden
         />
 
         <div
           aria-hidden
-          className="pointer-events-none mx-auto h-400 w-full max-w-1440 self-end bg-gradient-to-t from-black/80 to-transparent"
+          className="pointer-events-none h-400 w-full self-end bg-gradient-to-t from-black/80 to-transparent"
         />
 
         <div className="z-10 flex self-end justify-center px-4 pb-16 md:px-8 lg:px-10">
-          <div className="flex w-full max-w-311 flex-col items-center gap-6 lg:max-w-1360 lg:gap-40">
+          <Reveal direction="up" className="flex w-full max-w-311 flex-col items-center gap-6 lg:max-w-1360 lg:gap-40">
             <div className="flex flex-col items-center gap-3 text-center text-white lg:gap-4">
               <h2 id="visit-us-heading" className="font-larken text-32 font-light leading-110 lg:text-5xl">
                 Visit Us
@@ -48,15 +50,8 @@ const ProductDetailVisitUsSection = ({ imageSrc }: ProductDetailVisitUsSectionPr
                 </span>
               </p>
             </div>
-
-            <button
-              type="button"
-              onClick={() => setIsBookVisitOpen(true)}
-              className="text-link-underline inline-flex border-b-[1.5px] border-white pb-2 font-gill text-sm uppercase leading-normal tracking-caption text-white max-md:pb-2 lg:pb-1 lg:leading-110"
-            >
-              Book a Visit
-            </button>
-          </div>
+            <DetailTextLink onClick={() => setIsBookVisitOpen(true)} className="uppercase tracking-caption" light>Book a Visit</DetailTextLink>
+          </Reveal>
         </div>
       </section>
 

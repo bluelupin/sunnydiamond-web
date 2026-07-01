@@ -596,8 +596,8 @@ export function AlankaraCollection({
       aria-label={ariaLabel || title}
       className={cn("w-full bg-white", className,)} >
       {sectionHeading &&
-        <PageContainer className="mt-[40px]">
-          <Reveal as="h2" direction="up" className="mb-[38px] text-center font-larken text-32 font-light leading-110 text-darkblack lg:text-left lg:text-48">
+        <PageContainer className="lg:mt-100 mt-16">
+          <Reveal as="h2" direction="up" className="lg:mb-[40px] mb-8 text-center font-larken text-32 font-light leading-110 text-darkblack lg:text-left lg:text-48">
             {sectionHeading}
           </Reveal>
         </PageContainer>
