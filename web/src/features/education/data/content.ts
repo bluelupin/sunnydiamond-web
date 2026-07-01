@@ -35,7 +35,7 @@ export const educationPageImages = {
   claritySliderTrack: "/images/education/clarity-slider-track.svg",
   claritySliderDots: "/images/education/clarity-slider-dots.svg",
   claritySliderThumb: "/images/education/clarity-slider-thumb.svg",
-  caratHand: "/images/education/carat-hand.png",
+  caratHand: "/images/education/carat-hand-gray.png",
   caratDiamond: "/images/education/carat-diamond.png",
 } as const;
 

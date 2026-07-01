@@ -31,10 +31,11 @@ const EducationCaratHandVisual = ({ activeCarat }: EducationCaratHandVisualProps
     caratRange > 0 ? Math.min(Math.max((activeCarat - minCarat) / caratRange, 0), 1) : 0;
   const diamondPx =
     layout.diamondMinSize + normalizedCarat * (layout.diamondMaxSize - layout.diamondMinSize);
+  const baseSize = layout.diamondBaseSize;
+  const diamondScale = diamondPx / baseSize;
   const frameHeight = 300;
-  const diamondWidthPercent = (diamondPx / layout.frameWidth) * 100;
-  const diamondLeftPercent =
-    ((layout.frameWidth - layout.diamondLeft - diamondPx) / layout.frameWidth) * 100;
+  const diamondCenterX = layout.diamondLeft + baseSize / 2;
+  const diamondCenterY = ((layout.diamondTop + baseSize / 2) / layout.handAreaHeight) * frameHeight;
 
   return (
     <div
@@ -42,27 +43,31 @@ const EducationCaratHandVisual = ({ activeCarat }: EducationCaratHandVisualProps
       aria-hidden
     >
       <div
-        className="pointer-events-none absolute inset-0 overflow-hidden"
-        style={{ opacity: educationCaratVisualSpec.handOpacity }}
+        className="pointer-events-none absolute left-0 top-0 inset-0 overflow-hidden"
+      // style={{ opacity: educationCaratVisualSpec.handOpacity }}
       >
-        <div className="absolute left-0 top-[5%] h-[259%] w-[259%] origin-left-top -scale-x-100 rotate-[60deg] scale-[1.4]">
+        <div className="h-[300px] w-[500px]">
           <Image
             src={educationPageImages.caratHand}
             alt=""
             fill
-            className="object-cover object-left-top"
-            sizes="100vw"
+            className="object-cover !static !w-[500px] !h-[475px]"
+          // sizes="100vw"
           />
         </div>
       </div>
 
       <div
-        className="pointer-events-none absolute z-10 transition-[width,left] duration-300 ease-out"
+        className="pointer-events-none absolute z-10 transition-transform duration-300 ease-out"
         style={{
-          left: `${diamondLeftPercent}%`,
-          top: `${(layout.diamondTop / frameHeight) * 100}%`,
-          width: `${diamondWidthPercent}%`,
+          left: `222px`,
+          top: `150px`,
+          // left: `${(diamondCenterX / layout.frameWidth) * 100}%`,
+          // top: `${(diamondCenterY / frameHeight) * 100}%`,
+          width: `${(baseSize / layout.frameWidth) * 100}%`,
           aspectRatio: "1",
+          transform: `translate(-50%, -50%) scale(${diamondScale})`,
+          transformOrigin: "center center",
         }}
       >
         <Image
