@@ -729,7 +729,7 @@ export const educationCertifiedContent = {
     "Each Solitaire carries a laser inscription on its girdle, linking it directly to its report.",
 } as const;
 
-/** Figma nodes 692:29096 (desktop) + 692:28735 (mobile) */
+/** Figma 692:28885 (section) — 692:29096 (desktop) + 692:28735 (mobile) */
 export const educationCertifiedSpec = {
   section: {
     desktop: {
@@ -824,6 +824,9 @@ export const educationCertifiedSpec = {
       handHeight: 1530,
       handLeft: -393,
       handTop: -443,
+      /** Rotation bounding box scale from Figma 692:29096 */
+      handWrapperWidthScale: 1.16,
+      handWrapperHeightScale: 1.24,
     },
     mobile: {
       handLeft: -495,
