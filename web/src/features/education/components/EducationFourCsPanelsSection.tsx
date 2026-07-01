@@ -189,7 +189,7 @@ const PanelCopy = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent;
         "lg:h-full lg:gap-[32px] lg:px-10 lg:py-0",
       )}
     >
-      <Reveal as="p" direction="up" className="font-larken text-[60px] font-light leading-110 text-[#ab863b] opacity-50 lg:text-[110px]">
+      <Reveal as="p" direction="up" className="font-larken text-[60px] font-light leading-110 text-linkGold opacity-50 lg:text-[110px]">
         {panel.code}
       </Reveal>
       <div className="flex max-w-[303px] flex-col gap-3 lg:max-w-[441px] lg:gap-[16px]">

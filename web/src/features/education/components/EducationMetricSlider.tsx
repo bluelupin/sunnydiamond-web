@@ -80,7 +80,7 @@ const SliderLabel = ({
   useMobileLayout: boolean;
   mobileLabelFontSize?: number;
 }) => {
-  const colorClass = isActive ? "text-[#AB863B]" : "text-darkblack";
+  const colorClass = isActive ? "text-linkGold" : "text-darkblack";
   const font = labelFontProps(useMobileLayout, mobileLabelFontSize);
 
   if (useMobileLayout) {
@@ -376,7 +376,7 @@ const EducationMetricSlider = ({
                 useMobileLayout
                   ? mobileLabelAlignClass(0, options.length)
                   : "-translate-x-1/2",
-                activeIndex === 0 ? "text-[#AB863B]" : "text-darkblack",
+                activeIndex === 0 ? "text-linkGold" : "text-darkblack",
               )}
               style={{
                 left: toPercent(spec.dotCenters[0], spec.width),
@@ -395,7 +395,7 @@ const EducationMetricSlider = ({
                 useMobileLayout
                   ? mobileLabelAlignClass(lastDotIndex, options.length)
                   : "-translate-x-1/2",
-                activeIndex === lastDotIndex ? "text-[#AB863B]" : "text-darkblack",
+                activeIndex === lastDotIndex ? "text-linkGold" : "text-darkblack",
               )}
               style={{
                 left: toPercent(spec.dotCenters[lastDotIndex], spec.width),
@@ -409,7 +409,7 @@ const EducationMetricSlider = ({
           {activeOption && activeIndex > 0 && activeIndex < lastDotIndex ? (
             <span
               className={cn(
-                "pointer-events-none absolute whitespace-nowrap font-gill font-normal leading-110 text-[#AB863B] transition-[left] duration-200 ease-out",
+                "pointer-events-none absolute whitespace-nowrap font-gill font-normal leading-110 text-linkGold transition-[left] duration-200 ease-out",
                 labelFont.className,
                 useMobileLayout
                   ? mobileLabelAlignClass(activeIndex, options.length)
@@ -429,7 +429,7 @@ const EducationMetricSlider = ({
         activeOption ? (
           <span
             className={cn(
-              "pointer-events-none absolute whitespace-nowrap font-gill font-normal leading-110 text-[#AB863B] transition-[left] duration-200 ease-out",
+              "pointer-events-none absolute whitespace-nowrap font-gill font-normal leading-110 text-linkGold transition-[left] duration-200 ease-out",
               labelFont.className,
               useMobileLayout
                 ? mobileLabelAlignClass(activeIndex, options.length)
@@ -487,7 +487,7 @@ const EducationMetricSlider = ({
                         mobileLabelAlignClass(index, options.length),
                       )
                     : "text-center text-[14px]",
-                  isActive ? "text-[#AB863B]" : "text-darkblack",
+                  isActive ? "text-linkGold" : "text-darkblack",
                 )}
                 style={{
                   left: toPercent(useMobileLayout ? dotCenter : sublabelLeft, spec.width),

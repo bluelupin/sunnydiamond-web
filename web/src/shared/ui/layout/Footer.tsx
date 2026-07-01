@@ -59,7 +59,7 @@ const Footer = () => {
   }, [cmsSocialLinks]);
 
   return (
-    <footer className="bg-chalk-beige">
+    <footer className="bg-gray300">
       <TrustBadgeSection />
       <PageContainer className="flex flex-col gap-20 lg:gap-[120px] lg:py-100 py-16">
         <div className="flex flex-col items-center xl:gap-12 md:gap-[40px] gap-8 lg:flex-row lg:items-start lg:justify-start">

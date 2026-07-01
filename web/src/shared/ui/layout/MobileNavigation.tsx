@@ -601,7 +601,7 @@ const MobileNavigation = ({
               className="shrink-0"
             />
           </span>
-          <p className="whitespace-nowrap font-gill text-sm leading-110 text-[#AB863B]">
+          <p className="whitespace-nowrap font-gill text-sm leading-110 text-linkGold">
             Handicrafted Brilliance. Since 1989.
           </p>
         </div>

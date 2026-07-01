@@ -150,7 +150,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
 
       <div className="relative mx-auto flex w-full max-w-[1360px] flex-col items-center gap-8 px-4 md:gap-40 md:px-40">
         <div className="flex w-full flex-col items-center gap-6 text-center md:max-w-[510px]">
-          <Reveal as="p" direction="up" className="font-gill text-sm font-semibold leading-110 text-[#AB863B] md:text-base md:font-normal">
+          <Reveal as="p" direction="up" className="font-gill text-sm font-semibold leading-110 text-linkGold md:text-base md:font-normal">
             {eyebrow}
           </Reveal>
           <div className="flex w-full flex-col items-center gap-3 md:gap-4">

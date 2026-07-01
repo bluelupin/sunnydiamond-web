@@ -243,7 +243,7 @@ const JewelleryProductCard = ({
             className={cn(
               "transition-colors duration-200",
               isWishlisted
-                ? "fill-[#AB863B] text-[#AB863B]"
+                ? "fill-[#AB863B] text-linkGold"
                 : isMobileLifestyle
                   ? "text-white"
                   : "text-darkblack md:group-hover:text-white",

@@ -27,7 +27,7 @@ const WishlistButton = ({ wishlisted, onToggle, white = false }: WishlistButtonP
       className={cn(
         "transition-colors duration-200",
         wishlisted
-          ? "fill-[#AB863B] text-[#AB863B]"
+          ? "fill-[#AB863B] text-linkGold"
           : white
             ? "fill-none text-white"
             : "fill-none darkblack",
