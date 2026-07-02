@@ -11,6 +11,7 @@ import {
   educationPageImages,
   educationSectionTitleSpacingClassName,
 } from "../data/content";
+import Reveal from "@/shared/Animation/Reveal";
 
 type CarouselSlot = keyof typeof educationLearnMoreSpec.carousel.slots;
 
@@ -134,19 +135,12 @@ const EducationLearnMoreSection = () => {
     >
       <div className="mx-auto flex max-w-[1360px] flex-col items-center gap-6 lg:gap-16">
         <div className="flex w-full flex-col items-center">
-          <ScrollReveal
-            as="h2"
-            delayMs={0}
-            className={`w-full ${educationSectionTitleSpacingClassName}`}
+          <Reveal as="h2" direction="up"
+            id="education-learn-more-title"
+            className="lg:mb-[40px] mb-8 text-center font-larken font-light leading-110 text-darkblack lg:text-5xl md:text-4xl sm:text-3xl text-32"
           >
-            <span
-              id="education-learn-more-title"
-              className="block text-center font-larken text-[32px] font-light leading-110 text-darkblack lg:text-[48px]"
-            >
-              Learn more about Diamonds
-            </span>
-          </ScrollReveal>
-
+            Learn more about Diamonds
+          </Reveal>
           <ScrollReveal delayMs={100} className="w-full lg:max-w-[1200px]">
             <div className="w-full overflow-x-auto border-y-[0.4px] border-black/30 md:overflow-visible">
               <div

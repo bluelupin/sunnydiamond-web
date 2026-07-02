@@ -430,7 +430,7 @@ function ProductCarouselPanel({
       {!isMobile ? (
         <div className="flex h-full flex-col items-center">
           <div className="flex min-h-0 w-full flex-1 flex-col items-center justify-end">
-            <div className="relative mb-10 h-[400px] w-[400px] overflow-hidden">
+            <div className="relative mb-[40px] h-[400px] w-[400px] overflow-hidden">
               <div
                 className={cn(
                   "flex h-full items-center will-change-transform motion-reduce:transition-none",

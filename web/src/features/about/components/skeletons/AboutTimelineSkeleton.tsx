@@ -19,7 +19,7 @@ const AboutTimelineSkeleton = () => (
               ))}
             </div>
           </div>
-          <div className="mb-16 mt-auto lg:mb-100 lg:mt-auto lg:self-end">
+          <div className="mb-16 mt-auto lg:mb-[40px]0 lg:mt-auto lg:self-end">
             <Skeleton className="h-48 w-full rounded-none bg-white/90 lg:h-56 lg:w-557" aria-hidden />
           </div>
         </div>

@@ -32,7 +32,7 @@ const ShowroomSectionSkeleton = ({ className }: props) => {
       <div className="hidden lg:block">
         <div className="2xl:pl-24 lg:pl-20 pl-5 lg:pr-0 pr-5">
           <div
-            className="h-10 w-72 rounded bg-gray300 mx-auto lg:mx-0 mb-4 sm:mb-6 md:mb-8 lg:mb-10"
+            className="h-10 w-72 rounded bg-gray300 mx-auto lg:mx-0 mb-4 sm:mb-6 md:mb-8 lg:mb-[40px]"
             aria-hidden
           />
           <div className="md:hidden mx-auto mb-4 h-5 w-80 rounded bg-gray300" aria-hidden />

@@ -231,7 +231,7 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
         <ScrollReveal
           as="h2"
           delayMs={0}
-          className="mb-8 w-full text-center md:mb-10"
+          className="mb-8 w-full text-center md:mb-[40px]"
         >
           <span
             id="education-certified-title"
@@ -275,7 +275,7 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
         </div>
 
         {/* Desktop logos — Figma 692:29096 */}
-        <div className="mb-10 hidden w-full grid-cols-4 md:grid">
+        <div className="mb-[40px] hidden w-full grid-cols-4 md:grid">
           {certificate.certifications.map((cert, index) => (
             <ScrollReveal key={cert.id} delayMs={80 + index * 80}>
               <div
