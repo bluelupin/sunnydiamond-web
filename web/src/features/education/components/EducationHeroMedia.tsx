@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
+import { cn } from "@/shared/utils/cn";
 import { educationHeroFigmaSpec } from "../data/content";
 
 const { image } = educationHeroFigmaSpec;
@@ -11,6 +12,8 @@ type EducationHeroMediaProps = {
   posterDesktopUrl: string;
   posterMobileUrl: string;
   posterAlt: string;
+  expanded: boolean;
+  reducedMotion: boolean;
 };
 
 const getVideoMimeType = (url: string) => {
@@ -24,6 +27,8 @@ const EducationHeroMedia = ({
   posterDesktopUrl,
   posterMobileUrl,
   posterAlt,
+  expanded,
+  reducedMotion,
 }: EducationHeroMediaProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
@@ -63,6 +68,16 @@ const EducationHeroMedia = ({
   const showVideo = shouldLoadVideo && videoUrl && !useFallback;
   const videoMimeType = videoUrl ? getVideoMimeType(videoUrl) : undefined;
 
+  const imageTransition = reducedMotion
+    ? ""
+    : "transition-transform duration-500 ease-in-out lg:transition-none";
+
+  const mediaClassName = cn(
+    "absolute inset-0 h-full w-full object-cover object-center",
+    imageTransition,
+    // expanded ? "md:translate-y-0 -translate-y-5 md:h-full -h-[0px]" : "",
+  );
+
   return (
     <>
       <ResponsiveImage
@@ -74,13 +89,13 @@ const EducationHeroMedia = ({
         height={image.height}
         quality={90}
         sizes="100vw"
-        className="absolute inset-0 h-full w-full object-cover object-center"
+        className={mediaClassName}
       />
 
       {showVideo ? (
         <video
           ref={videoRef}
-          className="absolute inset-0 h-full w-full object-cover object-center"
+          className={mediaClassName}
           autoPlay
           loop
           muted

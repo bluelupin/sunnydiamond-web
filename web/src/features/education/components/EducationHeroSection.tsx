@@ -7,8 +7,7 @@ import { educationHeroFigmaSpec } from "../data/content";
 import EducationHeroMedia from "./EducationHeroMedia";
 import { useEducationHeroLoadAnimation } from "../hooks/useEducationHeroLoadAnimation";
 
-const { section, overlay, animation } = educationHeroFigmaSpec;
-const collapsedWidthPercent = `${animation.collapsedWidthRatio * 100}%`;
+const { overlay } = educationHeroFigmaSpec;
 
 type EducationHeroSectionProps = {
   hero: NormalizedEducationHero;
@@ -25,36 +24,40 @@ const EducationHeroSection = ({ hero }: EducationHeroSectionProps) => {
     <section
       id="education-hero"
       aria-labelledby="education-hero-title"
-      className="relative flex flex-col justify-end overflow-hidden bg-white pb-16"
-      style={{ height: section.height }}
+      className="relative flex flex-col overflow-hidden bg-white h-580 sm:h-580 lg:h-640 2xl:h-[85vh]"
     >
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="relative flex-1 overflow-hidden p-0">
         <div
           className={cn(
             "absolute left-1/2 h-full -translate-x-1/2 overflow-hidden",
             heroTransition,
-            expanded ? "top-0 w-full" : "top-[-100px]",
+            expanded ? "-top-5 w-full md:top-0 md:w-full w-[92%]" : "w-full",
           )}
-          style={{ width: expanded ? undefined : collapsedWidthPercent }}
         >
           <EducationHeroMedia
             videoUrl={hero.videoUrl}
             posterDesktopUrl={hero.posterDesktopUrl}
             posterMobileUrl={hero.posterMobileUrl}
             posterAlt={hero.posterAlt}
+            expanded={expanded}
+            reducedMotion={reducedMotion}
           />
 
-          <MediaContentOverlay gradient={overlay.gradient} />
+          <MediaContentOverlay
+            gradient={overlay.gradient}
+            className={cn(expanded ? "md:translate-y-0 -translate-y-0" : "")}
+          />
+
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-16 lg:pb-75">
+            <h1
+              id="education-hero-title"
+              className="w-full text-center font-larken text-[32px] font-light leading-none text-white lg:text-[60px]"
+            >
+              {hero.title}
+            </h1>
+          </div>
         </div>
       </div>
-
-      <h1
-        id="education-hero-title"
-        className={cn("relative z-10 text-center font-larken text-[32px] font-light leading-none text-white lg:text-[60px] transition-all duration-500",
-          expanded ? "" : "top-[-100px]",)}
-      >
-        {hero.title}
-      </h1>
     </section>
   );
 };

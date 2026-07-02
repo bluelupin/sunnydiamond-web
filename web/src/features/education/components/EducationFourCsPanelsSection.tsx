@@ -181,18 +181,17 @@ const PanelMedia = ({
 
 const PanelCopy = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent; delayMs?: number }) => {
   return (
-    <ScrollReveal
-      delayMs={delayMs}
+    <Reveal direction="up"
       className={cn(
         "flex w-full shrink-0 flex-col items-center justify-center text-center",
-        "max-md:h-[355px] max-md:gap-6 max-md:px-5 max-md:pt-10 max-md:pb-6",
-        "lg:h-full lg:gap-[32px] lg:px-10 lg:py-0",
+        "min-h-[355px] max-md:px-5 max-md:pt-10 max-md:pb-6",
+        "lg:h-full lg:gap-[32px] gap-6 lg:px-10 lg:py-0",
       )}
     >
       <Reveal as="p" direction="up" className="font-larken text-[60px] font-light leading-110 text-linkGold opacity-50 lg:text-[110px]">
         {panel.code}
       </Reveal>
-      <div className="flex max-w-[303px] flex-col gap-3 lg:max-w-[441px] lg:gap-[16px]">
+      <div className="flex max-w-[303px] flex-col lg:max-w-[441px] lg:gap-4 gap-3">
         <Reveal as="h3" direction="up"
           id={`education-panel-${panel.id}`}
           className="font-larken text-xl font-light leading-110 text-darkblack lg:text-[32px]"
@@ -203,7 +202,7 @@ const PanelCopy = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent;
           {panel.description}
         </Reveal>
       </div>
-    </ScrollReveal>
+    </Reveal>
   );
 };
 
@@ -226,7 +225,7 @@ const EducationFourCsPanel = ({
       aria-labelledby={`education-panel-${panel.id}`}
       className={cn(
         "overflow-hidden",
-        isChalk ? "bg-gray300" : "bg-white",
+        isChalk ? "bg-gray300" : "md:bg-white bg-gray300",
         "max-md:h-[725px]",
         panel.id === "carat" ? "lg:h-[610px]" : "lg:h-[633px]",
       )}
