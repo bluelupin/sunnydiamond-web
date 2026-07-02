@@ -3,13 +3,14 @@
 @tailwind utilities;
 
 @layer utilities {
+
   .btn-border-slide:hover,
-  .btn-border-slide:hover > * {
+  .btn-border-slide:hover>* {
     color: var(--btn-border-slide-text) !important;
   }
 
   .btn-dark-slide:hover,
-  .btn-dark-slide:hover > * {
+  .btn-dark-slide:hover>* {
     color: var(--btn-dark-slide-text) !important;
   }
 }
@@ -232,7 +233,7 @@
     transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  .btn-border-slide > * {
+  .btn-border-slide>* {
     position: relative;
     z-index: 1;
   }
@@ -266,7 +267,7 @@
     transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  .btn-dark-slide > * {
+  .btn-dark-slide>* {
     position: relative;
     z-index: 1;
   }
@@ -377,8 +378,9 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
+
   :is(a, button).text-link-underline:hover:not(:disabled),
-  :is(a, button):hover:not(:disabled) > .text-link-underline,
+  :is(a, button):hover:not(:disabled)>.text-link-underline,
   :is(a, button):hover:not(:disabled) .text-link-underline {
     color: var(--link-underline-hover) !important;
     border-color: var(--link-underline-hover) !important;
@@ -461,4 +463,34 @@
 
 .horizontalScroll::-webkit-scrollbar-thumb:hover {
   background: #cccccc;
+}
+
+
+
+
+/* For horizontal scroll inside .tabScroll */
+.horizontalScrollbar {
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  /* Firefox */
+  scrollbar-width: none;
+
+  /* IE/Edge Legacy */
+  -ms-overflow-style: none;
+}
+
+.horizontalScrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+  -webkit-appearance: none;
+}
+
+.horizontalScrollbar::-webkit-scrollbar-track {
+  display: none;
+}
+
+.horizontalScrollbar::-webkit-scrollbar-thumb {
+  display: none;
 }

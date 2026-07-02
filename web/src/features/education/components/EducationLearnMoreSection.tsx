@@ -133,7 +133,7 @@ const EducationLearnMoreSection = () => {
         "bg-white px-4 py-16 max-md:h-[681px] md:px-8 lg:px-10 lg:py-25",
       )}
     >
-      <div className="mx-auto flex max-w-[1360px] flex-col items-center gap-6 lg:gap-16">
+      <div className="mx-auto flex max-w-[1360px] flex-col items-center lg:gap-16 md:gap-12 sm:gap-[40px] gap-6">
         <div className="flex w-full flex-col items-center">
           <Reveal as="h2" direction="up"
             id="education-learn-more-title"
@@ -142,7 +142,7 @@ const EducationLearnMoreSection = () => {
             Learn more about Diamonds
           </Reveal>
           <ScrollReveal delayMs={100} className="w-full lg:max-w-[1200px]">
-            <div className="w-full overflow-x-auto border-y-[0.4px] border-black/30 md:overflow-visible">
+            <div className="w-full overflow-x-auto border-y-[0.4px] border-black/30 md:overflow-visible horizontalScrollbar">
               <div
                 className="flex h-[75px] min-w-max items-center max-md:gap-40 max-md:py-6 md:h-auto md:w-full md:min-w-0 md:gap-0 md:py-6 lg:gap-0 lg:py-6"
                 role="tablist"
@@ -162,10 +162,9 @@ const EducationLearnMoreSection = () => {
                         role="tab"
                         aria-selected={isActive}
                         onClick={() => handleTabChange(index)}
-                        className={cn(
-                          "flex items-center justify-center whitespace-nowrap py-2 font-gill font-normal leading-110 max-md:text-base md:w-full md:py-0 md:text-center md:text-base lg:text-xl",
+                        className={cn(`relative shrink-0 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-linkGold after:transition-all after:duration-300 cursor-pointer pb-1 font-gill md:text-base lg:text-xl font-normal uppercase leading-110 text-darkblack hover:border-linkGold hover:text-linkGold sm:pb-1 hover:after:w-full`,
                           isActive
-                            ? "border-b border-linkGold text-linkGold"
+                            ? "border-b-[1.5px] border-linkGold text-linkGold"
                             : "text-darkblack hover:text-linkGold",
                         )}
                       >
@@ -179,18 +178,10 @@ const EducationLearnMoreSection = () => {
           </ScrollReveal>
         </div>
 
-        <div className="flex w-full flex-col items-center gap-[49px] lg:gap-16">
-          <ScrollReveal delayMs={180}>
-            <div className="max-w-[700px] text-center font-gill text-base font-light leading-110 text-darkblack lg:text-xl lg:text-neutral500">
-              <p className="md:hidden">{activeTab.description.join(" ")}</p>
-              <div className="hidden md:block">
-                {activeTab.description.map((paragraph) => (
-                  <p key={paragraph}>{paragraph}</p>
-                ))}
-              </div>
-            </div>
-          </ScrollReveal>
-
+        <div className="flex w-full flex-col items-center gap-12 lg:gap-16">
+          <Reveal as="p" direction="up" className="max-w-[700px] text-center font-gill text-base font-light leading-110 text-darkblack lg:text-xl lg:text-neutral500">
+            Shape and cut are not the same. Shape refers to the diamond’s form. At Sunny, it is a reflection of personality, presence, and poetic symmetry.
+          </Reveal>
           <ScrollReveal delayMs={260} className="flex w-full flex-col items-center">
             <div className="relative flex w-full items-start justify-center lg:gap-[250px]">
               <div className="hidden shrink-0 md:block">
