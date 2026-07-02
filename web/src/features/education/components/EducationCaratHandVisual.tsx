@@ -58,7 +58,7 @@ const EducationCaratHandVisual = ({ activeCarat }: EducationCaratHandVisualProps
       </div>
 
       <div
-        className="pointer-events-none absolute z-10 transition-transform duration-300 ease-out sm:left-[250px] sm:top-[100px] left-[150px] top-[85px]"
+        className="pointer-events-none absolute z-10 transition-transform duration-300 ease-out sm:left-[200px] sm:top-[128px] left-[150px] top-[85px]"
         style={{
           // left: `250px`,
           // top: `100px`,

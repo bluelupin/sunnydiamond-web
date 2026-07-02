@@ -7,7 +7,7 @@ import { aboutHeroFigmaSpec } from "../data/content";
 import { useAboutHeroLoadAnimation } from "../hooks/useAboutHeroLoadAnimation";
 import type { NormalizedAboutHero } from "@/services/about/about-page.types";
 const { animation: heroAnimation } = aboutHeroFigmaSpec;
-const collapsedWidthPercent = `100%`;
+const collapsedWidthPercent = `${heroAnimation.collapsedWidthRatio * 100}%`;
 type AboutHeroSectionProps = NormalizedAboutHero;
 
 const AboutHeroSection = ({ title, image }: AboutHeroSectionProps) => {
@@ -36,9 +36,9 @@ const AboutHeroSection = ({ title, image }: AboutHeroSectionProps) => {
           className={cn(
             "absolute left-1/2 h-full -translate-x-1/2 overflow-hidden",
             heroTransition,
-            expanded ? "-top-5 w-full md:top-0 md:w-full w-[92%]" : "",
+            expanded ? "-top-5 w-full md:top-0 md:w-full w-[92%]" : "w-full",
           )}
-          style={{ width: !expanded ? collapsedWidthPercent : undefined }}
+        // style={{ width: !expanded ? collapsedWidthPercent : "100%" }}
         >
           <ResponsiveImage
             desktopSrc={image.desktopUrl}
@@ -52,13 +52,19 @@ const AboutHeroSection = ({ title, image }: AboutHeroSectionProps) => {
             className={cn(
               "absolute inset-0 h-full w-full object-cover object-center",
               imageTransition,
-              expanded ? "md:translate-y-0 -translate-y-1 md:h-full -h-[0px]" : "",
+              expanded ? "md:translate-y-0 -translate-y-5 md:h-full -h-[0px]" : "",
             )}
           />
-          <MediaContentOverlay gradient={aboutHeroFigmaSpec.overlay.gradient} />
+          <MediaContentOverlay gradient={aboutHeroFigmaSpec.overlay.gradient} className={cn(expanded ? "md:translate-y-0 -translate-y-3" : "",)} />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-16 lg:pb-75">
             <h1
-              className="w-full max-w-886 text-center font-larken text-32 font-light leading-110 text-white sm:text-36 lg:text-5xl 2xl:text-5xl">
+              id="about-hero-title"
+              className={cn(
+                "w-full max-w-886 text-center font-larken text-32 font-light leading-110 text-white sm:text-36 lg:text-5xl 2xl:text-5xl",
+                // titleTransition,
+                // titleVisible ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0",
+              )}
+            >
               {title}
             </h1>
           </div>
