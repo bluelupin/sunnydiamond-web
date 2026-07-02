@@ -235,7 +235,7 @@ const EducationFourCsPanel = ({
           className={cn(
             "shrink-0 lg:h-full",
             panel.mediaPosition === "left" && "lg:order-2",
-            isCopyWhiteBackground && "bg-white",
+            isCopyWhiteBackground && "lg:bg-white",
           )}
         >
           <PanelCopy panel={panel} delayMs={copyDelay} />
