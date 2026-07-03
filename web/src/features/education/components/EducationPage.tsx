@@ -22,7 +22,7 @@ const EducationPage = ({
 }: EducationPageProps) => {
   return (
     <>
-      <EducationHeroSection hero={hero} />
+      {hero ? <EducationHeroSection {...hero} /> : null}
       <EducationFourCsIntroSection intro={fourCsIntro} />
       <EducationFourCsPanelsSection fourCs={fourCs} />
       <EducationCertifiedSection certificate={certificate} />

@@ -6,7 +6,6 @@ import {
   educationFaqItems,
   educationFourCsIntroContent,
   educationFourCsPanels,
-  educationHeroFigmaSpec,
   educationPageImages,
   educationSliderSpecs,
   type EducationFourCsPanelContent,
@@ -56,21 +55,31 @@ const cleanText = (value?: string | null): string | undefined => {
   return trimmed || undefined;
 };
 
-const mapPosterUrls = (image?: StrapiEducationResponsiveImage | null) => {
-  const desktopUrl =
-    resolveCmsMediaUrl(image?.desktopImage) ??
-    resolveCmsMediaUrl(image?.mobileImage);
-  const mobileUrl =
-    resolveCmsMediaUrl(image?.mobileImage) ??
-    resolveCmsMediaUrl(image?.desktopImage);
+const mapHero = (hero?: StrapiEducationHero | null): NormalizedEducationHero | null => {
+  if (!hero || hero.isActive === false) return null;
+
+  const title = cleanText(hero.title);
+  if (!title) return null;
+
+  const desktopUrl = resolveCmsMediaUrl(hero.image?.desktopImage);
+  const mobileUrl = resolveCmsMediaUrl(hero.image?.mobileImage);
+
+  if (!desktopUrl && !mobileUrl) return null;
+
+  const posterDesktopUrl = desktopUrl ?? mobileUrl!;
+  const posterMobileUrl = mobileUrl ?? desktopUrl!;
+  const posterAlt =
+    cleanText(hero.image?.altText) ?? cleanText(hero.image?.caption) ?? "";
+  const videoUrl = resolveCmsMediaUrl(hero.heroVideo?.heroVideo);
 
   return {
-    desktopUrl: desktopUrl ?? educationPageImages.heroDesktop,
-    mobileUrl: mobileUrl ?? educationPageImages.heroMobile,
-    alt:
-      cleanText(image?.altText) ??
-      cleanText(image?.caption) ??
-      educationHeroFigmaSpec.image.alt,
+    title,
+    eyebrow: cleanText(hero.eyebrow),
+    subtitle: cleanText(hero.subtitle),
+    videoUrl,
+    posterDesktopUrl,
+    posterMobileUrl,
+    posterAlt,
   };
 };
 
@@ -89,25 +98,6 @@ const mapBackgroundUrls = (image?: StrapiEducationResponsiveImage | null) => {
     mobileUrl: mobileUrl ?? educationPageImages.discoverImage,
     alt: cleanText(image?.altText) ?? cleanText(image?.caption) ?? "",
     hasCmsBackgroundImage,
-  };
-};
-
-const mapHero = (hero?: StrapiEducationHero | null): NormalizedEducationHero => {
-  if (hero?.isActive === false) {
-    return EMPTY_LEARN_ABOUT_DIAMONDS_PAGE.hero;
-  }
-
-  const poster = mapPosterUrls(hero?.image);
-  const videoUrl = resolveCmsMediaUrl(hero?.heroVideo?.heroVideo);
-
-  return {
-    title: cleanText(hero?.title) ?? educationHeroFigmaSpec.title.text,
-    eyebrow: cleanText(hero?.eyebrow),
-    subtitle: cleanText(hero?.subtitle),
-    videoUrl,
-    posterDesktopUrl: poster.desktopUrl,
-    posterMobileUrl: poster.mobileUrl,
-    posterAlt: poster.alt,
   };
 };
 

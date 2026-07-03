@@ -4,7 +4,6 @@ import {
   educationFaqItems,
   educationFourCsIntroContent,
   educationFourCsPanels,
-  educationHeroFigmaSpec,
   educationPageImages,
   type EducationFourCsPanelContent,
   type EducationSliderOption,
@@ -192,19 +191,12 @@ export type NormalizedEducationCertificateSection = {
 };
 
 export type NormalizedLearnAboutDiamondsPage = {
-  hero: NormalizedEducationHero;
+  hero: NormalizedEducationHero | null;
   faq: NormalizedEducationFaqSection;
   ctaBanner: NormalizedEducationCtaBanner;
   fourCsIntro: NormalizedEducationFourCsIntro;
   fourCs: NormalizedEducationFourCsSection;
   certificate: NormalizedEducationCertificateSection;
-};
-
-export const EMPTY_EDUCATION_HERO: NormalizedEducationHero = {
-  title: educationHeroFigmaSpec.title.text,
-  posterDesktopUrl: educationPageImages.heroDesktop,
-  posterMobileUrl: educationPageImages.heroMobile,
-  posterAlt: educationHeroFigmaSpec.image.alt,
 };
 
 export const EMPTY_EDUCATION_FAQ: NormalizedEducationFaqSection = {
@@ -262,7 +254,7 @@ export const EMPTY_EDUCATION_CERTIFICATE: NormalizedEducationCertificateSection 
 };
 
 export const EMPTY_LEARN_ABOUT_DIAMONDS_PAGE: NormalizedLearnAboutDiamondsPage = {
-  hero: EMPTY_EDUCATION_HERO,
+  hero: null,
   faq: EMPTY_EDUCATION_FAQ,
   ctaBanner: EMPTY_EDUCATION_CTA_BANNER,
   fourCsIntro: EMPTY_EDUCATION_FOUR_CS_INTRO,

@@ -15,15 +15,15 @@ const EducationFourCsIntroSection = ({ intro }: EducationFourCsIntroSectionProps
   return (
     <section
       aria-labelledby="education-four-cs-intro-title"
-      className={spec.sectionClassName}
+      className="flex flex-col bg-white px-4 py-16 md:px-8 lg:px-10 lg:py-25"
     >
-      <div className={spec.contentClassName}>
+      <div className="mx-auto flex w-full max-w-680 flex-col items-center">
         <ScrollReveal
           as="h2"
           delayMs={0}
           className={`w-full ${educationSectionTitleSpacingClassName}`}
         >
-          <span id="education-four-cs-intro-title" className="block w-full text-center font-larken text-32 font-light leading-110 text-darkblack lg:text-48">
+          <span id="education-four-cs-intro-title" className="block w-full text-center font-larken text-darkblack font-light leading-110 text-3xl sm:text-4xl md:text-5xl lg:text-6xl">
             <span className="md:hidden">{intro.mobileTitle}</span>
             <span className="hidden md:inline">{intro.desktopTitle}</span>
           </span>

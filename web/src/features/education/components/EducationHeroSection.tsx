@@ -3,17 +3,17 @@
 import MediaContentOverlay from "@/shared/ui/MediaContentOverlay";
 import { cn } from "@/shared/utils/cn";
 import type { NormalizedEducationHero } from "@/services/education/learn-about-diamonds-page.types";
-import { educationHeroFigmaSpec } from "../data/content";
 import EducationHeroMedia from "./EducationHeroMedia";
 import { useEducationHeroLoadAnimation } from "../hooks/useEducationHeroLoadAnimation";
+type EducationHeroSectionProps = NormalizedEducationHero;
 
-const { overlay } = educationHeroFigmaSpec;
-
-type EducationHeroSectionProps = {
-  hero: NormalizedEducationHero;
-};
-
-const EducationHeroSection = ({ hero }: EducationHeroSectionProps) => {
+const EducationHeroSection = ({
+  title,
+  videoUrl,
+  posterDesktopUrl,
+  posterMobileUrl,
+  posterAlt,
+}: EducationHeroSectionProps) => {
   const { expanded, reducedMotion } = useEducationHeroLoadAnimation();
 
   const heroTransition = reducedMotion
@@ -35,25 +35,25 @@ const EducationHeroSection = ({ hero }: EducationHeroSectionProps) => {
           )}
         >
           <EducationHeroMedia
-            videoUrl={hero.videoUrl}
-            posterDesktopUrl={hero.posterDesktopUrl}
-            posterMobileUrl={hero.posterMobileUrl}
-            posterAlt={hero.posterAlt}
+            videoUrl={videoUrl}
+            posterDesktopUrl={posterDesktopUrl}
+            posterMobileUrl={posterMobileUrl}
+            posterAlt={posterAlt}
             expanded={expanded}
             reducedMotion={reducedMotion}
           />
 
           <MediaContentOverlay
-            gradient={overlay.gradient}
-            className={cn(expanded ? "md:translate-y-0 -translate-y-0" : "")}
+            gradient="bottom-strong"
+            className={cn(expanded ? "md:translate-y-0 -translate-y-3" : "")}
           />
 
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-16 lg:pb-75">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-16">
             <h1
               id="education-hero-title"
-              className="w-full text-center font-larken text-[32px] font-light leading-none text-white lg:text-[60px]"
+              className="w-full text-center font-larken font-light leading-none text-white lg:text-6xl md:text-5xl sm:text-4xl text-32"
             >
-              {hero.title}
+              {title}
             </h1>
           </div>
         </div>

@@ -1,9 +1,11 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { constructMetadata } from "@/shared/lib/seo/metadata";
 import JsonLd from "@/shared/lib/seo/JsonLd";
 import { footerPages } from "@/features/cms/data/footerPages";
 import { siteConfig } from "@/shared/lib/siteConfig";
 import EducationPage from "@/features/education/components/EducationPage";
+import EducationPageSkeleton from "@/features/education/components/skeletons/EducationPageSkeleton";
 import {
   EMPTY_LEARN_ABOUT_DIAMONDS_PAGE,
   getLearnAboutDiamondsPage,
@@ -28,7 +30,7 @@ const educationJsonLd = {
   url: `${siteConfig.seo.siteUrl}/education`,
 };
 
-export default async function Page() {
+async function EducationPageContent() {
   let cmsPage = EMPTY_LEARN_ABOUT_DIAMONDS_PAGE;
 
   try {
@@ -49,5 +51,13 @@ export default async function Page() {
         certificate={cmsPage.certificate}
       />
     </>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<EducationPageSkeleton />}>
+      <EducationPageContent />
+    </Suspense>
   );
 }

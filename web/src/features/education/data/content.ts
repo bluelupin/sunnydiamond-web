@@ -1,6 +1,4 @@
 export const educationPageImages = {
-  heroDesktop: "/images/education/hero-desktop.webp",
-  heroMobile: "/images/education/hero-desktop.webp",
   diamondOval: "/images/education/diamond-oval.png",
   star: "/images/education/star.svg",
   panelTexture: "/images/education/panel-texture.png",
@@ -355,10 +353,6 @@ export const educationHeroFigmaSpec = {
     durationMs: 500,
     titleDelayMs: 300,
   },
-} as const;
-
-export const educationHeroContent = {
-  title: educationHeroFigmaSpec.title.text,
 } as const;
 
 export const educationFourCsIntroContent = {

@@ -75,7 +75,7 @@ const EducationHeroMedia = ({
   const mediaClassName = cn(
     "absolute inset-0 h-full w-full object-cover object-center",
     imageTransition,
-    // expanded ? "md:translate-y-0 -translate-y-5 md:h-full -h-[0px]" : "",
+    expanded ? "md:translate-y-0 -translate-y-5 md:h-full -h-[0px]" : "",
   );
 
   return (
