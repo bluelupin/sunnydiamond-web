@@ -14,11 +14,11 @@ type EducationPageProps = Pick<
 
 const EducationPage = ({
   hero,
-  faq,
-  ctaBanner,
   fourCsIntro,
+  ctaBanner,
   fourCs,
   certificate,
+  faq,
 }: EducationPageProps) => {
   return (
     <>

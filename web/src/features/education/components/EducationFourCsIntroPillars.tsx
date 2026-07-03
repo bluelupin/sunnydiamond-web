@@ -6,7 +6,6 @@ import { observeScrollReveal } from "@/shared/lib/scrollRevealObserver";
 import { cn } from "@/shared/utils/cn";
 import {
   educationFourCsIntroSpec,
-  educationPageImages,
   educationScrollArrowClassName,
 } from "../data/content";
 
@@ -41,7 +40,7 @@ const EducationFourCsIntroPillars = ({ pillars }: EducationFourCsIntroPillarsPro
   const revealClassName = (order: number) =>
     cn(
       !reducedMotion &&
-        "motion-safe:transition-[opacity,transform] motion-safe:duration-700 motion-safe:ease-reveal",
+      "motion-safe:transition-[opacity,transform] motion-safe:duration-700 motion-safe:ease-reveal",
       reducedMotion || visible ? "translate-x-0 opacity-100" : "-translate-x-4 opacity-0",
     );
 
@@ -53,7 +52,7 @@ const EducationFourCsIntroPillars = ({ pillars }: EducationFourCsIntroPillarsPro
   let revealOrder = 0;
 
   return (
-    <div ref={ref} className={spec.pillarsClassName}>
+    <div ref={ref} className="flex flex-wrap items-center justify-center gap-y-2 font-gill lg:text-2xl md:text-xl text-base leading-110 text-darkblack lg:flex-nowrap lg:gap-x-8 md:gap-x-6 gap-3">
       {pillars.map((pillar, index) => {
         const labelOrder = revealOrder++;
         const isLast = index === pillars.length - 1;
@@ -66,8 +65,8 @@ const EducationFourCsIntroPillars = ({ pillars }: EducationFourCsIntroPillarsPro
 
             {!isLast ? (
               <Image
-                src={educationPageImages.scrollArrow}
-                alt=""
+                src="/images/education/scroll-arrow.svg"
+                alt="Scroll arrow"
                 width={24}
                 height={23}
                 className={cn(
