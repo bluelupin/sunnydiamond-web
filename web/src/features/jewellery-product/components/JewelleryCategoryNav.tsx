@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
 import { jewelleryCategories } from "../data/categories";
 import { categoryIconSrc } from "../data/categoryIcons";
@@ -41,14 +40,12 @@ const JewelleryCategoryNav = ({ activeCategory, onCategoryChange }: JewelleryCat
                   )}
                 >
                   <span className="flex size-6 shrink-0 items-center justify-center overflow-hidden lg:size-40">
-                    <Image
-                      src={categoryIconSrc[category.slug]}
-                      alt=""
-                      width={40}
-                      height={40}
-                      className="size-full object-contain"
-                      aria-hidden
-                    />
+                    {(() => {
+                      const Icon = categoryIconSrc[category.slug];
+                      return <Icon className={cn("size-full text-current",
+                        isActive ? "text-neutral500 lg:text-darkblack" : "text-gray600",
+                      )} aria-hidden />;
+                    })()}
                   </span>
                   <span
                     className={cn(

@@ -137,52 +137,68 @@ const LearnTabDescription = ({ tab }: { tab: EducationLearnTab }) => {
   );
 };
 
-const LearnCareTip = ({ tip }: { tip: EducationLearnCareTip }) => (
-  <div className="flex flex-col items-center text-center">
-    <div
-      className="relative mb-4 shrink-0 size-16 md:mb-6 md:size-20"
-    >
-      <Image src={tip.icon} alt="" fill className="object-contain" aria-hidden />
+const LearnCareTip = ({ tip, mobile = false }: { tip: EducationLearnCareTip; mobile?: boolean }) => {
+  const desktop = careSpec.desktop;
+  const mobileSpec = careSpec.mobile;
+
+  return (
+    <div className="flex flex-col items-center text-center">
+      <div
+        className="relative shrink-0"
+        style={{
+          width: mobile ? mobileSpec.iconSize : desktop.iconSize,
+          height: mobile ? mobileSpec.iconSize : desktop.iconSize,
+          marginBottom: mobile ? mobileSpec.labelGap : desktop.labelGap,
+        }}
+      >
+        <Image src={tip.icon} alt="" fill className="object-contain" aria-hidden />
+      </div>
+      <p
+        className="font-gill font-light uppercase md:text-lg text-base leading-110 text-darkblack md:text-neutral500"
+      >
+        {tip.labelLines.map((line) => (
+          <span key={line} className="block">
+            {line}
+          </span>
+        ))}
+      </p>
     </div>
-    <p className="font-gill text-xs font-light uppercase leading-110 text-neutral500 md:text-sm">
-      {tip.labelLines.map((line) => (
-        <span key={line} className="block">
-          {line}
-        </span>
-      ))}
-    </p>
-  </div>
-);
+  );
+};
 
 const LearnCareTipsGrid = ({ tips }: { tips: EducationLearnCareTip[] }) => {
   const topRow = tips.slice(0, 3);
   const bottomRow = tips.slice(3);
+  const desktop = careSpec.desktop;
 
   return (
     <ScrollReveal delayMs={260} className="flex w-full flex-col items-center">
-      <div
-        className="grid w-full grid-cols-1 place-items-center max-md:gap-8 md:grid-cols-3"
-        style={{
-          maxWidth: careSpec.desktop.maxWidth,
-          columnGap: careSpec.desktop.columnGap,
-          rowGap: careSpec.desktop.rowGap,
-        }}
-      >
-        {topRow.map((tip) => (
-          <LearnCareTip key={tip.id} tip={tip} />
+      <div className="flex w-full flex-col items-center gap-8 md:hidden">
+        {tips.map((tip) => (
+          <LearnCareTip key={tip.id} tip={tip} mobile />
         ))}
       </div>
 
       <div
-        className="mt-8 grid w-full grid-cols-1 place-items-center max-md:gap-8 md:mt-14 md:grid-cols-2"
+        className="hidden w-full grid-cols-6 md:grid"
         style={{
-          maxWidth: careSpec.desktop.bottomRowMaxWidth,
-          columnGap: careSpec.desktop.columnGap,
-          rowGap: careSpec.desktop.rowGap,
+          maxWidth: desktop.maxWidth,
+          rowGap: desktop.rowGap,
         }}
       >
-        {bottomRow.map((tip) => (
-          <LearnCareTip key={tip.id} tip={tip} />
+        {topRow.map((tip) => (
+          <div key={tip.id} className="col-span-2 flex justify-center">
+            <LearnCareTip tip={tip} />
+          </div>
+        ))}
+
+        {bottomRow.map((tip, index) => (
+          <div
+            key={tip.id}
+            className={cn("col-span-2 flex justify-center", index === 0 ? "col-start-2" : "col-start-4")}
+          >
+            <LearnCareTip tip={tip} />
+          </div>
         ))}
       </div>
     </ScrollReveal>
@@ -191,8 +207,8 @@ const LearnCareTipsGrid = ({ tips }: { tips: EducationLearnCareTip[] }) => {
 
 const LearnAnatomyDetailPanel = ({ detail }: { detail: EducationLearnAnatomyDetail }) => (
   <ScrollReveal delayMs={260} className="w-full">
-    <div className="mx-auto flex w-full max-w-[1200px] flex-col items-center gap-8 md:flex-row md:items-start md:gap-[120px]">
-      <div className="relative mx-auto h-[240px] w-[280px] shrink-0 mix-blend-darken md:h-[300px] md:w-[350px]">
+    <div className="flex w-full flex-col items-center gap-8 md:flex-row md:items-center md:gap-[120px]">
+      <div className="relative mx-auto h-[240px] w-[280px] shrink-0 mix-blend-darken md:h-[400px] md:w-[450px]">
         <Image
           src={detail.image}
           alt={detail.imageAlt}
@@ -202,15 +218,10 @@ const LearnAnatomyDetailPanel = ({ detail }: { detail: EducationLearnAnatomyDeta
         />
       </div>
 
-      <div className="flex w-full max-w-[520px] flex-col md:pt-2">
-        <h3 className="font-larken text-2xl font-light leading-110 text-darkblack md:text-[32px]">
+      <div className="flex w-full max-w-full flex-col lg:gap-6 gap-4 md:pt-2">
+        <h3 className="w-fit font-larken text-2xl font-light leading-110 text-darkblack md:text-[32px] border-b-[1.5px] border-neutral300 pb-3">
           {detail.title}
         </h3>
-        <div
-          className="my-4 h-px w-full"
-          style={{ backgroundColor: anatomySpec.desktop.dividerColor }}
-        />
-
         <ul className="flex flex-col gap-5 md:gap-6">
           {detail.traits.map((trait) => (
             <li key={trait.id} className="flex gap-3">
@@ -384,8 +395,8 @@ const EducationLearnMoreSection = () => {
     <section
       aria-labelledby="education-learn-more-title"
       className={cn(
-        "bg-white px-4 py-16 md:px-10 md:py-[104px]",
-        isCarousel && "max-md:h-[681px]",
+        "bg-white px-4 py-16 md:px-10 md:py-100",
+        isCarousel && "min-h-[681px]",
       )}
     >
       <div
@@ -453,14 +464,12 @@ const EducationLearnMoreSection = () => {
           role="tabpanel"
           id={`learn-tabpanel-${activeTab.id}`}
           aria-labelledby={`learn-tab-${activeTab.id}`}
-          className="flex w-full flex-col items-center max-md:gap-[49px] md:gap-16"
-          style={{
-            gap: isCareGrid
-              ? careSpec.mobile.descriptionGap
-              : isAnatomyDetail
-                ? anatomySpec.mobile.columnGap
-                : headerSpec.mobile.descriptionCarouselGap,
-          }}
+          className={cn(
+            "flex w-full flex-col items-center",
+            isCareGrid && "gap-8 md:gap-16",
+            isAnatomyDetail && "gap-8 md:gap-16",
+            isCarousel && "max-md:gap-[49px] md:gap-16",
+          )}
         >
           <LearnTabDescription tab={activeTab} />
 

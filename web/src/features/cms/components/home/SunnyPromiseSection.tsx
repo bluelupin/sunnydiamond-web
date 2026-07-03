@@ -74,7 +74,7 @@ const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
       </Reveal>
 
       <div className="flex w-full flex-col items-center gap-6 lg:gap-6">
-        <Reveal direction="up" className="max-w-[384px] text-center font-gill text-base font-light leading-110 text-[#4D4D4D] md:text-xl">
+        <Reveal direction="up" className="max-w-[384px] text-center font-gill text-base font-light leading-110 text-neutral500 md:text-xl">
           {description}
         </Reveal>
         {ctaUrl &&

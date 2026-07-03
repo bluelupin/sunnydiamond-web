@@ -84,7 +84,7 @@ const InlineCustomSelect = ({
       <span
         id={labelId}
         className={cn(
-          "font-gill text-[14px] font-normal leading-110 text-darkblack",
+          "font-gill text-sm font-normal leading-110 text-darkblack",
           labelClassName,
         )}
       >
@@ -101,7 +101,7 @@ const InlineCustomSelect = ({
         aria-describedby={errorId}
         onClick={() => setIsOpen((current) => !current)}
         className={cn(
-          "flex h-[56px] w-full items-center justify-between bg-[#F2F2F2] p-[12px] font-gill text-[14px] leading-110 outline-none",
+          "flex h-[56px] w-full items-center justify-between bg-[#F2F2F2] p-[12px] font-gill text-sm leading-110 outline-none",
           isOpen ? "border border-darkblack" : "border border-transparent",
           invalid && !isOpen && "ring-1 ring-[#B42318]",
           showPlaceholder && !isOpen ? "font-light text-neutral400" : "font-normal text-darkblack",
@@ -132,7 +132,7 @@ const InlineCustomSelect = ({
                   onBlur?.();
                 }}
                 className={cn(
-                  "flex h-[56px] w-full items-center p-[12px] text-left font-gill text-[14px] leading-110 transition-colors",
+                  "flex h-[56px] w-full items-center p-[12px] text-left font-gill text-sm leading-110 transition-colors",
                   selected
                     ? "bg-[#DECAA0] font-normal text-darkblack"
                     : "font-normal text-neutral400 hover:bg-[#DECAA0] hover:text-darkblack",

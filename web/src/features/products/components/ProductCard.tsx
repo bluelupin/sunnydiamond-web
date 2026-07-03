@@ -134,7 +134,7 @@ const ProductCard = ({ product }: { product: Product }) => {
       {/* Bestseller badge — straddles image / text boundary */}
       {product.bestseller && (
         <div className="absolute left-1/2 top-[331px] z-10 flex h-[36px] -translate-x-1/2 items-center justify-center bg-white px-[12px] drop-shadow-[0px_2px_2px_#c5a156]">
-          <span className="font-gill text-[14px] font-semibold leading-110 darkblack">
+          <span className="font-gill text-sm font-semibold leading-110 darkblack">
             BESTSELLER
           </span>
         </div>

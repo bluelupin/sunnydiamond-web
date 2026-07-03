@@ -35,7 +35,7 @@ const ProductCopy = ({ title, price, href, white = false, className }: ProductCo
   <div
     className={cn(
       "flex w-full flex-col items-center text-center leading-110",
-      "gap-[8px] px-[5px] text-[14px] md:gap-[12px] md:px-[12px] md:text-xl",
+      "gap-[8px] px-[5px] text-sm md:gap-[12px] md:px-[12px] md:text-xl",
       white ? "text-white" : "text-darkblack",
       white && "md:text-white",
       className,

@@ -18,7 +18,7 @@ const applyMaskReveal = (element: HTMLElement, reveal: number) => {
   const clip = `inset(0 0 ${(1 - value) * 100}% 0 round 0)`;
 
   element.style.clipPath = clip;
-  element.style.setProperty("-webkit-clip-path", clip);
+  element.style.setProperty("-webkit-clipPath", clip);
   element.style.maskImage = "linear-gradient(black, black)";
   element.style.setProperty("-webkit-mask-image", "linear-gradient(black, black)");
   element.style.maskSize = `100% ${maskHeight}`;
@@ -31,7 +31,7 @@ const applyMaskReveal = (element: HTMLElement, reveal: number) => {
 
 const clearMaskReveal = (element: HTMLElement) => {
   element.style.clipPath = "";
-  element.style.removeProperty("-webkit-clip-path");
+  element.style.removeProperty("-webkit-clipPath");
   element.style.maskImage = "";
   element.style.removeProperty("-webkit-mask-image");
   element.style.maskSize = "";

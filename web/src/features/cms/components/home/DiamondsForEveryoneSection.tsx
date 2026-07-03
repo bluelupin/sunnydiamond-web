@@ -157,7 +157,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
             <Reveal as="h2" direction="up" className="w-full whitespace-nowrap font-larken text-32 font-light leading-110 text-darkblack md:text-[48px]">
               {sectionTitle}
             </Reveal>
-            <Reveal direction="up" className="w-full font-gill text-base font-light leading-110 text-[#4D4D4D] md:text-xl">
+            <Reveal direction="up" className="w-full font-gill text-base font-light leading-110 text-neutral500 md:text-xl">
               {subtitle}
             </Reveal>
           </div>

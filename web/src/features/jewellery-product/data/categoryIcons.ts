@@ -1,12 +1,21 @@
+import type { ComponentType } from "react";
 import type { JewelleryCategorySlug } from "../types";
+import AllTabIcon from "@/assets/Icons/PLP/AllTabIcon";
+import RingsTabIcon from "@/assets/Icons/PLP/RingsTabIcon";
+import EarringsTabIcon from "@/assets/Icons/PLP/EarringsTabIcon";
+import NecklaceTabIcon from "@/assets/Icons/PLP/NcklaceTabIcon";
+import PendantsTabIcon from "@/assets/Icons/PLP/PendantsTabIcon";
+import BraceletsTabIcon from "@/assets/Icons/PLP/BraceletsTabIcon";
+import BanglesTabIcon from "@/assets/Icons/PLP/BanglesTabIcon";
+import NosepinsTabIcon from "@/assets/Icons/PLP/NosepinsTabIcon";
 
-export const categoryIconSrc: Record<JewelleryCategorySlug, string> = {
-  all: "/images/products/categories/all1.svg",
-  rings: "/images/products/categories/rings.svg",
-  earrings: "/images/products/categories/earrings.svg",
-  necklace: "/images/products/categories/necklace.svg",
-  pendants: "/images/products/categories/pendants.svg",
-  bracelets: "/images/products/categories/bracelets.svg",
-  bangles: "/images/products/categories/bangles.svg",
-  nosepins: "/images/products/categories/nosepins.svg",
+export const categoryIconSrc: Record<JewelleryCategorySlug, ComponentType<{ className?: string }>> = {
+  all: AllTabIcon,
+  rings: RingsTabIcon,
+  earrings: EarringsTabIcon,
+  necklace: NecklaceTabIcon,
+  pendants: PendantsTabIcon,
+  bracelets: BraceletsTabIcon,
+  bangles: BanglesTabIcon,
+  nosepins: NosepinsTabIcon,
 };

@@ -34,8 +34,8 @@ const VARIANT_CONFIG = {
     imageClassName: "relative h-100 w-full shrink-0 overflow-hidden",
     imageSizes: "50vw",
     imageCoverClassName: "object-cover",
-    labelClassName: "font-gill text-[14px] leading-110 text-darkblack",
-    allProductsClassName: "font-gill text-[14px] leading-110 text-darkblack",
+    labelClassName: "font-gill text-sm leading-110 text-darkblack",
+    allProductsClassName: "font-gill text-sm leading-110 text-darkblack",
   },
 } as const;
 

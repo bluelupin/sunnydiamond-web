@@ -148,7 +148,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
             <Reveal as="h2" direction="up" className="md:text-left text-center font-larken lg:text-5xl md:text-4xl sm:text-3xl text-32 font-light leading-110 text-darkblack">
               {sectionTitle}
             </Reveal>
-            <Reveal as="p" direction="up" className="md:text-left text-center font-gill text-xl font-light leading-110 text-[#4D4D4D]">
+            <Reveal as="p" direction="up" className="md:text-left text-center font-gill text-xl font-light leading-110 text-neutral500">
               {description}
             </Reveal>
           </div>

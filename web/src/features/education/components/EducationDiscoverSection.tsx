@@ -35,7 +35,7 @@ const DiscoverSteps = () => {
             key={index}
             className="relative z-10 flex h-[26px] w-4 shrink-0 items-center justify-center rounded-full border-[0.4px] border-darkblack bg-white p-1"
           >
-            <span className="font-gill text-[14px] font-light leading-none tracking-[0.14px] text-darkblack">
+            <span className="font-gill text-sm font-light leading-none tracking-[0.14px] text-darkblack">
               {index + 1}
             </span>
           </div>

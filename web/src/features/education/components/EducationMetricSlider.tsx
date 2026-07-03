@@ -486,7 +486,7 @@ const EducationMetricSlider = ({
                         "text-[12px]",
                         mobileLabelAlignClass(index, options.length),
                       )
-                    : "text-center text-[14px]",
+                    : "text-center text-sm",
                   isActive ? "text-linkGold" : "text-darkblack",
                 )}
                 style={{

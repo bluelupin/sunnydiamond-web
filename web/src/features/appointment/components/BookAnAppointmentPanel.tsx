@@ -165,7 +165,7 @@ const BookAnAppointmentPanel = ({
           variant === "page" && "mx-auto w-full max-w-[480px]",
         )}
       >
-        <p className="text-center font-gill text-sm font-light leading-normal tracking-[0.252px] text-[#4D4D4D]">
+        <p className="text-center font-gill text-sm font-light leading-normal tracking-[0.252px] text-neutral500">
           Our representative will get in touch with you soon
         </p>
         <PanelFooterDualActions>

@@ -139,7 +139,7 @@ const GemstoneTypeSelect = ({
     <div ref={rootRef} className="flex flex-col gap-[8px]">
       <span
         id="filter-gemstone-type-label"
-        className="font-gill text-[14px] font-normal leading-110 text-darkblack"
+        className="font-gill text-sm font-normal leading-110 text-darkblack"
       >
         Gemstone Type:
       </span>
@@ -152,7 +152,7 @@ const GemstoneTypeSelect = ({
         aria-labelledby="filter-gemstone-type-label filter-gemstone-type-value"
         onClick={() => setIsOpen((current) => !current)}
         className={cn(
-          "flex h-[56px] w-full items-center justify-between bg-[#F2F2F2] p-[12px] font-gill text-[14px] leading-110 outline-none",
+          "flex h-[56px] w-full items-center justify-between bg-[#F2F2F2] p-[12px] font-gill text-sm leading-110 outline-none",
           isOpen ? "border border-darkblack" : "border border-transparent",
           showPlaceholder && !isOpen ? "font-light text-neutral400" : "font-normal text-darkblack",
         )}
@@ -181,7 +181,7 @@ const GemstoneTypeSelect = ({
                   setIsOpen(false);
                 }}
                 className={cn(
-                  "flex h-[56px] w-full items-center p-[12px] text-left font-gill text-[14px] leading-110 transition-colors",
+                  "flex h-[56px] w-full items-center p-[12px] text-left font-gill text-sm leading-110 transition-colors",
                   selected
                     ? "bg-[#DECAA0] font-normal text-darkblack"
                     : "font-normal text-neutral400 hover:bg-white",
@@ -355,7 +355,7 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
                     aria-label="Maximum price"
                   />
                 </div>
-                <div className="flex items-center justify-between font-gill text-[14px] font-light leading-110 text-darkblack">
+                <div className="flex items-center justify-between font-gill text-sm font-light leading-110 text-darkblack">
                   <span>₹ {formatCurrency(draft.minPrice)}</span>
                   <span>₹ {formatCurrency(draft.maxPrice)}</span>
                 </div>
@@ -364,7 +364,7 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
 
             <section className="flex gap-[24px]">
               <label className="flex min-w-0 flex-1 flex-col gap-[8px]">
-                <span className="font-gill text-[14px] font-normal leading-110 text-darkblack">
+                <span className="font-gill text-sm font-normal leading-110 text-darkblack">
                   Min Amount
                 </span>
                 <input
@@ -383,13 +383,13 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
                     }))
                   }
                   className={cn(
-                    "h-[56px] w-full bg-[#F2F2F2] p-[12px] font-gill text-[14px] font-normal leading-110 text-darkblack outline-none",
+                    "h-[56px] w-full bg-[#F2F2F2] p-[12px] font-gill text-sm font-normal leading-110 text-darkblack outline-none",
                     minInputFocused && "border border-neutral500",
                   )}
                 />
               </label>
               <label className="flex min-w-0 flex-1 flex-col gap-[8px]">
-                <span className="font-gill text-[14px] font-normal leading-110 text-darkblack">
+                <span className="font-gill text-sm font-normal leading-110 text-darkblack">
                   Max Amount
                 </span>
                 <input
@@ -406,7 +406,7 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
                       ),
                     }))
                   }
-                  className="h-[56px] w-full bg-[#F2F2F2] p-[12px] font-gill text-[14px] font-normal leading-110 text-darkblack placeholder:text-neutral400 outline-none"
+                  className="h-[56px] w-full bg-[#F2F2F2] p-[12px] font-gill text-sm font-normal leading-110 text-darkblack placeholder:text-neutral400 outline-none"
                 />
               </label>
             </section>
@@ -479,14 +479,14 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
             <button
               type="button"
               onClick={handleClearAll}
-              className="btn-border-slide inline-flex h-[56px] min-w-0 flex-1 items-center justify-center border-[0.8px] border-neutral300 px-[28px] py-[20px] font-gill text-[14px] font-normal uppercase leading-110 text-darkblack"
+              className="btn-border-slide inline-flex h-[56px] min-w-0 flex-1 items-center justify-center border-[0.8px] border-neutral300 px-[28px] py-[20px] font-gill text-sm font-normal uppercase leading-110 text-darkblack"
             >
               Clear All
             </button>
             <button
               type="button"
               onClick={() => onApply(draft)}
-              className="btn-dark-slide inline-flex h-[56px] min-w-0 flex-1 items-center justify-center px-[28px] py-[20px] font-gill text-[14px] font-normal uppercase leading-110 text-white"
+              className="btn-dark-slide inline-flex h-[56px] min-w-0 flex-1 items-center justify-center px-[28px] py-[20px] font-gill text-sm font-normal uppercase leading-110 text-white"
             >
               Apply Filters
             </button>

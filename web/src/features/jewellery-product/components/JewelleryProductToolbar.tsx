@@ -10,6 +10,8 @@ import {
   jewelleryListingToolbarAssets,
   jewelleryListingToolbarSpec,
 } from "../data/content";
+import FilterIcon from "@/assets/Icons/PLP/FilterIcon";
+import SortByIcon from "@/assets/Icons/PLP/SortByIcon";
 
 interface JewelleryProductToolbarProps {
   productCount: number;
@@ -21,19 +23,6 @@ interface JewelleryProductToolbarProps {
 
 const desktopSpec = jewelleryListingToolbarSpec;
 const mobileSpec = jewelleryListingMobileFooterSpec;
-
-const FilterIcon = ({ size }: { size: number }) => (
-  <span className="inline-flex shrink-0 items-center justify-center" style={{ width: size, height: size }}>
-    <Image
-      src={jewelleryListingToolbarAssets.filterIcon}
-      alt=""
-      width={size}
-      height={size}
-      className="size-full object-contain"
-      aria-hidden
-    />
-  </span>
-);
 
 const SortChevron = ({ size, mobile = false }: { size: number; mobile?: boolean }) => {
   const chevronWidth = mobile ? 13.33 : 13.5;
@@ -76,13 +65,13 @@ const FilterControl = ({ iconSize, fontSize, gap, color, onClick }: FilterContro
   <button
     type="button"
     onClick={onClick}
-    className="inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 md:py-[6px]"
+    className="text-darkblack inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 md:py-[7px]"
     style={{ gap, color }}
     aria-label="Open filters"
   >
-    <FilterIcon size={iconSize} />
+    <FilterIcon className="size-6" />
     <span
-      className="whitespace-nowrap font-gill font-normal uppercase leading-110"
+      className="whitespace-nowrap font-gill font-normal uppercase leading-110 lg:text-xl text-base"
       style={{ fontSize }}
     >
       Filter
@@ -123,11 +112,10 @@ const SortControl = ({
       }}
     >
       <span
-        className="pointer-events-none col-start-1 row-start-1 inline-flex items-center gap-3 whitespace-nowrap font-gill font-normal uppercase leading-110"
-        style={{ fontSize }}
+        className="lg:text-xl text-base text-darkblack pointer-events-none col-start-1 row-start-1 inline-flex items-center gap-3 whitespace-nowrap font-gill font-normal uppercase leading-110"
       >
         Sort By
-        <SortChevron size={iconSize} />
+        <SortByIcon className="size-6" />
       </span>
       <select
         value={sortValue}

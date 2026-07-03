@@ -161,8 +161,8 @@ const PanelMedia = ({
         )}
 
         {panel.footnote &&
-          <ScrollReveal delayMs={300} className="mt-10 flex w-full max-w-full flex-col items-center gap-6 max-md:mt-10 max-md:max-w-[317px] max-md:gap-6 lg:mt-[64px] lg:gap-[24px]">
-            <p className="text-center font-gill text-[14px] font-light leading-110 text-neutral500 lg:text-base lg:text-[#4D4D4D]">
+          <ScrollReveal delayMs={300} className="mt-10 flex w-full max-w-full flex-col items-center gap-6 max-md:mt-10 max-md:max-w-[317px] mx-auto max-md:gap-6 lg:mt-[64px] lg:gap-[24px]">
+            <p className="text-center font-gill text-sm font-light leading-110 text-neutral500 lg:text-base lg:text-neutral500">
               {panel.footnote}
             </p>
             <Image
