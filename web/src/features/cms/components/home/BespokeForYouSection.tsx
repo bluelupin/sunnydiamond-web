@@ -127,7 +127,7 @@ const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
         <div className="flex w-full max-w-[375px] flex-col items-center gap-6 md:max-w-[1360px] md:gap-40">
           <div className="flex w-full flex-col items-center gap-3 text-center text-white md:gap-4">
             <Reveal as="h2" direction="up"
-              className="shrink-0 whitespace-nowrap font-larken text-[32px] font-light leading-110 md:text-[48px]"
+              className="shrink-0 whitespace-nowrap font-larken text-32 font-light leading-110 md:text-[48px]"
             >
               {sectionTitle}
             </Reveal>

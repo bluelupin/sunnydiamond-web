@@ -242,7 +242,7 @@ function CollectionHeroPanel({
       >
         {isMobile ? (
           <div className="flex flex-col items-center gap-3">
-            <h2 className="font-larken text-[32px] font-light leading-110">{title}</h2>
+            <h2 className="font-larken text-32 font-light leading-110">{title}</h2>
             {description ? (
               <p className="max-w-[343px] font-gill text-base font-light leading-110">
                 {description}

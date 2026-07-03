@@ -221,7 +221,7 @@ const EducationMetricSlider = ({
   const renderTrackSegment = (left: number, width: number, key: string) => (
     <div
       key={key}
-      className="absolute bg-[#D1B57A]"
+      className="absolute bg-lightGold"
       style={{
         left: toPercent(left, spec.width),
         top: spec.trackTop,
@@ -321,7 +321,7 @@ const EducationMetricSlider = ({
             return (
               <span
                 key={`dot-${index}`}
-                className="pointer-events-none absolute size-[6px] -translate-x-1/2 rounded-full bg-[#D1B57A]"
+                className="pointer-events-none absolute size-[6px] -translate-x-1/2 rounded-full bg-lightGold"
                 style={{
                   left: toPercent(dotCenter, spec.width),
                   top: spec.trackTop + spec.trackHeight / 2 - 3,

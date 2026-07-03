@@ -161,7 +161,7 @@ const PanelMedia = ({
         )}
 
         {panel.footnote &&
-          <Reveal direction="up" className="mt-10 flex w-full max-w-full flex-col items-center gap-6 max-md:mt-10 max-md:max-w-[317px] max-md:gap-6 lg:mt-[64px] lg:gap-[24px]">
+          <ScrollReveal delayMs={300} className="mt-10 flex w-full max-w-full flex-col items-center gap-6 max-md:mt-10 max-md:max-w-[317px] max-md:gap-6 lg:mt-[64px] lg:gap-[24px]">
             <p className="text-center font-gill text-[14px] font-light leading-110 text-neutral500 lg:text-[16px] lg:text-[#4D4D4D]">
               {panel.footnote}
             </p>
@@ -172,7 +172,7 @@ const PanelMedia = ({
               height={23}
               className={educationScrollArrowClassName}
             />
-          </Reveal>
+          </ScrollReveal>
         }
       </div>
     </ScrollReveal>
@@ -191,10 +191,10 @@ const PanelCopy = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent;
       <Reveal as="p" direction="up" className="font-larken text-[60px] font-light leading-110 text-linkGold opacity-50 lg:text-[110px]">
         {panel.code}
       </Reveal>
-      <div className="flex max-w-[303px] flex-col lg:max-w-[441px] lg:gap-4 gap-3">
+      <div className="flex max-w-[303px] flex-col lg:max-w-450 lg:gap-4 gap-3">
         <Reveal as="h3" direction="up"
           id={`education-panel-${panel.id}`}
-          className="font-larken text-xl font-light leading-110 text-darkblack lg:text-[32px]"
+          className="font-larken text-xl font-light leading-110 text-darkblack lg:text-32"
         >
           {panel.title}
         </Reveal>
@@ -256,7 +256,7 @@ type EducationFourCsPanelsSectionProps = {
 
 const EducationFourCsPanelsSection = ({ fourCs }: EducationFourCsPanelsSectionProps) => {
   return (
-    <div className="flex flex-col mb-16">
+    <div className="flex flex-col">
       {fourCs.panels.map((panel, index) => (
         <EducationFourCsPanel
           key={panel.id}

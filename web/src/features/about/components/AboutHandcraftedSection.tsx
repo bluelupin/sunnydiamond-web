@@ -29,7 +29,7 @@ const AboutHandcraftedSection = ({
           <div className="absolute inset-x-0 bottom-0 top-16 z-10 flex flex-col items-center justify-center gap-4 px-5 md:top-20">
             <Reveal as="h2" direction="up"
               id="about-handcrafted-title"
-              className="text-center font-larken text-[32px] font-light leading-110 text-white md:text-[40px] lg:text-5xl"
+              className="text-center font-larken text-32 font-light leading-110 text-white md:text-[40px] lg:text-5xl"
             >
               {title}
             </Reveal>

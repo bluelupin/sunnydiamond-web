@@ -154,7 +154,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
             {eyebrow}
           </Reveal>
           <div className="flex w-full flex-col items-center gap-3 md:gap-4">
-            <Reveal as="h2" direction="up" className="w-full whitespace-nowrap font-larken text-[32px] font-light leading-110 text-darkblack md:text-[48px]">
+            <Reveal as="h2" direction="up" className="w-full whitespace-nowrap font-larken text-32 font-light leading-110 text-darkblack md:text-[48px]">
               {sectionTitle}
             </Reveal>
             <Reveal direction="up" className="w-full font-gill text-base font-light leading-110 text-[#4D4D4D] md:text-xl">
