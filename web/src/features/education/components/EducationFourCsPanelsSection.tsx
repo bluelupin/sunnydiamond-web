@@ -87,7 +87,7 @@ const PanelMedia = ({
         )}
       >
         {panel.id === "carat" ? (
-          <div className="flex w-full flex-col items-start gap-10 lg:gap-[40px]">
+          <div className="flex w-full flex-col items-start gap-10 gap-0">
             <div className="w-full shrink-0 self-start overflow-hidden">
               <EducationCaratHandVisual activeCarat={activeCarat} />
             </div>

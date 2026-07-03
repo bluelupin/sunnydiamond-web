@@ -46,19 +46,19 @@ const EducationCaratHandVisual = ({ activeCarat }: EducationCaratHandVisualProps
         className="pointer-events-none absolute left-0 top-0 inset-0 overflow-hidden"
       // style={{ opacity: educationCaratVisualSpec.handOpacity }}
       >
-        <div className="h-[300px] sm:w-[500px] w-[350px]">
+        <div className="h-[350px] sm:w-[600px] w-[350px]">
           <Image
             src={educationPageImages.caratHand}
             alt=""
             fill
-            className="object-cover !static sm:!w-[500px] !w-[350px] sm:!h-[475px] !h-[300px]"
+            className="object-cover !static sm:!w-[650px] !w-[350px] sm:!h-[470px] !h-[300px]"
           // sizes="100vw"
           />
         </div>
       </div>
 
       <div
-        className="pointer-events-none absolute z-10 transition-transform duration-300 ease-out sm:left-[200px] sm:top-[128px] left-[150px] top-[85px]"
+        className="pointer-events-none absolute z-10 transition-transform duration-300 ease-out sm:left-[250px] sm:top-[120px] left-[150px] top-[85px]"
         style={{
           // left: `250px`,
           // top: `100px`,
