@@ -87,7 +87,7 @@ const EducationDiscoverSection = ({ ctaBanner }: EducationDiscoverSectionProps) 
 
   return (
     <section aria-labelledby="education-discover-title" className="bg-gray300">
-      <div className="flex w-full flex-col md:grid md:grid-cols-2 md:items-end lg:gap-100 md:gap-8">
+      <div className="flex w-full flex-col md:grid md:grid-cols-2 md:items-start lg:gap-20 md:gap-8">
         <Reveal direction="up" className="flex w-full mix-blend-darken md:order-1 order-2 lg:justify-start justify-end">
           <ResponsiveImage
             desktopSrc={desktopUrl}
@@ -99,7 +99,7 @@ const EducationDiscoverSection = ({ ctaBanner }: EducationDiscoverSectionProps) 
             className="h-full w-full object-cover object-center"
           />
         </Reveal>
-        <Reveal direction="up" className="md:order-2 order-1 w-full max-w-[585px] lg:justify-start justify-center lg:pt-100 lg:pb-100 pt-16 pb-[40px] lg:px-0 px-4 md:mx-0 mx-auto">
+        <Reveal direction="up" className="md:order-2 order-1 w-full max-w-640 lg:justify-start justify-center lg:pt-100 lg:pb-100 pt-16 lg:px-0 px-4 md:mx-0 mx-auto">
           <DiscoverContent
             heading={ctaBanner.heading}
             subheading={ctaBanner.subheading}

@@ -53,21 +53,16 @@ const FilterChip = ({
     aria-pressed={selected}
     onClick={onClick}
     className={cn(
-      "flex h-[56px] items-center justify-center bg-[#F2F2F2] px-[24px] py-[12px] font-gill text-base leading-110 text-darkblack",
+      "flex h-[56px] items-center justify-center bg-[#F2F2F2] px-[24px] py-[12px] font-gill text-base leading-110",
       showCheck && selected && "gap-[4px]",
     )}
   >
     {showCheck && selected ? (
-      <Image
-        src="/images/jewellery/filter-check.svg"
-        alt=""
-        width={18}
-        height={18}
-        aria-hidden
-        className="size-[18px] shrink-0 object-contain"
-      />
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3.75 9.75L6.75 12.75L14.25 5.25" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
     ) : null}
-    <span className={selected ? "font-normal" : "font-light"}>{label}</span>
+    <span className={selected ? "font-normal text-darkblack" : "font-light text-gary300 opacity-80"}>{label}</span>
   </button>
 );
 

@@ -774,8 +774,7 @@ export const educationLearnTabs: EducationLearnTab[] = [
     label: "FANCY COLOUR",
     layout: "carousel",
     description: [
-      "Fancy colour diamonds express rarity through hue, tone, and saturation.",
-      "Each stone carries a distinct character beyond traditional colourless grading.",
+      "Each hue is nature's rarest brushstroke, shaped by time, chemistry, and chance. Coloured diamonds are among the most scarce natural gems ever discovered."
     ],
     ctaLabel: "SHOP FANCY COLOUR DIAMONDS",
     ctaHref: "/products",

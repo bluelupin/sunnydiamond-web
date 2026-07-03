@@ -27,27 +27,19 @@ type ProductCopyProps = {
   title: string;
   price: number;
   href: string;
-  white?: boolean;
   className?: string;
 };
 
-const ProductCopy = ({ title, price, href, white = false, className }: ProductCopyProps) => (
+const ProductCopy = ({ title, price, href, className }: ProductCopyProps) => (
   <div
     className={cn(
       "flex w-full flex-col items-center text-center leading-110",
       "gap-[8px] px-[5px] text-sm md:gap-[12px] md:px-[12px] md:text-xl",
-      white ? "text-white" : "text-darkblack",
-      white && "md:text-white",
+      "text-darkblack",
       className,
     )}
   >
-    <Link
-      href={href}
-      className={cn(
-        "font-gill whitespace-nowrap font-light md:text-xl",
-        white && "font-normal md:font-light",
-      )}
-    >
+    <Link href={href} className="font-gill whitespace-nowrap font-light md:text-xl">
       {title}
     </Link>
     <p className="w-full font-gill font-semibold">
@@ -100,17 +92,17 @@ const JewelleryProductCard = ({
 
   const swipeSurfaceProps = hasModalImage
     ? {
-        onPointerDown: (event: React.PointerEvent<HTMLElement>) => {
-          if (window.matchMedia("(min-width: 768px)").matches) return;
-          onPointerDown(event);
-        },
-        onPointerMove: (event: React.PointerEvent<HTMLElement>) => {
-          if (window.matchMedia("(min-width: 768px)").matches) return;
-          onPointerMove(event);
-        },
-        onPointerUp,
-        onPointerCancel,
-      }
+      onPointerDown: (event: React.PointerEvent<HTMLElement>) => {
+        if (window.matchMedia("(min-width: 768px)").matches) return;
+        onPointerDown(event);
+      },
+      onPointerMove: (event: React.PointerEvent<HTMLElement>) => {
+        if (window.matchMedia("(min-width: 768px)").matches) return;
+        onPointerMove(event);
+      },
+      onPointerUp,
+      onPointerCancel,
+    }
     : {};
 
   return (
@@ -155,11 +147,11 @@ const JewelleryProductCard = ({
         </div>
       ) : null}
 
-      {/* Default product view */}
+      {/* Default product view — image only; copy lives in a shared bottom slot */}
       <div
         className={cn(
           "col-start-1 row-start-1 z-10 flex flex-col items-center transition-opacity duration-500",
-          "gap-[16px] px-[16px] py-[24px] md:h-full md:gap-[24px] md:px-[24px] md:py-[40px] md:group-hover:opacity-0",
+          "px-[16px] pt-[24px] md:px-[24px] md:pt-[40px] md:group-hover:opacity-0",
           isMobileLifestyle ? "pointer-events-none opacity-0 md:opacity-100" : "opacity-100",
         )}
         style={
@@ -169,23 +161,25 @@ const JewelleryProductCard = ({
         }
       >
         <ProductImage src={primaryImage} alt={title} />
-        <ProductCopy title={title} price={price} href={href} className="md:group-hover:hidden" />
       </div>
 
-      {/* Desktop hover copy */}
-      <div className="pointer-events-none col-start-1 row-start-1 z-20 hidden flex-col justify-end px-[24px] pb-[40px] opacity-0 transition-opacity duration-500 md:flex md:group-hover:opacity-100">
-        <ProductCopy title={title} price={price} href={href} white />
-      </div>
-
-      {/* Mobile lifestyle copy */}
+      {/* Title + price — bottom of card, same position for default, hover, and mobile lifestyle */}
       <div
         className={cn(
-          "pointer-events-none col-start-1 row-start-1 z-20 flex flex-col justify-end px-[16px] pb-[24px] md:hidden",
-          isMobileLifestyle ? "opacity-100" : "opacity-0",
-          !isDragging && "transition-opacity duration-500",
+          "pointer-events-none col-start-1 row-start-1 z-20 flex size-full flex-col justify-end",
+          "px-[16px] pb-[24px] md:px-[24px] md:pb-[40px]",
         )}
       >
-        <ProductCopy title={title} price={price} href={href} white />
+        <ProductCopy
+          title={title}
+          price={price}
+          href={href}
+          className={cn(
+            "transition-colors duration-500",
+            isMobileLifestyle ? "text-white" : "text-darkblack",
+            "md:text-darkblack md:group-hover:text-white",
+          )}
+        />
       </div>
 
       {/* Mobile bestseller badge — overlaid top-left, out of card flow */}
@@ -237,7 +231,7 @@ const JewelleryProductCard = ({
           }}
           className="pointer-events-auto flex size-6 items-center justify-center md:size-[32px]"
         >
-          <Heart
+          {/* <Heart
             size={20}
             strokeWidth={1.5}
             className={cn(
@@ -248,7 +242,30 @@ const JewelleryProductCard = ({
                   ? "text-white"
                   : "text-darkblack md:group-hover:text-white",
             )}
-          />
+          /> */}
+          <svg
+            width="29"
+            height="26"
+            viewBox="0 0 29 26"
+            xmlns="http://www.w3.org/2000/svg"
+            className={cn(
+              "transition-colors duration-200",
+              isWishlisted
+                ? "fill-[#AB863B] text-linkGold group-hover:text-linkGold"
+                : "fill-none text-darkblack group-hover:text-white",
+              // isMobileLifestyle
+              //   ? "text-white"
+              //   : "text-linkGold"
+            )}
+          >
+            <path
+              d="M27.4999 8.64967C27.4999 10.7116 26.7082 12.6922 25.2943 14.1572C22.0398 17.5307 18.8831 21.0484 15.507 24.2996C15.1194 24.6675 14.6179 24.8444 14.1209 24.8328C13.6256 24.8213 13.1346 24.6228 12.765 24.2396L3.03826 14.1572C0.0982486 11.1096 0.0982486 6.18968 3.03826 3.14213C6.00717 0.0646404 10.8438 0.0646404 13.8127 3.14213L14.1663 3.5086L14.5196 3.14235C15.9431 1.66604 17.8818 0.833374 19.907 0.833374C21.9322 0.833374 23.8707 1.66596 25.2943 3.14213C26.7083 4.60731 27.4999 6.58773 27.4999 8.64967Z"
+              stroke="currentColor"
+              fill="currentFill"
+              strokeWidth="1.66667"
+              strokeLinejoin="round"
+            />
+          </svg>
         </button>
       </div>
     </article>

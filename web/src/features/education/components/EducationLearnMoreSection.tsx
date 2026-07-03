@@ -42,15 +42,15 @@ const LearnCarouselImage = ({
 
   const image = (
     <div
-      className="relative overflow-hidden mix-blend-darken"
-      style={{ width: slotSpec.width, height: slotSpec.height }}
+      className="relative overflow-hidden mix-blend-darken lg:w-[350px] lg:h-[300px] w-[200px] h-[180px] imageTestContainer"
+    // style={{ width: slotSpec.width, height: slotSpec.height }}
     >
       <Image
         src={src}
         alt={alt}
         width={slotSpec.width}
         height={slotSpec.height}
-        className="absolute max-w-none object-cover"
+        className="w-full h-full object-cover"
         sizes={sizes}
         style={{
           height: slotSpec.cropHeight,
@@ -207,17 +207,18 @@ const LearnCareTipsGrid = ({ tips }: { tips: EducationLearnCareTip[] }) => {
 
 const LearnAnatomyDetailPanel = ({ detail }: { detail: EducationLearnAnatomyDetail }) => (
   <ScrollReveal delayMs={260} className="w-full">
-    <div className="flex w-full flex-col items-center gap-8 md:flex-row md:items-center md:gap-[120px]">
-      <div className="relative mx-auto h-[240px] w-[280px] shrink-0 mix-blend-darken md:h-[400px] md:w-[450px]">
-        <Image
-          src={detail.image}
-          alt={detail.imageAlt}
-          fill
-          className="object-contain"
-          sizes="(max-width: 768px) 280px, 350px"
-        />
+    <div className="grid md:grid-cols-2 gap-8 w-full items-center md:items-center">
+      <div>
+        <div className="relative mx-auto h-[280px] w-[280px] shrink-0 mix-blend-darken md:h-[350px] md:w-[350px]">
+          <Image
+            src={detail.image}
+            alt={detail.imageAlt}
+            fill
+            className="object-cover w-full h-full"
+          // sizes="(max-width: 768px) 280px, 350px"
+          />
+        </div>
       </div>
-
       <div className="flex w-full max-w-full flex-col lg:gap-6 gap-4 md:pt-2">
         <h3 className="w-fit font-larken text-2xl font-light leading-110 text-darkblack md:text-[32px] border-b-[1.5px] border-neutral300 pb-3">
           {detail.title}
@@ -339,14 +340,7 @@ const LearnCarouselPanel = ({
           {tab.ctaLabel && tab.ctaHref ? (
             <Link
               href={tab.ctaHref}
-              className="btn-border-slide inline-flex items-center justify-center border border-neutral300 font-gill font-normal uppercase leading-110 text-darkblack"
-              style={{
-                height: ctaSpec.height,
-                paddingInline: ctaSpec.paddingX,
-                paddingBlock: ctaSpec.paddingY,
-                fontSize: ctaSpec.fontSize,
-                borderWidth: ctaSpec.borderWidth,
-              }}
+              className="mt-2 btn-border-slide inline-flex h-14 min-w-[122px] items-center justify-center border-[0.8px] border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
             >
               {tab.ctaLabel}
             </Link>

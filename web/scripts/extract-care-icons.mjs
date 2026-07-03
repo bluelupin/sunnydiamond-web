@@ -1,6 +1,6 @@
 /**
- * Auto-detect icon bounding boxes from Diamond Care reference screenshot,
- * then export centered square PNGs for each tip.
+ * Extract Diamond Care icons from the icon-grid reference image.
+ * Source: Figma export — 5 tips in 3+2 staggered layout (1024×568).
  */
 import sharp from "sharp";
 import path from "node:path";
@@ -10,17 +10,17 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, "..");
 const source =
   process.argv[2] ??
-  "C:/Users/Admin/.cursor/projects/d-bluelupin-sunnydiamond-web/assets/c__Users_Admin_AppData_Roaming_Cursor_User_workspaceStorage_4463874bbdddcf516a98d5809e4843ed_images_image-1388115c-3511-44e2-9b63-b03fe80d6725.png";
+  "C:/Users/Admin/.cursor/projects/d-bluelupin-sunnydiamond-web/assets/c__Users_Admin_AppData_Roaming_Cursor_User_workspaceStorage_4463874bbdddcf516a98d5809e4843ed_images_image-e6a963f9-027e-4724-98d7-93e3f3c648b9.png";
 const outDir = path.join(root, "public/images/education");
 const OUTPUT_SIZE = 160;
 
-/** Search regions — icon graphics only, labels excluded */
+/** Icon-only search regions — labels excluded */
 const icons = [
-  ["care-icon-clean.png", { left: 120, top: 235, width: 200, height: 100 }],
-  ["care-icon-gentle-solution.png", { left: 400, top: 250, width: 220, height: 95 }],
-  ["care-icon-fine-detail.png", { left: 720, top: 250, width: 220, height: 95 }],
-  ["care-icon-avoid-harsh.png", { left: 260, top: 410, width: 180, height: 95 }],
-  ["care-icon-store.png", { left: 580, top: 410, width: 180, height: 95 }],
+  ["care-icon-clean.png", { left: 40, top: 10, width: 300, height: 130 }],
+  ["care-icon-gentle-solution.png", { left: 360, top: 10, width: 300, height: 130 }],
+  ["care-icon-fine-detail.png", { left: 680, top: 10, width: 300, height: 130 }],
+  ["care-icon-avoid-harsh.png", { left: 150, top: 250, width: 320, height: 130 }],
+  ["care-icon-store.png", { left: 530, top: 250, width: 320, height: 130 }],
 ];
 
 async function findDarkBBox(imagePath, region) {
@@ -77,7 +77,7 @@ function clampCrop(crop, imageWidth, imageHeight) {
   return { left, top, width, height };
 }
 
-function squareCropFromBBox(bbox, imageWidth, imageHeight, padding = 24) {
+function squareCropFromBBox(bbox, imageWidth, imageHeight, padding = 20) {
   const cx = bbox.left + bbox.width / 2;
   const cy = bbox.top + bbox.height / 2;
   const size = Math.max(bbox.width, bbox.height) + padding * 2;
@@ -97,11 +97,11 @@ function squareCropFromBBox(bbox, imageWidth, imageHeight, padding = 24) {
 
 const meta = await sharp(source).metadata();
 const imageWidth = meta.width ?? 1024;
-const imageHeight = meta.height ?? 619;
+const imageHeight = meta.height ?? 568;
 
 for (const [fileName, region] of icons) {
   const bbox = await findDarkBBox(source, region);
-  const crop = squareCropFromBBox(bbox, imageWidth, imageHeight, 32);
+  const crop = squareCropFromBBox(bbox, imageWidth, imageHeight, 24);
   console.log(fileName, "bbox", bbox, "crop", crop);
 
   await sharp(source)
