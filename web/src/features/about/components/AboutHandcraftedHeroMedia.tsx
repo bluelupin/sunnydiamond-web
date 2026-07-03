@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
-import { aboutHandcraftedFigmaSpec } from "../data/content";
+import { aboutHandcraftedFigmaSpec, aboutPageImages } from "../data/content";
 
 const { hero } = aboutHandcraftedFigmaSpec;
 
@@ -56,21 +56,23 @@ const AboutHandcraftedHeroMedia = ({
     }
   }, [shouldLoadVideo, showImageFallback]);
 
-  if ((useFallback || !videoUrl) && posterUrl) {
-    return (
-      <ResponsiveImage
-        desktopSrc={posterUrl}
-        alt=""
-        width={hero.width}
-        height={hero.height}
-        quality={80}
-        sizes="100vw"
-        className="absolute inset-0 h-full w-full object-cover object-center"
-      />
-    );
-  }
+  const effectivePoster = posterUrl ?? aboutPageImages.handcraftedBg;
 
-  if (!posterUrl && (useFallback || !videoUrl)) {
+  if (useFallback || !videoUrl) {
+    if (effectivePoster) {
+      return (
+        <ResponsiveImage
+          desktopSrc={effectivePoster}
+          alt=""
+          width={hero.width}
+          height={hero.height}
+          quality={80}
+          sizes="100vw"
+          className="absolute inset-0 h-full w-full object-cover object-center"
+        />
+      );
+    }
+
     return null;
   }
 
@@ -99,7 +101,7 @@ const AboutHandcraftedHeroMedia = ({
           muted
           playsInline
           preload="none"
-          poster={posterUrl}
+          poster={effectivePoster}
           aria-hidden
           tabIndex={-1}
           onError={showImageFallback}
