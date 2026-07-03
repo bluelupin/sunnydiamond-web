@@ -494,3 +494,8 @@
 .horizontalScrollbar::-webkit-scrollbar-thumb {
   display: none;
 }
+
+
+.imageTestContainer {
+  border: 0.4px solid #cccccc38;
+}

@@ -378,7 +378,7 @@ export const educationFourCsIntroSpec = {
   titleClassName:
     "block w-full text-center font-larken text-32 font-light leading-110 text-darkblack lg:text-48",
   imageClassName:
-    "relative h-130 w-160 overflow-hidden rounded-full lg:h-202 lg:w-250",
+    "relative h-130 w-40 overflow-hidden rounded-full lg:h-202 lg:w-250",
   imageSizes: "(max-width: 1024px) 160px, 250px",
   verticalRuleClassName: "h-55 w-px bg-darkblack/40",
   descriptionClassName:
@@ -386,7 +386,7 @@ export const educationFourCsIntroSpec = {
   gradientRuleClassName:
     "h-px w-250 bg-gradient-to-r from-darkMagenta to-goldAccent lg:w-420",
   pillarsClassName:
-    "flex flex-wrap items-center justify-center gap-x-3 gap-y-2 font-gill text-20 leading-110 text-darkblack lg:flex-nowrap lg:gap-x-4 lg:text-2xl",
+    "flex flex-wrap items-center justify-center gap-x-3 gap-y-2 font-gill text-20 leading-110 text-darkblack lg:flex-nowrap lg:gap-x-text-2xlt-2xl",
   scrollArrowClassName: "h-4 w-4 lg:h-[23px] lg:w-6",
 } as const;
 
