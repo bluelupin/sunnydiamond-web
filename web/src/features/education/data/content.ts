@@ -25,6 +25,22 @@ export const educationPageImages = {
   shapeLeft: "/images/education/shape-left.png",
   shapeCenter: "/images/education/shape-center.png",
   shapeRight: "/images/education/shape-right.png",
+  fancyColourLeft: "/images/education/fancy-colour-left.png",
+  fancyColourCenter: "/images/education/fancy-colour-center.png",
+  fancyColourRight: "/images/education/fancy-colour-right.png",
+  anatomyLeft: "/images/education/anatomy-left.png",
+  anatomyCenter: "/images/education/anatomy-center.png",
+  anatomyRight: "/images/education/anatomy-right.png",
+  anatomyFaceUp: "/images/education/anatomy-face-up.png",
+  anatomySparkle: "/images/education/anatomy-sparkle.svg",
+  careLeft: "/images/education/care-left.png",
+  careCenter: "/images/education/care-center.png",
+  careRight: "/images/education/care-right.png",
+  careIconClean: "/images/education/care-icon-clean.png",
+  careIconGentleSolution: "/images/education/care-icon-gentle-solution.png",
+  careIconFineDetail: "/images/education/care-icon-fine-detail.png",
+  careIconAvoidHarsh: "/images/education/care-icon-avoid-harsh.png",
+  careIconStore: "/images/education/care-icon-store.png",
   learnArrowLeft: "/images/education/learn-arrow-left.svg",
   learnArrowRight: "/images/education/learn-arrow-right.svg",
   learnArrowLeftMobile: "/images/education/learn-arrow-left-mobile.svg",
@@ -502,14 +518,41 @@ export const educationFourCsPanels: EducationFourCsPanelContent[] = [
   },
 ];
 
+export type EducationLearnCareTip = {
+  id: string;
+  icon: string;
+  labelLines: readonly [string, string];
+};
+
+export type EducationLearnAnatomyTrait = {
+  id: string;
+  term: string;
+  definition: string;
+};
+
+export type EducationLearnAnatomyDetail = {
+  image: string;
+  imageAlt: string;
+  title: string;
+  traits: EducationLearnAnatomyTrait[];
+};
+
 export type EducationLearnTab = {
   id: string;
   label: string;
   description: string[];
-  ctaLabel: string;
-  ctaHref: string;
-  slides: { src: string; alt: string }[];
+  layout: "carousel" | "care-grid" | "anatomy-detail";
+  ctaLabel?: string;
+  ctaHref?: string;
+  slides?: { src: string; alt: string }[];
+  careTips?: EducationLearnCareTip[];
+  anatomyDetail?: EducationLearnAnatomyDetail;
 };
+
+/** Figma nodes 692:29130 (desktop) + 692:28766 (mobile) */
+export const educationLearnMoreContent = {
+  title: "Learn more about Diamonds",
+} as const;
 
 /** Figma nodes 692:29130 (desktop) + 692:28766 (mobile) */
 export const educationLearnMoreSpec = {
@@ -615,12 +658,105 @@ export const educationLearnMoreSpec = {
     fontSize: 14,
     borderWidth: 0.8,
   },
+  careGrid: {
+    desktop: {
+      maxWidth: 1200,
+      descriptionGap: 64,
+      rowGap: 56,
+      columnGap: 80,
+      iconSize: 80,
+      labelGap: 24,
+      labelSize: 14,
+      labelColor: "#4D4D4D",
+      bottomRowMaxWidth: 640,
+    },
+    mobile: {
+      descriptionGap: 32,
+      rowGap: 32,
+      columnGap: 24,
+      iconSize: 64,
+      labelGap: 16,
+      labelSize: 12,
+    },
+  },
+  anatomyDetail: {
+    desktop: {
+      maxWidth: 1200,
+      columnGap: 120,
+      imageWidth: 350,
+      imageHeight: 300,
+      titleSize: 32,
+      titleGap: 16,
+      listGap: 24,
+      dividerColor: "#E5E5E5",
+    },
+    mobile: {
+      columnGap: 32,
+      imageWidth: 280,
+      imageHeight: 240,
+      titleSize: 24,
+      listGap: 20,
+    },
+  },
 } as const;
 
+export const educationDiamondAnatomyDetail: EducationLearnAnatomyDetail = {
+  image: educationPageImages.anatomyFaceUp,
+  imageAlt: "Round brilliant diamond face-up view",
+  title: "Face-up appearance",
+  traits: [
+    {
+      id: "brightness",
+      term: "Brightness",
+      definition: "The total internal and external reflection of white light.",
+    },
+    {
+      id: "fire",
+      term: "Fire",
+      definition: "The dispersion of light into the colours of the spectrum.",
+    },
+    {
+      id: "scintillation",
+      term: "Scintillation",
+      definition: "The pattern of light and dark areas, and the sparkle when moved.",
+    },
+  ],
+};
+
+export const educationDiamondCareTips: EducationLearnCareTip[] = [
+  {
+    id: "clean-regularly",
+    icon: educationPageImages.careIconClean,
+    labelLines: ["CLEAN YOUR DIAMOND", "REGULARLY"],
+  },
+  {
+    id: "gentle-solutions",
+    icon: educationPageImages.careIconGentleSolution,
+    labelLines: ["RELY ON GENTLE", "CLEANING SOLUTIONS"],
+  },
+  {
+    id: "fine-detailing",
+    icon: educationPageImages.careIconFineDetail,
+    labelLines: ["BE GENTLE WITH FINE", "DETAILING"],
+  },
+  {
+    id: "avoid-harsh",
+    icon: educationPageImages.careIconAvoidHarsh,
+    labelLines: ["AVOID HARSH", "MATERIAL"],
+  },
+  {
+    id: "store-handle",
+    icon: educationPageImages.careIconStore,
+    labelLines: ["STORE AND", "HANDLE WITH CARE"],
+  },
+];
+
+/** Figma nodes 692:29130 (SHAPE) · 692:29133 (FANCY COLOUR) · 692:29134 (ANATOMY) · 692:29135 (CARE) · 692:28766 (mobile) */
 export const educationLearnTabs: EducationLearnTab[] = [
   {
     id: "shape",
     label: "SHAPE",
+    layout: "carousel",
     description: [
       "Shape and cut are not the same. Shape refers to the diamond’s form.",
       "At Sunny, it is a reflection of personality, presence, and poetic symmetry.",
@@ -636,6 +772,7 @@ export const educationLearnTabs: EducationLearnTab[] = [
   {
     id: "fancy-colour",
     label: "FANCY COLOUR",
+    layout: "carousel",
     description: [
       "Fancy colour diamonds express rarity through hue, tone, and saturation.",
       "Each stone carries a distinct character beyond traditional colourless grading.",
@@ -643,40 +780,28 @@ export const educationLearnTabs: EducationLearnTab[] = [
     ctaLabel: "SHOP FANCY COLOUR DIAMONDS",
     ctaHref: "/products",
     slides: [
-      { src: educationPageImages.shapeLeft, alt: "Fancy colour diamond" },
-      { src: educationPageImages.shapeCenter, alt: "Fancy colour diamond detail" },
-      { src: educationPageImages.shapeRight, alt: "Fancy colour diamond ring" },
+      { src: educationPageImages.fancyColourLeft, alt: "Fancy pink round diamond" },
+      { src: educationPageImages.fancyColourCenter, alt: "Fancy yellow cushion diamond" },
+      { src: educationPageImages.fancyColourRight, alt: "Fancy orange pear diamond" },
     ],
   },
   {
     id: "diamond-anatomy",
     label: "DIAMOND ANATOMY",
+    layout: "anatomy-detail",
     description: [
-      "Understanding table, crown, girdle, and pavilion helps you read a diamond’s proportions.",
-      "Each facet plays a role in how light travels through the stone.",
+      "Assessing the major components of a diamond, as well as its ability to interact with light to grade the diamond's excellence.",
     ],
-    ctaLabel: "EXPLORE DIAMOND ANATOMY",
-    ctaHref: "/products",
-    slides: [
-      { src: educationPageImages.shapeLeft, alt: "Diamond anatomy side view" },
-      { src: educationPageImages.shapeCenter, alt: "Diamond anatomy diagram" },
-      { src: educationPageImages.shapeRight, alt: "Diamond anatomy top view" },
-    ],
+    anatomyDetail: educationDiamondAnatomyDetail,
   },
   {
     id: "diamond-care",
     label: "DIAMOND CARE",
+    layout: "care-grid",
     description: [
-      "Proper care preserves brilliance and protects settings over time.",
-      "Simple routines keep your diamonds luminous for generations.",
+      "Assessing the major components of a diamond, as well as its ability to interact with light to grade the diamond's excellence.",
     ],
-    ctaLabel: "VIEW DIAMOND CARE GUIDE",
-    ctaHref: "/products",
-    slides: [
-      { src: educationPageImages.shapeLeft, alt: "Diamond care" },
-      { src: educationPageImages.shapeCenter, alt: "Cleaning diamond jewellery" },
-      { src: educationPageImages.shapeRight, alt: "Storing diamond jewellery" },
-    ],
+    careTips: educationDiamondCareTips,
   },
 ];
 

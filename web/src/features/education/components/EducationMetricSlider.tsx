@@ -31,7 +31,7 @@ const MOBILE_THUMB_SIZE = 14;
 const labelFontProps = (useMobileLayout: boolean, mobileFontSize?: number) =>
   useMobileLayout
     ? { className: undefined as string | undefined, style: { fontSize: mobileFontSize ?? 12 } }
-    : { className: "text-[16px]", style: undefined as CSSProperties | undefined };
+    : { className: "text-base", style: undefined as CSSProperties | undefined };
 
 const TRACK_DOT_GAP = 10;
 
@@ -131,7 +131,7 @@ const SliderLabel = ({
     return (
       <span
         className={cn(
-          "pointer-events-none absolute whitespace-nowrap font-gill text-[16px] font-normal leading-110 transition-colors",
+          "pointer-events-none absolute whitespace-nowrap font-gill text-base font-normal leading-110 transition-colors",
           colorClass,
         )}
         style={{
@@ -147,7 +147,7 @@ const SliderLabel = ({
   return (
     <span
       className={cn(
-        "pointer-events-none absolute whitespace-nowrap font-gill text-[16px] font-normal leading-110 transition-colors",
+        "pointer-events-none absolute whitespace-nowrap font-gill text-base font-normal leading-110 transition-colors",
         colorClass,
       )}
       style={{

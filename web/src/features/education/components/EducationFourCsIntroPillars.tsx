@@ -65,7 +65,7 @@ const EducationFourCsIntroPillars = ({ pillars }: EducationFourCsIntroPillarsPro
 
             {!isLast ? (
               <Image
-                src="/images/education/scroll-arrow.svg"
+                src="/images/education/scroll-arrow-black.svg"
                 alt="Scroll arrow"
                 width={24}
                 height={23}

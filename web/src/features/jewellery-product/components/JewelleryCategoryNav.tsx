@@ -21,9 +21,9 @@ const JewelleryCategoryNav = ({ activeCategory, onCategoryChange }: JewelleryCat
         <ul
           className={cn(
             "flex w-max items-center",
-            "gap-[12px] px-[16px] py-[24px]",
-            "md:w-full md:max-w-full md:justify-between md:gap-0 md:px-8 md:py-8",
-            "lg:justify-center lg:gap-[32px] lg:p-[40px]",
+            "px-4",
+            "md:w-full md:max-w-full md:justify-between",
+            "lg:justify-center lg:gap-8 md:gap-6 gap-3 lg:py-[40px] md:py-8 py-6",
           )}
         >
           {jewelleryCategories.map((category) => {
@@ -40,7 +40,7 @@ const JewelleryCategoryNav = ({ activeCategory, onCategoryChange }: JewelleryCat
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2",
                   )}
                 >
-                  <span className="flex size-6 shrink-0 items-center justify-center overflow-hidden md:size-40">
+                  <span className="flex size-6 shrink-0 items-center justify-center overflow-hidden lg:size-40">
                     <Image
                       src={categoryIconSrc[category.slug]}
                       alt=""
@@ -52,8 +52,8 @@ const JewelleryCategoryNav = ({ activeCategory, onCategoryChange }: JewelleryCat
                   </span>
                   <span
                     className={cn(
-                      "whitespace-nowrap font-gill text-[14px] leading-110 lg:text-[16px]",
-                      isActive ? "font-semibold text-[#4D4D4D] lg:text-darkblack" : "font-normal text-neutral400",
+                      "whitespace-nowrap font-gill text-sm leading-110 lg:text-base",
+                      isActive ? "font-semibold text-neutral500 lg:text-darkblack" : "font-normal text-gray600",
                     )}
                   >
                     {category.label}

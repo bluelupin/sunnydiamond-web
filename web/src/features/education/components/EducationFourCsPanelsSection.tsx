@@ -162,7 +162,7 @@ const PanelMedia = ({
 
         {panel.footnote &&
           <ScrollReveal delayMs={300} className="mt-10 flex w-full max-w-full flex-col items-center gap-6 max-md:mt-10 max-md:max-w-[317px] max-md:gap-6 lg:mt-[64px] lg:gap-[24px]">
-            <p className="text-center font-gill text-[14px] font-light leading-110 text-neutral500 lg:text-[16px] lg:text-[#4D4D4D]">
+            <p className="text-center font-gill text-[14px] font-light leading-110 text-neutral500 lg:text-base lg:text-[#4D4D4D]">
               {panel.footnote}
             </p>
             <Image
@@ -185,7 +185,7 @@ const PanelCopy = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent;
       className={cn(
         "flex w-full shrink-0 flex-col items-center justify-center text-center",
         "min-h-[355px] max-md:px-5 max-md:pt-10 max-md:pb-6",
-        "lg:h-full lg:gap-[32px] gap-6 lg:px-10 lg:py-0",
+        "lg:h-full lg:gap-8 gap-6 lg:px-10 lg:py-0",
       )}
     >
       <Reveal as="p" direction="up" className="font-larken text-[60px] font-light leading-110 text-linkGold opacity-50 lg:text-[110px]">
@@ -198,7 +198,7 @@ const PanelCopy = ({ panel, delayMs = 0 }: { panel: EducationFourCsPanelContent;
         >
           {panel.title}
         </Reveal>
-        <Reveal as="p" direction="up" className="font-gill text-[16px] font-light leading-110 text-darkblack lg:text-xl">
+        <Reveal as="p" direction="up" className="font-gill text-base font-light leading-110 text-darkblack lg:text-xl">
           {panel.description}
         </Reveal>
       </div>

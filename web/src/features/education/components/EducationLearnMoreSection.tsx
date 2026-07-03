@@ -6,17 +6,26 @@ import Link from "next/link";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { cn } from "@/shared/utils/cn";
 import {
+  educationLearnMoreContent,
   educationLearnMoreSpec,
   educationLearnTabs,
   educationPageImages,
-  educationSectionTitleSpacingClassName,
+  type EducationLearnCareTip,
+  type EducationLearnAnatomyDetail,
+  type EducationLearnTab,
 } from "../data/content";
-import Reveal from "@/shared/Animation/Reveal";
 
 type CarouselSlot = keyof typeof educationLearnMoreSpec.carousel.slots;
 
-const slotSpecs = educationLearnMoreSpec.carousel.slots;
-const mobileCarousel = educationLearnMoreSpec.carousel.mobile;
+const spec = educationLearnMoreSpec;
+const headerSpec = spec.header;
+const tabsSpec = spec.tabs;
+const slotSpecs = spec.carousel.slots;
+const mobileCarousel = spec.carousel.mobile;
+const desktopCarousel = spec.carousel.desktop;
+const ctaSpec = spec.cta;
+const careSpec = spec.careGrid;
+const anatomySpec = spec.anatomyDetail;
 
 const LearnCarouselImage = ({
   src,
@@ -29,31 +38,31 @@ const LearnCarouselImage = ({
   slot: CarouselSlot;
   sizes: string;
 }) => {
-  const spec = slotSpecs[slot];
+  const slotSpec = slotSpecs[slot];
 
   const image = (
     <div
       className="relative overflow-hidden mix-blend-darken"
-      style={{ width: spec.width, height: spec.height }}
+      style={{ width: slotSpec.width, height: slotSpec.height }}
     >
       <Image
         src={src}
         alt={alt}
-        width={spec.width}
-        height={spec.height}
+        width={slotSpec.width}
+        height={slotSpec.height}
         className="absolute max-w-none object-cover"
         sizes={sizes}
         style={{
-          height: spec.cropHeight,
-          width: spec.cropWidth,
-          left: spec.cropLeft,
-          top: spec.cropTop,
+          height: slotSpec.cropHeight,
+          width: slotSpec.cropWidth,
+          left: slotSpec.cropLeft,
+          top: slotSpec.cropTop,
         }}
       />
     </div>
   );
 
-  if (spec.flip) {
+  if (slotSpec.flip) {
     return <div className="-scale-y-100 rotate-180">{image}</div>;
   }
 
@@ -82,8 +91,8 @@ const LearnNavArrow = ({
           : educationPageImages.learnArrowRightMobile
       }
       alt=""
-      width={19}
-      height={18}
+      width={spec.carousel.navIconWidth}
+      height={spec.carousel.navIconWidth}
       aria-hidden
       className="h-6 w-auto md:hidden"
     />
@@ -94,26 +103,275 @@ const LearnNavArrow = ({
           : educationPageImages.learnArrowRight
       }
       alt=""
-      width={19}
-      height={18}
+      width={spec.carousel.navIconWidth}
+      height={spec.carousel.navIconWidth}
       aria-hidden
       className="hidden h-6 w-auto md:block"
     />
   </button>
 );
 
+const LearnTabDescription = ({ tab }: { tab: EducationLearnTab }) => {
+  const isSingleParagraph =
+    tab.layout === "care-grid" || tab.layout === "anatomy-detail" || tab.description.length === 1;
+
+  return (
+    <ScrollReveal
+      key={tab.id}
+      delayMs={180}
+      className="max-w-[700px] text-center font-gill font-light leading-110 max-md:text-base max-md:text-darkblack md:text-xl md:text-neutral500"
+    >
+      {isSingleParagraph ? (
+        <p>{tab.description.join(" ")}</p>
+      ) : (
+        <>
+          <p className="md:hidden">{tab.description.join(" ")}</p>
+          <div className="hidden md:block">
+            {tab.description.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+          </div>
+        </>
+      )}
+    </ScrollReveal>
+  );
+};
+
+const LearnCareTip = ({ tip }: { tip: EducationLearnCareTip }) => (
+  <div className="flex flex-col items-center text-center">
+    <div
+      className="relative mb-4 shrink-0 size-16 md:mb-6 md:size-20"
+    >
+      <Image src={tip.icon} alt="" fill className="object-contain" aria-hidden />
+    </div>
+    <p className="font-gill text-xs font-light uppercase leading-110 text-neutral500 md:text-sm">
+      {tip.labelLines.map((line) => (
+        <span key={line} className="block">
+          {line}
+        </span>
+      ))}
+    </p>
+  </div>
+);
+
+const LearnCareTipsGrid = ({ tips }: { tips: EducationLearnCareTip[] }) => {
+  const topRow = tips.slice(0, 3);
+  const bottomRow = tips.slice(3);
+
+  return (
+    <ScrollReveal delayMs={260} className="flex w-full flex-col items-center">
+      <div
+        className="grid w-full grid-cols-1 place-items-center max-md:gap-8 md:grid-cols-3"
+        style={{
+          maxWidth: careSpec.desktop.maxWidth,
+          columnGap: careSpec.desktop.columnGap,
+          rowGap: careSpec.desktop.rowGap,
+        }}
+      >
+        {topRow.map((tip) => (
+          <LearnCareTip key={tip.id} tip={tip} />
+        ))}
+      </div>
+
+      <div
+        className="mt-8 grid w-full grid-cols-1 place-items-center max-md:gap-8 md:mt-14 md:grid-cols-2"
+        style={{
+          maxWidth: careSpec.desktop.bottomRowMaxWidth,
+          columnGap: careSpec.desktop.columnGap,
+          rowGap: careSpec.desktop.rowGap,
+        }}
+      >
+        {bottomRow.map((tip) => (
+          <LearnCareTip key={tip.id} tip={tip} />
+        ))}
+      </div>
+    </ScrollReveal>
+  );
+};
+
+const LearnAnatomyDetailPanel = ({ detail }: { detail: EducationLearnAnatomyDetail }) => (
+  <ScrollReveal delayMs={260} className="w-full">
+    <div className="mx-auto flex w-full max-w-[1200px] flex-col items-center gap-8 md:flex-row md:items-start md:gap-[120px]">
+      <div className="relative mx-auto h-[240px] w-[280px] shrink-0 mix-blend-darken md:h-[300px] md:w-[350px]">
+        <Image
+          src={detail.image}
+          alt={detail.imageAlt}
+          fill
+          className="object-contain"
+          sizes="(max-width: 768px) 280px, 350px"
+        />
+      </div>
+
+      <div className="flex w-full max-w-[520px] flex-col md:pt-2">
+        <h3 className="font-larken text-2xl font-light leading-110 text-darkblack md:text-[32px]">
+          {detail.title}
+        </h3>
+        <div
+          className="my-4 h-px w-full"
+          style={{ backgroundColor: anatomySpec.desktop.dividerColor }}
+        />
+
+        <ul className="flex flex-col gap-5 md:gap-6">
+          {detail.traits.map((trait) => (
+            <li key={trait.id} className="flex gap-3">
+              <Image
+                src={educationPageImages.anatomySparkle}
+                alt=""
+                width={16}
+                height={16}
+                aria-hidden
+                className="mt-1 size-4 shrink-0"
+              />
+              <p className="font-gill text-base font-light leading-130 text-neutral500 md:text-xl md:leading-110">
+                <span className="font-normal text-darkblack">{trait.term}:</span> {trait.definition}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </ScrollReveal>
+);
+
+const LearnCarouselPanel = ({
+  tab,
+  slides,
+  activeSlideIndex,
+  onPrev,
+  onNext,
+}: {
+  tab: EducationLearnTab;
+  slides: NonNullable<EducationLearnTab["slides"]>;
+  activeSlideIndex: number;
+  onPrev: () => void;
+  onNext: () => void;
+}) => {
+  const prevSlide = slides[(activeSlideIndex + slides.length - 1) % slides.length];
+  const currentSlide = slides[activeSlideIndex];
+  const nextSlide = slides[(activeSlideIndex + 1) % slides.length];
+
+  return (
+    <ScrollReveal delayMs={260} className="flex w-full flex-col items-center">
+      <div
+        className="relative flex w-full items-start justify-center"
+        style={{ gap: desktopCarousel.columnGap }}
+      >
+        <div className="hidden shrink-0 md:block">
+          <LearnCarouselImage
+            src={prevSlide.src}
+            alt=""
+            slot="left"
+            sizes={`${slotSpecs.left.width}px`}
+          />
+        </div>
+
+        <div
+          className="relative flex w-full flex-col items-center max-md:justify-between md:justify-start"
+          style={{
+            maxWidth: desktopCarousel.centerColumnWidth,
+            gap: desktopCarousel.centerButtonGap,
+            minHeight: mobileCarousel.height,
+          }}
+        >
+          <div className="relative mx-auto md:hidden">
+            <LearnCarouselImage
+              key={`${tab.id}-${activeSlideIndex}`}
+              src={currentSlide.src}
+              alt={currentSlide.alt}
+              slot="center"
+              sizes={`${Math.round(mobileCarousel.imageWidth)}px`}
+            />
+          </div>
+
+          <div
+            className="pointer-events-none absolute flex items-center justify-between md:hidden"
+            style={{
+              top: mobileCarousel.arrowTop,
+              left: mobileCarousel.arrowLeft,
+              width: mobileCarousel.arrowRowWidth,
+            }}
+          >
+            <LearnNavArrow
+              direction="left"
+              onClick={onPrev}
+              className="pointer-events-auto flex size-6 shrink-0 items-center justify-center text-darkblack"
+            />
+            <LearnNavArrow
+              direction="right"
+              onClick={onNext}
+              className="pointer-events-auto flex size-6 shrink-0 items-center justify-center text-darkblack"
+            />
+          </div>
+
+          <div
+            className="relative hidden w-full items-center justify-center md:flex"
+            style={{ gap: desktopCarousel.centerControlsGap }}
+          >
+            <LearnNavArrow
+              direction="left"
+              onClick={onPrev}
+              className="flex size-6 shrink-0 items-center justify-center text-darkblack"
+            />
+            <LearnCarouselImage
+              src={currentSlide.src}
+              alt={currentSlide.alt}
+              slot="center"
+              sizes={`${slotSpecs.center.width}px`}
+            />
+            <LearnNavArrow
+              direction="right"
+              onClick={onNext}
+              className="flex size-6 shrink-0 items-center justify-center text-darkblack"
+            />
+          </div>
+
+          {tab.ctaLabel && tab.ctaHref ? (
+            <Link
+              href={tab.ctaHref}
+              className="btn-border-slide inline-flex items-center justify-center border border-neutral300 font-gill font-normal uppercase leading-110 text-darkblack"
+              style={{
+                height: ctaSpec.height,
+                paddingInline: ctaSpec.paddingX,
+                paddingBlock: ctaSpec.paddingY,
+                fontSize: ctaSpec.fontSize,
+                borderWidth: ctaSpec.borderWidth,
+              }}
+            >
+              {tab.ctaLabel}
+            </Link>
+          ) : null}
+        </div>
+
+        <div className="hidden shrink-0 md:block">
+          <LearnCarouselImage
+            src={nextSlide.src}
+            alt=""
+            slot="right"
+            sizes={`${slotSpecs.right.width}px`}
+          />
+        </div>
+      </div>
+    </ScrollReveal>
+  );
+};
+
 const EducationLearnMoreSection = () => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [activeSlideIndex, setActiveSlideIndex] = useState(1);
 
   const activeTab = educationLearnTabs[activeTabIndex];
-  const slides = activeTab.slides;
+  const isCarousel = activeTab.layout === "carousel";
+  const isCareGrid = activeTab.layout === "care-grid";
+  const isAnatomyDetail = activeTab.layout === "anatomy-detail";
+  const slides = activeTab.slides ?? [];
 
   const goToPrevSlide = () => {
+    if (!slides.length) return;
     setActiveSlideIndex((current) => (current === 0 ? slides.length - 1 : current - 1));
   };
 
   const goToNextSlide = () => {
+    if (!slides.length) return;
     setActiveSlideIndex((current) => (current === slides.length - 1 ? 0 : current + 1));
   };
 
@@ -122,31 +380,38 @@ const EducationLearnMoreSection = () => {
     setActiveSlideIndex(1);
   };
 
-  const prevSlide = slides[(activeSlideIndex + slides.length - 1) % slides.length];
-  const currentSlide = slides[activeSlideIndex];
-  const nextSlide = slides[(activeSlideIndex + 1) % slides.length];
-
   return (
     <section
       aria-labelledby="education-learn-more-title"
       className={cn(
-        "bg-white px-4 py-16 max-md:h-[681px] md:px-8 lg:px-10 lg:py-25",
+        "bg-white px-4 py-16 md:px-10 md:py-[104px]",
+        isCarousel && "max-md:h-[681px]",
       )}
     >
-      <div className="mx-auto flex max-w-[1360px] flex-col items-center lg:gap-16 md:gap-12 sm:gap-[40px] gap-6">
+      <div
+        className="mx-auto flex max-w-[1360px] flex-col items-center max-md:gap-6 md:gap-16"
+      >
         <div className="flex w-full flex-col items-center">
-          <Reveal as="h2" direction="up"
-            id="education-learn-more-title"
-            className="lg:mb-[40px] mb-8 text-center font-larken font-light leading-110 text-darkblack lg:text-5xl md:text-4xl sm:text-3xl text-32"
-          >
-            Learn more about Diamonds
-          </Reveal>
+          <ScrollReveal delayMs={0}>
+            <h2
+              id="education-learn-more-title"
+              className="mb-8 text-center font-larken text-32 font-light leading-110 text-darkblack md:mb-[40px] md:text-5xl"
+            >
+              {educationLearnMoreContent.title}
+            </h2>
+          </ScrollReveal>
+
           <ScrollReveal delayMs={100} className="w-full lg:max-w-[1200px]">
             <div className="w-full overflow-x-auto border-y-[0.4px] border-black/30 md:overflow-visible horizontalScrollbar">
               <div
-                className="flex h-[75px] min-w-max items-center max-md:gap-40 max-md:py-6 md:h-auto md:w-full md:min-w-0 md:gap-0 md:py-6 lg:gap-0 lg:py-6"
+                className="flex min-w-max items-center md:w-full md:min-w-0"
                 role="tablist"
                 aria-label="Learn more topics"
+                style={{
+                  height: tabsSpec.mobile.height,
+                  gap: tabsSpec.mobile.gap,
+                  paddingBlock: tabsSpec.desktop.paddingY,
+                }}
               >
                 {educationLearnTabs.map((tab, index) => {
                   const isActive = index === activeTabIndex;
@@ -154,18 +419,23 @@ const EducationLearnMoreSection = () => {
                   return (
                     <div
                       key={tab.id}
-                      className="flex shrink-0 flex-col items-center lg:flex-1"
+                      className="flex shrink-0 flex-col items-center md:flex-1"
                       role="presentation"
                     >
                       <button
                         type="button"
+                        id={`learn-tab-${tab.id}`}
                         role="tab"
                         aria-selected={isActive}
+                        aria-controls={`learn-tabpanel-${tab.id}`}
+                        tabIndex={isActive ? 0 : -1}
                         onClick={() => handleTabChange(index)}
-                        className={cn(`relative shrink-0 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-linkGold after:transition-all after:duration-300 cursor-pointer pb-1 font-gill md:text-base lg:text-xl font-normal uppercase leading-110 text-darkblack hover:border-linkGold hover:text-linkGold sm:pb-1 hover:after:w-full`,
+                        className={cn(
+                          "!w-fit relative shrink-0 cursor-pointer whitespace-nowrap font-gill text-base font-normal uppercase leading-110 transition-colors md:flex md:items-center md:justify-center md:py-0 md:text-center lg:text-xl",
+                          "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-linkGold after:transition-all after:duration-300 hover:text-linkGold hover:after:w-full",
                           isActive
-                            ? "border-b-[1.5px] border-linkGold text-linkGold"
-                            : "text-darkblack hover:text-linkGold",
+                            ? "border-b-[1.5px] border-linkGold pb-2 text-linkGold"
+                            : "pb-1 text-darkblack",
                         )}
                       >
                         {tab.label}
@@ -178,89 +448,35 @@ const EducationLearnMoreSection = () => {
           </ScrollReveal>
         </div>
 
-        <div className="flex w-full flex-col items-center gap-12 lg:gap-16">
-          <Reveal as="p" direction="up" className="max-w-[700px] text-center font-gill text-base font-light leading-110 text-darkblack lg:text-xl lg:text-neutral500">
-            Shape and cut are not the same. Shape refers to the diamond’s form. At Sunny, it is a reflection of personality, presence, and poetic symmetry.
-          </Reveal>
-          <ScrollReveal delayMs={260} className="flex w-full flex-col items-center">
-            <div className="relative flex w-full items-start justify-center lg:gap-[250px]">
-              <div className="hidden shrink-0 md:block">
-                <LearnCarouselImage
-                  src={prevSlide.src}
-                  alt=""
-                  slot="left"
-                  sizes={`${slotSpecs.left.width}px`}
-                />
-              </div>
+        <div
+          key={activeTab.id}
+          role="tabpanel"
+          id={`learn-tabpanel-${activeTab.id}`}
+          aria-labelledby={`learn-tab-${activeTab.id}`}
+          className="flex w-full flex-col items-center max-md:gap-[49px] md:gap-16"
+          style={{
+            gap: isCareGrid
+              ? careSpec.mobile.descriptionGap
+              : isAnatomyDetail
+                ? anatomySpec.mobile.columnGap
+                : headerSpec.mobile.descriptionCarouselGap,
+          }}
+        >
+          <LearnTabDescription tab={activeTab} />
 
-              <div className="relative flex w-full flex-col items-center justify-between max-md:h-[252px] md:w-full md:justify-start md:gap-3 lg:w-[526px] lg:gap-3">
-                <div className="relative mx-auto h-[172px] w-[196px] mix-blend-darken md:hidden">
-                  <Image
-                    src={currentSlide.src}
-                    alt={currentSlide.alt}
-                    fill
-                    className="object-cover"
-                    sizes="196px"
-                  />
-                </div>
-
-                <div
-                  className="pointer-events-none absolute flex items-center justify-between md:hidden"
-                  style={{
-                    top: mobileCarousel.arrowTop,
-                    left: mobileCarousel.arrowLeft,
-                    width: mobileCarousel.arrowRowWidth,
-                  }}
-                >
-                  <LearnNavArrow
-                    direction="left"
-                    onClick={goToPrevSlide}
-                    className="pointer-events-auto flex size-6 shrink-0 items-center justify-center text-darkblack"
-                  />
-                  <LearnNavArrow
-                    direction="right"
-                    onClick={goToNextSlide}
-                    className="pointer-events-auto flex size-6 shrink-0 items-center justify-center text-darkblack"
-                  />
-                </div>
-
-                <div className="relative hidden w-full items-center justify-center gap-16 md:flex">
-                  <LearnNavArrow
-                    direction="left"
-                    onClick={goToPrevSlide}
-                    className="flex size-6 shrink-0 items-center justify-center text-darkblack"
-                  />
-                  <LearnCarouselImage
-                    src={currentSlide.src}
-                    alt={currentSlide.alt}
-                    slot="center"
-                    sizes={`${slotSpecs.center.width}px`}
-                  />
-                  <LearnNavArrow
-                    direction="right"
-                    onClick={goToNextSlide}
-                    className="flex size-6 shrink-0 items-center justify-center text-darkblack"
-                  />
-                </div>
-
-                <Link
-                  href={activeTab.ctaHref}
-                  className="btn-border-slide inline-flex h-14 items-center justify-center border-[0.8px] border-neutral300 px-7 py-5 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
-                >
-                  {activeTab.ctaLabel}
-                </Link>
-              </div>
-
-              <div className="hidden shrink-0 md:block">
-                <LearnCarouselImage
-                  src={nextSlide.src}
-                  alt=""
-                  slot="right"
-                  sizes={`${slotSpecs.right.width}px`}
-                />
-              </div>
-            </div>
-          </ScrollReveal>
+          {isCareGrid && activeTab.careTips ? (
+            <LearnCareTipsGrid tips={activeTab.careTips} />
+          ) : isAnatomyDetail && activeTab.anatomyDetail ? (
+            <LearnAnatomyDetailPanel detail={activeTab.anatomyDetail} />
+          ) : (
+            <LearnCarouselPanel
+              tab={activeTab}
+              slides={slides}
+              activeSlideIndex={activeSlideIndex}
+              onPrev={goToPrevSlide}
+              onNext={goToNextSlide}
+            />
+          )}
         </div>
       </div>
     </section>

@@ -53,7 +53,7 @@ const FilterChip = ({
     aria-pressed={selected}
     onClick={onClick}
     className={cn(
-      "flex h-[56px] items-center justify-center bg-[#F2F2F2] px-[24px] py-[12px] font-gill text-[16px] leading-110 text-darkblack",
+      "flex h-[56px] items-center justify-center bg-[#F2F2F2] px-[24px] py-[12px] font-gill text-base leading-110 text-darkblack",
       showCheck && selected && "gap-[4px]",
     )}
   >
@@ -307,7 +307,7 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
         <div className="filter-drawer-scroll flex min-h-0 flex-1 flex-col overflow-y-auto px-[24px] pt-[22px]">
           <div className="mx-auto flex w-full max-w-[424px] flex-col gap-[24px] pb-72">
             <section className="flex flex-col gap-[16px]">
-              <h3 className="font-gill text-[16px] font-normal leading-110 text-darkblack">
+              <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
                 By Price Range
               </h3>
               <div className="flex flex-col gap-[12px]">
@@ -412,7 +412,7 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
             </section>
 
             <section className="flex flex-col gap-[16px]">
-              <h3 className="font-gill text-[16px] font-normal leading-110 text-darkblack">
+              <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
                 By Categories:
               </h3>
               <div className="flex flex-col gap-[12px]">
@@ -433,7 +433,7 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
             </section>
 
             <section className="flex flex-col gap-[16px]">
-              <h3 className="font-gill text-[16px] font-normal leading-110 text-darkblack">
+              <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
                 Metal Type:
               </h3>
               <div className="flex flex-wrap gap-[7px]">
@@ -449,7 +449,7 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
             </section>
 
             <section className="flex flex-col gap-[16px]">
-              <h3 className="font-gill text-[16px] font-normal leading-110 text-darkblack">
+              <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
                 Metal Purity:
               </h3>
               <div className="flex flex-wrap gap-[7px]">

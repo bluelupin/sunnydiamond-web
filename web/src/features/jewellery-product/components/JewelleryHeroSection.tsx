@@ -23,7 +23,8 @@ const JewelleryHeroSection = () => {
           className="object-cover object-[62%_38%] md:object-[58%_42%]"
         />
       </div>
-      <div className="col-start-1 row-start-1 size-full bg-black/40" aria-hidden />
+      {/* <div className="col-start-1 row-start-1 size-full bg-black/40" aria-hidden /> */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-darkblack/85 via-darkblack/35 to-transparent"></div>
       <h1
         id="jewellery-listing-hero-title"
         className="col-start-1 row-start-1 z-10 flex w-full max-w-440 justify-center self-start justify-self-center whitespace-nowrap pt-[152px] text-center font-larken text-32 font-light leading-110 text-white md:pt-[203px] md:text-5xl"

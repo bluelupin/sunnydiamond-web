@@ -1,7 +1,7 @@
 import type { JewelleryCategorySlug } from "../types";
 
 export const categoryIconSrc: Record<JewelleryCategorySlug, string> = {
-  all: "/images/products/categories/all.svg",
+  all: "/images/products/categories/all1.svg",
   rings: "/images/products/categories/rings.svg",
   earrings: "/images/products/categories/earrings.svg",
   necklace: "/images/products/categories/necklace.svg",
