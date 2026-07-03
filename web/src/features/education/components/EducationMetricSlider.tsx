@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
 import {
   educationPageImages,
+  buildSliderSpecForOptionCount,
   type EducationSliderOption,
   type EducationSliderSpec,
 } from "../data/content";
@@ -20,7 +21,12 @@ type EducationMetricSliderProps = {
 
 const toPercent = (value: number, width: number) => `${(value / width) * 100}%`;
 
-const mobileLabelAlignClass = (index: number, total: number) => {
+const dotPositionStyle = (center: number, specWidth: number, top: number): CSSProperties => ({
+  left: toPercent(center, specWidth),
+  top,
+});
+
+const endpointLabelAlignClass = (index: number, total: number) => {
   if (index === 0) return "-translate-x-0 text-left";
   if (index === total - 1) return "-translate-x-full text-right";
   return "-translate-x-1/2 text-center";
@@ -60,7 +66,6 @@ const buildTrackSegments = (
 const SliderLabel = ({
   option,
   isActive,
-  labelLeft,
   dotCenter,
   labelTop,
   specWidth,
@@ -71,7 +76,6 @@ const SliderLabel = ({
 }: {
   option: EducationSliderOption;
   isActive: boolean;
-  labelLeft: number;
   dotCenter: number;
   labelTop: number;
   specWidth: number;
@@ -90,7 +94,7 @@ const SliderLabel = ({
           className={cn(
             "pointer-events-none absolute font-gill font-normal leading-110 transition-colors",
             font.className,
-            mobileLabelAlignClass(index, total),
+            endpointLabelAlignClass(index, total),
             colorClass,
           )}
           style={{
@@ -113,7 +117,7 @@ const SliderLabel = ({
         className={cn(
           "pointer-events-none absolute font-gill font-normal leading-110 transition-colors",
           font.className,
-          mobileLabelAlignClass(index, total),
+          endpointLabelAlignClass(index, total),
           colorClass,
         )}
         style={{
@@ -131,13 +135,10 @@ const SliderLabel = ({
     return (
       <span
         className={cn(
-          "pointer-events-none absolute whitespace-nowrap font-gill text-base font-normal leading-110 transition-colors",
+          "pointer-events-none absolute -translate-x-1/2 whitespace-nowrap text-center font-gill text-base font-normal leading-110 transition-colors",
           colorClass,
         )}
-        style={{
-          left: toPercent(labelLeft, specWidth),
-          top: labelTop,
-        }}
+        style={dotPositionStyle(dotCenter, specWidth, labelTop)}
       >
         {option.label}
       </span>
@@ -147,13 +148,10 @@ const SliderLabel = ({
   return (
     <span
       className={cn(
-        "pointer-events-none absolute whitespace-nowrap font-gill text-base font-normal leading-110 transition-colors",
+        "pointer-events-none absolute -translate-x-1/2 whitespace-nowrap text-center font-gill text-base font-normal leading-110 transition-colors",
         colorClass,
       )}
-      style={{
-        left: toPercent(labelLeft, specWidth),
-        top: labelTop,
-      }}
+      style={dotPositionStyle(dotCenter, specWidth, labelTop)}
     >
       {option.label}
     </span>
@@ -181,37 +179,43 @@ const EducationMetricSlider = ({
   }, []);
 
   const activeIndex = controlledIndex ?? internalIndex;
+  const dotCenters = useMemo(() => {
+    if (spec.dotCenters.length === options.length) {
+      return spec.dotCenters;
+    }
+
+    return buildSliderSpecForOptionCount(spec, options.length).dotCenters;
+  }, [options.length, spec]);
   const sliderHeight =
     useMobileLayout && spec.mobileHeight ? spec.mobileHeight : spec.height;
   const sliderMaxWidth =
     useMobileLayout && spec.mobileWidth ? spec.mobileWidth : spec.width;
   const thumbSize = useMobileLayout ? MOBILE_THUMB_SIZE : spec.thumbSize;
   const maxIndex = Math.max(options.length - 1, 0);
-  const thumbHalf = thumbSize / 2;
   const labelFont = labelFontProps(useMobileLayout, spec.mobileLabelFontSize);
-  const activeDotCenter = spec.dotCenters[activeIndex] ?? spec.dotCenters[0];
-  const activeThumbLeft = activeDotCenter - thumbHalf;
+  const activeDotCenter = dotCenters[activeIndex] ?? dotCenters[0];
   const hasSublabels = Boolean(spec.sublabelTop);
-  const showActiveLabelOnly = spec.labelDisplay === "active";
+  const showActiveLabelOnly =
+    spec.labelDisplay === "active" || (useMobileLayout && options.length >= 7);
   const showEndpointLabels = spec.labelDisplay === "endpoints";
   const activeOption = options[activeIndex];
   const showDots = spec.showDots !== false;
   const endpointDotsOnly = spec.endpointDotsOnly === true;
-  const lastDotIndex = spec.dotCenters.length - 1;
+  const lastDotIndex = dotCenters.length - 1;
   const trackDotGap = spec.trackDotGap ?? TRACK_DOT_GAP;
   const endpointTrackSegment =
-    endpointDotsOnly && showDots && spec.dotCenters.length >= 2
+    endpointDotsOnly && showDots && dotCenters.length >= 2
       ? {
           left: spec.trackLeft,
           width: Math.max(
-            spec.dotCenters[lastDotIndex] - trackDotGap - spec.trackLeft,
+            dotCenters[lastDotIndex]! - trackDotGap - spec.trackLeft,
             0,
           ),
         }
       : null;
   const trackSegments = showDots && !endpointDotsOnly
     ? buildTrackSegments(
-        spec.dotCenters,
+        dotCenters,
         spec.trackLeft,
         spec.trackWidth,
         spec.trackDotGap ?? TRACK_DOT_GAP,
@@ -254,7 +258,7 @@ const EducationMetricSlider = ({
       let nearestIndex = 0;
       let nearestDistance = Number.POSITIVE_INFINITY;
 
-      spec.dotCenters.forEach((center, index) => {
+      dotCenters.forEach((center, index) => {
         if (index > maxIndex) return;
 
         const distance = Math.abs(center - specX);
@@ -266,7 +270,7 @@ const EducationMetricSlider = ({
 
       return nearestIndex;
     },
-    [activeIndex, maxIndex, spec.dotCenters, spec.width],
+    [activeIndex, maxIndex, dotCenters, spec.width],
   );
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -290,7 +294,7 @@ const EducationMetricSlider = ({
     <div
       ref={sliderRef}
       className={cn("relative z-20 mx-auto w-full max-w-full cursor-pointer touch-none", className)}
-      style={{ maxWidth: sliderMaxWidth, height: sliderHeight }}
+      style={{ width: "100%", maxWidth: sliderMaxWidth, height: sliderHeight }}
       role="group"
       aria-label={spec.ariaLabel}
       onPointerDown={handlePointerDown}
@@ -313,7 +317,7 @@ const EducationMetricSlider = ({
         : renderTrackSegment(spec.trackLeft, spec.trackWidth, "continuous-track")}
 
       {showDots
-        ? spec.dotCenters.map((dotCenter, index) => {
+        ? dotCenters.map((dotCenter, index) => {
             if (endpointDotsOnly && index !== 0 && index !== lastDotIndex) {
               return null;
             }
@@ -333,8 +337,12 @@ const EducationMetricSlider = ({
         : null}
 
       <div
-        className="pointer-events-none absolute top-0 z-10 transition-[left] duration-200 ease-out"
-        style={{ left: toPercent(activeThumbLeft, spec.width) }}
+        className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-1/2 transition-[left] duration-200 ease-out"
+        style={dotPositionStyle(
+          activeDotCenter,
+          spec.width,
+          spec.trackTop + spec.trackHeight / 2,
+        )}
         aria-hidden
       >
         <Image
@@ -347,7 +355,7 @@ const EducationMetricSlider = ({
       </div>
 
       {options.map((option, index) => {
-        const dotCenter = spec.dotCenters[index] ?? spec.dotCenters[0];
+        const dotCenter = dotCenters[index] ?? dotCenters[0];
 
         return (
           <button
@@ -356,11 +364,12 @@ const EducationMetricSlider = ({
             aria-label={`Select ${option.label}`}
             aria-pressed={index === activeIndex}
             onClick={() => setActiveIndex(index)}
-            className="absolute top-0 z-30 -translate-x-1/2 cursor-pointer p-0"
+            className="absolute z-30 -translate-x-1/2 -translate-y-1/2 cursor-pointer p-0"
             style={{
               left: toPercent(dotCenter, spec.width),
+              top: spec.trackTop + spec.trackHeight / 2,
               width: 44,
-              height: sliderHeight,
+              height: 44,
             }}
           />
         );
@@ -373,13 +382,11 @@ const EducationMetricSlider = ({
               className={cn(
                 "pointer-events-none absolute whitespace-nowrap font-gill font-normal leading-110 transition-colors",
                 labelFont.className,
-                useMobileLayout
-                  ? mobileLabelAlignClass(0, options.length)
-                  : "-translate-x-1/2",
+                endpointLabelAlignClass(0, options.length),
                 activeIndex === 0 ? "text-linkGold" : "text-darkblack",
               )}
               style={{
-                left: toPercent(spec.dotCenters[0], spec.width),
+                left: toPercent(dotCenters[0]!, spec.width),
                 top: spec.labelTop,
                 ...labelFont.style,
               }}
@@ -392,13 +399,11 @@ const EducationMetricSlider = ({
               className={cn(
                 "pointer-events-none absolute whitespace-nowrap font-gill font-normal leading-110 transition-colors",
                 labelFont.className,
-                useMobileLayout
-                  ? mobileLabelAlignClass(lastDotIndex, options.length)
-                  : "-translate-x-1/2",
+                endpointLabelAlignClass(lastDotIndex, options.length),
                 activeIndex === lastDotIndex ? "text-linkGold" : "text-darkblack",
               )}
               style={{
-                left: toPercent(spec.dotCenters[lastDotIndex], spec.width),
+                left: toPercent(dotCenters[lastDotIndex]!, spec.width),
                 top: spec.labelTop,
                 ...labelFont.style,
               }}
@@ -411,9 +416,7 @@ const EducationMetricSlider = ({
               className={cn(
                 "pointer-events-none absolute whitespace-nowrap font-gill font-normal leading-110 text-linkGold transition-[left] duration-200 ease-out",
                 labelFont.className,
-                useMobileLayout
-                  ? mobileLabelAlignClass(activeIndex, options.length)
-                  : "-translate-x-1/2",
+                endpointLabelAlignClass(activeIndex, options.length),
               )}
               style={{
                 left: toPercent(activeDotCenter, spec.width),
@@ -432,7 +435,7 @@ const EducationMetricSlider = ({
               "pointer-events-none absolute whitespace-nowrap font-gill font-normal leading-110 text-linkGold transition-[left] duration-200 ease-out",
               labelFont.className,
               useMobileLayout
-                ? mobileLabelAlignClass(activeIndex, options.length)
+                ? endpointLabelAlignClass(activeIndex, options.length)
                 : "-translate-x-1/2",
             )}
             style={{
@@ -446,8 +449,7 @@ const EducationMetricSlider = ({
         ) : null
       ) : (
         options.map((option, index) => {
-          const labelLeft = spec.labelLeft[index] ?? spec.labelLeft[0];
-          const dotCenter = spec.dotCenters[index] ?? spec.dotCenters[0];
+          const dotCenter = dotCenters[index] ?? dotCenters[0];
           const isActive = index === activeIndex;
 
           return (
@@ -455,7 +457,6 @@ const EducationMetricSlider = ({
               key={`${option.label}-label`}
               option={option}
               isActive={isActive}
-              labelLeft={labelLeft}
               dotCenter={dotCenter}
               labelTop={spec.labelTop}
               specWidth={spec.width}
@@ -471,7 +472,7 @@ const EducationMetricSlider = ({
       {hasSublabels
         ? options.map((option, index) => {
             const sublabelLeft = spec.sublabelLeft?.[index] ?? spec.sublabelLeft?.[0] ?? 0;
-            const dotCenter = spec.dotCenters[index] ?? spec.dotCenters[0];
+            const dotCenter = dotCenters[index] ?? dotCenters[0];
             const isActive = index === activeIndex;
 
             if (!option.sublabel) return null;
@@ -484,7 +485,7 @@ const EducationMetricSlider = ({
                   useMobileLayout
                     ? cn(
                         "text-[12px]",
-                        mobileLabelAlignClass(index, options.length),
+                        endpointLabelAlignClass(index, options.length),
                       )
                     : "text-center text-sm",
                   isActive ? "text-linkGold" : "text-darkblack",

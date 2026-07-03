@@ -199,12 +199,13 @@ export const educationSliderSpecs: Record<string, EducationSliderSpec> = {
     mobileLabelFontSize: 12,
     trackLeft: 10.61,
     trackTop: 8.75,
-    trackWidth: 501,
+    trackWidth: 504,
     trackHeight: 1.5,
     thumbSize: 18,
     labelTop: 32.5,
     dotCenters: [10.61, 82.61, 154.61, 226.61, 298.61, 370.61, 442.61, 514.61],
     labelLeft: [0, 72.31, 141.87, 213.73, 280.59, 352.45, 436.05, 505.21],
+    labelDisplay: "endpoints",
     ariaLabel: "Diamond clarity grade",
   },
   cut: {
@@ -260,9 +261,7 @@ export const educationSliderSpecs: Record<string, EducationSliderSpec> = {
   },
 };
 
-const SLIDER_EDGE_PADDING = 10;
-
-/** Evenly space slider dots when CMS grade-stop count differs from the Figma spec. */
+/** Evenly space slider dots flush to track ends (matches Figma clarity SVG). */
 export function buildSliderSpecForOptionCount(
   baseSpec: EducationSliderSpec,
   optionCount: number,
@@ -274,14 +273,9 @@ export function buildSliderSpecForOptionCount(
   const dotCenters =
     optionCount === 1
       ? [baseSpec.trackLeft + baseSpec.trackWidth / 2]
-      : Array.from({ length: optionCount }, (_, index) => {
-          const span = baseSpec.trackWidth - SLIDER_EDGE_PADDING * 2;
-          return (
-            baseSpec.trackLeft +
-            SLIDER_EDGE_PADDING +
-            (span * index) / (optionCount - 1)
-          );
-        });
+      : Array.from({ length: optionCount }, (_, index) =>
+          baseSpec.trackLeft + (baseSpec.trackWidth * index) / (optionCount - 1),
+        );
 
   return {
     ...baseSpec,
