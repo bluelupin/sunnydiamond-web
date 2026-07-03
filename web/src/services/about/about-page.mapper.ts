@@ -228,24 +228,45 @@ const mapCraftCards = (
   mosaic?: StrapiAboutCraftMosaicSection | null,
 ): NormalizedCraftCard[] => {
   const layoutCards = aboutHandcraftedContent.cards;
-  const cards: NormalizedCraftCard[] = [];
+  let textCardCounter = 0;
 
-  (mosaic?.tile ?? []).forEach((tile, index) => {
-    const title = cleanText(tile.title);
-    if (!title) return;
+  return (mosaic?.tile ?? [])
+    .map((tile, index) => {
+      const type = tile.type === "textCard" ? "textCard" : "image";
+      const title = cleanText(tile.title);
+      const image = mapResponsiveImage(tile.image);
+      const imageUrl = image?.desktopUrl ?? image?.mobileUrl;
 
-    const layout = layoutCards[index];
-    if (!layout) return;
+      const layout = layoutCards[textCardCounter];
+      const layoutIndex =
+        type === "textCard" ? textCardCounter : index + layoutCards.length;
+      const card: NormalizedCraftCard = {
+        type,
+        title: title ?? undefined,
+        imageUrl: imageUrl ?? undefined,
+        imageAlt: image?.alt,
+        position:
+          type === "textCard" && layout
+            ? { left: layout.position.left, top: layout.position.top }
+            : undefined,
+        gap: layout?.gap ?? 0,
+        layoutIndex,
+        tileIndex: index,
+      };
 
-    cards.push({
-      title,
-      position: { left: layout.position.left, top: layout.position.top },
-      gap: layout.gap,
-      layoutIndex: index,
+      if (type === "textCard") {
+        textCardCounter += 1;
+      }
+
+      return card;
+    })
+    .filter((card) => {
+      if (card.type === "textCard") {
+        return Boolean(card.title);
+      }
+
+      return Boolean(card.imageUrl);
     });
-  });
-
-  return cards;
 };
 
 const mapCraft = (

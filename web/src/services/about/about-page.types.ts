@@ -194,10 +194,14 @@ export type NormalizedAboutTeam = {
 };
 
 export type NormalizedCraftCard = {
-  title: string;
-  position: { left: string; top: string };
+  type: "textCard" | "image";
+  title?: string;
+  imageUrl?: string;
+  imageAlt?: string;
+  position?: { left: string; top: string };
   gap: number;
   layoutIndex: number;
+  tileIndex: number;
 };
 
 export type NormalizedAboutCraft = {

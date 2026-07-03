@@ -66,11 +66,21 @@ function AnimatedTile({
   );
 }
 
-function CraftPhotoTile({ className }: { className?: string }) {
+function CraftPhotoTile({
+  className,
+  imageUrl,
+}: {
+  className?: string;
+  imageUrl?: string;
+}) {
   return (
     <div
       className={cn(craftPhotoClass, className)}
-      style={craftPhotoStyle}
+      style={
+        imageUrl
+          ? { backgroundImage: `url(${imageUrl})` }
+          : craftPhotoStyle
+      }
       aria-hidden
     />
   );
@@ -129,11 +139,39 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
   const [reducedMotion, setReducedMotion] = useState(false);
 
   const fallbackCards = aboutHandcraftedContent.cards;
-  const cardByIndex = (index: number) =>
-    cards.find((card) => card.layoutIndex === index)?.title ??
-    fallbackCards[index]?.title ??
-    fallbackCards[0]?.title ??
-    "";
+  const cardsByTileIndex = new Map(cards.map((card) => [card.tileIndex, card]));
+
+  const getTextTitle = (tileIndex: number, fallbackIndex: number) => {
+    const card = cardsByTileIndex.get(tileIndex);
+    return (
+      card?.type === "textCard"
+        ? card.title
+        : fallbackCards[fallbackIndex]?.title
+    ) ?? "";
+  };
+
+  const renderPhotoTile = (tileIndex: number, className?: string) => {
+    const card = cardsByTileIndex.get(tileIndex);
+    return (
+      <CraftPhotoTile
+        className={className}
+        imageUrl={card?.type === "image" ? card.imageUrl : undefined}
+      />
+    );
+  };
+
+  const renderTextTile = (
+    tileIndex: number,
+    fallbackIndex: number,
+    className?: string,
+    compact?: boolean,
+  ) => (
+    <CraftTextTile
+      title={getTextTitle(tileIndex, fallbackIndex)}
+      className={className}
+      compact={compact}
+    />
+  );
 
   useEffect(() => {
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -173,31 +211,31 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
           {...tileProps(0, 0, 5)}
           className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
-          <CraftPhotoTile className="size-full" />
+          {renderPhotoTile(0, "size-full")}
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(0, 1, 5)}
           className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
-          <CraftTextTile title={cardByIndex(0)} className="size-full" />
+          {renderTextTile(1, 0, "size-full")}
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(0, 2, 5)}
           className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
-          <CraftPhotoTile className="size-full" />
+          {renderPhotoTile(2, "size-full")}
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(0, 3, 5)}
           className="md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px] md:block hidden"
         >
-          <CraftPhotoTile className="size-full" />
+          {renderPhotoTile(3, "size-full")}
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(0, 4, 5)}
           className="md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px] md:block hidden"
         >
-          <CraftPhotoTile className="size-full" />
+          {renderPhotoTile(4, "size-full")}
         </AnimatedTile>
       </div>
 
@@ -206,23 +244,19 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
           {...tileProps(1, 0, 3)}
           className="h-[111px] w-[172px] sm:h-[132px] sm:w-[200px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
-          <CraftPhotoTile className="size-full" />
+          {renderPhotoTile(5, "size-full")}
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(1, 1, 3)}
           className="md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px] md:block hidden"
         >
-          <CraftTextTile
-            title={cardByIndex(1)}
-            className="size-full"
-            compact
-          />
+          {renderTextTile(6, 1, "size-full", true)}
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(1, 2, 3)}
           className="h-[111px] w-[172px] sm:h-[132px] sm:w-[200px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
-          <CraftPhotoTile className="size-full" />
+          {renderPhotoTile(7, "size-full")}
         </AnimatedTile>
       </div>
 
@@ -231,19 +265,19 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
           {...tileProps(2, 0, 3)}
           className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
-          <CraftTextTile title={cardByIndex(2)} className="size-full" />
+          {renderTextTile(8, 2, "size-full")}
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(2, 1, 3)}
           className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
-          <CraftPhotoTile className="size-full" />
+          {renderPhotoTile(9, "size-full")}
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(2, 2, 3)}
           className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
-          <CraftPhotoTile className="size-full" />
+          {renderPhotoTile(10, "size-full")}
         </AnimatedTile>
       </div>
     </div>
