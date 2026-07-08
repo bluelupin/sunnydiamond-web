@@ -6,6 +6,11 @@ import type { NormalizedEducationFaqSection } from "@/services/education/learn-a
 import { cn } from "@/shared/utils/cn";
 import { educationSectionTitleSpacingClassName } from "../data/content";
 
+const faqTransitionClassName =
+  "transition-[grid-template-rows,opacity] duration-500 ease-in-out";
+
+const faqIconTransitionClassName = "transition-opacity duration-500 ease-in-out";
+
 const FaqPlusIcon = () => (
   <span className="relative size-6 shrink-0 overflow-hidden" aria-hidden>
     <span className="absolute inset-1/4">
@@ -31,8 +36,28 @@ const FaqMinusIcon = () => (
   </svg>
 );
 
-const FaqToggleIcon = ({ isOpen }: { isOpen: boolean }) =>
-  isOpen ? <FaqMinusIcon /> : <FaqPlusIcon />;
+const FaqToggleIcon = ({ isOpen }: { isOpen: boolean }) => (
+  <span className="relative flex size-6 shrink-0 items-center justify-center" aria-hidden>
+    <span
+      className={cn(
+        "absolute inset-0 flex items-center justify-center",
+        faqIconTransitionClassName,
+        isOpen ? "pointer-events-none opacity-0" : "opacity-100",
+      )}
+    >
+      <FaqPlusIcon />
+    </span>
+    <span
+      className={cn(
+        "absolute inset-0 flex items-center justify-center",
+        faqIconTransitionClassName,
+        isOpen ? "opacity-100" : "pointer-events-none opacity-0",
+      )}
+    >
+      <FaqMinusIcon />
+    </span>
+  </span>
+);
 
 type EducationFaqSectionProps = {
   faq: NormalizedEducationFaqSection;
@@ -69,18 +94,12 @@ const EducationFaqSection = ({ faq }: EducationFaqSectionProps) => {
             return (
               <Fragment key={item.id}>
                 <ScrollReveal delayMs={80 + index * 70}>
-                  <div
-                    className={
-                      isOpen
-                        ? "flex flex-col gap-4 overflow-hidden rounded"
-                        : "flex flex-col overflow-hidden rounded lg:h-14 lg:justify-center"
-                    }
-                  >
+                  <div className="flex flex-col overflow-hidden rounded">
                     <button
                       type="button"
                       aria-expanded={isOpen}
                       onClick={() => setOpenId(isOpen ? null : item.id)}
-                      className="flex w-full items-start gap-2 text-left lg:items-center"
+                      className="flex w-full items-start gap-2 text-left lg:min-h-14 lg:items-center"
                     >
                       <span className="min-w-0 flex-1 font-gill text-base font-normal leading-110 text-darkblack lg:text-xl">
                         {item.question}
@@ -88,11 +107,22 @@ const EducationFaqSection = ({ faq }: EducationFaqSectionProps) => {
                       <FaqToggleIcon isOpen={isOpen} />
                     </button>
 
-                    {isOpen && item.answer ? (
-                      <p className="font-gill text-sm font-light leading-110 text-neutral500 lg:text-xl">
-                        {item.answer}
-                      </p>
-                    ) : null}
+                    <div
+                      className={cn(
+                        "grid min-h-0",
+                        faqTransitionClassName,
+                        isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+                      )}
+                      aria-hidden={!isOpen}
+                    >
+                      <div className="overflow-hidden">
+                        {item.answer ? (
+                          <p className="pt-4 font-gill text-sm font-light leading-110 text-neutral500 lg:text-xl">
+                            {item.answer}
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
                   </div>
                 </ScrollReveal>
 

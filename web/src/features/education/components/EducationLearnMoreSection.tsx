@@ -42,7 +42,7 @@ const LearnCarouselImage = ({
 
   const image = (
     <div
-      className="relative overflow-hidden mix-blend-darken lg:w-[350px] lg:h-[300px] w-[200px] h-[180px] imageTestContainer"
+      className="relative overflow-hidden mix-blend-darken lg:w-[350px] lg:h-[300px] w-[200px] h-[180px]"
     // style={{ width: slotSpec.width, height: slotSpec.height }}
     >
       <Image

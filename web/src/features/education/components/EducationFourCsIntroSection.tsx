@@ -28,7 +28,7 @@ const EducationFourCsIntroSection = ({ intro }: EducationFourCsIntroSectionProps
           </span>
         </ScrollReveal>
         <div className="flex flex-col items-center gap-6 lg:gap-8">
-          <ScrollReveal delayMs={100} className="relative overflow-hidden lg:h-202 lg:w-250 h-130 w-[160px] imageTestContainer">
+          <ScrollReveal delayMs={100} className="relative overflow-hidden lg:h-202 lg:w-250 h-130 w-[160px]">
             <ResponsiveImage
               desktopSrc={intro.imageDesktopUrl}
               mobileSrc={intro.imageMobileUrl}
