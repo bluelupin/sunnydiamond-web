@@ -39,7 +39,7 @@ const SectionNav = () => {
   return (
     <div
       className={cn(
-        "group/nav fixed left-0 top-1/2 z-50 hidden -translate-y-1/2 pl-40 md:block",
+        "group/nav fixed bottom-40 left-0 z-50 hidden pl-40 md:block",
         "transition-all duration-500 ease-out will-change-transform",
         isVisible
           ? "translate-x-0 opacity-100"
@@ -48,7 +48,7 @@ const SectionNav = () => {
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute left-0 top-1/2 h-[min(800px,100vh)] w-[min(720px,18vw)] -translate-y-1/2"
+        className="pointer-events-none absolute bottom-0 left-0 h-[min(800px,100vh)] w-[min(720px,18vw)]"
       >
         <Image
           src={NAV_GRADIENT}

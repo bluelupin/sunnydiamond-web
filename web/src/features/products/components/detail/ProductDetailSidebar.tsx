@@ -32,6 +32,7 @@ import PlusIcon from "@/assets/Icons/PlusIcon";
 import VanIcon from "@/assets/Icons/VanIcon";
 import StoreIcon from "@/assets/Icons/StoreIcon";
 import Reveal from "@/shared/Animation/Reveal";
+import ProductDetailAccordions from "./ProductDetailAccordions";
 
 type ProductDetailSidebarProps = {
   product: Product;
@@ -60,7 +61,6 @@ const ProductDetailSidebar = ({
   const [isDeliveryStoreOpen, setIsDeliveryStoreOpen] = useState(false);
   const [isGift, setIsGift] = useState(false);
   const [zipCode, setZipCode] = useState("122002");
-  const [openAccordion, setOpenAccordion] = useState<string | null>(null);
   const [isVideoCallOpen, setIsVideoCallOpen] = useState(false);
   const [isTryAtHomeOpen, setIsTryAtHomeOpen] = useState(false);
   const [isPersonaliseOpen, setIsPersonaliseOpen] = useState(false);
@@ -68,10 +68,6 @@ const ProductDetailSidebar = ({
   const wishlisted = isWishlisted(product.id);
 
   const activeMetal = content.metalColors.find((color) => color.id === selectedMetal);
-
-  const toggleAccordion = (id: string) => {
-    setOpenAccordion((current) => (current === id ? null : id));
-  };
 
   const purchaseSection = (
     <div className="flex flex-col gap-40 px-4 pt-8 md:pt-6 md:px-0 lg:pt-0">
@@ -310,53 +306,7 @@ const ProductDetailSidebar = ({
         </div>
       </section>
 
-      <section aria-label="Product information" className="flex flex-col gap-3">
-        {content.accordions.map((accordion) => {
-          const isOpen = openAccordion === accordion.id;
-
-          return (
-            <div key={accordion.id} className="flex flex-col lg:gap-3 gap-2">
-              <Reveal as="button" direction="up"
-                type="button"
-                aria-expanded={isOpen}
-                onClick={() => toggleAccordion(accordion.id)}
-                className="flex lg:h-14 h-[40px] items-center justify-between text-left"
-              >
-                <span className="font-gill lg:text-2xl text-xl font-normal leading-110 text-darkblack">
-                  {accordion.title}
-                </span>
-                {isOpen ? (
-                  <span className="inline-flex size-[32px] shrink-0 items-center justify-center p-[6px]" aria-hidden>
-                    <Image
-                      src="/images/products/pdp/accordion-minus.svg"
-                      alt=""
-                      width={12}
-                      height={12}
-                      className="size-[12px] object-contain"
-                    />
-                  </span>
-                ) : (
-                  <span className="inline-flex size-[32px] shrink-0 items-center justify-center p-[6px]" aria-hidden>
-                    <Image
-                      src="/images/products/pdp/accordion-plus.svg"
-                      alt=""
-                      width={12}
-                      height={12}
-                      className="size-[12px] object-contain"
-                    />
-                  </span>
-                )}
-              </Reveal>
-              {isOpen ? (
-                <Reveal as="p" direction="up" className="pb-3 font-gill text-base font-light leading-110 text-neutral500">
-                  {accordion.content}
-                </Reveal>
-              ) : null}
-              <Reveal direction="up" className="h-px bg-neutral300" aria-hidden />
-            </div>
-          );
-        })}
-      </section>
+      <ProductDetailAccordions items={content.accordions} />
 
       <section
         aria-label="Personalisation"
