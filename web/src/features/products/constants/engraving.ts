@@ -1,4 +1,4 @@
-export const ENGRAVING_FONTS = ["Inter", "Larken", "Gill Sans", "Playfair Display"] as const;
+export const ENGRAVING_FONTS = ["Gill Sans", "Larken"] as const;
 
 export type EngravingSelection = {
   text: string;

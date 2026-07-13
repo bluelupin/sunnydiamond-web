@@ -30,12 +30,11 @@ export default {
         desktop: "1440px",
       },
       fontFamily: {
-        heading: ["Larken", "var(--font-playfair)", "Georgia", "serif"],
-        body: ["var(--font-inter)", "system-ui", "sans-serif"],
-        satoshi: ["var(--font-inter)", "system-ui", "sans-serif"],
-        gill: ["Gill Sans", "Gill Sans MT", "Cabin", "system-ui", "sans-serif"],
-        larken: ["Larken", "var(--font-playfair)", "Georgia", "serif"],
-        systemUi: ["system-ui", "sans-serif"],
+        heading: ["Larken"],
+        body: ["Gill Sans"],
+        satoshi: ["Gill Sans"],
+        gill: ["Gill Sans"],
+        larken: ["Larken"],
       },
       colors: {
         darkMagenta: "#722257",
