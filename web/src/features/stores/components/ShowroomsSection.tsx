@@ -230,10 +230,8 @@ function ShowroomsDesktopLayout({
                     aria-pressed={isSelected}
                     onClick={() => onSelect(location.id ?? null)}
                     className={cn(
-                      "w-full lg:h-73 h-50 lg:px-0 px-6 flex items-center lg:justify-start justify-center lg:text-left text-center font-larken text-base md:text-xl lg:text-2xl text-darkblack transition-all duration-300",
-                      isSelected
-                        ? "font-normal border-b border-gray50"
-                        : "font-light"
+                      "font-light w-full lg:h-73 h-50 lg:px-0 px-6 flex items-center lg:justify-start justify-center lg:text-left text-center font-larken text-base md:text-xl lg:text-2xl text-darkblack transition-all duration-300",
+                      isSelected && "border-b border-gray50"
                     )}
                   >
                     {location.name}

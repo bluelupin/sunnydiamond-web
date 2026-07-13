@@ -78,7 +78,7 @@ function FeaturedProductsHeader({
       </Reveal>
       <Reveal
         direction="up"
-        className="max-w-[306px] font-gill text-base font-light leading-110 text-neutral500 lg:max-w-none lg:text-20"
+        className="max-w-[306px] font-gill text-base font-light leading-110 text-neutral500 lg:max-w-none lg:text-xl"
       >
         {description}
       </Reveal>

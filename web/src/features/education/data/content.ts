@@ -386,7 +386,7 @@ export const educationFourCsIntroSpec = {
   imageSizes: "(max-width: 1024px) 160px, 250px",
   verticalRuleClassName: "h-55 w-px bg-darkblack/40",
   descriptionClassName:
-    "max-w-350 text-center font-gill text-base font-light leading-110 text-darkblack lg:max-w-523 lg:text-20",
+    "max-w-350 text-center font-gill text-base font-light leading-110 text-darkblack lg:max-w-523 lg:text-xl",
   /** Figma brand divider — horizontal variant of Crafting Rarity line (#722257 → #DDA957) */
   gradientRule: {
     mobileWidth: 250,
@@ -395,7 +395,7 @@ export const educationFourCsIntroSpec = {
   },
   gradientRuleClassName: "h-px w-250 lg:w-[421px]",
   pillarsClassName:
-    "flex flex-wrap items-center justify-center gap-x-3 gap-y-2 font-gill text-20 leading-110 text-darkblack lg:flex-nowrap lg:gap-x-text-2xlt-2xl",
+    "flex flex-wrap items-center justify-center gap-x-3 gap-y-2 font-gill text-xl leading-110 text-darkblack lg:flex-nowrap lg:gap-x-text-2xlt-2xl",
   scrollArrowClassName: "h-4 w-4 lg:h-[23px] lg:w-6",
 } as const;
 

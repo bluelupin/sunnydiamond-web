@@ -165,7 +165,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
         {/* Desktop steps — Figma 684:3008 / 684:3012 */}
         <div className="hidden w-full flex-col items-center gap-6 md:flex">
           <ScrollReveal delayMs={200} className="relative h-40 w-full max-w-[1360px]">
-            <div className="pointer-events-none absolute left-1/2 top-[calc(50%+1px)] w-full max-w-[784px] -translate-x-1/2 -translate-y-1/2">
+            <div className="pointer-events-none absolute left-1/2 top-[calc(50%+1px)] w-full max-w-[740px] -translate-x-1/2 -translate-y-1/2">
               <Image src={STEPS_LINE} alt="" width={784} height={1} className="h-px w-full" aria-hidden />
             </div>
             <div className="relative flex h-40 items-center justify-between px-[19.85%]">

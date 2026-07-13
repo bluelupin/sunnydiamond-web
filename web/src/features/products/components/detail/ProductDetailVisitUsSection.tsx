@@ -41,7 +41,7 @@ const ProductDetailVisitUsSection = ({ imageSrc }: ProductDetailVisitUsSectionPr
               <h2 id="visit-us-heading" className="font-larken text-32 font-light leading-110 lg:text-5xl">
                 Visit Us
               </h2>
-              <p className="font-gill text-base font-light leading-110 lg:text-20">
+              <p className="font-gill text-base font-light leading-110 lg:text-xl">
                 <span className="md:hidden">
                   Schedule your store visit and we&apos;ll be ready to welcome you.
                 </span>

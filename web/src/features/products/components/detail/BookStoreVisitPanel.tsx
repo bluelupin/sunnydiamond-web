@@ -277,7 +277,7 @@ const StoreSelectionStep = ({
           </div>
 
           <StoreVisitMapBlock variant="store-select">
-              <p className="font-larken text-20 font-light leading-110 text-darkblack">
+              <p className="font-larken text-xl font-light leading-110 text-darkblack">
                 {selectedStore.storeName}
               </p>
               <div className="h-px w-full bg-neutral300" aria-hidden />
@@ -415,7 +415,7 @@ const BookingFormStep = ({
 
         <div className="mt-6 flex flex-col gap-6 pb-72">
           <StoreVisitMapBlock variant="store-select">
-            <p className="font-larken text-20 font-light leading-110 text-darkblack">
+            <p className="font-larken text-xl font-light leading-110 text-darkblack">
               {selectedStore.storeName}
             </p>
             <div className="h-px w-full bg-neutral300" aria-hidden />

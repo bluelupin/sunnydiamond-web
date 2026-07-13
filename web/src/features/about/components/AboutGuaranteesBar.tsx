@@ -50,7 +50,7 @@ type GuaranteeItemProps = {
 const AboutGuaranteeItem = ({ badge }: GuaranteeItemProps) => (
   <Reveal as="li" direction="up" className="flex lg:h-136 h-98 lg:w-260 w-full list-none flex-col items-center justify-center gap-3 rounded-figma text-center desktop:w-260 desktop:shrink-0">
     <GuaranteeIcon icon={badge.icon} />
-    <p className="max-w-236 font-gill text-base font-normal leading-110 text-darkblack desktop:text-20">
+    <p className="max-w-236 font-gill text-base font-normal leading-110 text-darkblack desktop:text-xl">
       {badge.label}
     </p>
   </Reveal>

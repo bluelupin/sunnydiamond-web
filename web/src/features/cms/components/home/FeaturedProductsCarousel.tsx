@@ -245,11 +245,11 @@ export default function FeaturedProductsCarousel({
 
         <div className="flex flex-col items-center gap-4 text-center md:gap-6">
           <div className="flex flex-col items-center gap-4">
-            <p className="font-gill text-base font-normal leading-110 text-darkblack md:text-20">
+            <p className="font-gill text-base font-normal leading-110 text-darkblack md:text-xl">
               {activeItem.name}
             </p>
             {typeof activeItem.price === "number" ? (
-              <p className="font-gill text-base font-normal leading-110 text-darkblack md:text-20">
+              <p className="font-gill text-base font-normal leading-110 text-darkblack md:text-xl">
                 <span aria-hidden>₹ </span>
                 {formatPrice(activeItem.price)}
               </p>

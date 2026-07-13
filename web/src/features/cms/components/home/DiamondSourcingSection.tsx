@@ -90,7 +90,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
               <Reveal direction="up" className="md:mt-26 mt-76 md:w-290 md:h-290 w-[243px] h-[293px]">
                 <div ref={diamondParallax} className="size-full">
                   <ResponsiveImage
-                    desktopSrc={desktopImageUrl || ""}
+                    desktopSrc={desktopImageUrl || "/logo-placeholder.png"}
                     mobileSrc={mobileImageUrl}
                     alt={imageAlt}
                     width={1024}

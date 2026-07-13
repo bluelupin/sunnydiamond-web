@@ -58,7 +58,7 @@ const AboutBrillianceSection = ({
             </Reveal>
           </div>
           <VerticalScrollLine className="lg:mt-[23px] mt-5" />
-          <Reveal as="p" direction="up" className="font-gill text-base font-light leading-110 text-gray600 sm:mt-3 lg:mt-[13px] lg:text-20 2xl:text-22 mx-auto mt-2.5 max-w-full md:max-w-[450px] lg:max-w-557 2xl:max-w-[620px]">
+          <Reveal as="p" direction="up" className="font-gill text-base font-light leading-110 text-gray600 sm:mt-3 lg:mt-[13px] lg:text-xl 2xl:text-22 mx-auto mt-2.5 max-w-full md:max-w-[450px] lg:max-w-557 2xl:max-w-[620px]">
             {body}
           </Reveal>
         </div>

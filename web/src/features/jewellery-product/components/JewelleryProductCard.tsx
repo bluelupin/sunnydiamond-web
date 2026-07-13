@@ -39,7 +39,7 @@ const ProductCopy = ({ title, price, href, className }: ProductCopyProps) => (
       className,
     )}
   >
-    <Link href={href} className="font-gill whitespace-nowrap font-light md:text-xl">
+    <Link href={href} className="font-gill whitespace-nowrap font-light md:text-xl sm:text-base text-sm">
       {title}
     </Link>
     <p className="w-full font-gill font-semibold">
