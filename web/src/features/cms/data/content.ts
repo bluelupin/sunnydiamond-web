@@ -202,4 +202,8 @@ export const seoContent = {
     title: "Checkout",
     description: "Complete your purchase of premium diamond jewellery from Sunny Diamonds.",
   },
+  wishlist: {
+    title: "Wishlist",
+    description: "View and manage your saved diamond jewellery pieces.",
+  },
 } as const;
