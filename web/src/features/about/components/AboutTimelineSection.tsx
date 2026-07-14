@@ -64,7 +64,7 @@ const AboutTimelineSection = ({
               <div
                 aria-live="polite"
                 aria-atomic="true"
-                className="mb-16 mt-auto lg:mb-[40px]0 lg:mt-auto lg:self-end"
+                className="mb-16 mt-auto lg:mb-100 lg:mt-auto lg:self-end"
               >
                 <AboutTimelineContent
                   activeYear={activeYear}

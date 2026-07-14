@@ -193,7 +193,7 @@ function ShowroomsDesktopLayout({
         <ScrollReveal
           as="h2"
           delayMs={0}
-          className="mb-8 text-center font-larken text-32 font-light leading-110 text-black md:text-4xl lg:mb-40 lg:text-left lg:text-5xl"
+          className="mb-8 text-center font-larken text-32 font-light leading-110 text-black md:text-4xl lg:mb-10 lg:text-left lg:text-5xl"
         >
           {sectionTitle}
         </ScrollReveal>

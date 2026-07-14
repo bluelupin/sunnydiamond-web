@@ -34,7 +34,7 @@ const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
     return (
       <section
         id={id}
-        className="flex flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 lg:gap-40 lg:px-40 lg:py-100"
+        className="flex flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 lg:gap-10 lg:px-10 lg:py-100"
         aria-busy="true"
         aria-label="The Sunny Promise"
       >
@@ -52,7 +52,7 @@ const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
     <section
       id={id}
       aria-label={sectionTitle}
-      className="flex flex-col items-center gap-8 bg-white px-4 py-16 lg:gap-[40px] lg:px-[40px] lg:py-100"
+      className="flex flex-col items-center gap-8 bg-white px-4 py-16 lg:gap-10 lg:px-10 lg:py-100"
     >
       <Reveal as="h2" direction="up" className="text-center font-larken text-32 font-light leading-110 text-darkblack lg:text-[48px] lg:whitespace-nowrap">
         {sectionTitle}

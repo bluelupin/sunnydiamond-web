@@ -151,7 +151,7 @@ const JewelleryProductCard = ({
       <div
         className={cn(
           "col-start-1 row-start-1 z-10 flex flex-col items-center transition-opacity duration-500",
-          "px-[16px] pt-[24px] md:px-[24px] md:pt-[40px] md:group-hover:opacity-0",
+          "px-[16px] pt-[24px] md:px-[24px] md:pt-10 md:group-hover:opacity-0",
           isMobileLifestyle ? "pointer-events-none opacity-0 md:opacity-100" : "opacity-100",
         )}
         style={
@@ -167,7 +167,7 @@ const JewelleryProductCard = ({
       <div
         className={cn(
           "pointer-events-none col-start-1 row-start-1 z-20 flex size-full flex-col justify-end",
-          "px-[16px] pb-[24px] md:px-[24px] md:pb-[40px]",
+          "px-[16px] pb-[24px] md:px-[24px] md:pb-10",
         )}
       >
         <ProductCopy
@@ -219,7 +219,7 @@ const JewelleryProductCard = ({
         aria-label={`View ${title}`}
       />
 
-      <div className="pointer-events-none col-start-1 row-start-1 z-40 flex justify-end self-start px-[16px] pt-[24px] md:px-[24px] md:pt-[40px]">
+      <div className="pointer-events-none col-start-1 row-start-1 z-40 flex justify-end self-start px-[16px] pt-[24px] md:px-[24px] md:pt-10">
         <button
           type="button"
           aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}

@@ -1,71 +1,111 @@
 import Link from "next/link";
-import { Minus, Plus, Trash2 } from "lucide-react";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
-import type { Product } from "@/features/products/data/products";
+import DustbinIcon from "@/assets/Icons/DustbinIcon";
+import { useWishlist } from "@/features/wishlist/context/WishlistContext";
+import type { CartLineItem, CartLineOptions } from "../types/cart.types";
+import { formatCartLineMeta, formatCartPrice } from "../utils/formatCartLine";
+import {
+  CartDivider,
+  CartGiftBadge,
+  CartGiftCheckbox,
+  CartMetaRow,
+  CartOutlineLink,
+  CartTextLink,
+} from "./CartFlowUi";
 
 interface CartItemProps {
-  product: Product;
-  quantity: number;
-  onUpdateQuantity: (productId: string, quantity: number) => void;
-  onRemove: (productId: string) => void;
+  item: CartLineItem;
+  onUpdateQuantity: (lineItemId: string, quantity: number) => void;
+  onRemove: (lineItemId: string) => void;
+  onUpdateOptions: (lineItemId: string, options: Partial<CartLineOptions>) => void;
 }
 
-const CartItem = ({
-  product,
-  quantity,
-  onUpdateQuantity,
-  onRemove,
-}: CartItemProps) => {
+const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
+  const { product, quantity, options } = item;
+  const { toggleWishlist, isWishlisted } = useWishlist();
+  const meta = formatCartLineMeta(item);
+  const wishlisted = isWishlisted(product.id);
+  const isGift = Boolean(options.isGift || item.gifting);
+
   return (
-    <article className="flex gap-4 pb-6 border-b border-border">
-      <Link
-        href={`/product/${product.id}`}
-        className="w-24 h-24 md:w-32 md:h-32 flex-shrink-0 bg-secondary rounded-sm overflow-hidden"
-      >
-        <OptimizedImage src={product.image} alt={product.name} />
-      </Link>
-      <div className="flex-1 flex flex-col justify-between">
-        <div>
+    <article className="relative flex flex-col gap-6 bg-white p-6">
+      {isGift ? (
+        <CartGiftBadge variant="cart" className="absolute left-0 top-0 z-10" />
+      ) : null}
+
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 max-w-[499.5px] flex-1 gap-6">
           <Link
             href={`/product/${product.id}`}
-            className="font-heading text-base font-medium text-foreground hover:text-primary transition-colors"
+            className="relative h-[105px] w-[140px] shrink-0 overflow-hidden bg-white max-lg:h-[90px] max-lg:w-[120px]"
           >
-            {product.name}
+            <OptimizedImage src={product.image} alt={product.name} />
           </Link>
-          <p className="font-body text-xs text-muted-foreground mt-0.5">
-            {product.metal} · {product.carat}
-          </p>
+
+          <div className="flex w-[176px] min-w-0 max-w-[176px] flex-col gap-8 max-lg:max-w-none max-lg:flex-1">
+            <div className="flex flex-col gap-3">
+              <Link
+                href={`/product/${product.id}`}
+                className="font-gill text-base leading-110 text-darkblack transition-colors hover:text-darkMagenta"
+              >
+                {product.name}
+              </Link>
+
+              <CartMetaRow parts={meta} />
+
+              <p className="font-gill text-base leading-110 text-darkblack">
+                {formatCartPrice(product.price * quantity)}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-4">
+              <CartTextLink href={`/product/${product.id}`}>Edit</CartTextLink>
+              <CartTextLink onClick={() => toggleWishlist(product.id)}>
+                {wishlisted ? "In wishlist" : "Move to wishlist"}
+              </CartTextLink>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center justify-between mt-2">
-          <div className="flex items-center border border-border">
-            <button
-              onClick={() => onUpdateQuantity(product.id, quantity - 1)}
-              className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="Decrease quantity"
-            >
-              <Minus size={14} />
-            </button>
-            <span className="px-3 font-body text-sm" aria-label="Product quantity">{quantity}</span>
-            <button
-              onClick={() => onUpdateQuantity(product.id, quantity + 1)}
-              className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="Increase quantity"
-            >
-              <Plus size={14} />
-            </button>
+
+        <button
+          type="button"
+          onClick={() => onRemove(item.id)}
+          aria-label={`Remove ${product.name}`}
+          className="shrink-0 text-darkblack transition-opacity hover:opacity-70"
+        >
+          <DustbinIcon className="size-6" />
+        </button>
+      </div>
+
+      <CartDivider weight={0.5} />
+
+      <label className="flex w-fit cursor-pointer items-center gap-2 px-4">
+        <CartGiftCheckbox
+          checked={isGift}
+          onChange={(checked) => onUpdateOptions(item.id, { isGift: checked })}
+        />
+        <span className="font-gill text-base leading-110 text-darkblack">
+          Mark this as a gift
+        </span>
+      </label>
+
+      <CartDivider weight={0.5} />
+
+      <div className="flex flex-col gap-2 self-stretch">
+        <p className="font-gill text-xl leading-110 text-darkblack">Engraving</p>
+
+        <div className="flex gap-2 self-stretch">
+          <div className="flex h-14 min-w-0 flex-1 items-center bg-aboutInactive px-3">
+            <p className="truncate font-gill text-base leading-110 text-darkblack">
+              {options.engraving ?? "Diya Gupta"}
+            </p>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="font-body text-sm font-semibold">
-              ${(product.price * quantity).toLocaleString()}
-            </span>
-            <button
-              onClick={() => onRemove(product.id)}
-              className="text-muted-foreground hover:text-destructive transition-colors"
-              aria-label={`Remove ${product.name}`}
-            >
-              <Trash2 size={16} />
-            </button>
-          </div>
+          <CartOutlineLink
+            href={`/product/${product.id}`}
+            className="h-14 w-auto shrink-0 px-7 uppercase"
+          >
+            Modify
+          </CartOutlineLink>
         </div>
       </div>
     </article>

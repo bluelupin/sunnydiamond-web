@@ -69,7 +69,7 @@ const StoreVisitMapBlock = ({
         </div>
         <div
           className={cn(
-            "mx-auto -mt-40 flex w-311 flex-col gap-4 bg-gray300 px-4 py-6",
+            "mx-auto -mt-10 flex w-311 flex-col gap-4 bg-gray300 px-4 py-6",
             cardClassName,
           )}
         >

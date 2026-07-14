@@ -21,7 +21,7 @@ const EducationFourCsIntroSection = ({ intro }: EducationFourCsIntroSectionProps
         <ScrollReveal
           as="h2"
           delayMs={0}
-          className="w-full mb-8 lg:mb-40"
+          className="w-full mb-8 lg:mb-10"
         >
           <span id="education-four-cs-intro-title" className="block w-full text-center font-larken text-darkblack font-light leading-110 text-3xl sm:text-3xl md:text-4xl lg:text-5xl">
             {intro.desktopTitle}

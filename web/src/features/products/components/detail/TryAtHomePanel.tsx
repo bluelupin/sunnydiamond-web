@@ -73,7 +73,7 @@ const TryAtHomeDetailsStep = ({
   return (
     <>
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-        <div className="flex flex-col gap-6 px-4 pt-6 lg:px-6 lg:pt-[40px]">
+        <div className="flex flex-col gap-6 px-4 pt-6 lg:px-6 lg:pt-10">
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4">
               <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">Try At Home</h2>
@@ -220,7 +220,7 @@ const TryAtHomeAddressStep = ({ onBack, onClose, onSubmit }: TryAtHomeAddressSte
   return (
     <>
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-        <div className="flex flex-col gap-6 px-4 pt-6 lg:px-6 lg:pt-[40px]">
+        <div className="flex flex-col gap-6 px-4 pt-6 lg:px-6 lg:pt-10">
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4">
               <div className="flex min-w-0 items-center gap-2">

@@ -2,7 +2,7 @@ import { Skeleton } from "@/shared/ui/skeleton";
 
 const AboutFacesSkeleton = () => (
   <section aria-busy="true" aria-label="Loading team section" className="bg-white pb-16 md:pb-20 lg:pb-100">
-    <div className="container mb-8 flex flex-col items-center gap-3 lg:mb-[40px] lg:gap-4">
+    <div className="container mb-8 flex flex-col items-center gap-3 lg:mb-10 lg:gap-4">
       <Skeleton className="h-10 w-80 max-w-full rounded-md bg-gray200 md:h-12" aria-hidden />
       <Skeleton className="h-5 w-full max-w-lg rounded-md bg-gray200" aria-hidden />
     </div>

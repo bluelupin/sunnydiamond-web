@@ -32,14 +32,14 @@ type GuaranteeIconProps = {
 };
 
 const GuaranteeIcon = ({ icon }: GuaranteeIconProps) => (
-  <div className="md:h-16 md:w-16 h-[40px] w-[40px]">
+  <div className="md:h-16 md:w-16 h-10 w-10">
     <ResponsiveImage
       desktopSrc={icon.desktopUrl}
       mobileSrc={icon.mobileUrl}
       alt=""
       width={icon.desktopUrl ? 64 : 40}
       height={icon.desktopUrl ? 64 : 40}
-      className="shrink-0 object-contain md:h-16 md:w-16 h-[40px] w-[40px]"
+      className="shrink-0 object-contain md:h-16 md:w-16 h-10 w-10"
     />
   </div>
 );

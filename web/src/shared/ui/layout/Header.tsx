@@ -112,7 +112,7 @@ const Header = () => {
         aria-hidden={mobileMenuOpen}
       >
         {/* Figma 692:6742 — solid PDP header: white bg, py-24, dark nav; mobile bar 64px */}
-        <div className="relative mx-auto flex h-16 w-full max-w-1440 items-center justify-between px-5 md:h-[104px] md:px-8 lg:px-[40px] lg:py-6 2xl:max-w-1920 2xl:px-[60px]">
+        <div className="relative mx-auto flex h-16 w-full max-w-1440 items-center justify-between px-5 md:h-[104px] md:px-8 lg:px-10 lg:py-6 2xl:max-w-1920 2xl:px-[60px]">
           <div className="flex w-[120px] items-center gap-6 md:hidden">
             <button
               type="button"
@@ -131,9 +131,9 @@ const Header = () => {
               <Search size={24} strokeWidth={1.5} />
             </button>
           </div>
-          <div className="hidden md:flex md:items-center md:gap-4 lg:gap-[40px]">
+          <div className="hidden md:flex md:items-center md:gap-4 lg:gap-10">
             {Logo}
-            <nav className="hidden items-center md:flex md:gap-4 lg:gap-[40px]" aria-label="Main navigation">
+            <nav className="hidden items-center md:flex md:gap-4 lg:gap-10" aria-label="Main navigation">
               {headerNavigationLinks.map((link) => {
                 const isJewellery = isJewelleryNavLink(link.label);
                 if (isJewellery) {

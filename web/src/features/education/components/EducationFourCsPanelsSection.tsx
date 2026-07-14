@@ -107,7 +107,7 @@ const PanelMedia = ({
         ) : (
           <div
             className={cn(
-              "flex w-full flex-col gap-10 lg:gap-[40px]",
+              "flex w-full flex-col gap-10 lg:gap-10",
               "items-center",
             )}
           >

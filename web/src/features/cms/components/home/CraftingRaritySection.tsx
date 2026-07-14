@@ -91,8 +91,8 @@ function CraftingRarityCopyBlock({
   secondaryCtaLabel: string;
 }) {
   return (
-    <PageContainer className="relative z-10 px-4 md:px-8 lg:px-[40px] 2xl:px-[60px]">
-      <Reveal direction="up" className="lg:h-432 h-390 w-full max-w-640 flex flex-col items-start lg:justify-center justify-end lg:gap-[40px] md:gap-8 gap-6">
+    <PageContainer className="relative z-10 px-4 md:px-8 lg:px-10 2xl:px-[60px]">
+      <Reveal direction="up" className="lg:h-432 h-390 w-full max-w-640 flex flex-col items-start lg:justify-center justify-end lg:gap-10 md:gap-8 gap-6">
         <h2
           className="lg:text-5xl sm:text-4xl text-32 font-larken font-light leading-110 text-darkblack"
         >
@@ -169,7 +169,7 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
         <div className="relative overflow-hidden h-390 md:h-420 lg:h-432">
           <div
             className={cn(
-              "absolute bottom-0 flex max-w-[549px] flex-col gap-[24px] left-[16px] lg:bottom-auto lg:top-[132px] lg:gap-[40px]",
+              "absolute bottom-0 flex max-w-[549px] flex-col gap-[24px] left-[16px] lg:bottom-auto lg:top-[132px] lg:gap-10",
               "lg:left-[max(40px,calc(100vw*40/1440))]",
             )}
           >
@@ -222,7 +222,7 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
           ))}
         </div>
       ) : (
-        <Reveal as="p" direction="up" className="px-4 lg:px-[40px] py-20 text-center font-gill text-base text-neutral500">
+        <Reveal as="p" direction="up" className="px-4 lg:px-10 py-20 text-center font-gill text-base text-neutral500">
           NO Categories Yet!
         </Reveal>
       )}

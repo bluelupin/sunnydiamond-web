@@ -112,7 +112,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
         aria-busy="true"
         aria-label="For Your Valentine"
       >
-        <div className="relative flex w-full flex-col items-center py-16 lg:h-full lg:flex-row lg:items-center lg:justify-between lg:px-40 lg:py-100">
+        <div className="relative flex w-full flex-col items-center py-16 lg:h-full lg:flex-row lg:items-center lg:justify-between lg:px-10 lg:py-100">
           <div className="order-2 flex w-full max-w-[375px] flex-col items-center gap-6 px-4 lg:order-1 lg:max-w-[437px] lg:items-start lg:gap-8 lg:px-0">
             <div className="order-1 h-[336px] w-[305px] rounded bg-[#E4C7BE]/40 md:hidden" aria-hidden />
             <div className="order-2 flex w-full flex-col items-center gap-3 lg:items-start lg:gap-4">
@@ -142,7 +142,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
         height={750}
         className="pointer-events-none absolute inset-0 size-full sm:!h-[157%] sm:top-[-300px] top-12 object-cover object-center opacity-80"
       />
-      <div className="flex flex-col items-center py-12 md:flex-row md:min-h-[750px] md:py-16 lg:items-center lg:justify-between lg:gap-8 lg:px-40 md:px-8 px-4 lg:py-100">
+      <div className="flex flex-col items-center py-12 md:flex-row md:min-h-[750px] md:py-16 lg:items-center lg:justify-between lg:gap-8 lg:px-10 md:px-8 px-4 lg:py-100">
         <div className="order-2 flex w-full max-w-full shrink-0 flex-col gap-8 md:order-1 md:max-w-[437px]">
           <div className="md:space-y-4 space-y-3">
             <Reveal as="h2" direction="up" className="md:text-left text-center font-larken lg:text-5xl md:text-4xl sm:text-3xl text-32 font-light leading-110 text-darkblack">

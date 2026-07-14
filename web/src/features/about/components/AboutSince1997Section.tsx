@@ -88,7 +88,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
       {/* Desktop — sticky viewport + scroll-driven horizontal slide */}
       <div data-since1997-mode="desktop" className="hidden md:block">
         <div className="sticky top-0 flex flex-col overflow-hidden bg-white">
-          <PageContainer className="shrink-0 2xl:pb-11 lg:pb-[40px] pb-8">
+          <PageContainer className="shrink-0 2xl:pb-11 lg:pb-10 pb-8">
             <Reveal as="h2" direction="up"
               id="about-since-1997-title"
               className="font-larken text-3xl lg:text-5xl text-56 font-light leading-110 text-darkblack">
@@ -102,7 +102,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                   data-since1997-track
                   className="flex h-full items-center xl:gap-20 gap-16 will-change-transform motion-reduce:transform-none"
                 >
-                  <article className="flex shrink-0 items-center lg:gap-8 gap-[40px]">
+                  <article className="flex shrink-0 items-center lg:gap-8 gap-10">
                     <GalleryImage
                       desktopUrl={founder.image.desktopUrl}
                       mobileUrl={founder.image.mobileUrl}

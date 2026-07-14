@@ -277,7 +277,7 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
           "md:h-full md:w-full md:max-w-[474px] md:animate-in md:slide-in-from-right md:duration-300",
         )}
       >
-        <div className="px-[24px] pt-[40px]">
+        <div className="px-[24px] pt-10">
           <div className="mx-auto flex h-[32px] w-full max-w-[424px] items-center justify-between">
             <h2 className="font-larken text-[24px] font-light leading-110 text-darkblack">FILTERS</h2>
             <button
@@ -469,7 +469,7 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
           </div>
         </div>
 
-        <PanelFooter contentClassName="border-t-[0.5px] border-neutral300 px-[40px] py-[24px]">
+        <PanelFooter contentClassName="border-t-[0.5px] border-neutral300 px-10 py-[24px]">
           <PanelFooterDualActions>
             <button
               type="button"

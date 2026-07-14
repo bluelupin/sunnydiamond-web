@@ -590,7 +590,7 @@ const MobileNavigation = ({
           />
         </div>
 
-        <div className="mt-40 flex items-center gap-2">
+        <div className="mt-10 flex items-center gap-2">
           <span className="inline-flex size-6 shrink-0 items-center justify-center">
             <Image
               src="/images/navigation/footer-star.svg"

@@ -81,7 +81,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
                   width={64}
                   height={64}
                   quality={80}
-                  className="w-[40px] h-[40px] md:w-12 md:h-12 lg:w-16 lg:h-16 opacity-80 mx-auto"
+                  className="w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 opacity-80 mx-auto"
                 />
               </Reveal>
               <Reveal as="h2" direction="up" className="mt-6 lg:text-5xl md:text-4xl text-32 font-light text-darkblack font-larken max-w-2xl leading-tight tracking-[0%]">
@@ -90,7 +90,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
               <Reveal direction="up" className="md:mt-26 mt-76 md:w-290 md:h-290 w-[243px] h-[293px]">
                 <div ref={diamondParallax} className="size-full">
                   <ResponsiveImage
-                    desktopSrc={desktopImageUrl || "/logo-placeholder.png"}
+                    desktopSrc={desktopImageUrl || "/image-placeholder.png"}
                     mobileSrc={mobileImageUrl}
                     alt={imageAlt}
                     width={1024}

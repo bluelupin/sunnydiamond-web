@@ -24,7 +24,7 @@ const RingSizeChartPanel = ({ open, onClose }: RingSizeChartPanelProps) => {
       dialogAriaLabel="Ring size chart"
     >
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <div className="flex items-center justify-end px-4 pt-6 lg:px-6 lg:pt-[40px]">
+        <div className="flex items-center justify-end px-4 pt-6 lg:px-6 lg:pt-10">
           <button
             type="button"
             onClick={onClose}

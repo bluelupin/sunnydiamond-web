@@ -39,7 +39,7 @@ const SectionNav = () => {
   return (
     <div
       className={cn(
-        "group/nav fixed bottom-40 left-0 z-50 hidden pl-40 md:block",
+        "group/nav fixed bottom-40 left-0 z-50 hidden pl-10 md:block",
         "transition-all duration-500 ease-out will-change-transform",
         isVisible
           ? "translate-x-0 opacity-100"

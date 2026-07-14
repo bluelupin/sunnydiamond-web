@@ -27,8 +27,8 @@ const StepConnectorLine = ({ className }: { className?: string }) => (
 const DiscoverSteps = () => {
   const { steps: stepLabels } = educationDiscoverContent;
   return (
-    <div className="lg:mb-[40px] mb-8 w-full items-start gap-4 flex">
-      <div className="relative flex shrink-0 flex-col items-start gap-40">
+    <div className="lg:mb-10 mb-8 w-full items-start gap-4 flex">
+      <div className="relative flex shrink-0 flex-col items-start gap-10">
         <StepConnectorLine className="left-2" />
         {stepLabels.map((_, index) => (
           <div
@@ -66,7 +66,7 @@ const DiscoverContent = ({ heading, subheading, ctaLabel, ctaHref }: DiscoverCon
     >
       {heading}
     </h2>
-    <p className="lg:mb-[40px] mb-8 font-gill font-light leading-110 lg:text-xl md:text-lg text-base lg:text-neutral500 text-darkblack">
+    <p className="lg:mb-10 mb-8 font-gill font-light leading-110 lg:text-xl md:text-lg text-base lg:text-neutral500 text-darkblack">
       {subheading}
     </p>
     <DiscoverSteps />

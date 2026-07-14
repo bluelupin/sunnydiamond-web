@@ -26,6 +26,7 @@ import PersonaliseProductPanel from "./PersonaliseProductPanel";
 import MetalEngravingPanel from "./MetalEngravingPanel";
 import RingSizeChartPanel from "./RingSizeChartPanel";
 import DeliveryStoreJourneyPanel from "./DeliveryStoreJourneyPanel";
+import type { AddToBagPayload } from "@/features/cart/types/cart.types";
 import type { EngravingSelection } from "@/features/products/constants/engraving";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import PlusIcon from "@/assets/Icons/PlusIcon";
@@ -38,7 +39,7 @@ type ProductDetailSidebarProps = {
   product: Product;
   content: ProductDetailContent;
   pricing: ProductDetailPricing;
-  onAddToBag: () => void;
+  onAddToBag: (payload: AddToBagPayload) => void;
   children?: (sections: {
     purchase: ReactNode;
     details: ReactNode;
@@ -70,8 +71,8 @@ const ProductDetailSidebar = ({
   const activeMetal = content.metalColors.find((color) => color.id === selectedMetal);
 
   const purchaseSection = (
-    <div className="flex flex-col gap-40 px-4 pt-8 md:pt-6 md:px-0 lg:pt-0">
-      <div className="flex flex-col gap-40">
+    <div className="flex flex-col gap-10 px-4 pt-8 md:pt-6 md:px-0 lg:pt-0">
+      <div className="flex flex-col gap-10">
         <div className="flex flex-col gap-6">
           <header className="flex flex-col gap-4">
             <ul className="m-0 flex list-none flex-wrap items-center gap-3 p-0">
@@ -157,7 +158,20 @@ const ProductDetailSidebar = ({
           </div>
 
           <div className="flex gap-2">
-            <DetailDarkButton className="flex-1 uppercase" onClick={onAddToBag}>
+            <DetailDarkButton
+              className="flex-1 uppercase"
+              onClick={() =>
+                onAddToBag({
+                  product,
+                  options: {
+                    metal: activeMetal?.label,
+                    ringSize: ringSize || undefined,
+                    engraving: engravingSelection?.text,
+                    isGift,
+                  },
+                })
+              }
+            >
               Add to Bag
             </DetailDarkButton>
             <button
@@ -228,13 +242,13 @@ const ProductDetailSidebar = ({
   );
 
   const detailsSection = (
-    <div className="flex flex-col gap-40 px-4 md:px-0 md:pb-12 lg:px-0 !pb-0">
+    <div className="flex flex-col gap-10 px-4 md:px-0 md:pb-12 lg:px-0 !pb-0">
       <section aria-label="Shopping benefits" className="flex flex-col gap-6">
         <Reveal direction="up" className="flex items-center justify-between">
           <h2 className="font-gill text-2xl leading-110 text-darkblack">With Sunny, you get</h2>
           <DetailTextLink href="/about">T&amp;C Apply</DetailTextLink>
         </Reveal>
-        <ul className="m-0 flex list-none flex-col bg-benefitSurface p-0 max-md:-mx-4 max-md:gap-6 max-md:px-4 max-md:py-40 md:flex-row md:items-stretch md:gap-4 md:p-6 lg:gap-4">
+        <ul className="m-0 flex list-none flex-col bg-benefitSurface p-0 max-md:-mx-4 max-md:gap-6 max-md:px-4 max-md:py-10 md:flex-row md:items-stretch md:gap-4 md:p-6 lg:gap-4">
           {content.benefits.flatMap((benefit, index) => {
             const item = (
               <Reveal as="li" direction="up"
@@ -246,14 +260,14 @@ const ProductDetailSidebar = ({
                   index > 0 && "md:border-l md:border-gray600",
                 )}
               >
-                <div className="flex size-40 shrink-0 items-center justify-center">
+                <div className="flex size-10 shrink-0 items-center justify-center">
                   <Image
                     src={benefit.icon}
                     alt=""
                     width={40}
                     height={40}
                     aria-hidden
-                    className="size-40 object-contain"
+                    className="size-10 object-contain"
                   />
                 </div>
                 <span className="font-gill text-base leading-110 text-darkblack md:hidden">
@@ -286,7 +300,7 @@ const ProductDetailSidebar = ({
         aria-label="Customer support"
         className="flex min-h-260 items-center overflow-hidden bg-supportSurface px-6 py-8"
       >
-        <div className="flex max-w-358 flex-col gap-40">
+        <div className="flex max-w-358 flex-col gap-10">
           <div className="flex flex-col gap-3">
             <Reveal as="h2" direction="up" className="font-larken text-2xl font-light leading-110 text-darkblack">
               We&apos;re here for you
@@ -312,7 +326,7 @@ const ProductDetailSidebar = ({
         aria-label="Personalisation"
         className="flex items-end justify-between overflow-hidden bg-chalkCard pl-4 py-6 lg:min-h-260 lg:pl-6"
       >
-        <Reveal direction="up" className="flex max-w-[172px] shrink-0 flex-col gap-6 max-md:-mr-[22px] md:max-w-240 lg:max-w-280 lg:gap-40">
+        <Reveal direction="up" className="flex max-w-[172px] shrink-0 flex-col gap-6 max-md:-mr-[22px] md:max-w-240 lg:max-w-280 lg:gap-10">
           <div className="flex flex-col gap-3">
             <h2 className="w-max whitespace-nowrap font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
               Personalise this for you
@@ -384,7 +398,7 @@ const ProductDetailSidebar = ({
   }
 
   return (
-    <aside className="flex flex-col gap-40">
+    <aside className="flex flex-col gap-10">
       {purchaseSection}
       {detailsSection}
       {panels}

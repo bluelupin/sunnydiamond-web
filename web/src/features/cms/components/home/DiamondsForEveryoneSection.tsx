@@ -34,7 +34,7 @@ const DEFAULT_STEPS: SavingsPlanStep[] = [
 ];
 
 const StepCircle = ({ number }: { number: number }) => (
-  <div className="relative z-10 box-border flex size-40 shrink-0 items-center justify-center rounded-full border-[0.571px] border-solid border-darkblack bg-[#EBDFC6]">
+  <div className="relative z-10 box-border flex size-10 shrink-0 items-center justify-center rounded-full border-[0.571px] border-solid border-darkblack bg-[#EBDFC6]">
     <span className="font-gill text-xl font-light leading-none tracking-[0.2px] text-darkblack">
       {number}
     </span>
@@ -102,7 +102,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
         aria-busy="true"
         aria-label="Diamonds for Everyone"
       >
-        <div className="relative mx-auto flex w-full max-w-[1360px] flex-col items-center gap-8 px-4 md:gap-40 md:px-40">
+        <div className="relative mx-auto flex w-full max-w-[1360px] flex-col items-center gap-8 px-4 md:gap-10 md:px-10">
           <div className="flex w-full flex-col items-center gap-6 md:max-w-[510px]">
             <div className="h-4 w-40 rounded bg-black/10" aria-hidden />
             <div className="flex w-full flex-col items-center gap-3 md:gap-4">
@@ -148,7 +148,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
         </div>
       </div>
 
-      <div className="relative mx-auto flex w-full max-w-[1360px] flex-col items-center gap-8 px-4 md:gap-40 md:px-40">
+      <div className="relative mx-auto flex w-full max-w-[1360px] flex-col items-center gap-8 px-4 md:gap-10 md:px-10">
         <div className="flex w-full flex-col items-center gap-6 text-center md:max-w-[510px]">
           <Reveal as="p" direction="up" className="font-gill text-sm font-semibold leading-110 text-linkGold md:text-base md:font-normal">
             {eyebrow}
@@ -175,7 +175,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
             </div>
           </ScrollReveal>
 
-          <div className="flex w-full justify-center gap-[140px]">
+          <div className="flex w-full justify-center gap-10">
             {steps.map((step, index) => (
               <ScrollReveal key={step.stepNumber} delayMs={280 + index * 80} className="w-[250px]">
                 <StepDescription

@@ -254,7 +254,7 @@ function CollectionHeroPanel({
             {collectionCta &&
               <Link
                 href={collectionCta.href}
-                className="pointer-events-none inline-flex max-h-0 w-fit flex-col items-start overflow-hidden pb-0 pt-0 opacity-0 motion-safe:transition-[max-height,padding,opacity] motion-safe:duration-500 motion-safe:ease-out group-hover:pointer-events-auto group-hover:max-h-[72px] group-hover:pb-16 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:max-h-[72px] group-focus-within:pt-40 group-focus-within:opacity-100"
+                className="pointer-events-none inline-flex max-h-0 w-fit flex-col items-start overflow-hidden pb-0 pt-0 opacity-0 motion-safe:transition-[max-height,padding,opacity] motion-safe:duration-500 motion-safe:ease-out group-hover:pointer-events-auto group-hover:max-h-[72px] group-hover:pb-16 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:max-h-[72px] group-focus-within:pt-10 group-focus-within:opacity-100"
               >
                 <span className="text-link-underline inline-flex w-fit items-center border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white">
                   {collectionCta.label}
@@ -430,7 +430,7 @@ function ProductCarouselPanel({
       {!isMobile ? (
         <div className="flex h-full flex-col items-center">
           <div className="flex min-h-0 w-full flex-1 flex-col items-center justify-end">
-            <div className="relative mb-[40px] h-[400px] w-[400px] overflow-hidden">
+            <div className="relative mb-10 h-[400px] w-[400px] overflow-hidden">
               <div
                 className={cn(
                   "flex h-full items-center will-change-transform motion-reduce:transition-none",
@@ -597,7 +597,7 @@ export function AlankaraCollection({
       className={cn("w-full bg-white", className,)} >
       {sectionHeading &&
         <PageContainer className="lg:mt-100 mt-16">
-          <Reveal as="h2" direction="up" className="lg:mb-[40px] mb-8 text-center font-larken text-32 font-light leading-110 text-darkblack lg:text-left lg:text-48">
+          <Reveal as="h2" direction="up" className="lg:mb-10 mb-8 text-center font-larken text-32 font-light leading-110 text-darkblack lg:text-left lg:text-48">
             {sectionHeading}
           </Reveal>
         </PageContainer>

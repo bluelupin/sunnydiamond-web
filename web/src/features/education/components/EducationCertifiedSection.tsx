@@ -227,11 +227,11 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
         className="pointer-events-none absolute inset-0 hidden bg-[radial-gradient(ellipse_at_72%_58%,rgba(244,243,238,0)_0%,rgba(244,243,238,0.55)_45%,rgba(244,243,238,1)_78%)] md:block"
       />
 
-      <div className="relative flex flex-col items-center md:gap[40px] gap-8 mx-auto w-full 2xl:max-w-1920 max-w-1440 px-5 md:px-8 lg:px-[40px] 2xl:px-[60px]">
+      <div className="relative flex flex-col items-center md:gap[40px] gap-8 mx-auto w-full 2xl:max-w-1920 max-w-1440 px-5 md:px-8 lg:px-10 2xl:px-[60px]">
         <ScrollReveal
           as="h2"
           delayMs={0}
-          className="mb-8 w-full text-center md:mb-[40px]"
+          className="mb-8 w-full text-center md:mb-10"
         >
           <span
             id="education-certified-title"
@@ -275,7 +275,7 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
         </div>
 
         {/* Desktop logos — Figma 692:29096 */}
-        <div className="mb-[40px] hidden w-full grid-cols-4 md:grid">
+        <div className="mb-10 hidden w-full grid-cols-4 md:grid">
           {certificate.certifications.map((cert, index) => (
             <ScrollReveal key={cert.id} delayMs={80 + index * 80}>
               <div

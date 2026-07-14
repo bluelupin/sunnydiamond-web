@@ -131,7 +131,7 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
     return (
       <section
         id={id}
-        className="overflow-visible px-4 py-16 md:px-40 md:py-104"
+        className="overflow-visible px-4 py-16 md:px-10 md:py-104"
         aria-label="Featured diamond carousel"
         aria-busy="true"
       >

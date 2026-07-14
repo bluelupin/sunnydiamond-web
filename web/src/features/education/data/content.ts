@@ -1056,7 +1056,7 @@ export type EducationFaqItem = {
 };
 
 /** Shared section title → content spacing (32px mobile, 40px desktop). */
-export const educationSectionTitleSpacingClassName = "mb-8 lg:mb-40";
+export const educationSectionTitleSpacingClassName = "mb-8 lg:mb-10";
 
 /** Figma nodes 692:29045 (desktop) + 692:28787 (mobile) */
 export const educationFaqSpec = {

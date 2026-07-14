@@ -21,7 +21,7 @@ const AboutFacesSection = ({ title, description, members }: AboutFacesSectionPro
       aria-labelledby="about-faces-title"
       className="bg-white lg:pb-100 md:pb-20 pb-16"
     >
-      <div className="container flex flex-col items-center text-center lg:mb-[40px] mb-8">
+      <div className="container flex flex-col items-center text-center lg:mb-10 mb-8">
         <div className="flex max-w-full flex-col items-center lg:gap-4 gap-3">
           <Reveal as="h2" direction="up"
             id="about-faces-title"
@@ -67,7 +67,7 @@ const AboutFacesSection = ({ title, description, members }: AboutFacesSectionPro
                   "opacity-100 transition-opacity duration-500 lg:opacity-0 lg:group-hover:opacity-100",
                 )}
               />
-              <figcaption className="absolute bottom-0 left-0 z-10 w-full text-left opacity-100 transition-all duration-500 lg:translate-y-2 lg:px-[40px] md:px-9 px-8 lg:py-20 md:py-16 py-12 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100">
+              <figcaption className="absolute bottom-0 left-0 z-10 w-full text-left opacity-100 transition-all duration-500 lg:translate-y-2 lg:px-10 md:px-9 px-8 lg:py-20 md:py-16 py-12 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100">
                 <Reveal as="p" direction="up" className="font-larken font-light xl:text-2xl lg:text-xl text-xl text-white leading-110">
                   {member.name}
                 </Reveal>

@@ -19,7 +19,7 @@ const ProductsPage = () => {
           subtitle={productsContent.header.subtitle}
           title={productsContent.header.title}
           as="h1"
-          className="mb-[40px]"
+          className="mb-10"
         />
       </div>
 

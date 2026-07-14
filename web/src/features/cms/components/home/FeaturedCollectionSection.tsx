@@ -43,7 +43,7 @@ const FeaturedCollectionSection = ({
       >
         {sectionHeading ? (
           <div className="mx-auto w-full max-w-1440 px-4 pt-16 lg:px-8 lg:pt-104">
-            <h2 className="mb-40 text-center font-larken text-32 font-light leading-110 text-darkblack lg:text-left lg:text-48">
+            <h2 className="mb-10 text-center font-larken text-32 font-light leading-110 text-darkblack lg:text-left lg:text-48">
               {sectionHeading}
             </h2>
           </div>

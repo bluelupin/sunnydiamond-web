@@ -39,7 +39,7 @@ const JewelleryCategoryNav = ({ activeCategory, onCategoryChange }: JewelleryCat
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2",
                   )}
                 >
-                  <span className="flex size-6 shrink-0 items-center justify-center overflow-hidden lg:size-40">
+                  <span className="flex size-6 shrink-0 items-center justify-center overflow-hidden lg:size-10">
                     {(() => {
                       const Icon = categoryIconSrc[category.slug];
                       return <Icon className={cn("size-full text-current",

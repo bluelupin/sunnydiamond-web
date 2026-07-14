@@ -29,7 +29,7 @@ const ProductDetailAccordions = ({ items }: ProductDetailAccordionsProps) => {
               aria-controls={`product-accordion-${accordion.id}`}
               id={`product-accordion-trigger-${accordion.id}`}
               onClick={() => toggleAccordion(accordion.id)}
-              className="flex h-[40px] items-center justify-between text-left lg:h-14"
+              className="flex h-10 items-center justify-between text-left lg:h-14"
             >
               <span className="font-gill text-xl font-normal leading-110 text-darkblack lg:text-2xl">
                 {accordion.title}

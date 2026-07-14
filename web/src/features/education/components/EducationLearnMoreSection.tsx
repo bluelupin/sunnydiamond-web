@@ -400,7 +400,7 @@ const EducationLearnMoreSection = () => {
           <ScrollReveal delayMs={0}>
             <h2
               id="education-learn-more-title"
-              className="mb-8 text-center font-larken text-32 font-light leading-110 text-darkblack md:mb-[40px] md:text-5xl"
+              className="mb-8 text-center font-larken text-32 font-light leading-110 text-darkblack md:mb-10 md:text-5xl"
             >
               {educationLearnMoreContent.title}
             </h2>
