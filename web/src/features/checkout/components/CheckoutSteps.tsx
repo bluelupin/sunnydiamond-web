@@ -114,7 +114,7 @@ const CheckoutAddressFields = ({
       value={form[fields.addressLine2] as string}
       onChange={(value) => onChange(fields.addressLine2, value)}
     />
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       <CheckoutField
         id={`${idPrefix}-pincode`}
         label="Pincode"
@@ -336,7 +336,7 @@ export const CheckoutPaymentStep = ({
                 value={payment.cardNumber}
                 onChange={(value) => onPaymentChange("cardNumber", value)}
               />
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <CheckoutField
                   id="card-expiry"
                   label="Expiry Date"

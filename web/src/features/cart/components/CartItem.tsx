@@ -28,32 +28,32 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
   const isGift = Boolean(options.isGift || item.gifting);
 
   return (
-    <article className="relative flex flex-col gap-6 bg-white p-6">
+    <article className="relative flex flex-col gap-4 bg-white p-4 lg:gap-6 lg:p-6">
       {isGift ? (
         <CartGiftBadge variant="cart" className="absolute left-0 top-0 z-10" />
       ) : null}
 
       <div className="flex items-start justify-between gap-4">
-        <div className="flex min-w-0 max-w-[499.5px] flex-1 gap-6">
+        <div className="flex min-w-0 flex-1 gap-4 lg:max-w-[499.5px] lg:gap-6">
           <Link
             href={`/product/${product.id}`}
-            className="relative h-[105px] w-[140px] shrink-0 overflow-hidden bg-white max-lg:h-[90px] max-lg:w-[120px]"
+            className="relative h-[68px] w-[91px] shrink-0 overflow-hidden bg-white lg:h-[105px] lg:w-[140px]"
           >
             <OptimizedImage src={product.image} alt={product.name} />
           </Link>
 
-          <div className="flex w-[176px] min-w-0 max-w-[176px] flex-col gap-8 max-lg:max-w-none max-lg:flex-1">
-            <div className="flex flex-col gap-3">
+          <div className="flex min-w-0 flex-1 flex-col gap-3 lg:w-[176px] lg:max-w-[176px] lg:gap-8">
+            <div className="flex flex-col gap-2 lg:gap-3">
               <Link
                 href={`/product/${product.id}`}
-                className="font-gill text-base leading-110 text-darkblack transition-colors hover:text-darkMagenta"
+                className="font-gill text-sm leading-110 text-darkblack transition-colors hover:text-darkMagenta lg:text-base"
               >
                 {product.name}
               </Link>
 
               <CartMetaRow parts={meta} />
 
-              <p className="font-gill text-base leading-110 text-darkblack">
+              <p className="font-gill text-sm leading-110 text-darkblack lg:text-base">
                 {formatCartPrice(product.price * quantity)}
               </p>
             </div>
@@ -79,12 +79,12 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
 
       <CartDivider weight={0.5} />
 
-      <label className="flex w-fit cursor-pointer items-center gap-2">
+      <label className="flex w-fit cursor-pointer items-center gap-2 px-0 lg:px-4">
         <CartGiftCheckbox
           checked={isGift}
           onChange={(checked) => onUpdateOptions(item.id, { isGift: checked })}
         />
-        <span className="font-gill text-base leading-110 text-darkblack">
+        <span className="font-gill text-sm leading-110 text-darkblack lg:text-base">
           Mark this as a gift
         </span>
       </label>
@@ -92,17 +92,19 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
       <CartDivider weight={0.5} />
 
       <div className="flex flex-col gap-2 self-stretch">
-        <p className="font-gill text-xl leading-110 text-darkblack">Engraving</p>
+        <p className="font-gill text-base font-normal leading-110 text-darkblack lg:text-xl">
+          Engraving
+        </p>
 
         <div className="flex gap-2 self-stretch">
           <div className="flex h-14 min-w-0 flex-1 items-center bg-aboutInactive px-3">
-            <p className="truncate font-gill text-base leading-110 text-darkblack">
+            <p className="truncate font-gill text-sm leading-110 text-darkblack lg:text-base">
               {options.engraving ?? "Diya Gupta"}
             </p>
           </div>
           <CartOutlineLink
             href={`/product/${product.id}`}
-            className="h-14 w-auto shrink-0 px-7 uppercase"
+            className="h-14 w-auto shrink-0 px-5 uppercase lg:px-7"
           >
             Modify
           </CartOutlineLink>

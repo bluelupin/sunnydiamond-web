@@ -82,15 +82,15 @@ const CheckoutOtpModal = ({ open, phone, onClose, onVerify }: CheckoutOtpModalPr
         onClick={onClose}
         className="absolute inset-0 bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
       />
-      <div className="relative flex h-full w-full items-start justify-center px-4 pt-[231px]">
+      <div className="relative flex h-full w-full items-center justify-center px-5 py-8 max-lg:min-h-0 max-lg:py-6 lg:items-start lg:px-4 lg:pt-[231px]">
         <div
           role="dialog"
           aria-modal="true"
           aria-label="Enter OTP"
-          className="relative z-10 flex w-full max-w-[560px] flex-col gap-6 bg-white p-6"
+          className="relative z-10 flex w-full max-w-[560px] flex-col gap-6 bg-white p-6 max-lg:max-h-[calc(100vh-3rem)] max-lg:overflow-y-auto"
         >
           <div className="flex items-center justify-between">
-            <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">Enter OTP</h2>
+            <h2 className="font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">Enter OTP</h2>
             <button type="button" onClick={onClose} aria-label="Close">
               <X className="size-6 text-darkblack" />
             </button>

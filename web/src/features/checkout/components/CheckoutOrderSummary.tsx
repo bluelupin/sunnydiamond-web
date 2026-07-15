@@ -18,6 +18,7 @@ type CheckoutOrderSummaryProps = {
   ctaType?: "button" | "submit";
   ctaDisabled?: boolean;
   compact?: boolean;
+  stickyOnMobile?: boolean;
   className?: string;
 };
 
@@ -53,17 +54,25 @@ const CheckoutOrderSummary = ({
   ctaType = "button",
   ctaDisabled = false,
   compact = false,
+  stickyOnMobile = false,
   className,
 }: CheckoutOrderSummaryProps) => {
   const { items, subtotal, taxes, totalPrice } = useCart();
   const [offersOpen, setOffersOpen] = useState(false);
 
   return (
-    <aside className={cn("h-fit w-full lg:sticky lg:top-12", className)}>
+    <aside
+      className={cn(
+        "h-fit w-full lg:sticky lg:top-12",
+        stickyOnMobile &&
+          "max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:z-40 max-lg:border-t max-lg:border-aboutInactive max-lg:pb-[env(safe-area-inset-bottom,0px)] max-lg:shadow-[0_-4px_24px_rgba(0,0,0,0.08)]",
+        className,
+      )}
+    >
       <div className="flex flex-col gap-6 bg-white p-6">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-6">
-            <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
+            <h2 className="font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
               Order Summary
             </h2>
             <CheckoutSummaryDivider />
@@ -107,7 +116,7 @@ const CheckoutOrderSummary = ({
           {!compact ? (
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-6">
-                <h3 className="font-larken text-2xl font-light leading-110 text-darkblack">
+                <h3 className="font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
                   Price Details
                 </h3>
                 <CheckoutSummaryDivider />

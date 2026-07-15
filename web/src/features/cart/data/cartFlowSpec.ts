@@ -1,14 +1,43 @@
-/** Figma Cart Flow 2083:8397 — desktop measurements from design tokens */
+/** Figma Cart Flow — desktop 2083:8397, mobile 2083:5213 */
 export const cartFlowSpec = {
   page: {
     maxWidth: 1440,
     paddingX: 40,
+    paddingXMobile: 20,
     titleOffsetY: 128,
     contentOffsetY: 203,
     columnGap: 24,
     itemsColumnWidth: 783,
     sidebarWidth: 553,
     sectionGap: 40,
+    stickyFooterClearanceMobile: 112,
+  },
+  mobile: {
+    pageWidth: 375,
+    stickyFooterZIndex: 40,
+    drawerMaxHeight: "90vh",
+    bagDrawerMaxHeight: "85vh",
+    /** Figma 2083:5334 — mobile cart page, 2083:5415 — sticky footer */
+    cartPage: {
+      titleFontSize: 32,
+      titleMarginTop: 24,
+      titleMarginBottom: 24,
+      contentGap: 24,
+      cardPadding: 16,
+      cardGap: 16,
+      lineItemImage: { width: 91, height: 68 },
+      lineItemInfoGap: 12,
+      lineItemNameGap: 8,
+      lineItemActionsGap: 16,
+      stickyFooterPadding: 16,
+      stickyFooterGap: 16,
+      stickyFooterCollapsedClearance: 208,
+      stickyFooterExpandedClearance: 320,
+      priceBreakupLinkSize: 14,
+      stickyTotalFontSize: 24,
+      benefitsBarPadding: 16,
+      benefitsItemWidth: 90,
+    },
   },
   drawer: {
     desktopWidth: 472,
@@ -72,7 +101,7 @@ export const cartFlowSpec = {
   },
   typography: {
     pageTitleDesktop: 32,
-    pageTitleMobile: 24,
+    pageTitleMobile: 32,
     sectionTitleDesktop: 24,
     sectionTitleMobile: 20,
     checkoutTitleDesktop: 48,

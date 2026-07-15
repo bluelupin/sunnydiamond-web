@@ -65,7 +65,7 @@ const GiftingIntroPanel = ({
   return (
     <div className="flex w-full flex-col gap-6 bg-gray300 p-6">
       <div className="flex flex-col gap-6">
-        <h2 className="font-larken text-32 font-light leading-110 text-darkblack">
+        <h2 className="font-larken text-2xl font-light leading-110 text-darkblack lg:text-32">
           Gifting options
         </h2>
         <CartDivider weight={1} />

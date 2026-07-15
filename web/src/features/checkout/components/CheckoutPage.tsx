@@ -154,12 +154,12 @@ const CheckoutPage = () => {
   const sidebarCtaLabel = step === "payment" ? "Pay Now" : "Continue to Payment";
 
   return (
-    <section className="bg-gray300 pb-16">
-      <div className="mx-auto w-full max-w-[1440px] px-5 py-10 md:px-8 lg:px-10 lg:py-16">
+    <section className="bg-gray300 max-lg:pb-[calc(7rem+env(safe-area-inset-bottom,0px))] lg:pb-16">
+      <div className="mx-auto w-full max-w-[1440px] px-5 py-6 md:px-8 lg:px-10 lg:py-16">
         <h1
           className={cn(
-            "font-larken text-5xl font-light leading-110 text-darkblack",
-            step === "payment" ? "mb-10" : "mb-6",
+            "font-larken text-32 font-light leading-110 text-darkblack lg:text-5xl",
+            step === "payment" ? "mb-6 lg:mb-10" : "mb-6",
           )}
         >
           Complete Checkout
@@ -192,11 +192,22 @@ const CheckoutPage = () => {
           </div>
 
           <CheckoutOrderSummary
+            className="hidden lg:block"
             ctaLabel={sidebarCtaLabel}
             ctaDisabled={submitting || (step === "form" && !canContinueToPayment)}
             onCtaClick={step === "payment" ? placeOrder : handleContinueToPayment}
           />
         </div>
+      </div>
+
+      <div className="lg:hidden">
+        <CheckoutOrderSummary
+          compact
+          stickyOnMobile
+          ctaLabel={sidebarCtaLabel}
+          ctaDisabled={submitting || (step === "form" && !canContinueToPayment)}
+          onCtaClick={step === "payment" ? placeOrder : handleContinueToPayment}
+        />
       </div>
 
       <CheckoutOtpModal
