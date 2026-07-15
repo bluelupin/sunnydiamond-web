@@ -26,7 +26,7 @@ const CheckoutSuccessView = ({ contact, items, totalPrice }: CheckoutSuccessView
       <div className="flex w-full max-w-[560px] flex-col gap-6 bg-white p-6">
         <div className="flex flex-col items-center gap-4 text-center">
           <CartSuccessCheck />
-          <h1 className="font-larken text-[32px] font-light leading-110 text-darkblack">
+          <h1 className="font-larken text-32 font-light leading-110 text-darkblack">
             Order Successfully Placed
           </h1>
           <p className="font-gill text-base font-light leading-110 text-darkblack">

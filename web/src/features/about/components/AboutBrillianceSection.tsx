@@ -39,7 +39,7 @@ const AboutBrillianceSection = ({
           >
             <Reveal as="h2" direction="up"
               id="about-crafting-rarity-title"
-              className="whitespace-pre-line font-larken text-40 font-light leading-110 text-darkblack sm:text-56 md:text-72 lg:text-90">
+              className="whitespace-pre-line font-larken text-40 font-light leading-110 text-darkblack sm:text-56 md:text-7xl lg:text-90">
               {heading}
             </Reveal>
           </div>

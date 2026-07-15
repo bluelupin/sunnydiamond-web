@@ -60,7 +60,7 @@ const AboutHeroSection = ({ title, image }: AboutHeroSectionProps) => {
             <h1
               id="about-hero-title"
               className={cn(
-                "w-full max-w-886 text-center font-larken text-32 font-light leading-110 text-white sm:text-36 lg:text-5xl 2xl:text-5xl",
+                "w-full max-w-886 text-center font-larken text-32 font-light leading-110 text-white sm:text-4xl lg:text-5xl 2xl:text-5xl",
                 // titleTransition,
                 // titleVisible ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0",
               )}

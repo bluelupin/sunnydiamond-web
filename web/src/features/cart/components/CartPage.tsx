@@ -12,7 +12,7 @@ const CartPage = () => {
   if (items.length === 0) {
     return (
       <section className="flex min-h-[60vh] flex-col items-center justify-center gap-4 bg-gray300 px-4 py-20 text-center">
-        <h1 className="font-larken text-2xl font-light leading-110 text-darkblack lg:text-[32px]">
+        <h1 className="font-larken text-2xl font-light leading-110 text-darkblack lg:text-32">
           Your bag is empty
         </h1>
         <p className="max-w-md font-gill text-base font-light leading-110 text-neutral500">
@@ -29,7 +29,7 @@ const CartPage = () => {
     <>
       <section className="bg-gray300 pb-28 lg:pb-16">
         <div className="mx-auto w-full px-5 md:px-8 lg:px-10 lg:py-6 2xl:max-w-1920 2xl:px-[60px]">
-          <h1 className="mb-10 mt-6 font-larken text-2xl font-light leading-110 text-darkblack lg:text-[32px]">
+          <h1 className="mb-10 mt-6 font-larken text-2xl font-light leading-110 text-darkblack lg:text-32">
             Your Shopping Bag
           </h1>
 

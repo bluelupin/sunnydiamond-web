@@ -220,7 +220,7 @@ const LearnAnatomyDetailPanel = ({ detail }: { detail: EducationLearnAnatomyDeta
         </div>
       </div>
       <div className="flex w-full max-w-full flex-col lg:gap-6 gap-4 md:pt-2">
-        <h3 className="w-fit font-larken text-2xl font-light leading-110 text-darkblack md:text-[32px] border-b-[1.5px] border-neutral300 pb-3">
+        <h3 className="w-fit font-larken text-2xl font-light leading-110 text-darkblack md:text-32 border-b-[1.5px] border-neutral300 pb-3">
           {detail.title}
         </h3>
         <ul className="flex flex-col gap-5 md:gap-6">
