@@ -93,7 +93,7 @@ const CheckoutPage = () => {
         <h1 className="font-larken text-2xl font-light leading-110 text-darkblack">
           No items to checkout
         </h1>
-        <CartOutlineLink href="/jewellery-product">Continue Shopping</CartOutlineLink>
+        <CartOutlineLink href="/jewellery-product" className="w-fit">Continue Shopping</CartOutlineLink>
       </section>
     );
   }
@@ -156,7 +156,12 @@ const CheckoutPage = () => {
   return (
     <section className="bg-gray300 pb-16">
       <div className="mx-auto w-full max-w-[1440px] px-5 py-10 md:px-8 lg:px-10 lg:py-16">
-        <h1 className="mb-6 font-larken text-5xl font-light leading-110 text-darkblack">
+        <h1
+          className={cn(
+            "font-larken text-5xl font-light leading-110 text-darkblack",
+            step === "payment" ? "mb-10" : "mb-6",
+          )}
+        >
           Complete Checkout
         </h1>
 
@@ -166,7 +171,7 @@ const CheckoutPage = () => {
             showOtpModal && "lg:grid-cols-[minmax(0,899px)_437px]",
           )}
         >
-          <div className="flex flex-col gap-6">
+          <div className={cn("flex flex-col", step === "payment" ? "gap-[33px]" : "gap-6")}>
             {step === "form" ? (
               <CheckoutFormStep
                 form={form}
@@ -181,6 +186,7 @@ const CheckoutPage = () => {
                 onPaymentChange={updatePayment}
                 onEditPersonal={() => setStep("form")}
                 onEditDelivery={() => setStep("form")}
+                onEditPayment={() => setStep("form")}
               />
             )}
           </div>

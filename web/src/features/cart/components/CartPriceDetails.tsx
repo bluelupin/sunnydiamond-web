@@ -76,8 +76,8 @@ const CartPriceDetails = ({
       ) : null}
 
       {children}
-
-      <div className="flex flex-col gap-4 border-t border-neutral300 pt-6 [border-top-width:0.5px]">
+      <hr className="border-neutral300"/>
+      <div className="flex flex-col gap-4">
         {showCheckoutCta ? (
           <CartPrimaryLink href="/checkout" className="uppercase">
             Checkout

@@ -63,28 +63,28 @@ const GiftingIntroPanel = ({
   };
 
   return (
-  <div className="flex w-full flex-col gap-6 bg-gray300 p-6">
-    <div className="flex flex-col gap-6">
-      <h2 className="font-larken text-32 font-light leading-110 text-darkblack">
-        Gifting options
-      </h2>
-      <CartDivider weight={1} />
-      <p className="font-gill text-base font-light leading-110 text-darkblack">
-        You can choose to personalise your gifts by adding a note and signature gift bags.
-      </p>
-    </div>
-
-    <div className="flex flex-col gap-4 border-t border-neutral300 pt-6 [border-top-width:0.5px]">
-      <CartPrimaryButton type="button" className="w-full uppercase" onClick={onPersonalise}>
-        Personalise Gift
-      </CartPrimaryButton>
-      <div className="flex justify-center">
-        <CartTextLink onClick={handleContinueToCheckout} className="uppercase">
-          Continue to Checkout
-        </CartTextLink>
+    <div className="flex w-full flex-col gap-6 bg-gray300 p-6">
+      <div className="flex flex-col gap-6">
+        <h2 className="font-larken text-32 font-light leading-110 text-darkblack">
+          Gifting options
+        </h2>
+        <CartDivider weight={1} />
+        <p className="font-gill text-base font-light leading-110 text-darkblack">
+          You can choose to personalise your gifts by adding a note and signature gift bags.
+        </p>
+      </div>
+      <hr className="border-neutral300" />
+      <div className="flex flex-col gap-4">
+        <CartPrimaryButton type="button" className="w-full uppercase" onClick={onPersonalise}>
+          Personalise Gift
+        </CartPrimaryButton>
+        <div className="flex justify-center">
+          <CartTextLink onClick={handleContinueToCheckout} className="uppercase">
+            Continue to Checkout
+          </CartTextLink>
+        </div>
       </div>
     </div>
-  </div>
   );
 };
 

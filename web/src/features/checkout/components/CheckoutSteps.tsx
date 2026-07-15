@@ -5,7 +5,7 @@ import {
   CheckoutCheckbox,
   CheckoutField,
   CheckoutPhoneField,
-  CheckoutRadioOption,
+  CheckoutRadioRow,
   CheckoutSectionCard,
   CheckoutSectionHeading,
   CheckoutSelectField,
@@ -230,7 +230,22 @@ type CheckoutPaymentStepProps = {
   onPaymentChange: (field: keyof CheckoutPaymentData, value: string) => void;
   onEditPersonal: () => void;
   onEditDelivery: () => void;
+  onEditPayment: () => void;
 };
+
+const PaymentCardLogos = () => (
+  <div className="flex h-6 items-center gap-2">
+    <div className="flex h-6 w-10 items-center justify-center overflow-hidden rounded-sm bg-white">
+      <VisaLogo className="h-4 w-10" />
+    </div>
+    <div className="flex h-6 w-10 items-center justify-center overflow-hidden rounded-sm bg-white">
+      <MastercardLogo className="h-6 w-10" />
+    </div>
+    <div className="flex h-6 w-10 items-center justify-center overflow-hidden rounded-sm bg-white">
+      <AmexLogo className="h-6 w-10" />
+    </div>
+  </div>
+);
 
 export const CheckoutPaymentStep = ({
   form,
@@ -238,6 +253,7 @@ export const CheckoutPaymentStep = ({
   onPaymentChange,
   onEditPersonal,
   onEditDelivery,
+  onEditPayment,
 }: CheckoutPaymentStepProps) => {
   const shippingLines = buildAddressLines({
     addressLine1: form.addressLine1,
@@ -275,41 +291,39 @@ export const CheckoutPaymentStep = ({
 
       <CheckoutSectionCard gapClassName="gap-8">
         <CheckoutSectionHeading onEdit={onEditDelivery}>Delivery Address</CheckoutSectionHeading>
-        <CheckoutSubheading>SHIPPING ADDRESS</CheckoutSubheading>
-        <CheckoutAddressBlock name={form.shippingName || form.name} lines={shippingLines} />
-        <CheckoutSubheading>BILLING ADDRESS</CheckoutSubheading>
-        <CheckoutCheckbox
-          checked={form.billingSameAsShipping}
-          onChange={() => undefined}
-          readOnly
-          label="My billing address is the same as my shipping address"
-        />
-        {!form.billingSameAsShipping ? (
-          <CheckoutAddressBlock name={billingName} lines={billingLines} />
-        ) : null}
+        <div className="flex flex-col gap-4">
+          <CheckoutSubheading>SHIPPING ADDRESS</CheckoutSubheading>
+          <CheckoutAddressBlock name={form.shippingName || form.name} lines={shippingLines} />
+        </div>
+        <div className="flex flex-col gap-4">
+          <CheckoutSubheading>BILLING ADDRESS</CheckoutSubheading>
+          <CheckoutCheckbox
+            checked={form.billingSameAsShipping}
+            onChange={() => undefined}
+            readOnly
+            label="My billing address is the same as my shipping address"
+          />
+          {!form.billingSameAsShipping ? (
+            <CheckoutAddressBlock name={billingName} lines={billingLines} />
+          ) : null}
+        </div>
       </CheckoutSectionCard>
 
       <CheckoutSectionCard gapClassName="gap-6">
-        <CheckoutSectionHeading>Payment Mehtod</CheckoutSectionHeading>
+        <CheckoutSectionHeading onEdit={onEditPayment}>Payment Mehtod</CheckoutSectionHeading>
 
-        <div className="flex flex-col gap-2">
-          <CheckoutRadioOption
-            checked={payment.method === "card"}
-            onChange={() => onPaymentChange("method", "card")}
-            label="Credit/Debit Card"
-          >
-            <div className="flex items-center gap-2 pl-6">
-              <div className="flex h-6 w-10 items-center justify-center rounded bg-white">
-                <VisaLogo className="h-4 w-10" />
-              </div>
-              <div className="flex h-6 w-10 items-center justify-center rounded bg-white">
-                <MastercardLogo className="h-6 w-10" />
-              </div>
-              <div className="flex h-6 w-10 items-center justify-center rounded bg-white">
-                <AmexLogo className="h-6 w-10" />
-              </div>
-            </div>
-            <div className="flex flex-col gap-6 pl-6">
+        <div className="flex flex-col gap-6">
+          <div className="flex items-center justify-between self-stretch">
+            <CheckoutRadioRow
+              checked={payment.method === "card"}
+              onChange={() => onPaymentChange("method", "card")}
+              label="Credit/Debit Card"
+            />
+            {payment.method === "card" ? <PaymentCardLogos /> : null}
+          </div>
+
+          {payment.method === "card" ? (
+            <>
               <CheckoutField
                 id="card-name"
                 label="Name on Card"
@@ -336,28 +350,29 @@ export const CheckoutPaymentStep = ({
                   onChange={(value) => onPaymentChange("cvv", value)}
                 />
               </div>
-            </div>
-          </CheckoutRadioOption>
+            </>
+          ) : null}
 
-          <CheckoutRadioOption
+          <CheckoutRadioRow
             checked={payment.method === "upi"}
             onChange={() => onPaymentChange("method", "upi")}
             label="UPI"
           />
 
-          <CheckoutRadioOption
+          <CheckoutRadioRow
             checked={payment.method === "netbanking"}
             onChange={() => onPaymentChange("method", "netbanking")}
             label="Net Banking"
           />
 
-          <CheckoutRadioOption
+          <CheckoutRadioRow
             checked={payment.method === "cod"}
             onChange={() => onPaymentChange("method", "cod")}
+            align="start"
             label={
-              <span>
-                Cash On Delivery
-                <span className="ml-1 font-gill text-xs font-light leading-110 text-darkblack">
+              <span className="flex flex-col gap-1">
+                <span>Cash On Delivery</span>
+                <span className="font-gill text-xs font-light leading-110 text-darkblack">
                   *for orders up to ₹40,000
                 </span>
               </span>

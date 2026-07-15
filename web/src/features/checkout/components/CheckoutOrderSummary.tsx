@@ -152,8 +152,8 @@ const CheckoutOrderSummary = ({
             </div>
           )}
         </div>
-
-        <div className="flex flex-col gap-4 border-t border-neutral300 pt-6 [border-top-width:0.5px]">
+        <hr className="border-neutral300" />
+        <div className="flex flex-col gap-4">
           <CartPrimaryButton
             type={ctaType}
             className="w-full uppercase"

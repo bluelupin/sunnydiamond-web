@@ -1,6 +1,7 @@
 "use client";
 
-import { Check, ChevronDown, Pencil } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
+import EditIcon from "@/assets/Icons/EditIcon";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import {
   Select,
@@ -157,11 +158,11 @@ type CheckoutSectionHeadingProps = {
 };
 
 export const CheckoutSectionHeading = ({ children, onEdit }: CheckoutSectionHeadingProps) => (
-  <div className="flex items-center justify-between gap-4">
+  <div className="flex items-center justify-between">
     <h2 className="font-gill text-2xl font-normal leading-110 text-darkblack">{children}</h2>
     {onEdit ? (
-      <button type="button" onClick={onEdit} aria-label={`Edit ${children}`}>
-        <Pencil className="size-4 text-darkblack" />
+      <button type="button" onClick={onEdit} aria-label={`Edit ${children}`} className="shrink-0">
+        <EditIcon className="size-6 text-darkblack" />
       </button>
     ) : null}
   </div>
@@ -206,27 +207,51 @@ type CheckoutRadioOptionProps = {
   onChange: () => void;
   label: React.ReactNode;
   children?: React.ReactNode;
+  align?: "center" | "start";
 };
+
+export const CheckoutRadioRow = ({
+  checked,
+  onChange,
+  label,
+  align = "center",
+}: Omit<CheckoutRadioOptionProps, "children">) => (
+  <label
+    className={cn(
+      "flex cursor-pointer gap-2",
+      align === "start" ? "items-start" : "items-center",
+    )}
+  >
+    <button
+      type="button"
+      role="radio"
+      aria-checked={checked}
+      onClick={onChange}
+      className={cn(
+        "flex size-6 shrink-0 items-center justify-center rounded-full border-[0.8px] border-darkblack bg-white",
+        align === "start" && "mt-1",
+      )}
+    >
+      <span
+        className={cn(
+          "size-2.5 rounded-full bg-darkblack transition-opacity",
+          checked ? "opacity-100" : "opacity-0",
+        )}
+      />
+    </button>
+    <div className="font-gill text-base font-normal leading-110 text-darkblack">{label}</div>
+  </label>
+);
 
 export const CheckoutRadioOption = ({
   checked,
   onChange,
   label,
   children,
+  align = "center",
 }: CheckoutRadioOptionProps) => (
   <div className="flex flex-col gap-4">
-    <label className="flex cursor-pointer items-center gap-2">
-      <button
-        type="button"
-        role="radio"
-        aria-checked={checked}
-        onClick={onChange}
-        className="flex size-4 shrink-0 items-center justify-center rounded-full border-[0.8px] border-darkblack bg-white"
-      >
-        <span className={cn("size-2 rounded-full bg-darkblack transition-opacity", checked ? "opacity-100" : "opacity-0")} />
-      </button>
-      <span className="font-gill text-base font-normal leading-110 text-darkblack">{label}</span>
-    </label>
+    <CheckoutRadioRow checked={checked} onChange={onChange} label={label} align={align} />
     {checked ? children : null}
   </div>
 );

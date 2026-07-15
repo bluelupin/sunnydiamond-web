@@ -129,7 +129,7 @@ const CheckoutOtpModal = ({ open, phone, onClose, onVerify }: CheckoutOtpModalPr
                 : "Resend code"}
             </p>
           </div>
-
+          <hr className="border-neutral300" />
           <CartPrimaryButton
             type="button"
             className="w-full uppercase"
