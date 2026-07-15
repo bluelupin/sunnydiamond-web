@@ -19,7 +19,7 @@ export const DetailTextLink = ({ children, href, onClick, className, light }: De
 
   if (href) {
     return (
-      <Link href={href} className={classes}>
+      <Link href={href} onClick={onClick} className={classes}>
         {children}
       </Link>
     );

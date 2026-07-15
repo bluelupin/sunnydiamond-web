@@ -79,7 +79,7 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
 
       <CartDivider weight={0.5} />
 
-      <label className="flex w-fit cursor-pointer items-center gap-2 px-4">
+      <label className="flex w-fit cursor-pointer items-center gap-2">
         <CartGiftCheckbox
           checked={isGift}
           onChange={(checked) => onUpdateOptions(item.id, { isGift: checked })}

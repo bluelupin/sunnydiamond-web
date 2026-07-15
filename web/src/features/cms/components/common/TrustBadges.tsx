@@ -3,12 +3,14 @@
 import { useMemo } from "react";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
 import { cn } from "@/shared/utils/cn";
+import { usePathname } from "next/navigation";
 interface TrustBadgeSectionProps {
     id?: string;
     itemClassName?: string;
 }
 
 const TrustBadgeSection = ({ id, itemClassName = "text-gray500", }: TrustBadgeSectionProps) => {
+    const pathName = usePathname();
     const { data: shoppingData, isLoading: isShoppingLoading } = useHomepageShoppingBlocks();
     const normalizedTrust = useMemo(() => {
         const trustSource = shoppingData?.trustBadges || shoppingData?.homepage?.trustBadges || [];
@@ -28,7 +30,7 @@ const TrustBadgeSection = ({ id, itemClassName = "text-gray500", }: TrustBadgeSe
     const showSkeleton = isShoppingLoading && marqueeItems.length === 0;
 
     return (
-        <section className="shrink-0 overflow-hidden border-t border-ivory/10 bg-gray300 text-ivory">
+        <section className={cn(pathName === "/cart" || "//checkout" ? "bg-gray200" : "bg-gray300", "shrink-0 overflow-hidden border-t border-ivory/10 text-ivory")}>
             <div className="relative flex h-[64px] overflow-hidden">
                 <div className="flex shrink-0 animate-marquee items-center whitespace-nowrap">
                     {showSkeleton ? (

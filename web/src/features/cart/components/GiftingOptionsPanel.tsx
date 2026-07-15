@@ -1,13 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Image from "next/image";
-import { X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Check, X } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
-import { useCart } from "../context/CartContext";
-import { useCartUI } from "../context/CartUIContext";
-import { cartFlowSpec } from "../data/cartFlowSpec";
-import { formatCartLineMeta, formatCartPrice } from "../utils/formatCartLine";
 import {
   Drawer,
   DrawerContent,
@@ -18,168 +15,428 @@ import {
   SheetContent,
   SheetTitle,
 } from "@/shared/ui/sheet";
+import { useCart } from "../context/CartContext";
+import { useCartUI } from "../context/CartUIContext";
+import { formatCartLineMeta, formatCartPrice } from "../utils/formatCartLine";
 import {
   CartDivider,
   CartMetaRow,
-  CartOutlineButton,
-  CartOutlineLink,
   CartPrimaryButton,
+  CartTextLink,
 } from "./CartFlowUi";
 
-const GiftingPanelBody = ({ onClose }: { onClose: () => void }) => {
+const giftingFadeClassName = "transition-opacity duration-300 ease-out motion-reduce:transition-none";
+
+const useGiftingModalEffects = (open: boolean, onClose: () => void) => {
+  useEffect(() => {
+    if (!open) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open, onClose]);
+};
+
+const GiftingIntroPanel = ({
+  onClose,
+  onPersonalise,
+}: {
+  onClose: () => void;
+  onPersonalise: () => void;
+}) => {
+  const router = useRouter();
+
+  const handleContinueToCheckout = () => {
+    onClose();
+    router.push("/checkout");
+  };
+
+  return (
+  <div className="flex w-full flex-col gap-6 bg-gray300 p-6">
+    <div className="flex flex-col gap-6">
+      <h2 className="font-larken text-[32px] font-light leading-110 text-darkblack">
+        Gifting options
+      </h2>
+      <CartDivider weight={1} />
+      <p className="font-gill text-base font-light leading-110 text-darkblack">
+        You can choose to personalise your gifts by adding a note and signature gift bags.
+      </p>
+    </div>
+
+    <div className="flex flex-col gap-4 border-t border-neutral300 pt-6 [border-top-width:0.5px]">
+      <CartPrimaryButton type="button" className="w-full uppercase" onClick={onPersonalise}>
+        Personalise Gift
+      </CartPrimaryButton>
+      <div className="flex justify-center">
+        <CartTextLink onClick={handleContinueToCheckout} className="uppercase">
+          Continue to Checkout
+        </CartTextLink>
+      </div>
+    </div>
+  </div>
+  );
+};
+
+const GiftingItemCheckbox = ({
+  checked,
+  onChange,
+  label,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  label: string;
+}) => (
+  <button
+    type="button"
+    role="checkbox"
+    aria-checked={checked}
+    aria-label={label}
+    onClick={() => onChange(!checked)}
+    className={cn(
+      "flex size-5 shrink-0 items-center justify-center border-[0.8px] border-darkblack bg-white",
+      checked && "border-transparent bg-linkGold",
+    )}
+  >
+    <Check
+      className={cn("size-3 text-white transition-opacity", checked ? "opacity-100" : "opacity-0")}
+      strokeWidth={2.5}
+    />
+  </button>
+);
+
+const GiftingNoteField = ({
+  id,
+  value,
+  onChange,
+  placeholder = "Add Gift Note",
+  variant = "single",
+}: {
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  variant?: "single" | "separate";
+}) => (
+  <div className="flex h-14 items-center gap-4 bg-aboutInactive px-3">
+    <input
+      id={id}
+      type="text"
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      placeholder={placeholder}
+      className={cn(
+        "h-14 min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none",
+        variant === "single"
+          ? "placeholder:font-normal placeholder:text-gray600"
+          : "placeholder:font-light placeholder:text-darkblack",
+      )}
+    />
+  </div>
+);
+
+const GiftingSeparateToggle = ({
+  checked,
+  onChange,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}) => (
+  <button
+    type="button"
+    role="switch"
+    aria-checked={checked}
+    aria-label="Send items as separate gifts"
+    onClick={() => onChange(!checked)}
+    className={cn(
+      "relative h-6 w-[44px] shrink-0 rounded-full p-1 transition-colors",
+      checked ? "bg-linkGold" : "bg-neutral300",
+    )}
+  >
+    <span
+      className={cn(
+        "absolute top-1/2 size-[18px] -translate-y-1/2 rounded-full transition-transform",
+        checked ? "left-[calc(100%-22px)] bg-aboutInactive" : "left-1 bg-white",
+      )}
+    />
+  </button>
+);
+
+const GiftingBagHero = ({ isSeparate }: { isSeparate: boolean }) => (
+  <div className="flex flex-col gap-6">
+    <p className="font-gill text-base font-light leading-110 text-darkblack">
+      {isSeparate
+        ? "Each of your items will be delivered in separate bags"
+        : "Your items will be gift wrapped in a single bag"}
+    </p>
+    <div className="relative h-[140px] w-full overflow-hidden bg-gray200">
+      <div
+        className="absolute inset-x-0 top-[-26px] h-[192px] bg-gradient-to-b from-gray200 via-gray300/60 to-gray200"
+        aria-hidden
+      />
+    </div>
+  </div>
+);
+
+const GiftingScrollIndicator = () => (
+  <div
+    className="pointer-events-none absolute bottom-6 right-0 top-6 flex w-[2px] justify-center rounded-[70px] bg-neutral300"
+    aria-hidden
+  >
+    <div className="h-[246px] w-[3px] bg-gray600" />
+  </div>
+);
+
+const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
   const { items, updateLineItemGifting } = useCart();
-  const { giftingStep, openGiftingPanel } = useCartUI();
   const [wrapMode, setWrapMode] = useState<"single" | "separate">("single");
   const [giftNote, setGiftNote] = useState("");
+  const [itemNotes, setItemNotes] = useState<Record<string, string>>({});
+  const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(
+    () => new Set(items.map((item) => item.id)),
+  );
+
+  useEffect(() => {
+    setSelectedItemIds(new Set(items.map((item) => item.id)));
+  }, [items]);
+
+  const isSeparate = wrapMode === "separate";
+
+  const selectedItems = useMemo(
+    () => items.filter((item) => selectedItemIds.has(item.id)),
+    [items, selectedItemIds],
+  );
+
+  const toggleItemSelection = (itemId: string, checked: boolean) => {
+    setSelectedItemIds((prev) => {
+      const next = new Set(prev);
+      if (checked) {
+        next.add(itemId);
+      } else {
+        next.delete(itemId);
+      }
+      return next;
+    });
+  };
 
   const applyGifting = () => {
-    items.forEach((item) => {
-      updateLineItemGifting(item.id, { wrapMode, note: giftNote.trim() || undefined });
+    selectedItems.forEach((item) => {
+      const note =
+        wrapMode === "separate"
+          ? itemNotes[item.id]?.trim()
+          : giftNote.trim();
+
+      updateLineItemGifting(item.id, {
+        wrapMode,
+        note: note || undefined,
+      });
     });
     onClose();
   };
 
-  if (giftingStep === "intro") {
-    return (
+  const renderItemRow = (item: (typeof items)[number], mode: "single" | "separate") => (
+    <div
+      className={cn(
+        "flex min-w-0 flex-1 items-center",
+        mode === "single" ? "gap-6" : "gap-4",
+      )}
+    >
       <div
-        className="flex h-full flex-col"
-        style={{
-          backgroundColor: cartFlowSpec.colors.pageBackground,
-          padding: cartFlowSpec.drawer.contentPadding,
-        }}
+        className={cn(
+          "relative shrink-0 overflow-hidden bg-gray200",
+          mode === "single" ? "h-[53px] w-[60px]" : "h-[71px] w-20",
+        )}
       >
-        <div className="flex flex-col" style={{ gap: cartFlowSpec.drawer.sectionGap }}>
-          <h2 className="font-larken text-[32px] font-light leading-110 text-darkblack">
-            Gifting options
-          </h2>
-          <CartDivider weight={1} />
-          <p className="font-gill text-base font-light leading-110 text-darkblack">
-            You can choose to personalise your gifts by adding a note and signature gift bags.
-          </p>
-        </div>
-        <div
-          className="mt-auto flex flex-col"
-          style={{ gap: cartFlowSpec.priceDetails.ctaGap, paddingTop: 40 }}
-        >
-          <CartPrimaryButton
-            type="button"
-            className="w-full uppercase"
-            onClick={() => openGiftingPanel("personalise")}
-          >
-            Personalise Gift
-          </CartPrimaryButton>
-          <CartOutlineLink href="/checkout" onClick={onClose}>
-            Continue to Checkout
-          </CartOutlineLink>
-        </div>
+        <Image src={item.product.image} alt={item.product.name} fill className="object-cover" />
       </div>
-    );
-  }
+      <div className="flex min-w-0 flex-1 flex-col gap-3">
+        <p className="font-gill text-base font-normal leading-110 text-darkblack">
+          {item.product.name}
+        </p>
+        <CartMetaRow parts={formatCartLineMeta(item)} />
+        <p className="font-gill text-base font-normal leading-110 text-darkblack">
+          {formatCartPrice(item.product.price)}
+        </p>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-white">
-      <div
-        className="flex items-center justify-between border-b border-neutral200"
-        style={{ padding: `${cartFlowSpec.card.metaGap * 2}px ${cartFlowSpec.drawer.contentPadding}px` }}
-      >
-        <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
-          Gifting Options
-        </h2>
-        <button type="button" onClick={onClose} aria-label="Close gifting options">
-          <X className="size-6 text-darkblack" />
-        </button>
-      </div>
-
-      <div
-        className="flex flex-1 flex-col overflow-y-auto"
-        style={{ padding: cartFlowSpec.drawer.contentPadding, gap: cartFlowSpec.drawer.sectionGap }}
-      >
-        <div className="flex flex-col gap-3">
-          <button
-            type="button"
-            onClick={() => setWrapMode("single")}
-            className={cn(
-              "border px-4 py-3 text-left font-gill text-base font-light leading-110",
-              wrapMode === "single" ? "border-darkblack bg-gray300" : "border-neutral300 bg-white",
-            )}
-          >
-            Your items will be gift wrapped in a single bag
-          </button>
-          <button
-            type="button"
-            onClick={() => setWrapMode("separate")}
-            className={cn(
-              "border px-4 py-3 text-left font-gill text-base font-light leading-110",
-              wrapMode === "separate" ? "border-darkblack bg-gray300" : "border-neutral300 bg-white",
-            )}
-          >
-            Each of your items will be delivered in separate bags
+    <div className="relative flex h-full min-h-0 flex-col bg-white">
+      <div className="w-full shrink-0 px-6 pt-10">
+        <div className="flex h-[26px] items-center justify-between">
+          <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
+            Gifting Options
+          </h2>
+          <button type="button" onClick={onClose} aria-label="Close gifting options">
+            <X className="size-6 text-darkblack" />
           </button>
         </div>
-
-        <div className="flex flex-col gap-2">
-          <label htmlFor="gift-note" className="font-gill text-base leading-110 text-neutral500">
-            Add Gift Note
-          </label>
-          <textarea
-            id="gift-note"
-            value={giftNote}
-            onChange={(event) => setGiftNote(event.target.value)}
-            rows={4}
-            className="resize-none border border-neutral300 bg-white p-3 font-gill text-base leading-110 text-darkblack outline-none focus:border-darkblack"
-            placeholder="Write a personalised message..."
-          />
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <p className="font-gill text-base font-light leading-110 text-darkblack">
-            Items currently in your shopping bag
-          </p>
-          {items.map((item) => (
-            <div
-              key={item.id}
-              className="flex items-center border border-neutral200"
-              style={{
-                gap: cartFlowSpec.card.imageGap,
-                padding: `${cartFlowSpec.drawer.previewPaddingY}px ${cartFlowSpec.drawer.previewPaddingX}px`,
-                backgroundColor: cartFlowSpec.colors.previewBackground,
-              }}
-            >
-              <div
-                className="relative shrink-0 overflow-hidden bg-neutral200"
-                style={{
-                  width: cartFlowSpec.drawer.previewImage.width,
-                  height: cartFlowSpec.drawer.previewImage.height,
-                }}
-              >
-                <Image src={item.product.image} alt={item.product.name} fill className="object-cover" />
-              </div>
-              <div className="min-w-0 flex flex-col" style={{ gap: cartFlowSpec.drawer.previewInfoGap }}>
-                <p className="font-gill text-base leading-110 text-darkblack">{item.product.name}</p>
-                <CartMetaRow parts={formatCartLineMeta(item)} />
-                <p className="font-gill text-base leading-110 text-darkblack">
-                  {formatCartPrice(item.product.price)}
-                </p>
-              </div>
-            </div>
-          ))}
+        <div className="mt-6">
+          <CartDivider weight={1} />
         </div>
       </div>
 
-      <div
-        className="border-t border-neutral200"
-        style={{ padding: cartFlowSpec.drawer.contentPadding }}
-      >
+      <div className="relative min-h-0 flex-1 pb-5">
+        <div className="flex h-full min-h-0 flex-col gap-6 overflow-y-auto px-6 pb-6 pt-6">
+          <GiftingBagHero isSeparate={isSeparate} />
+
+          {!isSeparate ? (
+            <GiftingNoteField
+              id="gift-note"
+              value={giftNote}
+              onChange={setGiftNote}
+            />
+          ) : null}
+
+          <div className="flex flex-col gap-6">
+            <p className="font-gill text-base font-light leading-110 text-darkblack">
+              Items currently in your shopping bag
+            </p>
+
+            {!isSeparate ? (
+              <div className="flex flex-col gap-6 bg-gray300 p-4">
+                {items.map((item) => (
+                  <div key={item.id} className="flex items-center gap-2">
+                    <GiftingItemCheckbox
+                      checked={selectedItemIds.has(item.id)}
+                      onChange={(checked) => toggleItemSelection(item.id, checked)}
+                      label={`Include ${item.product.name} in gifting`}
+                    />
+                    {renderItemRow(item, "single")}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-6">
+                {items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex flex-col gap-4 border border-neutral300 bg-white px-4 py-6 [border-width:0.5px]"
+                  >
+                    <div className="flex items-center gap-3">
+                      <GiftingItemCheckbox
+                        checked={selectedItemIds.has(item.id)}
+                        onChange={(checked) => toggleItemSelection(item.id, checked)}
+                        label={`Include ${item.product.name} in gifting`}
+                      />
+                      {renderItemRow(item, "separate")}
+                    </div>
+                    <GiftingNoteField
+                      id={`gift-note-${item.id}`}
+                      value={itemNotes[item.id] ?? ""}
+                      onChange={(value) =>
+                        setItemNotes((prev) => ({ ...prev, [item.id]: value }))
+                      }
+                      variant="separate"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between gap-4">
+            <p className="font-gill text-base font-normal leading-110 text-darkblack">
+              Send items as separate gifts
+            </p>
+            <GiftingSeparateToggle
+              checked={isSeparate}
+              onChange={(checked) => setWrapMode(checked ? "separate" : "single")}
+            />
+          </div>
+        </div>
+
+        <GiftingScrollIndicator />
+      </div>
+
+      <div className="relative shrink-0 border-t border-neutral300 bg-white px-4 py-6 [border-top-width:0.5px]">
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-full h-[71px] bg-gradient-to-b from-transparent to-white"
+          aria-hidden
+        />
         <CartPrimaryButton type="button" className="w-full uppercase" onClick={applyGifting}>
-          Save Gifting Options
+          Save
         </CartPrimaryButton>
       </div>
     </div>
   );
 };
 
+const GiftingDesktopModal = ({
+  open,
+  onClose,
+  children,
+}: {
+  open: boolean;
+  onClose: () => void;
+  children: ReactNode;
+}) => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useGiftingModalEffects(open, onClose);
+
+  useEffect(() => {
+    if (!open) {
+      setIsVisible(false);
+      return;
+    }
+
+    const frame = requestAnimationFrame(() => {
+      setIsVisible(true);
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+      setIsVisible(false);
+    };
+  }, [open]);
+
+  if (!open) {
+    return null;
+  }
+
+  return (
+    <div className="fixed inset-0 z-[70]">
+      <div className="pointer-events-none absolute inset-0 backdrop-blur-[4.5px]" aria-hidden />
+      <div
+        className={cn(
+          "relative flex h-full w-full items-center justify-center p-4",
+          giftingFadeClassName,
+          isVisible ? "opacity-100" : "opacity-0",
+        )}
+      >
+        <button
+          type="button"
+          aria-label="Close gifting options"
+          onClick={onClose}
+          className="absolute inset-0 bg-[rgba(30,30,30,0.75)]"
+        />
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Gifting options"
+          className="relative z-10 w-full max-w-[560px]"
+        >
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const GiftingOptionsPanel = () => {
-  const { isGiftingPanelOpen, closeGiftingPanel } = useCartUI();
+  const { isGiftingPanelOpen, closeGiftingPanel, giftingStep, openGiftingPanel } = useCartUI();
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -190,14 +447,40 @@ const GiftingOptionsPanel = () => {
     return () => media.removeEventListener("change", update);
   }, []);
 
+  const introPanel = (
+    <GiftingIntroPanel
+      onClose={closeGiftingPanel}
+      onPersonalise={() => openGiftingPanel("personalise")}
+    />
+  );
+
+  const personalisePanel = <GiftingPersonalisePanel onClose={closeGiftingPanel} />;
+
   if (isMobile) {
     return (
-      <Drawer open={isGiftingPanelOpen} onOpenChange={(open) => !open && closeGiftingPanel()}>
-        <DrawerContent className="max-h-[90vh] rounded-none border-0 p-0 [&>div:first-child]:hidden">
+      <Drawer
+        open={isGiftingPanelOpen}
+        shouldScaleBackground={false}
+        onOpenChange={(open) => !open && closeGiftingPanel()}
+      >
+        <DrawerContent
+          className={cn(
+            "max-h-[90vh] rounded-none border-0 p-0 [&>div:first-child]:hidden",
+            giftingStep === "intro" ? "bg-gray300" : "bg-white",
+          )}
+        >
           <DrawerTitle className="sr-only">Gifting options</DrawerTitle>
-          <GiftingPanelBody onClose={closeGiftingPanel} />
+          {giftingStep === "intro" ? introPanel : personalisePanel}
         </DrawerContent>
       </Drawer>
+    );
+  }
+
+  if (giftingStep === "intro") {
+    return (
+      <GiftingDesktopModal open={isGiftingPanelOpen} onClose={closeGiftingPanel}>
+        {introPanel}
+      </GiftingDesktopModal>
     );
   }
 
@@ -205,10 +488,14 @@ const GiftingOptionsPanel = () => {
     <Sheet open={isGiftingPanelOpen} onOpenChange={(open) => !open && closeGiftingPanel()}>
       <SheetContent
         side="right"
-        className="w-full border-0 p-0 sm:max-w-[560px] [&>button]:hidden"
+        overlayClassName="bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
+        className={cn(
+          "h-full w-full max-w-[472px] gap-0 border-0 p-0 shadow-none sm:max-w-[472px]",
+          "[&>button]:hidden",
+        )}
       >
         <SheetTitle className="sr-only">Gifting options</SheetTitle>
-        <GiftingPanelBody onClose={closeGiftingPanel} />
+        <div className="h-full max-h-screen overflow-hidden">{personalisePanel}</div>
       </SheetContent>
     </Sheet>
   );

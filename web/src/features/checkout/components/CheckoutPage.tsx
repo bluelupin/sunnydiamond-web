@@ -1,46 +1,74 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Image from "next/image";
-import { FormInput } from "@/shared/ui/FormInput";
+import { useEffect, useMemo, useState } from "react";
+import { cn } from "@/shared/utils/cn";
 import { useCart } from "@/features/cart/context/CartContext";
 import { useToast } from "@/shared/hooks/use-toast";
 import { trackEvent } from "@/infrastructure/analytics/use-gtag";
-import { cartFlowSpec } from "@/features/cart/data/cartFlowSpec";
-import { formatCartLineMeta, formatCartPrice } from "@/features/cart/utils/formatCartLine";
+import { CartOutlineLink } from "@/features/cart/components/CartFlowUi";
+import type { CartLineItem } from "@/features/cart/types/cart.types";
+import CheckoutOrderSummary from "./CheckoutOrderSummary";
+import CheckoutOtpModal from "./CheckoutOtpModal";
+import { CheckoutFormStep, CheckoutPaymentStep } from "./CheckoutSteps";
+import CheckoutSuccessView from "./CheckoutSuccessView";
 import {
-  CartDivider,
-  CartMetaRow,
-  CartOutlineLink,
-  CartPriceRow,
-  CartPrimaryButton,
-  CartPrimaryLink,
-  CartSuccessCheck,
-} from "@/features/cart/components/CartFlowUi";
+  createEmptyCheckoutForm,
+  createEmptyPaymentForm,
+  type CheckoutFormData,
+  type CheckoutPaymentData,
+  type CheckoutStep,
+} from "../types/checkout.types";
+
+const isShippingAddressComplete = (form: CheckoutFormData) =>
+  Boolean(
+    form.shippingName.trim() &&
+      form.addressLine1.trim() &&
+      form.pincode.trim() &&
+      form.city.trim() &&
+      form.state.trim(),
+  );
+
+const isBillingAddressComplete = (form: CheckoutFormData) =>
+  Boolean(
+    form.billingName.trim() &&
+      form.billingAddressLine1.trim() &&
+      form.billingPincode.trim() &&
+      form.billingCity.trim() &&
+      form.billingState.trim(),
+  );
+
+const isFormComplete = (form: CheckoutFormData) =>
+  Boolean(
+    form.name.trim() &&
+      form.phoneOrEmail.trim() &&
+      isShippingAddressComplete(form) &&
+      (form.billingSameAsShipping || isBillingAddressComplete(form)),
+  );
 
 const CheckoutPage = () => {
-  const { items, totalPrice, subtotal, taxes, clearCart } = useCart();
+  const { items, totalPrice, clearCart } = useCart();
   const { toast } = useToast();
-  const [orderPlaced, setOrderPlaced] = useState(false);
+
+  const [step, setStep] = useState<CheckoutStep>("form");
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [phoneVerified, setPhoneVerified] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [needsVerify, setNeedsVerify] = useState(false);
+  const [placedItems, setPlacedItems] = useState<CartLineItem[]>([]);
+  const [placedTotal, setPlacedTotal] = useState(0);
 
-  const [form, setForm] = useState({
-    email: "",
-    firstName: "",
-    lastName: "",
-    address: "",
-    city: "",
-    state: "",
-    zip: "",
-    verifyCode: "",
-  });
+  const [form, setForm] = useState<CheckoutFormData>(createEmptyCheckoutForm);
+  const [payment, setPayment] = useState<CheckoutPaymentData>(createEmptyPaymentForm);
 
-  const updateField = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm((prev) => ({ ...prev, [field]: e.target.value }));
+  const updateForm = (field: keyof CheckoutFormData, value: string | boolean) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const updatePayment = (field: keyof CheckoutPaymentData, value: string) => {
+    setPayment((prev) => ({ ...prev, [field]: value }));
+  };
 
   useEffect(() => {
-    if (items.length > 0) {
+    if (items.length > 0 && step === "form") {
       trackEvent("begin_checkout", {
         currency: "INR",
         value: totalPrice,
@@ -52,14 +80,16 @@ const CheckoutPage = () => {
         })),
       });
     }
-  }, [items, totalPrice]);
+  }, [items, totalPrice, step]);
 
-  if (items.length === 0 && !orderPlaced) {
+  const canContinueToPayment = useMemo(
+    () => isFormComplete(form) && phoneVerified,
+    [form, phoneVerified],
+  );
+
+  if (items.length === 0 && step !== "success") {
     return (
-      <section
-        className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-4 py-20 text-center"
-        style={{ backgroundColor: cartFlowSpec.colors.pageBackground }}
-      >
+      <section className="flex min-h-[60vh] flex-col items-center justify-center gap-4 bg-gray300 px-4 py-20 text-center">
         <h1 className="font-larken text-2xl font-light leading-110 text-darkblack">
           No items to checkout
         </h1>
@@ -68,30 +98,40 @@ const CheckoutPage = () => {
     );
   }
 
-  if (orderPlaced) {
-    return (
-      <section
-        className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-4 py-20 text-center"
-        style={{ backgroundColor: cartFlowSpec.colors.pageBackground }}
-      >
-        <CartSuccessCheck />
-        <h1 className="font-larken text-2xl font-light leading-110 text-darkblack lg:text-[48px]">
-          Order Successfully Placed
-        </h1>
-        <p className="max-w-md font-gill text-base font-light leading-110 text-neutral500">
-          We&apos;ll send you a confirmation email shortly with your order details.
-        </p>
-        <CartPrimaryLink href="/jewellery-product" className="mt-2 w-full max-w-xs">
-          Continue Shopping
-        </CartPrimaryLink>
-      </section>
-    );
+  if (step === "success") {
+    return <CheckoutSuccessView contact={form.phoneOrEmail} items={placedItems} totalPrice={placedTotal} />;
   }
+
+  const handleVerifyPhone = () => {
+    if (!form.phoneOrEmail.trim()) {
+      toast({ title: "Phone required", description: "Enter your phone number before verifying." });
+      return;
+    }
+    setShowOtpModal(true);
+  };
+
+  const handleOtpVerified = () => {
+    setPhoneVerified(true);
+    setShowOtpModal(false);
+    toast({ title: "Phone verified", description: "Your phone number has been verified." });
+  };
+
+  const handleContinueToPayment = () => {
+    if (!isFormComplete(form)) {
+      toast({ title: "Incomplete form", description: "Please fill in all required fields." });
+      return;
+    }
+    if (!phoneVerified) {
+      setShowOtpModal(true);
+      return;
+    }
+    setStep("payment");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const placeOrder = () => {
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
+    window.setTimeout(() => {
       trackEvent("purchase", {
         currency: "INR",
         value: totalPrice,
@@ -102,198 +142,63 @@ const CheckoutPage = () => {
           quantity: item.quantity,
         })),
       });
+      setPlacedItems([...items]);
+      setPlacedTotal(totalPrice);
       clearCart();
-      setOrderPlaced(true);
+      setSubmitting(false);
+      setStep("success");
       toast({ title: "Order placed!", description: "Your order has been placed successfully." });
     }, 1200);
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!needsVerify) {
-      setNeedsVerify(true);
-      return;
-    }
-    placeOrder();
-  };
+  const sidebarCtaLabel = step === "payment" ? "Pay Now" : "Continue to Payment";
 
   return (
-    <section className="pb-16" style={{ backgroundColor: cartFlowSpec.colors.pageBackground }}>
-      <div className="mx-auto w-full max-w-[1440px] px-4 py-10 lg:px-10 lg:py-16">
-        <h1 className="mb-10 font-larken text-2xl font-light leading-110 text-darkblack lg:text-[48px]">
+    <section className="bg-gray300 pb-16">
+      <div className="mx-auto w-full max-w-[1440px] px-5 py-10 md:px-8 lg:px-10 lg:py-16">
+        <h1 className="mb-6 font-larken text-[48px] font-light leading-110 text-darkblack">
           Complete Checkout
         </h1>
 
-        <form
-          onSubmit={handleSubmit}
-          className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_553px]"
-          style={{ gap: cartFlowSpec.page.sectionGap }}
+        <div
+          className={cn(
+            "grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,783px)_553px]",
+            showOtpModal && "lg:grid-cols-[minmax(0,899px)_437px]",
+          )}
         >
-          <div className="flex flex-col" style={{ gap: cartFlowSpec.page.sectionGap }}>
-            <fieldset className="flex flex-col gap-4">
-              <legend className="font-larken text-2xl font-light leading-110 text-darkblack">
-                Contact Information
-              </legend>
-              <FormInput
-                type="email"
-                placeholder="Email address"
-                label="Email Address"
-                required
-                value={form.email}
-                onChange={updateField("email")}
+          <div className="flex flex-col gap-6">
+            {step === "form" ? (
+              <CheckoutFormStep
+                form={form}
+                onChange={updateForm}
+                phoneVerified={phoneVerified}
+                onVerifyPhone={handleVerifyPhone}
               />
-            </fieldset>
-
-            <fieldset className="flex flex-col gap-4">
-              <legend className="font-larken text-2xl font-light leading-110 text-darkblack">
-                Shipping Address
-              </legend>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <FormInput
-                  type="text"
-                  placeholder="First name"
-                  label="First Name"
-                  required
-                  value={form.firstName}
-                  onChange={updateField("firstName")}
-                />
-                <FormInput
-                  type="text"
-                  placeholder="Last name"
-                  label="Last Name"
-                  required
-                  value={form.lastName}
-                  onChange={updateField("lastName")}
-                />
-              </div>
-              <FormInput
-                type="text"
-                placeholder="Address"
-                label="Address"
-                required
-                value={form.address}
-                onChange={updateField("address")}
+            ) : (
+              <CheckoutPaymentStep
+                form={form}
+                payment={payment}
+                onPaymentChange={updatePayment}
+                onEditPersonal={() => setStep("form")}
+                onEditDelivery={() => setStep("form")}
               />
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                <FormInput
-                  type="text"
-                  placeholder="City"
-                  label="City"
-                  required
-                  value={form.city}
-                  onChange={updateField("city")}
-                />
-                <FormInput
-                  type="text"
-                  placeholder="State"
-                  label="State"
-                  required
-                  value={form.state}
-                  onChange={updateField("state")}
-                />
-                <FormInput
-                  type="text"
-                  placeholder="ZIP Code"
-                  label="ZIP Code"
-                  required
-                  value={form.zip}
-                  onChange={updateField("zip")}
-                  className="col-span-2 sm:col-span-1"
-                />
-              </div>
-            </fieldset>
-
-            {needsVerify ? (
-              <fieldset
-                className="flex flex-col gap-4 border border-neutral200 bg-white"
-                style={{ padding: cartFlowSpec.priceDetails.padding }}
-              >
-                <legend className="font-larken text-2xl font-light leading-110 text-darkblack">
-                  Verify your email
-                </legend>
-                <p className="font-gill text-sm font-light leading-110 text-neutral500">
-                  Complete your checkout. We&apos;ll take care of setting up your account for
-                  effortless order tracking and quicker future purchases.
-                </p>
-                <FormInput
-                  type="text"
-                  placeholder="Enter verification code"
-                  label="Verification Code"
-                  required
-                  value={form.verifyCode}
-                  onChange={updateField("verifyCode")}
-                />
-              </fieldset>
-            ) : null}
+            )}
           </div>
 
-          <aside className="flex h-fit flex-col bg-white lg:sticky lg:top-24" style={{ padding: cartFlowSpec.priceDetails.padding }}>
-            <div className="flex flex-col" style={{ gap: cartFlowSpec.priceDetails.titleGap }}>
-              <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
-                Order Summary
-              </h2>
-
-              <div className="flex flex-col" style={{ gap: cartFlowSpec.page.columnGap }}>
-                {items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center border border-neutral200"
-                    style={{
-                      gap: cartFlowSpec.card.imageGap,
-                      padding: `${cartFlowSpec.drawer.previewPaddingY}px ${cartFlowSpec.drawer.previewPaddingX}px`,
-                      backgroundColor: cartFlowSpec.colors.previewBackground,
-                    }}
-                  >
-                    <div
-                      className="relative shrink-0 overflow-hidden bg-neutral200"
-                      style={{
-                        width: cartFlowSpec.drawer.previewImage.width,
-                        height: cartFlowSpec.drawer.previewImage.height,
-                      }}
-                    >
-                      <Image
-                        src={item.product.image}
-                        alt={item.product.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div
-                      className="min-w-0 flex flex-1 flex-col"
-                      style={{ gap: cartFlowSpec.drawer.previewInfoGap }}
-                    >
-                      <p className="font-gill text-base leading-110 text-darkblack">
-                        {item.product.name}
-                      </p>
-                      <CartMetaRow parts={formatCartLineMeta(item)} />
-                      <p className="font-gill text-base leading-110 text-darkblack">
-                        {formatCartPrice(item.product.price * item.quantity)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <CartDivider weight={1} />
-
-              <div className="flex flex-col" style={{ gap: cartFlowSpec.priceDetails.rowGap }}>
-                <CartPriceRow label="Subtotal" value={formatCartPrice(subtotal)} />
-                <CartPriceRow label="Taxes" value={formatCartPrice(taxes)} />
-                <CartPriceRow label="Shipping" value="Free" />
-                <CartPriceRow label="Total" value={formatCartPrice(totalPrice)} emphasis />
-              </div>
-            </div>
-
-            <CartPrimaryButton
-              type="submit"
-              className="mt-6 w-full uppercase"
-              disabled={submitting}
-            >
-              {submitting ? "Processing..." : needsVerify ? "Verify & Place Order" : "Verify"}
-            </CartPrimaryButton>
-          </aside>
-        </form>
+          <CheckoutOrderSummary
+            ctaLabel={sidebarCtaLabel}
+            ctaDisabled={submitting || (step === "form" && !canContinueToPayment)}
+            onCtaClick={step === "payment" ? placeOrder : handleContinueToPayment}
+          />
+        </div>
       </div>
+
+      <CheckoutOtpModal
+        open={showOtpModal}
+        phone={form.phoneOrEmail}
+        onClose={() => setShowOtpModal(false)}
+        onVerify={handleOtpVerified}
+      />
     </section>
   );
 };

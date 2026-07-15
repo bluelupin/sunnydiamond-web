@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
 import { siteConfig } from "@/shared/lib/siteConfig";
@@ -9,6 +10,7 @@ import { resolveShellFooterLinkGroups } from "@/shared/lib/shellNavigation";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import TrustBadgeSection from "@/features/cms/components/common/TrustBadges";
 import Reveal from "@/shared/Animation/Reveal";
+import { cn } from "@/shared/utils/cn";
 
 const SOCIAL_ICON_MAP: Record<string, string> = {
   instagram: "/images/navigation/social-instagram.svg",
@@ -28,8 +30,8 @@ const SOCIAL_FALLBACK = [
 const DEFAULT_COPYRIGHT = "© 2026 Sunny Diamonds. All Rights Reserved.";
 
 const Footer = () => {
+  const pathName = usePathname();
   const { data: shellData } = useHomepageShell();
-
   const cmsFooterLinkGroups = shellData?.global?.footerLinkGroups || shellData?.footerLinkGroups;
   const footerLinkGroups = useMemo(
     () => resolveShellFooterLinkGroups(cmsFooterLinkGroups),
@@ -59,7 +61,7 @@ const Footer = () => {
   }, [cmsSocialLinks]);
 
   return (
-    <footer className="bg-gray300">
+    <footer className={cn(pathName === "/cart" || "//checkout" ? "bg-gray200" : "bg-gray300")}>
       <TrustBadgeSection />
       <PageContainer className="flex flex-col gap-20 lg:gap-[120px] lg:py-100 py-16">
         <div className="flex flex-col items-center xl:gap-12 md:gap-10 gap-8 lg:flex-row lg:items-start lg:justify-start">
