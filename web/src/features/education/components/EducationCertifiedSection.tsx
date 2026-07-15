@@ -235,7 +235,7 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
         >
           <span
             id="education-certified-title"
-            className="block font-larken text-32 font-light leading-110 text-darkblack md:text-[48px] md:leading-none"
+            className="block font-larken text-32 font-light leading-110 text-darkblack md:text-5xl md:leading-none"
           >
             {certificate.title}
           </span>

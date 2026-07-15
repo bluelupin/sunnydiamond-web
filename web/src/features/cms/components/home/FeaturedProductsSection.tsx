@@ -72,7 +72,7 @@ function FeaturedProductsHeader({
       <Reveal
         as="h2"
         direction="up"
-        className="font-larken text-32 font-light leading-110 text-darkblack md:text-[40px] lg:text-[48px]"
+        className="font-larken text-32 font-light leading-110 text-darkblack md:text-[40px] lg:text-5xl"
       >
         {title}
       </Reveal>
