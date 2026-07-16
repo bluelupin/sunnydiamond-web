@@ -10,6 +10,7 @@ import {
   CartSuccessCheck,
   CartTextLink,
 } from "@/features/cart/components/CartFlowUi";
+import { cn } from "@/shared/utils/cn";
 import { getExpectedDeliveryDate } from "../types/checkout.types";
 
 type CheckoutSuccessViewProps = {
@@ -41,10 +42,40 @@ const SuccessItemMeta = ({ parts }: { parts: string[] }) => {
   );
 };
 
+const SuccessOrderItem = ({ item }: { item: CartLineItem }) => (
+  <div className="flex h-[68px] items-center gap-6">
+    <div className="relative h-[53px] w-[60px] shrink-0 overflow-hidden bg-gray200 border border-blue-300">
+      <Image src={item.product.image} alt={item.product.name} fill className="object-cover" sizes="60px" />
+    </div>
+    <div className="flex w-full min-w-0 flex-1 flex-col gap-2">
+      <p className="font-gill text-base font-normal leading-110 text-darkblack">
+        {item.product.name}
+      </p>
+      <SuccessItemMeta parts={formatCartLineMeta(item)} />
+      <p className="font-gill text-base font-normal leading-110 text-darkblack">
+        {formatCartPrice(item.product.price * item.quantity)}
+      </p>
+    </div>
+  </div>
+);
+
+const SuccessCtaSection = ({ className }: { className?: string }) => (
+  <div className={cn("flex flex-col gap-4", className)}>
+    <CartPrimaryLink href="/order-tracking" className="w-full uppercase">
+      Track Order
+    </CartPrimaryLink>
+    <div className="flex justify-center">
+      <CartTextLink href="/jewellery-product" className="uppercase">
+        Go Back to Shopping
+      </CartTextLink>
+    </div>
+  </div>
+);
+
 const CheckoutSuccessView = ({ contact, items, totalPrice }: CheckoutSuccessViewProps) => (
-  <section className="bg-gray300 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] max-lg:px-0 lg:pb-0">
-    <div className="mx-auto flex w-full max-w-[1440px] justify-center px-5 py-8 md:px-8 lg:px-10 lg:py-16">
-      <div className="flex w-full max-w-[560px] flex-col gap-6 p-6 max-lg:px-4 max-lg:py-6">
+  <section className="bg-gray300 max-lg:min-h-[100dvh] max-lg:pb-[calc(9.5rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
+    <div className="mx-auto flex w-full max-w-[1440px] justify-center px-5 py-6 md:px-8 lg:px-10 lg:py-16">
+      <div className="flex w-full max-w-[560px] flex-col gap-6 max-lg:max-w-none max-lg:gap-6 lg:p-6">
         <div className="flex flex-col items-center gap-6">
           <span className="text-[#69B353]" aria-hidden>
             <CartSuccessCheck />
@@ -59,26 +90,13 @@ const CheckoutSuccessView = ({ contact, items, totalPrice }: CheckoutSuccessView
           </div>
         </div>
 
-        <div className="flex min-h-[340px] flex-col gap-6 bg-gray200 px-4 py-6">
+        <div className="flex flex-col gap-6 bg-gray200 px-4 py-6 lg:min-h-[340px]">
           <h2 className="font-larken text-xl font-light leading-110 text-darkblack">Order Summary</h2>
           <CheckoutSummaryDivider />
 
           <div className="flex flex-col gap-6">
             {items.map((item) => (
-              <div key={item.id} className="flex h-[68px] items-center gap-6">
-                <div className="relative h-[53px] w-[60px] shrink-0 overflow-hidden bg-gray200 border border-blue-300">
-                  <Image src={item.product.image} alt={item.product.name} fill className="object-cover" />
-                </div>
-                <div className="flex w-full max-w-[214px] min-w-0 flex-1 flex-col gap-2">
-                  <p className="font-gill text-base font-normal leading-110 text-darkblack">
-                    {item.product.name}
-                  </p>
-                  <SuccessItemMeta parts={formatCartLineMeta(item)} />
-                  <p className="font-gill text-base font-normal leading-110 text-darkblack">
-                    {formatCartPrice(item.product.price * item.quantity)}
-                  </p>
-                </div>
-              </div>
+              <SuccessOrderItem key={item.id} item={item} />
             ))}
           </div>
 
@@ -96,17 +114,14 @@ const CheckoutSuccessView = ({ contact, items, totalPrice }: CheckoutSuccessView
           </p>
         </div>
 
-        <div className="flex flex-col gap-4 border-t-[0.5px] border-neutral300 pt-6">
-          <CartPrimaryLink href="/order-tracking" className="w-full uppercase">
-            Track Order
-          </CartPrimaryLink>
-          <div className="flex justify-center">
-            <CartTextLink href="/jewellery-product" className="uppercase">
-              Go Back to Shopping
-            </CartTextLink>
-          </div>
+        <div className="hidden border-t border-neutral300 pt-6 lg:flex lg:flex-col lg:gap-4 [border-top-width:0.5px]">
+          <SuccessCtaSection />
         </div>
       </div>
+    </div>
+
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral300 bg-white px-5 py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] lg:hidden [border-top-width:0.5px]">
+      <SuccessCtaSection />
     </div>
   </section>
 );
