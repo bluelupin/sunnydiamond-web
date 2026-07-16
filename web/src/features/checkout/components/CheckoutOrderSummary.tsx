@@ -11,6 +11,7 @@ import {
   CartMetaRow,
   CartPrimaryButton,
 } from "@/features/cart/components/CartFlowUi";
+import ChevronDownIcon from "@/assets/Icons/ChevronDownIcon";
 
 type CheckoutOrderSummaryProps = {
   ctaLabel: string;
@@ -65,7 +66,7 @@ const CheckoutOrderSummary = ({
       className={cn(
         "h-fit w-full lg:sticky lg:top-12",
         stickyOnMobile &&
-          "max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:z-40 max-lg:border-t max-lg:border-aboutInactive max-lg:pb-[env(safe-area-inset-bottom,0px)] max-lg:shadow-[0_-4px_24px_rgba(0,0,0,0.08)]",
+        "max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:z-40 max-lg:border-t max-lg:border-aboutInactive max-lg:pb-[env(safe-area-inset-bottom,0px)] max-lg:shadow-[0_-4px_24px_rgba(0,0,0,0.08)]",
         className,
       )}
     >
@@ -93,7 +94,7 @@ const CheckoutOrderSummary = ({
 
                 <div
                   className={cn(
-                    "relative shrink-0 overflow-hidden bg-gray200",
+                    "relative shrink-0 overflow-hidden bg-gray200 border border-blue-300 border border-blue-300",
                     compact ? "h-[53px] w-[60px]" : "h-[71px] w-20",
                   )}
                 >
@@ -139,7 +140,7 @@ const CheckoutOrderSummary = ({
                 <span className="font-gill text-base font-normal leading-110 text-darkblack">
                   Offers and Deals
                 </span>
-                <ChevronDown
+                <ChevronDownIcon
                   className={cn(
                     "size-6 text-darkblack transition-transform",
                     offersOpen && "rotate-180",

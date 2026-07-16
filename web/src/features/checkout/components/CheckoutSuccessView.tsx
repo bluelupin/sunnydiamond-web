@@ -66,7 +66,7 @@ const CheckoutSuccessView = ({ contact, items, totalPrice }: CheckoutSuccessView
           <div className="flex flex-col gap-6">
             {items.map((item) => (
               <div key={item.id} className="flex h-[68px] items-center gap-6">
-                <div className="relative h-[53px] w-[60px] shrink-0 overflow-hidden bg-gray200">
+                <div className="relative h-[53px] w-[60px] shrink-0 overflow-hidden bg-gray200 border border-blue-300">
                   <Image src={item.product.image} alt={item.product.name} fill className="object-cover" />
                 </div>
                 <div className="flex w-full max-w-[214px] min-w-0 flex-1 flex-col gap-2">

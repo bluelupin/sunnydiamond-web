@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/shared/ui/select";
 import { cn } from "@/shared/utils/cn";
+import ChevronDownIcon from "@/assets/Icons/ChevronDownIcon";
 
 export type CheckoutFieldProps = {
   id: string;
@@ -112,7 +113,7 @@ export const CheckoutPhoneField = ({
     <div className="flex h-14 items-center justify-between gap-2 border border-transparent bg-aboutInactive px-3 focus-within:border-darkblack">
       <div className="flex min-w-0 flex-1 items-center gap-2">
         <span className="shrink-0 font-gill text-base font-normal leading-110 text-darkblack">+91</span>
-        <ChevronDown className="size-5 shrink-0 text-darkblack" aria-hidden />
+        <ChevronDownIcon className="size-5 shrink-0 text-darkblack" aria-hidden />
         <input
           id={id}
           type="tel"

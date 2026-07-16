@@ -48,7 +48,7 @@ type CartGiftBadgeProps = {
 export const CartGiftBadge = ({ variant = "cart", className }: CartGiftBadgeProps) => (
   <span
     className={cn(
-      "inline-flex shrink-0 items-center justify-center px-3 py-1 font-gill leading-110",
+      "inline-flex shrink-0 items-center justify-center w-[42px] h-[22px] font-gill leading-110",
       variant === "cart"
         ? "text-sm text-darkblack"
         : "text-xs font-light tracking-[0.01em] text-white",

@@ -24,6 +24,8 @@ import {
   CartPrimaryButton,
   CartTextLink,
 } from "./CartFlowUi";
+import { giftingContent } from "../data/giftingContent";
+import { cartFlowSpec } from "../data/cartFlowSpec";
 
 const giftingFadeClassName = "transition-opacity duration-300 ease-out motion-reduce:transition-none";
 
@@ -172,21 +174,31 @@ const GiftingSeparateToggle = ({
   </button>
 );
 
-const GiftingBagHero = ({ isSeparate }: { isSeparate: boolean }) => (
-  <div className="flex flex-col gap-6">
-    <p className="font-gill text-base font-light leading-110 text-darkblack">
-      {isSeparate
-        ? "Each of your items will be delivered in separate bags"
-        : "Your items will be gift wrapped in a single bag"}
-    </p>
-    <div className="relative h-[140px] w-full overflow-hidden bg-gray200">
+const GiftingBagHero = ({ isSeparate }: { isSeparate: boolean }) => {
+  const { bagHero, copy } = giftingContent;
+
+  return (
+    <div className="flex flex-col gap-4">
+      <p className="font-gill text-base font-light leading-110 text-darkblack">
+        {isSeparate ? copy.separateBags : copy.singleBag}
+      </p>
       <div
-        className="absolute inset-x-0 top-[-26px] h-[192px] bg-gradient-to-b from-gray200 via-gray300/60 to-gray200"
-        aria-hidden
-      />
+        className="relative w-full overflow-hidden bg-gray200 border border-blue-300"
+        style={{ height: cartFlowSpec.gifting.personalise.heroImageHeight }}
+      >
+        <Image
+          src={isSeparate ? bagHero.separate : bagHero.single}
+          alt={bagHero.alt}
+          width={bagHero.width}
+          height={bagHero.height}
+          className="absolute inset-x-0 w-full object-cover"
+          style={{ top: bagHero.offsetTop, height: bagHero.height }}
+          sizes={`${bagHero.width}px`}
+        />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const GiftingScrollIndicator = () => (
   <div
@@ -253,7 +265,7 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
     >
       <div
         className={cn(
-          "relative shrink-0 overflow-hidden bg-gray200",
+          "relative shrink-0 overflow-hidden bg-gray200 border border-blue-300",
           mode === "single" ? "h-[53px] w-[60px]" : "h-[71px] w-20",
         )}
       >
@@ -264,9 +276,9 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
           {item.product.name}
         </p>
         <CartMetaRow parts={formatCartLineMeta(item)} />
-        <p className="font-gill text-base font-normal leading-110 text-darkblack">
+        {/* <p className="font-gill text-base font-normal leading-110 text-darkblack">
           {formatCartPrice(item.product.price)}
-        </p>
+        </p> */}
       </div>
     </div>
   );
@@ -287,7 +299,7 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
         </div>
       </div>
 
-      <div className="relative min-h-0 flex-1 pb-5">
+      <div className="relative min-h-0 flex-1">
         <div className="flex h-full min-h-0 flex-col gap-6 overflow-y-auto px-6 pb-6 pt-6">
           <GiftingBagHero isSeparate={isSeparate} />
 
@@ -299,7 +311,7 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
             />
           ) : null}
 
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4">
             <p className="font-gill text-base font-light leading-110 text-darkblack">
               Items currently in your shopping bag
             </p>
@@ -346,7 +358,7 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
             )}
           </div>
 
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-4 mt-1">
             <p className="font-gill text-base font-normal leading-110 text-darkblack">
               Send items as separate gifts
             </p>
@@ -359,15 +371,17 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
 
         <GiftingScrollIndicator />
       </div>
-
-      <div className="relative shrink-0 border-t border-neutral300 bg-white px-4 py-6 [border-top-width:0.5px]">
+      <div className="relative shrink-0 bg-white pb-6 border border-t border-neutral300">
         <div
           className="pointer-events-none absolute inset-x-0 bottom-full h-[71px] bg-gradient-to-b from-transparent to-white"
           aria-hidden
         />
-        <CartPrimaryButton type="button" className="w-full uppercase" onClick={applyGifting}>
-          Save
-        </CartPrimaryButton>
+        <hr className="border-neutral300 mb-6" />
+        <div className="w-full px-4">
+          <CartPrimaryButton type="button" className="w-full uppercase" onClick={applyGifting}>
+            Save
+          </CartPrimaryButton>
+        </div>
       </div>
     </div>
   );

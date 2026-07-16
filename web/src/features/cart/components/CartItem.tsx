@@ -1,6 +1,5 @@
 import Link from "next/link";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
-import DustbinIcon from "@/assets/Icons/DustbinIcon";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import type { CartLineItem, CartLineOptions } from "../types/cart.types";
 import { formatCartLineMeta, formatCartPrice } from "../utils/formatCartLine";
@@ -12,6 +11,7 @@ import {
   CartOutlineLink,
   CartTextLink,
 } from "./CartFlowUi";
+import DeleteIcon from "@/assets/Icons/DeleteIcon";
 
 interface CartItemProps {
   item: CartLineItem;
@@ -37,7 +37,7 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
         <div className="flex min-w-0 flex-1 gap-4 lg:max-w-[499.5px] lg:gap-6">
           <Link
             href={`/product/${product.id}`}
-            className="relative h-[68px] w-[91px] shrink-0 overflow-hidden bg-white lg:h-[105px] lg:w-[140px]"
+            className="relative h-[68px] w-[91px] shrink-0 overflow-hidden bg-white border border-blue-300 lg:h-[105px] lg:w-[140px]"
           >
             <OptimizedImage src={product.image} alt={product.name} />
           </Link>
@@ -73,13 +73,13 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
           aria-label={`Remove ${product.name}`}
           className="shrink-0 text-darkblack transition-opacity hover:opacity-70"
         >
-          <DustbinIcon className="size-6" />
+          <DeleteIcon className="size-6" />
         </button>
       </div>
 
       <CartDivider weight={0.5} />
 
-      <label className="flex w-fit cursor-pointer items-center gap-2 px-0 lg:px-4">
+      <label className="flex w-fit cursor-pointer items-center gap-2">
         <CartGiftCheckbox
           checked={isGift}
           onChange={(checked) => onUpdateOptions(item.id, { isGift: checked })}

@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
-import DustbinIcon from "@/assets/Icons/DustbinIcon";
 import { useCart } from "../context/CartContext";
 import { useCartUI } from "../context/CartUIContext";
 import { formatCartLineMeta, formatCartPrice } from "../utils/formatCartLine";
@@ -25,6 +24,7 @@ import {
   CartPrimaryLink,
   CartSuccessCheck,
 } from "./CartFlowUi";
+import DeleteIcon from "@/assets/Icons/DeleteIcon";
 
 const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
   const { items, totalItems, removeItem } = useCart();
@@ -78,7 +78,7 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
               ) : null}
 
               <div className="flex min-w-0 flex-1 items-center gap-4 pr-4">
-                <div className="relative h-[68px] w-[91px] shrink-0 overflow-hidden bg-white">
+                <div className="relative h-[68px] w-[91px] shrink-0 overflow-hidden bg-white border border-blue-300">
                   <Image
                     src={addedItem.product.image}
                     alt={addedItem.product.name}
@@ -104,7 +104,7 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
                 aria-label={`Remove ${addedItem.product.name} from bag`}
                 className="shrink-0 text-darkblack transition-opacity hover:opacity-70"
               >
-                <DustbinIcon className="size-6" />
+                <DeleteIcon className="size-6" />
               </button>
             </div>
 
