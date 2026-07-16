@@ -60,7 +60,7 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
-      <div className="mx-auto flex w-full flex-1 flex-col gap-6 overflow-y-auto px-6 pb-5 pt-6 lg:pt-10">
+      <div className="mx-auto flex w-full flex-1 flex-col gap-6 overflow-y-auto lg:px-6 px-4 pb-5 pt-6 lg:pt-10">
         <div className="flex flex-col items-center gap-4 text-center">
           <CartSuccessCheck />
           <p className="font-gill text-base font-light leading-110 text-darkblack">
@@ -71,13 +71,13 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
         <div className="h-px w-full shrink-0 bg-aboutInactive" aria-hidden />
 
         {addedItem ? (
-          <div className="flex min-h-0 flex-1 flex-col justify-between gap-6">
+          <div className="flex min-h-0 flex-1 flex-col justify-between lg:gap-6 gap-4">
             <div className="relative flex items-start justify-between bg-gray300 px-4 py-6">
               {isGift ? (
                 <CartGiftBadge variant="drawer" className="absolute left-0 top-0 z-10" />
               ) : null}
 
-              <div className="flex min-w-0 flex-1 items-center gap-4 pr-4">
+              <div className="flex min-w-0 flex-1 items-center lg:gap-4 gap-2 lg:pr-4 pr-2">
                 <div className="relative h-[68px] w-[91px] shrink-0 overflow-hidden bg-white border border-blue-300">
                   <Image
                     src={addedItem.product.image}

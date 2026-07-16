@@ -252,7 +252,7 @@ type CartMoreItemsNoteProps = {
 };
 
 export const CartMoreItemsNote = ({ count }: CartMoreItemsNoteProps) => (
-  <div className="flex items-center gap-2">
+  <div className="flex items-center gap-2 mb-16">
     <ShoppingBagIcon className="size-6 shrink-0 text-darkblack" />
     <p className="font-gill text-base font-light leading-110 text-darkblack">
       Your bag contains {count} more {count === 1 ? "item" : "items"}

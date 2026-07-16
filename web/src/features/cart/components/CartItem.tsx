@@ -28,7 +28,7 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
   const isGift = Boolean(options.isGift || item.gifting);
 
   return (
-    <article className="relative flex flex-col gap-4 bg-white p-4 lg:gap-6 lg:p-6">
+    <article className="relative flex flex-col gap-4 bg-white px-4 lg:gap-6 lg:px-6 py-6">
       {isGift ? (
         <CartGiftBadge variant="cart" className="absolute left-0 top-0 z-10" />
       ) : null}
