@@ -16,6 +16,8 @@ import CartPriceDetails from "@/features/cart/components/CartPriceDetails";
 
 import { useCart } from "@/features/cart/context/CartContext";
 
+import { cartFlowSpec } from "@/features/cart/data/cartFlowSpec";
+
 import { CartPrimaryLink } from "./CartFlowUi";
 
 
@@ -24,7 +26,22 @@ const CartPage = () => {
 
   const { items, updateQuantity, removeItem, updateLineItemOptions } = useCart();
 
+  const [offersOpen, setOffersOpen] = useState(false);
   const [priceBreakupOpen, setPriceBreakupOpen] = useState(false);
+
+  const mobileScrollPadding = (() => {
+    const { cartPage } = cartFlowSpec.mobile;
+    if (offersOpen && priceBreakupOpen) {
+      return `max-lg:pb-[calc(${cartPage.stickyFooterFullyExpandedClearance}px+env(safe-area-inset-bottom,0px))]`;
+    }
+    if (priceBreakupOpen) {
+      return `max-lg:pb-[calc(${cartPage.stickyFooterBreakupExpandedClearance}px+env(safe-area-inset-bottom,0px))]`;
+    }
+    if (offersOpen) {
+      return `max-lg:pb-[calc(${cartPage.stickyFooterOffersExpandedClearance}px+env(safe-area-inset-bottom,0px))]`;
+    }
+    return `max-lg:pb-[calc(${cartPage.stickyFooterCollapsedClearance}px+env(safe-area-inset-bottom,0px))]`;
+  })();
 
 
 
@@ -66,17 +83,7 @@ const CartPage = () => {
 
       <section
 
-        className={cn(
-
-          "bg-gray300 lg:pb-16",
-
-          priceBreakupOpen
-
-            ? "pb-[calc(20rem+env(safe-area-inset-bottom,0px))]"
-
-            : "pb-[calc(13rem+env(safe-area-inset-bottom,0px))]",
-
-        )}
+        className={cn("bg-gray300 lg:pb-16", mobileScrollPadding)}
 
       >
 
@@ -114,7 +121,7 @@ const CartPage = () => {
 
 
 
-              <div className="lg:hidden">
+              <div className="lg:hidden pt-4">
 
                 <CartBenefitsSection />
 
@@ -141,6 +148,10 @@ const CartPage = () => {
 
 
       <CartMobileStickyFooter
+
+        offersOpen={offersOpen}
+
+        onOffersToggle={() => setOffersOpen((open) => !open)}
 
         breakupOpen={priceBreakupOpen}
 
