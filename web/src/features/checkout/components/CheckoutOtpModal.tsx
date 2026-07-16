@@ -116,7 +116,7 @@ const CheckoutOtpModal = ({ open, phone, onClose, onVerify }: CheckoutOtpModalPr
                     value={digit}
                     onChange={(event) => updateDigit(index, event.target.value)}
                     onKeyDown={(event) => handleKeyDown(index, event)}
-                    className="absolute inset-0 bg-transparent text-center font-gill text-base leading-110 text-darkblack outline-none"
+                    className="absolute inset-0 bg-transparent text-center font-gill text-base lg:text-xl leading-110 text-darkblack outline-none"
                     aria-label={`OTP digit ${index + 1}`}
                   />
                   {!digit ? <span className="size-2 rounded-full bg-gray50" aria-hidden /> : null}

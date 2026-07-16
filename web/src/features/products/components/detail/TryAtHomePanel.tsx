@@ -400,12 +400,10 @@ const TryAtHomeAddressStep = ({ onBack, onClose, onSubmit }: TryAtHomeAddressSte
                     </option>
                   ))}
                 </select>
-                <ChevronDown
-                  size={20}
-                  strokeWidth={1.5}
-                  aria-hidden
-                  className="pointer-events-none shrink-0 text-darkblack"
-                />
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden
+                  className="pointer-events-none shrink-0 text-darkblack">
+                  <path fillRule="evenodd" clipRule="evenodd" d="M4.13134 9.19969C4.17617 9.15167 4.23002 9.11295 4.28982 9.08575C4.34963 9.05855 4.4142 9.04341 4.47986 9.04118C4.54552 9.03895 4.61097 9.04968 4.67248 9.07276C4.73399 9.09584 4.79035 9.13082 4.83833 9.17569L11.9983 15.8557L19.1583 9.17569C19.2553 9.08512 19.3842 9.03677 19.5168 9.04127C19.6494 9.04577 19.7748 9.10275 19.8653 9.19969C19.9559 9.29663 20.0043 9.42557 19.9998 9.55816C19.9953 9.69075 19.9383 9.81612 19.8413 9.90669L12.3413 16.9067C12.2488 16.993 12.1269 17.041 12.0003 17.041C11.8738 17.041 11.7519 16.993 11.6593 16.9067L4.15933 9.90669C4.11124 9.86193 4.07245 9.80812 4.04516 9.74836C4.01787 9.68859 4.00263 9.62403 4.00031 9.55837C3.99799 9.49271 4.00863 9.42724 4.03163 9.36569C4.05462 9.30415 4.08953 9.24774 4.13433 9.19969H4.13134Z" fill="currentColor" />
+                </svg>
               </div>
               <FormFieldError
                 id="try-at-home-state-error"

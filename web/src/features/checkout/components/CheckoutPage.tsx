@@ -155,7 +155,7 @@ const CheckoutPage = () => {
 
   return (
     <section className="bg-gray300 max-lg:pb-[calc(7rem+env(safe-area-inset-bottom,0px))] lg:pb-16">
-      <div className="mx-auto w-full max-w-[1440px] px-5 py-6 md:px-8 lg:px-10 lg:py-16">
+      <div className="mx-auto w-full 2xl:max-w-1920 px-5 py-6 md:px-8 lg:px-10 lg:py-10 2xl:px-[60px]">
         <h1
           className={cn(
             "font-larken text-32 font-light leading-110 text-darkblack lg:text-5xl",

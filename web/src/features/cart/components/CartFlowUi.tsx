@@ -4,34 +4,35 @@ import { Check } from "lucide-react";
 import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { cn } from "@/shared/utils/cn";
-import { cartFlowSpec } from "../data/cartFlowSpec";
+
+const cartButtonSizing = "h-14 px-7 py-5";
 
 export const CartDivider = ({
   weight = 1,
-  color = "#CCCCCC",
+  className,
 }: {
   weight?: 0.5 | 1;
-  color?: string;
+  className?: string;
 }) => (
-  <div className="w-full shrink-0" style={{ height: `${weight}px`, backgroundColor: color }} aria-hidden />
+  <div
+    className={cn(
+      "w-full shrink-0 bg-neutral300",
+      weight === 0.5 ? "h-[0.5px]" : "h-px",
+      className,
+    )}
+    aria-hidden
+  />
 );
 
 export const CartMetaRow = ({ parts }: { parts: string[] }) => {
   if (parts.length === 0) return null;
 
   return (
-    <div
-      className="flex flex-wrap items-center"
-      style={{ gap: cartFlowSpec.card.metaGap }}
-    >
+    <div className="flex flex-wrap items-center gap-2">
       {parts.map((part, index) => (
-        <span key={part} className="flex items-center" style={{ gap: cartFlowSpec.card.metaGap }}>
+        <span key={part} className="flex items-center gap-2">
           {index > 0 ? (
-            <span
-              className="w-[0.5px] shrink-0 bg-neutral300"
-              style={{ height: cartFlowSpec.card.metaDividerHeight }}
-              aria-hidden
-            />
+            <span className="h-4 w-[0.5px] shrink-0 bg-neutral300" aria-hidden />
           ) : null}
           <span className="font-gill text-sm font-light leading-110 text-neutral500">{part}</span>
         </span>
@@ -48,18 +49,12 @@ type CartGiftBadgeProps = {
 export const CartGiftBadge = ({ variant = "cart", className }: CartGiftBadgeProps) => (
   <span
     className={cn(
-      "inline-flex shrink-0 items-center justify-center w-[42px] h-[22px] font-gill leading-110",
+      "inline-flex h-[22px] w-[42px] shrink-0 items-center justify-center font-gill leading-110",
       variant === "cart"
-        ? "text-sm text-darkblack"
-        : "text-xs font-light tracking-[0.01em] text-white",
+        ? "bg-[#D9B0CB] text-sm text-darkblack"
+        : "bg-[#D9B0CB] text-xs font-light tracking-[0.01em] text-darkblack",
       className,
     )}
-    style={{
-      backgroundColor:
-        variant === "cart"
-          ? cartFlowSpec.colors.giftBadgeCart
-          : cartFlowSpec.colors.giftBadgeDrawer,
-    }}
   >
     Gift
   </span>
@@ -97,8 +92,8 @@ export const CartGiftCheckbox = ({ checked, onChange, className }: CartGiftCheck
     >
       <Check
         className={cn(
-          "transition-opacity",
-          checked ? "size-3 text-white opacity-100" : "size-3 text-darkblack opacity-0",
+          "size-3 transition-opacity",
+          checked ? "text-white opacity-100" : "text-darkblack opacity-0",
         )}
         strokeWidth={2.5}
       />
@@ -131,13 +126,10 @@ export const CartPrimaryButton = ({
     type="button"
     className={cn(
       cartButtonBase,
+      cartButtonSizing,
       "btn-dark-slide border border-black text-white",
       className,
     )}
-    style={{
-      height: cartFlowSpec.button.height,
-      padding: `${cartFlowSpec.button.paddingY}px ${cartFlowSpec.button.paddingX}px`,
-    }}
     {...props}
   >
     <span className="relative z-10">{children}</span>
@@ -153,13 +145,10 @@ export const CartOutlineButton = ({
     type="button"
     className={cn(
       cartButtonBase,
+      cartButtonSizing,
       "btn-border-slide border border-neutral300 text-darkblack",
       className,
     )}
-    style={{
-      height: cartFlowSpec.button.height,
-      padding: `${cartFlowSpec.button.paddingY}px ${cartFlowSpec.button.paddingX}px`,
-    }}
     {...props}
   >
     <span className="relative z-10">{children}</span>
@@ -179,13 +168,10 @@ export const CartPrimaryLink = ({ children, href, className, onClick }: CartPrim
     onClick={onClick}
     className={cn(
       cartButtonBase,
+      cartButtonSizing,
       "btn-dark-slide border border-black text-white",
       className,
     )}
-    style={{
-      height: cartFlowSpec.button.height,
-      padding: `${cartFlowSpec.button.paddingY}px ${cartFlowSpec.button.paddingX}px`,
-    }}
   >
     <span className="relative z-10">{children}</span>
   </Link>
@@ -204,13 +190,10 @@ export const CartOutlineLink = ({ children, href, className, onClick }: CartOutl
     onClick={onClick}
     className={cn(
       cartButtonBase,
+      cartButtonSizing,
       "btn-border-slide border border-neutral300 text-darkblack",
       className,
     )}
-    style={{
-      height: cartFlowSpec.button.height,
-      padding: `${cartFlowSpec.button.paddingY}px ${cartFlowSpec.button.paddingX}px`,
-    }}
   >
     <span className="relative z-10">{children}</span>
   </Link>
@@ -218,8 +201,7 @@ export const CartOutlineLink = ({ children, href, className, onClick }: CartOutl
 
 export const CartSuccessCheck = () => (
   <span
-    className="flex shrink-0 items-center justify-center"
-    style={{ width: 40, height: 40, color: cartFlowSpec.colors.successGreen }}
+    className="flex size-10 shrink-0 items-center justify-center text-[#47CB6C]"
     aria-hidden
   >
     <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -234,22 +216,20 @@ type CartQuantityStepperProps = {
   onIncrease: () => void;
 };
 
+const quantityButtonClassName =
+  "flex size-4 items-center justify-center border-[0.8px] border-darkblack bg-white font-gill text-xs leading-none text-darkblack";
+
 export const CartQuantityStepper = ({
   quantity,
   onDecrease,
   onIncrease,
 }: CartQuantityStepperProps) => (
-  <div className="flex items-center" style={{ gap: cartFlowSpec.card.footerGap }}>
+  <div className="flex items-center gap-2">
     <button
       type="button"
       onClick={onDecrease}
       aria-label="Decrease quantity"
-      className="flex items-center justify-center bg-white font-gill text-xs leading-none text-darkblack"
-      style={{
-        width: cartFlowSpec.quantity.boxSize,
-        height: cartFlowSpec.quantity.boxSize,
-        border: `${cartFlowSpec.quantity.borderWeight}px solid ${cartFlowSpec.colors.headingText}`,
-      }}
+      className={quantityButtonClassName}
     >
       −
     </button>
@@ -260,12 +240,7 @@ export const CartQuantityStepper = ({
       type="button"
       onClick={onIncrease}
       aria-label="Increase quantity"
-      className="flex items-center justify-center bg-white font-gill text-xs leading-none text-darkblack"
-      style={{
-        width: cartFlowSpec.quantity.boxSize,
-        height: cartFlowSpec.quantity.boxSize,
-        border: `${cartFlowSpec.quantity.borderWeight}px solid ${cartFlowSpec.colors.headingText}`,
-      }}
+      className={quantityButtonClassName}
     >
       +
     </button>
@@ -277,7 +252,7 @@ type CartMoreItemsNoteProps = {
 };
 
 export const CartMoreItemsNote = ({ count }: CartMoreItemsNoteProps) => (
-  <div className="flex items-center" style={{ gap: cartFlowSpec.card.metaGap }}>
+  <div className="flex items-center gap-2">
     <ShoppingBagIcon className="size-6 shrink-0 text-darkblack" />
     <p className="font-gill text-base font-light leading-110 text-darkblack">
       Your bag contains {count} more {count === 1 ? "item" : "items"}

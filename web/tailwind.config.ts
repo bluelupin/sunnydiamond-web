@@ -42,6 +42,7 @@ export default {
         gray100: "#EFEDE6",
         gray200: "#FBFAF6",
         gray300: "#F4F3EE",
+        green600: "#47CB6C",
         neutral300: "#CCCCCC",
         neutral500: "#4D4D4D",
         nuetral200: "#A2A1A1",

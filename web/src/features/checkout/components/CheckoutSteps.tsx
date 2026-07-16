@@ -94,7 +94,7 @@ const CheckoutAddressFields = ({
   form: CheckoutFormData;
   onChange: (field: keyof CheckoutFormData, value: string | boolean) => void;
 }) => (
-  <>
+  <div className="space-y-6">
     <CheckoutField
       id={`${idPrefix}-name`}
       label="Your Name"
@@ -142,7 +142,7 @@ const CheckoutAddressFields = ({
       onChange={(value) => onChange(fields.phone, value)}
       showVerify={false}
     />
-  </>
+  </div>
 );
 
 const buildAddressLines = ({
@@ -194,16 +194,17 @@ export const CheckoutFormStep = ({
 
     <CheckoutSectionCard gapClassName="gap-8">
       <CheckoutSubheading>Delivery Address</CheckoutSubheading>
-      <CheckoutSubheading>SHIPPING ADDRESS</CheckoutSubheading>
+      <div className="space-y-6">
+        <CheckoutSubheading>SHIPPING ADDRESS</CheckoutSubheading>
+        <CheckoutAddressFields
+          idPrefix="checkout-shipping"
+          fields={SHIPPING_ADDRESS_FIELDS}
+          form={form}
+          onChange={onChange}
+        />
+      </div>
 
-      <CheckoutAddressFields
-        idPrefix="checkout-shipping"
-        fields={SHIPPING_ADDRESS_FIELDS}
-        form={form}
-        onChange={onChange}
-      />
-
-      <div className="flex flex-col gap-4">
+      <div className="space-y-6">
         <CheckoutSubheading>BILLING ADDRESS</CheckoutSubheading>
         <CheckoutCheckbox
           checked={form.billingSameAsShipping}
@@ -267,13 +268,13 @@ export const CheckoutPaymentStep = ({
   const billingLines = form.billingSameAsShipping
     ? shippingLines
     : buildAddressLines({
-        addressLine1: form.billingAddressLine1,
-        addressLine2: form.billingAddressLine2,
-        city: form.billingCity,
-        state: form.billingState,
-        pincode: form.billingPincode,
-        phone: form.billingPhone,
-      });
+      addressLine1: form.billingAddressLine1,
+      addressLine2: form.billingAddressLine2,
+      city: form.billingCity,
+      state: form.billingState,
+      pincode: form.billingPincode,
+      phone: form.billingPhone,
+    });
 
   const billingName = form.billingSameAsShipping
     ? form.shippingName || form.name
