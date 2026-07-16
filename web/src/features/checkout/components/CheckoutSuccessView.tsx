@@ -42,7 +42,7 @@ const SuccessItemMeta = ({ parts }: { parts: string[] }) => {
 };
 
 const CheckoutSuccessView = ({ contact, items, totalPrice }: CheckoutSuccessViewProps) => (
-  <section className="bg-gray300 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] max-lg:px-0 lg:pb-16">
+  <section className="bg-gray300 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] max-lg:px-0 lg:pb-0">
     <div className="mx-auto flex w-full max-w-[1440px] justify-center px-5 py-8 md:px-8 lg:px-10 lg:py-16">
       <div className="flex w-full max-w-[560px] flex-col gap-6 p-6 max-lg:px-4 max-lg:py-6">
         <div className="flex flex-col items-center gap-6">
