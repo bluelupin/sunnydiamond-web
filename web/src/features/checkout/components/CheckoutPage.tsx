@@ -8,6 +8,8 @@ import { trackEvent } from "@/infrastructure/analytics/use-gtag";
 import { CartOutlineLink } from "@/features/cart/components/CartFlowUi";
 import type { CartLineItem } from "@/features/cart/types/cart.types";
 import CheckoutOrderSummary from "./CheckoutOrderSummary";
+import CheckoutMobileOrderSummaryDrawer from "./CheckoutMobileOrderSummaryDrawer";
+import CheckoutMobileStickyFooter from "./CheckoutMobileStickyFooter";
 import CheckoutOtpModal from "./CheckoutOtpModal";
 import { CheckoutFormStep, CheckoutPaymentStep } from "./CheckoutSteps";
 import CheckoutSuccessView from "./CheckoutSuccessView";
@@ -58,6 +60,12 @@ const CheckoutPage = () => {
 
   const [form, setForm] = useState<CheckoutFormData>(createEmptyCheckoutForm);
   const [payment, setPayment] = useState<CheckoutPaymentData>(createEmptyPaymentForm);
+  const [offersOpen, setOffersOpen] = useState(false);
+  const [orderSummaryOpen, setOrderSummaryOpen] = useState(false);
+
+  const mobileScrollPadding = offersOpen
+    ? "max-lg:pb-[calc(264px+env(safe-area-inset-bottom,0px))]"
+    : "max-lg:pb-[calc(220px+env(safe-area-inset-bottom,0px))]";
 
   const updateForm = (field: keyof CheckoutFormData, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -152,13 +160,15 @@ const CheckoutPage = () => {
   };
 
   const sidebarCtaLabel = step === "payment" ? "Pay Now" : "Continue to Payment";
+  const ctaDisabled = submitting || (step === "form" && !canContinueToPayment);
+  const handleSidebarCta = step === "payment" ? placeOrder : handleContinueToPayment;
 
   return (
-    <section className="bg-gray300 max-lg:pb-[calc(7rem+env(safe-area-inset-bottom,0px))]">
+    <section className={cn("bg-gray300", mobileScrollPadding)}>
       <div className="mx-auto w-full 2xl:max-w-1920 px-5 py-6 md:px-8 lg:px-10 lg:py-10 2xl:px-[60px]">
         <h1
           className={cn(
-            "font-larken text-32 font-light leading-110 text-darkblack lg:text-5xl",
+            "font-larken text-32 font-light leading-110 text-darkblack lg:text-5xl lg:border-0 border-b border-neutral300 lg:pb-0 pb-6",
             step === "payment" ? "mb-6 lg:mb-10" : "mb-6",
           )}
         >
@@ -194,21 +204,28 @@ const CheckoutPage = () => {
           <CheckoutOrderSummary
             className="hidden lg:block"
             ctaLabel={sidebarCtaLabel}
-            ctaDisabled={submitting || (step === "form" && !canContinueToPayment)}
-            onCtaClick={step === "payment" ? placeOrder : handleContinueToPayment}
+            ctaDisabled={ctaDisabled}
+            onCtaClick={handleSidebarCta}
           />
         </div>
       </div>
 
-      <div className="lg:hidden">
-        <CheckoutOrderSummary
-          compact
-          stickyOnMobile
-          ctaLabel={sidebarCtaLabel}
-          ctaDisabled={submitting || (step === "form" && !canContinueToPayment)}
-          onCtaClick={step === "payment" ? placeOrder : handleContinueToPayment}
-        />
-      </div>
+      <CheckoutMobileStickyFooter
+        offersOpen={offersOpen}
+        onOffersToggle={() => setOffersOpen((open) => !open)}
+        onOrderSummaryOpen={() => setOrderSummaryOpen(true)}
+        ctaLabel={sidebarCtaLabel}
+        onCtaClick={handleSidebarCta}
+        ctaDisabled={ctaDisabled}
+      />
+
+      <CheckoutMobileOrderSummaryDrawer
+        open={orderSummaryOpen}
+        onOpenChange={setOrderSummaryOpen}
+        ctaLabel={sidebarCtaLabel}
+        onCtaClick={handleSidebarCta}
+        ctaDisabled={ctaDisabled}
+      />
 
       <CheckoutOtpModal
         open={showOtpModal}

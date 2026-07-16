@@ -1,3 +1,4 @@
+import { useEffect, useState, type KeyboardEvent } from "react";
 import Link from "next/link";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
@@ -8,7 +9,7 @@ import {
   CartGiftBadge,
   CartGiftCheckbox,
   CartMetaRow,
-  CartOutlineLink,
+  CartOutlineButton,
   CartTextLink,
 } from "./CartFlowUi";
 import DeleteIcon from "@/assets/Icons/DeleteIcon";
@@ -20,12 +21,46 @@ interface CartItemProps {
   onUpdateOptions: (lineItemId: string, options: Partial<CartLineOptions>) => void;
 }
 
+const ENGRAVING_PLACEHOLDER = "Diya Gupta";
+
 const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
   const { product, quantity, options } = item;
   const { toggleWishlist, isWishlisted } = useWishlist();
   const meta = formatCartLineMeta(item);
   const wishlisted = isWishlisted(product.id);
   const isGift = Boolean(options.isGift || item.gifting);
+  const [isEditingEngraving, setIsEditingEngraving] = useState(false);
+  const [engravingDraft, setEngravingDraft] = useState(options.engraving ?? "");
+
+  useEffect(() => {
+    if (!isEditingEngraving) {
+      setEngravingDraft(options.engraving ?? "");
+    }
+  }, [options.engraving, isEditingEngraving]);
+
+  const handleEngravingAction = () => {
+    if (!isEditingEngraving) {
+      setEngravingDraft(options.engraving ?? "");
+      setIsEditingEngraving(true);
+      return;
+    }
+
+    const trimmed = engravingDraft.trim();
+    onUpdateOptions(item.id, { engraving: trimmed || undefined });
+    setIsEditingEngraving(false);
+  };
+
+  const handleEngravingKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleEngravingAction();
+    }
+
+    if (event.key === "Escape") {
+      setEngravingDraft(options.engraving ?? "");
+      setIsEditingEngraving(false);
+    }
+  };
 
   return (
     <article className="relative flex flex-col gap-4 bg-white px-4 lg:gap-6 lg:px-6 py-6">
@@ -98,16 +133,30 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
 
         <div className="flex gap-2 self-stretch">
           <div className="flex h-14 min-w-0 flex-1 items-center bg-aboutInactive px-3">
-            <p className="truncate font-gill text-sm leading-110 text-darkblack lg:text-base">
-              {options.engraving ?? "Diya Gupta"}
-            </p>
+            {isEditingEngraving ? (
+              <input
+                type="text"
+                value={engravingDraft}
+                onChange={(event) => setEngravingDraft(event.target.value)}
+                onKeyDown={handleEngravingKeyDown}
+                placeholder={ENGRAVING_PLACEHOLDER}
+                aria-label="Engraving text"
+                autoFocus
+                className="h-full w-full min-w-0 border-0 bg-transparent font-gill text-sm leading-110 text-darkblack outline-none placeholder:text-neutral500 lg:text-base"
+              />
+            ) : (
+              <p className="truncate font-gill text-sm leading-110 text-darkblack lg:text-base">
+                {options.engraving ?? ENGRAVING_PLACEHOLDER}
+              </p>
+            )}
           </div>
-          <CartOutlineLink
-            href={`/product/${product.id}`}
+          <CartOutlineButton
+            type="button"
+            onClick={handleEngravingAction}
             className="h-14 w-auto shrink-0 px-5 uppercase lg:px-7"
           >
-            Modify
-          </CartOutlineLink>
+            {isEditingEngraving ? "Save" : "Modify"}
+          </CartOutlineButton>
         </div>
       </div>
     </article>

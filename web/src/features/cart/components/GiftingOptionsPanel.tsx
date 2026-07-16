@@ -65,7 +65,7 @@ const GiftingIntroPanel = ({
   };
 
   return (
-    <div className="flex w-full flex-col gap-6 bg-gray300 p-6">
+    <div className="flex w-full flex-col gap-6 bg-gray300 lg:px-6 py-6 px-4">
       <div className="flex flex-col gap-6">
         <h2 className="font-larken text-2xl font-light leading-110 text-darkblack lg:text-32">
           Gifting options
@@ -284,8 +284,8 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
   );
 
   return (
-    <div className="relative flex h-full min-h-0 flex-col bg-white">
-      <div className="w-full shrink-0 px-6 pt-10">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
+      <div className="w-full shrink-0 lg:px-6 px-4 lg:pt-10 pt-6">
         <div className="flex h-[26px] items-center justify-between">
           <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
             Gifting Options
@@ -299,8 +299,8 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
         </div>
       </div>
 
-      <div className="relative min-h-0 flex-1">
-        <div className="flex h-full min-h-0 flex-col gap-6 overflow-y-auto px-6 pb-6 pt-6">
+      <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div className="flex flex-col gap-6 lg:px-6 px-4 py-6">
           <GiftingBagHero isSeparate={isSeparate} />
 
           {!isSeparate ? (
@@ -371,7 +371,8 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
 
         <GiftingScrollIndicator />
       </div>
-      <div className="relative shrink-0 bg-white pb-6 border border-t border-neutral300">
+
+      <div className="relative shrink-0 bg-white pb-6 border-t border-neutral300">
         <div
           className="pointer-events-none absolute inset-x-0 bottom-full h-[71px] bg-gradient-to-b from-transparent to-white"
           aria-hidden
@@ -479,12 +480,18 @@ const GiftingOptionsPanel = () => {
       >
         <DrawerContent
           className={cn(
-            "max-h-[90vh] rounded-none border-0 p-0 [&>div:first-child]:hidden",
-            giftingStep === "intro" ? "bg-gray300" : "bg-white",
+            "flex min-h-0 flex-col overflow-hidden rounded-none border-0 p-0 [&>div:first-child]:hidden",
+            giftingStep === "intro"
+              ? "max-h-[90vh] bg-gray300"
+              : "h-[90vh] max-h-[90vh] bg-white",
           )}
         >
           <DrawerTitle className="sr-only">Gifting options</DrawerTitle>
-          {giftingStep === "intro" ? introPanel : personalisePanel}
+          {giftingStep === "intro" ? (
+            introPanel
+          ) : (
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{personalisePanel}</div>
+          )}
         </DrawerContent>
       </Drawer>
     );
@@ -509,7 +516,7 @@ const GiftingOptionsPanel = () => {
         )}
       >
         <SheetTitle className="sr-only">Gifting options</SheetTitle>
-        <div className="h-full max-h-screen overflow-hidden">{personalisePanel}</div>
+        <div className="flex h-full min-h-0 flex-col overflow-hidden">{personalisePanel}</div>
       </SheetContent>
     </Sheet>
   );

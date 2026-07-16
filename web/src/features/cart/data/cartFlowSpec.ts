@@ -17,7 +17,7 @@ export const cartFlowSpec = {
     stickyFooterZIndex: 40,
     drawerMaxHeight: "90vh",
     bagDrawerMaxHeight: "85vh",
-    /** Figma 2083:5334 — mobile cart page, 2083:5665 — sticky footer with offers */
+    /** Figma 2083:5334 scroll, 2083:5665 sticky footer */
     cartPage: {
       titleFontSize: 32,
       titleMarginTop: 24,
