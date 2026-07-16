@@ -170,7 +170,7 @@ const CheckoutPage = () => {
 
   return (
     <section className={cn("bg-gray300", mobileScrollPadding)}>
-      <div className="mx-auto w-full 2xl:max-w-1920 px-5 py-6 md:px-8 lg:px-10 lg:py-10 2xl:px-[60px]">
+      <div className="mx-auto w-full 2xl:max-w-1920 px-4 py-6 md:px-8 lg:px-10 lg:py-10 2xl:px-[60px]">
         <h1
           className={cn(
             "font-larken text-32 font-light leading-110 text-darkblack lg:text-5xl",

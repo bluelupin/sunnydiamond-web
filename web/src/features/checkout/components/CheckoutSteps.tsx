@@ -283,7 +283,7 @@ export const CheckoutPaymentStep = ({
     : form.billingName || form.name;
 
   return (
-    <div className="flex flex-col gap-[33px]">
+    <div className="flex flex-col lg:gap-[33px] gap-6">
       <CheckoutSectionCard>
         <CheckoutSectionHeading onEdit={onEditPersonal}>Personal Information</CheckoutSectionHeading>
         <CheckoutSummaryText>
@@ -292,14 +292,14 @@ export const CheckoutPaymentStep = ({
         </CheckoutSummaryText>
       </CheckoutSectionCard>
 
-      <CheckoutSectionCard gapClassName="gap-8">
+      <CheckoutSectionCard gapClassName="lg:gap-8 gap-6">
         <CheckoutSectionHeading onEdit={onEditDelivery}>Delivery Address</CheckoutSectionHeading>
         <div className="flex flex-col gap-4">
-          <CheckoutSubheading>SHIPPING ADDRESS</CheckoutSubheading>
+          <CheckoutSubheading className="lg:text-xl text-base">SHIPPING ADDRESS</CheckoutSubheading>
           <CheckoutAddressBlock name={form.shippingName || form.name} lines={shippingLines} />
         </div>
         <div className="flex flex-col gap-4">
-          <CheckoutSubheading>BILLING ADDRESS</CheckoutSubheading>
+          <CheckoutSubheading className="lg:text-xl text-base">BILLING ADDRESS</CheckoutSubheading>
           <CheckoutCheckbox
             checked={form.billingSameAsShipping}
             onChange={() => undefined}

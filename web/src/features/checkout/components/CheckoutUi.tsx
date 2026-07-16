@@ -308,7 +308,7 @@ export const CheckoutAddressBlock = ({
 }) => (
   <div className="flex flex-col gap-2">
     <p className="font-gill text-base font-normal leading-110 text-darkblack">{name}</p>
-    <div className="font-gill text-base font-light leading-110 text-darkblack">
+    <div className="font-gill text-base font-light leading-110 text-darkblack space-y-2">
       {lines.map((line) => (
         <p key={line}>{line}</p>
       ))}
