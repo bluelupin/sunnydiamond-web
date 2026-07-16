@@ -152,7 +152,7 @@ export const CheckoutSectionCard = ({
   className,
   gapClassName = "gap-6",
 }: CheckoutSectionCardProps) => (
-  <section className={cn("flex flex-col bg-white px-4 py-6", gapClassName, className)}>
+  <section className={cn("flex flex-col bg-white px-4 py-6 lg:px-6", gapClassName, className)}>
     {children}
   </section>
 );
@@ -164,7 +164,7 @@ type CheckoutSectionHeadingProps = {
 
 export const CheckoutSectionHeading = ({ children, onEdit }: CheckoutSectionHeadingProps) => (
   <div className="flex items-center justify-between">
-    <h2 className="font-gill text-2xl font-normal leading-110 text-darkblack">{children}</h2>
+    <h2 className="font-gill text-xl font-normal leading-110 text-darkblack lg:text-2xl">{children}</h2>
     {onEdit ? (
       <button type="button" onClick={onEdit} aria-label={`Edit ${children}`} className="shrink-0">
         <EditIcon className="size-6 text-darkblack" />
@@ -173,8 +173,16 @@ export const CheckoutSectionHeading = ({ children, onEdit }: CheckoutSectionHead
   </div>
 );
 
-export const CheckoutSubheading = ({ children }: { children: React.ReactNode }) => (
-  <h3 className="font-gill text-xl font-normal leading-110 text-darkblack">{children}</h3>
+export const CheckoutSubheading = ({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => (
+  <h3 className={cn("font-gill text-xl font-normal leading-110 text-darkblack", className)}>
+    {children}
+  </h3>
 );
 
 type CheckoutCheckboxProps = {
@@ -258,6 +266,32 @@ export const CheckoutRadioOption = ({
   <div className="flex flex-col gap-4">
     <CheckoutRadioRow checked={checked} onChange={onChange} label={label} align={align} />
     {checked ? children : null}
+  </div>
+);
+
+export const CheckoutSummaryDivider = () => (
+  <div className="h-px w-full shrink-0 bg-neutral300" aria-hidden />
+);
+
+export const CheckoutPriceRow = ({
+  label,
+  value,
+  emphasis,
+}: {
+  label: string;
+  value: string;
+  emphasis?: boolean;
+}) => (
+  <div className="flex items-center justify-between">
+    <span
+      className={cn(
+        "font-gill text-base leading-110 text-darkblack",
+        !emphasis && "font-light",
+      )}
+    >
+      {label}
+    </span>
+    <span className="font-gill text-base font-normal leading-110 text-darkblack">{value}</span>
   </div>
 );
 

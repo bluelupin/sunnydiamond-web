@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
 import { useCart } from "@/features/cart/context/CartContext";
 import { formatCartPrice } from "@/features/cart/utils/formatCartLine";
@@ -52,7 +53,7 @@ const CheckoutMobileStickyFooter = ({
         </button>
 
         {offersOpen ? (
-          <div className="bg-gray200 px-4 pb-3">
+          <div className="bg-gray300 px-4 pb-3">
             <p className="text-center font-gill text-sm font-light leading-110 text-neutral500">
               No offers applied yet. Check back for seasonal promotions.
             </p>

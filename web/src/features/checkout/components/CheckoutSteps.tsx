@@ -94,7 +94,7 @@ const CheckoutAddressFields = ({
   form: CheckoutFormData;
   onChange: (field: keyof CheckoutFormData, value: string | boolean) => void;
 }) => (
-  <div className="space-y-6">
+  <div className="sm:space-y-6 space-y-4">
     <CheckoutField
       id={`${idPrefix}-name`}
       label="Your Name"
@@ -175,7 +175,9 @@ export const CheckoutFormStep = ({
 }: CheckoutFormStepProps) => (
   <div className="flex flex-col gap-6">
     <CheckoutSectionCard>
-      <h2 className="font-gill text-2xl font-normal leading-110 text-darkblack">Personal Information</h2>
+      <h2 className="font-gill text-xl font-normal leading-110 text-darkblack lg:text-2xl">
+        Personal Information
+      </h2>
       <CheckoutField
         id="checkout-name"
         label="Your Name*"
@@ -192,10 +194,10 @@ export const CheckoutFormStep = ({
       />
     </CheckoutSectionCard>
 
-    <CheckoutSectionCard gapClassName="gap-8">
+    <CheckoutSectionCard gapClassName="lg:gap-8 gap-6">
       <CheckoutSubheading>Delivery Address</CheckoutSubheading>
       <div className="space-y-6">
-        <CheckoutSubheading>SHIPPING ADDRESS</CheckoutSubheading>
+        <CheckoutSubheading className="lg:text-xl text-base">SHIPPING ADDRESS</CheckoutSubheading>
         <CheckoutAddressFields
           idPrefix="checkout-shipping"
           fields={SHIPPING_ADDRESS_FIELDS}
@@ -204,8 +206,8 @@ export const CheckoutFormStep = ({
         />
       </div>
 
-      <div className="space-y-6">
-        <CheckoutSubheading>BILLING ADDRESS</CheckoutSubheading>
+      <div className="lg:space-y-6 space-y-4">
+        <CheckoutSubheading className="lg:text-xl text-base">BILLING ADDRESS</CheckoutSubheading>
         <CheckoutCheckbox
           checked={form.billingSameAsShipping}
           onChange={(checked) => onChange("billingSameAsShipping", checked)}

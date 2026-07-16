@@ -11,6 +11,7 @@ import CheckoutOrderSummary from "./CheckoutOrderSummary";
 import CheckoutMobileOrderSummaryDrawer from "./CheckoutMobileOrderSummaryDrawer";
 import CheckoutMobileStickyFooter from "./CheckoutMobileStickyFooter";
 import CheckoutOtpModal from "./CheckoutOtpModal";
+import { checkoutFlowSpec } from "../data/checkoutFlowSpec";
 import { CheckoutFormStep, CheckoutPaymentStep } from "./CheckoutSteps";
 import CheckoutSuccessView from "./CheckoutSuccessView";
 import {
@@ -63,9 +64,13 @@ const CheckoutPage = () => {
   const [offersOpen, setOffersOpen] = useState(false);
   const [orderSummaryOpen, setOrderSummaryOpen] = useState(false);
 
-  const mobileScrollPadding = offersOpen
-    ? "max-lg:pb-[calc(264px+env(safe-area-inset-bottom,0px))]"
-    : "max-lg:pb-[calc(220px+env(safe-area-inset-bottom,0px))]";
+  const mobileScrollPadding = (() => {
+    const { mobile } = checkoutFlowSpec;
+    const clearance = offersOpen
+      ? mobile.stickyFooterOffersExpandedClearance
+      : mobile.stickyFooterCollapsedClearance;
+    return `max-lg:pb-[calc(${clearance}px+env(safe-area-inset-bottom,0px))]`;
+  })();
 
   const updateForm = (field: keyof CheckoutFormData, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -168,7 +173,8 @@ const CheckoutPage = () => {
       <div className="mx-auto w-full 2xl:max-w-1920 px-5 py-6 md:px-8 lg:px-10 lg:py-10 2xl:px-[60px]">
         <h1
           className={cn(
-            "font-larken text-32 font-light leading-110 text-darkblack lg:text-5xl lg:border-0 border-b border-neutral300 lg:pb-0 pb-6",
+            "font-larken text-32 font-light leading-110 text-darkblack lg:text-5xl",
+            "max-lg:border-b max-lg:border-neutral300 max-lg:pb-6",
             step === "payment" ? "mb-6 lg:mb-10" : "mb-6",
           )}
         >
