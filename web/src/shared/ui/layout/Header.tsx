@@ -107,7 +107,9 @@ const Header = () => {
         className={cn(
           "absolute top-0 inset-x-0 z-50 transition-colors duration-300",
           mobileMenuOpen ? "pointer-events-none opacity-0" : "",
-          isOverlay ? "bg-transparent" : "bg-white",
+          isOverlay ? "bg-transparent" : ["/cart", "/checkout"].includes(pathname)
+            ? "bg-gray300"
+            : "bg-white",
         )}
         aria-hidden={mobileMenuOpen}
       >
