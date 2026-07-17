@@ -4,6 +4,7 @@ import { useCallback, useRef } from "react";
 import Link from "next/link";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
+import { useHomepageOccasions } from "@/hooks/homepage/useHomepageOccasions";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import fallBackImage from "@/assets/fallBackImage.png";
 import { isSectionActive } from "@/shared/utils/cmsSection";
@@ -80,7 +81,7 @@ function OccasionCardItem({
       </div>
 
       {/* Desktop — same hover reveal as CollectionHeroPanel */}
-      <div className="absolute bottom-0 left-40 z-10 hidden max-w-[418px] flex-col-reverse items-start text-white md:flex">
+      <div className="absolute bottom-0 left-10 z-10 hidden max-w-[418px] flex-col-reverse items-start text-white md:flex">
         <div className="inline-flex max-h-0 w-fit flex-col items-start overflow-hidden pb-0 pt-0 opacity-0 motion-safe:transition-[max-height,padding,opacity] motion-safe:duration-500 motion-safe:ease-out group-hover:max-h-[72px] group-hover:pb-16 group-hover:opacity-100 group-focus-visible:max-h-[72px] group-focus-visible:pb-16 group-focus-visible:opacity-100">
           <div className="relative after:bg-white after:absolute after:h-0.5 after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-white hover:border-white sm:pb-1 font-gill text-sm font-normal uppercase leading-110 text-white hover:text-white">
             {ctaLabel}
@@ -103,9 +104,21 @@ function OccasionCardItem({
 
 const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
   const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
+  const { data: standaloneOccasions, isLoading: isStandaloneLoading } = useHomepageOccasions();
   const occasionSection = editorialData?.occasionSection ?? null;
   const sectionTitle =
     occasionSection?.sectionTitle?.trim() || "Timeless Pieces for Every Occasion";
+
+  const embeddedOccasions = (occasionSection?.occasions ?? []).filter(
+    (card) => card?.isActive !== false,
+  );
+  const occasions =
+    embeddedOccasions.length > 0
+      ? embeddedOccasions
+      : (standaloneOccasions ?? []).filter((card) => card?.isActive !== false);
+
+  const isLoading =
+    isEditorialLoading || (embeddedOccasions.length === 0 && isStandaloneLoading);
 
   const carouselRef = useRef<HTMLDivElement>(null);
 
@@ -136,7 +149,7 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
     return null;
   }
 
-  if (isEditorialLoading) {
+  if (isLoading) {
     return (
       <section
         id={id}
@@ -153,10 +166,6 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
       </section>
     );
   }
-
-  const occasions = (occasionSection?.occasions ?? []).filter(
-    (card) => card?.isActive !== false,
-  );
 
   if (!occasions.length) {
     return null;

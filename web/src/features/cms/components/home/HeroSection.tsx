@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
 import DiamondIcon from "@/assets/Icons/Diamond";
 import TrustBadgeSection from "../common/TrustBadges";
@@ -20,25 +21,28 @@ const HeroSection = ({ id }: HeroSectionProps) => {
   const title = hero?.title ?? "";
   const primaryCta = hero?.primaryCta?.url ?? "";
   const primaryCtaLabel = hero?.primaryCta?.label ?? "";
+  const heroVideoUrl = useMemo(() => getCmsAssetUrl(hero?.videoUrl), [hero?.videoUrl]);
+
+  const heroImage = hero?.image;
 
   const desktopImageUrl = useMemo(
-    () => resolveCmsMediaUrl(hero?.image?.desktopImage ?? hero?.image?.data?.attributes ?? hero?.image),
-    [hero],
+    () => resolveCmsMediaUrl(heroImage?.desktopImage ?? heroImage),
+    [heroImage],
   );
 
   const mobileImageUrl = useMemo(
-    () => resolveCmsMediaUrl(hero?.image?.mobileImage ?? hero?.image?.data?.attributes ?? hero?.image),
-    [hero],
+    () => resolveCmsMediaUrl(heroImage?.mobileImage ?? heroImage?.desktopImage ?? heroImage),
+    [heroImage],
   );
 
   const heroAlt = useMemo(
     () =>
-      hero?.image?.altText ||
-      resolveCmsAltText(hero?.image?.desktopImage ?? hero?.image?.data?.attributes ?? hero?.image) ||
-      resolveCmsAltText(hero?.image?.mobileImage ?? hero?.image?.data?.attributes ?? hero?.image) ||
+      heroImage?.altText ||
+      resolveCmsAltText(heroImage?.desktopImage ?? heroImage) ||
+      resolveCmsAltText(heroImage?.mobileImage ?? heroImage?.desktopImage) ||
       hero?.title ||
       "",
-    [hero],
+    [hero?.title, heroImage],
   );
 
   const heroTitle = String(title ?? "");
@@ -73,6 +77,7 @@ const HeroSection = ({ id }: HeroSectionProps) => {
           mobileImageUrl={mobileImageUrl}
           alt={heroAlt}
           isLoading={isShellLoading}
+          cmsVideoUrl={heroVideoUrl}
         />
         <HeroSectionOverlay />
         <div className="container relative flex h-full items-end justify-center md:py-16 sm:py-12 py-11 md:px-6 px-4">

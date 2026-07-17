@@ -1,4 +1,7 @@
 import type { HomepageQueryKey } from "@/hooks/homepage/queryKeys";
+import type { HomepageEditorialBlocksData } from "@/types/homepage/editorialBlocks";
+import type { HomepageShoppingBlocksData } from "@/types/homepage/categoryNavigation";
+import type { NormalizedHomepageShell } from "@/services/homepage/homepageShell.service";
 
 export type CmsCacheEntry<T> = {
   value?: T;
@@ -33,9 +36,9 @@ export function isCmsCacheFresh(key: HomepageQueryKey, staleTimeMs: number): boo
 }
 
 export type HomepagePrefetchedCms = {
-  shell?: unknown;
-  editorial?: unknown;
-  shopping?: unknown;
+  shell?: NormalizedHomepageShell;
+  editorial?: HomepageEditorialBlocksData;
+  shopping?: HomepageShoppingBlocksData;
 };
 
 export function seedHomepageCmsCache(

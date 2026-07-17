@@ -1,12 +1,11 @@
-import { apiFetch } from "@/api/fetchClient";
-import { STRAPI_ENDPOINTS } from "@/api/endpoints";
-import { homepagePopulateParams } from "./homepageSectionParams";
-import type { GiftingBannerData } from "@/types/homepage/giftingBanner";
+import { cache } from "react";
+import { getHomepageShoppingBlocks } from "./homepageShoppingBlocks.service";
+import type { GiftingBanner } from "@/types/homepage/categoryNavigation";
 
-export async function getGiftingBanner(signal?: AbortSignal): Promise<GiftingBannerData> {
-  return apiFetch<GiftingBannerData>(STRAPI_ENDPOINTS.homepage, {
-    params: homepagePopulateParams.giftingBanner,
-    signal,
-  });
-}
-
+/** @deprecated Prefer `getHomepageShoppingBlocks()` — gifting data lives on shopping-blocks. */
+export const getGiftingBanner = cache(
+  async (signal?: AbortSignal): Promise<GiftingBanner | null> => {
+    const shopping = await getHomepageShoppingBlocks(signal);
+    return shopping.giftingBanner ?? shopping.homepage?.giftingBanner ?? null;
+  },
+);

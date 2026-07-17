@@ -10,6 +10,9 @@ import {
 import { buildHomepageJsonLd, resolveHomepageSeoMetadata } from "@/shared/lib/seo/homepageSeo";
 import { siteConfig } from "@/shared/lib/siteConfig";
 
+/** Refresh CMS-driven homepage content without a full redeploy. */
+export const revalidate = 300;
+
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const shellData = await getCachedHomepageShell();

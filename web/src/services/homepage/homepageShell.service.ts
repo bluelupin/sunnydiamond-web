@@ -1,7 +1,22 @@
+import { cache } from "react";
 import { apiFetch } from "@/api/fetchClient";
+import { STRAPI_ENDPOINTS } from "@/api/endpoints";
+import {
+  EMPTY_HOMEPAGE_SHELL,
+  mapHomepageShellData,
+  type NormalizedHomepageShell,
+} from "./homepage.mapper";
+import type { StrapiHomepageShellEntity } from "./homepage.strapi.types";
 
-export async function getHomepageShell(signal?: AbortSignal) {
-  return apiFetch<any>("api/homepage/shell", {
-    signal,
-  });
-}
+export const getHomepageShell = cache(
+  async (signal?: AbortSignal): Promise<NormalizedHomepageShell> => {
+    const raw = await apiFetch<StrapiHomepageShellEntity>(STRAPI_ENDPOINTS.homepageShell, {
+      signal,
+    });
+
+    return mapHomepageShellData(raw);
+  },
+);
+
+export { EMPTY_HOMEPAGE_SHELL };
+export type { NormalizedHomepageShell };

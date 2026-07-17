@@ -1,4 +1,12 @@
 export const STRAPI_ENDPOINTS = {
-  homepage: "homepage",
+  homepageShell: "api/homepage/shell",
+  homepageEditorialBlocks: "api/homepage/editorial-blocks",
+  homepageShoppingBlocks: "api/homepage/shopping-blocks",
   learnAboutDiamondsPage: "api/learn-about-diamonds-page",
+  aboutPage: "api/about-page",
+  occasions: "api/occasions",
+  /** @deprecated Legacy single-type slug — prefer split homepage endpoints */
+  homepage: "homepage",
 } as const;
+
+export type StrapiEndpoint = (typeof STRAPI_ENDPOINTS)[keyof typeof STRAPI_ENDPOINTS];

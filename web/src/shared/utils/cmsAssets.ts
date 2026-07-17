@@ -1,5 +1,14 @@
-const CMS_BASE_URL: string = process.env.NEXT_PUBLIC_SITE_URL?.trim() ?? "";
-const CMS_ROOT_URL = CMS_BASE_URL.replace(/\/api\/?$/, "");
+import { getStrapiBaseUrl } from "@/api/config";
+
+function resolveCmsRootUrl(): string {
+  try {
+    return getStrapiBaseUrl();
+  } catch {
+    return "";
+  }
+}
+
+const CMS_ROOT_URL = resolveCmsRootUrl();
 
 /**
  * Normalizes Strapi media URLs.

@@ -1,3 +1,5 @@
+import { getPublicSiteUrl } from "@/api/config";
+
 export const siteConfig = {
   brand: {
     name: "Sunny Diamonds",
@@ -23,7 +25,7 @@ export const siteConfig = {
     titleTemplate: "%s | Sunny Diamonds",
     defaultDescription:
       "Handcrafted premium and custom diamond jewellery. Explore GIA-certified diamonds, bespoke designs, and timeless elegance.",
-    siteUrl: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://sunnydiamonds.com").replace(/\/$/, ""),
+    siteUrl: getPublicSiteUrl(),
     ogImage: "/og-image.jpg",
   },
   navigation: {

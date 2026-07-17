@@ -13,6 +13,7 @@ type HeroBackgroundMediaProps = {
   mobileImageUrl?: string;
   alt: string;
   isLoading: boolean;
+  cmsVideoUrl?: string;
 };
 
 const HeroBackgroundMedia = ({
@@ -20,6 +21,7 @@ const HeroBackgroundMedia = ({
   mobileImageUrl,
   alt,
   isLoading,
+  cmsVideoUrl,
 }: HeroBackgroundMediaProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
@@ -27,6 +29,9 @@ const HeroBackgroundMedia = ({
 
   const posterSrc = getImageSrc(desktopImageUrl || mobileImageUrl || "");
   const hasHeroImage = Boolean(desktopImageUrl || mobileImageUrl);
+  const videoWebmSrc = cmsVideoUrl?.endsWith(".webm") ? cmsVideoUrl : HERO_VIDEO_WEBM_SRC;
+  const videoMp4Src =
+    cmsVideoUrl && !cmsVideoUrl.endsWith(".webm") ? cmsVideoUrl : HERO_VIDEO_MP4_SRC;
 
   useEffect(() => {
     const media = window.matchMedia(TABLET_UP_MEDIA_QUERY);
@@ -98,8 +103,8 @@ const HeroBackgroundMedia = ({
           aria-hidden
           tabIndex={-1}
         >
-          <source src={HERO_VIDEO_WEBM_SRC} type="video/webm" />
-          <source src={HERO_VIDEO_MP4_SRC} type="video/mp4" />
+          <source src={videoWebmSrc} type="video/webm" />
+          <source src={videoMp4Src} type="video/mp4" />
         </video>
       ) : null}
     </>
