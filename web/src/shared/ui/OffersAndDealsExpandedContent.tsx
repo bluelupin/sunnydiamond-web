@@ -97,7 +97,7 @@ type OfferCardProps = {
 };
 
 const OfferCard = ({ offer, applied, onApply }: OfferCardProps) => (
-  <div className="flex min-w-0 flex-1 items-start gap-3 lg:bg-gray300 bg-white py-4 px-3 w-[214px] min-w-[214px] min-h-[120px]">
+  <div className="flex min-w-0 flex-1 items-start gap-3 lg:bg-gray300 bg-white py-4 px-3 w-[214px] min-w-[214px] min-h-[100px]">
     <Image
       src="/icons/kotal-bank-icon.svg"
       alt="Kotak Icon"
@@ -107,7 +107,7 @@ const OfferCard = ({ offer, applied, onApply }: OfferCardProps) => (
       className="h-6 w-7 shrink-0"
     />
     <div className="flex min-w-0 flex-col gap-4">
-      <p className="font-gill text-sm font-light leading-110 text-darkblack">{offer.headline}</p>
+      <p className="font-gill text-sm font-light leading-110 text-darkblack line-clamp-2">{offer.headline}</p>
       <p className="font-gill text-sm font-light leading-110 text-darkblack">{offer.categoryLabel}</p>
     </div>
   </div>
