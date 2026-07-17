@@ -188,6 +188,17 @@ export type StrapiOccasionCard = {
   image?: StrapiResponsiveImageBlock | null;
 };
 
+export type StrapiCraftingBrillianceSection = {
+  id?: number;
+  title?: string | null;
+  sectionTitle?: string | null;
+  isActive?: boolean | null;
+  showField?: boolean | null;
+  cta?: StrapiHomepageCta | null;
+  backgroundImage?: StrapiResponsiveImageBlock | null;
+  cutoutImage?: StrapiResponsiveImageBlock | null;
+};
+
 export type StrapiHomepageEditorialBlocksEntity = {
   sunnyPromise?: StrapiTextSection | null;
   sunnyPromiseSection?: StrapiTextSection | null;
@@ -200,7 +211,7 @@ export type StrapiHomepageEditorialBlocksEntity = {
   occasionSection?: StrapiOccasionSection | null;
   showroom?: StrapiShowroomSection | null;
   showroomSection?: StrapiShowroomSection | null;
-  craftingBrillianceSection?: unknown;
+  craftingBrillianceSection?: StrapiCraftingBrillianceSection | null;
   bespokeForYouCards?: unknown[] | null;
   showroomTeaser?: unknown;
 };

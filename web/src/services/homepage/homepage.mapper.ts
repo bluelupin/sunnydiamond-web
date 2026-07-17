@@ -14,11 +14,13 @@ import type {
   ShowroomSectionData,
   SunnyPromiseSectionData,
 } from "@/types/homepage/editorialBlocks";
+import type { CraftingBrillianceSectionData } from "@/types/homepage/craftingBrillianceSection";
 import type { FeaturedProductsSection } from "@/types/homepage/featuredProducts";
 import type { OccasionCard, OccasionSection } from "@/types/homepage/occasionSection";
 import type { TrustBadge } from "@/types/homepage/trustBadges";
 import type { HomepageSeo } from "@/types/homepage/seo";
 import type {
+  StrapiCraftingBrillianceSection,
   StrapiCategoryCard,
   StrapiFeaturedCollection,
   StrapiFeaturedProductsBlock,
@@ -424,6 +426,27 @@ export function mapOccasionCards(
     .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0));
 }
 
+function mapCraftingBrillianceSection(
+  raw?: StrapiCraftingBrillianceSection | null,
+): CraftingBrillianceSectionData | null {
+  if (!raw) return null;
+
+  const isActive = resolveSectionActive(raw.isActive, raw.showField);
+  if (isActive === false) return null;
+
+  const title = cleanText(raw.title) ?? cleanText(raw.sectionTitle);
+  if (!title) return null;
+
+  return {
+    id: raw.id,
+    title,
+    isActive,
+    cta: mapCta(raw.cta),
+    backgroundImage: pickResponsiveImage(raw.backgroundImage),
+    cutoutImage: pickResponsiveImage(raw.cutoutImage),
+  };
+}
+
 function mapShowroomSection(raw?: StrapiShowroomSection | null): ShowroomSectionData | null {
   if (!raw) return null;
 
@@ -457,6 +480,7 @@ export function mapHomepageEditorialBlocksData(
   const craftsmanshipSection = mapCraftsmanshipSection(raw.craftsmanshipSection);
   const occasionSection = mapOccasionSection(raw.occasionSection);
   const showroomSection = mapShowroomSection(raw.showroomSection ?? raw.showroom);
+  const craftingBrillianceSection = mapCraftingBrillianceSection(raw.craftingBrillianceSection);
 
   return {
     sunnyPromiseSection,
@@ -466,6 +490,7 @@ export function mapHomepageEditorialBlocksData(
     craftsmanshipSection,
     occasionSection,
     showroomSection,
+    craftingBrillianceSection,
     bespokeForYouCards: Array.isArray(raw.bespokeForYouCards)
       ? (raw.bespokeForYouCards as HomepageEditorialBlocksData["bespokeForYouCards"])
       : null,

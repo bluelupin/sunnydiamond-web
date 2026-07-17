@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
+import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
 import { resolveCategoryNavImages } from "@/shared/utils/responsiveCmsImage";
 import fallBackImage from "@/assets/fallBackImage.png";
@@ -16,8 +17,30 @@ import Reveal from "@/shared/Animation/Reveal";
 interface CraftingRaritySectionProps {
   id?: string;
 }
+
 const CRAFTING_RARITY_NECKLACE = "/images/home/crafting-rarity-necklace.png";
 const IMAGE_QUALITY = 90;
+
+function splitCraftingTitleLines(title: string): string[] {
+  const trimmed = title.trim();
+  if (!trimmed) return [];
+
+  if (trimmed.includes("\n")) {
+    return trimmed
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+  }
+
+  const breakAfter = "Crafting Rarity";
+  if (trimmed.toLowerCase().startsWith(breakAfter.toLowerCase())) {
+    const remainder = trimmed.slice(breakAfter.length).trim();
+    return remainder ? [breakAfter, remainder] : [trimmed];
+  }
+
+  return [trimmed];
+}
+
 const CategoryCard = ({ cat }: { cat: CategoryNavigationItem }) => {
   const slug = cat?.slug ?? "";
   const categoryLink =
@@ -120,43 +143,41 @@ function CraftingRarityCopyBlock({
 
 const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
   const { data: shellData, isLoading: isShellLoading } = useHomepageShell();
-  const hero = shellData?.homepage?.hero || shellData?.hero;
-  const subtitle = String(hero?.subtitle ?? "");
-
-  const subtitleLines = useMemo(() => {
-    if (!subtitle.trim()) return [];
-
-    // Preferred: allow editors to control line breaks from CMS
-    if (subtitle.includes("\n")) {
-      return subtitle
-        .split("\n")
-        .map((line) => line.trim())
-        .filter(Boolean);
-    }
-
-    // Fallback for current content
-    const breakAfter = "Crafting rarity";
-
-    if (subtitle.startsWith(breakAfter)) {
-      return [
-        breakAfter,
-        subtitle.slice(breakAfter.length).trim(),
-      ];
-    }
-
-    return [subtitle];
-  }, [subtitle]);
-  const secondaryCtaUrl = hero?.secondaryCta?.url ?? hero?.secondaryCta?.to ?? "/products";
-  const secondaryCtaLabel = hero?.secondaryCta?.label ?? "Explore Products";
-
+  const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
   const { data: shoppingData, isLoading: isShoppingLoading } = useHomepageShoppingBlocks();
+
+  const hero = shellData?.homepage?.hero || shellData?.hero;
+  const craftingBrilliance = editorialData?.craftingBrillianceSection ?? null;
+
+  const titleSource = useMemo(() => {
+    const cmsTitle = craftingBrilliance?.title?.trim();
+    const heroSubtitle = hero?.subtitle?.trim();
+    return cmsTitle || heroSubtitle || "";
+  }, [craftingBrilliance?.title, hero?.subtitle]);
+
+  const subtitleLines = useMemo(
+    () => splitCraftingTitleLines(titleSource),
+    [titleSource],
+  );
+
+  const secondaryCtaUrl =
+    craftingBrilliance?.cta?.url ??
+    craftingBrilliance?.cta?.to ??
+    hero?.secondaryCta?.url ??
+    hero?.secondaryCta?.to ??
+    "/products";
+  const secondaryCtaLabel =
+    craftingBrilliance?.cta?.label?.trim() ??
+    hero?.secondaryCta?.label ??
+    "Explore Products";
+
   const categories = Array.isArray(shoppingData?.categoryNavigation)
     ? [...shoppingData.categoryNavigation]
       .filter((item) => item?.isActive !== false)
       .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
     : [];
 
-  const isLoading = isShellLoading || isShoppingLoading;
+  const isLoading = isShellLoading || isEditorialLoading || isShoppingLoading;
 
   if (isLoading) {
     return (
@@ -212,7 +233,7 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
 
       {categories.length > 0 ? (
         <div className="mt-8 grid w-full grid-cols-2 gap-3 px-4 md:mt-10 md:grid-cols-4 md:gap-3 md:px-0 lg:mt-12">
-          {categories.map((cat, index) => (
+          {categories.map((cat) => (
             <Reveal direction="up"
               key={cat?.id ?? cat?.slug ?? cat?.title}
               className="aspect-square w-full xl:h-[424px]"

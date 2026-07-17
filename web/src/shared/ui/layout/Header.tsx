@@ -180,7 +180,7 @@ const Header = () => {
             </button>
 
             <Link
-              href="/products"
+              href="/wishlist"
               className={cn("relative inline-flex", iconButtonClass, hoverClass)}
               aria-label={
                 wishlistCount > 0 ? `Wishlist, ${wishlistCount} items` : "Wishlist"

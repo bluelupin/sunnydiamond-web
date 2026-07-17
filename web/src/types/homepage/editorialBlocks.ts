@@ -1,3 +1,4 @@
+import type { CraftingBrillianceSectionData } from "./craftingBrillianceSection";
 import type { BespokeForYouSectionData } from "./bespokeForYouSection";
 import type { CraftsmanshipStepsSection } from "./craftsmanshipSteps";
 import type { DiamondsForEveryoneSectionData } from "./diamondsForEveryoneSection";
@@ -87,6 +88,7 @@ export type HomepageEditorialBlocksData = {
   bespokeForYouCards?: BespokeForYouCard[] | null;
   showroomTeaser?: ShowroomTeaser | null;
   showroomSection?: ShowroomSectionData | null;
+  craftingBrillianceSection?: CraftingBrillianceSectionData | null;
   homepage?: {
     craftsmanshipSection?: CraftsmanshipSectionData | null;
   } | null;
