@@ -17,6 +17,7 @@ import type {
   NormalizedTimelineMilestone,
   NormalizedTrustBadge,
   StrapiAboutCraftMosaicSection,
+  StrapiAboutCraftMosaicTile,
   StrapiAboutCraftSection,
   StrapiAboutFeatureSlide,
   StrapiAboutHero,
@@ -224,18 +225,24 @@ const mapTeam = (
   };
 };
 
+const normalizeCraftTileType = (raw?: string | null): "textCard" | "image" => {
+  const normalized = (raw ?? "").trim().toLowerCase().replace(/[-_\s]/g, "");
+  return normalized === "textcard" ? "textCard" : "image";
+};
+
 const mapCraftCards = (
   mosaic?: StrapiAboutCraftMosaicSection | null,
 ): NormalizedCraftCard[] => {
   const layoutCards = aboutHandcraftedContent.cards;
   let textCardCounter = 0;
 
-  return (mosaic?.tile ?? [])
+  return coerceComponentArray<StrapiAboutCraftMosaicTile>(mosaic?.tile)
     .map((tile, index) => {
-      const type = tile.type === "textCard" ? "textCard" : "image";
+      const type = normalizeCraftTileType(tile.type);
       const title = cleanText(tile.title);
       const image = mapResponsiveImage(tile.image);
       const imageUrl = image?.desktopUrl ?? image?.mobileUrl;
+      const mobileImageUrl = image?.mobileUrl ?? image?.desktopUrl;
 
       const layout = layoutCards[textCardCounter];
       const layoutIndex =
@@ -244,6 +251,7 @@ const mapCraftCards = (
         type,
         title: title ?? undefined,
         imageUrl: imageUrl ?? undefined,
+        mobileImageUrl: mobileImageUrl ?? undefined,
         imageAlt: image?.alt,
         position:
           type === "textCard" && layout

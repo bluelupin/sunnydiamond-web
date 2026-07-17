@@ -69,16 +69,20 @@ function AnimatedTile({
 function CraftPhotoTile({
   className,
   imageUrl,
+  mobileImageUrl,
 }: {
   className?: string;
   imageUrl?: string;
+  mobileImageUrl?: string;
 }) {
+  const resolvedUrl = imageUrl ?? mobileImageUrl;
+
   return (
     <div
       className={cn(craftPhotoClass, className)}
       style={
-        imageUrl
-          ? { backgroundImage: `url(${imageUrl})` }
+        resolvedUrl
+          ? { backgroundImage: `url(${resolvedUrl})` }
           : craftPhotoStyle
       }
       aria-hidden
@@ -156,6 +160,7 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
       <CraftPhotoTile
         className={className}
         imageUrl={card?.type === "image" ? card.imageUrl : undefined}
+        mobileImageUrl={card?.type === "image" ? card.mobileImageUrl : undefined}
       />
     );
   };

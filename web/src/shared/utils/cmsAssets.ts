@@ -1,28 +1,20 @@
 import { getStrapiBaseUrl } from "@/api/config";
 
-function resolveCmsRootUrl(): string {
-  try {
-    return getStrapiBaseUrl();
-  } catch {
-    return "";
-  }
-}
-
-const CMS_ROOT_URL = resolveCmsRootUrl();
-
-/**
- * Normalizes Strapi media URLs.
- * - If `url` is already absolute, returns it as-is.
- * - If `url` is relative (e.g. `/uploads/...`), prefixes with the Strapi URL.
- */
-export function getCmsAssetUrl(url?: string | null): string | undefined {
-  const raw = typeof url === "string" ? url.trim() : "";
+export function getCmsAssetUrl(url?: string | null): string | undefined {  const raw = typeof url === "string" ? url.trim() : "";
   if (!raw) return undefined;
 
   if (raw.startsWith("http://") || raw.startsWith("https://")) return raw;
-  if (!CMS_ROOT_URL) return raw;
 
-  const base = CMS_ROOT_URL.endsWith("/") ? CMS_ROOT_URL.slice(0, -1) : CMS_ROOT_URL;
+  let cmsRoot = "";
+  try {
+    cmsRoot = getStrapiBaseUrl();
+  } catch {
+    cmsRoot = "";
+  }
+
+  if (!cmsRoot) return raw;
+
+  const base = cmsRoot.endsWith("/") ? cmsRoot.slice(0, -1) : cmsRoot;
   const path = raw.startsWith("/") ? raw : `/${raw}`;
   return `${base}${path}`;
 }

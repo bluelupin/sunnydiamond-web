@@ -197,6 +197,7 @@ export type NormalizedCraftCard = {
   type: "textCard" | "image";
   title?: string;
   imageUrl?: string;
+  mobileImageUrl?: string;
   imageAlt?: string;
   position?: { left: string; top: string };
   gap: number;
