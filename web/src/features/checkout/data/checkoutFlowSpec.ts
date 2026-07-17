@@ -1,4 +1,4 @@
-/** Figma Checkout — desktop success 2083:11893, mobile success 2083:6811, OTP 2083:6458 */
+/** Figma Checkout — desktop success 2083:11893, mobile success 2083:6811, OTP 2083:6458, offers expanded 2083:7653 */
 export const checkoutFlowSpec = {
   page: {
     paddingXMobile: 20,
@@ -24,7 +24,7 @@ export const checkoutFlowSpec = {
     successSectionGap: 24,
     successStickyFooterClearance: 152,
     stickyFooterCollapsedClearance: 220,
-    stickyFooterOffersExpandedClearance: 264,
+    stickyFooterOffersExpandedClearance: 704,
     orderSummaryDrawerMaxHeight: "90vh",
     orderSummaryLinkSize: 14,
     stickyTotalFontSize: 20,

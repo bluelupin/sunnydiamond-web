@@ -17,7 +17,7 @@ export const cartFlowSpec = {
     stickyFooterZIndex: 40,
     drawerMaxHeight: "90vh",
     bagDrawerMaxHeight: "85vh",
-    /** Figma 2083:5334 scroll, 2083:5665 sticky footer */
+    /** Figma 2083:5334 scroll, 2083:5665 sticky footer, 2083:7653 offers expanded */
     cartPage: {
       titleFontSize: 32,
       titleMarginTop: 24,
@@ -36,9 +36,9 @@ export const cartFlowSpec = {
       orderSummaryPaddingY: 24,
       orderSummaryGap: 16,
       stickyFooterCollapsedClearance: 268,
-      stickyFooterOffersExpandedClearance: 312,
+      stickyFooterOffersExpandedClearance: 752,
       stickyFooterBreakupExpandedClearance: 356,
-      stickyFooterFullyExpandedClearance: 400,
+      stickyFooterFullyExpandedClearance: 840,
       priceBreakupLinkSize: 14,
       stickyTotalFontSize: 20,
       benefitsBarPadding: 16,

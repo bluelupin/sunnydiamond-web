@@ -2,21 +2,21 @@
 
 import { Fragment } from "react";
 import ChevronDownIcon from "@/assets/Icons/ChevronDownIcon";
+import type { OffersAndDealsVariant } from "@/shared/data/offersAndDealsSpec";
 import { cn } from "@/shared/utils/cn";
+import OffersAndDealsExpandedContent, {
+  OFFERS_EMPTY_MESSAGE,
+} from "./OffersAndDealsExpandedContent";
 
-export const OFFERS_EMPTY_MESSAGE =
-  "No offers applied yet. Check back for seasonal promotions.";
+export { OFFERS_EMPTY_MESSAGE };
 
-export type OffersAndDealsVariant =
-  | "sticky-gray200"
-  | "sticky-gray300"
-  | "panel-gray300";
+export type { OffersAndDealsVariant } from "@/shared/data/offersAndDealsSpec";
 
 export type OffersAndDealsSectionProps = {
   open: boolean;
   onToggle: () => void;
   variant?: OffersAndDealsVariant;
-  /** When false, only the toggle is rendered (expanded message handled separately). */
+  /** When false, only the toggle is rendered (expanded content handled separately). */
   showExpandedContent?: boolean;
   /** Adds font-normal to the label (CartPriceDetails omits this). */
   labelRegular?: boolean;
@@ -30,11 +30,12 @@ const toggleClassesByVariant: Record<OffersAndDealsVariant, string> = {
   "panel-gray300": "bg-gray300 p-4",
 };
 
-const expandedWrapperClassesByVariant: Record<OffersAndDealsVariant, string | null> = {
-  "sticky-gray200": "bg-gray200 px-4 pb-3",
-  "sticky-gray300": "bg-gray300 px-4 pb-3",
-  "panel-gray300": null,
+export type OffersAndDealsExpandedContentProps = {
+  variant?: OffersAndDealsVariant;
+  className?: string;
 };
+
+export { default as OffersAndDealsExpandedContent } from "./OffersAndDealsExpandedContent";
 
 export const OffersAndDealsEmptyMessage = ({ className }: { className?: string }) => (
   <p
@@ -56,7 +57,6 @@ const OffersAndDealsSection = ({
   className,
   buttonClassName,
 }: OffersAndDealsSectionProps) => {
-  const expandedWrapperClass = expandedWrapperClassesByVariant[variant];
   const Wrapper = className ? "div" : Fragment;
   const wrapperProps = className ? { className } : {};
 
@@ -78,7 +78,7 @@ const OffersAndDealsSection = ({
             labelRegular && "font-normal",
           )}
         >
-          Offers and Deals test
+          Offers and Deals
         </span>
         <ChevronDownIcon
           aria-hidden
@@ -90,13 +90,7 @@ const OffersAndDealsSection = ({
       </button>
 
       {showExpandedContent && open ? (
-        expandedWrapperClass ? (
-          <div className={expandedWrapperClass}>
-            <OffersAndDealsEmptyMessage />
-          </div>
-        ) : (
-          <OffersAndDealsEmptyMessage />
-        )
+        <OffersAndDealsExpandedContent variant={variant} />
       ) : null}
     </Wrapper>
   );

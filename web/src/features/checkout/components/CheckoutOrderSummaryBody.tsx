@@ -7,7 +7,7 @@ import { useCart } from "@/features/cart/context/CartContext";
 import { formatCartLineMeta, formatCartPrice } from "@/features/cart/utils/formatCartLine";
 import { CartGiftBadge, CartMetaRow } from "@/features/cart/components/CartFlowUi";
 import OffersAndDealsSection, {
-  OffersAndDealsEmptyMessage,
+  OffersAndDealsExpandedContent,
 } from "@/shared/ui/OffersAndDealsSection";
 import { CheckoutPriceRow, CheckoutSummaryDivider } from "./CheckoutUi";
 
@@ -74,7 +74,9 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
             showExpandedContent={false}
             buttonClassName="lg:hidden flex"
           />
-          {offersOpen ? <OffersAndDealsEmptyMessage className="lg:hidden flex" /> : null}
+          {offersOpen ? (
+            <OffersAndDealsExpandedContent variant="panel-gray300" className="lg:hidden" />
+          ) : null}
 
           <div className="flex flex-col gap-3">
             <CheckoutPriceRow label="Subtotal" value={formatCartPrice(subtotal)} />
@@ -93,7 +95,9 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
             buttonClassName="lg:flex hidden"
           />
 
-          {offersOpen ? <OffersAndDealsEmptyMessage className="lg:flex hidden" /> : null}
+          {offersOpen ? (
+            <OffersAndDealsExpandedContent variant="panel-gray300" className="hidden lg:block" />
+          ) : null}
         </div>
       ) : (
         <div className="flex flex-col gap-4">
