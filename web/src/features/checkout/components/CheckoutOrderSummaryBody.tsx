@@ -6,7 +6,9 @@ import { cn } from "@/shared/utils/cn";
 import { useCart } from "@/features/cart/context/CartContext";
 import { formatCartLineMeta, formatCartPrice } from "@/features/cart/utils/formatCartLine";
 import { CartGiftBadge, CartMetaRow } from "@/features/cart/components/CartFlowUi";
-import ChevronDownIcon from "@/assets/Icons/ChevronDownIcon";
+import OffersAndDealsSection, {
+  OffersAndDealsEmptyMessage,
+} from "@/shared/ui/OffersAndDealsSection";
 import { CheckoutPriceRow, CheckoutSummaryDivider } from "./CheckoutUi";
 
 type CheckoutOrderSummaryBodyProps = {
@@ -16,6 +18,8 @@ type CheckoutOrderSummaryBodyProps = {
 const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyProps) => {
   const { items, subtotal, taxes, totalPrice } = useCart();
   const [offersOpen, setOffersOpen] = useState(false);
+
+  const toggleOffers = () => setOffersOpen((open) => !open);
 
   return (
     <>
@@ -62,23 +66,15 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
             </h3>
             <CheckoutSummaryDivider />
           </div>
-          <button
-            type="button"
-            onClick={() => setOffersOpen((open) => !open)}
-            aria-expanded={offersOpen}
-            className="lg:hidden flex w-full items-center justify-between bg-gray300 p-4 text-left"
-          >
-            <span className="font-gill text-base font-normal leading-110 text-darkblack">
-              Offers and Deals
-            </span>
-            <ChevronDownIcon
-              className={cn(
-                "size-6 text-darkblack transition-transform",
-                offersOpen && "rotate-180",
-              )}
-              aria-hidden
-            />
-          </button>
+
+          <OffersAndDealsSection
+            variant="panel-gray300"
+            open={offersOpen}
+            onToggle={toggleOffers}
+            showExpandedContent={false}
+            buttonClassName="lg:hidden flex"
+          />
+          {offersOpen ? <OffersAndDealsEmptyMessage className="lg:hidden flex" /> : null}
 
           <div className="flex flex-col gap-3">
             <CheckoutPriceRow label="Subtotal" value={formatCartPrice(subtotal)} />
@@ -89,29 +85,15 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
           <CheckoutSummaryDivider />
           <CheckoutPriceRow label="Total" value={formatCartPrice(totalPrice)} emphasis />
 
-          <button
-            type="button"
-            onClick={() => setOffersOpen((open) => !open)}
-            aria-expanded={offersOpen}
-            className="lg:flex hidden w-full items-center justify-between bg-gray300 p-4 text-left"
-          >
-            <span className="font-gill text-base font-normal leading-110 text-darkblack">
-              Offers and Deals
-            </span>
-            <ChevronDownIcon
-              className={cn(
-                "size-6 text-darkblack transition-transform",
-                offersOpen && "rotate-180",
-              )}
-              aria-hidden
-            />
-          </button>
+          <OffersAndDealsSection
+            variant="panel-gray300"
+            open={offersOpen}
+            onToggle={toggleOffers}
+            showExpandedContent={false}
+            buttonClassName="lg:flex hidden"
+          />
 
-          {offersOpen ? (
-            <p className="text-center font-gill text-sm font-light leading-110 text-neutral500">
-              No offers applied yet. Check back for seasonal promotions.
-            </p>
-          ) : null}
+          {offersOpen ? <OffersAndDealsEmptyMessage className="lg:flex hidden" /> : null}
         </div>
       ) : (
         <div className="flex flex-col gap-4">

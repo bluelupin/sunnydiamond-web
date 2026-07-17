@@ -161,7 +161,7 @@ const MetalEngravingPanel = ({
             type="button"
             onClick={handleSave}
             disabled={!font.trim()}
-            className="btn-dark-slide inline-flex h-14 w-full items-center justify-center px-7 font-gill text-sm uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="border border-darkblack btn-dark-slide inline-flex h-14 w-full items-center justify-center px-7 font-gill text-sm uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
             Save
           </button>

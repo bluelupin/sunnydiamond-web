@@ -90,7 +90,7 @@ const CheckoutSuccessView = ({ contact, items, totalPrice }: CheckoutSuccessView
           </div>
         </div>
 
-        <div className="flex flex-col gap-6 bg-gray200 px-4 py-6 lg:min-h-[340px]">
+        <div className="flex flex-col gap-6 bg-gray200 px-4 py-6">
           <h2 className="font-larken text-xl font-light leading-110 text-darkblack">Order Summary</h2>
           <CheckoutSummaryDivider />
 

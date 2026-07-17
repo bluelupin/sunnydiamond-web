@@ -1,11 +1,9 @@
 "use client";
 
-import Image from "next/image";
-import { cn } from "@/shared/utils/cn";
 import { useCart } from "@/features/cart/context/CartContext";
 import { formatCartPrice } from "@/features/cart/utils/formatCartLine";
 import { CartPrimaryButton, CartTextLink } from "@/features/cart/components/CartFlowUi";
-import ChevronDownIcon from "@/assets/Icons/ChevronDownIcon";
+import OffersAndDealsSection from "@/shared/ui/OffersAndDealsSection";
 
 type CheckoutMobileStickyFooterProps = {
   offersOpen: boolean;
@@ -34,31 +32,11 @@ const CheckoutMobileStickyFooter = ({
       />
 
       <aside className="flex flex-col" aria-label="Checkout order summary">
-        <button
-          type="button"
-          onClick={onOffersToggle}
-          aria-expanded={offersOpen}
-          className="flex w-full items-center justify-between bg-gray300 px-4 py-3 text-left"
-        >
-          <span className="font-gill text-base font-normal leading-110 text-darkblack">
-            Offers and Deals
-          </span>
-          <ChevronDownIcon
-            aria-hidden
-            className={cn(
-              "size-6 text-darkblack transition-transform",
-              offersOpen && "rotate-180",
-            )}
-          />
-        </button>
-
-        {offersOpen ? (
-          <div className="bg-gray300 px-4 pb-3">
-            <p className="text-center font-gill text-sm font-light leading-110 text-neutral500">
-              No offers applied yet. Check back for seasonal promotions.
-            </p>
-          </div>
-        ) : null}
+        <OffersAndDealsSection
+          variant="sticky-gray300"
+          open={offersOpen}
+          onToggle={onOffersToggle}
+        />
 
         <div className="flex flex-col gap-4 border-t border-neutral300 bg-white px-4 py-6 pb-[env(safe-area-inset-bottom,0px)] [border-top-width:0.5px]">
           <div className="flex items-end justify-between gap-4">

@@ -254,12 +254,12 @@ const CheckoutOtpModal = ({ open, phone, onClose, onVerify }: CheckoutOtpModalPr
                   </svg>
                 </button>
               </div>
-              <div className="mt-6">
+              {/* <div className="mt-6">
                 <CheckoutSummaryDivider />
-              </div>
+              </div> */}
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 lg:pt-6 lg:pb-6 pt-6 pb-4">
               <CheckoutOtpFields {...otpFieldsProps} variant="mobile" />
             </div>
 
