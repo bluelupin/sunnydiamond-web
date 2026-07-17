@@ -97,7 +97,7 @@ type OfferCardProps = {
 };
 
 const OfferCard = ({ offer, applied, onApply }: OfferCardProps) => (
-  <div className="flex min-w-0 flex-1 items-start gap-3 lg:bg-gray300 bg-white py-4 px-3 w-[214px] min-w-[214px] min-h-[100px]">
+  <div className="flex min-w-0 flex-1 items-start gap-3 lg:bg-gray300 bg-white py-4 px-3 w-[214px] min-w-[214px] min-h-[100px] border border-gray300">
     <Image
       src="/icons/kotal-bank-icon.svg"
       alt="Kotak Icon"
