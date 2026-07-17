@@ -33,6 +33,8 @@ export const offersAndDealsSpec = {
     applyFontSize: 14,
     applyFontWeight: 400,
     offerCardGap: 12,
+    offerCardIconSize: 24,
+    offerCardTextGap: 4,
     offerCardPadding: 12,
     offerTitleFontSize: 16,
     offerDescriptionFontSize: 14,

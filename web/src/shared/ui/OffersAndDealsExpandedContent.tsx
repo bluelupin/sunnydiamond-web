@@ -13,6 +13,7 @@ import {
 } from "@/shared/data/offersAndDealsMock";
 import type { OffersAndDealsVariant } from "@/shared/data/offersAndDealsSpec";
 import { cn } from "@/shared/utils/cn";
+import Image from "next/image";
 
 export const OFFERS_EMPTY_MESSAGE =
   "No offers applied yet. Check back for seasonal promotions.";
@@ -63,7 +64,7 @@ const PromoField = ({
     <label htmlFor={id} className="font-gill text-base font-normal leading-110 text-darkblack">
       {label}
     </label>
-    <div className="flex h-14 items-center gap-4 bg-aboutInactive px-3">
+    <div className="flex h-14 items-center gap-4 lg:bg-aboutInactive bg-white px-3">
       <input
         id={id}
         type="text"
@@ -96,29 +97,19 @@ type OfferCardProps = {
 };
 
 const OfferCard = ({ offer, applied, onApply }: OfferCardProps) => (
-  <div className="flex items-start justify-between gap-4 border border-neutral300 bg-white p-3">
-    <div className="flex min-w-0 flex-1 flex-col gap-1">
-      <div className="flex flex-wrap items-center gap-2">
-        <p className="font-gill text-base font-normal leading-110 text-darkblack">{offer.title}</p>
-        <span className="font-gill text-sm font-normal leading-110 text-darkblack">
-          {offer.discountLabel}
-        </span>
-      </div>
-      <p className="font-gill text-sm font-light leading-110 text-neutral500">{offer.description}</p>
-      <p className="font-gill text-sm font-light leading-110 text-neutral500">
-        Code: <span className="font-normal text-darkblack">{offer.code}</span>
-      </p>
+  <div className="flex min-w-0 flex-1 items-start gap-3 lg:bg-gray300 bg-white py-4 px-3 w-[214px] min-w-[214px] min-h-[115px]">
+    <Image
+      src="/icons/kotal-bank-icon.svg"
+      alt="Kotak Icon"
+      width="28"
+      height="24"
+      aria-hidden
+      className="h-6 w-7 shrink-0"
+    />
+    <div className="flex min-w-0 flex-col gap-4">
+      <p className="font-gill text-base font-normal leading-110 text-darkblack">{offer.headline}</p>
+      <p className="font-gill text-sm font-light leading-110 text-neutral500">{offer.categoryLabel}</p>
     </div>
-    {applied ? (
-      <span className="inline-flex shrink-0 items-center gap-1 font-gill text-sm font-normal leading-110 text-[#47CB6C]">
-        <Check className="size-4" strokeWidth={2.5} aria-hidden />
-        Applied
-      </span>
-    ) : (
-      <DetailTextLink onClick={onApply} className="shrink-0 pb-0.5">
-        Apply
-      </DetailTextLink>
-    )}
   </div>
 );
 
@@ -141,7 +132,7 @@ const AppliedSummary = ({
         <div className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 flex-1 flex-col gap-1">
             <p className="font-gill text-base font-normal leading-110 text-darkblack">
-              {offer.title}
+              {offer.headline}
             </p>
             <p className="font-gill text-sm font-light leading-110 text-neutral500">
               {offer.discountLabel} applied with code {offer.code}
@@ -195,7 +186,7 @@ const OffersAndDealsExpandedContent = ({
   const applyCoupon = () => {
     const match = findMockOfferByCode(couponCode);
     if (!match) {
-      setErrorMessage("This coupon code is not valid. Try SUNNY10, WELCOME500, or FESTIVE15.");
+      setErrorMessage("This coupon code is not valid. Try KOTAK12, SUNNY10, WELCOME500, or FESTIVE15.");
       return;
     }
 
@@ -223,51 +214,11 @@ const OffersAndDealsExpandedContent = ({
   };
 
   const body = (
-    <div className="flex flex-col gap-4">
-      <PromoField
-        id="offers-coupon-code"
-        label="Coupon code"
-        value={couponCode}
-        onChange={(value) => {
-          setCouponCode(value);
-          if (errorMessage) setErrorMessage(null);
-        }}
-        onApply={applyCoupon}
-        placeholder="Enter coupon code"
-        disabled={Boolean(appliedOffer)}
-      />
-
-      <PromoField
-        id="offers-gift-card"
-        label="Gift card"
-        value={giftCardCode}
-        onChange={(value) => {
-          setGiftCardCode(value);
-          if (errorMessage) setErrorMessage(null);
-        }}
-        onApply={applyGiftCard}
-        placeholder="Enter gift card number"
-        disabled={Boolean(appliedGiftCard)}
-      />
-
-      {errorMessage ? (
-        <p className="font-gill text-sm font-light leading-110 text-[#B42318]" role="alert">
-          {errorMessage}
-        </p>
-      ) : null}
-
-      {hasApplied ? (
-        <AppliedSummary
-          offer={appliedOffer}
-          giftCard={appliedGiftCard}
-          onRemoveOffer={() => setAppliedOffer(null)}
-          onRemoveGiftCard={() => setAppliedGiftCard(null)}
-        />
-      ) : null}
-
+    <div className="flex flex-col gap-6">
+      <div className="w-full shrink-0 bg-neutral300 h-px" aria-hidden="true"></div>
       <div className="flex flex-col gap-3">
-        <p className="font-gill text-base font-normal leading-110 text-darkblack">Available offers</p>
-        <div className="flex flex-col gap-3">
+        <p className="font-gill text-base font-normal leading-110 text-darkblack">Bank Offers</p>
+        <div className="flex items-start gap-2 overflow-auto horizontalScroll">
           {mockAvailableOffers.map((offer) => (
             <OfferCard
               key={offer.id}
@@ -278,14 +229,33 @@ const OffersAndDealsExpandedContent = ({
           ))}
         </div>
       </div>
-
-      {!hasApplied ? <OffersAndDealsEmptyMessage /> : null}
-
-      <p className="text-center font-gill text-sm font-light leading-110 text-neutral500">
-        <DetailTextLink href="/terms-and-conditions" className="inline pb-0.5">
-          T&amp;C Apply
-        </DetailTextLink>
-      </p>
+      <div className="w-full shrink-0 bg-neutral300 h-px" aria-hidden="true"></div>
+      {/* {!hasApplied && <OffersAndDealsEmptyMessage />} */}
+      <PromoField
+        id="offers-gift-card"
+        label="Have a gift card?"
+        value={giftCardCode}
+        onChange={(value) => {
+          setGiftCardCode(value);
+          if (errorMessage) setErrorMessage(null);
+        }}
+        onApply={applyGiftCard}
+        placeholder="Enter code"
+        disabled={Boolean(appliedGiftCard)}
+      />
+      {errorMessage &&
+        <p className="font-gill text-sm font-light leading-110 text-[#B42318]" role="alert">
+          {errorMessage}
+        </p>
+      }
+      {hasApplied &&
+        <AppliedSummary
+          offer={appliedOffer}
+          giftCard={appliedGiftCard}
+          onRemoveOffer={() => setAppliedOffer(null)}
+          onRemoveGiftCard={() => setAppliedGiftCard(null)}
+        />
+      }
     </div>
   );
 
@@ -294,7 +264,7 @@ const OffersAndDealsExpandedContent = ({
   }
 
   return (
-    <div className={cn(expandedBackground, "px-4 pb-4", className)}>
+    <div className={cn("bg-gray300", "px-4 pb-4", className)}>
       {body}
     </div>
   );
