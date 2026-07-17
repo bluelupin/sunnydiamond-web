@@ -27,7 +27,7 @@ const CartBenefitsSection = () => (
             key={benefit.label}
             className="flex lg:h-136 h-[98px] lg:w-[90px] w-full shrink-0 flex-col items-center justify-center gap-2 text-center"
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center">
+            <div className="flex shrink-0 items-center justify-center">
               <Image
                 src={benefit.icon}
                 alt=""
