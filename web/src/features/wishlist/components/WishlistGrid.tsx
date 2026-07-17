@@ -1,5 +1,6 @@
 "use client";
 
+import ScrollReveal from "@/shared/ui/ScrollReveal";
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 import WishlistCard from "./WishlistCard";
 
@@ -11,16 +12,18 @@ type WishlistGridProps = {
 
 const WishlistGrid = ({ products, onRemove, onAddToBag }: WishlistGridProps) => {
   return (
-    <div className="grid w-full grid-cols-2 md:grid-cols-3 md:gap-6">
-      {products.map((product, index) => (
-        <WishlistCard
-          key={`${product.id}-${index}`}
-          product={product}
-          onRemove={() => onRemove(product.id)}
-          onAddToBag={() => onAddToBag(product.id, product.name)}
-        />
-      ))}
-    </div>
+    <ScrollReveal threshold={0.06} rootMargin="0px 0px -4% 0px">
+      <div className="grid w-full grid-cols-2 md:grid-cols-3 md:gap-2 gap-1">
+        {products.map((product, index) => (
+          <WishlistCard
+            key={`${product.id}-${index}`}
+            product={product}
+            onRemove={() => onRemove(product.id)}
+            onAddToBag={() => onAddToBag(product.id, product.name)}
+          />
+        ))}
+      </div>
+    </ScrollReveal>
   );
 };
 

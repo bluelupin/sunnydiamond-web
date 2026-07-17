@@ -1,6 +1,6 @@
 "use client";
 
-import { wishlistHeadingMobileSpec, wishlistPageContent, type WishlistViewMode } from "@/features/wishlist/data/content";
+import { wishlistPageContent, type WishlistViewMode } from "@/features/wishlist/data/content";
 import { cn } from "@/shared/utils/cn";
 
 type WishlistViewToggleProps = {
@@ -8,29 +8,30 @@ type WishlistViewToggleProps = {
   onChange: (value: WishlistViewMode) => void;
 };
 
-const { activeColor, inactiveColor } = wishlistHeadingMobileSpec;
+type ToggleIconProps = {
+  active: boolean;
+};
 
-const GridIcon = ({ active }: { active: boolean }) => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
-    <rect x="3" y="3" width="8" height="8" fill={active ? activeColor : "none"} stroke={active ? activeColor : inactiveColor} strokeWidth="1.2" />
-    <rect x="13" y="3" width="8" height="8" fill={active ? activeColor : "none"} stroke={active ? activeColor : inactiveColor} strokeWidth="1.2" />
-    <rect x="3" y="13" width="8" height="8" fill={active ? activeColor : "none"} stroke={active ? activeColor : inactiveColor} strokeWidth="1.2" />
-    <rect x="13" y="13" width="8" height="8" fill={active ? activeColor : "none"} stroke={active ? activeColor : inactiveColor} strokeWidth="1.2" />
+const GridIcon = ({ active }: ToggleIconProps) => (
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0.5" y="0.5" width="7" height="7" fill={`${active ? "#0A0A0A" : ""}`} stroke="#0A0A0A" />
+    <rect x="10.5" y="0.5" width="7" height="7" fill={`${active ? "#0A0A0A" : ""}`} stroke="#0A0A0A" />
+    <rect x="0.5" y="10.5" width="7" height="7" fill={`${active ? "#0A0A0A" : ""}`} stroke="#0A0A0A" />
+    <rect x="10.5" y="10.5" width="7" height="7" fill={`${active ? "#0A0A0A" : ""}`} stroke="#0A0A0A" />
   </svg>
 );
 
-const ListIcon = ({ active }: { active: boolean }) => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
-    <rect x="3" y="5" width="18" height="6" fill={active ? activeColor : "none"} stroke={active ? activeColor : inactiveColor} strokeWidth="1.2" />
-    <rect x="3" y="13" width="18" height="6" fill={active ? activeColor : "none"} stroke={active ? activeColor : inactiveColor} strokeWidth="1.2" />
+const ListIcon = ({ active }: ToggleIconProps) => (
+  <svg width="17" height="18" viewBox="0 0 17 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0.5" y="0.5" width="16" height="7" fill={`${active ? "#0A0A0A" : ""}`} stroke="#0A0A0A" />
+    <rect x="0.5" y="10.5" width="16" height="7" fill={`${active ? "#0A0A0A" : ""}`} stroke="#0A0A0A" />
   </svg>
 );
 
 const WishlistViewToggle = ({ value, onChange }: WishlistViewToggleProps) => {
   return (
     <div
-      className="flex items-center justify-center md:hidden"
-      style={{ gap: wishlistHeadingMobileSpec.toggleGap }}
+      className="flex items-center justify-center gap-4 md:hidden"
       role="group"
       aria-label="Wishlist layout"
     >
@@ -39,24 +40,19 @@ const WishlistViewToggle = ({ value, onChange }: WishlistViewToggleProps) => {
         onClick={() => onChange("grid")}
         aria-label={wishlistPageContent.gridViewLabel}
         aria-pressed={value === "grid"}
-        className={cn(
-          "inline-flex size-6 items-center justify-center transition-opacity",
-          value === "grid" ? "opacity-100" : "opacity-70",
-        )}
-      >
+        className="flex items-center justify-center p-0">
         <GridIcon active={value === "grid"} />
       </button>
+      <svg width="1" height="24" viewBox="0 0 1 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-[18px]">
+        <line x1="0.5" y1="2.18556e-08" x2="0.499999" y2="24" stroke="#CCCCCC" />
+      </svg>
 
       <button
         type="button"
         onClick={() => onChange("list")}
         aria-label={wishlistPageContent.listViewLabel}
         aria-pressed={value === "list"}
-        className={cn(
-          "inline-flex size-6 items-center justify-center transition-opacity",
-          value === "list" ? "opacity-100" : "opacity-70",
-        )}
-      >
+        className="flex items-center justify-center p-0">
         <ListIcon active={value === "list"} />
       </button>
     </div>

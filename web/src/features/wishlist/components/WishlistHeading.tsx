@@ -1,11 +1,7 @@
 "use client";
 
 import PageContainer from "@/shared/ui/layout/PageContainer";
-import {
-  wishlistHeadingSpec,
-  wishlistPageContent,
-  type WishlistViewMode,
-} from "@/features/wishlist/data/content";
+import { wishlistPageContent, type WishlistViewMode } from "@/features/wishlist/data/content";
 import WishlistViewToggle from "./WishlistViewToggle";
 import { cn } from "@/shared/utils/cn";
 
@@ -22,37 +18,29 @@ const WishlistHeading = ({ productCount, viewMode, onViewModeChange }: WishlistH
   return (
     <section
       aria-labelledby="wishlist-page-title"
-      className="w-full border-b border-neutral300 bg-white"
+      className="w-full bg-white lg:mt-10 mt-6 mb-6"
     >
       <PageContainer
         className={cn(
-          "flex min-h-[140px] flex-col items-center px-4 md:min-h-[95px] md:px-5",
-          showViewToggle
-            ? "justify-between py-6 md:justify-center md:gap-2 md:py-0"
-            : "justify-center py-6 md:py-0",
+          "flex flex-col items-center lg:gap-6 gap-2 justify-center gap-6 px-4 md:px-5",
         )}
       >
-        <div
-          className="flex flex-col items-center"
-          style={{ gap: wishlistHeadingSpec.titleGap }}
-        >
+        <div className="flex flex-col items-center lg:gap-5 gap-2">
           <h1
             id="wishlist-page-title"
-            className="text-center font-larken text-32 font-light leading-110 text-darkblack md:text-5xl"
+            className="text-center font-larken text-32 font-light leading-110 lg:text-neutral500 text-darkblack md:text-5xl"
           >
             {wishlistPageContent.title}
           </h1>
-
-          {showCount ? (
-            <p className="text-center font-gill text-base font-normal leading-110 text-neutral500 md:text-xl">
+          {showCount &&
+            <p className="text-center font-gill text-base font-normal leading-110 lg:text-neutral500 text-darkblack md:text-xl">
               {wishlistPageContent.productCountLabel(productCount)}
             </p>
-          ) : null}
+          }
         </div>
-
-        {showViewToggle ? (
+        {showViewToggle &&
           <WishlistViewToggle value={viewMode} onChange={onViewModeChange} />
-        ) : null}
+        }
       </PageContainer>
     </section>
   );

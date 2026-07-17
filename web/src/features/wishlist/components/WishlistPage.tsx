@@ -53,19 +53,15 @@ const WishlistPage = () => {
         onViewModeChange={setViewMode}
       />
 
-      <div className="bg-gray200">
+      <div className="bg-gray200 mb-[110px]">
         {wishlistProducts.length === 0 ? (
-          <PageContainer className="pb-12 pt-6 md:pb-20 md:pt-8">
+          <PageContainer className="md:py-10 py-6">
             <WishlistEmptyState />
           </PageContainer>
         ) : (
           <>
             <div
-              className={cn(
-                "pb-0 md:mx-auto md:max-w-1440 md:px-10 md:pt-8 lg:px-[40px]",
-                viewMode === "grid" ? "pt-6" : "pt-0",
-              )}
-            >
+              className={cn("mx-auto w-full 2xl:max-w-1920 max-w-1440 px-5 md:px-8 lg:px-10 2xl:px-[60px]",)}>
               <div className={viewMode === "list" ? "hidden md:block" : "block"}>
                 <WishlistGrid
                   products={visibleProducts}
@@ -89,14 +85,16 @@ const WishlistPage = () => {
               ) : null}
             </div>
 
-            <ScrollReveal delayMs={40}>
-              <JewelleryLoadMoreSection
-                visibleCount={visibleProducts.length}
-                totalCount={wishlistProducts.length}
-                hasMore={hasMore}
-                onLoadMore={() => setVisibleCount((count) => count + PAGE_SIZE)}
-              />
-            </ScrollReveal>
+            {/* <ScrollReveal delayMs={40}>
+              <div className="pb-20">
+                <JewelleryLoadMoreSection
+                  visibleCount={visibleProducts.length}
+                  totalCount={wishlistProducts.length}
+                  hasMore={hasMore}
+                  onLoadMore={() => setVisibleCount((count) => count + PAGE_SIZE)}
+                />
+              </div>
+            </ScrollReveal> */}
           </>
         )}
       </div>
