@@ -42,7 +42,7 @@ export const footerPages = {
   bespokeJewellery: {
     title: "Bespoke Jewellery",
     description:
-      "Start a custom jewellery journey with Sunny Diamonds. The full page UI will be added here later.",
+      "Commission a one-of-a-kind Sunny Diamonds piece tailored to your vision, occasion, and style.",
   },
   returnsAndCancellations: {
     title: "Returns and Cancellations",

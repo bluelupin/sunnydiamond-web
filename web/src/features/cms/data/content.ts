@@ -121,7 +121,7 @@ export const homeContent = {
     title: "Design Your Own Masterpiece",
     description:
       "Work one-on-one with our designers to create a piece that is uniquely yours. From concept sketches to the finished jewel, we bring your vision to life.",
-    cta: { label: "Start Your Design", to: "/contact" },
+    cta: { label: "Start Your Design", to: "/bespoke-jewellery" },
   },
   brandStory: {
     subtitle: "Our Heritage",

@@ -14,6 +14,11 @@ function getLayoutRoot(section: HTMLElement, layout: ScrollLayout) {
   return section.querySelector<HTMLElement>(`[data-since1997-mode="${layout}"]`);
 }
 
+type Since1997ScrollOptions = {
+  /** Initial margin-left on the first track item; animates to 0 as scroll progresses. */
+  firstStepOffset?: number;
+};
+
 /**
  * Pins the Since 1997 gallery while scrolling, scrubbing horizontal translate on the track.
  * Desktop: full track slides from rest (translate 0) until the last image is flush to the screen edge.
@@ -22,6 +27,7 @@ function getLayoutRoot(section: HTMLElement, layout: ScrollLayout) {
 export function useSince1997HorizontalScroll(
   sectionRef: RefObject<HTMLElement | null>,
   enabled = true,
+  options?: Since1997ScrollOptions,
 ) {
   useLayoutEffect(() => {
     if (!enabled) return;
@@ -42,6 +48,8 @@ export function useSince1997HorizontalScroll(
     let scrollRoot: HTMLElement | null = null;
     let spacer: HTMLElement | null = null;
     let lastImage: HTMLElement | null = null;
+    let firstStep: HTMLElement | null = null;
+    const firstStepOffset = options?.firstStepOffset ?? 0;
 
     const bindActiveElements = () => {
       activeLayout = getActiveLayout(desktopQuery);
@@ -50,6 +58,7 @@ export function useSince1997HorizontalScroll(
       viewport = root?.querySelector<HTMLElement>("[data-since1997-viewport]") ?? null;
       spacer = root?.querySelector<HTMLElement>("[data-since1997-scroll-spacer]") ?? null;
       lastImage = track?.querySelector<HTMLElement>("[data-since1997-last-image]") ?? null;
+      firstStep = track?.querySelector<HTMLElement>("[data-since1997-first-step]") ?? null;
       scrollRoot =
         activeLayout === "mobile"
           ? (root?.querySelector<HTMLElement>("[data-since1997-scroll-zone]") ?? root)
@@ -64,9 +73,22 @@ export function useSince1997HorizontalScroll(
         });
     };
 
+    const resetFirstStepMargin = () => {
+      if (!firstStep || firstStepOffset <= 0) return;
+      firstStep.style.marginLeft = "";
+    };
+
+    const setFirstStepMargin = (progress: number) => {
+      if (!firstStep || firstStepOffset <= 0) return;
+      firstStep.style.marginLeft = `${firstStepOffset * (1 - progress)}px`;
+    };
+
     const resetInactiveTracks = () => {
       section.querySelectorAll<HTMLElement>("[data-since1997-track]").forEach((node) => {
         if (node !== track) node.style.transform = "";
+      });
+      section.querySelectorAll<HTMLElement>("[data-since1997-first-step]").forEach((node) => {
+        if (node !== firstStep) node.style.marginLeft = "";
       });
     };
 
@@ -112,6 +134,9 @@ export function useSince1997HorizontalScroll(
 
       if (scrollRange <= 0) {
         track.style.transform = "";
+        setFirstStepMargin(0);
+      } else if (firstStepOffset > 0) {
+        setFirstStepMargin(0);
       }
     };
 
@@ -122,24 +147,30 @@ export function useSince1997HorizontalScroll(
 
       if (motionQuery.matches) {
         track.style.transform = "";
+        if (firstStepOffset > 0) setFirstStepMargin(0);
+        else resetFirstStepMargin();
         return;
       }
 
       const spacerHeight = spacer?.offsetHeight ?? 0;
       if (spacerHeight <= 0 || scrollRange <= 0) {
         track.style.transform = "";
+        if (firstStepOffset > 0) setFirstStepMargin(0);
+        else resetFirstStepMargin();
         return;
       }
 
       const rootTop = (scrollRoot ?? section).getBoundingClientRect().top;
       if (rootTop > 0) {
         track.style.transform = "";
+        if (firstStepOffset > 0) setFirstStepMargin(0);
         return;
       }
 
       const progress = clamp(-rootTop / spacerHeight);
       const translate = progress * endTranslate;
       track.style.transform = `translate3d(${translate.toFixed(2)}px, 0, 0)`;
+      setFirstStepMargin(progress);
     };
 
     const scheduleUpdate = () => {
@@ -206,6 +237,9 @@ export function useSince1997HorizontalScroll(
       section.querySelectorAll<HTMLElement>("[data-since1997-track]").forEach((node) => {
         node.style.transform = "";
       });
+      section.querySelectorAll<HTMLElement>("[data-since1997-first-step]").forEach((node) => {
+        node.style.marginLeft = "";
+      });
     };
-  }, [enabled, sectionRef]);
+  }, [enabled, options?.firstStepOffset, sectionRef]);
 }

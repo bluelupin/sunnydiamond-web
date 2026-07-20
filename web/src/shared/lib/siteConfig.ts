@@ -32,7 +32,7 @@ export const siteConfig = {
     main: [
       { to: "/jewellery", label: "Jewellery" },
       { to: "/products", label: "Gifting" },
-      { to: "/contact", label: "Bespoke" },
+      { to: "/bespoke-jewellery", label: "Bespoke" },
       { to: "/about", label: "World of Sunny" },
     ],
     footer: {
