@@ -100,7 +100,7 @@ const BespokeStorySection = () => {
       </div>
       {/* Desktop / tablet — sticky viewport + scroll-driven horizontal slide */}
       <div data-since1997-mode="desktop" className="hidden md:block">
-        <div className="sticky top-0 flex flex-col overflow-hidden bg-white">
+        <div className="sticky top-40 flex flex-col overflow-hidden bg-white">
           <Reveal direction="up" className="flex min-h-0 flex-1 flex-col pb-100">
             <div
               data-since1997-viewport
@@ -123,25 +123,9 @@ const BespokeStorySection = () => {
             </div>
           </Reveal>
         </div>
-
         {hasHorizontalGallery ? (
-          <div data-since1997-scroll-spacer aria-hidden className="h-[85vh]" />
+          <div data-since1997-scroll-spacer aria-hidden className="h-[100vh]" />
         ) : null}
-
-        <PageContainer className="pb-100 pt-100">
-          <Reveal direction="up" className="flex justify-center">
-            <Link
-              href={story.ctaHref}
-              className="btn-dark-slide inline-flex items-center justify-center border border-darkblack bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white"
-              style={{
-                width: `${bespokeStoryFigmaSpec.ctaWidth}px`,
-                height: `${bespokeStoryFigmaSpec.ctaHeight}px`,
-              }}
-            >
-              <span className="relative z-10">{story.ctaLabel}</span>
-            </Link>
-          </Reveal>
-        </PageContainer>
       </div>
       {/* Mobile — static vertical stack, no scroll animation (Figma 2083:18264) */}
       <div className="md:hidden flex flex-col gap-4">
@@ -149,14 +133,16 @@ const BespokeStorySection = () => {
           <BespokeStoryStepPanel key={step.number} step={step} layout="mobile" />
         ))}
       </div>
-      <div className="md:mt-12 mt-4 flex justify-center md:w-fit-content w-full">
-        <Link
-          href={story.ctaHref}
-          className="btn-dark-slide inline-flex items-center justify-center bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white w-full h-14"
-        >
-          <span className="relative z-10">{story.ctaLabel}</span>
-        </Link>
-      </div>
+      <Reveal direction="up" className="flex justify-center">
+        <div className="md:mt-12 mt-4 flex justify-center md:w-[284px] mx-auto w-full">
+          <Link
+            href={story.ctaHref}
+            className="btn-dark-slide inline-flex items-center justify-center bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white w-full h-14"
+          >
+            <span className="relative z-10">{story.ctaLabel}</span>
+          </Link>
+        </div>
+      </Reveal>
     </section>
   );
 };
