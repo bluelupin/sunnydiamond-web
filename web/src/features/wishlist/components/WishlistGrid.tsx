@@ -7,7 +7,7 @@ import WishlistCard from "./WishlistCard";
 type WishlistGridProps = {
   products: JewelleryListingProduct[];
   onRemove: (productId: string) => void;
-  onAddToBag: (productId: string, productName: string) => void;
+  onAddToBag: (productId: string) => void;
 };
 
 const WishlistGrid = ({ products, onRemove, onAddToBag }: WishlistGridProps) => {
@@ -19,7 +19,7 @@ const WishlistGrid = ({ products, onRemove, onAddToBag }: WishlistGridProps) => 
             key={`${product.id}-${index}`}
             product={product}
             onRemove={() => onRemove(product.id)}
-            onAddToBag={() => onAddToBag(product.id, product.name)}
+            onAddToBag={() => onAddToBag(product.id)}
           />
         ))}
       </div>
