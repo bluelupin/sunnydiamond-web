@@ -46,7 +46,7 @@ const MobileHeaderBar = ({
           onClick={onNavigate}
         >
           <ShoppingBagIcon className="size-6" />
-          <HeaderIconBadge count={cartCount} className="bg-darkblack text-white" />
+          <HeaderIconBadge count={cartCount} />
         </Link>
 
         <Link href="/contact" aria-label="Account" className={iconButtonClass} onClick={onNavigate}>
