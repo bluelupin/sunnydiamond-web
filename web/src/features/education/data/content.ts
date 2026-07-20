@@ -1,41 +1,14 @@
 export const educationPageImages = {
-  diamondOval: "/images/education/diamond-oval.png",
-  star: "/images/education/star.svg",
   panelTexture: "/images/education/panel-texture.png",
-  diamondRating: "/images/education/diamond-rating.png",
   cutDiamondExcellent: "/images/education/cut-diamond-excellent.png",
   cutDiamondGood: "/images/education/cut-diamond-good.png",
-  decorativeDiamond: "/images/education/decorative-diamond.png",
-  discoverImage: "/images/education/discover-image.png",
-  discoverStepLine: "/images/education/discover-step-line.svg",
-  discoverStepLineMobile: "/images/education/discover-step-line-mobile.svg",
-  faqIconPlus: "/images/education/faq-icon-plus.svg",
-  faqIconMinus: "/images/education/faq-icon-minus.svg",
-  certifiedBg: "/images/education/certified-bg.png",
   certifiedHandBg: "/images/education/certified-hand-bg.png",
   certifiedDivider: "/images/education/certified-divider.svg",
   certifiedCalloutLine: "/images/education/certified-callout-line.svg",
   certifiedDividerMobile: "/images/education/certified-divider-mobile.svg",
   certifiedCalloutLineMobile: "/images/education/certified-callout-line-mobile.svg",
-  giaLogo: "/images/education/gia-logo.png",
-  agsLogo: "/images/education/ags-logo.png",
-  hrdLogo: "/images/education/hrd-logo.png",
-  kimberleyLogo: "/images/education/kimberley-logo.png",
   girdleScreenshot: "/images/education/girdle-screenshot.png",
-  shapeLeft: "/images/education/shape-left.png",
-  shapeCenter: "/images/education/shape-center.png",
-  shapeRight: "/images/education/shape-right.png",
-  fancyColourLeft: "/images/education/fancy-colour-left.png",
-  fancyColourCenter: "/images/education/fancy-colour-center.png",
-  fancyColourRight: "/images/education/fancy-colour-right.png",
-  anatomyLeft: "/images/education/anatomy-left.png",
-  anatomyCenter: "/images/education/anatomy-center.png",
-  anatomyRight: "/images/education/anatomy-right.png",
-  anatomyFaceUp: "/images/education/anatomy-face-up.png",
   anatomySparkle: "/images/education/scroll-arrow.svg",
-  careLeft: "/images/education/care-left.png",
-  careCenter: "/images/education/care-center.png",
-  careRight: "/images/education/care-right.png",
   careIconClean: "/images/education/care-icon-clean.png",
   careIconGentleSolution: "/images/education/care-icon-gentle-solution.png",
   careIconFineDetail: "/images/education/care-icon-fine-detail.png",
@@ -46,27 +19,9 @@ export const educationPageImages = {
   learnArrowLeftMobile: "/images/education/learn-arrow-left-mobile.svg",
   learnArrowRightMobile: "/images/education/learn-arrow-right-mobile.svg",
   scrollArrow: "/images/education/scroll-arrow.svg",
-  claritySliderTrack: "/images/education/clarity-slider-track.svg",
-  claritySliderDots: "/images/education/clarity-slider-dots.svg",
   claritySliderThumb: "/images/education/clarity-slider-thumb.svg",
   caratHand: "/images/education/carat-hand-gray.png",
   caratDiamond: "/images/education/carat-diamond.png",
-} as const;
-
-/** Figma mweb 692:28579 — mobile 4Cs panel stack */
-export const educationFourCsMobileSpec = {
-  panelHeight: 725,
-  copyHeight: 355,
-  mediaHeight: 370,
-  copyPaddingTop: 40,
-  copyPaddingBottom: 24,
-  copyPaddingX: 20,
-  copyCodeGap: 24,
-  copyTitleGap: 12,
-  copyDescriptionSize: 16,
-  mediaContentWidth: 323,
-  diamondToSliderGap: 40,
-  sliderToFootnoteGap: 40,
 } as const;
 
 /** Figma 692:29026 / 692:29042 / 692:29044 — C4 carat hand + diamond */
@@ -150,9 +105,6 @@ export type EducationSliderSpec = {
 /** C4 carat slider — 0.5 ct to 4.0 ct in 1 ct steps (0.5, 1, 2, 3, 4) */
 export const educationCaratWeights = [0.5, 1.0, 2.0, 3.0, 4.0] as const;
 
-const formatCaratLabel = (weight: number) =>
-  `${Number.isInteger(weight) ? weight : weight.toFixed(1).replace(/\.0$/, "")} ct`;
-
 const buildCaratDotCenters = (
   weights: readonly number[],
   start: number,
@@ -178,16 +130,6 @@ const caratSliderDotCenters = buildCaratDotCenters(
   educationCaratWeights[0],
   educationCaratWeights[educationCaratWeights.length - 1],
 );
-
-export const educationCaratSliderOptions: EducationSliderOption[] = educationCaratWeights.map(
-  (weight) => ({
-    label: formatCaratLabel(weight),
-    caratWeight: weight,
-    highlight: weight === 1.0,
-  }),
-);
-
-export const educationCaratDefaultIndex = educationCaratWeights.indexOf(1.0);
 
 const MOBILE_SLIDER_WIDTH = 323;
 
@@ -308,31 +250,6 @@ export function buildCaratSliderSpecForWeights(
   };
 }
 
-/** @deprecated Use educationFourCsPanelLayoutSpec + educationSliderSpecs */
-export const educationClarityPanelSpec = {
-  ...educationFourCsPanelLayoutSpec,
-  sliderWidth: educationSliderSpecs.clarity.width,
-  sliderHeight: educationSliderSpecs.clarity.height,
-  sliderTrackWidth: educationSliderSpecs.clarity.trackWidth,
-  sliderTrackHeight: educationSliderSpecs.clarity.trackHeight,
-  sliderTrackLeft: educationSliderSpecs.clarity.trackLeft,
-  sliderTrackTop: educationSliderSpecs.clarity.trackTop,
-  sliderDotsLeft: 7.61,
-  sliderDotsTop: 6,
-  sliderDotsWidth: 510,
-  sliderDotsHeight: 6,
-  sliderThumbSize: educationSliderSpecs.clarity.thumbSize,
-  sliderLabelTop: educationSliderSpecs.clarity.labelTop,
-  sliderLabelFontSize: 16,
-  sliderActiveColor: "#AB863B",
-  sliderDotCenters: educationSliderSpecs.clarity.dotCenters,
-  sliderLabelLeft: educationSliderSpecs.clarity.labelLeft,
-  copyWidth: 716,
-  codeColor: "#AB863B",
-  codeOpacity: 0.5,
-  textColor: "#0A0A0A",
-} as const;
-
 /** Figma node 692:29131 — education hero scroll collapse (desktop) */
 export const educationHeroFigmaSpec = {
   section: {
@@ -363,14 +280,6 @@ export const educationHeroFigmaSpec = {
     durationMs: 500,
     titleDelayMs: 300,
   },
-} as const;
-
-export const educationFourCsIntroContent = {
-  desktopTitle: "What You See And Don’t See: 4Cs",
-  mobileTitle: "When You See And Don’t See: 4Cs",
-  description:
-    "Every diamond, like a human fingerprint, has certain distinguishing characteristics. The 4Cs - globally accepted standards for assessing the quality of a diamond",
-  pillars: ["Cut", "Colour", "Carat", "Clarity"] as const,
 } as const;
 
 /** Figma nodes 692:29024 (desktop) + 692:28579 (mobile intro stack) */
@@ -428,124 +337,201 @@ export type EducationFourCsPanelContent = {
   };
 };
 
+/** Layout scaffolding for 4Cs panels — copy/slider options come from CMS. */
 export const educationFourCsPanels: EducationFourCsPanelContent[] = [
   {
     id: "clarity",
     code: "C1",
-    title: "CLARITY",
-    description:
-      "Clarity measures how free a diamond is from inclusions (internal imperfections) and blemishes (surface flaws).",
-    footnote:
-      "At Sunny you get the best of clarity, with most of our diamonds being Internally Flawless",
+    title: "",
+    description: "",
+    footnote: "",
     mediaPosition: "left",
     background: "chalk",
-    slider: {
-      defaultIndex: 6,
-      image: educationPageImages.diamondRating,
-      options: [
-        { label: "SI2", image: educationPageImages.cutDiamondGood },
-        { label: "SI1", image: educationPageImages.cutDiamondGood },
-        { label: "VS2", image: educationPageImages.cutDiamondGood },
-        { label: "VS1", image: educationPageImages.diamondRating },
-        { label: "VVS2", image: educationPageImages.diamondRating },
-        { label: "VVS1", image: educationPageImages.diamondRating },
-        { label: "IF", highlight: true, image: educationPageImages.diamondRating },
-        { label: "FL", image: educationPageImages.cutDiamondExcellent },
-      ],
-    },
+    slider: { defaultIndex: 0, options: [] },
   },
   {
     id: "cut",
     code: "C2",
-    title: "CUT",
-    description:
-      "A diamond's cut is a measure of how well its facets interact with light. Precise proportions, symmetry, and polish give a diamond its brilliance.",
-    footnote:
-      "We craft our jewellery with Excellent Cut, Polish, and Symmetry, the triple exceptional EX/EX/EX standard.",
+    title: "",
+    description: "",
+    footnote: "",
     mediaPosition: "right",
     background: "chalk",
-    slider: {
-      defaultIndex: 4,
-      options: [
-        { label: "Poor", image: educationPageImages.cutDiamondGood },
-        { label: "Fair", image: educationPageImages.cutDiamondGood },
-        { label: "Good", image: educationPageImages.cutDiamondGood },
-        { label: "Very Good", mobileLabelLines: ["Very", "Good"], image: educationPageImages.cutDiamondGood },
-        { label: "Excellent", highlight: true, image: educationPageImages.cutDiamondExcellent },
-      ],
-    },
+    slider: { defaultIndex: 0, options: [] },
   },
   {
     id: "colour",
     code: "C3",
-    title: "COLOUR",
-    description:
-      "Diamond colour is graded on a D to Z scale, measuring the absence of colour. D is perfectly colourless which is the rarest and most valued.",
+    title: "",
+    description: "",
     footnote: "",
     mediaPosition: "left",
     background: "chalk",
-    slider: {
-      defaultIndex: 4,
-      image: educationPageImages.diamondRating,
-      options: [
-        { label: "S-Z", sublabel: ["Light", "Yellow"] },
-        { label: "N-R", sublabel: ["Very Light", "Yellow"] },
-        { label: "K-M", sublabel: ["Faint", "Yellow"] },
-        { label: "G-J", sublabel: ["Near", "Colorless"] },
-        { label: "D-E-F", highlight: true, sublabel: "Colorless" },
-      ],
-    },
+    slider: { defaultIndex: 0, options: [] },
   },
   {
     id: "carat",
     code: "C4",
-    title: "CARAT",
-    description:
-      "Carat is the measure of a diamond's weight. Carat does not directly equal a visually bigger diamond, because shape and cut proportions influence perceived size.",
+    title: "",
+    description: "",
     footnote: "",
     mediaPosition: "right",
     background: "chalk",
-    slider: {
-      defaultIndex: educationCaratDefaultIndex,
-      options: educationCaratSliderOptions,
-    },
+    slider: { defaultIndex: 0, options: [] },
   },
 ];
 
+/** Care tip icons only — labels come from CMS learnMoreSection. */
 export type EducationLearnCareTip = {
   id: string;
   icon: string;
-  labelLines: readonly [string, string];
 };
 
-export type EducationLearnAnatomyTrait = {
-  id: string;
-  term: string;
-  definition: string;
-};
+export const educationDiamondCareTips: EducationLearnCareTip[] = [
+  { id: "clean-regularly", icon: educationPageImages.careIconClean },
+  { id: "gentle-solutions", icon: educationPageImages.careIconGentleSolution },
+  { id: "fine-detailing", icon: educationPageImages.careIconFineDetail },
+  { id: "avoid-harsh", icon: educationPageImages.careIconAvoidHarsh },
+  { id: "store-handle", icon: educationPageImages.careIconStore },
+];
 
-export type EducationLearnAnatomyDetail = {
-  image: string;
-  imageAlt: string;
-  title: string;
-  traits: EducationLearnAnatomyTrait[];
-};
+/** Logo layout classes only — labels/logos come from CMS certificateSection. */
+export const educationCertifiedContent = {
+  certifications: [
+    {
+      id: "gia",
+      logoClassName: "h-[74px] w-[76px]",
+      mobileLogoClassName: "h-[59.297px] w-[60.868px]",
+      imageClassName: "h-full w-[297%] max-w-none object-cover object-left",
+    },
+    {
+      id: "ags",
+      logoClassName: "h-[74px] w-[76px]",
+      mobileLogoClassName: "h-[59.294px] w-[60.882px]",
+      imageClassName: "h-full w-[177%] max-w-none object-cover object-left -left-[38%]",
+    },
+    {
+      id: "hrd",
+      logoClassName: "h-16 w-[127px]",
+      mobileLogoClassName: "h-[51.2px] w-[101.262px]",
+      imageClassName: "h-[165%] w-[136%] max-w-none object-cover object-left -left-[15%] -top-[28%]",
+      logoWrapClassName: "flex h-[90px] w-[142px] items-center justify-center",
+    },
+    {
+      id: "kimberley",
+      logoClassName: "size-[79px]",
+      mobileLogoClassName: "size-[59.286px]",
+      imageClassName: "size-full object-cover",
+    },
+  ],
+} as const;
 
-export type EducationLearnTab = {
-  id: string;
-  label: string;
-  description: string[];
-  layout: "carousel" | "care-grid" | "anatomy-detail";
-  ctaLabel?: string;
-  ctaHref?: string;
-  slides?: { src: string; alt: string }[];
-  careTips?: EducationLearnCareTip[];
-  anatomyDetail?: EducationLearnAnatomyDetail;
-};
-
-/** Figma nodes 692:29130 (desktop) + 692:28766 (mobile) */
-export const educationLearnMoreContent = {
-  title: "Learn more about Diamonds",
+/** Figma 692:28885 (section) — 692:29096 (desktop) + 692:28735 (mobile) */
+export const educationCertifiedSpec = {
+  section: {
+    desktop: {
+      background: "#F4F3EE",
+      paddingX: 40,
+      paddingY: 104,
+      blockGap: 40,
+      height: 791,
+    },
+    mobile: {
+      background: "#FFFFFF",
+      paddingX: 16,
+      paddingY: 64,
+      blockGap: 32,
+      height: 900,
+    },
+  },
+  title: {
+    desktopSize: 48,
+    mobileSize: 32,
+  },
+  logos: {
+    desktop: {
+      maxWidth: 1360,
+      columnMinHeight: 122,
+      labelSize: 16,
+    },
+    mobile: {
+      rowGap: 24,
+      labelSize: 14,
+      rowMinHeight: 101,
+    },
+  },
+  copy: {
+    desktop: {
+      width: 647,
+      blockGap: 40,
+      itemGap: 12,
+      titleSize: 24,
+      bodySize: 20,
+      bodyMaxWidth: 546,
+      bodyColor: "#4D4D4D",
+    },
+    mobile: {
+      blockGap: 24,
+      itemGap: 12,
+      titleSize: 16,
+      bodySize: 14,
+      bodyColor: "#0A0A0A",
+      dividerWidth: 350,
+    },
+  },
+  visual: {
+    desktop: {
+      width: 641,
+      height: 548,
+      left: 700,
+      top: -189,
+      calloutSize: 133.567,
+      calloutLeft: 66,
+      calloutTop: 262,
+      calloutBorder: 1.91,
+      calloutBorderColor: "#999999",
+      calloutCropHeight: "123.85%",
+      calloutCropWidth: "124.29%",
+      calloutCropLeft: "-13.53%",
+      calloutCropTop: "-10.91%",
+      lineLeft: 133,
+      lineTop: 396,
+      lineWidth: 209,
+      lineHeight: 109,
+    },
+    mobile: {
+      calloutLeft: 85,
+      calloutTop: 666,
+      calloutSize: 96,
+      calloutBorder: 1.373,
+      lineLeft: 130,
+      lineTop: 698,
+      lineWidth: 141,
+      lineHeight: 78,
+    },
+    calloutCropHeight: "123.85%",
+    calloutCropWidth: "124.29%",
+    calloutCropLeft: "-13.53%",
+    calloutCropTop: "-10.91%",
+  },
+  background: {
+    desktop: {
+      handRotate: -12.62,
+      handWidth: 1830,
+      handHeight: 1530,
+      handLeft: -393,
+      handTop: -443,
+      /** Rotation bounding box scale from Figma 692:29096 */
+      handWrapperWidthScale: 1.16,
+      handWrapperHeightScale: 1.24,
+    },
+    mobile: {
+      handLeft: -495,
+      handTop: 151,
+      handWidth: 1091,
+      handHeight: 912,
+    },
+  },
 } as const;
 
 /** Figma nodes 692:29130 (desktop) + 692:28766 (mobile) */
@@ -694,280 +680,6 @@ export const educationLearnMoreSpec = {
   },
 } as const;
 
-export const educationDiamondAnatomyDetail: EducationLearnAnatomyDetail = {
-  image: educationPageImages.anatomyFaceUp,
-  imageAlt: "Round brilliant diamond face-up view",
-  title: "Face-up appearance",
-  traits: [
-    {
-      id: "brightness",
-      term: "Brightness",
-      definition: "The total internal and external reflection of white light.",
-    },
-    {
-      id: "fire",
-      term: "Fire",
-      definition: "The dispersion of light into the colours of the spectrum.",
-    },
-    {
-      id: "scintillation",
-      term: "Scintillation",
-      definition: "The pattern of light and dark areas, and the sparkle when moved.",
-    },
-  ],
-};
-
-export const educationDiamondCareTips: EducationLearnCareTip[] = [
-  {
-    id: "clean-regularly",
-    icon: educationPageImages.careIconClean,
-    labelLines: ["CLEAN YOUR DIAMOND", "REGULARLY"],
-  },
-  {
-    id: "gentle-solutions",
-    icon: educationPageImages.careIconGentleSolution,
-    labelLines: ["RELY ON GENTLE", "CLEANING SOLUTIONS"],
-  },
-  {
-    id: "fine-detailing",
-    icon: educationPageImages.careIconFineDetail,
-    labelLines: ["BE GENTLE WITH FINE", "DETAILING"],
-  },
-  {
-    id: "avoid-harsh",
-    icon: educationPageImages.careIconAvoidHarsh,
-    labelLines: ["AVOID HARSH", "MATERIAL"],
-  },
-  {
-    id: "store-handle",
-    icon: educationPageImages.careIconStore,
-    labelLines: ["STORE AND", "HANDLE WITH CARE"],
-  },
-];
-
-/** Figma nodes 692:29130 (SHAPE) · 692:29133 (FANCY COLOUR) · 692:29134 (ANATOMY) · 692:29135 (CARE) · 692:28766 (mobile) */
-export const educationLearnTabs: EducationLearnTab[] = [
-  {
-    id: "shape",
-    label: "SHAPE",
-    layout: "carousel",
-    description: [
-      "Shape and cut are not the same. Shape refers to the diamond’s form.",
-      "At Sunny, it is a reflection of personality, presence, and poetic symmetry.",
-    ],
-    ctaLabel: "SHOP CUSHION SHAPED DIAMONDS",
-    ctaHref: "/products",
-    slides: [
-      { src: educationPageImages.shapeLeft, alt: "Round diamond shape" },
-      { src: educationPageImages.shapeCenter, alt: "Cushion diamond shape" },
-      { src: educationPageImages.shapeRight, alt: "Pear diamond shape" },
-    ],
-  },
-  {
-    id: "fancy-colour",
-    label: "FANCY COLOUR",
-    layout: "carousel",
-    description: [
-      "Each hue is nature's rarest brushstroke, shaped by time, chemistry, and chance. Coloured diamonds are among the most scarce natural gems ever discovered."
-    ],
-    ctaLabel: "SHOP FANCY COLOUR DIAMONDS",
-    ctaHref: "/products",
-    slides: [
-      { src: educationPageImages.fancyColourLeft, alt: "Fancy pink round diamond" },
-      { src: educationPageImages.fancyColourCenter, alt: "Fancy yellow cushion diamond" },
-      { src: educationPageImages.fancyColourRight, alt: "Fancy orange pear diamond" },
-    ],
-  },
-  {
-    id: "diamond-anatomy",
-    label: "DIAMOND ANATOMY",
-    layout: "anatomy-detail",
-    description: [
-      "Assessing the major components of a diamond, as well as its ability to interact with light to grade the diamond's excellence.",
-    ],
-    anatomyDetail: educationDiamondAnatomyDetail,
-  },
-  {
-    id: "diamond-care",
-    label: "DIAMOND CARE",
-    layout: "care-grid",
-    description: [
-      "Assessing the major components of a diamond, as well as its ability to interact with light to grade the diamond's excellence.",
-    ],
-    careTips: educationDiamondCareTips,
-  },
-];
-
-export const educationCertifiedContent = {
-  title: "Certified Brilliance",
-  certifications: [
-    {
-      id: "gia",
-      logo: educationPageImages.giaLogo,
-      label: "THE GEMOLOGICAL INSTITUTE OF AMERICA",
-      logoClassName: "h-[74px] w-[76px]",
-      mobileLogoClassName: "h-[59.297px] w-[60.868px]",
-      imageClassName: "h-full w-[297%] max-w-none object-cover object-left",
-    },
-    {
-      id: "ags",
-      logo: educationPageImages.agsLogo,
-      label: "AMERICAN GEM SOCIETY",
-      logoClassName: "h-[74px] w-[76px]",
-      mobileLogoClassName: "h-[59.294px] w-[60.882px]",
-      imageClassName: "h-full w-[177%] max-w-none object-cover object-left -left-[38%]",
-    },
-    {
-      id: "hrd",
-      logo: educationPageImages.hrdLogo,
-      label: "THE HOGE RAADVOOR DIAMANT",
-      mobileLabelLines: ["THE HOGE RAADVOOR", "DIAMANT"] as const,
-      logoClassName: "h-16 w-[127px]",
-      mobileLogoClassName: "h-[51.2px] w-[101.262px]",
-      imageClassName: "h-[165%] w-[136%] max-w-none object-cover object-left -left-[15%] -top-[28%]",
-      logoWrapClassName: "flex h-[90px] w-[142px] items-center justify-center",
-    },
-    {
-      id: "kimberley",
-      logo: educationPageImages.kimberleyLogo,
-      label: "THE KIMBERLY PROCESS",
-      mobileLabelLines: ["THE KIMBERLY ", "PROCESS"] as const,
-      logoClassName: "size-[79px]",
-      mobileLogoClassName: "size-[59.286px]",
-      imageClassName: "size-full object-cover",
-    },
-  ],
-  mobileLogoOrder: ["ags", "gia", "hrd", "kimberley"] as const,
-  whyTitle: "Why Certifications Matter?",
-  whyDescription:
-    "Certification gives you confidence about what you’re investing in. It ensures the quality of the diamond is graded fairly.",
-  howTitle: "How to check authenticity?",
-  howDescription:
-    "Each Solitaire carries a laser inscription on its girdle, linking it directly to its report.",
-} as const;
-
-/** Figma 692:28885 (section) — 692:29096 (desktop) + 692:28735 (mobile) */
-export const educationCertifiedSpec = {
-  section: {
-    desktop: {
-      background: "#F4F3EE",
-      paddingX: 40,
-      paddingY: 104,
-      blockGap: 40,
-      height: 791,
-    },
-    mobile: {
-      background: "#FFFFFF",
-      paddingX: 16,
-      paddingY: 64,
-      blockGap: 32,
-      height: 900,
-    },
-  },
-  title: {
-    desktopSize: 48,
-    mobileSize: 32,
-  },
-  logos: {
-    desktop: {
-      maxWidth: 1360,
-      columnMinHeight: 122,
-      labelSize: 16,
-    },
-    mobile: {
-      rowGap: 24,
-      labelSize: 14,
-      rowMinHeight: 101,
-    },
-  },
-  copy: {
-    desktop: {
-      width: 647,
-      blockGap: 40,
-      itemGap: 12,
-      titleSize: 24,
-      bodySize: 20,
-      bodyMaxWidth: 546,
-      bodyColor: "#4D4D4D",
-    },
-    mobile: {
-      blockGap: 24,
-      itemGap: 12,
-      titleSize: 16,
-      bodySize: 14,
-      bodyColor: "#0A0A0A",
-      dividerWidth: 350,
-    },
-  },
-  visual: {
-    desktop: {
-      width: 641,
-      height: 548,
-      left: 700,
-      top: -189,
-      calloutSize: 133.567,
-      calloutLeft: 66,
-      calloutTop: 262,
-      calloutBorder: 1.91,
-      calloutBorderColor: "#999999",
-      calloutCropHeight: "123.85%",
-      calloutCropWidth: "124.29%",
-      calloutCropLeft: "-13.53%",
-      calloutCropTop: "-10.91%",
-      lineLeft: 133,
-      lineTop: 396,
-      lineWidth: 209,
-      lineHeight: 109,
-    },
-    mobile: {
-      calloutLeft: 85,
-      calloutTop: 666,
-      calloutSize: 96,
-      calloutBorder: 1.373,
-      lineLeft: 130,
-      lineTop: 698,
-      lineWidth: 141,
-      lineHeight: 78,
-    },
-    calloutCropHeight: "123.85%",
-    calloutCropWidth: "124.29%",
-    calloutCropLeft: "-13.53%",
-    calloutCropTop: "-10.91%",
-  },
-  background: {
-    desktop: {
-      handRotate: -12.62,
-      handWidth: 1830,
-      handHeight: 1530,
-      handLeft: -393,
-      handTop: -443,
-      /** Rotation bounding box scale from Figma 692:29096 */
-      handWrapperWidthScale: 1.16,
-      handWrapperHeightScale: 1.24,
-    },
-    mobile: {
-      handLeft: -495,
-      handTop: 151,
-      handWidth: 1091,
-      handHeight: 912,
-    },
-  },
-} as const;
-
-export const educationDiscoverContent = {
-  title: "Discover What Speaks to You",
-  mobileTitleLines: ["Discover What Speaks ", "to You"] as const,
-  description:
-    "Tell us what you’re looking for, and we’ll curate a selection tailored to your style, occasion, and preferences.",
-  steps: [
-    "Define your price range",
-    "Choose your jewellery type",
-    "Pick your preferred diamond shape",
-  ],
-  ctaLabel: "BEGIN YOUR JOURNEY",
-  ctaHref: "/book-an-appointment",
-} as const;
-
 /** Figma nodes 692:29075 (desktop) + 692:28767 (mobile) */
 export const educationDiscoverSpec = {
   section: {
@@ -1049,88 +761,5 @@ export const educationDiscoverSpec = {
   },
 } as const;
 
-export type EducationFaqItem = {
-  id: string;
-  question: string;
-  answer?: string;
-};
-
 /** Shared section title → content spacing (32px mobile, 40px desktop). */
 export const educationSectionTitleSpacingClassName = "mb-8 lg:mb-10";
-
-/** Figma nodes 692:29045 (desktop) + 692:28787 (mobile) */
-export const educationFaqSpec = {
-  section: {
-    desktop: {
-      paddingX: 40,
-      paddingY: 104,
-      titleGap: 40,
-    },
-    mobile: {
-      paddingX: 16,
-      paddingY: 64,
-      titleGap: 32,
-    },
-    background: "#FFFFFF",
-  },
-  title: {
-    desktop: {
-      fontSize: 48,
-      align: "center" as const,
-    },
-    mobile: {
-      fontSize: 32,
-      align: "left" as const,
-    },
-    color: "#0A0A0A",
-  },
-  list: {
-    desktopWidth: 910,
-    itemGap: 16,
-  },
-  item: {
-    desktop: {
-      closedHeight: 56,
-      questionSize: 20,
-      answerSize: 20,
-      rowAlign: "center" as const,
-    },
-    mobile: {
-      questionSize: 16,
-      answerSize: 14,
-      rowAlign: "start" as const,
-    },
-    questionAnswerGap: 16,
-    questionIconGap: 8,
-    iconSize: 24,
-    dividerHeight: 0.5,
-    dividerColor: "#CCCCCC",
-  },
-} as const;
-
-export const educationFaqItems: EducationFaqItem[] = [
-  {
-    id: "value",
-    question: "What factors determine a diamond's overall value?",
-    answer:
-      "A diamond's value is determined by the 4Cs — cut, colour, clarity, and carat — along with certification, fluorescence, and market demand. At Sunny Diamonds, we prioritize cut quality and clarity to ensure exceptional brilliance.",
-  },
-  {
-    id: "authenticity",
-    question: "How can I verify the authenticity of my diamond?",
-    answer:
-      "To verify your diamond's authenticity, check for a laser inscription on the girdle that matches its grading report from a reputable gemological lab like GIA or AGS. You can also request to view the diamond's original certificate and cross-reference the details online.",
-  },
-  {
-    id: "cuts",
-    question: "What are the different diamond cuts offered at Sunny Diamonds?",
-    answer:
-      "Sunny Diamonds offers round brilliant, cushion, oval, pear, emerald, princess, and marquise cuts — each selected for exceptional light performance and proportion.",
-  },
-  {
-    id: "storage",
-    question: "How do I properly store my diamonds to prevent damage?",
-    answer:
-      "Store diamonds separately in soft pouches or lined compartments to prevent scratching other jewellery. Avoid exposing them to harsh chemicals and have settings inspected periodically.",
-  },
-];
