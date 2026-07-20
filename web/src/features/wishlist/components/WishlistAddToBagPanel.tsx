@@ -104,7 +104,7 @@ const WishlistAddToBagPanel = ({
             </button>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto md:px-6 px-4 pt-8 md:max-h-[calc(100vh-400px)] md:pb-8 pb-6">
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-8 md:px-6 md:pb-8">
             <div className="flex flex-col gap-6">
               <div className="flex flex-col gap-3">
                 <div className="flex items-start justify-between gap-4">

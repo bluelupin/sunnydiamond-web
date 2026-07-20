@@ -5,6 +5,10 @@ export function resolveHeaderNavHref(label: string, url: string): string {
     return "/jewellery";
   }
 
+  if (normalizedLabel === "bespoke") {
+    return "/bespoke-jewellery";
+  }
+
   return url;
 }
 
@@ -19,7 +23,8 @@ export function isHeroOverlayRoute(pathname: string): boolean {
     pathname === "/" ||
     pathname === "/about" ||
     pathname === "/education" ||
-    pathname === "/jewellery"
+    pathname === "/jewellery" ||
+    pathname === "/bespoke-jewellery"
   );
 }
 
