@@ -72,7 +72,7 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
         <div className="flex min-w-0 flex-1 gap-4 lg:max-w-[499.5px] lg:gap-6">
           <Link
             href={`/product/${product.id}`}
-            className="relative h-[68px] w-[91px] shrink-0 overflow-hidden bg-white border border-blue-300 lg:h-[105px] lg:w-[140px]"
+            className="relative h-[68px] w-[91px] shrink-0 overflow-hidden bg-white lg:h-[105px] lg:w-[140px]"
           >
             <OptimizedImage src={product.image} alt={product.name} />
           </Link>
