@@ -31,7 +31,7 @@ const WishlistCard = ({ product, onRemove, onAddToBag }: WishlistCardProps) => {
       >
         <DeleteIcon className="size-6 text-darkblack" />
       </button>
-      <Link href={href} className="pointer-events-auto block w-full xl:h-[303px] lg:h-[250px] md:h-[240px] sm:h-[180px] h-[110px] mx-auto border border-blue-300">
+      <Link href={href} className="pointer-events-auto block w-full xl:h-[303px] lg:h-[250px] md:h-[240px] sm:h-[180px] h-[110px] mx-auto">
         <OptimizedImage
           src={product.primaryImage}
           alt={product.name}
