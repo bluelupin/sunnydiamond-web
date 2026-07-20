@@ -8,42 +8,26 @@ const BespokeGuaranteesSection = () => {
   const { guarantees } = bespokePageContent;
 
   return (
-    <section aria-label="Shopping guarantees" className="border-y border-neutral300 bg-white">
-      <ul className="m-0 flex list-none flex-col items-center p-0 px-4 py-10 md:hidden">
+    <section aria-label="Shopping guarantees" className="bg-white">
+      <ul className="m-0 list-none flex items-center justify-center 2xl:gap-[75px] xl:gap-16 lg:gap-12 md:gap-10 gap-6 p-0 flex lg:flex-row flex-col md:py-16 py-10 px-4">
         {guarantees.map((item, index) => (
           <Fragment key={item.label}>
-            {index > 0 ? (
-              <li aria-hidden className="my-4 h-px w-full max-w-[320px] bg-neutral300" />
-            ) : null}
-            <Reveal as="li" direction="up" className="flex w-full max-w-[320px] flex-col items-center gap-3 text-center">
-              <div className="flex size-10 items-center justify-center md:size-16">
-                <Image src={item.iconSrc} alt="" width={64} height={64} className="size-full object-contain" aria-hidden />
-              </div>
-              <p className="font-gill text-base leading-110 text-darkblack">{item.label}</p>
-            </Reveal>
-          </Fragment>
-        ))}
-      </ul>
-
-      <ul className="m-0 hidden list-none items-stretch justify-center p-0 md:flex md:py-16 py-10 md:px-[180px] px-4">
-        {guarantees.map((item, index) => (
-          <Fragment key={item.label}>
-            {index > 0 ? (
-              <li aria-hidden className="flex min-w-0 flex-1 items-center justify-center self-stretch">
-                <span className="h-136 w-hairline bg-gray600" />
+            {index > 0 &&
+              <li aria-hidden className="w-full">
+                <div className="lg:w-[0.5px] w-full lg:h-[136px] h-[0.5px] bg-gray600"></div>
               </li>
-            ) : null}
+            }
             <Reveal
               as="li"
               direction="up"
               className={cn(
-                "flex w-[260px] shrink-0 flex-col items-center justify-center gap-3 p-3 text-center",
+                "flex lg:w-[260px] w-full shrink-0 flex-col items-center justify-center gap-3 lg:p-3 p-4 text-center",
               )}
             >
-              <div className="flex size-16 items-center justify-center">
-                <Image src={item.iconSrc} alt="" width={64} height={64} className="size-full object-contain" aria-hidden />
+              <div className="flex lg:size-16 size-10 items-center justify-center">
+                <Image src={item.iconSrc} alt="" width={64} height={64} className="size-full" aria-hidden />
               </div>
-              <p className="max-w-236 font-gill text-xl font-normal leading-110 text-darkblack">{item.label}</p>
+              <p className="max-w-236 font-gill lg:text-xl md:text-lg text-base font-normal leading-110 text-darkblack">{item.label}</p>
             </Reveal>
           </Fragment>
         ))}
