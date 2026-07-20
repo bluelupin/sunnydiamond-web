@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import Image from "next/image";
-import { Heart, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -30,6 +30,7 @@ import type { AddToBagPayload } from "@/features/cart/types/cart.types";
 import type { EngravingSelection } from "@/features/products/constants/engraving";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import PlusIcon from "@/assets/Icons/PlusIcon";
+import WishlistIcon from "@/assets/Icons/WishlistIcon";
 import VanIcon from "@/assets/Icons/VanIcon";
 import StoreIcon from "@/assets/Icons/StoreIcon";
 import Reveal from "@/shared/Animation/Reveal";
@@ -181,13 +182,11 @@ const ProductDetailSidebar = ({
               onClick={() => toggleWishlist(product.id)}
               className="inline-flex size-14 shrink-0 items-center justify-center bg-aboutInactive"
             >
-              <Heart
-                size={24}
-                strokeWidth={1.5}
-                aria-hidden
+              <WishlistIcon
+                filled={wishlisted}
                 className={cn(
-                  "transition-colors duration-200",
-                  wishlisted ? "fill-linkGold text-linkGold" : "text-darkblack",
+                  "size-6 transition-colors duration-200",
+                  wishlisted ? "text-linkGold" : "text-darkblack",
                 )}
               />
             </button>

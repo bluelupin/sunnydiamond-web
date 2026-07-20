@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { User } from "lucide-react";
 import SDLogo from "@/assets/Icons/SDLogo";
 import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
+import UserIcon from "@/assets/Icons/UserIcon";
 import HeaderIconBadge from "@/shared/ui/layout/HeaderIconBadge";
 import { cn } from "@/shared/utils/cn";
 
@@ -39,10 +39,6 @@ const MobileHeaderBar = ({
       </Link>
 
       <div className="flex w-[120px] items-center justify-end gap-6">
-        <Link href="/contact" aria-label="Account" className={iconButtonClass} onClick={onNavigate}>
-          <User size={24} strokeWidth={1.5} />
-        </Link>
-
         <Link
           href="/cart"
           aria-label={cartCount > 0 ? `Cart, ${cartCount} items` : "Cart"}
@@ -51,6 +47,10 @@ const MobileHeaderBar = ({
         >
           <ShoppingBagIcon className="size-6" />
           <HeaderIconBadge count={cartCount} className="bg-darkblack text-white" />
+        </Link>
+
+        <Link href="/contact" aria-label="Account" className={iconButtonClass} onClick={onNavigate}>
+          <UserIcon className="size-6" />
         </Link>
       </div>
     </div>

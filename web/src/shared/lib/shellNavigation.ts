@@ -36,11 +36,19 @@ export function getFallbackFooterLinkGroups(): FooterLinkGroup[] {
   }));
 }
 
+const REMOVED_HEADER_NAV_LABELS = new Set(["collection"]);
+
+function filterHeaderLinks(links: readonly HeaderNavLink[]): HeaderNavLink[] {
+  return links.filter(
+    (link) => !REMOVED_HEADER_NAV_LABELS.has(link.label.trim().toLowerCase()),
+  );
+}
+
 export function resolveShellHeaderLinks(
   cmsLinks: readonly HeaderNavLink[] | null | undefined,
 ): HeaderNavLink[] {
-  if (cmsLinks?.length) return [...cmsLinks];
-  return getFallbackHeaderLinks();
+  if (cmsLinks?.length) return filterHeaderLinks(cmsLinks);
+  return filterHeaderLinks(getFallbackHeaderLinks());
 }
 
 const REMOVED_FOOTER_PATHS = new Set([

@@ -4,17 +4,19 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, Heart, User } from "lucide-react";
 import { useCart } from "@/features/cart/context/CartContext";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import { siteConfig } from "@/shared/lib/siteConfig";
 import { cn } from "@/shared/utils/cn";
 import SDLogo from "@/assets/Icons/SDLogo";
+import SearchIcon from "@/assets/Icons/SearchIcon";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
 import { resolveHeaderNavHref, getHeaderVariant, isJewelleryNavLink } from "@/shared/utils/navigation";
 import { resolveShellHeaderLinks } from "@/shared/lib/shellNavigation";
 import MobileNavigation from "@/shared/ui/layout/MobileNavigation";
 import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
+import UserIcon from "@/assets/Icons/UserIcon";
+import WishlistIcon from "@/assets/Icons/WishlistIcon";
 import MenuIcon from "@/assets/Icons/MenuIcon";
 import HeaderIconBadge from "@/shared/ui/layout/HeaderIconBadge";
 
@@ -130,7 +132,7 @@ const Header = () => {
               className={cn(iconButtonClass, textClass, hoverClass)}
               aria-label="Search"
             >
-              <Search size={24} strokeWidth={1.5} />
+              <SearchIcon className="size-6" />
             </button>
           </div>
           <div className="hidden md:flex md:items-center md:gap-4 lg:gap-10">
@@ -165,6 +167,9 @@ const Header = () => {
                   </Link>
                 );
               })}
+              <Link href="/book-an-appointment" className={navLinkClass()}>
+                Book an Appointment
+              </Link>
             </nav>
           </div>
           <div className="pointer-events-none absolute inset-x-0 flex justify-center md:hidden">
@@ -176,7 +181,7 @@ const Header = () => {
               className={cn("!hidden md:!flex", iconButtonClass, hoverClass)}
               aria-label="Search"
             >
-              <Search size={24} strokeWidth={1.5} />
+              <SearchIcon className="size-6" />
             </button>
 
             <Link
@@ -186,16 +191,8 @@ const Header = () => {
                 wishlistCount > 0 ? `Wishlist, ${wishlistCount} items` : "Wishlist"
               }
             >
-              <Heart size={24} strokeWidth={1.5} />
+              <WishlistIcon className="size-6" />
               <HeaderIconBadge count={wishlistCount} />
-            </Link>
-
-            <Link
-              href="/contact"
-              className={cn("inline-flex", iconButtonClass, hoverClass)}
-              aria-label="Account"
-            >
-              <User size={24} strokeWidth={1.5} />
             </Link>
 
             <Link
@@ -205,6 +202,14 @@ const Header = () => {
             >
               <ShoppingBagIcon className="size-6" />
               <HeaderIconBadge count={cartCount} />
+            </Link>
+
+            <Link
+              href="/contact"
+              className={cn("inline-flex", iconButtonClass, hoverClass)}
+              aria-label="Account"
+            >
+              <UserIcon className="size-6" />
             </Link>
           </div>
         </div>

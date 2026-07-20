@@ -3,8 +3,11 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, Search, User, X } from "lucide-react";
+import { X } from "lucide-react";
 import SDLogo from "@/assets/Icons/SDLogo";
+import SearchIcon from "@/assets/Icons/SearchIcon";
+import UserIcon from "@/assets/Icons/UserIcon";
+import WishlistIcon from "@/assets/Icons/WishlistIcon";
 import { cn } from "@/shared/utils/cn";
 import { resolveHeaderNavHref, isJewelleryNavLink } from "@/shared/utils/navigation";
 import type { HeaderNavLink } from "@/shared/lib/shellNavigation";
@@ -21,8 +24,6 @@ type MobileNavigationProps = {
   cartCount: number;
   wishlistCount: number;
 };
-
-const EXCLUDED_MOBILE_NAV_LABELS = new Set(["collection"]);
 
 const LANGUAGES = [
   { code: "en", label: "English", display: "English" },
@@ -408,10 +409,6 @@ const MobileNavigation = ({
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const mobileNavLinks = navLinks.filter(
-    (link) => !EXCLUDED_MOBILE_NAV_LABELS.has(link.label.trim().toLowerCase()),
-  );
-
   const handleApplyLanguage = useCallback((lang: LanguageCode) => {
     setLanguage(lang);
     setSubPanel(null);
@@ -488,11 +485,11 @@ const MobileNavigation = ({
             onClick={handleClose}
             className="relative inline-flex size-6 items-center justify-center"
           >
-            <Heart size={24} strokeWidth={1.5} />
+            <WishlistIcon className="size-6" />
             <HeaderIconBadge count={wishlistCount} />
           </Link>
           <Link href="/contact" aria-label="Account" onClick={handleClose} className="inline-flex size-6 items-center justify-center">
-            <User size={24} strokeWidth={1.5} />
+            <UserIcon className="size-6" />
           </Link>
           <Link
             href="/cart"
@@ -500,7 +497,7 @@ const MobileNavigation = ({
             onClick={handleClose}
             className="relative inline-flex size-6 items-center justify-center"
           >
-            <ShoppingBagIcon />
+            <ShoppingBagIcon className="size-6" />
             <HeaderIconBadge count={cartCount} />
           </Link>
         </div>
@@ -512,7 +509,7 @@ const MobileNavigation = ({
           className="mt-2 flex h-[46px] w-full items-center gap-2 border border-aboutInactive bg-aboutInactive p-3"
           onSubmit={(event) => event.preventDefault()}
         >
-          <Search size={16} strokeWidth={1.5} aria-hidden className="shrink-0 text-darkblack" />
+          <SearchIcon className="size-4 shrink-0 text-darkblack" />
           <input
             ref={searchInputRef}
             type="text"
@@ -536,7 +533,7 @@ const MobileNavigation = ({
         </form>
 
         <nav aria-label="Main navigation" className="mt-6 flex w-full flex-col gap-4">
-          {mobileNavLinks.map((link, index) => {
+          {navLinks.map((link, index) => {
             const isJewellery = isJewelleryNavLink(link.label);
             return (
               <Fragment key={link.label}>
@@ -546,7 +543,7 @@ const MobileNavigation = ({
                   onNavigate={handleClose}
                   onOpenPanel={isJewellery ? () => setSubPanel("jewellery") : undefined}
                 />
-                {index < mobileNavLinks.length - 1 ? <NavDivider /> : null}
+                {index < navLinks.length - 1 ? <NavDivider /> : null}
               </Fragment>
             );
           })}
