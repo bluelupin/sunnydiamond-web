@@ -20,7 +20,7 @@ import type { JewelleryCategorySlug, JewelleryFilterState } from "../types";
 const JewelleryProductPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const categoryFromUrl = parseJewelleryCategorySlug(searchParams.get("category")) ?? "all";
+  const categoryFromUrl = parseJewelleryCategorySlug(searchParams?.get("category") ?? null) ?? "all";
 
   const [activeCategory, setActiveCategory] = useState<JewelleryCategorySlug>(categoryFromUrl);
   const [sortValue, setSortValue] = useState("featured");

@@ -1,4 +1,4 @@
-import { aboutHandcraftedContent } from "@/features/about/data/content";
+import { aboutHandcraftedTileLayout } from "@/features/about/data/content";
 import { extractStrapiImage, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import type {
   NormalizedAboutCraft,
@@ -233,7 +233,7 @@ const normalizeCraftTileType = (raw?: string | null): "textCard" | "image" => {
 const mapCraftCards = (
   mosaic?: StrapiAboutCraftMosaicSection | null,
 ): NormalizedCraftCard[] => {
-  const layoutCards = aboutHandcraftedContent.cards;
+  const layoutCards = aboutHandcraftedTileLayout.cards;
   let textCardCounter = 0;
 
   return coerceComponentArray<StrapiAboutCraftMosaicTile>(mosaic?.tile)
