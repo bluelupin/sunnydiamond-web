@@ -11,7 +11,7 @@ type WishlistListProps = {
 
 const WishlistList = ({ products, onRemove, onAddToBag }: WishlistListProps) => {
   return (
-    <div className="flex w-full flex-col md:hidden">
+    <div className="flex w-full flex-col items-center justify-center md:hidden">
       {products.map((product, index) => (
         <WishlistListItem
           key={`${product.id}-${index}`}

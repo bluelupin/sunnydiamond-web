@@ -61,7 +61,7 @@ const WishlistPage = () => {
         ) : (
           <>
             <div
-              className={cn("mx-auto w-full 2xl:max-w-1920 max-w-1440 px-5 md:px-8 lg:px-10 2xl:px-[60px]",)}>
+              className={cn("mx-auto w-full 2xl:max-w-1920 max-w-1440 px-0 md:px-8 lg:px-10 2xl:px-[60px]",)}>
               <div className={viewMode === "list" ? "hidden md:block" : "block"}>
                 <WishlistGrid
                   products={visibleProducts}

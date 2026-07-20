@@ -18,32 +18,33 @@ const WishlistListItem = ({ product, onRemove, onAddToBag }: WishlistListItemPro
   const href = getWishlistProductHref(product.id);
 
   return (
-    <article className="flex gap-4 border-b border-neutral300 bg-white px-4 py-6 last:border-b-0">
+    <article className="flex flex-col gap-4 px-4 py-6 w-full">
       <Link
         href={href}
-        className="flex size-[120px] shrink-0 items-center justify-center bg-gray200"
+        className="w-full max-w-[345px] mx-auto h-[140px] flex items-center justify-center"
       >
         <OptimizedImage
           src={product.primaryImage}
           alt={product.name}
           width={120}
           height={120}
-          className="mx-auto max-h-[88px] w-auto object-contain"
-          sizes="120px"
+          className="w-full h-full object-cover"
         />
       </Link>
 
-      <div className="flex min-w-0 flex-1 flex-col justify-center gap-2">
-        <Link
-          href={href}
-          className="line-clamp-2 max-w-[153px] font-gill text-sm font-light leading-110 text-darkblack"
-        >
-          {product.name}
-        </Link>
-        <p className="font-gill text-sm font-semibold leading-110 text-darkblack">
-          <span aria-hidden>₹ </span>
-          {formatJewelleryPrice(product.price)}
-        </p>
+      <div className="flex flex-col justify-center gap-6 max-w-[345px] mx-auto">
+        <div className="flex flex-col gap-2 items-center justify-center">
+          <Link
+            href={href}
+            className="line-clamp-2 max-w-[153px] font-gill text-sm font-light leading-110 text-darkblack text-center"
+          >
+            {product.name}
+          </Link>
+          <p className="font-gill text-sm font-normal leading-110 text-darkblack text-center">
+            <span aria-hidden>₹ </span>
+            {formatJewelleryPrice(product.price)}
+          </p>
+        </div>
         <div className="flex items-center gap-8">
           <DetailTextLink onClick={onAddToBag}>
             {wishlistPageContent.addToBagLabel}
