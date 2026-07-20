@@ -6,9 +6,12 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
+import WishlistMovedToast from "@/features/wishlist/components/WishlistMovedToast";
+import { wishlistMovedToastDurationMs } from "@/features/wishlist/data/content";
 
 const WISHLIST_STORAGE_KEY = "sunny-wishlist";
 
@@ -38,6 +41,33 @@ function readStoredWishlist(): string[] {
 export function WishlistProvider({ children }: { children: ReactNode }) {
   const [wishlistedIds, setWishlistedIds] = useState<string[]>([]);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [isMovedToastOpen, setIsMovedToastOpen] = useState(false);
+  const movedToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const dismissMovedToast = useCallback(() => {
+    if (movedToastTimeoutRef.current) {
+      clearTimeout(movedToastTimeoutRef.current);
+      movedToastTimeoutRef.current = null;
+    }
+    setIsMovedToastOpen(false);
+  }, []);
+
+  const showMovedToast = useCallback(() => {
+    dismissMovedToast();
+    setIsMovedToastOpen(true);
+    movedToastTimeoutRef.current = setTimeout(() => {
+      setIsMovedToastOpen(false);
+      movedToastTimeoutRef.current = null;
+    }, wishlistMovedToastDurationMs);
+  }, [dismissMovedToast]);
+
+  useEffect(() => {
+    return () => {
+      if (movedToastTimeoutRef.current) {
+        clearTimeout(movedToastTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     setWishlistedIds(readStoredWishlist());
@@ -60,12 +90,15 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   );
 
   const toggleWishlist = useCallback((productId: string) => {
-    setWishlistedIds((current) =>
-      current.includes(productId)
-        ? current.filter((id) => id !== productId)
-        : [...current, productId],
-    );
-  }, []);
+    setWishlistedIds((current) => {
+      if (current.includes(productId)) {
+        return current.filter((id) => id !== productId);
+      }
+
+      showMovedToast();
+      return [...current, productId];
+    });
+  }, [showMovedToast]);
 
   const value = useMemo(
     () => ({
@@ -77,7 +110,12 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     [wishlistedIds, isWishlisted, toggleWishlist],
   );
 
-  return <WishlistContext.Provider value={value}>{children}</WishlistContext.Provider>;
+  return (
+    <WishlistContext.Provider value={value}>
+      {children}
+      <WishlistMovedToast open={isMovedToastOpen} onClose={dismissMovedToast} />
+    </WishlistContext.Provider>
+  );
 }
 
 export function useWishlist() {

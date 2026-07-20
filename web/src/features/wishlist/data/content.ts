@@ -115,4 +115,9 @@ export const wishlistPageContent = {
   productCountLabel: (count: number) => `${count} ${count === 1 ? "Product" : "Products"}`,
   gridViewLabel: "Grid view",
   listViewLabel: "List view",
+  movedToWishlistMessage: "Item moved to Wishlist",
+  movedToWishlistViewLabel: "VIEW",
+  movedToWishlistHref: "/wishlist",
 } as const;
+
+export const wishlistMovedToastDurationMs = 4000;
