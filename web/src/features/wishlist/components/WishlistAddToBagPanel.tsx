@@ -104,27 +104,28 @@ const WishlistAddToBagPanel = ({
             </button>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-6 pt-6 md:max-h-[calc(100vh-400px)] md:pb-8 pb-6">
+          <div className="min-h-0 flex-1 overflow-y-auto md:px-6 px-4 pt-8 md:max-h-[calc(100vh-400px)] md:pb-8 pb-6">
             <div className="flex flex-col gap-6">
-              <div className="flex items-start justify-between gap-4">
-                <ul className="m-0 flex list-none flex-wrap items-center gap-3 p-0">
-                  {content.attributes.map((attribute, index) => (
-                    <li key={attribute} className="flex items-center gap-3">
-                      {index > 0 ? <AttributeSeparator /> : null}
-                      <span className="font-gill text-base font-light leading-110 text-neutral500">
-                        {attribute}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                <DetailTextLink href={productHref} className="shrink-0 whitespace-nowrap">
-                  See Details
-                </DetailTextLink>
+              <div className="flex flex-col gap-3">
+                <div className="flex items-start justify-between gap-4">
+                  <ul className="m-0 flex list-none flex-wrap items-center md:gap-3 gap-2 p-0">
+                    {content.attributes.map((attribute, index) => (
+                      <li key={attribute} className="flex items-center md:gap-3 gap-2">
+                        {index > 0 ? <AttributeSeparator /> : null}
+                        <span className="font-gill md:text-base text-sm font-light leading-110 text-neutral500">
+                          {attribute}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  <DetailTextLink href={productHref} className="shrink-0 whitespace-nowrap">
+                    See Details
+                  </DetailTextLink>
+                </div>
+                <h2 className="font-larken text-2xl font-light leading-110 text-darkblack lg:text-32">
+                  {product.name}
+                </h2>
               </div>
-
-              <h2 className="font-larken text-2xl font-light leading-110 text-darkblack lg:text-32">
-                {product.name}
-              </h2>
 
               <div className="flex flex-col gap-4">
                 <p className="font-gill text-base leading-110 text-darkblack">Metal Color</p>
@@ -151,7 +152,9 @@ const WishlistAddToBagPanel = ({
 
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between gap-4">
-                  <p className="font-gill text-base leading-110 text-darkblack">Ring Size</p>
+                  <p className="font-gill text-base leading-normal tracking-normal text-darkblack">
+                    Ring Size
+                  </p>
                   <DetailTextLink onClick={() => setIsRingSizeChartOpen(true)}>
                     Find your size
                   </DetailTextLink>
@@ -160,7 +163,7 @@ const WishlistAddToBagPanel = ({
                   <SelectTrigger className="h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0">
                     <SelectValue placeholder="-select-" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[80]">
                     {content.ringSizes.map((size) => (
                       <SelectItem key={size} value={size}>
                         {size}
@@ -172,7 +175,7 @@ const WishlistAddToBagPanel = ({
             </div>
           </div>
 
-          <PanelFooter contentClassName="px-6">
+          <PanelFooter contentClassName="px-6 !border-0 lg:!px-4 md:!px-4 !px-4">
             <div className="flex flex-col gap-4">
               <div className="flex items-end justify-between gap-4">
                 <div className="flex items-center gap-3 font-gill text-2xl leading-110 text-darkblack">
@@ -190,7 +193,7 @@ const WishlistAddToBagPanel = ({
             </div>
           </PanelFooter>
         </div>
-      </ProductDetailSidePanelShell>
+      </ProductDetailSidePanelShell >
 
       <RingSizeChartPanel open={isRingSizeChartOpen} onClose={() => setIsRingSizeChartOpen(false)} />
     </>
