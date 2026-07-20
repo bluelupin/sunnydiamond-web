@@ -7,7 +7,6 @@ import { cn } from "@/shared/utils/cn";
 import type { NormalizedCraftCard } from "@/services/about/about-page.types";
 import {
   aboutHandcraftedAssets,
-  aboutHandcraftedContent,
   aboutPageImages,
 } from "../data/content";
 import Reveal from "@/shared/Animation/Reveal";
@@ -142,16 +141,11 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
   const [revealed, setRevealed] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
 
-  const fallbackCards = aboutHandcraftedContent.cards;
   const cardsByTileIndex = new Map(cards.map((card) => [card.tileIndex, card]));
 
-  const getTextTitle = (tileIndex: number, fallbackIndex: number) => {
+  const getTextTitle = (tileIndex: number) => {
     const card = cardsByTileIndex.get(tileIndex);
-    return (
-      card?.type === "textCard"
-        ? card.title
-        : fallbackCards[fallbackIndex]?.title
-    ) ?? "";
+    return card?.type === "textCard" ? (card.title ?? "") : "";
   };
 
   const renderPhotoTile = (tileIndex: number, className?: string) => {
@@ -167,12 +161,11 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
 
   const renderTextTile = (
     tileIndex: number,
-    fallbackIndex: number,
     className?: string,
     compact?: boolean,
   ) => (
     <CraftTextTile
-      title={getTextTitle(tileIndex, fallbackIndex)}
+      title={getTextTitle(tileIndex)}
       className={className}
       compact={compact}
     />
@@ -222,7 +215,7 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
           {...tileProps(0, 1, 5)}
           className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
-          {renderTextTile(1, 0, "size-full")}
+          {renderTextTile(1, "size-full")}
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(0, 2, 5)}
@@ -255,7 +248,7 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
           {...tileProps(1, 1, 3)}
           className="md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px] md:block hidden"
         >
-          {renderTextTile(6, 1, "size-full", true)}
+          {renderTextTile(6, "size-full", true)}
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(1, 2, 3)}
@@ -270,7 +263,7 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
           {...tileProps(2, 0, 3)}
           className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
-          {renderTextTile(8, 2, "size-full")}
+          {renderTextTile(8, "size-full")}
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(2, 1, 3)}

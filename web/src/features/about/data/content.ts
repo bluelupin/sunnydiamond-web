@@ -58,29 +58,10 @@ export const aboutHeroFigmaSpec = {
   },
 } as const;
 
+/** Local fallbacks when craft media is missing from CMS. */
 export const aboutPageImages = {
-  heroDesktop: "/images/about/hero-desktop.png",
-  heroMobile: "/images/about/hero-mobile.png",
-  craftingDiamond: "/images/about/crafting-diamond.webp",
-  teamMemberDesktop1: "/images/about/team-member-desktop-1.png",
-  teamMemberMobile1: "/images/about/team-member-mobile-1.png",
-  teamMemberDesktop2: "/images/about/team-member-desktop-2.png",
-  teamMemberMobile2: "/images/about/team-member-mobile-2.png",
-  teamMemberDesktop3: "/images/about/team-member-desktop-3.png",
-  teamMemberMobile3: "/images/about/team-member-mobile-3.png",
-  storyFounderDesktop: "/images/about/story-founder-desktop.png",
-  storyFounderMobile: "/images/about/story-founder-mobile.png",
-  storyEventDesktop: "/images/about/story-event-desktop.png",
-  storyEventMobile: "/images/about/story-event-mobile.png",
-  storyAttendingDesktop: "/images/about/story-attending-desktop.png",
-  storyAttendingMobile: "/images/about/story-attending-mobile.png",
   handcraftedBg: "/images/about/handcrafted-bg.webp",
   craftsmanship: "/images/about/craftsmanship-764d7a.webp",
-  store: "/images/about/store.png",
-} as const;
-
-export const aboutHeroContent = {
-  title: aboutHeroFigmaSpec.title.text,
 } as const;
 
 /** Figma node 692:27430 — Crafting Rarity — Reveal V2 */
@@ -130,37 +111,12 @@ export const aboutCraftingRarityFigmaSpec = {
   },
 } as const;
 
-export const aboutSince1997Content = {
-  title: "Since 1997",
-  story:
-    "The story dates back to 3 generations where Sunny Diamonds has exemplified the singular refinement of rare, original, exclusive jewellery. The flag continued to fly high and proud primarily because we the fine craftsmanship, goodwill and love.",
-  gallery: [
-    {
-      desktopImage: aboutPageImages.storyFounderDesktop,
-      mobileImage: aboutPageImages.storyFounderMobile,
-      alt: "Mr. P.P. Sunny with his sons",
-      caption: "Mr. P.P. Sunny with his sons",
-      width: 549,
-      height: 600, 
-    },
-    {
-      desktopImage: aboutPageImages.storyEventDesktop,
-      mobileImage: aboutPageImages.storyEventMobile,
-      alt: "At an event hosted by Webandcrafts",
-      caption: "At an event hosted by Webandcrafts",
-      width: 320,
-      height: 417,
-    },
-    {
-      desktopImage: aboutPageImages.storyAttendingDesktop,
-      mobileImage: aboutPageImages.storyAttendingMobile,
-      alt: "P.P. Sunny attending",
-      caption: "P.P. Sunny attending",
-      width: 463,
-      height: 600,
-    },
-  ],
-} as const;
+/** Figma frame dimensions for legacy gallery when CMS omits width/height. */
+export const aboutSince1997GalleryDimensions = [
+  { width: 549, height: 600 },
+  { width: 320, height: 417 },
+  { width: 463, height: 600 },
+] as const;
 
 /** Figma Component 228 — team card hover overlay */
 export const aboutFacesFigmaSpec = {
@@ -169,21 +125,18 @@ export const aboutFacesFigmaSpec = {
   },
 } as const;
 
-export const aboutHandcraftedContent = {
-  title: "Handcrafted Brilliance",
+/** Mosaic text-card layout only — copy comes from CMS craftMosaicSection tiles. */
+export const aboutHandcraftedTileLayout = {
   cards: [
     {
-      title: "Ethically Sourced, conflict free diamonds",
       position: { left: "20.17%", top: "0" },
       gap: 12,
     },
     {
-      title: "Pinnacle of Craftsmanship and Artistry",
       position: { left: "40.43%", top: "34.04%" },
       gap: 12,
     },
     {
-      title: "Highest Level of Quality Checks",
       position: { left: "20.09%", top: "67.97%" },
       gap: 10,
     },
@@ -246,35 +199,7 @@ export const aboutHandcraftedFigmaSpec = {
 } as const;
 
 export const aboutHandcraftedAssets = {
-  gridMask: "/images/about/handcrafted-grid-mask.svg",
   flourish: "/images/about/handcrafted-flourish.svg",
-  /** Mosaic photo grid for mobile tiles (Figma 692:27493) */
-  intersect: "/images/about/handcrafted-intersect.webp",
-  /** Handcrafted hero background video */
-  heroVideo: "/videos/handcrafted-bg.mp4",
-} as const;
-
-/** Mobile tile layout — Figma 692:27493 (3-2-3 rows, mosaic sprite positions) */
-export const aboutHandcraftedMobileLayout = {
-  row1: [
-    { type: "photo" as const, mosaicCol: 0, mosaicRow: 0 },
-    { type: "card" as const, cardIndex: 1 },
-    { type: "photo" as const, mosaicCol: 4, mosaicRow: 0 },
-  ],
-  row2: [
-    { type: "photo" as const, mosaicCol: 1, mosaicRow: 1 },
-    { type: "photo" as const, mosaicCol: 3, mosaicRow: 1 },
-  ],
-  row3: [
-    { type: "card" as const, cardIndex: 0 },
-    { type: "photo" as const, mosaicCol: 3, mosaicRow: 2 },
-    { type: "card" as const, cardIndex: 2 },
-  ],
-} as const;
-
-/** Figma node 692:27386 — vertical divider below Handcrafted (Line 1512) */
-export const aboutHandcraftedProgressLineSpec = {
-  height: 105,
 } as const;
 
 /** Figma node 692:27191 — Timeline section */
@@ -313,9 +238,6 @@ export const aboutTimelineFigmaSpec = {
     durationMs: 500,
   },
 } as const;
-
-// const timelineDescription =
-//   "We source and transform the rarest Internally Flawless diamonds into timeless masterpieces, crafted with uncompromising precision for those for those who seek the truly exceptional.";
 
 /** Figma node 692:27229 — Heirloom quote */
 export const aboutHeirloomFigmaSpec = {

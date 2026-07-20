@@ -138,25 +138,6 @@ export const homeContent = {
   },
 } as const;
 
-export const aboutContent = {
-  header: {
-    subtitle: "Our Story",
-    title: "Crafting Brilliance Since 1987",
-  },
-  paragraphs: [
-    "At Sunny Diamonds, we believe every diamond carries a universe of light within it. Founded in 1987 by master jeweller Antoine Delacroix, our atelier has been dedicated to transforming the world's finest diamonds into wearable works of art.",
-    "Each piece in our collection is meticulously handcrafted by our team of skilled artisans, combining centuries-old techniques with contemporary design sensibilities. We source only conflict-free, GIA-certified diamonds, ensuring that every stone meets our exacting standards for cut, clarity, color, and carat.",
-    "Our custom design service allows you to collaborate directly with our designers to create a piece that is uniquely yours. From engagement rings that capture your love story to heirloom pieces that will be treasured for generations, we bring your vision to life with unparalleled craftsmanship.",
-  ],
-  stats: [
-    { value: "35+", label: "Years of Excellence" },
-    { value: "10,000+", label: "Pieces Crafted" },
-    { value: "50+", label: "Master Artisans" },
-  ],
-  closingParagraph:
-    "We invite you to visit our flagship boutique or explore our online collection. Every purchase comes with complimentary shipping, a lifetime warranty, and the assurance that you are wearing something truly exceptional.",
-} as const;
-
 export const productsContent = {
   header: {
     subtitle: "Our Collection",

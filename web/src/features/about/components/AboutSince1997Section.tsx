@@ -5,7 +5,7 @@ import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import { cn } from "@/shared/utils/cn";
 import type { NormalizedAboutLegacy } from "@/services/about/about-page.types";
-import { aboutSince1997Content } from "../data/content";
+import { aboutSince1997GalleryDimensions } from "../data/content";
 import { useSince1997HorizontalScroll } from "../hooks/useSince1997HorizontalScroll";
 import Reveal from "@/shared/Animation/Reveal";
 
@@ -72,12 +72,12 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
 
   useSince1997HorizontalScroll(sectionRef, hasHorizontalGallery);
 
-  const founderWidth = founder.image.width ?? aboutSince1997Content.gallery[0]?.width ?? 549;
-  const founderHeight = founder.image.height ?? aboutSince1997Content.gallery[0]?.height ?? 600;
-  const eventWidth = event?.image.width ?? aboutSince1997Content.gallery[1]?.width ?? 320;
-  const eventHeight = event?.image.height ?? aboutSince1997Content.gallery[1]?.height ?? 417;
-  const attendingWidth = attending?.image.width ?? aboutSince1997Content.gallery[2]?.width ?? 463;
-  const attendingHeight = attending?.image.height ?? aboutSince1997Content.gallery[2]?.height ?? 600;
+  const founderWidth = founder.image.width ?? aboutSince1997GalleryDimensions[0]?.width ?? 549;
+  const founderHeight = founder.image.height ?? aboutSince1997GalleryDimensions[0]?.height ?? 600;
+  const eventWidth = event?.image.width ?? aboutSince1997GalleryDimensions[1]?.width ?? 320;
+  const eventHeight = event?.image.height ?? aboutSince1997GalleryDimensions[1]?.height ?? 417;
+  const attendingWidth = attending?.image.width ?? aboutSince1997GalleryDimensions[2]?.width ?? 463;
+  const attendingHeight = attending?.image.height ?? aboutSince1997GalleryDimensions[2]?.height ?? 600;
 
   return (
     <section
