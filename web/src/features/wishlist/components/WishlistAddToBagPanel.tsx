@@ -20,12 +20,13 @@ import {
 } from "@/features/products/components/detail/shared";
 import RingSizeChartPanel from "@/features/products/components/detail/RingSizeChartPanel";
 import { ProductDetailSidePanelShell } from "@/features/products/components/detail/ProductDetailSidePanelShell";
+import ProductWishlistDetailGalleryCarousel from "@/features/products/components/detail/ProductWishlistDetailGalleryCarousel";
+import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
 import type { AddToBagPayload } from "@/features/cart/types/cart.types";
 import { wishlistPageContent } from "@/features/wishlist/data/content";
 import { getWishlistProductHref } from "@/features/wishlist/utils/resolveWishlistProducts";
 import { cn } from "@/shared/utils/cn";
-import ProductWishlistDetailGalleryCarousel from "@/features/products/components/detail/ProductWishlistDetailGalleryCarousel";
 
 type WishlistAddToBagPanelProps = {
   open: boolean;
@@ -82,9 +83,9 @@ const WishlistAddToBagPanel = ({
         onClose={onClose}
         overlayAriaLabel="Close product details"
         dialogAriaLabel="Product details"
-        asideClassName="max-md:max-h-[calc(100vh-4rem)] md:h-[812px] md:max-w-[472px] overflow-auto"
+        asideClassName="max-md:max-h-[calc(100vh-4rem)] md:h-[812px] md:max-w-[472px] max-w-full"
       >
-        <div className="flex h-full min-h-0 flex-col bg-white">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           <div className="relative shrink-0">
             <ProductWishlistDetailGalleryCarousel
               product={product}
@@ -102,7 +103,8 @@ const WishlistAddToBagPanel = ({
               </svg>
             </button>
           </div>
-          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 pt-6">
+
+          <div className="min-h-0 flex-1 overflow-y-auto px-6 pt-6 md:max-h-[calc(100vh-400px)] md:pb-8 pb-6">
             <div className="flex flex-col gap-6">
               <div className="flex items-start justify-between gap-4">
                 <ul className="m-0 flex list-none flex-wrap items-center gap-3 p-0">
@@ -169,7 +171,8 @@ const WishlistAddToBagPanel = ({
               </div>
             </div>
           </div>
-          <div className="shrink-0 border-t border-neutral300 px-6 py-6">
+
+          <PanelFooter contentClassName="px-6">
             <div className="flex flex-col gap-4">
               <div className="flex items-end justify-between gap-4">
                 <div className="flex items-center gap-3 font-gill text-2xl leading-110 text-darkblack">
@@ -185,7 +188,7 @@ const WishlistAddToBagPanel = ({
                 {wishlistPageContent.addToBagLabel}
               </DetailDarkButton>
             </div>
-          </div>
+          </PanelFooter>
         </div>
       </ProductDetailSidePanelShell>
 
