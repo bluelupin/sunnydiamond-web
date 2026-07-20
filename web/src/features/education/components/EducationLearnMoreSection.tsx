@@ -5,14 +5,15 @@ import Image from "next/image";
 import Link from "next/link";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { cn } from "@/shared/utils/cn";
+import type {
+  NormalizedEducationLearnAnatomyDetail,
+  NormalizedEducationLearnCareTip,
+  NormalizedEducationLearnMoreSection,
+  NormalizedEducationLearnTab,
+} from "@/services/education/learn-about-diamonds-page.types";
 import {
-  educationLearnMoreContent,
   educationLearnMoreSpec,
-  educationLearnTabs,
   educationPageImages,
-  type EducationLearnCareTip,
-  type EducationLearnAnatomyDetail,
-  type EducationLearnTab,
 } from "../data/content";
 
 type CarouselSlot = keyof typeof educationLearnMoreSpec.carousel.slots;
@@ -111,7 +112,7 @@ const LearnNavArrow = ({
   </button>
 );
 
-const LearnTabDescription = ({ tab }: { tab: EducationLearnTab }) => {
+const LearnTabDescription = ({ tab }: { tab: NormalizedEducationLearnTab }) => {
   const isSingleParagraph =
     tab.layout === "care-grid" || tab.layout === "anatomy-detail" || tab.description.length === 1;
 
@@ -137,7 +138,7 @@ const LearnTabDescription = ({ tab }: { tab: EducationLearnTab }) => {
   );
 };
 
-const LearnCareTip = ({ tip, mobile = false }: { tip: EducationLearnCareTip; mobile?: boolean }) => {
+const LearnCareTip = ({ tip, mobile = false }: { tip: NormalizedEducationLearnCareTip; mobile?: boolean }) => {
   const desktop = careSpec.desktop;
   const mobileSpec = careSpec.mobile;
 
@@ -166,7 +167,7 @@ const LearnCareTip = ({ tip, mobile = false }: { tip: EducationLearnCareTip; mob
   );
 };
 
-const LearnCareTipsGrid = ({ tips }: { tips: EducationLearnCareTip[] }) => {
+const LearnCareTipsGrid = ({ tips }: { tips: NormalizedEducationLearnCareTip[] }) => {
   const topRow = tips.slice(0, 3);
   const bottomRow = tips.slice(3);
   const desktop = careSpec.desktop;
@@ -205,7 +206,7 @@ const LearnCareTipsGrid = ({ tips }: { tips: EducationLearnCareTip[] }) => {
   );
 };
 
-const LearnAnatomyDetailPanel = ({ detail }: { detail: EducationLearnAnatomyDetail }) => (
+const LearnAnatomyDetailPanel = ({ detail }: { detail: NormalizedEducationLearnAnatomyDetail }) => (
   <ScrollReveal delayMs={260} className="w-full">
     <div className="grid md:grid-cols-2 gap-8 w-full items-center md:items-center">
       <div>
@@ -252,8 +253,8 @@ const LearnCarouselPanel = ({
   onPrev,
   onNext,
 }: {
-  tab: EducationLearnTab;
-  slides: NonNullable<EducationLearnTab["slides"]>;
+  tab: NormalizedEducationLearnTab;
+  slides: NonNullable<NormalizedEducationLearnTab["slides"]>;
   activeSlideIndex: number;
   onPrev: () => void;
   onNext: () => void;
@@ -360,11 +361,16 @@ const LearnCarouselPanel = ({
   );
 };
 
-const EducationLearnMoreSection = () => {
-  const [activeTabIndex, setActiveTabIndex] = useState(0);
-  const [activeSlideIndex, setActiveSlideIndex] = useState(1);
+type EducationLearnMoreSectionProps = {
+  learnMore: NormalizedEducationLearnMoreSection;
+};
 
-  const activeTab = educationLearnTabs[activeTabIndex];
+const EducationLearnMoreSection = ({ learnMore }: EducationLearnMoreSectionProps) => {
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+
+  const tabs = learnMore.tabs;
+  const activeTab = tabs[activeTabIndex]!;
   const isCarousel = activeTab.layout === "carousel";
   const isCareGrid = activeTab.layout === "care-grid";
   const isAnatomyDetail = activeTab.layout === "anatomy-detail";
@@ -382,7 +388,8 @@ const EducationLearnMoreSection = () => {
 
   const handleTabChange = (index: number) => {
     setActiveTabIndex(index);
-    setActiveSlideIndex(1);
+    const slideCount = tabs[index]?.slides?.length ?? 0;
+    setActiveSlideIndex(slideCount > 1 ? 1 : 0);
   };
 
   return (
@@ -402,7 +409,7 @@ const EducationLearnMoreSection = () => {
               id="education-learn-more-title"
               className="mb-8 text-center font-larken text-32 font-light leading-110 text-darkblack md:mb-10 md:text-5xl"
             >
-              {educationLearnMoreContent.title}
+              {learnMore.title}
             </h2>
           </ScrollReveal>
 
@@ -418,7 +425,7 @@ const EducationLearnMoreSection = () => {
                   paddingBlock: tabsSpec.desktop.paddingY,
                 }}
               >
-                {educationLearnTabs.map((tab, index) => {
+                {tabs.map((tab, index) => {
                   const isActive = index === activeTabIndex;
 
                   return (

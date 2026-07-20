@@ -56,7 +56,7 @@ const CertificationLabel = ({
 }) => {
   if (mobile && cert.mobileLabelLines) {
     return (
-      <div className="text-center font-gill text-sm font-light leading-110 text-darkblack">
+      <div className="max-w-[100px] mx-auto text-center font-gill text-sm font-light leading-110 text-darkblack">
         {cert.mobileLabelLines.map((line) => (
           <p key={line}>{line}</p>
         ))}
@@ -227,7 +227,7 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
         className="pointer-events-none absolute inset-0 hidden bg-[radial-gradient(ellipse_at_72%_58%,rgba(244,243,238,0)_0%,rgba(244,243,238,0.55)_45%,rgba(244,243,238,1)_78%)] md:block"
       />
 
-      <div className="relative flex flex-col items-center md:gap[40px] gap-8 mx-auto w-full 2xl:max-w-1920 max-w-1440 px-5 md:px-8 lg:px-10 2xl:px-[60px]">
+      <div className="relative flex flex-col items-center md:gap[40px] gap-8 mx-auto w-full 2xl:max-w-1920 max-w-1440 px-0 md:px-8 lg:px-10 2xl:px-[60px]">
         <ScrollReveal
           as="h2"
           delayMs={0}
@@ -308,23 +308,35 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
 
           <ScrollReveal delayMs={460}>
             <div className="flex flex-col" style={{ gap: copySpec.mobile.blockGap }}>
-              <div className="flex flex-col" style={{ gap: copySpec.mobile.itemGap }}>
-                <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
-                  {certificate.whyTitle}
-                </h3>
-                <p className="font-gill text-sm font-light leading-110 text-darkblack">
-                  {certificate.whyDescription}
-                </p>
-              </div>
+              {certificate.whyTitle || certificate.whyDescription ? (
+                <div className="flex flex-col" style={{ gap: copySpec.mobile.itemGap }}>
+                  {certificate.whyTitle ? (
+                    <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
+                      {certificate.whyTitle}
+                    </h3>
+                  ) : null}
+                  {certificate.whyDescription ? (
+                    <p className="font-gill text-sm font-light leading-110 text-darkblack">
+                      {certificate.whyDescription}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
 
-              <div className="flex flex-col" style={{ gap: copySpec.mobile.itemGap }}>
-                <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
-                  {certificate.howTitle}
-                </h3>
-                <p className="font-gill text-sm font-light leading-110 text-darkblack">
-                  {certificate.howDescription}
-                </p>
-              </div>
+              {certificate.howTitle || certificate.howDescription ? (
+                <div className="flex flex-col" style={{ gap: copySpec.mobile.itemGap }}>
+                  {certificate.howTitle ? (
+                    <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
+                      {certificate.howTitle}
+                    </h3>
+                  ) : null}
+                  {certificate.howDescription ? (
+                    <p className="font-gill text-sm font-light leading-110 text-darkblack">
+                      {certificate.howDescription}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
           </ScrollReveal>
         </div>
@@ -345,28 +357,38 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
               </div>
 
               <div className="flex flex-col" style={{ gap: copySpec.desktop.itemGap }}>
-                <h3 className="font-gill text-2xl font-normal leading-110 text-darkblack">
-                  {certificate.whyTitle}
-                </h3>
-                <p
-                  className="font-gill text-xl font-light leading-110 text-neutral500"
-                  style={{ maxWidth: copySpec.desktop.bodyMaxWidth }}
-                >
-                  {certificate.whyDescription}
-                </p>
+                {certificate.whyTitle ? (
+                  <h3 className="font-gill text-2xl font-normal leading-110 text-darkblack">
+                    {certificate.whyTitle}
+                  </h3>
+                ) : null}
+                {certificate.whyDescription ? (
+                  <p
+                    className="font-gill text-xl font-light leading-110 text-neutral500"
+                    style={{ maxWidth: copySpec.desktop.bodyMaxWidth }}
+                  >
+                    {certificate.whyDescription}
+                  </p>
+                ) : null}
               </div>
 
-              <div className="flex flex-col" style={{ gap: copySpec.desktop.itemGap }}>
-                <h3 className="font-gill text-2xl font-normal leading-110 text-darkblack">
-                  {certificate.howTitle}
-                </h3>
-                <p
-                  className="font-gill text-xl font-light leading-110 text-neutral500"
-                  style={{ maxWidth: copySpec.desktop.bodyMaxWidth }}
-                >
-                  {certificate.howDescription}
-                </p>
-              </div>
+              {certificate.howTitle || certificate.howDescription ? (
+                <div className="flex flex-col" style={{ gap: copySpec.desktop.itemGap }}>
+                  {certificate.howTitle ? (
+                    <h3 className="font-gill text-2xl font-normal leading-110 text-darkblack">
+                      {certificate.howTitle}
+                    </h3>
+                  ) : null}
+                  {certificate.howDescription ? (
+                    <p
+                      className="font-gill text-xl font-light leading-110 text-neutral500"
+                      style={{ maxWidth: copySpec.desktop.bodyMaxWidth }}
+                    >
+                      {certificate.howDescription}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
           </ScrollReveal>
 

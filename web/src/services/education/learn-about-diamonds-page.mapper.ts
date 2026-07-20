@@ -2,9 +2,7 @@ import {
   buildCaratSliderSpecForWeights,
   buildSliderSpecForOptionCount,
   educationCertifiedContent,
-  educationDiscoverContent,
-  educationFaqItems,
-  educationFourCsIntroContent,
+  educationDiamondCareTips,
   educationFourCsPanels,
   educationPageImages,
   educationSliderSpecs,
@@ -22,10 +20,16 @@ import type {
   NormalizedEducationFourCsPanel,
   NormalizedEducationFourCsSection,
   NormalizedEducationHero,
+  NormalizedEducationLearnAnatomyDetail,
+  NormalizedEducationLearnCareTip,
+  NormalizedEducationLearnMoreSection,
+  NormalizedEducationLearnTab,
+  NormalizedEducationSeo,
   NormalizedLearnAboutDiamondsPage,
   StrapiEducationCertificateSection,
   StrapiEducationCertificationLab,
-  StrapiEducationCtaBanner,
+  StrapiEducationDiscoverSection,
+  StrapiEducationSeo,
   StrapiEducationFaqItem,
   StrapiEducationFourCsInfoPanel,
   StrapiEducationFourCsIntro,
@@ -33,6 +37,10 @@ import type {
   StrapiEducationFourCsVisualPanel,
   StrapiEducationGradeStop,
   StrapiEducationHero,
+  StrapiEducationLearnCarouselImage,
+  StrapiEducationLearnFeatureItem,
+  StrapiEducationLearnMoreSection,
+  StrapiEducationLearnTab,
   StrapiEducationResponsiveImage,
   StrapiLearnAboutDiamondsPageEntity,
 } from "./learn-about-diamonds-page.types";
@@ -50,9 +58,62 @@ const PANEL_ID_BY_LABEL: Record<string, EducationFourCsPanelContent["id"]> = {
   CARAT: "carat",
 };
 
+const STATIC_CERTIFICATION_BY_ID = Object.fromEntries(
+  educationCertifiedContent.certifications.map((cert) => [cert.id, cert]),
+) as Record<
+  string,
+  (typeof educationCertifiedContent.certifications)[number]
+>;
+
+const LAB_ID_BY_CODE: Record<string, string> = {
+  GIA: "gia",
+  AGS: "ags",
+  HRD: "hrd",
+  TKP: "kimberley",
+  KIMBERLEY: "kimberley",
+  KPCS: "kimberley",
+  "KIMBERLY PROCESS": "kimberley",
+};
+
 const cleanText = (value?: string | null): string | undefined => {
   const trimmed = value?.trim();
   return trimmed || undefined;
+};
+
+const mapResponsiveImageUrls = (image?: StrapiEducationResponsiveImage | null) => {
+  const desktopUrl =
+    resolveCmsMediaUrl(image?.desktopImage) ??
+    resolveCmsMediaUrl(image?.mobileImage);
+  const mobileUrl =
+    resolveCmsMediaUrl(image?.mobileImage) ??
+    resolveCmsMediaUrl(image?.desktopImage);
+
+  return {
+    desktopUrl: desktopUrl ?? "",
+    mobileUrl: mobileUrl ?? "",
+    alt: cleanText(image?.altText) ?? cleanText(image?.caption) ?? "",
+    hasImage: Boolean(desktopUrl || mobileUrl),
+  };
+};
+
+const mapSeo = (seo?: StrapiEducationSeo | null): NormalizedEducationSeo | null => {
+  if (!seo || seo.showField === false) return null;
+
+  const metaTitle = cleanText(seo.metaTitle);
+  const metaDescription = cleanText(seo.metaDescription);
+  if (!metaTitle && !metaDescription) return null;
+
+  const ogImageUrl = resolveCmsMediaUrl(seo.ogImage);
+
+  return {
+    metaTitle: metaTitle ?? "Education",
+    metaDescription:
+      metaDescription ??
+      "Explore diamond expertise at Sunny Diamonds — learn the 4Cs, certifications, shapes, and care.",
+    canonicalPath: cleanText(seo.canonicalUrl) ?? "/education",
+    metaKeywords: cleanText(seo.metaKeywords),
+    ...(ogImageUrl ? { ogImageUrl } : {}),
+  };
 };
 
 const mapHero = (hero?: StrapiEducationHero | null): NormalizedEducationHero | null => {
@@ -61,15 +122,9 @@ const mapHero = (hero?: StrapiEducationHero | null): NormalizedEducationHero | n
   const title = cleanText(hero.title);
   if (!title) return null;
 
-  const desktopUrl = resolveCmsMediaUrl(hero.image?.desktopImage);
-  const mobileUrl = resolveCmsMediaUrl(hero.image?.mobileImage);
+  const image = mapResponsiveImageUrls(hero.image);
+  if (!image.hasImage) return null;
 
-  if (!desktopUrl && !mobileUrl) return null;
-
-  const posterDesktopUrl = desktopUrl ?? mobileUrl!;
-  const posterMobileUrl = mobileUrl ?? desktopUrl!;
-  const posterAlt =
-    cleanText(hero.image?.altText) ?? cleanText(hero.image?.caption) ?? "";
   const videoUrl = resolveCmsMediaUrl(hero.heroVideo?.heroVideo);
 
   return {
@@ -77,79 +132,74 @@ const mapHero = (hero?: StrapiEducationHero | null): NormalizedEducationHero | n
     eyebrow: cleanText(hero.eyebrow),
     subtitle: cleanText(hero.subtitle),
     videoUrl,
-    posterDesktopUrl,
-    posterMobileUrl,
-    posterAlt,
+    posterDesktopUrl: image.desktopUrl,
+    posterMobileUrl: image.mobileUrl,
+    posterAlt: image.alt,
   };
 };
 
-const mapBackgroundUrls = (image?: StrapiEducationResponsiveImage | null) => {
-  const desktopUrl =
-    resolveCmsMediaUrl(image?.desktopImage) ??
-    resolveCmsMediaUrl(image?.mobileImage);
-  const mobileUrl =
-    resolveCmsMediaUrl(image?.mobileImage) ??
-    resolveCmsMediaUrl(image?.desktopImage);
+const mapFaqItems = (items?: StrapiEducationFaqItem[] | null): NormalizedEducationFaqItem[] =>
+  items
+    ?.map((item, index) => {
+      const question = cleanText(item.question);
+      const answer = cleanText(item.answer);
+      if (!question) return null;
 
-  const hasCmsBackgroundImage = Boolean(desktopUrl || mobileUrl);
-
-  return {
-    desktopUrl: desktopUrl ?? educationPageImages.discoverImage,
-    mobileUrl: mobileUrl ?? educationPageImages.discoverImage,
-    alt: cleanText(image?.altText) ?? cleanText(image?.caption) ?? "",
-    hasCmsBackgroundImage,
-  };
-};
-
-const mapFaqItems = (items?: StrapiEducationFaqItem[] | null): NormalizedEducationFaqItem[] => {
-  const mapped =
-    items
-      ?.map((item, index) => {
-        const question = cleanText(item.question);
-        const answer = cleanText(item.answer);
-        if (!question) return null;
-
-        return {
-          id: item.id != null ? String(item.id) : `faq-${index}`,
-          question,
-          answer: answer ?? "",
-        };
-      })
-      .filter((item): item is NormalizedEducationFaqItem => item != null) ?? [];
-
-  if (mapped.length) return mapped;
-
-  return educationFaqItems.map(({ id, question, answer }) => ({
-    id,
-    question,
-    answer: answer ?? "",
-  }));
-};
+      return {
+        id: item.id != null ? String(item.id) : `faq-${index}`,
+        question,
+        answer: answer ?? "",
+      };
+    })
+    .filter((item): item is NormalizedEducationFaqItem => item != null) ?? [];
 
 const mapFaqSection = (
   faqSection?: StrapiLearnAboutDiamondsPageEntity["faqSection"],
-): NormalizedEducationFaqSection => ({
-  heading: cleanText(faqSection?.sectionHeading) ?? "Frequently Asked Questions",
-  items: mapFaqItems(faqSection?.faqItems),
-});
-
-const mapCtaBanner = (
-  ctaBanner?: StrapiEducationCtaBanner | null,
-): NormalizedEducationCtaBanner => {
-  const background = mapBackgroundUrls(ctaBanner?.backgroundImage);
+): NormalizedEducationFaqSection | null => {
+  const items = mapFaqItems(faqSection?.faqItems);
+  if (!items.length) return null;
 
   return {
-    heading: cleanText(ctaBanner?.heading) ?? educationDiscoverContent.title,
-    subheading:
-      cleanText(ctaBanner?.subheading) ?? educationDiscoverContent.description,
-    ctaLabel:
-      cleanText(ctaBanner?.ctaButtonLabel) ?? educationDiscoverContent.ctaLabel,
-    ctaHref:
-      cleanText(ctaBanner?.ctaButtonUrl) ?? educationDiscoverContent.ctaHref,
+    heading: cleanText(faqSection?.sectionHeading) ?? "Frequently Asked Questions",
+    items,
+  };
+};
+
+const mapDiscoverSteps = (
+  steps?: StrapiEducationDiscoverSection["steps"],
+): string[] =>
+  (steps ?? [])
+    .filter((step) => step.isActive !== false)
+    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+    .map((step) => cleanText(step.title))
+    .filter((title): title is string => Boolean(title));
+
+const mapDiscoverSection = (
+  section?: StrapiEducationDiscoverSection | null,
+): NormalizedEducationCtaBanner | null => {
+  if (!section) return null;
+
+  const heading = cleanText(section.heading);
+  const subheading = cleanText(section.subheading);
+  const ctaLabel = cleanText(section.ctaButtonLabel);
+  const ctaHref = cleanText(section.ctaButtonUrl);
+  const steps = mapDiscoverSteps(section.steps);
+  const background = mapResponsiveImageUrls(section.backgroundImage);
+
+  if (!heading && !subheading && !ctaLabel && steps.length === 0 && !background.hasImage) {
+    return null;
+  }
+
+  return {
+    heading: heading ?? "",
+    subheading: subheading ?? "",
+    ctaLabel: ctaLabel ?? "",
+    ctaHref: ctaHref ?? "/book-appointment",
+    steps,
     imageDesktopUrl: background.desktopUrl,
     imageMobileUrl: background.mobileUrl,
     imageAlt: background.alt,
-    hasCmsBackgroundImage: background.hasCmsBackgroundImage,
+    hasCmsBackgroundImage: background.hasImage,
   };
 };
 
@@ -233,7 +283,14 @@ const mapGradeStopToOption = (
     option.caratWeight = parseCaratWeight(label);
   }
 
-  if (panelId === "cut") {
+  // Per-stop CMS image when backend provides it; otherwise keep existing fallbacks.
+  const gradeImageUrl =
+    resolveCmsMediaUrl(stop.gradeImage?.desktopImage) ??
+    resolveCmsMediaUrl(stop.gradeImage?.mobileImage);
+
+  if (gradeImageUrl) {
+    option.image = gradeImageUrl;
+  } else if (panelId === "cut") {
     option.image = mapCutOptionImage(label);
   } else if (visualImageUrl) {
     option.image = visualImageUrl;
@@ -284,9 +341,15 @@ const mapFourCsPanel = (
   info: StrapiEducationFourCsInfoPanel,
   visual: StrapiEducationFourCsVisualPanel | null,
   index: number,
-): NormalizedEducationFourCsPanel => {
+): NormalizedEducationFourCsPanel | null => {
   const panelId = resolvePanelId(index, info.sectionLabel);
-  const staticPanel = STATIC_PANEL_BY_ID[panelId] ?? educationFourCsPanels[index]!;
+  const staticPanel = STATIC_PANEL_BY_ID[panelId] ?? educationFourCsPanels[index];
+  if (!staticPanel) return null;
+
+  const title = cleanText(info.sectionLabel);
+  const description = cleanText(info.description);
+  if (!title || !description) return null;
+
   const activeGradeCode = cleanText(info.activeGradeCode);
   const visualImageUrl =
     resolveCmsMediaUrl(visual?.visualImage?.desktopImage) ??
@@ -297,12 +360,11 @@ const mapFourCsPanel = (
       ?.map((stop) => mapGradeStopToOption(stop, panelId, activeGradeCode, visualImageUrl))
       .filter((option): option is EducationSliderOption => option != null) ?? [];
 
-  const options = mappedOptions.length ? mappedOptions : staticPanel.slider.options;
-  const defaultIndex = resolveDefaultIndex(
-    options,
-    activeGradeCode,
-    staticPanel.slider.defaultIndex,
-  );
+  // No static slider/copy fallbacks — require CMS gradeStops.
+  if (!mappedOptions.length) return null;
+
+  const options = mappedOptions;
+  const defaultIndex = resolveDefaultIndex(options, activeGradeCode, 0);
 
   const slider = {
     ...staticPanel.slider,
@@ -317,9 +379,9 @@ const mapFourCsPanel = (
     ...staticPanel,
     id: panelId,
     code: cleanText(info.displayTag) ?? staticPanel.code,
-    title: cleanText(info.sectionLabel) ?? staticPanel.title,
-    description: cleanText(info.description) ?? staticPanel.description,
-    footnote: cleanText(info.brandNote) ?? staticPanel.footnote,
+    title,
+    description,
+    footnote: cleanText(info.brandNote) ?? "",
     slider,
     sliderSpec: resolveSliderSpec(panelId, options),
   };
@@ -349,42 +411,38 @@ const formatPillarLabel = (label?: string | null) => {
     .join(" ");
 };
 
-const mapFourCsIntroImage = (image?: StrapiEducationFourCsIntro["image"]) => {
-  const desktopUrl =
-    resolveCmsMediaUrl(image?.desktopImage) ??
-    resolveCmsMediaUrl(image?.mobileImage) ??
-    educationPageImages.diamondOval;
-  const mobileUrl =
-    resolveCmsMediaUrl(image?.mobileImage) ??
-    resolveCmsMediaUrl(image?.desktopImage) ??
-    educationPageImages.diamondOval;
-
-  return {
-    desktopUrl,
-    mobileUrl,
-    alt: cleanText(image?.altText) ?? cleanText(image?.caption) ?? "",
-  };
+const mapFourCsIntroImage = (intro?: StrapiEducationFourCsIntro | null) => {
+  const image = intro?.decorativeImage ?? intro?.image;
+  return mapResponsiveImageUrls(image);
 };
 
 const mapFourCsIntro = (
   intro?: StrapiEducationFourCsIntro | null,
   fourCsSection?: StrapiEducationFourCsSection | null,
-): NormalizedEducationFourCsIntro => {
-  const fallback = EMPTY_LEARN_ABOUT_DIAMONDS_PAGE.fourCsIntro;
-  const image = mapFourCsIntroImage(intro?.image);
+): NormalizedEducationFourCsIntro | null => {
+  if (!intro) return null;
 
-  const heading = cleanText(intro?.heading) ?? fallback.desktopTitle;
-  const mobileHeading =
-    cleanText(intro?.mobileHeading) ?? heading ?? fallback.mobileTitle;
-  const description = cleanText(intro?.body) ?? fallback.description;
+  const image = mapFourCsIntroImage(intro);
+  const heading = cleanText(intro.heading);
+  const description = cleanText(intro.body);
+  if (!heading || !description || !image.hasImage) return null;
+
+  const mobileHeading = cleanText(intro.mobileHeading) ?? heading;
+
+  const pillarsFromTags =
+    intro.fourCsTags
+      ?.slice()
+      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+      .map((tag) => formatPillarLabel(tag.label))
+      .filter((label): label is string => Boolean(label)) ?? [];
 
   const pillarsFromPanels =
     fourCsSection?.cInfoPanel
       ?.map((panel) => formatPillarLabel(panel.sectionLabel))
       .filter((label): label is string => Boolean(label)) ?? [];
 
-  const pillars =
-    pillarsFromPanels.length > 0 ? pillarsFromPanels : fallback.pillars;
+  const pillars = pillarsFromTags.length > 0 ? pillarsFromTags : pillarsFromPanels;
+  if (!pillars.length) return null;
 
   return {
     desktopTitle: heading,
@@ -399,37 +457,16 @@ const mapFourCsIntro = (
 
 const mapFourCsSection = (
   section?: StrapiEducationFourCsSection | null,
-): NormalizedEducationFourCsSection => {
+): NormalizedEducationFourCsSection | null => {
   const infoPanels = section?.cInfoPanel ?? [];
-  if (!infoPanels.length) {
-    return EMPTY_LEARN_ABOUT_DIAMONDS_PAGE.fourCs;
-  }
+  if (!infoPanels.length) return null;
 
   const visualPanels = section?.cVisualPanel ?? [];
-  const panels = infoPanels.map((info, index) =>
-    mapFourCsPanel(info, visualPanels[index] ?? null, index),
-  );
+  const panels = infoPanels
+    .map((info, index) => mapFourCsPanel(info, visualPanels[index] ?? null, index))
+    .filter((panel): panel is NormalizedEducationFourCsPanel => panel != null);
 
-  return panels.length
-    ? { panels }
-    : EMPTY_LEARN_ABOUT_DIAMONDS_PAGE.fourCs;
-};
-
-const STATIC_CERTIFICATION_BY_ID = Object.fromEntries(
-  educationCertifiedContent.certifications.map((cert) => [cert.id, cert]),
-) as Record<
-  string,
-  (typeof educationCertifiedContent.certifications)[number]
->;
-
-const LAB_ID_BY_CODE: Record<string, string> = {
-  GIA: "gia",
-  AGS: "ags",
-  HRD: "hrd",
-  TKP: "kimberley",
-  KIMBERLEY: "kimberley",
-  KPCS: "kimberley",
-  "KIMBERLY PROCESS": "kimberley",
+  return panels.length ? { panels } : null;
 };
 
 const resolveLabId = (lab: StrapiEducationCertificationLab, index: number) => {
@@ -439,14 +476,28 @@ const resolveLabId = (lab: StrapiEducationCertificationLab, index: number) => {
   }
 
   const nameKey = cleanText(lab.labName)?.toUpperCase();
+  if (nameKey && LAB_ID_BY_CODE[nameKey]) {
+    return LAB_ID_BY_CODE[nameKey];
+  }
   if (nameKey?.includes("GIA")) return "gia";
   if (nameKey?.includes("AMERICAN GEM")) return "ags";
   if (nameKey?.includes("HOGE RAADVOOR") || nameKey?.includes("HRD")) return "hrd";
   if (nameKey?.includes("KIMBER")) return "kimberley";
 
-  return educationCertifiedContent.certifications[index]?.id ?? `lab-${index}`;
+  const descriptionKey = cleanText(lab.labDescription)?.toUpperCase();
+  if (descriptionKey?.includes("GIA") || descriptionKey?.includes("GEMOLOGICAL")) {
+    return "gia";
+  }
+  if (descriptionKey?.includes("AMERICAN GEM")) return "ags";
+  if (descriptionKey?.includes("HOGE RAADVOOR") || descriptionKey?.includes("HRD")) {
+    return "hrd";
+  }
+  if (descriptionKey?.includes("KIMBER")) return "kimberley";
+
+  return `lab-${index}`;
 };
 
+/** Prefer labDescription under logos (short labName is for CMS ID only). */
 const mapCertificationLab = (
   lab: StrapiEducationCertificationLab,
   index: number,
@@ -454,64 +505,306 @@ const mapCertificationLab = (
   const id = resolveLabId(lab, index);
   const staticCert = STATIC_CERTIFICATION_BY_ID[id];
   const label =
-    cleanText(lab.labName) ??
     cleanText(lab.labDescription) ??
-    staticCert?.label;
+    cleanText(lab.labName);
   if (!label) return null;
 
   const logoUrl =
     resolveCmsMediaUrl(lab.labLogo?.desktopImage) ??
-    resolveCmsMediaUrl(lab.labLogo?.mobileImage) ??
-    staticCert?.logo ??
-    "";
-
+    resolveCmsMediaUrl(lab.labLogo?.mobileImage);
   if (!logoUrl) return null;
 
   return {
     id,
     logoUrl,
     label,
-    ...(staticCert && "mobileLabelLines" in staticCert
-      ? { mobileLabelLines: staticCert.mobileLabelLines }
-      : {}),
     logoClassName: staticCert?.logoClassName ?? "size-[79px]",
     mobileLogoClassName: staticCert?.mobileLogoClassName ?? "size-[59.286px]",
     imageClassName: staticCert?.imageClassName ?? "size-full object-cover",
     ...(staticCert && "logoWrapClassName" in staticCert
       ? { logoWrapClassName: staticCert.logoWrapClassName }
       : {}),
-    usesCmsLogo: Boolean(
-      resolveCmsMediaUrl(lab.labLogo?.desktopImage) ??
-        resolveCmsMediaUrl(lab.labLogo?.mobileImage),
-    ),
+    usesCmsLogo: true,
+  };
+};
+
+/**
+ * CMS often stores Why + How copy in `sectionDescription` as:
+ *   Why Certifications Matter?\n<body>\n\nHow to check authenticity?\n<body>
+ * Prefer dedicated why/how fields when present.
+ */
+const parseCertificateSectionDescription = (raw?: string | null) => {
+  const text = cleanText(raw);
+  if (!text) return null;
+
+  const mapBlock = (block: string) => {
+    const lines = block
+      .split(/\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+    if (lines.length === 0) return { title: "", description: "" };
+    if (lines.length === 1) return { title: "", description: lines[0]! };
+    return {
+      title: lines[0]!,
+      description: lines.slice(1).join(" "),
+    };
+  };
+
+  const blocks = text
+    .split(/\n\s*\n/)
+    .map((block) => block.trim())
+    .filter(Boolean);
+
+  if (blocks.length >= 2) {
+    const why = mapBlock(blocks[0]!);
+    const how = mapBlock(blocks[1]!);
+    return {
+      whyTitle: why.title,
+      whyDescription: why.description,
+      howTitle: how.title,
+      howDescription: how.description,
+    };
+  }
+
+  const howSplit = text.split(/\n(?=How to check authenticity)/i);
+  if (howSplit.length >= 2) {
+    const why = mapBlock(howSplit[0]!);
+    const how = mapBlock(howSplit[1]!);
+    return {
+      whyTitle: why.title,
+      whyDescription: why.description,
+      howTitle: how.title,
+      howDescription: how.description,
+    };
+  }
+
+  return {
+    whyTitle: "",
+    whyDescription: text,
+    howTitle: "",
+    howDescription: "",
   };
 };
 
 const mapCertificateSection = (
   section?: StrapiEducationCertificateSection | null,
-): NormalizedEducationCertificateSection => {
-  const fallback = EMPTY_LEARN_ABOUT_DIAMONDS_PAGE.certificate;
-  const mappedLabs =
-    section?.certificationLabs
+): NormalizedEducationCertificateSection | null => {
+  if (!section) return null;
+
+  const certifications =
+    section.certificationLabs
       ?.map((lab, index) => mapCertificationLab(lab, index))
       .filter((lab): lab is NormalizedEducationCertification => lab != null) ?? [];
 
-  const certifications = mappedLabs.length ? mappedLabs : fallback.certifications;
+  const title = cleanText(section.sectionHeading);
+  const parsedDescription = parseCertificateSectionDescription(section.sectionDescription);
+
+  const whyTitle =
+    cleanText(section.whyCertificationHeading) ?? parsedDescription?.whyTitle ?? "";
+  const whyDescription =
+    cleanText(section.whyCertificationDescription) ??
+    parsedDescription?.whyDescription ??
+    "";
+  const howTitle =
+    cleanText(section.howToVerifyHeading) ?? parsedDescription?.howTitle ?? "";
+  const howDescription =
+    cleanText(section.howToVerifyDescription) ??
+    parsedDescription?.howDescription ??
+    "";
+
+  if (!title || !certifications.length) return null;
+  if (!whyTitle && !whyDescription && !howTitle && !howDescription) return null;
 
   return {
-    title: cleanText(section?.sectionHeading) ?? fallback.title,
+    title,
     certifications,
-    mobileLogoOrder: fallback.mobileLogoOrder,
-    whyTitle:
-      cleanText(section?.whyCertificationHeading) ?? fallback.whyTitle,
-    whyDescription:
-      cleanText(section?.whyCertificationDescription) ??
-      cleanText(section?.sectionDescription) ??
-      fallback.whyDescription,
-    howTitle: cleanText(section?.howToVerifyHeading) ?? fallback.howTitle,
-    howDescription:
-      cleanText(section?.howToVerifyDescription) ?? fallback.howDescription,
+    mobileLogoOrder: certifications.map((cert) => cert.id),
+    whyTitle,
+    whyDescription,
+    howTitle,
+    howDescription,
   };
+};
+
+const formatTabLabel = (tabLabel?: string | null) => {
+  const cleaned = cleanText(tabLabel);
+  if (!cleaned) return undefined;
+
+  return cleaned.replace(/_/g, " ");
+};
+
+const slugifyTabLabel = (tabLabel?: string | null, index = 0) => {
+  const cleaned = cleanText(tabLabel);
+  if (!cleaned) return `tab-${index}`;
+
+  return cleaned
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+};
+
+const mapLearnLayoutType = (
+  layoutType?: string | null,
+): NormalizedEducationLearnTab["layout"] => {
+  const normalized = (layoutType ?? "").trim().toLowerCase();
+
+  if (normalized.includes("image") && normalized.includes("feature")) {
+    return "anatomy-detail";
+  }
+
+  if (normalized.includes("feature list")) {
+    return "care-grid";
+  }
+
+  return "carousel";
+};
+
+const splitDescription = (value?: string | null): string[] => {
+  const cleaned = cleanText(value);
+  if (!cleaned) return [];
+
+  return cleaned.split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean);
+};
+
+const parseTraitLabel = (label: string, index: number) => {
+  const colonIndex = label.indexOf(":");
+  if (colonIndex === -1) {
+    return {
+      id: `trait-${index}`,
+      term: label,
+      definition: "",
+    };
+  }
+
+  return {
+    id: `trait-${index}`,
+    term: label.slice(0, colonIndex).trim(),
+    definition: label.slice(colonIndex + 1).trim(),
+  };
+};
+
+const mapCarouselSlide = (item: StrapiEducationLearnCarouselImage) => {
+  const image = mapResponsiveImageUrls(item.image);
+  if (!image.hasImage) return null;
+
+  return {
+    src: image.desktopUrl,
+    alt: image.alt,
+    ctaLabel: cleanText(item.ctaButton?.label),
+    ctaHref: cleanText(item.ctaButton?.url) ?? undefined,
+  };
+};
+
+const mapCareTips = (
+  items?: StrapiEducationLearnFeatureItem[] | null,
+): NormalizedEducationLearnCareTip[] =>
+  (items ?? [])
+    .map((item, index) => {
+      const label = cleanText(item.label);
+      if (!label) return null;
+
+      // Icons are UI assets (not in CMS). Labels always come from CMS — no static copy.
+      const staticTip = educationDiamondCareTips[index];
+
+      return {
+        id: item.id != null ? String(item.id) : `care-${index}`,
+        icon: staticTip?.icon ?? educationPageImages.careIconClean,
+        labelLines: [label],
+      };
+    })
+    .filter((tip): tip is NormalizedEducationLearnCareTip => tip != null);
+
+const mapAnatomyDetail = (
+  tab: StrapiEducationLearnTab,
+): NormalizedEducationLearnAnatomyDetail | null => {
+  const traits =
+    tab.featureItems
+      ?.map((item, index) => {
+        const label = cleanText(item.label);
+        if (!label) return null;
+        return parseTraitLabel(label, index);
+      })
+      .filter((trait): trait is NonNullable<typeof trait> => trait != null) ?? [];
+
+  const carouselImage = tab.carouselImage?.[0];
+  const featureImage = mapResponsiveImageUrls(tab.featureImage);
+  const carouselUrls = mapResponsiveImageUrls(carouselImage?.image);
+
+  const image = featureImage.hasImage
+    ? featureImage
+    : carouselUrls.hasImage
+      ? carouselUrls
+      : null;
+
+  if (!image || !traits.length) return null;
+
+  return {
+    image: image.desktopUrl,
+    imageAlt: image.alt || "Diamond anatomy illustration",
+    title: cleanText(tab.featureSubtitle) ?? "Face-up appearance",
+    traits,
+  };
+};
+
+const mapLearnTab = (
+  tab: StrapiEducationLearnTab,
+  index: number,
+): NormalizedEducationLearnTab | null => {
+  const label = formatTabLabel(tab.tabLabel);
+  const description = splitDescription(tab.tabDescription);
+  if (!label || !description.length) return null;
+
+  const layout = mapLearnLayoutType(tab.layoutType);
+  const id = slugifyTabLabel(tab.tabLabel, index);
+  const mapped: NormalizedEducationLearnTab = {
+    id,
+    label,
+    description,
+    layout,
+  };
+
+  if (layout === "care-grid") {
+    const careTips = mapCareTips(tab.featureItems);
+    if (!careTips.length) return null;
+    mapped.careTips = careTips;
+    return mapped;
+  }
+
+  if (layout === "anatomy-detail") {
+    const anatomyDetail = mapAnatomyDetail(tab);
+    if (!anatomyDetail) return null;
+    mapped.anatomyDetail = anatomyDetail;
+    return mapped;
+  }
+
+  const slides =
+    tab.carouselImage
+      ?.map((item) => mapCarouselSlide(item))
+      .filter((slide): slide is NonNullable<typeof slide> => slide != null) ?? [];
+
+  if (!slides.length) return null;
+
+  const primaryCta = slides.find((slide) => slide.ctaLabel);
+  mapped.slides = slides.map(({ src, alt }) => ({ src, alt }));
+  mapped.ctaLabel = primaryCta?.ctaLabel;
+  mapped.ctaHref = primaryCta?.ctaHref ?? "/products";
+  return mapped;
+};
+
+const mapLearnMoreSection = (
+  section?: StrapiEducationLearnMoreSection | null,
+): NormalizedEducationLearnMoreSection | null => {
+  if (!section) return null;
+
+  const title = cleanText(section.sectionHeading);
+  const tabs =
+    section.tabs
+      ?.map((tab, index) => mapLearnTab(tab, index))
+      .filter((tab): tab is NormalizedEducationLearnTab => tab != null) ?? [];
+
+  if (!title || !tabs.length) return null;
+
+  return { title, tabs };
 };
 
 export function mapLearnAboutDiamondsPage(
@@ -522,9 +815,11 @@ export function mapLearnAboutDiamondsPage(
   return {
     hero: mapHero(raw.hero),
     faq: mapFaqSection(raw.faqSection),
-    ctaBanner: mapCtaBanner(raw.ctaBanner),
+    ctaBanner: mapDiscoverSection(raw.discoverSection ?? raw.ctaBanner),
     fourCsIntro: mapFourCsIntro(raw.fourCsIntro, raw.fourCsSection),
     fourCs: mapFourCsSection(raw.fourCsSection),
     certificate: mapCertificateSection(raw.certificateSection),
+    learnMore: mapLearnMoreSection(raw.learnMoreSection),
+    seo: mapSeo(raw.seo),
   };
 }

@@ -7,22 +7,32 @@ import type {
   StrapiLearnAboutDiamondsPageEntity,
 } from "./learn-about-diamonds-page.types";
 
-/** Targeted populate — wired sections only (avoids full-page payload). */
+/** Targeted populate — matches Strapi schema field names. */
 const LEARN_ABOUT_DIAMONDS_POPULATE_QUERY =
   "populate[hero][populate][heroVideo][populate]=heroVideo" +
   "&populate[hero][populate][image][populate][desktopImage]=true" +
   "&populate[hero][populate][image][populate][mobileImage]=true" +
   "&populate[faqSection][populate]=faqItems" +
-  "&populate[ctaBanner][populate][backgroundImage][populate][desktopImage]=true" +
-  "&populate[ctaBanner][populate][backgroundImage][populate][mobileImage]=true" +
-  "&populate[fourCsIntro][populate][image][populate][desktopImage]=true" +
-  "&populate[fourCsIntro][populate][image][populate][mobileImage]=true" +
+  "&populate[discoverSection][populate][steps]=true" +
+  "&populate[discoverSection][populate][backgroundImage][populate][desktopImage]=true" +
+  "&populate[discoverSection][populate][backgroundImage][populate][mobileImage]=true" +
+  "&populate[fourCsIntro][populate][decorativeImage][populate][desktopImage]=true" +
+  "&populate[fourCsIntro][populate][decorativeImage][populate][mobileImage]=true" +
+  "&populate[fourCsIntro][populate][fourCsTags]=true" +
   "&populate[fourCsSection][populate][cInfoPanel]=true" +
-  "&populate[fourCsSection][populate][cVisualPanel][populate][gradeStops]=true" +
+  "&populate[fourCsSection][populate][cVisualPanel][populate][gradeStops][populate][gradeImage][populate][desktopImage]=true" +
+  "&populate[fourCsSection][populate][cVisualPanel][populate][gradeStops][populate][gradeImage][populate][mobileImage]=true" +
   "&populate[fourCsSection][populate][cVisualPanel][populate][visualImage][populate][desktopImage]=true" +
   "&populate[fourCsSection][populate][cVisualPanel][populate][visualImage][populate][mobileImage]=true" +
   "&populate[certificateSection][populate][certificationLabs][populate][labLogo][populate][desktopImage]=true" +
-  "&populate[certificateSection][populate][certificationLabs][populate][labLogo][populate][mobileImage]=true";
+  "&populate[certificateSection][populate][certificationLabs][populate][labLogo][populate][mobileImage]=true" +
+  "&populate[learnMoreSection][populate][tabs][populate][featureItems]=true" +
+  "&populate[learnMoreSection][populate][tabs][populate][featureImage][populate][desktopImage]=true" +
+  "&populate[learnMoreSection][populate][tabs][populate][featureImage][populate][mobileImage]=true" +
+  "&populate[learnMoreSection][populate][tabs][populate][carouselImage][populate][ctaButton]=true" +
+  "&populate[learnMoreSection][populate][tabs][populate][carouselImage][populate][image][populate][desktopImage]=true" +
+  "&populate[learnMoreSection][populate][tabs][populate][carouselImage][populate][image][populate][mobileImage]=true" +
+  "&populate[seo][populate]=ogImage";
 
 export const getLearnAboutDiamondsPage = cache(
   async (signal?: AbortSignal): Promise<NormalizedLearnAboutDiamondsPage> => {

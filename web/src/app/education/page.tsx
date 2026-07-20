@@ -3,32 +3,45 @@ import type { Metadata } from "next";
 import { constructMetadata } from "@/shared/lib/seo/metadata";
 import JsonLd from "@/shared/lib/seo/JsonLd";
 import { footerPages } from "@/features/cms/data/footerPages";
-import { siteConfig } from "@/shared/lib/siteConfig";
 import EducationPage from "@/features/education/components/EducationPage";
 import EducationPageSkeleton from "@/features/education/components/skeletons/EducationPageSkeleton";
 import {
   EMPTY_LEARN_ABOUT_DIAMONDS_PAGE,
   getLearnAboutDiamondsPage,
 } from "@/services/education/learn-about-diamonds-page.service";
+import {
+  buildEducationJsonLd,
+  resolveEducationSeoMetadata,
+} from "@/shared/lib/seo/educationSeo";
 
-const page = footerPages.education;
+const fallback = footerPages.education;
 
 /** Refresh CMS-driven sections without a full redeploy. */
 export const revalidate = 300;
 
-export const metadata: Metadata = constructMetadata({
-  title: page.title,
-  description: page.description,
-  canonicalPath: "/education",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const page = await getLearnAboutDiamondsPage();
+    const { title, description, canonicalPath, keywords, image } =
+      resolveEducationSeoMetadata(page);
 
-const educationJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  name: page.title,
-  description: page.description,
-  url: `${siteConfig.seo.siteUrl}/education`,
-};
+    return {
+      ...constructMetadata({
+        title,
+        description,
+        canonicalPath,
+        ...(image ? { image } : {}),
+      }),
+      ...(keywords ? { keywords } : {}),
+    };
+  } catch {
+    return constructMetadata({
+      title: fallback.title,
+      description: fallback.description,
+      canonicalPath: "/education",
+    });
+  }
+}
 
 async function EducationPageContent() {
   let cmsPage = EMPTY_LEARN_ABOUT_DIAMONDS_PAGE;
@@ -41,7 +54,7 @@ async function EducationPageContent() {
 
   return (
     <>
-      <JsonLd data={educationJsonLd} />
+      <JsonLd data={buildEducationJsonLd(cmsPage)} />
       <EducationPage
         hero={cmsPage.hero}
         faq={cmsPage.faq}
@@ -49,6 +62,7 @@ async function EducationPageContent() {
         fourCsIntro={cmsPage.fourCsIntro}
         fourCs={cmsPage.fourCs}
         certificate={cmsPage.certificate}
+        learnMore={cmsPage.learnMore}
       />
     </>
   );

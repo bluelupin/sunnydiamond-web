@@ -9,7 +9,7 @@ import EducationFaqSection from "./EducationFaqSection";
 
 type EducationPageProps = Pick<
   NormalizedLearnAboutDiamondsPage,
-  "hero" | "faq" | "ctaBanner" | "fourCsIntro" | "fourCs" | "certificate"
+  "hero" | "faq" | "ctaBanner" | "fourCsIntro" | "fourCs" | "certificate" | "learnMore"
 >;
 
 const EducationPage = ({
@@ -18,17 +18,18 @@ const EducationPage = ({
   ctaBanner,
   fourCs,
   certificate,
+  learnMore,
   faq,
 }: EducationPageProps) => {
   return (
     <>
       {hero ? <EducationHeroSection {...hero} /> : null}
-      <EducationFourCsIntroSection intro={fourCsIntro} />
-      <EducationFourCsPanelsSection fourCs={fourCs} />
-      <EducationCertifiedSection certificate={certificate} />
-      <EducationLearnMoreSection />
-      <EducationDiscoverSection ctaBanner={ctaBanner} />
-      <EducationFaqSection faq={faq} />
+      {fourCsIntro ? <EducationFourCsIntroSection intro={fourCsIntro} /> : null}
+      {fourCs ? <EducationFourCsPanelsSection fourCs={fourCs} /> : null}
+      {certificate ? <EducationCertifiedSection certificate={certificate} /> : null}
+      {learnMore ? <EducationLearnMoreSection learnMore={learnMore} /> : null}
+      {ctaBanner ? <EducationDiscoverSection ctaBanner={ctaBanner} /> : null}
+      {faq ? <EducationFaqSection faq={faq} /> : null}
     </>
   );
 };

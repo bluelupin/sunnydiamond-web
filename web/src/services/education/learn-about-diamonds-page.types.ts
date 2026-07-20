@@ -1,13 +1,6 @@
-import {
-  educationCertifiedContent,
-  educationDiscoverContent,
-  educationFaqItems,
-  educationFourCsIntroContent,
-  educationFourCsPanels,
-  educationPageImages,
-  type EducationFourCsPanelContent,
-  type EducationSliderOption,
-  type EducationSliderSpec,
+import type {
+  EducationFourCsPanelContent,
+  EducationSliderSpec,
 } from "@/features/education/data/content";
 
 export type StrapiEducationMediaFile = {
@@ -50,18 +43,46 @@ export type StrapiEducationFaqSection = {
   faqItems?: StrapiEducationFaqItem[] | null;
 };
 
-export type StrapiEducationCtaBanner = {
+export type StrapiEducationDiscoverStep = {
+  id?: number;
+  title?: string | null;
+  description?: string | null;
+  sortOrder?: number | null;
+  isActive?: boolean | null;
+};
+
+export type StrapiEducationCtaButton = {
+  label?: string | null;
+  url?: string | null;
+  targetType?: string | null;
+  openInNewTab?: boolean | null;
+};
+
+export type StrapiEducationDiscoverSection = {
   heading?: string | null;
   subheading?: string | null;
   ctaButtonLabel?: string | null;
   ctaButtonUrl?: string | null;
+  steps?: StrapiEducationDiscoverStep[] | null;
   backgroundImage?: StrapiEducationResponsiveImage | null;
+};
+
+/** @deprecated Legacy alias — API field is discoverSection */
+export type StrapiEducationCtaBanner = StrapiEducationDiscoverSection;
+
+export type StrapiEducationFourCsTag = {
+  id?: number;
+  label?: string | null;
+  sortOrder?: number | null;
 };
 
 export type StrapiEducationFourCsIntro = {
   heading?: string | null;
   body?: string | null;
   mobileHeading?: string | null;
+  decorativeImage?: StrapiEducationResponsiveImage | null;
+  fourCsTags?: StrapiEducationFourCsTag[] | null;
+  /** @deprecated Legacy field name */
   image?: StrapiEducationResponsiveImage | null;
 };
 
@@ -69,6 +90,7 @@ export type StrapiEducationGradeStop = {
   id?: number;
   gradeCode?: string | null;
   gradeLongLabel?: string | null;
+  gradeImage?: StrapiEducationResponsiveImage | null;
 };
 
 export type StrapiEducationFourCsInfoPanel = {
@@ -81,6 +103,7 @@ export type StrapiEducationFourCsInfoPanel = {
 };
 
 export type StrapiEducationFourCsVisualPanel = {
+  subTitle?: string | null;
   gradeStops?: StrapiEducationGradeStop[] | null;
   visualImage?: StrapiEducationResponsiveImage | null;
 };
@@ -108,13 +131,54 @@ export type StrapiEducationCertificateSection = {
   certificationLabs?: StrapiEducationCertificationLab[] | null;
 };
 
+export type StrapiEducationLearnFeatureItem = {
+  id?: number;
+  label?: string | null;
+};
+
+export type StrapiEducationLearnCarouselImage = {
+  id?: number;
+  ctaButton?: StrapiEducationCtaButton | null;
+  image?: StrapiEducationResponsiveImage | null;
+};
+
+export type StrapiEducationLearnTab = {
+  id?: number;
+  tabLabel?: string | null;
+  tabDescription?: string | null;
+  layoutType?: string | null;
+  featureSubtitle?: string | null;
+  featureImage?: StrapiEducationResponsiveImage | null;
+  featureItems?: StrapiEducationLearnFeatureItem[] | null;
+  carouselImage?: StrapiEducationLearnCarouselImage[] | null;
+};
+
+export type StrapiEducationLearnMoreSection = {
+  sectionHeading?: string | null;
+  tabs?: StrapiEducationLearnTab[] | null;
+};
+
+export type StrapiEducationSeo = {
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  canonicalUrl?: string | null;
+  metaKeywords?: string | null;
+  showField?: boolean | null;
+  ogImage?: StrapiEducationMediaFile | null;
+  structuredData?: unknown;
+};
+
 export type StrapiLearnAboutDiamondsPageEntity = {
   hero?: StrapiEducationHero | null;
   faqSection?: StrapiEducationFaqSection | null;
-  ctaBanner?: StrapiEducationCtaBanner | null;
+  discoverSection?: StrapiEducationDiscoverSection | null;
+  /** @deprecated Legacy field name */
+  ctaBanner?: StrapiEducationDiscoverSection | null;
   fourCsIntro?: StrapiEducationFourCsIntro | null;
   fourCsSection?: StrapiEducationFourCsSection | null;
   certificateSection?: StrapiEducationCertificateSection | null;
+  learnMoreSection?: StrapiEducationLearnMoreSection | null;
+  seo?: StrapiEducationSeo | null;
 };
 
 export type NormalizedEducationHero = {
@@ -143,10 +207,10 @@ export type NormalizedEducationCtaBanner = {
   subheading: string;
   ctaLabel: string;
   ctaHref: string;
+  steps: string[];
   imageDesktopUrl: string;
   imageMobileUrl: string;
   imageAlt: string;
-  /** True when CMS provides a background image (uses cover fit instead of Figma crop). */
   hasCmsBackgroundImage: boolean;
 };
 
@@ -190,74 +254,68 @@ export type NormalizedEducationCertificateSection = {
   howDescription: string;
 };
 
+export type NormalizedEducationLearnCareTip = {
+  id: string;
+  icon: string;
+  labelLines: string[];
+};
+
+export type NormalizedEducationLearnAnatomyTrait = {
+  id: string;
+  term: string;
+  definition: string;
+};
+
+export type NormalizedEducationLearnAnatomyDetail = {
+  image: string;
+  imageAlt: string;
+  title: string;
+  traits: NormalizedEducationLearnAnatomyTrait[];
+};
+
+export type NormalizedEducationLearnTab = {
+  id: string;
+  label: string;
+  description: string[];
+  layout: "carousel" | "care-grid" | "anatomy-detail";
+  ctaLabel?: string;
+  ctaHref?: string;
+  slides?: { src: string; alt: string }[];
+  careTips?: NormalizedEducationLearnCareTip[];
+  anatomyDetail?: NormalizedEducationLearnAnatomyDetail;
+};
+
+export type NormalizedEducationLearnMoreSection = {
+  title: string;
+  tabs: NormalizedEducationLearnTab[];
+};
+
+export type NormalizedEducationSeo = {
+  metaTitle: string;
+  metaDescription: string;
+  canonicalPath: string;
+  metaKeywords?: string;
+  ogImageUrl?: string;
+};
+
 export type NormalizedLearnAboutDiamondsPage = {
   hero: NormalizedEducationHero | null;
-  faq: NormalizedEducationFaqSection;
-  ctaBanner: NormalizedEducationCtaBanner;
-  fourCsIntro: NormalizedEducationFourCsIntro;
-  fourCs: NormalizedEducationFourCsSection;
-  certificate: NormalizedEducationCertificateSection;
-};
-
-export const EMPTY_EDUCATION_FAQ: NormalizedEducationFaqSection = {
-  heading: "Frequently Asked Questions",
-  items: educationFaqItems.map(({ id, question, answer }) => ({
-    id,
-    question,
-    answer: answer ?? "",
-  })),
-};
-
-export const EMPTY_EDUCATION_CTA_BANNER: NormalizedEducationCtaBanner = {
-  heading: educationDiscoverContent.title,
-  subheading: educationDiscoverContent.description,
-  ctaLabel: educationDiscoverContent.ctaLabel,
-  ctaHref: educationDiscoverContent.ctaHref,
-  imageDesktopUrl: educationPageImages.discoverImage,
-  imageMobileUrl: educationPageImages.discoverImage,
-  imageAlt: "",
-  hasCmsBackgroundImage: false,
-};
-
-export const EMPTY_EDUCATION_FOUR_CS_INTRO: NormalizedEducationFourCsIntro = {
-  desktopTitle: educationFourCsIntroContent.desktopTitle,
-  mobileTitle: educationFourCsIntroContent.mobileTitle,
-  description: educationFourCsIntroContent.description,
-  pillars: educationFourCsIntroContent.pillars,
-  imageDesktopUrl: educationPageImages.diamondOval,
-  imageMobileUrl: educationPageImages.diamondOval,
-  imageAlt: "",
-};
-
-export const EMPTY_EDUCATION_FOUR_CS: NormalizedEducationFourCsSection = {
-  panels: educationFourCsPanels.map((panel) => ({ ...panel })),
-};
-
-export const EMPTY_EDUCATION_CERTIFICATE: NormalizedEducationCertificateSection = {
-  title: educationCertifiedContent.title,
-  certifications: educationCertifiedContent.certifications.map((cert) => ({
-    id: cert.id,
-    logoUrl: cert.logo,
-    label: cert.label,
-    ...("mobileLabelLines" in cert ? { mobileLabelLines: cert.mobileLabelLines } : {}),
-    logoClassName: cert.logoClassName,
-    mobileLogoClassName: cert.mobileLogoClassName,
-    imageClassName: cert.imageClassName,
-    ...("logoWrapClassName" in cert ? { logoWrapClassName: cert.logoWrapClassName } : {}),
-    usesCmsLogo: false,
-  })),
-  mobileLogoOrder: educationCertifiedContent.mobileLogoOrder,
-  whyTitle: educationCertifiedContent.whyTitle,
-  whyDescription: educationCertifiedContent.whyDescription,
-  howTitle: educationCertifiedContent.howTitle,
-  howDescription: educationCertifiedContent.howDescription,
+  faq: NormalizedEducationFaqSection | null;
+  ctaBanner: NormalizedEducationCtaBanner | null;
+  fourCsIntro: NormalizedEducationFourCsIntro | null;
+  fourCs: NormalizedEducationFourCsSection | null;
+  certificate: NormalizedEducationCertificateSection | null;
+  learnMore: NormalizedEducationLearnMoreSection | null;
+  seo: NormalizedEducationSeo | null;
 };
 
 export const EMPTY_LEARN_ABOUT_DIAMONDS_PAGE: NormalizedLearnAboutDiamondsPage = {
   hero: null,
-  faq: EMPTY_EDUCATION_FAQ,
-  ctaBanner: EMPTY_EDUCATION_CTA_BANNER,
-  fourCsIntro: EMPTY_EDUCATION_FOUR_CS_INTRO,
-  fourCs: EMPTY_EDUCATION_FOUR_CS,
-  certificate: EMPTY_EDUCATION_CERTIFICATE,
+  faq: null,
+  ctaBanner: null,
+  fourCsIntro: null,
+  fourCs: null,
+  certificate: null,
+  learnMore: null,
+  seo: null,
 };
