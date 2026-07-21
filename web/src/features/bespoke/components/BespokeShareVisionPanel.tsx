@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Info } from "lucide-react";
 import { useToast } from "@/shared/hooks/use-toast";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
-import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
+import ShareYourVisionFields from "@/shared/ui/ShareYourVisionFields";
 import {
   appointmentFieldClassName,
   appointmentLabelClassName,
@@ -89,7 +89,7 @@ const BespokeShareVisionPanel = ({ open, onClose }: BespokeShareVisionPanelProps
           </div>
 
           <div className="flex flex-col gap-6 pb-72">
-            <AppointmentContactFields
+            <ShareYourVisionFields
               idPrefix="bespoke-share-vision"
               name={name}
               countryCode={countryCode}
@@ -111,7 +111,7 @@ const BespokeShareVisionPanel = ({ open, onClose }: BespokeShareVisionPanelProps
               nameLabel={panelConfig.nameLabel}
               emailLabel={panelConfig.emailLabel}
               noteLabel={panelConfig.noteLabel}
-              notePlaceholder="Enter"
+              notePlaceholder={panelConfig.notePlaceholder}
               noteLabelClassName={appointmentLabelClassName}
               noteTextareaClassName="font-gill text-base leading-110"
               labelClassName={appointmentLabelClassName}

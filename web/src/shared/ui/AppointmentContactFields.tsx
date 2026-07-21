@@ -42,10 +42,7 @@ type AppointmentContactFieldsProps = {
   markTouched: (field: AppointmentContactField) => void;
   labelClassName?: string;
   fieldClassName?: string;
-  showDate?: boolean;
   showTimeSlots?: boolean;
-  nameLabel?: string;
-  emailLabel?: string;
   selectedSlotStyle?: "dark" | "gold";
   showPurpose?: boolean;
   purposeOptions?: readonly string[];
@@ -78,10 +75,7 @@ const AppointmentContactFields = ({
   markTouched,
   labelClassName = appointmentLabelClassName,
   fieldClassName = appointmentFieldClassName,
-  showDate = true,
   showTimeSlots = true,
-  nameLabel = "Your Name*",
-  emailLabel = "Email",
   selectedSlotStyle = "dark",
   showPurpose = false,
   purposeOptions = [],
@@ -96,7 +90,7 @@ const AppointmentContactFields = ({
     <>
       <div className="flex flex-col gap-2">
         <label htmlFor={`${idPrefix}-name`} className={labelClassName}>
-          {nameLabel}
+          Your Name*
         </label>
         <input
           id={`${idPrefix}-name`}
@@ -169,7 +163,7 @@ const AppointmentContactFields = ({
 
       <div className="flex flex-col gap-2">
         <label htmlFor={`${idPrefix}-email`} className={labelClassName}>
-          {emailLabel}
+          Email
         </label>
         <input
           id={`${idPrefix}-email`}
@@ -186,24 +180,22 @@ const AppointmentContactFields = ({
         <FormFieldError id={`${idPrefix}-email-error`} message={showError("email") ? errors.email : undefined} />
       </div>
 
-      {showDate ? (
-        <div className="flex flex-col gap-2">
-          <label htmlFor={`${idPrefix}-date`} className={labelClassName}>
-            Date
-          </label>
-          <AppointmentDateField
-            id={`${idPrefix}-date`}
-            value={date}
-            minDate={minDate}
-            onChange={onDateChange}
-            onBlur={() => markTouched("date")}
-            hasError={showError("date")}
-            aria-invalid={showError("date") || undefined}
-            aria-describedby={showError("date") ? `${idPrefix}-date-error` : undefined}
-          />
-          <FormFieldError id={`${idPrefix}-date-error`} message={showError("date") ? errors.date : undefined} />
-        </div>
-      ) : null}
+      <div className="flex flex-col gap-2">
+        <label htmlFor={`${idPrefix}-date`} className={labelClassName}>
+          Date
+        </label>
+        <AppointmentDateField
+          id={`${idPrefix}-date`}
+          value={date}
+          minDate={minDate}
+          onChange={onDateChange}
+          onBlur={() => markTouched("date")}
+          hasError={showError("date")}
+          aria-invalid={showError("date") || undefined}
+          aria-describedby={showError("date") ? `${idPrefix}-date-error` : undefined}
+        />
+        <FormFieldError id={`${idPrefix}-date-error`} message={showError("date") ? errors.date : undefined} />
+      </div>
 
       {showTimeSlots && onSelectedSlotChange ? (
         <div className="flex flex-col gap-2">
@@ -267,7 +259,7 @@ const AppointmentContactFields = ({
           value={note}
           onChange={(event) => onNoteChange(event.target.value)}
           onBlur={() => markTouched("note")}
-          placeholder="Enter"
+          placeholder={notePlaceholder}
           rows={4}
           maxLength={500}
           aria-invalid={showError("note") || undefined}
