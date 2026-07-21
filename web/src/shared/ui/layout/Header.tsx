@@ -12,7 +12,7 @@ import SDLogo from "@/assets/Icons/SDLogo";
 import SearchIcon from "@/assets/Icons/SearchIcon";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
 import { resolveHeaderNavHref, getHeaderVariant, isJewelleryNavLink } from "@/shared/utils/navigation";
-import { resolveShellHeaderLinks } from "@/shared/lib/shellNavigation";
+import { resolveShellHeaderLinks, splitShellHeaderNavLinks } from "@/shared/lib/shellNavigation";
 import MobileNavigation from "@/shared/ui/layout/MobileNavigation";
 import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
 import UserIcon from "@/assets/Icons/UserIcon";
@@ -53,6 +53,10 @@ const Header = () => {
     const cmsLinks = shellData?.global?.headerNavigationLinks || shellData?.headerNavigationLinks;
     return resolveShellHeaderLinks(cmsLinks);
   }, [shellData]);
+  const { primaryLinks, appointmentLink } = useMemo(
+    () => splitShellHeaderNavLinks(headerNavigationLinks),
+    [headerNavigationLinks],
+  );
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -138,7 +142,7 @@ const Header = () => {
           <div className="hidden md:flex md:items-center md:gap-4 lg:gap-10">
             {Logo}
             <nav className="hidden items-center md:flex md:gap-4 lg:gap-10" aria-label="Main navigation">
-              {headerNavigationLinks.map((link) => {
+              {primaryLinks.map((link) => {
                 const isJewellery = isJewelleryNavLink(link.label);
                 if (isJewellery) {
                   return (
@@ -167,8 +171,11 @@ const Header = () => {
                   </Link>
                 );
               })}
-              <Link href="/book-an-appointment" className={navLinkClass()}>
-                Book an Appointment
+              <Link
+                href={resolveHeaderNavHref(appointmentLink.label, appointmentLink.url)}
+                className={navLinkClass()}
+              >
+                {appointmentLink.label}
               </Link>
             </nav>
           </div>
@@ -233,7 +240,8 @@ const Header = () => {
       <MobileNavigation
         isOpen={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
-        navLinks={headerNavigationLinks}
+        navLinks={primaryLinks}
+        appointmentLink={appointmentLink}
         cartCount={cartCount}
         wishlistCount={wishlistCount}
       />

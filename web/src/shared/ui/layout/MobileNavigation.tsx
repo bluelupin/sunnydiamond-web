@@ -21,6 +21,7 @@ type MobileNavigationProps = {
   isOpen: boolean;
   onClose: () => void;
   navLinks: HeaderNavLink[];
+  appointmentLink?: HeaderNavLink;
   cartCount: number;
   wishlistCount: number;
 };
@@ -398,6 +399,7 @@ const MobileNavigation = ({
   isOpen,
   onClose,
   navLinks,
+  appointmentLink = { label: "Book an Appointment", url: "/book-an-appointment" },
   cartCount,
   wishlistCount,
 }: MobileNavigationProps) => {
@@ -556,7 +558,7 @@ const MobileNavigation = ({
             iconSrc="/images/navigation/appointment.svg"
             iconW={20}
             iconH={20}
-            label="Book an Appointment"
+            label={appointmentLink.label}
             onClick={() => setSubPanel("appointment")}
           />
           <NavDivider className="bg-chalk300" />

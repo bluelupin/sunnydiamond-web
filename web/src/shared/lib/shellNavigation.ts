@@ -38,6 +38,17 @@ export function getFallbackFooterLinkGroups(): FooterLinkGroup[] {
 
 const REMOVED_HEADER_NAV_LABELS = new Set(["collection"]);
 
+const DEFAULT_APPOINTMENT_LINK: HeaderNavLink = {
+  label: "Book an Appointment",
+  url: "/book-an-appointment",
+};
+
+export function isBookAppointmentNavLink(link: HeaderNavLink): boolean {
+  const label = link.label.trim().toLowerCase();
+  const url = link.url.replace(/\/$/, "") || "/";
+  return label === "book an appointment" || url === "/book-an-appointment";
+}
+
 function filterHeaderLinks(links: readonly HeaderNavLink[]): HeaderNavLink[] {
   return links.filter(
     (link) => !REMOVED_HEADER_NAV_LABELS.has(link.label.trim().toLowerCase()),
@@ -49,6 +60,17 @@ export function resolveShellHeaderLinks(
 ): HeaderNavLink[] {
   if (cmsLinks?.length) return filterHeaderLinks(cmsLinks);
   return filterHeaderLinks(getFallbackHeaderLinks());
+}
+
+/** Primary nav links with Book an Appointment extracted for the dedicated CTA slot. */
+export function splitShellHeaderNavLinks(links: readonly HeaderNavLink[]): {
+  primaryLinks: HeaderNavLink[];
+  appointmentLink: HeaderNavLink;
+} {
+  const appointmentLink =
+    links.find((link) => isBookAppointmentNavLink(link)) ?? DEFAULT_APPOINTMENT_LINK;
+  const primaryLinks = links.filter((link) => !isBookAppointmentNavLink(link));
+  return { primaryLinks, appointmentLink };
 }
 
 const REMOVED_FOOTER_PATHS = new Set([
