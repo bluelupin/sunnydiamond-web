@@ -6,6 +6,7 @@ import JsonLd from "@/shared/lib/seo/JsonLd";
 import { buildProductJsonLd } from "@/shared/lib/seo/schema/product";
 import ProductDetailPageView from "@/features/products/components/ProductDetailPage";
 import { getImageSrc } from "@/shared/utils/image";
+import { getProductDisplayVisitUs } from "@/services/product-display/product-display-page.service";
 
 export const dynamic = "force-dynamic";
 
@@ -39,7 +40,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ProductPage({ params }: PageProps) {
   const { urlKey } = await params;
-  const product = await getMagentoProductByUrlKey(decodeURIComponent(urlKey));
+  const [product, visitUs] = await Promise.all([
+    getMagentoProductByUrlKey(decodeURIComponent(urlKey)),
+    getProductDisplayVisitUs(),
+  ]);
 
   if (!product) {
     notFound();
@@ -48,7 +52,7 @@ export default async function ProductPage({ params }: PageProps) {
   return (
     <>
       <JsonLd data={buildProductJsonLd(product)} id={`product-jsonld-${product.id}`} />
-      <ProductDetailPageView product={product} />
+      <ProductDetailPageView product={product} visitUs={visitUs} />
     </>
   );
 }

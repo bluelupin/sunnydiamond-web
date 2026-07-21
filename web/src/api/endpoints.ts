@@ -4,6 +4,7 @@ export const STRAPI_ENDPOINTS = {
   homepageShoppingBlocks: "api/homepage/shopping-blocks",
   learnAboutDiamondsPage: "api/learn-about-diamonds-page",
   aboutPage: "api/about-page",
+  productDisplayPage: "api/product-display-page",
   occasions: "api/occasions",
   genericForms: "api/generic-forms",
   genericSubmissions: "api/generic-submissions",

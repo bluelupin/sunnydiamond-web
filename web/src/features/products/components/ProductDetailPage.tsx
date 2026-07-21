@@ -18,12 +18,14 @@ import FeaturedCollectionSection from "@/features/cms/components/home/FeaturedCo
 import { homeContent } from "@/features/cms/data/content";
 import ProductDetailMoreForYouSection from "./detail/ProductDetailMoreForYouSection";
 import ProductDetailVisitUsSection from "./detail/ProductDetailVisitUsSection";
+import type { NormalizedVisitUsSection } from "@/services/product-display/product-display-page.service";
 
 type ProductDetailPageProps = {
   product: Product;
+  visitUs?: NormalizedVisitUsSection | null;
 };
 
-const ProductDetailPage = ({ product }: ProductDetailPageProps) => {
+const ProductDetailPage = ({ product, visitUs }: ProductDetailPageProps) => {
   const { addItem } = useCart();
   const { openBagDrawer } = useCartUI();
 
@@ -72,7 +74,7 @@ const ProductDetailPage = ({ product }: ProductDetailPageProps) => {
         description={homeContent.alankara.collection.description}
       />
       <ProductDetailMoreForYouSection items={moreForYou} />
-      <ProductDetailVisitUsSection imageSrc={content.visitUsImage} />
+      <ProductDetailVisitUsSection visitUs={visitUs} />
     </>
   );
 };
