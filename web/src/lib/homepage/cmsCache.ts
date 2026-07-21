@@ -1,7 +1,10 @@
 import type { HomepageQueryKey } from "@/hooks/homepage/queryKeys";
+import type { MagentoQueryKey } from "@/hooks/magento/queryKeys";
 import type { HomepageEditorialBlocksData } from "@/types/homepage/editorialBlocks";
 import type { HomepageShoppingBlocksData } from "@/types/homepage/categoryNavigation";
 import type { NormalizedHomepageShell } from "@/services/homepage/homepageShell.service";
+
+export type AppDataCacheKey = HomepageQueryKey | MagentoQueryKey;
 
 export type CmsCacheEntry<T> = {
   value?: T;
@@ -12,15 +15,15 @@ export type CmsCacheEntry<T> = {
 
 const cache = new Map<string, CmsCacheEntry<unknown>>();
 
-export function getCmsCacheEntry<T>(key: HomepageQueryKey): CmsCacheEntry<T> | undefined {
+export function getCmsCacheEntry<T>(key: AppDataCacheKey): CmsCacheEntry<T> | undefined {
   return cache.get(key) as CmsCacheEntry<T> | undefined;
 }
 
-export function setCmsCacheEntry<T>(key: HomepageQueryKey, entry: CmsCacheEntry<T>): void {
+export function setCmsCacheEntry<T>(key: AppDataCacheKey, entry: CmsCacheEntry<T>): void {
   cache.set(key, entry as CmsCacheEntry<unknown>);
 }
 
-export function seedCmsCacheEntry<T>(key: HomepageQueryKey, value: T): void {
+export function seedCmsCacheEntry<T>(key: AppDataCacheKey, value: T): void {
   setCmsCacheEntry(key, {
     value,
     promise: undefined,
@@ -29,7 +32,7 @@ export function seedCmsCacheEntry<T>(key: HomepageQueryKey, value: T): void {
   });
 }
 
-export function isCmsCacheFresh(key: HomepageQueryKey, staleTimeMs: number): boolean {
+export function isCmsCacheFresh(key: AppDataCacheKey, staleTimeMs: number): boolean {
   const entry = getCmsCacheEntry(key);
   if (!entry?.value || entry.updatedAt === 0) return false;
   return Date.now() - entry.updatedAt < staleTimeMs;

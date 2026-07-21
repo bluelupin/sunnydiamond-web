@@ -7,7 +7,7 @@ import {
   setCmsCacheEntry,
   type CmsCacheEntry,
 } from "@/lib/homepage/cmsCache";
-import type { HomepageQueryKey } from "./queryKeys";
+import type { AppDataCacheKey } from "@/lib/homepage/cmsCache";
 
 type CmsSectionState<T> = {
   data?: T;
@@ -15,14 +15,14 @@ type CmsSectionState<T> = {
   error?: string;
 };
 
-function readCachedState<T>(key: HomepageQueryKey): CmsSectionState<T> | null {
+function readCachedState<T>(key: AppDataCacheKey): CmsSectionState<T> | null {
   const entry = getCmsCacheEntry<T>(key);
   if (entry?.value === undefined) return null;
   return { data: entry.value, isLoading: false, error: undefined };
 }
 
 export function useCmsSection<T>(
-  queryKey: HomepageQueryKey,
+  queryKey: AppDataCacheKey,
   fetcher: (signal: AbortSignal) => Promise<T>,
   options?: { staleTimeMs?: number },
 ): CmsSectionState<T> {

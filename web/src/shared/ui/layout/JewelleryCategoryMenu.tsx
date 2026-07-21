@@ -3,11 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/shared/utils/cn";
-import {
-  getJewelleryNavRows,
-  resolveJewelleryNavItem,
-  type JewelleryNavVariant,
-} from "@/features/jewellery-product/utils/jewelleryRoutes";
+import { buildJewelleryNavRows } from "@/features/jewellery-product/utils/jewelleryRoutes";
+import { useMagentoJewelleryNav } from "@/hooks/magento/useMagentoJewelleryNav";
+import type { JewelleryNavCategory } from "@/types/magento/jewelleryNav";
+import type { JewelleryNavVariant } from "@/features/jewellery-product/utils/jewelleryRoutes";
 
 type JewelleryCategoryMenuProps = {
   variant: JewelleryNavVariant;
@@ -39,52 +38,76 @@ const VARIANT_CONFIG = {
   },
 } as const;
 
-export function JewelleryCategoryMenu({ variant, onClose, className }: JewelleryCategoryMenuProps) {
+function JewelleryCategoryMenuItems({
+  categories,
+  variant,
+  onClose,
+  className,
+}: {
+  categories: JewelleryNavCategory[];
+  variant: JewelleryNavVariant;
+  onClose: () => void;
+  className?: string;
+}) {
   const config = VARIANT_CONFIG[variant];
-  const rows = getJewelleryNavRows(variant);
+  const rows = buildJewelleryNavRows(categories, variant);
 
   return (
     <div className={cn(config.rowsClassName, className)}>
       {rows.map((row, rowIndex) => (
         <div key={rowIndex} className={config.rowClassName}>
-          {row.map((category) => {
-            const item = resolveJewelleryNavItem(category);
-
-            return (
-              <Link
-                key={item.category}
-                href={item.href}
-                onClick={onClose}
-                className={config.itemClassName}
-              >
-                <div className={config.imageClassName}>
-                  {item.image ? (
-                    <Image
-                      src={item.image}
-                      alt={item.label}
-                      fill
-                      className={config.imageCoverClassName}
-                      sizes={config.imageSizes}
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-benefitSurface">
-                      <span className={config.allProductsClassName}>{item.label}</span>
-                    </div>
-                  )}
-                </div>
+          {row.map((item) => (
+            <Link
+              key={item.id}
+              href={item.href}
+              onClick={onClose}
+              className={config.itemClassName}
+            >
+              <div className={config.imageClassName}>
                 {item.image ? (
-                  <span className={config.labelClassName}>{item.label}</span>
+                  <Image
+                    src={item.image}
+                    alt={item.label}
+                    fill
+                    className={config.imageCoverClassName}
+                    sizes={config.imageSizes}
+                  />
                 ) : (
-                  <span className={cn(config.labelClassName, "invisible")} aria-hidden>
-                    {item.label}
-                  </span>
+                  <div className="flex h-full w-full items-center justify-center bg-benefitSurface">
+                    <span className={config.allProductsClassName}>{item.label}</span>
+                  </div>
                 )}
-              </Link>
-            );
-          })}
+              </div>
+              {item.image ? (
+                <span className={config.labelClassName}>{item.label}</span>
+              ) : (
+                <span className={cn(config.labelClassName, "invisible")} aria-hidden>
+                  {item.label}
+                </span>
+              )}
+            </Link>
+          ))}
         </div>
       ))}
     </div>
+  );
+}
+
+export function JewelleryCategoryMenu({ variant, onClose, className }: JewelleryCategoryMenuProps) {
+  const { data } = useMagentoJewelleryNav();
+  const categories = data?.categories ?? [];
+
+  if (categories.length === 0) {
+    return null;
+  }
+
+  return (
+    <JewelleryCategoryMenuItems
+      categories={categories}
+      variant={variant}
+      onClose={onClose}
+      className={className}
+    />
   );
 }
 

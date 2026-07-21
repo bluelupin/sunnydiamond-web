@@ -84,6 +84,17 @@ export function getJewelleryNavRows(variant: JewelleryNavVariant): JewelleryCate
   return variant === "desktop" ? JEWELLERY_NAV_DESKTOP_ROWS : JEWELLERY_NAV_MOBILE_ROWS;
 }
 
+export function buildJewelleryNavRows<T>(items: T[], variant: JewelleryNavVariant): T[][] {
+  const chunkSize = variant === "desktop" ? 4 : 2;
+  const rows: T[][] = [];
+
+  for (let index = 0; index < items.length; index += chunkSize) {
+    rows.push(items.slice(index, index + chunkSize));
+  }
+
+  return rows;
+}
+
 export type ResolvedJewelleryNavItem = JewelleryMegaMenuLink & {
   href: string;
 };

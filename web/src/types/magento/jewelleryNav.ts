@@ -1,0 +1,16 @@
+import type { JewelleryCategorySlug } from "@/features/jewellery-product/types";
+
+export type JewelleryNavCategory = {
+  id: string;
+  label: string;
+  href: string;
+  image: string | null;
+  /** PLP slug when mapped from Magento url_key; null for synthetic items (e.g. All Products). */
+  slug: JewelleryCategorySlug | null;
+  productCount: number;
+  sortOrder: number;
+};
+
+export type JewelleryNavCategoriesData = {
+  categories: JewelleryNavCategory[];
+};
