@@ -589,7 +589,32 @@
   display: none;
 }
 
+/* For Verticle scroll inside .tabScroll */
+.verticleScrollbar {
+  overflow-x: auto;
+  overflow-y: hidden;
 
+  /* Firefox */
+  scrollbar-width: none;
+
+  /* IE/Edge Legacy */
+  -ms-overflow-style: none;
+}
+
+.verticleScrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+  -webkit-appearance: none;
+}
+
+.verticleScrollbar::-webkit-scrollbar-track {
+  display: none;
+}
+
+.verticleScrollbar::-webkit-scrollbar-thumb {
+  display: none;
+}
 .imageTestContainer {
   border: 0.4px solid #cccccc38;
 }

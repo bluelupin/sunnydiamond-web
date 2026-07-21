@@ -69,7 +69,7 @@ const BespokePastCreationsModal = ({
       role="dialog"
       aria-modal="true"
       aria-label="Past creations gallery"
-      className="fixed inset-0 z-[70] overflow-auto bg-white animate-in fade-in duration-300"
+      className="fixed inset-0 z-[70] overflow-auto bg-white animate-in fade-in duration-300 horizontalScrollbar verticleScrollbar"
     >
       <button
         type="button"
