@@ -18,6 +18,8 @@ import {
   bespokePageContent,
 } from "@/features/bespoke/data/content";
 import BespokeFeaturedStoryModal from "@/features/bespoke/components/BespokeFeaturedStoryModal";
+import Reveal from "@/shared/Animation/Reveal";
+import { DetailTextLink } from "@/features/products/components/detail/shared";
 
 type FeaturedSlide = (typeof bespokePageContent.featuredStories.slides)[number];
 
@@ -98,10 +100,10 @@ const FeaturedGalleryImage = ({
         isCenter
           ? compact
             ? "h-[240px] w-[280px]"
-            : "h-[360px] w-[560px]"
+            : "md:h-[360px] h-[400px] md:w-[560px] w-[296px]"
           : compact
             ? "h-[200px] w-[260px]"
-            : "h-[300px] w-[400px]",
+            : "md:h-[300px] h-[343px] md:w-[400px] w-[296px]",
         isSelected && !isCenter && "ring-2 ring-white/90 ring-offset-2 ring-offset-transparent",
         (interactive || openable) && "cursor-pointer",
       )}
@@ -110,18 +112,18 @@ const FeaturedGalleryImage = ({
         className={cn(
           "absolute overflow-hidden",
           isCenter &&
-            (compact
-              ? "left-1/2 top-1/2 h-[560px] w-[370px] -translate-x-1/2 -translate-y-1/2"
-              : "left-1/2 top-1/2 h-[847px] w-[559px] -translate-x-1/2 -translate-y-1/2"),
+          (compact
+            ? "left-1/2 top-1/2 h-[560px] w-[370px] -translate-x-1/2 -translate-y-1/2"
+            : "left-1/2 top-1/2 md:h-[847px] h-[400px] md:w-[559px] w-[296px] -translate-x-1/2 -translate-y-1/2"),
           isSideLeft &&
-            (compact
-              ? "right-0 top-1/2 h-[360px] w-[260px] -translate-y-1/2"
-              : "right-0 top-1/2 h-[534px] w-[400px] -translate-y-1/2"),
+          (compact
+            ? "right-0 top-1/2 h-[360px] w-[260px] -translate-y-1/2"
+            : "right-0 top-1/2 h-[534px] w-[400px] -translate-y-1/2"),
           !isCenter &&
-            !isSideLeft &&
-            (compact
-              ? "left-1/2 top-1/2 h-[240px] w-[400px] -translate-x-1/2 -translate-y-1/2"
-              : "left-1/2 top-1/2 h-[353px] w-[595px] -translate-x-1/2 -translate-y-1/2"),
+          !isSideLeft &&
+          (compact
+            ? "left-1/2 top-1/2 h-[240px] w-[400px] -translate-x-1/2 -translate-y-1/2"
+            : "left-1/2 top-1/2 md:h-[353px] h-[343px] md:w-[595px] w-[296px] -translate-x-1/2 -translate-y-1/2"),
         )}
       >
         <Image
@@ -180,7 +182,7 @@ const FeaturedGalleryBackground = ({ slides, activeIndex, compact }: FeaturedGal
     <div
       className={cn(
         "absolute inset-0 overflow-hidden",
-        compact ? "" : "left-1/2 top-0 h-[559px] w-[1920px] -translate-x-1/2",
+        compact ? "" : "left-1/2 top-0 md:h-[559px] h-[540px] w-[1920px] -translate-x-1/2",
       )}
     >
       {slides.map((slide, index) => (
@@ -536,7 +538,6 @@ type FeaturedStoriesLayoutProps = {
   primaryCtaLabel: string;
   secondaryCtaHref: string;
   secondaryCtaLabel: string;
-  variant: "desktop" | "mobile";
 };
 
 const FeaturedStoriesLayout = ({
@@ -551,26 +552,18 @@ const FeaturedStoriesLayout = ({
   primaryCtaLabel,
   secondaryCtaHref,
   secondaryCtaLabel,
-  variant,
 }: FeaturedStoriesLayoutProps) => {
-  const isDesktop = variant === "desktop";
-
-  if (isDesktop) {
-    return (
-      <section
-        aria-labelledby="bespoke-featured-stories-title"
-        className="relative hidden h-[817px] w-full overflow-hidden bg-gray200 md:block"
-      >
+  return (
+    <section aria-labelledby="bespoke-featured-stories-title" className=" bg-gray200">
+      <div className="relative md:h-[630px] h-[609px] w-full overflow-hidden">
         <FeaturedGalleryBackground slides={slides} activeIndex={selectedIndex} />
-
         <h2
           id="bespoke-featured-stories-title"
-          className="absolute left-1/2 top-[177px] z-10 w-[326px] -translate-x-1/2 whitespace-nowrap text-center font-larken text-5xl font-light leading-110 text-white"
+          className="absolute left-1/2 md:top-[177px] top-[150px] z-10 w-[326px] -translate-x-1/2 whitespace-nowrap text-center font-larken md:text-5xl text-32 font-light leading-110 text-white"
         >
           {title}
         </h2>
-
-        <div className="absolute left-1/2 top-[270px] z-10 -translate-x-1/2">
+        <div className="absolute left-1/2 md:top-[270px] top-[209px] z-10 -translate-x-1/2">
           <FeaturedGallerySlider
             slides={slides}
             activeIndex={activeIndex}
@@ -580,65 +573,15 @@ const FeaturedStoriesLayout = ({
             onCenterOpen={onCenterOpen}
           />
         </div>
-
-        <div className="absolute bottom-10 left-1/2 z-10 flex w-[1360px] max-w-[calc(100%-80px)] -translate-x-1/2 flex-col items-center gap-8">
-          <Link
-            href={primaryCtaHref}
-            className="btn-border-slide inline-flex h-14 w-[284px] items-center justify-center border border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
-          >
-            <span className="relative z-10">{primaryCtaLabel}</span>
-          </Link>
-          <Link
-            href={secondaryCtaHref}
-            className="border-b border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
-          >
-            {secondaryCtaLabel}
-          </Link>
-        </div>
-      </section>
-    );
-  }
-
-  return (
-    <section
-      aria-labelledby="bespoke-featured-stories-title-mobile"
-      className="bg-gray200 md:hidden"
-    >
-      <div className="relative h-[320px] overflow-hidden sm:h-[420px]">
-        <FeaturedGalleryBackground slides={slides} activeIndex={selectedIndex} compact />
-        <h2
-          id="bespoke-featured-stories-title-mobile"
-          className="absolute left-1/2 top-24 z-10 w-full max-w-[326px] -translate-x-1/2 text-center font-larken text-32 font-light leading-110 text-white"
-        >
-          {title}
-        </h2>
       </div>
-
-      <div className="overflow-hidden px-4 py-6">
-        <FeaturedGallerySlider
-          slides={slides}
-          activeIndex={activeIndex}
-          selectedIndex={selectedIndex}
-          onActiveIndexChange={onActiveIndexChange}
-          onSlideStart={onSlideStart}
-          onCenterOpen={onCenterOpen}
-          compact
-        />
-      </div>
-
-      <div className="flex flex-col items-center gap-6 px-4 pb-10">
+      <div className="flex flex-col items-center gap-6 px-4 md:pt-10 pt-6 md:pb-10 pb-16">
         <Link
           href={primaryCtaHref}
           className="btn-border-slide inline-flex h-14 w-[284px] items-center justify-center border border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
         >
           <span className="relative z-10">{primaryCtaLabel}</span>
         </Link>
-        <Link
-          href={secondaryCtaHref}
-          className="border-b border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
-        >
-          {secondaryCtaLabel}
-        </Link>
+        <DetailTextLink href={secondaryCtaHref} className="uppercase">{secondaryCtaLabel}</DetailTextLink>
       </div>
     </section>
   );
@@ -681,8 +624,7 @@ const BespokeFeaturedStoriesSection = () => {
 
   return (
     <>
-      <FeaturedStoriesLayout {...sharedProps} variant="desktop" />
-      <FeaturedStoriesLayout {...sharedProps} variant="mobile" />
+      <FeaturedStoriesLayout {...sharedProps} />
       <BespokeFeaturedStoryModal
         open={modalOpen}
         slide={modalSlide}

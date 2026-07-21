@@ -69,10 +69,12 @@ const FeaturedStoryModalCarousel = ({
   activeIndex,
   onActiveIndexChange,
 }: FeaturedStoryModalCarouselProps) => {
+  const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const dragState = useRef({ active: false, startX: 0, deltaX: 0, moved: false });
   const activeIndexRef = useRef(activeIndex);
 
+  const [viewportWidth, setViewportWidth] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
   const [enableTransition, setEnableTransition] = useState(true);
@@ -81,9 +83,27 @@ const FeaturedStoryModalCarousel = ({
 
   const canSlide = images.length > 1;
 
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    const updateWidth = () => {
+      setViewportWidth(viewport.offsetWidth);
+    };
+
+    updateWidth();
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(viewport);
+
+    return () => observer.disconnect();
+  }, []);
+
   const goToIndex = useCallback(
     (index: number) => {
       if (index < 0 || index >= images.length || index === activeIndexRef.current) return;
+
+      setDragOffset(0);
+      setEnableTransition(true);
       onActiveIndexChange(index);
     },
     [images.length, onActiveIndexChange],
@@ -133,23 +153,22 @@ const FeaturedStoryModalCarousel = ({
       goToIndex(Math.min(activeIndexRef.current + 1, images.length - 1));
     } else if (deltaX >= spec.swipeThresholdPx) {
       goToIndex(Math.max(activeIndexRef.current - 1, 0));
+    } else {
+      setDragOffset(0);
+      setEnableTransition(true);
     }
-
-    setDragOffset(0);
-    setEnableTransition(true);
   };
 
   const handleTransitionEnd = (event: TransitionEvent<HTMLDivElement>) => {
     if (event.propertyName !== "transform") return;
     setEnableTransition(true);
+    setDragOffset(0);
   };
 
-  const trackTransform = canSlide
-    ? `translate3d(calc(-${(activeIndex * 100) / images.length}% + ${dragOffset}px), 0, 0)`
-    : undefined;
+  const trackOffset = viewportWidth > 0 ? -activeIndex * viewportWidth + dragOffset : 0;
 
   return (
-    <div className="relative min-h-0 flex-1 overflow-hidden">
+    <div ref={viewportRef} className="relative min-h-0 flex-1 overflow-hidden">
       <div
         ref={trackRef}
         className={cn(
@@ -164,19 +183,16 @@ const FeaturedStoryModalCarousel = ({
         <div
           className="flex h-full touch-none select-none will-change-transform"
           style={{
-            width: `${images.length * 100}%`,
-            transform: trackTransform,
-            transition: enableTransition
-              ? `transform ${spec.slideDurationMs}ms ease-out`
-              : "none",
+            transform: canSlide ? `translate3d(${trackOffset}px, 0, 0)` : undefined,
+            transition: enableTransition ? `transform ${spec.slideDurationMs}ms ease-out` : "none",
           }}
           onTransitionEnd={handleTransitionEnd}
         >
           {images.map((image, index) => (
             <div
               key={`${image.src}-${index}`}
-              className="relative h-full shrink-0"
-              style={{ width: `${100 / images.length}%` }}
+              className="relative h-full shrink-0 "
+              style={{ width: viewportWidth > 0 ? viewportWidth : "100%" }}
             >
               <Image
                 src={image.src}
@@ -192,7 +208,7 @@ const FeaturedStoryModalCarousel = ({
       </div>
 
       {canSlide ? (
-        <div className="absolute bottom-6 left-6 z-10 flex items-center gap-2">
+        <div className="absolute md:bottom-[230px] bottom-[175px] md:left-6 left-4 z-10 flex items-center gap-2">
           {images.map((image, index) => {
             const isActive = index === activeIndex;
 
@@ -201,11 +217,12 @@ const FeaturedStoryModalCarousel = ({
                 <span
                   key={`${image.src}-${index}-active`}
                   aria-hidden
-                  className="block h-px bg-white"
+                  className="block h-1 bg-white transition-all duration-300 W-12 rounded-[24px]"
                   style={{ width: spec.paginationActiveWidth }}
                 />
               );
             }
+
             return (
               <button
                 key={`${image.src}-${index}`}
@@ -213,11 +230,7 @@ const FeaturedStoryModalCarousel = ({
                 aria-label={`View image ${index + 1}`}
                 onClick={() => goToIndex(index)}
                 onPointerDown={(event) => event.stopPropagation()}
-                className="rounded-full bg-white/60 transition-colors hover:bg-white"
-                style={{
-                  width: spec.paginationDotSize,
-                  height: spec.paginationDotSize,
-                }}
+                className="rounded-full bg-neutral300 transition-colors hover:bg-white w-2 h-2"
               />
             );
           })}
@@ -265,7 +278,7 @@ const FeaturedStoryModalPanel = ({
         </button>
       </div>
 
-      <div className="shrink-0 bg-transparent px-6 pt-5 pb-10 absolute bottom-0 w-full flex flex-col gap-10"
+      <div className="shrink-0 bg-transparent md:px-6 px-4 pt-5 pb-10 absolute bottom-0 w-full flex flex-col md:gap-10 gap-6"
         style={{ backgroundImage: "linear-gradient(to bottom, #00000000, #000000B1, #000000)", }}>
         <div className="flex flex-col gap-2 md:gap-4">
           <h2
@@ -274,7 +287,7 @@ const FeaturedStoryModalPanel = ({
             {slide.modalTitle}
           </h2>
           <p
-            className="font-gill font-light leading-110 text-white md:text-xl text-base"
+            className="font-gill font-light leading-110 text-white md:text-xl text-base line-clamp-2"
             style={{ fontSize: spec.bodySize }}
           >
             {slide.modalDescription}

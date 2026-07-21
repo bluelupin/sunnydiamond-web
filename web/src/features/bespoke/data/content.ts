@@ -157,7 +157,9 @@ export const bespokePageContent = {
         modalImages: [
           { src: "/images/bespoke/featured-gallery-left-1.png", alt: "Bespoke ring on hand" },
           { src: "/images/bespoke/featured-left-1.jpg", alt: "Bespoke ring on hand detail" },
-          { src: "/images/bespoke/featured-gallery-left-2.png", alt: "Bespoke ring on hand alternate view" },
+          { src: "/images/bespoke/featured-gallery-left-2.png", alt: "Bespoke ring alternate angle" },
+          { src: "/images/bespoke/featured-left-2.jpg", alt: "Bespoke ring craftsmanship" },
+          { src: "/images/bespoke/featured-background.jpg", alt: "Bespoke jewellery styling" },
         ],
       },
       {
@@ -170,6 +172,8 @@ export const bespokePageContent = {
           { src: "/images/bespoke/featured-gallery-left-2.png", alt: "Bespoke ring on hand" },
           { src: "/images/bespoke/featured-left-2.jpg", alt: "Bespoke ring detail" },
           { src: "/images/bespoke/featured-gallery-left-1.png", alt: "Bespoke ring alternate view" },
+          { src: "/images/bespoke/featured-left-1.jpg", alt: "Bespoke ring close-up" },
+          { src: "/images/bespoke/featured-background.jpg", alt: "Bespoke jewellery styling" },
         ],
       },
       {
@@ -181,7 +185,9 @@ export const bespokePageContent = {
         modalImages: [
           { src: "/images/bespoke/featured-gallery-center.png", alt: "Bespoke bracelet with henna" },
           { src: "/images/bespoke/featured-center.jpg", alt: "Bespoke bracelet detail" },
-          { src: "/images/bespoke/featured-gallery-center.png", alt: "Bespoke bracelet close-up" },
+          { src: "/images/bespoke/featured-gallery-left-1.png", alt: "Bespoke ring styling" },
+          { src: "/images/bespoke/featured-gallery-right-1.png", alt: "Bespoke ring detail" },
+          { src: "/images/bespoke/featured-background.jpg", alt: "Bespoke jewellery backdrop" },
         ],
       },
       {
@@ -194,6 +200,8 @@ export const bespokePageContent = {
           { src: "/images/bespoke/featured-gallery-right-1.png", alt: "Bespoke ring detail" },
           { src: "/images/bespoke/featured-right-1.jpg", alt: "Bespoke ring craftsmanship" },
           { src: "/images/bespoke/featured-gallery-right-2.png", alt: "Bespoke ring alternate angle" },
+          { src: "/images/bespoke/featured-right-2.jpg", alt: "Bespoke ring finish" },
+          { src: "/images/bespoke/featured-background.jpg", alt: "Bespoke jewellery styling" },
         ],
       },
       {
@@ -206,6 +214,8 @@ export const bespokePageContent = {
           { src: "/images/bespoke/featured-gallery-right-2.png", alt: "Bespoke ring detail" },
           { src: "/images/bespoke/featured-right-2.jpg", alt: "Bespoke ring finish" },
           { src: "/images/bespoke/featured-gallery-right-1.png", alt: "Bespoke ring side view" },
+          { src: "/images/bespoke/featured-right-1.jpg", alt: "Bespoke ring craftsmanship" },
+          { src: "/images/bespoke/featured-background.jpg", alt: "Bespoke jewellery backdrop" },
         ],
       },
     ] as const,
