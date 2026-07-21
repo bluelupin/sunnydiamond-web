@@ -1,5 +1,7 @@
 export type BookStoreVisitStore = {
   id: string;
+  /** Strapi showroom documentId — required for preferredShowroom relation on submit */
+  documentId?: string;
   tabLabel: string;
   storeName: string;
   address: string;
@@ -50,11 +52,3 @@ export const BOOK_STORE_VISIT_STORES: BookStoreVisitStore[] = [
     heroImage: "/images/products/delivery-store/book-visit-hero.png",
   },
 ];
-
-export const BOOK_STORE_VISIT_PURPOSES = [
-  "Engagement ring",
-  "Wedding jewellery",
-  "Gift shopping",
-  "Custom design consultation",
-  "General enquiry",
-] as const;

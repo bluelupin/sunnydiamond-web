@@ -13,6 +13,7 @@ type AppointmentDateFieldProps = {
   id: string;
   value: string;
   minDate: string;
+  maxDate?: string;
   onChange: (value: string) => void;
   onBlur?: () => void;
   hasError?: boolean;
@@ -70,6 +71,7 @@ const AppointmentDateField = ({
   id,
   value,
   minDate,
+  maxDate,
   onChange,
   onBlur,
   hasError,
@@ -79,6 +81,10 @@ const AppointmentDateField = ({
   const selectedDate = parseDateString(value);
   const minSelectableDate = parseDateString(minDate) ?? new Date();
   minSelectableDate.setHours(0, 0, 0, 0);
+  const maxSelectableDate = parseDateString(maxDate ?? "");
+  if (maxSelectableDate) {
+    maxSelectableDate.setHours(0, 0, 0, 0);
+  }
 
   const [open, setOpen] = useState(false);
   const [viewMonth, setViewMonth] = useState(() => selectedDate ?? minSelectableDate);
@@ -183,7 +189,9 @@ const AppointmentDateField = ({
 
             const isSelected = selectedDate ? isSameDay(date, selectedDate) : false;
             const isToday = isSameDay(date, new Date());
-            const isDisabled = normalizedDate < minSelectableDate;
+            const isDisabled =
+              normalizedDate < minSelectableDate ||
+              (maxSelectableDate != null && normalizedDate > maxSelectableDate);
 
             return (
               <button

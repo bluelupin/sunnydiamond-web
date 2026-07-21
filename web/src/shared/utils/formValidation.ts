@@ -114,6 +114,11 @@ export const validateOptionalDate = (value: string): FieldValidation => {
     return { valid: false, error: "Date cannot be in the past" };
   }
 
+  const max = parseDateOnly(getMaxSelectableDate());
+  if (max && selected > max) {
+    return { valid: false, error: "Date must be within 3 months from today" };
+  }
+
   return { valid: true };
 };
 
@@ -304,6 +309,25 @@ export const getMinSelectableDate = (): string => {
   const month = String(today.getMonth() + 1).padStart(2, "0");
   const day = String(today.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+};
+
+/** Preferred date upper bound: today + 3 months (inclusive). */
+export const getMaxSelectableDate = (): string => {
+  const max = new Date();
+  max.setHours(0, 0, 0, 0);
+  max.setMonth(max.getMonth() + 3);
+  const year = max.getFullYear();
+  const month = String(max.getMonth() + 1).padStart(2, "0");
+  const day = String(max.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const parseDateOnly = (value: string): Date | undefined => {
+  if (!value) return undefined;
+  const parsed = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) return undefined;
+  parsed.setHours(0, 0, 0, 0);
+  return parsed;
 };
 
 export const shouldShowFieldError = (touched: boolean, submitted: boolean, error?: string) =>

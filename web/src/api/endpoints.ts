@@ -5,6 +5,10 @@ export const STRAPI_ENDPOINTS = {
   learnAboutDiamondsPage: "api/learn-about-diamonds-page",
   aboutPage: "api/about-page",
   occasions: "api/occasions",
+  genericForms: "api/generic-forms",
+  genericSubmissions: "api/generic-submissions",
+  productForms: "api/product-forms",
+  productSubmissions: "api/product-submissions",
   /** @deprecated Legacy single-type slug — prefer split homepage endpoints */
   homepage: "homepage",
 } as const;
