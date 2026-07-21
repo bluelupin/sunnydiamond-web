@@ -18,26 +18,22 @@ const JewelleryProductGrid = ({
   return (
     <ScrollReveal threshold={0.06} rootMargin="0px 0px -4% 0px">
       <div className="grid w-full grid-cols-2 md:grid-cols-3">
-        {products.map((product) => {
-          const productId = product.id.split("-")[0];
-
-          return (
-            <JewelleryProductCard
-              key={product.id}
-              title={product.name}
-              price={product.price}
-              primaryImage={product.primaryImage}
-              modalImage={product.modalImage}
-              hoverImage={product.hoverImage}
-              href={`/product/${productId}`}
-              isBestseller={product.isBestseller}
-              isWishlisted={isWishlisted(product.id)}
-              onToggleWishlist={
-                onToggleWishlist ? () => onToggleWishlist(product.id) : undefined
-              }
-            />
-          );
-        })}
+        {products.map((product) => (
+          <JewelleryProductCard
+            key={product.id}
+            title={product.name}
+            price={product.price}
+            primaryImage={product.primaryImage}
+            modalImage={product.modalImage}
+            hoverImage={product.hoverImage}
+            href={`/product/${product.urlKey}`}
+            isBestseller={product.isBestseller}
+            isWishlisted={isWishlisted(product.id)}
+            onToggleWishlist={
+              onToggleWishlist ? () => onToggleWishlist(product.id) : undefined
+            }
+          />
+        ))}
       </div>
     </ScrollReveal>
   );

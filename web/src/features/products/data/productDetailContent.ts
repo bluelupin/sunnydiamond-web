@@ -1,5 +1,4 @@
 import type { StaticImageData } from "next/image";
-import { jewelleryListingProducts } from "@/features/jewellery-product/data/products";
 import type { Product } from "@/features/products/data/products";
 import type { ProductDetailContent, ProductDetailPricing } from "../types/productDetail";
 
@@ -67,24 +66,19 @@ function buildAccordions(product: Product) {
   ];
 }
 
-export function getProductDetailPricing(productId: string): ProductDetailPricing {
-  const listing = jewelleryListingProducts.find((item) => item.id.startsWith(`${productId}-`));
-
-  if (listing) {
-    return {
-      price: listing.price,
-      originalPrice: listing.price + 1000,
-    };
-  }
-
-  return { price: 9880, originalPrice: 10880 };
+export function getProductDetailPricing(product: Product): ProductDetailPricing {
+  return {
+    price: product.price,
+    originalPrice: product.originalPrice ?? product.price,
+  };
 }
 
 export function getProductDetailContent(product: Product): ProductDetailContent {
   const metalShort = product.metal.includes("18K") ? "18K Metal" : product.metal;
+  const attributes = product.detailAttributes ?? ["IF Grade", metalShort, `${product.carat}`];
 
   return {
-    attributes: ["IF Grade", metalShort, `${product.carat} Diamond`],
+    attributes,
     metalColors: [...metalColors],
     ringSizes,
     engravingPreviewImage,

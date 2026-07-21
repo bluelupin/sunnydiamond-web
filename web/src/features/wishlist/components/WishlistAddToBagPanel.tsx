@@ -44,7 +44,7 @@ const WishlistAddToBagPanel = ({
   const baseId = productId?.split("-")[0] ?? "";
   const product = getProductById(baseId);
   const content = product ? getProductDetailContent(product) : null;
-  const pricing = product ? getProductDetailPricing(product.id) : null;
+  const pricing = product ? getProductDetailPricing(product) : null;
 
   const [selectedMetal, setSelectedMetal] = useState(content?.metalColors[0]?.id ?? "gold");
   const [ringSize, setRingSize] = useState("");

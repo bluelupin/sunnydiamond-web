@@ -15,6 +15,7 @@ import {
   appointmentLabelClassName,
 } from "@/shared/constants/appointmentForm";
 import type { Product } from "@/features/products/data/products";
+import { getProductHref } from "@/features/products/utils/productRoutes";
 import { TRY_AT_HOME_INDIAN_STATES } from "@/features/products/data/tryAtHomeContent";
 import { useCurrentLocationAddress } from "@/shared/hooks/use-current-location-address";
 import {
@@ -654,7 +655,7 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
         pincode: address.pincode.trim(),
         city: address.city.trim(),
         sourcePage:
-          typeof window !== "undefined" ? window.location.pathname : `/product/${product.id}`,
+          typeof window !== "undefined" ? window.location.pathname : getProductHref(product),
         consentAccepted: true,
         workflowStatus: "New",
       });

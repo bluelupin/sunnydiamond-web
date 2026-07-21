@@ -6,6 +6,7 @@ import { Heart } from "lucide-react";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { cn } from "@/shared/utils/cn";
 import type { Product } from "@/features/products/data/products";
+import { getProductHref } from "@/features/products/utils/productRoutes";
 
 type WishlistButtonProps = {
   wishlisted: boolean;
@@ -45,11 +46,13 @@ const ProductCard = ({ product }: { product: Product }) => {
     setWishlisted((prev) => !prev);
   };
 
+  const productHref = getProductHref(product);
+
   /* ── Full-bleed lifestyle card ─────────────────────────────────── */
   if (product.cardVariant === "lifestyle" && product.lifestyleImage) {
     return (
       <Link
-        href={`/product/${product.id}`}
+        href={productHref}
         className="group relative flex h-[496px] flex-col items-center gap-[24px] overflow-hidden px-[24px] py-[40px]"
       >
         {/* Full-bleed lifestyle photo + gradient overlay */}
@@ -86,7 +89,7 @@ const ProductCard = ({ product }: { product: Product }) => {
 
   return (
     <Link
-      href={`/product/${product.id}`}
+      href={productHref}
       className="group relative flex h-[496px] flex-col items-center gap-[24px] bg-[#FBFAF6] px-[24px] py-[40px]"
     >
       {/* Image area — cross-fades to lifestyle image on hover */}

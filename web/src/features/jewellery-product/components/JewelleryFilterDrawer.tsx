@@ -9,19 +9,20 @@ import {
   jewelleryListingFilterDrawerSpec as spec,
 } from "../data/content";
 import {
-  DEFAULT_MAX_PRICE,
-  DEFAULT_MIN_PRICE,
+  chunkFilterOptions,
   createDefaultFilterState,
-  filterCategoryRows,
   filterGemstoneOptions,
-  filterMetalPurityOptions,
   filterMetalTypeOptions,
+  getAvailableCategoryLabels,
+  hasMagentoFilterFacets,
 } from "../data/filters";
 import type { JewelleryFilterState } from "../types";
+import type { JewelleryFilterFacets } from "@/types/magento/jewelleryListing";
 
 interface JewelleryFilterDrawerProps {
   open: boolean;
   filters: JewelleryFilterState;
+  facets: JewelleryFilterFacets;
   onClose: () => void;
   onApply: (filters: JewelleryFilterState) => void;
 }
@@ -206,7 +207,13 @@ const GemstoneTypeSelect = ({
   );
 };
 
-const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFilterDrawerProps) => {
+const JewelleryFilterDrawer = ({
+  open,
+  filters,
+  facets,
+  onClose,
+  onApply,
+}: JewelleryFilterDrawerProps) => {
   const [draft, setDraft] = useState<JewelleryFilterState>(filters);
   const [minInputFocused, setMinInputFocused] = useState(false);
 
@@ -246,13 +253,20 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
   };
 
   const handleClearAll = () => {
-    setDraft(createDefaultFilterState());
+    setDraft(hasMagentoFilterFacets(facets) ? createDefaultFilterState(facets) : filters);
   };
 
-  const minPercent =
-    ((draft.minPrice - DEFAULT_MIN_PRICE) / (DEFAULT_MAX_PRICE - DEFAULT_MIN_PRICE)) * 100;
-  const maxPercent =
-    ((draft.maxPrice - DEFAULT_MIN_PRICE) / (DEFAULT_MAX_PRICE - DEFAULT_MIN_PRICE)) * 100;
+  const categoryOptions = getAvailableCategoryLabels(facets);
+  const categoryRows = chunkFilterOptions(categoryOptions, 3);
+  const metalPurityOptions = facets.metalPurities.map((option) => option.label);
+  const hasPriceRange = facets.maxPrice > facets.minPrice;
+
+  const minPercent = hasPriceRange
+    ? ((draft.minPrice - facets.minPrice) / (facets.maxPrice - facets.minPrice)) * 100
+    : 0;
+  const maxPercent = hasPriceRange
+    ? ((draft.maxPrice - facets.minPrice) / (facets.maxPrice - facets.minPrice)) * 100
+    : 0;
 
   if (!open) {
     return null;
@@ -301,131 +315,137 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
 
         <div className="filter-drawer-scroll flex min-h-0 flex-1 flex-col overflow-y-auto px-[24px] pt-[22px]">
           <div className="mx-auto flex w-full max-w-[424px] flex-col gap-[24px] pb-72">
-            <section className="flex flex-col gap-[16px]">
-              <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
-                By Price Range
-              </h3>
-              <div className="flex flex-col gap-[12px]">
-                <div className="grid h-[12px] grid-cols-1 grid-rows-1 items-center">
-                  <div
-                    className="col-start-1 row-start-1 h-[4px] rounded-[70px] bg-neutral300"
-                    aria-hidden
-                  />
-                  <div
-                    className="col-start-1 row-start-1 h-[3px] rounded-[70px] bg-darkblack"
-                    style={{
-                      marginLeft: `${minPercent}%`,
-                      width: `${Math.max(maxPercent - minPercent, 0)}%`,
-                    }}
-                    aria-hidden
-                  />
-                  <input
-                    type="range"
-                    min={DEFAULT_MIN_PRICE}
-                    max={DEFAULT_MAX_PRICE}
-                    step={500}
-                    value={draft.minPrice}
-                    onChange={(event) =>
-                      setDraft((current) => ({
-                        ...current,
-                        minPrice: Math.min(Number(event.target.value), current.maxPrice),
-                      }))
-                    }
-                    className={rangeThumbClassName}
-                    aria-label="Minimum price"
-                  />
-                  <input
-                    type="range"
-                    min={DEFAULT_MIN_PRICE}
-                    max={DEFAULT_MAX_PRICE}
-                    step={500}
-                    value={draft.maxPrice}
-                    onChange={(event) =>
-                      setDraft((current) => ({
-                        ...current,
-                        maxPrice: Math.max(Number(event.target.value), current.minPrice),
-                      }))
-                    }
-                    className={cn(rangeThumbClassName, "z-30")}
-                    aria-label="Maximum price"
-                  />
-                </div>
-                <div className="flex items-center justify-between font-gill text-sm font-light leading-110 text-darkblack">
-                  <span>₹ {formatCurrency(draft.minPrice)}</span>
-                  <span>₹ {formatCurrency(draft.maxPrice)}</span>
-                </div>
-              </div>
-            </section>
-
-            <section className="flex gap-[24px]">
-              <label className="flex min-w-0 flex-1 flex-col gap-[8px]">
-                <span className="font-gill text-sm font-normal leading-110 text-darkblack">
-                  Min Amount
-                </span>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={formatCurrency(draft.minPrice)}
-                  onFocus={() => setMinInputFocused(true)}
-                  onBlur={() => setMinInputFocused(false)}
-                  onChange={(event) =>
-                    setDraft((current) => ({
-                      ...current,
-                      minPrice: Math.min(
-                        parseAmount(event.target.value) || DEFAULT_MIN_PRICE,
-                        current.maxPrice,
-                      ),
-                    }))
-                  }
-                  className={cn(
-                    "h-[56px] w-full bg-[#F2F2F2] p-[12px] font-gill text-sm font-normal leading-110 text-darkblack outline-none",
-                    minInputFocused && "border border-neutral500",
-                  )}
-                />
-              </label>
-              <label className="flex min-w-0 flex-1 flex-col gap-[8px]">
-                <span className="font-gill text-sm font-normal leading-110 text-darkblack">
-                  Max Amount
-                </span>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="Enter"
-                  value={draft.maxPrice === DEFAULT_MAX_PRICE ? "" : formatCurrency(draft.maxPrice)}
-                  onChange={(event) =>
-                    setDraft((current) => ({
-                      ...current,
-                      maxPrice: Math.max(
-                        parseAmount(event.target.value) || DEFAULT_MAX_PRICE,
-                        current.minPrice,
-                      ),
-                    }))
-                  }
-                  className="h-[56px] w-full bg-[#F2F2F2] p-[12px] font-gill text-sm font-normal leading-110 text-darkblack placeholder:text-neutral400 outline-none"
-                />
-              </label>
-            </section>
-
-            <section className="flex flex-col gap-[16px]">
-              <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
-                By Categories:
-              </h3>
-              <div className="flex flex-col gap-[12px]">
-                {filterCategoryRows.map((row, rowIndex) => (
-                  <div key={rowIndex} className="flex flex-wrap gap-[7px]">
-                    {row.map((category) => (
-                      <FilterChip
-                        key={category}
-                        label={category}
-                        selected={draft.categories.includes(category)}
-                        showCheck
-                        onClick={() => toggleListValue("categories", category)}
-                      />
-                    ))}
+            {hasPriceRange ? (
+              <section className="flex flex-col gap-[16px]">
+                <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
+                  By Price Range
+                </h3>
+                <div className="flex flex-col gap-[12px]">
+                  <div className="grid h-[12px] grid-cols-1 grid-rows-1 items-center">
+                    <div
+                      className="col-start-1 row-start-1 h-[4px] rounded-[70px] bg-neutral300"
+                      aria-hidden
+                    />
+                    <div
+                      className="col-start-1 row-start-1 h-[3px] rounded-[70px] bg-darkblack"
+                      style={{
+                        marginLeft: `${minPercent}%`,
+                        width: `${Math.max(maxPercent - minPercent, 0)}%`,
+                      }}
+                      aria-hidden
+                    />
+                    <input
+                      type="range"
+                      min={facets.minPrice}
+                      max={facets.maxPrice}
+                      step={500}
+                      value={draft.minPrice}
+                      onChange={(event) =>
+                        setDraft((current) => ({
+                          ...current,
+                          minPrice: Math.min(Number(event.target.value), current.maxPrice),
+                        }))
+                      }
+                      className={rangeThumbClassName}
+                      aria-label="Minimum price"
+                    />
+                    <input
+                      type="range"
+                      min={facets.minPrice}
+                      max={facets.maxPrice}
+                      step={500}
+                      value={draft.maxPrice}
+                      onChange={(event) =>
+                        setDraft((current) => ({
+                          ...current,
+                          maxPrice: Math.max(Number(event.target.value), current.minPrice),
+                        }))
+                      }
+                      className={cn(rangeThumbClassName, "z-30")}
+                      aria-label="Maximum price"
+                    />
                   </div>
-                ))}
-              </div>
-            </section>
+                  <div className="flex items-center justify-between font-gill text-sm font-light leading-110 text-darkblack">
+                    <span>₹ {formatCurrency(draft.minPrice)}</span>
+                    <span>₹ {formatCurrency(draft.maxPrice)}</span>
+                  </div>
+                </div>
+              </section>
+            ) : null}
+
+            {hasPriceRange ? (
+              <section className="flex gap-[24px]">
+                <label className="flex min-w-0 flex-1 flex-col gap-[8px]">
+                  <span className="font-gill text-sm font-normal leading-110 text-darkblack">
+                    Min Amount
+                  </span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={formatCurrency(draft.minPrice)}
+                    onFocus={() => setMinInputFocused(true)}
+                    onBlur={() => setMinInputFocused(false)}
+                    onChange={(event) =>
+                      setDraft((current) => ({
+                        ...current,
+                        minPrice: Math.min(
+                          parseAmount(event.target.value) || facets.minPrice,
+                          current.maxPrice,
+                        ),
+                      }))
+                    }
+                    className={cn(
+                      "h-[56px] w-full bg-[#F2F2F2] p-[12px] font-gill text-sm font-normal leading-110 text-darkblack outline-none",
+                      minInputFocused && "border border-neutral500",
+                    )}
+                  />
+                </label>
+                <label className="flex min-w-0 flex-1 flex-col gap-[8px]">
+                  <span className="font-gill text-sm font-normal leading-110 text-darkblack">
+                    Max Amount
+                  </span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="Enter"
+                    value={draft.maxPrice === facets.maxPrice ? "" : formatCurrency(draft.maxPrice)}
+                    onChange={(event) =>
+                      setDraft((current) => ({
+                        ...current,
+                        maxPrice: Math.max(
+                          parseAmount(event.target.value) || facets.maxPrice,
+                          current.minPrice,
+                        ),
+                      }))
+                    }
+                    className="h-[56px] w-full bg-[#F2F2F2] p-[12px] font-gill text-sm font-normal leading-110 text-darkblack placeholder:text-neutral400 outline-none"
+                  />
+                </label>
+              </section>
+            ) : null}
+
+            {categoryOptions.length > 0 ? (
+              <section className="flex flex-col gap-[16px]">
+                <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
+                  By Categories:
+                </h3>
+                <div className="flex flex-col gap-[12px]">
+                  {categoryRows.map((row, rowIndex) => (
+                    <div key={rowIndex} className="flex flex-wrap gap-[7px]">
+                      {row.map((category) => (
+                        <FilterChip
+                          key={category}
+                          label={category}
+                          selected={draft.categories.includes(category)}
+                          showCheck
+                          onClick={() => toggleListValue("categories", category)}
+                        />
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ) : null}
 
             <section className="flex flex-col gap-[16px]">
               <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
@@ -443,21 +463,23 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
               </div>
             </section>
 
-            <section className="flex flex-col gap-[16px]">
-              <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
-                Metal Purity:
-              </h3>
-              <div className="flex flex-wrap gap-[7px]">
-                {filterMetalPurityOptions.map((purity) => (
-                  <FilterChip
-                    key={purity}
-                    label={purity}
-                    selected={draft.metalPurities.includes(purity)}
-                    onClick={() => toggleListValue("metalPurities", purity)}
-                  />
-                ))}
-              </div>
-            </section>
+            {metalPurityOptions.length > 0 ? (
+              <section className="flex flex-col gap-[16px]">
+                <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
+                  Metal Purity:
+                </h3>
+                <div className="flex flex-wrap gap-[7px]">
+                  {metalPurityOptions.map((purity) => (
+                    <FilterChip
+                      key={purity}
+                      label={purity}
+                      selected={draft.metalPurities.includes(purity)}
+                      onClick={() => toggleListValue("metalPurities", purity)}
+                    />
+                  ))}
+                </div>
+              </section>
+            ) : null}
 
             <section>
               <GemstoneTypeSelect

@@ -29,7 +29,7 @@ export function getMoreForYouCarouselItems(currentProductId: string): MoreForYou
     return {
       id: product.id,
       name: listing?.name ?? product.name,
-      href: `/product/${product.id}`,
+      href: `/product/${product.urlKey}`,
       image: moreForYouProductImages[index % moreForYouProductImages.length],
     };
   });

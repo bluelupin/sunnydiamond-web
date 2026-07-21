@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import JewelleryHeroSection from "./JewelleryHeroSection";
@@ -10,13 +10,12 @@ import JewelleryProductGrid from "./JewelleryProductGrid";
 import JewelleryLoadMoreSection from "./JewelleryLoadMoreSection";
 import JewelleryGuaranteesSection from "./JewelleryGuaranteesSection";
 import JewelleryFilterDrawer from "./JewelleryFilterDrawer";
-import { jewelleryListingProducts } from "../data/products";
-import { createDefaultFilterState, PAGE_SIZE } from "../data/filters";
-import { filterJewelleryProducts, sortJewelleryProducts } from "../utils/productFilters";
+import { createDefaultFilterState, createEmptyFilterState, PAGE_SIZE, hasMagentoFilterFacets } from "../data/filters";
 import {
   buildJewelleryCategoryHref,
   parseJewelleryCategorySlug,
 } from "../utils/jewelleryRoutes";
+import { useMagentoJewelleryListing } from "@/hooks/magento/useMagentoJewelleryListing";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import type { JewelleryCategory, JewelleryCategorySlug, JewelleryFilterState } from "../types";
 
@@ -32,29 +31,45 @@ const JewelleryProductPage = () => {
 
   const [activeCategory, setActiveCategory] = useState<JewelleryCategorySlug>(categoryFromUrl);
   const [sortValue, setSortValue] = useState("featured");
-  const [filters, setFilters] = useState<JewelleryFilterState>(() => createDefaultFilterState());
-  const [draftFilters, setDraftFilters] = useState<JewelleryFilterState>(() => createDefaultFilterState());
+  const [filters, setFilters] = useState<JewelleryFilterState>(() => createEmptyFilterState());
+  const [draftFilters, setDraftFilters] = useState<JewelleryFilterState>(() => createEmptyFilterState());
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const facetsSyncedRef = useRef(false);
   const { isWishlisted, toggleWishlist } = useWishlist();
+
+  const {
+    products,
+    totalCount,
+    facets,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+  } = useMagentoJewelleryListing({
+    categoryUrlKey,
+    sortValue,
+    filters,
+    pageSize: PAGE_SIZE,
+  });
 
   useEffect(() => {
     setActiveCategory(categoryFromUrl);
-    setVisibleCount(PAGE_SIZE);
   }, [categoryFromUrl]);
 
-  const filteredProducts = useMemo(
-    () => sortJewelleryProducts(filterJewelleryProducts(jewelleryListingProducts, activeCategory, filters), sortValue),
-    [activeCategory, filters, sortValue],
-  );
+  useEffect(() => {
+    if (!hasMagentoFilterFacets(facets) || facetsSyncedRef.current) {
+      return;
+    }
 
-  const visibleProducts = filteredProducts.slice(0, visibleCount);
-  const hasMore = visibleCount < filteredProducts.length;
+    facetsSyncedRef.current = true;
+    const nextDefault = createDefaultFilterState(facets);
+    setFilters(nextDefault);
+    setDraftFilters(nextDefault);
+  }, [facets]);
 
   const handleCategoryChange = useCallback(
     (category: JewelleryCategory) => {
       setActiveCategory(category.slug);
-      setVisibleCount(PAGE_SIZE);
       router.replace(buildJewelleryCategoryHref(category.urlKey), { scroll: false });
     },
     [router],
@@ -63,7 +78,6 @@ const JewelleryProductPage = () => {
   const handleApplyFilters = (nextFilters: JewelleryFilterState) => {
     setFilters(nextFilters);
     setDraftFilters(nextFilters);
-    setVisibleCount(PAGE_SIZE);
     setIsFilterOpen(false);
   };
 
@@ -82,7 +96,7 @@ const JewelleryProductPage = () => {
       <JewelleryCategoryNav activeCategory={activeCategory} onCategoryChange={handleCategoryChange} />
 
       <JewelleryProductToolbar
-        productCount={filteredProducts.length}
+        productCount={totalCount}
         sortValue={sortValue}
         onSortChange={setSortValue}
         onFilterOpen={handleOpenFilters}
@@ -90,19 +104,21 @@ const JewelleryProductPage = () => {
       />
 
       <section className="w-full bg-gray200 pb-0 md:pb-10">
-        <JewelleryProductGrid
-          products={visibleProducts}
-          isWishlisted={isWishlisted}
-          onToggleWishlist={handleToggleWishlist}
-        />
+        {isLoading ? null : (
+          <JewelleryProductGrid
+            products={products}
+            isWishlisted={isWishlisted}
+            onToggleWishlist={handleToggleWishlist}
+          />
+        )}
       </section>
 
       <ScrollReveal delayMs={40}>
         <JewelleryLoadMoreSection
-          visibleCount={visibleProducts.length}
-          totalCount={filteredProducts.length}
+          visibleCount={products.length}
+          totalCount={totalCount}
           hasMore={hasMore}
-          onLoadMore={() => setVisibleCount((count) => count + PAGE_SIZE)}
+          onLoadMore={loadMore}
         />
       </ScrollReveal>
 
@@ -113,9 +129,12 @@ const JewelleryProductPage = () => {
       <JewelleryFilterDrawer
         open={isFilterOpen}
         filters={draftFilters}
+        facets={facets}
         onClose={() => setIsFilterOpen(false)}
         onApply={handleApplyFilters}
       />
+
+      {isLoadingMore ? <span className="sr-only" aria-live="polite">Loading more products</span> : null}
     </div>
   );
 };

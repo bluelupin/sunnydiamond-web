@@ -34,6 +34,8 @@ export const jewelleryListingProducts: JewelleryListingProduct[] = products.flat
 
     return {
       id: `${product.id}-${duplicateIndex}`,
+      sku: `${product.id}-${duplicateIndex}`,
+      urlKey: `${product.id}-${duplicateIndex}`,
       name: isPreviewCard ? "Rose Gold Infinity Bangle" : displayNames[assetIndex % displayNames.length],
       price: 9880 + index * 1200 + duplicateIndex * 500,
       primaryImage,

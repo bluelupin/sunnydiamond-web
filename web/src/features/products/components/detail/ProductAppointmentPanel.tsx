@@ -13,6 +13,7 @@ import {
   appointmentLabelClassName,
 } from "@/shared/constants/appointmentForm";
 import type { Product } from "@/features/products/data/products";
+import { getProductHref } from "@/features/products/utils/productRoutes";
 import {
   createProductSubmission,
   getProductFormByTag,
@@ -233,7 +234,7 @@ const ProductAppointmentForm = ({
             customerEmail: email.trim() || undefined,
             requestDetails: note.trim() || undefined,
             sourcePage:
-              typeof window !== "undefined" ? window.location.pathname : `/product/${product.id}`,
+              typeof window !== "undefined" ? window.location.pathname : getProductHref(product),
             consentAccepted: true,
             workflowStatus: "New",
             uploadedImage: allowImageUpload && referenceImage ? referenceImage : undefined,

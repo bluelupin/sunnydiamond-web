@@ -15,8 +15,8 @@ export interface JewelleryProductCardProps {
   title: string;
   price: number;
   primaryImage: string | StaticImageData;
-  modalImage: string | StaticImageData;
-  hoverImage: string | StaticImageData;
+  modalImage?: string | StaticImageData;
+  hoverImage?: string | StaticImageData;
   href: string;
   isBestseller?: boolean;
   isWishlisted?: boolean;
@@ -74,6 +74,7 @@ const JewelleryProductCard = ({
   onToggleWishlist,
 }: JewelleryProductCardProps) => {
   const hasModalImage = Boolean(modalImage);
+  const hasHoverImage = Boolean(hoverImage);
   const {
     activeSlide,
     dragOffset,
@@ -115,24 +116,26 @@ const JewelleryProductCard = ({
       {...swipeSurfaceProps}
     >
       {/* Desktop hover — full-card lifestyle */}
-      <div
-        className="col-start-1 row-start-1 hidden size-full grid opacity-0 transition-opacity duration-500 md:grid md:group-hover:opacity-100"
-        aria-hidden
-      >
-        <OptimizedImage
-          src={hoverImage}
-          alt=""
-          className="col-start-1 row-start-1 size-full object-cover"
-          sizes="33vw"
-        />
+      {hasHoverImage ? (
         <div
-          className="col-start-1 row-start-1 size-full bg-gradient-to-t from-[rgba(0,0,0,0.4)] from-[14%] to-transparent to-[50%]"
+          className="col-start-1 row-start-1 hidden size-full grid opacity-0 transition-opacity duration-500 md:grid md:group-hover:opacity-100"
           aria-hidden
-        />
-      </div>
+        >
+          <OptimizedImage
+            src={hoverImage!}
+            alt=""
+            className="col-start-1 row-start-1 size-full object-cover"
+            sizes="33vw"
+          />
+          <div
+            className="col-start-1 row-start-1 size-full bg-gradient-to-t from-[rgba(0,0,0,0.4)] from-[14%] to-transparent to-[50%]"
+            aria-hidden
+          />
+        </div>
+      ) : null}
 
       {/* Mobile lifestyle — loaded only after swipe */}
-      {isMobileLifestyle ? (
+      {isMobileLifestyle && modalImage ? (
         <div className="col-start-1 row-start-1 grid size-full md:hidden" aria-hidden>
           <OptimizedImage
             src={modalImage}
@@ -151,7 +154,8 @@ const JewelleryProductCard = ({
       <div
         className={cn(
           "col-start-1 row-start-1 z-10 flex w-full flex-col items-center transition-opacity duration-500",
-          "px-[16px] pt-[24px] md:px-[24px] md:pt-10 md:group-hover:opacity-0",
+          "px-[16px] pt-[24px] md:px-[24px] md:pt-10",
+          hasHoverImage && "md:group-hover:opacity-0",
           isMobileLifestyle ? "pointer-events-none opacity-0 md:opacity-100" : "opacity-100",
         )}
         style={
@@ -177,7 +181,7 @@ const JewelleryProductCard = ({
           className={cn(
             "transition-colors duration-500",
             isMobileLifestyle ? "text-white" : "text-darkblack",
-            "md:text-darkblack md:group-hover:text-white",
+            hasHoverImage && "md:group-hover:text-white",
           )}
         />
       </div>

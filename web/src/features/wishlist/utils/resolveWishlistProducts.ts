@@ -31,6 +31,11 @@ export function getWishlistRemovalId(productId: string, wishlistedIds: string[])
 }
 
 export function getWishlistProductHref(productId: string): string {
+  const product = listingProductById.get(productId);
+  if (product?.urlKey) {
+    return `/product/${product.urlKey}`;
+  }
+
   const baseId = productId.split("-")[0];
   return `/product/${baseId}`;
 }

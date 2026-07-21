@@ -25,7 +25,7 @@ export function buildProductJsonLd(product: ProductJsonLdSource) {
     offers: {
       "@type": "Offer",
       price: product.price,
-      priceCurrency: "USD",
+      priceCurrency: "INR",
       availability: product.inStock
         ? "https://schema.org/InStock"
         : "https://schema.org/OutOfStock",

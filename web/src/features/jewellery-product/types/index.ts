@@ -33,12 +33,14 @@ export interface JewellerySortOption {
 
 export interface JewelleryListingProduct {
   id: string;
+  sku: string;
+  urlKey: string;
   name: string;
   price: number;
   primaryImage: string | StaticImageData;
-  /** Model / lifestyle image — mobile swipe & desktop hover */
-  modalImage: string | StaticImageData;
-  hoverImage: string | StaticImageData;
+  /** Model / lifestyle image — mobile swipe & desktop hover (Magento l_/t_ only). */
+  modalImage?: string | StaticImageData;
+  hoverImage?: string | StaticImageData;
   category: string;
   metalType?: string;
   metalPurity?: string;

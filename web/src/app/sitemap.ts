@@ -31,7 +31,7 @@ const staticRoutes = [
 ];
 
 const productRoutes = products.map((product) => ({
-  url: `/product/${product.id}`,
+  url: `/product/${product.urlKey}`,
   changeFrequency: "weekly" as const,
   priority: 0.7,
 }));

@@ -12,6 +12,7 @@ import {
 
 export interface Product {
   id: string;
+  urlKey: string;
   name: string;
   price: number;
   originalPrice?: number;
@@ -29,11 +30,13 @@ export interface Product {
   bestseller?: boolean;
   rating: number;
   reviews: number;
+  detailAttributes?: string[];
 }
 
 export const products: Product[] = [
   {
     id: "1",
+    urlKey: "celestial-solitaire-ring",
     name: "Celestial Solitaire Ring",
     price: 4500,
     originalPrice: 5200,
@@ -56,6 +59,7 @@ export const products: Product[] = [
   },
   {
     id: "2",
+    urlKey: "lumiere-pendant-necklace",
     name: "Lumière Pendant Necklace",
     price: 3200,
     description: "An elegant pendant necklace showcasing a stunning round diamond suspended from a delicate rose gold chain. The minimalist design lets the diamond's brilliance take center stage.",
@@ -72,6 +76,7 @@ export const products: Product[] = [
   },
   {
     id: "3",
+    urlKey: "etoile-diamond-studs",
     name: "Étoile Diamond Studs",
     price: 2800,
     description: "Classic diamond stud earrings featuring matched round brilliant diamonds in a four-prong setting. These timeless studs are the perfect everyday luxury accessory.",
@@ -88,6 +93,7 @@ export const products: Product[] = [
   },
   {
     id: "4",
+    urlKey: "riviere-tennis-bracelet",
     name: "Rivière Tennis Bracelet",
     price: 8500,
     description: "A stunning tennis bracelet featuring a continuous line of graduated round brilliant diamonds set in rose gold. Each diamond is hand-selected for exceptional brilliance and fire.",
@@ -104,6 +110,7 @@ export const products: Product[] = [
   },
   {
     id: "5",
+    urlKey: "aurora-halo-ring",
     name: "Aurora Halo Ring",
     price: 6200,
     description: "A magnificent halo engagement ring featuring a 2-carat cushion-cut center diamond surrounded by a delicate halo of smaller diamonds set in platinum.",
@@ -120,6 +127,7 @@ export const products: Product[] = [
   },
   {
     id: "6",
+    urlKey: "cascade-drop-earrings",
     name: "Cascade Drop Earrings",
     price: 5100,
     description: "Exquisite drop earrings featuring cascading diamonds that catch the light with every movement. Set in 18K white gold for a cool, contemporary feel.",
@@ -147,8 +155,12 @@ export const categories = [
   { label: "Nosepins", value: "Nosepins", icon: "/images/products/categories/nosepins.svg" },
 ];
 
+export function getProductByUrlKey(urlKey: string): Product | undefined {
+  return products.find((product) => product.urlKey === urlKey || product.id === urlKey);
+}
+
 export function getProductById(id: string): Product | undefined {
-  return products.find((p) => p.id === id);
+  return products.find((product) => product.id === id || product.urlKey === id);
 }
 
 export function getProductsByCategory(category: string): Product[] {

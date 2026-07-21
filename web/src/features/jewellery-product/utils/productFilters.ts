@@ -1,6 +1,7 @@
 import type { JewelleryFilterState, JewelleryListingProduct } from "../types";
 import { categorySlugToProductCategory } from "../data/categories";
 import type { JewelleryCategorySlug } from "../types";
+import type { JewelleryFilterFacets } from "@/types/magento/jewelleryListing";
 import {
   isAllCategoriesSelected,
   isAllMetalPuritiesSelected,
@@ -11,6 +12,7 @@ export function filterJewelleryProducts(
   products: JewelleryListingProduct[],
   activeCategory: JewelleryCategorySlug,
   filters: JewelleryFilterState,
+  facets: JewelleryFilterFacets,
 ): JewelleryListingProduct[] {
   return products.filter((product) => {
     if (activeCategory !== "all") {
@@ -25,7 +27,7 @@ export function filterJewelleryProducts(
     }
 
     if (
-      !isAllCategoriesSelected(filters.categories) &&
+      !isAllCategoriesSelected(filters.categories, facets) &&
       !filters.categories.includes(product.category)
     ) {
       return false;
@@ -39,7 +41,7 @@ export function filterJewelleryProducts(
       }
     }
 
-    if (!isAllMetalPuritiesSelected(filters.metalPurities)) {
+    if (!isAllMetalPuritiesSelected(filters.metalPurities, facets)) {
       const metal = product.metalPurity?.toLowerCase() ?? "";
       const matchesPurity = filters.metalPurities.some((purity) => metal.includes(purity.toLowerCase()));
       if (!matchesPurity) {

@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import PageContainer from "@/shared/ui/layout/PageContainer";
-import { getProductById } from "@/features/products/data/products";
+import type { Product } from "@/features/products/data/products";
 import {
   getProductDetailContent,
   getProductDetailPricing,
@@ -20,26 +19,16 @@ import { homeContent } from "@/features/cms/data/content";
 import ProductDetailMoreForYouSection from "./detail/ProductDetailMoreForYouSection";
 import ProductDetailVisitUsSection from "./detail/ProductDetailVisitUsSection";
 
-const ProductDetailPage = () => {
-  const params = useParams() as { id?: string | string[] };
-  const id = Array.isArray(params.id) ? params.id[0] : params.id;
-  const product = getProductById(id || "");
+type ProductDetailPageProps = {
+  product: Product;
+};
+
+const ProductDetailPage = ({ product }: ProductDetailPageProps) => {
   const { addItem } = useCart();
   const { openBagDrawer } = useCartUI();
 
-  if (!product) {
-    return (
-      <div className="container py-20 text-center">
-        <h1 className="font-larken text-2xl text-darkblack">Product not found</h1>
-        <Link href="/jewellery" className="text-link-underline mt-4 inline-block font-gill text-sm text-darkblack underline">
-          Back to Jewellery
-        </Link>
-      </div>
-    );
-  }
-
   const content = getProductDetailContent(product);
-  const pricing = getProductDetailPricing(product.id);
+  const pricing = getProductDetailPricing(product);
   const moreForYou = getMoreForYouCarouselItems(product.id);
 
   const handleAddToCart = (payload: Parameters<typeof addItem>[0]) => {

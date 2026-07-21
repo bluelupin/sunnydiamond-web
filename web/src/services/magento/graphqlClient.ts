@@ -37,7 +37,9 @@ export async function magentoGraphqlFetch<T>({
     body: JSON.stringify({ query, variables }),
     signal,
     cache: cache ?? (isServer ? "force-cache" : "default"),
-    next: isServer ? { revalidate: MAGENTO_CATALOG_REVALIDATE_SECONDS } : undefined,
+    ...(isServer && cache !== "no-store"
+      ? { next: { revalidate: MAGENTO_CATALOG_REVALIDATE_SECONDS } }
+      : {}),
   });
 
   if (!response.ok) {

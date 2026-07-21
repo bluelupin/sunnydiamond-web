@@ -13,6 +13,7 @@ import {
   CartTextLink,
 } from "./CartFlowUi";
 import DeleteIcon from "@/assets/Icons/DeleteIcon";
+import { getProductHref } from "@/features/products/utils/productRoutes";
 
 interface CartItemProps {
   item: CartLineItem;
@@ -62,6 +63,8 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
     }
   };
 
+  const productHref = getProductHref(product);
+
   return (
     <article className="relative flex flex-col gap-4 bg-white px-4 lg:gap-6 lg:px-6 py-6">
       {isGift ? (
@@ -71,7 +74,7 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 flex-1 gap-4 lg:max-w-[499.5px] lg:gap-6">
           <Link
-            href={`/product/${product.id}`}
+            href={productHref}
             className="relative h-[68px] w-[91px] shrink-0 overflow-hidden bg-white lg:h-[105px] lg:w-[140px]"
           >
             <OptimizedImage src={product.image} alt={product.name} />
@@ -80,7 +83,7 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
           <div className="flex min-w-0 flex-1 flex-col lg:w-[176px] lg:max-w-[176px] gap-8">
             <div className="flex flex-col gap-2 lg:gap-3">
               <Link
-                href={`/product/${product.id}`}
+                href={productHref}
                 className="font-gill text-sm leading-110 text-darkblack transition-colors hover:text-darkMagenta lg:text-base"
               >
                 {product.name}
@@ -94,7 +97,7 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
             </div>
 
             <div className="flex flex-wrap gap-4">
-              <CartTextLink href={`/product/${product.id}`}>EDIT</CartTextLink>
+              <CartTextLink href={productHref}>EDIT</CartTextLink>
               <CartTextLink onClick={() => toggleWishlist(product.id)}>
                 {wishlisted ? "IN WISHLIST" : "MOVE TO WISHLIST"}
               </CartTextLink>
