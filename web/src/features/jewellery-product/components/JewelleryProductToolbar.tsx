@@ -181,7 +181,7 @@ const SortDrawer = ({ open, sortValue, onClose, onSelect }: SortDrawerProps) => 
       <button
         type="button"
         aria-label="Close sort options"
-        className="min-h-0 flex-1 bg-[#1E1E1E]/25 backdrop-blur-[10px] animate-in fade-in duration-300"
+        className="min-h-0 flex-1 bg-[#1E1E1E]/25 backdrop-blur-[9px] animate-in fade-in duration-300"
         onClick={onClose}
       />
       <aside

@@ -215,7 +215,7 @@ const BookAnAppointmentPanel = ({
       <button
         type="button"
         aria-label="Close book an appointment"
-        className="absolute inset-0 bg-[rgba(0,0,0,0.3)] backdrop-blur-[10px] animate-in fade-in duration-300"
+        className="absolute inset-0 bg-[rgba(0,0,0,0.3)] backdrop-blur-[9px] animate-in fade-in duration-300"
         onClick={onClose}
       />
       <aside
