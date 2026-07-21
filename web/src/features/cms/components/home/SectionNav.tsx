@@ -39,7 +39,7 @@ const SectionNav = () => {
   return (
     <div
       className={cn(
-        "group/nav fixed bottom-40 left-0 z-50 hidden pl-10 md:block",
+        "group/nav fixed bottom-0 left-0 z-50 hidden md:block",
         "transition-all duration-500 ease-out will-change-transform",
         isVisible
           ? "translate-x-0 opacity-100"
@@ -55,11 +55,11 @@ const SectionNav = () => {
           alt=""
           fill
           sizes="(max-width: 1440px) 50vw, 720px"
-          className="object-cover object-left"
+          className="object-cover object-left object-bottom"
         />
       </div>
 
-      <nav aria-label="Page sections" className="relative flex flex-col gap-y-5 py-10">
+      <nav aria-label="Page sections" className="relative flex flex-col gap-y-5 pb-60 pl-10 pt-10">
         {navSections.map((section, index) => {
           const isActive = activeId === section.id;
           const isComplete = activeIndex >= 0 && index < activeIndex;

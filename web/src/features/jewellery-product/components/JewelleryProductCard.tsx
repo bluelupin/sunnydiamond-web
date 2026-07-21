@@ -50,13 +50,13 @@ const ProductCopy = ({ title, price, href, className }: ProductCopyProps) => (
 );
 
 const ProductImage = ({ src, alt }: { src: string | StaticImageData; alt: string }) => (
-  <div className="flex h-[110px] w-full shrink-0 items-center justify-center overflow-hidden md:h-[303px]">
+  <div className="mx-auto h-[110px] w-[121px] shrink-0 overflow-hidden md:h-[303px] md:w-[372px]">
     <OptimizedImage
       src={src}
       alt={alt}
       width={372}
       height={287}
-      className="pointer-events-none shrink-0 object-cover max-md:size-[121px] md:h-[287px] md:w-[372px]"
+      className="size-full object-cover"
       sizes="(max-width: 768px) 50vw, 33vw"
     />
   </div>
@@ -150,7 +150,7 @@ const JewelleryProductCard = ({
       {/* Default product view — image only; copy lives in a shared bottom slot */}
       <div
         className={cn(
-          "col-start-1 row-start-1 z-10 flex flex-col items-center transition-opacity duration-500",
+          "col-start-1 row-start-1 z-10 flex w-full flex-col items-center transition-opacity duration-500",
           "px-[16px] pt-[24px] md:px-[24px] md:pt-10 md:group-hover:opacity-0",
           isMobileLifestyle ? "pointer-events-none opacity-0 md:opacity-100" : "opacity-100",
         )}

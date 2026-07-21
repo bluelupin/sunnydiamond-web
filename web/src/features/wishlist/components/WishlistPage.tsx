@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import PageContainer from "@/shared/ui/layout/PageContainer";
+import ScrollReveal from "@/shared/ui/ScrollReveal";
+import JewelleryLoadMoreSection from "@/features/jewellery-product/components/JewelleryLoadMoreSection";
 import { PAGE_SIZE } from "@/features/jewellery-product/data/filters";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import { useCart } from "@/features/cart/context/CartContext";
@@ -30,6 +32,7 @@ const WishlistPage = () => {
   );
 
   const visibleProducts = wishlistProducts.slice(0, visibleCount);
+  const hasMore = visibleCount < wishlistProducts.length;
 
   const handleAddToBagClick = (productId: string) => {
     setAddToBagProductId(productId);
@@ -49,7 +52,7 @@ const WishlistPage = () => {
         onViewModeChange={setViewMode}
       />
 
-      <div className="bg-gray200 mb-[110px]">
+      <div className={cn("bg-gray200", wishlistProducts.length === 0 && "mb-[110px]")}>
         {wishlistProducts.length === 0 ? (
           <PageContainer className="py-6 md:py-10">
             <WishlistEmptyState />
@@ -84,6 +87,19 @@ const WishlistPage = () => {
           </div>
         )}
       </div>
+
+      {wishlistProducts.length > 0 ? (
+        <div className="bg-gray200 mb-[110px]">
+          <ScrollReveal delayMs={40}>
+            <JewelleryLoadMoreSection
+              visibleCount={visibleProducts.length}
+              totalCount={wishlistProducts.length}
+              hasMore={hasMore}
+              onLoadMore={() => setVisibleCount((count) => count + PAGE_SIZE)}
+            />
+          </ScrollReveal>
+        </div>
+      ) : null}
 
       <WishlistAddToBagPanel
         open={Boolean(addToBagProductId)}

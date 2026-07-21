@@ -237,7 +237,7 @@ function CollectionHeroPanel({
           "absolute z-10 text-white",
           isMobile
             ? "inset-x-0 top-[323px] flex flex-col items-center gap-6 px-4 text-center"
-            : "bottom-0 left-40 flex max-w-[418px] flex-col-reverse items-start",
+            : "bottom-0 left-10 flex max-w-[418px] flex-col-reverse items-start",
         )}
       >
         {isMobile ? (
