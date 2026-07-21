@@ -3,7 +3,18 @@ export type FieldValidation = {
   error?: string;
 };
 
-export const formFieldErrorClassName = "font-gill text-sm leading-110 text-[#B42318]";
+/** Figma 2556:10875 — form field error state */
+export const formFieldErrorTextColor = "#F91616";
+export const formFieldErrorBackgroundColor = "#FEDCDC";
+
+export const formFieldErrorClassName =
+  "font-gill text-base leading-110 text-[#F91616]";
+
+export const invalidFieldClassName =
+  "border border-[#F91616] bg-[#FEDCDC]";
+
+export const invalidFieldContainerClassName =
+  "border border-[#F91616] bg-[#FEDCDC]";
 
 export const validateRequiredName = (value: string): FieldValidation => {
   const trimmed = value.trim();
@@ -215,8 +226,6 @@ export const validateRequiredSelection = (
 
   return { valid: true };
 };
-
-export const invalidFieldClassName = "border border-[#B42318]";
 
 export type AppointmentContactValues = {
   name: string;

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
+import { invalidFieldClassName } from "@/shared/utils/formValidation";
 
 const SELECT_CHEVRON_ICON = "/images/jewellery/chevron-down-filter.svg";
 
@@ -103,7 +104,7 @@ const InlineCustomSelect = ({
         className={cn(
           "flex h-[56px] w-full items-center justify-between bg-[#F2F2F2] p-[12px] font-gill text-sm leading-110 outline-none",
           isOpen ? "border border-darkblack" : "border border-transparent",
-          invalid && !isOpen && "ring-1 ring-[#B42318]",
+          invalid && !isOpen && invalidFieldClassName,
           showPlaceholder && !isOpen ? "font-light text-neutral400" : "font-normal text-darkblack",
         )}
       >

@@ -12,7 +12,9 @@ import {
   type MockOffer,
 } from "@/shared/data/offersAndDealsMock";
 import type { OffersAndDealsVariant } from "@/shared/data/offersAndDealsSpec";
+import FormFieldError from "@/shared/ui/FormFieldError";
 import { cn } from "@/shared/utils/cn";
+import { invalidFieldContainerClassName } from "@/shared/utils/formValidation";
 import Image from "next/image";
 
 export const OFFERS_EMPTY_MESSAGE =
@@ -48,6 +50,7 @@ type PromoFieldProps = {
   placeholder?: string;
   applyLabel?: string;
   disabled?: boolean;
+  hasError?: boolean;
 };
 
 const PromoField = ({
@@ -59,12 +62,18 @@ const PromoField = ({
   placeholder = "Enter",
   applyLabel = "Apply",
   disabled = false,
+  hasError = false,
 }: PromoFieldProps) => (
   <div className="flex flex-col gap-2">
     <label htmlFor={id} className="font-gill text-base font-normal leading-110 text-darkblack">
       {label}
     </label>
-    <div className="flex h-14 items-center gap-4 lg:bg-aboutInactive bg-white px-3">
+    <div
+      className={cn(
+        "flex h-14 items-center gap-4 border border-transparent bg-white px-3 lg:bg-aboutInactive",
+        hasError && invalidFieldContainerClassName,
+      )}
+    >
       <input
         id={id}
         type="text"
@@ -242,12 +251,9 @@ const OffersAndDealsExpandedContent = ({
         onApply={applyGiftCard}
         placeholder="Enter code"
         disabled={Boolean(appliedGiftCard)}
+        hasError={Boolean(errorMessage)}
       />
-      {errorMessage &&
-        <p className="font-gill text-sm font-light leading-110 text-[#B42318]" role="alert">
-          {errorMessage}
-        </p>
-      }
+      <FormFieldError message={errorMessage ?? undefined} />
       {hasApplied &&
         <AppliedSummary
           offer={appliedOffer}

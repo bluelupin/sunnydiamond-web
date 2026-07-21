@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
+import { invalidFieldContainerClassName } from "@/shared/utils/formValidation";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover";
 
 const WEEKDAY_LABELS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"] as const;
@@ -117,8 +118,8 @@ const AppointmentDateField = ({
           aria-haspopup="dialog"
           aria-expanded={open}
           className={cn(
-            "relative flex h-14 w-full items-center bg-[#F2F2F2] px-3 text-left",
-            hasError && "ring-1 ring-[#B42318]",
+            "relative flex h-14 w-full items-center border border-transparent bg-[#F2F2F2] px-3 text-left",
+            hasError && invalidFieldContainerClassName,
           )}
         >
           <span

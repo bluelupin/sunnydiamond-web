@@ -18,6 +18,7 @@ import { TRY_AT_HOME_INDIAN_STATES } from "@/features/products/data/tryAtHomeCon
 import { useCurrentLocationAddress } from "@/shared/hooks/use-current-location-address";
 import {
   invalidFieldClassName,
+  invalidFieldContainerClassName,
   sanitizePincodeInput,
   validateAddressLine1,
   validateCity,
@@ -377,8 +378,8 @@ const TryAtHomeAddressStep = ({ onBack, onClose, onSubmit }: TryAtHomeAddressSte
               </label>
               <div
                 className={cn(
-                  "flex h-14 w-full items-center bg-aboutInactive px-3",
-                  showError("state") && "ring-1 ring-destructive",
+                  "flex h-14 w-full items-center border border-transparent bg-aboutInactive px-3",
+                  showError("state") && invalidFieldContainerClassName,
                 )}
               >
                 <select

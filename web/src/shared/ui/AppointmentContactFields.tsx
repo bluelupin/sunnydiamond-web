@@ -14,6 +14,7 @@ import AppointmentDateField from "@/shared/ui/AppointmentDateField";
 import {
   getMinSelectableDate,
   invalidFieldClassName,
+  invalidFieldContainerClassName,
   sanitizePhoneInput,
   type AppointmentContactField,
 } from "@/shared/utils/formValidation";
@@ -102,8 +103,9 @@ const AppointmentContactFields = ({
           aria-describedby={showError("name") ? `${idPrefix}-name-error` : undefined}
           className={cn(
             fieldClassName,
-            "border border-transparent focus:border-darkblack",
-            showError("name") && invalidFieldClassName,
+            showError("name")
+              ? invalidFieldClassName
+              : "border border-transparent focus:border-darkblack",
           )}
         />
         <FormFieldError id={`${idPrefix}-name-error`} message={showError("name") ? errors.name : undefined} />
@@ -115,8 +117,8 @@ const AppointmentContactFields = ({
         </label>
         <div
           className={cn(
-            "flex h-14 w-full items-center gap-2 bg-[#F2F2F2] px-3",
-            showError("phone") && "ring-1 ring-[#B42318]",
+            "flex h-14 w-full items-center gap-2 border border-transparent bg-[#F2F2F2] px-3",
+            showError("phone") && invalidFieldContainerClassName,
           )}
         >
           <div className="relative flex shrink-0 items-center">

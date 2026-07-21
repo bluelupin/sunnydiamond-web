@@ -46,7 +46,7 @@ export const offersAndDealsSpec = {
     messageAlign: "center" as const,
     backgroundCart: "#FBFAF6",
     backgroundCheckout: "#F4F3EE",
-    errorColor: "#B42318",
+    errorColor: "#F91616",
     successColor: "#47CB6C",
   },
 } as const;
