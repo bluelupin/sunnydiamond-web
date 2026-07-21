@@ -34,6 +34,8 @@ type BespokeFeaturedStoryModalProps = {
   slide: FeaturedStoryModalSlide | null;
   modalCtaLabel: string;
   modalCtaHref: string;
+  initialImageIndex?: number;
+  elevated?: boolean;
   onClose: () => void;
 };
 
@@ -244,6 +246,7 @@ type FeaturedStoryModalPanelProps = {
   slide: FeaturedStoryModalSlide;
   modalCtaLabel: string;
   modalCtaHref: string;
+  initialImageIndex?: number;
   onClose: () => void;
 };
 
@@ -251,13 +254,14 @@ const FeaturedStoryModalPanel = ({
   slide,
   modalCtaLabel,
   modalCtaHref,
+  initialImageIndex = 0,
   onClose,
 }: FeaturedStoryModalPanelProps) => {
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [activeImageIndex, setActiveImageIndex] = useState(initialImageIndex);
 
   useEffect(() => {
-    setActiveImageIndex(0);
-  }, [slide.src]);
+    setActiveImageIndex(initialImageIndex);
+  }, [slide.src, initialImageIndex]);
 
   return (
     <div className="relative flex h-full min-h-0 w-full flex-col bg-black max-md:h-[100vh] max-md:w-full">
@@ -275,8 +279,8 @@ const FeaturedStoryModalPanel = ({
           className="absolute md:right-6 right-4 md:top-10 top-6 z-20 inline-flex size-6 items-center justify-center text-white transition-opacity hover:opacity-70"
         >
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden className="md:w-8 md:h-8 w-6 h-6" >
-            <path d="M24 8L8 24" stroke="white" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M24 24L8 8" stroke="white" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M24 8L8 24" stroke="white" strokeWidth="1.33333" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M24 24L8 8" stroke="white" strokeWidth="1.33333" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </button>
       </div>
@@ -313,6 +317,8 @@ const BespokeFeaturedStoryModal = ({
   slide,
   modalCtaLabel,
   modalCtaHref,
+  initialImageIndex = 0,
+  elevated = false,
   onClose,
 }: BespokeFeaturedStoryModalProps) => {
   useFeaturedStoryModalEffects(open, onClose);
@@ -322,7 +328,7 @@ const BespokeFeaturedStoryModal = ({
   }
 
   return (
-    <div className="fixed inset-0 z-[70] flex md:justify-end">
+    <div className={cn("fixed inset-0 flex md:justify-end", elevated ? "z-[80]" : "z-[70]")}>
       <button
         type="button"
         aria-label="Close featured story"
@@ -346,9 +352,11 @@ const BespokeFeaturedStoryModal = ({
         )}
       >
         <FeaturedStoryModalPanel
+          key={`${slide.src}-${initialImageIndex}-${slide.modalImages[initialImageIndex]?.src ?? ""}`}
           slide={slide}
           modalCtaLabel={modalCtaLabel}
           modalCtaHref={modalCtaHref}
+          initialImageIndex={initialImageIndex}
           onClose={onClose}
         />
       </aside>

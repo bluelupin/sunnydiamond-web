@@ -94,6 +94,54 @@ export const bespokeFeaturedStoryModalFigmaSpec = {
   swipeThresholdPx: 48,
 } as const;
 
+/** Figma — Past Creations full-screen masonry gallery */
+export const bespokePastCreationsFigmaSpec = {
+  columnGap: 8,
+  closeIconSize: 24,
+  closeTop: 24,
+  closeRight: 24,
+} as const;
+
+export type BespokePastCreationImage = {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+};
+
+export const bespokePastCreationsImages: readonly BespokePastCreationImage[] = [
+  { src: "/images/bespoke/featured-gallery-left-1.png", alt: "Gold ring on silk fabric", width: 400, height: 520 },
+  { src: "/images/bespoke/featured-left-1.jpg", alt: "Hand wearing bespoke diamond ring", width: 400, height: 560 },
+  { src: "/images/bespoke/featured-gallery-center.png", alt: "Bespoke bracelet with henna", width: 400, height: 640 },
+  { src: "/images/bespoke/featured-center.jpg", alt: "Bespoke bracelet detail", width: 400, height: 480 },
+  { src: "/images/bespoke/featured-gallery-left-2.png", alt: "Gold ring close-up on fabric", width: 400, height: 360 },
+  { src: "/images/bespoke/featured-left-2.jpg", alt: "Bespoke ring craftsmanship", width: 400, height: 500 },
+  { src: "/images/bespoke/featured-gallery-right-1.png", alt: "Bespoke ring detail", width: 400, height: 440 },
+  { src: "/images/bespoke/featured-right-1.jpg", alt: "Bespoke ring finish", width: 400, height: 580 },
+  { src: "/images/bespoke/featured-gallery-right-2.png", alt: "Bespoke ring alternate angle", width: 400, height: 380 },
+  { src: "/images/bespoke/featured-right-2.jpg", alt: "Bespoke ring on hand", width: 400, height: 520 },
+  { src: "/images/bespoke/featured-background.jpg", alt: "Bespoke jewellery styling", width: 400, height: 460 },
+  { src: "/images/bespoke/story-step-01.jpg", alt: "Hand sketching a bespoke design", width: 400, height: 300 },
+  { src: "/images/bespoke/story-step-02.jpg", alt: "Craftsman working on bespoke jewellery", width: 400, height: 300 },
+  { src: "/images/bespoke/story-step-03.jpg", alt: "Finished bespoke jewellery piece", width: 400, height: 300 },
+  { src: "/images/jewellery/plp/modal-lifestyle-1.webp", alt: "Model wearing diamond necklace", width: 400, height: 620 },
+  { src: "/images/jewellery/plp/modal-lifestyle-2.webp", alt: "Model wearing emerald jewellery", width: 400, height: 540 },
+  { src: "/images/home/featured-products/featured-product-left.png", alt: "Featured diamond ring", width: 400, height: 480 },
+  { src: "/images/home/featured-products/featured-product-center.png", alt: "Featured pendant necklace", width: 400, height: 560 },
+  { src: "/images/home/featured-products/featured-product-right.png", alt: "Featured earrings", width: 400, height: 420 },
+  { src: "/images/collection/thumb-1.webp", alt: "Bridal jewellery collection", width: 400, height: 500 },
+  { src: "/images/collection/thumb-2.png", alt: "Diamond necklace collection", width: 400, height: 380 },
+  { src: "/images/collection/thumb-3.webp", alt: "Gold ring collection", width: 400, height: 460 },
+  { src: "/images/collection/thumb-4.webp", alt: "Emerald jewellery collection", width: 400, height: 540 },
+  { src: "/images/collection/thumb-5.png", alt: "Ruby pendant collection", width: 400, height: 400 },
+  { src: "/images/about/craftsmanship-764d7a.webp", alt: "Jewellery craftsmanship detail", width: 400, height: 320 },
+  { src: "/images/about/handcrafted-intersect.webp", alt: "Handcrafted jewellery process", width: 400, height: 480 },
+  { src: "/images/products/pdp/gallery-product-image-lifestyle.png", alt: "Lifestyle jewellery photography", width: 400, height: 580 },
+  { src: "/images/home/crafting-rarity-necklace.png", alt: "Crafted diamond necklace", width: 400, height: 440 },
+  { src: "/images/home/valentine-rings.png", alt: "Diamond rings collection", width: 400, height: 360 },
+  { src: "/images/bespoke/hero.jpg", alt: "Model wearing bespoke diamond earrings", width: 400, height: 520 },
+] as const;
+
 export const bespokePageContent = {
   hero: {
     title: "Bespoke Jewellery",
@@ -222,7 +270,10 @@ export const bespokePageContent = {
     primaryCtaLabel: "Behind This Design",
     primaryCtaHref: "/about",
     secondaryCtaLabel: "See Past Creations",
-    secondaryCtaHref: "/products",
+  },
+  pastCreations: {
+    title: "Past Creations",
+    images: bespokePastCreationsImages,
   },
   guarantees: [
     {
@@ -252,3 +303,24 @@ export const bespokePageContent = {
     },
   },
 } as const;
+
+type FeaturedStorySlide = (typeof bespokePageContent.featuredStories.slides)[number];
+
+export const resolvePastCreationStory = (
+  slides: readonly FeaturedStorySlide[],
+  imageSrc: string,
+  defaultSlideIndex: number,
+): { slideIndex: number; imageIndex: number } => {
+  for (let slideIndex = 0; slideIndex < slides.length; slideIndex += 1) {
+    const slide = slides[slideIndex];
+    const imageIndex = slide.modalImages.findIndex((image) => image.src === imageSrc);
+    if (imageIndex >= 0) {
+      return { slideIndex, imageIndex };
+    }
+    if (slide.src === imageSrc) {
+      return { slideIndex, imageIndex: 0 };
+    }
+  }
+
+  return { slideIndex: defaultSlideIndex, imageIndex: 0 };
+};

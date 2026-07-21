@@ -16,12 +16,23 @@ import { cn } from "@/shared/utils/cn";
 import {
   bespokeFeaturedStoriesFigmaSpec,
   bespokePageContent,
+  resolvePastCreationStory,
+  type BespokePastCreationImage,
 } from "@/features/bespoke/data/content";
 import BespokeFeaturedStoryModal from "@/features/bespoke/components/BespokeFeaturedStoryModal";
+import BespokePastCreationsModal from "@/features/bespoke/components/BespokePastCreationsModal";
 import Reveal from "@/shared/Animation/Reveal";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 
 type FeaturedSlide = (typeof bespokePageContent.featuredStories.slides)[number];
+
+type FeaturedStoryModalSlide = {
+  src: string;
+  alt: string;
+  modalTitle: string;
+  modalDescription: string;
+  modalImages: readonly { src: string; alt: string }[];
+};
 
 const spec = bespokeFeaturedStoriesFigmaSpec;
 const GALLERY_SLOTS = [-2, -1, 0, 1, 2] as const;
@@ -536,8 +547,8 @@ type FeaturedStoriesLayoutProps = {
   title: string;
   primaryCtaHref: string;
   primaryCtaLabel: string;
-  secondaryCtaHref: string;
   secondaryCtaLabel: string;
+  onSecondaryCtaClick: () => void;
 };
 
 const FeaturedStoriesLayout = ({
@@ -550,8 +561,8 @@ const FeaturedStoriesLayout = ({
   title,
   primaryCtaHref,
   primaryCtaLabel,
-  secondaryCtaHref,
   secondaryCtaLabel,
+  onSecondaryCtaClick,
 }: FeaturedStoriesLayoutProps) => {
   return (
     <section aria-labelledby="bespoke-featured-stories-title" className=" bg-gray200">
@@ -581,32 +592,73 @@ const FeaturedStoriesLayout = ({
         >
           <span className="relative z-10">{primaryCtaLabel}</span>
         </Link>
-        <DetailTextLink href={secondaryCtaHref} className="uppercase">{secondaryCtaLabel}</DetailTextLink>
+        <DetailTextLink onClick={onSecondaryCtaClick} className="uppercase">{secondaryCtaLabel}</DetailTextLink>
       </div>
     </section>
   );
 };
 
 const BespokeFeaturedStoriesSection = () => {
-  const { featuredStories } = bespokePageContent;
+  const { featuredStories, pastCreations } = bespokePageContent;
   const { slides, defaultSlideIndex } = featuredStories;
   const [activeIndex, setActiveIndex] = useState<number>(defaultSlideIndex);
   const [selectedIndex, setSelectedIndex] = useState<number>(defaultSlideIndex);
   const [modalOpen, setModalOpen] = useState(false);
+  const [pastCreationsOpen, setPastCreationsOpen] = useState(false);
+  const [modalContext, setModalContext] = useState<{ slideIndex: number; imageIndex: number } | null>(
+    null,
+  );
+  const [modalSlideOverride, setModalSlideOverride] = useState<FeaturedStoryModalSlide | null>(null);
 
   const handleSlideStart = useCallback((index: number) => {
     setSelectedIndex(index);
   }, []);
 
   const handleCenterOpen = useCallback(() => {
+    setModalSlideOverride(null);
+    setModalContext({ slideIndex: selectedIndex, imageIndex: 0 });
     setModalOpen(true);
-  }, []);
+  }, [selectedIndex]);
 
   const handleModalClose = useCallback(() => {
     setModalOpen(false);
+    setModalContext(null);
+    setModalSlideOverride(null);
   }, []);
 
-  const modalSlide = slides[selectedIndex] ?? slides[defaultSlideIndex];
+  const handlePastCreationsOpen = useCallback(() => {
+    setPastCreationsOpen(true);
+  }, []);
+
+  const handlePastCreationsClose = useCallback(() => {
+    setPastCreationsOpen(false);
+  }, []);
+
+  const handlePastCreationImageClick = useCallback(
+    (image: BespokePastCreationImage) => {
+      const resolved = resolvePastCreationStory(slides, image.src, defaultSlideIndex);
+      const baseSlide = slides[resolved.slideIndex];
+      const matchedIndex = baseSlide.modalImages.findIndex((item) => item.src === image.src);
+
+      if (matchedIndex >= 0) {
+        setModalSlideOverride(null);
+        setModalContext({ slideIndex: resolved.slideIndex, imageIndex: matchedIndex });
+      } else {
+        setModalSlideOverride({
+          ...baseSlide,
+          modalImages: [{ src: image.src, alt: image.alt }, ...baseSlide.modalImages],
+        });
+        setModalContext({ slideIndex: resolved.slideIndex, imageIndex: 0 });
+      }
+
+      setModalOpen(true);
+    },
+    [defaultSlideIndex, slides],
+  );
+
+  const modalSlide: FeaturedStoryModalSlide | null =
+    modalSlideOverride ??
+    (modalContext !== null ? slides[modalContext.slideIndex] ?? slides[defaultSlideIndex] : null);
 
   const sharedProps = {
     slides,
@@ -618,8 +670,8 @@ const BespokeFeaturedStoriesSection = () => {
     title: featuredStories.title,
     primaryCtaHref: featuredStories.primaryCtaHref,
     primaryCtaLabel: featuredStories.primaryCtaLabel,
-    secondaryCtaHref: featuredStories.secondaryCtaHref,
     secondaryCtaLabel: featuredStories.secondaryCtaLabel,
+    onSecondaryCtaClick: handlePastCreationsOpen,
   };
 
   return (
@@ -628,9 +680,18 @@ const BespokeFeaturedStoriesSection = () => {
       <BespokeFeaturedStoryModal
         open={modalOpen}
         slide={modalSlide}
+        initialImageIndex={modalContext?.imageIndex ?? 0}
+        elevated={pastCreationsOpen}
         modalCtaLabel={featuredStories.modalCtaLabel}
         modalCtaHref={featuredStories.modalCtaHref}
         onClose={handleModalClose}
+      />
+      <BespokePastCreationsModal
+        open={pastCreationsOpen}
+        images={pastCreations.images}
+        onClose={handlePastCreationsClose}
+        onImageClick={handlePastCreationImageClick}
+        suppressEscape={modalOpen}
       />
     </>
   );
