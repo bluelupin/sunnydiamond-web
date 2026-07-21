@@ -30,9 +30,16 @@ const CartPriceDetails = ({
   stickyOnMobile = false,
   children,
 }: CartPriceDetailsProps) => {
-  const { subtotal, taxes, totalPrice } = useCart();
+  const { subtotal, taxes, shipping, totalPrice, selectedShippingMethod } = useCart();
   const { openGiftingPanel } = useCartUI();
   const [offersOpen, setOffersOpen] = useState(false);
+
+  const shippingLabel =
+    shipping === 0 && !selectedShippingMethod
+      ? "Calculated at checkout"
+      : shipping === 0
+        ? "Free"
+        : formatCartPrice(shipping);
 
   const showBreakdown = !compact;
   const showOffers = !compact;
@@ -58,7 +65,7 @@ const CartPriceDetails = ({
           <div className="flex flex-col gap-3">
             <CartPriceRow label="Subtotal" value={formatCartPrice(subtotal)} />
             <CartPriceRow label="Taxes" value={formatCartPrice(taxes)} />
-            <CartPriceRow label="Shipping" value="Free" />
+            <CartPriceRow label="Shipping" value={shippingLabel} />
           </div>
 
           <CartDivider weight={1} />

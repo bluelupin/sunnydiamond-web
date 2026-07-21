@@ -75,9 +75,16 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
         <div className="flex min-w-0 flex-1 gap-4 lg:max-w-[499.5px] lg:gap-6">
           <Link
             href={productHref}
-            className="relative h-[68px] w-[91px] shrink-0 overflow-hidden bg-white lg:h-[105px] lg:w-[140px]"
+            className="relative size-[68px] shrink-0 overflow-hidden bg-white lg:size-[140px]"
           >
-            <OptimizedImage src={product.image} alt={product.name} />
+            <OptimizedImage
+              src={product.image}
+              alt={product.name}
+              width={140}
+              height={140}
+              className="size-full object-contain"
+              sizes="(max-width: 1024px) 68px, 140px"
+            />
           </Link>
 
           <div className="flex min-w-0 flex-1 flex-col lg:w-[176px] lg:max-w-[176px] gap-8">

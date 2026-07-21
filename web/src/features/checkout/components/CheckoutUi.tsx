@@ -269,6 +269,7 @@ type CheckoutRadioOptionProps = {
   label: React.ReactNode;
   children?: React.ReactNode;
   align?: "center" | "start";
+  disabled?: boolean;
 };
 
 export const CheckoutRadioRow = ({
@@ -276,10 +277,12 @@ export const CheckoutRadioRow = ({
   onChange,
   label,
   align = "center",
+  disabled = false,
 }: Omit<CheckoutRadioOptionProps, "children">) => (
   <label
     className={cn(
-      "flex cursor-pointer gap-2",
+      "flex gap-2",
+      disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
       align === "start" ? "items-start" : "items-center",
     )}
   >
@@ -287,7 +290,12 @@ export const CheckoutRadioRow = ({
       type="button"
       role="radio"
       aria-checked={checked}
-      onClick={onChange}
+      disabled={disabled}
+      onClick={() => {
+        if (!disabled) {
+          onChange();
+        }
+      }}
       className={cn(
         "flex size-6 shrink-0 items-center justify-center rounded-full border-[0.8px] border-darkblack bg-white",
         align === "start" && "mt-1",

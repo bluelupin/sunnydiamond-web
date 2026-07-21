@@ -5,7 +5,7 @@ import { cn } from "@/shared/utils/cn";
 import { useCart } from "@/features/cart/context/CartContext";
 import { useToast } from "@/shared/hooks/use-toast";
 import { trackEvent } from "@/infrastructure/analytics/use-gtag";
-import { CartOutlineLink } from "@/features/cart/components/CartFlowUi";
+import { CartPrimaryLink } from "@/features/cart/components/CartFlowUi";
 import type { CartLineItem } from "@/features/cart/types/cart.types";
 import CheckoutOrderSummary from "./CheckoutOrderSummary";
 import CheckoutMobileOrderSummaryDrawer from "./CheckoutMobileOrderSummaryDrawer";
@@ -32,17 +32,35 @@ import {
   type CheckoutPaymentData,
   type CheckoutStep,
 } from "../types/checkout.types";
+import {
+  completeGuestCheckout,
+  ensureGuestCartId,
+  prepareGuestCheckoutForPayment,
+} from "@/services/magento/cart/cart.service";
+import { readCartLineMetadata } from "@/services/magento/cart/cartSession";
+import { MagentoGraphqlError } from "@/services/magento/magento.errors";
 
 const CheckoutPage = () => {
-  const { items, totalPrice, clearCart } = useCart();
+  const {
+    items,
+    totalPrice,
+    clearCart,
+    applyMagentoCartState,
+    selectShippingMethod,
+    shippingMethods,
+    selectedShippingMethod,
+    isUpdating,
+  } = useCart();
   const { toast } = useToast();
 
   const [step, setStep] = useState<CheckoutStep>("form");
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [phoneVerified, setPhoneVerified] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [isSavingAddresses, setIsSavingAddresses] = useState(false);
   const [placedItems, setPlacedItems] = useState<CartLineItem[]>([]);
   const [placedTotal, setPlacedTotal] = useState(0);
+  const [placedOrderNumber, setPlacedOrderNumber] = useState<string | null>(null);
 
   const [form, setForm] = useState<CheckoutFormData>(createEmptyCheckoutForm);
   const [payment, setPayment] = useState<CheckoutPaymentData>(createEmptyPaymentForm);
@@ -104,13 +122,20 @@ const CheckoutPage = () => {
         <h1 className="font-larken text-2xl font-light leading-110 text-darkblack">
           No items to checkout
         </h1>
-        <CartOutlineLink href="/jewellery-product" className="w-fit">Continue Shopping</CartOutlineLink>
+        <CartPrimaryLink href="/jewellery" className="w-fit">Continue Shopping</CartPrimaryLink>
       </section>
     );
   }
 
   if (step === "success") {
-    return <CheckoutSuccessView contact={form.phoneOrEmail} items={placedItems} totalPrice={placedTotal} />;
+    return (
+      <CheckoutSuccessView
+        contact={form.phoneOrEmail}
+        items={placedItems}
+        totalPrice={placedTotal}
+        orderNumber={placedOrderNumber}
+      />
+    );
   }
 
   const handleVerifyPhone = () => {
@@ -141,37 +166,116 @@ const CheckoutPage = () => {
         return;
       }
 
-      setStep("payment");
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      void (async () => {
+        setIsSavingAddresses(true);
+
+        try {
+          const cartId = await ensureGuestCartId();
+          const state = await prepareGuestCheckoutForPayment(
+            cartId,
+            form,
+            readCartLineMetadata(),
+          );
+          applyMagentoCartState(state);
+          setStep("payment");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        } catch (error) {
+          const description =
+            error instanceof MagentoGraphqlError
+              ? error.message
+              : error instanceof Error
+                ? error.message
+                : "Please check your address details and try again.";
+
+          toast({
+            title: "Could not save delivery address",
+            description,
+          });
+        } finally {
+          setIsSavingAddresses(false);
+        }
+      })();
     });
   };
 
   const placeOrder = () => {
     paymentValidation.validateSubmit(() => {
-      setSubmitting(true);
-      window.setTimeout(() => {
-        trackEvent("purchase", {
-          currency: "INR",
-          value: totalPrice,
-          items: items.map((item) => ({
-            item_id: item.product.id,
-            item_name: item.product.name,
-            price: item.product.price,
-            quantity: item.quantity,
-          })),
-        });
-        setPlacedItems([...items]);
-        setPlacedTotal(totalPrice);
-        clearCart();
-        setSubmitting(false);
-        setStep("success");
-        toast({ title: "Order placed!", description: "Your order has been placed successfully." });
-      }, 1200);
+      void (async () => {
+        setSubmitting(true);
+
+        try {
+          const cartId = await ensureGuestCartId();
+
+          if (!cartId) {
+            throw new Error("Your shopping bag could not be found. Please try again.");
+          }
+
+          if (requiresShippingSelection) {
+            toast({
+              title: "Shipping required",
+              description: "Please select a shipping method before placing your order.",
+            });
+            return;
+          }
+
+          const order = await completeGuestCheckout(
+            cartId,
+            payment.method,
+            readCartLineMetadata(),
+          );
+
+          trackEvent("purchase", {
+            currency: "INR",
+            value: totalPrice,
+            transaction_id: order.orderNumber,
+            items: items.map((item) => ({
+              item_id: item.product.id,
+              item_name: item.product.name,
+              price: item.product.price,
+              quantity: item.quantity,
+            })),
+          });
+
+          setPlacedItems([...items]);
+          setPlacedTotal(totalPrice);
+          setPlacedOrderNumber(order.orderNumber);
+          clearCart();
+          setStep("success");
+          toast({
+            title: "Order placed!",
+            description: `Order #${order.orderNumber} has been placed successfully.`,
+          });
+        } catch (error) {
+          const description =
+            error instanceof MagentoGraphqlError
+              ? error.message
+              : error instanceof Error
+                ? error.message
+                : "We could not place your order. Please try again.";
+
+          toast({
+            title: "Order could not be placed",
+            description,
+          });
+        } finally {
+          setSubmitting(false);
+        }
+      })();
     });
   };
 
-  const sidebarCtaLabel = step === "payment" ? "Pay Now" : "Continue to Payment";
-  const ctaDisabled = submitting;
+  const requiresShippingSelection = shippingMethods.length > 0 && !selectedShippingMethod;
+  const sidebarCtaLabel =
+    step === "payment"
+      ? submitting
+        ? "Placing order..."
+        : isUpdating
+          ? "Updating..."
+          : "Pay Now"
+      : isSavingAddresses
+        ? "Saving address..."
+        : "Continue to Payment";
+  const ctaDisabled = submitting || isSavingAddresses || isUpdating || requiresShippingSelection;
   const handleSidebarCta = step === "payment" ? placeOrder : handleContinueToPayment;
 
   const handleFormChange = (field: keyof CheckoutFormData, value: string | boolean) => {
@@ -225,6 +329,12 @@ const CheckoutPage = () => {
               <CheckoutPaymentStep
                 form={form}
                 payment={payment}
+                shippingMethods={shippingMethods}
+                selectedShippingMethod={selectedShippingMethod}
+                onShippingMethodChange={(carrierCode, methodCode) => {
+                  void selectShippingMethod(carrierCode, methodCode);
+                }}
+                shippingSelectionDisabled={isUpdating}
                 onPaymentChange={updatePayment}
                 onEditPersonal={() => setStep("form")}
                 onEditDelivery={() => setStep("form")}

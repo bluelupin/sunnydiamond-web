@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Heart } from "lucide-react";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { cn } from "@/shared/utils/cn";
 import { formatJewelleryPrice } from "../utils/formatPrice";
@@ -223,7 +222,7 @@ const JewelleryProductCard = ({
         aria-label={`View ${title}`}
       />
 
-      <div className="pointer-events-none col-start-1 row-start-1 z-40 flex justify-end self-start px-[16px] pt-[24px] md:px-[24px] md:pt-10">
+      <div className="pointer-events-none col-start-1 row-start-1 z-50 flex justify-end self-start px-[16px] pt-[24px] md:px-[24px] md:pt-10">
         <button
           type="button"
           aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
@@ -233,20 +232,8 @@ const JewelleryProductCard = ({
             event.stopPropagation();
             onToggleWishlist?.();
           }}
-          className="pointer-events-auto flex size-6 items-center justify-center md:size-[32px]"
+          className="pointer-events-auto relative z-50 flex size-6 items-center justify-center md:size-[32px]"
         >
-          {/* <Heart
-            size={20}
-            strokeWidth={1.5}
-            className={cn(
-              "transition-colors duration-200",
-              isWishlisted
-                ? "fill-[#AB863B] text-linkGold"
-                : isMobileLifestyle
-                  ? "text-white"
-                  : "text-darkblack md:group-hover:text-white",
-            )}
-          /> */}
           <svg
             width="29"
             height="26"
@@ -255,17 +242,18 @@ const JewelleryProductCard = ({
             className={cn(
               "transition-colors duration-200",
               isWishlisted
-                ? "fill-[#AB863B] text-linkGold group-hover:text-linkGold"
-                : "fill-none text-darkblack group-hover:text-white",
-              // isMobileLifestyle
-              //   ? "text-white"
-              //   : "text-linkGold"
+                ? "fill-[#AB863B] text-linkGold drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]"
+                : isMobileLifestyle
+                  ? "fill-none text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)]"
+                  : hasHoverImage
+                    ? "fill-none text-darkblack drop-shadow-none md:group-hover:text-white md:group-hover:drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]"
+                    : "fill-none text-darkblack",
             )}
           >
             <path
               d="M27.4999 8.64967C27.4999 10.7116 26.7082 12.6922 25.2943 14.1572C22.0398 17.5307 18.8831 21.0484 15.507 24.2996C15.1194 24.6675 14.6179 24.8444 14.1209 24.8328C13.6256 24.8213 13.1346 24.6228 12.765 24.2396L3.03826 14.1572C0.0982486 11.1096 0.0982486 6.18968 3.03826 3.14213C6.00717 0.0646404 10.8438 0.0646404 13.8127 3.14213L14.1663 3.5086L14.5196 3.14235C15.9431 1.66604 17.8818 0.833374 19.907 0.833374C21.9322 0.833374 23.8707 1.66596 25.2943 3.14213C26.7083 4.60731 27.4999 6.58773 27.4999 8.64967Z"
               stroke="currentColor"
-              fill="currentFill"
+              fill={isWishlisted ? "currentColor" : "none"}
               strokeWidth="1.66667"
               strokeLinejoin="round"
             />

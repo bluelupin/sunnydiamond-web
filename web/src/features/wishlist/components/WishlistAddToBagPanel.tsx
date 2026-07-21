@@ -8,7 +8,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui/select";
-import { getProductById } from "@/features/products/data/products";
 import {
   getProductDetailContent,
   getProductDetailPricing,
@@ -24,51 +23,106 @@ import ProductWishlistDetailGalleryCarousel from "@/features/products/components
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
 import type { AddToBagPayload } from "@/features/cart/types/cart.types";
+import type { Product } from "@/features/products/data/products";
+import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 import { wishlistPageContent } from "@/features/wishlist/data/content";
-import { getWishlistProductHref } from "@/features/wishlist/utils/resolveWishlistProducts";
+import { getWishlistProductHref } from "@/features/wishlist/utils/wishlistProduct.utils";
+import { fetchMagentoProductByUrlKey } from "@/services/magento/products/productDetail.service";
 import { cn } from "@/shared/utils/cn";
 
 type WishlistAddToBagPanelProps = {
   open: boolean;
-  productId: string | null;
+  product: JewelleryListingProduct | null;
   onClose: () => void;
   onAddToBag: (payload: AddToBagPayload) => void;
 };
 
 const WishlistAddToBagPanel = ({
   open,
-  productId,
+  product,
   onClose,
   onAddToBag,
 }: WishlistAddToBagPanelProps) => {
-  const baseId = productId?.split("-")[0] ?? "";
-  const product = getProductById(baseId);
-  const content = product ? getProductDetailContent(product) : null;
-  const pricing = product ? getProductDetailPricing(product) : null;
-
-  const [selectedMetal, setSelectedMetal] = useState(content?.metalColors[0]?.id ?? "gold");
+  const [detailProduct, setDetailProduct] = useState<Product | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedMetal, setSelectedMetal] = useState("gold");
   const [ringSize, setRingSize] = useState("");
   const [isRingSizeChartOpen, setIsRingSizeChartOpen] = useState(false);
 
   useEffect(() => {
-    if (!open || !productId || !product) return;
-    const detail = getProductDetailContent(product);
-    setSelectedMetal(detail.metalColors[0]?.id ?? "gold");
-    setRingSize("");
-  }, [open, productId, product]);
+    if (!open || !product?.urlKey) {
+      setDetailProduct(null);
+      setIsLoading(false);
+      return;
+    }
 
-  if (!open || !productId || !product || !content || !pricing) {
+    const controller = new AbortController();
+    setIsLoading(true);
+
+    void fetchMagentoProductByUrlKey(product.urlKey, controller.signal)
+      .then((fetchedProduct) => {
+        if (controller.signal.aborted) {
+          return;
+        }
+
+        setDetailProduct(fetchedProduct);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      controller.abort();
+    };
+  }, [open, product?.urlKey]);
+
+  const content = detailProduct ? getProductDetailContent(detailProduct) : null;
+  const pricing = detailProduct ? getProductDetailPricing(detailProduct) : null;
+
+  useEffect(() => {
+    if (!open || !detailProduct || !content) {
+      return;
+    }
+
+    setSelectedMetal(content.metalColors[0]?.id ?? "gold");
+    setRingSize("");
+  }, [open, detailProduct, content]);
+
+  if (!open || !product) {
     return (
       <RingSizeChartPanel open={isRingSizeChartOpen} onClose={() => setIsRingSizeChartOpen(false)} />
     );
   }
 
+  if (isLoading || !detailProduct || !content || !pricing) {
+    return (
+      <>
+        <ProductDetailSidePanelShell
+          open={open}
+          onClose={onClose}
+          overlayAriaLabel="Close product details"
+          dialogAriaLabel="Product details"
+          asideClassName="max-md:max-h-[calc(100vh-4rem)] md:h-[812px] md:max-w-[472px] max-w-full"
+        >
+          <div className="flex min-h-[320px] flex-1 items-center justify-center px-6">
+            <p className="sr-only" aria-live="polite">
+              Loading product details
+            </p>
+          </div>
+        </ProductDetailSidePanelShell>
+        <RingSizeChartPanel open={isRingSizeChartOpen} onClose={() => setIsRingSizeChartOpen(false)} />
+      </>
+    );
+  }
+
   const activeMetal = content.metalColors.find((metal) => metal.id === selectedMetal);
-  const productHref = getWishlistProductHref(productId);
+  const productHref = getWishlistProductHref(product);
 
   const handleAddToBag = () => {
     onAddToBag({
-      product,
+      product: detailProduct,
       options: {
         metal: activeMetal?.label,
         ringSize: ringSize || undefined,
@@ -88,7 +142,7 @@ const WishlistAddToBagPanel = ({
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           <div className="relative shrink-0">
             <ProductWishlistDetailGalleryCarousel
-              product={product}
+              product={detailProduct}
               imageMaxWidthClass="max-w-full"
             />
             <button
@@ -108,11 +162,11 @@ const WishlistAddToBagPanel = ({
             <div className="flex flex-col gap-6">
               <div className="flex flex-col gap-3">
                 <div className="flex items-start justify-between gap-4">
-                  <ul className="m-0 flex list-none flex-wrap items-center md:gap-3 gap-2 p-0">
+                  <ul className="m-0 flex list-none flex-wrap items-center gap-2 p-0 md:gap-3">
                     {content.attributes.map((attribute, index) => (
-                      <li key={attribute} className="flex items-center md:gap-3 gap-2">
+                      <li key={attribute} className="flex items-center gap-2 md:gap-3">
                         {index > 0 ? <AttributeSeparator /> : null}
-                        <span className="font-gill md:text-base text-sm font-light leading-110 text-neutral500">
+                        <span className="font-gill text-sm font-light leading-110 text-neutral500 md:text-base">
                           {attribute}
                         </span>
                       </li>
@@ -123,7 +177,7 @@ const WishlistAddToBagPanel = ({
                   </DetailTextLink>
                 </div>
                 <h2 className="font-larken text-2xl font-light leading-110 text-darkblack lg:text-32">
-                  {product.name}
+                  {detailProduct.name}
                 </h2>
               </div>
 
@@ -180,9 +234,11 @@ const WishlistAddToBagPanel = ({
               <div className="flex items-end justify-between gap-4">
                 <div className="flex items-center gap-3 font-gill text-2xl leading-110 text-darkblack">
                   <span>₹{formatJewelleryPrice(pricing.price)}</span>
-                  <span className="text-base text-gray600 line-through">
-                    ₹{formatJewelleryPrice(pricing.originalPrice)}
-                  </span>
+                  {pricing.originalPrice > pricing.price ? (
+                    <span className="text-base text-gray600 line-through">
+                      ₹{formatJewelleryPrice(pricing.originalPrice)}
+                    </span>
+                  ) : null}
                 </div>
                 <DetailTextLink href="/contact">View Price Breakup</DetailTextLink>
               </div>
@@ -193,7 +249,7 @@ const WishlistAddToBagPanel = ({
             </div>
           </PanelFooter>
         </div>
-      </ProductDetailSidePanelShell >
+      </ProductDetailSidePanelShell>
 
       <RingSizeChartPanel open={isRingSizeChartOpen} onClose={() => setIsRingSizeChartOpen(false)} />
     </>

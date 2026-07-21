@@ -78,13 +78,13 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
               ) : null}
 
               <div className="flex min-w-0 flex-1 items-center lg:gap-4 gap-2 lg:pr-4 pr-2">
-                <div className="relative h-[68px] w-[91px] shrink-0 overflow-hidden bg-white">
+                <div className="relative size-[68px] shrink-0 overflow-hidden bg-white lg:size-[91px]">
                   <Image
                     src={addedItem.product.image}
                     alt={addedItem.product.name}
                     fill
-                    className="object-cover"
-                    sizes="91px"
+                    className="object-contain"
+                    sizes="(max-width: 1023px) 68px, 91px"
                   />
                 </div>
                 <div className="flex min-w-0 max-w-[176px] flex-col gap-2">

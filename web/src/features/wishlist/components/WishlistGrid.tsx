@@ -6,20 +6,20 @@ import WishlistCard from "./WishlistCard";
 
 type WishlistGridProps = {
   products: JewelleryListingProduct[];
-  onRemove: (productId: string) => void;
-  onAddToBag: (productId: string) => void;
+  onRemove: (product: JewelleryListingProduct) => void;
+  onAddToBag: (product: JewelleryListingProduct) => void;
 };
 
 const WishlistGrid = ({ products, onRemove, onAddToBag }: WishlistGridProps) => {
   return (
     <ScrollReveal threshold={0.06} rootMargin="0px 0px -4% 0px">
-      <div className="grid w-full grid-cols-2 md:grid-cols-2 lg:grid-cols-3 md:gap-2 gap-1">
-        {products.map((product, index) => (
+      <div className="grid w-full grid-cols-2 gap-1 md:grid-cols-2 md:gap-2 lg:grid-cols-3">
+        {products.map((product) => (
           <WishlistCard
-            key={`${product.id}-${index}`}
+            key={product.sku}
             product={product}
-            onRemove={() => onRemove(product.id)}
-            onAddToBag={() => onAddToBag(product.id)}
+            onRemove={() => onRemove(product)}
+            onAddToBag={() => onAddToBag(product)}
           />
         ))}
       </div>

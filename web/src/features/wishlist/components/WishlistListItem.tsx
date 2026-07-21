@@ -5,7 +5,7 @@ import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
-import { getWishlistProductHref } from "@/features/wishlist/utils/resolveWishlistProducts";
+import { getWishlistProductHref } from "@/features/wishlist/utils/wishlistProduct.utils";
 import { wishlistPageContent } from "@/features/wishlist/data/content";
 
 type WishlistListItemProps = {
@@ -15,7 +15,7 @@ type WishlistListItemProps = {
 };
 
 const WishlistListItem = ({ product, onRemove, onAddToBag }: WishlistListItemProps) => {
-  const href = getWishlistProductHref(product.id);
+  const href = getWishlistProductHref(product);
 
   return (
     <article className="flex flex-col gap-4 px-4 py-6 w-full">

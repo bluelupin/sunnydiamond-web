@@ -1,6 +1,7 @@
 import { magentoGraphqlFetch } from "../graphqlClient";
 import { getMagentoJewelleryNavCategories } from "../categories/categories.service";
 import { MAGENTO_JEWELLERY_PRODUCTS_QUERY } from "./products.query";
+import { MAGENTO_PRODUCTS_BY_SKUS_QUERY } from "./productsBySkus.query";
 import {
   mapJewellerySortToMagento,
   mapMagentoProductsToJewelleryListing,
@@ -10,10 +11,18 @@ import {
   EMPTY_JEWELLERY_FILTER_FACETS,
   mapMagentoAggregationsToFacets,
 } from "./products.filters.mapper";
-import type { MagentoProductsResponse } from "./magentoProduct.types";
+import type { MagentoProductListItem, MagentoProductsResponse } from "./magentoProduct.types";
 import type { JewelleryListingProductsData } from "@/types/magento/jewelleryListing";
-import type { JewelleryFilterState } from "@/features/jewellery-product/types";
+import type { JewelleryFilterState, JewelleryListingProduct } from "@/features/jewellery-product/types";
 import { createEmptyFilterState } from "@/features/jewellery-product/data/filters";
+
+const WISHLIST_SKU_BATCH_SIZE = 50;
+
+type MagentoProductsBySkusResponse = {
+  products?: {
+    items?: MagentoProductListItem[] | null;
+  } | null;
+};
 
 export type GetMagentoJewelleryProductsParams = {
   categoryUrlKey?: string | null;
@@ -79,4 +88,49 @@ export async function getMagentoJewelleryProducts({
     totalPages: pageInfo?.total_pages ?? 0,
     facets: responseFacets,
   };
+}
+
+async function fetchMagentoProductsBySkuBatch(
+  skus: string[],
+  signal?: AbortSignal,
+): Promise<JewelleryListingProduct[]> {
+  if (skus.length === 0) {
+    return [];
+  }
+
+  const data = await magentoGraphqlFetch<MagentoProductsBySkusResponse>({
+    query: MAGENTO_PRODUCTS_BY_SKUS_QUERY,
+    variables: {
+      filter: { sku: { in: skus } },
+      pageSize: skus.length,
+    },
+    signal,
+    cache: "no-store",
+  });
+
+  return mapMagentoProductsToJewelleryListing(data.products?.items);
+}
+
+export async function getMagentoProductsBySkus(
+  skus: string[],
+  signal?: AbortSignal,
+): Promise<JewelleryListingProduct[]> {
+  const uniqueSkus = Array.from(
+    new Set(skus.map((sku) => sku.trim()).filter((sku) => sku.length > 0)),
+  );
+
+  if (uniqueSkus.length === 0) {
+    return [];
+  }
+
+  const batches: string[][] = [];
+  for (let index = 0; index < uniqueSkus.length; index += WISHLIST_SKU_BATCH_SIZE) {
+    batches.push(uniqueSkus.slice(index, index + WISHLIST_SKU_BATCH_SIZE));
+  }
+
+  const results = await Promise.all(
+    batches.map((batch) => fetchMagentoProductsBySkuBatch(batch, signal)),
+  );
+
+  return results.flat();
 }

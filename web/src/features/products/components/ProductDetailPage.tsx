@@ -31,8 +31,8 @@ const ProductDetailPage = ({ product }: ProductDetailPageProps) => {
   const pricing = getProductDetailPricing(product);
   const moreForYou = getMoreForYouCarouselItems(product.id);
 
-  const handleAddToCart = (payload: Parameters<typeof addItem>[0]) => {
-    const result = addItem(payload);
+  const handleAddToCart = async (payload: Parameters<typeof addItem>[0]) => {
+    const result = await addItem(payload);
     openBagDrawer(result);
   };
 

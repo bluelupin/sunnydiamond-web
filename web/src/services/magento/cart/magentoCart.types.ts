@@ -1,0 +1,209 @@
+import type { MagentoMediaGalleryItem } from "../products/magentoProduct.types";
+
+export type MagentoCartProduct = {
+  sku?: string | null;
+  name?: string | null;
+  url_key?: string | null;
+  media_gallery?: MagentoMediaGalleryItem[] | null;
+};
+
+export type MagentoCartItem = {
+  uid?: string | null;
+  quantity?: number | null;
+  product?: MagentoCartProduct | null;
+  prices?: {
+    price?: { value?: number | null } | null;
+    row_total?: { value?: number | null } | null;
+  } | null;
+};
+
+export type MagentoCartPrices = {
+  grand_total?: { value?: number | null; currency?: string | null } | null;
+  subtotal_excluding_tax?: { value?: number | null } | null;
+  applied_taxes?: Array<{
+    label?: string | null;
+    amount?: { value?: number | null } | null;
+  }> | null;
+};
+
+export type MagentoShippingMethod = {
+  carrier_code?: string | null;
+  carrier_title?: string | null;
+  method_code?: string | null;
+  method_title?: string | null;
+  amount?: { value?: number | null; currency?: string | null } | null;
+};
+
+export type MagentoPaymentMethod = {
+  code?: string | null;
+  title?: string | null;
+};
+
+export type MagentoCartShippingAddress = {
+  available_shipping_methods?: MagentoShippingMethod[] | null;
+  selected_shipping_method?: MagentoShippingMethod | null;
+};
+
+export type MagentoCart = {
+  id?: string | null;
+  total_quantity?: number | null;
+  prices?: MagentoCartPrices | null;
+  shipping_addresses?: MagentoCartShippingAddress[] | null;
+  available_payment_methods?: MagentoPaymentMethod[] | null;
+  selected_payment_method?: MagentoPaymentMethod | null;
+  itemsV2?: {
+    items?: MagentoCartItem[] | null;
+  } | null;
+};
+
+export type MagentoCartResponse = {
+  cart?: MagentoCart | null;
+};
+
+export type MagentoCreateGuestCartResponse = {
+  createGuestCart?: {
+    cart?: Pick<MagentoCart, "id"> | null;
+  } | null;
+};
+
+export type MagentoAddSimpleProductsToCartResponse = {
+  addSimpleProductsToCart?: {
+    cart?: MagentoCart | null;
+  } | null;
+};
+
+export type MagentoUpdateCartItemsResponse = {
+  updateCartItems?: {
+    cart?: MagentoCart | null;
+  } | null;
+};
+
+export type MagentoRemoveItemFromCartResponse = {
+  removeItemFromCart?: {
+    cart?: MagentoCart | null;
+  } | null;
+};
+
+export type MagentoCartAddressInput = {
+  firstname: string;
+  lastname: string;
+  street: string[];
+  city: string;
+  postcode: string;
+  country_code: string;
+  region_id: number;
+  telephone: string;
+};
+
+export type MagentoShippingAddressInput = {
+  address: MagentoCartAddressInput;
+};
+
+export type MagentoBillingAddressInput = {
+  address?: MagentoCartAddressInput;
+  same_as_shipping?: boolean;
+};
+
+export type MagentoSetGuestEmailOnCartResponse = {
+  setGuestEmailOnCart?: {
+    cart?: Pick<MagentoCart, "id"> | null;
+  } | null;
+};
+
+export type MagentoSetShippingAddressesOnCartResponse = {
+  setShippingAddressesOnCart?: {
+    cart?: MagentoCart | null;
+  } | null;
+};
+
+export type MagentoSetBillingAddressOnCartResponse = {
+  setBillingAddressOnCart?: {
+    cart?: MagentoCart | null;
+  } | null;
+};
+
+export type MagentoSetShippingMethodsOnCartResponse = {
+  setShippingMethodsOnCart?: {
+    cart?: MagentoCart | null;
+  } | null;
+};
+
+export type MagentoShippingMethodOption = {
+  carrierCode: string;
+  carrierTitle: string;
+  methodCode: string;
+  methodTitle: string;
+  amount: number;
+  currency: string;
+};
+
+export type MagentoSelectedShippingMethod = {
+  carrierCode: string;
+  methodCode: string;
+};
+
+export type MagentoPaymentMethodOption = {
+  code: string;
+  title: string;
+};
+
+export type MagentoSelectedPaymentMethod = {
+  code: string;
+  title: string;
+};
+
+export type PlacedGuestOrder = {
+  orderNumber: string;
+  orderId: string;
+};
+
+export type MagentoPaymentOrder = {
+  id: string;
+  mpOrderId: string | null;
+  status: string | null;
+  amount: number | null;
+  currencyCode: string | null;
+};
+
+export type MagentoSetPaymentMethodOnCartResponse = {
+  setPaymentMethodOnCart?: {
+    cart?: MagentoCart | null;
+  } | null;
+};
+
+export type MagentoPlaceOrderResponse = {
+  placeOrder?: {
+    orderV2?: {
+      id?: string | null;
+      number?: string | null;
+    } | null;
+    errors?: Array<{
+      message?: string | null;
+      code?: string | null;
+    }> | null;
+  } | null;
+};
+
+export type MagentoCreatePaymentOrderResponse = {
+  createPaymentOrder?: {
+    id?: string | null;
+    mp_order_id?: string | null;
+    status?: string | null;
+    amount?: number | null;
+    currency_code?: string | null;
+  } | null;
+};
+
+export type MappedMagentoCart = {
+  cartId: string;
+  totalQuantity: number;
+  subtotal: number;
+  taxes: number;
+  shipping: number;
+  grandTotal: number;
+  currency: string;
+  shippingMethods: MagentoShippingMethodOption[];
+  selectedShippingMethod: MagentoSelectedShippingMethod | null;
+  paymentMethods: MagentoPaymentMethodOption[];
+  selectedPaymentMethod: MagentoSelectedPaymentMethod | null;
+};

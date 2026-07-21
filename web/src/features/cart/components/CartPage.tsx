@@ -11,7 +11,7 @@ import { cartFlowSpec } from "@/features/cart/data/cartFlowSpec";
 import { CartPrimaryLink } from "./CartFlowUi";
 
 const CartPage = () => {
-  const { items, updateQuantity, removeItem, updateLineItemOptions } = useCart();
+  const { items, isHydrating, updateQuantity, removeItem, updateLineItemOptions } = useCart();
   const [offersOpen, setOffersOpen] = useState(false);
   const [priceBreakupOpen, setPriceBreakupOpen] = useState(false);
 
@@ -29,6 +29,16 @@ const CartPage = () => {
     return `max-lg:pb-[calc(${cartPage.stickyFooterCollapsedClearance}px+env(safe-area-inset-bottom,0px))]`;
   })();
 
+  if (isHydrating) {
+    return (
+      <section className="flex min-h-[60vh] flex-col items-center justify-center bg-gray300 px-4 py-20 text-center">
+        <p className="sr-only" aria-live="polite">
+          Loading your shopping bag
+        </p>
+      </section>
+    );
+  }
+
   if (items.length === 0) {
     return (
       <section className="flex min-h-[60vh] flex-col items-center justify-center gap-4 bg-gray300 px-4 py-20 text-center">
@@ -38,7 +48,7 @@ const CartPage = () => {
         <p className="max-w-md font-gill text-base font-light leading-110 text-neutral500">
           Discover our exquisite diamond collection and find something that speaks to you.
         </p>
-        <CartPrimaryLink href="/jewellery-product" className="mt-2 w-full max-w-xs">
+        <CartPrimaryLink href="/jewellery" className="mt-2 w-full max-w-xs">
           Shop Now
         </CartPrimaryLink>
       </section>

@@ -5,19 +5,19 @@ import WishlistListItem from "./WishlistListItem";
 
 type WishlistListProps = {
   products: JewelleryListingProduct[];
-  onRemove: (productId: string) => void;
-  onAddToBag: (productId: string) => void;
+  onRemove: (product: JewelleryListingProduct) => void;
+  onAddToBag: (product: JewelleryListingProduct) => void;
 };
 
 const WishlistList = ({ products, onRemove, onAddToBag }: WishlistListProps) => {
   return (
     <div className="flex w-full flex-col items-center justify-center md:hidden">
-      {products.map((product, index) => (
+      {products.map((product) => (
         <WishlistListItem
-          key={`${product.id}-${index}`}
+          key={product.sku}
           product={product}
-          onRemove={() => onRemove(product.id)}
-          onAddToBag={() => onAddToBag(product.id)}
+          onRemove={() => onRemove(product)}
+          onAddToBag={() => onAddToBag(product)}
         />
       ))}
     </div>

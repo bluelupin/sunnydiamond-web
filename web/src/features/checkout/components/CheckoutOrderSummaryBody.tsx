@@ -16,8 +16,15 @@ type CheckoutOrderSummaryBodyProps = {
 };
 
 const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyProps) => {
-  const { items, subtotal, taxes, totalPrice } = useCart();
+  const { items, subtotal, taxes, shipping, totalPrice, selectedShippingMethod } = useCart();
   const [offersOpen, setOffersOpen] = useState(false);
+
+  const shippingLabel =
+    shipping === 0 && !selectedShippingMethod
+      ? "Calculated at checkout"
+      : shipping === 0
+        ? "Free"
+        : formatCartPrice(shipping);
 
   const toggleOffers = () => setOffersOpen((open) => !open);
 
@@ -81,7 +88,7 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
           <div className="flex flex-col gap-3">
             <CheckoutPriceRow label="Subtotal" value={formatCartPrice(subtotal)} />
             <CheckoutPriceRow label="Taxes" value={formatCartPrice(taxes)} />
-            <CheckoutPriceRow label="Shipping" value="Free" />
+            <CheckoutPriceRow label="Shipping" value={shippingLabel} />
           </div>
 
           <CheckoutSummaryDivider />

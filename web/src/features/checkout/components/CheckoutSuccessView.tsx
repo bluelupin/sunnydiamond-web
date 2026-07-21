@@ -17,6 +17,7 @@ type CheckoutSuccessViewProps = {
   contact: string;
   items: CartLineItem[];
   totalPrice: number;
+  orderNumber?: string | null;
 };
 
 const CheckoutSummaryDivider = () => (
@@ -65,14 +66,19 @@ const SuccessCtaSection = ({ className }: { className?: string }) => (
       Track Order
     </CartPrimaryLink>
     <div className="flex justify-center">
-      <CartTextLink href="/jewellery-product" className="uppercase">
+      <CartTextLink href="/jewellery" className="uppercase">
         Go Back to Shopping
       </CartTextLink>
     </div>
   </div>
 );
 
-const CheckoutSuccessView = ({ contact, items, totalPrice }: CheckoutSuccessViewProps) => (
+const CheckoutSuccessView = ({
+  contact,
+  items,
+  totalPrice,
+  orderNumber,
+}: CheckoutSuccessViewProps) => (
   <section className="bg-gray300 max-lg:min-h-[100dvh] max-lg:pb-[calc(9.5rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
     <div className="mx-auto flex w-full max-w-[1440px] justify-center px-5 py-6 md:px-8 lg:px-10 lg:py-16">
       <div className="flex w-full max-w-[560px] flex-col gap-6 max-lg:max-w-none max-lg:gap-6 lg:p-6">
@@ -84,6 +90,11 @@ const CheckoutSuccessView = ({ contact, items, totalPrice }: CheckoutSuccessView
             <h1 className="font-larken text-2xl font-light leading-110 text-darkblack lg:text-32">
               Order Successfully Placed
             </h1>
+            {orderNumber ? (
+              <p className="font-gill text-base font-normal leading-110 text-darkblack">
+                Order number: {orderNumber}
+              </p>
+            ) : null}
             <p className="font-gill text-base font-light leading-110 text-darkblack">
               Your order is expected to be delivered by {getExpectedDeliveryDate()}.
             </p>

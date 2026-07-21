@@ -12,14 +12,15 @@ import {
 } from "react";
 import WishlistMovedToast from "@/features/wishlist/components/WishlistMovedToast";
 import { wishlistMovedToastDurationMs } from "@/features/wishlist/data/content";
+import { normalizeWishlistSkus } from "@/features/wishlist/utils/wishlistProduct.utils";
 
 const WISHLIST_STORAGE_KEY = "sunny-wishlist";
 
 interface WishlistContextType {
   wishlistedIds: string[];
   totalItems: number;
-  isWishlisted: (productId: string) => boolean;
-  toggleWishlist: (productId: string) => void;
+  isWishlisted: (productSku: string) => boolean;
+  toggleWishlist: (productSku: string) => void;
 }
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
@@ -32,7 +33,9 @@ function readStoredWishlist(): string[] {
     if (!stored) return [];
 
     const parsed = JSON.parse(stored);
-    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === "string") : [];
+    return Array.isArray(parsed)
+      ? normalizeWishlistSkus(parsed.filter((id): id is string => typeof id === "string"))
+      : [];
   } catch {
     return [];
   }
@@ -80,23 +83,23 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   }, [wishlistedIds, hasLoaded]);
 
   const isWishlisted = useCallback(
-    (productId: string) => {
-      if (wishlistedIds.includes(productId)) return true;
-
-      const baseId = productId.split("-")[0];
-      return productId !== baseId && wishlistedIds.includes(baseId);
-    },
+    (productSku: string) => wishlistedIds.includes(productSku.trim()),
     [wishlistedIds],
   );
 
-  const toggleWishlist = useCallback((productId: string) => {
+  const toggleWishlist = useCallback((productSku: string) => {
+    const normalizedSku = productSku.trim();
+    if (!normalizedSku) {
+      return;
+    }
+
     setWishlistedIds((current) => {
-      if (current.includes(productId)) {
-        return current.filter((id) => id !== productId);
+      if (current.includes(normalizedSku)) {
+        return current.filter((id) => id !== normalizedSku);
       }
 
       showMovedToast();
-      return [...current, productId];
+      return [...current, normalizedSku];
     });
   }, [showMovedToast]);
 

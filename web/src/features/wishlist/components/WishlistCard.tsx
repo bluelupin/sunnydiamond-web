@@ -6,7 +6,7 @@ import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
-import { getWishlistProductHref } from "@/features/wishlist/utils/resolveWishlistProducts";
+import { getWishlistProductHref } from "@/features/wishlist/utils/wishlistProduct.utils";
 import { wishlistPageContent } from "@/features/wishlist/data/content";
 import { cn } from "@/shared/utils/cn";
 import DeleteIcon from "@/assets/Icons/DeleteIcon";
@@ -18,7 +18,7 @@ type WishlistCardProps = {
 };
 
 const WishlistCard = ({ product, onRemove, onAddToBag }: WishlistCardProps) => {
-  const href = getWishlistProductHref(product.id);
+  const href = getWishlistProductHref(product);
 
   return (
     <article
