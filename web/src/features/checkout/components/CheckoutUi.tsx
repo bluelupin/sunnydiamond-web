@@ -3,6 +3,7 @@
 import { Check, ChevronDown } from "lucide-react";
 import EditIcon from "@/assets/Icons/EditIcon";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
+import FormFieldError from "@/shared/ui/FormFieldError";
 import {
   Select,
   SelectContent,
@@ -11,6 +12,7 @@ import {
   SelectValue,
 } from "@/shared/ui/select";
 import { cn } from "@/shared/utils/cn";
+import { invalidFieldClassName, invalidFieldContainerClassName } from "@/shared/utils/formValidation";
 import ChevronDownIcon from "@/assets/Icons/ChevronDownIcon";
 
 export type CheckoutFieldProps = {
@@ -19,8 +21,11 @@ export type CheckoutFieldProps = {
   optional?: boolean;
   value: string;
   onChange: (value: string) => void;
+  onBlur?: () => void;
   placeholder?: string;
   type?: string;
+  error?: string;
+  invalid?: boolean;
 };
 
 export const CheckoutField = ({
@@ -29,8 +34,11 @@ export const CheckoutField = ({
   optional,
   value,
   onChange,
+  onBlur,
   placeholder = "Enter",
   type = "text",
+  error,
+  invalid,
 }: CheckoutFieldProps) => (
   <div className="flex flex-col gap-2">
     <label htmlFor={id} className="font-gill text-base font-normal leading-110 text-darkblack">
@@ -44,9 +52,16 @@ export const CheckoutField = ({
       type={type}
       value={value}
       onChange={(event) => onChange(event.target.value)}
+      onBlur={onBlur}
       placeholder={placeholder}
-      className="h-14 w-full border border-transparent bg-aboutInactive px-3 font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600 focus:border-darkblack"
+      aria-invalid={invalid || undefined}
+      aria-describedby={error ? `${id}-error` : undefined}
+      className={cn(
+        "h-14 w-full border border-transparent bg-aboutInactive px-3 font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600 focus:border-darkblack",
+        invalid && invalidFieldClassName,
+      )}
     />
+    <FormFieldError id={`${id}-error`} message={error} />
   </div>
 );
 
@@ -55,7 +70,10 @@ type CheckoutSelectFieldProps = {
   label: string;
   value: string;
   onChange: (value: string) => void;
+  onBlur?: () => void;
   options: { value: string; label: string }[];
+  error?: string;
+  invalid?: boolean;
 };
 
 export const CheckoutSelectField = ({
@@ -63,16 +81,30 @@ export const CheckoutSelectField = ({
   label,
   value,
   onChange,
+  onBlur,
   options,
+  error,
+  invalid,
 }: CheckoutSelectFieldProps) => (
   <div className="flex flex-col gap-2">
     <label htmlFor={id} className="font-gill text-base font-normal leading-110 text-darkblack">
       {label}
     </label>
-    <Select value={value} onValueChange={onChange}>
+    <Select
+      value={value}
+      onValueChange={(nextValue) => {
+        onChange(nextValue);
+        onBlur?.();
+      }}
+    >
       <SelectTrigger
         id={id}
-        className="h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0"
+        aria-invalid={invalid || undefined}
+        aria-describedby={error ? `${id}-error` : undefined}
+        className={cn(
+          "h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0",
+          invalid && invalidFieldClassName,
+        )}
       >
         <SelectValue placeholder="-select-" />
       </SelectTrigger>
@@ -84,6 +116,7 @@ export const CheckoutSelectField = ({
         ))}
       </SelectContent>
     </Select>
+    <FormFieldError id={`${id}-error`} message={error} />
   </div>
 );
 
@@ -92,9 +125,12 @@ type CheckoutPhoneFieldProps = {
   label: string;
   value: string;
   onChange: (value: string) => void;
+  onBlur?: () => void;
   verified?: boolean;
   onVerify?: () => void;
   showVerify?: boolean;
+  error?: string;
+  invalid?: boolean;
 };
 
 export const CheckoutPhoneField = ({
@@ -102,15 +138,23 @@ export const CheckoutPhoneField = ({
   label,
   value,
   onChange,
+  onBlur,
   verified,
   onVerify,
   showVerify = true,
+  error,
+  invalid,
 }: CheckoutPhoneFieldProps) => (
   <div className="flex flex-col gap-2">
     <label htmlFor={id} className="font-gill text-base font-normal leading-110 text-darkblack">
       {label}
     </label>
-    <div className="flex h-14 items-center justify-between gap-2 border border-transparent bg-aboutInactive px-3 focus-within:border-darkblack">
+    <div
+      className={cn(
+        "flex h-14 items-center justify-between gap-2 border border-transparent bg-aboutInactive px-3 focus-within:border-darkblack",
+        invalid && invalidFieldContainerClassName,
+      )}
+    >
       <div className="flex min-w-0 flex-1 items-center gap-2">
         <span className="shrink-0 font-gill text-base font-normal leading-110 text-darkblack">+91</span>
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 text-darkblack">
@@ -121,7 +165,10 @@ export const CheckoutPhoneField = ({
           type="tel"
           value={value}
           onChange={(event) => onChange(event.target.value)}
+          onBlur={onBlur}
           placeholder="Enter"
+          aria-invalid={invalid || undefined}
+          aria-describedby={error ? `${id}-error` : undefined}
           className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600"
         />
       </div>
@@ -138,6 +185,7 @@ export const CheckoutPhoneField = ({
         )
       ) : null}
     </div>
+    <FormFieldError id={`${id}-error`} message={error} />
   </div>
 );
 

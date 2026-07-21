@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/shared/utils/cn";
 import { useCart } from "@/features/cart/context/CartContext";
 import { useToast } from "@/shared/hooks/use-toast";
@@ -15,38 +15,23 @@ import { checkoutFlowSpec } from "../data/checkoutFlowSpec";
 import { CheckoutFormStep, CheckoutPaymentStep } from "./CheckoutSteps";
 import CheckoutSuccessView from "./CheckoutSuccessView";
 import {
+  useCheckoutFormValidation,
+  useCheckoutPaymentValidation,
+} from "@/features/checkout/hooks/use-checkout-validation";
+import {
+  sanitizeCardCvvInput,
+  sanitizeCardExpiryInput,
+  sanitizeCardNumberInput,
+  sanitizePhoneInput,
+  sanitizePincodeInput,
+} from "@/shared/utils/formValidation";
+import {
   createEmptyCheckoutForm,
   createEmptyPaymentForm,
   type CheckoutFormData,
   type CheckoutPaymentData,
   type CheckoutStep,
 } from "../types/checkout.types";
-
-const isShippingAddressComplete = (form: CheckoutFormData) =>
-  Boolean(
-    form.shippingName.trim() &&
-      form.addressLine1.trim() &&
-      form.pincode.trim() &&
-      form.city.trim() &&
-      form.state.trim(),
-  );
-
-const isBillingAddressComplete = (form: CheckoutFormData) =>
-  Boolean(
-    form.billingName.trim() &&
-      form.billingAddressLine1.trim() &&
-      form.billingPincode.trim() &&
-      form.billingCity.trim() &&
-      form.billingState.trim(),
-  );
-
-const isFormComplete = (form: CheckoutFormData) =>
-  Boolean(
-    form.name.trim() &&
-      form.phoneOrEmail.trim() &&
-      isShippingAddressComplete(form) &&
-      (form.billingSameAsShipping || isBillingAddressComplete(form)),
-  );
 
 const CheckoutPage = () => {
   const { items, totalPrice, clearCart } = useCart();
@@ -64,6 +49,9 @@ const CheckoutPage = () => {
   const [offersOpen, setOffersOpen] = useState(false);
   const [orderSummaryOpen, setOrderSummaryOpen] = useState(false);
 
+  const formValidation = useCheckoutFormValidation(form);
+  const paymentValidation = useCheckoutPaymentValidation(payment, totalPrice);
+
   const mobileScrollPadding = (() => {
     const { mobile } = checkoutFlowSpec;
     const clearance = offersOpen
@@ -77,6 +65,21 @@ const CheckoutPage = () => {
   };
 
   const updatePayment = (field: keyof CheckoutPaymentData, value: string) => {
+    if (field === "cardNumber") {
+      setPayment((prev) => ({ ...prev, cardNumber: sanitizeCardNumberInput(value) }));
+      return;
+    }
+
+    if (field === "cvv") {
+      setPayment((prev) => ({ ...prev, cvv: sanitizeCardCvvInput(value) }));
+      return;
+    }
+
+    if (field === "expiry") {
+      setPayment((prev) => ({ ...prev, expiry: sanitizeCardExpiryInput(value) }));
+      return;
+    }
+
     setPayment((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -95,11 +98,6 @@ const CheckoutPage = () => {
     }
   }, [items, totalPrice, step]);
 
-  const canContinueToPayment = useMemo(
-    () => isFormComplete(form) && phoneVerified,
-    [form, phoneVerified],
-  );
-
   if (items.length === 0 && step !== "success") {
     return (
       <section className="flex min-h-[60vh] flex-col items-center justify-center gap-4 bg-gray300 px-4 py-20 text-center">
@@ -116,10 +114,13 @@ const CheckoutPage = () => {
   }
 
   const handleVerifyPhone = () => {
-    if (!form.phoneOrEmail.trim()) {
-      toast({ title: "Phone required", description: "Enter your phone number before verifying." });
+    formValidation.markTouched("phoneOrEmail");
+    formValidation.markSubmitted();
+
+    if (formValidation.errors.phoneOrEmail) {
       return;
     }
+
     setShowOtpModal(true);
   };
 
@@ -130,43 +131,67 @@ const CheckoutPage = () => {
   };
 
   const handleContinueToPayment = () => {
-    if (!isFormComplete(form)) {
-      toast({ title: "Incomplete form", description: "Please fill in all required fields." });
-      return;
-    }
-    if (!phoneVerified) {
-      setShowOtpModal(true);
-      return;
-    }
-    setStep("payment");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    formValidation.validateSubmit(() => {
+      if (!phoneVerified) {
+        setShowOtpModal(true);
+        toast({
+          title: "Verification required",
+          description: "Please verify your phone number before continuing.",
+        });
+        return;
+      }
+
+      setStep("payment");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
   };
 
   const placeOrder = () => {
-    setSubmitting(true);
-    window.setTimeout(() => {
-      trackEvent("purchase", {
-        currency: "INR",
-        value: totalPrice,
-        items: items.map((item) => ({
-          item_id: item.product.id,
-          item_name: item.product.name,
-          price: item.product.price,
-          quantity: item.quantity,
-        })),
-      });
-      setPlacedItems([...items]);
-      setPlacedTotal(totalPrice);
-      clearCart();
-      setSubmitting(false);
-      setStep("success");
-      toast({ title: "Order placed!", description: "Your order has been placed successfully." });
-    }, 1200);
+    paymentValidation.validateSubmit(() => {
+      setSubmitting(true);
+      window.setTimeout(() => {
+        trackEvent("purchase", {
+          currency: "INR",
+          value: totalPrice,
+          items: items.map((item) => ({
+            item_id: item.product.id,
+            item_name: item.product.name,
+            price: item.product.price,
+            quantity: item.quantity,
+          })),
+        });
+        setPlacedItems([...items]);
+        setPlacedTotal(totalPrice);
+        clearCart();
+        setSubmitting(false);
+        setStep("success");
+        toast({ title: "Order placed!", description: "Your order has been placed successfully." });
+      }, 1200);
+    });
   };
 
   const sidebarCtaLabel = step === "payment" ? "Pay Now" : "Continue to Payment";
-  const ctaDisabled = submitting || (step === "form" && !canContinueToPayment);
+  const ctaDisabled = submitting;
   const handleSidebarCta = step === "payment" ? placeOrder : handleContinueToPayment;
+
+  const handleFormChange = (field: keyof CheckoutFormData, value: string | boolean) => {
+    if (field === "pincode" || field === "billingPincode") {
+      updateForm(field, sanitizePincodeInput(String(value)));
+      return;
+    }
+
+    if (field === "shippingPhone" || field === "billingPhone") {
+      updateForm(field, sanitizePhoneInput(String(value), "+91"));
+      return;
+    }
+
+    if (field === "phoneOrEmail" && !String(value).includes("@")) {
+      updateForm(field, sanitizePhoneInput(String(value), "+91"));
+      return;
+    }
+
+    updateForm(field, value);
+  };
 
   return (
     <section className={cn("bg-gray300", mobileScrollPadding)}>
@@ -191,9 +216,10 @@ const CheckoutPage = () => {
             {step === "form" ? (
               <CheckoutFormStep
                 form={form}
-                onChange={updateForm}
+                onChange={handleFormChange}
                 phoneVerified={phoneVerified}
                 onVerifyPhone={handleVerifyPhone}
+                validation={formValidation}
               />
             ) : (
               <CheckoutPaymentStep
@@ -203,6 +229,7 @@ const CheckoutPage = () => {
                 onEditPersonal={() => setStep("form")}
                 onEditDelivery={() => setStep("form")}
                 onEditPayment={() => setStep("form")}
+                validation={paymentValidation}
               />
             )}
           </div>

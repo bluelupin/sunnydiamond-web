@@ -10,6 +10,7 @@ import {
   DrawerTitle,
 } from "@/shared/ui/drawer";
 import { CheckoutSummaryDivider } from "./CheckoutUi";
+import { DetailTextLink } from "@/features/products/components/detail/shared";
 
 type CheckoutOtpModalProps = {
   open: boolean;
@@ -48,9 +49,12 @@ const CheckoutOtpFields = ({
 }: CheckoutOtpFieldsProps) => (
   <div className="flex flex-col items-end gap-4">
     <div className="flex w-full flex-col gap-4">
-      <p className="font-gill text-base font-light leading-110 text-darkblack">
-        Please enter the OTP sent to {maskPhone(phone)}
-      </p>
+      <div className="flex items-center gap-2">
+        <p className="font-gill text-base font-light leading-110 text-darkblack">
+          Please enter the OTP sent to {maskPhone(phone)}
+        </p>
+        <DetailTextLink>EDIT</DetailTextLink>
+      </div>
       <div className="flex w-full gap-1">
         {otp.map((digit, index) => (
           <div
@@ -195,9 +199,22 @@ const CheckoutOtpModal = ({ open, phone, onClose, onVerify }: CheckoutOtpModalPr
               className="relative z-10 flex w-full max-w-[560px] flex-col gap-6 bg-white p-6"
             >
               <div className="flex items-center justify-between">
-                <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
-                  Enter OTP
-                </h2>
+                <div className="flex min-w-0 items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    aria-label="Go back"
+                    className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack"
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                      <path d="M15.5 20L8 12.5L15.5 5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+
+                  </button>
+                  <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
+                    Enter OTP
+                  </h2>
+                </div>
                 <button type="button" onClick={onClose} aria-label="Close" className="text-darkblack">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden >
                     <path d="M18.5 5L5 18.5" stroke="currentColor" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />

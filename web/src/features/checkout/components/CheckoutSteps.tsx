@@ -12,55 +12,40 @@ import {
   CheckoutSubheading,
   CheckoutSummaryText,
 } from "./CheckoutUi";
+import FormFieldError from "@/shared/ui/FormFieldError";
 import { AmexLogo, MastercardLogo, VisaLogo } from "@/shared/ui/PaymentLogos";
+import { INDIAN_STATES } from "@/features/checkout/constants/indianStates";
 import type { CheckoutFormData, CheckoutPaymentData } from "../types/checkout.types";
+import type { CheckoutFormField, CheckoutPaymentField } from "@/shared/utils/formValidation";
 
-const INDIAN_STATES = [
-  "Andhra Pradesh",
-  "Arunachal Pradesh",
-  "Assam",
-  "Bihar",
-  "Chhattisgarh",
-  "Goa",
-  "Gujarat",
-  "Haryana",
-  "Himachal Pradesh",
-  "Jharkhand",
-  "Karnataka",
-  "Kerala",
-  "Madhya Pradesh",
-  "Maharashtra",
-  "Manipur",
-  "Meghalaya",
-  "Mizoram",
-  "Nagaland",
-  "Odisha",
-  "Punjab",
-  "Rajasthan",
-  "Sikkim",
-  "Tamil Nadu",
-  "Telangana",
-  "Tripura",
-  "Uttar Pradesh",
-  "Uttarakhand",
-  "West Bengal",
-];
+type CheckoutFormValidationProps = {
+  errors: Partial<Record<CheckoutFormField, string | undefined>>;
+  showError: (field: CheckoutFormField) => boolean;
+  markTouched: (field: CheckoutFormField) => void;
+};
+
+type CheckoutPaymentValidationProps = {
+  errors: Partial<Record<CheckoutPaymentField, string | undefined>>;
+  showError: (field: CheckoutPaymentField) => boolean;
+  markTouched: (field: CheckoutPaymentField) => void;
+};
 
 type CheckoutFormStepProps = {
   form: CheckoutFormData;
   onChange: (field: keyof CheckoutFormData, value: string | boolean) => void;
   phoneVerified: boolean;
   onVerifyPhone: () => void;
+  validation: CheckoutFormValidationProps;
 };
 
 type AddressFieldConfig = {
-  name: keyof CheckoutFormData;
-  addressLine1: keyof CheckoutFormData;
-  addressLine2: keyof CheckoutFormData;
-  pincode: keyof CheckoutFormData;
-  city: keyof CheckoutFormData;
-  state: keyof CheckoutFormData;
-  phone: keyof CheckoutFormData;
+  name: CheckoutFormField;
+  addressLine1: CheckoutFormField;
+  addressLine2: CheckoutFormField;
+  pincode: CheckoutFormField;
+  city: CheckoutFormField;
+  state: CheckoutFormField;
+  phone: CheckoutFormField;
 };
 
 const SHIPPING_ADDRESS_FIELDS: AddressFieldConfig = {
@@ -88,11 +73,13 @@ const CheckoutAddressFields = ({
   fields,
   form,
   onChange,
+  validation,
 }: {
   idPrefix: string;
   fields: AddressFieldConfig;
   form: CheckoutFormData;
   onChange: (field: keyof CheckoutFormData, value: string | boolean) => void;
+  validation: CheckoutFormValidationProps;
 }) => (
   <div className="sm:space-y-6 space-y-4">
     <CheckoutField
@@ -100,12 +87,20 @@ const CheckoutAddressFields = ({
       label="Your Name"
       value={form[fields.name] as string}
       onChange={(value) => onChange(fields.name, value)}
+      onBlur={() => validation.markTouched(fields.name)}
+      invalid={validation.showError(fields.name)}
+      error={validation.showError(fields.name) ? validation.errors[fields.name] : undefined}
     />
     <CheckoutField
       id={`${idPrefix}-address-1`}
       label="Address Line 1"
       value={form[fields.addressLine1] as string}
       onChange={(value) => onChange(fields.addressLine1, value)}
+      onBlur={() => validation.markTouched(fields.addressLine1)}
+      invalid={validation.showError(fields.addressLine1)}
+      error={
+        validation.showError(fields.addressLine1) ? validation.errors[fields.addressLine1] : undefined
+      }
     />
     <CheckoutField
       id={`${idPrefix}-address-2`}
@@ -113,6 +108,11 @@ const CheckoutAddressFields = ({
       optional
       value={form[fields.addressLine2] as string}
       onChange={(value) => onChange(fields.addressLine2, value)}
+      onBlur={() => validation.markTouched(fields.addressLine2)}
+      invalid={validation.showError(fields.addressLine2)}
+      error={
+        validation.showError(fields.addressLine2) ? validation.errors[fields.addressLine2] : undefined
+      }
     />
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       <CheckoutField
@@ -120,12 +120,18 @@ const CheckoutAddressFields = ({
         label="Pincode"
         value={form[fields.pincode] as string}
         onChange={(value) => onChange(fields.pincode, value)}
+        onBlur={() => validation.markTouched(fields.pincode)}
+        invalid={validation.showError(fields.pincode)}
+        error={validation.showError(fields.pincode) ? validation.errors[fields.pincode] : undefined}
       />
       <CheckoutField
         id={`${idPrefix}-city`}
         label="City"
         value={form[fields.city] as string}
         onChange={(value) => onChange(fields.city, value)}
+        onBlur={() => validation.markTouched(fields.city)}
+        invalid={validation.showError(fields.city)}
+        error={validation.showError(fields.city) ? validation.errors[fields.city] : undefined}
       />
     </div>
     <CheckoutSelectField
@@ -133,14 +139,20 @@ const CheckoutAddressFields = ({
       label="State"
       value={form[fields.state] as string}
       onChange={(value) => onChange(fields.state, value)}
+      onBlur={() => validation.markTouched(fields.state)}
       options={INDIAN_STATES.map((state) => ({ value: state, label: state }))}
+      invalid={validation.showError(fields.state)}
+      error={validation.showError(fields.state) ? validation.errors[fields.state] : undefined}
     />
     <CheckoutPhoneField
       id={`${idPrefix}-phone`}
       label="Phone Number"
       value={form[fields.phone] as string}
       onChange={(value) => onChange(fields.phone, value)}
+      onBlur={() => validation.markTouched(fields.phone)}
       showVerify={false}
+      invalid={validation.showError(fields.phone)}
+      error={validation.showError(fields.phone) ? validation.errors[fields.phone] : undefined}
     />
   </div>
 );
@@ -172,6 +184,7 @@ export const CheckoutFormStep = ({
   onChange,
   phoneVerified,
   onVerifyPhone,
+  validation,
 }: CheckoutFormStepProps) => (
   <div className="flex flex-col gap-6">
     <CheckoutSectionCard>
@@ -183,14 +196,20 @@ export const CheckoutFormStep = ({
         label="Your Name*"
         value={form.name}
         onChange={(value) => onChange("name", value)}
+        onBlur={() => validation.markTouched("name")}
+        invalid={validation.showError("name")}
+        error={validation.showError("name") ? validation.errors.name : undefined}
       />
       <CheckoutPhoneField
         id="checkout-phone-email"
         label="PhoneNo / Email ID"
         value={form.phoneOrEmail}
         onChange={(value) => onChange("phoneOrEmail", value)}
+        onBlur={() => validation.markTouched("phoneOrEmail")}
         verified={phoneVerified}
         onVerify={onVerifyPhone}
+        invalid={validation.showError("phoneOrEmail")}
+        error={validation.showError("phoneOrEmail") ? validation.errors.phoneOrEmail : undefined}
       />
     </CheckoutSectionCard>
 
@@ -203,6 +222,7 @@ export const CheckoutFormStep = ({
           fields={SHIPPING_ADDRESS_FIELDS}
           form={form}
           onChange={onChange}
+          validation={validation}
         />
       </div>
 
@@ -221,6 +241,7 @@ export const CheckoutFormStep = ({
           fields={BILLING_ADDRESS_FIELDS}
           form={form}
           onChange={onChange}
+          validation={validation}
         />
       ) : null}
     </CheckoutSectionCard>
@@ -234,6 +255,7 @@ type CheckoutPaymentStepProps = {
   onEditPersonal: () => void;
   onEditDelivery: () => void;
   onEditPayment: () => void;
+  validation: CheckoutPaymentValidationProps;
 };
 
 const PaymentCardLogos = () => (
@@ -257,6 +279,7 @@ export const CheckoutPaymentStep = ({
   onEditPersonal,
   onEditDelivery,
   onEditPayment,
+  validation,
 }: CheckoutPaymentStepProps) => {
   const shippingLines = buildAddressLines({
     addressLine1: form.addressLine1,
@@ -332,12 +355,18 @@ export const CheckoutPaymentStep = ({
                 label="Name on Card"
                 value={payment.cardName}
                 onChange={(value) => onPaymentChange("cardName", value)}
+                onBlur={() => validation.markTouched("cardName")}
+                invalid={validation.showError("cardName")}
+                error={validation.showError("cardName") ? validation.errors.cardName : undefined}
               />
               <CheckoutField
                 id="card-number"
                 label="Credit Card No"
                 value={payment.cardNumber}
                 onChange={(value) => onPaymentChange("cardNumber", value)}
+                onBlur={() => validation.markTouched("cardNumber")}
+                invalid={validation.showError("cardNumber")}
+                error={validation.showError("cardNumber") ? validation.errors.cardNumber : undefined}
               />
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <CheckoutField
@@ -345,12 +374,19 @@ export const CheckoutPaymentStep = ({
                   label="Expiry Date"
                   value={payment.expiry}
                   onChange={(value) => onPaymentChange("expiry", value)}
+                  onBlur={() => validation.markTouched("expiry")}
+                  placeholder="MM/YY"
+                  invalid={validation.showError("expiry")}
+                  error={validation.showError("expiry") ? validation.errors.expiry : undefined}
                 />
                 <CheckoutField
                   id="card-cvv"
                   label="Security Code"
                   value={payment.cvv}
                   onChange={(value) => onPaymentChange("cvv", value)}
+                  onBlur={() => validation.markTouched("cvv")}
+                  invalid={validation.showError("cvv")}
+                  error={validation.showError("cvv") ? validation.errors.cvv : undefined}
                 />
               </div>
             </>
@@ -368,19 +404,27 @@ export const CheckoutPaymentStep = ({
             label="Net Banking"
           />
 
-          <CheckoutRadioRow
-            checked={payment.method === "cod"}
-            onChange={() => onPaymentChange("method", "cod")}
-            align="start"
-            label={
-              <span className="flex flex-col gap-1">
-                <span>Cash On Delivery</span>
-                <span className="font-gill text-xs font-light leading-110 text-darkblack">
-                  *for orders up to ₹40,000
+          <div className="flex flex-col gap-2">
+            <CheckoutRadioRow
+              checked={payment.method === "cod"}
+              onChange={() => onPaymentChange("method", "cod")}
+              align="start"
+              label={
+                <span className="flex flex-col gap-1">
+                  <span>Cash On Delivery</span>
+                  <span className="font-gill text-xs font-light leading-110 text-darkblack">
+                    *for orders up to ₹40,000
+                  </span>
                 </span>
-              </span>
-            }
-          />
+              }
+            />
+            {payment.method === "cod" ? (
+              <FormFieldError
+                id="checkout-cod-error"
+                message={validation.showError("cod") ? validation.errors.cod : undefined}
+              />
+            ) : null}
+          </div>
         </div>
       </CheckoutSectionCard>
     </div>
