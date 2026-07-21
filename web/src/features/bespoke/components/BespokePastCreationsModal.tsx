@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { useEdgeAutoScroll } from "@/shared/hooks/use-edge-auto-scroll";
+import { useInitialCenterScroll } from "@/shared/hooks/use-initial-center-scroll";
 import { cn } from "@/shared/utils/cn";
 import {
   bespokePastCreationsFigmaSpec,
@@ -52,10 +53,13 @@ const BespokePastCreationsModal = ({
   suppressEscape = false,
 }: BespokePastCreationsModalProps) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const galleryRef = useRef<HTMLDivElement>(null);
+
   useEdgeAutoScroll(scrollContainerRef, open, {
     edgeZone: 80,
     maxSpeedPxPerSec: 840,
   });
+  useInitialCenterScroll(scrollContainerRef, galleryRef, open);
 
   usePastCreationsModalEffects(open, onClose, suppressEscape);
 
@@ -84,6 +88,7 @@ const BespokePastCreationsModal = ({
         </svg>
       </button>
       <div
+        ref={galleryRef}
         className={cn(
           "inline-block min-h-full w-max min-w-full columns-[160px] gap-4 sm:columns-[200px] md:columns-[351px] md:gap-6 lg:columns-[351px] overflow-x-auto whitespace-nowrap min-w-[1851px]",
         )}
