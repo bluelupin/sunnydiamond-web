@@ -13,6 +13,8 @@ export type JewelleryCategorySlug =
 export interface JewelleryCategory {
   slug: JewelleryCategorySlug;
   label: string;
+  /** Magento category url_key; null for the "All" tab. */
+  urlKey: string | null;
 }
 
 export interface JewelleryFilterState {

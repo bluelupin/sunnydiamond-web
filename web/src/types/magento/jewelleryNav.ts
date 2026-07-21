@@ -5,7 +5,9 @@ export type JewelleryNavCategory = {
   label: string;
   href: string;
   image: string | null;
-  /** PLP slug when mapped from Magento url_key; null for synthetic items (e.g. All Products). */
+  /** Magento category url_key; null for synthetic items (e.g. All Products). */
+  urlKey: string | null;
+  /** PLP slug when mapped from Magento url_key; null for unmapped categories. */
   slug: JewelleryCategorySlug | null;
   productCount: number;
   sortOrder: number;

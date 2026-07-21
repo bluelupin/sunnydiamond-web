@@ -24,7 +24,6 @@ const VARIANT_CONFIG = {
     imageCoverClassName: "object-cover transition-transform duration-300 group-hover:scale-105",
     labelClassName:
       "font-gill text-xl leading-110 text-darkblack transition-opacity group-hover:opacity-70",
-    allProductsClassName: "font-gill text-xl leading-110 text-darkblack",
   },
   mobile: {
     rowsClassName: "flex flex-col gap-3",
@@ -34,7 +33,6 @@ const VARIANT_CONFIG = {
     imageSizes: "50vw",
     imageCoverClassName: "object-cover",
     labelClassName: "font-gill text-sm leading-110 text-darkblack",
-    allProductsClassName: "font-gill text-sm leading-110 text-darkblack",
   },
 } as const;
 
@@ -73,18 +71,10 @@ function JewelleryCategoryMenuItems({
                     sizes={config.imageSizes}
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-benefitSurface">
-                    <span className={config.allProductsClassName}>{item.label}</span>
-                  </div>
+                  <div className="h-full w-full bg-benefitSurface" aria-hidden />
                 )}
               </div>
-              {item.image ? (
-                <span className={config.labelClassName}>{item.label}</span>
-              ) : (
-                <span className={cn(config.labelClassName, "invisible")} aria-hidden>
-                  {item.label}
-                </span>
-              )}
+              <span className={config.labelClassName}>{item.label}</span>
             </Link>
           ))}
         </div>

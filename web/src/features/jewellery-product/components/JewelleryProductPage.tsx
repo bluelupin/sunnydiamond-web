@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import JewelleryHeroSection from "./JewelleryHeroSection";
 import JewelleryCategoryNav from "./JewelleryCategoryNav";
@@ -13,14 +13,22 @@ import JewelleryFilterDrawer from "./JewelleryFilterDrawer";
 import { jewelleryListingProducts } from "../data/products";
 import { createDefaultFilterState, PAGE_SIZE } from "../data/filters";
 import { filterJewelleryProducts, sortJewelleryProducts } from "../utils/productFilters";
-import { buildJewelleryHref, parseJewelleryCategorySlug } from "../utils/jewelleryRoutes";
+import {
+  buildJewelleryCategoryHref,
+  parseJewelleryCategorySlug,
+} from "../utils/jewelleryRoutes";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
-import type { JewelleryCategorySlug, JewelleryFilterState } from "../types";
+import type { JewelleryCategory, JewelleryCategorySlug, JewelleryFilterState } from "../types";
 
 const JewelleryProductPage = () => {
   const router = useRouter();
+  const params = useParams();
   const searchParams = useSearchParams();
-  const categoryFromUrl = parseJewelleryCategorySlug(searchParams?.get("category") ?? null) ?? "all";
+  const categoryUrlKey =
+    typeof params?.categoryUrl === "string" ? decodeURIComponent(params.categoryUrl) : null;
+  const categoryFromPath = parseJewelleryCategorySlug(categoryUrlKey);
+  const categoryFromQuery = parseJewelleryCategorySlug(searchParams?.get("category") ?? null);
+  const categoryFromUrl = categoryFromPath ?? categoryFromQuery ?? "all";
 
   const [activeCategory, setActiveCategory] = useState<JewelleryCategorySlug>(categoryFromUrl);
   const [sortValue, setSortValue] = useState("featured");
@@ -44,10 +52,10 @@ const JewelleryProductPage = () => {
   const hasMore = visibleCount < filteredProducts.length;
 
   const handleCategoryChange = useCallback(
-    (slug: JewelleryCategorySlug) => {
-      setActiveCategory(slug);
+    (category: JewelleryCategory) => {
+      setActiveCategory(category.slug);
       setVisibleCount(PAGE_SIZE);
-      router.replace(buildJewelleryHref(slug), { scroll: false });
+      router.replace(buildJewelleryCategoryHref(category.urlKey), { scroll: false });
     },
     [router],
   );

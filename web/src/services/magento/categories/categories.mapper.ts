@@ -1,17 +1,10 @@
-import { buildJewelleryHref } from "@/features/jewellery-product/utils/jewelleryRoutes";
+import {
+  buildJewelleryCategoryHref,
+  MAGENTO_URL_KEY_TO_SLUG,
+} from "@/features/jewellery-product/utils/jewelleryRoutes";
 import type { JewelleryCategorySlug } from "@/features/jewellery-product/types";
 import type { JewelleryNavCategory } from "@/types/magento/jewelleryNav";
 import type { MagentoCategoryNode } from "./magentoCategory.types";
-
-const MAGENTO_URL_KEY_TO_SLUG: Record<string, JewelleryCategorySlug> = {
-  "diamond-bangles": "bangles",
-  "diamond-necklaces": "necklace",
-  "diamond-rings": "rings",
-  "diamond-pendants": "pendants",
-  "diamond-nose-pins": "nosepins",
-  "diamond-earrings": "earrings",
-  "diamond-bracelets": "bracelets",
-};
 
 const MAGENTO_URL_KEY_SORT_ORDER: Record<string, number> = {
   "diamond-bangles": 0,
@@ -24,18 +17,6 @@ const MAGENTO_URL_KEY_SORT_ORDER: Record<string, number> = {
   accessories: 7,
   "loose-solitaires": 8,
 };
-
-function resolveCategoryHref(slug: JewelleryCategorySlug | null, urlPath?: string | null): string {
-  if (slug) {
-    return buildJewelleryHref(slug);
-  }
-
-  if (urlPath) {
-    return `/jewellery?magentoCategory=${encodeURIComponent(urlPath)}`;
-  }
-
-  return buildJewelleryHref("all");
-}
 
 function mapMagentoCategoryNode(node: MagentoCategoryNode): JewelleryNavCategory | null {
   const urlKey = node.url_key?.trim();
@@ -50,8 +31,9 @@ function mapMagentoCategoryNode(node: MagentoCategoryNode): JewelleryNavCategory
   return {
     id: String(node.uid ?? node.id ?? urlKey),
     label,
-    href: resolveCategoryHref(slug, node.url_path),
+    href: buildJewelleryCategoryHref(urlKey),
     image: node.image?.trim() || null,
+    urlKey,
     slug,
     productCount: node.product_count ?? 0,
     sortOrder: MAGENTO_URL_KEY_SORT_ORDER[urlKey] ?? 100,
@@ -78,8 +60,9 @@ export function mapMagentoCategoryListToJewelleryNav(
     {
       id: "all-products",
       label: "All Products",
-      href: buildJewelleryHref("all"),
+      href: buildJewelleryCategoryHref(),
       image: null,
+      urlKey: null,
       slug: "all",
       productCount: root?.product_count ?? 0,
       sortOrder: 999,

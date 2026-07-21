@@ -13,6 +13,21 @@ const VALID_CATEGORY_SLUGS: readonly JewelleryCategorySlug[] = [
   "nosepins",
 ];
 
+/** Magento category url_key → PLP filter slug */
+export const MAGENTO_URL_KEY_TO_SLUG: Record<string, JewelleryCategorySlug> = {
+  "diamond-bangles": "bangles",
+  "diamond-necklaces": "necklace",
+  "diamond-rings": "rings",
+  "diamond-pendants": "pendants",
+  "diamond-nose-pins": "nosepins",
+  "diamond-earrings": "earrings",
+  "diamond-bracelets": "bracelets",
+};
+
+export const JEWELLERY_SLUG_TO_URL_KEY = Object.fromEntries(
+  Object.entries(MAGENTO_URL_KEY_TO_SLUG).map(([urlKey, slug]) => [slug, urlKey]),
+) as Partial<Record<JewelleryCategorySlug, string>>;
+
 /** Legacy mega-menu path segments → PLP category slugs */
 export const JEWELLERY_PATH_SEGMENT_TO_SLUG: Record<string, JewelleryCategorySlug> = {
   bangles: "bangles",
@@ -34,14 +49,33 @@ export function parseJewelleryCategorySlug(value: string | null | undefined): Je
     return fromSegment;
   }
 
+  const fromMagentoUrlKey = MAGENTO_URL_KEY_TO_SLUG[normalized];
+  if (fromMagentoUrlKey) {
+    return fromMagentoUrlKey;
+  }
+
   return VALID_CATEGORY_SLUGS.includes(normalized as JewelleryCategorySlug)
     ? (normalized as JewelleryCategorySlug)
     : null;
 }
 
+export function buildJewelleryCategoryHref(urlKey?: string | null): string {
+  const normalized = urlKey?.trim();
+  if (!normalized) {
+    return JEWELLERY_PATH;
+  }
+
+  return `${JEWELLERY_PATH}/${encodeURIComponent(normalized)}`;
+}
+
 export function buildJewelleryHref(category: JewelleryCategorySlug = "all"): string {
   if (category === "all") {
     return JEWELLERY_PATH;
+  }
+
+  const urlKey = JEWELLERY_SLUG_TO_URL_KEY[category];
+  if (urlKey) {
+    return buildJewelleryCategoryHref(urlKey);
   }
 
   return `${JEWELLERY_PATH}?category=${category}`;

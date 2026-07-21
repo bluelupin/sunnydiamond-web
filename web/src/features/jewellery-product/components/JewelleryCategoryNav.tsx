@@ -1,16 +1,28 @@
 "use client";
 
+import { useMemo } from "react";
 import { cn } from "@/shared/utils/cn";
-import { jewelleryCategories } from "../data/categories";
 import { categoryIconSrc } from "../data/categoryIcons";
-import type { JewelleryCategorySlug } from "../types";
+import { mapMagentoCategoriesToPlpNav } from "../utils/plpCategoryNav";
+import { useMagentoJewelleryNav } from "@/hooks/magento/useMagentoJewelleryNav";
+import type { JewelleryCategory, JewelleryCategorySlug } from "../types";
 
 interface JewelleryCategoryNavProps {
   activeCategory: JewelleryCategorySlug;
-  onCategoryChange: (slug: JewelleryCategorySlug) => void;
+  onCategoryChange: (category: JewelleryCategory) => void;
 }
 
 const JewelleryCategoryNav = ({ activeCategory, onCategoryChange }: JewelleryCategoryNavProps) => {
+  const { data } = useMagentoJewelleryNav();
+  const categories = useMemo(
+    () => (data?.categories ? mapMagentoCategoriesToPlpNav(data.categories) : []),
+    [data?.categories],
+  );
+
+  if (categories.length === 0) {
+    return null;
+  }
+
   return (
     <nav
       aria-label="Jewellery categories"
@@ -25,14 +37,14 @@ const JewelleryCategoryNav = ({ activeCategory, onCategoryChange }: JewelleryCat
             "lg:justify-center lg:gap-8 md:gap-6 gap-3 lg:py-[40px] md:py-8 py-6",
           )}
         >
-          {jewelleryCategories.map((category) => {
+          {categories.map((category) => {
             const isActive = activeCategory === category.slug;
 
             return (
               <li key={category.slug} className="shrink-0 md:flex md:flex-1 md:justify-center lg:flex-none">
                 <button
                   type="button"
-                  onClick={() => onCategoryChange(category.slug)}
+                  onClick={() => onCategoryChange(category)}
                   aria-pressed={isActive}
                   className={cn(
                     "flex w-[56px] flex-col items-center justify-center gap-[8px] md:w-full md:max-w-[86px] lg:w-[86px]",
