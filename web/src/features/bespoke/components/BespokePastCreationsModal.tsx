@@ -99,7 +99,7 @@ const BespokePastCreationsModal = ({
             type="button"
             onClick={() => onImageClick(image)}
             aria-label={`View story: ${image.alt}`}
-            className="w-[351px] md:mb-6 mb-4 block w-full break-inside-avoid border-0 bg-transparent p-0 cursor-pointer transition-opacity hover:opacity-90"
+            className="w-[351px] md:mb-6 mb-4 block w-full md:h-[424px] break-inside-avoid border-0 bg-transparent p-0 cursor-pointer transition-opacity hover:opacity-90"
           >
             <ResponsiveImage
               desktopSrc={image.src}
