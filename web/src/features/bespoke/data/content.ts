@@ -154,6 +154,9 @@ export const bespokePageContent = {
   story: {
     title: "Designed around your story",
     subtitle: "Pieces crafted by turning your inspiration into something personal.",
+    video: {
+      src: "/videos/Bespoke-story-video.mp4",
+    },
     steps: [
       {
         number: "01",
@@ -188,6 +191,20 @@ export const bespokePageContent = {
     ] as const,
     ctaLabel: "Share Your Vision",
     ctaHref: "/contact",
+    shareVisionPanel: {
+      title: "Start your Custom Creation",
+      nameLabel: "Full Name*",
+      emailLabel: "Email ID*",
+      noteLabel: "Describe your vision*",
+      notePlaceholder: "I am looking to get a necklace with a pear shaped diamond pendant",
+      submitLabel: "Confirm Visit",
+      closeAriaLabel: "Close start your custom creation panel",
+      dialogAriaLabel: "Start your Custom Creation",
+      successToast: {
+        title: "Request submitted",
+        description: "Our representative will get in touch with you soon.",
+      },
+    },
   },
   featuredStories: {
     title: "Featured Stories",

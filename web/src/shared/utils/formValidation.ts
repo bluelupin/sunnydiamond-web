@@ -8,7 +8,7 @@ export const formFieldErrorTextColor = "#F91616";
 export const formFieldErrorBackgroundColor = "#FEDCDC";
 
 export const formFieldErrorClassName =
-  "font-gill text-base leading-110 text-[#F91616]";
+  "font-gill text-sm font-light leading-110 text-[#F91616]";
 
 export const invalidFieldClassName =
   "border border-[#F91616] bg-[#FEDCDC]";
@@ -85,6 +85,16 @@ export const validateOptionalEmail = (value: string): FieldValidation => {
   }
 
   return { valid: true };
+};
+
+export const validateRequiredEmail = (value: string): FieldValidation => {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return { valid: false, error: "Email is required" };
+  }
+
+  return validateOptionalEmail(trimmed);
 };
 
 export const validateOptionalDate = (value: string): FieldValidation => {
@@ -239,6 +249,7 @@ export type AppointmentContactValues = {
 
 export type AppointmentContactValidationOptions = {
   noteRequired?: boolean;
+  emailRequired?: boolean;
   validatePurpose?: boolean;
 };
 
@@ -261,7 +272,9 @@ export const getAppointmentContactErrors = (
   return {
     name: validateRequiredName(values.name).error,
     phone: validatePhone(values.phone, values.countryCode).error,
-    email: validateOptionalEmail(values.email).error,
+    email: options.emailRequired
+      ? validateRequiredEmail(values.email).error
+      : validateOptionalEmail(values.email).error,
     date: validateOptionalDate(values.date).error,
     note: noteValidation.error,
     purpose: options.validatePurpose

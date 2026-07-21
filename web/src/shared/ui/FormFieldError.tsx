@@ -22,7 +22,7 @@ const FormFieldError = forwardRef<HTMLDivElement, FormFieldErrorProps>(
         className={cn("flex items-center gap-2 text-[#F91616]", className)}
         {...props}
       >
-        <FormFieldErrorIcon className="size-6 shrink-0" />
+        <FormFieldErrorIcon className="size-4 shrink-0" />
         <p className={formFieldErrorClassName}>{message}</p>
       </div>
     );

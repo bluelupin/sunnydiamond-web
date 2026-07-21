@@ -76,14 +76,14 @@ const BespokePastCreationsModal = ({
           <path d="M24 24L8 8" stroke="white" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
-      <div className={cn("columns-2 gap-6 sm:columns-3 md:columns-4 lg:columns-5",)}>
+      <div className={cn("columns-2 md:gap-6 gap-4 sm:columns-3 md:columns-4 lg:columns-5",)}>
         {images.map((image, index) => (
           <button
             key={`${image.src}-${index}`}
             type="button"
             onClick={() => onImageClick(image)}
             aria-label={`View story: ${image.alt}`}
-            className="mb-6 block w-full break-inside-avoid border-0 bg-transparent p-0 text-left cursor-pointer transition-opacity hover:opacity-90"
+            className="md:mb-6 mb-4 block w-full break-inside-avoid border-0 bg-transparent p-0 text-left cursor-pointer transition-opacity hover:opacity-90"
           >
             <Image
               src={image.src}
