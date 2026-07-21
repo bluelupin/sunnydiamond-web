@@ -263,7 +263,7 @@ const JewelleryFilterDrawer = ({ open, filters, onClose, onApply }: JewelleryFil
       <button
         type="button"
         aria-label="Close filters"
-        className="min-h-0 flex-1 bg-[#1E1E1E]/25 backdrop-blur-[10px] animate-in fade-in duration-300 max-md:min-h-12"
+        className="min-h-0 flex-1 bg-[#1E1E1E]/25 backdrop-blur-[9px] animate-in fade-in duration-300 max-md:min-h-12"
         onClick={onClose}
       />
 

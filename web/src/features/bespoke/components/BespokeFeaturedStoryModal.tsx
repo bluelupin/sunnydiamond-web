@@ -279,8 +279,8 @@ const FeaturedStoryModalPanel = ({
           className="absolute md:right-6 right-4 md:top-10 top-6 z-20 inline-flex size-6 items-center justify-center text-white transition-opacity hover:opacity-70"
         >
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden className="md:w-8 md:h-8 w-6 h-6" >
-            <path d="M24 8L8 24" stroke="white" strokeWidth="1.33333" strokeLinecap="round" stroke-linejoin="round" />
-            <path d="M24 24L8 8" stroke="white" strokeWidth="1.33333" strokeLinecap="round" stroke-linejoin="round" />
+            <path d="M24 8L8 24" stroke="white" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M24 24L8 8" stroke="white" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
       </div>
