@@ -168,7 +168,7 @@ const FeaturedStoryModalCarousel = ({
   const trackOffset = viewportWidth > 0 ? -activeIndex * viewportWidth + dragOffset : 0;
 
   return (
-    <div ref={viewportRef} className="relative min-h-0 flex-1 overflow-hidden">
+    <div ref={viewportRef} className="relative h-full min-h-0 w-full flex-1 overflow-hidden max-md:h-[100vh] max-md:w-full">
       <div
         ref={trackRef}
         className={cn(
@@ -198,7 +198,7 @@ const FeaturedStoryModalCarousel = ({
                 src={image.src}
                 alt={image.alt}
                 fill
-                sizes={`${spec.panelMaxWidth}px`}
+                sizes="(max-width: 767px) 100vw, 480px"
                 className="object-cover object-center"
                 priority={index === 0}
               />
@@ -260,8 +260,8 @@ const FeaturedStoryModalPanel = ({
   }, [slide.src]);
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-black relative">
-      <div className="relative flex min-h-0 flex-1 flex-col">
+    <div className="relative flex h-full min-h-0 w-full flex-col bg-black max-md:h-[100vh] max-md:w-full">
+      <div className="relative flex min-h-0 flex-1 flex-col max-md:h-[100vh] max-md:w-full">
         <FeaturedStoryModalCarousel
           images={slide.modalImages}
           activeIndex={activeImageIndex}
@@ -272,9 +272,12 @@ const FeaturedStoryModalPanel = ({
           type="button"
           onClick={onClose}
           aria-label="Close featured story"
-          className="absolute right-6 top-6 z-20 inline-flex size-6 items-center justify-center text-white transition-opacity hover:opacity-70"
+          className="absolute md:right-6 right-4 md:top-10 top-6 z-20 inline-flex size-6 items-center justify-center text-white transition-opacity hover:opacity-70"
         >
-          <X size={spec.closeIconSize} strokeWidth={1.25} aria-hidden />
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden className="md:w-8 md:h-8 w-6 h-6" >
+            <path d="M24 8L8 24" stroke="white" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M24 24L8 8" stroke="white" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
         </button>
       </div>
 
@@ -319,13 +322,15 @@ const BespokeFeaturedStoryModal = ({
   }
 
   return (
-    <div className="fixed inset-0 z-[70] flex max-md:flex-col md:justify-end">
+    <div className="fixed inset-0 z-[70] flex md:justify-end">
       <button
         type="button"
         aria-label="Close featured story"
         onClick={onClose}
         className={cn(
-          "min-h-0 flex-1 animate-in fade-in duration-300 backdrop-blur-[10px] max-md:min-h-12",
+          "animate-in fade-in duration-300 backdrop-blur-[10px]",
+          "max-md:absolute max-md:inset-0 max-md:z-0",
+          "md:min-h-0 md:flex-1",
         )}
         style={{ backgroundColor: spec.overlayColor }}
       />
@@ -335,9 +340,9 @@ const BespokeFeaturedStoryModal = ({
         aria-modal="true"
         aria-label={slide.modalTitle}
         className={cn(
-          "flex h-full min-h-0 w-full max-w-480 shrink-0 flex-col overflow-hidden bg-black shadow-2xl",
-          "max-md:max-h-[calc(100vh-3rem)] max-md:animate-in max-md:slide-in-from-bottom max-md:duration-300",
-          "md:animate-in md:slide-in-from-right md:duration-300",
+          "relative z-10 flex min-h-0 w-full flex-col overflow-hidden bg-black shadow-2xl",
+          "max-md:h-[100vh] max-md:max-w-none max-md:animate-in max-md:fade-in max-md:duration-300",
+          "md:h-full md:max-w-480 md:shrink-0 md:animate-in md:slide-in-from-right md:duration-300",
         )}
       >
         <FeaturedStoryModalPanel
