@@ -4,7 +4,11 @@ import { useState } from "react";
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
 import { useCart } from "@/features/cart/context/CartContext";
-import { formatCartLineMeta, formatCartPrice } from "@/features/cart/utils/formatCartLine";
+import {
+  formatCartLineMeta,
+  formatCartPrice,
+  getCartShippingLabel,
+} from "@/features/cart/utils/formatCartLine";
 import { CartGiftBadge, CartMetaRow } from "@/features/cart/components/CartFlowUi";
 import OffersAndDealsSection, {
   OffersAndDealsExpandedContent,
@@ -16,15 +20,15 @@ type CheckoutOrderSummaryBodyProps = {
 };
 
 const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyProps) => {
-  const { items, subtotal, taxes, shipping, totalPrice, selectedShippingMethod } = useCart();
+  const { items, subtotal, taxes, shipping, totalPrice, selectedShippingMethod, shippingMethods, estimatedShippingMethods } = useCart();
   const [offersOpen, setOffersOpen] = useState(false);
 
-  const shippingLabel =
-    shipping === 0 && !selectedShippingMethod
-      ? "Calculated at checkout"
-      : shipping === 0
-        ? "Free"
-        : formatCartPrice(shipping);
+  const shippingLabel = getCartShippingLabel(
+    shipping,
+    selectedShippingMethod,
+    shippingMethods,
+    estimatedShippingMethods,
+  );
 
   const toggleOffers = () => setOffersOpen((open) => !open);
 

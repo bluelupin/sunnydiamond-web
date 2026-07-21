@@ -5,7 +5,7 @@ import { cn } from "@/shared/utils/cn";
 import OffersAndDealsSection from "@/shared/ui/OffersAndDealsSection";
 import { useCart } from "../context/CartContext";
 import { useCartUI } from "../context/CartUIContext";
-import { formatCartPrice } from "../utils/formatCartLine";
+import { formatCartPrice, getCartShippingLabel } from "../utils/formatCartLine";
 import {
   CartDivider,
   CartOutlineButton,
@@ -30,16 +30,16 @@ const CartPriceDetails = ({
   stickyOnMobile = false,
   children,
 }: CartPriceDetailsProps) => {
-  const { subtotal, taxes, shipping, totalPrice, selectedShippingMethod } = useCart();
+  const { subtotal, taxes, shipping, totalPrice, selectedShippingMethod, shippingMethods, estimatedShippingMethods } = useCart();
   const { openGiftingPanel } = useCartUI();
   const [offersOpen, setOffersOpen] = useState(false);
 
-  const shippingLabel =
-    shipping === 0 && !selectedShippingMethod
-      ? "Calculated at checkout"
-      : shipping === 0
-        ? "Free"
-        : formatCartPrice(shipping);
+  const shippingLabel = getCartShippingLabel(
+    shipping,
+    selectedShippingMethod,
+    shippingMethods,
+    estimatedShippingMethods,
+  );
 
   const showBreakdown = !compact;
   const showOffers = !compact;

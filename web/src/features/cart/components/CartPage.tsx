@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/shared/utils/cn";
 import CartBenefitsSection from "@/features/cart/components/CartBenefitsSection";
 import CartItem from "@/features/cart/components/CartItem";
@@ -11,9 +11,15 @@ import { cartFlowSpec } from "@/features/cart/data/cartFlowSpec";
 import { CartPrimaryLink } from "./CartFlowUi";
 
 const CartPage = () => {
-  const { items, isHydrating, updateQuantity, removeItem, updateLineItemOptions } = useCart();
+  const { items, isHydrating, refreshCart, updateQuantity, removeItem, updateLineItemOptions } = useCart();
   const [offersOpen, setOffersOpen] = useState(false);
   const [priceBreakupOpen, setPriceBreakupOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isHydrating) {
+      void refreshCart();
+    }
+  }, [isHydrating, refreshCart]);
 
   const mobileScrollPadding = (() => {
     const { cartPage } = cartFlowSpec.mobile;

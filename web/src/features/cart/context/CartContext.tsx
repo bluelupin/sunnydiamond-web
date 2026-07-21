@@ -15,6 +15,7 @@ import { trackEvent } from "@/infrastructure/analytics/use-gtag";
 import {
   addSimpleProductToGuestCart,
   ensureGuestCartId,
+  estimateGuestCartShippingMethods,
   fetchGuestCart,
   migrateLegacyLinesToGuestCart,
   removeGuestCartItem,
@@ -58,6 +59,7 @@ interface CartContextType {
   updateLineItemOptions: (lineItemId: string, options: Partial<CartLineOptions>) => void;
   updateLineItemGifting: (lineItemId: string, gifting: CartGiftingOptions) => void;
   applyMagentoCartState: (state: GuestCartState) => void;
+  refreshCart: () => Promise<void>;
   selectShippingMethod: (carrierCode: string, methodCode: string) => Promise<void>;
   clearCart: () => void;
   totalItems: number;
@@ -66,6 +68,7 @@ interface CartContextType {
   taxes: number;
   shipping: number;
   shippingMethods: MagentoShippingMethodOption[];
+  estimatedShippingMethods: MagentoShippingMethodOption[];
   selectedShippingMethod: MagentoSelectedShippingMethod | null;
 }
 
@@ -93,19 +96,54 @@ const emptyTotals = {
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cartState, setCartState] = useState<GuestCartState | null>(null);
   const [lineMetadata, setLineMetadata] = useState<StoredCartLineMetadata>({});
+  const [estimatedShippingMethods, setEstimatedShippingMethods] = useState<
+    MagentoShippingMethodOption[]
+  >([]);
   const [isHydrating, setIsHydrating] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const lineMetadataRef = useRef(lineMetadata);
   const initRef = useRef(false);
+  const shippingEstimateRequestRef = useRef(0);
 
   useEffect(() => {
     lineMetadataRef.current = lineMetadata;
     writeCartLineMetadata(lineMetadata);
   }, [lineMetadata]);
 
-  const applyCartState = useCallback((nextState: GuestCartState) => {
-    setCartState(nextState);
+  const refreshShippingEstimate = useCallback(async (state: GuestCartState | null) => {
+    const requestId = ++shippingEstimateRequestRef.current;
+
+    if (
+      !state ||
+      state.items.length === 0 ||
+      state.totals.selectedShippingMethod ||
+      state.totals.shippingMethods.length > 0
+    ) {
+      setEstimatedShippingMethods([]);
+      return;
+    }
+
+    try {
+      const methods = await estimateGuestCartShippingMethods(state.totals.cartId);
+      if (requestId !== shippingEstimateRequestRef.current) {
+        return;
+      }
+      setEstimatedShippingMethods(methods);
+    } catch {
+      if (requestId !== shippingEstimateRequestRef.current) {
+        return;
+      }
+      setEstimatedShippingMethods([]);
+    }
   }, []);
+
+  const applyCartState = useCallback(
+    (nextState: GuestCartState) => {
+      setCartState(nextState);
+      void refreshShippingEstimate(nextState);
+    },
+    [refreshShippingEstimate],
+  );
 
   const refreshCart = useCallback(async (cartId: string) => {
     const nextState = await fetchGuestCart(cartId, lineMetadataRef.current);
@@ -129,7 +167,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         lineMetadataRef.current = metadata;
 
         const legacyLines = readStoredCartLines();
-        let cartId = getGuestCartId();
+        const cartId = getGuestCartId();
 
         if (!cartId && legacyLines.length > 0) {
           const migrated = await migrateLegacyLinesToGuestCart(
@@ -164,14 +202,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
         }
 
         if (!cartId) {
+          shippingEstimateRequestRef.current += 1;
           setCartState(null);
+          setEstimatedShippingMethods([]);
           return;
         }
 
         await refreshCart(cartId);
       } catch {
         clearGuestCartId();
+        shippingEstimateRequestRef.current += 1;
         setCartState(null);
+        setEstimatedShippingMethods([]);
       } finally {
         setIsHydrating(false);
       }
@@ -387,12 +429,29 @@ export function CartProvider({ children }: { children: ReactNode }) {
     writeCartLineMetadata({});
     lineMetadataRef.current = {};
     setLineMetadata({});
+    shippingEstimateRequestRef.current += 1;
     setCartState(null);
+    setEstimatedShippingMethods([]);
   }, []);
 
   const applyMagentoCartState = useCallback((state: GuestCartState) => {
     applyCartState(state);
   }, [applyCartState]);
+
+  const refreshCartFromMagento = useCallback(async () => {
+    const cartId = getGuestCartId();
+    if (!cartId) {
+      return;
+    }
+
+    setIsUpdating(true);
+
+    try {
+      await refreshCart(cartId);
+    } finally {
+      setIsUpdating(false);
+    }
+  }, [refreshCart]);
 
   const selectShippingMethod = useCallback(
     async (carrierCode: string, methodCode: string) => {
@@ -446,6 +505,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       updateLineItemOptions,
       updateLineItemGifting,
       applyMagentoCartState,
+      refreshCart: refreshCartFromMagento,
       selectShippingMethod,
       clearCart,
       totalItems,
@@ -454,12 +514,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
       taxes,
       shipping,
       shippingMethods,
+      estimatedShippingMethods,
       selectedShippingMethod,
     }),
     [
       addItem,
       applyMagentoCartState,
+      refreshCartFromMagento,
       clearCart,
+      estimatedShippingMethods,
       isHydrating,
       isUpdating,
       items,

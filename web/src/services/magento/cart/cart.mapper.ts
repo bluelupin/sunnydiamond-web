@@ -47,6 +47,21 @@ function mapCartItemProduct(item: MagentoCartItem): Product | null {
   };
 }
 
+export function mapEstimateShippingMethods(
+  methods: MagentoShippingMethod[] | null | undefined,
+): MagentoShippingMethodOption[] {
+  const mapped: MagentoShippingMethodOption[] = [];
+
+  for (const method of methods ?? []) {
+    const option = mapShippingMethodOption(method);
+    if (option) {
+      mapped.push(option);
+    }
+  }
+
+  return mapped;
+}
+
 function mapShippingMethodOption(method: MagentoShippingMethod): MagentoShippingMethodOption | null {
   const carrierCode = method.carrier_code?.trim();
   const methodCode = method.method_code?.trim();
@@ -82,14 +97,36 @@ export function mapSelectedShippingMethod(
   cart: MagentoCart,
 ): MagentoSelectedShippingMethod | null {
   const selected = cart.shipping_addresses?.[0]?.selected_shipping_method;
-  const carrierCode = selected?.carrier_code?.trim();
   const methodCode = selected?.method_code?.trim();
+  const carrierCode = selected?.carrier_code?.trim() || methodCode;
 
-  if (!carrierCode || !methodCode) {
+  if (!methodCode || !carrierCode) {
     return null;
   }
 
-  return { carrierCode, methodCode };
+  return {
+    carrierCode,
+    methodCode,
+    title: selected?.method_title?.trim() || selected?.carrier_title?.trim() || methodCode,
+    amount: selected?.amount?.value ?? 0,
+  };
+}
+
+export function pickDefaultShippingMethod(
+  methods: MagentoShippingMethodOption[],
+): MagentoShippingMethodOption | null {
+  if (methods.length === 0) {
+    return null;
+  }
+
+  const freeMethods = methods.filter((method) => method.amount === 0);
+  if (freeMethods.length > 0) {
+    return freeMethods[0];
+  }
+
+  return methods.reduce((cheapest, method) =>
+    method.amount < cheapest.amount ? method : cheapest,
+  );
 }
 
 export function mapAvailablePaymentMethods(cart: MagentoCart): MagentoPaymentMethodOption[] {

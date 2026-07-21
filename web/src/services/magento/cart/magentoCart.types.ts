@@ -95,6 +95,14 @@ export type MagentoCartAddressInput = {
   telephone: string;
 };
 
+export type MagentoEstimateAddressInput = {
+  postcode: string;
+  country_code: string;
+  region: {
+    region_id: number;
+  };
+};
+
 export type MagentoShippingAddressInput = {
   address: MagentoCartAddressInput;
 };
@@ -140,6 +148,8 @@ export type MagentoShippingMethodOption = {
 export type MagentoSelectedShippingMethod = {
   carrierCode: string;
   methodCode: string;
+  title: string;
+  amount: number;
 };
 
 export type MagentoPaymentMethodOption = {
@@ -192,6 +202,10 @@ export type MagentoCreatePaymentOrderResponse = {
     amount?: number | null;
     currency_code?: string | null;
   } | null;
+};
+
+export type MagentoEstimateShippingMethodsResponse = {
+  estimateShippingMethods?: MagentoShippingMethod[] | null;
 };
 
 export type MappedMagentoCart = {

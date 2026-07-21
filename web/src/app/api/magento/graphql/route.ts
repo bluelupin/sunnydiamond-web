@@ -23,6 +23,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Missing GraphQL query" }, { status: 400 });
   }
 
+  const query = body.query;
+  const isCartOperation =
+    /\b(cart\s*\(|createGuestCart|addSimpleProductsToCart|updateCartItems|removeItemFromCart|setGuestEmailOnCart|setShippingAddressesOnCart|setBillingAddressOnCart|setShippingMethodsOnCart|setPaymentMethodOnCart|placeOrder|estimateShippingMethods)\b/.test(
+      query,
+    );
+
   try {
     const response = await fetch(getMagentoGraphqlUrl(), {
       method: "POST",
@@ -32,7 +38,9 @@ export async function POST(request: NextRequest) {
         Store: MAGENTO_DEFAULT_STORE_CODE,
       },
       body: JSON.stringify({ query: body.query, variables: body.variables }),
-      next: { revalidate: MAGENTO_CATALOG_REVALIDATE_SECONDS },
+      ...(isCartOperation
+        ? { cache: "no-store" as const }
+        : { next: { revalidate: MAGENTO_CATALOG_REVALIDATE_SECONDS } }),
     });
 
     const json = await response.json();

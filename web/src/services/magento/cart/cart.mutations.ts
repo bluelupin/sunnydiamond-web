@@ -144,3 +144,18 @@ export const MAGENTO_CREATE_PAYMENT_ORDER_MUTATION = `
     }
   }
 ` as const;
+
+export const MAGENTO_ESTIMATE_SHIPPING_METHODS_MUTATION = `
+  mutation MagentoEstimateShippingMethods($input: EstimateTotalsInput!) {
+    estimateShippingMethods(input: $input) {
+      carrier_code
+      carrier_title
+      method_code
+      method_title
+      amount {
+        value
+        currency
+      }
+    }
+  }
+` as const;

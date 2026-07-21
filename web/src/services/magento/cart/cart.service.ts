@@ -11,11 +11,14 @@ import {
   MAGENTO_SET_SHIPPING_METHODS_ON_CART_MUTATION,
   MAGENTO_PLACE_ORDER_MUTATION,
   MAGENTO_CREATE_PAYMENT_ORDER_MUTATION,
+  MAGENTO_ESTIMATE_SHIPPING_METHODS_MUTATION,
   MAGENTO_UPDATE_CART_ITEMS_MUTATION,
 } from "./cart.mutations";
 import {
   mapMagentoCartItems,
   mapMagentoCartTotals,
+  mapEstimateShippingMethods,
+  pickDefaultShippingMethod,
 } from "./cart.mapper";
 import {
   clearGuestCartId,
@@ -34,11 +37,13 @@ import type {
   MagentoSetGuestEmailOnCartResponse,
   MagentoSetShippingAddressesOnCartResponse,
   MagentoCreatePaymentOrderResponse,
+  MagentoEstimateShippingMethodsResponse,
   MagentoPlaceOrderResponse,
   MagentoPaymentOrder,
   MagentoSetPaymentMethodOnCartResponse,
   MagentoSetShippingMethodsOnCartResponse,
   MagentoShippingAddressInput,
+  MagentoShippingMethodOption,
   MagentoBillingAddressInput,
   PlacedGuestOrder,
   MagentoUpdateCartItemsResponse,
@@ -57,6 +62,7 @@ import {
   resolveMagentoPaymentCode,
 } from "./checkoutPayment.mapper";
 import { MagentoGraphqlError } from "../magento.errors";
+import { DEFAULT_CART_SHIPPING_ESTIMATE_ADDRESS } from "./cartShippingEstimate";
 
 export type GuestCartState = {
   cart: MagentoCart;
@@ -316,23 +322,23 @@ export async function selectFirstAvailableGuestShippingMethod(
   lineMetadata: StoredCartLineMetadata,
   signal?: AbortSignal,
 ): Promise<GuestCartState> {
-  const firstMethod = state.totals.shippingMethods[0];
+  const defaultMethod = pickDefaultShippingMethod(state.totals.shippingMethods);
 
-  if (!firstMethod) {
+  if (!defaultMethod) {
     return state;
   }
 
   if (
-    state.totals.selectedShippingMethod?.carrierCode === firstMethod.carrierCode &&
-    state.totals.selectedShippingMethod?.methodCode === firstMethod.methodCode
+    state.totals.selectedShippingMethod?.carrierCode === defaultMethod.carrierCode &&
+    state.totals.selectedShippingMethod?.methodCode === defaultMethod.methodCode
   ) {
     return state;
   }
 
   return setGuestShippingMethod(
     cartId,
-    firstMethod.carrierCode,
-    firstMethod.methodCode,
+    defaultMethod.carrierCode,
+    defaultMethod.methodCode,
     lineMetadata,
     signal,
   );
@@ -473,4 +479,23 @@ export async function completeGuestCheckout(
 
   await setGuestPaymentMethod(cartId, paymentCode, lineMetadata, signal);
   return placeGuestOrder(cartId, signal);
+}
+
+export async function estimateGuestCartShippingMethods(
+  cartId: string,
+  signal?: AbortSignal,
+): Promise<MagentoShippingMethodOption[]> {
+  const data = await magentoGraphqlFetch<MagentoEstimateShippingMethodsResponse>({
+    query: MAGENTO_ESTIMATE_SHIPPING_METHODS_MUTATION,
+    variables: {
+      input: {
+        cart_id: cartId,
+        address: DEFAULT_CART_SHIPPING_ESTIMATE_ADDRESS,
+      },
+    },
+    signal,
+    cache: "no-store",
+  });
+
+  return mapEstimateShippingMethods(data.estimateShippingMethods);
 }

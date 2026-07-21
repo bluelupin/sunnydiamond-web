@@ -3,7 +3,7 @@
 import OffersAndDealsSection from "@/shared/ui/OffersAndDealsSection";
 import { useCart } from "../context/CartContext";
 import { useCartUI } from "../context/CartUIContext";
-import { formatCartPrice } from "../utils/formatCartLine";
+import { formatCartPrice, getCartShippingLabel } from "../utils/formatCartLine";
 import {
   CartDivider,
   CartOutlineButton,
@@ -25,8 +25,14 @@ const CartMobileStickyFooter = ({
   breakupOpen,
   onBreakupToggle,
 }: CartMobileStickyFooterProps) => {
-  const { subtotal, taxes, totalPrice } = useCart();
+  const { subtotal, taxes, shipping, totalPrice, selectedShippingMethod, shippingMethods, estimatedShippingMethods } = useCart();
   const { openGiftingPanel } = useCartUI();
+  const shippingLabel = getCartShippingLabel(
+    shipping,
+    selectedShippingMethod,
+    shippingMethods,
+    estimatedShippingMethods,
+  );
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 lg:hidden">
@@ -47,7 +53,7 @@ const CartMobileStickyFooter = ({
             <div className="flex flex-col gap-3">
               <CartPriceRow label="Subtotal" value={formatCartPrice(subtotal)} />
               <CartPriceRow label="Taxes" value={formatCartPrice(taxes)} />
-              <CartPriceRow label="Shipping" value="Free" />
+              <CartPriceRow label="Shipping" value={shippingLabel} />
               <CartDivider weight={1} />
             </div>
           ) : null}

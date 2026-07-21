@@ -46,6 +46,7 @@ const CheckoutPage = () => {
     totalPrice,
     clearCart,
     applyMagentoCartState,
+    refreshCart,
     selectShippingMethod,
     shippingMethods,
     selectedShippingMethod,
@@ -115,6 +116,12 @@ const CheckoutPage = () => {
       });
     }
   }, [items, totalPrice, step]);
+
+  useEffect(() => {
+    if (step === "payment") {
+      void refreshCart();
+    }
+  }, [refreshCart, step]);
 
   if (items.length === 0 && step !== "success") {
     return (
