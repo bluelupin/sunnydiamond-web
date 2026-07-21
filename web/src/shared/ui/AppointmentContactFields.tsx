@@ -12,6 +12,7 @@ import FormFieldError from "@/shared/ui/FormFieldError";
 import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
 import AppointmentDateField from "@/shared/ui/AppointmentDateField";
 import {
+  getMaxSelectableDate,
   getMinSelectableDate,
   invalidFieldClassName,
   invalidFieldContainerClassName,
@@ -42,10 +43,22 @@ type AppointmentContactFieldsProps = {
   markTouched: (field: AppointmentContactField) => void;
   labelClassName?: string;
   fieldClassName?: string;
+  showDate?: boolean;
   showTimeSlots?: boolean;
+  timeSlots?: readonly string[];
   selectedSlotStyle?: "dark" | "gold";
   showPurpose?: boolean;
   purposeOptions?: readonly string[];
+  purposeLabel?: string;
+  purposePlaceholder?: string;
+  nameLabel?: string;
+  namePlaceholder?: string;
+  phoneLabel?: string;
+  phonePlaceholder?: string;
+  emailLabel?: string;
+  emailPlaceholder?: string;
+  dateLabel?: string;
+  timeSlotsLabel?: string;
   noteLabel?: string;
   notePlaceholder?: string;
   noteLabelClassName?: string;
@@ -75,22 +88,36 @@ const AppointmentContactFields = ({
   markTouched,
   labelClassName = appointmentLabelClassName,
   fieldClassName = appointmentFieldClassName,
+  showDate = true,
   showTimeSlots = true,
+  timeSlots = APPOINTMENT_TIME_SLOTS,
   selectedSlotStyle = "dark",
   showPurpose = false,
   purposeOptions = [],
+  purposeLabel = "Purpose of Visit",
+  purposePlaceholder = "-select-",
+  nameLabel = "Your Name*",
+  namePlaceholder,
+  phoneLabel = "Phone No.*",
+  phonePlaceholder,
+  emailLabel = "Email",
+  emailPlaceholder = "Enter",
+  dateLabel = "Date",
+  timeSlotsLabel = "Time Slots",
   noteLabel = "Describe more about your visit",
   notePlaceholder = "Enter",
   noteLabelClassName,
   noteTextareaClassName = "font-gill text-base leading-110",
 }: AppointmentContactFieldsProps) => {
   const minDate = getMinSelectableDate();
+  const maxDate = getMaxSelectableDate();
+  const slots = timeSlots.length > 0 ? timeSlots : APPOINTMENT_TIME_SLOTS;
 
   return (
     <>
       <div className="flex flex-col gap-2">
         <label htmlFor={`${idPrefix}-name`} className={labelClassName}>
-          Your Name*
+          {nameLabel}
         </label>
         <input
           id={`${idPrefix}-name`}
@@ -98,6 +125,7 @@ const AppointmentContactFields = ({
           value={name}
           onChange={(event) => onNameChange(event.target.value)}
           onBlur={() => markTouched("name")}
+          placeholder={namePlaceholder}
           autoComplete="name"
           aria-invalid={showError("name") || undefined}
           aria-describedby={showError("name") ? `${idPrefix}-name-error` : undefined}
@@ -113,7 +141,7 @@ const AppointmentContactFields = ({
 
       <div className="flex flex-col gap-2">
         <label htmlFor={`${idPrefix}-phone`} className={labelClassName}>
-          Phone No.*
+          {phoneLabel}
         </label>
         <div
           className={cn(
@@ -152,10 +180,11 @@ const AppointmentContactFields = ({
             value={phone}
             onChange={(event) => onPhoneChange(sanitizePhoneInput(event.target.value, countryCode))}
             onBlur={() => markTouched("phone")}
+            placeholder={phonePlaceholder}
             autoComplete="tel-national"
             aria-invalid={showError("phone") || undefined}
             aria-describedby={showError("phone") ? `${idPrefix}-phone-error` : undefined}
-            className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none"
+            className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:text-[#999999]"
           />
         </div>
         <FormFieldError id={`${idPrefix}-phone-error`} message={showError("phone") ? errors.phone : undefined} />
@@ -163,7 +192,7 @@ const AppointmentContactFields = ({
 
       <div className="flex flex-col gap-2">
         <label htmlFor={`${idPrefix}-email`} className={labelClassName}>
-          Email
+          {emailLabel}
         </label>
         <input
           id={`${idPrefix}-email`}
@@ -171,7 +200,7 @@ const AppointmentContactFields = ({
           value={email}
           onChange={(event) => onEmailChange(event.target.value)}
           onBlur={() => markTouched("email")}
-          placeholder="Enter"
+          placeholder={emailPlaceholder}
           autoComplete="email"
           aria-invalid={showError("email") || undefined}
           aria-describedby={showError("email") ? `${idPrefix}-email-error` : undefined}
@@ -180,30 +209,33 @@ const AppointmentContactFields = ({
         <FormFieldError id={`${idPrefix}-email-error`} message={showError("email") ? errors.email : undefined} />
       </div>
 
-      <div className="flex flex-col gap-2">
-        <label htmlFor={`${idPrefix}-date`} className={labelClassName}>
-          Date
-        </label>
-        <AppointmentDateField
-          id={`${idPrefix}-date`}
-          value={date}
-          minDate={minDate}
-          onChange={onDateChange}
-          onBlur={() => markTouched("date")}
-          hasError={showError("date")}
-          aria-invalid={showError("date") || undefined}
-          aria-describedby={showError("date") ? `${idPrefix}-date-error` : undefined}
-        />
-        <FormFieldError id={`${idPrefix}-date-error`} message={showError("date") ? errors.date : undefined} />
-      </div>
+      {showDate ? (
+        <div className="flex flex-col gap-2">
+          <label htmlFor={`${idPrefix}-date`} className={labelClassName}>
+            {dateLabel}
+          </label>
+          <AppointmentDateField
+            id={`${idPrefix}-date`}
+            value={date}
+            minDate={minDate}
+            maxDate={maxDate}
+            onChange={onDateChange}
+            onBlur={() => markTouched("date")}
+            hasError={showError("date")}
+            aria-invalid={showError("date") || undefined}
+            aria-describedby={showError("date") ? `${idPrefix}-date-error` : undefined}
+          />
+          <FormFieldError id={`${idPrefix}-date-error`} message={showError("date") ? errors.date : undefined} />
+        </div>
+      ) : null}
 
       {showTimeSlots && onSelectedSlotChange ? (
         <div className="flex flex-col gap-2">
-          <span className={labelClassName}>Time Slots</span>
+          <span className={labelClassName}>{timeSlotsLabel}</span>
           <div className="flex flex-col gap-3">
-            {Array.from({ length: APPOINTMENT_TIME_SLOTS.length / 2 }, (_, row) => (
+            {Array.from({ length: Math.ceil(slots.length / 2) }, (_, row) => (
               <div key={row} className="flex gap-2">
-                {[APPOINTMENT_TIME_SLOTS[row * 2], APPOINTMENT_TIME_SLOTS[row * 2 + 1]].map((slot) => {
+                {[slots[row * 2], slots[row * 2 + 1]].filter(Boolean).map((slot) => {
                   const isSelected = selectedSlot === slot;
 
                   return (
@@ -230,14 +262,14 @@ const AppointmentContactFields = ({
         </div>
       ) : null}
 
-      {showPurpose && onPurposeChange ? (
+      {showPurpose && onPurposeChange && purposeOptions.length > 0 ? (
         <div className="flex flex-col gap-2">
           <InlineCustomSelect
             id={`${idPrefix}-purpose`}
-            label="Purpose of Visit"
+            label={purposeLabel}
             value={purpose}
             options={purposeOptions}
-            placeholder="-select-"
+            placeholder={purposePlaceholder}
             onChange={onPurposeChange}
             onBlur={() => markTouched("purpose")}
             invalid={showError("purpose")}
