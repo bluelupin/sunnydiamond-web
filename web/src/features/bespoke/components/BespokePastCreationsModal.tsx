@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
+import { useEdgeAutoScroll } from "@/shared/hooks/use-edge-auto-scroll";
 import { cn } from "@/shared/utils/cn";
 import {
   bespokePastCreationsFigmaSpec,
@@ -50,6 +51,12 @@ const BespokePastCreationsModal = ({
   onImageClick,
   suppressEscape = false,
 }: BespokePastCreationsModalProps) => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  useEdgeAutoScroll(scrollContainerRef, open, {
+    edgeZone: 80,
+    maxSpeedPxPerSec: 840,
+  });
+
   usePastCreationsModalEffects(open, onClose, suppressEscape);
 
   if (!open) {
@@ -58,10 +65,11 @@ const BespokePastCreationsModal = ({
 
   return (
     <div
+      ref={scrollContainerRef}
       role="dialog"
       aria-modal="true"
       aria-label="Past creations gallery"
-      className="fixed inset-0 z-[70] overflow-y-auto bg-white animate-in fade-in duration-300"
+      className="fixed inset-0 z-[70] overflow-auto bg-white animate-in fade-in duration-300"
     >
       <button
         type="button"
@@ -75,22 +83,25 @@ const BespokePastCreationsModal = ({
           <path d="M24 24L8 8" stroke="white" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
-      <div className={cn("columns-2 md:gap-6 gap-4 sm:columns-3 md:columns-4 lg:columns-5",)}>
+      <div
+        className={cn(
+          "inline-block min-h-full w-max min-w-full columns-[160px] gap-4 sm:columns-[200px] md:columns-[351px] md:gap-6 lg:columns-[351px] overflow-x-auto whitespace-nowrap min-w-[1851px]",
+        )}
+      >
         {images.map((image, index) => (
           <button
             key={`${image.src}-${index}`}
             type="button"
             onClick={() => onImageClick(image)}
             aria-label={`View story: ${image.alt}`}
-            className="md:mb-6 mb-4 block w-full break-inside-avoid border-0 bg-transparent p-0 text-left cursor-pointer transition-opacity hover:opacity-90"
+            className="w-[351px] md:mb-6 mb-4 block w-full break-inside-avoid border-0 bg-transparent p-0 cursor-pointer transition-opacity hover:opacity-90"
           >
             <ResponsiveImage
               desktopSrc={image.src}
               alt={image.alt}
               width={image.width}
               height={image.height}
-              className="block h-auto w-full object-cover object-center"
-              sizes="(max-width: 639px) 50vw, (max-width: 767px) 50vw, (max-width: 1023px) 33vw, (max-width: 1279px) 25vw, 20vw"
+              className="block h-full w-full object-cover object-center"
             />
           </button>
         ))}
