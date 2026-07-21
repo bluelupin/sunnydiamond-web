@@ -41,12 +41,22 @@ export type StrapiHomepageHero = {
   videoBackground?: StrapiHeroVideoBlock | null;
 };
 
+export type StrapiFooterTickerItem = {
+  id?: number;
+  label?: string | null;
+  sortOrder?: number | null;
+  isActive?: boolean | null;
+  showField?: boolean | null;
+};
+
 export type StrapiGlobalShell = {
   headerNavigationLinks?: HeaderNavLink[] | null;
   footerLinkGroups?: FooterLinkGroup[] | null;
   footerCopyright?: string | null;
   socialLinks?: unknown[] | null;
   defaultSeo?: HomepageSeo | null;
+  /** Site-wide marquee ticker (Global config). */
+  footerTickerItems?: StrapiFooterTickerItem[] | null;
 };
 
 export type StrapiHomepageShellEntity = {
