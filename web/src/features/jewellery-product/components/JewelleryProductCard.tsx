@@ -50,13 +50,13 @@ const ProductCopy = ({ title, price, href, className }: ProductCopyProps) => (
 );
 
 const ProductImage = ({ src, alt }: { src: string | StaticImageData; alt: string }) => (
-  <div className="mx-auto h-[110px] w-[121px] shrink-0 overflow-hidden md:h-[303px] md:w-[372px]">
+  <div className="mx-auto size-[121px] shrink-0 overflow-hidden md:size-[303px]">
     <OptimizedImage
       src={src}
       alt={alt}
-      width={372}
-      height={287}
-      className="size-full object-cover"
+      width={303}
+      height={303}
+      className="size-full object-contain"
       sizes="(max-width: 768px) 50vw, 33vw"
     />
   </div>
