@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import Image from "next/image";
-import { X } from "lucide-react";
+import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { cn } from "@/shared/utils/cn";
 import {
   bespokePastCreationsFigmaSpec,
@@ -85,12 +84,12 @@ const BespokePastCreationsModal = ({
             aria-label={`View story: ${image.alt}`}
             className="md:mb-6 mb-4 block w-full break-inside-avoid border-0 bg-transparent p-0 text-left cursor-pointer transition-opacity hover:opacity-90"
           >
-            <Image
-              src={image.src}
+            <ResponsiveImage
+              desktopSrc={image.src}
               alt={image.alt}
               width={image.width}
               height={image.height}
-              className="block h-auto w-full"
+              className="block h-auto w-full object-cover object-center"
               sizes="(max-width: 639px) 50vw, (max-width: 767px) 50vw, (max-width: 1023px) 33vw, (max-width: 1279px) 25vw, 20vw"
             />
           </button>
