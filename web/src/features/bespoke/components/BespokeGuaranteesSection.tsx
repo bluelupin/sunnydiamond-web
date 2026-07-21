@@ -13,7 +13,7 @@ const BespokeGuaranteesSection = () => {
         {guarantees.map((item, index) => (
           <Fragment key={item.label}>
             {index > 0 &&
-              <li aria-hidden className="w-full">
+              <li aria-hidden className="lg:w-auto w-full">
                 <div className="lg:w-[0.5px] w-full lg:h-[136px] h-[0.5px] bg-gray600"></div>
               </li>
             }

@@ -4,7 +4,6 @@ import { useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Reveal from "@/shared/Animation/Reveal";
-import PageContainer from "@/shared/ui/layout/PageContainer";
 import { cn } from "@/shared/utils/cn";
 import { useSince1997HorizontalScroll } from "@/features/about/hooks/useSince1997HorizontalScroll";
 import { bespokePageContent, bespokeStoryFigmaSpec } from "@/features/bespoke/data/content";
@@ -26,17 +25,10 @@ const BespokeStoryStepPanel = ({ step, layout, isLastSlide, isFirstSlide }: Besp
     <article
       className={cn(
         "flex shrink-0",
-        isDesktop ? "items-center gap-10 w-[970px]" : "w-full flex-col bg-gray300",
+        isDesktop ? "items-center gap-6 w-[970px]" : "w-full flex-col bg-gray300", isLastSlide && "mr-10",
       )}
-      style={
-        !isDesktop
-          ? { gap: `0px` }
-          : isFirstSlide
-            ? { marginLeft: `${bespokeStoryFigmaSpec.firstStepOffset}px` }
-            : undefined
-      }
-      {...(isFirstSlide ? { "data-since1997-first-step": true } : {})}
-    >
+      style={!isDesktop ? { gap: `0px` } : isFirstSlide ? { marginLeft: `350px` } : undefined}
+      {...(isFirstSlide ? { "data-since1997-first-step": true } : {})}>
       <figure
         className={cn(
           "relative overflow-hidden bg-gray200",
@@ -54,7 +46,7 @@ const BespokeStoryStepPanel = ({ step, layout, isLastSlide, isFirstSlide }: Besp
           priority={isDesktop}
         />
       </figure>
-      <div className={cn("flex flex-col md:gap-3 gap-2 md:py-0 py-6 md:px-0 px-4", isDesktop && "max-w-[296px]")}>
+      <div className={cn("flex flex-col md:gap-3 gap-2 md:py-0 py-6 md:px-0 px-4", isDesktop && "max-w-[296px]", isLastSlide && "mr-20",)}>
         <span className="font-larken md:text-5xl text-32 font-light leading-110 text-neutral300">{step.number}</span>
         <h3 className="font-larken md:text-32 text-2xl font-light leading-110 text-darkblack">{step.title}</h3>
         <p className={cn("font-gill font-light leading-110 text-darkblack md:text-xl text-base")}>
@@ -79,7 +71,7 @@ const BespokeStorySection = () => {
     <section
       ref={sectionRef}
       aria-labelledby="bespoke-story-title"
-      className="relative bg-white md:py-100 py-16 mx-auto w-full px-4 md:px-8 lg:px-10 2xl:max-w-1920 2xl:px-[60px]"
+      className="relative bg-white md:py-100 py-16 mx-auto w-full pl-4 md:pl-8 lg:pl-10 2xl:max-w-1920 2xl:pl-[60px] pr-0"
     >
       <div className="md:mb-12 mb-6 mx-auto max-w-[720px] flex w-full flex-col gap-4">
         <Reveal
@@ -101,7 +93,7 @@ const BespokeStorySection = () => {
       {/* Desktop / tablet — sticky viewport + scroll-driven horizontal slide */}
       <div data-since1997-mode="desktop" className="hidden md:block">
         <div className="sticky top-40 flex flex-col overflow-hidden bg-white">
-          <Reveal direction="up" className="flex min-h-0 flex-1 flex-col pb-100">
+          <Reveal direction="up" className="flex min-h-0 flex-1 flex-col">
             <div
               data-since1997-viewport
               className="relative left-1/2 min-h-0 w-screen max-w-none -translate-x-1/2 overflow-hidden"
@@ -137,7 +129,7 @@ const BespokeStorySection = () => {
         <div className="md:mt-12 mt-4 flex justify-center md:w-[284px] mx-auto w-full">
           <Link
             href={story.ctaHref}
-            className="btn-dark-slide inline-flex items-center justify-center bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white w-full h-14"
+            className="btn-dark-slide inline-flex items-center justify-center bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white w-full h-14 border border-darkblack"
           >
             <span className="relative z-10">{story.ctaLabel}</span>
           </Link>
