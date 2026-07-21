@@ -53,6 +53,22 @@ export const MAGENTO_JEWELLERY_PRODUCTS_QUERY = `
           name
           url_key
         }
+        ... on SimpleProduct {
+          custom_attributesV2 {
+            items {
+              code
+              ... on AttributeValue {
+                value
+              }
+              ... on AttributeSelectedOptions {
+                selected_options {
+                  label
+                  value
+                }
+              }
+            }
+          }
+        }
       }
     }
   }

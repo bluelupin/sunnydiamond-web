@@ -1,5 +1,6 @@
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 import type { MagentoProductListItem, MagentoMediaGalleryItem } from "./magentoProduct.types";
+import { isMagentoBestSeller } from "./magentoAttribute.utils";
 
 function getActiveGalleryUrls(mediaGallery: MagentoMediaGalleryItem[] | null | undefined): string[] {
   return (mediaGallery ?? [])
@@ -70,6 +71,8 @@ export function mapMagentoProductToJewelleryListing(
     return null;
   }
 
+  const isBestseller = isMagentoBestSeller(product.custom_attributesV2?.items);
+
   return {
     id: sku,
     sku,
@@ -81,6 +84,7 @@ export function mapMagentoProductToJewelleryListing(
       ? { modalImage: lifestyleImage, hoverImage: lifestyleImage }
       : {}),
     category: resolveProductCategory(product.categories),
+    ...(isBestseller ? { isBestseller: true } : {}),
   };
 }
 

@@ -63,6 +63,9 @@ export type MagentoProductListItem = {
   } | null;
   media_gallery?: MagentoMediaGalleryItem[] | null;
   categories?: MagentoProductCategory[] | null;
+  custom_attributesV2?: {
+    items?: MagentoCustomAttributeItem[] | null;
+  } | null;
 };
 
 export type MagentoAggregationOption = {
