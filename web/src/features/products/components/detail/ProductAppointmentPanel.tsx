@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import type { StaticImageData } from "next/image";
-import { Info } from "lucide-react";
+import { Check, Info, X } from "lucide-react";
 import { useToast } from "@/shared/hooks/use-toast";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
+import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
 import {
   appointmentFieldClassName,
@@ -13,11 +14,18 @@ import {
 } from "@/shared/constants/appointmentForm";
 import type { Product } from "@/features/products/data/products";
 import {
+  createProductSubmission,
+  getProductFormByTag,
+} from "@/services/forms/product-form.service";
+import { wishlistMovedToastDurationMs } from "@/features/wishlist/data/content";
+import {
   PRODUCT_APPOINTMENT_PANEL_CONFIG,
   type ProductAppointmentVariant,
 } from "./productAppointmentPanel.config";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
+
+const PERSONALISE_FORM_TAG = "product-personalisation";
 
 type ProductAppointmentPanelProps = {
   open: boolean;
@@ -28,19 +36,28 @@ type ProductAppointmentPanelProps = {
 
 type ProductAppointmentFormProps = {
   config: (typeof PRODUCT_APPOINTMENT_PANEL_CONFIG)[ProductAppointmentVariant];
-  productName: string;
+  product: Product;
   productImage: string | StaticImageData;
+  variant: ProductAppointmentVariant;
+  open: boolean;
   onClose: () => void;
-  onSubmit: () => void;
+  onSubmitSuccess: (message: string) => void;
+  onSubmitError: (message: string) => void;
 };
 
 const ProductAppointmentForm = ({
   config,
-  productName,
+  product,
   productImage,
+  variant,
+  open,
   onClose,
-  onSubmit,
+  onSubmitSuccess,
+  onSubmitError,
 }: ProductAppointmentFormProps) => {
+  const isPersonalise = variant === "personalise";
+  const { contact: profileContact } = useCustomerProfileContact(open);
+
   const [name, setName] = useState("");
   const [countryCode, setCountryCode] = useState("+91");
   const [phone, setPhone] = useState("");
@@ -48,8 +65,28 @@ const ProductAppointmentForm = ({
   const [date, setDate] = useState("");
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [note, setNote] = useState("");
+  const [referenceImage, setReferenceImage] = useState<File | null>(null);
   const [referenceImageName, setReferenceImageName] = useState<string | null>(null);
+  const [referenceImagePreviewUrl, setReferenceImagePreviewUrl] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasAppliedProfilePrefill, setHasAppliedProfilePrefill] = useState(false);
   const referenceImageInputRef = useRef<HTMLInputElement>(null);
+  const referenceImagePreviewUrlRef = useRef<string | null>(null);
+
+  const [formTag, setFormTag] = useState(PERSONALISE_FORM_TAG);
+  const [formTitle, setFormTitle] = useState(config.title);
+  const [submitLabel, setSubmitLabel] = useState(config.submitLabel);
+  const [nameLabel, setNameLabel] = useState("Your Name*");
+  const [namePlaceholder, setNamePlaceholder] = useState<string | undefined>(undefined);
+  const [phoneLabel, setPhoneLabel] = useState("Phone No.*");
+  const [phonePlaceholder, setPhonePlaceholder] = useState<string | undefined>(undefined);
+  const [emailLabel, setEmailLabel] = useState("Email");
+  const [emailPlaceholder, setEmailPlaceholder] = useState("Enter");
+  const [notesLabel, setNotesLabel] = useState(config.noteLabel);
+  const [notesPlaceholder, setNotesPlaceholder] = useState(config.notePlaceholder);
+  const [notesRequired, setNotesRequired] = useState(config.noteRequired);
+  const [allowImageUpload, setAllowImageUpload] = useState(config.showReferenceImage);
+  const [timeSlots, setTimeSlots] = useState<readonly string[]>([]);
 
   const formValues = useMemo(
     () => ({ name, countryCode, phone, email, date, note }),
@@ -57,20 +94,160 @@ const ProductAppointmentForm = ({
   );
 
   const validationOptions = useMemo(
-    () => ({ noteRequired: config.noteRequired }),
-    [config.noteRequired],
+    () => ({ noteRequired: notesRequired }),
+    [notesRequired],
   );
 
-  const { isValid, submitted, errors, markTouched, showError, validateSubmit } =
+  const { isValid, errors, markTouched, showError, validateSubmit, resetValidation } =
     useAppointmentFormValidation(formValues, validationOptions);
 
-  const handleSubmit = () => {
-    validateSubmit(onSubmit);
+  const clearReferenceImage = () => {
+    if (referenceImagePreviewUrlRef.current) {
+      URL.revokeObjectURL(referenceImagePreviewUrlRef.current);
+      referenceImagePreviewUrlRef.current = null;
+    }
+    setReferenceImagePreviewUrl(null);
+    setReferenceImage(null);
+    setReferenceImageName(null);
+    if (referenceImageInputRef.current) {
+      referenceImageInputRef.current.value = "";
+    }
+  };
+
+  const resetForm = () => {
+    setName("");
+    setCountryCode("+91");
+    setPhone("");
+    setEmail("");
+    setDate("");
+    setSelectedSlot(null);
+    setNote("");
+    clearReferenceImage();
+    setIsSubmitting(false);
+    setHasAppliedProfilePrefill(false);
+    resetValidation();
+  };
+
+  useEffect(() => {
+    if (!open) {
+      resetForm();
+      return;
+    }
+
+    if (!isPersonalise) return;
+
+    const controller = new AbortController();
+
+    void (async () => {
+      try {
+        const form = await getProductFormByTag(PERSONALISE_FORM_TAG, controller.signal);
+        if (!form) return;
+
+        setFormTag(form.formTag || PERSONALISE_FORM_TAG);
+        if (form.formName) setFormTitle(form.formName);
+        if (form.submitButtonText) setSubmitLabel(form.submitButtonText);
+        if (form.nameLabel) setNameLabel(form.nameLabel);
+        if (form.namePlaceholder) setNamePlaceholder(form.namePlaceholder);
+        if (form.phoneLabel) setPhoneLabel(form.phoneLabel);
+        if (form.phonePlaceholder) setPhonePlaceholder(form.phonePlaceholder);
+        if (form.emailLabel) setEmailLabel(form.emailLabel);
+        if (form.emailPlaceholder) setEmailPlaceholder(form.emailPlaceholder);
+        if (form.notesLabel) setNotesLabel(form.notesLabel);
+        if (form.notesPlaceholder) setNotesPlaceholder(form.notesPlaceholder);
+        setNotesRequired(form.notesRequired);
+        setAllowImageUpload(form.allowImageUpload);
+        if (form.timeSlots.length > 0) setTimeSlots(form.timeSlots);
+      } catch {
+        // Keep local config fallbacks if CMS fails.
+      }
+    })();
+
+    return () => controller.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset/load on open only
+  }, [open, isPersonalise]);
+
+  useEffect(() => {
+    if (!profileContact || hasAppliedProfilePrefill) return;
+
+    const profileName = profileContact.fullName?.trim();
+    const profileEmail = profileContact.email?.trim();
+    const profilePhone = profileContact.phone?.trim();
+    const profileCountryCode = profileContact.countryCode?.trim();
+
+    if (profileName && !name.trim()) setName(profileName);
+    if (profileEmail && !email.trim()) setEmail(profileEmail);
+    if (profilePhone && !phone.trim()) setPhone(profilePhone);
+    if (profileCountryCode) setCountryCode(profileCountryCode);
+
+    setHasAppliedProfilePrefill(true);
+  }, [profileContact, hasAppliedProfilePrefill, name, email, phone]);
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
   };
 
   const handleReferenceImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    const file = event.target.files?.[0] ?? null;
+
+    if (referenceImagePreviewUrlRef.current) {
+      URL.revokeObjectURL(referenceImagePreviewUrlRef.current);
+      referenceImagePreviewUrlRef.current = null;
+    }
+
+    const previewUrl = file ? URL.createObjectURL(file) : null;
+    referenceImagePreviewUrlRef.current = previewUrl;
+    setReferenceImagePreviewUrl(previewUrl);
+    setReferenceImage(file);
     setReferenceImageName(file?.name ?? null);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (referenceImagePreviewUrlRef.current) {
+        URL.revokeObjectURL(referenceImagePreviewUrlRef.current);
+        referenceImagePreviewUrlRef.current = null;
+      }
+    };
+  }, []);
+
+  const handleSubmit = () => {
+    validateSubmit(() => {
+      void (async () => {
+        if (isSubmitting) return;
+
+        if (!isPersonalise) {
+          onSubmitSuccess(config.successToast.title);
+          handleClose();
+          return;
+        }
+
+        setIsSubmitting(true);
+        try {
+          await createProductSubmission({
+            formTag,
+            productName: product.name,
+            productId: product.id,
+            customerName: name.trim(),
+            customerPhone: `${countryCode} ${phone}`.trim(),
+            customerEmail: email.trim() || undefined,
+            requestDetails: note.trim() || undefined,
+            sourcePage:
+              typeof window !== "undefined" ? window.location.pathname : `/product/${product.id}`,
+            consentAccepted: true,
+            workflowStatus: "New",
+            uploadedImage: allowImageUpload && referenceImage ? referenceImage : undefined,
+          });
+
+          onSubmitSuccess("Request submitted");
+          handleClose();
+        } catch {
+          onSubmitError("Could not submit request");
+        } finally {
+          setIsSubmitting(false);
+        }
+      })();
+    });
   };
 
   return (
@@ -80,11 +257,11 @@ const ProductAppointmentForm = ({
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4">
               <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
-                {config.title}
+                {formTitle}
               </h2>
               <button
                 type="button"
-                onClick={onClose}
+                onClick={handleClose}
                 aria-label={config.closeAriaLabel}
                 className="inline-flex size-6 shrink-0 items-center justify-center"
               >
@@ -103,13 +280,13 @@ const ProductAppointmentForm = ({
           <div className="flex flex-col items-center gap-2 pb-4">
             <Image
               src={productImage}
-              alt={productName}
+              alt={product.name}
               width={206}
               height={133}
               className="h-133 w-206 object-contain"
               sizes="206px"
             />
-            <p className="font-gill text-base leading-110 text-darkblack">{productName}</p>
+            <p className="font-gill text-base leading-110 text-darkblack">{product.name}</p>
           </div>
 
           <div className="flex flex-col gap-6 pb-72">
@@ -122,6 +299,7 @@ const ProductAppointmentForm = ({
               date={date}
               note={note}
               selectedSlot={selectedSlot}
+              timeSlots={timeSlots}
               onNameChange={setName}
               onCountryCodeChange={setCountryCode}
               onPhoneChange={setPhone}
@@ -132,16 +310,23 @@ const ProductAppointmentForm = ({
               errors={errors}
               showError={showError}
               markTouched={markTouched}
+              showDate={!isPersonalise && config.showTimeSlots}
               showTimeSlots={config.showTimeSlots}
-              noteLabel={config.noteLabel}
-              notePlaceholder={config.notePlaceholder}
+              nameLabel={nameLabel}
+              namePlaceholder={namePlaceholder}
+              phoneLabel={phoneLabel}
+              phonePlaceholder={phonePlaceholder}
+              emailLabel={emailLabel}
+              emailPlaceholder={emailPlaceholder}
+              noteLabel={notesLabel}
+              notePlaceholder={notesPlaceholder}
               noteLabelClassName={config.noteLabelClassName}
               noteTextareaClassName={config.noteTextareaClassName}
               labelClassName={appointmentLabelClassName}
               fieldClassName={appointmentFieldClassName}
             />
 
-            {config.showReferenceImage ? (
+            {allowImageUpload ? (
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-1">
                   <Info size={24} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
@@ -157,13 +342,61 @@ const ProductAppointmentForm = ({
                   className="sr-only"
                   aria-label="Attach reference image"
                 />
-                <button
-                  type="button"
-                  onClick={() => referenceImageInputRef.current?.click()}
-                  className="text-link-underline inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
-                >
-                  {referenceImageName ?? "Attach Image"}
-                </button>
+
+                {referenceImagePreviewUrl ? (
+                  <div className="flex items-center gap-3">
+                    <div className="relative size-16 shrink-0">
+                      <div className="size-full overflow-hidden bg-[#F2F2F2]">
+                        <img
+                          src={referenceImagePreviewUrl}
+                          alt={
+                            referenceImageName
+                              ? `Preview of ${referenceImageName}`
+                              : "Reference image preview"
+                          }
+                          className="size-full object-cover"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={clearReferenceImage}
+                        aria-label="Remove reference image"
+                        className="absolute -right-2 -top-2 z-10 inline-flex size-6 items-center justify-center rounded-full bg-darkblack text-white shadow-sm"
+                      >
+                        <X size={14} strokeWidth={2} aria-hidden className="text-white" />
+                      </button>
+                    </div>
+                    <div className="flex min-w-0 flex-col gap-1">
+                      <p className="truncate font-gill text-sm font-light leading-110 text-darkblack">
+                        {referenceImageName}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => referenceImageInputRef.current?.click()}
+                          className="text-link-underline inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
+                        >
+                          Replace Image
+                        </button>
+                        <button
+                          type="button"
+                          onClick={clearReferenceImage}
+                          className="text-link-underline inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => referenceImageInputRef.current?.click()}
+                    className="text-link-underline inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
+                  >
+                    Attach Image
+                  </button>
+                )}
               </div>
             ) : null}
           </div>
@@ -177,10 +410,10 @@ const ProductAppointmentForm = ({
         <button
           type="button"
           onClick={handleSubmit}
-          disabled={submitted && !isValid}
+          disabled={isSubmitting || !isValid}
           className="btn-dark-slide inline-flex h-14 w-full items-center justify-center px-7 font-gill text-sm uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {config.submitLabel}
+          {isSubmitting ? "SUBMITTING..." : submitLabel}
         </button>
       </PanelFooter>
     </>
@@ -196,27 +429,81 @@ const ProductAppointmentPanel = ({
   const { toast } = useToast();
   const config = PRODUCT_APPOINTMENT_PANEL_CONFIG[variant];
   const productImage = product.images[0] ?? product.image;
+  const [statusToastMessage, setStatusToastMessage] = useState<string | null>(null);
+  const statusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleSubmit = () => {
-    toast(config.successToast);
-    onClose();
+  const dismissStatusToast = () => {
+    if (statusToastTimeoutRef.current) {
+      clearTimeout(statusToastTimeoutRef.current);
+      statusToastTimeoutRef.current = null;
+    }
+    setStatusToastMessage(null);
   };
 
-  return (
-    <ProductDetailSidePanelShell
-      open={open}
-      onClose={onClose}
-      overlayAriaLabel={config.closeAriaLabel}
-      dialogAriaLabel={config.dialogAriaLabel}
+  const showStatusToast = (message: string) => {
+    dismissStatusToast();
+    setStatusToastMessage(message);
+    statusToastTimeoutRef.current = setTimeout(() => {
+      setStatusToastMessage(null);
+      statusToastTimeoutRef.current = null;
+    }, wishlistMovedToastDurationMs);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (statusToastTimeoutRef.current) {
+        clearTimeout(statusToastTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleLegacySuccess = (message: string) => {
+    if (variant === "personalise") {
+      showStatusToast(message);
+      return;
+    }
+
+    toast(config.successToast);
+  };
+
+  const statusToast = statusToastMessage ? (
+    <div
+      role="status"
+      aria-live="polite"
+      className="pointer-events-auto fixed left-1/2 top-16 z-[80] w-[calc(100%-2rem)] max-w-[300px] -translate-x-1/2 animate-in fade-in slide-in-from-top-2 duration-300 md:top-104"
     >
-      <ProductAppointmentForm
-        config={config}
-        productName={product.name}
-        productImage={productImage}
+      <div className="flex w-full items-center gap-2 bg-darkblack px-4 py-3">
+        <Check size={18} strokeWidth={1.25} aria-hidden className="shrink-0 text-white" />
+        <p className="font-gill text-sm font-light leading-110 text-white">{statusToastMessage}</p>
+      </div>
+    </div>
+  ) : null;
+
+  if (!open) {
+    return statusToast;
+  }
+
+  return (
+    <>
+      {statusToast}
+      <ProductDetailSidePanelShell
+        open={open}
         onClose={onClose}
-        onSubmit={handleSubmit}
-      />
-    </ProductDetailSidePanelShell>
+        overlayAriaLabel={config.closeAriaLabel}
+        dialogAriaLabel={config.dialogAriaLabel}
+      >
+        <ProductAppointmentForm
+          config={config}
+          product={product}
+          productImage={productImage}
+          variant={variant}
+          open={open}
+          onClose={onClose}
+          onSubmitSuccess={handleLegacySuccess}
+          onSubmitError={showStatusToast}
+        />
+      </ProductDetailSidePanelShell>
+    </>
   );
 };
 

@@ -9,6 +9,8 @@ export const STRAPI_ENDPOINTS = {
   genericSubmissions: "api/generic-submissions",
   productForms: "api/product-forms",
   productSubmissions: "api/product-submissions",
+  /** Custom CMS action — accepts multipart `data` + `uploadedImage` (Postman-verified). */
+  productSubmissionsSubmit: "api/product-submissions/submit",
   /** @deprecated Legacy single-type slug — prefer split homepage endpoints */
   homepage: "homepage",
 } as const;
