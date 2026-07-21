@@ -11,7 +11,7 @@ export const bespokeStoryFigmaSpec = {
   visibleWindowWidth: 658,
   imageWidth: 658,
   /** Figma 1440px — initial left inset for step 01; animates to 0 on scroll */
-  firstStepOffset: 391,
+  firstStepOffset: 350,
   imageAspect: 496 / 658,
   textMaxWidth: 296,
   stepNumberSize: 48,
