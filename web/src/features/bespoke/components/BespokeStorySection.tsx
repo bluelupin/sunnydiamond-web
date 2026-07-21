@@ -71,7 +71,7 @@ const BespokeStorySection = () => {
     <section
       ref={sectionRef}
       aria-labelledby="bespoke-story-title"
-      className="relative bg-white md:py-100 py-16 mx-auto w-full pl-4 md:pl-8 lg:pl-10 2xl:max-w-1920 2xl:pl-[60px] pr-0"
+      className="relative bg-white md:py-100 py-16 mx-auto w-full pl-4 md:pl-8 lg:pl-10 2xl:max-w-1920 2xl:pl-[60px] md:pr-0 pr-4"
     >
       <div className="md:mb-12 mb-6 mx-auto max-w-[720px] flex w-full flex-col gap-4">
         <Reveal

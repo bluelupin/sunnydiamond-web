@@ -17,6 +17,7 @@ import {
   bespokeFeaturedStoriesFigmaSpec,
   bespokePageContent,
 } from "@/features/bespoke/data/content";
+import BespokeFeaturedStoryModal from "@/features/bespoke/components/BespokeFeaturedStoryModal";
 
 type FeaturedSlide = (typeof bespokePageContent.featuredStories.slides)[number];
 
@@ -70,7 +71,9 @@ type FeaturedGalleryImageProps = {
   selectedIndex: FeaturedSlideIndex;
   compact?: boolean;
   interactive?: boolean;
+  openable?: boolean;
   onSelect?: () => void;
+  onOpen?: () => void;
 };
 
 const FeaturedGalleryImage = ({
@@ -80,7 +83,9 @@ const FeaturedGalleryImage = ({
   selectedIndex,
   compact,
   interactive,
+  openable,
   onSelect,
+  onOpen,
 }: FeaturedGalleryImageProps) => {
   const isCenter = slot === 0;
   const isSideLeft = slot < 0;
@@ -98,7 +103,7 @@ const FeaturedGalleryImage = ({
             ? "h-[200px] w-[260px]"
             : "h-[300px] w-[400px]",
         isSelected && !isCenter && "ring-2 ring-white/90 ring-offset-2 ring-offset-transparent",
-        interactive && "cursor-pointer",
+        (interactive || openable) && "cursor-pointer",
       )}
     >
       <div
@@ -129,6 +134,20 @@ const FeaturedGalleryImage = ({
       </div>
     </figure>
   );
+
+  if (openable && onOpen) {
+    return (
+      <button
+        type="button"
+        onClick={onOpen}
+        onPointerDown={(event) => event.stopPropagation()}
+        aria-label={`Open story: ${slide.modalTitle}`}
+        className="shrink-0 border-0 bg-transparent p-0 text-left"
+      >
+        {figure}
+      </button>
+    );
+  }
 
   if (!interactive || !onSelect) {
     return figure;
@@ -206,6 +225,7 @@ type FeaturedGallerySliderProps = {
   selectedIndex: FeaturedSlideIndex;
   onActiveIndexChange: (index: number) => void;
   onSlideStart?: (index: number) => void;
+  onCenterOpen?: () => void;
   compact?: boolean;
 };
 
@@ -215,6 +235,7 @@ const FeaturedGallerySlider = ({
   selectedIndex,
   onActiveIndexChange,
   onSlideStart,
+  onCenterOpen,
   compact,
 }: FeaturedGallerySliderProps) => {
   const trackRef = useRef<HTMLDivElement>(null);
@@ -424,7 +445,7 @@ const FeaturedGallerySlider = ({
         className={cn(
           "flex items-center will-change-transform motion-reduce:transform-none",
           compact ? "gap-3" : "gap-4",
-          canSlide && (isDragging ? "cursor-grabbing" : "cursor-grab"),
+          canSlide && (isDragging ? "cursor-grabbing" : onCenterOpen ? "cursor-default" : "cursor-grab"),
           canSlide && "touch-none select-none",
         )}
         style={{
@@ -446,7 +467,9 @@ const FeaturedGallerySlider = ({
               selectedIndex={selectedIndex}
               compact={compact}
               interactive={canSlide && slot !== 0 && !isAnimating}
+              openable={slot === 0 && !isAnimating && Boolean(onCenterOpen)}
               onSelect={slot !== 0 ? () => goToSlot(slot) : undefined}
+              onOpen={slot === 0 ? onCenterOpen : undefined}
             />
           );
         })}
@@ -507,6 +530,7 @@ type FeaturedStoriesLayoutProps = {
   selectedIndex: FeaturedSlideIndex;
   onActiveIndexChange: (index: number) => void;
   onSlideStart: (index: number) => void;
+  onCenterOpen: () => void;
   title: string;
   primaryCtaHref: string;
   primaryCtaLabel: string;
@@ -521,6 +545,7 @@ const FeaturedStoriesLayout = ({
   selectedIndex,
   onActiveIndexChange,
   onSlideStart,
+  onCenterOpen,
   title,
   primaryCtaHref,
   primaryCtaLabel,
@@ -552,6 +577,7 @@ const FeaturedStoriesLayout = ({
             selectedIndex={selectedIndex}
             onActiveIndexChange={onActiveIndexChange}
             onSlideStart={onSlideStart}
+            onCenterOpen={onCenterOpen}
           />
         </div>
 
@@ -595,6 +621,7 @@ const FeaturedStoriesLayout = ({
           selectedIndex={selectedIndex}
           onActiveIndexChange={onActiveIndexChange}
           onSlideStart={onSlideStart}
+          onCenterOpen={onCenterOpen}
           compact
         />
       </div>
@@ -622,10 +649,21 @@ const BespokeFeaturedStoriesSection = () => {
   const { slides, defaultSlideIndex } = featuredStories;
   const [activeIndex, setActiveIndex] = useState<number>(defaultSlideIndex);
   const [selectedIndex, setSelectedIndex] = useState<number>(defaultSlideIndex);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const handleSlideStart = useCallback((index: number) => {
     setSelectedIndex(index);
   }, []);
+
+  const handleCenterOpen = useCallback(() => {
+    setModalOpen(true);
+  }, []);
+
+  const handleModalClose = useCallback(() => {
+    setModalOpen(false);
+  }, []);
+
+  const modalSlide = slides[selectedIndex] ?? slides[defaultSlideIndex];
 
   const sharedProps = {
     slides,
@@ -633,6 +671,7 @@ const BespokeFeaturedStoriesSection = () => {
     selectedIndex,
     onActiveIndexChange: setActiveIndex,
     onSlideStart: handleSlideStart,
+    onCenterOpen: handleCenterOpen,
     title: featuredStories.title,
     primaryCtaHref: featuredStories.primaryCtaHref,
     primaryCtaLabel: featuredStories.primaryCtaLabel,
@@ -644,6 +683,13 @@ const BespokeFeaturedStoriesSection = () => {
     <>
       <FeaturedStoriesLayout {...sharedProps} variant="desktop" />
       <FeaturedStoriesLayout {...sharedProps} variant="mobile" />
+      <BespokeFeaturedStoryModal
+        open={modalOpen}
+        slide={modalSlide}
+        modalCtaLabel={featuredStories.modalCtaLabel}
+        modalCtaHref={featuredStories.modalCtaHref}
+        onClose={handleModalClose}
+      />
     </>
   );
 };
