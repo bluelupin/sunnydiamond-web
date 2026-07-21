@@ -8,14 +8,14 @@ const BespokeGuaranteesSection = () => {
   const { guarantees } = bespokePageContent;
 
   return (
-    <section aria-label="Shopping guarantees" className="bg-white">
+    <section aria-label="Shopping guarantees" className="bg-gray200">
       <ul className="m-0 list-none flex items-center justify-center 2xl:gap-[75px] xl:gap-16 lg:gap-12 md:gap-10 gap-6 p-0 flex lg:flex-row flex-col md:py-16 py-10 px-4">
         {guarantees.map((item, index) => (
           <Fragment key={item.label}>
             {index > 0 &&
-              <li aria-hidden className="lg:w-auto w-full">
+              <Reveal as="li" direction="up" aria-hidden className="lg:w-auto w-full">
                 <div className="lg:w-[0.5px] w-full lg:h-[136px] h-[0.5px] bg-gray600"></div>
-              </li>
+              </Reveal>
             }
             <Reveal
               as="li"
