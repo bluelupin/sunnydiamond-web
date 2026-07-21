@@ -50,6 +50,33 @@ export const bespokePageFigmaSpec = {
   contentMaxWidth: 1360,
 } as const;
 
+/** Figma node 2574:60792 — Featured Stories section */
+export const bespokeFeaturedStoriesFigmaSpec = {
+  figmaNode: "2574:60792",
+  sectionHeight: 817,
+  backgroundColor: "#FBFAF6",
+  heroHeight: 559,
+  heroWidth: 1467,
+  titleTop: 177,
+  titleSize: 48,
+  galleryTop: 270,
+  galleryGap: 16,
+  sideWidth: 400,
+  sideHeight: 300,
+  centerWidth: 560,
+  centerHeight: 360,
+  ctaBottom: 40,
+  ctaMaxWidth: 1360,
+  ctaOuterGap: 40,
+  ctaInnerGap: 32,
+  ctaWidth: 284,
+  ctaHeight: 56,
+  ctaFontSize: 14,
+  overlayHorizontal: "rgba(0, 0, 0, 0.3)",
+  overlayVertical: "linear-gradient(0deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 53.563%)",
+  bottomGradient: "linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.8) 100%)",
+} as const;
+
 export const bespokePageContent = {
   hero: {
     title: "Bespoke Jewellery",
@@ -106,22 +133,32 @@ export const bespokePageContent = {
     },
     items: [
       {
-        src: "/images/bespoke/featured-left-1.jpg",
+        src: "/images/bespoke/featured-gallery-left-1.png",
         alt: "Bespoke ring on hand",
-        featured: false,
+        variant: "side-left" as const,
       },
       {
-        src: "/images/bespoke/featured-center.jpg",
+        src: "/images/bespoke/featured-gallery-left-2.png",
+        alt: "Bespoke ring on hand",
+        variant: "side-left" as const,
+      },
+      {
+        src: "/images/bespoke/featured-gallery-center.png",
         alt: "Bespoke bracelet with henna",
-        featured: true,
+        variant: "center" as const,
       },
       {
-        src: "/images/bespoke/featured-right-1.jpg",
+        src: "/images/bespoke/featured-gallery-right-1.png",
         alt: "Bespoke ring detail",
-        featured: false,
+        variant: "side-right" as const,
+      },
+      {
+        src: "/images/bespoke/featured-gallery-right-2.png",
+        alt: "Bespoke ring detail",
+        variant: "side-right" as const,
       },
     ] as const,
-    primaryCtaLabel: "Behind the Design",
+    primaryCtaLabel: "Behind This Design",
     primaryCtaHref: "/about",
     secondaryCtaLabel: "See Past Creations",
     secondaryCtaHref: "/products",
