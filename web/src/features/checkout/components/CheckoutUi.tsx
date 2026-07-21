@@ -134,7 +134,7 @@ export const CheckoutPhoneField = ({
             Verified
           </span>
         ) : (
-          <DetailTextLink onClick={onVerify}>Verify</DetailTextLink>
+          <DetailTextLink onClick={onVerify}>VERIFY</DetailTextLink>
         )
       ) : null}
     </div>

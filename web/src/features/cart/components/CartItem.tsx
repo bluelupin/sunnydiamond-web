@@ -94,9 +94,9 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
             </div>
 
             <div className="flex flex-wrap gap-4">
-              <CartTextLink href={`/product/${product.id}`}>Edit</CartTextLink>
+              <CartTextLink href={`/product/${product.id}`}>EDIT</CartTextLink>
               <CartTextLink onClick={() => toggleWishlist(product.id)}>
-                {wishlisted ? "In wishlist" : "Move to wishlist"}
+                {wishlisted ? "IN WISHLIST" : "MOVE TO WISHLIST"}
               </CartTextLink>
             </div>
           </div>

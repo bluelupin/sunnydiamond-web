@@ -104,7 +104,7 @@ const CheckoutOtpVerifyButton = ({
     disabled={disabled}
     onClick={onClick}
   >
-    Verify
+    VERIFY
   </CartPrimaryButton>
 );
 

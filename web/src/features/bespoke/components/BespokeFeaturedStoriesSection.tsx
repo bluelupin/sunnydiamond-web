@@ -36,36 +36,70 @@ type FeaturedStoryModalSlide = {
 
 const spec = bespokeFeaturedStoriesFigmaSpec;
 const GALLERY_SLOTS = [-2, -1, 0, 1, 2] as const;
-const SLIDE_DURATION_MS = 500;
+const SLIDE_DURATION_MS = 550;
+const SLIDE_EASING = "cubic-bezier(0.4, 0, 0.2, 1)";
 const SWIPE_THRESHOLD_PX = 48;
+const MOBILE_GALLERY_MEDIA_QUERY = "(max-width: 767px)";
 
 type GallerySlot = (typeof GALLERY_SLOTS)[number];
 
 type FeaturedSlideIndex = number;
+
+type GalleryDimensions = {
+  side: number;
+  center: number;
+  gap: number;
+};
+
+const COMPACT_GALLERY_DIMENSIONS: GalleryDimensions = {
+  side: 260,
+  center: 280,
+  gap: 12,
+};
+
+const MOBILE_GALLERY_DIMENSIONS: GalleryDimensions = {
+  side: 296,
+  center: 296,
+  gap: 16,
+};
+
+const DESKTOP_GALLERY_DIMENSIONS: GalleryDimensions = {
+  side: spec.sideWidth,
+  center: spec.centerWidth,
+  gap: spec.galleryGap,
+};
+
+const getGalleryDimensions = (compact?: boolean): GalleryDimensions => {
+  if (compact) return COMPACT_GALLERY_DIMENSIONS;
+  if (typeof window !== "undefined" && window.matchMedia(MOBILE_GALLERY_MEDIA_QUERY).matches) {
+    return MOBILE_GALLERY_DIMENSIONS;
+  }
+  return DESKTOP_GALLERY_DIMENSIONS;
+};
 
 const mod = (value: number, length: number) => ((value % length) + length) % length;
 
 const getSlideAt = (slides: readonly FeaturedSlide[], activeIndex: FeaturedSlideIndex, offset: number) =>
   slides[mod(activeIndex + offset, slides.length)];
 
-const getSlotOffsetToCenter = (slot: GallerySlot, compact?: boolean) => {
+const getSlotOffsetToCenter = (slot: GallerySlot, dimensions: GalleryDimensions) => {
   if (slot === 0) return 0;
 
-  const gap = compact ? 12 : spec.galleryGap;
-  const side = compact ? 260 : spec.sideWidth;
-  const center = compact ? 280 : spec.centerWidth;
+  const { side, center, gap } = dimensions;
+  const stepToAdjacentCenter = side / 2 + gap + center / 2;
+  const stepBetweenSideSlots = side + gap;
 
   if (slot < 0) {
     let offset = 0;
-    for (let s = -1; s >= slot; s -= 1) {
-      offset -= side + gap;
+    for (let step = -1; step >= slot; step -= 1) {
+      offset -= step === -1 ? stepToAdjacentCenter : stepBetweenSideSlots;
     }
     return offset;
   }
 
   let offset = 0;
-  for (let s = 1; s <= slot; s += 1) {
-    offset += (s === 1 ? center : side) + gap;
+  for (let step = 1; step <= slot; step += 1) {
+    offset += step === 1 ? stepToAdjacentCenter : stepBetweenSideSlots;
   }
   return offset;
 };
@@ -142,7 +176,7 @@ const FeaturedGalleryImage = ({
           alt={slide.alt}
           fill
           sizes={isCenter ? "560px" : "400px"}
-          className="object-cover object-center transition-opacity duration-500 ease-in-out"
+          className="object-cover object-center transition-opacity duration-[550ms] ease-in-out"
         />
       </div>
     </figure>
@@ -206,7 +240,7 @@ const FeaturedGalleryBackground = ({ slides, activeIndex, compact }: FeaturedGal
           height={2074}
           sizes={compact ? "100vw" : "1920px"}
           className={cn(
-            "absolute left-1/2 top-0 max-w-none -translate-x-1/2 object-cover object-top transition-opacity duration-500 ease-in-out",
+            "absolute left-1/2 top-0 max-w-none -translate-x-1/2 object-cover object-top transition-opacity duration-[550ms] ease-in-out",
             compact ? "inset-0 size-full" : "h-[2074px] w-[1920px]",
             index === activeIndex ? "opacity-100" : "opacity-0",
           )}
@@ -262,8 +296,18 @@ const FeaturedGallerySlider = ({
   const [dragOffset, setDragOffset] = useState(0);
   const [slideOffset, setSlideOffset] = useState(0);
   const [enableTransition, setEnableTransition] = useState(false);
+  const [galleryDimensions, setGalleryDimensions] = useState<GalleryDimensions>(() =>
+    getGalleryDimensions(compact),
+  );
 
   activeIndexRef.current = activeIndex;
+
+  useEffect(() => {
+    const updateDimensions = () => setGalleryDimensions(getGalleryDimensions(compact));
+    updateDimensions();
+    window.addEventListener("resize", updateDimensions);
+    return () => window.removeEventListener("resize", updateDimensions);
+  }, [compact]);
 
   const canSlide = slides.length > 1;
 
@@ -277,11 +321,12 @@ const FeaturedGallerySlider = ({
   const finishSlideToIndex = useCallback(
     (targetIndex: number) => {
       clearFinishTimeout();
-      onActiveIndexChange(targetIndex);
+      pendingTargetIndex.current = null;
+      setIsAnimating(false);
       setEnableTransition(false);
       setSlideOffset(0);
-      setIsAnimating(false);
-      pendingTargetIndex.current = null;
+      setDragOffset(0);
+      onActiveIndexChange(targetIndex);
     },
     [clearFinishTimeout, onActiveIndexChange],
   );
@@ -293,9 +338,8 @@ const FeaturedGallerySlider = ({
 
       const delta = getShortestIndexDelta(currentIndex, targetIndex, slides.length);
       const slot = -delta as GallerySlot;
-      const targetOffset = getSlotOffsetToCenter(slot, compact);
+      const targetOffset = getSlotOffsetToCenter(slot, galleryDimensions);
 
-      onSlideStart?.(targetIndex);
       pendingTargetIndex.current = targetIndex;
       setIsAnimating(true);
       setEnableTransition(true);
@@ -315,7 +359,7 @@ const FeaturedGallerySlider = ({
         }
       }, SLIDE_DURATION_MS + 80);
     },
-    [clearFinishTimeout, compact, finishSlideToIndex, onSlideStart, slides.length],
+    [clearFinishTimeout, finishSlideToIndex, galleryDimensions, slides.length],
   );
 
   const goToSlot = useCallback(
@@ -325,14 +369,13 @@ const FeaturedGallerySlider = ({
       const targetIndex = mod(activeIndexRef.current + slot, slides.length);
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduceMotion) {
-        onSlideStart?.(targetIndex);
         onActiveIndexChange(targetIndex);
         return;
       }
 
       startSlideToIndex(targetIndex);
     },
-    [canSlide, isAnimating, onActiveIndexChange, onSlideStart, slides.length, startSlideToIndex],
+    [canSlide, isAnimating, onActiveIndexChange, slides.length, startSlideToIndex],
   );
 
   const animateSlide = useCallback(
@@ -342,14 +385,13 @@ const FeaturedGallerySlider = ({
       const targetIndex = mod(activeIndexRef.current + direction, slides.length);
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduceMotion) {
-        onSlideStart?.(targetIndex);
         onActiveIndexChange(targetIndex);
         return;
       }
 
       startSlideToIndex(targetIndex);
     },
-    [canSlide, isAnimating, onActiveIndexChange, onSlideStart, slides.length, startSlideToIndex],
+    [canSlide, isAnimating, onActiveIndexChange, slides.length, startSlideToIndex],
   );
 
   const handleTrackTransitionEnd = useCallback(
@@ -463,7 +505,7 @@ const FeaturedGallerySlider = ({
         )}
         style={{
           transform: trackTransform,
-          transition: enableTransition ? `transform ${SLIDE_DURATION_MS}ms ease-out` : "none",
+          transition: enableTransition ? `transform ${SLIDE_DURATION_MS}ms ${SLIDE_EASING}` : "none",
         }}
         onTransitionEnd={handleTrackTransitionEnd}
       >
@@ -542,7 +584,7 @@ type FeaturedStoriesLayoutProps = {
   activeIndex: FeaturedSlideIndex;
   selectedIndex: FeaturedSlideIndex;
   onActiveIndexChange: (index: number) => void;
-  onSlideStart: (index: number) => void;
+  onSlideStart?: (index: number) => void;
   onCenterOpen: () => void;
   title: string;
   primaryCtaHref: string;
@@ -610,7 +652,8 @@ const BespokeFeaturedStoriesSection = () => {
   );
   const [modalSlideOverride, setModalSlideOverride] = useState<FeaturedStoryModalSlide | null>(null);
 
-  const handleSlideStart = useCallback((index: number) => {
+  const handleActiveIndexChange = useCallback((index: number) => {
+    setActiveIndex(index);
     setSelectedIndex(index);
   }, []);
 
@@ -664,8 +707,7 @@ const BespokeFeaturedStoriesSection = () => {
     slides,
     activeIndex,
     selectedIndex,
-    onActiveIndexChange: setActiveIndex,
-    onSlideStart: handleSlideStart,
+    onActiveIndexChange: handleActiveIndexChange,
     onCenterOpen: handleCenterOpen,
     title: featuredStories.title,
     primaryCtaHref: featuredStories.primaryCtaHref,
