@@ -126,36 +126,28 @@ export const bespokePageContent = {
   },
   featuredStories: {
     title: "Featured Stories",
-    background: {
-      desktop: "/images/bespoke/featured-background.jpg",
-      mobile: "/images/bespoke/featured-background.jpg",
-      alt: "Hands adorned with henna and jewellery",
-    },
-    items: [
+    /** Default center slide index on first load */
+    defaultSlideIndex: 2,
+    slides: [
       {
         src: "/images/bespoke/featured-gallery-left-1.png",
         alt: "Bespoke ring on hand",
-        variant: "side-left" as const,
       },
       {
         src: "/images/bespoke/featured-gallery-left-2.png",
         alt: "Bespoke ring on hand",
-        variant: "side-left" as const,
       },
       {
         src: "/images/bespoke/featured-gallery-center.png",
         alt: "Bespoke bracelet with henna",
-        variant: "center" as const,
       },
       {
         src: "/images/bespoke/featured-gallery-right-1.png",
         alt: "Bespoke ring detail",
-        variant: "side-right" as const,
       },
       {
         src: "/images/bespoke/featured-gallery-right-2.png",
         alt: "Bespoke ring detail",
-        variant: "side-right" as const,
       },
     ] as const,
     primaryCtaLabel: "Behind This Design",
