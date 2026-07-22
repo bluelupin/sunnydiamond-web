@@ -33,7 +33,7 @@ export function filterJewelleryProducts(
       return false;
     }
 
-    if (!isAllMetalTypesSelected(filters.metalTypes)) {
+    if (!isAllMetalTypesSelected(filters.metalTypes, facets)) {
       const metal = product.metalType?.toLowerCase() ?? "";
       const matchesMetal = filters.metalTypes.some((type) => metal.includes(type.toLowerCase()));
       if (!matchesMetal) {

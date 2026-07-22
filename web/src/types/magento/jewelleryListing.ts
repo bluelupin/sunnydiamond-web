@@ -10,7 +10,9 @@ export type JewelleryFilterFacets = {
   minPrice: number;
   maxPrice: number;
   categories: JewelleryFilterFacetOption[];
+  metalTypes: JewelleryFilterFacetOption[];
   metalPurities: JewelleryFilterFacetOption[];
+  gemstoneTypes: JewelleryFilterFacetOption[];
 };
 
 export type JewelleryListingProductsData = {

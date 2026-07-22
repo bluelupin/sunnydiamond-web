@@ -1,6 +1,11 @@
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 import type { MagentoProductListItem, MagentoMediaGalleryItem } from "./magentoProduct.types";
-import { isMagentoBestSeller } from "./magentoAttribute.utils";
+import {
+  formatMagentoFacetLabel,
+  getMagentoCustomAttributeValue,
+  isMagentoBestSeller,
+  normalizeGemstoneTypeLabel,
+} from "./magentoAttribute.utils";
 
 function getActiveGalleryUrls(mediaGallery: MagentoMediaGalleryItem[] | null | undefined): string[] {
   return (mediaGallery ?? [])
@@ -71,7 +76,15 @@ export function mapMagentoProductToJewelleryListing(
     return null;
   }
 
-  const isBestseller = isMagentoBestSeller(product.custom_attributesV2?.items);
+  const customAttributes = product.custom_attributesV2?.items;
+  const isBestseller = isMagentoBestSeller(customAttributes);
+  const metalType = formatMagentoFacetLabel(
+    getMagentoCustomAttributeValue(customAttributes, "sd_metal_type"),
+  );
+  const metalPurity = getMagentoCustomAttributeValue(customAttributes, "sd_metal_purity");
+  const gemstoneType = normalizeGemstoneTypeLabel(
+    getMagentoCustomAttributeValue(customAttributes, "sd_gemstone_type"),
+  );
 
   return {
     id: sku,
@@ -84,6 +97,9 @@ export function mapMagentoProductToJewelleryListing(
       ? { modalImage: lifestyleImage, hoverImage: lifestyleImage }
       : {}),
     category: resolveProductCategory(product.categories),
+    ...(metalType ? { metalType } : {}),
+    ...(metalPurity ? { metalPurity } : {}),
+    ...(gemstoneType ? { gemstoneType } : {}),
     ...(isBestseller ? { isBestseller: true } : {}),
   };
 }

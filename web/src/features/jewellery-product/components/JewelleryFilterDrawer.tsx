@@ -11,13 +11,13 @@ import {
 import {
   chunkFilterOptions,
   createDefaultFilterState,
-  filterGemstoneOptions,
-  filterMetalTypeOptions,
   getAvailableCategoryLabels,
+  getAvailableMetalTypeLabels,
+  hasActiveFilters,
   hasMagentoFilterFacets,
 } from "../data/filters";
 import type { JewelleryFilterState } from "../types";
-import type { JewelleryFilterFacets } from "@/types/magento/jewelleryListing";
+import type { JewelleryFilterFacetOption, JewelleryFilterFacets } from "@/types/magento/jewelleryListing";
 
 interface JewelleryFilterDrawerProps {
   open: boolean;
@@ -89,14 +89,14 @@ const FilterSelectChevron = ({ open = false }: { open?: boolean }) => (
   </span>
 );
 
-const gemstoneChoices = filterGemstoneOptions.filter((option) => option.value);
-
 const GemstoneTypeSelect = ({
   value,
+  options,
   onChange,
   drawerOpen,
 }: {
   value: string;
+  options: JewelleryFilterFacetOption[];
   onChange: (value: string) => void;
   drawerOpen: boolean;
 }) => {
@@ -127,9 +127,13 @@ const GemstoneTypeSelect = ({
     };
   }, [isOpen]);
 
-  const selectedOption = gemstoneChoices.find((option) => option.value === value);
+  const selectedOption = options.find((option) => option.label === value);
   const triggerLabel = selectedOption?.label ?? "Select";
   const showPlaceholder = !selectedOption;
+
+  if (options.length === 0) {
+    return null;
+  }
 
   return (
     <div ref={rootRef} className="flex flex-col gap-[8px]">
@@ -163,17 +167,17 @@ const GemstoneTypeSelect = ({
           aria-labelledby="filter-gemstone-type-label"
           className="flex w-full flex-col bg-[#F2F2F2]"
         >
-          {gemstoneChoices.map((option) => {
-            const selected = value === option.value;
+          {options.map((option) => {
+            const selected = value === option.label;
 
             return (
               <button
-                key={option.value}
+                key={option.label}
                 type="button"
                 role="option"
                 aria-selected={selected}
                 onClick={() => {
-                  onChange(option.value);
+                  onChange(selected ? "" : option.label);
                   setIsOpen(false);
                 }}
                 className={cn(
@@ -258,6 +262,7 @@ const JewelleryFilterDrawer = ({
 
   const categoryOptions = getAvailableCategoryLabels(facets);
   const categoryRows = chunkFilterOptions(categoryOptions, 3);
+  const metalTypeOptions = getAvailableMetalTypeLabels(facets);
   const metalPurityOptions = facets.metalPurities.map((option) => option.label);
   const hasPriceRange = facets.maxPrice > facets.minPrice;
 
@@ -267,6 +272,7 @@ const JewelleryFilterDrawer = ({
   const maxPercent = hasPriceRange
     ? ((draft.maxPrice - facets.minPrice) / (facets.maxPrice - facets.minPrice)) * 100
     : 0;
+  const canApplyFilters = hasActiveFilters(draft, facets);
 
   if (!open) {
     return null;
@@ -447,21 +453,24 @@ const JewelleryFilterDrawer = ({
               </section>
             ) : null}
 
-            <section className="flex flex-col gap-[16px]">
-              <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
-                Metal Type:
-              </h3>
-              <div className="flex flex-wrap gap-[7px]">
-                {filterMetalTypeOptions.map((metalType) => (
-                  <FilterChip
-                    key={metalType}
-                    label={metalType}
-                    selected={draft.metalTypes.includes(metalType)}
-                    onClick={() => toggleListValue("metalTypes", metalType)}
-                  />
-                ))}
-              </div>
-            </section>
+            {metalTypeOptions.length > 0 ? (
+              <section className="flex flex-col gap-[16px]">
+                <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
+                  Metal Type:
+                </h3>
+                <div className="flex flex-wrap gap-[7px]">
+                  {metalTypeOptions.map((metalType) => (
+                    <FilterChip
+                      key={metalType}
+                      label={metalType}
+                      selected={draft.metalTypes.includes(metalType)}
+                      showCheck
+                      onClick={() => toggleListValue("metalTypes", metalType)}
+                    />
+                  ))}
+                </div>
+              </section>
+            ) : null}
 
             {metalPurityOptions.length > 0 ? (
               <section className="flex flex-col gap-[16px]">
@@ -474,6 +483,7 @@ const JewelleryFilterDrawer = ({
                       key={purity}
                       label={purity}
                       selected={draft.metalPurities.includes(purity)}
+                      showCheck
                       onClick={() => toggleListValue("metalPurities", purity)}
                     />
                   ))}
@@ -481,13 +491,16 @@ const JewelleryFilterDrawer = ({
               </section>
             ) : null}
 
-            <section>
-              <GemstoneTypeSelect
-                drawerOpen={open}
-                value={draft.gemstoneType}
-                onChange={(gemstoneType) => setDraft((current) => ({ ...current, gemstoneType }))}
-              />
-            </section>
+            {facets.gemstoneTypes.length > 0 ? (
+              <section>
+                <GemstoneTypeSelect
+                  drawerOpen={open}
+                  options={facets.gemstoneTypes}
+                  value={draft.gemstoneType}
+                  onChange={(gemstoneType) => setDraft((current) => ({ ...current, gemstoneType }))}
+                />
+              </section>
+            ) : null}
           </div>
         </div>
 
@@ -503,7 +516,8 @@ const JewelleryFilterDrawer = ({
             <button
               type="button"
               onClick={() => onApply(draft)}
-              className="btn-dark-slide inline-flex h-[56px] min-w-0 flex-1 items-center justify-center px-[28px] py-[20px] font-gill text-sm font-normal uppercase leading-110 text-white"
+              disabled={!canApplyFilters}
+              className="btn-dark-slide inline-flex h-[56px] min-w-0 flex-1 items-center justify-center px-[28px] py-[20px] font-gill text-sm font-normal uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               Apply Filters
             </button>

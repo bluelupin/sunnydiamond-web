@@ -3,19 +3,6 @@ import type { JewelleryFilterFacets } from "@/types/magento/jewelleryListing";
 
 export const PAGE_SIZE = 9;
 
-/** Not wired to Magento — UI only until catalog supports metal type filtering. */
-export const filterMetalTypeOptions = ["Silver", "Gold"];
-
-/** Not wired to Magento — UI only until catalog gemstone data is normalized. */
-export const filterGemstoneOptions = [
-  { value: "", label: "Select" },
-  { value: "diamond", label: "Diamond" },
-  { value: "ruby", label: "Ruby" },
-  { value: "emerald", label: "Emerald" },
-  { value: "sapphire", label: "Sapphire" },
-  { value: "pearl", label: "Pearl" },
-] as const;
-
 export const sortOptions: JewellerySortOption[] = [
   { value: "featured", label: "Featured" },
   { value: "price-asc", label: "Price: Low to High" },
@@ -27,15 +14,25 @@ export function getAvailableCategoryLabels(facets: JewelleryFilterFacets): strin
   return facets.categories.filter((category) => category.value).map((category) => category.label);
 }
 
+export function getAvailableMetalTypeLabels(facets: JewelleryFilterFacets): string[] {
+  return facets.metalTypes.map((metalType) => metalType.label);
+}
+
 export function getAvailableMetalPurityLabels(facets: JewelleryFilterFacets): string[] {
   return facets.metalPurities.map((purity) => purity.label);
+}
+
+export function getAvailableGemstoneTypeLabels(facets: JewelleryFilterFacets): string[] {
+  return facets.gemstoneTypes.map((gemstoneType) => gemstoneType.label);
 }
 
 export function hasMagentoFilterFacets(facets: JewelleryFilterFacets): boolean {
   return (
     facets.maxPrice > facets.minPrice ||
     getAvailableCategoryLabels(facets).length > 0 ||
-    facets.metalPurities.length > 0
+    facets.metalTypes.length > 0 ||
+    facets.metalPurities.length > 0 ||
+    facets.gemstoneTypes.length > 0
   );
 }
 
@@ -44,7 +41,7 @@ export function createEmptyFilterState(): JewelleryFilterState {
     minPrice: 0,
     maxPrice: 0,
     categories: [],
-    metalTypes: [...filterMetalTypeOptions],
+    metalTypes: [],
     metalPurities: [],
     gemstoneType: "",
   };
@@ -54,9 +51,9 @@ export function createDefaultFilterState(facets: JewelleryFilterFacets): Jewelle
   return {
     minPrice: facets.minPrice,
     maxPrice: facets.maxPrice,
-    categories: getAvailableCategoryLabels(facets),
-    metalTypes: [...filterMetalTypeOptions],
-    metalPurities: getAvailableMetalPurityLabels(facets),
+    categories: [],
+    metalTypes: [],
+    metalPurities: [],
     gemstoneType: "",
   };
 }
@@ -73,8 +70,16 @@ export function isAllCategoriesSelected(
   return categories.length === 0 || categories.length >= available.length;
 }
 
-export function isAllMetalTypesSelected(metalTypes: string[]): boolean {
-  return metalTypes.length === 0 || metalTypes.length >= filterMetalTypeOptions.length;
+export function isAllMetalTypesSelected(
+  metalTypes: string[],
+  facets: JewelleryFilterFacets,
+): boolean {
+  const available = getAvailableMetalTypeLabels(facets);
+  if (available.length === 0) {
+    return true;
+  }
+
+  return metalTypes.length === 0 || metalTypes.length >= available.length;
 }
 
 export function isAllMetalPuritiesSelected(
@@ -98,6 +103,29 @@ export function isDefaultPriceRange(
   }
 
   return filters.minPrice <= facets.minPrice && filters.maxPrice >= facets.maxPrice;
+}
+
+export function hasActiveFilters(
+  filters: JewelleryFilterState,
+  facets: JewelleryFilterFacets,
+): boolean {
+  if (!isDefaultPriceRange(filters, facets)) {
+    return true;
+  }
+
+  if (!isAllCategoriesSelected(filters.categories, facets)) {
+    return true;
+  }
+
+  if (!isAllMetalTypesSelected(filters.metalTypes, facets)) {
+    return true;
+  }
+
+  if (!isAllMetalPuritiesSelected(filters.metalPurities, facets)) {
+    return true;
+  }
+
+  return filters.gemstoneType.trim().length > 0;
 }
 
 export function chunkFilterOptions<T>(items: T[], chunkSize: number): T[][] {

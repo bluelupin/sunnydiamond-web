@@ -9,6 +9,7 @@ import {
 import {
   buildMagentoProductsFilter,
   EMPTY_JEWELLERY_FILTER_FACETS,
+  enrichFacetsWithNavCategories,
   mapMagentoAggregationsToFacets,
 } from "./products.filters.mapper";
 import type { MagentoProductListItem, MagentoProductsResponse } from "./magentoProduct.types";
@@ -56,6 +57,8 @@ export async function getMagentoJewelleryProducts({
     ? await resolveCategoryIdByUrlKey(categoryUrlKey, signal)
     : null;
 
+  const { categories: navCategories } = await getMagentoJewelleryNavCategories(signal);
+
   const magentoFilter = buildMagentoProductsFilter({
     categoryUrlKey,
     categoryId,
@@ -63,20 +66,45 @@ export async function getMagentoJewelleryProducts({
     facets,
   });
 
-  const data = await magentoGraphqlFetch<MagentoProductsResponse>({
-    query: MAGENTO_JEWELLERY_PRODUCTS_QUERY,
-    variables: {
-      search: "",
-      filter: magentoFilter,
-      pageSize,
-      currentPage: page,
-      sort: mapJewellerySortToMagento(sortValue),
-    },
-    signal,
-    cache: "no-store",
+  const facetScopeFilter = buildMagentoProductsFilter({
+    categoryUrlKey,
+    categoryId,
+    filters,
+    facets,
+    includeDrawerFilters: false,
   });
 
-  const responseFacets = mapMagentoAggregationsToFacets(data.products?.aggregations);
+  const [data, facetScopeData] = await Promise.all([
+    magentoGraphqlFetch<MagentoProductsResponse>({
+      query: MAGENTO_JEWELLERY_PRODUCTS_QUERY,
+      variables: {
+        search: "",
+        filter: magentoFilter,
+        pageSize,
+        currentPage: page,
+        sort: mapJewellerySortToMagento(sortValue),
+      },
+      signal,
+      cache: "no-store",
+    }),
+    magentoGraphqlFetch<MagentoProductsResponse>({
+      query: MAGENTO_JEWELLERY_PRODUCTS_QUERY,
+      variables: {
+        search: "",
+        filter: facetScopeFilter,
+        pageSize: 1,
+        currentPage: 1,
+        sort: mapJewellerySortToMagento(sortValue),
+      },
+      signal,
+      cache: "no-store",
+    }),
+  ]);
+
+  const responseFacets = enrichFacetsWithNavCategories(
+    mapMagentoAggregationsToFacets(facetScopeData.products?.aggregations),
+    navCategories,
+  );
   const products = mapMagentoProductsToJewelleryListing(data.products?.items);
   const pageInfo = data.products?.page_info;
 

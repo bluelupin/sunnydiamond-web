@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  createDefaultFilterState,
   PAGE_SIZE,
 } from "@/features/jewellery-product/data/filters";
 import { getMagentoJewelleryProducts } from "@/services/magento/products/products.service";
