@@ -23,7 +23,7 @@ type SlideCropVariant = "center" | "left-peek" | "right-peek";
 function mobilePeekCropClassName(desktopCropClassName: string) {
   return cn(
     desktopCropClassName,
-    "max-md:left-0 max-md:top-0 max-md:size-[230px] max-md:translate-x-0 max-md:translate-y-0",
+    "max-md:left-[-15px] max-md:top-[-37px] max-md:size-[230px] max-md:translate-x-0 max-md:translate-y-0",
   );
 }
 
@@ -66,24 +66,24 @@ function CarouselSlideImage({
 }) {
   const cropClassName =
     variant === "center"
-      ? "absolute left-[-87px] top-[-257.92px] size-[774px] max-md:left-0 max-md:top-0 max-md:size-[200px] max-md:translate-x-0 max-md:translate-y-0"
+      ? "flex items-center justify-center size-[774px] max-md:size-[155px] max-md:translate-x-0 max-md:translate-y-0"
       : variant === "left-peek"
-        ? mobilePeekCropClassName("absolute left-[22px] top-[-83px] size-[434px]")
-        : mobilePeekCropClassName("absolute left-[162px] top-[-78px] size-[426px]");
+        ? mobilePeekCropClassName("flex items-center justify-start absolute left-[22px] top-[-83px] size-[434px]")
+        : mobilePeekCropClassName("flex items-center justify-end absolute left-[162px] top-[-78px] size-[426px]");
 
   const sizes =
     variant === "center" ? "(max-width: 767px) 430px, 774px" : "(max-width: 767px) 230px, 434px";
 
   return (
-    <div className="featured-slide-viewport">
+    <div className="featured-slide-viewport flex items-center justify-center">
       <div className={cropClassName}>
-        <div className="relative size-full">
+        <div className="relative md:w-[258px] w-[260px] md:h-[258px] h-[154px] w-[154px] border border-gray-200">
           <Image
             src={src}
             alt={alt}
             fill
             quality={90}
-            className="object-contain"
+            className="size-full object-contain"
             sizes={sizes}
             priority={priority}
           />
