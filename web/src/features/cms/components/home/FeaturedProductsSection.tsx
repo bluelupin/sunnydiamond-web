@@ -3,15 +3,12 @@
 import { useMemo } from "react";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
 import { useMagentoTrendingProducts } from "@/hooks/magento/useMagentoTrendingProducts";
-import { featuredProductsCarouselFallbackItems } from "@/features/cms/data/featuredProductsFallback";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import Reveal from "@/shared/Animation/Reveal";
-import FeaturedProductsCarousel, {
-  type FeaturedCarouselItem,
-} from "@/features/cms/components/home/FeaturedProductsCarousel";
+import FeaturedProductsCarousel from "@/features/cms/components/home/FeaturedProductsCarousel";
 import { mapJewelleryListingToFeaturedCarouselItems } from "@/services/magento/products/trendingProducts.service";
 
-/** Recommended transparent product PNG/WebP for CMS + fallbacks. */
+/** Recommended transparent product PNG/WebP for CMS uploads. */
 export const FEATURED_PRODUCTS_IMAGE_SPEC = {
   /** Primary center slide — Figma display ~774px; upload 2× for retina. */
   width: 1600,
@@ -22,18 +19,8 @@ export const FEATURED_PRODUCTS_IMAGE_SPEC = {
     "Center the product with ~12–15% padding on all sides so side peeks and object-contain crops stay clean.",
 } as const;
 
-const FALLBACK_TITLE = "Your Diamond Awaits";
-const FALLBACK_DESCRIPTION =
-  "Traditional mastery bringing every diamond to radiant, eternal life.";
-
 interface FeaturedProductsSectionProps {
   id?: string;
-}
-
-const FEATURED_CAROUSEL_COUNT = 3;
-
-function getFallbackItems(): FeaturedCarouselItem[] {
-  return featuredProductsCarouselFallbackItems.slice(0, FEATURED_CAROUSEL_COUNT);
 }
 
 function FeaturedProductsHeader({
@@ -45,19 +32,23 @@ function FeaturedProductsHeader({
 }) {
   return (
     <div className="flex w-full flex-col items-center gap-4 px-4 text-center md:px-0">
-      <Reveal
-        as="h2"
-        direction="up"
-        className="font-larken text-32 font-light leading-110 text-darkblack md:text-[40px] lg:text-5xl"
-      >
-        {title}
-      </Reveal>
-      <Reveal
-        direction="up"
-        className="max-w-[306px] font-gill text-base font-light leading-110 text-neutral500 lg:max-w-none lg:text-xl"
-      >
-        {description}
-      </Reveal>
+      {title ? (
+        <Reveal
+          as="h2"
+          direction="up"
+          className="font-larken text-32 font-light leading-110 text-darkblack md:text-[40px] lg:text-5xl"
+        >
+          {title}
+        </Reveal>
+      ) : null}
+      {description ? (
+        <Reveal
+          direction="up"
+          className="max-w-[306px] font-gill text-base font-light leading-110 text-neutral500 lg:max-w-none lg:text-xl"
+        >
+          {description}
+        </Reveal>
+      ) : null}
     </div>
   );
 }
@@ -68,18 +59,14 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
   const featuredProductsData =
     shoppingData?.homepage?.featuredProductsSection || shoppingData?.featuredProductsSection;
 
-  const sectionTitle = featuredProductsData?.sectionTitle?.trim() || FALLBACK_TITLE;
-  const description = featuredProductsData?.description?.trim() || FALLBACK_DESCRIPTION;
-  const ctaLabel = featuredProductsData?.cta?.label?.trim() || "Discover";
+  const sectionTitle = featuredProductsData?.sectionTitle?.trim() ?? "";
+  const description = featuredProductsData?.description?.trim() ?? "";
+  const ctaLabel = featuredProductsData?.cta?.label?.trim() ?? "";
 
-  const items = useMemo(() => {
-    const magentoItems = mapJewelleryListingToFeaturedCarouselItems(trendingProducts ?? []);
-    if (magentoItems.length > 0) {
-      return magentoItems;
-    }
-
-    return getFallbackItems();
-  }, [trendingProducts]);
+  const items = useMemo(
+    () => mapJewelleryListingToFeaturedCarouselItems(trendingProducts ?? []),
+    [trendingProducts],
+  );
 
   const isLoading = isShoppingLoading || isTrendingLoading;
 
@@ -108,6 +95,10 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
     );
   }
 
+  if (items.length === 0) {
+    return null;
+  }
+
   return (
     <section
       id={id}
@@ -115,11 +106,13 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
       aria-label="Featured diamond carousel"
     >
       <div className="flex w-full max-w-full flex-col items-center gap-10 overflow-visible">
-        <FeaturedProductsHeader title={sectionTitle} description={description} />
+        {sectionTitle || description ? (
+          <FeaturedProductsHeader title={sectionTitle} description={description} />
+        ) : null}
         <FeaturedProductsCarousel
           items={items}
           ctaLabel={ctaLabel}
-          sectionLabel={sectionTitle}
+          sectionLabel={sectionTitle || "Featured products"}
         />
       </div>
     </section>
