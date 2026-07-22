@@ -55,6 +55,7 @@ export default {
         supportSurface: "#F2E3ED",
         goldAccent: "#DDA957",
         lightGold:"#D1B57A",
+        gold300: "#DECAA0",
         goldGrid: "#EFE7D4",
         chalkCard: "#F8F4EC",
         chalk300: "#ECE9E9",

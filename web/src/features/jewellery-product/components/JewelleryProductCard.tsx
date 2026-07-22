@@ -224,7 +224,7 @@ const JewelleryProductCard = ({
         aria-label={`View ${title}`}
       />
 
-      <div className="pointer-events-none col-start-1 row-start-1 z-50 flex justify-end self-start px-[16px] pt-[24px] md:px-[24px] md:pt-10">
+      <div className="pointer-events-none col-start-1 row-start-1 z-40 flex justify-end self-start px-[16px] pt-[24px] md:z-50 md:px-[24px] md:pt-10">
         <button
           type="button"
           aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
@@ -234,7 +234,7 @@ const JewelleryProductCard = ({
             event.stopPropagation();
             onToggleWishlist?.();
           }}
-          className="pointer-events-auto relative z-50 flex size-6 items-center justify-center md:size-[32px]"
+          className="pointer-events-auto relative flex size-6 items-center justify-center md:size-[32px]"
         >
           <svg width="32" height="32" viewBox="0 0 32 32" fill={isWishlisted ? "currentColor" : "none"} xmlns="http://www.w3.org/2000/svg"
             className={cn(
