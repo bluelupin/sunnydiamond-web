@@ -123,12 +123,12 @@ function ProductSlideImage({
   }
 
   return (
-    <div className="relative w-[300px] h-[300px]">
+    <div className="relative h-[420px] w-[420px]">
       <Image
         src={imageSrc}
         alt={product.name}
         fill
-        sizes="400px"
+        sizes="520px"
         priority={priority}
         quality={DEFAULT_IMAGE_QUALITY}
         className="object-cover object-center"
@@ -442,8 +442,8 @@ function ProductCarouselPanel({
 
       {!isMobile ? (
         <div className="flex h-full flex-col items-center">
-          <div className="flex min-h-0 w-full flex-1 flex-col items-center justify-end">
-            <div className="relative mb-10 h-[400px] w-[400px] overflow-hidden">
+          <div className="flex min-h-0 w-full flex-1 flex-col items-center justify-end pb-2 pt-24">
+            <div className="relative mb-6 h-[520px] w-[520px] translate-y-8 overflow-hidden">
               <div
                 className={cn(
                   "flex h-full items-center will-change-transform motion-reduce:transition-none",
