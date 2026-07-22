@@ -17,7 +17,7 @@ const CartBenefitsSection = () => (
       <h2 className="font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
         With Sunny, you get
       </h2>
-      <CartTextLink href="/about">T&amp;C Apply</CartTextLink>
+      <CartTextLink href="/terms-and-conditions">T&amp;C Apply</CartTextLink>
     </div>
 
     <ul className="m-0 flex lg:flex-row flex-col list-none items-center justify-start gap-6 overflow-x-auto lg:bg-gray200 p-4 justify-center lg:gap-4 lg:p-6">

@@ -245,7 +245,7 @@ const ProductDetailSidebar = ({
       <section aria-label="Shopping benefits" className="flex flex-col gap-6">
         <Reveal direction="up" className="flex items-center justify-between">
           <h2 className="font-gill text-2xl leading-110 text-darkblack">With Sunny, you get</h2>
-          <DetailTextLink href="/about">T&amp;C Apply</DetailTextLink>
+          <DetailTextLink href="/terms-and-conditions">T&amp;C Apply</DetailTextLink>
         </Reveal>
         <ul className="m-0 flex list-none flex-col bg-benefitSurface p-0 max-md:-mx-4 max-md:gap-6 max-md:px-4 max-md:py-10 md:flex-row md:items-stretch md:gap-4 md:p-6 lg:gap-4">
           {content.benefits.flatMap((benefit, index) => {
