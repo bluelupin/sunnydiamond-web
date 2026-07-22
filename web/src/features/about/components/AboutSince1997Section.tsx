@@ -87,7 +87,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
     >
       {/* Desktop — sticky viewport + scroll-driven horizontal slide */}
       <div data-since1997-mode="desktop" className="hidden md:block">
-        <div className="sticky top-0 flex flex-col overflow-hidden bg-white">
+        <div className="sticky top-0 flex flex-col overflow-x-hidden bg-white">
           <PageContainer className="shrink-0 2xl:pb-11 lg:pb-10 pb-8">
             <Reveal as="h2" direction="up"
               id="about-since-1997-title"
@@ -97,10 +97,10 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
           </PageContainer>
           <PageContainer className="pb-100 pr-0">
             <Reveal direction="up" className="flex min-h-0 flex-1 flex-col">
-              <div data-since1997-viewport className="min-h-0 flex-1 overflow-hidden w-full">
+              <div data-since1997-viewport className="min-h-0 flex-1 w-full overflow-x-hidden overflow-y-visible">
                 <div
                   data-since1997-track
-                  className="flex h-full items-center xl:gap-20 gap-16 will-change-transform motion-reduce:transform-none"
+                  className="flex h-full items-start xl:gap-20 gap-16 will-change-transform motion-reduce:transform-none"
                 >
                   <article className="flex shrink-0 items-center lg:gap-8 gap-10">
                     <GalleryImage
@@ -202,10 +202,10 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
           <Reveal direction="up" data-since1997-scroll-zone className="relative">
             <div className="sticky sm:top-0 top-[120px] bg-white pb-16 md:pb-20">
               <PageContainer className="!pr-0 pl-5 pt-0">
-                <div data-since1997-viewport className="overflow-hidden">
+                <div data-since1997-viewport className="overflow-x-hidden overflow-y-visible">
                   <div
                     data-since1997-track
-                    className="flex w-full shrink-0 items-center gap-3 will-change-transform motion-reduce:transform-none sm:gap-12"
+                    className="flex w-full shrink-0 items-start gap-3 will-change-transform motion-reduce:transform-none sm:gap-12"
                   >
                     <GalleryImage
                       desktopUrl={event!.image.desktopUrl}

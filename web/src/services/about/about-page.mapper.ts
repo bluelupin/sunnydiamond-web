@@ -183,7 +183,16 @@ const mapLegacy = (
     gallery.map((item) => item.description).find(isUsableDescription) ??
     gallery[0]?.description;
 
-  return { title, story, gallery };
+  const galleryWithCaptions = gallery.map((item, index) =>
+    index === 0
+      ? item
+      : {
+          ...item,
+          caption: item.description ?? item.caption,
+        },
+  );
+
+  return { title, story, gallery: galleryWithCaptions };
 };
 
 const mapTeamMember = (
