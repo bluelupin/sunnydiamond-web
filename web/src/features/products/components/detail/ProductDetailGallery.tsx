@@ -164,7 +164,7 @@ const ProductDetailGallery = ({ product, topGalleryRef }: ProductDetailGalleryPr
               maxWidthClass="w-full max-w-504"
               priority
               centered
-              containerClassName="aspect-square h-auto shrink-0 border-2 border-red-500"
+              containerClassName="aspect-square h-auto shrink-0"
             />
           </div>
 
@@ -176,7 +176,7 @@ const ProductDetailGallery = ({ product, topGalleryRef }: ProductDetailGalleryPr
                 sizes="312px"
                 maxWidthClass="w-full max-w-311"
                 centered
-                containerClassName="aspect-square h-auto shrink-0 border-2 border-red-500"
+                containerClassName="aspect-square h-auto shrink-0"
               />
             </div>
             <div className="flex min-h-280 w-full overflow-hidden sm:min-h-360 md:h-400 md:shrink-0 lg:h-465 sm:w-1/2">

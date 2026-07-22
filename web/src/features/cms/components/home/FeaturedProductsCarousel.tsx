@@ -77,7 +77,7 @@ function CarouselSlideImage({
   return (
     <div className="featured-slide-viewport flex items-center justify-center">
       <div className={cropClassName}>
-        <div className="relative md:w-[258px] w-[260px] md:h-[258px] h-[154px] w-[154px] border border-gray-200">
+        <div className="relative md:w-[258px] w-[260px] md:h-[258px] h-[154px] w-[154px]">
           <Image
             src={src}
             alt={alt}
