@@ -22,6 +22,10 @@ export type MagentoCustomAttributeItem = {
 
 export type MagentoProductDetailItem = MagentoProductListItem & {
   stock_status?: string | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
+  meta_keyword?: string | null;
+  canonical_url?: string | null;
   description?: { html?: string | null } | null;
   short_description?: { html?: string | null } | null;
   price_range?: {

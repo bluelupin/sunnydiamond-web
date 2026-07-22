@@ -27,6 +27,7 @@ import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 
 const PERSONALISE_FORM_TAG = "product-personalisation";
+const SCHEDULE_VIDEO_CALL_FORM_TAG = "schedule-video-call-form";
 
 type ProductAppointmentPanelProps = {
   open: boolean;
@@ -57,6 +58,7 @@ const ProductAppointmentForm = ({
   onSubmitError,
 }: ProductAppointmentFormProps) => {
   const isPersonalise = variant === "personalise";
+  const isScheduleVideoCall = variant === "schedule-video-call";
   const { contact: profileContact } = useCustomerProfileContact(open);
 
   const [name, setName] = useState("");
@@ -74,7 +76,9 @@ const ProductAppointmentForm = ({
   const referenceImageInputRef = useRef<HTMLInputElement>(null);
   const referenceImagePreviewUrlRef = useRef<string | null>(null);
 
-  const [formTag, setFormTag] = useState(PERSONALISE_FORM_TAG);
+  const [formTag, setFormTag] = useState(
+    isPersonalise ? PERSONALISE_FORM_TAG : SCHEDULE_VIDEO_CALL_FORM_TAG,
+  );
   const [formTitle, setFormTitle] = useState(config.title);
   const [submitLabel, setSubmitLabel] = useState(config.submitLabel);
   const [nameLabel, setNameLabel] = useState("Your Name*");
@@ -83,6 +87,7 @@ const ProductAppointmentForm = ({
   const [phonePlaceholder, setPhonePlaceholder] = useState<string | undefined>(undefined);
   const [emailLabel, setEmailLabel] = useState("Email");
   const [emailPlaceholder, setEmailPlaceholder] = useState("Enter");
+  const [dateLabel, setDateLabel] = useState("Date");
   const [notesLabel, setNotesLabel] = useState(config.noteLabel);
   const [notesPlaceholder, setNotesPlaceholder] = useState(config.notePlaceholder);
   const [notesRequired, setNotesRequired] = useState(config.noteRequired);
@@ -90,13 +95,17 @@ const ProductAppointmentForm = ({
   const [timeSlots, setTimeSlots] = useState<readonly string[]>([]);
 
   const formValues = useMemo(
-    () => ({ name, countryCode, phone, email, date, note }),
-    [name, countryCode, phone, email, date, note],
+    () => ({ name, countryCode, phone, email, date, note, selectedSlot }),
+    [name, countryCode, phone, email, date, note, selectedSlot],
   );
 
   const validationOptions = useMemo(
-    () => ({ noteRequired: notesRequired }),
-    [notesRequired],
+    () => ({
+      noteRequired: notesRequired,
+      dateRequired: config.showTimeSlots,
+      selectedSlotRequired: config.showTimeSlots,
+    }),
+    [notesRequired, config.showTimeSlots],
   );
 
   const { isValid, errors, markTouched, showError, validateSubmit, resetValidation } =
@@ -135,16 +144,17 @@ const ProductAppointmentForm = ({
       return;
     }
 
-    if (!isPersonalise) return;
+    if (!isPersonalise && !isScheduleVideoCall) return;
 
     const controller = new AbortController();
+    const cmsFormTag = isPersonalise ? PERSONALISE_FORM_TAG : SCHEDULE_VIDEO_CALL_FORM_TAG;
 
     void (async () => {
       try {
-        const form = await getProductFormByTag(PERSONALISE_FORM_TAG, controller.signal);
+        const form = await getProductFormByTag(cmsFormTag, controller.signal);
         if (!form) return;
 
-        setFormTag(form.formTag || PERSONALISE_FORM_TAG);
+        setFormTag(form.formTag || cmsFormTag);
         if (form.formName) setFormTitle(form.formName);
         if (form.submitButtonText) setSubmitLabel(form.submitButtonText);
         if (form.nameLabel) setNameLabel(form.nameLabel);
@@ -153,6 +163,7 @@ const ProductAppointmentForm = ({
         if (form.phonePlaceholder) setPhonePlaceholder(form.phonePlaceholder);
         if (form.emailLabel) setEmailLabel(form.emailLabel);
         if (form.emailPlaceholder) setEmailPlaceholder(form.emailPlaceholder);
+        if (form.dateLabel) setDateLabel(form.dateLabel);
         if (form.notesLabel) setNotesLabel(form.notesLabel);
         if (form.notesPlaceholder) setNotesPlaceholder(form.notesPlaceholder);
         setNotesRequired(form.notesRequired);
@@ -165,7 +176,7 @@ const ProductAppointmentForm = ({
 
     return () => controller.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reset/load on open only
-  }, [open, isPersonalise]);
+  }, [open, isPersonalise, isScheduleVideoCall]);
 
   useEffect(() => {
     if (!profileContact || hasAppliedProfilePrefill) return;
@@ -217,7 +228,7 @@ const ProductAppointmentForm = ({
       void (async () => {
         if (isSubmitting) return;
 
-        if (!isPersonalise) {
+        if (!isPersonalise && !isScheduleVideoCall) {
           onSubmitSuccess(config.successToast.title);
           handleClose();
           return;
@@ -233,6 +244,8 @@ const ProductAppointmentForm = ({
             customerPhone: `${countryCode} ${phone}`.trim(),
             customerEmail: email.trim() || undefined,
             requestDetails: note.trim() || undefined,
+            requestedDate: isScheduleVideoCall ? date || undefined : undefined,
+            selectedTimeSlot: isScheduleVideoCall ? (selectedSlot ?? undefined) : undefined,
             sourcePage:
               typeof window !== "undefined" ? window.location.pathname : getProductHref(product),
             consentAccepted: true,
@@ -240,10 +253,14 @@ const ProductAppointmentForm = ({
             uploadedImage: allowImageUpload && referenceImage ? referenceImage : undefined,
           });
 
-          onSubmitSuccess("Request submitted");
+          onSubmitSuccess(
+            isScheduleVideoCall ? config.successToast.title : "Request submitted",
+          );
           handleClose();
         } catch {
-          onSubmitError("Could not submit request");
+          onSubmitError(
+            isScheduleVideoCall ? "Could not schedule video call" : "Could not submit request",
+          );
         } finally {
           setIsSubmitting(false);
         }
@@ -319,6 +336,7 @@ const ProductAppointmentForm = ({
               phonePlaceholder={phonePlaceholder}
               emailLabel={emailLabel}
               emailPlaceholder={emailPlaceholder}
+              dateLabel={dateLabel}
               noteLabel={notesLabel}
               notePlaceholder={notesPlaceholder}
               noteLabelClassName={config.noteLabelClassName}

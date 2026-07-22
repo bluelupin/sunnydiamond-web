@@ -3,6 +3,8 @@ import productNecklace from "@/assets/product-necklace.jpg";
 import productEarrings from "@/assets/product-earrings.jpg";
 import productBracelet from "@/assets/product-bracelet.jpg";
 import type { StaticImageData } from "next/image";
+import type { ProductSeo } from "@/shared/lib/seo/productSeo";
+import { buildProductSeo } from "@/shared/lib/seo/productSeo";
 import {
   PRODUCT_DETAIL_GALLERY_HERO_IMAGE,
   PRODUCT_DETAIL_GALLERY_LIFESTYLE_IMAGE,
@@ -31,10 +33,22 @@ export interface Product {
   rating: number;
   reviews: number;
   detailAttributes?: string[];
+  seo: ProductSeo;
+}
+
+function withProductSeo(product: Omit<Product, "seo">): Product {
+  return {
+    ...product,
+    seo: buildProductSeo({
+      name: product.name,
+      urlKey: product.urlKey,
+      shortDescription: product.shortDescription,
+    }),
+  };
 }
 
 export const products: Product[] = [
-  {
+  withProductSeo({
     id: "1",
     urlKey: "celestial-solitaire-ring",
     name: "Celestial Solitaire Ring",
@@ -56,8 +70,8 @@ export const products: Product[] = [
     featured: true,
     rating: 4.9,
     reviews: 127,
-  },
-  {
+  }),
+  withProductSeo({
     id: "2",
     urlKey: "lumiere-pendant-necklace",
     name: "Lumière Pendant Necklace",
@@ -73,8 +87,8 @@ export const products: Product[] = [
     featured: true,
     rating: 4.8,
     reviews: 89,
-  },
-  {
+  }),
+  withProductSeo({
     id: "3",
     urlKey: "etoile-diamond-studs",
     name: "Étoile Diamond Studs",
@@ -90,8 +104,8 @@ export const products: Product[] = [
     featured: true,
     rating: 4.9,
     reviews: 203,
-  },
-  {
+  }),
+  withProductSeo({
     id: "4",
     urlKey: "riviere-tennis-bracelet",
     name: "Rivière Tennis Bracelet",
@@ -107,8 +121,8 @@ export const products: Product[] = [
     featured: true,
     rating: 5.0,
     reviews: 56,
-  },
-  {
+  }),
+  withProductSeo({
     id: "5",
     urlKey: "aurora-halo-ring",
     name: "Aurora Halo Ring",
@@ -124,8 +138,8 @@ export const products: Product[] = [
     featured: false,
     rating: 4.7,
     reviews: 74,
-  },
-  {
+  }),
+  withProductSeo({
     id: "6",
     urlKey: "cascade-drop-earrings",
     name: "Cascade Drop Earrings",
@@ -141,7 +155,7 @@ export const products: Product[] = [
     featured: false,
     rating: 4.8,
     reviews: 45,
-  },
+  }),
 ];
 
 export const categories = [

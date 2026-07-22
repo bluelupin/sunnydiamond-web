@@ -1,5 +1,6 @@
 import type { Product } from "@/features/products/data/products";
 import type { CartLineItem } from "@/features/cart/types/cart.types";
+import { buildProductSeo } from "@/shared/lib/seo/productSeo";
 import { resolveMagentoProductImages } from "../products/products.mapper";
 import type {
   MagentoCart,
@@ -44,6 +45,11 @@ function mapCartItemProduct(item: MagentoCartItem): Product | null {
     rating: 0,
     reviews: 0,
     detailAttributes: [],
+    seo: buildProductSeo({
+      name,
+      urlKey,
+      shortDescription: name,
+    }),
   };
 }
 

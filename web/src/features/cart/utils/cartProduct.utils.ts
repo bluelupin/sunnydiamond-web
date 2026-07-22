@@ -2,6 +2,7 @@ import type { Product } from "@/features/products/data/products";
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 import type { CartLineItem } from "../types/cart.types";
 import type { StoredCartLine } from "../types/cartPersistence.types";
+import { buildProductSeo } from "@/shared/lib/seo/productSeo";
 
 const CART_STORAGE_KEY = "sunny-cart-v2";
 const LEGACY_CART_STORAGE_KEY = "sunny-cart-v1";
@@ -117,6 +118,11 @@ export function mapListingProductToCartProduct(listing: JewelleryListingProduct)
     rating: 0,
     reviews: 0,
     detailAttributes: [],
+    seo: buildProductSeo({
+      name: listing.name,
+      urlKey: listing.urlKey,
+      shortDescription: listing.name,
+    }),
   };
 }
 

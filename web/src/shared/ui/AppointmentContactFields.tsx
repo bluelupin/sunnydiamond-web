@@ -242,7 +242,10 @@ const AppointmentContactFields = ({
                     <button
                       key={slot}
                       type="button"
-                      onClick={() => onSelectedSlotChange(isSelected ? null : slot)}
+                      onClick={() => {
+                        onSelectedSlotChange(isSelected ? null : slot);
+                        markTouched("selectedSlot");
+                      }}
                       className={cn(
                         "flex h-14 min-w-0 flex-1 items-center justify-center px-3 font-gill text-base leading-110",
                         isSelected
@@ -259,6 +262,10 @@ const AppointmentContactFields = ({
               </div>
             ))}
           </div>
+          <FormFieldError
+            id={`${idPrefix}-time-slot-error`}
+            message={showError("selectedSlot") ? errors.selectedSlot : undefined}
+          />
         </div>
       ) : null}
 

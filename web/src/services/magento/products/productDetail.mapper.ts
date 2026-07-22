@@ -3,6 +3,7 @@ import type {
   MagentoCustomAttributeItem,
   MagentoProductDetailItem,
 } from "./magentoProduct.types";
+import { buildProductSeo } from "@/shared/lib/seo/productSeo";
 import { resolveMagentoProductImages } from "./products.mapper";
 
 function stripHtml(html?: string | null): string {
@@ -125,6 +126,8 @@ export function mapMagentoProductDetailToProduct(product: MagentoProductDetailIt
     carat,
   ].filter((attribute): attribute is string => Boolean(attribute));
 
+  const shortDescription = stripHtml(product.short_description?.html) || name;
+
   return {
     id: sku,
     urlKey,
@@ -132,7 +135,7 @@ export function mapMagentoProductDetailToProduct(product: MagentoProductDetailIt
     price: finalPrice,
     originalPrice: regularPrice && regularPrice > finalPrice ? regularPrice : undefined,
     description: stripHtml(product.description?.html) || name,
-    shortDescription: stripHtml(product.short_description?.html) || name,
+    shortDescription,
     category: resolveProductCategory(product.categories),
     image: primaryImage,
     images,
@@ -144,5 +147,14 @@ export function mapMagentoProductDetailToProduct(product: MagentoProductDetailIt
     rating: Number.isFinite(rating) ? rating : 0,
     reviews: 0,
     detailAttributes,
+    seo: buildProductSeo({
+      name,
+      urlKey,
+      shortDescription,
+      metaTitle: product.meta_title,
+      metaDescription: product.meta_description,
+      metaKeywords: product.meta_keyword,
+      canonicalUrl: product.canonical_url,
+    }),
   };
 }

@@ -31,10 +31,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   return constructMetadata({
-    title: product.name,
-    description: product.shortDescription,
+    title: product.seo.title,
+    description: product.seo.description,
+    keywords: product.seo.keywords,
     image: getImageSrc(product.image),
-    canonicalPath: `/product/${product.urlKey}`,
+    url: product.seo.canonicalUrl,
+    canonicalPath: product.seo.canonicalUrl ? undefined : product.seo.canonicalPath,
   });
 }
 

@@ -6,6 +6,10 @@ export const MAGENTO_PRODUCT_BY_URL_KEY_QUERY = `
         sku
         name
         url_key
+        meta_title
+        meta_description
+        meta_keyword
+        canonical_url
         stock_status
         description {
           html

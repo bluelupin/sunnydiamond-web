@@ -122,6 +122,14 @@ export const validateOptionalDate = (value: string): FieldValidation => {
   return { valid: true };
 };
 
+export const validateRequiredDate = (value: string): FieldValidation => {
+  if (!value.trim()) {
+    return { valid: false, error: "Select a date" };
+  }
+
+  return validateOptionalDate(value);
+};
+
 export const validateIndianPincode = (value: string): FieldValidation => {
   const trimmed = value.trim();
 
@@ -250,12 +258,15 @@ export type AppointmentContactValues = {
   date: string;
   note: string;
   purpose?: string;
+  selectedSlot?: string | null;
 };
 
 export type AppointmentContactValidationOptions = {
   noteRequired?: boolean;
   emailRequired?: boolean;
   validatePurpose?: boolean;
+  dateRequired?: boolean;
+  selectedSlotRequired?: boolean;
 };
 
 export type AppointmentContactField =
@@ -264,7 +275,8 @@ export type AppointmentContactField =
   | "email"
   | "date"
   | "note"
-  | "purpose";
+  | "purpose"
+  | "selectedSlot";
 
 export const getAppointmentContactErrors = (
   values: AppointmentContactValues,
@@ -274,16 +286,23 @@ export const getAppointmentContactErrors = (
     ? validateRequiredNote(values.note)
     : validateOptionalNote(values.note);
 
+  const dateValidation = options.dateRequired
+    ? validateRequiredDate(values.date)
+    : validateOptionalDate(values.date);
+
   return {
     name: validateRequiredName(values.name).error,
     phone: validatePhone(values.phone, values.countryCode).error,
     email: options.emailRequired
       ? validateRequiredEmail(values.email).error
       : validateOptionalEmail(values.email).error,
-    date: validateOptionalDate(values.date).error,
+    date: dateValidation.error,
     note: noteValidation.error,
     purpose: options.validatePurpose
       ? validateRequiredSelection(values.purpose ?? "", "purpose").error
+      : undefined,
+    selectedSlot: options.selectedSlotRequired
+      ? validateRequiredSelection(values.selectedSlot ?? "", "time slot").error
       : undefined,
   };
 };

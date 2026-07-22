@@ -4,6 +4,7 @@ import { siteConfig } from "@/shared/lib/siteConfig";
 interface SeoConfig {
   title: string;
   description?: string;
+  keywords?: string;
   image?: string;
   canonicalPath?: string;
   noIndex?: boolean;
@@ -25,6 +26,7 @@ function normalizeUrl(rawUrl?: string): string | undefined {
 export function constructMetadata({
   title,
   description = siteConfig.seo.defaultDescription,
+  keywords,
   image = siteConfig.seo.ogImage,
   canonicalPath,
   noIndex = false,
@@ -39,6 +41,7 @@ export function constructMetadata({
   return {
     title,
     description,
+    ...(keywords ? { keywords } : {}),
     openGraph: {
       title,
       description,
