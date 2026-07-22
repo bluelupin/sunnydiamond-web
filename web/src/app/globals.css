@@ -589,6 +589,36 @@
   display: none;
 }
 
+/* For horizontal Mobile scroll inside .tabScroll */
+.horizontalMobileScrollbar::-webkit-scrollbar {
+  height: 0px !important;
+  /* Thin horizontal scrollbar */
+}
+
+.horizontalMobileScrollbar::-webkit-scrollbar-thumb {
+  background: #cccccc;
+  border-radius: 4px;
+}
+
+.horizontalMobileScrollbar::-webkit-scrollbar-thumb:hover {
+  background: #cccccc;
+}
+
+/* For Verticle Mobile scroll inside .tabScroll */
+.verticleMobileScrollbar::-webkit-scrollbar {
+  width: 0px !important;
+  /* Thin horizontal scrollbar */
+}
+
+.verticleMobileScrollbar::-webkit-scrollbar-thumb {
+  background: #cccccc;
+  border-radius: 4px;
+}
+
+.verticleMobileScrollbar::-webkit-scrollbar-thumb:hover {
+  background: #cccccc;
+}
+
 /* For Verticle scroll inside .tabScroll */
 .verticleScrollbar {
   overflow-x: auto;
@@ -615,6 +645,7 @@
 .verticleScrollbar::-webkit-scrollbar-thumb {
   display: none;
 }
+
 .imageTestContainer {
   border: 0.4px solid #cccccc38;
 }
