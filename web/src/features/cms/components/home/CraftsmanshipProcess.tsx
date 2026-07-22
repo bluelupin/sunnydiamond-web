@@ -141,7 +141,7 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
         className="bg-gray200 py-16 md:py-0 md:pt-20"
         aria-busy="true"
       >
-        <div className="sticky top-24 h-screen overflow-hidden bg-gray200">
+        <div className="sticky md:top-24 top-10 h-screen overflow-hidden bg-gray200">
           <CraftsmanshipBackground />
           <div className="container relative z-10 h-full">
             <div className="grid h-full grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-12">
@@ -170,7 +170,7 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
       aria-label={sectionTitle}
       className="bg-gray200 py-16 md:py-0 md:pt-20"
     >
-      <div className="sticky top-24 h-screen overflow-hidden bg-gray200">
+      <div className="sticky md:top-24 top-10 h-screen overflow-hidden bg-gray200">
         <CraftsmanshipBackground />
         <div className="container relative z-10 h-full">
           <div className="grid h-full grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-12">

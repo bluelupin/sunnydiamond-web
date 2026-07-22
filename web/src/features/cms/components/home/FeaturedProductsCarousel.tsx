@@ -243,7 +243,7 @@ export default function FeaturedProductsCarousel({
           </button>
         </div>
 
-        <div className="flex flex-col items-center gap-4 text-center md:gap-6">
+        <div className="flex flex-col items-center gap-4 text-center md:gap-6 mt-3">
           <div className="flex flex-col items-center gap-4">
             <p className="font-gill text-base font-normal leading-110 text-darkblack md:text-xl">
               {activeItem.name}

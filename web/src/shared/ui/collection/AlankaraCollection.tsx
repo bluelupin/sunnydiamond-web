@@ -108,7 +108,7 @@ function ProductSlideImage({
 
   if (variant === "mobile") {
     return (
-      <div className="relative size-full">
+      <div className="relative w-[300px] h-[300px]">
         <Image
           src={imageSrc}
           alt={product.name}
@@ -116,22 +116,24 @@ function ProductSlideImage({
           sizes="180px"
           priority={priority}
           quality={DEFAULT_IMAGE_QUALITY}
-          className="size-full scale-[2] object-contain object-center"
+          className="size-full object-contain object-center"
         />
       </div>
     );
   }
 
   return (
-    <Image
-      src={imageSrc}
-      alt={product.name}
-      fill
-      sizes="400px"
-      priority={priority}
-      quality={DEFAULT_IMAGE_QUALITY}
-      className="scale-[2.3] object-cover object-center"
-    />
+    <div className="relative w-[300px] h-[300px]">
+      <Image
+        src={imageSrc}
+        alt={product.name}
+        fill
+        sizes="400px"
+        priority={priority}
+        quality={DEFAULT_IMAGE_QUALITY}
+        className="object-cover object-center"
+      />
+    </div>
   );
 }
 
