@@ -1,13 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import {
-  jewelleryListingFilterDrawerAssets,
-  jewelleryListingFilterDrawerSpec as spec,
-} from "../data/content";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import {
   chunkFilterOptions,
   createDefaultFilterState,
@@ -17,7 +20,7 @@ import {
   hasMagentoFilterFacets,
 } from "../data/filters";
 import type { JewelleryFilterState } from "../types";
-import type { JewelleryFilterFacetOption, JewelleryFilterFacets } from "@/types/magento/jewelleryListing";
+import type { JewelleryFilterFacets } from "@/types/magento/jewelleryListing";
 
 interface JewelleryFilterDrawerProps {
   open: boolean;
@@ -59,150 +62,6 @@ const FilterChip = ({
     <span className={selected ? "font-normal text-darkblack" : "font-light text-gary300 opacity-80"}>{label}</span>
   </button>
 );
-
-const FilterSelectChevron = ({ open = false }: { open?: boolean }) => (
-  <span
-    className="pointer-events-none inline-flex size-[24px] shrink-0 items-center justify-center"
-    aria-hidden
-  >
-    <Image
-      src={jewelleryListingFilterDrawerAssets.selectChevronIcon}
-      alt=""
-      width={spec.selectChevronIconWidth}
-      height={spec.selectChevronIconHeight}
-      className={cn(
-        "shrink-0 object-contain transition-transform duration-200",
-        open ? "-rotate-90" : "rotate-90",
-      )}
-      style={{
-        width: spec.selectChevronIconWidth,
-        height: spec.selectChevronIconHeight,
-      }}
-    />
-  </span>
-);
-
-const GemstoneTypeSelect = ({
-  value,
-  options,
-  onChange,
-  drawerOpen,
-}: {
-  value: string;
-  options: JewelleryFilterFacetOption[];
-  onChange: (value: string) => void;
-  drawerOpen: boolean;
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!drawerOpen) {
-      setIsOpen(false);
-    }
-  }, [drawerOpen]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    const handlePointerDown = (event: MouseEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handlePointerDown);
-
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-    };
-  }, [isOpen]);
-
-  const selectedOption = options.find((option) => option.label === value);
-  const triggerLabel = selectedOption?.label ?? "Select";
-  const showPlaceholder = !selectedOption;
-
-  if (options.length === 0) {
-    return null;
-  }
-
-  return (
-    <div ref={rootRef} className="flex flex-col gap-[8px]">
-      <span
-        id="filter-gemstone-type-label"
-        className="font-gill text-base font-normal leading-110 text-darkblack"
-      >
-        Gemstone Type:
-      </span>
-      <button
-        type="button"
-        id="filter-gemstone-type"
-        aria-haspopup="listbox"
-        aria-expanded={isOpen}
-        aria-controls={isOpen ? "filter-gemstone-type-listbox" : undefined}
-        aria-labelledby="filter-gemstone-type-label filter-gemstone-type-value"
-        onClick={() => setIsOpen((current) => !current)}
-        className={cn(
-          "flex h-[56px] w-full items-center justify-between bg-aboutInactive p-[12px] font-gill text-sm leading-110 outline-none",
-          isOpen ? "border border-darkblack" : "border border-transparent",
-          showPlaceholder && !isOpen ? "font-light text-neutral400" : "font-normal text-darkblack",
-        )}
-      >
-        <span id="filter-gemstone-type-value">{triggerLabel}</span>
-        <FilterSelectChevron open={isOpen} />
-      </button>
-      {isOpen ? (
-        <div
-          id="filter-gemstone-type-listbox"
-          role="listbox"
-          aria-labelledby="filter-gemstone-type-label"
-          className="flex w-full flex-col bg-aboutInactive"
-        >
-          {options.map((option) => {
-            const selected = value === option.label;
-
-            return (
-              <button
-                key={option.label}
-                type="button"
-                role="option"
-                aria-selected={selected}
-                onClick={() => {
-                  onChange(selected ? "" : option.label);
-                  setIsOpen(false);
-                }}
-                className={cn(
-                  "flex h-[56px] w-full items-center p-[12px] text-left font-gill text-sm leading-110 transition-colors",
-                  selected
-                    ? "bg-[#DECAA0] font-normal text-darkblack"
-                    : "font-normal text-neutral400 hover:bg-white",
-                )}
-              >
-                <span className="flex items-center gap-[8px]">
-                  <Image
-                    src={
-                      selected
-                        ? jewelleryListingFilterDrawerAssets.gemstoneRadioSelectedIcon
-                        : jewelleryListingFilterDrawerAssets.gemstoneRadioDefaultIcon
-                    }
-                    alt=""
-                    width={24}
-                    height={24}
-                    aria-hidden
-                    className="size-[24px] shrink-0 object-contain"
-                  />
-                  <span>{option.label}</span>
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      ) : null}
-    </div>
-  );
-};
 
 const JewelleryFilterDrawer = ({
   open,
@@ -482,13 +341,27 @@ const JewelleryFilterDrawer = ({
             ) : null}
 
             {facets.gemstoneTypes.length > 0 ? (
-              <section>
-                <GemstoneTypeSelect
-                  drawerOpen={open}
-                  options={facets.gemstoneTypes}
+              <section className="flex flex-col gap-2">
+                <p className="font-gill text-base leading-normal tracking-normal text-darkblack">
+                  Gemstone Type:
+                </p>
+                <Select
                   value={draft.gemstoneType}
-                  onChange={(gemstoneType) => setDraft((current) => ({ ...current, gemstoneType }))}
-                />
+                  onValueChange={(gemstoneType) =>
+                    setDraft((current) => ({ ...current, gemstoneType }))
+                  }
+                >
+                  <SelectTrigger className="h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0">
+                    <SelectValue placeholder="-select-" />
+                  </SelectTrigger>
+                  <SelectContent className="z-[80]">
+                    {facets.gemstoneTypes.map((option) => (
+                      <SelectItem key={option.label} value={option.label}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </section>
             ) : null}
           </div>
