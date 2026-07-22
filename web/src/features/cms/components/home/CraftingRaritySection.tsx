@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
-import { useCraftingRarityCategories } from "@/hooks/magento/useCraftingRarityCategories";
+import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
 import CraftingRarityCategoryGrid from "@/features/cms/components/home/CraftingRarityCategoryGrid";
 import { cn } from "@/shared/utils/cn";
 import PageContainer from "@/shared/ui/layout/PageContainer";
@@ -73,7 +73,7 @@ function CraftingRarityCopyBlock({
 const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
   const { data: shellData, isLoading: isShellLoading } = useHomepageShell();
   const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
-  const { data: craftingRarityData, isLoading: isCategoriesLoading } = useCraftingRarityCategories();
+  const { data: shoppingData, isLoading: isShoppingLoading } = useHomepageShoppingBlocks();
 
   const hero = shellData?.homepage?.hero || shellData?.hero;
   const craftingBrilliance = editorialData?.craftingBrillianceSection ?? null;
@@ -100,9 +100,17 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
     hero?.secondaryCta?.label ??
     "Explore Products";
 
-  const categories = craftingRarityData?.categories ?? [];
+  const categories = useMemo(() => {
+    const items = shoppingData?.categoryNavigation;
+    if (!Array.isArray(items)) return [];
+
+    return [...items]
+      .filter((item) => item?.isActive !== false)
+      .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0));
+  }, [shoppingData?.categoryNavigation]);
 
   const isCopyLoading = isShellLoading || isEditorialLoading;
+  const isCategoriesLoading = isShoppingLoading;
 
   if (isCopyLoading) {
     return (

@@ -1,30 +1,67 @@
 "use client";
 
 import Link from "next/link";
-import OptimizedImage from "@/shared/ui/OptimizedImage";
+import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { LazyInView } from "@/shared/ui/LazyInView";
 import Reveal from "@/shared/Animation/Reveal";
-import type { CraftingRarityCategory } from "@/features/cms/data/craftingRarityCategories";
+import { resolveCategoryNavImages } from "@/shared/utils/responsiveCmsImage";
+import type { CategoryNavigationItem } from "@/types/homepage/categoryNavigation";
+
+const IMAGE_QUALITY = 90;
 
 type CraftingRarityCategoryCardProps = {
-  category: CraftingRarityCategory;
+  category: CategoryNavigationItem;
 };
 
 const CraftingRarityCategoryCard = ({ category }: CraftingRarityCategoryCardProps) => {
+  const slug = category?.slug ?? "";
+  const categoryLink =
+    category?.cta?.url ??
+    category?.cta?.to ??
+    (slug ? `/products?category=${encodeURIComponent(slug)}` : "/products");
+
+  const {
+    title,
+    desktopImageUrl,
+    mobileImageUrl,
+    hoverDesktopImageUrl,
+    hoverMobileImageUrl,
+    imageAlt,
+    hoverAlt,
+    hasDistinctHover,
+  } = resolveCategoryNavImages(category);
+
+  const hasProductImage = Boolean(desktopImageUrl || mobileImageUrl);
+
   return (
     <Link
-      href={category.href}
+      href={categoryLink}
       className="group relative flex aspect-square h-full w-full flex-col items-center justify-between overflow-hidden bg-gray300"
     >
+      {hasDistinctHover && hoverDesktopImageUrl ? (
+        <ResponsiveImage
+          desktopSrc={hoverDesktopImageUrl}
+          mobileSrc={hoverMobileImageUrl || hoverDesktopImageUrl}
+          alt={hoverAlt}
+          width={600}
+          height={600}
+          quality={IMAGE_QUALITY}
+          sizes="(max-width: 768px) 50vw, 25vw"
+          className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        />
+      ) : null}
+
       <div className="relative z-10 flex min-h-0 flex-1 items-center justify-center overflow-hidden px-4 pt-4 max-h-[303px] max-w-[303px] lg:px-6 lg:pt-6">
-        {category.imageSrc ? (
-          <OptimizedImage
-            src={category.imageSrc}
-            alt={category.label}
-            width={303}
-            height={303}
+        {hasProductImage && desktopImageUrl ? (
+          <ResponsiveImage
+            desktopSrc={desktopImageUrl}
+            mobileSrc={mobileImageUrl || desktopImageUrl}
+            alt={imageAlt}
+            width={600}
+            height={600}
+            quality={IMAGE_QUALITY}
             sizes="(max-width: 768px) 50vw, 25vw"
-            className="max-h-full max-w-full object-contain"
+            className={`max-h-full max-w-full object-contain transition-opacity duration-500${hasDistinctHover ? " group-hover:opacity-0" : ""}`}
           />
         ) : null}
       </div>
@@ -34,7 +71,7 @@ const CraftingRarityCategoryCard = ({ category }: CraftingRarityCategoryCardProp
           className="pointer-events-none absolute inset-x-0 -top-3 bottom-0 -z-10 w-full bg-gradient-to-t from-black/80 via-black/45 to-transparent opacity-0 motion-safe:transition-opacity motion-safe:duration-500 group-hover:opacity-100 group-focus-visible:opacity-100"
         />
         <span className="relative block text-center font-gill text-base font-normal leading-110 text-darkblack motion-safe:transition-colors motion-safe:duration-500 group-hover:text-white group-focus-visible:text-white lg:text-xl">
-          {category.label}
+          {title}
         </span>
       </div>
     </Link>
@@ -42,7 +79,7 @@ const CraftingRarityCategoryCard = ({ category }: CraftingRarityCategoryCardProp
 };
 
 type CraftingRarityCategoryGridProps = {
-  categories: CraftingRarityCategory[];
+  categories: CategoryNavigationItem[];
   isLoading?: boolean;
 };
 
@@ -63,11 +100,7 @@ const CraftingRarityCategoryGrid = ({
   }
 
   if (categories.length === 0) {
-    return (
-      <Reveal as="p" direction="up" className="px-4 py-20 text-center font-gill text-base text-neutral500 lg:px-10">
-        No categories available.
-      </Reveal>
-    );
+    return null;
   }
 
   return (
@@ -78,7 +111,7 @@ const CraftingRarityCategoryGrid = ({
       {categories.map((category) => (
         <Reveal
           direction="up"
-          key={category.id}
+          key={category?.id ?? category?.slug ?? category?.title}
           className="aspect-square w-full xl:h-[424px]"
         >
           <CraftingRarityCategoryCard category={category} />

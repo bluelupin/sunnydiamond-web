@@ -1,6 +1,5 @@
 export const magentoQueryKeys = {
   jewelleryNav: "magento:jewelleryNav",
-  craftingRarityCategories: "magento:craftingRarityCategories",
   trendingProducts: "magento:trendingProducts",
 } as const;
 
