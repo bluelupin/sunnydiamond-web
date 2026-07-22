@@ -41,6 +41,10 @@ export type StrapiBespokeVisionCard = {
   isActive?: boolean | null;
   image?: StrapiBespokeResponsiveImage | null;
   media?: StrapiImagePayload | null;
+  video?: {
+    altText?: string | null;
+    heroVideo?: StrapiImagePayload | null;
+  } | null;
 };
 
 export type StrapiBespokeVisionSection = {
@@ -56,7 +60,9 @@ export type StrapiBespokeVisionSection = {
 
 export type StrapiBespokeFeaturedStoryCard = {
   id?: number;
+  documentId?: string | null;
   title?: string | null;
+  slug?: string | null;
   description?: string | null;
   sortOrder?: number | null;
   isActive?: boolean | null;

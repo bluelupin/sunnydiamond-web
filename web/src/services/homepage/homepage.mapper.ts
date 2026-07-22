@@ -182,6 +182,46 @@ function mapFeaturedCollection(
 ): FeaturedCollectionSection | null {
   if (!raw) return null;
 
+  // New shape: collection-showcase-section with editorial-collection relations
+  const collections = Array.isArray(raw.collections) ? raw.collections : [];
+  if (collections.length > 0) {
+    const activeCollections = collections
+      .filter((item) => item?.isActive !== false)
+      .slice()
+      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+
+    const selected =
+      activeCollections.find((item) => cleanText(item.slug)?.toLowerCase() === "alankara") ??
+      activeCollections[0] ??
+      collections.find((item) => cleanText(item.slug)?.toLowerCase() === "alankara") ??
+      collections[0];
+
+    if (!selected) return null;
+    if (selected.isActive === false) return null;
+
+    const productSkus = (selected.productSkus ?? [])
+      .map((item) => cleanText(item?.sku))
+      .filter((sku): sku is string => Boolean(sku));
+
+    const featuredProductSku = cleanText(selected.featuredProductSku);
+
+    return {
+      id: selected.id ?? raw.id,
+      sectionTitle: cleanText(selected.title) ?? cleanText(selected.collectionName),
+      description: cleanText(selected.description),
+      isActive: true,
+      slug: cleanText(selected.slug),
+      cta: mapCta(selected.cta),
+      primaryImage: selected.backgroundImage as FeaturedCollectionSection["primaryImage"],
+      backgroundImage: selected.backgroundImage as FeaturedCollectionSection["backgroundImage"],
+      image: selected.backgroundImage as FeaturedCollectionSection["image"],
+      productSkus,
+      featuredProductSku: featuredProductSku ?? null,
+      products: null,
+    };
+  }
+
+  // Legacy flat featured-collection block
   const isActive = resolveSectionActive(raw.isActive, raw.showField);
   if (isActive === false) return null;
 
@@ -197,6 +237,8 @@ function mapFeaturedCollection(
     products: Array.isArray(raw.products)
       ? (raw.products as FeaturedCollectionSection["products"])
       : null,
+    productSkus: null,
+    featuredProductSku: null,
   };
 }
 

@@ -40,9 +40,15 @@ export type FeaturedCollectionSection = {
   sectionTitle?: string | null;
   description?: string | null;
   isActive?: boolean | null;
+  slug?: string | null;
   cta?: CategoryNavigationCta | null;
   label?: { label?: string | null } | null;
+  /** Legacy CMS product image cards (pre-SKU). */
   products?: FeaturedCollectionImage[] | null;
+  /** Magento SKUs from Strapi `productSkus` (CMS order). */
+  productSkus?: string[] | null;
+  /** Preferred default/active Magento SKU. */
+  featuredProductSku?: string | null;
   backgroundImage?: StrapiMedia | null;
   primaryImage?: CategoryNavigationImage | StrapiMedia | null;
   image?: CategoryNavigationImage | StrapiMedia | null;

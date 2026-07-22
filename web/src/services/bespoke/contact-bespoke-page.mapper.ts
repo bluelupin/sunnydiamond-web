@@ -1,12 +1,10 @@
-import {
-  bespokeMediaFallbacks,
-  bespokeUiDefaults,
-} from "./bespoke-fallbacks";
+import { bespokeUiDefaults } from "./bespoke-fallbacks";
 import {
   extractStrapiImage,
   resolveCmsAltText,
   resolveCmsMediaUrl,
 } from "@/shared/utils/strapiMedia";
+import type { StrapiImagePayload } from "@/types/strapiMedia";
 import type {
   NormalizedBespokeCustomDesignForm,
   NormalizedBespokeFeaturedSlide,
@@ -103,11 +101,16 @@ const mapHero = (hero?: StrapiBespokeHero | null): NormalizedBespokeHero | null 
   const title = cleanText(hero.title);
   if (!title) return null;
 
-  const image = mapResponsiveImage(hero.backgroundImage, bespokeMediaFallbacks.hero);
+  const image = mapResponsiveImage(hero.backgroundImage);
   if (!image) return null;
 
   return { title, image };
 };
+
+const resolveVisionCardVideoUrl = (card: {
+  video?: { heroVideo?: unknown } | null;
+}): string | undefined =>
+  resolveCmsMediaUrl(card.video?.heroVideo) ?? resolveCmsMediaUrl(card.video);
 
 const mapStory = (section?: StrapiBespokeVisionSection | null): NormalizedBespokeStory | null => {
   if (!section || section.showField === false) return null;
@@ -130,18 +133,18 @@ const mapStory = (section?: StrapiBespokeVisionSection | null): NormalizedBespok
         resolveCmsMediaUrl(card.image?.mobileImage) ??
         resolveCmsMediaUrl(card.media);
 
-      const mediaFallback = bespokeMediaFallbacks.storySteps[index] ?? bespokeMediaFallbacks.storySteps[0];
+      if (!cmsImage) return null;
 
       return {
         number: cleanText(card.stepLabel) ?? String(index + 1).padStart(2, "0"),
         title: stepTitle,
         description: cleanText(card.description) ?? "",
         image: {
-          src: cmsImage ?? mediaFallback.src,
+          src: cmsImage,
           alt:
             cleanText(card.image?.altText) ??
             resolveCmsAltText(card.media) ??
-            mediaFallback.alt,
+            stepTitle,
         },
       };
     })
@@ -152,7 +155,8 @@ const mapStory = (section?: StrapiBespokeVisionSection | null): NormalizedBespok
   const videoSrc =
     resolveCmsMediaUrl(section.video) ??
     resolveCmsMediaUrl(section.videoUrl?.heroVideo) ??
-    bespokeMediaFallbacks.storyVideo;
+    cmsCards.map(resolveVisionCardVideoUrl).find((src): src is string => Boolean(src)) ??
+    "";
 
   return {
     title,
@@ -166,6 +170,7 @@ const mapStory = (section?: StrapiBespokeVisionSection | null): NormalizedBespok
 const mapFeaturedCardToSlide = (
   card: StrapiBespokeFeaturedStoryCard,
   index: number,
+  galleryOverride?: StrapiImagePayload[] | null,
 ): NormalizedBespokeFeaturedSlide | null => {
   if (card.isActive === false) return null;
 
@@ -181,7 +186,12 @@ const mapFeaturedCardToSlide = (
   const coverAlt =
     resolveCmsAltText(card.coverImage) ?? cleanText(card.image?.altText) ?? title;
 
-  const galleryImages = (card.gallery ?? [])
+  // Prefer card.gallery; when Strapi omits it on featuredStoriesSection.cards,
+  // reuse gallery from the matching pastCreations entry (same featured-story).
+  const gallerySource =
+    card.gallery && card.gallery.length > 0 ? card.gallery : galleryOverride;
+
+  const galleryImages = (gallerySource ?? [])
     .map((item) => {
       const src = resolveCmsMediaUrl(item);
       if (!src) return null;
@@ -198,8 +208,28 @@ const mapFeaturedCardToSlide = (
   };
 };
 
+const resolvePastCreationGallery = (
+  card: StrapiBespokeFeaturedStoryCard,
+  pastCreations?: StrapiBespokePastCreation[] | null,
+): StrapiImagePayload[] | null => {
+  if (!pastCreations?.length) return null;
+
+  const documentId = cleanText(card.documentId);
+  const slug = cleanText(card.slug);
+  const title = cleanText(card.title)?.toLowerCase();
+
+  const match =
+    pastCreations.find((item) => documentId && cleanText(item.documentId) === documentId) ??
+    pastCreations.find((item) => slug && cleanText(item.slug) === slug) ??
+    pastCreations.find((item) => title && cleanText(item.title)?.toLowerCase() === title);
+
+  const gallery = match?.gallery;
+  return gallery && gallery.length > 0 ? gallery : null;
+};
+
 const mapFeaturedStories = (
   section?: StrapiBespokeFeaturedStoriesSection | null,
+  pastCreations?: StrapiBespokePastCreation[] | null,
 ): NormalizedBespokeFeaturedStories | null => {
   if (!section || section.showField === false) return null;
 
@@ -207,7 +237,9 @@ const mapFeaturedStories = (
   const slides = (section.cards ?? [])
     .slice()
     .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
-    .map(mapFeaturedCardToSlide)
+    .map((card, index) =>
+      mapFeaturedCardToSlide(card, index, resolvePastCreationGallery(card, pastCreations)),
+    )
     .filter((slide): slide is NormalizedBespokeFeaturedSlide => slide != null);
 
   const backgroundImage = mapResponsiveImage(section.backgroundImage);
@@ -317,7 +349,7 @@ const mapGetInTouch = (
   const title = cleanText(section.title);
   if (!title) return null;
 
-  const image = mapResponsiveImage(section.backgroundImage, bespokeMediaFallbacks.interested);
+  const image = mapResponsiveImage(section.backgroundImage);
   if (!image) return null;
 
   return {
@@ -325,7 +357,7 @@ const mapGetInTouch = (
     title,
     description: cleanText(section.description) ?? "",
     ctaLabel: cleanText(section.cta?.label) ?? "",
-    ctaHref: cleanText(section.cta?.url) ?? "/contact",
+    ctaHref: cleanText(section.cta?.url) ?? "",
     image,
   };
 };
@@ -367,7 +399,7 @@ export function mapContactBespokePage(
   return {
     hero: mapHero(raw.hero),
     story: mapStory(raw.visionSection),
-    featuredStories: mapFeaturedStories(raw.featuredStoriesSection),
+    featuredStories: mapFeaturedStories(raw.featuredStoriesSection, raw.pastCreations),
     pastCreations: mapPastCreations(raw.pastCreations),
     guarantees: mapGuarantees(raw.serviceHighlights),
     interested: mapGetInTouch(raw.getInTouchSection),

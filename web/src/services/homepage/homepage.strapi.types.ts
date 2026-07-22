@@ -81,6 +81,27 @@ export type StrapiCategoryCard = {
   cta?: StrapiHomepageCta | null;
 };
 
+export type StrapiProductSkuItem = {
+  id?: number;
+  sku?: string | null;
+};
+
+export type StrapiEditorialCollection = {
+  id?: number;
+  documentId?: string;
+  collectionName?: string | null;
+  title?: string | null;
+  slug?: string | null;
+  description?: string | null;
+  featuredProductSku?: string | null;
+  sortOrder?: number | null;
+  isActive?: boolean | null;
+  cta?: StrapiHomepageCta | null;
+  productSkus?: StrapiProductSkuItem[] | null;
+  backgroundImage?: StrapiResponsiveImageBlock | null;
+};
+
+/** Legacy flat featured-collection block + new collection-showcase shape. */
 export type StrapiFeaturedCollection = {
   id?: number;
   sectionTitle?: string | null;
@@ -94,6 +115,9 @@ export type StrapiFeaturedCollection = {
   backgroundImage?: StrapiResponsiveImageBlock | null;
   image?: StrapiResponsiveImageBlock | null;
   products?: unknown[] | null;
+  /** New showcase wrapper */
+  eyebrow?: string | null;
+  collections?: StrapiEditorialCollection[] | null;
 };
 
 export type StrapiFeaturedProductsBlock = {

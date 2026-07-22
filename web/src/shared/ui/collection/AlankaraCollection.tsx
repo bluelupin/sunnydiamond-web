@@ -289,25 +289,36 @@ function CollectionHeroPanel({
 function ProductCarouselPanel({
   products,
   defaultProductCtaLabel,
+  defaultActiveIndex = ALANKARA_DEFAULT_ACTIVE_INDEX,
   variant,
   imagePriority = false,
 }: {
   products: AlankaraCollectionProduct[];
   defaultProductCtaLabel: string;
+  defaultActiveIndex?: number;
   variant: "desktop" | "mobile";
   imagePriority?: boolean;
 }) {
   const isMobile = variant === "mobile";
-  const [activeIndex, setActiveIndex] = useState(ALANKARA_DEFAULT_ACTIVE_INDEX);
+  const total = products.length;
+  const clampedDefault = Math.min(
+    Math.max(0, defaultActiveIndex),
+    Math.max(0, total - 1),
+  );
+  const [activeIndex, setActiveIndex] = useState(clampedDefault);
   const trackRef = useRef<HTMLDivElement>(null);
   const dragState = useRef({ active: false, startX: 0, deltaX: 0, pointerId: 0 });
   const [dragOffset, setDragOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
 
-  const total = products.length;
   const canGoPrev = activeIndex > 0;
   const canGoNext = activeIndex < total - 1;
+
+  useEffect(() => {
+    const next = Math.min(Math.max(0, defaultActiveIndex), Math.max(0, total - 1));
+    setActiveIndex(next);
+  }, [defaultActiveIndex, total]);
 
   useEffect(() => {
     if (activeIndex >= total) {
@@ -581,6 +592,7 @@ export function AlankaraCollection({
   collectionImageMobile,
   collectionCta,
   products,
+  defaultActiveIndex = ALANKARA_DEFAULT_ACTIVE_INDEX,
   defaultProductCtaLabel = DEFAULT_PRODUCT_CTA,
   priority = false,
   className,
@@ -621,6 +633,7 @@ export function AlankaraCollection({
           <ProductCarouselPanel
             products={products}
             defaultProductCtaLabel={defaultProductCtaLabel}
+            defaultActiveIndex={defaultActiveIndex}
             variant="desktop"
             imagePriority={priority}
           />
@@ -644,6 +657,7 @@ export function AlankaraCollection({
           <ProductCarouselPanel
             products={products}
             defaultProductCtaLabel={defaultProductCtaLabel}
+            defaultActiveIndex={defaultActiveIndex}
             variant="mobile"
             imagePriority={priority}
           />

@@ -1,36 +1,7 @@
 /**
- * Local media assets only — used when Strapi returns text/structure but nested
- * media is missing (known populate gaps). No marketing copy lives here.
+ * UI chrome defaults for fields not returned / not modeled by Strapi.
+ * Media for hero, get-in-touch, and vision steps comes from CMS only.
  */
-export const bespokeMediaFallbacks = {
-  hero: {
-    desktop: "/images/bespoke/hero.jpg",
-    mobile: "/images/bespoke/hero.jpg",
-    alt: "Bespoke jewellery",
-  },
-  interested: {
-    desktop: "/images/bespoke/interested.jpg",
-    mobile: "/images/bespoke/interested.jpg",
-    alt: "Bespoke jewellery",
-  },
-  storyVideo: "/videos/Bespoke-story-video.mp4",
-  storySteps: [
-    {
-      src: "/images/bespoke/story-step-01.jpg",
-      alt: "Bespoke design process",
-    },
-    {
-      src: "/images/bespoke/story-step-02.jpg",
-      alt: "Bespoke craftsmanship",
-    },
-    {
-      src: "/images/bespoke/story-step-03.jpg",
-      alt: "Finished bespoke jewellery",
-    },
-  ],
-} as const;
-
-/** UI chrome not modeled in Strapi customDesignForm / featured CTAs. */
 export const bespokeUiDefaults = {
   pastCreationsTitle: "Past Creations",
   secondaryCtaLabel: "See Past Creations",

@@ -1,10 +1,15 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
 import { AlankaraCollection } from "@/shared/ui/collection/AlankaraCollection";
 import { isSectionActive } from "@/shared/utils/cmsSection";
-import { resolveAlankaraCollectionSection } from "@/shared/utils/resolveAlankaraCollectionSection";
+import {
+  mapMagentoProductsToAlankaraCollection,
+  resolveAlankaraCollectionSection,
+} from "@/shared/utils/resolveAlankaraCollectionSection";
+import { getMagentoProductsBySkus } from "@/services/magento/products/products.service";
+import type { AlankaraCollectionProduct } from "@/shared/ui/collection/alankaraCollection.types";
 
 interface FeaturedCollectionSectionProps {
   id?: string;
@@ -29,11 +34,58 @@ const FeaturedCollectionSection = ({
     [descriptionProp, featuredCollectionData],
   );
 
+  const productSkus = collectionProps.productSkus;
+  const featuredProductSku = collectionProps.featuredProductSku;
+  const skuKey = productSkus.join("|");
+
+  const [magentoProducts, setMagentoProducts] = useState<AlankaraCollectionProduct[] | null>(
+    null,
+  );
+  const [defaultActiveIndex, setDefaultActiveIndex] = useState(
+    collectionProps.defaultActiveIndex,
+  );
+  const [isMagentoLoading, setIsMagentoLoading] = useState(productSkus.length > 0);
+
+  useEffect(() => {
+    if (productSkus.length === 0) {
+      setMagentoProducts(null);
+      setDefaultActiveIndex(collectionProps.defaultActiveIndex);
+      setIsMagentoLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const skus = skuKey.split("|").filter(Boolean);
+    setIsMagentoLoading(true);
+
+    void getMagentoProductsBySkus(skus, controller.signal)
+      .then((items) => {
+        if (controller.signal.aborted) return;
+        const mapped = mapMagentoProductsToAlankaraCollection(items, skus, {
+          featuredProductSku,
+        });
+        setMagentoProducts(mapped.products.length > 0 ? mapped.products : null);
+        setDefaultActiveIndex(mapped.defaultActiveIndex);
+      })
+      .catch(() => {
+        if (controller.signal.aborted) return;
+        setMagentoProducts(null);
+        setDefaultActiveIndex(collectionProps.defaultActiveIndex);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setIsMagentoLoading(false);
+        }
+      });
+
+    return () => controller.abort();
+  }, [skuKey, featuredProductSku, collectionProps.defaultActiveIndex]);
+
   if (!isSectionActive(collectionProps.isActive)) {
     return null;
   }
 
-  if (isShoppingLoading) {
+  if (isShoppingLoading || (productSkus.length > 0 && isMagentoLoading && !magentoProducts)) {
     return (
       <section
         id={id}
@@ -56,12 +108,22 @@ const FeaturedCollectionSection = ({
     );
   }
 
+  const {
+    productSkus: _skus,
+    featuredProductSku: _featured,
+    defaultActiveIndex: _default,
+    products: fallbackProducts,
+    ...alankaraProps
+  } = collectionProps;
+
   return (
     <AlankaraCollection
       id={id}
       sectionHeading={sectionHeading}
       defaultProductCtaLabel="Shop Now"
-      {...collectionProps}
+      defaultActiveIndex={defaultActiveIndex}
+      {...alankaraProps}
+      products={magentoProducts ?? fallbackProducts}
     />
   );
 };
