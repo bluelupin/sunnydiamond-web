@@ -5,7 +5,6 @@ import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import { cn } from "@/shared/utils/cn";
 import type { NormalizedAboutLegacy } from "@/services/about/about-page.types";
-import { aboutSince1997GalleryDimensions } from "../data/content";
 import { useSince1997HorizontalScroll } from "../hooks/useSince1997HorizontalScroll";
 import Reveal from "@/shared/Animation/Reveal";
 
@@ -16,8 +15,8 @@ type GalleryImageProps = {
   mobileUrl: string;
   alt: string;
   caption?: string;
-  imageWidth: number;
-  imageHeight: number;
+  imageWidth?: number;
+  imageHeight?: number;
   sizes: string;
   figureClassName?: string;
   frameClassName?: string;
@@ -68,16 +67,11 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
   const sectionRef = useRef<HTMLElement>(null);
 
   const [founder, event, attending] = gallery;
-  const hasHorizontalGallery = Boolean(event && attending);
+  const hasHorizontalGallery = Boolean(founder && event && attending);
 
   useSince1997HorizontalScroll(sectionRef, hasHorizontalGallery);
 
-  const founderWidth = founder.image.width ?? aboutSince1997GalleryDimensions[0]?.width ?? 549;
-  const founderHeight = founder.image.height ?? aboutSince1997GalleryDimensions[0]?.height ?? 600;
-  const eventWidth = event?.image.width ?? aboutSince1997GalleryDimensions[1]?.width ?? 320;
-  const eventHeight = event?.image.height ?? aboutSince1997GalleryDimensions[1]?.height ?? 417;
-  const attendingWidth = attending?.image.width ?? aboutSince1997GalleryDimensions[2]?.width ?? 463;
-  const attendingHeight = attending?.image.height ?? aboutSince1997GalleryDimensions[2]?.height ?? 600;
+  if (!founder) return null;
 
   return (
     <section
@@ -87,7 +81,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
     >
       {/* Desktop — sticky viewport + scroll-driven horizontal slide */}
       <div data-since1997-mode="desktop" className="hidden md:block">
-        <div className="sticky top-0 flex flex-col overflow-hidden bg-white">
+        <div className="sticky top-0 flex flex-col overflow-x-hidden bg-white">
           <PageContainer className="shrink-0 2xl:pb-11 lg:pb-10 pb-8">
             <Reveal as="h2" direction="up"
               id="about-since-1997-title"
@@ -97,10 +91,10 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
           </PageContainer>
           <PageContainer className="pb-100 pr-0">
             <Reveal direction="up" className="flex min-h-0 flex-1 flex-col">
-              <div data-since1997-viewport className="min-h-0 flex-1 overflow-hidden w-full">
+              <div data-since1997-viewport className="min-h-0 flex-1 w-full overflow-x-hidden overflow-y-visible">
                 <div
                   data-since1997-track
-                  className="flex h-full items-center xl:gap-20 gap-16 will-change-transform motion-reduce:transform-none"
+                  className="flex h-full items-start xl:gap-20 gap-16 will-change-transform motion-reduce:transform-none"
                 >
                   <article className="flex shrink-0 items-center lg:gap-8 gap-10">
                     <GalleryImage
@@ -108,8 +102,8 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                       mobileUrl={founder.image.mobileUrl}
                       alt={founder.image.alt}
                       caption={founder.caption}
-                      imageWidth={founderWidth}
-                      imageHeight={founderHeight}
+                      imageWidth={founder.image.width}
+                      imageHeight={founder.image.height}
                       sizes="549px"
                       figureClassName="w-[549px]"
                       frameClassName="h-600 w-[549px]"
@@ -129,8 +123,8 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                         mobileUrl={event!.image.mobileUrl}
                         alt={event!.image.alt}
                         caption={event!.caption}
-                        imageWidth={eventWidth}
-                        imageHeight={eventHeight}
+                        imageWidth={event!.image.width}
+                        imageHeight={event!.image.height}
                         sizes="320px"
                         figureClassName="w-[320px]"
                         frameClassName="h-[417px]"
@@ -141,8 +135,8 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                         mobileUrl={attending!.image.mobileUrl}
                         alt={attending!.image.alt}
                         caption={attending!.caption}
-                        imageWidth={attendingWidth}
-                        imageHeight={attendingHeight}
+                        imageWidth={attending!.image.width}
+                        imageHeight={attending!.image.height}
                         sizes="463px"
                         figureClassName="w-[463px]"
                         frameClassName="h-600"
@@ -186,8 +180,8 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                 mobileUrl={founder.image.mobileUrl}
                 alt={founder.image.alt}
                 caption={founder.caption}
-                imageWidth={founderWidth}
-                imageHeight={founderHeight}
+                imageWidth={founder.image.width}
+                imageHeight={founder.image.height}
                 sizes="549px"
                 figureClassName="w-full"
                 frameClassName="h-600 w-full"
@@ -202,18 +196,18 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
           <Reveal direction="up" data-since1997-scroll-zone className="relative">
             <div className="sticky sm:top-0 top-[120px] bg-white pb-16 md:pb-20">
               <PageContainer className="!pr-0 pl-5 pt-0">
-                <div data-since1997-viewport className="overflow-hidden">
+                <div data-since1997-viewport className="overflow-x-hidden overflow-y-visible">
                   <div
                     data-since1997-track
-                    className="flex w-full shrink-0 items-center gap-3 will-change-transform motion-reduce:transform-none sm:gap-12"
+                    className="flex w-full shrink-0 items-start gap-3 will-change-transform motion-reduce:transform-none sm:gap-12"
                   >
                     <GalleryImage
                       desktopUrl={event!.image.desktopUrl}
                       mobileUrl={event!.image.mobileUrl}
                       alt={event!.image.alt}
                       caption={event!.caption}
-                      imageWidth={eventWidth}
-                      imageHeight={eventHeight}
+                      imageWidth={event!.image.width}
+                      imageHeight={event!.image.height}
                       sizes="320px"
                       figureClassName="w-[256px] min-w-[256px] sm:w-[550px] lg:w-[400px] lg:min-w-[400px]"
                       frameClassName="lg:h-[240px] md:h-[500px] sm:h-[400px] h-[240px]"
@@ -224,8 +218,8 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                       mobileUrl={attending!.image.mobileUrl}
                       alt={attending!.image.alt}
                       caption={attending!.caption}
-                      imageWidth={attendingWidth}
-                      imageHeight={attendingHeight}
+                      imageWidth={attending!.image.width}
+                      imageHeight={attending!.image.height}
                       sizes="463px"
                       figureClassName="w-[256px] min-w-[256px] sm:w-[550px] lg:w-[400px] lg:min-w-[400px]"
                       frameClassName="lg:h-[277px] md:h-[560px] sm:h-[520px] h-[277px]"
