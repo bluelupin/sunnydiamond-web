@@ -5,10 +5,15 @@ import Image from "next/image";
 import Reveal from "@/shared/Animation/Reveal";
 import { cn } from "@/shared/utils/cn";
 import { useSince1997HorizontalScroll } from "@/features/about/hooks/useSince1997HorizontalScroll";
-import { bespokePageContent, bespokeStoryFigmaSpec } from "@/features/bespoke/data/content";
+import { bespokeStoryFigmaSpec } from "@/features/bespoke/data/content";
 import BespokeShareVisionPanel from "@/features/bespoke/components/BespokeShareVisionPanel";
+import type {
+  NormalizedBespokeCustomDesignForm,
+  NormalizedBespokeStory,
+  NormalizedBespokeStoryStep,
+} from "@/services/bespoke/contact-bespoke-page.types";
 
-type StoryStep = (typeof bespokePageContent.story.steps)[number];
+type StoryStep = NormalizedBespokeStoryStep;
 
 type BespokeStoryStepPanelProps = {
   step: StoryStep;
@@ -132,9 +137,13 @@ const BespokeStoryStepPanel = ({
   );
 };
 
-const BespokeStorySection = () => {
+type BespokeStorySectionProps = {
+  story: NormalizedBespokeStory;
+  customDesignForm: NormalizedBespokeCustomDesignForm | null;
+};
+
+const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionProps) => {
   const sectionRef = useRef<HTMLElement>(null);
-  const { story } = bespokePageContent;
   const hasHorizontalGallery = story.steps.length > 1;
   const [shareVisionOpen, setShareVisionOpen] = useState(false);
 
@@ -207,7 +216,7 @@ const BespokeStorySection = () => {
                     key={step.number}
                     step={step}
                     layout="desktop"
-                    videoSrc={story.video.src}
+                    videoSrc={story.videoSrc}
                     isFirstSlide={index === 0}
                     isLastSlide={index === story.steps.length - 1}
                   />
@@ -223,21 +232,29 @@ const BespokeStorySection = () => {
       {/* Mobile — static vertical stack, no scroll animation (Figma 2083:18264) */}
       <div className="md:hidden flex flex-col gap-12">
         {story.steps.map((step) => (
-          <BespokeStoryStepPanel key={step.number} step={step} layout="mobile" videoSrc={story.video.src} />
+          <BespokeStoryStepPanel key={step.number} step={step} layout="mobile" videoSrc={story.videoSrc} />
         ))}
       </div>
       <Reveal direction="up" className="flex justify-center">
         <div className="md:mt-12 mt-4 flex justify-center md:w-[284px] mx-auto w-full">
-          <button
-            type="button"
-            onClick={handleShareVisionOpen}
-            className="btn-dark-slide inline-flex items-center justify-center bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white w-full h-14 border border-darkblack"
-          >
-            <span className="relative z-10">{story.ctaLabel}</span>
-          </button>
+          {story.ctaLabel ? (
+            <button
+              type="button"
+              onClick={handleShareVisionOpen}
+              className="btn-dark-slide inline-flex items-center justify-center bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white w-full h-14 border border-darkblack"
+            >
+              <span className="relative z-10">{story.ctaLabel}</span>
+            </button>
+          ) : null}
         </div>
       </Reveal>
-      <BespokeShareVisionPanel open={shareVisionOpen} onClose={handleShareVisionClose} />
+      {customDesignForm ? (
+        <BespokeShareVisionPanel
+          open={shareVisionOpen}
+          onClose={handleShareVisionClose}
+          form={customDesignForm}
+        />
+      ) : null}
     </section>
   );
 };

@@ -2,19 +2,22 @@
 
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import Reveal from "@/shared/Animation/Reveal";
-import { bespokePageContent, bespokePageFigmaSpec } from "@/features/bespoke/data/content";
+import { bespokePageFigmaSpec } from "@/features/bespoke/data/content";
+import type { NormalizedBespokeHero } from "@/services/bespoke/contact-bespoke-page.types";
 
-const BespokeHeroSection = () => {
-  const { hero } = bespokePageContent;
+type BespokeHeroSectionProps = {
+  hero: NormalizedBespokeHero;
+};
 
+const BespokeHeroSection = ({ hero }: BespokeHeroSectionProps) => {
   return (
     <section
       aria-labelledby="bespoke-hero-title"
       className="relative h-240 w-full overflow-hidden md:h-320"
     >
       <ResponsiveImage
-        desktopSrc={hero.image.desktop}
-        mobileSrc={hero.image.mobile}
+        desktopSrc={hero.image.desktopUrl}
+        mobileSrc={hero.image.mobileUrl}
         alt={hero.image.alt}
         width={1440}
         height={bespokePageFigmaSpec.heroDesktopHeight}
@@ -23,10 +26,7 @@ const BespokeHeroSection = () => {
         className="absolute inset-0 size-full object-cover object-center"
       />
 
-      <div
-        aria-hidden
-        className="absolute inset-0 bg-[#00000066]"
-      />
+      <div aria-hidden className="absolute inset-0 bg-[#00000066]" />
 
       <Reveal
         as="h1"

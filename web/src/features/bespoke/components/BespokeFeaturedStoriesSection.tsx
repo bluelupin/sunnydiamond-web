@@ -15,16 +15,20 @@ import CarouselChevronRight from "@/assets/Icons/CarouselChevronRight";
 import { cn } from "@/shared/utils/cn";
 import {
   bespokeFeaturedStoriesFigmaSpec,
-  bespokePageContent,
   resolvePastCreationStory,
   type BespokePastCreationImage,
 } from "@/features/bespoke/data/content";
 import BespokeFeaturedStoryModal from "@/features/bespoke/components/BespokeFeaturedStoryModal";
 import BespokePastCreationsModal from "@/features/bespoke/components/BespokePastCreationsModal";
-import Reveal from "@/shared/Animation/Reveal";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
+import type {
+  NormalizedBespokeFeaturedSlide,
+  NormalizedBespokeFeaturedStories,
+  NormalizedBespokePastCreations,
+} from "@/services/bespoke/contact-bespoke-page.types";
+import { bespokeUiDefaults } from "@/services/bespoke/bespoke-fallbacks";
 
-type FeaturedSlide = (typeof bespokePageContent.featuredStories.slides)[number];
+type FeaturedSlide = NormalizedBespokeFeaturedSlide;
 
 type FeaturedStoryModalSlide = {
   src: string;
@@ -217,11 +221,19 @@ const FeaturedGalleryImage = ({
 type FeaturedGalleryBackgroundProps = {
   slides: readonly FeaturedSlide[];
   activeIndex: FeaturedSlideIndex;
+  backgroundImage?: { desktopUrl: string; mobileUrl: string; alt: string } | null;
   compact?: boolean;
 };
 
-const FeaturedGalleryBackground = ({ slides, activeIndex, compact }: FeaturedGalleryBackgroundProps) => {
+const FeaturedGalleryBackground = ({
+  slides,
+  activeIndex,
+  backgroundImage,
+  compact,
+}: FeaturedGalleryBackgroundProps) => {
   const activeSlide = slides[activeIndex];
+  const sectionBgSrc = backgroundImage?.desktopUrl || backgroundImage?.mobileUrl || null;
+  const srAlt = backgroundImage?.alt || activeSlide?.alt || "";
 
   return (
     <div
@@ -230,22 +242,37 @@ const FeaturedGalleryBackground = ({ slides, activeIndex, compact }: FeaturedGal
         compact ? "" : "left-1/2 top-0 md:h-[559px] h-[540px] w-[1920px] -translate-x-1/2",
       )}
     >
-      {slides.map((slide, index) => (
+      {sectionBgSrc ? (
         <Image
-          key={slide.src}
-          src={slide.src}
+          src={sectionBgSrc}
           alt=""
           aria-hidden
           width={1920}
           height={2074}
           sizes={compact ? "100vw" : "1920px"}
           className={cn(
-            "absolute left-1/2 top-0 max-w-none -translate-x-1/2 object-cover object-top transition-opacity duration-[550ms] ease-in-out",
+            "absolute left-1/2 top-0 max-w-none -translate-x-1/2 object-cover object-top",
             compact ? "inset-0 size-full" : "h-[2074px] w-[1920px]",
-            index === activeIndex ? "opacity-100" : "opacity-0",
           )}
         />
-      ))}
+      ) : (
+        slides.map((slide, index) => (
+          <Image
+            key={slide.src}
+            src={slide.src}
+            alt=""
+            aria-hidden
+            width={1920}
+            height={2074}
+            sizes={compact ? "100vw" : "1920px"}
+            className={cn(
+              "absolute left-1/2 top-0 max-w-none -translate-x-1/2 object-cover object-top transition-opacity duration-[550ms] ease-in-out",
+              compact ? "inset-0 size-full" : "h-[2074px] w-[1920px]",
+              index === activeIndex ? "opacity-100" : "opacity-0",
+            )}
+          />
+        ))
+      )}
       <div
         aria-hidden
         className="absolute inset-0"
@@ -261,7 +288,7 @@ const FeaturedGalleryBackground = ({ slides, activeIndex, compact }: FeaturedGal
           style={{ backgroundImage: spec.bottomGradient }}
         />
       ) : null}
-      <span className="sr-only">{activeSlide.alt}</span>
+      {srAlt ? <span className="sr-only">{srAlt}</span> : null}
     </div>
   );
 };
@@ -591,6 +618,8 @@ type FeaturedStoriesLayoutProps = {
   primaryCtaLabel: string;
   secondaryCtaLabel: string;
   onSecondaryCtaClick: () => void;
+  backgroundImage?: { desktopUrl: string; mobileUrl: string; alt: string } | null;
+  showHero: boolean;
 };
 
 const FeaturedStoriesLayout = ({
@@ -605,44 +634,77 @@ const FeaturedStoriesLayout = ({
   primaryCtaLabel,
   secondaryCtaLabel,
   onSecondaryCtaClick,
+  backgroundImage,
+  showHero,
 }: FeaturedStoriesLayoutProps) => {
   return (
     <section aria-labelledby="bespoke-featured-stories-title" className=" bg-gray200">
-      <div className="relative md:h-[630px] h-[609px] w-full overflow-hidden">
-        <FeaturedGalleryBackground slides={slides} activeIndex={selectedIndex} />
-        <h2
-          id="bespoke-featured-stories-title"
-          className="absolute left-1/2 md:top-[177px] top-[150px] z-10 w-[326px] -translate-x-1/2 whitespace-nowrap text-center font-larken md:text-5xl text-32 font-light leading-110 text-white"
-        >
-          {title}
-        </h2>
-        <div className="absolute left-1/2 md:top-[270px] top-[209px] z-10 -translate-x-1/2">
-          <FeaturedGallerySlider
+      {showHero ? (
+        <div className="relative md:h-[630px] h-[609px] w-full overflow-hidden">
+          <FeaturedGalleryBackground
             slides={slides}
-            activeIndex={activeIndex}
-            selectedIndex={selectedIndex}
-            onActiveIndexChange={onActiveIndexChange}
-            onSlideStart={onSlideStart}
-            onCenterOpen={onCenterOpen}
+            activeIndex={selectedIndex}
+            backgroundImage={backgroundImage}
           />
+          {title ? (
+            <h2
+              id="bespoke-featured-stories-title"
+              className="absolute left-1/2 md:top-[177px] top-[150px] z-10 w-[326px] -translate-x-1/2 whitespace-nowrap text-center font-larken md:text-5xl text-32 font-light leading-110 text-white"
+            >
+              {title}
+            </h2>
+          ) : null}
+          {slides.length > 0 ? (
+            <div className="absolute left-1/2 md:top-[270px] top-[209px] z-10 -translate-x-1/2">
+              <FeaturedGallerySlider
+                slides={slides}
+                activeIndex={activeIndex}
+                selectedIndex={selectedIndex}
+                onActiveIndexChange={onActiveIndexChange}
+                onSlideStart={onSlideStart}
+                onCenterOpen={onCenterOpen}
+              />
+            </div>
+          ) : null}
         </div>
-      </div>
+      ) : title ? (
+        <div className="px-4 pt-16 pb-6 text-center">
+          <h2
+            id="bespoke-featured-stories-title"
+            className="font-larken md:text-5xl text-32 font-light leading-110 text-darkblack"
+          >
+            {title}
+          </h2>
+        </div>
+      ) : null}
       <div className="flex flex-col items-center gap-6 px-4 md:pt-10 pt-6 md:pb-10 pb-16">
-        <Link
-          href={primaryCtaHref}
-          className="btn-border-slide inline-flex h-14 w-[284px] items-center justify-center border border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
-        >
-          <span className="relative z-10">{primaryCtaLabel}</span>
-        </Link>
-        <DetailTextLink onClick={onSecondaryCtaClick} className="uppercase">{secondaryCtaLabel}</DetailTextLink>
+        {primaryCtaLabel ? (
+          <Link
+            href={primaryCtaHref}
+            className="btn-border-slide inline-flex h-14 w-[284px] items-center justify-center border border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
+          >
+            <span className="relative z-10">{primaryCtaLabel}</span>
+          </Link>
+        ) : null}
+        {secondaryCtaLabel ? (
+          <DetailTextLink onClick={onSecondaryCtaClick} className="uppercase">
+            {secondaryCtaLabel}
+          </DetailTextLink>
+        ) : null}
       </div>
     </section>
   );
 };
 
-const BespokeFeaturedStoriesSection = () => {
-  const { featuredStories, pastCreations } = bespokePageContent;
-  const { slides, defaultSlideIndex } = featuredStories;
+const BespokeFeaturedStoriesSection = ({
+  featuredStories,
+  pastCreations,
+}: {
+  featuredStories: NormalizedBespokeFeaturedStories | null;
+  pastCreations: NormalizedBespokePastCreations | null;
+}) => {
+  const slides = featuredStories?.slides ?? [];
+  const defaultSlideIndex = featuredStories?.defaultSlideIndex ?? 0;
   const [activeIndex, setActiveIndex] = useState<number>(defaultSlideIndex);
   const [selectedIndex, setSelectedIndex] = useState<number>(defaultSlideIndex);
   const [modalOpen, setModalOpen] = useState(false);
@@ -658,10 +720,11 @@ const BespokeFeaturedStoriesSection = () => {
   }, []);
 
   const handleCenterOpen = useCallback(() => {
+    if (slides.length === 0) return;
     setModalSlideOverride(null);
     setModalContext({ slideIndex: selectedIndex, imageIndex: 0 });
     setModalOpen(true);
-  }, [selectedIndex]);
+  }, [selectedIndex, slides.length]);
 
   const handleModalClose = useCallback(() => {
     setModalOpen(false);
@@ -679,6 +742,19 @@ const BespokeFeaturedStoriesSection = () => {
 
   const handlePastCreationImageClick = useCallback(
     (image: BespokePastCreationImage) => {
+      if (slides.length === 0) {
+        setModalSlideOverride({
+          src: image.src,
+          alt: image.alt,
+          modalTitle: pastCreations?.title || bespokeUiDefaults.pastCreationsTitle,
+          modalDescription: "",
+          modalImages: [{ src: image.src, alt: image.alt }],
+        });
+        setModalContext({ slideIndex: 0, imageIndex: 0 });
+        setModalOpen(true);
+        return;
+      }
+
       const resolved = resolvePastCreationStory(slides, image.src, defaultSlideIndex);
       const baseSlide = slides[resolved.slideIndex];
       const matchedIndex = baseSlide.modalImages.findIndex((item) => item.src === image.src);
@@ -696,7 +772,7 @@ const BespokeFeaturedStoriesSection = () => {
 
       setModalOpen(true);
     },
-    [defaultSlideIndex, slides],
+    [defaultSlideIndex, pastCreations?.title, slides],
   );
 
   const modalSlide: FeaturedStoryModalSlide | null =
@@ -709,11 +785,16 @@ const BespokeFeaturedStoriesSection = () => {
     selectedIndex,
     onActiveIndexChange: handleActiveIndexChange,
     onCenterOpen: handleCenterOpen,
-    title: featuredStories.title,
-    primaryCtaHref: featuredStories.primaryCtaHref,
-    primaryCtaLabel: featuredStories.primaryCtaLabel,
-    secondaryCtaLabel: featuredStories.secondaryCtaLabel,
+    title: featuredStories?.title ?? "",
+    primaryCtaHref: featuredStories?.primaryCtaHref ?? "/featured-stories",
+    primaryCtaLabel: featuredStories?.primaryCtaLabel ?? "",
+    secondaryCtaLabel:
+      pastCreations && pastCreations.images.length > 0
+        ? featuredStories?.secondaryCtaLabel || bespokeUiDefaults.secondaryCtaLabel
+        : "",
     onSecondaryCtaClick: handlePastCreationsOpen,
+    backgroundImage: featuredStories?.backgroundImage ?? null,
+    showHero: slides.length > 0 || Boolean(featuredStories?.backgroundImage),
   };
 
   return (
@@ -724,17 +805,19 @@ const BespokeFeaturedStoriesSection = () => {
         slide={modalSlide}
         initialImageIndex={modalContext?.imageIndex ?? 0}
         elevated={pastCreationsOpen}
-        modalCtaLabel={featuredStories.modalCtaLabel}
-        modalCtaHref={featuredStories.modalCtaHref}
+        modalCtaLabel={featuredStories?.modalCtaLabel ?? bespokeUiDefaults.modalCtaLabel}
+        modalCtaHref={featuredStories?.modalCtaHref ?? bespokeUiDefaults.modalCtaHref}
         onClose={handleModalClose}
       />
-      <BespokePastCreationsModal
-        open={pastCreationsOpen}
-        images={pastCreations.images}
-        onClose={handlePastCreationsClose}
-        onImageClick={handlePastCreationImageClick}
-        suppressEscape={modalOpen}
-      />
+      {pastCreations ? (
+        <BespokePastCreationsModal
+          open={pastCreationsOpen}
+          images={pastCreations.images}
+          onClose={handlePastCreationsClose}
+          onImageClick={handlePastCreationImageClick}
+          suppressEscape={modalOpen}
+        />
+      ) : null}
     </>
   );
 };

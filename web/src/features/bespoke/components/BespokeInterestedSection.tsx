@@ -1,11 +1,14 @@
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import Reveal from "@/shared/Animation/Reveal";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
-import { bespokePageContent, bespokePageFigmaSpec } from "@/features/bespoke/data/content";
+import { bespokePageFigmaSpec } from "@/features/bespoke/data/content";
+import type { NormalizedBespokeGetInTouch } from "@/services/bespoke/contact-bespoke-page.types";
 
-const BespokeInterestedSection = () => {
-  const { interested } = bespokePageContent;
+type BespokeInterestedSectionProps = {
+  interested: NormalizedBespokeGetInTouch;
+};
 
+const BespokeInterestedSection = ({ interested }: BespokeInterestedSectionProps) => {
   return (
     <section
       id={interested.id}
@@ -13,8 +16,8 @@ const BespokeInterestedSection = () => {
       className="relative w-full overflow-hidden md:h-[432px] h-[219px]"
     >
       <ResponsiveImage
-        desktopSrc={interested.image.desktop}
-        mobileSrc={interested.image.mobile}
+        desktopSrc={interested.image.desktopUrl}
+        mobileSrc={interested.image.mobileUrl}
         alt={interested.image.alt}
         width={1440}
         height={bespokePageFigmaSpec.interestedHeight}
@@ -33,14 +36,20 @@ const BespokeInterestedSection = () => {
             >
               {interested.title}
             </Reveal>
-            <Reveal as="p" direction="up" className="font-gill text-base font-light leading-110 text-white lg:text-xl md:text-lg">
+            <Reveal
+              as="p"
+              direction="up"
+              className="font-gill text-base font-light leading-110 text-white lg:text-xl md:text-lg"
+            >
               {interested.description}
             </Reveal>
           </div>
           <Reveal direction="up">
-            <DetailTextLink href={interested.ctaHref} light className="uppercase border-black">
-              {interested.ctaLabel}
-            </DetailTextLink>
+            {interested.ctaLabel ? (
+              <DetailTextLink href={interested.ctaHref} light className="uppercase border-black">
+                {interested.ctaLabel}
+              </DetailTextLink>
+            ) : null}
           </Reveal>
         </div>
       </div>

@@ -5,6 +5,7 @@ export const STRAPI_ENDPOINTS = {
   learnAboutDiamondsPage: "api/learn-about-diamonds-page",
   aboutPage: "api/about-page",
   productDisplayPage: "api/product-display-page",
+  contactBespokePage: "api/contact-bespoke-page",
   occasions: "api/occasions",
   genericForms: "api/generic-forms",
   genericSubmissions: "api/generic-submissions",
@@ -12,6 +13,8 @@ export const STRAPI_ENDPOINTS = {
   productSubmissions: "api/product-submissions",
   /** Custom CMS action — accepts multipart `data` + `uploadedImage` (Postman-verified). */
   productSubmissionsSubmit: "api/product-submissions/submit",
+  /** Custom creation submit — JSON or multipart `data` + `referenceImage`. */
+  bespokeSubmissionsSubmit: "api/bespoke-submissions/submit",
   /** @deprecated Legacy single-type slug — prefer split homepage endpoints */
   homepage: "homepage",
 } as const;
