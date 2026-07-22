@@ -4,6 +4,8 @@ export type CartLineOptions = {
   metal?: string;
   ringSize?: string;
   engraving?: string;
+  engravingFont?: string;
+  engravingMaxCharacters?: number;
   isGift?: boolean;
 };
 

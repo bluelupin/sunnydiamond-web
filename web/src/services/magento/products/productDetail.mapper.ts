@@ -5,6 +5,8 @@ import type {
 } from "./magentoProduct.types";
 import { buildProductSeo } from "@/shared/lib/seo/productSeo";
 import { resolveMagentoProductImages } from "./products.mapper";
+import { mapMagentoProductEngraving } from "./productEngraving.mapper";
+import type { MagentoEngravingFontOption } from "./engravingFonts.service";
 
 function stripHtml(html?: string | null): string {
   if (!html) {
@@ -92,7 +94,10 @@ function resolveProductCategory(categories: MagentoProductDetailItem["categories
   return jewelleryCategory?.name?.trim() || categories?.[0]?.name?.trim() || "Jewellery";
 }
 
-export function mapMagentoProductDetailToProduct(product: MagentoProductDetailItem): Product | null {
+export function mapMagentoProductDetailToProduct(
+  product: MagentoProductDetailItem,
+  options?: { engravingFontOptions?: MagentoEngravingFontOption[] },
+): Product | null {
   const sku = product.sku?.trim();
   const name = product.name?.trim();
   const urlKey = product.url_key?.trim();
@@ -132,6 +137,10 @@ export function mapMagentoProductDetailToProduct(product: MagentoProductDetailIt
   ].filter((attribute): attribute is string => Boolean(attribute));
 
   const shortDescription = stripHtml(product.short_description?.html) || name;
+  const engraving = mapMagentoProductEngraving(
+    product.custom_attributesV2?.items,
+    options?.engravingFontOptions ?? [],
+  );
 
   return {
     id: sku,
@@ -152,6 +161,7 @@ export function mapMagentoProductDetailToProduct(product: MagentoProductDetailIt
     rating: Number.isFinite(rating) ? rating : 0,
     reviews: 0,
     detailAttributes,
+    engraving,
     seo: buildProductSeo({
       name,
       urlKey,

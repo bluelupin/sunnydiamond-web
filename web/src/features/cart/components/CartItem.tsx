@@ -1,5 +1,6 @@
 import { useEffect, useState, type KeyboardEvent } from "react";
 import Link from "next/link";
+import { clampEngravingText } from "@/features/products/constants/engraving";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import type { CartLineItem, CartLineOptions } from "../types/cart.types";
@@ -30,8 +31,12 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
   const meta = formatCartLineMeta(item);
   const wishlisted = isWishlisted(product.id);
   const isGift = Boolean(options.isGift || item.gifting);
+  const engravingMaxCharacters = options.engravingMaxCharacters;
   const [isEditingEngraving, setIsEditingEngraving] = useState(false);
   const [engravingDraft, setEngravingDraft] = useState(options.engraving ?? "");
+
+  const clampDraft = (value: string) =>
+    engravingMaxCharacters ? clampEngravingText(value, engravingMaxCharacters) : value;
 
   useEffect(() => {
     if (!isEditingEngraving) {
@@ -46,7 +51,7 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
       return;
     }
 
-    const trimmed = engravingDraft.trim();
+    const trimmed = clampDraft(engravingDraft.trim());
     onUpdateOptions(item.id, { engraving: trimmed || undefined });
     setIsEditingEngraving(false);
   };
@@ -137,9 +142,16 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
       <CartDivider weight={0.5} />
 
       <div className="flex flex-col gap-2 self-stretch">
-        <p className="font-gill text-base font-normal leading-110 text-darkblack lg:text-xl">
-          Engraving
-        </p>
+        <div className="flex items-center justify-between gap-4">
+          <p className="font-gill text-base font-normal leading-110 text-darkblack lg:text-xl">
+            Engraving
+          </p>
+          {isEditingEngraving && engravingMaxCharacters ? (
+            <span className="font-gill text-sm font-light leading-110 text-neutral500">
+              {engravingDraft.length}/{engravingMaxCharacters}
+            </span>
+          ) : null}
+        </div>
 
         <div className="flex gap-2 self-stretch">
           <div className="flex h-14 min-w-0 flex-1 items-center bg-aboutInactive px-3">
@@ -147,8 +159,9 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
               <input
                 type="text"
                 value={engravingDraft}
-                onChange={(event) => setEngravingDraft(event.target.value)}
+                onChange={(event) => setEngravingDraft(clampDraft(event.target.value))}
                 onKeyDown={handleEngravingKeyDown}
+                maxLength={engravingMaxCharacters}
                 placeholder={ENGRAVING_PLACEHOLDER}
                 aria-label="Engraving text"
                 autoFocus

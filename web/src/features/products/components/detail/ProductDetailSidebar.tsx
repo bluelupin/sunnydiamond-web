@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import Image from "next/image";
 import { Plus } from "lucide-react";
 import {
@@ -68,6 +68,11 @@ const ProductDetailSidebar = ({
   const [isPersonaliseOpen, setIsPersonaliseOpen] = useState(false);
   const { isWishlisted, toggleWishlist } = useWishlist();
   const wishlisted = isWishlisted(product.id);
+  const engravingConfig = product.engraving;
+
+  useEffect(() => {
+    setEngravingSelection(null);
+  }, [product.id]);
 
   const activeMetal = content.metalColors.find((color) => color.id === selectedMetal);
 
@@ -136,16 +141,18 @@ const ProductDetailSidebar = ({
               </Select>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setIsEngravingOpen(true)}
-              className="flex h-14 items-center justify-between gap-4 bg-aboutInactive p-3 text-left"
-            >
-              <span className="font-gill text-base leading-110 text-darkblack">
-                {engravingSelection?.text ?? "Metal Engraving (Optional)"}
-              </span>
-              <PlusIcon aria-hidden className="shrink-0 text-darkblack" />
-            </button>
+            {engravingConfig?.enabled ? (
+              <button
+                type="button"
+                onClick={() => setIsEngravingOpen(true)}
+                className="flex h-14 items-center justify-between gap-4 bg-aboutInactive p-3 text-left"
+              >
+                <span className="font-gill text-base leading-110 text-darkblack">
+                  {engravingSelection?.text ?? "Metal Engraving (Optional)"}
+                </span>
+                <PlusIcon aria-hidden className="shrink-0 text-darkblack" />
+              </button>
+            ) : null}
           </div>
         </div>
 
@@ -168,6 +175,8 @@ const ProductDetailSidebar = ({
                     metal: activeMetal?.label,
                     ringSize: ringSize || undefined,
                     engraving: engravingSelection?.text,
+                    engravingFont: engravingSelection?.font,
+                    engravingMaxCharacters: engravingConfig?.maxCharacters,
                     isGift,
                   },
                 })
@@ -355,13 +364,17 @@ const ProductDetailSidebar = ({
 
   const panels = (
     <>
-      <MetalEngravingPanel
-        open={isEngravingOpen}
-        onClose={() => setIsEngravingOpen(false)}
-        previewImage={content.engravingPreviewImage}
-        initialValue={engravingSelection}
-        onSave={setEngravingSelection}
-      />
+      {engravingConfig?.enabled ? (
+        <MetalEngravingPanel
+          open={isEngravingOpen}
+          onClose={() => setIsEngravingOpen(false)}
+          previewImage={content.engravingPreviewImage}
+          fonts={engravingConfig.fonts}
+          maxCharacters={engravingConfig.maxCharacters}
+          initialValue={engravingSelection}
+          onSave={setEngravingSelection}
+        />
+      ) : null}
 
       <RingSizeChartPanel open={isRingSizeChartOpen} onClose={() => setIsRingSizeChartOpen(false)} />
 

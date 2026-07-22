@@ -3,7 +3,11 @@ import { magentoGraphqlFetch } from "../graphqlClient";
 import { MAGENTO_PRODUCT_BY_URL_KEY_QUERY } from "./productDetail.query";
 import { mapMagentoProductDetailToProduct } from "./productDetail.mapper";
 import { resolveMoreForYouProducts } from "./moreForYou.service";
+import { fetchMagentoEngravingFontOptions } from "./engravingFonts.service";
+import { isMagentoProductEngravingEnabled } from "./productEngraving.mapper";
 import type { MagentoProductByUrlKeyResponse } from "./magentoProduct.types";
+import type { MagentoCustomAttributeItem } from "./magentoProduct.types";
+import type { MagentoEngravingFontOption } from "./engravingFonts.service";
 import type { Product } from "@/features/products/data/products";
 import type { MoreForYouCarouselItem } from "@/features/products/data/moreForYouContent";
 
@@ -11,6 +15,17 @@ export type MagentoProductDetailPageData = {
   product: Product;
   moreForYou: MoreForYouCarouselItem[];
 };
+
+async function resolveEngravingFontMetadata(
+  items: MagentoCustomAttributeItem[] | null | undefined,
+  signal?: AbortSignal,
+): Promise<MagentoEngravingFontOption[]> {
+  if (!isMagentoProductEngravingEnabled(items)) {
+    return [];
+  }
+
+  return fetchMagentoEngravingFontOptions(signal);
+}
 
 export async function fetchMagentoProductDetailPage(
   urlKey: string,
@@ -33,7 +48,11 @@ export async function fetchMagentoProductDetailPage(
     return null;
   }
 
-  const product = mapMagentoProductDetailToProduct(item);
+  const engravingFontOptions = await resolveEngravingFontMetadata(
+    item.custom_attributesV2?.items,
+    signal,
+  );
+  const product = mapMagentoProductDetailToProduct(item, { engravingFontOptions });
   if (!product) {
     return null;
   }
@@ -64,7 +83,12 @@ export async function fetchMagentoProductByUrlKey(
     return null;
   }
 
-  return mapMagentoProductDetailToProduct(item);
+  const engravingFontOptions = await resolveEngravingFontMetadata(
+    item.custom_attributesV2?.items,
+    signal,
+  );
+
+  return mapMagentoProductDetailToProduct(item, { engravingFontOptions });
 }
 
 export const getMagentoProductByUrlKey = cache((urlKey: string) =>

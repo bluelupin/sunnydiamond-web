@@ -21,6 +21,71 @@ export function getMagentoCustomAttributeValue(
   return value || null;
 }
 
+function parseMagentoAttributeListValue(value: string): string[] {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return [];
+  }
+
+  if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
+    try {
+      const parsed = JSON.parse(trimmed) as unknown;
+      if (Array.isArray(parsed)) {
+        return parsed.map((entry) => String(entry).trim()).filter(Boolean);
+      }
+    } catch {
+      // Fall through to delimiter parsing.
+    }
+  }
+
+  return trimmed
+    .split(/[,;|]/)
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+}
+
+export function getMagentoCustomAttributeSelectedValues(
+  items: MagentoCustomAttributeItem[] | null | undefined,
+  code: string,
+): string[] {
+  const item = (items ?? []).find((attribute) => attribute.code?.trim() === code);
+  if (!item) {
+    return [];
+  }
+
+  const fromSelected = (item.selected_options ?? [])
+    .map((option) => option.value?.trim() || "")
+    .filter((value) => value.length > 0);
+
+  if (fromSelected.length > 0) {
+    return fromSelected;
+  }
+
+  const value = item.value?.trim();
+  return value ? parseMagentoAttributeListValue(value) : [];
+}
+
+export function getMagentoCustomAttributeOptionLabels(
+  items: MagentoCustomAttributeItem[] | null | undefined,
+  code: string,
+): string[] {
+  const item = (items ?? []).find((attribute) => attribute.code?.trim() === code);
+  if (!item) {
+    return [];
+  }
+
+  const fromSelected = (item.selected_options ?? [])
+    .map((option) => option.label?.trim() || option.value?.trim() || "")
+    .filter((label) => label.length > 0 && label !== " ");
+
+  if (fromSelected.length > 0) {
+    return fromSelected;
+  }
+
+  const value = item.value?.trim();
+  return value ? parseMagentoAttributeListValue(value) : [];
+}
+
 export function isMagentoBooleanTruthy(value: string | null | undefined): boolean {
   if (!value) {
     return false;

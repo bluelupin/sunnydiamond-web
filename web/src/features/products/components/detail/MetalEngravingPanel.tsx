@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import type { StaticImageData } from "next/image";
 import { Info } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/shared/hooks/use-toast";
 import { appointmentFieldClassName, appointmentLabelClassName } from "@/shared/constants/appointmentForm";
-import { ENGRAVING_FONTS, type EngravingSelection } from "@/features/products/constants/engraving";
+import { resolveEngravingFonts, clampEngravingText, type EngravingSelection } from "@/features/products/constants/engraving";
 import {
   Select,
   SelectContent,
@@ -22,6 +22,8 @@ type MetalEngravingPanelProps = {
   open: boolean;
   onClose: () => void;
   previewImage: string | StaticImageData;
+  fonts?: readonly string[];
+  maxCharacters: number;
   initialValue?: EngravingSelection | null;
   onSave: (value: EngravingSelection | null) => void;
 };
@@ -30,26 +32,34 @@ const MetalEngravingPanel = ({
   open,
   onClose,
   previewImage,
+  fonts,
+  maxCharacters,
   initialValue,
   onSave,
 }: MetalEngravingPanelProps) => {
   const { toast } = useToast();
+  const availableFonts = useMemo(() => resolveEngravingFonts(fonts), [fonts]);
   const [text, setText] = useState("");
-  const [font, setFont] = useState<string>(ENGRAVING_FONTS[0]);
+  const [font, setFont] = useState<string>(availableFonts[0]);
 
   useEffect(() => {
     if (!open) return;
 
-    setText(initialValue?.text ?? "");
-    setFont(initialValue?.font ?? ENGRAVING_FONTS[0]);
-  }, [open, initialValue]);
+    setText(clampEngravingText(initialValue?.text ?? "", maxCharacters));
+    setFont(initialValue?.font ?? availableFonts[0]);
+  }, [open, initialValue, availableFonts, maxCharacters]);
+
+  const handleTextChange = (value: string) => {
+    setText(clampEngravingText(value, maxCharacters));
+  };
 
   const handleSave = () => {
     if (!font.trim()) {
       return;
     }
 
-    const value = text.trim() ? { text: text.trim(), font } : null;
+    const trimmedText = clampEngravingText(text.trim(), maxCharacters);
+    const value = trimmedText ? { text: trimmedText, font } : null;
     onSave(value);
     toast({
       title: value ? "Engraving saved" : "Engraving removed",
@@ -104,15 +114,25 @@ const MetalEngravingPanel = ({
 
             <div className="flex flex-col gap-6 pb-72">
               <div className="flex flex-col gap-2">
-                <label htmlFor="engraving-text" className={appointmentLabelClassName}>
-                  What do you want engraved?
-                </label>
+                <div className="flex items-center justify-between gap-4">
+                  <label htmlFor="engraving-text" className={appointmentLabelClassName}>
+                    What do you want engraved?
+                  </label>
+                  <span
+                    id="engraving-character-limit"
+                    className="font-gill text-sm font-light leading-110 text-neutral500"
+                  >
+                    {text.length}/{maxCharacters}
+                  </span>
+                </div>
                 <input
                   id="engraving-text"
                   type="text"
                   value={text}
-                  onChange={(event) => setText(event.target.value)}
+                  maxLength={maxCharacters}
+                  onChange={(event) => handleTextChange(event.target.value)}
                   placeholder="Diya Gupta"
+                  aria-describedby="engraving-character-limit"
                   className={appointmentFieldClassName}
                 />
               </div>
@@ -129,7 +149,7 @@ const MetalEngravingPanel = ({
                     <SelectValue placeholder="-select-" />
                   </SelectTrigger>
                   <SelectContent className="z-[80]">
-                    {ENGRAVING_FONTS.map((option) => (
+                    {availableFonts.map((option) => (
                       <SelectItem key={option} value={option}>
                         {option}
                       </SelectItem>
