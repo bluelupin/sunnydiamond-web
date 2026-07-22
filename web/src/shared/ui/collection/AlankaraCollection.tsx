@@ -108,7 +108,7 @@ function ProductSlideImage({
 
   if (variant === "mobile") {
     return (
-      <div className="relative w-[300px] h-[300px]">
+      <div className="relative aspect-square w-full overflow-hidden">
         <Image
           src={imageSrc}
           alt={product.name}
@@ -520,7 +520,7 @@ function ProductCarouselPanel({
 
       {isMobile ? (
         <div className="relative flex flex-col items-center justify-center gap-6">
-          <div className="relative h-[150px] w-[180px] overflow-hidden">
+          <div className="relative aspect-square w-[180px] overflow-hidden">
             <div
               className={cn(
                 "flex h-full items-center will-change-transform motion-reduce:transition-none",

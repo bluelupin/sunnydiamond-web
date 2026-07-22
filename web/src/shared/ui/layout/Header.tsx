@@ -111,7 +111,7 @@ const Header = () => {
     <>
       <header
         className={cn(
-          "absolute top-0 inset-x-0 z-50 transition-colors duration-300",
+          "absolute top-0 inset-x-0 z-50 transition-colors duration-300 max-md:pt-[calc(0.5rem+env(safe-area-inset-top,0px))]",
           mobileMenuOpen ? "pointer-events-none opacity-0" : "",
           isOverlay ? "bg-transparent" : ["/cart", "/checkout"].includes(pathname)
             ? "bg-gray300"
