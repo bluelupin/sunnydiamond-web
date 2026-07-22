@@ -413,7 +413,7 @@ function ProductCarouselPanel({
       )}
     >
       {!isMobile && total > 1 ? (
-        <div className="pointer-events-none absolute inset-x-40 top-1/2 z-10 flex -translate-y-1/2 items-center justify-between">
+        <div className="pointer-events-none absolute w-full px-10 left-0 inset-x-40 top-1/2 z-10 flex -translate-y-1/2 items-center justify-between">
           <CarouselNavButton
             direction="prev"
             variant="desktop"
