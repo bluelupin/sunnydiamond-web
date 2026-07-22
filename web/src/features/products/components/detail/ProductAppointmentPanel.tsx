@@ -27,7 +27,7 @@ import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 
 const PERSONALISE_FORM_TAG = "product-personalisation";
-const SCHEDULE_VIDEO_CALL_FORM_TAG = "schedule-video-call-form";
+const SCHEDULE_VIDEO_CALL_FORM_TAG = "product-video-call";
 
 type ProductAppointmentPanelProps = {
   open: boolean;
