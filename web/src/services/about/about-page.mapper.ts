@@ -153,15 +153,12 @@ const mapLegacyBlock = (
   const image = mapResponsiveImage(block.image);
   if (!image) return null;
 
-  const caption =
-    cleanText(block.image?.caption) ??
-    cleanText(block.image?.altText) ??
-    image.alt;
+  const caption = cleanText(block.image?.caption);
 
   return {
     description: cleanText(block.description),
     caption,
-    image: { ...image, alt: caption || image.alt },
+    image,
   };
 };
 
@@ -179,17 +176,11 @@ const mapLegacy = (
 
   if (gallery.length === 0) return null;
 
-  const story =
-    gallery.map((item) => item.description).find(isUsableDescription) ??
-    gallery[0]?.description;
+  const storyDescription = cleanText(gallery[0]?.description);
+  const story = isUsableDescription(storyDescription) ? storyDescription : undefined;
 
   const galleryWithCaptions = gallery.map((item, index) =>
-    index === 0
-      ? item
-      : {
-          ...item,
-          caption: item.description ?? item.caption,
-        },
+    index === 0 ? item : { ...item, caption: item.description },
   );
 
   return { title, story, gallery: galleryWithCaptions };

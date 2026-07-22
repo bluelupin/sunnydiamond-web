@@ -5,7 +5,6 @@ import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import { cn } from "@/shared/utils/cn";
 import type { NormalizedAboutLegacy } from "@/services/about/about-page.types";
-import { aboutSince1997GalleryDimensions } from "../data/content";
 import { useSince1997HorizontalScroll } from "../hooks/useSince1997HorizontalScroll";
 import Reveal from "@/shared/Animation/Reveal";
 
@@ -16,8 +15,8 @@ type GalleryImageProps = {
   mobileUrl: string;
   alt: string;
   caption?: string;
-  imageWidth: number;
-  imageHeight: number;
+  imageWidth?: number;
+  imageHeight?: number;
   sizes: string;
   figureClassName?: string;
   frameClassName?: string;
@@ -68,16 +67,11 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
   const sectionRef = useRef<HTMLElement>(null);
 
   const [founder, event, attending] = gallery;
-  const hasHorizontalGallery = Boolean(event && attending);
+  const hasHorizontalGallery = Boolean(founder && event && attending);
 
   useSince1997HorizontalScroll(sectionRef, hasHorizontalGallery);
 
-  const founderWidth = founder.image.width ?? aboutSince1997GalleryDimensions[0]?.width ?? 549;
-  const founderHeight = founder.image.height ?? aboutSince1997GalleryDimensions[0]?.height ?? 600;
-  const eventWidth = event?.image.width ?? aboutSince1997GalleryDimensions[1]?.width ?? 320;
-  const eventHeight = event?.image.height ?? aboutSince1997GalleryDimensions[1]?.height ?? 417;
-  const attendingWidth = attending?.image.width ?? aboutSince1997GalleryDimensions[2]?.width ?? 463;
-  const attendingHeight = attending?.image.height ?? aboutSince1997GalleryDimensions[2]?.height ?? 600;
+  if (!founder) return null;
 
   return (
     <section
@@ -108,8 +102,8 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                       mobileUrl={founder.image.mobileUrl}
                       alt={founder.image.alt}
                       caption={founder.caption}
-                      imageWidth={founderWidth}
-                      imageHeight={founderHeight}
+                      imageWidth={founder.image.width}
+                      imageHeight={founder.image.height}
                       sizes="549px"
                       figureClassName="w-[549px]"
                       frameClassName="h-600 w-[549px]"
@@ -129,8 +123,8 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                         mobileUrl={event!.image.mobileUrl}
                         alt={event!.image.alt}
                         caption={event!.caption}
-                        imageWidth={eventWidth}
-                        imageHeight={eventHeight}
+                        imageWidth={event!.image.width}
+                        imageHeight={event!.image.height}
                         sizes="320px"
                         figureClassName="w-[320px]"
                         frameClassName="h-[417px]"
@@ -141,8 +135,8 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                         mobileUrl={attending!.image.mobileUrl}
                         alt={attending!.image.alt}
                         caption={attending!.caption}
-                        imageWidth={attendingWidth}
-                        imageHeight={attendingHeight}
+                        imageWidth={attending!.image.width}
+                        imageHeight={attending!.image.height}
                         sizes="463px"
                         figureClassName="w-[463px]"
                         frameClassName="h-600"
@@ -186,8 +180,8 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                 mobileUrl={founder.image.mobileUrl}
                 alt={founder.image.alt}
                 caption={founder.caption}
-                imageWidth={founderWidth}
-                imageHeight={founderHeight}
+                imageWidth={founder.image.width}
+                imageHeight={founder.image.height}
                 sizes="549px"
                 figureClassName="w-full"
                 frameClassName="h-600 w-full"
@@ -212,8 +206,8 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                       mobileUrl={event!.image.mobileUrl}
                       alt={event!.image.alt}
                       caption={event!.caption}
-                      imageWidth={eventWidth}
-                      imageHeight={eventHeight}
+                      imageWidth={event!.image.width}
+                      imageHeight={event!.image.height}
                       sizes="320px"
                       figureClassName="w-[256px] min-w-[256px] sm:w-[550px] lg:w-[400px] lg:min-w-[400px]"
                       frameClassName="lg:h-[240px] md:h-[500px] sm:h-[400px] h-[240px]"
@@ -224,8 +218,8 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                       mobileUrl={attending!.image.mobileUrl}
                       alt={attending!.image.alt}
                       caption={attending!.caption}
-                      imageWidth={attendingWidth}
-                      imageHeight={attendingHeight}
+                      imageWidth={attending!.image.width}
+                      imageHeight={attending!.image.height}
                       sizes="463px"
                       figureClassName="w-[256px] min-w-[256px] sm:w-[550px] lg:w-[400px] lg:min-w-[400px]"
                       frameClassName="lg:h-[277px] md:h-[560px] sm:h-[520px] h-[277px]"

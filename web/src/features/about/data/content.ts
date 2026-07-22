@@ -111,13 +111,6 @@ export const aboutCraftingRarityFigmaSpec = {
   },
 } as const;
 
-/** Figma frame dimensions for legacy gallery when CMS omits width/height. */
-export const aboutSince1997GalleryDimensions = [
-  { width: 549, height: 600 },
-  { width: 320, height: 417 },
-  { width: 463, height: 600 },
-] as const;
-
 /** Figma Component 228 — team card hover overlay */
 export const aboutFacesFigmaSpec = {
   overlay: {
