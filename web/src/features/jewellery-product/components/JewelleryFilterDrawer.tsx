@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
-import { PanelFooter, PanelFooterDualActions } from "@/shared/ui/PanelFooter";
+import { PanelFooter } from "@/shared/ui/PanelFooter";
 import {
   jewelleryListingFilterDrawerAssets,
   jewelleryListingFilterDrawerSpec as spec,
@@ -41,12 +41,10 @@ const rangeThumbClassName =
 const FilterChip = ({
   label,
   selected,
-  showCheck,
   onClick,
 }: {
   label: string;
   selected: boolean;
-  showCheck?: boolean;
   onClick: () => void;
 }) => (
   <button
@@ -54,15 +52,10 @@ const FilterChip = ({
     aria-pressed={selected}
     onClick={onClick}
     className={cn(
-      "flex h-[56px] items-center justify-center bg-[#F2F2F2] px-[24px] py-[12px] font-gill text-base leading-110",
-      showCheck && selected && "gap-[4px]",
+      "flex h-[56px] items-center justify-center px-[24px] py-[12px] font-gill text-base leading-110",
+      selected ? "bg-gold300" : "bg-aboutInactive",
     )}
   >
-    {showCheck && selected ? (
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M3.75 9.75L6.75 12.75L14.25 5.25" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ) : null}
     <span className={selected ? "font-normal text-darkblack" : "font-light text-gary300 opacity-80"}>{label}</span>
   </button>
 );
@@ -139,7 +132,7 @@ const GemstoneTypeSelect = ({
     <div ref={rootRef} className="flex flex-col gap-[8px]">
       <span
         id="filter-gemstone-type-label"
-        className="font-gill text-sm font-normal leading-110 text-darkblack"
+        className="font-gill text-base font-normal leading-110 text-darkblack"
       >
         Gemstone Type:
       </span>
@@ -152,7 +145,7 @@ const GemstoneTypeSelect = ({
         aria-labelledby="filter-gemstone-type-label filter-gemstone-type-value"
         onClick={() => setIsOpen((current) => !current)}
         className={cn(
-          "flex h-[56px] w-full items-center justify-between bg-[#F2F2F2] p-[12px] font-gill text-sm leading-110 outline-none",
+          "flex h-[56px] w-full items-center justify-between bg-aboutInactive p-[12px] font-gill text-sm leading-110 outline-none",
           isOpen ? "border border-darkblack" : "border border-transparent",
           showPlaceholder && !isOpen ? "font-light text-neutral400" : "font-normal text-darkblack",
         )}
@@ -165,7 +158,7 @@ const GemstoneTypeSelect = ({
           id="filter-gemstone-type-listbox"
           role="listbox"
           aria-labelledby="filter-gemstone-type-label"
-          className="flex w-full flex-col bg-[#F2F2F2]"
+          className="flex w-full flex-col bg-aboutInactive"
         >
           {options.map((option) => {
             const selected = value === option.label;
@@ -283,7 +276,7 @@ const JewelleryFilterDrawer = ({
       <button
         type="button"
         aria-label="Close filters"
-        className="min-h-0 flex-1 bg-[#1E1E1E]/25 backdrop-blur-[9px] animate-in fade-in duration-300 max-md:min-h-12"
+        className="min-h-0 flex-1 bg-[#1E1E1EBF] backdrop-blur-[3px] animate-in fade-in duration-300 max-md:min-h-12"
         onClick={onClose}
       />
 
@@ -297,9 +290,9 @@ const JewelleryFilterDrawer = ({
           "md:h-full md:w-full md:max-w-[474px] md:animate-in md:slide-in-from-right md:duration-300",
         )}
       >
-        <div className="px-[24px] pt-10">
+        <div className="md:px-6 px-4 md:pt-10 pt-6">
           <div className="mx-auto flex h-[32px] w-full max-w-[424px] items-center justify-between">
-            <h2 className="font-larken text-[24px] font-light leading-110 text-darkblack">FILTERS</h2>
+            <h2 className="font-larken text-[24px] font-light leading-110 text-darkblack">Filters</h2>
             <button
               type="button"
               onClick={onClose}
@@ -316,10 +309,10 @@ const JewelleryFilterDrawer = ({
               />
             </button>
           </div>
-          <div className="mx-auto mt-[22px] h-px w-full max-w-[424px] bg-neutral300" aria-hidden />
+          <div className="mx-auto mt-6 h-px w-full max-w-[424px] bg-neutral300" aria-hidden />
         </div>
 
-        <div className="filter-drawer-scroll flex min-h-0 flex-1 flex-col overflow-y-auto px-[24px] pt-[22px]">
+        <div className="filter-drawer-scroll flex min-h-0 flex-1 flex-col overflow-y-auto md:px-6 px-4 pt-6">
           <div className="mx-auto flex w-full max-w-[424px] flex-col gap-[24px] pb-72">
             {hasPriceRange ? (
               <section className="flex flex-col gap-[16px]">
@@ -382,7 +375,7 @@ const JewelleryFilterDrawer = ({
             {hasPriceRange ? (
               <section className="flex gap-[24px]">
                 <label className="flex min-w-0 flex-1 flex-col gap-[8px]">
-                  <span className="font-gill text-sm font-normal leading-110 text-darkblack">
+                  <span className="font-gill text-base font-normal leading-110 text-darkblack">
                     Min Amount
                   </span>
                   <input
@@ -401,13 +394,13 @@ const JewelleryFilterDrawer = ({
                       }))
                     }
                     className={cn(
-                      "h-[56px] w-full bg-[#F2F2F2] p-[12px] font-gill text-sm font-normal leading-110 text-darkblack outline-none",
+                      "h-[56px] w-full bg-aboutInactive p-[12px] font-gill text-sm font-normal leading-110 text-darkblack outline-none",
                       minInputFocused && "border border-neutral500",
                     )}
                   />
                 </label>
                 <label className="flex min-w-0 flex-1 flex-col gap-[8px]">
-                  <span className="font-gill text-sm font-normal leading-110 text-darkblack">
+                  <span className="font-gill text-base font-normal leading-110 text-darkblack">
                     Max Amount
                   </span>
                   <input
@@ -424,7 +417,7 @@ const JewelleryFilterDrawer = ({
                         ),
                       }))
                     }
-                    className="h-[56px] w-full bg-[#F2F2F2] p-[12px] font-gill text-sm font-normal leading-110 text-darkblack placeholder:text-neutral400 outline-none"
+                    className="h-[56px] w-full bg-aboutInactive p-[12px] font-gill text-base font-normal leading-110 text-darkblack placeholder:text-neutral400 outline-none"
                   />
                 </label>
               </section>
@@ -443,7 +436,6 @@ const JewelleryFilterDrawer = ({
                           key={category}
                           label={category}
                           selected={draft.categories.includes(category)}
-                          showCheck
                           onClick={() => toggleListValue("categories", category)}
                         />
                       ))}
@@ -464,7 +456,6 @@ const JewelleryFilterDrawer = ({
                       key={metalType}
                       label={metalType}
                       selected={draft.metalTypes.includes(metalType)}
-                      showCheck
                       onClick={() => toggleListValue("metalTypes", metalType)}
                     />
                   ))}
@@ -483,7 +474,6 @@ const JewelleryFilterDrawer = ({
                       key={purity}
                       label={purity}
                       selected={draft.metalPurities.includes(purity)}
-                      showCheck
                       onClick={() => toggleListValue("metalPurities", purity)}
                     />
                   ))}
@@ -504,24 +494,24 @@ const JewelleryFilterDrawer = ({
           </div>
         </div>
 
-        <PanelFooter contentClassName="border-t-[0.5px] border-neutral300 px-10 py-[24px]">
-          <PanelFooterDualActions>
-            <button
-              type="button"
-              onClick={handleClearAll}
-              className="btn-border-slide inline-flex h-[56px] min-w-0 flex-1 items-center justify-center border-[0.8px] border-neutral300 px-[28px] py-[20px] font-gill text-sm font-normal uppercase leading-110 text-darkblack"
-            >
-              Clear All
-            </button>
+        <PanelFooter contentClassName="border-t-[0.5px] border-neutral300 px-0 py-6 lg:px-6 px-4">
+          <div className="flex w-full flex-col gap-4">
             <button
               type="button"
               onClick={() => onApply(draft)}
               disabled={!canApplyFilters}
-              className="btn-dark-slide inline-flex h-[56px] min-w-0 flex-1 items-center justify-center px-[28px] py-[20px] font-gill text-sm font-normal uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
+              className="btn-dark-slide inline-flex h-[56px] w-full items-center justify-center px-[28px] py-[20px] font-gill text-sm font-normal uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               Apply Filters
             </button>
-          </PanelFooterDualActions>
+            <button
+              type="button"
+              onClick={handleClearAll}
+              className="btn-border-slide inline-flex h-[56px] w-full items-center justify-center border-[0.8px] border-neutral300 px-[28px] py-[20px] font-gill text-sm font-normal uppercase leading-110 text-darkblack"
+            >
+              Clear All
+            </button>
+          </div>
         </PanelFooter>
       </aside>
     </div>

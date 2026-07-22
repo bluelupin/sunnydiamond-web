@@ -128,7 +128,7 @@ const JewelleryProductPage = () => {
         isFilterOpen={isFilterOpen}
       />
 
-      <section className="w-full bg-gray200 pb-0 md:pb-10">
+      <section className="relative isolate z-0 w-full bg-gray200 pb-0 md:pb-10">
         {isLoading ? null : (
           <JewelleryProductGrid
             products={products}

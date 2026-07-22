@@ -298,7 +298,7 @@ const JewelleryProductToolbar = ({
       {/* Mobile — sticky footer (Figma 1279:1015) */}
       {!hideMobileBar ? (
         <div
-          className="fixed inset-x-0 bottom-0 z-50 border-t border-neutral300/60 pb-[env(safe-area-inset-bottom,0px)] md:hidden"
+          className="fixed inset-x-0 bottom-0 z-[60] border-t border-neutral300/60 pb-[env(safe-area-inset-bottom,0px)] md:hidden"
           style={{ backgroundColor: mobileSpec.backgroundColor }}
         >
           <div
