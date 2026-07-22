@@ -69,13 +69,12 @@ const FilterControl = ({ iconSize, fontSize, gap, color, onClick }: FilterContro
     style={{ gap, color }}
     aria-label="Open filters"
   >
-    <FilterIcon className="size-6" />
     <span
       className="whitespace-nowrap font-gill font-normal uppercase leading-110 lg:text-xl text-base"
-      style={{ fontSize }}
     >
       Filter
     </span>
+    <FilterIcon className="size-6" />
   </button>
 );
 
@@ -112,7 +111,7 @@ const SortControl = ({
       }}
     >
       <span
-        className="lg:text-xl text-base text-darkblack pointer-events-none col-start-1 row-start-1 inline-flex items-center gap-3 whitespace-nowrap font-gill font-normal uppercase leading-110"
+        className="lg:text-xl text-base text-darkblack pointer-events-none col-start-1 row-start-1 inline-flex items-center gap-2 whitespace-nowrap font-gill font-normal uppercase leading-110"
       >
         Sort By
         <SortByIcon className="size-6" />
@@ -276,7 +275,7 @@ const JewelleryProductToolbar = ({
             {productCount.toLocaleString("en-IN")} Products
           </p>
 
-          <div className="flex shrink-0 items-center" style={{ gap: desktopSpec.controlsGap }}>
+          <div className="flex shrink-0 items-center gap-8">
             <FilterControl
               iconSize={desktopSpec.iconSize}
               fontSize={desktopSpec.controlFontSize}
