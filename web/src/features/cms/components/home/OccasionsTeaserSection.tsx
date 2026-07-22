@@ -9,6 +9,7 @@ import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import fallBackImage from "@/assets/fallBackImage.png";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import { resolveResponsiveCmsImage } from "@/shared/utils/responsiveCmsImage";
+import { buildOccasionCardHref } from "@/features/jewellery-product/utils/occasionListing";
 import type { OccasionCard } from "@/types/homepage/occasionSection";
 
 interface OccasionsTeaserSectionProps {
@@ -27,10 +28,11 @@ function OccasionCardItem({
   sectionTitle: string;
 }) {
   const { desktopUrl, mobileUrl, alt } = resolveResponsiveCmsImage(card.image);
-  const href =
-    card?.cta?.url ||
-    card?.cta?.to ||
-    (card?.slug ? `/products?occasion=${card.slug}` : "/products");
+  const href = buildOccasionCardHref({
+    title: card.title,
+    slug: card.slug,
+    ctaUrl: card?.cta?.url || card?.cta?.to,
+  });
   const ctaLabel = card?.cta?.label?.trim() || DEFAULT_CTA_LABEL;
   const description = card?.description?.trim() || card?.subtitle?.trim();
   const imageAlt = alt || card?.title?.trim() || `${sectionTitle} — occasion ${index + 1}`;

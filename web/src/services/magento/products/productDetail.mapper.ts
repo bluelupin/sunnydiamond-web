@@ -73,6 +73,7 @@ function buildGalleryImages(product: MagentoProductDetailItem): string[] {
   const { primaryImage, lifestyleImage } = resolveMagentoProductImages(
     product.media_gallery,
     product.image?.url,
+    product.model_wear_image,
   );
   const urls = (product.media_gallery ?? [])
     .filter((item) => item?.url && !item.disabled)
@@ -112,7 +113,11 @@ export function mapMagentoProductDetailToProduct(product: MagentoProductDetailIt
   const rating = ratingRaw ? Number(ratingRaw) : 0;
 
   const metal = [metalPurity, metalColor].filter(Boolean).join(" ") || "Gold";
-  const { lifestyleImage } = resolveMagentoProductImages(product.media_gallery, product.image?.url);
+  const { lifestyleImage } = resolveMagentoProductImages(
+    product.media_gallery,
+    product.image?.url,
+    product.model_wear_image,
+  );
   const images = buildGalleryImages(product);
   const primaryImage = images[0] ?? product.image?.url?.trim() ?? "";
 

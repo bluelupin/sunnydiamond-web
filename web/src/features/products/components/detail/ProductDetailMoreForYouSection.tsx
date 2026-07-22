@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import CarouselChevronLeft from "@/assets/Icons/CarouselChevronLeft";
 import CarouselChevronRight from "@/assets/Icons/CarouselChevronRight";
@@ -8,26 +8,148 @@ import PageContainer from "@/shared/ui/layout/PageContainer";
 import { cn } from "@/shared/utils/cn";
 import type { MoreForYouCarouselItem } from "@/features/products/data/moreForYouContent";
 import { DetailOutlineLink } from "./shared";
-import Reveal from "@/shared/Animation/Reveal";
-import { DELIVERY_STORE_LOCATIONS } from "../../data/deliveryStoreContent";
 
 type ProductDetailMoreForYouSectionProps = {
   items: MoreForYouCarouselItem[];
 };
 
-const SLIDE_DURATION_MS = 500;
+const TRANSITION_MS = 500;
+const TRANSITION_EASING = "cubic-bezier(0.4, 0, 0.2, 1)";
 const DESKTOP_FRAME_SIZE = 305;
 const DESKTOP_IMAGE_FRAME = "size-[305px]";
 const DESKTOP_IMAGE_SIZES = "305px";
 const DESKTOP_SIDE_PEEK_VISIBLE_RATIO = 0.7;
 const DESKTOP_SIDE_PEEK_VISIBLE_PX = DESKTOP_FRAME_SIZE * DESKTOP_SIDE_PEEK_VISIBLE_RATIO;
 
+type CrossfadeLayerIndex = 0 | 1;
+
+function useCrossfadeSrc(src: string) {
+  const frontIndexRef = useRef<CrossfadeLayerIndex>(0);
+  const layersRef = useRef<[string, string]>([src, src]);
+  const [state, setState] = useState({
+    layers: [src, src] as [string, string],
+    frontIndex: 0 as CrossfadeLayerIndex,
+    animating: false,
+    incomingVisible: false,
+  });
+
+  useEffect(() => {
+    const frontIndex = frontIndexRef.current;
+    if (src === layersRef.current[frontIndex]) {
+      return;
+    }
+
+    const incomingIndex = (1 - frontIndex) as CrossfadeLayerIndex;
+    const nextLayers: [string, string] = [...layersRef.current];
+    nextLayers[incomingIndex] = src;
+    layersRef.current = nextLayers;
+
+    setState({
+      layers: nextLayers,
+      frontIndex,
+      animating: true,
+      incomingVisible: false,
+    });
+
+    const showFrame = requestAnimationFrame(() => {
+      requestAnimationFrame(() => setState((current) => ({ ...current, incomingVisible: true })));
+    });
+
+    const settleTimer = window.setTimeout(() => {
+      frontIndexRef.current = incomingIndex;
+      setState({
+        layers: layersRef.current,
+        frontIndex: incomingIndex,
+        animating: false,
+        incomingVisible: false,
+      });
+    }, TRANSITION_MS);
+
+    return () => {
+      cancelAnimationFrame(showFrame);
+      clearTimeout(settleTimer);
+    };
+  }, [src]);
+
+  return state;
+}
+
+type CrossfadeImageProps = {
+  src: string;
+  alt: string;
+  className?: string;
+  sizes: string;
+  priority?: boolean;
+  fill?: boolean;
+  width?: number;
+  height?: number;
+  slideDirection?: -1 | 0 | 1;
+};
+
+function CrossfadeImage({
+  src,
+  alt,
+  className,
+  sizes,
+  priority = false,
+  fill = true,
+  width,
+  height,
+  slideDirection = 0,
+}: CrossfadeImageProps) {
+  const { layers, frontIndex, animating, incomingVisible } = useCrossfadeSrc(src);
+  const incomingIndex = (1 - frontIndex) as CrossfadeLayerIndex;
+  const enterOffset =
+    slideDirection === 1 ? "translate-x-3" : slideDirection === -1 ? "-translate-x-3" : "translate-x-0";
+  const imageMotionClassName =
+    "motion-safe:transition-[opacity,transform] motion-safe:duration-500 motion-reduce:transition-none motion-reduce:transform-none";
+
+  const renderLayer = (layerIndex: CrossfadeLayerIndex) => {
+    const isIncoming = animating && layerIndex === incomingIndex;
+    const isVisible = animating
+      ? isIncoming
+        ? incomingVisible
+        : !incomingVisible
+      : layerIndex === frontIndex;
+
+    return (
+      <Image
+        key={`layer-${layerIndex}`}
+        src={layers[layerIndex]}
+        alt={alt}
+        fill={fill}
+        width={width}
+        height={height}
+        sizes={sizes}
+        priority={priority && layerIndex === frontIndex && !animating}
+        aria-hidden={!isVisible}
+        className={cn(
+          className,
+          imageMotionClassName,
+          "absolute inset-0",
+          isVisible ? "z-10 translate-x-0 opacity-100" : cn("z-0 opacity-0", isIncoming ? enterOffset : "translate-x-0"),
+        )}
+        style={{ transitionTimingFunction: TRANSITION_EASING }}
+      />
+    );
+  };
+
+  return (
+    <div className="relative size-full overflow-hidden">
+      {renderLayer(0)}
+      {renderLayer(1)}
+    </div>
+  );
+}
+
 function DesktopSidePeek({
   src,
   side,
+  slideDirection,
 }: {
   src: string;
   side: "prev" | "next";
+  slideDirection: -1 | 0 | 1;
 }) {
   return (
     <div className="pointer-events-none relative h-[305px] overflow-hidden">
@@ -44,6 +166,8 @@ function DesktopSidePeek({
           frameClassName={cn(DESKTOP_IMAGE_FRAME, side === "prev" && "mix-blend-luminosity")}
           sizes={DESKTOP_IMAGE_SIZES}
           ariaHidden
+          slideDirection={slideDirection}
+          crossfade
         />
       </div>
     </div>
@@ -58,6 +182,8 @@ function DesktopCarouselImage({
   sizes,
   priority,
   ariaHidden,
+  slideDirection = 0,
+  crossfade = false,
 }: {
   src: string;
   alt: string;
@@ -66,18 +192,31 @@ function DesktopCarouselImage({
   sizes: string;
   priority?: boolean;
   ariaHidden?: boolean;
+  slideDirection?: -1 | 0 | 1;
+  crossfade?: boolean;
 }) {
   return (
     <div className={cn("relative shrink-0 overflow-hidden", frameClassName)}>
-      <Image
-        src={src}
-        alt={alt}
-        fill
-        aria-hidden={ariaHidden}
-        className={cn("object-contain object-center", imageClassName)}
-        sizes={sizes}
-        priority={priority}
-      />
+      {crossfade ? (
+        <CrossfadeImage
+          src={src}
+          alt={alt}
+          className={cn("object-contain object-center", imageClassName)}
+          sizes={sizes}
+          priority={priority}
+          slideDirection={slideDirection}
+        />
+      ) : (
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          aria-hidden={ariaHidden}
+          className={cn("object-contain object-center", imageClassName)}
+          sizes={sizes}
+          priority={priority}
+        />
+      )}
     </div>
   );
 }
@@ -85,17 +224,23 @@ function DesktopCarouselImage({
 const sidePeekImageClassName =
   "absolute left-1/2 top-1/2 size-[262px] -translate-x-[calc(50%-28px)] -translate-y-1/2 object-cover";
 
-function SidePeekImage({ src, flip }: { src: string; flip?: boolean }) {
+function SidePeekImage({
+  src,
+  flip,
+  slideDirection,
+}: {
+  src: string;
+  flip?: boolean;
+  slideDirection: -1 | 0 | 1;
+}) {
   const image = (
     <div className="relative h-[237px] w-[160px] overflow-hidden">
-      <Image
+      <CrossfadeImage
         src={src}
         alt=""
-        width={262}
-        height={262}
-        aria-hidden
-        className={sidePeekImageClassName}
+        className={cn(sidePeekImageClassName, "object-cover")}
         sizes="160px"
+        slideDirection={slideDirection}
       />
     </div>
   );
@@ -107,34 +252,45 @@ function SidePeekImage({ src, flip }: { src: string; flip?: boolean }) {
 
 const ProductDetailMoreForYouSection = ({ items }: ProductDetailMoreForYouSectionProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [slideDirection, setSlideDirection] = useState<-1 | 0 | 1>(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState(0);
+  const transitionTimeoutRef = useRef<number | null>(null);
   const dragState = useRef({ active: false, startX: 0, deltaX: 0, pointerId: 0 });
   const mobileTrackRef = useRef<HTMLDivElement>(null);
   const desktopTrackRef = useRef<HTMLDivElement>(null);
 
   const total = items.length;
-  const canGoPrev = activeIndex > 0;
-  const canGoNext = activeIndex < total - 1;
+  const canGoPrev = total > 1;
+  const canGoNext = total > 1;
 
   const go = useCallback(
     (direction: -1 | 1) => {
-      if (isAnimating || total <= 1) return;
+      if (total <= 1 || isTransitioning) return;
 
-      const next = activeIndex + direction;
-      if (next < 0 || next >= total) return;
+      setSlideDirection(direction);
+      setIsTransitioning(true);
+      setActiveIndex((current) => (current + direction + total) % total);
 
-      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (!reduceMotion) {
-        setIsAnimating(true);
-        window.setTimeout(() => setIsAnimating(false), SLIDE_DURATION_MS);
+      if (transitionTimeoutRef.current) {
+        clearTimeout(transitionTimeoutRef.current);
       }
 
-      setActiveIndex(next);
+      transitionTimeoutRef.current = window.setTimeout(() => {
+        setIsTransitioning(false);
+        transitionTimeoutRef.current = null;
+      }, TRANSITION_MS);
     },
-    [activeIndex, isAnimating, total],
+    [isTransitioning, total],
   );
+
+  useEffect(() => {
+    return () => {
+      if (transitionTimeoutRef.current) {
+        clearTimeout(transitionTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const onCarouselKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -154,7 +310,7 @@ const ProductDetailMoreForYouSection = ({ items }: ProductDetailMoreForYouSectio
   const onPointerDown = useCallback(
     (trackRef: React.RefObject<HTMLDivElement | null>) =>
       (event: React.PointerEvent<HTMLDivElement>) => {
-        if (!trackRef.current || total <= 1 || isAnimating) return;
+        if (!trackRef.current || total <= 1) return;
         if ((event.target as HTMLElement).closest("button, a")) return;
 
         trackRef.current.setPointerCapture(event.pointerId);
@@ -166,20 +322,13 @@ const ProductDetailMoreForYouSection = ({ items }: ProductDetailMoreForYouSectio
         };
         setIsDragging(true);
       },
-    [isAnimating, total],
+    [total],
   );
 
-  const onPointerMove = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>) => {
-      if (!dragState.current.active) return;
-      let deltaX = event.clientX - dragState.current.startX;
-      if (activeIndex === 0 && deltaX > 0) deltaX = 0;
-      if (activeIndex === total - 1 && deltaX < 0) deltaX = 0;
-      dragState.current.deltaX = deltaX;
-      setDragOffset(deltaX);
-    },
-    [activeIndex, total],
-  );
+  const onPointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragState.current.active) return;
+    dragState.current.deltaX = event.clientX - dragState.current.startX;
+  }, []);
 
   const endDrag = useCallback(
     (trackRef: React.RefObject<HTMLDivElement | null>) =>
@@ -196,7 +345,6 @@ const ProductDetailMoreForYouSection = ({ items }: ProductDetailMoreForYouSectio
         }
 
         setIsDragging(false);
-        setDragOffset(0);
 
         const threshold = 48;
         if (deltaX <= -threshold && canGoNext) go(1);
@@ -208,21 +356,18 @@ const ProductDetailMoreForYouSection = ({ items }: ProductDetailMoreForYouSectio
   if (items.length === 0) return null;
 
   const activeItem = items[activeIndex];
-  const prevItem = total > 1 ? items[(activeIndex - 1 + total) % total] : null;
-  const nextItem = total > 1 ? items[(activeIndex + 1) % total] : null;
-
-  const slideOffsetPercent = total > 0 ? (activeIndex * 100) / total : 0;
-  const slideTransform = `translateX(calc(-${slideOffsetPercent}% + ${isDragging ? dragOffset : 0}px))`;
-
-  const slideTrackClassName = cn(
-    "flex h-full will-change-transform motion-reduce:transition-none",
-    !isDragging && "transition-transform duration-500 ease-in-out",
-  );
+  const prevItem =
+    total > 1 ? items[activeIndex > 0 ? activeIndex - 1 : total - 1] : null;
+  const nextItem =
+    total > 1 ? items[activeIndex < total - 1 ? activeIndex + 1 : 0] : null;
 
   const carouselInteractionClassName = cn(
-    total > 1 && !isAnimating && (isDragging ? "cursor-grabbing" : "cursor-grab"),
+    total > 1 && !isTransitioning && (isDragging ? "cursor-grabbing" : "cursor-grab"),
     total > 1 && "touch-none select-none",
   );
+
+  const labelMotionClassName =
+    "motion-safe:transition-opacity motion-safe:duration-500 motion-reduce:transition-none";
 
   return (
     <section aria-labelledby="more-for-you-heading" className="py-16 lg:py-100">
@@ -257,44 +402,37 @@ const ProductDetailMoreForYouSection = ({ items }: ProductDetailMoreForYouSectio
             >
               <div className="flex items-center justify-center gap-6">
                 <div className="flex w-[160px] shrink-0 items-center justify-center">
-                  {prevItem ? <SidePeekImage src={prevItem.image} flip /> : null}
+                  {prevItem ? (
+                    <SidePeekImage src={prevItem.image} flip slideDirection={slideDirection} />
+                  ) : null}
                 </div>
 
                 <div className="relative h-[150px] w-[180px] shrink-0 overflow-hidden">
-                  <div
-                    className={slideTrackClassName}
-                    style={{
-                      width: `${total * 100}%`,
-                      transform: slideTransform,
-                    }}
-                  >
-                    {items.map((item, index) => (
-                      <div
-                        key={item.id}
-                        className="relative h-full shrink-0"
-                        style={{ width: `${100 / total}%` }}
-                      >
-                        <Image
-                          src={item.image}
-                          alt={index === activeIndex ? item.name : ""}
-                          fill
-                          className="size-full scale-[2] object-contain object-center"
-                          sizes="180px"
-                          priority={index === 0}
-                        />
-                      </div>
-                    ))}
-                  </div>
+                  <CrossfadeImage
+                    src={activeItem.image}
+                    alt={activeItem.name}
+                    className="size-full scale-[2] object-contain object-center"
+                    sizes="180px"
+                    priority={activeIndex === 0}
+                    slideDirection={slideDirection}
+                  />
                 </div>
 
                 <div className="flex w-[160px] shrink-0 items-center justify-center">
-                  {nextItem ? <SidePeekImage src={nextItem.image} /> : null}
+                  {nextItem ? (
+                    <SidePeekImage src={nextItem.image} slideDirection={slideDirection} />
+                  ) : null}
                 </div>
               </div>
 
               <div className="relative mt-[9px] w-full">
                 <div className="mx-auto flex w-[144px] flex-col items-center gap-4">
-                  <p className="whitespace-nowrap font-gill text-base leading-110 text-darkblack">
+                  <p
+                    className={cn(
+                      "whitespace-nowrap font-gill text-base leading-110 text-darkblack",
+                      labelMotionClassName,
+                    )}
+                  >
                     {activeItem.name}
                   </p>
                   <DetailOutlineLink href={activeItem.href} className="h-14 min-w-[132px] uppercase">
@@ -351,34 +489,24 @@ const ProductDetailMoreForYouSection = ({ items }: ProductDetailMoreForYouSectio
         onPointerUp={endDrag(desktopTrackRef)}
         onPointerCancel={endDrag(desktopTrackRef)}
       >
-        {total > 1 && prevItem ? <DesktopSidePeek src={prevItem.image} side="prev" /> : null}
+        {prevItem ? (
+          <DesktopSidePeek src={prevItem.image} side="prev" slideDirection={slideDirection} />
+        ) : (
+          <div aria-hidden />
+        )}
 
         <div className="flex w-600 max-w-600 flex-col items-center justify-end gap-3">
           <div className="grid h-[305px] w-full place-items-center overflow-hidden [&>*]:col-start-1 [&>*]:row-start-1">
             <div className="relative mx-auto size-[305px] overflow-hidden">
-              <div
-                className={slideTrackClassName}
-                style={{
-                  width: `${total * 100}%`,
-                  transform: slideTransform,
-                }}
-              >
-                {items.map((item, index) => (
-                  <div
-                    key={item.id}
-                    className="relative flex h-full shrink-0 items-center justify-center"
-                    style={{ width: `${100 / total}%` }}
-                  >
-                    <DesktopCarouselImage
-                      src={item.image}
-                      alt={index === activeIndex ? item.name : ""}
-                      frameClassName={DESKTOP_IMAGE_FRAME}
-                      sizes={DESKTOP_IMAGE_SIZES}
-                      priority={index === 0}
-                    />
-                  </div>
-                ))}
-              </div>
+              <DesktopCarouselImage
+                src={activeItem.image}
+                alt={activeItem.name}
+                frameClassName={DESKTOP_IMAGE_FRAME}
+                sizes={DESKTOP_IMAGE_SIZES}
+                priority={activeIndex === 0}
+                slideDirection={slideDirection}
+                crossfade
+              />
             </div>
 
             {total > 1 ? (
@@ -413,7 +541,12 @@ const ProductDetailMoreForYouSection = ({ items }: ProductDetailMoreForYouSectio
 
           <div className="flex flex-col items-center gap-6 text-center">
             <div className="flex flex-col items-center">
-              <p className="whitespace-nowrap font-gill text-xl font-normal leading-110 text-darkblack">
+              <p
+                className={cn(
+                  "whitespace-nowrap font-gill text-xl font-normal leading-110 text-darkblack",
+                  labelMotionClassName,
+                )}
+              >
                 {activeItem.name}
               </p>
             </div>
@@ -423,7 +556,11 @@ const ProductDetailMoreForYouSection = ({ items }: ProductDetailMoreForYouSectio
           </div>
         </div>
 
-        {total > 1 && nextItem ? <DesktopSidePeek src={nextItem.image} side="next" /> : null}
+        {nextItem ? (
+          <DesktopSidePeek src={nextItem.image} side="next" slideDirection={slideDirection} />
+        ) : (
+          <div aria-hidden />
+        )}
       </div>
     </section>
   );

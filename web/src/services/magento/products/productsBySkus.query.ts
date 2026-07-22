@@ -29,6 +29,7 @@ export const MAGENTO_PRODUCTS_BY_SKUS_QUERY = `
           url_key
         }
         ... on SimpleProduct {
+          model_wear_image
           custom_attributesV2 {
             items {
               code

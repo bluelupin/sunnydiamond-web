@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { constructMetadata } from "@/shared/lib/seo/metadata";
-import { getMagentoProductByUrlKey } from "@/services/magento/products/productDetail.service";
+import {
+  fetchMagentoProductDetailPage,
+  getMagentoProductByUrlKey,
+} from "@/services/magento/products/productDetail.service";
 import JsonLd from "@/shared/lib/seo/JsonLd";
 import { buildProductJsonLd } from "@/shared/lib/seo/schema/product";
 import ProductDetailPageView from "@/features/products/components/ProductDetailPage";
@@ -42,19 +45,22 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ProductPage({ params }: PageProps) {
   const { urlKey } = await params;
-  const [product, visitUs] = await Promise.all([
-    getMagentoProductByUrlKey(decodeURIComponent(urlKey)),
+  const decodedUrlKey = decodeURIComponent(urlKey);
+  const [detailPage, visitUs] = await Promise.all([
+    fetchMagentoProductDetailPage(decodedUrlKey),
     getProductDisplayVisitUs(),
   ]);
 
-  if (!product) {
+  if (!detailPage) {
     notFound();
   }
+
+  const { product, moreForYou } = detailPage;
 
   return (
     <>
       <JsonLd data={buildProductJsonLd(product)} id={`product-jsonld-${product.id}`} />
-      <ProductDetailPageView product={product} visitUs={visitUs} />
+      <ProductDetailPageView product={product} moreForYou={moreForYou} visitUs={visitUs} />
     </>
   );
 }

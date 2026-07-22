@@ -17,6 +17,7 @@ import type {
 import type { CraftingBrillianceSectionData } from "@/types/homepage/craftingBrillianceSection";
 import type { FeaturedProductsSection } from "@/types/homepage/featuredProducts";
 import type { OccasionCard, OccasionSection } from "@/types/homepage/occasionSection";
+import { slugifyOccasionTitle } from "@/features/jewellery-product/utils/occasionListing";
 import type { TrustBadge } from "@/types/homepage/trustBadges";
 import type { HomepageSeo } from "@/types/homepage/seo";
 import type {
@@ -407,7 +408,7 @@ export function mapOccasionCard(raw?: StrapiOccasionCard | null): OccasionCard |
     title,
     description: cleanText(raw.description),
     subtitle: cleanText(raw.subtitle),
-    slug: cleanText(raw.slug),
+    slug: cleanText(raw.slug) ?? slugifyOccasionTitle(title),
     sortOrder: raw.sortOrder ?? undefined,
     isActive,
     cta: mapCta(raw.cta),

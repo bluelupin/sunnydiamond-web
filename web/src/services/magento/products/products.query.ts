@@ -57,6 +57,7 @@ export const MAGENTO_JEWELLERY_PRODUCTS_QUERY = `
           url_key
         }
         ... on SimpleProduct {
+          model_wear_image
           custom_attributesV2 {
             items {
               code

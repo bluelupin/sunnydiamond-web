@@ -20,6 +20,29 @@ export type MagentoCustomAttributeItem = {
   }> | null;
 };
 
+export type MagentoProductListItem = {
+  uid?: string | null;
+  sku?: string | null;
+  name?: string | null;
+  url_key?: string | null;
+  price_range?: {
+    minimum_price?: {
+      final_price?: {
+        value?: number | null;
+        currency?: string | null;
+      } | null;
+    } | null;
+  } | null;
+  image?: { url?: string | null } | null;
+  media_gallery?: MagentoMediaGalleryItem[] | null;
+  categories?: MagentoProductCategory[] | null;
+  /** Top-level SimpleProduct field — model/lifestyle shot for PLP hover. */
+  model_wear_image?: string | null;
+  custom_attributesV2?: {
+    items?: MagentoCustomAttributeItem[] | null;
+  } | null;
+};
+
 export type MagentoProductDetailItem = MagentoProductListItem & {
   stock_status?: string | null;
   meta_title?: string | null;
@@ -44,32 +67,12 @@ export type MagentoProductDetailItem = MagentoProductListItem & {
   custom_attributesV2?: {
     items?: MagentoCustomAttributeItem[] | null;
   } | null;
+  related_products?: MagentoProductListItem[] | null;
 };
 
 export type MagentoProductByUrlKeyResponse = {
   products: {
     items?: MagentoProductDetailItem[] | null;
-  } | null;
-};
-
-export type MagentoProductListItem = {
-  uid?: string | null;
-  sku?: string | null;
-  name?: string | null;
-  url_key?: string | null;
-  price_range?: {
-    minimum_price?: {
-      final_price?: {
-        value?: number | null;
-        currency?: string | null;
-      } | null;
-    } | null;
-  } | null;
-  image?: { url?: string | null } | null;
-  media_gallery?: MagentoMediaGalleryItem[] | null;
-  categories?: MagentoProductCategory[] | null;
-  custom_attributesV2?: {
-    items?: MagentoCustomAttributeItem[] | null;
   } | null;
 };
 

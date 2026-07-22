@@ -13,6 +13,7 @@ export type JewelleryFilterFacets = {
   metalTypes: JewelleryFilterFacetOption[];
   metalPurities: JewelleryFilterFacetOption[];
   gemstoneTypes: JewelleryFilterFacetOption[];
+  occasions: JewelleryFilterFacetOption[];
 };
 
 export type JewelleryListingProductsData = {

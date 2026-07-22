@@ -15,6 +15,7 @@ import {
   buildJewelleryCategoryHref,
   parseJewelleryCategorySlug,
 } from "../utils/jewelleryRoutes";
+import { resolveOccasionFacetOption } from "../utils/occasionListing";
 import { useMagentoJewelleryListing } from "@/hooks/magento/useMagentoJewelleryListing";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import type { JewelleryCategory, JewelleryCategorySlug, JewelleryFilterState } from "../types";
@@ -28,6 +29,7 @@ const JewelleryProductPage = () => {
   const categoryFromPath = parseJewelleryCategorySlug(categoryUrlKey);
   const categoryFromQuery = parseJewelleryCategorySlug(searchParams?.get("category") ?? null);
   const categoryFromUrl = categoryFromPath ?? categoryFromQuery ?? "all";
+  const occasionSlug = searchParams?.get("occasion");
 
   const [activeCategory, setActiveCategory] = useState<JewelleryCategorySlug>(categoryFromUrl);
   const [sortValue, setSortValue] = useState("featured");
@@ -35,6 +37,7 @@ const JewelleryProductPage = () => {
   const [draftFilters, setDraftFilters] = useState<JewelleryFilterState>(() => createEmptyFilterState());
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const facetsSyncedRef = useRef(false);
+  const lastOccasionSlugRef = useRef<string | null>(null);
   const { isWishlisted, toggleWishlist } = useWishlist();
 
   const {
@@ -57,13 +60,33 @@ const JewelleryProductPage = () => {
   }, [categoryFromUrl]);
 
   useEffect(() => {
-    if (!hasMagentoFilterFacets(facets) || facetsSyncedRef.current) {
+    if (!hasMagentoFilterFacets(facets)) {
       return;
     }
 
-    facetsSyncedRef.current = true;
-    setDraftFilters(createDefaultFilterState(facets));
-  }, [facets]);
+    const occasionOption = resolveOccasionFacetOption(occasionSlug, facets.occasions);
+    const occasionChanged = lastOccasionSlugRef.current !== (occasionSlug ?? null);
+    lastOccasionSlugRef.current = occasionSlug ?? null;
+
+    if (!facetsSyncedRef.current || occasionChanged) {
+      facetsSyncedRef.current = true;
+      const nextFilters = createDefaultFilterState(facets);
+      if (occasionOption) {
+        nextFilters.occasion = occasionOption.value;
+      }
+      setDraftFilters(nextFilters);
+      setFilters(nextFilters);
+      return;
+    }
+
+    if (occasionOption) {
+      setFilters((current) =>
+        current.occasion === occasionOption.value
+          ? current
+          : { ...current, occasion: occasionOption.value },
+      );
+    }
+  }, [facets, occasionSlug]);
 
   const handleCategoryChange = useCallback(
     (category: JewelleryCategory) => {

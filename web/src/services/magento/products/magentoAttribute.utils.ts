@@ -1,4 +1,7 @@
-import type { MagentoCustomAttributeItem } from "./magentoProduct.types";
+import type {
+  MagentoCustomAttributeItem,
+  MagentoMediaGalleryItem,
+} from "./magentoProduct.types";
 
 export function getMagentoCustomAttributeValue(
   items: MagentoCustomAttributeItem[] | null | undefined,
@@ -31,6 +34,82 @@ export function isMagentoBestSeller(
   items: MagentoCustomAttributeItem[] | null | undefined,
 ): boolean {
   return isMagentoBooleanTruthy(getMagentoCustomAttributeValue(items, "is_best_seller"));
+}
+
+function getActiveGalleryUrls(
+  mediaGallery: MagentoMediaGalleryItem[] | null | undefined,
+): string[] {
+  return (mediaGallery ?? [])
+    .filter((item) => item?.url && !item.disabled)
+    .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+    .map((item) => item.url!.trim());
+}
+
+function buildMagentoDirectCatalogUrl(
+  relativePath: string,
+  referenceImageUrl?: string | null,
+): string {
+  const reference = referenceImageUrl?.trim();
+  if (!reference) {
+    return "";
+  }
+
+  const marker = "/media/catalog/product/";
+  const markerIndex = reference.indexOf(marker);
+  if (markerIndex === -1) {
+    return "";
+  }
+
+  const prefix = reference.slice(0, markerIndex + marker.length);
+  const path = relativePath.replace(/^\/+/, "");
+  return path ? `${prefix}${path}` : "";
+}
+
+/** Magento cache URLs for shared model-wear assets can 403 — use the direct catalog path. */
+function stripMagentoImageCacheSegment(url: string): string {
+  const marker = "/media/catalog/product/cache/";
+  const markerIndex = url.indexOf(marker);
+  if (markerIndex === -1) {
+    return url;
+  }
+
+  const afterCache = url.slice(markerIndex + marker.length);
+  const pathStart = afterCache.indexOf("/");
+  if (pathStart === -1) {
+    return url;
+  }
+
+  const catalogPath = afterCache.slice(pathStart + 1);
+  return `${url.slice(0, markerIndex)}/media/catalog/product/${catalogPath}`;
+}
+
+/** Resolves Magento `model_wear_image` (absolute URL or catalog-relative path) to a CDN URL. */
+export function resolveMagentoModelWearImageUrl(
+  modelWearImage: string | null | undefined,
+  mediaGallery: MagentoMediaGalleryItem[] | null | undefined,
+  referenceImageUrl?: string | null,
+): string {
+  const raw = modelWearImage?.trim();
+  if (!raw || isMagentoPlaceholderImage(raw)) {
+    return "";
+  }
+
+  if (/^https?:\/\//i.test(raw)) {
+    return stripMagentoImageCacheSegment(raw);
+  }
+
+  const directUrl = buildMagentoDirectCatalogUrl(raw, referenceImageUrl);
+  if (directUrl) {
+    return directUrl;
+  }
+
+  const galleryUrls = getActiveGalleryUrls(mediaGallery);
+  const filename = raw.split("/").pop() ?? raw;
+  const galleryMatch = galleryUrls.find(
+    (url) => url.includes(raw) || url.endsWith(raw) || url.split("/").pop() === filename,
+  );
+
+  return galleryMatch ? stripMagentoImageCacheSegment(galleryMatch) : "";
 }
 
 export function isMagentoPlaceholderImage(url: string | null | undefined): boolean {

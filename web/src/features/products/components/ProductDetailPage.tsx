@@ -7,7 +7,7 @@ import {
   getProductDetailContent,
   getProductDetailPricing,
 } from "@/features/products/data/productDetailContent";
-import { getMoreForYouCarouselItems } from "@/features/products/data/moreForYouContent";
+import type { MoreForYouCarouselItem } from "@/features/products/data/moreForYouContent";
 import { useCart } from "@/features/cart/context/CartContext";
 import { useCartUI } from "@/features/cart/context/CartUIContext";
 import { ChevronLeft } from "lucide-react";
@@ -22,16 +22,16 @@ import type { NormalizedVisitUsSection } from "@/services/product-display/produc
 
 type ProductDetailPageProps = {
   product: Product;
+  moreForYou: MoreForYouCarouselItem[];
   visitUs?: NormalizedVisitUsSection | null;
 };
 
-const ProductDetailPage = ({ product, visitUs }: ProductDetailPageProps) => {
+const ProductDetailPage = ({ product, moreForYou, visitUs }: ProductDetailPageProps) => {
   const { addItem } = useCart();
   const { openBagDrawer } = useCartUI();
 
   const content = getProductDetailContent(product);
   const pricing = getProductDetailPricing(product);
-  const moreForYou = getMoreForYouCarouselItems(product.id);
 
   const handleAddToCart = async (payload: Parameters<typeof addItem>[0]) => {
     const result = await addItem(payload);

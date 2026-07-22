@@ -24,6 +24,8 @@ export interface JewelleryFilterState {
   metalTypes: string[];
   metalPurities: string[];
   gemstoneType: string;
+  /** Magento `sd_occasions` option value (e.g. "46"). */
+  occasion: string;
 }
 
 export interface JewellerySortOption {
@@ -38,7 +40,7 @@ export interface JewelleryListingProduct {
   name: string;
   price: number;
   primaryImage: string | StaticImageData;
-  /** Model / lifestyle image — mobile swipe & desktop hover (Magento l_/t_ only). */
+  /** Model / lifestyle image — mobile swipe & desktop hover (`model_wear_image`, else l_/t_ gallery). */
   modalImage?: string | StaticImageData;
   hoverImage?: string | StaticImageData;
   category: string;

@@ -32,7 +32,8 @@ export function hasMagentoFilterFacets(facets: JewelleryFilterFacets): boolean {
     getAvailableCategoryLabels(facets).length > 0 ||
     facets.metalTypes.length > 0 ||
     facets.metalPurities.length > 0 ||
-    facets.gemstoneTypes.length > 0
+    facets.gemstoneTypes.length > 0 ||
+    facets.occasions.length > 0
   );
 }
 
@@ -44,6 +45,7 @@ export function createEmptyFilterState(): JewelleryFilterState {
     metalTypes: [],
     metalPurities: [],
     gemstoneType: "",
+    occasion: "",
   };
 }
 
@@ -55,6 +57,7 @@ export function createDefaultFilterState(facets: JewelleryFilterFacets): Jewelle
     metalTypes: [],
     metalPurities: [],
     gemstoneType: "",
+    occasion: "",
   };
 }
 
@@ -130,7 +133,7 @@ export function hasActiveFilters(
     return true;
   }
 
-  return filters.gemstoneType.trim().length > 0;
+  return filters.gemstoneType.trim().length > 0 || filters.occasion.trim().length > 0;
 }
 
 export function chunkFilterOptions<T>(items: T[], chunkSize: number): T[][] {

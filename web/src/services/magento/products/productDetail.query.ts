@@ -1,3 +1,5 @@
+import { MAGENTO_LISTING_PRODUCT_FIELDS } from "./listingProductFields.fragment";
+
 export const MAGENTO_PRODUCT_BY_URL_KEY_QUERY = `
   query MagentoProductByUrlKey($urlKey: String!) {
     products(filter: { url_key: { eq: $urlKey } }) {
@@ -44,6 +46,10 @@ export const MAGENTO_PRODUCT_BY_URL_KEY_QUERY = `
           url_key
         }
         ... on SimpleProduct {
+          model_wear_image
+          related_products {
+            ${MAGENTO_LISTING_PRODUCT_FIELDS}
+          }
           custom_attributesV2 {
             items {
               code

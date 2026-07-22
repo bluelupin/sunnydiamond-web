@@ -1,17 +1,8 @@
-import { jewelleryListingProducts } from "@/features/jewellery-product/data/products";
-import { products } from "@/features/products/data/products";
+import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
+import { getProductHref } from "@/features/products/utils/productRoutes";
+import { getImageSrc } from "@/shared/utils/image";
 
-export const moreForYouTransparentImages = [
-  "/images/products/more-for-you/sample-left.png",
-  "/images/products/more-for-you/sample-center.png",
-  "/images/products/more-for-you/sample-right.png",
-] as const;
-
-export const moreForYouProductImages = [
-  "/images/products/more-for-you/bracelet-left.png",
-  "/images/products/more-for-you/ring-center.png",
-  "/images/products/more-for-you/bracelet-right.png",
-] as const;
+export const MORE_FOR_YOU_PRODUCT_LIMIT = 8;
 
 export type MoreForYouCarouselItem = {
   id: string;
@@ -20,17 +11,29 @@ export type MoreForYouCarouselItem = {
   image: string;
 };
 
-export function getMoreForYouCarouselItems(currentProductId: string): MoreForYouCarouselItem[] {
-  const pool = products.filter((product) => product.id !== currentProductId);
+export function mapJewelleryListingToMoreForYouItems(
+  products: JewelleryListingProduct[],
+  excludeSku: string,
+  limit = MORE_FOR_YOU_PRODUCT_LIMIT,
+): MoreForYouCarouselItem[] {
+  const normalizedExcludeSku = excludeSku.trim();
 
-  return pool.map((product, index) => {
-    const listing = jewelleryListingProducts.find((item) => item.id.startsWith(`${product.id}-`));
+  return products
+    .filter((product) => product.sku !== normalizedExcludeSku)
+    .slice(0, limit)
+    .flatMap((product) => {
+      const image = getImageSrc(product.primaryImage);
+      if (!image) {
+        return [];
+      }
 
-    return {
-      id: product.id,
-      name: listing?.name ?? product.name,
-      href: `/product/${product.urlKey}`,
-      image: moreForYouProductImages[index % moreForYouProductImages.length],
-    };
-  });
+      return [
+        {
+          id: product.sku,
+          name: product.name,
+          href: getProductHref({ urlKey: product.urlKey, id: product.sku }),
+          image,
+        },
+      ];
+    });
 }

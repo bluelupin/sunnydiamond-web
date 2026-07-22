@@ -135,6 +135,10 @@ export function buildMagentoProductsFilter({
     }
   }
 
+  if (filters.occasion.trim()) {
+    magentoFilter.sd_occasions = { in: [filters.occasion.trim()] };
+  }
+
   return Object.keys(magentoFilter).length > 0 ? magentoFilter : undefined;
 }
 
@@ -289,6 +293,9 @@ export function mapMagentoAggregationsToFacets(
   const gemstoneTypeAggregation = aggregationList.find(
     (item) => item?.attribute_code === "sd_gemstone_type",
   );
+  const occasionsAggregation = aggregationList.find(
+    (item) => item?.attribute_code === "sd_occasions",
+  );
 
   const priceBounds = parsePriceBounds(priceAggregation?.options);
 
@@ -316,6 +323,7 @@ export function mapMagentoAggregationsToFacets(
     metalTypes: mapMetalTypeOptions(metalTypeAggregation?.options),
     metalPurities: mapMetalPurityOptions(purityAggregation?.options),
     gemstoneTypes: mapGemstoneTypeOptions(gemstoneTypeAggregation?.options),
+    occasions: mapFacetOptions(occasionsAggregation?.options, (label) => formatMagentoFacetLabel(label) ?? label),
   };
 }
 
@@ -326,4 +334,5 @@ export const EMPTY_JEWELLERY_FILTER_FACETS: JewelleryFilterFacets = {
   metalTypes: [],
   metalPurities: [],
   gemstoneTypes: [],
+  occasions: [],
 };
