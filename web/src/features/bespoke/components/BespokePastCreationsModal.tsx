@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { useEdgeAutoScroll } from "@/shared/hooks/use-edge-auto-scroll";
 import { useInitialCenterScroll } from "@/shared/hooks/use-initial-center-scroll";
+import { MOBILE_MEDIA_QUERY } from "@/shared/lib/breakpoints";
 import { cn } from "@/shared/utils/cn";
 import {
   bespokePastCreationsFigmaSpec,
@@ -79,6 +80,24 @@ const usePastCreationsMasonryLayout = (images: readonly BespokePastCreationImage
   return { columns, layout };
 };
 
+const useManualScrollViewport = () => {
+  const [isManualScrollViewport, setIsManualScrollViewport] = useState(() =>
+    typeof window !== "undefined"
+      ? window.matchMedia(MOBILE_MEDIA_QUERY).matches
+      : false,
+  );
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(MOBILE_MEDIA_QUERY);
+    const update = () => setIsManualScrollViewport(mediaQuery.matches);
+    update();
+    mediaQuery.addEventListener("change", update);
+    return () => mediaQuery.removeEventListener("change", update);
+  }, []);
+
+  return isManualScrollViewport;
+};
+
 type BespokePastCreationsModalProps = {
   open: boolean;
   images: readonly BespokePastCreationImage[];
@@ -122,14 +141,29 @@ const BespokePastCreationsModal = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const galleryRef = useRef<HTMLDivElement>(null);
   const { columns, layout } = usePastCreationsMasonryLayout(images);
+  const isManualScrollViewport = useManualScrollViewport();
+  const useDesktopGalleryScroll = open && !isManualScrollViewport;
 
-  useEdgeAutoScroll(scrollContainerRef, open, {
+  useEdgeAutoScroll(scrollContainerRef, useDesktopGalleryScroll, {
     edgeZone: 80,
     maxSpeedPxPerSec: 840,
   });
-  useInitialCenterScroll(scrollContainerRef, galleryRef, open);
+  useInitialCenterScroll(scrollContainerRef, galleryRef, useDesktopGalleryScroll);
 
   usePastCreationsModalEffects(open, onClose, suppressEscape);
+
+  useEffect(() => {
+    if (!open || !isManualScrollViewport) {
+      return;
+    }
+
+    const container = scrollContainerRef.current;
+    if (!container) {
+      return;
+    }
+
+    container.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [open, isManualScrollViewport]);
 
   if (!open) {
     return null;
@@ -141,7 +175,11 @@ const BespokePastCreationsModal = ({
       role="dialog"
       aria-modal="true"
       aria-label="Past creations gallery"
-      className="fixed inset-0 z-[70] overflow-auto bg-white animate-in fade-in duration-300 horizontalScrollbar verticleScrollbar"
+      className={cn(
+        "fixed inset-0 z-[70] overflow-auto bg-white animate-in fade-in duration-300 horizontalMobileScrollbar verticleMobileScrollbar",
+        isManualScrollViewport &&
+        "touch-pan-x touch-pan-y overscroll-contain [-webkit-overflow-scrolling:touch]",
+      )}
     >
       <button
         type="button"
@@ -157,7 +195,7 @@ const BespokePastCreationsModal = ({
       </button>
       <div
         ref={galleryRef}
-        className="inline-flex min-h-full w-max min-w-full pt-[calc(100px+1rem)] md:gap-6 gap-4 md:pt-[calc(100px+1.5rem)]"
+        className="inline-flex min-h-max w-max min-w-full items-start gap-4 md:gap-6"
       >
         {columns.map((column, columnIndex) => {
           const isOddColumn = columnIndex % 2 === 0;
