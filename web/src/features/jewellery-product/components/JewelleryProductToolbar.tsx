@@ -12,6 +12,13 @@ import {
 } from "../data/content";
 import FilterIcon from "@/assets/Icons/PLP/FilterIcon";
 import SortByIcon from "@/assets/Icons/PLP/SortByIcon";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 
 interface JewelleryProductToolbarProps {
   productCount: number;
@@ -98,7 +105,7 @@ const SortControl = ({
   onMobileOpen,
 }: SortControlProps) => (
   <>
-    {/* Desktop — native select overlay (Figma 692:4239) */}
+    {/* Desktop — original Sort By control; Gemstone Type-style dropdown menu */}
     <div
       className="hidden grid-cols-1 grid-rows-1 items-center justify-center md:grid"
       style={{
@@ -111,23 +118,26 @@ const SortControl = ({
       }}
     >
       <span
-        className="lg:text-xl text-base text-darkblack pointer-events-none col-start-1 row-start-1 inline-flex items-center gap-2 whitespace-nowrap font-gill font-normal uppercase leading-110"
+        className="pointer-events-none col-start-1 row-start-1 inline-flex items-center gap-2 whitespace-nowrap font-gill text-base font-normal uppercase leading-110 text-darkblack lg:text-xl"
       >
         Sort By
         <SortByIcon className="size-6" />
       </span>
-      <select
-        value={sortValue}
-        onChange={(event) => onSortChange(event.target.value)}
-        className="col-start-1 row-start-1 z-10 size-full cursor-pointer appearance-none bg-transparent opacity-0"
-        aria-label="Sort products"
-      >
-        {sortOptions.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+      <Select value={sortValue} onValueChange={onSortChange}>
+        <SelectTrigger
+          aria-label="Sort products"
+          className="col-start-1 row-start-1 z-10 size-full h-full min-h-0 cursor-pointer border-0 bg-transparent opacity-0 shadow-none focus:ring-0 [&>svg]:hidden"
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent className="z-30">
+          {sortOptions.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
 
     {/* Mobile — opens sort drawer (Figma 1279:1020) */}
@@ -219,14 +229,14 @@ const SortDrawer = ({ open, sortValue, onClose, onSelect }: SortDrawerProps) => 
                       onClose();
                     }}
                     className={cn(
-                      "flex w-full items-center justify-between px-6 py-5 text-left font-gill text-base leading-110 text-darkblack",
-                      selected ? "font-normal" : "font-light",
+                      "flex w-full items-center gap-3 px-6 py-5 text-left font-gill text-base leading-110 text-darkblack",
+                      selected ? "bg-gold300 font-normal" : "font-light",
                     )}
                   >
+                    <span className="inline-flex size-5 shrink-0 items-center justify-center" aria-hidden>
+                      {selected ? <Check size={20} strokeWidth={1.5} /> : null}
+                    </span>
                     <span>{option.label}</span>
-                    {selected ? (
-                      <Check size={20} strokeWidth={1.5} aria-hidden className="shrink-0" />
-                    ) : null}
                   </button>
                 </li>
               );

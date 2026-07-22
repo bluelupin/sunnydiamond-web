@@ -131,7 +131,7 @@ const JewelleryFilterDrawer = ({
   }
 
   return (
-    <div className="fixed inset-0 z-[70] flex max-md:flex-col md:justify-end">
+    <div className="fixed inset-0 z-[70] flex max-md:flex-col max-md:overflow-hidden md:justify-end">
       <button
         type="button"
         aria-label="Close filters"
@@ -144,9 +144,10 @@ const JewelleryFilterDrawer = ({
         aria-modal="true"
         aria-label="Filters"
         className={cn(
-          "flex max-h-full min-h-0 shrink-0 flex-col bg-white shadow-2xl",
-          "max-md:w-full max-md:animate-in max-md:slide-in-from-bottom max-md:duration-300",
-          "md:h-full md:w-full md:max-w-[474px] md:animate-in md:slide-in-from-right md:duration-300",
+          "flex min-h-0 flex-col bg-white shadow-2xl",
+          "max-md:w-full max-md:max-h-[calc(100dvh-3rem)] max-md:overflow-hidden",
+          "max-md:animate-in max-md:slide-in-from-bottom max-md:duration-300",
+          "md:h-full md:w-full md:max-w-[474px] md:shrink-0 md:animate-in md:slide-in-from-right md:duration-300",
         )}
       >
         <div className="md:px-6 px-4 md:pt-10 pt-6">
@@ -367,7 +368,10 @@ const JewelleryFilterDrawer = ({
           </div>
         </div>
 
-        <PanelFooter contentClassName="border-t-[0.5px] border-neutral300 px-0 py-6 lg:px-6 px-4">
+        <PanelFooter
+          className="max-md:pb-[env(safe-area-inset-bottom,0px)]"
+          contentClassName="border-t-[0.5px] border-neutral300 px-0 py-6 lg:px-6 md:px-6 px-4"
+        >
           <div className="flex w-full flex-col gap-4">
             <button
               type="button"
