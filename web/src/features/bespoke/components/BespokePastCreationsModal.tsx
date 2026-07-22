@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { useEdgeAutoScroll } from "@/shared/hooks/use-edge-auto-scroll";
 import { useInitialCenterScroll } from "@/shared/hooks/use-initial-center-scroll";
@@ -11,6 +11,73 @@ import {
 } from "@/features/bespoke/data/content";
 
 const spec = bespokePastCreationsFigmaSpec;
+
+type MasonryLayout = {
+  columnCount: number;
+  columnWidth: number;
+  gap: number;
+  tileHeight: number;
+};
+
+type MasonryColumnItem = {
+  image: BespokePastCreationImage;
+  index: number;
+};
+
+const getMasonryLayout = (viewportWidth: number): MasonryLayout => {
+  if (viewportWidth < 640) {
+    return { columnCount: 3, columnWidth: 165, gap: 16, tileHeight: 226 };
+  }
+
+  if (viewportWidth < 768) {
+    return { columnCount: 4, columnWidth: 200, gap: 16, tileHeight: 350 };
+  }
+
+  return { columnCount: 5, columnWidth: 351, gap: 24, tileHeight: 424 };
+};
+
+const distributeImagesToColumns = (
+  images: readonly BespokePastCreationImage[],
+  layout: MasonryLayout,
+): MasonryColumnItem[][] => {
+  const columns: MasonryColumnItem[][] = Array.from({ length: layout.columnCount }, () => []);
+  const columnHeights = Array.from({ length: layout.columnCount }, () => 0);
+
+  images.forEach((image, index) => {
+    let targetColumn = 0;
+
+    for (let columnIndex = 1; columnIndex < layout.columnCount; columnIndex += 1) {
+      if (columnHeights[columnIndex] < columnHeights[targetColumn]) {
+        targetColumn = columnIndex;
+      }
+    }
+
+    columns[targetColumn].push({ image, index });
+    columnHeights[targetColumn] += layout.tileHeight + layout.gap;
+  });
+
+  return columns;
+};
+
+const usePastCreationsMasonryLayout = (images: readonly BespokePastCreationImage[]) => {
+  const [layout, setLayout] = useState<MasonryLayout>(() =>
+    getMasonryLayout(typeof window !== "undefined" ? window.innerWidth : 1440),
+  );
+
+  useEffect(() => {
+    const updateLayout = () => setLayout(getMasonryLayout(window.innerWidth));
+    updateLayout();
+    window.addEventListener("resize", updateLayout);
+    return () => window.removeEventListener("resize", updateLayout);
+  }, []);
+
+  const columns = useMemo(
+    () => distributeImagesToColumns(images, layout),
+    [images, layout],
+  );
+
+  return { columns, layout };
+};
 
 type BespokePastCreationsModalProps = {
   open: boolean;
@@ -54,6 +121,7 @@ const BespokePastCreationsModal = ({
 }: BespokePastCreationsModalProps) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const galleryRef = useRef<HTMLDivElement>(null);
+  const { columns, layout } = usePastCreationsMasonryLayout(images);
 
   useEdgeAutoScroll(scrollContainerRef, open, {
     edgeZone: 80,
@@ -89,27 +157,42 @@ const BespokePastCreationsModal = ({
       </button>
       <div
         ref={galleryRef}
-        className={cn(
-          "inline-block min-h-full w-max min-w-full columns-[160px] gap-4 sm:columns-[200px] md:columns-[351px] md:gap-6 lg:columns-[351px] overflow-x-auto whitespace-nowrap min-w-[1851px]",
-        )}
+        className="inline-flex min-h-full w-max min-w-full pt-[calc(100px+1rem)] md:gap-6 gap-4 md:pt-[calc(100px+1.5rem)]"
       >
-        {images.map((image, index) => (
-          <button
-            key={`${image.src}-${index}`}
-            type="button"
-            onClick={() => onImageClick(image)}
-            aria-label={`View story: ${image.alt}`}
-            className="w-[351px] md:mb-6 mb-4 block w-full md:h-[424px] break-inside-avoid border-0 bg-transparent p-0 cursor-pointer transition-opacity hover:opacity-90"
-          >
-            <ResponsiveImage
-              desktopSrc={image.src}
-              alt={image.alt}
-              width={image.width}
-              height={image.height}
-              className="block h-full w-full object-cover object-center"
-            />
-          </button>
-        ))}
+        {columns.map((column, columnIndex) => {
+          const isOddColumn = columnIndex % 2 === 0;
+
+          return (
+            <div
+              key={`past-creations-column-${columnIndex}`}
+              className={cn(
+                "flex shrink-0 flex-col gap-4 md:gap-6",
+                isOddColumn && "relative -mt-[100px]",
+              )}
+              style={{ width: layout.columnWidth }}
+            >
+              {column.map(({ image, index }) => (
+                <button
+                  key={`${image.src}-${index}`}
+                  type="button"
+                  onClick={() => onImageClick(image)}
+                  aria-label={`View story: ${image.alt}`}
+                  className="block w-full cursor-pointer border-0 bg-transparent p-0 transition-opacity hover:opacity-90 md:h-[424px] h-[165px]"
+                  style={{ height: layout.tileHeight }}
+                >
+                  <ResponsiveImage
+                    desktopSrc={image.src}
+                    alt={image.alt}
+                    width={image.width}
+                    height={image.height}
+                    className="block h-full w-full object-cover object-center"
+                    sizes={`${layout.columnWidth}px`}
+                  />
+                </button>
+              ))}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
