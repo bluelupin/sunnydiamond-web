@@ -2,16 +2,14 @@
 
 import { useMemo } from "react";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
-import {
-  featuredProductsCarouselFallbackImages,
-  featuredProductsCarouselFallbackItems,
-} from "@/features/cms/data/featuredProductsFallback";
-import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { useMagentoTrendingProducts } from "@/hooks/magento/useMagentoTrendingProducts";
+import { featuredProductsCarouselFallbackItems } from "@/features/cms/data/featuredProductsFallback";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import Reveal from "@/shared/Animation/Reveal";
 import FeaturedProductsCarousel, {
   type FeaturedCarouselItem,
 } from "@/features/cms/components/home/FeaturedProductsCarousel";
+import { mapJewelleryListingToFeaturedCarouselItems } from "@/services/magento/products/trendingProducts.service";
 
 /** Recommended transparent product PNG/WebP for CMS + fallbacks. */
 export const FEATURED_PRODUCTS_IMAGE_SPEC = {
@@ -36,28 +34,6 @@ const FEATURED_CAROUSEL_COUNT = 3;
 
 function getFallbackItems(): FeaturedCarouselItem[] {
   return featuredProductsCarouselFallbackItems.slice(0, FEATURED_CAROUSEL_COUNT);
-}
-
-function normalizeCarouselItems(cmsItems: FeaturedCarouselItem[]): FeaturedCarouselItem[] {
-  const fallbacks = getFallbackItems();
-
-  if (cmsItems.length === 0) {
-    return fallbacks;
-  }
-
-  if (cmsItems.length >= FEATURED_CAROUSEL_COUNT) {
-    return cmsItems.slice(0, FEATURED_CAROUSEL_COUNT);
-  }
-
-  const merged = [...cmsItems];
-  for (const fallback of fallbacks) {
-    if (merged.length >= FEATURED_CAROUSEL_COUNT) break;
-    if (!merged.some((item) => String(item.id) === String(fallback.id))) {
-      merged.push(fallback);
-    }
-  }
-
-  return merged.slice(0, FEATURED_CAROUSEL_COUNT);
 }
 
 function FeaturedProductsHeader({
@@ -88,6 +64,7 @@ function FeaturedProductsHeader({
 
 const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
   const { data: shoppingData, isLoading: isShoppingLoading } = useHomepageShoppingBlocks();
+  const { data: trendingProducts, isLoading: isTrendingLoading } = useMagentoTrendingProducts();
   const featuredProductsData =
     shoppingData?.homepage?.featuredProductsSection || shoppingData?.featuredProductsSection;
 
@@ -96,38 +73,21 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
   const ctaLabel = featuredProductsData?.cta?.label?.trim() || "Discover";
 
   const items = useMemo(() => {
-    const products = Array.isArray(featuredProductsData?.products)
-      ? featuredProductsData.products
-      : [];
+    const magentoItems = mapJewelleryListingToFeaturedCarouselItems(trendingProducts ?? []);
+    if (magentoItems.length > 0) {
+      return magentoItems;
+    }
 
-    const mapped: FeaturedCarouselItem[] = products
-      .map((product, index) => {
-        const name = product?.name?.trim() ?? "";
-        const cmsImage = resolveCmsMediaUrl(product?.image);
-        const image =
-          cmsImage ||
-          featuredProductsCarouselFallbackImages[
-            index % featuredProductsCarouselFallbackImages.length
-          ];
+    return getFallbackItems();
+  }, [trendingProducts]);
 
-        return {
-          id: product?.id ?? index,
-          name,
-          price: typeof product?.price === "number" ? product.price : null,
-          image,
-          href: product?.id ? `/product/${product.id}` : "/products",
-        };
-      })
-      .filter((product) => Boolean(product.name));
-
-    return normalizeCarouselItems(mapped);
-  }, [featuredProductsData?.products]);
+  const isLoading = isShoppingLoading || isTrendingLoading;
 
   if (!isSectionActive(featuredProductsData?.isActive)) {
     return null;
   }
 
-  if (isShoppingLoading) {
+  if (isLoading) {
     return (
       <section
         id={id}

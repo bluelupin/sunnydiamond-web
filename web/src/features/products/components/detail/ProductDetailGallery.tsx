@@ -41,8 +41,10 @@ type CroppedGalleryImageProps = {
   sizes: string;
   maxWidthClass: string;
   minHeightClass?: string;
-  cropStyle: typeof nestedImageCropStyle;
+  cropStyle?: typeof nestedImageCropStyle;
   priority?: boolean;
+  containerClassName?: string;
+  centered?: boolean;
 };
 
 const CroppedGalleryImage = ({
@@ -51,26 +53,42 @@ const CroppedGalleryImage = ({
   sizes,
   maxWidthClass,
   minHeightClass = "min-h-52",
-  cropStyle,
+  cropStyle = nestedImageCropStyle,
   priority,
+  containerClassName,
+  centered = false,
 }: CroppedGalleryImageProps) => (
   <div
     className={cn(
-      "mx-auto flex h-full w-full overflow-hidden",
+      "mx-auto flex h-full w-full items-center justify-center overflow-hidden",
       maxWidthClass,
       minHeightClass,
+      containerClassName,
     )}
   >
-    <Image
-      src={getImageSrc(src)}
-      alt={alt}
-      width={800}
-      height={880}
-      priority={priority}
-      sizes={sizes}
-      className="max-w-none object-cover"
-      style={cropStyle}
-    />
+    {centered ? (
+      <div className="relative size-full">
+        <Image
+          src={getImageSrc(src)}
+          alt={alt}
+          fill
+          priority={priority}
+          sizes={sizes}
+          className="object-cover object-center"
+        />
+      </div>
+    ) : (
+      <Image
+        src={getImageSrc(src)}
+        alt={alt}
+        width={800}
+        height={880}
+        priority={priority}
+        sizes={sizes}
+        className="max-w-none object-cover object-center"
+        style={cropStyle}
+      />
+    )}
   </div>
 );
 
@@ -138,26 +156,27 @@ const ProductDetailGallery = ({ product, topGalleryRef }: ProductDetailGalleryPr
 
       <div className="hidden min-h-full flex-1 flex-col gap-3 md:flex">
         <div ref={topGalleryRef} className="flex shrink-0 flex-col gap-3">
-          <div className={galleryFrameClass}>
+          <div className={cn(galleryFrameClass, "items-center justify-center")}>
             <CroppedGalleryImage
               src={heroImage ?? product.image}
               alt={`${product.name} — primary view`}
               sizes="504px"
-              maxWidthClass="max-w-504"
-              minHeightClass="min-h-320"
-              cropStyle={nestedImageCropStyle}
+              maxWidthClass="w-full max-w-504"
               priority
+              centered
+              containerClassName="aspect-square h-auto shrink-0 border-2 border-red-500"
             />
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <div className="flex min-h-280 flex-1 overflow-hidden bg-gray300 px-4 py-8 sm:min-h-360 md:h-380 md:px-5 md:py-10 lg:h-465 lg:px-6 lg:py-12 sm:w-1/2">
+            <div className="flex min-h-280 flex-1 items-center justify-center overflow-hidden bg-gray300 px-4 py-8 sm:min-h-360 md:h-380 md:px-5 md:py-10 lg:h-465 lg:px-6 lg:py-12 sm:w-1/2">
               <CroppedGalleryImage
                 src={thumbOne ?? product.image}
                 alt={`${product.name} — detail view`}
                 sizes="312px"
-                maxWidthClass="max-w-311"
-                cropStyle={nestedImageCropStyle}
+                maxWidthClass="w-full max-w-311"
+                centered
+                containerClassName="aspect-square h-auto shrink-0 border-2 border-red-500"
               />
             </div>
             <div className="flex min-h-280 w-full overflow-hidden sm:min-h-360 md:h-400 md:shrink-0 lg:h-465 sm:w-1/2">

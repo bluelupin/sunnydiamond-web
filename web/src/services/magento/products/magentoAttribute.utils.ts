@@ -36,6 +36,12 @@ export function isMagentoBestSeller(
   return isMagentoBooleanTruthy(getMagentoCustomAttributeValue(items, "is_best_seller"));
 }
 
+export function isMagentoTrending(
+  items: MagentoCustomAttributeItem[] | null | undefined,
+): boolean {
+  return isMagentoBooleanTruthy(getMagentoCustomAttributeValue(items, "sd_trending"));
+}
+
 function getActiveGalleryUrls(
   mediaGallery: MagentoMediaGalleryItem[] | null | undefined,
 ): string[] {
