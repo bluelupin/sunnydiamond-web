@@ -412,13 +412,12 @@ const mapTimeline = (
   if (milestones.length === 0) return null;
 
   const years = milestones.map((milestone) => milestone.year);
-  const preferredDefault = years.includes("2008") ? "2008" : years[0];
 
   return {
     backgroundImage,
     milestones,
     years,
-    defaultYear: preferredDefault,
+    defaultYear: years[0],
   };
 };
 
