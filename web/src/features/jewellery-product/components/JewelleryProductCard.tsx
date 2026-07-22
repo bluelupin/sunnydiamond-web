@@ -236,29 +236,19 @@ const JewelleryProductCard = ({
           }}
           className="pointer-events-auto relative z-50 flex size-6 items-center justify-center md:size-[32px]"
         >
-          <svg
-            width="29"
-            height="26"
-            viewBox="0 0 29 26"
-            xmlns="http://www.w3.org/2000/svg"
+          <svg width="32" height="32" viewBox="0 0 32 32" fill={isWishlisted ? "currentColor" : "none"} xmlns="http://www.w3.org/2000/svg"
             className={cn(
-              "transition-colors duration-200",
+              "transition-colors duration-200 md:w-8 md:h-8 w-6 h-6",
               isWishlisted
-                ? "fill-[#AB863B] text-linkGold drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]"
+                ? "fill-[#AB863B] text-linkGold"
                 : isMobileLifestyle
                   ? "fill-none text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)]"
                   : hasHoverImage
-                    ? "fill-none text-darkblack drop-shadow-none md:group-hover:text-white md:group-hover:drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]"
+                    ? "fill-none text-darkblack drop-shadow-none"
                     : "fill-none text-darkblack",
-            )}
-          >
-            <path
-              d="M27.4999 8.64967C27.4999 10.7116 26.7082 12.6922 25.2943 14.1572C22.0398 17.5307 18.8831 21.0484 15.507 24.2996C15.1194 24.6675 14.6179 24.8444 14.1209 24.8328C13.6256 24.8213 13.1346 24.6228 12.765 24.2396L3.03826 14.1572C0.0982486 11.1096 0.0982486 6.18968 3.03826 3.14213C6.00717 0.0646404 10.8438 0.0646404 13.8127 3.14213L14.1663 3.5086L14.5196 3.14235C15.9431 1.66604 17.8818 0.833374 19.907 0.833374C21.9322 0.833374 23.8707 1.66596 25.2943 3.14213C26.7083 4.60731 27.4999 6.58773 27.4999 8.64967Z"
-              stroke="currentColor"
-              fill={isWishlisted ? "currentColor" : "none"}
-              strokeWidth="1.66667"
-              strokeLinejoin="round"
-            />
+            )}>
+            <path d="M15.6676 27.3342L26.8376 16.0042C28.0098 14.8319 28.6684 13.242 28.6684 11.5842C28.6684 9.92638 28.0098 8.33645 26.8376 7.1642C25.6653 5.99194 24.0754 5.33337 22.4176 5.33337C20.7598 5.33337 19.1698 5.99194 17.9976 7.1642L15.6676 9.3342L13.3376 7.1642C12.1653 5.99194 10.5754 5.33337 8.91757 5.33337C7.25975 5.33337 5.66983 5.99194 4.49757 7.1642C3.32532 8.33645 2.66675 9.92638 2.66675 11.5842C2.66675 13.242 3.32532 14.8319 4.49757 16.0042L15.6676 27.3342Z"
+              stroke={isWishlisted ? "currentColor" : "#0A0A0A"} strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
       </div>
