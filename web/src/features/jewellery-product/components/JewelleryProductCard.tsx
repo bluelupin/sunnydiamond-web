@@ -114,7 +114,7 @@ const JewelleryProductCard = ({
       )}
       {...swipeSurfaceProps}
     >
-      {/* Desktop hover — full-card lifestyle */}
+      {/* Desktop hover — lazy-loaded so load more does not fetch every lifestyle image at once */}
       {hasHoverImage ? (
         <div
           className="col-start-1 row-start-1 hidden size-full grid opacity-0 transition-opacity duration-500 md:grid md:group-hover:opacity-100"
@@ -123,6 +123,8 @@ const JewelleryProductCard = ({
           <OptimizedImage
             src={hoverImage!}
             alt=""
+            width={303}
+            height={496}
             className="col-start-1 row-start-1 size-full object-cover"
             sizes="33vw"
           />

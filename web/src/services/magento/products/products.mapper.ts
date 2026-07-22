@@ -4,6 +4,7 @@ import {
   formatMagentoFacetLabel,
   getMagentoCustomAttributeValue,
   isMagentoBestSeller,
+  isMagentoPlaceholderImage,
   normalizeGemstoneTypeLabel,
 } from "./magentoAttribute.utils";
 
@@ -38,13 +39,20 @@ function pickImageByRole(urls: string[], roles: Array<"f" | "sd" | "l" | "t">): 
   );
 }
 
-export function resolveMagentoProductImages(mediaGallery: MagentoMediaGalleryItem[] | null | undefined): {
+export function resolveMagentoProductImages(
+  mediaGallery: MagentoMediaGalleryItem[] | null | undefined,
+  fallbackImageUrl?: string | null,
+): {
   primaryImage: string;
   lifestyleImage: string;
 } {
   const urls = getActiveGalleryUrls(mediaGallery);
 
-  const primaryImage = pickImageByRole(urls, ["f", "sd"]) ?? "";
+  const primaryImage =
+    pickImageByRole(urls, ["f", "sd"]) ??
+    urls[0] ??
+    (!isMagentoPlaceholderImage(fallbackImageUrl) ? fallbackImageUrl?.trim() ?? "" : "");
+
   const lifestyleImage = pickImageByRole(urls, ["l", "t"]) ?? "";
 
   return { primaryImage, lifestyleImage };
@@ -70,7 +78,10 @@ export function mapMagentoProductToJewelleryListing(
     return null;
   }
 
-  const { primaryImage, lifestyleImage } = resolveMagentoProductImages(product.media_gallery);
+  const { primaryImage, lifestyleImage } = resolveMagentoProductImages(
+    product.media_gallery,
+    product.image?.url,
+  );
 
   if (!primaryImage) {
     return null;

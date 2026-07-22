@@ -69,7 +69,10 @@ function formatCaratLabel(value: string | null): string {
 }
 
 function buildGalleryImages(product: MagentoProductDetailItem): string[] {
-  const { primaryImage, lifestyleImage } = resolveMagentoProductImages(product.media_gallery);
+  const { primaryImage, lifestyleImage } = resolveMagentoProductImages(
+    product.media_gallery,
+    product.image?.url,
+  );
   const urls = (product.media_gallery ?? [])
     .filter((item) => item?.url && !item.disabled)
     .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
@@ -108,7 +111,7 @@ export function mapMagentoProductDetailToProduct(product: MagentoProductDetailIt
   const rating = ratingRaw ? Number(ratingRaw) : 0;
 
   const metal = [metalPurity, metalColor].filter(Boolean).join(" ") || "Gold";
-  const { lifestyleImage } = resolveMagentoProductImages(product.media_gallery);
+  const { lifestyleImage } = resolveMagentoProductImages(product.media_gallery, product.image?.url);
   const images = buildGalleryImages(product);
   const primaryImage = images[0] ?? product.image?.url?.trim() ?? "";
 

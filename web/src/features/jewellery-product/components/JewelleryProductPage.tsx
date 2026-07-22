@@ -62,9 +62,7 @@ const JewelleryProductPage = () => {
     }
 
     facetsSyncedRef.current = true;
-    const nextDefault = createDefaultFilterState(facets);
-    setFilters(nextDefault);
-    setDraftFilters(nextDefault);
+    setDraftFilters(createDefaultFilterState(facets));
   }, [facets]);
 
   const handleCategoryChange = useCallback(
@@ -82,7 +80,11 @@ const JewelleryProductPage = () => {
   };
 
   const handleOpenFilters = () => {
-    setDraftFilters(filters);
+    setDraftFilters(
+      hasMagentoFilterFacets(facets)
+        ? { ...createDefaultFilterState(facets), ...filters }
+        : filters,
+    );
     setIsFilterOpen(true);
   };
 
@@ -118,6 +120,7 @@ const JewelleryProductPage = () => {
           visibleCount={products.length}
           totalCount={totalCount}
           hasMore={hasMore}
+          isLoadingMore={isLoadingMore}
           onLoadMore={loadMore}
         />
       </ScrollReveal>

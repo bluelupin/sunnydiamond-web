@@ -32,16 +32,33 @@ export type GetMagentoJewelleryProductsParams = {
   sortValue?: string;
   filters?: JewelleryFilterState;
   facets?: JewelleryListingProductsData["facets"];
+  /** When false, skips the extra aggregation query (use for pagination). */
+  includeFacets?: boolean;
   signal?: AbortSignal;
 };
 
-async function resolveCategoryIdByUrlKey(
-  categoryUrlKey: string,
-  signal?: AbortSignal,
-): Promise<string | null> {
-  const { categories } = await getMagentoJewelleryNavCategories(signal);
-  const match = categories.find((category) => category.urlKey === categoryUrlKey);
-  return match?.categoryId ?? null;
+type NavCategoriesCache = {
+  data: Awaited<ReturnType<typeof getMagentoJewelleryNavCategories>>;
+  fetchedAt: number;
+};
+
+const NAV_CATEGORIES_CACHE_TTL_MS = 5 * 60 * 1000;
+let navCategoriesCache: NavCategoriesCache | null = null;
+
+async function getJewelleryNavCategoriesCached(signal?: AbortSignal) {
+  if (typeof window !== "undefined" && navCategoriesCache) {
+    if (Date.now() - navCategoriesCache.fetchedAt < NAV_CATEGORIES_CACHE_TTL_MS) {
+      return navCategoriesCache.data;
+    }
+  }
+
+  const data = await getMagentoJewelleryNavCategories(signal);
+
+  if (typeof window !== "undefined") {
+    navCategoriesCache = { data, fetchedAt: Date.now() };
+  }
+
+  return data;
 }
 
 export async function getMagentoJewelleryProducts({
@@ -51,13 +68,17 @@ export async function getMagentoJewelleryProducts({
   sortValue = "featured",
   filters = createEmptyFilterState(),
   facets = EMPTY_JEWELLERY_FILTER_FACETS,
+  includeFacets = true,
   signal,
 }: GetMagentoJewelleryProductsParams): Promise<JewelleryListingProductsData> {
-  const categoryId = categoryUrlKey
-    ? await resolveCategoryIdByUrlKey(categoryUrlKey, signal)
-    : null;
+  const needsNavCategories = includeFacets || Boolean(categoryUrlKey);
+  const navCategories = needsNavCategories
+    ? (await getJewelleryNavCategoriesCached(signal)).categories
+    : [];
 
-  const { categories: navCategories } = await getMagentoJewelleryNavCategories(signal);
+  const categoryId = categoryUrlKey
+    ? navCategories.find((category) => category.urlKey === categoryUrlKey)?.categoryId ?? null
+    : null;
 
   const magentoFilter = buildMagentoProductsFilter({
     categoryUrlKey,
@@ -65,6 +86,34 @@ export async function getMagentoJewelleryProducts({
     filters,
     facets,
   });
+
+  const productDataPromise = magentoGraphqlFetch<MagentoProductsResponse>({
+    query: MAGENTO_JEWELLERY_PRODUCTS_QUERY,
+    variables: {
+      search: "",
+      filter: magentoFilter,
+      pageSize,
+      currentPage: page,
+      sort: mapJewellerySortToMagento(sortValue),
+    },
+    signal,
+    cache: "no-store",
+  });
+
+  if (!includeFacets) {
+    const data = await productDataPromise;
+    const products = mapMagentoProductsToJewelleryListing(data.products?.items);
+    const pageInfo = data.products?.page_info;
+
+    return {
+      products,
+      totalCount: data.products?.total_count ?? 0,
+      currentPage: pageInfo?.current_page ?? page,
+      pageSize: pageInfo?.page_size ?? pageSize,
+      totalPages: pageInfo?.total_pages ?? 0,
+      facets,
+    };
+  }
 
   const facetScopeFilter = buildMagentoProductsFilter({
     categoryUrlKey,
@@ -75,18 +124,7 @@ export async function getMagentoJewelleryProducts({
   });
 
   const [data, facetScopeData] = await Promise.all([
-    magentoGraphqlFetch<MagentoProductsResponse>({
-      query: MAGENTO_JEWELLERY_PRODUCTS_QUERY,
-      variables: {
-        search: "",
-        filter: magentoFilter,
-        pageSize,
-        currentPage: page,
-        sort: mapJewellerySortToMagento(sortValue),
-      },
-      signal,
-      cache: "no-store",
-    }),
+    productDataPromise,
     magentoGraphqlFetch<MagentoProductsResponse>({
       query: MAGENTO_JEWELLERY_PRODUCTS_QUERY,
       variables: {

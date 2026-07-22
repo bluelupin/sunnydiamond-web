@@ -14,6 +14,9 @@ export const MAGENTO_PRODUCTS_BY_SKUS_QUERY = `
             }
           }
         }
+        image {
+          url
+        }
         media_gallery {
           url
           label

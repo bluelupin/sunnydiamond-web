@@ -17,6 +17,8 @@ type UseMagentoJewelleryListingParams = {
   pageSize?: number;
 };
 
+const MAX_EMPTY_PAGE_SKIPS = 10;
+
 type UseMagentoJewelleryListingState = {
   products: JewelleryListingProduct[];
   totalCount: number;
@@ -28,6 +30,20 @@ type UseMagentoJewelleryListingState = {
   loadMore: () => void;
 };
 
+function appendUniqueProducts(
+  current: JewelleryListingProduct[],
+  incoming: JewelleryListingProduct[],
+): JewelleryListingProduct[] {
+  if (incoming.length === 0) {
+    return current;
+  }
+
+  const seen = new Set(current.map((product) => product.id));
+  const uniqueIncoming = incoming.filter((product) => !seen.has(product.id));
+
+  return uniqueIncoming.length > 0 ? [...current, ...uniqueIncoming] : current;
+}
+
 export function useMagentoJewelleryListing({
   categoryUrlKey,
   sortValue,
@@ -36,6 +52,7 @@ export function useMagentoJewelleryListing({
 }: UseMagentoJewelleryListingParams): UseMagentoJewelleryListingState {
   const [products, setProducts] = useState<JewelleryListingProduct[]>([]);
   const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [facets, setFacets] = useState<JewelleryFilterFacets>(EMPTY_JEWELLERY_FILTER_FACETS);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,16 +60,26 @@ export function useMagentoJewelleryListing({
   const [error, setError] = useState<string | undefined>();
   const requestIdRef = useRef(0);
   const facetsRef = useRef(facets);
+  const filtersRef = useRef(filters);
+  const currentPageRef = useRef(1);
+  const totalPagesRef = useRef(0);
+  const isLoadingMoreRef = useRef(false);
+  const appliedFiltersKeyRef = useRef(JSON.stringify(filters));
 
   useEffect(() => {
     facetsRef.current = facets;
   }, [facets]);
+
+  useEffect(() => {
+    filtersRef.current = filters;
+  }, [filters]);
 
   const fetchPage = useCallback(
     async (page: number, append: boolean) => {
       const requestId = ++requestIdRef.current;
 
       if (append) {
+        isLoadingMoreRef.current = true;
         setIsLoadingMore(true);
       } else {
         setIsLoading(true);
@@ -60,23 +87,67 @@ export function useMagentoJewelleryListing({
       }
 
       try {
-        const data = await getMagentoJewelleryProducts({
-          categoryUrlKey,
-          page,
-          pageSize,
-          sortValue,
-          filters,
-          facets: facetsRef.current,
-        });
+        let pageToFetch = page;
+        let appendedProducts: JewelleryListingProduct[] = [];
+        let data: Awaited<ReturnType<typeof getMagentoJewelleryProducts>> | undefined;
 
-        if (requestId !== requestIdRef.current) {
+        do {
+          data = await getMagentoJewelleryProducts({
+            categoryUrlKey,
+            page: pageToFetch,
+            pageSize,
+            sortValue,
+            filters: filtersRef.current,
+            facets: facetsRef.current,
+            includeFacets: !append,
+          });
+
+          if (requestId !== requestIdRef.current) {
+            return;
+          }
+
+          if (!append) {
+            break;
+          }
+
+          appendedProducts.push(...data.products);
+
+          const shouldSkipEmptyPage =
+            data.products.length === 0 &&
+            pageToFetch < (data.totalPages ?? 0) &&
+            pageToFetch - page < MAX_EMPTY_PAGE_SKIPS;
+
+          if (!shouldSkipEmptyPage) {
+            break;
+          }
+
+          pageToFetch += 1;
+        } while (append);
+
+        if (!data || requestId !== requestIdRef.current) {
           return;
         }
 
-        setProducts((current) => (append ? [...current, ...data.products] : data.products));
-        setTotalCount(data.totalCount);
-        setFacets(data.facets);
-        setCurrentPage(data.currentPage);
+        if (append) {
+          setProducts((current) => appendUniqueProducts(current, appendedProducts));
+        } else {
+          setProducts(data.products);
+        }
+
+        if (data.totalCount > 0) {
+          setTotalCount(data.totalCount);
+        }
+
+        setTotalPages(data.totalPages);
+        totalPagesRef.current = data.totalPages;
+
+        if (!append) {
+          setFacets(data.facets);
+        }
+
+        const resolvedPage = append ? pageToFetch : data.currentPage;
+        setCurrentPage(resolvedPage);
+        currentPageRef.current = resolvedPage;
         setError(undefined);
       } catch (fetchError) {
         if (requestId !== requestIdRef.current) {
@@ -89,31 +160,57 @@ export function useMagentoJewelleryListing({
         if (!append) {
           setProducts([]);
           setTotalCount(0);
+          setTotalPages(0);
+          totalPagesRef.current = 0;
         }
 
         setError(message);
       } finally {
-        if (requestId === requestIdRef.current) {
-          setIsLoading(false);
+        if (append) {
+          isLoadingMoreRef.current = false;
           setIsLoadingMore(false);
+        } else if (requestId === requestIdRef.current) {
+          setIsLoading(false);
         }
       }
     },
-    [categoryUrlKey, filters, pageSize, sortValue],
+    [categoryUrlKey, pageSize, sortValue],
   );
 
   useEffect(() => {
+    currentPageRef.current = 1;
     setCurrentPage(1);
     void fetchPage(1, false);
-  }, [fetchPage]);
+  }, [categoryUrlKey, sortValue, fetchPage]);
 
-  const loadMore = useCallback(() => {
-    if (isLoading || isLoadingMore || products.length >= totalCount) {
+  useEffect(() => {
+    const nextKey = JSON.stringify(filters);
+    if (nextKey === appliedFiltersKeyRef.current) {
       return;
     }
 
-    void fetchPage(currentPage + 1, true);
-  }, [currentPage, fetchPage, isLoading, isLoadingMore, products.length, totalCount]);
+    appliedFiltersKeyRef.current = nextKey;
+    currentPageRef.current = 1;
+    setCurrentPage(1);
+    void fetchPage(1, false);
+  }, [filters, fetchPage]);
+
+  const loadMore = useCallback(() => {
+    if (isLoadingMoreRef.current) {
+      return;
+    }
+
+    if (currentPageRef.current >= totalPagesRef.current) {
+      return;
+    }
+
+    const nextPage = currentPageRef.current + 1;
+    void fetchPage(nextPage, true);
+  }, [fetchPage]);
+
+  const hasMore = totalPages > 0
+    ? currentPage < totalPages
+    : products.length < totalCount;
 
   return {
     products,
@@ -122,7 +219,7 @@ export function useMagentoJewelleryListing({
     isLoading,
     isLoadingMore,
     error,
-    hasMore: products.length < totalCount,
+    hasMore,
     loadMore,
   };
 }

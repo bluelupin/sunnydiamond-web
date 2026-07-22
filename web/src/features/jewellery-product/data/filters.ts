@@ -102,6 +102,11 @@ export function isDefaultPriceRange(
     return true;
   }
 
+  // createEmptyFilterState() uses 0/0 until the user applies a price range.
+  if (filters.minPrice === 0 && filters.maxPrice === 0) {
+    return true;
+  }
+
   return filters.minPrice <= facets.minPrice && filters.maxPrice >= facets.maxPrice;
 }
 

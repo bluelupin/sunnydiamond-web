@@ -7,6 +7,7 @@ interface JewelleryLoadMoreSectionProps {
   totalCount: number;
   onLoadMore: () => void;
   hasMore: boolean;
+  isLoadingMore?: boolean;
 }
 
 const {
@@ -27,6 +28,7 @@ const JewelleryLoadMoreSection = ({
   totalCount,
   onLoadMore,
   hasMore,
+  isLoadingMore = false,
 }: JewelleryLoadMoreSectionProps) => {
   const progress = totalCount > 0 ? Math.min(100, (visibleCount / totalCount) * 100) : 0;
 
@@ -69,7 +71,9 @@ const JewelleryLoadMoreSection = ({
           <button
             type="button"
             onClick={onLoadMore}
-            className="btn-border-slide inline-flex w-full items-center justify-center border-[0.8px] border-neutral300 font-gill font-normal uppercase leading-110 text-darkblack transition-colors hover:text-white"
+            disabled={isLoadingMore}
+            aria-busy={isLoadingMore}
+            className="btn-border-slide inline-flex w-full items-center justify-center border-[0.8px] border-neutral300 font-gill font-normal uppercase leading-110 text-darkblack transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
             style={{
               height: `${buttonHeight}px`,
               paddingLeft: `${buttonPaddingX}px`,
@@ -79,7 +83,7 @@ const JewelleryLoadMoreSection = ({
               fontSize: `${buttonFontSize}px`,
             }}
           >
-            <span>Load More</span>
+            <span>{isLoadingMore ? "Loading..." : "Load More"}</span>
           </button>
         ) : null}
       </div>

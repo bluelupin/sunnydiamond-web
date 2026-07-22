@@ -91,10 +91,15 @@ export function buildMagentoProductsFilter({
   }
 
   if (!isDefaultPriceRange(filters, facets)) {
-    magentoFilter.price = {
-      from: String(Math.round(filters.minPrice)),
-      to: String(Math.round(filters.maxPrice)),
-    };
+    const from = Math.round(filters.minPrice);
+    const to = Math.round(filters.maxPrice);
+
+    if (from > 0 || to > 0) {
+      magentoFilter.price = {
+        from: String(from),
+        to: String(to),
+      };
+    }
   }
 
   const drawerCategoriesActive = !isAllCategoriesSelected(filters.categories, facets);

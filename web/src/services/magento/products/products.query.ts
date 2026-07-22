@@ -42,6 +42,9 @@ export const MAGENTO_JEWELLERY_PRODUCTS_QUERY = `
             }
           }
         }
+        image {
+          url
+        }
         media_gallery {
           url
           label

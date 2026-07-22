@@ -33,6 +33,19 @@ export function isMagentoBestSeller(
   return isMagentoBooleanTruthy(getMagentoCustomAttributeValue(items, "is_best_seller"));
 }
 
+export function isMagentoPlaceholderImage(url: string | null | undefined): boolean {
+  if (!url?.trim()) {
+    return true;
+  }
+
+  const lower = url.trim().toLowerCase();
+  return (
+    lower.includes("/static/version") ||
+    lower.includes("/placeholder/") ||
+    (lower.endsWith("/image.jpg") && lower.includes("placeholder"))
+  );
+}
+
 export function formatMagentoFacetLabel(value: string | null | undefined): string | null {
   if (!value?.trim()) {
     return null;

@@ -2,16 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import ResponsiveImage from "@/shared/ui/ResponsiveImage";
+import { useMemo } from "react";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
-import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
-import { resolveCategoryNavImages } from "@/shared/utils/responsiveCmsImage";
-import fallBackImage from "@/assets/fallBackImage.png";
-import type { CategoryNavigationItem } from "@/types/homepage/categoryNavigation";
+import { useCraftingRarityCategories } from "@/hooks/magento/useCraftingRarityCategories";
+import CraftingRarityCategoryGrid from "@/features/cms/components/home/CraftingRarityCategoryGrid";
 import { cn } from "@/shared/utils/cn";
 import PageContainer from "@/shared/ui/layout/PageContainer";
-import { useMemo } from "react";
 import Reveal from "@/shared/Animation/Reveal";
 
 interface CraftingRaritySectionProps {
@@ -41,69 +38,6 @@ function splitCraftingTitleLines(title: string): string[] {
   return [trimmed];
 }
 
-const CategoryCard = ({ cat }: { cat: CategoryNavigationItem }) => {
-  const slug = cat?.slug ?? "";
-  const categoryLink =
-    cat?.cta?.url ??
-    cat?.cta?.to ??
-    (slug ? `/products?category=${encodeURIComponent(slug)}` : "/products");
-
-  const {
-    title,
-    desktopImageUrl,
-    mobileImageUrl,
-    hoverDesktopImageUrl,
-    hoverMobileImageUrl,
-    imageAlt,
-    hoverAlt,
-    hasDistinctHover,
-  } = resolveCategoryNavImages(cat);
-
-  const hasProductImage = Boolean(desktopImageUrl || mobileImageUrl);
-
-  return (
-    <Link
-      href={categoryLink}
-      className="group relative flex aspect-square h-full w-full flex-col items-center justify-between overflow-hidden bg-gray300"
-    >
-      {hasDistinctHover &&
-        <ResponsiveImage
-          desktopSrc={hoverDesktopImageUrl || fallBackImage}
-          mobileSrc={hoverMobileImageUrl || hoverDesktopImageUrl || fallBackImage}
-          alt={hoverAlt}
-          width={600}
-          height={600}
-          quality={IMAGE_QUALITY}
-          className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-        />
-      }
-
-      <div className="relative z-10 flex min-h-0 flex-1 items-center justify-center overflow-hidden px-4 lg:px-6 lg:pt-6 pt-4 max-w-[303px] max-h-[303px]">
-        {hasProductImage &&
-          <ResponsiveImage
-            desktopSrc={desktopImageUrl || fallBackImage}
-            mobileSrc={mobileImageUrl || desktopImageUrl || fallBackImage}
-            alt={imageAlt}
-            width={600}
-            height={600}
-            quality={IMAGE_QUALITY}
-            className={`max-h-full max-w-full object-contain transition-opacity duration-500${hasDistinctHover ? " group-hover:opacity-0" : ""}`}
-          />
-        }
-      </div>
-      <div className="relative z-10 shrink-0 pt-2 pb-4 lg:pb-12 w-full">
-        <span
-          aria-hidden
-          className="w-full pointer-events-none absolute inset-x-0 -top-3 bottom-0 -z-10 bg-gradient-to-t from-black/80 via-black/45 to-transparent opacity-0 motion-safe:transition-opacity motion-safe:duration-500 group-hover:opacity-100 group-focus-visible:opacity-100"
-        />
-        <span className="relative block text-center font-gill text-base font-normal leading-110 text-darkblack motion-safe:transition-colors motion-safe:duration-500 group-hover:text-white group-focus-visible:text-white lg:text-xl">
-          {title}
-        </span>
-      </div>
-    </Link>
-  );
-};
-
 function CraftingRarityCopyBlock({
   subtitleLines,
   secondaryCtaUrl,
@@ -116,26 +50,21 @@ function CraftingRarityCopyBlock({
   return (
     <PageContainer className="relative z-10 px-4 md:px-8 lg:px-10 2xl:px-[60px]">
       <Reveal direction="up" className="lg:h-432 h-390 w-full max-w-640 flex flex-col items-start lg:justify-center justify-end lg:gap-10 md:gap-8 gap-6">
-        <h2
-          className="lg:text-5xl sm:text-4xl text-32 font-larken font-light leading-110 text-darkblack"
-        >
+        <h2 className="lg:text-5xl sm:text-4xl text-32 font-larken font-light leading-110 text-darkblack">
           {subtitleLines.map((line, index) => (
-            <span
-              key={`${line}-${index}`}
-              className="block"
-            >
+            <span key={`${line}-${index}`} className="block">
               {line}
             </span>
           ))}
         </h2>
-        {secondaryCtaUrl &&
+        {secondaryCtaUrl ? (
           <Link
             href={secondaryCtaUrl}
             className="relative shrink-0 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-darkMagenta after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack hover:border-darkMagenta hover:text-darkMagenta sm:pb-1 hover:after:w-full"
           >
             {secondaryCtaLabel}
           </Link>
-        }
+        ) : null}
       </Reveal>
     </PageContainer>
   );
@@ -144,7 +73,7 @@ function CraftingRarityCopyBlock({
 const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
   const { data: shellData, isLoading: isShellLoading } = useHomepageShell();
   const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
-  const { data: shoppingData, isLoading: isShoppingLoading } = useHomepageShoppingBlocks();
+  const { data: craftingRarityData, isLoading: isCategoriesLoading } = useCraftingRarityCategories();
 
   const hero = shellData?.homepage?.hero || shellData?.hero;
   const craftingBrilliance = editorialData?.craftingBrillianceSection ?? null;
@@ -165,21 +94,17 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
     craftingBrilliance?.cta?.to ??
     hero?.secondaryCta?.url ??
     hero?.secondaryCta?.to ??
-    "/products";
+    "/jewellery";
   const secondaryCtaLabel =
     craftingBrilliance?.cta?.label?.trim() ??
     hero?.secondaryCta?.label ??
     "Explore Products";
 
-  const categories = Array.isArray(shoppingData?.categoryNavigation)
-    ? [...shoppingData.categoryNavigation]
-      .filter((item) => item?.isActive !== false)
-      .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
-    : [];
+  const categories = craftingRarityData?.categories ?? [];
 
-  const isLoading = isShellLoading || isEditorialLoading || isShoppingLoading;
+  const isCopyLoading = isShellLoading || isEditorialLoading;
 
-  if (isLoading) {
+  if (isCopyLoading) {
     return (
       <section
         id={id}
@@ -198,11 +123,7 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
             <div className="h-[19px] w-[134px] animate-pulse rounded bg-gray200" aria-hidden />
           </div>
         </div>
-        <div className="mt-8 grid w-full grid-cols-2 gap-3 px-4 md:mt-10 md:grid-cols-4 md:gap-3 md:px-0 lg:mt-12">
-          {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="aspect-square animate-pulse bg-gray200" aria-hidden />
-          ))}
-        </div>
+        <CraftingRarityCategoryGrid categories={[]} isLoading />
       </section>
     );
   }
@@ -210,7 +131,8 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
   return (
     <section id={id} className="w-full bg-white md:pb-12 pb-16">
       <div className="relative overflow-hidden h-390 md:h-420 lg:h-432">
-        <Reveal direction="up"
+        <Reveal
+          direction="up"
           className="pointer-events-none absolute right-[-29px] sm:top-[-83px] top-[-100px] z-0 lg:right-[2%] lg:top-[-204px] lg:w-[600px] lg:h-[850px] md:w-[550px] md:h-[560px] sm:w-[550px] sm:h-[560px] w-full h-[435px]"
         >
           <div className="relative h-full w-full rotate-[-13.91deg]">
@@ -231,22 +153,7 @@ const CraftingRaritySection = ({ id }: CraftingRaritySectionProps) => {
         />
       </div>
 
-      {categories.length > 0 ? (
-        <div className="mt-8 grid w-full grid-cols-2 gap-3 px-4 md:mt-10 md:grid-cols-4 md:gap-3 md:px-0 lg:mt-12">
-          {categories.map((cat) => (
-            <Reveal direction="up"
-              key={cat?.id ?? cat?.slug ?? cat?.title}
-              className="aspect-square w-full xl:h-[424px]"
-            >
-              <CategoryCard cat={cat} />
-            </Reveal>
-          ))}
-        </div>
-      ) : (
-        <Reveal as="p" direction="up" className="px-4 lg:px-10 py-20 text-center font-gill text-base text-neutral500">
-          NO Categories Yet!
-        </Reveal>
-      )}
+      <CraftingRarityCategoryGrid categories={categories} isLoading={isCategoriesLoading} />
     </section>
   );
 };
