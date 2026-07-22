@@ -5,6 +5,8 @@ export const STRAPI_ENDPOINTS = {
   learnAboutDiamondsPage: "api/learn-about-diamonds-page",
   aboutPage: "api/about-page",
   productDisplayPage: "api/product-display-page",
+  /** Jewellery PLP (`/jewellery`) — SEO + landing content */
+  productLandingPage: "api/product-landing-page",
   contactBespokePage: "api/contact-bespoke-page",
   occasions: "api/occasions",
   genericForms: "api/generic-forms",
