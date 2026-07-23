@@ -7,6 +7,8 @@ import { CartUIProvider } from '@/features/cart/context/CartUIContext';
 import CartBagDrawer from '@/features/cart/components/CartBagDrawer';
 import GiftingOptionsPanel from '@/features/cart/components/GiftingOptionsPanel';
 import { WishlistProvider } from '@/features/wishlist/context/WishlistContext';
+import { LoginModalProvider } from '@/features/auth/context/LoginModalContext';
+import LoginModal from '@/features/auth/components/LoginModal';
 
 export default function AppProvider({ children }: { children: React.ReactNode }) {
   return (
@@ -14,9 +16,12 @@ export default function AppProvider({ children }: { children: React.ReactNode })
       <CartProvider>
         <CartUIProvider>
           <WishlistProvider>
-            {children}
-            <CartBagDrawer />
-            <GiftingOptionsPanel />
+            <LoginModalProvider>
+              {children}
+              <CartBagDrawer />
+              <GiftingOptionsPanel />
+              <LoginModal />
+            </LoginModalProvider>
           </WishlistProvider>
         </CartUIProvider>
       </CartProvider>

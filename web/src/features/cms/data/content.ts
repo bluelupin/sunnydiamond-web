@@ -183,6 +183,10 @@ export const seoContent = {
     title: "Checkout",
     description: "Complete your purchase of premium diamond jewellery from Sunny Diamonds.",
   },
+  login: {
+    title: "Sign In",
+    description: "Sign in or create your Sunny Diamonds account with your mobile number.",
+  },
   wishlist: {
     title: "Wishlist",
     description: "View and manage your saved diamond jewellery pieces.",

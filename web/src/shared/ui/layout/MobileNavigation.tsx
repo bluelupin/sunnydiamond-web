@@ -3,6 +3,7 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
 import SDLogo from "@/assets/Icons/SDLogo";
 import SearchIcon from "@/assets/Icons/SearchIcon";
@@ -16,6 +17,7 @@ import BookStoreVisitPanel from "@/features/products/components/detail/BookStore
 import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
 import HeaderIconBadge from "@/shared/ui/layout/HeaderIconBadge";
 import { JewelleryCategoryMenu } from "@/shared/ui/layout/JewelleryCategoryMenu";
+import { getLoginHref } from "@/features/auth/utils/authNavigation";
 
 type MobileNavigationProps = {
   isOpen: boolean;
@@ -403,6 +405,8 @@ const MobileNavigation = ({
   cartCount,
   wishlistCount,
 }: MobileNavigationProps) => {
+  const pathname = usePathname() ?? "/";
+  const loginHref = getLoginHref(pathname);
   const [subPanel, setSubPanel] = useState<
     "language" | "currency" | "appointment" | "jewellery" | "store-visit" | null
   >(null);
@@ -445,6 +449,10 @@ const MobileNavigation = ({
     setSearchQuery("");
     searchInputRef.current?.focus();
   }, []);
+
+  const handleAccountClick = useCallback(() => {
+    handleClose();
+  }, [handleClose]);
 
   if (!isOpen) return null;
 
@@ -490,7 +498,12 @@ const MobileNavigation = ({
             <WishlistIcon className="size-6" />
             <HeaderIconBadge count={wishlistCount} />
           </Link>
-          <Link href="/contact" aria-label="Account" onClick={handleClose} className="inline-flex size-6 items-center justify-center">
+          <Link
+            href={loginHref}
+            aria-label="Account"
+            onClick={handleAccountClick}
+            className="inline-flex size-6 items-center justify-center"
+          >
             <UserIcon className="size-6" />
           </Link>
           <Link
