@@ -7,9 +7,18 @@ export type MagentoCartProduct = {
   media_gallery?: MagentoMediaGalleryItem[] | null;
 };
 
+export type MagentoCartCustomizableOption = {
+  label?: string | null;
+  values?: Array<{
+    label?: string | null;
+    value?: string | null;
+  }> | null;
+};
+
 export type MagentoCartItem = {
   uid?: string | null;
   quantity?: number | null;
+  customizable_options?: MagentoCartCustomizableOption[] | null;
   product?: MagentoCartProduct | null;
   prices?: {
     price?: { value?: number | null } | null;
@@ -68,6 +77,22 @@ export type MagentoCreateGuestCartResponse = {
 
 export type MagentoAddSimpleProductsToCartResponse = {
   addSimpleProductsToCart?: {
+    cart?: MagentoCart | null;
+  } | null;
+};
+
+export type MagentoAddProductsToCartResponse = {
+  addProductsToCart?: {
+    cart?: MagentoCart | null;
+    user_errors?: Array<{
+      code?: string | null;
+      message?: string | null;
+    }> | null;
+  } | null;
+};
+
+export type MagentoSyncCartItemsOptionsResponse = {
+  updateCartItems?: {
     cart?: MagentoCart | null;
   } | null;
 };

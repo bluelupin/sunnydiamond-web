@@ -18,3 +18,12 @@ export const MAGENTO_DEFAULT_STORE_CODE =
 export const MAGENTO_CATALOG_REVALIDATE_SECONDS = Number(
   process.env.MAGENTO_CATALOG_REVALIDATE_SECONDS ?? 3600,
 );
+
+export function getMagentoRestBaseUrl(): string {
+  return getMagentoGraphqlUrl().replace(/\/graphql$/, "");
+}
+
+export function getMagentoIntegrationAccessToken(): string | null {
+  const token = process.env.MAGENTO_INTEGRATION_ACCESS_TOKEN?.trim();
+  return token || null;
+}

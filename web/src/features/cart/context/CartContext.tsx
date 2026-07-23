@@ -13,13 +13,14 @@ import {
 import type { Product } from "@/features/products/data/products";
 import { trackEvent } from "@/infrastructure/analytics/use-gtag";
 import {
-  addSimpleProductToGuestCart,
+  addProductToGuestCart,
   ensureGuestCartId,
   estimateGuestCartShippingMethods,
   fetchGuestCart,
   migrateLegacyLinesToGuestCart,
   removeGuestCartItem,
   setGuestShippingMethod,
+  syncGuestCartLineOption,
   updateGuestCartItemQuantity,
   type GuestCartState,
 } from "@/services/magento/cart/cart.service";
@@ -45,6 +46,7 @@ import type {
   CartLineItem,
   CartLineOptions,
 } from "../types/cart.types";
+import type { ProductCustomOptions } from "@/features/products/types/productCustomOptions";
 
 /** @deprecated Use CartLineItem from cart.types */
 export type CartItem = CartLineItem;
@@ -78,7 +80,37 @@ const isAddToBagPayload = (payload: AddToBagPayload | Product): payload is AddTo
   "product" in payload;
 
 const normalizePayload = (payload: AddToBagPayload | Product): AddToBagPayload =>
-  isAddToBagPayload(payload) ? payload : { product: payload, options: {} };
+  isAddToBagPayload(payload)
+    ? payload
+    : { product: payload, options: {}, productCustomOptions: payload.customOptions };
+
+function resolveLineUidForSku(state: GuestCartState, sku: string): string | null {
+  const fromCart = findCartItemUidBySku(state.cart, sku);
+  if (fromCart) {
+    return fromCart;
+  }
+
+  const matchingItems = state.items.filter((item) => item.product.id === sku);
+  return matchingItems.at(-1)?.id ?? null;
+}
+
+function upsertLineMetadata(
+  current: StoredCartLineMetadata,
+  lineUid: string,
+  options: CartLineOptions,
+  productCustomOptions?: ProductCustomOptions,
+): StoredCartLineMetadata {
+  const previous = current[lineUid] ?? { options: {} };
+
+  return {
+    ...current,
+    [lineUid]: {
+      ...previous,
+      options: { ...previous.options, ...options },
+      productCustomOptions: productCustomOptions ?? previous.productCustomOptions,
+    },
+  };
+}
 
 const emptyTotals = {
   subtotal: 0,
@@ -95,7 +127,7 @@ const emptyTotals = {
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cartState, setCartState] = useState<GuestCartState | null>(null);
-  const [lineMetadata, setLineMetadata] = useState<StoredCartLineMetadata>({});
+  const [lineMetadata, setLineMetadata] = useState<StoredCartLineMetadata>(() => readCartLineMetadata());
   const [estimatedShippingMethods, setEstimatedShippingMethods] = useState<
     MagentoShippingMethodOption[]
   >([]);
@@ -107,8 +139,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     lineMetadataRef.current = lineMetadata;
-    writeCartLineMetadata(lineMetadata);
-  }, [lineMetadata]);
+    if (!isHydrating) {
+      writeCartLineMetadata(lineMetadata);
+    }
+  }, [isHydrating, lineMetadata]);
 
   const refreshShippingEstimate = useCallback(async (state: GuestCartState | null) => {
     const requestId = ++shippingEstimateRequestRef.current;
@@ -223,7 +257,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [applyCartState, refreshCart]);
 
   const addItem = useCallback(async (payload: AddToBagPayload | Product): Promise<AddItemResult> => {
-    const { product, options = {} } = normalizePayload(payload);
+    const { product, options = {}, productCustomOptions = product.customOptions } =
+      normalizePayload(payload);
     const sku = product.id.trim();
 
     if (!sku) {
@@ -234,33 +269,38 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     try {
       const cartId = await ensureGuestCartId();
-      const nextState = await addSimpleProductToGuestCart(
+      const nextState = await addProductToGuestCart({
         cartId,
         sku,
-        1,
-        lineMetadataRef.current,
-      );
+        quantity: 1,
+        lineOptions: options,
+        productCustomOptions,
+        lineMetadata: lineMetadataRef.current,
+      });
 
-      const lineUid = findCartItemUidBySku(nextState.cart, sku);
+      const lineUid = resolveLineUidForSku(nextState, sku);
       if (lineUid) {
-        setLineMetadata((current) => {
-          const next = {
-            ...current,
-            [lineUid]: {
-              options,
-              gifting: current[lineUid]?.gifting,
-            },
-          };
-          lineMetadataRef.current = next;
-          return next;
-        });
+        const nextMetadata = upsertLineMetadata(
+          lineMetadataRef.current,
+          lineUid,
+          options,
+          productCustomOptions,
+        );
+        lineMetadataRef.current = nextMetadata;
+        writeCartLineMetadata(nextMetadata);
+        setLineMetadata(nextMetadata);
       }
 
       const hydratedState = lineUid
         ? {
             ...nextState,
             items: nextState.items.map((item) =>
-              item.id === lineUid ? { ...item, options } : item,
+              item.id === lineUid
+                ? {
+                    ...item,
+                    options: { ...item.options, ...options },
+                  }
+                : item,
             ),
           }
         : nextState;
@@ -365,18 +405,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const updateLineItemOptions = useCallback(
     (lineItemId: string, options: Partial<CartLineOptions>) => {
-      setLineMetadata((current) => {
-        const previous = current[lineItemId] ?? { options: {} };
-        const next = {
-          ...current,
-          [lineItemId]: {
-            ...previous,
-            options: { ...previous.options, ...options },
-          },
-        };
-        lineMetadataRef.current = next;
-        return next;
-      });
+      const previous = lineMetadataRef.current[lineItemId] ?? { options: {} };
+      const nextMetadata = {
+        ...lineMetadataRef.current,
+        [lineItemId]: {
+          ...previous,
+          options: { ...previous.options, ...options },
+        },
+      };
+      lineMetadataRef.current = nextMetadata;
+      writeCartLineMetadata(nextMetadata);
+      setLineMetadata(nextMetadata);
 
       setCartState((current) => {
         if (!current) {
@@ -392,8 +431,29 @@ export function CartProvider({ children }: { children: ReactNode }) {
           ),
         };
       });
+
+      const cartId = getGuestCartId();
+      const lineItem = cartState?.items.find((item) => item.id === lineItemId);
+      if (!cartId || !lineItem) {
+        return;
+      }
+
+      void (async () => {
+        try {
+          const syncedState = await syncGuestCartLineOption(
+            cartId,
+            lineItemId,
+            nextMetadata[lineItemId],
+            lineItem.quantity,
+            nextMetadata,
+          );
+          applyCartState(syncedState);
+        } catch {
+          // Keep local metadata even if Magento sync fails.
+        }
+      })();
     },
-    [],
+    [applyCartState, cartState?.items],
   );
 
   const updateLineItemGifting = useCallback((lineItemId: string, gifting: CartGiftingOptions) => {

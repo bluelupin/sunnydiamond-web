@@ -20,6 +20,15 @@ export const MAGENTO_CART_FIELDS = `
     items {
       uid
       quantity
+      ... on SimpleCartItem {
+        customizable_options {
+          label
+          values {
+            label
+            value
+          }
+        }
+      }
       product {
         sku
         name

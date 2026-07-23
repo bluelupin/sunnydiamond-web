@@ -14,6 +14,7 @@ import type {
   MappedMagentoCart,
 } from "./magentoCart.types";
 import type { CartLineMetadata, StoredCartLineMetadata } from "./cartSession";
+import { mapMagentoCartCustomizableOptionsToLineOptions } from "./cartLineCustomOptions.mapper";
 
 function mapCartItemProduct(item: MagentoCartItem): Product | null {
   const product = item.product;
@@ -212,12 +213,17 @@ export function mapMagentoCartItems(
     }
 
     const metadata: CartLineMetadata = lineMetadata[uid] ?? { options: {} };
+    const magentoOptions = mapMagentoCartCustomizableOptionsToLineOptions(item.customizable_options);
+    const mergedOptions = {
+      ...metadata.options,
+      ...magentoOptions,
+    };
 
     items.push({
       id: uid,
       product,
       quantity,
-      options: metadata.options,
+      options: mergedOptions,
       gifting: metadata.gifting,
     });
   }

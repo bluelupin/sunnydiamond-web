@@ -10,6 +10,30 @@ export const MAGENTO_CREATE_GUEST_CART_MUTATION = `
   }
 ` as const;
 
+export const MAGENTO_ADD_PRODUCTS_TO_CART_MUTATION = `
+  mutation MagentoAddProductsToCart($cartId: String!, $cartItems: [CartItemInput!]!) {
+    addProductsToCart(cartId: $cartId, cartItems: $cartItems) {
+      cart {
+        ${MAGENTO_CART_FIELDS}
+      }
+      user_errors {
+        code
+        message
+      }
+    }
+  }
+` as const;
+
+export const MAGENTO_SYNC_CART_ITEMS_OPTIONS_MUTATION = `
+  mutation MagentoSyncCartItemsOptions($cartId: String!, $cartItems: [CartItemUpdateInput!]!) {
+    updateCartItems(input: { cart_id: $cartId, cart_items: $cartItems }) {
+      cart {
+        ${MAGENTO_CART_FIELDS}
+      }
+    }
+  }
+` as const;
+
 export const MAGENTO_ADD_SIMPLE_PRODUCTS_TO_CART_MUTATION = `
   mutation MagentoAddSimpleProductsToCart($cartId: String!, $sku: String!, $quantity: Float!) {
     addSimpleProductsToCart(

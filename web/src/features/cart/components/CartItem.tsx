@@ -168,8 +168,14 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
                 className="h-full w-full min-w-0 border-0 bg-transparent font-gill text-sm leading-110 text-darkblack outline-none placeholder:text-neutral500 lg:text-base"
               />
             ) : (
-              <p className="truncate font-gill text-sm leading-110 text-darkblack lg:text-base">
-                {options.engraving ?? ENGRAVING_PLACEHOLDER}
+              <p
+                className={
+                  options.engraving?.trim()
+                    ? "truncate font-gill text-sm leading-110 text-darkblack lg:text-base"
+                    : "truncate font-gill text-sm leading-110 text-neutral500 lg:text-base"
+                }
+              >
+                {options.engraving?.trim() || "Not set"}
               </p>
             )}
           </div>

@@ -1,4 +1,5 @@
 import type { Product } from "@/features/products/data/products";
+import type { ProductCustomOptions } from "@/features/products/types/productCustomOptions";
 
 export type CartLineOptions = {
   metal?: string;
@@ -25,6 +26,7 @@ export type CartLineItem = {
 export type AddToBagPayload = {
   product: Product;
   options?: CartLineOptions;
+  productCustomOptions?: ProductCustomOptions;
 };
 
 export type AddItemResult = {

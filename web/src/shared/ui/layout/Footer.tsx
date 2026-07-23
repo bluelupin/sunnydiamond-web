@@ -61,7 +61,7 @@ const Footer = () => {
   }, [cmsSocialLinks]);
 
   return (
-    <footer className={cn(pathName === "/cart" || "//checkout" ? "bg-gray200" : "bg-gray300")}>
+    <footer className={cn(pathName === "/cart" || pathName === "/checkout" ? "bg-gray200" : "bg-gray300")}>
       <TrustBadgeSection />
       <PageContainer className="flex flex-col gap-20 lg:gap-[120px] lg:py-100 py-16">
         <div className="flex flex-col items-center xl:gap-12 md:gap-10 gap-8 lg:flex-row lg:items-start lg:justify-start">

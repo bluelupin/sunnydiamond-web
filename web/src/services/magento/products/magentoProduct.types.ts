@@ -1,3 +1,5 @@
+import type { MagentoProductCustomOption } from "./productCustomOptions.mapper";
+
 export type MagentoProductCategory = {
   id?: number | null;
   name?: string | null;
@@ -69,6 +71,7 @@ export type MagentoProductDetailItem = MagentoProductListItem & {
     items?: MagentoCustomAttributeItem[] | null;
   } | null;
   related_products?: MagentoProductListItem[] | null;
+  options?: MagentoProductCustomOption[] | null;
 };
 
 export type MagentoProductByUrlKeyResponse = {

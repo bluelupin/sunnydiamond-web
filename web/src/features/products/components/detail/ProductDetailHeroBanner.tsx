@@ -10,55 +10,57 @@ type ProductDetailHeroBannerProps = {
   alt?: string;
 };
 
+function resolveVideoMimeType(videoSrc: string): string {
+  const normalized = videoSrc.split("?")[0]?.toLowerCase() ?? "";
+
+  if (normalized.endsWith(".webm")) {
+    return "video/webm";
+  }
+
+  if (normalized.endsWith(".mov")) {
+    return "video/quicktime";
+  }
+
+  return "video/mp4";
+}
+
+function resolveCompanionWebmSrc(videoSrc: string): string | undefined {
+  if (!videoSrc.startsWith("/") || !videoSrc.endsWith(".mp4")) {
+    return undefined;
+  }
+
+  return videoSrc.replace(/\.mp4$/, ".webm");
+}
+
 const ProductDetailHeroBanner = ({
   imageSrc,
   videoSrc,
   alt = "Sunny Diamonds lifestyle",
 }: ProductDetailHeroBannerProps) => {
   const sectionRef = useRef<HTMLElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
-  const [usePosterOnly, setUsePosterOnly] = useState(!videoSrc);
+  const [videoFailed, setVideoFailed] = useState(false);
 
-  const showPosterOnly = useCallback(() => {
-    setUsePosterOnly(true);
+  const handleVideoError = useCallback(() => {
+    setVideoFailed(true);
   }, []);
 
   useEffect(() => {
-    if (!videoSrc || usePosterOnly) return;
+    setVideoFailed(false);
+    setShouldLoadVideo(Boolean(videoSrc));
+  }, [videoSrc]);
 
-    const section = sectionRef.current;
-    if (!section) return;
+  const handleVideoCanPlay = useCallback((event: React.SyntheticEvent<HTMLVideoElement>) => {
+    const video = event.currentTarget;
+    video.muted = true;
+    void video.play().catch(() => {
+      // Autoplay can be blocked transiently; keep the loaded video in place.
+    });
+  }, []);
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setShouldLoadVideo(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: "200px 0px" },
-    );
-
-    observer.observe(section);
-    return () => observer.disconnect();
-  }, [usePosterOnly, videoSrc]);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video || !shouldLoadVideo) return;
-
-    video.load();
-    const playPromise = video.play();
-    if (playPromise) {
-      playPromise.catch(showPosterOnly);
-    }
-  }, [shouldLoadVideo, showPosterOnly]);
-
-  const showVideo = Boolean(videoSrc && shouldLoadVideo && !usePosterOnly);
-  const videoWebmSrc = videoSrc?.endsWith(".mp4")
-    ? videoSrc.replace(/\.mp4$/, ".webm")
-    : undefined;
+  const showVideo = Boolean(videoSrc && shouldLoadVideo && !videoFailed);
+  const videoWebmSrc = videoSrc ? resolveCompanionWebmSrc(videoSrc) : undefined;
+  const videoMimeType = videoSrc ? resolveVideoMimeType(videoSrc) : "video/mp4";
 
   return (
     <Reveal direction="up">
@@ -79,7 +81,7 @@ const ProductDetailHeroBanner = ({
 
         {showVideo ? (
           <video
-            ref={videoRef}
+            key={videoSrc}
             className="h-full w-full object-cover object-top"
             autoPlay
             loop
@@ -89,10 +91,11 @@ const ProductDetailHeroBanner = ({
             poster={imageSrc}
             aria-hidden
             tabIndex={-1}
-            onError={showPosterOnly}
+            onCanPlay={handleVideoCanPlay}
+            onError={handleVideoError}
           >
             {videoWebmSrc ? <source src={videoWebmSrc} type="video/webm" /> : null}
-            <source src={videoSrc} type="video/mp4" />
+            <source src={videoSrc} type={videoMimeType} />
           </video>
         ) : null}
       </section>

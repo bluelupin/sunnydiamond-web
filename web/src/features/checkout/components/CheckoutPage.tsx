@@ -50,6 +50,7 @@ const CheckoutPage = () => {
     selectShippingMethod,
     shippingMethods,
     selectedShippingMethod,
+    isHydrating,
     isUpdating,
   } = useCart();
   const { toast } = useToast();
@@ -118,10 +119,26 @@ const CheckoutPage = () => {
   }, [items, totalPrice, step]);
 
   useEffect(() => {
+    if (!isHydrating) {
+      void refreshCart();
+    }
+  }, [isHydrating, refreshCart]);
+
+  useEffect(() => {
     if (step === "payment") {
       void refreshCart();
     }
   }, [refreshCart, step]);
+
+  if (isHydrating) {
+    return (
+      <section className="flex min-h-[60vh] flex-col items-center justify-center bg-gray300 px-4 py-20 text-center">
+        <p className="sr-only" aria-live="polite">
+          Loading checkout
+        </p>
+      </section>
+    );
+  }
 
   if (items.length === 0 && step !== "success") {
     return (
@@ -230,6 +247,17 @@ const CheckoutPage = () => {
             payment.method,
             readCartLineMetadata(),
           );
+
+          void fetch("/api/magento/orders/line-metadata", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              orderNumber: order.orderNumber,
+              items,
+            }),
+          }).catch(() => {
+            // Order placement already succeeded; metadata attachment is best-effort.
+          });
 
           trackEvent("purchase", {
             currency: "INR",

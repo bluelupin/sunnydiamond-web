@@ -5,6 +5,7 @@ import productBracelet from "@/assets/product-bracelet.jpg";
 import type { StaticImageData } from "next/image";
 import type { ProductSeo } from "@/shared/lib/seo/productSeo";
 import type { ProductEngravingConfig } from "@/features/products/constants/engraving";
+import type { ProductCustomOptions } from "@/features/products/types/productCustomOptions";
 import { buildProductSeo } from "@/shared/lib/seo/productSeo";
 import {
   PRODUCT_DETAIL_GALLERY_HERO_IMAGE,
@@ -35,6 +36,8 @@ export interface Product {
   reviews: number;
   detailAttributes?: string[];
   engraving?: ProductEngravingConfig;
+  customOptions?: ProductCustomOptions;
+  productVideoUrl?: string;
   seo: ProductSeo;
 }
 

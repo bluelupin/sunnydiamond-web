@@ -3,7 +3,9 @@
 import {
     ComponentPropsWithoutRef,
     ElementType,
+    useEffect,
     useMemo,
+    useState,
     type ComponentType,
 } from "react";
 import { motion } from "motion/react";
@@ -47,8 +49,13 @@ export default function Reveal<T extends ElementType = "div">({
     children,
     ...props
 }: RevealProps<T>) {
+    const [isMounted, setIsMounted] = useState(false);
     const tag = as || "div";
     const Component = useMemo(() => getMotionComponent(tag), [tag]);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const initial = {
         opacity: 0,
@@ -68,7 +75,7 @@ export default function Reveal<T extends ElementType = "div">({
 
     return (
         <Component
-            initial={initial}
+            initial={isMounted ? initial : false}
             whileInView={{
                 opacity: 1,
                 x: 0,

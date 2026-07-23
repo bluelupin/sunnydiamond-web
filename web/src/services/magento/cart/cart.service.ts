@@ -1,6 +1,7 @@
 import { magentoGraphqlFetch } from "../graphqlClient";
 import { MAGENTO_GET_CART_QUERY } from "./cart.queries";
 import {
+  MAGENTO_ADD_PRODUCTS_TO_CART_MUTATION,
   MAGENTO_ADD_SIMPLE_PRODUCTS_TO_CART_MUTATION,
   MAGENTO_CREATE_GUEST_CART_MUTATION,
   MAGENTO_REMOVE_ITEM_FROM_CART_MUTATION,
@@ -13,6 +14,7 @@ import {
   MAGENTO_CREATE_PAYMENT_ORDER_MUTATION,
   MAGENTO_ESTIMATE_SHIPPING_METHODS_MUTATION,
   MAGENTO_UPDATE_CART_ITEMS_MUTATION,
+  MAGENTO_SYNC_CART_ITEMS_OPTIONS_MUTATION,
 } from "./cart.mutations";
 import {
   mapMagentoCartItems,
@@ -24,10 +26,16 @@ import {
   clearGuestCartId,
   getGuestCartId,
   setGuestCartId,
+  type CartLineMetadata,
   type StoredCartLineMetadata,
 } from "./cartSession";
+import type { CartLineOptions } from "@/features/cart/types/cart.types";
+import type { ProductCustomOptions } from "@/features/products/types/productCustomOptions";
+import { buildMagentoCartItemOptionPayload } from "./cartLineCustomOptions.mapper";
 import type {
   MagentoAddSimpleProductsToCartResponse,
+  MagentoAddProductsToCartResponse,
+  MagentoSyncCartItemsOptionsResponse,
   MagentoCart,
   MagentoCartAddressInput,
   MagentoCartResponse,
@@ -156,6 +164,143 @@ export async function addSimpleProductToGuestCart(
   });
 
   return mapGuestCartState(assertCart(data.addSimpleProductsToCart?.cart), lineMetadata);
+}
+
+type AddProductToGuestCartInput = {
+  cartId: string;
+  sku: string;
+  quantity: number;
+  lineOptions?: CartLineOptions;
+  productCustomOptions?: ProductCustomOptions;
+  lineMetadata: StoredCartLineMetadata;
+  signal?: AbortSignal;
+};
+
+export async function addProductToGuestCart({
+  cartId,
+  sku,
+  quantity,
+  lineOptions = {},
+  productCustomOptions,
+  lineMetadata,
+  signal,
+}: AddProductToGuestCartInput): Promise<GuestCartState> {
+  const optionPayload = buildMagentoCartItemOptionPayload(lineOptions, productCustomOptions);
+
+  if (!optionPayload) {
+    return addSimpleProductToGuestCart(cartId, sku, quantity, lineMetadata, signal);
+  }
+
+  const data = await magentoGraphqlFetch<MagentoAddProductsToCartResponse>({
+    query: MAGENTO_ADD_PRODUCTS_TO_CART_MUTATION,
+    variables: {
+      cartId,
+      cartItems: [
+        {
+          sku,
+          quantity,
+          entered_options: optionPayload.enteredOptions,
+          selected_options: optionPayload.selectedOptions,
+        },
+      ],
+    },
+    signal,
+    cache: "no-store",
+  });
+
+  const userErrors = data.addProductsToCart?.user_errors ?? [];
+  if (userErrors.length > 0) {
+    const message =
+      userErrors.map((error) => error.message?.trim()).filter(Boolean).join("; ") ||
+      "Magento could not add this product with the selected options";
+    throw new MagentoGraphqlError(message);
+  }
+
+  return mapGuestCartState(assertCart(data.addProductsToCart?.cart), lineMetadata);
+}
+
+export async function syncGuestCartLineOptions(
+  cartId: string,
+  lineMetadata: StoredCartLineMetadata,
+  signal?: AbortSignal,
+): Promise<GuestCartState> {
+  const currentState = await fetchGuestCart(cartId, lineMetadata, signal);
+
+  const cartItems = currentState.items
+    .map((item) => {
+      const metadata = lineMetadata[item.id];
+      if (!metadata) {
+        return null;
+      }
+
+      const optionPayload = buildMagentoCartItemOptionPayload(
+        metadata.options,
+        metadata.productCustomOptions,
+      );
+
+      if (!optionPayload) {
+        return null;
+      }
+
+      return {
+        cart_item_uid: item.id,
+        quantity: item.quantity,
+        customizable_options: optionPayload.customizableOptions,
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
+
+  if (cartItems.length === 0) {
+    return currentState;
+  }
+
+  const data = await magentoGraphqlFetch<MagentoSyncCartItemsOptionsResponse>({
+    query: MAGENTO_SYNC_CART_ITEMS_OPTIONS_MUTATION,
+    variables: {
+      cartId,
+      cartItems,
+    },
+    signal,
+    cache: "no-store",
+  });
+
+  return mapGuestCartState(assertCart(data.updateCartItems?.cart), lineMetadata);
+}
+
+export async function syncGuestCartLineOption(
+  cartId: string,
+  cartItemUid: string,
+  metadata: CartLineMetadata,
+  quantity: number,
+  lineMetadata: StoredCartLineMetadata,
+  signal?: AbortSignal,
+): Promise<GuestCartState> {
+  const optionPayload = buildMagentoCartItemOptionPayload(
+    metadata.options,
+    metadata.productCustomOptions,
+  );
+
+  if (!optionPayload) {
+    return fetchGuestCart(cartId, lineMetadata, signal);
+  }
+
+  const data = await magentoGraphqlFetch<MagentoSyncCartItemsOptionsResponse>({
+    query: MAGENTO_SYNC_CART_ITEMS_OPTIONS_MUTATION,
+    variables: {
+      cartId,
+      cartItems: [
+        {
+          cart_item_uid: cartItemUid,
+          quantity,
+          customizable_options: optionPayload.customizableOptions,
+        },
+      ],
+    },
+    signal,
+    cache: "no-store",
+  });
+
+  return mapGuestCartState(assertCart(data.updateCartItems?.cart), lineMetadata);
 }
 
 export async function updateGuestCartItemQuantity(
@@ -351,7 +496,13 @@ export async function prepareGuestCheckoutForPayment(
   signal?: AbortSignal,
 ): Promise<GuestCartState> {
   const addressedState = await applyGuestCheckoutAddresses(cartId, form, lineMetadata, signal);
-  return selectFirstAvailableGuestShippingMethod(cartId, addressedState, lineMetadata, signal);
+  const shippingState = await selectFirstAvailableGuestShippingMethod(
+    cartId,
+    addressedState,
+    lineMetadata,
+    signal,
+  );
+  return syncGuestCartLineOptions(cartId, lineMetadata, signal);
 }
 
 export async function setGuestPaymentMethod(
@@ -478,6 +629,7 @@ export async function completeGuestCheckout(
   }
 
   await setGuestPaymentMethod(cartId, paymentCode, lineMetadata, signal);
+  await syncGuestCartLineOptions(cartId, lineMetadata, signal);
   return placeGuestOrder(cartId, signal);
 }
 

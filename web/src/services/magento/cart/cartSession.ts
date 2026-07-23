@@ -2,10 +2,12 @@ const GUEST_CART_ID_KEY = "sunny-guest-cart-id";
 const CART_LINE_METADATA_KEY = "sunny-cart-line-meta-v1";
 
 import type { CartGiftingOptions, CartLineOptions } from "@/features/cart/types/cart.types";
+import type { ProductCustomOptions } from "@/features/products/types/productCustomOptions";
 
 export type CartLineMetadata = {
   options: CartLineOptions;
   gifting?: CartGiftingOptions;
+  productCustomOptions?: ProductCustomOptions;
 };
 
 export type StoredCartLineMetadata = Record<string, CartLineMetadata>;

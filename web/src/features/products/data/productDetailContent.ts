@@ -86,7 +86,7 @@ export function getProductDetailContent(product: Product): ProductDetailContent 
     benefits,
     accordions: buildAccordions(product),
     heroBannerImage: "/images/products/pdp/hero-banner-poster.png",
-    heroBannerVideo: "/videos/pdp-lifestyle-banner.mp4",
+    heroBannerVideo: product.productVideoUrl ?? "/videos/pdp-lifestyle-banner.mp4",
     visitUsImage: "/images/products/pdp/visit-us-hero.png",
     personaliseImage: "/images/products/pdp/personalise-support.png",
   };

@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
 
   const query = body.query;
   const isCartOperation =
-    /\b(cart\s*\(|createGuestCart|addSimpleProductsToCart|updateCartItems|removeItemFromCart|setGuestEmailOnCart|setShippingAddressesOnCart|setBillingAddressOnCart|setShippingMethodsOnCart|setPaymentMethodOnCart|placeOrder|estimateShippingMethods)\b/.test(
+    /\b(cart\s*\(|createGuestCart|addSimpleProductsToCart|addProductsToCart|updateCartItems|removeItemFromCart|setGuestEmailOnCart|setShippingAddressesOnCart|setBillingAddressOnCart|setShippingMethodsOnCart|setPaymentMethodOnCart|placeOrder|estimateShippingMethods)\b/.test(
       query,
     );
 

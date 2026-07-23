@@ -1,4 +1,5 @@
 import { MAGENTO_LISTING_PRODUCT_FIELDS } from "./listingProductFields.fragment";
+import { MAGENTO_PRODUCT_CUSTOM_OPTIONS_FIELDS } from "./productCustomOptions.fragment";
 
 export const MAGENTO_PRODUCT_BY_URL_KEY_QUERY = `
   query MagentoProductByUrlKey($urlKey: String!) {
@@ -51,6 +52,7 @@ export const MAGENTO_PRODUCT_BY_URL_KEY_QUERY = `
           related_products {
             ${MAGENTO_LISTING_PRODUCT_FIELDS}
           }
+          ${MAGENTO_PRODUCT_CUSTOM_OPTIONS_FIELDS}
           custom_attributesV2 {
             items {
               code
