@@ -2,9 +2,17 @@
 
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type RefObject } from "react";
 import { createCustomerAccount, requestLoginOtp, verifyLoginOtp } from "../services/auth.service";
+import { sanitizePhoneInput } from "@/shared/utils/formValidation";
+import {
+  createCustomerAccount,
+  loginWithPassword,
+  requestLoginOtp,
+  verifyLoginOtp,
+} from "../services/auth.service";
 import { runPostLoginSync } from "../services/postLoginSync";
 import { signInWithApple, signInWithGoogle } from "../services/socialSignIn";
 import {
+  isEmailIdentifier,
   isLoginIdentifierReadyForOtp,
   isOtpComplete,
   LOGIN_OTP_LENGTH,
@@ -14,7 +22,7 @@ import {
 } from "../utils/authValidation";
 import { sanitizeReturnUrl } from "../utils/authNavigation";
 
-export type AuthFlowStep = "sign-in" | "otp" | "create-account";
+export type AuthFlowStep = "sign-in" | "otp" | "create-account" | "password";
 
 const RESEND_SECONDS = 60;
 
@@ -65,6 +73,15 @@ export type AuthFlowContentProps = {
     onClose: () => void;
     onCreateAccount: () => void;
   };
+  password: {
+    email: string;
+    password: string;
+    passwordError?: string;
+    onPasswordChange: (value: string) => void;
+    onBack: () => void;
+    onClose: () => void;
+    onLogin: () => void;
+  };
 };
 
 export function useAuthFlow({
@@ -80,6 +97,8 @@ export function useAuthFlow({
   const [otp, setOtp] = useState<string[]>(Array(LOGIN_OTP_LENGTH).fill(""));
   const [otpError, setOtpError] = useState<string | undefined>();
   const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
+  const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState<string | undefined>();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -105,6 +124,8 @@ export function useAuthFlow({
     setOtp(Array(LOGIN_OTP_LENGTH).fill(""));
     setOtpError(undefined);
     setSecondsLeft(RESEND_SECONDS);
+    setPassword("");
+    setPasswordError(undefined);
     setFullName("");
     setEmail("");
     setTermsAccepted(false);
@@ -146,6 +167,10 @@ export function useAuthFlow({
     if (step === "create-account" && !verifiedPhone) {
       setStep(isLoginIdentifierReadyForOtp(identifier) ? "otp" : "sign-in");
     }
+
+    if (step === "password" && !isEmailIdentifier(identifier)) {
+      setStep("sign-in");
+    }
   }, [active, step, identifier, verifiedPhone]);
 
   const handleClose = useCallback(() => {
@@ -154,6 +179,10 @@ export function useAuthFlow({
 
   const handleIdentifierChange = useCallback((value: string) => {
     setIdentifier(value);
+    // Digits-only input is treated as a phone number; anything containing a
+    // letter or @ is left untouched so an email can actually be typed.
+    const nextValue = /[a-zA-Z@]/.test(value) ? value : sanitizePhoneInput(value, "+91");
+    setIdentifier(nextValue);
     setIdentifierError(undefined);
   }, []);
 
@@ -163,6 +192,15 @@ export function useAuthFlow({
 
     if (!validation.valid) {
       setIdentifierError(validation.error);
+      return;
+    }
+
+    if (isEmailIdentifier(identifier)) {
+      setIdentifier(identifier.trim());
+      setIdentifierError(undefined);
+      setPassword("");
+      setPasswordError(undefined);
+      setStep("password");
       return;
     }
 
@@ -311,6 +349,36 @@ export function useAuthFlow({
     await completeAuth();
   }, [completeAuth, email, fullName, isSubmitting, otp, termsAccepted, verifiedPhone]);
 
+  const handlePasswordChange = useCallback((value: string) => {
+    setPassword(value);
+    setPasswordError(undefined);
+  }, []);
+
+  const handleBackFromPassword = useCallback(() => {
+    setStep("sign-in");
+    setPassword("");
+    setPasswordError(undefined);
+  }, []);
+
+  const handlePasswordLogin = useCallback(async () => {
+    if (isSubmitting) return;
+    if (!password) {
+      setPasswordError("Password is required");
+      return;
+    }
+
+    setIsSubmitting(true);
+    const result = await loginWithPassword(identifier.trim(), password);
+
+    if (!result.success) {
+      setIsSubmitting(false);
+      setPasswordError(result.error);
+      return;
+    }
+
+    await completeAuth();
+  }, [completeAuth, identifier, isSubmitting, password]);
+
   const handleGoogleContinue = useCallback(async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
@@ -386,6 +454,15 @@ export function useAuthFlow({
       onBack: handleBackToOtp,
       onClose: handleClose,
       onCreateAccount: handleCreateAccount,
+    },
+    password: {
+      email: identifier,
+      password,
+      passwordError,
+      onPasswordChange: handlePasswordChange,
+      onBack: handleBackFromPassword,
+      onClose: handleClose,
+      onLogin: handlePasswordLogin,
     },
   };
 

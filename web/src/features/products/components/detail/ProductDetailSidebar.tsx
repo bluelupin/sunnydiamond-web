@@ -35,11 +35,13 @@ import VanIcon from "@/assets/Icons/VanIcon";
 import StoreIcon from "@/assets/Icons/StoreIcon";
 import Reveal from "@/shared/Animation/Reveal";
 import ProductDetailAccordions from "./ProductDetailAccordions";
+import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
 
 type ProductDetailSidebarProps = {
   product: Product;
   content: ProductDetailContent;
   pricing: ProductDetailPricing;
+  sizeGuide?: NormalizedSizeGuide | null;
   onAddToBag: (payload: AddToBagPayload) => void;
   children?: (sections: {
     purchase: ReactNode;
@@ -52,6 +54,7 @@ const ProductDetailSidebar = ({
   product,
   content,
   pricing,
+  sizeGuide = null,
   onAddToBag,
   children,
 }: ProductDetailSidebarProps) => {
@@ -69,9 +72,12 @@ const ProductDetailSidebar = ({
   const { isWishlisted, toggleWishlist } = useWishlist();
   const wishlisted = isWishlisted(product.id);
   const engravingConfig = product.engraving;
+  const sizeLabels = sizeGuide?.sizeLabels ?? [];
+  const showSizeSelector = sizeLabels.length > 0;
 
   useEffect(() => {
     setEngravingSelection(null);
+    setRingSize("");
   }, [product.id]);
 
   const activeMetal = content.metalColors.find((color) => color.id === selectedMetal);
@@ -120,26 +126,30 @@ const ProductDetailSidebar = ({
           </div>
 
           <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <p className="font-gill text-base leading-normal tracking-normal text-darkblack">
-                  Ring Size
-                </p>
-                <DetailTextLink onClick={() => setIsRingSizeChartOpen(true)}>Find your size</DetailTextLink>
+            {showSizeSelector ? (
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <p className="font-gill text-base leading-normal tracking-normal text-darkblack">
+                    {sizeGuide?.sizeFieldLabel ?? "Size"}
+                  </p>
+                  <DetailTextLink onClick={() => setIsRingSizeChartOpen(true)}>
+                    Find your size
+                  </DetailTextLink>
+                </div>
+                <Select value={ringSize} onValueChange={setRingSize}>
+                  <SelectTrigger className="h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0">
+                    <SelectValue placeholder="-select-" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sizeLabels.map((size) => (
+                      <SelectItem key={size} value={size}>
+                        {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <Select value={ringSize} onValueChange={setRingSize}>
-                <SelectTrigger className="h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0">
-                  <SelectValue placeholder="-select-" />
-                </SelectTrigger>
-                <SelectContent>
-                  {content.ringSizes.map((size) => (
-                    <SelectItem key={size} value={size}>
-                      {size}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            ) : null}
 
             {engravingConfig?.enabled ? (
               <button
@@ -380,7 +390,11 @@ const ProductDetailSidebar = ({
         />
       ) : null}
 
-      <RingSizeChartPanel open={isRingSizeChartOpen} onClose={() => setIsRingSizeChartOpen(false)} />
+      <RingSizeChartPanel
+        open={isRingSizeChartOpen}
+        onClose={() => setIsRingSizeChartOpen(false)}
+        guide={sizeGuide}
+      />
 
       <DeliveryStoreJourneyPanel
         open={isDeliveryStoreOpen}

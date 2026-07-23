@@ -19,19 +19,28 @@ import { homeContent } from "@/features/cms/data/content";
 import ProductDetailMoreForYouSection from "./detail/ProductDetailMoreForYouSection";
 import ProductDetailVisitUsSection from "./detail/ProductDetailVisitUsSection";
 import type { NormalizedVisitUsSection } from "@/services/product-display/product-display-page.service";
+import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
+import { resolveSizeGuideForProduct } from "@/services/size-guide/size-guide.mapper";
 
 type ProductDetailPageProps = {
   product: Product;
   moreForYou: MoreForYouCarouselItem[];
   visitUs?: NormalizedVisitUsSection | null;
+  sizeGuides?: NormalizedSizeGuide[];
 };
 
-const ProductDetailPage = ({ product, moreForYou, visitUs }: ProductDetailPageProps) => {
+const ProductDetailPage = ({
+  product,
+  moreForYou,
+  visitUs,
+  sizeGuides = [],
+}: ProductDetailPageProps) => {
   const { addItem } = useCart();
   const { openBagDrawer } = useCartUI();
 
   const content = getProductDetailContent(product);
   const pricing = getProductDetailPricing(product);
+  const sizeGuide = resolveSizeGuideForProduct(sizeGuides, product);
 
   const handleAddToCart = async (payload: Parameters<typeof addItem>[0]) => {
     const result = await addItem(payload);
@@ -42,6 +51,7 @@ const ProductDetailPage = ({ product, moreForYou, visitUs }: ProductDetailPagePr
     product,
     content,
     pricing,
+    sizeGuide,
     onAddToBag: handleAddToCart,
   };
 

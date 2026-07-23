@@ -9,6 +9,8 @@ export const STRAPI_ENDPOINTS = {
   productLandingPage: "api/product-landing-page",
   contactBespokePage: "api/contact-bespoke-page",
   occasions: "api/occasions",
+  /** PDP size dropdown + chart drawer — fetch all, match by `name` / category */
+  sizeGuides: "api/size-guides",
   genericForms: "api/generic-forms",
   genericSubmissions: "api/generic-submissions",
   productForms: "api/product-forms",

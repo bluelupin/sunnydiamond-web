@@ -10,6 +10,7 @@ import { buildProductJsonLd } from "@/shared/lib/seo/schema/product";
 import ProductDetailPageView from "@/features/products/components/ProductDetailPage";
 import { getImageSrc } from "@/shared/utils/image";
 import { getProductDisplayVisitUs } from "@/services/product-display/product-display-page.service";
+import { getSizeGuides } from "@/services/size-guide/size-guide.service";
 
 export const dynamic = "force-dynamic";
 
@@ -46,9 +47,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function ProductPage({ params }: PageProps) {
   const { urlKey } = await params;
   const decodedUrlKey = decodeURIComponent(urlKey);
-  const [detailPage, visitUs] = await Promise.all([
+  const [detailPage, visitUs, sizeGuides] = await Promise.all([
     fetchMagentoProductDetailPage(decodedUrlKey),
     getProductDisplayVisitUs(),
+    getSizeGuides(),
   ]);
 
   if (!detailPage) {
@@ -60,7 +62,12 @@ export default async function ProductPage({ params }: PageProps) {
   return (
     <>
       <JsonLd data={buildProductJsonLd(product)} id={`product-jsonld-${product.id}`} />
-      <ProductDetailPageView product={product} moreForYou={moreForYou} visitUs={visitUs} />
+      <ProductDetailPageView
+        product={product}
+        moreForYou={moreForYou}
+        visitUs={visitUs}
+        sizeGuides={sizeGuides}
+      />
     </>
   );
 }

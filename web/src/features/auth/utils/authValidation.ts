@@ -14,8 +14,12 @@ export const normalizeIndianPhoneDigits = (value: string): string => {
   return digits;
 };
 
+export const isEmailIdentifier = (value: string): boolean => value.trim().includes("@");
+
 /**
  * Sign-in identifier validation. Format checks are deferred until Magento auth is wired.
+ * Sign-in identifier validation. A phone number continues to the SMS-OTP flow;
+ * an email continues to the password flow.
  */
 export const validateLoginIdentifier = (value: string): FieldValidation => {
   const trimmed = value.trim();
@@ -23,8 +27,11 @@ export const validateLoginIdentifier = (value: string): FieldValidation => {
   if (!trimmed) {
     return { valid: false, error: "Phone number or email is required" };
   }
-
   return { valid: true };
+  if (isEmailIdentifier(trimmed)) {
+    return validateRequiredEmail(trimmed);
+  }
+  return validatePhone(normalizeIndianPhoneDigits(trimmed), "+91");
 };
 
 export const isLoginIdentifierReadyForOtp = (value: string): boolean =>
