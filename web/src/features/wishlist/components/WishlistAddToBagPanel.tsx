@@ -29,8 +29,7 @@ import type { JewelleryListingProduct } from "@/features/jewellery-product/types
 import { wishlistPageContent } from "@/features/wishlist/data/content";
 import { getWishlistProductHref } from "@/features/wishlist/utils/wishlistProduct.utils";
 import { fetchMagentoProductByUrlKey } from "@/services/magento/products/productDetail.service";
-import { fetchSizeGuides } from "@/services/size-guide/size-guide.service";
-import { resolveSizeGuideForProduct } from "@/services/size-guide/size-guide.mapper";
+import { getSizeGuideForProduct } from "@/services/size-guide/size-guide.service";
 import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
 import { cn } from "@/shared/utils/cn";
 
@@ -48,7 +47,7 @@ const WishlistAddToBagPanel = ({
   onAddToBag,
 }: WishlistAddToBagPanelProps) => {
   const [detailProduct, setDetailProduct] = useState<Product | null>(null);
-  const [sizeGuides, setSizeGuides] = useState<NormalizedSizeGuide[]>([]);
+  const [sizeGuide, setSizeGuide] = useState<NormalizedSizeGuide | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedMetal, setSelectedMetal] = useState("gold");
   const [ringSize, setRingSize] = useState("");
@@ -58,6 +57,7 @@ const WishlistAddToBagPanel = ({
   useEffect(() => {
     if (!open || !product?.urlKey) {
       setDetailProduct(null);
+      setSizeGuide(null);
       setIsLoading(false);
       return;
     }
@@ -65,17 +65,23 @@ const WishlistAddToBagPanel = ({
     const controller = new AbortController();
     setIsLoading(true);
 
-    void Promise.all([
-      fetchMagentoProductByUrlKey(product.urlKey, controller.signal),
-      fetchSizeGuides(controller.signal),
-    ])
-      .then(([fetchedProduct, guides]) => {
+    void fetchMagentoProductByUrlKey(product.urlKey, controller.signal)
+      .then(async (fetchedProduct) => {
         if (controller.signal.aborted) {
           return;
         }
 
         setDetailProduct(fetchedProduct);
-        setSizeGuides(guides);
+
+        if (!fetchedProduct) {
+          setSizeGuide(null);
+          return;
+        }
+
+        const guide = await getSizeGuideForProduct(fetchedProduct, controller.signal);
+        if (!controller.signal.aborted) {
+          setSizeGuide(guide);
+        }
       })
       .finally(() => {
         if (!controller.signal.aborted) {
@@ -90,8 +96,6 @@ const WishlistAddToBagPanel = ({
 
   const content = detailProduct ? getProductDetailContent(detailProduct) : null;
   const pricing = detailProduct ? getProductDetailPricing(detailProduct) : null;
-  const sizeGuide =
-    detailProduct != null ? resolveSizeGuideForProduct(sizeGuides, detailProduct) : null;
   const sizeLabels = sizeGuide?.sizeLabels ?? [];
   const showSizeSelector = sizeLabels.length > 0;
 

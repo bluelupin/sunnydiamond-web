@@ -1,4 +1,4 @@
-import { MAGENTO_LISTING_PRODUCT_FIELDS } from "./listingProductFields.fragment";
+import { MAGENTO_MORE_FOR_YOU_PRODUCT_FIELDS } from "./moreForYouProductFields.fragment";
 
 export const MAGENTO_MORE_FOR_YOU_CATEGORY_FALLBACK_QUERY = `
   query MoreForYouCategoryFallback($categoryId: String!, $pageSize: Int!) {
@@ -8,7 +8,7 @@ export const MAGENTO_MORE_FOR_YOU_CATEGORY_FALLBACK_QUERY = `
       sort: { position: ASC }
     ) {
       items {
-        ${MAGENTO_LISTING_PRODUCT_FIELDS}
+        ${MAGENTO_MORE_FOR_YOU_PRODUCT_FIELDS}
       }
     }
   }

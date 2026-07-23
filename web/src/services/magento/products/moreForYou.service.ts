@@ -41,7 +41,6 @@ async function fetchCategoryFallbackProducts(
       pageSize,
     },
     signal,
-    cache: "no-store",
   });
 
   return data.products?.items ?? [];

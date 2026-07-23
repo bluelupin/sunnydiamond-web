@@ -122,7 +122,7 @@ const ProductDetailGallery = ({ product, topGalleryRef }: ProductDetailGalleryPr
               <OptimizedImage
                 src={carouselImages[activeSlide]}
                 alt={`${product.name} — view ${activeSlide + 1}`}
-                priority
+                priority={activeSlide === 0}
                 sizes="375px"
                 className="object-contain object-center"
               />

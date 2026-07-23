@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import Reveal from "@/shared/Animation/Reveal";
 
 type ProductDetailHeroBannerProps = {
   imageSrc: string;
@@ -47,7 +46,32 @@ const ProductDetailHeroBanner = ({
 
   useEffect(() => {
     setVideoFailed(false);
-    setShouldLoadVideo(Boolean(videoSrc));
+    setShouldLoadVideo(false);
+
+    if (!videoSrc) {
+      return;
+    }
+
+    const node = sectionRef.current;
+    if (!node) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setShouldLoadVideo(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px 0px" },
+    );
+
+    observer.observe(node);
+
+    return () => {
+      observer.disconnect();
+    };
   }, [videoSrc]);
 
   const handleVideoCanPlay = useCallback((event: React.SyntheticEvent<HTMLVideoElement>) => {
@@ -63,12 +87,11 @@ const ProductDetailHeroBanner = ({
   const videoMimeType = videoSrc ? resolveVideoMimeType(videoSrc) : "video/mp4";
 
   return (
-    <Reveal direction="up">
-      <section
-        ref={sectionRef}
-        aria-label="Lifestyle showcase"
-        className="grid h-361 w-full overflow-hidden md:h-600 lg:h-804 [&>*]:col-start-1 [&>*]:row-start-1"
-      >
+    <section
+      ref={sectionRef}
+      aria-label="Lifestyle showcase"
+      className="grid h-361 w-full overflow-hidden md:h-600 lg:h-804 [&>*]:col-start-1 [&>*]:row-start-1"
+    >
         <Image
           src={imageSrc}
           alt={alt}
@@ -87,7 +110,7 @@ const ProductDetailHeroBanner = ({
             loop
             muted
             playsInline
-            preload="auto"
+            preload="metadata"
             poster={imageSrc}
             aria-hidden
             tabIndex={-1}
@@ -98,8 +121,7 @@ const ProductDetailHeroBanner = ({
             <source src={videoSrc} type={videoMimeType} />
           </video>
         ) : null}
-      </section>
-    </Reveal>
+    </section>
   );
 };
 

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, type ReactNode } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
-import { Plus } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -20,13 +20,6 @@ import {
   DetailOutlineButton,
   DetailTextLink,
 } from "./shared";
-import ScheduleVideoCallPanel from "./ScheduleVideoCallPanel";
-import TryAtHomePanel from "./TryAtHomePanel";
-import PersonaliseProductPanel from "./PersonaliseProductPanel";
-import MetalEngravingPanel from "./MetalEngravingPanel";
-import RingSizeChartPanel from "./RingSizeChartPanel";
-import PriceBreakupPanel from "./PriceBreakupPanel";
-import DeliveryStoreJourneyPanel from "./DeliveryStoreJourneyPanel";
 import type { AddToBagPayload } from "@/features/cart/types/cart.types";
 import type { EngravingSelection } from "@/features/products/constants/engraving";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
@@ -37,6 +30,16 @@ import StoreIcon from "@/assets/Icons/StoreIcon";
 import Reveal from "@/shared/Animation/Reveal";
 import ProductDetailAccordions from "./ProductDetailAccordions";
 import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
+
+const MetalEngravingPanel = dynamic(() => import("./MetalEngravingPanel"), { ssr: false });
+const RingSizeChartPanel = dynamic(() => import("./RingSizeChartPanel"), { ssr: false });
+const DeliveryStoreJourneyPanel = dynamic(() => import("./DeliveryStoreJourneyPanel"), {
+  ssr: false,
+});
+const ScheduleVideoCallPanel = dynamic(() => import("./ScheduleVideoCallPanel"), { ssr: false });
+const TryAtHomePanel = dynamic(() => import("./TryAtHomePanel"), { ssr: false });
+const PersonaliseProductPanel = dynamic(() => import("./PersonaliseProductPanel"), { ssr: false });
+const PriceBreakupPanel = dynamic(() => import("./PriceBreakupPanel"), { ssr: false });
 
 type ProductDetailSidebarProps = {
   product: Product;
@@ -220,7 +223,7 @@ const ProductDetailSidebar = ({
           </div>
         </div>
 
-        <Reveal as="label" direction="up" className="flex cursor-pointer flex-col gap-3 bg-aboutInactive p-4">
+        <label className="flex cursor-pointer flex-col gap-3 bg-aboutInactive p-4">
           <span className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -233,11 +236,11 @@ const ProductDetailSidebar = ({
           <span className="font-gill text-base font-light leading-110 text-darkblack">
             Make this a special with a gift bag and a personalized message.
           </span>
-        </Reveal>
+        </label>
 
         <div className="flex flex-col gap-4">
-          <Reveal as="p" direction="up" className="font-gill text-base leading-110 text-darkblack">Delivery and Stores</Reveal>
-          <Reveal direction="up" className="flex gap-2">
+          <p className="font-gill text-base leading-110 text-darkblack">Delivery and Stores</p>
+          <div className="flex gap-2">
             <input
               type="text"
               value={zipCode}
@@ -246,21 +249,21 @@ const ProductDetailSidebar = ({
               className="h-14 min-w-0 flex-1 border border-neutral500 px-6 font-gill text-base text-darkblack outline-none"
             />
             <DetailDarkButton className="w-auto shrink-0 px-7 uppercase">Check</DetailDarkButton>
-          </Reveal>
+          </div>
           <div className="flex flex-col gap-3">
-            <Reveal direction="up" className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <VanIcon className="shrink-0" />
               <p className="font-gill text-base font-light leading-110 text-darkblack">
                 Estimated delivery May 12 2026
               </p>
-            </Reveal>
-            <Reveal direction="up" className="flex flex-wrap items-center gap-2">
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
               <StoreIcon className="shrink-0" />
               <p className="font-gill text-base font-light leading-110 text-darkblack">
                 Available now at nearest store
               </p>
               <DetailTextLink onClick={() => setIsDeliveryStoreOpen(true)}>Coimbatore</DetailTextLink>
-            </Reveal>
+            </div>
           </div>
         </div>
       </div>
@@ -270,80 +273,82 @@ const ProductDetailSidebar = ({
   const detailsSection = (
     <div className="flex flex-col gap-10 px-4 md:px-0 md:pb-12 lg:px-0 !pb-0">
       <section aria-label="Shopping benefits" className="flex flex-col gap-6">
-        <Reveal direction="up" className="flex items-center justify-between">
+        <div className="flex items-center justify-between">
           <h2 className="font-gill text-2xl leading-110 text-darkblack">With Sunny, you get</h2>
           <DetailTextLink href="/terms-and-conditions">T&amp;C Apply</DetailTextLink>
+        </div>
+        <Reveal direction="up">
+          <ul className="m-0 flex list-none flex-col bg-benefitSurface p-0 max-md:-mx-4 max-md:gap-6 max-md:px-4 max-md:py-10 md:flex-row md:items-stretch md:gap-4 md:p-6 lg:gap-4">
+            {content.benefits.flatMap((benefit, index) => {
+              const item = (
+                <li
+                  key={benefit.label}
+                  className={cn(
+                    "flex w-full shrink-0 flex-col items-center justify-center text-center",
+                    "max-md:gap-2 max-md:px-3 max-md:py-4",
+                    "md:h-136 md:flex-1 md:gap-2 md:p-3",
+                    index > 0 && "md:border-l md:border-gray600",
+                  )}
+                >
+                  <div className="flex size-10 shrink-0 items-center justify-center">
+                    <Image
+                      src={benefit.icon}
+                      alt=""
+                      width={40}
+                      height={40}
+                      aria-hidden
+                      className="size-10 object-contain"
+                    />
+                  </div>
+                  <span className="font-gill text-base leading-110 text-darkblack md:hidden">
+                    {benefit.mobileLabel}
+                  </span>
+                  <span className="hidden font-gill text-base leading-110 text-darkblack md:block">
+                    {benefit.lines[0]}
+                    <br />
+                    {benefit.lines[1]}
+                  </span>
+                </li>
+              );
+
+              if (index === 0) return [item];
+
+              return [
+                <li
+                  key={`${benefit.label}-divider`}
+                  role="presentation"
+                  aria-hidden
+                  className="block h-[1px] min-h-px w-full shrink-0 bg-[#999999] p-0 md:hidden"
+                />,
+                item,
+              ];
+            })}
+          </ul>
         </Reveal>
-        <ul className="m-0 flex list-none flex-col bg-benefitSurface p-0 max-md:-mx-4 max-md:gap-6 max-md:px-4 max-md:py-10 md:flex-row md:items-stretch md:gap-4 md:p-6 lg:gap-4">
-          {content.benefits.flatMap((benefit, index) => {
-            const item = (
-              <Reveal as="li" direction="up"
-                key={benefit.label}
-                className={cn(
-                  "flex w-full shrink-0 flex-col items-center justify-center text-center",
-                  "max-md:gap-2 max-md:px-3 max-md:py-4",
-                  "md:h-136 md:flex-1 md:gap-2 md:p-3",
-                  index > 0 && "md:border-l md:border-gray600",
-                )}
-              >
-                <div className="flex size-10 shrink-0 items-center justify-center">
-                  <Image
-                    src={benefit.icon}
-                    alt=""
-                    width={40}
-                    height={40}
-                    aria-hidden
-                    className="size-10 object-contain"
-                  />
-                </div>
-                <span className="font-gill text-base leading-110 text-darkblack md:hidden">
-                  {benefit.mobileLabel}
-                </span>
-                <span className="hidden font-gill text-base leading-110 text-darkblack md:block">
-                  {benefit.lines[0]}
-                  <br />
-                  {benefit.lines[1]}
-                </span>
-              </Reveal>
-            );
-
-            if (index === 0) return [item];
-
-            return [
-              <Reveal as="li" direction="up"
-                key={`${benefit.label}-divider`}
-                role="presentation"
-                aria-hidden
-                className="block h-[1px] min-h-px w-full shrink-0 bg-[#999999] p-0 md:hidden"
-              />,
-              item,
-            ];
-          })}
-        </ul>
       </section>
 
       <section
         aria-label="Customer support"
         className="flex min-h-260 items-center overflow-hidden bg-supportSurface px-6 py-8"
       >
-        <div className="flex max-w-358 flex-col gap-10">
+        <Reveal direction="up" className="flex max-w-358 flex-col gap-10">
           <div className="flex flex-col gap-3">
-            <Reveal as="h2" direction="up" className="font-larken text-2xl font-light leading-110 text-darkblack">
+            <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
               We&apos;re here for you
-            </Reveal>
-            <Reveal as="p" direction="up" className="font-gill text-base font-light leading-110 text-darkblack">
+            </h2>
+            <p className="font-gill text-base font-light leading-110 text-darkblack">
               Our salesperson will personally help you choose the right diamond.
-            </Reveal>
+            </p>
           </div>
-          <Reveal direction="up" className="flex max-w-220 flex-col gap-3">
+          <div className="flex max-w-220 flex-col gap-3">
             <DetailDarkButton onClick={() => setIsVideoCallOpen(true)} className="uppercase">
               Schedule a Video Call
             </DetailDarkButton>
             <DetailTextLink onClick={() => setIsTryAtHomeOpen(true)} className="self-start uppercase">
               Try At Home
             </DetailTextLink>
-          </Reveal>
-        </div>
+          </div>
+        </Reveal>
       </section>
 
       <ProductDetailAccordions items={content.accordions} />
@@ -352,7 +357,7 @@ const ProductDetailSidebar = ({
         aria-label="Personalisation"
         className="flex items-end justify-between overflow-hidden bg-chalkCard pl-4 py-6 lg:min-h-260 lg:pl-6"
       >
-        <Reveal direction="up" className="flex max-w-[172px] shrink-0 flex-col gap-6 max-md:-mr-[22px] md:max-w-240 lg:max-w-280 lg:gap-10">
+        <div className="flex max-w-[172px] shrink-0 flex-col gap-6 max-md:-mr-[22px] md:max-w-240 lg:max-w-280 lg:gap-10">
           <div className="flex flex-col gap-3">
             <h2 className="w-max whitespace-nowrap font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
               Personalise this for you
@@ -364,8 +369,8 @@ const ProductDetailSidebar = ({
           <DetailOutlineButton className="w-fit uppercase" onClick={() => setIsPersonaliseOpen(true)}>
             Get in Touch
           </DetailOutlineButton>
-        </Reveal>
-        <Reveal direction="up" className="relative h-[118px] w-177 shrink-0 overflow-hidden md:h-220 md:w-280 lg:h-[213px] lg:w-[322px]">
+        </div>
+        <div className="relative h-[118px] w-177 shrink-0 overflow-hidden md:h-220 md:w-280 lg:h-[213px] lg:w-[322px]">
           <Image
             src={content.personaliseImage}
             alt=""
@@ -375,16 +380,16 @@ const ProductDetailSidebar = ({
             className="size-full object-cover object-[center_-4%]"
             sizes="(max-width: 1023px) 177px, 322px"
           />
-        </Reveal>
+        </div>
       </section>
     </div>
   );
 
   const panels = (
     <>
-      {engravingConfig?.enabled ? (
+      {engravingConfig?.enabled && isEngravingOpen ? (
         <MetalEngravingPanel
-          open={isEngravingOpen}
+          open
           onClose={() => setIsEngravingOpen(false)}
           previewImage={engravingConfig.previewImage}
           fonts={engravingConfig.fonts}
@@ -394,41 +399,49 @@ const ProductDetailSidebar = ({
         />
       ) : null}
 
-      <RingSizeChartPanel
-        open={isRingSizeChartOpen}
-        onClose={() => setIsRingSizeChartOpen(false)}
-        guide={sizeGuide}
-      />
+      {isRingSizeChartOpen ? (
+        <RingSizeChartPanel open onClose={() => setIsRingSizeChartOpen(false)} guide={sizeGuide} />
+      ) : null}
 
-      <DeliveryStoreJourneyPanel
-        open={isDeliveryStoreOpen}
-        onClose={() => setIsDeliveryStoreOpen(false)}
-        city="Coimbatore"
-      />
+      {isDeliveryStoreOpen ? (
+        <DeliveryStoreJourneyPanel
+          open
+          onClose={() => setIsDeliveryStoreOpen(false)}
+          city="Coimbatore"
+        />
+      ) : null}
 
-      <ScheduleVideoCallPanel
-        open={isVideoCallOpen}
-        onClose={() => setIsVideoCallOpen(false)}
-        product={product}
-      />
+      {isVideoCallOpen ? (
+        <ScheduleVideoCallPanel
+          open
+          onClose={() => setIsVideoCallOpen(false)}
+          product={product}
+        />
+      ) : null}
 
-      <TryAtHomePanel open={isTryAtHomeOpen} onClose={() => setIsTryAtHomeOpen(false)} product={product} />
+      {isTryAtHomeOpen ? (
+        <TryAtHomePanel open onClose={() => setIsTryAtHomeOpen(false)} product={product} />
+      ) : null}
 
-      <PersonaliseProductPanel
-        open={isPersonaliseOpen}
-        onClose={() => setIsPersonaliseOpen(false)}
-        product={product}
-      />
+      {isPersonaliseOpen ? (
+        <PersonaliseProductPanel
+          open
+          onClose={() => setIsPersonaliseOpen(false)}
+          product={product}
+        />
+      ) : null}
 
-      <PriceBreakupPanel
-        open={isPriceBreakupOpen}
-        onClose={() => setIsPriceBreakupOpen(false)}
-        productName={product.name}
-        productImage={product.image}
-        metalLabel={activeMetal?.label}
-        ringSize={ringSize || undefined}
-        pricing={pricing}
-      />
+      {isPriceBreakupOpen ? (
+        <PriceBreakupPanel
+          open
+          onClose={() => setIsPriceBreakupOpen(false)}
+          productName={product.name}
+          productImage={product.image}
+          metalLabel={activeMetal?.label}
+          ringSize={ringSize || undefined}
+          pricing={pricing}
+        />
+      ) : null}
     </>
   );
 

@@ -4,7 +4,6 @@ import { useState } from "react";
 import Image from "next/image";
 import BookStoreVisitPanel from "./BookStoreVisitPanel";
 import { DetailTextLink } from "./shared";
-import Reveal from "@/shared/Animation/Reveal";
 import type { NormalizedVisitUsSection } from "@/services/product-display/product-display-page.service";
 import { VISIT_US_FALLBACK } from "@/services/product-display/product-display-page.service";
 
@@ -41,7 +40,7 @@ const ProductDetailVisitUsSection = ({
         />
 
         <div className="z-10 flex self-end justify-center px-4 pb-16 md:px-8 lg:px-10">
-          <Reveal direction="up" className="flex w-full max-w-311 flex-col items-center gap-6 lg:max-w-1360 lg:gap-10">
+          <div className="flex w-full max-w-311 flex-col items-center gap-6 lg:max-w-1360 lg:gap-10">
             <div className="flex flex-col items-center gap-3 text-center text-white lg:gap-4">
               <h2 id="visit-us-heading" className="font-larken text-32 font-light leading-110 lg:text-5xl">
                 {content.title}
@@ -58,7 +57,7 @@ const ProductDetailVisitUsSection = ({
             >
               {content.ctaLabel}
             </DetailTextLink>
-          </Reveal>
+          </div>
         </div>
       </section>
 

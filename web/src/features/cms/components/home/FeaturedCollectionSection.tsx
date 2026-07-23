@@ -10,17 +10,21 @@ import {
 } from "@/shared/utils/resolveAlankaraCollectionSection";
 import { getMagentoProductsBySkus } from "@/services/magento/products/products.service";
 import type { AlankaraCollectionProduct } from "@/shared/ui/collection/alankaraCollection.types";
+import type { PrefetchedAlankaraCollection } from "@/features/products/services/prefetchProductDetailAlankara";
 
 interface FeaturedCollectionSectionProps {
   id?: string;
   sectionHeading?: string;
   description?: string;
+  /** When set, skips the client-side Magento SKU fetch (server-prefetched on PDP). */
+  prefetchedAlankara?: PrefetchedAlankaraCollection;
 }
 
 const FeaturedCollectionSection = ({
   id,
   sectionHeading,
   description: descriptionProp,
+  prefetchedAlankara,
 }: FeaturedCollectionSectionProps) => {
   const { data: shoppingData, isLoading: isShoppingLoading } = useHomepageShoppingBlocks();
   const featuredCollectionData =
@@ -38,18 +42,26 @@ const FeaturedCollectionSection = ({
   const featuredProductSku = collectionProps.featuredProductSku;
   const skuKey = productSkus.join("|");
 
+  const hasServerPrefetch = prefetchedAlankara != null;
+
   const [magentoProducts, setMagentoProducts] = useState<AlankaraCollectionProduct[] | null>(
-    null,
+    hasServerPrefetch ? prefetchedAlankara.products : null,
   );
   const [defaultActiveIndex, setDefaultActiveIndex] = useState(
-    collectionProps.defaultActiveIndex,
+    hasServerPrefetch
+      ? prefetchedAlankara.defaultActiveIndex
+      : collectionProps.defaultActiveIndex,
   );
-  const [isMagentoLoading, setIsMagentoLoading] = useState(productSkus.length > 0);
+  const [isMagentoLoading, setIsMagentoLoading] = useState(
+    !hasServerPrefetch && productSkus.length > 0,
+  );
 
   useEffect(() => {
-    if (productSkus.length === 0) {
-      setMagentoProducts(null);
-      setDefaultActiveIndex(collectionProps.defaultActiveIndex);
+    if (hasServerPrefetch || productSkus.length === 0) {
+      if (!hasServerPrefetch) {
+        setMagentoProducts(null);
+        setDefaultActiveIndex(collectionProps.defaultActiveIndex);
+      }
       setIsMagentoLoading(false);
       return;
     }
@@ -79,7 +91,7 @@ const FeaturedCollectionSection = ({
       });
 
     return () => controller.abort();
-  }, [skuKey, featuredProductSku, collectionProps.defaultActiveIndex]);
+  }, [hasServerPrefetch, skuKey, featuredProductSku, collectionProps.defaultActiveIndex, productSkus.length]);
 
   if (!isSectionActive(collectionProps.isActive)) {
     return null;

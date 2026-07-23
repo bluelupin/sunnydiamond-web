@@ -8,11 +8,15 @@ import {
 import JsonLd from "@/shared/lib/seo/JsonLd";
 import { buildProductJsonLd } from "@/shared/lib/seo/schema/product";
 import ProductDetailPageView from "@/features/products/components/ProductDetailPage";
+import ProductDetailBelowFoldLazy from "@/features/products/components/ProductDetailBelowFoldLazy";
+import { getProductDetailContent } from "@/features/products/data/productDetailContent";
+import { prefetchProductDetailAlankaraCollection } from "@/features/products/services/prefetchProductDetailAlankara";
 import { getImageSrc } from "@/shared/utils/image";
 import { getProductDisplayVisitUs } from "@/services/product-display/product-display-page.service";
-import { getSizeGuides } from "@/services/size-guide/size-guide.service";
+import { getSizeGuideForProduct } from "@/services/size-guide/size-guide.service";
 
-export const dynamic = "force-dynamic";
+/** Matches MAGENTO_CATALOG_REVALIDATE_SECONDS default (segment config must be a literal). */
+export const revalidate = 3600;
 
 type PageParams = {
   urlKey: string;
@@ -47,10 +51,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function ProductPage({ params }: PageProps) {
   const { urlKey } = await params;
   const decodedUrlKey = decodeURIComponent(urlKey);
-  const [detailPage, visitUs, sizeGuides] = await Promise.all([
+  const [detailPage, visitUs, alankaraPrefetch] = await Promise.all([
     fetchMagentoProductDetailPage(decodedUrlKey),
     getProductDisplayVisitUs(),
-    getSizeGuides(),
+    prefetchProductDetailAlankaraCollection(),
   ]);
 
   if (!detailPage) {
@@ -58,15 +62,20 @@ export default async function ProductPage({ params }: PageProps) {
   }
 
   const { product, moreForYou } = detailPage;
+  const content = getProductDetailContent(product);
+  const sizeGuide = await getSizeGuideForProduct(product);
 
   return (
     <>
       <JsonLd data={buildProductJsonLd(product)} id={`product-jsonld-${product.id}`} />
-      <ProductDetailPageView
-        product={product}
+      <ProductDetailPageView product={product} sizeGuide={sizeGuide} />
+      <ProductDetailBelowFoldLazy
+        heroBannerImage={content.heroBannerImage}
+        heroBannerVideo={content.heroBannerVideo}
+        productName={product.name}
         moreForYou={moreForYou}
         visitUs={visitUs}
-        sizeGuides={sizeGuides}
+        alankaraPrefetch={alankaraPrefetch}
       />
     </>
   );

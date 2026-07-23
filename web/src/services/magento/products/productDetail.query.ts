@@ -1,4 +1,4 @@
-import { MAGENTO_LISTING_PRODUCT_FIELDS } from "./listingProductFields.fragment";
+import { MAGENTO_MORE_FOR_YOU_PRODUCT_FIELDS } from "./moreForYouProductFields.fragment";
 import { MAGENTO_PRODUCT_CUSTOM_OPTIONS_FIELDS } from "./productCustomOptions.fragment";
 
 export const MAGENTO_PRODUCT_BY_URL_KEY_QUERY = `
@@ -50,7 +50,7 @@ export const MAGENTO_PRODUCT_BY_URL_KEY_QUERY = `
           model_wear_image
           special_price
           related_products {
-            ${MAGENTO_LISTING_PRODUCT_FIELDS}
+            ${MAGENTO_MORE_FOR_YOU_PRODUCT_FIELDS}
           }
           ${MAGENTO_PRODUCT_CUSTOM_OPTIONS_FIELDS}
           custom_attributesV2 {
