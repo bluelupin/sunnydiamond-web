@@ -205,7 +205,7 @@ export default function FeaturedProductsCarousel({
               onClick={goPrev}
               className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
             >
-              <LeftArrow className="h-[17px] w-[18px]" />
+              <LeftArrow className="h-6 w-6" />
             </button>
             <button
               type="button"
@@ -214,15 +214,15 @@ export default function FeaturedProductsCarousel({
               onClick={goNext}
               className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
             >
-              <RightArrow className="h-[17px] w-[18px]" />
+              <RightArrow className="h-6 w-6" />
             </button>
           </div>
         </div>
       </div>
 
       {/* Product details + mobile arrows — Figma 684:2940 / 684:3238 */}
-      <div className="mx-auto flex w-[200px] flex-col items-center gap-3 sm:w-[260px] md:w-[600px] md:gap-3">
-        <div className="relative z-20 flex w-full max-w-[303px] items-center justify-between md:hidden">
+      <div className="mx-auto flex w-[200px] flex-col items-center sm:w-[260px] md:w-[600px]">
+        <div className="relative z-20 flex w-full max-w-[303px] w-[303px] items-center justify-between md:hidden top-16">
           <button
             type="button"
             aria-label="Previous product"
@@ -230,7 +230,7 @@ export default function FeaturedProductsCarousel({
             onClick={goPrev}
             className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
           >
-            <LeftArrow className="h-[17px] w-[18px]" />
+            <LeftArrow className="w-6 h-6" />
           </button>
           <button
             type="button"
@@ -239,7 +239,7 @@ export default function FeaturedProductsCarousel({
             onClick={goNext}
             className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
           >
-            <RightArrow className="h-[17px] w-[18px]" />
+            <RightArrow className="w-6 h-6" />
           </button>
         </div>
 

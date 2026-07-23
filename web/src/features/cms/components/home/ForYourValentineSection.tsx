@@ -143,7 +143,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
         className="pointer-events-none absolute inset-0 size-full sm:!h-[157%] sm:top-[-300px] top-12 object-cover object-center opacity-80"
       />
       <div className="flex flex-col items-center py-12 md:flex-row md:min-h-[750px] md:py-16 lg:items-center lg:justify-between lg:gap-8 lg:px-10 md:px-8 px-4 lg:py-100">
-        <div className="order-2 flex w-full max-w-full shrink-0 flex-col gap-8 md:order-1 md:max-w-[437px]">
+        <div className="order-2 flex w-full max-w-full shrink-0 flex-col md:gap-10 gap-6 md:order-1 md:max-w-[437px]">
           <div className="md:space-y-4 space-y-3">
             <Reveal as="h2" direction="up" className="md:text-left text-center font-larken lg:text-5xl md:text-4xl sm:text-3xl text-32 font-light leading-110 text-darkblack">
               {sectionTitle}

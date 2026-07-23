@@ -254,10 +254,10 @@ function ShowroomsDesktopLayout({
                       </div>
 
                       <div className="mt-4 lg:mb-6 mb-8 flex gap-3 items-center">
-                        <Phone
-                          size={16}
-                          className="text-black flex-shrink-0"
-                        />
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-black flex-shrink-0">
+                          <path d="M18 20V3.5C18 2.67157 17.3284 2 16.5 2L7.5 2C6.67157 2 6 2.67157 6 3.5L6 20C6 20.8284 6.67157 21.5 7.5 21.5H16.5C17.3284 21.5 18 20.8284 18 20Z" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+                          <path d="M12 6.3125C12.5178 6.3125 12.9375 5.89277 12.9375 5.375C12.9375 4.85723 12.5178 4.4375 12 4.4375C11.4822 4.4375 11.0625 4.85723 11.0625 5.375C11.0625 5.89277 11.4822 6.3125 12 6.3125Z" fill="#0A0A0A" />
+                        </svg>
                         <p className="lg:text-xl md:text-lg text-base text-darkblack font-light tracking-[2%] leading-130 font-gill">
                           {location.phone}
                         </p>
