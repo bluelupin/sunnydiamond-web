@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type RefObject } from "react";
-import { createCustomerAccount, requestLoginOtp, verifyLoginOtp } from "../services/auth.service";
 import { sanitizePhoneInput } from "@/shared/utils/formValidation";
 import {
   createCustomerAccount,
@@ -87,6 +86,7 @@ export type AuthFlowContentProps = {
 export function useAuthFlow({
   active,
   returnUrl: returnUrlInput,
+  onComplete,
   onAbort,
 }: UseAuthFlowOptions) {
   const returnUrl = sanitizeReturnUrl(returnUrlInput);
@@ -113,8 +113,8 @@ export function useAuthFlow({
   /** Session cookie is set — sync guest cart/wishlist, then full navigation so providers reboot. */
   const completeAuth = useCallback(async () => {
     await runPostLoginSync();
-    window.location.assign(returnUrl);
-  }, [returnUrl]);
+    onComplete(returnUrl);
+  }, [onComplete, returnUrl]);
 
   const resetState = useCallback(() => {
     setStep("sign-in");
@@ -178,9 +178,6 @@ export function useAuthFlow({
   }, [onAbort]);
 
   const handleIdentifierChange = useCallback((value: string) => {
-    setIdentifier(value);
-    // Digits-only input is treated as a phone number; anything containing a
-    // letter or @ is left untouched so an email can actually be typed.
     const nextValue = /[a-zA-Z@]/.test(value) ? value : sanitizePhoneInput(value, "+91");
     setIdentifier(nextValue);
     setIdentifierError(undefined);
