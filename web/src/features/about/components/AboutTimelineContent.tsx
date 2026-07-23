@@ -37,10 +37,10 @@ const AboutTimelineContent = ({
         <span className="h-px flex-1 bg-neutral300" aria-hidden />
       </div>
 
-      <div className="flex w-full flex-col gap-4">
+      <div className="flex w-full flex-col md:gap-4 gap-3">
         <h2
           id="about-timeline-title"
-          className="font-larken text-32 font-light leading-110 text-darkblack"
+          className="font-larken md:text-32 text-2xl font-light leading-110 text-darkblack"
         >
           {milestone.title}
         </h2>
