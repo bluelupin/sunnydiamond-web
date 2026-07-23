@@ -72,8 +72,8 @@ const PanelMedia = ({
         "relative box-border flex w-full shrink-0 lg:mx-0",
         "max-md:mx-4 max-md:w-[calc(100%-32px)]",
         panel.id === "carat"
-          ? "items-start justify-start max-md:h-[370px] md:h-500 lg:h-[610px]"
-          : "items-center justify-center max-md:h-[370px] md:h-500 lg:h-[633px]",
+          ? "items-start justify-start max-md:h-auto md:py-5 py-14 md:h-500 lg:h-[610px]"
+          : "items-center justify-center max-md:h-auto md:py-5 py-14 md:h-500 lg:h-[633px]",
       )}
     >
       <PanelTexture panelId={panel.id} />
@@ -226,7 +226,7 @@ const EducationFourCsPanel = ({
       className={cn(
         "overflow-hidden",
         isChalk ? "bg-gray300" : "md:bg-white bg-gray300",
-        "max-md:h-[725px]",
+        "max-md:h-auto",
         panel.id === "carat" ? "lg:h-[610px]" : "lg:h-[633px]",
       )}
     >

@@ -649,3 +649,16 @@
 .imageTestContainer {
   border: 0.4px solid #cccccc38;
 }
+
+.education-certified-section {
+  background-image: url("https://d1gf9vo4d2b63b.cloudfront.net/cms/education_certificate_bg_mobile_d302ab1faa.svg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+@media (min-width: 768px) {
+  .education-certified-section {
+    background-image: url("https://d1gf9vo4d2b63b.cloudfront.net/cms/education_certificate_bg_f231e31b04.svg");
+  }
+}
