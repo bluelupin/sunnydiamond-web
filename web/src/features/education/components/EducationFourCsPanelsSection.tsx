@@ -76,6 +76,14 @@ const PanelMedia = ({
           : "items-center justify-center max-md:h-[370px] md:h-500 lg:h-[633px]",
       )}
     >
+      <div
+        className="w-full h-full absolute z-[1]"
+        style={{
+          backgroundImage: "url('https://d1gf9vo4d2b63b.cloudfront.net/cms/education_card_bg_5ba520d9ef.webp')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}></div>
       <PanelTexture panelId={panel.id} />
 
       <div

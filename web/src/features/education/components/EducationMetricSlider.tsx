@@ -26,18 +26,55 @@ const dotPositionStyle = (center: number, specWidth: number, top: number): CSSPr
   top,
 });
 
-const endpointLabelAlignClass = (index: number, total: number) => {
-  if (index === 0) return "-translate-x-0 text-left";
-  if (index === total - 1) return "-translate-x-full text-right";
-  return "-translate-x-1/2 text-center";
-};
+const centeredLabelLayout = (
+  labelCenter: number,
+  specWidth: number,
+  labelTop: number,
+) => ({
+  className: "-translate-x-1/2 text-center",
+  style: {
+    left: toPercent(labelCenter, specWidth),
+    top: labelTop,
+  } satisfies CSSProperties,
+});
 
 const MOBILE_THUMB_SIZE = 14;
+/** Half of the 44px tap target — inset selected thumb/label at track ends only. */
+const SLIDER_EDGE_INSET = 22;
+
+const clampSelectedCenter = (center: number, specWidth: number) =>
+  Math.min(Math.max(center, SLIDER_EDGE_INSET), specWidth - SLIDER_EDGE_INSET);
 
 const labelFontProps = (useMobileLayout: boolean, mobileFontSize?: number) =>
   useMobileLayout
     ? { className: undefined as string | undefined, style: { fontSize: mobileFontSize ?? 12 } }
     : { className: "text-base", style: undefined as CSSProperties | undefined };
+
+const EndpointLabelContent = ({
+  option,
+  stacked = false,
+}: {
+  option: EducationSliderOption;
+  stacked?: boolean;
+}) => {
+  if (!option.mobileLabelLines?.length) {
+    return option.label;
+  }
+
+  if (stacked) {
+    return (
+      <>
+        {option.mobileLabelLines.map((line) => (
+          <span key={line} className="block leading-110">
+            {line}
+          </span>
+        ))}
+      </>
+    );
+  }
+
+  return option.label;
+};
 
 const TRACK_DOT_GAP = 10;
 
@@ -88,45 +125,30 @@ const SliderLabel = ({
   const font = labelFontProps(useMobileLayout, mobileLabelFontSize);
 
   if (useMobileLayout) {
-    if (option.mobileLabelLines) {
-      return (
-        <span
-          className={cn(
-            "pointer-events-none absolute font-gill font-normal leading-110 transition-colors",
-            font.className,
-            endpointLabelAlignClass(index, total),
-            colorClass,
-          )}
-          style={{
-            left: toPercent(dotCenter, specWidth),
-            top: labelTop,
-            ...font.style,
-          }}
-        >
-          {option.mobileLabelLines.map((line) => (
-            <span key={line} className="block">
-              {line}
-            </span>
-          ))}
-        </span>
-      );
-    }
+    const layout = centeredLabelLayout(dotCenter, specWidth, labelTop);
 
     return (
       <span
         className={cn(
-          "pointer-events-none absolute font-gill font-normal leading-110 transition-colors",
+          "pointer-events-none absolute font-gill font-normal leading-110 transition-colors min-w-8",
           font.className,
-          endpointLabelAlignClass(index, total),
+          layout.className,
           colorClass,
         )}
         style={{
-          left: toPercent(dotCenter, specWidth),
-          top: labelTop,
+          ...layout.style,
           ...font.style,
         }}
       >
-        {option.label}
+        {option.mobileLabelLines ? (
+          option.mobileLabelLines.map((line) => (
+            <span key={line} className="block">
+              {line}
+            </span>
+          ))
+        ) : (
+          option.label
+        )}
       </span>
     );
   }
@@ -193,11 +215,15 @@ const EducationMetricSlider = ({
   const thumbSize = useMobileLayout ? MOBILE_THUMB_SIZE : spec.thumbSize;
   const maxIndex = Math.max(options.length - 1, 0);
   const labelFont = labelFontProps(useMobileLayout, spec.mobileLabelFontSize);
-  const activeDotCenter = dotCenters[activeIndex] ?? dotCenters[0];
+  const rawActiveDotCenter = dotCenters[activeIndex] ?? dotCenters[0] ?? 0;
+  const activeDotCenter = clampSelectedCenter(rawActiveDotCenter, spec.width);
   const hasSublabels = Boolean(spec.sublabelTop);
   const showActiveLabelOnly =
     spec.labelDisplay === "active" || (useMobileLayout && options.length >= 7);
   const showEndpointLabels = spec.labelDisplay === "endpoints";
+  const stackEndpointLabels =
+    showEndpointLabels &&
+    options.some((option) => Boolean(option.mobileLabelLines));
   const activeOption = options[activeIndex];
   const showDots = spec.showDots !== false;
   const endpointDotsOnly = spec.endpointDotsOnly === true;
@@ -376,81 +402,74 @@ const EducationMetricSlider = ({
       })}
 
       {showEndpointLabels ? (
-        <>
-          {options[0] ? (
+        options.map((option, index) => {
+          const rawCenter = dotCenters[index] ?? dotCenters[0] ?? 0;
+          const isActive = index === activeIndex;
+          const labelCenter = isActive
+            ? clampSelectedCenter(rawCenter, spec.width)
+            : rawCenter;
+
+          const labelLayout = centeredLabelLayout(
+            labelCenter,
+            spec.width,
+            spec.labelTop,
+          );
+
+          return (
             <span
+              key={`${option.label}-endpoint-label`}
               className={cn(
-                "pointer-events-none absolute whitespace-nowrap font-gill font-normal leading-110 transition-colors",
+                "pointer-events-none absolute font-gill font-normal leading-110 transition-colors",
                 labelFont.className,
-                endpointLabelAlignClass(0, options.length),
-                activeIndex === 0 ? "text-linkGold" : "text-darkblack",
+                labelLayout.className,
+                stackEndpointLabels && option.mobileLabelLines
+                  ? "whitespace-normal"
+                  : "whitespace-nowrap",
+                isActive ? "text-linkGold" : "text-darkblack",
+                isActive && "transition-[left] duration-200 ease-out",
               )}
               style={{
-                left: toPercent(dotCenters[0]!, spec.width),
-                top: spec.labelTop,
+                ...labelLayout.style,
                 ...labelFont.style,
               }}
             >
-              {options[0].label}
+              <EndpointLabelContent option={option} stacked={stackEndpointLabels} />
             </span>
-          ) : null}
-          {options[lastDotIndex] ? (
-            <span
-              className={cn(
-                "pointer-events-none absolute whitespace-nowrap font-gill font-normal leading-110 transition-colors",
-                labelFont.className,
-                endpointLabelAlignClass(lastDotIndex, options.length),
-                activeIndex === lastDotIndex ? "text-linkGold" : "text-darkblack",
-              )}
-              style={{
-                left: toPercent(dotCenters[lastDotIndex]!, spec.width),
-                top: spec.labelTop,
-                ...labelFont.style,
-              }}
-            >
-              {options[lastDotIndex].label}
-            </span>
-          ) : null}
-          {activeOption && activeIndex > 0 && activeIndex < lastDotIndex ? (
-            <span
-              className={cn(
-                "pointer-events-none absolute whitespace-nowrap font-gill font-normal leading-110 text-linkGold transition-[left] duration-200 ease-out",
-                labelFont.className,
-                endpointLabelAlignClass(activeIndex, options.length),
-              )}
-              style={{
-                left: toPercent(activeDotCenter, spec.width),
-                top: spec.labelTop,
-                ...labelFont.style,
-              }}
-            >
-              {activeOption.label}
-            </span>
-          ) : null}
-        </>
+          );
+        })
       ) : showActiveLabelOnly ? (
         activeOption ? (
-          <span
-            className={cn(
-              "pointer-events-none absolute whitespace-nowrap font-gill font-normal leading-110 text-linkGold transition-[left] duration-200 ease-out",
-              labelFont.className,
-              useMobileLayout
-                ? endpointLabelAlignClass(activeIndex, options.length)
-                : "-translate-x-1/2",
-            )}
-            style={{
-              left: toPercent(activeDotCenter, spec.width),
-              top: spec.labelTop,
-              ...labelFont.style,
-            }}
-          >
-            {activeOption.label}
-          </span>
+          (() => {
+            const activeLabelLayout = centeredLabelLayout(
+              activeDotCenter,
+              spec.width,
+              spec.labelTop,
+            );
+
+            return (
+              <span
+                className={cn(
+                  "pointer-events-none absolute whitespace-nowrap font-gill font-normal leading-110 text-linkGold transition-[left] duration-200 ease-out",
+                  labelFont.className,
+                  activeLabelLayout.className,
+                )}
+                style={{
+                  ...activeLabelLayout.style,
+                  ...labelFont.style,
+                }}
+              >
+                {activeOption.label}
+              </span>
+            );
+          })()
         ) : null
       ) : (
         options.map((option, index) => {
-          const dotCenter = dotCenters[index] ?? dotCenters[0];
+          const rawCenter = dotCenters[index] ?? dotCenters[0] ?? 0;
           const isActive = index === activeIndex;
+          const dotCenter = isActive
+            ? clampSelectedCenter(rawCenter, spec.width)
+            : rawCenter;
 
           return (
             <SliderLabel
@@ -472,8 +491,11 @@ const EducationMetricSlider = ({
       {hasSublabels
         ? options.map((option, index) => {
             const sublabelLeft = spec.sublabelLeft?.[index] ?? spec.sublabelLeft?.[0] ?? 0;
-            const dotCenter = dotCenters[index] ?? dotCenters[0];
+            const rawCenter = dotCenters[index] ?? dotCenters[0] ?? 0;
             const isActive = index === activeIndex;
+            const mobileSublabelCenter = isActive
+              ? clampSelectedCenter(rawCenter, spec.width)
+              : rawCenter;
 
             if (!option.sublabel) return null;
 
@@ -481,17 +503,15 @@ const EducationMetricSlider = ({
               <span
                 key={`${option.label}-sublabel`}
                 className={cn(
-                  "pointer-events-none absolute max-w-[80px] font-gill font-light leading-110",
-                  useMobileLayout
-                    ? cn(
-                        "text-[12px]",
-                        endpointLabelAlignClass(index, options.length),
-                      )
-                    : "text-center text-sm",
+                  "pointer-events-none absolute max-w-[80px] -translate-x-1/2 text-center font-gill font-light leading-110",
+                  useMobileLayout ? "text-[12px]" : "text-sm",
                   isActive ? "text-linkGold" : "text-darkblack",
                 )}
                 style={{
-                  left: toPercent(useMobileLayout ? dotCenter : sublabelLeft, spec.width),
+                  left: toPercent(
+                    useMobileLayout ? mobileSublabelCenter : sublabelLeft,
+                    spec.width,
+                  ),
                   top: spec.sublabelTop,
                 }}
               >

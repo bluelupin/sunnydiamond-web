@@ -186,6 +186,7 @@ export const educationSliderSpecs: Record<string, EducationSliderSpec> = {
   carat: {
     width: 517.84,
     height: 50.51,
+    mobileHeight: 64,
     mobileWidth: MOBILE_SLIDER_WIDTH,
     mobileLabelFontSize: 12,
     trackLeft: caratSliderTrackLeft,
@@ -196,7 +197,6 @@ export const educationSliderSpecs: Record<string, EducationSliderSpec> = {
     labelTop: 32.51,
     labelDisplay: "endpoints",
     showDots: true,
-    endpointDotsOnly: true,
     dotCenters: caratSliderDotCenters,
     labelLeft: caratSliderDotCenters.map((center) => center - 20),
     ariaLabel: "Diamond carat weight",

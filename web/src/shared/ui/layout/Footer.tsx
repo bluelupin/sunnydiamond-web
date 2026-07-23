@@ -107,7 +107,7 @@ const Footer = () => {
           </nav>
         </div>
         <div className="relative flex flex-col items-center gap-8 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-7">
+          <div className="flex items-center gap-7 lg:order-1 order-1">
             {socialLinks.map((social) => (
               <a
                 key={social.id}
@@ -128,19 +128,18 @@ const Footer = () => {
               </a>
             ))}
           </div>
-          <div className="relative h-[25px] w-[320px] lg:w-[380px]">
+          <p className="text-center font-gill text-sm font-light leading-110 text-neutral500 lg:whitespace-nowrap lg:order-2 order-3">
+            {footerCopyright}
+          </p>
+          <div className="relative h-[25px] w-[320px] lg:w-[380px] lg:order-3 order-2">
             <Image
-              src="/images/navigation/payment-methods.png"
+              src="https://d1gf9vo4d2b63b.cloudfront.net/cms/payment_methods_8c1c3bee98.webp"
               alt="Accepted payment methods: Visa, Mastercard, Amex, Maestro, PayTM, RuPay"
               fill
               sizes="(max-width: 1024px) 320px, 380px"
               className="object-contain object-left"
             />
           </div>
-
-          <p className="text-center font-gill text-sm font-light leading-110 text-neutral500 lg:absolute lg:left-1/2 lg:-translate-x-1/2 lg:whitespace-nowrap">
-            {footerCopyright}
-          </p>
         </div>
       </PageContainer>
     </footer>
