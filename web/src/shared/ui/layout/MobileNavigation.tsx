@@ -7,8 +7,8 @@ import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
 import SDLogo from "@/assets/Icons/SDLogo";
 import SearchIcon from "@/assets/Icons/SearchIcon";
-import UserIcon from "@/assets/Icons/UserIcon";
 import WishlistIcon from "@/assets/Icons/WishlistIcon";
+import AccountMenu from "@/features/auth/components/AccountMenu";
 import { cn } from "@/shared/utils/cn";
 import { resolveHeaderNavHref, isJewelleryNavLink } from "@/shared/utils/navigation";
 import type { HeaderNavLink } from "@/shared/lib/shellNavigation";
@@ -498,14 +498,7 @@ const MobileNavigation = ({
             <WishlistIcon className="size-6" />
             <HeaderIconBadge count={wishlistCount} />
           </Link>
-          <Link
-            href={loginHref}
-            aria-label="Account"
-            onClick={handleAccountClick}
-            className="inline-flex size-6 items-center justify-center"
-          >
-            <UserIcon className="size-6" />
-          </Link>
+          <AccountMenu loginHref={loginHref} onNavigate={handleAccountClick} className="inline-flex size-6 items-center justify-center" />
           <Link
             href="/cart"
             aria-label={cartCount > 0 ? `Cart, ${cartCount} items` : "Cart"}

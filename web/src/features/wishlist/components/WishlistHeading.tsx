@@ -22,7 +22,7 @@ const WishlistHeading = ({ productCount, viewMode, onViewModeChange }: WishlistH
       className="w-full bg-white"
     >
       <div className="flex sm:flex-row flex-col items-center justify-center sm:gap-2 bg-gray300 p-4 mt-6 sm:gap-2 gap-4">
-        <Link href="" className="text-base font-gill tracking-[1.8%] uppercase font-gill font-normal text-darkblack border-b border-darkblack pb-1">LOGIN</Link>
+        <Link href="/login?next=/wishlist" className="text-base font-gill tracking-[1.8%] uppercase font-gill font-normal text-darkblack border-b border-darkblack pb-1">LOGIN</Link>
         <p className="md:text-[18px] sm:text-base text-sm font-light leadiing-100 sm:tracking-[1%] tracking-[0%] text-darkblack">to save items and access them anytime in your wishlist</p>
       </div>
       <PageContainer

@@ -2,8 +2,16 @@
 
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type RefObject } from "react";
 import { sanitizePhoneInput } from "@/shared/utils/formValidation";
-import { createCustomerAccount, verifyLoginOtp } from "../services/auth.service";
 import {
+  createCustomerAccount,
+  loginWithPassword,
+  requestLoginOtp,
+  verifyLoginOtp,
+} from "../services/auth.service";
+import { runPostLoginSync } from "../services/postLoginSync";
+import { signInWithApple, signInWithGoogle } from "../services/socialSignIn";
+import {
+  isEmailIdentifier,
   isLoginIdentifierReadyForOtp,
   isOtpComplete,
   LOGIN_OTP_LENGTH,
@@ -13,9 +21,9 @@ import {
 } from "../utils/authValidation";
 import { sanitizeReturnUrl } from "../utils/authNavigation";
 
-export type AuthFlowStep = "sign-in" | "otp" | "create-account";
+export type AuthFlowStep = "sign-in" | "otp" | "create-account" | "password";
 
-const RESEND_SECONDS = 30;
+const RESEND_SECONDS = 60;
 
 type UseAuthFlowOptions = {
   active: boolean;
@@ -64,12 +72,20 @@ export type AuthFlowContentProps = {
     onClose: () => void;
     onCreateAccount: () => void;
   };
+  password: {
+    email: string;
+    password: string;
+    passwordError?: string;
+    onPasswordChange: (value: string) => void;
+    onBack: () => void;
+    onClose: () => void;
+    onLogin: () => void;
+  };
 };
 
 export function useAuthFlow({
   active,
   returnUrl: returnUrlInput,
-  onComplete,
   onAbort,
 }: UseAuthFlowOptions) {
   const returnUrl = sanitizeReturnUrl(returnUrlInput);
@@ -80,6 +96,8 @@ export function useAuthFlow({
   const [otp, setOtp] = useState<string[]>(Array(LOGIN_OTP_LENGTH).fill(""));
   const [otpError, setOtpError] = useState<string | undefined>();
   const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
+  const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState<string | undefined>();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -88,6 +106,14 @@ export function useAuthFlow({
   const [termsError, setTermsError] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  /** Server-provided resend cooldown; the timer effect reads this on entering the OTP step. */
+  const cooldownRef = useRef(RESEND_SECONDS);
+
+  /** Session cookie is set — sync guest cart/wishlist, then full navigation so providers reboot. */
+  const completeAuth = useCallback(async () => {
+    await runPostLoginSync();
+    window.location.assign(returnUrl);
+  }, [returnUrl]);
 
   const resetState = useCallback(() => {
     setStep("sign-in");
@@ -97,6 +123,8 @@ export function useAuthFlow({
     setOtp(Array(LOGIN_OTP_LENGTH).fill(""));
     setOtpError(undefined);
     setSecondsLeft(RESEND_SECONDS);
+    setPassword("");
+    setPasswordError(undefined);
     setFullName("");
     setEmail("");
     setTermsAccepted(false);
@@ -115,7 +143,7 @@ export function useAuthFlow({
   useEffect(() => {
     if (!active || step !== "otp") return;
 
-    setSecondsLeft(RESEND_SECONDS);
+    setSecondsLeft(cooldownRef.current);
     const timer = window.setInterval(() => {
       setSecondsLeft((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
@@ -138,6 +166,10 @@ export function useAuthFlow({
     if (step === "create-account" && !verifiedPhone) {
       setStep(isLoginIdentifierReadyForOtp(identifier) ? "otp" : "sign-in");
     }
+
+    if (step === "password" && !isEmailIdentifier(identifier)) {
+      setStep("sign-in");
+    }
   }, [active, step, identifier, verifiedPhone]);
 
   const handleClose = useCallback(() => {
@@ -145,12 +177,15 @@ export function useAuthFlow({
   }, [onAbort]);
 
   const handleIdentifierChange = useCallback((value: string) => {
-    const nextValue = value.includes("@") ? value : sanitizePhoneInput(value, "+91");
+    // Digits-only input is treated as a phone number; anything containing a
+    // letter or @ is left untouched so an email can actually be typed.
+    const nextValue = /[a-zA-Z@]/.test(value) ? value : sanitizePhoneInput(value, "+91");
     setIdentifier(nextValue);
     setIdentifierError(undefined);
   }, []);
 
-  const handleContinue = useCallback(() => {
+  const handleContinue = useCallback(async () => {
+    if (isSubmitting) return;
     const validation = validateLoginIdentifier(identifier);
 
     if (!validation.valid) {
@@ -158,13 +193,32 @@ export function useAuthFlow({
       return;
     }
 
+    if (isEmailIdentifier(identifier)) {
+      setIdentifier(identifier.trim());
+      setIdentifierError(undefined);
+      setPassword("");
+      setPasswordError(undefined);
+      setStep("password");
+      return;
+    }
+
     const phoneDigits = normalizeIndianPhoneDigits(identifier);
+    setIsSubmitting(true);
+    const result = await requestLoginOtp(phoneDigits);
+    setIsSubmitting(false);
+
+    if (!result.success) {
+      setIdentifierError(result.error);
+      return;
+    }
+
+    cooldownRef.current = result.resendAfterSeconds;
     setIdentifier(phoneDigits);
     setIdentifierError(undefined);
     setOtp(Array(LOGIN_OTP_LENGTH).fill(""));
     setOtpError(undefined);
     setStep("otp");
-  }, [identifier]);
+  }, [identifier, isSubmitting]);
 
   const handleBackToSignIn = useCallback(() => {
     setStep("sign-in");
@@ -207,17 +261,28 @@ export function useAuthFlow({
     [otp],
   );
 
-  const handleResend = useCallback(() => {
-    if (!otpError && secondsLeft > 0) return;
+  const handleResend = useCallback(async () => {
+    if ((!otpError && secondsLeft > 0) || isSubmitting) return;
     if (!isLoginIdentifierReadyForOtp(identifier)) {
       setStep("sign-in");
       return;
     }
+
+    setIsSubmitting(true);
+    const result = await requestLoginOtp(normalizeIndianPhoneDigits(identifier));
+    setIsSubmitting(false);
+
+    if (!result.success) {
+      setOtpError(result.error);
+      return;
+    }
+
+    cooldownRef.current = result.resendAfterSeconds;
     setOtpError(undefined);
-    setSecondsLeft(RESEND_SECONDS);
+    setSecondsLeft(result.resendAfterSeconds);
     setOtp(Array(LOGIN_OTP_LENGTH).fill(""));
     inputRefs.current[0]?.focus();
-  }, [identifier, otpError, secondsLeft]);
+  }, [identifier, isSubmitting, otpError, secondsLeft]);
 
   const handleLogin = useCallback(async () => {
     if (!isOtpComplete(otp) || isSubmitting) return;
@@ -245,8 +310,9 @@ export function useAuthFlow({
       return;
     }
 
-    onComplete(returnUrl);
-  }, [identifier, isSubmitting, onComplete, otp, returnUrl]);
+    setIsSubmitting(true);
+    await completeAuth();
+  }, [completeAuth, identifier, isSubmitting, otp]);
 
   const handleCreateAccount = useCallback(async () => {
     if (!verifiedPhone || isSubmitting) return;
@@ -264,23 +330,80 @@ export function useAuthFlow({
     if (!valid) return;
 
     setIsSubmitting(true);
-    await createCustomerAccount({
+    const result = await createCustomerAccount({
       phone: verifiedPhone,
+      otp: otp.join(""),
       fullName: fullName.trim(),
       email: email.trim(),
       marketingOptIn: termsAccepted,
     });
-    setIsSubmitting(false);
-    onComplete(returnUrl);
-  }, [email, fullName, isSubmitting, onComplete, returnUrl, termsAccepted, verifiedPhone]);
 
-  const handleGoogleContinue = useCallback(() => {
-    // TODO(auth): wire Google OAuth.
+    if (!result.success) {
+      setIsSubmitting(false);
+      setEmailError(result.error);
+      return;
+    }
+
+    await completeAuth();
+  }, [completeAuth, email, fullName, isSubmitting, otp, termsAccepted, verifiedPhone]);
+
+  const handlePasswordChange = useCallback((value: string) => {
+    setPassword(value);
+    setPasswordError(undefined);
   }, []);
 
-  const handleAppleContinue = useCallback(() => {
-    // TODO(auth): wire Apple Sign In.
+  const handleBackFromPassword = useCallback(() => {
+    setStep("sign-in");
+    setPassword("");
+    setPasswordError(undefined);
   }, []);
+
+  const handlePasswordLogin = useCallback(async () => {
+    if (isSubmitting) return;
+    if (!password) {
+      setPasswordError("Password is required");
+      return;
+    }
+
+    setIsSubmitting(true);
+    const result = await loginWithPassword(identifier.trim(), password);
+
+    if (!result.success) {
+      setIsSubmitting(false);
+      setPasswordError(result.error);
+      return;
+    }
+
+    await completeAuth();
+  }, [completeAuth, identifier, isSubmitting, password]);
+
+  const handleGoogleContinue = useCallback(async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    const result = await signInWithGoogle();
+
+    if (!result.success) {
+      setIsSubmitting(false);
+      if (result.error) setIdentifierError(result.error);
+      return;
+    }
+
+    await completeAuth();
+  }, [completeAuth, isSubmitting]);
+
+  const handleAppleContinue = useCallback(async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    const result = await signInWithApple();
+
+    if (!result.success) {
+      setIsSubmitting(false);
+      if (result.error) setIdentifierError(result.error);
+      return;
+    }
+
+    await completeAuth();
+  }, [completeAuth, isSubmitting]);
 
   const contentProps: AuthFlowContentProps = {
     step,
@@ -329,6 +452,15 @@ export function useAuthFlow({
       onBack: handleBackToOtp,
       onClose: handleClose,
       onCreateAccount: handleCreateAccount,
+    },
+    password: {
+      email: identifier,
+      password,
+      passwordError,
+      onPasswordChange: handlePasswordChange,
+      onBack: handleBackFromPassword,
+      onClose: handleClose,
+      onLogin: handlePasswordLogin,
     },
   };
 

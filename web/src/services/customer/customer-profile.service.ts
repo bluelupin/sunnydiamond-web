@@ -1,16 +1,38 @@
 import type { CustomerProfileContact } from "./customer-profile.types";
 
+type AuthMePayload = {
+  customer: {
+    firstname: string;
+    lastname: string;
+    email: string;
+  } | null;
+};
+
 /**
- * Fetches the signed-in customer's profile contact details.
- *
- * Backend My Profile is not available yet — this returns `null` and is safe
- * to call from forms. When the API lands, implement the fetch here only;
- * Book a Visit / other forms already consume this contract.
+ * Fetches the signed-in customer's profile contact details via the session
+ * cookie. Returns `null` for guests — safe to call from forms.
  */
 export async function getCustomerProfileContact(
-  _signal?: AbortSignal,
+  signal?: AbortSignal,
 ): Promise<CustomerProfileContact | null> {
-  // TODO(my-profile): replace with authenticated GET (e.g. /api/customer/me or /api/profile)
-  // and map the response into CustomerProfileContact.
-  return null;
+  try {
+    const response = await fetch("/api/auth/me", { cache: "no-store", signal });
+    if (!response.ok) {
+      return null;
+    }
+
+    const { customer } = (await response.json()) as AuthMePayload;
+    if (!customer) {
+      return null;
+    }
+
+    return {
+      fullName: [customer.firstname, customer.lastname].filter(Boolean).join(" ") || null,
+      email: customer.email ?? null,
+      phone: null,
+      countryCode: null,
+    };
+  } catch {
+    return null;
+  }
 }

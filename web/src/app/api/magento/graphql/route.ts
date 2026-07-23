@@ -4,6 +4,7 @@ import {
   MAGENTO_CATALOG_REVALIDATE_SECONDS,
   MAGENTO_DEFAULT_STORE_CODE,
 } from "@/services/magento/config";
+import { CUSTOMER_TOKEN_COOKIE } from "@/services/auth/session";
 
 type GraphqlBody = {
   query?: string;
@@ -29,6 +30,8 @@ export async function POST(request: NextRequest) {
       query,
     );
 
+  const customerToken = request.cookies.get(CUSTOMER_TOKEN_COOKIE)?.value;
+
   try {
     const response = await fetch(getMagentoGraphqlUrl(), {
       method: "POST",
@@ -36,9 +39,10 @@ export async function POST(request: NextRequest) {
         "Content-Type": "application/json",
         Accept: "application/json",
         Store: MAGENTO_DEFAULT_STORE_CODE,
+        ...(customerToken ? { Authorization: `Bearer ${customerToken}` } : {}),
       },
       body: JSON.stringify({ query: body.query, variables: body.variables }),
-      ...(isCartOperation
+      ...(isCartOperation || customerToken
         ? { cache: "no-store" as const }
         : { next: { revalidate: MAGENTO_CATALOG_REVALIDATE_SECONDS } }),
     });

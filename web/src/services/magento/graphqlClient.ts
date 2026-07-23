@@ -11,6 +11,8 @@ export type MagentoGraphqlRequest = {
   signal?: AbortSignal;
   /** When false, skips Next.js fetch cache (client-side refresh). */
   cache?: RequestCache;
+  /** Magento customer token; forces no-store and adds Authorization header. Server-side only. */
+  authToken?: string;
 };
 
 type MagentoGraphqlResponse<T> = {
@@ -23,9 +25,11 @@ export async function magentoGraphqlFetch<T>({
   variables,
   signal,
   cache,
+  authToken,
 }: MagentoGraphqlRequest): Promise<T> {
   const isServer = typeof window === "undefined";
   const endpoint = isServer ? getMagentoGraphqlUrl() : "/api/magento/graphql";
+  const effectiveCache = authToken ? "no-store" : cache;
 
   const response = await fetch(endpoint, {
     method: "POST",
@@ -33,11 +37,12 @@ export async function magentoGraphqlFetch<T>({
       "Content-Type": "application/json",
       Accept: "application/json",
       Store: MAGENTO_DEFAULT_STORE_CODE,
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
     },
     body: JSON.stringify({ query, variables }),
     signal,
-    cache: cache ?? (isServer ? "force-cache" : "default"),
-    ...(isServer && cache !== "no-store"
+    cache: effectiveCache ?? (isServer ? "force-cache" : "default"),
+    ...(isServer && effectiveCache !== "no-store"
       ? { next: { revalidate: MAGENTO_CATALOG_REVALIDATE_SECONDS } }
       : {}),
   });

@@ -1,46 +1,102 @@
+export type RequestOtpResult =
+  | { success: true; resendAfterSeconds: number }
+  | { success: false; error: string };
+
 export type VerifyOtpResult =
   | { success: true; requiresAccountSetup: boolean }
   | { success: false; error: string };
 
-/** Dev stub: treat these numbers as already-registered customers. */
-const EXISTING_CUSTOMER_PHONES = new Set(["9876543210", "9999900000"]);
+export type CreateAccountResult = { success: true } | { success: false; error: string };
 
-const isExistingCustomerPhone = (phone: string) => EXISTING_CUSTOMER_PHONES.has(phone);
+async function postJson(
+  url: string,
+  body: Record<string, unknown>,
+): Promise<{ ok: boolean; data: Record<string, unknown> | null }> {
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = (await response.json().catch(() => null)) as Record<string, unknown> | null;
+    return { ok: response.ok, data };
+  } catch {
+    return { ok: false, data: null };
+  }
+}
 
-/**
- * Verifies the OTP for phone-based sign in.
- * TODO(auth): replace with Magento OTP verification and customer lookup.
- */
-export async function verifyLoginOtp(
-  phone: string,
-  code: string,
-): Promise<VerifyOtpResult> {
-  await Promise.resolve();
+export type PasswordLoginResult = { success: true } | { success: false; error: string };
 
-  if (!/^\d{6}$/.test(code)) {
-    return { success: false, error: "Incorrect code" };
+/** Email + password sign in against Magento (native generateCustomerToken). */
+export async function loginWithPassword(
+  email: string,
+  password: string,
+): Promise<PasswordLoginResult> {
+  const { ok, data } = await postJson("/api/auth/login", { email, password });
+
+  if (!ok || !data?.ok) {
+    return {
+      success: false,
+      error: (data?.error as string) ?? "The email or password is incorrect",
+    };
   }
 
-  if (code === "000000") {
-    return { success: false, error: "Incorrect code" };
+  return { success: true };
+}
+
+/** Sends a login OTP. Phone is 10 national digits; the backend normalizes to +91. */
+export async function requestLoginOtp(phone: string): Promise<RequestOtpResult> {
+  const { ok, data } = await postJson("/api/auth/otp/request", { phone });
+
+  if (!ok || !data?.ok) {
+    return {
+      success: false,
+      error: (data?.error as string) ?? "We could not send the OTP. Please try again.",
+    };
   }
 
-  return {
-    success: true,
-    requiresAccountSetup: !isExistingCustomerPhone(phone),
-  };
+  return { success: true, resendAfterSeconds: (data.resendAfterSeconds as number) ?? 60 };
+}
+
+/** Verifies the OTP for phone-based sign in against Magento. */
+export async function verifyLoginOtp(phone: string, code: string): Promise<VerifyOtpResult> {
+  const { ok, data } = await postJson("/api/auth/otp/verify", { phone, otp: code });
+
+  if (!ok || !data?.ok) {
+    return { success: false, error: (data?.error as string) ?? "Incorrect code" };
+  }
+
+  return { success: true, requiresAccountSetup: Boolean(data.registrationRequired) };
 }
 
 /**
- * Creates a new customer account after OTP verification.
- * TODO(auth): replace with Magento customer registration.
+ * Completes first-time registration: re-verifies the same OTP with the
+ * customer's details, creating the Magento account with the verified phone.
  */
-export async function createCustomerAccount(_input: {
+export async function createCustomerAccount(input: {
   phone: string;
+  otp: string;
   fullName: string;
   email: string;
   marketingOptIn: boolean;
-}): Promise<{ success: boolean }> {
-  await Promise.resolve();
+}): Promise<CreateAccountResult> {
+  const [firstName, ...rest] = input.fullName.trim().split(/\s+/);
+  const lastName = rest.join(" ") || "-";
+
+  const { ok, data } = await postJson("/api/auth/otp/verify", {
+    phone: input.phone,
+    otp: input.otp,
+    email: input.email,
+    firstName,
+    lastName,
+  });
+
+  if (!ok || !data?.ok || data.registrationRequired) {
+    return {
+      success: false,
+      error: (data?.error as string) ?? "We could not create your account. Please try again.",
+    };
+  }
+
   return { success: true };
 }
