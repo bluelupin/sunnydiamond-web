@@ -15,8 +15,8 @@ import { resolveHeaderNavHref, getHeaderVariant, isJewelleryNavLink } from "@/sh
 import { resolveShellHeaderLinks, splitShellHeaderNavLinks } from "@/shared/lib/shellNavigation";
 import MobileNavigation from "@/shared/ui/layout/MobileNavigation";
 import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
-import UserIcon from "@/assets/Icons/UserIcon";
 import WishlistIcon from "@/assets/Icons/WishlistIcon";
+import AccountMenu from "@/features/auth/components/AccountMenu";
 import MenuIcon from "@/assets/Icons/MenuIcon";
 import HeaderIconBadge from "@/shared/ui/layout/HeaderIconBadge";
 
@@ -211,13 +211,7 @@ const Header = () => {
               <HeaderIconBadge count={cartCount} />
             </Link>
 
-            <Link
-              href="/contact"
-              className={cn("inline-flex", iconButtonClass, hoverClass)}
-              aria-label="Account"
-            >
-              <UserIcon className="size-6" />
-            </Link>
+            <AccountMenu className={cn("inline-flex", iconButtonClass, hoverClass)} />
           </div>
         </div>
 
