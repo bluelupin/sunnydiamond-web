@@ -31,36 +31,37 @@ const benefits = [
 ];
 
 function buildAccordions(product: Product) {
-  return [
+  const sections = product.detailSections;
+  const candidates = [
     {
       id: "specifications",
       title: "Specifications",
-      content: `Metal: ${product.metal}. Diamond weight: ${product.carat}. Crafted with precision-set stones and a polished finish designed for everyday elegance.`,
+      content: sections?.specifications?.trim() ?? "",
     },
     {
       id: "quality",
       title: "Quality & Certifications",
-      content:
-        "Every Sunny diamond is independently certified for cut, colour, clarity, and carat. Each piece undergoes rigorous quality checks before it reaches you.",
+      content: sections?.qualityCertifications?.trim() ?? "",
     },
     {
       id: "shipping",
       title: "Shipping & Policies",
-      content:
-        "Pan India free shipping on all orders. Standard delivery in 5–7 business days. Express delivery available in select cities.",
+      content: sections?.shippingPolicies?.trim() ?? "",
     },
     {
       id: "care",
       title: "Care & Maintenance",
-      content:
-        "Clean gently with a soft cloth. Store separately to avoid scratches. Annual professional cleaning recommended to maintain brilliance.",
+      content: sections?.careMaintenance?.trim() ?? "",
     },
     {
       id: "manufacturer",
       title: "Manufactured By",
-      content: "Sunny Diamonds Pvt. Ltd., Kerala, India. BIS Hallmarked gold. IGI/GIA certified diamonds.",
+      content: sections?.manufacturedBy?.trim() ?? "",
     },
   ];
+
+  // Only render accordions that have Magento content — same UI when shown.
+  return candidates.filter((accordion) => accordion.content.length > 0);
 }
 
 export function getProductDetailPricing(product: Product): ProductDetailPricing {

@@ -27,6 +27,32 @@ function stripHtml(html?: string | null): string {
     .trim();
 }
 
+/** Magento attribute codes → PDP accordion sections. */
+const PDP_DETAIL_SECTION_ATTRIBUTE_CODES = {
+  specifications: "product_specification",
+  qualityCertifications: "quality_certificate",
+  shippingPolicies: "shipping_policies",
+  careMaintenance: "care_maintenance",
+  manufacturedBy: "manufactured_by",
+} as const;
+
+function mapMagentoProductDetailSections(
+  items: MagentoCustomAttributeItem[] | null | undefined,
+): Product["detailSections"] | undefined {
+  const sections: NonNullable<Product["detailSections"]> = {};
+
+  for (const [key, code] of Object.entries(PDP_DETAIL_SECTION_ATTRIBUTE_CODES) as Array<
+    [keyof NonNullable<Product["detailSections"]>, string]
+  >) {
+    const value = stripHtml(getMagentoCustomAttributeValue(items, code));
+    if (value) {
+      sections[key] = value;
+    }
+  }
+
+  return Object.keys(sections).length > 0 ? sections : undefined;
+}
+
 function getAttributeMap(items: MagentoCustomAttributeItem[] | null | undefined) {
   const map = new Map<string, MagentoCustomAttributeItem>();
 
@@ -198,6 +224,7 @@ export function mapMagentoProductDetailToProduct(
     product.media_gallery,
     product.image?.url,
   );
+  const detailSections = mapMagentoProductDetailSections(product.custom_attributesV2?.items);
   const jewelleryCategory = resolveJewelleryCategory(product.categories);
   const categorySlug = jewelleryCategory.urlKey
     ? MAGENTO_URL_KEY_TO_SLUG[jewelleryCategory.urlKey]
@@ -227,6 +254,7 @@ export function mapMagentoProductDetailToProduct(
     engraving,
     customOptions,
     productVideoUrl,
+    ...(detailSections ? { detailSections } : {}),
     seo: buildProductSeo({
       name,
       urlKey,

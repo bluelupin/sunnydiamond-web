@@ -42,6 +42,18 @@ export interface Product {
   engraving?: ProductEngravingConfig;
   customOptions?: ProductCustomOptions;
   productVideoUrl?: string;
+  /**
+   * PDP accordion copy from Magento product attributes:
+   * product_specification, quality_certificate, shipping_policies,
+   * care_maintenance, manufactured_by.
+   */
+  detailSections?: {
+    specifications?: string;
+    qualityCertifications?: string;
+    shippingPolicies?: string;
+    careMaintenance?: string;
+    manufacturedBy?: string;
+  };
   seo: ProductSeo;
 }
 

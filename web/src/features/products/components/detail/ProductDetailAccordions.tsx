@@ -16,6 +16,10 @@ const ProductDetailAccordions = ({ items }: ProductDetailAccordionsProps) => {
     setOpenAccordion((current) => (current === id ? null : id));
   };
 
+  if (items.length === 0) {
+    return null;
+  }
+
   return (
     <section aria-label="Product information" className="flex flex-col gap-3">
       {items.map((accordion) => {
