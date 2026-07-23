@@ -4,14 +4,21 @@ import {
   resolveEngravingMaxCharacters,
   type ProductEngravingConfig,
 } from "@/features/products/constants/engraving";
-import type { MagentoCustomAttributeItem } from "./magentoProduct.types";
+import type { MagentoCustomAttributeItem, MagentoMediaGalleryItem } from "./magentoProduct.types";
 import type { MagentoEngravingFontOption } from "./engravingFonts.service";
 import {
   getMagentoCustomAttributeOptionLabels,
   getMagentoCustomAttributeSelectedValues,
   getMagentoCustomAttributeValue,
   isMagentoBooleanTruthy,
+  resolveMagentoModelWearImageUrl,
 } from "./magentoAttribute.utils";
+
+type MapMagentoProductEngravingOptions = {
+  fontMetadataOptions?: MagentoEngravingFontOption[];
+  mediaGallery?: MagentoMediaGalleryItem[] | null;
+  referenceImageUrl?: string | null;
+};
 
 export function isMagentoProductEngravingEnabled(
   items: MagentoCustomAttributeItem[] | null | undefined,
@@ -64,11 +71,13 @@ export function resolveProductEngravingFonts(
 
 export function mapMagentoProductEngraving(
   items: MagentoCustomAttributeItem[] | null | undefined,
-  metadataOptions: MagentoEngravingFontOption[] = [],
+  options: MapMagentoProductEngravingOptions = {},
 ): ProductEngravingConfig | undefined {
   if (!isMagentoProductEngravingEnabled(items)) {
     return undefined;
   }
+
+  const { fontMetadataOptions = [], mediaGallery, referenceImageUrl } = options;
 
   const maxRaw =
     getMagentoCustomAttributeValue(items, "engraving_max_characters") ??
@@ -76,11 +85,19 @@ export function mapMagentoProductEngraving(
   const maxCharacters =
     resolveEngravingMaxCharacters(maxRaw) ?? DEFAULT_ENGRAVING_MAX_CHARACTERS;
 
-  const fonts = resolveProductEngravingFonts(items, metadataOptions);
+  const fonts = resolveProductEngravingFonts(items, fontMetadataOptions);
+
+  const previewImageRaw =
+    getMagentoCustomAttributeValue(items, "engraving_preview_image") ??
+    getMagentoCustomAttributeValue(items, "sd_engraving_preview_image");
+  const previewImage =
+    resolveMagentoModelWearImageUrl(previewImageRaw, mediaGallery, referenceImageUrl) ||
+    undefined;
 
   return {
     enabled: true,
     maxCharacters,
     fonts,
+    previewImage,
   };
 }

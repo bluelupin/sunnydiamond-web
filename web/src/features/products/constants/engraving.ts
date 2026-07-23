@@ -9,6 +9,7 @@ export type ProductEngravingConfig = {
   enabled: boolean;
   maxCharacters: number;
   fonts: string[];
+  previewImage?: string;
 };
 
 export type EngravingSelection = {

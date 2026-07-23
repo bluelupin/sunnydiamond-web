@@ -47,6 +47,7 @@ export const MAGENTO_PRODUCT_BY_URL_KEY_QUERY = `
         }
         ... on SimpleProduct {
           model_wear_image
+          special_price
           related_products {
             ${MAGENTO_LISTING_PRODUCT_FIELDS}
           }

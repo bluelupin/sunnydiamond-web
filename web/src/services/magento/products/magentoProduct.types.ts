@@ -38,6 +38,7 @@ export type MagentoProductListItem = {
   categories?: MagentoProductCategory[] | null;
   /** Top-level SimpleProduct field — model/lifestyle shot for PLP hover. */
   model_wear_image?: string | null;
+  special_price?: number | null;
   custom_attributesV2?: {
     items?: MagentoCustomAttributeItem[] | null;
   } | null;

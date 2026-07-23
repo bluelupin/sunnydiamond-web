@@ -160,7 +160,11 @@ const ProductDetailSidebar = ({
           <div className="flex items-end justify-between gap-4">
             <div className="flex items-center gap-3 font-gill text-2xl leading-110 text-darkblack">
               <span>₹{formatJewelleryPrice(pricing.price)}</span>
-              <span className="text-gray600 line-through">₹{formatJewelleryPrice(pricing.originalPrice)}</span>
+              {pricing.originalPrice != null && pricing.originalPrice > pricing.price ? (
+                <span className="text-gray600 line-through">
+                  ₹{formatJewelleryPrice(pricing.originalPrice)}
+                </span>
+              ) : null}
             </div>
             <DetailTextLink href="/contact">View Price Breakup</DetailTextLink>
           </div>
@@ -368,7 +372,7 @@ const ProductDetailSidebar = ({
         <MetalEngravingPanel
           open={isEngravingOpen}
           onClose={() => setIsEngravingOpen(false)}
-          previewImage={content.engravingPreviewImage}
+          previewImage={engravingConfig.previewImage}
           fonts={engravingConfig.fonts}
           maxCharacters={engravingConfig.maxCharacters}
           initialValue={engravingSelection}

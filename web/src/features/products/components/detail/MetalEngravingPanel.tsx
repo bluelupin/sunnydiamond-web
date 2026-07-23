@@ -21,7 +21,7 @@ import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 type MetalEngravingPanelProps = {
   open: boolean;
   onClose: () => void;
-  previewImage: string | StaticImageData;
+  previewImage?: string | StaticImageData;
   fonts?: readonly string[];
   maxCharacters: number;
   initialValue?: EngravingSelection | null;
@@ -101,16 +101,18 @@ const MetalEngravingPanel = ({
               <div className="h-px w-full bg-neutral300" aria-hidden />
             </div>
 
-            <div className="h-214 w-full overflow-hidden bg-aboutInactive">
-              <Image
-                src={previewImage}
-                alt="Engraving preview"
-                width={480}
-                height={214}
-                className="h-full w-full object-cover object-center"
-                sizes="(max-width: 1024px) 100vw, 480px"
-              />
-            </div>
+            {previewImage ? (
+              <div className="h-214 w-full overflow-hidden bg-aboutInactive">
+                <Image
+                  src={previewImage}
+                  alt="Engraving preview"
+                  width={480}
+                  height={214}
+                  className="h-full w-full object-cover object-center"
+                  sizes="(max-width: 1024px) 100vw, 480px"
+                />
+              </div>
+            ) : null}
 
             <div className="flex flex-col gap-6 pb-72">
               <div className="flex flex-col gap-2">

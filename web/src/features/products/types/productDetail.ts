@@ -1,5 +1,3 @@
-import type { StaticImageData } from "next/image";
-
 export type MetalColorOption = {
   id: string;
   label: string;
@@ -16,7 +14,6 @@ export type ProductDetailContent = {
   attributes: string[];
   metalColors: MetalColorOption[];
   ringSizes: string[];
-  engravingPreviewImage: string | StaticImageData;
   benefits: {
     label: string;
     mobileLabel: string;
@@ -32,5 +29,5 @@ export type ProductDetailContent = {
 
 export type ProductDetailPricing = {
   price: number;
-  originalPrice: number;
+  originalPrice?: number;
 };

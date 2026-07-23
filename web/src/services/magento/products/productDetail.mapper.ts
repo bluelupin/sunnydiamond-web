@@ -5,6 +5,7 @@ import type {
 } from "./magentoProduct.types";
 import { buildProductSeo } from "@/shared/lib/seo/productSeo";
 import { resolveMagentoProductImages } from "./products.mapper";
+import { resolveMagentoProductPricing } from "./productPricing.utils";
 import { mapMagentoProductEngraving } from "./productEngraving.mapper";
 import type { MagentoEngravingFontOption } from "./engravingFonts.service";
 
@@ -101,10 +102,9 @@ export function mapMagentoProductDetailToProduct(
   const sku = product.sku?.trim();
   const name = product.name?.trim();
   const urlKey = product.url_key?.trim();
-  const finalPrice = product.price_range?.minimum_price?.final_price?.value;
-  const regularPrice = product.price_range?.minimum_price?.regular_price?.value;
+  const pricing = resolveMagentoProductPricing(product);
 
-  if (!sku || !name || !urlKey || finalPrice == null) {
+  if (!sku || !name || !urlKey || !pricing) {
     return null;
   }
 
@@ -137,17 +137,18 @@ export function mapMagentoProductDetailToProduct(
   ].filter((attribute): attribute is string => Boolean(attribute));
 
   const shortDescription = stripHtml(product.short_description?.html) || name;
-  const engraving = mapMagentoProductEngraving(
-    product.custom_attributesV2?.items,
-    options?.engravingFontOptions ?? [],
-  );
+  const engraving = mapMagentoProductEngraving(product.custom_attributesV2?.items, {
+    fontMetadataOptions: options?.engravingFontOptions ?? [],
+    mediaGallery: product.media_gallery,
+    referenceImageUrl: product.image?.url,
+  });
 
   return {
     id: sku,
     urlKey,
     name,
-    price: finalPrice,
-    originalPrice: regularPrice && regularPrice > finalPrice ? regularPrice : undefined,
+    price: pricing.price,
+    originalPrice: pricing.originalPrice,
     description: stripHtml(product.description?.html) || name,
     shortDescription,
     category: resolveProductCategory(product.categories),

@@ -1,4 +1,3 @@
-import type { StaticImageData } from "next/image";
 import type { Product } from "@/features/products/data/products";
 import type { ProductDetailContent, ProductDetailPricing } from "../types/productDetail";
 
@@ -9,8 +8,6 @@ const metalColors = [
   { id: "rose", label: "Rose Gold", color: "#D9B0CB" },
   { id: "silver", label: "Silver", color: "#CCCCCC" },
 ] as const;
-
-const engravingPreviewImage = "/images/about/crafting-diamond.png";
 
 const benefits = [
   {
@@ -67,10 +64,15 @@ function buildAccordions(product: Product) {
 }
 
 export function getProductDetailPricing(product: Product): ProductDetailPricing {
-  return {
+  const pricing: ProductDetailPricing = {
     price: product.price,
-    originalPrice: product.originalPrice ?? product.price,
   };
+
+  if (product.originalPrice != null && product.originalPrice > product.price) {
+    pricing.originalPrice = product.originalPrice;
+  }
+
+  return pricing;
 }
 
 export function getProductDetailContent(product: Product): ProductDetailContent {
@@ -81,7 +83,6 @@ export function getProductDetailContent(product: Product): ProductDetailContent 
     attributes,
     metalColors: [...metalColors],
     ringSizes,
-    engravingPreviewImage,
     benefits,
     accordions: buildAccordions(product),
     heroBannerImage: "/images/products/pdp/hero-banner-poster.png",
