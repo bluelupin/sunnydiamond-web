@@ -143,33 +143,48 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
 
   const cardsByTileIndex = new Map(cards.map((card) => [card.tileIndex, card]));
 
-  const getTextTitle = (tileIndex: number) => {
-    const card = cardsByTileIndex.get(tileIndex);
-    return card?.type === "textCard" ? (card.title ?? "") : "";
-  };
+  /** Slots that historically rendered text when CMS data was absent. */
+  const legacyTextSlots = new Set([1, 6, 8]);
 
-  const renderPhotoTile = (tileIndex: number, className?: string) => {
-    const card = cardsByTileIndex.get(tileIndex);
-    return (
-      <CraftPhotoTile
-        className={className}
-        imageUrl={card?.type === "image" ? card.imageUrl : undefined}
-        mobileImageUrl={card?.type === "image" ? card.mobileImageUrl : undefined}
-      />
-    );
-  };
-
-  const renderTextTile = (
+  const renderTile = (
     tileIndex: number,
     className?: string,
     compact?: boolean,
-  ) => (
-    <CraftTextTile
-      title={getTextTitle(tileIndex)}
-      className={className}
-      compact={compact}
-    />
-  );
+  ) => {
+    const card = cardsByTileIndex.get(tileIndex);
+
+    if (card?.type === "textCard") {
+      return (
+        <CraftTextTile
+          title={card.title ?? ""}
+          className={className}
+          compact={compact}
+        />
+      );
+    }
+
+    if (card?.type === "image") {
+      return (
+        <CraftPhotoTile
+          className={className}
+          imageUrl={card.imageUrl}
+          mobileImageUrl={card.mobileImageUrl}
+        />
+      );
+    }
+
+    if (legacyTextSlots.has(tileIndex)) {
+      return (
+        <CraftTextTile
+          title=""
+          className={className}
+          compact={compact}
+        />
+      );
+    }
+
+    return <CraftPhotoTile className={className} />;
+  };
 
   useEffect(() => {
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -209,31 +224,31 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
           {...tileProps(0, 0, 5)}
           className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
-          {renderPhotoTile(0, "size-full")}
+          {renderTile(0, "size-full")}
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(0, 1, 5)}
           className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
-          {renderTextTile(1, "size-full")}
+          {renderTile(1, "size-full")}
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(0, 2, 5)}
-          className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
+          className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px] md:block hidden"
         >
-          {renderPhotoTile(2, "size-full")}
+          {renderTile(2, "size-full")}
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(0, 3, 5)}
           className="md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px] md:block hidden"
         >
-          {renderPhotoTile(3, "size-full")}
+          {renderTile(3, "size-full")}
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(0, 4, 5)}
-          className="md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px] md:block hidden"
+          className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
-          {renderPhotoTile(4, "size-full")}
+          {renderTile(4, "size-full")}
         </AnimatedTile>
       </div>
 
@@ -242,40 +257,52 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
           {...tileProps(1, 0, 3)}
           className="h-[111px] w-[172px] sm:h-[132px] sm:w-[200px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
-          {renderPhotoTile(5, "size-full")}
+          {renderTile(5, "size-full")}
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(1, 1, 3)}
           className="md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px] md:block hidden"
         >
-          {renderTextTile(6, "size-full", true)}
+          {renderTile(6, "size-full", true)}
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(1, 2, 3)}
           className="h-[111px] w-[172px] sm:h-[132px] sm:w-[200px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
-          {renderPhotoTile(7, "size-full")}
+          {renderTile(7, "size-full")}
         </AnimatedTile>
       </div>
 
       <div className="flex items-center justify-center gap-3">
         <AnimatedTile
-          {...tileProps(2, 0, 3)}
-          className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
+          {...tileProps(1, 1, 3)}
+          className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px] md:hidden block"
         >
-          {renderTextTile(8, "size-full")}
+          {renderTile(6, "size-full", true)}
+        </AnimatedTile>
+        <AnimatedTile
+          {...tileProps(2, 0, 3)}
+          className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px] md:block hidden"
+        >
+          {renderTile(8, "size-full")}
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(2, 1, 3)}
           className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
         >
-          {renderPhotoTile(9, "size-full")}
+          {renderTile(9, "size-full")}
         </AnimatedTile>
         <AnimatedTile
           {...tileProps(2, 2, 3)}
-          className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px]"
+          className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px] md:block hidden"
         >
-          {renderPhotoTile(10, "size-full")}
+          {renderTile(10, "size-full")}
+        </AnimatedTile>
+        <AnimatedTile
+          {...tileProps(2, 0, 3)}
+          className="h-[132px] w-[111px] sm:h-[132px] sm:w-[130px] md:h-[130px] md:w-[130px] lg:h-[175px] lg:w-[175px] xl:h-[222px] xl:w-[222px] md:hidden block"
+        >
+          {renderTile(8, "size-full")}
         </AnimatedTile>
       </div>
     </div>

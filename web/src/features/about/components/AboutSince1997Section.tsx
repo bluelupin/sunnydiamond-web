@@ -139,7 +139,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                         imageHeight={attending!.image.height}
                         sizes="463px"
                         figureClassName="w-[463px]"
-                        frameClassName="h-600 test"
+                        frameClassName="h-600"
                         captionClassName="text-base"
                         dataSince1997Last
                       />
