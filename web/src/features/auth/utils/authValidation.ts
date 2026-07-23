@@ -27,11 +27,8 @@ export const validateLoginIdentifier = (value: string): FieldValidation => {
   if (!trimmed) {
     return { valid: false, error: "Phone number or email is required" };
   }
+
   return { valid: true };
-  if (isEmailIdentifier(trimmed)) {
-    return validateRequiredEmail(trimmed);
-  }
-  return validatePhone(normalizeIndianPhoneDigits(trimmed), "+91");
 };
 
 export const isLoginIdentifierReadyForOtp = (value: string): boolean =>

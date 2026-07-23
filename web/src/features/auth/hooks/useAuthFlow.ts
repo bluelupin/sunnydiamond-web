@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type RefObject } from "react";
-import { createCustomerAccount, requestLoginOtp, verifyLoginOtp } from "../services/auth.service";
 import { sanitizePhoneInput } from "@/shared/utils/formValidation";
 import {
   createCustomerAccount,

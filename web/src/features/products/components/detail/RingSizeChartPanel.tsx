@@ -3,9 +3,6 @@
 import { Fragment, useState } from "react";
 import Image from "next/image";
 import { Play } from "lucide-react";
-import {
-  RING_SIZE_CHART_IMAGES,
-} from "@/features/products/data/ringSizeChartContent";
 import { PanelFooterGradient } from "@/shared/ui/PanelFooter";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
@@ -23,6 +20,8 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
   const subtitle = guide?.drawerSubtitle ?? "Measure Dimensions in millimeters";
   const rows = guide?.rows ?? [];
   const videoUrl = guide?.tutorialVideoUrl;
+  const circumferenceHeaderUrl = guide?.circumferenceHeaderImageUrl;
+  const diameterHeaderUrl = guide?.diameterHeaderImageUrl;
 
   return (
     <ProductDetailSidePanelShell
@@ -52,26 +51,26 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
         <div className="min-h-0 flex-1 overflow-y-auto">
           <div className="flex flex-col gap-6 pb-72">
             {videoUrl ? (
-              <div className="relative h-400 w-full shrink-0 overflow-hidden bg-darkblack">
+              <div className="relative w-full shrink-0 overflow-hidden bg-white">
                 {isVideoPlaying ? (
                   <video
                     src={videoUrl}
-                    className="h-full w-full object-cover"
+                    className="block h-auto w-full"
                     controls
                     autoPlay
                     playsInline
                   />
                 ) : (
-                  <div className="grid h-full w-full [&>*]:col-start-1 [&>*]:row-start-1">
-                    <Image
-                      src={RING_SIZE_CHART_IMAGES.videoPoster}
-                      alt=""
-                      width={480}
-                      height={400}
-                      className="h-full w-full object-cover"
-                      sizes="(max-width: 1024px) 100vw, 480px"
+                  <div className="relative w-full">
+                    <video
+                      src={videoUrl}
+                      className="block h-auto w-full"
+                      muted
+                      playsInline
+                      preload="metadata"
+                      aria-hidden
                     />
-                    <div className="flex items-center justify-center">
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/20">
                       <button
                         type="button"
                         aria-label={`Play ${title} video`}
@@ -89,18 +88,7 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
                   </div>
                 )}
               </div>
-            ) : (
-              <div className="grid h-400 w-full shrink-0 overflow-hidden [&>*]:col-start-1 [&>*]:row-start-1">
-                <Image
-                  src={RING_SIZE_CHART_IMAGES.videoPoster}
-                  alt=""
-                  width={480}
-                  height={400}
-                  className="h-full w-full object-cover"
-                  sizes="(max-width: 1024px) 100vw, 480px"
-                />
-              </div>
-            )}
+            ) : null}
 
             <div className="flex flex-col gap-6 pb-8">
               <div className="flex flex-col items-center gap-3 px-4 text-center lg:px-8">
@@ -113,9 +101,35 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
               </div>
 
               <div className="grid w-full grid-cols-3">
+                {circumferenceHeaderUrl ? (
+                  <Image
+                    src={circumferenceHeaderUrl}
+                    alt="Circumference"
+                    width={1402}
+                    height={1122}
+                    className="aspect-[1402/1122] h-auto w-full object-cover"
+                    sizes="160px"
+                  />
+                ) : (
+                  <div className="aspect-[1402/1122] w-full bg-gray200" aria-hidden />
+                )}
+                {diameterHeaderUrl ? (
+                  <Image
+                    src={diameterHeaderUrl}
+                    alt="Diameter"
+                    width={1402}
+                    height={1122}
+                    className="aspect-[1402/1122] h-auto w-full object-cover object-left-top"
+                    sizes="160px"
+                  />
+                ) : (
+                  <div className="aspect-[1402/1122] w-full bg-gray200" aria-hidden />
+                )}
+                <div className="aspect-[1402/1122] w-full bg-white" aria-hidden />
+
                 <div className="flex h-14 items-center justify-center border-b border-aboutInactive bg-gray200">
                   <p className="font-gill text-sm font-semibold leading-110 text-darkblack">
-                    sizeLabel
+                    unit
                   </p>
                 </div>
                 <div className="flex h-14 flex-col items-center justify-center gap-0.5 border-b border-aboutInactive bg-gray200">
@@ -128,7 +142,7 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
                 </div>
                 <div className="flex h-14 items-center justify-center border-b border-aboutInactive bg-gray200">
                   <p className="font-gill text-sm font-semibold leading-110 text-darkblack">
-                    unit
+                    sizeLabel
                   </p>
                 </div>
 
@@ -136,7 +150,7 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
                   <Fragment key={row.size}>
                     <div className="flex h-14 items-center justify-center border-b border-aboutInactive">
                       <p className="whitespace-nowrap font-gill text-base leading-110 text-darkblack">
-                        {row.size}
+                        {row.circumference}
                       </p>
                     </div>
                     <div className="flex h-14 items-center justify-center border-b border-aboutInactive">
@@ -146,7 +160,7 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
                     </div>
                     <div className="flex h-14 items-center justify-center border-b border-aboutInactive bg-gray200">
                       <p className="whitespace-nowrap font-gill text-base leading-110 text-darkblack">
-                        {row.circumference}
+                        {row.size}
                       </p>
                     </div>
                   </Fragment>
