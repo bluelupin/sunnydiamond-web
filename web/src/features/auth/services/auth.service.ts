@@ -25,6 +25,25 @@ async function postJson(
   }
 }
 
+export type PasswordLoginResult = { success: true } | { success: false; error: string };
+
+/** Email + password sign in against Magento (native generateCustomerToken). */
+export async function loginWithPassword(
+  email: string,
+  password: string,
+): Promise<PasswordLoginResult> {
+  const { ok, data } = await postJson("/api/auth/login", { email, password });
+
+  if (!ok || !data?.ok) {
+    return {
+      success: false,
+      error: (data?.error as string) ?? "The email or password is incorrect",
+    };
+  }
+
+  return { success: true };
+}
+
 /** Sends a login OTP. Phone is 10 national digits; the backend normalizes to +91. */
 export async function requestLoginOtp(phone: string): Promise<RequestOtpResult> {
   const { ok, data } = await postJson("/api/auth/otp/request", { phone });

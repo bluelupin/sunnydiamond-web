@@ -15,9 +15,11 @@ export const normalizeIndianPhoneDigits = (value: string): string => {
   return digits;
 };
 
+export const isEmailIdentifier = (value: string): boolean => value.trim().includes("@");
+
 /**
- * Sign-in identifier validation. OTP flow requires a valid Indian mobile number.
- * Email is rejected with a clear message because this step sends an SMS OTP.
+ * Sign-in identifier validation. A phone number continues to the SMS-OTP flow;
+ * an email continues to the password flow.
  */
 export const validateLoginIdentifier = (value: string): FieldValidation => {
   const trimmed = value.trim();
@@ -26,11 +28,8 @@ export const validateLoginIdentifier = (value: string): FieldValidation => {
     return { valid: false, error: "Phone number or email is required" };
   }
 
-  if (trimmed.includes("@")) {
-    return {
-      valid: false,
-      error: "Enter your mobile number to receive an OTP",
-    };
+  if (isEmailIdentifier(trimmed)) {
+    return validateRequiredEmail(trimmed);
   }
 
   return validatePhone(normalizeIndianPhoneDigits(trimmed), "+91");
