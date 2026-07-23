@@ -18,6 +18,7 @@ import {
   DetailTextLink,
 } from "@/features/products/components/detail/shared";
 import RingSizeChartPanel from "@/features/products/components/detail/RingSizeChartPanel";
+import PriceBreakupPanel from "@/features/products/components/detail/PriceBreakupPanel";
 import { ProductDetailSidePanelShell } from "@/features/products/components/detail/ProductDetailSidePanelShell";
 import ProductWishlistDetailGalleryCarousel from "@/features/products/components/detail/ProductWishlistDetailGalleryCarousel";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
@@ -52,6 +53,7 @@ const WishlistAddToBagPanel = ({
   const [selectedMetal, setSelectedMetal] = useState("gold");
   const [ringSize, setRingSize] = useState("");
   const [isRingSizeChartOpen, setIsRingSizeChartOpen] = useState(false);
+  const [isPriceBreakupOpen, setIsPriceBreakupOpen] = useState(false);
 
   useEffect(() => {
     if (!open || !product?.urlKey) {
@@ -262,7 +264,9 @@ const WishlistAddToBagPanel = ({
                     </span>
                   ) : null}
                 </div>
-                <DetailTextLink href="/contact">View Price Breakup</DetailTextLink>
+                <DetailTextLink onClick={() => setIsPriceBreakupOpen(true)}>
+                  View Price Breakup
+                </DetailTextLink>
               </div>
 
               <DetailDarkButton className="uppercase" onClick={handleAddToBag}>
@@ -277,6 +281,16 @@ const WishlistAddToBagPanel = ({
         open={isRingSizeChartOpen}
         onClose={() => setIsRingSizeChartOpen(false)}
         guide={sizeGuide}
+      />
+
+      <PriceBreakupPanel
+        open={isPriceBreakupOpen}
+        onClose={() => setIsPriceBreakupOpen(false)}
+        productName={detailProduct.name}
+        productImage={detailProduct.image}
+        metalLabel={activeMetal?.label}
+        ringSize={ringSize || undefined}
+        pricing={pricing}
       />
     </>
   );

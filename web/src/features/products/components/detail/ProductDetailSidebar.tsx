@@ -25,6 +25,7 @@ import TryAtHomePanel from "./TryAtHomePanel";
 import PersonaliseProductPanel from "./PersonaliseProductPanel";
 import MetalEngravingPanel from "./MetalEngravingPanel";
 import RingSizeChartPanel from "./RingSizeChartPanel";
+import PriceBreakupPanel from "./PriceBreakupPanel";
 import DeliveryStoreJourneyPanel from "./DeliveryStoreJourneyPanel";
 import type { AddToBagPayload } from "@/features/cart/types/cart.types";
 import type { EngravingSelection } from "@/features/products/constants/engraving";
@@ -69,6 +70,7 @@ const ProductDetailSidebar = ({
   const [isVideoCallOpen, setIsVideoCallOpen] = useState(false);
   const [isTryAtHomeOpen, setIsTryAtHomeOpen] = useState(false);
   const [isPersonaliseOpen, setIsPersonaliseOpen] = useState(false);
+  const [isPriceBreakupOpen, setIsPriceBreakupOpen] = useState(false);
   const { isWishlisted, toggleWishlist } = useWishlist();
   const wishlisted = isWishlisted(product.id);
   const engravingConfig = product.engraving;
@@ -176,7 +178,9 @@ const ProductDetailSidebar = ({
                 </span>
               ) : null}
             </div>
-            <DetailTextLink href="/contact">View Price Breakup</DetailTextLink>
+            <DetailTextLink onClick={() => setIsPriceBreakupOpen(true)}>
+              View Price Breakup
+            </DetailTextLink>
           </div>
 
           <div className="flex gap-2">
@@ -414,6 +418,16 @@ const ProductDetailSidebar = ({
         open={isPersonaliseOpen}
         onClose={() => setIsPersonaliseOpen(false)}
         product={product}
+      />
+
+      <PriceBreakupPanel
+        open={isPriceBreakupOpen}
+        onClose={() => setIsPriceBreakupOpen(false)}
+        productName={product.name}
+        productImage={product.image}
+        metalLabel={activeMetal?.label}
+        ringSize={ringSize || undefined}
+        pricing={pricing}
       />
     </>
   );
