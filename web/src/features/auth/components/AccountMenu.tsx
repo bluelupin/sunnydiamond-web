@@ -15,15 +15,17 @@ import { useAuth } from "../context/AuthContext";
 type AccountMenuProps = {
   className?: string;
   onNavigate?: () => void;
+  /** Guest destination, e.g. getLoginHref(pathname) so the return URL is preserved. */
+  loginHref?: string;
 };
 
-/** Header account icon: links to /login for guests, shows an account dropdown when signed in. */
-const AccountMenu = ({ className, onNavigate }: AccountMenuProps) => {
+/** Header account icon: links to the login page for guests, shows an account dropdown when signed in. */
+const AccountMenu = ({ className, onNavigate, loginHref = "/login" }: AccountMenuProps) => {
   const { status, customer, logout } = useAuth();
 
   if (status !== "authenticated" || !customer) {
     return (
-      <Link href="/login" aria-label="Sign in" onClick={onNavigate} className={className}>
+      <Link href={loginHref} aria-label="Sign in" onClick={onNavigate} className={className}>
         <UserIcon className="size-6" />
       </Link>
     );

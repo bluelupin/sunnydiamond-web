@@ -17,9 +17,14 @@ export function isJewelleryNavLink(label: string): boolean {
   return normalizedLabel === "jewellery" || normalizedLabel === "jewelry";
 }
 
+export function isAuthRoute(pathname: string): boolean {
+  return pathname === "/login" || pathname === "/sign-up";
+}
+
 /** Routes where the hero uses a transparent header treatment at the top of the page. */
 export function isHeroOverlayRoute(pathname: string): boolean {
   return (
+    isAuthRoute(pathname) ||
     pathname === "/" ||
     pathname === "/about" ||
     pathname === "/education" ||
@@ -31,6 +36,16 @@ export function isHeroOverlayRoute(pathname: string): boolean {
 
 export type HeaderVariant = "overlay" | "solid";
 
+const HEADER_SOLID_SCROLL_THRESHOLD_PX = 24;
+const HEADER_OVERLAY_SCROLL_THRESHOLD_PX = 8;
+
+/** Hysteresis avoids header background flicker around the scroll threshold. */
+export function isHeaderScrolled(scrollY: number, wasScrolled = false): boolean {
+  return wasScrolled
+    ? scrollY > HEADER_OVERLAY_SCROLL_THRESHOLD_PX
+    : scrollY > HEADER_SOLID_SCROLL_THRESHOLD_PX;
+}
+
 /** Figma 692:6742 — solid white header on PDP and other non-hero pages. */
 export function getHeaderVariant(
   pathname: string,
@@ -38,7 +53,15 @@ export function getHeaderVariant(
 ): HeaderVariant {
   const { scrolled = false, menuOpen = false } = options;
 
-  if (isHeroOverlayRoute(pathname) && !scrolled && !menuOpen) {
+  if (menuOpen) {
+    return "solid";
+  }
+
+  if (isAuthRoute(pathname)) {
+    return "overlay";
+  }
+
+  if (isHeroOverlayRoute(pathname) && !scrolled) {
     return "overlay";
   }
 
@@ -47,4 +70,8 @@ export function getHeaderVariant(
 
 export function shouldOffsetMainForHeader(pathname: string): boolean {
   return !isHeroOverlayRoute(pathname);
+}
+
+export function shouldHideFooter(pathname: string): boolean {
+  return isAuthRoute(pathname);
 }

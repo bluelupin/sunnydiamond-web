@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -11,7 +11,7 @@ import { cn } from "@/shared/utils/cn";
 import SDLogo from "@/assets/Icons/SDLogo";
 import SearchIcon from "@/assets/Icons/SearchIcon";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
-import { resolveHeaderNavHref, getHeaderVariant, isJewelleryNavLink } from "@/shared/utils/navigation";
+import { resolveHeaderNavHref, getHeaderVariant, isAuthRoute, isHeaderScrolled, isJewelleryNavLink } from "@/shared/utils/navigation";
 import { resolveShellHeaderLinks, splitShellHeaderNavLinks } from "@/shared/lib/shellNavigation";
 import MobileNavigation from "@/shared/ui/layout/MobileNavigation";
 import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
@@ -19,6 +19,7 @@ import WishlistIcon from "@/assets/Icons/WishlistIcon";
 import AccountMenu from "@/features/auth/components/AccountMenu";
 import MenuIcon from "@/assets/Icons/MenuIcon";
 import HeaderIconBadge from "@/shared/ui/layout/HeaderIconBadge";
+import { getLoginHref } from "@/features/auth/utils/authNavigation";
 
 const JewelleryMegaMenu = dynamic(
   () =>
@@ -43,10 +44,13 @@ const Header = () => {
   const { totalItems: cartCount } = useCart();
   const { totalItems: wishlistCount } = useWishlist();
   const pathname = usePathname() ?? "/";
+  const loginHref = getLoginHref(pathname);
 
+  const isAuthPage = isAuthRoute(pathname);
   const menuOpen = mobileMenuOpen || jewelleryMenuOpen;
   const headerVariant = getHeaderVariant(pathname, { scrolled, menuOpen });
   const isOverlay = headerVariant === "overlay";
+  const isLightOverlay = isOverlay && !isAuthPage;
 
   const { data: shellData } = useHomepageShell();
   const headerNavigationLinks = useMemo(() => {
@@ -58,17 +62,20 @@ const Header = () => {
     [headerNavigationLinks],
   );
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => {
+  useLayoutEffect(() => {
+    setScrolled(isHeaderScrolled(window.scrollY));
     setMobileMenuOpen(false);
     setJewelleryMenuOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled((previous) => isHeaderScrolled(window.scrollY, previous));
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const openJewelleryMenu = useCallback(() => {
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
@@ -85,15 +92,15 @@ const Header = () => {
     setJewelleryMenuOpen(false);
   }, []);
 
-  const textClass = isOverlay ? "text-white" : "text-darkblack";
-  const logoClass = isOverlay ? "text-white" : "text-darkMagenta";
-  const hoverClass = isOverlay ? "hover:text-ivory/70" : "hover:text-neutral500";
+  const textClass = isLightOverlay ? "text-white" : "text-darkblack";
+  const logoClass = isLightOverlay ? "text-white" : isAuthPage ? "text-darkblack" : "text-darkMagenta";
+  const hoverClass = isLightOverlay ? "hover:text-ivory/70" : "hover:text-neutral500";
   const navLinkClass = (active = false) =>
     cn(
       "inline-flex items-center font-gill uppercase transition-colors",
       "text-sm font-normal leading-[130%] tracking-[-0.02em]",
       "lg:text-sm lg:font-semibold lg:leading-110 lg:tracking-normal",
-      active ? (isOverlay ? "text-primary" : "text-darkblack") : textClass,
+      active ? (isLightOverlay ? "text-primary" : "text-darkblack") : textClass,
       !active ? hoverClass : "",
     );
 
@@ -111,7 +118,7 @@ const Header = () => {
     <>
       <header
         className={cn(
-          "absolute top-0 inset-x-0 z-50 transition-colors duration-300 max-md:pt-[calc(0.5rem+env(safe-area-inset-top,0px))]",
+          "absolute top-0 inset-x-0 z-50 max-md:pt-[calc(0.5rem+env(safe-area-inset-top,0px))]",
           mobileMenuOpen ? "pointer-events-none opacity-0" : "",
           isOverlay ? "bg-transparent" : ["/cart", "/checkout"].includes(pathname)
             ? "bg-gray300"
@@ -211,7 +218,7 @@ const Header = () => {
               <HeaderIconBadge count={cartCount} />
             </Link>
 
-            <AccountMenu className={cn("inline-flex", iconButtonClass, hoverClass)} />
+            <AccountMenu loginHref={loginHref} className={cn("inline-flex", iconButtonClass, hoverClass)} />
           </div>
         </div>
 
