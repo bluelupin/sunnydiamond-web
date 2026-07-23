@@ -147,7 +147,7 @@ export const educationSliderSpecs: Record<string, EducationSliderSpec> = {
     labelTop: 32.5,
     dotCenters: [10.61, 82.61, 154.61, 226.61, 298.61, 370.61, 442.61, 514.61],
     labelLeft: [0, 72.31, 141.87, 213.73, 280.59, 352.45, 436.05, 505.21],
-    labelDisplay: "endpoints",
+    labelDisplay: "all",
     ariaLabel: "Diamond clarity grade",
   },
   cut: {
