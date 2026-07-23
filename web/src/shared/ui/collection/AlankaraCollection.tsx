@@ -489,7 +489,7 @@ function ProductCarouselPanel({
           {total > 1 ? (
             <>
               {/* <div aria-hidden className="h-[45px] shrink-0" /> */}
-              <div className="pt-12 flex justify-between shrink-0 gap-[5.6px] w-full overflow-x-auto">
+              <div className="pt-12 flex justify-between shrink-0 gap-[5.6px] w-full overflow-x-auto horizontalScroll">
                 {products.map((product, index) => {
                   const thumbSrc = getImageSrc(product.thumbnailImage ?? product.image) || "";
                   const isActive = index === activeIndex;
