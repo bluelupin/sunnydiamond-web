@@ -1,5 +1,5 @@
 import { magentoGraphqlFetch } from "../graphqlClient";
-import { MAGENTO_GET_CART_QUERY } from "./cart.queries";
+import { MAGENTO_GET_CART_QUERY, MAGENTO_GET_CUSTOMER_CART_QUERY } from "./cart.queries";
 import {
   MAGENTO_ADD_PRODUCTS_TO_CART_MUTATION,
   MAGENTO_ADD_SIMPLE_PRODUCTS_TO_CART_MUTATION,
@@ -70,6 +70,7 @@ import {
   resolveMagentoPaymentCode,
 } from "./checkoutPayment.mapper";
 import { MagentoGraphqlError } from "../magento.errors";
+import { MAGENTO_CUSTOMER_CART_QUERY } from "@/services/customer/customer.gql";
 import { DEFAULT_CART_SHIPPING_ESTIMATE_ADDRESS } from "./cartShippingEstimate";
 
 export type GuestCartState = {
@@ -99,6 +100,55 @@ function mapGuestCartState(cart: MagentoCart, lineMetadata: StoredCartLineMetada
   };
 }
 
+function isCustomerCartRequiredError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes("customerCart") || message.includes("CustomerCart");
+}
+
+export async function fetchCustomerCart(
+  lineMetadata: StoredCartLineMetadata,
+  signal?: AbortSignal,
+): Promise<GuestCartState> {
+  const data = await magentoGraphqlFetch<{ customerCart: MagentoCart }>({
+    query: MAGENTO_GET_CUSTOMER_CART_QUERY,
+    signal,
+    cache: "no-store",
+  });
+
+  const cart = assertCart(data.customerCart);
+  setGuestCartId(cart.id!.trim());
+  return mapGuestCartState(cart, lineMetadata);
+}
+
+async function tryEnsureCustomerCartId(signal?: AbortSignal): Promise<string | null> {
+  try {
+    const data = await magentoGraphqlFetch<{ customerCart: { id: string } }>({
+      query: MAGENTO_CUSTOMER_CART_QUERY,
+      signal,
+      cache: "no-store",
+    });
+
+    const cartId = data.customerCart?.id?.trim();
+    if (!cartId) {
+      return null;
+    }
+
+    setGuestCartId(cartId);
+    return cartId;
+  } catch {
+    return null;
+  }
+}
+
+export async function ensureCustomerCartId(signal?: AbortSignal): Promise<string> {
+  const cartId = await tryEnsureCustomerCartId(signal);
+  if (!cartId) {
+    throw new Error("Failed to resolve customer cart");
+  }
+
+  return cartId;
+}
+
 export async function createGuestCart(signal?: AbortSignal): Promise<string> {
   const data = await magentoGraphqlFetch<MagentoCreateGuestCartResponse>({
     query: MAGENTO_CREATE_GUEST_CART_MUTATION,
@@ -120,14 +170,22 @@ export async function fetchGuestCart(
   lineMetadata: StoredCartLineMetadata,
   signal?: AbortSignal,
 ): Promise<GuestCartState> {
-  const data = await magentoGraphqlFetch<MagentoCartResponse>({
-    query: MAGENTO_GET_CART_QUERY,
-    variables: { cartId },
-    signal,
-    cache: "no-store",
-  });
+  try {
+    const data = await magentoGraphqlFetch<MagentoCartResponse>({
+      query: MAGENTO_GET_CART_QUERY,
+      variables: { cartId },
+      signal,
+      cache: "no-store",
+    });
 
-  return mapGuestCartState(assertCart(data.cart), lineMetadata);
+    return mapGuestCartState(assertCart(data.cart), lineMetadata);
+  } catch (error) {
+    if (isCustomerCartRequiredError(error)) {
+      return fetchCustomerCart(lineMetadata, signal);
+    }
+
+    throw error;
+  }
 }
 
 export async function ensureGuestCartId(signal?: AbortSignal): Promise<string> {
@@ -141,9 +199,21 @@ export async function ensureGuestCartId(signal?: AbortSignal): Promise<string> {
         cache: "no-store",
       });
       return existingCartId;
-    } catch {
+    } catch (error) {
+      if (isCustomerCartRequiredError(error)) {
+        const customerCartId = await tryEnsureCustomerCartId(signal);
+        if (customerCartId) {
+          return customerCartId;
+        }
+      }
+
       clearGuestCartId();
     }
+  }
+
+  const customerCartId = await tryEnsureCustomerCartId(signal);
+  if (customerCartId) {
+    return customerCartId;
   }
 
   return createGuestCart(signal);

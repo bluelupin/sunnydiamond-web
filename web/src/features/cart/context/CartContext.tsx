@@ -11,11 +11,13 @@ import {
   type ReactNode,
 } from "react";
 import type { Product } from "@/features/products/data/products";
+import { useAuth } from "@/features/auth/context/AuthContext";
 import { trackEvent } from "@/infrastructure/analytics/use-gtag";
 import {
   addProductToGuestCart,
   ensureGuestCartId,
   estimateGuestCartShippingMethods,
+  fetchCustomerCart,
   fetchGuestCart,
   migrateLegacyLinesToGuestCart,
   removeGuestCartItem,
@@ -126,6 +128,8 @@ const emptyTotals = {
 };
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  const { status } = useAuth();
+  const isAuthenticated = status === "authenticated";
   const [cartState, setCartState] = useState<GuestCartState | null>(null);
   const [lineMetadata, setLineMetadata] = useState<StoredCartLineMetadata>(() => readCartLineMetadata());
   const [estimatedShippingMethods, setEstimatedShippingMethods] = useState<
@@ -179,13 +183,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [refreshShippingEstimate],
   );
 
-  const refreshCart = useCallback(async (cartId: string) => {
-    const nextState = await fetchGuestCart(cartId, lineMetadataRef.current);
-    applyCartState(nextState);
-    return nextState;
-  }, [applyCartState]);
+  const refreshCart = useCallback(
+    async (cartId: string) => {
+      const nextState = isAuthenticated
+        ? await fetchCustomerCart(lineMetadataRef.current)
+        : await fetchGuestCart(cartId, lineMetadataRef.current);
+      applyCartState(nextState);
+      return nextState;
+    },
+    [applyCartState, isAuthenticated],
+  );
 
   useEffect(() => {
+    if (status === "loading") {
+      return;
+    }
+
     if (initRef.current) {
       return;
     }
@@ -199,6 +212,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const metadata = readCartLineMetadata();
         setLineMetadata(metadata);
         lineMetadataRef.current = metadata;
+
+        if (isAuthenticated) {
+          const nextState = await fetchCustomerCart(metadata);
+          applyCartState(nextState);
+          return;
+        }
 
         const legacyLines = readStoredCartLines();
         const cartId = getGuestCartId();
@@ -254,7 +273,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
 
     void initializeCart();
-  }, [applyCartState, refreshCart]);
+  }, [applyCartState, isAuthenticated, refreshCart, status]);
 
   const addItem = useCallback(async (payload: AddToBagPayload | Product): Promise<AddItemResult> => {
     const { product, options = {}, productCustomOptions = product.customOptions } =
@@ -499,6 +518,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [applyCartState]);
 
   const refreshCartFromMagento = useCallback(async () => {
+    if (isAuthenticated) {
+      setIsUpdating(true);
+
+      try {
+        const nextState = await fetchCustomerCart(lineMetadataRef.current);
+        applyCartState(nextState);
+      } finally {
+        setIsUpdating(false);
+      }
+      return;
+    }
+
     const cartId = getGuestCartId();
     if (!cartId) {
       return;
@@ -511,7 +542,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsUpdating(false);
     }
-  }, [refreshCart]);
+  }, [applyCartState, isAuthenticated, refreshCart]);
 
   const selectShippingMethod = useCallback(
     async (carrierCode: string, methodCode: string) => {
