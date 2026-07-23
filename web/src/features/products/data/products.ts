@@ -23,6 +23,10 @@ export interface Product {
   description: string;
   shortDescription: string;
   category: string;
+  /** Magento jewellery category `url_key` (e.g. diamond-rings). */
+  categoryUrlKey?: string;
+  /** App jewellery slug (e.g. rings) — used to match Strapi size-guide `name`. */
+  categorySlug?: string;
   image: string | StaticImageData;
   images: Array<string | StaticImageData>;
   lifestyleImage?: string | StaticImageData;

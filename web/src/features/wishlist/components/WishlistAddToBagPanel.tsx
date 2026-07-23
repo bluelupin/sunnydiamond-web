@@ -28,6 +28,9 @@ import type { JewelleryListingProduct } from "@/features/jewellery-product/types
 import { wishlistPageContent } from "@/features/wishlist/data/content";
 import { getWishlistProductHref } from "@/features/wishlist/utils/wishlistProduct.utils";
 import { fetchMagentoProductByUrlKey } from "@/services/magento/products/productDetail.service";
+import { fetchSizeGuides } from "@/services/size-guide/size-guide.service";
+import { resolveSizeGuideForProduct } from "@/services/size-guide/size-guide.mapper";
+import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
 import { cn } from "@/shared/utils/cn";
 
 type WishlistAddToBagPanelProps = {
@@ -44,6 +47,7 @@ const WishlistAddToBagPanel = ({
   onAddToBag,
 }: WishlistAddToBagPanelProps) => {
   const [detailProduct, setDetailProduct] = useState<Product | null>(null);
+  const [sizeGuides, setSizeGuides] = useState<NormalizedSizeGuide[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedMetal, setSelectedMetal] = useState("gold");
   const [ringSize, setRingSize] = useState("");
@@ -59,13 +63,17 @@ const WishlistAddToBagPanel = ({
     const controller = new AbortController();
     setIsLoading(true);
 
-    void fetchMagentoProductByUrlKey(product.urlKey, controller.signal)
-      .then((fetchedProduct) => {
+    void Promise.all([
+      fetchMagentoProductByUrlKey(product.urlKey, controller.signal),
+      fetchSizeGuides(controller.signal),
+    ])
+      .then(([fetchedProduct, guides]) => {
         if (controller.signal.aborted) {
           return;
         }
 
         setDetailProduct(fetchedProduct);
+        setSizeGuides(guides);
       })
       .finally(() => {
         if (!controller.signal.aborted) {
@@ -80,6 +88,10 @@ const WishlistAddToBagPanel = ({
 
   const content = detailProduct ? getProductDetailContent(detailProduct) : null;
   const pricing = detailProduct ? getProductDetailPricing(detailProduct) : null;
+  const sizeGuide =
+    detailProduct != null ? resolveSizeGuideForProduct(sizeGuides, detailProduct) : null;
+  const sizeLabels = sizeGuide?.sizeLabels ?? [];
+  const showSizeSelector = sizeLabels.length > 0;
 
   useEffect(() => {
     if (!open || !detailProduct || !content) {
@@ -92,7 +104,11 @@ const WishlistAddToBagPanel = ({
 
   if (!open || !product) {
     return (
-      <RingSizeChartPanel open={isRingSizeChartOpen} onClose={() => setIsRingSizeChartOpen(false)} />
+      <RingSizeChartPanel
+        open={isRingSizeChartOpen}
+        onClose={() => setIsRingSizeChartOpen(false)}
+        guide={sizeGuide}
+      />
     );
   }
 
@@ -112,7 +128,11 @@ const WishlistAddToBagPanel = ({
             </p>
           </div>
         </ProductDetailSidePanelShell>
-        <RingSizeChartPanel open={isRingSizeChartOpen} onClose={() => setIsRingSizeChartOpen(false)} />
+        <RingSizeChartPanel
+          open={isRingSizeChartOpen}
+          onClose={() => setIsRingSizeChartOpen(false)}
+          guide={sizeGuide}
+        />
       </>
     );
   }
@@ -204,28 +224,30 @@ const WishlistAddToBagPanel = ({
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between gap-4">
-                  <p className="font-gill text-base leading-normal tracking-normal text-darkblack">
-                    Ring Size
-                  </p>
-                  <DetailTextLink onClick={() => setIsRingSizeChartOpen(true)}>
-                    Find your size
-                  </DetailTextLink>
+              {showSizeSelector ? (
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="font-gill text-base leading-normal tracking-normal text-darkblack">
+                      {sizeGuide?.sizeFieldLabel ?? "Size"}
+                    </p>
+                    <DetailTextLink onClick={() => setIsRingSizeChartOpen(true)}>
+                      Find your size
+                    </DetailTextLink>
+                  </div>
+                  <Select value={ringSize} onValueChange={setRingSize}>
+                    <SelectTrigger className="h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0">
+                      <SelectValue placeholder="-select-" />
+                    </SelectTrigger>
+                    <SelectContent className="z-[80]">
+                      {sizeLabels.map((size) => (
+                        <SelectItem key={size} value={size}>
+                          {size}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                <Select value={ringSize} onValueChange={setRingSize}>
-                  <SelectTrigger className="h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0">
-                    <SelectValue placeholder="-select-" />
-                  </SelectTrigger>
-                  <SelectContent className="z-[80]">
-                    {content.ringSizes.map((size) => (
-                      <SelectItem key={size} value={size}>
-                        {size}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              ) : null}
             </div>
           </div>
 
@@ -251,7 +273,11 @@ const WishlistAddToBagPanel = ({
         </div>
       </ProductDetailSidePanelShell>
 
-      <RingSizeChartPanel open={isRingSizeChartOpen} onClose={() => setIsRingSizeChartOpen(false)} />
+      <RingSizeChartPanel
+        open={isRingSizeChartOpen}
+        onClose={() => setIsRingSizeChartOpen(false)}
+        guide={sizeGuide}
+      />
     </>
   );
 };

@@ -14,6 +14,7 @@ import { resolveMagentoProductPricing } from "./productPricing.utils";
 import { mapMagentoProductEngraving } from "./productEngraving.mapper";
 import { mapMagentoProductCustomOptions } from "./productCustomOptions.mapper";
 import type { MagentoEngravingFontOption } from "./engravingFonts.service";
+import { MAGENTO_URL_KEY_TO_SLUG } from "@/features/jewellery-product/utils/jewelleryRoutes";
 
 function stripHtml(html?: string | null): string {
   if (!html) {
@@ -93,12 +94,24 @@ function buildGalleryImages(product: MagentoProductDetailItem): string[] {
   return unique.length > 0 ? unique : primaryImage ? [primaryImage] : [];
 }
 
-function resolveProductCategory(categories: MagentoProductDetailItem["categories"]): string {
-  const jewelleryCategory = (categories ?? []).find((category) =>
-    category.url_key?.startsWith("diamond-"),
-  );
+function resolveJewelleryCategory(
+  categories: MagentoProductDetailItem["categories"],
+): { name: string; urlKey?: string } {
+  const list = categories ?? [];
+  const diamondCategories = list.filter((category) => category.url_key?.startsWith("diamond-"));
 
-  return jewelleryCategory?.name?.trim() || categories?.[0]?.name?.trim() || "Jewellery";
+  // Prefer a known jewellery leaf (rings/bangles/…) over a generic diamond-* parent.
+  const leafCategory =
+    diamondCategories.find((category) => {
+      const urlKey = category.url_key?.trim();
+      return Boolean(urlKey && MAGENTO_URL_KEY_TO_SLUG[urlKey]);
+    }) ?? diamondCategories[0];
+
+  const fallback = leafCategory ?? list[0];
+  const name = fallback?.name?.trim() || "Jewellery";
+  const urlKey = fallback?.url_key?.trim() || undefined;
+
+  return urlKey ? { name, urlKey } : { name };
 }
 
 function resolveProductVideoUrl(
@@ -185,6 +198,10 @@ export function mapMagentoProductDetailToProduct(
     product.media_gallery,
     product.image?.url,
   );
+  const jewelleryCategory = resolveJewelleryCategory(product.categories);
+  const categorySlug = jewelleryCategory.urlKey
+    ? MAGENTO_URL_KEY_TO_SLUG[jewelleryCategory.urlKey]
+    : undefined;
 
   return {
     id: sku,
@@ -194,7 +211,9 @@ export function mapMagentoProductDetailToProduct(
     originalPrice: pricing.originalPrice,
     description: stripHtml(product.description?.html) || name,
     shortDescription,
-    category: resolveProductCategory(product.categories),
+    category: jewelleryCategory.name,
+    ...(jewelleryCategory.urlKey ? { categoryUrlKey: jewelleryCategory.urlKey } : {}),
+    ...(categorySlug ? { categorySlug } : {}),
     image: primaryImage,
     images,
     lifestyleImage: lifestyleImage || primaryImage,
