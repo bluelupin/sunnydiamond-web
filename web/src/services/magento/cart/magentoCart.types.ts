@@ -129,11 +129,13 @@ export type MagentoEstimateAddressInput = {
 };
 
 export type MagentoShippingAddressInput = {
-  address: MagentoCartAddressInput;
+  address?: MagentoCartAddressInput;
+  customer_address_uid?: string;
 };
 
 export type MagentoBillingAddressInput = {
   address?: MagentoCartAddressInput;
+  customer_address_uid?: string;
   same_as_shipping?: boolean;
 };
 

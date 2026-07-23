@@ -1,6 +1,7 @@
 "use client";
 
 import PageContainer from "@/shared/ui/layout/PageContainer";
+import { useAuth } from "@/features/auth/context/AuthContext";
 import { wishlistPageContent, type WishlistViewMode } from "@/features/wishlist/data/content";
 import WishlistViewToggle from "./WishlistViewToggle";
 import { cn } from "@/shared/utils/cn";
@@ -13,18 +14,29 @@ type WishlistHeadingProps = {
 };
 
 const WishlistHeading = ({ productCount, viewMode, onViewModeChange }: WishlistHeadingProps) => {
+  const { status } = useAuth();
   const showCount = productCount > 0;
   const showViewToggle = showCount;
+  const isAuthenticated = status === "authenticated";
 
   return (
     <section
       aria-labelledby="wishlist-page-title"
       className="w-full bg-white"
     >
-      <div className="flex sm:flex-row flex-col items-center justify-center sm:gap-2 bg-gray300 p-4 mt-6 sm:gap-2 gap-4">
-        <Link href="/login?next=/wishlist" className="text-base font-gill tracking-[1.8%] uppercase font-gill font-normal text-darkblack border-b border-darkblack pb-1">LOGIN</Link>
-        <p className="md:text-[18px] sm:text-base text-sm font-light leadiing-100 sm:tracking-[1%] tracking-[0%] text-darkblack">to save items and access them anytime in your wishlist</p>
-      </div>
+      {!isAuthenticated ? (
+        <div className="mt-6 flex flex-col items-center justify-center gap-4 bg-gray300 p-4 sm:flex-row sm:gap-2">
+          <Link
+            href="/login?next=/wishlist"
+            className="border-b border-darkblack pb-1 font-gill text-base font-normal uppercase tracking-[1.8%] text-darkblack"
+          >
+            LOGIN
+          </Link>
+          <p className="text-sm font-light leading-100 tracking-[0%] text-darkblack sm:text-base sm:tracking-[1%] md:text-[18px]">
+            to save items and access them anytime in your wishlist
+          </p>
+        </div>
+      ) : null}
       <PageContainer
         className={cn(
           "flex flex-col items-center lg:gap-6 gap-2 justify-center gap-6 px-4 md:px-5 lg:mt-10 mt-6 mb-6",

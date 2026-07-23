@@ -1,13 +1,12 @@
+import { getGuestCartId, setGuestCartId } from "@/services/magento/cart/cartSession";
+import { WISHLIST_STORAGE_KEY } from "@/features/wishlist/constants";
+import { normalizeWishlistSkus } from "@/features/wishlist/utils/wishlistProduct.utils";
+import { syncCustomerWishlist } from "@/services/customer/customer-wishlist.client";
 import { magentoGraphqlFetch } from "@/services/magento/graphqlClient";
 import {
-  MAGENTO_ADD_PRODUCTS_TO_WISHLIST_MUTATION,
   MAGENTO_CUSTOMER_CART_QUERY,
-  MAGENTO_CUSTOMER_WISHLIST_IDS_QUERY,
   MAGENTO_MERGE_CARTS_MUTATION,
 } from "@/services/customer/customer.gql";
-import { getGuestCartId, setGuestCartId } from "@/services/magento/cart/cartSession";
-
-const WISHLIST_STORAGE_KEY = "sunny-wishlist";
 
 /**
  * Merges the guest cart into the customer cart, then stores the customer cart id
@@ -33,43 +32,23 @@ async function mergeGuestCart(): Promise<void> {
   setGuestCartId(customerCartId);
 }
 
-/** Pushes locally saved wishlist SKUs into the customer's Magento wishlist. */
-async function pushWishlist(): Promise<void> {
-  let skus: string[] = [];
+function readLocalWishlistSkus(): string[] {
   try {
     const raw = window.localStorage.getItem(WISHLIST_STORAGE_KEY);
     const parsed = raw ? (JSON.parse(raw) as unknown) : [];
-    skus = Array.isArray(parsed)
-      ? parsed.filter((sku): sku is string => typeof sku === "string" && sku.length > 0)
+    return Array.isArray(parsed)
+      ? normalizeWishlistSkus(parsed.filter((sku): sku is string => typeof sku === "string"))
       : [];
   } catch {
-    skus = [];
+    return [];
   }
+}
 
-  if (!skus.length) {
-    return;
-  }
-
-  const data = await magentoGraphqlFetch<{
-    customer: { wishlists: Array<{ id: string }> };
-  }>({
-    query: MAGENTO_CUSTOMER_WISHLIST_IDS_QUERY,
-    cache: "no-store",
-  });
-
-  const wishlistId = data.customer.wishlists[0]?.id;
-  if (!wishlistId) {
-    return;
-  }
-
-  await magentoGraphqlFetch({
-    query: MAGENTO_ADD_PRODUCTS_TO_WISHLIST_MUTATION,
-    variables: {
-      wishlistId,
-      wishlistItems: skus.map((sku) => ({ sku, quantity: 1 })),
-    },
-    cache: "no-store",
-  });
+/** Merges local wishlist SKUs with Magento and persists the merged list locally. */
+async function syncWishlistAfterLogin(): Promise<void> {
+  const localSkus = readLocalWishlistSkus();
+  const wishlist = await syncCustomerWishlist(localSkus);
+  window.localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(wishlist.skus));
 }
 
 /**
@@ -79,7 +58,7 @@ async function pushWishlist(): Promise<void> {
 export async function runPostLoginSync(): Promise<{ cartMerged: boolean; wishlistPushed: boolean }> {
   const [cartResult, wishlistResult] = await Promise.allSettled([
     mergeGuestCart(),
-    pushWishlist(),
+    syncWishlistAfterLogin(),
   ]);
 
   return {

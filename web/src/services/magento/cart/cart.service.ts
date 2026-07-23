@@ -1,5 +1,5 @@
 import { magentoGraphqlFetch } from "../graphqlClient";
-import { MAGENTO_GET_CART_QUERY } from "./cart.queries";
+import { MAGENTO_GET_CART_QUERY, MAGENTO_GET_CUSTOMER_CART_QUERY } from "./cart.queries";
 import {
   MAGENTO_ADD_PRODUCTS_TO_CART_MUTATION,
   MAGENTO_ADD_SIMPLE_PRODUCTS_TO_CART_MUTATION,
@@ -71,6 +71,7 @@ import {
   resolveMagentoPaymentCode,
 } from "./checkoutPayment.mapper";
 import { MagentoGraphqlError } from "../magento.errors";
+import { MAGENTO_CUSTOMER_CART_QUERY } from "@/services/customer/customer.gql";
 import { DEFAULT_CART_SHIPPING_ESTIMATE_ADDRESS } from "./cartShippingEstimate";
 
 export type GuestCartState = {
@@ -100,6 +101,55 @@ function mapGuestCartState(cart: MagentoCart, lineMetadata: StoredCartLineMetada
   };
 }
 
+function isCustomerCartRequiredError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes("customerCart") || message.includes("CustomerCart");
+}
+
+export async function fetchCustomerCart(
+  lineMetadata: StoredCartLineMetadata,
+  signal?: AbortSignal,
+): Promise<GuestCartState> {
+  const data = await magentoGraphqlFetch<{ customerCart: MagentoCart }>({
+    query: MAGENTO_GET_CUSTOMER_CART_QUERY,
+    signal,
+    cache: "no-store",
+  });
+
+  const cart = assertCart(data.customerCart);
+  setGuestCartId(cart.id!.trim());
+  return mapGuestCartState(cart, lineMetadata);
+}
+
+async function tryEnsureCustomerCartId(signal?: AbortSignal): Promise<string | null> {
+  try {
+    const data = await magentoGraphqlFetch<{ customerCart: { id: string } }>({
+      query: MAGENTO_CUSTOMER_CART_QUERY,
+      signal,
+      cache: "no-store",
+    });
+
+    const cartId = data.customerCart?.id?.trim();
+    if (!cartId) {
+      return null;
+    }
+
+    setGuestCartId(cartId);
+    return cartId;
+  } catch {
+    return null;
+  }
+}
+
+export async function ensureCustomerCartId(signal?: AbortSignal): Promise<string> {
+  const cartId = await tryEnsureCustomerCartId(signal);
+  if (!cartId) {
+    throw new Error("Failed to resolve customer cart");
+  }
+
+  return cartId;
+}
+
 export async function createGuestCart(signal?: AbortSignal): Promise<string> {
   const data = await magentoGraphqlFetch<MagentoCreateGuestCartResponse>({
     query: MAGENTO_CREATE_GUEST_CART_MUTATION,
@@ -121,14 +171,22 @@ export async function fetchGuestCart(
   lineMetadata: StoredCartLineMetadata,
   signal?: AbortSignal,
 ): Promise<GuestCartState> {
-  const data = await magentoGraphqlFetch<MagentoCartResponse>({
-    query: MAGENTO_GET_CART_QUERY,
-    variables: { cartId },
-    signal,
-    cache: "no-store",
-  });
+  try {
+    const data = await magentoGraphqlFetch<MagentoCartResponse>({
+      query: MAGENTO_GET_CART_QUERY,
+      variables: { cartId },
+      signal,
+      cache: "no-store",
+    });
 
-  return mapGuestCartState(assertCart(data.cart), lineMetadata);
+    return mapGuestCartState(assertCart(data.cart), lineMetadata);
+  } catch (error) {
+    if (isCustomerCartRequiredError(error)) {
+      return fetchCustomerCart(lineMetadata, signal);
+    }
+
+    throw error;
+  }
 }
 
 export async function ensureGuestCartId(signal?: AbortSignal): Promise<string> {
@@ -142,9 +200,21 @@ export async function ensureGuestCartId(signal?: AbortSignal): Promise<string> {
         cache: "no-store",
       });
       return existingCartId;
-    } catch {
+    } catch (error) {
+      if (isCustomerCartRequiredError(error)) {
+        const customerCartId = await tryEnsureCustomerCartId(signal);
+        if (customerCartId) {
+          return customerCartId;
+        }
+      }
+
       clearGuestCartId();
     }
+  }
+
+  const customerCartId = await tryEnsureCustomerCartId(signal);
+  if (customerCartId) {
+    return customerCartId;
   }
 
   return createGuestCart(signal);
@@ -393,6 +463,26 @@ export async function setGuestShippingAddress(
   return mapGuestCartState(assertCart(data.setShippingAddressesOnCart?.cart), lineMetadata);
 }
 
+export async function setCartShippingAddressByUid(
+  cartId: string,
+  customerAddressUid: string,
+  lineMetadata: StoredCartLineMetadata,
+  signal?: AbortSignal,
+): Promise<GuestCartState> {
+  const shippingAddresses: MagentoShippingAddressInput[] = [
+    { customer_address_uid: customerAddressUid },
+  ];
+
+  const data = await magentoGraphqlFetch<MagentoSetShippingAddressesOnCartResponse>({
+    query: MAGENTO_SET_SHIPPING_ADDRESSES_ON_CART_MUTATION,
+    variables: { cartId, shippingAddresses },
+    signal,
+    cache: "no-store",
+  });
+
+  return mapGuestCartState(assertCart(data.setShippingAddressesOnCart?.cart), lineMetadata);
+}
+
 export async function setGuestBillingAddress(
   cartId: string,
   billingAddress: MagentoCartAddressInput | null,
@@ -421,16 +511,36 @@ export async function setGuestBillingAddress(
   return mapGuestCartState(assertCart(data.setBillingAddressOnCart?.cart), lineMetadata);
 }
 
-export async function applyGuestCheckoutAddresses(
+export type CheckoutPrepareOptions = {
+  isAuthenticated: boolean;
+  customerEmail?: string;
+  shippingAddressUid?: string | null;
+};
+
+export async function applyCheckoutAddresses(
   cartId: string,
   form: CheckoutFormData,
   lineMetadata: StoredCartLineMetadata,
+  options: CheckoutPrepareOptions,
   signal?: AbortSignal,
 ): Promise<GuestCartState> {
-  await setGuestEmailOnCart(cartId, resolveGuestCheckoutEmail(form.phoneOrEmail), signal);
+  if (!options.isAuthenticated) {
+    await setGuestEmailOnCart(cartId, resolveGuestCheckoutEmail(form.phoneOrEmail), signal);
+  }
 
-  const shippingAddress = mapCheckoutFormToShippingAddress(form);
-  let state = await setGuestShippingAddress(cartId, shippingAddress, lineMetadata, signal);
+  let state: GuestCartState;
+
+  if (options.isAuthenticated && options.shippingAddressUid) {
+    state = await setCartShippingAddressByUid(
+      cartId,
+      options.shippingAddressUid,
+      lineMetadata,
+      signal,
+    );
+  } else {
+    const shippingAddress = mapCheckoutFormToShippingAddress(form);
+    state = await setGuestShippingAddress(cartId, shippingAddress, lineMetadata, signal);
+  }
 
   if (form.billingSameAsShipping) {
     state = await setGuestBillingAddress(cartId, null, true, lineMetadata, signal);
@@ -440,6 +550,21 @@ export async function applyGuestCheckoutAddresses(
   }
 
   return state;
+}
+
+export async function applyGuestCheckoutAddresses(
+  cartId: string,
+  form: CheckoutFormData,
+  lineMetadata: StoredCartLineMetadata,
+  signal?: AbortSignal,
+): Promise<GuestCartState> {
+  return applyCheckoutAddresses(
+    cartId,
+    form,
+    lineMetadata,
+    { isAuthenticated: false },
+    signal,
+  );
 }
 
 export async function setGuestShippingMethod(
@@ -490,13 +615,14 @@ export async function selectFirstAvailableGuestShippingMethod(
   );
 }
 
-export async function prepareGuestCheckoutForPayment(
+export async function prepareCheckoutForPayment(
   cartId: string,
   form: CheckoutFormData,
   lineMetadata: StoredCartLineMetadata,
+  options: CheckoutPrepareOptions,
   signal?: AbortSignal,
 ): Promise<GuestCartState> {
-  const addressedState = await applyGuestCheckoutAddresses(cartId, form, lineMetadata, signal);
+  const addressedState = await applyCheckoutAddresses(cartId, form, lineMetadata, options, signal);
   const shippingState = await selectFirstAvailableGuestShippingMethod(
     cartId,
     addressedState,
@@ -504,6 +630,21 @@ export async function prepareGuestCheckoutForPayment(
     signal,
   );
   return syncGuestCartLineOptions(cartId, lineMetadata, signal);
+}
+
+export async function prepareGuestCheckoutForPayment(
+  cartId: string,
+  form: CheckoutFormData,
+  lineMetadata: StoredCartLineMetadata,
+  signal?: AbortSignal,
+): Promise<GuestCartState> {
+  return prepareCheckoutForPayment(
+    cartId,
+    form,
+    lineMetadata,
+    { isAuthenticated: false },
+    signal,
+  );
 }
 
 export async function setGuestPaymentMethod(

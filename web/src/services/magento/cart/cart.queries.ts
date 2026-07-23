@@ -7,3 +7,11 @@ export const MAGENTO_GET_CART_QUERY = `
     }
   }
 ` as const;
+
+export const MAGENTO_GET_CUSTOMER_CART_QUERY = `
+  query MagentoCustomerCart {
+    customerCart {
+      ${MAGENTO_CART_FIELDS}
+    }
+  }
+` as const;

@@ -22,6 +22,8 @@ import type {
   MagentoShippingMethodOption,
 } from "@/services/magento/cart/magentoCart.types";
 import { formatCartPrice } from "@/features/cart/utils/formatCartLine";
+import type { CustomerAddress } from "@/services/customer/customer-account.types";
+import CheckoutSavedAddressPicker from "./CheckoutSavedAddressPicker";
 
 const formatShippingAmount = (amount: number) => (amount === 0 ? "Free" : formatCartPrice(amount));
 
@@ -43,6 +45,10 @@ type CheckoutFormStepProps = {
   phoneVerified: boolean;
   onVerifyPhone: () => void;
   validation: CheckoutFormValidationProps;
+  isAuthenticated?: boolean;
+  savedAddresses?: CustomerAddress[];
+  onSelectSavedAddress?: (address: CustomerAddress) => void;
+  onUseNewAddress?: () => void;
 };
 
 type AddressFieldConfig = {
@@ -192,12 +198,21 @@ export const CheckoutFormStep = ({
   phoneVerified,
   onVerifyPhone,
   validation,
+  isAuthenticated = false,
+  savedAddresses = [],
+  onSelectSavedAddress,
+  onUseNewAddress,
 }: CheckoutFormStepProps) => (
   <div className="flex flex-col gap-6">
     <CheckoutSectionCard>
       <h2 className="font-gill text-xl font-normal leading-110 text-darkblack lg:text-2xl">
         Personal Information
       </h2>
+      {isAuthenticated ? (
+        <p className="font-gill text-sm font-light leading-110 text-neutral500">
+          Signed in to your Sunny Diamonds account.
+        </p>
+      ) : null}
       <CheckoutField
         id="checkout-name"
         label="Your Name*"
@@ -207,21 +222,43 @@ export const CheckoutFormStep = ({
         invalid={validation.showError("name")}
         error={validation.showError("name") ? validation.errors.name : undefined}
       />
-      <CheckoutPhoneField
-        id="checkout-phone-email"
-        label="PhoneNo / Email ID"
-        value={form.phoneOrEmail}
-        onChange={(value) => onChange("phoneOrEmail", value)}
-        onBlur={() => validation.markTouched("phoneOrEmail")}
-        verified={phoneVerified}
-        onVerify={onVerifyPhone}
-        invalid={validation.showError("phoneOrEmail")}
-        error={validation.showError("phoneOrEmail") ? validation.errors.phoneOrEmail : undefined}
-      />
+      {isAuthenticated ? (
+        <CheckoutField
+          id="checkout-email"
+          label="Email"
+          type="email"
+          value={form.phoneOrEmail}
+          onChange={(value) => onChange("phoneOrEmail", value)}
+          onBlur={() => validation.markTouched("phoneOrEmail")}
+          invalid={validation.showError("phoneOrEmail")}
+          error={validation.showError("phoneOrEmail") ? validation.errors.phoneOrEmail : undefined}
+        />
+      ) : (
+        <CheckoutPhoneField
+          id="checkout-phone-email"
+          label="PhoneNo / Email ID"
+          value={form.phoneOrEmail}
+          onChange={(value) => onChange("phoneOrEmail", value)}
+          onBlur={() => validation.markTouched("phoneOrEmail")}
+          verified={phoneVerified}
+          onVerify={onVerifyPhone}
+          invalid={validation.showError("phoneOrEmail")}
+          error={validation.showError("phoneOrEmail") ? validation.errors.phoneOrEmail : undefined}
+        />
+      )}
     </CheckoutSectionCard>
 
     <CheckoutSectionCard gapClassName="lg:gap-8 gap-6">
       <CheckoutSubheading>Delivery Address</CheckoutSubheading>
+      {isAuthenticated && savedAddresses.length > 0 ? (
+        <CheckoutSavedAddressPicker
+          addresses={savedAddresses}
+          selectedUid={form.selectedShippingAddressUid}
+          usingNewAddress={form.addressEntryMode === "new"}
+          onSelect={(address) => onSelectSavedAddress?.(address)}
+          onUseNewAddress={() => onUseNewAddress?.()}
+        />
+      ) : null}
       <div className="space-y-6">
         <CheckoutSubheading className="lg:text-xl text-base">SHIPPING ADDRESS</CheckoutSubheading>
         <CheckoutAddressFields
@@ -231,6 +268,13 @@ export const CheckoutFormStep = ({
           onChange={onChange}
           validation={validation}
         />
+        {isAuthenticated && form.addressEntryMode === "new" ? (
+          <CheckoutCheckbox
+            checked={form.saveNewAddress}
+            onChange={(checked) => onChange("saveNewAddress", checked)}
+            label="Save this address to my account"
+          />
+        ) : null}
       </div>
 
       <div className="lg:space-y-6 space-y-4">
@@ -267,6 +311,7 @@ type CheckoutPaymentStepProps = {
   onEditDelivery: () => void;
   onEditPayment: () => void;
   validation: CheckoutPaymentValidationProps;
+  isAuthenticated?: boolean;
 };
 
 const RazorpaySecureNote = () => (
@@ -301,6 +346,7 @@ export const CheckoutPaymentStep = ({
   onEditDelivery,
   onEditPayment,
   validation,
+  isAuthenticated = false,
 }: CheckoutPaymentStepProps) => {
   const shippingLines = buildAddressLines({
     addressLine1: form.addressLine1,
@@ -332,7 +378,11 @@ export const CheckoutPaymentStep = ({
         <CheckoutSectionHeading onEdit={onEditPersonal}>Personal Information</CheckoutSectionHeading>
         <CheckoutSummaryText>
           You are checking out as {form.name || "Guest"}
-          {form.phoneOrEmail ? `, +91 ${form.phoneOrEmail}` : ""}
+          {form.phoneOrEmail
+            ? isAuthenticated && form.phoneOrEmail.includes("@")
+              ? `, ${form.phoneOrEmail}`
+              : `, +91 ${form.phoneOrEmail}`
+            : ""}
         </CheckoutSummaryText>
       </CheckoutSectionCard>
 
