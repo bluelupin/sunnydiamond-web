@@ -35,7 +35,7 @@ const AboutBrillianceSection = ({
         <div className="flex w-full max-w-[950px] flex-col items-center text-center">
           <div
             data-reveal-mask="heading"
-            className="w-full overflow-hidden pt-0 lg:mb-12 md:mb-9 mb-8"
+            className="w-full overflow-hidden pt-0 mb-8"
           >
             <Reveal as="h2" direction="up"
               id="about-crafting-rarity-title"

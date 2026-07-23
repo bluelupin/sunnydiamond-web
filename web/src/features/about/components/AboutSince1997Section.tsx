@@ -139,7 +139,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                         imageHeight={attending!.image.height}
                         sizes="463px"
                         figureClassName="w-[463px]"
-                        frameClassName="h-600"
+                        frameClassName="h-600 test"
                         captionClassName="text-base"
                         dataSince1997Last
                       />
@@ -184,7 +184,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                 imageHeight={founder.image.height}
                 sizes="549px"
                 figureClassName="w-full"
-                frameClassName="h-600 w-full"
+                frameClassName="md:h-600 h-[426px] w-full"
                 captionClassName="text-sm md:text-base"
               />
             </article>

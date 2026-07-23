@@ -117,8 +117,8 @@ function CraftTextTile({
         className={cn(
           "text-center font-larken font-light leading-110 text-darkblack",
           compact
-            ? "max-w-[79.73%] text-sm text-base md:text-base lg:text-xl xl:text-2xl"
-            : "text-sm text-base md:text-base lg:text-xl xl:text-2xl",
+            ? "max-w-[79.73%] text-sm md:text-base lg:text-xl xl:text-2xl"
+            : "text-sm md:text-base lg:text-xl xl:text-2xl",
         )}
       >
         {title}

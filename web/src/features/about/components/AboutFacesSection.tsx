@@ -21,7 +21,7 @@ const AboutFacesSection = ({ title, description, members }: AboutFacesSectionPro
       aria-labelledby="about-faces-title"
       className="bg-white lg:pb-100 md:pb-20 pb-16"
     >
-      <div className="container flex flex-col items-center text-center lg:mb-10 mb-8">
+      <div className="max-w-1920 2xl:px-[60px] lg:px-10 px-4 flex flex-col items-center text-center lg:mb-10 mb-8">
         <div className="flex max-w-full flex-col items-center lg:gap-4 gap-3">
           <Reveal as="h2" direction="up"
             id="about-faces-title"
