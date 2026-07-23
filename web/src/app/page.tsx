@@ -3,10 +3,12 @@ import { constructMetadata } from "@/shared/lib/seo/metadata";
 import JsonLd from "@/shared/lib/seo/JsonLd";
 import HomePageView from "@/features/cms/components/HomePage";
 import HomepageCmsSeeder from "@/shared/lib/providers/HomepageCmsSeeder";
+import MagentoTrendingSeeder from "@/shared/lib/providers/MagentoTrendingSeeder";
 import {
   getCachedHomepageShell,
   prefetchHomepageCms,
 } from "@/lib/homepage/prefetchHomepageCms";
+import { prefetchMagentoTrendingProducts } from "@/lib/magento/prefetchMagento";
 import { buildHomepageJsonLd, resolveHomepageSeoMetadata } from "@/shared/lib/seo/homepageSeo";
 import { siteConfig } from "@/shared/lib/siteConfig";
 
@@ -37,7 +39,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Page() {
-  const prefetchedCms = await prefetchHomepageCms();
+  const [prefetchedCms, trendingProducts] = await Promise.all([
+    prefetchHomepageCms(),
+    prefetchMagentoTrendingProducts(),
+  ]);
   const { title, description, canonicalUrl, imageUrl } = resolveHomepageSeoMetadata(
     prefetchedCms.shell ?? {},
   );
@@ -49,6 +54,7 @@ export default async function Page() {
         editorial={prefetchedCms.editorial}
         shopping={prefetchedCms.shopping}
       />
+      <MagentoTrendingSeeder trendingProducts={trendingProducts} />
       <JsonLd data={buildHomepageJsonLd({ title, description, url: canonicalUrl, image: imageUrl })} />
       <HomePageView />
     </>

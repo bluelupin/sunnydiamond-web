@@ -8,6 +8,8 @@ import Reveal from "@/shared/Animation/Reveal";
 import FeaturedProductsCarousel from "@/features/cms/components/home/FeaturedProductsCarousel";
 import { mapJewelleryListingToFeaturedCarouselItems } from "@/services/magento/products/trendingProducts.service";
 
+const DEFAULT_FEATURED_PRODUCTS_CTA_LABEL = "Shop Now";
+
 /** Recommended transparent product PNG/WebP for CMS uploads. */
 export const FEATURED_PRODUCTS_IMAGE_SPEC = {
   /** Primary center slide — Figma display ~774px; upload 2× for retina. */
@@ -53,6 +55,12 @@ function FeaturedProductsHeader({
   );
 }
 
+const FeaturedCarouselSkeleton = () => (
+  <div className="relative h-[275px] w-full sm:h-[303px] md:h-[411px]">
+    <div className="absolute left-1/2 top-0 h-[155px] w-[200px] -translate-x-1/2 animate-pulse rounded bg-gray200 sm:h-[170px] sm:w-[260px] md:h-[259px] md:w-[600px]" aria-hidden />
+  </div>
+);
+
 const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
   const { data: shoppingData, isLoading: isShoppingLoading } = useHomepageShoppingBlocks();
   const { data: trendingProducts, isLoading: isTrendingLoading } = useMagentoTrendingProducts();
@@ -61,20 +69,21 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
 
   const sectionTitle = featuredProductsData?.sectionTitle?.trim() ?? "";
   const description = featuredProductsData?.description?.trim() ?? "";
-  const ctaLabel = featuredProductsData?.cta?.label?.trim() ?? "";
+  const ctaLabel = featuredProductsData?.cta?.label?.trim() || DEFAULT_FEATURED_PRODUCTS_CTA_LABEL;
 
   const items = useMemo(
     () => mapJewelleryListingToFeaturedCarouselItems(trendingProducts ?? []),
     [trendingProducts],
   );
 
-  const isLoading = isShoppingLoading || isTrendingLoading;
+  const isCarouselLoading = isTrendingLoading && items.length === 0;
+  const showSectionShell = !isShoppingLoading || Boolean(sectionTitle || description);
 
   if (!isSectionActive(featuredProductsData?.isActive)) {
     return null;
   }
 
-  if (isLoading) {
+  if (!showSectionShell && isCarouselLoading) {
     return (
       <section
         id={id}
@@ -87,15 +96,13 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
             <div className="h-[35px] w-[283px] animate-pulse rounded bg-gray200 md:h-[53px] md:w-[424px]" aria-hidden />
             <div className="h-[36px] w-[306px] animate-pulse rounded bg-gray200 md:h-[22px] md:w-[517px]" aria-hidden />
           </div>
-          <div className="relative h-[275px] w-full sm:h-[303px] md:h-[411px]">
-            <div className="absolute left-1/2 top-0 h-[155px] w-[200px] -translate-x-1/2 animate-pulse rounded bg-gray200 sm:h-[170px] sm:w-[260px] md:h-[259px] md:w-[600px]" aria-hidden />
-          </div>
+          <FeaturedCarouselSkeleton />
         </div>
       </section>
     );
   }
 
-  if (items.length === 0) {
+  if (!isCarouselLoading && items.length === 0) {
     return null;
   }
 
@@ -104,16 +111,21 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
       id={id}
       className="overflow-visible px-0 py-16 md:py-104"
       aria-label="Featured diamond carousel"
+      aria-busy={isCarouselLoading}
     >
       <div className="flex w-full max-w-full flex-col items-center gap-10 overflow-visible">
         {sectionTitle || description ? (
           <FeaturedProductsHeader title={sectionTitle} description={description} />
         ) : null}
-        <FeaturedProductsCarousel
-          items={items}
-          ctaLabel={ctaLabel}
-          sectionLabel={sectionTitle || "Featured products"}
-        />
+        {isCarouselLoading ? (
+          <FeaturedCarouselSkeleton />
+        ) : (
+          <FeaturedProductsCarousel
+            items={items}
+            ctaLabel={ctaLabel}
+            sectionLabel={sectionTitle || "Featured products"}
+          />
+        )}
       </div>
     </section>
   );

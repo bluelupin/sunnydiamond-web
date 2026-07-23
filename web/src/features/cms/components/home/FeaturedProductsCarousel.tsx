@@ -257,9 +257,9 @@ export default function FeaturedProductsCarousel({
           </div>
           <Link
             href={activeItem.href}
-            className="btn-border-slide inline-flex h-14 min-w-[122px] items-center justify-center border-[0.8px] border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
+            className="btn-border-slide inline-flex h-14 min-w-[122px] items-center justify-center border-[0.8px] border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-none text-darkblack"
           >
-            {ctaLabel}
+            <span className="relative z-10">{ctaLabel}</span>
           </Link>
         </div>
       </div>

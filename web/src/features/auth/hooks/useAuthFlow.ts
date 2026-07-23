@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type RefObject } from "react";
-import { sanitizePhoneInput } from "@/shared/utils/formValidation";
 import { createCustomerAccount, requestLoginOtp, verifyLoginOtp } from "../services/auth.service";
 import { runPostLoginSync } from "../services/postLoginSync";
 import { signInWithApple, signInWithGoogle } from "../services/socialSignIn";
@@ -154,8 +153,7 @@ export function useAuthFlow({
   }, [onAbort]);
 
   const handleIdentifierChange = useCallback((value: string) => {
-    const nextValue = value.includes("@") ? value : sanitizePhoneInput(value, "+91");
-    setIdentifier(nextValue);
+    setIdentifier(value);
     setIdentifierError(undefined);
   }, []);
 
@@ -254,7 +252,7 @@ export function useAuthFlow({
     if (!isOtpComplete(otp) || isSubmitting) return;
     if (!isLoginIdentifierReadyForOtp(identifier)) {
       setStep("sign-in");
-      setIdentifierError("Enter your mobile number to receive an OTP");
+      setIdentifierError("Phone number or email is required");
       return;
     }
 

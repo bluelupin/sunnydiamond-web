@@ -87,11 +87,11 @@ const LoginModalContent = ({
           <input
             id="login-identifier"
             type="text"
-            inputMode="tel"
+            inputMode="text"
             value={identifier}
             onChange={(event) => onIdentifierChange(event.target.value)}
             placeholder="Enter"
-            autoComplete="username tel"
+            autoComplete="username"
             required
             aria-invalid={identifierError ? true : undefined}
             aria-describedby={identifierError ? "login-identifier-error" : undefined}
