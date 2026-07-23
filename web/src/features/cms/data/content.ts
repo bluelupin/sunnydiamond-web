@@ -191,4 +191,8 @@ export const seoContent = {
     title: "Wishlist",
     description: "View and manage your saved diamond jewellery pieces.",
   },
+  profile: {
+    title: "My Profile",
+    description: "Manage your Sunny Diamonds account, orders, addresses, and appointments.",
+  },
 } as const;

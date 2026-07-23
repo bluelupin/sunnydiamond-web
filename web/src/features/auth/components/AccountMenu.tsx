@@ -36,10 +36,16 @@ const AccountMenu = ({ className, onNavigate, loginHref = "/login" }: AccountMen
       <DropdownMenuTrigger aria-label={`Account, ${customer.firstname}`} className={className}>
         <UserIcon className="size-6" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-44 font-body">
+      <DropdownMenuContent align="end" className="min-w-48 font-body">
         <DropdownMenuLabel className="font-normal">
           Hi, {customer.firstname}
         </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/profile" onClick={onNavigate}>
+            My Profile
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onSelect={() => {

@@ -77,3 +77,100 @@ export const MAGENTO_ADD_PRODUCTS_TO_WISHLIST_MUTATION = `
     }
   }
 ` as const;
+
+export const MAGENTO_CUSTOMER_ORDERS_QUERY = `
+  query MagentoCustomerOrders($pageSize: Int!, $currentPage: Int!) {
+    customer {
+      orders(pageSize: $pageSize, currentPage: $currentPage) {
+        total_count
+        page_info {
+          current_page
+          page_size
+          total_pages
+        }
+        items {
+          id
+          number
+          order_date
+          status
+          items {
+            product_name
+            quantity_ordered
+            product_url_key
+            product_sku
+          }
+          total {
+            grand_total {
+              value
+              currency
+            }
+          }
+        }
+      }
+    }
+  }
+` as const;
+
+export const MAGENTO_CUSTOMER_ADDRESSES_QUERY = `
+  query MagentoCustomerAddresses {
+    customer {
+      addresses {
+        uid
+        firstname
+        lastname
+        street
+        city
+        region {
+          region
+          region_code
+          region_id
+        }
+        postcode
+        country_code
+        telephone
+        default_shipping
+        default_billing
+      }
+    }
+  }
+` as const;
+
+const CUSTOMER_ADDRESS_FIELDS = `
+  uid
+  firstname
+  lastname
+  street
+  city
+  region {
+    region
+    region_code
+    region_id
+  }
+  postcode
+  country_code
+  telephone
+  default_shipping
+  default_billing
+`;
+
+export const MAGENTO_CREATE_CUSTOMER_ADDRESS_MUTATION = `
+  mutation MagentoCreateCustomerAddress($input: CustomerAddressInput!) {
+    createCustomerAddress(input: $input) {
+      ${CUSTOMER_ADDRESS_FIELDS}
+    }
+  }
+` as const;
+
+export const MAGENTO_UPDATE_CUSTOMER_ADDRESS_MUTATION = `
+  mutation MagentoUpdateCustomerAddressV2($uid: ID!, $input: CustomerAddressInput!) {
+    updateCustomerAddressV2(uid: $uid, input: $input) {
+      ${CUSTOMER_ADDRESS_FIELDS}
+    }
+  }
+` as const;
+
+export const MAGENTO_DELETE_CUSTOMER_ADDRESS_MUTATION = `
+  mutation MagentoDeleteCustomerAddressV2($uid: ID!) {
+    deleteCustomerAddressV2(uid: $uid)
+  }
+` as const;

@@ -40,3 +40,13 @@ export function getIndiaMagentoRegionId(state: string): number | null {
 
   return INDIA_MAGENTO_REGION_IDS[normalized as IndianState] ?? null;
 }
+
+export function getIndianStateFromMagentoRegionId(regionId: number): IndianState | null {
+  for (const [state, id] of Object.entries(INDIA_MAGENTO_REGION_IDS)) {
+    if (id === regionId) {
+      return state as IndianState;
+    }
+  }
+
+  return null;
+}
