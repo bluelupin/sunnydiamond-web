@@ -279,10 +279,9 @@ const LearnCarouselPanel = ({
         </div>
 
         <div
-          className="relative flex w-full flex-col items-center max-md:justify-between md:justify-start"
+          className="relative flex w-full flex-col items-center max-md:justify-between md:justify-start md:gap-10 gap-6"
           style={{
             maxWidth: desktopCarousel.centerColumnWidth,
-            gap: desktopCarousel.centerButtonGap,
             minHeight: mobileCarousel.height,
           }}
         >
@@ -401,7 +400,7 @@ const EducationLearnMoreSection = ({ learnMore }: EducationLearnMoreSectionProps
       )}
     >
       <div
-        className="mx-auto flex max-w-[1360px] flex-col items-center max-md:gap-6 md:gap-16"
+        className="mx-auto flex max-w-[1360px] flex-col items-center max-md:gap-6 md:gap-10"
       >
         <div className="flex w-full flex-col items-center">
           <ScrollReveal delayMs={0}>
@@ -416,13 +415,11 @@ const EducationLearnMoreSection = ({ learnMore }: EducationLearnMoreSectionProps
           <ScrollReveal delayMs={100} className="w-full lg:max-w-[1200px]">
             <div className="w-full overflow-x-auto border-y-[0.4px] border-black/30 md:overflow-visible horizontalScrollbar">
               <div
-                className="flex min-w-max items-center md:w-full md:min-w-0"
+                className="flex min-w-max items-center md:w-full md:min-w-0 py-5"
                 role="tablist"
                 aria-label="Learn more topics"
                 style={{
-                  height: tabsSpec.mobile.height,
                   gap: tabsSpec.mobile.gap,
-                  paddingBlock: tabsSpec.desktop.paddingY,
                 }}
               >
                 {tabs.map((tab, index) => {
@@ -443,11 +440,11 @@ const EducationLearnMoreSection = ({ learnMore }: EducationLearnMoreSectionProps
                         tabIndex={isActive ? 0 : -1}
                         onClick={() => handleTabChange(index)}
                         className={cn(
-                          "!w-fit relative shrink-0 cursor-pointer whitespace-nowrap font-gill text-base font-normal uppercase leading-110 transition-colors md:flex md:items-center md:justify-center md:py-0 md:text-center lg:text-xl",
+                          "pb-2 !w-fit relative shrink-0 cursor-pointer whitespace-nowrap font-gill text-sm font-normal uppercase leading-110 transition-colors md:flex md:items-center md:justify-center md:text-center",
                           "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-linkGold after:transition-all after:duration-300 hover:text-linkGold hover:after:w-full",
                           isActive
                             ? "border-b-[1.5px] border-linkGold pb-2 text-linkGold"
-                            : "pb-1 text-darkblack",
+                            : "pb-2 text-darkblack",
                         )}
                       >
                         {tab.label}
@@ -468,8 +465,8 @@ const EducationLearnMoreSection = ({ learnMore }: EducationLearnMoreSectionProps
           className={cn(
             "flex w-full flex-col items-center",
             isCareGrid && "gap-8 md:gap-16",
-            isAnatomyDetail && "gap-8 md:gap-16",
-            isCarousel && "max-md:gap-[49px] md:gap-16",
+            isAnatomyDetail && "gap-8 md:gap-10",
+            isCarousel && "max-md:gap-[49px] md:gap-10",
           )}
         >
           <LearnTabDescription tab={activeTab} />

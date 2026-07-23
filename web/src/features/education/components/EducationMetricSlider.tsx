@@ -73,6 +73,7 @@ const SliderLabel = ({
   total,
   useMobileLayout,
   mobileLabelFontSize,
+  centeredLabelLayout,
 }: {
   option: EducationSliderOption;
   isActive: boolean;
@@ -83,9 +84,14 @@ const SliderLabel = ({
   total: number;
   useMobileLayout: boolean;
   mobileLabelFontSize?: number;
+  centeredLabelLayout?: boolean;
 }) => {
   const colorClass = isActive ? "text-linkGold" : "text-darkblack";
   const font = labelFontProps(useMobileLayout, mobileLabelFontSize);
+  const labelAlignClass =
+    centeredLabelLayout && useMobileLayout
+      ? "-translate-x-1/2 text-center"
+      : endpointLabelAlignClass(index, total);
 
   if (useMobileLayout) {
     if (option.mobileLabelLines) {
@@ -94,7 +100,7 @@ const SliderLabel = ({
           className={cn(
             "pointer-events-none absolute font-gill font-normal leading-110 transition-colors",
             font.className,
-            endpointLabelAlignClass(index, total),
+            labelAlignClass,
             colorClass,
           )}
           style={{
@@ -117,7 +123,7 @@ const SliderLabel = ({
         className={cn(
           "pointer-events-none absolute font-gill font-normal leading-110 transition-colors",
           font.className,
-          endpointLabelAlignClass(index, total),
+          labelAlignClass,
           colorClass,
         )}
         style={{
@@ -195,9 +201,10 @@ const EducationMetricSlider = ({
   const labelFont = labelFontProps(useMobileLayout, spec.mobileLabelFontSize);
   const activeDotCenter = dotCenters[activeIndex] ?? dotCenters[0];
   const hasSublabels = Boolean(spec.sublabelTop);
-  const showActiveLabelOnly =
-    spec.labelDisplay === "active" || (useMobileLayout && options.length >= 7);
+  const showActiveLabelOnly = spec.labelDisplay === "active";
   const showEndpointLabels = spec.labelDisplay === "endpoints";
+  const showAllLabels =
+    spec.labelDisplay === "all" || spec.labelDisplay === undefined;
   const activeOption = options[activeIndex];
   const showDots = spec.showDots !== false;
   const endpointDotsOnly = spec.endpointDotsOnly === true;
@@ -464,6 +471,7 @@ const EducationMetricSlider = ({
               total={options.length}
               useMobileLayout={useMobileLayout}
               mobileLabelFontSize={spec.mobileLabelFontSize}
+              centeredLabelLayout={showAllLabels}
             />
           );
         })
