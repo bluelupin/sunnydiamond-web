@@ -386,66 +386,6 @@ export const validateOptionalPhone = (value: string, countryCode = "+91"): Field
   return validatePhone(value, countryCode);
 };
 
-export const validateCardName = (value: string): FieldValidation => validateRequiredName(value);
-
-export const validateCardNumber = (value: string): FieldValidation => {
-  const digits = value.replace(/\D/g, "");
-
-  if (!digits) {
-    return { valid: false, error: "Card number is required" };
-  }
-
-  if (digits.length < 13 || digits.length > 19) {
-    return { valid: false, error: "Enter a valid card number" };
-  }
-
-  return { valid: true };
-};
-
-export const validateCardExpiry = (value: string): FieldValidation => {
-  const trimmed = value.trim();
-
-  if (!trimmed) {
-    return { valid: false, error: "Expiry date is required" };
-  }
-
-  const match = trimmed.match(/^(\d{2})\s*\/\s*(\d{2})$/);
-
-  if (!match) {
-    return { valid: false, error: "Use MM/YY format" };
-  }
-
-  const month = Number.parseInt(match[1], 10);
-  const year = Number.parseInt(match[2], 10);
-
-  if (month < 1 || month > 12) {
-    return { valid: false, error: "Enter a valid month" };
-  }
-
-  const now = new Date();
-  const expiryEnd = new Date(2000 + year, month, 0, 23, 59, 59, 999);
-
-  if (expiryEnd < now) {
-    return { valid: false, error: "Card has expired" };
-  }
-
-  return { valid: true };
-};
-
-export const validateCardCvv = (value: string): FieldValidation => {
-  const digits = value.replace(/\D/g, "");
-
-  if (!digits) {
-    return { valid: false, error: "Security code is required" };
-  }
-
-  if (!/^\d{3,4}$/.test(digits)) {
-    return { valid: false, error: "Enter a valid security code" };
-  }
-
-  return { valid: true };
-};
-
 export const validateCodOrderTotal = (
   orderTotal: number,
   limit = 40_000,
@@ -478,7 +418,7 @@ export type CheckoutFormField =
   | "billingState"
   | "billingPhone";
 
-export type CheckoutPaymentField = "cardName" | "cardNumber" | "expiry" | "cvv" | "cod";
+export type CheckoutPaymentField = "cod";
 
 export type CheckoutFormValues = {
   name: string;
@@ -502,10 +442,6 @@ export type CheckoutFormValues = {
 
 export type CheckoutPaymentValues = {
   method: "card" | "upi" | "netbanking" | "cod";
-  cardName: string;
-  cardNumber: string;
-  expiry: string;
-  cvv: string;
 };
 
 const getAddressBlockErrors = (
@@ -558,15 +494,6 @@ export const getCheckoutPaymentErrors = (
   values: CheckoutPaymentValues,
   orderTotal: number,
 ): Partial<Record<CheckoutPaymentField, string | undefined>> => {
-  if (values.method === "card") {
-    return {
-      cardName: validateCardName(values.cardName).error,
-      cardNumber: validateCardNumber(values.cardNumber).error,
-      expiry: validateCardExpiry(values.expiry).error,
-      cvv: validateCardCvv(values.cvv).error,
-    };
-  }
-
   if (values.method === "cod") {
     return {
       cod: validateCodOrderTotal(orderTotal).error,
@@ -581,19 +508,3 @@ export const isCheckoutPaymentValid = (
   orderTotal: number,
 ): boolean =>
   Object.values(getCheckoutPaymentErrors(values, orderTotal)).every((error) => !error);
-
-export const sanitizeCardNumberInput = (value: string): string =>
-  value.replace(/\D/g, "").slice(0, 19);
-
-export const sanitizeCardCvvInput = (value: string): string =>
-  value.replace(/\D/g, "").slice(0, 4);
-
-export const sanitizeCardExpiryInput = (value: string): string => {
-  const digits = value.replace(/\D/g, "").slice(0, 4);
-
-  if (digits.length <= 2) {
-    return digits;
-  }
-
-  return `${digits.slice(0, 2)}/${digits.slice(2)}`;
-};

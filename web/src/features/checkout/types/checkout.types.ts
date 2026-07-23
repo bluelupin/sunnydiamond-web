@@ -18,12 +18,12 @@ export type CheckoutFormData = {
   billingPhone: string;
 };
 
+/**
+ * Card/UPI/netbanking details are collected inside Razorpay's payment modal,
+ * never in our forms — the checkout only tracks the chosen method.
+ */
 export type CheckoutPaymentData = {
   method: "card" | "upi" | "netbanking" | "cod";
-  cardName: string;
-  cardNumber: string;
-  expiry: string;
-  cvv: string;
 };
 
 export type CheckoutStep = "form" | "payment" | "success";
@@ -50,10 +50,6 @@ export const createEmptyCheckoutForm = (): CheckoutFormData => ({
 
 export const createEmptyPaymentForm = (): CheckoutPaymentData => ({
   method: "card",
-  cardName: "",
-  cardNumber: "",
-  expiry: "",
-  cvv: "",
 });
 
 export const getExpectedDeliveryDate = () => {

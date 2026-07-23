@@ -53,6 +53,7 @@ import type {
   MagentoShippingAddressInput,
   MagentoShippingMethodOption,
   MagentoBillingAddressInput,
+  GuestCheckoutResult,
   PlacedGuestOrder,
   MagentoUpdateCartItemsResponse,
   MappedMagentoCart,
@@ -605,7 +606,7 @@ export async function completeGuestCheckout(
   paymentMethod: CheckoutPaymentData["method"],
   lineMetadata: StoredCartLineMetadata,
   signal?: AbortSignal,
-): Promise<PlacedGuestOrder> {
+): Promise<GuestCheckoutResult> {
   const cartState = await fetchGuestCart(cartId, lineMetadata, signal);
   const paymentCode = resolveMagentoPaymentCode(
     paymentMethod,
@@ -616,7 +617,7 @@ export async function completeGuestCheckout(
     throw new Error("No payment methods are available for this cart");
   }
 
-  if (!isOfflineMagentoPaymentCode(paymentCode)) {
+  if (paymentCode !== "razorpay" && !isOfflineMagentoPaymentCode(paymentCode)) {
     await createGuestPaymentOrder(
       cartId,
       paymentCode,
@@ -630,7 +631,13 @@ export async function completeGuestCheckout(
 
   await setGuestPaymentMethod(cartId, paymentCode, lineMetadata, signal);
   await syncGuestCartLineOptions(cartId, lineMetadata, signal);
-  return placeGuestOrder(cartId, signal);
+  const order = await placeGuestOrder(cartId, signal);
+
+  return {
+    ...order,
+    paymentCode,
+    awaitingOnlinePayment: paymentCode === "razorpay",
+  };
 }
 
 export async function estimateGuestCartShippingMethods(

@@ -18,13 +18,7 @@ import {
   useCheckoutFormValidation,
   useCheckoutPaymentValidation,
 } from "@/features/checkout/hooks/use-checkout-validation";
-import {
-  sanitizeCardCvvInput,
-  sanitizeCardExpiryInput,
-  sanitizeCardNumberInput,
-  sanitizePhoneInput,
-  sanitizePincodeInput,
-} from "@/shared/utils/formValidation";
+import { sanitizePhoneInput, sanitizePincodeInput } from "@/shared/utils/formValidation";
 import {
   createEmptyCheckoutForm,
   createEmptyPaymentForm,
@@ -39,6 +33,11 @@ import {
 } from "@/services/magento/cart/cart.service";
 import { readCartLineMetadata } from "@/services/magento/cart/cartSession";
 import { MagentoGraphqlError } from "@/services/magento/magento.errors";
+import {
+  collectRazorpayPayment,
+  resetRazorpayCart,
+  verifyRazorpayPayment,
+} from "../services/razorpayCheckout";
 
 const CheckoutPage = () => {
   const {
@@ -84,22 +83,10 @@ const CheckoutPage = () => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const updatePayment = (field: keyof CheckoutPaymentData, value: string) => {
-    if (field === "cardNumber") {
-      setPayment((prev) => ({ ...prev, cardNumber: sanitizeCardNumberInput(value) }));
-      return;
-    }
-
-    if (field === "cvv") {
-      setPayment((prev) => ({ ...prev, cvv: sanitizeCardCvvInput(value) }));
-      return;
-    }
-
-    if (field === "expiry") {
-      setPayment((prev) => ({ ...prev, expiry: sanitizeCardExpiryInput(value) }));
-      return;
-    }
-
+  const updatePayment = (
+    field: keyof CheckoutPaymentData,
+    value: CheckoutPaymentData["method"],
+  ) => {
     setPayment((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -247,6 +234,41 @@ const CheckoutPage = () => {
             payment.method,
             readCartLineMetadata(),
           );
+
+          if (order.awaitingOnlinePayment) {
+            const isEmailContact = form.phoneOrEmail.includes("@");
+            const outcome = await collectRazorpayPayment({
+              orderNumber: order.orderNumber,
+              method: payment.method === "cod" ? undefined : payment.method,
+              prefill: {
+                name: form.name || undefined,
+                email: isEmailContact ? form.phoneOrEmail : undefined,
+                contact:
+                  form.shippingPhone || (!isEmailContact ? form.phoneOrEmail : undefined),
+              },
+            });
+
+            if (outcome.status === "dismissed") {
+              await resetRazorpayCart(order.orderNumber);
+              await refreshCart();
+              toast({
+                title: "Payment cancelled",
+                description: "Your bag has been kept as it was. You can try again anytime.",
+              });
+              return;
+            }
+
+            try {
+              await verifyRazorpayPayment({
+                orderNumber: order.orderNumber,
+                paymentId: outcome.paymentId,
+                signature: outcome.signature,
+              });
+            } catch {
+              // Payment is captured on Razorpay's side; Magento's webhook and
+              // cron reconcile the order even if this confirmation call fails.
+            }
+          }
 
           void fetch("/api/magento/orders/line-metadata", {
             method: "POST",

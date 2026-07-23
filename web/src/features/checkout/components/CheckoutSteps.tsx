@@ -262,12 +262,18 @@ type CheckoutPaymentStepProps = {
   selectedShippingMethod: MagentoSelectedShippingMethod | null;
   onShippingMethodChange: (carrierCode: string, methodCode: string) => void;
   shippingSelectionDisabled?: boolean;
-  onPaymentChange: (field: keyof CheckoutPaymentData, value: string) => void;
+  onPaymentChange: (field: keyof CheckoutPaymentData, value: CheckoutPaymentData["method"]) => void;
   onEditPersonal: () => void;
   onEditDelivery: () => void;
   onEditPayment: () => void;
   validation: CheckoutPaymentValidationProps;
 };
+
+const RazorpaySecureNote = () => (
+  <CheckoutSummaryText>
+    You will complete this payment in Razorpay&apos;s secure window after reviewing your order.
+  </CheckoutSummaryText>
+);
 
 const PaymentCardLogos = () => (
   <div className="flex h-6 items-center gap-2">
@@ -398,49 +404,7 @@ export const CheckoutPaymentStep = ({
             {payment.method === "card" ? <PaymentCardLogos /> : null}
           </div>
 
-          {payment.method === "card" ? (
-            <>
-              <CheckoutField
-                id="card-name"
-                label="Name on Card"
-                value={payment.cardName}
-                onChange={(value) => onPaymentChange("cardName", value)}
-                onBlur={() => validation.markTouched("cardName")}
-                invalid={validation.showError("cardName")}
-                error={validation.showError("cardName") ? validation.errors.cardName : undefined}
-              />
-              <CheckoutField
-                id="card-number"
-                label="Credit Card No"
-                value={payment.cardNumber}
-                onChange={(value) => onPaymentChange("cardNumber", value)}
-                onBlur={() => validation.markTouched("cardNumber")}
-                invalid={validation.showError("cardNumber")}
-                error={validation.showError("cardNumber") ? validation.errors.cardNumber : undefined}
-              />
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <CheckoutField
-                  id="card-expiry"
-                  label="Expiry Date"
-                  value={payment.expiry}
-                  onChange={(value) => onPaymentChange("expiry", value)}
-                  onBlur={() => validation.markTouched("expiry")}
-                  placeholder="MM/YY"
-                  invalid={validation.showError("expiry")}
-                  error={validation.showError("expiry") ? validation.errors.expiry : undefined}
-                />
-                <CheckoutField
-                  id="card-cvv"
-                  label="Security Code"
-                  value={payment.cvv}
-                  onChange={(value) => onPaymentChange("cvv", value)}
-                  onBlur={() => validation.markTouched("cvv")}
-                  invalid={validation.showError("cvv")}
-                  error={validation.showError("cvv") ? validation.errors.cvv : undefined}
-                />
-              </div>
-            </>
-          ) : null}
+          {payment.method === "card" ? <RazorpaySecureNote /> : null}
 
           <CheckoutRadioRow
             checked={payment.method === "upi"}
@@ -448,11 +412,15 @@ export const CheckoutPaymentStep = ({
             label="UPI"
           />
 
+          {payment.method === "upi" ? <RazorpaySecureNote /> : null}
+
           <CheckoutRadioRow
             checked={payment.method === "netbanking"}
             onChange={() => onPaymentChange("method", "netbanking")}
             label="Net Banking"
           />
+
+          {payment.method === "netbanking" ? <RazorpaySecureNote /> : null}
 
           <div className="flex flex-col gap-2">
             <CheckoutRadioRow

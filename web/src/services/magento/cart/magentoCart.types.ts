@@ -192,6 +192,12 @@ export type PlacedGuestOrder = {
   orderId: string;
 };
 
+export type GuestCheckoutResult = PlacedGuestOrder & {
+  paymentCode: string;
+  /** True when the order is placed but still needs an online (Razorpay) payment. */
+  awaitingOnlinePayment: boolean;
+};
+
 export type MagentoPaymentOrder = {
   id: string;
   mpOrderId: string | null;
