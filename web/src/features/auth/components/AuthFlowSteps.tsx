@@ -1,6 +1,7 @@
 "use client";
 
 import LoginCreateAccountContent from "./LoginCreateAccountContent";
+import LoginEmailCreateAccountContent from "./LoginEmailCreateAccountContent";
 import LoginModalContent from "./LoginModalContent";
 import LoginOtpContent from "./LoginOtpContent";
 import LoginPasswordContent from "./LoginPasswordContent";
@@ -15,6 +16,7 @@ const AuthFlowSteps = ({
   otp,
   createAccount,
   password,
+  emailCreateAccount,
 }: AuthFlowStepsProps) => {
   if (step === "sign-in") {
     return <LoginModalContent {...signIn} titleClassName={titleClassName} />;
@@ -26,6 +28,12 @@ const AuthFlowSteps = ({
 
   if (step === "password") {
     return <LoginPasswordContent {...password} titleClassName={titleClassName} />;
+  }
+
+  if (step === "email-create-account") {
+    return (
+      <LoginEmailCreateAccountContent {...emailCreateAccount} titleClassName={titleClassName} />
+    );
   }
 
   return <LoginCreateAccountContent {...createAccount} titleClassName={titleClassName} />;

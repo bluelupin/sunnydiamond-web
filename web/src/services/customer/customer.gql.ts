@@ -10,7 +10,10 @@ export const MAGENTO_CREATE_CUSTOMER_MUTATION = `
   mutation MagentoCreateCustomer($input: CustomerCreateInput!) {
     createCustomerV2(input: $input) {
       customer {
+        id
         email
+        firstname
+        lastname
       }
     }
   }

@@ -12,6 +12,7 @@ type RegisterBody = {
   lastname?: string;
   email?: string;
   password?: string;
+  isSubscribed?: boolean;
 };
 
 export async function POST(request: NextRequest) {
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
 
   const firstname = body.firstname?.trim();
   const lastname = body.lastname?.trim();
-  const email = body.email?.trim();
+  const email = body.email?.trim().toLowerCase();
   const password = body.password;
 
   if (!firstname || !lastname || !email || !password) {
@@ -33,13 +34,37 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    await magentoGraphqlFetch({
+    const data = await magentoGraphqlFetch<{
+      createCustomerV2: {
+        customer: {
+          id: string;
+          email: string;
+          firstname: string;
+          lastname: string;
+        } | null;
+      };
+    }>({
       query: MAGENTO_CREATE_CUSTOMER_MUTATION,
-      variables: { input: { firstname, lastname, email, password } },
+      variables: {
+        input: {
+          firstname,
+          lastname,
+          email,
+          password,
+          is_subscribed: Boolean(body.isSubscribed),
+        },
+      },
       cache: "no-store",
     });
+
+    const customer = data.createCustomerV2?.customer;
+    if (!customer?.email) {
+      return NextResponse.json(
+        { error: "Magento did not create the customer account" },
+        { status: 502 },
+      );
+    }
   } catch (error) {
-    // Magento's validation messages (weak password, duplicate email) are user-appropriate.
     const message =
       error instanceof MagentoGraphqlError ? error.message : "Registration failed";
     const isDuplicate = /same email address/i.test(message);
@@ -58,11 +83,16 @@ export async function POST(request: NextRequest) {
     const token = data.generateCustomerToken?.token;
     if (token) {
       await setCustomerTokenCookie(token);
-      return NextResponse.json({ ok: true, loggedIn: true });
+      return NextResponse.json({ ok: true, loggedIn: true, email });
     }
   } catch {
     // Account created but auto-login failed (e.g. email confirmation required).
   }
 
-  return NextResponse.json({ ok: true, loggedIn: false });
+  return NextResponse.json({
+    ok: true,
+    loggedIn: false,
+    email,
+    error: "Account created but sign-in failed. Try logging in with your email and password.",
+  });
 }

@@ -8,6 +8,10 @@ export type VerifyOtpResult =
 
 export type CreateAccountResult = { success: true } | { success: false; error: string };
 
+export type EmailRegisterResult =
+  | { success: true; loggedIn: boolean }
+  | { success: false; error: string };
+
 async function postJson(
   url: string,
   body: Record<string, unknown>,
@@ -81,7 +85,7 @@ export async function createCustomerAccount(input: {
   marketingOptIn: boolean;
 }): Promise<CreateAccountResult> {
   const [firstName, ...rest] = input.fullName.trim().split(/\s+/);
-  const lastName = rest.join(" ") || "-";
+  const lastName = rest.join(" ") || "Customer";
 
   const { ok, data } = await postJson("/api/auth/otp/verify", {
     phone: input.phone,
@@ -98,5 +102,56 @@ export async function createCustomerAccount(input: {
     };
   }
 
+  if (!data.loggedIn) {
+    return {
+      success: false,
+      error:
+        (data?.error as string) ??
+        "Your account may have been created, but sign-in failed. Try logging in again.",
+    };
+  }
+
   return { success: true };
+}
+
+/** Email + password registration via Magento createCustomerV2. */
+export async function registerWithEmail(input: {
+  fullName: string;
+  email: string;
+  password: string;
+  marketingOptIn?: boolean;
+}): Promise<EmailRegisterResult> {
+  const [firstName, ...rest] = input.fullName.trim().split(/\s+/);
+  const lastName = rest.join(" ") || "Customer";
+
+  const { ok, data } = await postJson("/api/auth/register", {
+    firstname: firstName,
+    lastname: lastName,
+    email: input.email.trim(),
+    password: input.password,
+    isSubscribed: Boolean(input.marketingOptIn),
+  });
+
+  if (!ok || !data?.ok) {
+    return {
+      success: false,
+      error: (data?.error as string) ?? "We could not create your account. Please try again.",
+    };
+  }
+
+  if (data.loggedIn) {
+    return { success: true, loggedIn: true };
+  }
+
+  const login = await loginWithPassword(input.email.trim(), input.password);
+  if (login.success) {
+    return { success: true, loggedIn: true };
+  }
+
+  return {
+    success: false,
+    error:
+      (data.error as string) ??
+      "Your account may have been created, but sign-in failed. Try logging in with your email and password.",
+  };
 }

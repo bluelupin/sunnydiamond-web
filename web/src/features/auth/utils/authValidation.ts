@@ -2,6 +2,7 @@ import {
   type FieldValidation,
   validateRequiredEmail,
   validateRequiredName,
+  validateRequiredPassword,
 } from "@/shared/utils/formValidation";
 
 export const LOGIN_OTP_LENGTH = 6;
@@ -28,6 +29,10 @@ export const validateLoginIdentifier = (value: string): FieldValidation => {
     return { valid: false, error: "Phone number or email is required" };
   }
 
+  if (isEmailIdentifier(trimmed)) {
+    return validateRequiredEmail(trimmed);
+  }
+
   return { valid: true };
 };
 
@@ -46,8 +51,39 @@ export type CreateAccountFormValues = {
 export type CreateAccountFormErrors = {
   fullName?: string;
   email?: string;
+  password?: string;
   terms?: string;
 };
+
+export type EmailRegisterFormValues = {
+  fullName: string;
+  email: string;
+  password: string;
+  termsAccepted: boolean;
+};
+
+export const validateEmailRegisterForm = (
+  values: EmailRegisterFormValues,
+): { valid: boolean; errors: CreateAccountFormErrors } => {
+  const nameValidation = validateRequiredName(values.fullName);
+  const emailValidation = validateRequiredEmail(values.email);
+  const passwordValidation = validateRequiredPassword(values.password);
+
+  const errors: CreateAccountFormErrors = {
+    fullName: nameValidation.valid ? undefined : nameValidation.error,
+    email: emailValidation.valid ? undefined : emailValidation.error,
+    password: passwordValidation.valid ? undefined : passwordValidation.error,
+    terms: values.termsAccepted ? undefined : "Please accept the terms and conditions",
+  };
+
+  return {
+    valid: !errors.fullName && !errors.email && !errors.password && !errors.terms,
+    errors,
+  };
+};
+
+export const isEmailRegisterReady = (values: EmailRegisterFormValues): boolean =>
+  validateEmailRegisterForm(values).valid;
 
 export const validateCreateAccountForm = (
   values: CreateAccountFormValues,

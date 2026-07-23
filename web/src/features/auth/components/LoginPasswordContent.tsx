@@ -14,6 +14,7 @@ type LoginPasswordContentProps = {
   onBack: () => void;
   onClose: () => void;
   onLogin: () => void;
+  onCreateAccount: () => void;
   titleClassName?: string;
 };
 
@@ -32,6 +33,7 @@ const LoginPasswordContent = ({
   onBack,
   onClose,
   onLogin,
+  onCreateAccount,
   titleClassName,
 }: LoginPasswordContentProps) => {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -119,6 +121,17 @@ const LoginPasswordContent = ({
       >
         LOG IN
       </CartPrimaryButton>
+
+      <p className="text-center font-gill text-sm font-light leading-110 text-neutral500">
+        New to Sunny Diamonds?{" "}
+        <button
+          type="button"
+          onClick={onCreateAccount}
+          className="font-normal text-darkblack underline-offset-2 hover:underline"
+        >
+          Create an account
+        </button>
+      </p>
     </form>
   );
 };

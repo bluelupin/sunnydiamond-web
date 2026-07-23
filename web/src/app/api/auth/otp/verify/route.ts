@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { normalizePhoneForMagento } from "@/lib/auth/magentoPhone";
 import { magentoGraphqlFetch } from "@/services/magento/graphqlClient";
 import { MagentoGraphqlError } from "@/services/magento/magento.errors";
 import { MAGENTO_VERIFY_LOGIN_OTP_MUTATION } from "@/services/auth/auth.gql";
@@ -21,8 +22,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const phone = body.phone?.trim();
+  const phone = normalizePhoneForMagento(body.phone?.trim() ?? "");
   const otp = body.otp?.trim();
+  const email = body.email?.trim().toLowerCase();
+  const firstName = body.firstName?.trim();
+  const lastName = body.lastName?.trim();
+  const isCompletingRegistration = Boolean(email && firstName && lastName);
+
   if (!phone || !otp) {
     return NextResponse.json({ error: "Phone and OTP are required" }, { status: 400 });
   }
@@ -40,9 +46,9 @@ export async function POST(request: NextRequest) {
         input: {
           phone,
           otp,
-          email: body.email?.trim() || null,
-          first_name: body.firstName?.trim() || null,
-          last_name: body.lastName?.trim() || null,
+          email: email || null,
+          first_name: firstName || null,
+          last_name: lastName || null,
         },
       },
       cache: "no-store",
@@ -54,12 +60,27 @@ export async function POST(request: NextRequest) {
       await setCustomerTokenCookie(token);
       return NextResponse.json({
         ok: true,
+        loggedIn: true,
         registrationRequired: false,
         customerCreated: customer_created,
       });
     }
 
-    return NextResponse.json({ ok: true, registrationRequired: registration_required });
+    if (registration_required) {
+      return NextResponse.json({ ok: true, loggedIn: false, registrationRequired: true });
+    }
+
+    if (isCompletingRegistration) {
+      return NextResponse.json(
+        {
+          error:
+            "We could not create your account in Magento. Please request a new OTP and try again.",
+        },
+        { status: 400 },
+      );
+    }
+
+    return NextResponse.json({ ok: true, loggedIn: false, registrationRequired: false });
   } catch (error) {
     const message =
       error instanceof MagentoGraphqlError ? error.message : "OTP verification failed";

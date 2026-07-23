@@ -5,6 +5,7 @@ import { sanitizePhoneInput } from "@/shared/utils/formValidation";
 import {
   createCustomerAccount,
   loginWithPassword,
+  registerWithEmail,
   requestLoginOtp,
   verifyLoginOtp,
 } from "../services/auth.service";
@@ -17,11 +18,13 @@ import {
   LOGIN_OTP_LENGTH,
   normalizeIndianPhoneDigits,
   validateCreateAccountForm,
+  validateEmailRegisterForm,
+  isEmailRegisterReady,
   validateLoginIdentifier,
 } from "../utils/authValidation";
 import { sanitizeReturnUrl } from "../utils/authNavigation";
 
-export type AuthFlowStep = "sign-in" | "otp" | "create-account" | "password";
+export type AuthFlowStep = "sign-in" | "otp" | "create-account" | "password" | "email-create-account";
 
 const RESEND_SECONDS = 60;
 
@@ -80,6 +83,23 @@ export type AuthFlowContentProps = {
     onBack: () => void;
     onClose: () => void;
     onLogin: () => void;
+    onCreateAccount: () => void;
+  };
+  emailCreateAccount: {
+    email: string;
+    fullName: string;
+    password: string;
+    termsAccepted: boolean;
+    fullNameError?: string;
+    emailError?: string;
+    passwordError?: string;
+    termsError?: string;
+    onFullNameChange: (value: string) => void;
+    onPasswordChange: (value: string) => void;
+    onTermsAcceptedChange: (value: boolean) => void;
+    onBack: () => void;
+    onClose: () => void;
+    onCreateAccount: () => void;
   };
 };
 
@@ -98,6 +118,8 @@ export function useAuthFlow({
   const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState<string | undefined>();
+  const [registerPassword, setRegisterPassword] = useState("");
+  const [registerPasswordError, setRegisterPasswordError] = useState<string | undefined>();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -125,6 +147,8 @@ export function useAuthFlow({
     setSecondsLeft(RESEND_SECONDS);
     setPassword("");
     setPasswordError(undefined);
+    setRegisterPassword("");
+    setRegisterPasswordError(undefined);
     setFullName("");
     setEmail("");
     setTermsAccepted(false);
@@ -168,6 +192,10 @@ export function useAuthFlow({
     }
 
     if (step === "password" && !isEmailIdentifier(identifier)) {
+      setStep("sign-in");
+    }
+
+    if (step === "email-create-account" && !isEmailIdentifier(identifier)) {
       setStep("sign-in");
     }
   }, [active, step, identifier, verifiedPhone]);
@@ -359,6 +387,80 @@ export function useAuthFlow({
     setPasswordError(undefined);
   }, []);
 
+  const handleGoToEmailCreateAccount = useCallback(() => {
+    if (!isEmailIdentifier(identifier)) {
+      setStep("sign-in");
+      return;
+    }
+
+    setEmail(identifier.trim());
+    setFullName("");
+    setRegisterPassword("");
+    setTermsAccepted(false);
+    setFullNameError(undefined);
+    setEmailError(undefined);
+    setRegisterPasswordError(undefined);
+    setTermsError(undefined);
+    setStep("email-create-account");
+  }, [identifier]);
+
+  const handleBackFromEmailCreateAccount = useCallback(() => {
+    setStep("password");
+    setFullNameError(undefined);
+    setEmailError(undefined);
+    setRegisterPasswordError(undefined);
+    setTermsError(undefined);
+  }, []);
+
+  const handleEmailRegister = useCallback(async () => {
+    if (!isEmailIdentifier(identifier) || isSubmitting) return;
+
+    const emailValue = identifier.trim();
+    const { valid, errors } = validateEmailRegisterForm({
+      fullName,
+      email: emailValue,
+      password: registerPassword,
+      termsAccepted,
+    });
+
+    setFullNameError(errors.fullName);
+    setEmailError(errors.email);
+    setRegisterPasswordError(errors.password);
+    setTermsError(errors.terms);
+
+    if (!valid) return;
+
+    setIsSubmitting(true);
+    const result = await registerWithEmail({
+      fullName: fullName.trim(),
+      email: emailValue,
+      password: registerPassword,
+      marketingOptIn: termsAccepted,
+    });
+
+    if (!result.success) {
+      setIsSubmitting(false);
+      if (/same email address/i.test(result.error)) {
+        setEmailError(result.error);
+      } else if (/password/i.test(result.error)) {
+        setRegisterPasswordError(result.error);
+      } else {
+        setEmailError(result.error);
+      }
+      return;
+    }
+
+    setIsSubmitting(false);
+    await completeAuth();
+  }, [
+    completeAuth,
+    fullName,
+    identifier,
+    isSubmitting,
+    registerPassword,
+    termsAccepted,
+  ]);
+
   const handlePasswordLogin = useCallback(async () => {
     if (isSubmitting) return;
     if (!password) {
@@ -462,6 +564,32 @@ export function useAuthFlow({
       onBack: handleBackFromPassword,
       onClose: handleClose,
       onLogin: handlePasswordLogin,
+      onCreateAccount: handleGoToEmailCreateAccount,
+    },
+    emailCreateAccount: {
+      email: identifier.trim(),
+      fullName,
+      password: registerPassword,
+      termsAccepted,
+      fullNameError,
+      emailError,
+      passwordError: registerPasswordError,
+      termsError,
+      onFullNameChange: (value) => {
+        setFullName(value);
+        setFullNameError(undefined);
+      },
+      onPasswordChange: (value) => {
+        setRegisterPassword(value);
+        setRegisterPasswordError(undefined);
+      },
+      onTermsAcceptedChange: (value) => {
+        setTermsAccepted(value);
+        setTermsError(undefined);
+      },
+      onBack: handleBackFromEmailCreateAccount,
+      onClose: handleClose,
+      onCreateAccount: handleEmailRegister,
     },
   };
 
