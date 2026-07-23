@@ -392,6 +392,26 @@ export async function setGuestShippingAddress(
   return mapGuestCartState(assertCart(data.setShippingAddressesOnCart?.cart), lineMetadata);
 }
 
+export async function setCartShippingAddressByUid(
+  cartId: string,
+  customerAddressUid: string,
+  lineMetadata: StoredCartLineMetadata,
+  signal?: AbortSignal,
+): Promise<GuestCartState> {
+  const shippingAddresses: MagentoShippingAddressInput[] = [
+    { customer_address_uid: customerAddressUid },
+  ];
+
+  const data = await magentoGraphqlFetch<MagentoSetShippingAddressesOnCartResponse>({
+    query: MAGENTO_SET_SHIPPING_ADDRESSES_ON_CART_MUTATION,
+    variables: { cartId, shippingAddresses },
+    signal,
+    cache: "no-store",
+  });
+
+  return mapGuestCartState(assertCart(data.setShippingAddressesOnCart?.cart), lineMetadata);
+}
+
 export async function setGuestBillingAddress(
   cartId: string,
   billingAddress: MagentoCartAddressInput | null,
@@ -420,16 +440,36 @@ export async function setGuestBillingAddress(
   return mapGuestCartState(assertCart(data.setBillingAddressOnCart?.cart), lineMetadata);
 }
 
-export async function applyGuestCheckoutAddresses(
+export type CheckoutPrepareOptions = {
+  isAuthenticated: boolean;
+  customerEmail?: string;
+  shippingAddressUid?: string | null;
+};
+
+export async function applyCheckoutAddresses(
   cartId: string,
   form: CheckoutFormData,
   lineMetadata: StoredCartLineMetadata,
+  options: CheckoutPrepareOptions,
   signal?: AbortSignal,
 ): Promise<GuestCartState> {
-  await setGuestEmailOnCart(cartId, resolveGuestCheckoutEmail(form.phoneOrEmail), signal);
+  if (!options.isAuthenticated) {
+    await setGuestEmailOnCart(cartId, resolveGuestCheckoutEmail(form.phoneOrEmail), signal);
+  }
 
-  const shippingAddress = mapCheckoutFormToShippingAddress(form);
-  let state = await setGuestShippingAddress(cartId, shippingAddress, lineMetadata, signal);
+  let state: GuestCartState;
+
+  if (options.isAuthenticated && options.shippingAddressUid) {
+    state = await setCartShippingAddressByUid(
+      cartId,
+      options.shippingAddressUid,
+      lineMetadata,
+      signal,
+    );
+  } else {
+    const shippingAddress = mapCheckoutFormToShippingAddress(form);
+    state = await setGuestShippingAddress(cartId, shippingAddress, lineMetadata, signal);
+  }
 
   if (form.billingSameAsShipping) {
     state = await setGuestBillingAddress(cartId, null, true, lineMetadata, signal);
@@ -439,6 +479,21 @@ export async function applyGuestCheckoutAddresses(
   }
 
   return state;
+}
+
+export async function applyGuestCheckoutAddresses(
+  cartId: string,
+  form: CheckoutFormData,
+  lineMetadata: StoredCartLineMetadata,
+  signal?: AbortSignal,
+): Promise<GuestCartState> {
+  return applyCheckoutAddresses(
+    cartId,
+    form,
+    lineMetadata,
+    { isAuthenticated: false },
+    signal,
+  );
 }
 
 export async function setGuestShippingMethod(
@@ -489,13 +544,14 @@ export async function selectFirstAvailableGuestShippingMethod(
   );
 }
 
-export async function prepareGuestCheckoutForPayment(
+export async function prepareCheckoutForPayment(
   cartId: string,
   form: CheckoutFormData,
   lineMetadata: StoredCartLineMetadata,
+  options: CheckoutPrepareOptions,
   signal?: AbortSignal,
 ): Promise<GuestCartState> {
-  const addressedState = await applyGuestCheckoutAddresses(cartId, form, lineMetadata, signal);
+  const addressedState = await applyCheckoutAddresses(cartId, form, lineMetadata, options, signal);
   const shippingState = await selectFirstAvailableGuestShippingMethod(
     cartId,
     addressedState,
@@ -503,6 +559,21 @@ export async function prepareGuestCheckoutForPayment(
     signal,
   );
   return syncGuestCartLineOptions(cartId, lineMetadata, signal);
+}
+
+export async function prepareGuestCheckoutForPayment(
+  cartId: string,
+  form: CheckoutFormData,
+  lineMetadata: StoredCartLineMetadata,
+  signal?: AbortSignal,
+): Promise<GuestCartState> {
+  return prepareCheckoutForPayment(
+    cartId,
+    form,
+    lineMetadata,
+    { isAuthenticated: false },
+    signal,
+  );
 }
 
 export async function setGuestPaymentMethod(

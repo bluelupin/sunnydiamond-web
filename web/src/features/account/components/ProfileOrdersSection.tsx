@@ -124,9 +124,18 @@ const ProfileOrdersSection = () => {
                   <p className="font-gill text-base font-normal leading-110 text-darkblack">
                     {formatOrderTotal(order.grandTotal, order.currency)}
                   </p>
-                  <CartPrimaryLink href="/order-tracking" className="w-full min-w-[180px] md:w-auto">
-                    Track Order
+                  <CartPrimaryLink
+                    href={`/profile/orders/${encodeURIComponent(order.number)}`}
+                    className="w-full min-w-[180px] md:w-auto"
+                  >
+                    View Details
                   </CartPrimaryLink>
+                  <Link
+                    href={`/order-tracking?order=${encodeURIComponent(order.number)}`}
+                    className="font-gill text-sm font-light leading-110 text-neutral500 underline-offset-2 hover:underline"
+                  >
+                    Track shipment
+                  </Link>
                 </div>
               </div>
             </li>

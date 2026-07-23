@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/shared/utils/cn";
 import { useCart } from "@/features/cart/context/CartContext";
 import { useToast } from "@/shared/hooks/use-toast";
@@ -18,6 +18,7 @@ import {
   useCheckoutFormValidation,
   useCheckoutPaymentValidation,
 } from "@/features/checkout/hooks/use-checkout-validation";
+import { useCheckoutCustomerPrefill } from "@/features/checkout/hooks/use-checkout-customer-prefill";
 import {
   sanitizeCardCvvInput,
   sanitizeCardExpiryInput,
@@ -33,12 +34,18 @@ import {
   type CheckoutStep,
 } from "../types/checkout.types";
 import {
+  applyCustomerAddressToCheckoutForm,
+  mapCheckoutFormToCustomerAddressInput,
+} from "../utils/checkoutCustomer.utils";
+import {
   completeGuestCheckout,
   ensureGuestCartId,
-  prepareGuestCheckoutForPayment,
+  prepareCheckoutForPayment,
 } from "@/services/magento/cart/cart.service";
+import { saveCustomerAddress } from "@/services/customer/customer-account.client";
 import { readCartLineMetadata } from "@/services/magento/cart/cartSession";
 import { MagentoGraphqlError } from "@/services/magento/magento.errors";
+import type { CustomerAddress } from "@/services/customer/customer-account.types";
 
 const CheckoutPage = () => {
   const {
@@ -54,6 +61,15 @@ const CheckoutPage = () => {
     isUpdating,
   } = useCart();
   const { toast } = useToast();
+  const {
+    isAuthenticated,
+    isLoading: isAuthPrefillLoading,
+    customer,
+    addresses,
+    defaultFormPatch,
+    defaultShippingAddress,
+  } = useCheckoutCustomerPrefill();
+  const prefillAppliedRef = useRef(false);
 
   const [step, setStep] = useState<CheckoutStep>("form");
   const [showOtpModal, setShowOtpModal] = useState(false);
@@ -130,7 +146,28 @@ const CheckoutPage = () => {
     }
   }, [refreshCart, step]);
 
-  if (isHydrating) {
+  useEffect(() => {
+    if (isAuthPrefillLoading || prefillAppliedRef.current || !isAuthenticated || !defaultFormPatch) {
+      return;
+    }
+
+    setForm((current) => {
+      let next: CheckoutFormData = {
+        ...current,
+        ...defaultFormPatch,
+      };
+
+      if (defaultShippingAddress) {
+        next = applyCustomerAddressToCheckoutForm(next, defaultShippingAddress);
+      }
+
+      return next;
+    });
+    setPhoneVerified(true);
+    prefillAppliedRef.current = true;
+  }, [defaultFormPatch, defaultShippingAddress, isAuthPrefillLoading, isAuthenticated]);
+
+  if (isHydrating || isAuthPrefillLoading) {
     return (
       <section className="flex min-h-[60vh] flex-col items-center justify-center bg-gray300 px-4 py-20 text-center">
         <p className="sr-only" aria-live="polite">
@@ -158,6 +195,7 @@ const CheckoutPage = () => {
         items={placedItems}
         totalPrice={placedTotal}
         orderNumber={placedOrderNumber}
+        isAuthenticated={isAuthenticated}
       />
     );
   }
@@ -181,7 +219,7 @@ const CheckoutPage = () => {
 
   const handleContinueToPayment = () => {
     formValidation.validateSubmit(() => {
-      if (!phoneVerified) {
+      if (!isAuthenticated && !phoneVerified) {
         setShowOtpModal(true);
         toast({
           title: "Verification required",
@@ -194,11 +232,25 @@ const CheckoutPage = () => {
         setIsSavingAddresses(true);
 
         try {
+          if (isAuthenticated && form.saveNewAddress && form.addressEntryMode === "new") {
+            await saveCustomerAddress(mapCheckoutFormToCustomerAddressInput(form));
+          }
+
           const cartId = await ensureGuestCartId();
-          const state = await prepareGuestCheckoutForPayment(
+          const shippingAddressUid =
+            isAuthenticated && form.addressEntryMode === "saved"
+              ? form.selectedShippingAddressUid || null
+              : null;
+
+          const state = await prepareCheckoutForPayment(
             cartId,
             form,
             readCartLineMetadata(),
+            {
+              isAuthenticated,
+              customerEmail: customer?.email,
+              shippingAddressUid,
+            },
           );
           applyMagentoCartState(state);
           setStep("payment");
@@ -314,6 +366,27 @@ const CheckoutPage = () => {
   const handleSidebarCta = step === "payment" ? placeOrder : handleContinueToPayment;
 
   const handleFormChange = (field: keyof CheckoutFormData, value: string | boolean) => {
+    const addressFields: Array<keyof CheckoutFormData> = [
+      "shippingName",
+      "addressLine1",
+      "addressLine2",
+      "pincode",
+      "city",
+      "state",
+      "shippingPhone",
+    ];
+
+    if (addressFields.includes(field) && form.addressEntryMode === "saved") {
+      setForm((prev) => ({
+        ...prev,
+        [field]: value,
+        addressEntryMode: "new",
+        selectedShippingAddressUid: "",
+        saveNewAddress: true,
+      }));
+      return;
+    }
+
     if (field === "pincode" || field === "billingPincode") {
       updateForm(field, sanitizePincodeInput(String(value)));
       return;
@@ -330,6 +403,19 @@ const CheckoutPage = () => {
     }
 
     updateForm(field, value);
+  };
+
+  const handleSelectSavedAddress = (address: CustomerAddress) => {
+    setForm((current) => applyCustomerAddressToCheckoutForm(current, address));
+  };
+
+  const handleUseNewAddress = () => {
+    setForm((current) => ({
+      ...current,
+      addressEntryMode: "new",
+      selectedShippingAddressUid: "",
+      saveNewAddress: true,
+    }));
   };
 
   return (
@@ -359,6 +445,10 @@ const CheckoutPage = () => {
                 phoneVerified={phoneVerified}
                 onVerifyPhone={handleVerifyPhone}
                 validation={formValidation}
+                isAuthenticated={isAuthenticated}
+                savedAddresses={addresses}
+                onSelectSavedAddress={handleSelectSavedAddress}
+                onUseNewAddress={handleUseNewAddress}
               />
             ) : (
               <CheckoutPaymentStep
@@ -375,6 +465,7 @@ const CheckoutPage = () => {
                 onEditDelivery={() => setStep("form")}
                 onEditPayment={() => setStep("form")}
                 validation={paymentValidation}
+                isAuthenticated={isAuthenticated}
               />
             )}
           </div>

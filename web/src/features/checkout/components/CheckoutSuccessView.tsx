@@ -18,6 +18,7 @@ type CheckoutSuccessViewProps = {
   items: CartLineItem[];
   totalPrice: number;
   orderNumber?: string | null;
+  isAuthenticated?: boolean;
 };
 
 const CheckoutSummaryDivider = () => (
@@ -60,24 +61,58 @@ const SuccessOrderItem = ({ item }: { item: CartLineItem }) => (
   </div>
 );
 
-const SuccessCtaSection = ({ className }: { className?: string }) => (
+const SuccessCtaSection = ({
+  className,
+  isAuthenticated,
+  orderNumber,
+}: {
+  className?: string;
+  isAuthenticated?: boolean;
+  orderNumber?: string | null;
+}) => {
+  const trackingHref = orderNumber
+    ? `/order-tracking?order=${encodeURIComponent(orderNumber)}`
+    : "/order-tracking";
+
+  return (
   <div className={cn("flex flex-col gap-4", className)}>
-    <CartPrimaryLink href="/order-tracking" className="w-full uppercase">
-      Track Order
-    </CartPrimaryLink>
+    {isAuthenticated ? (
+      <CartPrimaryLink href="/profile?section=orders" className="w-full uppercase">
+        View My Orders
+      </CartPrimaryLink>
+    ) : (
+      <CartPrimaryLink href={trackingHref} className="w-full uppercase">
+        Track Order
+      </CartPrimaryLink>
+    )}
+    {isAuthenticated && orderNumber ? (
+      <CartTextLink
+        href={`/profile/orders/${encodeURIComponent(orderNumber)}`}
+        className="mx-auto uppercase"
+      >
+        View Order Details
+      </CartTextLink>
+    ) : null}
+    {isAuthenticated && orderNumber ? (
+      <CartTextLink href={trackingHref} className="mx-auto uppercase">
+        Track This Order
+      </CartTextLink>
+    ) : null}
     <div className="flex justify-center">
       <CartTextLink href="/jewellery" className="uppercase">
         Go Back to Shopping
       </CartTextLink>
     </div>
   </div>
-);
+  );
+};
 
 const CheckoutSuccessView = ({
   contact,
   items,
   totalPrice,
   orderNumber,
+  isAuthenticated = false,
 }: CheckoutSuccessViewProps) => (
   <section className="bg-gray300 max-lg:min-h-[100dvh] max-lg:pb-[calc(9.5rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
     <div className="mx-auto flex w-full max-w-[1440px] justify-center px-5 py-6 md:px-8 lg:px-10 lg:py-16">
@@ -120,19 +155,29 @@ const CheckoutSuccessView = ({
         <div className="flex items-start gap-3">
           <ShoppingBagIcon className="size-6 shrink-0 text-darkblack" aria-hidden />
           <p className="font-gill text-base font-light leading-110 text-darkblack">
-            We have also initiated your account setup, please check you email{" "}
-            <span className="font-normal">{contact || "on file"}</span> to complete setup.
+            {isAuthenticated ? (
+              <>
+                A confirmation has been sent to{" "}
+                <span className="font-normal">{contact || "your email"}</span>. You can view this
+                order anytime in My Profile.
+              </>
+            ) : (
+              <>
+                We have also initiated your account setup, please check your email{" "}
+                <span className="font-normal">{contact || "on file"}</span> to complete setup.
+              </>
+            )}
           </p>
         </div>
 
         <div className="hidden border-t border-neutral300 pt-6 lg:flex lg:flex-col lg:gap-4 [border-top-width:0.5px]">
-          <SuccessCtaSection />
+          <SuccessCtaSection isAuthenticated={isAuthenticated} orderNumber={orderNumber} />
         </div>
       </div>
     </div>
 
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral300 bg-white px-5 py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] lg:hidden [border-top-width:0.5px]">
-      <SuccessCtaSection />
+      <SuccessCtaSection isAuthenticated={isAuthenticated} orderNumber={orderNumber} />
     </div>
   </section>
 );

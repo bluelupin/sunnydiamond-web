@@ -195,4 +195,8 @@ export const seoContent = {
     title: "My Profile",
     description: "Manage your Sunny Diamonds account, orders, addresses, and appointments.",
   },
+  orderTracking: {
+    title: "Order Tracking",
+    description: "Track your Sunny Diamonds order status, shipment updates, and delivery details.",
+  },
 } as const;

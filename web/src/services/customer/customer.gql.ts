@@ -63,9 +63,47 @@ export const MAGENTO_CUSTOMER_WISHLIST_IDS_QUERY = `
   }
 ` as const;
 
+export const MAGENTO_CUSTOMER_WISHLIST_QUERY = `
+  query MagentoCustomerWishlist($pageSize: Int!, $currentPage: Int!) {
+    customer {
+      wishlists {
+        id
+        items_count
+        items_v2(pageSize: $pageSize, currentPage: $currentPage) {
+          items {
+            id
+            product {
+              sku
+            }
+          }
+          page_info {
+            current_page
+            total_pages
+          }
+        }
+      }
+    }
+  }
+` as const;
+
 export const MAGENTO_ADD_PRODUCTS_TO_WISHLIST_MUTATION = `
   mutation MagentoAddProductsToWishlist($wishlistId: ID!, $wishlistItems: [WishlistItemInput!]!) {
     addProductsToWishlist(wishlistId: $wishlistId, wishlistItems: $wishlistItems) {
+      wishlist {
+        id
+        items_count
+      }
+      user_errors {
+        code
+        message
+      }
+    }
+  }
+` as const;
+
+export const MAGENTO_REMOVE_PRODUCTS_FROM_WISHLIST_MUTATION = `
+  mutation MagentoRemoveProductsFromWishlist($wishlistId: ID!, $wishlistItemsIds: [ID!]!) {
+    removeProductsFromWishlist(wishlistId: $wishlistId, wishlistItemsIds: $wishlistItemsIds) {
       wishlist {
         id
         items_count
@@ -172,5 +210,108 @@ export const MAGENTO_UPDATE_CUSTOMER_ADDRESS_MUTATION = `
 export const MAGENTO_DELETE_CUSTOMER_ADDRESS_MUTATION = `
   mutation MagentoDeleteCustomerAddressV2($uid: ID!) {
     deleteCustomerAddressV2(uid: $uid)
+  }
+` as const;
+
+const ORDER_DETAIL_FIELDS = `
+  id
+  number
+  order_date
+  status
+  carrier
+  shipping_method
+  comments {
+    message
+    timestamp
+  }
+  items {
+    product_name
+    quantity_ordered
+    product_url_key
+    product_sku
+    product_sale_price {
+      value
+      currency
+    }
+    selected_options {
+      label
+      value
+    }
+    entered_options {
+      label
+      value
+    }
+  }
+  total {
+    grand_total {
+      value
+      currency
+    }
+    subtotal_incl_tax {
+      value
+      currency
+    }
+    total_tax {
+      value
+      currency
+    }
+    total_shipping {
+      value
+      currency
+    }
+  }
+  payment_methods {
+    name
+    type
+    additional_data {
+      name
+      value
+    }
+  }
+  shipping_address {
+    firstname
+    lastname
+    street
+    city
+    region
+    postcode
+    telephone
+  }
+  billing_address {
+    firstname
+    lastname
+    street
+    city
+    region
+    postcode
+    telephone
+  }
+  shipments {
+    number
+    tracking {
+      title
+      number
+      carrier
+    }
+  }
+`;
+
+export const MAGENTO_CUSTOMER_ORDER_BY_NUMBER_QUERY = `
+  query MagentoCustomerOrderByNumber($filter: CustomerOrdersFilterInput!) {
+    customer {
+      orders(filter: $filter, pageSize: 1, currentPage: 1) {
+        items {
+          ${ORDER_DETAIL_FIELDS}
+        }
+      }
+    }
+  }
+` as const;
+
+export const MAGENTO_GUEST_ORDER_QUERY = `
+  query MagentoGuestOrder($input: GuestOrderInformationInput!) {
+    guestOrder(input: $input) {
+      ${ORDER_DETAIL_FIELDS}
+    }
   }
 ` as const;
