@@ -183,7 +183,7 @@ const GiftingBagHero = ({ isSeparate }: { isSeparate: boolean }) => {
         {isSeparate ? copy.separateBags : copy.singleBag}
       </p>
       <div
-        className="relative w-full overflow-hidden bg-gray200 border border-blue-300"
+        className="relative w-full overflow-hidden bg-gray200"
         style={{ height: cartFlowSpec.gifting.personalise.heroImageHeight }}
       >
         <Image
@@ -265,7 +265,7 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
     >
       <div
         className={cn(
-          "relative shrink-0 overflow-hidden bg-gray200 border border-blue-300",
+          "relative shrink-0 overflow-hidden bg-gray200",
           mode === "single" ? "h-[53px] w-[60px]" : "h-[71px] w-20",
         )}
       >

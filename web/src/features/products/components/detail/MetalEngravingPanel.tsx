@@ -133,7 +133,6 @@ const MetalEngravingPanel = ({
                   value={text}
                   maxLength={maxCharacters}
                   onChange={(event) => handleTextChange(event.target.value)}
-                  placeholder="Diya Gupta"
                   aria-describedby="engraving-character-limit"
                   className={appointmentFieldClassName}
                 />

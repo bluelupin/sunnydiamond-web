@@ -16,6 +16,9 @@ type InlineCustomSelectProps = {
   onChange: (value: string) => void;
   onBlur?: () => void;
   labelClassName?: string;
+  triggerClassName?: string;
+  listClassName?: string;
+  optionClassName?: string;
   invalid?: boolean;
   errorId?: string;
 };
@@ -48,6 +51,9 @@ const InlineCustomSelect = ({
   onChange,
   onBlur,
   labelClassName,
+  triggerClassName,
+  listClassName,
+  optionClassName,
   invalid = false,
   errorId,
 }: InlineCustomSelectProps) => {
@@ -62,17 +68,23 @@ const InlineCustomSelect = ({
       return;
     }
 
-    const handlePointerDown = (event: MouseEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setIsOpen(false);
-        onBlur?.();
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (rootRef.current?.contains(target)) {
+        return;
       }
+
+      setIsOpen(false);
+      onBlur?.();
     };
 
-    document.addEventListener("mousedown", handlePointerDown);
+    const timeoutId = window.setTimeout(() => {
+      document.addEventListener("pointerdown", handlePointerDown);
+    }, 0);
 
     return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
+      window.clearTimeout(timeoutId);
+      document.removeEventListener("pointerdown", handlePointerDown);
     };
   }, [isOpen, onBlur]);
 
@@ -80,8 +92,14 @@ const InlineCustomSelect = ({
   const triggerLabel = selectedOption ?? placeholder;
   const showPlaceholder = !selectedOption;
 
+  const selectOption = (option: string) => {
+    onChange(option);
+    setIsOpen(false);
+    onBlur?.();
+  };
+
   return (
-    <div ref={rootRef} className="flex flex-col gap-[8px]">
+    <div ref={rootRef} className="relative flex flex-col gap-[8px]">
       <span
         id={labelId}
         className={cn(
@@ -100,12 +118,16 @@ const InlineCustomSelect = ({
         aria-labelledby={`${labelId} ${valueId}`}
         aria-invalid={invalid || undefined}
         aria-describedby={errorId}
-        onClick={() => setIsOpen((current) => !current)}
+        onClick={(event) => {
+          event.stopPropagation();
+          setIsOpen((current) => !current);
+        }}
         className={cn(
           "flex h-[56px] w-full items-center justify-between bg-[#F2F2F2] p-[12px] font-gill text-sm leading-110 outline-none",
           isOpen ? "border border-darkblack" : "border border-transparent",
           invalid && !isOpen && invalidFieldClassName,
           showPlaceholder && !isOpen ? "font-light text-neutral400" : "font-normal text-darkblack",
+          triggerClassName,
         )}
       >
         <span id={valueId}>{triggerLabel}</span>
@@ -116,7 +138,10 @@ const InlineCustomSelect = ({
           id={listboxId}
           role="listbox"
           aria-labelledby={labelId}
-          className="flex w-full flex-col bg-[#F2F2F2]"
+          className={cn(
+            "absolute left-0 right-0 top-full z-[90] mt-1 flex max-h-64 flex-col overflow-y-auto bg-[#F2F2F2] shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
+            listClassName,
+          )}
         >
           {options.map((option) => {
             const selected = value === option;
@@ -127,16 +152,17 @@ const InlineCustomSelect = ({
                 type="button"
                 role="option"
                 aria-selected={selected}
-                onClick={() => {
-                  onChange(option);
-                  setIsOpen(false);
-                  onBlur?.();
+                onPointerDown={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  selectOption(option);
                 }}
                 className={cn(
-                  "flex h-[56px] w-full items-center p-[12px] text-left font-gill text-sm leading-110 transition-colors",
+                  "flex h-[56px] w-full shrink-0 items-center p-[12px] text-left font-gill text-sm leading-110 transition-colors",
                   selected
                     ? "bg-[#DECAA0] font-normal text-darkblack"
                     : "font-normal text-neutral400 hover:bg-[#DECAA0] hover:text-darkblack",
+                  optionClassName,
                 )}
               >
                 {option}

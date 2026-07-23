@@ -1,13 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select";
+import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
 import {
   getProductDetailContent,
   getProductDetailPricing,
@@ -30,6 +24,11 @@ import { wishlistPageContent } from "@/features/wishlist/data/content";
 import { getWishlistProductHref } from "@/features/wishlist/utils/wishlistProduct.utils";
 import { fetchMagentoProductByUrlKey } from "@/services/magento/products/productDetail.service";
 import { getSizeGuideForProduct } from "@/services/size-guide/size-guide.service";
+import { getRingSizeLabels } from "@/features/products/utils/ringSizeOptions.utils";
+import {
+  getDefaultMetalColorId,
+  isMetalColorSelectable,
+} from "@/features/products/utils/metalColorOptions.utils";
 import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
 import { cn } from "@/shared/utils/cn";
 
@@ -96,17 +95,22 @@ const WishlistAddToBagPanel = ({
 
   const content = detailProduct ? getProductDetailContent(detailProduct) : null;
   const pricing = detailProduct ? getProductDetailPricing(detailProduct) : null;
-  const sizeLabels = sizeGuide?.sizeLabels ?? [];
+  const sizeLabels = detailProduct && content
+    ? getRingSizeLabels(detailProduct, sizeGuide, content.ringSizes)
+    : [];
   const showSizeSelector = sizeLabels.length > 0;
+  const metalColorSelectable = detailProduct ? isMetalColorSelectable(detailProduct) : false;
+  const showMetalColor = (content?.metalColors.length ?? 0) > 0;
 
   useEffect(() => {
-    if (!open || !detailProduct || !content) {
+    if (!open || !detailProduct) {
       return;
     }
 
-    setSelectedMetal(content.metalColors[0]?.id ?? "gold");
+    const nextContent = getProductDetailContent(detailProduct);
+    setSelectedMetal(getDefaultMetalColorId(detailProduct, nextContent.metalColors));
     setRingSize("");
-  }, [open, detailProduct, content]);
+  }, [open, detailProduct?.id]);
 
   if (!open || !product) {
     return (
@@ -207,28 +211,39 @@ const WishlistAddToBagPanel = ({
                 </h2>
               </div>
 
-              <div className="flex flex-col gap-4">
-                <p className="font-gill text-base leading-110 text-darkblack">Metal Color</p>
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-6">
-                    {content.metalColors.map((metal) => (
-                      <button
-                        key={metal.id}
-                        type="button"
-                        aria-label={metal.label}
-                        aria-pressed={selectedMetal === metal.id}
-                        onClick={() => setSelectedMetal(metal.id)}
-                        className={cn(
-                          "size-[52px] shrink-0",
-                          selectedMetal === metal.id && "border-2 border-darkblack",
-                        )}
-                        style={{ backgroundColor: metal.color }}
-                      />
-                    ))}
+              {showMetalColor ? (
+                <div className="flex flex-col gap-4">
+                  <p className="font-gill text-base leading-110 text-darkblack">Metal Color</p>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-6">
+                      {content.metalColors.map((metal) =>
+                        metalColorSelectable ? (
+                          <button
+                            key={metal.id}
+                            type="button"
+                            aria-label={metal.label}
+                            aria-pressed={selectedMetal === metal.id}
+                            onClick={() => setSelectedMetal(metal.id)}
+                            className={cn(
+                              "size-[52px] shrink-0",
+                              selectedMetal === metal.id && "border-2 border-darkblack",
+                            )}
+                            style={{ backgroundColor: metal.color }}
+                          />
+                        ) : (
+                          <div
+                            key={metal.id}
+                            aria-label={metal.label}
+                            className="size-[52px] shrink-0 border-2 border-darkblack"
+                            style={{ backgroundColor: metal.color }}
+                          />
+                        ),
+                      )}
+                    </div>
+                    <p className="font-gill text-base leading-110 text-neutral500">{activeMetal?.label}</p>
                   </div>
-                  <p className="font-gill text-base leading-110 text-neutral500">{activeMetal?.label}</p>
                 </div>
-              </div>
+              ) : null}
 
               {showSizeSelector ? (
                 <div className="flex flex-col gap-2">
@@ -240,18 +255,18 @@ const WishlistAddToBagPanel = ({
                       Find your size
                     </DetailTextLink>
                   </div>
-                  <Select value={ringSize} onValueChange={setRingSize}>
-                    <SelectTrigger className="h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0">
-                      <SelectValue placeholder="-select-" />
-                    </SelectTrigger>
-                    <SelectContent className="z-[80]">
-                      {sizeLabels.map((size) => (
-                        <SelectItem key={size} value={size}>
-                          {size}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <InlineCustomSelect
+                    id="wishlist-ring-size"
+                    label={sizeGuide?.sizeFieldLabel ?? "Size"}
+                    labelClassName="sr-only"
+                    value={ringSize}
+                    options={sizeLabels}
+                    placeholder="-select-"
+                    onChange={setRingSize}
+                    triggerClassName="rounded-none border-0 bg-aboutInactive px-3 text-base text-darkblack"
+                    listClassName="bg-aboutInactive"
+                    optionClassName="text-base"
+                  />
                 </div>
               ) : null}
             </div>

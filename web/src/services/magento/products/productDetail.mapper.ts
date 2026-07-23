@@ -13,6 +13,7 @@ import { resolveMagentoProductImages } from "./products.mapper";
 import { resolveMagentoProductPricing } from "./productPricing.utils";
 import { mapMagentoProductEngraving } from "./productEngraving.mapper";
 import { mapMagentoProductCustomOptions } from "./productCustomOptions.mapper";
+import { formatMetalColorLabel } from "@/features/products/utils/metalColorOptions.utils";
 import type { MagentoEngravingFontOption } from "./engravingFonts.service";
 import { MAGENTO_URL_KEY_TO_SLUG } from "@/features/jewellery-product/utils/jewelleryRoutes";
 
@@ -78,17 +79,6 @@ function getAttributeValue(
 
   const value = item?.value?.trim();
   return value || null;
-}
-
-function formatMetalColorLabel(value: string | null): string | null {
-  if (!value) {
-    return null;
-  }
-
-  return value
-    .split("-")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
 }
 
 function formatCaratLabel(value: string | null): string {
@@ -187,7 +177,8 @@ export function mapMagentoProductDetailToProduct(
   const attributes = getAttributeMap(product.custom_attributesV2?.items);
   const clarity = getAttributeValue(attributes, "sd_diamond_clarity");
   const metalPurity = getAttributeValue(attributes, "sd_metal_purity");
-  const metalColor = formatMetalColorLabel(getAttributeValue(attributes, "sd_metal_color"));
+  const metalColorRaw = getAttributeValue(attributes, "sd_metal_color");
+  const metalColor = metalColorRaw ? formatMetalColorLabel(metalColorRaw) : null;
   const caratRaw = getAttributeValue(attributes, "sd_diamond_carat");
   const carat = formatCaratLabel(caratRaw);
   const ratingRaw = getAttributeValue(attributes, "sd_rating");
@@ -246,6 +237,7 @@ export function mapMagentoProductDetailToProduct(
     lifestyleImage: lifestyleImage || primaryImage,
     carat,
     metal,
+    ...(metalColorRaw ? { metalColorValue: metalColorRaw } : {}),
     inStock: product.stock_status === "IN_STOCK",
     featured: false,
     rating: Number.isFinite(rating) ? rating : 0,

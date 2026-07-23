@@ -16,10 +16,6 @@ export type CheckoutFormData = {
   billingCity: string;
   billingState: string;
   billingPhone: string;
-  /** When set, shipping is applied via Magento `customer_address_uid`. */
-  selectedShippingAddressUid: string;
-  addressEntryMode: "saved" | "new";
-  saveNewAddress: boolean;
 };
 
 /**
@@ -50,9 +46,6 @@ export const createEmptyCheckoutForm = (): CheckoutFormData => ({
   billingCity: "",
   billingState: "",
   billingPhone: "",
-  selectedShippingAddressUid: "",
-  addressEntryMode: "new",
-  saveNewAddress: false,
 });
 
 export const createEmptyPaymentForm = (): CheckoutPaymentData => ({

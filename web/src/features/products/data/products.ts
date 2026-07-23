@@ -33,6 +33,8 @@ export interface Product {
   cardVariant?: "lifestyle";
   carat: string;
   metal: string;
+  /** Magento `sd_metal_color` slug (e.g. rose-gold). */
+  metalColorValue?: string;
   inStock: boolean;
   featured: boolean;
   bestseller?: boolean;

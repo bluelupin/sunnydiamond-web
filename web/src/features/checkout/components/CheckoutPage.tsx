@@ -29,14 +29,12 @@ import {
 } from "../types/checkout.types";
 import {
   applyCustomerAddressToCheckoutForm,
-  mapCheckoutFormToCustomerAddressInput,
 } from "../utils/checkoutCustomer.utils";
 import {
   completeGuestCheckout,
   ensureGuestCartId,
   prepareCheckoutForPayment,
 } from "@/services/magento/cart/cart.service";
-import { saveCustomerAddress } from "@/services/customer/customer-account.client";
 import { readCartLineMetadata } from "@/services/magento/cart/cartSession";
 import { MagentoGraphqlError } from "@/services/magento/magento.errors";
 import {
@@ -44,7 +42,6 @@ import {
   resetRazorpayCart,
   verifyRazorpayPayment,
 } from "../services/razorpayCheckout";
-import type { CustomerAddress } from "@/services/customer/customer-account.types";
 
 const CheckoutPage = () => {
   const {
@@ -64,7 +61,6 @@ const CheckoutPage = () => {
     isAuthenticated,
     isLoading: isAuthPrefillLoading,
     customer,
-    addresses,
     defaultFormPatch,
     defaultShippingAddress,
   } = useCheckoutCustomerPrefill();
@@ -215,20 +211,19 @@ const CheckoutPage = () => {
         return;
       }
 
+      if (isAuthenticated && !defaultShippingAddress) {
+        toast({
+          title: "Delivery address required",
+          description: "Add a saved address in My Addresses on your profile before checkout.",
+        });
+        return;
+      }
+
       void (async () => {
         setIsSavingAddresses(true);
 
         try {
-          if (isAuthenticated && form.saveNewAddress && form.addressEntryMode === "new") {
-            await saveCustomerAddress(mapCheckoutFormToCustomerAddressInput(form));
-          }
-
           const cartId = await ensureGuestCartId();
-          const shippingAddressUid =
-            isAuthenticated && form.addressEntryMode === "saved"
-              ? form.selectedShippingAddressUid || null
-              : null;
-
           const state = await prepareCheckoutForPayment(
             cartId,
             form,
@@ -236,7 +231,6 @@ const CheckoutPage = () => {
             {
               isAuthenticated,
               customerEmail: customer?.email,
-              shippingAddressUid,
             },
           );
           applyMagentoCartState(state);
@@ -374,6 +368,7 @@ const CheckoutPage = () => {
   };
 
   const requiresShippingSelection = shippingMethods.length > 0 && !selectedShippingMethod;
+  const lacksSavedDeliveryAddress = isAuthenticated && !defaultShippingAddress;
   const sidebarCtaLabel =
     step === "payment"
       ? submitting
@@ -384,31 +379,15 @@ const CheckoutPage = () => {
       : isSavingAddresses
         ? "Saving address..."
         : "Continue to Payment";
-  const ctaDisabled = submitting || isSavingAddresses || isUpdating || requiresShippingSelection;
+  const ctaDisabled =
+    submitting ||
+    isSavingAddresses ||
+    isUpdating ||
+    requiresShippingSelection ||
+    lacksSavedDeliveryAddress;
   const handleSidebarCta = step === "payment" ? placeOrder : handleContinueToPayment;
 
   const handleFormChange = (field: keyof CheckoutFormData, value: string | boolean) => {
-    const addressFields: Array<keyof CheckoutFormData> = [
-      "shippingName",
-      "addressLine1",
-      "addressLine2",
-      "pincode",
-      "city",
-      "state",
-      "shippingPhone",
-    ];
-
-    if (addressFields.includes(field) && form.addressEntryMode === "saved") {
-      setForm((prev) => ({
-        ...prev,
-        [field]: value,
-        addressEntryMode: "new",
-        selectedShippingAddressUid: "",
-        saveNewAddress: true,
-      }));
-      return;
-    }
-
     if (field === "pincode" || field === "billingPincode") {
       updateForm(field, sanitizePincodeInput(String(value)));
       return;
@@ -425,19 +404,6 @@ const CheckoutPage = () => {
     }
 
     updateForm(field, value);
-  };
-
-  const handleSelectSavedAddress = (address: CustomerAddress) => {
-    setForm((current) => applyCustomerAddressToCheckoutForm(current, address));
-  };
-
-  const handleUseNewAddress = () => {
-    setForm((current) => ({
-      ...current,
-      addressEntryMode: "new",
-      selectedShippingAddressUid: "",
-      saveNewAddress: true,
-    }));
   };
 
   return (
@@ -468,9 +434,7 @@ const CheckoutPage = () => {
                 onVerifyPhone={handleVerifyPhone}
                 validation={formValidation}
                 isAuthenticated={isAuthenticated}
-                savedAddresses={addresses}
-                onSelectSavedAddress={handleSelectSavedAddress}
-                onUseNewAddress={handleUseNewAddress}
+                hasSavedDeliveryAddress={Boolean(defaultShippingAddress)}
               />
             ) : (
               <CheckoutPaymentStep

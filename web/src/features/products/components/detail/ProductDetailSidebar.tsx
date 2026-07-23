@@ -4,22 +4,16 @@ import { useState, useEffect, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select";
-import { cn } from "@/shared/utils/cn";
-import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
-import type { Product } from "@/features/products/data/products";
-import type { ProductDetailContent, ProductDetailPricing } from "@/features/products/types/productDetail";
-import {
   AttributeSeparator,
   DetailDarkButton,
   DetailOutlineButton,
   DetailTextLink,
 } from "./shared";
+import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
+import { cn } from "@/shared/utils/cn";
+import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
+import type { Product } from "@/features/products/data/products";
+import type { ProductDetailContent, ProductDetailPricing } from "@/features/products/types/productDetail";
 import type { AddToBagPayload } from "@/features/cart/types/cart.types";
 import type { EngravingSelection } from "@/features/products/constants/engraving";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
@@ -30,6 +24,12 @@ import StoreIcon from "@/assets/Icons/StoreIcon";
 import Reveal from "@/shared/Animation/Reveal";
 import ProductDetailAccordions from "./ProductDetailAccordions";
 import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
+import { getRingSizeLabels } from "@/features/products/utils/ringSizeOptions.utils";
+import {
+  getDefaultMetalColorId,
+  getMetalColorOptions,
+  isMetalColorSelectable,
+} from "@/features/products/utils/metalColorOptions.utils";
 
 const MetalEngravingPanel = dynamic(() => import("./MetalEngravingPanel"), { ssr: false });
 const RingSizeChartPanel = dynamic(() => import("./RingSizeChartPanel"), { ssr: false });
@@ -62,7 +62,9 @@ const ProductDetailSidebar = ({
   onAddToBag,
   children,
 }: ProductDetailSidebarProps) => {
-  const [selectedMetal, setSelectedMetal] = useState(content.metalColors[0]?.id ?? "gold");
+  const [selectedMetal, setSelectedMetal] = useState(() =>
+    getDefaultMetalColorId(product, content.metalColors),
+  );
   const [ringSize, setRingSize] = useState<string>("");
   const [engravingSelection, setEngravingSelection] = useState<EngravingSelection | null>(null);
   const [isEngravingOpen, setIsEngravingOpen] = useState(false);
@@ -77,13 +79,16 @@ const ProductDetailSidebar = ({
   const { isWishlisted, toggleWishlist } = useWishlist();
   const wishlisted = isWishlisted(product.id);
   const engravingConfig = product.engraving;
-  const sizeLabels = sizeGuide?.sizeLabels ?? [];
+  const sizeLabels = getRingSizeLabels(product, sizeGuide, content.ringSizes);
   const showSizeSelector = sizeLabels.length > 0;
+  const metalColorSelectable = isMetalColorSelectable(product);
+  const showMetalColor = content.metalColors.length > 0;
 
   useEffect(() => {
     setEngravingSelection(null);
     setRingSize("");
-  }, [product.id]);
+    setSelectedMetal(getDefaultMetalColorId(product, getMetalColorOptions(product)));
+  }, [product]);
 
   const activeMetal = content.metalColors.find((color) => color.id === selectedMetal);
 
@@ -107,28 +112,39 @@ const ProductDetailSidebar = ({
             </h1>
           </header>
 
-          <div className="flex flex-col gap-4">
-            <p className="font-gill text-base leading-110 text-darkblack">Metal Color</p>
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-6">
-                {content.metalColors.map((metal) => (
-                  <button
-                    key={metal.id}
-                    type="button"
-                    aria-label={metal.label}
-                    aria-pressed={selectedMetal === metal.id}
-                    onClick={() => setSelectedMetal(metal.id)}
-                    className={cn(
-                      "size-51 shrink-0",
-                      selectedMetal === metal.id && "border-2 border-darkblack",
-                    )}
-                    style={{ backgroundColor: metal.color }}
-                  />
-                ))}
+          {showMetalColor ? (
+            <div className="flex flex-col gap-4">
+              <p className="font-gill text-base leading-110 text-darkblack">Metal Color</p>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-6">
+                  {content.metalColors.map((metal) =>
+                    metalColorSelectable ? (
+                      <button
+                        key={metal.id}
+                        type="button"
+                        aria-label={metal.label}
+                        aria-pressed={selectedMetal === metal.id}
+                        onClick={() => setSelectedMetal(metal.id)}
+                        className={cn(
+                          "size-51 shrink-0",
+                          selectedMetal === metal.id && "border-2 border-darkblack",
+                        )}
+                        style={{ backgroundColor: metal.color }}
+                      />
+                    ) : (
+                      <div
+                        key={metal.id}
+                        aria-label={metal.label}
+                        className="size-51 shrink-0 border-2 border-darkblack"
+                        style={{ backgroundColor: metal.color }}
+                      />
+                    ),
+                  )}
+                </div>
+                <p className="font-gill text-base leading-110 text-neutral500">{activeMetal?.label}</p>
               </div>
-              <p className="font-gill text-base leading-110 text-neutral500">{activeMetal?.label}</p>
             </div>
-          </div>
+          ) : null}
 
           <div className="flex flex-col gap-6">
             {showSizeSelector ? (
@@ -141,18 +157,18 @@ const ProductDetailSidebar = ({
                     Find your size
                   </DetailTextLink>
                 </div>
-                <Select value={ringSize} onValueChange={setRingSize}>
-                  <SelectTrigger className="h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0">
-                    <SelectValue placeholder="-select-" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {sizeLabels.map((size) => (
-                      <SelectItem key={size} value={size}>
-                        {size}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <InlineCustomSelect
+                  id="product-ring-size"
+                  label={sizeGuide?.sizeFieldLabel ?? "Size"}
+                  labelClassName="sr-only"
+                  value={ringSize}
+                  options={sizeLabels}
+                  placeholder="-select-"
+                  onChange={setRingSize}
+                  triggerClassName="rounded-none border-0 bg-aboutInactive px-3 text-base text-darkblack"
+                  listClassName="bg-aboutInactive"
+                  optionClassName="text-base"
+                />
               </div>
             ) : null}
 

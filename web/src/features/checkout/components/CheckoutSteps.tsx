@@ -22,8 +22,6 @@ import type {
   MagentoShippingMethodOption,
 } from "@/services/magento/cart/magentoCart.types";
 import { formatCartPrice } from "@/features/cart/utils/formatCartLine";
-import type { CustomerAddress } from "@/services/customer/customer-account.types";
-import CheckoutSavedAddressPicker from "./CheckoutSavedAddressPicker";
 
 const formatShippingAmount = (amount: number) => (amount === 0 ? "Free" : formatCartPrice(amount));
 
@@ -46,9 +44,7 @@ type CheckoutFormStepProps = {
   onVerifyPhone: () => void;
   validation: CheckoutFormValidationProps;
   isAuthenticated?: boolean;
-  savedAddresses?: CustomerAddress[];
-  onSelectSavedAddress?: (address: CustomerAddress) => void;
-  onUseNewAddress?: () => void;
+  hasSavedDeliveryAddress?: boolean;
 };
 
 type AddressFieldConfig = {
@@ -199,9 +195,7 @@ export const CheckoutFormStep = ({
   onVerifyPhone,
   validation,
   isAuthenticated = false,
-  savedAddresses = [],
-  onSelectSavedAddress,
-  onUseNewAddress,
+  hasSavedDeliveryAddress = true,
 }: CheckoutFormStepProps) => (
   <div className="flex flex-col gap-6">
     <CheckoutSectionCard>
@@ -250,51 +244,52 @@ export const CheckoutFormStep = ({
 
     <CheckoutSectionCard gapClassName="lg:gap-8 gap-6">
       <CheckoutSubheading>Delivery Address</CheckoutSubheading>
-      {isAuthenticated && savedAddresses.length > 0 ? (
-        <CheckoutSavedAddressPicker
-          addresses={savedAddresses}
-          selectedUid={form.selectedShippingAddressUid}
-          usingNewAddress={form.addressEntryMode === "new"}
-          onSelect={(address) => onSelectSavedAddress?.(address)}
-          onUseNewAddress={() => onUseNewAddress?.()}
-        />
-      ) : null}
-      <div className="space-y-6">
-        <CheckoutSubheading className="lg:text-xl text-base">SHIPPING ADDRESS</CheckoutSubheading>
-        <CheckoutAddressFields
-          idPrefix="checkout-shipping"
-          fields={SHIPPING_ADDRESS_FIELDS}
-          form={form}
-          onChange={onChange}
-          validation={validation}
-        />
-        {isAuthenticated && form.addressEntryMode === "new" ? (
-          <CheckoutCheckbox
-            checked={form.saveNewAddress}
-            onChange={(checked) => onChange("saveNewAddress", checked)}
-            label="Save this address to my account"
-          />
-        ) : null}
-      </div>
+      {isAuthenticated && !hasSavedDeliveryAddress ? (
+        <p className="font-gill text-sm font-light leading-130 text-neutral500">
+          Add a delivery address in{" "}
+          <a href="/profile?section=addresses" className="border-b border-darkblack text-darkblack">
+            My Addresses
+          </a>{" "}
+          on your profile before continuing checkout.
+        </p>
+      ) : (
+        <>
+          {isAuthenticated ? (
+            <p className="font-gill text-sm font-light leading-130 text-neutral500">
+              Prefilled from your saved address. Any changes here apply to this order only.
+            </p>
+          ) : null}
+          <div className="space-y-6">
+            <CheckoutSubheading className="lg:text-xl text-base">SHIPPING ADDRESS</CheckoutSubheading>
+            <CheckoutAddressFields
+              idPrefix="checkout-shipping"
+              fields={SHIPPING_ADDRESS_FIELDS}
+              form={form}
+              onChange={onChange}
+              validation={validation}
+            />
+          </div>
 
-      <div className="lg:space-y-6 space-y-4">
-        <CheckoutSubheading className="lg:text-xl text-base">BILLING ADDRESS</CheckoutSubheading>
-        <CheckoutCheckbox
-          checked={form.billingSameAsShipping}
-          onChange={(checked) => onChange("billingSameAsShipping", checked)}
-          label="My billing address is the same as my shipping address"
-        />
-      </div>
+          <div className="lg:space-y-6 space-y-4">
+            <CheckoutSubheading className="lg:text-xl text-base">BILLING ADDRESS</CheckoutSubheading>
+            <CheckoutCheckbox
+              checked={form.billingSameAsShipping}
+              onChange={(checked) => onChange("billingSameAsShipping", checked)}
+              label="My billing address is the same as my shipping address"
+            />
+          </div>
 
-      {!form.billingSameAsShipping ? (
-        <CheckoutAddressFields
-          idPrefix="checkout-billing"
-          fields={BILLING_ADDRESS_FIELDS}
-          form={form}
-          onChange={onChange}
-          validation={validation}
-        />
-      ) : null}
+          {!form.billingSameAsShipping ? (
+            <CheckoutAddressFields
+              idPrefix="checkout-billing"
+              fields={BILLING_ADDRESS_FIELDS}
+              form={form}
+              onChange={onChange}
+              validation={validation}
+            />
+          ) : null}
+        </>
+      )}
     </CheckoutSectionCard>
   </div>
 );

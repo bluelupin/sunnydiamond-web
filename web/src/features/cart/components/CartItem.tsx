@@ -23,7 +23,7 @@ interface CartItemProps {
   onUpdateOptions: (lineItemId: string, options: Partial<CartLineOptions>) => void;
 }
 
-const ENGRAVING_PLACEHOLDER = "Diya Gupta";
+const ENGRAVING_EMPTY_LABEL = "Metal Engraving (Optional)";
 
 const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
   const { product, quantity, options } = item;
@@ -32,6 +32,7 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
   const wishlisted = isWishlisted(product.id);
   const isGift = Boolean(options.isGift || item.gifting);
   const engravingMaxCharacters = options.engravingMaxCharacters;
+  const hasEngraving = Boolean(options.engraving?.trim());
   const [isEditingEngraving, setIsEditingEngraving] = useState(false);
   const [engravingDraft, setEngravingDraft] = useState(options.engraving ?? "");
 
@@ -162,7 +163,6 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
                 onChange={(event) => setEngravingDraft(clampDraft(event.target.value))}
                 onKeyDown={handleEngravingKeyDown}
                 maxLength={engravingMaxCharacters}
-                placeholder={ENGRAVING_PLACEHOLDER}
                 aria-label="Engraving text"
                 autoFocus
                 className="h-full w-full min-w-0 border-0 bg-transparent font-gill text-sm leading-110 text-darkblack outline-none placeholder:text-neutral500 lg:text-base"
@@ -170,12 +170,12 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
             ) : (
               <p
                 className={
-                  options.engraving?.trim()
+                  hasEngraving
                     ? "truncate font-gill text-sm leading-110 text-darkblack lg:text-base"
                     : "truncate font-gill text-sm leading-110 text-neutral500 lg:text-base"
                 }
               >
-                {options.engraving?.trim() || "Not set"}
+                {hasEngraving ? options.engraving!.trim() : ENGRAVING_EMPTY_LABEL}
               </p>
             )}
           </div>
@@ -184,7 +184,7 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
             onClick={handleEngravingAction}
             className="h-14 w-auto shrink-0 px-5 uppercase lg:px-7"
           >
-            {isEditingEngraving ? "Save" : "Modify"}
+            {isEditingEngraving ? "Save" : hasEngraving ? "Modify" : "Add"}
           </CartOutlineButton>
         </div>
       </div>

@@ -514,7 +514,6 @@ export async function setGuestBillingAddress(
 export type CheckoutPrepareOptions = {
   isAuthenticated: boolean;
   customerEmail?: string;
-  shippingAddressUid?: string | null;
 };
 
 export async function applyCheckoutAddresses(
@@ -528,19 +527,8 @@ export async function applyCheckoutAddresses(
     await setGuestEmailOnCart(cartId, resolveGuestCheckoutEmail(form.phoneOrEmail), signal);
   }
 
-  let state: GuestCartState;
-
-  if (options.isAuthenticated && options.shippingAddressUid) {
-    state = await setCartShippingAddressByUid(
-      cartId,
-      options.shippingAddressUid,
-      lineMetadata,
-      signal,
-    );
-  } else {
-    const shippingAddress = mapCheckoutFormToShippingAddress(form);
-    state = await setGuestShippingAddress(cartId, shippingAddress, lineMetadata, signal);
-  }
+  const shippingAddress = mapCheckoutFormToShippingAddress(form);
+  let state = await setGuestShippingAddress(cartId, shippingAddress, lineMetadata, signal);
 
   if (form.billingSameAsShipping) {
     state = await setGuestBillingAddress(cartId, null, true, lineMetadata, signal);

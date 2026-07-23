@@ -1,13 +1,8 @@
 import type { Product } from "@/features/products/data/products";
 import type { ProductDetailContent, ProductDetailPricing } from "../types/productDetail";
+import { getMetalColorOptions } from "@/features/products/utils/metalColorOptions.utils";
 
 const ringSizes = ["4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"];
-
-const metalColors = [
-  { id: "gold", label: "Gold", color: "#D1B57A" },
-  { id: "rose", label: "Rose Gold", color: "#D9B0CB" },
-  { id: "silver", label: "Silver", color: "#CCCCCC" },
-] as const;
 
 const benefits = [
   {
@@ -82,7 +77,7 @@ export function getProductDetailContent(product: Product): ProductDetailContent 
 
   return {
     attributes,
-    metalColors: [...metalColors],
+    metalColors: getMetalColorOptions(product),
     ringSizes,
     benefits,
     accordions: buildAccordions(product),
