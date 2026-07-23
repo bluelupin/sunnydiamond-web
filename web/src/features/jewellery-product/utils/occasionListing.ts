@@ -47,10 +47,12 @@ const GENERIC_PRODUCT_LISTING_PATHS = new Set(["/products", "/products/"]);
 export function buildOccasionCardHref({
   title,
   slug,
+  filterSlug,
   ctaUrl,
 }: {
   title?: string | null;
   slug?: string | null;
+  filterSlug?: string | null;
   ctaUrl?: string | null;
 }): string {
   const normalizedCtaUrl = ctaUrl?.trim();
@@ -58,6 +60,7 @@ export function buildOccasionCardHref({
     return normalizedCtaUrl;
   }
 
-  const occasionSlug = slug?.trim() || slugifyOccasionTitle(title);
+  const occasionSlug =
+    filterSlug?.trim() || slug?.trim() || slugifyOccasionTitle(title);
   return buildJewelleryOccasionHref(occasionSlug);
 }

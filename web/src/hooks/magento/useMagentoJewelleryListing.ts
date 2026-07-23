@@ -134,9 +134,7 @@ export function useMagentoJewelleryListing({
           setProducts(data.products);
         }
 
-        if (data.totalCount > 0) {
-          setTotalCount(data.totalCount);
-        }
+        setTotalCount(data.totalCount);
 
         setTotalPages(data.totalPages);
         totalPagesRef.current = data.totalPages;

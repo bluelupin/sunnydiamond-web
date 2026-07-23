@@ -1,5 +1,6 @@
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 import type { MagentoProductListItem, MagentoMediaGalleryItem } from "./magentoProduct.types";
+import fallBackImage from "@/assets/fallBackImage.png";
 import {
   formatMagentoFacetLabel,
   getMagentoCustomAttributeValue,
@@ -83,15 +84,14 @@ export function mapMagentoProductToJewelleryListing(
     return null;
   }
 
-  const { primaryImage, lifestyleImage } = resolveMagentoProductImages(
+  const { primaryImage: resolvedPrimaryImage, lifestyleImage } = resolveMagentoProductImages(
     product.media_gallery,
     product.image?.url,
     product.model_wear_image,
   );
 
-  if (!primaryImage) {
-    return null;
-  }
+  // Keep products that only have Magento's Luma placeholder so PLP count matches the grid.
+  const primaryImage = resolvedPrimaryImage || fallBackImage;
 
   const customAttributes = product.custom_attributesV2?.items;
   const isBestseller = isMagentoBestSeller(customAttributes);

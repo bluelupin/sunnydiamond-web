@@ -31,6 +31,7 @@ function OccasionCardItem({
   const href = buildOccasionCardHref({
     title: card.title,
     slug: card.slug,
+    filterSlug: card.filterSlug,
     ctaUrl: card?.cta?.url || card?.cta?.to,
   });
   const ctaLabel = card?.cta?.label?.trim() || DEFAULT_CTA_LABEL;
