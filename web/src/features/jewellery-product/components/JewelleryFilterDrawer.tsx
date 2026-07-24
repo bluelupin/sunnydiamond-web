@@ -377,16 +377,16 @@ const JewelleryFilterDrawer = ({
               type="button"
               onClick={() => onApply(draft)}
               disabled={!canApplyFilters}
-              className="btn-dark-slide inline-flex h-[56px] w-full items-center justify-center px-[28px] py-[20px] font-gill text-sm font-normal uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
+              className="btn-dark-slide inline-flex h-[56px] w-full items-center justify-center border border-darkblack px-[28px] py-[20px] font-gill text-sm font-normal uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Apply Filters
+              <span className="relative z-10">Apply Filters</span>
             </button>
             <button
               type="button"
               onClick={handleClearAll}
               className="btn-border-slide inline-flex h-[56px] w-full items-center justify-center border-[0.8px] border-neutral300 px-[28px] py-[20px] font-gill text-sm font-normal uppercase leading-110 text-darkblack"
             >
-              Clear All
+              <span className="relative z-10">Clear All</span>
             </button>
           </div>
         </PanelFooter>
