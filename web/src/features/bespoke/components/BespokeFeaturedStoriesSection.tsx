@@ -31,6 +31,7 @@ import { bespokeUiDefaults } from "@/services/bespoke/bespoke-fallbacks";
 type FeaturedSlide = NormalizedBespokeFeaturedSlide;
 
 type FeaturedStoryModalSlide = {
+  documentId?: string;
   src: string;
   alt: string;
   modalTitle: string;
@@ -744,6 +745,7 @@ const BespokeFeaturedStoriesSection = ({
     (image: BespokePastCreationImage) => {
       if (slides.length === 0) {
         setModalSlideOverride({
+          documentId: image.documentId,
           src: image.src,
           alt: image.alt,
           modalTitle: pastCreations?.title || bespokeUiDefaults.pastCreationsTitle,
@@ -765,6 +767,7 @@ const BespokeFeaturedStoriesSection = ({
       } else {
         setModalSlideOverride({
           ...baseSlide,
+          documentId: image.documentId ?? baseSlide.documentId,
           modalImages: [{ src: image.src, alt: image.alt }, ...baseSlide.modalImages],
         });
         setModalContext({ slideIndex: resolved.slideIndex, imageIndex: 0 });

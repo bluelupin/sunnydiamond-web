@@ -12,6 +12,7 @@ import {
 import { WISHLIST_STORAGE_KEY } from "@/features/wishlist/constants";
 
 export type AuthCustomer = {
+  id: number;
   firstname: string;
   lastname: string;
   email: string;

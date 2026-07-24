@@ -9,9 +9,12 @@ import {
   type TransitionEvent,
 } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { cn } from "@/shared/utils/cn";
+import { useToast } from "@/shared/hooks/use-toast";
+import { useAuth } from "@/features/auth/context/AuthContext";
+import { getLoginHrefForReturn } from "@/features/auth/utils/authNavigation";
+import { saveCustomerCreationClient } from "@/services/customer/customer-saved-creations.client";
 import { bespokeFeaturedStoryModalFigmaSpec } from "@/features/bespoke/data/content";
 
 const spec = bespokeFeaturedStoryModalFigmaSpec;
@@ -22,6 +25,7 @@ type FeaturedStoryModalImage = {
 };
 
 type FeaturedStoryModalSlide = {
+  documentId?: string;
   src: string;
   alt: string;
   modalTitle: string;
@@ -253,15 +257,67 @@ type FeaturedStoryModalPanelProps = {
 const FeaturedStoryModalPanel = ({
   slide,
   modalCtaLabel,
-  modalCtaHref,
   initialImageIndex = 0,
   onClose,
 }: FeaturedStoryModalPanelProps) => {
+  const router = useRouter();
+  const { toast } = useToast();
+  const { status } = useAuth();
   const [activeImageIndex, setActiveImageIndex] = useState(initialImageIndex);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     setActiveImageIndex(initialImageIndex);
   }, [slide.src, initialImageIndex]);
+
+  const handleSaveInspiration = async () => {
+    const creationDocumentId = slide.documentId?.trim();
+    if (!creationDocumentId) {
+      toast({
+        title: "Could not save inspiration",
+        description: "This creation is missing a CMS id. Please try another story.",
+      });
+      return;
+    }
+
+    // Wait for auth hydration — treating "loading" as guest was aborting saves.
+    if (status === "loading") {
+      toast({
+        title: "Just a moment",
+        description: "Checking your sign-in status. Tap Save again in a second.",
+      });
+      return;
+    }
+
+    if (status !== "authenticated") {
+      onClose();
+      router.push(getLoginHrefForReturn("/bespoke-jewellery"));
+      return;
+    }
+
+    if (isSaving) return;
+    setIsSaving(true);
+    try {
+      const result = await saveCustomerCreationClient(creationDocumentId);
+      toast({
+        title: result.alreadySaved ? "Already saved" : "Saved as inspiration",
+        description: result.alreadySaved
+          ? "This creation is already in your Bespoke Inspirations."
+          : "Find it anytime under Profile → Bespoke Inspirations.",
+      });
+      onClose();
+    } catch (error) {
+      toast({
+        title: "Could not save inspiration",
+        description: error instanceof Error ? error.message : "Please try again.",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const canSave = Boolean(slide.documentId?.trim());
+  const saveDisabled = isSaving || status === "loading";
 
   return (
     <div className="relative flex h-full min-h-0 w-full flex-col bg-black max-md:h-[85vh] max-md:w-full">
@@ -300,13 +356,21 @@ const FeaturedStoryModalPanel = ({
             {slide.modalDescription}
           </p>
         </div>
-        <Link
-          href={modalCtaHref}
-          onClick={onClose}
-          className="w-fit inline-flex border-b border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-80"
+        <button
+          type="button"
+          onClick={() => {
+            void handleSaveInspiration();
+          }}
+          disabled={saveDisabled}
+          className="w-fit inline-flex border-b border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-80 disabled:opacity-60"
         >
-          {modalCtaLabel}
-        </Link>
+          {isSaving ? "Saving..." : status === "loading" ? "Loading..." : modalCtaLabel}
+        </button>
+        {!canSave ? (
+          <p className="font-gill text-xs font-light leading-110 text-white/70">
+            Save unavailable for this item (missing CMS document id).
+          </p>
+        ) : null}
       </div>
     </div>
   );

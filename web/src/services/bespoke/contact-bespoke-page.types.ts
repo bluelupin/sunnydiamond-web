@@ -171,6 +171,8 @@ export type NormalizedBespokeStory = {
 };
 
 export type NormalizedBespokeFeaturedSlide = {
+  /** Strapi featured-story / past-creation documentId — required to save as inspiration. */
+  documentId?: string;
   src: string;
   alt: string;
   modalTitle: string;
@@ -191,6 +193,7 @@ export type NormalizedBespokeFeaturedStories = {
 };
 
 export type NormalizedBespokePastCreationImage = {
+  documentId?: string;
   src: string;
   alt: string;
   width: number;

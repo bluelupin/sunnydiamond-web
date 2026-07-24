@@ -103,6 +103,8 @@ export const bespokePastCreationsFigmaSpec = {
 } as const;
 
 export type BespokePastCreationImage = {
+  /** Strapi past-creation / featured-story documentId for Save as Inspiration. */
+  documentId?: string;
   src: string;
   alt: string;
   width: number;

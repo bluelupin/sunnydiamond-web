@@ -200,6 +200,7 @@ const mapFeaturedCardToSlide = (
     .filter((item): item is { src: string; alt: string } => item != null);
 
   return {
+    documentId: cleanText(card.documentId) || undefined,
     src: coverUrl,
     alt: coverAlt,
     modalTitle: title,
@@ -267,12 +268,14 @@ const mapFeaturedStories = (
 const mapMediaToPastCreationImage = (
   media: unknown,
   fallbackAlt: string,
+  documentId?: string,
 ): NormalizedBespokePastCreationImage | null => {
   const file = extractStrapiImage(media);
   const src = resolveCmsMediaUrl(media);
   if (!src) return null;
 
   return {
+    documentId: documentId || undefined,
     src,
     alt: resolveCmsAltText(media) ?? fallbackAlt,
     width: file?.width ?? 400,
@@ -288,10 +291,11 @@ const mapPastCreations = (
 
   for (const item of items ?? []) {
     const alt = cleanText(item.title) ?? "Past creation";
+    const documentId = cleanText(item.documentId) || undefined;
     const mediaList = [item.coverImage, ...(item.gallery ?? [])];
 
     for (const media of mediaList) {
-      const mapped = mapMediaToPastCreationImage(media, alt);
+      const mapped = mapMediaToPastCreationImage(media, alt, documentId);
       if (!mapped || seenUrls.has(mapped.src)) continue;
       seenUrls.add(mapped.src);
       images.push(mapped);

@@ -24,6 +24,7 @@ import {
   createGenericSubmission,
   getGenericFormByTag,
 } from "@/services/forms/generic-form.service";
+import { useAuth } from "@/features/auth/context/AuthContext";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import { wishlistMovedToastDurationMs } from "@/features/wishlist/data/content";
 import { DetailDarkButton } from "./shared";
@@ -52,6 +53,7 @@ const BookStoreVisitPanel = ({
   onBack,
 }: BookStoreVisitPanelProps) => {
   const profileEnabled = variant !== "modal" || open;
+  const { customer } = useAuth();
   const { contact: profileContact } = useCustomerProfileContact(profileEnabled);
   const [step, setStep] = useState<BookVisitStep>("select-store");
   const [stores, setStores] = useState<BookStoreVisitStore[]>(BOOK_STORE_VISIT_STORES);
@@ -291,6 +293,7 @@ const BookStoreVisitPanel = ({
         preferredDate: date || undefined,
         selectedTimeSlot: selectedSlot ?? undefined,
         notes: composedNotes || undefined,
+        ...(customer?.id != null ? { magentoCustomerId: customer.id } : {}),
         sourcePage:
           typeof window !== "undefined" ? window.location.pathname : "/store-locator",
         consentAccepted: true,

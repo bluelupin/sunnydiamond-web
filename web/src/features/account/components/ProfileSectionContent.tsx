@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import type { AuthCustomer } from "@/features/auth/context/AuthContext";
-import { CartPrimaryLink } from "@/features/cart/components/CartFlowUi";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { cn } from "@/shared/utils/cn";
 import type { ProfileSectionId } from "../types";
 import ProfileAddressesSection from "./ProfileAddressesSection";
+import ProfileAppointmentsSection from "./ProfileAppointmentsSection";
+import ProfileBespokeSection from "./ProfileBespokeSection";
 import ProfileOrdersSection from "./ProfileOrdersSection";
 
 type ProfileSectionContentProps = {
@@ -38,32 +39,6 @@ function ProfilePanel({
         ) : null}
       </div>
       {children}
-    </div>
-  );
-}
-
-function EmptyState({
-  title,
-  description,
-  actionHref,
-  actionLabel,
-}: {
-  title: string;
-  description: string;
-  actionHref?: string;
-  actionLabel?: string;
-}) {
-  return (
-    <div className="flex flex-col items-start gap-4 rounded-sm border border-dashed border-neutral300 bg-gray200/60 p-6">
-      <div className="space-y-2">
-        <p className="font-gill text-base font-normal leading-110 text-darkblack">{title}</p>
-        <p className="font-gill text-sm font-light leading-110 text-neutral500">{description}</p>
-      </div>
-      {actionHref && actionLabel ? (
-        <CartPrimaryLink href={actionHref} className="w-full max-w-xs">
-          {actionLabel}
-        </CartPrimaryLink>
-      ) : null}
     </div>
   );
 }
@@ -122,12 +97,7 @@ const ProfileSectionContent = ({ section, customer }: ProfileSectionContentProps
         title="My Appointments"
         description="Book a visit or manage your upcoming consultations."
       >
-        <EmptyState
-          title="No upcoming appointments"
-          description="Schedule a private consultation at your nearest Sunny Diamonds showroom."
-          actionHref="/book-an-appointment"
-          actionLabel="Book an Appointment"
-        />
+        <ProfileAppointmentsSection />
       </ProfilePanel>
     );
   }
@@ -136,17 +106,9 @@ const ProfileSectionContent = ({ section, customer }: ProfileSectionContentProps
     return (
       <ProfilePanel
         title="Bespoke Inspirations"
-        description="Commission a one-of-a-kind piece crafted around your story."
+        description="Creations you’ve saved for custom jewellery conversations."
       >
-        <div className="space-y-4">
-          <p className="font-gill text-base font-light leading-110 text-neutral500">
-            Explore bespoke designs, share your inspiration, and work with our master artisans to
-            create jewellery made only for you.
-          </p>
-          <CartPrimaryLink href="/bespoke-jewellery" className="w-full max-w-xs">
-            Explore Bespoke
-          </CartPrimaryLink>
-        </div>
+        <ProfileBespokeSection />
       </ProfilePanel>
     );
   }

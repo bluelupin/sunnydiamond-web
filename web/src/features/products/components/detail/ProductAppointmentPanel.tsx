@@ -18,6 +18,7 @@ import {
   createProductSubmission,
   getProductFormByTag,
 } from "@/services/forms/product-form.service";
+import { useAuth } from "@/features/auth/context/AuthContext";
 import { wishlistMovedToastDurationMs } from "@/features/wishlist/data/content";
 import {
   PRODUCT_APPOINTMENT_PANEL_CONFIG,
@@ -59,6 +60,7 @@ const ProductAppointmentForm = ({
 }: ProductAppointmentFormProps) => {
   const isPersonalise = variant === "personalise";
   const isScheduleVideoCall = variant === "schedule-video-call";
+  const { customer } = useAuth();
   const { contact: profileContact } = useCustomerProfileContact(open);
 
   const [name, setName] = useState("");
@@ -243,6 +245,7 @@ const ProductAppointmentForm = ({
             customerName: name.trim(),
             customerPhone: `${countryCode} ${phone}`.trim(),
             customerEmail: email.trim() || undefined,
+            ...(customer?.id != null ? { magentoCustomerId: customer.id } : {}),
             requestDetails: note.trim() || undefined,
             requestedDate: isScheduleVideoCall ? date || undefined : undefined,
             selectedTimeSlot: isScheduleVideoCall ? (selectedSlot ?? undefined) : undefined,

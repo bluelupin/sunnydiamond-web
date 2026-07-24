@@ -19,6 +19,10 @@ export const STRAPI_ENDPOINTS = {
   productSubmissionsSubmit: "api/product-submissions/submit",
   /** Custom creation submit — JSON or multipart `data` + `referenceImage`. */
   bespokeSubmissionsSubmit: "api/bespoke-submissions/submit",
+  /** Authenticated customer appointments (Bearer Magento customer token). */
+  customerAppointments: "api/customer/appointments",
+  /** Authenticated customer saved bespoke creations. */
+  customerSavedCreations: "api/customer/saved-creations",
   /** @deprecated Legacy single-type slug — prefer split homepage endpoints */
   homepage: "homepage",
 } as const;

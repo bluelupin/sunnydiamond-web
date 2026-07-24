@@ -23,6 +23,7 @@ import {
   getProductFormByTag,
   type NormalizedProductForm,
 } from "@/services/forms/product-form.service";
+import { useAuth } from "@/features/auth/context/AuthContext";
 import { wishlistMovedToastDurationMs } from "@/features/wishlist/data/content";
 import {
   invalidFieldClassName,
@@ -554,6 +555,7 @@ const TryAtHomeAddressStep = ({
 
 const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
   const router = useRouter();
+  const { customer } = useAuth();
   const [step, setStep] = useState<TryAtHomeStep>("details");
   const [cmsForm, setCmsForm] = useState<NormalizedProductForm | null>(null);
   const [details, setDetails] = useState<TryAtHomeDetailsData | null>(null);
@@ -647,6 +649,7 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
         customerName: details.name.trim(),
         customerPhone: `${details.countryCode} ${details.phone}`.trim(),
         customerEmail: details.email.trim() || undefined,
+        ...(customer?.id != null ? { magentoCustomerId: customer.id } : {}),
         requestDetails: requestDetails || undefined,
         requestedDate: details.date || undefined,
         selectedTimeSlot: details.selectedSlot ?? undefined,
