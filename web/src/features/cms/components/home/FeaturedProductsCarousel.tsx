@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Slider, { type Settings } from "react-slick";
@@ -26,18 +26,46 @@ function normalizeIndex(index: number, total: number) {
   return ((index % total) + total) % total;
 }
 
+type SlideCropVariant = "center" | "left-peek" | "right-peek";
+
+function getSlideVariant(
+  slideIndex: number,
+  activeIndex: number,
+  total: number,
+): SlideCropVariant {
+  if (total <= 1) return "center";
+
+  const slide = normalizeIndex(slideIndex, total);
+  const active = normalizeIndex(activeIndex, total);
+  if (slide === active) return "center";
+
+  const prev = normalizeIndex(active - 1, total);
+  const next = normalizeIndex(active + 1, total);
+  if (slide === prev) return "left-peek";
+  if (slide === next) return "right-peek";
+  return "center";
+}
+
 function CarouselSlideImage({
   src,
   alt,
+  variant,
   priority,
 }: {
   src: string;
   alt: string;
+  variant: SlideCropVariant;
   priority?: boolean;
 }) {
   return (
     <div className="featured-slide-viewport">
-      <div className="featured-slide-image">
+      <div
+        className={cn(
+          "featured-slide-image",
+          variant === "left-peek" && "featured-slide-image--left",
+          variant === "right-peek" && "featured-slide-image--right",
+        )}
+      >
         <Image
           src={src}
           alt={alt}
@@ -62,7 +90,6 @@ export default function FeaturedProductsCarousel({
   sectionLabel: string;
 }) {
   const sliderRef = useRef<Slider>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
   const initialIndex = items.length >= 3 ? 1 : 0;
   const [activeIndex, setActiveIndex] = useState(initialIndex);
 
@@ -70,28 +97,6 @@ export default function FeaturedProductsCarousel({
   const showThreeUp = items.length >= 3;
   const slidesToShow = showThreeUp ? 3 : items.length;
   const activeItem = items[normalizeIndex(activeIndex, items.length)] ?? items[0];
-
-  useEffect(() => {
-    const refreshSlider = () => {
-      sliderRef.current?.innerSlider?.onWindowResized?.();
-    };
-
-    refreshSlider();
-    window.addEventListener("resize", refreshSlider);
-
-    const track = trackRef.current;
-    const resizeObserver =
-      typeof ResizeObserver !== "undefined" && track
-        ? new ResizeObserver(refreshSlider)
-        : null;
-
-    resizeObserver?.observe(track);
-
-    return () => {
-      window.removeEventListener("resize", refreshSlider);
-      resizeObserver?.disconnect();
-    };
-  }, [items.length]);
 
   const handleBeforeChange = useCallback(
     (_current: number, next: number) => {
@@ -184,13 +189,14 @@ export default function FeaturedProductsCarousel({
       onKeyDown={onKeyDown}
       className="featured-products-carousel relative w-full max-w-full outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
     >
-      <div ref={trackRef} className="featured-products-track relative w-full max-w-full">
+      <div className="featured-products-track relative w-full max-w-full">
         <Slider ref={sliderRef} {...sliderSettings}>
           {items.map((item, index) => (
             <div key={String(item.id)} className="featured-products-slide">
               <CarouselSlideImage
                 src={item.image}
                 alt={item.name}
+                variant={getSlideVariant(index, activeIndex, items.length)}
                 priority={index === initialIndex}
               />
             </div>

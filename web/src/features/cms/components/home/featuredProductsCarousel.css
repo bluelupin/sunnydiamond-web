@@ -92,7 +92,16 @@
   max-height: 140px;
   flex-shrink: 0;
   margin-inline: auto;
-  transition: width 500ms ease, height 500ms ease, max-width 500ms ease, max-height 500ms ease;
+  transition: width 500ms ease, height 500ms ease, max-width 500ms ease, max-height 500ms ease,
+    left 500ms ease, right 500ms ease;
+}
+
+.featured-slide-image--left {
+  right: 40%;
+}
+
+.featured-slide-image--right {
+  left: 40%;
 }
 
 @media (min-width: 640px) {
