@@ -21,7 +21,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
           isAuthPage
             ? "relative flex-1 min-h-0 overflow-y-auto"
             : offsetMain
-              ? "flex-1 pt-[calc(4.5rem+env(safe-area-inset-top,0px))] md:pt-104 lg:pt-104"
+              ? "flex-1 pt-[calc(4.5rem+env(safe-area-inset-top,0px))] md:landscape:pt-104 lg:landscape:pt-104"
               : "flex-1"
         }
       >

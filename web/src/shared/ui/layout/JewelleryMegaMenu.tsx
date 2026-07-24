@@ -6,8 +6,8 @@ import { pageContainerClassName } from "@/shared/ui/layout/PageContainer";
 import { cn } from "@/shared/utils/cn";
 
 type JewelleryMegaMenuProps = {
-  onMouseEnter: () => void;
-  onMouseLeave: () => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
   onClose: () => void;
 };
 

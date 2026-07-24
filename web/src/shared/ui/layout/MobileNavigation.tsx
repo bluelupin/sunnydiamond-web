@@ -456,7 +456,7 @@ const MobileNavigation = ({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex flex-col bg-white md:hidden"
+      className="fixed inset-0 z-[60] flex flex-col bg-white md:landscape:hidden"
       role="dialog"
       aria-modal="true"
       aria-label="Mobile navigation"

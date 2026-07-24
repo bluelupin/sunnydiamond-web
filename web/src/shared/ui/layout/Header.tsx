@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -27,6 +27,7 @@ import WishlistIcon from "@/assets/Icons/WishlistIcon";
 import AccountMenu from "@/features/auth/components/AccountMenu";
 import MenuIcon from "@/assets/Icons/MenuIcon";
 import HeaderIconBadge from "@/shared/ui/layout/HeaderIconBadge";
+import { useCanHover } from "@/shared/hooks/use-can-hover";
 
 const JewelleryMegaMenu = dynamic(
   () =>
@@ -51,6 +52,7 @@ const Header = () => {
   const { totalItems: cartCount } = useCart();
   const { totalItems: wishlistCount } = useWishlist();
   const pathname = usePathname() ?? "/";
+  const canHoverNav = useCanHover();
 
   const isAuthPage = isAuthRoute(pathname);
   const menuOpen = mobileMenuOpen || jewelleryMenuOpen;
@@ -99,6 +101,23 @@ const Header = () => {
     setJewelleryMenuOpen(false);
   }, []);
 
+  const toggleJewelleryMenu = useCallback(() => {
+    if (jewelleryMenuOpen) {
+      closeJewelleryMenuNow();
+      return;
+    }
+    openJewelleryMenu();
+  }, [closeJewelleryMenuNow, jewelleryMenuOpen, openJewelleryMenu]);
+
+  const handleJewelleryNavClick = useCallback(
+    (event: MouseEvent<HTMLAnchorElement>) => {
+      if (canHoverNav) return;
+      event.preventDefault();
+      toggleJewelleryMenu();
+    },
+    [canHoverNav, toggleJewelleryMenu],
+  );
+
   const textClass = isLightOverlay ? "text-white" : "text-darkblack";
   const logoClass = isLightOverlay ? "text-white" : isAuthPage ? "text-darkblack" : "text-darkMagenta";
   const hoverClass = isLightOverlay ? "hover:text-ivory/70" : "hover:text-neutral500";
@@ -117,7 +136,7 @@ const Header = () => {
       aria-label={siteConfig.brand.name}
       className={cn("inline-flex shrink-0 items-center justify-center leading-none", logoClass)}
     >
-      <SDLogo className="!h-16 !w-20 md:!h-14 md:!w-14 lg:!h-[62px] lg:!w-[62px]" />
+      <SDLogo className="!h-16 !w-20 md:landscape:!h-14 md:landscape:!w-14 lg:landscape:!h-[62px] lg:landscape:!w-[62px]" />
     </Link>
   );
 
@@ -133,13 +152,13 @@ const Header = () => {
       >
         <div
           className={cn(
-            "w-full max-md:pt-[env(safe-area-inset-top,0px)]",
+            "w-full max-md:pt-[env(safe-area-inset-top,0px)] md:max-desktop:portrait:pt-[env(safe-area-inset-top,0px)] md:landscape:pt-0",
             headerSurfaceClass,
           )}
         >
           {/* Figma 692:6742 — solid PDP header: white bg, py-24, dark nav; mobile bar 64px */}
-          <div className="relative mx-auto flex h-16 w-full max-w-1440 items-center justify-between px-5 max-md:pt-2 md:h-[104px] md:px-8 md:pt-0 lg:px-10 lg:py-6 2xl:max-w-1920 2xl:px-[60px]">
-          <div className="flex w-[120px] items-center gap-6 md:hidden">
+          <div className="relative mx-auto flex h-16 w-full max-w-1440 items-center justify-between px-5 max-md:pt-2 md:landscape:h-[104px] md:landscape:px-8 md:landscape:pt-0 lg:landscape:px-10 lg:landscape:py-6 2xl:max-w-1920 2xl:landscape:px-[60px]">
+          <div className="flex w-[120px] items-center gap-6 md:landscape:hidden">
             <button
               type="button"
               className={cn(iconButtonClass, textClass, hoverClass)}
@@ -157,9 +176,9 @@ const Header = () => {
               <SearchIcon className="size-6" />
             </button>
           </div>
-          <div className="hidden md:flex md:items-center md:gap-4 lg:gap-10">
+          <div className="hidden md:landscape:flex md:landscape:items-center md:landscape:gap-4 lg:landscape:gap-10">
             {Logo}
-            <nav className="hidden items-center md:flex md:gap-4 lg:gap-10" aria-label="Main navigation">
+            <nav className="hidden items-center md:landscape:flex md:landscape:gap-4 lg:landscape:gap-10" aria-label="Main navigation">
               {primaryLinks.map((link) => {
                 const isJewellery = isJewelleryNavLink(link.label);
                 if (isJewellery) {
@@ -167,12 +186,15 @@ const Header = () => {
                     <div
                       key={link.label}
                       className="inline-flex items-center"
-                      onMouseEnter={openJewelleryMenu}
-                      onMouseLeave={scheduleCloseJewelleryMenu}
+                      onMouseEnter={canHoverNav ? openJewelleryMenu : undefined}
+                      onMouseLeave={canHoverNav ? scheduleCloseJewelleryMenu : undefined}
                     >
                       <Link
                         href={resolveHeaderNavHref(link.label, link.url)}
                         className={navLinkClass(jewelleryMenuOpen)}
+                        aria-expanded={jewelleryMenuOpen}
+                        aria-haspopup="true"
+                        onClick={handleJewelleryNavClick}
                       >
                         {link.label}
                       </Link>
@@ -197,13 +219,13 @@ const Header = () => {
               </Link>
             </nav>
           </div>
-          <div className="pointer-events-none absolute inset-x-0 flex justify-center md:hidden">
+          <div className="pointer-events-none absolute inset-x-0 flex justify-center md:landscape:hidden">
             <div className="pointer-events-auto">{Logo}</div>
           </div>
           <div className={cn("relative z-10 flex items-center gap-6 lg:gap-[24px]", textClass)}>
             <button
               type="button"
-              className={cn("!hidden md:!flex", iconButtonClass, hoverClass)}
+              className={cn("!hidden md:landscape:!flex", iconButtonClass, hoverClass)}
               aria-label="Search"
             >
               <SearchIcon className="size-6" />
@@ -235,8 +257,8 @@ const Header = () => {
 
           {jewelleryMenuOpen && (
             <JewelleryMegaMenu
-              onMouseEnter={openJewelleryMenu}
-              onMouseLeave={scheduleCloseJewelleryMenu}
+              onMouseEnter={canHoverNav ? openJewelleryMenu : undefined}
+              onMouseLeave={canHoverNav ? scheduleCloseJewelleryMenu : undefined}
               onClose={closeJewelleryMenuNow}
             />
           )}
@@ -246,7 +268,9 @@ const Header = () => {
       {jewelleryMenuOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/50"
-          onMouseEnter={scheduleCloseJewelleryMenu}
+          onClick={canHoverNav ? undefined : closeJewelleryMenuNow}
+          onMouseEnter={canHoverNav ? scheduleCloseJewelleryMenu : undefined}
+          aria-hidden
         />
       )}
 
