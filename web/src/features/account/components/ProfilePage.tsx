@@ -22,7 +22,7 @@ const ProfilePage = () => {
   const searchParams = useSearchParams();
 
   const activeSection = useMemo<ProfileSectionId>(() => {
-    const requested = searchParams.get("section");
+    const requested = searchParams?.get("section");
     return isProfileSectionId(requested) ? requested : DEFAULT_PROFILE_SECTION;
   }, [searchParams]);
 
@@ -30,7 +30,7 @@ const ProfilePage = () => {
 
   const handleSectionChange = useCallback(
     (section: ProfileSectionId) => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
       if (section === DEFAULT_PROFILE_SECTION) {
         params.delete("section");
       } else {

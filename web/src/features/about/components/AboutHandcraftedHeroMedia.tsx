@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
-import { aboutHandcraftedFigmaSpec, aboutPageImages } from "../data/content";
+import { aboutHandcraftedFigmaSpec } from "../data/content";
 
 const { hero } = aboutHandcraftedFigmaSpec;
 
@@ -23,14 +23,14 @@ const AboutHandcraftedHeroMedia = ({
 }: AboutHandcraftedHeroMediaProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
-  const [useFallback, setUseFallback] = useState(!videoUrl);
+  const [usePosterOnly, setUsePosterOnly] = useState(!videoUrl);
 
-  const showImageFallback = useCallback(() => {
-    setUseFallback(true);
+  const showPosterOnly = useCallback(() => {
+    setUsePosterOnly(true);
   }, []);
 
   useEffect(() => {
-    if (!videoUrl || useFallback) return;
+    if (!videoUrl || usePosterOnly) return;
 
     const start = () => setShouldLoadVideo(true);
 
@@ -41,7 +41,7 @@ const AboutHandcraftedHeroMedia = ({
 
     const timeoutId = window.setTimeout(start, 1500);
     return () => window.clearTimeout(timeoutId);
-  }, [useFallback, videoUrl]);
+  }, [usePosterOnly, videoUrl]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -51,32 +51,30 @@ const AboutHandcraftedHeroMedia = ({
     const playPromise = video.play();
     if (playPromise) {
       playPromise.catch(() => {
-        showImageFallback();
+        showPosterOnly();
       });
     }
-  }, [shouldLoadVideo, showImageFallback]);
+  }, [shouldLoadVideo, showPosterOnly]);
 
-  const effectivePoster = posterUrl ?? aboutPageImages.handcraftedBg;
-
-  if (useFallback || !videoUrl) {
-    if (effectivePoster) {
-      return (
-        <ResponsiveImage
-          desktopSrc={effectivePoster}
-          alt=""
-          width={hero.width}
-          height={hero.height}
-          quality={80}
-          sizes="100vw"
-          className="absolute inset-0 h-full w-full object-cover object-center"
-        />
-      );
+  if (usePosterOnly || !videoUrl) {
+    if (!posterUrl) {
+      return null;
     }
 
-    return null;
+    return (
+      <ResponsiveImage
+        desktopSrc={posterUrl}
+        alt=""
+        width={hero.width}
+        height={hero.height}
+        quality={80}
+        sizes="100vw"
+        className="absolute inset-0 h-full w-full object-cover object-center"
+      />
+    );
   }
 
-  const videoMimeType = videoUrl ? getVideoMimeType(videoUrl) : undefined;
+  const videoMimeType = getVideoMimeType(videoUrl);
 
   return (
     <>
@@ -92,7 +90,7 @@ const AboutHandcraftedHeroMedia = ({
         />
       ) : null}
 
-      {shouldLoadVideo && videoUrl ? (
+      {shouldLoadVideo ? (
         <video
           ref={videoRef}
           className="absolute inset-0 h-full w-full object-cover object-center"
@@ -101,10 +99,10 @@ const AboutHandcraftedHeroMedia = ({
           muted
           playsInline
           preload="none"
-          poster={effectivePoster}
+          poster={posterUrl}
           aria-hidden
           tabIndex={-1}
-          onError={showImageFallback}
+          onError={showPosterOnly}
         >
           <source src={videoUrl} type={videoMimeType} />
         </video>

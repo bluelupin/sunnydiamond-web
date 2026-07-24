@@ -13,7 +13,7 @@ import ProfileAuthGate from "@/features/account/components/ProfileAuthGate";
 const ProfileOrderDetailPage = () => {
   const params = useParams<{ orderNumber: string }>();
   const { customer } = useAuth();
-  const orderNumber = decodeURIComponent(params.orderNumber ?? "").trim();
+  const orderNumber = decodeURIComponent(params?.orderNumber ?? "").trim();
 
   const [order, setOrder] = useState<TrackedOrder | null>(null);
   const [error, setError] = useState<string | null>(null);

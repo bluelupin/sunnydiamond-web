@@ -446,15 +446,6 @@
     height: calc(100% + 2rem);
   }
 
-  .handcrafted-grid-mask {
-    -webkit-mask-image: url("/images/about/handcrafted-grid-mask.svg");
-    mask-image: url("/images/about/handcrafted-grid-mask.svg");
-    -webkit-mask-size: 100% 100%;
-    mask-size: 100% 100%;
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-  }
-
   .about-handcrafted-photo {
     left: -12.069%;
     top: -12.844%;

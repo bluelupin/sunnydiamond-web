@@ -7,7 +7,6 @@ import { cn } from "@/shared/utils/cn";
 import type { NormalizedCraftCard } from "@/services/about/about-page.types";
 import {
   aboutHandcraftedAssets,
-  aboutPageImages,
 } from "../data/content";
 import Reveal from "@/shared/Animation/Reveal";
 
@@ -16,9 +15,6 @@ type AboutHandcraftedTileGridProps = {
 };
 
 const craftPhotoClass = "h-full w-full bg-cover bg-center";
-const craftPhotoStyle = {
-  backgroundImage: `url(${aboutPageImages.craftsmanship})`,
-} as const;
 
 const STAGGER_MS = 75;
 const REVEAL_DURATION = "duration-700 ease-reveal";
@@ -75,15 +71,14 @@ function CraftPhotoTile({
   mobileImageUrl?: string;
 }) {
   const resolvedUrl = imageUrl ?? mobileImageUrl;
+  if (!resolvedUrl) {
+    return null;
+  }
 
   return (
     <div
       className={cn(craftPhotoClass, className)}
-      style={
-        resolvedUrl
-          ? { backgroundImage: `url(${resolvedUrl})` }
-          : craftPhotoStyle
-      }
+      style={{ backgroundImage: `url(${resolvedUrl})` }}
       aria-hidden
     />
   );
@@ -143,9 +138,6 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
 
   const cardsByTileIndex = new Map(cards.map((card) => [card.tileIndex, card]));
 
-  /** Slots that historically rendered text when CMS data was absent. */
-  const legacyTextSlots = new Set([1, 6, 8]);
-
   const renderTile = (
     tileIndex: number,
     className?: string,
@@ -153,17 +145,17 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
   ) => {
     const card = cardsByTileIndex.get(tileIndex);
 
-    if (card?.type === "textCard") {
+    if (card?.type === "textCard" && card.title?.trim()) {
       return (
         <CraftTextTile
-          title={card.title ?? ""}
+          title={card.title}
           className={className}
           compact={compact}
         />
       );
     }
 
-    if (card?.type === "image") {
+    if (card?.type === "image" && (card.imageUrl || card.mobileImageUrl)) {
       return (
         <CraftPhotoTile
           className={className}
@@ -173,17 +165,7 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
       );
     }
 
-    if (legacyTextSlots.has(tileIndex)) {
-      return (
-        <CraftTextTile
-          title=""
-          className={className}
-          compact={compact}
-        />
-      );
-    }
-
-    return <CraftPhotoTile className={className} />;
+    return null;
   };
 
   useEffect(() => {

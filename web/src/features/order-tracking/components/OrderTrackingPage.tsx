@@ -25,7 +25,7 @@ const OrderTrackingPage = () => {
   const { status, customer } = useAuth();
   const isAuthenticated = status === "authenticated" && Boolean(customer);
 
-  const initialOrderNumber = searchParams.get("order")?.trim() ?? "";
+  const initialOrderNumber = searchParams?.get("order")?.trim() ?? "";
 
   const [form, setForm] = useState<TrackingFormState>({
     number: initialOrderNumber,

@@ -58,10 +58,9 @@ export const aboutHeroFigmaSpec = {
   },
 } as const;
 
-/** Local fallbacks when craft media is missing from CMS. */
-export const aboutPageImages = {
-  handcraftedBg: "/images/about/handcrafted-bg.webp",
-  craftsmanship: "/images/about/craftsmanship-764d7a.webp",
+/** Local decorative / layout assets only — section content comes from CMS. */
+export const aboutHandcraftedAssets = {
+  flourish: "/images/about/handcrafted-flourish.svg",
 } as const;
 
 /** Figma node 692:27430 — Crafting Rarity — Reveal V2 */
@@ -189,10 +188,6 @@ export const aboutHandcraftedFigmaSpec = {
     offsetY: -89,
     shadow: "0px 4px 4px 0px rgba(0, 0, 0, 0.25)",
   },
-} as const;
-
-export const aboutHandcraftedAssets = {
-  flourish: "/images/about/handcrafted-flourish.svg",
 } as const;
 
 /** Figma node 692:27191 — Timeline section */
