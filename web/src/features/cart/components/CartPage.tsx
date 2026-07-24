@@ -2,38 +2,26 @@
 
 import { useEffect, useState } from "react";
 import { cn } from "@/shared/utils/cn";
+import { useMobileStickyFooterClearance } from "@/shared/hooks/use-mobile-sticky-footer-clearance";
+import { MobileStickyFooterSpacer } from "@/shared/ui/layout/MobileStickyFooterSpacer";
 import CartBenefitsSection from "@/features/cart/components/CartBenefitsSection";
 import CartItem from "@/features/cart/components/CartItem";
 import CartMobileStickyFooter from "@/features/cart/components/CartMobileStickyFooter";
 import CartPriceDetails from "@/features/cart/components/CartPriceDetails";
 import { useCart } from "@/features/cart/context/CartContext";
-import { cartFlowSpec } from "@/features/cart/data/cartFlowSpec";
 import { CartPrimaryLink } from "./CartFlowUi";
 
 const CartPage = () => {
   const { items, isHydrating, refreshCart, updateQuantity, removeItem, updateLineItemOptions } = useCart();
   const [offersOpen, setOffersOpen] = useState(false);
   const [priceBreakupOpen, setPriceBreakupOpen] = useState(false);
+  const { footerRef, clearancePx } = useMobileStickyFooterClearance();
 
   useEffect(() => {
     if (!isHydrating) {
       void refreshCart();
     }
   }, [isHydrating, refreshCart]);
-
-  const mobileScrollPadding = (() => {
-    const { cartPage } = cartFlowSpec.mobile;
-    if (offersOpen && priceBreakupOpen) {
-      return `max-md:pb-[calc(${cartPage.stickyFooterFullyExpandedClearance}px+env(safe-area-inset-bottom,0px))]`;
-    }
-    if (priceBreakupOpen) {
-      return `max-md:pb-[calc(${cartPage.stickyFooterBreakupExpandedClearance}px+env(safe-area-inset-bottom,0px))]`;
-    }
-    if (offersOpen) {
-      return `max-md:pb-[calc(${cartPage.stickyFooterOffersExpandedClearance}px+env(safe-area-inset-bottom,0px))]`;
-    }
-    return `max-md:pb-[calc(${cartPage.stickyFooterCollapsedClearance}px+env(safe-area-inset-bottom,0px))]`;
-  })();
 
   if (isHydrating) {
     return (
@@ -65,16 +53,17 @@ const CartPage = () => {
     <>
       <section
         className={cn(
-          "bg-gray300 -mt-2 md:landscape:mt-0 md:pb-16",
-          mobileScrollPadding,
+          "bg-gray300 lg:pb-16",
+          "md:max-lg:-mt-2 md:max-lg:landscape:mt-0",
+          "md:max-lg:pb-16",
         )}
       >
-        <div className="mx-auto w-full px-5 pt-6 md:px-8 md:landscape:pt-0 lg:px-10 2xl:max-w-1920 2xl:px-[60px]">
+        <div className="mx-auto w-full px-5 pt-6 md:max-lg:px-8 md:max-lg:landscape:pt-0 lg:px-10 2xl:max-w-1920 2xl:px-[60px]">
           <h1 className="mb-6 font-larken text-32 font-light leading-110 text-darkblack lg:mb-10 lg:text-32">
             Your Shopping Bag
           </h1>
 
-          <div className="grid grid-cols-1 gap-6 md:max-lg:portrait:grid-cols-[minmax(0,1fr)_minmax(0,360px)] md:landscape:grid-cols-[minmax(0,1fr)_minmax(0,300px)] md:items-start lg:grid-cols-[minmax(0,783px)_553px] lg:gap-6">
+          <div className="grid grid-cols-1 gap-6 md:max-lg:portrait:grid-cols-[minmax(0,1fr)_minmax(0,360px)] md:max-lg:landscape:grid-cols-[minmax(0,1fr)_minmax(0,300px)] md:max-lg:items-start lg:grid-cols-[minmax(0,783px)_553px] lg:gap-6">
             <div className="flex min-w-0 flex-col gap-6">
               {items.map((item) => (
                 <CartItem
@@ -89,9 +78,11 @@ const CartPage = () => {
               <div className="pt-4 md:hidden">
                 <CartBenefitsSection />
               </div>
+
+              <MobileStickyFooterSpacer height={clearancePx} />
             </div>
 
-            <aside className="hidden h-fit w-full min-w-0 flex-col gap-0 md:sticky md:top-12 md:flex">
+            <aside className="hidden h-fit w-full min-w-0 flex-col gap-0 md:max-lg:sticky md:max-lg:top-12 md:max-lg:flex lg:sticky lg:top-12 lg:flex">
               <CartPriceDetails />
               <CartBenefitsSection />
             </aside>
@@ -100,6 +91,7 @@ const CartPage = () => {
       </section>
 
       <CartMobileStickyFooter
+        ref={footerRef}
         offersOpen={offersOpen}
         onOffersToggle={() => setOffersOpen((open) => !open)}
         breakupOpen={priceBreakupOpen}

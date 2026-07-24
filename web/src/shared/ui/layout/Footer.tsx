@@ -29,7 +29,7 @@ const SOCIAL_FALLBACK = [
 
 const DEFAULT_COPYRIGHT = "© 2026 Sunny Diamonds. All Rights Reserved.";
 
-const Footer = () => {
+const Footer = ({ className }: { className?: string }) => {
   const pathName = usePathname();
   const { data: shellData } = useHomepageShell();
   const cmsFooterLinkGroups = shellData?.global?.footerLinkGroups || shellData?.footerLinkGroups;
@@ -61,7 +61,7 @@ const Footer = () => {
   }, [cmsSocialLinks]);
 
   return (
-    <footer className={cn(pathName === "/cart" || pathName === "/checkout" ? "bg-gray200" : "bg-gray300")}>
+    <footer className={cn(pathName === "/cart" || pathName === "/checkout" ? "bg-gray200" : "bg-gray300", className)}>
       <TrustBadgeSection />
       <PageContainer className="flex flex-col gap-20 lg:gap-[120px] lg:py-100 py-16">
         <div className="flex flex-col items-center xl:gap-12 md:gap-10 gap-8 lg:flex-row lg:items-start lg:justify-start">

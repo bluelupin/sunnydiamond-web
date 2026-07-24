@@ -7,11 +7,12 @@ import { useToast } from "@/shared/hooks/use-toast";
 import { trackEvent } from "@/infrastructure/analytics/use-gtag";
 import { CartPrimaryLink } from "@/features/cart/components/CartFlowUi";
 import type { CartLineItem } from "@/features/cart/types/cart.types";
+import { useMobileStickyFooterClearance } from "@/shared/hooks/use-mobile-sticky-footer-clearance";
+import { MobileStickyFooterSpacer } from "@/shared/ui/layout/MobileStickyFooterSpacer";
 import CheckoutOrderSummary from "./CheckoutOrderSummary";
 import CheckoutMobileOrderSummaryDrawer from "./CheckoutMobileOrderSummaryDrawer";
 import CheckoutMobileStickyFooter from "./CheckoutMobileStickyFooter";
 import CheckoutOtpModal from "./CheckoutOtpModal";
-import { checkoutFlowSpec } from "../data/checkoutFlowSpec";
 import { CheckoutFormStep, CheckoutPaymentStep } from "./CheckoutSteps";
 import CheckoutSuccessView from "./CheckoutSuccessView";
 import {
@@ -79,17 +80,10 @@ const CheckoutPage = () => {
   const [payment, setPayment] = useState<CheckoutPaymentData>(createEmptyPaymentForm);
   const [offersOpen, setOffersOpen] = useState(false);
   const [orderSummaryOpen, setOrderSummaryOpen] = useState(false);
+  const { footerRef, clearancePx } = useMobileStickyFooterClearance();
 
   const formValidation = useCheckoutFormValidation(form);
   const paymentValidation = useCheckoutPaymentValidation(payment, totalPrice);
-
-  const mobileScrollPadding = (() => {
-    const { mobile } = checkoutFlowSpec;
-    const clearance = offersOpen
-      ? mobile.stickyFooterOffersExpandedClearance
-      : mobile.stickyFooterCollapsedClearance;
-    return `max-md:pb-[calc(${clearance}px+env(safe-area-inset-bottom,0px))]`;
-  })();
 
   const updateForm = (field: keyof CheckoutFormData, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -409,18 +403,19 @@ const CheckoutPage = () => {
   return (
     <section
       className={cn(
-        "bg-gray300 -mt-2 md:landscape:mt-0 md:pb-16",
-        mobileScrollPadding,
+        "bg-gray300 lg:pb-16",
+        "md:max-lg:-mt-2 md:max-lg:landscape:mt-0",
+        "md:max-lg:pb-16",
       )}
     >
-      <div className="mx-auto w-full px-5 pt-6 md:px-8 md:landscape:pt-0 lg:px-10 2xl:max-w-1920 2xl:px-[60px]">
+      <div className="mx-auto w-full px-5 pt-6 md:max-lg:px-8 md:max-lg:landscape:pt-0 lg:px-10 2xl:max-w-1920 2xl:px-[60px]">
         <h1 className="mb-6 font-larken text-32 font-light leading-110 text-darkblack lg:mb-10 lg:text-32">
           Complete Checkout
         </h1>
 
         <div
           className={cn(
-            "grid grid-cols-1 gap-6 md:max-lg:portrait:grid-cols-[minmax(0,1fr)_minmax(0,360px)] md:landscape:grid-cols-[minmax(0,1fr)_minmax(0,300px)] md:items-start lg:grid-cols-[minmax(0,783px)_553px] lg:gap-6",
+            "grid grid-cols-1 gap-6 md:max-lg:portrait:grid-cols-[minmax(0,1fr)_minmax(0,360px)] md:max-lg:landscape:grid-cols-[minmax(0,1fr)_minmax(0,300px)] md:max-lg:items-start lg:grid-cols-[minmax(0,783px)_553px] lg:gap-6",
             showOtpModal && "lg:grid-cols-[minmax(0,899px)_437px]",
           )}
         >
@@ -453,6 +448,7 @@ const CheckoutPage = () => {
                 isAuthenticated={isAuthenticated}
               />
             )}
+            <MobileStickyFooterSpacer height={clearancePx} />
           </div>
 
           <CheckoutOrderSummary
@@ -465,6 +461,7 @@ const CheckoutPage = () => {
       </div>
 
       <CheckoutMobileStickyFooter
+        ref={footerRef}
         offersOpen={offersOpen}
         onOffersToggle={() => setOffersOpen((open) => !open)}
         onOrderSummaryOpen={() => setOrderSummaryOpen(true)}
