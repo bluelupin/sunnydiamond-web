@@ -201,7 +201,7 @@ const SortDrawer = ({ open, sortValue, onClose, onSelect }: SortDrawerProps) => 
       >
         <div className="bg-white shadow-2xl">
           <div className="flex items-center justify-between border-b border-neutral300/50 px-6 py-6">
-            <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">SORT BY</h2>
+            <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">Sort By</h2>
             <button
               type="button"
               onClick={onClose}

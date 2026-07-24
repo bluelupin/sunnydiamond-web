@@ -21,7 +21,7 @@ const WishlistListItem = ({ product, onRemove, onAddToBag }: WishlistListItemPro
     <article className="flex flex-col gap-4 px-4 py-6 w-full">
       <Link
         href={href}
-        className="w-full max-w-[345px] mx-auto h-[140px] flex items-center justify-center"
+        className="sm:w-[300px] sm:h-[300px] mx-auto w-[160px] h-[160px] flex items-center justify-center"
       >
         <OptimizedImage
           src={product.primaryImage}
