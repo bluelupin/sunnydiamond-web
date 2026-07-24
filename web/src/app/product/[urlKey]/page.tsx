@@ -11,7 +11,7 @@ import ProductDetailPageView from "@/features/products/components/ProductDetailP
 import ProductDetailBelowFoldLazy from "@/features/products/components/ProductDetailBelowFoldLazy";
 import { getProductDetailContent } from "@/features/products/data/productDetailContent";
 import { prefetchProductDetailAlankaraCollection } from "@/features/products/services/prefetchProductDetailAlankara";
-import { getImageSrc } from "@/shared/utils/image";
+import { resolveImageSrcString } from "@/shared/utils/image";
 import { getProductDisplayVisitUs } from "@/services/product-display/product-display-page.service";
 import { getSizeGuideForProduct } from "@/services/size-guide/size-guide.service";
 
@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: product.seo.title,
     description: product.seo.description,
     keywords: product.seo.keywords,
-    image: getImageSrc(product.image),
+    image: resolveImageSrcString(product.image),
     url: product.seo.canonicalUrl,
     canonicalPath: product.seo.canonicalUrl ? undefined : product.seo.canonicalPath,
   });

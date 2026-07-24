@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
-import { getImageSrc } from "@/shared/utils/image";
+import { resolveImageSrcString } from "@/shared/utils/image";
 import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 import { homeContent } from "@/features/cms/data/content";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
@@ -65,7 +65,7 @@ const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
           muted
           playsInline
           preload="metadata"
-          poster={getImageSrc(posterUrl || PROMISE_POSTER)}
+          poster={resolveImageSrcString(posterUrl || PROMISE_POSTER)}
           aria-hidden
           tabIndex={-1}
         >

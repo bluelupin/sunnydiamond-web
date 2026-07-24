@@ -2,6 +2,7 @@ import type { Product } from "@/features/products/data/products";
 import type { CartLineItem } from "@/features/cart/types/cart.types";
 import { buildProductSeo } from "@/shared/lib/seo/productSeo";
 import { resolveMagentoProductImages } from "../products/products.mapper";
+import fallBackImage from "@/assets/fallBackImage.png";
 import type {
   MagentoCart,
   MagentoCartItem,
@@ -28,6 +29,7 @@ function mapCartItemProduct(item: MagentoCartItem): Product | null {
   }
 
   const { primaryImage } = resolveMagentoProductImages(product?.media_gallery);
+  const image = primaryImage || fallBackImage;
 
   return {
     id: sku,
@@ -37,8 +39,8 @@ function mapCartItemProduct(item: MagentoCartItem): Product | null {
     description: name,
     shortDescription: name,
     category: "",
-    image: primaryImage,
-    images: primaryImage ? [primaryImage] : [],
+    image,
+    images: [image],
     carat: "",
     metal: "",
     inStock: true,

@@ -1,6 +1,6 @@
 import type { FeaturedCarouselItem } from "@/features/cms/components/home/FeaturedProductsCarousel";
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
-import { getImageSrc } from "@/shared/utils/image";
+import { resolveImageSrcString } from "@/shared/utils/image";
 import { magentoGraphqlFetch } from "../graphqlClient";
 import { isMagentoTrending } from "./magentoAttribute.utils";
 import type { MagentoProductListItem, MagentoProductsResponse } from "./magentoProduct.types";
@@ -74,7 +74,7 @@ export function mapJewelleryListingToFeaturedCarouselItems(
     id: product.sku,
     name: product.name,
     price: product.price,
-    image: getImageSrc(product.primaryImage),
+    image: resolveImageSrcString(product.primaryImage),
     href: `/product/${product.urlKey}`,
   }));
 }

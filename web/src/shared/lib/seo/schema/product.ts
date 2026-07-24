@@ -1,5 +1,5 @@
 import { siteConfig } from "@/shared/lib/siteConfig";
-import { getImageSrc } from "@/shared/utils/image";
+import { resolveImageSrcString } from "@/shared/utils/image";
 
 interface ProductJsonLdSource {
   name: string;
@@ -17,7 +17,7 @@ export function buildProductJsonLd(product: ProductJsonLdSource) {
     "@type": "Product",
     name: product.name,
     description: product.description,
-    image: getImageSrc(product.image),
+    image: resolveImageSrcString(product.image),
     brand: {
       "@type": "Brand",
       name: siteConfig.brand.name,

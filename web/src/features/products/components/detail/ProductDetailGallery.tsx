@@ -57,7 +57,13 @@ const CroppedGalleryImage = ({
   priority,
   containerClassName,
   centered = false,
-}: CroppedGalleryImageProps) => (
+}: CroppedGalleryImageProps) => {
+  const imageSrc = getImageSrc(src);
+  if (!imageSrc) {
+    return null;
+  }
+
+  return (
   <div
     className={cn(
       "mx-auto flex h-full w-full items-center justify-center overflow-hidden",
@@ -69,7 +75,7 @@ const CroppedGalleryImage = ({
     {centered ? (
       <div className="relative size-full">
         <Image
-          src={getImageSrc(src)}
+          src={imageSrc}
           alt={alt}
           fill
           priority={priority}
@@ -79,7 +85,7 @@ const CroppedGalleryImage = ({
       </div>
     ) : (
       <Image
-        src={getImageSrc(src)}
+        src={imageSrc}
         alt={alt}
         width={800}
         height={880}
@@ -90,7 +96,8 @@ const CroppedGalleryImage = ({
       />
     )}
   </div>
-);
+  );
+};
 
 const ProductDetailGallery = ({ product, topGalleryRef }: ProductDetailGalleryProps) => {
   const [activeSlide, setActiveSlide] = useState(0);

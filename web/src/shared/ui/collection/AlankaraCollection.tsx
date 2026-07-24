@@ -8,7 +8,7 @@ import CarouselChevronLeft from "@/assets/Icons/CarouselChevronLeft";
 import CarouselChevronRight from "@/assets/Icons/CarouselChevronRight";
 import { cn } from "@/shared/utils/cn";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
-import { getImageSrc } from "@/shared/utils/image";
+import { getImageSrc, resolveImageSrc, resolveImageSrcString } from "@/shared/utils/image";
 import {
   ALANKARA_HERO_DESKTOP_CROP,
   ALANKARA_DEFAULT_ACTIVE_INDEX,
@@ -76,12 +76,17 @@ function CroppedFillImage({
   priority?: boolean;
   className?: string;
 }) {
+  const imageSrc = getImageSrc(src);
+  if (!imageSrc) {
+    return null;
+  }
+
   return (
     <div className="absolute inset-0 overflow-hidden">
       <div className="absolute" style={cropStyle}>
         <div className="relative size-full">
           <Image
-            src={src}
+            src={imageSrc}
             alt={alt}
             fill
             sizes={sizes}
@@ -104,7 +109,7 @@ function ProductSlideImage({
   variant: "desktop" | "mobile";
   priority?: boolean;
 }) {
-  const imageSrc = getImageSrc(product.image) || "";
+  const imageSrc = resolveImageSrc(product.image);
 
   if (variant === "mobile") {
     return (
@@ -491,7 +496,10 @@ function ProductCarouselPanel({
               {/* <div aria-hidden className="h-[45px] shrink-0" /> */}
               <div className="pt-12 flex justify-between shrink-0 gap-[5.6px] w-full overflow-x-auto horizontalScroll">
                 {products.map((product, index) => {
-                  const thumbSrc = getImageSrc(product.thumbnailImage ?? product.image) || "";
+                  const thumbSrc = getImageSrc(product.thumbnailImage ?? product.image);
+                  if (!thumbSrc) {
+                    return null;
+                  }
                   const isActive = index === activeIndex;
                   return (
                     <AlankaraProductThumbnail
@@ -598,9 +606,8 @@ export function AlankaraCollection({
   className,
   "aria-label": ariaLabel,
 }: AlankaraCollectionProps) {
-  const desktopHero = getImageSrc(collectionImage) || "";
-  const mobileHero =
-    getImageSrc(collectionImageMobile ?? collectionImage) || desktopHero;
+  const desktopHero = resolveImageSrcString(collectionImage);
+  const mobileHero = resolveImageSrcString(collectionImageMobile ?? collectionImage, desktopHero);
 
   if (!products.length) return null;
 

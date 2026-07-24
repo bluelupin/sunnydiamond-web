@@ -27,8 +27,8 @@ const HeroBackgroundMedia = ({
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
   const [isTabletUp, setIsTabletUp] = useState(false);
 
-  const posterSrc = getImageSrc(desktopImageUrl || mobileImageUrl || "");
-  const hasHeroImage = Boolean(desktopImageUrl || mobileImageUrl);
+  const posterSrc = getImageSrc(desktopImageUrl || mobileImageUrl);
+  const hasHeroImage = Boolean(posterSrc);
   const videoWebmSrc = cmsVideoUrl?.endsWith(".webm") ? cmsVideoUrl : HERO_VIDEO_WEBM_SRC;
   const videoMp4Src =
     cmsVideoUrl && !cmsVideoUrl.endsWith(".webm") ? cmsVideoUrl : HERO_VIDEO_MP4_SRC;
@@ -79,7 +79,7 @@ const HeroBackgroundMedia = ({
   return (
     <>
       <ResponsiveImage
-        desktopSrc={desktopImageUrl || ""}
+        desktopSrc={desktopImageUrl || mobileImageUrl || posterSrc || ""}
         mobileSrc={mobileImageUrl}
         alt={alt}
         priority
@@ -99,7 +99,7 @@ const HeroBackgroundMedia = ({
           muted
           playsInline
           preload="none"
-          poster={posterSrc}
+          poster={posterSrc ?? undefined}
           aria-hidden
           tabIndex={-1}
         >
