@@ -29,10 +29,10 @@ const AboutBrillianceSection = ({
     <section
       ref={sectionRef}
       aria-labelledby="about-crafting-rarity-title"
-      className="bg-white pt-14 sm:pt-16 lg:py-100"
+      className="bg-white py-10 sm:py-16 lg:py-100"
     >
       <PageContainer className="flex w-full justify-center">
-        <div className="flex w-full max-w-[950px] flex-col items-center text-center">
+        <div className="flex w-full lg:max-w-[950px] max-w-[700px] flex-col items-center text-center">
           <div
             data-reveal-mask="heading"
             className="w-full overflow-hidden pt-0 mb-8"
@@ -45,7 +45,7 @@ const AboutBrillianceSection = ({
           </div>
           <div data-reveal-mask="image" className="mx-auto w-full overflow-hidden">
             <Reveal direction="up"
-              className="mx-auto h-auto w-220 sm:h-280 sm:w-280 lg:h-354 lg:w-354 2xl:w-400 2xl:h-400">
+              className="mx-auto h-[300px] w-[300px] lg:h-354 lg:w-354 2xl:w-400 2xl:h-400">
               <ResponsiveImage
                 desktopSrc={image.desktopUrl}
                 mobileSrc={image.mobileUrl}
