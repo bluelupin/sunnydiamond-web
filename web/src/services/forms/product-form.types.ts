@@ -79,6 +79,8 @@ export type ProductSubmissionPayload = {
   customerName: string;
   customerPhone: string;
   customerEmail?: string;
+  /** Magento customer id from `/api/auth/me` — links submission to My Appointments. */
+  magentoCustomerId?: number;
   requestDetails?: string;
   requestedDate?: string;
   selectedTimeSlot?: string;

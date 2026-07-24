@@ -2,6 +2,7 @@ import type { CustomerProfileContact } from "./customer-profile.types";
 
 type AuthMePayload = {
   customer: {
+    id: number;
     firstname: string;
     lastname: string;
     email: string;

@@ -109,6 +109,8 @@ export type GenericSubmissionPayload = {
   preferredDate?: string;
   selectedTimeSlot?: string;
   notes?: string;
+  /** Magento customer id from `/api/auth/me` — links submission to My Appointments. */
+  magentoCustomerId?: number;
   sourcePage?: string;
   utmSource?: string;
   utmMedium?: string;

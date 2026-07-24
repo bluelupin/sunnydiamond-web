@@ -30,6 +30,7 @@ export const MAGENTO_REVOKE_CUSTOMER_TOKEN_MUTATION = `
 export const MAGENTO_CUSTOMER_ME_QUERY = `
   query MagentoCustomerMe {
     customer {
+      id
       firstname
       lastname
       email

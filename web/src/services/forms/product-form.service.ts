@@ -30,11 +30,10 @@ export async function getProductFormByTag(
 }
 
 /**
- * Matches the working Postman request:
- * POST /api/product-submissions/submit
- * form-data:
- *   data → JSON string of fields
- *   uploadedImage → file (when attached)
+ * Browser posts to same-origin BFF so the Magento session cookie can be attached
+ * as Bearer for CMS customer linking (My Appointments).
+ *
+ * BFF → POST /api/product-submissions/submit (multipart data + uploadedImage).
  */
 export async function createProductSubmission(
   payload: ProductSubmissionPayload,
@@ -64,11 +63,25 @@ export async function createProductSubmission(
     );
   }
 
-  await apiFetch(STRAPI_ENDPOINTS.productSubmissionsSubmit, {
+  const response = await fetch("/api/product-submissions/submit", {
     method: "POST",
-    signal,
     body: formData,
+    signal,
+    cache: "no-store",
   });
+
+  if (!response.ok) {
+    let message = `Product submission failed (${response.status})`;
+    try {
+      const payloadJson = (await response.json()) as { error?: string };
+      if (payloadJson.error?.trim()) {
+        message = payloadJson.error;
+      }
+    } catch {
+      // ignore parse errors
+    }
+    throw new Error(message);
+  }
 }
 
 export type { NormalizedProductForm, ProductSubmissionPayload };

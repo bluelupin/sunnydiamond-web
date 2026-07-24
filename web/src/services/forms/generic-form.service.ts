@@ -32,21 +32,43 @@ export const getGenericFormByTag = cache(
   },
 );
 
+/**
+ * Browser → same-origin BFF so Magento session can link the booking to
+ * My Appointments. Guests still submit (no Bearer).
+ */
 export async function createGenericSubmission(
   payload: GenericSubmissionPayload,
   signal?: AbortSignal,
 ): Promise<void> {
-  await apiFetch(STRAPI_ENDPOINTS.genericSubmissions, {
+  const response = await fetch("/api/generic-submissions", {
     method: "POST",
-    signal,
-    body: {
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
       data: {
         ...payload,
         workflowStatus: payload.workflowStatus ?? "New",
         consentAccepted: payload.consentAccepted ?? true,
       },
-    },
+    }),
+    signal,
+    cache: "no-store",
   });
+
+  if (!response.ok) {
+    let message = `Generic submission failed (${response.status})`;
+    try {
+      const payloadJson = (await response.json()) as { error?: string };
+      if (payloadJson.error?.trim()) {
+        message = payloadJson.error;
+      }
+    } catch {
+      // ignore parse errors
+    }
+    throw new Error(message);
+  }
 }
 
 export type { NormalizedGenericForm, GenericSubmissionPayload };
