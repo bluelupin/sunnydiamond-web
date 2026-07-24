@@ -168,14 +168,14 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
             <div className="pointer-events-none absolute left-1/2 top-[calc(50%+1px)] w-full lg:w-[740px] w-[530px] mx-auto -translate-x-1/2 -translate-y-1/2">
               <Image src={STEPS_LINE} alt="" width={784} height={1} className="h-px w-full" aria-hidden />
             </div>
-            <div className="relative flex h-10 items-center justify-between lg:w-[740px] w-[530px] mx-auto px-0">
+            <div className="relative flex h-10 items-center justify-between lg:w-[740px] w-[700px] mx-auto px-0">
               {steps.map((step) => (
                 <StepCircle key={step.stepNumber} number={step.stepNumber ?? 0} />
               ))}
             </div>
           </ScrollReveal>
 
-          <div className="flex w-full justify-center gap-10">
+          <div className="flex w-full lg:justify-center justify-between gap-10">
             {steps.map((step, index) => (
               <ScrollReveal key={step.stepNumber} delayMs={280 + index * 80} className="lg:w-[250px] w-[200px]">
                 <StepDescription

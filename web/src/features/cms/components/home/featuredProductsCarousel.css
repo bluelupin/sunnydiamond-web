@@ -1,20 +1,35 @@
 /* Figma 684:2920 / 684:2930 / 684:3238 — Featured Products slick overrides */
+.featured-products-carousel {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  --featured-column-width: calc(100% / 3);
+}
+
+.featured-products-track {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.featured-products-slider {
+  width: 100%;
+  max-width: 100%;
+}
+
 .featured-products-slider .slick-list {
-  overflow: visible;
+  overflow: hidden;
+  margin-inline: auto;
 }
 
 .featured-products-slider .slick-track {
   display: flex !important;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .featured-products-slider .slick-slide {
   float: none;
   height: auto;
-  /* flex track + variableWidth leaves slides at 0px without explicit width */
-  width: 200px !important;
-  flex: 0 0 200px;
-  min-width: 200px;
   opacity: 0.6;
   transition: opacity 500ms ease;
 }
@@ -25,44 +40,30 @@
 
 .featured-products-slider .slick-slide > div {
   outline: none;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Always 3 equal columns when 3+ products */
+.featured-products-slider--triple .slick-slide {
+  width: var(--featured-column-width) !important;
+}
+
+.featured-products-slider--triple .featured-products-slide {
+  width: 100%;
 }
 
 .featured-products-slider--single .slick-slide {
   opacity: 1;
 }
 
-.featured-products-slide {
-  width: 200px;
-}
-
-@media (min-width: 640px) {
-  .featured-products-slider .slick-slide {
-    width: 260px !important;
-    flex: 0 0 260px;
-    min-width: 260px;
-  }
-
-  .featured-products-slide {
-    width: 260px;
-  }
-}
-@media (min-width: 768px) {
-  .featured-products-slider .slick-slide {
-    width: 600px !important;
-    flex: 0 0 600px;
-    min-width: 600px;
-  }
-
-  .featured-products-slide {
-    width: 600px;
-  }
-}
-
-/* Image viewport — Figma 684:2930 (259px) / 684:3238 mobile (155px small / 170px sm+) */
 .featured-slide-viewport {
-  position: relative;
-  height: 155px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
+  height: 155px;
   overflow: hidden;
 }
 
@@ -75,5 +76,70 @@
 @media (min-width: 768px) {
   .featured-slide-viewport {
     height: 259px;
+  }
+}
+
+/* Side slides — ~60% visual weight vs center */
+/* .featured-products-slider--triple .slick-slide:not(.slick-center) .featured-slide-viewport {
+  padding-inline: 8%;
+} */
+
+.featured-slide-image {
+  position: relative;
+  width: 60%;
+  height: 60%;
+  max-width: 140px;
+  max-height: 140px;
+  flex-shrink: 0;
+  margin-inline: auto;
+  transition: width 500ms ease, height 500ms ease, max-width 500ms ease, max-height 500ms ease;
+}
+
+@media (min-width: 640px) {
+  .featured-slide-image {
+    max-width: 160px;
+    max-height: 160px;
+  }
+}
+
+@media (min-width: 768px) {
+  .featured-slide-image {
+    max-width: 200px;
+    max-height: 200px;
+  }
+}
+
+.featured-products-slider .slick-slide.slick-center .featured-slide-image {
+  width: 100%;
+  height: 100%;
+  max-width: 154px;
+  max-height: 154px;
+}
+
+@media (min-width: 640px) {
+  .featured-products-slider .slick-slide.slick-center .featured-slide-image {
+    max-width: 170px;
+    max-height: 170px;
+  }
+}
+
+@media (min-width: 768px) {
+  .featured-products-slider .slick-slide.slick-center .featured-slide-image {
+    max-width: 258px;
+    max-height: 258px;
+  }
+}
+
+.featured-products-details {
+  width: var(--featured-column-width);
+  max-width: 100%;
+  margin-inline: auto;
+  padding-inline: 16px;
+}
+
+@media (min-width: 768px) {
+  .featured-products-details {
+    max-width: min(600px, var(--featured-column-width));
+    padding-inline: 0;
   }
 }

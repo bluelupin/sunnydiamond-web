@@ -109,11 +109,11 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
   return (
     <section
       id={id}
-      className="overflow-visible px-0 py-16 md:py-104"
+      className="overflow-x-clip px-0 py-16 md:py-104"
       aria-label="Featured diamond carousel"
       aria-busy={isCarouselLoading}
     >
-      <div className="flex w-full max-w-full flex-col items-center gap-10 overflow-visible">
+      <div className="flex w-full max-w-full flex-col items-center gap-10 overflow-x-clip">
         {sectionTitle || description ? (
           <FeaturedProductsHeader title={sectionTitle} description={description} />
         ) : null}
