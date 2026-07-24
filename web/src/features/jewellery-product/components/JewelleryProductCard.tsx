@@ -131,10 +131,10 @@ const JewelleryProductCard = ({
       )}
       {...swipeSurfaceProps}
     >
-      {/* Desktop hover — lazy-loaded so load more does not fetch every lifestyle image at once */}
+      {/* Desktop hover — instant swap (no cross-fade) */}
       {hasHoverImage ? (
         <div
-          className="col-start-1 row-start-1 hidden size-full grid opacity-0 transition-opacity duration-500 md:grid md:group-hover:opacity-100"
+          className="col-start-1 row-start-1 hidden size-full md:group-hover:grid"
           aria-hidden
         >
           <OptimizedImage
@@ -175,9 +175,9 @@ const JewelleryProductCard = ({
       {/* Default product view — image only; copy lives in a shared bottom slot */}
       <div
         className={cn(
-          "col-start-1 row-start-1 z-10 flex w-full flex-col items-center transition-opacity duration-500",
+          "col-start-1 row-start-1 z-10 flex w-full flex-col items-center max-md:transition-opacity max-md:duration-500",
           "px-[16px] pt-[24px] md:px-[24px] md:pt-10",
-          hasHoverImage && "md:group-hover:opacity-0",
+          hasHoverImage && "md:group-hover:hidden",
           isMobileLifestyle ? "pointer-events-none opacity-0 md:opacity-100" : "opacity-100",
         )}
         style={
@@ -201,7 +201,6 @@ const JewelleryProductCard = ({
           price={price}
           href={href}
           className={cn(
-            "transition-colors duration-500",
             isMobileLifestyle ? "text-white" : "text-darkblack",
             hasHoverImage && "md:group-hover:text-white",
           )}
@@ -265,7 +264,7 @@ const JewelleryProductCard = ({
                 : isMobileLifestyle
                   ? "fill-none text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)]"
                   : hasHoverImage
-                    ? "fill-none text-darkblack drop-shadow-none"
+                    ? "fill-none text-darkblack md:group-hover:text-white md:group-hover:drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)]"
                     : "fill-none text-darkblack",
             )}>
             <path d="M15.6676 27.3342L26.8376 16.0042C28.0098 14.8319 28.6684 13.242 28.6684 11.5842C28.6684 9.92638 28.0098 8.33645 26.8376 7.1642C25.6653 5.99194 24.0754 5.33337 22.4176 5.33337C20.7598 5.33337 19.1698 5.99194 17.9976 7.1642L15.6676 9.3342L13.3376 7.1642C12.1653 5.99194 10.5754 5.33337 8.91757 5.33337C7.25975 5.33337 5.66983 5.99194 4.49757 7.1642C3.32532 8.33645 2.66675 9.92638 2.66675 11.5842C2.66675 13.242 3.32532 14.8319 4.49757 16.0042L15.6676 27.3342Z"
