@@ -294,7 +294,7 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
 const AboutHandcraftedTileGrid = ({ cards }: AboutHandcraftedTileGridProps) => (
   <LazyInView
     fallback={<GridFallback />}
-    className="min-h-[400px] sm:min-h-[520px]"
+    className=""
     rootMargin="120px 0px 80px 0px"
     threshold={0.01}
   >

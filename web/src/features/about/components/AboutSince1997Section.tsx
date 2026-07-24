@@ -81,7 +81,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
     >
       {/* Desktop — sticky viewport + scroll-driven horizontal slide */}
       <div data-since1997-mode="desktop" className="hidden md:block">
-        <div className="sticky 2xl:top-0 md:top-0 top-[-150px] flex flex-col overflow-x-hidden bg-white">
+        <div className="sticky 2xl:top-0 md:top-10 top-[-150px] flex flex-col overflow-x-hidden bg-white">
           <PageContainer className="shrink-0 2xl:pb-11 lg:pb-10 pb-8">
             <Reveal as="h2" direction="up"
               id="about-since-1997-title"

@@ -66,9 +66,9 @@ const AboutTimelineNav = ({
       <ol
         id={listId}
         className={cn(
-          "flex flex-col items-start md:gap-8 sm:gap-6 gap-4 lg:items-end",
+          "flex flex-col items-start gap-4 sm:gap-6 md:gap-8 lg:items-end",
           isExpanded ? "mt-4 flex" : "hidden",
-          "lg:mt-0 lg:flex lg:items-start",
+          "md:mt-0 md:flex md:items-start lg:items-end",
         )}
       >
         {years.map((year) => {
@@ -80,7 +80,7 @@ const AboutTimelineNav = ({
                 type="button"
                 onClick={() => handleYearSelect(year)}
                 className={cn(
-                  "flex w-full items-center justify-end gap-2 text-right transition-opacity duration-500 ease-out motion-reduce:transition-none lg:justify-start",
+                  "flex w-full items-center justify-end gap-2 text-right transition-opacity duration-500 ease-out motion-reduce:transition-none md:justify-start",
                   !isActive && "opacity-40 hover:opacity-70",
                 )}
                 aria-current={isActive ? "step" : undefined}
