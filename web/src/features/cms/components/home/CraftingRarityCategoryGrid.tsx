@@ -5,8 +5,8 @@ import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { LazyInView } from "@/shared/ui/LazyInView";
 import Reveal from "@/shared/Animation/Reveal";
 import { resolveCategoryNavImages } from "@/shared/utils/responsiveCmsImage";
+import { buildJewelleryHref, JEWELLERY_PATH, parseJewelleryCategorySlug } from "@/features/jewellery-product/utils/jewelleryRoutes";
 import type { CategoryNavigationItem } from "@/types/homepage/categoryNavigation";
-
 const IMAGE_QUALITY = 90;
 
 type CraftingRarityCategoryCardProps = {
@@ -15,10 +15,11 @@ type CraftingRarityCategoryCardProps = {
 
 const CraftingRarityCategoryCard = ({ category }: CraftingRarityCategoryCardProps) => {
   const slug = category?.slug ?? "";
+  const parsedCategory = parseJewelleryCategorySlug(slug);
   const categoryLink =
     category?.cta?.url ??
     category?.cta?.to ??
-    (slug ? `/products?category=${encodeURIComponent(slug)}` : "/products");
+    (parsedCategory ? buildJewelleryHref(parsedCategory) : JEWELLERY_PATH);
 
   const {
     title,

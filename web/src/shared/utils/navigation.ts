@@ -47,6 +47,21 @@ export function isHeaderScrolled(scrollY: number, wasScrolled = false): boolean 
 }
 
 /** Figma 692:6742 — solid white header on PDP and other non-hero pages. */
+export function getHeaderSurfaceClass(
+  pathname: string,
+  headerVariant: HeaderVariant,
+): string {
+  if (headerVariant === "overlay") {
+    return "bg-transparent";
+  }
+
+  if (pathname === "/cart" || pathname === "/checkout") {
+    return "bg-gray300";
+  }
+
+  return "bg-white";
+}
+
 export function getHeaderVariant(
   pathname: string,
   options: { scrolled?: boolean; menuOpen?: boolean } = {},

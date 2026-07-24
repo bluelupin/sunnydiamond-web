@@ -16,6 +16,7 @@ const LoginModal = () => {
   const { step, contentProps } = useAuthFlow({
     active: isLoginModalOpen,
     returnUrl,
+    surface: "modal",
     onComplete: (nextReturnUrl) => {
       closeLoginModal();
       router.push(nextReturnUrl);

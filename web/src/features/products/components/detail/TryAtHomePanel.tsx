@@ -679,7 +679,7 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
 
   const handleContinueShopping = () => {
     handleClose();
-    router.push("/products");
+    router.push("/jewellery");
   };
 
   const statusToast = statusToastMessage ? (

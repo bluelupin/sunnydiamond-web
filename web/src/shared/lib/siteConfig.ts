@@ -31,7 +31,7 @@ export const siteConfig = {
   navigation: {
     main: [
       { to: "/jewellery", label: "Jewellery" },
-      { to: "/products", label: "Gifting" },
+      { to: "/jewellery", label: "Gifting" },
       { to: "/bespoke-jewellery", label: "Bespoke" },
       { to: "/about", label: "World of Sunny" },
     ],

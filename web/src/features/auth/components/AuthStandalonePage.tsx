@@ -21,6 +21,7 @@ const AuthStandalonePage = ({ returnUrl }: AuthStandalonePageProps) => {
   const { step, contentProps } = useAuthFlow({
     active: true,
     returnUrl,
+    surface: "standalone",
     onComplete: (nextReturnUrl) => {
       router.push(nextReturnUrl);
     },

@@ -85,7 +85,7 @@ function buildCmsProduct(
     thumbnailImage: cmsImage || figmaFallback.image,
     thumbnailCrop: figmaFallback.thumbnailCrop,
     desktopCrop: figmaFallback.desktopCrop,
-    href: productId ? `/product/${productId}` : "/products",
+    href: productId ? `/product/${productId}` : "/jewellery",
     ctaLabel: homeContent.alankara.product.cta.label,
   };
 }

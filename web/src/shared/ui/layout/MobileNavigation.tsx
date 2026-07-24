@@ -3,7 +3,6 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
 import SDLogo from "@/assets/Icons/SDLogo";
 import SearchIcon from "@/assets/Icons/SearchIcon";
@@ -17,8 +16,6 @@ import BookStoreVisitPanel from "@/features/products/components/detail/BookStore
 import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
 import HeaderIconBadge from "@/shared/ui/layout/HeaderIconBadge";
 import { JewelleryCategoryMenu } from "@/shared/ui/layout/JewelleryCategoryMenu";
-import { getLoginHref } from "@/features/auth/utils/authNavigation";
-
 type MobileNavigationProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -405,8 +402,6 @@ const MobileNavigation = ({
   cartCount,
   wishlistCount,
 }: MobileNavigationProps) => {
-  const pathname = usePathname() ?? "/";
-  const loginHref = getLoginHref(pathname);
   const [subPanel, setSubPanel] = useState<
     "language" | "currency" | "appointment" | "jewellery" | "store-visit" | null
   >(null);
@@ -490,7 +485,7 @@ const MobileNavigation = ({
 
         <div className="flex w-[112px] items-center justify-end gap-6">
           <Link
-            href="/products"
+            href="/wishlist"
             aria-label={wishlistCount > 0 ? `Wishlist, ${wishlistCount} items` : "Wishlist"}
             onClick={handleClose}
             className="relative inline-flex size-6 items-center justify-center"
@@ -498,7 +493,7 @@ const MobileNavigation = ({
             <WishlistIcon className="size-6" />
             <HeaderIconBadge count={wishlistCount} />
           </Link>
-          <AccountMenu loginHref={loginHref} onNavigate={handleAccountClick} className="inline-flex size-6 items-center justify-center" />
+          <AccountMenu onNavigate={handleAccountClick} className="inline-flex size-6 items-center justify-center" />
           <Link
             href="/cart"
             aria-label={cartCount > 0 ? `Cart, ${cartCount} items` : "Cart"}

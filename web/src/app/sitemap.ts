@@ -4,7 +4,6 @@ import { siteEnv } from "@/shared/lib/seo/siteConfig";
 
 const staticRoutes = [
   { url: "/", changeFrequency: "weekly" as const, priority: 1 },
-  { url: "/products", changeFrequency: "weekly" as const, priority: 0.8 },
   { url: "/jewellery", changeFrequency: "weekly" as const, priority: 0.8 },
   { url: "/about", changeFrequency: "monthly" as const, priority: 0.6 },
   { url: "/contact", changeFrequency: "monthly" as const, priority: 0.6 },

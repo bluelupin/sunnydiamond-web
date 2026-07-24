@@ -42,7 +42,7 @@ export const homeContent = {
       title: "Alankara Collection",
       description:
         "Guided by tradition and perfected by expertise, our craftsmen bring every diamond to life with",
-      cta: { label: "View Collection", to: "/products" },
+      cta: { label: "View Collection", to: "/jewellery" },
     },
     productIds: ["1", "3", "5", "6", "2"],
     product: {
@@ -54,7 +54,7 @@ export const homeContent = {
         "Honoring a lifetime of connection through rare, masterfully crafted jewelry designed for the moments that matter.",
       mobileDescription:
         "Traditional mastery bringing every diamond to radiant, eternal life.",
-      cta: { label: "Shop Now", to: "/products" },
+      cta: { label: "Shop Now", to: "/jewellery" },
     },
   },
   craftsmanship: {
@@ -114,7 +114,7 @@ export const homeContent = {
     title: "Make Every Moment Shine",
     description:
       "From birthdays to anniversaries, our luxury gift packaging and personalisation options make each present unforgettable.",
-    cta: { label: "Shop Gifts", to: "/products" },
+    cta: { label: "Shop Gifts", to: "/jewellery" },
   },
   customJewellery: {
     subtitle: "Bespoke Service",
@@ -138,13 +138,6 @@ export const homeContent = {
   },
 } as const;
 
-export const productsContent = {
-  header: {
-    subtitle: "Our Collection",
-    title: "Diamond Jewellery",
-  },
-} as const;
-
 export const contactContent = {
   header: {
     subtitle: "Get in Touch",
@@ -159,11 +152,6 @@ export const seoContent = {
     title: "Sunny Diamonds — Premium Diamond Jewellery",
     description:
       "Handcrafted premium and custom diamond jewellery. Explore GIA-certified diamonds, bespoke designs, and timeless elegance.",
-  },
-  products: {
-    title: "Diamond Jewellery Collection",
-    description:
-      "Browse our curated collection of rings, necklaces, earrings, and bracelets featuring GIA-certified diamonds.",
   },
   about: {
     title: "Our Story",

@@ -38,7 +38,7 @@ const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
   const secondaryCtaUrl =
     sectionData.secondaryCta?.url ||
     sectionData.secondaryCta?.to ||
-    "/products";
+    "/jewellery";
   const secondaryCtaLabel =
     sectionData.secondaryCta?.label?.trim() || "View Past Work";
 

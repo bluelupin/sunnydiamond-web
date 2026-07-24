@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import UserIcon from "@/assets/Icons/UserIcon";
 import {
   DropdownMenu,
@@ -11,23 +12,34 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
 import { useAuth } from "../context/AuthContext";
+import { useRequestAuth } from "../hooks/useRequestAuth";
 
 type AccountMenuProps = {
   className?: string;
   onNavigate?: () => void;
-  /** Guest destination, e.g. getLoginHref(pathname) so the return URL is preserved. */
-  loginHref?: string;
+  /** Post-auth return path for guest sign-in. Defaults to the current route. */
+  returnUrl?: string;
 };
 
-/** Header account icon: links to the login page for guests, shows an account dropdown when signed in. */
-const AccountMenu = ({ className, onNavigate, loginHref = "/login" }: AccountMenuProps) => {
+/** Header account icon: opens sign-in modal for guests, shows an account dropdown when signed in. */
+const AccountMenu = ({ className, onNavigate, returnUrl }: AccountMenuProps) => {
+  const pathname = usePathname() ?? "/";
   const { status, customer, logout } = useAuth();
+  const { requestAuth } = useRequestAuth();
 
   if (status !== "authenticated" || !customer) {
     return (
-      <Link href={loginHref} aria-label="Sign in" onClick={onNavigate} className={className}>
+      <button
+        type="button"
+        aria-label="Sign in"
+        onClick={() => {
+          onNavigate?.();
+          requestAuth({ returnUrl: returnUrl ?? pathname });
+        }}
+        className={className}
+      >
         <UserIcon className="size-6" />
-      </Link>
+      </button>
     );
   }
 

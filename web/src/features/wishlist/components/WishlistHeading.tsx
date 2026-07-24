@@ -1,11 +1,11 @@
 "use client";
 
+import { useRequestAuth } from "@/features/auth/hooks/useRequestAuth";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { wishlistPageContent, type WishlistViewMode } from "@/features/wishlist/data/content";
 import WishlistViewToggle from "./WishlistViewToggle";
 import { cn } from "@/shared/utils/cn";
-import Link from "next/link";
 
 type WishlistHeadingProps = {
   productCount: number;
@@ -15,6 +15,7 @@ type WishlistHeadingProps = {
 
 const WishlistHeading = ({ productCount, viewMode, onViewModeChange }: WishlistHeadingProps) => {
   const { status } = useAuth();
+  const { requestAuth } = useRequestAuth();
   const showCount = productCount > 0;
   const showViewToggle = showCount;
   const isAuthenticated = status === "authenticated";
@@ -26,12 +27,13 @@ const WishlistHeading = ({ productCount, viewMode, onViewModeChange }: WishlistH
     >
       {!isAuthenticated ? (
         <div className="mt-6 flex flex-col items-center justify-center gap-4 bg-gray300 p-4 sm:flex-row sm:gap-2">
-          <Link
-            href="/login?next=/wishlist"
+          <button
+            type="button"
+            onClick={() => requestAuth({ returnUrl: "/wishlist" })}
             className="border-b border-darkblack pb-1 font-gill text-base font-normal uppercase tracking-[1.8%] text-darkblack"
           >
             LOGIN
-          </Link>
+          </button>
           <p className="text-sm font-light leading-100 tracking-[0%] text-darkblack sm:text-base sm:tracking-[1%] md:text-[18px]">
             to save items and access them anytime in your wishlist
           </p>

@@ -20,10 +20,31 @@ export function getAuthFlowLabel(
   return "Enter Details";
 }
 
+export function getLoginHrefForReturn(
+  returnUrl: string,
+  extraParams?: Record<string, string>,
+): string {
+  const sanitized = sanitizeReturnUrl(returnUrl);
+  const params = new URLSearchParams();
+
+  if (sanitized !== DEFAULT_RETURN_URL) {
+    params.set("returnUrl", sanitized);
+  }
+
+  if (extraParams) {
+    for (const [key, value] of Object.entries(extraParams)) {
+      params.set(key, value);
+    }
+  }
+
+  const query = params.toString();
+  return query ? `/login?${query}` : "/login";
+}
+
 export function getLoginHref(pathname: string): string {
   if (pathname === "/login" || pathname === "/sign-up") {
     return "/login";
   }
 
-  return `/login?returnUrl=${encodeURIComponent(pathname)}`;
+  return getLoginHrefForReturn(pathname);
 }

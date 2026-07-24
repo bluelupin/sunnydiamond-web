@@ -22,7 +22,7 @@ import {
   isEmailRegisterReady,
   validateLoginIdentifier,
 } from "../utils/authValidation";
-import { sanitizeReturnUrl } from "../utils/authNavigation";
+import { getLoginHrefForReturn, sanitizeReturnUrl } from "../utils/authNavigation";
 
 export type AuthFlowStep = "sign-in" | "otp" | "create-account" | "password" | "email-create-account";
 
@@ -33,6 +33,7 @@ type UseAuthFlowOptions = {
   returnUrl?: string;
   onComplete: (returnUrl: string) => void;
   onAbort: () => void;
+  surface?: "modal" | "standalone";
 };
 
 export type AuthFlowContentProps = {
@@ -107,6 +108,7 @@ export function useAuthFlow({
   active,
   returnUrl: returnUrlInput,
   onAbort,
+  surface = "standalone",
 }: UseAuthFlowOptions) {
   const returnUrl = sanitizeReturnUrl(returnUrlInput);
   const [step, setStep] = useState<AuthFlowStep>("sign-in");
@@ -496,6 +498,13 @@ export function useAuthFlow({
 
   const handleAppleContinue = useCallback(async () => {
     if (isSubmitting) return;
+
+    if (surface === "modal") {
+      onAbort();
+      window.location.assign(getLoginHrefForReturn(returnUrl, { provider: "apple" }));
+      return;
+    }
+
     setIsSubmitting(true);
     const result = await signInWithApple();
 
@@ -506,7 +515,7 @@ export function useAuthFlow({
     }
 
     await completeAuth();
-  }, [completeAuth, isSubmitting]);
+  }, [completeAuth, isSubmitting, onAbort, returnUrl, surface]);
 
   const contentProps: AuthFlowContentProps = {
     step,

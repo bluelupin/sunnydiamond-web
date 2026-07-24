@@ -42,7 +42,12 @@ export function buildJewelleryOccasionHref(
   return `${JEWELLERY_PATH}?occasion=${encodeURIComponent(slug)}`;
 }
 
-const GENERIC_PRODUCT_LISTING_PATHS = new Set(["/products", "/products/"]);
+const GENERIC_PRODUCT_LISTING_PATHS = new Set([
+  "/products",
+  "/products/",
+  "/jewellery",
+  "/jewellery/",
+]);
 
 export function buildOccasionCardHref({
   title,

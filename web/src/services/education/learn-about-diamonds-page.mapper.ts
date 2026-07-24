@@ -787,7 +787,7 @@ const mapLearnTab = (
   const primaryCta = slides.find((slide) => slide.ctaLabel);
   mapped.slides = slides.map(({ src, alt }) => ({ src, alt }));
   mapped.ctaLabel = primaryCta?.ctaLabel;
-  mapped.ctaHref = primaryCta?.ctaHref ?? "/products";
+  mapped.ctaHref = primaryCta?.ctaHref ?? "/jewellery";
   return mapped;
 };
 

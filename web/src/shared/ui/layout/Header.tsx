@@ -11,7 +11,15 @@ import { cn } from "@/shared/utils/cn";
 import SDLogo from "@/assets/Icons/SDLogo";
 import SearchIcon from "@/assets/Icons/SearchIcon";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
-import { resolveHeaderNavHref, getHeaderVariant, isAuthRoute, isHeaderScrolled, isJewelleryNavLink } from "@/shared/utils/navigation";
+import {
+  resolveHeaderNavHref,
+  getHeaderSurfaceClass,
+  getHeaderVariant,
+  isAuthRoute,
+  isHeaderScrolled,
+  isJewelleryNavLink,
+} from "@/shared/utils/navigation";
+import MobileThemeColor from "@/shared/ui/layout/MobileThemeColor";
 import { resolveShellHeaderLinks, splitShellHeaderNavLinks } from "@/shared/lib/shellNavigation";
 import MobileNavigation from "@/shared/ui/layout/MobileNavigation";
 import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
@@ -19,7 +27,6 @@ import WishlistIcon from "@/assets/Icons/WishlistIcon";
 import AccountMenu from "@/features/auth/components/AccountMenu";
 import MenuIcon from "@/assets/Icons/MenuIcon";
 import HeaderIconBadge from "@/shared/ui/layout/HeaderIconBadge";
-import { getLoginHref } from "@/features/auth/utils/authNavigation";
 
 const JewelleryMegaMenu = dynamic(
   () =>
@@ -44,11 +51,11 @@ const Header = () => {
   const { totalItems: cartCount } = useCart();
   const { totalItems: wishlistCount } = useWishlist();
   const pathname = usePathname() ?? "/";
-  const loginHref = getLoginHref(pathname);
 
   const isAuthPage = isAuthRoute(pathname);
   const menuOpen = mobileMenuOpen || jewelleryMenuOpen;
   const headerVariant = getHeaderVariant(pathname, { scrolled, menuOpen });
+  const headerSurfaceClass = getHeaderSurfaceClass(pathname, headerVariant);
   const isOverlay = headerVariant === "overlay";
   const isLightOverlay = isOverlay && !isAuthPage;
 
@@ -116,18 +123,22 @@ const Header = () => {
 
   return (
     <>
+      <MobileThemeColor pathname={pathname} headerVariant={headerVariant} />
       <header
         className={cn(
-          "absolute top-0 inset-x-0 z-50 max-md:pt-[calc(0.5rem+env(safe-area-inset-top,0px))]",
+          "absolute top-0 inset-x-0 z-50",
           mobileMenuOpen ? "pointer-events-none opacity-0" : "",
-          isOverlay ? "bg-transparent" : ["/cart", "/checkout"].includes(pathname)
-            ? "bg-gray300"
-            : "bg-white",
         )}
         aria-hidden={mobileMenuOpen}
       >
-        {/* Figma 692:6742 — solid PDP header: white bg, py-24, dark nav; mobile bar 64px */}
-        <div className="relative mx-auto flex h-16 w-full max-w-1440 items-center justify-between px-5 md:h-[104px] md:px-8 lg:px-10 lg:py-6 2xl:max-w-1920 2xl:px-[60px]">
+        <div
+          className={cn(
+            "w-full max-md:pt-[env(safe-area-inset-top,0px)]",
+            headerSurfaceClass,
+          )}
+        >
+          {/* Figma 692:6742 — solid PDP header: white bg, py-24, dark nav; mobile bar 64px */}
+          <div className="relative mx-auto flex h-16 w-full max-w-1440 items-center justify-between px-5 max-md:pt-2 md:h-[104px] md:px-8 md:pt-0 lg:px-10 lg:py-6 2xl:max-w-1920 2xl:px-[60px]">
           <div className="flex w-[120px] items-center gap-6 md:hidden">
             <button
               type="button"
@@ -218,17 +229,18 @@ const Header = () => {
               <HeaderIconBadge count={cartCount} />
             </Link>
 
-            <AccountMenu loginHref={loginHref} className={cn("inline-flex", iconButtonClass, hoverClass)} />
+            <AccountMenu className={cn("inline-flex", iconButtonClass, hoverClass)} />
           </div>
         </div>
 
-        {jewelleryMenuOpen && (
-          <JewelleryMegaMenu
-            onMouseEnter={openJewelleryMenu}
-            onMouseLeave={scheduleCloseJewelleryMenu}
-            onClose={closeJewelleryMenuNow}
-          />
-        )}
+          {jewelleryMenuOpen && (
+            <JewelleryMegaMenu
+              onMouseEnter={openJewelleryMenu}
+              onMouseLeave={scheduleCloseJewelleryMenu}
+              onClose={closeJewelleryMenuNow}
+            />
+          )}
+        </div>
       </header>
 
       {jewelleryMenuOpen && (
