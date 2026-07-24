@@ -130,12 +130,12 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
 
       <CartDivider weight={0.5} />
 
-      <label className="flex w-fit cursor-pointer items-center gap-2">
+      <label className="inline-flex w-fit cursor-pointer items-center gap-2">
         <CartGiftCheckbox
           checked={isGift}
           onChange={(checked) => onUpdateOptions(item.id, { isGift: checked })}
         />
-        <span className="font-gill text-sm leading-110 text-darkblack lg:text-base">
+        <span className="font-gill text-sm leading-4 text-darkblack lg:text-base lg:leading-5">
           Mark this as a gift
         </span>
       </label>

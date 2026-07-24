@@ -69,8 +69,7 @@ type CartGiftCheckboxProps = {
 export const CartGiftCheckbox = ({ checked, onChange, className }: CartGiftCheckboxProps) => (
   <span
     className={cn(
-      "relative inline-flex shrink-0 items-center justify-center",
-      checked ? "size-5" : "size-4",
+      "relative inline-flex size-4 shrink-0 items-center justify-center lg:size-5",
       className,
     )}
   >
@@ -78,15 +77,15 @@ export const CartGiftCheckbox = ({ checked, onChange, className }: CartGiftCheck
       type="checkbox"
       checked={checked}
       onChange={(event) => onChange(event.target.checked)}
-      className="absolute inset-0 z-10 cursor-pointer opacity-0"
+      className="absolute inset-0 z-10 m-0 cursor-pointer opacity-0"
       aria-label="Mark this as a gift"
     />
     <span
       className={cn(
         "flex items-center justify-center transition-colors",
         checked
-          ? "size-5 bg-linkGold"
-          : "size-4 border-[0.8px] border-darkblack bg-white",
+          ? "size-4 bg-linkGold lg:size-5"
+          : "size-4 border-[0.8px] border-darkblack bg-white lg:size-5",
       )}
       aria-hidden
     >

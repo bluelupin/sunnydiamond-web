@@ -35,7 +35,7 @@ const CartMobileStickyFooter = ({
   );
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 lg:hidden">
+    <div className="fixed inset-x-0 bottom-0 z-40 md:hidden">
       <div
         className="pointer-events-none h-[71px] w-full bg-gradient-to-b from-transparent to-white"
         aria-hidden

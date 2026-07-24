@@ -24,15 +24,15 @@ const CartPage = () => {
   const mobileScrollPadding = (() => {
     const { cartPage } = cartFlowSpec.mobile;
     if (offersOpen && priceBreakupOpen) {
-      return `max-lg:pb-[calc(${cartPage.stickyFooterFullyExpandedClearance}px+env(safe-area-inset-bottom,0px))]`;
+      return `max-md:pb-[calc(${cartPage.stickyFooterFullyExpandedClearance}px+env(safe-area-inset-bottom,0px))]`;
     }
     if (priceBreakupOpen) {
-      return `max-lg:pb-[calc(${cartPage.stickyFooterBreakupExpandedClearance}px+env(safe-area-inset-bottom,0px))]`;
+      return `max-md:pb-[calc(${cartPage.stickyFooterBreakupExpandedClearance}px+env(safe-area-inset-bottom,0px))]`;
     }
     if (offersOpen) {
-      return `max-lg:pb-[calc(${cartPage.stickyFooterOffersExpandedClearance}px+env(safe-area-inset-bottom,0px))]`;
+      return `max-md:pb-[calc(${cartPage.stickyFooterOffersExpandedClearance}px+env(safe-area-inset-bottom,0px))]`;
     }
-    return `max-lg:pb-[calc(${cartPage.stickyFooterCollapsedClearance}px+env(safe-area-inset-bottom,0px))]`;
+    return `max-md:pb-[calc(${cartPage.stickyFooterCollapsedClearance}px+env(safe-area-inset-bottom,0px))]`;
   })();
 
   if (isHydrating) {
@@ -63,14 +63,19 @@ const CartPage = () => {
 
   return (
     <>
-      <section className={cn("bg-gray300 lg:pb-16", mobileScrollPadding)}>
-        <div className="mx-auto w-full px-5 pt-6 md:px-8 lg:px-10 2xl:max-w-1920 2xl:px-[60px]">
+      <section
+        className={cn(
+          "bg-gray300 -mt-2 md:landscape:mt-0 md:pb-16",
+          mobileScrollPadding,
+        )}
+      >
+        <div className="mx-auto w-full px-5 pt-6 md:px-8 md:landscape:pt-0 lg:px-10 2xl:max-w-1920 2xl:px-[60px]">
           <h1 className="mb-6 font-larken text-32 font-light leading-110 text-darkblack lg:mb-10 lg:text-32">
             Your Shopping Bag
           </h1>
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,783px)_553px] lg:gap-6">
-            <div className="flex flex-col gap-6">
+          <div className="grid grid-cols-1 gap-6 md:max-lg:portrait:gap-8 md:landscape:grid-cols-[minmax(0,1fr)_minmax(0,300px)] lg:grid-cols-[minmax(0,783px)_553px] lg:gap-6">
+            <div className="flex min-w-0 flex-col gap-6">
               {items.map((item) => (
                 <CartItem
                   key={item.id}
@@ -81,12 +86,12 @@ const CartPage = () => {
                 />
               ))}
 
-              <div className="lg:hidden pt-4">
+              <div className="pt-4 md:hidden">
                 <CartBenefitsSection />
               </div>
             </div>
 
-            <aside className="hidden h-fit w-full flex-col lg:sticky lg:top-12 lg:flex">
+            <aside className="hidden h-fit w-full min-w-0 flex-col gap-0 md:flex md:max-lg:portrait:pt-2 lg:sticky lg:top-12">
               <CartPriceDetails />
               <CartBenefitsSection />
             </aside>
