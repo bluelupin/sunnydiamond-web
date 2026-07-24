@@ -18,15 +18,6 @@ export type FeaturedCarouselItem = {
   href: string;
 };
 
-type SlideCropVariant = "center" | "left-peek" | "right-peek";
-
-function mobilePeekCropClassName(desktopCropClassName: string) {
-  return cn(
-    desktopCropClassName,
-    "max-md:left-[-15px] max-md:top-[-37px] max-md:size-[230px] max-md:translate-x-0 max-md:translate-y-0",
-  );
-}
-
 const formatPrice = (price: number) =>
   new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(price);
 
@@ -34,6 +25,8 @@ function normalizeIndex(index: number, total: number) {
   if (total <= 0) return 0;
   return ((index % total) + total) % total;
 }
+
+type SlideCropVariant = "center" | "left-peek" | "right-peek";
 
 function getSlideVariant(
   slideIndex: number,
@@ -64,30 +57,24 @@ function CarouselSlideImage({
   variant: SlideCropVariant;
   priority?: boolean;
 }) {
-  const cropClassName =
-    variant === "center"
-      ? "flex items-center justify-center size-[774px] max-md:size-[155px] max-md:translate-x-0 max-md:translate-y-0"
-      : variant === "left-peek"
-        ? mobilePeekCropClassName("flex items-center justify-start absolute left-[22px] top-[-83px] size-[434px]")
-        : mobilePeekCropClassName("flex items-center justify-end absolute left-[162px] top-[-78px] size-[426px]");
-
-  const sizes =
-    variant === "center" ? "(max-width: 767px) 430px, 774px" : "(max-width: 767px) 230px, 434px";
-
   return (
-    <div className="featured-slide-viewport flex items-center justify-center">
-      <div className={cropClassName}>
-        <div className="relative md:w-[258px] w-[260px] md:h-[258px] h-[154px] w-[154px]">
-          <Image
-            src={src}
-            alt={alt}
-            fill
-            quality={75}
-            className="size-full object-contain"
-            sizes={sizes}
-            priority={priority}
-          />
-        </div>
+    <div className="featured-slide-viewport">
+      <div
+        className={cn(
+          "featured-slide-image",
+          variant === "left-peek" && "featured-slide-image--left",
+          variant === "right-peek" && "featured-slide-image--right",
+        )}
+      >
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          quality={75}
+          className="size-full object-contain"
+          sizes="(max-width: 767px) 170px, 258px"
+          priority={priority}
+        />
       </div>
     </div>
   );
@@ -107,6 +94,8 @@ export default function FeaturedProductsCarousel({
   const [activeIndex, setActiveIndex] = useState(initialIndex);
 
   const showInfinite = items.length >= 3;
+  const showThreeUp = items.length >= 3;
+  const slidesToShow = showThreeUp ? 3 : items.length;
   const activeItem = items[normalizeIndex(activeIndex, items.length)] ?? items[0];
 
   const handleBeforeChange = useCallback(
@@ -119,46 +108,66 @@ export default function FeaturedProductsCarousel({
   const sliderSettings = useMemo<Settings>(
     () => ({
       className: cn(
-        "featured-products-slider",
+        "center featured-products-slider",
         !showInfinite && "featured-products-slider--single",
+        showThreeUp && "featured-products-slider--triple",
       ),
-      centerMode: showInfinite,
+      centerMode: items.length > 1,
       infinite: showInfinite,
-      initialSlide: initialIndex,
-      slidesToShow: 1,
+      centerPadding: "0px",
+      slidesToShow,
       slidesToScroll: 1,
       speed: 500,
+      initialSlide: initialIndex,
       arrows: false,
       dots: false,
-      swipe: showInfinite,
-      draggable: showInfinite,
+      swipe: items.length > 1,
+      draggable: items.length > 1,
       focusOnSelect: false,
-      variableWidth: true,
-      centerPadding: "0px",
+      variableWidth: false,
       beforeChange: handleBeforeChange,
-      responsive: [
-        {
-          breakpoint: 768,
-          settings: {
-            centerPadding: "calc((100vw - 260px) / 2 - 80px)",
-          },
-        },
-        {
-          breakpoint: 640,
-          settings: {
-            centerPadding: "calc((100vw - 200px) / 2 - 60px)",
-          },
-        },
-      ],
+      ...(showThreeUp
+        ? {
+            responsive: [
+              {
+                breakpoint: 1024,
+                settings: {
+                  slidesToShow: 3,
+                  slidesToScroll: 1,
+                  centerMode: true,
+                  centerPadding: "0px",
+                },
+              },
+              {
+                breakpoint: 768,
+                settings: {
+                  slidesToShow: 3,
+                  slidesToScroll: 1,
+                  centerMode: true,
+                  centerPadding: "0px",
+                },
+              },
+              {
+                breakpoint: 480,
+                settings: {
+                  slidesToShow: 3,
+                  slidesToScroll: 1,
+                  centerMode: true,
+                  centerPadding: "0px",
+                },
+              },
+            ],
+          }
+        : {}),
     }),
-    [handleBeforeChange, initialIndex, showInfinite],
+    [handleBeforeChange, initialIndex, items.length, showInfinite, showThreeUp, slidesToShow],
   );
 
   const goPrev = () => sliderRef.current?.slickPrev();
   const goNext = () => sliderRef.current?.slickNext();
 
   const onKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (!showInfinite) return;
+    if (items.length <= 1) return;
     if (event.key === "ArrowLeft") {
       event.preventDefault();
       goPrev();
@@ -178,10 +187,9 @@ export default function FeaturedProductsCarousel({
       aria-label={sectionLabel}
       tabIndex={0}
       onKeyDown={onKeyDown}
-      className="relative w-full outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
+      className="featured-products-carousel relative w-full max-w-full outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
     >
-      {/* Figma 684:3238 — 303px mobile track; desktop unchanged */}
-      <div className="relative h-auto w-full overflow-hidden md:h-auto">
+      <div className="featured-products-track relative w-full max-w-full">
         <Slider ref={sliderRef} {...sliderSettings}>
           {items.map((item, index) => (
             <div key={String(item.id)} className="featured-products-slide">
@@ -195,13 +203,13 @@ export default function FeaturedProductsCarousel({
           ))}
         </Slider>
 
-        {/* Desktop arrows — Figma 684:2937 @ top 117.5px, width 487px */}
+        {/* Desktop arrows — Figma 684:2937 */}
         <div className="pointer-events-none absolute inset-x-0 top-[117.5px] z-20 hidden justify-center md:flex">
           <div className="pointer-events-auto flex w-[487px] max-w-[calc(100%-48px)] items-center justify-between">
             <button
               type="button"
               aria-label="Previous product"
-              disabled={!showInfinite}
+              disabled={items.length <= 1}
               onClick={goPrev}
               className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
             >
@@ -210,7 +218,7 @@ export default function FeaturedProductsCarousel({
             <button
               type="button"
               aria-label="Next product"
-              disabled={!showInfinite}
+              disabled={items.length <= 1}
               onClick={goNext}
               className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
             >
@@ -220,30 +228,30 @@ export default function FeaturedProductsCarousel({
         </div>
       </div>
 
-      {/* Product details + mobile arrows — Figma 684:2940 / 684:3238 */}
-      <div className="mx-auto flex w-[200px] flex-col items-center sm:w-[260px] md:w-[600px]">
-        <div className="relative z-20 flex w-full max-w-[303px] w-[303px] items-center justify-between md:hidden top-16">
+      {/* Product details + mobile arrows — width matches center slide */}
+      <div className="featured-products-details flex flex-col items-center md:!w-[350px] !max-w-[350px] !w-full">
+        <div className="relative top-16 z-20 flex w-full items-center justify-between md:hidden">
           <button
             type="button"
             aria-label="Previous product"
-            disabled={!showInfinite}
+            disabled={items.length <= 1}
             onClick={goPrev}
             className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
           >
-            <LeftArrow className="w-6 h-6" />
+            <LeftArrow className="h-6 w-6" />
           </button>
           <button
             type="button"
             aria-label="Next product"
-            disabled={!showInfinite}
+            disabled={items.length <= 1}
             onClick={goNext}
             className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
           >
-            <RightArrow className="w-6 h-6" />
+            <RightArrow className="h-6 w-6" />
           </button>
         </div>
 
-        <div className="flex flex-col items-center gap-4 text-center md:gap-6 mt-3">
+        <div className="mt-3 flex flex-col items-center gap-4 text-center md:gap-6">
           <div className="flex flex-col items-center gap-4">
             <p className="font-gill text-base font-normal leading-110 text-darkblack md:text-xl">
               {activeItem.name}

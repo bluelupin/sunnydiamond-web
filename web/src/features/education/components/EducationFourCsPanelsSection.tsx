@@ -111,11 +111,11 @@ const PanelMedia = ({
               "items-center",
             )}
           >
-            {panel.id === "cut" ? (
+            {panel.id === "cut" && panel.slider.dualImages ? (
               <div className="flex items-center gap-6 lg:gap-[24px]">
                 <div className="relative size-[120px] shrink-0 overflow-hidden md:size-[160px] lg:size-[200px]">
                   <Image
-                    src={educationPageImages.cutDiamondGood}
+                    src={panel.slider.dualImages[0]}
                     alt=""
                     fill
                     className="object-cover"
@@ -124,7 +124,7 @@ const PanelMedia = ({
                 </div>
                 <div className="relative size-[120px] shrink-0 overflow-hidden md:size-[160px] lg:size-[200px]">
                   <Image
-                    src={educationPageImages.cutDiamondExcellent}
+                    src={panel.slider.dualImages[1]}
                     alt=""
                     fill
                     className="object-cover"

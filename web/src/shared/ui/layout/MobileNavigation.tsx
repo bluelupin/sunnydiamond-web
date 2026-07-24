@@ -6,7 +6,7 @@ import Link from "next/link";
 import { X } from "lucide-react";
 import SDLogo from "@/assets/Icons/SDLogo";
 import SearchIcon from "@/assets/Icons/SearchIcon";
-import WishlistIcon from "@/assets/Icons/WishlistIcon";
+import WishlistNavLink from "@/features/wishlist/components/WishlistNavLink";
 import AccountMenu from "@/features/auth/components/AccountMenu";
 import { cn } from "@/shared/utils/cn";
 import { resolveHeaderNavHref, isJewelleryNavLink } from "@/shared/utils/navigation";
@@ -22,7 +22,6 @@ type MobileNavigationProps = {
   navLinks: HeaderNavLink[];
   appointmentLink?: HeaderNavLink;
   cartCount: number;
-  wishlistCount: number;
 };
 
 const LANGUAGES = [
@@ -400,7 +399,6 @@ const MobileNavigation = ({
   navLinks,
   appointmentLink = { label: "Book an Appointment", url: "/book-an-appointment" },
   cartCount,
-  wishlistCount,
 }: MobileNavigationProps) => {
   const [subPanel, setSubPanel] = useState<
     "language" | "currency" | "appointment" | "jewellery" | "store-visit" | null
@@ -455,12 +453,24 @@ const MobileNavigation = ({
   const currentCurrencyDisplay = CURRENCIES.find((c) => c.code === currency)?.display ?? "India · ₹ INR";
 
   return (
-    <div
-      className="fixed inset-0 z-[60] flex flex-col bg-white md:landscape:hidden"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Mobile navigation"
-    >
+    <>
+      <button
+        type="button"
+        className="fixed inset-0 z-[59] hidden bg-black/50 md:portrait:block md:landscape:hidden"
+        onClick={handleClose}
+        aria-label="Close menu"
+      />
+
+      <div
+        className={cn(
+          "fixed z-[60] flex flex-col bg-white md:landscape:hidden",
+          "inset-0",
+          "md:portrait:inset-x-auto md:portrait:inset-y-0 md:portrait:left-0 md:portrait:w-[60%] md:portrait:max-w-[60%]",
+        )}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Mobile navigation"
+      >
       <div className="flex h-16 shrink-0 items-center justify-between px-4 gap-4">
         <div className="flex w-[120px] items-center">
           <button
@@ -484,15 +494,10 @@ const MobileNavigation = ({
         </Link>
 
         <div className="flex w-[112px] items-center justify-end gap-6">
-          <Link
-            href="/wishlist"
-            aria-label={wishlistCount > 0 ? `Wishlist, ${wishlistCount} items` : "Wishlist"}
-            onClick={handleClose}
+          <WishlistNavLink
+            onNavigate={handleClose}
             className="relative inline-flex size-6 items-center justify-center"
-          >
-            <WishlistIcon className="size-6" />
-            <HeaderIconBadge count={wishlistCount} />
-          </Link>
+          />
           <AccountMenu onNavigate={handleAccountClick} className="inline-flex size-6 items-center justify-center" />
           <Link
             href="/cart"
@@ -590,7 +595,7 @@ const MobileNavigation = ({
           />
         </div>
 
-        <div className="mt-10 flex items-center gap-2">
+        <div className="mt-10 flex items-center justify-center text-center gap-2">
           <span className="inline-flex size-6 shrink-0 items-center justify-center">
             <Image
               src="/images/navigation/footer-star.svg"
@@ -647,7 +652,8 @@ const MobileNavigation = ({
           onClose={handleClose}
         />
       )}
-    </div>
+      </div>
+    </>
   );
 };
 

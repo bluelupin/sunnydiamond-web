@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/features/cart/context/CartContext";
-import { useWishlist } from "@/features/wishlist/context/WishlistContext";
+import WishlistNavLink from "@/features/wishlist/components/WishlistNavLink";
 import { siteConfig } from "@/shared/lib/siteConfig";
 import { cn } from "@/shared/utils/cn";
 import SDLogo from "@/assets/Icons/SDLogo";
@@ -23,7 +23,6 @@ import MobileThemeColor from "@/shared/ui/layout/MobileThemeColor";
 import { resolveShellHeaderLinks, splitShellHeaderNavLinks } from "@/shared/lib/shellNavigation";
 import MobileNavigation from "@/shared/ui/layout/MobileNavigation";
 import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
-import WishlistIcon from "@/assets/Icons/WishlistIcon";
 import AccountMenu from "@/features/auth/components/AccountMenu";
 import MenuIcon from "@/assets/Icons/MenuIcon";
 import HeaderIconBadge from "@/shared/ui/layout/HeaderIconBadge";
@@ -50,7 +49,6 @@ const Header = () => {
   const [jewelleryMenuOpen, setJewelleryMenuOpen] = useState(false);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { totalItems: cartCount } = useCart();
-  const { totalItems: wishlistCount } = useWishlist();
   const pathname = usePathname() ?? "/";
   const canHoverNav = useCanHover();
 
@@ -231,16 +229,7 @@ const Header = () => {
               <SearchIcon className="size-6" />
             </button>
 
-            <Link
-              href="/wishlist"
-              className={cn("relative inline-flex", iconButtonClass, hoverClass)}
-              aria-label={
-                wishlistCount > 0 ? `Wishlist, ${wishlistCount} items` : "Wishlist"
-              }
-            >
-              <WishlistIcon className="size-6" />
-              <HeaderIconBadge count={wishlistCount} />
-            </Link>
+            <WishlistNavLink className={cn(iconButtonClass, hoverClass)} />
 
             <Link
               href="/cart"
@@ -280,7 +269,6 @@ const Header = () => {
         navLinks={primaryLinks}
         appointmentLink={appointmentLink}
         cartCount={cartCount}
-        wishlistCount={wishlistCount}
       />
     </>
   );

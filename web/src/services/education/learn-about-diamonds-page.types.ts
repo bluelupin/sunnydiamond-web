@@ -134,6 +134,13 @@ export type StrapiEducationCertificateSection = {
 export type StrapiEducationLearnFeatureItem = {
   id?: number;
   label?: string | null;
+  icon?: StrapiEducationResponsiveImage | null;
+};
+
+export type StrapiEducationLearnFeatureGroup = {
+  id?: number;
+  featureSubtitle?: string | null;
+  featureItems?: StrapiEducationLearnFeatureItem[] | null;
 };
 
 export type StrapiEducationLearnCarouselImage = {
@@ -149,7 +156,9 @@ export type StrapiEducationLearnTab = {
   layoutType?: string | null;
   featureSubtitle?: string | null;
   featureImage?: StrapiEducationResponsiveImage | null;
+  /** @deprecated Prefer featureGroups — kept for older payloads */
   featureItems?: StrapiEducationLearnFeatureItem[] | null;
+  featureGroups?: StrapiEducationLearnFeatureGroup[] | null;
   carouselImage?: StrapiEducationLearnCarouselImage[] | null;
 };
 
@@ -266,11 +275,16 @@ export type NormalizedEducationLearnAnatomyTrait = {
   definition: string;
 };
 
+export type NormalizedEducationLearnAnatomySection = {
+  id: string;
+  title: string;
+  traits: NormalizedEducationLearnAnatomyTrait[];
+};
+
 export type NormalizedEducationLearnAnatomyDetail = {
   image: string;
   imageAlt: string;
-  title: string;
-  traits: NormalizedEducationLearnAnatomyTrait[];
+  sections: NormalizedEducationLearnAnatomySection[];
 };
 
 export type NormalizedEducationLearnTab = {

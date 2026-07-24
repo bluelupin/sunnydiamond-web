@@ -58,12 +58,12 @@ const CartPage = () => {
           "md:max-lg:pb-16",
         )}
       >
-        <div className="mx-auto w-full px-5 pt-6 md:max-lg:px-8 md:max-lg:landscape:pt-0 lg:px-10 2xl:max-w-1920 2xl:px-[60px]">
+        <div className="mx-auto w-full px-5 max-md:pt-4 pt-6 md:max-lg:px-8 md:max-lg:landscape:pt-0 lg:px-10 2xl:max-w-1920 2xl:px-[60px]">
           <h1 className="mb-6 font-larken text-32 font-light leading-110 text-darkblack lg:mb-10 lg:text-32">
             Your Shopping Bag
           </h1>
 
-          <div className="grid grid-cols-1 gap-6 md:max-lg:portrait:grid-cols-[minmax(0,1fr)_minmax(0,360px)] md:max-lg:landscape:grid-cols-[minmax(0,1fr)_minmax(0,300px)] md:max-lg:items-start lg:grid-cols-[minmax(0,783px)_553px] lg:gap-6">
+          <div className="grid grid-cols-1 gap-6 md:max-lg:portrait:grid-cols-[minmax(0,1fr)_minmax(0,360px)] md:max-lg:landscape:grid-cols-2 md:max-lg:items-start lg:grid-cols-2 lg:gap-6">
             <div className="flex min-w-0 flex-col gap-6">
               {items.map((item) => (
                 <CartItem

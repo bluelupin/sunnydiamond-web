@@ -21,6 +21,7 @@ const staticRoutes = [
   { url: "/faqs", changeFrequency: "monthly" as const, priority: 0.5 },
   { url: "/book-an-appointment", changeFrequency: "monthly" as const, priority: 0.6 },
   { url: "/bespoke-jewellery", changeFrequency: "monthly" as const, priority: 0.7 },
+  { url: "/gifting", changeFrequency: "weekly" as const, priority: 0.8 },
   { url: "/order-tracking", changeFrequency: "monthly" as const, priority: 0.4 },
   { url: "/returns-and-cancellations", changeFrequency: "monthly" as const, priority: 0.4 },
   { url: "/exchange-and-resizing", changeFrequency: "monthly" as const, priority: 0.4 },

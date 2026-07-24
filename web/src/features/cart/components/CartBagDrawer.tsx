@@ -154,7 +154,7 @@ const CartBagDrawer = () => {
         side="right"
         overlayClassName="bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
         className={cn(
-          "h-[812px] max-h-100vh w-full max-w-[472px] border-0 bg-white p-0 sm:max-w-[472px] [&>button]:hidden",
+          "h-screen max-h-100vh w-full max-w-[472px] border-0 bg-white p-0 sm:max-w-[472px] [&>button]:hidden",
         )}
       >
         <SheetTitle className="sr-only">Item added to your bag</SheetTitle>
