@@ -6,7 +6,7 @@ import Link from "next/link";
 import { X } from "lucide-react";
 import SDLogo from "@/assets/Icons/SDLogo";
 import SearchIcon from "@/assets/Icons/SearchIcon";
-import WishlistIcon from "@/assets/Icons/WishlistIcon";
+import WishlistNavLink from "@/features/wishlist/components/WishlistNavLink";
 import AccountMenu from "@/features/auth/components/AccountMenu";
 import { cn } from "@/shared/utils/cn";
 import { resolveHeaderNavHref, isJewelleryNavLink } from "@/shared/utils/navigation";
@@ -22,7 +22,6 @@ type MobileNavigationProps = {
   navLinks: HeaderNavLink[];
   appointmentLink?: HeaderNavLink;
   cartCount: number;
-  wishlistCount: number;
 };
 
 const LANGUAGES = [
@@ -400,7 +399,6 @@ const MobileNavigation = ({
   navLinks,
   appointmentLink = { label: "Book an Appointment", url: "/book-an-appointment" },
   cartCount,
-  wishlistCount,
 }: MobileNavigationProps) => {
   const [subPanel, setSubPanel] = useState<
     "language" | "currency" | "appointment" | "jewellery" | "store-visit" | null
@@ -496,15 +494,10 @@ const MobileNavigation = ({
         </Link>
 
         <div className="flex w-[112px] items-center justify-end gap-6">
-          <Link
-            href="/wishlist"
-            aria-label={wishlistCount > 0 ? `Wishlist, ${wishlistCount} items` : "Wishlist"}
-            onClick={handleClose}
+          <WishlistNavLink
+            onNavigate={handleClose}
             className="relative inline-flex size-6 items-center justify-center"
-          >
-            <WishlistIcon className="size-6" />
-            <HeaderIconBadge count={wishlistCount} />
-          </Link>
+          />
           <AccountMenu onNavigate={handleAccountClick} className="inline-flex size-6 items-center justify-center" />
           <Link
             href="/cart"

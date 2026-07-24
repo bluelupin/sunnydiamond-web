@@ -10,11 +10,12 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { useLoginModal } from "@/features/auth/context/LoginModalContext";
 import WishlistMovedToast from "@/features/wishlist/components/WishlistMovedToast";
 import { WISHLIST_STORAGE_KEY } from "@/features/wishlist/constants";
 import { wishlistMovedToastDurationMs } from "@/features/wishlist/data/content";
-import { normalizeWishlistSkus } from "@/features/wishlist/utils/wishlistProduct.utils";
 import {
   addCustomerWishlistSku,
   getCustomerWishlist,
@@ -30,24 +31,10 @@ interface WishlistContextType {
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
-function readStoredWishlist(): string[] {
-  if (typeof window === "undefined") return [];
-
-  try {
-    const stored = window.localStorage.getItem(WISHLIST_STORAGE_KEY);
-    if (!stored) return [];
-
-    const parsed = JSON.parse(stored);
-    return Array.isArray(parsed)
-      ? normalizeWishlistSkus(parsed.filter((id): id is string => typeof id === "string"))
-      : [];
-  } catch {
-    return [];
-  }
-}
-
 export function WishlistProvider({ children }: { children: ReactNode }) {
   const { status } = useAuth();
+  const { openLoginModal } = useLoginModal();
+  const pathname = usePathname() ?? "/";
   const [wishlistedIds, setWishlistedIds] = useState<string[]>([]);
   const [hasLoaded, setHasLoaded] = useState(false);
   const wishlistedIdsRef = useRef(wishlistedIds);
@@ -83,12 +70,21 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    setWishlistedIds(readStoredWishlist());
     setHasLoaded(true);
   }, []);
 
   useEffect(() => {
-    if (!hasLoaded || status !== "authenticated") {
+    if (!hasLoaded) {
+      return;
+    }
+
+    if (status === "guest") {
+      setWishlistedIds([]);
+      window.localStorage.removeItem(WISHLIST_STORAGE_KEY);
+      return;
+    }
+
+    if (status !== "authenticated") {
       return;
     }
 
@@ -103,24 +99,38 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         setWishlistedIds(wishlist.skus);
       })
       .catch(() => {
-        // Keep local wishlist when remote hydration fails.
+        setWishlistedIds([]);
       });
   }, [hasLoaded, status]);
 
   useEffect(() => {
-    if (!hasLoaded) return;
+    if (!hasLoaded || status !== "authenticated") {
+      return;
+    }
+
     window.localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(wishlistedIds));
-  }, [wishlistedIds, hasLoaded]);
+  }, [wishlistedIds, hasLoaded, status]);
 
   const isWishlisted = useCallback(
-    (productSku: string) => wishlistedIds.includes(productSku.trim()),
-    [wishlistedIds],
+    (productSku: string) => {
+      if (status !== "authenticated") {
+        return false;
+      }
+
+      return wishlistedIds.includes(productSku.trim());
+    },
+    [wishlistedIds, status],
   );
 
   const toggleWishlist = useCallback(
     (productSku: string) => {
       const normalizedSku = productSku.trim();
       if (!normalizedSku) {
+        return;
+      }
+
+      if (status !== "authenticated") {
+        openLoginModal({ returnUrl: pathname });
         return;
       }
 
@@ -137,10 +147,6 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         showMovedToast();
       }
 
-      if (status !== "authenticated") {
-        return;
-      }
-
       void (async () => {
         try {
           const wishlist = isCurrentlyWishlisted
@@ -152,17 +158,17 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         }
       })();
     },
-    [showMovedToast, status],
+    [openLoginModal, pathname, showMovedToast, status],
   );
 
   const value = useMemo(
     () => ({
       wishlistedIds,
-      totalItems: wishlistedIds.length,
+      totalItems: status === "authenticated" ? wishlistedIds.length : 0,
       isWishlisted,
       toggleWishlist,
     }),
-    [wishlistedIds, isWishlisted, toggleWishlist],
+    [isWishlisted, status, toggleWishlist, wishlistedIds],
   );
 
   return (

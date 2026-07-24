@@ -17,14 +17,14 @@ export default function AppProvider({ children }: { children: React.ReactNode })
       <AuthProvider>
         <CartProvider>
           <CartUIProvider>
-            <WishlistProvider>
-              <LoginModalProvider>
+            <LoginModalProvider>
+              <WishlistProvider>
                 {children}
                 <CartBagDrawer />
                 <GiftingOptionsPanel />
                 <LoginModal />
-              </LoginModalProvider>
-            </WishlistProvider>
+              </WishlistProvider>
+            </LoginModalProvider>
           </CartUIProvider>
         </CartProvider>
       </AuthProvider>
