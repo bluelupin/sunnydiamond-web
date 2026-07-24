@@ -15,10 +15,18 @@ export type MagentoCartCustomizableOption = {
   }> | null;
 };
 
+export type MagentoGiftMessage = {
+  message?: string | null;
+};
+
+export type MagentoGiftMode = "GROUPED" | "SEPARATE";
+
 export type MagentoCartItem = {
   uid?: string | null;
   quantity?: number | null;
   customizable_options?: MagentoCartCustomizableOption[] | null;
+  is_gift?: boolean | null;
+  gift_message?: MagentoGiftMessage | null;
   product?: MagentoCartProduct | null;
   prices?: {
     price?: { value?: number | null } | null;
@@ -56,6 +64,8 @@ export type MagentoCartShippingAddress = {
 export type MagentoCart = {
   id?: string | null;
   total_quantity?: number | null;
+  gift_mode?: MagentoGiftMode | null;
+  gift_message?: MagentoGiftMessage | null;
   prices?: MagentoCartPrices | null;
   shipping_addresses?: MagentoCartShippingAddress[] | null;
   available_payment_methods?: MagentoPaymentMethod[] | null;
@@ -210,6 +220,12 @@ export type MagentoPaymentOrder = {
 
 export type MagentoSetPaymentMethodOnCartResponse = {
   setPaymentMethodOnCart?: {
+    cart?: MagentoCart | null;
+  } | null;
+};
+
+export type MagentoSetGiftOptionsResponse = {
+  setSunnyGiftOptions?: {
     cart?: MagentoCart | null;
   } | null;
 };

@@ -30,15 +30,26 @@ function formatLineMetadataComment(items: CartLineItem[]): string {
     if (options.metal?.trim()) {
       parts.push(`Metal: ${options.metal.trim()}`);
     }
-    if (options.isGift) {
+    if (options.isGift || item.gifting) {
       parts.push("Gift wrap: Yes");
+    }
+    if (item.gifting?.note?.trim()) {
+      parts.push(`Gift note: "${item.gifting.note.trim()}"`);
     }
 
     const details = parts.length > 0 ? parts.join(", ") : "No personalization selected";
     return `- ${item.product.name} (${item.product.id}): ${details}`;
   });
 
-  return ["Storefront line options:", ...lines].join("\n");
+  const giftedItems = items.filter((item) => item.gifting || item.options.isGift);
+  const giftingSummary =
+    giftedItems.length === 0
+      ? []
+      : giftedItems.some((item) => item.gifting?.wrapMode === "separate")
+        ? ["Gifting: SEPARATE PACKAGES — one per gift item, note per item."]
+        : ["Gifting: ONE PACKAGE — all gift items together, single shared note."];
+
+  return ["Storefront line options:", ...giftingSummary, ...lines].join("\n");
 }
 
 async function findMagentoOrderEntityId(orderNumber: string): Promise<{

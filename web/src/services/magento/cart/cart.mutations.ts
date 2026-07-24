@@ -34,6 +34,16 @@ export const MAGENTO_SYNC_CART_ITEMS_OPTIONS_MUTATION = `
   }
 ` as const;
 
+export const MAGENTO_SET_GIFT_OPTIONS_MUTATION = `
+  mutation MagentoSetGiftOptions($input: SetSunnyGiftOptionsInput!) {
+    setSunnyGiftOptions(input: $input) {
+      cart {
+        ${MAGENTO_CART_FIELDS}
+      }
+    }
+  }
+` as const;
+
 export const MAGENTO_ADD_SIMPLE_PRODUCTS_TO_CART_MUTATION = `
   mutation MagentoAddSimpleProductsToCart($cartId: String!, $sku: String!, $quantity: Float!) {
     addSimpleProductsToCart(

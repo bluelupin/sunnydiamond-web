@@ -21,6 +21,7 @@ import {
   fetchGuestCart,
   migrateLegacyLinesToGuestCart,
   removeGuestCartItem,
+  setCartGiftOptions,
   setGuestShippingMethod,
   syncGuestCartLineOption,
   updateGuestCartItemQuantity,
@@ -45,6 +46,7 @@ import type {
   AddItemResult,
   AddToBagPayload,
   CartGiftingOptions,
+  CartGiftingSelection,
   CartLineItem,
   CartLineOptions,
 } from "../types/cart.types";
@@ -61,7 +63,7 @@ interface CartContextType {
   removeItem: (lineItemId: string) => Promise<void>;
   updateQuantity: (lineItemId: string, quantity: number) => Promise<void>;
   updateLineItemOptions: (lineItemId: string, options: Partial<CartLineOptions>) => void;
-  updateLineItemGifting: (lineItemId: string, gifting: CartGiftingOptions) => void;
+  applyGiftingSelection: (selection: CartGiftingSelection) => Promise<void>;
   applyMagentoCartState: (state: GuestCartState) => void;
   refreshCart: () => Promise<void>;
   selectShippingMethod: (carrierCode: string, methodCode: string) => Promise<void>;
@@ -475,33 +477,68 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [applyCartState, cartState?.items],
   );
 
-  const updateLineItemGifting = useCallback((lineItemId: string, gifting: CartGiftingOptions) => {
-    setLineMetadata((current) => {
-      const previous = current[lineItemId] ?? { options: {} };
-      const next = {
-        ...current,
-        [lineItemId]: {
-          ...previous,
-          gifting,
-        },
-      };
-      lineMetadataRef.current = next;
-      return next;
-    });
+  const applyGiftingSelection = useCallback(
+    async (selection: CartGiftingSelection) => {
+      const giftingByLine = new Map<string, CartGiftingOptions | undefined>(
+        selection.items.map((item) => [
+          item.lineItemId,
+          item.isGift
+            ? {
+                wrapMode: selection.mode,
+                note:
+                  (selection.mode === "separate" ? item.note : selection.groupedNote)?.trim() ||
+                  undefined,
+              }
+            : undefined,
+        ]),
+      );
 
-    setCartState((current) => {
-      if (!current) {
-        return current;
+      const nextMetadata = { ...lineMetadataRef.current };
+      for (const [lineItemId, gifting] of giftingByLine) {
+        const previous = nextMetadata[lineItemId] ?? { options: {} };
+        nextMetadata[lineItemId] = {
+          ...previous,
+          options: { ...previous.options, isGift: Boolean(gifting) },
+          gifting,
+        };
+      }
+      lineMetadataRef.current = nextMetadata;
+      writeCartLineMetadata(nextMetadata);
+      setLineMetadata(nextMetadata);
+
+      setCartState((current) => {
+        if (!current) {
+          return current;
+        }
+
+        return {
+          ...current,
+          items: current.items.map((item) =>
+            giftingByLine.has(item.id)
+              ? {
+                  ...item,
+                  options: { ...item.options, isGift: Boolean(giftingByLine.get(item.id)) },
+                  gifting: giftingByLine.get(item.id),
+                }
+              : item,
+          ),
+        };
+      });
+
+      const cartId = getGuestCartId();
+      if (!cartId) {
+        return;
       }
 
-      return {
-        ...current,
-        items: current.items.map((item) =>
-          item.id === lineItemId ? { ...item, gifting } : item,
-        ),
-      };
-    });
-  }, []);
+      try {
+        const syncedState = await setCartGiftOptions(cartId, selection, nextMetadata);
+        applyCartState(syncedState);
+      } catch {
+        // Keep the local gifting state; checkout re-syncs before placing the order.
+      }
+    },
+    [applyCartState],
+  );
 
   const clearCart = useCallback(() => {
     clearGuestCartId();
@@ -594,7 +631,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeItem,
       updateQuantity,
       updateLineItemOptions,
-      updateLineItemGifting,
+      applyGiftingSelection,
       applyMagentoCartState,
       refreshCart: refreshCartFromMagento,
       selectShippingMethod,
@@ -626,7 +663,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       taxes,
       totalItems,
       totalPrice,
-      updateLineItemGifting,
+      applyGiftingSelection,
       updateLineItemOptions,
       updateQuantity,
     ],

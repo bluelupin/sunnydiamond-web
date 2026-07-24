@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Check, X } from "lucide-react";
@@ -210,24 +210,35 @@ const GiftingScrollIndicator = () => (
 );
 
 const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
-  const { items, updateLineItemGifting } = useCart();
-  const [wrapMode, setWrapMode] = useState<"single" | "separate">("single");
-  const [giftNote, setGiftNote] = useState("");
-  const [itemNotes, setItemNotes] = useState<Record<string, string>>({});
-  const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(
-    () => new Set(items.map((item) => item.id)),
+  const { items, applyGiftingSelection } = useCart();
+  const [wrapMode, setWrapMode] = useState<"single" | "separate">(() =>
+    items.some((item) => item.gifting?.wrapMode === "separate") ? "separate" : "single",
   );
+  const [giftNote, setGiftNote] = useState(
+    () =>
+      items.find((item) => item.gifting?.wrapMode !== "separate" && item.gifting?.note)?.gifting
+        ?.note ?? "",
+  );
+  const [itemNotes, setItemNotes] = useState<Record<string, string>>(() =>
+    Object.fromEntries(
+      items
+        .filter((item) => item.gifting?.wrapMode === "separate" && item.gifting.note)
+        .map((item) => [item.id, item.gifting?.note ?? ""]),
+    ),
+  );
+  const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(() => {
+    const gifted = items.filter((item) => item.gifting || item.options.isGift);
+    return new Set((gifted.length > 0 ? gifted : items).map((item) => item.id));
+  });
 
   useEffect(() => {
-    setSelectedItemIds(new Set(items.map((item) => item.id)));
+    setSelectedItemIds((previous) => {
+      const validIds = items.filter((item) => previous.has(item.id)).map((item) => item.id);
+      return new Set(validIds);
+    });
   }, [items]);
 
   const isSeparate = wrapMode === "separate";
-
-  const selectedItems = useMemo(
-    () => items.filter((item) => selectedItemIds.has(item.id)),
-    [items, selectedItemIds],
-  );
 
   const toggleItemSelection = (itemId: string, checked: boolean) => {
     setSelectedItemIds((prev) => {
@@ -242,16 +253,17 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
   };
 
   const applyGifting = () => {
-    selectedItems.forEach((item) => {
-      const note =
-        wrapMode === "separate"
-          ? itemNotes[item.id]?.trim()
-          : giftNote.trim();
-
-      updateLineItemGifting(item.id, {
-        wrapMode,
-        note: note || undefined,
-      });
+    void applyGiftingSelection({
+      mode: wrapMode,
+      groupedNote: wrapMode === "single" ? giftNote.trim() || undefined : undefined,
+      items: items.map((item) => ({
+        lineItemId: item.id,
+        isGift: selectedItemIds.has(item.id),
+        note:
+          wrapMode === "separate" && selectedItemIds.has(item.id)
+            ? itemNotes[item.id]?.trim() || undefined
+            : undefined,
+      })),
     });
     onClose();
   };

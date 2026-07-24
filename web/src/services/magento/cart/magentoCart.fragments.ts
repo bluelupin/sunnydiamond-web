@@ -1,6 +1,10 @@
 export const MAGENTO_CART_FIELDS = `
   id
   total_quantity
+  gift_mode
+  gift_message {
+    message
+  }
   prices {
     grand_total {
       value
@@ -21,6 +25,10 @@ export const MAGENTO_CART_FIELDS = `
       uid
       quantity
       ... on SimpleCartItem {
+        is_gift
+        gift_message {
+          message
+        }
         customizable_options {
           label
           values {

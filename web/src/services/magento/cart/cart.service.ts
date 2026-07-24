@@ -15,6 +15,7 @@ import {
   MAGENTO_ESTIMATE_SHIPPING_METHODS_MUTATION,
   MAGENTO_UPDATE_CART_ITEMS_MUTATION,
   MAGENTO_SYNC_CART_ITEMS_OPTIONS_MUTATION,
+  MAGENTO_SET_GIFT_OPTIONS_MUTATION,
 } from "./cart.mutations";
 import {
   mapMagentoCartItems,
@@ -56,9 +57,10 @@ import type {
   GuestCheckoutResult,
   PlacedGuestOrder,
   MagentoUpdateCartItemsResponse,
+  MagentoSetGiftOptionsResponse,
   MappedMagentoCart,
 } from "./magentoCart.types";
-import type { CartLineItem } from "@/features/cart/types/cart.types";
+import type { CartGiftingSelection, CartLineItem } from "@/features/cart/types/cart.types";
 import type { CheckoutFormData, CheckoutPaymentData } from "@/features/checkout/types/checkout.types";
 import {
   mapCheckoutFormToBillingAddress,
@@ -372,6 +374,33 @@ export async function syncGuestCartLineOption(
   });
 
   return mapGuestCartState(assertCart(data.updateCartItems?.cart), lineMetadata);
+}
+
+export async function setCartGiftOptions(
+  cartId: string,
+  selection: CartGiftingSelection,
+  lineMetadata: StoredCartLineMetadata,
+  signal?: AbortSignal,
+): Promise<GuestCartState> {
+  const data = await magentoGraphqlFetch<MagentoSetGiftOptionsResponse>({
+    query: MAGENTO_SET_GIFT_OPTIONS_MUTATION,
+    variables: {
+      input: {
+        cart_id: cartId,
+        mode: selection.mode === "separate" ? "SEPARATE" : "GROUPED",
+        grouped_note: selection.groupedNote?.trim() || null,
+        items: selection.items.map((item) => ({
+          cart_item_uid: item.lineItemId,
+          is_gift: item.isGift,
+          note: item.note?.trim() || null,
+        })),
+      },
+    },
+    signal,
+    cache: "no-store",
+  });
+
+  return mapGuestCartState(assertCart(data.setSunnyGiftOptions?.cart), lineMetadata);
 }
 
 export async function updateGuestCartItemQuantity(

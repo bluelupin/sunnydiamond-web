@@ -15,6 +15,13 @@ export type CartGiftingOptions = {
   wrapMode?: "single" | "separate";
 };
 
+/** Complete desired gifting state for the whole bag, as saved from the gifting panel. */
+export type CartGiftingSelection = {
+  mode: "single" | "separate";
+  groupedNote?: string;
+  items: Array<{ lineItemId: string; isGift: boolean; note?: string }>;
+};
+
 export type CartLineItem = {
   id: string;
   product: Product;

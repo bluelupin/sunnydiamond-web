@@ -1,5 +1,5 @@
 import type { Product } from "@/features/products/data/products";
-import type { CartLineItem } from "@/features/cart/types/cart.types";
+import type { CartGiftingOptions, CartLineItem } from "@/features/cart/types/cart.types";
 import { buildProductSeo } from "@/shared/lib/seo/productSeo";
 import { resolveMagentoProductImages } from "../products/products.mapper";
 import fallBackImage from "@/assets/fallBackImage.png";
@@ -199,6 +199,23 @@ export function mapMagentoCartTotals(cart: MagentoCart): MappedMagentoCart | nul
   };
 }
 
+function mapServerGifting(
+  cart: MagentoCart,
+  item: MagentoCartItem,
+): CartGiftingOptions | undefined {
+  if (!item.is_gift) {
+    return undefined;
+  }
+
+  const wrapMode = cart.gift_mode === "SEPARATE" ? "separate" : "single";
+  const note =
+    wrapMode === "separate"
+      ? item.gift_message?.message?.trim()
+      : cart.gift_message?.message?.trim();
+
+  return { wrapMode, note: note || undefined };
+}
+
 export function mapMagentoCartItems(
   cart: MagentoCart,
   lineMetadata: StoredCartLineMetadata,
@@ -221,12 +238,19 @@ export function mapMagentoCartItems(
       ...magentoOptions,
     };
 
+    // Magento is the source of truth once a gift is saved there; localStorage
+    // metadata covers marks that have not been synced yet.
+    const serverGifting = mapServerGifting(cart, item);
+    if (serverGifting) {
+      mergedOptions.isGift = true;
+    }
+
     items.push({
       id: uid,
       product,
       quantity,
       options: mergedOptions,
-      gifting: metadata.gifting,
+      gifting: serverGifting ?? metadata.gifting,
     });
   }
 

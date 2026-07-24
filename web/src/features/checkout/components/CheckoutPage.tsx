@@ -35,6 +35,7 @@ import {
   completeGuestCheckout,
   ensureGuestCartId,
   prepareCheckoutForPayment,
+  setCartGiftOptions,
 } from "@/services/magento/cart/cart.service";
 import { readCartLineMetadata } from "@/services/magento/cart/cartSession";
 import { MagentoGraphqlError } from "@/services/magento/magento.errors";
@@ -267,6 +268,32 @@ const CheckoutPage = () => {
               description: "Please select a shipping method before placing your order.",
             });
             return;
+          }
+
+          // Re-sync the full gifting state onto the Magento cart so the order
+          // carries it even when a mark was never saved through the panel.
+          try {
+            const giftMode = items.some((item) => item.gifting?.wrapMode === "separate")
+              ? "separate"
+              : "single";
+            await setCartGiftOptions(
+              cartId,
+              {
+                mode: giftMode,
+                groupedNote:
+                  giftMode === "single"
+                    ? items.find((item) => item.gifting?.note)?.gifting?.note
+                    : undefined,
+                items: items.map((item) => ({
+                  lineItemId: item.id,
+                  isGift: Boolean(item.gifting || item.options.isGift),
+                  note: giftMode === "separate" ? item.gifting?.note : undefined,
+                })),
+              },
+              readCartLineMetadata(),
+            );
+          } catch {
+            // Best-effort: the order comment below still records gifting for staff.
           }
 
           const order = await completeGuestCheckout(
