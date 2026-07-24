@@ -6,6 +6,7 @@ import {
   resolveJewelleryCategorySeoMetadata,
   resolveJewellerySeoMetadata,
 } from "@/shared/lib/seo/jewellerySeo";
+import { buildJewelleryListingBreadcrumbJsonLd } from "@/shared/lib/seo/schema/breadcrumb";
 import { getProductLandingPage } from "@/services/product-landing/product-landing-page.service";
 import { getMagentoJewelleryNavCategories } from "@/services/magento/categories/categories.service";
 import { prefetchJewelleryListing } from "@/lib/magento/prefetchMagento";
@@ -58,6 +59,13 @@ export default async function Page({ params, searchParams }: PageProps) {
 
   return (
     <>
+      <JsonLd
+        data={buildJewelleryListingBreadcrumbJsonLd({
+          categoryLabel: category?.label ?? seo.title,
+          categoryUrlKey,
+        })}
+        id={`jewellery-category-breadcrumb-jsonld-${categoryUrlKey}`}
+      />
       <JsonLd
         data={buildJewelleryListingJsonLd({
           name: seo.title,

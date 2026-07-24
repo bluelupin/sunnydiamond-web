@@ -2,17 +2,20 @@ import type { Metadata } from "next";
 import { constructMetadata } from "@/shared/lib/seo/metadata";
 import JsonLd from "@/shared/lib/seo/JsonLd";
 import HomePageView from "@/features/cms/components/HomePage";
-import HomepageCmsSeeder from "@/shared/lib/providers/HomepageCmsSeeder";
-import MagentoTrendingSeeder from "@/shared/lib/providers/MagentoTrendingSeeder";
+import { HomepageCmsProvider } from "@/shared/lib/providers/HomepageCmsProvider";
 import {
   getCachedHomepageShell,
-  prefetchHomepageCms,
+  prefetchHomepageBundle,
 } from "@/lib/homepage/prefetchHomepageCms";
-import { prefetchMagentoTrendingProducts } from "@/lib/magento/prefetchMagento";
+import {
+  preloadHeroLcpImages,
+  resolveCraftingRarityContent,
+  resolveHeroContent,
+} from "@/lib/homepage/resolveHomepageAboveFold";
 import { buildHomepageJsonLd, resolveHomepageSeoMetadata } from "@/shared/lib/seo/homepageSeo";
 import { siteConfig } from "@/shared/lib/siteConfig";
 
-/** Refresh CMS-driven homepage content without a full redeploy. */
+/** Matches HOMEPAGE_CMS_REVALIDATE_SECONDS — segment config must be a literal. */
 export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -39,24 +42,30 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Page() {
-  const [prefetchedCms, trendingProducts] = await Promise.all([
-    prefetchHomepageCms(),
-    prefetchMagentoTrendingProducts(),
-  ]);
+  const prefetched = await prefetchHomepageBundle();
+  const hero = resolveHeroContent(prefetched.shell);
+  const craftingRarity = resolveCraftingRarityContent(
+    prefetched.shell,
+    prefetched.editorial,
+    prefetched.shopping,
+  );
+
+  preloadHeroLcpImages(hero);
+
   const { title, description, canonicalUrl, imageUrl } = resolveHomepageSeoMetadata(
-    prefetchedCms.shell ?? {},
+    prefetched.shell ?? {},
   );
 
   return (
-    <>
-      <HomepageCmsSeeder
-        shell={prefetchedCms.shell}
-        editorial={prefetchedCms.editorial}
-        shopping={prefetchedCms.shopping}
-      />
-      <MagentoTrendingSeeder trendingProducts={trendingProducts} />
+    <HomepageCmsProvider
+      shell={prefetched.shell}
+      editorial={prefetched.editorial}
+      shopping={prefetched.shopping}
+      standaloneOccasions={prefetched.standaloneOccasions}
+      alankara={prefetched.alankara}
+    >
       <JsonLd data={buildHomepageJsonLd({ title, description, url: canonicalUrl, image: imageUrl })} />
-      <HomePageView />
-    </>
+      <HomePageView hero={hero} craftingRarity={craftingRarity} />
+    </HomepageCmsProvider>
   );
 }

@@ -3,6 +3,7 @@ import type { MagentoQueryKey } from "@/hooks/magento/queryKeys";
 import type { HomepageEditorialBlocksData } from "@/types/homepage/editorialBlocks";
 import type { HomepageShoppingBlocksData } from "@/types/homepage/categoryNavigation";
 import type { NormalizedHomepageShell } from "@/services/homepage/homepageShell.service";
+import type { OccasionCard } from "@/types/homepage/occasionSection";
 
 export type AppDataCacheKey = HomepageQueryKey | MagentoQueryKey;
 
@@ -42,6 +43,7 @@ export type HomepagePrefetchedCms = {
   shell?: NormalizedHomepageShell;
   editorial?: HomepageEditorialBlocksData;
   shopping?: HomepageShoppingBlocksData;
+  standaloneOccasions?: OccasionCard[];
 };
 
 export function seedHomepageCmsCache(
@@ -50,6 +52,7 @@ export function seedHomepageCmsCache(
     shell: HomepageQueryKey;
     editorial: HomepageQueryKey;
     shopping: HomepageQueryKey;
+    occasions?: HomepageQueryKey;
   },
 ): void {
   if (data.shell !== undefined) {
@@ -60,5 +63,8 @@ export function seedHomepageCmsCache(
   }
   if (data.shopping !== undefined) {
     seedCmsCacheEntry(keys.shopping, data.shopping);
+  }
+  if (data.standaloneOccasions !== undefined && keys.occasions) {
+    seedCmsCacheEntry(keys.occasions, data.standaloneOccasions);
   }
 }

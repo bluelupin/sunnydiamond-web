@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useHomepageCmsPrefetched } from "@/shared/lib/providers/HomepageCmsProvider";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
 import { AlankaraCollection } from "@/shared/ui/collection/AlankaraCollection";
 import { isSectionActive } from "@/shared/utils/cmsSection";
@@ -16,16 +17,18 @@ interface FeaturedCollectionSectionProps {
   id?: string;
   sectionHeading?: string;
   description?: string;
-  /** When set, skips the client-side Magento SKU fetch (server-prefetched on PDP). */
-  prefetchedAlankara?: PrefetchedAlankaraCollection;
+  /** When set, skips the client-side Magento SKU fetch (server-prefetched on homepage/PDP). */
+  prefetchedAlankara?: PrefetchedAlankaraCollection | null;
 }
 
 const FeaturedCollectionSection = ({
   id,
   sectionHeading,
   description: descriptionProp,
-  prefetchedAlankara,
+  prefetchedAlankara: prefetchedAlankaraProp,
 }: FeaturedCollectionSectionProps) => {
+  const homepagePrefetch = useHomepageCmsPrefetched();
+  const prefetchedAlankara = prefetchedAlankaraProp ?? homepagePrefetch?.alankara;
   const { data: shoppingData, isLoading: isShoppingLoading } = useHomepageShoppingBlocks();
   const featuredCollectionData =
     shoppingData?.homepage?.featuredCollectionSection || shoppingData?.featuredCollectionSection;
@@ -42,14 +45,14 @@ const FeaturedCollectionSection = ({
   const featuredProductSku = collectionProps.featuredProductSku;
   const skuKey = productSkus.join("|");
 
-  const hasServerPrefetch = prefetchedAlankara != null;
+  const hasServerPrefetch = prefetchedAlankara !== undefined;
 
   const [magentoProducts, setMagentoProducts] = useState<AlankaraCollectionProduct[] | null>(
-    hasServerPrefetch ? prefetchedAlankara.products : null,
+    hasServerPrefetch ? (prefetchedAlankara?.products ?? null) : null,
   );
   const [defaultActiveIndex, setDefaultActiveIndex] = useState(
     hasServerPrefetch
-      ? prefetchedAlankara.defaultActiveIndex
+      ? (prefetchedAlankara?.defaultActiveIndex ?? collectionProps.defaultActiveIndex)
       : collectionProps.defaultActiveIndex,
   );
   const [isMagentoLoading, setIsMagentoLoading] = useState(

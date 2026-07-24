@@ -13,7 +13,7 @@ interface BespokeForYouSectionProps {
   id?: string;
 }
 
-const FALLBACK_BG = "/images/home/bespoke-for-you-bg.png";
+const FALLBACK_BG = "/images/home/bespoke-for-you-bg.webp";
 const FALLBACK_SUBTITLE =
   "Designs thoughtfully crafted to bring your vision to life";
 

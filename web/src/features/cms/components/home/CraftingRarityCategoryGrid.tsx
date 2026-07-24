@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { LazyInView } from "@/shared/ui/LazyInView";
@@ -7,13 +8,18 @@ import Reveal from "@/shared/Animation/Reveal";
 import { resolveCategoryNavImages } from "@/shared/utils/responsiveCmsImage";
 import { buildJewelleryHref, JEWELLERY_PATH, parseJewelleryCategorySlug } from "@/features/jewellery-product/utils/jewelleryRoutes";
 import type { CategoryNavigationItem } from "@/types/homepage/categoryNavigation";
-const IMAGE_QUALITY = 90;
+const IMAGE_QUALITY = 75;
 
 type CraftingRarityCategoryCardProps = {
   category: CategoryNavigationItem;
 };
 
 const CraftingRarityCategoryCard = ({ category }: CraftingRarityCategoryCardProps) => {
+  const [loadHoverImage, setLoadHoverImage] = useState(false);
+  const prefetchHoverImage = useCallback(() => {
+    setLoadHoverImage(true);
+  }, []);
+
   const slug = category?.slug ?? "";
   const parsedCategory = parseJewelleryCategorySlug(slug);
   const categoryLink =
@@ -38,8 +44,10 @@ const CraftingRarityCategoryCard = ({ category }: CraftingRarityCategoryCardProp
     <Link
       href={categoryLink}
       className="group relative flex aspect-square h-full w-full flex-col items-center justify-between overflow-hidden bg-gray300"
+      onPointerEnter={hasDistinctHover ? prefetchHoverImage : undefined}
+      onFocus={hasDistinctHover ? prefetchHoverImage : undefined}
     >
-      {hasDistinctHover && hoverDesktopImageUrl ? (
+      {hasDistinctHover && hoverDesktopImageUrl && loadHoverImage ? (
         <ResponsiveImage
           desktopSrc={hoverDesktopImageUrl}
           mobileSrc={hoverMobileImageUrl || hoverDesktopImageUrl}

@@ -60,7 +60,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
                 alt={imageAlt}
                 width={1920}
                 height={1080}
-                quality={80}
+                quality={75}
                 className="w-full h-full object-cover opacity-90 scale-110"
               />
               <div className="absolute inset-0 bg-background/40" aria-hidden />
@@ -80,7 +80,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
                   alt={imageAlt}
                   width={64}
                   height={64}
-                  quality={80}
+                  quality={75}
                   className="w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 opacity-80 mx-auto"
                 />
               </Reveal>
@@ -95,7 +95,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
                     alt={imageAlt}
                     width={1024}
                     height={1024}
-                    quality={80}
+                    quality={75}
                     className="w-full h-full object-cover"
                   />
                 </div>

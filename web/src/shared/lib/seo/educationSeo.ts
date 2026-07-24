@@ -1,6 +1,7 @@
 import { footerPages } from "@/features/cms/data/footerPages";
 import { siteConfig } from "@/shared/lib/siteConfig";
 import type { NormalizedLearnAboutDiamondsPage } from "@/services/education/learn-about-diamonds-page.types";
+import { buildFaqPageJsonLd } from "@/shared/lib/seo/schema/faqPage";
 
 const fallback = footerPages.education;
 
@@ -20,11 +21,24 @@ export function buildEducationJsonLd(page: NormalizedLearnAboutDiamondsPage | nu
   const { title, description, canonicalPath } = resolveEducationSeoMetadata(page);
   const path = canonicalPath.startsWith("/") ? canonicalPath : `/${canonicalPath}`;
 
-  return {
-    "@context": "https://schema.org",
+  const webPage = {
     "@type": "WebPage",
     name: title,
     description,
     url: `${siteConfig.seo.siteUrl}${path}`,
+  };
+
+  const faqItems =
+    page?.faq?.items.map((item) => ({
+      question: item.question,
+      answer: item.answer,
+    })) ?? [];
+
+  const faqPage = buildFaqPageJsonLd(faqItems);
+  const graph = faqPage ? [webPage, faqPage] : [webPage];
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": graph,
   };
 }

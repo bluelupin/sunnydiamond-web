@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import ServerAppShell from "@/shared/ui/layout/ServerAppShell";
+import GoogleAnalytics from "@/infrastructure/analytics/GoogleAnalytics";
 import siteEnv, { getAbsoluteUrl } from "@/shared/lib/seo/siteConfig";
+import { getGoogleSiteVerification } from "@/infrastructure/analytics/gaConfig";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -19,6 +21,8 @@ const TITLE = {
 
 const DESCRIPTION =
   "Handcrafted premium and custom diamond jewellery. Explore GIA-certified diamonds, bespoke designs, and timeless elegance.";
+
+const googleSiteVerification = getGoogleSiteVerification();
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -81,6 +85,13 @@ export const metadata: Metadata = {
     index: siteEnv.indexing,
     follow: true,
   },
+  ...(googleSiteVerification
+    ? {
+        verification: {
+          google: googleSiteVerification,
+        },
+      }
+    : {}),
 };
 
 export default function RootLayout({
@@ -91,6 +102,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="antialiased">
       <body className="min-h-screen bg-white font-body" suppressHydrationWarning>
+        <GoogleAnalytics />
         <ServerAppShell>{children}</ServerAppShell>
       </body>
     </html>

@@ -7,6 +7,7 @@ import {
 } from "@/services/magento/products/productDetail.service";
 import JsonLd from "@/shared/lib/seo/JsonLd";
 import { buildProductJsonLd } from "@/shared/lib/seo/schema/product";
+import { buildProductBreadcrumbJsonLd } from "@/shared/lib/seo/schema/breadcrumb";
 import ProductDetailPageView from "@/features/products/components/ProductDetailPage";
 import ProductDetailBelowFoldLazy from "@/features/products/components/ProductDetailBelowFoldLazy";
 import { getProductDetailContent } from "@/features/products/data/productDetailContent";
@@ -67,6 +68,15 @@ export default async function ProductPage({ params }: PageProps) {
 
   return (
     <>
+      <JsonLd
+        data={buildProductBreadcrumbJsonLd({
+          name: product.name,
+          urlKey: product.urlKey,
+          category: product.category,
+          categoryUrlKey: product.categoryUrlKey,
+        })}
+        id={`product-breadcrumb-jsonld-${product.id}`}
+      />
       <JsonLd
         data={buildProductJsonLd({
           sku: product.id,

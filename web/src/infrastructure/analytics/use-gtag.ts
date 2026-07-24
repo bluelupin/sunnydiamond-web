@@ -1,3 +1,5 @@
+import { getGaMeasurementId } from "@/infrastructure/analytics/gaConfig";
+
 declare global {
   interface Window {
     gtag?: (...args: unknown[]) => void;
@@ -11,7 +13,9 @@ export function trackEvent(action: string, params?: Record<string, unknown>) {
 }
 
 export function trackPageView(path: string) {
-  if (window.gtag) {
-    window.gtag("config", "G-XXXXXXXXXX", { page_path: path });
+  const measurementId = getGaMeasurementId();
+
+  if (window.gtag && measurementId) {
+    window.gtag("config", measurementId, { page_path: path });
   }
 }

@@ -20,7 +20,7 @@ interface CraftsmanshipProcessProps {
 }
 
 /** Figma 684:3024 — silk ripple texture behind the scroll-driven diamond. */
-const CRAFTSMANSHIP_BACKGROUND = "/images/home/craftsmanship-bg.png";
+const CRAFTSMANSHIP_BACKGROUND = "/images/home/craftsmanship-bg.webp";
 
 function CraftsmanshipSilkLayer({ variant }: { variant: "desktop" | "mobile" }) {
   if (variant === "desktop") {
@@ -247,7 +247,7 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
                   alt={imageAlt}
                   width={desktopImageUrl ? 750 : 390}
                   height={desktopImageUrl ? 470 : 350}
-                  quality={80}
+                  quality={75}
                   className="w-full h-h-full object-cover"
                 />
               </div>

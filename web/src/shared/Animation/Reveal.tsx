@@ -49,13 +49,24 @@ export default function Reveal<T extends ElementType = "div">({
     children,
     ...props
 }: RevealProps<T>) {
-    const [isMounted, setIsMounted] = useState(false);
+    const [motionState, setMotionState] = useState({
+        mounted: false,
+        reducedMotion: false,
+    });
     const tag = as || "div";
     const Component = useMemo(() => getMotionComponent(tag), [tag]);
 
     useEffect(() => {
-        setIsMounted(true);
+        setMotionState({
+            mounted: true,
+            reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+        });
     }, []);
+
+    if (!motionState.mounted || motionState.reducedMotion) {
+        const StaticTag = tag;
+        return <StaticTag {...props}>{children}</StaticTag>;
+    }
 
     const initial = {
         opacity: 0,
@@ -75,7 +86,7 @@ export default function Reveal<T extends ElementType = "div">({
 
     return (
         <Component
-            initial={isMounted ? initial : false}
+            initial={initial}
             whileInView={{
                 opacity: 1,
                 x: 0,

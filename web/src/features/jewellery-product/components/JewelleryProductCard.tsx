@@ -43,7 +43,7 @@ const ProductCopy = ({ title, price, href, className }: ProductCopyProps) => (
       className,
     )}
   >
-    <Link href={href} className="font-gill whitespace-nowrap font-light md:text-xl sm:text-base text-sm">
+    <Link href={href} className="max-w-full truncate font-gill font-light md:text-xl sm:text-base text-sm desktop:whitespace-nowrap">
       {title}
     </Link>
     <p className="w-full font-gill font-semibold">
@@ -62,7 +62,7 @@ const ProductImage = ({
   alt: string;
   priority?: boolean;
 }) => (
-  <div className="mx-auto size-[121px] shrink-0 overflow-hidden md:size-[303px]">
+  <div className="mx-auto size-[121px] w-full max-w-[121px] shrink-0 overflow-hidden md:aspect-square md:h-auto md:max-w-[303px] md:w-full desktop:size-[303px]">
     <OptimizedImage
       src={src}
       alt={alt}
@@ -124,7 +124,8 @@ const JewelleryProductCard = ({
   return (
     <article
       className={cn(
-        "group grid h-[227px] grid-cols-1 grid-rows-1 overflow-hidden bg-gray200 md:h-[496px]",
+        "group grid h-[227px] min-w-0 w-full grid-cols-1 grid-rows-1 overflow-hidden bg-gray200",
+        "md:h-auto md:min-h-[420px] desktop:h-[496px]",
         hasModalImage && "touch-pan-y select-none md:touch-auto md:select-auto",
         isDragging && "cursor-grabbing md:cursor-auto",
       )}

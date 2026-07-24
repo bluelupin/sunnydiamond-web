@@ -16,7 +16,7 @@ const JewelleryProductGrid = ({
   onToggleWishlist,
 }: JewelleryProductGridProps) => {
   return (
-    <div className="grid w-full grid-cols-2 md:grid-cols-3">
+    <div className="grid w-full min-w-0 grid-cols-2 md:grid-cols-3">
       {products.map((product, index) => (
         <JewelleryProductCard
           key={product.id}

@@ -3,6 +3,7 @@
 import { type ReactNode } from "react";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { LazyInView } from "@/shared/ui/LazyInView";
+import { useResponsiveLazyRootMargin } from "@/shared/hooks/useResponsiveLazyRootMargin";
 import { cn } from "@/shared/utils/cn";
 
 type LazyAnimatedSectionProps = {
@@ -26,8 +27,10 @@ export function LazyAnimatedSection({
   revealDelayMs = 0,
   rootMargin,
 }: LazyAnimatedSectionProps) {
+  const responsiveRootMargin = useResponsiveLazyRootMargin(rootMargin);
+
   return (
-    <LazyInView fallback={fallback} className={className} rootMargin={rootMargin}>
+    <LazyInView fallback={fallback} className={className} rootMargin={responsiveRootMargin}>
       {animate ? (
         <ScrollReveal delayMs={revealDelayMs} className={cn("w-full", className)}>
           {children}

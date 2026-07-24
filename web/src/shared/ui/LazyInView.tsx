@@ -20,7 +20,7 @@ export function LazyInView({
   children,
   fallback = null,
   className,
-  rootMargin = "280px 0px 280px 0px",
+  rootMargin = "120px 0px 120px 0px",
   threshold = 0,
 }: LazyInViewProps) {
   const ref = useRef<HTMLDivElement>(null);

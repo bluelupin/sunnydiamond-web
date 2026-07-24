@@ -82,7 +82,7 @@ function CarouselSlideImage({
             src={src}
             alt={alt}
             fill
-            quality={90}
+            quality={75}
             className="size-full object-contain"
             sizes={sizes}
             priority={priority}

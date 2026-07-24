@@ -84,7 +84,4 @@ export const siteConfig = {
       paymentMethods: ["Visa", "Mastercard", "Amex", "Maestro", "UPI", "Paytm", "RuPay"],
     },
   },
-  ga: {
-    measurementId: "G-XXXXXXXXXX", // Replace with your GA4 Measurement ID
-  },
 } as const;

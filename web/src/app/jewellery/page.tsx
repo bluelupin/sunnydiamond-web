@@ -5,6 +5,7 @@ import {
   buildJewelleryListingJsonLd,
   resolveJewellerySeoMetadata,
 } from "@/shared/lib/seo/jewellerySeo";
+import { buildJewelleryListingBreadcrumbJsonLd } from "@/shared/lib/seo/schema/breadcrumb";
 import { getProductLandingPage } from "@/services/product-landing/product-landing-page.service";
 import { prefetchJewelleryListing } from "@/lib/magento/prefetchMagento";
 import JewelleryProductPage from "@/features/jewellery-product/components/JewelleryProductPage";
@@ -46,6 +47,7 @@ export default async function Page({ searchParams }: PageProps) {
 
   return (
     <>
+      <JsonLd data={buildJewelleryListingBreadcrumbJsonLd()} id="jewellery-breadcrumb-jsonld" />
       <JsonLd
         data={buildJewelleryListingJsonLd({
           name: seo.title,

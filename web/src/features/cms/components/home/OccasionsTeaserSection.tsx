@@ -3,6 +3,7 @@
 import { useCallback, useRef } from "react";
 import Link from "next/link";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
+import { useHomepageCmsPrefetched } from "@/shared/lib/providers/HomepageCmsProvider";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import { useHomepageOccasions } from "@/hooks/homepage/useHomepageOccasions";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
@@ -49,7 +50,7 @@ function OccasionCardItem({
         alt={imageAlt}
         width={desktopUrl ? 718 : 328}
         height={desktopUrl ? 700 : 400}
-        quality={80}
+        quality={75}
         className="size-full object-cover"
       />
 
@@ -106,6 +107,7 @@ function OccasionCardItem({
 }
 
 const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
+  const homepagePrefetch = useHomepageCmsPrefetched();
   const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
   const { data: standaloneOccasions, isLoading: isStandaloneLoading } = useHomepageOccasions();
   const occasionSection = editorialData?.occasionSection ?? null;
@@ -121,7 +123,10 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
       : (standaloneOccasions ?? []).filter((card) => card?.isActive !== false);
 
   const isLoading =
-    isEditorialLoading || (embeddedOccasions.length === 0 && isStandaloneLoading);
+    isEditorialLoading ||
+    (embeddedOccasions.length === 0 &&
+      homepagePrefetch?.standaloneOccasions === undefined &&
+      isStandaloneLoading);
 
   const carouselRef = useRef<HTMLDivElement>(null);
 

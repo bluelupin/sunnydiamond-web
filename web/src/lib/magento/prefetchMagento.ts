@@ -3,14 +3,11 @@ import { PAGE_SIZE, createEmptyFilterState, DEFAULT_JEWELLERY_LISTING_SORT } fro
 import { measureJewelleryPlpGraphql } from "@/features/jewellery-product/utils/jewelleryPlpPerformance";
 import { getMagentoJewelleryNavCategories } from "@/services/magento/categories/categories.service";
 import { getMagentoJewelleryProducts } from "@/services/magento/products/products.service";
-import { getMagentoTrendingProducts } from "@/services/magento/products/trendingProducts.service";
 import type { JewelleryListingProductsData } from "@/types/magento/jewelleryListing";
 
 export const getCachedMagentoJewelleryNavCategories = cache(async () =>
   getMagentoJewelleryNavCategories(),
 );
-
-export const getCachedMagentoTrendingProducts = cache(async () => getMagentoTrendingProducts());
 
 export const getCachedJewelleryListing = cache(
   async (categoryUrlKey: string | null): Promise<JewelleryListingProductsData> =>
@@ -27,14 +24,6 @@ export const getCachedJewelleryListing = cache(
 export async function prefetchMagentoJewelleryNav() {
   try {
     return await getCachedMagentoJewelleryNavCategories();
-  } catch {
-    return undefined;
-  }
-}
-
-export async function prefetchMagentoTrendingProducts() {
-  try {
-    return await getCachedMagentoTrendingProducts();
   } catch {
     return undefined;
   }

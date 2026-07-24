@@ -5,14 +5,13 @@ import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { getImageSrc } from "@/shared/utils/image";
 import { TABLET_UP_MEDIA_QUERY } from "@/shared/lib/breakpoints";
 
-const HERO_VIDEO_WEBM_SRC = "/videos/hero-banner-video.webm";
 const HERO_VIDEO_MP4_SRC = "/videos/hero-banner-video.mp4";
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
 type HeroBackgroundMediaProps = {
   desktopImageUrl: string;
   mobileImageUrl?: string;
   alt: string;
-  isLoading: boolean;
   cmsVideoUrl?: string;
 };
 
@@ -20,29 +19,40 @@ const HeroBackgroundMedia = ({
   desktopImageUrl,
   mobileImageUrl,
   alt,
-  isLoading,
   cmsVideoUrl,
 }: HeroBackgroundMediaProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
   const [isTabletUp, setIsTabletUp] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   const posterSrc = getImageSrc(desktopImageUrl || mobileImageUrl);
   const hasHeroImage = Boolean(posterSrc);
-  const videoWebmSrc = cmsVideoUrl?.endsWith(".webm") ? cmsVideoUrl : HERO_VIDEO_WEBM_SRC;
+  const videoWebmSrc = cmsVideoUrl?.endsWith(".webm") ? cmsVideoUrl : null;
   const videoMp4Src =
     cmsVideoUrl && !cmsVideoUrl.endsWith(".webm") ? cmsVideoUrl : HERO_VIDEO_MP4_SRC;
 
   useEffect(() => {
-    const media = window.matchMedia(TABLET_UP_MEDIA_QUERY);
-    const update = () => setIsTabletUp(media.matches);
-    update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
+    const tabletMedia = window.matchMedia(TABLET_UP_MEDIA_QUERY);
+    const motionMedia = window.matchMedia(REDUCED_MOTION_QUERY);
+
+    const updateTablet = () => setIsTabletUp(tabletMedia.matches);
+    const updateMotion = () => setPrefersReducedMotion(motionMedia.matches);
+
+    updateTablet();
+    updateMotion();
+
+    tabletMedia.addEventListener("change", updateTablet);
+    motionMedia.addEventListener("change", updateMotion);
+
+    return () => {
+      tabletMedia.removeEventListener("change", updateTablet);
+      motionMedia.removeEventListener("change", updateMotion);
+    };
   }, []);
 
   useEffect(() => {
-    if (!isTabletUp) return;
+    if (!isTabletUp || prefersReducedMotion) return;
 
     const start = () => setShouldLoadVideo(true);
 
@@ -53,7 +63,7 @@ const HeroBackgroundMedia = ({
 
     const timeoutId = window.setTimeout(start, 1500);
     return () => window.clearTimeout(timeoutId);
-  }, [isTabletUp]);
+  }, [isTabletUp, prefersReducedMotion]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -67,10 +77,6 @@ const HeroBackgroundMedia = ({
       });
     }
   }, [shouldLoadVideo]);
-
-  if (isLoading && !hasHeroImage) {
-    return <div className="absolute inset-0 animate-pulse bg-gray200" aria-hidden />;
-  }
 
   if (!hasHeroImage) {
     return <div className="absolute inset-0 bg-gray200" aria-hidden />;
@@ -90,7 +96,7 @@ const HeroBackgroundMedia = ({
         className="absolute inset-0 h-full w-full object-cover"
       />
 
-      {isTabletUp && shouldLoadVideo ? (
+      {isTabletUp && shouldLoadVideo && !prefersReducedMotion ? (
         <video
           ref={videoRef}
           className="absolute inset-0 h-full w-full object-cover"
@@ -103,7 +109,7 @@ const HeroBackgroundMedia = ({
           aria-hidden
           tabIndex={-1}
         >
-          <source src={videoWebmSrc} type="video/webm" />
+          {videoWebmSrc ? <source src={videoWebmSrc} type="video/webm" /> : null}
           <source src={videoMp4Src} type="video/mp4" />
         </video>
       ) : null}

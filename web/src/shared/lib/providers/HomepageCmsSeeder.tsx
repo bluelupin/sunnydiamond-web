@@ -6,7 +6,7 @@ import { seedHomepageCmsCache, type HomepagePrefetchedCms } from "@/lib/homepage
 
 type HomepageCmsSeederProps = HomepagePrefetchedCms;
 
-/** Seeds the client CMS cache synchronously on first render (no UI). */
+/** Seeds shell CMS for global chrome (header/footer) before layout children render. */
 export default function HomepageCmsSeeder({
   shell,
   editorial,

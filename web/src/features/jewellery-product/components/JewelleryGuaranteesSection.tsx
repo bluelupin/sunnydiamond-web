@@ -7,15 +7,11 @@ import {
 } from "../data/content";
 
 const {
-  paddingX,
-  paddingY,
-  itemWidth,
   itemHeight,
   itemPadding,
   itemGap,
   iconSize,
   mobileIconSize,
-  labelFontSize,
   dividerColor,
 } = jewelleryListingGuaranteesSpec;
 
@@ -41,7 +37,7 @@ const GuaranteeDivider = ({ orientation }: { orientation: "vertical" | "horizont
     className={cn(
       "flex list-none items-center justify-center",
       orientation === "vertical"
-        ? "min-w-0 flex-1 self-stretch"
+        ? "self-stretch px-4 max-desktop:flex-none desktop:min-w-0 desktop:flex-1 desktop:px-0"
         : "w-full shrink-0 py-4",
     )}
   >
@@ -57,19 +53,15 @@ const GuaranteeDivider = ({ orientation }: { orientation: "vertical" | "horizont
 
 const GuaranteeItem = ({ iconSrc, label }: { iconSrc: string; label: string }) => (
   <li
-    className="list-none flex flex-col items-center justify-center text-center"
+    className="list-none flex w-[200px] shrink-0 flex-col items-center justify-center text-center desktop:w-[260px]"
     style={{
-      width: `${itemWidth}px`,
       height: `${itemHeight}px`,
       gap: `${itemGap}px`,
       padding: `${itemPadding}px`,
     }}
   >
     <GuaranteeIcon iconSrc={iconSrc} size={iconSize} />
-    <p
-      className="font-gill font-normal leading-110 text-darkblack"
-      style={{ fontSize: `${labelFontSize}px` }}
-    >
+    <p className="whitespace-nowrap font-gill text-15 font-normal leading-110 text-darkblack desktop:text-xl desktop:whitespace-normal">
       {label}
     </p>
   </li>
@@ -94,13 +86,11 @@ const JewelleryGuaranteesSection = () => {
       </ul>
 
       <ul
-        className="m-0 hidden list-none items-start justify-between p-0 md:flex"
-        style={{
-          paddingLeft: `${paddingX}px`,
-          paddingRight: `${paddingX}px`,
-          paddingTop: `${paddingY}px`,
-          paddingBottom: `${paddingY}px`,
-        }}
+        className={cn(
+          "m-0 hidden list-none items-stretch justify-evenly p-0 md:flex",
+          "px-10 py-16",
+          "desktop:justify-between desktop:px-[180px] desktop:py-16",
+        )}
       >
         {jewelleryListingGuarantees.map(({ iconSrc, label }, index) => (
           <Fragment key={label}>
