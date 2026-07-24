@@ -294,7 +294,7 @@ const ProductDetailSidebar = ({
           <DetailTextLink href="/terms-and-conditions">T&amp;C Apply</DetailTextLink>
         </div>
         <Reveal direction="up">
-          <ul className="m-0 flex list-none flex-col bg-benefitSurface p-0 max-md:-mx-4 max-md:gap-6 max-md:px-4 max-md:py-10 md:flex-row md:items-stretch md:gap-4 md:p-6 lg:gap-4">
+          <ul className="m-0 flex list-none flex-col bg-benefitSurface p-0 max-md:-mx-4 max-md:gap-6 max-md:px-4 max-md:py-10 md:max-desktop:portrait:gap-6 md:max-desktop:portrait:p-6 md:landscape:flex-row md:landscape:items-stretch md:landscape:gap-4 md:landscape:p-6 lg:landscape:gap-4">
             {content.benefits.flatMap((benefit, index) => {
               const item = (
                 <li
@@ -302,8 +302,9 @@ const ProductDetailSidebar = ({
                   className={cn(
                     "flex w-full shrink-0 flex-col items-center justify-center text-center",
                     "max-md:gap-2 max-md:px-3 max-md:py-4",
-                    "md:h-136 md:flex-1 md:gap-2 md:p-3",
-                    index > 0 && "md:border-l md:border-gray600",
+                    "md:max-desktop:portrait:gap-2 md:max-desktop:portrait:px-3 md:max-desktop:portrait:py-4",
+                    "md:landscape:h-136 md:landscape:flex-1 md:landscape:gap-2 md:landscape:p-3",
+                    index > 0 && "md:landscape:border-l md:landscape:border-gray600",
                   )}
                 >
                   <div className="flex size-10 shrink-0 items-center justify-center">
@@ -316,10 +317,10 @@ const ProductDetailSidebar = ({
                       className="size-10 object-contain"
                     />
                   </div>
-                  <span className="font-gill text-base leading-110 text-darkblack md:hidden">
+                  <span className="font-gill text-base leading-110 text-darkblack md:landscape:hidden">
                     {benefit.mobileLabel}
                   </span>
-                  <span className="hidden font-gill text-base leading-110 text-darkblack md:block">
+                  <span className="hidden font-gill text-base leading-110 text-darkblack md:landscape:block">
                     {benefit.lines[0]}
                     <br />
                     {benefit.lines[1]}
@@ -334,7 +335,7 @@ const ProductDetailSidebar = ({
                   key={`${benefit.label}-divider`}
                   role="presentation"
                   aria-hidden
-                  className="block h-[1px] min-h-px w-full shrink-0 bg-[#999999] p-0 md:hidden"
+                  className="block h-[1px] min-h-px w-full shrink-0 bg-[#999999] p-0 md:landscape:hidden"
                 />,
                 item,
               ];
@@ -371,11 +372,27 @@ const ProductDetailSidebar = ({
 
       <section
         aria-label="Personalisation"
-        className="flex items-end justify-between overflow-hidden bg-chalkCard pl-4 py-6 lg:min-h-260 lg:pl-6"
+        className={cn(
+          "flex overflow-hidden bg-chalkCard pr-0",
+          "items-end justify-between pl-4 py-6",
+          "max-lg:portrait:flex-col max-lg:portrait:items-stretch max-lg:portrait:justify-start max-lg:portrait:gap-6 max-lg:portrait:py-8 max-lg:portrait:pl-6",
+          "md:landscape:flex-row md:landscape:items-stretch md:landscape:justify-between md:landscape:gap-4 md:landscape:py-6 md:landscape:pl-6",
+          "lg:flex-row lg:items-stretch lg:justify-between lg:gap-4 lg:py-6 lg:pl-6",
+          "desktop:min-h-260 desktop:items-end desktop:gap-0 desktop:py-6",
+        )}
       >
-        <div className="flex max-w-[172px] shrink-0 flex-col gap-6 max-md:-mr-[22px] md:max-w-240 lg:max-w-280 lg:gap-10">
+        <div
+          className={cn(
+            "flex shrink-0 flex-col gap-6",
+            "max-w-[172px] max-md:-mr-[22px]",
+            "max-lg:portrait:max-w-none max-lg:portrait:mr-0",
+            "md:landscape:min-w-0 md:landscape:flex-1 md:landscape:justify-center md:landscape:py-2 md:landscape:max-w-[54%]",
+            "lg:min-w-0 lg:flex-1 lg:justify-center lg:py-2 lg:max-w-[54%]",
+            "desktop:max-w-280 desktop:justify-start desktop:gap-10 desktop:py-0",
+          )}
+        >
           <div className="flex flex-col gap-3">
-            <h2 className="w-max whitespace-nowrap font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
+            <h2 className="font-larken text-xl font-light leading-110 text-darkblack max-lg:portrait:whitespace-normal lg:whitespace-normal desktop:w-max desktop:whitespace-nowrap desktop:text-2xl">
               Personalise this for you
             </h2>
             <p className="font-gill text-sm font-light leading-110 text-darkblack lg:text-base">
@@ -386,15 +403,24 @@ const ProductDetailSidebar = ({
             Get in Touch
           </DetailOutlineButton>
         </div>
-        <div className="relative h-[118px] w-177 shrink-0 overflow-hidden md:h-220 md:w-280 lg:h-[213px] lg:w-[322px]">
+        <div
+          className={cn(
+            "relative shrink-0 overflow-hidden",
+            "h-[118px] w-177",
+            "max-lg:portrait:aspect-[322/213] max-lg:portrait:h-auto max-lg:portrait:w-full max-lg:portrait:flex-none",
+            "md:landscape:ml-auto md:landscape:h-auto md:landscape:min-h-[200px] md:landscape:w-auto md:landscape:min-w-[160px] md:landscape:max-w-[46%] md:landscape:flex-1 md:landscape:self-stretch",
+            "lg:ml-auto lg:h-auto lg:min-h-[200px] lg:w-auto lg:min-w-[160px] lg:max-w-[46%] lg:flex-1 lg:self-stretch",
+            "desktop:h-[213px] desktop:w-[322px] desktop:min-h-0 desktop:min-w-0 desktop:max-w-none desktop:flex-none desktop:self-auto",
+          )}
+        >
           <Image
             src={content.personaliseImage}
             alt=""
             width={322}
             height={213}
             aria-hidden
-            className="size-full object-cover object-[center_-4%]"
-            sizes="(max-width: 1023px) 177px, 322px"
+            className="size-full object-cover object-center max-lg:portrait:object-[center_15%] md:landscape:object-[center_20%] lg:object-[center_20%] desktop:object-[center_-4%]"
+            sizes="(max-width: 1023px) 100vw, 322px"
           />
         </div>
       </section>

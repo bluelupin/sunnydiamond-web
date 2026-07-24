@@ -128,12 +128,12 @@ function ProductSlideImage({
   }
 
   return (
-    <div className="relative h-[420px] w-[420px]">
+    <div className="relative aspect-square h-full w-full max-w-[420px] desktop:h-[420px] desktop:w-[420px] desktop:max-w-[420px]">
       <Image
         src={imageSrc}
         alt={product.name}
         fill
-        sizes="520px"
+        sizes="(max-width: 1439px) 40vw, 520px"
         priority={priority}
         quality={DEFAULT_IMAGE_QUALITY}
         className="object-cover object-center"
@@ -164,12 +164,12 @@ function AlankaraProductThumbnail({
       aria-current={isActive}
       onClick={onClick}
       className={cn(
-        "box-border shrink-0 bg-gray300 px-4 py-6 transition-opacity",
+        "box-border shrink-0 bg-gray300 transition-opacity max-desktop:px-3 max-desktop:py-4 desktop:px-4 desktop:py-6",
         isActive ? "opacity-100" : "opacity-70 hover:opacity-100",
       )}
     >
-      <div className="relative size-[98px] overflow-hidden">
-        <div className="absolute left-1/2 top-1/2 size-[121px] -translate-x-1/2 -translate-y-1/2">
+      <div className="relative size-[72px] overflow-hidden max-desktop:mx-auto desktop:size-[98px]">
+        <div className="absolute left-1/2 top-1/2 size-[88px] -translate-x-1/2 -translate-y-1/2 desktop:size-[121px]">
           <CroppedFillImage
             src={src}
             alt=""
@@ -208,7 +208,9 @@ function CollectionHeroPanel({
     <div
       className={cn(
         "relative overflow-hidden",
-        isMobile ? "h-[540px] w-full" : "group xl:h-[800px] h-[700px] w-full",
+        isMobile
+          ? "h-[540px] w-full"
+          : "group aspect-square h-auto w-full desktop:aspect-auto desktop:h-[800px]",
       )}
     >
       <div className="absolute inset-0 overflow-hidden">
@@ -268,13 +270,15 @@ function CollectionHeroPanel({
                 </span>
               </Link>
             }
-            <div className="w-full max-w-[418px] flex flex-col items-start lg:gap-5 md:gap-4 gap-3 mb-6">
-              <h2 className="whitespace-nowrap font-larken lg:text-5xl md:text-4xl text-32 font-light leading-none">{title}</h2>
-              {description &&
-                <p className="font-gill lg:text-xl md:text-lg text-base font-light leading-[120%] tracking-[1%]">
+            <div className="w-full max-w-[418px] flex flex-col items-start lg:gap-5 md:gap-3 gap-3 mb-4 desktop:mb-6">
+              <h2 className="font-larken text-32 font-light leading-none md:text-3xl lg:text-5xl desktop:whitespace-nowrap">
+                {title}
+              </h2>
+              {description && (
+                <p className="font-gill text-base font-light leading-[120%] tracking-[1%] md:text-sm lg:text-lg desktop:text-xl">
                   {description}
                 </p>
-              }
+              )}
             </div>
           </>
         )}
@@ -423,7 +427,9 @@ function ProductCarouselPanel({
       onPointerCancel={endDrag}
       className={cn(
         "relative overflow-hidden",
-        isMobile ? "mx-4 bg-gray300 py-[40px]" : "xl:h-[800px] h-[700px] w-full bg-white px-6",
+        isMobile
+          ? "mx-4 bg-gray300 py-[40px]"
+          : "aspect-square h-auto w-full bg-white px-4 md:px-6 desktop:aspect-auto desktop:h-[800px] desktop:px-6",
         total > 1 && !isAnimating && (isDragging ? "cursor-grabbing" : "cursor-grab"),
         total > 1 && "touch-none select-none",
       )}
@@ -446,9 +452,9 @@ function ProductCarouselPanel({
       ) : null}
 
       {!isMobile ? (
-        <div className="flex h-full flex-col items-center">
-          <div className="flex min-h-0 w-full flex-1 flex-col items-center justify-end pb-2 pt-24">
-            <div className="relative mb-6 h-[520px] w-[520px] translate-y-8 overflow-hidden">
+        <div className="flex h-full min-h-0 flex-col items-center">
+          <div className="flex min-h-0 w-full flex-1 flex-col items-center justify-center pb-1 pt-10 desktop:justify-end desktop:pb-2 desktop:pt-24">
+            <div className="relative mb-3 aspect-square w-[min(72%,280px)] max-w-full overflow-hidden desktop:mb-6 desktop:h-[520px] desktop:w-[520px] desktop:translate-y-8">
               <div
                 className={cn(
                   "flex h-full items-center will-change-transform motion-reduce:transition-none",
@@ -476,13 +482,13 @@ function ProductCarouselPanel({
             </div>
           </div>
 
-          <div className="flex shrink-0 flex-col items-center gap-4">
-            <p className="whitespace-nowrap font-gill lg:text-xl md:text-lg text-base font-normal leading-110 text-darkblack text-center">
+          <div className="flex shrink-0 flex-col items-center gap-3 desktop:gap-4">
+            <p className="max-w-full truncate px-2 text-center font-gill text-sm font-normal leading-110 text-darkblack md:text-base lg:text-xl">
               {activeProduct.name}
             </p>
             <Link
               href={activeProduct.href}
-              className="relative flex h-14 w-fit items-center justify-center overflow-hidden border-2 border-neutral300 bg-white px-7 font-gill text-sm font-normal uppercase leading-110 hover:border-darkblack group"
+              className="relative flex h-12 w-fit items-center justify-center overflow-hidden border-2 border-neutral300 bg-white px-6 font-gill text-sm font-normal uppercase leading-110 hover:border-darkblack group desktop:h-14 desktop:px-7"
             >
               <div className="absolute left-0 top-full h-14 w-full bg-darkblack transition-all duration-300 group-hover:top-0" />
               <span className="relative text-darkblack transition-all duration-300 group-hover:text-white">
@@ -494,7 +500,7 @@ function ProductCarouselPanel({
           {total > 1 ? (
             <>
               {/* <div aria-hidden className="h-[45px] shrink-0" /> */}
-              <div className="pt-12 flex justify-between shrink-0 gap-[5.6px] w-full overflow-x-auto horizontalScroll">
+              <div className="flex w-full shrink-0 justify-between gap-1 overflow-x-auto pt-6 horizontalScroll desktop:gap-[5.6px] desktop:pt-12">
                 {products.map((product, index) => {
                   const thumbSrc = getImageSrc(product.thumbnailImage ?? product.image);
                   if (!thumbSrc) {
@@ -623,7 +629,7 @@ export function AlankaraCollection({
           </Reveal>
         </PageContainer>
       }
-      <div className="hidden w-full md:grid md:grid-cols-2">
+      <div className="hidden w-full md:grid md:grid-cols-2 md:items-stretch">
         <ScrollReveal delayMs={0} className="min-w-0 w-full">
           <CollectionHeroPanel
             title={title}
