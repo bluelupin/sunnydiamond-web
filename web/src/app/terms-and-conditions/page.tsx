@@ -8,6 +8,7 @@ const page = footerPages.termsAndConditions;
 export const metadata: Metadata = constructMetadata({
   title: page.title,
   description: page.description,
+  canonicalPath: "/terms-and-conditions",
 });
 
 export default function Page() {

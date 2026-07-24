@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import JewelleryHeroSection from "./JewelleryHeroSection";
 import JewelleryCategoryNav from "./JewelleryCategoryNav";
@@ -9,19 +10,40 @@ import JewelleryProductToolbar from "./JewelleryProductToolbar";
 import JewelleryProductGrid from "./JewelleryProductGrid";
 import JewelleryLoadMoreSection from "./JewelleryLoadMoreSection";
 import JewelleryGuaranteesSection from "./JewelleryGuaranteesSection";
-import JewelleryFilterDrawer from "./JewelleryFilterDrawer";
-import { createDefaultFilterState, createEmptyFilterState, PAGE_SIZE, hasMagentoFilterFacets } from "../data/filters";
+import JewelleryProductGridSkeleton from "./skeletons/JewelleryProductGridSkeleton";
+import { createDefaultFilterState, createEmptyFilterState, DEFAULT_JEWELLERY_LISTING_SORT, PAGE_SIZE, hasMagentoFilterFacets } from "../data/filters";
 import {
   buildJewelleryCategoryHref,
   parseJewelleryCategorySlug,
 } from "../utils/jewelleryRoutes";
 import { resolveOccasionFacetOption } from "../utils/occasionListing";
-import { useMagentoJewelleryListing } from "@/hooks/magento/useMagentoJewelleryListing";
+import {
+  markJewelleryPlpNavigation,
+  reportJewelleryPlpFirstGridPaint,
+  reportJewelleryPlpProductsReady,
+  reportJewelleryPlpTtfb,
+} from "../utils/jewelleryPlpPerformance";
+import { useMagentoJewelleryListing, createJewelleryListingPrefetchParams } from "@/hooks/magento/useMagentoJewelleryListing";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import type { JewelleryCategory, JewelleryCategorySlug, JewelleryFilterState } from "../types";
+import type { JewelleryListingProductsData } from "@/types/magento/jewelleryListing";
 
-const JewelleryProductPage = () => {
+const JewelleryFilterDrawer = dynamic(() => import("./JewelleryFilterDrawer"), {
+  ssr: false,
+  loading: () => null,
+});
+
+type JewelleryProductPageProps = {
+  initialListing?: JewelleryListingProductsData;
+  prefetchedCategoryUrlKey?: string | null;
+};
+
+const JewelleryProductPage = ({
+  initialListing,
+  prefetchedCategoryUrlKey,
+}: JewelleryProductPageProps) => {
   const router = useRouter();
+  const pathname = usePathname();
   const params = useParams();
   const searchParams = useSearchParams();
   const categoryUrlKey =
@@ -32,13 +54,20 @@ const JewelleryProductPage = () => {
   const occasionSlug = searchParams?.get("occasion");
 
   const [activeCategory, setActiveCategory] = useState<JewelleryCategorySlug>(categoryFromUrl);
-  const [sortValue, setSortValue] = useState("featured");
+  const [sortValue, setSortValue] = useState(DEFAULT_JEWELLERY_LISTING_SORT);
   const [filters, setFilters] = useState<JewelleryFilterState>(() => createEmptyFilterState());
   const [draftFilters, setDraftFilters] = useState<JewelleryFilterState>(() => createEmptyFilterState());
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const facetsSyncedRef = useRef(false);
   const lastOccasionSlugRef = useRef<string | null>(null);
+  const plpTtfbReportedRef = useRef(false);
+  const plpPrefetchReportedRef = useRef(false);
   const { isWishlisted, toggleWishlist } = useWishlist();
+
+  const initialListingParams =
+    initialListing && prefetchedCategoryUrlKey !== undefined
+      ? createJewelleryListingPrefetchParams(prefetchedCategoryUrlKey)
+      : undefined;
 
   const {
     products,
@@ -53,7 +82,50 @@ const JewelleryProductPage = () => {
     sortValue,
     filters,
     pageSize: PAGE_SIZE,
+    initialListing,
+    initialListingParams,
   });
+
+  useEffect(() => {
+    markJewelleryPlpNavigation();
+
+    if (!plpTtfbReportedRef.current) {
+      plpTtfbReportedRef.current = true;
+      reportJewelleryPlpTtfb();
+    }
+  }, [categoryUrlKey]);
+
+  useEffect(() => {
+    if (plpPrefetchReportedRef.current || !initialListing) {
+      return;
+    }
+
+    plpPrefetchReportedRef.current = true;
+    reportJewelleryPlpProductsReady({
+      source: "prefetch",
+      productCount: initialListing.products.length,
+      categoryUrlKey: prefetchedCategoryUrlKey ?? categoryUrlKey,
+      durationMs: 0,
+    });
+  }, [initialListing, prefetchedCategoryUrlKey, categoryUrlKey]);
+
+  useEffect(() => {
+    if (isLoading || products.length === 0) {
+      return;
+    }
+
+    const routeKey = pathname ?? "/jewellery";
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        reportJewelleryPlpFirstGridPaint({
+          routeKey,
+          productCount: products.length,
+          hadPrefetch: Boolean(initialListing),
+        });
+      });
+    });
+  }, [isLoading, products.length, pathname, initialListing]);
 
   useEffect(() => {
     setActiveCategory(categoryFromUrl);
@@ -68,14 +140,27 @@ const JewelleryProductPage = () => {
     const occasionChanged = lastOccasionSlugRef.current !== (occasionSlug ?? null);
     lastOccasionSlugRef.current = occasionSlug ?? null;
 
-    if (!facetsSyncedRef.current || occasionChanged) {
+    const nextDraft = createDefaultFilterState(facets);
+    if (occasionOption) {
+      nextDraft.occasion = occasionOption.value;
+    }
+
+    if (!facetsSyncedRef.current) {
       facetsSyncedRef.current = true;
-      const nextFilters = createDefaultFilterState(facets);
+      setDraftFilters(nextDraft);
       if (occasionOption) {
-        nextFilters.occasion = occasionOption.value;
+        setFilters((current) =>
+          current.occasion === occasionOption.value
+            ? current
+            : { ...current, occasion: occasionOption.value },
+        );
       }
-      setDraftFilters(nextFilters);
-      setFilters(nextFilters);
+      return;
+    }
+
+    if (occasionChanged) {
+      setDraftFilters(nextDraft);
+      setFilters(nextDraft);
       return;
     }
 
@@ -103,6 +188,7 @@ const JewelleryProductPage = () => {
   };
 
   const handleOpenFilters = () => {
+    void import("./JewelleryFilterDrawer");
     setDraftFilters(
       hasMagentoFilterFacets(facets)
         ? { ...createDefaultFilterState(facets), ...filters }
@@ -129,7 +215,9 @@ const JewelleryProductPage = () => {
       />
 
       <section className="relative isolate z-0 w-full bg-gray200 pb-0 md:pb-10">
-        {isLoading ? null : (
+        {isLoading ? (
+          <JewelleryProductGridSkeleton count={PAGE_SIZE} />
+        ) : (
           <JewelleryProductGrid
             products={products}
             isWishlisted={isWishlisted}

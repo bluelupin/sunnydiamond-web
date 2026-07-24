@@ -8,6 +8,7 @@ const page = footerPages.privacyPolicy;
 export const metadata: Metadata = constructMetadata({
   title: page.title,
   description: page.description,
+  canonicalPath: "/privacy-policy",
 });
 
 export default function Page() {

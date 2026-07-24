@@ -8,6 +8,7 @@ const page = footerPages.diamondsForEveryone;
 export const metadata: Metadata = constructMetadata({
   title: page.title,
   description: page.description,
+  canonicalPath: "/diamonds-for-everyone",
 });
 
 export default function Page() {

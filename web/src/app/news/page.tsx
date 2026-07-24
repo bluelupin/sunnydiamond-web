@@ -8,6 +8,7 @@ const page = footerPages.news;
 export const metadata: Metadata = constructMetadata({
   title: page.title,
   description: page.description,
+  canonicalPath: "/news",
 });
 
 export default function Page() {

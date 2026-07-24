@@ -8,6 +8,7 @@ const page = footerPages.cashOnDeliveryPolicy;
 export const metadata: Metadata = constructMetadata({
   title: page.title,
   description: page.description,
+  canonicalPath: "/cash-on-delivery-policy",
 });
 
 export default function Page() {

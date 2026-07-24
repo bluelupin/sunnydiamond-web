@@ -8,6 +8,7 @@ const page = footerPages.bookAnAppointment;
 export const metadata: Metadata = constructMetadata({
   title: page.title,
   description: page.description,
+  canonicalPath: "/book-an-appointment",
 });
 
 export default function Page() {

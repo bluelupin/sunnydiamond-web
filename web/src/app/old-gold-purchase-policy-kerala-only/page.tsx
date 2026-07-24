@@ -8,6 +8,7 @@ const page = footerPages.oldGoldPurchasePolicy;
 export const metadata: Metadata = constructMetadata({
   title: page.title,
   description: page.description,
+  canonicalPath: "/old-gold-purchase-policy-kerala-only",
 });
 
 export default function Page() {

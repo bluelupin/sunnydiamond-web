@@ -8,6 +8,7 @@ const page = footerPages.storeLocator;
 export const metadata: Metadata = constructMetadata({
   title: page.title,
   description: page.description,
+  canonicalPath: "/store-locator",
 });
 
 export default function Page() {

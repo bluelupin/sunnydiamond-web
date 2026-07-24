@@ -8,6 +8,7 @@ const page = footerPages.careers;
 export const metadata: Metadata = constructMetadata({
   title: page.title,
   description: page.description,
+  canonicalPath: "/careers",
 });
 
 export default function Page() {

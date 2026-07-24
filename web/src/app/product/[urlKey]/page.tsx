@@ -67,7 +67,20 @@ export default async function ProductPage({ params }: PageProps) {
 
   return (
     <>
-      <JsonLd data={buildProductJsonLd(product)} id={`product-jsonld-${product.id}`} />
+      <JsonLd
+        data={buildProductJsonLd({
+          sku: product.id,
+          urlKey: product.urlKey,
+          name: product.name,
+          description: product.shortDescription || product.description,
+          image: product.image,
+          price: product.price,
+          inStock: product.inStock,
+          rating: product.rating,
+          reviews: product.reviews,
+        })}
+        id={`product-jsonld-${product.id}`}
+      />
       <ProductDetailPageView product={product} sizeGuide={sizeGuide} />
       <ProductDetailBelowFoldLazy
         heroBannerImage={content.heroBannerImage}

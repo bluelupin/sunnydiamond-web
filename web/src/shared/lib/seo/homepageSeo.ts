@@ -73,17 +73,26 @@ export function buildHomepageJsonLd(data: {
 
   return {
     "@context": "https://schema.org",
-    "@type": "Organization",
-    name: siteConfig.brand.name,
-    url: data.url,
-    description: data.description,
-    logo: data.image
-      ? {
-          "@type": "ImageObject",
-          url: data.image,
-        }
-      : undefined,
-    sameAs: sameAs.length > 0 ? sameAs : undefined,
-    mainEntityOfPage: data.url,
+    "@graph": [
+      {
+        "@type": "WebSite",
+        name: siteConfig.brand.name,
+        url: data.url,
+        description: data.description,
+      },
+      {
+        "@type": "Organization",
+        name: siteConfig.brand.name,
+        url: data.url,
+        description: data.description,
+        logo: data.image
+          ? {
+              "@type": "ImageObject",
+              url: data.image,
+            }
+          : undefined,
+        sameAs: sameAs.length > 0 ? sameAs : undefined,
+      },
+    ],
   };
 }

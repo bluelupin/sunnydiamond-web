@@ -3,6 +3,7 @@ import {
   jewelleryListingHeroAssets,
   jewelleryListingHeroSpec,
 } from "../data/content";
+import { PLP_HERO_IMAGE_QUALITY } from "../utils/jewelleryPlpImage";
 
 const JewelleryHeroSection = () => {
   const { title } = jewelleryListingHeroSpec;
@@ -18,7 +19,7 @@ const JewelleryHeroSection = () => {
           alt={jewelleryListingHeroAssets.alt}
           fill
           priority
-          quality={90}
+          quality={PLP_HERO_IMAGE_QUALITY}
           sizes="100vw"
           className="object-cover object-[62%_38%] md:object-[58%_42%]"
         />

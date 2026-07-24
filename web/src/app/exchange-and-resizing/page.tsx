@@ -8,6 +8,7 @@ const page = footerPages.exchangeAndResizing;
 export const metadata: Metadata = constructMetadata({
   title: page.title,
   description: page.description,
+  canonicalPath: "/exchange-and-resizing",
 });
 
 export default function Page() {

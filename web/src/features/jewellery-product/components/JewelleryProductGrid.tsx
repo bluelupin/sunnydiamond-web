@@ -1,6 +1,7 @@
 "use client";
 
 import JewelleryProductCard from "./JewelleryProductCard";
+import { PLP_PRIORITY_IMAGE_COUNT } from "../utils/jewelleryPlpImage";
 import type { JewelleryListingProduct } from "../types";
 
 interface JewelleryProductGridProps {
@@ -16,7 +17,7 @@ const JewelleryProductGrid = ({
 }: JewelleryProductGridProps) => {
   return (
     <div className="grid w-full grid-cols-2 md:grid-cols-3">
-      {products.map((product) => (
+      {products.map((product, index) => (
         <JewelleryProductCard
           key={product.id}
           title={product.name}
@@ -27,6 +28,7 @@ const JewelleryProductGrid = ({
           href={`/product/${product.urlKey}`}
           isBestseller={product.isBestseller}
           isWishlisted={isWishlisted(product.id)}
+          priorityImage={index < PLP_PRIORITY_IMAGE_COUNT}
           onToggleWishlist={
             onToggleWishlist ? () => onToggleWishlist(product.id) : undefined
           }

@@ -12,6 +12,7 @@ interface SeoConfig {
   siteName?: string;
   imageWidth?: number;
   imageHeight?: number;
+  openGraphType?: "website" | "article";
 }
 
 function normalizeUrl(rawUrl?: string): string | undefined {
@@ -34,6 +35,7 @@ export function constructMetadata({
   siteName = siteConfig.brand.name,
   imageWidth = 1200,
   imageHeight = 630,
+  openGraphType = "website",
 }: SeoConfig): Metadata {
   const resolvedImage = normalizeUrl(image) ?? `${siteConfig.seo.siteUrl}${image.startsWith("/") ? "" : "/"}${image}`;
   const resolvedUrl = normalizeUrl(url ?? canonicalPath ?? siteConfig.seo.siteUrl);
@@ -47,7 +49,7 @@ export function constructMetadata({
       description,
       url: resolvedUrl,
       siteName,
-      type: "website",
+      type: openGraphType,
       images: [
         {
           url: resolvedImage,

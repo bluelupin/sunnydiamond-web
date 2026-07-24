@@ -13,11 +13,12 @@ export const viewport: Viewport = {
 };
 
 const TITLE = {
-  default: "Sunny Diamonds - Premium Diamond Jewellery (F)",
-  template: "%s | Sunny Diamonds (F)",
+  default: "Sunny Diamonds — Premium Diamond Jewellery",
+  template: "%s | Sunny Diamonds",
 } as const;
 
-const DESCRIPTION = "Handcrafted premium and custom diamond jewellery. Explore GIA-certified diamonds, bespoke designs, and timeless elegance. (F)";
+const DESCRIPTION =
+  "Handcrafted premium and custom diamond jewellery. Explore GIA-certified diamonds, bespoke designs, and timeless elegance.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -35,7 +36,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteEnv.baseUrl),
   openGraph: {
     type: "website",
-    locale: "en_US",
+    locale: "en_IN",
     url: siteEnv.baseUrl,
     siteName: "Sunny Diamonds",
     title: TITLE.default,
@@ -79,9 +80,6 @@ export const metadata: Metadata = {
   robots: {
     index: siteEnv.indexing,
     follow: true,
-  },
-  alternates: {
-    canonical: siteEnv.baseUrl,
   },
 };
 

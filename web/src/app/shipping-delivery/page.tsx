@@ -8,6 +8,7 @@ const page = footerPages.shippingDelivery;
 export const metadata: Metadata = constructMetadata({
   title: page.title,
   description: page.description,
+  canonicalPath: "/shipping-delivery",
 });
 
 export default function Page() {

@@ -6,6 +6,10 @@ import { cn } from "@/shared/utils/cn";
 import { formatJewelleryPrice } from "../utils/formatPrice";
 import { useCardImageSwipe } from "../hooks/useCardImageSwipe";
 import {
+  PLP_CARD_IMAGE_QUALITY,
+  PLP_CARD_IMAGE_WIDTH,
+} from "../utils/jewelleryPlpImage";
+import {
   jewelleryListingProductCardMobileSpec,
 } from "../data/content";
 import type { StaticImageData } from "next/image";
@@ -20,6 +24,7 @@ export interface JewelleryProductCardProps {
   isBestseller?: boolean;
   isWishlisted?: boolean;
   onToggleWishlist?: () => void;
+  priorityImage?: boolean;
 }
 
 type ProductCopyProps = {
@@ -48,15 +53,25 @@ const ProductCopy = ({ title, price, href, className }: ProductCopyProps) => (
   </div>
 );
 
-const ProductImage = ({ src, alt }: { src: string | StaticImageData; alt: string }) => (
+const ProductImage = ({
+  src,
+  alt,
+  priority = false,
+}: {
+  src: string | StaticImageData;
+  alt: string;
+  priority?: boolean;
+}) => (
   <div className="mx-auto size-[121px] shrink-0 overflow-hidden md:size-[303px]">
     <OptimizedImage
       src={src}
       alt={alt}
-      width={303}
-      height={303}
+      width={PLP_CARD_IMAGE_WIDTH}
+      height={PLP_CARD_IMAGE_WIDTH}
       className="size-full object-contain"
       sizes="(max-width: 768px) 50vw, 33vw"
+      priority={priority}
+      quality={PLP_CARD_IMAGE_QUALITY}
     />
   </div>
 );
@@ -71,6 +86,7 @@ const JewelleryProductCard = ({
   isBestseller = false,
   isWishlisted = false,
   onToggleWishlist,
+  priorityImage = false,
 }: JewelleryProductCardProps) => {
   const hasModalImage = Boolean(modalImage);
   const hasHoverImage = Boolean(hoverImage);
@@ -123,10 +139,11 @@ const JewelleryProductCard = ({
           <OptimizedImage
             src={hoverImage!}
             alt=""
-            width={303}
+            width={PLP_CARD_IMAGE_WIDTH}
             height={496}
             className="col-start-1 row-start-1 size-full object-cover"
             sizes="33vw"
+            quality={PLP_CARD_IMAGE_QUALITY}
           />
           <div
             className="col-start-1 row-start-1 size-full bg-gradient-to-t from-[rgba(0,0,0,0.4)] from-[14%] to-transparent to-[50%]"
@@ -141,8 +158,11 @@ const JewelleryProductCard = ({
           <OptimizedImage
             src={modalImage}
             alt=""
+            width={PLP_CARD_IMAGE_WIDTH}
+            height={PLP_CARD_IMAGE_WIDTH}
             className="col-start-1 row-start-1 size-full object-cover"
             sizes="50vw"
+            quality={PLP_CARD_IMAGE_QUALITY}
           />
           <div
             className="col-start-1 row-start-1 size-full bg-gradient-to-t from-black/60 to-transparent"
@@ -165,7 +185,7 @@ const JewelleryProductCard = ({
             : undefined
         }
       >
-        <ProductImage src={primaryImage} alt={title} />
+        <ProductImage src={primaryImage} alt={title} priority={priorityImage} />
       </div>
 
       {/* Title + price — bottom of card, same position for default, hover, and mobile lifestyle */}

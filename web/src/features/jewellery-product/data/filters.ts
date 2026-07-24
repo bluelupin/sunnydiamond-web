@@ -3,6 +3,8 @@ import type { JewelleryFilterFacets } from "@/types/magento/jewelleryListing";
 
 export const PAGE_SIZE = 9;
 
+export const DEFAULT_JEWELLERY_LISTING_SORT = "featured";
+
 export const sortOptions: JewellerySortOption[] = [
   { value: "featured", label: "Featured" },
   { value: "price-asc", label: "Price: Low to High" },
@@ -111,6 +113,19 @@ export function isDefaultPriceRange(
   }
 
   return filters.minPrice <= facets.minPrice && filters.maxPrice >= facets.maxPrice;
+}
+
+/** Stable key for listing refetch — treats default / empty price ranges as equivalent. */
+export function getJewelleryListingFiltersKey(
+  filters: JewelleryFilterState,
+  facets: Pick<JewelleryFilterFacets, "minPrice" | "maxPrice">,
+): string {
+  const normalized =
+    isDefaultPriceRange(filters, facets)
+      ? { ...filters, minPrice: 0, maxPrice: 0 }
+      : filters;
+
+  return JSON.stringify(normalized);
 }
 
 export function hasActiveFilters(

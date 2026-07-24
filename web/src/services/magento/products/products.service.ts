@@ -1,6 +1,9 @@
 import { magentoGraphqlFetch } from "../graphqlClient";
 import { getMagentoJewelleryNavCategories } from "../categories/categories.service";
-import { MAGENTO_JEWELLERY_PRODUCTS_QUERY } from "./products.query";
+import {
+  MAGENTO_JEWELLERY_PRODUCT_FACETS_QUERY,
+  MAGENTO_JEWELLERY_PRODUCTS_QUERY,
+} from "./products.query";
 import { MAGENTO_PRODUCTS_BY_SKUS_QUERY } from "./productsBySkus.query";
 import {
   mapJewellerySortToMagento,
@@ -15,7 +18,19 @@ import {
 import type { MagentoProductListItem, MagentoProductsResponse } from "./magentoProduct.types";
 import type { JewelleryListingProductsData } from "@/types/magento/jewelleryListing";
 import type { JewelleryFilterState, JewelleryListingProduct } from "@/features/jewellery-product/types";
-import { createEmptyFilterState } from "@/features/jewellery-product/data/filters";
+import {
+  createEmptyFilterState,
+  getJewelleryListingFiltersKey,
+} from "@/features/jewellery-product/data/filters";
+import { measureJewelleryPlpGraphql } from "@/features/jewellery-product/utils/jewelleryPlpPerformance";
+import { magentoQueryKeys } from "@/hooks/magento/queryKeys";
+import {
+  getCmsCacheEntry,
+  isCmsCacheFresh,
+  seedCmsCacheEntry,
+  setCmsCacheEntry,
+} from "@/lib/homepage/cmsCache";
+import type { JewelleryNavCategoriesData } from "@/types/magento/jewelleryNav";
 
 const WISHLIST_SKU_BATCH_SIZE = 50;
 
@@ -37,31 +52,128 @@ export type GetMagentoJewelleryProductsParams = {
   signal?: AbortSignal;
 };
 
-type NavCategoriesCache = {
-  data: Awaited<ReturnType<typeof getMagentoJewelleryNavCategories>>;
-  fetchedAt: number;
-};
-
 const NAV_CATEGORIES_CACHE_TTL_MS = 5 * 60 * 1000;
-let navCategoriesCache: NavCategoriesCache | null = null;
+const JEWELLERY_NAV_CACHE_KEY = magentoQueryKeys.jewelleryNav;
+const LISTING_RESULT_CACHE_TTL_MS = 60_000;
 
-async function getJewelleryNavCategoriesCached(signal?: AbortSignal) {
-  if (typeof window !== "undefined" && navCategoriesCache) {
-    if (Date.now() - navCategoriesCache.fetchedAt < NAV_CATEGORIES_CACHE_TTL_MS) {
-      return navCategoriesCache.data;
+const listingInFlight = new Map<string, Promise<JewelleryListingProductsData>>();
+const listingResultCache = new Map<
+  string,
+  { data: JewelleryListingProductsData; fetchedAt: number }
+>();
+
+function buildJewelleryListingRequestKey(params: GetMagentoJewelleryProductsParams): string {
+  const filters = params.filters ?? createEmptyFilterState();
+  const facets = params.facets ?? EMPTY_JEWELLERY_FILTER_FACETS;
+
+  return JSON.stringify({
+    categoryUrlKey: params.categoryUrlKey ?? null,
+    page: params.page ?? 1,
+    pageSize: params.pageSize ?? 9,
+    sortValue: params.sortValue ?? "featured",
+    filtersKey: getJewelleryListingFiltersKey(filters, facets),
+    includeFacets: params.includeFacets !== false,
+  });
+}
+
+async function getJewelleryNavCategoriesCached(signal?: AbortSignal): Promise<JewelleryNavCategoriesData> {
+  if (typeof window !== "undefined") {
+    const cached = getCmsCacheEntry<JewelleryNavCategoriesData>(JEWELLERY_NAV_CACHE_KEY);
+
+    if (cached?.value && isCmsCacheFresh(JEWELLERY_NAV_CACHE_KEY, NAV_CATEGORIES_CACHE_TTL_MS)) {
+      return cached.value;
+    }
+
+    if (cached?.promise) {
+      return cached.promise;
     }
   }
 
-  const data = await getMagentoJewelleryNavCategories(signal);
+  const fetchPromise = getMagentoJewelleryNavCategories(signal);
 
   if (typeof window !== "undefined") {
-    navCategoriesCache = { data, fetchedAt: Date.now() };
+    const existing = getCmsCacheEntry<JewelleryNavCategoriesData>(JEWELLERY_NAV_CACHE_KEY);
+    setCmsCacheEntry(JEWELLERY_NAV_CACHE_KEY, {
+      value: existing?.value,
+      promise: fetchPromise,
+      error: undefined,
+      updatedAt: existing?.updatedAt ?? 0,
+    });
   }
 
-  return data;
+  try {
+    const data = await fetchPromise;
+
+    if (typeof window !== "undefined") {
+      seedCmsCacheEntry(JEWELLERY_NAV_CACHE_KEY, data);
+    }
+
+    return data;
+  } catch (error) {
+    if (typeof window !== "undefined") {
+      const existing = getCmsCacheEntry<JewelleryNavCategoriesData>(JEWELLERY_NAV_CACHE_KEY);
+      setCmsCacheEntry(JEWELLERY_NAV_CACHE_KEY, {
+        value: existing?.value,
+        promise: undefined,
+        error: error instanceof Error ? error.message : "Failed to load jewellery nav",
+        updatedAt: existing?.updatedAt ?? 0,
+      });
+    }
+
+    throw error;
+  }
 }
 
-export async function getMagentoJewelleryProducts({
+export async function getMagentoJewelleryProducts(
+  params: GetMagentoJewelleryProductsParams,
+): Promise<JewelleryListingProductsData> {
+  const key = buildJewelleryListingRequestKey(params);
+
+  if (typeof window !== "undefined") {
+    const cached = listingResultCache.get(key);
+    if (cached && Date.now() - cached.fetchedAt < LISTING_RESULT_CACHE_TTL_MS) {
+      return cached.data;
+    }
+
+    const inFlight = listingInFlight.get(key);
+    if (inFlight) {
+      return inFlight;
+    }
+  }
+
+  const promise = fetchMagentoJewelleryProducts(params).then((data) => {
+    if (typeof window !== "undefined") {
+      listingResultCache.set(key, { data, fetchedAt: Date.now() });
+    }
+    return data;
+  });
+
+  if (typeof window !== "undefined") {
+    listingInFlight.set(key, promise);
+    void promise.finally(() => {
+      listingInFlight.delete(key);
+    });
+  }
+
+  return promise;
+}
+
+/** Seeds the client listing cache after a server prefetch so hydration does not refetch. */
+export function seedMagentoJewelleryListingCache(
+  params: GetMagentoJewelleryProductsParams,
+  data: JewelleryListingProductsData,
+): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  listingResultCache.set(buildJewelleryListingRequestKey(params), {
+    data,
+    fetchedAt: Date.now(),
+  });
+}
+
+async function fetchMagentoJewelleryProducts({
   categoryUrlKey,
   page = 1,
   pageSize = 9,
@@ -73,7 +185,13 @@ export async function getMagentoJewelleryProducts({
 }: GetMagentoJewelleryProductsParams): Promise<JewelleryListingProductsData> {
   const needsNavCategories = includeFacets || Boolean(categoryUrlKey);
   const navCategories = needsNavCategories
-    ? (await getJewelleryNavCategoriesCached(signal)).categories
+    ? (
+        await measureJewelleryPlpGraphql(
+          "nav-categories",
+          () => getJewelleryNavCategoriesCached(signal),
+          { category: categoryUrlKey ?? "all" },
+        )
+      ).categories
     : [];
 
   const categoryId = categoryUrlKey
@@ -87,21 +205,27 @@ export async function getMagentoJewelleryProducts({
     facets,
   });
 
-  const productDataPromise = magentoGraphqlFetch<MagentoProductsResponse>({
-    query: MAGENTO_JEWELLERY_PRODUCTS_QUERY,
-    variables: {
-      search: "",
-      filter: magentoFilter,
-      pageSize,
-      currentPage: page,
-      sort: mapJewellerySortToMagento(sortValue),
-    },
-    signal,
-    cache: "no-store",
-  });
+  const sort = mapJewellerySortToMagento(sortValue);
+
+  const fetchProducts = () =>
+    magentoGraphqlFetch<MagentoProductsResponse>({
+      query: MAGENTO_JEWELLERY_PRODUCTS_QUERY,
+      variables: {
+        search: "",
+        filter: magentoFilter,
+        pageSize,
+        currentPage: page,
+        sort,
+      },
+      signal,
+    });
 
   if (!includeFacets) {
-    const data = await productDataPromise;
+    const data = await measureJewelleryPlpGraphql("products", fetchProducts, {
+      page,
+      pageSize,
+      category: categoryUrlKey ?? "all",
+    });
     const products = mapMagentoProductsToJewelleryListing(data.products?.items);
     const pageInfo = data.products?.page_info;
 
@@ -124,19 +248,25 @@ export async function getMagentoJewelleryProducts({
   });
 
   const [data, facetScopeData] = await Promise.all([
-    productDataPromise,
-    magentoGraphqlFetch<MagentoProductsResponse>({
-      query: MAGENTO_JEWELLERY_PRODUCTS_QUERY,
-      variables: {
-        search: "",
-        filter: facetScopeFilter,
-        pageSize: 1,
-        currentPage: 1,
-        sort: mapJewellerySortToMagento(sortValue),
-      },
-      signal,
-      cache: "no-store",
+    measureJewelleryPlpGraphql("products", fetchProducts, {
+      page,
+      pageSize,
+      category: categoryUrlKey ?? "all",
     }),
+    measureJewelleryPlpGraphql(
+      "facets",
+      () =>
+        magentoGraphqlFetch<MagentoProductsResponse>({
+          query: MAGENTO_JEWELLERY_PRODUCT_FACETS_QUERY,
+          variables: {
+            search: "",
+            filter: facetScopeFilter,
+            sort,
+          },
+          signal,
+        }),
+      { category: categoryUrlKey ?? "all" },
+    ),
   ]);
 
   const responseFacets = enrichFacetsWithNavCategories(

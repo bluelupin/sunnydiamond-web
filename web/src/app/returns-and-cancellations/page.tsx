@@ -8,6 +8,7 @@ const page = footerPages.returnsAndCancellations;
 export const metadata: Metadata = constructMetadata({
   title: page.title,
   description: page.description,
+  canonicalPath: "/returns-and-cancellations",
 });
 
 export default function Page() {
