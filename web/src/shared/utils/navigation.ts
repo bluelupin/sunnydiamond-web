@@ -9,6 +9,10 @@ export function resolveHeaderNavHref(label: string, url: string): string {
     return "/bespoke-jewellery";
   }
 
+  if (normalizedLabel === "gifting") {
+    return "/gifting";
+  }
+
   return url;
 }
 
@@ -30,7 +34,9 @@ export function isHeroOverlayRoute(pathname: string): boolean {
     pathname === "/education" ||
     pathname === "/jewellery" ||
     pathname.startsWith("/jewellery/") ||
-    pathname === "/bespoke-jewellery"
+    pathname === "/bespoke-jewellery" ||
+    pathname === "/gifting" ||
+    pathname === "/careers"
   );
 }
 

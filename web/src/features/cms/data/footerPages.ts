@@ -12,7 +12,7 @@ export const footerPages = {
   careers: {
     title: "Careers",
     description:
-      "Join the Sunny Diamonds team. Career listings and hiring details will be added here later.",
+      "Join Sunny Diamonds — explore open roles, employee benefits, and life at our diamond jewellery atelier and showrooms.",
   },
   news: {
     title: "News",
@@ -43,6 +43,11 @@ export const footerPages = {
     title: "Bespoke Jewellery",
     description:
       "Commission a one-of-a-kind Sunny Diamonds piece tailored to your vision, occasion, and style.",
+  },
+  gifting: {
+    title: "Gifting",
+    description:
+      "Discover occasion-led diamond jewellery, curated gift ideas, gift cards, and the Sunny Diamonds promise for every celebration.",
   },
   returnsAndCancellations: {
     title: "Returns and Cancellations",

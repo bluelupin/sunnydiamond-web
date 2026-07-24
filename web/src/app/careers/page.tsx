@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 import { constructMetadata } from "@/shared/lib/seo/metadata";
 import { footerPages } from "@/features/cms/data/footerPages";
-import StaticRoutePage from "@/features/cms/components/StaticRoutePage";
+import CareersPage from "@/features/careers/components/CareersPage";
 
-const page = footerPages.careers;
+const fallback = footerPages.careers;
 
 export const metadata: Metadata = constructMetadata({
-  title: page.title,
-  description: page.description,
+  title: fallback.title,
+  description: fallback.description,
   canonicalPath: "/careers",
 });
 
 export default function Page() {
-  return <StaticRoutePage title={page.title} description={page.description} />;
+  return <CareersPage />;
 }
