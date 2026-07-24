@@ -175,7 +175,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
             </div>
           </ScrollReveal>
 
-          <div className="flex w-full lg:justify-center justify-between gap-10">
+          <div className="flex xl:w-[980px] w-full justify-between gap-10">
             {steps.map((step, index) => (
               <ScrollReveal key={step.stepNumber} delayMs={280 + index * 80} className="lg:w-[250px] w-[200px]">
                 <StepDescription
@@ -204,11 +204,9 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
           ))}
         </div>
         {ctaUrl &&
-          // <Reveal direction="up">
           <Link href={ctaUrl} className="relative after:bg-darkMagenta after:absolute after:h-0.5 after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-darkblack hover:border-darkMagenta sm:pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack hover:text-darkMagenta">
             {ctaLabel}
           </Link>
-          // </Reveal>
         }
       </div>
     </section>
