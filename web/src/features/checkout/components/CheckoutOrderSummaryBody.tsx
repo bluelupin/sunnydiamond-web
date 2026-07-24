@@ -71,7 +71,7 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
 
       {!compact ? (
         <div className="flex flex-col gap-4">
-          <div className="lg:flex hidden flex-col gap-6">
+          <div className="hidden flex-col gap-6 md:flex">
             <h3 className="font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
               Price Details
             </h3>
@@ -83,10 +83,10 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
             open={offersOpen}
             onToggle={toggleOffers}
             showExpandedContent={false}
-            buttonClassName="lg:hidden flex"
+            buttonClassName="flex md:hidden"
           />
           {offersOpen ? (
-            <OffersAndDealsExpandedContent variant="panel-gray300" className="lg:hidden" />
+            <OffersAndDealsExpandedContent variant="panel-gray300" className="md:hidden" />
           ) : null}
 
           <div className="flex flex-col gap-3">
@@ -103,11 +103,11 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
             open={offersOpen}
             onToggle={toggleOffers}
             showExpandedContent={false}
-            buttonClassName="lg:flex hidden"
+            buttonClassName="hidden md:flex"
           />
 
           {offersOpen ? (
-            <OffersAndDealsExpandedContent variant="panel-gray300" className="hidden lg:block" />
+            <OffersAndDealsExpandedContent variant="panel-gray300" className="hidden md:block" />
           ) : null}
         </div>
       ) : (

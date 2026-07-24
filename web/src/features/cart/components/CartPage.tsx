@@ -74,7 +74,7 @@ const CartPage = () => {
             Your Shopping Bag
           </h1>
 
-          <div className="grid grid-cols-1 gap-6 md:max-lg:portrait:gap-8 md:landscape:grid-cols-[minmax(0,1fr)_minmax(0,300px)] lg:grid-cols-[minmax(0,783px)_553px] lg:gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,300px)] md:items-start lg:grid-cols-[minmax(0,783px)_553px] lg:gap-6">
             <div className="flex min-w-0 flex-col gap-6">
               {items.map((item) => (
                 <CartItem
@@ -91,7 +91,7 @@ const CartPage = () => {
               </div>
             </div>
 
-            <aside className="hidden h-fit w-full min-w-0 flex-col gap-0 md:flex md:max-lg:portrait:pt-2 lg:sticky lg:top-12">
+            <aside className="hidden h-fit w-full min-w-0 flex-col gap-0 md:sticky md:top-12 md:flex">
               <CartPriceDetails />
               <CartBenefitsSection />
             </aside>

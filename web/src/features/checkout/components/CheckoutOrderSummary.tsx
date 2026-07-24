@@ -27,7 +27,7 @@ const CheckoutOrderSummary = ({
   return (
     <aside
       className={cn(
-        "h-fit w-full lg:sticky lg:top-12",
+        "h-fit w-full min-w-0 md:sticky md:top-12",
         stickyOnMobile &&
           "max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:z-40 max-lg:border-t max-lg:border-aboutInactive max-lg:pb-[env(safe-area-inset-bottom,0px)] max-lg:shadow-[0_-4px_24px_rgba(0,0,0,0.08)]",
         className,

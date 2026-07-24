@@ -88,7 +88,7 @@ const CheckoutPage = () => {
     const clearance = offersOpen
       ? mobile.stickyFooterOffersExpandedClearance
       : mobile.stickyFooterCollapsedClearance;
-    return `max-lg:pb-[calc(${clearance}px+env(safe-area-inset-bottom,0px))]`;
+    return `max-md:pb-[calc(${clearance}px+env(safe-area-inset-bottom,0px))]`;
   })();
 
   const updateForm = (field: keyof CheckoutFormData, value: string | boolean) => {
@@ -421,11 +421,11 @@ const CheckoutPage = () => {
 
         <div
           className={cn(
-            "grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,783px)_553px]",
+            "grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,300px)] md:items-start lg:grid-cols-[minmax(0,783px)_553px] lg:gap-6",
             showOtpModal && "lg:grid-cols-[minmax(0,899px)_437px]",
           )}
         >
-          <div className={cn("flex flex-col", step === "payment" ? "gap-[33px]" : "gap-6")}>
+          <div className={cn("flex min-w-0 flex-col", step === "payment" ? "gap-[33px]" : "gap-6")}>
             {step === "form" ? (
               <CheckoutFormStep
                 form={form}
@@ -457,7 +457,7 @@ const CheckoutPage = () => {
           </div>
 
           <CheckoutOrderSummary
-            className="hidden lg:block"
+            className="max-md:hidden"
             ctaLabel={sidebarCtaLabel}
             ctaDisabled={ctaDisabled}
             onCtaClick={handleSidebarCta}
