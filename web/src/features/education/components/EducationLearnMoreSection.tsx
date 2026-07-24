@@ -26,7 +26,6 @@ const mobileCarousel = spec.carousel.mobile;
 const desktopCarousel = spec.carousel.desktop;
 const ctaSpec = spec.cta;
 const careSpec = spec.careGrid;
-const anatomySpec = spec.anatomyDetail;
 
 const LearnCarouselImage = ({
   src,
@@ -205,49 +204,86 @@ const LearnCareTipsGrid = ({ tips }: { tips: NormalizedEducationLearnCareTip[] }
   );
 };
 
-const LearnAnatomyDetailPanel = ({ detail }: { detail: NormalizedEducationLearnAnatomyDetail }) => (
-  <ScrollReveal delayMs={260} className="w-full">
-    <div className="grid md:grid-cols-2 gap-12 w-full items-start">
-      <div>
-        <div className="relative mx-auto h-[200px] w-[200px] shrink-0 mix-blend-darken md:h-[350px] md:w-[350px]">
-          <Image
-            src={detail.image}
-            alt={detail.imageAlt}
-            fill
-            className="object-cover w-full h-full"
-          />
+const LearnAnatomyDetailPanel = ({ detail }: { detail: NormalizedEducationLearnAnatomyDetail }) => {
+  const [openSectionId, setOpenSectionId] = useState<string | null>(
+    detail.sections[0]?.id ?? null,
+  );
+
+  return (
+    <ScrollReveal delayMs={260} className="w-full">
+      <div className="grid w-full items-start gap-12 md:grid-cols-2">
+        <div>
+          <div className="relative mx-auto h-[200px] w-[200px] shrink-0 mix-blend-darken md:h-[350px] md:w-[350px]">
+            <Image
+              src={detail.image}
+              alt={detail.imageAlt}
+              fill
+              className="h-full w-full object-cover"
+            />
+          </div>
+        </div>
+
+        <div className="flex w-full max-w-full flex-col gap-3">
+          {detail.sections.map((section) => {
+            const isOpen = openSectionId === section.id;
+
+            return (
+              <div key={section.id} className="bg-gray300">
+                <button
+                  type="button"
+                  aria-expanded={isOpen}
+                  aria-controls={`anatomy-section-${section.id}`}
+                  id={`anatomy-trigger-${section.id}`}
+                  onClick={() =>
+                    setOpenSectionId((current) =>
+                      current === section.id ? null : section.id,
+                    )
+                  }
+                  className="flex w-full items-center px-6 py-5 text-left"
+                >
+                  <span className="font-larken text-xl font-light leading-110 text-darkblack md:text-2xl">
+                    {section.title}
+                  </span>
+                </button>
+
+                <div
+                  id={`anatomy-section-${section.id}`}
+                  role="region"
+                  aria-labelledby={`anatomy-trigger-${section.id}`}
+                  hidden={!isOpen}
+                  className={cn(!isOpen && "hidden")}
+                >
+                  <ul className="flex flex-col gap-5 px-6 pb-6 md:gap-4">
+                    {section.traits.map((trait) => (
+                      <li key={trait.id} className="flex items-start gap-[10px]">
+                        <div className="flex items-center gap-[10px]">
+                          <Image
+                            src={educationPageImages.anatomySparkle}
+                            alt=""
+                            width={16}
+                            height={16}
+                            aria-hidden
+                            className="size-4 shrink-0"
+                          />
+                          <p className="font-gill text-sm font-normal leading-130 text-darkblack md:text-xl md:leading-110">
+                            {trait.term}:
+                          </p>
+                        </div>
+                        <p className="font-gill text-sm font-light leading-130 text-neutral500 md:text-xl md:leading-110">
+                          {trait.definition}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
-      <div className="flex w-full max-w-full flex-col md:gap-6 gap-4 bg-gray300 p-6">
-        <h3 className="font-larken md:text-2xl text-xl font-light leading-110 text-darkblack">
-          {detail.title}
-        </h3>
-        <ul className="flex flex-col gap-5 md:gap-4">
-          {detail.traits.map((trait) => (
-            <li key={trait.id} className="flex gap-[10px] items-start">
-              <div className="flex items-center gap-[10px]">
-                <Image
-                  src={educationPageImages.anatomySparkle}
-                  alt=""
-                  width={16}
-                  height={16}
-                  aria-hidden
-                  className="size-4 shrink-0"
-                />
-                <p className="font-gill text-sm font-normal leading-130 text-darkblack md:text-xl md:leading-110">
-                  {trait.term}:
-                </p>
-              </div>
-              <p className="font-gill text-sm font-light leading-130 text-neutral500 md:text-xl md:leading-110">
-                {trait.definition}
-              </p>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  </ScrollReveal>
-);
+    </ScrollReveal>
+  );
+};
 
 const LearnCarouselPanel = ({
   tab,

@@ -2,9 +2,7 @@ import {
   buildCaratSliderSpecForWeights,
   buildSliderSpecForOptionCount,
   educationCertifiedContent,
-  educationDiamondCareTips,
   educationFourCsPanels,
-  educationPageImages,
   educationSliderSpecs,
   type EducationFourCsPanelContent,
   type EducationSliderOption,
@@ -38,6 +36,7 @@ import type {
   StrapiEducationGradeStop,
   StrapiEducationHero,
   StrapiEducationLearnCarouselImage,
+  StrapiEducationLearnFeatureGroup,
   StrapiEducationLearnFeatureItem,
   StrapiEducationLearnMoreSection,
   StrapiEducationLearnTab,
@@ -252,10 +251,30 @@ const mapColourSublabel = (longLabel?: string) => {
   return label;
 };
 
-const mapCutOptionImage = (label: string) =>
-  label.trim().toLowerCase() === "excellent"
-    ? educationPageImages.cutDiamondExcellent
-    : educationPageImages.cutDiamondGood;
+const isCutGoodLabel = (label: string) => {
+  const normalized = label.trim().toLowerCase();
+  return normalized === "good" || normalized === "g";
+};
+
+const isCutExcellentLabel = (label: string) => {
+  const normalized = label.trim().toLowerCase();
+  return normalized === "excellent" || normalized.startsWith("excellent");
+};
+
+/** Dual cut diamonds from CMS gradeImages (Good + Excellent). */
+const resolveCutDualImages = (
+  options: EducationSliderOption[],
+): [string, string] | undefined => {
+  const goodFromCms = options.find(
+    (option) => isCutGoodLabel(option.label) && option.image,
+  )?.image;
+  const excellentFromCms = options.find(
+    (option) => isCutExcellentLabel(option.label) && option.image,
+  )?.image;
+
+  if (!goodFromCms || !excellentFromCms) return undefined;
+  return [goodFromCms, excellentFromCms];
+};
 
 const mapGradeStopToOption = (
   stop: StrapiEducationGradeStop,
@@ -283,16 +302,13 @@ const mapGradeStopToOption = (
     option.caratWeight = parseCaratWeight(label);
   }
 
-  // Per-stop CMS image when backend provides it; otherwise keep existing fallbacks.
   const gradeImageUrl =
     resolveCmsMediaUrl(stop.gradeImage?.desktopImage) ??
     resolveCmsMediaUrl(stop.gradeImage?.mobileImage);
 
   if (gradeImageUrl) {
     option.image = gradeImageUrl;
-  } else if (panelId === "cut") {
-    option.image = mapCutOptionImage(label);
-  } else if (visualImageUrl) {
+  } else if (visualImageUrl && panelId !== "cut") {
     option.image = visualImageUrl;
   }
 
@@ -365,11 +381,13 @@ const mapFourCsPanel = (
 
   const options = mappedOptions;
   const defaultIndex = resolveDefaultIndex(options, activeGradeCode, 0);
+  const cutDualImages = panelId === "cut" ? resolveCutDualImages(options) : undefined;
 
   const slider = {
     ...staticPanel.slider,
     defaultIndex,
     options,
+    ...(cutDualImages ? { dualImages: cutDualImages } : {}),
     ...(visualImageUrl && panelId !== "cut" && panelId !== "carat"
       ? { image: visualImageUrl }
       : {}),
@@ -695,6 +713,32 @@ const mapCarouselSlide = (item: StrapiEducationLearnCarouselImage) => {
   };
 };
 
+/** Prefer featureGroups (current CMS); fall back to legacy top-level featureItems. */
+const resolveLearnFeatureGroups = (
+  tab: StrapiEducationLearnTab,
+): StrapiEducationLearnFeatureGroup[] => {
+  const groups = (tab.featureGroups ?? []).filter(
+    (group) => (group.featureItems?.length ?? 0) > 0,
+  );
+  if (groups.length) return groups;
+
+  if ((tab.featureItems?.length ?? 0) > 0) {
+    return [
+      {
+        featureSubtitle: tab.featureSubtitle,
+        featureItems: tab.featureItems,
+      },
+    ];
+  }
+
+  return [];
+};
+
+const flattenLearnFeatureItems = (
+  tab: StrapiEducationLearnTab,
+): StrapiEducationLearnFeatureItem[] =>
+  resolveLearnFeatureGroups(tab).flatMap((group) => group.featureItems ?? []);
+
 const mapCareTips = (
   items?: StrapiEducationLearnFeatureItem[] | null,
 ): NormalizedEducationLearnCareTip[] =>
@@ -703,12 +747,12 @@ const mapCareTips = (
       const label = cleanText(item.label);
       if (!label) return null;
 
-      // Icons are UI assets (not in CMS). Labels always come from CMS — no static copy.
-      const staticTip = educationDiamondCareTips[index];
+      const iconUrls = mapResponsiveImageUrls(item.icon);
+      if (!iconUrls.hasImage) return null;
 
       return {
         id: item.id != null ? String(item.id) : `care-${index}`,
-        icon: staticTip?.icon ?? educationPageImages.careIconClean,
+        icon: iconUrls.desktopUrl,
         labelLines: [label],
       };
     })
@@ -717,14 +761,34 @@ const mapCareTips = (
 const mapAnatomyDetail = (
   tab: StrapiEducationLearnTab,
 ): NormalizedEducationLearnAnatomyDetail | null => {
-  const traits =
-    tab.featureItems
-      ?.map((item, index) => {
-        const label = cleanText(item.label);
-        if (!label) return null;
-        return parseTraitLabel(label, index);
-      })
-      .filter((trait): trait is NonNullable<typeof trait> => trait != null) ?? [];
+  const groups = resolveLearnFeatureGroups(tab);
+  const sections = groups
+    .map((group, groupIndex) => {
+      const traits =
+        group.featureItems
+          ?.map((item, index) => {
+            const label = cleanText(item.label);
+            if (!label) return null;
+            return parseTraitLabel(label, index);
+          })
+          .filter((trait): trait is NonNullable<typeof trait> => trait != null) ?? [];
+
+      const title =
+        cleanText(group.featureSubtitle) ??
+        cleanText(tab.featureSubtitle) ??
+        (groupIndex === 0 ? "Face-up appearance" : undefined);
+
+      if (!title || !traits.length) return null;
+
+      return {
+        id: group.id != null ? String(group.id) : `anatomy-section-${groupIndex}`,
+        title,
+        traits,
+      };
+    })
+    .filter(
+      (section): section is NonNullable<typeof section> => section != null,
+    );
 
   const carouselImage = tab.carouselImage?.[0];
   const featureImage = mapResponsiveImageUrls(tab.featureImage);
@@ -736,13 +800,12 @@ const mapAnatomyDetail = (
       ? carouselUrls
       : null;
 
-  if (!image || !traits.length) return null;
+  if (!image || !sections.length) return null;
 
   return {
     image: image.desktopUrl,
     imageAlt: image.alt || "Diamond anatomy illustration",
-    title: cleanText(tab.featureSubtitle) ?? "Face-up appearance",
-    traits,
+    sections,
   };
 };
 
@@ -754,6 +817,9 @@ const mapLearnTab = (
   const description = splitDescription(tab.tabDescription);
   if (!label || !description.length) return null;
 
+  // Orphan/incomplete CMS tabs (e.g. duplicate SHAPE with no layoutType) — skip.
+  if (!(tab.layoutType ?? "").trim()) return null;
+
   const layout = mapLearnLayoutType(tab.layoutType);
   const id = slugifyTabLabel(tab.tabLabel, index);
   const mapped: NormalizedEducationLearnTab = {
@@ -764,7 +830,7 @@ const mapLearnTab = (
   };
 
   if (layout === "care-grid") {
-    const careTips = mapCareTips(tab.featureItems);
+    const careTips = mapCareTips(flattenLearnFeatureItems(tab));
     if (!careTips.length) return null;
     mapped.careTips = careTips;
     return mapped;

@@ -1,7 +1,5 @@
 export const educationPageImages = {
   panelTexture: "/images/education/panel-texture.png",
-  cutDiamondExcellent: "/images/education/cut-diamond-excellent.png",
-  cutDiamondGood: "/images/education/cut-diamond-good.png",
   certifiedHandBg: "/images/education/certified-hand-bg.png",
   certifiedDivider: "/images/education/certified-divider.svg",
   certifiedCalloutLine: "/images/education/certified-callout-line.svg",
@@ -9,11 +7,6 @@ export const educationPageImages = {
   certifiedCalloutLineMobile: "/images/education/certified-callout-line-mobile.svg",
   girdleScreenshot: "/images/education/girdle-screenshot.png",
   anatomySparkle: "/images/education/scroll-arrow.svg",
-  careIconClean: "/images/education/care-icon-clean.png",
-  careIconGentleSolution: "/images/education/care-icon-gentle-solution.png",
-  careIconFineDetail: "/images/education/care-icon-fine-detail.png",
-  careIconAvoidHarsh: "/images/education/care-icon-avoid-harsh.png",
-  careIconStore: "/images/education/care-icon-store.png",
   learnArrowLeft: "/images/education/learn-arrow-left.svg",
   learnArrowRight: "/images/education/learn-arrow-right.svg",
   learnArrowLeftMobile: "/images/education/learn-arrow-left-mobile.svg",
@@ -379,20 +372,6 @@ export const educationFourCsPanels: EducationFourCsPanelContent[] = [
     background: "chalk",
     slider: { defaultIndex: 0, options: [] },
   },
-];
-
-/** Care tip icons only — labels come from CMS learnMoreSection. */
-export type EducationLearnCareTip = {
-  id: string;
-  icon: string;
-};
-
-export const educationDiamondCareTips: EducationLearnCareTip[] = [
-  { id: "clean-regularly", icon: educationPageImages.careIconClean },
-  { id: "gentle-solutions", icon: educationPageImages.careIconGentleSolution },
-  { id: "fine-detailing", icon: educationPageImages.careIconFineDetail },
-  { id: "avoid-harsh", icon: educationPageImages.careIconAvoidHarsh },
-  { id: "store-handle", icon: educationPageImages.careIconStore },
 ];
 
 /** Logo layout classes only — labels/logos come from CMS certificateSection. */
