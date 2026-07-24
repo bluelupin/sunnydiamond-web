@@ -88,7 +88,7 @@ const CheckoutPage = () => {
     const clearance = offersOpen
       ? mobile.stickyFooterOffersExpandedClearance
       : mobile.stickyFooterCollapsedClearance;
-    return `max-lg:pb-[calc(${clearance}px+env(safe-area-inset-bottom,0px))]`;
+    return `max-md:pb-[calc(${clearance}px+env(safe-area-inset-bottom,0px))]`;
   })();
 
   const updateForm = (field: keyof CheckoutFormData, value: string | boolean) => {
@@ -407,25 +407,24 @@ const CheckoutPage = () => {
   };
 
   return (
-    <section className={cn("bg-gray300", mobileScrollPadding)}>
-      <div className="mx-auto w-full 2xl:max-w-1920 px-4 py-6 md:px-8 lg:px-10 lg:py-10 2xl:px-[60px]">
-        <h1
-          className={cn(
-            "font-larken text-32 font-light leading-110 text-darkblack lg:text-5xl",
-            "max-lg:border-b max-lg:border-neutral300 max-lg:pb-6",
-            step === "payment" ? "mb-6 lg:mb-10" : "mb-6",
-          )}
-        >
+    <section
+      className={cn(
+        "bg-gray300 -mt-2 md:landscape:mt-0 md:pb-16",
+        mobileScrollPadding,
+      )}
+    >
+      <div className="mx-auto w-full px-5 pt-6 md:px-8 md:landscape:pt-0 lg:px-10 2xl:max-w-1920 2xl:px-[60px]">
+        <h1 className="mb-6 font-larken text-32 font-light leading-110 text-darkblack lg:mb-10 lg:text-32">
           Complete Checkout
         </h1>
 
         <div
           className={cn(
-            "grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,783px)_553px]",
+            "grid grid-cols-1 gap-6 md:max-lg:portrait:grid-cols-[minmax(0,1fr)_minmax(0,360px)] md:landscape:grid-cols-[minmax(0,1fr)_minmax(0,300px)] md:items-start lg:grid-cols-[minmax(0,783px)_553px] lg:gap-6",
             showOtpModal && "lg:grid-cols-[minmax(0,899px)_437px]",
           )}
         >
-          <div className={cn("flex flex-col", step === "payment" ? "gap-[33px]" : "gap-6")}>
+          <div className={cn("flex min-w-0 flex-col", step === "payment" ? "gap-[33px]" : "gap-6")}>
             {step === "form" ? (
               <CheckoutFormStep
                 form={form}
@@ -457,7 +456,7 @@ const CheckoutPage = () => {
           </div>
 
           <CheckoutOrderSummary
-            className="hidden lg:block"
+            className="max-md:hidden"
             ctaLabel={sidebarCtaLabel}
             ctaDisabled={ctaDisabled}
             onCtaClick={handleSidebarCta}

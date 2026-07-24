@@ -58,8 +58,8 @@ const HeroSection = ({ id, hero }: HeroSectionProps) => {
                 href={hero.primaryCtaUrl}
                 className="bg-white relative flex items-center justify-center px-7 h-14 overflow-hidden font-gill text-sm font-normal uppercase leading-110 border-2 border-white group w-fit"
               >
-                <div className="absolute left-0 w-full h-14 transition-all duration-300 bg-white top-full group-hover:top-0" />
-                <span className="relative transition-all duration-300 text-darkblack group-hover:text-">
+                <div className="absolute left-0 top-full z-0 h-14 w-full bg-darkblack transition-all duration-300 group-hover:top-0" />
+                <span className="relative z-10 text-darkblack transition-all duration-300 group-hover:text-white">
                   {hero.primaryCtaLabel}
                 </span>
               </Link>
