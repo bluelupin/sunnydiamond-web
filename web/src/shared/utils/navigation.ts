@@ -87,6 +87,15 @@ export function shouldOffsetMainForHeader(pathname: string): boolean {
   return !isHeroOverlayRoute(pathname);
 }
 
+export function isCartOrCheckoutRoute(pathname: string): boolean {
+  return pathname === "/cart" || pathname === "/checkout";
+}
+
 export function shouldHideFooter(pathname: string): boolean {
   return isAuthRoute(pathname);
+}
+
+/** Cart/checkout use a sticky mobile action bar; hide the site footer below md. */
+export function shouldHideFooterOnMobile(pathname: string): boolean {
+  return isCartOrCheckoutRoute(pathname);
 }

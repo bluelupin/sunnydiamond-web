@@ -5,12 +5,13 @@ import Header from "./Header";
 import Footer from "./Footer";
 import { usePathname } from "next/navigation";
 import { cn } from "@/shared/utils/cn";
-import { isAuthRoute, shouldHideFooter, shouldOffsetMainForHeader } from "@/shared/utils/navigation";
+import { isAuthRoute, shouldHideFooter, shouldHideFooterOnMobile, shouldOffsetMainForHeader } from "@/shared/utils/navigation";
 
 const Layout = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname() ?? "/";
   const offsetMain = shouldOffsetMainForHeader(pathname);
   const hideFooter = shouldHideFooter(pathname);
+  const hideFooterOnMobile = shouldHideFooterOnMobile(pathname);
   const isAuthPage = isAuthRoute(pathname);
 
   return (
@@ -27,7 +28,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
       >
         {children}
       </main>
-      {hideFooter ? null : <Footer />}
+      {hideFooter ? null : <Footer className={hideFooterOnMobile ? "max-md:hidden" : undefined} />}
     </div>
   );
 };

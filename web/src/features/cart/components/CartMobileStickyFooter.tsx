@@ -1,5 +1,6 @@
 "use client";
 
+import { forwardRef } from "react";
 import OffersAndDealsSection from "@/shared/ui/OffersAndDealsSection";
 import { useCart } from "../context/CartContext";
 import { useCartUI } from "../context/CartUIContext";
@@ -19,12 +20,15 @@ type CartMobileStickyFooterProps = {
   onBreakupToggle: () => void;
 };
 
-const CartMobileStickyFooter = ({
-  offersOpen,
-  onOffersToggle,
-  breakupOpen,
-  onBreakupToggle,
-}: CartMobileStickyFooterProps) => {
+const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooterProps>(function CartMobileStickyFooter(
+  {
+    offersOpen,
+    onOffersToggle,
+    breakupOpen,
+    onBreakupToggle,
+  },
+  ref,
+) {
   const { subtotal, taxes, shipping, totalPrice, selectedShippingMethod, shippingMethods, estimatedShippingMethods } = useCart();
   const { openGiftingPanel } = useCartUI();
   const shippingLabel = getCartShippingLabel(
@@ -35,7 +39,7 @@ const CartMobileStickyFooter = ({
   );
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 md:hidden">
+    <div ref={ref} className="fixed inset-x-0 bottom-0 z-40 md:hidden">
       <div
         className="pointer-events-none h-[71px] w-full bg-gradient-to-b from-transparent to-white"
         aria-hidden
@@ -83,6 +87,6 @@ const CartMobileStickyFooter = ({
       </aside>
     </div>
   );
-};
+});
 
 export default CartMobileStickyFooter;

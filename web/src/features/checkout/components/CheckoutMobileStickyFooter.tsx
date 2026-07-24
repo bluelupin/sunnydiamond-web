@@ -1,5 +1,6 @@
 "use client";
 
+import { forwardRef } from "react";
 import { useCart } from "@/features/cart/context/CartContext";
 import { formatCartPrice } from "@/features/cart/utils/formatCartLine";
 import { CartPrimaryButton, CartTextLink } from "@/features/cart/components/CartFlowUi";
@@ -14,18 +15,22 @@ type CheckoutMobileStickyFooterProps = {
   ctaDisabled?: boolean;
 };
 
-const CheckoutMobileStickyFooter = ({
-  offersOpen,
-  onOffersToggle,
-  onOrderSummaryOpen,
-  ctaLabel,
-  onCtaClick,
-  ctaDisabled = false,
-}: CheckoutMobileStickyFooterProps) => {
+const CheckoutMobileStickyFooter = forwardRef<HTMLDivElement, CheckoutMobileStickyFooterProps>(
+  function CheckoutMobileStickyFooter(
+    {
+      offersOpen,
+      onOffersToggle,
+      onOrderSummaryOpen,
+      ctaLabel,
+      onCtaClick,
+      ctaDisabled = false,
+    },
+    ref,
+  ) {
   const { totalPrice } = useCart();
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 md:hidden">
+    <div ref={ref} className="fixed inset-x-0 bottom-0 z-40 md:hidden">
       <div
         className="pointer-events-none h-[71px] w-full bg-gradient-to-b from-transparent to-white"
         aria-hidden
@@ -58,6 +63,7 @@ const CheckoutMobileStickyFooter = ({
       </aside>
     </div>
   );
-};
+},
+);
 
 export default CheckoutMobileStickyFooter;
