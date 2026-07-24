@@ -74,7 +74,7 @@ const CartPage = () => {
             Your Shopping Bag
           </h1>
 
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,300px)] md:items-start lg:grid-cols-[minmax(0,783px)_553px] lg:gap-6">
+          <div className="grid grid-cols-1 gap-6 md:max-lg:portrait:grid-cols-[minmax(0,1fr)_minmax(0,360px)] md:landscape:grid-cols-[minmax(0,1fr)_minmax(0,300px)] md:items-start lg:grid-cols-[minmax(0,783px)_553px] lg:gap-6">
             <div className="flex min-w-0 flex-col gap-6">
               {items.map((item) => (
                 <CartItem
