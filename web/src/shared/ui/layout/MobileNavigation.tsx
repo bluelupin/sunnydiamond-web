@@ -455,12 +455,24 @@ const MobileNavigation = ({
   const currentCurrencyDisplay = CURRENCIES.find((c) => c.code === currency)?.display ?? "India · ₹ INR";
 
   return (
-    <div
-      className="fixed inset-0 z-[60] flex flex-col bg-white md:landscape:hidden"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Mobile navigation"
-    >
+    <>
+      <button
+        type="button"
+        className="fixed inset-0 z-[59] hidden bg-black/50 md:portrait:block md:landscape:hidden"
+        onClick={handleClose}
+        aria-label="Close menu"
+      />
+
+      <div
+        className={cn(
+          "fixed z-[60] flex flex-col bg-white md:landscape:hidden",
+          "inset-0",
+          "md:portrait:inset-x-auto md:portrait:inset-y-0 md:portrait:left-0 md:portrait:w-[60%] md:portrait:max-w-[60%]",
+        )}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Mobile navigation"
+      >
       <div className="flex h-16 shrink-0 items-center justify-between px-4 gap-4">
         <div className="flex w-[120px] items-center">
           <button
@@ -590,7 +602,7 @@ const MobileNavigation = ({
           />
         </div>
 
-        <div className="mt-10 flex items-center gap-2">
+        <div className="mt-10 flex items-center justify-center text-center gap-2">
           <span className="inline-flex size-6 shrink-0 items-center justify-center">
             <Image
               src="/images/navigation/footer-star.svg"
@@ -647,7 +659,8 @@ const MobileNavigation = ({
           onClose={handleClose}
         />
       )}
-    </div>
+      </div>
+    </>
   );
 };
 
