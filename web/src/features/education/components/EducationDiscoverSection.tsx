@@ -87,7 +87,7 @@ const EducationDiscoverSection = ({ ctaBanner }: EducationDiscoverSectionProps) 
 
   return (
     <section aria-labelledby="education-discover-title" className="bg-gray300">
-      <div className="flex w-full flex-col md:grid md:grid-cols-2 md:items-start lg:gap-20 md:gap-8">
+      <div className="flex w-full flex-col md:grid md:grid-cols-2 md:items-end lg:gap-20 md:gap-8">
         {hasImage ? (
           <Reveal direction="up" className="flex w-full mix-blend-darken md:order-1 order-2 lg:justify-start justify-end">
             <ResponsiveImage
