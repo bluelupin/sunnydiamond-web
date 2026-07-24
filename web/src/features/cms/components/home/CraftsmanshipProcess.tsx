@@ -29,7 +29,7 @@ function CraftsmanshipSilkLayer({ variant }: { variant: "desktop" | "mobile" }) 
     return (
       <div
         className="absolute left-1/2 top-[calc(50%+0.08px)] hidden -translate-x-1/2 -translate-y-1/2 items-center justify-center lg:flex"
-        // style={{ height: spec.height, width: `max(100vw, ${spec.minSpan}px)` }}
+      // style={{ height: spec.height, width: `max(100vw, ${spec.minSpan}px)` }}
       >
         <div className="rotate-90">
           <Image
@@ -54,7 +54,7 @@ function CraftsmanshipSilkLayer({ variant }: { variant: "desktop" | "mobile" }) 
   return (
     <div
       className="absolute left-1/2 top-0 flex -translate-x-1/2 items-center justify-center lg:hidden"
-      // style={{ height: spec.height, width: `max(100vw, ${spec.minSpan}px)` }}
+    // style={{ height: spec.height, width: `max(100vw, ${spec.minSpan}px)` }}
     >
       <div className="sm:rotate-90 rotate-180 test-2">
         <Image
@@ -62,7 +62,7 @@ function CraftsmanshipSilkLayer({ variant }: { variant: "desktop" | "mobile" }) 
           alt=""
           width={spec.imageWidth}
           height={spec.imageHeight}
-          className="h-[max(100vw,1339px)] w-[651px] max-w-none object-bottom"
+          className="h-screen w-[651px] max-w-none object-bottom"
           sizes="100vw"
         />
       </div>
@@ -170,18 +170,18 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
       aria-label={sectionTitle}
       className="bg-gray200 py-16 md:py-0 md:pt-20"
     >
-      <div className="sticky md:top-24 top-10 h-screen overflow-hidden bg-gray200">
+      <div className="sticky lg:top-24 top-10 h-screen overflow-hidden bg-gray200">
         <CraftsmanshipBackground />
-        <div className="container relative z-10 h-full">
-          <div className="grid h-full grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-12">
+        <div className="max-w-1920 mx-auto 2xl:px[60px] md:px-10 px-4 relative z-10 h-full">
+          <div className="grid h-full grid-cols-1 lg:grid-cols-12 gap-6 md:gap-0 lg:gap-12">
             {/* Left column: title + steps */}
-            <div className="lg:col-span-5 flex flex-col gap-8 xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20">
+            <div className="xl:col-span-5 lg:col-span-6 flex flex-col xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20 gap-8">
               <ScrollReveal as="h2" delayMs={0} className="lg:text-5xl md:text-4xl text-32 text-black font-normal font-larken tracking-[0%] lg:text-left text-center">
                 {sectionTitle}
               </ScrollReveal>
 
               {/* Active + next upcoming step (faded) */}
-              <ol className="space-y-12 md:space-y-16 relative">
+              <ol className="space-y-10 lg:space-y-16 relative">
                 {steps.map((step, i) => {
                   const Icon = stepIcons[i] ?? PencilLine;
                   const isActiveStep = i === activeIndex;
@@ -215,7 +215,7 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
                         strokeWidth={1.25}
                         aria-hidden
                       />
-                      <h3 className="text-base sm:text-xl md:text-2xl lg:text-28 font-normal tracking-[0%] leading-[100%] text-darkblack font-gill lg:text-left text-center">
+                      <h3 className="text-base sm:text-xl md:text-2xl lg:text-32 font-normal tracking-[0%] leading-[100%] text-darkblack font-gill lg:text-left text-center">
                         {step.title || ""}
                       </h3>
                       {isActiveStep && (
@@ -230,10 +230,10 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
             </div>
             {/* Right column: 3D scroll-driven diamond */}
             <div
-              className="lg:col-span-7 relative h-auto flex items-center justify-center"
+              className="xl:col-span-7 lg:col-span-6 relative h-auto flex items-center justify-center"
               style={{ perspective: "1200px", perspectiveOrigin: "center center" }}
             >
-              <div className="w-[80%] lg:aspect-[750/470] aspect-[390/350] h-auto will-change-transform"
+              <div className="w-[300px] h-[300px] lg:aspect-[750/470] aspect-[390/350] h-auto will-change-transform"
                 style={{
                   transformStyle: "preserve-3d",
                   transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`,

@@ -70,7 +70,7 @@ export default function HomeBelowFoldSections() {
         <DiamondSourcingSection id="flawless" />
       </LazyHomeSection>
 
-      <LazyHomeSection minHeight="min-h-[800px]">
+      <LazyHomeSection minHeight="xl:min-h-[800px] min-h-[700px]">
         <FeaturedCollectionSection
           id="alankara"
           description={homeContent.alankara.collection.description}

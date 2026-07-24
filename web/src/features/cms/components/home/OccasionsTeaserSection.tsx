@@ -41,7 +41,7 @@ function OccasionCardItem({
   return (
     <Link
       href={href}
-      className="group relative block h-[400px] w-[328px] shrink-0 snap-start overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2 md:h-[700px] md:w-full md:min-w-0 md:shrink"
+      className="group relative block h-[400px] w-[328px] shrink-0 snap-start overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2 lg:h-[700px] md:h-[500px] md:w-full md:min-w-0 md:shrink"
     >
       <ResponsiveImage
         desktopSrc={desktopUrl || fallBackImage}
@@ -91,7 +91,7 @@ function OccasionCardItem({
           </div>
         </div>
         <div className="mb-16 group-hover:mb-6 flex w-full max-w-[418px] flex-col items-start gap-2 lg:gap-3">
-          <h3 className="whitespace-nowrap font-larken text-32 font-light leading-none md:text-3xl lg:text-32">
+          <h3 className="whitespace-nowrap font-larken text-32 font-light leading-none md:text-2xl lg:text-32">
             {card.title}
           </h3>
           {description ? (
@@ -180,7 +180,7 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
       aria-label={sectionTitle}
       className="flex w-full flex-col items-center gap-8 bg-white pt-16 md:gap-10 px-0 md:pt-100"
     >
-      <ScrollReveal as="h2" delayMs={0} className="max-w-sm text-center font-larken text-32 font-light leading-110 text-darkblack md:max-w-none md:text-5xl lg:whitespace-nowrap">
+      <ScrollReveal as="h2" delayMs={0} className="max-w-sm text-center font-larken font-light leading-110 text-darkblack md:max-w-none lg:text-5xl md:text-4xl text-32 lg:whitespace-nowrap">
         {sectionTitle}
       </ScrollReveal>
 

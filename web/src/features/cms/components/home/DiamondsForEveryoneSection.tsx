@@ -154,21 +154,21 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
             {eyebrow}
           </Reveal>
           <div className="flex w-full flex-col items-center gap-3 md:gap-4">
-            <Reveal as="h2" direction="up" className="w-full whitespace-nowrap font-larken text-32 font-light leading-110 text-darkblack md:text-5xl">
+            <Reveal as="h2" direction="up" className="w-full whitespace-nowrap font-larken font-light leading-110 text-darkblack lg:text-5xl md:text-4xl text-32">
               {sectionTitle}
             </Reveal>
-            <Reveal direction="up" className="w-full font-gill text-base font-light leading-110 text-neutral500 md:text-xl">
+            <Reveal direction="up" className="w-full font-gill text-base font-light leading-110 text-neutral500 lg:text-xl md:text-lg">
               {subtitle}
             </Reveal>
           </div>
         </div>
         {/* Desktop steps — Figma 684:3008 / 684:3012 */}
         <div className="hidden w-full flex-col items-center gap-6 md:flex">
-          <ScrollReveal delayMs={200} className="relative h-10 w-full max-w-[1360px]">
-            <div className="pointer-events-none absolute left-1/2 top-[calc(50%+1px)] w-full max-w-[740px] -translate-x-1/2 -translate-y-1/2">
+          <ScrollReveal delayMs={200} className="relative h-10 w-full lg:w-[740px] w-[700px] mx-auto">
+            <div className="pointer-events-none absolute left-1/2 top-[calc(50%+1px)] w-full lg:w-[740px] w-[530px] mx-auto -translate-x-1/2 -translate-y-1/2">
               <Image src={STEPS_LINE} alt="" width={784} height={1} className="h-px w-full" aria-hidden />
             </div>
-            <div className="relative flex h-10 items-center justify-between px-[19.85%]">
+            <div className="relative flex h-10 items-center justify-between lg:w-[740px] w-[530px] mx-auto px-0">
               {steps.map((step) => (
                 <StepCircle key={step.stepNumber} number={step.stepNumber ?? 0} />
               ))}
@@ -177,10 +177,10 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
 
           <div className="flex w-full justify-center gap-10">
             {steps.map((step, index) => (
-              <ScrollReveal key={step.stepNumber} delayMs={280 + index * 80} className="w-[250px]">
+              <ScrollReveal key={step.stepNumber} delayMs={280 + index * 80} className="lg:w-[250px] w-[200px]">
                 <StepDescription
                   step={step}
-                  className="text-center font-gill text-xl font-light leading-110 text-darkblack"
+                  className="text-center font-gill lg:text-xl text-base font-light leading-110 text-darkblack"
                 />
               </ScrollReveal>
             ))}

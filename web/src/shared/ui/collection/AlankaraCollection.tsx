@@ -208,7 +208,7 @@ function CollectionHeroPanel({
     <div
       className={cn(
         "relative overflow-hidden",
-        isMobile ? "h-[540px] w-full" : "group h-[800px] w-full",
+        isMobile ? "h-[540px] w-full" : "group xl:h-[800px] h-[700px] w-full",
       )}
     >
       <div className="absolute inset-0 overflow-hidden">
@@ -423,7 +423,7 @@ function ProductCarouselPanel({
       onPointerCancel={endDrag}
       className={cn(
         "relative overflow-hidden",
-        isMobile ? "mx-4 bg-gray300 py-[40px]" : "h-[800px] w-full bg-white px-6",
+        isMobile ? "mx-4 bg-gray300 py-[40px]" : "xl:h-[800px] h-[700px] w-full bg-white px-6",
         total > 1 && !isAnimating && (isDragging ? "cursor-grabbing" : "cursor-grab"),
         total > 1 && "touch-none select-none",
       )}
@@ -569,7 +569,7 @@ function ProductCarouselPanel({
             </div>
 
             {total > 1 ? (
-              <div className="pointer-events-none absolute inset-x-4 top-[32px] z-20 flex items-start justify-between">
+              <div className="pointer-events-none absolute inset-x-4 top-[32px] z-20 flex items-start justify-between max-w-[300px] mx-auto">
                 <CarouselNavButton
                   direction="prev"
                   variant="mobile"
@@ -647,7 +647,7 @@ export function AlankaraCollection({
         </ScrollReveal>
       </div>
 
-      <div className="relative mx-auto w-full max-w-full pb-10 md:hidden">
+      <div className="relative mx-auto w-full max-w-full md:hidden">
         <ScrollReveal delayMs={0}>
           <CollectionHeroPanel
             title={title}

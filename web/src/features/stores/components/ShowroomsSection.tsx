@@ -61,9 +61,9 @@ function ShowroomLocationDetails({
             width={24}
             height={24}
             aria-hidden
-            className="sm:size-6 w-5 h-5 shrink-0 sm:mt-0 mt-1.5"
+            className="lg:size-6 size-5 shrink-0 sm:mt-0 mt-1.5"
           />
-          <p className="font-gill text-xl font-light leading-110 text-darkblack">
+          <p className="font-gill lg:text-xl text-lg font-light leading-110 text-darkblack">
             {location.address}
           </p>
         </div>
@@ -76,7 +76,7 @@ function ShowroomLocationDetails({
             aria-hidden
             className="size-6 shrink-0"
           />
-          <p className="font-gill text-xl font-light leading-110 text-darkblack">
+          <p className="font-gill lg:text-xl text-lg font-light leading-110 text-darkblack">
             {location.phone}
           </p>
         </div>
@@ -189,7 +189,7 @@ function ShowroomsDesktopLayout({
 }) {
   return (
     <>
-      <div className="hidden lg:block 2xl:pl-24 lg:pl-20 pl-5 lg:pr-0 pr-5">
+      <div className="hidden lg:block 2xl:pl-24 lg:pl-10 pl-5 lg:pr-0 pr-5">
         <ScrollReveal
           as="h2"
           delayMs={0}
@@ -219,7 +219,7 @@ function ShowroomsDesktopLayout({
                 <div
                   key={location.id}
                   className={cn(
-                    "2xl:pl-24 lg:pl-20 lg:w-full w-fit lg:pr-4 border-b-[3px] lg:border-b-0 transition-all duration-300",
+                    "2xl:pl-24 lg:pl-10 lg:w-full w-fit lg:pr-4 border-b-[3px] lg:border-b-0 transition-all duration-300",
                     isSelected
                       ? "border-black bg-gray300"
                       : "border-transparent"

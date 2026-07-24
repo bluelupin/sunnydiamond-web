@@ -120,7 +120,7 @@ const LearnTabDescription = ({ tab }: { tab: NormalizedEducationLearnTab }) => {
     <ScrollReveal
       key={tab.id}
       delayMs={180}
-      className="max-w-[700px] text-center font-gill font-light leading-110 max-md:text-base max-md:text-darkblack md:text-xl md:text-neutral500"
+      className="max-w-[700px] text-center font-gill font-light leading-110 md:text-base text-sm max-md:text-darkblack md:text-neutral500"
     >
       {isSingleParagraph ? (
         <p>{tab.description.join(" ")}</p>
@@ -143,19 +143,18 @@ const LearnCareTip = ({ tip, mobile = false }: { tip: NormalizedEducationLearnCa
   const mobileSpec = careSpec.mobile;
 
   return (
-    <div className="flex flex-col items-center text-center">
+    <div className="flex flex-col items-center text-center gap-4">
       <div
-        className="relative shrink-0"
+        className="relative shrink-0 w-20 h-20"
         style={{
           width: mobile ? mobileSpec.iconSize : desktop.iconSize,
           height: mobile ? mobileSpec.iconSize : desktop.iconSize,
-          marginBottom: mobile ? mobileSpec.labelGap : desktop.labelGap,
         }}
       >
         <Image src={tip.icon} alt="" fill className="object-contain" aria-hidden />
       </div>
       <p
-        className="font-gill font-light uppercase md:text-lg text-base leading-110 text-darkblack md:text-neutral500"
+        className="font-gill font-light text-base leading-110 text-darkblack md:text-neutral500"
       >
         {tip.labelLines.map((line) => (
           <span key={line} className="block">
@@ -208,35 +207,39 @@ const LearnCareTipsGrid = ({ tips }: { tips: NormalizedEducationLearnCareTip[] }
 
 const LearnAnatomyDetailPanel = ({ detail }: { detail: NormalizedEducationLearnAnatomyDetail }) => (
   <ScrollReveal delayMs={260} className="w-full">
-    <div className="grid md:grid-cols-2 gap-8 w-full items-center md:items-center">
+    <div className="grid md:grid-cols-2 gap-12 w-full items-start">
       <div>
-        <div className="relative mx-auto h-[280px] w-[280px] shrink-0 mix-blend-darken md:h-[350px] md:w-[350px]">
+        <div className="relative mx-auto h-[200px] w-[200px] shrink-0 mix-blend-darken md:h-[350px] md:w-[350px]">
           <Image
             src={detail.image}
             alt={detail.imageAlt}
             fill
             className="object-cover w-full h-full"
-          // sizes="(max-width: 768px) 280px, 350px"
           />
         </div>
       </div>
-      <div className="flex w-full max-w-full flex-col lg:gap-6 gap-4 md:pt-2">
-        <h3 className="w-fit font-larken text-2xl font-light leading-110 text-darkblack md:text-32 border-b-[1.5px] border-neutral300 pb-3">
+      <div className="flex w-full max-w-full flex-col md:gap-6 gap-4 bg-gray300 p-6">
+        <h3 className="font-larken md:text-2xl text-xl font-light leading-110 text-darkblack">
           {detail.title}
         </h3>
-        <ul className="flex flex-col gap-5 md:gap-6">
+        <ul className="flex flex-col gap-5 md:gap-4">
           {detail.traits.map((trait) => (
-            <li key={trait.id} className="flex gap-3">
-              <Image
-                src={educationPageImages.anatomySparkle}
-                alt=""
-                width={16}
-                height={16}
-                aria-hidden
-                className="mt-1 size-4 shrink-0"
-              />
-              <p className="font-gill text-base font-light leading-130 text-neutral500 md:text-xl md:leading-110">
-                <span className="font-normal text-darkblack">{trait.term}:</span> {trait.definition}
+            <li key={trait.id} className="flex gap-[10px] items-start">
+              <div className="flex items-center gap-[10px]">
+                <Image
+                  src={educationPageImages.anatomySparkle}
+                  alt=""
+                  width={16}
+                  height={16}
+                  aria-hidden
+                  className="size-4 shrink-0"
+                />
+                <p className="font-gill text-sm font-normal leading-130 text-darkblack md:text-xl md:leading-110">
+                  {trait.term}:
+                </p>
+              </div>
+              <p className="font-gill text-sm font-light leading-130 text-neutral500 md:text-xl md:leading-110">
+                {trait.definition}
               </p>
             </li>
           ))}
@@ -406,7 +409,7 @@ const EducationLearnMoreSection = ({ learnMore }: EducationLearnMoreSectionProps
           <ScrollReveal delayMs={0}>
             <h2
               id="education-learn-more-title"
-              className="mb-8 text-center font-larken text-32 font-light leading-110 text-darkblack md:mb-10 md:text-5xl"
+              className="text-center font-larken text-32 font-light leading-110 text-darkblack mb-10 md:text-5xl"
             >
               {learnMore.title}
             </h2>
@@ -464,9 +467,9 @@ const EducationLearnMoreSection = ({ learnMore }: EducationLearnMoreSectionProps
           aria-labelledby={`learn-tab-${activeTab.id}`}
           className={cn(
             "flex w-full flex-col items-center",
-            isCareGrid && "gap-8 md:gap-16",
-            isAnatomyDetail && "gap-8 md:gap-10",
-            isCarousel && "max-md:gap-[49px] md:gap-10",
+            isCareGrid && "gap-10",
+            isAnatomyDetail && "gap-10",
+            isCarousel && "gap-10",
           )}
         >
           <LearnTabDescription tab={activeTab} />

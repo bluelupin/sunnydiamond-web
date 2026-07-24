@@ -54,7 +54,7 @@ const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
       aria-label={sectionTitle}
       className="flex flex-col items-center gap-8 bg-white px-4 py-16 lg:gap-10 lg:px-10 lg:py-100"
     >
-      <Reveal as="h2" direction="up" className="text-center font-larken text-32 font-light leading-110 text-darkblack lg:text-5xl lg:whitespace-nowrap">
+      <Reveal as="h2" direction="up" className="text-center font-larken font-light leading-110 text-darkblack lg:text-5xl md:text-4xl text-32 lg:whitespace-nowrap">
         {sectionTitle}
       </Reveal>
       <Reveal direction="up" className="relative h-[670px] w-full max-w-[1360px] shrink-0 overflow-hidden md:h-[700px]">
