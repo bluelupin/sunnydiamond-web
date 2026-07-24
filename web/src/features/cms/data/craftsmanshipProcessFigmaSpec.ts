@@ -1,5 +1,5 @@
 /**
- * Craftsmanship section backgrounds — Figma 684:3023 (desktop) / 684:3332 (responsive).
+ * Craftsmanship section backgrounds — Figma 2556:943 (desktop) / 2556:1238 (responsive).
  * Radial overlay values from Figma 684:3025 SVG export.
  */
 export const craftsmanshipProcessFigmaSpec = {

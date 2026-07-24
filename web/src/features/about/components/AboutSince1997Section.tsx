@@ -81,22 +81,22 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
     >
       {/* Desktop — sticky viewport + scroll-driven horizontal slide */}
       <div data-since1997-mode="desktop" className="hidden md:block">
-        <div className="sticky 2xl:top-0 top-[-150px] flex flex-col overflow-x-hidden bg-white">
+        <div className="sticky 2xl:top-0 md:top-0 top-[-150px] flex flex-col overflow-x-hidden bg-white">
           <PageContainer className="shrink-0 2xl:pb-11 lg:pb-10 pb-8">
             <Reveal as="h2" direction="up"
               id="about-since-1997-title"
-              className="font-larken text-3xl lg:text-5xl text-56 font-light leading-110 text-darkblack">
+              className="font-larken text-3xl md:text-4xl lg:text-5xl xl:text-56 font-light leading-110 text-darkblack">
               {title}
             </Reveal>
           </PageContainer>
-          <PageContainer className="pb-100 pr-0">
+          <PageContainer className="xl:pb-100 pb-16 pr-0">
             <Reveal direction="up" className="flex min-h-0 flex-1 flex-col">
               <div data-since1997-viewport className="min-h-0 flex-1 w-full overflow-x-hidden overflow-y-visible">
                 <div
                   data-since1997-track
                   className="flex h-full items-start xl:gap-20 gap-16 will-change-transform motion-reduce:transform-none"
                 >
-                  <article className="flex shrink-0 items-center lg:gap-8 gap-10">
+                  <article className="flex shrink-0 items-center lg:gap-8 md:gap-6 gap-10">
                     <GalleryImage
                       desktopUrl={founder.image.desktopUrl}
                       mobileUrl={founder.image.mobileUrl}
@@ -110,14 +110,14 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                       captionClassName="text-base"
                     />
                     {story ? (
-                      <p className="max-w-358 font-gill text-xl font-light leading-110 text-neutral500">
+                      <p className="max-w-358 font-gill lg:text-xl md:text-lg text-base font-light leading-110 text-neutral500">
                         {story}
                       </p>
                     ) : null}
                   </article>
 
                   {hasHorizontalGallery ? (
-                    <div className="flex items-center justify-center lg:gap-5 2xl:gap-8">
+                    <div className="flex items-center justify-center gap-4 lg:gap-5 2xl:gap-8">
                       <GalleryImage
                         desktopUrl={event!.image.desktopUrl}
                         mobileUrl={event!.image.mobileUrl}
