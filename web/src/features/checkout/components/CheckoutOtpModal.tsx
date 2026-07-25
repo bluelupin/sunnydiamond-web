@@ -1,22 +1,29 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
-import { ChevronLeft, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CartPrimaryButton } from "@/features/cart/components/CartFlowUi";
+import {
+  requestLoginOtp,
+  verifyLoginOtp,
+} from "@/features/auth/services/auth.service";
 import {
   Drawer,
   DrawerContent,
   DrawerTitle,
 } from "@/shared/ui/drawer";
-import { CheckoutSummaryDivider } from "./CheckoutUi";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
+
+export type CheckoutOtpVerifyResult = {
+  otp: string;
+  registrationRequired: boolean;
+  loggedIn: boolean;
+};
 
 type CheckoutOtpModalProps = {
   open: boolean;
   phone: string;
   onClose: () => void;
-  onVerify: () => void;
+  onVerify: (result: CheckoutOtpVerifyResult) => void;
 };
 
 const OTP_LENGTH = 6;
@@ -32,9 +39,11 @@ type CheckoutOtpFieldsProps = {
   phone: string;
   otp: string[];
   secondsLeft: number;
+  otpError?: string;
   inputRefs: React.MutableRefObject<Array<HTMLInputElement | null>>;
   onDigitChange: (index: number, value: string) => void;
   onKeyDown: (index: number, event: React.KeyboardEvent<HTMLInputElement>) => void;
+  onResend: () => void;
   variant?: "mobile" | "desktop";
 };
 
@@ -42,9 +51,11 @@ const CheckoutOtpFields = ({
   phone,
   otp,
   secondsLeft,
+  otpError,
   inputRefs,
   onDigitChange,
   onKeyDown,
+  onResend,
   variant = "desktop",
 }: CheckoutOtpFieldsProps) => (
   <div className="flex flex-col items-end gap-4">
@@ -81,42 +92,76 @@ const CheckoutOtpFields = ({
                   : "absolute inset-0 bg-transparent text-center font-gill text-base leading-110 text-darkblack outline-none lg:text-xl"
               }
               aria-label={`OTP digit ${index + 1}`}
+              aria-invalid={otpError ? true : undefined}
             />
             {!digit ? <span className="size-2 rounded-full bg-gray50" aria-hidden /> : null}
           </div>
         ))}
       </div>
+      {otpError ? (
+        <p className="w-full font-gill text-sm font-light leading-110 text-[#F91616]">{otpError}</p>
+      ) : null}
     </div>
-    <p className="font-gill text-base font-light leading-110 text-darkblack">
-      {secondsLeft > 0
-        ? `Resend code in 00:${secondsLeft.toString().padStart(2, "0")}`
-        : "Resend code"}
-    </p>
+    {secondsLeft > 0 ? (
+      <p className="font-gill text-base font-light leading-110 text-darkblack">
+        {`Resend code in 00:${secondsLeft.toString().padStart(2, "0")}`}
+      </p>
+    ) : (
+      <button
+        type="button"
+        onClick={onResend}
+        className="font-gill text-base font-light leading-110 text-darkblack underline"
+      >
+        Resend code
+      </button>
+    )}
   </div>
 );
 
 const CheckoutOtpVerifyButton = ({
   disabled,
   onClick,
+  loading,
 }: {
   disabled: boolean;
   onClick: () => void;
+  loading?: boolean;
 }) => (
   <CartPrimaryButton
     type="button"
-    className="w-full uppercase"
-    disabled={disabled}
+    className="w-full uppercase disabled:cursor-not-allowed disabled:opacity-50"
+    disabled={disabled || loading}
     onClick={onClick}
   >
-    VERIFY
+    {loading ? "VERIFYING..." : "VERIFY"}
   </CartPrimaryButton>
 );
 
 const CheckoutOtpModal = ({ open, phone, onClose, onVerify }: CheckoutOtpModalProps) => {
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
+  const [otpError, setOtpError] = useState<string | undefined>();
+  const [isVerifying, setIsVerifying] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+
+  const phoneDigits = phone.replace(/\D/g, "");
+
+  const sendOtp = useCallback(async () => {
+    if (phoneDigits.length < 10) {
+      setOtpError("Enter a valid phone number before requesting an OTP.");
+      return;
+    }
+
+    const result = await requestLoginOtp(phoneDigits);
+    if (!result.success) {
+      setOtpError(result.error);
+      return;
+    }
+
+    setOtpError(undefined);
+    setSecondsLeft(result.resendAfterSeconds);
+  }, [phoneDigits]);
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 1023px)");
@@ -130,15 +175,19 @@ const CheckoutOtpModal = ({ open, phone, onClose, onVerify }: CheckoutOtpModalPr
     if (!open) {
       setOtp(Array(OTP_LENGTH).fill(""));
       setSecondsLeft(RESEND_SECONDS);
+      setOtpError(undefined);
+      setIsVerifying(false);
       return;
     }
+
+    void sendOtp();
 
     const timer = window.setInterval(() => {
       setSecondsLeft((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
 
     return () => window.clearInterval(timer);
-  }, [open]);
+  }, [open, sendOtp]);
 
   useEffect(() => {
     if (!open || isMobile) return;
@@ -172,13 +221,40 @@ const CheckoutOtpModal = ({ open, phone, onClose, onVerify }: CheckoutOtpModalPr
 
   const isComplete = otp.every((digit) => digit.length === 1);
 
+  const handleVerify = async () => {
+    if (!isComplete || isVerifying) {
+      return;
+    }
+
+    setIsVerifying(true);
+    setOtpError(undefined);
+
+    const result = await verifyLoginOtp(phoneDigits, otp.join(""));
+    setIsVerifying(false);
+
+    if (!result.success) {
+      setOtpError(result.error);
+      return;
+    }
+
+    onVerify({
+      otp: otp.join(""),
+      registrationRequired: result.requiresAccountSetup,
+      loggedIn: !result.requiresAccountSetup,
+    });
+  };
+
   const otpFieldsProps = {
     phone,
     otp,
     secondsLeft,
+    otpError,
     inputRefs,
     onDigitChange: updateDigit,
     onKeyDown: handleKeyDown,
+    onResend: () => {
+      void sendOtp();
+    },
   };
 
   return (
@@ -226,7 +302,13 @@ const CheckoutOtpModal = ({ open, phone, onClose, onVerify }: CheckoutOtpModalPr
               <CheckoutOtpFields {...otpFieldsProps} variant="desktop" />
 
               <hr className="border-neutral300" />
-              <CheckoutOtpVerifyButton disabled={!isComplete} onClick={onVerify} />
+              <CheckoutOtpVerifyButton
+                disabled={!isComplete}
+                loading={isVerifying}
+                onClick={() => {
+                  void handleVerify();
+                }}
+              />
             </div>
           </div>
         </div>
@@ -287,7 +369,13 @@ const CheckoutOtpModal = ({ open, phone, onClose, onVerify }: CheckoutOtpModalPr
               />
               <hr className="mb-6 border-neutral300" />
               <div className="w-full px-4">
-                <CheckoutOtpVerifyButton disabled={!isComplete} onClick={onVerify} />
+                <CheckoutOtpVerifyButton
+                disabled={!isComplete}
+                loading={isVerifying}
+                onClick={() => {
+                  void handleVerify();
+                }}
+              />
               </div>
             </div>
           </div>

@@ -7,12 +7,14 @@ import { useCart } from "@/features/cart/context/CartContext";
 import {
   formatCartLineMeta,
   formatCartPrice,
-  getCartShippingLabel,
+  getCheckoutShippingDisplay,
+  resolveCheckoutDisplayTotal,
 } from "@/features/cart/utils/formatCartLine";
 import { CartGiftBadge, CartMetaRow } from "@/features/cart/components/CartFlowUi";
 import OffersAndDealsSection, {
   OffersAndDealsExpandedContent,
 } from "@/shared/ui/OffersAndDealsSection";
+import PriceDetailsBreakdown from "@/features/cart/components/PriceDetailsBreakdown";
 import { CheckoutPriceRow, CheckoutSummaryDivider } from "./CheckoutUi";
 
 type CheckoutOrderSummaryBodyProps = {
@@ -20,14 +22,31 @@ type CheckoutOrderSummaryBodyProps = {
 };
 
 const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyProps) => {
-  const { items, subtotal, taxes, shipping, totalPrice, selectedShippingMethod, shippingMethods, estimatedShippingMethods } = useCart();
+  const {
+    items,
+    subtotal,
+    taxes,
+    shipping,
+    totalPrice,
+    offerDiscount,
+    giftCardDiscount,
+    selectedShippingMethod,
+    shippingMethods,
+  } = useCart();
   const [offersOpen, setOffersOpen] = useState(false);
 
-  const shippingLabel = getCartShippingLabel(
+  const shippingDisplay = getCheckoutShippingDisplay(
     shipping,
     selectedShippingMethod,
     shippingMethods,
-    estimatedShippingMethods,
+  );
+  const displayTotal = resolveCheckoutDisplayTotal(
+    subtotal,
+    taxes,
+    totalPrice,
+    shippingDisplay,
+    offerDiscount,
+    giftCardDiscount,
   );
 
   const toggleOffers = () => setOffersOpen((open) => !open);
@@ -89,14 +108,16 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
             <OffersAndDealsExpandedContent variant="panel-gray300" className="lg:hidden" />
           ) : null}
 
-          <div className="flex flex-col gap-3">
-            <CheckoutPriceRow label="Subtotal" value={formatCartPrice(subtotal)} />
-            <CheckoutPriceRow label="Taxes" value={formatCartPrice(taxes)} />
-            <CheckoutPriceRow label="Shipping" value={shippingLabel} />
-          </div>
-
-          <CheckoutSummaryDivider />
-          <CheckoutPriceRow label="Total" value={formatCartPrice(totalPrice)} emphasis />
+          <PriceDetailsBreakdown
+            variant="checkout"
+            showTitle={false}
+            subtotal={subtotal}
+            offerDiscount={offerDiscount}
+            giftCardDiscount={giftCardDiscount}
+            taxes={taxes}
+            shippingLabel={shippingDisplay.label}
+            total={displayTotal}
+          />
 
           <OffersAndDealsSection
             variant="panel-gray300"
@@ -113,7 +134,7 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
       ) : (
         <div className="flex flex-col gap-4">
           <CheckoutSummaryDivider />
-          <CheckoutPriceRow label="Total" value={formatCartPrice(totalPrice)} emphasis />
+          <CheckoutPriceRow label="Total" value={formatCartPrice(displayTotal)} emphasis />
         </div>
       )}
     </>

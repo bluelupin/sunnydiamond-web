@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import {
   getCustomerAddresses,
   removeCustomerAddress,
@@ -33,11 +33,21 @@ export function useCustomerAddresses(enabled = true): UseCustomerAddressesResult
     setRefreshKey((value) => value + 1);
   }, []);
 
+  // Keep loading true synchronously when auth enables the hook so checkout
+  // prefill does not run before the saved-address fetch starts.
+  useLayoutEffect(() => {
+    if (enabled) {
+      setIsLoading(true);
+      return;
+    }
+
+    setAddresses([]);
+    setIsLoading(false);
+    setError(null);
+  }, [enabled]);
+
   useEffect(() => {
     if (!enabled) {
-      setAddresses([]);
-      setIsLoading(false);
-      setError(null);
       return;
     }
 

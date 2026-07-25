@@ -40,7 +40,7 @@ import {
   writeCartLineMetadata,
   type StoredCartLineMetadata,
 } from "@/services/magento/cart/cartSession";
-import { findCartItemUidBySku } from "@/services/magento/cart/cart.mapper";
+import { findCartItemUidBySku, computeCartTotalQuantity } from "@/services/magento/cart/cart.mapper";
 import { readStoredCartLines, writeStoredCartLines } from "@/features/cart/utils/cartProduct.utils";
 import type {
   AddItemResult,
@@ -73,6 +73,9 @@ interface CartContextType {
   subtotal: number;
   taxes: number;
   shipping: number;
+  offerDiscount: number;
+  giftCardDiscount: number;
+  appliedGiftCardCode: string | null;
   shippingMethods: MagentoShippingMethodOption[];
   estimatedShippingMethods: MagentoShippingMethodOption[];
   selectedShippingMethod: MagentoSelectedShippingMethod | null;
@@ -120,6 +123,9 @@ const emptyTotals = {
   subtotal: 0,
   taxes: 0,
   shipping: 0,
+  offerDiscount: 0,
+  giftCardDiscount: 0,
+  appliedGiftCardCode: null as string | null,
   grandTotal: 0,
   totalQuantity: 0,
   currency: "INR",
@@ -263,6 +269,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
           return;
         }
 
+        if (legacyLines.length > 0) {
+          writeStoredCartLines([]);
+        }
+
         await refreshCart(cartId);
       } catch {
         clearGuestCartId();
@@ -351,7 +361,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return {
         lineItemId: lineItem.id,
         lineItem,
-        totalItemsAfterAdd: hydratedState.totals.totalQuantity,
+        totalItemsAfterAdd: computeCartTotalQuantity(hydratedState.items),
       };
     } finally {
       setIsUpdating(false);
@@ -613,10 +623,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
 
   const items = cartState?.items ?? [];
-  const totalItems = cartState?.totals.totalQuantity ?? 0;
+  const totalItems = useMemo(
+    () => computeCartTotalQuantity(items),
+    [items],
+  );
   const subtotal = cartState?.totals.subtotal ?? emptyTotals.subtotal;
   const taxes = cartState?.totals.taxes ?? emptyTotals.taxes;
   const shipping = cartState?.totals.shipping ?? emptyTotals.shipping;
+  const offerDiscount = cartState?.totals.offerDiscount ?? emptyTotals.offerDiscount;
+  const giftCardDiscount = cartState?.totals.giftCardDiscount ?? emptyTotals.giftCardDiscount;
+  const appliedGiftCardCode =
+    cartState?.totals.appliedGiftCardCode ?? emptyTotals.appliedGiftCardCode;
   const totalPrice = cartState?.totals.grandTotal ?? emptyTotals.grandTotal;
   const shippingMethods = cartState?.totals.shippingMethods ?? emptyTotals.shippingMethods;
   const selectedShippingMethod =
@@ -641,6 +658,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       subtotal,
       taxes,
       shipping,
+      offerDiscount,
+      giftCardDiscount,
+      appliedGiftCardCode,
       shippingMethods,
       estimatedShippingMethods,
       selectedShippingMethod,
@@ -658,6 +678,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       selectShippingMethod,
       selectedShippingMethod,
       shipping,
+      offerDiscount,
+      giftCardDiscount,
+      appliedGiftCardCode,
       shippingMethods,
       subtotal,
       taxes,

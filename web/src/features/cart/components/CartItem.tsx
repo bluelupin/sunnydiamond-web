@@ -104,6 +104,12 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
 
               <CartMetaRow parts={meta} />
 
+              {quantity > 1 ? (
+                <p className="font-gill text-sm font-light leading-110 text-neutral500">
+                  Qty: {quantity}
+                </p>
+              ) : null}
+
               <p className="font-gill text-sm leading-110 text-darkblack lg:text-base">
                 {formatCartPrice(product.price * quantity)}
               </p>

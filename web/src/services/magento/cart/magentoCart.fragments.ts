@@ -19,6 +19,16 @@ export const MAGENTO_CART_FIELDS = `
         value
       }
     }
+    discounts {
+      label
+      applied_to
+      amount {
+        value
+      }
+      coupon {
+        code
+      }
+    }
   }
   itemsV2 {
     items {

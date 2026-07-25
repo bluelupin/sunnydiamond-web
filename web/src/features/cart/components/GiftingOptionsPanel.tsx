@@ -17,6 +17,7 @@ import {
 } from "@/shared/ui/sheet";
 import { useCart } from "../context/CartContext";
 import { useCartUI } from "../context/CartUIContext";
+import { useCartCheckout } from "../hooks/useCartCheckout";
 import { formatCartLineMeta, formatCartPrice } from "../utils/formatCartLine";
 import {
   CartDivider,
@@ -57,11 +58,18 @@ const GiftingIntroPanel = ({
   onClose: () => void;
   onPersonalise: () => void;
 }) => {
-  const router = useRouter();
+  const { markGiftingOptionsExplored } = useCartUI();
+  const { navigateToCheckout } = useCartCheckout();
+
+  const handlePersonalise = () => {
+    markGiftingOptionsExplored();
+    onPersonalise();
+  };
 
   const handleContinueToCheckout = () => {
+    markGiftingOptionsExplored();
     onClose();
-    router.push("/checkout");
+    navigateToCheckout();
   };
 
   return (
@@ -77,7 +85,7 @@ const GiftingIntroPanel = ({
       </div>
       <hr className="border-neutral300" />
       <div className="flex flex-col gap-4">
-        <CartPrimaryButton type="button" className="w-full uppercase" onClick={onPersonalise}>
+        <CartPrimaryButton type="button" className="w-full uppercase" onClick={handlePersonalise}>
           Personalise Gift
         </CartPrimaryButton>
         <div className="flex justify-center">
@@ -210,7 +218,9 @@ const GiftingScrollIndicator = () => (
 );
 
 const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
+  const router = useRouter();
   const { items, applyGiftingSelection } = useCart();
+  const { markGiftingOptionsExplored } = useCartUI();
   const [wrapMode, setWrapMode] = useState<"single" | "separate">(() =>
     items.some((item) => item.gifting?.wrapMode === "separate") ? "separate" : "single",
   );
@@ -253,6 +263,7 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
   };
 
   const applyGifting = () => {
+    markGiftingOptionsExplored();
     void applyGiftingSelection({
       mode: wrapMode,
       groupedNote: wrapMode === "single" ? giftNote.trim() || undefined : undefined,
@@ -266,6 +277,7 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
       })),
     });
     onClose();
+    router.push("/cart");
   };
 
   const renderItemRow = (item: (typeof items)[number], mode: "single" | "separate") => (

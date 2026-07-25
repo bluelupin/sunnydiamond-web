@@ -22,6 +22,7 @@ import {
   mapMagentoCartTotals,
   mapEstimateShippingMethods,
   pickDefaultShippingMethod,
+  computeCartTotalQuantity,
 } from "./cart.mapper";
 import {
   clearGuestCartId,
@@ -96,10 +97,17 @@ function mapGuestCartState(cart: MagentoCart, lineMetadata: StoredCartLineMetada
     throw new Error("Magento cart totals were unavailable");
   }
 
+  const items = mapMagentoCartItems(cart, lineMetadata);
+
   return {
     cart,
-    totals,
-    items: mapMagentoCartItems(cart, lineMetadata),
+    totals: {
+      ...totals,
+      // Badge and bag UI should match visible line items — Magento total_quantity
+      // can include lines we skip when product data is incomplete.
+      totalQuantity: computeCartTotalQuantity(items),
+    },
+    items,
   };
 }
 
@@ -632,6 +640,27 @@ export async function selectFirstAvailableGuestShippingMethod(
   );
 }
 
+export async function fetchActiveCartState(
+  lineMetadata: StoredCartLineMetadata,
+  signal?: AbortSignal,
+): Promise<GuestCartState> {
+  const cartId = getGuestCartId();
+
+  if (!cartId) {
+    throw new Error("Magento cart was not available");
+  }
+
+  try {
+    return await fetchGuestCart(cartId, lineMetadata, signal);
+  } catch (error) {
+    if (isCustomerCartRequiredError(error)) {
+      return fetchCustomerCart(lineMetadata, signal);
+    }
+
+    throw error;
+  }
+}
+
 export async function prepareCheckoutForPayment(
   cartId: string,
   form: CheckoutFormData,
@@ -640,13 +669,10 @@ export async function prepareCheckoutForPayment(
   signal?: AbortSignal,
 ): Promise<GuestCartState> {
   const addressedState = await applyCheckoutAddresses(cartId, form, lineMetadata, options, signal);
-  const shippingState = await selectFirstAvailableGuestShippingMethod(
-    cartId,
-    addressedState,
-    lineMetadata,
-    signal,
-  );
-  return syncGuestCartLineOptions(cartId, lineMetadata, signal);
+  const syncedState = await syncGuestCartLineOptions(cartId, lineMetadata, signal);
+  await selectFirstAvailableGuestShippingMethod(cartId, syncedState, lineMetadata, signal);
+
+  return fetchActiveCartState(lineMetadata, signal);
 }
 
 export async function prepareGuestCheckoutForPayment(

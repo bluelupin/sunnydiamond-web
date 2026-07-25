@@ -174,11 +174,18 @@ export async function collectRazorpayPayment(input: {
   }
 
   return new Promise<RazorpayPaymentOutcome>((resolve) => {
+    const callbackUrl = new URL("/api/checkout/razorpay/callback", window.location.origin);
+    callbackUrl.searchParams.set("order", input.orderNumber);
+
+    const usesRedirectFlow = input.method === "netbanking" || input.method === "upi";
+
     const razorpay = new window.Razorpay!({
       key: config.keyId,
       order_id: order.rzpOrderId,
       name: config.merchantName,
       description: `Order #${input.orderNumber}`,
+      callback_url: callbackUrl.toString(),
+      ...(usesRedirectFlow ? { redirect: true } : {}),
       prefill: {
         ...(input.prefill.name ? { name: input.prefill.name } : {}),
         ...(input.prefill.email ? { email: input.prefill.email } : {}),

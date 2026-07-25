@@ -1,7 +1,6 @@
 "use client";
 
 import { Check, ChevronDown } from "lucide-react";
-import EditIcon from "@/assets/Icons/EditIcon";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import {
@@ -129,6 +128,7 @@ type CheckoutPhoneFieldProps = {
   verified?: boolean;
   onVerify?: () => void;
   showVerify?: boolean;
+  mode?: "phone" | "phoneOrEmail";
   error?: string;
   invalid?: boolean;
 };
@@ -142,9 +142,14 @@ export const CheckoutPhoneField = ({
   verified,
   onVerify,
   showVerify = true,
+  mode = "phone",
   error,
   invalid,
-}: CheckoutPhoneFieldProps) => (
+}: CheckoutPhoneFieldProps) => {
+  const isEmailInput = mode === "phoneOrEmail" && /[a-zA-Z@]/.test(value);
+  const shouldShowVerify = showVerify && !isEmailInput;
+
+  return (
   <div className="flex flex-col gap-2">
     <label htmlFor={id} className="font-gill text-base font-normal leading-110 text-darkblack">
       {label}
@@ -156,23 +161,29 @@ export const CheckoutPhoneField = ({
       )}
     >
       <div className="flex min-w-0 flex-1 items-center gap-2">
-        <span className="shrink-0 font-gill text-base font-normal leading-110 text-darkblack">+91</span>
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 text-darkblack">
-          <path fillRule="evenodd" clipRule="evenodd" d="M2.13134 7.6664C2.17617 7.62638 2.23002 7.59412 2.28982 7.57145C2.34963 7.54879 2.4142 7.53616 2.47986 7.53431C2.54552 7.53245 2.61097 7.54139 2.67248 7.56063C2.73399 7.57986 2.79035 7.60901 2.83833 7.6464L9.99833 13.2131L17.1583 7.6464C17.2553 7.57092 17.3842 7.53063 17.5168 7.53438C17.6494 7.53813 17.7748 7.58562 17.8653 7.6664C17.9559 7.74718 18.0043 7.85463 17.9998 7.96513C17.9953 8.07562 17.9383 8.18009 17.8413 8.25557L10.3413 14.0889C10.2488 14.1608 10.1269 14.2008 10.0003 14.2008C9.87376 14.2008 9.7519 14.1608 9.65933 14.0889L2.15933 8.25557C2.11124 8.21826 2.07245 8.17343 2.04516 8.12362C2.01787 8.07382 2.00263 8.02002 2.00031 7.9653C1.99799 7.91058 2.00863 7.85602 2.03163 7.80474C2.05462 7.75345 2.08953 7.70644 2.13433 7.6664H2.13134Z" fill="currentColor" />
-        </svg>
+        {!isEmailInput ? (
+          <>
+            <span className="shrink-0 font-gill text-base font-normal leading-110 text-darkblack">+91</span>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 text-darkblack">
+              <path fillRule="evenodd" clipRule="evenodd" d="M2.13134 7.6664C2.17617 7.62638 2.23002 7.59412 2.28982 7.57145C2.34963 7.54879 2.4142 7.53616 2.47986 7.53431C2.54552 7.53245 2.61097 7.54139 2.67248 7.56063C2.73399 7.57986 2.79035 7.60901 2.83833 7.6464L9.99833 13.2131L17.1583 7.6464C17.2553 7.57092 17.3842 7.53063 17.5168 7.53438C17.6494 7.53813 17.7748 7.58562 17.8653 7.6664C17.9559 7.74718 18.0043 7.85463 17.9998 7.96513C17.9953 8.07562 17.9383 8.18009 17.8413 8.25557L10.3413 14.0889C10.2488 14.1608 10.1269 14.2008 10.0003 14.2008C9.87376 14.2008 9.7519 14.1608 9.65933 14.0889L2.15933 8.25557C2.11124 8.21826 2.07245 8.17343 2.04516 8.12362C2.01787 8.07382 2.00263 8.02002 2.00031 7.9653C1.99799 7.91058 2.00863 7.85602 2.03163 7.80474C2.05462 7.75345 2.08953 7.70644 2.13433 7.6664H2.13134Z" fill="currentColor" />
+            </svg>
+          </>
+        ) : null}
         <input
           id={id}
-          type="tel"
+          type={isEmailInput ? "email" : "tel"}
+          inputMode={isEmailInput ? "email" : "numeric"}
           value={value}
           onChange={(event) => onChange(event.target.value)}
           onBlur={onBlur}
           placeholder="Enter"
+          autoComplete={isEmailInput ? "email" : "tel"}
           aria-invalid={invalid || undefined}
           aria-describedby={error ? `${id}-error` : undefined}
           className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600"
         />
       </div>
-      {showVerify ? (
+      {shouldShowVerify ? (
         verified ? (
           <span className="flex shrink-0 items-center gap-1 font-gill text-base font-normal leading-110 text-green600">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -187,7 +198,8 @@ export const CheckoutPhoneField = ({
     </div>
     <FormFieldError id={`${id}-error`} message={error} />
   </div>
-);
+  );
+};
 
 type CheckoutSectionCardProps = {
   children: React.ReactNode;
@@ -211,13 +223,9 @@ type CheckoutSectionHeadingProps = {
 };
 
 export const CheckoutSectionHeading = ({ children, onEdit }: CheckoutSectionHeadingProps) => (
-  <div className="flex items-center justify-between">
+  <div className="flex items-center justify-between gap-4">
     <h2 className="font-gill text-xl font-normal leading-110 text-darkblack lg:text-2xl">{children}</h2>
-    {onEdit ? (
-      <button type="button" onClick={onEdit} aria-label={`Edit ${children}`} className="shrink-0">
-        <EditIcon className="size-6 text-darkblack" />
-      </button>
-    ) : null}
+    {onEdit ? <DetailTextLink onClick={onEdit}>EDIT</DetailTextLink> : null}
   </div>
 );
 

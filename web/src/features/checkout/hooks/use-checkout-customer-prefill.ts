@@ -28,6 +28,7 @@ export function useCheckoutCustomerPrefill() {
 
   return {
     isAuthenticated,
+    addressesLoading: isAuthenticated && addressesLoading,
     isLoading: status === "loading" || (isAuthenticated && addressesLoading),
     customer,
     addresses,

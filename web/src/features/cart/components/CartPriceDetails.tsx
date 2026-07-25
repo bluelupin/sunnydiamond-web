@@ -4,13 +4,13 @@ import { useState, type ReactNode } from "react";
 import { cn } from "@/shared/utils/cn";
 import OffersAndDealsSection from "@/shared/ui/OffersAndDealsSection";
 import { useCart } from "../context/CartContext";
-import { useCartUI } from "../context/CartUIContext";
+import { useCartCheckout } from "../hooks/useCartCheckout";
 import { formatCartPrice, getCartShippingLabel } from "../utils/formatCartLine";
+import PriceDetailsBreakdown from "./PriceDetailsBreakdown";
 import {
-  CartDivider,
   CartOutlineButton,
   CartPriceRow,
-  CartPrimaryLink,
+  CartPrimaryButton,
 } from "./CartFlowUi";
 
 type CartPriceDetailsProps = {
@@ -30,8 +30,18 @@ const CartPriceDetails = ({
   stickyOnMobile = false,
   children,
 }: CartPriceDetailsProps) => {
-  const { subtotal, taxes, shipping, totalPrice, selectedShippingMethod, shippingMethods, estimatedShippingMethods } = useCart();
-  const { openGiftingPanel } = useCartUI();
+  const {
+    subtotal,
+    taxes,
+    shipping,
+    totalPrice,
+    offerDiscount,
+    giftCardDiscount,
+    selectedShippingMethod,
+    shippingMethods,
+    estimatedShippingMethods,
+  } = useCart();
+  const { proceedToCheckout, openGiftingOptions } = useCartCheckout();
   const [offersOpen, setOffersOpen] = useState(false);
 
   const shippingLabel = getCartShippingLabel(
@@ -56,21 +66,15 @@ const CartPriceDetails = ({
       )}
     >
       {showBreakdown ? (
-        <div className="flex flex-col gap-4">
-          <h2 className="font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
-            Price Details
-          </h2>
-          <CartDivider weight={1} />
-
-          <div className="flex flex-col gap-3">
-            <CartPriceRow label="Subtotal" value={formatCartPrice(subtotal)} />
-            <CartPriceRow label="Taxes" value={formatCartPrice(taxes)} />
-            <CartPriceRow label="Shipping" value={shippingLabel} />
-          </div>
-
-          <CartDivider weight={1} />
-          <CartPriceRow label="Total" value={formatCartPrice(totalPrice)} emphasis />
-        </div>
+        <PriceDetailsBreakdown
+          variant="cart"
+          subtotal={subtotal}
+          offerDiscount={offerDiscount}
+          giftCardDiscount={giftCardDiscount}
+          taxes={taxes}
+          shippingLabel={shippingLabel}
+          total={totalPrice}
+        />
       ) : (
         <CartPriceRow label="Total" value={formatCartPrice(totalPrice)} emphasis />
       )}
@@ -94,16 +98,16 @@ const CartPriceDetails = ({
           )}
         >
           {showCheckoutCta ? (
-            <CartPrimaryLink href="/checkout" className="uppercase">
+            <CartPrimaryButton type="button" className="uppercase" onClick={proceedToCheckout}>
               Checkout
-            </CartPrimaryLink>
+            </CartPrimaryButton>
           ) : null}
 
           {showGiftingCta ? (
             <CartOutlineButton
               type="button"
               className="w-full uppercase"
-              onClick={() => openGiftingPanel("intro")}
+              onClick={openGiftingOptions}
             >
               View Gifting Options
             </CartOutlineButton>

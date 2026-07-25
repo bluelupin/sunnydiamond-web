@@ -2,7 +2,11 @@
 
 import { forwardRef } from "react";
 import { useCart } from "@/features/cart/context/CartContext";
-import { formatCartPrice } from "@/features/cart/utils/formatCartLine";
+import {
+  formatCartPrice,
+  getCheckoutShippingDisplay,
+  resolveCheckoutDisplayTotal,
+} from "@/features/cart/utils/formatCartLine";
 import { CartPrimaryButton, CartTextLink } from "@/features/cart/components/CartFlowUi";
 import OffersAndDealsSection from "@/shared/ui/OffersAndDealsSection";
 
@@ -27,7 +31,20 @@ const CheckoutMobileStickyFooter = forwardRef<HTMLDivElement, CheckoutMobileStic
     },
     ref,
   ) {
-  const { totalPrice } = useCart();
+  const { subtotal, taxes, totalPrice, shipping, offerDiscount, giftCardDiscount, selectedShippingMethod, shippingMethods } = useCart();
+  const shippingDisplay = getCheckoutShippingDisplay(
+    shipping,
+    selectedShippingMethod,
+    shippingMethods,
+  );
+  const displayTotal = resolveCheckoutDisplayTotal(
+    subtotal,
+    taxes,
+    totalPrice,
+    shippingDisplay,
+    offerDiscount,
+    giftCardDiscount,
+  );
 
   return (
     <div ref={ref} className="fixed inset-x-0 bottom-0 z-40 md:hidden">
@@ -46,7 +63,7 @@ const CheckoutMobileStickyFooter = forwardRef<HTMLDivElement, CheckoutMobileStic
         <div className="flex flex-col gap-4 border-t border-neutral300 bg-white px-4 py-6 pb-[env(safe-area-inset-bottom,0px)] [border-top-width:0.5px]">
           <div className="flex items-end justify-between gap-4">
             <p className="font-gill text-xl font-normal leading-110 text-darkblack">
-              {formatCartPrice(totalPrice)}
+              {formatCartPrice(displayTotal)}
             </p>
             <CartTextLink onClick={onOrderSummaryOpen}>View order Summary</CartTextLink>
           </div>

@@ -3,13 +3,13 @@
 import { forwardRef } from "react";
 import OffersAndDealsSection from "@/shared/ui/OffersAndDealsSection";
 import { useCart } from "../context/CartContext";
-import { useCartUI } from "../context/CartUIContext";
+import { useCartCheckout } from "../hooks/useCartCheckout";
 import { formatCartPrice, getCartShippingLabel } from "../utils/formatCartLine";
 import {
   CartDivider,
   CartOutlineButton,
   CartPriceRow,
-  CartPrimaryLink,
+  CartPrimaryButton,
   CartTextLink,
 } from "./CartFlowUi";
 
@@ -30,7 +30,7 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
   ref,
 ) {
   const { subtotal, taxes, shipping, totalPrice, selectedShippingMethod, shippingMethods, estimatedShippingMethods } = useCart();
-  const { openGiftingPanel } = useCartUI();
+  const { proceedToCheckout, openGiftingOptions } = useCartCheckout();
   const shippingLabel = getCartShippingLabel(
     shipping,
     selectedShippingMethod,
@@ -72,13 +72,13 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
           </div>
 
           <div className="flex flex-col gap-4">
-            <CartPrimaryLink href="/checkout" className="uppercase">
+            <CartPrimaryButton type="button" className="uppercase" onClick={proceedToCheckout}>
               Checkout
-            </CartPrimaryLink>
+            </CartPrimaryButton>
             <CartOutlineButton
               type="button"
               className="w-full uppercase"
-              onClick={() => openGiftingPanel("intro")}
+              onClick={openGiftingOptions}
             >
               Gifting Options
             </CartOutlineButton>

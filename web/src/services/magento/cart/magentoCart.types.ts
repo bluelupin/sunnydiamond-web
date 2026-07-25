@@ -34,6 +34,13 @@ export type MagentoCartItem = {
   } | null;
 };
 
+export type MagentoCartDiscount = {
+  label?: string | null;
+  applied_to?: string | null;
+  amount?: { value?: number | null } | null;
+  coupon?: { code?: string | null } | null;
+};
+
 export type MagentoCartPrices = {
   grand_total?: { value?: number | null; currency?: string | null } | null;
   subtotal_excluding_tax?: { value?: number | null } | null;
@@ -41,6 +48,7 @@ export type MagentoCartPrices = {
     label?: string | null;
     amount?: { value?: number | null } | null;
   }> | null;
+  discounts?: MagentoCartDiscount[] | null;
 };
 
 export type MagentoShippingMethod = {
@@ -263,6 +271,9 @@ export type MappedMagentoCart = {
   subtotal: number;
   taxes: number;
   shipping: number;
+  offerDiscount: number;
+  giftCardDiscount: number;
+  appliedGiftCardCode: string | null;
   grandTotal: number;
   currency: string;
   shippingMethods: MagentoShippingMethodOption[];

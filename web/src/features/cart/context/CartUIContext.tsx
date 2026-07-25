@@ -21,10 +21,15 @@ type CartUIContextType = {
   bagDrawerSnapshot: BagDrawerSnapshot | null;
   isGiftingPanelOpen: boolean;
   giftingStep: "intro" | "personalise";
+  hasExploredGiftingOptions: boolean;
+  isGuestCheckoutModalOpen: boolean;
   openBagDrawer: (result: AddItemResult) => void;
   closeBagDrawer: () => void;
   openGiftingPanel: (step?: "intro" | "personalise") => void;
   closeGiftingPanel: () => void;
+  markGiftingOptionsExplored: () => void;
+  openGuestCheckoutModal: () => void;
+  closeGuestCheckoutModal: () => void;
 };
 
 const CartUIContext = createContext<CartUIContextType | undefined>(undefined);
@@ -35,6 +40,8 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
   const [bagDrawerSnapshot, setBagDrawerSnapshot] = useState<BagDrawerSnapshot | null>(null);
   const [isGiftingPanelOpen, setIsGiftingPanelOpen] = useState(false);
   const [giftingStep, setGiftingStep] = useState<"intro" | "personalise">("intro");
+  const [hasExploredGiftingOptions, setHasExploredGiftingOptions] = useState(false);
+  const [isGuestCheckoutModalOpen, setIsGuestCheckoutModalOpen] = useState(false);
 
   const openBagDrawer = useCallback((result: AddItemResult) => {
     setLastAddedLineItemId(result.lineItemId);
@@ -60,6 +67,18 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
     setGiftingStep("intro");
   }, []);
 
+  const markGiftingOptionsExplored = useCallback(() => {
+    setHasExploredGiftingOptions(true);
+  }, []);
+
+  const openGuestCheckoutModal = useCallback(() => {
+    setIsGuestCheckoutModalOpen(true);
+  }, []);
+
+  const closeGuestCheckoutModal = useCallback(() => {
+    setIsGuestCheckoutModalOpen(false);
+  }, []);
+
   return (
     <CartUIContext.Provider
       value={{
@@ -68,10 +87,15 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
         bagDrawerSnapshot,
         isGiftingPanelOpen,
         giftingStep,
+        hasExploredGiftingOptions,
+        isGuestCheckoutModalOpen,
         openBagDrawer,
         closeBagDrawer,
         openGiftingPanel,
         closeGiftingPanel,
+        markGiftingOptionsExplored,
+        openGuestCheckoutModal,
+        closeGuestCheckoutModal,
       }}
     >
       {children}

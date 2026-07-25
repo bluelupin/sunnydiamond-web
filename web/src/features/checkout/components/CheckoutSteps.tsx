@@ -17,13 +17,6 @@ import { AmexLogo, MastercardLogo, VisaLogo } from "@/shared/ui/PaymentLogos";
 import { INDIAN_STATES } from "@/features/checkout/constants/indianStates";
 import type { CheckoutFormData, CheckoutPaymentData } from "../types/checkout.types";
 import type { CheckoutFormField, CheckoutPaymentField } from "@/shared/utils/formValidation";
-import type {
-  MagentoSelectedShippingMethod,
-  MagentoShippingMethodOption,
-} from "@/services/magento/cart/magentoCart.types";
-import { formatCartPrice } from "@/features/cart/utils/formatCartLine";
-
-const formatShippingAmount = (amount: number) => (amount === 0 ? "Free" : formatCartPrice(amount));
 
 type CheckoutFormValidationProps = {
   errors: Partial<Record<CheckoutFormField, string | undefined>>;
@@ -231,6 +224,7 @@ export const CheckoutFormStep = ({
         <CheckoutPhoneField
           id="checkout-phone-email"
           label="PhoneNo / Email ID"
+          mode="phoneOrEmail"
           value={form.phoneOrEmail}
           onChange={(value) => onChange("phoneOrEmail", value)}
           onBlur={() => validation.markTouched("phoneOrEmail")}
@@ -297,10 +291,6 @@ export const CheckoutFormStep = ({
 type CheckoutPaymentStepProps = {
   form: CheckoutFormData;
   payment: CheckoutPaymentData;
-  shippingMethods: MagentoShippingMethodOption[];
-  selectedShippingMethod: MagentoSelectedShippingMethod | null;
-  onShippingMethodChange: (carrierCode: string, methodCode: string) => void;
-  shippingSelectionDisabled?: boolean;
   onPaymentChange: (field: keyof CheckoutPaymentData, value: CheckoutPaymentData["method"]) => void;
   onEditPersonal: () => void;
   onEditDelivery: () => void;
@@ -332,10 +322,6 @@ const PaymentCardLogos = () => (
 export const CheckoutPaymentStep = ({
   form,
   payment,
-  shippingMethods,
-  selectedShippingMethod,
-  onShippingMethodChange,
-  shippingSelectionDisabled = false,
   onPaymentChange,
   onEditPersonal,
   onEditDelivery,
@@ -399,41 +385,6 @@ export const CheckoutPaymentStep = ({
             <CheckoutAddressBlock name={billingName} lines={billingLines} />
           ) : null}
         </div>
-      </CheckoutSectionCard>
-
-      <CheckoutSectionCard gapClassName="gap-6">
-        <CheckoutSectionHeading>Shipping Method</CheckoutSectionHeading>
-
-        {shippingMethods.length > 0 ? (
-          <div className="flex flex-col gap-4">
-            {shippingMethods.map((method) => {
-              const isSelected =
-                selectedShippingMethod?.carrierCode === method.carrierCode &&
-                selectedShippingMethod?.methodCode === method.methodCode;
-
-              return (
-                <CheckoutRadioRow
-                  key={`${method.carrierCode}-${method.methodCode}`}
-                  checked={isSelected}
-                  disabled={shippingSelectionDisabled}
-                  onChange={() =>
-                    onShippingMethodChange(method.carrierCode, method.methodCode)
-                  }
-                  label={
-                    <span className="flex w-full items-center justify-between gap-4">
-                      <span>{method.methodTitle || method.carrierTitle}</span>
-                      <span>{formatShippingAmount(method.amount)}</span>
-                    </span>
-                  }
-                />
-              );
-            })}
-          </div>
-        ) : (
-          <CheckoutSummaryText>
-            No shipping methods are available for this address. Please edit your delivery address.
-          </CheckoutSummaryText>
-        )}
       </CheckoutSectionCard>
 
       <CheckoutSectionCard gapClassName="gap-6">

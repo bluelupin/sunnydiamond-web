@@ -5,6 +5,9 @@ import type { CartLineItem } from "../types/cart.types";
 
 export const formatCartPrice = (price: number) => `₹${formatJewelleryPrice(price)}`;
 
+export const formatCartDiscountPrice = (price: number) =>
+  `-${formatCartPrice(price)}`;
+
 export const getCartShippingLabel = (
   shipping: number,
   selectedShippingMethod: MagentoSelectedShippingMethod | null,
@@ -42,6 +45,54 @@ export const getCartShippingLabel = (
 
   return defaultMethod.amount === 0 ? "Free" : formatCartPrice(defaultMethod.amount);
 };
+
+export type CheckoutShippingDisplay = {
+  label: string;
+  amount: number | null;
+  isConfirmed: boolean;
+};
+
+/** Checkout must only show Magento rates after the delivery address is on the cart. */
+export const getCheckoutShippingDisplay = (
+  shipping: number,
+  selectedShippingMethod: MagentoSelectedShippingMethod | null,
+  shippingMethods: MagentoShippingMethodOption[] = [],
+): CheckoutShippingDisplay => {
+  if (selectedShippingMethod) {
+    const amount =
+      selectedShippingMethod.amount ??
+      shippingMethods.find(
+        (method) =>
+          method.carrierCode === selectedShippingMethod.carrierCode &&
+          method.methodCode === selectedShippingMethod.methodCode,
+      )?.amount ??
+      shipping;
+
+    return {
+      amount,
+      label: amount === 0 ? "Free" : formatCartPrice(amount),
+      isConfirmed: true,
+    };
+  }
+
+  return {
+    amount: null,
+    label: "Calculated at checkout",
+    isConfirmed: false,
+  };
+};
+
+export const resolveCheckoutDisplayTotal = (
+  subtotal: number,
+  taxes: number,
+  grandTotal: number,
+  shippingDisplay: CheckoutShippingDisplay,
+  offerDiscount = 0,
+  giftCardDiscount = 0,
+) =>
+  shippingDisplay.isConfirmed
+    ? grandTotal
+    : subtotal - offerDiscount - giftCardDiscount + taxes;
 
 export const formatCartLineMeta = (item: CartLineItem) => {
   const parts: string[] = [];

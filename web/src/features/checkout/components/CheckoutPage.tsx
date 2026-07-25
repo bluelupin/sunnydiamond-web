@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { cn } from "@/shared/utils/cn";
 import { useCart } from "@/features/cart/context/CartContext";
+import { useAuth } from "@/features/auth/context/AuthContext";
 import { useToast } from "@/shared/hooks/use-toast";
 import { trackEvent } from "@/infrastructure/analytics/use-gtag";
 import { CartPrimaryLink } from "@/features/cart/components/CartFlowUi";
@@ -12,15 +14,16 @@ import { MobileStickyFooterSpacer } from "@/shared/ui/layout/MobileStickyFooterS
 import CheckoutOrderSummary from "./CheckoutOrderSummary";
 import CheckoutMobileOrderSummaryDrawer from "./CheckoutMobileOrderSummaryDrawer";
 import CheckoutMobileStickyFooter from "./CheckoutMobileStickyFooter";
-import CheckoutOtpModal from "./CheckoutOtpModal";
+import CheckoutOtpModal, { type CheckoutOtpVerifyResult } from "./CheckoutOtpModal";
 import { CheckoutFormStep, CheckoutPaymentStep } from "./CheckoutSteps";
 import CheckoutSuccessView from "./CheckoutSuccessView";
+import { registerGuestCustomerAfterOrder } from "../services/guestCustomerRegistration";
 import {
   useCheckoutFormValidation,
   useCheckoutPaymentValidation,
 } from "@/features/checkout/hooks/use-checkout-validation";
 import { useCheckoutCustomerPrefill } from "@/features/checkout/hooks/use-checkout-customer-prefill";
-import { sanitizePhoneInput, sanitizePincodeInput } from "@/shared/utils/formValidation";
+import { sanitizePhoneInput, sanitizePincodeInput, isCheckoutEmailContact } from "@/shared/utils/formValidation";
 import {
   createEmptyCheckoutForm,
   createEmptyPaymentForm,
@@ -34,7 +37,9 @@ import {
 import {
   completeGuestCheckout,
   ensureGuestCartId,
+  fetchActiveCartState,
   prepareCheckoutForPayment,
+  selectFirstAvailableGuestShippingMethod,
   setCartGiftOptions,
 } from "@/services/magento/cart/cart.service";
 import { readCartLineMetadata } from "@/services/magento/cart/cartSession";
@@ -44,6 +49,11 @@ import {
   resetRazorpayCart,
   verifyRazorpayPayment,
 } from "../services/razorpayCheckout";
+import {
+  clearPendingCheckoutPayment,
+  readPendingCheckoutPayment,
+  savePendingCheckoutPayment,
+} from "../services/checkoutPendingPayment";
 
 const CheckoutPage = () => {
   const {
@@ -52,25 +62,29 @@ const CheckoutPage = () => {
     clearCart,
     applyMagentoCartState,
     refreshCart,
-    selectShippingMethod,
-    shippingMethods,
-    selectedShippingMethod,
     isHydrating,
     isUpdating,
   } = useCart();
+  const { refresh: refreshAuth } = useAuth();
   const { toast } = useToast();
+  const searchParams = useSearchParams();
+  const paymentReturnHandledRef = useRef(false);
   const {
     isAuthenticated,
     isLoading: isAuthPrefillLoading,
+    addressesLoading,
     customer,
     defaultFormPatch,
     defaultShippingAddress,
   } = useCheckoutCustomerPrefill();
-  const prefillAppliedRef = useRef(false);
+  const contactPrefillAppliedRef = useRef(false);
+  const shippingPrefillAppliedRef = useRef(false);
+  const verifiedCheckoutOtpRef = useRef<string | null>(null);
 
   const [step, setStep] = useState<CheckoutStep>("form");
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [phoneVerified, setPhoneVerified] = useState(false);
+  const [orderSuccessAuthenticated, setOrderSuccessAuthenticated] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [isSavingAddresses, setIsSavingAddresses] = useState(false);
   const [placedItems, setPlacedItems] = useState<CartLineItem[]>([]);
@@ -86,6 +100,17 @@ const CheckoutPage = () => {
   const formValidation = useCheckoutFormValidation(form);
   const paymentValidation = useCheckoutPaymentValidation(payment, totalPrice);
 
+  const hasDeliveryAddressAvailable =
+    Boolean(defaultShippingAddress) ||
+    Boolean(
+      form.addressLine1.trim() &&
+        form.pincode.trim() &&
+        form.city.trim() &&
+        form.state.trim() &&
+        form.shippingName.trim(),
+    );
+  const lacksSavedDeliveryAddress = isAuthenticated && !hasDeliveryAddressAvailable;
+
   const updateForm = (field: keyof CheckoutFormData, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
@@ -96,6 +121,115 @@ const CheckoutPage = () => {
   ) => {
     setPayment((prev) => ({ ...prev, [field]: value }));
   };
+
+  const finalizeOrderSuccess = useCallback(
+    async (input: {
+      orderNumber: string;
+      contact: string;
+      orderItems: CartLineItem[];
+      orderTotal: number;
+      orderForm: CheckoutFormData;
+      wasAuthenticated: boolean;
+      guestOtp: string | null;
+    }) => {
+      void fetch("/api/magento/orders/line-metadata", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderNumber: input.orderNumber,
+          items: input.orderItems,
+        }),
+      }).catch(() => {
+        // Order placement already succeeded; metadata attachment is best-effort.
+      });
+
+      trackEvent("purchase", {
+        currency: "INR",
+        value: input.orderTotal,
+        transaction_id: input.orderNumber,
+        items: input.orderItems.map((item) => ({
+          item_id: item.product.id,
+          item_name: item.product.name,
+          price: item.product.price,
+          quantity: item.quantity,
+        })),
+      });
+
+      let completedAsCustomer = input.wasAuthenticated;
+
+      if (!input.wasAuthenticated && input.guestOtp) {
+        const registered = await registerGuestCustomerAfterOrder(input.orderForm, input.guestOtp);
+
+        if (registered) {
+          await refreshAuth();
+          completedAsCustomer = true;
+        }
+      }
+
+      setOrderSuccessAuthenticated(completedAsCustomer);
+      setPlacedItems([...input.orderItems]);
+      setPlacedTotal(input.orderTotal);
+      setPlacedOrderNumber(input.orderNumber);
+      setForm(input.orderForm);
+      clearPendingCheckoutPayment();
+      clearCart();
+      setStep("success");
+      toast({
+        title: "Order placed!",
+        description: `Order #${input.orderNumber} has been placed successfully.`,
+      });
+      window.history.replaceState({}, "", "/checkout");
+    },
+    [clearCart, refreshAuth, toast],
+  );
+
+  const paymentStatus = searchParams.get("payment");
+  const paymentOrderNumber = searchParams.get("order");
+  const isPaymentReturn = paymentStatus === "success" && Boolean(paymentOrderNumber);
+
+  useEffect(() => {
+    if (paymentReturnHandledRef.current) {
+      return;
+    }
+
+    if (paymentStatus === "failed") {
+      paymentReturnHandledRef.current = true;
+      clearPendingCheckoutPayment();
+      toast({
+        title: "Payment failed",
+        description: "Your payment could not be completed. Please try again.",
+      });
+      window.history.replaceState({}, "", "/checkout");
+      return;
+    }
+
+    if (!isPaymentReturn || !paymentOrderNumber) {
+      return;
+    }
+
+    const pending = readPendingCheckoutPayment();
+    if (!pending || pending.orderNumber !== paymentOrderNumber) {
+      paymentReturnHandledRef.current = true;
+      toast({
+        title: "Payment received",
+        description:
+          "Your payment was processed, but we could not restore the order summary. Please check order tracking.",
+      });
+      window.history.replaceState({}, "", "/checkout");
+      return;
+    }
+
+    paymentReturnHandledRef.current = true;
+    void finalizeOrderSuccess({
+      orderNumber: pending.orderNumber,
+      contact: pending.contact,
+      orderItems: pending.placedItems,
+      orderTotal: pending.totalPrice,
+      orderForm: pending.form,
+      wasAuthenticated: pending.isAuthenticated,
+      guestOtp: pending.guestOtp,
+    });
+  }, [finalizeOrderSuccess, isPaymentReturn, paymentOrderNumber, paymentStatus, toast]);
 
   useEffect(() => {
     if (items.length > 0 && step === "form") {
@@ -119,31 +253,31 @@ const CheckoutPage = () => {
   }, [isHydrating, refreshCart]);
 
   useEffect(() => {
-    if (step === "payment") {
-      void refreshCart();
-    }
-  }, [refreshCart, step]);
-
-  useEffect(() => {
-    if (isAuthPrefillLoading || prefillAppliedRef.current || !isAuthenticated || !defaultFormPatch) {
+    if (isAuthPrefillLoading || contactPrefillAppliedRef.current || !isAuthenticated || !defaultFormPatch) {
       return;
     }
 
-    setForm((current) => {
-      let next: CheckoutFormData = {
-        ...current,
-        ...defaultFormPatch,
-      };
-
-      if (defaultShippingAddress) {
-        next = applyCustomerAddressToCheckoutForm(next, defaultShippingAddress);
-      }
-
-      return next;
-    });
+    setForm((current) => ({
+      ...current,
+      ...defaultFormPatch,
+    }));
     setPhoneVerified(true);
-    prefillAppliedRef.current = true;
-  }, [defaultFormPatch, defaultShippingAddress, isAuthPrefillLoading, isAuthenticated]);
+    contactPrefillAppliedRef.current = true;
+  }, [defaultFormPatch, isAuthPrefillLoading, isAuthenticated]);
+
+  useEffect(() => {
+    if (
+      addressesLoading ||
+      shippingPrefillAppliedRef.current ||
+      !isAuthenticated ||
+      !defaultShippingAddress
+    ) {
+      return;
+    }
+
+    setForm((current) => applyCustomerAddressToCheckoutForm(current, defaultShippingAddress));
+    shippingPrefillAppliedRef.current = true;
+  }, [addressesLoading, defaultShippingAddress, isAuthenticated]);
 
   if (isHydrating || isAuthPrefillLoading) {
     return (
@@ -155,7 +289,7 @@ const CheckoutPage = () => {
     );
   }
 
-  if (items.length === 0 && step !== "success") {
+  if (items.length === 0 && step !== "success" && !isPaymentReturn) {
     return (
       <section className="flex min-h-[60vh] flex-col items-center justify-center gap-4 bg-gray300 px-4 py-20 text-center">
         <h1 className="font-larken text-2xl font-light leading-110 text-darkblack">
@@ -173,12 +307,16 @@ const CheckoutPage = () => {
         items={placedItems}
         totalPrice={placedTotal}
         orderNumber={placedOrderNumber}
-        isAuthenticated={isAuthenticated}
+        isAuthenticated={isAuthenticated || orderSuccessAuthenticated}
       />
     );
   }
 
   const handleVerifyPhone = () => {
+    if (isCheckoutEmailContact(form.phoneOrEmail)) {
+      return;
+    }
+
     formValidation.markTouched("phoneOrEmail");
     formValidation.markSubmitted();
 
@@ -189,15 +327,24 @@ const CheckoutPage = () => {
     setShowOtpModal(true);
   };
 
-  const handleOtpVerified = () => {
+  const handleOtpVerified = (result: CheckoutOtpVerifyResult) => {
+    verifiedCheckoutOtpRef.current = result.otp;
     setPhoneVerified(true);
     setShowOtpModal(false);
+
+    if (result.loggedIn) {
+      void refreshAuth();
+      setOrderSuccessAuthenticated(true);
+    }
+
     toast({ title: "Phone verified", description: "Your phone number has been verified." });
   };
 
   const handleContinueToPayment = () => {
     formValidation.validateSubmit(() => {
-      if (!isAuthenticated && !phoneVerified) {
+      const contactIsEmail = isCheckoutEmailContact(form.phoneOrEmail);
+
+      if (!isAuthenticated && !contactIsEmail && !phoneVerified) {
         setShowOtpModal(true);
         toast({
           title: "Verification required",
@@ -206,7 +353,7 @@ const CheckoutPage = () => {
         return;
       }
 
-      if (isAuthenticated && !defaultShippingAddress) {
+      if (isAuthenticated && !hasDeliveryAddressAvailable) {
         toast({
           title: "Delivery address required",
           description: "Add a saved address in My Addresses on your profile before checkout.",
@@ -240,7 +387,7 @@ const CheckoutPage = () => {
                 : "Please check your address details and try again.";
 
           toast({
-            title: "Could not save delivery address",
+            title: isAuthenticated ? "Could not continue to payment" : "Could not save delivery address",
             description,
           });
         } finally {
@@ -262,13 +409,14 @@ const CheckoutPage = () => {
             throw new Error("Your shopping bag could not be found. Please try again.");
           }
 
-          if (requiresShippingSelection) {
-            toast({
-              title: "Shipping required",
-              description: "Please select a shipping method before placing your order.",
-            });
-            return;
-          }
+          const lineMetadata = readCartLineMetadata();
+          const cartState = await fetchActiveCartState(lineMetadata);
+          const cartWithShipping = await selectFirstAvailableGuestShippingMethod(
+            cartId,
+            cartState,
+            lineMetadata,
+          );
+          applyMagentoCartState(cartWithShipping);
 
           // Re-sync the full gifting state onto the Magento cart so the order
           // carries it even when a mark was never saved through the panel.
@@ -303,6 +451,16 @@ const CheckoutPage = () => {
           );
 
           if (order.awaitingOnlinePayment) {
+            savePendingCheckoutPayment({
+              orderNumber: order.orderNumber,
+              contact: form.phoneOrEmail,
+              totalPrice,
+              placedItems: [...items],
+              guestOtp: verifiedCheckoutOtpRef.current,
+              form: { ...form },
+              isAuthenticated,
+            });
+
             const isEmailContact = form.phoneOrEmail.includes("@");
             const outcome = await collectRazorpayPayment({
               orderNumber: order.orderNumber,
@@ -316,6 +474,7 @@ const CheckoutPage = () => {
             });
 
             if (outcome.status === "dismissed") {
+              clearPendingCheckoutPayment();
               await resetRazorpayCart(order.orderNumber);
               await refreshCart();
               toast({
@@ -337,37 +496,14 @@ const CheckoutPage = () => {
             }
           }
 
-          void fetch("/api/magento/orders/line-metadata", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              orderNumber: order.orderNumber,
-              items,
-            }),
-          }).catch(() => {
-            // Order placement already succeeded; metadata attachment is best-effort.
-          });
-
-          trackEvent("purchase", {
-            currency: "INR",
-            value: totalPrice,
-            transaction_id: order.orderNumber,
-            items: items.map((item) => ({
-              item_id: item.product.id,
-              item_name: item.product.name,
-              price: item.product.price,
-              quantity: item.quantity,
-            })),
-          });
-
-          setPlacedItems([...items]);
-          setPlacedTotal(totalPrice);
-          setPlacedOrderNumber(order.orderNumber);
-          clearCart();
-          setStep("success");
-          toast({
-            title: "Order placed!",
-            description: `Order #${order.orderNumber} has been placed successfully.`,
+          await finalizeOrderSuccess({
+            orderNumber: order.orderNumber,
+            contact: form.phoneOrEmail,
+            orderItems: [...items],
+            orderTotal: totalPrice,
+            orderForm: { ...form },
+            wasAuthenticated: isAuthenticated,
+            guestOtp: verifiedCheckoutOtpRef.current,
           });
         } catch (error) {
           const description =
@@ -388,8 +524,6 @@ const CheckoutPage = () => {
     });
   };
 
-  const requiresShippingSelection = shippingMethods.length > 0 && !selectedShippingMethod;
-  const lacksSavedDeliveryAddress = isAuthenticated && !defaultShippingAddress;
   const sidebarCtaLabel =
     step === "payment"
       ? submitting
@@ -398,13 +532,14 @@ const CheckoutPage = () => {
           ? "Updating..."
           : "Pay Now"
       : isSavingAddresses
-        ? "Saving address..."
+        ? isAuthenticated
+          ? "Continuing..."
+          : "Saving address..."
         : "Continue to Payment";
   const ctaDisabled =
     submitting ||
     isSavingAddresses ||
     isUpdating ||
-    requiresShippingSelection ||
     lacksSavedDeliveryAddress;
   const handleSidebarCta = step === "payment" ? placeOrder : handleContinueToPayment;
 
@@ -419,8 +554,21 @@ const CheckoutPage = () => {
       return;
     }
 
-    if (field === "phoneOrEmail" && !String(value).includes("@")) {
-      updateForm(field, sanitizePhoneInput(String(value), "+91"));
+    if (field === "phoneOrEmail") {
+      const nextValue = String(value);
+
+      if (isCheckoutEmailContact(nextValue)) {
+        setPhoneVerified(false);
+        verifiedCheckoutOtpRef.current = null;
+        updateForm(field, nextValue);
+        return;
+      }
+
+      updateForm(field, sanitizePhoneInput(nextValue, "+91"));
+      if (phoneVerified) {
+        setPhoneVerified(false);
+        verifiedCheckoutOtpRef.current = null;
+      }
       return;
     }
 
@@ -454,18 +602,12 @@ const CheckoutPage = () => {
                 onVerifyPhone={handleVerifyPhone}
                 validation={formValidation}
                 isAuthenticated={isAuthenticated}
-                hasSavedDeliveryAddress={Boolean(defaultShippingAddress)}
+                hasSavedDeliveryAddress={hasDeliveryAddressAvailable}
               />
             ) : (
               <CheckoutPaymentStep
                 form={form}
                 payment={payment}
-                shippingMethods={shippingMethods}
-                selectedShippingMethod={selectedShippingMethod}
-                onShippingMethodChange={(carrierCode, methodCode) => {
-                  void selectShippingMethod(carrierCode, methodCode);
-                }}
-                shippingSelectionDisabled={isUpdating}
                 onPaymentChange={updatePayment}
                 onEditPersonal={() => setStep("form")}
                 onEditDelivery={() => setStep("form")}

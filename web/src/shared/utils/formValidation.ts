@@ -378,6 +378,9 @@ export const validatePhoneOrEmail = (value: string): FieldValidation => {
   return validatePhone(trimmed, "+91");
 };
 
+/** True when the contact field is being used as an email address (not a phone). */
+export const isCheckoutEmailContact = (value: string): boolean => /[a-zA-Z@]/.test(value);
+
 export const validateOptionalPhone = (value: string, countryCode = "+91"): FieldValidation => {
   if (!value.trim()) {
     return { valid: true };

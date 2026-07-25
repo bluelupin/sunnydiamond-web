@@ -20,7 +20,7 @@ import {
   CartGiftBadge,
   CartMetaRow,
   CartMoreItemsNote,
-  CartOutlineButton,
+  CartOutlineLink,
   CartPrimaryLink,
   CartSuccessCheck,
 } from "./CartFlowUi";
@@ -40,14 +40,7 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
     );
   }, [items, lastAddedLineItemId, bagDrawerSnapshot]);
 
-  const resolvedTotalItems = Math.max(
-    totalItems,
-    bagDrawerSnapshot?.totalItemsAfterAdd ?? 0,
-  );
-
-  const otherCount = addedItem
-    ? Math.max(resolvedTotalItems - addedItem.quantity, 0)
-    : 0;
+  const otherCount = addedItem ? Math.max(totalItems - addedItem.quantity, 0) : 0;
 
   const meta = addedItem ? formatCartLineMeta(addedItem) : [];
   const isGift = Boolean(addedItem?.options.isGift || addedItem?.gifting);
@@ -117,9 +110,9 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
         <CartPrimaryLink href="/cart" onClick={onClose} className="uppercase">
           View Shopping Bag
         </CartPrimaryLink>
-        <CartOutlineButton type="button" className="w-full uppercase" onClick={onClose}>
+        <CartOutlineLink href="/jewellery" className="w-full uppercase" onClick={onClose}>
           Continue Shopping
-        </CartOutlineButton>
+        </CartOutlineLink>
       </div>
     </div>
   );
