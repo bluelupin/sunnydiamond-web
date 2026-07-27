@@ -52,8 +52,8 @@ const AboutTimelineSection = ({
           solidOpacity={aboutTimelineFigmaSpec.overlayOpacity}
         />
 
-        <PageContainer className="!max-w-full relative z-10 flex h-full flex-col px-4 lg:block lg:max-w-full lg:!px-0 xl:!px-0 2xl:!px-0">
-          <div className="flex h-full flex-col md:flex-row lg:justify-between">
+        <PageContainer className="!max-w-full relative z-10 flex h-full flex-col px-4 lg:block lg:max-w-full md:!px-0 lg:!px-0 xl:!px-0 2xl:!px-0">
+          <div className="flex h-full flex-col md:flex-row md:justify-between">
             <AboutTimelineNav
               years={years}
               activeYear={activeYear}
@@ -64,7 +64,7 @@ const AboutTimelineSection = ({
               <div
                 aria-live="polite"
                 aria-atomic="true"
-                className="mb-16 mt-auto lg:mb-100 lg:mt-auto lg:self-end"
+                className="mb-16 mt-auto lg:mb-100 lg:mt-auto md:self-end lg:self-end"
               >
                 <AboutTimelineContent
                   activeYear={activeYear}

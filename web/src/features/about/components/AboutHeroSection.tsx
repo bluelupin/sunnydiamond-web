@@ -29,7 +29,7 @@ const AboutHeroSection = ({ title, image }: AboutHeroSectionProps) => {
     <section
       id="about-hero"
       aria-labelledby="about-hero-title"
-      className="relative flex flex-col overflow-hidden bg-white h-580 sm:h-580 lg:h-640 2xl:h-[85vh]"
+      className="relative flex flex-col overflow-hidden bg-white sm:h-580 md:h-[633px] lg:h-640 2xl:h-[85vh]"
     >
       <div className="relative flex-1 overflow-hidden p-0">
         <div

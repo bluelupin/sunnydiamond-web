@@ -55,9 +55,9 @@ const TrustBadgeSection = ({
             marqueeItems.map((item, idx) => (
               <div
                 key={idx}
-                className="flex items-center font-light text-xs md:text-sm tracking-[1.8%] uppercase font-gill"
+                className="flex items-center font-normal text-xs md:text-sm tracking-[1.8%] uppercase font-gill"
               >
-                <span className={cn("text-gray500", itemClassName)}>{item}</span>
+                <span className={cn("text-neutral500", itemClassName)}>{item}</span>
                 <span className="px-60 text-gray600" aria-hidden>
                   •
                 </span>
@@ -74,9 +74,9 @@ const TrustBadgeSection = ({
             : marqueeItems.map((item, idx) => (
                 <div
                   key={`dup-${idx}`}
-                  className="flex items-center font-light text-xs md:text-sm tracking-[1.8%] uppercase font-gill"
+                  className="flex items-center font-normal text-xs md:text-sm tracking-[1.8%] uppercase font-gill"
                 >
-                  <span className={cn("text-gray500", itemClassName)}>{item}</span>
+                  <span className={cn("text-neutral500", itemClassName)}>{item}</span>
 
                   <span className="px-60 text-gray600" aria-hidden>
                     •
