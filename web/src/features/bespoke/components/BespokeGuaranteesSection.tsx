@@ -13,19 +13,19 @@ const BespokeGuaranteesSection = ({ guarantees }: BespokeGuaranteesSectionProps)
 
   return (
     <section aria-label="Shopping guarantees" className="bg-gray200">
-      <ul className="m-0 list-none flex items-center justify-center 2xl:gap-[75px] xl:gap-16 lg:gap-12 md:gap-10 gap-6 p-0 flex lg:flex-row flex-col md:py-16 py-10 px-4">
+      <ul className="m-0 list-none flex items-center justify-center 2xl:gap-[75px] xl:gap-16 lg:gap-12 md:gap-8 gap-6 p-0 flex md:flex-row flex-col md:py-16 py-10 px-4">
         {guarantees.map((item, index) => (
           <Fragment key={item.label}>
             {index > 0 && (
-              <Reveal as="li" direction="up" aria-hidden className="lg:w-auto w-full">
-                <div className="lg:w-[0.5px] w-full lg:h-[136px] h-[0.5px] bg-gray600"></div>
+              <Reveal as="li" direction="up" aria-hidden className="md:w-auto w-full">
+                <div className="md:w-[0.5px] w-full md:h-[136px] h-[0.5px] bg-gray600"></div>
               </Reveal>
             )}
             <Reveal
               as="li"
               direction="up"
               className={cn(
-                "flex lg:w-[260px] w-full shrink-0 flex-col items-center justify-center gap-3 lg:p-3 p-4 text-center",
+                "flex lg:w-[260px] md:w-[210px] w-full shrink-0 flex-col items-center justify-center gap-3 md:p-3 p-4 text-center",
               )}
             >
               <div className="flex lg:size-16 size-10 items-center justify-center">

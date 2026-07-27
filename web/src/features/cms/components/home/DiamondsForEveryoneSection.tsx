@@ -71,7 +71,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
   );
 
   const eyebrow = sectionData.eyebrow?.trim() || FALLBACK_EYEBROW;
-  const sectionTitle = sectionData.sectionTitle?.trim() || "Diamonds for Everyone";
+  const sectionTitle = sectionData.sectionTitle?.trim() || "Diamonds for Everyone test";
   const subtitle =
     sectionData.subtitle?.trim() ||
     "Save monthly towards fine jewellery within reach";

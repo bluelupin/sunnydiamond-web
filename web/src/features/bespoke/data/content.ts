@@ -12,6 +12,10 @@ export const bespokeStoryFigmaSpec = {
   imageWidth: 658,
   /** Figma 1440px — initial left inset for step 01; animates to 0 on scroll */
   firstStepOffset: 350,
+  /** Tablet (md–lg): half of desktop first-step inset */
+  firstStepOffsetBelowLg: 175,
+  /** Vertical scrub fraction for first-step inset before horizontal track translate */
+  trackScrollLeadInRatio: 0.35,
   imageAspect: 496 / 658,
   textMaxWidth: 296,
   stepNumberSize: 48,

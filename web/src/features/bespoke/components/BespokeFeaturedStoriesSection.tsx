@@ -43,6 +43,7 @@ const spec = bespokeFeaturedStoriesFigmaSpec;
 const GALLERY_SLOTS = [-2, -1, 0, 1, 2] as const;
 const SLIDE_DURATION_MS = 550;
 const SLIDE_EASING = "cubic-bezier(0.4, 0, 0.2, 1)";
+const AUTO_SLIDE_INTERVAL_MS = 2000;
 const SWIPE_THRESHOLD_PX = 48;
 const MOBILE_GALLERY_MEDIA_QUERY = "(max-width: 767px)";
 
@@ -324,6 +325,7 @@ const FeaturedGallerySlider = ({
   const [dragOffset, setDragOffset] = useState(0);
   const [slideOffset, setSlideOffset] = useState(0);
   const [enableTransition, setEnableTransition] = useState(false);
+  const [isAutoPaused, setIsAutoPaused] = useState(false);
   const [galleryDimensions, setGalleryDimensions] = useState<GalleryDimensions>(() =>
     getGalleryDimensions(compact),
   );
@@ -422,6 +424,18 @@ const FeaturedGallerySlider = ({
     [canSlide, isAnimating, onActiveIndexChange, slides.length, startSlideToIndex],
   );
 
+  useEffect(() => {
+    if (!canSlide || isAutoPaused) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const intervalId = window.setInterval(() => {
+      if (isAnimating || isDragging || dragState.current.active) return;
+      animateSlide(1);
+    }, AUTO_SLIDE_INTERVAL_MS);
+
+    return () => window.clearInterval(intervalId);
+  }, [animateSlide, canSlide, isAnimating, isAutoPaused, isDragging]);
+
   const handleTrackTransitionEnd = useCallback(
     (event: TransitionEvent<HTMLDivElement>) => {
       if (event.propertyName !== "transform" || pendingTargetIndex.current === null) return;
@@ -503,6 +517,14 @@ const FeaturedGallerySlider = ({
       role="region"
       aria-roledescription="carousel"
       aria-label="Featured story gallery"
+      onPointerEnter={() => setIsAutoPaused(true)}
+      onPointerLeave={() => setIsAutoPaused(false)}
+      onFocusCapture={() => setIsAutoPaused(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+          setIsAutoPaused(false);
+        }
+      }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={endDrag}

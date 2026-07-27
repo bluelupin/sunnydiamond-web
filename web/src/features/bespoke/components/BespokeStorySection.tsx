@@ -27,12 +27,10 @@ const BespokeStoryStepMedia = ({
   step,
   videoSrc,
   isDesktop,
-  isLastSlide,
 }: {
   step: StoryStep;
   videoSrc: string;
   isDesktop: boolean;
-  isLastSlide?: boolean;
 }) => {
   const figureRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -70,9 +68,8 @@ const BespokeStoryStepMedia = ({
     <figure
       ref={figureRef}
       className={cn(
-        "relative shrink-0 overflow-hidden bg-gray200 h-[400px] w-full md:h-[496px] md:w-[658px]",
+        "relative shrink-0 overflow-hidden bg-gray200 h-[400px] w-full lg:h-[496px] lg:w-[658px]",
       )}
-      {...(isLastSlide ? { "data-since1997-last-image": true } : {})}
     >
       {useImageFallback ? (
         <Image
@@ -116,20 +113,22 @@ const BespokeStoryStepPanel = ({
     <article
       className={cn(
         "flex shrink-0",
-        isDesktop ? "items-center gap-6 w-[970px]" : "w-full flex-col bg-gray300", isLastSlide && "mr-10",
+        isDesktop ? "items-center gap-6 w-[970px]" : "w-full flex-col bg-gray300",
+        isDesktop && isFirstSlide && "max-lg:ml-[175px] lg:ml-[350px]",
+        isLastSlide && "mr-10",
       )}
       style={!isDesktop ? { gap: "0px" } : undefined}
-      {...(isFirstSlide ? { "data-since1997-first-step": true } : {})}>
+      {...(isFirstSlide ? { "data-since1997-first-step": true } : {})}
+      {...(isLastSlide ? { "data-since1997-last-image": true } : {})}>
       <BespokeStoryStepMedia
         step={step}
         videoSrc={videoSrc}
         isDesktop={isDesktop}
-        isLastSlide={isLastSlide}
       />
-      <div className={cn("flex flex-col md:gap-3 gap-2 md:py-0 py-6 md:px-0 px-4", isDesktop && "max-w-[296px] min-w-[296px]", isLastSlide && "mr-20",)}>
-        <span className="font-larken md:text-5xl text-32 font-light leading-110 text-neutral300">{step.number}</span>
-        <h3 className="font-larken md:text-32 text-2xl font-light leading-110 text-darkblack">{step.title}</h3>
-        <p className={cn("font-gill font-light leading-110 text-darkblack md:text-xl text-base")}>
+      <div className={cn("flex flex-col md:gap-3 gap-2 lg:py-0 py-6 lg:px-0 px-4", isDesktop && "max-w-[296px] min-w-[296px]", isLastSlide && "mr-20",)}>
+        <span className="font-larken lg:text-5xl md:text-4xl text-32 font-light leading-110 text-neutral300">{step.number}</span>
+        <h3 className="font-larken lg:text-32 md:text-3xl text-2xl font-light leading-110 text-darkblack">{step.title}</h3>
+        <p className={cn("font-gill font-light leading-110 text-darkblack lg:text-xl md:text-lg text-base")}>
           {step.description}
         </p>
       </div>
@@ -157,15 +156,17 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
 
   useSince1997HorizontalScroll(sectionRef, hasHorizontalGallery, {
     firstStepOffset: bespokeStoryFigmaSpec.firstStepOffset,
+    firstStepOffsetBelowLg: bespokeStoryFigmaSpec.firstStepOffsetBelowLg,
+    trackScrollLeadInRatio: bespokeStoryFigmaSpec.trackScrollLeadInRatio,
   });
 
   return (
     <section
       ref={sectionRef}
       aria-labelledby="bespoke-story-title"
-      className="relative bg-white md:py-100 py-16 mx-auto w-full pl-4 md:pl-8 lg:pl-10 2xl:max-w-1920 2xl:pl-[60px] md:pr-0 pr-4"
+      className="relative bg-white lg:py-100 py-16 mx-auto w-full pl-4 lg:pl-8 lg:pl-10 2xl:max-w-1920 2xl:pl-[60px] lg:pr-0 pr-4"
     >
-      <div className="md:mb-12 mb-6 mx-auto max-w-[720px] md:hidden flex w-full flex-col gap-4">
+      <div className="lg:mb-12 mb-6 mx-auto max-w-[720px] lg:hidden flex w-full flex-col gap-4">
         <Reveal
           as="h2"
           id="bespoke-story-title"
@@ -183,8 +184,8 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
         </Reveal>
       </div>
       {/* Desktop / tablet — sticky viewport + scroll-driven horizontal slide */}
-      <div data-since1997-mode="desktop" className="hidden md:block">
-        <div className="sticky top-10 flex min-h-[calc(100dvh-10rem)] flex-col bg-white pb-8">
+      <div data-since1997-mode="desktop" className="hidden lg:block">
+        <div className="sticky lg:top-10 top-24 flex min-h-[calc(100dvh-10rem)] flex-col bg-white pb-8">
           <div className="md:mb-12 mb-6 mx-auto max-w-[720px] hidden md:flex w-full flex-col gap-4">
             <Reveal
               as="h2"
@@ -230,13 +231,13 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
         ) : null}
       </div>
       {/* Mobile — static vertical stack, no scroll animation (Figma 2083:18264) */}
-      <div className="md:hidden flex flex-col gap-12">
+      <div className="lg:hidden flex flex-col lg:gap-12 gap-8">
         {story.steps.map((step) => (
           <BespokeStoryStepPanel key={step.number} step={step} layout="mobile" videoSrc={story.videoSrc} />
         ))}
       </div>
       <Reveal direction="up" className="flex justify-center">
-        <div className="md:mt-12 mt-4 flex justify-center md:w-[284px] mx-auto w-full">
+        <div className="lg:mt-12 mt-4 flex justify-center md:w-[284px] mx-auto w-full">
           {story.ctaLabel ? (
             <button
               type="button"

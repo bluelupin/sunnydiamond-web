@@ -1,5 +1,5 @@
 import { useLayoutEffect, type RefObject } from "react";
-import { TABLET_UP_MEDIA_QUERY } from "@/shared/lib/breakpoints";
+import { DESKTOP_MEDIA_QUERY, TABLET_UP_MEDIA_QUERY } from "@/shared/lib/breakpoints";
 
 const clamp = (value: number, min = 0, max = 1) =>
   Math.min(max, Math.max(min, value));
@@ -17,6 +17,13 @@ function getLayoutRoot(section: HTMLElement, layout: ScrollLayout) {
 type Since1997ScrollOptions = {
   /** Initial margin-left on the first track item; animates to 0 as scroll progresses. */
   firstStepOffset?: number;
+  /** Initial margin-left below `lg` when different from `firstStepOffset`. */
+  firstStepOffsetBelowLg?: number;
+  /**
+   * Fraction of vertical scrub (0–1) used for first-step inset only before horizontal
+   * track translate begins. Desktop layout only.
+   */
+  trackScrollLeadInRatio?: number;
 };
 
 /**
@@ -37,6 +44,7 @@ export function useSince1997HorizontalScroll(
 
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     const desktopQuery = window.matchMedia(TABLET_UP_MEDIA_QUERY);
+    const lgQuery = window.matchMedia(DESKTOP_MEDIA_QUERY);
 
     let rafRef: number | null = null;
     let scrollRange = 0;
@@ -49,7 +57,12 @@ export function useSince1997HorizontalScroll(
     let spacer: HTMLElement | null = null;
     let lastImage: HTMLElement | null = null;
     let firstStep: HTMLElement | null = null;
-    const firstStepOffset = options?.firstStepOffset ?? 0;
+    const firstStepOffsetLg = options?.firstStepOffset ?? 0;
+    const firstStepOffsetBelowLg = options?.firstStepOffsetBelowLg ?? firstStepOffsetLg;
+    const trackScrollLeadInRatio = clamp(options?.trackScrollLeadInRatio ?? 0);
+
+    const getActiveFirstStepOffset = () =>
+      lgQuery.matches ? firstStepOffsetLg : firstStepOffsetBelowLg;
 
     const bindActiveElements = () => {
       activeLayout = getActiveLayout(desktopQuery);
@@ -74,13 +87,14 @@ export function useSince1997HorizontalScroll(
     };
 
     const resetFirstStepMargin = () => {
-      if (!firstStep || firstStepOffset <= 0) return;
+      if (!firstStep || getActiveFirstStepOffset() <= 0) return;
       firstStep.style.marginLeft = "";
     };
 
-    const setFirstStepMargin = (progress: number) => {
+    const setFirstStepMargin = (marginProgress: number) => {
+      const firstStepOffset = getActiveFirstStepOffset();
       if (!firstStep || firstStepOffset <= 0) return;
-      firstStep.style.marginLeft = `${firstStepOffset * (1 - progress)}px`;
+      firstStep.style.marginLeft = `${firstStepOffset * (1 - clamp(marginProgress))}px`;
     };
 
     const resetInactiveTracks = () => {
@@ -135,7 +149,7 @@ export function useSince1997HorizontalScroll(
       if (scrollRange <= 0) {
         track.style.transform = "";
         setFirstStepMargin(0);
-      } else if (firstStepOffset > 0) {
+      } else if (getActiveFirstStepOffset() > 0) {
         setFirstStepMargin(0);
       }
     };
@@ -147,7 +161,7 @@ export function useSince1997HorizontalScroll(
 
       if (motionQuery.matches) {
         track.style.transform = "";
-        if (firstStepOffset > 0) setFirstStepMargin(0);
+        if (getActiveFirstStepOffset() > 0) setFirstStepMargin(0);
         else resetFirstStepMargin();
         return;
       }
@@ -155,7 +169,7 @@ export function useSince1997HorizontalScroll(
       const spacerHeight = spacer?.offsetHeight ?? 0;
       if (spacerHeight <= 0 || scrollRange <= 0) {
         track.style.transform = "";
-        if (firstStepOffset > 0) setFirstStepMargin(0);
+        if (getActiveFirstStepOffset() > 0) setFirstStepMargin(0);
         else resetFirstStepMargin();
         return;
       }
@@ -163,14 +177,31 @@ export function useSince1997HorizontalScroll(
       const rootTop = (scrollRoot ?? section).getBoundingClientRect().top;
       if (rootTop > 0) {
         track.style.transform = "";
-        if (firstStepOffset > 0) setFirstStepMargin(0);
+        if (getActiveFirstStepOffset() > 0) setFirstStepMargin(0);
         return;
       }
 
       const progress = clamp(-rootTop / spacerHeight);
-      const translate = progress * endTranslate;
+
+      if (trackScrollLeadInRatio > 0 && progress < trackScrollLeadInRatio) {
+        setFirstStepMargin(progress / trackScrollLeadInRatio);
+        track.style.transform = "";
+        return;
+      }
+
+      const translateProgress =
+        trackScrollLeadInRatio > 0
+          ? clamp((progress - trackScrollLeadInRatio) / (1 - trackScrollLeadInRatio))
+          : progress;
+
+      if (trackScrollLeadInRatio > 0) {
+        setFirstStepMargin(1);
+      } else if (getActiveFirstStepOffset() > 0) {
+        setFirstStepMargin(progress);
+      }
+
+      const translate = translateProgress * endTranslate;
       track.style.transform = `translate3d(${translate.toFixed(2)}px, 0, 0)`;
-      setFirstStepMargin(progress);
     };
 
     const scheduleUpdate = () => {
@@ -222,6 +253,7 @@ export function useSince1997HorizontalScroll(
 
     motionQuery.addEventListener("change", onPreferenceChange);
     desktopQuery.addEventListener("change", onPreferenceChange);
+    lgQuery.addEventListener("change", onPreferenceChange);
 
     return () => {
       resizeObserver.disconnect();
@@ -231,6 +263,7 @@ export function useSince1997HorizontalScroll(
       window.removeEventListener("load", scheduleRemeasure);
       motionQuery.removeEventListener("change", onPreferenceChange);
       desktopQuery.removeEventListener("change", onPreferenceChange);
+      lgQuery.removeEventListener("change", onPreferenceChange);
       if (rafRef !== null) window.cancelAnimationFrame(rafRef);
       delayedRemeasureTimers.forEach((timer) => window.clearTimeout(timer));
       clearViewportSizing();
@@ -241,5 +274,11 @@ export function useSince1997HorizontalScroll(
         node.style.marginLeft = "";
       });
     };
-  }, [enabled, options?.firstStepOffset, sectionRef]);
+  }, [
+    enabled,
+    options?.firstStepOffset,
+    options?.firstStepOffsetBelowLg,
+    options?.trackScrollLeadInRatio,
+    sectionRef,
+  ]);
 }
