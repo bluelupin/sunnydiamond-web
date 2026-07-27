@@ -193,7 +193,6 @@ const FeaturedGalleryImage = ({
       <button
         type="button"
         onClick={onOpen}
-        onPointerDown={(event) => event.stopPropagation()}
         aria-label={`Open story: ${slide.modalTitle}`}
         className="shrink-0 border-0 bg-transparent p-0 text-left"
       >
@@ -210,7 +209,6 @@ const FeaturedGalleryImage = ({
     <button
       type="button"
       onClick={onSelect}
-      onPointerDown={(event) => event.stopPropagation()}
       aria-label={`View ${slide.alt}`}
       aria-current={isSelected ? "true" : undefined}
       className="shrink-0 border-0 bg-transparent p-0 text-left"
@@ -319,6 +317,7 @@ const FeaturedGallerySlider = ({
   const dragState = useRef({ active: false, startX: 0, deltaX: 0, moved: false });
   const pendingTargetIndex = useRef<number | null>(null);
   const finishTimeoutRef = useRef<number | null>(null);
+  const suppressClickRef = useRef(false);
 
   const [isAnimating, setIsAnimating] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -408,6 +407,27 @@ const FeaturedGallerySlider = ({
     [canSlide, isAnimating, onActiveIndexChange, slides.length, startSlideToIndex],
   );
 
+  const handleSlotSelect = useCallback(
+    (slot: GallerySlot) => {
+      if (suppressClickRef.current) {
+        suppressClickRef.current = false;
+        return;
+      }
+
+      goToSlot(slot);
+    },
+    [goToSlot],
+  );
+
+  const handleCenterOpen = useCallback(() => {
+    if (suppressClickRef.current) {
+      suppressClickRef.current = false;
+      return;
+    }
+
+    onCenterOpen?.();
+  }, [onCenterOpen]);
+
   const animateSlide = useCallback(
     (direction: -1 | 1) => {
       if (!canSlide || isAnimating || dragState.current.active) return;
@@ -448,9 +468,9 @@ const FeaturedGallerySlider = ({
 
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!canSlide || isAnimating) return;
-    if ((event.target as HTMLElement).closest("button, a")) return;
 
-    trackRef.current?.setPointerCapture(event.pointerId);
+    suppressClickRef.current = false;
+    event.currentTarget.setPointerCapture(event.pointerId);
     dragState.current = { active: true, startX: event.clientX, deltaX: 0, moved: false };
     setIsDragging(true);
     setEnableTransition(false);
@@ -473,7 +493,7 @@ const FeaturedGallerySlider = ({
     dragState.current.active = false;
 
     try {
-      trackRef.current?.releasePointerCapture(event.pointerId);
+      event.currentTarget.releasePointerCapture(event.pointerId);
     } catch {
       /* noop */
     }
@@ -484,6 +504,8 @@ const FeaturedGallerySlider = ({
       setDragOffset(0);
       return;
     }
+
+    suppressClickRef.current = true;
 
     if (deltaX <= -SWIPE_THRESHOLD_PX) {
       if (!canSlide || isAnimating) {
@@ -525,10 +547,6 @@ const FeaturedGallerySlider = ({
           setIsAutoPaused(false);
         }
       }}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={endDrag}
-      onPointerCancel={endDrag}
     >
       {canSlide && !compact ? (
         <div className="pointer-events-none absolute inset-y-0 -left-16 -right-16 z-20 flex items-center justify-between">
@@ -557,6 +575,10 @@ const FeaturedGallerySlider = ({
           transform: trackTransform,
           transition: enableTransition ? `transform ${SLIDE_DURATION_MS}ms ${SLIDE_EASING}` : "none",
         }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
         onTransitionEnd={handleTrackTransitionEnd}
       >
         {GALLERY_SLOTS.map((slot) => {
@@ -573,8 +595,8 @@ const FeaturedGallerySlider = ({
               compact={compact}
               interactive={canSlide && slot !== 0 && !isAnimating}
               openable={slot === 0 && !isAnimating && Boolean(onCenterOpen)}
-              onSelect={slot !== 0 ? () => goToSlot(slot) : undefined}
-              onOpen={slot === 0 ? onCenterOpen : undefined}
+              onSelect={slot !== 0 ? () => handleSlotSelect(slot) : undefined}
+              onOpen={slot === 0 ? handleCenterOpen : undefined}
             />
           );
         })}
