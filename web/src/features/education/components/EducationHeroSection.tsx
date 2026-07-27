@@ -24,7 +24,7 @@ const EducationHeroSection = ({
     <section
       id="education-hero"
       aria-labelledby="education-hero-title"
-      className="relative flex flex-col overflow-hidden bg-white h-580 sm:h-580 lg:h-640 2xl:h-[85vh]"
+      className="relative flex flex-col overflow-hidden bg-white h-640 2xl:h-[85vh]"
     >
       <div className="relative flex-1 overflow-hidden p-0">
         <div
@@ -45,10 +45,11 @@ const EducationHeroSection = ({
 
           <MediaContentOverlay
             gradient="bottom-strong"
-            className={cn(expanded ? "md:translate-y-0 -translate-y-3" : "")}
+            className={cn(expanded ? "max-md:h-[632px] md:translate-y-0 -translate-y-3" : "")}
           />
 
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-16">
+          <div className={cn("pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-16 lg:pb-75", expanded && "max-md:bottom-5")}
+          >
             <h1
               id="education-hero-title"
               className="w-full text-center font-larken font-light leading-none text-white lg:text-6xl md:text-5xl sm:text-4xl text-32"

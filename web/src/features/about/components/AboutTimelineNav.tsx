@@ -66,9 +66,9 @@ const AboutTimelineNav = ({
       <ol
         id={listId}
         className={cn(
-          "flex flex-col items-start gap-4 sm:gap-6 md:gap-8 lg:items-end",
+          "flex flex-col items-start gap-4 sm:gap-6 md:gap-8 lg:items-start",
           isExpanded ? "mt-4 flex" : "hidden",
-          "md:mt-0 md:flex md:items-start lg:items-end",
+          "md:mt-0 md:flex md:items-start lg:items-start",
         )}
       >
         {years.map((year) => {

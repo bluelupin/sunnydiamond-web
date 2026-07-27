@@ -98,7 +98,7 @@ const SliderLabel = ({
       return (
         <span
           className={cn(
-            "pointer-events-none absolute font-gill font-normal leading-110 transition-colors",
+            "pointer-events-none absolute font-gill font-normal leading-110 transition-colors whitespace-nowrap",
             font.className,
             labelAlignClass,
             colorClass,
@@ -121,7 +121,7 @@ const SliderLabel = ({
     return (
       <span
         className={cn(
-          "pointer-events-none absolute font-gill font-normal leading-110 transition-colors",
+          "pointer-events-none absolute font-gill font-normal leading-110 transition-colors whitespace-nowrap",
           font.className,
           labelAlignClass,
           colorClass,
