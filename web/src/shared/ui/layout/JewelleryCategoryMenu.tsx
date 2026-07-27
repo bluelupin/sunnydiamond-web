@@ -8,6 +8,14 @@ import { useMagentoJewelleryNav } from "@/hooks/magento/useMagentoJewelleryNav";
 import type { JewelleryNavCategory } from "@/types/magento/jewelleryNav";
 import type { JewelleryNavVariant } from "@/features/jewellery-product/utils/jewelleryRoutes";
 
+function isAllProductsNavItem(item: JewelleryNavCategory): boolean {
+  return item.slug === "all" || item.id === "all-products";
+}
+
+function getFallbackAllProductsImage(categories: JewelleryNavCategory[]): string | null {
+  return [...categories].reverse().find((item) => Boolean(item.image))?.image ?? null;
+}
+
 type JewelleryCategoryMenuProps = {
   variant: JewelleryNavVariant;
   onClose: () => void;
@@ -49,34 +57,59 @@ function JewelleryCategoryMenuItems({
 }) {
   const config = VARIANT_CONFIG[variant];
   const rows = buildJewelleryNavRows(categories, variant);
+  const fallbackAllProductsImage = getFallbackAllProductsImage(categories);
 
   return (
     <div className={cn(config.rowsClassName, className)}>
       {rows.map((row, rowIndex) => (
         <div key={rowIndex} className={config.rowClassName}>
-          {row.map((item) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              onClick={onClose}
-              className={config.itemClassName}
-            >
-              <div className={config.imageClassName}>
-                {item.image ? (
-                  <Image
-                    src={item.image}
-                    alt={item.label}
-                    fill
-                    className={config.imageCoverClassName}
-                    sizes={config.imageSizes}
-                  />
-                ) : (
-                  <div className="h-full w-full bg-benefitSurface" aria-hidden />
-                )}
-              </div>
-              <span className={config.labelClassName}>{item.label}</span>
-            </Link>
-          ))}
+          {row.map((item) => {
+            const isAllProduct = isAllProductsNavItem(item);
+            const cardImageSrc = item.image ?? (isAllProduct ? fallbackAllProductsImage : null);
+
+            return (
+              <Link
+                key={item.id}
+                href={item.href}
+                onClick={onClose}
+                className={config.itemClassName}
+              >
+                <div className={config.imageClassName}>
+                  {cardImageSrc ? (
+                    <Image
+                      src={cardImageSrc}
+                      alt={item.label}
+                      fill
+                      className={config.imageCoverClassName}
+                      sizes={config.imageSizes}
+                    />
+                  ) : (
+                    <div className="h-full w-full bg-gray200" aria-hidden />
+                  )}
+
+                  {isAllProduct && (
+                    <>
+                      <div
+                        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/70 via-black/80 to-black/70"
+                        aria-hidden
+                      />
+
+                      <div
+                        className="pointer-events-none absolute inset-3 border border-neutral300/80"
+                        aria-hidden
+                      />
+
+                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-4">
+                        <span className={cn(config.labelClassName, "text-center text-white")}>{item.label}</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {!isAllProduct && <span className={config.labelClassName}>{item.label}</span>}
+              </Link>
+            );
+          })}
         </div>
       ))}
     </div>
