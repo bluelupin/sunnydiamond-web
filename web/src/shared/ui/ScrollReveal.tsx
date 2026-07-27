@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type ElementType,
@@ -9,6 +9,7 @@ import {
 } from "react";
 import { observeScrollReveal } from "@/shared/lib/scrollRevealObserver";
 import { cn } from "@/shared/utils/cn";
+import { isElementInViewportWithRootMargin } from "@/shared/utils/viewport";
 
 type ScrollRevealProps = {
   children: ReactNode;
@@ -27,16 +28,21 @@ const ScrollReveal = ({
   threshold = 0.12,
   rootMargin = "0px 0px -6% 0px",
 }: ScrollRevealProps) => {
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<HTMLElement | null>(null);
   const [visible, setVisible] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const node = ref.current;
     if (!node) return;
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setReducedMotion(true);
+      setVisible(true);
+      return;
+    }
+
+    if (isElementInViewportWithRootMargin(node, rootMargin)) {
       setVisible(true);
       return;
     }
@@ -49,7 +55,9 @@ const ScrollReveal = ({
 
   return (
     <Tag
-      ref={ref}
+      ref={(node: HTMLElement | null) => {
+        ref.current = node;
+      }}
       className={cn(
         reducedMotion || visible
           ? "translate-y-0 opacity-100"

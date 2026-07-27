@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import type { MouseEvent } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import CarouselChevronLeft from "@/assets/Icons/CarouselChevronLeft";
 import CarouselChevronRight from "@/assets/Icons/CarouselChevronRight";
@@ -19,6 +21,10 @@ import {
 } from "./alankaraCollection.types";
 import PageContainer from "../layout/PageContainer";
 import Reveal from "@/shared/Animation/Reveal";
+import {
+  scrollToTopBeforeClientNavigation,
+  shouldPreventClientNavigation,
+} from "@/shared/utils/navigation";
 
 const DEFAULT_PRODUCT_CTA = "Shop Now";
 const SLIDE_DURATION_MS = 500;
@@ -192,6 +198,7 @@ function CollectionHeroPanel({
   collectionCta,
   priority,
   variant,
+  onCollectionCtaClick,
 }: {
   title: string;
   description?: string;
@@ -201,6 +208,7 @@ function CollectionHeroPanel({
   collectionCta?: AlankaraCollectionProps["collectionCta"];
   priority?: boolean;
   variant: "desktop" | "mobile";
+  onCollectionCtaClick?: (event: MouseEvent<HTMLAnchorElement>, href: string) => void;
 }) {
   const isMobile = variant === "mobile";
 
@@ -263,6 +271,7 @@ function CollectionHeroPanel({
             {collectionCta &&
               <Link
                 href={collectionCta.href}
+                onClick={(event) => onCollectionCtaClick?.(event, collectionCta.href)}
                 className="pointer-events-none inline-flex max-h-0 w-fit flex-col items-start overflow-hidden pb-0 pt-0 opacity-0 motion-safe:transition-[max-height,padding,opacity] motion-safe:duration-500 motion-safe:ease-out group-hover:pointer-events-auto group-hover:max-h-[72px] group-hover:pb-16 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:max-h-[72px] group-focus-within:pt-10 group-focus-within:opacity-100"
               >
                 <span className="text-link-underline inline-flex w-fit items-center border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white">
@@ -285,6 +294,7 @@ function CollectionHeroPanel({
         {isMobile && collectionCta &&
           <Link
             href={collectionCta.href}
+            onClick={(event) => onCollectionCtaClick?.(event, collectionCta.href)}
             className="text-link-underline inline-flex items-center justify-center border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
           >
             {collectionCta.label}
@@ -614,6 +624,25 @@ export function AlankaraCollection({
 }: AlankaraCollectionProps) {
   const desktopHero = resolveImageSrcString(collectionImage);
   const mobileHero = resolveImageSrcString(collectionImageMobile ?? collectionImage, desktopHero);
+  const router = useRouter();
+
+  const handleCollectionCtaClick = useCallback(
+    (event: MouseEvent<HTMLAnchorElement>, href: string) => {
+      if (shouldPreventClientNavigation(event)) {
+        return;
+      }
+
+      const isInternalPath = href.startsWith("/") && !href.startsWith("//");
+      if (!isInternalPath) {
+        return;
+      }
+
+      event.preventDefault();
+      scrollToTopBeforeClientNavigation();
+      router.push(href);
+    },
+    [router],
+  );
 
   if (!products.length) return null;
 
@@ -640,6 +669,7 @@ export function AlankaraCollection({
             collectionCta={collectionCta}
             priority={priority}
             variant="desktop"
+            onCollectionCtaClick={handleCollectionCtaClick}
           />
         </ScrollReveal>
         <ScrollReveal delayMs={100} className="min-w-0 w-full">
@@ -664,6 +694,7 @@ export function AlankaraCollection({
             collectionCta={collectionCta}
             priority={priority}
             variant="mobile"
+            onCollectionCtaClick={handleCollectionCtaClick}
           />
         </ScrollReveal>
         <ScrollReveal delayMs={100} className="relative z-10 -mt-[51px] w-full">

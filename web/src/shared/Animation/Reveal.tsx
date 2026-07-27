@@ -4,11 +4,14 @@ import {
     ComponentPropsWithoutRef,
     ElementType,
     useEffect,
+    useLayoutEffect,
     useMemo,
+    useRef,
     useState,
     type ComponentType,
 } from "react";
 import { motion } from "motion/react";
+import { isElementInViewport } from "@/shared/utils/viewport";
 
 type Direction = "up" | "down" | "left" | "right";
 
@@ -53,8 +56,16 @@ export default function Reveal<T extends ElementType = "div">({
         mounted: false,
         reducedMotion: false,
     });
+    const [revealedOnMount, setRevealedOnMount] = useState(false);
+    const elementRef = useRef<HTMLElement | null>(null);
     const tag = as || "div";
     const Component = useMemo(() => getMotionComponent(tag), [tag]);
+
+    useLayoutEffect(() => {
+        if (elementRef.current && isElementInViewport(elementRef.current, 120)) {
+            setRevealedOnMount(true);
+        }
+    }, []);
 
     useEffect(() => {
         setMotionState({
@@ -63,9 +74,18 @@ export default function Reveal<T extends ElementType = "div">({
         });
     }, []);
 
-    if (!motionState.mounted || motionState.reducedMotion) {
+    if (!motionState.mounted || motionState.reducedMotion || revealedOnMount) {
         const StaticTag = tag;
-        return <StaticTag {...props}>{children}</StaticTag>;
+        return (
+            <StaticTag
+                ref={(node: HTMLElement | null) => {
+                    elementRef.current = node;
+                }}
+                {...props}
+            >
+                {children}
+            </StaticTag>
+        );
     }
 
     const initial = {

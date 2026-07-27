@@ -105,3 +105,24 @@ export function shouldHideFooter(pathname: string): boolean {
 export function shouldHideFooterOnMobile(pathname: string): boolean {
   return isCartOrCheckoutRoute(pathname);
 }
+
+/** Reset scroll before client navigation so route loading skeletons do not flash the footer. */
+export function scrollToTopBeforeClientNavigation() {
+  window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+}
+
+export function shouldPreventClientNavigation(event: {
+  metaKey: boolean;
+  ctrlKey: boolean;
+  shiftKey: boolean;
+  altKey: boolean;
+  button: number;
+}) {
+  return (
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey ||
+    event.button !== 0
+  );
+}

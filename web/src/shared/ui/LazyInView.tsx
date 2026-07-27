@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/shared/utils/cn";
+import { isElementInViewportWithRootMargin } from "@/shared/utils/viewport";
 
 type LazyInViewProps = {
   children: ReactNode;
@@ -26,9 +27,14 @@ export function LazyInView({
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const node = ref.current;
     if (!node || visible) return;
+
+    if (isElementInViewportWithRootMargin(node, rootMargin)) {
+      setVisible(true);
+      return;
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
