@@ -4,12 +4,8 @@ import { useRef } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import { aboutCraftingRarityFigmaSpec } from "../data/content";
-import {
-  craftingRarityLineSpec,
-  useCraftingRarityScrollReveal,
-} from "../hooks/useCraftingRarityScrollReveal";
+import { useCraftingRarityScrollReveal } from "../hooks/useCraftingRarityScrollReveal";
 import type { NormalizedBrillianceSection } from "@/services/about/about-page.types";
-import Animate from "@/shared/Animation/Reveal";
 import Reveal from "@/shared/Animation/Reveal";
 import VerticalScrollLine from "./VerticalScrollLine";
 

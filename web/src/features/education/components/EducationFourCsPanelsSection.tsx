@@ -72,7 +72,7 @@ const PanelMedia = ({
         "relative box-border flex w-full shrink-0 lg:mx-0",
         "max-md:mx-4 max-md:w-[calc(100%-32px)]",
         panel.id === "carat"
-          ? "items-start justify-start max-md:h-auto md:py-5 py-14 md:h-500 lg:h-[610px]"
+          ? "items-start justify-start max-md:h-auto md:py-5 py-14 md:h-[600px] lg:h-[610px]"
           : "items-center justify-center max-md:h-auto md:py-5 py-14 md:h-500 lg:h-[633px]",
       )}
     >
@@ -83,7 +83,7 @@ const PanelMedia = ({
           "relative z-10 flex w-full min-w-0 flex-col",
           panel.id === "carat"
             ? "items-start lg:px-0"
-            : "max-w-[323px] items-center lg:max-w-[528px] lg:px-4",
+            : " items-center max-w-400 lg:max-w-[528px] lg:px-4",
         )}
       >
         {panel.id === "carat" ? (

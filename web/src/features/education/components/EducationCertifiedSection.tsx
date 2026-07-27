@@ -96,7 +96,7 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
       className={cn(
         "education-certified-section relative overflow-hidden",
         "min-h-[900px] px-4 py-16",
-        "md:min-h-[791px] md:px-0 md:py-104",
+        "lg:min-h-[791px] md:px-0 md:py-104",
       )}
     >
       <div className="relative flex flex-col items-center md:gap[40px] gap-8 mx-auto w-full 2xl:max-w-1920 max-w-1440 px-0 md:px-8 lg:px-10 2xl:px-[60px]">

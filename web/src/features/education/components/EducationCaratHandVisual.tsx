@@ -39,7 +39,7 @@ const EducationCaratHandVisual = ({ activeCarat }: EducationCaratHandVisualProps
 
   return (
     <div
-      className="pointer-events-none relative lg:h-[300px] h-[200px] w-full shrink-0 self-start overflow-hidden"
+      className="pointer-events-none relative lg:h-[300px] md:h-300 h-[200px] w-full shrink-0 self-start overflow-hidden"
       aria-hidden
     >
       <div

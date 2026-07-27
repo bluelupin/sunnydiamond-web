@@ -141,7 +141,7 @@ const SliderLabel = ({
     return (
       <span
         className={cn(
-          "pointer-events-none absolute -translate-x-1/2 whitespace-nowrap text-center font-gill text-base font-normal leading-110 transition-colors",
+          "pointer-events-none absolute -translate-x-1/2 whitespace-nowrap text-center font-gill text-sm text-sm font-normal leading-110 transition-colors",
           colorClass,
         )}
         style={dotPositionStyle(dotCenter, specWidth, labelTop)}
@@ -154,7 +154,7 @@ const SliderLabel = ({
   return (
     <span
       className={cn(
-        "pointer-events-none absolute -translate-x-1/2 whitespace-nowrap text-center font-gill text-base font-normal leading-110 transition-colors",
+        "pointer-events-none absolute -translate-x-1/2 whitespace-nowrap text-center font-gill text-sm text-sm font-normal leading-110 transition-colors",
         colorClass,
       )}
       style={dotPositionStyle(dotCenter, specWidth, labelTop)}
@@ -213,20 +213,20 @@ const EducationMetricSlider = ({
   const endpointTrackSegment =
     endpointDotsOnly && showDots && dotCenters.length >= 2
       ? {
-          left: spec.trackLeft,
-          width: Math.max(
-            dotCenters[lastDotIndex]! - trackDotGap - spec.trackLeft,
-            0,
-          ),
-        }
+        left: spec.trackLeft,
+        width: Math.max(
+          dotCenters[lastDotIndex]! - trackDotGap - spec.trackLeft,
+          0,
+        ),
+      }
       : null;
   const trackSegments = showDots && !endpointDotsOnly
     ? buildTrackSegments(
-        dotCenters,
-        spec.trackLeft,
-        spec.trackWidth,
-        spec.trackDotGap ?? TRACK_DOT_GAP,
-      )
+      dotCenters,
+      spec.trackLeft,
+      spec.trackWidth,
+      spec.trackDotGap ?? TRACK_DOT_GAP,
+    )
     : [];
 
   const renderTrackSegment = (left: number, width: number, key: string) => (
@@ -300,8 +300,8 @@ const EducationMetricSlider = ({
   return (
     <div
       ref={sliderRef}
-      className={cn("relative z-20 mx-auto w-full max-w-full cursor-pointer touch-none", className)}
-      style={{ width: "100%", maxWidth: sliderMaxWidth, height: sliderHeight }}
+      className={cn("relative z-20 mx-auto w-full max-w-full cursor-pointer touch-none max-w-400 lg:max-w-400", className)}
+      style={{ width: "100%", height: sliderHeight }}
       role="group"
       aria-label={spec.ariaLabel}
       onPointerDown={handlePointerDown}
@@ -312,35 +312,35 @@ const EducationMetricSlider = ({
       {showDots
         ? endpointTrackSegment
           ? renderTrackSegment(
-              endpointTrackSegment.left,
-              endpointTrackSegment.width,
-              "endpoint-track",
-            )
+            endpointTrackSegment.left,
+            endpointTrackSegment.width,
+            "endpoint-track",
+          )
           : trackSegments.length > 0
             ? trackSegments.map((segment, index) =>
-                renderTrackSegment(segment.left, segment.width, `track-${index}`),
-              )
+              renderTrackSegment(segment.left, segment.width, `track-${index}`),
+            )
             : null
         : renderTrackSegment(spec.trackLeft, spec.trackWidth, "continuous-track")}
 
       {showDots
         ? dotCenters.map((dotCenter, index) => {
-            if (endpointDotsOnly && index !== 0 && index !== lastDotIndex) {
-              return null;
-            }
+          if (endpointDotsOnly && index !== 0 && index !== lastDotIndex) {
+            return null;
+          }
 
-            return (
-              <span
-                key={`dot-${index}`}
-                className="pointer-events-none absolute size-[6px] -translate-x-1/2 rounded-full bg-lightGold"
-                style={{
-                  left: toPercent(dotCenter, spec.width),
-                  top: spec.trackTop + spec.trackHeight / 2 - 3,
-                }}
-                aria-hidden
-              />
-            );
-          })
+          return (
+            <span
+              key={`dot-${index}`}
+              className="pointer-events-none absolute size-[6px] -translate-x-1/2 rounded-full bg-lightGold"
+              style={{
+                left: toPercent(dotCenter, spec.width),
+                top: spec.trackTop + spec.trackHeight / 2 - 3,
+              }}
+              aria-hidden
+            />
+          );
+        })
         : null}
 
       <div
@@ -479,42 +479,42 @@ const EducationMetricSlider = ({
 
       {hasSublabels
         ? options.map((option, index) => {
-            const sublabelLeft = spec.sublabelLeft?.[index] ?? spec.sublabelLeft?.[0] ?? 0;
-            const dotCenter = dotCenters[index] ?? dotCenters[0];
-            const isActive = index === activeIndex;
+          const sublabelLeft = spec.sublabelLeft?.[index] ?? spec.sublabelLeft?.[0] ?? 0;
+          const dotCenter = dotCenters[index] ?? dotCenters[0];
+          const isActive = index === activeIndex;
 
-            if (!option.sublabel) return null;
+          if (!option.sublabel) return null;
 
-            return (
-              <span
-                key={`${option.label}-sublabel`}
-                className={cn(
-                  "pointer-events-none absolute max-w-[80px] font-gill font-light leading-110",
-                  useMobileLayout
-                    ? cn(
-                        "text-[12px]",
-                        endpointLabelAlignClass(index, options.length),
-                      )
-                    : "text-center text-sm",
-                  isActive ? "text-linkGold" : "text-darkblack",
-                )}
-                style={{
-                  left: toPercent(useMobileLayout ? dotCenter : sublabelLeft, spec.width),
-                  top: spec.sublabelTop,
-                }}
-              >
-                {Array.isArray(option.sublabel) ? (
-                  option.sublabel.map((line) => (
-                    <span key={line} className="block whitespace-nowrap">
-                      {line}
-                    </span>
-                  ))
-                ) : (
-                  <span className="block whitespace-nowrap">{option.sublabel}</span>
-                )}
-              </span>
-            );
-          })
+          return (
+            <span
+              key={`${option.label}-sublabel`}
+              className={cn(
+                "pointer-events-none absolute max-w-[80px] font-gill font-light leading-110",
+                useMobileLayout
+                  ? cn(
+                    "text-[12px]",
+                    endpointLabelAlignClass(index, options.length),
+                  )
+                  : "text-center text-sm",
+                isActive ? "text-linkGold" : "text-darkblack",
+              )}
+              style={{
+                left: toPercent(useMobileLayout ? dotCenter : sublabelLeft, spec.width),
+                top: spec.sublabelTop,
+              }}
+            >
+              {Array.isArray(option.sublabel) ? (
+                option.sublabel.map((line) => (
+                  <span key={line} className="block whitespace-nowrap">
+                    {line}
+                  </span>
+                ))
+              ) : (
+                <span className="block whitespace-nowrap">{option.sublabel}</span>
+              )}
+            </span>
+          );
+        })
         : null}
     </div>
   );

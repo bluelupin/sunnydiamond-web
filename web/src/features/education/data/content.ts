@@ -187,9 +187,8 @@ export const educationSliderSpecs: Record<string, EducationSliderSpec> = {
     trackHeight: 1.5,
     thumbSize: 18,
     labelTop: 32.51,
-    labelDisplay: "endpoints",
+    labelDisplay: "all",
     showDots: true,
-    endpointDotsOnly: true,
     dotCenters: caratSliderDotCenters,
     labelLeft: caratSliderDotCenters.map((center) => center - 20),
     ariaLabel: "Diamond carat weight",
@@ -238,6 +237,8 @@ export function buildCaratSliderSpecForWeights(
 
   return {
     ...baseSpec,
+    labelDisplay: "all",
+    endpointDotsOnly: false,
     dotCenters,
     labelLeft: dotCenters.map((center) => center - 20),
   };
