@@ -68,7 +68,7 @@ const CertificationLabel = ({
     <p
       className={cn(
         "text-center font-gill leading-110 text-darkblack",
-        mobile ? "text-sm font-light" : "text-base font-normal",
+        mobile ? "text-sm font-light" : "lg:text-base text-sm font-normal",
       )}
     >
       {cert.label}

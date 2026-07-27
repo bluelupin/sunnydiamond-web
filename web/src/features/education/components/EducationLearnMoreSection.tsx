@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
+import FeaturedProductsCarousel, {
+  type FeaturedCarouselItem,
+} from "@/features/cms/components/home/FeaturedProductsCarousel";
 import { cn } from "@/shared/utils/cn";
 import type {
   NormalizedEducationLearnAnatomyDetail,
@@ -16,126 +18,79 @@ import {
   educationPageImages,
 } from "../data/content";
 
-type CarouselSlot = keyof typeof educationLearnMoreSpec.carousel.slots;
+const tabsSpec = educationLearnMoreSpec.tabs;
+const careSpec = educationLearnMoreSpec.careGrid;
 
-const spec = educationLearnMoreSpec;
-const headerSpec = spec.header;
-const tabsSpec = spec.tabs;
-const slotSpecs = spec.carousel.slots;
-const mobileCarousel = spec.carousel.mobile;
-const desktopCarousel = spec.carousel.desktop;
-const ctaSpec = spec.cta;
-const careSpec = spec.careGrid;
+function mapSlidesToCarouselItems(
+  tab: NormalizedEducationLearnTab,
+  slides: NonNullable<NormalizedEducationLearnTab["slides"]>,
+): FeaturedCarouselItem[] {
+  return slides.map((slide, index) => ({
+    id: `${tab.id}-${index}`,
+    name: slide.alt?.trim() ?? "",
+    price: null,
+    image: slide.src,
+    href: tab.ctaHref ?? "#",
+  }));
+}
 
-const LearnCarouselImage = ({
-  src,
-  alt,
-  slot,
-  sizes,
+const LearnTabDescription = ({
+  tab,
+  animate = true,
 }: {
-  src: string;
-  alt: string;
-  slot: CarouselSlot;
-  sizes: string;
+  tab: NormalizedEducationLearnTab;
+  animate?: boolean;
 }) => {
-  const slotSpec = slotSpecs[slot];
-
-  const image = (
-    <div
-      className="relative overflow-hidden mix-blend-darken lg:w-[350px] lg:h-[300px] w-[200px] h-[180px]"
-    // style={{ width: slotSpec.width, height: slotSpec.height }}
-    >
-      <Image
-        src={src}
-        alt={alt}
-        width={slotSpec.width}
-        height={slotSpec.height}
-        className="w-full h-full object-cover"
-        sizes={sizes}
-        style={{
-          height: slotSpec.cropHeight,
-          width: slotSpec.cropWidth,
-          left: slotSpec.cropLeft,
-          top: slotSpec.cropTop,
-        }}
-      />
-    </div>
-  );
-
-  if (slotSpec.flip) {
-    return <div className="-scale-y-100 rotate-180">{image}</div>;
-  }
-
-  return image;
-};
-
-const LearnNavArrow = ({
-  direction,
-  onClick,
-  className,
-}: {
-  direction: "left" | "right";
-  onClick: () => void;
-  className?: string;
-}) => (
-  <button
-    type="button"
-    aria-label={direction === "left" ? "Previous slide" : "Next slide"}
-    onClick={onClick}
-    className={className}
-  >
-    <Image
-      src={
-        direction === "left"
-          ? educationPageImages.learnArrowLeftMobile
-          : educationPageImages.learnArrowRightMobile
-      }
-      alt=""
-      width={spec.carousel.navIconWidth}
-      height={spec.carousel.navIconWidth}
-      aria-hidden
-      className="h-6 w-auto md:hidden"
-    />
-    <Image
-      src={
-        direction === "left"
-          ? educationPageImages.learnArrowLeft
-          : educationPageImages.learnArrowRight
-      }
-      alt=""
-      width={spec.carousel.navIconWidth}
-      height={spec.carousel.navIconWidth}
-      aria-hidden
-      className="hidden h-6 w-auto md:block"
-    />
-  </button>
-);
-
-const LearnTabDescription = ({ tab }: { tab: NormalizedEducationLearnTab }) => {
   const isSingleParagraph =
     tab.layout === "care-grid" || tab.layout === "anatomy-detail" || tab.description.length === 1;
 
+  const content = isSingleParagraph ? (
+    <p>{tab.description.join(" ")}</p>
+  ) : (
+    <>
+      <p className="md:hidden">{tab.description.join(" ")}</p>
+      <div className="hidden md:block">
+        {tab.description.map((paragraph) => (
+          <p key={paragraph}>{paragraph}</p>
+        ))}
+      </div>
+    </>
+  );
+
+  const className =
+    "lg:max-w-[700px] max-w-[500px] mx-auto text-center font-gill font-light leading-110 lg:text-xl md:text-base text-sm max-md:text-darkblack md:text-neutral500";
+
+  if (!animate) {
+    return (
+      <div key={tab.id} className={className}>
+        {content}
+      </div>
+    );
+  }
+
   return (
-    <ScrollReveal
-      key={tab.id}
-      delayMs={180}
-      className="max-w-[700px] text-center font-gill font-light leading-110 md:text-base text-sm max-md:text-darkblack md:text-neutral500"
-    >
-      {isSingleParagraph ? (
-        <p>{tab.description.join(" ")}</p>
-      ) : (
-        <>
-          <p className="md:hidden">{tab.description.join(" ")}</p>
-          <div className="hidden md:block">
-            {tab.description.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
-          </div>
-        </>
-      )}
+    <ScrollReveal key={tab.id} delayMs={180} className={className}>
+      {content}
     </ScrollReveal>
   );
 };
+
+const LearnCarouselPanel = ({
+  tab,
+  items,
+}: {
+  tab: NormalizedEducationLearnTab;
+  items: FeaturedCarouselItem[];
+}) => (
+  <div className="flex w-full max-w-full min-w-0 flex-col items-center overflow-x-clip">
+    <FeaturedProductsCarousel
+      items={items}
+      ctaLabel={tab.ctaLabel ?? "Discover"}
+      sectionLabel={tab.label}
+      showCta={Boolean(tab.ctaLabel && tab.ctaHref)}
+    />
+  </div>
+);
 
 const LearnCareTip = ({ tip, mobile = false }: { tip: NormalizedEducationLearnCareTip; mobile?: boolean }) => {
   const desktop = careSpec.desktop;
@@ -210,9 +165,9 @@ const LearnAnatomyDetailPanel = ({ detail }: { detail: NormalizedEducationLearnA
   );
 
   return (
-    <ScrollReveal delayMs={260} className="w-full">
-      <div className="grid w-full items-start gap-12 md:grid-cols-2 lg:grid-cols-5">
-        <div className="lg:col-span-2">
+    <ScrollReveal delayMs={260} className="w-full max-w-1920 2xl:px[60px] lg:px-10 md:px-8 px-4">
+      <div className="grid w-full items-start lg:gap-12 gap-6 md:grid-cols-5">
+        <div className="md:col-span-2">
           <div className="relative mx-auto h-[200px] w-[200px] shrink-0 mix-blend-darken md:h-[300px] md:w-[300px]">
             <Image
               src={detail.image}
@@ -223,176 +178,63 @@ const LearnAnatomyDetailPanel = ({ detail }: { detail: NormalizedEducationLearnA
           </div>
         </div>
 
-        <div className="lg:col-span-3 flex w-full max-w-full flex-col gap-3">
-          {detail.sections.map((section) => {
-            const isOpen = openSectionId === section.id;
+        <div className="md:col-span-3 flex w-full max-w-full flex-col gap-3">
+          <div className="lg:space-y-4 space-y-3">
+            {detail.sections.map((section) => {
+              const isOpen = openSectionId === section.id;
+              return (
+                <div key={section.id} className="bg-gray300 lg:max-w-[667px] md:max-w-[530px] max-w-full">
+                  <button
+                    type="button"
+                    aria-expanded={isOpen}
+                    aria-controls={`anatomy-section-${section.id}`}
+                    id={`anatomy-trigger-${section.id}`}
+                    onClick={() =>
+                      setOpenSectionId((current) =>
+                        current === section.id ? null : section.id,
+                      )
+                    }
+                    className="flex w-full items-center px-6 py-5 text-left"
+                  >
+                    <span className="font-larken text-xl font-light leading-110 text-darkblack md:text-2xl">
+                      {section.title}
+                    </span>
+                  </button>
 
-            return (
-              <div key={section.id} className="bg-gray300">
-                <button
-                  type="button"
-                  aria-expanded={isOpen}
-                  aria-controls={`anatomy-section-${section.id}`}
-                  id={`anatomy-trigger-${section.id}`}
-                  onClick={() =>
-                    setOpenSectionId((current) =>
-                      current === section.id ? null : section.id,
-                    )
-                  }
-                  className="flex w-full items-center px-6 py-5 text-left"
-                >
-                  <span className="font-larken text-xl font-light leading-110 text-darkblack md:text-2xl">
-                    {section.title}
-                  </span>
-                </button>
-
-                <div
-                  id={`anatomy-section-${section.id}`}
-                  role="region"
-                  aria-labelledby={`anatomy-trigger-${section.id}`}
-                  hidden={!isOpen}
-                  className={cn(!isOpen && "hidden")}
-                >
-                  <ul className="flex flex-col gap-5 px-6 pb-6 md:gap-4">
-                    {section.traits.map((trait) => (
-                      <li key={trait.id} className="flex items-start gap-[10px]">
-                        <div className="flex items-center gap-[10px]">
-                          <Image
-                            src={educationPageImages.anatomySparkle}
-                            alt=""
-                            width={16}
-                            height={16}
-                            aria-hidden
-                            className="size-4 shrink-0"
-                          />
-                          <p className="font-gill text-sm font-normal leading-130 text-darkblack md:text-xl md:leading-110">
-                            {trait.term}:
+                  <div
+                    id={`anatomy-section-${section.id}`}
+                    role="region"
+                    aria-labelledby={`anatomy-trigger-${section.id}`}
+                    hidden={!isOpen}
+                    className={cn(!isOpen && "hidden")}
+                  >
+                    <ul className="flex flex-col gap-5 px-6 pb-6 md:gap-4">
+                      {section.traits.map((trait) => (
+                        <li key={trait.id} className="flex items-start gap-[10px]">
+                          <div className="flex items-center gap-[10px]">
+                            <Image
+                              src={educationPageImages.anatomySparkle}
+                              alt=""
+                              width={16}
+                              height={16}
+                              aria-hidden
+                              className="size-4 shrink-0"
+                            />
+                            <p className="font-gill text-sm font-normal leading-130 text-darkblack md:text-xl md:leading-110">
+                              {trait.term}:
+                            </p>
+                          </div>
+                          <p className="font-gill text-sm font-light leading-130 text-neutral500 md:text-xl md:leading-110">
+                            {trait.definition}
                           </p>
-                        </div>
-                        <p className="font-gill text-sm font-light leading-130 text-neutral500 md:text-xl md:leading-110">
-                          {trait.definition}
-                        </p>
-                      </li>
-                    ))}
-                  </ul>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </ScrollReveal>
-  );
-};
-
-const LearnCarouselPanel = ({
-  tab,
-  slides,
-  activeSlideIndex,
-  onPrev,
-  onNext,
-}: {
-  tab: NormalizedEducationLearnTab;
-  slides: NonNullable<NormalizedEducationLearnTab["slides"]>;
-  activeSlideIndex: number;
-  onPrev: () => void;
-  onNext: () => void;
-}) => {
-  const prevSlide = slides[(activeSlideIndex + slides.length - 1) % slides.length];
-  const currentSlide = slides[activeSlideIndex];
-  const nextSlide = slides[(activeSlideIndex + 1) % slides.length];
-
-  return (
-    <ScrollReveal delayMs={260} className="flex w-full flex-col items-center">
-      <div
-        className="relative flex w-full items-start justify-center"
-        style={{ gap: desktopCarousel.columnGap }}
-      >
-        <div className="hidden shrink-0 md:block">
-          <LearnCarouselImage
-            src={prevSlide.src}
-            alt=""
-            slot="left"
-            sizes={`${slotSpecs.left.width}px`}
-          />
-        </div>
-
-        <div
-          className="relative flex w-full flex-col items-center max-md:justify-between md:justify-start md:gap-10 gap-6"
-          style={{
-            maxWidth: desktopCarousel.centerColumnWidth,
-            minHeight: mobileCarousel.height,
-          }}
-        >
-          <div className="relative mx-auto md:hidden">
-            <LearnCarouselImage
-              key={`${tab.id}-${activeSlideIndex}`}
-              src={currentSlide.src}
-              alt={currentSlide.alt}
-              slot="center"
-              sizes={`${Math.round(mobileCarousel.imageWidth)}px`}
-            />
+              );
+            })}
           </div>
-
-          <div
-            className="pointer-events-none absolute flex items-center justify-between md:hidden"
-            style={{
-              top: mobileCarousel.arrowTop,
-              left: mobileCarousel.arrowLeft,
-              width: mobileCarousel.arrowRowWidth,
-            }}
-          >
-            <LearnNavArrow
-              direction="left"
-              onClick={onPrev}
-              className="pointer-events-auto flex size-6 shrink-0 items-center justify-center text-darkblack"
-            />
-            <LearnNavArrow
-              direction="right"
-              onClick={onNext}
-              className="pointer-events-auto flex size-6 shrink-0 items-center justify-center text-darkblack"
-            />
-          </div>
-
-          <div
-            className="relative hidden w-full items-center justify-center md:flex"
-            style={{ gap: desktopCarousel.centerControlsGap }}
-          >
-            <LearnNavArrow
-              direction="left"
-              onClick={onPrev}
-              className="flex size-6 shrink-0 items-center justify-center text-darkblack"
-            />
-            <LearnCarouselImage
-              src={currentSlide.src}
-              alt={currentSlide.alt}
-              slot="center"
-              sizes={`${slotSpecs.center.width}px`}
-            />
-            <LearnNavArrow
-              direction="right"
-              onClick={onNext}
-              className="flex size-6 shrink-0 items-center justify-center text-darkblack"
-            />
-          </div>
-
-          {tab.ctaLabel && tab.ctaHref ? (
-            <Link
-              href={tab.ctaHref}
-              className="mt-2 btn-border-slide inline-flex h-14 min-w-[122px] items-center justify-center border-[0.8px] border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
-            >
-              {tab.ctaLabel}
-            </Link>
-          ) : null}
-        </div>
-
-        <div className="hidden shrink-0 md:block">
-          <LearnCarouselImage
-            src={nextSlide.src}
-            alt=""
-            slot="right"
-            sizes={`${slotSpecs.right.width}px`}
-          />
         </div>
       </div>
     </ScrollReveal>
@@ -405,7 +247,6 @@ type EducationLearnMoreSectionProps = {
 
 const EducationLearnMoreSection = ({ learnMore }: EducationLearnMoreSectionProps) => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
-  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
 
   const tabs = learnMore.tabs;
   const activeTab = tabs[activeTabIndex]!;
@@ -413,35 +254,19 @@ const EducationLearnMoreSection = ({ learnMore }: EducationLearnMoreSectionProps
   const isCareGrid = activeTab.layout === "care-grid";
   const isAnatomyDetail = activeTab.layout === "anatomy-detail";
   const slides = activeTab.slides ?? [];
-
-  const goToPrevSlide = () => {
-    if (!slides.length) return;
-    setActiveSlideIndex((current) => (current === 0 ? slides.length - 1 : current - 1));
-  };
-
-  const goToNextSlide = () => {
-    if (!slides.length) return;
-    setActiveSlideIndex((current) => (current === slides.length - 1 ? 0 : current + 1));
-  };
+  const carouselItems = isCarousel ? mapSlidesToCarouselItems(activeTab, slides) : [];
 
   const handleTabChange = (index: number) => {
     setActiveTabIndex(index);
-    const slideCount = tabs[index]?.slides?.length ?? 0;
-    setActiveSlideIndex(slideCount > 1 ? 1 : 0);
   };
 
   return (
     <section
       aria-labelledby="education-learn-more-title"
-      className={cn(
-        "bg-white px-4 py-16 md:px-10 md:py-100",
-        isCarousel && "min-h-[681px]",
-      )}
+      className={cn("bg-white py-16 md:py-100", isCarousel && "overflow-x-clip")}
     >
-      <div
-        className="mx-auto flex max-w-[1360px] flex-col items-center max-md:gap-6 md:gap-10"
-      >
-        <div className="flex w-full flex-col items-center">
+      <div className="flex w-full max-w-full flex-col items-center overflow-x-clip max-md:gap-6 md:gap-10">
+        <div className="flex w-full flex-col items-center mx-auto max-w-[1360px] md:px-10 px-4">
           <ScrollReveal delayMs={0}>
             <h2
               id="education-learn-more-title"
@@ -502,26 +327,22 @@ const EducationLearnMoreSection = ({ learnMore }: EducationLearnMoreSectionProps
           id={`learn-tabpanel-${activeTab.id}`}
           aria-labelledby={`learn-tab-${activeTab.id}`}
           className={cn(
-            "flex w-full flex-col items-center",
+            "flex w-full max-w-full min-w-0 flex-col items-center self-stretch overflow-x-clip",
             isCareGrid && "gap-10",
             isAnatomyDetail && "gap-10",
             isCarousel && "gap-10",
           )}
         >
-          <LearnTabDescription tab={activeTab} />
+          <div className={cn(isCarousel && "w-full px-4 md:px-10")}>
+            <LearnTabDescription tab={activeTab} animate={!isCarousel} />
+          </div>
 
           {isCareGrid && activeTab.careTips ? (
             <LearnCareTipsGrid tips={activeTab.careTips} />
           ) : isAnatomyDetail && activeTab.anatomyDetail ? (
             <LearnAnatomyDetailPanel detail={activeTab.anatomyDetail} />
           ) : (
-            <LearnCarouselPanel
-              tab={activeTab}
-              slides={slides}
-              activeSlideIndex={activeSlideIndex}
-              onPrev={goToPrevSlide}
-              onNext={goToNextSlide}
-            />
+            <LearnCarouselPanel tab={activeTab} items={carouselItems} />
           )}
         </div>
       </div>

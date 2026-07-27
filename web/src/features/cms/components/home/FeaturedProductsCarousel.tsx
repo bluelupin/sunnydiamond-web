@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Slider, { type Settings } from "react-slick";
@@ -24,6 +24,25 @@ const formatPrice = (price: number) =>
 function normalizeIndex(index: number, total: number) {
   if (total <= 0) return 0;
   return ((index % total) + total) % total;
+}
+
+/**
+ * Slick disables track scrolling when slideCount <= slidesToShow.
+ * Education tabs often have exactly 3 slides, so duplicate once (3 → 6)
+ * to restore the same infinite scroll animation as larger product carousels.
+ */
+function buildRenderItems(items: FeaturedCarouselItem[]) {
+  if (items.length !== 3) {
+    return { renderItems: items, sourceCount: items.length };
+  }
+
+  return {
+    sourceCount: 3,
+    renderItems: [
+      ...items.map((item, index) => ({ ...item, id: `${item.id}-a-${index}` })),
+      ...items.map((item, index) => ({ ...item, id: `${item.id}-b-${index}` })),
+    ],
+  };
 }
 
 type SlideCropVariant = "center" | "left-peek" | "right-peek";
@@ -80,30 +99,104 @@ function CarouselSlideImage({
   );
 }
 
+type SliderWithInner = Slider & {
+  innerSlider?: { onWindowResized?: () => void };
+};
+
 export default function FeaturedProductsCarousel({
   items,
   ctaLabel,
   sectionLabel,
+  showCta = true,
 }: {
   items: FeaturedCarouselItem[];
   ctaLabel: string;
   sectionLabel: string;
+  showCta?: boolean;
 }) {
+  const { renderItems, sourceCount } = useMemo(() => buildRenderItems(items), [items]);
   const sliderRef = useRef<Slider>(null);
-  const initialIndex = items.length >= 3 ? 1 : 0;
+  const trackRef = useRef<HTMLDivElement>(null);
+  const refreshTimeoutRef = useRef<number | null>(null);
+  const initialIndex = renderItems.length >= 3 ? 1 : 0;
   const [activeIndex, setActiveIndex] = useState(initialIndex);
+  const itemsKey = useMemo(
+    () => renderItems.map((item) => String(item.id)).join("|"),
+    [renderItems],
+  );
 
-  const showInfinite = items.length >= 3;
-  const showThreeUp = items.length >= 3;
-  const slidesToShow = showThreeUp ? 3 : items.length;
-  const activeItem = items[normalizeIndex(activeIndex, items.length)] ?? items[0];
+  const showInfinite = renderItems.length > 3;
+  const showThreeUp = renderItems.length >= 3;
+  const slidesToShow = showThreeUp ? 3 : renderItems.length;
+  const logicalActiveIndex = normalizeIndex(activeIndex, sourceCount);
+  const activeItem = items[logicalActiveIndex] ?? items[0];
+
+  const refreshSlider = useCallback(() => {
+    const slider = sliderRef.current as SliderWithInner | null;
+    slider?.innerSlider?.onWindowResized?.();
+  }, []);
+
+  const scheduleRefresh = useCallback(() => {
+    if (refreshTimeoutRef.current != null) {
+      window.clearTimeout(refreshTimeoutRef.current);
+    }
+
+    refreshTimeoutRef.current = window.setTimeout(() => {
+      refreshTimeoutRef.current = null;
+      refreshSlider();
+    }, 120);
+  }, [refreshSlider]);
+
+  useLayoutEffect(() => {
+    setActiveIndex(renderItems.length >= 3 ? 1 : 0);
+
+    scheduleRefresh();
+    const raf = requestAnimationFrame(scheduleRefresh);
+
+    const onWindowResize = () => scheduleRefresh();
+    window.addEventListener("resize", onWindowResize);
+
+    const track = trackRef.current;
+    let intersectionObserver: IntersectionObserver | undefined;
+    if (track && typeof IntersectionObserver !== "undefined") {
+      intersectionObserver = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) {
+            scheduleRefresh();
+          }
+        },
+        { threshold: 0.08 },
+      );
+      intersectionObserver.observe(track);
+    }
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", onWindowResize);
+      intersectionObserver?.disconnect();
+      if (refreshTimeoutRef.current != null) {
+        window.clearTimeout(refreshTimeoutRef.current);
+      }
+    };
+  }, [itemsKey, renderItems.length, scheduleRefresh]);
 
   const handleBeforeChange = useCallback(
     (_current: number, next: number) => {
-      setActiveIndex(normalizeIndex(next, items.length));
+      setActiveIndex(normalizeIndex(next, renderItems.length));
     },
-    [items.length],
+    [renderItems.length],
   );
+
+  const handleAfterChange = useCallback(
+    (current: number) => {
+      setActiveIndex(normalizeIndex(current, renderItems.length));
+    },
+    [renderItems.length],
+  );
+
+  const handleInit = useCallback(() => {
+    scheduleRefresh();
+  }, [scheduleRefresh]);
 
   const sliderSettings = useMemo<Settings>(
     () => ({
@@ -112,20 +205,24 @@ export default function FeaturedProductsCarousel({
         !showInfinite && "featured-products-slider--single",
         showThreeUp && "featured-products-slider--triple",
       ),
-      centerMode: items.length > 1,
+      centerMode: sourceCount > 1,
       infinite: showInfinite,
       centerPadding: "0px",
       slidesToShow,
       slidesToScroll: 1,
       speed: 500,
+      cssEase: "ease",
       initialSlide: initialIndex,
       arrows: false,
       dots: false,
-      swipe: items.length > 1,
-      draggable: items.length > 1,
+      swipe: sourceCount > 1,
+      draggable: sourceCount > 1,
+      waitForAnimate: true,
       focusOnSelect: false,
       variableWidth: false,
       beforeChange: handleBeforeChange,
+      afterChange: handleAfterChange,
+      onInit: handleInit,
       ...(showThreeUp
         ? {
             responsive: [
@@ -160,7 +257,16 @@ export default function FeaturedProductsCarousel({
           }
         : {}),
     }),
-    [handleBeforeChange, initialIndex, items.length, showInfinite, showThreeUp, slidesToShow],
+    [
+      handleAfterChange,
+      handleBeforeChange,
+      handleInit,
+      initialIndex,
+      showInfinite,
+      showThreeUp,
+      slidesToShow,
+      sourceCount,
+    ],
   );
 
   const goPrev = () => sliderRef.current?.slickPrev();
@@ -187,16 +293,16 @@ export default function FeaturedProductsCarousel({
       aria-label={sectionLabel}
       tabIndex={0}
       onKeyDown={onKeyDown}
-      className="featured-products-carousel relative w-full max-w-full outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
+      className="featured-products-carousel relative w-full min-w-0 max-w-full outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
     >
-      <div className="featured-products-track relative w-full max-w-full">
-        <Slider ref={sliderRef} {...sliderSettings}>
-          {items.map((item, index) => (
+      <div ref={trackRef} className="featured-products-track relative w-full max-w-full">
+        <Slider key={itemsKey} ref={sliderRef} {...sliderSettings}>
+          {renderItems.map((item, index) => (
             <div key={String(item.id)} className="featured-products-slide">
               <CarouselSlideImage
                 src={item.image}
                 alt={item.name}
-                variant={getSlideVariant(index, activeIndex, items.length)}
+                variant={getSlideVariant(index, activeIndex, renderItems.length)}
                 priority={index === initialIndex}
               />
             </div>
@@ -252,10 +358,12 @@ export default function FeaturedProductsCarousel({
         </div>
 
         <div className="mt-3 flex flex-col items-center gap-4 text-center md:gap-6">
-          <div className="flex flex-col items-center gap-4">
-            <p className="font-gill text-base font-normal leading-110 text-darkblack md:text-xl">
-              {activeItem.name}
-            </p>
+          <div className="flex flex-col items-center gap-4 md:min-h-0 min-h-12">
+            {activeItem.name ? (
+              <p className="font-gill text-base font-normal leading-110 text-darkblack md:text-xl">
+                {activeItem.name}
+              </p>
+            ) : null}
             {typeof activeItem.price === "number" ? (
               <p className="font-gill text-base font-normal leading-110 text-darkblack md:text-xl">
                 <span aria-hidden>₹ </span>
@@ -263,12 +371,14 @@ export default function FeaturedProductsCarousel({
               </p>
             ) : null}
           </div>
-          <Link
-            href={activeItem.href}
-            className="btn-border-slide inline-flex h-14 min-w-[122px] items-center justify-center border-[0.8px] border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-none text-darkblack"
-          >
-            <span className="relative z-10">{ctaLabel}</span>
-          </Link>
+          {showCta ? (
+            <Link
+              href={activeItem.href}
+              className="btn-border-slide inline-flex h-14 min-w-[122px] items-center justify-center border-[0.8px] border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-none text-darkblack"
+            >
+              <span className="relative z-10">{ctaLabel}</span>
+            </Link>
+          ) : null}
         </div>
       </div>
     </div>
