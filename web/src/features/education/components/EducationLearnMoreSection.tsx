@@ -211,9 +211,9 @@ const LearnAnatomyDetailPanel = ({ detail }: { detail: NormalizedEducationLearnA
 
   return (
     <ScrollReveal delayMs={260} className="w-full">
-      <div className="grid w-full items-start gap-12 md:grid-cols-2">
-        <div>
-          <div className="relative mx-auto h-[200px] w-[200px] shrink-0 mix-blend-darken md:h-[350px] md:w-[350px]">
+      <div className="grid w-full items-start gap-12 md:grid-cols-2 lg:grid-cols-5">
+        <div className="lg:col-span-2">
+          <div className="relative mx-auto h-[200px] w-[200px] shrink-0 mix-blend-darken md:h-[300px] md:w-[300px]">
             <Image
               src={detail.image}
               alt={detail.imageAlt}
@@ -223,7 +223,7 @@ const LearnAnatomyDetailPanel = ({ detail }: { detail: NormalizedEducationLearnA
           </div>
         </div>
 
-        <div className="flex w-full max-w-full flex-col gap-3">
+        <div className="lg:col-span-3 flex w-full max-w-full flex-col gap-3">
           {detail.sections.map((section) => {
             const isOpen = openSectionId === section.id;
 
