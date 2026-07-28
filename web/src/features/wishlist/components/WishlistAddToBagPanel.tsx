@@ -39,6 +39,9 @@ type WishlistAddToBagPanelProps = {
   onAddToBag: (payload: AddToBagPayload) => void;
 };
 
+const wishlistAddToBagAsideClassName =
+  "max-w-full max-md:max-h-[calc(100vh-4rem)] md:h-full md:max-h-[812px] md:max-w-[472px]";
+
 const WishlistAddToBagPanel = ({
   open,
   product,
@@ -130,7 +133,7 @@ const WishlistAddToBagPanel = ({
           onClose={onClose}
           overlayAriaLabel="Close product details"
           dialogAriaLabel="Product details"
-          asideClassName="max-md:max-h-[calc(100vh-4rem)] md:h-[812px] md:max-w-[472px] max-w-full"
+          asideClassName={wishlistAddToBagAsideClassName}
         >
           <div className="flex min-h-[320px] flex-1 items-center justify-center px-6">
             <p className="sr-only" aria-live="polite">
@@ -167,9 +170,9 @@ const WishlistAddToBagPanel = ({
         onClose={onClose}
         overlayAriaLabel="Close product details"
         dialogAriaLabel="Product details"
-        asideClassName="max-md:max-h-[calc(100vh-4rem)] md:h-[812px] md:max-w-[472px] max-w-full"
+        asideClassName={wishlistAddToBagAsideClassName}
       >
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden">
           <div className="relative shrink-0">
             <ProductWishlistDetailGalleryCarousel
               product={detailProduct}
@@ -272,7 +275,11 @@ const WishlistAddToBagPanel = ({
             </div>
           </div>
 
-          <PanelFooter contentClassName="px-6 !border-0 lg:!px-4 md:!px-4 !px-4">
+          <PanelFooter
+            showGradient={false}
+            className="relative z-10"
+            contentClassName="px-6 !border-0 lg:!px-4 md:!px-4 !px-4"
+          >
             <div className="flex flex-col gap-4">
               <div className="flex items-end justify-between gap-4">
                 <div className="flex items-center gap-3 font-gill text-2xl leading-110 text-darkblack">

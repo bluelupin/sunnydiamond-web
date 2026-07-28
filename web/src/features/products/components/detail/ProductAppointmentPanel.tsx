@@ -25,6 +25,7 @@ import {
   type ProductAppointmentVariant,
 } from "./productAppointmentPanel.config";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { DetailDarkButton } from "./shared";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 
 const PERSONALISE_FORM_TAG = "product-personalisation";
@@ -429,14 +430,13 @@ const ProductAppointmentForm = ({
         <p className="text-center font-gill text-sm font-light leading-normal tracking-normal text-neutral500">
           Our representative will get in touch with you soon
         </p>
-        <button
-          type="button"
+        <DetailDarkButton
           onClick={handleSubmit}
           disabled={isSubmitting || !isValid}
-          className="btn-dark-slide inline-flex h-14 w-full items-center justify-center px-7 font-gill text-sm uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
+          className="uppercase disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSubmitting ? "SUBMITTING..." : submitLabel}
-        </button>
+        </DetailDarkButton>
       </PanelFooter>
     </>
   );

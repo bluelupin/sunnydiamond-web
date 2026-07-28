@@ -75,35 +75,40 @@ const SuccessCtaSection = ({
     : "/order-tracking";
 
   return (
-  <div className={cn("flex flex-col gap-4", className)}>
-    {isAuthenticated ? (
-      <CartPrimaryLink href="/profile?section=orders" className="w-full uppercase">
-        View My Orders
-      </CartPrimaryLink>
-    ) : (
-      <CartPrimaryLink href={trackingHref} className="w-full uppercase">
-        Track Order
-      </CartPrimaryLink>
-    )}
-    {isAuthenticated && orderNumber ? (
-      <CartTextLink
-        href={`/profile/orders/${encodeURIComponent(orderNumber)}`}
-        className="mx-auto uppercase"
-      >
-        View Order Details
-      </CartTextLink>
-    ) : null}
-    {isAuthenticated && orderNumber ? (
-      <CartTextLink href={trackingHref} className="mx-auto uppercase">
-        Track This Order
-      </CartTextLink>
-    ) : null}
-    <div className="flex justify-center">
-      <CartTextLink href="/jewellery" className="uppercase">
-        Go Back to Shopping
-      </CartTextLink>
+    <div className={cn("flex flex-col gap-4", className)}>
+      {/* {isAuthenticated ? (
+        <CartPrimaryLink href="/profile?section=orders" className="w-full uppercase">
+          View My Orders
+        </CartPrimaryLink>
+      ) : (
+        <CartPrimaryLink href={trackingHref} className="w-full uppercase">
+          Track Order
+        </CartPrimaryLink>
+      )} */}
+      {isAuthenticated && orderNumber &&
+        <CartPrimaryLink href={trackingHref} className="w-full uppercase">
+          Track Order
+        </CartPrimaryLink>
+      }
+      {/* {isAuthenticated && orderNumber ? (
+        <CartTextLink
+          href={`/profile/orders/${encodeURIComponent(orderNumber)}`}
+          className="mx-auto uppercase"
+        >
+          View Order Details
+        </CartTextLink>
+      ) : null} */}
+      {/* {isAuthenticated && orderNumber ? (
+        <CartTextLink href={trackingHref} className="mx-auto uppercase">
+          Track This Order
+        </CartTextLink>
+      ) : null} */}
+      <div className="flex justify-center">
+        <CartTextLink href="/jewellery" className="uppercase">
+          Go Back to Shopping
+        </CartTextLink>
+      </div>
     </div>
-  </div>
   );
 };
 
