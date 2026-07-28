@@ -1,16 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import { ChevronRight } from "lucide-react";
+import { Calendar, ChevronRight } from "lucide-react";
 import {
   DetailDarkButton,
   DetailOutlineButton,
   DetailTextLink,
 } from "@/features/products/components/detail/shared";
-import { appointmentFieldClassName } from "@/shared/constants/appointmentForm";
 import { profileTabsContent } from "../data/profileContent";
 import type { ProfileAppointmentUi } from "../types/profileUi.types";
+import { cn } from "@/shared/utils/cn";
 import { ProfileCard, ProfileInfoNote } from "./profileUi";
+
+const bookingFieldClassName =
+  "flex h-14 w-full items-center bg-aboutInactive p-3 font-gill text-base font-normal leading-110 text-darkblack";
 
 type ProfileAppointmentCardProps = {
   appointment: ProfileAppointmentUi;
@@ -45,11 +48,81 @@ function ProductGallery({ products }: { products: ProfileAppointmentUi["products
   );
 }
 
-function ReadOnlyField({ label, value }: { label: string; value: string }) {
+function ProfileAppointmentPersonalDetails({
+  title,
+  name,
+  phone,
+  email,
+}: {
+  title: string;
+  name: string;
+  phone: string;
+  email: string;
+}) {
   return (
-    <div className="flex flex-col gap-2">
-      <span className="font-gill text-base font-light leading-110 text-darkblack">{label}</span>
-      <div className={appointmentFieldClassName}>{value}</div>
+    <div className="bg-white p-4 lg:p-6">
+      <h4 className="mb-4 font-larken text-2xl font-light leading-110 text-darkblack">
+        {title}
+      </h4>
+      <div className="flex flex-col gap-2 font-gill text-base leading-110 text-darkblack">
+        <p className="font-normal">{name}</p>
+        <div className="font-light">
+          <p>{phone}</p>
+          <p>{email}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProfileAppointmentNote({ title, note }: { title: string; note: string }) {
+  return (
+    <div className="bg-white p-4 lg:p-6">
+      <h4 className="mb-4 font-larken text-2xl font-light leading-110 text-darkblack">
+        {title}
+      </h4>
+      <p className="font-gill text-base font-light leading-110 text-darkblack">{note}</p>
+    </div>
+  );
+}
+
+function ProfileAppointmentBookingDetails({
+  dateLabel,
+  timeLabel,
+  bookingDate,
+  bookingTime,
+}: {
+  dateLabel: string;
+  timeLabel: string;
+  bookingDate: string;
+  bookingTime: string;
+}) {
+  const content = profileTabsContent.appointments;
+
+  return (
+    <div className="bg-white p-4 lg:p-6">
+      <h4 className="mb-4 font-larken text-2xl font-light leading-110 text-darkblack">
+        {content.bookingDetailsTitle}
+      </h4>
+      <div className="flex flex-col gap-4 sm:flex-row">
+        <div className="flex min-h-[82px] flex-1 flex-col justify-between gap-2 sm:gap-0">
+          <span className="font-gill text-base font-normal leading-110 text-darkblack">
+            {dateLabel}
+          </span>
+          <div className={cn(bookingFieldClassName, "justify-between")}>
+            <span className="truncate">{bookingDate}</span>
+            <Calendar className="size-6 shrink-0" strokeWidth={1.5} aria-hidden />
+          </div>
+        </div>
+        <div className="flex flex-1 flex-col gap-2">
+          <span className="font-gill text-base font-normal leading-110 text-darkblack">
+            {timeLabel}
+          </span>
+          <div className={bookingFieldClassName}>
+            <span className="truncate">{bookingTime}</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -64,7 +137,7 @@ export function ProfileAppointmentCard({
   return (
     <ProfileCard className="relative flex flex-col gap-4 p-4 lg:gap-6 lg:p-6">
       <span
-        className="absolute left-0 top-0 bg-white px-3 py-2 font-gill text-base font-normal leading-110 text-darkblack"
+        className="absolute left-0 top-0 bg-mauve300 px-3 py-2 font-gill text-base font-normal leading-110 whitespace-nowrap text-darkblack"
       >
         {appointment.typeLabel}
       </span>
@@ -73,16 +146,12 @@ export function ProfileAppointmentCard({
         <ProductGallery products={appointment.products} />
       </div>
 
-      <div className="bg-gray300 p-4 lg:p-6">
-        <h4 className="mb-4 font-larken text-xl font-light leading-110 text-darkblack">
-          {content.personalDetailsTitle}
-        </h4>
-        <div className="space-y-2 font-gill text-base leading-110 text-darkblack">
-          <p className="font-normal">{appointment.customerName}</p>
-          <p className="font-light">{appointment.customerPhone}</p>
-          <p className="font-light">{appointment.customerEmail}</p>
-        </div>
-      </div>
+      <ProfileAppointmentPersonalDetails
+        title={content.personalDetailsTitle}
+        name={appointment.customerName}
+        phone={appointment.customerPhone}
+        email={appointment.customerEmail}
+      />
 
       {appointment.appointmentAddress ? (
         <div className="bg-gray300 p-4 lg:p-6">
@@ -123,41 +192,31 @@ export function ProfileAppointmentCard({
         </div>
       ) : null}
 
-      <div className="bg-gray300 p-4 lg:p-6">
-        <h4 className="mb-4 font-larken text-xl font-light leading-110 text-darkblack">
-          {content.bookingDetailsTitle}
-        </h4>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <ReadOnlyField label={content.bookingDateLabel} value={appointment.bookingDate} />
-          <ReadOnlyField label={content.bookingTimeLabel} value={appointment.bookingTime} />
-        </div>
-      </div>
+      <ProfileAppointmentBookingDetails
+        dateLabel={content.bookingDateLabel}
+        timeLabel={content.bookingTimeLabel}
+        bookingDate={appointment.bookingDate}
+        bookingTime={appointment.bookingTime}
+      />
 
-      <div className="bg-gray300 p-4 lg:p-6">
-        <h4 className="mb-4 font-larken text-xl font-light leading-110 text-darkblack">
-          {appointment.notesLabel}
-        </h4>
-        <p className="font-gill text-base font-light leading-110 text-darkblack">
-          {appointment.notes}
-        </p>
-      </div>
+      <ProfileAppointmentNote title={content.notesLabel} note={appointment.notes} />
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
+      <div className="flex items-center gap-6">
         <DetailOutlineButton
           type="button"
-          className="w-full sm:flex-1"
-          onClick={onReschedule}
-          disabled={!appointment.canReschedule}
-        >
-          {content.rescheduleLabel}
-        </DetailOutlineButton>
-        <DetailDarkButton
-          type="button"
-          className="w-full sm:flex-1"
+          className="min-w-0 flex-1"
           onClick={onCancel}
           disabled={!appointment.canCancel}
         >
           {content.cancelLabel}
+        </DetailOutlineButton>
+        <DetailDarkButton
+          type="button"
+          className="min-w-0 flex-1"
+          onClick={onReschedule}
+          disabled={!appointment.canReschedule}
+        >
+          {content.rescheduleLabel}
         </DetailDarkButton>
       </div>
 

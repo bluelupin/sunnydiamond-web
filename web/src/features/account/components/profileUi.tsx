@@ -39,6 +39,36 @@ export function ProfileCard({
   return <div className={cn("bg-gray300 p-6", className)}>{children}</div>;
 }
 
+export function ProfileAddAddressCard({
+  label,
+  onClick,
+  disabled,
+  className,
+}: {
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={cn(
+        "flex w-full flex-col items-center justify-center gap-6 bg-gray300 p-6 text-darkblack transition-colors",
+        disabled && "pointer-events-none opacity-50",
+        className,
+      )}
+    >
+      <span className="flex size-16 items-center justify-center rounded-full bg-white">
+        <Plus className="size-10 shrink-0" strokeWidth={1.5} aria-hidden />
+      </span>
+      <span className="font-gill text-base font-light leading-110">{label}</span>
+    </button>
+  );
+}
+
 const STATUS_BADGE_VARIANTS: Record<
   OrderFilterKey,
   { background: string; dot: string; labelWeight: string }
@@ -77,7 +107,7 @@ export function ProfileStatusBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-2 px-4 py-2 font-gill text-base leading-110 text-darkblack",
+        "inline-flex w-fit shrink-0 items-center gap-2 self-start px-4 py-2 font-gill text-base leading-110 whitespace-nowrap text-darkblack",
         variant.background,
         variant.labelWeight,
       )}
@@ -126,8 +156,8 @@ export function ProfileInlineActions({
   );
 }
 
-export function ProfileMetaDivider() {
-  return <span className="h-3.5 w-px bg-neutral300" aria-hidden />;
+export function ProfileMetaDivider({ className }: { className?: string }) {
+  return <span className={cn("h-3.5 w-px shrink-0 bg-neutral300", className)} aria-hidden />;
 }
 
 export function ProfileFilterChips<T extends string>({
@@ -135,20 +165,26 @@ export function ProfileFilterChips<T extends string>({
   activeKey,
   onChange,
   scrollOnMobile = false,
+  className,
 }: {
   options: { key: T; label: string; mobileLabel?: string }[];
   activeKey: T;
   onChange: (key: T) => void;
   scrollOnMobile?: boolean;
+  className?: string;
 }) {
   const wrapperClass = scrollOnMobile
-    ? "-mx-4 flex gap-2 overflow-x-auto px-4 lg:mx-0 lg:flex-wrap lg:overflow-visible lg:px-0"
-    : "flex flex-wrap gap-2";
+    ? cn(
+        "-mx-4 flex gap-2 overflow-x-auto px-4 lg:mx-0 lg:flex-nowrap lg:justify-end lg:overflow-visible lg:px-0",
+        className,
+      )
+    : cn("flex flex-wrap gap-2", className);
 
   return (
     <div className={wrapperClass}>
       {options.map((option) => {
         const isActive = activeKey === option.key;
+        const chipLabel = option.mobileLabel ?? option.label;
 
         return (
           <button
@@ -156,14 +192,11 @@ export function ProfileFilterChips<T extends string>({
             type="button"
             onClick={() => onChange(option.key)}
             className={cn(
-              "shrink-0 rounded-sm px-4 py-2 font-gill text-base leading-110 transition-colors",
-              isActive
-                ? "bg-gray300 font-normal text-darkblack"
-                : "font-light text-darkblack hover:bg-gray300/60",
+              "shrink-0 bg-gray300 px-4 py-2 font-gill text-base leading-110 text-darkblack transition-colors",
+              isActive ? "font-normal" : "font-light",
             )}
           >
-            <span className="lg:hidden">{option.mobileLabel ?? option.label}</span>
-            <span className="hidden lg:inline">{option.label}</span>
+            {chipLabel}
           </button>
         );
       })}
@@ -192,9 +225,9 @@ export function ProfileInnerPanel({
 
 export function ProfileInfoNote({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-3 font-gill text-base leading-110 text-neutral500">
-      <Info className="mt-0.5 size-6 shrink-0" strokeWidth={1.5} aria-hidden />
-      <p className="font-light">{children}</p>
+    <div className="flex items-center gap-2 font-gill text-base font-light leading-110 text-darkblack">
+      <Info className="size-6 shrink-0" strokeWidth={1.5} aria-hidden />
+      <p>{children}</p>
     </div>
   );
 }

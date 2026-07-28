@@ -17,6 +17,8 @@ export type ProfileOrderItemUi = {
   size?: string;
   metal?: string;
   isGift?: boolean;
+  isBespoke?: boolean;
+  useIconPlaceholder?: boolean;
   productUrlKey?: string | null;
   quantity: number;
 };
@@ -36,6 +38,7 @@ export type ProfileOrderUi = {
   currency: string;
   footnote?: string;
   showTrack: boolean;
+  showCancel: boolean;
   showReturn: boolean;
   showDownloadInvoice: boolean;
   showCancelNote: boolean;

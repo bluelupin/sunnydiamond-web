@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { profileTabsContent } from "../data/profileContent";
+import { formatOrderDate } from "../utils/formatAccountData";
 import type { ProfileOrderItemUi } from "../types/profileUi.types";
 
 export function ProfileOrderMobileThumbnails({ items }: { items: ProfileOrderItemUi[] }) {
@@ -49,7 +50,7 @@ export function getOrderMobileSubtext(order: {
   }
 
   if (order.category === "delivered" && order.deliveryBy) {
-    return `${content.deliveredOn} ${order.deliveryBy}`;
+    return `${content.deliveredOn} ${formatOrderDate(order.deliveryBy)}`;
   }
 
   if (order.category === "returned") {
@@ -57,7 +58,7 @@ export function getOrderMobileSubtext(order: {
   }
 
   if (order.category === "cancelled" && order.deliveryBy) {
-    return `${content.deliveredOn} ${order.deliveryBy}`;
+    return `${content.deliveredOn} ${formatOrderDate(order.deliveryBy)}`;
   }
 
   return null;

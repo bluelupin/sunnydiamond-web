@@ -7,6 +7,7 @@ import type {
   CustomerAddress,
   CustomerAddressInput,
   CustomerOrder,
+  CustomerOrderItem,
   CustomerOrdersPage,
 } from "./customer-account.types";
 
@@ -15,11 +16,18 @@ type MagentoMoney = {
   currency?: string | null;
 };
 
+type MagentoOrderItemOption = {
+  label?: string | null;
+  value?: string | null;
+};
+
 type MagentoOrderItem = {
   product_name?: string | null;
   quantity_ordered?: number | null;
   product_url_key?: string | null;
   product_sku?: string | null;
+  selected_options?: MagentoOrderItemOption[] | null;
+  entered_options?: MagentoOrderItemOption[] | null;
 };
 
 type MagentoCustomerOrder = {
@@ -92,6 +100,17 @@ export function mapMagentoCustomerOrders(
   };
 }
 
+function mapMagentoOrderItemOptions(
+  options: MagentoOrderItemOption[] | null | undefined,
+): CustomerOrderItem["selectedOptions"] {
+  return (options ?? [])
+    .filter((option) => option.label?.trim() && option.value?.trim())
+    .map((option) => ({
+      label: option.label!.trim(),
+      value: option.value!.trim(),
+    }));
+}
+
 function mapMagentoCustomerOrder(order: MagentoCustomerOrder): CustomerOrder {
   return {
     id: order.id ?? "",
@@ -103,6 +122,9 @@ function mapMagentoCustomerOrder(order: MagentoCustomerOrder): CustomerOrder {
       quantity: item.quantity_ordered ?? 0,
       productUrlKey: item.product_url_key ?? null,
       productSku: item.product_sku ?? null,
+      imageUrl: null,
+      selectedOptions: mapMagentoOrderItemOptions(item.selected_options),
+      enteredOptions: mapMagentoOrderItemOptions(item.entered_options),
     })),
     grandTotal: order.total?.grand_total?.value ?? 0,
     currency: order.total?.grand_total?.currency ?? "INR",

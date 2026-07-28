@@ -3,9 +3,14 @@
 import Image from "next/image";
 import { PLP_HERO_IMAGE_QUALITY } from "@/features/jewellery-product/utils/jewelleryPlpImage";
 import { profileHeroSpec } from "../data/profileContent";
+import { ProfileAvatar } from "./ProfileAvatar";
 
-const ProfileHeroSection = () => {
-  const { image, avatar } = profileHeroSpec;
+type ProfileHeroSectionProps = {
+  firstName: string;
+};
+
+const ProfileHeroSection = ({ firstName }: ProfileHeroSectionProps) => {
+  const { image } = profileHeroSpec;
 
   return (
     <section
@@ -27,14 +32,7 @@ const ProfileHeroSection = () => {
       <div
         className="absolute left-1/2 top-[191px] z-10 flex h-[85px] w-20 -translate-x-1/2 items-center justify-center md:top-[255px] md:h-[130px] md:w-[122px]"
       >
-        <Image
-          src={avatar.src}
-          alt={avatar.alt}
-          width={avatar.width}
-          height={avatar.height}
-          className="size-[60px] md:size-[90px]"
-          aria-hidden
-        />
+        <ProfileAvatar firstName={firstName} />
       </div>
     </section>
   );

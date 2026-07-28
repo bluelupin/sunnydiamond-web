@@ -137,6 +137,14 @@ export const MAGENTO_CUSTOMER_ORDERS_QUERY = `
             quantity_ordered
             product_url_key
             product_sku
+            selected_options {
+              label
+              value
+            }
+            entered_options {
+              label
+              value
+            }
           }
           total {
             grand_total {

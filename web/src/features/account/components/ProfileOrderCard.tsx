@@ -2,9 +2,11 @@
 
 import { Copy, Info } from "lucide-react";
 import {
+  CartDivider,
   CartPrimaryLink,
 } from "@/features/cart/components/CartFlowUi";
 import {
+  DetailDarkButton,
   DetailOutlineButton,
   DetailTextLink,
 } from "@/features/products/components/detail/shared";
@@ -28,6 +30,7 @@ export function ProfileOrderCard({ order }: ProfileOrderCardProps) {
   const { toast } = useToast();
   const content = profileTabsContent.orders;
   const mobileSubtext = getOrderMobileSubtext(order);
+  const orderDetailsHref = `/profile/orders/${encodeURIComponent(order.number)}`;
 
   const handleCopyOrderId = async () => {
     try {
@@ -57,14 +60,25 @@ export function ProfileOrderCard({ order }: ProfileOrderCardProps) {
     });
   };
 
+  const handleCancelOrder = () => {
+    toast({
+      title: content.cancelOrderLabel,
+      description: "Order cancellation will be available soon. Contact support for assistance.",
+    });
+  };
+
+  const handleTrackOrder = () => {
+    window.location.href = `/order-tracking?order=${encodeURIComponent(order.number)}`;
+  };
+
   return (
     <article className="bg-gray300 p-4 lg:p-6">
       <div className="flex flex-col gap-4 lg:gap-6">
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 lg:gap-6">
           <ProfileStatusBadge label={order.statusLabel} category={order.category} />
 
           <div className="flex flex-col gap-2 lg:hidden">
-            <span className="inline-flex items-center gap-2 font-gill text-base font-light leading-110 text-darkblack">
+            <span className="inline-flex items-center gap-1 font-gill text-base font-light leading-110 text-darkblack">
               {content.orderIdLabel}{" "}
               <span className="font-normal">{order.number}</span>
               <button
@@ -81,9 +95,9 @@ export function ProfileOrderCard({ order }: ProfileOrderCardProps) {
             ) : null}
           </div>
 
-          <div className="hidden flex-col gap-3 lg:flex lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-wrap items-center gap-3 font-gill text-base leading-110 text-darkblack">
-              <span className="inline-flex items-center gap-2 font-light">
+          <div className="hidden items-center justify-between lg:flex">
+            <div className="flex items-center gap-4 font-gill text-base leading-110 text-darkblack">
+              <span className="inline-flex items-center gap-1 font-light">
                 {content.orderIdLabel}{" "}
                 <span className="font-normal">{order.number}</span>
                 <button
@@ -92,10 +106,10 @@ export function ProfileOrderCard({ order }: ProfileOrderCardProps) {
                   className="text-darkblack"
                   aria-label={content.copyOrderIdLabel}
                 >
-                  <Copy className="size-6" strokeWidth={1.5} aria-hidden />
+                  <Copy className="size-5" strokeWidth={1.5} aria-hidden />
                 </button>
               </span>
-              <ProfileMetaDivider />
+              <ProfileMetaDivider className="h-4 self-center" />
               <span className="font-light">
                 {content.placedOnLabel}{" "}
                 <span className="font-normal">{formatOrderDate(order.orderDate)}</span>
@@ -105,7 +119,7 @@ export function ProfileOrderCard({ order }: ProfileOrderCardProps) {
             {order.deliveryBy ? (
               <span className="font-gill text-base leading-110 text-darkblack">
                 <span className="font-light">{content.deliveryByLabel} </span>
-                <span className="font-normal">{order.deliveryBy}</span>
+                <span className="font-normal">{formatOrderDate(order.deliveryBy)}</span>
               </span>
             ) : null}
           </div>
@@ -131,7 +145,7 @@ export function ProfileOrderCard({ order }: ProfileOrderCardProps) {
           </>
         ) : null}
 
-        {order.showDownloadInvoice ? (
+        {order.showDownloadInvoice && order.category !== "in_progress" ? (
           <div className="hidden justify-end lg:flex">
             <DetailTextLink onClick={handleDownloadInvoice} className="text-sm uppercase">
               {content.downloadInvoiceLabel}
@@ -139,46 +153,72 @@ export function ProfileOrderCard({ order }: ProfileOrderCardProps) {
           </div>
         ) : null}
 
-        <div className="flex items-center justify-between border-t border-neutral300 pt-4 font-gill text-base leading-110 text-darkblack">
-          <span className="font-light lg:hidden">{content.mobileTotalLabel}</span>
-          <span className="hidden font-light lg:inline">{content.totalLabel}</span>
+        <div className="hidden lg:flex lg:justify-end">
+          <DetailTextLink href={orderDetailsHref} className="text-sm uppercase">
+            {content.viewDetailsLabel}
+          </DetailTextLink>
+        </div>
+
+        <CartDivider className="hidden lg:block" />
+
+        <div className="flex items-center justify-between border-t border-neutral300 pt-4 font-gill text-base leading-110 text-darkblack lg:border-0 lg:pt-0">
+          <span className="font-light lg:font-normal">
+            <span className="lg:hidden">{content.mobileTotalLabel}</span>
+            <span className="hidden lg:inline">{content.totalLabel}</span>
+          </span>
           <span className="font-normal">
             {formatOrderTotal(order.grandTotal, order.currency)}
           </span>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <CartDivider className="hidden lg:block" />
+
+        <div className="hidden gap-6 lg:flex">
+          {order.showCancel ? (
+            <DetailOutlineButton type="button" className="flex-1" onClick={handleCancelOrder}>
+              {content.cancelOrderLabel}
+            </DetailOutlineButton>
+          ) : null}
+
+          {order.showTrack ? (
+            <DetailDarkButton type="button" className="flex-1" onClick={handleTrackOrder}>
+              {content.trackOrderLabel}
+            </DetailDarkButton>
+          ) : null}
+
+          {order.showReturn ? (
+            <DetailOutlineButton type="button" className="flex-1" onClick={handleReturn}>
+              {content.returnOrderLabel}
+            </DetailOutlineButton>
+          ) : null}
+        </div>
+
+        <div className="flex flex-col gap-4 lg:hidden">
           {order.showTrack ? (
             <DetailOutlineButton
               type="button"
-              className="hidden w-full sm:flex-1 lg:flex"
-              onClick={() => {
-                window.location.href = `/order-tracking?order=${encodeURIComponent(order.number)}`;
-              }}
+              className="w-full"
+              onClick={handleTrackOrder}
             >
               {content.trackOrderLabel}
             </DetailOutlineButton>
           ) : null}
 
           {order.showReturn ? (
-            <DetailOutlineButton
-              type="button"
-              className="hidden w-full max-w-md lg:flex"
-              onClick={handleReturn}
-            >
+            <DetailOutlineButton type="button" className="w-full" onClick={handleReturn}>
               {content.returnOrderLabel}
             </DetailOutlineButton>
           ) : null}
 
-          <CartPrimaryLink href={`/profile/orders/${encodeURIComponent(order.number)}`} className="w-full">
+          <CartPrimaryLink href={orderDetailsHref} className="w-full">
             {content.viewDetailsLabel}
           </CartPrimaryLink>
         </div>
 
         {order.footnote ? (
-          <div className="hidden items-start gap-3 font-gill text-base leading-110 text-neutral500 lg:flex">
-            <Info className="mt-0.5 size-6 shrink-0" strokeWidth={1.5} aria-hidden />
-            <p className="font-light">{order.footnote}</p>
+          <div className="hidden items-center gap-2 font-gill text-base font-light leading-110 text-darkblack lg:flex">
+            <Info className="size-6 shrink-0" strokeWidth={1.5} aria-hidden />
+            <p>{order.footnote}</p>
           </div>
         ) : null}
       </div>

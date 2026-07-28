@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import {
   CartOutlineButton,
-  CartPrimaryLink,
 } from "@/features/cart/components/CartFlowUi";
 import { profileTabsContent } from "../data/profileContent";
 import {
@@ -17,15 +16,16 @@ import {
   mapCustomerOrderToProfileUi,
 } from "../utils/profileDisplayMappers";
 import { ProfileOrderCard } from "./ProfileOrderCard";
-import { ProfileEmptyState, ProfileFilterChips } from "./profileUi";
+import { ProfileOrdersEmptyState } from "./ProfileOrdersEmptyState";
+import { ProfileFilterChips } from "./profileUi";
 
 const content = profileTabsContent.orders;
 
-const FILTER_OPTIONS: { key: OrderFilterKey; label: string; mobileLabel: string }[] = [
-  { key: "in_progress", label: content.filters.inProgress, mobileLabel: content.mobileFilters.inProgress },
-  { key: "delivered", label: content.filters.delivered, mobileLabel: content.mobileFilters.delivered },
-  { key: "cancelled", label: content.filters.cancelled, mobileLabel: content.mobileFilters.cancelled },
-  { key: "returned", label: content.filters.returned, mobileLabel: content.mobileFilters.returned },
+const FILTER_OPTIONS: { key: OrderFilterKey; label: string }[] = [
+  { key: "in_progress", label: content.filters.inProgress },
+  { key: "delivered", label: content.filters.delivered },
+  { key: "cancelled", label: content.filters.cancelled },
+  { key: "returned", label: content.filters.returned },
 ];
 
 function OrdersSkeleton() {
@@ -75,23 +75,13 @@ const ProfileOrdersSection = () => {
   }
 
   if (!usingMockData && (!data || data.orders.length === 0)) {
-    return (
-      <ProfileEmptyState
-        title={content.emptyTitle}
-        description={content.emptyDescription}
-        action={
-          <CartPrimaryLink href={content.emptyCtaHref} className="w-full max-w-xs">
-            {content.emptyCta}
-          </CartPrimaryLink>
-        }
-      />
-    );
+    return <ProfileOrdersEmptyState />;
   }
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4">
-        <p className="font-gill text-base font-light leading-110 text-darkblack">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <p className="shrink-0 font-gill text-base font-normal leading-110 text-darkblack">
           {content.filterLabel}
         </p>
         <ProfileFilterChips

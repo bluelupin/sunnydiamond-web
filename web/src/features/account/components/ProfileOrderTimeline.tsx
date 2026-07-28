@@ -20,32 +20,35 @@ export function ProfileOrderTimeline({
     return null;
   }
 
-  const lastCompletedIndex = steps.reduce(
-    (max, step, index) =>
-      step.status === "completed" || step.status === "current" ? index : max,
-    -1,
-  );
+  const currentIndex = steps.findIndex((step) => step.status === "current");
+  const filledThroughIndex =
+    currentIndex >= 0
+      ? currentIndex
+      : steps.reduce(
+          (max, step, index) => (step.status === "completed" ? index : max),
+          -1,
+        );
 
   return (
     <div className={cn("bg-white", className)}>
       {estimatedLabel && estimatedValue ? (
-        <div className="flex items-center justify-between px-6 py-4 font-gill text-base leading-110 text-darkblack">
-          <span className="font-light">{estimatedLabel}</span>
-          <span className="font-normal">{estimatedValue}</span>
+        <div
+          className="flex items-center justify-between border-b border-neutral300 bg-chalk300 px-6 py-4 font-gill text-base font-normal leading-110 text-darkblack"
+        >
+          <span>{estimatedLabel}</span>
+          <span>{estimatedValue}</span>
         </div>
       ) : null}
 
-      <div className="px-6 pb-6">
+      <div className="p-6">
         <div className="relative">
-          <div
-            className="absolute left-6 right-6 top-5 h-px bg-neutral300"
-            aria-hidden
-          />
-          {lastCompletedIndex >= 0 ? (
+          <div className="absolute left-5 right-5 top-5 h-px bg-neutral300" aria-hidden />
+
+          {filledThroughIndex > 0 && steps.length > 1 ? (
             <div
-              className="absolute left-6 top-5 h-px bg-darkblack"
+              className="absolute left-5 top-5 h-px bg-darkblack"
               style={{
-                width: `calc((100% - 3rem) * ${lastCompletedIndex / (steps.length - 1)})`,
+                width: `calc((100% - 2.5rem) * ${filledThroughIndex / (steps.length - 1)})`,
               }}
               aria-hidden
             />
@@ -53,7 +56,9 @@ export function ProfileOrderTimeline({
 
           <ol className="relative flex justify-between gap-2">
             {steps.map((step) => {
-              const isActive = step.status === "completed" || step.status === "current";
+              const isCompleted = step.status === "completed";
+              const isCurrent = step.status === "current";
+              const isUpcoming = step.status === "upcoming";
 
               return (
                 <li
@@ -62,15 +67,20 @@ export function ProfileOrderTimeline({
                 >
                   <span
                     className={cn(
-                      "flex size-10 shrink-0 items-center justify-center rounded-full font-gill text-xl leading-110",
-                      isActive
-                        ? "bg-darkblack text-white"
-                        : "bg-neutral300 text-darkblack",
+                      "flex size-10 shrink-0 items-center justify-center rounded-full font-gill text-base font-normal leading-110",
+                      isCompleted && "bg-gold500 text-darkblack",
+                      isCurrent && "border border-darkblack bg-gray300 text-darkblack",
+                      isUpcoming && "border border-neutral300 bg-gray300 text-neutral500",
                     )}
                   >
                     {step.step}
                   </span>
-                  <span className="text-center font-gill text-base leading-110 text-darkblack">
+                  <span
+                    className={cn(
+                      "text-center font-gill text-base leading-110 text-darkblack",
+                      isUpcoming ? "font-light" : "font-normal",
+                    )}
+                  >
                     {step.label}
                   </span>
                 </li>

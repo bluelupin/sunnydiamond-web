@@ -18,6 +18,7 @@ import {
   formatOrderDate,
   formatOrderStatus,
 } from "./formatAccountData";
+import { mapCustomerOrderItemToDisplayFields } from "./orderItemDisplay.mapper";
 
 const PLACEHOLDER_RING_IMAGE = "/images/jewellery/plp/product-ring-transparent.png";
 const ordersContent = profileTabsContent.orders;
@@ -65,13 +66,23 @@ function defaultDeliveryTimeline(): ProfileTimelineStep[] {
 }
 
 function mapOrderItems(order: CustomerOrder): ProfileOrderItemUi[] {
-  return order.items.map((item, index) => ({
-    id: `${order.id}-${item.productSku ?? index}`,
-    name: item.productName,
-    imageSrc: PLACEHOLDER_RING_IMAGE,
-    quantity: item.quantity,
-    productUrlKey: item.productUrlKey,
-  }));
+  return order.items.map((item, index) => {
+    const display = mapCustomerOrderItemToDisplayFields(item);
+    const imageUrl = item.imageUrl?.trim() || null;
+
+    return {
+      id: `${order.id}-${item.productSku ?? index}`,
+      name: item.productName,
+      imageSrc: imageUrl ?? PLACEHOLDER_RING_IMAGE,
+      size: display.size,
+      metal: display.metal,
+      isGift: display.isGift,
+      isBespoke: display.isBespoke,
+      useIconPlaceholder: display.isBespoke && !imageUrl,
+      quantity: item.quantity,
+      productUrlKey: item.productUrlKey,
+    };
+  });
 }
 
 export function mapCustomerOrderToProfileUi(order: CustomerOrder): ProfileOrderUi {
@@ -90,6 +101,7 @@ export function mapCustomerOrderToProfileUi(order: CustomerOrder): ProfileOrderU
     grandTotal: order.grandTotal,
     currency: order.currency,
     showTrack: category === "in_progress",
+    showCancel: category === "in_progress",
     showReturn: category === "delivered",
     showDownloadInvoice: true,
     showCancelNote: category === "in_progress",

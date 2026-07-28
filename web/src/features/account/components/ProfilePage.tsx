@@ -50,7 +50,7 @@ const ProfilePage = () => {
     <ProfileAuthGate>
       {customer ? (
         <div className="bg-white">
-          <ProfileHeroSection />
+          <ProfileHeroSection firstName={customer.firstname} />
 
           <div className="px-4 pb-16 pt-10 md:px-10 lg:px-10">
             <ProfileMobileSectionHeader
@@ -65,7 +65,7 @@ const ProfilePage = () => {
               onSectionChange={handleSectionChange}
             />
 
-            <div className="lg:grid lg:grid-cols-[minmax(280px,437px)_minmax(0,1fr)] lg:gap-16">
+            <div className="lg:mt-8 lg:grid lg:grid-cols-[minmax(280px,437px)_minmax(0,1fr)] lg:gap-16">
               <aside className="hidden lg:block">
                 <ProfileSidebar
                   activeSection={activeSection}

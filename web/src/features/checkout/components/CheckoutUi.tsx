@@ -71,6 +71,7 @@ type CheckoutSelectFieldProps = {
   onChange: (value: string) => void;
   onBlur?: () => void;
   options: { value: string; label: string }[];
+  placeholder?: string;
   error?: string;
   invalid?: boolean;
 };
@@ -82,6 +83,7 @@ export const CheckoutSelectField = ({
   onChange,
   onBlur,
   options,
+  placeholder = "-select-",
   error,
   invalid,
 }: CheckoutSelectFieldProps) => (
@@ -105,7 +107,7 @@ export const CheckoutSelectField = ({
           invalid && invalidFieldClassName,
         )}
       >
-        <SelectValue placeholder="-select-" />
+        <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
         {options.map((option) => (

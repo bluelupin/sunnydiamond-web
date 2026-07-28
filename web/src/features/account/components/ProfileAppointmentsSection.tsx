@@ -20,7 +20,6 @@ import { ProfileAppointmentCancelDialog } from "./ProfileAppointmentCancelDialog
 import {
   ProfileEmptyState,
   ProfileFilterChips,
-  ProfileSectionHeader,
 } from "./profileUi";
 
 const content = profileTabsContent.appointments;
@@ -98,7 +97,6 @@ const ProfileAppointmentsSection = () => {
   if (!usingMockData && (!data || data.appointments.length === 0)) {
     return (
       <div className="flex flex-col gap-6">
-        <ProfileSectionHeader title={content.title} className="hidden lg:flex" />
         <ProfileEmptyState
           title={content.emptyTitle}
           description={
@@ -120,7 +118,9 @@ const ProfileAppointmentsSection = () => {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <ProfileSectionHeader title={content.title} className="hidden lg:flex" />
+        <p className="shrink-0 font-gill text-base font-normal leading-110 text-darkblack">
+          {content.filterLabel}
+        </p>
         <ProfileFilterChips
           options={FILTER_OPTIONS}
           activeKey={activeFilter}

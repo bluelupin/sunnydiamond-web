@@ -1,8 +1,16 @@
+export type CustomerOrderItemOption = {
+  label: string;
+  value: string;
+};
+
 export type CustomerOrderItem = {
   productName: string;
   quantity: number;
   productUrlKey: string | null;
   productSku: string | null;
+  imageUrl: string | null;
+  selectedOptions: CustomerOrderItemOption[];
+  enteredOptions: CustomerOrderItemOption[];
 };
 
 export type CustomerOrder = {
