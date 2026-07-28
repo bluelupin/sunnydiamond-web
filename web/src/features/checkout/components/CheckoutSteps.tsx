@@ -239,7 +239,11 @@ export const CheckoutFormStep = ({
     <CheckoutSectionCard gapClassName="lg:gap-8 gap-6">
       <CheckoutSubheading>Delivery Address</CheckoutSubheading>
       {isAuthenticated && !hasSavedDeliveryAddress ? (
-        <p className="font-gill text-sm font-light leading-130 text-neutral500">
+        <p
+          id="checkout-delivery-address-required"
+          className="font-gill text-sm font-light leading-130 text-neutral500"
+          role="status"
+        >
           Add a delivery address in{" "}
           <a href="/profile?section=addresses" className="border-b border-darkblack text-darkblack">
             My Addresses
