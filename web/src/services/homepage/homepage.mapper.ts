@@ -280,9 +280,10 @@ function mapGiftingBanner(raw?: StrapiGiftingBanner | null): GiftingBanner | nul
     primaryCta: mapCta(raw.primaryCta ?? raw.cta),
     secondaryCta: mapCta(raw.secondaryCta ?? raw.secondary),
     secondary: mapCta(raw.secondary),
-    backgroundImage: raw.backgroundImage as GiftingBanner["backgroundImage"],
+    backgroundImage: pickResponsiveImage(raw.backgroundImage),
+    cutoutImage: pickResponsiveImage(raw.cutoutImage),
+    image: pickResponsiveImage(raw.cutoutImage, raw.image),
     sideImage: raw.sideImage as GiftingBanner["sideImage"],
-    image: pickResponsiveImage(raw.image) ?? mapResponsiveImage(raw.image),
   };
 }
 

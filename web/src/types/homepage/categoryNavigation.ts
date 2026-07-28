@@ -66,9 +66,10 @@ export type GiftingBanner = {
   secondaryCta?: CategoryNavigationCta | null;
   cta?: CategoryNavigationCta | null;
   secondary?: CategoryNavigationCta | null;
-  backgroundImage?: StrapiMedia | null;
+  backgroundImage?: (CategoryNavigationImage & { altText?: string }) | StrapiMedia | null;
+  cutoutImage?: (CategoryNavigationImage & { altText?: string }) | StrapiMedia | null;
   sideImage?: StrapiMedia | null;
-  image?: CategoryNavigationImage | StrapiMedia | null;
+  image?: (CategoryNavigationImage & { altText?: string }) | StrapiMedia | null;
 };
 
 export type HomepageShoppingBlocksData = {

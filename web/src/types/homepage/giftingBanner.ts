@@ -12,9 +12,10 @@ export type GiftingBanner = {
   secondaryCta?: { label?: string; url?: string; to?: string };
   cta?: { label?: string; url?: string; to?: string };
   secondary?: { label?: string; url?: string; to?: string };
-  backgroundImage?: StrapiMedia;
+  backgroundImage?: StrapiMedia | { desktopImage?: StrapiMedia; mobileImage?: StrapiMedia; altText?: string };
+  cutoutImage?: StrapiMedia | { desktopImage?: StrapiMedia; mobileImage?: StrapiMedia; altText?: string };
   sideImage?: StrapiMedia;
-  image?: StrapiMedia | { desktopImage?: StrapiMedia; mobileImage?: StrapiMedia };
+  image?: StrapiMedia | { desktopImage?: StrapiMedia; mobileImage?: StrapiMedia; altText?: string };
 };
 
 export type GiftingBannerData = {
