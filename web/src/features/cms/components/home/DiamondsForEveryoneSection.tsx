@@ -14,7 +14,7 @@ interface DiamondsForEveryoneSectionProps {
   id?: string;
 }
 
-const BACKGROUND_TEXTURE = "/images/home/diamonds-for-everyone-bg.png";
+const BACKGROUND_TEXTURE = "https://d1gf9vo4d2b63b.cloudfront.net/cms/diamonds_for_everyone_bg_8acd81b417.png";
 const STEPS_LINE = "/images/home/savings-plan-line.svg";
 
 const DEFAULT_STEPS: SavingsPlanStep[] = [

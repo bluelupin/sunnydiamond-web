@@ -5,7 +5,6 @@ export const educationPageImages = {
   certifiedCalloutLine: "/images/education/certified-callout-line.svg",
   certifiedDividerMobile: "/images/education/certified-divider-mobile.svg",
   certifiedCalloutLineMobile: "/images/education/certified-callout-line-mobile.svg",
-  girdleScreenshot: "/images/education/girdle-screenshot.png",
   anatomySparkle: "/images/education/scroll-arrow.svg",
   learnArrowLeft: "/images/education/learn-arrow-left.svg",
   learnArrowRight: "/images/education/learn-arrow-right.svg",
