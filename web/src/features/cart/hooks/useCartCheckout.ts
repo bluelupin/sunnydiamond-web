@@ -11,7 +11,6 @@ export function useCartCheckout() {
   const { status } = useAuth();
   const { items } = useCart();
   const {
-    hasExploredGiftingOptions,
     markGiftingOptionsExplored,
     openGiftingPanel,
     openGuestCheckoutModal,
@@ -35,7 +34,9 @@ export function useCartCheckout() {
   };
 
   const proceedToCheckout = () => {
-    if (!hasExploredGiftingOptions && !hasExistingGifting) {
+    // Gift marked → always show gifting reminder (personalise may have been skipped).
+    // No gift → guest welcome modal or /checkout; never open gifting for that case.
+    if (hasExistingGifting) {
       openGiftingPanel("intro");
       return;
     }
