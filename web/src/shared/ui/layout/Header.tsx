@@ -16,8 +16,10 @@ import {
   getHeaderSurfaceClass,
   getHeaderVariant,
   isAuthRoute,
+  isHeroOverlayRoute,
   isJewelleryNavLink,
 } from "@/shared/utils/navigation";
+import { usePageLoading } from "@/shared/context/PageLoadingContext";
 import MobileThemeColor from "@/shared/ui/layout/MobileThemeColor";
 import { resolveShellHeaderLinks, splitShellHeaderNavLinks } from "@/shared/lib/shellNavigation";
 import MobileNavigation from "@/shared/ui/layout/MobileNavigation";
@@ -50,12 +52,18 @@ const Header = () => {
   const pathname = usePathname() ?? "/";
   const canHoverNav = useCanHover();
 
+  const { isPageLoading } = usePageLoading();
+
   const isAuthPage = isAuthRoute(pathname);
   const menuOpen = mobileMenuOpen || jewelleryMenuOpen;
   const headerVariant = getHeaderVariant(pathname, { menuOpen });
-  const headerSurfaceClass = getHeaderSurfaceClass(pathname, headerVariant);
+  const isLoadingHeader = isPageLoading && isHeroOverlayRoute(pathname) && !menuOpen;
+  const headerSurfaceClass = isLoadingHeader
+    ? "bg-white"
+    : getHeaderSurfaceClass(pathname, headerVariant);
   const isOverlay = headerVariant === "overlay";
-  const isLightOverlay = isOverlay && !isAuthPage;
+  const isLightOverlay = !isLoadingHeader && isOverlay && !isAuthPage;
+  const themeHeaderVariant = isLoadingHeader ? "solid" : headerVariant;
 
   const { data: shellData } = useHomepageShell();
   const headerNavigationLinks = useMemo(() => {
@@ -128,7 +136,7 @@ const Header = () => {
 
   return (
     <>
-      <MobileThemeColor pathname={pathname} headerVariant={headerVariant} />
+      <MobileThemeColor pathname={pathname} headerVariant={themeHeaderVariant} />
       <header
         className={cn(
           "absolute top-0 inset-x-0 z-50",

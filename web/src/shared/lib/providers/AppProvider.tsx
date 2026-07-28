@@ -11,6 +11,7 @@ import GuestCheckoutModal from '@/features/cart/components/GuestCheckoutModal';
 import { WishlistProvider } from '@/features/wishlist/context/WishlistContext';
 import { LoginModalProvider } from '@/features/auth/context/LoginModalContext';
 import LoginModal from '@/features/auth/components/LoginModal';
+import { PageLoadingProvider } from '@/shared/context/PageLoadingContext';
 
 export default function AppProvider({ children }: { children: React.ReactNode }) {
   return (
@@ -20,7 +21,9 @@ export default function AppProvider({ children }: { children: React.ReactNode })
           <CartUIProvider>
             <LoginModalProvider>
               <WishlistProvider>
-                {children}
+                <PageLoadingProvider>
+                  {children}
+                </PageLoadingProvider>
                 <CartBagDrawer />
                 <GiftingOptionsPanel />
                 <GuestCheckoutModal />
