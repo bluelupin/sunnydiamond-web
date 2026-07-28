@@ -100,16 +100,19 @@ const CheckoutPage = () => {
   const formValidation = useCheckoutFormValidation(form);
   const paymentValidation = useCheckoutPaymentValidation(payment, totalPrice);
 
-  const hasDeliveryAddressAvailable =
-    Boolean(defaultShippingAddress) ||
-    Boolean(
-      form.addressLine1.trim() &&
-        form.pincode.trim() &&
-        form.city.trim() &&
-        form.state.trim() &&
-        form.shippingName.trim(),
-    );
-  const lacksSavedDeliveryAddress = isAuthenticated && !hasDeliveryAddressAvailable;
+  // Signed-in checkout requires a Magento saved address (fields are hidden otherwise).
+  const hasDeliveryAddressAvailable = Boolean(defaultShippingAddress);
+
+  const showDeliveryAddressRequiredFeedback = () => {
+    document
+      .getElementById("checkout-delivery-address-required")
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    toast({
+      title: "Delivery address required",
+      description:
+        "Add a delivery address in My Addresses on your profile, then return here to continue.",
+    });
+  };
 
   const updateForm = (field: keyof CheckoutFormData, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -183,8 +186,8 @@ const CheckoutPage = () => {
     [clearCart, refreshAuth, toast],
   );
 
-  const paymentStatus = searchParams.get("payment");
-  const paymentOrderNumber = searchParams.get("order");
+  const paymentStatus = searchParams?.get("payment");
+  const paymentOrderNumber = searchParams?.get("order");
   const isPaymentReturn = paymentStatus === "success" && Boolean(paymentOrderNumber);
 
   useEffect(() => {
@@ -341,6 +344,13 @@ const CheckoutPage = () => {
   };
 
   const handleContinueToPayment = () => {
+    // Must run before form validation: with no saved address the shipping fields are
+    // hidden/empty, so validateSubmit fails silently and never reaches this toast.
+    if (isAuthenticated && !hasDeliveryAddressAvailable) {
+      showDeliveryAddressRequiredFeedback();
+      return;
+    }
+
     formValidation.validateSubmit(() => {
       const contactIsEmail = isCheckoutEmailContact(form.phoneOrEmail);
 
@@ -349,14 +359,6 @@ const CheckoutPage = () => {
         toast({
           title: "Verification required",
           description: "Please verify your phone number before continuing.",
-        });
-        return;
-      }
-
-      if (isAuthenticated && !hasDeliveryAddressAvailable) {
-        toast({
-          title: "Delivery address required",
-          description: "Add a saved address in My Addresses on your profile before checkout.",
         });
         return;
       }
@@ -536,11 +538,9 @@ const CheckoutPage = () => {
           ? "Continuing..."
           : "Saving address..."
         : "Continue to Payment";
-  const ctaDisabled =
-    submitting ||
-    isSavingAddresses ||
-    isUpdating ||
-    lacksSavedDeliveryAddress;
+  // Keep the CTA clickable when address is missing so the click can show a toast
+  // (a disabled button gives no feedback and feels broken).
+  const ctaDisabled = submitting || isSavingAddresses || isUpdating;
   const handleSidebarCta = step === "payment" ? placeOrder : handleContinueToPayment;
 
   const handleFormChange = (field: keyof CheckoutFormData, value: string | boolean) => {

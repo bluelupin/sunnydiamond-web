@@ -17,6 +17,14 @@ import type {
   CustomerAddress,
   CustomerAddressInput,
 } from "@/services/customer/customer-account.types";
+import {
+  getProfileAddressFormErrors,
+  isProfileAddressFormValid,
+  sanitizePhoneInput,
+  sanitizePincodeInput,
+  shouldShowFieldError,
+  type ProfileAddressFormField,
+} from "@/shared/utils/formValidation";
 import { useCustomerAddresses } from "../hooks/useCustomerAddresses";
 import { formatAddressLines } from "../utils/formatAccountData";
 
@@ -34,6 +42,22 @@ const emptyAddressForm = (): CustomerAddressInput => ({
 
 const stateOptions = INDIAN_STATES.map((state) => ({ value: state, label: state }));
 
+function normalizeProfileAddressForm(input: CustomerAddressInput): CustomerAddressInput {
+  const phoneDigits = input.phone.replace(/\D/g, "");
+  const normalizedPhone =
+    phoneDigits.length === 12 && phoneDigits.startsWith("91")
+      ? phoneDigits.slice(2)
+      : phoneDigits.length === 11 && phoneDigits.startsWith("0")
+        ? phoneDigits.slice(1)
+        : phoneDigits;
+
+  return {
+    ...input,
+    pincode: sanitizePincodeInput(input.pincode),
+    phone: sanitizePhoneInput(normalizedPhone, "+91"),
+  };
+}
+
 type ProfileAddressFormProps = {
   initialValues?: CustomerAddressInput;
   submitLabel: string;
@@ -49,16 +73,47 @@ const ProfileAddressForm = ({
   onCancel,
   onSubmit,
 }: ProfileAddressFormProps) => {
-  const [form, setForm] = useState<CustomerAddressInput>(initialValues ?? emptyAddressForm());
+  const [form, setForm] = useState<CustomerAddressInput>(
+    normalizeProfileAddressForm(initialValues ?? emptyAddressForm()),
+  );
   const [formError, setFormError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [touched, setTouched] = useState<Partial<Record<ProfileAddressFormField, boolean>>>({});
+
+  const errors = useMemo(
+    () => getProfileAddressFormErrors(form, INDIAN_STATES),
+    [form],
+  );
+
+  const showError = (field: ProfileAddressFormField) =>
+    shouldShowFieldError(Boolean(touched[field]), submitted, errors[field]);
+
+  const markTouched = (field: ProfileAddressFormField) => {
+    setTouched((current) => ({ ...current, [field]: true }));
+  };
 
   const handleChange = (field: keyof CustomerAddressInput, value: string | boolean) => {
+    if (field === "pincode" && typeof value === "string") {
+      setForm((current) => ({ ...current, pincode: sanitizePincodeInput(value) }));
+      return;
+    }
+
+    if (field === "phone" && typeof value === "string") {
+      setForm((current) => ({ ...current, phone: sanitizePhoneInput(value, "+91") }));
+      return;
+    }
+
     setForm((current) => ({ ...current, [field]: value }));
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFormError(null);
+    setSubmitted(true);
+
+    if (!isProfileAddressFormValid(form, INDIAN_STATES)) {
+      return;
+    }
 
     try {
       await onSubmit(form);
@@ -68,18 +123,24 @@ const ProfileAddressForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-sm border border-neutral300 bg-white p-5 md:p-6">
+    <form onSubmit={handleSubmit} className="space-y-4 rounded-sm border border-neutral300 bg-white p-5 md:p-6" noValidate>
       <CheckoutField
         id="profile-address-name"
         label="Your Name"
         value={form.name}
         onChange={(value) => handleChange("name", value)}
+        onBlur={() => markTouched("name")}
+        invalid={showError("name")}
+        error={showError("name") ? errors.name : undefined}
       />
       <CheckoutField
         id="profile-address-line-1"
         label="Address Line 1"
         value={form.addressLine1}
         onChange={(value) => handleChange("addressLine1", value)}
+        onBlur={() => markTouched("addressLine1")}
+        invalid={showError("addressLine1")}
+        error={showError("addressLine1") ? errors.addressLine1 : undefined}
       />
       <CheckoutField
         id="profile-address-line-2"
@@ -87,6 +148,9 @@ const ProfileAddressForm = ({
         optional
         value={form.addressLine2 ?? ""}
         onChange={(value) => handleChange("addressLine2", value)}
+        onBlur={() => markTouched("addressLine2")}
+        invalid={showError("addressLine2")}
+        error={showError("addressLine2") ? errors.addressLine2 : undefined}
       />
       <div className="grid gap-4 sm:grid-cols-2">
         <CheckoutField
@@ -94,12 +158,18 @@ const ProfileAddressForm = ({
           label="Pincode"
           value={form.pincode}
           onChange={(value) => handleChange("pincode", value)}
+          onBlur={() => markTouched("pincode")}
+          invalid={showError("pincode")}
+          error={showError("pincode") ? errors.pincode : undefined}
         />
         <CheckoutField
           id="profile-address-city"
           label="City"
           value={form.city}
           onChange={(value) => handleChange("city", value)}
+          onBlur={() => markTouched("city")}
+          invalid={showError("city")}
+          error={showError("city") ? errors.city : undefined}
         />
       </div>
       <CheckoutSelectField
@@ -107,6 +177,9 @@ const ProfileAddressForm = ({
         label="State"
         value={form.state}
         onChange={(value) => handleChange("state", value)}
+        onBlur={() => markTouched("state")}
+        invalid={showError("state")}
+        error={showError("state") ? errors.state : undefined}
         options={stateOptions}
       />
       <CheckoutField
@@ -115,6 +188,9 @@ const ProfileAddressForm = ({
         type="tel"
         value={form.phone}
         onChange={(value) => handleChange("phone", value)}
+        onBlur={() => markTouched("phone")}
+        invalid={showError("phone")}
+        error={showError("phone") ? errors.phone : undefined}
       />
       <div className="space-y-3">
         <CheckoutCheckbox
