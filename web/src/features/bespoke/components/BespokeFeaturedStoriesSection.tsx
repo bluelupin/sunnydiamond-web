@@ -193,6 +193,7 @@ const FeaturedGalleryImage = ({
       <button
         type="button"
         onClick={onOpen}
+        onPointerDown={(event) => event.stopPropagation()}
         aria-label={`Open story: ${slide.modalTitle}`}
         className="shrink-0 border-0 bg-transparent p-0 text-left"
       >
@@ -209,6 +210,7 @@ const FeaturedGalleryImage = ({
     <button
       type="button"
       onClick={onSelect}
+      onPointerDown={(event) => event.stopPropagation()}
       aria-label={`View ${slide.alt}`}
       aria-current={isSelected ? "true" : undefined}
       className="shrink-0 border-0 bg-transparent p-0 text-left"
@@ -468,6 +470,8 @@ const FeaturedGallerySlider = ({
 
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!canSlide || isAnimating) return;
+    // Don't start a drag when the user is clicking a story / nav control.
+    if ((event.target as HTMLElement).closest("button, a")) return;
 
     suppressClickRef.current = false;
     event.currentTarget.setPointerCapture(event.pointerId);
