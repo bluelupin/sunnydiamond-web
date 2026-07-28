@@ -166,8 +166,8 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
         <div className="hidden w-full flex-col items-center gap-6 md:flex">
           <ScrollReveal delayMs={200} className="relative h-10 w-full lg:w-[740px] w-[700px] mx-auto">
             <div className="pointer-events-none absolute left-1/2 top-[calc(50%+1px)] w-full lg:w-[740px] w-[530px] mx-auto -translate-x-1/2 -translate-y-1/2">
-              <Image src={STEPS_LINE} alt="" width={784} height={1} className="h-px w-full" aria-hidden />
-              <div className="w-full h-0.5 border border-dashed border-red-400"></div>
+              {/* <Image src={STEPS_LINE} alt="" width={784} height={1} className="h-px w-full" aria-hidden /> */}
+              <div className="w-full border-[0.5px] border-dashed border-neutral500"></div>
             </div>
             <div className="relative flex h-10 items-center justify-between lg:w-[740px] w-[700px] mx-auto px-0">
               {steps.map((step) => (
