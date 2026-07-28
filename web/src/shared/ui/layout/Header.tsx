@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -16,7 +16,6 @@ import {
   getHeaderSurfaceClass,
   getHeaderVariant,
   isAuthRoute,
-  isHeaderScrolled,
   isJewelleryNavLink,
 } from "@/shared/utils/navigation";
 import MobileThemeColor from "@/shared/ui/layout/MobileThemeColor";
@@ -45,7 +44,6 @@ const iconButtonClass =
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const [jewelleryMenuOpen, setJewelleryMenuOpen] = useState(false);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { totalItems: cartCount } = useCart();
@@ -54,7 +52,7 @@ const Header = () => {
 
   const isAuthPage = isAuthRoute(pathname);
   const menuOpen = mobileMenuOpen || jewelleryMenuOpen;
-  const headerVariant = getHeaderVariant(pathname, { scrolled, menuOpen });
+  const headerVariant = getHeaderVariant(pathname, { menuOpen });
   const headerSurfaceClass = getHeaderSurfaceClass(pathname, headerVariant);
   const isOverlay = headerVariant === "overlay";
   const isLightOverlay = isOverlay && !isAuthPage;
@@ -70,19 +68,9 @@ const Header = () => {
   );
 
   useLayoutEffect(() => {
-    setScrolled(isHeaderScrolled(window.scrollY));
     setMobileMenuOpen(false);
     setJewelleryMenuOpen(false);
   }, [pathname]);
-
-  useEffect(() => {
-    const onScroll = () => {
-      setScrolled((previous) => isHeaderScrolled(window.scrollY, previous));
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   const openJewelleryMenu = useCallback(() => {
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);

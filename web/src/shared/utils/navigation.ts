@@ -43,16 +43,6 @@ export function isHeroOverlayRoute(pathname: string): boolean {
 
 export type HeaderVariant = "overlay" | "solid";
 
-const HEADER_SOLID_SCROLL_THRESHOLD_PX = 24;
-const HEADER_OVERLAY_SCROLL_THRESHOLD_PX = 8;
-
-/** Hysteresis avoids header background flicker around the scroll threshold. */
-export function isHeaderScrolled(scrollY: number, wasScrolled = false): boolean {
-  return wasScrolled
-    ? scrollY > HEADER_OVERLAY_SCROLL_THRESHOLD_PX
-    : scrollY > HEADER_SOLID_SCROLL_THRESHOLD_PX;
-}
-
 /** Figma 692:6742 — solid white header on PDP and other non-hero pages. */
 export function getHeaderSurfaceClass(
   pathname: string,
@@ -71,9 +61,9 @@ export function getHeaderSurfaceClass(
 
 export function getHeaderVariant(
   pathname: string,
-  options: { scrolled?: boolean; menuOpen?: boolean } = {},
+  options: { menuOpen?: boolean } = {},
 ): HeaderVariant {
-  const { scrolled = false, menuOpen = false } = options;
+  const { menuOpen = false } = options;
 
   if (menuOpen) {
     return "solid";
@@ -83,7 +73,7 @@ export function getHeaderVariant(
     return "overlay";
   }
 
-  if (isHeroOverlayRoute(pathname) && !scrolled) {
+  if (isHeroOverlayRoute(pathname)) {
     return "overlay";
   }
 
