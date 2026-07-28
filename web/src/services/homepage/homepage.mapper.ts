@@ -18,6 +18,7 @@ import type { CraftingBrillianceSectionData } from "@/types/homepage/craftingBri
 import type { FeaturedProductsSection } from "@/types/homepage/featuredProducts";
 import type { OccasionCard, OccasionSection } from "@/types/homepage/occasionSection";
 import { slugifyOccasionTitle } from "@/features/jewellery-product/utils/occasionListing";
+import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import type { TrustBadge } from "@/types/homepage/trustBadges";
 import type { HomepageSeo } from "@/types/homepage/seo";
 import type {
@@ -380,7 +381,8 @@ function mapSunnyPromise(raw?: StrapiTextSection | null): SunnyPromiseSectionDat
     description: cleanText(raw.description),
     isActive,
     cta: mapCta(raw.cta),
-    posterImage: (raw.posterImage ?? raw.video) as SunnyPromiseSectionData["posterImage"],
+    posterImage: raw.posterImage as SunnyPromiseSectionData["posterImage"],
+    videoUrl: resolveCmsMediaUrl(raw.video?.heroVideo),
   };
 }
 

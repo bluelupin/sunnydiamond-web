@@ -14,6 +14,7 @@ export type SunnyPromiseSectionData = {
   isActive?: boolean | null;
   cta?: CategoryNavigationCta | null;
   posterImage?: StrapiMedia | null;
+  videoUrl?: string | null;
 };
 
 export type DiamondSourcingSectionData = {

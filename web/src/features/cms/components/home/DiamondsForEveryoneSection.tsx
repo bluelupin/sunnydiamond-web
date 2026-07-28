@@ -175,8 +175,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
               ))}
             </div>
           </ScrollReveal>
-
-          <div className="flex xl:w-[980px] w-full justify-between gap-10">
+          <div className="flex xl:w-[980px] justify-between gap-10">
             {steps.map((step, index) => (
               <ScrollReveal key={step.stepNumber} delayMs={280 + index * 80} className="lg:w-[250px] w-[200px]">
                 <StepDescription

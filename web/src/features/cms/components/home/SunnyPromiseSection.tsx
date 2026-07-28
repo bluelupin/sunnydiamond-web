@@ -1,32 +1,62 @@
 "use client";
 
 import Link from "next/link";
-import ScrollReveal from "@/shared/ui/ScrollReveal";
+import { useEffect, useRef, useState } from "react";
 import { resolveImageSrcString } from "@/shared/utils/image";
-import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
-import { homeContent } from "@/features/cms/data/content";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import { isSectionActive } from "@/shared/utils/cmsSection";
+import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import Reveal from "@/shared/Animation/Reveal";
 
 interface SunnyPromiseSectionProps {
   id?: string;
 }
 
-const PROMISE_VIDEO_MP4 = "/videos/handcrafted-bg.mp4";
-const PROMISE_POSTER = "/images/about/handcrafted-bg.webp";
+const getVideoMimeType = (url: string) => {
+  if (url.endsWith(".webm")) return "video/webm";
+  if (url.endsWith(".mp4")) return "video/mp4";
+  return undefined;
+};
 
 const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
   const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
   const sunnyPromiseData = editorialData?.sunnyPromiseSection ?? null;
-  const fallback = homeContent.promise;
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
 
-  const sectionTitle = sunnyPromiseData?.sectionTitle?.trim() || "The Sunny Promise";
-  const description =
-    sunnyPromiseData?.description?.trim() || fallback.description;
-  const ctaUrl = sunnyPromiseData?.cta?.url || sunnyPromiseData?.cta?.to || fallback.cta.to;
-  const ctaLabel = sunnyPromiseData?.cta?.label?.trim() || fallback.cta.label;
-  const posterUrl = getCmsAssetUrl(sunnyPromiseData?.posterImage?.data?.attributes?.url);
+  const sectionTitle = sunnyPromiseData?.sectionTitle?.trim();
+  const description = sunnyPromiseData?.description?.trim();
+  const ctaUrl = sunnyPromiseData?.cta?.url || sunnyPromiseData?.cta?.to;
+  const ctaLabel = sunnyPromiseData?.cta?.label?.trim();
+  const videoUrl = sunnyPromiseData?.videoUrl;
+  const posterUrl = resolveCmsMediaUrl(sunnyPromiseData?.posterImage);
+
+  useEffect(() => {
+    if (!videoUrl) return;
+
+    const start = () => setShouldLoadVideo(true);
+
+    if (typeof window.requestIdleCallback === "function") {
+      const idleId = window.requestIdleCallback(start, { timeout: 2500 });
+      return () => window.cancelIdleCallback(idleId);
+    }
+
+    const timeoutId = window.setTimeout(start, 1500);
+    return () => window.clearTimeout(timeoutId);
+  }, [videoUrl]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !shouldLoadVideo) return;
+
+    video.load();
+    const playPromise = video.play();
+    if (playPromise) {
+      playPromise.catch(() => {
+        /* autoplay blocked — poster remains visible */
+      });
+    }
+  }, [shouldLoadVideo]);
 
   if (!isSectionActive(sunnyPromiseData?.isActive)) return null;
 
@@ -48,43 +78,57 @@ const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
     );
   }
 
+  const videoMimeType = videoUrl ? getVideoMimeType(videoUrl) : undefined;
+
   return (
     <section
       id={id}
-      aria-label={sectionTitle}
+      aria-label={sectionTitle ?? "The Sunny Promise"}
       className="flex flex-col items-center gap-8 bg-white px-4 py-16 lg:gap-10 lg:px-10 lg:py-100"
     >
-      <Reveal as="h2" direction="up" className="text-center font-larken font-light leading-110 text-darkblack lg:text-5xl md:text-4xl text-32 lg:whitespace-nowrap">
-        {sectionTitle}
-      </Reveal>
-      <Reveal direction="up" className="relative h-[670px] w-full max-w-[1360px] shrink-0 overflow-hidden md:h-[700px]">
-        <video
-          className="absolute inset-0 size-full object-cover object-center"
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="metadata"
-          poster={resolveImageSrcString(posterUrl || PROMISE_POSTER)}
-          aria-hidden
-          tabIndex={-1}
-        >
-          <source src={PROMISE_VIDEO_MP4} type="video/mp4" />
-        </video>
-      </Reveal>
-
-      <div className="flex w-full flex-col items-center gap-6 lg:gap-6">
-        <Reveal direction="up" className="max-w-[384px] text-center font-gill text-base font-light leading-110 text-neutral500 md:text-xl">
-          {description}
+      {sectionTitle ? (
+        <Reveal as="h2" direction="up" className="text-center font-larken font-light leading-110 text-darkblack lg:text-5xl md:text-4xl text-32 lg:whitespace-nowrap">
+          {sectionTitle}
         </Reveal>
-        {ctaUrl &&
-          <Reveal direction="up">
-            <Link href={ctaUrl} className="relative after:bg-darkMagenta after:absolute after:h-0.5 after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-darkblack hover:border-darkMagenta sm:pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack hover:text-darkMagenta">
-              {ctaLabel}
-            </Link>
-          </Reveal>
-        }
-      </div>
+      ) : null}
+
+      {videoUrl ? (
+        <Reveal direction="up" className="relative h-[670px] w-full max-w-[1360px] shrink-0 overflow-hidden md:h-[700px]">
+          <video
+            ref={videoRef}
+            className="absolute inset-0 size-full object-cover object-center"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload={shouldLoadVideo ? "metadata" : "none"}
+            poster={posterUrl ? resolveImageSrcString(posterUrl) : undefined}
+            aria-hidden
+            tabIndex={-1}
+          >
+            {shouldLoadVideo ? (
+              <source src={videoUrl} type={videoMimeType} />
+            ) : null}
+          </video>
+        </Reveal>
+      ) : null}
+
+      {(description || (ctaUrl && ctaLabel)) ? (
+        <div className="flex w-full flex-col items-center gap-6 lg:gap-6">
+          {description ? (
+            <Reveal direction="up" className="max-w-[384px] text-center font-gill text-base font-light leading-110 text-neutral500 md:text-xl">
+              {description}
+            </Reveal>
+          ) : null}
+          {ctaUrl && ctaLabel ? (
+            <Reveal direction="up">
+              <Link href={ctaUrl} className="relative after:bg-darkMagenta after:absolute after:h-0.5 after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-darkblack hover:border-darkMagenta sm:pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack hover:text-darkMagenta">
+                {ctaLabel}
+              </Link>
+            </Reveal>
+          ) : null}
+        </div>
+      ) : null}
     </section>
   );
 };

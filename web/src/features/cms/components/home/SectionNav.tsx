@@ -46,20 +46,25 @@ const SectionNav = () => {
           : "pointer-events-none -translate-x-3 opacity-0",
       )}
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute bottom-0 left-0 h-[min(800px,100vh)] w-[min(720px,18vw)]"
-      >
-        <Image
-          src={NAV_GRADIENT}
-          alt=""
-          fill
-          sizes="(max-width: 1440px) 50vw, 720px"
-          className="object-cover object-left object-bottom"
-        />
-      </div>
-
       <nav aria-label="Page sections" className="relative flex flex-col gap-y-5 pb-60 pl-10 pt-10">
+        <div
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute inset-y-0 left-0 w-[min(720px,18vw)]",
+            "[mask-image:linear-gradient(to_bottom,transparent_0%,black_20%,black_100%)]",
+            "[-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,black_20%,black_100%)]",
+          )}
+        >
+          <Image
+            src={NAV_GRADIENT}
+            alt=""
+            fill
+            sizes="(max-width: 1440px) 50vw, 720px"
+            className="object-cover object-left object-bottom drop-shadow-[16px_0_40px_rgba(0,0,0,0.08)] drop-shadow-[0_-12px_32px_rgba(0,0,0,0.05)]"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.05)_0%,transparent_24%)]" />
+        </div>
+
         {navSections.map((section, index) => {
           const isActive = activeId === section.id;
           const isComplete = activeIndex >= 0 && index < activeIndex;
