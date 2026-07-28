@@ -30,7 +30,7 @@ function mapSlidesToCarouselItems(
     name: slide.alt?.trim() ?? "",
     price: null,
     image: slide.src,
-    href: tab.ctaHref ?? "#",
+    href: tab.ctaHref ?? "",
   }));
 }
 
@@ -85,7 +85,7 @@ const LearnCarouselPanel = ({
   <div className="flex w-full max-w-full min-w-0 flex-col items-center overflow-x-clip">
     <FeaturedProductsCarousel
       items={items}
-      ctaLabel={tab.ctaLabel ?? "Discover"}
+      ctaLabel={tab.ctaLabel ?? ""}
       sectionLabel={tab.label}
       showCta={Boolean(tab.ctaLabel && tab.ctaHref)}
     />

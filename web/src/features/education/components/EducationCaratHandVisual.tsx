@@ -48,7 +48,7 @@ const EducationCaratHandVisual = ({ activeCarat }: EducationCaratHandVisualProps
       >
         <div className="h-[350px] sm:w-[600px] w-[350px]">
           <Image
-            src={educationPageImages.caratHand}
+            src="https://d1gf9vo4d2b63b.cloudfront.net/cms/carat_hand_gray_f4bddc2a4c.png"
             alt=""
             fill
             className="object-cover !static sm:!w-[650px] !w-[350px] sm:!h-[470px] !h-[300px]"
