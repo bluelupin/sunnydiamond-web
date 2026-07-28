@@ -39,6 +39,7 @@ export type NormalizedVisitUsSection = {
   title: string;
   description: string;
   imageSrc: string;
+  mobileImageSrc?: string;
   imageAlt?: string;
   ctaLabel: string;
   /** When set, CTA navigates; when omitted, UI opens Book a Visit panel. */

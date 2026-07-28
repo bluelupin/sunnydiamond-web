@@ -69,7 +69,7 @@ const StoreVisitMapBlock = ({
         </div>
         <div
           className={cn(
-            "mx-auto -mt-10 flex w-311 flex-col gap-4 bg-gray300 px-4 py-6",
+            "mx-4 -mt-10 flex w-auto flex-col gap-4 bg-gray300 px-4 py-6",
             cardClassName,
           )}
         >
@@ -85,7 +85,7 @@ const StoreVisitMapBlock = ({
         <MapLayersStack />
         <div
           className={cn(
-            "absolute bottom-4 left-1/2 flex w-311 -translate-x-1/2 flex-col gap-6 bg-gray300 px-4 py-6",
+            "absolute inset-x-4 bottom-4 flex flex-col gap-6 bg-gray300 px-4 py-6",
             cardClassName,
           )}
         >
@@ -100,7 +100,7 @@ const StoreVisitMapBlock = ({
       <MapLayersStack />
       <div
         className={cn(
-          "absolute left-1/2 top-[163px] flex w-311 -translate-x-1/2 flex-col gap-4 bg-gray300 px-4 py-6",
+          "absolute inset-x-4 top-[163px] flex flex-col gap-4 bg-gray300 px-4 py-6",
           cardClassName,
         )}
       >
