@@ -78,7 +78,11 @@
     height: 259px;
   }
 }
-
+@media (min-width: 1440px) {
+  .featured-slide-viewport {
+    height: 300px;
+  }
+}
 /* Side slides — ~60% visual weight vs center */
 /* .featured-products-slider--triple .slick-slide:not(.slick-center) .featured-slide-viewport {
   padding-inline: 8%;
@@ -136,6 +140,13 @@
   .featured-products-slider .slick-slide.slick-center .featured-slide-image {
     max-width: 258px;
     max-height: 258px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .featured-products-slider .slick-slide.slick-center .featured-slide-image {
+    max-width: 298px;
+    max-height: 298px;
   }
 }
 

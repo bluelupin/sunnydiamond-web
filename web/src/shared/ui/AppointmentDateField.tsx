@@ -136,8 +136,13 @@ const AppointmentDateField = ({
           >
             {value ? formatDisplayDate(value) : "Select date"}
           </span>
-          <span className="inline-flex size-6 shrink-0 items-center justify-center" aria-hidden>
-            <Image src="/images/forms/calendar.svg" alt="" width={20} height={20} />
+          <span className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack" aria-hidden>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M19.75 4.5H4.75C4.33579 4.5 4 4.83579 4 5.25V20.25C4 20.6642 4.33579 21 4.75 21H19.75C20.1642 21 20.5 20.6642 20.5 20.25V5.25C20.5 4.83579 20.1642 4.5 19.75 4.5Z" stroke="currentColor" strokeWidth="1.125" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M16.75 3V6" stroke="currentColor" strokeWidth="1.125" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M7.75 3V6" stroke="currentColor" strokeWidth="1.125" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M4 9H20.5" stroke="currentColor" strokeWidth="1.125" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </span>
         </button>
       </PopoverTrigger>

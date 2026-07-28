@@ -31,22 +31,19 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
       dialogAriaLabel={title}
     >
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <div className="flex items-center justify-end px-4 pt-6 lg:px-6 lg:pt-10">
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={`Close ${title}`}
-            className="inline-flex size-6 items-center justify-center"
-          >
-            <Image
-              src="/images/navigation/menu-close.svg"
-              alt=""
-              width={24}
-              height={24}
-              aria-hidden
-            />
-          </button>
-        </div>
+        {/* <div className="flex items-center justify-end px-4 pt-6 lg:px-6 lg:pt-10"> */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label={`Close ${title}`}
+          className="absolute top-8 right-7 z-10 text-white"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 6L6 18" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M18 18L6 6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+        {/* </div> */}
 
         <div className="min-h-0 flex-1 overflow-y-auto">
           <div className="flex flex-col gap-6 pb-72">
@@ -169,7 +166,6 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
             </div>
           </div>
         </div>
-
         <div className="relative shrink-0">
           <PanelFooterGradient overlay />
         </div>

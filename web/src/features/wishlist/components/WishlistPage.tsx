@@ -38,7 +38,7 @@ const WishlistPage = () => {
   };
 
   return (
-    <>
+    <section className="min-h-screen">
       <WishlistHeading
         productCount={wishlistProducts.length}
         viewMode={viewMode}
@@ -102,7 +102,7 @@ const WishlistPage = () => {
         onClose={() => setAddToBagProduct(null)}
         onAddToBag={handlePanelAddToBag}
       />
-    </>
+    </section>
   );
 };
 

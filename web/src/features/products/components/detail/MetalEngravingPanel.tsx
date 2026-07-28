@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/shared/ui/select";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { DetailDarkButton } from "./shared";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 
 type MetalEngravingPanelProps = {
@@ -134,6 +135,7 @@ const MetalEngravingPanel = ({
                   maxLength={maxCharacters}
                   onChange={(event) => handleTextChange(event.target.value)}
                   aria-describedby="engraving-character-limit"
+                  placeholder="Enter"
                   className={appointmentFieldClassName}
                 />
               </div>
@@ -178,14 +180,13 @@ const MetalEngravingPanel = ({
         </div>
 
         <PanelFooter>
-          <button
-            type="button"
+          <DetailDarkButton
             onClick={handleSave}
             disabled={!font.trim()}
-            className="border border-darkblack btn-dark-slide inline-flex h-14 w-full items-center justify-center px-7 font-gill text-sm uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="uppercase disabled:cursor-not-allowed disabled:opacity-50"
           >
             Save
-          </button>
+          </DetailDarkButton>
         </PanelFooter>
       </div>
     </ProductDetailSidePanelShell>
