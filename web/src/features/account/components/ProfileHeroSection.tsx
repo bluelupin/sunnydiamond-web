@@ -1,0 +1,43 @@
+"use client";
+
+import Image from "next/image";
+import { PLP_HERO_IMAGE_QUALITY } from "@/features/jewellery-product/utils/jewelleryPlpImage";
+import { profileHeroSpec } from "../data/profileContent";
+
+const ProfileHeroSection = () => {
+  const { image, avatar } = profileHeroSpec;
+
+  return (
+    <section
+      aria-hidden
+      className="relative left-1/2 h-[240px] w-screen max-w-none -translate-x-1/2 overflow-visible md:h-320"
+    >
+      <div className="relative size-full overflow-hidden">
+        <Image
+          src={image.src}
+          alt={image.alt}
+          fill
+          priority
+          quality={PLP_HERO_IMAGE_QUALITY}
+          sizes="100vw"
+          className="object-cover object-[50%_30%]"
+        />
+        <div className="absolute inset-0 bg-black/40" />
+      </div>
+      <div
+        className="absolute left-1/2 top-[191px] z-10 flex h-[85px] w-20 -translate-x-1/2 items-center justify-center md:top-[255px] md:h-[130px] md:w-[122px]"
+      >
+        <Image
+          src={avatar.src}
+          alt={avatar.alt}
+          width={avatar.width}
+          height={avatar.height}
+          className="size-[60px] md:size-[90px]"
+          aria-hidden
+        />
+      </div>
+    </section>
+  );
+};
+
+export default ProfileHeroSection;

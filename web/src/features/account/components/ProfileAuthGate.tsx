@@ -22,7 +22,7 @@ const ProfileAuthGate = ({ children }: ProfileAuthGateProps) => {
 
   if (status === "loading") {
     return (
-      <section className="flex min-h-[60vh] items-center justify-center bg-gray200">
+      <section className="flex min-h-[60vh] items-center justify-center bg-white">
         <p className="sr-only" aria-live="polite">
           Loading your profile
         </p>

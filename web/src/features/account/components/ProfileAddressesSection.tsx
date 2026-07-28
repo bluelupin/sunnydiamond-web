@@ -10,8 +10,12 @@ import { INDIAN_STATES } from "@/features/checkout/constants/indianStates";
 import {
   CartOutlineButton,
   CartPrimaryButton,
-  CartPrimaryLink,
 } from "@/features/cart/components/CartFlowUi";
+import {
+  DetailDarkButton,
+  DetailOutlineButton,
+  DetailTextLink,
+} from "@/features/products/components/detail/shared";
 import { mapCustomerAddressToFormInput } from "@/services/customer/customer-account.mapper";
 import type {
   CustomerAddress,
@@ -25,8 +29,17 @@ import {
   shouldShowFieldError,
   type ProfileAddressFormField,
 } from "@/shared/utils/formValidation";
+import { profileTabsContent } from "../data/profileContent";
 import { useCustomerAddresses } from "../hooks/useCustomerAddresses";
 import { formatAddressLines } from "../utils/formatAccountData";
+import {
+  ProfileCard,
+  ProfileEmptyState,
+  ProfileInlineActions,
+  ProfileSectionHeader,
+} from "./profileUi";
+
+const addressContent = profileTabsContent.addresses;
 
 const emptyAddressForm = (): CustomerAddressInput => ({
   name: "",
@@ -236,52 +249,74 @@ function AddressCard({
   onEdit: () => void;
   onDelete: () => void;
 }) {
-  const badges = [
-    address.isDefaultShipping ? "Default shipping" : null,
-    address.isDefaultBilling ? "Default billing" : null,
+  const isDefaultShipping = address.isDefaultShipping;
+  const isDefaultBilling = address.isDefaultBilling;
+  const showDefaultLabel = isDefaultShipping || isDefaultBilling;
+  const defaultLabel = isDefaultShipping
+    ? addressContent.defaultShippingLabel
+    : addressContent.defaultBillingLabel;
+
+  const addressLines = [
+    formatAddressLines(address.streetLines),
+    `${address.city}, ${address.pincode}`,
   ].filter(Boolean);
 
-  return (
-    <article className="rounded-sm border border-neutral300 bg-gray200/40 p-5 md:p-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-        <div className="space-y-2">
-          <p className="font-gill text-base font-normal leading-110 text-darkblack">{address.fullName}</p>
-          <p className="font-gill text-sm font-light leading-110 text-neutral500">
-            {formatAddressLines(address.streetLines)}
-            <br />
-            {address.city}, {address.state} {address.pincode}
-            <br />
-            {address.phone}
-          </p>
-          {badges.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {badges.map((badge) => (
-                <span
-                  key={badge}
-                  className="inline-flex rounded-sm bg-white px-2 py-1 font-gill text-xs font-light leading-110 text-neutral500"
-                >
-                  {badge}
-                </span>
+  if (showDefaultLabel) {
+    return (
+      <ProfileCard className="flex flex-col gap-6">
+        <div className="flex items-start justify-between gap-6">
+          <div className="flex flex-col gap-3 font-gill text-base leading-110 text-darkblack">
+            <p className="font-normal">{address.fullName}</p>
+            <div className="font-light">
+              {addressLines.map((line) => (
+                <p key={line}>{line}</p>
               ))}
             </div>
-          ) : null}
+          </div>
+          <p className="shrink-0 font-gill text-base font-normal leading-110 text-linkGold">
+            {defaultLabel}
+          </p>
         </div>
-
-        <div className="flex flex-col gap-3 sm:flex-row md:flex-col">
-          <CartOutlineButton type="button" className="w-full min-w-[120px] md:w-auto" onClick={onEdit} disabled={isSaving}>
-            Edit
-          </CartOutlineButton>
-          <CartOutlineButton
+        <div className="flex flex-col gap-6 sm:flex-row">
+          <DetailOutlineButton
             type="button"
-            className="w-full min-w-[120px] md:w-auto"
+            className="w-full sm:flex-1"
             onClick={onDelete}
             disabled={isSaving}
           >
-            Delete
-          </CartOutlineButton>
+            {addressContent.removeLabel}
+          </DetailOutlineButton>
+          <DetailDarkButton
+            type="button"
+            className="w-full sm:flex-1"
+            onClick={onEdit}
+            disabled={isSaving}
+          >
+            {addressContent.editLabel}
+          </DetailDarkButton>
+        </div>
+      </ProfileCard>
+    );
+  }
+
+  return (
+    <ProfileCard className="flex items-start justify-between gap-6">
+      <div className="flex flex-col gap-3 font-gill text-base leading-110 text-darkblack">
+        <p className="font-normal">{address.fullName}</p>
+        <div className="font-light">
+          {addressLines.map((line) => (
+            <p key={line}>{line}</p>
+          ))}
         </div>
       </div>
-    </article>
+      <ProfileInlineActions
+        primaryLabel={addressContent.editLabel}
+        secondaryLabel={addressContent.removeLabel}
+        onPrimary={onEdit}
+        onSecondary={onDelete}
+        disabled={isSaving}
+      />
+    </ProfileCard>
   );
 }
 
@@ -348,7 +383,31 @@ const ProfileAddressesSection = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
+      {!showAddForm && !editingAddress ? (
+        <div className="flex justify-end lg:hidden">
+          <DetailTextLink
+            onClick={() => {
+              setEditingUid(null);
+              setShowAddForm(true);
+            }}
+            className="text-sm uppercase"
+          >
+            {addressContent.addLabel}
+          </DetailTextLink>
+        </div>
+      ) : null}
+
+      <ProfileSectionHeader
+        title={addressContent.title}
+        actionLabel={!showAddForm && !editingAddress ? addressContent.addLabel : undefined}
+        onAction={() => {
+          setEditingUid(null);
+          setShowAddForm(true);
+        }}
+        className="hidden lg:flex"
+      />
+
       {error ? (
         <p className="font-gill text-sm font-light leading-110 text-red-700" role="alert">
           {error}
@@ -356,21 +415,22 @@ const ProfileAddressesSection = () => {
       ) : null}
 
       {addresses.length === 0 && !showAddForm && !editingAddress ? (
-        <div className="flex flex-col items-start gap-4 rounded-sm border border-dashed border-neutral300 bg-gray200/60 p-6">
-          <div className="space-y-2">
-            <p className="font-gill text-base font-normal leading-110 text-darkblack">
-              No saved addresses
-            </p>
-            <p className="font-gill text-sm font-light leading-110 text-neutral500">
-              Add a delivery address to speed up checkout on your next purchase.
-            </p>
-          </div>
-          <CartPrimaryLink href="/jewellery" className="w-full max-w-xs">
-            Continue Shopping
-          </CartPrimaryLink>
-        </div>
+        <ProfileEmptyState
+          title={addressContent.emptyTitle}
+          description={addressContent.emptyDescription}
+          action={
+            <CartOutlineButton
+              type="button"
+              className="w-full max-w-xs"
+              onClick={() => setShowAddForm(true)}
+              disabled={isSaving}
+            >
+              {addressContent.emptyCta}
+            </CartOutlineButton>
+          }
+        />
       ) : (
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           {addresses.map((address) =>
             editingUid === address.uid ? (
               <ProfileAddressForm
@@ -404,19 +464,7 @@ const ProfileAddressesSection = () => {
           onCancel={() => setShowAddForm(false)}
           onSubmit={handleCreate}
         />
-      ) : (
-        <CartOutlineButton
-          type="button"
-          className="w-full max-w-xs"
-          onClick={() => {
-            setEditingUid(null);
-            setShowAddForm(true);
-          }}
-          disabled={isSaving}
-        >
-          Add New Address
-        </CartOutlineButton>
-      )}
+      ) : null}
     </div>
   );
 };

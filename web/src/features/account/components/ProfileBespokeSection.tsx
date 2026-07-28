@@ -1,29 +1,62 @@
 "use client";
 
-import Image from "next/image";
 import {
-  CartMetaRow,
   CartOutlineButton,
   CartPrimaryLink,
 } from "@/features/cart/components/CartFlowUi";
+import { DetailTextLink } from "@/features/products/components/detail/shared";
+import { useToast } from "@/shared/hooks/use-toast";
+import { profileTabsContent } from "../data/profileContent";
+import {
+  MOCK_PROFILE_BESPOKE,
+  PROFILE_PREVIEW_MOCK_WHEN_EMPTY,
+} from "../data/profileMockData";
 import { useCustomerSavedCreations } from "../hooks/useCustomerSavedCreations";
-import { formatAppointmentDate } from "../utils/formatAccountData";
+import { mapSavedCreationToBespokeUi } from "../utils/profileDisplayMappers";
+import { ProfileBespokeCard } from "./ProfileBespokeCard";
+import { ProfileEmptyState, ProfileSectionHeader } from "./profileUi";
+
+const content = profileTabsContent.bespoke;
 
 function BespokeSkeleton() {
   return (
-    <div className="space-y-4" aria-busy="true" aria-label="Loading saved inspirations">
-      {Array.from({ length: 3 }).map((_, index) => (
-        <div
-          key={index}
-          className="h-36 animate-pulse rounded-sm border border-neutral300 bg-gray200/60"
-        />
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2" aria-busy="true" aria-label="Loading saved inspirations">
+      {Array.from({ length: 2 }).map((_, index) => (
+        <div key={index} className="h-[557px] animate-pulse bg-gray300" />
       ))}
     </div>
   );
 }
 
 const ProfileBespokeSection = () => {
+  const { toast } = useToast();
   const { data, isLoading, error, page, setPage } = useCustomerSavedCreations(true);
+
+  const items =
+    data && data.items.length > 0
+      ? data.items
+          .map((item) => mapSavedCreationToBespokeUi(item))
+          .filter((item): item is NonNullable<typeof item> => item != null)
+      : PROFILE_PREVIEW_MOCK_WHEN_EMPTY
+        ? MOCK_PROFILE_BESPOKE
+        : [];
+
+  const usingMockData =
+    PROFILE_PREVIEW_MOCK_WHEN_EMPTY && (!data || data.items.length === 0);
+
+  const handleShare = () => {
+    toast({
+      title: content.shareUnavailableTitle,
+      description: content.shareUnavailableDescription,
+    });
+  };
+
+  const handleRemove = () => {
+    toast({
+      title: content.removeUnavailableTitle,
+      description: content.removeUnavailableDescription,
+    });
+  };
 
   if (isLoading) {
     return <BespokeSkeleton />;
@@ -37,83 +70,46 @@ const ProfileBespokeSection = () => {
     );
   }
 
-  if (!data || data.items.length === 0) {
+  if (!usingMockData && items.length === 0) {
     return (
-      <div className="flex flex-col items-start gap-4 rounded-sm border border-dashed border-neutral300 bg-gray200/60 p-6">
-        <div className="space-y-2">
-          <p className="font-gill text-base font-normal leading-110 text-darkblack">
-            No saved inspirations yet
-          </p>
-          <p className="font-gill text-sm font-light leading-110 text-neutral500">
-            Browse bespoke creations and save the ones that speak to you.
-          </p>
-        </div>
-        <CartPrimaryLink href="/bespoke-jewellery" className="w-full max-w-xs">
-          Explore Bespoke
-        </CartPrimaryLink>
+      <div className="flex flex-col gap-6">
+        <ProfileSectionHeader title={content.title} className="hidden lg:flex" />
+        <ProfileEmptyState
+          title={content.emptyTitle}
+          description={
+            <>
+              <span className="block">{content.emptyDescription}</span>
+              <span className="mt-2 block">{content.emptyDescriptionSecondary}</span>
+            </>
+          }
+          action={
+            <div className="flex flex-col items-start gap-6">
+              <CartPrimaryLink href={content.emptyCtaHref} className="w-full max-w-xs">
+                {content.emptyCta}
+              </CartPrimaryLink>
+              <DetailTextLink href={content.emptyCtaHref} className="text-sm uppercase">
+                {content.emptySecondaryCta}
+              </DetailTextLink>
+            </div>
+          }
+        />
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <ul className="space-y-4">
-        {data.items.map((item) => {
-          const creation = item.creation;
-          const title = creation?.title || "Saved creation";
-          const image = creation?.coverImage ?? creation?.gallery[0] ?? null;
-          const metaParts = [
-            item.savedAt ? `Saved ${formatAppointmentDate(item.savedAt)}` : null,
-          ].filter(Boolean) as string[];
+    <div className="flex flex-col gap-6">
+      <ProfileSectionHeader title={content.title} className="hidden lg:flex" />
 
-          return (
-            <li
-              key={item.documentId}
-              className="rounded-sm border border-neutral300 bg-gray200/40 p-5 md:p-6"
-            >
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-                {image ? (
-                  <div className="relative h-28 w-full shrink-0 overflow-hidden rounded-sm bg-neutral300 sm:h-24 sm:w-24">
-                    <Image
-                      src={image.url}
-                      alt={image.alt || title}
-                      fill
-                      className="object-cover"
-                      sizes="96px"
-                    />
-                  </div>
-                ) : null}
-
-                <div className="min-w-0 flex-1 space-y-3">
-                  <div className="space-y-1">
-                    <p className="font-gill text-base font-normal leading-110 text-darkblack">
-                      {title}
-                    </p>
-                    {metaParts.length > 0 ? <CartMetaRow parts={metaParts} /> : null}
-                  </div>
-
-                  {creation?.description ? (
-                    <p className="line-clamp-2 font-gill text-sm font-light leading-110 text-neutral500">
-                      {creation.description}
-                    </p>
-                  ) : null}
-
-                  <div className="flex flex-wrap gap-3 pt-1">
-                    <CartPrimaryLink
-                      href="/bespoke-jewellery"
-                      className="w-full min-w-[160px] sm:w-auto"
-                    >
-                      View Bespoke
-                    </CartPrimaryLink>
-                  </div>
-                </div>
-              </div>
-            </li>
-          );
-        })}
+      <ul className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        {items.map((item) => (
+          <li key={item.id}>
+            <ProfileBespokeCard item={item} onShare={handleShare} onRemove={handleRemove} />
+          </li>
+        ))}
       </ul>
 
-      {data.totalPages > 1 ? (
+      {!usingMockData && data && data.totalPages > 1 ? (
         <div className="flex items-center justify-between gap-4 pt-2">
           <CartOutlineButton
             type="button"

@@ -1,26 +1,38 @@
 "use client";
 
-import Link from "next/link";
+import { useMemo, useState } from "react";
 import {
-  CartMetaRow,
   CartOutlineButton,
   CartPrimaryLink,
 } from "@/features/cart/components/CartFlowUi";
-import { useCustomerOrders } from "../hooks/useCustomerOrders";
+import { profileTabsContent } from "../data/profileContent";
 import {
-  formatOrderDate,
-  formatOrderStatus,
-  formatOrderTotal,
-} from "../utils/formatAccountData";
+  getMockOrdersByFilter,
+  PROFILE_PREVIEW_MOCK_WHEN_EMPTY,
+} from "../data/profileMockData";
+import { useCustomerOrders } from "../hooks/useCustomerOrders";
+import type { OrderFilterKey } from "../types/profileUi.types";
+import {
+  categorizeOrderStatus,
+  mapCustomerOrderToProfileUi,
+} from "../utils/profileDisplayMappers";
+import { ProfileOrderCard } from "./ProfileOrderCard";
+import { ProfileEmptyState, ProfileFilterChips } from "./profileUi";
+
+const content = profileTabsContent.orders;
+
+const FILTER_OPTIONS: { key: OrderFilterKey; label: string; mobileLabel: string }[] = [
+  { key: "in_progress", label: content.filters.inProgress, mobileLabel: content.mobileFilters.inProgress },
+  { key: "delivered", label: content.filters.delivered, mobileLabel: content.mobileFilters.delivered },
+  { key: "cancelled", label: content.filters.cancelled, mobileLabel: content.mobileFilters.cancelled },
+  { key: "returned", label: content.filters.returned, mobileLabel: content.mobileFilters.returned },
+];
 
 function OrdersSkeleton() {
   return (
     <div className="space-y-4" aria-busy="true" aria-label="Loading orders">
-      {Array.from({ length: 3 }).map((_, index) => (
-        <div
-          key={index}
-          className="h-32 animate-pulse rounded-sm border border-neutral300 bg-gray200/60"
-        />
+      {Array.from({ length: 2 }).map((_, index) => (
+        <div key={index} className="h-48 animate-pulse bg-gray300 p-6" />
       ))}
     </div>
   );
@@ -28,6 +40,27 @@ function OrdersSkeleton() {
 
 const ProfileOrdersSection = () => {
   const { data, isLoading, error, page, setPage } = useCustomerOrders(true);
+  const [activeFilter, setActiveFilter] = useState<OrderFilterKey>("in_progress");
+
+  const orders = useMemo(() => {
+    if (data && data.orders.length > 0) {
+      return data.orders.map(mapCustomerOrderToProfileUi);
+    }
+
+    if (PROFILE_PREVIEW_MOCK_WHEN_EMPTY) {
+      return getMockOrdersByFilter(activeFilter);
+    }
+
+    return [];
+  }, [data, activeFilter]);
+
+  const filteredOrders = useMemo(
+    () => orders.filter((order) => order.category === activeFilter),
+    [orders, activeFilter],
+  );
+
+  const usingMockData =
+    PROFILE_PREVIEW_MOCK_WHEN_EMPTY && (!data || data.orders.length === 0);
 
   if (isLoading) {
     return <OrdersSkeleton />;
@@ -41,109 +74,49 @@ const ProfileOrdersSection = () => {
     );
   }
 
-  if (!data || data.orders.length === 0) {
+  if (!usingMockData && (!data || data.orders.length === 0)) {
     return (
-      <div className="flex flex-col items-start gap-4 rounded-sm border border-dashed border-neutral300 bg-gray200/60 p-6">
-        <div className="space-y-2">
-          <p className="font-gill text-base font-normal leading-110 text-darkblack">
-            No orders to show yet
-          </p>
-          <p className="font-gill text-sm font-light leading-110 text-neutral500">
-            When you place an order while signed in, it will appear here. You can also track an order
-            using your order number.
-          </p>
-        </div>
-        <CartPrimaryLink href="/order-tracking" className="w-full max-w-xs">
-          Track an Order
-        </CartPrimaryLink>
-      </div>
+      <ProfileEmptyState
+        title={content.emptyTitle}
+        description={content.emptyDescription}
+        action={
+          <CartPrimaryLink href={content.emptyCtaHref} className="w-full max-w-xs">
+            {content.emptyCta}
+          </CartPrimaryLink>
+        }
+      />
     );
   }
 
   return (
-    <div className="space-y-4">
-      <ul className="space-y-4">
-        {data.orders.map((order) => {
-          const itemSummary = order.items
-            .slice(0, 2)
-            .map((item) => item.productName)
-            .join(", ");
-          const remainingItems = Math.max(0, order.items.length - 2);
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4">
+        <p className="font-gill text-base font-light leading-110 text-darkblack">
+          {content.filterLabel}
+        </p>
+        <ProfileFilterChips
+          options={FILTER_OPTIONS}
+          activeKey={activeFilter}
+          onChange={setActiveFilter}
+          scrollOnMobile
+        />
+      </div>
 
-          return (
-            <li
-              key={order.id}
-              className="rounded-sm border border-neutral300 bg-gray200/40 p-5 md:p-6"
-            >
-              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                <div className="min-w-0 space-y-3">
-                  <div className="space-y-1">
-                    <p className="font-gill text-base font-normal leading-110 text-darkblack">
-                      Order #{order.number}
-                    </p>
-                    <CartMetaRow
-                      parts={[
-                        formatOrderDate(order.orderDate),
-                        formatOrderStatus(order.status),
-                      ]}
-                    />
-                  </div>
-
-                  {itemSummary ? (
-                    <p className="font-gill text-sm font-light leading-110 text-neutral500">
-                      {itemSummary}
-                      {remainingItems > 0 ? ` +${remainingItems} more` : ""}
-                    </p>
-                  ) : null}
-
-                  <ul className="space-y-2">
-                    {order.items.map((item, index) => (
-                      <li
-                        key={`${order.id}-${item.productSku ?? index}`}
-                        className="flex items-start justify-between gap-4 font-gill text-sm font-light leading-110 text-darkblack"
-                      >
-                        <span className="min-w-0">
-                          {item.productUrlKey ? (
-                            <Link
-                              href={`/product/${item.productUrlKey}`}
-                              className="underline-offset-2 hover:underline"
-                            >
-                              {item.productName}
-                            </Link>
-                          ) : (
-                            item.productName
-                          )}
-                          {item.quantity > 1 ? ` × ${item.quantity}` : ""}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="flex shrink-0 flex-col items-start gap-3 md:items-end">
-                  <p className="font-gill text-base font-normal leading-110 text-darkblack">
-                    {formatOrderTotal(order.grandTotal, order.currency)}
-                  </p>
-                  <CartPrimaryLink
-                    href={`/profile/orders/${encodeURIComponent(order.number)}`}
-                    className="w-full min-w-[180px] md:w-auto"
-                  >
-                    View Details
-                  </CartPrimaryLink>
-                  <Link
-                    href={`/order-tracking?order=${encodeURIComponent(order.number)}`}
-                    className="font-gill text-sm font-light leading-110 text-neutral500 underline-offset-2 hover:underline"
-                  >
-                    Track shipment
-                  </Link>
-                </div>
-              </div>
+      {filteredOrders.length === 0 ? (
+        <p className="font-gill text-base font-light leading-110 text-neutral500">
+          {content.emptyFilterMessage}
+        </p>
+      ) : (
+        <ul className="flex flex-col gap-4">
+          {filteredOrders.map((order) => (
+            <li key={order.id}>
+              <ProfileOrderCard order={order} />
             </li>
-          );
-        })}
-      </ul>
+          ))}
+        </ul>
+      )}
 
-      {data.totalPages > 1 ? (
+      {!usingMockData && data && data.totalPages > 1 ? (
         <div className="flex items-center justify-between gap-4 pt-2">
           <CartOutlineButton
             type="button"

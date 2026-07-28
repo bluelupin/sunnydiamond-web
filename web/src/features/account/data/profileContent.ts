@@ -1,0 +1,246 @@
+export const profileHeroSpec = {
+  image: {
+    src: "/images/profile/hero.png",
+    alt: "Sunny Diamonds profile banner",
+    width: 1440,
+    height: 800,
+  },
+  avatar: {
+    src: "/images/profile/avatar.svg",
+    alt: "",
+    width: 90,
+    height: 90,
+  },
+  height: {
+    mobile: 240,
+    desktop: 320,
+  },
+} as const;
+
+export const profileDetailsContent = {
+  sectionTitle: "Personal Details",
+  fields: {
+    fullName: "Full Name",
+    email: "Email ID",
+    phone: "Phone No.",
+  },
+  verifyLabel: "VERIFY",
+  saveLabel: "SAVE",
+  cancelLabel: "CANCEL",
+  phoneInfo:
+    "Phone number is linked to your login and cannot be changed here. Contact support for assistance.",
+  saveUnavailableTitle: "Profile updates",
+  saveUnavailableDescription:
+    "To update your details, please contact our support team or visit a showroom.",
+  deleteAccount: {
+    title: "Delete Account",
+    description:
+      "Deleting your Sunny Diamonds account will permanently remove your profile, saved addresses, orders, wishlist, and plan details. This action cannot be undone.",
+    ctaLabel: "DELETE MY ACCOUNT",
+    contactHref: "/contact",
+    dialog: {
+      title: "Delete Account?",
+      description:
+        "We're sorry to see you cancel. Please share your reason so we can serve you better next time.",
+      reasonLabel: "Select Reason",
+      reasons: [
+        "I'm not satisfied with the service",
+        "I found better prices elsewhere",
+        "I no longer need the account",
+        "Other",
+      ],
+      otherPlaceholder: "Tell us more (optional)",
+      submitLabel: "DELETE MY ACCOUNT",
+      unavailableTitle: "Account deletion",
+      unavailableDescription:
+        "To delete your account, please contact our support team or visit a showroom.",
+    },
+  },
+  logout: {
+    title: "Logout",
+    description: "You will need to log in again to access your account and orders.",
+    ctaLabel: "LOGOUT",
+  },
+} as const;
+
+export const profilePromoContent = {
+  help: {
+    title: "We're Here To Help",
+    description:
+      "Reach out to our experts for support with your orders, plans, or jewellery care.",
+    callLabel: "CALL US",
+    callHref: "tel:+919744355555",
+    emailLabel: "EMAIL US",
+    emailHref: "mailto:customerservice@sunnydiamonds.com",
+  },
+  returns: {
+    title: "15-Day Return Policy",
+    description:
+      "Hassle-free returns available within 15 days of delivery on eligible orders.",
+    ctaLabel: "LEARN MORE",
+    ctaHref: "/returns-and-cancellations",
+  },
+} as const;
+
+export const profileTabsContent = {
+  orders: {
+    filterLabel: "Filter by:",
+    filters: {
+      inProgress: "In Progress",
+      delivered: "Delivered Orders",
+      cancelled: "Cancelled Orders",
+      returned: "Returned Orders",
+    },
+    orderIdLabel: "Order ID:",
+    placedOnLabel: "Placed On:",
+    deliveryByLabel: "Delivery by:",
+    totalLabel: "Total Order Amount",
+    viewDetailsLabel: "VIEW DETAILS",
+    trackOrderLabel: "TRACK ORDER",
+    returnOrderLabel: "RETURN ORDER",
+    downloadInvoiceLabel: "DOWNLOAD INVOICE",
+    cancelNote: "Orders can only be cancelled before they are shipped.",
+    returnDeadlineNote: "Orders can be returned till 30th September 2026",
+    estimatedDeliveryLabel: "Estimated Delivery",
+    estimatedDeliveryPlaceholder: "2 June 2026",
+    estimatedDeliveryRangePlaceholder: "Within 5-7 business days",
+    statusInProgress: "Order in Progress",
+    statusCancelled: "Cancelled",
+    statusRefundInProgress: "Refund In Progress",
+    copyOrderIdLabel: "Copy order ID",
+    copyOrderIdSuccess: "Order ID copied",
+    invoiceUnavailableTitle: "Invoice download",
+    invoiceUnavailableDescription: "Invoice download will be available soon.",
+    emptyTitle: "No Orders Yet",
+    emptyDescription:
+      "When you place an order while signed in, it will appear here. You can also track an order using your order number.",
+    emptyCta: "Track an Order",
+    emptyCtaHref: "/order-tracking",
+    emptyFilterMessage: "No orders match this filter.",
+    mobileTotalLabel: "Total",
+    mobileFilters: {
+      inProgress: "In Progress",
+      delivered: "Delivered",
+      cancelled: "Cancelled",
+      returned: "Returned",
+    },
+    mobileMeta: {
+      estimatedDelivery: "Estimated Delivery:",
+      deliveredOn: "Delivered On:",
+      refundTimeline: "Refund Timeline:",
+      refundTimelineValue: "5-7 Business days",
+    },
+  },
+  addresses: {
+    title: "Saved Address",
+    addLabel: "ADD NEW ADDRESS",
+    defaultShippingLabel: "Default Shipping Address",
+    defaultBillingLabel: "Default Billing Address",
+    editLabel: "EDIT",
+    removeLabel: "REMOVE",
+    emptyTitle: "No Addresses Yet",
+    emptyDescription: "Add a delivery address to speed up checkout on your next purchase.",
+    emptyCta: "Add New Address",
+  },
+  appointments: {
+    title: "My Appointments",
+    filterLabel: "Filter by:",
+    filters: {
+      videoCall: "Video Call",
+      tryAtHome: "Try at Home",
+      storeVisit: "Store Visit",
+    },
+    personalDetailsTitle: "Personal Details",
+    appointmentAddressTitle: "Appointment Address",
+    storeVisitTitle: "Store Visit Details",
+    bookingDetailsTitle: "Booking Details",
+    bookingDateLabel: "Date",
+    bookingTimeLabel: "Time",
+    notesLabel: "Message",
+    rescheduleLabel: "RESCHEDULE",
+    cancelLabel: "CANCEL APPOINTMENT",
+    rescheduleNotePlaceholder: "Appointment can be rescheduled before 14 June 2026",
+    getDirectionsLabel: "GET DIRECTIONS",
+    cancelDialog: {
+      title: "Cancel Appointment",
+      description:
+        "Something came up? Cancel or reschedule the appointment at your convenience.",
+      rescheduleLabel: "RESCHEDULE",
+      confirmLabel: "CANCEL APPOINTMENT",
+      unavailableTitle: "Appointment updates",
+      unavailableDescription:
+        "Rescheduling and cancellation will be available soon. Please contact support for assistance.",
+    },
+    emptyTitle: "No Appointments Yet",
+    emptyDescription: "You haven't booked any appointments yet.",
+    emptyDescriptionSecondary: "Schedule a visit for personalised jewellery guidance.",
+    emptyCta: "Book an Appointment",
+    emptyCtaHref: "/book-an-appointment",
+    bookAnotherLabel: "BOOK ANOTHER",
+    emptyFilterMessage: "No appointments match this filter.",
+  },
+  bespoke: {
+    title: "Bespoke Inspirations",
+    shareLabel: "SHARE",
+    removeLabel: "REMOVE",
+    emptyTitle: "No Inspirations Saved",
+    emptyDescription: "You haven't saved any bespoke inspirations yet.",
+    emptyDescriptionSecondary: "Save styles you love to shape your custom creation.",
+    emptyCta: "Explore Bespoke",
+    emptyCtaHref: "/bespoke-jewellery",
+    emptySecondaryCta: "Browse Bespoke Creations",
+    viewLabel: "VIEW BESPOKE",
+    shareUnavailableTitle: "Share",
+    shareUnavailableDescription: "Sharing will be available soon.",
+    removeUnavailableTitle: "Remove",
+    removeUnavailableDescription: "Removing saved inspirations will be available soon.",
+  },
+  support: {
+    callUs: {
+      title: "Call Us",
+      hours: [
+        { label: "Monday to Saturday", value: "9:00 AM to 7:00 PM" },
+        { label: "Sunday:", value: "9:00 AM to 4:00 PM" },
+      ],
+      phone: "+91 9744355555",
+      phoneHref: "tel:+919744355555",
+      ctaLabel: "CONTACT US",
+      ctaHref: "/contact",
+    },
+    emailUs: {
+      title: "Email Us",
+      description:
+        "Our customer support team would be delighted to help resolve your concerns",
+      email: "customerservice@sunnydiamonds.com",
+      emailHref: "mailto:customerservice@sunnydiamonds.com",
+      ctaLabel: "SEND AN EMAIL",
+    },
+    faqTitle: "Frequently Asked Questions",
+    faqItems: [
+      {
+        id: "track-order",
+        question: "How can I track my order?",
+        answer:
+          "You can track your order directly from the Profile section under “My Orders” once your purchase has been shipped.",
+      },
+      {
+        id: "modify-order",
+        question: "Can I modify or cancel my order after placing it?",
+        answer:
+          "Orders can be modified or cancelled before they are shipped. Contact our support team or visit a showroom for assistance.",
+      },
+      {
+        id: "return-exchange",
+        question: "How do I initiate a return or exchange?",
+        answer:
+          "Visit our Returns & Cancellations page or contact customer support within 15 days of delivery for eligible orders.",
+      },
+      {
+        id: "custom-return",
+        question: "Are customised or engraved products returnable?",
+        answer:
+          "Customised and engraved jewellery may not be eligible for return. Our team will confirm eligibility based on your order details.",
+      },
+    ],
+  },
+} as const;

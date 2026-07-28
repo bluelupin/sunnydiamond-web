@@ -54,6 +54,8 @@ export default {
         benefitSurface: "#F8F1F6",
         supportSurface: "#F2E3ED",
         goldAccent: "#DDA957",
+        yellow100: "#FDE5BF",
+        yellow600: "#E5930A",
         lightGold:"#D1B57A",
         gold300: "#DECAA0",
         goldGrid: "#EFE7D4",

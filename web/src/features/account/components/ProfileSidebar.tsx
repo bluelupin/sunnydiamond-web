@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { cn } from "@/shared/utils/cn";
-import { PROFILE_SECTIONS } from "../data/profileSections";
+import { PROFILE_NAV_ITEMS } from "../data/profileSections";
 import type { ProfileSectionId } from "../types";
 
 type ProfileSidebarProps = {
@@ -10,24 +11,36 @@ type ProfileSidebarProps = {
 };
 
 const ProfileSidebar = ({ activeSection, onSectionChange }: ProfileSidebarProps) => (
-  <nav aria-label="Profile sections" className="flex flex-col gap-1">
-    {PROFILE_SECTIONS.map((section) => {
-      const isActive = section.id === activeSection;
+  <nav aria-label="Profile sections" className="flex flex-col border-r border-neutral300">
+    {PROFILE_NAV_ITEMS.map((item) => {
+      if (item.kind === "link") {
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="px-6 py-6 font-gill text-xl font-light leading-110 text-darkblack transition-colors hover:bg-gray300/60"
+          >
+            {item.label}
+          </Link>
+        );
+      }
+
+      const isActive = item.id === activeSection;
 
       return (
         <button
-          key={section.id}
+          key={item.id}
           type="button"
-          onClick={() => onSectionChange(section.id)}
+          onClick={() => onSectionChange(item.id)}
           aria-current={isActive ? "page" : undefined}
           className={cn(
-            "rounded-sm px-4 py-3 text-left font-gill text-base leading-110 transition-colors",
+            "px-6 py-6 text-left font-gill text-xl leading-110 transition-colors",
             isActive
-              ? "bg-white font-normal text-darkblack shadow-[0_1px_0_rgba(0,0,0,0.04)]"
-              : "font-light text-neutral500 hover:bg-white/60 hover:text-darkblack",
+              ? "border-r-2 border-darkblack bg-gray300 font-normal text-darkblack"
+              : "font-light text-darkblack hover:bg-gray300/60",
           )}
         >
-          {section.label}
+          {item.label}
         </button>
       );
     })}

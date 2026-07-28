@@ -1,17 +1,19 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/features/auth/context/AuthContext";
-import PageContainer from "@/shared/ui/layout/PageContainer";
 import {
   DEFAULT_PROFILE_SECTION,
-  getProfileSection,
+  getProfileSectionMobileTitle,
   isProfileSectionId,
-  PROFILE_SECTIONS,
 } from "../data/profileSections";
 import type { ProfileSectionId } from "../types";
 import ProfileAuthGate from "./ProfileAuthGate";
+import ProfileHeroSection from "./ProfileHeroSection";
+import { ProfileMobileNavSheet } from "./ProfileMobileNavSheet";
+import { ProfileMobileSectionHeader } from "./ProfileMobileSectionHeader";
+import { ProfilePromoStrip } from "./ProfilePromoStrip";
 import ProfileSectionContent from "./ProfileSectionContent";
 import ProfileSidebar from "./ProfileSidebar";
 
@@ -26,7 +28,8 @@ const ProfilePage = () => {
     return isProfileSectionId(requested) ? requested : DEFAULT_PROFILE_SECTION;
   }, [searchParams]);
 
-  const activeMeta = getProfileSection(activeSection);
+  const mobileSectionTitle = getProfileSectionMobileTitle(activeSection);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const handleSectionChange = useCallback(
     (section: ProfileSectionId) => {
@@ -46,49 +49,37 @@ const ProfilePage = () => {
   return (
     <ProfileAuthGate>
       {customer ? (
-        <section className="bg-gray200 pb-16 pt-6 md:pb-20 md:pt-10">
-        <PageContainer>
-          <div className="mb-8 space-y-2">
-            <h1 className="font-larken text-32 font-light leading-110 text-darkblack md:text-40">
-              My Profile
-            </h1>
-            <p className="font-gill text-base font-light leading-110 text-neutral500">
-              Hi {customer.firstname}, manage your account and services in one place.
-            </p>
-          </div>
+        <div className="bg-white">
+          <ProfileHeroSection />
 
-          <div className="lg:hidden">
-            <label htmlFor="profile-section-mobile" className="sr-only">
-              Profile section
-            </label>
-            <select
-              id="profile-section-mobile"
-              value={activeSection}
-              onChange={(event) => handleSectionChange(event.target.value as ProfileSectionId)}
-              className="mb-6 h-14 w-full rounded-sm border border-neutral300 bg-white px-4 font-gill text-base text-darkblack outline-none focus:border-darkblack"
-            >
-              {PROFILE_SECTIONS.map((section) => (
-                <option key={section.id} value={section.id}>
-                  {section.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <div className="px-4 pb-16 pt-10 md:px-10 lg:px-10">
+            <ProfileMobileSectionHeader
+              title={mobileSectionTitle}
+              onOpenNav={() => setMobileNavOpen(true)}
+            />
 
-          <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-8">
-            <aside className="hidden rounded-sm bg-gray200/80 p-2 lg:block">
-              <ProfileSidebar activeSection={activeSection} onSectionChange={handleSectionChange} />
-            </aside>
+            <ProfileMobileNavSheet
+              open={mobileNavOpen}
+              onOpenChange={setMobileNavOpen}
+              activeSection={activeSection}
+              onSectionChange={handleSectionChange}
+            />
 
-            <div className="min-w-0">
-              <p className="mb-4 font-gill text-sm font-light leading-110 text-neutral500 lg:hidden">
-                {activeMeta.description}
-              </p>
-              <ProfileSectionContent section={activeSection} customer={customer} />
+            <div className="lg:grid lg:grid-cols-[minmax(280px,437px)_minmax(0,1fr)] lg:gap-16">
+              <aside className="hidden lg:block">
+                <ProfileSidebar
+                  activeSection={activeSection}
+                  onSectionChange={handleSectionChange}
+                />
+              </aside>
+
+              <div className="min-w-0">
+                <ProfileSectionContent section={activeSection} customer={customer} />
+                {activeSection !== "support" ? <ProfilePromoStrip /> : null}
+              </div>
             </div>
           </div>
-        </PageContainer>
-      </section>
+        </div>
       ) : null}
     </ProfileAuthGate>
   );

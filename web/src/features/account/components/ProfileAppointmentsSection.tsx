@@ -1,32 +1,87 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import {
-  CartMetaRow,
   CartOutlineButton,
   CartPrimaryLink,
 } from "@/features/cart/components/CartFlowUi";
-import { useCustomerAppointments } from "../hooks/useCustomerAppointments";
+import { DetailTextLink } from "@/features/products/components/detail/shared";
+import { useToast } from "@/shared/hooks/use-toast";
+import { profileTabsContent } from "../data/profileContent";
 import {
-  formatAppointmentDate,
-  formatAppointmentFormTag,
-  formatAppointmentStatus,
-} from "../utils/formatAccountData";
+  getMockAppointmentsByFilter,
+  PROFILE_PREVIEW_MOCK_WHEN_EMPTY,
+} from "../data/profileMockData";
+import { useCustomerAppointments } from "../hooks/useCustomerAppointments";
+import type { AppointmentFilterKey } from "../types/profileUi.types";
+import { mapCustomerAppointmentToProfileUi } from "../utils/profileDisplayMappers";
+import { ProfileAppointmentCard } from "./ProfileAppointmentCard";
+import { ProfileAppointmentCancelDialog } from "./ProfileAppointmentCancelDialog";
+import {
+  ProfileEmptyState,
+  ProfileFilterChips,
+  ProfileSectionHeader,
+} from "./profileUi";
+
+const content = profileTabsContent.appointments;
+
+const FILTER_OPTIONS: { key: AppointmentFilterKey; label: string }[] = [
+  { key: "video_call", label: content.filters.videoCall },
+  { key: "try_at_home", label: content.filters.tryAtHome },
+  { key: "store_visit", label: content.filters.storeVisit },
+];
 
 function AppointmentsSkeleton() {
   return (
     <div className="space-y-4" aria-busy="true" aria-label="Loading appointments">
-      {Array.from({ length: 3 }).map((_, index) => (
-        <div
-          key={index}
-          className="h-32 animate-pulse rounded-sm border border-neutral300 bg-gray200/60"
-        />
+      {Array.from({ length: 2 }).map((_, index) => (
+        <div key={index} className="h-64 animate-pulse bg-gray300 p-6" />
       ))}
     </div>
   );
 }
 
 const ProfileAppointmentsSection = () => {
+  const { toast } = useToast();
   const { data, isLoading, error, page, setPage } = useCustomerAppointments(true);
+  const [activeFilter, setActiveFilter] = useState<AppointmentFilterKey>("video_call");
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+
+  const appointments = useMemo(() => {
+    if (data && data.appointments.length > 0) {
+      return data.appointments.map(mapCustomerAppointmentToProfileUi);
+    }
+
+    if (PROFILE_PREVIEW_MOCK_WHEN_EMPTY) {
+      return getMockAppointmentsByFilter(activeFilter);
+    }
+
+    return [];
+  }, [data, activeFilter]);
+
+  const filteredAppointments = useMemo(
+    () => appointments.filter((appointment) => appointment.type === activeFilter),
+    [appointments, activeFilter],
+  );
+
+  const usingMockData =
+    PROFILE_PREVIEW_MOCK_WHEN_EMPTY && (!data || data.appointments.length === 0);
+
+  const handleReschedule = () => {
+    toast({
+      title: content.cancelDialog.unavailableTitle,
+      description: content.cancelDialog.unavailableDescription,
+    });
+    setCancelDialogOpen(false);
+  };
+
+  const handleConfirmCancel = () => {
+    toast({
+      title: content.cancelDialog.unavailableTitle,
+      description: content.cancelDialog.unavailableDescription,
+    });
+    setCancelDialogOpen(false);
+  };
 
   if (isLoading) {
     return <AppointmentsSkeleton />;
@@ -40,93 +95,61 @@ const ProfileAppointmentsSection = () => {
     );
   }
 
-  if (!data || data.appointments.length === 0) {
+  if (!usingMockData && (!data || data.appointments.length === 0)) {
     return (
-      <div className="flex flex-col items-start gap-4 rounded-sm border border-dashed border-neutral300 bg-gray200/60 p-6">
-        <div className="space-y-2">
-          <p className="font-gill text-base font-normal leading-110 text-darkblack">
-            No upcoming appointments
-          </p>
-          <p className="font-gill text-sm font-light leading-110 text-neutral500">
-            Schedule a private consultation at your nearest Sunny Diamonds showroom.
-          </p>
-        </div>
-        <CartPrimaryLink href="/book-an-appointment" className="w-full max-w-xs">
-          Book an Appointment
-        </CartPrimaryLink>
+      <div className="flex flex-col gap-6">
+        <ProfileSectionHeader title={content.title} className="hidden lg:flex" />
+        <ProfileEmptyState
+          title={content.emptyTitle}
+          description={
+            <>
+              <span className="block">{content.emptyDescription}</span>
+              <span className="mt-2 block">{content.emptyDescriptionSecondary}</span>
+            </>
+          }
+          action={
+            <CartPrimaryLink href={content.emptyCtaHref} className="w-full max-w-xs">
+              {content.emptyCta}
+            </CartPrimaryLink>
+          }
+        />
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <ul className="space-y-4">
-        {data.appointments.map((appointment) => {
-          const title =
-            appointment.productName ||
-            (appointment.formTag
-              ? formatAppointmentFormTag(appointment.formTag)
-              : "Appointment");
-          const showroomParts = [
-            appointment.preferredShowroom?.name,
-            appointment.preferredShowroom?.city,
-            appointment.preferredShowroom?.state,
-          ].filter(Boolean);
-          const metaParts = [
-            appointment.requestedDate
-              ? formatAppointmentDate(appointment.requestedDate)
-              : null,
-            appointment.selectedTimeSlot || null,
-            appointment.workflowStatus
-              ? formatAppointmentStatus(appointment.workflowStatus)
-              : null,
-          ].filter(Boolean) as string[];
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <ProfileSectionHeader title={content.title} className="hidden lg:flex" />
+        <ProfileFilterChips
+          options={FILTER_OPTIONS}
+          activeKey={activeFilter}
+          onChange={setActiveFilter}
+          scrollOnMobile
+        />
+      </div>
 
-          return (
-            <li
-              key={appointment.documentId}
-              className="rounded-sm border border-neutral300 bg-gray200/40 p-5 md:p-6"
-            >
-              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                <div className="min-w-0 space-y-3">
-                  <div className="space-y-1">
-                    <p className="font-gill text-base font-normal leading-110 text-darkblack">
-                      {title}
-                    </p>
-                    {metaParts.length > 0 ? <CartMetaRow parts={metaParts} /> : null}
-                  </div>
-
-                  {showroomParts.length > 0 ? (
-                    <p className="font-gill text-sm font-light leading-110 text-neutral500">
-                      {showroomParts.join(", ")}
-                    </p>
-                  ) : null}
-
-                  {appointment.formTag && appointment.productName ? (
-                    <p className="font-gill text-sm font-light leading-110 text-neutral500">
-                      {formatAppointmentFormTag(appointment.formTag)}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="flex shrink-0 flex-col items-start gap-3 md:items-end">
-                  <p className="font-gill text-base font-normal leading-110 text-darkblack">
-                    {formatAppointmentStatus(appointment.workflowStatus)}
-                  </p>
-                  <CartPrimaryLink
-                    href="/book-an-appointment"
-                    className="w-full min-w-[180px] md:w-auto"
-                  >
-                    Book Another
-                  </CartPrimaryLink>
-                </div>
-              </div>
+      {filteredAppointments.length === 0 ? (
+        <p className="font-gill text-base font-light leading-110 text-neutral500">
+          {content.emptyFilterMessage}
+        </p>
+      ) : (
+        <ul className="flex flex-col gap-6">
+          {filteredAppointments.map((appointment) => (
+            <li key={appointment.id}>
+              <ProfileAppointmentCard
+                appointment={appointment}
+                onReschedule={handleReschedule}
+                onCancel={() => {
+                  setCancelDialogOpen(true);
+                }}
+              />
             </li>
-          );
-        })}
-      </ul>
+          ))}
+        </ul>
+      )}
 
-      {data.totalPages > 1 ? (
+      {!usingMockData && data && data.totalPages > 1 ? (
         <div className="flex items-center justify-between gap-4 pt-2">
           <CartOutlineButton
             type="button"
@@ -149,6 +172,13 @@ const ProfileAppointmentsSection = () => {
           </CartOutlineButton>
         </div>
       ) : null}
+
+      <ProfileAppointmentCancelDialog
+        open={cancelDialogOpen}
+        onOpenChange={setCancelDialogOpen}
+        onReschedule={handleReschedule}
+        onConfirmCancel={handleConfirmCancel}
+      />
     </div>
   );
 };
