@@ -214,8 +214,8 @@ export type NormalizedEducationFaqSection = {
 export type NormalizedEducationCtaBanner = {
   heading: string;
   subheading: string;
-  ctaLabel: string;
-  ctaHref: string;
+  ctaLabel?: string;
+  ctaHref?: string;
   steps: string[];
   imageDesktopUrl: string;
   imageMobileUrl: string;

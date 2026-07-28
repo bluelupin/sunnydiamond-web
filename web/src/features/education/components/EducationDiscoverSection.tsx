@@ -93,7 +93,7 @@ const EducationDiscoverSection = ({ ctaBanner }: EducationDiscoverSectionProps) 
             <ResponsiveImage
               desktopSrc={ctaBanner.imageDesktopUrl}
               mobileSrc={ctaBanner.imageMobileUrl}
-              alt={ctaBanner.imageAlt || ctaBanner.heading}
+              alt={ctaBanner.imageAlt}
               width={621}
               height={585}
               quality={85}

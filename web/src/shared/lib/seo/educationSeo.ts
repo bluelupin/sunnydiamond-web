@@ -1,19 +1,26 @@
-import { footerPages } from "@/features/cms/data/footerPages";
 import { siteConfig } from "@/shared/lib/siteConfig";
 import type { NormalizedLearnAboutDiamondsPage } from "@/services/education/learn-about-diamonds-page.types";
 import { buildFaqPageJsonLd } from "@/shared/lib/seo/schema/faqPage";
 
-const fallback = footerPages.education;
-
 export function resolveEducationSeoMetadata(page: NormalizedLearnAboutDiamondsPage | null) {
   const cmsSeo = page?.seo;
 
+  if (!cmsSeo) {
+    return {
+      title: siteConfig.brand.name,
+      description: siteConfig.seo.defaultDescription,
+      canonicalPath: "/education",
+      keywords: undefined,
+      image: undefined,
+    };
+  }
+
   return {
-    title: cmsSeo?.metaTitle ?? fallback.title,
-    description: cmsSeo?.metaDescription ?? fallback.description,
-    canonicalPath: cmsSeo?.canonicalPath ?? "/education",
-    keywords: cmsSeo?.metaKeywords,
-    image: cmsSeo?.ogImageUrl,
+    title: cmsSeo.metaTitle,
+    description: cmsSeo.metaDescription,
+    canonicalPath: cmsSeo.canonicalPath,
+    keywords: cmsSeo.metaKeywords,
+    image: cmsSeo.ogImageUrl,
   };
 }
 

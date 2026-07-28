@@ -12,7 +12,6 @@ export const educationPageImages = {
   learnArrowRightMobile: "/images/education/learn-arrow-right-mobile.svg",
   scrollArrow: "/images/education/scroll-arrow.svg",
   claritySliderThumb: "/images/education/clarity-slider-thumb.svg",
-  caratHand: "/images/education/carat-hand-gray.png",
   caratDiamond: "/images/education/carat-diamond.png",
 } as const;
 
@@ -41,28 +40,6 @@ export const educationCaratVisualSpec = {
     diamondMinSize: 6,
     diamondMaxSize: 43,
   },
-} as const;
-
-/** Shared 4Cs panel layout — Figma 692:28887+ */
-export const educationFourCsPanelLayoutSpec = {
-  height: 633,
-  caratHeight: 610,
-  background: "#F4F3EE",
-  mediaContentWidth: 528,
-  diamondSize: 200,
-  diamondToSliderGap: 40,
-  sliderToFootnoteGap: 64,
-  footnoteWidth: 481,
-  footnoteGap: 24,
-  footnoteFontSize: 16,
-  footnoteColor: "#4D4D4D",
-  copyMaxWidth: 441,
-  copyCodeGap: 32,
-  copyTitleGap: 16,
-  codeFontSize: 110,
-  titleFontSize: 32,
-  descriptionFontSize: 20,
-  sliderActiveColor: "#AB863B",
 } as const;
 
 export type EducationSliderSpec = {
@@ -243,29 +220,12 @@ export function buildCaratSliderSpecForWeights(
   };
 }
 
-/** Figma node 692:29131 — education hero scroll collapse (desktop) */
+/** Figma node 692:29131 — hero media dimensions + scroll-collapse animation */
 export const educationHeroFigmaSpec = {
-  section: {
-    height: 640,
-    background: "#FFFFFF",
-  },
   image: {
     width: 1498,
     height: 659,
-    alt: "Hands presenting a brilliant-cut diamond on black velvet",
   },
-  title: {
-    text: "Diamond Expertise",
-    bottom: 70,
-    fontSize: 60,
-    mobileFontSize: 32,
-    color: "#FFFFFF",
-    lineHeight: 100,
-  },
-  overlay: {
-    gradient: "bottom-strong" as const,
-  },
-  /** Figma component 692:28386 — collapsed on load, expands on scroll */
   animation: {
     collapsedWidthRatio: 1360 / 1440,
     collapsedOffsetY: 100,
@@ -330,52 +290,23 @@ export type EducationFourCsPanelContent = {
   };
 };
 
-/** Layout scaffolding for 4Cs panels — copy/slider options come from CMS. */
-export const educationFourCsPanels: EducationFourCsPanelContent[] = [
-  {
-    id: "clarity",
-    code: "C1",
-    title: "",
-    description: "",
-    footnote: "",
-    mediaPosition: "left",
-    background: "chalk",
-    slider: { defaultIndex: 0, options: [] },
-  },
-  {
-    id: "cut",
-    code: "C2",
-    title: "",
-    description: "",
-    footnote: "",
-    mediaPosition: "right",
-    background: "chalk",
-    slider: { defaultIndex: 0, options: [] },
-  },
-  {
-    id: "colour",
-    code: "C3",
-    title: "",
-    description: "",
-    footnote: "",
-    mediaPosition: "left",
-    background: "chalk",
-    slider: { defaultIndex: 0, options: [] },
-  },
-  {
-    id: "carat",
-    code: "C4",
-    title: "",
-    description: "",
-    footnote: "",
-    mediaPosition: "right",
-    background: "chalk",
-    slider: { defaultIndex: 0, options: [] },
-  },
+export type EducationFourCsPanelLayout = {
+  id: string;
+  code: string;
+  mediaPosition: "left" | "right";
+  background: "chalk" | "white";
+};
+
+/** Panel order + layout only — copy and slider data come from CMS. */
+export const educationFourCsPanelLayouts: EducationFourCsPanelLayout[] = [
+  { id: "clarity", code: "C1", mediaPosition: "left", background: "chalk" },
+  { id: "cut", code: "C2", mediaPosition: "right", background: "chalk" },
+  { id: "colour", code: "C3", mediaPosition: "left", background: "chalk" },
+  { id: "carat", code: "C4", mediaPosition: "right", background: "chalk" },
 ];
 
-/** Logo layout classes only — labels/logos come from CMS certificateSection. */
-export const educationCertifiedContent = {
+/** Logo layout classes only — labels and logos come from CMS certificateSection. */
+export const educationCertificationLogoStyles = {
   certifications: [
     {
       id: "gia",
