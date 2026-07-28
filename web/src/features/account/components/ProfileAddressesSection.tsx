@@ -127,7 +127,11 @@ function AddressCard({
 
 function AddressesSkeleton() {
   return (
-    <div className="space-y-4" aria-busy="true" aria-label="Loading addresses">
+    <div
+      className="grid grid-cols-1 gap-4 md:grid-cols-2"
+      aria-busy="true"
+      aria-label="Loading addresses"
+    >
       {Array.from({ length: 2 }).map((_, index) => (
         <div
           key={index}
@@ -283,12 +287,13 @@ const ProfileAddressesSection = () => {
           }
         />
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {!sheetOpen ? (
             <ProfileAddAddressCard
               label={addressContent.addCardLabel}
               onClick={openAddForm}
               disabled={isSaving}
+              className="h-full min-h-[200px]"
             />
           ) : null}
           {addresses.map((address) => (
@@ -317,6 +322,7 @@ const ProfileAddressesSection = () => {
         initialValues={
           editingAddress ? mapCustomerAddressToFormInput(editingAddress) : undefined
         }
+        isEditing={Boolean(editingUid)}
         isSaving={isSaving}
         onSubmit={editingUid ? handleUpdate : handleCreate}
       />

@@ -16,6 +16,7 @@ import {
 } from "@/shared/constants/appointmentForm";
 import { profileDetailsContent } from "../data/profileContent";
 import { ProfileDeleteAccountDialog } from "./ProfileDeleteAccountDialog";
+import { ProfileDeleteAccountReasonDialog } from "./ProfileDeleteAccountReasonDialog";
 
 type ProfileDetailsSectionProps = {
   customer: AuthCustomer;
@@ -26,7 +27,8 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
   const { toast } = useToast();
   const { contact } = useCustomerProfileContact(true);
   const content = profileDetailsContent;
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteReasonOpen, setDeleteReasonOpen] = useState(false);
 
   const initialFullName = [customer.firstname, customer.lastname].filter(Boolean).join(" ");
   const initialEmail = customer.email ?? "";
@@ -154,14 +156,30 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
           </p>
         </div>
         <DetailTextLink
-          onClick={() => setDeleteDialogOpen(true)}
+          onClick={() => setDeleteConfirmOpen(true)}
           className="text-sm uppercase"
         >
           {content.deleteAccount.ctaLabel}
         </DetailTextLink>
       </div>
 
-      <ProfileDeleteAccountDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen} />
+      <ProfileDeleteAccountDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        onDelete={() => setDeleteReasonOpen(true)}
+      />
+
+      <ProfileDeleteAccountReasonDialog
+        open={deleteReasonOpen}
+        onOpenChange={setDeleteReasonOpen}
+        onConfirm={() => {
+          setDeleteReasonOpen(false);
+          toast({
+            title: content.deleteAccount.reasonDialog.deletedToastTitle,
+            description: content.deleteAccount.reasonDialog.deletedToastDescription,
+          });
+        }}
+      />
 
       <div className="flex flex-col gap-6 bg-gray300 p-4 md:flex-row md:items-center md:justify-between md:p-6">
         <div className="flex max-w-md flex-col gap-4">

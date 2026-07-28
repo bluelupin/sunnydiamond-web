@@ -3,22 +3,16 @@
 import { useMemo, useState } from "react";
 import {
   CartOutlineButton,
-  CartPrimaryLink,
 } from "@/features/cart/components/CartFlowUi";
-import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { useToast } from "@/shared/hooks/use-toast";
 import { profileTabsContent } from "../data/profileContent";
-import {
-  getMockAppointmentsByFilter,
-  PROFILE_PREVIEW_MOCK_WHEN_EMPTY,
-} from "../data/profileMockData";
 import { useCustomerAppointments } from "../hooks/useCustomerAppointments";
 import type { AppointmentFilterKey } from "../types/profileUi.types";
 import { mapCustomerAppointmentToProfileUi } from "../utils/profileDisplayMappers";
 import { ProfileAppointmentCard } from "./ProfileAppointmentCard";
 import { ProfileAppointmentCancelDialog } from "./ProfileAppointmentCancelDialog";
+import { ProfileAppointmentsEmptyState } from "./ProfileAppointmentsEmptyState";
 import {
-  ProfileEmptyState,
   ProfileFilterChips,
 } from "./profileUi";
 
@@ -47,24 +41,17 @@ const ProfileAppointmentsSection = () => {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
 
   const appointments = useMemo(() => {
-    if (data && data.appointments.length > 0) {
-      return data.appointments.map(mapCustomerAppointmentToProfileUi);
+    if (!data?.appointments.length) {
+      return [];
     }
 
-    if (PROFILE_PREVIEW_MOCK_WHEN_EMPTY) {
-      return getMockAppointmentsByFilter(activeFilter);
-    }
-
-    return [];
-  }, [data, activeFilter]);
+    return data.appointments.map(mapCustomerAppointmentToProfileUi);
+  }, [data]);
 
   const filteredAppointments = useMemo(
     () => appointments.filter((appointment) => appointment.type === activeFilter),
     [appointments, activeFilter],
   );
-
-  const usingMockData =
-    PROFILE_PREVIEW_MOCK_WHEN_EMPTY && (!data || data.appointments.length === 0);
 
   const handleReschedule = () => {
     toast({
@@ -94,25 +81,8 @@ const ProfileAppointmentsSection = () => {
     );
   }
 
-  if (!usingMockData && (!data || data.appointments.length === 0)) {
-    return (
-      <div className="flex flex-col gap-6">
-        <ProfileEmptyState
-          title={content.emptyTitle}
-          description={
-            <>
-              <span className="block">{content.emptyDescription}</span>
-              <span className="mt-2 block">{content.emptyDescriptionSecondary}</span>
-            </>
-          }
-          action={
-            <CartPrimaryLink href={content.emptyCtaHref} className="w-full max-w-xs">
-              {content.emptyCta}
-            </CartPrimaryLink>
-          }
-        />
-      </div>
-    );
+  if (!data || data.appointments.length === 0) {
+    return <ProfileAppointmentsEmptyState />;
   }
 
   return (
@@ -149,7 +119,7 @@ const ProfileAppointmentsSection = () => {
         </ul>
       )}
 
-      {!usingMockData && data && data.totalPages > 1 ? (
+      {data && data.totalPages > 1 ? (
         <div className="flex items-center justify-between gap-4 pt-2">
           <CartOutlineButton
             type="button"

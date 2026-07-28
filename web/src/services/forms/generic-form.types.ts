@@ -68,6 +68,9 @@ export type NormalizedGenericFormShowroom = {
   phone: string;
   directionsUrl: string;
   heroImage: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
 };
 
 export type NormalizedGenericFormField = {

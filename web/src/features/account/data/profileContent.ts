@@ -35,18 +35,25 @@ export const profileDetailsContent = {
     dialog: {
       title: "Delete Account?",
       description:
+        "Once your account is deleted, you will lose access to your orders, savings plans, saved preferences, and account history permanently.",
+      cancelLabel: "CANCEL",
+      confirmLabel: "DELETE",
+    },
+    reasonDialog: {
+      title: "Delete Account?",
+      description:
         "We're sorry to see you cancel. Please share your reason so we can serve you better next time.",
       reasonLabel: "Select Reason",
       reasons: [
-        "I'm not satisfied with the service",
-        "I found better prices elsewhere",
-        "I no longer need the account",
+        "I no longer use this account",
+        "I'm concerned about privacy or security",
+        "I had a poor shopping experience",
         "Other",
       ],
-      otherPlaceholder: "Tell us more (optional)",
-      submitLabel: "DELETE MY ACCOUNT",
-      unavailableTitle: "Account deletion",
-      unavailableDescription:
+      commentsPlaceholder: "Additional comments",
+      confirmLabel: "CONFIRM",
+      deletedToastTitle: "Account deletion",
+      deletedToastDescription:
         "To delete your account, please contact our support team or visit a showroom.",
     },
   },
@@ -192,7 +199,7 @@ export const profileTabsContent = {
     emptyTitle: "No Appointments Yet",
     emptyDescription: "You haven't booked any appointments yet.",
     emptyDescriptionSecondary: "Schedule a visit for personalised jewellery guidance.",
-    emptyCta: "Book an Appointment",
+    emptyCta: "BOOK AN APPOINTMENT",
     emptyCtaHref: "/book-an-appointment",
     bookAnotherLabel: "BOOK ANOTHER",
     emptyFilterMessage: "No appointments match this filter.",
@@ -201,6 +208,9 @@ export const profileTabsContent = {
     title: "Bespoke Inspirations",
     shareLabel: "SHARE",
     removeLabel: "REMOVE",
+    removedToastMessage: "Image removed from Bespoke Inspiration",
+    removedUndoLabel: "UNDO",
+    removeErrorTitle: "Remove failed",
     emptyTitle: "No Inspirations Saved",
     emptyDescription: "You haven't saved any bespoke inspirations yet.",
     emptyDescriptionSecondary: "Save styles you love to shape your custom creation.",

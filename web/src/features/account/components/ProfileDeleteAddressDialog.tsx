@@ -29,7 +29,10 @@ export function ProfileDeleteAddressDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[520px] gap-6 border-neutral300 bg-white p-6 sm:rounded-none">
+      <DialogContent
+        hideCloseButton
+        className="max-w-[520px] gap-6 border-neutral300 bg-white p-6 sm:rounded-none"
+      >
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between gap-4">
             <DialogTitle className="font-larken text-32 font-light leading-110 text-darkblack">

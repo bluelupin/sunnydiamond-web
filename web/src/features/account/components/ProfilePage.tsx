@@ -9,6 +9,7 @@ import {
   isProfileSectionId,
 } from "../data/profileSections";
 import type { ProfileSectionId } from "../types";
+import { ProfileBespokeToastProvider } from "../context/ProfileBespokeToastContext";
 import ProfileAuthGate from "./ProfileAuthGate";
 import ProfileHeroSection from "./ProfileHeroSection";
 import { ProfileMobileNavSheet } from "./ProfileMobileNavSheet";
@@ -16,6 +17,8 @@ import { ProfileMobileSectionHeader } from "./ProfileMobileSectionHeader";
 import { ProfilePromoStrip } from "./ProfilePromoStrip";
 import ProfileSectionContent from "./ProfileSectionContent";
 import ProfileSidebar from "./ProfileSidebar";
+import ProfileSupportFaqSection from "./ProfileSupportFaqSection";
+import { cn } from "@/shared/utils/cn";
 
 const ProfilePage = () => {
   const { customer } = useAuth();
@@ -49,38 +52,47 @@ const ProfilePage = () => {
   return (
     <ProfileAuthGate>
       {customer ? (
-        <div className="bg-white">
-          <ProfileHeroSection firstName={customer.firstname} />
+        <ProfileBespokeToastProvider>
+          <div className="bg-white">
+            <ProfileHeroSection firstName={customer.firstname} />
 
-          <div className="px-4 pb-16 pt-10 md:px-10 lg:px-10">
-            <ProfileMobileSectionHeader
-              title={mobileSectionTitle}
-              onOpenNav={() => setMobileNavOpen(true)}
-            />
+            <div
+              className={cn(
+                "px-4 pt-10 md:px-10 lg:px-10",
+                activeSection === "support" ? "pb-0" : "pb-16",
+              )}
+            >
+              <ProfileMobileSectionHeader
+                title={mobileSectionTitle}
+                onOpenNav={() => setMobileNavOpen(true)}
+              />
 
-            <ProfileMobileNavSheet
-              open={mobileNavOpen}
-              onOpenChange={setMobileNavOpen}
-              activeSection={activeSection}
-              onSectionChange={handleSectionChange}
-            />
+              <ProfileMobileNavSheet
+                open={mobileNavOpen}
+                onOpenChange={setMobileNavOpen}
+                activeSection={activeSection}
+                onSectionChange={handleSectionChange}
+              />
 
-            <div className="lg:mt-8 lg:grid lg:grid-cols-[minmax(280px,437px)_minmax(0,1fr)] lg:gap-16">
-              <aside className="hidden lg:block">
-                <ProfileSidebar
-                  activeSection={activeSection}
-                  onSectionChange={handleSectionChange}
-                />
-              </aside>
+              <div className="lg:-mx-10 lg:mt-8 lg:grid lg:grid-cols-[480px_minmax(0,1fr)] lg:gap-6">
+                <aside className="hidden lg:block lg:pl-10">
+                  <ProfileSidebar
+                    activeSection={activeSection}
+                    onSectionChange={handleSectionChange}
+                  />
+                </aside>
 
-              <div className="min-w-0">
-                <ProfileSectionContent section={activeSection} customer={customer} />
+                <div className="min-w-0 lg:pr-6">
+                  <ProfileSectionContent section={activeSection} customer={customer} />
+                </div>
               </div>
             </div>
-          </div>
 
-          {activeSection !== "support" ? <ProfilePromoStrip /> : null}
-        </div>
+            {activeSection === "support" ? <ProfileSupportFaqSection /> : null}
+
+            {activeSection !== "support" ? <ProfilePromoStrip /> : null}
+          </div>
+        </ProfileBespokeToastProvider>
       ) : null}
     </ProfileAuthGate>
   );

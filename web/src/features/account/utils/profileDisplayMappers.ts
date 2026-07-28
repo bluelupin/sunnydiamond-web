@@ -13,8 +13,6 @@ import type {
 } from "../types/profileUi.types";
 import {
   formatAppointmentDate,
-  formatAppointmentFormTag,
-  formatAppointmentStatus,
   formatOrderDate,
   formatOrderStatus,
 } from "./formatAccountData";
@@ -53,6 +51,40 @@ function inferAppointmentType(formTag: string): AppointmentFilterKey {
   }
 
   return "store_visit";
+}
+
+function canModifyAppointment(workflowStatus: string): boolean {
+  const normalized = workflowStatus.toLowerCase();
+  return (
+    !normalized.includes("cancel") &&
+    !normalized.includes("complete") &&
+    !normalized.includes("done") &&
+    !normalized.includes("closed")
+  );
+}
+
+function mapAppointmentAddressToUi(
+  appointment: CustomerAppointment,
+): ProfileAppointmentUi["appointmentAddress"] | undefined {
+  const addressLine1 = appointment.addressLine1?.trim() ?? "";
+  const addressLine2 = appointment.addressLine2?.trim();
+  const city = appointment.city?.trim();
+  const state = appointment.state?.trim();
+  const pincode = appointment.pincode?.trim();
+
+  if (!addressLine1 && !addressLine2 && !city && !state && !pincode) {
+    return undefined;
+  }
+
+  return {
+    name: appointment.customerName,
+    addressLine1,
+    addressLine2,
+    city,
+    state,
+    pincode,
+    phone: appointment.customerPhone,
+  };
 }
 
 function defaultDeliveryTimeline(): ProfileTimelineStep[] {
@@ -184,6 +216,8 @@ export function mapCustomerAppointmentToProfileUi(
         ]
       : [];
 
+  const canModify = canModifyAppointment(appointment.workflowStatus);
+
   const base: ProfileAppointmentUi = {
     id: appointment.documentId,
     type,
@@ -197,20 +231,16 @@ export function mapCustomerAppointmentToProfileUi(
       : "",
     bookingTime: appointment.selectedTimeSlot,
     notesLabel: profileTabsContent.appointments.notesLabel,
-    notes: formatAppointmentFormTag(appointment.formTag),
+    notes: appointment.customerMessage ?? "",
     rescheduleNote: profileTabsContent.appointments.rescheduleNotePlaceholder,
-    canReschedule: true,
-    canCancel: true,
+    canReschedule: canModify,
+    canCancel: canModify,
   };
 
   if (type === "try_at_home") {
-    return {
-      ...base,
-      appointmentAddress: {
-        name: appointment.customerName,
-        lines: showroomParts.length > 0 ? showroomParts : [appointment.customerPhone],
-      },
-    };
+    const appointmentAddress = mapAppointmentAddressToUi(appointment);
+
+    return appointmentAddress ? { ...base, appointmentAddress } : base;
   }
 
   if (type === "store_visit" && showroomParts.length > 0) {
@@ -224,10 +254,7 @@ export function mapCustomerAppointmentToProfileUi(
     };
   }
 
-  return {
-    ...base,
-    notes: formatAppointmentStatus(appointment.workflowStatus),
-  };
+  return base;
 }
 
 export function mapSavedCreationToBespokeUi(
@@ -241,6 +268,7 @@ export function mapSavedCreationToBespokeUi(
 
   return {
     id: item.documentId,
+    creationDocumentId: creation.documentId,
     title: creation.title,
     imageSrc: image,
     price: undefined,

@@ -17,6 +17,12 @@ export type CustomerAppointment = {
   requestedDate: string;
   selectedTimeSlot: string;
   workflowStatus: string;
+  customerMessage: string | null;
+  addressLine1: string | null;
+  addressLine2: string | null;
+  pincode: string | null;
+  city: string | null;
+  state: string | null;
   preferredShowroom: CustomerAppointmentShowroom | null;
   createdAt: string;
   updatedAt: string;
@@ -49,6 +55,15 @@ export type StrapiCustomerAppointment = {
   requestedDate?: string | null;
   selectedTimeSlot?: string | null;
   workflowStatus?: string | null;
+  requestDetails?: string | null;
+  notes?: string | null;
+  message?: string | null;
+  customerMessage?: string | null;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  pincode?: string | null;
+  city?: string | null;
+  state?: string | null;
   preferredShowroom?: StrapiCustomerAppointmentShowroom | null;
   createdAt?: string | null;
   updatedAt?: string | null;

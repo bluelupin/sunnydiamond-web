@@ -4,12 +4,13 @@ import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
 import { CartPrimaryLink } from "@/features/cart/components/CartFlowUi";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { profileTabsContent } from "../data/profileContent";
+import { ProfileTabEmptyStateLayout } from "./profileUi";
 
 const content = profileTabsContent.orders;
 
 export function ProfileOrdersEmptyState() {
   return (
-    <div className="flex flex-col items-center gap-6 py-6 text-center">
+    <ProfileTabEmptyStateLayout>
       <ShoppingBagIcon className="size-16 text-gold500" />
 
       <h3 className="w-full font-larken text-32 font-light leading-110 text-darkblack">
@@ -29,6 +30,6 @@ export function ProfileOrdersEmptyState() {
           {content.emptySecondaryCta}
         </DetailTextLink>
       </div>
-    </div>
+    </ProfileTabEmptyStateLayout>
   );
 }

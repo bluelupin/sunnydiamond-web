@@ -7,7 +7,7 @@ import { cn } from "@/shared/utils/cn";
 
 type ProfileBespokeCardProps = {
   item: ProfileBespokeItemUi;
-  onRemove: () => void;
+  onRemove: (item: ProfileBespokeItemUi) => void;
 };
 
 const overlayVisibility =
@@ -17,27 +17,27 @@ export function ProfileBespokeCard({ item, onRemove }: ProfileBespokeCardProps) 
   const content = profileTabsContent.bespoke;
 
   return (
-    <article className="group relative h-[204px] overflow-hidden">
+    <article className="group relative h-[204px] w-full min-w-0 overflow-hidden">
       <Image
         src={item.imageSrc}
         alt={item.title}
         fill
         className="object-cover"
-        sizes="(max-width: 768px) 100vw, 33vw"
+        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
       />
 
       <div className={cn("absolute inset-0 bg-black/20", overlayVisibility)} aria-hidden />
 
       <div
         className={cn(
-          "absolute inset-x-0 bottom-0 flex justify-center pb-3",
+          "absolute left-1/2 top-[161px] -translate-x-1/2",
           overlayVisibility,
         )}
       >
         <button
           type="button"
-          onClick={onRemove}
-          className="border-b border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white"
+          onClick={() => onRemove(item)}
+          className="flex flex-col items-start border-b border-white pb-1 font-gill text-sm font-normal leading-110 text-white"
           aria-label={`Remove ${item.title}`}
         >
           {content.removeLabel}

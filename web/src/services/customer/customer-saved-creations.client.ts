@@ -69,3 +69,31 @@ export async function saveCustomerCreationClient(
 
   return (await response.json()) as SaveCustomerCreationResult;
 }
+
+export async function deleteCustomerSavedCreationClient(
+  documentId: string,
+  signal?: AbortSignal,
+): Promise<void> {
+  const id = documentId.trim();
+  if (!id) {
+    throw new Error("Missing saved inspiration id.");
+  }
+
+  const response = await fetch(
+    `/api/customer/saved-creations/${encodeURIComponent(id)}`,
+    {
+      method: "DELETE",
+      cache: "no-store",
+      credentials: "same-origin",
+      signal,
+    },
+  );
+
+  if (response.status === 401) {
+    throw new Error("Please sign in to manage your saved inspirations.");
+  }
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response));
+  }
+}

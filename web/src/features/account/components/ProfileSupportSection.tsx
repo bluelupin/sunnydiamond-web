@@ -1,21 +1,24 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { Mail, Phone } from "lucide-react";
-import { DetailOutlineLink } from "@/features/products/components/detail/shared";
 import { profileTabsContent } from "../data/profileContent";
-import { ProfileAccordion, ProfileCard } from "./profileUi";
+import { cn } from "@/shared/utils/cn";
+
+const outlineCtaClassName =
+  "btn-border-slide inline-flex h-14 shrink-0 items-center justify-center border border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack";
 
 const ProfileSupportSection = () => {
-  const { callUs, emailUs, faqTitle, faqItems } = profileTabsContent.support;
+  const { callUs, emailUs } = profileTabsContent.support;
 
   return (
     <div className="flex flex-col gap-10">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <ProfileCard className="flex flex-col items-center gap-6 text-center">
+        <div className="flex flex-col items-center gap-6 bg-gray300 p-6 text-center">
           <h3 className="font-larken text-2xl font-light leading-110 text-darkblack">
             {callUs.title}
           </h3>
+
           <div className="flex flex-col items-center gap-4">
             <div className="flex flex-col items-center gap-3 text-base leading-110 text-darkblack">
               {callUs.hours.map((entry) => (
@@ -25,52 +28,59 @@ const ProfileSupportSection = () => {
                 </div>
               ))}
             </div>
+
             <Link
               href={callUs.phoneHref}
               className="flex items-center gap-2 font-gill text-base font-normal leading-110 text-darkblack"
             >
-              <Phone className="size-6" strokeWidth={1.5} aria-hidden />
+              <Image
+                src="/images/contact/icon-phone.svg"
+                alt=""
+                width={24}
+                height={24}
+                aria-hidden
+              />
               {callUs.phone}
             </Link>
           </div>
-          <DetailOutlineLink href={callUs.ctaHref} className="w-full max-w-xs">
-            {callUs.ctaLabel}
-          </DetailOutlineLink>
-        </ProfileCard>
 
-        <ProfileCard className="flex flex-col items-center justify-between gap-6 text-center">
-          <div className="flex flex-col items-center gap-6">
+          <Link href={callUs.ctaHref} className={outlineCtaClassName}>
+            {callUs.ctaLabel}
+          </Link>
+        </div>
+
+        <div className="flex flex-col items-center justify-between gap-6 bg-gray300 p-6 text-center">
+          <div className="flex w-full flex-col items-center gap-6">
             <h3 className="font-larken text-2xl font-light leading-110 text-darkblack">
               {emailUs.title}
             </h3>
-            <div className="flex flex-col items-center gap-4">
-              <p className="font-gill text-base font-light leading-110 text-darkblack">
+
+            <div className="flex w-full flex-col items-center gap-4">
+              <p className="max-w-full font-gill text-base font-light leading-110 text-darkblack">
                 {emailUs.description}
               </p>
+
               <Link
                 href={emailUs.emailHref}
-                className="flex items-center gap-2 font-gill text-base font-normal leading-110 text-darkblack"
+                className="flex flex-wrap items-center justify-center gap-2 font-gill text-base font-normal leading-110 text-darkblack"
               >
-                <Mail className="size-6" strokeWidth={1.5} aria-hidden />
+                <Image
+                  src="/images/contact/icon-email.svg"
+                  alt=""
+                  width={24}
+                  height={24}
+                  aria-hidden
+                />
                 {emailUs.email}
               </Link>
             </div>
           </div>
-          <DetailOutlineLink href={emailUs.emailHref} className="w-full max-w-xs">
-            {emailUs.ctaLabel}
-          </DetailOutlineLink>
-        </ProfileCard>
-      </div>
 
-      <section aria-labelledby="profile-support-faq" className="flex flex-col gap-10 py-6">
-        <h2
-          id="profile-support-faq"
-          className="text-center font-larken text-32 font-light leading-110 text-darkblack md:text-5xl"
-        >
-          {faqTitle}
-        </h2>
-        <ProfileAccordion items={faqItems} />
-      </section>
+          <Link href={emailUs.emailHref} className={cn(outlineCtaClassName, "mt-auto")}>
+            {emailUs.ctaLabel}
+          </Link>
+        </div>
+      </div>
     </div>
   );
 };

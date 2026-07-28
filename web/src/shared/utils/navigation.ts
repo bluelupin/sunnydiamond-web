@@ -38,6 +38,7 @@ export function isHeroOverlayRoute(pathname: string): boolean {
     pathname === "/gifting" ||
     pathname === "/careers" ||
     pathname === "/contact" ||
+    pathname === "/store-locator" ||
     pathname === "/profile" ||
     pathname.startsWith("/profile/")
   );

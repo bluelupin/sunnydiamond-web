@@ -117,3 +117,29 @@ export async function saveCustomerCreation(
   const payload = (await response.json()) as StrapiSaveCreationResponse;
   return mapSaveCreationResult(payload);
 }
+
+export async function deleteCustomerSavedCreation(
+  authToken: string,
+  documentId: string,
+  signal?: AbortSignal,
+): Promise<void> {
+  const id = documentId.trim();
+  if (!id) {
+    throw new CustomerSavedCreationsApiError("Missing documentId", 400);
+  }
+
+  const url = `${getStrapiBaseUrl()}/${STRAPI_ENDPOINTS.customerSavedCreations}/${encodeURIComponent(id)}`;
+  const response = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${authToken}`,
+    },
+    cache: "no-store",
+    signal,
+  });
+
+  if (!response.ok) {
+    throw new CustomerSavedCreationsApiError(await parseErrorMessage(response), response.status);
+  }
+}

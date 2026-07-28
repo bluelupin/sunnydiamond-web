@@ -4,6 +4,7 @@ import Image from "next/image";
 import { PLP_HERO_IMAGE_QUALITY } from "@/features/jewellery-product/utils/jewelleryPlpImage";
 import { profileHeroSpec } from "../data/profileContent";
 import { ProfileAvatar } from "./ProfileAvatar";
+import { ProfileBespokeRemovedToastBanner } from "./ProfileBespokeRemovedToast";
 
 type ProfileHeroSectionProps = {
   firstName: string;
@@ -29,10 +30,9 @@ const ProfileHeroSection = ({ firstName }: ProfileHeroSectionProps) => {
         />
         <div className="absolute inset-0 bg-black/40" />
       </div>
-      <div
-        className="absolute left-1/2 top-[191px] z-10 flex h-[85px] w-20 -translate-x-1/2 items-center justify-center md:top-[255px] md:h-[130px] md:w-[122px]"
-      >
+      <div className="absolute left-1/2 top-[191px] z-20 flex -translate-x-1/2 flex-col items-center md:top-[255px]">
         <ProfileAvatar firstName={firstName} />
+        <ProfileBespokeRemovedToastBanner />
       </div>
     </section>
   );

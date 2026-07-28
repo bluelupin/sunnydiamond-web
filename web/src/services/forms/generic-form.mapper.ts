@@ -1,4 +1,5 @@
 import { getStrapiBaseUrl } from "@/api/config";
+import { extractPincodeFromAddress } from "@/features/stores/utils/storeLocatorFilters";
 import type {
   NormalizedGenericForm,
   NormalizedGenericFormField,
@@ -100,6 +101,9 @@ const mapShowroom = (
       cleanText(showroom.mapUrl) ??
       `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(storeName)}`,
     heroImage,
+    city: cleanText(showroom.city),
+    state: cleanText(showroom.state),
+    pincode: extractPincodeFromAddress(cleanText(showroom.address)),
   };
 };
 

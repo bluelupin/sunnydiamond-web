@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronDown, Info, Plus } from "lucide-react";
+import { Fragment, useState } from "react";
+import { Info, Plus } from "lucide-react";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { cn } from "@/shared/utils/cn";
 import type { OrderFilterKey } from "../types/profileUi.types";
@@ -232,6 +232,16 @@ export function ProfileInfoNote({ children }: { children: React.ReactNode }) {
   );
 }
 
+export function ProfileTabEmptyStateLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex w-full min-h-[min(520px,55vh)] items-center justify-center">
+      <div className="flex w-full max-w-[464px] flex-col items-center gap-6 text-center">
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export function ProfileEmptyState({
   title,
   description,
@@ -242,15 +252,15 @@ export function ProfileEmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-6 py-6">
-      <h3 className="font-larken text-32 font-light leading-110 text-darkblack">{title}</h3>
+    <ProfileTabEmptyStateLayout>
+      <h3 className="w-full font-larken text-32 font-light leading-110 text-darkblack">{title}</h3>
       {description ? (
-        <div className="max-w-lg font-gill text-base font-light leading-110 text-neutral500">
+        <div className="w-full font-gill text-base font-light leading-110 text-neutral500">
           {description}
         </div>
       ) : null}
-      {action}
-    </div>
+      {action ? <div className="flex flex-col items-center gap-6">{action}</div> : null}
+    </ProfileTabEmptyStateLayout>
   );
 }
 
@@ -259,6 +269,56 @@ type ProfileAccordionItem = {
   question: string;
   answer: string;
 };
+
+const profileAccordionTransitionClassName =
+  "transition-[grid-template-rows,opacity] duration-500 ease-in-out";
+
+const profileAccordionIconTransitionClassName = "transition-opacity duration-500 ease-in-out";
+
+const ProfileFaqPlusIcon = () => (
+  <span className="relative size-6 shrink-0 overflow-hidden" aria-hidden>
+    <span className="absolute inset-1/4">
+      <svg viewBox="0 0 12 12" fill="none" className="size-full" xmlns="http://www.w3.org/2000/svg">
+        <path d="M5.5 6.5H0V5.5H5.5V0H6.5V5.5H12V6.5H6.5V12H5.5V6.5Z" fill="#0A0A0A" />
+      </svg>
+    </span>
+  </span>
+);
+
+const ProfileFaqMinusIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    className="size-6 shrink-0"
+    aria-hidden
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M17 12H5V11H17V12Z" fill="#0A0A0A" />
+  </svg>
+);
+
+const ProfileFaqToggleIcon = ({ isOpen }: { isOpen: boolean }) => (
+  <span className="relative flex size-6 shrink-0 items-center justify-center" aria-hidden>
+    <span
+      className={cn(
+        "absolute inset-0 flex items-center justify-center",
+        profileAccordionIconTransitionClassName,
+        isOpen ? "pointer-events-none opacity-0" : "opacity-100",
+      )}
+    >
+      <ProfileFaqPlusIcon />
+    </span>
+    <span
+      className={cn(
+        "absolute inset-0 flex items-center justify-center",
+        profileAccordionIconTransitionClassName,
+        isOpen ? "opacity-100" : "pointer-events-none opacity-0",
+      )}
+    >
+      <ProfileFaqMinusIcon />
+    </span>
+  </span>
+);
 
 export function ProfileAccordion({
   items,
@@ -273,31 +333,40 @@ export function ProfileAccordion({
         const isOpen = openId === item.id;
 
         return (
-          <div key={item.id} className="flex flex-col gap-4">
-            <button
-              type="button"
-              onClick={() => setOpenId(isOpen ? null : item.id)}
-              className="flex w-full items-center justify-between gap-2 text-left"
-              aria-expanded={isOpen}
-            >
-              <span className="font-gill text-xl font-normal leading-110 text-darkblack">
-                {item.question}
-              </span>
-              {isOpen ? (
-                <ChevronDown className="size-6 shrink-0 text-darkblack" aria-hidden />
-              ) : (
-                <Plus className="size-6 shrink-0 text-darkblack" aria-hidden />
-              )}
-            </button>
-            {isOpen ? (
-              <p className="font-gill text-xl font-light leading-110 text-neutral500">
-                {item.answer}
-              </p>
-            ) : null}
+          <Fragment key={item.id}>
+            <div className="flex flex-col overflow-hidden rounded">
+              <button
+                type="button"
+                onClick={() => setOpenId(isOpen ? null : item.id)}
+                className="flex w-full items-start gap-2 py-6 text-left lg:min-h-14 lg:items-center lg:py-0"
+                aria-expanded={isOpen}
+              >
+                <span className="min-w-0 flex-1 font-gill text-base font-normal leading-110 text-darkblack lg:text-xl">
+                  {item.question}
+                </span>
+                <ProfileFaqToggleIcon isOpen={isOpen} />
+              </button>
+
+              <div
+                className={cn(
+                  "grid min-h-0",
+                  profileAccordionTransitionClassName,
+                  isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+                )}
+                aria-hidden={!isOpen}
+              >
+                <div className="overflow-hidden">
+                  <p className="pt-4 font-gill text-base font-light leading-110 text-neutral500 lg:text-xl">
+                    {item.answer}
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {index < items.length - 1 ? (
-              <div className="h-px w-full bg-neutral300" aria-hidden />
+              <div className="h-[0.5px] bg-neutral300" aria-hidden />
             ) : null}
-          </div>
+          </Fragment>
         );
       })}
     </div>

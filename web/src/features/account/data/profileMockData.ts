@@ -208,11 +208,12 @@ export const MOCK_PROFILE_APPOINTMENTS: ProfileAppointmentUi[] = [
     ],
     appointmentAddress: {
       name: "Bhavini Sharma",
-      lines: [
-        "42, Palm Grove Avenue, Koramangala",
-        "Bengaluru, Karnataka – 560034",
-        "+91 9876543210",
-      ],
+      addressLine1: "82, Besant Nagar",
+      addressLine2: "E-39, 16th Cross Street, Elliot's Beach",
+      city: "Chennai",
+      state: "Tamil Nadu",
+      pincode: "600090",
+      phone: "+91 9876543210",
     },
     bookingDate: "14 June 2026",
     bookingTime: "2:00 PM – 3:00 PM",
@@ -251,6 +252,7 @@ export const MOCK_PROFILE_APPOINTMENTS: ProfileAppointmentUi[] = [
 export const MOCK_PROFILE_BESPOKE: ProfileBespokeItemUi[] = [
   {
     id: "mock-bespoke-1",
+    creationDocumentId: "mock-creation-1",
     title: "Alankara Diamond Necklace",
     imageSrc: PLACEHOLDER_NECKLACE_IMAGE,
     size: "14",
@@ -260,6 +262,7 @@ export const MOCK_PROFILE_BESPOKE: ProfileBespokeItemUi[] = [
   },
   {
     id: "mock-bespoke-2",
+    creationDocumentId: "mock-creation-2",
     title: "Alankara Diamond Necklace",
     imageSrc: PLACEHOLDER_NECKLACE_IMAGE,
     size: "14",
@@ -269,6 +272,7 @@ export const MOCK_PROFILE_BESPOKE: ProfileBespokeItemUi[] = [
   },
   {
     id: "mock-bespoke-3",
+    creationDocumentId: "mock-creation-3",
     title: "Alankara Diamond Necklace",
     imageSrc: PLACEHOLDER_NECKLACE_IMAGE,
     size: "14",
@@ -278,6 +282,7 @@ export const MOCK_PROFILE_BESPOKE: ProfileBespokeItemUi[] = [
   },
   {
     id: "mock-bespoke-4",
+    creationDocumentId: "mock-creation-4",
     title: "Alankara Diamond Necklace",
     imageSrc: PLACEHOLDER_NECKLACE_IMAGE,
     size: "14",

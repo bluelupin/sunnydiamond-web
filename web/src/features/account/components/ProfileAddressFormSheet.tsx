@@ -11,6 +11,7 @@ import { INDIAN_STATES } from "@/features/checkout/constants/indianStates";
 import { DetailDarkButton, DetailTextLink } from "@/features/products/components/detail/shared";
 import { useCurrentLocationAddress } from "@/shared/hooks/use-current-location-address";
 import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
+import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { cn } from "@/shared/utils/cn";
 import {
   getProfileAddressFormErrors,
@@ -60,6 +61,7 @@ type ProfileAddressFormSheetProps = {
   onOpenChange: (open: boolean) => void;
   title: string;
   initialValues?: CustomerAddressInput;
+  isEditing?: boolean;
   isSaving: boolean;
   onSubmit: (input: CustomerAddressInput) => Promise<void>;
 };
@@ -69,6 +71,7 @@ export function ProfileAddressFormSheet({
   onOpenChange,
   title,
   initialValues,
+  isEditing = false,
   isSaving,
   onSubmit,
 }: ProfileAddressFormSheetProps) {
@@ -188,17 +191,19 @@ export function ProfileAddressFormSheet({
           className="flex min-h-0 flex-1 flex-col"
           noValidate
         >
-          <div className="flex-1 overflow-y-auto px-6 pb-6 pt-6">
-            <div className="flex flex-col items-center gap-6">
-              <DetailTextLink
-                onClick={isLocating || isSaving ? undefined : handleUseCurrentLocation}
-                className={cn(
-                  "text-sm uppercase",
-                  (isLocating || isSaving) && "pointer-events-none opacity-50",
-                )}
-              >
-                {isLocating ? "DETECTING LOCATION..." : addressContent.useCurrentLocationLabel}
-              </DetailTextLink>
+          <div className="flex-1 overflow-y-auto px-6 pt-6">
+            <div className="flex flex-col items-center gap-6 pb-72">
+              {!isEditing ? (
+                <DetailTextLink
+                  onClick={isLocating || isSaving ? undefined : handleUseCurrentLocation}
+                  className={cn(
+                    "text-sm uppercase",
+                    (isLocating || isSaving) && "pointer-events-none opacity-50",
+                  )}
+                >
+                  {isLocating ? "DETECTING LOCATION..." : addressContent.useCurrentLocationLabel}
+                </DetailTextLink>
+              ) : null}
 
               <div className="flex w-full flex-col gap-6">
                 <CheckoutField
@@ -292,11 +297,11 @@ export function ProfileAddressFormSheet({
             </div>
           </div>
 
-          <div className="shrink-0 border-t border-neutral300 bg-white px-4 py-6">
+          <PanelFooter contentClassName="px-4 py-6">
             <DetailDarkButton type="submit" className="w-full" disabled={isSaving}>
               {isSaving ? "Saving..." : addressContent.saveLabel}
             </DetailDarkButton>
-          </div>
+          </PanelFooter>
         </form>
       </SheetContent>
     </Sheet>

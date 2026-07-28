@@ -81,7 +81,38 @@ function ProfileAppointmentNote({ title, note }: { title: string; note: string }
       <h4 className="mb-4 font-larken text-2xl font-light leading-110 text-darkblack">
         {title}
       </h4>
-      <p className="font-gill text-base font-light leading-110 text-darkblack">{note}</p>
+      {note.trim() ? (
+        <p className="font-gill text-base font-light leading-110 whitespace-pre-line text-darkblack">
+          {note}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function ProfileAppointmentAddress({
+  title,
+  address,
+}: {
+  title: string;
+  address: NonNullable<ProfileAppointmentUi["appointmentAddress"]>;
+}) {
+  const cityStatePincode = [address.city, address.state, address.pincode]
+    .filter((part): part is string => Boolean(part))
+    .join(", ");
+
+  return (
+    <div className="flex flex-col gap-4 bg-white p-4 lg:p-6">
+      <h4 className="font-larken text-2xl font-light leading-110 text-darkblack">{title}</h4>
+      <div className="flex flex-col gap-2 font-gill text-base leading-110 text-darkblack">
+        <p className="font-normal">{address.name}</p>
+        <div className="font-light">
+          {address.addressLine1 ? <p>{address.addressLine1}</p> : null}
+          {address.addressLine2 ? <p>{address.addressLine2}</p> : null}
+          {cityStatePincode ? <p>{cityStatePincode}</p> : null}
+          {address.phone ? <p>{address.phone}</p> : null}
+        </div>
+      </div>
     </div>
   );
 }
@@ -154,17 +185,10 @@ export function ProfileAppointmentCard({
       />
 
       {appointment.appointmentAddress ? (
-        <div className="bg-gray300 p-4 lg:p-6">
-          <h4 className="mb-4 font-larken text-xl font-light leading-110 text-darkblack">
-            {content.appointmentAddressTitle}
-          </h4>
-          <div className="space-y-2 font-gill text-base leading-110 text-darkblack">
-            <p className="font-normal">{appointment.appointmentAddress.name}</p>
-            {appointment.appointmentAddress.lines.map((line) => (
-              <p key={line} className="font-light">{line}</p>
-            ))}
-          </div>
-        </div>
+        <ProfileAppointmentAddress
+          title={content.appointmentAddressTitle}
+          address={appointment.appointmentAddress}
+        />
       ) : null}
 
       {appointment.storeVisit ? (

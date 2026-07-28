@@ -25,6 +25,7 @@ export async function getCustomerAppointments(
   });
   const response = await fetch(`/api/customer/appointments?${params.toString()}`, {
     cache: "no-store",
+    credentials: "same-origin",
     signal,
   });
 

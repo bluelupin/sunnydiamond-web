@@ -3,11 +3,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import {
-  Check,
   ChevronLeft,
-  ExternalLink,
-  Phone,
+  Check,
 } from "lucide-react";
+import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
+import { resolveBookStoreVisitStores } from "@/features/products/utils/bookStoreVisitStores";
+import { filterBookStoreVisitStores } from "@/features/stores/utils/storeLocatorFilters";
+import { BookStoreVisitLocationDetails } from "./BookStoreVisitLocationDetails";
+import { StoreLocatorMapView } from "@/features/stores/components/StoreLocatorMapView";
 import { cn } from "@/shared/utils/cn";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
@@ -28,7 +31,6 @@ import { useAuth } from "@/features/auth/context/AuthContext";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import { wishlistMovedToastDurationMs } from "@/features/wishlist/data/content";
 import { DetailDarkButton } from "./shared";
-import StoreVisitMapBlock from "./StoreVisitMapBlock";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import {
   productDetailSidePanelAsideClassName,
@@ -42,6 +44,8 @@ type BookStoreVisitPanelProps = {
   open?: boolean;
   onClose?: () => void;
   onBack?: () => void;
+  storeSearchQuery?: string;
+  storeStateFilter?: string | null;
 };
 
 type BookVisitStep = "select-store" | "form";
@@ -51,10 +55,17 @@ const BookStoreVisitPanel = ({
   open = true,
   onClose,
   onBack,
+  storeSearchQuery = "",
+  storeStateFilter = null,
 }: BookStoreVisitPanelProps) => {
   const profileEnabled = variant !== "modal" || open;
   const { customer } = useAuth();
   const { contact: profileContact } = useCustomerProfileContact(profileEnabled);
+  const { data: editorialData } = useHomepageEditorialBlocks();
+  const editorialShowrooms = useMemo(
+    () => editorialData?.showroomSection?.showrooms ?? [],
+    [editorialData?.showroomSection?.showrooms],
+  );
   const [step, setStep] = useState<BookVisitStep>("select-store");
   const [stores, setStores] = useState<BookStoreVisitStore[]>(BOOK_STORE_VISIT_STORES);
   const [timeSlots, setTimeSlots] = useState<readonly string[]>(APPOINTMENT_TIME_SLOTS);
@@ -112,8 +123,31 @@ const BookStoreVisitPanel = ({
     };
   }, []);
 
+  const displayStores = useMemo(() => {
+    if (variant !== "page") {
+      return stores;
+    }
+
+    return filterBookStoreVisitStores(stores, storeSearchQuery, storeStateFilter);
+  }, [stores, storeSearchQuery, storeStateFilter, variant]);
+
   const selectedStore =
-    stores.find((store) => store.id === selectedStoreId) ?? stores[0] ?? BOOK_STORE_VISIT_STORES[0];
+    displayStores.find((store) => store.id === selectedStoreId) ??
+    displayStores[0] ??
+    stores[0] ??
+    BOOK_STORE_VISIT_STORES[0];
+
+  useEffect(() => {
+    if (variant !== "page") {
+      return;
+    }
+
+    if (displayStores.some((store) => store.id === selectedStoreId)) {
+      return;
+    }
+
+    setSelectedStoreId(displayStores[0]?.id ?? stores[0]?.id ?? BOOK_STORE_VISIT_STORES[0].id);
+  }, [displayStores, selectedStoreId, stores, variant]);
 
   // Prefill from My Profile once when available; never overwrite fields the user already typed.
   useEffect(() => {
@@ -148,7 +182,16 @@ const BookStoreVisitPanel = ({
     void (async () => {
       try {
         const form = await getGenericFormByTag(SHOWROOM_VISIT_FORM_TAG, controller.signal);
-        if (!form) return;
+        if (!form) {
+          const resolvedStores = resolveBookStoreVisitStores([], editorialShowrooms);
+          setStores(resolvedStores);
+          setSelectedStoreId((current) =>
+            resolvedStores.some((store) => store.id === current)
+              ? current
+              : resolvedStores[0]?.id ?? BOOK_STORE_VISIT_STORES[0].id,
+          );
+          return;
+        }
 
         setFormTag(form.formTag || SHOWROOM_VISIT_FORM_TAG);
         if (form.formName) {
@@ -196,21 +239,27 @@ const BookStoreVisitPanel = ({
         if (form.notesPlaceholder) {
           setNotesPlaceholder(form.notesPlaceholder);
         }
-        if (form.showrooms.length > 0) {
-          setStores(form.showrooms);
-          setSelectedStoreId((current) =>
-            form.showrooms.some((store) => store.id === current)
-              ? current
-              : form.showrooms[0]!.id,
-          );
-        }
+
+        const resolvedStores = resolveBookStoreVisitStores(form.showrooms, editorialShowrooms);
+        setStores(resolvedStores);
+        setSelectedStoreId((current) =>
+          resolvedStores.some((store) => store.id === current)
+            ? current
+            : resolvedStores[0]!.id,
+        );
       } catch {
-        // Keep local fallbacks so the panel remains usable if CMS fails.
+        const resolvedStores = resolveBookStoreVisitStores([], editorialShowrooms);
+        setStores(resolvedStores);
+        setSelectedStoreId((current) =>
+          resolvedStores.some((store) => store.id === current)
+            ? current
+            : resolvedStores[0]?.id ?? BOOK_STORE_VISIT_STORES[0].id,
+        );
       }
     })();
 
     return () => controller.abort();
-  }, [open, variant]);
+  }, [open, variant, editorialShowrooms]);
 
   useEffect(() => {
     if (variant !== "modal" || !open) {
@@ -329,9 +378,9 @@ const BookStoreVisitPanel = ({
   const panelBody =
     step === "select-store" ? (
       <StoreSelectionStep
-        stores={stores}
+        stores={displayStores}
         selectedStoreId={selectedStoreId}
-        selectedStore={selectedStore}
+        layout={variant === "page" ? "page" : "panel"}
         formTitle={formTitle}
         onSelectStore={setSelectedStoreId}
         onProceed={() => setStep("form")}
@@ -415,7 +464,17 @@ const BookStoreVisitPanel = ({
     return (
       <>
         {statusToast}
-        {panelContent}
+        {step === "select-store" ? (
+          panelBody
+        ) : (
+          <aside
+            role="dialog"
+            aria-label="Book your store visit"
+            className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-480 flex-col overflow-hidden bg-white"
+          >
+            {panelBody}
+          </aside>
+        )}
       </>
     );
   }
@@ -439,8 +498,8 @@ const BookStoreVisitPanel = ({
 type StoreSelectionStepProps = {
   stores: BookStoreVisitStore[];
   selectedStoreId: string;
-  selectedStore: BookStoreVisitStore;
   formTitle: string;
+  layout?: "panel" | "page";
   onSelectStore: (storeId: string) => void;
   onProceed: () => void;
   onBack?: () => void;
@@ -451,14 +510,90 @@ type StoreSelectionStepProps = {
 const StoreSelectionStep = ({
   stores,
   selectedStoreId,
-  selectedStore,
   formTitle,
+  layout = "panel",
   onSelectStore,
   onProceed,
   onBack,
   onClose,
   showBack = false,
-}: StoreSelectionStepProps) => (
+}: StoreSelectionStepProps) => {
+  const selectedStore =
+    stores.find((store) => store.id === selectedStoreId) ?? stores[0] ?? null;
+
+  if (layout === "page") {
+    return (
+      <>
+        <section className="mx-auto w-full max-w-1440 pt-10 pb-26">
+          <div className="flex flex-col items-start gap-6 lg:flex-row">
+            <div
+              className="w-full shrink-0 lg:w-[593px] lg:border-r lg:border-neutral300"
+              aria-label="Showroom locations"
+            >
+              {stores.length === 0 ? (
+                <p className="px-4 py-8 font-gill text-base font-light leading-110 text-neutral500 lg:px-10">
+                  No showrooms match your search. Try another location or state.
+                </p>
+              ) : (
+                stores.map((store) => {
+                  const isSelected = store.id === selectedStoreId;
+
+                  return (
+                    <div key={store.id} className="w-full">
+                      {isSelected ? (
+                        <div className="flex flex-col gap-4 bg-gray300 px-4 py-8 lg:px-10">
+                          <p className="font-larken text-2xl font-light leading-110 text-darkblack">
+                            {store.storeName}
+                          </p>
+                          <div className="h-px w-full bg-neutral300" aria-hidden />
+                          {store.heroImage ? (
+                            <div className="relative aspect-[2500/1797] w-full overflow-hidden lg:hidden">
+                              <Image
+                                src={store.heroImage}
+                                alt=""
+                                fill
+                                className="object-cover"
+                                sizes="100vw"
+                                aria-hidden
+                              />
+                            </div>
+                          ) : null}
+                          <BookStoreVisitLocationDetails store={store} size="page" />
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          aria-pressed={false}
+                          onClick={() => onSelectStore(store.id)}
+                          className="flex w-full items-center px-4 py-8 text-left font-larken text-2xl font-light leading-110 text-darkblack lg:px-10"
+                        >
+                          {store.storeName}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {selectedStore ? (
+              <div className="hidden min-w-0 flex-1 self-stretch lg:block">
+                <StoreLocatorMapView store={selectedStore} />
+              </div>
+            ) : null}
+          </div>
+        </section>
+
+        <PanelFooter>
+          <DetailDarkButton onClick={onProceed} disabled={stores.length === 0}>
+            PROCEED WITH THIS STORE
+          </DetailDarkButton>
+        </PanelFooter>
+      </>
+    );
+  }
+
+  return (
   <>
     <div className="min-h-0 flex-1 overflow-y-auto">
       <div className="px-4 pt-6 lg:px-6 lg:pt-10">
@@ -499,73 +634,66 @@ const StoreSelectionStep = ({
           <div className="h-px w-full bg-neutral300" aria-hidden />
         </div>
 
-        <div className="mt-6 flex flex-col gap-4 pb-72">
-          <div className="-mx-4 flex gap-10 overflow-x-auto px-4 lg:-mx-8 lg:px-8">
-            {stores.map((store) => {
-              const isSelected = store.id === selectedStoreId;
-
-              return (
-                <button
-                  key={store.id}
-                  type="button"
-                  onClick={() => onSelectStore(store.id)}
-                  className={cn(
-                    "shrink-0 py-2 font-gill text-base leading-110",
-                    isSelected
-                      ? "border-b border-linkGold text-linkGold"
-                      : "text-darkblack hover:text-linkGold",
-                  )}
-                >
-                  {store.tabLabel}
-                </button>
-              );
-            })}
-          </div>
-
-          <StoreVisitMapBlock variant="store-select">
-            <p className="font-larken text-xl font-light leading-110 text-darkblack">
-              {selectedStore.storeName}
+        <div
+          className="mt-6 flex flex-col border-r border-neutral300 pb-72"
+          aria-label="Showroom locations"
+        >
+          {stores.length === 0 ? (
+            <p className="px-4 py-8 font-gill text-base font-light leading-110 text-neutral500 lg:px-10">
+              No showrooms match your search. Try another location or state.
             </p>
-            <div className="h-px w-full bg-neutral300" aria-hidden />
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-4">
-                <div className="flex gap-3">
-                  <ExternalLink
-                    size={24}
-                    strokeWidth={1.25}
-                    aria-hidden
-                    className="mt-0.5 shrink-0 text-darkblack"
-                  />
-                  <p className="font-gill text-base font-light leading-110 text-darkblack">
-                    {selectedStore.address}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Phone size={24} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
-                  <p className="font-gill text-base font-light leading-110 text-darkblack">
-                    {selectedStore.phone}
-                  </p>
-                </div>
+          ) : (
+            stores.map((store) => {
+            const isSelected = store.id === selectedStoreId;
+
+            return (
+              <div key={store.id} className="w-full">
+                {isSelected ? (
+                  <div className="flex flex-col gap-4 bg-gray300 px-4 py-8 lg:px-10">
+                    <p className="font-larken text-2xl font-light leading-110 text-darkblack">
+                      {store.storeName}
+                    </p>
+                    <div className="h-px w-full bg-neutral300" aria-hidden />
+                    {store.heroImage ? (
+                      <div className="relative aspect-[2500/1797] w-full overflow-hidden">
+                        <Image
+                          src={store.heroImage}
+                          alt=""
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 480px) 100vw, 480px"
+                          aria-hidden
+                        />
+                      </div>
+                    ) : null}
+                    <BookStoreVisitLocationDetails store={store} />
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    aria-pressed={false}
+                    onClick={() => onSelectStore(store.id)}
+                    className="flex min-h-[90px] w-full items-center px-4 py-8 text-left font-larken text-2xl font-light leading-110 text-darkblack lg:px-10"
+                  >
+                    {store.storeName}
+                  </button>
+                )}
               </div>
-              <a
-                href={selectedStore.directionsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-link-underline inline-flex border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
-              >
-                GET DIRECTIONS
-              </a>
-            </div>
-          </StoreVisitMapBlock>
+            );
+          })
+          )}
         </div>
       </div>
     </div>
 
     <PanelFooter>
-      <DetailDarkButton onClick={onProceed}>PROCEED WITH THIS STORE</DetailDarkButton>
+      <DetailDarkButton onClick={onProceed} disabled={stores.length === 0}>
+        PROCEED WITH THIS STORE
+      </DetailDarkButton>
     </PanelFooter>
   </>
-);
+  );
+};
 
 type BookingFormStepProps = {
   selectedStore: BookStoreVisitStore;
@@ -694,41 +822,13 @@ const BookingFormStep = ({
           </div>
 
           <div className="mt-6 flex flex-col gap-6 pb-72">
-            <StoreVisitMapBlock variant="store-select">
-              <p className="font-larken text-xl font-light leading-110 text-darkblack">
+            <div className="flex flex-col gap-4 bg-gray300 px-4 py-8 lg:px-6">
+              <p className="font-larken text-2xl font-light leading-110 text-darkblack">
                 {selectedStore.storeName}
               </p>
               <div className="h-px w-full bg-neutral300" aria-hidden />
-              <div className="flex flex-col gap-6">
-                <div className="flex flex-col gap-4">
-                  <div className="flex gap-3">
-                    <ExternalLink
-                      size={24}
-                      strokeWidth={1.25}
-                      aria-hidden
-                      className="mt-0.5 shrink-0 text-darkblack"
-                    />
-                    <p className="font-gill text-base font-light leading-110 text-darkblack">
-                      {selectedStore.address}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Phone size={24} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
-                    <p className="font-gill text-base font-light leading-110 text-darkblack">
-                      {selectedStore.phone}
-                    </p>
-                  </div>
-                </div>
-                <a
-                  href={selectedStore.directionsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-link-underline inline-flex border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
-                >
-                  GET DIRECTIONS
-                </a>
-              </div>
-            </StoreVisitMapBlock>
+              <BookStoreVisitLocationDetails store={selectedStore} />
+            </div>
 
             <div className="flex flex-col gap-6">
               <AppointmentContactFields

@@ -60,7 +60,12 @@ export type ProfileAppointmentUi = {
   products: ProfileAppointmentProductUi[];
   appointmentAddress?: {
     name: string;
-    lines: string[];
+    addressLine1: string;
+    addressLine2?: string;
+    city?: string;
+    state?: string;
+    pincode?: string;
+    phone: string;
   };
   storeVisit?: {
     city: string;
@@ -78,6 +83,7 @@ export type ProfileAppointmentUi = {
 
 export type ProfileBespokeItemUi = {
   id: string;
+  creationDocumentId: string;
   title: string;
   imageSrc: string;
   size?: string;

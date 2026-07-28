@@ -2,13 +2,12 @@
 
 import Image from "next/image";
 import { CartPrimaryLink } from "@/features/cart/components/CartFlowUi";
-import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { profileTabsContent } from "../data/profileContent";
 import { ProfileTabEmptyStateLayout } from "./profileUi";
 
-const content = profileTabsContent.wishlist;
+const content = profileTabsContent.appointments;
 
-export function ProfileWishlistEmptyState() {
+export function ProfileAppointmentsEmptyState() {
   return (
     <ProfileTabEmptyStateLayout>
       <div className="relative size-16 shrink-0 overflow-clip">
@@ -27,18 +26,13 @@ export function ProfileWishlistEmptyState() {
       </h3>
 
       <div className="flex w-full flex-col gap-2 font-gill text-base font-light leading-110 text-neutral500">
-        <p>{content.emptyDescriptionPrimary}</p>
+        <p>{content.emptyDescription}</p>
         <p>{content.emptyDescriptionSecondary}</p>
       </div>
 
-      <div className="flex flex-col items-center gap-6">
-        <CartPrimaryLink href={content.emptyPrimaryCtaHref} className="shrink-0">
-          {content.emptyPrimaryCta}
-        </CartPrimaryLink>
-        <DetailTextLink href={content.emptySecondaryCtaHref} className="text-sm uppercase">
-          {content.emptySecondaryCta}
-        </DetailTextLink>
-      </div>
+      <CartPrimaryLink href={content.emptyCtaHref} className="shrink-0">
+        {content.emptyCta}
+      </CartPrimaryLink>
     </ProfileTabEmptyStateLayout>
   );
 }

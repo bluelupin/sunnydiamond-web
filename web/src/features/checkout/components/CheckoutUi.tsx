@@ -14,6 +14,23 @@ import { cn } from "@/shared/utils/cn";
 import { invalidFieldClassName, invalidFieldContainerClassName } from "@/shared/utils/formValidation";
 import ChevronDownIcon from "@/assets/Icons/ChevronDownIcon";
 
+function formatRequiredFieldLabel(label: string): string {
+  return label.endsWith("*") ? label : `${label}*`;
+}
+
+type CheckoutFieldLabelProps = {
+  id: string;
+  label: string;
+  optional?: boolean;
+};
+
+const CheckoutFieldLabel = ({ id, label, optional }: CheckoutFieldLabelProps) => (
+  <label htmlFor={id} className="font-gill text-base font-normal leading-110 text-darkblack">
+    {optional ? label : formatRequiredFieldLabel(label)}
+    {optional ? <span className="font-light text-gray600"> (Optional)</span> : null}
+  </label>
+);
+
 export type CheckoutFieldProps = {
   id: string;
   label: string;
@@ -40,12 +57,7 @@ export const CheckoutField = ({
   invalid,
 }: CheckoutFieldProps) => (
   <div className="flex flex-col gap-2">
-    <label htmlFor={id} className="font-gill text-base font-normal leading-110 text-darkblack">
-      {label}
-      {optional ? (
-        <span className="font-light text-gray600"> (Optional)</span>
-      ) : null}
-    </label>
+    <CheckoutFieldLabel id={id} label={label} optional={optional} />
     <input
       id={id}
       type={type}
@@ -67,6 +79,7 @@ export const CheckoutField = ({
 type CheckoutSelectFieldProps = {
   id: string;
   label: string;
+  optional?: boolean;
   value: string;
   onChange: (value: string) => void;
   onBlur?: () => void;
@@ -79,6 +92,7 @@ type CheckoutSelectFieldProps = {
 export const CheckoutSelectField = ({
   id,
   label,
+  optional,
   value,
   onChange,
   onBlur,
@@ -88,9 +102,7 @@ export const CheckoutSelectField = ({
   invalid,
 }: CheckoutSelectFieldProps) => (
   <div className="flex flex-col gap-2">
-    <label htmlFor={id} className="font-gill text-base font-normal leading-110 text-darkblack">
-      {label}
-    </label>
+    <CheckoutFieldLabel id={id} label={label} optional={optional} />
     <Select
       value={value}
       onValueChange={(nextValue) => {
@@ -124,6 +136,7 @@ export const CheckoutSelectField = ({
 type CheckoutPhoneFieldProps = {
   id: string;
   label: string;
+  optional?: boolean;
   value: string;
   onChange: (value: string) => void;
   onBlur?: () => void;
@@ -138,6 +151,7 @@ type CheckoutPhoneFieldProps = {
 export const CheckoutPhoneField = ({
   id,
   label,
+  optional,
   value,
   onChange,
   onBlur,
@@ -153,9 +167,7 @@ export const CheckoutPhoneField = ({
 
   return (
   <div className="flex flex-col gap-2">
-    <label htmlFor={id} className="font-gill text-base font-normal leading-110 text-darkblack">
-      {label}
-    </label>
+    <CheckoutFieldLabel id={id} label={label} optional={optional} />
     <div
       className={cn(
         "flex h-14 items-center justify-between gap-2 border border-transparent bg-aboutInactive px-3 focus-within:border-darkblack",

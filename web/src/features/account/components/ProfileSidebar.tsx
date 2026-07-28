@@ -11,7 +11,10 @@ type ProfileSidebarProps = {
 };
 
 const ProfileSidebar = ({ activeSection, onSectionChange }: ProfileSidebarProps) => (
-  <nav aria-label="Profile sections" className="flex flex-col border-r border-neutral300">
+  <nav
+    aria-label="Profile sections"
+    className="flex w-full max-w-[440px] flex-col border-r border-neutral300 lg:w-[440px]"
+  >
     {PROFILE_NAV_ITEMS.map((item) => {
       if (item.kind === "link") {
         return (
