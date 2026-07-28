@@ -33,10 +33,6 @@ const EducationCaratHandVisual = ({ activeCarat }: EducationCaratHandVisualProps
     layout.diamondMinSize + normalizedCarat * (layout.diamondMaxSize - layout.diamondMinSize);
   const baseSize = layout.diamondBaseSize;
   const diamondScale = diamondPx / baseSize;
-  const frameHeight = 300;
-  const diamondCenterX = layout.diamondLeft + baseSize / 2;
-  const diamondCenterY = ((layout.diamondTop + baseSize / 2) / layout.handAreaHeight) * frameHeight;
-
   return (
     <div
       className="pointer-events-none relative lg:h-[300px] md:h-300 h-[200px] w-full shrink-0 self-start overflow-hidden"
@@ -60,10 +56,6 @@ const EducationCaratHandVisual = ({ activeCarat }: EducationCaratHandVisualProps
       <div
         className="pointer-events-none absolute z-10 transition-transform duration-300 ease-out sm:left-[250px] sm:top-[120px] left-[150px] top-[85px]"
         style={{
-          // left: `250px`,
-          // top: `100px`,
-          // left: `${(diamondCenterX / layout.frameWidth) * 100}%`,
-          // top: `${(diamondCenterY / frameHeight) * 100}%`,
           width: `${(baseSize / layout.frameWidth) * 100}%`,
           aspectRatio: "1",
           transform: `scale(${diamondScale})`,
