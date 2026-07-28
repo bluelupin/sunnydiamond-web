@@ -16,7 +16,6 @@ interface ForYourValentineSectionProps {
 
 const FALLBACK_RINGS = "/images/home/valentine-rings.png";
 const FALLBACK_BG_DESKTOP = "/images/home/valentine-bg-desktop.svg";
-const FALLBACK_BG_MOBILE = "/images/home/valentine-bg-mobile.svg";
 
 const ctaFocusClass =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2";
@@ -128,10 +127,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
       </section>
     );
   }
-
   const ringsDesktop = desktopImageUrl || FALLBACK_RINGS;
-  const ringsMobile = mobileImageUrl || desktopImageUrl || FALLBACK_RINGS;
-
   return (
     <section id={id} aria-label={sectionTitle} className="relative w-full overflow-hidden bg-[#F3E6E2]">
       <OptimizedImage

@@ -36,11 +36,11 @@ const VARIANT_CONFIG = {
   mobile: {
     rowsClassName: "flex flex-col gap-3",
     rowClassName: "flex items-stretch gap-3",
-    itemClassName: "flex min-w-0 flex-1 flex-col gap-1",
-    imageClassName: "relative h-100 w-full shrink-0 overflow-hidden",
+    itemClassName: "flex min-w-0 flex-1 flex-col gap-2",
+    imageClassName: "relative lg:h-100 h-[140px] w-full shrink-0 overflow-hidden",
     imageSizes: "50vw",
     imageCoverClassName: "object-cover",
-    labelClassName: "font-gill text-sm leading-110 text-darkblack",
+    labelClassName: "font-gill md:text-base text-sm leading-110 text-darkblack",
   },
 } as const;
 
@@ -99,13 +99,12 @@ function JewelleryCategoryMenuItems({
                         aria-hidden
                       />
 
-                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-4">
-                        <span className={cn(config.labelClassName, "text-center text-white")}>{item.label}</span>
+                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-4 bg-benefitSurface">
+                        <span className={cn(config.labelClassName, "text-center text-darkblack text-xl font-normal font-gill")}>{item.label}</span>
                       </div>
                     </>
                   )}
                 </div>
-
                 {!isAllProduct && <span className={config.labelClassName}>{item.label}</span>}
               </Link>
             );

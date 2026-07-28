@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { getImageSrc } from "@/shared/utils/image";
 
-const HERO_VIDEO_MP4_SRC = "/videos/hero-banner-video.mp4";
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
 type HeroBackgroundMediaProps = {
@@ -26,9 +25,7 @@ const HeroBackgroundMedia = ({
 
   const posterSrc = getImageSrc(mobileImageUrl || desktopImageUrl);
   const hasHeroImage = Boolean(posterSrc);
-  const videoWebmSrc = cmsVideoUrl?.endsWith(".webm") ? cmsVideoUrl : null;
-  const videoMp4Src =
-    cmsVideoUrl && !cmsVideoUrl.endsWith(".webm") ? cmsVideoUrl : HERO_VIDEO_MP4_SRC;
+  const videoWebmSrc = cmsVideoUrl?.endsWith(".webm") && cmsVideoUrl;
 
   useEffect(() => {
     const motionMedia = window.matchMedia(REDUCED_MOTION_QUERY);
@@ -102,8 +99,7 @@ const HeroBackgroundMedia = ({
           aria-hidden
           tabIndex={-1}
         >
-          {videoWebmSrc ? <source src={videoWebmSrc} type="video/webm" /> : null}
-          <source src={videoMp4Src} type="video/mp4" />
+          {videoWebmSrc && <source src={videoWebmSrc} type="video/webm" />}
         </video>
       ) : null}
     </>
