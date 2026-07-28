@@ -20,9 +20,13 @@ const content = profileTabsContent.bespoke;
 
 function BespokeSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2" aria-busy="true" aria-label="Loading saved inspirations">
-      {Array.from({ length: 2 }).map((_, index) => (
-        <div key={index} className="h-[557px] animate-pulse bg-gray300" />
+    <div
+      className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
+      aria-busy="true"
+      aria-label="Loading saved inspirations"
+    >
+      {Array.from({ length: 3 }).map((_, index) => (
+        <div key={index} className="h-[204px] animate-pulse bg-gray300" />
       ))}
     </div>
   );
@@ -43,13 +47,6 @@ const ProfileBespokeSection = () => {
 
   const usingMockData =
     PROFILE_PREVIEW_MOCK_WHEN_EMPTY && (!data || data.items.length === 0);
-
-  const handleShare = () => {
-    toast({
-      title: content.shareUnavailableTitle,
-      description: content.shareUnavailableDescription,
-    });
-  };
 
   const handleRemove = () => {
     toast({
@@ -101,10 +98,10 @@ const ProfileBespokeSection = () => {
     <div className="flex flex-col gap-6">
       <ProfileSectionHeader title={content.title} className="hidden lg:flex" />
 
-      <ul className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {items.map((item) => (
           <li key={item.id}>
-            <ProfileBespokeCard item={item} onShare={handleShare} onRemove={handleRemove} />
+            <ProfileBespokeCard item={item} onRemove={handleRemove} />
           </li>
         ))}
       </ul>

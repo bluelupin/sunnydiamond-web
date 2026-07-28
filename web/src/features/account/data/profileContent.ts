@@ -62,7 +62,7 @@ export const profilePromoContent = {
     title: "We're Here To Help",
     description:
       "Reach out to our experts for support with your orders, plans, or jewellery care.",
-    callLabel: "CALL US",
+    phoneLabel: "+91 9744355555",
     callHref: "tel:+919744355555",
     emailLabel: "EMAIL US",
     emailHref: "mailto:customerservice@sunnydiamonds.com",
@@ -71,7 +71,7 @@ export const profilePromoContent = {
     title: "15-Day Return Policy",
     description:
       "Hassle-free returns available within 15 days of delivery on eligible orders.",
-    ctaLabel: "LEARN MORE",
+    ctaLabel: "SEE RETURN POLICY",
     ctaHref: "/returns-and-cancellations",
   },
 } as const;
@@ -150,6 +150,15 @@ export const profileTabsContent = {
     emptyTitle: "No Addresses Yet",
     emptyDescription: "Add a delivery address to speed up checkout on your next purchase.",
     emptyCta: "Add New Address",
+  },
+  wishlist: {
+    emptyTitle: "Your Wishlist Is Empty",
+    emptyDescriptionPrimary: "You haven't saved any pieces yet.",
+    emptyDescriptionSecondary: "Add your favourites here to revisit them anytime.",
+    emptyPrimaryCta: "START EXPLORING",
+    emptyPrimaryCtaHref: "/jewellery",
+    emptySecondaryCta: "DISCOVER JEWELLERY",
+    emptySecondaryCtaHref: "/jewellery",
   },
   appointments: {
     title: "My Appointments",

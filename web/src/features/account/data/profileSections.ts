@@ -17,6 +17,11 @@ export const PROFILE_SECTIONS: ProfileSection[] = [
     description: "Manage saved delivery addresses.",
   },
   {
+    id: "wishlist",
+    label: "MY WISHLIST",
+    description: "View saved jewellery pieces.",
+  },
+  {
     id: "appointments",
     label: "MY APPOINTMENTS",
     description: "View and book showroom visits.",
@@ -41,7 +46,7 @@ export const PROFILE_NAV_ITEMS: ProfileNavItem[] = [
   { kind: "section", id: "details", label: "PROFILE" },
   { kind: "section", id: "orders", label: "MY ORDERS" },
   { kind: "section", id: "addresses", label: "MY ADDRESSES" },
-  { kind: "link", href: "/wishlist", label: "MY WISHLIST" },
+  { kind: "section", id: "wishlist", label: "MY WISHLIST" },
   { kind: "section", id: "appointments", label: "MY APPOINTMENTS" },
   { kind: "link", href: "/diamonds-for-everyone", label: "DIAMONDS FOR EVERYONE" },
   { kind: "section", id: "bespoke", label: "BESPOKE INSPIRATIONS" },
@@ -62,6 +67,7 @@ const PROFILE_SECTION_MOBILE_TITLES: Record<ProfileSection["id"], string> = {
   details: "Profile",
   orders: "My Orders",
   addresses: "My Addresses",
+  wishlist: "My Wishlist",
   appointments: "My Appointments",
   bespoke: "Bespoke Inspirations",
   support: "Help & Support",

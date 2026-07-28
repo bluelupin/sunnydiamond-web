@@ -117,7 +117,7 @@ export const wishlistPageContent = {
   listViewLabel: "List view",
   movedToWishlistMessage: "Item moved to Wishlist",
   movedToWishlistViewLabel: "VIEW",
-  movedToWishlistHref: "/wishlist",
+  movedToWishlistHref: "/profile?section=wishlist",
 } as const;
 
 export const wishlistMovedToastDurationMs = 4000;

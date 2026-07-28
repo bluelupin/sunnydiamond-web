@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import WishlistRemoveIcon from "@/assets/Icons/WishlistRemoveIcon";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
@@ -15,10 +14,50 @@ type WishlistCardProps = {
   product: JewelleryListingProduct;
   onRemove: () => void;
   onAddToBag: () => void;
+  variant?: "page" | "profile";
 };
 
-const WishlistCard = ({ product, onRemove, onAddToBag }: WishlistCardProps) => {
+const WishlistCard = ({ product, onRemove, onAddToBag, variant = "page" }: WishlistCardProps) => {
   const href = getWishlistProductHref(product);
+
+  if (variant === "profile") {
+    return (
+      <article className="flex flex-col items-center gap-6 bg-gray200 px-6 py-10">
+        <Link href={href} className="h-[303px] w-full overflow-hidden">
+          <OptimizedImage
+            src={product.primaryImage}
+            alt={product.name}
+            width={425}
+            height={303}
+            className="h-full w-full object-cover"
+            sizes="50vw"
+          />
+        </Link>
+        <div className="flex w-full flex-col items-center gap-6">
+          <div className="flex w-full flex-col items-center gap-3 px-3">
+            <Link
+              href={href}
+              className="text-center font-gill text-xl font-light leading-110 text-darkblack"
+            >
+              {product.name}
+            </Link>
+            <p className="w-full text-center font-gill text-xl font-semibold leading-110 text-darkblack">
+              <span aria-hidden>₹ </span>
+              {formatJewelleryPrice(product.price)}
+            </p>
+          </div>
+          <div className="flex items-center gap-6">
+            <DetailTextLink onClick={onAddToBag} className="text-sm uppercase">
+              {wishlistPageContent.addToBagLabel}
+            </DetailTextLink>
+            <DetailTextLink onClick={onRemove} className="text-sm uppercase">
+              {wishlistPageContent.removeLabel}
+            </DetailTextLink>
+          </div>
+        </div>
+      </article>
+    );
+  }
 
   return (
     <article

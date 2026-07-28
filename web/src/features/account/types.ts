@@ -2,6 +2,7 @@ export type ProfileSectionId =
   | "details"
   | "orders"
   | "addresses"
+  | "wishlist"
   | "appointments"
   | "bespoke"
   | "support";

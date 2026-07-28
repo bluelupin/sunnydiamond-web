@@ -75,10 +75,11 @@ const ProfilePage = () => {
 
               <div className="min-w-0">
                 <ProfileSectionContent section={activeSection} customer={customer} />
-                {activeSection !== "support" ? <ProfilePromoStrip /> : null}
               </div>
             </div>
           </div>
+
+          {activeSection !== "support" ? <ProfilePromoStrip /> : null}
         </div>
       ) : null}
     </ProfileAuthGate>

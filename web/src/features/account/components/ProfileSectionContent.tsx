@@ -5,6 +5,7 @@ import ProfileBespokeSection from "./ProfileBespokeSection";
 import ProfileDetailsSection from "./ProfileDetailsSection";
 import ProfileOrdersSection from "./ProfileOrdersSection";
 import ProfileAddressesSection from "./ProfileAddressesSection";
+import ProfileWishlistSection from "./ProfileWishlistSection";
 import ProfileSupportSection from "./ProfileSupportSection";
 import type { AuthCustomer } from "@/features/auth/context/AuthContext";
 import type { ProfileSectionId } from "../types";
@@ -25,6 +26,10 @@ const ProfileSectionContent = ({ section, customer }: ProfileSectionContentProps
 
   if (section === "addresses") {
     return <ProfileAddressesSection />;
+  }
+
+  if (section === "wishlist") {
+    return <ProfileWishlistSection />;
   }
 
   if (section === "appointments") {
