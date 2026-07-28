@@ -32,6 +32,8 @@ export function mapVisitUsSection(
     title: cleanText(raw.sectionTitle) ?? VISIT_US_FALLBACK.title,
     description: cleanText(raw.description) ?? VISIT_US_FALLBACK.description,
     imageSrc,
+    mobileImageSrc:
+      mobileSrc && mobileSrc !== imageSrc ? mobileSrc : undefined,
     imageAlt,
     ctaLabel,
     ctaUrl,
