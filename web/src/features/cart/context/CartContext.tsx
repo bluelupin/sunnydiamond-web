@@ -437,12 +437,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const updateLineItemOptions = useCallback(
     (lineItemId: string, options: Partial<CartLineOptions>) => {
       const previous = lineMetadataRef.current[lineItemId] ?? { options: {} };
+      const clearingGift = options.isGift === false;
+      const togglingGift = typeof options.isGift === "boolean";
+      const nextOptions = { ...previous.options, ...options };
+
+      const nextLine: (typeof previous) = {
+        ...previous,
+        options: nextOptions,
+      };
+
+      if (clearingGift) {
+        nextOptions.isGift = false;
+        nextLine.options = nextOptions;
+        delete nextLine.gifting;
+      }
+
       const nextMetadata = {
         ...lineMetadataRef.current,
-        [lineItemId]: {
-          ...previous,
-          options: { ...previous.options, ...options },
-        },
+        [lineItemId]: nextLine,
       };
       lineMetadataRef.current = nextMetadata;
       writeCartLineMetadata(nextMetadata);
@@ -455,22 +467,81 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
         return {
           ...current,
-          items: current.items.map((item) =>
-            item.id === lineItemId
-              ? { ...item, options: { ...item.options, ...options } }
-              : item,
-          ),
+          items: current.items.map((item) => {
+            if (item.id !== lineItemId) {
+              return item;
+            }
+
+            if (clearingGift) {
+              return {
+                ...item,
+                options: { ...item.options, ...options, isGift: false },
+                gifting: undefined,
+              };
+            }
+
+            return {
+              ...item,
+              options: { ...item.options, ...options },
+            };
+          }),
         };
       });
 
-      const cartId = getGuestCartId();
-      const lineItem = cartState?.items.find((item) => item.id === lineItemId);
-      if (!cartId || !lineItem) {
+      const cartId = cartState?.totals.cartId?.trim() || getGuestCartId();
+      const lineItems = cartState?.items;
+      if (!cartId || !lineItems) {
         return;
       }
 
       void (async () => {
         try {
+          // Gift checkbox is not a Magento customizable option — sync via gift API
+          // so refresh/mapper cannot force the old is_gift flag back on.
+          if (togglingGift) {
+            const hasSeparate = lineItems.some((item) => {
+              const meta = nextMetadata[item.id];
+              return meta?.gifting?.wrapMode === "separate";
+            });
+
+            const selection: CartGiftingSelection = {
+              mode: hasSeparate ? "separate" : "single",
+              groupedNote: undefined,
+              items: lineItems.map((item) => {
+                const meta = nextMetadata[item.id];
+                const isGift =
+                  item.id === lineItemId
+                    ? options.isGift === true
+                    : Boolean(meta?.options.isGift || meta?.gifting);
+
+                return {
+                  lineItemId: item.id,
+                  isGift,
+                  note:
+                    isGift && hasSeparate
+                      ? meta?.gifting?.note?.trim() || undefined
+                      : undefined,
+                };
+              }),
+            };
+
+            if (selection.mode === "single") {
+              const noteOwner = selection.items.find((item) => item.isGift);
+              selection.groupedNote = noteOwner
+                ? nextMetadata[noteOwner.lineItemId]?.gifting?.note?.trim() || undefined
+                : undefined;
+            }
+
+            const syncedState = await setCartGiftOptions(cartId, selection, nextMetadata);
+            applyCartState(syncedState);
+            return;
+          }
+
+          const lineItem = lineItems.find((item) => item.id === lineItemId);
+          if (!lineItem) {
+            return;
+          }
+
           const syncedState = await syncGuestCartLineOption(
             cartId,
             lineItemId,
@@ -484,7 +555,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         }
       })();
     },
-    [applyCartState, cartState?.items],
+    [applyCartState, cartState?.items, cartState?.totals.cartId],
   );
 
   const applyGiftingSelection = useCallback(

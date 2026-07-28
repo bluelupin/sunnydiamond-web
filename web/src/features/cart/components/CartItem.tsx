@@ -30,7 +30,8 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
   const { toggleWishlist, isWishlisted } = useWishlist();
   const meta = formatCartLineMeta(item);
   const wishlisted = isWishlisted(product.id);
-  const isGift = Boolean(options.isGift || item.gifting);
+  const isGift =
+    options.isGift === false ? false : Boolean(options.isGift || item.gifting);
   const engravingMaxCharacters = options.engravingMaxCharacters;
   const hasEngraving = Boolean(options.engraving?.trim());
   const [isEditingEngraving, setIsEditingEngraving] = useState(false);
