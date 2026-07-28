@@ -511,3 +511,34 @@ export const isCheckoutPaymentValid = (
   orderTotal: number,
 ): boolean =>
   Object.values(getCheckoutPaymentErrors(values, orderTotal)).every((error) => !error);
+
+export type ProfileAddressFormValues = {
+  name: string;
+  addressLine1: string;
+  addressLine2?: string;
+  pincode: string;
+  city: string;
+  state: string;
+  phone: string;
+};
+
+export type ProfileAddressFormField = keyof ProfileAddressFormValues;
+
+export const getProfileAddressFormErrors = (
+  values: ProfileAddressFormValues,
+  states: readonly string[],
+): Partial<Record<ProfileAddressFormField, string | undefined>> => ({
+  name: validateRequiredName(values.name).error,
+  addressLine1: validateAddressLine1(values.addressLine1).error,
+  addressLine2: validateOptionalAddressLine2(values.addressLine2 ?? "").error,
+  pincode: validateIndianPincode(values.pincode).error,
+  city: validateCity(values.city).error,
+  state: validateIndianState(values.state, states).error,
+  phone: validatePhone(values.phone, "+91").error,
+});
+
+export const isProfileAddressFormValid = (
+  values: ProfileAddressFormValues,
+  states: readonly string[],
+): boolean =>
+  Object.values(getProfileAddressFormErrors(values, states)).every((error) => !error);
