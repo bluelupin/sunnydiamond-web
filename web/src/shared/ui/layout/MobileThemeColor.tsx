@@ -2,10 +2,7 @@
 
 import { useEffect } from "react";
 import type { HeaderVariant } from "@/shared/utils/navigation";
-import {
-  resolveAppleStatusBarStyle,
-  resolveMobileThemeColor,
-} from "@/shared/utils/themeColor";
+import { resolveMobileThemeColor } from "@/shared/utils/themeColor";
 
 type MobileThemeColorProps = {
   pathname: string;
@@ -27,10 +24,6 @@ function setMetaContent(name: string, content: string) {
 const MobileThemeColor = ({ pathname, headerVariant }: MobileThemeColorProps) => {
   useEffect(() => {
     setMetaContent("theme-color", resolveMobileThemeColor(pathname, headerVariant));
-    setMetaContent(
-      "apple-mobile-web-app-status-bar-style",
-      resolveAppleStatusBarStyle(headerVariant),
-    );
   }, [pathname, headerVariant]);
 
   return null;

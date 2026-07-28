@@ -1,6 +1,6 @@
 import type { HeaderVariant } from "@/shared/utils/navigation";
 
-/** Matches manifest.json / root viewport theme_color. */
+/** Matches root viewport theme_color. */
 export const THEME_COLORS = {
   brand: "#C6A87D",
   white: "#FFFFFF",
@@ -21,10 +21,4 @@ export function resolveMobileThemeColor(
   }
 
   return THEME_COLORS.white;
-}
-
-export function resolveAppleStatusBarStyle(
-  headerVariant: HeaderVariant,
-): "default" | "black-translucent" {
-  return headerVariant === "overlay" ? "black-translucent" : "default";
 }

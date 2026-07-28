@@ -31,12 +31,6 @@ export const metadata: Metadata = {
   authors: [{ name: "Sunny Diamonds" }],
   creator: "Sunny Diamonds",
   applicationName: "Sunny Diamonds",
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    title: "Sunny Diamonds",
-    statusBarStyle: "default",
-  },
   metadataBase: new URL(siteEnv.baseUrl),
   openGraph: {
     type: "website",
