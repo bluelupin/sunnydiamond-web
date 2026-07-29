@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronDown, X } from "lucide-react";
+import { X } from "lucide-react";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import AppointmentDateField from "@/shared/ui/AppointmentDateField";
 import { cn } from "@/shared/utils/cn";
@@ -26,13 +26,16 @@ import {
   CAREERS_WORK_EXPERIENCE_OPTIONS,
   careersFormFieldClassName,
   careersFormFieldGridClassName,
+  careersFormFieldsStackClassName,
   careersFormLabelClassName,
   careersFormSectionClassName,
   careersFormSectionTitleClassName,
   careersFormSelectClassName,
+  careersFormSelectChevronClassName,
   getCareersBirthDateBounds,
 } from "@/features/careers/constants/careersApplicationForm";
 import CareersApplicationJobHeader from "./CareersApplicationJobHeader";
+import CareersChevronDownIcon from "./CareersChevronDownIcon";
 import CareersUploadResumeModal from "./CareersUploadResumeModal";
 import CareersResumeFileChip from "./CareersResumeFileChip";
 import CareersSearchIcon from "./CareersSearchIcon";
@@ -97,7 +100,12 @@ function SelectField({
           value={value}
           onChange={(event) => onChange(event.target.value)}
           onBlur={onBlur}
-          className={cn(careersFormSelectClassName, error && invalidFieldClassName, "pr-10")}
+          className={cn(
+            careersFormSelectClassName,
+            !value && "text-gray600",
+            error && invalidFieldClassName,
+            "pr-10",
+          )}
         >
           {placeholder ? (
             <option value="" disabled>
@@ -110,10 +118,7 @@ function SelectField({
             </option>
           ))}
         </select>
-        <ChevronDown
-          className="pointer-events-none absolute right-3 top-1/2 size-6 -translate-y-1/2 text-darkblack"
-          aria-hidden
-        />
+        <CareersChevronDownIcon className={careersFormSelectChevronClassName} />
       </div>
     </FormField>
   );
@@ -400,95 +405,100 @@ const CareersApplicationForm = () => {
           <h2 className={careersFormSectionTitleClassName}>
             {applicationForm.personalDetailsHeading}
           </h2>
-          <div className={careersFormFieldGridClassName}>
-            <FormField label={fields.fullNameLabel} error={showError("name") ? errors.name : undefined}>
-              <input
-                type="text"
-                autoComplete="name"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                onBlur={() => markTouched("name")}
-                className={cn(
-                  careersFormFieldClassName,
-                  showError("name") && invalidFieldClassName,
-                )}
-              />
-            </FormField>
-
-            <FormField label={fields.phoneLabel} error={showError("phone") ? errors.phone : undefined}>
-              <div className="flex h-14 items-center gap-2 bg-[#F2F2F2] px-3">
-                <div className="flex items-center gap-1">
-                  <select
-                    aria-label="Country code"
-                    value={countryCode}
-                    onChange={(event) => setCountryCode(event.target.value)}
-                    className="appearance-none bg-transparent font-gill text-base leading-110 text-darkblack outline-none"
-                  >
-                    {APPOINTMENT_COUNTRY_CODES.map((entry) => (
-                      <option key={entry.code} value={entry.code}>
-                        {entry.code}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="size-6 shrink-0 text-darkblack" aria-hidden />
-                </div>
+          <div className={careersFormFieldsStackClassName}>
+            <div className={careersFormFieldGridClassName}>
+              <FormField label={fields.fullNameLabel} error={showError("name") ? errors.name : undefined}>
                 <input
-                  type="tel"
-                  autoComplete="tel"
-                  value={phone}
-                  onChange={(event) => setPhone(sanitizePhoneInput(event.target.value, countryCode))}
-                  onBlur={() => markTouched("phone")}
+                  type="text"
+                  autoComplete="name"
+                  placeholder={fields.fieldPlaceholder}
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  onBlur={() => markTouched("name")}
                   className={cn(
-                    "min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none",
-                    showError("phone") && "text-red-600",
+                    careersFormFieldClassName,
+                    showError("name") && invalidFieldClassName,
                   )}
                 />
-              </div>
-            </FormField>
+              </FormField>
 
-            <FormField label={fields.emailLabel} error={showError("email") ? errors.email : undefined}>
-              <input
-                type="email"
-                autoComplete="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                onBlur={() => markTouched("email")}
-                className={cn(
-                  careersFormFieldClassName,
-                  showError("email") && invalidFieldClassName,
-                )}
+              <FormField label={fields.phoneLabel} error={showError("phone") ? errors.phone : undefined}>
+                <div className="flex h-14 items-center gap-2 bg-[#F2F2F2] p-3">
+                  <div className="flex shrink-0 items-center">
+                    <select
+                      aria-label="Country code"
+                      value={countryCode}
+                      onChange={(event) => setCountryCode(event.target.value)}
+                      className="appearance-none bg-transparent font-gill text-base font-normal leading-110 text-darkblack outline-none"
+                    >
+                      {APPOINTMENT_COUNTRY_CODES.map((entry) => (
+                        <option key={entry.code} value={entry.code}>
+                          {entry.code}
+                        </option>
+                      ))}
+                    </select>
+                    <CareersChevronDownIcon />
+                  </div>
+                  <input
+                    type="tel"
+                    autoComplete="tel"
+                    placeholder={fields.fieldPlaceholder}
+                    value={phone}
+                    onChange={(event) => setPhone(sanitizePhoneInput(event.target.value, countryCode))}
+                    onBlur={() => markTouched("phone")}
+                    className={cn(
+                      "min-w-0 flex-1 bg-transparent font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600",
+                      showError("phone") && "text-red-600 placeholder:text-red-600",
+                    )}
+                  />
+                </div>
+              </FormField>
+
+              <FormField label={fields.emailLabel} error={showError("email") ? errors.email : undefined}>
+                <input
+                  type="email"
+                  autoComplete="email"
+                  placeholder={fields.fieldPlaceholder}
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  onBlur={() => markTouched("email")}
+                  className={cn(
+                    careersFormFieldClassName,
+                    showError("email") && invalidFieldClassName,
+                  )}
+                />
+              </FormField>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2 lg:max-w-[736px]">
+              <FormField
+                label={fields.dateOfBirthLabel}
+                error={showError("dateOfBirth") ? errors.dateOfBirth : undefined}
+              >
+                <AppointmentDateField
+                  id="careers-date-of-birth"
+                  value={dateOfBirth}
+                  minDate={careersBirthDateBounds.minDate}
+                  maxDate={careersBirthDateBounds.maxDate}
+                  onChange={setDateOfBirth}
+                  onBlur={() => markTouched("dateOfBirth")}
+                  hasError={showError("dateOfBirth")}
+                  aria-invalid={showError("dateOfBirth") || undefined}
+                  placeholder={fields.dateOfBirthPlaceholder}
+                  displayFormat="dd/mm/yyyy"
+                />
+              </FormField>
+
+              <SelectField
+                label={fields.genderLabel}
+                value={gender}
+                onChange={setGender}
+                onBlur={() => markTouched("gender")}
+                options={CAREERS_GENDER_OPTIONS}
+                placeholder="Select"
+                error={showError("gender") ? errors.gender : undefined}
               />
-            </FormField>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2 lg:max-w-[736px]">
-            <FormField
-              label={fields.dateOfBirthLabel}
-              error={showError("dateOfBirth") ? errors.dateOfBirth : undefined}
-            >
-              <AppointmentDateField
-                id="careers-date-of-birth"
-                value={dateOfBirth}
-                minDate={careersBirthDateBounds.minDate}
-                maxDate={careersBirthDateBounds.maxDate}
-                onChange={setDateOfBirth}
-                onBlur={() => markTouched("dateOfBirth")}
-                hasError={showError("dateOfBirth")}
-                aria-invalid={showError("dateOfBirth") || undefined}
-                placeholder={fields.dateOfBirthPlaceholder}
-                displayFormat="dd/mm/yyyy"
-              />
-            </FormField>
-
-            <SelectField
-              label={fields.genderLabel}
-              value={gender}
-              onChange={setGender}
-              onBlur={() => markTouched("gender")}
-              options={CAREERS_GENDER_OPTIONS}
-              placeholder="Select"
-              error={showError("gender") ? errors.gender : undefined}
-            />
+            </div>
           </div>
         </section>
 

@@ -1,9 +1,10 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { careersPageContent } from "@/features/careers/data/content";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
+import { careersFormSelectChevronClassName } from "@/features/careers/constants/careersApplicationForm";
+import CareersChevronDownIcon from "./CareersChevronDownIcon";
 
 type FilterFieldProps = {
   label: string;
@@ -33,10 +34,7 @@ const FilterField = ({ label, value, placeholder, options, onChange }: FilterFie
           </option>
         ))}
       </select>
-      <ChevronDown
-        className="pointer-events-none absolute right-3 top-1/2 size-6 -translate-y-1/2 text-darkblack"
-        aria-hidden
-      />
+      <CareersChevronDownIcon className={careersFormSelectChevronClassName} />
     </div>
   </div>
 );

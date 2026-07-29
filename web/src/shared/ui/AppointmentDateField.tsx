@@ -136,14 +136,14 @@ const AppointmentDateField = ({
           aria-haspopup="dialog"
           aria-expanded={open}
           className={cn(
-            "relative flex h-14 w-full items-center border border-transparent bg-[#F2F2F2] px-3 text-left",
+            "relative flex h-14 w-full items-center border border-transparent bg-[#F2F2F2] p-3 text-left",
             hasError && invalidFieldContainerClassName,
           )}
         >
           <span
             className={cn(
               "min-w-0 flex-1 font-gill text-base leading-110",
-              value ? "text-darkblack" : "text-neutral400",
+              value ? "text-darkblack" : "text-gray600",
             )}
           >
             {value ? formatDisplayDate(value, displayFormat) : placeholder}

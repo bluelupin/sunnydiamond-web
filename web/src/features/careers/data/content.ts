@@ -86,6 +86,7 @@ export const careersPageContent = {
       emailLabel: "Email ID*",
       dateOfBirthLabel: "Date of Birth*",
       dateOfBirthPlaceholder: "DD/MM/YYYY",
+      fieldPlaceholder: "Enter",
       genderLabel: "Gender*",
       highestDegreeLabel: "Highest Degree*",
       areaOfStudyLabel: "Area of Study*",
