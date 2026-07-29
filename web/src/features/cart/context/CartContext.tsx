@@ -288,8 +288,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [applyCartState, isAuthenticated, refreshCart, status]);
 
   const addItem = useCallback(async (payload: AddToBagPayload | Product): Promise<AddItemResult> => {
-    const { product, options = {}, productCustomOptions = product.customOptions } =
-      normalizePayload(payload);
+    const {
+      product,
+      options = {},
+      productCustomOptions = product.customOptions,
+      configurableOptionUids,
+    } = normalizePayload(payload);
     const sku = product.id.trim();
 
     if (!sku) {
@@ -306,6 +310,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         quantity: 1,
         lineOptions: options,
         productCustomOptions,
+        configurableOptionUids,
         lineMetadata: lineMetadataRef.current,
       });
 

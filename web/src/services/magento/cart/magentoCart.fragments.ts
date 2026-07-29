@@ -47,10 +47,44 @@ export const MAGENTO_CART_FIELDS = `
           }
         }
       }
+      ... on ConfigurableCartItem {
+        is_gift
+        gift_message {
+          message
+        }
+        customizable_options {
+          label
+          values {
+            label
+            value
+          }
+        }
+        configurable_options {
+          option_label
+          value_label
+        }
+        configured_variant {
+          sku
+          image {
+            url
+          }
+          ... on SimpleProduct {
+            media_gallery {
+              url
+              label
+              position
+              disabled
+            }
+          }
+        }
+      }
       product {
         sku
         name
         url_key
+        image {
+          url
+        }
         ... on SimpleProduct {
           media_gallery {
             url

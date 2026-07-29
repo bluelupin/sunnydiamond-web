@@ -4,6 +4,7 @@ export type MagentoCartProduct = {
   sku?: string | null;
   name?: string | null;
   url_key?: string | null;
+  image?: { url?: string | null } | null;
   media_gallery?: MagentoMediaGalleryItem[] | null;
 };
 
@@ -13,6 +14,11 @@ export type MagentoCartCustomizableOption = {
     label?: string | null;
     value?: string | null;
   }> | null;
+};
+
+export type MagentoCartConfigurableOption = {
+  option_label?: string | null;
+  value_label?: string | null;
 };
 
 export type MagentoGiftMessage = {
@@ -25,6 +31,8 @@ export type MagentoCartItem = {
   uid?: string | null;
   quantity?: number | null;
   customizable_options?: MagentoCartCustomizableOption[] | null;
+  configurable_options?: MagentoCartConfigurableOption[] | null;
+  configured_variant?: MagentoCartProduct | null;
   is_gift?: boolean | null;
   gift_message?: MagentoGiftMessage | null;
   product?: MagentoCartProduct | null;

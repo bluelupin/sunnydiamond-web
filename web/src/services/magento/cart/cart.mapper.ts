@@ -1,10 +1,11 @@
 import type { Product } from "@/features/products/data/products";
-import type { CartGiftingOptions, CartLineItem } from "@/features/cart/types/cart.types";
+import type { CartGiftingOptions, CartLineItem, CartLineOptions } from "@/features/cart/types/cart.types";
 import { buildProductSeo } from "@/shared/lib/seo/productSeo";
 import { resolveMagentoProductImages } from "../products/products.mapper";
 import fallBackImage from "@/assets/fallBackImage.png";
 import type {
   MagentoCart,
+  MagentoCartConfigurableOption,
   MagentoCartDiscount,
   MagentoCartItem,
   MagentoShippingMethod,
@@ -29,7 +30,12 @@ function mapCartItemProduct(item: MagentoCartItem): Product | null {
     return null;
   }
 
-  const { primaryImage } = resolveMagentoProductImages(product?.media_gallery);
+  // Prefer Magento configured child (gold variant) imagery over the configurable parent.
+  const variant = item.configured_variant;
+  const { primaryImage } = resolveMagentoProductImages(
+    variant?.media_gallery ?? product?.media_gallery,
+    variant?.image?.url ?? product?.image?.url,
+  );
   const image = primaryImage || fallBackImage;
 
   return {
@@ -55,6 +61,26 @@ function mapCartItemProduct(item: MagentoCartItem): Product | null {
       shortDescription: name,
     }),
   };
+}
+
+function mapMagentoConfigurableOptionsToLineOptions(
+  options: MagentoCartConfigurableOption[] | null | undefined,
+): Partial<CartLineOptions> {
+  const mapped: Partial<CartLineOptions> = {};
+
+  for (const option of options ?? []) {
+    const optionLabel = option.option_label?.trim().toLowerCase() ?? "";
+    const valueLabel = option.value_label?.trim();
+    if (!valueLabel) {
+      continue;
+    }
+
+    if (optionLabel.includes("metal") || optionLabel.includes("color") || optionLabel.includes("gold")) {
+      mapped.metal = valueLabel;
+    }
+  }
+
+  return mapped;
 }
 
 export function mapEstimateShippingMethods(
@@ -275,9 +301,11 @@ export function mapMagentoCartItems(
 
     const metadata: CartLineMetadata = lineMetadata[uid] ?? { options: {} };
     const magentoOptions = mapMagentoCartCustomizableOptionsToLineOptions(item.customizable_options);
+    const configurableOptions = mapMagentoConfigurableOptionsToLineOptions(item.configurable_options);
     const mergedOptions = {
       ...metadata.options,
       ...magentoOptions,
+      ...configurableOptions,
     };
 
     // Magento is the source of truth once a gift is saved there; localStorage

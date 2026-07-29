@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import type { Product } from "@/features/products/data/products";
@@ -13,6 +14,11 @@ import { ChevronLeft } from "lucide-react";
 import ProductDetailSidebar from "./detail/ProductDetailSidebar";
 import ProductDetailHeroLayout from "./detail/ProductDetailHeroLayout";
 import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
+import {
+  getDefaultMetalColorId,
+  getMetalColorOptions,
+} from "@/features/products/utils/metalColorOptions.utils";
+import { applySelectedMetalVariant } from "@/features/products/utils/productVariant.utils";
 
 type ProductDetailPageProps = {
   product: Product;
@@ -23,8 +29,20 @@ const ProductDetailPage = ({ product, sizeGuide = null }: ProductDetailPageProps
   const { addItem } = useCart();
   const { openBagDrawer } = useCartUI();
 
-  const content = getProductDetailContent(product);
-  const pricing = getProductDetailPricing(product);
+  const content = useMemo(() => getProductDetailContent(product), [product]);
+  const [selectedMetal, setSelectedMetal] = useState(() =>
+    getDefaultMetalColorId(product, content.metalColors),
+  );
+
+  useEffect(() => {
+    setSelectedMetal(getDefaultMetalColorId(product, getMetalColorOptions(product)));
+  }, [product]);
+
+  const displayProduct = useMemo(
+    () => applySelectedMetalVariant(product, selectedMetal),
+    [product, selectedMetal],
+  );
+  const pricing = getProductDetailPricing(displayProduct);
 
   const handleAddToCart = async (payload: Parameters<typeof addItem>[0]) => {
     const result = await addItem(payload);
@@ -33,8 +51,11 @@ const ProductDetailPage = ({ product, sizeGuide = null }: ProductDetailPageProps
 
   const sidebarProps = {
     product,
+    displayProduct,
     content,
     pricing,
+    selectedMetal,
+    onSelectedMetalChange: setSelectedMetal,
     sizeGuide,
     onAddToBag: handleAddToCart,
   };
@@ -51,7 +72,12 @@ const ProductDetailPage = ({ product, sizeGuide = null }: ProductDetailPageProps
 
       <ProductDetailSidebar {...sidebarProps}>
         {({ purchase, details }) => (
-          <ProductDetailHeroLayout product={product} purchase={purchase} details={details} />
+          <ProductDetailHeroLayout
+            key={selectedMetal || displayProduct.image.toString()}
+            product={displayProduct}
+            purchase={purchase}
+            details={details}
+          />
         )}
       </ProductDetailSidebar>
     </PageContainer>

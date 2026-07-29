@@ -253,6 +253,7 @@ type AddProductToGuestCartInput = {
   quantity: number;
   lineOptions?: CartLineOptions;
   productCustomOptions?: ProductCustomOptions;
+  configurableOptionUids?: string[];
   lineMetadata: StoredCartLineMetadata;
   signal?: AbortSignal;
 };
@@ -263,12 +264,21 @@ export async function addProductToGuestCart({
   quantity,
   lineOptions = {},
   productCustomOptions,
+  configurableOptionUids = [],
   lineMetadata,
   signal,
 }: AddProductToGuestCartInput): Promise<GuestCartState> {
-  const optionPayload = buildMagentoCartItemOptionPayload(lineOptions, productCustomOptions);
+  const configurableUids = configurableOptionUids.map((uid) => uid.trim()).filter(Boolean);
+  const optionPayload = buildMagentoCartItemOptionPayload(
+    lineOptions,
+    configurableUids.length > 0 && productCustomOptions
+      ? { ...productCustomOptions, metal: undefined }
+      : productCustomOptions,
+  );
+  const selectedOptions = [...(optionPayload?.selectedOptions ?? []), ...configurableUids];
+  const enteredOptions = optionPayload?.enteredOptions ?? [];
 
-  if (!optionPayload) {
+  if (!optionPayload && configurableUids.length === 0) {
     return addSimpleProductToGuestCart(cartId, sku, quantity, lineMetadata, signal);
   }
 
@@ -280,8 +290,8 @@ export async function addProductToGuestCart({
         {
           sku,
           quantity,
-          entered_options: optionPayload.enteredOptions,
-          selected_options: optionPayload.selectedOptions,
+          ...(enteredOptions.length > 0 ? { entered_options: enteredOptions } : {}),
+          ...(selectedOptions.length > 0 ? { selected_options: selectedOptions } : {}),
         },
       ],
     },

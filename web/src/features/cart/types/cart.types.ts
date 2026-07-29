@@ -34,6 +34,8 @@ export type AddToBagPayload = {
   product: Product;
   options?: CartLineOptions;
   productCustomOptions?: ProductCustomOptions;
+  /** Magento configurable option value UIDs (e.g. gold color) for addProductsToCart. */
+  configurableOptionUids?: string[];
 };
 
 export type AddItemResult = {

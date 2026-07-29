@@ -14,6 +14,40 @@ import {
   PRODUCT_DETAIL_GALLERY_THIRD_IMAGE,
 } from "@/features/products/data/productGalleryContent";
 
+export type ProductConfigurableOptionValue = {
+  /** Normalized id used by PDP swatches (e.g. rose-gold). */
+  id: string;
+  label: string;
+  /** Magento configurable option value UID for addProductsToCart.selected_options. */
+  uid: string;
+  /** Magento Visual Swatch hex (ColorSwatchData.value), when configured in Admin. */
+  swatchColor?: string;
+};
+
+export type ProductConfigurableOption = {
+  attributeCode: string;
+  label: string;
+  values: ProductConfigurableOptionValue[];
+};
+
+export type ProductConfigurableVariant = {
+  sku: string;
+  price: number;
+  originalPrice?: number;
+  image: string;
+  images: string[];
+  inStock: boolean;
+  /** attribute_code → option label (e.g. sd_metal_color → rose-gold). */
+  attributes: Record<string, string>;
+  /** Configurable value UIDs required when adding the parent SKU to cart. */
+  optionUids: string[];
+};
+
+export type ProductConfigurable = {
+  options: ProductConfigurableOption[];
+  variants: ProductConfigurableVariant[];
+};
+
 export interface Product {
   id: string;
   urlKey: string;
@@ -43,6 +77,8 @@ export interface Product {
   detailAttributes?: string[];
   engraving?: ProductEngravingConfig;
   customOptions?: ProductCustomOptions;
+  /** Present when Magento product is ConfigurableProduct (e.g. gold color variants). */
+  configurable?: ProductConfigurable;
   productVideoUrl?: string;
   /**
    * PDP accordion copy from Magento product attributes:
