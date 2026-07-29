@@ -3,6 +3,7 @@
 import { ReactNode } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
+import BrowserBackScrollRestore from "@/shared/lib/providers/BrowserBackScrollRestore";
 import { usePathname } from "next/navigation";
 import { cn } from "@/shared/utils/cn";
 import { isAuthRoute, isCartOrCheckoutRoute, shouldHideFooter, shouldHideFooterOnMobile, shouldOffsetMainForHeader } from "@/shared/utils/navigation";
@@ -17,6 +18,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
 
   return (
     <div className={cn("flex flex-col", isAuthPage ? "h-[100dvh] overflow-hidden" : "min-h-screen")}>
+      <BrowserBackScrollRestore />
       <Header />
       <main
         className={
