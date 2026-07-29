@@ -70,9 +70,9 @@ const DiscoverContent = ({
     {ctaLabel && ctaHref ? (
       <Link
         href={ctaHref}
-        className="btn-border-slide inline-flex h-14 min-w-[199px] shrink-0 items-center justify-center whitespace-nowrap border border-neutral300 px-7 py-5 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
+        className="btn-border-slide inline-flex h-14 min-w-[199px] shrink-0 items-center justify-center whitespace-nowrap border border-neutral300 bg-white px-7 py-5 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
       >
-        {ctaLabel}
+        <span className="relative z-[1]">{ctaLabel}</span>
       </Link>
     ) : null}
   </>
@@ -87,9 +87,12 @@ const EducationDiscoverSection = ({ ctaBanner }: EducationDiscoverSectionProps) 
 
   return (
     <section aria-labelledby="education-discover-title" className="bg-gray300">
-      <div className="flex w-full flex-col md:grid md:grid-cols-2 md:items-end lg:gap-20 md:gap-8">
+      <div className="isolate flex w-full flex-col md:grid md:grid-cols-2 md:items-end lg:gap-20 md:gap-8">
         {hasImage ? (
-          <Reveal direction="up" className="flex w-full mix-blend-darken md:order-1 order-2 lg:justify-start justify-end">
+          <Reveal
+            direction="up"
+            className="flex w-full md:order-1 order-2 lg:justify-start justify-end"
+          >
             <ResponsiveImage
               desktopSrc={ctaBanner.imageDesktopUrl}
               mobileSrc={ctaBanner.imageMobileUrl}
@@ -97,14 +100,14 @@ const EducationDiscoverSection = ({ ctaBanner }: EducationDiscoverSectionProps) 
               width={621}
               height={585}
               quality={85}
-              className="h-full w-full object-cover object-center"
+              className="h-full w-full object-cover object-center mix-blend-darken"
             />
           </Reveal>
         ) : null}
         <Reveal
           direction="up"
           className={cn(
-            "md:order-2 order-1 w-full max-w-640 lg:justify-start justify-center lg:pt-100 lg:pb-100 pt-16 lg:px-0 px-4 md:mx-0 mx-auto py-10",
+            "relative z-10 md:order-2 order-1 w-full max-w-640 lg:justify-start justify-center lg:pt-100 lg:pb-100 pt-16 lg:px-0 px-4 md:mx-0 mx-auto py-10",
             !hasImage && "md:col-span-2",
           )}
         >
