@@ -62,7 +62,7 @@ function CraftsmanshipSilkLayer({ variant }: { variant: "desktop" | "mobile" }) 
           alt=""
           width={spec.imageWidth}
           height={spec.imageHeight}
-          className="h-screen w-[651px] max-w-none object-bottom"
+          className="h-screen w-[651px] max-w-none object-bottom md:max-lg:portrait:h-[85vh]"
           sizes="100vw"
         />
       </div>
@@ -136,12 +136,12 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
       <section
         id={id}
         ref={containerRef}
-        style={{ height: `${2 * 100}vh` }}
+        style={{ height: `calc(2 * var(--craftsmanship-vh-unit, 100vh))` }}
         aria-label="Craftsmanship"
-        className="bg-gray200 py-16 md:py-0 md:pt-20"
+        className="craftsmanship-process-section [--craftsmanship-vh-unit:100vh] md:max-lg:portrait:[--craftsmanship-vh-unit:72vh] bg-gray200 py-16 md:py-0 md:pt-20 md:max-lg:portrait:pt-12"
         aria-busy="true"
       >
-        <div className="sticky md:top-24 top-10 h-screen overflow-hidden bg-gray200">
+        <div className="sticky md:top-24 top-10 h-screen overflow-hidden bg-gray200 md:max-lg:portrait:h-[85vh]">
           <CraftsmanshipBackground />
           <div className="container relative z-10 h-full">
             <div className="grid h-full grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-12">
@@ -166,22 +166,22 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
     <section
       id={id}
       ref={containerRef}
-      style={{ height: `${(stepCount + 1) * 100}vh` }}
+      style={{ height: `calc(${stepCount + 1} * var(--craftsmanship-vh-unit, 100vh))` }}
       aria-label={sectionTitle}
-      className="bg-gray200 py-16 md:py-0 md:pt-20"
+      className="craftsmanship-process-section [--craftsmanship-vh-unit:100vh] md:max-lg:portrait:[--craftsmanship-vh-unit:72vh] bg-gray200 py-16 md:py-0 md:pt-20 md:max-lg:portrait:pt-12"
     >
-      <div className="sticky lg:top-24 top-10 h-screen overflow-hidden bg-gray200">
+      <div className="sticky lg:top-24 top-10 h-screen overflow-hidden bg-gray200 md:max-lg:portrait:h-[85vh]">
         <CraftsmanshipBackground />
         <div className="max-w-1920 mx-auto 2xl:px[60px] md:px-10 px-4 relative z-10 h-full">
           <div className="grid h-full grid-cols-1 lg:grid-cols-12 gap-6 md:gap-0 lg:gap-12">
             {/* Left column: title + steps */}
-            <div className="xl:col-span-5 lg:col-span-6 flex flex-col xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20 gap-8">
+            <div className="xl:col-span-5 lg:col-span-6 flex flex-col xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20 gap-8 md:max-lg:portrait:gap-6">
               <ScrollReveal as="h2" delayMs={0} className="lg:text-5xl md:text-4xl text-32 text-black font-normal font-larken tracking-[0%] lg:text-left text-center">
                 {sectionTitle}
               </ScrollReveal>
 
               {/* Active + next upcoming step (faded) */}
-              <ol className="space-y-10 lg:space-y-16 relative">
+              <ol className="space-y-10 lg:space-y-16 relative md:max-lg:portrait:space-y-8">
                 {steps.map((step, i) => {
                   const Icon = stepIcons[i] ?? PencilLine;
                   const isActiveStep = i === activeIndex;
@@ -233,7 +233,7 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
               className="xl:col-span-7 lg:col-span-6 relative h-auto flex items-center justify-center"
               style={{ perspective: "1200px", perspectiveOrigin: "center center" }}
             >
-              <div className="w-[300px] h-[300px] lg:aspect-[750/470] aspect-[390/350] h-auto will-change-transform"
+              <div className="lg:w-[550px] lg:h-[550px] lg:aspect-[550/550] md:w-[400px] md:h-[400px] md:aspect-[400/400] md:max-lg:portrait:w-[320px] md:max-lg:portrait:h-[320px] md:max-lg:portrait:aspect-square w-[400px] h-[400px] aspect-[400/400] h-auto will-change-transform"
                 style={{
                   transformStyle: "preserve-3d",
                   transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`,
@@ -245,8 +245,8 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
                   desktopSrc={desktopImageUrl || fallBackImage}
                   mobileSrc={mobileImageUrl || fallBackImage}
                   alt={imageAlt}
-                  width={desktopImageUrl ? 750 : 390}
-                  height={desktopImageUrl ? 470 : 350}
+                  width={desktopImageUrl ? 550 : 550}
+                  height={desktopImageUrl ? 400 : 400}
                   quality={75}
                   className="w-full h-h-full object-cover"
                 />

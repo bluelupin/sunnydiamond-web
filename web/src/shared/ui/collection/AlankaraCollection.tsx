@@ -218,7 +218,7 @@ function CollectionHeroPanel({
         "relative overflow-hidden",
         isMobile
           ? "h-[540px] w-full"
-          : "group aspect-square h-auto w-full desktop:aspect-auto desktop:h-[800px]",
+          : "group aspect-square h-auto w-full lg:aspect-auto lg:h-[800px] md:h-[550px]",
       )}
     >
       <div className="absolute inset-0 overflow-hidden">
@@ -439,7 +439,7 @@ function ProductCarouselPanel({
         "relative overflow-hidden",
         isMobile
           ? "mx-4 bg-gray300 py-[40px]"
-          : "aspect-square h-auto w-full bg-white px-4 md:px-6 desktop:aspect-auto desktop:h-[800px] desktop:px-6",
+          : "aspect-square h-auto w-full bg-white px-4 md:px-6 desktop:aspect-auto lg:h-[800px] md:h-[550px] desktop:px-6",
         total > 1 && !isAnimating && (isDragging ? "cursor-grabbing" : "cursor-grab"),
         total > 1 && "touch-none select-none",
       )}
