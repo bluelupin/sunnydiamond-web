@@ -118,18 +118,18 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
             shippingLabel={shippingDisplay.label}
             total={displayTotal}
           />
-
-          <OffersAndDealsSection
-            variant="panel-gray300"
-            open={offersOpen}
-            onToggle={toggleOffers}
-            showExpandedContent={false}
-            buttonClassName="hidden lg:flex"
-          />
-
-          {offersOpen ? (
-            <OffersAndDealsExpandedContent variant="panel-gray300" className="hidden lg:block" />
-          ) : null}
+          <div className="lg:bg-gray300">
+            <OffersAndDealsSection
+              variant="panel-gray300"
+              open={offersOpen}
+              onToggle={toggleOffers}
+              showExpandedContent={false}
+              buttonClassName="hidden lg:flex"
+            />
+            {offersOpen ? (
+              <OffersAndDealsExpandedContent variant="panel-gray300" className="hidden lg:block lg:px-4 lg:pb-4" />
+            ) : null}
+          </div>
         </div>
       ) : (
         <div className="flex flex-col gap-4">

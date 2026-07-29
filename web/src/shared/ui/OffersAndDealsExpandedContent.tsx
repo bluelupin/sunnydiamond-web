@@ -85,7 +85,7 @@ const PromoField = ({
 );
 
 const OfferCard = ({ offer }: { offer: MockOffer }) => (
-  <div className="flex min-h-[100px] w-[214px] min-w-[214px] flex-1 items-start gap-3 border border-gray300 bg-white px-3 py-4 lg:bg-gray300">
+  <div className="flex min-h-[100px] w-[214px] min-w-[214px] flex-1 items-start gap-3 border border-gray300 bg-white px-3 py-4 lg:bg-white">
     <Image
       src="/icons/kotal-bank-icon.svg"
       alt=""
@@ -165,7 +165,7 @@ const OffersAndDealsExpandedContent = ({
         </div>
       </div>
 
-      <div className="h-px w-full shrink-0 bg-neutral300" aria-hidden />
+      <div className="h-px w-full shrink-0 bg-neutral300 md:hidden" aria-hidden />
 
       <PromoField
         id="offers-gift-card"

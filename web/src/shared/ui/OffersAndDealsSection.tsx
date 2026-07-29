@@ -62,36 +62,37 @@ const OffersAndDealsSection = ({
 
   return (
     <Wrapper {...wrapperProps}>
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={open}
-        className={cn(
-          "flex w-full items-center justify-between text-left",
-          toggleClassesByVariant[variant],
-          buttonClassName,
-        )}
-      >
-        <span
+      <div className="md:bg-gray300">
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={open}
           className={cn(
-            "font-gill text-base leading-110 text-darkblack",
-            labelRegular && "font-normal",
+            "flex w-full items-center justify-between text-left",
+            toggleClassesByVariant[variant],
+            buttonClassName,
           )}
         >
-          Offers and Deals
-        </span>
-        <ChevronDownIcon
-          aria-hidden
-          className={cn(
-            "size-6 shrink-0 text-darkblack transition-transform",
-            open && "rotate-180",
-          )}
-        />
-      </button>
-
-      {showExpandedContent && open ? (
-        <OffersAndDealsExpandedContent variant={variant} />
-      ) : null}
+          <span
+            className={cn(
+              "font-gill text-base leading-110 text-darkblack",
+              labelRegular && "font-normal",
+            )}
+          >
+            Offers and Deals
+          </span>
+          <ChevronDownIcon
+            aria-hidden
+            className={cn(
+              "size-6 shrink-0 text-darkblack transition-transform",
+              open && "rotate-180",
+            )}
+          />
+        </button>
+        {showExpandedContent && open ? (
+          <OffersAndDealsExpandedContent variant={variant} className="md:px-4 md:pb-4" />
+        ) : null}
+      </div>
     </Wrapper>
   );
 };

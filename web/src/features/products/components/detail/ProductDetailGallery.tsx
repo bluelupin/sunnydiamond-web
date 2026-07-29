@@ -24,7 +24,7 @@ type ProductDetailGalleryProps = {
 const GALLERY_SLIDE_COUNT = 5;
 
 const galleryFrameClass =
-  "flex w-full overflow-hidden bg-gray300 px-6 py-12 md:h-520 md:px-6 md:py-10 lg:h-680 lg:py-12";
+  "flex w-full overflow-hidden bg-gray300 px-6 py-12 lg:h-520 md:px-6 md:py-10 lg:h-680 lg:py-12";
 
 const thumbFrameClass =
   "flex min-h-280 flex-1 overflow-hidden bg-gray300 px-4 py-8 sm:min-h-360 md:h-380 md:px-5 md:py-10 lg:h-465 lg:px-6 lg:py-12";
@@ -64,38 +64,38 @@ const CroppedGalleryImage = ({
   }
 
   return (
-  <div
-    className={cn(
-      "mx-auto flex h-full w-full items-center justify-center overflow-hidden",
-      maxWidthClass,
-      minHeightClass,
-      containerClassName,
-    )}
-  >
-    {centered ? (
-      <div className="relative size-full">
+    <div
+      className={cn(
+        "mx-auto flex h-full w-full items-center justify-center overflow-hidden",
+        maxWidthClass,
+        minHeightClass,
+        containerClassName,
+      )}
+    >
+      {centered ? (
+        <div className="relative size-full">
+          <Image
+            src={imageSrc}
+            alt={alt}
+            fill
+            priority={priority}
+            sizes={sizes}
+            className="object-cover object-center"
+          />
+        </div>
+      ) : (
         <Image
           src={imageSrc}
           alt={alt}
-          fill
+          width={800}
+          height={880}
           priority={priority}
           sizes={sizes}
-          className="object-cover object-center"
+          className="max-w-none object-cover object-center"
+          style={cropStyle}
         />
-      </div>
-    ) : (
-      <Image
-        src={imageSrc}
-        alt={alt}
-        width={800}
-        height={880}
-        priority={priority}
-        sizes={sizes}
-        className="max-w-none object-cover object-center"
-        style={cropStyle}
-      />
-    )}
-  </div>
+      )}
+    </div>
   );
 };
 
@@ -176,7 +176,7 @@ const ProductDetailGallery = ({ product, topGalleryRef }: ProductDetailGalleryPr
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <div className="flex min-h-280 flex-1 items-center justify-center overflow-hidden bg-gray300 px-4 py-8 sm:min-h-360 md:h-380 md:px-5 md:py-10 lg:h-465 lg:px-6 lg:py-12 sm:w-1/2">
+            <div className="flex flex-1 items-center justify-center overflow-hidden bg-gray300 px-4 py-8 md:px-5 md:py-10 lg:h-465 md:h-380 lg:px-6 lg:py-12 sm:w-1/2">
               <CroppedGalleryImage
                 src={thumbOne ?? product.image}
                 alt={`${product.name} — detail view`}
@@ -186,7 +186,7 @@ const ProductDetailGallery = ({ product, topGalleryRef }: ProductDetailGalleryPr
                 containerClassName="aspect-square h-auto shrink-0"
               />
             </div>
-            <div className="flex min-h-280 w-full overflow-hidden sm:min-h-360 md:h-400 md:shrink-0 lg:h-465 sm:w-1/2">
+            <div className="flex w-full overflow-hidden md:shrink-0 lg:h-465 md:h-380 sm:w-1/2">
               <OptimizedImage
                 src={thumbTwo ?? product.image}
                 alt={`${product.name} — alternate view`}
