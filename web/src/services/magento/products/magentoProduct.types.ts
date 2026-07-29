@@ -46,6 +46,56 @@ export type MagentoProductListItem = {
   } | null;
 };
 
+export type MagentoConfigurableOptionValue = {
+  uid?: string | null;
+  label?: string | null;
+  swatch_data?: {
+    value?: string | null;
+    thumbnail?: string | null;
+  } | null;
+};
+
+export type MagentoConfigurableOption = {
+  attribute_code?: string | null;
+  uid?: string | null;
+  label?: string | null;
+  values?: MagentoConfigurableOptionValue[] | null;
+};
+
+export type MagentoConfigurableVariantAttribute = {
+  code?: string | null;
+  uid?: string | null;
+  label?: string | null;
+  value_index?: number | null;
+};
+
+export type MagentoProductPriceRange = {
+  minimum_price?: {
+    regular_price?: {
+      value?: number | null;
+      currency?: string | null;
+    } | null;
+    final_price?: {
+      value?: number | null;
+      currency?: string | null;
+    } | null;
+  } | null;
+};
+
+export type MagentoConfigurableVariantProduct = {
+  sku?: string | null;
+  stock_status?: string | null;
+  special_price?: number | null;
+  price_range?: MagentoProductPriceRange | null;
+  image?: { url?: string | null } | null;
+  media_gallery?: MagentoMediaGalleryItem[] | null;
+};
+
+export type MagentoConfigurableVariant = {
+  attributes?: MagentoConfigurableVariantAttribute[] | null;
+  product?: MagentoConfigurableVariantProduct | null;
+};
+
 export type MagentoProductDetailItem = MagentoProductListItem & {
   stock_status?: string | null;
   meta_title?: string | null;
@@ -54,24 +104,15 @@ export type MagentoProductDetailItem = MagentoProductListItem & {
   canonical_url?: string | null;
   description?: { html?: string | null } | null;
   short_description?: { html?: string | null } | null;
-  price_range?: {
-    minimum_price?: {
-      regular_price?: {
-        value?: number | null;
-        currency?: string | null;
-      } | null;
-      final_price?: {
-        value?: number | null;
-        currency?: string | null;
-      } | null;
-    } | null;
-  } | null;
+  price_range?: MagentoProductPriceRange | null;
   image?: { url?: string | null } | null;
   custom_attributesV2?: {
     items?: MagentoCustomAttributeItem[] | null;
   } | null;
   related_products?: MagentoProductListItem[] | null;
   options?: MagentoProductCustomOption[] | null;
+  configurable_options?: MagentoConfigurableOption[] | null;
+  variants?: MagentoConfigurableVariant[] | null;
 };
 
 export type MagentoProductByUrlKeyResponse = {

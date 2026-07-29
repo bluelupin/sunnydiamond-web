@@ -1,5 +1,6 @@
 import type { Product } from "@/features/products/data/products";
 import type { MetalColorOption } from "@/features/products/types/productDetail";
+import { getConfigurableMetalOption } from "@/features/products/utils/productVariant.utils";
 
 const METAL_COLOR_SWATCHES: Record<string, string> = {
   "yellow-gold": "#D1B57A",
@@ -49,22 +50,34 @@ function resolveSwatchColor(id: string, label: string): string {
   return "#CCCCCC";
 }
 
-function buildMetalColorOption(id: string, label: string): MetalColorOption {
+function buildMetalColorOption(id: string, label: string, swatchColor?: string): MetalColorOption {
   const normalizedId = normalizeMetalColorKey(id);
   const displayLabel = formatMetalColorLabel(label) || label.trim();
 
   return {
     id: normalizedId,
     label: displayLabel,
-    color: resolveSwatchColor(normalizedId, displayLabel),
+    color: swatchColor?.trim() || resolveSwatchColor(normalizedId, displayLabel),
   };
 }
 
 export function isMetalColorSelectable(product: Product): boolean {
+  const configurableMetal = getConfigurableMetalOption(product);
+  if ((configurableMetal?.values.length ?? 0) > 1) {
+    return true;
+  }
+
   return Object.keys(product.customOptions?.metal?.valuesByLabel ?? {}).length > 0;
 }
 
 export function getMetalColorOptions(product: Product): MetalColorOption[] {
+  const configurableMetal = getConfigurableMetalOption(product);
+  if (configurableMetal && configurableMetal.values.length > 0) {
+    return configurableMetal.values.map((value) =>
+      buildMetalColorOption(value.id, value.label, value.swatchColor),
+    );
+  }
+
   const customMetal = product.customOptions?.metal;
   if (customMetal) {
     const options = Object.keys(customMetal.valuesByLabel).map((key) =>

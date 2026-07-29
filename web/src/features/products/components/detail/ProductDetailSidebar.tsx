@@ -25,11 +25,8 @@ import Reveal from "@/shared/Animation/Reveal";
 import ProductDetailAccordions from "./ProductDetailAccordions";
 import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
 import { getRingSizeLabels } from "@/features/products/utils/ringSizeOptions.utils";
-import {
-  getDefaultMetalColorId,
-  getMetalColorOptions,
-  isMetalColorSelectable,
-} from "@/features/products/utils/metalColorOptions.utils";
+import { isMetalColorSelectable } from "@/features/products/utils/metalColorOptions.utils";
+import { getConfigurableOptionUidsForMetal } from "@/features/products/utils/productVariant.utils";
 
 const MetalEngravingPanel = dynamic(() => import("./MetalEngravingPanel"), { ssr: false });
 const RingSizeChartPanel = dynamic(() => import("./RingSizeChartPanel"), { ssr: false });
@@ -43,8 +40,12 @@ const PriceBreakupPanel = dynamic(() => import("./PriceBreakupPanel"), { ssr: fa
 
 type ProductDetailSidebarProps = {
   product: Product;
+  /** Variant-aware product used for price/image panels (falls back to `product`). */
+  displayProduct?: Product;
   content: ProductDetailContent;
   pricing: ProductDetailPricing;
+  selectedMetal?: string;
+  onSelectedMetalChange?: (metalId: string) => void;
   sizeGuide?: NormalizedSizeGuide | null;
   onAddToBag: (payload: AddToBagPayload) => void;
   children?: (sections: {
@@ -56,15 +57,20 @@ type ProductDetailSidebarProps = {
 
 const ProductDetailSidebar = ({
   product,
+  displayProduct = product,
   content,
   pricing,
+  selectedMetal: selectedMetalProp,
+  onSelectedMetalChange,
   sizeGuide = null,
   onAddToBag,
   children,
 }: ProductDetailSidebarProps) => {
-  const [selectedMetal, setSelectedMetal] = useState(() =>
-    getDefaultMetalColorId(product, content.metalColors),
+  const [selectedMetalInternal, setSelectedMetalInternal] = useState(
+    () => selectedMetalProp ?? content.metalColors[0]?.id ?? "",
   );
+  const selectedMetal = selectedMetalProp ?? selectedMetalInternal;
+  const setSelectedMetal = onSelectedMetalChange ?? setSelectedMetalInternal;
   const [ringSize, setRingSize] = useState<string>("");
   const [engravingSelection, setEngravingSelection] = useState<EngravingSelection | null>(null);
   const [isEngravingOpen, setIsEngravingOpen] = useState(false);
@@ -87,10 +93,13 @@ const ProductDetailSidebar = ({
   useEffect(() => {
     setEngravingSelection(null);
     setRingSize("");
-    setSelectedMetal(getDefaultMetalColorId(product, getMetalColorOptions(product)));
-  }, [product]);
+    if (!onSelectedMetalChange) {
+      setSelectedMetalInternal(content.metalColors[0]?.id ?? "");
+    }
+  }, [product, content.metalColors, onSelectedMetalChange]);
 
   const activeMetal = content.metalColors.find((color) => color.id === selectedMetal);
+  const configurableOptionUids = getConfigurableOptionUidsForMetal(product, selectedMetal);
 
   const purchaseSection = (
     <div className="flex flex-col gap-10 px-4 pt-8 md:pt-6 md:px-0 lg:pt-0">
@@ -216,6 +225,9 @@ const ProductDetailSidebar = ({
                     engravingMaxCharacters: engravingConfig?.maxCharacters,
                     isGift,
                   },
+                  ...(configurableOptionUids.length > 0
+                    ? { configurableOptionUids }
+                    : {}),
                 })
               }
             >
@@ -477,8 +489,8 @@ const ProductDetailSidebar = ({
         <PriceBreakupPanel
           open
           onClose={() => setIsPriceBreakupOpen(false)}
-          productName={product.name}
-          productImage={product.image}
+          productName={displayProduct.name}
+          productImage={displayProduct.image}
           metalLabel={activeMetal?.label}
           ringSize={ringSize || undefined}
           pricing={pricing}
