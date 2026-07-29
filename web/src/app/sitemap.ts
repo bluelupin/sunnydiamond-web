@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import {
   buildJewelleryCategoryHref,
-  MAGENTO_URL_KEY_TO_SLUG,
+  JEWELLERY_CATEGORY_URL_KEYS,
 } from "@/features/jewellery-product/utils/jewelleryRoutes";
 import { getAllBlogSlugs } from "@/features/blogs/data/getBlogDetail";
 import { getMagentoProductSitemapEntries } from "@/services/magento/products/sitemapProducts.service";
@@ -38,7 +38,7 @@ const staticRoutes = [
   { url: "/terms-and-conditions", changeFrequency: "monthly" as const, priority: 0.4 },
 ];
 
-const categoryRoutes = Object.keys(MAGENTO_URL_KEY_TO_SLUG).map((urlKey) => ({
+const categoryRoutes = JEWELLERY_CATEGORY_URL_KEYS.map((urlKey) => ({
   url: buildJewelleryCategoryHref(urlKey),
   changeFrequency: "daily" as const,
   priority: 0.8,

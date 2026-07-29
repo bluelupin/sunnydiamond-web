@@ -59,13 +59,36 @@ export function parseJewelleryCategorySlug(value: string | null | undefined): Je
     : null;
 }
 
+export const JEWELLERY_CATEGORY_URL_KEYS = Object.keys(MAGENTO_URL_KEY_TO_SLUG);
+
+export function isJewelleryCategoryUrlKey(urlKey: string | null | undefined): boolean {
+  if (!urlKey?.trim()) {
+    return false;
+  }
+
+  return MAGENTO_URL_KEY_TO_SLUG[urlKey.trim().toLowerCase()] != null;
+}
+
+export function isJewelleryCategoryPath(pathname: string): boolean {
+  if (pathname === JEWELLERY_PATH || pathname === `${JEWELLERY_PATH}/`) {
+    return true;
+  }
+
+  const segment = pathname.replace(/^\//, "").split("/")[0];
+  if (!segment || pathname.includes("/", 1)) {
+    return false;
+  }
+
+  return isJewelleryCategoryUrlKey(segment);
+}
+
 export function buildJewelleryCategoryHref(urlKey?: string | null): string {
   const normalized = urlKey?.trim();
   if (!normalized) {
     return JEWELLERY_PATH;
   }
 
-  return `${JEWELLERY_PATH}/${encodeURIComponent(normalized)}`;
+  return `/${encodeURIComponent(normalized)}`;
 }
 
 export function buildJewelleryHref(category: JewelleryCategorySlug = "all"): string {

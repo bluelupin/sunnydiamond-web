@@ -47,6 +47,13 @@ const GENERIC_PRODUCT_LISTING_PATHS = new Set([
   "/products/",
   "/jewellery",
   "/jewellery/",
+  "/diamond-bangles",
+  "/diamond-necklaces",
+  "/diamond-rings",
+  "/diamond-pendants",
+  "/diamond-nose-pins",
+  "/diamond-earrings",
+  "/diamond-bracelets",
 ]);
 
 export function buildOccasionCardHref({

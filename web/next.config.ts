@@ -1,5 +1,15 @@
 import type { NextConfig } from "next";
 
+const JEWELLERY_CATEGORY_DESTINATIONS = [
+  "diamond-bangles",
+  "diamond-necklaces",
+  "diamond-rings",
+  "diamond-pendants",
+  "diamond-nose-pins",
+  "diamond-earrings",
+  "diamond-bracelets",
+] as const;
+
 const nextConfig: NextConfig = {
   turbopack: {
     root: process.cwd(),
@@ -20,13 +30,13 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     const jewelleryCategoryRedirects = [
-      { value: "bangles", destination: "/jewellery/diamond-bangles" },
-      { value: "necklace", destination: "/jewellery/diamond-necklaces" },
-      { value: "rings", destination: "/jewellery/diamond-rings" },
-      { value: "pendants", destination: "/jewellery/diamond-pendants" },
-      { value: "nosepins", destination: "/jewellery/diamond-nose-pins" },
-      { value: "earrings", destination: "/jewellery/diamond-earrings" },
-      { value: "bracelets", destination: "/jewellery/diamond-bracelets" },
+      { value: "bangles", destination: "/diamond-bangles" },
+      { value: "necklace", destination: "/diamond-necklaces" },
+      { value: "rings", destination: "/diamond-rings" },
+      { value: "pendants", destination: "/diamond-pendants" },
+      { value: "nosepins", destination: "/diamond-nose-pins" },
+      { value: "earrings", destination: "/diamond-earrings" },
+      { value: "bracelets", destination: "/diamond-bracelets" },
     ] as const;
 
     const legacyListingCategoryRedirects = jewelleryCategoryRedirects.flatMap((entry) => [
@@ -44,6 +54,21 @@ const nextConfig: NextConfig = {
       },
     ]);
 
+    const legacyJewelleryPathRedirects = [
+      { source: "/jewellery/bangles", destination: "/diamond-bangles", permanent: true },
+      { source: "/jewellery/necklaces", destination: "/diamond-necklaces", permanent: true },
+      { source: "/jewellery/rings", destination: "/diamond-rings", permanent: true },
+      { source: "/jewellery/pendants", destination: "/diamond-pendants", permanent: true },
+      { source: "/jewellery/nose-pins", destination: "/diamond-nose-pins", permanent: true },
+      { source: "/jewellery/earrings", destination: "/diamond-earrings", permanent: true },
+      { source: "/jewellery/bracelets", destination: "/diamond-bracelets", permanent: true },
+      ...JEWELLERY_CATEGORY_DESTINATIONS.map((slug) => ({
+        source: `/jewellery/${slug}`,
+        destination: `/${slug}`,
+        permanent: true,
+      })),
+    ];
+
     return [
       {
         source: "/products",
@@ -55,13 +80,7 @@ const nextConfig: NextConfig = {
         destination: "/jewellery",
         permanent: true,
       },
-      { source: "/jewellery/bangles", destination: "/jewellery/diamond-bangles", permanent: true },
-      { source: "/jewellery/necklaces", destination: "/jewellery/diamond-necklaces", permanent: true },
-      { source: "/jewellery/rings", destination: "/jewellery/diamond-rings", permanent: true },
-      { source: "/jewellery/pendants", destination: "/jewellery/diamond-pendants", permanent: true },
-      { source: "/jewellery/nose-pins", destination: "/jewellery/diamond-nose-pins", permanent: true },
-      { source: "/jewellery/earrings", destination: "/jewellery/diamond-earrings", permanent: true },
-      { source: "/jewellery/bracelets", destination: "/jewellery/diamond-bracelets", permanent: true },
+      ...legacyJewelleryPathRedirects,
       ...legacyListingCategoryRedirects,
     ];
   },

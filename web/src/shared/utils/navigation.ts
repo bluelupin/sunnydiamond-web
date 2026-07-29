@@ -1,3 +1,5 @@
+import { isJewelleryCategoryPath } from "@/features/jewellery-product/utils/jewelleryRoutes";
+
 export function resolveHeaderNavHref(label: string, url: string): string {
   const normalizedLabel = label.trim().toLowerCase();
 
@@ -32,8 +34,7 @@ export function isHeroOverlayRoute(pathname: string): boolean {
     pathname === "/" ||
     pathname === "/about" ||
     pathname === "/education" ||
-    pathname === "/jewellery" ||
-    pathname.startsWith("/jewellery/") ||
+    isJewelleryCategoryPath(pathname) ||
     pathname === "/bespoke-jewellery" ||
     pathname === "/gifting" ||
     pathname === "/careers" ||
