@@ -74,7 +74,6 @@ export function splitShellHeaderNavLinks(links: readonly HeaderNavLink[]): {
 }
 
 const REMOVED_FOOTER_PATHS = new Set([
-  "/blogs",
   "/help-and-support",
   "/monthly-plans",
   "/gift-card",
@@ -84,11 +83,19 @@ const REMOVED_FOOTER_PATHS = new Set([
 
 function isRemovedFooterLink(link: FooterLink): boolean {
   const normalized = link.url.replace(/\/$/, "") || "/";
-  if (REMOVED_FOOTER_PATHS.has(normalized) || normalized.startsWith("/blogs")) {
+  if (REMOVED_FOOTER_PATHS.has(normalized)) {
     return true;
   }
 
-  return /\bblog(s)?\b/i.test(link.label);
+  if (normalized.startsWith("/blogs/")) {
+    return false;
+  }
+
+  if (/\bblog(s)?\b/i.test(link.label) && normalized !== "/blogs") {
+    return true;
+  }
+
+  return false;
 }
 
 function filterFooterLinks(groups: readonly FooterLinkGroup[]): FooterLinkGroup[] {

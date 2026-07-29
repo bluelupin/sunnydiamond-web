@@ -45,6 +45,7 @@ export const siteConfig = {
             { to: "/diamonds-for-everyone", label: "Diamonds For Everyone" },
             { to: "/careers", label: "Careers" },
             { to: "/news", label: "News" },
+            { to: "/blogs", label: "Blogs" },
           ],
         },
         {

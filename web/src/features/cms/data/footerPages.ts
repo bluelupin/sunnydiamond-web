@@ -19,6 +19,11 @@ export const footerPages = {
     description:
       "Read brand updates, announcements, and stories from Sunny Diamonds. The full page UI will be added here later.",
   },
+  blogs: {
+    title: "Blogs",
+    description:
+      "Explore The Diamond Guide — expert articles on bridal jewellery, buying guides, gifting, styling, and diamond care from Sunny Diamonds.",
+  },
   orderTracking: {
     title: "Order Tracking",
     description:
