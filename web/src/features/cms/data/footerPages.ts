@@ -80,9 +80,9 @@ export const footerPages = {
       "Review the old gold purchase policy for Kerala customers. The full page UI will be added here later.",
   },
   privacyPolicy: {
-    title: "Privacy Policy",
+    title: "Policy & Certifications",
     description:
-      "Review how Sunny Diamonds handles data, privacy, and user protection. The full page UI will be added here later.",
+      "Review Sunny Diamonds privacy policy, terms, certifications, and business policies including returns, cancellations, and gift vouchers.",
   },
   termsAndConditions: {
     title: "Terms & Conditions",
