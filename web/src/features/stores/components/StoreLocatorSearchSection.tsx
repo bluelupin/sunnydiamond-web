@@ -1,11 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import SearchIcon from "@/assets/Icons/SearchIcon";
 import { cn } from "@/shared/utils/cn";
 import {
   storeLocatorPageContent,
+  storeLocatorSearchFigmaSpec,
 } from "../data/storeLocatorContent";
+import StoreLocatorStateIcon from "./StoreLocatorStateIcon";
 
 type StoreLocatorSearchSectionProps = {
   searchQuery: string;
@@ -45,7 +46,7 @@ const StoreLocatorSearchSection = ({
         </label>
 
         <div
-          className="flex gap-8 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex items-center gap-8 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           role="list"
           aria-label="Filter by state"
         >
@@ -62,21 +63,13 @@ const StoreLocatorSearchSection = ({
                   onSelectedStateChange(isSelected ? null : state.label)
                 }
                 className={cn(
-                  "flex w-[86px] shrink-0 flex-col items-center justify-center gap-2 transition-opacity",
-                  isSelected ? "opacity-100" : "opacity-100 hover:opacity-80",
+                  "flex shrink-0 flex-col items-center justify-center gap-2 transition-opacity hover:opacity-80",
+                  isSelected && "opacity-100",
                 )}
+                style={{ width: storeLocatorSearchFigmaSpec.stateItemWidth }}
               >
-                <div className="flex h-16 items-center justify-center">
-                  <Image
-                    src={state.iconSrc}
-                    alt=""
-                    width={state.iconWidth}
-                    height={state.iconHeight}
-                    aria-hidden
-                    className="max-h-16 w-auto"
-                  />
-                </div>
-                <span className="font-gill text-base font-normal leading-110 text-neutral500">
+                <StoreLocatorStateIcon state={state} />
+                <span className="whitespace-nowrap font-gill text-base font-normal leading-110 text-neutral500">
                   {state.label}
                 </span>
               </button>

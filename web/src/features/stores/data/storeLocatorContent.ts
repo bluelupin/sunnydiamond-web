@@ -27,9 +27,13 @@ export const storeLocatorSearchFigmaSpec = {
 export type StoreLocatorStateFilter = {
   id: string;
   label: string;
-  iconSrc: string;
+  spriteSrc: string;
   iconWidth: number;
   iconHeight: number;
+  imageWidthPct: number;
+  imageHeightPct: number;
+  imageLeftPct: number;
+  imageTopPct: number;
 };
 
 export const storeLocatorPageContent = {
@@ -50,44 +54,68 @@ export const storeLocatorPageContent = {
       {
         id: "tamil-nadu",
         label: "Tamil Nadu",
-        iconSrc: "/images/stores/state-icons/tamil-nadu.png",
-        iconWidth: 70,
+        spriteSrc: "/images/stores/state-icons/sprites/tamil-nadu-kerala-sprite.png",
+        iconWidth: 69.368,
         iconHeight: 64,
+        imageWidthPct: 552.08,
+        imageHeightPct: 273.55,
+        imageLeftPct: -122.02,
+        imageTopPct: -62.58,
       },
       {
         id: "karnataka",
         label: "Karnataka",
-        iconSrc: "/images/stores/state-icons/karnataka.svg",
-        iconWidth: 64,
+        spriteSrc: "/images/stores/state-icons/sprites/south-states-sprite.png",
+        iconWidth: 63.75,
         iconHeight: 60,
+        imageWidthPct: 1135.69,
+        imageHeightPct: 402.22,
+        imageLeftPct: -303.46,
+        imageTopPct: -126.11,
       },
       {
         id: "maharashtra",
         label: "Maharashtra",
-        iconSrc: "/images/stores/state-icons/maharashtra.svg",
-        iconWidth: 81,
+        spriteSrc: "/images/stores/state-icons/sprites/south-states-sprite.png",
+        iconWidth: 62.66,
         iconHeight: 64,
+        imageWidthPct: 1161.5,
+        imageHeightPct: 379.06,
+        imageLeftPct: -83.96,
+        imageTopPct: -116.23,
       },
       {
         id: "new-delhi",
         label: "New Delhi",
-        iconSrc: "/images/stores/state-icons/new-delhi.svg",
-        iconWidth: 81,
+        spriteSrc: "/images/stores/state-icons/sprites/south-states-sprite.png",
+        iconWidth: 80.711,
         iconHeight: 64,
+        imageWidthPct: 956.83,
+        imageHeightPct: 402.22,
+        imageLeftPct: -429.96,
+        imageTopPct: -122.22,
       },
       {
         id: "telangana",
         label: "Telangana",
-        iconSrc: "/images/stores/state-icons/telangana.svg",
-        iconWidth: 76,
+        spriteSrc: "/images/stores/state-icons/sprites/south-states-sprite.png",
+        iconWidth: 75.738,
         iconHeight: 64,
+        imageWidthPct: 801.48,
+        imageHeightPct: 316.16,
+        imageLeftPct: -497.05,
+        imageTopPct: -80.35,
       },
       {
         id: "kerala",
         label: "Kerala",
-        iconSrc: "/images/stores/state-icons/kerala.svg",
-        iconWidth: 94,
+        spriteSrc: "/images/stores/state-icons/sprites/kerala-sprite.png",
+        iconWidth: 94.28,
         iconHeight: 64,
+        imageWidthPct: 451.34,
+        imageHeightPct: 303.94,
+        imageLeftPct: -246.96,
+        imageTopPct: -81,
       },
     ] satisfies StoreLocatorStateFilter[],
   },
