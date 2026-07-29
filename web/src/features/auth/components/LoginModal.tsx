@@ -78,7 +78,7 @@ const LoginModal = () => {
       >
         <DrawerContent className="z-[80] flex max-h-[90vh] min-h-0 flex-col overflow-hidden rounded-none border-0 bg-white p-0 [&>div:first-child]:hidden">
           <DrawerTitle className="sr-only">{modalLabel}</DrawerTitle>
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain md:px-6 py-6 px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
             <AuthFlowSteps {...contentProps} titleClassName={titleClassName} />
           </div>
         </DrawerContent>

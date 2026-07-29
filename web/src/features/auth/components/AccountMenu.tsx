@@ -21,7 +21,7 @@ type AccountMenuProps = {
   returnUrl?: string;
 };
 
-/** Header account icon: opens sign-in modal for guests, shows an account dropdown when signed in. */
+/** Header account icon: opens the standalone login page for guests, account dropdown when signed in. */
 const AccountMenu = ({ className, onNavigate, returnUrl }: AccountMenuProps) => {
   const pathname = usePathname() ?? "/";
   const { status, customer, logout } = useAuth();
@@ -34,7 +34,10 @@ const AccountMenu = ({ className, onNavigate, returnUrl }: AccountMenuProps) => 
         aria-label="Sign in"
         onClick={() => {
           onNavigate?.();
-          requestAuth({ returnUrl: returnUrl ?? pathname });
+          requestAuth({
+            returnUrl: returnUrl ?? pathname,
+            mode: "page",
+          });
         }}
         className={className}
       >

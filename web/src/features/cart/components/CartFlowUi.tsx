@@ -16,7 +16,7 @@ export const CartDivider = ({
 }) => (
   <div
     className={cn(
-      "w-full shrink-0 bg-neutral300",
+      "w-full shrink-0 bg-gray600",
       weight === 0.5 ? "h-[0.5px]" : "h-px",
       className,
     )}
