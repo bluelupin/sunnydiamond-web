@@ -54,6 +54,7 @@ export type StrapiBespokeVisionSection = {
   showField?: boolean | null;
   cards?: StrapiBespokeVisionCard[] | null;
   cta?: StrapiBespokeCta | null;
+  primaryCta?: StrapiBespokeCta | null;
   video?: StrapiImagePayload | null;
   videoUrl?: { heroVideo?: StrapiImagePayload | null } | null;
 };

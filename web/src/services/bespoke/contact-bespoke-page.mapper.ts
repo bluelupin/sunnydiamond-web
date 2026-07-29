@@ -163,7 +163,10 @@ const mapStory = (section?: StrapiBespokeVisionSection | null): NormalizedBespok
     subtitle: cleanText(section.description) ?? "",
     videoSrc,
     steps,
-    ctaLabel: cleanText(section.cta?.label) ?? "",
+    ctaLabel:
+      cleanText(section.cta?.label) ??
+      cleanText(section.primaryCta?.label) ??
+      "",
   };
 };
 

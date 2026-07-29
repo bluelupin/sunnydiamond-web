@@ -17,6 +17,22 @@ const navSections = homeSections.slice(
 
 const sectionIds = navSections.map((section) => section.id);
 
+/** md–lg portrait: SectionNav visible; center target section in viewport on nav click. */
+const TABLET_PORTRAIT_SCROLL_MQ = "(min-width: 768px) and (max-width: 1023px) and (orientation: portrait)";
+
+const scrollToSection = (id: string) => {
+  const element = document.getElementById(id);
+  if (!element) return;
+
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const isTabletPortrait = window.matchMedia(TABLET_PORTRAIT_SCROLL_MQ).matches;
+
+  element.scrollIntoView({
+    behavior: prefersReducedMotion ? "auto" : "smooth",
+    block: isTabletPortrait ? "center" : "start",
+  });
+};
+
 const SectionNav = () => {
   const { activeId, isVisible, progress } = useScrollSpy({
     sectionIds,
@@ -29,11 +45,7 @@ const SectionNav = () => {
   );
 
   const handleClick = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        ? "auto"
-        : "smooth",
-    });
+    scrollToSection(id);
   };
 
   return (

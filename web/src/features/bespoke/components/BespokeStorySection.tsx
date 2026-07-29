@@ -7,6 +7,7 @@ import { cn } from "@/shared/utils/cn";
 import { useSince1997HorizontalScroll } from "@/features/about/hooks/useSince1997HorizontalScroll";
 import { bespokeStoryFigmaSpec } from "@/features/bespoke/data/content";
 import BespokeShareVisionPanel from "@/features/bespoke/components/BespokeShareVisionPanel";
+import { DetailDarkButton } from "@/features/products/components/detail/shared";
 import type {
   NormalizedBespokeCustomDesignForm,
   NormalizedBespokeStory,
@@ -145,6 +146,7 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
   const sectionRef = useRef<HTMLElement>(null);
   const hasHorizontalGallery = story.steps.length > 1;
   const [shareVisionOpen, setShareVisionOpen] = useState(false);
+  const ctaLabel = story.ctaLabel?.trim() || customDesignForm?.title?.trim() || "";
 
   const handleShareVisionOpen = useCallback(() => {
     setShareVisionOpen(true);
@@ -238,14 +240,14 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
       </div>
       <Reveal direction="up" className="flex justify-center">
         <div className="lg:mt-12 mt-4 flex justify-center md:w-[284px] mx-auto w-full">
-          {story.ctaLabel ? (
-            <button
+          {ctaLabel && customDesignForm ? (
+            <DetailDarkButton
               type="button"
               onClick={handleShareVisionOpen}
-              className="btn-dark-slide inline-flex items-center justify-center bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white w-full h-14 border border-darkblack"
+              className="w-full uppercase"
             >
-              <span className="relative z-10">{story.ctaLabel}</span>
-            </button>
+              {ctaLabel}
+            </DetailDarkButton>
           ) : null}
         </div>
       </Reveal>
