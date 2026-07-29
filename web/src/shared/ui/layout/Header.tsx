@@ -44,6 +44,8 @@ const preloadJewelleryMegaMenu = () => {
 const iconButtonClass =
   "inline-flex size-6 items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2";
 
+const SEARCH_HREF = "/coming-soon";
+
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [jewelleryMenuOpen, setJewelleryMenuOpen] = useState(false);
@@ -162,13 +164,13 @@ const Header = () => {
             >
               <MenuIcon className="size-6" />
             </button>
-            <button
-              type="button"
+            <Link
+              href={SEARCH_HREF}
               className={cn(iconButtonClass, textClass, hoverClass)}
               aria-label="Search"
             >
               <SearchIcon className="size-6" />
-            </button>
+            </Link>
           </div>
           <div className="hidden md:landscape:flex md:landscape:items-center md:landscape:gap-4 lg:landscape:gap-10">
             {Logo}
@@ -217,13 +219,13 @@ const Header = () => {
             <div className="pointer-events-auto">{Logo}</div>
           </div>
           <div className={cn("relative z-10 flex items-center gap-6 lg:gap-[24px]", textClass)}>
-            <button
-              type="button"
+            <Link
+              href={SEARCH_HREF}
               className={cn("!hidden md:landscape:!flex", iconButtonClass, hoverClass)}
               aria-label="Search"
             >
               <SearchIcon className="size-6" />
-            </button>
+            </Link>
 
             <WishlistNavLink className={cn(iconButtonClass, hoverClass)} />
 
