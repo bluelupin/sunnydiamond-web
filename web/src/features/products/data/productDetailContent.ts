@@ -2,8 +2,6 @@ import type { Product } from "@/features/products/data/products";
 import type { ProductDetailContent, ProductDetailPricing } from "../types/productDetail";
 import { getMetalColorOptions } from "@/features/products/utils/metalColorOptions.utils";
 
-const ringSizes = ["4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"];
-
 const benefits = [
   {
     label: "Cash on Delivery",
@@ -78,7 +76,6 @@ export function getProductDetailContent(product: Product): ProductDetailContent 
   return {
     attributes,
     metalColors: getMetalColorOptions(product),
-    ringSizes,
     benefits,
     accordions: buildAccordions(product),
     heroBannerImage: "/images/products/pdp/hero-banner-poster.png",

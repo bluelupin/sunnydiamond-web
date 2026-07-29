@@ -13,7 +13,6 @@ export type ProductDetailAccordion = {
 export type ProductDetailContent = {
   attributes: string[];
   metalColors: MetalColorOption[];
-  ringSizes: string[];
   benefits: {
     label: string;
     mobileLabel: string;

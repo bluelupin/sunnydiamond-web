@@ -99,7 +99,7 @@ const WishlistAddToBagPanel = ({
   const content = detailProduct ? getProductDetailContent(detailProduct) : null;
   const pricing = detailProduct ? getProductDetailPricing(detailProduct) : null;
   const sizeLabels = detailProduct && content
-    ? getRingSizeLabels(detailProduct, sizeGuide, content.ringSizes)
+    ? getRingSizeLabels(detailProduct, sizeGuide)
     : [];
   const showSizeSelector = sizeLabels.length > 0;
   const metalColorSelectable = detailProduct ? isMetalColorSelectable(detailProduct) : false;
