@@ -41,6 +41,16 @@ export const blogsPageContent = {
   ] satisfies BlogCategory[],
   posts: [
     {
+      id: "layering-necklaces",
+      title: "How to layer diamond necklaces like a stylist",
+      date: "23 May 2024",
+      readTime: "8 min read",
+      imageSrc: `${IMAGE_BASE}/card-styling.png`,
+      imageAlt: "Layered diamond necklaces",
+      category: "styling",
+      href: "/blogs/how-to-layer-diamond-necklaces-like-a-stylist",
+    },
+    {
       id: "onam-gift",
       title: "The perfect Onam gift to celebrate and shower them with your love!",
       date: "23 May 2024",

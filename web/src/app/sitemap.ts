@@ -3,6 +3,7 @@ import {
   buildJewelleryCategoryHref,
   MAGENTO_URL_KEY_TO_SLUG,
 } from "@/features/jewellery-product/utils/jewelleryRoutes";
+import { getAllBlogSlugs } from "@/features/blogs/data/getBlogDetail";
 import { getMagentoProductSitemapEntries } from "@/services/magento/products/sitemapProducts.service";
 import { siteEnv } from "@/shared/lib/seo/siteConfig";
 
@@ -57,9 +58,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     productRoutes = [];
   }
 
-  return [...staticRoutes, ...categoryRoutes, ...productRoutes].map((route) => ({
-    url: new URL(route.url, siteEnv.baseUrl).toString(),
-    changeFrequency: route.changeFrequency,
-    priority: route.priority,
+  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...getBlogSlugRoutes()].map(
+    (route) => ({
+      url: new URL(route.url, siteEnv.baseUrl).toString(),
+      changeFrequency: route.changeFrequency,
+      priority: route.priority,
+    }),
+  );
+}
+
+function getBlogSlugRoutes(): MetadataRoute.Sitemap {
+  return getAllBlogSlugs().map((slug) => ({
+    url: `/blogs/${slug}`,
+    changeFrequency: "weekly" as const,
+    priority: 0.55,
   }));
 }
