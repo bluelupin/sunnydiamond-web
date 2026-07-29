@@ -4,7 +4,6 @@ import { PencilLine, Gem, Hammer, PackageCheck, type LucideIcon } from "lucide-r
 import Image from "next/image";
 import { useStepScroll } from "@/shared/hooks/use-step-scroll";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
-import fallBackImage from "@/assets/fallBackImage.png";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
@@ -120,7 +119,10 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
 
   const { sectionTitle, steps, desktopImageUrl, mobileImageUrl, imageAlt } = craftsmanship;
   const stepCount = steps.length;
-  const { activeIndex, progress, containerRef } = useStepScroll(stepCount);
+  const hasDiamondImage = Boolean(desktopImageUrl || mobileImageUrl);
+  const resolvedDesktopImage = desktopImageUrl ?? mobileImageUrl;
+  const resolvedMobileImage = mobileImageUrl ?? desktopImageUrl;
+  const { activeIndex, progress, containerRef } = useStepScroll(Math.max(stepCount, 1));
 
   // Scroll-driven 3D rotation: combines tilt (X), spin (Y), and a touch of Z roll
   const rotateY = progress * 540;
@@ -128,6 +130,10 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
   const rotateZ = Math.sin(progress * Math.PI * 2) * 8;
 
   if (!isSectionActive(craftsmanship.isActive)) {
+    return null;
+  }
+
+  if (!isEditorialLoading && (!sectionTitle.trim() || stepCount === 0)) {
     return null;
   }
 
@@ -241,15 +247,17 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
                   filter: "drop-shadow(0 30px 50px hsl(var(--foreground) / 0.18))",
                 }}
               >
-                <ResponsiveImage
-                  desktopSrc={desktopImageUrl || fallBackImage}
-                  mobileSrc={mobileImageUrl || fallBackImage}
-                  alt={imageAlt}
-                  width={desktopImageUrl ? 550 : 550}
-                  height={desktopImageUrl ? 400 : 400}
-                  quality={75}
-                  className="w-full h-h-full object-cover"
-                />
+                {hasDiamondImage && resolvedDesktopImage && resolvedMobileImage && (
+                  <ResponsiveImage
+                    desktopSrc={resolvedDesktopImage}
+                    mobileSrc={resolvedMobileImage}
+                    alt={imageAlt}
+                    width={resolvedDesktopImage ? 550 : 550}
+                    height={resolvedMobileImage ? 400 : 400}
+                    quality={75}
+                    className="w-full h-h-full object-cover"
+                  />
+                )}
               </div>
             </div>
           </div>

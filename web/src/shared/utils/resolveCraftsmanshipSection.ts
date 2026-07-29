@@ -1,4 +1,3 @@
-import { homeContent } from "@/features/cms/data/content";
 import type { CraftsmanshipSectionData } from "@/types/homepage/editorialBlocks";
 import type { CraftsmanshipStep } from "@/types/homepage/craftsmanshipSteps";
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
@@ -13,8 +12,6 @@ export type ResolvedCraftsmanshipSection = {
   fromCms: boolean;
 };
 
-const FALLBACK = homeContent.craftsmanship;
-
 function getCraftsmanshipMedia(section: CraftsmanshipSectionData | null | undefined) {
   return section?.image ?? section?.diamondImage;
 }
@@ -22,24 +19,9 @@ function getCraftsmanshipMedia(section: CraftsmanshipSectionData | null | undefi
 function resolveCraftsmanshipSteps(
   cmsSteps: CraftsmanshipStep[] | null | undefined,
 ): CraftsmanshipStep[] {
-  const normalized = Array.isArray(cmsSteps)
-    ? [...cmsSteps]
-        .filter((step) => step?.isActive !== false)
-        .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
-    : [];
+  if (!Array.isArray(cmsSteps)) return [];
 
-  if (normalized.length > 0) {
-    return normalized;
-  }
-
-  return FALLBACK.steps.map((step, index) => ({
-    id: index,
-    sortOrder: index,
-    number: step.number,
-    title: step.title,
-    description: step.description,
-    isActive: true,
-  }));
+  return cmsSteps.filter((step) => step?.isActive !== false);
 }
 
 export function resolveCraftsmanshipSection(
@@ -67,7 +49,7 @@ export function resolveCraftsmanshipSection(
   const sectionTitle =
     section?.sectionTitle?.trim() ||
     section?.title?.trim() ||
-    FALLBACK.title;
+    "";
 
   const imageAlt =
     section?.image?.altText ||

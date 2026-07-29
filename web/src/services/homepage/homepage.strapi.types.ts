@@ -170,6 +170,16 @@ export type StrapiHomepageShoppingBlocksEntity = {
   giftingBanner?: StrapiGiftingBanner | null;
 };
 
+export type StrapiCraftsmanshipStep = {
+  id?: number;
+  title?: string | null;
+  description?: string | null;
+  sortOrder?: number | null;
+  isActive?: boolean | null;
+  icon?: unknown;
+  image?: unknown;
+};
+
 export type StrapiTextSection = {
   id?: number;
   title?: string | null;
@@ -187,7 +197,7 @@ export type StrapiTextSection = {
   gifOrImage?: unknown;
   video?: StrapiHeroVideoBlock | null;
   posterImage?: unknown;
-  steps?: unknown[] | null;
+  steps?: StrapiCraftsmanshipStep[] | null;
 };
 
 export type StrapiShowroomSection = {

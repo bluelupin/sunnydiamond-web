@@ -15,6 +15,7 @@ import type {
   SunnyPromiseSectionData,
 } from "@/types/homepage/editorialBlocks";
 import type { CraftingBrillianceSectionData } from "@/types/homepage/craftingBrillianceSection";
+import type { CraftsmanshipStep } from "@/types/homepage/craftsmanshipSteps";
 import type { FeaturedProductsSection } from "@/types/homepage/featuredProducts";
 import type { OccasionCard, OccasionSection } from "@/types/homepage/occasionSection";
 import { slugifyOccasionTitle } from "@/features/jewellery-product/utils/occasionListing";
@@ -37,6 +38,7 @@ import type {
   StrapiOccasionCard,
   StrapiResponsiveImageBlock,
   StrapiShowroomSection,
+  StrapiCraftsmanshipStep,
   StrapiTextSection,
   StrapiTrustBadge,
 } from "./homepage.strapi.types";
@@ -400,6 +402,21 @@ function mapDiamondSourcing(raw?: StrapiTextSection | null): DiamondSourcingSect
   };
 }
 
+function mapCraftsmanshipSteps(rawSteps?: StrapiCraftsmanshipStep[] | null): CraftsmanshipStep[] {
+  if (!Array.isArray(rawSteps)) return [];
+
+  return rawSteps
+    .filter((step) => step?.isActive !== false)
+    .map((step, index) => ({
+      id: step.id,
+      title: cleanText(step.title),
+      description: cleanText(step.description),
+      sortOrder: typeof step.sortOrder === "number" ? step.sortOrder : undefined,
+      number: String(index + 1).padStart(2, "0"),
+      isActive: step.isActive ?? true,
+    }));
+}
+
 function mapCraftsmanshipSection(
   raw?: StrapiTextSection | null,
 ): HomepageEditorialBlocksData["craftsmanshipSection"] {
@@ -415,9 +432,7 @@ function mapCraftsmanshipSection(
     image: pickResponsiveImage(raw.image) as NonNullable<
       HomepageEditorialBlocksData["craftsmanshipSection"]
     >["image"],
-    steps: Array.isArray(raw.steps)
-      ? (raw.steps as NonNullable<HomepageEditorialBlocksData["craftsmanshipSection"]>["steps"])
-      : undefined,
+    steps: mapCraftsmanshipSteps(raw.steps),
   };
 }
 
