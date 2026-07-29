@@ -92,8 +92,12 @@ export function isCartOrCheckoutRoute(pathname: string): boolean {
   return pathname === "/cart" || pathname === "/checkout";
 }
 
+export function isDfeInvestRoute(pathname: string): boolean {
+  return pathname === "/diamonds-for-everyone/invest";
+}
+
 export function shouldHideFooter(pathname: string): boolean {
-  return isAuthRoute(pathname);
+  return isAuthRoute(pathname) || isDfeInvestRoute(pathname);
 }
 
 /** Cart/checkout use a sticky mobile action bar; hide the site footer below md. */

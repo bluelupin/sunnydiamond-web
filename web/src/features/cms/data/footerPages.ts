@@ -5,9 +5,9 @@ export const footerPages = {
       "Explore diamond expertise at Sunny Diamonds — learn the 4Cs, certifications, shapes, and care to choose your perfect stone with confidence.",
   },
   diamondsForEveryone: {
-    title: "Diamonds For Everyone",
+    title: "Diamonds for Everyone",
     description:
-      "Discover the story behind the Sunny Diamonds philosophy of accessible luxury. The full page UI will be added here later.",
+      "Start your Diamonds for Everyone savings plan from ₹1,000 a month. Enjoy the 11+1 plan and redeem your savings for fine jewellery at Sunny Diamonds.",
   },
   careers: {
     title: "Careers",
