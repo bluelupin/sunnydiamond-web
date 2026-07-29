@@ -1,0 +1,25 @@
+"use client";
+
+import { careersPageContent } from "@/features/careers/data/content";
+import CareersJobFilterFields from "./CareersJobFilterFields";
+
+const CareersJobFiltersSidebar = () => {
+  const { jobListing } = careersPageContent;
+
+  return (
+    <aside className="w-full shrink-0 bg-gray200 lg:w-[437px]">
+      <div className="flex flex-col gap-6 p-6">
+        <div className="flex flex-col gap-6">
+          <h3 className="font-larken text-2xl font-light leading-110 text-darkblack">
+            {jobListing.filtersTitle}
+          </h3>
+          <span className="h-px w-full bg-neutral300" aria-hidden />
+        </div>
+
+        <CareersJobFilterFields />
+      </div>
+    </aside>
+  );
+};
+
+export default CareersJobFiltersSidebar;

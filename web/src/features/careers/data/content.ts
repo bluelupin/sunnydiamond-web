@@ -7,178 +7,253 @@ import type {
 
 export const careersPageContent = {
   hero: {
-    title: "Craft Your Career With Us",
-    description:
-      "Join a legacy of diamond craftsmanship and help create jewellery that becomes part of life's most cherished moments.",
+    title: "Work with Us",
+    ctaLabel: "DISCOVER OPEN ROLES",
     image: {
-      desktopUrl: "/images/about/handcrafted-bg.webp",
-      mobileUrl: "/images/about/handcrafted-bg.webp",
-      alt: "Craftsmanship at Sunny Diamonds",
+      desktopUrl: "/images/careers/hero.png",
+      mobileUrl: "/images/careers/hero.png",
+      alt: "Team at Sunny Diamonds",
     },
   },
-  recentOpenings: {
-    title: "Recent Openings",
-    description: "Explore our latest opportunities across retail, design, and operations.",
+  openings: {
+    title: "Open Roles",
+    mobileTitle: "Your next chapter begins here",
+    subtitle: "Explore opportunities across our growing team.",
+    viewAllLabel: "VIEW ALL OPENINGS",
   },
   jobListing: {
-    title: "All Open Roles",
-    description: "Find a role that matches your skills and passion for fine jewellery.",
+    title: "Job Listing",
+    mobileTitle: "Job listing",
+    searchPlaceholder: "Search roles",
+    mobileSearchPlaceholder: "Search roles",
+    filtersTitle: "Filters",
+    filterLocationLabel: "Location",
+    filterDepartmentLabel: "Department",
+    filterExperienceLabel: "Experience",
+    filterSelectPlaceholder: "Select",
+    openFiltersLabel: "Open filters",
+    closeFiltersLabel: "Close filters",
   },
   jobDetails: {
-    title: "Role Overview",
-    responsibilitiesHeading: "Key Responsibilities",
-    requirementsHeading: "What We're Looking For",
-    emptyState: "Select a role from the listings above to view full details.",
-  },
-  applicationForm: {
-    title: "Apply Now",
-    description:
-      "Share your details and we'll be in touch if your profile is a match for the role.",
-    positionLabel: "Applying for",
-    noRoleSelected: "Please select a role to continue your application.",
-    submitLabel: "Submit Application",
-    successTitle: "Application received",
-    successDescription: "Thank you for your interest. Our HR team will review your profile and reach out soon.",
-    fields: {
-      nameLabel: "Full Name",
-      emailLabel: "Email Address",
-      phoneLabel: "Phone Number",
-      portfolioLabel: "LinkedIn / Portfolio URL",
-      portfolioPlaceholder: "https://",
-      coverLetterLabel: "Cover Letter",
-      coverLetterPlaceholder: "Tell us why you'd be a great fit for Sunny Diamonds.",
+    applyLabel: "APPLY NOW",
+    jobSummaryHeading: "Job Summary",
+    rolesHeading: "Roles & Responsibilities",
+    qualificationsHeading: "Qualifications & Experience",
+    lookingForHeading: "What We're Looking For",
+    whyJoinHeading: "Why Join Us?",
+    shareLabel: "Share",
+    applyModal: {
+      title: "Start your Application",
+      autofillResumeLabel: "AUTOFILL WITH RESUME",
+      applyManuallyLabel: "APPLY MANUALLY",
+      applyLinkedInLabel: "APPLY WITH LINKEDIN",
+      closeLabel: "Close",
     },
   },
+  applicationForm: {
+    title: "Start your Application",
+    resumeHeading: "Resume",
+    resumeHint: "*File up to 5mb and (ZIP, PDF, JPEG, PNG) format supported",
+    resumeUploadLabel: "Upload resume",
+    resumeRemoveLabel: "Remove resume",
+    uploadResumeModal: {
+      title: "Upload Resume",
+      description:
+        "Please review your details before submitting your application. Our team will come to a decision based on the information provided.",
+      onlyUploadLabel: "ONLY UPLOAD",
+      autofillResumeLabel: "AUTOFILL WITH RESUME",
+      closeLabel: "Close",
+    },
+    confirmSubmissionModal: {
+      title: "Confirm Submission?",
+      description:
+        "Please review your details before submitting your application. Our team will come to a decision based on the information provided.",
+      goBackLabel: "GO BACK AND REVIEW",
+      submitLabel: "SUBMIT APPLICATION",
+      closeLabel: "Close",
+    },
+    personalDetailsHeading: "Personal Details",
+    educationHeading: "Education Details",
+    workExperienceHeading: "Work Experience",
+    skillsHeading: "Skills and Languages",
+    additionalInfoHeading: "Additional Information",
+    submitLabel: "SUBMIT APPLICATION",
+    noRoleSelected: "Please select a role to continue your application.",
+    shareLabel: "Share",
+    fields: {
+      fullNameLabel: "Full Name*",
+      phoneLabel: "Phone No.*",
+      emailLabel: "Email ID*",
+      dateOfBirthLabel: "Date of Birth*",
+      dateOfBirthPlaceholder: "DD/MM/YYYY",
+      genderLabel: "Gender*",
+      highestDegreeLabel: "Highest Degree*",
+      areaOfStudyLabel: "Area of Study*",
+      yearOfCompletionLabel: "Year of Completion*",
+      relevantExperienceLabel: "Relevant Work Experience*",
+      currentCompanyLabel: "Current Company's Name",
+      currentJobTitleLabel: "Current Job Title",
+      currentCtcLabel: "Current CTC",
+      expectedCtcLabel: "Expected CTC*",
+      noticePeriodLabel: "Notice Period",
+      skillsSearchLabel: "Add skills and known languages to your application",
+      skillsSearchPlaceholder: "Search",
+      skillsLabel: "Skills",
+      languagesLabel: "Languages",
+      companyRelationLabel: "Do you have any relation in the company?",
+      companyRelationYes: "Yes",
+      companyRelationNo: "No",
+      employeeNameLabel: "Employee Name*",
+      employeeJobTitleLabel: "Employee Job Title*",
+    },
+  },
+  applicationSuccess: {
+    title: "Application Submitted",
+    descriptionLine1:
+      "Thank you for applying. Your application has been received and is now under review.",
+    descriptionLine2: "We will get back to you shortly.",
+    appliedJobDetailsHeading: "Applied Job Details",
+    jobTitleLabel: "Job Title:",
+    jobIdLabel: "Job ID:",
+    goHomeLabel: "GO TO HOME",
+  },
   lifeAt: {
-    title: "Life at Sunny Diamonds",
+    title: "More Than A\nPlace To Work",
     description:
-      "From master artisans to showroom consultants, our team shares a commitment to excellence, heritage, and growth.",
-    highlights: [
-      {
-        id: "craft",
-        title: "Master Craftsmanship",
-        description:
-          "Work alongside skilled artisans who have perfected diamond setting and jewellery design for generations.",
-        image: {
-          desktopUrl: "/images/home/craftsmanship-bg.webp",
-          mobileUrl: "/images/home/craftsmanship-bg.webp",
-          alt: "Jewellery craftsmanship at Sunny Diamonds",
-        },
-      },
-      {
-        id: "growth",
-        title: "Growth & Learning",
-        description:
-          "Structured training in product knowledge, customer experience, and leadership across our showrooms and atelier.",
-        image: {
-          desktopUrl: "/images/home/crafting-rarity-necklace.png",
-          mobileUrl: "/images/home/crafting-rarity-necklace.png",
-          alt: "Team learning at Sunny Diamonds",
-        },
-      },
-      {
-        id: "culture",
-        title: "People-First Culture",
-        description:
-          "A supportive environment where collaboration, integrity, and pride in every piece we create come first.",
-        image: {
-          desktopUrl: "/images/home/bespoke-for-you-bg.webp",
-          mobileUrl: "/images/home/bespoke-for-you-bg.webp",
-          alt: "Team culture at Sunny Diamonds",
-        },
-      },
-    ] satisfies readonly CareerLifeHighlight[],
+      "We've spent decades building a team that doesn't just make jewellery they understand what jewellery means. The skill the silence before a presentation, the weight of a well- chosen stone.",
+    quote: "Every piece we create is for a moment that matters.",
+    leftImage: {
+      desktopUrl: "/images/careers/life-at.png",
+      mobileUrl: "/images/careers/life-at.png",
+      alt: "Craftsmanship at Sunny Diamonds",
+    },
+    rightImage: {
+      desktopUrl: "/images/careers/life-right.png",
+      mobileUrl: "/images/careers/life-right.png",
+      alt: "Team collaboration at Sunny Diamonds",
+    },
+    highlights: [] satisfies readonly CareerLifeHighlight[],
   },
   benefits: {
-    title: "Employee Benefits",
-    description: "We invest in our people with benefits designed for wellbeing and long-term growth.",
+    title: "Investing in You",
+    image: {
+      desktopUrl: "/images/careers/benefits.png",
+      mobileUrl: "/images/careers/benefits.png",
+      alt: "Learning and development at Sunny Diamonds",
+    },
     items: [
       {
-        id: "health",
-        label: "Health & Wellness",
-        description: "Medical coverage and wellness support for you and your family.",
-        iconSrc: "/images/about/guarantees/return.svg",
-      },
-      {
         id: "learning",
-        label: "Learning Programs",
-        description: "Ongoing training in diamonds, design, and customer excellence.",
+        label: "Learning & Development",
+        description:
+          "Continuous training, mentorship, and opportunities to build expertise in the jewellery and luxury retail industry.",
         iconSrc: "/images/about/flourishIcon.svg",
       },
       {
-        id: "growth",
-        label: "Career Growth",
-        description: "Clear pathways to advance across retail, design, and operations.",
-        iconSrc: "/images/about/guarantees/moneyback.svg",
+        id: "culture",
+        label: "Supportive Culture",
+        description:
+          "A collaborative environment where craftsmanship, integrity, and pride in every piece we create come first.",
+        iconSrc: "/images/about/guarantees/return.svg",
       },
       {
-        id: "perks",
-        label: "Team Perks",
-        description: "Employee discounts, festive bonuses, and recognition programs.",
-        iconSrc: "/images/products/pdp/benefit-cod.svg",
+        id: "recognition",
+        label: "Recognition & Rewards",
+        description:
+          "Performance-based recognition, festive bonuses, and employee discounts across our collections.",
+        iconSrc: "/images/about/guarantees/moneyback.svg",
       },
     ] satisfies readonly CareerBenefit[],
   },
   bespokeInspirations: {
-    title: "Bespoke Inspirations",
-    description:
-      "Many of our designers began on the showroom floor. Discover how bespoke craftsmanship can shape your career journey.",
-    primaryCta: { label: "Explore Bespoke", href: "/bespoke-jewellery" },
-    secondaryCta: { label: "Our Story", href: "/about" },
+    title: "The pieces we make last for generations. So can the impact you make.",
+    ctaLabel: "DISCOVER OPEN ROLES",
     image: {
-      desktopUrl: "/images/home/bespoke-for-you-bg.webp",
-      mobileUrl: "/images/home/bespoke-for-you-bg.webp",
-      alt: "Bespoke jewellery inspiration",
+      desktopUrl: "/images/careers/bespoke-inspirations.png",
+      mobileUrl: "/images/careers/bespoke-inspirations.png",
+      alt: "Silk fabric texture",
     },
   },
   faq: {
     title: "Frequently Asked Questions",
     items: [
       {
-        id: "apply",
-        question: "How do I apply for a role?",
+        id: "roles",
+        question: "What kind of roles does Sunny Diamonds hire for?",
         answer:
-          "Select a position from our openings, review the role details, and complete the application form on this page. Our HR team reviews every submission.",
-      },
-      {
-        id: "timeline",
-        question: "What is the typical hiring timeline?",
-        answer:
-          "We aim to respond within one to two weeks. Shortlisted candidates are invited for interviews, which may include a showroom visit or design assessment depending on the role.",
+          "We hire across retail, sales, customer experience, merchandising, marketing, operations, finance, technology, and corporate functions. As we continue to grow, new opportunities are added regularly.",
       },
       {
         id: "experience",
-        question: "Do I need jewellery industry experience?",
+        question: "Do I need prior jewellery industry experience to apply?",
         answer:
-          "Experience is valued but not always required. We look for customer focus, attention to detail, and a genuine interest in diamonds and fine jewellery.",
+          "Not always. Many roles value retail, hospitality, or customer service experience. We provide training for jewellery-specific knowledge where needed.",
       },
       {
-        id: "locations",
-        question: "Which locations are you hiring in?",
+        id: "recruitment",
+        question: "What is the recruitment process like?",
         answer:
-          "Roles are listed with their location. We hire across our Kerala showrooms and select cities in South India, with some hybrid roles in digital and design.",
+          "After you apply, our HR team reviews your profile. Shortlisted candidates are invited for interviews, which may include a showroom visit or skills assessment depending on the role.",
       },
       {
-        id: "internships",
-        question: "Do you offer internships or graduate programs?",
+        id: "training",
+        question: "Do you provide training and career development opportunities?",
         answer:
-          "Yes. We periodically open internship and trainee roles in design, retail, and operations. Check Recent Openings or contact HR for upcoming cohorts.",
+          "Yes. We offer continuous learning, mentorship, and pathways to grow across retail, design, and corporate functions.",
       },
     ] satisfies readonly CareerFaqItem[],
   },
 } as const;
 
+const retailSalesDetail = {
+  jobCode: "SD2847",
+  experienceLabel: "2-4 yrs",
+  workplaceLabel: "On-site",
+  isFeatured: true,
+  jobSummary:
+    "As a Retail Sales Consultant at Sunny Diamonds, you will be the face of our brand — guiding customers through our diamond collections with warmth, product expertise, and a passion for creating memorable experiences. You will work closely with our design and bespoke teams to help clients find or create pieces that mark life's most cherished moments.",
+  rolesAndResponsibilities:
+    "You will welcome and assist customers across engagement, wedding, and everyday jewellery categories. Share deep product knowledge on diamonds, certifications, and craftsmanship. Support bespoke consultations and coordinate with the design team. Maintain showroom presentation standards and inventory accuracy.",
+  qualifications: [
+    {
+      label: "Education",
+      text: "Bachelor's degree in any discipline. Diploma in retail or hospitality is a plus.",
+    },
+    {
+      label: "Experience",
+      text: "1–3 years in luxury retail or customer-facing roles preferred.",
+    },
+    {
+      label: "Skills",
+      text: "Excellent communication in English and Malayalam. Strong interpersonal skills and attention to detail.",
+    },
+  ],
+  whatWeAreLookingFor:
+    "A genuine interest in fine jewellery and client service. Someone who listens carefully, communicates with warmth, and takes pride in helping customers find pieces that matter.",
+  whyJoinUs:
+    "Join a legacy of diamond craftsmanship. Work alongside master artisans and consultants who have perfected the art of fine jewellery for generations. Structured training, clear growth pathways, and a people-first culture await you.",
+} as const;
+
 export const careerJobs: readonly CareerJob[] = [
   {
     id: "retail-sales-consultant-kochi",
+    jobCode: retailSalesDetail.jobCode,
     title: "Retail Sales Consultant",
     department: "Retail",
     location: "Kochi, Kerala",
     type: "Full-time",
-    postedAt: "2026-07-01",
+    postedAt: "2026-06-01",
     isNew: true,
+    isFeatured: retailSalesDetail.isFeatured,
+    experienceLabel: retailSalesDetail.experienceLabel,
+    workplaceLabel: retailSalesDetail.workplaceLabel,
     summary:
       "Guide customers through our diamond collections with warmth, product expertise, and a passion for memorable experiences.",
+    jobSummary: retailSalesDetail.jobSummary,
+    rolesAndResponsibilities: retailSalesDetail.rolesAndResponsibilities,
+    qualifications: retailSalesDetail.qualifications,
+    whatWeAreLookingFor: retailSalesDetail.whatWeAreLookingFor,
+    whyJoinUs: retailSalesDetail.whyJoinUs,
     responsibilities: [
       "Welcome and assist customers across engagement, wedding, and everyday jewellery categories.",
       "Share product knowledge on diamonds, certifications, and craftsmanship.",
@@ -193,12 +268,15 @@ export const careerJobs: readonly CareerJob[] = [
   },
   {
     id: "jewellery-designer-chalakkudy",
+    jobCode: "SD2851",
     title: "Jewellery Designer",
     department: "Design",
     location: "Chalakkudy, Kerala",
     type: "Full-time",
     postedAt: "2026-06-20",
     isNew: true,
+    experienceLabel: "3-5 yrs",
+    workplaceLabel: "On-site",
     summary:
       "Create original designs for bespoke and collection pieces, from concept sketches to production-ready specifications.",
     responsibilities: [
@@ -215,11 +293,14 @@ export const careerJobs: readonly CareerJob[] = [
   },
   {
     id: "digital-marketing-executive",
+    jobCode: "SD2860",
     title: "Digital Marketing Executive",
     department: "Marketing",
     location: "Hybrid — Kochi",
     type: "Full-time",
     postedAt: "2026-06-10",
+    experienceLabel: "2-4 yrs",
+    workplaceLabel: "Hybrid",
     summary:
       "Drive brand storytelling across digital channels and support campaigns that connect customers to our collections.",
     responsibilities: [
@@ -236,11 +317,14 @@ export const careerJobs: readonly CareerJob[] = [
   },
   {
     id: "cad-designer-chalakkudy",
+    jobCode: "SD2872",
     title: "CAD Designer",
     department: "Design",
     location: "Chalakkudy, Kerala",
     type: "Full-time",
     postedAt: "2026-05-28",
+    experienceLabel: "2-4 yrs",
+    workplaceLabel: "On-site",
     summary:
       "Translate designer concepts into precise CAD models for prototyping and production in our atelier.",
     responsibilities: [
@@ -257,11 +341,14 @@ export const careerJobs: readonly CareerJob[] = [
   },
   {
     id: "store-manager-bangalore",
+    jobCode: "SD2885",
     title: "Store Manager",
     department: "Retail",
     location: "Bangalore, Karnataka",
     type: "Full-time",
     postedAt: "2026-05-15",
+    experienceLabel: "5+ yrs",
+    workplaceLabel: "On-site",
     summary:
       "Lead showroom operations, team performance, and the Sunny Diamonds client experience at our Bangalore location.",
     responsibilities: [
@@ -278,12 +365,15 @@ export const careerJobs: readonly CareerJob[] = [
   },
   {
     id: "design-intern-kochi",
+    jobCode: "SD2891",
     title: "Design Intern",
     department: "Design",
     location: "Kochi, Kerala",
     type: "Contract",
     postedAt: "2026-07-05",
     isNew: true,
+    experienceLabel: "0-1 yr",
+    workplaceLabel: "On-site",
     summary:
       "A six-month internship supporting our design studio with research, sketching, and CAD production.",
     responsibilities: [
@@ -309,4 +399,8 @@ export function getRecentCareerJobs(limit = 3): CareerJob[] {
 export function getCareerJobById(jobId: string | null | undefined): CareerJob | null {
   if (!jobId) return null;
   return careerJobs.find((job) => job.id === jobId) ?? null;
+}
+
+export function getFeaturedCareerJob(): CareerJob | null {
+  return careerJobs.find((job) => job.isFeatured) ?? careerJobs[0] ?? null;
 }

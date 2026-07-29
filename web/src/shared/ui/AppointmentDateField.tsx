@@ -9,6 +9,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover";
 
 const WEEKDAY_LABELS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"] as const;
 
+type AppointmentDateDisplayFormat = "dd/mm/yy" | "dd/mm/yyyy";
+
 type AppointmentDateFieldProps = {
   id: string;
   value: string;
@@ -17,6 +19,8 @@ type AppointmentDateFieldProps = {
   onChange: (value: string) => void;
   onBlur?: () => void;
   hasError?: boolean;
+  placeholder?: string;
+  displayFormat?: AppointmentDateDisplayFormat;
   "aria-invalid"?: boolean;
   "aria-describedby"?: string;
 };
@@ -35,13 +39,19 @@ const toDateValue = (date: Date): string => {
   return `${year}-${month}-${day}`;
 };
 
-const formatDisplayDate = (value: string): string => {
+const formatDisplayDate = (
+  value: string,
+  displayFormat: AppointmentDateDisplayFormat = "dd/mm/yy",
+): string => {
   const date = parseDateString(value);
   if (!date) return "";
 
   const day = String(date.getDate()).padStart(2, "0");
   const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = String(date.getFullYear()).slice(-2);
+  const year =
+    displayFormat === "dd/mm/yyyy"
+      ? String(date.getFullYear())
+      : String(date.getFullYear()).slice(-2);
   return `${day}/${month}/${year}`;
 };
 
@@ -75,6 +85,8 @@ const AppointmentDateField = ({
   onChange,
   onBlur,
   hasError,
+  placeholder = "Select date",
+  displayFormat = "dd/mm/yy",
   "aria-invalid": ariaInvalid,
   "aria-describedby": ariaDescribedBy,
 }: AppointmentDateFieldProps) => {
@@ -134,7 +146,7 @@ const AppointmentDateField = ({
               value ? "text-darkblack" : "text-neutral400",
             )}
           >
-            {value ? formatDisplayDate(value) : "Select date"}
+            {value ? formatDisplayDate(value, displayFormat) : placeholder}
           </span>
           <span className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack" aria-hidden>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

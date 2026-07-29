@@ -28,6 +28,7 @@ import AccountMenu from "@/features/auth/components/AccountMenu";
 import MenuIcon from "@/assets/Icons/MenuIcon";
 import HeaderIconBadge from "@/shared/ui/layout/HeaderIconBadge";
 import { useCanHover } from "@/shared/hooks/use-can-hover";
+import { useCareersHeaderMode } from "@/features/careers/context/careersHeaderBridge";
 
 const JewelleryMegaMenu = dynamic(
   () =>
@@ -55,10 +56,15 @@ const Header = () => {
   const canHoverNav = useCanHover();
 
   const { isPageLoading } = usePageLoading();
+  const careersHeaderMode = useCareersHeaderMode(pathname);
 
   const isAuthPage = isAuthRoute(pathname);
   const menuOpen = mobileMenuOpen || jewelleryMenuOpen;
-  const headerVariant = getHeaderVariant(pathname, { menuOpen });
+  const pathnameHeaderVariant = getHeaderVariant(pathname, { menuOpen });
+  const headerVariant =
+    pathname === "/careers" && careersHeaderMode === "solid"
+      ? "solid"
+      : pathnameHeaderVariant;
   const isLoadingHeader = isPageLoading && isHeroOverlayRoute(pathname) && !menuOpen;
   const headerSurfaceClass = isLoadingHeader
     ? "bg-white"

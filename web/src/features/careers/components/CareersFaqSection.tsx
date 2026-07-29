@@ -3,7 +3,7 @@
 import { Fragment, useState } from "react";
 import Reveal from "@/shared/Animation/Reveal";
 import { cn } from "@/shared/utils/cn";
-import { careersPageContent } from "../data/content";
+import { careersPageContent } from "@/features/careers/data/content";
 
 const faqTransitionClassName =
   "transition-[grid-template-rows,opacity] duration-500 ease-in-out";
@@ -57,14 +57,14 @@ const CareersFaqSection = () => {
     <section
       id="careers-faq"
       aria-labelledby="careers-faq-title"
-      className="bg-white px-4 py-16 md:px-8 lg:px-10 lg:py-100"
+      className="bg-white px-4 py-16 md:px-10 md:py-104"
     >
-      <div className="mx-auto flex max-w-[910px] flex-col items-center">
+      <div className="mx-auto flex w-full max-w-[910px] flex-col items-center gap-8 md:gap-10">
         <Reveal
           as="h2"
           id="careers-faq-title"
           direction="up"
-          className="mb-10 w-full text-left font-larken text-32 font-light leading-110 text-darkblack md:mb-12 lg:text-center lg:text-5xl md:text-4xl"
+          className="w-full text-center font-larken text-32 font-light leading-110 text-darkblack md:text-5xl"
         >
           {faq.title}
         </Reveal>
@@ -76,14 +76,19 @@ const CareersFaqSection = () => {
             return (
               <Fragment key={item.id}>
                 <Reveal direction="up" delay={index * 0.05}>
-                  <div className="flex flex-col overflow-hidden rounded">
+                  <div
+                    className={cn(
+                      "flex flex-col overflow-hidden rounded",
+                      isOpen ? "gap-4" : "min-h-14 justify-center py-6",
+                    )}
+                  >
                     <button
                       type="button"
                       aria-expanded={isOpen}
                       onClick={() => setOpenId(isOpen ? null : item.id)}
-                      className="flex w-full items-start gap-2 text-left lg:min-h-14 lg:items-center"
+                      className="flex w-full items-center gap-2 text-left"
                     >
-                      <span className="min-w-0 flex-1 font-gill text-base font-normal leading-110 text-darkblack lg:text-xl">
+                      <span className="min-w-0 flex-1 font-gill text-base font-normal leading-110 text-darkblack md:text-xl">
                         {item.question}
                       </span>
                       <FaqToggleIcon isOpen={isOpen} />
@@ -98,7 +103,7 @@ const CareersFaqSection = () => {
                       aria-hidden={!isOpen}
                     >
                       <div className="overflow-hidden">
-                        <p className="pt-4 font-gill text-sm font-light leading-110 text-neutral500 lg:text-xl">
+                        <p className="font-gill text-base font-light leading-110 text-neutral500 md:text-xl">
                           {item.answer}
                         </p>
                       </div>

@@ -1,15 +1,16 @@
 "use client";
 
-import Link from "next/link";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import Reveal from "@/shared/Animation/Reveal";
-import { careersPageContent } from "../data/content";
+import { careersPageContent } from "@/features/careers/data/content";
+import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
 
 const ctaFocusClass =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2";
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2";
 
 const CareersBespokeInspirationsSection = () => {
   const { bespokeInspirations } = careersPageContent;
+  const { goToListings } = useCareersJobs();
 
   return (
     <section
@@ -22,45 +23,33 @@ const CareersBespokeInspirationsSection = () => {
         mobileSrc={bespokeInspirations.image.mobileUrl}
         alt={bespokeInspirations.image.alt}
         width={1440}
-        height={560}
+        height={439}
         sizes="100vw"
         className="absolute inset-0 size-full object-cover object-center"
       />
-      <div aria-hidden className="absolute inset-0 bg-black/55" />
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-[radial-gradient(ellipse_at_34%_61%,rgba(244,243,238,0)_0%,rgba(251,250,246,1)_100%)]"
+      />
 
-      <div className="relative flex min-h-[420px] flex-col items-center justify-center px-4 py-16 text-center md:min-h-[520px] md:px-10 md:py-100">
-        <div className="flex max-w-[720px] flex-col items-center gap-6 md:gap-10">
+      <div className="relative flex flex-col items-center justify-center px-4 py-16 md:py-104">
+        <div className="flex w-full max-w-[568px] flex-col items-center gap-4 text-center">
           <Reveal
             as="h2"
             id="careers-bespoke-title"
             direction="up"
-            className="font-larken text-32 font-light leading-110 text-white md:text-4xl lg:text-5xl"
+            className="font-larken text-32 font-light leading-110 text-darkblack md:text-5xl"
           >
             {bespokeInspirations.title}
           </Reveal>
-          <Reveal
-            as="p"
-            direction="up"
-            className="font-gill text-base font-light leading-110 text-white/90 md:text-lg lg:text-xl"
-          >
-            {bespokeInspirations.description}
-          </Reveal>
-          <Reveal
-            direction="up"
-            className="flex flex-col items-center gap-6 md:flex-row md:gap-8"
-          >
-            <Link
-              href={bespokeInspirations.primaryCta.href}
-              className={`inline-flex h-14 items-center justify-center bg-white px-8 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-90 ${ctaFocusClass}`}
+          <Reveal direction="up">
+            <button
+              type="button"
+              onClick={goToListings}
+              className={`inline-flex h-14 items-center justify-center border border-darkblack bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-90 ${ctaFocusClass}`}
             >
-              {bespokeInspirations.primaryCta.label}
-            </Link>
-            <Link
-              href={bespokeInspirations.secondaryCta.href}
-              className={`relative cursor-pointer border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all after:duration-300 hover:after:w-full ${ctaFocusClass}`}
-            >
-              {bespokeInspirations.secondaryCta.label}
-            </Link>
+              {bespokeInspirations.ctaLabel}
+            </button>
           </Reveal>
         </div>
       </div>
