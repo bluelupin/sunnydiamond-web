@@ -208,6 +208,7 @@ export const profileTabsContent = {
     title: "Bespoke Inspirations",
     shareLabel: "SHARE",
     removeLabel: "REMOVE",
+    removeFromSavedLabel: "REMOVE FROM SAVED",
     removedToastMessage: "Image removed from Bespoke Inspiration",
     removedUndoLabel: "UNDO",
     removeErrorTitle: "Remove failed",

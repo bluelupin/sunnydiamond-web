@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getCustomerToken } from "@/services/auth/session";
+import { getCustomerTokenFromRequest } from "@/services/auth/session";
 import {
   CustomerSavedCreationsApiError,
   deleteCustomerSavedCreation,
@@ -23,11 +23,14 @@ function mapApiStatus(status: number): number {
   return 500;
 }
 
-export async function DELETE(_request: Request, context: RouteContext) {
-  const token = await getCustomerToken();
+export async function DELETE(request: Request, context: RouteContext) {
+  const token = await getCustomerTokenFromRequest(request);
 
   if (!token) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Unauthorized", reason: "no_session" },
+      { status: 401 },
+    );
   }
 
   const { documentId } = await context.params;
@@ -42,7 +45,19 @@ export async function DELETE(_request: Request, context: RouteContext) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     if (error instanceof CustomerSavedCreationsApiError) {
-      return NextResponse.json({ error: error.message }, { status: mapApiStatus(error.status) });
+      console.warn("[saved-creations DELETE]", {
+        documentId: id,
+        upstreamStatus: error.status,
+        message: error.message,
+      });
+      return NextResponse.json(
+        {
+          error: error.message,
+          reason: "upstream",
+          upstreamStatus: error.status,
+        },
+        { status: mapApiStatus(error.status) },
+      );
     }
 
     const message = error instanceof Error ? error.message : "Failed to remove saved inspiration";

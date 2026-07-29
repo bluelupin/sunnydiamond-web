@@ -20,6 +20,7 @@ import { useCustomerSavedCreations } from "../hooks/useCustomerSavedCreations";
 import type { ProfileBespokeItemUi } from "../types/profileUi.types";
 import { mapSavedCreationToBespokeUi } from "../utils/profileDisplayMappers";
 import { ProfileBespokeCard } from "./ProfileBespokeCard";
+import { ProfileBespokeDetailPanel } from "./ProfileBespokeDetailPanel";
 import { useProfileBespokeToast } from "../context/ProfileBespokeToastContext";
 import { ProfileEmptyState } from "./profileUi";
 
@@ -44,6 +45,7 @@ const ProfileBespokeSection = () => {
   const { showBespokeRemovedToast } = useProfileBespokeToast();
   const { data, isLoading, error, page, setPage, refresh } = useCustomerSavedCreations(true);
   const [removedIds, setRemovedIds] = useState<string[]>([]);
+  const [selectedItem, setSelectedItem] = useState<ProfileBespokeItemUi | null>(null);
 
   const items =
     data && data.items.length > 0
@@ -91,7 +93,7 @@ const ProfileBespokeSection = () => {
     showBespokeRemovedToast({ onUndo: undo });
 
     if (!usingMockData) {
-      void deleteCustomerSavedCreationClient(item.id).catch((removeError) => {
+      void deleteCustomerSavedCreationClient(item.creationDocumentId).catch((removeError) => {
         restoreItem(item.id);
         toast({
           title: content.removeErrorTitle,
@@ -143,7 +145,11 @@ const ProfileBespokeSection = () => {
       <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:items-start">
         {displayItems.map((item) => (
           <li key={item.id} className="min-w-0">
-            <ProfileBespokeCard item={item} onRemove={handleRemove} />
+            <ProfileBespokeCard
+              item={item}
+              onOpen={setSelectedItem}
+              onRemove={handleRemove}
+            />
           </li>
         ))}
       </ul>
@@ -171,6 +177,13 @@ const ProfileBespokeSection = () => {
           </CartOutlineButton>
         </div>
       ) : null}
+
+      <ProfileBespokeDetailPanel
+        open={selectedItem != null}
+        item={selectedItem}
+        onClose={() => setSelectedItem(null)}
+        onRemove={handleRemove}
+      />
     </div>
   );
 };

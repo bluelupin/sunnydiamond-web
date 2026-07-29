@@ -140,6 +140,28 @@ export async function deleteCustomerSavedCreation(
   });
 
   if (!response.ok) {
-    throw new CustomerSavedCreationsApiError(await parseErrorMessage(response), response.status);
+    const message = await parseErrorMessage(response);
+
+    // Same Magento Bearer works for GET/POST; if DELETE alone is 401 while
+    // list still succeeds, CMS has not enabled Magento-auth on DELETE yet.
+    if (response.status === 401) {
+      try {
+        await fetchCustomerSavedCreations(authToken, 1, 1, signal);
+        throw new CustomerSavedCreationsApiError(
+          "CMS rejected DELETE for this Magento customer token (list still works). Ask CMS to enable DELETE on /api/customer/saved-creations/:documentId with Magento Bearer auth.",
+          401,
+        );
+      } catch (probeError) {
+        if (
+          probeError instanceof CustomerSavedCreationsApiError &&
+          probeError.message.startsWith("CMS rejected DELETE")
+        ) {
+          throw probeError;
+        }
+        // Token also fails list → genuine auth/session problem.
+      }
+    }
+
+    throw new CustomerSavedCreationsApiError(message, response.status);
   }
 }

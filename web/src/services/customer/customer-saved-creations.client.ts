@@ -28,7 +28,7 @@ export async function getCustomerSavedCreations(
   });
   const response = await fetch(`/api/customer/saved-creations?${params.toString()}`, {
     cache: "no-store",
-    credentials: "same-origin",
+    credentials: "include",
     signal,
   });
 
@@ -55,7 +55,7 @@ export async function saveCustomerCreationClient(
     },
     body: JSON.stringify({ creationDocumentId }),
     cache: "no-store",
-    credentials: "same-origin",
+    credentials: "include",
     signal,
   });
 
@@ -84,7 +84,7 @@ export async function deleteCustomerSavedCreationClient(
     {
       method: "DELETE",
       cache: "no-store",
-      credentials: "same-origin",
+      credentials: "include",
       signal,
     },
   );

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getCustomerToken } from "@/services/auth/session";
+import { getCustomerTokenFromRequest } from "@/services/auth/session";
 import {
   CustomerSavedCreationsApiError,
   fetchCustomerSavedCreations,
@@ -21,10 +21,13 @@ function mapApiStatus(status: number): number {
 }
 
 export async function GET(request: Request) {
-  const token = await getCustomerToken();
+  const token = await getCustomerTokenFromRequest(request);
 
   if (!token) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Unauthorized", reason: "no_session" },
+      { status: 401 },
+    );
   }
 
   const { searchParams } = new URL(request.url);
@@ -36,7 +39,10 @@ export async function GET(request: Request) {
     return NextResponse.json(creations);
   } catch (error) {
     if (error instanceof CustomerSavedCreationsApiError) {
-      return NextResponse.json({ error: error.message }, { status: mapApiStatus(error.status) });
+      return NextResponse.json(
+        { error: error.message, reason: "upstream" },
+        { status: mapApiStatus(error.status) },
+      );
     }
 
     const message = error instanceof Error ? error.message : "Failed to load saved creations";
@@ -45,10 +51,13 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const token = await getCustomerToken();
+  const token = await getCustomerTokenFromRequest(request);
 
   if (!token) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Unauthorized", reason: "no_session" },
+      { status: 401 },
+    );
   }
 
   let body: { creationDocumentId?: unknown };
@@ -71,7 +80,10 @@ export async function POST(request: Request) {
     return NextResponse.json(result, { status: result.alreadySaved ? 200 : 201 });
   } catch (error) {
     if (error instanceof CustomerSavedCreationsApiError) {
-      return NextResponse.json({ error: error.message }, { status: mapApiStatus(error.status) });
+      return NextResponse.json(
+        { error: error.message, reason: "upstream" },
+        { status: mapApiStatus(error.status) },
+      );
     }
 
     const message = error instanceof Error ? error.message : "Failed to save creation";

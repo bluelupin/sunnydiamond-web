@@ -16,7 +16,7 @@ const ProfileHeroSection = ({ firstName }: ProfileHeroSectionProps) => {
   return (
     <section
       aria-hidden
-      className="relative left-1/2 h-[240px] w-screen max-w-none -translate-x-1/2 overflow-visible md:h-320"
+      className="relative left-1/2 z-30 h-[240px] w-screen max-w-none -translate-x-1/2 overflow-visible md:h-320"
     >
       <div className="relative size-full overflow-hidden">
         <Image
@@ -30,7 +30,7 @@ const ProfileHeroSection = ({ firstName }: ProfileHeroSectionProps) => {
         />
         <div className="absolute inset-0 bg-black/40" />
       </div>
-      <div className="absolute left-1/2 top-[191px] z-20 flex -translate-x-1/2 flex-col items-center md:top-[255px]">
+      <div className="absolute left-1/2 top-[191px] z-40 flex -translate-x-1/2 flex-col items-center md:top-[255px]">
         <ProfileAvatar firstName={firstName} />
         <ProfileBespokeRemovedToastBanner />
       </div>

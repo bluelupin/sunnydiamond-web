@@ -19,7 +19,7 @@ export function ProfileBespokeRemovedToastBanner() {
 
   return (
     <div
-      className="mt-4 flex w-max max-w-[calc(100vw-2rem)] animate-in fade-in slide-in-from-top-2 items-center gap-8 bg-darkblack px-4 py-3 text-white duration-300"
+      className="relative z-40 mt-4 flex w-max max-w-[calc(100vw-2rem)] animate-in fade-in slide-in-from-top-2 items-center gap-8 bg-darkblack px-4 py-3 text-white duration-300"
       role="status"
     >
       <div className="flex min-w-0 items-center gap-3">

@@ -263,14 +263,21 @@ export function mapSavedCreationToBespokeUi(
   const creation = item.creation;
   if (!creation) return null;
 
-  const image =
-    creation.coverImage?.url ?? creation.gallery[0]?.url ?? PLACEHOLDER_RING_IMAGE;
+  const coverUrl = creation.coverImage?.url?.trim() ?? "";
+  const galleryUrls = creation.gallery
+    .map((media) => media.url?.trim() ?? "")
+    .filter(Boolean);
+  const images = Array.from(
+    new Set([coverUrl, ...galleryUrls].filter(Boolean)),
+  );
+  const imageSrc = images[0] ?? PLACEHOLDER_RING_IMAGE;
 
   return {
     id: item.documentId,
     creationDocumentId: creation.documentId,
     title: creation.title,
-    imageSrc: image,
+    imageSrc,
+    images: images.length > 0 ? images : [imageSrc],
     price: undefined,
     viewHref: creation.cta?.href ?? profileTabsContent.bespoke.emptyCtaHref,
     savedAt: item.savedAt,

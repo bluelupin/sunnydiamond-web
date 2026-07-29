@@ -86,6 +86,8 @@ export type ProfileBespokeItemUi = {
   creationDocumentId: string;
   title: string;
   imageSrc: string;
+  /** Cover + gallery URLs for the detail panel carousel. */
+  images: string[];
   size?: string;
   metal?: string;
   price?: string;
