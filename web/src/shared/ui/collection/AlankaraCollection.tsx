@@ -502,7 +502,7 @@ function ProductCarouselPanel({
             >
               <div className="absolute left-0 top-full h-14 w-full bg-darkblack transition-all duration-300 group-hover:top-0" />
               <span className="relative text-darkblack transition-all duration-300 group-hover:text-white">
-                {activeProduct.ctaLabel || defaultProductCtaLabel}
+                Shop Now
               </span>
             </Link>
           </div>
@@ -580,7 +580,7 @@ function ProductCarouselPanel({
                 href={activeProduct.href}
                 className="btn-border-slide relative inline-flex h-14 items-center justify-center border-[0.8px] border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2"
               >
-                {activeProduct.ctaLabel || defaultProductCtaLabel}
+                Shop Now
               </Link>
             </div>
 

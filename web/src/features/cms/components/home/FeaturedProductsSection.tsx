@@ -8,8 +8,6 @@ import Reveal from "@/shared/Animation/Reveal";
 import FeaturedProductsCarousel from "@/features/cms/components/home/FeaturedProductsCarousel";
 import { mapJewelleryListingToFeaturedCarouselItems } from "@/services/magento/products/trendingProducts.service";
 
-const DEFAULT_FEATURED_PRODUCTS_CTA_LABEL = "Shop Now";
-
 /** Recommended transparent product PNG/WebP for CMS uploads. */
 export const FEATURED_PRODUCTS_IMAGE_SPEC = {
   /** Primary center slide — Figma display ~774px; upload 2× for retina. */
@@ -69,7 +67,7 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
 
   const sectionTitle = featuredProductsData?.sectionTitle?.trim() ?? "";
   const description = featuredProductsData?.description?.trim() ?? "";
-  const ctaLabel = featuredProductsData?.cta?.label?.trim() || DEFAULT_FEATURED_PRODUCTS_CTA_LABEL;
+  const ctaLabel = featuredProductsData?.cta?.label?.trim() ?? "";
 
   const items = useMemo(
     () => mapJewelleryListingToFeaturedCarouselItems(trendingProducts ?? []),
@@ -124,6 +122,7 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
             items={items}
             ctaLabel={ctaLabel}
             sectionLabel={sectionTitle || "Featured products"}
+            showCta={Boolean(ctaLabel)}
           />
         )}
       </div>
