@@ -40,7 +40,7 @@ export const getLearnAboutDiamondsPage = cache(
   async (signal?: AbortSignal): Promise<NormalizedLearnAboutDiamondsPage> => {
     const raw = await apiFetch<StrapiLearnAboutDiamondsPageEntity>(
       `${STRAPI_ENDPOINTS.learnAboutDiamondsPage}?${LEARN_ABOUT_DIAMONDS_POPULATE_QUERY}`,
-      { signal },
+      { signal, cache: "no-store" },
     );
 
     return mapLearnAboutDiamondsPage(raw);

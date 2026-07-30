@@ -88,12 +88,15 @@ export type StrapiEducationFourCsIntro = {
 
 export type StrapiEducationGradeStop = {
   id?: number;
+  sortOrder?: number | null;
   gradeCode?: string | null;
   gradeLongLabel?: string | null;
   gradeImage?: StrapiEducationResponsiveImage | null;
 };
 
 export type StrapiEducationFourCsInfoPanel = {
+  id?: number;
+  sortOrder?: number | null;
   displayTag?: string | null;
   sectionLabel?: string | null;
   description?: string | null;
@@ -103,6 +106,8 @@ export type StrapiEducationFourCsInfoPanel = {
 };
 
 export type StrapiEducationFourCsVisualPanel = {
+  id?: number;
+  sortOrder?: number | null;
   subTitle?: string | null;
   gradeStops?: StrapiEducationGradeStop[] | null;
   visualImage?: StrapiEducationResponsiveImage | null;
