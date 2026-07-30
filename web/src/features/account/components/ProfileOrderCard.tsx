@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Info } from "lucide-react";
 import CopyIcon from "@/assets/Icons/CopyIcon";
 import {
@@ -21,6 +22,9 @@ import {
   ProfileOrderMobileThumbnails,
 } from "./ProfileOrderMobileThumbnails";
 import { ProfileOrderItemRow } from "./ProfileOrderItemRow";
+import { ProfileOrderCancelDialog } from "./ProfileOrderCancelDialog";
+import { ProfileOrderCancelReasonDialog } from "./ProfileOrderCancelReasonDialog";
+import { ProfileOrderCancelSuccessDialog } from "./ProfileOrderCancelSuccessDialog";
 import { ProfileOrderTimeline } from "./ProfileOrderTimeline";
 import { ProfileOrderTrackModal } from "./ProfileOrderTrackModal";
 import { ProfileMetaDivider, ProfileStatusBadge } from "./profileUi";
@@ -37,7 +41,11 @@ export function ProfileOrderCard({
   resolvedStatus,
 }: ProfileOrderCardProps) {
   const { toast } = useToast();
+  const router = useRouter();
   const [trackModalOpen, setTrackModalOpen] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancelReasonDialogOpen, setCancelReasonDialogOpen] = useState(false);
+  const [cancelSuccessDialogOpen, setCancelSuccessDialogOpen] = useState(false);
   const [localResolvedStatus, setLocalResolvedStatus] = useState<string | null>(null);
   const content = profileTabsContent.orders;
 
@@ -84,10 +92,22 @@ export function ProfileOrderCard({
   };
 
   const handleCancelOrder = () => {
-    toast({
-      title: content.cancelOrderLabel,
-      description: "Order cancellation will be available soon. Contact support for assistance.",
-    });
+    setCancelDialogOpen(true);
+  };
+
+  const handleContactSupport = () => {
+    setCancelDialogOpen(false);
+    router.push(content.cancelDialog.contactHref);
+  };
+
+  const handleProceedToCancel = () => {
+    setCancelDialogOpen(false);
+    setCancelReasonDialogOpen(true);
+  };
+
+  const handleConfirmCancellation = (_payload: { reason: string; comments: string }) => {
+    setCancelReasonDialogOpen(false);
+    setCancelSuccessDialogOpen(true);
   };
 
   const handleTrackOrder = () => {
@@ -256,6 +276,25 @@ export function ProfileOrderCard({
       onOpenChange={setTrackModalOpen}
       order={order}
       onTrackedStatusChange={setLocalResolvedStatus}
+    />
+
+    <ProfileOrderCancelDialog
+      open={cancelDialogOpen}
+      onOpenChange={setCancelDialogOpen}
+      onContactSupport={handleContactSupport}
+      onProceedToCancel={handleProceedToCancel}
+    />
+
+    <ProfileOrderCancelReasonDialog
+      open={cancelReasonDialogOpen}
+      onOpenChange={setCancelReasonDialogOpen}
+      onConfirm={handleConfirmCancellation}
+    />
+
+    <ProfileOrderCancelSuccessDialog
+      open={cancelSuccessDialogOpen}
+      onOpenChange={setCancelSuccessDialogOpen}
+      orderNumber={order.number}
     />
     </>
   );

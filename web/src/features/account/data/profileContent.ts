@@ -105,6 +105,36 @@ export const profileTabsContent = {
       trackingPlaceholder: "Tracking details will appear here once available.",
       loadingLabel: "Loading tracking details...",
     },
+    cancelDialog: {
+      title: "Cancel Order?",
+      description:
+        "Need help before cancelling? Contact our support team, we may be able to resolve your concern.",
+      contactSupportLabel: "CONTACT SUPPORT",
+      proceedLabel: "PROCEED TO CANCEL",
+      contactHref: "/contact",
+      unavailableTitle: "Order cancellation",
+      unavailableDescription:
+        "Order cancellation will be available soon. Contact support for assistance.",
+    },
+    cancelReasonDialog: {
+      title: "Cancel Order?",
+      description:
+        "We're sorry to see you cancel. Please share your reason so we can serve you better next time.",
+      reasonLabel: "Select Reason",
+      reasons: [
+        "Expected delivery timeline no longer works for me",
+        "Found an alternative product",
+        "My requirements have changed",
+        "Other",
+      ],
+      commentsPlaceholder: "Additional comments",
+      confirmLabel: "CONFIRM CANCELLATION",
+    },
+    cancelSuccessDialog: {
+      title: "Order Cancellation",
+      description:
+        "Order cancelled successfully. You can track your refund status from your order summary.",
+    },
     detailDialog: {
       title: "Order Details",
       deliveryDetailsTitle: "Delivery Details",

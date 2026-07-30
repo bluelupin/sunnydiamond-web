@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronUp, Info } from "lucide-react";
 import CopyIcon from "@/assets/Icons/CopyIcon";
 import {
@@ -12,7 +13,11 @@ import { cn } from "@/shared/utils/cn";
 import { profileTabsContent } from "../data/profileContent";
 import type { ProfileOrderDetailUi } from "../types/profileUi.types";
 import { formatAddressLines, formatOrderDate, formatOrderTotal } from "../utils/formatAccountData";
+import { resolveProfileOrderTimelineSteps } from "../utils/orderDeliveryTimeline.utils";
 import { ProfileOrderDetailItemCard } from "./ProfileOrderDetailItemCard";
+import { ProfileOrderCancelDialog } from "./ProfileOrderCancelDialog";
+import { ProfileOrderCancelReasonDialog } from "./ProfileOrderCancelReasonDialog";
+import { ProfileOrderCancelSuccessDialog } from "./ProfileOrderCancelSuccessDialog";
 import { ProfileOrderTimeline } from "./ProfileOrderTimeline";
 import { ProfileMetaDivider } from "./profileUi";
 
@@ -23,9 +28,13 @@ type ProfileOrderDetailViewProps = {
 
 export function ProfileOrderDetailView({ order, onBack }: ProfileOrderDetailViewProps) {
   const { toast } = useToast();
+  const router = useRouter();
   const content = profileTabsContent.orders;
   const detailContent = content.detail;
   const [totalsExpanded, setTotalsExpanded] = useState(true);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancelReasonDialogOpen, setCancelReasonDialogOpen] = useState(false);
+  const [cancelSuccessDialogOpen, setCancelSuccessDialogOpen] = useState(false);
 
   const handleCopyOrderId = async () => {
     try {
@@ -47,14 +56,30 @@ export function ProfileOrderDetailView({ order, onBack }: ProfileOrderDetailView
   };
 
   const handleCancelOrder = () => {
-    toast({
-      title: content.cancelOrderLabel,
-      description: "Order cancellation will be available soon. Contact support for assistance.",
-    });
+    setCancelDialogOpen(true);
+  };
+
+  const handleContactSupport = () => {
+    setCancelDialogOpen(false);
+    router.push(content.cancelDialog.contactHref);
+  };
+
+  const handleProceedToCancel = () => {
+    setCancelDialogOpen(false);
+    setCancelReasonDialogOpen(true);
+  };
+
+  const handleConfirmCancellation = (_payload: { reason: string; comments: string }) => {
+    setCancelReasonDialogOpen(false);
+    setCancelSuccessDialogOpen(true);
   };
 
   const { priceBreakdown } = order;
   const hasDiscount = priceBreakdown.orderDiscount > 0;
+  const timelineSteps = useMemo(
+    () => resolveProfileOrderTimelineSteps(order.status, order.timeline),
+    [order.status, order.timeline],
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -111,12 +136,11 @@ export function ProfileOrderDetailView({ order, onBack }: ProfileOrderDetailView
         ) : null}
       </div>
 
-      {order.timeline && order.timeline.length > 0 ? (
+      {timelineSteps.length > 0 ? (
         <ProfileOrderTimeline
-          variant="detail"
           estimatedLabel={order.estimatedDeliveryLabel}
           estimatedValue={order.estimatedDeliveryValue}
-          steps={order.timeline}
+          steps={timelineSteps}
           className="bg-gray300"
         />
       ) : null}
@@ -248,6 +272,25 @@ export function ProfileOrderDetailView({ order, onBack }: ProfileOrderDetailView
           ) : null}
         </div>
       ) : null}
+
+      <ProfileOrderCancelDialog
+        open={cancelDialogOpen}
+        onOpenChange={setCancelDialogOpen}
+        onContactSupport={handleContactSupport}
+        onProceedToCancel={handleProceedToCancel}
+      />
+
+      <ProfileOrderCancelReasonDialog
+        open={cancelReasonDialogOpen}
+        onOpenChange={setCancelReasonDialogOpen}
+        onConfirm={handleConfirmCancellation}
+      />
+
+      <ProfileOrderCancelSuccessDialog
+        open={cancelSuccessDialogOpen}
+        onOpenChange={setCancelSuccessDialogOpen}
+        orderNumber={order.number}
+      />
     </div>
   );
 }
