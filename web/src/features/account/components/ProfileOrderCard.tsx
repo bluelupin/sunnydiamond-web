@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { Copy, Info } from "lucide-react";
 import {
   CartDivider,
@@ -14,12 +15,14 @@ import { useToast } from "@/shared/hooks/use-toast";
 import { profileTabsContent } from "../data/profileContent";
 import type { ProfileOrderUi } from "../types/profileUi.types";
 import { formatOrderDate, formatOrderTotal } from "../utils/formatAccountData";
+import { resolveProfileOrderTimelineSteps } from "../utils/orderDeliveryTimeline.utils";
 import {
   getOrderMobileSubtext,
   ProfileOrderMobileThumbnails,
 } from "./ProfileOrderMobileThumbnails";
 import { ProfileOrderItemRow } from "./ProfileOrderItemRow";
 import { ProfileOrderTimeline } from "./ProfileOrderTimeline";
+import { ProfileOrderTrackModal } from "./ProfileOrderTrackModal";
 import { ProfileMetaDivider, ProfileStatusBadge } from "./profileUi";
 
 type ProfileOrderCardProps = {
@@ -28,7 +31,12 @@ type ProfileOrderCardProps = {
 
 export function ProfileOrderCard({ order }: ProfileOrderCardProps) {
   const { toast } = useToast();
+  const [trackModalOpen, setTrackModalOpen] = useState(false);
   const content = profileTabsContent.orders;
+  const timelineSteps = useMemo(
+    () => resolveProfileOrderTimelineSteps(order.status, order.timeline),
+    [order.status, order.timeline],
+  );
   const mobileSubtext = getOrderMobileSubtext(order);
   const orderDetailsHref = `/profile/orders/${encodeURIComponent(order.number)}`;
 
@@ -68,10 +76,11 @@ export function ProfileOrderCard({ order }: ProfileOrderCardProps) {
   };
 
   const handleTrackOrder = () => {
-    window.location.href = `/order-tracking?order=${encodeURIComponent(order.number)}`;
+    setTrackModalOpen(true);
   };
 
   return (
+    <>
     <article className="bg-gray300 p-4 lg:p-6">
       <div className="flex flex-col gap-4 lg:gap-6">
         <div className="flex flex-col gap-4 lg:gap-6">
@@ -125,12 +134,11 @@ export function ProfileOrderCard({ order }: ProfileOrderCardProps) {
           </div>
         </div>
 
-        {order.timeline ? (
+        {timelineSteps.length > 0 ? (
           <ProfileOrderTimeline
-            className="hidden lg:block"
             estimatedLabel={order.estimatedDeliveryLabel}
             estimatedValue={order.estimatedDeliveryValue}
-            steps={order.timeline}
+            steps={timelineSteps}
           />
         ) : null}
 
@@ -223,5 +231,12 @@ export function ProfileOrderCard({ order }: ProfileOrderCardProps) {
         ) : null}
       </div>
     </article>
+
+    <ProfileOrderTrackModal
+      open={trackModalOpen}
+      onOpenChange={setTrackModalOpen}
+      order={order}
+    />
+    </>
   );
 }

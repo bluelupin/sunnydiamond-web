@@ -3,42 +3,14 @@
 import Link from "next/link";
 import { CartMetaRow, CartPrimaryLink } from "@/features/cart/components/CartFlowUi";
 import { formatOrderDate, formatOrderTotal, formatAddressLines } from "@/features/account/utils/formatAccountData";
+import { buildOrderDeliveryTimelineFromStatus } from "@/features/account/utils/orderDeliveryTimeline.utils";
+import { ProfileOrderTimeline } from "@/features/account/components/ProfileOrderTimeline";
 import { formatCartPrice } from "@/features/cart/utils/formatCartLine";
 import type { TrackedOrder, TrackedOrderItem } from "@/services/customer/order-tracking.types";
-import { cn } from "@/shared/utils/cn";
 import {
   formatTrackedOrderStatus,
-  getTrackedOrderProgress,
   getTrackedOrderStatusMessage,
-  TRACKING_PROGRESS_STEPS,
 } from "@/features/order-tracking/utils/orderStatus";
-
-function TrackingProgress({ order }: { order: TrackedOrder }) {
-  const activeStep = getTrackedOrderProgress(order.status, order);
-
-  return (
-    <ol className="grid gap-3 sm:grid-cols-4">
-      {TRACKING_PROGRESS_STEPS.map((label, index) => {
-        const stepNumber = index + 1;
-        const isActive = stepNumber <= activeStep;
-
-        return (
-          <li
-            key={label}
-            className={cn(
-              "rounded-sm border px-4 py-3",
-              isActive
-                ? "border-darkblack bg-white"
-                : "border-neutral300 bg-gray200/40 text-neutral500",
-            )}
-          >
-            <p className="font-gill text-sm font-normal leading-110">{label}</p>
-          </li>
-        );
-      })}
-    </ol>
-  );
-}
 
 function OrderItemOptions({ item }: { item: TrackedOrderItem }) {
   const options = [...item.selectedOptions, ...item.enteredOptions];
@@ -96,7 +68,10 @@ const OrderDetailView = ({
   showBackLink = false,
   backHref = "/profile?section=orders",
   backLabel = "Back to My Orders",
-}: OrderDetailViewProps) => (
+}: OrderDetailViewProps) => {
+  const deliveryTimeline = buildOrderDeliveryTimelineFromStatus(order.status);
+
+  return (
   <div className="space-y-6">
     {showBackLink ? (
       <Link
@@ -120,7 +95,9 @@ const OrderDetailView = ({
         </p>
       </div>
 
-      <TrackingProgress order={order} />
+      {deliveryTimeline.length > 0 ? (
+        <ProfileOrderTimeline steps={deliveryTimeline} className="border border-neutral300" />
+      ) : null}
 
       <div className="mt-6 grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
@@ -277,6 +254,7 @@ const OrderDetailView = ({
       </CartPrimaryLink>
     </div>
   </div>
-);
+  );
+};
 
 export default OrderDetailView;

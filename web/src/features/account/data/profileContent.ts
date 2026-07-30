@@ -98,6 +98,12 @@ export const profileTabsContent = {
     totalLabel: "Total Order Amount",
     viewDetailsLabel: "VIEW ORDER DETAILS",
     trackOrderLabel: "TRACK",
+    trackDialog: {
+      title: "Track Order",
+      shipmentUpdatesTitle: "Shipment Updates",
+      trackingPlaceholder: "Tracking details will appear here once available.",
+      loadingLabel: "Loading tracking details...",
+    },
     cancelOrderLabel: "CANCEL ORDER",
     returnOrderLabel: "RETURN ORDER",
     downloadInvoiceLabel: "DOWNLOAD INVOICE",

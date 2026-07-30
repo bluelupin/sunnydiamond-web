@@ -450,7 +450,7 @@ const ProductAppointmentPanel = ({
 }: ProductAppointmentPanelProps) => {
   const { toast } = useToast();
   const config = PRODUCT_APPOINTMENT_PANEL_CONFIG[variant];
-  const productImage = product.image || product.images[0];
+  const productImage = product.images[0] ?? product.image;
   const [statusToastMessage, setStatusToastMessage] = useState<string | null>(null);
   const statusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 

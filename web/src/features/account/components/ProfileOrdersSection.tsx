@@ -5,16 +5,9 @@ import {
   CartOutlineButton,
 } from "@/features/cart/components/CartFlowUi";
 import { profileTabsContent } from "../data/profileContent";
-import {
-  getMockOrdersByFilter,
-  PROFILE_PREVIEW_MOCK_WHEN_EMPTY,
-} from "../data/profileMockData";
 import { useCustomerOrders } from "../hooks/useCustomerOrders";
 import type { OrderFilterKey } from "../types/profileUi.types";
-import {
-  categorizeOrderStatus,
-  mapCustomerOrderToProfileUi,
-} from "../utils/profileDisplayMappers";
+import { mapCustomerOrderToProfileUi } from "../utils/profileDisplayMappers";
 import { ProfileOrderCard } from "./ProfileOrderCard";
 import { ProfileOrdersEmptyState } from "./ProfileOrdersEmptyState";
 import { ProfileFilterChips } from "./profileUi";
@@ -42,25 +35,15 @@ const ProfileOrdersSection = () => {
   const { data, isLoading, error, page, setPage } = useCustomerOrders(true);
   const [activeFilter, setActiveFilter] = useState<OrderFilterKey>("in_progress");
 
-  const orders = useMemo(() => {
-    if (data && data.orders.length > 0) {
-      return data.orders.map(mapCustomerOrderToProfileUi);
-    }
-
-    if (PROFILE_PREVIEW_MOCK_WHEN_EMPTY) {
-      return getMockOrdersByFilter(activeFilter);
-    }
-
-    return [];
-  }, [data, activeFilter]);
+  const orders = useMemo(
+    () => (data?.orders ?? []).map(mapCustomerOrderToProfileUi),
+    [data],
+  );
 
   const filteredOrders = useMemo(
     () => orders.filter((order) => order.category === activeFilter),
     [orders, activeFilter],
   );
-
-  const usingMockData =
-    PROFILE_PREVIEW_MOCK_WHEN_EMPTY && (!data || data.orders.length === 0);
 
   if (isLoading) {
     return <OrdersSkeleton />;
@@ -74,7 +57,7 @@ const ProfileOrdersSection = () => {
     );
   }
 
-  if (!usingMockData && (!data || data.orders.length === 0)) {
+  if (!data || data.orders.length === 0) {
     return <ProfileOrdersEmptyState />;
   }
 
@@ -106,7 +89,7 @@ const ProfileOrdersSection = () => {
         </ul>
       )}
 
-      {!usingMockData && data && data.totalPages > 1 ? (
+      {data.totalPages > 1 ? (
         <div className="flex items-center justify-between gap-4 pt-2">
           <CartOutlineButton
             type="button"

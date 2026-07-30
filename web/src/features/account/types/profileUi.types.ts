@@ -27,6 +27,8 @@ export type ProfileOrderUi = {
   id: string;
   number: string;
   orderDate: string;
+  /** Raw Magento order status from the API. */
+  status: string;
   statusLabel: string;
   category: OrderFilterKey;
   deliveryBy?: string;
