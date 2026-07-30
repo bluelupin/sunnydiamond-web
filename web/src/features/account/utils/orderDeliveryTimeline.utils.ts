@@ -9,6 +9,16 @@ export const ORDER_DELIVERY_TIMELINE_LABELS = [
   "Delivered",
 ] as const;
 
+export const ORDER_DELIVERY_STEP_DESCRIPTIONS: Partial<
+  Record<(typeof ORDER_DELIVERY_TIMELINE_LABELS)[number], string>
+> = {
+  "In Production": "Your piece is undergoing final inspection.",
+  "Packaged": "Your order has been carefully packed and is ready to ship.",
+  "Shipped": "Your order is on its way to you.",
+  "Out for Delivery": "Your order will arrive soon.",
+  "Delivered": "Your order has been delivered.",
+};
+
 const LEGACY_STATUS_TO_ACTIVE_STEP: Record<string, number> = {
   processing: 1,
   pending: 1,
@@ -73,6 +83,35 @@ export function resolveProfileOrderTimelineSteps(
   }
 
   return fallbackTimeline ?? [];
+}
+
+export function isProfileTimelineStepActive(status: TimelineStepStatus): boolean {
+  return status === "completed" || status === "current";
+}
+
+export function getProfileTimelineFilledThroughIndex(steps: ProfileTimelineStep[]): number {
+  const currentIndex = steps.findIndex((step) => step.status === "current");
+  if (currentIndex >= 0) {
+    return currentIndex;
+  }
+
+  return steps.reduce(
+    (max, step, index) => (step.status === "completed" ? index : max),
+    -1,
+  );
+}
+
+export function getProfileTimelineCompletedThroughIndex(steps: ProfileTimelineStep[]): number {
+  return steps.reduce(
+    (max, step, index) => (step.status === "completed" ? index : max),
+    -1,
+  );
+}
+
+export function getProfileTimelineStepDescription(label: string): string | undefined {
+  return ORDER_DELIVERY_STEP_DESCRIPTIONS[
+    label as keyof typeof ORDER_DELIVERY_STEP_DESCRIPTIONS
+  ];
 }
 
 /** Display label for ProfileStatusBadge — uses canonical timeline label when status matches. */

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { StaticImageData } from "next/image";
 import { useMagentoWishlistProducts } from "@/hooks/magento/useMagentoWishlistProducts";
 import { trackOrder } from "@/services/customer/order-tracking.client";
@@ -24,9 +24,14 @@ function OrderDetailSkeleton() {
 type ProfileOrderDetailPanelProps = {
   orderNumber: string;
   onBack: () => void;
+  onTrackedStatusChange?: (status: string) => void;
 };
 
-export function ProfileOrderDetailPanel({ orderNumber, onBack }: ProfileOrderDetailPanelProps) {
+export function ProfileOrderDetailPanel({
+  orderNumber,
+  onBack,
+  onTrackedStatusChange,
+}: ProfileOrderDetailPanelProps) {
   const [order, setOrder] = useState<TrackedOrder | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -65,6 +70,17 @@ export function ProfileOrderDetailPanel({ orderNumber, onBack }: ProfileOrderDet
       controller.abort();
     };
   }, [orderNumber]);
+
+  const onTrackedStatusChangeRef = useRef(onTrackedStatusChange);
+  onTrackedStatusChangeRef.current = onTrackedStatusChange;
+
+  useEffect(() => {
+    if (!order?.status) {
+      return;
+    }
+
+    onTrackedStatusChangeRef.current?.(order.status);
+  }, [order?.status]);
 
   const orderSkus = useMemo(
     () =>
