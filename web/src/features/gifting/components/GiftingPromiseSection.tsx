@@ -70,8 +70,8 @@ const GiftingPromiseSection = () => {
       aria-labelledby="gifting-finishing-title"
       className="relative z-30 isolate flex flex-col gap-6 bg-gray200 pt-16 pb-16 md:gap-10 md:py-100"
     >
-      <div className="mx-auto flex w-full max-w-1440 flex-col items-center gap-6 md:gap-10">
-        <div className="flex w-full flex-col items-center gap-4 px-4 text-center md:px-10">
+      <div className="mx-auto flex w-full max-w-1440 flex-col items-center gap-6 px-4 md:gap-10 md:px-0">
+        <div className="flex w-full flex-col items-center gap-4 text-center md:px-10">
           <h2
             id="gifting-finishing-title"
             className="font-larken text-[32px] font-light leading-110 text-darkblack md:text-5xl"
@@ -85,7 +85,7 @@ const GiftingPromiseSection = () => {
 
         {/* Mobile — Figma 1049:57987 horizontal carousel */}
         <div
-          className="scrollbar-none flex w-full snap-x snap-mandatory gap-3 overflow-x-auto scroll-pl-4 scroll-pr-4 pb-2 md:hidden"
+          className="scrollbar-none flex w-full snap-x snap-mandatory gap-3 overflow-x-auto scroll-pr-4 pb-2 md:hidden"
           role="list"
           aria-label={finishingTouch.title}
         >
