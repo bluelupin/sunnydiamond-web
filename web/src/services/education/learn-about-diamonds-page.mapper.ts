@@ -373,9 +373,9 @@ const mapFourCsPanel = (
     resolveCmsMediaUrl(visual?.visualImage?.mobileImage);
 
   const mappedOptions =
-    visual?.gradeStops
-      ?.map((stop) => mapGradeStopToOption(stop, panelId, activeGradeCode, visualImageUrl))
-      .filter((option): option is EducationSliderOption => option != null) ?? [];
+    (visual?.gradeStops ?? [])
+      .map((stop) => mapGradeStopToOption(stop, panelId, activeGradeCode, visualImageUrl))
+      .filter((option): option is EducationSliderOption => option != null);
 
   // No static slider/copy fallbacks — require CMS gradeStops.
   if (!mappedOptions.length) return null;
@@ -448,17 +448,17 @@ const mapFourCsIntro = (
 
   const mobileHeading = cleanText(intro.mobileHeading) ?? heading;
 
+  // Use CMS list order as returned (Strapi drag-and-drop). Do not re-sort by
+  // sortOrder — those numbers are often stale after drag and would undo the order.
   const pillarsFromTags =
     intro.fourCsTags
-      ?.slice()
-      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
-      .map((tag) => formatPillarLabel(tag.label))
+      ?.map((tag) => formatPillarLabel(tag.label))
       .filter((label): label is string => Boolean(label)) ?? [];
 
   const pillarsFromPanels =
-    fourCsSection?.cInfoPanel
-      ?.map((panel) => formatPillarLabel(panel.sectionLabel))
-      .filter((label): label is string => Boolean(label)) ?? [];
+    (fourCsSection?.cInfoPanel ?? [])
+      .map((panel) => formatPillarLabel(panel.sectionLabel))
+      .filter((label): label is string => Boolean(label));
 
   const pillars = pillarsFromTags.length > 0 ? pillarsFromTags : pillarsFromPanels;
   if (!pillars.length) return null;
@@ -477,6 +477,7 @@ const mapFourCsIntro = (
 const mapFourCsSection = (
   section?: StrapiEducationFourCsSection | null,
 ): NormalizedEducationFourCsSection | null => {
+  // Preserve Strapi component order (drag-and-drop). Pair info[i] with visual[i].
   const infoPanels = section?.cInfoPanel ?? [];
   if (!infoPanels.length) return null;
 
