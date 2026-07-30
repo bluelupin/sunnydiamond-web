@@ -68,7 +68,7 @@ const GiftingPromiseSection = () => {
     <section
       id="the-finishing-touch"
       aria-labelledby="gifting-finishing-title"
-      className="relative z-30 isolate bg-gray200 pt-16 pb-16 md:py-100"
+      className="relative z-30 isolate flex flex-col gap-6 bg-gray200 pt-16 pb-16 md:gap-10 md:py-100"
     >
       <div className="mx-auto flex w-full max-w-1440 flex-col items-center gap-6 md:gap-10">
         <div className="flex w-full flex-col items-center gap-4 px-4 text-center md:px-10">
@@ -95,19 +95,19 @@ const GiftingPromiseSection = () => {
             </div>
           ))}
         </div>
+      </div>
 
-        {/* Desktop — Figma 1049:51053 three-column grid */}
-        <div
-          className="hidden w-full grid-cols-3 gap-2 px-4 md:grid md:px-10"
-          role="list"
-          aria-label={finishingTouch.title}
-        >
-          {finishingTouch.items.map((item) => (
-            <div key={item.id} role="listitem">
-              <FinishingTouchCard item={item} layout="desktop" />
-            </div>
-          ))}
-        </div>
+      {/* Desktop — full-bleed three-column grid (Figma 1049:51053) */}
+      <div
+        className="hidden w-full grid-cols-3 gap-2 md:grid"
+        role="list"
+        aria-label={finishingTouch.title}
+      >
+        {finishingTouch.items.map((item) => (
+          <div key={item.id} role="listitem">
+            <FinishingTouchCard item={item} layout="desktop" />
+          </div>
+        ))}
       </div>
     </section>
   );
