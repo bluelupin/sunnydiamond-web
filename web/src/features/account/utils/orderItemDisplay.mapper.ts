@@ -3,6 +3,7 @@ import type {
   CustomerOrderItem,
   CustomerOrderItemOption,
 } from "@/services/customer/customer-account.types";
+import { isGiftMarkedOrderItem } from "./orderGiftDetection.utils";
 
 function normalizeKey(text: string): string {
   return text.trim().toLowerCase();
@@ -26,18 +27,6 @@ function findOptionValue(
   return undefined;
 }
 
-function detectGift(options: CustomerOrderItemOption[]): boolean {
-  return options.some((option) => {
-    const label = normalizeKey(option.label);
-    const value = normalizeKey(option.value);
-
-    return (
-      label.includes("gift") &&
-      (value === "yes" || value === "true" || value.includes("gift wrap"))
-    );
-  });
-}
-
 function detectBespoke(item: CustomerOrderItem, options: CustomerOrderItemOption[]): boolean {
   const sku = item.productSku?.toLowerCase() ?? "";
   const name = item.productName.toLowerCase();
@@ -54,7 +43,10 @@ function detectBespoke(item: CustomerOrderItem, options: CustomerOrderItemOption
   });
 }
 
-export function mapCustomerOrderItemToDisplayFields(item: CustomerOrderItem) {
+export function mapCustomerOrderItemToDisplayFields(
+  item: CustomerOrderItem,
+  giftedProductNames?: Set<string>,
+) {
   const options = getAllOptions(item);
   const size = findOptionValue(options, ["ring size", "size"]);
   const metalRaw = findOptionValue(options, ["metal color", "metal", "color"]);
@@ -63,7 +55,7 @@ export function mapCustomerOrderItemToDisplayFields(item: CustomerOrderItem) {
   return {
     size,
     metal,
-    isGift: detectGift(options),
+    isGift: isGiftMarkedOrderItem(item.productName, options, giftedProductNames),
     isBespoke: detectBespoke(item, options),
   };
 }

@@ -132,6 +132,9 @@ export const MAGENTO_CUSTOMER_ORDERS_QUERY = `
           number
           order_date
           status
+          comments {
+            message
+          }
           items {
             product_name
             quantity_ordered

@@ -10,6 +10,7 @@ import {
 } from "@/features/cart/components/CartFlowUi";
 import { CheckoutField } from "@/features/checkout/components/CheckoutUi";
 import OrderDetailView from "@/features/orders/components/OrderDetailView";
+import { buildProfileOrderDetailHref } from "@/features/account/utils/profileOrderNavigation";
 import { trackOrder } from "@/services/customer/order-tracking.client";
 import type { TrackedOrder } from "@/services/customer/order-tracking.types";
 import PageContainer from "@/shared/ui/layout/PageContainer";
@@ -216,7 +217,7 @@ const OrderTrackingPage = () => {
           {isAuthenticated && order ? (
             <div className="flex justify-center">
               <CartPrimaryLink
-                href={`/profile/orders/${encodeURIComponent(order.number)}`}
+                href={buildProfileOrderDetailHref(order.number)}
                 className="w-full max-w-xs"
               >
                 View Full Order Details

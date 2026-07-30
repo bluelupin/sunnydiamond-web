@@ -53,7 +53,7 @@ export const PROFILE_NAV_ITEMS: ProfileNavItem[] = [
   { kind: "section", id: "support", label: "HELP & SUPPORT" },
 ];
 
-export const DEFAULT_PROFILE_SECTION = PROFILE_SECTIONS[0].id;
+export const DEFAULT_PROFILE_SECTION: ProfileSection["id"] = "orders";
 
 export function isProfileSectionId(value: string | null | undefined): value is ProfileSection["id"] {
   return PROFILE_SECTIONS.some((section) => section.id === value);

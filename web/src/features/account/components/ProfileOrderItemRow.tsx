@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import RingsTabIcon from "@/assets/Icons/PLP/RingsTabIcon";
 import type { ProfileOrderItemUi } from "../types/profileUi.types";
-import { ProfileMetaDivider } from "./profileUi";
+import { ProfileMetaDivider, ProfileOrderItemBadge } from "./profileUi";
 
 type ProfileOrderItemRowProps = {
   item: ProfileOrderItemUi;
@@ -15,13 +15,7 @@ export function ProfileOrderItemRow({ item }: ProfileOrderItemRowProps) {
 
   return (
     <div className="relative border border-aboutInactive bg-white p-4">
-      {badgeLabel ? (
-        <span
-          className="absolute -left-px -top-px bg-mauve300 px-3 py-1 font-gill text-sm font-normal leading-110 text-darkblack"
-        >
-          {badgeLabel}
-        </span>
-      ) : null}
+      {badgeLabel ? <ProfileOrderItemBadge label={badgeLabel} /> : null}
 
       <div className="flex items-center gap-6">
         <div className="relative h-[63px] w-[71px] shrink-0 overflow-hidden bg-white">

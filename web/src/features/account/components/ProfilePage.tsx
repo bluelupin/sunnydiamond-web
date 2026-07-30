@@ -8,7 +8,9 @@ import {
   getProfileSectionMobileTitle,
   isProfileSectionId,
 } from "../data/profileSections";
+import { profileTabsContent } from "../data/profileContent";
 import type { ProfileSectionId } from "../types";
+import { PROFILE_ORDER_QUERY_PARAM } from "../utils/profileOrderNavigation";
 import { ProfileBespokeToastProvider } from "../context/ProfileBespokeToastContext";
 import ProfileAuthGate from "./ProfileAuthGate";
 import ProfileHeroSection from "./ProfileHeroSection";
@@ -31,12 +33,20 @@ const ProfilePage = () => {
     return isProfileSectionId(requested) ? requested : DEFAULT_PROFILE_SECTION;
   }, [searchParams]);
 
-  const mobileSectionTitle = getProfileSectionMobileTitle(activeSection);
+  const mobileSectionTitle = useMemo(() => {
+    const orderNumber = searchParams?.get(PROFILE_ORDER_QUERY_PARAM)?.trim();
+    if (activeSection === "orders" && orderNumber) {
+      return profileTabsContent.orders.detail.pageTitle;
+    }
+
+    return getProfileSectionMobileTitle(activeSection);
+  }, [activeSection, searchParams]);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const handleSectionChange = useCallback(
     (section: ProfileSectionId) => {
       const params = new URLSearchParams(searchParams?.toString() ?? "");
+      params.delete(PROFILE_ORDER_QUERY_PARAM);
       if (section === DEFAULT_PROFILE_SECTION) {
         params.delete("section");
       } else {

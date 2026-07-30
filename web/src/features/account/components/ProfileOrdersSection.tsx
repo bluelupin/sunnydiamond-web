@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   CartOutlineButton,
 } from "@/features/cart/components/CartFlowUi";
@@ -8,7 +9,11 @@ import { profileTabsContent } from "../data/profileContent";
 import { useCustomerOrders } from "../hooks/useCustomerOrders";
 import type { OrderFilterKey } from "../types/profileUi.types";
 import { mapCustomerOrderToProfileUi } from "../utils/profileDisplayMappers";
+import {
+  PROFILE_ORDER_QUERY_PARAM,
+} from "../utils/profileOrderNavigation";
 import { ProfileOrderCard } from "./ProfileOrderCard";
+import { ProfileOrderDetailPanel } from "./ProfileOrderDetailPanel";
 import { ProfileOrdersEmptyState } from "./ProfileOrdersEmptyState";
 import { ProfileFilterChips } from "./profileUi";
 
@@ -32,8 +37,30 @@ function OrdersSkeleton() {
 }
 
 const ProfileOrdersSection = () => {
+  const router = useRouter();
+  const pathname = usePathname() ?? "/profile";
+  const searchParams = useSearchParams();
+  const selectedOrderNumber = searchParams?.get(PROFILE_ORDER_QUERY_PARAM)?.trim() ?? "";
+
   const { data, isLoading, error, page, setPage } = useCustomerOrders(true);
   const [activeFilter, setActiveFilter] = useState<OrderFilterKey>("in_progress");
+
+  const openOrderDetail = useCallback(
+    (orderNumber: string) => {
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
+      params.set("section", "orders");
+      params.set(PROFILE_ORDER_QUERY_PARAM, orderNumber.trim());
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [pathname, router, searchParams],
+  );
+
+  const closeOrderDetail = useCallback(() => {
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
+    params.delete(PROFILE_ORDER_QUERY_PARAM);
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }, [pathname, router, searchParams]);
 
   const orders = useMemo(
     () => (data?.orders ?? []).map(mapCustomerOrderToProfileUi),
@@ -44,6 +71,15 @@ const ProfileOrdersSection = () => {
     () => orders.filter((order) => order.category === activeFilter),
     [orders, activeFilter],
   );
+
+  if (selectedOrderNumber) {
+    return (
+      <ProfileOrderDetailPanel
+        orderNumber={selectedOrderNumber}
+        onBack={closeOrderDetail}
+      />
+    );
+  }
 
   if (isLoading) {
     return <OrdersSkeleton />;
@@ -83,7 +119,7 @@ const ProfileOrdersSection = () => {
         <ul className="flex flex-col gap-4">
           {filteredOrders.map((order) => (
             <li key={order.id}>
-              <ProfileOrderCard order={order} />
+              <ProfileOrderCard order={order} onViewDetails={openOrderDetail} />
             </li>
           ))}
         </ul>

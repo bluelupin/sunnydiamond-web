@@ -90,5 +90,9 @@ export function formatOrderStatusLabel(status: string): string {
     return matchedLabel;
   }
 
+  if (normalized.includes("cancel")) {
+    return "Cancelled";
+  }
+
   return formatOrderStatus(status);
 }

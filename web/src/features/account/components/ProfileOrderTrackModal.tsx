@@ -15,6 +15,7 @@ import {
 } from "@/shared/ui/dialog";
 import { useToast } from "@/shared/hooks/use-toast";
 import { profileTabsContent } from "../data/profileContent";
+import { buildProfileOrderDetailHref } from "../utils/profileOrderNavigation";
 import type { ProfileOrderUi } from "../types/profileUi.types";
 import { formatOrderDate } from "../utils/formatAccountData";
 import {
@@ -85,7 +86,7 @@ export function ProfileOrderTrackModal({
     [activeStatus, order.timeline],
   );
   const statusMessage = getTrackedOrderStatusMessage(activeStatus);
-  const orderDetailsHref = `/profile/orders/${encodeURIComponent(order.number)}`;
+  const orderDetailsHref = buildProfileOrderDetailHref(order.number);
 
   const handleCopyOrderId = async () => {
     try {
@@ -223,7 +224,11 @@ export function ProfileOrderTrackModal({
           ) : null}
 
           <div className="flex justify-end border-t border-neutral300 pt-4">
-            <DetailTextLink href={orderDetailsHref} className="text-sm uppercase">
+            <DetailTextLink
+              href={orderDetailsHref}
+              onClick={() => onOpenChange(false)}
+              className="text-sm uppercase"
+            >
               {content.viewDetailsLabel}
             </DetailTextLink>
           </div>

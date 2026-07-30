@@ -23,6 +23,48 @@ export type ProfileOrderItemUi = {
   quantity: number;
 };
 
+export type ProfileOrderDetailItemUi = ProfileOrderItemUi & {
+  unitPrice: number;
+  currency: string;
+  giftNote?: string;
+};
+
+export type ProfileOrderPriceBreakdownUi = {
+  orderAmount: number;
+  orderDiscount: number;
+  tax: number;
+  orderTotal: number;
+  currency: string;
+};
+
+export type ProfileOrderDetailUi = {
+  id: string;
+  number: string;
+  orderDate: string;
+  status: string;
+  statusLabel: string;
+  category: OrderFilterKey;
+  deliveryBy?: string;
+  estimatedDeliveryLabel?: string;
+  estimatedDeliveryValue?: string;
+  timeline?: ProfileTimelineStep[];
+  items: ProfileOrderDetailItemUi[];
+  priceBreakdown: ProfileOrderPriceBreakdownUi;
+  paymentMethod?: string;
+  shippingAddress?: {
+    fullName: string;
+    streetLines: string[];
+    city: string;
+    region: string;
+    pincode: string;
+    phone: string;
+  };
+  footnote?: string;
+  showCancel: boolean;
+  showDownloadInvoice: boolean;
+  showCancelNote: boolean;
+};
+
 export type ProfileOrderUi = {
   id: string;
   number: string;

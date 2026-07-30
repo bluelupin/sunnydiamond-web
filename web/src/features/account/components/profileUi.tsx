@@ -84,8 +84,8 @@ const STATUS_BADGE_VARIANTS: Record<
     labelWeight: "font-light",
   },
   cancelled: {
-    background: "bg-gray300",
-    dot: "bg-gray600",
+    background: "bg-[#FEDCDC]",
+    dot: "bg-[#F91616]",
     labelWeight: "font-light",
   },
   returned: {
@@ -113,6 +113,17 @@ export function ProfileStatusBadge({
       )}
     >
       <span className={cn("size-2 shrink-0 rounded-full", variant.dot)} aria-hidden />
+      {label}
+    </span>
+  );
+}
+
+/** Figma 1536:30206 — mauve pill for gift / bespoke order line items. */
+export function ProfileOrderItemBadge({ label }: { label: string }) {
+  return (
+    <span
+      className="absolute -left-px -top-px bg-mauve300 px-3 py-1 font-gill text-sm font-normal leading-110 text-darkblack"
+    >
       {label}
     </span>
   );

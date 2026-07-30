@@ -14,6 +14,7 @@ import {
   formatAppointmentDate,
   formatOrderDate,
 } from "./formatAccountData";
+import { parseGiftMarkedProductNamesFromComments } from "./orderGiftDetection.utils";
 import { mapCustomerOrderItemToDisplayFields } from "./orderItemDisplay.mapper";
 import {
   buildOrderDeliveryTimelineFromStatus,
@@ -102,8 +103,12 @@ function mapAppointmentAddressToUi(
 }
 
 function mapOrderItems(order: CustomerOrder): ProfileOrderItemUi[] {
+  const giftedProductNames = parseGiftMarkedProductNamesFromComments(
+    order.commentMessages ?? [],
+  );
+
   return order.items.map((item, index) => {
-    const display = mapCustomerOrderItemToDisplayFields(item);
+    const display = mapCustomerOrderItemToDisplayFields(item, giftedProductNames);
     const imageUrl = item.imageUrl?.trim() || null;
 
     return {
@@ -196,6 +201,7 @@ export function mapCustomerOrderToProfileUi(order: CustomerOrder): ProfileOrderU
 
 export function mapCustomerAppointmentToProfileUi(
   appointment: CustomerAppointment,
+  productImageBySku?: Record<string, string>,
 ): ProfileAppointmentUi {
   const type = inferAppointmentType(appointment.formTag);
   const typeLabels = profileTabsContent.appointments.filters;
@@ -212,13 +218,19 @@ export function mapCustomerAppointmentToProfileUi(
     appointment.preferredShowroom?.state,
   ].filter((part): part is string => Boolean(part));
 
+  const productSku = appointment.productId?.trim();
+  const productImage =
+    productSku && productImageBySku?.[productSku]
+      ? productImageBySku[productSku]
+      : PLACEHOLDER_RING_IMAGE;
+
   const products =
     appointment.productName
       ? [
           {
             id: appointment.productId ?? appointment.documentId,
             name: appointment.productName,
-            imageSrc: PLACEHOLDER_RING_IMAGE,
+            imageSrc: productImage,
           },
         ]
       : [];

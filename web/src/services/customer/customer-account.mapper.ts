@@ -30,11 +30,16 @@ type MagentoOrderItem = {
   entered_options?: MagentoOrderItemOption[] | null;
 };
 
+type MagentoOrderComment = {
+  message?: string | null;
+};
+
 type MagentoCustomerOrder = {
   id?: string | null;
   number?: string | null;
   order_date?: string | null;
   status?: string | null;
+  comments?: MagentoOrderComment[] | null;
   items?: MagentoOrderItem[] | null;
   total?: {
     grand_total?: MagentoMoney | null;
@@ -112,11 +117,16 @@ function mapMagentoOrderItemOptions(
 }
 
 function mapMagentoCustomerOrder(order: MagentoCustomerOrder): CustomerOrder {
+  const commentMessages = (order.comments ?? [])
+    .map((comment) => comment.message?.trim() ?? "")
+    .filter(Boolean);
+
   return {
     id: order.id ?? "",
     number: order.number ?? "",
     orderDate: order.order_date ?? "",
     status: order.status ?? "unknown",
+    commentMessages,
     items: (order.items ?? []).map((item) => ({
       productName: item.product_name ?? "Product",
       quantity: item.quantity_ordered ?? 0,

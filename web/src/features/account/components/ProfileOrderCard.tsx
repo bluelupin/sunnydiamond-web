@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { Copy, Info } from "lucide-react";
 import {
   CartDivider,
-  CartPrimaryLink,
 } from "@/features/cart/components/CartFlowUi";
 import {
   DetailDarkButton,
@@ -27,9 +26,10 @@ import { ProfileMetaDivider, ProfileStatusBadge } from "./profileUi";
 
 type ProfileOrderCardProps = {
   order: ProfileOrderUi;
+  onViewDetails?: (orderNumber: string) => void;
 };
 
-export function ProfileOrderCard({ order }: ProfileOrderCardProps) {
+export function ProfileOrderCard({ order, onViewDetails }: ProfileOrderCardProps) {
   const { toast } = useToast();
   const [trackModalOpen, setTrackModalOpen] = useState(false);
   const content = profileTabsContent.orders;
@@ -38,7 +38,7 @@ export function ProfileOrderCard({ order }: ProfileOrderCardProps) {
     [order.status, order.timeline],
   );
   const mobileSubtext = getOrderMobileSubtext(order);
-  const orderDetailsHref = `/profile/orders/${encodeURIComponent(order.number)}`;
+  const handleViewDetails = () => onViewDetails?.(order.number);
 
   const handleCopyOrderId = async () => {
     try {
@@ -162,7 +162,7 @@ export function ProfileOrderCard({ order }: ProfileOrderCardProps) {
         ) : null}
 
         <div className="hidden lg:flex lg:justify-end">
-          <DetailTextLink href={orderDetailsHref} className="text-sm uppercase">
+          <DetailTextLink onClick={handleViewDetails} className="text-sm uppercase">
             {content.viewDetailsLabel}
           </DetailTextLink>
         </div>
@@ -218,9 +218,9 @@ export function ProfileOrderCard({ order }: ProfileOrderCardProps) {
             </DetailOutlineButton>
           ) : null}
 
-          <CartPrimaryLink href={orderDetailsHref} className="w-full">
+          <DetailDarkButton type="button" className="w-full" onClick={handleViewDetails}>
             {content.viewDetailsLabel}
-          </CartPrimaryLink>
+          </DetailDarkButton>
         </div>
 
         {order.footnote ? (

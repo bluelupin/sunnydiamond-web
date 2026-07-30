@@ -5,6 +5,7 @@ import Link from "next/link";
 import { profileTabsContent } from "../data/profileContent";
 import { formatOrderDate } from "../utils/formatAccountData";
 import type { ProfileOrderItemUi } from "../types/profileUi.types";
+import { ProfileOrderItemBadge } from "./profileUi";
 
 export function ProfileOrderMobileThumbnails({ items }: { items: ProfileOrderItemUi[] }) {
   const thumbnails = items.slice(0, 3);
@@ -13,6 +14,7 @@ export function ProfileOrderMobileThumbnails({ items }: { items: ProfileOrderIte
     <div className="flex gap-2 lg:hidden">
       {thumbnails.map((item) => (
         <div key={item.id} className="relative size-[100px] shrink-0 overflow-hidden bg-neutral300">
+          {item.isGift ? <ProfileOrderItemBadge label="Gift" /> : null}
           {item.productUrlKey ? (
             <Link href={`/product/${item.productUrlKey}`} className="block size-full">
               <Image

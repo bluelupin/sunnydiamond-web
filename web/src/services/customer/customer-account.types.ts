@@ -21,6 +21,8 @@ export type CustomerOrder = {
   items: CustomerOrderItem[];
   grandTotal: number;
   currency: string;
+  /** Order comment messages (used to detect gift-marked line items). */
+  commentMessages?: string[];
 };
 
 export type CustomerOrdersPage = {
