@@ -3,6 +3,7 @@
 import ProfileAppointmentsSection from "./ProfileAppointmentsSection";
 import ProfileBespokeSection from "./ProfileBespokeSection";
 import ProfileDetailsSection from "./ProfileDetailsSection";
+import ProfileDiamondsForEveryoneSection from "./ProfileDiamondsForEveryoneSection";
 import ProfileOrdersSection from "./ProfileOrdersSection";
 import ProfileAddressesSection from "./ProfileAddressesSection";
 import ProfileWishlistSection from "./ProfileWishlistSection";
@@ -34,6 +35,10 @@ const ProfileSectionContent = ({ section, customer }: ProfileSectionContentProps
 
   if (section === "appointments") {
     return <ProfileAppointmentsSection />;
+  }
+
+  if (section === "diamonds_for_everyone") {
+    return <ProfileDiamondsForEveryoneSection customer={customer} />;
   }
 
   if (section === "bespoke") {

@@ -4,6 +4,7 @@ export type ProfileSectionId =
   | "addresses"
   | "wishlist"
   | "appointments"
+  | "diamonds_for_everyone"
   | "bespoke"
   | "support";
 

@@ -27,6 +27,11 @@ export const PROFILE_SECTIONS: ProfileSection[] = [
     description: "View and book showroom visits.",
   },
   {
+    id: "diamonds_for_everyone",
+    label: "DIAMONDS FOR EVERYONE",
+    description: "View your savings plan and investment details.",
+  },
+  {
     id: "bespoke",
     label: "BESPOKE INSPIRATIONS",
     description: "Explore custom jewellery ideas and consultations.",
@@ -48,7 +53,7 @@ export const PROFILE_NAV_ITEMS: ProfileNavItem[] = [
   { kind: "section", id: "addresses", label: "MY ADDRESSES" },
   { kind: "section", id: "wishlist", label: "MY WISHLIST" },
   { kind: "section", id: "appointments", label: "MY APPOINTMENTS" },
-  { kind: "link", href: "/diamonds-for-everyone", label: "DIAMONDS FOR EVERYONE" },
+  { kind: "section", id: "diamonds_for_everyone", label: "DIAMONDS FOR EVERYONE" },
   { kind: "section", id: "bespoke", label: "BESPOKE INSPIRATIONS" },
   { kind: "section", id: "support", label: "HELP & SUPPORT" },
 ];
@@ -69,6 +74,7 @@ const PROFILE_SECTION_MOBILE_TITLES: Record<ProfileSection["id"], string> = {
   addresses: "My Addresses",
   wishlist: "My Wishlist",
   appointments: "My Appointments",
+  diamonds_for_everyone: "Diamonds for Everyone",
   bespoke: "Bespoke Inspirations",
   support: "Help & Support",
 };

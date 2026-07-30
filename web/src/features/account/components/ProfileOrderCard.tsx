@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Copy, Info } from "lucide-react";
+import { Info } from "lucide-react";
+import CopyIcon from "@/assets/Icons/CopyIcon";
 import {
   CartDivider,
 } from "@/features/cart/components/CartFlowUi";
@@ -114,7 +115,7 @@ export function ProfileOrderCard({
                 className="text-darkblack"
                 aria-label={content.copyOrderIdLabel}
               >
-                <Copy className="size-5" strokeWidth={1.5} aria-hidden />
+                <CopyIcon className="size-5" />
               </button>
             </span>
             {mobileSubtext ? (
@@ -133,7 +134,7 @@ export function ProfileOrderCard({
                   className="text-darkblack"
                   aria-label={content.copyOrderIdLabel}
                 >
-                  <Copy className="size-5" strokeWidth={1.5} aria-hidden />
+                  <CopyIcon className="size-5" />
                 </button>
               </span>
               <ProfileMetaDivider className="h-4 self-center" />

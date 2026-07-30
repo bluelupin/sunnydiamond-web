@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Copy, X } from "lucide-react";
+import { X } from "lucide-react";
+import CopyIcon from "@/assets/Icons/CopyIcon";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { trackOrder } from "@/services/customer/order-tracking.client";
 import type { TrackedOrder } from "@/services/customer/order-tracking.types";
@@ -154,7 +155,7 @@ export function ProfileOrderTrackModal({
                 className="text-darkblack"
                 aria-label={content.copyOrderIdLabel}
               >
-                <Copy className="size-5" strokeWidth={1.5} aria-hidden />
+                <CopyIcon className="size-5" />
               </button>
             </span>
           </div>

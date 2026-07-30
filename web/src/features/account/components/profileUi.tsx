@@ -129,6 +129,47 @@ export function ProfileOrderItemBadge({ label }: { label: string }) {
   );
 }
 
+export function ProfileDfeSectionCard({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex w-full flex-col gap-6 bg-gray300 p-6">
+      <h2 className="font-gill text-xl font-normal leading-110 text-darkblack">{title}</h2>
+      {children}
+    </div>
+  );
+}
+
+export function ProfileDfeReadOnlyField({
+  label,
+  value,
+  mutedLabel = false,
+  className,
+}: {
+  label: string;
+  value: string;
+  mutedLabel?: boolean;
+  className?: string;
+}) {
+  return (
+    <div className={cn("flex max-w-[508px] flex-col gap-2", className)}>
+      <p
+        className={cn(
+          "font-gill text-base font-normal leading-110",
+          mutedLabel ? "text-[#2B2B2B]" : "text-darkblack",
+        )}
+      >
+        {label}
+      </p>
+      <p className="font-gill text-base font-normal leading-110 text-darkblack">{value}</p>
+    </div>
+  );
+}
+
 export function ProfileInlineActions({
   primaryLabel,
   secondaryLabel,

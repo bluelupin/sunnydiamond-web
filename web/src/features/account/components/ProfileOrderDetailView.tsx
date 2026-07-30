@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, ChevronUp, Copy, Info } from "lucide-react";
+import { ChevronLeft, ChevronUp, Info } from "lucide-react";
+import CopyIcon from "@/assets/Icons/CopyIcon";
 import {
   DetailDarkButton,
   DetailOutlineButton,
@@ -83,7 +84,7 @@ export function ProfileOrderDetailView({ order, onBack }: ProfileOrderDetailView
                 className="text-darkblack"
                 aria-label={content.copyOrderIdLabel}
               >
-                <Copy className="size-5" strokeWidth={1.5} aria-hidden />
+                <CopyIcon className="size-5" />
               </button>
             </span>
             <ProfileMetaDivider className="hidden h-4 lg:block" />
