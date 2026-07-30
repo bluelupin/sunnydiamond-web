@@ -1,11 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Copy, X } from "lucide-react";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
-import {
-  getTrackedOrderStatusMessage,
-} from "@/features/order-tracking/utils/orderStatus";
 import { trackOrder } from "@/services/customer/order-tracking.client";
 import type { TrackedOrder } from "@/services/customer/order-tracking.types";
 import {
@@ -17,24 +14,31 @@ import { useToast } from "@/shared/hooks/use-toast";
 import { profileTabsContent } from "../data/profileContent";
 import { buildProfileOrderDetailHref } from "../utils/profileOrderNavigation";
 import type { ProfileOrderUi } from "../types/profileUi.types";
-import { formatOrderDate } from "../utils/formatAccountData";
-import {
-  formatOrderStatusLabel,
-  resolveProfileOrderTimelineSteps,
-} from "../utils/orderDeliveryTimeline.utils";
-import { ProfileOrderTimeline } from "./ProfileOrderTimeline";
-import { ProfileMetaDivider, ProfileStatusBadge } from "./profileUi";
+import { resolveProfileOrderTimelineSteps } from "../utils/orderDeliveryTimeline.utils";
+import { ProfileOrderTrackTimeline } from "./ProfileOrderTrackTimeline";
+import { ProfileStatusBadge } from "./profileUi";
 
 type ProfileOrderTrackModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   order: ProfileOrderUi;
+  onTrackedStatusChange?: (status: string) => void;
 };
+
+function resolveTrackingId(order: ProfileOrderUi, trackedOrder: TrackedOrder | null): string {
+  const shipmentTrackingNumber = trackedOrder?.shipments
+    .flatMap((shipment) => shipment.tracking)
+    .map((tracking) => tracking.number.trim())
+    .find(Boolean);
+
+  return shipmentTrackingNumber ?? order.number;
+}
 
 export function ProfileOrderTrackModal({
   open,
   onOpenChange,
   order,
+  onTrackedStatusChange,
 }: ProfileOrderTrackModalProps) {
   const { toast } = useToast();
   const content = profileTabsContent.orders;
@@ -79,25 +83,37 @@ export function ProfileOrderTrackModal({
     };
   }, [open, order.number]);
 
+  const onTrackedStatusChangeRef = useRef(onTrackedStatusChange);
+  onTrackedStatusChangeRef.current = onTrackedStatusChange;
+
+  useEffect(() => {
+    if (!trackedOrder?.status) {
+      return;
+    }
+
+    onTrackedStatusChangeRef.current?.(trackedOrder.status);
+  }, [trackedOrder?.status]);
+
   const activeStatus = trackedOrder?.status ?? order.status;
-  const statusLabel = formatOrderStatusLabel(activeStatus) || order.statusLabel;
   const timelineSteps = useMemo(
     () => resolveProfileOrderTimelineSteps(activeStatus, order.timeline),
     [activeStatus, order.timeline],
   );
-  const statusMessage = getTrackedOrderStatusMessage(activeStatus);
+  const trackingId = resolveTrackingId(order, trackedOrder);
+  const badgeLabel =
+    order.category === "in_progress" ? content.statusInProgress : order.statusLabel;
   const orderDetailsHref = buildProfileOrderDetailHref(order.number);
 
-  const handleCopyOrderId = async () => {
+  const handleCopyTrackingId = async () => {
     try {
-      await navigator.clipboard.writeText(order.number);
+      await navigator.clipboard.writeText(trackingId);
       toast({
         title: content.copyOrderIdSuccess,
       });
     } catch {
       toast({
         title: "Unable to copy",
-        description: "Please copy the order ID manually.",
+        description: "Please copy the tracking ID manually.",
       });
     }
   };
@@ -106,7 +122,7 @@ export function ProfileOrderTrackModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         hideCloseButton
-        className="max-h-[90vh] max-w-[720px] gap-6 overflow-y-auto border-neutral300 bg-white p-6 sm:rounded-none"
+        className="max-h-[90vh] max-w-[520px] gap-6 overflow-y-auto border-neutral300 bg-white p-6 sm:rounded-none"
       >
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between gap-4">
@@ -126,54 +142,33 @@ export function ProfileOrderTrackModal({
         </div>
 
         <div className="flex flex-col gap-6">
-          <ProfileStatusBadge label={statusLabel} category={order.category} />
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <ProfileStatusBadge label={badgeLabel} category={order.category} />
 
-          <div className="flex flex-col gap-2 font-gill text-base leading-110 text-darkblack">
-            <span className="inline-flex items-center gap-1 font-light">
-              {content.orderIdLabel}{" "}
-              <span className="font-normal">{order.number}</span>
+            <span className="inline-flex items-center gap-1 font-gill text-base font-light leading-110 text-darkblack">
+              {trackDialog.trackingIdLabel}{" "}
+              <span className="font-normal">{trackingId}</span>
               <button
                 type="button"
-                onClick={() => void handleCopyOrderId()}
+                onClick={() => void handleCopyTrackingId()}
                 className="text-darkblack"
                 aria-label={content.copyOrderIdLabel}
               >
                 <Copy className="size-5" strokeWidth={1.5} aria-hidden />
               </button>
             </span>
-
-            <div className="flex flex-wrap items-center gap-4">
-              <span className="font-light">
-                {content.placedOnLabel}{" "}
-                <span className="font-normal">{formatOrderDate(order.orderDate)}</span>
-              </span>
-              {order.deliveryBy ? (
-                <>
-                  <ProfileMetaDivider className="hidden h-4 sm:inline-flex" />
-                  <span className="font-light">
-                    {content.deliveryByLabel}{" "}
-                    <span className="font-normal">{formatOrderDate(order.deliveryBy)}</span>
-                  </span>
-                </>
-              ) : null}
-            </div>
           </div>
 
-          {timelineSteps.length > 0 ? (
-            <ProfileOrderTimeline
-              estimatedLabel={order.estimatedDeliveryLabel}
-              estimatedValue={order.estimatedDeliveryValue}
-              steps={timelineSteps}
-              className="border border-neutral300"
-            />
-          ) : null}
-
-          {isLoading ? (
+          {isLoading && timelineSteps.length === 0 ? (
             <div
-              className="h-20 animate-pulse bg-gray300"
+              className="h-48 animate-pulse bg-gray300"
               aria-busy="true"
               aria-label={trackDialog.loadingLabel}
             />
+          ) : null}
+
+          {timelineSteps.length > 0 ? (
+            <ProfileOrderTrackTimeline steps={timelineSteps} />
           ) : null}
 
           {error ? (
@@ -182,25 +177,16 @@ export function ProfileOrderTrackModal({
             </p>
           ) : null}
 
-          {!isLoading && !error ? (
-            <p className="font-gill text-base font-light leading-110 text-neutral500">
-              {statusMessage}
-            </p>
-          ) : null}
-
           {trackedOrder && trackedOrder.shipments.length > 0 ? (
-            <div className="border border-neutral300 bg-white p-6">
-              <h3 className="mb-4 font-gill text-xl font-normal leading-110 text-darkblack">
+            <div className="border-t border-neutral300 pt-4">
+              <h3 className="mb-3 font-gill text-base font-normal leading-110 text-darkblack">
                 {trackDialog.shipmentUpdatesTitle}
               </h3>
-              <ul className="space-y-4">
+              <ul className="space-y-3">
                 {trackedOrder.shipments.map((shipment) => (
-                  <li key={shipment.number} className="bg-gray300 p-4">
-                    <p className="font-gill text-base font-normal leading-110 text-darkblack">
-                      Shipment #{shipment.number}
-                    </p>
+                  <li key={shipment.number}>
                     {shipment.tracking.length > 0 ? (
-                      <ul className="mt-3 space-y-2">
+                      <ul className="space-y-2">
                         {shipment.tracking.map((tracking) => (
                           <li
                             key={`${shipment.number}-${tracking.number}-${tracking.title}`}
@@ -213,7 +199,7 @@ export function ProfileOrderTrackModal({
                         ))}
                       </ul>
                     ) : (
-                      <p className="mt-2 font-gill text-sm font-light leading-110 text-neutral500">
+                      <p className="font-gill text-sm font-light leading-110 text-neutral500">
                         {trackDialog.trackingPlaceholder}
                       </p>
                     )}

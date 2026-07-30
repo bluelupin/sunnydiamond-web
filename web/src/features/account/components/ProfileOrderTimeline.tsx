@@ -2,12 +2,18 @@
 
 import { cn } from "@/shared/utils/cn";
 import type { ProfileTimelineStep } from "../types/profileUi.types";
+import {
+  getProfileTimelineCompletedThroughIndex,
+  getProfileTimelineFilledThroughIndex,
+  isProfileTimelineStepActive,
+} from "../utils/orderDeliveryTimeline.utils";
 
 type ProfileOrderTimelineProps = {
   estimatedLabel?: string;
   estimatedValue?: string;
   steps?: ProfileTimelineStep[];
   className?: string;
+  variant?: "default" | "detail";
 };
 
 export function ProfileOrderTimeline({
@@ -15,19 +21,16 @@ export function ProfileOrderTimeline({
   estimatedValue,
   steps,
   className,
+  variant = "default",
 }: ProfileOrderTimelineProps) {
   if (!steps || steps.length === 0) {
     return null;
   }
 
-  const currentIndex = steps.findIndex((step) => step.status === "current");
   const filledThroughIndex =
-    currentIndex >= 0
-      ? currentIndex
-      : steps.reduce(
-          (max, step, index) => (step.status === "completed" ? index : max),
-          -1,
-        );
+    variant === "detail"
+      ? getProfileTimelineCompletedThroughIndex(steps)
+      : getProfileTimelineFilledThroughIndex(steps);
 
   return (
     <div className={cn("bg-white", className)}>
@@ -46,7 +49,7 @@ export function ProfileOrderTimeline({
 
           {filledThroughIndex > 0 && steps.length > 1 ? (
             <div
-              className="absolute left-5 top-5 h-px bg-darkblack"
+              className="absolute left-5 top-5 h-px bg-gold500"
               style={{
                 width: `calc((100% - 2.5rem) * ${filledThroughIndex / (steps.length - 1)})`,
               }}
@@ -59,6 +62,7 @@ export function ProfileOrderTimeline({
               const isCompleted = step.status === "completed";
               const isCurrent = step.status === "current";
               const isUpcoming = step.status === "upcoming";
+              const isActive = isProfileTimelineStepActive(step.status);
 
               return (
                 <li
@@ -68,17 +72,25 @@ export function ProfileOrderTimeline({
                   <span
                     className={cn(
                       "flex size-10 shrink-0 items-center justify-center rounded-full font-gill text-base font-normal leading-110",
-                      isCompleted && "bg-gold500 text-darkblack",
-                      isCurrent && "border border-darkblack bg-gray300 text-darkblack",
-                      isUpcoming && "border border-neutral300 bg-gray300 text-neutral500",
+                      variant === "detail" && isCompleted && "bg-gold500 text-white",
+                      variant === "detail" &&
+                        isCurrent &&
+                        "border border-gold500 bg-white text-darkblack",
+                      variant === "detail" &&
+                        isUpcoming &&
+                        "border border-neutral300 bg-gray300 text-neutral500",
+                      variant === "default" && isActive && "bg-gold500 text-white",
+                      variant === "default" &&
+                        isUpcoming &&
+                        "border border-neutral300 bg-gray300 text-neutral500",
                     )}
                   >
                     {step.step}
                   </span>
                   <span
                     className={cn(
-                      "text-center font-gill text-base leading-110 text-darkblack",
-                      isUpcoming ? "font-light" : "font-normal",
+                      "text-center font-gill text-base leading-110",
+                      isActive || isCurrent ? "font-normal text-darkblack" : "font-light text-neutral500",
                     )}
                   >
                     {step.label}

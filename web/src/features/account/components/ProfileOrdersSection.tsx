@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   CartOutlineButton,
@@ -9,9 +9,7 @@ import { profileTabsContent } from "../data/profileContent";
 import { useCustomerOrders } from "../hooks/useCustomerOrders";
 import type { OrderFilterKey } from "../types/profileUi.types";
 import { mapCustomerOrderToProfileUi } from "../utils/profileDisplayMappers";
-import {
-  PROFILE_ORDER_QUERY_PARAM,
-} from "../utils/profileOrderNavigation";
+import { PROFILE_ORDER_QUERY_PARAM } from "../utils/profileOrderNavigation";
 import { ProfileOrderCard } from "./ProfileOrderCard";
 import { ProfileOrderDetailPanel } from "./ProfileOrderDetailPanel";
 import { ProfileOrdersEmptyState } from "./ProfileOrdersEmptyState";
@@ -44,6 +42,7 @@ const ProfileOrdersSection = () => {
 
   const { data, isLoading, error, page, setPage } = useCustomerOrders(true);
   const [activeFilter, setActiveFilter] = useState<OrderFilterKey>("in_progress");
+  const [resolvedStatuses, setResolvedStatuses] = useState<Record<string, string>>({});
 
   const openOrderDetail = useCallback(
     (orderNumber: string) => {
@@ -62,6 +61,14 @@ const ProfileOrdersSection = () => {
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
   }, [pathname, router, searchParams]);
 
+  useEffect(() => {
+    if (!selectedOrderNumber) {
+      return;
+    }
+
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+  }, [selectedOrderNumber]);
+
   const orders = useMemo(
     () => (data?.orders ?? []).map(mapCustomerOrderToProfileUi),
     [data],
@@ -72,14 +79,18 @@ const ProfileOrdersSection = () => {
     [orders, activeFilter],
   );
 
-  if (selectedOrderNumber) {
-    return (
-      <ProfileOrderDetailPanel
-        orderNumber={selectedOrderNumber}
-        onBack={closeOrderDetail}
-      />
-    );
-  }
+  const handleTrackedStatusChange = useCallback((orderId: string, status: string) => {
+    setResolvedStatuses((current) => {
+      if (current[orderId] === status) {
+        return current;
+      }
+
+      return {
+        ...current,
+        [orderId]: status,
+      };
+    });
+  }, []);
 
   if (isLoading) {
     return <OrdersSkeleton />;
@@ -95,6 +106,22 @@ const ProfileOrdersSection = () => {
 
   if (!data || data.orders.length === 0) {
     return <ProfileOrdersEmptyState />;
+  }
+
+  if (selectedOrderNumber) {
+    const selectedOrder = orders.find((order) => order.number === selectedOrderNumber);
+
+    return (
+      <ProfileOrderDetailPanel
+        orderNumber={selectedOrderNumber}
+        onBack={closeOrderDetail}
+        onTrackedStatusChange={
+          selectedOrder
+            ? (status) => handleTrackedStatusChange(selectedOrder.id, status)
+            : undefined
+        }
+      />
+    );
   }
 
   return (
@@ -119,7 +146,11 @@ const ProfileOrdersSection = () => {
         <ul className="flex flex-col gap-4">
           {filteredOrders.map((order) => (
             <li key={order.id}>
-              <ProfileOrderCard order={order} onViewDetails={openOrderDetail} />
+              <ProfileOrderCard
+                order={order}
+                onViewDetails={openOrderDetail}
+                resolvedStatus={resolvedStatuses[order.id]}
+              />
             </li>
           ))}
         </ul>

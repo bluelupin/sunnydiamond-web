@@ -203,8 +203,8 @@ export function ProfileFilterChips<T extends string>({
             type="button"
             onClick={() => onChange(option.key)}
             className={cn(
-              "shrink-0 bg-gray300 px-4 py-2 font-gill text-base leading-110 text-darkblack transition-colors",
-              isActive ? "font-normal" : "font-light",
+              "shrink-0 px-4 py-2 font-gill text-base leading-110 text-darkblack transition-colors",
+              isActive ? "font-normal bg-lightGold" : "font-light bg-gray300",
             )}
           >
             {chipLabel}

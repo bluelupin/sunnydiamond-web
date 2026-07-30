@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Copy, Info } from "lucide-react";
 import {
   CartDivider,
@@ -27,18 +27,32 @@ import { ProfileMetaDivider, ProfileStatusBadge } from "./profileUi";
 type ProfileOrderCardProps = {
   order: ProfileOrderUi;
   onViewDetails?: (orderNumber: string) => void;
+  resolvedStatus?: string;
 };
 
-export function ProfileOrderCard({ order, onViewDetails }: ProfileOrderCardProps) {
+export function ProfileOrderCard({
+  order,
+  onViewDetails,
+  resolvedStatus,
+}: ProfileOrderCardProps) {
   const { toast } = useToast();
   const [trackModalOpen, setTrackModalOpen] = useState(false);
+  const [localResolvedStatus, setLocalResolvedStatus] = useState<string | null>(null);
   const content = profileTabsContent.orders;
+
+  useEffect(() => {
+    setLocalResolvedStatus(null);
+  }, [order.id, order.status]);
+
   const timelineSteps = useMemo(
-    () => resolveProfileOrderTimelineSteps(order.status, order.timeline),
-    [order.status, order.timeline],
+    () =>
+      resolveProfileOrderTimelineSteps(
+        resolvedStatus ?? localResolvedStatus ?? order.status,
+        order.timeline,
+      ),
+    [resolvedStatus, localResolvedStatus, order.status, order.timeline],
   );
   const mobileSubtext = getOrderMobileSubtext(order);
-  const handleViewDetails = () => onViewDetails?.(order.number);
 
   const handleCopyOrderId = async () => {
     try {
@@ -77,6 +91,10 @@ export function ProfileOrderCard({ order, onViewDetails }: ProfileOrderCardProps
 
   const handleTrackOrder = () => {
     setTrackModalOpen(true);
+  };
+
+  const handleViewDetails = () => {
+    onViewDetails?.(order.number);
   };
 
   return (
@@ -218,9 +236,9 @@ export function ProfileOrderCard({ order, onViewDetails }: ProfileOrderCardProps
             </DetailOutlineButton>
           ) : null}
 
-          <DetailDarkButton type="button" className="w-full" onClick={handleViewDetails}>
+          <DetailOutlineButton type="button" className="w-full" onClick={handleViewDetails}>
             {content.viewDetailsLabel}
-          </DetailDarkButton>
+          </DetailOutlineButton>
         </div>
 
         {order.footnote ? (
@@ -236,6 +254,7 @@ export function ProfileOrderCard({ order, onViewDetails }: ProfileOrderCardProps
       open={trackModalOpen}
       onOpenChange={setTrackModalOpen}
       order={order}
+      onTrackedStatusChange={setLocalResolvedStatus}
     />
     </>
   );

@@ -112,6 +112,7 @@ export function ProfileOrderDetailView({ order, onBack }: ProfileOrderDetailView
 
       {order.timeline && order.timeline.length > 0 ? (
         <ProfileOrderTimeline
+          variant="detail"
           estimatedLabel={order.estimatedDeliveryLabel}
           estimatedValue={order.estimatedDeliveryValue}
           steps={order.timeline}
