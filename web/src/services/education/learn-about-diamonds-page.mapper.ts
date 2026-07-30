@@ -799,11 +799,16 @@ const mapAnatomyDetail = (
       ? carouselUrls
       : null;
 
-  if (!image || !image.alt || !sections.length) return null;
+  if (!image || !sections.length) return null;
+
+  const imageAlt =
+    image.alt ||
+    cleanText(tab.tabLabel)?.replace(/_/g, " ") ||
+    "Diamond anatomy";
 
   return {
     image: image.desktopUrl,
-    imageAlt: image.alt,
+    imageAlt,
     sections,
   };
 };
