@@ -13,6 +13,11 @@ export type ApiFetchOptions = {
   signal?: AbortSignal;
   authToken?: string;
   params?: Record<string, unknown>;
+  cache?: RequestCache;
+  next?: {
+    revalidate?: number | false;
+    tags?: string[];
+  };
 };
 
 export class ApiError extends Error {
@@ -103,6 +108,8 @@ export async function apiFetch<T = unknown>(endpoint: string, options: ApiFetchO
         ? JSON.stringify(options.body)
         : (options.body as BodyInit | undefined),
     signal: options.signal,
+    cache: options.cache,
+    next: options.next,
   });
 
   if (API_DEBUG) {

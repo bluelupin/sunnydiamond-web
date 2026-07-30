@@ -23,6 +23,12 @@ export const STRAPI_ENDPOINTS = {
   customerAppointments: "api/customer/appointments",
   /** Authenticated customer saved bespoke creations. */
   customerSavedCreations: "api/customer/saved-creations",
+  careerLandingPage: "api/career-landing-page",
+  careerListingPage: "api/career-listing-page",
+  careerOpenings: "api/career-openings",
+  blogLandingPage: "api/blog-landing-page",
+  blogCategories: "api/blog-categories",
+  blogPosts: "api/blog-posts",
   /** @deprecated Legacy single-type slug — prefer split homepage endpoints */
   homepage: "homepage",
 } as const;
