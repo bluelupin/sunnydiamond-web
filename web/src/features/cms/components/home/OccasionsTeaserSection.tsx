@@ -1,23 +1,19 @@
 "use client";
 
 import { useCallback, useRef } from "react";
-import Link from "next/link";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
+import OccasionLedCard from "@/shared/ui/OccasionLedCard";
 import { useHomepageCmsPrefetched } from "@/shared/lib/providers/HomepageCmsProvider";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import { useHomepageOccasions } from "@/hooks/homepage/useHomepageOccasions";
-import ResponsiveImage from "@/shared/ui/ResponsiveImage";
-import fallBackImage from "@/assets/fallBackImage.png";
 import { isSectionActive } from "@/shared/utils/cmsSection";
-import { resolveResponsiveCmsImage } from "@/shared/utils/responsiveCmsImage";
 import { buildOccasionCardHref } from "@/features/jewellery-product/utils/occasionListing";
 import type { OccasionCard } from "@/types/homepage/occasionSection";
+import { resolveResponsiveCmsImage } from "@/shared/utils/responsiveCmsImage";
 
 interface OccasionsTeaserSectionProps {
   id?: string;
 }
-
-const DEFAULT_CTA_LABEL = "View Collection";
 
 function OccasionCardItem({
   card,
@@ -35,74 +31,21 @@ function OccasionCardItem({
     filterSlug: card.filterSlug,
     ctaUrl: card?.cta?.url || card?.cta?.to,
   });
-  const ctaLabel = card?.cta?.label?.trim() || DEFAULT_CTA_LABEL;
+  const ctaLabel = card?.cta?.label?.trim() || "View Collection";
   const description = card?.description?.trim() || card?.subtitle?.trim();
-  const imageAlt = alt || card?.title?.trim() || `${sectionTitle} — occasion ${index + 1}`;
 
   return (
-    <Link
+    <OccasionLedCard
+      title={card.title?.trim() || ""}
+      description={description}
       href={href}
-      className="group relative block h-[400px] w-[328px] shrink-0 snap-start overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2 lg:h-[700px] md:h-[500px] md:w-full md:min-w-0 md:shrink"
-    >
-      <ResponsiveImage
-        desktopSrc={desktopUrl || fallBackImage}
-        mobileSrc={mobileUrl || desktopUrl || fallBackImage}
-        alt={imageAlt}
-        width={desktopUrl ? 718 : 328}
-        height={desktopUrl ? 700 : 400}
-        quality={75}
-        className="size-full object-cover"
-      />
-
-      {/* Mobile — black to transparent over bottom 50% */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black to-transparent md:hidden"
-      />
-      {/* Desktop */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 hidden bg-gradient-to-t from-[rgba(0,0,0,0.7)] from-0% to-[rgba(0,0,0,0)] to-[53.563%] md:block"
-      />
-
-      {/* Mobile — title, description, and CTA always visible */}
-      <div className="absolute inset-x-0 bottom-0 z-10 px-4 pb-8 md:hidden">
-        <div className="flex max-w-[296px] flex-col gap-4">
-          <div className="flex flex-col md:gap-3 gap-2 text-white">
-            <h3 className="font-larken font-light leading-110 lg:text-32 md:text-3xl text-2xl">
-              {card.title}
-            </h3>
-            {description ? (
-              <p className="font-gill font-light leading-[120%] tracking-[0%] lg:text-xl md:text-lg text-base">
-                {description}
-              </p>
-            ) : null}
-          </div>
-          <span className="text-link-underline inline-flex w-fit items-center justify-center border-b-[1.5px] border-white pb-1.5 font-gill text-sm font-normal uppercase tracking-[0.28px] text-white">
-            {ctaLabel}
-          </span>
-        </div>
-      </div>
-
-      {/* Desktop — same hover reveal as CollectionHeroPanel */}
-      <div className="absolute bottom-0 left-10 z-10 hidden max-w-[418px] flex-col-reverse items-start text-white md:flex">
-        <div className="inline-flex max-h-0 w-fit flex-col items-start overflow-hidden pb-0 pt-0 opacity-0 motion-safe:transition-[max-height,padding,opacity] motion-safe:duration-500 motion-safe:ease-out group-hover:max-h-[72px] group-hover:pb-16 group-hover:opacity-100 group-focus-visible:max-h-[72px] group-focus-visible:pb-16 group-focus-visible:opacity-100">
-          <div className="relative after:bg-white after:absolute after:h-0.5 after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-white hover:border-white sm:pb-1 font-gill text-sm font-normal uppercase leading-110 text-white hover:text-white">
-            {ctaLabel}
-          </div>
-        </div>
-        <div className="mb-16 group-hover:mb-6 flex w-full max-w-[418px] flex-col items-start gap-2 lg:gap-3">
-          <h3 className="whitespace-nowrap font-larken text-32 font-light leading-none md:text-2xl lg:text-32">
-            {card.title}
-          </h3>
-          {description ? (
-            <p className="font-gill text-base font-light leading-[120%] tracking-[1%] md:text-lg lg:text-xl">
-              {description}
-            </p>
-          ) : null}
-        </div>
-      </div>
-    </Link>
+      ctaLabel={ctaLabel}
+      desktopImageUrl={desktopUrl}
+      mobileImageUrl={mobileUrl}
+      imageAlt={alt || card?.title?.trim()}
+      index={index}
+      sectionTitle={sectionTitle}
+    />
   );
 }
 

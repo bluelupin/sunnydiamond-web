@@ -132,7 +132,7 @@ export const giftingPageContent = {
       {
         id: "engraving",
         title: "Engraving",
-        description: "Add a heartfelt note to your gift and express to them",
+        description: "Engrave your story for a personal touch",
         image: {
           src: `${GIFTING_IMAGE_BASE}/finishing-engraving.png`,
           alt: "Engraved diamond ring",
@@ -158,4 +158,19 @@ export const giftingPageContent = {
       },
     ],
   },
+  /** Figma node 1049:51078 */
+  guarantees: [
+    {
+      iconSrc: `${GIFTING_IMAGE_BASE}/guarantees/flawless-diamond.svg`,
+      label: "Internally Flawless Diamond",
+    },
+    {
+      iconSrc: `${GIFTING_IMAGE_BASE}/guarantees/brand-quality.svg`,
+      label: "Brand Assured Quality",
+    },
+    {
+      iconSrc: `${GIFTING_IMAGE_BASE}/guarantees/certificate.svg`,
+      label: "Certifications of Diamond",
+    },
+  ],
 } as const;

@@ -1,5 +1,8 @@
+import { Suspense } from "react";
+import GiftingDiscoverOptionsLoader from "./GiftingDiscoverOptionsLoader";
 import GiftingDiscoverSection from "./GiftingDiscoverSection";
 import GiftingGiftCardSection from "./GiftingGiftCardSection";
+import GiftingGuaranteesSection from "./GiftingGuaranteesSection";
 import GiftingIntroSection from "./GiftingIntroSection";
 import GiftingOccasionSection from "./GiftingOccasionSection";
 import GiftingProductListSection from "./GiftingProductListSection";
@@ -13,9 +16,12 @@ const GiftingPage = () => {
       <GiftingWithLoveSection />
       <GiftingOccasionSection />
       <GiftingProductListSection />
-      <GiftingDiscoverSection />
+      <Suspense fallback={<GiftingDiscoverSection />}>
+        <GiftingDiscoverOptionsLoader />
+      </Suspense>
       <GiftingGiftCardSection />
       <GiftingPromiseSection />
+      <GiftingGuaranteesSection />
     </>
   );
 };

@@ -18,6 +18,10 @@ import {
 } from "../utils/jewelleryRoutes";
 import { resolveOccasionFacetOption } from "../utils/occasionListing";
 import {
+  applyGiftFinderPriceToFilterState,
+  parseGiftFinderPriceParam,
+} from "@/features/gifting/utils/giftFinderRoutes";
+import {
   markJewelleryPlpNavigation,
   reportJewelleryPlpFirstGridPaint,
   reportJewelleryPlpProductsReady,
@@ -52,6 +56,8 @@ const JewelleryProductPage = ({
   const categoryFromQuery = parseJewelleryCategorySlug(searchParams?.get("category") ?? null);
   const categoryFromUrl = categoryFromPath ?? categoryFromQuery ?? "all";
   const occasionSlug = searchParams?.get("occasion");
+  const minPriceFromUrl = parseGiftFinderPriceParam(searchParams?.get("minPrice"));
+  const maxPriceFromUrl = parseGiftFinderPriceParam(searchParams?.get("maxPrice"));
 
   const [activeCategory, setActiveCategory] = useState<JewelleryCategorySlug>(categoryFromUrl);
   const [sortValue, setSortValue] = useState(DEFAULT_JEWELLERY_LISTING_SORT);
@@ -60,6 +66,7 @@ const JewelleryProductPage = ({
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const facetsSyncedRef = useRef(false);
   const lastOccasionSlugRef = useRef<string | null>(null);
+  const lastPriceParamsRef = useRef<string | null>(null);
   const plpTtfbReportedRef = useRef(false);
   const plpPrefetchReportedRef = useRef(false);
   const { isWishlisted, toggleWishlist } = useWishlist();
@@ -140,38 +147,37 @@ const JewelleryProductPage = ({
     const occasionChanged = lastOccasionSlugRef.current !== (occasionSlug ?? null);
     lastOccasionSlugRef.current = occasionSlug ?? null;
 
-    const nextDraft = createDefaultFilterState(facets);
-    if (occasionOption) {
-      nextDraft.occasion = occasionOption.value;
-    }
+    const priceParamsKey = `${minPriceFromUrl}|${maxPriceFromUrl}`;
+    const priceParamsChanged = lastPriceParamsRef.current !== priceParamsKey;
+    lastPriceParamsRef.current = priceParamsKey;
+
+    const buildFiltersFromUrl = () => {
+      let nextDraft = createDefaultFilterState(facets);
+      if (occasionOption) {
+        nextDraft.occasion = occasionOption.value;
+      }
+      return applyGiftFinderPriceToFilterState(
+        nextDraft,
+        facets,
+        minPriceFromUrl,
+        maxPriceFromUrl,
+      );
+    };
 
     if (!facetsSyncedRef.current) {
       facetsSyncedRef.current = true;
-      setDraftFilters(nextDraft);
-      if (occasionOption) {
-        setFilters((current) =>
-          current.occasion === occasionOption.value
-            ? current
-            : { ...current, occasion: occasionOption.value },
-        );
-      }
-      return;
-    }
-
-    if (occasionChanged) {
+      const nextDraft = buildFiltersFromUrl();
       setDraftFilters(nextDraft);
       setFilters(nextDraft);
       return;
     }
 
-    if (occasionOption) {
-      setFilters((current) =>
-        current.occasion === occasionOption.value
-          ? current
-          : { ...current, occasion: occasionOption.value },
-      );
+    if (occasionChanged || priceParamsChanged) {
+      const nextDraft = buildFiltersFromUrl();
+      setDraftFilters(nextDraft);
+      setFilters(nextDraft);
     }
-  }, [facets, occasionSlug]);
+  }, [facets, occasionSlug, minPriceFromUrl, maxPriceFromUrl]);
 
   const handleCategoryChange = useCallback(
     (category: JewelleryCategory) => {

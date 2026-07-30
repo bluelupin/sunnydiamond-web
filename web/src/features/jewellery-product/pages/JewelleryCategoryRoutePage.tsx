@@ -14,12 +14,13 @@ import JewelleryProductPage from "@/features/jewellery-product/components/Jewell
 import {
   isJewelleryCategoryUrlKey,
 } from "@/features/jewellery-product/utils/jewelleryRoutes";
+import { hasGiftFinderSearchParams } from "@/features/gifting/utils/giftFinderRoutes";
 import JsonLd from "@/shared/lib/seo/JsonLd";
 import { resolveImageSrcString } from "@/shared/utils/image";
 
 type JewelleryCategoryRoutePageProps = {
   params: Promise<{ categoryUrl: string }>;
-  searchParams: Promise<{ occasion?: string; category?: string }>;
+  searchParams: Promise<{ occasion?: string; category?: string; minPrice?: string; maxPrice?: string }>;
 };
 
 export async function generateJewelleryCategoryMetadata({
@@ -45,7 +46,7 @@ export async function generateJewelleryCategoryMetadata({
     canonicalPath,
     keywords,
     ...(image ? { image } : {}),
-    noIndex: Boolean(query.occasion || query.category),
+    noIndex: hasGiftFinderSearchParams(query) || Boolean(query.category),
   });
 }
 
@@ -61,7 +62,9 @@ export async function JewelleryCategoryRoutePage({
   }
 
   const [initialListing, page, nav] = await Promise.all([
-    query.occasion ? Promise.resolve(undefined) : prefetchJewelleryListing(categoryUrlKey),
+    hasGiftFinderSearchParams(query)
+      ? Promise.resolve(undefined)
+      : prefetchJewelleryListing(categoryUrlKey),
     getProductLandingPage(),
     getMagentoJewelleryNavCategories(),
   ]);

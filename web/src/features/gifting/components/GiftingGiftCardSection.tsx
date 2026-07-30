@@ -12,9 +12,9 @@ const GiftingGiftCardSection = () => {
     <section
       id="gift-card"
       aria-labelledby="gifting-gift-card-title"
-      className="relative left-1/2 w-screen max-w-none -translate-x-1/2 overflow-hidden"
+      className="relative z-0 left-1/2 w-screen max-w-none -translate-x-1/2 overflow-hidden"
     >
-      <div className="relative min-h-[475px] w-full pb-8 md:h-[520px] md:pb-0">
+      <div className="relative z-0 min-h-[475px] w-full pb-8 md:h-[520px] md:pb-0">
         <Image
           src={giftCard.background.src}
           alt={giftCard.background.alt}
@@ -56,17 +56,20 @@ const GiftingGiftCardSection = () => {
               </Link>
             </Reveal>
           </div>
-
-          <Reveal direction="up" className="relative h-[240px] w-full max-w-[400px] md:absolute md:bottom-0 md:right-10 md:h-[527px] md:w-[791px] md:max-w-none">
-            <Image
-              src={giftCard.image.src}
-              alt={giftCard.image.alt}
-              fill
-              className="object-contain object-center md:object-right-bottom"
-              sizes="(max-width: 768px) 100vw, 791px"
-            />
-          </Reveal>
         </div>
+
+        <Reveal
+          direction="up"
+          className="relative mx-auto mt-6 h-[240px] w-full max-w-[400px] px-4 md:absolute md:bottom-0 md:right-0 md:mt-0 md:h-[527px] md:w-[791px] md:max-w-none md:px-0"
+        >
+          <Image
+            src={giftCard.image.src}
+            alt={giftCard.image.alt}
+            fill
+            className="object-contain object-center md:object-right-bottom"
+            sizes="(max-width: 768px) 100vw, 791px"
+          />
+        </Reveal>
       </div>
     </section>
   );

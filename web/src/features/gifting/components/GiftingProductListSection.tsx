@@ -1,59 +1,54 @@
 "use client";
 
 import { useMemo } from "react";
-import Reveal from "@/shared/Animation/Reveal";
 import FeaturedProductsCarousel from "@/features/cms/components/home/FeaturedProductsCarousel";
-import JewelleryProductGridSkeleton from "@/features/jewellery-product/components/skeletons/JewelleryProductGridSkeleton";
+import {
+  FeaturedCarouselSkeleton,
+  FeaturedProductsHeader,
+} from "@/features/cms/components/home/FeaturedProductsSection";
 import { useMagentoTrendingProducts } from "@/hooks/magento/useMagentoTrendingProducts";
 import { mapJewelleryListingToFeaturedCarouselItems } from "@/services/magento/products/trendingProducts.service";
 import { giftingPageContent } from "../data/content";
-
-const PRODUCT_LIMIT = 9;
 
 const GiftingProductListSection = () => {
   const { products: section } = giftingPageContent;
   const { data: trendingProducts, isLoading } = useMagentoTrendingProducts();
 
   const items = useMemo(
-    () => mapJewelleryListingToFeaturedCarouselItems((trendingProducts ?? []).slice(0, PRODUCT_LIMIT)),
+    () => mapJewelleryListingToFeaturedCarouselItems(trendingProducts ?? []),
     [trendingProducts],
   );
+
+  const isCarouselLoading = isLoading && items.length === 0;
+
+  if (!isCarouselLoading && items.length === 0) {
+    return null;
+  }
 
   return (
     <section
       id="gifting-products"
       aria-labelledby="gifting-products-title"
-      className="px-4 py-16 md:px-10 md:py-100"
+      className="overflow-x-clip px-0 py-16 md:py-104"
+      aria-label={section.title}
+      aria-busy={isCarouselLoading}
     >
-      <div className="mx-auto flex w-full max-w-1440 flex-col items-center gap-10">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <Reveal
-            as="h2"
-            id="gifting-products-title"
-            direction="up"
-            className="font-larken text-5xl font-light leading-110 text-darkblack"
-          >
-            {section.title}
-          </Reveal>
-          <Reveal
-            as="p"
-            direction="up"
-            className="font-gill text-xl font-light leading-110 text-neutral500"
-          >
-            {section.description}
-          </Reveal>
-        </div>
-
-        {isLoading && items.length === 0 ? (
-          <JewelleryProductGridSkeleton count={3} />
-        ) : items.length > 0 ? (
+      <div className="flex w-full max-w-full flex-col items-center gap-10 overflow-x-clip">
+        <FeaturedProductsHeader
+          titleId="gifting-products-title"
+          title={section.title}
+          description={section.description}
+        />
+        {isCarouselLoading ? (
+          <FeaturedCarouselSkeleton />
+        ) : (
           <FeaturedProductsCarousel
             items={items}
             ctaLabel={section.ctaLabel}
             sectionLabel={section.title}
-            showCta={false}
+            showCta={Boolean(section.ctaLabel)}
           />
-        ) : null}
+        )}
       </div>
     </section>
   );
