@@ -3,7 +3,8 @@ import type {
   CustomerOrderItem,
   CustomerOrderItemOption,
 } from "@/services/customer/customer-account.types";
-import { isGiftMarkedOrderItem } from "./orderGiftDetection.utils";
+import type { OrderGiftMetadata } from "./orderGiftDetection.utils";
+import { isOrderItemGiftMarked } from "./orderGiftDetection.utils";
 
 function normalizeKey(text: string): string {
   return text.trim().toLowerCase();
@@ -45,7 +46,7 @@ function detectBespoke(item: CustomerOrderItem, options: CustomerOrderItemOption
 
 export function mapCustomerOrderItemToDisplayFields(
   item: CustomerOrderItem,
-  giftedProductNames?: Set<string>,
+  giftMetadata?: OrderGiftMetadata,
 ) {
   const options = getAllOptions(item);
   const size = findOptionValue(options, ["ring size", "size"]);
@@ -55,7 +56,12 @@ export function mapCustomerOrderItemToDisplayFields(
   return {
     size,
     metal,
-    isGift: isGiftMarkedOrderItem(item.productName, options, giftedProductNames),
+    isGift: isOrderItemGiftMarked(
+      giftMetadata,
+      item.productName,
+      item.productSku,
+      options,
+    ),
     isBespoke: detectBespoke(item, options),
   };
 }

@@ -14,7 +14,7 @@ import {
   formatAppointmentDate,
   formatOrderDate,
 } from "./formatAccountData";
-import { parseGiftMarkedProductNamesFromComments } from "./orderGiftDetection.utils";
+import { parseOrderGiftMetadataFromComments } from "./orderGiftDetection.utils";
 import { mapCustomerOrderItemToDisplayFields } from "./orderItemDisplay.mapper";
 import {
   buildOrderDeliveryTimelineFromStatus,
@@ -103,12 +103,10 @@ function mapAppointmentAddressToUi(
 }
 
 function mapOrderItems(order: CustomerOrder): ProfileOrderItemUi[] {
-  const giftedProductNames = parseGiftMarkedProductNamesFromComments(
-    order.commentMessages ?? [],
-  );
+  const giftMetadata = parseOrderGiftMetadataFromComments(order.commentMessages ?? []);
 
   return order.items.map((item, index) => {
-    const display = mapCustomerOrderItemToDisplayFields(item, giftedProductNames);
+    const display = mapCustomerOrderItemToDisplayFields(item, giftMetadata);
     const imageUrl = item.imageUrl?.trim() || null;
 
     return {

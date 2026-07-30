@@ -135,16 +135,18 @@ const CheckoutPage = () => {
       wasAuthenticated: boolean;
       guestOtp: string | null;
     }) => {
-      void fetch("/api/magento/orders/line-metadata", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderNumber: input.orderNumber,
-          items: input.orderItems,
-        }),
-      }).catch(() => {
+      try {
+        await fetch("/api/magento/orders/line-metadata", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderNumber: input.orderNumber,
+            items: input.orderItems,
+          }),
+        });
+      } catch {
         // Order placement already succeeded; metadata attachment is best-effort.
-      });
+      }
 
       trackEvent("purchase", {
         currency: "INR",

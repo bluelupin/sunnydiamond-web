@@ -31,7 +31,74 @@ function isGiftOptionLabel(label: string): boolean {
   );
 }
 
-const LINE_METADATA_LINE_PATTERN = /^-\s+(.+?)\s+\([^)]+\):\s*(.+)$/;
+const LINE_METADATA_LINE_PATTERN = /^-\s+(.+?)\s+\(([^)]+)\):\s*(.+)$/;
+const GIFT_NOTE_PATTERN = /Gift note:\s*"([^"]+)"/i;
+
+export type OrderGiftMetadata = {
+  giftedProductNames: Set<string>;
+  giftedProductSkus: Set<string>;
+  giftNotes: Map<string, string>;
+};
+
+const EMPTY_GIFT_METADATA: OrderGiftMetadata = {
+  giftedProductNames: new Set(),
+  giftedProductSkus: new Set(),
+  giftNotes: new Map(),
+};
+
+function isGiftDetails(details: string): boolean {
+  return details.includes("Gift wrap: Yes") || normalizeKey(details).includes("gift wrap");
+}
+
+function storeGiftNote(
+  notes: Map<string, string>,
+  keys: string[],
+  note: string,
+): void {
+  for (const key of keys) {
+    const normalized = normalizeKey(key);
+    if (normalized) {
+      notes.set(normalized, note);
+    }
+  }
+}
+
+export function parseOrderGiftMetadataFromComments(comments: string[]): OrderGiftMetadata {
+  const giftedProductNames = new Set<string>();
+  const giftedProductSkus = new Set<string>();
+  const giftNotes = new Map<string, string>();
+
+  for (const comment of comments) {
+    for (const line of comment.split("\n")) {
+      const trimmed = line.trim();
+      if (!trimmed.startsWith("- ")) {
+        continue;
+      }
+
+      const match = trimmed.match(LINE_METADATA_LINE_PATTERN);
+      if (!match) {
+        continue;
+      }
+
+      const productName = match[1].trim();
+      const productIdentifier = match[2].trim();
+      const details = match[3];
+      const keys = [productName, productIdentifier];
+
+      if (isGiftDetails(details)) {
+        giftedProductNames.add(normalizeKey(productName));
+        giftedProductSkus.add(normalizeKey(productIdentifier));
+      }
+
+      const noteMatch = details.match(GIFT_NOTE_PATTERN);
+      if (noteMatch?.[1]?.trim()) {
+        storeGiftNote(giftNotes, keys, noteMatch[1].trim());
+      }
+    }
+  }
+
+  return { giftedProductNames, giftedProductSkus, giftNotes };
+}
 
 export function detectGiftFromOrderItemOptions(options: CustomerOrderItemOption[]): boolean {
   return options.some((option) => {
@@ -51,73 +118,73 @@ export function detectGiftFromOrderItemOptions(options: CustomerOrderItemOption[
 }
 
 export function parseGiftMarkedProductNamesFromComments(comments: string[]): Set<string> {
-  const giftedNames = new Set<string>();
-
-  for (const comment of comments) {
-    for (const line of comment.split("\n")) {
-      const trimmed = line.trim();
-      if (!trimmed.startsWith("- ")) {
-        continue;
-      }
-
-      const match = trimmed.match(LINE_METADATA_LINE_PATTERN);
-      if (!match) {
-        continue;
-      }
-
-      const productName = match[1].trim();
-      const details = match[2];
-
-      if (
-        details.includes("Gift wrap: Yes") ||
-        normalizeKey(details).includes("gift wrap")
-      ) {
-        giftedNames.add(normalizeKey(productName));
-      }
-    }
-  }
-
-  return giftedNames;
+  return parseOrderGiftMetadataFromComments(comments).giftedProductNames;
 }
 
-const GIFT_NOTE_PATTERN = /Gift note:\s*"([^"]+)"/i;
-
 export function parseGiftNotesFromComments(comments: string[]): Map<string, string> {
-  const notes = new Map<string, string>();
+  return parseOrderGiftMetadataFromComments(comments).giftNotes;
+}
 
-  for (const comment of comments) {
-    for (const line of comment.split("\n")) {
-      const trimmed = line.trim();
-      if (!trimmed.startsWith("- ")) {
-        continue;
-      }
+export function getOrderItemGiftNote(
+  metadata: OrderGiftMetadata | undefined,
+  productName: string,
+  productSku?: string | null,
+): string | undefined {
+  if (!metadata) {
+    return undefined;
+  }
 
-      const match = trimmed.match(LINE_METADATA_LINE_PATTERN);
-      if (!match) {
-        continue;
-      }
-
-      const productName = match[1].trim();
-      const details = match[2];
-      const noteMatch = details.match(GIFT_NOTE_PATTERN);
-
-      if (noteMatch?.[1]?.trim()) {
-        notes.set(normalizeKey(productName), noteMatch[1].trim());
-      }
+  const sku = productSku?.trim();
+  if (sku) {
+    const noteBySku = metadata.giftNotes.get(normalizeKey(sku));
+    if (noteBySku) {
+      return noteBySku;
     }
   }
 
-  return notes;
+  return metadata.giftNotes.get(normalizeKey(productName));
+}
+
+export function isOrderItemGiftMarked(
+  metadata: OrderGiftMetadata | undefined,
+  productName: string,
+  productSku?: string | null,
+  options: CustomerOrderItemOption[] = [],
+): boolean {
+  if (detectGiftFromOrderItemOptions(options)) {
+    return true;
+  }
+
+  if (!metadata) {
+    return false;
+  }
+
+  if (metadata.giftedProductNames.has(normalizeKey(productName))) {
+    return true;
+  }
+
+  const sku = productSku?.trim();
+  if (sku && metadata.giftedProductSkus.has(normalizeKey(sku))) {
+    return true;
+  }
+
+  return false;
 }
 
 export function isGiftMarkedOrderItem(
   productName: string,
   options: CustomerOrderItemOption[],
   giftedProductNames?: Set<string>,
+  productSku?: string | null,
 ): boolean {
-  if (detectGiftFromOrderItemOptions(options)) {
-    return true;
-  }
+  const metadata =
+    giftedProductNames
+      ? {
+          giftedProductNames,
+          giftedProductSkus: new Set<string>(),
+          giftNotes: new Map<string, string>(),
+        }
+      : EMPTY_GIFT_METADATA;
 
-  return giftedProductNames?.has(normalizeKey(productName)) ?? false;
+  return isOrderItemGiftMarked(metadata, productName, productSku, options);
 }

@@ -13,6 +13,16 @@ type MagentoOrderSearchResponse = {
   }>;
 };
 
+type MagentoOrderStatusHistory = {
+  comment?: string | null;
+};
+
+type MagentoOrderDetailResponse = {
+  status_histories?: MagentoOrderStatusHistory[] | null;
+};
+
+const STOREFRONT_LINE_METADATA_MARKER = "Storefront line options:";
+
 function formatLineMetadataComment(items: CartLineItem[]): string {
   const lines = items.map((item) => {
     const parts: string[] = [];
@@ -124,7 +134,7 @@ export async function attachLineMetadataToMagentoOrder(
         statusHistory: {
           comment: formatLineMetadataComment(items),
           is_customer_notified: 0,
-          is_visible_on_front: 0,
+          is_visible_on_front: 1,
           parent_id: order.entityId,
           status: order.status,
         },
@@ -138,4 +148,51 @@ export async function attachLineMetadataToMagentoOrder(
   }
 
   return true;
+}
+
+function isStorefrontLineMetadataComment(comment: string): boolean {
+  return (
+    comment.includes(STOREFRONT_LINE_METADATA_MARKER) || comment.includes("Gift wrap: Yes")
+  );
+}
+
+export async function fetchStorefrontLineMetadataComments(
+  orderNumber: string,
+): Promise<string[]> {
+  const token = getMagentoIntegrationAccessToken();
+  if (!token) {
+    return [];
+  }
+
+  try {
+    const order = await findMagentoOrderEntityId(orderNumber);
+    if (!order) {
+      return [];
+    }
+
+    const response = await fetch(
+      `${getMagentoRestBaseUrl()}/rest/V1/orders/${order.entityId}`,
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+          Store: MAGENTO_DEFAULT_STORE_CODE,
+        },
+        cache: "no-store",
+      },
+    );
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const json = (await response.json()) as MagentoOrderDetailResponse;
+
+    return (json.status_histories ?? [])
+      .map((entry) => entry.comment?.trim() ?? "")
+      .filter(isStorefrontLineMetadataComment);
+  } catch {
+    return [];
+  }
 }
