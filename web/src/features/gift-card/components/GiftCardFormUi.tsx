@@ -36,8 +36,7 @@ export const GiftCardTextField = ({
     <label className={giftCardFieldLabelClass} htmlFor={id}>{label}</label>
     <div
       className={cn(
-        "flex h-14 items-center bg-gray200 p-3",
-        focused && "border border-darkblack",
+        "flex h-14 items-center bg-gray200 p-3 focus-within:border focus-within:border-darkblack",
       )}
     >
       <input
@@ -58,7 +57,6 @@ type GiftCardPhoneFieldProps = {
   label: string;
   value: string;
   onChange: (value: string) => void;
-  focused?: boolean;
 };
 
 export const GiftCardPhoneField = ({
@@ -66,14 +64,12 @@ export const GiftCardPhoneField = ({
   label,
   value,
   onChange,
-  focused = false,
 }: GiftCardPhoneFieldProps) => (
   <div className="flex flex-col gap-2">
     <label className={giftCardFieldLabelClass} htmlFor={id}>{label}</label>
     <div
       className={cn(
-        "flex h-14 items-center gap-2 bg-gray200 p-3",
-        focused && "border border-darkblack",
+        "flex h-14 items-center gap-2 bg-gray200 p-3 focus-within:border focus-within:border-darkblack",
       )}
     >
       <div className="flex shrink-0 items-center gap-2">

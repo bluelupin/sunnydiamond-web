@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { CartPrimaryButton } from "@/features/cart/components/CartFlowUi";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { cn } from "@/shared/utils/cn";
@@ -13,15 +12,17 @@ import {
   giftCardSectionHeadingClass,
 } from "./GiftCardFormUi";
 
-const GiftCardDetailsStep = ({ onClose }: { onClose: () => void }) => {
-  const router = useRouter();
+const GiftCardDetailsStep = () => {
   const {
+    cardType,
     sender,
     receiver,
     receiverSameAsSender,
     setSender,
     setReceiver,
     setReceiverSameAsSender,
+    goToAddress,
+    completeOrder,
   } = useGiftCardFlow();
 
   const { details, cta } = giftCardFlowContent;
@@ -34,8 +35,11 @@ const GiftCardDetailsStep = ({ onClose }: { onClose: () => void }) => {
 
   const handleContinue = () => {
     if (!canContinue) return;
-    onClose();
-    router.push("/checkout");
+    if (cardType === "physical") {
+      goToAddress();
+      return;
+    }
+    completeOrder();
   };
 
   return (
@@ -55,7 +59,6 @@ const GiftCardDetailsStep = ({ onClose }: { onClose: () => void }) => {
             label={details.phoneLabel}
             value={sender.phone}
             onChange={(value) => setSender({ phone: value })}
-            focused={sender.phone.length > 0}
           />
           <GiftCardTextField
             id="gift-card-sender-email"

@@ -1,4 +1,4 @@
-/** Figma nodes 1049:49593, 1049:49826, 1049:50059 */
+/** Figma nodes 1049:49593, 1049:49826, 1049:50059, delivery & success screens */
 export const giftCardFlowContent = {
   title: "Gift Card",
   cardTypes: {
@@ -37,6 +37,34 @@ export const giftCardFlowContent = {
     phoneLabel: "Phone No.*",
     emailLabel: "Email ID",
     placeholder: "Enter",
+  },
+  address: {
+    useCurrentLocationLabel: "USE CURRENT LOCATION",
+    detectingLocationLabel: "DETECTING LOCATION...",
+    heading: "Delivery Address",
+    addressLine1Label: "Address line 1",
+    addressLine2Label: "Address Line 2 (Optional)",
+    pincodeLabel: "Pin code",
+    cityLabel: "City",
+    stateLabel: "State",
+    placeholder: "Enter",
+    invalidPincodeError: "Invalid Pincode",
+    estimatedDeliveryPrefix: "Estimated order delivery by",
+    payNowLabel: "PAY NOW",
+  },
+  success: {
+    title: "Gift Card Confirmed",
+    physicalMessage:
+      "Your physical gift card order has been placed and will be delivered to the recipient by",
+    digitalMessage:
+      "Your digital gift card has been sent to the recipient and will be available shortly.",
+    image: {
+      src: "/images/gifting/gift-cards.png",
+      alt: "Sunny Diamonds gift card",
+    },
+    trackOrderLabel: "TRACK ORDER",
+    backToShoppingLabel: "GO BACK TO SHOPPING",
+    backToShoppingHref: "/jewellery",
   },
   cta: {
     addDetails: "ADD DETAILS",
