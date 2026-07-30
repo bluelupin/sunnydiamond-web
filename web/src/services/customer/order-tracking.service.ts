@@ -1,4 +1,5 @@
 import { magentoGraphqlFetch } from "@/services/magento/graphqlClient";
+import { fetchStorefrontLineMetadataComments } from "@/services/magento/orders/orderLineMetadata.service";
 import {
   MAGENTO_CUSTOMER_ORDER_BY_NUMBER_QUERY,
   MAGENTO_GUEST_ORDER_QUERY,
@@ -8,7 +9,28 @@ import {
   type MagentoCustomerOrderByNumberResponse,
   type MagentoGuestOrderResponse,
 } from "./order-tracking.mapper";
-import type { GuestOrderLookupInput, TrackedOrder } from "./order-tracking.types";
+import type { GuestOrderLookupInput, TrackedOrder, TrackedOrderComment } from "./order-tracking.types";
+
+async function enrichTrackedOrderComments(order: TrackedOrder): Promise<TrackedOrder> {
+  const storefrontComments = await fetchStorefrontLineMetadataComments(order.number);
+  if (storefrontComments.length === 0) {
+    return order;
+  }
+
+  const existingMessages = new Set(order.comments.map((comment) => comment.message));
+  const additional: TrackedOrderComment[] = storefrontComments
+    .filter((message) => !existingMessages.has(message))
+    .map((message) => ({ message, timestamp: null }));
+
+  if (additional.length === 0) {
+    return order;
+  }
+
+  return {
+    ...order,
+    comments: [...order.comments, ...additional],
+  };
+}
 
 export async function fetchCustomerOrderByNumber(
   authToken: string,
@@ -25,7 +47,13 @@ export async function fetchCustomerOrderByNumber(
   });
 
   const order = data.customer?.orders?.items?.[0];
-  return order ? mapMagentoOrderDetail(order) : null;
+  const mapped = order ? mapMagentoOrderDetail(order) : null;
+
+  if (!mapped) {
+    return null;
+  }
+
+  return enrichTrackedOrderComments(mapped);
 }
 
 export async function fetchGuestOrder(input: GuestOrderLookupInput): Promise<TrackedOrder | null> {
@@ -41,5 +69,14 @@ export async function fetchGuestOrder(input: GuestOrderLookupInput): Promise<Tra
     cache: "no-store",
   });
 
-  return data.guestOrder ? mapMagentoOrderDetail(data.guestOrder) : null;
+  if (!data.guestOrder) {
+    return null;
+  }
+
+  const mapped = mapMagentoOrderDetail(data.guestOrder);
+  if (!mapped) {
+    return null;
+  }
+
+  return enrichTrackedOrderComments(mapped);
 }

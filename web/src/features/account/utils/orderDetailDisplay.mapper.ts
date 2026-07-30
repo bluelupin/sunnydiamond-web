@@ -8,8 +8,8 @@ import type {
 import { formatOrderDate } from "./formatAccountData";
 import { mapCustomerOrderItemToDisplayFields } from "./orderItemDisplay.mapper";
 import {
-  parseGiftMarkedProductNamesFromComments,
-  parseGiftNotesFromComments,
+  getOrderItemGiftNote,
+  parseOrderGiftMetadataFromComments,
 } from "./orderGiftDetection.utils";
 import {
   buildOrderDeliveryTimelineFromStatus,
@@ -19,10 +19,6 @@ import { categorizeOrderStatus } from "./profileDisplayMappers";
 
 const PLACEHOLDER_RING_IMAGE = "/images/jewellery/plp/product-ring-transparent.png";
 const ordersContent = profileTabsContent.orders;
-
-function normalizeKey(text: string): string {
-  return text.trim().toLowerCase();
-}
 
 function trackedItemToMapperInput(item: TrackedOrderItem) {
   return {
@@ -60,16 +56,15 @@ function mapDetailItems(
   imageBySku: Record<string, string>,
 ): ProfileOrderDetailItemUi[] {
   const commentMessages = order.comments.map((comment) => comment.message);
-  const giftedProductNames = parseGiftMarkedProductNamesFromComments(commentMessages);
-  const giftNotes = parseGiftNotesFromComments(commentMessages);
+  const giftMetadata = parseOrderGiftMetadataFromComments(commentMessages);
 
   return order.items.map((item, index) => {
     const mapperInput = trackedItemToMapperInput(item);
-    const display = mapCustomerOrderItemToDisplayFields(mapperInput, giftedProductNames);
+    const display = mapCustomerOrderItemToDisplayFields(mapperInput, giftMetadata);
     const sku = item.productSku?.trim();
     const imageFromSku = sku ? imageBySku[sku] : undefined;
     const imageUrl = imageFromSku?.trim() || null;
-    const giftNote = giftNotes.get(normalizeKey(item.productName));
+    const giftNote = getOrderItemGiftNote(giftMetadata, item.productName, item.productSku);
 
     return {
       id: `${order.id}-${item.productSku ?? index}`,

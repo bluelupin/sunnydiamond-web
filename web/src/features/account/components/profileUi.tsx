@@ -118,6 +118,33 @@ export function ProfileStatusBadge({
   );
 }
 
+/** Figma 1480:22300 — compact status pill for mobile order cards */
+export function ProfileOrderMobileStatusBadge({
+  label,
+  category = "in_progress",
+}: {
+  label: string;
+  category?: OrderFilterKey;
+}) {
+  const variant = STATUS_BADGE_VARIANTS[category];
+
+  return (
+    <span
+      className={cn(
+        "inline-flex w-fit shrink-0 items-center gap-2 px-3 py-2 font-gill text-sm font-normal leading-110 text-darkblack",
+        variant.background,
+      )}
+    >
+      <span className={cn("size-2 shrink-0 rounded-full", variant.dot)} aria-hidden />
+      {label}
+    </span>
+  );
+}
+
+export function ProfileOrderCardDivider() {
+  return <div className="h-px w-full shrink-0 bg-neutral300" aria-hidden />;
+}
+
 /** Figma 1536:30206 — mauve pill for gift / bespoke order line items. */
 export function ProfileOrderItemBadge({ label }: { label: string }) {
   return (

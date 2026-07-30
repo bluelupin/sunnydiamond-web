@@ -2,8 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { profileTabsContent } from "../data/profileContent";
-import { formatOrderDate } from "../utils/formatAccountData";
 import type { ProfileOrderItemUi } from "../types/profileUi.types";
 import { ProfileOrderItemBadge } from "./profileUi";
 
@@ -13,7 +11,7 @@ export function ProfileOrderMobileThumbnails({ items }: { items: ProfileOrderIte
   return (
     <div className="flex gap-2 lg:hidden">
       {thumbnails.map((item) => (
-        <div key={item.id} className="relative size-[100px] shrink-0 overflow-hidden bg-neutral300">
+        <div key={item.id} className="relative size-[100px] shrink-0 overflow-hidden bg-white">
           {item.isGift ? <ProfileOrderItemBadge label="Gift" /> : null}
           {item.productUrlKey ? (
             <Link href={`/product/${item.productUrlKey}`} className="block size-full">
@@ -38,30 +36,4 @@ export function ProfileOrderMobileThumbnails({ items }: { items: ProfileOrderIte
       ))}
     </div>
   );
-}
-
-export function getOrderMobileSubtext(order: {
-  category: string;
-  estimatedDeliveryValue?: string;
-  deliveryBy?: string;
-}): string | null {
-  const content = profileTabsContent.orders.mobileMeta;
-
-  if (order.category === "in_progress" && order.estimatedDeliveryValue) {
-    return `${content.estimatedDelivery} ${order.estimatedDeliveryValue}`;
-  }
-
-  if (order.category === "delivered" && order.deliveryBy) {
-    return `${content.deliveredOn} ${formatOrderDate(order.deliveryBy)}`;
-  }
-
-  if (order.category === "returned") {
-    return `${content.refundTimeline} ${content.refundTimelineValue}`;
-  }
-
-  if (order.category === "cancelled" && order.deliveryBy) {
-    return `${content.deliveredOn} ${formatOrderDate(order.deliveryBy)}`;
-  }
-
-  return null;
 }
