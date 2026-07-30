@@ -1,7 +1,7 @@
 "use client";
 
-import ResponsiveImage from "@/shared/ui/ResponsiveImage";
-import Reveal from "@/shared/Animation/Reveal";
+import Image from "next/image";
+import { PLP_HERO_IMAGE_QUALITY } from "@/features/jewellery-product/utils/jewelleryPlpImage";
 import { giftingPageContent } from "../data/content";
 
 const GiftingIntroSection = () => {
@@ -10,38 +10,35 @@ const GiftingIntroSection = () => {
   return (
     <section
       aria-labelledby="gifting-intro-title"
-      className="relative h-240 w-full overflow-hidden md:h-320"
+      className="relative left-1/2 grid h-240 w-screen max-w-none -translate-x-1/2 overflow-hidden md:h-320"
     >
-      <ResponsiveImage
-        desktopSrc={intro.image.desktopUrl}
-        mobileSrc={intro.image.mobileUrl}
-        alt={intro.image.alt}
-        width={1440}
-        height={640}
-        priority
-        sizes="100vw"
-        className="absolute inset-0 size-full object-cover object-center"
-      />
-
-      <div aria-hidden className="absolute inset-0 bg-[#00000066]" />
-
-      <div className="absolute inset-x-0 bottom-11 flex flex-col items-center gap-3 px-4 text-center md:bottom-16">
-        <Reveal
-          as="h1"
-          id="gifting-intro-title"
-          direction="up"
-          className="font-larken text-32 font-light leading-110 text-white md:text-4xl lg:text-5xl"
-        >
-          {intro.title}
-        </Reveal>
-        <Reveal
-          as="p"
-          direction="up"
-          className="max-w-[520px] font-gill text-base font-light leading-110 text-white/90 md:text-lg lg:text-xl"
-        >
-          {intro.description}
-        </Reveal>
+      <div className="relative col-start-1 row-start-1 size-full overflow-hidden">
+        <Image
+          src={intro.image.mobileUrl}
+          alt={intro.image.alt}
+          fill
+          priority
+          quality={PLP_HERO_IMAGE_QUALITY}
+          sizes="100vw"
+          className="object-cover object-center md:hidden"
+        />
+        <Image
+          src={intro.image.desktopUrl}
+          alt={intro.image.alt}
+          fill
+          priority
+          quality={PLP_HERO_IMAGE_QUALITY}
+          sizes="100vw"
+          className="hidden object-cover object-center md:block"
+        />
+        <div className="absolute inset-0 bg-black/40" aria-hidden />
       </div>
+      <h1
+        id="gifting-intro-title"
+        className="absolute left-1/2 top-[calc(50%+42px)] z-10 -translate-x-1/2 whitespace-nowrap text-center font-larken text-32 font-light leading-110 text-white md:static md:col-start-1 md:row-start-1 md:translate-x-0 md:self-start md:justify-self-center md:pt-[203px] md:text-5xl"
+      >
+        {intro.title}
+      </h1>
     </section>
   );
 };
