@@ -8,7 +8,7 @@ import { parseDfeInvestAmount } from "@/features/diamonds-for-everyone/utils/inv
 export const metadata: Metadata = constructMetadata({
   title: diamondsForEveryonePageContent.investFlow.pageTitle,
   description:
-    "Complete KYC, add a nominee, and review your Diamonds for Everyone investment plan with Sunny Diamonds.",
+    "Open your Diamonds for Everyone account, complete KYC, add a nominee, and review your savings plan with Sunny Diamonds.",
   canonicalPath: "/diamonds-for-everyone/invest",
 });
 

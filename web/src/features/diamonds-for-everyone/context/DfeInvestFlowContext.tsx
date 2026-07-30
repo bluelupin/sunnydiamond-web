@@ -10,10 +10,11 @@ import {
 } from "react";
 import { diamondsForEveryonePageContent } from "../data/content";
 
-export type DfeInvestStep = "kyc" | "nominee" | "review";
+export type DfeInvestStep = "intro" | "kyc" | "nominee" | "review";
 
 type DfeInvestFlowContextValue = {
   monthlyAmount: number;
+  setMonthlyAmount: (value: number) => void;
   step: DfeInvestStep;
   idType: string;
   idNumber: string;
@@ -36,17 +37,29 @@ type DfeInvestFlowContextValue = {
 
 const DfeInvestFlowContext = createContext<DfeInvestFlowContextValue | undefined>(undefined);
 
-const STEP_ORDER: DfeInvestStep[] = ["kyc", "nominee", "review"];
+const STEP_ORDER: DfeInvestStep[] = ["intro", "kyc", "nominee", "review"];
 
 export function DfeInvestFlowProvider({
-  monthlyAmount,
+  initialMonthlyAmount,
   children,
 }: {
-  monthlyAmount: number;
+  initialMonthlyAmount: number;
   children: ReactNode;
 }) {
-  const { monthsPaid, totalMonths } = diamondsForEveryonePageContent.investment;
-  const [step, setStep] = useState<DfeInvestStep>("kyc");
+  const { investment, monthsPaid, totalMonths } = {
+    investment: diamondsForEveryonePageContent.investment,
+    monthsPaid: diamondsForEveryonePageContent.investment.monthsPaid,
+    totalMonths: diamondsForEveryonePageContent.investment.totalMonths,
+  };
+
+  const clampMonthlyAmount = useCallback((value: number) => {
+    return Math.min(investment.maxMonthly, Math.max(investment.minMonthly, value));
+  }, [investment.maxMonthly, investment.minMonthly]);
+
+  const [monthlyAmount, setMonthlyAmountState] = useState(() =>
+    clampMonthlyAmount(initialMonthlyAmount),
+  );
+  const [step, setStep] = useState<DfeInvestStep>("intro");
   const [idType, setIdType] = useState<string>(
     diamondsForEveryonePageContent.investFlow.kyc.idTypeOptions[0],
   );
@@ -55,6 +68,13 @@ export function DfeInvestFlowProvider({
   const [nomineeName, setNomineeName] = useState("");
   const [nomineeRelationship, setNomineeRelationship] = useState("");
   const [nomineePhone, setNomineePhone] = useState("");
+
+  const setMonthlyAmount = useCallback(
+    (value: number) => {
+      setMonthlyAmountState(clampMonthlyAmount(value));
+    },
+    [clampMonthlyAmount],
+  );
 
   const contribution = monthlyAmount * monthsPaid;
   const totalValue = monthlyAmount * totalMonths;
@@ -80,6 +100,7 @@ export function DfeInvestFlowProvider({
   const value = useMemo(
     () => ({
       monthlyAmount,
+      setMonthlyAmount,
       step,
       idType,
       idNumber,
@@ -101,6 +122,7 @@ export function DfeInvestFlowProvider({
     }),
     [
       monthlyAmount,
+      setMonthlyAmount,
       step,
       idType,
       idNumber,

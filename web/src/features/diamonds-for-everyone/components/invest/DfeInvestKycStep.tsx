@@ -28,6 +28,7 @@ const DfeInvestKycStep = () => {
     setIdNumber,
     setIdFile,
     goNext,
+    goBack,
   } = useDfeInvestFlow();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -169,6 +170,13 @@ const DfeInvestKycStep = () => {
           )}
         >
           {nextLabel}
+        </button>
+        <button
+          type="button"
+          onClick={goBack}
+          className="border-b border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
+        >
+          BACK
         </button>
         <Link
           href="/diamonds-for-everyone"

@@ -1,3 +1,16 @@
+export const diamondsForEveryoneHeroFigmaSpec = {
+  /** Figma node 1052:66687 — page hero banner (aligned with contact/store locator pattern) */
+  height: {
+    mobile: 240,
+    desktop: 320,
+  },
+  overlayOpacity: 0.4,
+  titleTop: {
+    mobile: 152,
+    desktop: 203,
+  },
+} as const;
+
 export const diamondsForEveryonePageContent = {
   hero: {
     title: "Diamonds for Everyone",
@@ -88,11 +101,32 @@ export const diamondsForEveryonePageContent = {
     ],
   },
   investFlow: {
+    /** Figma node 1052:66382 — intro step (first screen after login / START INVESTING) */
     pageTitle: "Your Investment Plan",
     backLabel: "Back to Diamonds for Everyone",
     cancelLabel: "CANCEL",
     nextLabel: "NEXT",
     payLabel: "PAY NOW",
+    intro: {
+      title: "Diamonds for Everyone",
+      subtitle:
+        "Keep the following things ready and set your account in 3 simple steps",
+      steps: [
+        {
+          label: "Verify your identity",
+          detail: "Your government ID proof",
+        },
+        {
+          label: "Assign a nominee",
+          detail: "Details of your chosen nominee",
+        },
+        {
+          label: "Pay the 1st Instalment",
+          detail: "Payment method and details",
+        },
+      ],
+      openAccountLabel: "OPEN YOUR ACCOUNT",
+    },
     steps: [
       { id: "kyc", label: "Quick KYC" },
       { id: "nominee", label: "Add a Nominee" },

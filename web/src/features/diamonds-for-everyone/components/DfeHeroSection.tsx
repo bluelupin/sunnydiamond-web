@@ -29,7 +29,7 @@ const DfeHeroSection = () => {
           priority
           quality={PLP_HERO_IMAGE_QUALITY}
           sizes="100vw"
-          className="hidden object-cover object-[50%_38%] md:block"
+          className="hidden object-cover object-center md:block"
         />
         <div className="absolute inset-0 bg-black/40" aria-hidden />
       </div>
