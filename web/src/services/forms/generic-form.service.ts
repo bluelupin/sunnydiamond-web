@@ -33,8 +33,9 @@ export const getGenericFormByTag = cache(
 );
 
 /**
- * Browser → same-origin BFF so Magento session can link the booking to
- * My Appointments. Guests still submit (no Bearer).
+ * Browser → same-origin BFF → Strapi generic-submissions (Public create).
+ * Used by contact + store-locator/nav Book a Visit (`showroom-visit`).
+ * PDP Visit Us / Try at Home / Video Call use product-submissions instead.
  */
 export async function createGenericSubmission(
   payload: GenericSubmissionPayload,
@@ -46,6 +47,7 @@ export async function createGenericSubmission(
       Accept: "application/json",
       "Content-Type": "application/json",
     },
+    credentials: "same-origin",
     body: JSON.stringify({
       data: {
         ...payload,

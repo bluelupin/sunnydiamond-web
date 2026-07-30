@@ -566,7 +566,7 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusToastMessage, setStatusToastMessage] = useState<string | null>(null);
   const statusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const productImage = product.images[0] ?? product.image;
+  const productImage = product.image || product.images[0];
 
   const dismissStatusToast = () => {
     if (statusToastTimeoutRef.current) {

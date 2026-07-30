@@ -164,6 +164,10 @@ export function ProfileAppointmentCard({
   onCancel,
 }: ProfileAppointmentCardProps) {
   const content = profileTabsContent.appointments;
+  const notesText =
+    typeof appointment.notes === "string"
+      ? appointment.notes.trim()
+      : String(appointment.notes ?? "").trim();
 
   return (
     <ProfileCard className="relative flex flex-col gap-4 p-4 lg:gap-6 lg:p-6">
@@ -199,8 +203,10 @@ export function ProfileAppointmentCard({
           <div className="space-y-4">
             <div className="space-y-2 font-gill text-base leading-110 text-darkblack">
               <p className="font-normal">{appointment.storeVisit.city}</p>
-              {appointment.storeVisit.lines.map((line) => (
-                <p key={line} className="font-light">{line}</p>
+              {appointment.storeVisit.lines.map((line, index) => (
+                <p key={`${index}-${line}`} className="font-light">
+                  {line}
+                </p>
               ))}
             </div>
             {appointment.storeVisit.directionsHref ? (
@@ -223,7 +229,9 @@ export function ProfileAppointmentCard({
         bookingTime={appointment.bookingTime}
       />
 
-      <ProfileAppointmentNote title={content.notesLabel} note={appointment.notes} />
+      {notesText ? (
+        <ProfileAppointmentNote title={content.notesLabel} note={notesText} />
+      ) : null}
 
       <div className="flex items-center gap-6">
         <DetailOutlineButton

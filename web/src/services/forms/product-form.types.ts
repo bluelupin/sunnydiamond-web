@@ -84,6 +84,8 @@ export type ProductSubmissionPayload = {
   requestDetails?: string;
   requestedDate?: string;
   selectedTimeSlot?: string;
+  /** Showroom documentId — used by product-store-visit for My Appointments. */
+  preferredShowroom?: string;
   addressLine1?: string;
   addressLine2?: string;
   pincode?: string;

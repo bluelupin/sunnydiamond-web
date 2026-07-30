@@ -90,7 +90,7 @@ const AppointmentContactFields = ({
   fieldClassName = appointmentFieldClassName,
   showDate = true,
   showTimeSlots = true,
-  timeSlots = APPOINTMENT_TIME_SLOTS,
+  timeSlots,
   selectedSlotStyle = "dark",
   showPurpose = false,
   purposeOptions = [],
@@ -111,7 +111,8 @@ const AppointmentContactFields = ({
 }: AppointmentContactFieldsProps) => {
   const minDate = getMinSelectableDate();
   const maxDate = getMaxSelectableDate();
-  const slots = timeSlots.length > 0 ? timeSlots : APPOINTMENT_TIME_SLOTS;
+  // Explicit `[]` means no slots (CMS empty). Only default when prop is omitted.
+  const slots = timeSlots ?? APPOINTMENT_TIME_SLOTS;
 
   return (
     <>
@@ -229,7 +230,7 @@ const AppointmentContactFields = ({
         </div>
       ) : null}
 
-      {showTimeSlots && onSelectedSlotChange ? (
+      {showTimeSlots && onSelectedSlotChange && slots.length > 0 ? (
         <div className="flex flex-col gap-2">
           <span className={labelClassName}>{timeSlotsLabel}</span>
           <div className="flex flex-col gap-3">

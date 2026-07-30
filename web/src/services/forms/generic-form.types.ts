@@ -112,6 +112,8 @@ export type GenericSubmissionPayload = {
   preferredDate?: string;
   selectedTimeSlot?: string;
   notes?: string;
+  /** Purpose of visit — mapped for showroom-visit `/submit` validation. */
+  purposeOfVisit?: string;
   /** Magento customer id from `/api/auth/me` — links submission to My Appointments. */
   magentoCustomerId?: number;
   sourcePage?: string;

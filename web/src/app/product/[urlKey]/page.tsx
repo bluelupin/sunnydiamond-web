@@ -96,6 +96,7 @@ export default async function ProductPage({ params }: PageProps) {
         heroBannerImage={content.heroBannerImage}
         heroBannerVideo={content.heroBannerVideo}
         productName={product.name}
+        productId={product.id}
         moreForYou={moreForYou}
         visitUs={visitUs}
         alankaraPrefetch={alankaraPrefetch}

@@ -24,6 +24,7 @@ type ProductDetailBelowFoldLazyProps = {
   heroBannerImage: string;
   heroBannerVideo?: string;
   productName: string;
+  productId: string;
   moreForYou: MoreForYouCarouselItem[];
   visitUs?: NormalizedVisitUsSection | null;
   alankaraPrefetch?: PrefetchedAlankaraCollection | null;
@@ -33,6 +34,7 @@ const ProductDetailBelowFoldLazy = ({
   heroBannerImage,
   heroBannerVideo,
   productName,
+  productId,
   moreForYou,
   visitUs,
   alankaraPrefetch,
@@ -50,7 +52,11 @@ const ProductDetailBelowFoldLazy = ({
       prefetchedAlankara={alankaraPrefetch ?? undefined}
     />
     <ProductDetailMoreForYouSection items={moreForYou} />
-    <ProductDetailVisitUsSection visitUs={visitUs} />
+    <ProductDetailVisitUsSection
+      visitUs={visitUs}
+      productName={productName}
+      productId={productId}
+    />
   </>
 );
 

@@ -1,9 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type { StaticImageData } from "next/image";
 import {
   CartOutlineButton,
 } from "@/features/cart/components/CartFlowUi";
+import { useMagentoWishlistProducts } from "@/hooks/magento/useMagentoWishlistProducts";
 import { useToast } from "@/shared/hooks/use-toast";
 import { profileTabsContent } from "../data/profileContent";
 import { useCustomerAppointments } from "../hooks/useCustomerAppointments";
@@ -24,6 +26,10 @@ const FILTER_OPTIONS: { key: AppointmentFilterKey; label: string }[] = [
   { key: "store_visit", label: content.filters.storeVisit },
 ];
 
+function listingImageUrl(image: string | StaticImageData): string {
+  return typeof image === "string" ? image : image.src;
+}
+
 function AppointmentsSkeleton() {
   return (
     <div className="space-y-4" aria-busy="true" aria-label="Loading appointments">
@@ -40,13 +46,52 @@ const ProfileAppointmentsSection = () => {
   const [activeFilter, setActiveFilter] = useState<AppointmentFilterKey>("video_call");
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
 
+  const appointmentSkus = useMemo(
+    () =>
+      (data?.appointments ?? [])
+        .map((appointment) => {
+          const productId = appointment.productId;
+          if (typeof productId === "string") {
+            return productId.trim();
+          }
+          if (productId == null) {
+            return "";
+          }
+          return String(productId).trim();
+        })
+        .filter(Boolean),
+    [data],
+  );
+
+  const { products: magentoProducts, isLoading: isProductImagesLoading } =
+    useMagentoWishlistProducts(appointmentSkus);
+
+  const productImageBySku = useMemo(() => {
+    const images: Record<string, string> = {};
+
+    for (const product of magentoProducts) {
+      const sku = product.sku?.trim();
+      if (!sku) {
+        continue;
+      }
+
+      images[sku] = listingImageUrl(product.primaryImage);
+    }
+
+    return images;
+  }, [magentoProducts]);
+
   const appointments = useMemo(() => {
     if (!data?.appointments.length) {
       return [];
     }
 
-    return data.appointments.map(mapCustomerAppointmentToProfileUi);
-  }, [data]);
+    return data.appointments
+      .map((appointment) =>
+        mapCustomerAppointmentToProfileUi(appointment, productImageBySku),
+      )
+      .filter((appointment): appointment is NonNullable<typeof appointment> => appointment != null);
+  }, [data, productImageBySku]);
 
   const filteredAppointments = useMemo(
     () => appointments.filter((appointment) => appointment.type === activeFilter),
@@ -69,7 +114,7 @@ const ProfileAppointmentsSection = () => {
     setCancelDialogOpen(false);
   };
 
-  if (isLoading) {
+  if (isLoading || (appointmentSkus.length > 0 && isProductImagesLoading)) {
     return <AppointmentsSkeleton />;
   }
 

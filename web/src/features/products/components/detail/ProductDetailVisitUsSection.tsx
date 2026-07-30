@@ -9,10 +9,14 @@ import { VISIT_US_FALLBACK } from "@/services/product-display/product-display-pa
 
 type ProductDetailVisitUsSectionProps = {
   visitUs?: NormalizedVisitUsSection | null;
+  productName?: string;
+  productId?: string;
 };
 
 const ProductDetailVisitUsSection = ({
   visitUs = VISIT_US_FALLBACK,
+  productName,
+  productId,
 }: ProductDetailVisitUsSectionProps) => {
   const [isBookVisitOpen, setIsBookVisitOpen] = useState(false);
   const content = visitUs ?? VISIT_US_FALLBACK;
@@ -63,7 +67,13 @@ const ProductDetailVisitUsSection = ({
         </div>
       </section>
 
-      <BookStoreVisitPanel open={isBookVisitOpen} onClose={() => setIsBookVisitOpen(false)} />
+      <BookStoreVisitPanel
+        open={isBookVisitOpen}
+        onClose={() => setIsBookVisitOpen(false)}
+        submissionFormTag="product-store-visit"
+        productName={productName}
+        productId={productId}
+      />
     </>
   );
 };

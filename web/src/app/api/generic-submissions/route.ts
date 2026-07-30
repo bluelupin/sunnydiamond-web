@@ -1,13 +1,38 @@
 import { NextResponse } from "next/server";
 import { getStrapiBaseUrl } from "@/api/config";
 import { STRAPI_ENDPOINTS } from "@/api/endpoints";
-import { getCustomerToken } from "@/services/auth/session";
 
 /**
- * Browser → same-origin BFF → Strapi generic-submissions.
- * Attaches Magento customer Bearer when signed in so CMS can link bookings
- * to My Appointments.
+ * Browser → same-origin BFF → Strapi `POST /api/generic-submissions`.
+ *
+ * Thin collection proxy for generic forms (contact, store-locator Book a Visit).
+ * - Do not attach Magento Bearer — collection create rejects Magento JWT (401).
+ * - Strip `magentoCustomerId` — not a collection attribute (400 Invalid key).
+ *
+ * PDP Visit Us → My Appointments uses `product-store-visit` via
+ * `/api/product-submissions/submit` (not this route).
+ * Try at Home / Video Call also use product-submissions (not this route).
  */
+
+function stripMagentoCustomerId(body: unknown): unknown {
+  if (!body || typeof body !== "object") {
+    return body;
+  }
+
+  const record = body as Record<string, unknown>;
+  const data = record.data;
+
+  if (data && typeof data === "object" && !Array.isArray(data)) {
+    const nextData = { ...(data as Record<string, unknown>) };
+    delete nextData.magentoCustomerId;
+    return { ...record, data: nextData };
+  }
+
+  const next = { ...record };
+  delete next.magentoCustomerId;
+  return next;
+}
+
 export async function POST(request: Request) {
   let body: unknown;
 
@@ -17,7 +42,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const customerToken = await getCustomerToken();
   const url = `${getStrapiBaseUrl()}/${STRAPI_ENDPOINTS.genericSubmissions}`;
 
   try {
@@ -26,9 +50,8 @@ export async function POST(request: Request) {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        ...(customerToken ? { Authorization: `Bearer ${customerToken}` } : {}),
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(stripMagentoCustomerId(body)),
       cache: "no-store",
     });
 

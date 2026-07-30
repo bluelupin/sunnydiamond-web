@@ -7,8 +7,17 @@ import type {
   StrapiCustomerAppointmentsResponse,
 } from "./customer-appointments.types";
 
-function cleanText(value?: string | null): string {
-  return value?.trim() ?? "";
+function cleanText(value?: unknown): string {
+  if (value == null) {
+    return "";
+  }
+  if (typeof value === "string") {
+    return value.trim();
+  }
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value).trim();
+  }
+  return "";
 }
 
 function mapShowroom(
@@ -51,41 +60,70 @@ function normalizeAppointmentRaw(raw: unknown): StrapiCustomerAppointment & Reco
 }
 
 const CUSTOMER_MESSAGE_KEYS = [
-  "customerMessage",
+  // Try at Home / product submissions store "What are you looking for?" here.
   "requestDetails",
+  "request_details",
+  "customerMessage",
   "notes",
   "message",
   "note",
   "customerNote",
+  "lookingFor",
+  "looking_for",
+  "whatAreYouLookingFor",
   "description",
-  "request_details",
   "submissionNotes",
   "submissionMessage",
   "details",
 ] as const;
 
+/** Drop FE-appended "State: …" lines so Note shows the looking-for text. */
+function normalizeCustomerMessageText(value: string): string {
+  const withoutStateLines = value
+    .split(/\r?\n/)
+    .filter((line) => !/^\s*State\s*:/i.test(line))
+    .join("\n")
+    .trim();
+
+  return withoutStateLines || value.trim();
+}
+
+function coerceMessageValue(value: unknown): string {
+  if (typeof value === "string") {
+    return value.trim();
+  }
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value).trim();
+  }
+  return "";
+}
+
 function mapCustomerMessage(
   item: StrapiCustomerAppointment & Record<string, unknown>,
 ): string | null {
   for (const key of CUSTOMER_MESSAGE_KEYS) {
-    const value = cleanText(item[key] as string | null | undefined);
+    const value = coerceMessageValue(item[key]);
     if (value) {
-      return value;
+      return normalizeCustomerMessageText(value);
     }
   }
 
   for (const [key, value] of Object.entries(item)) {
-    if (typeof value !== "string" || !value.trim()) {
+    const text = coerceMessageValue(value);
+    if (!text) {
       continue;
     }
 
     const normalizedKey = key.toLowerCase();
     if (
+      normalizedKey.includes("request_detail") ||
+      normalizedKey.includes("requestdetail") ||
+      normalizedKey.includes("looking") ||
       normalizedKey.includes("note") ||
       normalizedKey.includes("detail") ||
       normalizedKey.includes("message")
     ) {
-      return value.trim();
+      return normalizeCustomerMessageText(text);
     }
   }
 
@@ -97,7 +135,7 @@ function pickTextField(
   keys: readonly string[],
 ): string | null {
   for (const key of keys) {
-    const value = cleanText(item[key] as string | null | undefined);
+    const value = cleanText(item[key]);
     if (value) {
       return value;
     }
@@ -141,11 +179,27 @@ export function mapCustomerAppointment(
     formTag: cleanText(normalized.formTag),
     productName: cleanText(normalized.productName) || null,
     productId: cleanText(normalized.productId) || null,
-    customerName: cleanText(normalized.customerName),
-    customerPhone: cleanText(normalized.customerPhone),
-    customerEmail: cleanText(normalized.customerEmail),
-    requestedDate: cleanText(normalized.requestedDate),
-    selectedTimeSlot: cleanText(normalized.selectedTimeSlot),
+    // Product forms use customer*; Book a Visit (showroom-visit) uses fullName/phone/email/preferredDate.
+    customerName:
+      cleanText(normalized.customerName) ||
+      pickTextField(normalized, ["fullName", "name", "full_name"]) ||
+      "",
+    customerPhone:
+      cleanText(normalized.customerPhone) ||
+      pickTextField(normalized, ["phone", "mobile", "customer_phone"]) ||
+      "",
+    customerEmail:
+      cleanText(normalized.customerEmail) ||
+      pickTextField(normalized, ["email", "customer_email"]) ||
+      "",
+    requestedDate:
+      cleanText(normalized.requestedDate) ||
+      pickTextField(normalized, ["preferredDate", "preferred_date", "bookingDate"]) ||
+      "",
+    selectedTimeSlot:
+      cleanText(normalized.selectedTimeSlot) ||
+      pickTextField(normalized, ["selected_time_slot", "timeSlot", "time_slot"]) ||
+      "",
     workflowStatus: cleanText(normalized.workflowStatus) || "New",
     customerMessage: mapCustomerMessage(normalized),
     addressLine1: addressFields.addressLine1,

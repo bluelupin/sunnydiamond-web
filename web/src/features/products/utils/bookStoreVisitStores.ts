@@ -1,5 +1,4 @@
 import type { BookStoreVisitStore } from "../data/bookStoreVisitContent";
-import { BOOK_STORE_VISIT_STORES } from "../data/bookStoreVisitContent";
 import type { NormalizedGenericFormShowroom } from "@/services/forms/generic-form.types";
 import type { ShowroomSectionLocation } from "@/types/homepage/editorialBlocks";
 import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
@@ -87,9 +86,6 @@ export function resolveBookStoreVisitStores(
     .map(mapEditorialShowroomToBookStoreVisit)
     .filter((store): store is BookStoreVisitStore => store != null);
 
-  if (fromEditorial.length > 0) {
-    return fromEditorial;
-  }
-
-  return BOOK_STORE_VISIT_STORES;
+  // No static hardcoded stores — only CMS form showrooms or editorial showrooms.
+  return fromEditorial;
 }

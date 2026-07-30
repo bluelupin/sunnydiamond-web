@@ -39,18 +39,43 @@ function categorizeOrderStatus(status: string): OrderFilterKey {
   return "in_progress";
 }
 
-function inferAppointmentType(formTag: string): AppointmentFilterKey {
-  const normalized = formTag.toLowerCase();
+/**
+ * Map CMS `formTag` → My Appointments filter.
+ * Only known appointment tags are included — contact / personalisation / etc.
+ * must NOT fall through into Store Visit (that was showing Get in Touch there).
+ */
+function inferAppointmentType(formTag: string): AppointmentFilterKey | null {
+  const normalized = formTag.toLowerCase().trim();
 
+  if (!normalized) {
+    return null;
+  }
+
+  // Video Call — e.g. product-video-call
   if (normalized.includes("video")) {
     return "video_call";
   }
 
-  if (normalized.includes("home") || normalized.includes("try")) {
+  // Try at Home — e.g. try-at-home / product-try-at-home (not showroom-visit)
+  if (normalized.includes("try-at-home") || normalized.includes("try_at_home")) {
+    return "try_at_home";
+  }
+  if (normalized.includes("home") && !normalized.includes("showroom")) {
     return "try_at_home";
   }
 
-  return "store_visit";
+  // Book a Visit / Store Visit — e.g. showroom-visit, product-store-visit
+  if (
+    normalized.includes("showroom") ||
+    normalized.includes("store-visit") ||
+    normalized.includes("store_visit") ||
+    (normalized.includes("store") && normalized.includes("visit"))
+  ) {
+    return "store_visit";
+  }
+
+  // contact-us, product-personalisation (Get in Touch), book-appointment, etc.
+  return null;
 }
 
 function canModifyAppointment(workflowStatus: string): boolean {
@@ -189,8 +214,13 @@ export function mapCustomerOrderToProfileUi(order: CustomerOrder): ProfileOrderU
 
 export function mapCustomerAppointmentToProfileUi(
   appointment: CustomerAppointment,
-): ProfileAppointmentUi {
+  productImageBySku?: Record<string, string>,
+): ProfileAppointmentUi | null {
   const type = inferAppointmentType(appointment.formTag);
+  if (!type) {
+    return null;
+  }
+
   const typeLabels = profileTabsContent.appointments.filters;
   const typeLabel =
     type === "video_call"
@@ -205,13 +235,20 @@ export function mapCustomerAppointmentToProfileUi(
     appointment.preferredShowroom?.state,
   ].filter((part): part is string => Boolean(part));
 
+  const productSku =
+    typeof appointment.productId === "string"
+      ? appointment.productId.trim()
+      : appointment.productId != null
+        ? String(appointment.productId).trim()
+        : "";
   const products =
     appointment.productName
       ? [
           {
-            id: appointment.productId ?? appointment.documentId,
+            id: productSku || appointment.documentId,
             name: appointment.productName,
-            imageSrc: PLACEHOLDER_RING_IMAGE,
+            imageSrc:
+              (productSku && productImageBySku?.[productSku]) || PLACEHOLDER_RING_IMAGE,
           },
         ]
       : [];
@@ -244,11 +281,25 @@ export function mapCustomerAppointmentToProfileUi(
   }
 
   if (type === "store_visit" && showroomParts.length > 0) {
+    const heading =
+      appointment.preferredShowroom?.name?.trim() ||
+      appointment.preferredShowroom?.city?.trim() ||
+      showroomParts[0] ||
+      "";
+    const uniqueLines = Array.from(
+      new Set(
+        showroomParts
+          .map((part) => part.trim())
+          .filter((part) => part.length > 0)
+          .filter((part) => part.toLowerCase() !== heading.toLowerCase()),
+      ),
+    );
+
     return {
       ...base,
       storeVisit: {
-        city: appointment.preferredShowroom?.city ?? showroomParts[0] ?? "",
-        lines: showroomParts,
+        city: heading,
+        lines: uniqueLines,
         directionsHref: "/store-locator",
       },
     };

@@ -469,19 +469,19 @@ const ProductDetailSidebar = ({
         <ScheduleVideoCallPanel
           open
           onClose={() => setIsVideoCallOpen(false)}
-          product={product}
+          product={displayProduct}
         />
       ) : null}
 
       {isTryAtHomeOpen ? (
-        <TryAtHomePanel open onClose={() => setIsTryAtHomeOpen(false)} product={product} />
+        <TryAtHomePanel open onClose={() => setIsTryAtHomeOpen(false)} product={displayProduct} />
       ) : null}
 
       {isPersonaliseOpen ? (
         <PersonaliseProductPanel
           open
           onClose={() => setIsPersonaliseOpen(false)}
-          product={product}
+          product={displayProduct}
         />
       ) : null}
 

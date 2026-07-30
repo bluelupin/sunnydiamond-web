@@ -17,16 +17,13 @@ import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
 import {
   appointmentFieldClassName,
   appointmentLabelClassName,
-  APPOINTMENT_TIME_SLOTS,
 } from "@/shared/constants/appointmentForm";
-import {
-  BOOK_STORE_VISIT_STORES,
-  type BookStoreVisitStore,
-} from "@/features/products/data/bookStoreVisitContent";
+import type { BookStoreVisitStore } from "@/features/products/data/bookStoreVisitContent";
 import {
   createGenericSubmission,
   getGenericFormByTag,
 } from "@/services/forms/generic-form.service";
+import { createProductSubmission } from "@/services/forms/product-form.service";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import { wishlistMovedToastDurationMs } from "@/features/wishlist/data/content";
@@ -37,7 +34,10 @@ import {
   productDetailSidePanelOverlayClassName,
 } from "./ProductDetailSidePanelShell";
 
-const SHOWROOM_VISIT_FORM_TAG = "showroom-visit";
+/** CMS schema/showrooms for the Book a Visit UI (generic form). */
+const SHOWROOM_VISIT_SCHEMA_TAG = "showroom-visit";
+/** PDP Visit Us submit tag — linked into My Appointments Store Visit. */
+const PRODUCT_STORE_VISIT_FORM_TAG = "product-store-visit";
 
 type BookStoreVisitPanelProps = {
   variant?: "embedded" | "page" | "modal";
@@ -46,6 +46,14 @@ type BookStoreVisitPanelProps = {
   onBack?: () => void;
   storeSearchQuery?: string;
   storeStateFilter?: string | null;
+  /**
+   * formTag sent on submit. PDP Visit Us must use `product-store-visit` so CMS
+   * lists the booking under My Appointments → Store Visit.
+   * UI schema/showrooms still load from `showroom-visit`.
+   */
+  submissionFormTag?: string;
+  productName?: string;
+  productId?: string;
 };
 
 type BookVisitStep = "select-store" | "form";
@@ -57,6 +65,9 @@ const BookStoreVisitPanel = ({
   onBack,
   storeSearchQuery = "",
   storeStateFilter = null,
+  submissionFormTag,
+  productName,
+  productId,
 }: BookStoreVisitPanelProps) => {
   const profileEnabled = variant !== "modal" || open;
   const { customer } = useAuth();
@@ -67,8 +78,8 @@ const BookStoreVisitPanel = ({
     [editorialData?.showroomSection?.showrooms],
   );
   const [step, setStep] = useState<BookVisitStep>("select-store");
-  const [stores, setStores] = useState<BookStoreVisitStore[]>(BOOK_STORE_VISIT_STORES);
-  const [timeSlots, setTimeSlots] = useState<readonly string[]>(APPOINTMENT_TIME_SLOTS);
+  const [stores, setStores] = useState<BookStoreVisitStore[]>([]);
+  const [timeSlots, setTimeSlots] = useState<readonly string[]>([]);
   const [purposeOptions, setPurposeOptions] = useState<readonly string[]>([]);
   const [formTitle, setFormTitle] = useState("Book Your Store Visit");
   const [nameLabel, setNameLabel] = useState("Your Name*");
@@ -83,9 +94,11 @@ const BookStoreVisitPanel = ({
   const [notesLabel, setNotesLabel] = useState("Describe more about your visit");
   const [notesPlaceholder, setNotesPlaceholder] = useState("Enter");
   const [submitButtonText, setSubmitButtonText] = useState("BOOK A VISIT");
-  const [formTag, setFormTag] = useState(SHOWROOM_VISIT_FORM_TAG);
+  const [formTag, setFormTag] = useState(
+    submissionFormTag ?? SHOWROOM_VISIT_SCHEMA_TAG,
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedStoreId, setSelectedStoreId] = useState(BOOK_STORE_VISIT_STORES[0].id);
+  const [selectedStoreId, setSelectedStoreId] = useState("");
   const [name, setName] = useState("");
   const [countryCode, setCountryCode] = useState("+91");
   const [phone, setPhone] = useState("");
@@ -135,10 +148,15 @@ const BookStoreVisitPanel = ({
     displayStores.find((store) => store.id === selectedStoreId) ??
     displayStores[0] ??
     stores[0] ??
-    BOOK_STORE_VISIT_STORES[0];
+    null;
 
   useEffect(() => {
     if (variant !== "page") {
+      return;
+    }
+
+    if (displayStores.length === 0) {
+      setSelectedStoreId("");
       return;
     }
 
@@ -146,7 +164,7 @@ const BookStoreVisitPanel = ({
       return;
     }
 
-    setSelectedStoreId(displayStores[0]?.id ?? stores[0]?.id ?? BOOK_STORE_VISIT_STORES[0].id);
+    setSelectedStoreId(displayStores[0]?.id ?? stores[0]?.id ?? "");
   }, [displayStores, selectedStoreId, stores, variant]);
 
   // Prefill from My Profile once when available; never overwrite fields the user already typed.
@@ -181,30 +199,36 @@ const BookStoreVisitPanel = ({
 
     void (async () => {
       try {
-        const form = await getGenericFormByTag(SHOWROOM_VISIT_FORM_TAG, controller.signal);
+        const form = await getGenericFormByTag(SHOWROOM_VISIT_SCHEMA_TAG, controller.signal);
         if (!form) {
           const resolvedStores = resolveBookStoreVisitStores([], editorialShowrooms);
           setStores(resolvedStores);
+          setTimeSlots([]);
           setSelectedStoreId((current) =>
             resolvedStores.some((store) => store.id === current)
               ? current
-              : resolvedStores[0]?.id ?? BOOK_STORE_VISIT_STORES[0].id,
+              : resolvedStores[0]?.id ?? "",
           );
           return;
         }
 
-        setFormTag(form.formTag || SHOWROOM_VISIT_FORM_TAG);
+        // PDP Visit Us keeps product-store-visit for submit; do not overwrite from schema tag.
+        if (!submissionFormTag) {
+          setFormTag(form.formTag || SHOWROOM_VISIT_SCHEMA_TAG);
+        } else {
+          setFormTag(submissionFormTag);
+        }
         if (form.formName) {
           setFormTitle(form.formName);
         }
         if (form.submitButtonText) {
           setSubmitButtonText(form.submitButtonText.toUpperCase());
         }
-        if (form.timeSlots.length > 0) {
-          setTimeSlots(form.timeSlots);
-        }
+        setTimeSlots(form.timeSlots.length > 0 ? form.timeSlots : []);
         if (form.purposeOptions.length > 0) {
           setPurposeOptions(form.purposeOptions);
+        } else {
+          setPurposeOptions([]);
         }
         if (form.nameLabel) {
           setNameLabel(form.nameLabel);
@@ -245,21 +269,28 @@ const BookStoreVisitPanel = ({
         setSelectedStoreId((current) =>
           resolvedStores.some((store) => store.id === current)
             ? current
-            : resolvedStores[0]!.id,
+            : resolvedStores[0]?.id ?? "",
         );
       } catch {
         const resolvedStores = resolveBookStoreVisitStores([], editorialShowrooms);
         setStores(resolvedStores);
+        setTimeSlots([]);
         setSelectedStoreId((current) =>
           resolvedStores.some((store) => store.id === current)
             ? current
-            : resolvedStores[0]?.id ?? BOOK_STORE_VISIT_STORES[0].id,
+            : resolvedStores[0]?.id ?? "",
         );
       }
     })();
 
     return () => controller.abort();
-  }, [open, variant, editorialShowrooms]);
+  }, [open, variant, editorialShowrooms, submissionFormTag]);
+
+  useEffect(() => {
+    if (submissionFormTag) {
+      setFormTag(submissionFormTag);
+    }
+  }, [submissionFormTag]);
 
   useEffect(() => {
     if (variant !== "modal" || !open) {
@@ -294,7 +325,7 @@ const BookStoreVisitPanel = ({
     setIsSubmitting(false);
     setHasAppliedProfilePrefill(false);
     setSelectedStoreId((current) =>
-      stores.some((store) => store.id === current) ? current : (stores[0]?.id ?? BOOK_STORE_VISIT_STORES[0].id),
+      stores.some((store) => store.id === current) ? current : (stores[0]?.id ?? ""),
     );
   };
 
@@ -321,7 +352,7 @@ const BookStoreVisitPanel = ({
   const showStoreSelectionBack = variant === "embedded" || variant === "page";
 
   const handleSubmit = async () => {
-    if (isSubmitting) return;
+    if (isSubmitting || !selectedStore) return;
 
     setIsSubmitting(true);
     try {
@@ -333,21 +364,57 @@ const BookStoreVisitPanel = ({
       const preferredShowroom =
         selectedStore.documentId ?? selectedStore.id;
 
-      await createGenericSubmission({
-        formTag,
-        fullName: name.trim(),
-        email: email.trim() || undefined,
-        phone: `${countryCode} ${phone}`.trim(),
-        preferredShowroom,
-        preferredDate: date || undefined,
-        selectedTimeSlot: selectedSlot ?? undefined,
-        notes: composedNotes || undefined,
-        ...(customer?.id != null ? { magentoCustomerId: customer.id } : {}),
-        sourcePage:
-          typeof window !== "undefined" ? window.location.pathname : "/store-locator",
-        consentAccepted: true,
-        workflowStatus: "New",
-      });
+      const submitTag = submissionFormTag || formTag;
+      const sourcePage =
+        typeof window !== "undefined" ? window.location.pathname : "/store-locator";
+
+      // PDP Visit Us → product-store-visit via product-submissions (My Appointments).
+      // Store locator / nav → showroom-visit via generic-submissions.
+      if (submitTag === PRODUCT_STORE_VISIT_FORM_TAG) {
+        const showroomLabel =
+          selectedStore.storeName?.trim() ||
+          selectedStore.tabLabel?.trim() ||
+          "";
+        await createProductSubmission({
+          formTag: PRODUCT_STORE_VISIT_FORM_TAG,
+          productName: productName?.trim() || "Store visit",
+          productId: productId?.trim() || "store-visit",
+          customerName: name.trim(),
+          customerPhone: `${countryCode} ${phone}`.trim(),
+          customerEmail: email.trim() || undefined,
+          preferredShowroom,
+          requestedDate: date || undefined,
+          selectedTimeSlot: selectedSlot ?? undefined,
+          requestDetails:
+            [
+              composedNotes,
+              showroomLabel ? `Showroom: ${showroomLabel}` : "",
+            ]
+              .filter(Boolean)
+              .join("\n") || undefined,
+          city: selectedStore.city?.trim() || undefined,
+          ...(customer?.id != null ? { magentoCustomerId: customer.id } : {}),
+          sourcePage,
+          consentAccepted: true,
+          workflowStatus: "New",
+        });
+      } else {
+        await createGenericSubmission({
+          formTag: submitTag,
+          fullName: name.trim(),
+          email: email.trim() || undefined,
+          phone: `${countryCode} ${phone}`.trim(),
+          preferredShowroom,
+          preferredDate: date || undefined,
+          selectedTimeSlot: selectedSlot ?? undefined,
+          purposeOfVisit: purpose.trim() || undefined,
+          notes: composedNotes || undefined,
+          ...(customer?.id != null ? { magentoCustomerId: customer.id } : {}),
+          sourcePage,
+          consentAccepted: true,
+          workflowStatus: "New",
+        });
+      }
 
       showStatusToast("Visit booked");
       handleClose();
@@ -376,14 +443,18 @@ const BookStoreVisitPanel = ({
   }
 
   const panelBody =
-    step === "select-store" ? (
+    step === "select-store" || !selectedStore ? (
       <StoreSelectionStep
         stores={displayStores}
         selectedStoreId={selectedStoreId}
         layout={variant === "page" ? "page" : "panel"}
         formTitle={formTitle}
         onSelectStore={setSelectedStoreId}
-        onProceed={() => setStep("form")}
+        onProceed={() => {
+          if (selectedStore) {
+            setStep("form");
+          }
+        }}
         onBack={showStoreSelectionBack ? handleStoreSelectionBack : undefined}
         onClose={variant !== "page" ? handleClose : undefined}
         showBack={showStoreSelectionBack}
@@ -532,7 +603,7 @@ const StoreSelectionStep = ({
             >
               {stores.length === 0 ? (
                 <p className="px-4 py-8 font-gill text-base font-light leading-110 text-neutral500 lg:px-10">
-                  No showrooms match your search. Try another location or state.
+                  No showrooms available right now.
                 </p>
               ) : (
                 stores.map((store) => {
@@ -640,7 +711,7 @@ const StoreSelectionStep = ({
         >
           {stores.length === 0 ? (
             <p className="px-4 py-8 font-gill text-base font-light leading-110 text-neutral500 lg:px-10">
-              No showrooms match your search. Try another location or state.
+              No showrooms available right now.
             </p>
           ) : (
             stores.map((store) => {
