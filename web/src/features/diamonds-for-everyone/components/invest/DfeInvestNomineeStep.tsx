@@ -13,16 +13,17 @@ const fieldInputClass =
   "h-14 w-full bg-aboutInactive p-3 font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600";
 
 const DfeInvestNomineeStep = () => {
-  const { nominee, cancelLabel, nextLabel } = diamondsForEveryonePageContent.investFlow;
+  const { nominee, cancelLabel } = diamondsForEveryonePageContent.investFlow;
   const {
     nomineeName,
     nomineeRelationship,
     nomineePhone,
+    nomineeEmail,
     setNomineeName,
     setNomineeRelationship,
     setNomineePhone,
+    setNomineeEmail,
     goNext,
-    goBack,
   } = useDfeInvestFlow();
 
   const [touched, setTouched] = useState(false);
@@ -46,14 +47,15 @@ const DfeInvestNomineeStep = () => {
 
       <div className="mt-6 flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <label className={fieldLabelClass} htmlFor="dfe-nominee-name">{nominee.nameLabel}</label>
+          <label className={fieldLabelClass} htmlFor="dfe-nominee-name">
+            {nominee.nameLabel}
+          </label>
           <input
             id="dfe-nominee-name"
             type="text"
             value={nomineeName}
             onChange={(event) => setNomineeName(event.target.value)}
             onBlur={() => setTouched(true)}
-            placeholder="Enter"
             className={fieldInputClass}
           />
         </div>
@@ -68,7 +70,11 @@ const DfeInvestNomineeStep = () => {
               value={nomineeRelationship}
               onChange={(event) => setNomineeRelationship(event.target.value)}
               onBlur={() => setTouched(true)}
-              className={cn(fieldInputClass, "appearance-none pr-10", !nomineeRelationship && "text-gray600")}
+              className={cn(
+                fieldInputClass,
+                "appearance-none pr-10",
+                !nomineeRelationship && "text-gray600",
+              )}
             >
               <option value="" disabled>Select</option>
               {nominee.relationshipOptions.map((option) => (
@@ -80,14 +86,30 @@ const DfeInvestNomineeStep = () => {
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className={fieldLabelClass} htmlFor="dfe-nominee-phone">{nominee.phoneLabel}</label>
+          <label className={fieldLabelClass} htmlFor="dfe-nominee-phone">
+            {nominee.phoneLabel}
+          </label>
           <input
             id="dfe-nominee-phone"
             type="tel"
             value={nomineePhone}
-            onChange={(event) => setNomineePhone(event.target.value.replace(/\D/g, "").slice(0, 10))}
+            onChange={(event) =>
+              setNomineePhone(event.target.value.replace(/\D/g, "").slice(0, 10))
+            }
             onBlur={() => setTouched(true)}
-            placeholder="Enter"
+            className={fieldInputClass}
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <label className={fieldLabelClass} htmlFor="dfe-nominee-email">
+            {nominee.emailLabel}
+          </label>
+          <input
+            id="dfe-nominee-email"
+            type="email"
+            value={nomineeEmail}
+            onChange={(event) => setNomineeEmail(event.target.value)}
             className={fieldInputClass}
           />
         </div>
@@ -105,14 +127,7 @@ const DfeInvestNomineeStep = () => {
               : "bg-neutral500 opacity-50",
           )}
         >
-          {nextLabel}
-        </button>
-        <button
-          type="button"
-          onClick={goBack}
-          className="border-b border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
-        >
-          BACK
+          {nominee.reviewAndPayLabel}
         </button>
         <Link
           href="/diamonds-for-everyone"

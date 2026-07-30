@@ -25,18 +25,19 @@ function InvestStepConnector() {
 
 function InvestStepCircle({
   number,
-  emphasized,
+  state,
 }: {
   number: number;
-  emphasized: boolean;
+  state: "completed" | "active" | "future";
 }) {
   return (
     <div
       className={cn(
-        "flex size-6 shrink-0 items-center justify-center rounded-full border border-solid",
-        emphasized
-          ? "border-darkblack font-gill text-sm font-normal leading-110 text-darkblack"
-          : "border-neutral500 font-gill text-sm font-light leading-110 text-neutral500",
+        "flex size-6 shrink-0 items-center justify-center rounded-full border border-solid font-gill text-sm leading-110",
+        state === "completed" &&
+          "border-darkblack bg-[#EBDFC6] font-normal text-darkblack",
+        state === "active" && "border-darkblack font-normal text-darkblack",
+        state === "future" && "border-neutral500 font-light text-neutral500",
       )}
     >
       {number}
@@ -54,17 +55,22 @@ const DfeInvestStepper = () => {
       <div className="flex w-full items-center justify-between px-7">
         {steps.map((stepItem, index) => {
           const isLast = index === steps.length - 1;
-          const emphasized = index <= activeIndex;
+          const circleState =
+            index < activeIndex
+              ? "completed"
+              : index === activeIndex
+                ? "active"
+                : "future";
 
           if (isLast) {
             return (
-              <InvestStepCircle key={stepItem.id} number={index + 1} emphasized={emphasized} />
+              <InvestStepCircle key={stepItem.id} number={index + 1} state={circleState} />
             );
           }
 
           return (
             <div key={stepItem.id} className="flex min-w-0 flex-1 items-center">
-              <InvestStepCircle number={index + 1} emphasized={emphasized} />
+              <InvestStepCircle number={index + 1} state={circleState} />
               <InvestStepConnector />
             </div>
           );
@@ -75,14 +81,16 @@ const DfeInvestStepper = () => {
         className="flex w-full items-start justify-between whitespace-nowrap text-center font-gill text-xl leading-110 text-darkblack"
       >
         {steps.map((stepItem, index) => {
-          const emphasized = index <= activeIndex;
+          const isActive = index === activeIndex;
+          const isFuture = index > activeIndex;
 
           return (
             <p
               key={stepItem.id}
               className={cn(
                 "shrink-0",
-                emphasized ? "font-normal" : "font-light text-neutral500",
+                isActive ? "font-normal" : "font-light",
+                isFuture && "text-neutral500",
               )}
             >
               {stepItem.label}

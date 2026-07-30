@@ -7,6 +7,7 @@ import DfeInvestKycStep from "./DfeInvestKycStep";
 import DfeInvestNomineeStep from "./DfeInvestNomineeStep";
 import DfeInvestIntroStep from "./DfeInvestIntroStep";
 import DfeInvestReviewStep from "./DfeInvestReviewStep";
+import DfeInvestSuccessStep from "./DfeInvestSuccessStep";
 import { DfeInvestHeader, DfeInvestStepper } from "./DfeInvestStepper";
 
 function DfeInvestStepContent() {
@@ -14,6 +15,10 @@ function DfeInvestStepContent() {
 
   if (step === "intro") {
     return <DfeInvestIntroStep />;
+  }
+
+  if (step === "success") {
+    return <DfeInvestSuccessStep />;
   }
 
   if (step === "nominee") {
@@ -37,17 +42,22 @@ const DfeInvestPageContent = ({ monthlyAmount }: { monthlyAmount: number }) => {
 
 function DfeInvestPageLayout() {
   const { step } = useDfeInvestFlow();
-  const showStepper = step !== "intro";
-  const showInvestHeader = step !== "intro";
+  const isStandaloneStep = step === "intro" || step === "success";
+  const showStepper = !isStandaloneStep;
+  const showInvestHeader = !isStandaloneStep;
 
   return (
     <section
-      className="relative flex min-h-[calc(100dvh-4.5rem-env(safe-area-inset-top,0px))] flex-col items-center justify-center bg-gray300 py-8 md:landscape:min-h-[calc(100dvh-104px)] lg:landscape:min-h-[calc(100dvh-104px)]"
+      className={
+        step === "review"
+          ? "relative flex min-h-[calc(100dvh-4.5rem-env(safe-area-inset-top,0px))] flex-col items-center justify-start bg-gray300 py-8 md:landscape:min-h-[calc(100dvh-104px)] lg:landscape:min-h-[calc(100dvh-104px)]"
+          : "relative flex min-h-[calc(100dvh-4.5rem-env(safe-area-inset-top,0px))] flex-col items-center justify-center bg-gray300 py-8 md:landscape:min-h-[calc(100dvh-104px)] lg:landscape:min-h-[calc(100dvh-104px)]"
+      }
     >
       <div className="relative mx-auto flex w-full max-w-[601px] flex-col items-center gap-10 px-4">
         {showInvestHeader ? <DfeInvestHeader /> : null}
         {showStepper ? <DfeInvestStepper /> : null}
-        <div className={step === "intro" ? "w-full" : "w-full bg-gray200 p-6"}>
+        <div className={isStandaloneStep ? "w-full" : "w-full bg-gray200 p-6"}>
           <DfeInvestStepContent />
         </div>
       </div>

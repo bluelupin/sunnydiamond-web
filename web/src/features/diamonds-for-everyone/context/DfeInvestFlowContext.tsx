@@ -10,7 +10,7 @@ import {
 } from "react";
 import { diamondsForEveryonePageContent } from "../data/content";
 
-export type DfeInvestStep = "intro" | "kyc" | "nominee" | "review";
+export type DfeInvestStep = "intro" | "kyc" | "nominee" | "review" | "success";
 
 type DfeInvestFlowContextValue = {
   monthlyAmount: number;
@@ -22,13 +22,16 @@ type DfeInvestFlowContextValue = {
   nomineeName: string;
   nomineeRelationship: string;
   nomineePhone: string;
+  nomineeEmail: string;
   setIdType: (value: string) => void;
   setIdNumber: (value: string) => void;
   setIdFile: (file: File | null) => void;
   setNomineeName: (value: string) => void;
   setNomineeRelationship: (value: string) => void;
   setNomineePhone: (value: string) => void;
+  setNomineeEmail: (value: string) => void;
   goToStep: (step: DfeInvestStep) => void;
+  completeEnrollment: () => void;
   goNext: () => void;
   goBack: () => void;
   contribution: number;
@@ -37,7 +40,7 @@ type DfeInvestFlowContextValue = {
 
 const DfeInvestFlowContext = createContext<DfeInvestFlowContextValue | undefined>(undefined);
 
-const STEP_ORDER: DfeInvestStep[] = ["intro", "kyc", "nominee", "review"];
+const STEP_ORDER: DfeInvestStep[] = ["intro", "kyc", "nominee", "review", "success"];
 
 export function DfeInvestFlowProvider({
   initialMonthlyAmount,
@@ -68,6 +71,7 @@ export function DfeInvestFlowProvider({
   const [nomineeName, setNomineeName] = useState("");
   const [nomineeRelationship, setNomineeRelationship] = useState("");
   const [nomineePhone, setNomineePhone] = useState("");
+  const [nomineeEmail, setNomineeEmail] = useState("");
 
   const setMonthlyAmount = useCallback(
     (value: number) => {
@@ -81,6 +85,10 @@ export function DfeInvestFlowProvider({
 
   const goToStep = useCallback((nextStep: DfeInvestStep) => {
     setStep(nextStep);
+  }, []);
+
+  const completeEnrollment = useCallback(() => {
+    setStep("success");
   }, []);
 
   const goNext = useCallback(() => {
@@ -108,13 +116,16 @@ export function DfeInvestFlowProvider({
       nomineeName,
       nomineeRelationship,
       nomineePhone,
+      nomineeEmail,
       setIdType,
       setIdNumber,
       setIdFile,
       setNomineeName,
       setNomineeRelationship,
       setNomineePhone,
+      setNomineeEmail,
       goToStep,
+      completeEnrollment,
       goNext,
       goBack,
       contribution,
@@ -130,7 +141,9 @@ export function DfeInvestFlowProvider({
       nomineeName,
       nomineeRelationship,
       nomineePhone,
+      nomineeEmail,
       goToStep,
+      completeEnrollment,
       goNext,
       goBack,
       contribution,
