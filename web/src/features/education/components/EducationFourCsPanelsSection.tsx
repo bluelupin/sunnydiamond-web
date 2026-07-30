@@ -39,11 +39,8 @@ const resolveActiveImage = (
   const optionImage = slider.options[activeIndex]?.image;
   if (optionImage) return optionImage;
 
-  if (slider.dualImages) {
-    const midpoint = Math.floor(slider.options.length / 2);
-    return activeIndex >= midpoint ? slider.dualImages[1] : slider.dualImages[0];
-  }
-
+  // No dual/compare fallback — if this gradeStop has no CMS gradeImage, show nothing.
+  // Clarity/Colour can still use panel-level visualImage via slider.image.
   return slider.image ?? null;
 };
 
@@ -111,28 +108,7 @@ const PanelMedia = ({
               "items-center",
             )}
           >
-            {panel.id === "cut" && panel.slider.dualImages ? (
-              <div className="flex items-center gap-6 lg:gap-[24px]">
-                <div className="relative size-[120px] shrink-0 overflow-hidden md:size-[160px] lg:size-[200px]">
-                  <Image
-                    src={panel.slider.dualImages[0]}
-                    alt=""
-                    fill
-                    className="object-cover"
-                    sizes="200px"
-                  />
-                </div>
-                <div className="relative size-[120px] shrink-0 overflow-hidden md:size-[160px] lg:size-[200px]">
-                  <Image
-                    src={panel.slider.dualImages[1]}
-                    alt=""
-                    fill
-                    className="object-cover"
-                    sizes="200px"
-                  />
-                </div>
-              </div>
-            ) : activeImage ? (
+            {activeImage ? (
               <div className="relative size-[120px] shrink-0 overflow-hidden transition-opacity duration-300 lg:size-[200px]">
                 <Image
                   key={`${panel.id}-${activeIndex}-${activeImage}`}

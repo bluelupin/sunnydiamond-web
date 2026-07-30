@@ -384,7 +384,12 @@ const EducationMetricSlider = ({
 
       {showEndpointLabels ? (
         <>
-          {options[0] ? (
+          {options[0] &&
+          !(
+            activeIndex > 0 &&
+            activeIndex < lastDotIndex &&
+            Math.abs((dotCenters[0] ?? 0) - activeDotCenter) < 56
+          ) ? (
             <span
               className={cn(
                 "pointer-events-none absolute whitespace-nowrap font-gill font-normal leading-110 transition-colors",
@@ -401,7 +406,12 @@ const EducationMetricSlider = ({
               {options[0].label}
             </span>
           ) : null}
-          {options[lastDotIndex] ? (
+          {options[lastDotIndex] &&
+          !(
+            activeIndex > 0 &&
+            activeIndex < lastDotIndex &&
+            Math.abs((dotCenters[lastDotIndex] ?? 0) - activeDotCenter) < 56
+          ) ? (
             <span
               className={cn(
                 "pointer-events-none absolute whitespace-nowrap font-gill font-normal leading-110 transition-colors",
