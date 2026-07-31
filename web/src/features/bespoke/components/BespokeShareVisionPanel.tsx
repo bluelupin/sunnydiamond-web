@@ -10,6 +10,7 @@ import {
   appointmentLabelClassName,
 } from "@/shared/constants/appointmentForm";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { DetailDarkButton } from "@/features/products/components/detail/shared";
 import { ProductDetailSidePanelShell } from "@/features/products/components/detail/ProductDetailSidePanelShell";
 import { createBespokeSubmission } from "@/services/bespoke/bespoke-submission.service";
 import type { NormalizedBespokeCustomDesignForm } from "@/services/bespoke/contact-bespoke-page.types";
@@ -318,14 +319,14 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
           <p className="text-center font-gill text-sm font-light leading-normal tracking-normal text-neutral500">
             {form.helperText}
           </p>
-          <button
+          <DetailDarkButton
             type="button"
             onClick={handleSubmit}
             disabled={isSubmitting || (submitted && !isValid)}
-            className="btn-dark-slide inline-flex h-14 w-full items-center justify-center px-7 font-gill text-sm uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50 border border-darkblack"
+            className="w-full border-darkblack disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSubmitting ? "SUBMITTING..." : form.submitButtonText}
-          </button>
+          </DetailDarkButton>
         </PanelFooter>
       </ProductDetailSidePanelShell>
     </>
