@@ -202,6 +202,45 @@ export const policyCertificationsContent = {
           ],
         },
         {
+          id: "exchange-and-resizing",
+          navLabel: "EXCHANGE AND RESIZING",
+          contentTitle: "Exchange and Resizing",
+          sections: [
+            {
+              id: "exchange-overview",
+              title: "Exchange and Resizing",
+              body:
+                "Review exchange, resizing, and alteration details. Contact Sunny Diamonds customer support for eligibility, timelines, and showroom assistance for exchange or resizing requests.",
+            },
+          ],
+        },
+        {
+          id: "shipping-delivery",
+          navLabel: "SHIPPING & DELIVERY",
+          contentTitle: "Shipping & Delivery",
+          sections: [
+            {
+              id: "shipping-overview",
+              title: "Shipping & Delivery",
+              body:
+                "See shipping coverage, delivery timelines, and order fulfillment details for domestic and international Sunny Diamonds orders.",
+            },
+          ],
+        },
+        {
+          id: "cash-on-delivery-policy",
+          navLabel: "CASH ON DELIVERY POLICY",
+          contentTitle: "Cash on Delivery Policy",
+          sections: [
+            {
+              id: "cod-overview",
+              title: "Cash on Delivery Policy",
+              body:
+                "Understand cash-on-delivery availability, order limits, and related conditions for eligible Sunny Diamonds purchases.",
+            },
+          ],
+        },
+        {
           id: "dfe-terms",
           navLabel: "DFE TERMS & CONDITIONS",
           mobileNavLabel: "DFE TERMS AND CONDITIONS",

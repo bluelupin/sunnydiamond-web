@@ -33,18 +33,17 @@ export const siteConfig = {
       { to: "/jewellery", label: "Jewellery" },
       { to: "/gifting", label: "Gifting" },
       { to: "/bespoke-jewellery", label: "Bespoke" },
-      { to: "/about", label: "World of Sunny" },
+      { to: "/world-of-sunny", label: "World of Sunny" },
     ],
     footer: {
       columns: [
         {
           heading: "Our Company",
           links: [
-            { to: "/about", label: "About Us" },
+            { to: "/world-of-sunny", label: "World of Sunny" },
             { to: "/learn-about-diamonds", label: "Learn About Diamonds" },
             { to: "/diamonds-for-everyone", label: "Diamonds For Everyone" },
             { to: "/careers", label: "Careers" },
-            { to: "/news", label: "News" },
             { to: "/blogs", label: "Blogs" },
           ],
         },
@@ -66,13 +65,30 @@ export const siteConfig = {
         {
           heading: "Legal",
           links: [
-            { to: "/returns-and-cancellations", label: "Returns and Cancellations" },
-            { to: "/exchange-and-resizing", label: "Exchange and Resizing" },
-            { to: "/shipping-delivery", label: "Shipping & Delivery" },
-            { to: "/cash-on-delivery-policy", label: "Cash on Delivery Policy" },
-            { to: "/old-gold-purchase-policy-kerala-only", label: "Old Gold Purchase Policy (Kerala Only)" },
-            { to: "/privacy-policy", label: "Privacy Policy" },
-            { to: "/terms-and-conditions", label: "Terms & Conditions" },
+            {
+              to: "/policy-and-certifications?policy=15-day-return-policy",
+              label: "Returns and Cancellations",
+            },
+            {
+              to: "/policy-and-certifications?policy=exchange-and-resizing",
+              label: "Exchange and Resizing",
+            },
+            {
+              to: "/policy-and-certifications?policy=shipping-delivery",
+              label: "Shipping & Delivery",
+            },
+            {
+              to: "/policy-and-certifications?policy=cash-on-delivery-policy",
+              label: "Cash on Delivery Policy",
+            },
+            {
+              to: "/policy-and-certifications?policy=privacy-policy",
+              label: "Privacy Policy",
+            },
+            {
+              to: "/policy-and-certifications?policy=terms-and-conditions",
+              label: "Terms & Conditions",
+            },
           ],
         },
       ],

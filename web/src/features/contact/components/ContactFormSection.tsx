@@ -7,6 +7,7 @@ import Reveal from "@/shared/Animation/Reveal";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
 import { useToast } from "@/shared/hooks/use-toast";
+import { buildPolicyCertificationsHref } from "@/features/cms/utils/policyCertificationsRoutes";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import { useAuth } from "@/features/auth/context/AuthContext";
@@ -358,7 +359,7 @@ const ContactFormSection = () => {
                   {form.termsLabel}
                 </Link>{" "}
                 <span className="font-gill font-normal">and</span>{" "}
-                <Link href="/privacy-policy" className={consentLinkClassName}>
+                <Link href={buildPolicyCertificationsHref("privacy-policy")} className={consentLinkClassName}>
                   {form.privacyLabel}
                 </Link>
                 {form.consentSuffix}
@@ -373,7 +374,7 @@ const ContactFormSection = () => {
                 </Link>{" "}
                 <span className="font-normal">and</span>{" "}
                 <Link
-                  href="/privacy-policy"
+                  href={buildPolicyCertificationsHref("privacy-policy")}
                   className="border-b border-neutral500 text-neutral500"
                 >
                   {form.mobilePrivacyLabel}

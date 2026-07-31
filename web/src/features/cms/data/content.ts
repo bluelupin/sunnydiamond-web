@@ -128,13 +128,13 @@ export const homeContent = {
     title: "Crafting Brilliance Since 1987",
     description:
       "For over 35 years, Sunny Diamonds has been transforming the world's finest diamonds into wearable works of art. Our atelier combines centuries-old techniques with contemporary design to create pieces that transcend time.",
-    cta: { label: "Read Our Story", to: "/about" },
+    cta: { label: "Read Our Story", to: "/world-of-sunny" },
   },
   promise: {
     title: "THE SUNNY PROMISE",
     description:
       "Guided by heritage and perfected by pride every setting a masterpiece of expert precision.",
-    cta: { label: "View Our Story", to: "/about" },
+    cta: { label: "View Our Story", to: "/world-of-sunny" },
   },
 } as const;
 

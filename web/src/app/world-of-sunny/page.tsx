@@ -10,6 +10,7 @@ import {
   EMPTY_ABOUT_PAGE,
 } from "@/services/about/about-page.service";
 import { buildAboutJsonLd, resolveAboutSeoMetadata } from "@/shared/lib/seo/aboutSeo";
+import { WORLD_OF_SUNNY_PATH } from "@/shared/utils/navigation";
 
 /** Refresh CMS-driven about content without a full redeploy. */
 // export const revalidate = 300;
@@ -28,12 +29,12 @@ export async function generateMetadata(): Promise<Metadata> {
     return constructMetadata({
       title: seoContent.about.title,
       description: seoContent.about.description,
-      canonicalPath: "/about",
+      canonicalPath: WORLD_OF_SUNNY_PATH,
     });
   }
 }
 
-async function AboutPageContent() {
+async function WorldOfSunnyPageContent() {
   let page = EMPTY_ABOUT_PAGE;
 
   try {
@@ -53,7 +54,7 @@ async function AboutPageContent() {
 export default function Page() {
   return (
     <Suspense fallback={<AboutPageSkeleton />}>
-      <AboutPageContent />
+      <WorldOfSunnyPageContent />
     </Suspense>
   );
 }

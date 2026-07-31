@@ -8,6 +8,7 @@ import { CartDivider } from "@/features/cart/components/CartFlowUi";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { invalidFieldContainerClassName } from "@/shared/utils/formValidation";
 import { cn } from "@/shared/utils/cn";
+import { buildPolicyCertificationsHref } from "@/features/cms/utils/policyCertificationsRoutes";
 import { isOtpComplete, LOGIN_OTP_LENGTH, normalizeIndianPhoneDigits } from "../utils/authValidation";
 
 const OTP_LENGTH = LOGIN_OTP_LENGTH;
@@ -199,7 +200,7 @@ const LoginOtpContent = ({
             Terms and Conditions
           </Link>{" "}
           and{" "}
-          <Link href="/privacy-policy" className="font-normal text-neutral500">
+          <Link href={buildPolicyCertificationsHref("privacy-policy")} className="font-normal text-neutral500">
             Privacy Policy
           </Link>
         </p>

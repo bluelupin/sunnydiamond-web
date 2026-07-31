@@ -1,14 +1,20 @@
 import { seoContent } from "@/features/cms/data/content";
 import { siteConfig } from "@/shared/lib/siteConfig";
+import { WORLD_OF_SUNNY_PATH } from "@/shared/utils/navigation";
 import type { NormalizedAboutPage } from "@/services/about/about-page.types";
 
 export function resolveAboutSeoMetadata(page: NormalizedAboutPage | null) {
   const cmsSeo = page?.seo;
+  const cmsCanonical = cmsSeo?.canonicalPath?.replace(/\/$/, "") || "";
+  const canonicalPath =
+    cmsCanonical === "/about" || !cmsCanonical
+      ? WORLD_OF_SUNNY_PATH
+      : cmsSeo?.canonicalPath ?? WORLD_OF_SUNNY_PATH;
 
   return {
     title: cmsSeo?.metaTitle ?? seoContent.about.title,
     description: cmsSeo?.metaDescription ?? seoContent.about.description,
-    canonicalPath: cmsSeo?.canonicalPath ?? "/about",
+    canonicalPath,
     keywords: cmsSeo?.metaKeywords,
   };
 }

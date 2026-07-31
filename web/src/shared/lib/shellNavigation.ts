@@ -1,4 +1,10 @@
 import { siteConfig } from "@/shared/lib/siteConfig";
+import {
+  buildPolicyCertificationsHref,
+  resolvePolicyIdFromFooterPath,
+  resolvePolicyIdFromParam,
+} from "@/features/cms/utils/policyCertificationsRoutes";
+import { WORLD_OF_SUNNY_PATH } from "@/shared/utils/navigation";
 
 export type HeaderNavLink = {
   label: string;
@@ -78,7 +84,8 @@ const REMOVED_FOOTER_PATHS = new Set([
   "/monthly-plans",
   "/gift-card",
   "/finance-options",
-  "/policy-and-certification",
+  "/news",
+  "/old-gold-purchase-policy-kerala-only",
 ]);
 
 function isRemovedFooterLink(link: FooterLink): boolean {
@@ -98,11 +105,78 @@ function isRemovedFooterLink(link: FooterLink): boolean {
   return false;
 }
 
+function normalizeFooterLink(link: FooterLink): FooterLink {
+  const normalizedUrl = link.url.replace(/\/$/, "") || "/";
+  const normalizedLabel = link.label.trim().toLowerCase();
+  const pathOnly = normalizedUrl.split("?")[0] || "/";
+  const policyQueryMatch = link.url.match(/[?&]policy=([^&]+)/);
+  const policyIdFromQuery = resolvePolicyIdFromParam(
+    policyQueryMatch ? decodeURIComponent(policyQueryMatch[1]) : undefined,
+  );
+
+  if (normalizedUrl === "/about" || normalizedLabel === "about us") {
+    return {
+      ...link,
+      label: "World of Sunny",
+      url: WORLD_OF_SUNNY_PATH,
+    };
+  }
+
+  const policyId = policyIdFromQuery ?? resolvePolicyIdFromFooterPath(pathOnly);
+  if (policyId) {
+    return {
+      ...link,
+      label: policyId === "privacy-policy" ? "Privacy Policy" : link.label,
+      url: buildPolicyCertificationsHref(policyId),
+    };
+  }
+
+  if (
+    pathOnly === "/policy-and-certifications" ||
+    pathOnly === "/policy-and-certification" ||
+    pathOnly === "/privacy-policy" ||
+    normalizedLabel === "privacy policy"
+  ) {
+    return {
+      ...link,
+      label: "Privacy Policy",
+      url: buildPolicyCertificationsHref("privacy-policy"),
+    };
+  }
+
+  if (normalizedLabel === "policy & certifications" || normalizedLabel === "policy and certifications") {
+    return {
+      ...link,
+      label: "Privacy Policy",
+      url: buildPolicyCertificationsHref("privacy-policy"),
+    };
+  }
+
+  return link;
+}
+
+function dedupeFooterLinks(links: FooterLink[]): FooterLink[] {
+  const seen = new Set<string>();
+
+  return links.filter((link) => {
+    if (seen.has(link.url)) {
+      return false;
+    }
+
+    seen.add(link.url);
+    return true;
+  });
+}
+
 function filterFooterLinks(groups: readonly FooterLinkGroup[]): FooterLinkGroup[] {
   return groups
     .map((group) => ({
       ...group,
-      links: group.links.filter((link) => !isRemovedFooterLink(link)),
+      links: dedupeFooterLinks(
+        group.links
+          .map(normalizeFooterLink)
+          .filter((link) => !isRemovedFooterLink(link)),
+      ),
     }))
     .filter((group) => group.links.length > 0);
 }

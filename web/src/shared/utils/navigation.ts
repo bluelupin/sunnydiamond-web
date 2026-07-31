@@ -1,8 +1,12 @@
 import { learnAboutDiamondsRoute } from "@/features/education/data/content";
 import { isJewelleryCategoryPath } from "@/features/jewellery-product/utils/jewelleryRoutes";
 
+export const WORLD_OF_SUNNY_PATH = "/world-of-sunny";
+export const POLICY_AND_CERTIFICATIONS_PATH = "/policy-and-certifications";
+
 export function resolveHeaderNavHref(label: string, url: string): string {
   const normalizedLabel = label.trim().toLowerCase();
+  const normalizedUrl = url.replace(/\/$/, "") || "/";
 
   if (normalizedLabel === "jewellery" || normalizedLabel === "jewelry") {
     return "/jewellery";
@@ -14,6 +18,14 @@ export function resolveHeaderNavHref(label: string, url: string): string {
 
   if (normalizedLabel === "gifting") {
     return "/gifting";
+  }
+
+  if (
+    normalizedLabel === "world of sunny" ||
+    normalizedLabel === "about us" ||
+    normalizedUrl === "/about"
+  ) {
+    return WORLD_OF_SUNNY_PATH;
   }
 
   return url;
@@ -33,7 +45,7 @@ export function isHeroOverlayRoute(pathname: string): boolean {
   return (
     isAuthRoute(pathname) ||
     pathname === "/" ||
-    pathname === "/about" ||
+    pathname === WORLD_OF_SUNNY_PATH ||
     pathname === learnAboutDiamondsRoute ||
     isJewelleryCategoryPath(pathname) ||
     pathname === "/bespoke-jewellery" ||

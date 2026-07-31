@@ -71,6 +71,46 @@ const nextConfig: NextConfig = {
 
     return [
       {
+        source: "/about",
+        destination: "/world-of-sunny",
+        permanent: true,
+      },
+      {
+        source: "/privacy-policy",
+        destination: "/policy-and-certifications?policy=privacy-policy",
+        permanent: true,
+      },
+      {
+        source: "/policy-and-certification",
+        destination: "/policy-and-certifications?policy=privacy-policy",
+        permanent: true,
+      },
+      {
+        source: "/returns-and-cancellations",
+        destination: "/policy-and-certifications?policy=15-day-return-policy",
+        permanent: true,
+      },
+      {
+        source: "/exchange-and-resizing",
+        destination: "/policy-and-certifications?policy=exchange-and-resizing",
+        permanent: true,
+      },
+      {
+        source: "/shipping-delivery",
+        destination: "/policy-and-certifications?policy=shipping-delivery",
+        permanent: true,
+      },
+      {
+        source: "/cash-on-delivery-policy",
+        destination: "/policy-and-certifications?policy=cash-on-delivery-policy",
+        permanent: true,
+      },
+      {
+        source: "/terms-and-conditions",
+        destination: "/policy-and-certifications?policy=terms-and-conditions",
+        permanent: true,
+      },
+      {
         source: "/products",
         destination: "/jewellery",
         permanent: true,

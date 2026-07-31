@@ -12,12 +12,11 @@ export const revalidate = 3600;
 const staticRoutes = [
   { url: "/", changeFrequency: "weekly" as const, priority: 1 },
   { url: "/jewellery", changeFrequency: "daily" as const, priority: 0.9 },
-  { url: "/about", changeFrequency: "monthly" as const, priority: 0.6 },
+  { url: "/world-of-sunny", changeFrequency: "monthly" as const, priority: 0.6 },
   { url: "/contact", changeFrequency: "monthly" as const, priority: 0.6 },
   { url: "/learn-about-diamonds", changeFrequency: "monthly" as const, priority: 0.5 },
   { url: "/diamonds-for-everyone", changeFrequency: "monthly" as const, priority: 0.5 },
   { url: "/careers", changeFrequency: "monthly" as const, priority: 0.5 },
-  { url: "/news", changeFrequency: "monthly" as const, priority: 0.5 },
   { url: "/blogs", changeFrequency: "weekly" as const, priority: 0.6 },
   { url: "/store-locator", changeFrequency: "monthly" as const, priority: 0.6 },
   { url: "/faqs", changeFrequency: "monthly" as const, priority: 0.5 },
@@ -25,17 +24,7 @@ const staticRoutes = [
   { url: "/bespoke-jewellery", changeFrequency: "monthly" as const, priority: 0.7 },
   { url: "/gifting", changeFrequency: "weekly" as const, priority: 0.8 },
   { url: "/order-tracking", changeFrequency: "monthly" as const, priority: 0.4 },
-  { url: "/returns-and-cancellations", changeFrequency: "monthly" as const, priority: 0.4 },
-  { url: "/exchange-and-resizing", changeFrequency: "monthly" as const, priority: 0.4 },
-  { url: "/shipping-delivery", changeFrequency: "monthly" as const, priority: 0.4 },
-  { url: "/cash-on-delivery-policy", changeFrequency: "monthly" as const, priority: 0.4 },
-  {
-    url: "/old-gold-purchase-policy-kerala-only",
-    changeFrequency: "monthly" as const,
-    priority: 0.4,
-  },
-  { url: "/privacy-policy", changeFrequency: "monthly" as const, priority: 0.4 },
-  { url: "/terms-and-conditions", changeFrequency: "monthly" as const, priority: 0.4 },
+  { url: "/policy-and-certifications", changeFrequency: "monthly" as const, priority: 0.4 },
 ];
 
 const categoryRoutes = JEWELLERY_CATEGORY_URL_KEYS.map((urlKey) => ({

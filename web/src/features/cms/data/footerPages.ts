@@ -14,11 +14,6 @@ export const footerPages = {
     description:
       "Join Sunny Diamonds — explore open roles, employee benefits, and life at our diamond jewellery atelier and showrooms.",
   },
-  news: {
-    title: "News",
-    description:
-      "Read brand updates, announcements, and stories from Sunny Diamonds. The full page UI will be added here later.",
-  },
   blogs: {
     title: "Blogs",
     description:
@@ -73,11 +68,6 @@ export const footerPages = {
     title: "Cash on Delivery Policy",
     description:
       "Understand cash-on-delivery availability and related conditions. The full page UI will be added here later.",
-  },
-  oldGoldPurchasePolicy: {
-    title: "Old Gold Purchase Policy (Kerala Only)",
-    description:
-      "Review the old gold purchase policy for Kerala customers. The full page UI will be added here later.",
   },
   privacyPolicy: {
     title: "Policy & Certifications",

@@ -6,6 +6,7 @@ import LeftArrow from "@/assets/Icons/LeftArrow";
 import { CartDivider, CartPrimaryButton } from "@/features/cart/components/CartFlowUi";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import { cn } from "@/shared/utils/cn";
+import { buildPolicyCertificationsHref } from "@/features/cms/utils/policyCertificationsRoutes";
 import { isEmailRegisterReady } from "../utils/authValidation";
 
 type LoginEmailCreateAccountContentProps = {
@@ -199,7 +200,7 @@ const LoginEmailCreateAccountContent = ({
           <p className="font-gill text-sm font-light leading-110 text-neutral500">
             By checking this box, you agree to receive updates, offers, and service-related communication.
             Your data is protected as per our{" "}
-            <Link href="/privacy-policy" className="font-normal text-neutral500 underline-offset-2 hover:underline">
+            <Link href={buildPolicyCertificationsHref("privacy-policy")} className="font-normal text-neutral500 underline-offset-2 hover:underline">
               privacy policy
             </Link>
             .

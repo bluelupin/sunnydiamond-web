@@ -88,7 +88,7 @@ export const profilePromoContent = {
     description:
       "Hassle-free returns available within 15 days of delivery on eligible orders.",
     ctaLabel: "SEE RETURN POLICY",
-    ctaHref: "/returns-and-cancellations",
+    ctaHref: "/policy-and-certifications?policy=15-day-return-policy",
   },
 } as const;
 

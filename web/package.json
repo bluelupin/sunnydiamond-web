@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:signup": "node scripts/test-signup-flow.mjs",
+    "test:signup:smoke": "node scripts/test-signup-flow.mjs --smoke"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.3",

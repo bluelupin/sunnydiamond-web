@@ -3,8 +3,13 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
+import {
+  POLICY_QUERY_PARAM,
+  resolvePolicyIdFromParam,
+} from "@/features/cms/utils/policyCertificationsRoutes";
 import {
   defaultPolicyId,
   getPolicyById,
@@ -476,9 +481,25 @@ function PolicySupportSection() {
 const PolicyCertificationsPage = ({
   initialPolicyId = defaultPolicyId,
 }: PolicyCertificationsPageProps) => {
-  const [activePolicyId, setActivePolicyId] = useState(initialPolicyId);
+  const searchParams = useSearchParams();
+  const policyFromUrl = resolvePolicyIdFromParam(searchParams.get(POLICY_QUERY_PARAM));
+
+  const [activePolicyId, setActivePolicyId] = useState(
+    policyFromUrl ?? initialPolicyId,
+  );
   const [searchQuery, setSearchQuery] = useState("");
-  const [mobileShowDetail, setMobileShowDetail] = useState(false);
+  const [mobileShowDetail, setMobileShowDetail] = useState(Boolean(policyFromUrl));
+
+  useEffect(() => {
+    const resolvedPolicyId = resolvePolicyIdFromParam(searchParams.get(POLICY_QUERY_PARAM));
+    if (!resolvedPolicyId) {
+      return;
+    }
+
+    setActivePolicyId(resolvedPolicyId);
+    setSearchQuery("");
+    setMobileShowDetail(true);
+  }, [searchParams]);
 
   const activePolicy = getPolicyById(activePolicyId) ?? getPolicyById(defaultPolicyId);
 
