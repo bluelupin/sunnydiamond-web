@@ -1,21 +1,23 @@
 "use client";
 
-import { blogsPageContent } from "../data/content";
-import type { BlogCategoryId } from "../types";
+import type { BlogCategory, BlogCategoryId } from "../types";
 
 type BlogsFilterBarProps = {
+  filterLabel: string;
+  categories: BlogCategory[];
   selectedCategory: BlogCategoryId;
   onSelectCategory: (category: BlogCategoryId) => void;
 };
 
-const BlogsFilterBar = ({ selectedCategory, onSelectCategory }: BlogsFilterBarProps) => {
-  const { filterLabel, categories } = blogsPageContent;
-
+const BlogsFilterBar = ({
+  filterLabel,
+  categories,
+  selectedCategory,
+  onSelectCategory,
+}: BlogsFilterBarProps) => {
   return (
     <div className="mx-auto w-full max-w-1440 px-4 pt-16 md:px-10">
-      <div
-        className="flex min-h-[38px] flex-col gap-4 md:h-[38px] md:flex-row md:items-center md:justify-between md:gap-0"
-      >
+      <div className="flex min-h-[38px] flex-col gap-4 md:h-[38px] md:flex-row md:items-center md:justify-between md:gap-0">
         <p className="shrink-0 font-gill text-base font-normal leading-110 text-darkblack">
           {filterLabel}
         </p>

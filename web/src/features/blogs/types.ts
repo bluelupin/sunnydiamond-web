@@ -1,11 +1,5 @@
-export type BlogCategoryId =
-  | "all"
-  | "bridal"
-  | "buying-guides"
-  | "occasion"
-  | "gifting"
-  | "jewellery"
-  | "styling";
+/** Static category ids plus CMS `blog-categories` values when available. */
+export type BlogCategoryId = string;
 
 export type BlogCategory = {
   id: BlogCategoryId;
@@ -20,7 +14,7 @@ export type BlogPost = {
   readTime: string;
   imageSrc: string;
   imageAlt: string;
-  category: Exclude<BlogCategoryId, "all">;
+  category: string;
   href: string;
 };
 

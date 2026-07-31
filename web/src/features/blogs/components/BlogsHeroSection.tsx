@@ -2,11 +2,19 @@
 
 import Image from "next/image";
 import { PLP_HERO_IMAGE_QUALITY } from "@/features/jewellery-product/utils/jewelleryPlpImage";
-import { blogsPageContent } from "../data/content";
 
-const BlogsHeroSection = () => {
-  const { hero } = blogsPageContent;
+type BlogsHeroSectionProps = {
+  hero: {
+    title: string;
+    image: {
+      desktopUrl: string;
+      mobileUrl: string;
+      alt: string;
+    };
+  };
+};
 
+const BlogsHeroSection = ({ hero }: BlogsHeroSectionProps) => {
   return (
     <section
       aria-labelledby="blogs-hero-title"

@@ -1,10 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
-import { blogsPageContent } from "../data/content";
+import type { BlogFeaturedPost } from "../types";
 
-const BlogsFeaturedSection = () => {
-  const featured = blogsPageContent.featured;
+type BlogsFeaturedSectionProps = {
+  featured: BlogFeaturedPost;
+};
 
+const BlogsFeaturedSection = ({ featured }: BlogsFeaturedSectionProps) => {
   return (
     <section
       aria-labelledby="blogs-featured-title"

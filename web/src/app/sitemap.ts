@@ -3,7 +3,7 @@ import {
   buildJewelleryCategoryHref,
   JEWELLERY_CATEGORY_URL_KEYS,
 } from "@/features/jewellery-product/utils/jewelleryRoutes";
-import { getAllBlogSlugs } from "@/features/blogs/data/getBlogDetail";
+import { getAllBlogSlugsForStaticParams } from "@/services/blogs/blogs.service";
 import { getMagentoProductSitemapEntries } from "@/services/magento/products/sitemapProducts.service";
 import { siteEnv } from "@/shared/lib/seo/siteConfig";
 
@@ -34,12 +34,21 @@ const categoryRoutes = JEWELLERY_CATEGORY_URL_KEYS.map((urlKey) => ({
 }));
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  let productRoutes: MetadataRoute.Sitemap = [];
+  let productRoutes: Array<{
+    url: string;
+    changeFrequency: "weekly";
+    priority: number;
+  }> = [];
+  let blogRoutes: Array<{
+    url: string;
+    changeFrequency: "weekly";
+    priority: number;
+  }> = [];
 
   try {
     const products = await getMagentoProductSitemapEntries();
     productRoutes = products.map((product) => ({
-      url: new URL(`/product/${product.urlKey}`, siteEnv.baseUrl).toString(),
+      url: `/product/${product.urlKey}`,
       changeFrequency: "weekly" as const,
       priority: 0.7,
     }));
@@ -47,19 +56,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     productRoutes = [];
   }
 
-  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...getBlogSlugRoutes()].map(
+  try {
+    const slugs = await getAllBlogSlugsForStaticParams();
+    blogRoutes = slugs.map((slug) => ({
+      url: `/blogs/${slug}`,
+      changeFrequency: "weekly" as const,
+      priority: 0.55,
+    }));
+  } catch {
+    blogRoutes = [];
+  }
+
+  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...blogRoutes].map(
     (route) => ({
       url: new URL(route.url, siteEnv.baseUrl).toString(),
       changeFrequency: route.changeFrequency,
       priority: route.priority,
     }),
   );
-}
-
-function getBlogSlugRoutes(): MetadataRoute.Sitemap {
-  return getAllBlogSlugs().map((slug) => ({
-    url: `/blogs/${slug}`,
-    changeFrequency: "weekly" as const,
-    priority: 0.55,
-  }));
 }

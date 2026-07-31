@@ -2,8 +2,12 @@
 
 import { useMemo, useState } from "react";
 import { cn } from "@/shared/utils/cn";
-import { blogsPageContent } from "../data/content";
-import type { BlogCategoryId, BlogPost } from "../types";
+import type {
+  BlogCategory,
+  BlogCategoryId,
+  BlogFeaturedPost,
+  BlogPost,
+} from "../types";
 import BlogsFilterBar from "./BlogsFilterBar";
 import { BlogCard } from "./BlogCard";
 import BlogsFeaturedSection from "./BlogsFeaturedSection";
@@ -13,6 +17,14 @@ const blogsGridSectionClassName =
 const INITIAL_VISIBLE = 3;
 const LOAD_MORE_STEP = 3;
 
+type BlogsListingSectionProps = {
+  filterLabel: string;
+  categories: BlogCategory[];
+  posts: BlogPost[];
+  featured: BlogFeaturedPost | null;
+  loadMoreButtonLabel: string;
+};
+
 function filterPosts(posts: BlogPost[], category: BlogCategoryId): BlogPost[] {
   if (category === "all") {
     return posts;
@@ -21,13 +33,19 @@ function filterPosts(posts: BlogPost[], category: BlogCategoryId): BlogPost[] {
   return posts.filter((post) => post.category === category);
 }
 
-const BlogsListingSection = () => {
+const BlogsListingSection = ({
+  filterLabel,
+  categories,
+  posts,
+  featured,
+  loadMoreButtonLabel,
+}: BlogsListingSectionProps) => {
   const [selectedCategory, setSelectedCategory] = useState<BlogCategoryId>("all");
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE + 6);
 
   const filteredPosts = useMemo(
-    () => filterPosts(blogsPageContent.posts, selectedCategory),
-    [selectedCategory],
+    () => filterPosts(posts, selectedCategory),
+    [posts, selectedCategory],
   );
 
   const firstRowPosts = filteredPosts.slice(0, 3);
@@ -37,6 +55,7 @@ const BlogsListingSection = () => {
     (visibleCount / Math.max(filteredPosts.length, 1)) * 360,
     360,
   );
+  const shownCount = Math.min(visibleCount, filteredPosts.length);
 
   const handleCategoryChange = (category: BlogCategoryId) => {
     setSelectedCategory(category);
@@ -46,6 +65,8 @@ const BlogsListingSection = () => {
   return (
     <>
       <BlogsFilterBar
+        filterLabel={filterLabel}
+        categories={categories}
         selectedCategory={selectedCategory}
         onSelectCategory={handleCategoryChange}
       />
@@ -60,7 +81,7 @@ const BlogsListingSection = () => {
         </section>
       ) : null}
 
-      <BlogsFeaturedSection />
+      {featured ? <BlogsFeaturedSection featured={featured} /> : null}
 
       {remainingPosts.length > 0 ? (
         <section className={blogsGridSectionClassName}>
@@ -83,7 +104,7 @@ const BlogsListingSection = () => {
             <div className="mx-auto mt-16 flex w-full max-w-[360px] flex-col items-center gap-6">
               <div className="flex w-full flex-col items-center gap-3">
                 <p className="font-gill text-base font-light leading-110 text-darkblack">
-                  {blogsPageContent.loadMore.progressLabel}
+                  {shownCount} out of {filteredPosts.length} Articles
                 </p>
                 <div className="h-0.5 w-full overflow-hidden bg-neutral300">
                   <div
@@ -101,7 +122,7 @@ const BlogsListingSection = () => {
                     "flex h-14 w-full items-center justify-center border border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-colors hover:border-darkblack",
                   )}
                 >
-                  {blogsPageContent.loadMore.buttonLabel}
+                  {loadMoreButtonLabel}
                 </button>
               ) : null}
             </div>
