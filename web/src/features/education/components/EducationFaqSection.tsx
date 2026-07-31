@@ -127,7 +127,10 @@ const EducationFaqSection = ({ faq }: EducationFaqSectionProps) => {
                 </ScrollReveal>
 
                 {index < faq.items.length - 1 ? (
-                  <div className="h-[0.5px] bg-neutral300" aria-hidden />
+                  <div
+                    className="w-full shrink-0 border-t border-neutral300 [border-top-width:0.5px]"
+                    aria-hidden
+                  />
                 ) : null}
               </Fragment>
             );

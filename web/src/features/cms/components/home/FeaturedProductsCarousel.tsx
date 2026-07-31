@@ -9,6 +9,8 @@ import RightArrow from "@/assets/Icons/RightArrow";
 import { cn } from "@/shared/utils/cn";
 import "slick-carousel/slick/slick.css";
 import "./featuredProductsCarousel.css";
+import { learnAboutDiamondsRoute } from "@/features/education/data/content";
+import { usePathname } from "next/navigation";
 
 export type FeaturedCarouselItem = {
   id: string | number;
@@ -130,7 +132,8 @@ export default function FeaturedProductsCarousel({
   const slidesToShow = showThreeUp ? 3 : renderItems.length;
   const logicalActiveIndex = normalizeIndex(activeIndex, sourceCount);
   const activeItem = items[logicalActiveIndex] ?? items[0];
-
+  const pathname = usePathname();
+  const isEducationPage = pathname === learnAboutDiamondsRoute;
   const refreshSlider = useCallback(() => {
     const slider = sliderRef.current as SliderWithInner | null;
     slider?.innerSlider?.onWindowResized?.();
@@ -225,36 +228,36 @@ export default function FeaturedProductsCarousel({
       onInit: handleInit,
       ...(showThreeUp
         ? {
-            responsive: [
-              {
-                breakpoint: 1024,
-                settings: {
-                  slidesToShow: 3,
-                  slidesToScroll: 1,
-                  centerMode: true,
-                  centerPadding: "0px",
-                },
+          responsive: [
+            {
+              breakpoint: 1024,
+              settings: {
+                slidesToShow: 3,
+                slidesToScroll: 1,
+                centerMode: true,
+                centerPadding: "0px",
               },
-              {
-                breakpoint: 768,
-                settings: {
-                  slidesToShow: 3,
-                  slidesToScroll: 1,
-                  centerMode: true,
-                  centerPadding: "0px",
-                },
+            },
+            {
+              breakpoint: 768,
+              settings: {
+                slidesToShow: 3,
+                slidesToScroll: 1,
+                centerMode: true,
+                centerPadding: "0px",
               },
-              {
-                breakpoint: 480,
-                settings: {
-                  slidesToShow: 3,
-                  slidesToScroll: 1,
-                  centerMode: true,
-                  centerPadding: "0px",
-                },
+            },
+            {
+              breakpoint: 480,
+              settings: {
+                slidesToShow: 3,
+                slidesToScroll: 1,
+                centerMode: true,
+                centerPadding: "0px",
               },
-            ],
-          }
+            },
+          ],
+        }
         : {}),
     }),
     [
@@ -335,8 +338,13 @@ export default function FeaturedProductsCarousel({
       </div>
 
       {/* Product details + mobile arrows — width matches center slide */}
-      <div className="featured-products-details flex flex-col items-center md:!w-[350px] !max-w-[350px] !w-full">
-        <div className="relative top-16 z-20 flex w-full items-center justify-between md:hidden">
+      <div className="featured-products-details flex flex-col items-center">
+        <div
+          className={cn(
+            "relative z-20 flex w-full items-center justify-between md:hidden !w-[200px]",
+            isEducationPage ? "-top-[90px]" : "top-16",
+          )}
+        >
           <button
             type="button"
             aria-label="Previous product"
@@ -357,8 +365,8 @@ export default function FeaturedProductsCarousel({
           </button>
         </div>
 
-        <div className="mt-3 flex flex-col items-center gap-4 text-center md:gap-6">
-          <div className="flex flex-col items-center gap-4 md:min-h-0 min-h-12">
+        <div className="mt-3 flex flex-col items-center gap-4 text-center md:gap-6 !w-[300px]">
+          <div className="flex flex-col items-center gap-4 md:min-h-0">
             {activeItem.name ? (
               <p className="font-gill text-base font-normal leading-110 text-darkblack md:text-xl">
                 {activeItem.name}

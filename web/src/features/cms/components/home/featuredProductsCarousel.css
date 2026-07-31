@@ -30,8 +30,7 @@
 .featured-products-slider .slick-slide {
   float: none;
   height: auto;
-  opacity: 0.6;
-  transition: opacity 500ms ease;
+  opacity: 1;
 }
 
 .featured-products-slider .slick-slide.slick-center {
@@ -145,8 +144,8 @@
 
 @media (min-width: 1440px) {
   .featured-products-slider .slick-slide.slick-center .featured-slide-image {
-    max-width: 298px;
-    max-height: 298px;
+    max-width: 350px;
+    max-height: 350px;
   }
 }
 
