@@ -274,6 +274,8 @@ export type EducationSliderOption = {
   highlight?: boolean;
   sublabel?: string | string[];
   image?: string;
+  /** Cut panel: two CMS grade images side-by-side (Figma dual compare). */
+  dualImages?: [string, string];
   caratWeight?: number;
 };
 

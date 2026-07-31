@@ -14,8 +14,9 @@ export type StrapiEducationMediaFile = {
 export type StrapiEducationResponsiveImage = {
   altText?: string | null;
   caption?: string | null;
-  desktopImage?: StrapiEducationMediaFile | null;
-  mobileImage?: StrapiEducationMediaFile | null;
+  /** Single file or multi-media array from Strapi. */
+  desktopImage?: StrapiEducationMediaFile | StrapiEducationMediaFile[] | null;
+  mobileImage?: StrapiEducationMediaFile | StrapiEducationMediaFile[] | null;
 };
 
 export type StrapiEducationHeroVideo = {

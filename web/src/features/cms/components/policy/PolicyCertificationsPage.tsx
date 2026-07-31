@@ -482,7 +482,9 @@ const PolicyCertificationsPage = ({
   initialPolicyId = defaultPolicyId,
 }: PolicyCertificationsPageProps) => {
   const searchParams = useSearchParams();
-  const policyFromUrl = resolvePolicyIdFromParam(searchParams.get(POLICY_QUERY_PARAM));
+  const policyFromUrl = resolvePolicyIdFromParam(
+    searchParams?.get(POLICY_QUERY_PARAM) ?? null,
+  );
 
   const [activePolicyId, setActivePolicyId] = useState(
     policyFromUrl ?? initialPolicyId,
@@ -491,7 +493,9 @@ const PolicyCertificationsPage = ({
   const [mobileShowDetail, setMobileShowDetail] = useState(Boolean(policyFromUrl));
 
   useEffect(() => {
-    const resolvedPolicyId = resolvePolicyIdFromParam(searchParams.get(POLICY_QUERY_PARAM));
+    const resolvedPolicyId = resolvePolicyIdFromParam(
+      searchParams?.get(POLICY_QUERY_PARAM) ?? null,
+    );
     if (!resolvedPolicyId) {
       return;
     }

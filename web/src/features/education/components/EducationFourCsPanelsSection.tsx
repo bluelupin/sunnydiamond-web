@@ -62,6 +62,9 @@ const PanelMedia = ({
 
   const activeCarat = slider.options[activeIndex]?.caratWeight ?? 1.0;
 
+  const cutDualImages =
+    panel.id === "cut" ? slider.options[activeIndex]?.dualImages : undefined;
+
   return (
     <ScrollReveal
       delayMs={delayMs}
@@ -108,7 +111,30 @@ const PanelMedia = ({
               "items-center",
             )}
           >
-            {activeImage ? (
+            {cutDualImages ? (
+              <div className="flex items-center gap-6 lg:gap-[24px]">
+                <div className="relative size-[120px] shrink-0 overflow-hidden md:size-[160px] lg:size-[200px]">
+                  <Image
+                    key={`${panel.id}-${activeIndex}-dual-0-${cutDualImages[0]}`}
+                    src={cutDualImages[0]}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="200px"
+                  />
+                </div>
+                <div className="relative size-[120px] shrink-0 overflow-hidden md:size-[160px] lg:size-[200px]">
+                  <Image
+                    key={`${panel.id}-${activeIndex}-dual-1-${cutDualImages[1]}`}
+                    src={cutDualImages[1]}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="200px"
+                  />
+                </div>
+              </div>
+            ) : activeImage ? (
               <div className="relative size-[120px] shrink-0 overflow-hidden transition-opacity duration-300 lg:size-[200px]">
                 <Image
                   key={`${panel.id}-${activeIndex}-${activeImage}`}

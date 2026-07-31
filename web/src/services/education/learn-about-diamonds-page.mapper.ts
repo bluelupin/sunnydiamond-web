@@ -8,7 +8,7 @@ import {
   type EducationFourCsPanelLayout,
   type EducationSliderOption,
 } from "@/features/education/data/content";
-import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { resolveCmsMediaUrl, resolveCmsMediaUrls } from "@/shared/utils/strapiMedia";
 import type {
   NormalizedEducationCertificateSection,
   NormalizedEducationCertification,
@@ -255,31 +255,6 @@ const mapColourSublabel = (longLabel?: string) => {
   return label;
 };
 
-const isCutGoodLabel = (label: string) => {
-  const normalized = label.trim().toLowerCase();
-  return normalized === "good" || normalized === "g";
-};
-
-const isCutExcellentLabel = (label: string) => {
-  const normalized = label.trim().toLowerCase();
-  return normalized === "excellent" || normalized.startsWith("excellent");
-};
-
-/** Dual cut diamonds from CMS gradeImages (Good + Excellent). */
-const resolveCutDualImages = (
-  options: EducationSliderOption[],
-): [string, string] | undefined => {
-  const goodFromCms = options.find(
-    (option) => isCutGoodLabel(option.label) && option.image,
-  )?.image;
-  const excellentFromCms = options.find(
-    (option) => isCutExcellentLabel(option.label) && option.image,
-  )?.image;
-
-  if (!goodFromCms || !excellentFromCms) return undefined;
-  return [goodFromCms, excellentFromCms];
-};
-
 const mapGradeStopToOption = (
   stop: StrapiEducationGradeStop,
   panelId: EducationFourCsPanelContent["id"],
@@ -306,14 +281,25 @@ const mapGradeStopToOption = (
     option.caratWeight = parseCaratWeight(label);
   }
 
-  const gradeImageUrl =
-    resolveCmsMediaUrl(stop.gradeImage?.desktopImage) ??
-    resolveCmsMediaUrl(stop.gradeImage?.mobileImage);
+  const gradeImageUrls = [
+    ...resolveCmsMediaUrls(stop.gradeImage?.desktopImage),
+    // Only use mobile files when desktop has none (avoid duplicating the same pair).
+  ];
+  const mobileOnlyUrls =
+    gradeImageUrls.length === 0
+      ? resolveCmsMediaUrls(stop.gradeImage?.mobileImage)
+      : [];
+  const mediaUrls = gradeImageUrls.length > 0 ? gradeImageUrls : mobileOnlyUrls;
 
-  if (gradeImageUrl) {
-    option.image = gradeImageUrl;
+  if (mediaUrls[0]) {
+    option.image = mediaUrls[0];
   } else if (visualImageUrl && panelId !== "cut") {
     option.image = visualImageUrl;
+  }
+
+  // Cut: CMS often uploads two diamonds per grade for the Figma dual compare layout.
+  if (panelId === "cut" && mediaUrls.length >= 2 && mediaUrls[0] && mediaUrls[1]) {
+    option.dualImages = [mediaUrls[0], mediaUrls[1]];
   }
 
   if (labelParts.length === 2) {
@@ -388,12 +374,10 @@ const mapFourCsPanel = (
 
   const options = mappedOptions;
   const defaultIndex = resolveDefaultIndex(options, activeGradeCode, 0);
-  const cutDualImages = panelId === "cut" ? resolveCutDualImages(options) : undefined;
 
   const slider = {
     defaultIndex,
     options,
-    ...(cutDualImages ? { dualImages: cutDualImages } : {}),
     ...(visualImageUrl && panelId !== "cut" && panelId !== "carat"
       ? { image: visualImageUrl }
       : {}),
