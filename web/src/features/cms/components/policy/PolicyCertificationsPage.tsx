@@ -10,16 +10,16 @@ import {
   POLICY_QUERY_PARAM,
   resolvePolicyIdFromParam,
 } from "@/features/cms/utils/policyCertificationsRoutes";
-import {
-  defaultPolicyId,
-  getPolicyById,
-  policyCertificationsContent,
-  type PolicyAccordionSection,
-  type PolicyDocument,
-  type PolicyNavGroup,
+import type {
+  PolicyAccordionSection,
+  PolicyDocument,
+  PolicyNavGroup,
 } from "@/features/cms/data/policyCertificationsContent";
+import { getPolicyFromPage } from "@/services/policy/policy-certifications-page.mapper";
+import type { NormalizedPolicyCertificationsPage } from "@/services/policy/policy-certifications-page.types";
 
 type PolicyCertificationsPageProps = {
+  page: NormalizedPolicyCertificationsPage;
   initialPolicyId?: string;
 };
 
@@ -47,13 +47,16 @@ function filterSections(
   });
 }
 
-function filterNavGroups(query: string): PolicyNavGroup[] {
+function filterNavGroups(
+  navGroups: PolicyNavGroup[],
+  query: string,
+): PolicyNavGroup[] {
   const normalized = query.trim().toLowerCase();
   if (!normalized) {
-    return policyCertificationsContent.navGroups;
+    return navGroups;
   }
 
-  return policyCertificationsContent.navGroups
+  return navGroups
     .map((group) => ({
       ...group,
       items: group.items.filter((policy) => {
@@ -74,6 +77,19 @@ function filterNavGroups(query: string): PolicyNavGroup[] {
       }),
     }))
     .filter((group) => group.items.length > 0);
+}
+
+function resolveActivePolicyId(
+  page: NormalizedPolicyCertificationsPage,
+  candidate: string | undefined,
+): string {
+  if (candidate && getPolicyFromPage(page, candidate)) {
+    return candidate;
+  }
+  if (getPolicyFromPage(page, page.defaultPolicyId)) {
+    return page.defaultPolicyId;
+  }
+  return page.navGroups[0]?.items[0]?.id ?? page.defaultPolicyId;
 }
 
 function PolicySearchField({
@@ -112,9 +128,11 @@ function PolicySearchField({
 }
 
 function PolicyDesktopSidebar({
+  navGroups,
   activePolicyId,
   onSelect,
 }: {
+  navGroups: PolicyNavGroup[];
   activePolicyId: string;
   onSelect: (policyId: string) => void;
 }) {
@@ -124,7 +142,7 @@ function PolicyDesktopSidebar({
       className="hidden w-full shrink-0 border-neutral300 lg:block lg:w-[435px] lg:border-r lg:pr-6"
     >
       <div className="flex flex-col gap-6">
-        {policyCertificationsContent.navGroups.map((group) => (
+        {navGroups.map((group) => (
           <div key={group.id} className="flex flex-col gap-4">
             <p className="font-gill text-xl font-light leading-110 text-darkblack">
               {group.label}
@@ -160,23 +178,27 @@ function PolicyDesktopSidebar({
 }
 
 function PolicyMobileNav({
+  navGroups,
+  emptySearchLabel,
   activePolicyId,
   searchQuery,
   onSelect,
 }: {
+  navGroups: PolicyNavGroup[];
+  emptySearchLabel: string;
   activePolicyId: string;
   searchQuery: string;
   onSelect: (policyId: string) => void;
 }) {
   const filteredGroups = useMemo(
-    () => filterNavGroups(searchQuery),
-    [searchQuery],
+    () => filterNavGroups(navGroups, searchQuery),
+    [navGroups, searchQuery],
   );
 
   if (filteredGroups.length === 0) {
     return (
       <p className="font-gill text-base font-light leading-110 text-neutral500">
-        {policyCertificationsContent.emptySearchLabel}
+        {emptySearchLabel}
       </p>
     );
   }
@@ -273,8 +295,8 @@ function PolicyAccordionItem({
 
       {isOpen ? (
         <div className="flex flex-col gap-6 pb-4 font-gill text-base font-normal leading-110 text-neutral500">
-          {section.intro ? <p>{section.intro}</p> : null}
-          {section.body ? <p>{section.body}</p> : null}
+          {section.intro ? <p className="whitespace-pre-line">{section.intro}</p> : null}
+          {section.body ? <p className="whitespace-pre-line">{section.body}</p> : null}
           {section.listItems?.length ? (
             <ol className="flex flex-col gap-2">
               {section.listItems.map((item, index) => (
@@ -292,9 +314,11 @@ function PolicyAccordionItem({
 
 function PolicyAccordions({
   sections,
+  emptySearchLabel,
   variant = "desktop",
 }: {
   sections: PolicyAccordionSection[];
+  emptySearchLabel: string;
   variant?: "desktop" | "mobile";
 }) {
   const isMobile = variant === "mobile";
@@ -311,7 +335,7 @@ function PolicyAccordions({
   if (sections.length === 0) {
     return (
       <p className="font-gill text-base font-light leading-110 text-neutral500">
-        {policyCertificationsContent.emptySearchLabel}
+        {emptySearchLabel}
       </p>
     );
   }
@@ -351,9 +375,11 @@ function PolicyAccordions({
 
 function PolicyMobileDetailPanel({
   policy,
+  emptySearchLabel,
   onBack,
 }: {
   policy: PolicyDocument;
+  emptySearchLabel: string;
   onBack: () => void;
 }) {
   return (
@@ -371,7 +397,11 @@ function PolicyMobileDetailPanel({
           {policy.contentTitle}
         </h1>
       </div>
-      <PolicyAccordions sections={policy.sections} variant="mobile" />
+      <PolicyAccordions
+        sections={policy.sections}
+        emptySearchLabel={emptySearchLabel}
+        variant="mobile"
+      />
     </div>
   );
 }
@@ -379,9 +409,11 @@ function PolicyMobileDetailPanel({
 function PolicyContentPanel({
   policy,
   searchQuery,
+  emptySearchLabel,
 }: {
   policy: PolicyDocument;
   searchQuery: string;
+  emptySearchLabel: string;
 }) {
   const filteredSections = useMemo(
     () => filterSections(policy.sections, searchQuery),
@@ -393,13 +425,22 @@ function PolicyContentPanel({
       <h2 className="font-larken text-32 font-light leading-110 text-darkblack">
         {policy.contentTitle}
       </h2>
-      <PolicyAccordions sections={filteredSections} />
+      <PolicyAccordions
+        sections={filteredSections}
+        emptySearchLabel={emptySearchLabel}
+      />
     </div>
   );
 }
 
-function PolicySupportSection() {
-  const { support } = policyCertificationsContent;
+function PolicySupportSection({
+  support,
+}: {
+  support: NormalizedPolicyCertificationsPage["support"];
+}) {
+  if (!support.phoneLabel && !support.emailLabel) {
+    return null;
+  }
 
   return (
     <section
@@ -414,7 +455,7 @@ function PolicySupportSection() {
           <div className="flex flex-col items-center gap-4">
             <div className="flex flex-col items-center gap-2 text-base leading-110 text-darkblack">
               {support.hours.map((entry) => (
-                <div key={entry.label} className="flex flex-wrap items-center justify-center gap-3">
+                <div key={`${entry.label}-${entry.value}`} className="flex flex-wrap items-center justify-center gap-3">
                   <span className="font-gill font-light">{entry.label}</span>
                   <span className="font-gill font-normal">{entry.value}</span>
                 </div>
@@ -479,33 +520,37 @@ function PolicySupportSection() {
 }
 
 const PolicyCertificationsPage = ({
-  initialPolicyId = defaultPolicyId,
+  page,
+  initialPolicyId,
 }: PolicyCertificationsPageProps) => {
   const searchParams = useSearchParams();
   const policyFromUrl = resolvePolicyIdFromParam(
-    searchParams?.get(POLICY_QUERY_PARAM) ?? null,
+    searchParams?.get(POLICY_QUERY_PARAM),
   );
 
-  const [activePolicyId, setActivePolicyId] = useState(
-    policyFromUrl ?? initialPolicyId,
+  const [activePolicyId, setActivePolicyId] = useState(() =>
+    resolveActivePolicyId(page, policyFromUrl ?? initialPolicyId),
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileShowDetail, setMobileShowDetail] = useState(Boolean(policyFromUrl));
 
   useEffect(() => {
-    const resolvedPolicyId = resolvePolicyIdFromParam(
-      searchParams?.get(POLICY_QUERY_PARAM) ?? null,
+    const resolvedFromUrl = resolvePolicyIdFromParam(
+      searchParams?.get(POLICY_QUERY_PARAM),
     );
-    if (!resolvedPolicyId) {
+    if (!resolvedFromUrl) {
       return;
     }
 
-    setActivePolicyId(resolvedPolicyId);
+    setActivePolicyId(resolveActivePolicyId(page, resolvedFromUrl));
     setSearchQuery("");
     setMobileShowDetail(true);
-  }, [searchParams]);
+  }, [page, searchParams]);
 
-  const activePolicy = getPolicyById(activePolicyId) ?? getPolicyById(defaultPolicyId);
+  const activePolicy =
+    getPolicyFromPage(page, activePolicyId) ??
+    getPolicyFromPage(page, page.defaultPolicyId) ??
+    page.navGroups[0]?.items[0];
 
   if (!activePolicy) {
     return null;
@@ -529,19 +574,22 @@ const PolicyCertificationsPage = ({
           {mobileShowDetail ? (
             <PolicyMobileDetailPanel
               policy={activePolicy}
+              emptySearchLabel={page.emptySearchLabel}
               onBack={() => setMobileShowDetail(false)}
             />
           ) : (
             <>
               <h1 className="font-larken text-32 font-light leading-110 text-darkblack">
-                {policyCertificationsContent.pageTitle}
+                {page.pageTitle}
               </h1>
               <PolicySearchField
                 value={searchQuery}
                 onChange={setSearchQuery}
-                placeholder={policyCertificationsContent.searchPlaceholder}
+                placeholder={page.searchPlaceholder}
               />
               <PolicyMobileNav
+                navGroups={page.navGroups}
+                emptySearchLabel={page.emptySearchLabel}
                 activePolicyId={activePolicyId}
                 searchQuery={searchQuery}
                 onSelect={handlePolicySelect}
@@ -553,28 +601,33 @@ const PolicyCertificationsPage = ({
         <div className="hidden lg:flex lg:flex-col">
           <div className="flex flex-col items-center gap-10 pb-16">
             <h1 className="text-center font-larken text-48 font-light leading-110 text-darkblack">
-              {policyCertificationsContent.pageTitle}
+              {page.pageTitle}
             </h1>
             <div className="w-full max-w-[623px]">
               <PolicySearchField
                 value={searchQuery}
                 onChange={setSearchQuery}
-                placeholder={policyCertificationsContent.searchPlaceholder}
+                placeholder={page.searchPlaceholder}
               />
             </div>
           </div>
 
           <div className="flex flex-row gap-6">
             <PolicyDesktopSidebar
+              navGroups={page.navGroups}
               activePolicyId={activePolicyId}
               onSelect={handleDesktopPolicySelect}
             />
-            <PolicyContentPanel policy={activePolicy} searchQuery={searchQuery} />
+            <PolicyContentPanel
+              policy={activePolicy}
+              searchQuery={searchQuery}
+              emptySearchLabel={page.emptySearchLabel}
+            />
           </div>
         </div>
       </section>
 
-      <PolicySupportSection />
+      <PolicySupportSection support={page.support} />
     </div>
   );
 };

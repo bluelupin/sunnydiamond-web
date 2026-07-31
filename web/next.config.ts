@@ -97,12 +97,12 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/shipping-delivery",
-        destination: "/policy-and-certifications?policy=shipping-delivery",
+        destination: "/policy-and-certifications?policy=shipping-and-delivery",
         permanent: true,
       },
       {
         source: "/cash-on-delivery-policy",
-        destination: "/policy-and-certifications?policy=cash-on-delivery-policy",
+        destination: "/policy-and-certifications?policy=cash-on-delivery",
         permanent: true,
       },
       {

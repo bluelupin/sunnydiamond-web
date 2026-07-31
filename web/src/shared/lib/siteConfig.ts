@@ -74,11 +74,11 @@ export const siteConfig = {
               label: "Exchange and Resizing",
             },
             {
-              to: "/policy-and-certifications?policy=shipping-delivery",
+              to: "/policy-and-certifications?policy=shipping-and-delivery",
               label: "Shipping & Delivery",
             },
             {
-              to: "/policy-and-certifications?policy=cash-on-delivery-policy",
+              to: "/policy-and-certifications?policy=cash-on-delivery",
               label: "Cash on Delivery Policy",
             },
             {

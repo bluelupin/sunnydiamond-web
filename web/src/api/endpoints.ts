@@ -30,6 +30,8 @@ export const STRAPI_ENDPOINTS = {
   blogLandingPage: "api/blog-landing-page",
   blogCategories: "api/blog-categories",
   blogPosts: "api/blog-posts",
+  policyCertificationsPage: "api/policy-certifications-page",
+  legalPages: "api/legal-pages",
   /** @deprecated Legacy single-type slug — prefer split homepage endpoints */
   homepage: "homepage",
 } as const;
