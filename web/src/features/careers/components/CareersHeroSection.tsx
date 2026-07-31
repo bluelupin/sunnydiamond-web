@@ -32,7 +32,9 @@ const CareersHeroSection = ({ hero }: CareersHeroSectionProps) => {
         className="absolute inset-0 size-full object-cover object-center"
       />
 
-      <div className="absolute left-1/2 top-[150px] flex w-[268px] -translate-x-1/2 flex-col items-center gap-6 md:top-[200px]">
+      <div className="absolute inset-0 bg-black/40" aria-hidden />
+
+      <div className="absolute left-1/2 top-[150px] z-10 flex w-fit -translate-x-1/2 flex-col items-center gap-6 md:top-[200px]">
         <Reveal
           as="h1"
           id="careers-hero-title"

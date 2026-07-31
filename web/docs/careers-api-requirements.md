@@ -42,6 +42,7 @@ populate[moreThanSection][populate][featuredImage2][populate][desktopImage]=true
 populate[moreThanSection][populate][featuredImage2][populate][mobileImage]=true
 populate[discoverSection][populate][backgroundImage][populate][desktopImage]=true
 populate[discoverSection][populate][backgroundImage][populate][mobileImage]=true
+populate[discoverSection][populate][cta]=true
 populate[investingSection][populate][InvestingFeatures][populate][featureImage][populate][desktopImage]=true
 populate[investingSection][populate][InvestingFeatures][populate][featureImage][populate][mobileImage]=true
 populate[openingsSection][populate][career_openings][populate][applyCta]=true

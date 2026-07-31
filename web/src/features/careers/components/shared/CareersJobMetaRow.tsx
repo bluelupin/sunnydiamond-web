@@ -5,7 +5,7 @@ import type { CareerJob } from "@/features/careers/types";
 import CareersJobMetaIcon from "./CareersJobMetaIcon";
 
 type CareersJobMetaRowProps = {
-  job: Pick<CareerJob, "experienceLabel" | "location" | "workplaceLabel">;
+  job: Pick<CareerJob, "experienceLabel" | "location" | "department">;
   className?: string;
   iconClassName?: string;
 };
@@ -35,7 +35,7 @@ function FigmaMetaItem({
   label,
   iconClassName,
 }: {
-  icon: "experience" | "map" | "workplace";
+  icon: "experience" | "map" | "workplace" | "department";
   label: string;
   iconClassName?: string;
 }) {
@@ -52,7 +52,7 @@ const CareersJobMetaRow = ({
   className,
   iconClassName,
 }: CareersJobMetaRowProps) => {
-  const showWorkplace = Boolean(job.workplaceLabel?.trim());
+  const showDepartment = Boolean(job.department?.trim());
 
   return (
     <div
@@ -68,12 +68,12 @@ const CareersJobMetaRow = ({
       />
       <MetaDivider />
       <FigmaMetaItem icon="map" label={job.location} iconClassName={iconClassName} />
-      {showWorkplace ? (
+      {showDepartment ? (
         <>
           <MetaDivider />
           <FigmaMetaItem
-            icon="workplace"
-            label={job.workplaceLabel}
+            icon="department"
+            label={job.department}
             iconClassName={iconClassName}
           />
         </>

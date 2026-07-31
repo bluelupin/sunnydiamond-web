@@ -24,9 +24,11 @@ const CAREER_LANDING_POPULATE_QUERY =
   "&populate[moreThanSection][populate][featuredImage2][populate][mobileImage]=true" +
   "&populate[discoverSection][populate][backgroundImage][populate][desktopImage]=true" +
   "&populate[discoverSection][populate][backgroundImage][populate][mobileImage]=true" +
+  "&populate[discoverSection][populate][cta]=true" +
   "&populate[investingSection][populate][InvestingFeatures][populate][featureImage][populate][desktopImage]=true" +
   "&populate[investingSection][populate][InvestingFeatures][populate][featureImage][populate][mobileImage]=true" +
-  "&populate[openingsSection][populate][career_openings][populate][applyCta]=true";
+  "&populate[openingsSection][populate][career_openings][populate][applyCta]=true" +
+  "&populate[FAQs][populate]=faqItems";
 
 const CAREER_LANDING_FALLBACK_QUERY = "populate=*";
 

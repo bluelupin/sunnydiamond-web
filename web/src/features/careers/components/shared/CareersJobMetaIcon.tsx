@@ -5,7 +5,7 @@ import { cn } from "@/shared/utils/cn";
 const ICON_BOX_CLASS = "relative size-6 shrink-0 overflow-hidden";
 
 type CareersJobMetaIconProps = {
-  name: "experience" | "map" | "workplace";
+  name: "experience" | "map" | "workplace" | "department";
   className?: string;
 };
 
@@ -45,6 +45,7 @@ const CareersJobMetaIcon = ({ name, className }: CareersJobMetaIconProps) => {
     );
   }
 
+  // workplace + department share the same Figma icon
   return (
     <span className={cn(ICON_BOX_CLASS, className)} aria-hidden>
       <span className="absolute inset-[20.83%_4.17%_16.67%_8.33%]">
