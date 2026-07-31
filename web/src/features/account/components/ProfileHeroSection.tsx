@@ -15,10 +15,9 @@ const ProfileHeroSection = ({ firstName }: ProfileHeroSectionProps) => {
 
   return (
     <section
-      aria-hidden
-      className="relative left-1/2 z-30 h-[240px] w-screen max-w-none -translate-x-1/2 overflow-visible md:h-320"
+      className="relative left-1/2 h-240 w-screen max-w-none -translate-x-1/2 overflow-hidden md:h-320"
     >
-      <div className="relative size-full overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden">
         <Image
           src={image.src}
           alt={image.alt}
@@ -26,11 +25,21 @@ const ProfileHeroSection = ({ firstName }: ProfileHeroSectionProps) => {
           priority
           quality={PLP_HERO_IMAGE_QUALITY}
           sizes="100vw"
-          className="object-cover object-[50%_30%]"
+          className="object-cover object-[80%_70%] md:hidden"
         />
-        <div className="absolute inset-0 bg-black/40" />
+        <Image
+          src={image.src}
+          alt={image.alt}
+          fill
+          priority
+          quality={PLP_HERO_IMAGE_QUALITY}
+          sizes="100vw"
+          className="hidden object-cover object-[50%_30%] md:block"
+        />
+        <div className="absolute inset-0 bg-black/60 md:bg-black/40" aria-hidden />
       </div>
-      <div className="absolute left-1/2 top-[191px] z-40 flex -translate-x-1/2 flex-col items-center md:top-[255px]">
+
+      <div className="absolute left-1/2 top-[191px] z-10 flex -translate-x-1/2 flex-col items-center md:top-[255px]">
         <ProfileAvatar firstName={firstName} />
         <ProfileBespokeRemovedToastBanner />
       </div>

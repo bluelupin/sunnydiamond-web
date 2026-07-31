@@ -20,9 +20,13 @@ import { ProfileWishlistEmptyState } from "./ProfileWishlistEmptyState";
 
 function WishlistSkeleton() {
   return (
-    <div className="grid grid-cols-2 gap-6" aria-busy="true" aria-label="Loading wishlist">
-      {Array.from({ length: 2 }).map((_, index) => (
-        <div key={index} className="h-[521px] animate-pulse bg-gray200" />
+    <div
+      className="grid grid-cols-2 gap-1 md:grid-cols-2 md:gap-2 lg:grid-cols-3"
+      aria-busy="true"
+      aria-label="Loading wishlist"
+    >
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div key={index} className="h-[280px] animate-pulse bg-gray300 md:h-[420px] lg:h-[496px]" />
       ))}
     </div>
   );
@@ -48,7 +52,11 @@ const ProfileWishlistSection = () => {
   };
 
   if (isLoading && wishlistedIds.length > 0) {
-    return <WishlistSkeleton />;
+    return (
+      <div className="-mx-4 bg-gray200 py-6 md:mx-0">
+        <WishlistSkeleton />
+      </div>
+    );
   }
 
   if (showEmptyState) {
@@ -68,24 +76,25 @@ const ProfileWishlistSection = () => {
         <WishlistViewToggle value={viewMode} onChange={setViewMode} />
       </div>
 
-      <div className={cn(viewMode === "list" ? "hidden md:block" : "block")}>
-        <WishlistGrid
-          variant="profile"
-          products={visibleProducts}
-          onRemove={(product) => toggleWishlist(product.sku)}
-          onAddToBag={setAddToBagProduct}
-        />
-      </div>
-
-      {viewMode === "list" ? (
-        <div className="md:hidden">
-          <WishlistList
+      <div className="-mx-4 bg-gray200 md:mx-0">
+        <div className={cn(viewMode === "list" ? "hidden md:block" : "block")}>
+          <WishlistGrid
             products={visibleProducts}
             onRemove={(product) => toggleWishlist(product.sku)}
             onAddToBag={setAddToBagProduct}
           />
         </div>
-      ) : null}
+
+        {viewMode === "list" ? (
+          <div className="md:hidden">
+            <WishlistList
+              products={visibleProducts}
+              onRemove={(product) => toggleWishlist(product.sku)}
+              onAddToBag={setAddToBagProduct}
+            />
+          </div>
+        ) : null}
+      </div>
 
       {hasMore ? (
         <ScrollReveal delayMs={40}>

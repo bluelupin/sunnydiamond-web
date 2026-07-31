@@ -5,6 +5,15 @@ export const profileHeroSpec = {
     width: 1440,
     height: 800,
   },
+  /** Figma 1480:18126 — mobile hero crop anchors bottom-right ring box */
+  imageCrop: {
+    mobile: "80% 70%",
+    desktop: "50% 30%",
+  },
+  overlayOpacity: {
+    mobile: 0.6,
+    desktop: 0.4,
+  },
   height: {
     mobile: 240,
     desktop: 320,
