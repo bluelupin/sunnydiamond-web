@@ -15,7 +15,7 @@ import {
 } from "@/shared/lib/seo/educationSeo";
 
 /** Refresh CMS-driven sections without a full redeploy. */
-export const revalidate = 0;
+export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
   try {

@@ -11,7 +11,7 @@ export function useCartCheckout() {
   const { status } = useAuth();
   const { items } = useCart();
   const {
-    markGiftingOptionsExplored,
+    hasExploredGiftingOptions,
     openGiftingPanel,
     openGuestCheckoutModal,
   } = useCartUI();
@@ -34,9 +34,10 @@ export function useCartCheckout() {
   };
 
   const proceedToCheckout = () => {
-    // Gift marked → always show gifting reminder (personalise may have been skipped).
-    // No gift → guest welcome modal or /checkout; never open gifting for that case.
-    if (hasExistingGifting) {
+    // Existing flow: gift marked → show gifting modal.
+    // Exception only: user already completed View gifting options / personalise
+    // (hasExploredGiftingOptions). Newly marked gifts clear that flag.
+    if (hasExistingGifting && !hasExploredGiftingOptions) {
       openGiftingPanel("intro");
       return;
     }
@@ -45,7 +46,8 @@ export function useCartCheckout() {
   };
 
   const openGiftingOptions = () => {
-    markGiftingOptionsExplored();
+    // Do not mark explored here — only personalise / continue-to-checkout does.
+    // Otherwise merely opening the panel would skip the checkout nudge.
     openGiftingPanel("intro");
   };
 

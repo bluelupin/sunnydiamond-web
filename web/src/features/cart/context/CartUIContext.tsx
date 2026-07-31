@@ -28,6 +28,8 @@ type CartUIContextType = {
   openGiftingPanel: (step?: "intro" | "personalise") => void;
   closeGiftingPanel: () => void;
   markGiftingOptionsExplored: () => void;
+  /** Reset so checkout shows the gifting nudge again (e.g. newly marked gift). */
+  clearGiftingOptionsExplored: () => void;
   openGuestCheckoutModal: () => void;
   closeGuestCheckoutModal: () => void;
 };
@@ -71,6 +73,10 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
     setHasExploredGiftingOptions(true);
   }, []);
 
+  const clearGiftingOptionsExplored = useCallback(() => {
+    setHasExploredGiftingOptions(false);
+  }, []);
+
   const openGuestCheckoutModal = useCallback(() => {
     setIsGuestCheckoutModalOpen(true);
   }, []);
@@ -94,6 +100,7 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
         openGiftingPanel,
         closeGiftingPanel,
         markGiftingOptionsExplored,
+        clearGiftingOptionsExplored,
         openGuestCheckoutModal,
         closeGuestCheckoutModal,
       }}

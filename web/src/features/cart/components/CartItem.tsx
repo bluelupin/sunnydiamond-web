@@ -5,6 +5,7 @@ import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import type { CartLineItem, CartLineOptions } from "../types/cart.types";
 import { formatCartLineMeta, formatCartPrice } from "../utils/formatCartLine";
+import { useCartUI } from "../context/CartUIContext";
 import {
   CartDivider,
   CartGiftBadge,
@@ -28,6 +29,7 @@ const ENGRAVING_EMPTY_LABEL = "Metal Engraving (Optional)";
 const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
   const { product, quantity, options } = item;
   const { toggleWishlist, isWishlisted } = useWishlist();
+  const { clearGiftingOptionsExplored } = useCartUI();
   const meta = formatCartLineMeta(item);
   const wishlisted = isWishlisted(product.id);
   const isGift =
@@ -140,7 +142,13 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
       <label className="inline-flex w-fit cursor-pointer items-center gap-2">
         <CartGiftCheckbox
           checked={isGift}
-          onChange={(checked) => onUpdateOptions(item.id, { isGift: checked })}
+          onChange={(checked) => {
+            // Newly marked gift should restore the checkout gifting nudge.
+            if (checked) {
+              clearGiftingOptionsExplored();
+            }
+            onUpdateOptions(item.id, { isGift: checked });
+          }}
         />
         <span className="font-gill text-sm leading-4 text-darkblack lg:text-base lg:leading-5">
           Mark this as a gift
