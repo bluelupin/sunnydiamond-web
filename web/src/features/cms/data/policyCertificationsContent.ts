@@ -9,6 +9,8 @@ export type PolicyAccordionSection = {
 export type PolicyDocument = {
   id: string;
   navLabel: string;
+  /** Mobile nav label when it differs from desktop sidebar text. */
+  mobileNavLabel?: string;
   contentTitle: string;
   sections: PolicyAccordionSection[];
 };
@@ -100,6 +102,7 @@ export const policyCertificationsContent = {
         {
           id: "terms-and-conditions",
           navLabel: "TERMS & CONDITIONS",
+          mobileNavLabel: "TERMS AND CONDITIONS",
           contentTitle: "Terms & Conditions",
           sections: [
             {
@@ -201,6 +204,7 @@ export const policyCertificationsContent = {
         {
           id: "dfe-terms",
           navLabel: "DFE TERMS & CONDITIONS",
+          mobileNavLabel: "DFE TERMS AND CONDITIONS",
           contentTitle: "DFE Terms & Conditions",
           sections: [
             {
