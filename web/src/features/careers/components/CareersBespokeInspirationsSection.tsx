@@ -2,14 +2,19 @@
 
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import Reveal from "@/shared/Animation/Reveal";
-import { careersPageContent } from "@/features/careers/data/content";
+import type { NormalizedCareerDiscoverSection } from "@/services/careers/careers.types";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
 
 const ctaFocusClass =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2";
 
-const CareersBespokeInspirationsSection = () => {
-  const { bespokeInspirations } = careersPageContent;
+type CareersBespokeInspirationsSectionProps = {
+  discover: NormalizedCareerDiscoverSection;
+};
+
+const CareersBespokeInspirationsSection = ({
+  discover,
+}: CareersBespokeInspirationsSectionProps) => {
   const { goToListings } = useCareersJobs();
 
   return (
@@ -19,9 +24,9 @@ const CareersBespokeInspirationsSection = () => {
       className="relative w-full overflow-hidden"
     >
       <ResponsiveImage
-        desktopSrc={bespokeInspirations.image.desktopUrl}
-        mobileSrc={bespokeInspirations.image.mobileUrl}
-        alt={bespokeInspirations.image.alt}
+        desktopSrc={discover.image.desktopUrl}
+        mobileSrc={discover.image.mobileUrl}
+        alt={discover.image.alt}
         width={1440}
         height={439}
         sizes="100vw"
@@ -40,7 +45,7 @@ const CareersBespokeInspirationsSection = () => {
             direction="up"
             className="font-larken text-32 font-light leading-110 text-darkblack md:text-5xl"
           >
-            {bespokeInspirations.title}
+            {discover.title}
           </Reveal>
           <Reveal direction="up">
             <button
@@ -48,7 +53,7 @@ const CareersBespokeInspirationsSection = () => {
               onClick={goToListings}
               className={`inline-flex h-14 items-center justify-center border border-darkblack bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-90 ${ctaFocusClass}`}
             >
-              {bespokeInspirations.ctaLabel}
+              {discover.ctaLabel}
             </button>
           </Reveal>
         </div>

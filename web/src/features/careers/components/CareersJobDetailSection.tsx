@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Reveal from "@/shared/Animation/Reveal";
 import { cn } from "@/shared/utils/cn";
-import { careersPageContent } from "@/features/careers/data/content";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
 import CareersJobPageHeader from "./shared/CareersJobPageHeader";
 import CareersApplyOptionsModal from "./shared/CareersApplyOptionsModal";
@@ -32,13 +31,15 @@ function DetailSection({
 }
 
 const CareersJobDetailSection = () => {
-  const { jobDetails } = careersPageContent;
-  const { selectedJob, goToApplication } = useCareersJobs();
+  const { selectedJob, goToApplication, cms } = useCareersJobs();
+  const applicationFlow = cms.landing.applicationFlow;
   const [applyModalOpen, setApplyModalOpen] = useState(false);
 
-  if (!selectedJob) {
+  if (!selectedJob || !applicationFlow) {
     return null;
   }
+
+  const { jobDetails } = applicationFlow;
 
   const handleShare = async () => {
     const url = `${window.location.origin}/careers`;
@@ -59,6 +60,16 @@ const CareersJobDetailSection = () => {
   const lookingFor = selectedJob.whatWeAreLookingFor ?? selectedJob.requirements.join(" ");
   const whyJoin = selectedJob.whyJoinUs;
   const summaryParagraphs = jobSummary.split(/\n\n+/).filter(Boolean);
+  const applyLabel = selectedJob.applyLabel ?? jobDetails.applyLabel;
+  const hasStructuredDetail =
+    Boolean(selectedJob.jobSummary) ||
+    Boolean(selectedJob.rolesAndResponsibilities) ||
+    Boolean(selectedJob.qualifications?.length) ||
+    Boolean(selectedJob.whatWeAreLookingFor) ||
+    Boolean(selectedJob.whyJoinUs) ||
+    selectedJob.responsibilities.length > 0 ||
+    selectedJob.requirements.length > 0;
+  const showRichTextOnly = Boolean(selectedJob.descriptionHtml) && !hasStructuredDetail;
 
   return (
     <section
@@ -77,80 +88,99 @@ const CareersJobDetailSection = () => {
         </Reveal>
 
         <div className="flex flex-col gap-6">
-          <Reveal direction="up">
-            <DetailSection heading={jobDetails.jobSummaryHeading}>
-              <div className="flex flex-col gap-2">
-                {summaryParagraphs.map((paragraph) => (
-                  <p key={paragraph}>{paragraph}</p>
-                ))}
-              </div>
-            </DetailSection>
-          </Reveal>
+          {showRichTextOnly ? (
+            <Reveal direction="up">
+              <DetailSection heading={jobDetails.jobSummaryHeading}>
+                <div
+                  className="flex flex-col gap-2 [&_p]:m-0"
+                  dangerouslySetInnerHTML={{ __html: selectedJob.descriptionHtml ?? "" }}
+                />
+              </DetailSection>
+            </Reveal>
+          ) : (
+            <>
+              <Reveal direction="up">
+                <DetailSection heading={jobDetails.jobSummaryHeading}>
+                  <div className="flex flex-col gap-2">
+                    {summaryParagraphs.map((paragraph) => (
+                      <p key={paragraph}>{paragraph}</p>
+                    ))}
+                  </div>
+                </DetailSection>
+              </Reveal>
 
-          <Reveal direction="up">
-            <DetailSection heading={jobDetails.rolesHeading}>
-              {responsibilitiesText ? (
-                <p>{responsibilitiesText}</p>
-              ) : (
-                <ul className={detailListClass}>
-                  {selectedJob.responsibilities.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              )}
-            </DetailSection>
-          </Reveal>
-
-          <Reveal direction="up">
-            <DetailSection heading={jobDetails.qualificationsHeading}>
-              {qualifications ? (
-                <div className="flex flex-col gap-4">
-                  {qualifications.map((group) => (
-                    <div key={group.label} className="flex flex-col gap-3">
-                      <p>{group.label}</p>
+              {responsibilitiesText || selectedJob.responsibilities.length > 0 ? (
+                <Reveal direction="up">
+                  <DetailSection heading={jobDetails.rolesHeading}>
+                    {responsibilitiesText ? (
+                      <p>{responsibilitiesText}</p>
+                    ) : (
                       <ul className={detailListClass}>
-                        {group.text.split(/\n+/).filter(Boolean).map((item) => (
+                        {selectedJob.responsibilities.map((item) => (
                           <li key={item}>{item}</li>
                         ))}
                       </ul>
+                    )}
+                  </DetailSection>
+                </Reveal>
+              ) : null}
+
+              {qualifications || selectedJob.requirements.length > 0 ? (
+                <Reveal direction="up">
+                  <DetailSection heading={jobDetails.qualificationsHeading}>
+                    {qualifications ? (
+                      <div className="flex flex-col gap-4">
+                        {qualifications.map((group) => (
+                          <div key={group.label} className="flex flex-col gap-3">
+                            <p>{group.label}</p>
+                            <ul className={detailListClass}>
+                              {group.text.split(/\n+/).filter(Boolean).map((item) => (
+                                <li key={item}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <ul className={detailListClass}>
+                        {selectedJob.requirements.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </DetailSection>
+                </Reveal>
+              ) : null}
+
+              {selectedJob.whatWeAreLookingFor || selectedJob.requirements.length > 0 ? (
+                <Reveal direction="up">
+                  <DetailSection heading={jobDetails.lookingForHeading}>
+                    {selectedJob.requirements.length > 1 ? (
+                      <ul className={detailListClass}>
+                        {selectedJob.requirements.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>{lookingFor}</p>
+                    )}
+                  </DetailSection>
+                </Reveal>
+              ) : null}
+
+              {whyJoin ? (
+                <Reveal direction="up">
+                  <DetailSection heading={jobDetails.whyJoinHeading}>
+                    <div className="flex flex-col gap-2">
+                      {whyJoin.split(/\n\n+/).filter(Boolean).map((paragraph) => (
+                        <p key={paragraph}>{paragraph}</p>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <ul className={detailListClass}>
-                  {selectedJob.requirements.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              )}
-            </DetailSection>
-          </Reveal>
-
-          <Reveal direction="up">
-            <DetailSection heading={jobDetails.lookingForHeading}>
-              {selectedJob.requirements.length > 1 ? (
-                <ul className={detailListClass}>
-                  {selectedJob.requirements.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p>{lookingFor}</p>
-              )}
-            </DetailSection>
-          </Reveal>
-
-          {whyJoin ? (
-            <Reveal direction="up">
-              <DetailSection heading={jobDetails.whyJoinHeading}>
-                <div className="flex flex-col gap-2">
-                  {whyJoin.split(/\n\n+/).filter(Boolean).map((paragraph) => (
-                    <p key={paragraph}>{paragraph}</p>
-                  ))}
-                </div>
-              </DetailSection>
-            </Reveal>
-          ) : null}
+                  </DetailSection>
+                </Reveal>
+              ) : null}
+            </>
+          )}
         </div>
 
         <Reveal direction="up">
@@ -159,13 +189,14 @@ const CareersJobDetailSection = () => {
             onClick={() => setApplyModalOpen(true)}
             className="inline-flex h-14 w-full items-center justify-center bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 md:w-[183px]"
           >
-            {jobDetails.applyLabel}
+            {applyLabel}
           </button>
         </Reveal>
       </div>
 
       <CareersApplyOptionsModal
         job={selectedJob}
+        applyModal={jobDetails.applyModal}
         open={applyModalOpen}
         onOpenChange={setApplyModalOpen}
         onAutofillResume={(file) => goToApplication("resume", file)}

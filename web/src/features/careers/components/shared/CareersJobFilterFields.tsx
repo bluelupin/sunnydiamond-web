@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/shared/utils/cn";
-import { careersPageContent } from "@/features/careers/data/content";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
 import { careersFormSelectChevronClassName } from "@/features/careers/constants/careersApplicationForm";
 import CareersChevronDownIcon from "./CareersChevronDownIcon";
@@ -40,8 +39,8 @@ const FilterField = ({ label, value, placeholder, options, onChange }: FilterFie
 );
 
 const CareersJobFilterFields = () => {
-  const { jobListing } = careersPageContent;
   const {
+    cms,
     filterOptions,
     locationFilter,
     departmentFilter,
@@ -50,27 +49,37 @@ const CareersJobFilterFields = () => {
     setDepartmentFilter,
     setExperienceFilter,
   } = useCareersJobs();
+  const { listing } = cms;
+
+  if (
+    !listing.filterLocationLabel ||
+    !listing.filterDepartmentLabel ||
+    !listing.filterExperienceLabel ||
+    !listing.filterSelectPlaceholder
+  ) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col gap-4">
       <FilterField
-        label={jobListing.filterLocationLabel}
+        label={listing.filterLocationLabel}
         value={locationFilter}
-        placeholder={jobListing.filterSelectPlaceholder}
+        placeholder={listing.filterSelectPlaceholder}
         options={filterOptions.locations}
         onChange={setLocationFilter}
       />
       <FilterField
-        label={jobListing.filterDepartmentLabel}
+        label={listing.filterDepartmentLabel}
         value={departmentFilter}
-        placeholder={jobListing.filterSelectPlaceholder}
+        placeholder={listing.filterSelectPlaceholder}
         options={filterOptions.departments}
         onChange={setDepartmentFilter}
       />
       <FilterField
-        label={jobListing.filterExperienceLabel}
+        label={listing.filterExperienceLabel}
         value={experienceFilter}
-        placeholder={jobListing.filterSelectPlaceholder}
+        placeholder={listing.filterSelectPlaceholder}
         options={filterOptions.experiences}
         onChange={setExperienceFilter}
       />

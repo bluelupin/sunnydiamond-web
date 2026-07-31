@@ -2,14 +2,17 @@
 
 import Link from "next/link";
 import Reveal from "@/shared/Animation/Reveal";
-import { careersPageContent } from "@/features/careers/data/content";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
 import CareersApplicationSuccessIcon from "./shared/CareersApplicationSuccessIcon";
 import CareersSuccessJobIdCopy from "./shared/CareersSuccessJobIdCopy";
 
 const CareersApplicationSuccessSection = () => {
-  const { applicationSuccess } = careersPageContent;
-  const { selectedJob } = useCareersJobs();
+  const { selectedJob, cms } = useCareersJobs();
+  const applicationSuccess = cms.landing.applicationFlow?.applicationSuccess;
+
+  if (!applicationSuccess) {
+    return null;
+  }
 
   return (
     <section
@@ -32,10 +35,7 @@ const CareersApplicationSuccessSection = () => {
         </Reveal>
 
         {selectedJob ? (
-          <Reveal
-            direction="up"
-            className="flex w-full flex-col gap-4 bg-gray300 p-6 text-left"
-          >
+          <Reveal direction="up" className="flex w-full flex-col gap-4 bg-gray300 p-6 text-left">
             <h2 className="font-larken text-xl font-light leading-110 text-darkblack">
               {applicationSuccess.appliedJobDetailsHeading}
             </h2>

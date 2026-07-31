@@ -1,7 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
-import { careersPageContent } from "@/features/careers/data/content";
+import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
 import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
 import CareersJobFilterFields from "./CareersJobFilterFields";
 
@@ -11,24 +11,27 @@ type CareersJobFiltersDrawerProps = {
 };
 
 const CareersJobFiltersDrawer = ({ open, onOpenChange }: CareersJobFiltersDrawerProps) => {
-  const { jobListing } = careersPageContent;
+  const { cms } = useCareersJobs();
+  const { filtersTitle, closeFiltersLabel } = cms.listing;
+
+  if (!filtersTitle || !closeFiltersLabel) {
+    return null;
+  }
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange} shouldScaleBackground={false}>
-      <DrawerContent
-        className="z-[80] flex max-h-[90vh] min-h-0 flex-col overflow-hidden rounded-none border-0 bg-gray200 p-0 [&>div:first-child]:hidden"
-      >
-        <DrawerTitle className="sr-only">{jobListing.filtersTitle}</DrawerTitle>
+      <DrawerContent className="z-[80] flex max-h-[90vh] min-h-0 flex-col overflow-hidden rounded-none border-0 bg-gray200 p-0 [&>div:first-child]:hidden">
+        <DrawerTitle className="sr-only">{filtersTitle}</DrawerTitle>
         <div className="flex flex-col gap-6 p-6">
           <div className="flex items-center justify-between gap-4">
             <h3 className="font-larken text-2xl font-light leading-110 text-darkblack">
-              {jobListing.filtersTitle}
+              {filtersTitle}
             </h3>
             <button
               type="button"
               onClick={() => onOpenChange(false)}
               className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
-              aria-label={jobListing.closeFiltersLabel}
+              aria-label={closeFiltersLabel}
             >
               <X className="size-6" strokeWidth={1.5} aria-hidden />
             </button>

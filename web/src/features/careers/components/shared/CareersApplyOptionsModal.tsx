@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
-import { careersPageContent } from "@/features/careers/data/content";
+import type { NormalizedCareerApplicationFlow } from "@/services/careers/careers.types";
 import type { CareerJob } from "@/features/careers/types";
 import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
@@ -12,6 +12,7 @@ import CareersJobMetaRow from "./CareersJobMetaRow";
 
 type CareersApplyOptionsModalProps = {
   job: CareerJob;
+  applyModal: NormalizedCareerApplicationFlow["jobDetails"]["applyModal"];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAutofillResume: (file: File) => void;
@@ -32,7 +33,7 @@ const linkedInButtonClass =
   "inline-flex flex-col items-center border-b border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2";
 
 type ApplyOptionsActionsProps = {
-  applyModal: typeof careersPageContent.jobDetails.applyModal;
+  applyModal: NormalizedCareerApplicationFlow["jobDetails"]["applyModal"];
   onAutofillClick: () => void;
   onApplyManually: () => void;
   onApplyLinkedIn: () => void;
@@ -91,7 +92,7 @@ function ApplyOptionsActions({
 
 type ApplyOptionsBodyProps = {
   job: CareerJob;
-  applyModal: typeof careersPageContent.jobDetails.applyModal;
+  applyModal: NormalizedCareerApplicationFlow["jobDetails"]["applyModal"];
   onClose: () => void;
   variant: "mobile" | "desktop";
 };
@@ -162,13 +163,13 @@ function ApplyOptionsBody({
 
 const CareersApplyOptionsModal = ({
   job,
+  applyModal,
   open,
   onOpenChange,
   onAutofillResume,
   onApplyManually,
   onApplyLinkedIn,
 }: CareersApplyOptionsModalProps) => {
-  const { applyModal } = careersPageContent.jobDetails;
   const resumeInputRef = useRef<HTMLInputElement>(null);
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
 

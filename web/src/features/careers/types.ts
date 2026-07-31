@@ -7,6 +7,7 @@ export type CareerQualificationGroup = {
 
 export type CareerJob = {
   id: string;
+  slug: string;
   jobCode: string;
   title: string;
   department: string;
@@ -23,6 +24,8 @@ export type CareerJob = {
   qualifications?: readonly CareerQualificationGroup[];
   whatWeAreLookingFor?: string;
   whyJoinUs?: string;
+  descriptionHtml?: string;
+  applyLabel?: string;
   isNew?: boolean;
   isFeatured?: boolean;
 };

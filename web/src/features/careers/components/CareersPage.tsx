@@ -1,6 +1,7 @@
 "use client";
 
 import { CareersJobsProvider } from "@/features/careers/context/CareersJobsContext";
+import type { NormalizedCareersPageData } from "@/services/careers/careers.types";
 import CareersApplicationFormSection from "./CareersApplicationFormSection";
 import CareersApplicationSuccessSection from "./CareersApplicationSuccessSection";
 import CareersBenefitsSection from "./CareersBenefitsSection";
@@ -14,30 +15,33 @@ import CareersOpeningsSection from "./CareersOpeningsSection";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
 
 function CareersFlowContent() {
-  const { flowStep } = useCareersJobs();
+  const { flowStep, cms } = useCareersJobs();
+  const { landing, listing } = cms;
 
   if (flowStep === "detail") {
-    return <CareersJobDetailSection />;
+    return landing.applicationFlow ? <CareersJobDetailSection /> : null;
   }
 
   if (flowStep === "application") {
-    return <CareersApplicationFormSection />;
+    return landing.applicationFlow ? <CareersApplicationFormSection /> : null;
   }
 
   if (flowStep === "success") {
-    return <CareersApplicationSuccessSection />;
+    return landing.applicationFlow ? <CareersApplicationSuccessSection /> : null;
   }
+
+  const hero = flowStep === "listings" ? (listing.hero ?? landing.hero) : landing.hero;
 
   return (
     <>
-      <CareersHeroSection />
+      {hero ? <CareersHeroSection hero={hero} /> : null}
       {flowStep === "landing" ? (
         <>
-          <CareersOpeningsSection />
-          <CareersLifeSection />
-          <CareersBenefitsSection />
-          <CareersBespokeInspirationsSection />
-          <CareersFaqSection />
+          {landing.openings ? <CareersOpeningsSection openings={landing.openings} /> : null}
+          {landing.lifeAt ? <CareersLifeSection lifeAt={landing.lifeAt} /> : null}
+          {landing.benefits ? <CareersBenefitsSection benefits={landing.benefits} /> : null}
+          {landing.discover ? <CareersBespokeInspirationsSection discover={landing.discover} /> : null}
+          {landing.faq ? <CareersFaqSection faq={landing.faq} /> : null}
         </>
       ) : (
         <CareersJobListingsSection />
@@ -46,9 +50,13 @@ function CareersFlowContent() {
   );
 }
 
-const CareersPage = () => {
+type CareersPageProps = {
+  cms: NormalizedCareersPageData;
+};
+
+const CareersPage = ({ cms }: CareersPageProps) => {
   return (
-    <CareersJobsProvider>
+    <CareersJobsProvider cms={cms}>
       <CareersFlowContent />
     </CareersJobsProvider>
   );

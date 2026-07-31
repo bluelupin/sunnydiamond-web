@@ -1,22 +1,24 @@
 "use client";
 
 import { X } from "lucide-react";
-import { careersPageContent } from "@/features/careers/data/content";
+import type { NormalizedCareerApplicationFlow } from "@/services/careers/careers.types";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/shared/ui/dialog";
 
 type CareersSubmitConfirmationModalProps = {
+  confirmSubmissionModal: NormalizedCareerApplicationFlow["applicationForm"]["confirmSubmissionModal"];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
+  isSubmitting?: boolean;
 };
 
 const CareersSubmitConfirmationModal = ({
+  confirmSubmissionModal,
   open,
   onOpenChange,
   onConfirm,
+  isSubmitting = false,
 }: CareersSubmitConfirmationModalProps) => {
-  const { confirmSubmissionModal } = careersPageContent.applicationForm;
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -49,14 +51,16 @@ const CareersSubmitConfirmationModal = ({
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="inline-flex h-14 flex-1 items-center justify-center border border-neutral300 bg-white px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-colors hover:bg-gray300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
+              disabled={isSubmitting}
+              className="inline-flex h-14 flex-1 items-center justify-center border border-neutral300 bg-white px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-colors hover:bg-gray300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {confirmSubmissionModal.goBackLabel}
             </button>
             <button
               type="button"
               onClick={onConfirm}
-              className="inline-flex h-14 flex-1 items-center justify-center bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
+              disabled={isSubmitting}
+              className="inline-flex h-14 flex-1 items-center justify-center bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {confirmSubmissionModal.submitLabel}
             </button>

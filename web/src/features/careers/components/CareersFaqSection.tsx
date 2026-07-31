@@ -3,7 +3,7 @@
 import { Fragment, useState } from "react";
 import Reveal from "@/shared/Animation/Reveal";
 import { cn } from "@/shared/utils/cn";
-import { careersPageContent } from "@/features/careers/data/content";
+import type { NormalizedCareerFaqSection } from "@/services/careers/careers.types";
 
 const faqTransitionClassName =
   "transition-[grid-template-rows,opacity] duration-500 ease-in-out";
@@ -49,8 +49,11 @@ const FaqToggleIcon = ({ isOpen }: { isOpen: boolean }) => (
   </span>
 );
 
-const CareersFaqSection = () => {
-  const { faq } = careersPageContent;
+type CareersFaqSectionProps = {
+  faq: NormalizedCareerFaqSection;
+};
+
+const CareersFaqSection = ({ faq }: CareersFaqSectionProps) => {
   const [openId, setOpenId] = useState<string | null>(faq.items[0]?.id ?? null);
 
   return (
@@ -112,7 +115,10 @@ const CareersFaqSection = () => {
                 </Reveal>
 
                 {index < faq.items.length - 1 ? (
-                  <div className="h-[0.5px] bg-neutral300" aria-hidden />
+                  <div
+                    className="w-full shrink-0 border-t border-neutral300 [border-top-width:0.5px]"
+                    aria-hidden
+                  />
                 ) : null}
               </Fragment>
             );

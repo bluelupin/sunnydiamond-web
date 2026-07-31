@@ -1,10 +1,11 @@
 "use client";
 
 import { X } from "lucide-react";
-import { careersPageContent } from "@/features/careers/data/content";
+import type { NormalizedCareerApplicationFlow } from "@/services/careers/careers.types";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/shared/ui/dialog";
 
 type CareersUploadResumeModalProps = {
+  uploadResumeModal: NormalizedCareerApplicationFlow["applicationForm"]["uploadResumeModal"];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onOnlyUpload: () => void;
@@ -12,13 +13,12 @@ type CareersUploadResumeModalProps = {
 };
 
 const CareersUploadResumeModal = ({
+  uploadResumeModal,
   open,
   onOpenChange,
   onOnlyUpload,
   onAutofillResume,
 }: CareersUploadResumeModalProps) => {
-  const { uploadResumeModal } = careersPageContent.applicationForm;
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent

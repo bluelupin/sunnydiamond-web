@@ -2,14 +2,17 @@
 
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import Reveal from "@/shared/Animation/Reveal";
-import { careersPageContent } from "@/features/careers/data/content";
+import type { NormalizedCareerHero } from "@/services/careers/careers.types";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
 
 const ctaFocusClass =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-0";
 
-const CareersHeroSection = () => {
-  const { hero } = careersPageContent;
+type CareersHeroSectionProps = {
+  hero: NormalizedCareerHero;
+};
+
+const CareersHeroSection = ({ hero }: CareersHeroSectionProps) => {
   const { flowStep, goToListings } = useCareersJobs();
   const showCta = flowStep === "landing";
 
@@ -29,9 +32,7 @@ const CareersHeroSection = () => {
         className="absolute inset-0 size-full object-cover object-center"
       />
 
-      <div
-        className="absolute left-1/2 top-[150px] flex w-[268px] -translate-x-1/2 flex-col items-center gap-6 md:top-[200px]"
-      >
+      <div className="absolute left-1/2 top-[150px] flex w-[268px] -translate-x-1/2 flex-col items-center gap-6 md:top-[200px]">
         <Reveal
           as="h1"
           id="careers-hero-title"

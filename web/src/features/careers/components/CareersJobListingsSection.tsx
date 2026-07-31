@@ -5,16 +5,22 @@ import { Search } from "lucide-react";
 import FilterIcon from "@/assets/Icons/PLP/FilterIcon";
 import Reveal from "@/shared/Animation/Reveal";
 import { cn } from "@/shared/utils/cn";
-import { careersPageContent } from "@/features/careers/data/content";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
 import CareersJobCard from "./shared/CareersJobCard";
 import CareersJobFiltersSidebar from "./shared/CareersJobFiltersSidebar";
 import CareersJobFiltersDrawer from "./shared/CareersJobFiltersDrawer";
 
 const CareersJobListingsSection = () => {
-  const { jobListing } = careersPageContent;
-  const { filteredJobs, searchQuery, setSearchQuery, goToDetail } = useCareersJobs();
+  const { filteredJobs, searchQuery, setSearchQuery, goToDetail, cms } = useCareersJobs();
+  const { listing } = cms;
   const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const listingTitle = listing.title ?? listing.featuredTitle;
+  const searchPlaceholder = listing.searchPlaceholder ?? listing.mobileSearchPlaceholder;
+
+  if (!listingTitle || !searchPlaceholder) {
+    return null;
+  }
 
   return (
     <section
@@ -33,7 +39,7 @@ const CareersJobListingsSection = () => {
               id="careers-job-listing-title"
               className="font-larken text-32 font-light leading-110 text-darkblack"
             >
-              {jobListing.title}
+              {listingTitle}
             </h2>
           </Reveal>
 
@@ -48,21 +54,23 @@ const CareersJobListingsSection = () => {
                   type="search"
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder={jobListing.searchPlaceholder}
+                  placeholder={searchPlaceholder}
                   className={cn(
                     "h-auto w-full border border-[#F2F2F2] bg-[#F2F2F2] p-3 pl-12 font-gill text-sm font-light leading-110 text-darkblack placeholder:text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2",
                   )}
-                  aria-label={jobListing.searchPlaceholder}
+                  aria-label={searchPlaceholder}
                 />
               </div>
-              <button
-                type="button"
-                onClick={() => setFiltersOpen(true)}
-                className="inline-flex size-12 shrink-0 items-center justify-center border border-[#F2F2F2] bg-[#F2F2F2] text-darkblack transition-colors hover:bg-gray300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 lg:hidden"
-                aria-label={jobListing.openFiltersLabel}
-              >
-                <FilterIcon className="size-6" />
-              </button>
+              {listing.openFiltersLabel ? (
+                <button
+                  type="button"
+                  onClick={() => setFiltersOpen(true)}
+                  className="inline-flex size-12 shrink-0 items-center justify-center border border-[#F2F2F2] bg-[#F2F2F2] text-darkblack transition-colors hover:bg-gray300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 lg:hidden"
+                  aria-label={listing.openFiltersLabel}
+                >
+                  <FilterIcon className="size-6" />
+                </button>
+              ) : null}
             </Reveal>
 
             <div className="flex flex-col gap-4">
@@ -76,17 +84,19 @@ const CareersJobListingsSection = () => {
                     />
                   </Reveal>
                 ))
-              ) : (
+              ) : listing.emptyResultsMessage ? (
                 <p className="font-gill text-base font-light leading-110 text-neutral500">
-                  No roles match your search. Try a different keyword.
+                  {listing.emptyResultsMessage}
                 </p>
-              )}
+              ) : null}
             </div>
           </div>
         </div>
       </div>
 
-      <CareersJobFiltersDrawer open={filtersOpen} onOpenChange={setFiltersOpen} />
+      {listing.closeFiltersLabel ? (
+        <CareersJobFiltersDrawer open={filtersOpen} onOpenChange={setFiltersOpen} />
+      ) : null}
     </section>
   );
 };

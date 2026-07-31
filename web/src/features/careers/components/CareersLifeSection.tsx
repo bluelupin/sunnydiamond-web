@@ -3,10 +3,13 @@
 import Image from "next/image";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import Reveal from "@/shared/Animation/Reveal";
-import { careersPageContent } from "@/features/careers/data/content";
+import type { NormalizedCareerLifeSection } from "@/services/careers/careers.types";
 
-const CareersLifeSection = () => {
-  const { lifeAt } = careersPageContent;
+type CareersLifeSectionProps = {
+  lifeAt: NormalizedCareerLifeSection;
+};
+
+const CareersLifeSection = ({ lifeAt }: CareersLifeSectionProps) => {
   const titleLines = lifeAt.title.split("\n");
 
   return (
@@ -31,10 +34,7 @@ const CareersLifeSection = () => {
             </h2>
           </Reveal>
 
-          <Reveal
-            direction="up"
-            className="relative hidden h-[496px] overflow-hidden md:block"
-          >
+          <Reveal direction="up" className="relative hidden h-[496px] overflow-hidden md:block">
             <ResponsiveImage
               desktopSrc={lifeAt.leftImage.desktopUrl}
               mobileSrc={lifeAt.leftImage.mobileUrl}
@@ -53,15 +53,17 @@ const CareersLifeSection = () => {
           <p className="font-gill text-sm font-light leading-110 text-neutral500 md:text-xl md:font-normal md:text-darkblack">
             {lifeAt.description}
           </p>
-          <div className="flex items-end gap-2 md:items-center">
-            <span
-              className="h-9 w-px shrink-0 bg-darkMagenta md:h-[38px] md:w-[1.5px]"
-              aria-hidden
-            />
-            <p className="max-w-[213px] font-gill text-sm font-light leading-110 text-[#696969] md:max-w-[292px] md:text-base md:text-darkblack">
-              &ldquo;{lifeAt.quote}&rdquo;
-            </p>
-          </div>
+          {lifeAt.quote ? (
+            <div className="flex items-end gap-2 md:items-center">
+              <span
+                className="h-9 w-px shrink-0 bg-darkMagenta md:h-[38px] md:w-[1.5px]"
+                aria-hidden
+              />
+              <p className="max-w-[213px] font-gill text-sm font-light leading-110 text-[#696969] md:max-w-[292px] md:text-base md:text-darkblack">
+                &ldquo;{lifeAt.quote}&rdquo;
+              </p>
+            </div>
+          ) : null}
         </Reveal>
 
         <Reveal direction="up" className="flex items-center gap-4 md:hidden">

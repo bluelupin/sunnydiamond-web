@@ -15,15 +15,11 @@ import {
   validateRequiredEmail,
   validateRequiredName,
 } from "@/shared/utils/formValidation";
-import { careersPageContent } from "@/features/careers/data/content";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
+import { submitCareerApplication } from "@/services/careers/career-submission.service";
 import {
-  CAREERS_EMPLOYEE_OPTIONS,
-  CAREERS_GENDER_OPTIONS,
-  CAREERS_NOTICE_PERIOD_OPTIONS,
   CAREERS_RESUME_ACCEPT,
   CAREERS_RESUME_MAX_BYTES,
-  CAREERS_WORK_EXPERIENCE_OPTIONS,
   careersFormFieldClassName,
   careersFormFieldGridClassName,
   careersFormFieldsStackClassName,
@@ -143,13 +139,11 @@ function TagChip({ label, onRemove }: { label: string; onRemove: () => void }) {
 const careersBirthDateBounds = getCareersBirthDateBounds();
 
 const CareersApplicationForm = () => {
-  const { applicationForm, jobDetails } = careersPageContent;
-  const {
-    selectedJob,
-    goToSuccess,
-    pendingResumeFile,
-    clearPendingResume,
-  } = useCareersJobs();
+  const { cms, selectedJob, goToSuccess, pendingResumeFile, clearPendingResume, applicationEntry } =
+    useCareersJobs();
+  const applicationFlow = cms.landing.applicationFlow;
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const resumeInputRef = useRef<HTMLInputElement>(null);
 
@@ -336,10 +330,67 @@ const CareersApplicationForm = () => {
     setSubmitConfirmModalOpen(true);
   };
 
-  const handleConfirmSubmit = () => {
-    setSubmitConfirmModalOpen(false);
-    goToSuccess();
+  const handleConfirmSubmit = async () => {
+    if (!selectedJob || !applicationFlow) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await submitCareerApplication({
+        jobID: selectedJob.jobCode,
+        jobTitle: selectedJob.title,
+        location: selectedJob.location,
+        department: selectedJob.department,
+        experience: selectedJob.experienceLabel,
+        personalDetails: {
+          fullName: name.trim(),
+          phone: `${countryCode}${phone.trim()}`,
+          email: email.trim(),
+          dateOfBirth,
+          gender,
+        },
+        educationDetails: {
+          highestDegree: highestDegree.trim(),
+          areaOfStudy: areaOfStudy.trim(),
+          yearOfCompletion: yearOfCompletion.trim(),
+        },
+        workExperience: {
+          relevantExperience,
+          currentCompany: currentCompany.trim(),
+          currentJobTitle: currentJobTitle.trim(),
+          currentCtc: currentCtc.trim(),
+          expectedCtc: expectedCtc.trim(),
+          noticePeriod,
+        },
+        skillsAndLanguages: {
+          skills,
+          languages,
+        },
+        addInfo: {
+          hasCompanyRelation,
+          employeeName,
+          employeeJobTitle: employeeJobTitle.trim(),
+          applicationEntry: applicationEntry ?? "manual",
+        },
+        resumeFile,
+      });
+
+      setSubmitConfirmModalOpen(false);
+      goToSuccess();
+    } catch {
+      setSubmitConfirmModalOpen(false);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  if (!applicationFlow) {
+    return null;
+  }
+
+  const { applicationForm, jobDetails } = applicationFlow;
 
   if (!selectedJob) {
     return (
@@ -494,7 +545,7 @@ const CareersApplicationForm = () => {
                 value={gender}
                 onChange={setGender}
                 onBlur={() => markTouched("gender")}
-                options={CAREERS_GENDER_OPTIONS}
+                options={applicationForm.genderOptions}
                 placeholder="Select"
                 error={showError("gender") ? errors.gender : undefined}
               />
@@ -565,7 +616,7 @@ const CareersApplicationForm = () => {
               value={relevantExperience}
               onChange={setRelevantExperience}
               onBlur={() => markTouched("relevantExperience")}
-              options={CAREERS_WORK_EXPERIENCE_OPTIONS}
+              options={applicationForm.workExperienceOptions}
               placeholder="Select"
               error={showError("relevantExperience") ? errors.relevantExperience : undefined}
             />
@@ -619,7 +670,7 @@ const CareersApplicationForm = () => {
               label={fields.noticePeriodLabel}
               value={noticePeriod}
               onChange={setNoticePeriod}
-              options={CAREERS_NOTICE_PERIOD_OPTIONS}
+              options={applicationForm.noticePeriodOptions}
               placeholder="Select"
             />
           </div>
@@ -726,7 +777,7 @@ const CareersApplicationForm = () => {
                 value={employeeName}
                 onChange={setEmployeeName}
                 onBlur={() => markTouched("employeeName")}
-                options={CAREERS_EMPLOYEE_OPTIONS}
+                options={applicationForm.employeeRelationOptions}
                 placeholder="Select"
                 error={showError("employeeName") ? errors.employeeName : undefined}
               />
@@ -759,6 +810,7 @@ const CareersApplicationForm = () => {
       </button>
 
       <CareersUploadResumeModal
+        uploadResumeModal={applicationForm.uploadResumeModal}
         open={uploadResumeModalOpen}
         onOpenChange={setUploadResumeModalOpen}
         onOnlyUpload={openResumeFilePicker}
@@ -766,9 +818,11 @@ const CareersApplicationForm = () => {
       />
 
       <CareersSubmitConfirmationModal
+        confirmSubmissionModal={applicationForm.confirmSubmissionModal}
         open={submitConfirmModalOpen}
         onOpenChange={setSubmitConfirmModalOpen}
         onConfirm={handleConfirmSubmit}
+        isSubmitting={isSubmitting}
       />
     </form>
   );

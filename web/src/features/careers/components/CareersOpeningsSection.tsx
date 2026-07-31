@@ -1,15 +1,23 @@
 "use client";
 
 import Reveal from "@/shared/Animation/Reveal";
-import { careersPageContent, getRecentCareerJobs } from "@/features/careers/data/content";
+import type { NormalizedCareerOpeningsSection } from "@/services/careers/careers.types";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
+import { getRelatedCareerJobs } from "@/features/careers/utils/careersJobs";
 import CareersJobCard from "./shared/CareersJobCard";
 import CareersSectionCta from "./shared/CareersSectionCta";
 
-const CareersOpeningsSection = () => {
-  const { openings } = careersPageContent;
-  const recentJobs = getRecentCareerJobs(3);
-  const { goToDetail, goToListings } = useCareersJobs();
+type CareersOpeningsSectionProps = {
+  openings: NormalizedCareerOpeningsSection;
+};
+
+const CareersOpeningsSection = ({ openings }: CareersOpeningsSectionProps) => {
+  const { jobs, goToDetail, goToListings } = useCareersJobs();
+  const recentJobs = getRelatedCareerJobs(jobs, openings.relatedJobIds, 3);
+
+  if (recentJobs.length === 0) {
+    return null;
+  }
 
   return (
     <section
@@ -18,7 +26,7 @@ const CareersOpeningsSection = () => {
       className="bg-white px-4 py-10 md:px-100 md:pb-104 md:pt-16"
     >
       <div className="flex w-full flex-col gap-10 md:items-center">
-        <div className="flex flex-col gap-3 text-left md:gap-4 md:w-full md:items-center md:text-center">
+        <div className="flex flex-col gap-3 text-left md:w-full md:items-center md:gap-4 md:text-center">
           <Reveal
             as="h2"
             id="careers-openings-title"

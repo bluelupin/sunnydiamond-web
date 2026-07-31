@@ -75,7 +75,7 @@ const ErrorPage = ({
       <div className="animate-fade-in mx-auto flex w-full max-w-xl flex-col items-center gap-8 text-center md:gap-10">
         <ErrorBrandHeader />
         <ErrorStatusBadge label={errorPageCopy.badge} />
-        <ErrorIllustration />
+        {/* <ErrorIllustration /> */}
 
         <div className="flex max-w-lg flex-col gap-3">
           <h1 className="font-larken text-3xl font-light leading-110 text-[#1E1E1E] md:text-4xl">
@@ -84,11 +84,11 @@ const ErrorPage = ({
           <p className="font-gill text-base font-light leading-relaxed text-[#6B6B6B] md:text-lg">
             {description}
           </p>
-          <p className="font-gill text-sm leading-relaxed text-[#6B6B6B]">
+          {/* <p className="font-gill text-sm leading-relaxed text-[#6B6B6B]">
             {variantContent.statusMessage}
-          </p>
+          </p> */}
         </div>
-
+        {/* 
         {showStatusCard ? (
           <ErrorStatusCard
             statusLabel={variantContent.statusLabel}
@@ -100,7 +100,7 @@ const ErrorPage = ({
             }
             errorCode={errorCode}
           />
-        ) : null}
+        ) : null} */}
 
         <ErrorActionButtons onRetry={onRetry ? handleRetry : undefined} isRetrying={isRetrying} />
         <ErrorFooterMessage />

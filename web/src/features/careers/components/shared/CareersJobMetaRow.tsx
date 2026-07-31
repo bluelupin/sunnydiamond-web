@@ -52,6 +52,8 @@ const CareersJobMetaRow = ({
   className,
   iconClassName,
 }: CareersJobMetaRowProps) => {
+  const showWorkplace = Boolean(job.workplaceLabel?.trim());
+
   return (
     <div
       className={cn(
@@ -66,12 +68,16 @@ const CareersJobMetaRow = ({
       />
       <MetaDivider />
       <FigmaMetaItem icon="map" label={job.location} iconClassName={iconClassName} />
-      <MetaDivider />
-      <FigmaMetaItem
-        icon="workplace"
-        label={job.workplaceLabel}
-        iconClassName={iconClassName}
-      />
+      {showWorkplace ? (
+        <>
+          <MetaDivider />
+          <FigmaMetaItem
+            icon="workplace"
+            label={job.workplaceLabel}
+            iconClassName={iconClassName}
+          />
+        </>
+      ) : null}
     </div>
   );
 };

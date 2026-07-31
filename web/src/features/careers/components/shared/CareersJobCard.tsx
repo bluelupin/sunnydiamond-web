@@ -2,6 +2,7 @@
 
 import { cn } from "@/shared/utils/cn";
 import type { CareerJob } from "@/features/careers/types";
+import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
 import CareersJobIdChip from "./CareersJobIdChip";
 import CareersJobMetaRow from "./CareersJobMetaRow";
 import CareersPostedLabel from "./CareersPostedLabel";
@@ -31,6 +32,8 @@ const CareersJobCard = ({
   showSummary = variant !== "landing" && variant !== "listing",
   showViewJobButton,
 }: CareersJobCardProps) => {
+  const { cms } = useCareersJobs();
+  const viewJobLabel = cms.landing.applicationFlow?.jobDetails.viewJobLabel;
   const isLanding = variant === "landing";
   const isListing = variant === "listing";
   const shouldShowViewJob = showViewJobButton ?? Boolean(onViewJob);
@@ -119,7 +122,7 @@ const CareersJobCard = ({
         ) : null}
       </div>
 
-      {shouldShowViewJob && onViewJob ? (
+      {shouldShowViewJob && onViewJob && viewJobLabel ? (
         <button
           type="button"
           onClick={(event) => {
@@ -134,7 +137,7 @@ const CareersJobCard = ({
             isLanding && "md:hidden",
           )}
         >
-          VIEW JOB
+          {viewJobLabel}
         </button>
       ) : null}
 

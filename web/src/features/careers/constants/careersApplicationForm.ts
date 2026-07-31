@@ -3,31 +3,6 @@ export const CAREERS_RESUME_ACCEPT =
 
 export const CAREERS_RESUME_MAX_BYTES = 5 * 1024 * 1024;
 
-export const CAREERS_GENDER_OPTIONS = ["Female", "Male", "Other"] as const;
-
-export const CAREERS_WORK_EXPERIENCE_OPTIONS = [
-  "0–1 years",
-  "1–2 years",
-  "2–4 years",
-  "4–6 years",
-  "6+ years",
-] as const;
-
-export const CAREERS_NOTICE_PERIOD_OPTIONS = [
-  "Immediate",
-  "15 days",
-  "1 month",
-  "2 months",
-  "3 months",
-] as const;
-
-export const CAREERS_EMPLOYEE_OPTIONS = [
-  "Saumya",
-  "Gauri J",
-  "Priya Nair",
-  "Rahul Menon",
-] as const;
-
 export const careersFormLabelClassName =
   "font-gill text-base font-normal leading-110 text-darkblack";
 

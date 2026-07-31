@@ -9,17 +9,16 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { careerJobs, getCareerJobById } from "../data/content";
+import type { NormalizedCareersPageData } from "@/services/careers/careers.types";
 import type { CareerJob, CareersApplicationEntry, CareersFlowStep } from "../types";
-import {
-  filterCareerJobs,
-  getUniqueCareerFilterOptions,
-} from "../utils/careersFormatting";
+import { filterCareerJobs } from "../utils/careersFormatting";
+import { getCareerJobById } from "../utils/careersJobs";
 import { resetCareersHeaderMode, setCareersHeaderMode } from "./careersHeaderBridge";
 
 export type CareersHeaderMode = "overlay" | "solid";
 
 type CareersJobsContextValue = {
+  cms: NormalizedCareersPageData;
   jobs: readonly CareerJob[];
   selectedJobId: string | null;
   selectedJob: CareerJob | null;
@@ -28,7 +27,7 @@ type CareersJobsContextValue = {
   locationFilter: string;
   departmentFilter: string;
   experienceFilter: string;
-  filterOptions: ReturnType<typeof getUniqueCareerFilterOptions>;
+  filterOptions: NormalizedCareersPageData["listing"]["filterOptions"];
   filteredJobs: CareerJob[];
   headerMode: CareersHeaderMode;
   applicationEntry: CareersApplicationEntry | null;
@@ -59,11 +58,13 @@ function headerModeForFlowStep(flowStep: CareersFlowStep): CareersHeaderMode {
 }
 
 type CareersJobsProviderProps = {
+  cms: NormalizedCareersPageData;
   children: ReactNode;
 };
 
-export function CareersJobsProvider({ children }: CareersJobsProviderProps) {
-  const [selectedJobId, setSelectedJobId] = useState<string | null>(careerJobs[0]?.id ?? null);
+export function CareersJobsProvider({ cms, children }: CareersJobsProviderProps) {
+  const jobs = cms.jobs;
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(jobs[0]?.id ?? null);
   const [flowStep, setFlowStep] = useState<CareersFlowStep>("landing");
   const [searchQuery, setSearchQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
@@ -72,7 +73,7 @@ export function CareersJobsProvider({ children }: CareersJobsProviderProps) {
   const [applicationEntry, setApplicationEntry] = useState<CareersApplicationEntry | null>(null);
   const [pendingResumeFile, setPendingResumeFile] = useState<File | null>(null);
 
-  const filterOptions = useMemo(() => getUniqueCareerFilterOptions(careerJobs), []);
+  const filterOptions = cms.listing.filterOptions;
 
   const selectJob = useCallback((jobId: string) => {
     setSelectedJobId(jobId);
@@ -138,12 +139,12 @@ export function CareersJobsProvider({ children }: CareersJobsProviderProps) {
 
   const filteredJobs = useMemo(
     () =>
-      filterCareerJobs(careerJobs, searchQuery, {
+      filterCareerJobs(jobs, searchQuery, {
         location: locationFilter || undefined,
         department: departmentFilter || undefined,
         experience: experienceFilter || undefined,
       }),
-    [searchQuery, locationFilter, departmentFilter, experienceFilter],
+    [jobs, searchQuery, locationFilter, departmentFilter, experienceFilter],
   );
 
   const headerMode: CareersHeaderMode = headerModeForFlowStep(flowStep);
@@ -158,9 +159,10 @@ export function CareersJobsProvider({ children }: CareersJobsProviderProps) {
 
   const value = useMemo(
     () => ({
-      jobs: careerJobs,
+      cms,
+      jobs,
       selectedJobId,
-      selectedJob: getCareerJobById(selectedJobId),
+      selectedJob: getCareerJobById(jobs, selectedJobId),
       flowStep,
       searchQuery,
       locationFilter,
@@ -189,6 +191,7 @@ export function CareersJobsProvider({ children }: CareersJobsProviderProps) {
       applicationEntry,
       clearSelectedJob,
       clearPendingResume,
+      cms,
       departmentFilter,
       experienceFilter,
       filterOptions,
@@ -198,6 +201,7 @@ export function CareersJobsProvider({ children }: CareersJobsProviderProps) {
       goBackFromApplication,
       goToSuccess,
       headerMode,
+      jobs,
       locationFilter,
       pendingResumeFile,
       searchQuery,

@@ -26,6 +26,7 @@ export const STRAPI_ENDPOINTS = {
   careerLandingPage: "api/career-landing-page",
   careerListingPage: "api/career-listing-page",
   careerOpenings: "api/career-openings",
+  jobOpeningSubmissions: "api/submissions-job-openings",
   blogLandingPage: "api/blog-landing-page",
   blogCategories: "api/blog-categories",
   blogPosts: "api/blog-posts",
