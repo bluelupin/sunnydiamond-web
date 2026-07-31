@@ -80,6 +80,11 @@ const nextConfig: NextConfig = {
         destination: "/jewellery",
         permanent: true,
       },
+      {
+        source: "/education",
+        destination: "/learn-about-diamonds",
+        permanent: true,
+      },
       ...legacyJewelleryPathRedirects,
       ...legacyListingCategoryRedirects,
     ];

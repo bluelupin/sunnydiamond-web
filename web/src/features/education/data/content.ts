@@ -1,3 +1,5 @@
+export const learnAboutDiamondsRoute = "/learn-about-diamonds" as const;
+
 export const educationPageImages = {
   panelTexture: "/images/education/panel-texture.png",
   certifiedHandBg: "/images/education/certified-hand-bg.png",

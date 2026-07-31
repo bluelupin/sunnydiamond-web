@@ -105,11 +105,17 @@ const mapSeo = (seo?: StrapiEducationSeo | null): NormalizedEducationSeo | null 
   if (!metaTitle || !metaDescription || !canonicalPath) return null;
 
   const ogImageUrl = resolveCmsMediaUrl(seo.ogImage);
+  const normalizedCanonicalPath =
+    canonicalPath === "/education" || canonicalPath === "education"
+      ? "/learn-about-diamonds"
+      : canonicalPath.startsWith("/")
+        ? canonicalPath
+        : `/${canonicalPath}`;
 
   return {
     metaTitle,
     metaDescription,
-    canonicalPath,
+    canonicalPath: normalizedCanonicalPath,
     metaKeywords: cleanText(seo.metaKeywords),
     ...(ogImageUrl ? { ogImageUrl } : {}),
   };

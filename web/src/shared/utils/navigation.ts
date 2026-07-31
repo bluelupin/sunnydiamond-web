@@ -1,3 +1,4 @@
+import { learnAboutDiamondsRoute } from "@/features/education/data/content";
 import { isJewelleryCategoryPath } from "@/features/jewellery-product/utils/jewelleryRoutes";
 
 export function resolveHeaderNavHref(label: string, url: string): string {
@@ -33,7 +34,7 @@ export function isHeroOverlayRoute(pathname: string): boolean {
     isAuthRoute(pathname) ||
     pathname === "/" ||
     pathname === "/about" ||
-    pathname === "/education" ||
+    pathname === learnAboutDiamondsRoute ||
     isJewelleryCategoryPath(pathname) ||
     pathname === "/bespoke-jewellery" ||
     pathname === "/gifting" ||

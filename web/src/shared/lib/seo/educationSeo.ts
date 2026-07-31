@@ -1,6 +1,16 @@
 import { siteConfig } from "@/shared/lib/siteConfig";
 import type { NormalizedLearnAboutDiamondsPage } from "@/services/education/learn-about-diamonds-page.types";
+import { learnAboutDiamondsRoute } from "@/features/education/data/content";
 import { buildFaqPageJsonLd } from "@/shared/lib/seo/schema/faqPage";
+
+function normalizeEducationCanonicalPath(path: string): string {
+  const trimmed = path.trim();
+  if (trimmed === "/education" || trimmed === "education") {
+    return learnAboutDiamondsRoute;
+  }
+
+  return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+}
 
 export function resolveEducationSeoMetadata(page: NormalizedLearnAboutDiamondsPage | null) {
   const cmsSeo = page?.seo;
@@ -9,7 +19,7 @@ export function resolveEducationSeoMetadata(page: NormalizedLearnAboutDiamondsPa
     return {
       title: siteConfig.brand.name,
       description: siteConfig.seo.defaultDescription,
-      canonicalPath: "/education",
+      canonicalPath: learnAboutDiamondsRoute,
       keywords: undefined,
       image: undefined,
     };
@@ -18,7 +28,7 @@ export function resolveEducationSeoMetadata(page: NormalizedLearnAboutDiamondsPa
   return {
     title: cmsSeo.metaTitle,
     description: cmsSeo.metaDescription,
-    canonicalPath: cmsSeo.canonicalPath,
+    canonicalPath: normalizeEducationCanonicalPath(cmsSeo.canonicalPath),
     keywords: cmsSeo.metaKeywords,
     image: cmsSeo.ogImageUrl,
   };
