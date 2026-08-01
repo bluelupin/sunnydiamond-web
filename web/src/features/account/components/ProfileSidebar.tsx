@@ -13,7 +13,7 @@ type ProfileSidebarProps = {
 const ProfileSidebar = ({ activeSection, onSectionChange }: ProfileSidebarProps) => (
   <nav
     aria-label="Profile sections"
-    className="flex w-full max-w-[440px] flex-col border-r border-neutral300 lg:w-[440px]"
+    className="flex w-full flex-col border-r border-neutral300"
   >
     {PROFILE_NAV_ITEMS.map((item) => {
       if (item.kind === "link") {
@@ -21,7 +21,7 @@ const ProfileSidebar = ({ activeSection, onSectionChange }: ProfileSidebarProps)
           <Link
             key={item.href}
             href={item.href}
-            className="px-6 py-6 font-gill text-xl font-light leading-110 text-darkblack transition-colors hover:bg-gray300/60"
+            className="flex w-full items-center p-6 font-gill text-xl font-light leading-110 text-darkblack transition-colors hover:bg-gray300/60"
           >
             {item.label}
           </Link>
@@ -37,10 +37,10 @@ const ProfileSidebar = ({ activeSection, onSectionChange }: ProfileSidebarProps)
           onClick={() => onSectionChange(item.id)}
           aria-current={isActive ? "page" : undefined}
           className={cn(
-            "px-6 py-6 text-left font-gill text-xl leading-110 transition-colors",
+            "flex w-full items-center p-6 text-left font-gill text-xl leading-110 text-darkblack transition-colors",
             isActive
-              ? "border-r-2 border-darkblack bg-gray300 font-normal text-darkblack"
-              : "font-light text-darkblack hover:bg-gray300/60",
+              ? "border-r-2 border-darkblack bg-gray300 font-normal"
+              : "font-light hover:bg-gray300/60",
           )}
         >
           {item.label}

@@ -85,7 +85,7 @@ const ProfilePage = () => {
               />
 
               <div className="lg:-mx-10 lg:mt-8 lg:grid lg:grid-cols-[480px_minmax(0,1fr)] lg:gap-6">
-                <aside className="hidden lg:block lg:pl-10">
+                <aside className="hidden lg:block">
                   <ProfileSidebar
                     activeSection={activeSection}
                     onSectionChange={handleSectionChange}
