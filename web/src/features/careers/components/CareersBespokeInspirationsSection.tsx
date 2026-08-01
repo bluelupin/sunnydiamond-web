@@ -38,12 +38,12 @@ const CareersBespokeInspirationsSection = ({
       />
 
       <div className="relative flex flex-col items-center justify-center px-4 py-16 md:py-104">
-        <div className="flex w-full max-w-[568px] flex-col items-center gap-4 text-center">
+        <div className="flex w-full max-w-[568px] flex-col items-center gap-6 text-center">
           <Reveal
             as="h2"
             id="careers-bespoke-title"
             direction="up"
-            className="font-larken text-32 font-light leading-110 text-darkblack md:text-5xl"
+            className="w-full font-larken text-32 font-light leading-110 text-darkblack md:text-5xl"
           >
             {discover.title}
           </Reveal>
@@ -51,7 +51,7 @@ const CareersBespokeInspirationsSection = ({
             <button
               type="button"
               onClick={goToListings}
-              className={`inline-flex h-14 items-center justify-center border border-darkblack bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-90 ${ctaFocusClass}`}
+              className={`inline-flex h-14 shrink-0 items-center justify-center bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-90 ${ctaFocusClass}`}
             >
               {discover.ctaLabel}
             </button>

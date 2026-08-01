@@ -56,7 +56,8 @@ const CareersJobIdChip = ({
           "inline-flex shrink-0 items-center gap-1.5 px-3 py-1",
           "font-gill text-base font-light leading-110 text-darkblack",
           "transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2",
-          surface === "muted" && "bg-gray300 hover:bg-gray300",
+          surface === "muted" &&
+            "bg-[#ECE9E9] text-sm font-light hover:bg-[#ECE9E9] md:bg-gray300 md:text-base",
           surface === "listing" &&
             "bg-[#ECE9E9] text-sm font-light hover:bg-[#ECE9E9] md:text-base",
           surface === "white" && "bg-white hover:bg-white",

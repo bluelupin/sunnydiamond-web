@@ -33,7 +33,8 @@ const CareersJobCard = ({
   showViewJobButton,
 }: CareersJobCardProps) => {
   const { cms } = useCareersJobs();
-  const viewJobLabel = cms.landing.applicationFlow?.jobDetails.viewJobLabel;
+  const viewJobLabel =
+    cms.landing.applicationFlow?.jobDetails.viewJobLabel ?? "VIEW JOB";
   const isLanding = variant === "landing";
   const isListing = variant === "listing";
   const shouldShowViewJob = showViewJobButton ?? Boolean(onViewJob);
@@ -66,7 +67,7 @@ const CareersJobCard = ({
       tabIndex={isListing ? 0 : undefined}
       className={cn(
         "flex flex-col",
-        isLanding && "gap-6 bg-gray300 p-6",
+        isLanding && "gap-6 bg-gray200 p-4 md:bg-gray300 md:p-6",
         isListing &&
           "group cursor-pointer gap-6 bg-gray300 p-4 transition-colors md:bg-gray200 md:p-6 md:hover:flex-row md:hover:items-start md:hover:justify-between md:hover:bg-gray300",
         !isLanding && !isListing && "gap-6 bg-gray200 p-4 md:gap-8 md:p-8",
@@ -78,7 +79,7 @@ const CareersJobCard = ({
           <div
             className={cn(
               "flex items-center gap-3",
-              isLanding && "flex-wrap md:flex-row",
+              isLanding && "flex-wrap gap-3 md:flex-row",
               isListing && "flex-wrap",
               !isLanding && !isListing && "flex-wrap md:flex-col md:items-start md:gap-4",
             )}
@@ -113,6 +114,7 @@ const CareersJobCard = ({
           <CareersPostedLabel
             postedAt={job.postedAt}
             className={cn(
+              isLanding && "hidden md:block",
               isListing && "hidden md:block",
               isListing ? postedDesktopClass : "",
               !isListing &&
@@ -122,7 +124,7 @@ const CareersJobCard = ({
         ) : null}
       </div>
 
-      {shouldShowViewJob && onViewJob && viewJobLabel ? (
+      {shouldShowViewJob && onViewJob ? (
         <button
           type="button"
           onClick={(event) => {
@@ -132,9 +134,10 @@ const CareersJobCard = ({
           className={cn(
             viewJobButtonClass,
             isListing && "md:hidden md:group-hover:inline-flex",
-            !isListing &&
-              "md:border md:border-darkblack md:bg-transparent md:px-8 md:text-darkblack md:hover:bg-darkblack md:hover:text-white",
             isLanding && "md:hidden",
+            !isListing &&
+              !isLanding &&
+              "md:border md:border-darkblack md:bg-transparent md:px-8 md:text-darkblack md:hover:bg-darkblack md:hover:text-white",
           )}
         >
           {viewJobLabel}

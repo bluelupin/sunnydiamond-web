@@ -25,7 +25,7 @@ const CareersOpeningsSection = ({ openings }: CareersOpeningsSectionProps) => {
       aria-labelledby="careers-openings-title"
       className="bg-white px-4 py-10 md:px-100 md:pb-104 md:pt-16"
     >
-      <div className="flex w-full flex-col gap-10 md:items-center">
+      <div className="flex w-full flex-col gap-6 md:gap-10 md:items-center">
         <div className="flex flex-col gap-3 text-left md:w-full md:items-center md:gap-4 md:text-center">
           <Reveal
             as="h2"
@@ -38,13 +38,13 @@ const CareersOpeningsSection = ({ openings }: CareersOpeningsSectionProps) => {
           <Reveal
             as="p"
             direction="up"
-            className="font-gill text-base font-light leading-110 text-neutral500 md:text-xl"
+            className="font-gill text-base font-light leading-110 text-darkblack md:text-xl md:text-neutral500"
           >
             {openings.subtitle}
           </Reveal>
         </div>
 
-        <div className="flex w-full flex-col gap-4 md:gap-4">
+        <div className="flex w-full flex-col gap-6 md:gap-4">
           {recentJobs.map((job) => (
             <Reveal key={job.id} direction="up">
               <CareersJobCard

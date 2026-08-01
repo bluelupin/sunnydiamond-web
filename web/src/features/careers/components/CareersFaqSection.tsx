@@ -62,12 +62,12 @@ const CareersFaqSection = ({ faq }: CareersFaqSectionProps) => {
       aria-labelledby="careers-faq-title"
       className="bg-white px-4 py-16 md:px-10 md:py-104"
     >
-      <div className="mx-auto flex w-full max-w-[910px] flex-col items-center gap-8 md:gap-10">
+      <div className="mx-auto flex w-full max-w-[910px] flex-col gap-8 md:items-center md:gap-10">
         <Reveal
           as="h2"
           id="careers-faq-title"
           direction="up"
-          className="w-full text-center font-larken text-32 font-light leading-110 text-darkblack md:text-5xl"
+          className="w-full text-left font-larken text-32 font-light leading-110 text-darkblack md:text-center md:text-5xl"
         >
           {faq.title}
         </Reveal>
@@ -82,14 +82,14 @@ const CareersFaqSection = ({ faq }: CareersFaqSectionProps) => {
                   <div
                     className={cn(
                       "flex flex-col overflow-hidden rounded",
-                      isOpen ? "gap-4" : "min-h-14 justify-center py-6",
+                      isOpen && "gap-4",
                     )}
                   >
                     <button
                       type="button"
                       aria-expanded={isOpen}
                       onClick={() => setOpenId(isOpen ? null : item.id)}
-                      className="flex w-full items-center gap-2 text-left"
+                      className="flex w-full items-start gap-2 text-left lg:min-h-14 lg:items-center"
                     >
                       <span className="min-w-0 flex-1 font-gill text-base font-normal leading-110 text-darkblack md:text-xl">
                         {item.question}
@@ -106,7 +106,7 @@ const CareersFaqSection = ({ faq }: CareersFaqSectionProps) => {
                       aria-hidden={!isOpen}
                     >
                       <div className="overflow-hidden">
-                        <p className="font-gill text-base font-light leading-110 text-neutral500 md:text-xl">
+                        <p className="font-gill text-sm font-light leading-110 text-neutral500 md:text-base md:text-xl">
                           {item.answer}
                         </p>
                       </div>
