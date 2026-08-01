@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { ProfileBespokeRemovedToastBanner } from "../components/ProfileBespokeRemovedToast";
 
 type BespokeRemovedToastState = {
   onUndo?: () => void | Promise<void>;
@@ -61,6 +62,7 @@ export function ProfileBespokeToastProvider({ children }: { children: ReactNode 
       value={{ toast, showBespokeRemovedToast, dismissBespokeRemovedToast }}
     >
       {children}
+      <ProfileBespokeRemovedToastBanner />
     </ProfileBespokeToastContext.Provider>
   );
 }

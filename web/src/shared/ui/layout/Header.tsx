@@ -25,9 +25,11 @@ import { resolveShellHeaderLinks, splitShellHeaderNavLinks } from "@/shared/lib/
 import MobileNavigation from "@/shared/ui/layout/MobileNavigation";
 import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
 import AccountMenu from "@/features/auth/components/AccountMenu";
+import { ProfileMobileNavSheet } from "@/features/account/components/ProfileMobileNavSheet";
 import MenuIcon from "@/assets/Icons/MenuIcon";
 import HeaderIconBadge from "@/shared/ui/layout/HeaderIconBadge";
 import { useCanHover } from "@/shared/hooks/use-can-hover";
+import { useMobileHeaderLayout } from "@/shared/hooks/use-mobile-header-layout";
 import { useCareersHeaderMode } from "@/features/careers/context/careersHeaderBridge";
 
 const JewelleryMegaMenu = dynamic(
@@ -49,17 +51,24 @@ const SEARCH_HREF = "/coming-soon";
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileNavOpen, setProfileNavOpen] = useState(false);
   const [jewelleryMenuOpen, setJewelleryMenuOpen] = useState(false);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { totalItems: cartCount } = useCart();
   const pathname = usePathname() ?? "/";
   const canHoverNav = useCanHover();
+  const isMobileHeader = useMobileHeaderLayout();
+
+  const openProfileNav = useCallback(() => {
+    setProfileNavOpen(true);
+  }, []);
 
   const { isPageLoading } = usePageLoading();
   const careersHeaderMode = useCareersHeaderMode(pathname);
 
   const isAuthPage = isAuthRoute(pathname);
   const menuOpen = mobileMenuOpen || jewelleryMenuOpen;
+  const headerHidden = mobileMenuOpen || profileNavOpen;
   const pathnameHeaderVariant = getHeaderVariant(pathname, { menuOpen });
   const headerVariant =
     pathname === "/careers" && careersHeaderMode === "solid"
@@ -148,9 +157,9 @@ const Header = () => {
       <header
         className={cn(
           "absolute top-0 inset-x-0 z-50",
-          mobileMenuOpen ? "pointer-events-none opacity-0" : "",
+          headerHidden ? "pointer-events-none opacity-0" : "",
         )}
-        aria-hidden={mobileMenuOpen}
+        aria-hidden={headerHidden}
       >
         <div
           className={cn(
@@ -244,7 +253,10 @@ const Header = () => {
               <HeaderIconBadge count={cartCount} />
             </Link>
 
-            <AccountMenu className={cn("inline-flex", iconButtonClass, hoverClass)} />
+            <AccountMenu
+              className={cn("inline-flex", iconButtonClass, hoverClass)}
+              onProfileOpen={isMobileHeader ? openProfileNav : undefined}
+            />
           </div>
         </div>
 
@@ -272,6 +284,13 @@ const Header = () => {
         onClose={() => setMobileMenuOpen(false)}
         navLinks={primaryLinks}
         appointmentLink={appointmentLink}
+        cartCount={cartCount}
+        onProfileOpen={isMobileHeader ? openProfileNav : undefined}
+      />
+
+      <ProfileMobileNavSheet
+        open={profileNavOpen}
+        onOpenChange={setProfileNavOpen}
         cartCount={cartCount}
       />
     </>

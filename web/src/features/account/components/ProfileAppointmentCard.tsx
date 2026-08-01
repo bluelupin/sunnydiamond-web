@@ -60,11 +60,11 @@ function ProfileAppointmentPersonalDetails({
   email: string;
 }) {
   return (
-    <div className="bg-white p-4 lg:p-6">
-      <h4 className="mb-4 font-larken text-2xl font-light leading-110 text-darkblack">
+    <div className="flex flex-col gap-6 bg-white p-4 lg:p-6">
+      <h4 className="font-gill text-xl font-normal leading-110 text-darkblack lg:font-larken lg:text-2xl lg:font-light">
         {title}
       </h4>
-      <div className="flex flex-col gap-2 font-gill text-base leading-110 text-darkblack">
+      <div className="flex w-full flex-col gap-2 font-gill text-base leading-110 text-darkblack">
         <p className="font-normal">{name}</p>
         <div className="font-light">
           <p>{phone}</p>
@@ -77,12 +77,12 @@ function ProfileAppointmentPersonalDetails({
 
 function ProfileAppointmentNote({ title, note }: { title: string; note: string }) {
   return (
-    <div className="bg-white p-4 lg:p-6">
-      <h4 className="mb-4 font-larken text-2xl font-light leading-110 text-darkblack">
+    <div className="flex flex-col gap-4 bg-white p-4 lg:gap-6 lg:p-6">
+      <h4 className="font-gill text-xl font-normal leading-110 text-darkblack lg:font-larken lg:text-2xl lg:font-light">
         {title}
       </h4>
       {note.trim() ? (
-        <p className="font-gill text-base font-light leading-110 whitespace-pre-line text-darkblack">
+        <p className="font-gill text-sm font-normal leading-110 whitespace-pre-line text-darkblack lg:text-base lg:font-light">
           {note}
         </p>
       ) : null}
@@ -101,10 +101,25 @@ function ProfileAppointmentAddress({
     .filter((part): part is string => Boolean(part))
     .join(", ");
 
+  const addressLines = [address.addressLine1, address.addressLine2, cityStatePincode].filter(
+    Boolean,
+  );
+
+  const mobileAddressText = [address.name, ...addressLines, address.phone]
+    .filter((part): part is string => Boolean(part))
+    .join("\n");
+
   return (
-    <div className="flex flex-col gap-4 bg-white p-4 lg:p-6">
-      <h4 className="font-larken text-2xl font-light leading-110 text-darkblack">{title}</h4>
-      <div className="flex flex-col gap-2 font-gill text-base leading-110 text-darkblack">
+    <div className="flex flex-col gap-6 bg-white p-4 lg:gap-4 lg:p-6">
+      <h4 className="font-gill text-xl font-normal leading-110 text-darkblack lg:font-larken lg:text-2xl lg:font-light">
+        {title}
+      </h4>
+
+      <p className="font-gill text-base font-light leading-110 whitespace-pre-line text-darkblack lg:hidden">
+        {mobileAddressText}
+      </p>
+
+      <div className="hidden flex-col gap-2 font-gill text-base leading-110 text-darkblack lg:flex">
         <p className="font-normal">{address.name}</p>
         <div className="font-light">
           {address.addressLine1 ? <p>{address.addressLine1}</p> : null}
@@ -113,6 +128,43 @@ function ProfileAppointmentAddress({
           {address.phone ? <p>{address.phone}</p> : null}
         </div>
       </div>
+    </div>
+  );
+}
+
+function ProfileAppointmentStoreVisit({
+  title,
+  storeVisit,
+  directionsLabel,
+}: {
+  title: string;
+  storeVisit: NonNullable<ProfileAppointmentUi["storeVisit"]>;
+  directionsLabel: string;
+}) {
+  return (
+    <div className="flex flex-col gap-6 bg-white p-4 lg:bg-gray300 lg:p-6">
+      <h4 className="font-gill text-xl font-normal leading-110 text-darkblack lg:font-larken lg:text-xl lg:font-light">
+        {title}
+      </h4>
+
+      <div className="flex flex-col gap-2 font-gill text-base leading-110 text-darkblack">
+        <p className="font-normal">{storeVisit.city}</p>
+        <div className="font-light">
+          {storeVisit.lines.map((line, index) => (
+            <p key={`${index}-${line}`}>{line}</p>
+          ))}
+        </div>
+      </div>
+
+      {storeVisit.directionsHref ? (
+        <DetailTextLink
+          href={storeVisit.directionsHref}
+          className="text-sm uppercase lg:inline-flex lg:items-center lg:gap-2"
+        >
+          {directionsLabel}
+          <ChevronRight className="hidden size-4 lg:block" aria-hidden />
+        </DetailTextLink>
+      ) : null}
     </div>
   );
 }
@@ -131,12 +183,24 @@ function ProfileAppointmentBookingDetails({
   const content = profileTabsContent.appointments;
 
   return (
-    <div className="bg-white p-4 lg:p-6">
-      <h4 className="mb-4 font-larken text-2xl font-light leading-110 text-darkblack">
+    <div className="flex flex-col gap-6 bg-white p-4 lg:p-6">
+      <h4 className="font-gill text-xl font-normal leading-110 text-darkblack lg:font-larken lg:text-2xl lg:font-light">
         {content.bookingDetailsTitle}
       </h4>
-      <div className="flex flex-col gap-4 sm:flex-row">
-        <div className="flex min-h-[82px] flex-1 flex-col justify-between gap-2 sm:gap-0">
+
+      <div className="flex w-full flex-col gap-4 font-gill text-base font-normal leading-110 text-darkblack lg:hidden">
+        <div className="flex w-full flex-col gap-2">
+          <p>{dateLabel}</p>
+          <p>{bookingDate}</p>
+        </div>
+        <div className="flex w-full flex-col gap-2">
+          <p>{timeLabel}</p>
+          <p>{bookingTime}</p>
+        </div>
+      </div>
+
+      <div className="hidden flex-col gap-4 lg:flex lg:flex-row">
+        <div className="flex min-h-[82px] flex-1 flex-col justify-between gap-2 lg:gap-0">
           <span className="font-gill text-base font-normal leading-110 text-darkblack">
             {dateLabel}
           </span>
@@ -196,30 +260,11 @@ export function ProfileAppointmentCard({
       ) : null}
 
       {appointment.storeVisit ? (
-        <div className="bg-gray300 p-4 lg:p-6">
-          <h4 className="mb-4 font-larken text-xl font-light leading-110 text-darkblack">
-            {content.storeVisitTitle}
-          </h4>
-          <div className="space-y-4">
-            <div className="space-y-2 font-gill text-base leading-110 text-darkblack">
-              <p className="font-normal">{appointment.storeVisit.city}</p>
-              {appointment.storeVisit.lines.map((line, index) => (
-                <p key={`${index}-${line}`} className="font-light">
-                  {line}
-                </p>
-              ))}
-            </div>
-            {appointment.storeVisit.directionsHref ? (
-              <DetailTextLink
-                href={appointment.storeVisit.directionsHref}
-                className="inline-flex items-center gap-2 text-sm uppercase"
-              >
-                {content.getDirectionsLabel}
-                <ChevronRight className="size-4" aria-hidden />
-              </DetailTextLink>
-            ) : null}
-          </div>
-        </div>
+        <ProfileAppointmentStoreVisit
+          title={content.storeVisitTitle}
+          storeVisit={appointment.storeVisit}
+          directionsLabel={content.getDirectionsLabel}
+        />
       ) : null}
 
       <ProfileAppointmentBookingDetails
@@ -233,28 +278,30 @@ export function ProfileAppointmentCard({
         <ProfileAppointmentNote title={content.notesLabel} note={notesText} />
       ) : null}
 
-      <div className="flex items-center gap-6">
-        <DetailOutlineButton
-          type="button"
-          className="min-w-0 flex-1"
-          onClick={onCancel}
-          disabled={!appointment.canCancel}
-        >
-          {content.cancelLabel}
-        </DetailOutlineButton>
-        <DetailDarkButton
-          type="button"
-          className="min-w-0 flex-1"
-          onClick={onReschedule}
-          disabled={!appointment.canReschedule}
-        >
-          {content.rescheduleLabel}
-        </DetailDarkButton>
-      </div>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center">
+          <DetailDarkButton
+            type="button"
+            className="w-full lg:order-2 lg:min-w-0 lg:flex-1"
+            onClick={onReschedule}
+            disabled={!appointment.canReschedule}
+          >
+            {content.rescheduleLabel}
+          </DetailDarkButton>
+          <DetailOutlineButton
+            type="button"
+            className="w-full lg:order-1 lg:min-w-0 lg:flex-1"
+            onClick={onCancel}
+            disabled={!appointment.canCancel}
+          >
+            {content.cancelLabel}
+          </DetailOutlineButton>
+        </div>
 
-      {appointment.rescheduleNote ? (
-        <ProfileInfoNote>{appointment.rescheduleNote}</ProfileInfoNote>
-      ) : null}
+        {appointment.rescheduleNote ? (
+          <ProfileInfoNote>{appointment.rescheduleNote}</ProfileInfoNote>
+        ) : null}
+      </div>
     </ProfileCard>
   );
 }

@@ -1,7 +1,8 @@
 "use client";
 
 import { Fragment, useState } from "react";
-import { Info, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
+import InformationIcon from "@/assets/Icons/InformationIcon";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { cn } from "@/shared/utils/cn";
 import type { OrderFilterKey } from "../types/profileUi.types";
@@ -56,12 +57,12 @@ export function ProfileAddAddressCard({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "flex w-full flex-col items-center justify-center gap-6 bg-gray300 p-6 text-darkblack transition-colors",
+        "flex w-full flex-col items-center justify-center gap-6 bg-gray300 p-4 text-darkblack transition-colors min-h-[246px] md:min-h-[262px] md:p-6",
         disabled && "pointer-events-none opacity-50",
         className,
       )}
     >
-      <span className="flex size-16 items-center justify-center rounded-full bg-white">
+      <span className="flex size-16 shrink-0 items-center justify-center rounded-full bg-white">
         <Plus className="size-10 shrink-0" strokeWidth={1.5} aria-hidden />
       </span>
       <span className="font-gill text-base font-light leading-110">{label}</span>
@@ -304,9 +305,9 @@ export function ProfileInnerPanel({
 
 export function ProfileInfoNote({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-2 font-gill text-base font-light leading-110 text-darkblack">
-      <Info className="size-6 shrink-0" strokeWidth={1.5} aria-hidden />
-      <p>{children}</p>
+    <div className="flex w-full items-center gap-2 font-gill text-base font-light leading-110 text-darkblack">
+      <InformationIcon className="size-6 shrink-0 text-darkblack" />
+      <p className="min-w-0 flex-1">{children}</p>
     </div>
   );
 }
@@ -417,7 +418,7 @@ export function ProfileAccordion({
               <button
                 type="button"
                 onClick={() => setOpenId(isOpen ? null : item.id)}
-                className="flex w-full items-start gap-2 py-6 text-left lg:min-h-14 lg:items-center lg:py-0"
+                className="flex w-full items-start gap-2 text-left lg:min-h-14 lg:items-center"
                 aria-expanded={isOpen}
               >
                 <span className="min-w-0 flex-1 font-gill text-base font-normal leading-110 text-darkblack lg:text-xl">
@@ -435,7 +436,7 @@ export function ProfileAccordion({
                 aria-hidden={!isOpen}
               >
                 <div className="overflow-hidden">
-                  <p className="pt-4 font-gill text-base font-light leading-110 text-neutral500 lg:text-xl">
+                  <p className="pt-4 font-gill text-sm font-light leading-110 text-neutral500 lg:text-base lg:text-xl">
                     {item.answer}
                   </p>
                 </div>

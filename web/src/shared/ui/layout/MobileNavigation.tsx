@@ -22,6 +22,7 @@ type MobileNavigationProps = {
   navLinks: HeaderNavLink[];
   appointmentLink?: HeaderNavLink;
   cartCount: number;
+  onProfileOpen?: () => void;
 };
 
 const LANGUAGES = [
@@ -399,6 +400,7 @@ const MobileNavigation = ({
   navLinks,
   appointmentLink = { label: "Book an Appointment", url: "/book-an-appointment" },
   cartCount,
+  onProfileOpen,
 }: MobileNavigationProps) => {
   const [subPanel, setSubPanel] = useState<
     "language" | "currency" | "appointment" | "jewellery" | "store-visit" | null
@@ -442,10 +444,6 @@ const MobileNavigation = ({
     setSearchQuery("");
     searchInputRef.current?.focus();
   }, []);
-
-  const handleAccountClick = useCallback(() => {
-    handleClose();
-  }, [handleClose]);
 
   if (!isOpen) return null;
 
@@ -498,7 +496,11 @@ const MobileNavigation = ({
             onNavigate={handleClose}
             className="relative inline-flex size-6 items-center justify-center"
           />
-          <AccountMenu onNavigate={handleAccountClick} className="inline-flex size-6 items-center justify-center" />
+          <AccountMenu
+            onNavigate={handleClose}
+            onProfileOpen={onProfileOpen}
+            className="inline-flex size-6 items-center justify-center"
+          />
           <Link
             href="/cart"
             aria-label={cartCount > 0 ? `Cart, ${cartCount} items` : "Cart"}

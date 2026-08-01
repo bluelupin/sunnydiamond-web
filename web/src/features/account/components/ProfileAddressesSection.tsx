@@ -293,7 +293,6 @@ const ProfileAddressesSection = () => {
               label={addressContent.addCardLabel}
               onClick={openAddForm}
               disabled={isSaving}
-              className="h-full min-h-[200px]"
             />
           ) : null}
           {addresses.map((address) => (

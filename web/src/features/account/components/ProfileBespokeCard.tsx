@@ -12,13 +12,13 @@ type ProfileBespokeCardProps = {
 };
 
 const overlayVisibility =
-  "opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100";
+  "max-lg:opacity-100 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100";
 
 export function ProfileBespokeCard({ item, onOpen, onRemove }: ProfileBespokeCardProps) {
   const content = profileTabsContent.bespoke;
 
   return (
-    <article className="group relative h-[204px] w-full min-w-0 overflow-hidden">
+    <article className="group relative h-[220px] w-full min-w-0 overflow-hidden lg:h-[204px]">
       <button
         type="button"
         onClick={() => onOpen(item)}
@@ -30,7 +30,7 @@ export function ProfileBespokeCard({ item, onOpen, onRemove }: ProfileBespokeCar
           alt={item.title}
           fill
           className="object-cover"
-          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          sizes="(max-width: 1024px) 50vw, 33vw"
         />
       </button>
 
@@ -38,7 +38,7 @@ export function ProfileBespokeCard({ item, onOpen, onRemove }: ProfileBespokeCar
 
       <div
         className={cn(
-          "absolute left-1/2 top-[161px] z-20 -translate-x-1/2",
+          "absolute left-1/2 top-[185px] z-20 -translate-x-1/2 lg:top-[161px]",
           overlayVisibility,
         )}
       >

@@ -5,11 +5,7 @@ import {
   DetailDarkButton,
   DetailOutlineButton,
 } from "@/features/products/components/detail/shared";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/shared/ui/dialog";
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/shared/ui/sheet";
 import { profileTabsContent } from "../data/profileContent";
 
 type ProfileDeleteAddressDialogProps = {
@@ -19,6 +15,7 @@ type ProfileDeleteAddressDialogProps = {
   isDeleting?: boolean;
 };
 
+/** Figma 1480:21781 — delete address bottom sheet spacing */
 export function ProfileDeleteAddressDialog({
   open,
   onOpenChange,
@@ -27,20 +24,29 @@ export function ProfileDeleteAddressDialog({
 }: ProfileDeleteAddressDialogProps) {
   const content = profileTabsContent.addresses.deleteDialog;
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen && isDeleting) {
+      return;
+    }
+
+    onOpenChange(nextOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        hideCloseButton
-        className="max-w-[520px] gap-6 border-neutral300 bg-white p-6 sm:rounded-none"
+    <Sheet open={open} onOpenChange={handleOpenChange}>
+      <SheetContent
+        side="bottom"
+        overlayClassName="bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
+        className="w-full gap-0 rounded-none border-0 bg-white p-0 sm:max-w-full [&>button]:hidden"
       >
-        <div className="flex flex-col gap-6">
+        <div className="px-4 pt-6">
           <div className="flex items-center justify-between gap-4">
-            <DialogTitle className="font-larken text-32 font-light leading-110 text-darkblack">
+            <SheetTitle className="font-larken text-2xl font-light leading-110 text-darkblack">
               {content.title}
-            </DialogTitle>
+            </SheetTitle>
             <button
               type="button"
-              onClick={() => onOpenChange(false)}
+              onClick={() => handleOpenChange(false)}
               className="text-darkblack"
               aria-label="Close"
               disabled={isDeleting}
@@ -48,32 +54,35 @@ export function ProfileDeleteAddressDialog({
               <X className="size-6" strokeWidth={1.5} aria-hidden />
             </button>
           </div>
-          <div className="h-px w-full bg-neutral300" aria-hidden />
+
+          <div className="mt-6 h-px w-full bg-neutral300" aria-hidden />
+
+          <SheetDescription className="mt-6 font-gill text-base font-light leading-110 text-darkblack">
+            {content.description}
+          </SheetDescription>
         </div>
 
-        <p className="font-gill text-base font-light leading-110 text-darkblack">
-          {content.description}
-        </p>
-
-        <div className="flex items-center gap-4">
-          <DetailOutlineButton
-            type="button"
-            className="min-w-0 flex-1"
-            onClick={() => onOpenChange(false)}
-            disabled={isDeleting}
-          >
-            {content.cancelLabel}
-          </DetailOutlineButton>
-          <DetailDarkButton
-            type="button"
-            className="min-w-0 flex-1"
-            onClick={onConfirmDelete}
-            disabled={isDeleting}
-          >
-            {isDeleting ? "Deleting..." : content.confirmLabel}
-          </DetailDarkButton>
+        <div className="mt-12 border-t border-neutral300 px-4 pb-6 pt-6">
+          <div className="flex flex-col gap-4">
+            <DetailDarkButton
+              type="button"
+              className="w-full"
+              onClick={onConfirmDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : content.confirmLabel}
+            </DetailDarkButton>
+            <DetailOutlineButton
+              type="button"
+              className="w-full"
+              onClick={() => handleOpenChange(false)}
+              disabled={isDeleting}
+            >
+              {content.cancelLabel}
+            </DetailOutlineButton>
+          </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }

@@ -29,12 +29,12 @@ const content = profileTabsContent.bespoke;
 function BespokeSkeleton() {
   return (
     <div
-      className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
+      className="grid grid-cols-2 gap-2 lg:grid-cols-3 lg:gap-4"
       aria-busy="true"
       aria-label="Loading saved inspirations"
     >
-      {Array.from({ length: 3 }).map((_, index) => (
-        <div key={index} className="min-w-0 h-[204px] animate-pulse bg-gray300" />
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div key={index} className="min-w-0 h-[220px] animate-pulse bg-gray300 lg:h-[204px]" />
       ))}
     </div>
   );
@@ -142,7 +142,7 @@ const ProfileBespokeSection = () => {
 
   return (
     <div className="flex flex-col gap-6">
-      <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:items-start">
+      <ul className="grid grid-cols-2 gap-2 lg:grid-cols-3 lg:gap-4 lg:items-start">
         {displayItems.map((item) => (
           <li key={item.id} className="min-w-0">
             <ProfileBespokeCard

@@ -234,7 +234,7 @@ export function ProfileAddressFormSheet({
                   invalid={showError("addressLine2")}
                   error={showError("addressLine2") ? errors.addressLine2 : undefined}
                 />
-                <div className="grid gap-6 sm:grid-cols-2">
+                <div className="grid grid-cols-2 gap-6">
                   <CheckoutField
                     id="profile-address-pincode"
                     label="Pincode"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import {
@@ -14,7 +14,6 @@ import { PROFILE_ORDER_QUERY_PARAM } from "../utils/profileOrderNavigation";
 import { ProfileBespokeToastProvider } from "../context/ProfileBespokeToastContext";
 import ProfileAuthGate from "./ProfileAuthGate";
 import ProfileHeroSection from "./ProfileHeroSection";
-import { ProfileMobileNavSheet } from "./ProfileMobileNavSheet";
 import { ProfileMobileSectionHeader } from "./ProfileMobileSectionHeader";
 import { ProfilePromoStrip } from "./ProfilePromoStrip";
 import ProfileSectionContent from "./ProfileSectionContent";
@@ -41,7 +40,6 @@ const ProfilePage = () => {
 
     return getProfileSectionMobileTitle(activeSection);
   }, [activeSection, searchParams]);
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const handleSectionChange = useCallback(
     (section: ProfileSectionId) => {
@@ -72,17 +70,7 @@ const ProfilePage = () => {
                 activeSection === "support" ? "pb-0" : "pb-16",
               )}
             >
-              <ProfileMobileSectionHeader
-                title={mobileSectionTitle}
-                onOpenNav={() => setMobileNavOpen(true)}
-              />
-
-              <ProfileMobileNavSheet
-                open={mobileNavOpen}
-                onOpenChange={setMobileNavOpen}
-                activeSection={activeSection}
-                onSectionChange={handleSectionChange}
-              />
+              <ProfileMobileSectionHeader title={mobileSectionTitle} />
 
               <div className="lg:-mx-10 lg:mt-8 lg:grid lg:grid-cols-[480px_minmax(0,1fr)] lg:gap-6">
                 <aside className="hidden lg:block">

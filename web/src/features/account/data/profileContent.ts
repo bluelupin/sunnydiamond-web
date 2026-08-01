@@ -42,16 +42,16 @@ export const profileDetailsContent = {
     ctaLabel: "DELETE MY ACCOUNT",
     contactHref: "/contact",
     dialog: {
-      title: "Delete Account?",
+      title: "Delete Account",
       description:
         "Once your account is deleted, you will lose access to your orders, savings plans, saved preferences, and account history permanently.",
       cancelLabel: "CANCEL",
       confirmLabel: "DELETE",
     },
     reasonDialog: {
-      title: "Delete Account?",
+      title: "Delete Account",
       description:
-        "We're sorry to see you cancel. Please share your reason so we can serve you better next time.",
+        "We're sorry to see you go. Please share your reason so we can serve you better next time.",
       reasonLabel: "Select Reason",
       reasons: [
         "I no longer use this account",
@@ -221,7 +221,7 @@ export const profileTabsContent = {
     defaultAddressUndoLabel: "UNDO",
     markAsDefaultErrorTitle: "Unable to update default address",
     deleteDialog: {
-      title: "Delete Address?",
+      title: "Delete Address",
       description:
         "Deleting this address will permanently remove it from your account. This action cannot be reversed.",
       cancelLabel: "CANCEL",
@@ -290,7 +290,7 @@ export const profileTabsContent = {
     rescheduleNotePlaceholder: "Appointment can be rescheduled before 14 June 2026",
     getDirectionsLabel: "GET DIRECTIONS",
     cancelDialog: {
-      title: "Cancel Appointment",
+      title: "Cancel Appointment?",
       description:
         "Something came up? Cancel or reschedule the appointment at your convenience.",
       rescheduleLabel: "RESCHEDULE",

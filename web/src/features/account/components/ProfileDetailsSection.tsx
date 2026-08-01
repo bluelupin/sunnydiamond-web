@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Info } from "lucide-react";
+import InformationIcon from "@/assets/Icons/InformationIcon";
 import { useAuth, type AuthCustomer } from "@/features/auth/context/AuthContext";
 import {
   DetailDarkButton,
@@ -22,6 +22,7 @@ type ProfileDetailsSectionProps = {
   customer: AuthCustomer;
 };
 
+/** Figma 1480:20341 — profile personal details, delete account, and logout mobile layout */
 const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
   const { logout } = useAuth();
   const { toast } = useToast();
@@ -68,7 +69,7 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-6">
-        <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
+        <h2 className="font-gill text-xl font-normal leading-110 text-darkblack lg:font-larken lg:text-2xl lg:font-light">
           {content.sectionTitle}
         </h2>
 
@@ -91,7 +92,7 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
             <label htmlFor="profile-email" className={appointmentLabelClassName}>
               {content.fields.email}
             </label>
-            <div className="flex h-14 w-full items-center justify-between bg-[#F2F2F2] px-3">
+            <div className="flex h-14 w-full items-center justify-between bg-aboutInactive p-3">
               <input
                 id="profile-email"
                 type="email"
@@ -114,7 +115,7 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
                 aria-label={content.phoneInfo}
                 title={content.phoneInfo}
               >
-                <Info className="size-6" strokeWidth={1.5} aria-hidden />
+                <InformationIcon className="size-6 shrink-0 text-darkblack" aria-hidden />
               </button>
             </div>
             <input
@@ -146,19 +147,16 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
         </div>
       </div>
 
-      <div className="flex flex-col gap-6 bg-gray300 p-4 md:gap-6 md:p-6">
-        <div className="flex flex-col gap-3.5 md:gap-4">
-          <h3 className="font-larken text-2xl font-light leading-110 text-darkblack">
+      <div className="flex flex-col gap-6 bg-gray300 p-4 lg:p-6">
+        <div className="flex flex-col gap-4">
+          <h3 className="font-gill text-xl font-normal leading-110 text-darkblack lg:font-larken lg:text-2xl lg:font-light">
             {content.deleteAccount.title}
           </h3>
-          <p className="font-gill text-base font-light leading-110 text-neutral500">
+          <p className="font-gill text-base font-light leading-110 text-darkblack lg:text-neutral500">
             {content.deleteAccount.description}
           </p>
         </div>
-        <DetailTextLink
-          onClick={() => setDeleteConfirmOpen(true)}
-          className="text-sm uppercase"
-        >
+        <DetailTextLink onClick={() => setDeleteConfirmOpen(true)} className="text-sm uppercase">
           {content.deleteAccount.ctaLabel}
         </DetailTextLink>
       </div>
@@ -181,19 +179,19 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
         }}
       />
 
-      <div className="flex flex-col gap-6 bg-gray300 p-4 md:flex-row md:items-center md:justify-between md:p-6">
-        <div className="flex max-w-md flex-col gap-4">
-          <h3 className="font-larken text-2xl font-light leading-110 text-darkblack">
+      <div className="flex flex-col gap-6 bg-gray300 p-4 lg:flex-row lg:items-center lg:justify-between lg:p-6">
+        <div className="flex flex-col gap-4 lg:max-w-md">
+          <h3 className="font-gill text-xl font-normal leading-110 text-darkblack lg:font-larken lg:text-2xl lg:font-light">
             {content.logout.title}
           </h3>
-          <p className="font-gill text-base font-light leading-110 text-neutral500">
+          <p className="font-gill text-base font-light leading-110 text-darkblack lg:text-neutral500">
             {content.logout.description}
           </p>
         </div>
         <DetailDarkButton
           type="button"
           onClick={() => void logout()}
-          className="w-full shrink-0 md:w-auto md:min-w-[160px]"
+          className="w-full shrink-0 lg:w-auto lg:min-w-[160px]"
         >
           {content.logout.ctaLabel}
         </DetailDarkButton>
