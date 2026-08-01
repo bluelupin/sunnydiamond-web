@@ -14,20 +14,20 @@ const BlogDetailHeader = ({
   readTime,
 }: BlogDetailHeaderProps) => {
   return (
-    <header className="flex flex-col items-center gap-4 text-center">
-      <h1 className="font-larken text-32 font-light leading-110 text-darkblack lg:text-5xl">
+    <header className="flex w-full flex-col items-center gap-6 text-center md:gap-4">
+      <h1 className="w-full font-larken text-32 font-light leading-110 text-darkblack lg:text-5xl">
         {title}
       </h1>
-      <div className="flex w-full max-w-[875px] items-center justify-between gap-4 text-left">
-        <p className="font-gill text-[15px] font-normal leading-110 text-neutral500 md:text-[20px]">
+      <div className="flex w-full items-center justify-between gap-4 md:max-w-[875px]">
+        <p className="text-t4-regular text-darkblack md:text-[20px] md:font-normal md:text-neutral500">
           {author}
         </p>
-        <div className="flex shrink-0 items-center gap-2">
-          <p className="font-gill text-[13px] font-normal leading-110 text-neutral500 md:text-base">
+        <div className="flex shrink-0 items-center gap-2 whitespace-nowrap">
+          <p className="text-t4-regular text-neutral500 md:text-base">
             {date}
           </p>
           <span className="size-1 shrink-0 rounded-full bg-neutral500" aria-hidden />
-          <p className="font-gill text-[13px] font-normal leading-110 text-neutral500 md:text-base">
+          <p className="text-t4-regular text-neutral500 md:text-base">
             {readTime}
           </p>
         </div>

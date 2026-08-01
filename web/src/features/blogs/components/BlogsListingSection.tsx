@@ -1,21 +1,20 @@
-"use client";
-
-import { useMemo, useState } from "react";
-import { cn } from "@/shared/utils/cn";
+import { Suspense } from "react";
 import type {
   BlogCategory,
-  BlogCategoryId,
   BlogFeaturedPost,
   BlogPost,
 } from "../types";
+import {
+  filterBlogPosts,
+  parseBlogsListingQuery,
+} from "../utils/blogsListingQuery";
+import BlogsCardGrid from "./BlogsCardGrid";
 import BlogsFilterBar from "./BlogsFilterBar";
-import { BlogCard } from "./BlogCard";
 import BlogsFeaturedSection from "./BlogsFeaturedSection";
+import BlogsLoadMore from "./BlogsLoadMore";
 
 const blogsGridSectionClassName =
   "bg-gray200 px-4 py-16 md:px-10 md:py-104";
-const INITIAL_VISIBLE = 3;
-const LOAD_MORE_STEP = 3;
 
 type BlogsListingSectionProps = {
   filterLabel: string;
@@ -23,15 +22,8 @@ type BlogsListingSectionProps = {
   posts: BlogPost[];
   featured: BlogFeaturedPost | null;
   loadMoreButtonLabel: string;
+  searchParams?: Record<string, string | string[] | undefined>;
 };
-
-function filterPosts(posts: BlogPost[], category: BlogCategoryId): BlogPost[] {
-  if (category === "all") {
-    return posts;
-  }
-
-  return posts.filter((post) => post.category === category);
-}
 
 const BlogsListingSection = ({
   filterLabel,
@@ -39,94 +31,50 @@ const BlogsListingSection = ({
   posts,
   featured,
   loadMoreButtonLabel,
+  searchParams,
 }: BlogsListingSectionProps) => {
-  const [selectedCategory, setSelectedCategory] = useState<BlogCategoryId>("all");
-  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE + 6);
-
-  const filteredPosts = useMemo(
-    () => filterPosts(posts, selectedCategory),
-    [posts, selectedCategory],
-  );
-
+  const { category, limit } = parseBlogsListingQuery(searchParams, categories);
+  const filteredPosts = filterBlogPosts(posts, category);
   const firstRowPosts = filteredPosts.slice(0, 3);
-  const remainingPosts = filteredPosts.slice(3, visibleCount);
-  const hasMore = visibleCount < filteredPosts.length;
-  const progressWidth = Math.min(
-    (visibleCount / Math.max(filteredPosts.length, 1)) * 360,
-    360,
-  );
-  const shownCount = Math.min(visibleCount, filteredPosts.length);
-
-  const handleCategoryChange = (category: BlogCategoryId) => {
-    setSelectedCategory(category);
-    setVisibleCount(INITIAL_VISIBLE + 6);
-  };
+  const remainingPosts = filteredPosts.slice(3, limit);
+  const showLoadMoreFooter =
+    filteredPosts.length > 0 && limit < filteredPosts.length;
 
   return (
     <>
-      <BlogsFilterBar
-        filterLabel={filterLabel}
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onSelectCategory={handleCategoryChange}
-      />
+      <Suspense
+        fallback={
+          <div className="mx-auto w-full max-w-1440 px-4 pt-10 md:px-10 md:pt-16" />
+        }
+      >
+        <BlogsFilterBar filterLabel={filterLabel} categories={categories} />
+      </Suspense>
 
       {firstRowPosts.length > 0 ? (
         <section className={blogsGridSectionClassName}>
-          <div className="mx-auto flex w-full max-w-1440 flex-col gap-10 md:flex-row md:items-start md:gap-2">
-            {firstRowPosts.map((post) => (
-              <BlogCard key={post.id} post={post} />
-            ))}
-          </div>
+          <BlogsCardGrid posts={firstRowPosts} />
         </section>
       ) : null}
 
       {featured ? <BlogsFeaturedSection featured={featured} /> : null}
 
-      {remainingPosts.length > 0 ? (
+      {remainingPosts.length > 0 || showLoadMoreFooter ? (
         <section className={blogsGridSectionClassName}>
-          <div className="mx-auto flex w-full max-w-1440 flex-col gap-10">
-            <div className="flex flex-col gap-10 md:flex-row md:items-start md:gap-2">
-              {remainingPosts.slice(0, 3).map((post) => (
-                <BlogCard key={post.id} post={post} />
-              ))}
-            </div>
-            {remainingPosts.length > 3 ? (
-              <div className="flex flex-col gap-10 md:flex-row md:items-start md:gap-2">
-                {remainingPosts.slice(3).map((post) => (
-                  <BlogCard key={`${post.id}-row-2`} post={post} />
-                ))}
-              </div>
+          <div className="mx-auto flex w-full max-w-1440 flex-col items-center gap-16">
+            {remainingPosts.length > 0 ? (
+              <BlogsCardGrid posts={remainingPosts} />
+            ) : null}
+            {showLoadMoreFooter ? (
+              <Suspense fallback={null}>
+                <BlogsLoadMore
+                  category={category}
+                  limit={limit}
+                  total={filteredPosts.length}
+                  buttonLabel={loadMoreButtonLabel}
+                />
+              </Suspense>
             ) : null}
           </div>
-
-          {hasMore || filteredPosts.length > 0 ? (
-            <div className="mx-auto mt-16 flex w-full max-w-[360px] flex-col items-center gap-6">
-              <div className="flex w-full flex-col items-center gap-3">
-                <p className="font-gill text-base font-light leading-110 text-darkblack">
-                  {shownCount} out of {filteredPosts.length} Blogs
-                </p>
-                <div className="h-0.5 w-full overflow-hidden bg-neutral300">
-                  <div
-                    className="h-[3px] bg-darkblack transition-all duration-300"
-                    style={{ width: `${progressWidth}px` }}
-                    aria-hidden
-                  />
-                </div>
-              </div>
-              {hasMore ? (
-                <button
-                  type="button"
-                  onClick={() => setVisibleCount((count) => count + LOAD_MORE_STEP)}
-                  className={cn(
-                    "flex h-14 w-full items-center justify-center border border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-colors hover:border-darkblack",
-                  )}
-                >
-                  {loadMoreButtonLabel}
-                </button>
-              ) : null}
-            </div>
-          ) : null}
         </section>
       ) : null}
 

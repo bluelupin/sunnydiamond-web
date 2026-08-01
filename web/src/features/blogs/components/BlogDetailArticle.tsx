@@ -17,8 +17,8 @@ function renderBlock(block: BlogContentBlock) {
         <p
           className={
             block.emphasis === "regular"
-              ? "font-gill text-[20px] font-normal leading-110 text-darkblack"
-              : "font-gill text-[20px] font-light leading-110 text-darkblack"
+              ? "font-gill text-base font-normal leading-110 text-darkblack md:text-[20px]"
+              : "font-gill text-base font-light leading-110 text-darkblack md:text-[20px]"
           }
         >
           {block.text}
@@ -31,7 +31,7 @@ function renderBlock(block: BlogContentBlock) {
           {block.lines.map((line) => (
             <p
               key={`${line.label}-${line.text}`}
-              className="font-gill text-[20px] font-light leading-110 text-darkblack"
+              className="font-gill text-base font-light leading-110 text-darkblack md:text-[20px]"
             >
               <span className="font-normal">{line.label}</span>
               {line.text}
@@ -46,7 +46,7 @@ function renderBlock(block: BlogContentBlock) {
           {block.items.map((item) => (
             <li
               key={item.text}
-              className="ms-[30px] list-disc font-gill text-[20px] font-light leading-110 text-darkblack"
+              className="ms-6 list-disc font-gill text-base font-light leading-110 text-darkblack md:ms-[30px] md:text-[20px]"
             >
               {item.lead ? (
                 <>
@@ -63,7 +63,7 @@ function renderBlock(block: BlogContentBlock) {
 
     case "image_row":
       return (
-        <div className="flex w-full flex-col gap-0 md:flex-row">
+        <div className="flex w-full flex-row gap-0">
           {block.images.map((image) => (
             <div
               key={image.src}
@@ -89,9 +89,9 @@ function renderBlock(block: BlogContentBlock) {
 const BlogDetailArticle = ({ introParagraphs, sections }: BlogDetailArticleProps) => {
   return (
     <article className="min-w-0 flex-1 desktop:max-w-[875px]">
-      <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-6 md:gap-10">
         {introParagraphs.length > 0 ? (
-          <div className="flex flex-col gap-4 font-gill text-[20px] font-light leading-110 text-darkblack">
+          <div className="flex flex-col gap-4 font-gill text-base font-normal leading-110 text-darkblack md:text-[20px] md:font-light">
             {introParagraphs.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
             ))}
@@ -102,9 +102,9 @@ const BlogDetailArticle = ({ introParagraphs, sections }: BlogDetailArticleProps
           <section
             key={section.id}
             id={section.id}
-            className="flex scroll-mt-28 flex-col gap-6"
+            className="flex scroll-mt-28 flex-col gap-4 md:gap-6"
           >
-            <h2 className="font-larken text-32 font-light leading-110 text-darkblack">
+            <h2 className="font-larken text-2xl font-light leading-110 text-darkblack md:text-32">
               {section.heading}
             </h2>
             <div className="flex flex-col gap-6">

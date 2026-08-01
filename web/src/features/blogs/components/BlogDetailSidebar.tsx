@@ -86,8 +86,8 @@ const BlogDetailSidebar = ({ title, tableOfContents }: BlogDetailSidebarProps) =
 
   return (
     <aside
-      className="flex w-full flex-col gap-10 border-neutral300 bg-gray300 p-6 desktop:w-[437px] desktop:shrink-0 desktop:border-r desktop:p-6"
-      aria-label="Article navigation"
+      className="flex w-full flex-col gap-6 border-r border-neutral300 bg-gray300 p-4 desktop:w-[437px] desktop:shrink-0 desktop:gap-10 desktop:p-6"
+      aria-label="Blog navigation"
     >
       <div className="flex flex-col gap-6">
         <p className="font-larken text-2xl font-light leading-110 text-darkblack">
@@ -95,16 +95,16 @@ const BlogDetailSidebar = ({ title, tableOfContents }: BlogDetailSidebarProps) =
         </p>
 
         {tableOfContents.length > 0 ? (
-          <nav className="relative border-l-2 border-neutral300">
-            <ul className="flex flex-col gap-8">
+          <nav className="desktop:relative desktop:border-l-2 desktop:border-neutral300">
+            <ul className="flex flex-col gap-6 desktop:gap-8">
               {tableOfContents.map((item) => {
                 const isActive = item.id === activeId;
 
                 return (
-                  <li key={item.id} className="relative pl-4">
+                  <li key={item.id} className="relative desktop:pl-4">
                     {isActive ? (
                       <span
-                        className="absolute -left-0.5 top-0 h-[78px] w-0.5 bg-darkblack"
+                        className="absolute -left-0.5 top-0 hidden h-[78px] w-0.5 bg-darkblack desktop:block"
                         aria-hidden
                       />
                     ) : null}
@@ -132,7 +132,7 @@ const BlogDetailSidebar = ({ title, tableOfContents }: BlogDetailSidebarProps) =
         <button
           type="button"
           onClick={handleListen}
-          className="flex h-14 flex-1 items-center justify-center gap-2 border border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-colors hover:border-darkblack"
+          className="flex h-14 flex-1 items-center justify-center gap-2 border border-neutral300 px-7 text-t4-regular uppercase leading-110 text-darkblack transition-colors hover:border-darkblack"
         >
           <Headphones className="size-6 shrink-0" aria-hidden />
           LISTEN
@@ -140,7 +140,7 @@ const BlogDetailSidebar = ({ title, tableOfContents }: BlogDetailSidebarProps) =
         <button
           type="button"
           onClick={handleShare}
-          className="flex h-14 flex-1 items-center justify-center gap-2 border border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-colors hover:border-darkblack"
+          className="flex h-14 flex-1 items-center justify-center gap-2 border border-neutral300 px-7 text-t4-regular uppercase leading-110 text-darkblack transition-colors hover:border-darkblack"
         >
           <Share2 className="size-6 shrink-0" aria-hidden />
           SHARE

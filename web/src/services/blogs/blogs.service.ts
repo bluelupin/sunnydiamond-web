@@ -20,7 +20,13 @@ import type {
   StrapiBlogPost,
 } from "./blogs.types";
 
-const BLOG_POSTS_QUERY = "populate=*&pagination[pageSize]=100&sort=publishedDate:desc";
+const BLOG_POSTS_LIST_QUERY =
+  "populate[coverImage]=true" +
+  "&populate[heroImage]=true" +
+  "&populate[tags]=true" +
+  "&populate[blog_category]=true" +
+  "&pagination[pageSize]=100" +
+  "&sort=publishedDate:desc";
 
 /** Targeted populate — `populate=*` 400s on this single-type. */
 const BLOG_LANDING_POPULATE_QUERY =
@@ -52,7 +58,7 @@ async function softFetch<T>(
 async function fetchBlogPosts(signal?: AbortSignal): Promise<StrapiBlogPost[]> {
   try {
     const data = await apiFetch<StrapiBlogPost[]>(
-      `${STRAPI_ENDPOINTS.blogPosts}?${BLOG_POSTS_QUERY}`,
+      `${STRAPI_ENDPOINTS.blogPosts}?${BLOG_POSTS_LIST_QUERY}`,
       { signal },
     );
     return Array.isArray(data) ? data : [];

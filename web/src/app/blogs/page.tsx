@@ -29,8 +29,13 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-export default async function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   let blogsPage = mapStaticBlogsPage();
+  const resolvedSearchParams = await searchParams;
 
   try {
     blogsPage = await getBlogsPageData();
@@ -38,5 +43,5 @@ export default async function Page() {
     blogsPage = mapStaticBlogsPage();
   }
 
-  return <BlogsPage page={blogsPage} />;
+  return <BlogsPage page={blogsPage} searchParams={resolvedSearchParams} />;
 }

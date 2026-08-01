@@ -1,21 +1,33 @@
 "use client";
 
+import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/shared/utils/cn";
-import type { BlogCategory, BlogCategoryId } from "../types";
+import type { BlogCategory } from "../types";
 
 type BlogsFilterBarProps = {
   filterLabel: string;
   categories: BlogCategory[];
-  selectedCategory: BlogCategoryId;
-  onSelectCategory: (category: BlogCategoryId) => void;
 };
 
-const BlogsFilterBar = ({
-  filterLabel,
-  categories,
-  selectedCategory,
-  onSelectCategory,
-}: BlogsFilterBarProps) => {
+const BlogsFilterBar = ({ filterLabel, categories }: BlogsFilterBarProps) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const selectedCategory = searchParams.get("category") ?? "all";
+
+  const handleSelectCategory = (categoryId: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("limit");
+
+    if (categoryId === "all") {
+      params.delete("category");
+    } else {
+      params.set("category", categoryId);
+    }
+
+    const query = params.toString();
+    router.push(query ? `/blogs?${query}` : "/blogs", { scroll: false });
+  };
+
   return (
     <div className="mx-auto w-full max-w-1440 px-4 pt-10 md:px-10 md:pt-16">
       <div className="flex flex-col items-start gap-4 md:h-[38px] md:flex-row md:items-center md:justify-between md:gap-0">
@@ -36,7 +48,7 @@ const BlogsFilterBar = ({
                 type="button"
                 role="listitem"
                 aria-pressed={isSelected}
-                onClick={() => onSelectCategory(category.id)}
+                onClick={() => handleSelectCategory(category.id)}
                 className={cn(
                   "shrink-0 px-4 py-2 text-center font-gill font-normal leading-110 whitespace-nowrap",
                   "text-t4-regular md:text-base",
