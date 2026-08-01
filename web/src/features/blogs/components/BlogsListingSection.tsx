@@ -73,7 +73,7 @@ const BlogsListingSection = ({
 
       {firstRowPosts.length > 0 ? (
         <section className={blogsGridSectionClassName}>
-          <div className="mx-auto flex w-full max-w-1440 flex-col gap-4 md:flex-row md:items-start md:gap-2">
+          <div className="mx-auto flex w-full max-w-1440 flex-col gap-10 md:flex-row md:items-start md:gap-2">
             {firstRowPosts.map((post) => (
               <BlogCard key={post.id} post={post} />
             ))}
@@ -85,14 +85,14 @@ const BlogsListingSection = ({
 
       {remainingPosts.length > 0 ? (
         <section className={blogsGridSectionClassName}>
-          <div className="mx-auto flex w-full max-w-1440 flex-col gap-16">
-            <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-2">
+          <div className="mx-auto flex w-full max-w-1440 flex-col gap-10">
+            <div className="flex flex-col gap-10 md:flex-row md:items-start md:gap-2">
               {remainingPosts.slice(0, 3).map((post) => (
                 <BlogCard key={post.id} post={post} />
               ))}
             </div>
             {remainingPosts.length > 3 ? (
-              <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-2">
+              <div className="flex flex-col gap-10 md:flex-row md:items-start md:gap-2">
                 {remainingPosts.slice(3).map((post) => (
                   <BlogCard key={`${post.id}-row-2`} post={post} />
                 ))}
@@ -104,7 +104,7 @@ const BlogsListingSection = ({
             <div className="mx-auto mt-16 flex w-full max-w-[360px] flex-col items-center gap-6">
               <div className="flex w-full flex-col items-center gap-3">
                 <p className="font-gill text-base font-light leading-110 text-darkblack">
-                  {shownCount} out of {filteredPosts.length} Articles
+                  {shownCount} out of {filteredPosts.length} Blogs
                 </p>
                 <div className="h-0.5 w-full overflow-hidden bg-neutral300">
                   <div
@@ -133,7 +133,7 @@ const BlogsListingSection = ({
       {filteredPosts.length === 0 ? (
         <section className={blogsGridSectionClassName}>
           <p className="mx-auto max-w-1440 text-center font-gill text-base font-light leading-110 text-neutral500">
-            No articles match this filter yet.
+            No blogs match this filter yet.
           </p>
         </section>
       ) : null}

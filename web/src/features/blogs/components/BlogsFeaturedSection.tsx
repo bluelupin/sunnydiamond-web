@@ -14,7 +14,7 @@ const BlogsFeaturedSection = ({ featured }: BlogsFeaturedSectionProps) => {
     >
       <div className="relative mx-auto w-full max-w-1440 overflow-hidden desktop:h-[750px]">
         <div
-          className="pointer-events-none absolute left-0 top-1/2 h-[1405px] w-full -translate-y-1/2 desktop:top-[calc(50%-59.5px)]"
+          className="pointer-events-none absolute left-1/2 top-4 h-[684px] w-[714px] -translate-x-1/2 desktop:top-[calc(50%-59.5px)] desktop:h-[1405px] desktop:w-full desktop:-translate-y-1/2"
           aria-hidden
         >
           <Image
@@ -26,40 +26,40 @@ const BlogsFeaturedSection = ({ featured }: BlogsFeaturedSectionProps) => {
           />
         </div>
 
-        <div className="relative z-10 flex flex-col gap-10 px-4 py-16 desktop:absolute desktop:inset-0 desktop:px-0 desktop:py-0">
-          <div className="flex w-full max-w-[530px] flex-col gap-10 desktop:absolute desktop:left-10 desktop:top-1/2 desktop:-translate-y-1/2">
-            <div className="flex flex-col gap-6">
+        <div className="relative z-10 flex flex-col items-center gap-6 px-4 py-16 desktop:absolute desktop:inset-0 desktop:items-stretch desktop:gap-10 desktop:px-0 desktop:py-0">
+          <div className="flex w-full max-w-[375px] flex-col items-center gap-6 desktop:absolute desktop:left-10 desktop:top-1/2 desktop:max-w-[530px] desktop:-translate-y-1/2 desktop:items-start desktop:gap-10">
+            <div className="flex w-full flex-col items-center gap-4 text-center desktop:items-start desktop:gap-6 desktop:text-left">
               <h2
                 id="blogs-featured-title"
-                className="font-larken text-32 font-light leading-110 text-darkblack lg:text-5xl"
+                className="w-full font-larken text-32 font-light leading-110 text-darkblack lg:text-5xl"
               >
                 {featured.title}
               </h2>
-              <div className="flex items-center gap-4">
-                <p className="font-gill text-base font-normal leading-110 text-neutral500">
+              <div className="flex items-center justify-center gap-2 desktop:justify-start desktop:gap-4">
+                <p className="text-t4-regular text-neutral500 desktop:text-base">
                   {featured.date}
                 </p>
                 <span
                   className="size-1 shrink-0 rounded-full bg-neutral500"
                   aria-hidden
                 />
-                <p className="font-gill text-base font-normal leading-110 text-neutral500">
+                <p className="text-t4-regular text-neutral500 desktop:text-base">
                   {featured.readTime}
                 </p>
               </div>
-              <p className="font-gill text-[20px] font-light leading-110 text-darkblack">
+              <p className="w-full font-gill text-base font-light leading-110 text-neutral500 desktop:text-[20px] desktop:text-darkblack">
                 {featured.excerpt}
               </p>
             </div>
             <Link
               href={featured.href}
-              className="inline-flex w-fit self-start border-b border-darkblack pb-1 text-t4-regular whitespace-nowrap text-darkblack"
+              className="inline-flex w-fit border-b border-darkblack pb-1 text-t4-regular whitespace-nowrap text-darkblack"
             >
               {featured.readNowLabel}
             </Link>
           </div>
 
-          <div className="relative mx-auto h-[min(400px,70vw)] w-full max-w-[746px] desktop:absolute desktop:left-[617px] desktop:top-0 desktop:mx-0 desktop:h-[750px] desktop:w-[823px] desktop:max-w-none">
+          <div className="relative h-[357px] w-[324px] shrink-0 desktop:absolute desktop:left-[617px] desktop:top-0 desktop:mx-0 desktop:h-[750px] desktop:w-[823px] desktop:max-w-none">
             <div className="absolute left-0 top-[2px] size-full overflow-hidden desktop:left-[38px] desktop:size-[746px]">
               <Image
                 src={featured.imageSrc}
