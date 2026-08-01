@@ -554,6 +554,15 @@ type StoreSelectionStepProps = {
   showBack?: boolean;
 };
 
+const storeListTitleClassName =
+  "font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl";
+
+const selectedStoreCardClassName =
+  "flex flex-col gap-4 bg-gray300 px-4 py-6 lg:px-10 lg:py-8";
+
+const unselectedStoreButtonClassName =
+  "flex w-full items-center px-4 py-6 text-left font-larken text-xl font-light leading-110 text-darkblack lg:px-10 lg:py-8 lg:text-2xl";
+
 const StoreSelectionStep = ({
   stores,
   selectedStoreId,
@@ -571,14 +580,14 @@ const StoreSelectionStep = ({
   if (layout === "page") {
     return (
       <>
-        <section className="mx-auto w-full max-w-1440 pt-10 pb-26">
+        <section className="mx-auto w-full max-w-1440 pb-26 pt-0 lg:pt-10">
           <div className="flex flex-col items-start gap-6 lg:flex-row">
             <div
               className="w-full shrink-0 lg:w-[593px] lg:border-r lg:border-neutral300"
               aria-label="Showroom locations"
             >
               {stores.length === 0 ? (
-                <p className="px-4 py-8 font-gill text-base font-light leading-110 text-neutral500 lg:px-10">
+                <p className="px-4 py-6 font-gill text-base font-light leading-110 text-neutral500 lg:px-10 lg:py-8">
                   No showrooms match your search. Try another location or state.
                 </p>
               ) : (
@@ -588,10 +597,8 @@ const StoreSelectionStep = ({
                   return (
                     <div key={store.id} className="w-full">
                       {isSelected ? (
-                        <div className="flex flex-col gap-4 bg-gray300 px-4 py-8 lg:px-10">
-                          <p className="font-larken text-2xl font-light leading-110 text-darkblack">
-                            {store.storeName}
-                          </p>
+                        <div className={selectedStoreCardClassName}>
+                          <p className={storeListTitleClassName}>{store.storeName}</p>
                           <div className="h-px w-full bg-neutral300" aria-hidden />
                           {store.heroImage ? (
                             <div className="relative aspect-[2500/1797] w-full overflow-hidden lg:hidden">
@@ -612,7 +619,7 @@ const StoreSelectionStep = ({
                           type="button"
                           aria-pressed={false}
                           onClick={() => onSelectStore(store.id)}
-                          className="flex w-full items-center px-4 py-8 text-left font-larken text-2xl font-light leading-110 text-darkblack lg:px-10"
+                          className={unselectedStoreButtonClassName}
                         >
                           {store.storeName}
                         </button>
@@ -630,12 +637,6 @@ const StoreSelectionStep = ({
             ) : null}
           </div>
         </section>
-
-        <PanelFooter>
-          <DetailDarkButton onClick={onProceed} disabled={stores.length === 0}>
-            PROCEED WITH THIS STORE
-          </DetailDarkButton>
-        </PanelFooter>
       </>
     );
   }
@@ -696,10 +697,8 @@ const StoreSelectionStep = ({
             return (
               <div key={store.id} className="w-full">
                 {isSelected ? (
-                  <div className="flex flex-col gap-4 bg-gray300 px-4 py-8 lg:px-10">
-                    <p className="font-larken text-2xl font-light leading-110 text-darkblack">
-                      {store.storeName}
-                    </p>
+                  <div className={selectedStoreCardClassName}>
+                    <p className={storeListTitleClassName}>{store.storeName}</p>
                     <div className="h-px w-full bg-neutral300" aria-hidden />
                     {store.heroImage ? (
                       <div className="relative aspect-[2500/1797] w-full overflow-hidden">
@@ -713,14 +712,14 @@ const StoreSelectionStep = ({
                         />
                       </div>
                     ) : null}
-                    <BookStoreVisitLocationDetails store={store} />
+                    <BookStoreVisitLocationDetails store={store} size="page" />
                   </div>
                 ) : (
                   <button
                     type="button"
                     aria-pressed={false}
                     onClick={() => onSelectStore(store.id)}
-                    className="flex min-h-[90px] w-full items-center px-4 py-8 text-left font-larken text-2xl font-light leading-110 text-darkblack lg:px-10"
+                    className={unselectedStoreButtonClassName}
                   >
                     {store.storeName}
                   </button>

@@ -18,15 +18,14 @@ export function BookStoreVisitLocationDetails({
   const isPage = size === "page";
   const textClassName = isPage
     ? "font-gill text-xl font-light leading-110 text-darkblack"
-    : "font-gill text-base font-light leading-110 text-darkblack";
-  const rowGapClassName = isPage ? "gap-3" : "gap-3";
-  const stackGapClassName = isPage ? "gap-4" : "gap-4";
-  const directionsClassName = isPage
-    ? "inline-flex w-fit border-b border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
-    : "inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack";
+    : "font-gill text-base font-light leading-110 text-darkblack lg:text-xl";
+  const rowGapClassName = "gap-3";
+  const stackGapClassName = "gap-4";
+  const directionsClassName =
+    "inline-flex w-fit border-b border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack";
 
   return (
-    <div className={cn("flex flex-col", isPage ? "gap-6" : "gap-6")}>
+    <div className="flex flex-col gap-6">
       <div className={cn("flex flex-col", stackGapClassName)}>
         {store.address ? (
           <div className={cn("flex items-start", rowGapClassName)}>
@@ -36,7 +35,7 @@ export function BookStoreVisitLocationDetails({
               width={24}
               height={24}
               aria-hidden
-              className="mt-0.5 size-6 shrink-0"
+              className="size-6 shrink-0"
             />
             <p className={textClassName}>
               {store.address}
