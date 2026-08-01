@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { ContactSupportIcon } from "@/features/contact/components/ContactSupportIcon";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -139,28 +140,28 @@ function PolicyDesktopSidebar({
   return (
     <nav
       aria-label="Policy categories"
-      className="hidden w-full shrink-0 border-neutral300 lg:block lg:w-[435px] lg:border-r lg:pr-6"
+      className="hidden w-full shrink-0 border-r border-neutral300 lg:block lg:w-[435px]"
     >
       <div className="flex flex-col gap-6">
         {navGroups.map((group) => (
-          <div key={group.id} className="flex flex-col gap-4">
-            <p className="font-gill text-xl font-light leading-110 text-darkblack">
+          <div key={group.id} className="flex w-full flex-col items-start gap-4">
+            <p className="font-gill text-[20px] font-light leading-110 text-darkblack">
               {group.label}
             </p>
-            <ul className="flex flex-col">
+            <ul className="flex w-full flex-col items-start">
               {group.items.map((policy) => {
                 const isActive = policy.id === activePolicyId;
 
                 return (
-                  <li key={policy.id}>
+                  <li key={policy.id} className="w-full">
                     <button
                       type="button"
                       onClick={() => onSelect(policy.id)}
                       className={cn(
-                        "flex h-[70px] w-full items-center px-6 text-left transition-colors",
+                        "flex h-[70px] w-full items-center p-6 text-left transition-colors",
                         isActive
-                          ? "border-r-2 border-darkblack bg-gray300 font-gill text-xl font-normal leading-110 text-darkblack"
-                          : "font-gill text-xl font-light leading-110 text-darkblack hover:bg-gray300/60",
+                          ? "border-r-2 border-darkblack bg-gray300 font-gill text-[20px] font-normal leading-110 text-darkblack"
+                          : "font-gill text-[20px] font-light leading-110 text-darkblack hover:bg-gray300/60",
                       )}
                       aria-current={isActive ? "page" : undefined}
                     >
@@ -275,16 +276,24 @@ function PolicyAccordionItem({
   variant?: "desktop" | "mobile";
 }) {
   const isMobile = variant === "mobile";
+  const contentId = `policy-accordion-${section.id}`;
+  const triggerId = `policy-accordion-trigger-${section.id}`;
 
   return (
-    <div className="flex flex-col">
+    <div className={cn("flex flex-col", isOpen && "gap-4")}>
       <button
         type="button"
+        id={triggerId}
         onClick={onToggle}
         aria-expanded={isOpen}
+        aria-controls={contentId}
         className={cn(
-          "flex w-full items-center gap-2 text-left",
-          !isMobile && "h-14",
+          "flex w-full gap-2 text-left",
+          isMobile
+            ? isOpen
+              ? "items-start"
+              : "items-center"
+            : "h-14 shrink-0 items-center",
         )}
       >
         <span className="min-w-0 flex-1 font-gill text-base font-normal leading-110 text-darkblack">
@@ -293,21 +302,44 @@ function PolicyAccordionItem({
         <PolicyAccordionToggleIcon isOpen={isOpen} />
       </button>
 
-      {isOpen ? (
-        <div className="flex flex-col gap-6 pb-4 font-gill text-base font-normal leading-110 text-neutral500">
-          {section.intro ? <p className="whitespace-pre-line">{section.intro}</p> : null}
-          {section.body ? <p className="whitespace-pre-line">{section.body}</p> : null}
-          {section.listItems?.length ? (
-            <ol className="flex flex-col gap-2">
-              {section.listItems.map((item, index) => (
-                <li key={index} className="ms-6 list-decimal">
-                  {item}
-                </li>
-              ))}
-            </ol>
-          ) : null}
+      <div
+        id={contentId}
+        role="region"
+        aria-labelledby={triggerId}
+        aria-hidden={!isOpen}
+        className={cn(
+          "grid min-h-0 transition-[grid-template-rows,opacity] duration-500 ease-in-out motion-reduce:transition-none",
+          isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+        )}
+      >
+        <div className="overflow-hidden">
+          <div
+            className={cn(
+              "flex flex-col font-gill leading-110 text-neutral500",
+              isMobile
+                ? "gap-4 text-sm font-light"
+                : "gap-6 text-base font-normal",
+            )}
+          >
+            {section.intro ? <p className="whitespace-pre-line">{section.intro}</p> : null}
+            {section.body ? <p className="whitespace-pre-line">{section.body}</p> : null}
+            {section.listItems?.length ? (
+              <ol
+                className={cn(
+                  "flex flex-col gap-2",
+                  isMobile ? "ms-[21px]" : "ms-6",
+                )}
+              >
+                {section.listItems.map((item, index) => (
+                  <li key={index} className="list-decimal">
+                    {item}
+                  </li>
+                ))}
+              </ol>
+            ) : null}
+          </div>
         </div>
-      ) : null}
+      </div>
     </div>
   );
 }
@@ -323,14 +355,14 @@ function PolicyAccordions({
 }) {
   const isMobile = variant === "mobile";
   const [openSectionId, setOpenSectionId] = useState<string | null>(
-    isMobile ? null : (sections[0]?.id ?? null),
+    sections[0]?.id ?? null,
   );
 
   useEffect(() => {
     if (!sections.some((section) => section.id === openSectionId)) {
-      setOpenSectionId(isMobile ? null : (sections[0]?.id ?? null));
+      setOpenSectionId(sections[0]?.id ?? null);
     }
-  }, [isMobile, openSectionId, sections]);
+  }, [openSectionId, sections]);
 
   if (sections.length === 0) {
     return (
@@ -358,13 +390,7 @@ function PolicyAccordions({
               }
             />
             {index < sections.length - 1 ? (
-              <div
-                className={cn(
-                  "w-full bg-neutral300",
-                  isMobile ? "h-[0.5px]" : "h-px",
-                )}
-                aria-hidden
-              />
+              <div className="h-[0.5px] w-full bg-neutral300" aria-hidden />
             ) : null}
           </div>
         );
@@ -383,17 +409,17 @@ function PolicyMobileDetailPanel({
   onBack: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-[29px]">
+    <div className="flex flex-col gap-6 pb-16 pt-6">
       <div className="flex items-center gap-2">
         <button
           type="button"
           onClick={onBack}
-          className="text-darkblack"
+          className="shrink-0 text-darkblack"
           aria-label="Back to policy list"
         >
-          <ChevronLeft className="size-6 shrink-0" strokeWidth={1.5} aria-hidden />
+          <ChevronLeft className="size-6" strokeWidth={1.5} aria-hidden />
         </button>
-        <h1 className="font-larken text-2xl font-light leading-110 text-darkblack">
+        <h1 className="min-w-0 font-larken text-2xl font-light leading-110 text-darkblack">
           {policy.contentTitle}
         </h1>
       </div>
@@ -422,7 +448,7 @@ function PolicyContentPanel({
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-6">
-      <h2 className="font-larken text-32 font-light leading-110 text-darkblack">
+      <h2 className="font-larken text-[32px] font-light leading-110 text-darkblack">
         {policy.contentTitle}
       </h2>
       <PolicyAccordions
@@ -442,20 +468,26 @@ function PolicySupportSection({
     return null;
   }
 
+  const ctaClassName =
+    "inline-flex h-14 items-center justify-center border border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-colors hover:bg-white";
+
   return (
     <section
       aria-label="Customer support"
-      className="bg-gray200 px-4 py-10 md:px-6 md:py-10"
+      className="bg-gray300 px-4 py-10 lg:bg-gray200 lg:py-10"
     >
-      <div className="mx-auto flex max-w-[1360px] flex-col items-center justify-center gap-10 lg:flex-row lg:gap-16">
-        <div className="flex max-w-[301px] flex-col items-center justify-between gap-6 p-4 text-center">
-          <h3 className="font-larken text-2xl font-light leading-110 text-darkblack">
+      <div className="mx-auto flex max-w-[1360px] flex-col items-center justify-center gap-10 lg:flex-row lg:items-center lg:gap-16">
+        <div className="flex w-full max-w-[301px] flex-col items-center gap-4 text-center lg:h-[230px] lg:justify-between lg:gap-0 lg:p-4">
+          <h3 className="w-full font-larken text-[20px] font-light leading-110 text-darkblack lg:text-2xl">
             {support.callTitle}
           </h3>
-          <div className="flex flex-col items-center gap-4">
-            <div className="flex flex-col items-center gap-2 text-base leading-110 text-darkblack">
+          <div className="flex flex-col items-center gap-4 lg:items-start">
+            <div className="flex flex-col items-center gap-2 whitespace-nowrap text-base leading-110 text-darkblack">
               {support.hours.map((entry) => (
-                <div key={`${entry.label}-${entry.value}`} className="flex flex-wrap items-center justify-center gap-3">
+                <div
+                  key={`${entry.label}-${entry.value}`}
+                  className="flex items-center gap-3"
+                >
                   <span className="font-gill font-light">{entry.label}</span>
                   <span className="font-gill font-normal">{entry.value}</span>
                 </div>
@@ -463,54 +495,43 @@ function PolicySupportSection({
             </div>
             <Link
               href={support.phoneHref}
-              className="flex items-center gap-2 font-gill text-base font-normal leading-110 text-darkblack"
+              className="flex w-full items-center justify-center gap-2 font-gill text-base font-normal leading-110 text-darkblack"
             >
-              <Image
-                src="/images/contact/icon-phone.svg"
-                alt=""
-                width={24}
-                height={24}
-                aria-hidden
-              />
+              <ContactSupportIcon name="phone" />
               {support.phoneLabel}
             </Link>
           </div>
-          <Link
-            href={support.contactHref}
-            className="inline-flex h-14 items-center justify-center border border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-colors hover:bg-white"
-          >
+          <Link href={support.contactHref} className={cn(ctaClassName, "hidden lg:inline-flex")}>
             {support.contactCtaLabel}
           </Link>
         </div>
 
-        <div className="hidden h-[230px] w-px shrink-0 bg-neutral300 lg:block" aria-hidden />
+        <div className="h-px w-full shrink-0 bg-neutral300 lg:hidden" aria-hidden />
 
-        <div className="flex max-w-[316px] flex-col items-center justify-between gap-6 p-4 text-center">
-          <div className="flex flex-col items-center gap-4">
-            <h3 className="font-larken text-2xl font-light leading-110 text-darkblack">
+        <div
+          className="hidden w-px shrink-0 self-stretch bg-neutral300 lg:block lg:h-[230px]"
+          aria-hidden
+        />
+
+        <div className="flex w-full max-w-[316px] flex-col items-center gap-4 text-center lg:h-[222px] lg:w-[316px] lg:justify-between lg:gap-0 lg:p-4">
+          <div className="flex w-full flex-col items-center gap-4">
+            <h3 className="font-larken text-[20px] font-light leading-110 text-darkblack lg:text-2xl">
               {support.emailTitle}
             </h3>
-            <p className="font-gill text-base font-light leading-110 text-darkblack">
-              {support.emailDescription}
-            </p>
-            <Link
-              href={support.emailHref}
-              className="flex items-center gap-2 font-gill text-base font-normal leading-110 text-darkblack"
-            >
-              <Image
-                src="/images/contact/icon-email.svg"
-                alt=""
-                width={24}
-                height={24}
-                aria-hidden
-              />
-              {support.emailLabel}
-            </Link>
+            <div className="flex w-full flex-col items-center gap-4">
+              <p className="w-full font-gill text-base font-light leading-110 text-darkblack">
+                {support.emailDescription}
+              </p>
+              <Link
+                href={support.emailHref}
+                className="flex w-full items-center justify-center gap-2 font-gill text-base font-normal leading-110 text-darkblack"
+              >
+                <ContactSupportIcon name="email" />
+                {support.emailLabel}
+              </Link>
+            </div>
           </div>
-          <Link
-            href={support.emailHref}
-            className="inline-flex h-14 items-center justify-center border border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-colors hover:bg-white"
-          >
+          <Link href={support.emailHref} className={cn(ctaClassName, "hidden lg:inline-flex")}>
             {support.emailCtaLabel}
           </Link>
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import { ContactSupportIcon } from "@/features/contact/components/ContactSupportIcon";
 import { profileTabsContent } from "../data/profileContent";
 import { cn } from "@/shared/utils/cn";
 
@@ -22,7 +22,7 @@ const ProfileSupportSection = () => {
           <div className="flex flex-col items-center gap-4">
             <div className="flex flex-col items-center gap-3 text-base leading-110 text-darkblack">
               {callUs.hours.map((entry) => (
-                <div key={entry.label} className="flex flex-wrap items-center justify-center gap-3">
+                <div key={entry.label} className="flex items-center gap-3 whitespace-nowrap">
                   <span className="font-gill font-light">{entry.label}</span>
                   <span className="font-gill font-normal">{entry.value}</span>
                 </div>
@@ -33,13 +33,7 @@ const ProfileSupportSection = () => {
               href={callUs.phoneHref}
               className="flex items-center gap-2 font-gill text-base font-normal leading-110 text-darkblack"
             >
-              <Image
-                src="/images/contact/icon-phone.svg"
-                alt=""
-                width={24}
-                height={24}
-                aria-hidden
-              />
+              <ContactSupportIcon name="phone" />
               {callUs.phone}
             </Link>
           </div>
@@ -64,13 +58,7 @@ const ProfileSupportSection = () => {
                 href={emailUs.emailHref}
                 className="flex flex-wrap items-center justify-center gap-2 font-gill text-base font-normal leading-110 text-darkblack"
               >
-                <Image
-                  src="/images/contact/icon-email.svg"
-                  alt=""
-                  width={24}
-                  height={24}
-                  aria-hidden
-                />
+                <ContactSupportIcon name="email" />
                 {emailUs.email}
               </Link>
             </div>

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { ContactSupportIcon } from "./ContactSupportIcon";
 import Reveal from "@/shared/Animation/Reveal";
 import { contactPageContent } from "../data/content";
 
@@ -55,13 +56,7 @@ const ContactInfoMobileCard = ({
               href={card.link.href}
               className="flex items-center gap-2 font-gill text-base font-normal leading-110 text-darkblack"
             >
-              <Image
-                src="/images/contact/icon-phone.svg"
-                alt=""
-                width={24}
-                height={24}
-                aria-hidden
-              />
+              <ContactSupportIcon name="phone" />
               {card.link.label}
             </Link>
           ) : (
