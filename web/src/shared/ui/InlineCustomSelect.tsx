@@ -21,6 +21,8 @@ type InlineCustomSelectProps = {
   optionClassName?: string;
   invalid?: boolean;
   errorId?: string;
+  hideLabel?: boolean;
+  placeholderClassName?: string;
 };
 
 const SelectChevron = ({ open }: { open: boolean }) => (
@@ -56,6 +58,8 @@ const InlineCustomSelect = ({
   optionClassName,
   invalid = false,
   errorId,
+  hideLabel = false,
+  placeholderClassName,
 }: InlineCustomSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -99,23 +103,26 @@ const InlineCustomSelect = ({
   };
 
   return (
-    <div ref={rootRef} className="relative flex flex-col gap-[8px]">
-      <span
-        id={labelId}
-        className={cn(
-          "font-gill text-sm font-normal leading-110 text-darkblack",
-          labelClassName,
-        )}
-      >
-        {label}
-      </span>
+    <div ref={rootRef} className="relative flex w-full flex-col gap-2">
+      {!hideLabel ? (
+        <span
+          id={labelId}
+          className={cn(
+            "font-gill text-sm font-normal leading-110 text-darkblack",
+            labelClassName,
+          )}
+        >
+          {label}
+        </span>
+      ) : null}
       <button
         type="button"
         id={id}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-controls={isOpen ? listboxId : undefined}
-        aria-labelledby={`${labelId} ${valueId}`}
+        aria-labelledby={hideLabel ? undefined : `${labelId} ${valueId}`}
+        aria-label={hideLabel ? label : undefined}
         aria-invalid={invalid || undefined}
         aria-describedby={errorId}
         onClick={(event) => {
@@ -123,10 +130,12 @@ const InlineCustomSelect = ({
           setIsOpen((current) => !current);
         }}
         className={cn(
-          "flex h-[56px] w-full items-center justify-between bg-[#F2F2F2] p-[12px] font-gill text-sm leading-110 outline-none",
+          "flex h-14 w-full items-center justify-between bg-[#F2F2F2] p-3 font-gill text-sm leading-110 outline-none",
           isOpen ? "border border-darkblack" : "border border-transparent",
           invalid && !isOpen && invalidFieldClassName,
-          showPlaceholder && !isOpen ? "font-light text-neutral400" : "font-normal text-darkblack",
+          showPlaceholder && !isOpen
+            ? (placeholderClassName ?? "font-light text-neutral400")
+            : "font-normal text-darkblack",
           triggerClassName,
         )}
       >
@@ -158,7 +167,7 @@ const InlineCustomSelect = ({
                   selectOption(option);
                 }}
                 className={cn(
-                  "flex h-[56px] w-full shrink-0 items-center p-[12px] text-left font-gill text-sm leading-110 transition-colors",
+                  "flex h-14 w-full shrink-0 items-center p-3 text-left font-gill text-sm leading-110 transition-colors",
                   selected
                     ? "bg-[#DECAA0] font-normal text-darkblack"
                     : "font-normal text-neutral400 hover:bg-[#DECAA0] hover:text-darkblack",
