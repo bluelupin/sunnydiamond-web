@@ -178,6 +178,23 @@ export const profileTabsContent = {
     emptySecondaryCta: "BROWSE YOUR COLLECTION",
     emptySecondaryCtaHref: "/#alankara",
     emptyFilterMessage: "No orders match this filter.",
+    emptyFilterStates: {
+      delivered: {
+        title: "No Delivered Orders",
+        descriptionPrimary: "You don't have any delivered orders yet.",
+        descriptionSecondary: "Discover timeless designs made to be treasured",
+      },
+      cancelled: {
+        title: "No Cancelled Orders",
+        descriptionPrimary: "You don't have any cancelled orders yet.",
+        descriptionSecondary: "Discover timeless designs made to be treasured",
+      },
+      returned: {
+        title: "No Returned Orders",
+        descriptionPrimary: "You don't have any returned orders yet.",
+        descriptionSecondary: "Discover timeless designs made to be treasured",
+      },
+    },
     mobileTotalLabel: "Total",
     mobileMeta: {
       estimatedDelivery: "Estimated Delivery:",

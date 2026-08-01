@@ -7,9 +7,10 @@ import type { CustomerOrdersPage } from "@/services/customer/customer-account.ty
 type UseCustomerOrdersResult = {
   data: CustomerOrdersPage | null;
   isLoading: boolean;
+  isLoadingMore: boolean;
   error: string | null;
-  page: number;
-  setPage: (page: number) => void;
+  hasMore: boolean;
+  loadMore: () => void;
   refresh: () => void;
 };
 
@@ -17,10 +18,22 @@ export function useCustomerOrders(enabled = true, pageSize = 10): UseCustomerOrd
   const [page, setPage] = useState(1);
   const [data, setData] = useState<CustomerOrdersPage | null>(null);
   const [isLoading, setIsLoading] = useState(Boolean(enabled));
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  const hasMore = data != null && data.currentPage < data.totalPages;
+
+  const loadMore = useCallback(() => {
+    if (!hasMore || isLoading || isLoadingMore) {
+      return;
+    }
+
+    setPage((current) => current + 1);
+  }, [hasMore, isLoading, isLoadingMore]);
+
   const refresh = useCallback(() => {
+    setPage(1);
     setRefreshKey((value) => value + 1);
   }, []);
 
@@ -28,15 +41,21 @@ export function useCustomerOrders(enabled = true, pageSize = 10): UseCustomerOrd
     if (!enabled) {
       setData(null);
       setIsLoading(false);
+      setIsLoadingMore(false);
       setError(null);
       return;
     }
 
     const controller = new AbortController();
     let cancelled = false;
+    const isInitialLoad = page === 1;
 
     void (async () => {
-      setIsLoading(true);
+      if (isInitialLoad) {
+        setIsLoading(true);
+      } else {
+        setIsLoadingMore(true);
+      }
       setError(null);
 
       try {
@@ -47,7 +66,19 @@ export function useCustomerOrders(enabled = true, pageSize = 10): UseCustomerOrd
             setData(null);
             setError("Unable to load orders. Please sign in again.");
           } else {
-            setData(result);
+            setData((current) => {
+              if (page === 1 || !current) {
+                return result;
+              }
+
+              const existingIds = new Set(current.orders.map((order) => order.id));
+              const nextOrders = result.orders.filter((order) => !existingIds.has(order.id));
+
+              return {
+                ...result,
+                orders: [...current.orders, ...nextOrders],
+              };
+            });
           }
         }
       } catch (loadError) {
@@ -56,7 +87,11 @@ export function useCustomerOrders(enabled = true, pageSize = 10): UseCustomerOrd
         }
       } finally {
         if (!cancelled) {
-          setIsLoading(false);
+          if (isInitialLoad) {
+            setIsLoading(false);
+          } else {
+            setIsLoadingMore(false);
+          }
         }
       }
     })();
@@ -67,5 +102,5 @@ export function useCustomerOrders(enabled = true, pageSize = 10): UseCustomerOrd
     };
   }, [enabled, page, pageSize, refreshKey]);
 
-  return { data, isLoading, error, page, setPage, refresh };
+  return { data, isLoading, isLoadingMore, error, hasMore, loadMore, refresh };
 }

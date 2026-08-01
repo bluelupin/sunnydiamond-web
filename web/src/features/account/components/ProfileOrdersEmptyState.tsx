@@ -1,6 +1,6 @@
 "use client";
 
-import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
+import DiamondIcon from "@/assets/Icons/Diamond";
 import { CartPrimaryLink } from "@/features/cart/components/CartFlowUi";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { profileTabsContent } from "../data/profileContent";
@@ -8,18 +8,29 @@ import { ProfileTabEmptyStateLayout } from "./profileUi";
 
 const content = profileTabsContent.orders;
 
-export function ProfileOrdersEmptyState() {
+type ProfileOrdersEmptyStateProps = {
+  title?: string;
+  descriptionPrimary?: string;
+  descriptionSecondary?: string;
+};
+
+/** Figma 1480:60117 — orders empty / filter empty layout */
+export function ProfileOrdersEmptyState({
+  title = content.emptyTitle,
+  descriptionPrimary = content.emptyDescriptionPrimary,
+  descriptionSecondary = content.emptyDescriptionSecondary,
+}: ProfileOrdersEmptyStateProps = {}) {
   return (
     <ProfileTabEmptyStateLayout>
-      <ShoppingBagIcon className="size-16 text-gold500" />
+      <DiamondIcon className="size-16 text-gold500" aria-hidden />
 
       <h3 className="w-full font-larken text-32 font-light leading-110 text-darkblack">
-        {content.emptyTitle}
+        {title}
       </h3>
 
       <div className="flex w-full flex-col gap-2 font-gill text-base font-light leading-110 text-neutral500">
-        <p>{content.emptyDescriptionPrimary}</p>
-        <p>{content.emptyDescriptionSecondary}</p>
+        <p>{descriptionPrimary}</p>
+        <p>{descriptionSecondary}</p>
       </div>
 
       <div className="flex flex-col items-center gap-6">

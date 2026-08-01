@@ -8,7 +8,6 @@ import {
   getProfileSectionMobileTitle,
   isProfileSectionId,
 } from "../data/profileSections";
-import { profileTabsContent } from "../data/profileContent";
 import type { ProfileSectionId } from "../types";
 import { PROFILE_ORDER_QUERY_PARAM } from "../utils/profileOrderNavigation";
 import { ProfileBespokeToastProvider } from "../context/ProfileBespokeToastContext";
@@ -32,13 +31,14 @@ const ProfilePage = () => {
     return isProfileSectionId(requested) ? requested : DEFAULT_PROFILE_SECTION;
   }, [searchParams]);
 
-  const mobileSectionTitle = useMemo(() => {
-    const orderNumber = searchParams?.get(PROFILE_ORDER_QUERY_PARAM)?.trim();
-    if (activeSection === "orders" && orderNumber) {
-      return profileTabsContent.orders.detail.pageTitle;
-    }
+  const mobileSectionTitle = useMemo(
+    () => getProfileSectionMobileTitle(activeSection),
+    [activeSection],
+  );
 
-    return getProfileSectionMobileTitle(activeSection);
+  const showMobileSectionHeader = useMemo(() => {
+    const orderNumber = searchParams?.get(PROFILE_ORDER_QUERY_PARAM)?.trim();
+    return activeSection !== "orders" || !orderNumber;
   }, [activeSection, searchParams]);
 
   const handleSectionChange = useCallback(
@@ -70,7 +70,9 @@ const ProfilePage = () => {
                 activeSection === "support" ? "pb-0" : "pb-16",
               )}
             >
-              <ProfileMobileSectionHeader title={mobileSectionTitle} />
+              {showMobileSectionHeader ? (
+                <ProfileMobileSectionHeader title={mobileSectionTitle} />
+              ) : null}
 
               <div className="lg:-mx-10 lg:mt-8 lg:grid lg:grid-cols-[480px_minmax(0,1fr)] lg:gap-6">
                 <aside className="hidden lg:block">
