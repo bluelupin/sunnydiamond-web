@@ -1,5 +1,7 @@
 export type OrderFilterKey = "in_progress" | "delivered" | "cancelled" | "returned";
 
+export type OrderFilterEmptyStateKey = "delivered" | "cancelled" | "returned";
+
 export type AppointmentFilterKey = "video_call" | "try_at_home" | "store_visit";
 
 export type TimelineStepStatus = "completed" | "current" | "upcoming";

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { profileTabsContent } from "../data/profileContent";
 import { useCustomerOrders } from "../hooks/useCustomerOrders";
-import type { OrderFilterKey } from "../types/profileUi.types";
+import type { OrderFilterEmptyStateKey, OrderFilterKey } from "../types/profileUi.types";
 import { mapCustomerOrderToProfileUi } from "../utils/profileDisplayMappers";
 import { PROFILE_ORDER_QUERY_PARAM } from "../utils/profileOrderNavigation";
 import { ProfileOrderCard } from "./ProfileOrderCard";
@@ -21,7 +21,17 @@ const FILTER_OPTIONS: { key: OrderFilterKey; label: string }[] = [
   { key: "returned", label: content.filters.returned },
 ];
 
-const FILTER_EMPTY_UI_KEYS: OrderFilterKey[] = ["delivered", "cancelled", "returned"];
+const FILTER_EMPTY_UI_KEYS: readonly OrderFilterEmptyStateKey[] = [
+  "delivered",
+  "cancelled",
+  "returned",
+];
+
+function isOrderFilterEmptyStateKey(
+  filter: OrderFilterKey,
+): filter is OrderFilterEmptyStateKey {
+  return (FILTER_EMPTY_UI_KEYS as readonly string[]).includes(filter);
+}
 
 function OrdersSkeleton() {
   return (
@@ -160,7 +170,7 @@ const ProfileOrdersSection = () => {
       </div>
 
       {filteredOrders.length === 0 ? (
-        FILTER_EMPTY_UI_KEYS.includes(activeFilter) ? (
+        isOrderFilterEmptyStateKey(activeFilter) ? (
           <ProfileOrdersEmptyState
             title={content.emptyFilterStates[activeFilter].title}
             descriptionPrimary={content.emptyFilterStates[activeFilter].descriptionPrimary}
