@@ -1,12 +1,8 @@
+import { getStrapiBaseUrl } from "@/api/config";
 import { getApiErrorMessage } from "@/shared/utils/errorHandler";
 import { buildQueryString } from "./queryBuilder";
 
-const API_BASE_URL: string =
-  process.env.NEXT_PUBLIC_API_URL ??
-  process.env.NEXT_PUBLIC_STRAPI_URL ??
-  (() => {
-    throw new Error("Missing NEXT_PUBLIC_API_URL or NEXT_PUBLIC_STRAPI_URL");
-  })();
+const API_BASE_URL: string = getStrapiBaseUrl();
 
 const API_DEBUG = process.env.NEXT_PUBLIC_API_DEBUG === "true";
 
@@ -17,6 +13,11 @@ export type ApiFetchOptions = {
   signal?: AbortSignal;
   authToken?: string;
   params?: Record<string, unknown>;
+  cache?: RequestCache;
+  next?: {
+    revalidate?: number | false;
+    tags?: string[];
+  };
 };
 
 export class ApiError extends Error {
@@ -107,6 +108,8 @@ export async function apiFetch<T = unknown>(endpoint: string, options: ApiFetchO
         ? JSON.stringify(options.body)
         : (options.body as BodyInit | undefined),
     signal: options.signal,
+    cache: options.cache,
+    next: options.next,
   });
 
   if (API_DEBUG) {

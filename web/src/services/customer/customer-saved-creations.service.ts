@@ -1,0 +1,167 @@
+import { getStrapiBaseUrl } from "@/api/config";
+import { STRAPI_ENDPOINTS } from "@/api/endpoints";
+import {
+  mapSaveCreationResult,
+  mapSavedCreationsPage,
+} from "./customer-saved-creations.mapper";
+import type {
+  CustomerSavedCreationsPage,
+  SaveCustomerCreationResult,
+  StrapiSaveCreationResponse,
+  StrapiSavedCreationsResponse,
+} from "./customer-saved-creations.types";
+
+export class CustomerSavedCreationsApiError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "CustomerSavedCreationsApiError";
+    this.status = status;
+  }
+}
+
+async function parseErrorMessage(response: Response): Promise<string> {
+  try {
+    const payload = (await response.json()) as {
+      error?: string | {
+        message?: string;
+        details?: { key?: string; path?: string };
+      };
+      message?: string;
+    };
+
+    if (typeof payload.error === "string" && payload.error.trim()) {
+      return payload.error;
+    }
+
+    if (payload.error && typeof payload.error === "object") {
+      const message =
+        typeof payload.error.message === "string" ? payload.error.message.trim() : "";
+      if (message) return message;
+    }
+
+    if (typeof payload.message === "string" && payload.message.trim()) {
+      return payload.message;
+    }
+  } catch {
+    // ignore
+  }
+
+  return `Request failed (${response.status})`;
+}
+
+/**
+ * Strapi customer saved creations — Magento customer token as Bearer.
+ * Call only from server (BFF) with token from httpOnly cookie.
+ */
+export async function fetchCustomerSavedCreations(
+  authToken: string,
+  page = 1,
+  pageSize = 20,
+  signal?: AbortSignal,
+): Promise<CustomerSavedCreationsPage> {
+  const safePage = Math.max(1, page);
+  const safePageSize = Math.min(100, Math.max(1, pageSize));
+  const params = new URLSearchParams({
+    page: String(safePage),
+    pageSize: String(safePageSize),
+  });
+
+  const url = `${getStrapiBaseUrl()}/${STRAPI_ENDPOINTS.customerSavedCreations}?${params.toString()}`;
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${authToken}`,
+    },
+    cache: "no-store",
+    signal,
+  });
+
+  if (!response.ok) {
+    throw new CustomerSavedCreationsApiError(await parseErrorMessage(response), response.status);
+  }
+
+  const payload = (await response.json()) as StrapiSavedCreationsResponse;
+  return mapSavedCreationsPage(payload);
+}
+
+export async function saveCustomerCreation(
+  authToken: string,
+  creationDocumentId: string,
+  signal?: AbortSignal,
+): Promise<SaveCustomerCreationResult> {
+  const id = creationDocumentId.trim();
+  if (!id) {
+    throw new CustomerSavedCreationsApiError("Missing creationDocumentId", 400);
+  }
+
+  const url = `${getStrapiBaseUrl()}/${STRAPI_ENDPOINTS.customerSavedCreations}`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${authToken}`,
+    },
+    body: JSON.stringify({ creationDocumentId: id }),
+    cache: "no-store",
+    signal,
+  });
+
+  if (!response.ok) {
+    throw new CustomerSavedCreationsApiError(await parseErrorMessage(response), response.status);
+  }
+
+  const payload = (await response.json()) as StrapiSaveCreationResponse;
+  return mapSaveCreationResult(payload);
+}
+
+export async function deleteCustomerSavedCreation(
+  authToken: string,
+  documentId: string,
+  signal?: AbortSignal,
+): Promise<void> {
+  const id = documentId.trim();
+  if (!id) {
+    throw new CustomerSavedCreationsApiError("Missing documentId", 400);
+  }
+
+  const url = `${getStrapiBaseUrl()}/${STRAPI_ENDPOINTS.customerSavedCreations}/${encodeURIComponent(id)}`;
+  const response = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${authToken}`,
+    },
+    cache: "no-store",
+    signal,
+  });
+
+  if (!response.ok) {
+    const message = await parseErrorMessage(response);
+
+    // Same Magento Bearer works for GET/POST; if DELETE alone is 401 while
+    // list still succeeds, CMS has not enabled Magento-auth on DELETE yet.
+    if (response.status === 401) {
+      try {
+        await fetchCustomerSavedCreations(authToken, 1, 1, signal);
+        throw new CustomerSavedCreationsApiError(
+          "CMS rejected DELETE for this Magento customer token (list still works). Ask CMS to enable DELETE on /api/customer/saved-creations/:documentId with Magento Bearer auth.",
+          401,
+        );
+      } catch (probeError) {
+        if (
+          probeError instanceof CustomerSavedCreationsApiError &&
+          probeError.message.startsWith("CMS rejected DELETE")
+        ) {
+          throw probeError;
+        }
+        // Token also fails list → genuine auth/session problem.
+      }
+    }
+
+    throw new CustomerSavedCreationsApiError(message, response.status);
+  }
+}

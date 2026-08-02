@@ -1,0 +1,137 @@
+export const MAGENTO_CART_FIELDS = `
+  id
+  total_quantity
+  gift_mode
+  gift_message {
+    message
+  }
+  prices {
+    grand_total {
+      value
+      currency
+    }
+    subtotal_excluding_tax {
+      value
+    }
+    applied_taxes {
+      label
+      amount {
+        value
+      }
+    }
+    discounts {
+      label
+      applied_to
+      amount {
+        value
+      }
+      coupon {
+        code
+      }
+    }
+  }
+  itemsV2 {
+    items {
+      uid
+      quantity
+      ... on SimpleCartItem {
+        is_gift
+        gift_message {
+          message
+        }
+        customizable_options {
+          label
+          values {
+            label
+            value
+          }
+        }
+      }
+      ... on ConfigurableCartItem {
+        is_gift
+        gift_message {
+          message
+        }
+        customizable_options {
+          label
+          values {
+            label
+            value
+          }
+        }
+        configurable_options {
+          option_label
+          value_label
+        }
+        configured_variant {
+          sku
+          image {
+            url
+          }
+          ... on SimpleProduct {
+            media_gallery {
+              url
+              label
+              position
+              disabled
+            }
+          }
+        }
+      }
+      product {
+        sku
+        name
+        url_key
+        image {
+          url
+        }
+        ... on SimpleProduct {
+          media_gallery {
+            url
+            label
+            position
+            disabled
+          }
+        }
+      }
+      prices {
+        price {
+          value
+        }
+        row_total {
+          value
+        }
+      }
+    }
+  }
+  shipping_addresses {
+    available_shipping_methods {
+      carrier_code
+      carrier_title
+      method_code
+      method_title
+      amount {
+        value
+        currency
+      }
+    }
+    selected_shipping_method {
+      carrier_code
+      carrier_title
+      method_code
+      method_title
+      amount {
+        value
+        currency
+      }
+    }
+  }
+  available_payment_methods {
+    code
+    title
+  }
+  selected_payment_method {
+    code
+    title
+  }
+` as const;

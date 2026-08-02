@@ -1,151 +1,299 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ShoppingBag, Menu, X, Search, Heart, User } from "lucide-react";
 import { useCart } from "@/features/cart/context/CartContext";
+import WishlistNavLink from "@/features/wishlist/components/WishlistNavLink";
 import { siteConfig } from "@/shared/lib/siteConfig";
 import { cn } from "@/shared/utils/cn";
 import SDLogo from "@/assets/Icons/SDLogo";
+import SearchIcon from "@/assets/Icons/SearchIcon";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
+import {
+  resolveHeaderNavHref,
+  getHeaderSurfaceClass,
+  getHeaderVariant,
+  isAuthRoute,
+  isHeroOverlayRoute,
+  isJewelleryNavLink,
+} from "@/shared/utils/navigation";
+import { usePageLoading } from "@/shared/context/PageLoadingContext";
+import MobileThemeColor from "@/shared/ui/layout/MobileThemeColor";
+import { resolveShellHeaderLinks, splitShellHeaderNavLinks } from "@/shared/lib/shellNavigation";
+import MobileNavigation from "@/shared/ui/layout/MobileNavigation";
+import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
+import AccountMenu from "@/features/auth/components/AccountMenu";
+import { ProfileMobileNavSheet } from "@/features/account/components/ProfileMobileNavSheet";
+import MenuIcon from "@/assets/Icons/MenuIcon";
+import HeaderIconBadge from "@/shared/ui/layout/HeaderIconBadge";
+import { useCanHover } from "@/shared/hooks/use-can-hover";
+import { useMobileHeaderLayout } from "@/shared/hooks/use-mobile-header-layout";
+import { useCareersHeaderMode } from "@/features/careers/context/careersHeaderBridge";
+
+const JewelleryMegaMenu = dynamic(
+  () =>
+    import("@/shared/ui/layout/JewelleryMegaMenu").then((mod) => ({
+      default: mod.JewelleryMegaMenu,
+    })),
+  { ssr: false, loading: () => null },
+);
+
+const preloadJewelleryMegaMenu = () => {
+  void import("@/shared/ui/layout/JewelleryMegaMenu");
+};
+
+const iconButtonClass =
+  "inline-flex size-6 items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2";
+
+const SEARCH_HREF = "/coming-soon";
+
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const { totalItems } = useCart();
+  const [profileNavOpen, setProfileNavOpen] = useState(false);
+  const [jewelleryMenuOpen, setJewelleryMenuOpen] = useState(false);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { totalItems: cartCount } = useCart();
   const pathname = usePathname() ?? "/";
+  const canHoverNav = useCanHover();
+  const isMobileHeader = useMobileHeaderLayout();
 
-  const isHome = pathname === "/";
-  const overlay = isHome && !scrolled && !mobileMenuOpen;
-
-  const { data: shellData, isLoading: isShellLoading } = useHomepageShell();
-  const headerNavigationLinks = shellData?.global?.headerNavigationLinks || shellData?.headerNavigationLinks;
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+  const openProfileNav = useCallback(() => {
+    setProfileNavOpen(true);
   }, []);
 
-  const textClass = overlay ? "text-white" : "text-darkblack";
-  const hoverClass = overlay ? "hover:text-ivory/70" : "hover:text-primary";
+  const { isPageLoading } = usePageLoading();
+  const careersHeaderMode = useCareersHeaderMode(pathname);
+
+  const isAuthPage = isAuthRoute(pathname);
+  const menuOpen = mobileMenuOpen || jewelleryMenuOpen;
+  const headerHidden = mobileMenuOpen || profileNavOpen;
+  const pathnameHeaderVariant = getHeaderVariant(pathname, { menuOpen });
+  const headerVariant =
+    pathname === "/careers" && careersHeaderMode === "solid"
+      ? "solid"
+      : pathnameHeaderVariant;
+  const isLoadingHeader = isPageLoading && isHeroOverlayRoute(pathname) && !menuOpen;
+  const headerSurfaceClass = isLoadingHeader
+    ? "bg-white"
+    : getHeaderSurfaceClass(pathname, headerVariant);
+  const isOverlay = headerVariant === "overlay";
+  const isLightOverlay = !isLoadingHeader && isOverlay && !isAuthPage;
+  const themeHeaderVariant = isLoadingHeader ? "solid" : headerVariant;
+
+  const { data: shellData } = useHomepageShell();
+  const headerNavigationLinks = useMemo(() => {
+    const cmsLinks = shellData?.global?.headerNavigationLinks || shellData?.headerNavigationLinks;
+    return resolveShellHeaderLinks(cmsLinks);
+  }, [shellData]);
+  const { primaryLinks, appointmentLink } = useMemo(
+    () => splitShellHeaderNavLinks(headerNavigationLinks),
+    [headerNavigationLinks],
+  );
+
+  useLayoutEffect(() => {
+    setMobileMenuOpen(false);
+    setJewelleryMenuOpen(false);
+  }, [pathname]);
+
+  const openJewelleryMenu = useCallback(() => {
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    preloadJewelleryMegaMenu();
+    setJewelleryMenuOpen(true);
+  }, []);
+
+  const scheduleCloseJewelleryMenu = useCallback(() => {
+    closeTimerRef.current = setTimeout(() => setJewelleryMenuOpen(false), 150);
+  }, []);
+
+  const closeJewelleryMenuNow = useCallback(() => {
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    setJewelleryMenuOpen(false);
+  }, []);
+
+  const toggleJewelleryMenu = useCallback(() => {
+    if (jewelleryMenuOpen) {
+      closeJewelleryMenuNow();
+      return;
+    }
+    openJewelleryMenu();
+  }, [closeJewelleryMenuNow, jewelleryMenuOpen, openJewelleryMenu]);
+
+  const handleJewelleryNavClick = useCallback(
+    (event: MouseEvent<HTMLAnchorElement>) => {
+      if (canHoverNav) return;
+      event.preventDefault();
+      toggleJewelleryMenu();
+    },
+    [canHoverNav, toggleJewelleryMenu],
+  );
+
+  const textClass = isLightOverlay ? "text-white" : "text-darkblack";
+  const logoClass = isLightOverlay ? "text-white" : isAuthPage ? "text-darkblack" : "text-darkMagenta";
+  const hoverClass = isLightOverlay ? "hover:text-ivory/70" : "hover:text-neutral500";
+  const navLinkClass = (active = false) =>
+    cn(
+      "inline-flex items-center font-gill uppercase transition-colors",
+      "text-sm font-normal leading-[130%] tracking-[-0.02em]",
+      "lg:text-sm lg:font-semibold lg:leading-110 lg:tracking-normal",
+      active ? (isLightOverlay ? "text-primary" : "text-darkblack") : textClass,
+      !active ? hoverClass : "",
+    );
+
   const Logo = (
     <Link
       href="/"
       aria-label={siteConfig.brand.name}
-      className={cn(
-        "flex items-center justify-center font-heading italic font-semibold leading-none",
-        "text-3xl md:text-4xl",
-        textClass,
-      )}
+      className={cn("inline-flex shrink-0 items-center justify-center leading-none", logoClass)}
     >
-      <SDLogo />
+      <SDLogo className="!h-16 !w-20 md:landscape:!h-14 md:landscape:!w-14 lg:landscape:!h-[62px] lg:landscape:!w-[62px]" />
     </Link>
   );
 
   return (
-    <header
-      className={cn(
-        "fixed top-0 inset-x-0 z-50 transition-colors duration-300",
-        overlay
-          ? "bg-transparent"
-          : "bg-background/95 backdrop-blur-sm border-b border-border",
-      )}
-    >
-      <div className="container relative flex items-center justify-between h-16 md:h-20">
-        {/* Left: mobile hamburger | Desktop: logo + nav */}
-        <div className="flex items-center gap-6 md:gap-4 lg:gap-6 xl:gap-10">
-          <button
-            className={cn("md:hidden p-2 -ml-2", textClass)}
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
-            aria-expanded={mobileMenuOpen}
-          >
-            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
-
-          {/* Desktop logo (inline) */}
-          <div className="hidden md:block">{Logo}</div>
-
-          {/* Desktop nav inline next to logo */}
-          <nav className="hidden md:flex items-center gap-7 md:gap-4 lg:gap-9" aria-label="Main navigation">
-            {headerNavigationLinks?.map((link: any) => (
-              <Link
-                key={link.label}
-                href={link.url}
-                className={cn(
-                  "lg:text-base md:text-15 text-sm font-gill font-normal leading-[130%] tracking-[-0.02em] uppercase transition-colors",
-                  textClass,
-                  hoverClass,
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-        </div>
-
-        {/* Mobile centered logo */}
-        <div className="md:hidden absolute left-1/2 -translate-x-1/2">
-          {Logo}
-        </div>
-
-        {/* Right: icons */}
-        <div className={cn("flex items-center gap-1 lg:gap-2", textClass)}>
-          <button
-            className={cn("p-2 transition-colors", hoverClass)}
-            aria-label="Search"
-          >
-            <Search size={20} strokeWidth={1.5} />
-          </button>
-          <Link
-            href="/products"
-            className={cn("p-2 transition-colors", hoverClass)}
-            aria-label="Wishlist"
-          >
-            <Heart size={20} strokeWidth={1.5} />
-          </Link>
-          <Link
-            href="/cart"
-            className={cn("p-2 transition-colors relative", hoverClass)}
-            aria-label="Cart"
-          >
-            <ShoppingBag size={20} strokeWidth={1.5} />
-            {totalItems > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-semibold rounded-full w-5 h-5 flex items-center justify-center">
-                {totalItems}
-              </span>
-            )}
-          </Link>
-          <Link
-            href="/contact"
-            className={cn("p-2 transition-colors hidden md:inline-flex", hoverClass)}
-            aria-label="Account"
-          >
-            <User size={20} strokeWidth={1.5} />
-          </Link>
-        </div>
-      </div>
-
-      {mobileMenuOpen && (
-        <nav
-          className="md:hidden border-t border-border bg-background px-6 py-6 space-y-4 animate-fade-in"
-          aria-label="Mobile navigation"
+    <>
+      <MobileThemeColor pathname={pathname} headerVariant={themeHeaderVariant} />
+      <header
+        className={cn(
+          "absolute top-0 inset-x-0 z-50",
+          headerHidden ? "pointer-events-none opacity-0" : "",
+        )}
+        aria-hidden={headerHidden}
+      >
+        <div
+          className={cn(
+            "w-full max-md:pt-[env(safe-area-inset-top,0px)] md:max-desktop:portrait:pt-[env(safe-area-inset-top,0px)] md:landscape:pt-0",
+            headerSurfaceClass,
+          )}
         >
-          {headerNavigationLinks?.map((link: any) => (
-            <Link
-              key={link.label}
-              href={link.url}
-              onClick={() => setMobileMenuOpen(false)}
-              className="block font-body text-sm tracking-[0.25em] uppercase text-muted-foreground hover:text-foreground transition-colors"
+          {/* Figma 692:6742 — solid PDP header: white bg, py-24, dark nav; mobile bar 64px */}
+          <div className="relative mx-auto flex h-16 w-full max-w-1440 items-center justify-between px-5 max-md:pt-2 md:landscape:h-[104px] md:landscape:px-8 md:landscape:pt-0 lg:landscape:px-10 lg:landscape:py-6 2xl:max-w-1920 2xl:landscape:px-[60px]">
+          <div className="flex w-[120px] items-center gap-6 md:landscape:hidden">
+            <button
+              type="button"
+              className={cn(iconButtonClass, textClass, hoverClass)}
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Open menu"
+              aria-expanded={mobileMenuOpen}
             >
-              {link.label}
+              <MenuIcon className="size-6" />
+            </button>
+            <Link
+              href={SEARCH_HREF}
+              className={cn(iconButtonClass, textClass, hoverClass)}
+              aria-label="Search"
+            >
+              <SearchIcon className="size-6" />
             </Link>
-          ))}
-        </nav>
+          </div>
+          <div className="hidden md:landscape:flex md:landscape:items-center md:landscape:gap-4 lg:landscape:gap-10">
+            {Logo}
+            <nav className="hidden items-center md:landscape:flex md:landscape:gap-4 lg:landscape:gap-10" aria-label="Main navigation">
+              {primaryLinks.map((link) => {
+                const isJewellery = isJewelleryNavLink(link.label);
+                if (isJewellery) {
+                  return (
+                    <div
+                      key={link.label}
+                      className="inline-flex items-center"
+                      onMouseEnter={canHoverNav ? openJewelleryMenu : undefined}
+                      onMouseLeave={canHoverNav ? scheduleCloseJewelleryMenu : undefined}
+                    >
+                      <Link
+                        href={resolveHeaderNavHref(link.label, link.url)}
+                        className={navLinkClass(jewelleryMenuOpen)}
+                        aria-expanded={jewelleryMenuOpen}
+                        aria-haspopup="true"
+                        onClick={handleJewelleryNavClick}
+                      >
+                        {link.label}
+                      </Link>
+                    </div>
+                  );
+                }
+                return (
+                  <Link
+                    key={link.label}
+                    href={resolveHeaderNavHref(link.label, link.url)}
+                    className={navLinkClass()}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+              <Link
+                href={resolveHeaderNavHref(appointmentLink.label, appointmentLink.url)}
+                className={navLinkClass()}
+              >
+                {appointmentLink.label}
+              </Link>
+            </nav>
+          </div>
+          <div className="pointer-events-none absolute inset-x-0 flex justify-center md:landscape:hidden">
+            <div className="pointer-events-auto">{Logo}</div>
+          </div>
+          <div className={cn("relative z-10 flex items-center gap-6 lg:gap-[24px]", textClass)}>
+            <Link
+              href={SEARCH_HREF}
+              className={cn("!hidden md:landscape:!flex", iconButtonClass, hoverClass)}
+              aria-label="Search"
+            >
+              <SearchIcon className="size-6" />
+            </Link>
+
+            <WishlistNavLink className={cn(iconButtonClass, hoverClass)} />
+
+            <Link
+              href="/cart"
+              className={cn("relative inline-flex", iconButtonClass, hoverClass)}
+              aria-label={cartCount > 0 ? `Cart, ${cartCount} items` : "Cart"}
+            >
+              <ShoppingBagIcon className="size-6" />
+              <HeaderIconBadge count={cartCount} />
+            </Link>
+
+            <AccountMenu
+              className={cn("inline-flex", iconButtonClass, hoverClass)}
+              onProfileOpen={isMobileHeader ? openProfileNav : undefined}
+            />
+          </div>
+        </div>
+
+          {jewelleryMenuOpen && (
+            <JewelleryMegaMenu
+              onMouseEnter={canHoverNav ? openJewelleryMenu : undefined}
+              onMouseLeave={canHoverNav ? scheduleCloseJewelleryMenu : undefined}
+              onClose={closeJewelleryMenuNow}
+            />
+          )}
+        </div>
+      </header>
+
+      {jewelleryMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50"
+          onClick={canHoverNav ? undefined : closeJewelleryMenuNow}
+          onMouseEnter={canHoverNav ? scheduleCloseJewelleryMenu : undefined}
+          aria-hidden
+        />
       )}
-    </header>
+
+      <MobileNavigation
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        navLinks={primaryLinks}
+        appointmentLink={appointmentLink}
+        cartCount={cartCount}
+        onProfileOpen={isMobileHeader ? openProfileNav : undefined}
+      />
+
+      <ProfileMobileNavSheet
+        open={profileNavOpen}
+        onOpenChange={setProfileNavOpen}
+        cartCount={cartCount}
+      />
+    </>
   );
 };
 

@@ -1,37 +1,69 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import BlogDetailPage from "@/features/blogs/components/BlogDetailPage";
+import {
+  getAllBlogSlugsForStaticParams,
+  getBlogDetailBySlug,
+} from "@/services/blogs/blogs.service";
 import { constructMetadata } from "@/shared/lib/seo/metadata";
-import { blogs } from "@/features/cms/data/blogs";
-import BlogDetailPage from "@/features/cms/components/BlogDetailPage";
 
-export function generateStaticParams() {
-  return blogs.map((post) => ({ slug: post.slug }));
+type PageProps = {
+  params: Promise<{ slug: string }>;
+};
+
+/** Refresh CMS-driven blog posts without a full redeploy. */
+export const revalidate = 300;
+
+export async function generateStaticParams() {
+  try {
+    const slugs = await getAllBlogSlugsForStaticParams();
+    return slugs.map((slug) => ({ slug }));
+  } catch {
+    return [];
+  }
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const post = blogs.find((item) => item.slug === params.slug);
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
 
-  if (!post) {
+  try {
+    const result = await getBlogDetailBySlug(slug);
+
+    if (!result) {
+      return constructMetadata({
+        title: "Blog",
+        description: "Sunny Diamonds blog",
+        canonicalPath: `/blogs/${slug}`,
+      });
+    }
+
+    return constructMetadata({
+      title: result.seo?.metaTitle ?? result.detail.title,
+      description:
+        result.seo?.metaDescription ??
+        result.detail.introParagraphs[0] ??
+        result.detail.title,
+      canonicalPath: result.seo?.canonicalPath ?? `/blogs/${slug}`,
+      ...(result.seo?.keywords ? { keywords: result.seo.keywords } : {}),
+    });
+  } catch {
     return constructMetadata({
       title: "Blog",
-      description: "Blog detail placeholder.",
-      noIndex: true,
+      description: "Sunny Diamonds blog",
+      canonicalPath: `/blogs/${slug}`,
     });
   }
-
-  return constructMetadata({
-    title: post.title,
-    description: post.excerpt,
-    canonicalPath: `/blogs/${params.slug}`,
-  });
 }
 
-export default function Page({ params }: { params: { slug: string } }) {
-  const post = blogs.find((item) => item.slug === params.slug);
+export default async function Page({ params }: PageProps) {
+  const { slug } = await params;
+  const result = await getBlogDetailBySlug(slug);
 
-  if (!post) {
+  if (!result) {
     notFound();
   }
 
-  return <BlogDetailPage post={post} />;
+  return (
+    <BlogDetailPage detail={result.detail} relatedPosts={result.relatedPosts} />
+  );
 }

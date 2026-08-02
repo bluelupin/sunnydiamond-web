@@ -1,128 +1,85 @@
-"use client";
-
-import { useMemo } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import ResponsiveImage from "@/shared/ui/ResponsiveImage";
-import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
-import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
-import DiamondIcon from "@/assets/Icons/Diamond";
-import { getImageSrc } from "@/shared/utils/image";
 import TrustBadgeSection from "../common/TrustBadges";
-interface HeroSectionProps {
+import HeroBackgroundMedia from "./HeroBackgroundMedia";
+import HeroSectionOverlay from "./HeroSectionOverlay";
+import type { ResolvedHeroContent } from "@/lib/homepage/resolveHomepageAboveFold";
+
+const HERO_FALLBACK = (
+  <section className="relative flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden">
+    <div className="relative min-h-0 flex-1 overflow-hidden">
+      <div className="absolute inset-0 animate-pulse bg-gray200" aria-hidden />
+    </div>
+    <TrustBadgeSection />
+  </section>
+);
+
+type HeroSectionProps = {
   id?: string;
-}
+  hero: ResolvedHeroContent | null;
+};
 
-const HeroSection = ({ id }: HeroSectionProps) => {
-  const { data: shellData, isLoading: isShellLoading } = useHomepageShell();
-  const hero = shellData?.homepage?.hero || shellData?.hero;
-  const eyebrow = hero?.eyebrow ?? "";
-  const title = hero?.title ?? "";
-  const primaryCta = hero?.primaryCta?.url ?? "";
-  const primaryCtaLabel = hero?.primaryCta?.label ?? "";
-
-  const desktopImageUrl = useMemo(
-    () => resolveCmsMediaUrl(hero?.image?.desktopImage ?? hero?.image?.data?.attributes ?? hero?.image),
-    [hero]
-  );
-
-  const mobileImageUrl = useMemo(
-    () => resolveCmsMediaUrl(hero?.image?.mobileImage ?? hero?.image?.data?.attributes ?? hero?.image),
-    [hero]
-  );
-
-  const heroAlt = useMemo(
-    () =>
-      hero?.image?.altText ||
-      resolveCmsAltText(hero?.image?.desktopImage ?? hero?.image?.data?.attributes ?? hero?.image) ||
-      resolveCmsAltText(hero?.image?.mobileImage ?? hero?.image?.data?.attributes ?? hero?.image) ||
-      hero?.title ||
-      "",
-    [hero]
-  );
-
-  const hasHeroImage = useMemo(
-    () => Boolean(desktopImageUrl || mobileImageUrl),
-    [desktopImageUrl, mobileImageUrl]
-  );
+const HeroSection = ({ id, hero }: HeroSectionProps) => {
+  if (!hero) {
+    return HERO_FALLBACK;
+  }
 
   return (
-    <>
-      <section id={id} className="relative h-screen flex flex-col overflow-hidden">
-        <div className="relative flex-1 overflow-hidden">
-          <video
-            className="absolute inset-0 w-full h-full object-cover"
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="metadata"
-            poster={getImageSrc(desktopImageUrl || mobileImageUrl || "")}
-            aria-hidden="true"
-            tabIndex={-1}
-          >
-            <source src="/videos/hero-banner-video.mp4" type="video/mp4" />
-            {isShellLoading ? (
-              <div className="absolute inset-0 h-full w-full animate-pulse bg-gray200" />
-            ) : hasHeroImage ? (
-              <ResponsiveImage
-                desktopSrc={desktopImageUrl || ""}
-                mobileSrc={mobileImageUrl}
-                alt={heroAlt}
-                priority
-                width={512}
-                height={512}
-                quality={desktopImageUrl ? 90 : 85}
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-            ) : (
-              <div
-                className="absolute inset-0 h-full w-full bg-gray200"
-                aria-hidden="true"
-              />
-            )}
-          </video>
-          <div className="absolute inset-0 bg-gradient-to-r from-charcoal/55 via-charcoal/15 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-charcoal/40 to-transparent md:hidden" />
-          <div className="container relative h-full flex items-end pb-12 md:pb-20 lg:pb-24">
-            <div className="md:max-w-[742px] animate-fade-in">
-              <div className="mb-6 inline-flex items-center gap-2 text-white font-gill font-normal lg:text-xl md:text-lg text-base tracking-[1.8%] uppercase">
-                <DiamondIcon className="text-white" />
-                <span className="tracking-[1.8%]">
-                  {isShellLoading ? (
-                    <span
-                      className="inline-block h-5 w-56 bg-white/20 rounded animate-pulse"
-                      aria-hidden
-                    />
-                  ) : (eyebrow)}
-                </span>
-              </div>
-              <h1 className="mb-40 lg:text-[54px] md:text-[42px] text-[32px] text-white">
-                {isShellLoading ? (
-                  <span
-                    className="block h-12 w-[min(680px,90vw)] bg-white/20 rounded animate-pulse"
-                    aria-hidden
-                  />
-                ) : (title)}
-              </h1>
-              {!isShellLoading && primaryCta ? (
-                <Link
-                  href={primaryCta}
-                  className="group relative overflow-hidden inline-flex items-center justify-center border-[0.8px] border-white text-white md:text-base text-sm px-8 md:h-50 h-12 tracking-[0%] uppercase font-gill transition-colors duration-500"
-                >
-                  <span className="absolute inset-0 bg-white origin-bottom scale-y-0 transition-transform duration-500 ease-out group-hover:scale-y-100"></span>
-                  <span className="relative z-10 group-hover:text-charcoal transition-colors duration-500">
-                    {primaryCtaLabel}
+    <section
+      id={id}
+      className="relative flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden"
+    >
+      <div className="relative min-h-0 flex-1 overflow-hidden">
+        <HeroBackgroundMedia
+          desktopImageUrl={hero.desktopImageUrl}
+          mobileImageUrl={hero.mobileImageUrl}
+          alt={hero.heroAlt}
+          cmsVideoUrl={hero.heroVideoUrl}
+        />
+        <HeroSectionOverlay />
+        <div className="container relative flex h-full items-end justify-center md:py-16 sm:py-12 py-11 md:px-6 px-4">
+          <div className="flex w-full max-w-886 animate-fade-in flex-col items-center md:gap-8 gap-6 text-center">
+            <div className="flex flex-col items-center gap-4">
+              <div className="inline-flex items-center gap-2 font-gill text-base font-semibold leading-110 text-white">
+                <span className="relative size-6 shrink-0 overflow-clip" aria-hidden>
+                  <span className="absolute inset-[12.5%_4.17%_15.63%_8.33%]">
+                    <span className="absolute inset-[-2.9%_-2.38%]">
+                      <Image
+                        src="/images/home/hero-eyebrow-diamond.svg"
+                        alt=""
+                        width={24}
+                        height={24}
+                        className="block size-full max-w-none"
+                      />
+                    </span>
                   </span>
-                </Link>
-              ) : (
-                <div className="h-12 w-40 bg-white/20 rounded animate-pulse" />
-              )}
+                </span>
+                <span>{hero.eyebrow}</span>
+              </div>
+              <h1 className="max-w-886 font-larken xl:text-6xl md:text-5xl sm:text-4xl text-32 font-light leading-110 text-white">
+                {hero.titleLines.map((line, index) => (
+                  <span key={`${line}-${index}`} className="block">
+                    {line}
+                  </span>
+                ))}
+              </h1>
             </div>
+            {hero.primaryCtaUrl ? (
+              <Link
+                href={hero.primaryCtaUrl}
+                className="bg-white relative flex items-center justify-center px-7 h-14 overflow-hidden font-gill text-sm font-normal uppercase leading-110 border-2 border-white group w-fit"
+              >
+                <div className="absolute left-0 top-full z-0 h-14 w-full bg-darkblack transition-all duration-300 group-hover:top-0" />
+                <span className="relative z-10 text-darkblack transition-all duration-300 group-hover:text-white">
+                  {hero.primaryCtaLabel}
+                </span>
+              </Link>
+            ) : null}
           </div>
         </div>
-      </section>
+      </div>
       <TrustBadgeSection />
-    </>
+    </section>
   );
 };
 

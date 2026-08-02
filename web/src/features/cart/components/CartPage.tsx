@@ -1,62 +1,103 @@
 "use client";
 
-import Link from "next/link";
-import Layout from "@/shared/ui/layout/Layout";
+import { useEffect, useState } from "react";
+import { cn } from "@/shared/utils/cn";
+import { useMobileStickyFooterClearance } from "@/shared/hooks/use-mobile-sticky-footer-clearance";
+import { MobileStickyFooterSpacer } from "@/shared/ui/layout/MobileStickyFooterSpacer";
+import CartBenefitsSection from "@/features/cart/components/CartBenefitsSection";
 import CartItem from "@/features/cart/components/CartItem";
-import OrderSummary from "@/shared/ui/OrderSummary";
-import { PrimaryLink } from "@/shared/ui/PrimaryButton";
+import CartMobileStickyFooter from "@/features/cart/components/CartMobileStickyFooter";
+import CartPriceDetails from "@/features/cart/components/CartPriceDetails";
 import { useCart } from "@/features/cart/context/CartContext";
-import { ShoppingBag } from "lucide-react";
+import { CartPrimaryLink } from "./CartFlowUi";
 
 const CartPage = () => {
-  const { items, updateQuantity, removeItem, totalPrice } = useCart();
+  const { items, isHydrating, refreshCart, updateQuantity, removeItem, updateLineItemOptions } = useCart();
+  const [offersOpen, setOffersOpen] = useState(false);
+  const [priceBreakupOpen, setPriceBreakupOpen] = useState(false);
+  const { footerRef, clearancePx } = useMobileStickyFooterClearance();
+
+  useEffect(() => {
+    if (!isHydrating) {
+      void refreshCart();
+    }
+  }, [isHydrating, refreshCart]);
+
+  if (isHydrating) {
+    return (
+      <section className="flex min-h-[60vh] flex-col items-center justify-center bg-gray300 px-4 py-20 text-center">
+        <p className="sr-only" aria-live="polite">
+          Loading your shopping bag
+        </p>
+      </section>
+    );
+  }
 
   if (items.length === 0) {
     return (
-      <Layout>
-        <div className="container py-20 text-center space-y-4">
-          <ShoppingBag size={48} className="mx-auto text-muted-foreground" />
-          <h1 className="font-heading text-2xl text-foreground">Your bag is empty</h1>
-          <p className="font-body text-sm text-muted-foreground">
-            Discover our exquisite diamond collection
-          </p>
-          <PrimaryLink href="/products" className="mt-4">Shop Now</PrimaryLink>
-        </div>
-      </Layout>
+      <section className="flex min-h-[60vh] flex-col items-center justify-center gap-4 bg-gray300 px-4 py-20 text-center">
+        <h1 className="font-larken text-32 font-light leading-110 text-darkblack lg:text-32">
+          Your bag is empty
+        </h1>
+        <p className="max-w-md font-gill text-base font-light leading-110 text-neutral500">
+          Discover our exquisite diamond collection and find something that speaks to you.
+        </p>
+        <CartPrimaryLink href="/jewellery" className="mt-2 w-full max-w-xs">
+          Shop Now
+        </CartPrimaryLink>
+      </section>
     );
   }
 
   return (
-    <Layout>
-      <section className="container py-10 md:py-16">
-        <h1 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-8">
-          Shopping Bag
-        </h1>
+    <>
+      <section
+        className={cn(
+          "bg-gray300 lg:pb-16",
+          "md:max-lg:-mt-2 md:max-lg:landscape:mt-0",
+          "md:max-lg:pb-16",
+        )}
+      >
+        <div className="mx-auto w-full px-5 max-md:pt-4 pt-6 md:max-lg:px-8 md:max-lg:landscape:pt-0 lg:px-10 2xl:max-w-1920 2xl:px-[60px]">
+          <h1 className="mb-6 font-larken text-32 font-light leading-110 text-darkblack lg:mb-10 lg:text-32">
+            Your Shopping Bag
+          </h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            {items.map(({ product, quantity }) => (
-              <CartItem
-                key={product.id}
-                product={product}
-                quantity={quantity}
-                onUpdateQuantity={updateQuantity}
-                onRemove={removeItem}
-              />
-            ))}
+          <div className="grid grid-cols-1 gap-6 md:max-lg:portrait:grid-cols-[minmax(0,1fr)_minmax(0,360px)] md:max-lg:landscape:grid-cols-2 md:max-lg:items-start lg:grid-cols-2 lg:gap-6">
+            <div className="flex min-w-0 flex-col gap-6">
+              {items.map((item) => (
+                <CartItem
+                  key={item.id}
+                  item={item}
+                  onUpdateQuantity={updateQuantity}
+                  onRemove={removeItem}
+                  onUpdateOptions={updateLineItemOptions}
+                />
+              ))}
+
+              <div className="pt-4 md:hidden">
+                <CartBenefitsSection />
+              </div>
+
+              <MobileStickyFooterSpacer height={clearancePx} />
+            </div>
+
+            <aside className="hidden h-fit w-full min-w-0 flex-col gap-0 md:max-lg:sticky md:max-lg:top-12 md:max-lg:flex lg:sticky lg:top-12 lg:flex">
+              <CartPriceDetails />
+              <CartBenefitsSection />
+            </aside>
           </div>
-
-          <OrderSummary items={items} totalPrice={totalPrice}>
-            <Link
-              href="/checkout"
-              className="block text-center w-full bg-primary hover:bg-gold-dark text-primary-foreground py-3 text-sm tracking-widest uppercase font-body transition-colors"
-            >
-              Proceed to Checkout
-            </Link>
-          </OrderSummary>
         </div>
       </section>
-    </Layout>
+
+      <CartMobileStickyFooter
+        ref={footerRef}
+        offersOpen={offersOpen}
+        onOffersToggle={() => setOffersOpen((open) => !open)}
+        breakupOpen={priceBreakupOpen}
+        onBreakupToggle={() => setPriceBreakupOpen((open) => !open)}
+      />
+    </>
   );
 };
 

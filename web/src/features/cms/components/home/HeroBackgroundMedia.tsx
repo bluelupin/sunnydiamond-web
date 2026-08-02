@@ -1,0 +1,109 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import ResponsiveImage from "@/shared/ui/ResponsiveImage";
+import { getImageSrc } from "@/shared/utils/image";
+
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+
+type HeroBackgroundMediaProps = {
+  desktopImageUrl: string;
+  mobileImageUrl?: string;
+  alt: string;
+  cmsVideoUrl?: string;
+};
+
+const HeroBackgroundMedia = ({
+  desktopImageUrl,
+  mobileImageUrl,
+  alt,
+  cmsVideoUrl,
+}: HeroBackgroundMediaProps) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  const posterSrc = getImageSrc(mobileImageUrl || desktopImageUrl);
+  const hasHeroImage = Boolean(posterSrc);
+  const videoWebmSrc = cmsVideoUrl?.endsWith(".webm") && cmsVideoUrl;
+
+  useEffect(() => {
+    const motionMedia = window.matchMedia(REDUCED_MOTION_QUERY);
+
+    const updateMotion = () => setPrefersReducedMotion(motionMedia.matches);
+
+    updateMotion();
+
+    motionMedia.addEventListener("change", updateMotion);
+
+    return () => {
+      motionMedia.removeEventListener("change", updateMotion);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+
+    const start = () => setShouldLoadVideo(true);
+
+    if (typeof window.requestIdleCallback === "function") {
+      const idleId = window.requestIdleCallback(start, { timeout: 2500 });
+      return () => window.cancelIdleCallback(idleId);
+    }
+
+    const timeoutId = window.setTimeout(start, 1500);
+    return () => window.clearTimeout(timeoutId);
+  }, [prefersReducedMotion]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !shouldLoadVideo) return;
+
+    video.load();
+    const playPromise = video.play();
+    if (playPromise) {
+      playPromise.catch(() => {
+        /* autoplay blocked — poster remains visible */
+      });
+    }
+  }, [shouldLoadVideo]);
+
+  if (!hasHeroImage) {
+    return <div className="absolute inset-0 bg-gray200" aria-hidden />;
+  }
+
+  return (
+    <>
+      <ResponsiveImage
+        desktopSrc={desktopImageUrl || mobileImageUrl || posterSrc || ""}
+        mobileSrc={mobileImageUrl}
+        alt={alt}
+        priority
+        width={1920}
+        height={1080}
+        sizes="100vw"
+        quality={80}
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+
+      {shouldLoadVideo && !prefersReducedMotion ? (
+        <video
+          ref={videoRef}
+          className="absolute inset-0 h-full w-full object-cover"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="none"
+          poster={posterSrc ?? undefined}
+          aria-hidden
+          tabIndex={-1}
+        >
+          {videoWebmSrc && <source src={videoWebmSrc} type="video/webm" />}
+        </video>
+      ) : null}
+    </>
+  );
+};
+
+export default HeroBackgroundMedia;

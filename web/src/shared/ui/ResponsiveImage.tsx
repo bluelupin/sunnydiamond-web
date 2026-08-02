@@ -3,77 +3,87 @@ import { cn } from "../../shared/utils/cn";
 import { getImageSrc } from "../../shared/utils/image";
 
 interface ResponsiveImageProps {
-    desktopSrc: string | StaticImageData;
-    mobileSrc?: string | StaticImageData;
-    retinaSrc?: string | StaticImageData;
-    alt: string;
-    width?: number;
-    height?: number;
-    className?: string;
-    priority?: boolean;
-    sizes?: string;
-    quality?: number;
+  desktopSrc: string | StaticImageData;
+  mobileSrc?: string | StaticImageData;
+  retinaSrc?: string | StaticImageData;
+  alt: string;
+  width?: number;
+  height?: number;
+  className?: string;
+  priority?: boolean;
+  sizes?: string;
+  quality?: number;
 }
 
 const ResponsiveImage = ({
-    desktopSrc,
-    mobileSrc,
-    retinaSrc,
+  desktopSrc,
+  mobileSrc,
+  retinaSrc,
+  alt,
+  width,
+  height,
+  className,
+  priority = false,
+  quality,
+  sizes = "100vw",
+}: ResponsiveImageProps) => {
+  const desktopImage = getImageSrc(desktopSrc) ?? (mobileSrc ? getImageSrc(mobileSrc) : null);
+  if (!desktopImage) {
+    return null;
+  }
+
+  const mobileImage = mobileSrc ? getImageSrc(mobileSrc) : null;
+  const retinaImage = retinaSrc ? getImageSrc(retinaSrc) : null;
+  const hasDistinctMobile = mobileImage !== null && mobileImage !== desktopImage;
+  const hasDistinctRetina = retinaImage !== null && retinaImage !== desktopImage;
+
+  const imageClassName = cn("h-full w-full object-cover", className);
+  const commonProps = {
     alt,
     width,
     height,
-    className,
-    priority = false,
+    priority,
+    loading: priority ? ("eager" as const) : ("lazy" as const),
+    fetchPriority: priority ? ("high" as const) : undefined,
+    sizes,
     quality,
-    sizes = "100vw",
-}: ResponsiveImageProps) => {
-    const desktopImage = getImageSrc(desktopSrc);
-    if (!desktopImage) {
-        return null;
-    }
-    const mobileImage = mobileSrc
-        ? getImageSrc(mobileSrc)
-        : desktopImage;
+  };
 
-    const retinaImage = retinaSrc
-        ? getImageSrc(retinaSrc)
-        : desktopImage;
-
+  if (hasDistinctMobile) {
     return (
-        <picture>
-            {/* Mobile Image */}
-            {mobileImage && (
-                <source
-                    media="(max-width: 767px)"
-                    srcSet={mobileImage}
-                />
-            )}
-
-            {/* Retina Image */}
-            {retinaImage && (
-                <source
-                    media="(min-width: 768px) and (-webkit-min-device-pixel-ratio: 2)"
-                    srcSet={retinaImage}
-                />
-            )}
-
-            <Image
-                src={desktopImage}
-                alt={alt}
-                width={width}
-                height={height}
-                priority={priority}
-                loading={priority ? "eager" : "lazy"}
-                fetchPriority={priority ? "high" : undefined}
-                sizes={sizes}
-                quality={quality}
-                className={cn(
-                    "w-full h-full object-cover",
-                    className
-                )}
-            />
-        </picture>
+      <>
+        <Image
+          {...commonProps}
+          src={mobileImage}
+          className={cn(imageClassName, "md:hidden")}
+        />
+        <Image
+          {...commonProps}
+          src={hasDistinctRetina ? retinaImage! : desktopImage}
+          className={cn(imageClassName, "hidden md:block")}
+        />
+      </>
     );
+  }
+
+  if (hasDistinctRetina) {
+    return (
+      <>
+        <Image
+          {...commonProps}
+          src={desktopImage}
+          className={cn(imageClassName, "md:hidden")}
+        />
+        <Image
+          {...commonProps}
+          src={retinaImage}
+          className={cn(imageClassName, "hidden md:block")}
+        />
+      </>
+    );
+  }
+
+  return <Image {...commonProps} src={desktopImage} className={imageClassName} />;
 };
 
 export default ResponsiveImage;

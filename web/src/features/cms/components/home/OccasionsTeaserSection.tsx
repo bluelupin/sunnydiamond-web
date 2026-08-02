@@ -1,111 +1,159 @@
 "use client";
 
-import { useFadeIn } from "@/shared/hooks/use-fade-in";
+import { useCallback, useRef } from "react";
+import ScrollReveal from "@/shared/ui/ScrollReveal";
+import OccasionLedCard from "@/shared/ui/OccasionLedCard";
+import { useHomepageCmsPrefetched } from "@/shared/lib/providers/HomepageCmsProvider";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
-import Link from "next/link";
-import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { useHomepageOccasions } from "@/hooks/homepage/useHomepageOccasions";
-import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { isSectionActive } from "@/shared/utils/cmsSection";
+import { buildOccasionCardHref } from "@/features/jewellery-product/utils/occasionListing";
+import type { OccasionCard } from "@/types/homepage/occasionSection";
+import { resolveResponsiveCmsImage } from "@/shared/utils/responsiveCmsImage";
 
 interface OccasionsTeaserSectionProps {
   id?: string;
 }
 
+function OccasionCardItem({
+  card,
+  index,
+  sectionTitle,
+}: {
+  card: OccasionCard;
+  index: number;
+  sectionTitle: string;
+}) {
+  const { desktopUrl, mobileUrl, alt } = resolveResponsiveCmsImage(card.image);
+  const href = buildOccasionCardHref({
+    title: card.title,
+    slug: card.slug,
+    filterSlug: card.filterSlug,
+    ctaUrl: card?.cta?.url || card?.cta?.to,
+  });
+  const ctaLabel = card?.cta?.label?.trim() || "View Collection";
+  const description = card?.description?.trim() || card?.subtitle?.trim();
+
+  return (
+    <OccasionLedCard
+      title={card.title?.trim() || ""}
+      description={description}
+      href={href}
+      ctaLabel={ctaLabel}
+      desktopImageUrl={desktopUrl}
+      mobileImageUrl={mobileUrl}
+      imageAlt={alt || card?.title?.trim()}
+      index={index}
+      sectionTitle={sectionTitle}
+    />
+  );
+}
+
 const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
-  const { data: occasionsData, isLoading: isOccasionsLoading } = useHomepageOccasions();
+  const homepagePrefetch = useHomepageCmsPrefetched();
   const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
+  const { data: standaloneOccasions, isLoading: isStandaloneLoading } = useHomepageOccasions();
   const occasionSection = editorialData?.occasionSection ?? null;
-  const sectionTitle = occasionSection?.sectionTitle?.trim();
-  const isActive = occasionSection?.isActive === true;
+  const sectionTitle =
+    occasionSection?.sectionTitle?.trim() || "Timeless Pieces for Every Occasion";
 
-  const headingRef = useFadeIn(0);
-  const card1Ref = useFadeIn(150);
-  const card2Ref = useFadeIn(300);
-  const cardRefs = [card1Ref, card2Ref];
+  const embeddedOccasions = (occasionSection?.occasions ?? []).filter(
+    (card) => card?.isActive !== false,
+  );
+  const occasions =
+    embeddedOccasions.length > 0
+      ? embeddedOccasions
+      : (standaloneOccasions ?? []).filter((card) => card?.isActive !== false);
 
-  const occasions = Array.isArray(occasionsData)
-    ? occasionsData
-      .filter((item: any) => item?.isActive !== false)
-      .sort(
-        (a: any, b: any) =>
-          (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0)
-      )
-    : [];
-  if (!isActive) { return null; }
-  if (isEditorialLoading || isOccasionsLoading) {
+  const isLoading =
+    isEditorialLoading ||
+    (embeddedOccasions.length === 0 &&
+      homepagePrefetch?.standaloneOccasions === undefined &&
+      isStandaloneLoading);
+
+  const carouselRef = useRef<HTMLDivElement>(null);
+
+  const scrollCarousel = useCallback((direction: -1 | 1) => {
+    const el = carouselRef.current;
+    if (!el) return;
+    const card = el.querySelector<HTMLElement>("a");
+    const scrollAmount = card ? card.offsetWidth + 12 : 340;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    el.scrollBy({
+      left: direction * scrollAmount,
+      behavior: reduceMotion ? "auto" : "smooth",
+    });
+  }, []);
+
+  const handleCarouselKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      scrollCarousel(1);
+    }
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      scrollCarousel(-1);
+    }
+  };
+
+  if (!isSectionActive(occasionSection?.isActive)) {
+    return null;
+  }
+
+  if (isLoading) {
     return (
-      <section id={id} className="md:px-0 px-4 py-10 sm:py-12 md:py-16 lg:py-20 bg-gray200 lg:min-h-948" aria-busy="true">
-        <div className="h-10 w-80 bg-gray300 rounded mx-auto mb-4 sm:mb-6 md:mb-8 lg:mb-10" aria-hidden />
-        <div className="grid grid-cols-1 md:grid-cols-2 md:gap-0 gap-12">
-          {[0, 1].map((i) => (
-            <div key={i} className="flex flex-col">
-              <div className="aspect-square md:aspect-auto h-357 md:h-auto lg:h-620 overflow-hidden bg-gray300/70" aria-hidden />
-              <div className="mt-4 text-center md:px-4 px-2">
-                <div className="h-6 w-52 bg-gray300 rounded mx-auto mb-2" aria-hidden />
-                <div className="h-5 w-72 bg-gray300 rounded mx-auto" aria-hidden />
-              </div>
-            </div>
+      <section
+        id={id}
+        className="flex w-full flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 md:px-0 md:py-100"
+        aria-busy="true"
+        aria-label="Occasions"
+      >
+        <div className="h-10 w-80 rounded bg-gray200 px-4" aria-hidden />
+        <div className="relative left-1/2 grid w-screen max-w-none -translate-x-1/2 grid-cols-2 gap-1 overflow-hidden md:grid-cols-2">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="aspect-[328/400] bg-gray200 md:aspect-auto md:h-[700px]" aria-hidden />
           ))}
         </div>
       </section>
     );
   }
+
+  if (!occasions.length) {
+    return null;
+  }
+
   return (
     <section
       id={id}
-      ref={headingRef as React.RefObject<HTMLHeadingElement>}
-      className="bg-gray200 py-6 sm:py-10 md:py-16 lg:py-20">
-      <div className="md:px-3 pl-3">
-        <h2 className="md:mb-10 mb-8 lg:text-5xl md:text-4xl text-32 font-larken font-light tracking-[0%] leading-[100%] text-black text-center">
-          {sectionTitle}
-        </h2>
-        <div
-          className="flex md:gap-4 gap-3 overflow-x-auto snap-x snap-mandatory  px-4 pb-2 md:mx-0 md:px-0 md:pb-0 md:overflow-visible md:grid md:grid-cols-3 md:gap-4"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
-        >
-          {occasions.map((occasion: any) => {
-            const desktopImage = resolveCmsMediaUrl(
-              occasion?.image?.desktopImage
-            );
+      aria-label={sectionTitle}
+      className="flex w-full flex-col items-center gap-8 bg-white pt-16 md:gap-10 px-0 md:pt-100"
+    >
+      <ScrollReveal as="h2" delayMs={0} className="max-w-sm text-center font-larken font-light leading-110 text-darkblack md:max-w-none lg:text-5xl md:text-4xl text-32 lg:whitespace-nowrap">
+        {sectionTitle}
+      </ScrollReveal>
 
-            const mobileImage = resolveCmsMediaUrl(
-              occasion?.image?.mobileImage
-            );
-
-            const altText =
-              occasion?.image?.altText ||
-              resolveCmsAltText(
-                occasion?.image?.desktopImage
-              ) ||
-              occasion?.title ||
-              "Occasion";
-
-            return (
-              <Link
-                key={occasion.id}
-                href={`/products?occasion=${occasion.slug}`}
-                className="group relative overflow-hidden flex-shrink-0 w-[78%] snap-start md:w-auto h-auto transition-shadow duration-500 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-              >
-                <ResponsiveImage
-                  desktopSrc={desktopImage || ""}
-                  mobileSrc={mobileImage}
-                  alt={altText}
-                  priority={false}
-                  width={464}
-                  height={620}
-                  quality={85}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0A0A0A] to-transparent pointer-events-none" />
-                <div className="absolute inset-x-0 bottom-5 md:bottom-6 flex items-center justify-center">
-                  <span className="text-base sm:text-lg md:text-xl tracking-[0.3em] uppercase text-gray200 font-gill font-normal tracking-[1.8%] text-center leading-[100%]">
-                    {occasion.title}
-                  </span>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+      <div
+        ref={carouselRef}
+        role="region"
+        aria-roledescription="carousel"
+        aria-label={sectionTitle}
+        tabIndex={-1}
+        onKeyDownCapture={handleCarouselKeyDown}
+        className="scrollbar-none relative left-1/2 flex w-screen max-w-none -translate-x-1/2 snap-x snap-mandatory gap-3 overflow-x-auto scroll-pl-4 scroll-pr-4 pb-2 md:grid md:grid-cols-2 md:gap-1 md:overflow-visible md:px-0 pl-4 md:pb-0 md:snap-none md:outline-none"
+      >
+        {occasions.map((card, index) => (
+          <ScrollReveal
+            key={String(card.id ?? card.slug ?? card.title ?? index)}
+            delayMs={80 + index * 80}
+            className="contents"
+          >
+            <OccasionCardItem
+              card={card}
+              index={index}
+              sectionTitle={sectionTitle}
+            />
+          </ScrollReveal>
+        ))}
       </div>
     </section>
   );

@@ -18,12 +18,30 @@ export function extractStrapiImage(image: unknown): StrapiImagePayload {
 }
 
 export function resolveCmsMediaUrl(image: unknown): string | undefined {
-  const payload = extractStrapiImage(image);
-  if (!payload || typeof payload !== "object") {
-    return undefined;
+  const urls = resolveCmsMediaUrls(image);
+  return urls[0];
+}
+
+/** All media URLs from a single file or multi-file CMS field (preserves order). */
+export function resolveCmsMediaUrls(image: unknown): string[] {
+  if (image == null) return [];
+
+  if (Array.isArray(image)) {
+    const urls: string[] = [];
+    for (const entry of image) {
+      urls.push(...resolveCmsMediaUrls(entry));
+    }
+    return urls;
   }
 
-  return typeof payload.url === "string" ? getCmsAssetUrl(payload.url) : undefined;
+  const payload = extractStrapiImage(image);
+  if (!payload || typeof payload !== "object") {
+    return [];
+  }
+
+  const url =
+    typeof payload.url === "string" ? getCmsAssetUrl(payload.url) : undefined;
+  return url ? [url] : [];
 }
 
 export function resolveCmsAltText(image: unknown): string | undefined {

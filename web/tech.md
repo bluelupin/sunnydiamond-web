@@ -49,6 +49,5 @@
 - `npm run lint` -> `eslint`
 
 ## Notes
-- PWA manifest is configured in `public/manifest.json`.
 - The home page requests video assets at `/videos/hero-bg.mp4` and `/videos/promise-bg.mp4`.
 - If those files are not present in `public/videos/`, the browser will show 404s for those assets.

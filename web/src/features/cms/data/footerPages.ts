@@ -2,57 +2,32 @@ export const footerPages = {
   education: {
     title: "Education",
     description:
-      "Explore how Sunny Diamonds sources, grades, and crafts each diamond. The full page UI will be added here later.",
+      "Explore diamond expertise at Sunny Diamonds — learn the 4Cs, certifications, shapes, and care to choose your perfect stone with confidence.",
   },
   diamondsForEveryone: {
-    title: "Diamonds For Everyone",
+    title: "Diamonds for Everyone",
     description:
-      "Discover the story behind the Sunny Diamonds philosophy of accessible luxury. The full page UI will be added here later.",
+      "Start your Diamonds for Everyone savings plan from ₹1,000 a month. Enjoy the 11+1 plan and redeem your savings for fine jewellery at Sunny Diamonds.",
   },
   careers: {
     title: "Careers",
     description:
-      "Join the Sunny Diamonds team. Career listings and hiring details will be added here later.",
+      "Join Sunny Diamonds — explore open roles, employee benefits, and life at our diamond jewellery atelier and showrooms.",
   },
-  news: {
-    title: "News",
+  blogs: {
+    title: "Blogs",
     description:
-      "Read brand updates, announcements, and stories from Sunny Diamonds. The full page UI will be added here later.",
+      "Explore The Diamond Guide — expert articles on bridal jewellery, buying guides, gifting, styling, and diamond care from Sunny Diamonds.",
   },
   orderTracking: {
     title: "Order Tracking",
     description:
       "Track your order status, shipping progress, and delivery milestones. The full page UI will be added here later.",
   },
-  helpAndSupport: {
-    title: "Help and Support",
-    description:
-      "Find support resources, service help, and customer care details. The full page UI will be added here later.",
-  },
-  monthlyPlans: {
-    title: "Monthly Plans",
-    description:
-      "Explore monthly purchase plans and savings options. The full page UI will be added here later.",
-  },
-  giftCard: {
-    title: "Gift Card",
-    description:
-      "Discover Sunny Diamonds gift card options and gifting details. The full page UI will be added here later.",
-  },
-  financeOptions: {
-    title: "Finance Options",
-    description:
-      "Review available finance and payment options. The full page UI will be added here later.",
-  },
-  policyAndCertification: {
-    title: "Policy and Certification",
-    description:
-      "Review certification details and policy information in one place. The full page UI will be added here later.",
-  },
   storeLocator: {
     title: "Store Locator",
     description:
-      "Find Sunny Diamonds showrooms and studio locations. The full page UI will be added here later.",
+      "Find Sunny Diamonds showrooms and book a store visit at your nearest location.",
   },
   faqs: {
     title: "FAQs",
@@ -62,12 +37,17 @@ export const footerPages = {
   bookAnAppointment: {
     title: "Book an Appointment",
     description:
-      "Schedule a showroom visit or design consultation. The full page UI will be added here later.",
+      "Schedule a showroom visit or design consultation with Sunny Diamonds.",
   },
   bespokeJewellery: {
     title: "Bespoke Jewellery",
     description:
-      "Start a custom jewellery journey with Sunny Diamonds. The full page UI will be added here later.",
+      "Commission a one-of-a-kind Sunny Diamonds piece tailored to your vision, occasion, and style.",
+  },
+  gifting: {
+    title: "Gifting",
+    description:
+      "Discover occasion-led diamond jewellery, curated gift ideas, gift cards, and the Sunny Diamonds promise for every celebration.",
   },
   returnsAndCancellations: {
     title: "Returns and Cancellations",
@@ -89,15 +69,10 @@ export const footerPages = {
     description:
       "Understand cash-on-delivery availability and related conditions. The full page UI will be added here later.",
   },
-  oldGoldPurchasePolicy: {
-    title: "Old Gold Purchase Policy (Kerala Only)",
-    description:
-      "Review the old gold purchase policy for Kerala customers. The full page UI will be added here later.",
-  },
   privacyPolicy: {
-    title: "Privacy Policy",
+    title: "Policy & Certifications",
     description:
-      "Review how Sunny Diamonds handles data, privacy, and user protection. The full page UI will be added here later.",
+      "Review Sunny Diamonds privacy policy, terms, certifications, and business policies including returns, cancellations, and gift vouchers.",
   },
   termsAndConditions: {
     title: "Terms & Conditions",

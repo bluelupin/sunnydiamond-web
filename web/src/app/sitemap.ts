@@ -1,58 +1,77 @@
 import type { MetadataRoute } from "next";
-import { blogs } from "@/features/cms/data/blogs";
-import { products } from "@/features/products/data/products";
+import {
+  buildJewelleryCategoryHref,
+  JEWELLERY_CATEGORY_URL_KEYS,
+} from "@/features/jewellery-product/utils/jewelleryRoutes";
+import { getAllBlogSlugsForStaticParams } from "@/services/blogs/blogs.service";
+import { getMagentoProductSitemapEntries } from "@/services/magento/products/sitemapProducts.service";
 import { siteEnv } from "@/shared/lib/seo/siteConfig";
+
+export const revalidate = 3600;
 
 const staticRoutes = [
   { url: "/", changeFrequency: "weekly" as const, priority: 1 },
-  { url: "/products", changeFrequency: "weekly" as const, priority: 0.8 },
-  { url: "/about", changeFrequency: "monthly" as const, priority: 0.6 },
+  { url: "/jewellery", changeFrequency: "daily" as const, priority: 0.9 },
+  { url: "/world-of-sunny", changeFrequency: "monthly" as const, priority: 0.6 },
   { url: "/contact", changeFrequency: "monthly" as const, priority: 0.6 },
-  { url: "/education", changeFrequency: "monthly" as const, priority: 0.5 },
+  { url: "/learn-about-diamonds", changeFrequency: "monthly" as const, priority: 0.5 },
   { url: "/diamonds-for-everyone", changeFrequency: "monthly" as const, priority: 0.5 },
   { url: "/careers", changeFrequency: "monthly" as const, priority: 0.5 },
-  { url: "/news", changeFrequency: "monthly" as const, priority: 0.5 },
-  { url: "/blogs", changeFrequency: "monthly" as const, priority: 0.5 },
-  { url: "/store-locator", changeFrequency: "monthly" as const, priority: 0.5 },
+  { url: "/blogs", changeFrequency: "weekly" as const, priority: 0.6 },
+  { url: "/store-locator", changeFrequency: "monthly" as const, priority: 0.6 },
   { url: "/faqs", changeFrequency: "monthly" as const, priority: 0.5 },
-  { url: "/book-an-appointment", changeFrequency: "monthly" as const, priority: 0.5 },
-  { url: "/bespoke-jewellery", changeFrequency: "monthly" as const, priority: 0.5 },
-  { url: "/order-tracking", changeFrequency: "monthly" as const, priority: 0.5 },
-  { url: "/help-and-support", changeFrequency: "monthly" as const, priority: 0.5 },
-  { url: "/monthly-plans", changeFrequency: "monthly" as const, priority: 0.5 },
-  { url: "/gift-card", changeFrequency: "monthly" as const, priority: 0.5 },
-  { url: "/finance-options", changeFrequency: "monthly" as const, priority: 0.5 },
-  { url: "/policy-and-certification", changeFrequency: "monthly" as const, priority: 0.5 },
-  { url: "/returns-and-cancellations", changeFrequency: "monthly" as const, priority: 0.5 },
-  { url: "/exchange-and-resizing", changeFrequency: "monthly" as const, priority: 0.5 },
-  { url: "/shipping-delivery", changeFrequency: "monthly" as const, priority: 0.5 },
-  { url: "/cash-on-delivery-policy", changeFrequency: "monthly" as const, priority: 0.5 },
-  {
-    url: "/old-gold-purchase-policy-kerala-only",
-    changeFrequency: "monthly" as const,
-    priority: 0.5,
-  },
-  { url: "/privacy-policy", changeFrequency: "monthly" as const, priority: 0.5 },
-  { url: "/terms-and-conditions", changeFrequency: "monthly" as const, priority: 0.5 },
+  { url: "/book-an-appointment", changeFrequency: "monthly" as const, priority: 0.6 },
+  { url: "/bespoke-jewellery", changeFrequency: "monthly" as const, priority: 0.7 },
+  { url: "/gifting", changeFrequency: "weekly" as const, priority: 0.8 },
+  { url: "/order-tracking", changeFrequency: "monthly" as const, priority: 0.4 },
+  { url: "/policy-and-certifications", changeFrequency: "monthly" as const, priority: 0.4 },
 ];
 
-const productRoutes = products.map((product) => ({
-  url: `/product/${product.id}`,
-  changeFrequency: "weekly" as const,
-  priority: 0.7,
+const categoryRoutes = JEWELLERY_CATEGORY_URL_KEYS.map((urlKey) => ({
+  url: buildJewelleryCategoryHref(urlKey),
+  changeFrequency: "daily" as const,
+  priority: 0.8,
 }));
 
-const blogRoutes = blogs.map((post) => ({
-  url: `/blogs/${post.slug}`,
-  changeFrequency: "monthly" as const,
-  priority: 0.4,
-}));
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  let productRoutes: Array<{
+    url: string;
+    changeFrequency: "weekly";
+    priority: number;
+  }> = [];
+  let blogRoutes: Array<{
+    url: string;
+    changeFrequency: "weekly";
+    priority: number;
+  }> = [];
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  return [...staticRoutes, ...productRoutes, ...blogRoutes].map((route) => ({
-    url: new URL(route.url, siteEnv.baseUrl).toString(),
-    changeFrequency: route.changeFrequency,
-    priority: route.priority,
-    lastModified: new Date(),
-  }));
+  try {
+    const products = await getMagentoProductSitemapEntries();
+    productRoutes = products.map((product) => ({
+      url: `/product/${product.urlKey}`,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    }));
+  } catch {
+    productRoutes = [];
+  }
+
+  try {
+    const slugs = await getAllBlogSlugsForStaticParams();
+    blogRoutes = slugs.map((slug) => ({
+      url: `/blogs/${slug}`,
+      changeFrequency: "weekly" as const,
+      priority: 0.55,
+    }));
+  } catch {
+    blogRoutes = [];
+  }
+
+  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...blogRoutes].map(
+    (route) => ({
+      url: new URL(route.url, siteEnv.baseUrl).toString(),
+      changeFrequency: route.changeFrequency,
+      priority: route.priority,
+    }),
+  );
 }

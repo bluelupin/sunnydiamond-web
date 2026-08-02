@@ -1,330 +1,138 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
-import OptimizedImage from "@/shared/ui/OptimizedImage";
-import { useFadeIn } from "@/shared/hooks/use-fade-in";
-import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
-import LeftArrow from "@/assets/Icons/LeftArrow";
-import RightArrow from "@/assets/Icons/RightArrow";
+import { useMemo } from "react";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
+import { useMagentoTrendingProducts } from "@/hooks/magento/useMagentoTrendingProducts";
+import { isSectionActive } from "@/shared/utils/cmsSection";
+import Reveal from "@/shared/Animation/Reveal";
+import FeaturedProductsCarousel from "@/features/cms/components/home/FeaturedProductsCarousel";
+import { mapJewelleryListingToFeaturedCarouselItems } from "@/services/magento/products/trendingProducts.service";
 
-const formatPrice = (price: number) =>
-  new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(price);
+/** Recommended transparent product PNG/WebP for CMS uploads. */
+export const FEATURED_PRODUCTS_IMAGE_SPEC = {
+  /** Primary center slide — Figma display ~774px; upload 2× for retina. */
+  width: 1600,
+  height: 1600,
+  aspectRatio: "1:1" as const,
+  format: "PNG or WebP with transparent background",
+  notes:
+    "Center the product with ~12–15% padding on all sides so side peeks and object-contain crops stay clean.",
+} as const;
 
 interface FeaturedProductsSectionProps {
   id?: string;
 }
 
+function FeaturedProductsHeader({
+  title,
+  description,
+  titleId,
+}: {
+  title: string;
+  description: string;
+  titleId?: string;
+}) {
+  return (
+    <div className="flex w-full flex-col items-center gap-4 px-4 text-center md:px-0">
+      {title ? (
+        <Reveal
+          as="h2"
+          id={titleId}
+          direction="up"
+          className="font-larken text-32 font-light leading-110 text-darkblack md:text-[40px] lg:text-5xl"
+        >
+          {title}
+        </Reveal>
+      ) : null}
+      {description ? (
+        <Reveal
+          direction="up"
+          className="max-w-[306px] font-gill text-base font-light leading-110 text-neutral500 lg:max-w-none lg:text-xl"
+        >
+          {description}
+        </Reveal>
+      ) : null}
+    </div>
+  );
+}
+
+export { FeaturedProductsHeader };
+
+const FeaturedCarouselSkeleton = () => (
+  <div className="relative h-[275px] w-full sm:h-[303px] md:h-[411px]">
+    <div className="absolute left-1/2 top-0 h-[155px] w-[200px] -translate-x-1/2 animate-pulse rounded bg-gray200 sm:h-[170px] sm:w-[260px] md:h-[259px] md:w-[600px]" aria-hidden />
+  </div>
+);
+
+export { FeaturedCarouselSkeleton };
+
 const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
   const { data: shoppingData, isLoading: isShoppingLoading } = useHomepageShoppingBlocks();
-  const featuredProductsData = shoppingData?.homepage?.featuredProductsSection || shoppingData?.featuredProductsSection;
-  const sectionTitle = featuredProductsData?.sectionTitle ?? "";
-  const description = featuredProductsData?.description ?? "";
+  const { data: trendingProducts, isLoading: isTrendingLoading } = useMagentoTrendingProducts();
+  const featuredProductsData =
+    shoppingData?.homepage?.featuredProductsSection || shoppingData?.featuredProductsSection;
 
-  const ref = useFadeIn();
-  const items = useMemo(() => {
-    const products = Array.isArray(featuredProductsData?.products) ? featuredProductsData?.products : [];
-    return products
-      .map((p: any) => ({
-        id: p?.id,
-        name: p?.name ?? "",
-        price: typeof p?.price === "number" ? p?.price : null,
-        imageUrl: getCmsAssetUrl(p?.image?.data?.attributes?.url),
-      }))
-      .filter((p: any) => Boolean(p.id) && Boolean(p.name) && Boolean(p.imageUrl));
-  }, [featuredProductsData?.products]);
+  const sectionTitle = featuredProductsData?.sectionTitle?.trim() ?? "";
+  const description = featuredProductsData?.description?.trim() ?? "";
+  const ctaLabel = featuredProductsData?.cta?.label?.trim() ?? "";
 
-  const total = items.length;
-
-  // Start from second item
-  const [index, setIndex] = useState(1);
-
-  const trackRef = useRef<HTMLDivElement>(null);
-  const trackWidthRef = useRef(1);
-
-  const dragState = useRef({
-    active: false,
-    startX: 0,
-    deltaX: 0,
-    pointerId: 0,
-    width: 0,
-  });
-
-  const [dragOffset, setDragOffset] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-
-  useEffect(() => {
-    if (total <= 1) {
-      setIndex(0);
-    }
-  }, [total]);
-
-  useEffect(() => {
-    const el = trackRef.current;
-    if (!el) return;
-
-    trackWidthRef.current = el.clientWidth || 1;
-
-    const ro = new ResizeObserver((entries) => {
-      const w = entries[0]?.contentRect.width;
-
-      if (w) trackWidthRef.current = w;
-    });
-
-    ro.observe(el);
-
-    return () => ro.disconnect();
-  }, []);
-
-  // Infinite slider
-  const go = useCallback(
-    (dir: -1 | 1) => {
-      setIndex((prev) => {
-        if (dir === 1) {
-          return (prev + 1) % total;
-        }
-
-        return (prev - 1 + total) % total;
-      });
-    },
-    [total]
+  const items = useMemo(
+    () => mapJewelleryListingToFeaturedCarouselItems(trendingProducts ?? []),
+    [trendingProducts],
   );
 
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!trackRef.current) return;
+  const isCarouselLoading = isTrendingLoading && items.length === 0;
+  const showSectionShell = !isShoppingLoading || Boolean(sectionTitle || description);
 
-    trackRef.current.setPointerCapture(e.pointerId);
+  if (!isSectionActive(featuredProductsData?.isActive)) {
+    return null;
+  }
 
-    dragState.current = {
-      active: true,
-      startX: e.clientX,
-      deltaX: 0,
-      pointerId: e.pointerId,
-      width: trackWidthRef.current || trackRef.current.clientWidth || 1,
-    };
-
-    setIsDragging(true);
-  };
-
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragState.current.active) return;
-
-    const dx = e.clientX - dragState.current.startX;
-
-    dragState.current.deltaX = dx;
-
-    setDragOffset(dx);
-  };
-
-  const endDrag = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragState.current.active) return;
-
-    const { deltaX, width } = dragState.current;
-
-    dragState.current.active = false;
-
-    try {
-      trackRef.current?.releasePointerCapture(e.pointerId);
-    } catch {
-      //
-    }
-
-    setIsDragging(false);
-    setDragOffset(0);
-
-    const threshold = Math.max(40, width * 0.15);
-
-    // Infinite swipe
-    if (deltaX <= -threshold) go(1);
-    else if (deltaX >= threshold) go(-1);
-  };
-
-  if (isShoppingLoading) {
+  if (!showSectionShell && isCarouselLoading) {
     return (
       <section
         id={id}
-        ref={ref}
-        className="bg-gray200 py-6 sm:py-10 md:py-16 lg:py-20 overflow-hidden h-auto flex flex-col items-center justify-center"
+        className="overflow-visible px-4 py-16 md:px-10 md:py-104"
         aria-label="Featured diamond carousel"
         aria-busy="true"
       >
-        <div className="text-center md:max-w-2xl sm:max-w-xl max-w-[350px] mx-auto md:mb-10 sm:mb-8 mb-6 px-5">
-          <div className="md:mb-5 mb-3 h-10 w-72 bg-gray300 rounded mx-auto" aria-hidden />
-          <div className="h-5 w-80 bg-gray300 rounded mx-auto" aria-hidden />
-        </div>
-        <div className="relative w-full">
-          <div className="relative w-full mx-auto h-[250px] sm:h-[310px] md:h-[350px] lg:h-[336px]">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 h-full w-[80vw] sm:w-[55vw] md:w-[42vw] lg:w-[36vw] bg-gray300/70 rounded" aria-hidden />
+        <div className="mx-auto flex w-full max-w-1360 flex-col items-center gap-10 overflow-visible">
+          <div className="flex w-full flex-col items-center gap-4 text-center">
+            <div className="h-[35px] w-[283px] animate-pulse rounded bg-gray200 md:h-[53px] md:w-[424px]" aria-hidden />
+            <div className="h-[36px] w-[306px] animate-pulse rounded bg-gray200 md:h-[22px] md:w-[517px]" aria-hidden />
           </div>
-          <div className="md:mt-12 mt-8 flex items-center justify-center gap-6">
-            <div className="h-10 w-10 bg-gray300 rounded-full" aria-hidden />
-            <div className="h-10 w-10 bg-gray300 rounded-full" aria-hidden />
-          </div>
+          <FeaturedCarouselSkeleton />
         </div>
       </section>
     );
   }
 
-  // if (!section?.sectionTitle || !section?.description || total === 0) return null;
-
-  const dragPct = trackWidthRef.current
-    ? dragOffset / trackWidthRef.current
-    : 0;
+  if (!isCarouselLoading && items.length === 0) {
+    return null;
+  }
 
   return (
     <section
       id={id}
-      ref={ref}
-      className="bg-gray200 py-6 sm:py-10 md:py-16 lg:py-20 overflow-hidden h-auto flex flex-col items-center justify-center"
+      className="overflow-x-clip px-0 py-16 md:py-104"
       aria-label="Featured diamond carousel"
+      aria-busy={isCarouselLoading}
     >
-      {/* Heading */}
-      <div className="text-center md:max-w-2xl sm:max-w-xl max-w-[350px] mx-auto md:mb-10 sm:mb-8 mb-6 px-5">
-        <h2 className="md:mb-5 mb-3 text-foreground lg:text-5xl md:text-4xl text-[32px] font-larken font-light tracking-[0%] leading-[100%] text-darkblack text-center whitespace-nowrap">
-          {sectionTitle || "Your Diamond Awaits (F)"}
-        </h2>
-
-        <p className="text-base md:text-lg lg:text-xl text-darkblack font-light font-gill tracking-[1%] leading-[100%] text-center">
-          {description || "Traditional mastery bringing every diamond to radiant, eternal life. (F)"}
-        </p>
+      <div className="flex w-full max-w-full flex-col items-center gap-10 overflow-x-clip">
+        {sectionTitle || description ? (
+          <FeaturedProductsHeader title={sectionTitle} description={description} />
+        ) : null}
+        {isCarouselLoading ? (
+          <FeaturedCarouselSkeleton />
+        ) : (
+          <FeaturedProductsCarousel
+            items={items}
+            ctaLabel={ctaLabel}
+            sectionLabel={sectionTitle || "Featured products"}
+            showCta={Boolean(ctaLabel)}
+          />
+        )}
       </div>
-
-      {/* Slider */}
-      {/* <div className="relative w-full">
-        <div
-          ref={trackRef}
-          role="region"
-          aria-roledescription="carousel"
-          aria-label={section?.sectionTitle ?? "Featured products"}
-          tabIndex={0}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={endDrag}
-          onPointerCancel={endDrag}
-          className={`relative w-full mx-auto select-none touch-pan-y outline-none h-[250px] sm:h-[310px] md:h-[350px] lg:h-[336px] ${isDragging ? "cursor-grabbing" : "cursor-grab"
-            }`}
-          style={{ WebkitUserSelect: "none" }}
-        >
-          {items.map((p, i) => {
-            // Infinite distance calculation
-            let dist = i - index;
-
-            if (dist > total / 2) dist -= total;
-            if (dist < -total / 2) dist += total;
-
-            dist -= dragPct;
-
-            const absDist = Math.abs(dist);
-
-            if (absDist > 2.2) return null;
-
-            const translateXVw = dist * 47;
-            const scale = Math.max(0.7, 1 - absDist * 0.18);
-            const opacity = Math.max(0, 1 - absDist * 0.55);
-
-            const isActive = i === index;
-
-            const zIndex = 100 - Math.round(absDist * 10);
-
-            return (
-              <div
-                key={p.id}
-                aria-roledescription="slide"
-                aria-hidden={!isActive}
-                className="absolute top-0 left-1/2 h-full w-[80vw] sm:w-[55vw] md:w-[42vw] lg:w-[36vw] -translate-x-1/2 flex flex-col items-center justify-start"
-                style={{
-                  transform: `translate3d(calc(-50% + ${translateXVw}vw), 0, 0) scale(${scale})`,
-                  opacity,
-                  zIndex,
-                  transition: isDragging
-                    ? "none"
-                    : "transform 0.65s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease",
-                  pointerEvents: isActive ? "auto" : "none",
-                  willChange: "transform, opacity",
-                  filter: isActive ? "none" : "blur(2px)",
-                }}
-              >
-                <Link
-                  href={`/product/${p.id ?? ""}`}
-                  className="block w-full overflow-hidden group md:h-278 h-206"
-                  aria-label={`View ${p.name}`}
-                  draggable={false}
-                  onClick={(e) => {
-                    if (Math.abs(dragState.current.deltaX) > 5)
-                      e.preventDefault();
-
-                    if (!isActive) e.preventDefault();
-                  }}
-                  tabIndex={isActive ? 0 : -1}
-                >
-                  <OptimizedImage
-                    src={p.imageUrl ?? ""}
-                    alt={p.name}
-                    width={1200}
-                    height={1200}
-                    priority={isActive}
-                    className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-[1.02] pointer-events-none"
-                  />
-                </Link>
-
-                <div
-                  className="mt-4 flex flex-col items-center text-center"
-                  style={{
-                    opacity: isActive ? 1 : 0,
-                    transition: "opacity 0.4s ease",
-                  }}
-                >
-                  <h3 className="md:mb-4 sm:mb-3 mb-2 text-base md:text-lg lg:text-xl text-darkblack font-light font-gill tracking-[1%] leading-[100%]">
-                    {p.name}
-                  </h3>
-
-                  <p className="md:mb-6 sm:mb-5 mb-4 text-base md:text-lg lg:text-xl text-darkblack font-normal tracking-[1%] font-gill">
-                    <span aria-hidden className="mr-0.5">
-                      ₹
-                    </span>
-
-                    <span className="font-medium">
-                      {typeof p.price === "number" ? formatPrice(p.price) : ""}
-                    </span>
-                  </p>
-
-                  <Link
-                    href={`/product/${p.id ?? ""}`}
-                    tabIndex={isActive ? 0 : -1}
-                    className="group relative overflow-hidden inline-flex items-center justify-center border-[0.8px] border-darkblack text-darkblack md:text-base text-sm px-8 md:h-50 h-12 tracking-[1.8%] uppercase font-gill transition-colors duration-500"
-                  >
-                    <span className="absolute inset-0 bg-darkblack origin-bottom scale-y-0 transition-transform duration-500 ease-out group-hover:scale-y-100"></span>
-
-                    <span className="relative z-10 group-hover:text-white transition-colors duration-500">
-                      {section?.cta?.label ?? ""}
-                    </span>
-                  </Link>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        <div className="md:mt-12 mt-8 flex items-center justify-center gap-6">
-          <button
-            type="button"
-            onClick={() => go(-1)}
-            aria-label="Previous"
-            className="text-black transition-opacity hover:opacity-70"
-          >
-            <LeftArrow className="md:w-8 md:h-8 w-6 h-6" />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => go(1)}
-            aria-label="Next"
-            className="text-black transition-opacity hover:opacity-70"
-          >
-            <RightArrow className="md:w-8 md:h-8 w-6 h-6" />
-          </button>
-        </div>
-      </div> */}
     </section>
   );
 };

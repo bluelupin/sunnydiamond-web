@@ -37,6 +37,7 @@
     --gold: 36 40% 62%;
     --gold-light: 36 50% 85%;
     --gold-dark: 36 35% 42%;
+    --link-underline-hover: #AB863B;
     --charcoal: 30 10% 15%;
     --ivory: 40 30% 96%;
     --warm-gray: 30 5% 50%;
@@ -50,12 +51,12 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
 
-    --font-body: "Inter", system-ui, sans-serif;
-    --font-heading: "Larken", "Playfair Display", Georgia, serif;
-    --font-display: "Larken", "Playfair Display", Georgia, serif;
-    --font-gill: "Gill Sans", "Gill Sans MT", Calibri, system-ui, sans-serif;
-    --font-larken: "Larken", "Playfair Display", Georgia, serif;
-    --font-satoshi: "Satoshi", "Inter", system-ui, sans-serif;
+    --font-body: "Gill Sans";
+    --font-heading: "Larken";
+    --font-display: "Larken";
+    --font-gill: "Gill Sans";
+    --font-larken: "Larken";
+    --font-satoshi: "Gill Sans";
 
     --h1-font-size: 32px;
     --h1-line-height: 100%;
@@ -83,12 +84,15 @@
   }
 }
 
+/* Larken — heading/display */
 @font-face {
   font-family: "Larken";
   font-style: normal;
   font-weight: 300;
   font-display: swap;
-  src: local("Larken Light"), local("Larken-Light");
+  src:
+    url("/fonts/Larken/Larken-Light.woff2") format("woff2"),
+    url("/fonts/Larken/Larken-Light.woff") format("woff");
 }
 
 @font-face {
@@ -96,7 +100,106 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: local("Larken"), local("Larken-Regular");
+  src:
+    url("/fonts/Larken/Larken-Light.woff2") format("woff2"),
+    url("/fonts/Larken/Larken-Light.woff") format("woff");
+}
+
+/* Gill Sans — body UI / labels */
+@font-face {
+  font-family: "Gill Sans";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/GillSans/Gill Sans Light.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Gill Sans";
+  font-style: italic;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/GillSans/Gill Sans Light Italic.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Gill Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/GillSans/Gill Sans.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Gill Sans";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/GillSans/Gill Sans Italic.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Gill Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/GillSans/Gill Sans Medium.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Gill Sans";
+  font-style: italic;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/GillSans/Gill Sans Medium Italic.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Gill Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/GillSans/Gill Sans Medium.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Gill Sans";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/GillSans/Gill Sans Bold.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Gill Sans";
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/GillSans/Gill Sans Bold Italic.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Gill Sans";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("/fonts/GillSans/Gill Sans Heavy.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Gill Sans";
+  font-style: italic;
+  font-weight: 800;
+  font-display: swap;
+  src: url("/fonts/GillSans/Gill Sans Heavy Italic.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Gill Sans";
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url("/fonts/GillSans/Gill Sans Heavy.otf") format("opentype");
 }
 
 @layer base {
@@ -104,12 +207,11 @@
     @apply border-border;
   }
 
-  html{
+  html {}
 
-  }
   body {
-   @apply bg-background text-foreground font-body antialiased;
-    overflow-x: clip; 
+    @apply bg-background text-foreground font-body antialiased;
+    overflow-x: clip;
   }
 
   body {
@@ -180,6 +282,22 @@
     letter-spacing: var(--h2-letter-spacing);
   }
 
+  .text-h4-light {
+    font-family: var(--font-larken);
+    font-weight: 300;
+    font-size: 20px;
+    line-height: 110%;
+    letter-spacing: 0;
+  }
+
+  .text-t4-regular {
+    font-family: var(--font-gill);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 110%;
+    letter-spacing: 0;
+  }
+
   .btn-slide-up {
     transform: translateY(0);
     transition:
@@ -191,9 +309,103 @@
     will-change: transform;
   }
 
+  .btn-border-slide {
+    position: relative;
+    z-index: 0;
+    isolation: isolate;
+    overflow: hidden;
+    --btn-border-slide-fill: #0a0a0a;
+    --btn-border-slide-text: #ffffff;
+    transition:
+      color 0.15s ease,
+      border-color 0.35s ease;
+  }
+
+  .btn-border-slide::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-color: var(--btn-border-slide-fill);
+    transform: translateY(100%);
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+  }
+
+  .btn-border-slide > * {
+    position: relative;
+    z-index: 1;
+    transition: color 0.15s ease;
+  }
+
+  .btn-dark-slide {
+    position: relative;
+    z-index: 0;
+    isolation: isolate;
+    overflow: hidden;
+    background-color: transparent;
+    --btn-dark-slide-base: #0a0a0a;
+    --btn-dark-slide-fill: #ffffff;
+    --btn-dark-slide-text: #0a0a0a;
+    transition: color 0.2s ease;
+  }
+
+  .btn-dark-slide::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-color: var(--btn-dark-slide-base);
+  }
+
+  .btn-dark-slide::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background-color: var(--btn-dark-slide-fill);
+    transform: translateY(100%);
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .btn-dark-slide > * {
+    position: relative;
+    z-index: 2;
+    transition: color 0.2s ease;
+  }
+
   @media (hover: hover) and (pointer: fine) {
     .btn-slide-up:hover {
       transform: translateY(-3px);
+    }
+
+    .btn-border-slide:hover::before {
+      transform: translateY(0);
+    }
+
+    .btn-border-slide:hover {
+      border-color: var(--btn-border-slide-fill);
+      color: var(--btn-border-slide-text) !important;
+      transition-delay: 0.18s, 0s;
+    }
+
+    .btn-border-slide:hover > * {
+      color: var(--btn-border-slide-text) !important;
+      transition-delay: 0.18s;
+    }
+
+    .btn-dark-slide:hover::before {
+      transform: translateY(0);
+    }
+
+    .btn-dark-slide:hover {
+      color: var(--btn-dark-slide-text) !important;
+      transition-delay: 0.18s;
+    }
+
+    .btn-dark-slide:hover > * {
+      color: var(--btn-dark-slide-text) !important;
+      transition-delay: 0.18s;
     }
   }
 
@@ -205,6 +417,103 @@
     .btn-slide-up:hover {
       transform: none;
     }
+
+    .btn-border-slide::before {
+      transition: none;
+    }
+
+    .btn-border-slide:hover::before {
+      transform: translateY(0);
+    }
+
+    .btn-border-slide:hover {
+      border-color: var(--btn-border-slide-fill);
+      color: var(--btn-border-slide-text) !important;
+    }
+
+    .btn-border-slide:hover > * {
+      color: var(--btn-border-slide-text) !important;
+    }
+
+    .btn-dark-slide::before {
+      transition: none;
+    }
+
+    .btn-dark-slide:hover::before {
+      transform: translateY(0);
+    }
+
+    .btn-dark-slide:hover {
+      color: var(--btn-dark-slide-text) !important;
+    }
+
+    .btn-dark-slide:hover > * {
+      color: var(--btn-dark-slide-text) !important;
+    }
+  }
+
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-drawer-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #999999 #cccccc;
+  }
+
+  .filter-drawer-scroll::-webkit-scrollbar {
+    width: 2px;
+  }
+
+  .filter-drawer-scroll::-webkit-scrollbar-track {
+    background: #cccccc;
+    border-radius: 70px;
+  }
+
+  .filter-drawer-scroll::-webkit-scrollbar-thumb {
+    background: #999999;
+    border-radius: 70px;
+  }
+
+  .h-timeline-connector {
+    height: calc(100% + 2rem);
+  }
+
+  .about-handcrafted-photo {
+    left: -12.069%;
+    top: -12.844%;
+    width: 124.138%;
+    height: 125.973%;
+  }
+
+  .text-link-underline {
+    transition:
+      color 0.2s ease,
+      border-color 0.2s ease,
+      opacity 0.2s ease,
+      text-decoration-color 0.2s ease;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+
+  :is(a, button).text-link-underline:hover:not(:disabled),
+  :is(a, button):hover:not(:disabled)>.text-link-underline,
+  :is(a, button):hover:not(:disabled) .text-link-underline {
+    color: var(--link-underline-hover) !important;
+    border-color: var(--link-underline-hover) !important;
+    opacity: 1 !important;
+  }
+
+  a.underline:hover:not(:disabled),
+  button.underline:hover:not(:disabled) {
+    color: var(--link-underline-hover);
+    text-decoration-color: var(--link-underline-hover);
   }
 }
 
@@ -250,6 +559,7 @@
   0% {
     transform: translateX(0);
   }
+
   100% {
     transform: translateX(-100%);
   }
@@ -257,4 +567,149 @@
 
 .animate-marquee {
   animation: marquee 40s linear infinite;
+}
+
+
+
+
+
+/* For horizontal scroll inside .tabScroll */
+.horizontalScroll::-webkit-scrollbar {
+  height: 0px !important;
+  /* Thin horizontal scrollbar */
+}
+
+.horizontalScroll::-webkit-scrollbar-thumb {
+  background: #cccccc;
+  border-radius: 4px;
+}
+
+.horizontalScroll::-webkit-scrollbar-thumb:hover {
+  background: #cccccc;
+}
+
+
+
+
+/* For horizontal scroll inside .tabScroll */
+.horizontalScrollbar {
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  /* Firefox */
+  scrollbar-width: none;
+
+  /* IE/Edge Legacy */
+  -ms-overflow-style: none;
+}
+
+.horizontalScrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+  -webkit-appearance: none;
+}
+
+.horizontalScrollbar::-webkit-scrollbar-track {
+  display: none;
+}
+
+.horizontalScrollbar::-webkit-scrollbar-thumb {
+  display: none;
+}
+
+/* For horizontal Mobile scroll inside .tabScroll */
+.horizontalMobileScrollbar::-webkit-scrollbar {
+  height: 0px !important;
+  /* Thin horizontal scrollbar */
+}
+
+.horizontalMobileScrollbar::-webkit-scrollbar-thumb {
+  background: #cccccc;
+  border-radius: 4px;
+}
+
+.horizontalMobileScrollbar::-webkit-scrollbar-thumb:hover {
+  background: #cccccc;
+}
+
+/* For Verticle Mobile scroll inside .tabScroll */
+.verticleMobileScrollbar::-webkit-scrollbar {
+  width: 0px !important;
+  /* Thin horizontal scrollbar */
+}
+
+.verticleMobileScrollbar::-webkit-scrollbar-thumb {
+  background: #cccccc;
+  border-radius: 4px;
+}
+
+.verticleMobileScrollbar::-webkit-scrollbar-thumb:hover {
+  background: #cccccc;
+}
+
+/* For Verticle scroll inside .tabScroll */
+.verticleScrollbar {
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  /* Firefox */
+  scrollbar-width: none;
+
+  /* IE/Edge Legacy */
+  -ms-overflow-style: none;
+}
+
+.verticleScrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+  -webkit-appearance: none;
+}
+
+.verticleScrollbar::-webkit-scrollbar-track {
+  display: none;
+}
+
+.verticleScrollbar::-webkit-scrollbar-thumb {
+  display: none;
+}
+
+.imageTestContainer {
+  border: 0.4px solid #cccccc38;
+}
+
+.education-certified-section {
+  background-color: #ffffff;
+  background-image: url("https://d1gf9vo4d2b63b.cloudfront.net/cms/education_certificate_bg_mobile_d302ab1faa.svg");
+  background-size: cover;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+}
+
+@media (min-width: 768px) {
+  .education-certified-section {
+    background-color: #f4f3ee;
+    background-image: url("https://d1gf9vo4d2b63b.cloudfront.net/cms/education_certificate_bg_f231e31b04.svg");
+    background-size: cover;
+    background-position: center;
+  }
+}
+
+/* Tablet (md–lg): desktop art is right-weighted — center crop hides the hand/girdle visual */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .education-certified-section {
+    background-size: 100%;
+    background-position: right center;
+    min-height: 1330px;
+  }
+}
+
+/* Tablet portrait — use mobile artwork (hand anchored bottom) for clearer visibility */
+@media (min-width: 768px) and (max-width: 1023px) and (orientation: portrait) {
+  .education-certified-section {
+    background-color: #ffffff;
+    background-image: url("https://d1gf9vo4d2b63b.cloudfront.net/cms/education_certificate_bg_mobile_d302ab1faa.svg");
+    background-position: center bottom;
+  }
 }

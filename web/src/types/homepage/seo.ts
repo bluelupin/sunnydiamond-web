@@ -1,11 +1,13 @@
-import type { StrapiMedia } from "./hero";
+import type { StrapiImage } from "@/types/strapiMedia";
 
 export type HomepageSeo = {
   id?: number;
   metaTitle?: string;
   metaDescription?: string;
-  shareImage?: StrapiMedia;
+  shareImage?: StrapiImage;
+  ogImage?: StrapiImage;
   canonicalURL?: string;
+  canonicalUrl?: string;
   noIndex?: boolean;
 };
 

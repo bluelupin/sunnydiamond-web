@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
-import { constructMetadata } from "@/shared/lib/seo/metadata";
 import { footerPages } from "@/features/cms/data/footerPages";
-import StaticRoutePage from "@/features/cms/components/StaticRoutePage";
+import GiftCardPage from "@/features/gift-card/components/GiftCardPage";
+import { constructMetadata } from "@/shared/lib/seo/metadata";
 
-const page = footerPages.giftCard;
+const fallback = footerPages.gifting;
 
-export const metadata: Metadata = constructMetadata({
-  title: page.title,
-  description: page.description,
-});
+export function generateMetadata(): Metadata {
+  return constructMetadata({
+    title: "Gift Card",
+    description: fallback.description,
+    canonicalPath: "/gift-card",
+  });
+}
 
 export default function Page() {
-  return <StaticRoutePage title={page.title} description={page.description} />;
+  return <GiftCardPage />;
 }

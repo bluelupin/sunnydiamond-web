@@ -1,75 +1,16 @@
 export const homeSections = [
-  { id: "alankara", label: "Alankara" },
-  { id: "diamond-awaits", label: "Your Diamond" },
-  { id: "categories", label: "Categories" },
-  { id: "craftsmanship", label: "Craftsmanship" },
-  { id: "promise", label: "Promise" },
-  { id: "for-you", label: "For You" },
+  { id: "alankara", label: "Collections" },
+  { id: "categories", label: "By Occasions" },
+  { id: "diamond-awaits", label: "Category" },
+  { id: "valentine", label: "Gifting" },
+  { id: "promise", label: "The Sunny Promise" },
+  { id: "bespoke-for-you", label: "For You" },
+  { id: "diamonds-for-everyone", label: "Diamonds for Everyone" },
+  { id: "craftsmanship", label: "Know Your Diamonds" },
   { id: "showrooms", label: "Showrooms" },
 ] as const;
 
 export const homeContent = {
-  //  showrooms: {
-  //   title: "Visit Our Showrooms",
-  //   subtitle: "Step into our atelier to discover the Belgian-sourced mastery behind every stone",
-  //   locations: [
-  //     {
-  //       id: "calicut",
-  //       name: "CALICUT",
-  //       address: "Sunny Diamonds Calicut, Mavoor Road, Arayidathupalam, Kozhikode, Kerala 673004",
-  //       phone: "+91 97443 11111",
-  //       directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Calicut",
-  //     },
-  //     {
-  //       id: "kochi",
-  //       name: "KOCHI",
-  //       address: "Sunny Diamonds Kochi 40/9134 B & C, Rajaji Rd, Ernakulam, Kerala 682035",
-  //       phone: "+91 97443 55555",
-  //       directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Kochi",
-  //     },
-  //     {
-  //       id: "thrissur",
-  //       name: "THRISSUR",
-  //       address: "Sunny Diamonds Thrissur, Round West, Thrissur, Kerala 680001",
-  //       phone: "+91 97443 22222",
-  //       directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Thrissur",
-  //     },
-  //     {
-  //       id: "coimbatore",
-  //       name: "COIMBATORE",
-  //       address: "Sunny Diamonds Coimbatore, Avinashi Road, Coimbatore, Tamil Nadu 641018",
-  //       phone: "+91 97443 33333",
-  //       directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Coimbatore",
-  //     },
-  //     {
-  //       id: "trivandrum",
-  //       name: "TRIVANDRUM",
-  //       address: "Sunny Diamonds Trivandrum, MG Road, Thiruvananthapuram, Kerala 695001",
-  //       phone: "+91 97443 44444",
-  //       directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Trivandrum",
-  //     },
-  //   ],
-  // },
-  // hero: {
-  //   badge: "20 Years of Legacy (s)",
-  //   title: "Fine jewellery designed with a tradition of excellence (s)",
-  //   cta: { label: "Shop Now", to: "/products" },
-  //   trustSignals: [
-  //     "BIS Halmark for Jewellery (s)",
-  //     "Cash on Delivery (s)",
-  //     "Internally Flawless Diamonds (s)",
-  //     "100% Moneyback Guarantee (s)",
-  //   ],
-  // },
-  // craftingRarity: {
-  //   title: "Crafting rarity into timeless brilliance (s)",
-  //   cta: { label: " Explore Products", to: "/products" },
-  // },
-  // featured: {
-  //   subtitle: "Curated for You",
-  //   title: "Featured Collections",
-  //   cta: { label: "View All", to: "/products" },
-  // },
   whyUs: {
     subtitle: "Why Sunny Diamonds",
     title: "What Sets Us Apart",
@@ -99,32 +40,23 @@ export const homeContent = {
   alankara: {
     collection: {
       title: "Alankara Collection",
-      cta: { label: "Explore Collection", to: "/products" },
+      description:
+        "Guided by tradition and perfected by expertise, our craftsmen bring every diamond to life with",
+      cta: { label: "View Collection", to: "/jewellery" },
     },
-    productIds: ["1", "5", "2", "4"],
+    productIds: ["1", "3", "5", "6", "2"],
     product: {
       cta: { label: "Discover" },
     },
     gifting: {
-      title: "Gifting For Your Valentine",
-      cta: { label: "Shop Now", to: "/products" },
-      secondary: { label: "Send a Gift Card Instead", to: "/contact" },
+      title: "For Your Valentine",
+      description:
+        "Honoring a lifetime of connection through rare, masterfully crafted jewelry designed for the moments that matter.",
+      mobileDescription:
+        "Traditional mastery bringing every diamond to radiant, eternal life.",
+      cta: { label: "Shop Now", to: "/jewellery" },
     },
   },
-  // featuredProductsSection: {
-  //   title: "Your Diamond Awaits",
-  //   subtitle: "Traditional mastery bringing every diamond to radiant, eternal life.",
-  //   productIds: ["1", "2", "3", "4", "5", "6"],
-  //   cta: { label: "Discover" },
-  // },
-  // categories: {
-  //   title: "Timeless Pieces for Every Occasion",
-  //   items: [
-  //     { label: "FESTIVAL", slug: "festival" },
-  //     { label: "COCKTAIL", slug: "cocktail" },
-  //     { label: "WEDDING", slug: "wedding" },
-  //   ],
-  // },
   craftsmanship: {
     subtitle: "Our Process",
     title: "From Vision to Masterpiece",
@@ -182,111 +114,27 @@ export const homeContent = {
     title: "Make Every Moment Shine",
     description:
       "From birthdays to anniversaries, our luxury gift packaging and personalisation options make each present unforgettable.",
-    cta: { label: "Shop Gifts", to: "/products" },
+    cta: { label: "Shop Gifts", to: "/jewellery" },
   },
   customJewellery: {
     subtitle: "Bespoke Service",
     title: "Design Your Own Masterpiece",
     description:
       "Work one-on-one with our designers to create a piece that is uniquely yours. From concept sketches to the finished jewel, we bring your vision to life.",
-    cta: { label: "Start Your Design", to: "/contact" },
+    cta: { label: "Start Your Design", to: "/bespoke-jewellery" },
   },
   brandStory: {
     subtitle: "Our Heritage",
     title: "Crafting Brilliance Since 1987",
     description:
       "For over 35 years, Sunny Diamonds has been transforming the world's finest diamonds into wearable works of art. Our atelier combines centuries-old techniques with contemporary design to create pieces that transcend time.",
-    cta: { label: "Read Our Story", to: "/about" },
+    cta: { label: "Read Our Story", to: "/world-of-sunny" },
   },
-  forYouForever: {
-    title: "For you, Forever",
-    cards: [
-      {
-        image: "foryou-bespoke",
-        title: "BESPOKE JEWELLERY",
-        subtitle:
-          "Designs thoughtfully crafted to bring your vision to life",
-      },
-      {
-        image: "foryou-diamonds",
-        title: "DIAMONDS FOR EVERYONE",
-        subtitle:
-          "Save monthly towards your timeless diamond",
-      },
-    ],
-  },
-  // showrooms: {
-  //   title: "Visit Our Showrooms",
-  //   subtitle: "Step into our atelier to discover the Belgian-sourced mastery behind every stone",
-  //   locations: [
-  //     {
-  //       id: "calicut",
-  //       name: "CALICUT",
-  //       address: "Sunny Diamonds Calicut, Mavoor Road, Arayidathupalam, Kozhikode, Kerala 673004",
-  //       phone: "+91 97443 11111",
-  //       directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Calicut",
-  //     },
-  //     {
-  //       id: "kochi",
-  //       name: "KOCHI",
-  //       address: "Sunny Diamonds Kochi 40/9134 B & C, Rajaji Rd, Ernakulam, Kerala 682035",
-  //       phone: "+91 97443 55555",
-  //       directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Kochi",
-  //     },
-  //     {
-  //       id: "thrissur",
-  //       name: "THRISSUR",
-  //       address: "Sunny Diamonds Thrissur, Round West, Thrissur, Kerala 680001",
-  //       phone: "+91 97443 22222",
-  //       directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Thrissur",
-  //     },
-  //     {
-  //       id: "coimbatore",
-  //       name: "COIMBATORE",
-  //       address: "Sunny Diamonds Coimbatore, Avinashi Road, Coimbatore, Tamil Nadu 641018",
-  //       phone: "+91 97443 33333",
-  //       directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Coimbatore",
-  //     },
-  //     {
-  //       id: "trivandrum",
-  //       name: "TRIVANDRUM",
-  //       address: "Sunny Diamonds Trivandrum, MG Road, Thiruvananthapuram, Kerala 695001",
-  //       phone: "+91 97443 44444",
-  //       directionsUrl: "https://maps.google.com/?q=Sunny+Diamonds+Trivandrum",
-  //     },
-  //   ],
-  // },
   promise: {
     title: "THE SUNNY PROMISE",
     description:
       "Guided by heritage and perfected by pride every setting a masterpiece of expert precision.",
-    cta: { label: "View Our Story", to: "/about" },
-  },
-} as const;
-
-export const aboutContent = {
-  header: {
-    subtitle: "Our Story",
-    title: "Crafting Brilliance Since 1987",
-  },
-  paragraphs: [
-    "At Sunny Diamonds, we believe every diamond carries a universe of light within it. Founded in 1987 by master jeweller Antoine Delacroix, our atelier has been dedicated to transforming the world's finest diamonds into wearable works of art.",
-    "Each piece in our collection is meticulously handcrafted by our team of skilled artisans, combining centuries-old techniques with contemporary design sensibilities. We source only conflict-free, GIA-certified diamonds, ensuring that every stone meets our exacting standards for cut, clarity, color, and carat.",
-    "Our custom design service allows you to collaborate directly with our designers to create a piece that is uniquely yours. From engagement rings that capture your love story to heirloom pieces that will be treasured for generations, we bring your vision to life with unparalleled craftsmanship.",
-  ],
-  stats: [
-    { value: "35+", label: "Years of Excellence" },
-    { value: "10,000+", label: "Pieces Crafted" },
-    { value: "50+", label: "Master Artisans" },
-  ],
-  closingParagraph:
-    "We invite you to visit our flagship boutique or explore our online collection. Every purchase comes with complimentary shipping, a lifetime warranty, and the assurance that you are wearing something truly exceptional.",
-} as const;
-
-export const productsContent = {
-  header: {
-    subtitle: "Our Collection",
-    title: "Diamond Jewellery",
+    cta: { label: "View Our Story", to: "/world-of-sunny" },
   },
 } as const;
 
@@ -305,15 +153,10 @@ export const seoContent = {
     description:
       "Handcrafted premium and custom diamond jewellery. Explore GIA-certified diamonds, bespoke designs, and timeless elegance.",
   },
-  products: {
-    title: "Diamond Jewellery Collection",
-    description:
-      "Browse our curated collection of rings, necklaces, earrings, and bracelets featuring GIA-certified diamonds.",
-  },
   about: {
     title: "Our Story",
     description:
-      "Learn about Sunny Diamonds' 35+ year legacy of crafting premium diamond jewellery with master artisans.",
+      "Discover Sunny Diamonds' legacy since 1997 — three generations of internally flawless diamonds, master craftsmanship, and timeless jewellery from Chalakkudy to the world.",
   },
   contact: {
     title: "Contact Us",
@@ -327,5 +170,21 @@ export const seoContent = {
   checkout: {
     title: "Checkout",
     description: "Complete your purchase of premium diamond jewellery from Sunny Diamonds.",
+  },
+  login: {
+    title: "Sign In",
+    description: "Sign in or create your Sunny Diamonds account with your mobile number.",
+  },
+  wishlist: {
+    title: "Wishlist",
+    description: "View and manage your saved diamond jewellery pieces.",
+  },
+  profile: {
+    title: "My Profile",
+    description: "Manage your Sunny Diamonds account, orders, addresses, and appointments.",
+  },
+  orderTracking: {
+    title: "Order Tracking",
+    description: "Track your Sunny Diamonds order status, shipment updates, and delivery details.",
   },
 } as const;

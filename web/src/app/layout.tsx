@@ -1,22 +1,28 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import AppProvider from "@/shared/lib/providers/AppProvider";
+import ServerAppShell from "@/shared/ui/layout/ServerAppShell";
+import GoogleAnalytics from "@/infrastructure/analytics/GoogleAnalytics";
 import siteEnv, { getAbsoluteUrl } from "@/shared/lib/seo/siteConfig";
+import { getGoogleSiteVerification } from "@/infrastructure/analytics/gaConfig";
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
+  viewportFit: "cover",
   themeColor: "#C6A87D",
 };
 
 const TITLE = {
-  default: "Sunny Diamonds - Premium Diamond Jewellery (F)",
-  template: "%s | Sunny Diamonds (F)",
+  default: "Sunny Diamonds — Premium Diamond Jewellery",
+  template: "%s | Sunny Diamonds",
 } as const;
 
-const DESCRIPTION = "Handcrafted premium and custom diamond jewellery. Explore GIA-certified diamonds, bespoke designs, and timeless elegance. (F)";
+const DESCRIPTION =
+  "Handcrafted premium and custom diamond jewellery. Explore GIA-certified diamonds, bespoke designs, and timeless elegance.";
+
+const googleSiteVerification = getGoogleSiteVerification();
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -25,16 +31,10 @@ export const metadata: Metadata = {
   authors: [{ name: "Sunny Diamonds" }],
   creator: "Sunny Diamonds",
   applicationName: "Sunny Diamonds",
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    title: "Sunny Diamonds",
-    statusBarStyle: "default",
-  },
   metadataBase: new URL(siteEnv.baseUrl),
   openGraph: {
     type: "website",
-    locale: "en_US",
+    locale: "en_IN",
     url: siteEnv.baseUrl,
     siteName: "Sunny Diamonds",
     title: TITLE.default,
@@ -79,9 +79,13 @@ export const metadata: Metadata = {
     index: siteEnv.indexing,
     follow: true,
   },
-  alternates: {
-    canonical: siteEnv.baseUrl,
-  },
+  ...(googleSiteVerification
+    ? {
+        verification: {
+          google: googleSiteVerification,
+        },
+      }
+    : {}),
 };
 
 export default function RootLayout({
@@ -91,12 +95,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="antialiased">
-      <body className="min-h-screen bg-background font-body" suppressHydrationWarning>
-        <AppProvider>
-          <div className="relative flex min-h-screen flex-col">
-            {children}
-          </div>
-        </AppProvider>
+      <body className="min-h-screen bg-white font-body" suppressHydrationWarning>
+        <GoogleAnalytics />
+        <ServerAppShell>{children}</ServerAppShell>
       </body>
     </html>
   );

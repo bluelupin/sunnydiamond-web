@@ -35,6 +35,12 @@ export const homepagePopulateParams = {
   sunnyPromiseSection: {
     populate: "sunnyPromiseSection",
   },
+  bespokeForYouSection: {
+    populate: "bespokeForYouSection",
+  },
+  diamondsForEveryoneSection: {
+    populate: "diamondsForEveryoneSection",
+  },
   bespokeForYouCards: {
     populate: "bespokeForYouCards",
   },

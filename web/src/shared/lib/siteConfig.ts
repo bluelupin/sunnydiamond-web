@@ -1,3 +1,5 @@
+import { getPublicSiteUrl } from "@/api/config";
+
 export const siteConfig = {
   brand: {
     name: "Sunny Diamonds",
@@ -23,28 +25,26 @@ export const siteConfig = {
     titleTemplate: "%s | Sunny Diamonds",
     defaultDescription:
       "Handcrafted premium and custom diamond jewellery. Explore GIA-certified diamonds, bespoke designs, and timeless elegance.",
-    siteUrl: "https://sunnydiamonds.com",
+    siteUrl: getPublicSiteUrl(),
     ogImage: "/og-image.jpg",
   },
   navigation: {
     main: [
-      { to: "/products", label: "Jewellery" },
-      { to: "/products", label: "Collection" },
-      { to: "/products", label: "Gifting" },
-      { to: "/contact", label: "Bespoke" },
-      { to: "/about", label: "World of Sunny" },
+      { to: "/jewellery", label: "Jewellery" },
+      { to: "/gifting", label: "Gifting" },
+      { to: "/bespoke-jewellery", label: "Bespoke" },
+      { to: "/world-of-sunny", label: "World of Sunny" },
     ],
     footer: {
       columns: [
         {
           heading: "Our Company",
           links: [
-            { to: "/about", label: "About Us" },
-            { to: "/education", label: "Learn About Diamonds" },
+            { to: "/world-of-sunny", label: "World of Sunny" },
+            { to: "/learn-about-diamonds", label: "Learn About Diamonds" },
             { to: "/diamonds-for-everyone", label: "Diamonds For Everyone" },
             { to: "/careers", label: "Careers" },
-            { to: "/news", label: "News" },
-            { to: "/blogs", label: "Blog" },
+            { to: "/blogs", label: "Blogs" },
           ],
         },
         {
@@ -53,7 +53,6 @@ export const siteConfig = {
             { to: "/contact", label: "Contact Us" },
             { to: "/store-locator", label: "Store Locator" },
             { to: "/faqs", label: "FAQs" },
-            { to: "/help-and-support", label: "Help and Support" },
           ],
         },
         {
@@ -61,22 +60,35 @@ export const siteConfig = {
           links: [
             { to: "/book-an-appointment", label: "Book an Appointment" },
             { to: "/bespoke-jewellery", label: "Bespoke Jewellery" },
-            { to: "/monthly-plans", label: "Monthly Plans" },
-            { to: "/gift-card", label: "Gift Card" },
-            { to: "/finance-options", label: "Finance Options" },
           ],
         },
         {
           heading: "Legal",
           links: [
-            { to: "/returns-and-cancellations", label: "Returns and Cancellations" },
-            { to: "/exchange-and-resizing", label: "Exchange and Resizing" },
-            { to: "/shipping-delivery", label: "Shipping & Delivery" },
-            { to: "/cash-on-delivery-policy", label: "Cash on Delivery Policy" },
-            { to: "/old-gold-purchase-policy-kerala-only", label: "Old Gold Purchase Policy (Kerala Only)" },
-            { to: "/privacy-policy", label: "Privacy Policy" },
-            { to: "/terms-and-conditions", label: "Terms & Conditions" },
-            { to: "/policy-and-certification", label: "Policy and Certification" },
+            {
+              to: "/policy-and-certifications?policy=15-day-return-policy",
+              label: "Returns and Cancellations",
+            },
+            {
+              to: "/policy-and-certifications?policy=exchange-and-resizing",
+              label: "Exchange and Resizing",
+            },
+            {
+              to: "/policy-and-certifications?policy=shipping-and-delivery",
+              label: "Shipping & Delivery",
+            },
+            {
+              to: "/policy-and-certifications?policy=cash-on-delivery",
+              label: "Cash on Delivery Policy",
+            },
+            {
+              to: "/policy-and-certifications?policy=privacy-policy",
+              label: "Privacy Policy",
+            },
+            {
+              to: "/policy-and-certifications?policy=terms-and-conditions",
+              label: "Terms & Conditions",
+            },
           ],
         },
       ],
@@ -88,8 +100,5 @@ export const siteConfig = {
       ],
       paymentMethods: ["Visa", "Mastercard", "Amex", "Maestro", "UPI", "Paytm", "RuPay"],
     },
-  },
-  ga: {
-    measurementId: "G-XXXXXXXXXX", // Replace with your GA4 Measurement ID
   },
 } as const;

@@ -12,7 +12,8 @@ export type FeaturedProductsSection = {
   id?: number;
   sectionTitle?: string;
   description?: string;
-  cta?: { label?: string; to?: string };
+  isActive?: boolean | null;
+  cta?: { label?: string; to?: string; url?: string };
   products?: FeaturedProduct[];
 };
 

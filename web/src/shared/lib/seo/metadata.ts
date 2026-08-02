@@ -1,30 +1,60 @@
 import { Metadata } from "next";
-import siteEnv from "./siteConfig";
+import { siteConfig } from "@/shared/lib/siteConfig";
 
 interface SeoConfig {
   title: string;
   description?: string;
+  keywords?: string;
   image?: string;
   canonicalPath?: string;
   noIndex?: boolean;
+  url?: string;
+  siteName?: string;
+  imageWidth?: number;
+  imageHeight?: number;
+  openGraphType?: "website" | "article";
+}
+
+function normalizeUrl(rawUrl?: string): string | undefined {
+  if (!rawUrl) return undefined;
+  try {
+    return new URL(rawUrl).toString();
+  } catch {
+    return undefined;
+  }
 }
 
 export function constructMetadata({
   title,
-  description = "Sunny Diamond - Premium Jewelry and Diamonds",
-  image = "/og-image.jpg",
+  description = siteConfig.seo.defaultDescription,
+  keywords,
+  image = siteConfig.seo.ogImage,
   canonicalPath,
   noIndex = false,
+  url,
+  siteName = siteConfig.brand.name,
+  imageWidth = 1200,
+  imageHeight = 630,
+  openGraphType = "website",
 }: SeoConfig): Metadata {
+  const resolvedImage = normalizeUrl(image) ?? `${siteConfig.seo.siteUrl}${image.startsWith("/") ? "" : "/"}${image}`;
+  const resolvedUrl = normalizeUrl(url ?? canonicalPath ?? siteConfig.seo.siteUrl);
+
   return {
     title,
     description,
+    ...(keywords ? { keywords } : {}),
     openGraph: {
       title,
       description,
+      url: resolvedUrl,
+      siteName,
+      type: openGraphType,
       images: [
         {
-          url: image,
+          url: resolvedImage,
+          width: imageWidth,
+          height: imageHeight,
         },
       ],
     },
@@ -32,25 +62,22 @@ export function constructMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: [image],
-      creator: "@sunnydiamond",
+      images: [resolvedImage],
     },
     icons: {
       icon: "/favicon.ico",
       shortcut: "/favicon.ico",
       apple: "/favicon.ico",
     },
-    metadataBase: new URL(siteEnv.baseUrl),
-    ...(canonicalPath && {
-      alternates: {
-        canonical: canonicalPath,
-      },
-    }),
-    ...(noIndex && {
-      robots: {
-        index: false,
-        follow: false,
-      },
-    }),
+    metadataBase: new URL(siteConfig.seo.siteUrl),
+    alternates: canonicalPath
+      ? {
+          canonical: canonicalPath,
+        }
+      : undefined,
+    robots: {
+      index: !noIndex,
+      follow: !noIndex,
+    },
   };
 }

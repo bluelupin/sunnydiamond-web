@@ -1,15 +1,19 @@
+import { getPublicSiteUrl } from "@/api/config";
+
 export type AppEnv = "local" | "qa" | "production";
 
 export interface SiteEnvConfig {
   env: AppEnv;
-  baseUrl: string; // full origin, no trailing slash
-  indexing: boolean; // should search engines index this env
+  baseUrl: string;
+  indexing: boolean;
   label?: string;
 }
 
 const ENV =
   (process.env.NEXT_PUBLIC_APP_ENV as AppEnv) ||
   (process.env.NODE_ENV === "development" ? "local" : "production");
+
+const effectiveBaseUrl = getPublicSiteUrl();
 
 const configs: Record<AppEnv, SiteEnvConfig> = {
   local: {
@@ -20,7 +24,7 @@ const configs: Record<AppEnv, SiteEnvConfig> = {
   },
   qa: {
     env: "qa",
-    baseUrl: "https://qa.sunnydiamonds.com",
+    baseUrl: "https://sunnydiamonds-web-dev.on-forge.com",
     indexing: true,
     label: "QA",
   },
@@ -32,7 +36,10 @@ const configs: Record<AppEnv, SiteEnvConfig> = {
   },
 };
 
-export const siteEnv = configs[ENV] ?? configs.production;
+export const siteEnv: SiteEnvConfig = {
+  ...(configs[ENV] ?? configs.production),
+  baseUrl: effectiveBaseUrl || configs[ENV]?.baseUrl || configs.production.baseUrl,
+};
 
 export const getAbsoluteUrl = (path = "/") => {
   try {
