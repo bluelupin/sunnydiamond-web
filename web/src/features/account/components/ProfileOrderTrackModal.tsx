@@ -16,6 +16,7 @@ import { profileTabsContent } from "../data/profileContent";
 import { buildProfileOrderDetailHref } from "../utils/profileOrderNavigation";
 import type { ProfileOrderUi } from "../types/profileUi.types";
 import { resolveProfileOrderTimelineSteps } from "../utils/orderDeliveryTimeline.utils";
+import { mapSunnyTrackingToTimeline } from "../utils/orderFlowSteps.mapper";
 import { ProfileOrderTrackTimeline } from "./ProfileOrderTrackTimeline";
 import { ProfileStatusBadge } from "./profileUi";
 
@@ -96,10 +97,19 @@ export function ProfileOrderTrackModal({
   }, [trackedOrder?.status]);
 
   const activeStatus = trackedOrder?.status ?? order.status;
-  const timelineSteps = useMemo(
-    () => resolveProfileOrderTimelineSteps(activeStatus, order.timeline),
-    [activeStatus, order.timeline],
-  );
+  const timelineSteps = useMemo(() => {
+    // The freshly tracked order carries the authoritative stepper; the card's mapped
+    // timeline stands in until it arrives.
+    const trackedSteps = mapSunnyTrackingToTimeline(trackedOrder?.sunnyTracking ?? null);
+    const serverSteps =
+      trackedSteps.length > 0
+        ? trackedSteps
+        : order.timelineFromServer
+          ? order.timeline
+          : null;
+
+    return resolveProfileOrderTimelineSteps(activeStatus, order.timeline, serverSteps);
+  }, [activeStatus, order.timeline, order.timelineFromServer, trackedOrder?.sunnyTracking]);
   const trackingId = resolveTrackingId(order, trackedOrder);
   const badgeLabel =
     order.category === "in_progress" ? content.statusInProgress : order.statusLabel;

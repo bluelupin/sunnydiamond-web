@@ -3,7 +3,7 @@ import {
   MAGENTO_CATALOG_REVALIDATE_SECONDS,
   MAGENTO_DEFAULT_STORE_CODE,
 } from "./config";
-import { MagentoGraphqlError } from "./magento.errors";
+import { MagentoGraphqlError, type MagentoGraphqlErrorEntry } from "./magento.errors";
 
 export type MagentoGraphqlRequest = {
   query: string;
@@ -17,7 +17,7 @@ export type MagentoGraphqlRequest = {
 
 type MagentoGraphqlResponse<T> = {
   data?: T;
-  errors?: Array<{ message: string }>;
+  errors?: MagentoGraphqlErrorEntry[];
 };
 
 export async function magentoGraphqlFetch<T>({

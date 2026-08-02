@@ -19,6 +19,16 @@ export const ORDER_DELIVERY_STEP_DESCRIPTIONS: Partial<
   "Delivered": "Your order has been delivered.",
 };
 
+/** Custom status codes installed by SunnyDiamonds_OrderFlow — independent of display copy. */
+const ORDER_FLOW_STATUS_TO_ACTIVE_STEP: Record<string, number> = {
+  in_production: 1,
+  packaged: 2,
+  shipped: 3,
+  out_for_delivery: 4,
+  delivered: 5,
+};
+
+/** Pre-module Magento statuses — last resort, kept for orders placed before the rollout. */
 const LEGACY_STATUS_TO_ACTIVE_STEP: Record<string, number> = {
   processing: 1,
   pending: 1,
@@ -36,6 +46,12 @@ export function normalizeOrderStatus(status: string): string {
 }
 
 export function getOrderDeliveryTimelineActiveStep(status: string): number | null {
+  const statusCode = status.trim().toLowerCase();
+  const codeStep = ORDER_FLOW_STATUS_TO_ACTIVE_STEP[statusCode];
+  if (codeStep) {
+    return codeStep;
+  }
+
   const normalized = normalizeOrderStatus(status);
 
   if (!normalized) {
@@ -73,10 +89,20 @@ export function buildOrderDeliveryTimelineFromStatus(status: string): ProfileTim
   });
 }
 
+/**
+ * Steps rendered on a profile order card/detail, in preference order:
+ * server steps (`sunny_tracking`/`sunny_refund`) → status-derived delivery timeline →
+ * whatever the mapper already produced.
+ */
 export function resolveProfileOrderTimelineSteps(
   status: string,
   fallbackTimeline?: ProfileTimelineStep[],
+  serverSteps?: ProfileTimelineStep[] | null,
 ): ProfileTimelineStep[] {
+  if (serverSteps && serverSteps.length > 0) {
+    return serverSteps;
+  }
+
   const fromStatus = buildOrderDeliveryTimelineFromStatus(status);
   if (fromStatus.length > 0) {
     return fromStatus;

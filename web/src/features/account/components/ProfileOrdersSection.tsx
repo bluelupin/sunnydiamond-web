@@ -2,10 +2,16 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import type { TrackedOrder } from "@/services/customer/order-tracking.types";
 import { profileTabsContent } from "../data/profileContent";
 import { useCustomerOrders } from "../hooks/useCustomerOrders";
-import type { OrderFilterEmptyStateKey, OrderFilterKey } from "../types/profileUi.types";
-import { mapCustomerOrderToProfileUi } from "../utils/profileDisplayMappers";
+import type {
+  OrderFilterEmptyStateKey,
+  OrderFilterKey,
+  ProfileOrderUi,
+} from "../types/profileUi.types";
+import { formatOrderStatusLabel } from "../utils/orderDeliveryTimeline.utils";
+import { categorizeOrder, mapCustomerOrderToProfileUi } from "../utils/profileDisplayMappers";
 import { PROFILE_ORDER_QUERY_PARAM } from "../utils/profileOrderNavigation";
 import { ProfileOrderCard } from "./ProfileOrderCard";
 import { ProfileOrderDetailPanel } from "./ProfileOrderDetailPanel";
@@ -33,6 +39,27 @@ function isOrderFilterEmptyStateKey(
   return (FILTER_EMPTY_UI_KEYS as readonly string[]).includes(filter);
 }
 
+type ProfileOrderOverride = Pick<
+  ProfileOrderUi,
+  "status" | "statusLabel" | "category" | "subState" | "showTrack" | "showCancel" | "showReturn"
+>;
+
+/** Patch applied over the list mapping so a cancelled/returned order changes tab at once. */
+function buildOrderOverride(order: TrackedOrder): ProfileOrderOverride {
+  const { category, subState } = categorizeOrder(order.sunnyStatus, order.status);
+  const actions = order.sunnyActions;
+
+  return {
+    status: order.status,
+    statusLabel: formatOrderStatusLabel(order.status),
+    category,
+    subState,
+    showTrack: actions ? actions.canTrack : false,
+    showCancel: actions ? actions.canCancel : false,
+    showReturn: actions ? actions.canReturn : false,
+  };
+}
+
 function OrdersSkeleton() {
   return (
     <div className="space-y-4" aria-busy="true" aria-label="Loading orders">
@@ -50,9 +77,11 @@ const ProfileOrdersSection = () => {
   const selectedOrderNumber = searchParams?.get(PROFILE_ORDER_QUERY_PARAM)?.trim() ?? "";
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  const { data, isLoading, isLoadingMore, error, hasMore, loadMore } = useCustomerOrders(true);
+  const { data, isLoading, isLoadingMore, error, hasMore, loadMore, refresh } =
+    useCustomerOrders(true);
   const [activeFilter, setActiveFilter] = useState<OrderFilterKey>("in_progress");
   const [resolvedStatuses, setResolvedStatuses] = useState<Record<string, string>>({});
+  const [orderOverrides, setOrderOverrides] = useState<Record<string, ProfileOrderOverride>>({});
 
   const openOrderDetail = useCallback(
     (orderNumber: string) => {
@@ -80,8 +109,15 @@ const ProfileOrdersSection = () => {
   }, [selectedOrderNumber]);
 
   const orders = useMemo(
-    () => (data?.orders ?? []).map(mapCustomerOrderToProfileUi),
-    [data],
+    () =>
+      (data?.orders ?? []).map((order) => {
+        const mapped = mapCustomerOrderToProfileUi(order);
+        const override = orderOverrides[order.id];
+
+        // Once a refetch reports the mutated status, the mapped order is authoritative again.
+        return override && override.status !== order.status ? { ...mapped, ...override } : mapped;
+      }),
+    [data, orderOverrides],
   );
 
   const filteredOrders = useMemo(
@@ -123,7 +159,20 @@ const ProfileOrdersSection = () => {
     });
   }, []);
 
-  if (isLoading) {
+  const handleOrderChanged = useCallback(
+    (freshOrder: TrackedOrder) => {
+      setOrderOverrides((current) => ({
+        ...current,
+        [freshOrder.id]: buildOrderOverride(freshOrder),
+      }));
+      refresh();
+    },
+    [refresh],
+  );
+
+  // Only the first load blanks the section. A post-mutation `refresh()` keeps the current
+  // tree mounted, so the open detail panel (and its success dialog) survives the refetch.
+  if (isLoading && !data) {
     return <OrdersSkeleton />;
   }
 
@@ -151,6 +200,7 @@ const ProfileOrdersSection = () => {
             ? (status) => handleTrackedStatusChange(selectedOrder.id, status)
             : undefined
         }
+        onOrderChanged={handleOrderChanged}
       />
     );
   }
@@ -189,6 +239,7 @@ const ProfileOrdersSection = () => {
                 order={order}
                 onViewDetails={openOrderDetail}
                 resolvedStatus={resolvedStatuses[order.id]}
+                onOrderChanged={handleOrderChanged}
               />
             </li>
           ))}

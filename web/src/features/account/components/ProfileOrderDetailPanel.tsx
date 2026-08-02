@@ -25,12 +25,14 @@ type ProfileOrderDetailPanelProps = {
   orderNumber: string;
   onBack: () => void;
   onTrackedStatusChange?: (status: string) => void;
+  onOrderChanged?: (order: TrackedOrder) => void;
 };
 
 export function ProfileOrderDetailPanel({
   orderNumber,
   onBack,
   onTrackedStatusChange,
+  onOrderChanged,
 }: ProfileOrderDetailPanelProps) {
   const [order, setOrder] = useState<TrackedOrder | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -137,5 +139,17 @@ export function ProfileOrderDetailPanel({
     return null;
   }
 
-  return <ProfileOrderDetailView order={orderDetail} onBack={onBack} />;
+  // The mutation response is the freshest state there is — no refetch needed here.
+  const handleOrderChanged = (freshOrder: TrackedOrder) => {
+    setOrder(freshOrder);
+    onOrderChanged?.(freshOrder);
+  };
+
+  return (
+    <ProfileOrderDetailView
+      order={orderDetail}
+      onBack={onBack}
+      onOrderChanged={handleOrderChanged}
+    />
+  );
 }

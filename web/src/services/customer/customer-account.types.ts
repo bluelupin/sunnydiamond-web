@@ -1,3 +1,5 @@
+import type { SunnyItemTag, TrackedOrderSunnyFields } from "./order-tracking.types";
+
 export type CustomerOrderItemOption = {
   label: string;
   value: string;
@@ -11,6 +13,9 @@ export type CustomerOrderItem = {
   imageUrl: string | null;
   selectedOptions: CustomerOrderItemOption[];
   enteredOptions: CustomerOrderItemOption[];
+  isGift: boolean;
+  sunnyTag: SunnyItemTag | null;
+  giftMessage: string | null;
 };
 
 export type CustomerOrder = {
@@ -23,7 +28,7 @@ export type CustomerOrder = {
   currency: string;
   /** Order comment messages (used to detect gift-marked line items). */
   commentMessages?: string[];
-};
+} & TrackedOrderSunnyFields;
 
 export type CustomerOrdersPage = {
   orders: CustomerOrder[];

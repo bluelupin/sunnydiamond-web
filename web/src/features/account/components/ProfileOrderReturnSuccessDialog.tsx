@@ -12,23 +12,23 @@ import { profileTabsContent } from "../data/profileContent";
 
 const SUCCESS_ICON_SRC = "/images/careers/icon-application-success.svg";
 
-type ProfileOrderCancelSuccessDialogProps = {
+type ProfileOrderReturnSuccessDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   orderNumber: string;
-  /** Refund ETA from the cancellation mutation — absent for unpaid orders. */
+  /** Refund ETA from the return mutation — absent until the refund is scheduled. */
   refundNote?: string;
 };
 
-export function ProfileOrderCancelSuccessDialog({
+export function ProfileOrderReturnSuccessDialog({
   open,
   onOpenChange,
   orderNumber,
   refundNote,
-}: ProfileOrderCancelSuccessDialogProps) {
+}: ProfileOrderReturnSuccessDialogProps) {
   const { toast } = useToast();
   const content = profileTabsContent.orders;
-  const dialog = content.cancelSuccessDialog;
+  const dialog = content.returnSuccessDialog;
 
   const handleCopyOrderId = async () => {
     try {

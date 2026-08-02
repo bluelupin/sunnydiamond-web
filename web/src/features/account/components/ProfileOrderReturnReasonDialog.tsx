@@ -11,7 +11,7 @@ import {
 } from "@/shared/ui/dialog";
 import { profileTabsContent } from "../data/profileContent";
 
-type ProfileOrderCancelReasonDialogProps = {
+type ProfileOrderReturnReasonDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: (payload: { reason: string; comments: string }) => void;
@@ -21,16 +21,16 @@ type ProfileOrderCancelReasonDialogProps = {
   errorMessage?: string | null;
 };
 
-export function ProfileOrderCancelReasonDialog({
+export function ProfileOrderReturnReasonDialog({
   open,
   onOpenChange,
   onConfirm,
   reasons,
   isSubmitting = false,
   errorMessage,
-}: ProfileOrderCancelReasonDialogProps) {
+}: ProfileOrderReturnReasonDialogProps) {
   const ordersContent = profileTabsContent.orders;
-  const dialog = ordersContent.cancelReasonDialog;
+  const dialog = ordersContent.returnReasonDialog;
   const [selectedCode, setSelectedCode] = useState("");
   const [comments, setComments] = useState("");
 
@@ -50,7 +50,6 @@ export function ProfileOrderCancelReasonDialog({
       return;
     }
 
-    // Magento validates the cancellation reason against its configured labels.
     onConfirm({ reason: selectedReason.label, comments: comments.trim() });
   };
 
@@ -94,7 +93,7 @@ export function ProfileOrderCancelReasonDialog({
               >
                 <input
                   type="radio"
-                  name="cancel-order-reason"
+                  name="return-order-reason"
                   value={reason.code}
                   checked={selectedReason?.code === reason.code}
                   onChange={() => setSelectedCode(reason.code)}

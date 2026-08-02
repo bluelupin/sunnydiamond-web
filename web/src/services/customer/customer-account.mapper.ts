@@ -3,6 +3,12 @@ import {
   getIndiaMagentoRegionId,
   getIndianStateFromMagentoRegionId,
 } from "@/services/magento/regions/indiaRegionIds";
+import {
+  mapSunnyOrderFields,
+  mapSunnyOrderItemFields,
+  type MagentoSunnyOrderFields,
+  type MagentoSunnyOrderItemFields,
+} from "./order-tracking.mapper";
 import type {
   CustomerAddress,
   CustomerAddressInput,
@@ -28,7 +34,7 @@ type MagentoOrderItem = {
   product_sku?: string | null;
   selected_options?: MagentoOrderItemOption[] | null;
   entered_options?: MagentoOrderItemOption[] | null;
-};
+} & MagentoSunnyOrderItemFields;
 
 type MagentoOrderComment = {
   message?: string | null;
@@ -44,7 +50,7 @@ type MagentoCustomerOrder = {
   total?: {
     grand_total?: MagentoMoney | null;
   } | null;
-};
+} & MagentoSunnyOrderFields;
 
 export type MagentoCustomerOrdersResponse = {
   customer?: {
@@ -127,17 +133,23 @@ function mapMagentoCustomerOrder(order: MagentoCustomerOrder): CustomerOrder {
     orderDate: order.order_date ?? "",
     status: order.status ?? "unknown",
     commentMessages,
-    items: (order.items ?? []).map((item) => ({
-      productName: item.product_name ?? "Product",
-      quantity: item.quantity_ordered ?? 0,
-      productUrlKey: item.product_url_key ?? null,
-      productSku: item.product_sku ?? null,
-      imageUrl: null,
-      selectedOptions: mapMagentoOrderItemOptions(item.selected_options),
-      enteredOptions: mapMagentoOrderItemOptions(item.entered_options),
-    })),
+    items: (order.items ?? []).map((item) => {
+      const { thumbnailUrl, ...sunnyItemFields } = mapSunnyOrderItemFields(item);
+
+      return {
+        productName: item.product_name ?? "Product",
+        quantity: item.quantity_ordered ?? 0,
+        productUrlKey: item.product_url_key ?? null,
+        productSku: item.product_sku ?? null,
+        imageUrl: thumbnailUrl,
+        selectedOptions: mapMagentoOrderItemOptions(item.selected_options),
+        enteredOptions: mapMagentoOrderItemOptions(item.entered_options),
+        ...sunnyItemFields,
+      };
+    }),
     grandTotal: order.total?.grand_total?.value ?? 0,
     currency: order.total?.grand_total?.currency ?? "INR",
+    ...mapSunnyOrderFields(order),
   };
 }
 

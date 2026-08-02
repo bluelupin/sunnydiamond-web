@@ -9,25 +9,38 @@ import {
   DetailDarkButton,
   DetailOutlineButton,
 } from "@/features/products/components/detail/shared";
+import type { TrackedOrder } from "@/services/customer/order-tracking.types";
 import { useToast } from "@/shared/hooks/use-toast";
 import { cn } from "@/shared/utils/cn";
 import { profileTabsContent } from "../data/profileContent";
+import { useOrderActionReasons } from "../hooks/useOrderActionReasons";
+import { useOrderActions } from "../hooks/useOrderActions";
+import { useOrderInvoiceDownload } from "../hooks/useOrderInvoiceDownload";
 import type { ProfileOrderDetailUi } from "../types/profileUi.types";
 import { formatOrderDate, formatOrderTotal } from "../utils/formatAccountData";
 import { resolveProfileOrderTimelineSteps } from "../utils/orderDeliveryTimeline.utils";
+import { formatRefundNote } from "../utils/profileDisplayMappers";
 import { ProfileOrderDetailItemCard } from "./ProfileOrderDetailItemCard";
 import { ProfileOrderCancelDialog } from "./ProfileOrderCancelDialog";
 import { ProfileOrderCancelReasonDialog } from "./ProfileOrderCancelReasonDialog";
 import { ProfileOrderCancelSuccessDialog } from "./ProfileOrderCancelSuccessDialog";
+import { ProfileOrderReturnDialog } from "./ProfileOrderReturnDialog";
+import { ProfileOrderReturnReasonDialog } from "./ProfileOrderReturnReasonDialog";
+import { ProfileOrderReturnSuccessDialog } from "./ProfileOrderReturnSuccessDialog";
 import { ProfileOrderTimeline } from "./ProfileOrderTimeline";
 import { ProfileMetaDivider } from "./profileUi";
 
 type ProfileOrderDetailViewProps = {
   order: ProfileOrderDetailUi;
   onBack: () => void;
+  onOrderChanged?: (order: TrackedOrder) => void;
 };
 
-export function ProfileOrderDetailView({ order, onBack }: ProfileOrderDetailViewProps) {
+export function ProfileOrderDetailView({
+  order,
+  onBack,
+  onOrderChanged,
+}: ProfileOrderDetailViewProps) {
   const { toast } = useToast();
   const router = useRouter();
   const content = profileTabsContent.orders;
@@ -36,6 +49,15 @@ export function ProfileOrderDetailView({ order, onBack }: ProfileOrderDetailView
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelReasonDialogOpen, setCancelReasonDialogOpen] = useState(false);
   const [cancelSuccessDialogOpen, setCancelSuccessDialogOpen] = useState(false);
+  const [returnDialogOpen, setReturnDialogOpen] = useState(false);
+  const [returnReasonDialogOpen, setReturnReasonDialogOpen] = useState(false);
+  const [returnSuccessDialogOpen, setReturnSuccessDialogOpen] = useState(false);
+  const [refundNote, setRefundNote] = useState<string | undefined>(undefined);
+  const { cancelReasons, returnReasons } = useOrderActionReasons();
+  const { isSubmitting, error, clearError, cancelOrder, returnOrder } = useOrderActions();
+  const { download, downloadingNumber } = useOrderInvoiceDownload();
+  const isDownloadingInvoice = downloadingNumber === order.number;
+  const invoiceDisabled = Boolean(order.invoiceDisabled) || isDownloadingInvoice;
 
   const handleCopyOrderId = async () => {
     try {
@@ -50,18 +72,22 @@ export function ProfileOrderDetailView({ order, onBack }: ProfileOrderDetailView
   };
 
   const handleDownloadInvoice = () => {
-    toast({
-      title: content.invoiceUnavailableTitle,
-      description: content.invoiceUnavailableDescription,
-    });
+    void download(order.number);
   };
 
   const handleCancelOrder = () => {
+    clearError();
     setCancelDialogOpen(true);
+  };
+
+  const handleReturnOrder = () => {
+    clearError();
+    setReturnDialogOpen(true);
   };
 
   const handleContactSupport = () => {
     setCancelDialogOpen(false);
+    setReturnDialogOpen(false);
     router.push(content.cancelDialog.contactHref);
   };
 
@@ -70,16 +96,61 @@ export function ProfileOrderDetailView({ order, onBack }: ProfileOrderDetailView
     setCancelReasonDialogOpen(true);
   };
 
-  const handleConfirmCancellation = (_payload: { reason: string; comments: string }) => {
-    setCancelReasonDialogOpen(false);
-    setCancelSuccessDialogOpen(true);
+  const handleProceedToReturn = () => {
+    setReturnDialogOpen(false);
+    setReturnReasonDialogOpen(true);
+  };
+
+  const handleConfirmCancellation = async (payload: { reason: string; comments: string }) => {
+    try {
+      const freshOrder = await cancelOrder(order.number, {
+        orderId: order.id,
+        reason: payload.reason,
+        ...(payload.comments ? { comment: payload.comments } : {}),
+      });
+
+      setRefundNote(formatRefundNote(freshOrder?.sunnyRefund));
+      setCancelReasonDialogOpen(false);
+      setCancelSuccessDialogOpen(true);
+
+      if (freshOrder) {
+        onOrderChanged?.(freshOrder);
+      }
+    } catch {
+      // `useOrderActions` keeps the message; the reason dialog renders it.
+    }
+  };
+
+  const handleConfirmReturn = async (payload: { reason: string; comments: string }) => {
+    try {
+      const freshOrder = await returnOrder(order.number, {
+        orderId: order.id,
+        reason: payload.reason,
+        ...(payload.comments ? { comment: payload.comments } : {}),
+      });
+
+      setRefundNote(formatRefundNote(freshOrder?.sunnyRefund));
+      setReturnReasonDialogOpen(false);
+      setReturnSuccessDialogOpen(true);
+
+      if (freshOrder) {
+        onOrderChanged?.(freshOrder);
+      }
+    } catch {
+      // `useOrderActions` keeps the message; the reason dialog renders it.
+    }
   };
 
   const { priceBreakdown } = order;
   const hasDiscount = priceBreakdown.orderDiscount > 0;
   const timelineSteps = useMemo(
-    () => resolveProfileOrderTimelineSteps(order.status, order.timeline),
-    [order.status, order.timeline],
+    () =>
+      resolveProfileOrderTimelineSteps(
+        order.status,
+        order.timeline,
+        order.timelineFromServer ? order.timeline : null,
+      ),
+    [order.status, order.timeline, order.timelineFromServer],
   );
 
   return (
@@ -292,16 +363,19 @@ export function ProfileOrderDetailView({ order, onBack }: ProfileOrderDetailView
         </div>
       ) : null}
 
-      {(order.showCancel || order.showDownloadInvoice) ? (
+      {(order.showCancel || order.showReturn || order.showDownloadInvoice) ? (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
             {order.showDownloadInvoice ? (
               <DetailDarkButton
                 type="button"
-                className="order-1 h-14 min-h-[56px] w-full shrink-0 px-7 py-5 font-normal lg:order-2 lg:flex-1"
+                className="order-1 h-14 min-h-[56px] w-full shrink-0 px-7 py-5 font-normal disabled:cursor-not-allowed disabled:opacity-50 lg:order-2 lg:flex-1"
                 onClick={handleDownloadInvoice}
+                disabled={invoiceDisabled}
               >
-                {content.downloadInvoiceLabel}
+                {isDownloadingInvoice
+                  ? content.downloadingInvoiceLabel
+                  : content.downloadInvoiceLabel}
               </DetailDarkButton>
             ) : null}
 
@@ -312,6 +386,16 @@ export function ProfileOrderDetailView({ order, onBack }: ProfileOrderDetailView
                 onClick={handleCancelOrder}
               >
                 {content.cancelOrderLabel}
+              </DetailOutlineButton>
+            ) : null}
+
+            {order.showReturn ? (
+              <DetailOutlineButton
+                type="button"
+                className="order-3 h-14 min-h-[56px] w-full shrink-0 px-7 py-5 font-normal lg:order-1 lg:flex-1"
+                onClick={handleReturnOrder}
+              >
+                {content.returnOrderLabel}
               </DetailOutlineButton>
             ) : null}
           </div>
@@ -337,13 +421,40 @@ export function ProfileOrderDetailView({ order, onBack }: ProfileOrderDetailView
       <ProfileOrderCancelReasonDialog
         open={cancelReasonDialogOpen}
         onOpenChange={setCancelReasonDialogOpen}
-        onConfirm={handleConfirmCancellation}
+        onConfirm={(payload) => void handleConfirmCancellation(payload)}
+        reasons={cancelReasons}
+        isSubmitting={isSubmitting}
+        errorMessage={error}
       />
 
       <ProfileOrderCancelSuccessDialog
         open={cancelSuccessDialogOpen}
         onOpenChange={setCancelSuccessDialogOpen}
         orderNumber={order.number}
+        refundNote={refundNote}
+      />
+
+      <ProfileOrderReturnDialog
+        open={returnDialogOpen}
+        onOpenChange={setReturnDialogOpen}
+        onContactSupport={handleContactSupport}
+        onProceedToReturn={handleProceedToReturn}
+      />
+
+      <ProfileOrderReturnReasonDialog
+        open={returnReasonDialogOpen}
+        onOpenChange={setReturnReasonDialogOpen}
+        onConfirm={(payload) => void handleConfirmReturn(payload)}
+        reasons={returnReasons}
+        isSubmitting={isSubmitting}
+        errorMessage={error}
+      />
+
+      <ProfileOrderReturnSuccessDialog
+        open={returnSuccessDialogOpen}
+        onOpenChange={setReturnSuccessDialogOpen}
+        orderNumber={order.number}
+        refundNote={refundNote}
       />
     </div>
   );

@@ -117,6 +117,84 @@ export const MAGENTO_REMOVE_PRODUCTS_FROM_WISHLIST_MUTATION = `
   }
 ` as const;
 
+/**
+ * The `sunny_*` order fields only exist once SunnyDiamonds_OrderFlow is deployed, and
+ * GraphQL hard-fails on unknown fields — so the fragments below collapse to empty
+ * strings until `MAGENTO_ORDER_FLOW_FIELDS=true`. The flag is intentionally not
+ * `NEXT_PUBLIC_`: every document that interpolates these fragments is executed
+ * server-side only (customer order services called from `/api` route handlers).
+ */
+const ORDER_FLOW_FIELDS_ENABLED = process.env.MAGENTO_ORDER_FLOW_FIELDS === "true";
+
+const SUNNY_REFUND_STATUS_FIELDS = `
+  type
+  steps {
+    code
+    label
+    state
+    timestamp
+  }
+  refund_amount {
+    value
+    currency
+  }
+  refund_mode
+  estimated_completion_date
+  estimated_window_label
+`;
+
+const SUNNY_ORDER_STATUS_FIELDS = ORDER_FLOW_FIELDS_ENABLED
+  ? `
+  sunny_status
+  sunny_actions {
+    can_track
+    can_cancel
+    can_return
+    can_download_invoice
+    can_contact_support
+  }
+  sunny_delivery {
+    estimated_delivery_at
+    delivered_at
+    returnable_till
+  }
+  sunny_refund {
+    ${SUNNY_REFUND_STATUS_FIELDS}
+  }
+  gift_mode
+`
+  : "";
+
+const SUNNY_ORDER_TRACKING_FIELDS = ORDER_FLOW_FIELDS_ENABLED
+  ? `
+  sunny_tracking {
+    current_step
+    steps {
+      code
+      label
+      state
+      timestamp
+      description
+    }
+  }
+`
+  : "";
+
+const SUNNY_ORDER_ITEM_FIELDS = ORDER_FLOW_FIELDS_ENABLED
+  ? `
+  is_gift
+  sunny_tag
+  gift_message {
+    message
+  }
+  product {
+    thumbnail {
+      url
+    }
+  }
+`
+  : "";
+
 export const MAGENTO_CUSTOMER_ORDERS_QUERY = `
   query MagentoCustomerOrders($pageSize: Int!, $currentPage: Int!) {
     customer {
@@ -148,6 +226,7 @@ export const MAGENTO_CUSTOMER_ORDERS_QUERY = `
               label
               value
             }
+            ${SUNNY_ORDER_ITEM_FIELDS}
           }
           total {
             grand_total {
@@ -155,6 +234,8 @@ export const MAGENTO_CUSTOMER_ORDERS_QUERY = `
               currency
             }
           }
+          ${SUNNY_ORDER_STATUS_FIELDS}
+          ${SUNNY_ORDER_TRACKING_FIELDS}
         }
       }
     }
@@ -253,6 +334,7 @@ const ORDER_DETAIL_FIELDS = `
       label
       value
     }
+    ${SUNNY_ORDER_ITEM_FIELDS}
   }
   total {
     grand_total {
@@ -270,6 +352,13 @@ const ORDER_DETAIL_FIELDS = `
     total_shipping {
       value
       currency
+    }
+    discounts {
+      label
+      amount {
+        value
+        currency
+      }
     }
   }
   payment_methods {
@@ -306,6 +395,8 @@ const ORDER_DETAIL_FIELDS = `
       carrier
     }
   }
+  ${SUNNY_ORDER_STATUS_FIELDS}
+  ${SUNNY_ORDER_TRACKING_FIELDS}
 `;
 
 export const MAGENTO_CUSTOMER_ORDER_BY_NUMBER_QUERY = `
@@ -324,6 +415,66 @@ export const MAGENTO_GUEST_ORDER_QUERY = `
   query MagentoGuestOrder($input: GuestOrderInformationInput!) {
     guestOrder(input: $input) {
       ${ORDER_DETAIL_FIELDS}
+    }
+  }
+` as const;
+
+/**
+ * Order-flow mutations and the invoice query are never gated: they are only ever sent
+ * when the customer triggers the feature, which cannot happen before the module ships.
+ */
+export const SUNNY_CANCEL_ORDER_MUTATION = `
+  mutation SunnyCancelOrder($input: SunnyCancelOrderInput!) {
+    sunnyCancelOrder(input: $input) {
+      order {
+        ${ORDER_DETAIL_FIELDS}
+      }
+      refund {
+        ${SUNNY_REFUND_STATUS_FIELDS}
+      }
+    }
+  }
+` as const;
+
+export const SUNNY_REQUEST_RETURN_MUTATION = `
+  mutation SunnyRequestOrderReturn($input: SunnyRequestReturnInput!) {
+    requestSunnyOrderReturn(input: $input) {
+      order {
+        ${ORDER_DETAIL_FIELDS}
+      }
+      return_details {
+        state
+        reason
+        comment
+        requested_at
+      }
+      refund {
+        ${SUNNY_REFUND_STATUS_FIELDS}
+      }
+    }
+  }
+` as const;
+
+export const SUNNY_ORDER_REASONS_QUERY = `
+  query SunnyOrderReasons {
+    sunnyOrderCancellationReasons {
+      code
+      label
+      requires_comment
+    }
+    sunnyOrderReturnReasons {
+      code
+      label
+      requires_comment
+    }
+  }
+` as const;
+
+export const SUNNY_INVOICE_PDF_QUERY = `
+  query SunnyInvoicePdf($orderUid: ID!) {
+    sunnyInvoicePdf(order_uid: $orderUid) {
+      url
+      expires_at
     }
   }
 ` as const;

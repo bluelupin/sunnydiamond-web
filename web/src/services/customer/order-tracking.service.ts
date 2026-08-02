@@ -11,7 +11,7 @@ import {
 } from "./order-tracking.mapper";
 import type { GuestOrderLookupInput, TrackedOrder, TrackedOrderComment } from "./order-tracking.types";
 
-async function enrichTrackedOrderComments(order: TrackedOrder): Promise<TrackedOrder> {
+export async function enrichTrackedOrderComments(order: TrackedOrder): Promise<TrackedOrder> {
   const storefrontComments = await fetchStorefrontLineMetadataComments(order.number);
   if (storefrontComments.length === 0) {
     return order;

@@ -5,7 +5,8 @@ import { Plus } from "lucide-react";
 import InformationIcon from "@/assets/Icons/InformationIcon";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { cn } from "@/shared/utils/cn";
-import type { OrderFilterKey } from "../types/profileUi.types";
+import { profileTabsContent } from "../data/profileContent";
+import type { OrderFilterKey, ProfileOrderSubState } from "../types/profileUi.types";
 
 export function ProfileSectionHeader({
   title,
@@ -96,12 +97,20 @@ const STATUS_BADGE_VARIANTS: Record<
   },
 };
 
+/** Copy shown while Magento is still processing a cancellation/return. */
+const SUB_STATE_LABELS: Record<ProfileOrderSubState, string> = {
+  cancellation_in_progress: profileTabsContent.orders.statusCancellationInProgress,
+  return_in_progress: profileTabsContent.orders.statusReturnInProgress,
+};
+
 export function ProfileStatusBadge({
   label,
   category = "in_progress",
+  subState,
 }: {
   label: string;
   category?: OrderFilterKey;
+  subState?: ProfileOrderSubState;
 }) {
   const variant = STATUS_BADGE_VARIANTS[category];
 
@@ -114,7 +123,7 @@ export function ProfileStatusBadge({
       )}
     >
       <span className={cn("size-2 shrink-0 rounded-full", variant.dot)} aria-hidden />
-      {label}
+      {subState ? SUB_STATE_LABELS[subState] : label}
     </span>
   );
 }
@@ -123,9 +132,11 @@ export function ProfileStatusBadge({
 export function ProfileOrderMobileStatusBadge({
   label,
   category = "in_progress",
+  subState,
 }: {
   label: string;
   category?: OrderFilterKey;
+  subState?: ProfileOrderSubState;
 }) {
   const variant = STATUS_BADGE_VARIANTS[category];
 
@@ -137,7 +148,7 @@ export function ProfileOrderMobileStatusBadge({
       )}
     >
       <span className={cn("size-2 shrink-0 rounded-full", variant.dot)} aria-hidden />
-      {label}
+      {subState ? SUB_STATE_LABELS[subState] : label}
     </span>
   );
 }

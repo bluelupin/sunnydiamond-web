@@ -10,16 +10,25 @@ import {
   DetailOutlineButton,
   DetailTextLink,
 } from "@/features/products/components/detail/shared";
+import type { TrackedOrder } from "@/services/customer/order-tracking.types";
 import { useToast } from "@/shared/hooks/use-toast";
+import { cn } from "@/shared/utils/cn";
 import { profileTabsContent } from "../data/profileContent";
+import { useOrderActionReasons } from "../hooks/useOrderActionReasons";
+import { useOrderActions } from "../hooks/useOrderActions";
+import { useOrderInvoiceDownload } from "../hooks/useOrderInvoiceDownload";
 import type { ProfileOrderUi } from "../types/profileUi.types";
 import { formatOrderDate, formatOrderTotal } from "../utils/formatAccountData";
 import { resolveProfileOrderTimelineSteps } from "../utils/orderDeliveryTimeline.utils";
+import { formatRefundNote } from "../utils/profileDisplayMappers";
 import { ProfileOrderMobileThumbnails } from "./ProfileOrderMobileThumbnails";
 import { ProfileOrderItemRow } from "./ProfileOrderItemRow";
 import { ProfileOrderCancelDialog } from "./ProfileOrderCancelDialog";
 import { ProfileOrderCancelReasonDialog } from "./ProfileOrderCancelReasonDialog";
 import { ProfileOrderCancelSuccessDialog } from "./ProfileOrderCancelSuccessDialog";
+import { ProfileOrderReturnDialog } from "./ProfileOrderReturnDialog";
+import { ProfileOrderReturnReasonDialog } from "./ProfileOrderReturnReasonDialog";
+import { ProfileOrderReturnSuccessDialog } from "./ProfileOrderReturnSuccessDialog";
 import { ProfileOrderTimeline } from "./ProfileOrderTimeline";
 import { ProfileOrderTrackModal } from "./ProfileOrderTrackModal";
 import {
@@ -33,6 +42,7 @@ type ProfileOrderCardProps = {
   order: ProfileOrderUi;
   onViewDetails?: (orderNumber: string) => void;
   resolvedStatus?: string;
+  onOrderChanged?: (order: TrackedOrder) => void;
 };
 
 function getMobileDeliveryMeta(order: ProfileOrderUi) {
@@ -73,6 +83,7 @@ export function ProfileOrderCard({
   order,
   onViewDetails,
   resolvedStatus,
+  onOrderChanged,
 }: ProfileOrderCardProps) {
   const { toast } = useToast();
   const router = useRouter();
@@ -80,8 +91,18 @@ export function ProfileOrderCard({
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelReasonDialogOpen, setCancelReasonDialogOpen] = useState(false);
   const [cancelSuccessDialogOpen, setCancelSuccessDialogOpen] = useState(false);
+  const [returnDialogOpen, setReturnDialogOpen] = useState(false);
+  const [returnReasonDialogOpen, setReturnReasonDialogOpen] = useState(false);
+  const [returnSuccessDialogOpen, setReturnSuccessDialogOpen] = useState(false);
+  const [refundNote, setRefundNote] = useState<string | undefined>(undefined);
+  const [changedOrder, setChangedOrder] = useState<TrackedOrder | null>(null);
   const [localResolvedStatus, setLocalResolvedStatus] = useState<string | null>(null);
   const content = profileTabsContent.orders;
+  const { cancelReasons, returnReasons } = useOrderActionReasons();
+  const { isSubmitting, error, clearError, cancelOrder, returnOrder } = useOrderActions();
+  const { download, downloadingNumber } = useOrderInvoiceDownload();
+  const isDownloadingInvoice = downloadingNumber === order.number;
+  const invoiceDisabled = Boolean(order.invoiceDisabled) || isDownloadingInvoice;
 
   useEffect(() => {
     setLocalResolvedStatus(null);
@@ -92,8 +113,15 @@ export function ProfileOrderCard({
       resolveProfileOrderTimelineSteps(
         resolvedStatus ?? localResolvedStatus ?? order.status,
         order.timeline,
+        order.timelineFromServer ? order.timeline : null,
       ),
-    [resolvedStatus, localResolvedStatus, order.status, order.timeline],
+    [
+      resolvedStatus,
+      localResolvedStatus,
+      order.status,
+      order.timeline,
+      order.timelineFromServer,
+    ],
   );
 
   const mobileDeliveryMeta = getMobileDeliveryMeta(order);
@@ -115,25 +143,22 @@ export function ProfileOrderCard({
   };
 
   const handleDownloadInvoice = () => {
-    toast({
-      title: content.invoiceUnavailableTitle,
-      description: content.invoiceUnavailableDescription,
-    });
+    void download(order.number);
   };
 
-  const handleReturn = () => {
-    toast({
-      title: content.returnOrderLabel,
-      description: "Returns will be available soon. Contact support for assistance.",
-    });
+  const handleReturnOrder = () => {
+    clearError();
+    setReturnDialogOpen(true);
   };
 
   const handleCancelOrder = () => {
+    clearError();
     setCancelDialogOpen(true);
   };
 
   const handleContactSupport = () => {
     setCancelDialogOpen(false);
+    setReturnDialogOpen(false);
     router.push(content.cancelDialog.contactHref);
   };
 
@@ -142,9 +167,57 @@ export function ProfileOrderCard({
     setCancelReasonDialogOpen(true);
   };
 
-  const handleConfirmCancellation = (_payload: { reason: string; comments: string }) => {
-    setCancelReasonDialogOpen(false);
-    setCancelSuccessDialogOpen(true);
+  const handleProceedToReturn = () => {
+    setReturnDialogOpen(false);
+    setReturnReasonDialogOpen(true);
+  };
+
+  const handleConfirmCancellation = async (payload: { reason: string; comments: string }) => {
+    try {
+      const freshOrder = await cancelOrder(order.number, {
+        orderId: order.id,
+        reason: payload.reason,
+        ...(payload.comments ? { comment: payload.comments } : {}),
+      });
+
+      setRefundNote(formatRefundNote(freshOrder?.sunnyRefund));
+      setChangedOrder(freshOrder);
+      setCancelReasonDialogOpen(false);
+      setCancelSuccessDialogOpen(true);
+    } catch {
+      // `useOrderActions` keeps the message; the reason dialog renders it.
+    }
+  };
+
+  const handleConfirmReturn = async (payload: { reason: string; comments: string }) => {
+    try {
+      const freshOrder = await returnOrder(order.number, {
+        orderId: order.id,
+        reason: payload.reason,
+        ...(payload.comments ? { comment: payload.comments } : {}),
+      });
+
+      setRefundNote(formatRefundNote(freshOrder?.sunnyRefund));
+      setChangedOrder(freshOrder);
+      setReturnReasonDialogOpen(false);
+      setReturnSuccessDialogOpen(true);
+    } catch {
+      // `useOrderActions` keeps the message; the reason dialog renders it.
+    }
+  };
+
+  // The list drops this card the moment the order changes tab, so the mutated order is
+  // handed over once the success dialog is dismissed.
+  const handleSuccessDialogChange = (
+    setOpen: (open: boolean) => void,
+    open: boolean,
+  ) => {
+    setOpen(open);
+
+    if (!open && changedOrder) {
+      onOrderChanged?.(changedOrder);
+      setChangedOrder(null);
+    }
   };
 
   const handleTrackOrder = () => {
@@ -164,6 +237,7 @@ export function ProfileOrderCard({
               <ProfileOrderMobileStatusBadge
                 label={mobileStatusLabel}
                 category={order.category}
+                subState={order.subState}
               />
 
               <div className="flex flex-col gap-2">
@@ -211,7 +285,11 @@ export function ProfileOrderCard({
 
         <div className="hidden flex-col gap-6 lg:flex">
           <div className="flex flex-col gap-6">
-            <ProfileStatusBadge label={order.statusLabel} category={order.category} />
+            <ProfileStatusBadge
+              label={order.statusLabel}
+              category={order.category}
+              subState={order.subState}
+            />
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4 font-gill text-base leading-110 text-darkblack">
@@ -261,8 +339,16 @@ export function ProfileOrderCard({
 
           {order.showDownloadInvoice && order.category !== "in_progress" ? (
             <div className="flex justify-end">
-              <DetailTextLink onClick={handleDownloadInvoice} className="text-sm uppercase">
-                {content.downloadInvoiceLabel}
+              <DetailTextLink
+                onClick={invoiceDisabled ? undefined : handleDownloadInvoice}
+                className={cn(
+                  "text-sm uppercase",
+                  invoiceDisabled && "pointer-events-none opacity-50",
+                )}
+              >
+                {isDownloadingInvoice
+                  ? content.downloadingInvoiceLabel
+                  : content.downloadInvoiceLabel}
               </DetailTextLink>
             </div>
           ) : null}
@@ -296,7 +382,7 @@ export function ProfileOrderCard({
             ) : null}
 
             {order.showReturn ? (
-              <DetailOutlineButton type="button" className="flex-1" onClick={handleReturn}>
+              <DetailOutlineButton type="button" className="flex-1" onClick={handleReturnOrder}>
                 {content.returnOrderLabel}
               </DetailOutlineButton>
             ) : null}
@@ -328,13 +414,40 @@ export function ProfileOrderCard({
       <ProfileOrderCancelReasonDialog
         open={cancelReasonDialogOpen}
         onOpenChange={setCancelReasonDialogOpen}
-        onConfirm={handleConfirmCancellation}
+        onConfirm={(payload) => void handleConfirmCancellation(payload)}
+        reasons={cancelReasons}
+        isSubmitting={isSubmitting}
+        errorMessage={error}
       />
 
       <ProfileOrderCancelSuccessDialog
         open={cancelSuccessDialogOpen}
-        onOpenChange={setCancelSuccessDialogOpen}
+        onOpenChange={(open) => handleSuccessDialogChange(setCancelSuccessDialogOpen, open)}
         orderNumber={order.number}
+        refundNote={refundNote}
+      />
+
+      <ProfileOrderReturnDialog
+        open={returnDialogOpen}
+        onOpenChange={setReturnDialogOpen}
+        onContactSupport={handleContactSupport}
+        onProceedToReturn={handleProceedToReturn}
+      />
+
+      <ProfileOrderReturnReasonDialog
+        open={returnReasonDialogOpen}
+        onOpenChange={setReturnReasonDialogOpen}
+        onConfirm={(payload) => void handleConfirmReturn(payload)}
+        reasons={returnReasons}
+        isSubmitting={isSubmitting}
+        errorMessage={error}
+      />
+
+      <ProfileOrderReturnSuccessDialog
+        open={returnSuccessDialogOpen}
+        onOpenChange={(open) => handleSuccessDialogChange(setReturnSuccessDialogOpen, open)}
+        orderNumber={order.number}
+        refundNote={refundNote}
       />
     </>
   );

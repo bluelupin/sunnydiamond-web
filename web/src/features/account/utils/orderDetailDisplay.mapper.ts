@@ -5,7 +5,6 @@ import type {
   ProfileOrderDetailUi,
   ProfileOrderPriceBreakdownUi,
 } from "../types/profileUi.types";
-import { formatOrderDate } from "./formatAccountData";
 import { mapCustomerOrderItemToDisplayFields } from "./orderItemDisplay.mapper";
 import {
   getOrderItemGiftNote,
@@ -15,10 +14,29 @@ import {
   buildOrderDeliveryTimelineFromStatus,
   formatOrderStatusLabel,
 } from "./orderDeliveryTimeline.utils";
-import { categorizeOrderStatus } from "./profileDisplayMappers";
+import { mapSunnyTrackingToTimeline } from "./orderFlowSteps.mapper";
+import {
+  categorizeOrder,
+  formatReturnDeadlineNote,
+  LEGACY_CANCELLED_REFUND_STEPS,
+  LEGACY_RETURN_REFUND_STEPS,
+  resolveEstimatedDeliveryValue,
+  resolveOrderDeliveryBy,
+  resolveRefundEstimateValue,
+  resolveRefundTimeline,
+} from "./profileDisplayMappers";
 
 const PLACEHOLDER_RING_IMAGE = "/images/jewellery/plp/product-ring-transparent.png";
 const ordersContent = profileTabsContent.orders;
+
+/** Magento payment method codes that collect the money at the door. */
+const COD_PAYMENT_TYPES = new Set(["cashondelivery", "cod"]);
+
+function isCashOnDeliveryOrder(order: TrackedOrder): boolean {
+  return order.paymentMethods.some((method) =>
+    COD_PAYMENT_TYPES.has(method.type.trim().toLowerCase()),
+  );
+}
 
 function trackedItemToMapperInput(item: TrackedOrderItem) {
   return {
@@ -29,6 +47,9 @@ function trackedItemToMapperInput(item: TrackedOrderItem) {
     imageUrl: null,
     selectedOptions: item.selectedOptions,
     enteredOptions: item.enteredOptions,
+    isGift: item.isGift,
+    sunnyTag: item.sunnyTag,
+    giftMessage: item.giftMessage,
   };
 }
 
@@ -48,6 +69,9 @@ function buildPriceBreakdown(order: TrackedOrder): ProfileOrderPriceBreakdownUi 
     tax: totals.totalTax,
     orderTotal: totals.grandTotal,
     currency: totals.currency,
+    ...(isCashOnDeliveryOrder(order)
+      ? { amountPayableAtDelivery: totals.grandTotal }
+      : {}),
   };
 }
 
@@ -64,7 +88,9 @@ function mapDetailItems(
     const sku = item.productSku?.trim();
     const imageFromSku = sku ? imageBySku[sku] : undefined;
     const imageUrl = imageFromSku?.trim() || null;
-    const giftNote = getOrderItemGiftNote(giftMetadata, item.productName, item.productSku);
+    // GraphQL gift fields win; the REST comment chain still carries engraving notes.
+    const giftNote =
+      item.giftMessage ?? getOrderItemGiftNote(giftMetadata, item.productName, item.productSku);
 
     return {
       id: `${order.id}-${item.productSku ?? index}`,
@@ -72,7 +98,7 @@ function mapDetailItems(
       imageSrc: imageUrl ?? PLACEHOLDER_RING_IMAGE,
       size: display.size,
       metal: display.metal,
-      isGift: display.isGift,
+      isGift: item.isGift || display.isGift,
       isBespoke: display.isBespoke,
       useIconPlaceholder: display.isBespoke && !imageUrl,
       quantity: item.quantity,
@@ -88,10 +114,15 @@ export function mapTrackedOrderToProfileDetailUi(
   order: TrackedOrder,
   imageBySku: Record<string, string> = {},
 ): ProfileOrderDetailUi {
-  const category = categorizeOrderStatus(order.status);
+  const { category, subState } = categorizeOrder(order.sunnyStatus, order.status);
   const statusLabel = formatOrderStatusLabel(order.status);
-  const deliveryBy = formatOrderDate(order.orderDate);
-  const deliveryTimeline = buildOrderDeliveryTimelineFromStatus(order.status);
+  const deliveryBy = resolveOrderDeliveryBy(order.sunnyDelivery);
+  const actions = order.sunnyActions;
+  const trackingTimeline = mapSunnyTrackingToTimeline(order.sunnyTracking);
+  const deliveryTimeline =
+    trackingTimeline.length > 0
+      ? trackingTimeline
+      : buildOrderDeliveryTimelineFromStatus(order.status);
   const priceBreakdown = buildPriceBreakdown(order);
 
   const base: ProfileOrderDetailUi = {
@@ -101,7 +132,8 @@ export function mapTrackedOrderToProfileDetailUi(
     status: order.status,
     statusLabel,
     category,
-    deliveryBy,
+    ...(subState ? { subState } : {}),
+    ...(deliveryBy ? { deliveryBy } : {}),
     items: mapDetailItems(order, imageBySku),
     priceBreakdown,
     paymentMethod: order.paymentMethods[0]?.name,
@@ -115,41 +147,36 @@ export function mapTrackedOrderToProfileDetailUi(
           phone: order.shippingAddress.phone,
         }
       : undefined,
-    showCancel: category === "in_progress",
+    showCancel: actions ? actions.canCancel : category === "in_progress",
+    showReturn: actions ? actions.canReturn : category === "delivered",
     showDownloadInvoice: true,
+    ...(actions ? { invoiceDisabled: !actions.canDownloadInvoice } : {}),
     showCancelNote: category === "in_progress",
     footnote:
       category === "in_progress"
         ? ordersContent.cancelNote
         : category === "delivered"
-          ? ordersContent.returnDeadlineNote
+          ? formatReturnDeadlineNote(order.sunnyDelivery?.returnableTill)
           : undefined,
   };
 
-  if (category === "returned") {
-    return {
-      ...base,
-      estimatedDeliveryLabel: ordersContent.estimatedDeliveryLabel,
-      estimatedDeliveryValue: ordersContent.estimatedDeliveryPlaceholder,
-      timeline: [
-        { step: 1, label: "Return Initiated", status: "completed" },
-        { step: 2, label: "Order Picked Up", status: "completed" },
-        { step: 3, label: "Refund Initiated", status: "current" },
-        { step: 4, label: "Refunded Successfully", status: "upcoming" },
-      ],
-    };
-  }
+  if (category === "returned" || category === "cancelled") {
+    const refundTimeline = resolveRefundTimeline(
+      order,
+      category === "returned" ? LEGACY_RETURN_REFUND_STEPS : LEGACY_CANCELLED_REFUND_STEPS,
+    );
 
-  if (category === "cancelled") {
     return {
       ...base,
       estimatedDeliveryLabel: ordersContent.estimatedDeliveryLabel,
-      estimatedDeliveryValue: ordersContent.estimatedDeliveryRangePlaceholder,
-      timeline: [
-        { step: 1, label: "Order Cancelled", status: "completed" },
-        { step: 2, label: "Refund Initiated", status: "current" },
-        { step: 3, label: "Refunded Successfully", status: "upcoming" },
-      ],
+      estimatedDeliveryValue: resolveRefundEstimateValue(
+        order.sunnyRefund,
+        category === "returned"
+          ? ordersContent.estimatedDeliveryPlaceholder
+          : ordersContent.estimatedDeliveryRangePlaceholder,
+      ),
+      timeline: refundTimeline.steps,
+      ...(refundTimeline.fromServer ? { timelineFromServer: true } : {}),
     };
   }
 
@@ -159,10 +186,11 @@ export function mapTrackedOrderToProfileDetailUi(
       ...(category === "in_progress"
         ? {
             estimatedDeliveryLabel: ordersContent.estimatedDeliveryLabel,
-            estimatedDeliveryValue: ordersContent.estimatedDeliveryPlaceholder,
+            estimatedDeliveryValue: resolveEstimatedDeliveryValue(order.sunnyDelivery),
           }
         : {}),
       timeline: deliveryTimeline,
+      ...(trackingTimeline.length > 0 ? { timelineFromServer: true } : {}),
     };
   }
 

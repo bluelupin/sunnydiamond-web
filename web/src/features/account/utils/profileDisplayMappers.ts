@@ -1,6 +1,12 @@
 import type { CustomerAppointment } from "@/services/customer/customer-appointments.types";
 import type { CustomerOrder } from "@/services/customer/customer-account.types";
 import type { CustomerSavedCreationRecord } from "@/services/customer/customer-saved-creations.types";
+import type {
+  SunnyOrderStatus,
+  TrackedOrderDelivery,
+  TrackedOrderRefundStatus,
+  TrackedOrderSunnyFields,
+} from "@/services/customer/order-tracking.types";
 import { profileTabsContent } from "../data/profileContent";
 import type {
   AppointmentFilterKey,
@@ -8,7 +14,9 @@ import type {
   ProfileAppointmentUi,
   ProfileBespokeItemUi,
   ProfileOrderItemUi,
+  ProfileOrderSubState,
   ProfileOrderUi,
+  ProfileTimelineStep,
 } from "../types/profileUi.types";
 import {
   formatAppointmentDate,
@@ -16,6 +24,10 @@ import {
 } from "./formatAccountData";
 import { parseOrderGiftMetadataFromComments } from "./orderGiftDetection.utils";
 import { mapCustomerOrderItemToDisplayFields } from "./orderItemDisplay.mapper";
+import {
+  mapSunnyRefundToTimeline,
+  mapSunnyTrackingToTimeline,
+} from "./orderFlowSteps.mapper";
 import {
   buildOrderDeliveryTimelineFromStatus,
   formatOrderStatusLabel,
@@ -25,7 +37,38 @@ import {
 const PLACEHOLDER_RING_IMAGE = "/images/jewellery/plp/product-ring-transparent.png";
 const ordersContent = profileTabsContent.orders;
 
-function categorizeOrderStatus(status: string): OrderFilterKey {
+/** Rendered only for orders placed before SunnyDiamonds_OrderFlow went live. */
+export const LEGACY_RETURN_REFUND_STEPS: ProfileTimelineStep[] = [
+  { step: 1, label: "Return Initiated", status: "completed" },
+  { step: 2, label: "Order Picked Up", status: "completed" },
+  { step: 3, label: "Refund Initiated", status: "current" },
+  { step: 4, label: "Refunded Successfully", status: "upcoming" },
+];
+
+/** Rendered only for orders placed before SunnyDiamonds_OrderFlow went live. */
+export const LEGACY_CANCELLED_REFUND_STEPS: ProfileTimelineStep[] = [
+  { step: 1, label: "Order Cancelled", status: "completed" },
+  { step: 2, label: "Refund Initiated", status: "current" },
+  { step: 3, label: "Refunded Successfully", status: "upcoming" },
+];
+
+const CATEGORY_BY_SUNNY_STATUS: Record<
+  SunnyOrderStatus,
+  { category: OrderFilterKey; subState?: ProfileOrderSubState }
+> = {
+  IN_PROGRESS: { category: "in_progress" },
+  DELIVERED: { category: "delivered" },
+  CANCELLED: { category: "cancelled" },
+  CANCELLATION_IN_PROGRESS: {
+    category: "cancelled",
+    subState: "cancellation_in_progress",
+  },
+  RETURNED: { category: "returned" },
+  RETURN_IN_PROGRESS: { category: "returned", subState: "return_in_progress" },
+};
+
+/** Pre-deployment fallback: guesses the tab from the Magento status label. */
+function categorizeOrderStatusFromLabel(status: string): OrderFilterKey {
   const normalized = normalizeOrderStatus(status);
 
   if (normalized.includes("cancel")) {
@@ -52,6 +95,95 @@ function categorizeOrderStatus(status: string): OrderFilterKey {
   }
 
   return "in_progress";
+}
+
+/** `sunny_status` maps 1:1 to a tab; the label heuristic only runs when it is absent. */
+export function categorizeOrder(
+  sunnyStatus: SunnyOrderStatus | null,
+  statusLabel: string,
+): { category: OrderFilterKey; subState?: ProfileOrderSubState } {
+  if (sunnyStatus) {
+    return CATEGORY_BY_SUNNY_STATUS[sunnyStatus];
+  }
+
+  return { category: categorizeOrderStatusFromLabel(statusLabel) };
+}
+
+/** "Delivery by" is a real delivery date or nothing at all — never the order date. */
+export function resolveOrderDeliveryBy(
+  delivery: TrackedOrderDelivery | null,
+): string | undefined {
+  const deliveryDate = delivery?.deliveredAt ?? delivery?.estimatedDeliveryAt;
+
+  return deliveryDate ? formatOrderDate(deliveryDate) : undefined;
+}
+
+/** Estimated delivery copy — the literal placeholder is a pre-deployment fallback. */
+export function resolveEstimatedDeliveryValue(delivery: TrackedOrderDelivery | null): string {
+  return delivery?.estimatedDeliveryAt
+    ? formatOrderDate(delivery.estimatedDeliveryAt)
+    : ordersContent.estimatedDeliveryPlaceholder;
+}
+
+/** Refund ETA copy: server date → server window label → literal placeholder. */
+export function resolveRefundEstimateValue(
+  refund: TrackedOrderRefundStatus | null,
+  placeholder: string,
+): string {
+  if (refund?.estimatedCompletionDate) {
+    return formatOrderDate(refund.estimatedCompletionDate);
+  }
+
+  return refund?.estimatedWindowLabel.trim() || placeholder;
+}
+
+/** Refund line on the cancel/return success dialogs — omitted when the server sends no refund. */
+export function formatRefundNote(
+  refund: TrackedOrderRefundStatus | null | undefined,
+): string | undefined {
+  if (!refund) {
+    return undefined;
+  }
+
+  const mode = refund.refundMode.trim() || ordersContent.refundNoteDefaultMode;
+
+  if (refund.estimatedCompletionDate) {
+    return ordersContent.refundNoteDateTemplate
+      .replace("{mode}", mode)
+      .replace("{date}", formatOrderDate(refund.estimatedCompletionDate));
+  }
+
+  const window = refund.estimatedWindowLabel.trim();
+
+  return window
+    ? ordersContent.refundNoteWindowTemplate.replace("{mode}", mode).replace("{window}", window)
+    : undefined;
+}
+
+export function formatReturnDeadlineNote(returnableTill: string | null | undefined): string {
+  if (!returnableTill) {
+    return ordersContent.returnDeadlineNote;
+  }
+
+  return ordersContent.returnDeadlineNoteTemplate.replace(
+    "{date}",
+    formatOrderDate(returnableTill),
+  );
+}
+
+/**
+ * Refund stepper source: server steps when the module answers with a refund, nothing
+ * when it answers without one (unpaid COD cancellation), legacy steps pre-deployment.
+ */
+export function resolveRefundTimeline(
+  order: Pick<TrackedOrderSunnyFields, "sunnyRefund" | "sunnyStatus">,
+  legacySteps: ProfileTimelineStep[],
+): { steps: ProfileTimelineStep[]; fromServer: boolean } {
+  if (order.sunnyRefund) {
+    return { steps: mapSunnyRefundToTimeline(order.sunnyRefund), fromServer: true };
+  }
+
+  return { steps: order.sunnyStatus ? [] : legacySteps, fromServer: false };
 }
 
 function inferAppointmentType(formTag: string): AppointmentFilterKey {
@@ -125,10 +257,15 @@ function mapOrderItems(order: CustomerOrder): ProfileOrderItemUi[] {
 }
 
 export function mapCustomerOrderToProfileUi(order: CustomerOrder): ProfileOrderUi {
-  const category = categorizeOrderStatus(order.status);
+  const { category, subState } = categorizeOrder(order.sunnyStatus, order.status);
   const statusLabel = formatOrderStatusLabel(order.status);
-  const deliveryBy = formatOrderDate(order.orderDate);
-  const deliveryTimeline = buildOrderDeliveryTimelineFromStatus(order.status);
+  const deliveryBy = resolveOrderDeliveryBy(order.sunnyDelivery);
+  const actions = order.sunnyActions;
+  const trackingTimeline = mapSunnyTrackingToTimeline(order.sunnyTracking);
+  const deliveryTimeline =
+    trackingTimeline.length > 0
+      ? trackingTimeline
+      : buildOrderDeliveryTimelineFromStatus(order.status);
 
   const base: ProfileOrderUi = {
     id: order.id,
@@ -137,47 +274,42 @@ export function mapCustomerOrderToProfileUi(order: CustomerOrder): ProfileOrderU
     status: order.status,
     statusLabel,
     category,
-    deliveryBy,
+    ...(subState ? { subState } : {}),
+    ...(deliveryBy ? { deliveryBy } : {}),
     items: mapOrderItems(order),
     grandTotal: order.grandTotal,
     currency: order.currency,
-    showTrack: category === "in_progress",
-    showCancel: category === "in_progress",
-    showReturn: category === "delivered",
+    showTrack: actions ? actions.canTrack : category === "in_progress",
+    showCancel: actions ? actions.canCancel : category === "in_progress",
+    showReturn: actions ? actions.canReturn : category === "delivered",
     showDownloadInvoice: true,
+    ...(actions ? { invoiceDisabled: !actions.canDownloadInvoice } : {}),
     showCancelNote: category === "in_progress",
     footnote:
       category === "in_progress"
         ? ordersContent.cancelNote
         : category === "delivered"
-          ? ordersContent.returnDeadlineNote
+          ? formatReturnDeadlineNote(order.sunnyDelivery?.returnableTill)
           : undefined,
   };
 
-  if (category === "returned") {
-    return {
-      ...base,
-      estimatedDeliveryLabel: ordersContent.estimatedDeliveryLabel,
-      estimatedDeliveryValue: ordersContent.estimatedDeliveryPlaceholder,
-      timeline: [
-        { step: 1, label: "Return Initiated", status: "completed" },
-        { step: 2, label: "Order Picked Up", status: "completed" },
-        { step: 3, label: "Refund Initiated", status: "current" },
-        { step: 4, label: "Refunded Successfully", status: "upcoming" },
-      ],
-    };
-  }
+  if (category === "returned" || category === "cancelled") {
+    const refundTimeline = resolveRefundTimeline(
+      order,
+      category === "returned" ? LEGACY_RETURN_REFUND_STEPS : LEGACY_CANCELLED_REFUND_STEPS,
+    );
 
-  if (category === "cancelled") {
     return {
       ...base,
       estimatedDeliveryLabel: ordersContent.estimatedDeliveryLabel,
-      estimatedDeliveryValue: ordersContent.estimatedDeliveryRangePlaceholder,
-      timeline: [
-        { step: 1, label: "Order Cancelled", status: "completed" },
-        { step: 2, label: "Refund Initiated", status: "current" },
-        { step: 3, label: "Refunded Successfully", status: "upcoming" },
-      ],
+      estimatedDeliveryValue: resolveRefundEstimateValue(
+        order.sunnyRefund,
+        category === "returned"
+          ? ordersContent.estimatedDeliveryPlaceholder
+          : ordersContent.estimatedDeliveryRangePlaceholder,
+      ),
+      timeline: refundTimeline.steps,
+      ...(refundTimeline.fromServer ? { timelineFromServer: true } : {}),
     };
   }
 
@@ -187,10 +319,11 @@ export function mapCustomerOrderToProfileUi(order: CustomerOrder): ProfileOrderU
       ...(category === "in_progress"
         ? {
             estimatedDeliveryLabel: ordersContent.estimatedDeliveryLabel,
-            estimatedDeliveryValue: ordersContent.estimatedDeliveryPlaceholder,
+            estimatedDeliveryValue: resolveEstimatedDeliveryValue(order.sunnyDelivery),
           }
         : {}),
       timeline: deliveryTimeline,
+      ...(trackingTimeline.length > 0 ? { timelineFromServer: true } : {}),
     };
   }
 
@@ -305,4 +438,4 @@ export function formatBespokePriceDisplay(price?: string): string | undefined {
   return price;
 }
 
-export { categorizeOrderStatus, inferAppointmentType };
+export { categorizeOrderStatusFromLabel, inferAppointmentType };

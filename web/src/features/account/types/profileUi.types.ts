@@ -6,10 +6,17 @@ export type AppointmentFilterKey = "video_call" | "try_at_home" | "store_visit";
 
 export type TimelineStepStatus = "completed" | "current" | "upcoming";
 
+/** Badge shown on top of the tab category while a cancellation/return is being processed. */
+export type ProfileOrderSubState = "cancellation_in_progress" | "return_in_progress";
+
 export type ProfileTimelineStep = {
   step: number;
   label: string;
   status: TimelineStepStatus;
+  /** Server-provided step copy (`sunny_tracking`); falls back to local descriptions. */
+  description?: string;
+  /** ISO timestamp the step was reached, when the server reports one. */
+  timestamp?: string;
 };
 
 export type ProfileOrderItemUi = {
@@ -37,6 +44,8 @@ export type ProfileOrderPriceBreakdownUi = {
   tax: number;
   orderTotal: number;
   currency: string;
+  /** Set for cash-on-delivery orders — the full total is collected at the door. */
+  amountPayableAtDelivery?: number;
 };
 
 export type ProfileOrderDetailUi = {
@@ -46,10 +55,13 @@ export type ProfileOrderDetailUi = {
   status: string;
   statusLabel: string;
   category: OrderFilterKey;
+  subState?: ProfileOrderSubState;
   deliveryBy?: string;
   estimatedDeliveryLabel?: string;
   estimatedDeliveryValue?: string;
   timeline?: ProfileTimelineStep[];
+  /** True when `timeline` comes from `sunny_tracking`/`sunny_refund` (never re-derive it). */
+  timelineFromServer?: boolean;
   items: ProfileOrderDetailItemUi[];
   priceBreakdown: ProfileOrderPriceBreakdownUi;
   paymentMethod?: string;
@@ -63,7 +75,10 @@ export type ProfileOrderDetailUi = {
   };
   footnote?: string;
   showCancel: boolean;
+  showReturn: boolean;
   showDownloadInvoice: boolean;
+  /** Invoice button stays visible but inert until Magento has an invoice. */
+  invoiceDisabled?: boolean;
   showCancelNote: boolean;
 };
 
@@ -75,10 +90,13 @@ export type ProfileOrderUi = {
   status: string;
   statusLabel: string;
   category: OrderFilterKey;
+  subState?: ProfileOrderSubState;
   deliveryBy?: string;
   estimatedDeliveryLabel?: string;
   estimatedDeliveryValue?: string;
   timeline?: ProfileTimelineStep[];
+  /** True when `timeline` comes from `sunny_tracking`/`sunny_refund` (never re-derive it). */
+  timelineFromServer?: boolean;
   items: ProfileOrderItemUi[];
   grandTotal: number;
   currency: string;
@@ -87,6 +105,8 @@ export type ProfileOrderUi = {
   showCancel: boolean;
   showReturn: boolean;
   showDownloadInvoice: boolean;
+  /** Invoice button stays visible but inert until Magento has an invoice. */
+  invoiceDisabled?: boolean;
   showCancelNote: boolean;
 };
 
