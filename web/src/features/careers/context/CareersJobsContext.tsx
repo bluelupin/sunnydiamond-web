@@ -9,7 +9,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useRouter } from "next/navigation";
 import type { NormalizedCareersPageData } from "@/services/careers/careers.types";
+import { getCareerJobPath } from "../constants/careersRoutes";
 import type { CareerJob, CareersApplicationEntry, CareersFlowStep } from "../types";
 import { filterCareerJobs } from "../utils/careersFormatting";
 import { getCareerJobById } from "../utils/careersJobs";
@@ -38,6 +40,7 @@ type CareersJobsContextValue = {
   setLocationFilter: (value: string) => void;
   setDepartmentFilter: (value: string) => void;
   setExperienceFilter: (value: string) => void;
+  clearListingFilters: () => void;
   goToLanding: () => void;
   goToListings: () => void;
   goToDetail: (jobId: string) => void;
@@ -60,12 +63,22 @@ function headerModeForFlowStep(flowStep: CareersFlowStep): CareersHeaderMode {
 type CareersJobsProviderProps = {
   cms: NormalizedCareersPageData;
   children: ReactNode;
+  initialSelectedJobId?: string | null;
+  initialFlowStep?: CareersFlowStep;
 };
 
-export function CareersJobsProvider({ cms, children }: CareersJobsProviderProps) {
+export function CareersJobsProvider({
+  cms,
+  children,
+  initialSelectedJobId,
+  initialFlowStep = "landing",
+}: CareersJobsProviderProps) {
+  const router = useRouter();
   const jobs = cms.jobs;
-  const [selectedJobId, setSelectedJobId] = useState<string | null>(jobs[0]?.id ?? null);
-  const [flowStep, setFlowStep] = useState<CareersFlowStep>("landing");
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(
+    initialSelectedJobId ?? jobs[0]?.id ?? null,
+  );
+  const [flowStep, setFlowStep] = useState<CareersFlowStep>(initialFlowStep);
   const [searchQuery, setSearchQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("");
@@ -81,6 +94,13 @@ export function CareersJobsProvider({ cms, children }: CareersJobsProviderProps)
 
   const clearSelectedJob = useCallback(() => {
     setSelectedJobId(null);
+  }, []);
+
+  const clearListingFilters = useCallback(() => {
+    setSearchQuery("");
+    setLocationFilter("");
+    setDepartmentFilter("");
+    setExperienceFilter("");
   }, []);
 
   const goToLanding = useCallback(() => {
@@ -99,12 +119,21 @@ export function CareersJobsProvider({ cms, children }: CareersJobsProviderProps)
     scrollCareersToTop();
   }, []);
 
-  const goToDetail = useCallback((jobId: string) => {
-    setSelectedJobId(jobId);
-    setFlowStep("detail");
-    setCareersHeaderMode("solid");
-    scrollCareersToTop();
-  }, []);
+  const goToDetail = useCallback(
+    (jobId: string) => {
+      const job = getCareerJobById(jobs, jobId);
+      if (job?.slug) {
+        router.push(getCareerJobPath(job.slug));
+        return;
+      }
+
+      setSelectedJobId(jobId);
+      setFlowStep("detail");
+      setCareersHeaderMode("solid");
+      scrollCareersToTop();
+    },
+    [jobs, router],
+  );
 
   const goToApplication = useCallback(
     (entry: CareersApplicationEntry = "manual", resumeFile?: File) => {
@@ -179,6 +208,7 @@ export function CareersJobsProvider({ cms, children }: CareersJobsProviderProps)
       setLocationFilter,
       setDepartmentFilter,
       setExperienceFilter,
+      clearListingFilters,
       goToLanding,
       goToListings,
       goToDetail,
@@ -190,6 +220,7 @@ export function CareersJobsProvider({ cms, children }: CareersJobsProviderProps)
     [
       applicationEntry,
       clearSelectedJob,
+      clearListingFilters,
       clearPendingResume,
       cms,
       departmentFilter,

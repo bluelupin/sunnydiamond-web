@@ -19,7 +19,7 @@ function CareersFlowContent() {
   const { landing, listing } = cms;
 
   if (flowStep === "detail") {
-    return landing.applicationFlow ? <CareersJobDetailSection /> : null;
+    return <CareersJobDetailSection />;
   }
 
   if (flowStep === "application") {

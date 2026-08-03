@@ -215,14 +215,38 @@ export type StrapiCareerLandingPageEntity = {
   faqSection?: StrapiCareerFaqSection | null;
 };
 
+export type StrapiCareerFilterSectionItem = {
+  id?: number | string;
+  ItemName?: string | null;
+};
+
+export type StrapiCareerFilterSectionGroup = {
+  id?: number | string;
+  FeaturedTitle?: string | null;
+  Items?: StrapiCareerFilterSectionItem[] | null;
+};
+
+export type StrapiCareerListingFilterSection = {
+  id?: number | string;
+  /** CMS typo — live API uses `fiterTitle` */
+  fiterTitle?: string | null;
+  filterTitle?: string | null;
+  Location?: StrapiCareerFilterSectionGroup | null;
+  Department?: StrapiCareerFilterSectionGroup | null;
+  Experience?: StrapiCareerFilterSectionGroup | null;
+};
+
 export type StrapiCareerListingPageEntity = {
   seo?: StrapiCareerSeo | null;
   hero?: StrapiCareerHero | null;
+  heroSection?: StrapiCareerHero | null;
   featuredTitle?: string | null;
   title?: string | null;
   mobileTitle?: string | null;
   searchPlaceholder?: string | null;
   mobileSearchPlaceholder?: string | null;
+  filterSection?: StrapiCareerListingFilterSection | null;
+  /** Legacy flat filter fields — prefer `filterSection` when present */
   filtersTitle?: string | null;
   filterLocationLabel?: string | null;
   filterDepartmentLabel?: string | null;

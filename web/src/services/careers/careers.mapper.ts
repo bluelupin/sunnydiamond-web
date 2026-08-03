@@ -25,6 +25,9 @@ import type {
   StrapiCareerLandingPageEntity,
   StrapiCareerLifeSection,
   StrapiCareerListingPageEntity,
+  StrapiCareerListingFilterSection,
+  StrapiCareerFilterSectionGroup,
+  StrapiCareerFilterSectionItem,
   StrapiCareerOpeningsSection,
   StrapiCareerOpeningEntity,
   StrapiCareerQualificationGroup,
@@ -697,34 +700,107 @@ const deriveFilterOptionsFromJobs = (jobs: readonly NormalizedCareerJob[]) => ({
   experiences: [...new Set(jobs.map((job) => job.experienceLabel))].sort(),
 });
 
+const mapFilterSectionItems = (
+  group?: StrapiCareerFilterSectionGroup | null,
+): string[] => {
+  return coerceArray<StrapiCareerFilterSectionItem>(group?.Items)
+    .map((item) => cleanText(item.ItemName))
+    .filter(Boolean) as string[];
+};
+
+const mapFilterSectionLabel = (
+  group?: StrapiCareerFilterSectionGroup | null,
+): string | null => {
+  return cleanText(group?.FeaturedTitle) ?? null;
+};
+
+const mapListingFilterSection = (
+  filterSection?: StrapiCareerListingFilterSection | null,
+) => {
+  if (!filterSection) {
+    return null;
+  }
+
+  const filtersTitle =
+    cleanText(filterSection.fiterTitle) ?? cleanText(filterSection.filterTitle);
+  const filterLocationLabel = mapFilterSectionLabel(filterSection.Location);
+  const filterDepartmentLabel = mapFilterSectionLabel(filterSection.Department);
+  const filterExperienceLabel = mapFilterSectionLabel(filterSection.Experience);
+
+  const locations = mapFilterSectionItems(filterSection.Location);
+  const departments = mapFilterSectionItems(filterSection.Department);
+  const experiences = mapFilterSectionItems(filterSection.Experience);
+
+  const hasContent =
+    Boolean(filtersTitle) ||
+    Boolean(filterLocationLabel) ||
+    Boolean(filterDepartmentLabel) ||
+    Boolean(filterExperienceLabel) ||
+    locations.length > 0 ||
+    departments.length > 0 ||
+    experiences.length > 0;
+
+  if (!hasContent) {
+    return null;
+  }
+
+  return {
+    filtersTitle: filtersTitle ?? null,
+    filterLocationLabel,
+    filterDepartmentLabel,
+    filterExperienceLabel,
+    filterOptions: {
+      locations,
+      departments,
+      experiences,
+    },
+  };
+};
+
 export const mapCareerListingPage = (
   raw?: StrapiCareerListingPageEntity | null,
 ): NormalizedCareerListingPage => {
   if (!raw) return { ...EMPTY_CAREER_LISTING_PAGE };
 
-  const cmsFilters = {
+  const fromFilterSection = mapListingFilterSection(raw.filterSection);
+
+  const legacyFilters = {
     locations: mapFilterOptions(raw.locationFilters),
     departments: mapFilterOptions(raw.departmentFilters),
     experiences: mapFilterOptions(raw.experienceFilters),
   };
 
+  const filterOptions = fromFilterSection
+    ? fromFilterSection.filterOptions
+    : legacyFilters;
+
   return {
     seo: mapSeo(raw.seo),
-    hero: mapHero(raw.hero),
+    hero: mapHero(raw.heroSection ?? raw.hero),
     featuredTitle: cleanText(raw.featuredTitle) ?? null,
     title: cleanText(raw.title) ?? null,
     mobileTitle: cleanText(raw.mobileTitle) ?? null,
     searchPlaceholder: cleanText(raw.searchPlaceholder) ?? null,
     mobileSearchPlaceholder: cleanText(raw.mobileSearchPlaceholder) ?? null,
-    filtersTitle: cleanText(raw.filtersTitle) ?? null,
-    filterLocationLabel: cleanText(raw.filterLocationLabel) ?? null,
-    filterDepartmentLabel: cleanText(raw.filterDepartmentLabel) ?? null,
-    filterExperienceLabel: cleanText(raw.filterExperienceLabel) ?? null,
+    filtersTitle:
+      fromFilterSection?.filtersTitle ?? cleanText(raw.filtersTitle) ?? null,
+    filterLocationLabel:
+      fromFilterSection?.filterLocationLabel ??
+      cleanText(raw.filterLocationLabel) ??
+      null,
+    filterDepartmentLabel:
+      fromFilterSection?.filterDepartmentLabel ??
+      cleanText(raw.filterDepartmentLabel) ??
+      null,
+    filterExperienceLabel:
+      fromFilterSection?.filterExperienceLabel ??
+      cleanText(raw.filterExperienceLabel) ??
+      null,
     filterSelectPlaceholder: cleanText(raw.filterSelectPlaceholder) ?? null,
-    openFiltersLabel: cleanText(raw.openFiltersLabel) ?? null,
+    openFiltersLabel: cleanText(raw.openFiltersLabel) ?? fromFilterSection?.filtersTitle ?? null,
     closeFiltersLabel: cleanText(raw.closeFiltersLabel) ?? null,
     emptyResultsMessage: cleanText(raw.emptyResultsMessage) ?? null,
-    filterOptions: cmsFilters,
+    filterOptions,
   };
 };
 

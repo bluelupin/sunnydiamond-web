@@ -1,8 +1,9 @@
 import { cache } from "react";
 import { apiFetch } from "@/api/fetchClient";
 import { STRAPI_ENDPOINTS } from "@/api/endpoints";
-import { mapCareersPageData } from "./careers.mapper";
+import { mapCareerOpening, mapCareersPageData } from "./careers.mapper";
 import type {
+  NormalizedCareerJob,
   NormalizedCareersPageData,
   StrapiCareerLandingPageEntity,
   StrapiCareerListingPageEntity,
@@ -32,10 +33,26 @@ const CAREER_LANDING_POPULATE_QUERY =
 
 const CAREER_LANDING_FALLBACK_QUERY = "populate=*";
 
-const CAREER_LISTING_POPULATE_QUERY =
-  "populate=*" +
-  "&populate[hero][populate][backgroundImage][populate][desktopImage]=true" +
-  "&populate[hero][populate][backgroundImage][populate][mobileImage]=true";
+/** `populate=*` only — deep populate on this type returns CMS 500 (incl. when `heroSection` is null). */
+const CAREER_LISTING_POPULATE_QUERY = "populate=*";
+
+const CAREER_LISTING_FALLBACK_QUERY = "populate=*";
+
+async function fetchCareerListingPage(
+  signal?: AbortSignal,
+): Promise<StrapiCareerListingPageEntity> {
+  try {
+    return await apiFetch<StrapiCareerListingPageEntity>(
+      `${STRAPI_ENDPOINTS.careerListingPage}?${CAREER_LISTING_POPULATE_QUERY}`,
+      { signal },
+    );
+  } catch {
+    return apiFetch<StrapiCareerListingPageEntity>(
+      `${STRAPI_ENDPOINTS.careerListingPage}?${CAREER_LISTING_FALLBACK_QUERY}`,
+      { signal },
+    );
+  }
+}
 
 /** Job openings use populate=* — `qualifications` is not a valid populate key on this type yet. */
 const CAREER_OPENINGS_POPULATE_QUERY =
@@ -63,10 +80,7 @@ export const getCareerLandingPageRaw = cache(async (signal?: AbortSignal) => {
 });
 
 export const getCareerListingPageRaw = cache(async (signal?: AbortSignal) => {
-  return apiFetch<StrapiCareerListingPageEntity>(
-    `${STRAPI_ENDPOINTS.careerListingPage}?${CAREER_LISTING_POPULATE_QUERY}`,
-    { signal },
-  );
+  return fetchCareerListingPage(signal);
 });
 
 export const getCareerOpeningsRaw = cache(async (signal?: AbortSignal) => {
@@ -75,6 +89,30 @@ export const getCareerOpeningsRaw = cache(async (signal?: AbortSignal) => {
     { signal },
   );
 });
+
+const CAREER_OPENING_BY_SLUG_QUERY = (slug: string) =>
+  `filters[slug][$eq]=${encodeURIComponent(slug)}` +
+  "&filters[isActive][$eq]=true" +
+  "&populate=*";
+
+export const getCareerOpeningBySlug = cache(
+  async (slug: string, signal?: AbortSignal): Promise<NormalizedCareerJob | null> => {
+    const trimmed = slug.trim();
+    if (!trimmed) return null;
+
+    try {
+      const openings = await apiFetch<StrapiCareerOpeningEntity[]>(
+        `${STRAPI_ENDPOINTS.careerOpenings}?${CAREER_OPENING_BY_SLUG_QUERY(trimmed)}`,
+        { signal },
+      );
+      const opening = openings[0];
+      if (!opening) return null;
+      return mapCareerOpening(opening);
+    } catch {
+      return null;
+    }
+  },
+);
 
 export const getCareersPageData = cache(
   async (signal?: AbortSignal): Promise<NormalizedCareersPageData> => {

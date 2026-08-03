@@ -1,4 +1,3 @@
-import type { NormalizedCareersPageData } from "@/services/careers/careers.types";
 import type { CareerJob } from "../types";
 
 export function getCareerJobById(
@@ -23,4 +22,12 @@ export function getRelatedCareerJobs(
     .filter(Boolean) as CareerJob[];
 
   return ordered.slice(0, limit);
+}
+
+/** First N jobs from the API-sorted list (sortOrder asc, publishedAt desc). */
+export function getLandingCareerJobs(
+  jobs: readonly CareerJob[],
+  limit = 3,
+): CareerJob[] {
+  return jobs.slice(0, limit);
 }

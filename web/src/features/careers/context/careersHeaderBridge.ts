@@ -24,19 +24,25 @@ export function subscribeCareersHeaderMode(listener: () => void) {
   };
 }
 
-/** Header lives outside CareersJobsProvider; sync header mode via this bridge on /careers. */
+/** Header lives outside CareersJobsProvider; sync header mode on careers routes. */
 export function useCareersHeaderMode(pathname: string): CareersHeaderMode | null {
   const [, setRevision] = useState(0);
+  const isCareersLanding = pathname === "/careers";
+  const isCareersJobDetail = pathname.startsWith("/careers/");
 
   useLayoutEffect(() => {
-    if (pathname !== "/careers") {
+    if (!isCareersLanding) {
       return;
     }
 
     return subscribeCareersHeaderMode(() => setRevision((value) => value + 1));
-  }, [pathname]);
+  }, [isCareersLanding]);
 
-  if (pathname !== "/careers") {
+  if (isCareersJobDetail) {
+    return "solid";
+  }
+
+  if (!isCareersLanding) {
     return null;
   }
 

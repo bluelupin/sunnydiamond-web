@@ -9,16 +9,42 @@ import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
 import CareersJobCard from "./shared/CareersJobCard";
 import CareersJobFiltersSidebar from "./shared/CareersJobFiltersSidebar";
 import CareersJobFiltersDrawer from "./shared/CareersJobFiltersDrawer";
+import CareersJobListingsEmptyState from "./shared/CareersJobListingsEmptyState";
+import {
+  CAREERS_LISTING_CLEAR_FILTERS_LABEL,
+  hasActiveListingFilters,
+} from "@/features/careers/constants/careersListing";
+
+const LISTING_FILTER_EMPTY_TITLE = "No matching roles found";
+const LISTING_FILTER_EMPTY_DESCRIPTION =
+  "Try adjusting your search or filters to see all open positions.";
 
 const CareersJobListingsSection = () => {
-  const { filteredJobs, searchQuery, setSearchQuery, goToDetail, cms } = useCareersJobs();
+  const {
+    filteredJobs,
+    searchQuery,
+    setSearchQuery,
+    goToDetail,
+    cms,
+    locationFilter,
+    departmentFilter,
+    experienceFilter,
+    clearListingFilters,
+  } = useCareersJobs();
   const { listing } = cms;
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  const listingTitle = listing.title ?? listing.featuredTitle;
-  const searchPlaceholder = listing.searchPlaceholder ?? listing.mobileSearchPlaceholder;
+  const listingHeading = listing.featuredTitle ?? listing.title;
+  const searchPlaceholder = "Search roles";
+  const hasActiveFilters = hasActiveListingFilters(
+    searchQuery,
+    locationFilter,
+    departmentFilter,
+    experienceFilter,
+  );
+  const showFilterEmptyState = filteredJobs.length === 0 && hasActiveFilters;
 
-  if (!listingTitle || !searchPlaceholder) {
+  if (!listingHeading || !searchPlaceholder) {
     return null;
   }
 
@@ -39,7 +65,7 @@ const CareersJobListingsSection = () => {
               id="careers-job-listing-title"
               className="font-larken text-32 font-light leading-110 text-darkblack"
             >
-              {listingTitle}
+              {listingHeading}
             </h2>
           </Reveal>
 
@@ -47,7 +73,7 @@ const CareersJobListingsSection = () => {
             <Reveal direction="up" className="flex items-center gap-3">
               <div className="relative min-w-0 flex-1">
                 <Search
-                  className="pointer-events-none absolute left-3 top-1/2 size-6 -translate-y-1/2 text-darkblack"
+                  className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-darkblack"
                   aria-hidden
                 />
                 <input
@@ -56,17 +82,17 @@ const CareersJobListingsSection = () => {
                   onChange={(event) => setSearchQuery(event.target.value)}
                   placeholder={searchPlaceholder}
                   className={cn(
-                    "h-auto w-full border border-[#F2F2F2] bg-[#F2F2F2] p-3 pl-12 font-gill text-sm font-light leading-110 text-darkblack placeholder:text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2",
+                    "h-12 w-full border border-[#F2F2F2] bg-[#F2F2F2] p-3 pl-12 font-gill text-sm font-light leading-110 text-darkblack placeholder:text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2",
                   )}
                   aria-label={searchPlaceholder}
                 />
               </div>
-              {listing.openFiltersLabel ? (
+              {(listing.openFiltersLabel ?? listing.filtersTitle) ? (
                 <button
                   type="button"
                   onClick={() => setFiltersOpen(true)}
                   className="inline-flex size-12 shrink-0 items-center justify-center border border-[#F2F2F2] bg-[#F2F2F2] text-darkblack transition-colors hover:bg-gray300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 lg:hidden"
-                  aria-label={listing.openFiltersLabel}
+                  aria-label={listing.openFiltersLabel ?? listing.filtersTitle ?? "Filters"}
                 >
                   <FilterIcon className="size-6" />
                 </button>
@@ -84,17 +110,24 @@ const CareersJobListingsSection = () => {
                     />
                   </Reveal>
                 ))
-              ) : listing.emptyResultsMessage ? (
-                <p className="font-gill text-base font-light leading-110 text-neutral500">
-                  {listing.emptyResultsMessage}
-                </p>
+              ) : showFilterEmptyState ? (
+                <Reveal direction="up">
+                  <CareersJobListingsEmptyState
+                    title={LISTING_FILTER_EMPTY_TITLE}
+                    description={
+                      listing.emptyResultsMessage ?? LISTING_FILTER_EMPTY_DESCRIPTION
+                    }
+                    clearFiltersLabel={CAREERS_LISTING_CLEAR_FILTERS_LABEL}
+                    onClearFilters={clearListingFilters}
+                  />
+                </Reveal>
               ) : null}
             </div>
           </div>
         </div>
       </div>
 
-      {listing.closeFiltersLabel ? (
+      {listing.filtersTitle ? (
         <CareersJobFiltersDrawer open={filtersOpen} onOpenChange={setFiltersOpen} />
       ) : null}
     </section>

@@ -21,7 +21,7 @@ const CareersLifeSection = ({ lifeAt }: CareersLifeSectionProps) => {
           <Reveal direction="up">
             <h2
               id="careers-life-title"
-              className="w-full whitespace-pre-wrap font-larken text-32 font-light leading-110 text-darkblack md:text-5xl"
+              className="w-full whitespace-pre-wrap font-larken text-32 font-light leading-110 text-darkblack md:text-5xl max-w-[300px]"
             >
               {lifeAt.title}
             </h2>

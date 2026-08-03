@@ -2,6 +2,7 @@
 
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
 import CareersJobFilterFields from "./CareersJobFilterFields";
+import CareersJobFiltersHeader from "./CareersJobFiltersHeader";
 
 const CareersJobFiltersSidebar = () => {
   const { cms } = useCareersJobs();
@@ -15,9 +16,7 @@ const CareersJobFiltersSidebar = () => {
     <aside className="w-full shrink-0 bg-gray200 lg:w-[437px]">
       <div className="flex flex-col gap-6 p-6">
         <div className="flex flex-col gap-6">
-          <h3 className="font-larken text-2xl font-light leading-110 text-darkblack">
-            {filtersTitle}
-          </h3>
+          <CareersJobFiltersHeader title={filtersTitle} />
           <span className="h-px w-full bg-neutral300" aria-hidden />
         </div>
 

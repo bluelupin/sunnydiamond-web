@@ -37,10 +37,11 @@ const CareersJobCard = ({
     cms.landing.applicationFlow?.jobDetails.viewJobLabel ?? "VIEW JOB";
   const isLanding = variant === "landing";
   const isListing = variant === "listing";
+  const isInteractive = (isLanding || isListing) && Boolean(onViewJob);
   const shouldShowViewJob = showViewJobButton ?? Boolean(onViewJob);
 
   const handleCardActivate = () => {
-    if (isListing && onViewJob) {
+    if (isInteractive && onViewJob) {
       onViewJob();
     }
   };
@@ -52,9 +53,9 @@ const CareersJobCard = ({
 
   return (
     <article
-      onClick={isListing ? handleCardActivate : undefined}
+      onClick={isInteractive ? handleCardActivate : undefined}
       onKeyDown={(event) => {
-        if (!isListing || !onViewJob) {
+        if (!isInteractive || !onViewJob) {
           return;
         }
 
@@ -63,18 +64,23 @@ const CareersJobCard = ({
           onViewJob();
         }
       }}
-      role={isListing ? "button" : undefined}
-      tabIndex={isListing ? 0 : undefined}
+      role={isInteractive ? "button" : undefined}
+      tabIndex={isInteractive ? 0 : undefined}
       className={cn(
         "flex flex-col",
-        isLanding && "gap-6 bg-gray200 p-4 md:bg-gray300 md:p-6",
+        isLanding &&
+          cn(
+            "gap-6 bg-gray200 p-4 md:bg-gray300 md:p-6",
+            isInteractive &&
+              "group cursor-pointer transition-colors md:hover:flex-row md:hover:items-start md:hover:justify-between",
+          ),
         isListing &&
           "group cursor-pointer gap-6 bg-gray300 p-4 transition-colors md:bg-gray200 md:p-6 md:hover:flex-row md:hover:items-start md:hover:justify-between md:hover:bg-gray300",
         !isLanding && !isListing && "gap-6 bg-gray200 p-4 md:gap-8 md:p-8",
         className,
       )}
     >
-      <div className={cn("flex flex-col gap-6", isListing && "min-w-0 md:flex-1")}>
+      <div className={cn("flex flex-col gap-6", isInteractive && "min-w-0 md:flex-1")}>
         <div className="flex flex-col gap-4">
           <div
             className={cn(
@@ -133,10 +139,9 @@ const CareersJobCard = ({
           }}
           className={cn(
             viewJobButtonClass,
-            isListing && "md:hidden md:group-hover:inline-flex",
-            isLanding && "md:hidden",
-            !isListing &&
-              !isLanding &&
+            isInteractive && "md:hidden md:group-hover:inline-flex",
+            !isLanding &&
+              !isListing &&
               "md:border md:border-darkblack md:bg-transparent md:px-8 md:text-darkblack md:hover:bg-darkblack md:hover:text-white",
           )}
         >
