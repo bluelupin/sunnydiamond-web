@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
@@ -35,8 +35,10 @@ import {
   reportJewelleryPlpTtfb,
 } from "../utils/jewelleryPlpPerformance";
 import { useMagentoJewelleryListing, createJewelleryListingPrefetchParams } from "@/hooks/magento/useMagentoJewelleryListing";
+import { useMagentoJewelleryNav } from "@/hooks/magento/useMagentoJewelleryNav";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
-import type { JewelleryCategory, JewelleryCategorySlug, JewelleryFilterState } from "../types";
+import { resolveActiveCategorySlugFromFilters } from "../utils/plpCategoryNav";
+import type { JewelleryCategory, JewelleryFilterState } from "../types";
 import type { JewelleryListingProductsData } from "@/types/magento/jewelleryListing";
 
 const JewelleryFilterDrawer = dynamic(() => import("./JewelleryFilterDrawer"), {
@@ -66,10 +68,11 @@ const JewelleryProductPage = ({
   const minPriceFromUrl = parseGiftFinderPriceParam(searchParams?.get("minPrice"));
   const maxPriceFromUrl = parseGiftFinderPriceParam(searchParams?.get("maxPrice"));
 
-  const [activeCategory, setActiveCategory] = useState<JewelleryCategorySlug>(categoryFromUrl);
   const [sortValue, setSortValue] = useState(DEFAULT_JEWELLERY_LISTING_SORT);
   const [filters, setFilters] = useState<JewelleryFilterState>(() => createEmptyFilterState());
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const { data: navData } = useMagentoJewelleryNav();
+  const navCategories = navData?.categories ?? [];
   const facetsSyncedRef = useRef(false);
   const lastOccasionSlugRef = useRef<string | null>(null);
   const lastPriceParamsRef = useRef<string | null>(null);
@@ -140,9 +143,15 @@ const JewelleryProductPage = ({
     });
   }, [isLoading, products.length, pathname, initialListing]);
 
-  useEffect(() => {
-    setActiveCategory(categoryFromUrl);
-  }, [categoryFromUrl]);
+  const activeCategory = useMemo(() => {
+    const fromDrawerCategory = resolveActiveCategorySlugFromFilters(
+      filters,
+      facets,
+      navCategories,
+    );
+
+    return fromDrawerCategory ?? categoryFromUrl;
+  }, [filters, facets, navCategories, categoryFromUrl]);
 
   useEffect(() => {
     if (!hasMagentoFilterFacets(facets)) {
@@ -185,8 +194,11 @@ const JewelleryProductPage = ({
 
   const handleCategoryChange = useCallback(
     (category: JewelleryCategory) => {
-      setActiveCategory(category.slug);
       router.replace(buildJewelleryCategoryHref(category.urlKey), { scroll: false });
+      setFilters((current) => ({
+        ...current,
+        categories: [],
+      }));
     },
     [router],
   );
