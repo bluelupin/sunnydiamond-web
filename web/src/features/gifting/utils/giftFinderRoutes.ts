@@ -37,11 +37,15 @@ export function parseGiftFinderPriceParam(value: string | null | undefined): num
 
 export function hasGiftFinderSearchParams(searchParams: {
   occasion?: string;
+  diamondShape?: string;
+  fancyColour?: string;
   minPrice?: string;
   maxPrice?: string;
 }): boolean {
   return Boolean(
     searchParams.occasion?.trim() ||
+      searchParams.diamondShape?.trim() ||
+      searchParams.fancyColour?.trim() ||
       parseGiftFinderPriceParam(searchParams.minPrice) > 0 ||
       parseGiftFinderPriceParam(searchParams.maxPrice) > 0,
   );

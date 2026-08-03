@@ -14,7 +14,14 @@ import JsonLd from "@/shared/lib/seo/JsonLd";
 import { resolveImageSrcString } from "@/shared/utils/image";
 
 type PageProps = {
-  searchParams: Promise<{ occasion?: string; category?: string; minPrice?: string; maxPrice?: string }>;
+  searchParams: Promise<{
+    occasion?: string;
+    diamondShape?: string;
+    fancyColour?: string;
+    category?: string;
+    minPrice?: string;
+    maxPrice?: string;
+  }>;
 };
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {

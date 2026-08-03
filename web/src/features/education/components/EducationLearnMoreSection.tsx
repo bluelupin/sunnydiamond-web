@@ -30,7 +30,10 @@ function mapSlidesToCarouselItems(
     name: slide.alt?.trim() ?? "",
     price: null,
     image: slide.src,
-    href: tab.ctaHref ?? "",
+    href: slide.ctaHref ?? tab.ctaHref ?? "",
+    ...(slide.ctaLabel || tab.ctaLabel
+      ? { ctaLabel: slide.ctaLabel ?? tab.ctaLabel }
+      : {}),
   }));
 }
 
@@ -81,16 +84,20 @@ const LearnCarouselPanel = ({
 }: {
   tab: NormalizedEducationLearnTab;
   items: FeaturedCarouselItem[];
-}) => (
-  <div className="flex w-full max-w-full min-w-0 flex-col items-center overflow-x-clip">
-    <FeaturedProductsCarousel
-      items={items}
-      ctaLabel={tab.ctaLabel ?? ""}
-      sectionLabel={tab.label}
-      showCta={Boolean(tab.ctaLabel && tab.ctaHref)}
-    />
-  </div>
-);
+}) => {
+  const hasPerSlideCta = items.some((item) => Boolean(item.href && (item.ctaLabel || tab.ctaLabel)));
+
+  return (
+    <div className="flex w-full max-w-full min-w-0 flex-col items-center overflow-x-clip">
+      <FeaturedProductsCarousel
+        items={items}
+        ctaLabel={tab.ctaLabel ?? ""}
+        sectionLabel={tab.label}
+        showCta={hasPerSlideCta}
+      />
+    </div>
+  );
+};
 
 const LearnCareTip = ({ tip, mobile = false }: { tip: NormalizedEducationLearnCareTip; mobile?: boolean }) => {
   const desktop = careSpec.desktop;

@@ -23,6 +23,8 @@ import {
   buildJewelleryCategoryHref,
   parseJewelleryCategorySlug,
 } from "../utils/jewelleryRoutes";
+import { resolveDiamondShapeFacetOption } from "../utils/diamondShapeListing";
+import { resolveFancyColourFacetOption } from "../utils/fancyColourListing";
 import { resolveOccasionFacetOption } from "../utils/occasionListing";
 import {
   applyGiftFinderPriceToFilterState,
@@ -65,16 +67,44 @@ const JewelleryProductPage = ({
   const categoryFromQuery = parseJewelleryCategorySlug(searchParams?.get("category") ?? null);
   const categoryFromUrl = categoryFromPath ?? categoryFromQuery ?? "all";
   const occasionSlug = searchParams?.get("occasion");
+  const diamondShapeSlug = searchParams?.get("diamondShape");
+  const fancyColourSlug = searchParams?.get("fancyColour");
   const minPriceFromUrl = parseGiftFinderPriceParam(searchParams?.get("minPrice"));
   const maxPriceFromUrl = parseGiftFinderPriceParam(searchParams?.get("maxPrice"));
 
   const [sortValue, setSortValue] = useState(DEFAULT_JEWELLERY_LISTING_SORT);
-  const [filters, setFilters] = useState<JewelleryFilterState>(() => createEmptyFilterState());
+  const [filters, setFilters] = useState<JewelleryFilterState>(() => {
+    const initial = createEmptyFilterState();
+    // Resolve Magento option id before the first listing fetch (slug "heart" → "69").
+    const shapeOption = resolveDiamondShapeFacetOption(diamondShapeSlug);
+    if (shapeOption) {
+      initial.diamondShape = shapeOption.value;
+    }
+    const colourOption = resolveFancyColourFacetOption(fancyColourSlug);
+    if (colourOption) {
+      initial.fancyColour = colourOption.value;
+    }
+    return initial;
+  });
+  const [draftFilters, setDraftFilters] = useState<JewelleryFilterState>(() => {
+    const initial = createEmptyFilterState();
+    const shapeOption = resolveDiamondShapeFacetOption(diamondShapeSlug);
+    if (shapeOption) {
+      initial.diamondShape = shapeOption.value;
+    }
+    const colourOption = resolveFancyColourFacetOption(fancyColourSlug);
+    if (colourOption) {
+      initial.fancyColour = colourOption.value;
+    }
+    return initial;
+  });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const { data: navData } = useMagentoJewelleryNav();
   const navCategories = navData?.categories ?? [];
   const facetsSyncedRef = useRef(false);
   const lastOccasionSlugRef = useRef<string | null>(null);
+  const lastDiamondShapeSlugRef = useRef<string | null>(null);
+  const lastFancyColourSlugRef = useRef<string | null>(null);
   const lastPriceParamsRef = useRef<string | null>(null);
   const plpTtfbReportedRef = useRef(false);
   const plpPrefetchReportedRef = useRef(false);
@@ -162,6 +192,22 @@ const JewelleryProductPage = ({
     const occasionChanged = lastOccasionSlugRef.current !== (occasionSlug ?? null);
     lastOccasionSlugRef.current = occasionSlug ?? null;
 
+    const diamondShapeOption = resolveDiamondShapeFacetOption(
+      diamondShapeSlug,
+      facets.diamondShapes,
+    );
+    const diamondShapeChanged =
+      lastDiamondShapeSlugRef.current !== (diamondShapeSlug ?? null);
+    lastDiamondShapeSlugRef.current = diamondShapeSlug ?? null;
+
+    const fancyColourOption = resolveFancyColourFacetOption(
+      fancyColourSlug,
+      facets.fancyColours,
+    );
+    const fancyColourChanged =
+      lastFancyColourSlugRef.current !== (fancyColourSlug ?? null);
+    lastFancyColourSlugRef.current = fancyColourSlug ?? null;
+
     const priceParamsKey = `${minPriceFromUrl}|${maxPriceFromUrl}`;
     const priceParamsChanged = lastPriceParamsRef.current !== priceParamsKey;
     lastPriceParamsRef.current = priceParamsKey;
@@ -170,6 +216,12 @@ const JewelleryProductPage = ({
       let nextDraft = createDefaultFilterState(facets);
       if (occasionOption) {
         nextDraft.occasion = occasionOption.value;
+      }
+      if (diamondShapeOption) {
+        nextDraft.diamondShape = diamondShapeOption.value;
+      }
+      if (fancyColourOption) {
+        nextDraft.fancyColour = fancyColourOption.value;
       }
       return applyGiftFinderPriceToFilterState(
         nextDraft,
@@ -186,11 +238,23 @@ const JewelleryProductPage = ({
       return;
     }
 
-    if (occasionChanged || priceParamsChanged) {
+    if (
+      occasionChanged ||
+      diamondShapeChanged ||
+      fancyColourChanged ||
+      priceParamsChanged
+    ) {
       const nextDraft = buildFiltersFromUrl();
       setFilters(nextDraft);
     }
-  }, [facets, occasionSlug, minPriceFromUrl, maxPriceFromUrl]);
+  }, [
+    facets,
+    occasionSlug,
+    diamondShapeSlug,
+    fancyColourSlug,
+    minPriceFromUrl,
+    maxPriceFromUrl,
+  ]);
 
   const handleCategoryChange = useCallback(
     (category: JewelleryCategory) => {

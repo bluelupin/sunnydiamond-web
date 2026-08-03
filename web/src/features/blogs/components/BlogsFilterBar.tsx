@@ -12,10 +12,10 @@ type BlogsFilterBarProps = {
 const BlogsFilterBar = ({ filterLabel, categories }: BlogsFilterBarProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const selectedCategory = searchParams.get("category") ?? "all";
+  const selectedCategory = searchParams?.get("category") ?? "all";
 
   const handleSelectCategory = (categoryId: string) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
     params.delete("limit");
 
     if (categoryId === "all") {

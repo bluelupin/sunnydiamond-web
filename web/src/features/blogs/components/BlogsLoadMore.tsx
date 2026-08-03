@@ -27,7 +27,7 @@ const BlogsLoadMore = ({
   const progressWidth = Math.min((shownCount / Math.max(total, 1)) * 360, 360);
 
   const handleLoadMore = () => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
     const nextLimit = Math.min(limit + BLOGS_LOAD_MORE_STEP, total);
     params.set("limit", String(nextLimit));
 
