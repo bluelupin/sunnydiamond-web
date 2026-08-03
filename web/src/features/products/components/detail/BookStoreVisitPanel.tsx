@@ -47,6 +47,10 @@ type BookStoreVisitPanelProps = {
   onBack?: () => void;
   storeSearchQuery?: string;
   storeStateFilter?: string | null;
+  /** Prefetched showrooms from `/api/store-locator-page` (page variant). */
+  initialStores?: BookStoreVisitStore[];
+  getDirectionsLabel?: string | null;
+  noResultsMessage?: string | null;
   /**
    * PDP Visit Us only. When set (e.g. `product-store-visit`), submit via
    * product-submissions so the booking appears under My Appointments.
@@ -66,6 +70,9 @@ const BookStoreVisitPanel = ({
   onBack,
   storeSearchQuery = "",
   storeStateFilter = null,
+  initialStores,
+  getDirectionsLabel,
+  noResultsMessage,
   submissionFormTag,
   productName,
   productId,
@@ -79,7 +86,11 @@ const BookStoreVisitPanel = ({
     [editorialData?.showroomSection?.showrooms],
   );
   const [step, setStep] = useState<BookVisitStep>("select-store");
-  const [stores, setStores] = useState<BookStoreVisitStore[]>(BOOK_STORE_VISIT_STORES);
+  const [stores, setStores] = useState<BookStoreVisitStore[]>(() => {
+    if (initialStores && initialStores.length > 0) return initialStores;
+    if (variant === "page") return [];
+    return BOOK_STORE_VISIT_STORES;
+  });
   const [timeSlots, setTimeSlots] = useState<readonly string[]>(APPOINTMENT_TIME_SLOTS);
   const [purposeOptions, setPurposeOptions] = useState<readonly string[]>([]);
   const [formTitle, setFormTitle] = useState("Book Your Store Visit");
@@ -97,7 +108,11 @@ const BookStoreVisitPanel = ({
   const [submitButtonText, setSubmitButtonText] = useState("BOOK A VISIT");
   const [formTag, setFormTag] = useState(submissionFormTag ?? SHOWROOM_VISIT_FORM_TAG);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedStoreId, setSelectedStoreId] = useState(BOOK_STORE_VISIT_STORES[0].id);
+  const [selectedStoreId, setSelectedStoreId] = useState(
+    () =>
+      initialStores?.[0]?.id ??
+      (variant === "page" ? "" : BOOK_STORE_VISIT_STORES[0]?.id ?? ""),
+  );
   const [name, setName] = useState("");
   const [countryCode, setCountryCode] = useState("+91");
   const [phone, setPhone] = useState("");
@@ -147,7 +162,7 @@ const BookStoreVisitPanel = ({
     displayStores.find((store) => store.id === selectedStoreId) ??
     displayStores[0] ??
     stores[0] ??
-    BOOK_STORE_VISIT_STORES[0];
+    (variant === "page" ? undefined : BOOK_STORE_VISIT_STORES[0]);
 
   useEffect(() => {
     if (variant !== "page") {
@@ -158,7 +173,7 @@ const BookStoreVisitPanel = ({
       return;
     }
 
-    setSelectedStoreId(displayStores[0]?.id ?? stores[0]?.id ?? BOOK_STORE_VISIT_STORES[0].id);
+    setSelectedStoreId(displayStores[0]?.id ?? stores[0]?.id ?? "");
   }, [displayStores, selectedStoreId, stores, variant]);
 
   // Prefill from My Profile once when available; never overwrite fields the user already typed.
@@ -195,12 +210,17 @@ const BookStoreVisitPanel = ({
       try {
         const form = await getGenericFormByTag(SHOWROOM_VISIT_FORM_TAG, controller.signal);
         if (!form) {
-          const resolvedStores = resolveBookStoreVisitStores([], editorialShowrooms);
+          const resolvedStores =
+            variant === "page"
+              ? (initialStores ?? [])
+              : initialStores && initialStores.length > 0
+                ? initialStores
+                : resolveBookStoreVisitStores([], editorialShowrooms);
           setStores(resolvedStores);
           setSelectedStoreId((current) =>
             resolvedStores.some((store) => store.id === current)
               ? current
-              : resolvedStores[0]?.id ?? BOOK_STORE_VISIT_STORES[0].id,
+              : resolvedStores[0]?.id ?? (variant === "page" ? "" : BOOK_STORE_VISIT_STORES[0].id),
           );
           return;
         }
@@ -255,26 +275,36 @@ const BookStoreVisitPanel = ({
           setNotesPlaceholder(form.notesPlaceholder);
         }
 
-        const resolvedStores = resolveBookStoreVisitStores(form.showrooms, editorialShowrooms);
+        const resolvedStores =
+          variant === "page"
+            ? (initialStores ?? [])
+            : initialStores && initialStores.length > 0
+              ? initialStores
+              : resolveBookStoreVisitStores(form.showrooms, editorialShowrooms);
         setStores(resolvedStores);
         setSelectedStoreId((current) =>
           resolvedStores.some((store) => store.id === current)
             ? current
-            : resolvedStores[0]!.id,
+            : resolvedStores[0]?.id ?? (variant === "page" ? "" : BOOK_STORE_VISIT_STORES[0].id),
         );
       } catch {
-        const resolvedStores = resolveBookStoreVisitStores([], editorialShowrooms);
+        const resolvedStores =
+          variant === "page"
+            ? (initialStores ?? [])
+            : initialStores && initialStores.length > 0
+              ? initialStores
+              : resolveBookStoreVisitStores([], editorialShowrooms);
         setStores(resolvedStores);
         setSelectedStoreId((current) =>
           resolvedStores.some((store) => store.id === current)
             ? current
-            : resolvedStores[0]?.id ?? BOOK_STORE_VISIT_STORES[0].id,
+            : resolvedStores[0]?.id ?? (variant === "page" ? "" : BOOK_STORE_VISIT_STORES[0].id),
         );
       }
     })();
 
     return () => controller.abort();
-  }, [open, variant, editorialShowrooms, submissionFormTag]);
+  }, [open, variant, editorialShowrooms, submissionFormTag, initialStores]);
 
   useEffect(() => {
     if (submissionFormTag) {
@@ -315,7 +345,9 @@ const BookStoreVisitPanel = ({
     setIsSubmitting(false);
     setHasAppliedProfilePrefill(false);
     setSelectedStoreId((current) =>
-      stores.some((store) => store.id === current) ? current : (stores[0]?.id ?? BOOK_STORE_VISIT_STORES[0].id),
+      stores.some((store) => store.id === current)
+        ? current
+        : (stores[0]?.id ?? (variant === "page" ? "" : BOOK_STORE_VISIT_STORES[0].id)),
     );
   };
 
@@ -342,7 +374,7 @@ const BookStoreVisitPanel = ({
   const showStoreSelectionBack = variant === "embedded" || variant === "page";
 
   const handleSubmit = async () => {
-    if (isSubmitting) return;
+    if (isSubmitting || !selectedStore) return;
 
     setIsSubmitting(true);
     try {
@@ -423,7 +455,7 @@ const BookStoreVisitPanel = ({
   }
 
   const panelBody =
-    step === "select-store" ? (
+    step === "select-store" || !selectedStore ? (
       <StoreSelectionStep
         stores={displayStores}
         selectedStoreId={selectedStoreId}
@@ -434,6 +466,8 @@ const BookStoreVisitPanel = ({
         onBack={showStoreSelectionBack ? handleStoreSelectionBack : undefined}
         onClose={variant !== "page" ? handleClose : undefined}
         showBack={showStoreSelectionBack}
+        getDirectionsLabel={getDirectionsLabel}
+        noResultsMessage={noResultsMessage}
       />
     ) : (
       <BookingFormStep
@@ -464,6 +498,7 @@ const BookStoreVisitPanel = ({
         isSubmitting={isSubmitting}
         onBack={() => setStep("select-store")}
         onClose={variant !== "page" ? handleClose : undefined}
+        getDirectionsLabel={getDirectionsLabel}
         onNameChange={setName}
         onCountryCodeChange={setCountryCode}
         onPhoneChange={setPhone}
@@ -552,6 +587,8 @@ type StoreSelectionStepProps = {
   onBack?: () => void;
   onClose?: () => void;
   showBack?: boolean;
+  getDirectionsLabel?: string | null;
+  noResultsMessage?: string | null;
 };
 
 const storeListTitleClassName =
@@ -573,6 +610,8 @@ const StoreSelectionStep = ({
   onBack,
   onClose,
   showBack = false,
+  getDirectionsLabel,
+  noResultsMessage,
 }: StoreSelectionStepProps) => {
   const selectedStore =
     stores.find((store) => store.id === selectedStoreId) ?? stores[0] ?? null;
@@ -588,7 +627,7 @@ const StoreSelectionStep = ({
             >
               {stores.length === 0 ? (
                 <p className="px-4 py-6 font-gill text-base font-light leading-110 text-neutral500 lg:px-10 lg:py-8">
-                  No showrooms match your search. Try another location or state.
+                  {noResultsMessage?.trim() || "No showrooms match your search. Try another location or state."}
                 </p>
               ) : (
                 stores.map((store) => {
@@ -612,7 +651,7 @@ const StoreSelectionStep = ({
                               />
                             </div>
                           ) : null}
-                          <BookStoreVisitLocationDetails store={store} size="page" />
+                          <BookStoreVisitLocationDetails store={store} size="page" directionsLabel={getDirectionsLabel} />
                         </div>
                       ) : (
                         <button
@@ -688,7 +727,7 @@ const StoreSelectionStep = ({
         >
           {stores.length === 0 ? (
             <p className="px-4 py-8 font-gill text-base font-light leading-110 text-neutral500 lg:px-10">
-              No showrooms match your search. Try another location or state.
+              {noResultsMessage?.trim() || "No showrooms match your search. Try another location or state."}
             </p>
           ) : (
             stores.map((store) => {
@@ -712,7 +751,7 @@ const StoreSelectionStep = ({
                         />
                       </div>
                     ) : null}
-                    <BookStoreVisitLocationDetails store={store} size="page" />
+                    <BookStoreVisitLocationDetails store={store} size="page" directionsLabel={getDirectionsLabel} />
                   </div>
                 ) : (
                   <button
@@ -769,6 +808,7 @@ type BookingFormStepProps = {
   isSubmitting: boolean;
   onBack: () => void;
   onClose?: () => void;
+  getDirectionsLabel?: string | null;
   onNameChange: (value: string) => void;
   onCountryCodeChange: (value: string) => void;
   onPhoneChange: (value: string) => void;
@@ -808,6 +848,7 @@ const BookingFormStep = ({
   isSubmitting,
   onBack,
   onClose,
+  getDirectionsLabel,
   onNameChange,
   onCountryCodeChange,
   onPhoneChange,
@@ -873,7 +914,7 @@ const BookingFormStep = ({
                 {selectedStore.storeName}
               </p>
               <div className="h-px w-full bg-neutral300" aria-hidden />
-              <BookStoreVisitLocationDetails store={selectedStore} />
+              <BookStoreVisitLocationDetails store={selectedStore} directionsLabel={getDirectionsLabel} />
             </div>
 
             <div className="flex flex-col gap-6">

@@ -6,7 +6,7 @@ import { profileTabsContent } from "../data/profileContent";
 import { cn } from "@/shared/utils/cn";
 
 const outlineCtaClassName =
-  "btn-border-slide inline-flex h-14 shrink-0 items-center justify-center border border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack";
+  "btn-border-slide inline-flex h-14 shrink-0 items-center justify-center border border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack hover:text-white";
 
 const ProfileSupportSection = () => {
   const { callUs, emailUs } = profileTabsContent.support;
@@ -39,7 +39,7 @@ const ProfileSupportSection = () => {
           </div>
 
           <Link href={callUs.ctaHref} className={outlineCtaClassName}>
-            {callUs.ctaLabel}
+            <span>{callUs.ctaLabel}</span>
           </Link>
         </div>
 
@@ -65,7 +65,7 @@ const ProfileSupportSection = () => {
           </div>
 
           <Link href={emailUs.emailHref} className={cn(outlineCtaClassName, "mt-auto")}>
-            {emailUs.ctaLabel}
+            <span>{emailUs.ctaLabel}</span>
           </Link>
         </div>
       </div>

@@ -8,6 +8,10 @@ export const STRAPI_ENDPOINTS = {
   /** Jewellery PLP (`/jewellery`) — SEO + landing content */
   productLandingPage: "api/product-landing-page",
   contactBespokePage: "api/contact-bespoke-page",
+  /** Store locator page — hero, filters, showrooms, SEO (deep-populated). */
+  storeLocatorPage: "api/store-locator-page",
+  /** Help & Support / FAQs page — contact options, FAQs, SEO. */
+  supportPage: "api/support-page",
   occasions: "api/occasions",
   /** PDP size dropdown + chart drawer — fetch all, match by `name` / category */
   sizeGuides: "api/size-guides",
