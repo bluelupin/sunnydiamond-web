@@ -3,17 +3,24 @@
 import { Headphones, Share2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { cn } from "@/shared/utils/cn";
-import type { BlogDetail, BlogTableOfContentsItem } from "../types";
+import { useBrowserTextToSpeech } from "../hooks/useBrowserTextToSpeech";
+import type { BlogTableOfContentsItem } from "../types";
 
 type BlogDetailSidebarProps = {
   title: string;
   tableOfContents: BlogTableOfContentsItem[];
+  speechText: string;
 };
 
-const BlogDetailSidebar = ({ title, tableOfContents }: BlogDetailSidebarProps) => {
+const BlogDetailSidebar = ({
+  title,
+  tableOfContents,
+  speechText,
+}: BlogDetailSidebarProps) => {
   const [activeId, setActiveId] = useState(
     tableOfContents[0]?.id ?? "",
   );
+  const { isSupported, isSpeaking, toggle } = useBrowserTextToSpeech(speechText);
 
   useEffect(() => {
     if (tableOfContents.length === 0) {
@@ -71,11 +78,6 @@ const BlogDetailSidebar = ({ title, tableOfContents }: BlogDetailSidebarProps) =
     }
   }, [title]);
 
-  const handleListen = useCallback(() => {
-    const firstSection = document.getElementById(tableOfContents[0]?.id ?? "");
-    firstSection?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [tableOfContents]);
-
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
@@ -131,11 +133,18 @@ const BlogDetailSidebar = ({ title, tableOfContents }: BlogDetailSidebarProps) =
       <div className="flex gap-4">
         <button
           type="button"
-          onClick={handleListen}
-          className="flex h-14 flex-1 items-center justify-center gap-2 border border-neutral300 px-7 text-t4-regular uppercase leading-110 text-darkblack transition-colors hover:border-darkblack"
+          onClick={toggle}
+          disabled={!isSupported || !speechText.trim()}
+          aria-pressed={isSpeaking}
+          aria-label={isSpeaking ? "Stop listening to article" : "Listen to article"}
+          className={cn(
+            "flex h-14 flex-1 items-center justify-center gap-2 border border-neutral300 px-7 text-t4-regular uppercase leading-110 text-darkblack transition-colors hover:border-darkblack",
+            (!isSupported || !speechText.trim()) && "pointer-events-none opacity-50",
+            isSpeaking && "border-darkblack",
+          )}
         >
           <Headphones className="size-6 shrink-0" aria-hidden />
-          LISTEN
+          {isSpeaking ? "STOP" : "LISTEN"}
         </button>
         <button
           type="button"

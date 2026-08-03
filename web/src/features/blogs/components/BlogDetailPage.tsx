@@ -1,3 +1,4 @@
+import { buildBlogSpeechText } from "../utils/buildBlogSpeechText";
 import BlogDetailArticle from "./BlogDetailArticle";
 import BlogDetailHeader from "./BlogDetailHeader";
 import BlogDetailHero from "./BlogDetailHero";
@@ -11,6 +12,12 @@ type BlogDetailPageProps = {
 };
 
 const BlogDetailPage = ({ detail, relatedPosts }: BlogDetailPageProps) => {
+  const speechText = buildBlogSpeechText(
+    detail.title,
+    detail.introParagraphs,
+    detail.sections,
+  );
+
   return (
     <>
       <div className="bg-white">
@@ -27,6 +34,7 @@ const BlogDetailPage = ({ detail, relatedPosts }: BlogDetailPageProps) => {
             <BlogDetailSidebar
               title={detail.title}
               tableOfContents={detail.tableOfContents}
+              speechText={speechText}
             />
           </div>
 
@@ -40,6 +48,7 @@ const BlogDetailPage = ({ detail, relatedPosts }: BlogDetailPageProps) => {
               <BlogDetailSidebar
                 title={detail.title}
                 tableOfContents={detail.tableOfContents}
+                speechText={speechText}
               />
             </div>
           </div>
