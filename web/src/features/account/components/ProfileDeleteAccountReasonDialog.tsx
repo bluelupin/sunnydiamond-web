@@ -17,6 +17,7 @@ type ProfileDeleteAccountReasonDialogProps = {
   onOpenChange: (open: boolean) => void;
   onConfirm: (payload: { reason: string; comments: string }) => void;
   isSubmitting?: boolean;
+  errorMessage?: string | null;
 };
 
 type ReasonFormProps = {
@@ -103,6 +104,7 @@ export function ProfileDeleteAccountReasonDialog({
   onOpenChange,
   onConfirm,
   isSubmitting = false,
+  errorMessage,
 }: ProfileDeleteAccountReasonDialogProps) {
   const isMobile = useIsMobile();
   const dialog = profileDetailsContent.deleteAccount.reasonDialog;
@@ -171,6 +173,14 @@ export function ProfileDeleteAccountReasonDialog({
           </div>
 
           <div className="shrink-0 border-t border-neutral300 px-4 pb-6 pt-6">
+            {errorMessage ? (
+              <p
+                className="mb-4 font-gill text-sm font-light leading-110 text-red-700"
+                role="alert"
+              >
+                {errorMessage}
+              </p>
+            ) : null}
             <DetailDarkButton
               type="button"
               className="w-full"
@@ -210,6 +220,12 @@ export function ProfileDeleteAccountReasonDialog({
         </div>
 
         <DeleteAccountReasonForm {...formProps} />
+
+        {errorMessage ? (
+          <p className="font-gill text-sm font-light leading-110 text-red-700" role="alert">
+            {errorMessage}
+          </p>
+        ) : null}
 
         <DetailDarkButton
           type="button"
