@@ -192,10 +192,17 @@ const JewelleryProductCard = ({
       {/* Title + price — bottom of card, same position for default, hover, and mobile lifestyle */}
       <div
         className={cn(
-          "pointer-events-none col-start-1 row-start-1 z-20 flex size-full flex-col justify-end",
-          "px-[16px] pb-[24px] md:px-[24px] md:pb-10",
+          "pointer-events-none col-start-1 row-start-1 z-20 flex size-full flex-col items-center justify-end",
+          "gap-3 px-[16px] pb-[24px] md:px-[24px] md:pb-10",
         )}
       >
+        {isBestseller ? (
+          <span
+            className="hidden h-9 shrink-0 items-center justify-center bg-white px-3 font-gill text-sm font-semibold leading-110 text-darkblack shadow-[0px_2px_2px_#C5A156] md:flex"
+          >
+            BESTSELLER
+          </span>
+        ) : null}
         <ProductCopy
           title={title}
           price={price}
@@ -223,15 +230,6 @@ const JewelleryProductCard = ({
               fontSize: `${jewelleryListingProductCardMobileSpec.bestsellerFontSize}px`,
             }}
           >
-            BESTSELLER
-          </span>
-        </div>
-      ) : null}
-
-      {/* Desktop bestseller badge at image / copy boundary */}
-      {isBestseller ? (
-        <div className="pointer-events-none col-start-1 row-start-1 z-20 hidden justify-center self-start pt-[331px] md:flex">
-          <span className="flex h-9 items-center justify-center bg-white px-3 font-gill text-sm font-semibold leading-110 text-darkblack shadow-[0px_2px_2px_#C5A156]">
             BESTSELLER
           </span>
         </div>
