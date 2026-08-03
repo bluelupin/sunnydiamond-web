@@ -14,6 +14,8 @@ export type JewelleryFilterFacets = {
   metalPurities: JewelleryFilterFacetOption[];
   gemstoneTypes: JewelleryFilterFacetOption[];
   occasions: JewelleryFilterFacetOption[];
+  diamondShapes: JewelleryFilterFacetOption[];
+  fancyColours: JewelleryFilterFacetOption[];
 };
 
 export type JewelleryListingProductsData = {

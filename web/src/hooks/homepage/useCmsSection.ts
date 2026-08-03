@@ -52,7 +52,7 @@ export function useCmsSection<T>(
 
     if (staleValue !== undefined && isFresh) {
       setState({ data: staleValue, isLoading: false, error: undefined });
-      return () => controller.abort();
+      return;
     }
 
     const run = async () => {
@@ -85,7 +85,10 @@ export function useCmsSection<T>(
           setState({ data, isLoading: false, error: undefined });
         }
       } catch (e) {
-        if (controller.signal.aborted) return;
+        // Expected when the effect re-runs or unmounts mid-fetch (Strict Mode, nav).
+        if (isAbortError(e) || controller.signal.aborted) {
+          return;
+        }
 
         const message = e instanceof Error ? e.message : "Failed to load section";
 
@@ -106,10 +109,10 @@ export function useCmsSection<T>(
       }
     };
 
-    run();
+    void run();
 
     return () => {
-      controller.abort();
+      controller.abort("cms-section-unmount");
       const entry = getCmsCacheEntry<T>(key);
       if (entry?.promise) {
         setCmsCacheEntry<T>(key, {
@@ -121,6 +124,18 @@ export function useCmsSection<T>(
   }, [key, staleTimeMs, fetcher]);
 
   return state;
+}
+
+function isAbortError(error: unknown): boolean {
+  if (error == null || typeof error !== "object") {
+    return false;
+  }
+
+  if (error instanceof DOMException && error.name === "AbortError") {
+    return true;
+  }
+
+  return "name" in error && (error as { name?: string }).name === "AbortError";
 }
 
 export type { CmsCacheEntry };

@@ -300,7 +300,7 @@ export type NormalizedEducationLearnTab = {
   layout: "carousel" | "care-grid" | "anatomy-detail";
   ctaLabel?: string;
   ctaHref?: string;
-  slides?: { src: string; alt: string }[];
+  slides?: { src: string; alt: string; ctaLabel?: string; ctaHref?: string }[];
   careTips?: NormalizedEducationLearnCareTip[];
   anatomyDetail?: NormalizedEducationLearnAnatomyDetail;
 };

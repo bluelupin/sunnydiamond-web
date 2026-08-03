@@ -20,7 +20,14 @@ import { resolveImageSrcString } from "@/shared/utils/image";
 
 type JewelleryCategoryRoutePageProps = {
   params: Promise<{ categoryUrl: string }>;
-  searchParams: Promise<{ occasion?: string; category?: string; minPrice?: string; maxPrice?: string }>;
+  searchParams: Promise<{
+    occasion?: string;
+    diamondShape?: string;
+    fancyColour?: string;
+    category?: string;
+    minPrice?: string;
+    maxPrice?: string;
+  }>;
 };
 
 export async function generateJewelleryCategoryMetadata({

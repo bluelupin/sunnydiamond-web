@@ -8,6 +8,8 @@ import {
   type EducationFourCsPanelLayout,
   type EducationSliderOption,
 } from "@/features/education/data/content";
+import { resolveEducationDiamondShapeHref } from "@/features/jewellery-product/utils/diamondShapeListing";
+import { resolveEducationFancyColourHref } from "@/features/jewellery-product/utils/fancyColourListing";
 import { resolveCmsMediaUrl, resolveCmsMediaUrls } from "@/shared/utils/strapiMedia";
 import type {
   NormalizedEducationCertificateSection,
@@ -697,11 +699,28 @@ const mapCarouselSlide = (item: StrapiEducationLearnCarouselImage) => {
   const image = mapResponsiveImageUrls(item.image);
   if (!image.hasImage) return null;
 
+  const ctaLabel = cleanText(item.ctaButton?.label);
+  const shapeHref = resolveEducationDiamondShapeHref({
+    ctaLabel,
+    ctaUrl: item.ctaButton?.url,
+  });
+  const fancyHref = resolveEducationFancyColourHref({
+    ctaLabel,
+    ctaUrl: item.ctaButton?.url,
+  });
+
+  // Prefer an explicit shape/colour deep-link when either resolver produced one.
+  const ctaHref =
+    (shapeHref?.includes("diamondShape=") ? shapeHref : undefined) ??
+    (fancyHref?.includes("fancyColour=") ? fancyHref : undefined) ??
+    fancyHref ??
+    shapeHref;
+
   return {
     src: image.desktopUrl,
     alt: image.alt,
-    ctaLabel: cleanText(item.ctaButton?.label),
-    ctaHref: cleanText(item.ctaButton?.url) ?? undefined,
+    ctaLabel,
+    ctaHref,
   };
 };
 
@@ -846,7 +865,12 @@ const mapLearnTab = (
   if (!slides.length) return null;
 
   const primaryCta = slides.find((slide) => slide.ctaLabel && slide.ctaHref);
-  mapped.slides = slides.map(({ src, alt }) => ({ src, alt }));
+  mapped.slides = slides.map(({ src, alt, ctaLabel, ctaHref }) => ({
+    src,
+    alt,
+    ...(ctaLabel ? { ctaLabel } : {}),
+    ...(ctaHref ? { ctaHref } : {}),
+  }));
   if (primaryCta?.ctaLabel && primaryCta.ctaHref) {
     mapped.ctaLabel = primaryCta.ctaLabel;
     mapped.ctaHref = primaryCta.ctaHref;

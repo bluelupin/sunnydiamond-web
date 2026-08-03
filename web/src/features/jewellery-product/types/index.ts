@@ -26,6 +26,10 @@ export interface JewelleryFilterState {
   gemstoneType: string;
   /** Magento `sd_occasions` option value (e.g. "46"). */
   occasion: string;
+  /** Magento `sd_diamond_shape` option value (e.g. "66"). */
+  diamondShape: string;
+  /** Magento `sd_fancy_colour` option value (e.g. "71"). */
+  fancyColour: string;
 }
 
 export interface JewellerySortOption {

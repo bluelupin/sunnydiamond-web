@@ -2,6 +2,8 @@ import type { MagentoAggregation } from "./magentoProduct.types";
 import type { JewelleryFilterFacets } from "@/types/magento/jewelleryListing";
 import type { JewelleryFilterState } from "@/features/jewellery-product/types";
 import type { JewelleryNavCategory } from "@/types/magento/jewelleryNav";
+import { resolveDiamondShapeFacetOption } from "@/features/jewellery-product/utils/diamondShapeListing";
+import { resolveFancyColourFacetOption } from "@/features/jewellery-product/utils/fancyColourListing";
 import { formatMagentoFacetLabel, normalizeGemstoneTypeLabel } from "./magentoAttribute.utils";
 import {
   isAllCategoriesSelected,
@@ -139,6 +141,26 @@ export function buildMagentoProductsFilter({
     magentoFilter.sd_occasions = { in: [filters.occasion.trim()] };
   }
 
+  if (filters.diamondShape.trim()) {
+    // Accept Magento option id ("69") or URL slug ("heart").
+    const shapeOption = resolveDiamondShapeFacetOption(
+      filters.diamondShape,
+      facets.diamondShapes,
+    );
+    const shapeValue = shapeOption?.value ?? filters.diamondShape.trim();
+    magentoFilter.sd_diamond_shape = { in: [shapeValue] };
+  }
+
+  if (filters.fancyColour.trim()) {
+    // Accept Magento option id ("71") or URL slug ("yellow").
+    const colourOption = resolveFancyColourFacetOption(
+      filters.fancyColour,
+      facets.fancyColours,
+    );
+    const colourValue = colourOption?.value ?? filters.fancyColour.trim();
+    magentoFilter.sd_fancy_colour = { in: [colourValue] };
+  }
+
   return Object.keys(magentoFilter).length > 0 ? magentoFilter : undefined;
 }
 
@@ -175,13 +197,17 @@ function parsePriceBounds(
 }
 
 function mapFacetOptions(
-  options: Array<{ label?: string | null; value?: string | null; count?: number | null }> | null | undefined,
+  options: Array<{
+    label?: string | null;
+    value?: string | number | null;
+    count?: number | null;
+  }> | null | undefined,
   formatLabel: (label: string) => string = (label) => label,
 ) {
   return (options ?? [])
     .map((option) => {
       const rawLabel = option.label?.trim();
-      const value = option.value?.trim();
+      const value = option.value == null ? "" : String(option.value).trim();
 
       if (!rawLabel || !value) {
         return null;
@@ -296,6 +322,12 @@ export function mapMagentoAggregationsToFacets(
   const occasionsAggregation = aggregationList.find(
     (item) => item?.attribute_code === "sd_occasions",
   );
+  const diamondShapeAggregation = aggregationList.find(
+    (item) => item?.attribute_code === "sd_diamond_shape",
+  );
+  const fancyColourAggregation = aggregationList.find(
+    (item) => item?.attribute_code === "sd_fancy_colour",
+  );
 
   const priceBounds = parsePriceBounds(priceAggregation?.options);
 
@@ -324,6 +356,14 @@ export function mapMagentoAggregationsToFacets(
     metalPurities: mapMetalPurityOptions(purityAggregation?.options),
     gemstoneTypes: mapGemstoneTypeOptions(gemstoneTypeAggregation?.options),
     occasions: mapFacetOptions(occasionsAggregation?.options, (label) => formatMagentoFacetLabel(label) ?? label),
+    diamondShapes: mapFacetOptions(
+      diamondShapeAggregation?.options,
+      (label) => formatMagentoFacetLabel(label) ?? label,
+    ),
+    fancyColours: mapFacetOptions(
+      fancyColourAggregation?.options,
+      (label) => formatMagentoFacetLabel(label) ?? label,
+    ),
   };
 }
 
@@ -335,4 +375,6 @@ export const EMPTY_JEWELLERY_FILTER_FACETS: JewelleryFilterFacets = {
   metalPurities: [],
   gemstoneTypes: [],
   occasions: [],
+  diamondShapes: [],
+  fancyColours: [],
 };
