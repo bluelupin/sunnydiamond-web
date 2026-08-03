@@ -1,0 +1,2 @@
+export const careersApplyButtonClassName =
+  "inline-flex h-14 w-fit min-w-[183px] items-center justify-center bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2";

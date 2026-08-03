@@ -8,6 +8,7 @@ import type { CareerJob } from "@/features/careers/types";
 import { getCareerJobPath } from "@/features/careers/constants/careersRoutes";
 import CareersJobPageHeader from "./shared/CareersJobPageHeader";
 import CareersApplyOptionsModal from "./shared/CareersApplyOptionsModal";
+import { careersApplyButtonClassName } from "@/features/careers/constants/careersApplyButton";
 
 const detailListClass =
   "m-0 flex list-disc flex-col gap-2 pl-[21px] font-gill text-sm font-normal leading-110 text-darkblack md:pl-[30px] md:text-xl";
@@ -50,8 +51,8 @@ function JobDescriptionContent({ descriptionHtml }: { descriptionHtml: string })
 
   return (
     <div className="flex flex-col gap-4 whitespace-pre-line">
-      {paragraphs.map((paragraph) => (
-        <p key={paragraph} className="m-0">
+      {paragraphs.map((paragraph, index) => (
+        <p key={`description-paragraph-${index}`} className="m-0">
           {paragraph}
         </p>
       ))}
@@ -102,6 +103,11 @@ const CareersJobDetailView = ({
   const whyJoin = job.whyJoinUs;
   const summaryParagraphs = jobSummary.split(/\n\n+/).filter(Boolean);
   const applyLabel = job.applyLabel ?? jobDetails.applyLabel;
+
+  const handleApplyClick = () => {
+    setApplyModalOpen(true);
+  };
+
   const hasStructuredDetail =
     Boolean(job.jobSummary) ||
     Boolean(job.rolesAndResponsibilities) ||
@@ -143,8 +149,8 @@ const CareersJobDetailView = ({
               <Reveal direction="up">
                 <DetailSection heading={jobDetails.jobSummaryHeading}>
                   <div className="flex flex-col gap-2">
-                    {summaryParagraphs.map((paragraph) => (
-                      <p key={paragraph}>{paragraph}</p>
+                    {summaryParagraphs.map((paragraph, index) => (
+                      <p key={`summary-paragraph-${index}`}>{paragraph}</p>
                     ))}
                   </div>
                 </DetailSection>
@@ -157,8 +163,8 @@ const CareersJobDetailView = ({
                       <p>{responsibilitiesText}</p>
                     ) : (
                       <ul className={detailListClass}>
-                        {job.responsibilities.map((item) => (
-                          <li key={item}>{item}</li>
+                        {job.responsibilities.map((item, index) => (
+                          <li key={`responsibility-${index}`}>{item}</li>
                         ))}
                       </ul>
                     )}
@@ -171,12 +177,12 @@ const CareersJobDetailView = ({
                   <DetailSection heading={jobDetails.qualificationsHeading}>
                     {qualifications ? (
                       <div className="flex flex-col gap-4">
-                        {qualifications.map((group) => (
-                          <div key={group.label} className="flex flex-col gap-3">
+                        {qualifications.map((group, index) => (
+                          <div key={`qualification-${index}-${group.label}`} className="flex flex-col gap-3">
                             <p>{group.label}</p>
                             <ul className={detailListClass}>
-                              {group.text.split(/\n+/).filter(Boolean).map((item) => (
-                                <li key={item}>{item}</li>
+                              {group.text.split(/\n+/).filter(Boolean).map((item, itemIndex) => (
+                                <li key={`qualification-item-${index}-${itemIndex}`}>{item}</li>
                               ))}
                             </ul>
                           </div>
@@ -184,8 +190,8 @@ const CareersJobDetailView = ({
                       </div>
                     ) : (
                       <ul className={detailListClass}>
-                        {job.requirements.map((item) => (
-                          <li key={item}>{item}</li>
+                        {job.requirements.map((item, index) => (
+                          <li key={`requirement-${index}`}>{item}</li>
                         ))}
                       </ul>
                     )}
@@ -198,8 +204,8 @@ const CareersJobDetailView = ({
                   <DetailSection heading={jobDetails.lookingForHeading}>
                     {job.requirements.length > 1 ? (
                       <ul className={detailListClass}>
-                        {job.requirements.map((item) => (
-                          <li key={item}>{item}</li>
+                        {job.requirements.map((item, index) => (
+                          <li key={`requirement-${index}`}>{item}</li>
                         ))}
                       </ul>
                     ) : (
@@ -213,8 +219,8 @@ const CareersJobDetailView = ({
                 <Reveal direction="up">
                   <DetailSection heading={jobDetails.whyJoinHeading}>
                     <div className="flex flex-col gap-2">
-                      {whyJoin.split(/\n\n+/).filter(Boolean).map((paragraph) => (
-                        <p key={paragraph}>{paragraph}</p>
+                      {whyJoin.split(/\n\n+/).filter(Boolean).map((paragraph, index) => (
+                        <p key={`why-join-paragraph-${index}`}>{paragraph}</p>
                       ))}
                     </div>
                   </DetailSection>
@@ -224,30 +230,26 @@ const CareersJobDetailView = ({
           )}
         </div>
 
-        {onApply ? (
-          <Reveal direction="up">
-            <button
-              type="button"
-              onClick={() => setApplyModalOpen(true)}
-              className="inline-flex h-14 w-full items-center justify-center bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 md:w-[183px]"
-            >
-              {applyLabel}
-            </button>
-          </Reveal>
-        ) : null}
+        <Reveal direction="up" className="flex w-full justify-start">
+          <button
+            type="button"
+            onClick={handleApplyClick}
+            className={careersApplyButtonClassName}
+          >
+            {applyLabel}
+          </button>
+        </Reveal>
       </div>
 
-      {onApply ? (
-        <CareersApplyOptionsModal
-          job={job}
-          applyModal={jobDetails.applyModal}
-          open={applyModalOpen}
-          onOpenChange={setApplyModalOpen}
-          onAutofillResume={(file) => onApply("resume", file)}
-          onApplyManually={() => onApply("manual")}
-          onApplyLinkedIn={() => onApply("linkedin")}
-        />
-      ) : null}
+      <CareersApplyOptionsModal
+        job={job}
+        applyModal={jobDetails.applyModal}
+        open={applyModalOpen}
+        onOpenChange={setApplyModalOpen}
+        onAutofillResume={(file) => onApply?.("resume", file)}
+        onApplyManually={() => onApply?.("manual")}
+        onApplyLinkedIn={() => onApply?.("linkedin")}
+      />
     </section>
   );
 };

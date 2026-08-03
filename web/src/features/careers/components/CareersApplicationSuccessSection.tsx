@@ -2,17 +2,14 @@
 
 import Link from "next/link";
 import Reveal from "@/shared/Animation/Reveal";
+import { resolveCareerApplicationFlow } from "@/services/careers/resolveCareerApplicationFlow";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
 import CareersApplicationSuccessIcon from "./shared/CareersApplicationSuccessIcon";
 import CareersSuccessJobIdCopy from "./shared/CareersSuccessJobIdCopy";
 
 const CareersApplicationSuccessSection = () => {
   const { selectedJob, cms } = useCareersJobs();
-  const applicationSuccess = cms.landing.applicationFlow?.applicationSuccess;
-
-  if (!applicationSuccess) {
-    return null;
-  }
+  const applicationSuccess = resolveCareerApplicationFlow(cms.landing.applicationFlow).applicationSuccess;
 
   return (
     <section

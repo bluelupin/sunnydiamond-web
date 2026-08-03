@@ -31,26 +31,20 @@ function CareersJobSlugFlowContent({ job }: { job: NormalizedCareerJob }) {
       ? `${window.location.origin}${getCareerJobPath(job.slug)}`
       : undefined;
 
-  if (flowStep === "application" && cms.landing.applicationFlow) {
+  if (flowStep === "application") {
     return <CareersApplicationFormSection />;
   }
 
-  if (flowStep === "success" && cms.landing.applicationFlow) {
+  if (flowStep === "success") {
     return <CareersApplicationSuccessSection />;
   }
-
-  const canApply = Boolean(cms.landing.applicationFlow);
 
   return (
     <CareersJobDetailView
       job={job}
       jobDetails={jobDetails}
       shareUrl={shareUrl}
-      onApply={
-        canApply
-          ? (entry, resumeFile) => goToApplication(entry, resumeFile)
-          : undefined
-      }
+      onApply={(entry, resumeFile) => goToApplication(entry, resumeFile)}
     />
   );
 }

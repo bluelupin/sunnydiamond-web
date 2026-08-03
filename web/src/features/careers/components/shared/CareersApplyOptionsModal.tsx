@@ -171,18 +171,23 @@ const CareersApplyOptionsModal = ({
   onApplyLinkedIn,
 }: CareersApplyOptionsModalProps) => {
   const resumeInputRef = useRef<HTMLInputElement>(null);
-  const [isMobile, setIsMobile] = useState<boolean | null>(null);
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+
+    return window.matchMedia("(max-width: 767px)").matches;
+  });
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 767px)");
     const update = () => setIsMobile(media.matches);
-    update();
     media.addEventListener("change", update);
     return () => media.removeEventListener("change", update);
   }, []);
 
-  const showMobileDrawer = open && isMobile === true;
-  const showDesktopDialog = open && isMobile === false;
+  const showMobileDrawer = open && isMobile;
+  const showDesktopDialog = open && !isMobile;
 
   const handleClose = () => onOpenChange(false);
 

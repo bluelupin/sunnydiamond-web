@@ -2,20 +2,7 @@
 
 import { appointmentLabelClassName } from "@/shared/constants/appointmentForm";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select";
-
-/** Radix Select does not allow empty string values — maps cleared filter to this sentinel. */
-const FILTER_ALL_VALUE = "__careers_filter_all__";
-
-/** Matches MetalEngravingPanel font dropdown trigger styling. */
-const engravingSelectTriggerClassName =
-  "h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0";
+import CareersSelectField from "./CareersSelectField";
 
 type FilterFieldProps = {
   id: string;
@@ -27,30 +14,16 @@ type FilterFieldProps = {
 };
 
 const FilterField = ({ id, label, value, placeholder, options, onChange }: FilterFieldProps) => {
-  const selectPlaceholder = placeholder.trim() || "-select-";
-
   return (
-    <div className="flex flex-col gap-2">
-      <label htmlFor={id} className={appointmentLabelClassName}>
-        {label}
-      </label>
-      <Select
-        value={value || FILTER_ALL_VALUE}
-        onValueChange={(next) => onChange(next === FILTER_ALL_VALUE ? "" : next)}
-      >
-        <SelectTrigger id={id} className={engravingSelectTriggerClassName}>
-          <SelectValue placeholder={selectPlaceholder} />
-        </SelectTrigger>
-        <SelectContent className="z-[80]">
-          <SelectItem value={FILTER_ALL_VALUE}>{selectPlaceholder}</SelectItem>
-          {options.map((option) => (
-            <SelectItem key={option} value={option}>
-              {option}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+    <CareersSelectField
+      id={id}
+      label={label}
+      value={value}
+      placeholder={placeholder.trim() || "-select-"}
+      options={options}
+      onChange={onChange}
+      labelClassName={appointmentLabelClassName}
+    />
   );
 };
 

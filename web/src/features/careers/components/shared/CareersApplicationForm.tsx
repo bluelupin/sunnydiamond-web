@@ -17,6 +17,7 @@ import {
 } from "@/shared/utils/formValidation";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
 import { submitCareerApplication } from "@/services/careers/career-submission.service";
+import { resolveCareerApplicationFlow } from "@/services/careers/resolveCareerApplicationFlow";
 import {
   CAREERS_RESUME_ACCEPT,
   CAREERS_RESUME_MAX_BYTES,
@@ -26,13 +27,12 @@ import {
   careersFormLabelClassName,
   careersFormSectionClassName,
   careersFormSectionTitleClassName,
-  careersFormSelectClassName,
-  careersFormSelectChevronClassName,
   getCareersBirthDateBounds,
 } from "@/features/careers/constants/careersApplicationForm";
 import CareersApplicationJobHeader from "./CareersApplicationJobHeader";
-import CareersChevronDownIcon from "./CareersChevronDownIcon";
+import CareersSelectField from "./CareersSelectField";
 import CareersUploadResumeModal from "./CareersUploadResumeModal";
+import CareersChevronDownIcon from "./CareersChevronDownIcon";
 import CareersResumeFileChip from "./CareersResumeFileChip";
 import CareersSearchIcon from "./CareersSearchIcon";
 import CareersSubmitConfirmationModal from "./CareersSubmitConfirmationModal";
@@ -72,55 +72,7 @@ function FormField({
   );
 }
 
-function SelectField({
-  label,
-  value,
-  onChange,
-  onBlur,
-  options,
-  error,
-  placeholder,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  onBlur?: () => void;
-  options: readonly string[];
-  error?: string;
-  placeholder?: string;
-}) {
-  return (
-    <FormField label={label} error={error}>
-      <div className="relative">
-        <select
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          onBlur={onBlur}
-          className={cn(
-            careersFormSelectClassName,
-            !value && "text-gray600",
-            error && invalidFieldClassName,
-            "pr-10",
-          )}
-        >
-          {placeholder ? (
-            <option value="" disabled>
-              {placeholder}
-            </option>
-          ) : null}
-          {options.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-        <CareersChevronDownIcon className={careersFormSelectChevronClassName} />
-      </div>
-    </FormField>
-  );
-}
-
-function TagChip({ label, onRemove }: { label: string; onRemove: () => void }) {
+const TagChip = ({ label, onRemove }: { label: string; onRemove: () => void }) => {
   return (
     <span className="inline-flex items-center gap-2 bg-[#ECE9E9] px-4 py-2">
       <span className="font-gill text-sm leading-110 text-darkblack">{label}</span>
@@ -141,7 +93,7 @@ const careersBirthDateBounds = getCareersBirthDateBounds();
 const CareersApplicationForm = () => {
   const { cms, selectedJob, goToSuccess, pendingResumeFile, clearPendingResume, applicationEntry } =
     useCareersJobs();
-  const applicationFlow = cms.landing.applicationFlow;
+  const applicationFlow = resolveCareerApplicationFlow(cms.landing.applicationFlow);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -331,7 +283,7 @@ const CareersApplicationForm = () => {
   };
 
   const handleConfirmSubmit = async () => {
-    if (!selectedJob || !applicationFlow) {
+    if (!selectedJob) {
       return;
     }
 
@@ -385,10 +337,6 @@ const CareersApplicationForm = () => {
       setIsSubmitting(false);
     }
   };
-
-  if (!applicationFlow) {
-    return null;
-  }
 
   const { applicationForm, jobDetails } = applicationFlow;
 
@@ -540,7 +488,8 @@ const CareersApplicationForm = () => {
                 />
               </FormField>
 
-              <SelectField
+              <CareersSelectField
+                id="careers-gender"
                 label={fields.genderLabel}
                 value={gender}
                 onChange={setGender}
@@ -611,7 +560,8 @@ const CareersApplicationForm = () => {
             {applicationForm.workExperienceHeading}
           </h2>
           <div className={careersFormFieldGridClassName}>
-            <SelectField
+            <CareersSelectField
+              id="careers-relevant-experience"
               label={fields.relevantExperienceLabel}
               value={relevantExperience}
               onChange={setRelevantExperience}
@@ -666,7 +616,8 @@ const CareersApplicationForm = () => {
               />
             </FormField>
 
-            <SelectField
+            <CareersSelectField
+              id="careers-notice-period"
               label={fields.noticePeriodLabel}
               value={noticePeriod}
               onChange={setNoticePeriod}
@@ -772,7 +723,8 @@ const CareersApplicationForm = () => {
 
           {hasCompanyRelation ? (
             <div className="grid gap-6 md:grid-cols-2">
-              <SelectField
+              <CareersSelectField
+                id="careers-employee-name"
                 label={fields.employeeNameLabel}
                 value={employeeName}
                 onChange={setEmployeeName}

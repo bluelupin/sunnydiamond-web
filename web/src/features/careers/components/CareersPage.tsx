@@ -23,11 +23,11 @@ function CareersFlowContent() {
   }
 
   if (flowStep === "application") {
-    return landing.applicationFlow ? <CareersApplicationFormSection /> : null;
+    return <CareersApplicationFormSection />;
   }
 
   if (flowStep === "success") {
-    return landing.applicationFlow ? <CareersApplicationSuccessSection /> : null;
+    return <CareersApplicationSuccessSection />;
   }
 
   const hero = flowStep === "listings" ? (listing.hero ?? landing.hero) : landing.hero;

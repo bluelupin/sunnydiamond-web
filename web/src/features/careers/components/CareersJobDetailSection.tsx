@@ -12,15 +12,12 @@ const CareersJobDetailSection = () => {
   }
 
   const jobDetails = resolveCareerJobDetailLabels(cms.landing.applicationFlow?.jobDetails);
-  const canApply = Boolean(cms.landing.applicationFlow);
 
   return (
     <CareersJobDetailView
       job={selectedJob}
       jobDetails={jobDetails}
-      onApply={
-        canApply ? (entry, resumeFile) => goToApplication(entry, resumeFile) : undefined
-      }
+      onApply={(entry, resumeFile) => goToApplication(entry, resumeFile)}
     />
   );
 };
