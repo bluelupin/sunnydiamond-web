@@ -274,12 +274,25 @@ export function useMagentoJewelleryListing({
       prefetchedScopeKey === currentScopeKey
     ) {
       consumePrefetchedListingRef.current = false;
-      appliedFiltersKeyRef.current = getJewelleryListingFiltersKey(
+      // Prefetch is always empty-filter; only skip the network fetch when the
+      // live filter state is also empty. URL filters (occasion/shape/colour)
+      // must still trigger a filtered request.
+      const emptyFiltersKey = getJewelleryListingFiltersKey(
+        createEmptyFilterState(),
+        initialListing.facets,
+      );
+      const liveFiltersKey = getJewelleryListingFiltersKey(
         filtersRef.current,
         initialListing.facets,
       );
       facetsRef.current = initialListing.facets;
-      return;
+
+      if (liveFiltersKey === emptyFiltersKey) {
+        appliedFiltersKeyRef.current = liveFiltersKey;
+        return;
+      }
+
+      appliedFiltersKeyRef.current = emptyFiltersKey;
     }
 
     currentPageRef.current = 1;

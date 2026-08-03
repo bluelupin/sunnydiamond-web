@@ -10,9 +10,13 @@ export function slugifyOccasionTitle(title: string | null | undefined): string {
     .replace(/^-+|-+$/g, "");
 }
 
+/**
+ * Resolve a CMS/URL occasion slug (or Magento option id) against live Magento options.
+ * Options should come from listing facets and/or `customAttributeMetadata` — never hardcoded.
+ */
 export function resolveOccasionFacetOption(
   occasionSlug: string | null | undefined,
-  occasions: readonly JewelleryFilterFacetOption[],
+  occasions: readonly JewelleryFilterFacetOption[] = [],
 ): JewelleryFilterFacetOption | null {
   const normalized = occasionSlug?.trim().toLowerCase();
   if (!normalized) {

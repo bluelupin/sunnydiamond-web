@@ -4,6 +4,7 @@ import type { JewelleryFilterState } from "@/features/jewellery-product/types";
 import type { JewelleryNavCategory } from "@/types/magento/jewelleryNav";
 import { resolveDiamondShapeFacetOption } from "@/features/jewellery-product/utils/diamondShapeListing";
 import { resolveFancyColourFacetOption } from "@/features/jewellery-product/utils/fancyColourListing";
+import { resolveOccasionFacetOption } from "@/features/jewellery-product/utils/occasionListing";
 import { formatMagentoFacetLabel, normalizeGemstoneTypeLabel } from "./magentoAttribute.utils";
 import {
   isAllCategoriesSelected,
@@ -138,7 +139,13 @@ export function buildMagentoProductsFilter({
   }
 
   if (filters.occasion.trim()) {
-    magentoFilter.sd_occasions = { in: [filters.occasion.trim()] };
+    // Accept Magento option id ("46") or URL slug ("wedding").
+    const occasionOption = resolveOccasionFacetOption(
+      filters.occasion,
+      facets.occasions,
+    );
+    const occasionValue = occasionOption?.value ?? filters.occasion.trim();
+    magentoFilter.sd_occasions = { in: [occasionValue] };
   }
 
   if (filters.diamondShape.trim()) {

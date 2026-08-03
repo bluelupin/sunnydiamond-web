@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
@@ -17,14 +17,26 @@ interface ForYourValentineSectionProps {
 const ctaFocusClass =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2";
 
+const backgroundMediaWrapperClass =
+  "pointer-events-none absolute inset-0 size-full sm:!h-[157%] sm:top-[-300px] top-12 opacity-80";
+
 function resolveGiftingCutoutMedia(giftingData: GiftingBanner | null) {
   return (giftingData?.cutoutImage ??
     giftingData?.image ??
     giftingData?.sideImage) as CategoryNavigationImage | null | undefined;
 }
 
+function getVideoMimeType(url: string) {
+  const normalized = url.split("?")[0]?.toLowerCase() ?? "";
+  if (normalized.endsWith(".webm")) return "video/webm";
+  if (normalized.endsWith(".mp4")) return "video/mp4";
+  return undefined;
+}
+
 const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
   const { data: shoppingData, isLoading } = useHomepageShoppingBlocks();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
 
   const giftingData =
     shoppingData?.homepage?.giftingBanner ?? shoppingData?.giftingBanner ?? null;
@@ -60,7 +72,10 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
     [giftingData],
   );
 
+  const backgroundVideoUrl = giftingData?.backgroundVideoUrl?.trim() || undefined;
   const hasBackgroundImage = Boolean(backgroundImages.desktopUrl || backgroundImages.mobileUrl);
+  // Image wins when both are set; video only when image is empty.
+  const showBackgroundVideo = Boolean(backgroundVideoUrl) && !hasBackgroundImage;
   const hasCutoutImage = Boolean(cutoutImages.desktopUrl || cutoutImages.mobileUrl);
   const cutoutAlt =
     cutoutImages.alt ||
@@ -71,6 +86,37 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
   const hasPrimaryCta = Boolean(primaryCtaUrl && primaryCtaLabel);
   const hasSecondaryCta = Boolean(secondaryCtaUrl && secondaryCtaLabel);
   const hasCtaRow = hasPrimaryCta || hasSecondaryCta;
+  const videoMimeType = backgroundVideoUrl ? getVideoMimeType(backgroundVideoUrl) : undefined;
+
+  useEffect(() => {
+    if (!showBackgroundVideo) {
+      setShouldLoadVideo(false);
+      return;
+    }
+
+    const start = () => setShouldLoadVideo(true);
+
+    if (typeof window.requestIdleCallback === "function") {
+      const idleId = window.requestIdleCallback(start, { timeout: 2500 });
+      return () => window.cancelIdleCallback(idleId);
+    }
+
+    const timeoutId = window.setTimeout(start, 1500);
+    return () => window.clearTimeout(timeoutId);
+  }, [showBackgroundVideo]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !shouldLoadVideo || !showBackgroundVideo) return;
+
+    video.load();
+    const playPromise = video.play();
+    if (playPromise) {
+      playPromise.catch(() => {
+        /* autoplay blocked — solid section background remains */
+      });
+    }
+  }, [shouldLoadVideo, showBackgroundVideo]);
 
   if (isLoading) {
     return (
@@ -112,10 +158,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
       className="relative w-full overflow-hidden bg-[#F3E6E2]"
     >
       {hasBackgroundImage ? (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 size-full sm:!h-[157%] sm:top-[-300px] top-12 opacity-80"
-        >
+        <div aria-hidden className={backgroundMediaWrapperClass}>
           <ResponsiveImage
             desktopSrc={backgroundImages.desktopUrl || backgroundImages.mobileUrl || ""}
             mobileSrc={backgroundImages.mobileUrl}
@@ -125,6 +168,23 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
             sizes="100vw"
             className="size-full object-cover object-center"
           />
+        </div>
+      ) : showBackgroundVideo && backgroundVideoUrl ? (
+        <div aria-hidden className={backgroundMediaWrapperClass}>
+          <video
+            ref={videoRef}
+            className="size-full object-cover object-center"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload={shouldLoadVideo ? "metadata" : "none"}
+            tabIndex={-1}
+          >
+            {shouldLoadVideo ? (
+              <source src={backgroundVideoUrl} type={videoMimeType} />
+            ) : null}
+          </video>
         </div>
       ) : null}
       <div className="flex flex-col items-center py-12 md:flex-row md:min-h-[750px] md:py-16 lg:items-center lg:justify-between lg:gap-8 lg:px-10 md:px-8 px-4 lg:py-100">

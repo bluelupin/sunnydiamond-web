@@ -15,8 +15,13 @@ import {
   enrichFacetsWithNavCategories,
   mapMagentoAggregationsToFacets,
 } from "./products.filters.mapper";
+import {
+  getMagentoProductAttributeOptions,
+  mergeFacetOptions,
+} from "./productAttributeOptions.service";
+import { resolveOccasionFacetOption } from "@/features/jewellery-product/utils/occasionListing";
 import type { MagentoProductListItem, MagentoProductsResponse } from "./magentoProduct.types";
-import type { JewelleryListingProductsData } from "@/types/magento/jewelleryListing";
+import type { JewelleryFilterFacets, JewelleryListingProductsData } from "@/types/magento/jewelleryListing";
 import type { JewelleryFilterState, JewelleryListingProduct } from "@/features/jewellery-product/types";
 import {
   createEmptyFilterState,
@@ -173,6 +178,33 @@ export function seedMagentoJewelleryListingCache(
   });
 }
 
+async function enrichFacetsWithOccasionAttributeOptions(
+  filters: JewelleryFilterState,
+  facets: JewelleryFilterFacets,
+  signal?: AbortSignal,
+): Promise<JewelleryFilterFacets> {
+  const occasion = filters.occasion.trim();
+  if (!occasion) {
+    return facets;
+  }
+
+  // Already resolvable from listing aggregations (or already an option id present there).
+  if (resolveOccasionFacetOption(occasion, facets.occasions)) {
+    return facets;
+  }
+
+  try {
+    const magentoOccasions = await getMagentoProductAttributeOptions("sd_occasions", signal);
+    return {
+      ...facets,
+      occasions: mergeFacetOptions(facets.occasions, magentoOccasions),
+    };
+  } catch {
+    // Fall through — filter builder will pass the raw slug if metadata is unavailable.
+    return facets;
+  }
+}
+
 async function fetchMagentoJewelleryProducts({
   categoryUrlKey,
   page = 1,
@@ -198,11 +230,18 @@ async function fetchMagentoJewelleryProducts({
     ? navCategories.find((category) => category.urlKey === categoryUrlKey)?.categoryId ?? null
     : null;
 
+  // Resolve CMS/URL occasion slugs (e.g. valentine) via live Magento attribute options.
+  const facetsForFilter = await enrichFacetsWithOccasionAttributeOptions(
+    filters,
+    facets,
+    signal,
+  );
+
   const magentoFilter = buildMagentoProductsFilter({
     categoryUrlKey,
     categoryId,
     filters,
-    facets,
+    facets: facetsForFilter,
   });
 
   const sort = mapJewellerySortToMagento(sortValue);
@@ -235,7 +274,7 @@ async function fetchMagentoJewelleryProducts({
       currentPage: pageInfo?.current_page ?? page,
       pageSize: pageInfo?.page_size ?? pageSize,
       totalPages: pageInfo?.total_pages ?? 0,
-      facets,
+      facets: facetsForFilter,
     };
   }
 
@@ -243,7 +282,7 @@ async function fetchMagentoJewelleryProducts({
     categoryUrlKey,
     categoryId,
     filters,
-    facets,
+    facets: facetsForFilter,
     includeDrawerFilters: false,
   });
 
@@ -282,7 +321,11 @@ async function fetchMagentoJewelleryProducts({
     currentPage: pageInfo?.current_page ?? page,
     pageSize: pageInfo?.page_size ?? pageSize,
     totalPages: pageInfo?.total_pages ?? 0,
-    facets: responseFacets,
+    // Keep Magento attribute options available for URL slug → option id sync.
+    facets: {
+      ...responseFacets,
+      occasions: mergeFacetOptions(responseFacets.occasions, facetsForFilter.occasions),
+    },
   };
 }
 

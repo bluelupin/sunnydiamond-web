@@ -13,6 +13,7 @@ export type GiftingBanner = {
   cta?: { label?: string; url?: string; to?: string };
   secondary?: { label?: string; url?: string; to?: string };
   backgroundImage?: StrapiMedia | { desktopImage?: StrapiMedia; mobileImage?: StrapiMedia; altText?: string };
+  backgroundVideoUrl?: string;
   cutoutImage?: StrapiMedia | { desktopImage?: StrapiMedia; mobileImage?: StrapiMedia; altText?: string };
   sideImage?: StrapiMedia;
   image?: StrapiMedia | { desktopImage?: StrapiMedia; mobileImage?: StrapiMedia; altText?: string };

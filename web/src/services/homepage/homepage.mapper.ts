@@ -284,6 +284,7 @@ function mapGiftingBanner(raw?: StrapiGiftingBanner | null): GiftingBanner | nul
     secondaryCta: mapCta(raw.secondaryCta ?? raw.secondary),
     secondary: mapCta(raw.secondary),
     backgroundImage: pickResponsiveImage(raw.backgroundImage),
+    backgroundVideoUrl: resolveCmsMediaUrl(raw.backgroundVideo?.heroVideo),
     cutoutImage: pickResponsiveImage(raw.cutoutImage),
     image: pickResponsiveImage(raw.cutoutImage, raw.image),
     sideImage: raw.sideImage as GiftingBanner["sideImage"],

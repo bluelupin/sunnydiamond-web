@@ -146,6 +146,7 @@ export type StrapiGiftingBanner = {
   secondaryCta?: StrapiHomepageCta | null;
   secondary?: StrapiHomepageCta | null;
   backgroundImage?: StrapiResponsiveImageBlock | null;
+  backgroundVideo?: StrapiHeroVideoBlock | null;
   cutoutImage?: StrapiResponsiveImageBlock | null;
   sideImage?: unknown;
   image?: StrapiResponsiveImageBlock | null;

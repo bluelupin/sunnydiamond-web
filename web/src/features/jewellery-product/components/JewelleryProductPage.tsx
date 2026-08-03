@@ -75,7 +75,10 @@ const JewelleryProductPage = ({
   const [sortValue, setSortValue] = useState(DEFAULT_JEWELLERY_LISTING_SORT);
   const [filters, setFilters] = useState<JewelleryFilterState>(() => {
     const initial = createEmptyFilterState();
-    // Resolve Magento option id before the first listing fetch (slug "heart" → "69").
+    // Keep CMS/URL slug as-is; Magento option ids are resolved from live attribute options.
+    if (occasionSlug?.trim()) {
+      initial.occasion = occasionSlug.trim();
+    }
     const shapeOption = resolveDiamondShapeFacetOption(diamondShapeSlug);
     if (shapeOption) {
       initial.diamondShape = shapeOption.value;
@@ -88,6 +91,9 @@ const JewelleryProductPage = ({
   });
   const [draftFilters, setDraftFilters] = useState<JewelleryFilterState>(() => {
     const initial = createEmptyFilterState();
+    if (occasionSlug?.trim()) {
+      initial.occasion = occasionSlug.trim();
+    }
     const shapeOption = resolveDiamondShapeFacetOption(diamondShapeSlug);
     if (shapeOption) {
       initial.diamondShape = shapeOption.value;
