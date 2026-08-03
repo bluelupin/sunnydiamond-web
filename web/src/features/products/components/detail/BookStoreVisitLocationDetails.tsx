@@ -9,11 +9,13 @@ const PHONE_ICON = "/images/products/delivery-store/phone-icon.svg";
 type BookStoreVisitLocationDetailsProps = {
   store: BookStoreVisitStore;
   size?: "default" | "page";
+  directionsLabel?: string | null;
 };
 
 export function BookStoreVisitLocationDetails({
   store,
   size = "default",
+  directionsLabel,
 }: BookStoreVisitLocationDetailsProps) {
   const isPage = size === "page";
   const textClassName = isPage
@@ -23,6 +25,7 @@ export function BookStoreVisitLocationDetails({
   const stackGapClassName = "gap-4";
   const directionsClassName =
     "inline-flex w-fit border-b border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack";
+  const directionsText = directionsLabel?.trim() || "GET DIRECTIONS";
 
   return (
     <div className="flex flex-col gap-6">
@@ -65,7 +68,7 @@ export function BookStoreVisitLocationDetails({
           rel="noopener noreferrer"
           className={directionsClassName}
         >
-          GET DIRECTIONS
+          {directionsText}
         </Link>
       ) : null}
     </div>

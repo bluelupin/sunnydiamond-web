@@ -1,5 +1,6 @@
 import type { BookStoreVisitStore } from "../data/bookStoreVisitContent";
 import type { NormalizedGenericFormShowroom } from "@/services/forms/generic-form.types";
+import type { NormalizedStoreLocatorShowroom } from "@/services/store-locator/store-locator-page.types";
 import type { ShowroomSectionLocation } from "@/types/homepage/editorialBlocks";
 import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import {
@@ -11,6 +12,24 @@ const FALLBACK_HERO_IMAGE = "/images/products/delivery-store/book-visit-hero.png
 
 function cleanText(value?: string | null): string {
   return value?.trim() ?? "";
+}
+
+export function mapStoreLocatorShowroomToBookStoreVisit(
+  showroom: NormalizedStoreLocatorShowroom,
+): BookStoreVisitStore {
+  return {
+    id: showroom.id,
+    documentId: showroom.documentId,
+    tabLabel: showroom.name.toUpperCase(),
+    storeName: showroom.name,
+    address: showroom.address,
+    phone: showroom.phone,
+    directionsUrl: showroom.mapUrl,
+    heroImage: showroom.imageUrl,
+    city: showroom.city ?? undefined,
+    state: showroom.state ?? inferStateFromAddress(showroom.address),
+    pincode: extractPincodeFromAddress(showroom.address),
+  };
 }
 
 export function mapGenericFormShowroomToBookStoreVisit(
@@ -86,6 +105,5 @@ export function resolveBookStoreVisitStores(
     .map(mapEditorialShowroomToBookStoreVisit)
     .filter((store): store is BookStoreVisitStore => store != null);
 
-  // No static hardcoded stores — only CMS form showrooms or editorial showrooms.
   return fromEditorial;
 }
