@@ -1,16 +1,53 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { constructMetadata } from "@/shared/lib/seo/metadata";
-import { footerPages } from "@/features/cms/data/footerPages";
-import StaticRoutePage from "@/features/cms/components/StaticRoutePage";
+import SupportPage from "@/features/support/components/SupportPage";
+import JsonLd from "@/shared/lib/seo/JsonLd";
+import { buildFaqPageJsonLd } from "@/shared/lib/seo/schema/faqPage";
+import {
+  EMPTY_SUPPORT_PAGE,
+  getSupportPage,
+} from "@/services/support/support-page.service";
 
-const page = footerPages.faqs;
+export const revalidate = 300;
 
-export const metadata: Metadata = constructMetadata({
-  title: page.title,
-  description: page.description,
-  canonicalPath: "/faqs",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getSupportPage();
+  const seo = page.seo;
+
+  return constructMetadata({
+    title: seo?.metaTitle || page.title || "",
+    description: seo?.metaDescription || page.subtitle || undefined,
+    canonicalPath: seo?.canonicalPath || "/faqs",
+    ...(seo?.metaKeywords ? { keywords: seo.metaKeywords } : {}),
+    ...(seo?.ogImageUrl ? { image: seo.ogImageUrl } : {}),
+  });
+}
+
+async function SupportPageContent() {
+  const page = await getSupportPage();
+  const faqJsonLd =
+    page.faq && page.faq.items.length > 0
+      ? buildFaqPageJsonLd(
+          page.faq.items.map((item) => ({
+            question: item.question,
+            answer: item.answer,
+          })),
+        )
+      : null;
+
+  return (
+    <>
+      {faqJsonLd ? <JsonLd data={faqJsonLd} id="support-faq-jsonld" /> : null}
+      <SupportPage page={page} />
+    </>
+  );
+}
 
 export default function Page() {
-  return <StaticRoutePage title={page.title} description={page.description} />;
+  return (
+    <Suspense fallback={<SupportPage page={EMPTY_SUPPORT_PAGE} />}>
+      <SupportPageContent />
+    </Suspense>
+  );
 }

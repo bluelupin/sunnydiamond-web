@@ -12,33 +12,43 @@ export function slugifyOccasionTitle(title: string | null | undefined): string {
 
 /**
  * Resolve a CMS/URL occasion slug (or Magento option id) against live Magento options.
- * Options should come from listing facets and/or `customAttributeMetadata` — never hardcoded.
+ * Accepts raw labels ("evening & parties"), spaced forms ("evening and parties"),
+ * and hyphen slugs ("evening-and-parties").
  */
 export function resolveOccasionFacetOption(
   occasionSlug: string | null | undefined,
   occasions: readonly JewelleryFilterFacetOption[] = [],
 ): JewelleryFilterFacetOption | null {
-  const normalized = occasionSlug?.trim().toLowerCase();
-  if (!normalized) {
+  const raw = occasionSlug?.trim();
+  if (!raw) {
     return null;
   }
 
+  const normalized = raw.toLowerCase();
+  const normalizedSlug = slugifyOccasionTitle(raw);
+
   return (
     occasions.find((option) => {
+      const label = option.label.trim().toLowerCase();
       const labelSlug = slugifyOccasionTitle(option.label);
+      const value = option.value.trim().toLowerCase();
+
       return (
-        option.label.trim().toLowerCase() === normalized ||
+        value === normalized ||
+        value === normalizedSlug ||
+        label === normalized ||
         labelSlug === normalized ||
-        option.value.trim().toLowerCase() === normalized
+        labelSlug === normalizedSlug
       );
     }) ?? null
   );
 }
 
+/** Always emit a hyphenated occasion slug in PLP URLs. */
 export function buildJewelleryOccasionHref(
   occasionSlug: string | null | undefined,
 ): string {
-  const slug = occasionSlug?.trim();
+  const slug = slugifyOccasionTitle(occasionSlug);
   if (!slug) {
     return JEWELLERY_PATH;
   }
@@ -60,6 +70,37 @@ const GENERIC_PRODUCT_LISTING_PATHS = new Set([
   "/diamond-bracelets",
 ]);
 
+/** If a CMS CTA already has `?occasion=…`, rewrite it to a clean hyphen slug. */
+export function normalizeJewelleryOccasionCtaUrl(ctaUrl: string): string {
+  const trimmed = ctaUrl.trim();
+  if (!trimmed) {
+    return trimmed;
+  }
+
+  try {
+    const url = new URL(trimmed, "http://occasion.local");
+    const occasion = url.searchParams.get("occasion");
+    if (!occasion) {
+      return trimmed;
+    }
+
+    const slug = slugifyOccasionTitle(occasion);
+    if (!slug) {
+      return trimmed;
+    }
+
+    url.searchParams.set("occasion", slug);
+
+    if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+      return url.toString();
+    }
+
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return trimmed;
+  }
+}
+
 export function buildOccasionCardHref({
   title,
   slug,
@@ -73,6 +114,10 @@ export function buildOccasionCardHref({
 }): string {
   const normalizedCtaUrl = ctaUrl?.trim();
   if (normalizedCtaUrl && !GENERIC_PRODUCT_LISTING_PATHS.has(normalizedCtaUrl.toLowerCase())) {
+    // Prefer CMS deep links, but always clean `?occasion=` when present.
+    if (normalizedCtaUrl.includes("occasion=")) {
+      return normalizeJewelleryOccasionCtaUrl(normalizedCtaUrl);
+    }
     return normalizedCtaUrl;
   }
 

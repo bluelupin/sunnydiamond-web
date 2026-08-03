@@ -54,8 +54,7 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
   const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
   const { data: standaloneOccasions, isLoading: isStandaloneLoading } = useHomepageOccasions();
   const occasionSection = editorialData?.occasionSection ?? null;
-  const sectionTitle =
-    occasionSection?.sectionTitle?.trim() || "Timeless Pieces for Every Occasion";
+  const sectionTitle = occasionSection?.sectionTitle?.trim() || undefined;
 
   const embeddedOccasions = (occasionSection?.occasions ?? []).filter(
     (card) => card?.isActive !== false,
@@ -125,18 +124,20 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
   return (
     <section
       id={id}
-      aria-label={sectionTitle}
+      aria-label={sectionTitle || "Occasions"}
       className="flex w-full flex-col items-center gap-8 bg-white pt-16 md:gap-10 px-0 md:pt-100"
     >
-      <ScrollReveal as="h2" delayMs={0} className="max-w-sm text-center font-larken font-light leading-110 text-darkblack md:max-w-none lg:text-5xl md:text-4xl text-32 lg:whitespace-nowrap">
-        {sectionTitle}
-      </ScrollReveal>
+      {sectionTitle ? (
+        <ScrollReveal as="h2" delayMs={0} className="max-w-sm text-center font-larken font-light leading-110 text-darkblack md:max-w-none lg:text-5xl md:text-4xl text-32 lg:whitespace-nowrap">
+          {sectionTitle}
+        </ScrollReveal>
+      ) : null}
 
       <div
         ref={carouselRef}
         role="region"
         aria-roledescription="carousel"
-        aria-label={sectionTitle}
+        aria-label={sectionTitle || "Occasions"}
         tabIndex={-1}
         onKeyDownCapture={handleCarouselKeyDown}
         className="scrollbar-none relative left-1/2 flex w-screen max-w-none -translate-x-1/2 snap-x snap-mandatory gap-3 overflow-x-auto scroll-pl-4 scroll-pr-4 pb-2 md:grid md:grid-cols-2 md:gap-1 md:overflow-visible md:px-0 pl-4 md:pb-0 md:snap-none md:outline-none"
@@ -150,7 +151,7 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
             <OccasionCardItem
               card={card}
               index={index}
-              sectionTitle={sectionTitle}
+              sectionTitle={sectionTitle || "Occasions"}
             />
           </ScrollReveal>
         ))}
