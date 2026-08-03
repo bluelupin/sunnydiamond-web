@@ -129,6 +129,7 @@ export type StrapiCareerApplicationFormFields = {
   dateOfBirthLabel?: string | null;
   dateOfBirthPlaceholder?: string | null;
   fieldPlaceholder?: string | null;
+  selectPlaceholder?: string | null;
   genderLabel?: string | null;
   highestDegreeLabel?: string | null;
   areaOfStudyLabel?: string | null;
@@ -370,6 +371,7 @@ export type NormalizedCareerApplicationFormFields = {
   dateOfBirthLabel: string;
   dateOfBirthPlaceholder: string;
   fieldPlaceholder: string;
+  selectPlaceholder: string;
   genderLabel: string;
   highestDegreeLabel: string;
   areaOfStudyLabel: string;

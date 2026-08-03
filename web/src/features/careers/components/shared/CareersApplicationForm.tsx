@@ -17,10 +17,12 @@ import {
 } from "@/shared/utils/formValidation";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
 import { submitCareerApplication } from "@/services/careers/career-submission.service";
+import { isValidCtcLpa } from "@/services/careers/career-submission.mapper";
 import { resolveCareerApplicationFlow } from "@/services/careers/resolveCareerApplicationFlow";
 import {
   CAREERS_RESUME_ACCEPT,
   CAREERS_RESUME_MAX_BYTES,
+  CAREERS_SUBMITTING_APPLICATION_LABEL,
   careersFormFieldClassName,
   careersFormFieldGridClassName,
   careersFormFieldsStackClassName,
@@ -48,8 +50,7 @@ type ApplicationField =
   | "yearOfCompletion"
   | "relevantExperience"
   | "expectedCtc"
-  | "employeeName"
-  | "employeeJobTitle"
+  | "companyRelation"
   | "resume";
 
 function FormField({
@@ -91,7 +92,7 @@ const TagChip = ({ label, onRemove }: { label: string; onRemove: () => void }) =
 const careersBirthDateBounds = getCareersBirthDateBounds();
 
 const CareersApplicationForm = () => {
-  const { cms, selectedJob, goToSuccess, pendingResumeFile, clearPendingResume, applicationEntry } =
+  const { cms, selectedJob, goToSuccess, pendingResumeFile, clearPendingResume } =
     useCareersJobs();
   const applicationFlow = resolveCareerApplicationFlow(cms.landing.applicationFlow);
 
@@ -101,6 +102,7 @@ const CareersApplicationForm = () => {
 
   const [uploadResumeModalOpen, setUploadResumeModalOpen] = useState(false);
   const [submitConfirmModalOpen, setSubmitConfirmModalOpen] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const [name, setName] = useState("");
   const [countryCode, setCountryCode] = useState("+91");
@@ -133,7 +135,6 @@ const CareersApplicationForm = () => {
     }
 
     setResumeFile(pendingResumeFile);
-    setTouched((current) => ({ ...current, resume: true }));
 
     const dataTransfer = new DataTransfer();
     dataTransfer.items.add(pendingResumeFile);
@@ -162,12 +163,14 @@ const CareersApplicationForm = () => {
     if (!areaOfStudy.trim()) next.areaOfStudy = "Area of study is required";
     if (!yearOfCompletion.trim()) next.yearOfCompletion = "Year of completion is required";
     if (!relevantExperience) next.relevantExperience = "Relevant work experience is required";
-    if (!expectedCtc.trim()) next.expectedCtc = "Expected CTC is required";
+    if (!expectedCtc.trim()) {
+      next.expectedCtc = "Expected CTC is required";
+    } else if (!isValidCtcLpa(expectedCtc)) {
+      next.expectedCtc = "Enter expected CTC as a number in LPA";
+    }
     if (!resumeFile) next.resume = "Resume is required";
-
-    if (hasCompanyRelation) {
-      if (!employeeName) next.employeeName = "Employee name is required";
-      if (!employeeJobTitle.trim()) next.employeeJobTitle = "Employee job title is required";
+    if (hasCompanyRelation === null) {
+      next.companyRelation = "Please select whether you have a company relation";
     }
 
     return next;
@@ -176,8 +179,6 @@ const CareersApplicationForm = () => {
     countryCode,
     dateOfBirth,
     email,
-    employeeJobTitle,
-    employeeName,
     expectedCtc,
     gender,
     hasCompanyRelation,
@@ -188,6 +189,8 @@ const CareersApplicationForm = () => {
     resumeFile,
     yearOfCompletion,
   ]);
+
+  const isFormComplete = Object.keys(errors).length === 0;
 
   const showError = (field: ApplicationField) =>
     Boolean(touched[field] || submitted) && Boolean(errors[field]);
@@ -219,13 +222,11 @@ const CareersApplicationForm = () => {
 
     if (file.size > CAREERS_RESUME_MAX_BYTES) {
       setResumeFile(null);
-      setTouched((current) => ({ ...current, resume: true }));
       event.target.value = "";
       return;
     }
 
     setResumeFile(file);
-    markTouched("resume");
     setUploadResumeModalOpen(false);
   };
 
@@ -238,7 +239,6 @@ const CareersApplicationForm = () => {
     if (resumeInputRef.current) {
       resumeInputRef.current.value = "";
     }
-    markTouched("resume");
   };
 
   const addSkill = () => {
@@ -280,6 +280,7 @@ const CareersApplicationForm = () => {
     }
 
     setSubmitConfirmModalOpen(true);
+    setSubmitError(null);
   };
 
   const handleConfirmSubmit = async () => {
@@ -287,7 +288,13 @@ const CareersApplicationForm = () => {
       return;
     }
 
+    if (!resumeFile) {
+      setSubmitError("Please upload your resume before submitting.");
+      return;
+    }
+
     setIsSubmitting(true);
+    setSubmitError(null);
 
     try {
       await submitCareerApplication({
@@ -324,15 +331,16 @@ const CareersApplicationForm = () => {
           hasCompanyRelation,
           employeeName,
           employeeJobTitle: employeeJobTitle.trim(),
-          applicationEntry: applicationEntry ?? "manual",
         },
         resumeFile,
       });
 
       setSubmitConfirmModalOpen(false);
       goToSuccess();
-    } catch {
-      setSubmitConfirmModalOpen(false);
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error ? error.message : "Unable to submit your application. Please try again.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -349,6 +357,8 @@ const CareersApplicationForm = () => {
   }
 
   const fields = applicationForm.fields;
+  const textPlaceholder = fields.fieldPlaceholder;
+  const selectPlaceholder = fields.selectPlaceholder;
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-10" noValidate>
@@ -359,18 +369,12 @@ const CareersApplicationForm = () => {
       />
 
       <div className="flex flex-col gap-6">
-        <div
-          className={cn(
-            "flex flex-col gap-6 bg-gray200 p-6 md:flex-row md:items-center md:justify-between",
-            showError("resume") && "ring-1 ring-red-600",
-          )}
-        >
+        <div className="flex flex-col gap-6 bg-gray200 md:p-6 p-4 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-col gap-4">
             <h2 className={careersFormSectionTitleClassName}>{applicationForm.resumeHeading}</h2>
             <p className="font-gill text-base font-light leading-110 text-darkblack">
               {applicationForm.resumeHint}
             </p>
-            {showError("resume") ? <FormFieldError message={errors.resume} /> : null}
           </div>
 
           <div className="flex shrink-0 items-center gap-10">
@@ -399,13 +403,14 @@ const CareersApplicationForm = () => {
             )}
           </div>
         </div>
+        {showError("resume") ? <FormFieldError message={errors.resume!} /> : null}
 
         <section className={careersFormSectionClassName}>
           <h2 className={careersFormSectionTitleClassName}>
             {applicationForm.personalDetailsHeading}
           </h2>
           <div className={careersFormFieldsStackClassName}>
-            <div className={careersFormFieldGridClassName}>
+            <div className="grid lg:grid-cols-3 md:grid-cols-3 grid-cols-1 gap-6">
               <FormField label={fields.fullNameLabel} error={showError("name") ? errors.name : undefined}>
                 <input
                   type="text"
@@ -420,7 +425,6 @@ const CareersApplicationForm = () => {
                   )}
                 />
               </FormField>
-
               <FormField label={fields.phoneLabel} error={showError("phone") ? errors.phone : undefined}>
                 <div className="flex h-14 items-center gap-2 bg-[#F2F2F2] p-3">
                   <div className="flex shrink-0 items-center">
@@ -452,7 +456,6 @@ const CareersApplicationForm = () => {
                   />
                 </div>
               </FormField>
-
               <FormField label={fields.emailLabel} error={showError("email") ? errors.email : undefined}>
                 <input
                   type="email"
@@ -467,9 +470,6 @@ const CareersApplicationForm = () => {
                   )}
                 />
               </FormField>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2 lg:max-w-[736px]">
               <FormField
                 label={fields.dateOfBirthLabel}
                 error={showError("dateOfBirth") ? errors.dateOfBirth : undefined}
@@ -487,7 +487,6 @@ const CareersApplicationForm = () => {
                   displayFormat="dd/mm/yyyy"
                 />
               </FormField>
-
               <CareersSelectField
                 id="careers-gender"
                 label={fields.genderLabel}
@@ -495,7 +494,7 @@ const CareersApplicationForm = () => {
                 onChange={setGender}
                 onBlur={() => markTouched("gender")}
                 options={applicationForm.genderOptions}
-                placeholder="Select"
+                placeholder={selectPlaceholder}
                 error={showError("gender") ? errors.gender : undefined}
               />
             </div>
@@ -503,14 +502,15 @@ const CareersApplicationForm = () => {
         </section>
 
         <section className={careersFormSectionClassName}>
-          <h2 className={careersFormSectionTitleClassName}>{applicationForm.educationHeading}</h2>
-          <div className={careersFormFieldGridClassName}>
+          <h2 className={careersFormSectionTitleClassName}>Education Details</h2>
+          <div className="grid lg:grid-cols-3 md:grid-cols-3 grid-cols-1 gap-6">
             <FormField
               label={fields.highestDegreeLabel}
               error={showError("highestDegree") ? errors.highestDegree : undefined}
             >
               <input
                 type="text"
+                placeholder={textPlaceholder}
                 value={highestDegree}
                 onChange={(event) => setHighestDegree(event.target.value)}
                 onBlur={() => markTouched("highestDegree")}
@@ -520,13 +520,13 @@ const CareersApplicationForm = () => {
                 )}
               />
             </FormField>
-
             <FormField
               label={fields.areaOfStudyLabel}
               error={showError("areaOfStudy") ? errors.areaOfStudy : undefined}
             >
               <input
                 type="text"
+                placeholder={textPlaceholder}
                 value={areaOfStudy}
                 onChange={(event) => setAreaOfStudy(event.target.value)}
                 onBlur={() => markTouched("areaOfStudy")}
@@ -536,13 +536,13 @@ const CareersApplicationForm = () => {
                 )}
               />
             </FormField>
-
             <FormField
               label={fields.yearOfCompletionLabel}
               error={showError("yearOfCompletion") ? errors.yearOfCompletion : undefined}
             >
               <input
                 type="text"
+                placeholder={textPlaceholder}
                 value={yearOfCompletion}
                 onChange={(event) => setYearOfCompletion(event.target.value)}
                 onBlur={() => markTouched("yearOfCompletion")}
@@ -554,12 +554,11 @@ const CareersApplicationForm = () => {
             </FormField>
           </div>
         </section>
-
         <section className={careersFormSectionClassName}>
           <h2 className={careersFormSectionTitleClassName}>
-            {applicationForm.workExperienceHeading}
+            Work Experience
           </h2>
-          <div className={careersFormFieldGridClassName}>
+          <div className="grid lg:grid-cols-3 md:grid-cols-3 grid-cols-1 gap-6">
             <CareersSelectField
               id="careers-relevant-experience"
               label={fields.relevantExperienceLabel}
@@ -567,45 +566,43 @@ const CareersApplicationForm = () => {
               onChange={setRelevantExperience}
               onBlur={() => markTouched("relevantExperience")}
               options={applicationForm.workExperienceOptions}
-              placeholder="Select"
+              placeholder={selectPlaceholder}
               error={showError("relevantExperience") ? errors.relevantExperience : undefined}
             />
-
             <FormField label={fields.currentCompanyLabel}>
               <input
                 type="text"
+                placeholder={textPlaceholder}
                 value={currentCompany}
                 onChange={(event) => setCurrentCompany(event.target.value)}
                 className={careersFormFieldClassName}
               />
             </FormField>
-
             <FormField label={fields.currentJobTitleLabel}>
               <input
                 type="text"
+                placeholder={textPlaceholder}
                 value={currentJobTitle}
                 onChange={(event) => setCurrentJobTitle(event.target.value)}
                 className={careersFormFieldClassName}
               />
             </FormField>
-          </div>
-
-          <div className={careersFormFieldGridClassName}>
             <FormField label={fields.currentCtcLabel}>
               <input
                 type="text"
+                placeholder={textPlaceholder}
                 value={currentCtc}
                 onChange={(event) => setCurrentCtc(event.target.value)}
                 className={careersFormFieldClassName}
               />
             </FormField>
-
             <FormField
               label={fields.expectedCtcLabel}
               error={showError("expectedCtc") ? errors.expectedCtc : undefined}
             >
               <input
                 type="text"
+                placeholder={textPlaceholder}
                 value={expectedCtc}
                 onChange={(event) => setExpectedCtc(event.target.value)}
                 onBlur={() => markTouched("expectedCtc")}
@@ -615,22 +612,21 @@ const CareersApplicationForm = () => {
                 )}
               />
             </FormField>
-
             <CareersSelectField
               id="careers-notice-period"
               label={fields.noticePeriodLabel}
               value={noticePeriod}
               onChange={setNoticePeriod}
               options={applicationForm.noticePeriodOptions}
-              placeholder="Select"
+              placeholder={selectPlaceholder}
             />
           </div>
         </section>
 
         <section className={careersFormSectionClassName}>
-          <h2 className={careersFormSectionTitleClassName}>{applicationForm.skillsHeading}</h2>
-
-          <FormField label={fields.skillsSearchLabel} className="max-w-[356px]">
+          <h2 className={careersFormSectionTitleClassName}>Skills & Languages</h2>
+          <FormField label="" className="max-w-[356px]" arial-hidden>
+            <p className="md:text-base text-sm font-gill font-normal font-darkblack">Add skils and known language to your application</p>
             <div className="flex h-14 items-center justify-between bg-[#F2F2F2] p-3">
               <input
                 type="text"
@@ -687,7 +683,12 @@ const CareersApplicationForm = () => {
             {applicationForm.additionalInfoHeading}
           </h2>
 
-          <div className="flex max-w-[356px] flex-col gap-3">
+          <div
+            className={cn(
+              "flex max-w-[356px] flex-col gap-3",
+              showError("companyRelation") && "rounded-sm ring-1 ring-red-600 p-3 -m-3",
+            )}
+          >
             <p className={careersFormLabelClassName}>{fields.companyRelationLabel}</p>
             <div className="flex gap-6">
               <label className="inline-flex items-center gap-2">
@@ -695,7 +696,10 @@ const CareersApplicationForm = () => {
                   type="radio"
                   name="company-relation"
                   checked={hasCompanyRelation === true}
-                  onChange={() => setHasCompanyRelation(true)}
+                  onChange={() => {
+                    setHasCompanyRelation(true);
+                    markTouched("companyRelation");
+                  }}
                   className="size-6 accent-darkblack"
                 />
                 <span className="font-gill text-base leading-110 text-darkblack">
@@ -711,6 +715,7 @@ const CareersApplicationForm = () => {
                     setHasCompanyRelation(false);
                     setEmployeeName("");
                     setEmployeeJobTitle("");
+                    markTouched("companyRelation");
                   }}
                   className="size-6 accent-darkblack"
                 />
@@ -719,6 +724,9 @@ const CareersApplicationForm = () => {
                 </span>
               </label>
             </div>
+            {showError("companyRelation") ? (
+              <FormFieldError message={errors.companyRelation} />
+            ) : null}
           </div>
 
           {hasCompanyRelation ? (
@@ -728,25 +736,17 @@ const CareersApplicationForm = () => {
                 label={fields.employeeNameLabel}
                 value={employeeName}
                 onChange={setEmployeeName}
-                onBlur={() => markTouched("employeeName")}
                 options={applicationForm.employeeRelationOptions}
-                placeholder="Select"
-                error={showError("employeeName") ? errors.employeeName : undefined}
+                placeholder={selectPlaceholder}
               />
 
-              <FormField
-                label={fields.employeeJobTitleLabel}
-                error={showError("employeeJobTitle") ? errors.employeeJobTitle : undefined}
-              >
+              <FormField label={fields.employeeJobTitleLabel}>
                 <input
                   type="text"
+                  placeholder={textPlaceholder}
                   value={employeeJobTitle}
                   onChange={(event) => setEmployeeJobTitle(event.target.value)}
-                  onBlur={() => markTouched("employeeJobTitle")}
-                  className={cn(
-                    careersFormFieldClassName,
-                    showError("employeeJobTitle") && invalidFieldClassName,
-                  )}
+                  className={careersFormFieldClassName}
                 />
               </FormField>
             </div>
@@ -756,9 +756,10 @@ const CareersApplicationForm = () => {
 
       <button
         type="submit"
-        className="inline-flex h-14 w-full items-center justify-center bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 md:w-[193px]"
+        disabled={!isFormComplete || isSubmitting}
+        className="inline-flex h-14 w-full items-center justify-center bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 md:w-[193px]"
       >
-        {applicationForm.submitLabel}
+        {isSubmitting ? CAREERS_SUBMITTING_APPLICATION_LABEL : applicationForm.submitLabel}
       </button>
 
       <CareersUploadResumeModal
@@ -775,6 +776,7 @@ const CareersApplicationForm = () => {
         onOpenChange={setSubmitConfirmModalOpen}
         onConfirm={handleConfirmSubmit}
         isSubmitting={isSubmitting}
+        errorMessage={submitError}
       />
     </form>
   );

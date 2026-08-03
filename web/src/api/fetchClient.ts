@@ -122,7 +122,8 @@ export async function apiFetch<T = unknown>(endpoint: string, options: ApiFetchO
 
   if (!response.ok) {
     const errorBody = await parseJsonSafe(response);
-    const message = getApiErrorMessage(errorBody) || `Request failed with status ${response.status}`;
+    const message =
+      getApiErrorMessage(errorBody) || `Request failed with status ${response.status}`;
     throw new ApiError(message, response.status, errorBody);
   }
 

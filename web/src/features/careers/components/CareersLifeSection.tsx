@@ -14,7 +14,7 @@ const CareersLifeSection = ({ lifeAt }: CareersLifeSectionProps) => {
     <section
       id="life-at-sunny"
       aria-labelledby="careers-life-title"
-      className="bg-gray300 px-4 py-16 md:px-10 md:py-104"
+      className="md:bg-gray300 px-4 md:px-10 md:pt-100 md:pb-100 mt-0 pb-16"
     >
       <div className="flex w-full flex-col gap-6 md:flex-row md:items-stretch md:gap-10">
         <div className="flex w-full flex-col gap-6 md:max-w-[474px] md:shrink-0 md:gap-10">
@@ -51,30 +51,30 @@ const CareersLifeSection = ({ lifeAt }: CareersLifeSectionProps) => {
                 className="h-9 w-px shrink-0 bg-darkMagenta md:h-[38px] md:w-[1.5px]"
                 aria-hidden
               />
-              <p className="max-w-[213px] shrink-0 font-gill text-sm font-light leading-110 text-[#696969] md:max-w-[292px] md:text-base md:text-darkblack">
+              <p className="max-w-full shrink-0 font-gill text-sm font-light leading-110 text-[#696969] md:max-w-[292px] md:text-base md:text-darkblack">
                 &ldquo;{lifeAt.quote}&rdquo;
               </p>
             </div>
           ) : null}
         </Reveal>
 
-        <Reveal direction="up" className="flex w-full items-center gap-4 md:hidden">
-          <div className="relative h-[226px] w-[165.5px] shrink-0 overflow-hidden">
+        <Reveal direction="up" className="grid grid-cols-2 w-full items-center gap-4 md:hidden">
+          <div className="sm:h-auto h-[226px] w-full">
             <Image
               src={lifeAt.leftImage.mobileUrl}
               alt={lifeAt.leftImage.alt}
               width={310}
               height={226}
-              className="absolute top-0 left-[-20.07%] h-full w-[187.44%] max-w-none object-cover"
+              className="h-full w-full object-cover"
             />
           </div>
-          <div className="relative h-[200px] w-[146px] shrink-0 overflow-hidden">
+          <div className="sm:h-auto h-[200px] w-full">
             <Image
               src={lifeAt.rightImage.mobileUrl}
               alt={lifeAt.rightImage.alt}
               width={344}
               height={251}
-              className="absolute top-[-10.98%] left-[-121.93%] h-[125.59%] w-[235.4%] max-w-none object-cover"
+              className="w-full h-full object-cover"
             />
           </div>
         </Reveal>

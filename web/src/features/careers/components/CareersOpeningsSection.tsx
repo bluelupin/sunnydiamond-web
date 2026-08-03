@@ -23,7 +23,7 @@ const CareersOpeningsSection = ({ openings }: CareersOpeningsSectionProps) => {
     <section
       id="open-roles"
       aria-labelledby="careers-openings-title"
-      className="bg-white px-4 py-10 md:px-100 md:pb-104 md:pt-16"
+      className="bg-white max-w-[1240px] mx-auto px-4 md:pb-100 pb-16 md:pt-16 pt-10"
     >
       <div className="flex w-full flex-col gap-6 md:gap-10 md:items-center">
         <div className="flex flex-col gap-3 text-left md:w-full md:items-center md:gap-4 md:text-center">

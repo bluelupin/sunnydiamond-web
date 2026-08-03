@@ -90,19 +90,19 @@ export const getCareerOpeningsRaw = cache(async (signal?: AbortSignal) => {
   );
 });
 
-const CAREER_OPENING_BY_SLUG_QUERY = (slug: string) =>
-  `filters[slug][$eq]=${encodeURIComponent(slug)}` +
+const CAREER_OPENING_BY_JOB_ID_QUERY = (jobId: string) =>
+  `filters[jobID][$eq]=${encodeURIComponent(jobId)}` +
   "&filters[isActive][$eq]=true" +
   "&populate=*";
 
-export const getCareerOpeningBySlug = cache(
-  async (slug: string, signal?: AbortSignal): Promise<NormalizedCareerJob | null> => {
-    const trimmed = slug.trim();
+export const getCareerOpeningByJobId = cache(
+  async (jobId: string, signal?: AbortSignal): Promise<NormalizedCareerJob | null> => {
+    const trimmed = jobId.trim();
     if (!trimmed) return null;
 
     try {
       const openings = await apiFetch<StrapiCareerOpeningEntity[]>(
-        `${STRAPI_ENDPOINTS.careerOpenings}?${CAREER_OPENING_BY_SLUG_QUERY(trimmed)}`,
+        `${STRAPI_ENDPOINTS.careerOpenings}?${CAREER_OPENING_BY_JOB_ID_QUERY(trimmed)}`,
         { signal },
       );
       const opening = openings[0];

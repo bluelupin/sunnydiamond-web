@@ -5,7 +5,7 @@ export function getCareerJobById(
   jobId: string | null | undefined,
 ): CareerJob | null {
   if (!jobId) return null;
-  return jobs.find((job) => job.id === jobId || job.slug === jobId) ?? null;
+  return jobs.find((job) => job.id === jobId || job.jobCode === jobId) ?? null;
 }
 
 export function getRelatedCareerJobs(

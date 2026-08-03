@@ -11,7 +11,7 @@ import CareersApplicationSuccessSection from "./CareersApplicationSuccessSection
 import CareersJobDetailView from "./CareersJobDetailView";
 
 function mergeJobIntoCms(cms: NormalizedCareersPageData, job: NormalizedCareerJob): NormalizedCareersPageData {
-  const hasJob = cms.jobs.some((entry) => entry.id === job.id || entry.slug === job.slug);
+  const hasJob = cms.jobs.some((entry) => entry.id === job.id || entry.jobCode === job.jobCode);
 
   if (hasJob) {
     return cms;
@@ -28,7 +28,7 @@ function CareersJobSlugFlowContent({ job }: { job: NormalizedCareerJob }) {
   const jobDetails = resolveCareerJobDetailLabels(cms.landing.applicationFlow?.jobDetails);
   const shareUrl =
     typeof window !== "undefined"
-      ? `${window.location.origin}${getCareerJobPath(job.slug)}`
+      ? `${window.location.origin}${getCareerJobPath(job.jobCode)}`
       : undefined;
 
   if (flowStep === "application") {

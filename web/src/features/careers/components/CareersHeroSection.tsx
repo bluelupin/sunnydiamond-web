@@ -34,7 +34,7 @@ const CareersHeroSection = ({ hero }: CareersHeroSectionProps) => {
 
       <div className="absolute inset-0 bg-black/40" aria-hidden />
 
-      <div className="absolute left-1/2 top-[150px] z-10 flex w-fit -translate-x-1/2 flex-col items-center gap-6 md:top-[200px]">
+      <div className="absolute left-1/2 bottom-6 z-10 flex w-fit -translate-x-1/2 flex-col items-center gap-6 md:top-[200px]">
         <Reveal
           as="h1"
           id="careers-hero-title"

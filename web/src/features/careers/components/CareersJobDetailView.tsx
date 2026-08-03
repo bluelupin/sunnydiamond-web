@@ -79,8 +79,8 @@ const CareersJobDetailView = ({
     const url =
       shareUrl ??
       (typeof window !== "undefined"
-        ? `${window.location.origin}${getCareerJobPath(job.slug)}`
-        : getCareerJobPath(job.slug));
+        ? `${window.location.origin}${getCareerJobPath(job.jobCode)}`
+        : getCareerJobPath(job.jobCode));
 
     try {
       if (typeof navigator !== "undefined" && navigator.share) {

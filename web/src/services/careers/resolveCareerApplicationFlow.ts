@@ -1,6 +1,39 @@
 import type { NormalizedCareerApplicationFlow } from "./careers.types";
 import { resolveCareerJobDetailLabels } from "./careersJobDetailLabels";
 
+const OPTIONAL_APPLICATION_FIELD_LABEL_KEYS = new Set<
+  keyof NormalizedCareerApplicationFlow["applicationForm"]["fields"]
+>([
+  "currentCompanyLabel",
+  "currentJobTitleLabel",
+  "currentCtcLabel",
+  "noticePeriodLabel",
+  "skillsSearchLabel",
+  "skillsLabel",
+  "languagesLabel",
+  "employeeNameLabel",
+  "employeeJobTitleLabel",
+]);
+
+function stripOptionalFieldRequiredMarker(label: string): string {
+  return label.replace(/\*+$/, "").trim();
+}
+
+function stripLeadingRequiredMarker(text: string): string {
+  return text.replace(/^\*\s*/, "").trim();
+}
+
+function normalizeApplicationFieldLabel(
+  key: keyof NormalizedCareerApplicationFlow["applicationForm"]["fields"],
+  label: string,
+): string {
+  if (!OPTIONAL_APPLICATION_FIELD_LABEL_KEYS.has(key)) {
+    return label;
+  }
+
+  return stripOptionalFieldRequiredMarker(label);
+}
+
 const APPLICATION_FORM_FIELD_FALLBACKS: NormalizedCareerApplicationFlow["applicationForm"]["fields"] =
   {
     fullNameLabel: "Full Name*",
@@ -9,6 +42,7 @@ const APPLICATION_FORM_FIELD_FALLBACKS: NormalizedCareerApplicationFlow["applica
     dateOfBirthLabel: "Date of Birth*",
     dateOfBirthPlaceholder: "DD / MM / YYYY",
     fieldPlaceholder: "Enter here",
+    selectPlaceholder: "Select",
     genderLabel: "Gender*",
     highestDegreeLabel: "Highest Degree*",
     areaOfStudyLabel: "Area of Study*",
@@ -18,24 +52,24 @@ const APPLICATION_FORM_FIELD_FALLBACKS: NormalizedCareerApplicationFlow["applica
     currentJobTitleLabel: "Current Job Title",
     currentCtcLabel: "Current CTC",
     expectedCtcLabel: "Expected CTC*",
-    noticePeriodLabel: "Notice Period*",
+    noticePeriodLabel: "Notice Period",
     skillsSearchLabel: "Skills",
     skillsSearchPlaceholder: "Search skills",
-    skillsLabel: "Skills*",
+    skillsLabel: "Skills",
     languagesLabel: "Languages Known",
     companyRelationLabel: "Do you know anyone at Sunny Diamonds?*",
     companyRelationYes: "Yes",
     companyRelationNo: "No",
-    employeeNameLabel: "Employee Name*",
-    employeeJobTitleLabel: "Employee Job Title*",
+    employeeNameLabel: "Employee Name",
+    employeeJobTitleLabel: "Employee Job Title",
   };
 
 const APPLICATION_FLOW_FALLBACKS: NormalizedCareerApplicationFlow = {
   jobDetails: resolveCareerJobDetailLabels(null),
   applicationForm: {
     title: "Application Form",
-    resumeHeading: "Upload Resume",
-    resumeHint: "Upload your latest resume to help us review your application.",
+    resumeHeading: "Resume",
+    resumeHint: "File up to 5 mb and (ZIP, PDF, JPEG, PNG) Format Supported.",
     resumeUploadLabel: "Upload Resume",
     resumeRemoveLabel: "Remove",
     uploadResumeModal: {
@@ -68,9 +102,9 @@ const APPLICATION_FLOW_FALLBACKS: NormalizedCareerApplicationFlow = {
   },
   applicationSuccess: {
     title: "Application Submitted",
-    descriptionLine1: "Thank you for applying.",
-    descriptionLine2: "Our team will review your application and get back to you soon.",
-    appliedJobDetailsHeading: "Applied Role Details",
+    descriptionLine1: "Thank you for applying. Your application has been received and in now under review.",
+    descriptionLine2: "We will get back to you shortly.",
+    appliedJobDetailsHeading: "Applied Job Details",
     jobTitleLabel: "Job Title:",
     jobIdLabel: "Job ID:",
     goHomeLabel: "Go to Homepage",
@@ -99,9 +133,11 @@ export function resolveCareerApplicationFlow(
         applicationFlow.applicationForm.resumeHeading,
         fallback.applicationForm.resumeHeading,
       ),
-      resumeHint: withFallback(
-        applicationFlow.applicationForm.resumeHint,
-        fallback.applicationForm.resumeHint,
+      resumeHint: stripLeadingRequiredMarker(
+        withFallback(
+          applicationFlow.applicationForm.resumeHint,
+          fallback.applicationForm.resumeHint,
+        ),
       ),
       resumeUploadLabel: withFallback(
         applicationFlow.applicationForm.resumeUploadLabel,
@@ -188,15 +224,19 @@ export function resolveCareerApplicationFlow(
         fallback.applicationForm.shareLabel,
       ),
       fields: Object.fromEntries(
-        Object.entries(fallback.applicationForm.fields).map(([key, defaultValue]) => [
-          key,
-          withFallback(
-            applicationFlow.applicationForm.fields[
-              key as keyof NormalizedCareerApplicationFlow["applicationForm"]["fields"]
-            ],
+        Object.entries(fallback.applicationForm.fields).map(([key, defaultValue]) => {
+          const fieldKey =
+            key as keyof NormalizedCareerApplicationFlow["applicationForm"]["fields"];
+          const resolvedLabel = withFallback(
+            applicationFlow.applicationForm.fields[fieldKey],
             defaultValue,
-          ),
-        ]),
+          );
+
+          return [
+            key,
+            normalizeApplicationFieldLabel(fieldKey, resolvedLabel),
+          ];
+        }),
       ) as NormalizedCareerApplicationFlow["applicationForm"]["fields"],
       genderOptions:
         applicationFlow.applicationForm.genderOptions.length > 0

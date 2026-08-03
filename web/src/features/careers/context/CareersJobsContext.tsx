@@ -122,8 +122,8 @@ export function CareersJobsProvider({
   const goToDetail = useCallback(
     (jobId: string) => {
       const job = getCareerJobById(jobs, jobId);
-      if (job?.slug) {
-        router.push(getCareerJobPath(job.slug));
+      if (job?.jobCode) {
+        router.push(getCareerJobPath(job.jobCode));
         return;
       }
 

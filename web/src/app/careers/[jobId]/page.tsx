@@ -6,20 +6,20 @@ import CareersJobSlugPage from "@/features/careers/components/CareersJobSlugPage
 import { getCareerJobPath } from "@/features/careers/constants/careersRoutes";
 import {
   EMPTY_CAREERS_PAGE_DATA,
-  getCareerOpeningBySlug,
+  getCareerOpeningByJobId,
   getCareersPageData,
 } from "@/services/careers/careers.service";
 
 export const revalidate = 300;
 
 type PageProps = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ jobId: string }>;
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const decodedSlug = decodeURIComponent(slug);
-  const job = await getCareerOpeningBySlug(decodedSlug);
+  const { jobId } = await params;
+  const decodedJobId = decodeURIComponent(jobId);
+  const job = await getCareerOpeningByJobId(decodedJobId);
 
   if (!job) {
     return constructMetadata({
@@ -32,16 +32,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return constructMetadata({
     title: `${job.title} | Careers | ${siteConfig.brand.name}`,
     description: job.summary,
-    canonicalPath: getCareerJobPath(job.slug),
+    canonicalPath: getCareerJobPath(job.jobCode),
   });
 }
 
 export default async function CareerJobPage({ params }: PageProps) {
-  const { slug } = await params;
-  const decodedSlug = decodeURIComponent(slug);
+  const { jobId } = await params;
+  const decodedJobId = decodeURIComponent(jobId);
 
   const [job, cmsResult] = await Promise.allSettled([
-    getCareerOpeningBySlug(decodedSlug),
+    getCareerOpeningByJobId(decodedJobId),
     getCareersPageData(),
   ]);
 

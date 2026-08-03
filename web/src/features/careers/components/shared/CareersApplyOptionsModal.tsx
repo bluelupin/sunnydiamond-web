@@ -73,21 +73,21 @@ function ApplyOptionsActions({
     </>
   );
 
-  if (layout === "mobile-footer") {
-    return (
-      <div className="shrink-0">
-        <div
-          className="h-[71px] bg-gradient-to-b from-transparent to-white"
-          aria-hidden
-        />
-        <div className="border-t border-neutral300 bg-white px-4 py-6">
-          <div className="flex flex-col items-center gap-4">{buttons}</div>
-        </div>
-      </div>
-    );
-  }
+  // if (layout === "mobile-footer") {
+  //   return (
+  //     <div className="shrink-0">
+  //       <div
+  //         className="h-[71px] bg-gradient-to-b from-transparent to-white"
+  //         aria-hidden
+  //       />
+  //       <div className="border-t border-neutral300 bg-white px-4 py-6">
+  //         <div className="flex flex-col items-center gap-4">{buttons}</div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
-  return <div className="flex flex-col items-center gap-4">{buttons}</div>;
+  return <div className="flex flex-col items-center gap-4 px-4 py-6 border-t border-neutral300">{buttons}</div>;
 }
 
 type ApplyOptionsBodyProps = {
@@ -123,7 +123,8 @@ function ApplyOptionsBody({
             className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
             aria-label={applyModal.closeLabel}
           >
-            <X className="size-6" strokeWidth={1.5} aria-hidden />
+            
+            <X className="size-6" strokeWidth={1} aria-hidden />
           </button>
         </div>
         <div className="h-px w-full bg-neutral300" aria-hidden />
@@ -241,7 +242,7 @@ const CareersApplyOptionsModal = ({
           className="z-[80] flex max-h-[90vh] min-h-0 flex-col overflow-hidden rounded-none border-0 bg-white p-0 [&>div:first-child]:hidden"
         >
           <DrawerTitle className="sr-only">{applyModal.title}</DrawerTitle>
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pt-6 pb-4">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6">
             <ApplyOptionsBody
               job={job}
               applyModal={applyModal}

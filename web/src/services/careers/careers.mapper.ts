@@ -505,7 +505,10 @@ const mapApplicationFormFields = (
     return null;
   }
 
-  return mapped as NormalizedCareerApplicationFlow["applicationForm"]["fields"];
+  return {
+    ...(mapped as NormalizedCareerApplicationFlow["applicationForm"]["fields"]),
+    selectPlaceholder: cleanText(fields?.selectPlaceholder) ?? "Select",
+  };
 };
 
 const mapApplicationFlow = (

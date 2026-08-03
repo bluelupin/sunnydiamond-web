@@ -57,6 +57,11 @@ const formatDisplayDate = (
 
 const startOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1);
 
+const MONTH_OPTIONS = Array.from({ length: 12 }, (_, index) => ({
+  value: index,
+  label: new Date(2000, index, 1).toLocaleDateString("en-IN", { month: "long" }),
+}));
+
 const isSameDay = (a: Date, b: Date) =>
   a.getFullYear() === b.getFullYear() &&
   a.getMonth() === b.getMonth() &&
@@ -101,10 +106,22 @@ const AppointmentDateField = ({
   const [open, setOpen] = useState(false);
   const [viewMonth, setViewMonth] = useState(() => selectedDate ?? minSelectableDate);
 
-  const monthLabel = viewMonth.toLocaleDateString("en-IN", {
-    month: "long",
-    year: "numeric",
-  });
+  const minMonthStart = startOfMonth(minSelectableDate);
+  const maxMonthStart = maxSelectableDate ? startOfMonth(maxSelectableDate) : null;
+
+  const yearOptions = useMemo(() => {
+    const minYear = minSelectableDate.getFullYear();
+    const maxYear = (maxSelectableDate ?? new Date()).getFullYear();
+    return Array.from({ length: maxYear - minYear + 1 }, (_, index) => maxYear - index);
+  }, [maxSelectableDate, minSelectableDate]);
+
+  const canGoPrev =
+    startOfMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1, 1)) >= minMonthStart;
+
+  const canGoNext =
+    maxMonthStart == null
+      ? true
+      : startOfMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 1)) <= maxMonthStart;
 
   const calendarDays = useMemo(() => getCalendarDays(viewMonth), [viewMonth]);
 
@@ -112,11 +129,19 @@ const AppointmentDateField = ({
     setOpen(nextOpen);
 
     if (nextOpen) {
-      setViewMonth(selectedDate ?? minSelectableDate);
+      setViewMonth(selectedDate ?? maxSelectableDate ?? minSelectableDate);
       return;
     }
 
     onBlur?.();
+  };
+
+  const handleMonthSelect = (month: number) => {
+    setViewMonth(new Date(viewMonth.getFullYear(), month, 1));
+  };
+
+  const handleYearSelect = (year: number) => {
+    setViewMonth(new Date(year, viewMonth.getMonth(), 1));
   };
 
   const handleSelectDate = (date: Date) => {
@@ -164,25 +189,52 @@ const AppointmentDateField = ({
         sideOffset={8}
         className="z-[80] w-[320px] rounded-none border-neutral300 bg-white p-4 font-gill shadow-lg"
       >
-        <div className="flex items-center justify-between pb-4">
+        <div className="flex items-center justify-between gap-2 pb-4">
           <button
             type="button"
             aria-label="Previous month"
+            disabled={!canGoPrev}
             onClick={() =>
               setViewMonth((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))
             }
-            className="inline-flex size-8 items-center justify-center text-darkblack"
+            className="inline-flex size-8 shrink-0 items-center justify-center text-darkblack disabled:cursor-not-allowed disabled:opacity-40"
           >
             <ChevronLeft size={20} strokeWidth={1.25} aria-hidden />
           </button>
-          <p className="font-gill text-base leading-110 text-darkblack">{monthLabel}</p>
+          <div className="flex min-w-0 flex-1 items-center justify-center gap-2">
+            <select
+              aria-label="Select month"
+              value={viewMonth.getMonth()}
+              onChange={(event) => handleMonthSelect(Number(event.target.value))}
+              className="h-9 min-w-0 flex-1 appearance-none bg-aboutInactive px-2 font-gill text-sm leading-110 text-darkblack outline-none"
+            >
+              {MONTH_OPTIONS.map((month) => (
+                <option key={month.value} value={month.value}>
+                  {month.label}
+                </option>
+              ))}
+            </select>
+            <select
+              aria-label="Select year"
+              value={viewMonth.getFullYear()}
+              onChange={(event) => handleYearSelect(Number(event.target.value))}
+              className="h-9 w-[88px] shrink-0 appearance-none bg-aboutInactive px-2 font-gill text-sm leading-110 text-darkblack outline-none"
+            >
+              {yearOptions.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </div>
           <button
             type="button"
             aria-label="Next month"
+            disabled={!canGoNext}
             onClick={() =>
               setViewMonth((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1))
             }
-            className="inline-flex size-8 items-center justify-center text-darkblack"
+            className="inline-flex size-8 shrink-0 items-center justify-center text-darkblack disabled:cursor-not-allowed disabled:opacity-40"
           >
             <ChevronRight size={20} strokeWidth={1.25} aria-hidden />
           </button>

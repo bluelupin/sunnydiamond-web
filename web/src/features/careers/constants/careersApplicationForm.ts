@@ -3,6 +3,8 @@ export const CAREERS_RESUME_ACCEPT =
 
 export const CAREERS_RESUME_MAX_BYTES = 5 * 1024 * 1024;
 
+export const CAREERS_SUBMITTING_APPLICATION_LABEL = "Submitting...";
+
 export const careersFormLabelClassName =
   "font-gill text-base font-normal leading-110 text-darkblack";
 
