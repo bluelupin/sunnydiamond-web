@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import ScrollReveal from "@/shared/ui/ScrollReveal";
 import JewelleryLoadMoreSection from "@/features/jewellery-product/components/JewelleryLoadMoreSection";
 import { PAGE_SIZE } from "@/features/jewellery-product/data/filters";
 import { useCart } from "@/features/cart/context/CartContext";
@@ -97,14 +96,12 @@ const ProfileWishlistSection = () => {
       </div>
 
       {hasMore ? (
-        <ScrollReveal delayMs={40}>
-          <JewelleryLoadMoreSection
-            visibleCount={visibleProducts.length}
-            totalCount={wishlistProducts.length}
-            hasMore={hasMore}
-            onLoadMore={() => setVisibleCount((count) => count + PAGE_SIZE)}
-          />
-        </ScrollReveal>
+        <JewelleryLoadMoreSection
+          visibleCount={visibleProducts.length}
+          totalCount={wishlistProducts.length}
+          hasMore={hasMore}
+          onLoadMore={() => setVisibleCount((count) => count + PAGE_SIZE)}
+        />
       ) : null}
 
       <WishlistAddToBagPanel

@@ -255,15 +255,13 @@ const JewelleryProductPage = ({
         )}
       </section>
 
-      <ScrollReveal delayMs={40}>
-        <JewelleryLoadMoreSection
-          visibleCount={products.length}
-          totalCount={totalCount}
-          hasMore={hasMore}
-          isLoadingMore={isLoadingMore}
-          onLoadMore={loadMore}
-        />
-      </ScrollReveal>
+      <JewelleryLoadMoreSection
+        visibleCount={products.length}
+        totalCount={totalCount}
+        hasMore={hasMore}
+        isLoadingMore={isLoadingMore}
+        onLoadMore={loadMore}
+      />
 
       <ScrollReveal delayMs={0}>
         <JewelleryGuaranteesSection />

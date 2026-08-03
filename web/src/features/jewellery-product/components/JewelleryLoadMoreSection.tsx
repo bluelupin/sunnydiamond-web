@@ -33,7 +33,7 @@ const JewelleryLoadMoreSection = ({
   const progress = totalCount > 0 ? Math.min(100, (visibleCount / totalCount) * 100) : 0;
 
   return (
-    <section className="flex w-full px-4 py-16 md:py-16">
+    <section className="relative z-[70] flex w-full px-4 py-16 md:z-auto md:py-16">
       <div
         className="mx-auto flex w-full flex-col items-center"
         style={{

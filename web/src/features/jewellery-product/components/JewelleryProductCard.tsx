@@ -210,7 +210,7 @@ const JewelleryProductCard = ({
       {/* Title + price — bottom of card, same position for default, hover, and mobile lifestyle */}
       <div
         className={cn(
-          "pointer-events-none col-start-1 row-start-1 z-20 flex size-full flex-col items-center justify-end",
+          "pointer-events-none col-start-1 row-start-1 z-[70] flex size-full flex-col items-center justify-end md:z-20",
           "gap-3 px-[16px] pb-[24px] md:px-[24px] md:pb-10",
         )}
       >
