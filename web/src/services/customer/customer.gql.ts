@@ -478,3 +478,11 @@ export const SUNNY_INVOICE_PDF_QUERY = `
     }
   }
 ` as const;
+
+export const SUNNY_DELETE_CUSTOMER_MUTATION = `
+  mutation SunnyDeleteCustomer($input: SunnyDeleteCustomerInput) {
+    sunnyDeleteCustomer(input: $input) {
+      success
+    }
+  }
+` as const;

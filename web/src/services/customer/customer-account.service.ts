@@ -5,6 +5,7 @@ import {
   MAGENTO_CUSTOMER_ORDERS_QUERY,
   MAGENTO_DELETE_CUSTOMER_ADDRESS_MUTATION,
   MAGENTO_UPDATE_CUSTOMER_ADDRESS_MUTATION,
+  SUNNY_DELETE_CUSTOMER_MUTATION,
 } from "./customer.gql";
 import {
   mapCustomerAddressInputToMagento,
@@ -85,4 +86,24 @@ export async function deleteCustomerAddress(
   });
 
   return fetchCustomerAddresses(authToken);
+}
+
+/**
+ * Throws `MagentoGraphqlError` on failure — the caller branches on
+ * `errors[0].extensions.category` (e.g. `ACTIVE_ORDERS`).
+ */
+export async function deleteCustomerAccount(
+  authToken: string,
+  payload: { reason?: string; comment?: string },
+): Promise<void> {
+  await magentoGraphqlFetch({
+    query: SUNNY_DELETE_CUSTOMER_MUTATION,
+    variables: {
+      input: {
+        ...(payload.reason ? { reason: payload.reason } : {}),
+        ...(payload.comment ? { comment: payload.comment } : {}),
+      },
+    },
+    authToken,
+  });
 }
