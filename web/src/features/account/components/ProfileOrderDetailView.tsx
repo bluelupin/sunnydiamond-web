@@ -143,6 +143,7 @@ export function ProfileOrderDetailView({
 
   const { priceBreakdown } = order;
   const hasDiscount = priceBreakdown.orderDiscount > 0;
+  const hasShipping = typeof priceBreakdown.shipping === "number";
   const timelineSteps = useMemo(
     () =>
       resolveProfileOrderTimelineSteps(
@@ -333,6 +334,21 @@ export function ProfileOrderDetailView({
                 </div>
               ) : null}
 
+              {hasShipping ? (
+                <div className="flex items-center justify-between">
+                  <span className="font-light">
+                    {priceBreakdown.shippingMethod
+                      ? `${detailContent.shippingLabel} (${priceBreakdown.shippingMethod})`
+                      : detailContent.shippingLabel}
+                  </span>
+                  <span className="font-normal">
+                    {priceBreakdown.shipping === 0
+                      ? detailContent.shippingFreeLabel
+                      : formatOrderTotal(priceBreakdown.shipping!, priceBreakdown.currency)}
+                  </span>
+                </div>
+              ) : null}
+
               <div className="flex items-center justify-between">
                 <span className="font-light">{detailContent.taxLabel}</span>
                 <span className="font-normal">
@@ -363,7 +379,7 @@ export function ProfileOrderDetailView({
         </div>
       ) : null}
 
-      {(order.showCancel || order.showReturn || order.showDownloadInvoice) ? (
+      {(order.showCancel || order.showReturn || order.showDownloadInvoice || order.showContactUs) ? (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
             {order.showDownloadInvoice ? (
@@ -397,6 +413,16 @@ export function ProfileOrderDetailView({
               >
                 {content.returnOrderLabel}
               </DetailOutlineButton>
+            ) : null}
+
+            {order.showContactUs ? (
+              <DetailDarkButton
+                type="button"
+                className="h-14 min-h-[56px] w-full shrink-0 px-7 py-5 font-normal lg:flex-1"
+                onClick={handleContactSupport}
+              >
+                {content.contactUsLabel}
+              </DetailDarkButton>
             ) : null}
           </div>
 

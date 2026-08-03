@@ -345,6 +345,10 @@ const ORDER_DETAIL_FIELDS = `
       value
       currency
     }
+    subtotal {
+      value
+      currency
+    }
     total_tax {
       value
       currency

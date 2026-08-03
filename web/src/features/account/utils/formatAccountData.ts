@@ -1,5 +1,3 @@
-import { formatCartPrice } from "@/features/cart/utils/formatCartLine";
-
 export function getProfileAvatarInitial(firstName?: string | null): string {
   const trimmed = firstName?.trim();
   if (!trimmed) {
@@ -80,14 +78,20 @@ export function formatOrderDate(orderDate: string): string {
 }
 
 export function formatOrderTotal(amount: number, currency: string): string {
+  const formattedAmount = new Intl.NumberFormat("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+
   if (currency === "INR") {
-    return formatCartPrice(amount);
+    return `₹${formattedAmount}`;
   }
 
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(amount);
 }
 

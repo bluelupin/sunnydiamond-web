@@ -281,6 +281,12 @@ export function ProfileOrderCard({
           <DetailDarkButton type="button" className="w-full" onClick={handleViewDetails}>
             {content.viewDetailsLabel}
           </DetailDarkButton>
+
+          {order.showContactUs ? (
+            <DetailDarkButton type="button" className="w-full" onClick={handleContactSupport}>
+              {content.contactUsLabel}
+            </DetailDarkButton>
+          ) : null}
         </div>
 
         <div className="hidden flex-col gap-6 lg:flex">
@@ -385,6 +391,12 @@ export function ProfileOrderCard({
               <DetailOutlineButton type="button" className="flex-1" onClick={handleReturnOrder}>
                 {content.returnOrderLabel}
               </DetailOutlineButton>
+            ) : null}
+
+            {order.showContactUs ? (
+              <DetailDarkButton type="button" className="flex-1" onClick={handleContactSupport}>
+                {content.contactUsLabel}
+              </DetailDarkButton>
             ) : null}
           </div>
 

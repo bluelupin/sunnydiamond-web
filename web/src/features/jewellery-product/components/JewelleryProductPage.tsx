@@ -11,7 +11,14 @@ import JewelleryProductGrid from "./JewelleryProductGrid";
 import JewelleryLoadMoreSection from "./JewelleryLoadMoreSection";
 import JewelleryGuaranteesSection from "./JewelleryGuaranteesSection";
 import JewelleryProductGridSkeleton from "./skeletons/JewelleryProductGridSkeleton";
-import { createDefaultFilterState, createEmptyFilterState, DEFAULT_JEWELLERY_LISTING_SORT, PAGE_SIZE, hasMagentoFilterFacets } from "../data/filters";
+import {
+  createDefaultFilterState,
+  createEmptyFilterState,
+  DEFAULT_JEWELLERY_LISTING_SORT,
+  PAGE_SIZE,
+  hasActiveFilters,
+  hasMagentoFilterFacets,
+} from "../data/filters";
 import {
   buildJewelleryCategoryHref,
   parseJewelleryCategorySlug,
@@ -62,7 +69,6 @@ const JewelleryProductPage = ({
   const [activeCategory, setActiveCategory] = useState<JewelleryCategorySlug>(categoryFromUrl);
   const [sortValue, setSortValue] = useState(DEFAULT_JEWELLERY_LISTING_SORT);
   const [filters, setFilters] = useState<JewelleryFilterState>(() => createEmptyFilterState());
-  const [draftFilters, setDraftFilters] = useState<JewelleryFilterState>(() => createEmptyFilterState());
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const facetsSyncedRef = useRef(false);
   const lastOccasionSlugRef = useRef<string | null>(null);
@@ -167,14 +173,12 @@ const JewelleryProductPage = ({
     if (!facetsSyncedRef.current) {
       facetsSyncedRef.current = true;
       const nextDraft = buildFiltersFromUrl();
-      setDraftFilters(nextDraft);
       setFilters(nextDraft);
       return;
     }
 
     if (occasionChanged || priceParamsChanged) {
       const nextDraft = buildFiltersFromUrl();
-      setDraftFilters(nextDraft);
       setFilters(nextDraft);
     }
   }, [facets, occasionSlug, minPriceFromUrl, maxPriceFromUrl]);
@@ -189,17 +193,24 @@ const JewelleryProductPage = ({
 
   const handleApplyFilters = (nextFilters: JewelleryFilterState) => {
     setFilters(nextFilters);
-    setDraftFilters(nextFilters);
     setIsFilterOpen(false);
+
+    const clearedToDefault = hasMagentoFilterFacets(facets) && !hasActiveFilters(nextFilters, facets);
+    const hasUrlFilterParams =
+      Boolean(occasionSlug) || minPriceFromUrl != null || maxPriceFromUrl != null;
+
+    if (clearedToDefault && hasUrlFilterParams && pathname) {
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
+      params.delete("occasion");
+      params.delete("minPrice");
+      params.delete("maxPrice");
+      const query = params.toString();
+      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    }
   };
 
   const handleOpenFilters = () => {
     void import("./JewelleryFilterDrawer");
-    setDraftFilters(
-      hasMagentoFilterFacets(facets)
-        ? { ...createDefaultFilterState(facets), ...filters }
-        : filters,
-    );
     setIsFilterOpen(true);
   };
 
@@ -248,7 +259,7 @@ const JewelleryProductPage = ({
 
       <JewelleryFilterDrawer
         open={isFilterOpen}
-        filters={draftFilters}
+        appliedFilters={filters}
         facets={facets}
         onClose={() => setIsFilterOpen(false)}
         onApply={handleApplyFilters}

@@ -301,6 +301,8 @@ export function mapCustomerOrderToProfileUi(order: CustomerOrder): ProfileOrderU
 
     return {
       ...base,
+      showDownloadInvoice: false,
+      showContactUs: category === "cancelled",
       estimatedDeliveryLabel: ordersContent.estimatedDeliveryLabel,
       estimatedDeliveryValue: resolveRefundEstimateValue(
         order.sunnyRefund,

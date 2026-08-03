@@ -148,6 +148,7 @@ export type MagentoCustomerOrderDetail = {
   total?: {
     grand_total?: MagentoMoney | null;
     subtotal_incl_tax?: MagentoMoney | null;
+    subtotal?: MagentoMoney | null;
     total_tax?: MagentoMoney | null;
     total_shipping?: MagentoMoney | null;
     discounts?: MagentoOrderDiscount[] | null;
@@ -336,6 +337,7 @@ function mapMagentoOrderTotals(order: MagentoCustomerOrderDetail): TrackedOrderT
 
   return {
     grandTotal: order.total?.grand_total?.value ?? 0,
+    subtotalExclTax: order.total?.subtotal?.value ?? 0,
     subtotalInclTax: order.total?.subtotal_incl_tax?.value ?? 0,
     totalTax: order.total?.total_tax?.value ?? 0,
     totalShipping: order.total?.total_shipping?.value ?? 0,

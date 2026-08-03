@@ -41,6 +41,9 @@ export type ProfileOrderDetailItemUi = ProfileOrderItemUi & {
 export type ProfileOrderPriceBreakdownUi = {
   orderAmount: number;
   orderDiscount: number;
+  /** Present when Magento reports shipping on the order (amount may be 0 for free shipping). */
+  shipping?: number;
+  shippingMethod?: string;
   tax: number;
   orderTotal: number;
   currency: string;
@@ -77,6 +80,7 @@ export type ProfileOrderDetailUi = {
   showCancel: boolean;
   showReturn: boolean;
   showDownloadInvoice: boolean;
+  showContactUs?: boolean;
   /** Invoice button stays visible but inert until Magento has an invoice. */
   invoiceDisabled?: boolean;
   showCancelNote: boolean;
@@ -105,6 +109,7 @@ export type ProfileOrderUi = {
   showCancel: boolean;
   showReturn: boolean;
   showDownloadInvoice: boolean;
+  showContactUs?: boolean;
   /** Invoice button stays visible but inert until Magento has an invoice. */
   invoiceDisabled?: boolean;
   showCancelNote: boolean;

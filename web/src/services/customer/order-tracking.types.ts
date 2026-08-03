@@ -153,6 +153,7 @@ export type TrackedOrderDiscount = {
 
 export type TrackedOrderTotals = {
   grandTotal: number;
+  subtotalExclTax: number;
   subtotalInclTax: number;
   totalTax: number;
   totalShipping: number;

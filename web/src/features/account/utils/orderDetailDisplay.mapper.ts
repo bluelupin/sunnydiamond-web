@@ -53,19 +53,31 @@ function trackedItemToMapperInput(item: TrackedOrderItem) {
   };
 }
 
+function hasOrderShipping(order: TrackedOrder): boolean {
+  return Boolean(order.shippingMethod?.trim()) || order.totals.totalShipping > 0;
+}
+
 function buildPriceBreakdown(order: TrackedOrder): ProfileOrderPriceBreakdownUi {
   const { totals } = order;
-  const lineTotal = order.items.reduce(
-    (sum, item) => sum + item.unitPrice * item.quantity,
+  const orderDiscount = totals.discounts.reduce(
+    (sum, discount) => sum + Math.abs(discount.amount),
     0,
   );
-  const orderAmount = lineTotal > 0 ? lineTotal : totals.subtotalInclTax;
-  const preTaxTotal = totals.grandTotal - totals.totalTax - totals.totalShipping;
-  const orderDiscount = Math.max(0, orderAmount - preTaxTotal);
+  const orderAmount =
+    totals.subtotalExclTax > 0
+      ? totals.subtotalExclTax
+      : totals.subtotalInclTax;
+  const shippingMethod = order.shippingMethod?.trim() || undefined;
 
   return {
     orderAmount,
     orderDiscount,
+    ...(hasOrderShipping(order)
+      ? {
+          shipping: totals.totalShipping,
+          ...(shippingMethod ? { shippingMethod } : {}),
+        }
+      : {}),
     tax: totals.totalTax,
     orderTotal: totals.grandTotal,
     currency: totals.currency,
@@ -168,6 +180,8 @@ export function mapTrackedOrderToProfileDetailUi(
 
     return {
       ...base,
+      showDownloadInvoice: false,
+      showContactUs: category === "cancelled",
       estimatedDeliveryLabel: ordersContent.estimatedDeliveryLabel,
       estimatedDeliveryValue: resolveRefundEstimateValue(
         order.sunnyRefund,

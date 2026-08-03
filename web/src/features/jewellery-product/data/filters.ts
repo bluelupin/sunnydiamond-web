@@ -128,6 +128,14 @@ export function getJewelleryListingFiltersKey(
   return JSON.stringify(normalized);
 }
 
+export function hasFilterChanges(
+  next: JewelleryFilterState,
+  current: JewelleryFilterState,
+  facets: Pick<JewelleryFilterFacets, "minPrice" | "maxPrice">,
+): boolean {
+  return getJewelleryListingFiltersKey(next, facets) !== getJewelleryListingFiltersKey(current, facets);
+}
+
 export function hasActiveFilters(
   filters: JewelleryFilterState,
   facets: JewelleryFilterFacets,

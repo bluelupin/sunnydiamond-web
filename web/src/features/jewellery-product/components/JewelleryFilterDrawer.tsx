@@ -14,9 +14,10 @@ import {
 import {
   chunkFilterOptions,
   createDefaultFilterState,
+  createEmptyFilterState,
   getAvailableCategoryLabels,
   getAvailableMetalTypeLabels,
-  hasActiveFilters,
+  hasFilterChanges,
   hasMagentoFilterFacets,
 } from "../data/filters";
 import type { JewelleryFilterState } from "../types";
@@ -24,7 +25,7 @@ import type { JewelleryFilterFacets } from "@/types/magento/jewelleryListing";
 
 interface JewelleryFilterDrawerProps {
   open: boolean;
-  filters: JewelleryFilterState;
+  appliedFilters: JewelleryFilterState;
   facets: JewelleryFilterFacets;
   onClose: () => void;
   onApply: (filters: JewelleryFilterState) => void;
@@ -63,21 +64,32 @@ const FilterChip = ({
   </button>
 );
 
+function buildDrawerDraft(
+  appliedFilters: JewelleryFilterState,
+  facets: JewelleryFilterFacets,
+): JewelleryFilterState {
+  return hasMagentoFilterFacets(facets)
+    ? { ...createDefaultFilterState(facets), ...appliedFilters }
+    : appliedFilters;
+}
+
 const JewelleryFilterDrawer = ({
   open,
-  filters,
+  appliedFilters,
   facets,
   onClose,
   onApply,
 }: JewelleryFilterDrawerProps) => {
-  const [draft, setDraft] = useState<JewelleryFilterState>(filters);
+  const [draft, setDraft] = useState<JewelleryFilterState>(() =>
+    buildDrawerDraft(appliedFilters, facets),
+  );
   const [minInputFocused, setMinInputFocused] = useState(false);
 
   useEffect(() => {
     if (open) {
-      setDraft(filters);
+      setDraft(buildDrawerDraft(appliedFilters, facets));
     }
-  }, [open, filters]);
+  }, [open, appliedFilters, facets]);
 
   useEffect(() => {
     if (!open) return;
@@ -109,7 +121,11 @@ const JewelleryFilterDrawer = ({
   };
 
   const handleClearAll = () => {
-    setDraft(hasMagentoFilterFacets(facets) ? createDefaultFilterState(facets) : filters);
+    const cleared = hasMagentoFilterFacets(facets)
+      ? createDefaultFilterState(facets)
+      : createEmptyFilterState();
+    setDraft(cleared);
+    onApply(cleared);
   };
 
   const categoryOptions = getAvailableCategoryLabels(facets);
@@ -124,7 +140,7 @@ const JewelleryFilterDrawer = ({
   const maxPercent = hasPriceRange
     ? ((draft.maxPrice - facets.minPrice) / (facets.maxPrice - facets.minPrice)) * 100
     : 0;
-  const canApplyFilters = hasActiveFilters(draft, facets);
+  const canApplyFilters = hasFilterChanges(draft, appliedFilters, facets);
 
   if (!open) {
     return null;
