@@ -1,3 +1,4 @@
+import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 
 const JEWELLERY_CATEGORY_DESTINATIONS = [
@@ -131,4 +132,9 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// org/project/auth token come from SENTRY_ORG, SENTRY_PROJECT and SENTRY_AUTH_TOKEN
+// env vars. Without SENTRY_AUTH_TOKEN the plugin skips source map upload.
+export default withSentryConfig(nextConfig, {
+  silent: true,
+  telemetry: false,
+});

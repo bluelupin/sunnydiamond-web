@@ -38,7 +38,7 @@ export const profileDetailsContent = {
   deleteAccount: {
     title: "Delete Account",
     description:
-      "Deleting your Sunny Diamonds account will permanently remove your profile, saved addresses, orders, wishlist, and plan details. This action cannot be undone.",
+      "Deleting your Sunny Diamonds account will permanently remove your profile and saved addresses, and you will lose access to your orders, wishlist, and plan details. This action cannot be undone.",
     ctaLabel: "DELETE MY ACCOUNT",
     contactHref: "/contact",
     dialog: {
@@ -61,10 +61,16 @@ export const profileDetailsContent = {
       ],
       commentsPlaceholder: "Additional comments",
       confirmLabel: "CONFIRM",
-      deletedToastTitle: "Account deletion",
-      deletedToastDescription:
-        "To delete your account, please contact our support team or visit a showroom.",
     },
+    successDialog: {
+      title: "Account Deleted",
+      description:
+        "Your Sunny Diamonds account has been deleted. Thank you for being with us — you are always welcome back.",
+      ctaLabel: "OK",
+    },
+    activeOrdersMessage:
+      "You have orders in progress. Complete, cancel or return them before deleting your account.",
+    errorMessage: "We could not delete your account right now. Please try again.",
   },
   logout: {
     title: "Logout",

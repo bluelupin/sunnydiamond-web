@@ -15,8 +15,10 @@ import {
   appointmentLabelClassName,
 } from "@/shared/constants/appointmentForm";
 import { profileDetailsContent } from "../data/profileContent";
+import { useDeleteAccount } from "../hooks/useDeleteAccount";
 import { ProfileDeleteAccountDialog } from "./ProfileDeleteAccountDialog";
 import { ProfileDeleteAccountReasonDialog } from "./ProfileDeleteAccountReasonDialog";
+import { ProfileDeleteAccountSuccessDialog } from "./ProfileDeleteAccountSuccessDialog";
 
 type ProfileDetailsSectionProps = {
   customer: AuthCustomer;
@@ -30,6 +32,8 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
   const content = profileDetailsContent;
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteReasonOpen, setDeleteReasonOpen] = useState(false);
+  const [deleteSuccessOpen, setDeleteSuccessOpen] = useState(false);
+  const { isSubmitting, error, clearError, deleteAccount } = useDeleteAccount();
 
   const initialFullName = [customer.firstname, customer.lastname].filter(Boolean).join(" ");
   const initialEmail = customer.email ?? "";
@@ -64,6 +68,36 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
       title: "Email verified",
       description: "Your email is linked to your Sunny Diamonds account.",
     });
+  };
+
+  const handleProceedToDelete = () => {
+    clearError();
+    setDeleteReasonOpen(true);
+  };
+
+  const handleReasonOpenChange = (open: boolean) => {
+    if (!open) {
+      clearError();
+    }
+    setDeleteReasonOpen(open);
+  };
+
+  const handleConfirmDelete = async (payload: { reason: string; comments: string }) => {
+    try {
+      await deleteAccount(payload);
+      setDeleteReasonOpen(false);
+      setDeleteSuccessOpen(true);
+    } catch {
+      // `useDeleteAccount` keeps the message; the reason dialog renders it.
+    }
+  };
+
+  // The account is already gone server-side — dismissing only clears local state.
+  // The dialog stays mounted while `logout` hard-navigates home.
+  const handleSuccessOpenChange = (open: boolean) => {
+    if (!open) {
+      void logout();
+    }
   };
 
   return (
@@ -164,19 +198,20 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
       <ProfileDeleteAccountDialog
         open={deleteConfirmOpen}
         onOpenChange={setDeleteConfirmOpen}
-        onDelete={() => setDeleteReasonOpen(true)}
+        onDelete={handleProceedToDelete}
       />
 
       <ProfileDeleteAccountReasonDialog
         open={deleteReasonOpen}
-        onOpenChange={setDeleteReasonOpen}
-        onConfirm={() => {
-          setDeleteReasonOpen(false);
-          toast({
-            title: content.deleteAccount.reasonDialog.deletedToastTitle,
-            description: content.deleteAccount.reasonDialog.deletedToastDescription,
-          });
-        }}
+        onOpenChange={handleReasonOpenChange}
+        onConfirm={(payload) => void handleConfirmDelete(payload)}
+        isSubmitting={isSubmitting}
+        errorMessage={error}
+      />
+
+      <ProfileDeleteAccountSuccessDialog
+        open={deleteSuccessOpen}
+        onOpenChange={handleSuccessOpenChange}
       />
 
       <div className="flex flex-col gap-6 bg-gray300 p-4 lg:flex-row lg:items-center lg:justify-between lg:p-6">
