@@ -159,6 +159,44 @@ export function hasActiveFilters(
   return filters.gemstoneType.trim().length > 0 || filters.occasion.trim().length > 0;
 }
 
+export function parseJewelleryPriceInput(value: string, fallback: number): number {
+  const trimmed = value.replace(/,/g, "").trim();
+
+  if (!trimmed) {
+    return fallback;
+  }
+
+  const parsed = Number(trimmed);
+
+  if (!Number.isFinite(parsed)) {
+    return fallback;
+  }
+
+  return Math.max(0, Math.round(parsed));
+}
+
+/** Keeps min/max within facet bounds and ensures max is never below min. */
+export function normalizeJewelleryPriceRange(
+  minPrice: number,
+  maxPrice: number,
+  facets: Pick<JewelleryFilterFacets, "minPrice" | "maxPrice">,
+): { minPrice: number; maxPrice: number } {
+  const facetMin = facets.minPrice;
+  const facetMax = facets.maxPrice;
+
+  if (facetMax <= facetMin) {
+    return { minPrice: facetMin, maxPrice: facetMax };
+  }
+
+  const nextMin = Math.min(Math.max(minPrice, facetMin), facetMax);
+  const nextMax = Math.min(Math.max(maxPrice, facetMin), facetMax);
+
+  return {
+    minPrice: nextMin,
+    maxPrice: Math.max(nextMax, nextMin),
+  };
+}
+
 export function chunkFilterOptions<T>(items: T[], chunkSize: number): T[][] {
   const rows: T[][] = [];
 

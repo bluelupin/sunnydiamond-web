@@ -19,6 +19,8 @@ import {
   getAvailableMetalTypeLabels,
   hasFilterChanges,
   hasMagentoFilterFacets,
+  normalizeJewelleryPriceRange,
+  parseJewelleryPriceInput,
 } from "../data/filters";
 import type { JewelleryFilterState } from "../types";
 import type { JewelleryFilterFacets } from "@/types/magento/jewelleryListing";
@@ -33,11 +35,6 @@ interface JewelleryFilterDrawerProps {
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(value);
-
-const parseAmount = (value: string) => {
-  const parsed = Number(value.replace(/,/g, ""));
-  return Number.isFinite(parsed) ? parsed : 0;
-};
 
 const rangeThumbClassName =
   "pointer-events-none col-start-1 row-start-1 z-20 h-[12px] w-full appearance-none bg-transparent [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:size-[12px] [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-darkblack [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:size-[12px] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-darkblack";
@@ -118,6 +115,20 @@ const JewelleryFilterDrawer = ({
 
       return { ...current, [key]: next };
     });
+  };
+
+  const updatePriceRange = (minPrice: number, maxPrice: number) => {
+    const normalized = normalizeJewelleryPriceRange(minPrice, maxPrice, facets);
+    setDraft((current) => ({
+      ...current,
+      minPrice: normalized.minPrice,
+      maxPrice: normalized.maxPrice,
+    }));
+  };
+
+  const applyDraft = () => {
+    const normalized = normalizeJewelleryPriceRange(draft.minPrice, draft.maxPrice, facets);
+    onApply({ ...draft, ...normalized });
   };
 
   const handleClearAll = () => {
@@ -216,10 +227,7 @@ const JewelleryFilterDrawer = ({
                       step={500}
                       value={draft.minPrice}
                       onChange={(event) =>
-                        setDraft((current) => ({
-                          ...current,
-                          minPrice: Math.min(Number(event.target.value), current.maxPrice),
-                        }))
+                        updatePriceRange(Number(event.target.value), draft.maxPrice)
                       }
                       className={rangeThumbClassName}
                       aria-label="Minimum price"
@@ -231,10 +239,7 @@ const JewelleryFilterDrawer = ({
                       step={500}
                       value={draft.maxPrice}
                       onChange={(event) =>
-                        setDraft((current) => ({
-                          ...current,
-                          maxPrice: Math.max(Number(event.target.value), current.minPrice),
-                        }))
+                        updatePriceRange(draft.minPrice, Number(event.target.value))
                       }
                       className={cn(rangeThumbClassName, "z-30")}
                       aria-label="Maximum price"
@@ -261,13 +266,10 @@ const JewelleryFilterDrawer = ({
                     onFocus={() => setMinInputFocused(true)}
                     onBlur={() => setMinInputFocused(false)}
                     onChange={(event) =>
-                      setDraft((current) => ({
-                        ...current,
-                        minPrice: Math.min(
-                          parseAmount(event.target.value) || facets.minPrice,
-                          current.maxPrice,
-                        ),
-                      }))
+                      updatePriceRange(
+                        parseJewelleryPriceInput(event.target.value, facets.minPrice),
+                        draft.maxPrice,
+                      )
                     }
                     className={cn(
                       "h-[56px] w-full bg-aboutInactive p-[12px] font-gill text-sm font-normal leading-110 text-darkblack outline-none",
@@ -285,13 +287,10 @@ const JewelleryFilterDrawer = ({
                     placeholder="Enter"
                     value={draft.maxPrice === facets.maxPrice ? "" : formatCurrency(draft.maxPrice)}
                     onChange={(event) =>
-                      setDraft((current) => ({
-                        ...current,
-                        maxPrice: Math.max(
-                          parseAmount(event.target.value) || facets.maxPrice,
-                          current.minPrice,
-                        ),
-                      }))
+                      updatePriceRange(
+                        draft.minPrice,
+                        parseJewelleryPriceInput(event.target.value, facets.maxPrice),
+                      )
                     }
                     className="h-[56px] w-full bg-aboutInactive p-[12px] font-gill text-base font-normal leading-110 text-darkblack placeholder:text-neutral400 outline-none"
                   />
@@ -391,7 +390,7 @@ const JewelleryFilterDrawer = ({
           <div className="flex w-full flex-col gap-4">
             <button
               type="button"
-              onClick={() => onApply(draft)}
+              onClick={applyDraft}
               disabled={!canApplyFilters}
               className="btn-dark-slide inline-flex h-[56px] w-full items-center justify-center border border-darkblack px-[28px] py-[20px] font-gill text-sm font-normal uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
