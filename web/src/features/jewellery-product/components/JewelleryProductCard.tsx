@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { cn } from "@/shared/utils/cn";
@@ -105,6 +106,18 @@ const JewelleryProductCard = ({
   });
 
   const isMobileLifestyle = activeSlide === 1 && hasModalImage;
+  const [isDesktopHovered, setIsDesktopHovered] = useState(false);
+  const showDesktopHover = hasHoverImage && isDesktopHovered;
+
+  const handleDesktopHoverStart = () => {
+    if (window.matchMedia("(min-width: 768px)").matches) {
+      setIsDesktopHovered(true);
+    }
+  };
+
+  const handleDesktopHoverEnd = () => {
+    setIsDesktopHovered(false);
+  };
 
   const swipeSurfaceProps = hasModalImage
     ? {
@@ -124,30 +137,35 @@ const JewelleryProductCard = ({
   return (
     <article
       className={cn(
-        "group grid h-[227px] min-w-0 w-full grid-cols-1 grid-rows-1 overflow-hidden bg-gray200",
-        "md:h-auto md:min-h-[420px] desktop:h-[496px]",
+        "relative grid h-[227px] min-w-0 w-full grid-cols-1 grid-rows-1 overflow-hidden bg-gray200",
+        "md:h-[420px] desktop:h-[496px]",
         hasModalImage && "touch-pan-y select-none md:touch-auto md:select-auto",
         isDragging && "cursor-grabbing md:cursor-auto",
       )}
+      onMouseEnter={handleDesktopHoverStart}
+      onMouseLeave={handleDesktopHoverEnd}
       {...swipeSurfaceProps}
     >
-      {/* Desktop hover — instant swap (no cross-fade) */}
+      {/* Desktop hover — full-card overlay; absolute so it never affects card height */}
       {hasHoverImage ? (
         <div
-          className="col-start-1 row-start-1 hidden size-full md:group-hover:grid"
+          className={cn(
+            "pointer-events-none absolute inset-0 z-0 hidden overflow-hidden md:block",
+            showDesktopHover ? "opacity-100" : "opacity-0",
+          )}
           aria-hidden
         >
           <OptimizedImage
             src={hoverImage!}
             alt=""
             width={PLP_CARD_IMAGE_WIDTH}
-            height={496}
-            className="col-start-1 row-start-1 size-full object-cover"
+            height={PLP_CARD_IMAGE_WIDTH}
+            className="size-full object-cover"
             sizes="33vw"
             quality={PLP_CARD_IMAGE_QUALITY}
           />
           <div
-            className="col-start-1 row-start-1 size-full bg-gradient-to-t from-[rgba(0,0,0,0.4)] from-[14%] to-transparent to-[50%]"
+            className="absolute inset-0 bg-gradient-to-t from-[rgba(0,0,0,0.4)] from-[14%] to-transparent to-[50%]"
             aria-hidden
           />
         </div>
@@ -177,7 +195,7 @@ const JewelleryProductCard = ({
         className={cn(
           "col-start-1 row-start-1 z-10 flex w-full flex-col items-center max-md:transition-opacity max-md:duration-500",
           "px-[16px] pt-[24px] md:px-[24px] md:pt-10",
-          hasHoverImage && "md:group-hover:hidden",
+          showDesktopHover && "md:pointer-events-none md:opacity-0",
           isMobileLifestyle ? "pointer-events-none opacity-0 md:opacity-100" : "opacity-100",
         )}
         style={
@@ -209,7 +227,7 @@ const JewelleryProductCard = ({
           href={href}
           className={cn(
             isMobileLifestyle ? "text-white" : "text-darkblack",
-            hasHoverImage && "md:group-hover:text-white",
+            showDesktopHover && "md:text-white",
           )}
         />
       </div>
@@ -261,8 +279,8 @@ const JewelleryProductCard = ({
                 ? "fill-[#AB863B] text-linkGold"
                 : isMobileLifestyle
                   ? "fill-none text-white"
-                  : hasHoverImage
-                    ? "fill-none text-darkblack md:group-hover:text-white"
+                  : showDesktopHover
+                    ? "fill-none text-white"
                     : "fill-none text-darkblack",
             )}>
             <path d="M15.6676 27.3342L26.8376 16.0042C28.0098 14.8319 28.6684 13.242 28.6684 11.5842C28.6684 9.92638 28.0098 8.33645 26.8376 7.1642C25.6653 5.99194 24.0754 5.33337 22.4176 5.33337C20.7598 5.33337 19.1698 5.99194 17.9976 7.1642L15.6676 9.3342L13.3376 7.1642C12.1653 5.99194 10.5754 5.33337 8.91757 5.33337C7.25975 5.33337 5.66983 5.99194 4.49757 7.1642C3.32532 8.33645 2.66675 9.92638 2.66675 11.5842C2.66675 13.242 3.32532 14.8319 4.49757 16.0042L15.6676 27.3342Z"
