@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { cn } from "@/shared/utils/cn";
@@ -107,7 +107,13 @@ const JewelleryProductCard = ({
 
   const isMobileLifestyle = activeSlide === 1 && hasModalImage;
   const [isDesktopHovered, setIsDesktopHovered] = useState(false);
+  const [optimisticWishlisted, setOptimisticWishlisted] = useState<boolean | null>(null);
   const showDesktopHover = hasHoverImage && isDesktopHovered;
+  const displayedWishlisted = optimisticWishlisted ?? isWishlisted;
+
+  useEffect(() => {
+    setOptimisticWishlisted(null);
+  }, [isWishlisted]);
 
   const handleDesktopHoverStart = () => {
     if (window.matchMedia("(min-width: 768px)").matches) {
@@ -263,19 +269,20 @@ const JewelleryProductCard = ({
       <div className="pointer-events-none col-start-1 row-start-1 z-40 flex justify-end self-start px-[16px] pt-[24px] md:z-50 md:px-[24px] md:pt-10">
         <button
           type="button"
-          aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-          aria-pressed={isWishlisted}
+          aria-label={displayedWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          aria-pressed={displayedWishlisted}
           onClick={(event) => {
             event.preventDefault();
             event.stopPropagation();
+            setOptimisticWishlisted(!displayedWishlisted);
             onToggleWishlist?.();
           }}
           className="pointer-events-auto relative flex size-6 items-center justify-center md:size-[32px]"
         >
-          <svg width="32" height="32" viewBox="0 0 32 32" fill={isWishlisted ? "currentColor" : "none"} xmlns="http://www.w3.org/2000/svg"
+          <svg width="32" height="32" viewBox="0 0 32 32" fill={displayedWishlisted ? "currentColor" : "none"} xmlns="http://www.w3.org/2000/svg"
             className={cn(
               "transition-colors duration-200 md:w-8 md:h-8 w-6 h-6",
-              isWishlisted
+              displayedWishlisted
                 ? "fill-[#AB863B] text-linkGold"
                 : isMobileLifestyle
                   ? "fill-none text-white"
@@ -284,7 +291,7 @@ const JewelleryProductCard = ({
                     : "fill-none text-darkblack",
             )}>
             <path d="M15.6676 27.3342L26.8376 16.0042C28.0098 14.8319 28.6684 13.242 28.6684 11.5842C28.6684 9.92638 28.0098 8.33645 26.8376 7.1642C25.6653 5.99194 24.0754 5.33337 22.4176 5.33337C20.7598 5.33337 19.1698 5.99194 17.9976 7.1642L15.6676 9.3342L13.3376 7.1642C12.1653 5.99194 10.5754 5.33337 8.91757 5.33337C7.25975 5.33337 5.66983 5.99194 4.49757 7.1642C3.32532 8.33645 2.66675 9.92638 2.66675 11.5842C2.66675 13.242 3.32532 14.8319 4.49757 16.0042L15.6676 27.3342Z"
-              stroke={isWishlisted ? "currentColor" : "#0A0A0A"} strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
+              stroke={displayedWishlisted ? "currentColor" : "#0A0A0A"} strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
       </div>

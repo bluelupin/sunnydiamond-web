@@ -39,6 +39,8 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   const [hasLoaded, setHasLoaded] = useState(false);
   const wishlistedIdsRef = useRef(wishlistedIds);
   const syncRequestIdRef = useRef(0);
+  const lastLocalMutationAtRef = useRef(0);
+  const toggleGenerationRef = useRef(0);
   const [isMovedToastOpen, setIsMovedToastOpen] = useState(false);
   const movedToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -89,10 +91,15 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     }
 
     const requestId = ++syncRequestIdRef.current;
+    const syncStartedAt = Date.now();
 
     void getCustomerWishlist()
       .then((wishlist) => {
         if (requestId !== syncRequestIdRef.current || !wishlist) {
+          return;
+        }
+
+        if (lastLocalMutationAtRef.current >= syncStartedAt) {
           return;
         }
 
@@ -141,6 +148,8 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         ? current.filter((id) => id !== normalizedSku)
         : [...current, normalizedSku];
 
+      const toggleGeneration = ++toggleGenerationRef.current;
+      lastLocalMutationAtRef.current = Date.now();
       setWishlistedIds(next);
 
       if (!isCurrentlyWishlisted) {
@@ -152,8 +161,17 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
           const wishlist = isCurrentlyWishlisted
             ? await removeCustomerWishlistSku(normalizedSku)
             : await addCustomerWishlistSku(normalizedSku);
+
+          if (toggleGeneration !== toggleGenerationRef.current) {
+            return;
+          }
+
           setWishlistedIds(wishlist.skus);
         } catch {
+          if (toggleGeneration !== toggleGenerationRef.current) {
+            return;
+          }
+
           setWishlistedIds(previous);
         }
       })();
