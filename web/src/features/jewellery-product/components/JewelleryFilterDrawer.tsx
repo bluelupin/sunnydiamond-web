@@ -81,12 +81,33 @@ const JewelleryFilterDrawer = ({
     buildDrawerDraft(appliedFilters, facets),
   );
   const [minInputFocused, setMinInputFocused] = useState(false);
+  const [maxInputFocused, setMaxInputFocused] = useState(false);
+  const [maxInputValue, setMaxInputValue] = useState("");
+
+  const getMaxAmountDisplayValue = (
+    maxPrice: number,
+    minPrice: number,
+    facetMax: number,
+  ): string => {
+    if (maxPrice === facetMax && minPrice !== maxPrice) {
+      return "";
+    }
+
+    return formatCurrency(maxPrice);
+  };
 
   useEffect(() => {
     if (open) {
       setDraft(buildDrawerDraft(appliedFilters, facets));
+      setMaxInputFocused(false);
     }
   }, [open, appliedFilters, facets]);
+
+  useEffect(() => {
+    if (!maxInputFocused) {
+      setMaxInputValue(getMaxAmountDisplayValue(draft.maxPrice, draft.minPrice, facets.maxPrice));
+    }
+  }, [draft.maxPrice, draft.minPrice, facets.maxPrice, maxInputFocused]);
 
   useEffect(() => {
     if (!open) return;
@@ -126,9 +147,23 @@ const JewelleryFilterDrawer = ({
     }));
   };
 
+  const resolveDraftPriceRange = () => {
+    const trimmedMax = maxInputValue.replace(/,/g, "").trim();
+    const draftMax =
+      trimmedMax === ""
+        ? draft.maxPrice
+        : parseJewelleryPriceInput(maxInputValue, facets.maxPrice);
+
+    return normalizeJewelleryPriceRange(draft.minPrice, draftMax, facets);
+  };
+
   const applyDraft = () => {
-    const normalized = normalizeJewelleryPriceRange(draft.minPrice, draft.maxPrice, facets);
+    const normalized = resolveDraftPriceRange();
     onApply({ ...draft, ...normalized });
+    setMaxInputFocused(false);
+    setMaxInputValue(
+      getMaxAmountDisplayValue(normalized.maxPrice, normalized.minPrice, facets.maxPrice),
+    );
   };
 
   const handleClearAll = () => {
@@ -152,6 +187,23 @@ const JewelleryFilterDrawer = ({
     ? ((draft.maxPrice - facets.minPrice) / (facets.maxPrice - facets.minPrice)) * 100
     : 0;
   const canApplyFilters = hasFilterChanges(draft, appliedFilters, facets);
+
+  const commitMaxAmountInput = () => {
+    const trimmed = maxInputValue.replace(/,/g, "").trim();
+    const nextMax =
+      trimmed === "" ? facets.maxPrice : parseJewelleryPriceInput(maxInputValue, facets.maxPrice);
+    const normalized = normalizeJewelleryPriceRange(draft.minPrice, nextMax, facets);
+
+    setDraft((current) => ({
+      ...current,
+      minPrice: normalized.minPrice,
+      maxPrice: normalized.maxPrice,
+    }));
+    setMaxInputFocused(false);
+    setMaxInputValue(
+      getMaxAmountDisplayValue(normalized.maxPrice, normalized.minPrice, facets.maxPrice),
+    );
+  };
 
   if (!open) {
     return null;
@@ -285,13 +337,28 @@ const JewelleryFilterDrawer = ({
                     type="text"
                     inputMode="numeric"
                     placeholder="Enter"
-                    value={draft.maxPrice === facets.maxPrice ? "" : formatCurrency(draft.maxPrice)}
-                    onChange={(event) =>
-                      updatePriceRange(
-                        draft.minPrice,
-                        parseJewelleryPriceInput(event.target.value, facets.maxPrice),
-                      )
-                    }
+                    value={maxInputValue}
+                    onFocus={() => {
+                      setMaxInputFocused(true);
+                      setMaxInputValue(
+                        getMaxAmountDisplayValue(draft.maxPrice, draft.minPrice, facets.maxPrice),
+                      );
+                    }}
+                    onBlur={commitMaxAmountInput}
+                    onChange={(event) => {
+                      const nextValue = event.target.value;
+                      setMaxInputValue(nextValue);
+
+                      const trimmed = nextValue.replace(/,/g, "").trim();
+                      if (!trimmed) {
+                        return;
+                      }
+
+                      const parsed = Number(trimmed);
+                      if (Number.isFinite(parsed)) {
+                        updatePriceRange(draft.minPrice, Math.max(0, Math.round(parsed)));
+                      }
+                    }}
                     className="h-[56px] w-full bg-aboutInactive p-[12px] font-gill text-base font-normal leading-110 text-darkblack placeholder:text-neutral400 outline-none"
                   />
                 </label>

@@ -76,6 +76,28 @@ function resolveSelectedGemstoneTypeValues(
     .filter(Boolean);
 }
 
+/** Magento price ranges treat equal bounds as empty; widen `to` by 1 for exact INR matches. */
+export function buildMagentoPriceFilterRange(
+  minPrice: number,
+  maxPrice: number,
+): { from: string; to: string } {
+  const from = Math.round(minPrice);
+  const to = Math.round(maxPrice);
+
+  if (from === to) {
+    // Widen the Magento interval, then refine to an exact price client-side.
+    return {
+      from: String(from),
+      to: String(from + 1),
+    };
+  }
+
+  return {
+    from: String(from),
+    to: String(to),
+  };
+}
+
 export function buildMagentoProductsFilter({
   categoryUrlKey,
   categoryId,
@@ -98,10 +120,7 @@ export function buildMagentoProductsFilter({
     const to = Math.round(filters.maxPrice);
 
     if (from > 0 || to > 0) {
-      magentoFilter.price = {
-        from: String(from),
-        to: String(to),
-      };
+      magentoFilter.price = buildMagentoPriceFilterRange(from, to);
     }
   }
 

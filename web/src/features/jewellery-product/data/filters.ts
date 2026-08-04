@@ -2,9 +2,6 @@ import type { JewelleryFilterState, JewellerySortOption } from "../types";
 import type { JewelleryFilterFacets } from "@/types/magento/jewelleryListing";
 
 export const PAGE_SIZE = 9;
-/** Products shown on first PLP paint; fetched via multiple Magento pages at {@link PAGE_SIZE}. */
-export const INITIAL_PLP_PRODUCT_COUNT = 30;
-export const INITIAL_PLP_PAGE_COUNT = Math.ceil(INITIAL_PLP_PRODUCT_COUNT / PAGE_SIZE);
 
 export const DEFAULT_JEWELLERY_LISTING_SORT = "featured";
 
@@ -112,6 +109,10 @@ export function isDefaultPriceRange(
   filters: JewelleryFilterState,
   facets: Pick<JewelleryFilterFacets, "minPrice" | "maxPrice">,
 ): boolean {
+  if (filters.minPrice > 0 && filters.minPrice === filters.maxPrice) {
+    return false;
+  }
+
   if (facets.maxPrice <= facets.minPrice) {
     return true;
   }
@@ -122,6 +123,25 @@ export function isDefaultPriceRange(
   }
 
   return filters.minPrice <= facets.minPrice && filters.maxPrice >= facets.maxPrice;
+}
+
+/** When set, PLP should show only products whose rounded price equals this value. */
+export function getExactJewelleryPriceFilter(
+  filters: JewelleryFilterState,
+  facets: Pick<JewelleryFilterFacets, "minPrice" | "maxPrice">,
+): number | null {
+  if (isDefaultPriceRange(filters, facets)) {
+    return null;
+  }
+
+  const minPrice = Math.round(filters.minPrice);
+  const maxPrice = Math.round(filters.maxPrice);
+
+  if (minPrice > 0 && minPrice === maxPrice) {
+    return minPrice;
+  }
+
+  return null;
 }
 
 /** Stable key for listing refetch — treats default / empty price ranges as equivalent. */

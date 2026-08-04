@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   PAGE_SIZE,
   createEmptyFilterState,
+  getExactJewelleryPriceFilter,
   getJewelleryListingFiltersKey,
   DEFAULT_JEWELLERY_LISTING_SORT,
 } from "@/features/jewellery-product/data/filters";
@@ -184,7 +185,12 @@ export function useMagentoJewelleryListing({
 
   const applyInitialListing = useCallback((listing: JewelleryListingProductsData) => {
     setProducts(listing.products);
-    setTotalCount(listing.totalCount);
+    const exactPrice = getExactJewelleryPriceFilter(filtersRef.current, listing.facets);
+    setTotalCount(
+      exactPrice != null
+        ? listing.products.length + (listing.pendingProducts?.length ?? 0)
+        : listing.totalCount,
+    );
     setTotalPages(listing.totalPages);
     totalPagesRef.current = listing.totalPages;
     setFacets(listing.facets);
@@ -349,7 +355,10 @@ export function useMagentoJewelleryListing({
             setCurrentPage(fetchedPage);
             totalPagesRef.current = data.totalPages;
             setTotalPages(data.totalPages);
-            setTotalCount(data.totalCount);
+
+            if (getExactJewelleryPriceFilter(filtersRef.current, facetsRef.current) == null) {
+              setTotalCount(data.totalCount);
+            }
 
             const shouldSkipEmptyPage =
               data.products.length === 0 &&
@@ -386,7 +395,13 @@ export function useMagentoJewelleryListing({
         setPendingCount(pendingProductsRef.current.length);
 
         if (batch.length > 0) {
-          setProducts((current) => appendUniqueProducts(current, batch));
+          setProducts((current) => {
+            const next = appendUniqueProducts(current, batch);
+            if (getExactJewelleryPriceFilter(filtersRef.current, facetsRef.current) != null) {
+              setTotalCount(next.length + pendingProductsRef.current.length);
+            }
+            return next;
+          });
         }
       } catch (fetchError) {
         if (requestId !== requestIdRef.current) {

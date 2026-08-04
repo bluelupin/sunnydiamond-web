@@ -16,7 +16,6 @@ import {
   createDefaultFilterState,
   createEmptyFilterState,
   DEFAULT_JEWELLERY_LISTING_SORT,
-  INITIAL_PLP_PRODUCT_COUNT,
   PAGE_SIZE,
   hasActiveFilters,
   hasMagentoFilterFacets,
@@ -347,7 +346,7 @@ const JewelleryProductPage = ({
 
       <section className="relative isolate z-0 w-full bg-gray200 pb-0 md:pb-10">
         {isLoading ? (
-          <JewelleryProductGridSkeleton count={INITIAL_PLP_PRODUCT_COUNT} />
+          <JewelleryProductGridSkeleton count={PAGE_SIZE} />
         ) : showFilterEmptyState ? (
           <JewelleryListingEmptyState onClearFilters={handleClearFilters} />
         ) : (

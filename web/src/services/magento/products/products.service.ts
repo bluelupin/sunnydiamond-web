@@ -25,9 +25,8 @@ import type { JewelleryFilterFacets, JewelleryListingProductsData } from "@/type
 import type { JewelleryFilterState, JewelleryListingProduct } from "@/features/jewellery-product/types";
 import {
   createEmptyFilterState,
+  getExactJewelleryPriceFilter,
   getJewelleryListingFiltersKey,
-  INITIAL_PLP_PAGE_COUNT,
-  INITIAL_PLP_PRODUCT_COUNT,
   PAGE_SIZE,
 } from "@/features/jewellery-product/data/filters";
 import { measureJewelleryPlpGraphql } from "@/features/jewellery-product/utils/jewelleryPlpPerformance";
@@ -268,12 +267,18 @@ async function fetchMagentoJewelleryProducts({
       pageSize,
       category: categoryUrlKey ?? "all",
     });
-    const products = mapMagentoProductsToJewelleryListing(data.products?.items);
+    const rawProducts = mapMagentoProductsToJewelleryListing(data.products?.items);
+    const products = refineListingProductsForExactPrice(rawProducts, filters, facetsForFilter);
     const pageInfo = data.products?.page_info;
 
     return {
       products,
-      totalCount: data.products?.total_count ?? 0,
+      totalCount: resolveListingTotalCount(
+        products,
+        data.products?.total_count ?? 0,
+        filters,
+        facetsForFilter,
+      ),
       currentPage: pageInfo?.current_page ?? page,
       pageSize: pageInfo?.page_size ?? pageSize,
       totalPages: pageInfo?.total_pages ?? 0,
@@ -315,12 +320,18 @@ async function fetchMagentoJewelleryProducts({
     mapMagentoAggregationsToFacets(facetScopeData.products?.aggregations),
     navCategories,
   );
-  const products = mapMagentoProductsToJewelleryListing(data.products?.items);
+  const rawProducts = mapMagentoProductsToJewelleryListing(data.products?.items);
+  const products = refineListingProductsForExactPrice(rawProducts, filters, facetsForFilter);
   const pageInfo = data.products?.page_info;
 
   return {
     products,
-    totalCount: data.products?.total_count ?? 0,
+    totalCount: resolveListingTotalCount(
+      products,
+      data.products?.total_count ?? 0,
+      filters,
+      facetsForFilter,
+    ),
     currentPage: pageInfo?.current_page ?? page,
     pageSize: pageInfo?.page_size ?? pageSize,
     totalPages: pageInfo?.total_pages ?? 0,
@@ -332,32 +343,41 @@ async function fetchMagentoJewelleryProducts({
   };
 }
 
-function appendUniqueListingProducts(
-  current: JewelleryListingProduct[],
-  incoming: JewelleryListingProduct[],
-): JewelleryListingProduct[] {
-  if (incoming.length === 0) {
-    return current;
-  }
-
-  const seen = new Set(current.map((product) => product.id));
-  const uniqueIncoming = incoming.filter((product) => !seen.has(product.id));
-
-  return uniqueIncoming.length > 0 ? [...current, ...uniqueIncoming] : current;
-}
-
 export type MagentoJewelleryInitialListingResult = {
   listing: JewelleryListingProductsData;
   pendingProducts: JewelleryListingProduct[];
 };
 
-/** Fetches the first PLP batch (30 products) via multiple Magento pages at {@link PAGE_SIZE}. */
+function refineListingProductsForExactPrice(
+  products: JewelleryListingProduct[],
+  filters: JewelleryFilterState,
+  facets: JewelleryFilterFacets,
+): JewelleryListingProduct[] {
+  const exactPrice = getExactJewelleryPriceFilter(filters, facets);
+  if (exactPrice == null) {
+    return products;
+  }
+
+  return products.filter((product) => Math.round(product.price) === exactPrice);
+}
+
+function resolveListingTotalCount(
+  products: JewelleryListingProduct[],
+  apiTotalCount: number,
+  filters: JewelleryFilterState,
+  facets: JewelleryFilterFacets,
+): number {
+  return getExactJewelleryPriceFilter(filters, facets) != null ? products.length : apiTotalCount;
+}
+
+/** Fetches the first PLP page ({@link PAGE_SIZE} products) with facets. */
 export async function getMagentoJewelleryInitialListing(
   params: Omit<GetMagentoJewelleryProductsParams, "page"> & {
     pageSize?: number;
   },
 ): Promise<MagentoJewelleryInitialListingResult> {
   const pageSize = params.pageSize ?? PAGE_SIZE;
+  const filters = params.filters ?? createEmptyFilterState();
 
   const firstPage = await getMagentoJewelleryProducts({
     ...params,
@@ -366,44 +386,28 @@ export async function getMagentoJewelleryInitialListing(
     includeFacets: params.includeFacets !== false,
   });
 
-  const totalPages = firstPage.totalPages;
-  const lastPageToFetch = Math.min(INITIAL_PLP_PAGE_COUNT, Math.max(totalPages, 1));
-
-  let mergedProducts = firstPage.products;
-
-  if (lastPageToFetch > 1) {
-    const additionalPages = await Promise.all(
-      Array.from({ length: lastPageToFetch - 1 }, (_, index) =>
-        getMagentoJewelleryProducts({
-          ...params,
-          page: index + 2,
-          pageSize,
-          includeFacets: false,
-          facets: firstPage.facets,
-        }),
-      ),
-    );
-
-    mergedProducts = appendUniqueListingProducts(
-      mergedProducts,
-      additionalPages.flatMap((page) => page.products),
-    );
-  }
-
-  const products = mergedProducts.slice(0, INITIAL_PLP_PRODUCT_COUNT);
-  const pendingProducts = mergedProducts.slice(INITIAL_PLP_PRODUCT_COUNT);
+  const products = refineListingProductsForExactPrice(
+    firstPage.products,
+    filters,
+    firstPage.facets,
+  );
 
   return {
     listing: {
       products,
-      totalCount: firstPage.totalCount,
+      totalCount: resolveListingTotalCount(
+        products,
+        firstPage.totalCount,
+        filters,
+        firstPage.facets,
+      ),
       totalPages: firstPage.totalPages,
       pageSize: firstPage.pageSize,
-      currentPage: lastPageToFetch,
+      currentPage: 1,
       facets: firstPage.facets,
-      pendingProducts,
+      pendingProducts: [],
     },
-    pendingProducts,
+    pendingProducts: [],
   };
 }
 

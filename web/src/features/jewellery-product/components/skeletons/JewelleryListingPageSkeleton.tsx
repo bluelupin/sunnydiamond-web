@@ -1,5 +1,5 @@
 import JewelleryProductGridSkeleton from "./JewelleryProductGridSkeleton";
-import { INITIAL_PLP_PRODUCT_COUNT } from "../../data/filters";
+import { PAGE_SIZE } from "../../data/filters";
 
 const shimmerClass = "animate-pulse bg-gray200";
 
@@ -34,7 +34,7 @@ const JewelleryListingPageSkeleton = () => (
     </div>
 
     <section className="relative isolate z-0 w-full bg-gray200 pb-0 md:pb-10">
-      <JewelleryProductGridSkeleton count={INITIAL_PLP_PRODUCT_COUNT} />
+      <JewelleryProductGridSkeleton count={PAGE_SIZE} />
     </section>
   </div>
 );
