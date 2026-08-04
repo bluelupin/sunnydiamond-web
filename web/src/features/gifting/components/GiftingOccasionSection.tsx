@@ -3,10 +3,13 @@
 import { useCallback, useRef } from "react";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import OccasionLedCard from "@/shared/ui/OccasionLedCard";
-import { giftingPageContent } from "../data/content";
+import type { NormalizedGiftingOccasionCard } from "@/services/gifting/gifting-page.types";
 
-const GiftingOccasionSection = () => {
-  const { cards, viewCollectionLabel } = giftingPageContent.occasions;
+type GiftingOccasionSectionProps = {
+  cards: NormalizedGiftingOccasionCard[];
+};
+
+const GiftingOccasionSection = ({ cards }: GiftingOccasionSectionProps) => {
   const sectionTitle = "Timeless Pieces for Every Occasion";
 
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -65,9 +68,9 @@ const GiftingOccasionSection = () => {
           >
             <OccasionLedCard
               title={card.title}
-              description={card.description}
+              description={card.description ?? ""}
               href={card.href}
-              ctaLabel={viewCollectionLabel}
+              ctaLabel={card.ctaLabel}
               desktopImageUrl={card.image.desktopUrl}
               mobileImageUrl={card.image.mobileUrl}
               imageAlt={card.image.alt}

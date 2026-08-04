@@ -1,11 +1,19 @@
 import GuaranteesBar from "@/shared/ui/GuaranteesBar";
-import { giftingPageContent } from "../data/content";
+import type { NormalizedGiftingTrustBadge } from "@/services/gifting/gifting-page.types";
 
-const GiftingGuaranteesSection = () => (
-  <GuaranteesBar
-    items={giftingPageContent.guarantees}
-    ariaLabel="Sunny Diamonds guarantees"
-  />
-);
+type GiftingGuaranteesSectionProps = {
+  trustBadges: NormalizedGiftingTrustBadge[];
+};
+
+const GiftingGuaranteesSection = ({ trustBadges }: GiftingGuaranteesSectionProps) => {
+  if (trustBadges.length === 0) return null;
+
+  return (
+    <GuaranteesBar
+      items={trustBadges}
+      ariaLabel="Sunny Diamonds guarantees"
+    />
+  );
+};
 
 export default GiftingGuaranteesSection;

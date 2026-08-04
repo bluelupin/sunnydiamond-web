@@ -1,13 +1,11 @@
 import Image from "next/image";
-import { giftingPageContent } from "../data/content";
-
-type FinishingTouchItem = typeof giftingPageContent.finishingTouch.items[number];
+import type { NormalizedGiftingFinishingItem, NormalizedGiftingFinishingTouch } from "@/services/gifting/gifting-page.types";
 
 const FinishingTouchCard = ({
   item,
   layout,
 }: {
-  item: FinishingTouchItem;
+  item: NormalizedGiftingFinishingItem;
   layout: "mobile" | "desktop";
 }) => {
   const isMobile = layout === "mobile";
@@ -28,7 +26,7 @@ const FinishingTouchCard = ({
         }
       >
         <Image
-          src={item.image.src}
+          src={item.image.desktopUrl}
           alt={item.image.alt}
           fill
           className="object-cover object-center"
@@ -47,23 +45,27 @@ const FinishingTouchCard = ({
         }
       >
         <h3 className="font-larken text-xl font-light leading-110">{item.title}</h3>
-        <p
-          className={
-            isMobile
-              ? "font-gill text-base font-light leading-normal"
-              : "font-gill text-base font-light leading-110"
-          }
-        >
-          {item.description}
-        </p>
+        {item.description ? (
+          <p
+            className={
+              isMobile
+                ? "font-gill text-base font-light leading-normal"
+                : "font-gill text-base font-light leading-110"
+            }
+          >
+            {item.description}
+          </p>
+        ) : null}
       </div>
     </article>
   );
 };
 
-const GiftingPromiseSection = () => {
-  const { finishingTouch } = giftingPageContent;
+type GiftingPromiseSectionProps = {
+  finishingTouch: NormalizedGiftingFinishingTouch;
+};
 
+const GiftingPromiseSection = ({ finishingTouch }: GiftingPromiseSectionProps) => {
   return (
     <section
       id="the-finishing-touch"
@@ -78,9 +80,11 @@ const GiftingPromiseSection = () => {
           >
             {finishingTouch.title}
           </h2>
-          <p className="hidden font-gill text-xl font-light leading-110 text-neutral500 md:block">
-            {finishingTouch.description}
-          </p>
+          {finishingTouch.description ? (
+            <p className="hidden font-gill text-xl font-light leading-110 text-neutral500 md:block">
+              {finishingTouch.description}
+            </p>
+          ) : null}
         </div>
 
         {/* Mobile — Figma 1049:57987 horizontal carousel */}

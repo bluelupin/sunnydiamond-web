@@ -2,10 +2,17 @@ import {
   prefetchJewelleryListing,
   prefetchMagentoJewelleryNav,
 } from "@/lib/magento/prefetchMagento";
+import type { NormalizedGiftingGiftFinder } from "@/services/gifting/gifting-page.types";
 import { mapGiftingDiscoverOptions } from "../utils/giftFinderRoutes";
 import GiftingDiscoverSection from "./GiftingDiscoverSection";
 
-const GiftingDiscoverOptionsLoader = async () => {
+type GiftingDiscoverOptionsLoaderProps = {
+  giftFinder: NormalizedGiftingGiftFinder;
+};
+
+const GiftingDiscoverOptionsLoader = async ({
+  giftFinder,
+}: GiftingDiscoverOptionsLoaderProps) => {
   const [nav, listing] = await Promise.all([
     prefetchMagentoJewelleryNav(),
     prefetchJewelleryListing(null),
@@ -16,7 +23,12 @@ const GiftingDiscoverOptionsLoader = async () => {
       ? mapGiftingDiscoverOptions(nav, listing.facets)
       : undefined;
 
-  return <GiftingDiscoverSection discoverOptions={discoverOptions} />;
+  return (
+    <GiftingDiscoverSection
+      giftFinder={giftFinder}
+      discoverOptions={discoverOptions}
+    />
+  );
 };
 
 export default GiftingDiscoverOptionsLoader;

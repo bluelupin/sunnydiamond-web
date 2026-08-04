@@ -6,9 +6,18 @@ export type JewelleryFilterFacetOption = {
   count?: number;
 };
 
+/** Magento `price` aggregation buckets (gift-finder / experimental consumers). */
+export type JewelleryPriceBucket = {
+  min: number;
+  max: number;
+  label: string;
+};
+
 export type JewelleryFilterFacets = {
   minPrice: number;
   maxPrice: number;
+  /** Discrete Magento price aggregation bands when available. */
+  priceBuckets: JewelleryPriceBucket[];
   categories: JewelleryFilterFacetOption[];
   metalTypes: JewelleryFilterFacetOption[];
   metalPurities: JewelleryFilterFacetOption[];

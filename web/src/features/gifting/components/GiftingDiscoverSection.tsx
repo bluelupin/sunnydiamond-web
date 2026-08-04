@@ -7,6 +7,7 @@ import { cn } from "@/shared/utils/cn";
 import CareersChevronDownIcon from "@/features/careers/components/shared/CareersChevronDownIcon";
 import { careersFormSelectChevronClassName } from "@/features/careers/constants/careersApplicationForm";
 import Reveal from "@/shared/Animation/Reveal";
+import type { NormalizedGiftingGiftFinder } from "@/services/gifting/gifting-page.types";
 import { giftingPageContent } from "../data/content";
 import {
   buildGiftFinderHref,
@@ -54,21 +55,31 @@ const GiftingDiscoverField = ({
 );
 
 type GiftingDiscoverSectionProps = {
+  giftFinder: NormalizedGiftingGiftFinder;
   discoverOptions?: GiftingDiscoverOptions;
 };
 
-const GiftingDiscoverSection = ({ discoverOptions }: GiftingDiscoverSectionProps) => {
+const GiftingDiscoverSection = ({
+  giftFinder,
+  discoverOptions,
+}: GiftingDiscoverSectionProps) => {
   const { discover } = giftingPageContent;
   const router = useRouter();
+
+  const title = giftFinder.title;
+  const description = giftFinder.description;
+  const submitLabel = giftFinder.submitLabel ?? "FIND PRODUCTS";
+  const imageSrc = giftFinder.image?.desktopUrl;
+  const imageAlt = giftFinder.image?.alt ?? "";
 
   const options = useMemo(
     () =>
       discoverOptions ?? {
-        categories: discover.categories,
-        occasions: discover.occasions,
-        priceRanges: discover.priceRanges,
+        categories: [],
+        occasions: [],
+        priceRanges: [...discover.priceRanges],
       },
-    [discover, discoverOptions],
+    [discover.priceRanges, discoverOptions],
   );
 
   const [category, setCategory] = useState("");
@@ -101,18 +112,20 @@ const GiftingDiscoverSection = ({ discoverOptions }: GiftingDiscoverSectionProps
       aria-labelledby="gifting-discover-title"
       className="flex flex-col md:flex-row md:items-center md:justify-between md:pl-0 md:pr-10 md:pb-100"
     >
-      <Reveal
-        direction="up"
-        className="relative h-[320px] w-full shrink-0 md:h-[521px] md:w-[732px]"
-      >
-        <Image
-          src={discover.image.src}
-          alt={discover.image.alt}
-          fill
-          className="object-cover object-center"
-          sizes="(max-width: 768px) 100vw, 732px"
-        />
-      </Reveal>
+      {imageSrc ? (
+        <Reveal
+          direction="up"
+          className="relative h-[320px] w-full shrink-0 md:h-[521px] md:w-[732px]"
+        >
+          <Image
+            src={imageSrc}
+            alt={imageAlt}
+            fill
+            className="object-cover object-center"
+            sizes="(max-width: 768px) 100vw, 732px"
+          />
+        </Reveal>
+      ) : null}
 
       <div className="flex w-full max-w-[530px] flex-col gap-6 px-4 py-16 md:shrink-0 md:gap-10 md:px-0 md:py-0">
         <div className="flex flex-col gap-6 md:gap-10">
@@ -123,15 +136,17 @@ const GiftingDiscoverSection = ({ discoverOptions }: GiftingDiscoverSectionProps
               direction="up"
               className="font-larken text-[32px] font-light leading-110 text-darkblack md:text-5xl"
             >
-              {discover.title}
+              {title}
             </Reveal>
-            <Reveal
-              as="p"
-              direction="up"
-              className="max-w-[306px] font-gill text-base font-light leading-110 text-neutral500 md:max-w-none md:text-xl"
-            >
-              {discover.description}
-            </Reveal>
+            {description ? (
+              <Reveal
+                as="p"
+                direction="up"
+                className="max-w-[306px] font-gill text-base font-light leading-110 text-neutral500 md:max-w-none md:text-xl"
+              >
+                {description}
+              </Reveal>
+            ) : null}
           </div>
 
           <div className="flex flex-col gap-4 md:gap-6">
@@ -168,7 +183,7 @@ const GiftingDiscoverSection = ({ discoverOptions }: GiftingDiscoverSectionProps
             onClick={handleSubmit}
             className="inline-flex h-14 items-center justify-center self-start bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 md:w-full md:self-auto"
           >
-            {discover.submitLabel}
+            {submitLabel}
           </button>
         </Reveal>
       </div>

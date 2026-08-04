@@ -2,11 +2,13 @@
 
 import Image from "next/image";
 import { PLP_HERO_IMAGE_QUALITY } from "@/features/jewellery-product/utils/jewelleryPlpImage";
-import { giftingPageContent } from "../data/content";
+import type { NormalizedGiftingHero } from "@/services/gifting/gifting-page.types";
 
-const GiftingIntroSection = () => {
-  const { intro } = giftingPageContent;
+type GiftingIntroSectionProps = {
+  hero: NormalizedGiftingHero;
+};
 
+const GiftingIntroSection = ({ hero }: GiftingIntroSectionProps) => {
   return (
     <section
       aria-labelledby="gifting-intro-title"
@@ -14,8 +16,8 @@ const GiftingIntroSection = () => {
     >
       <div className="relative col-start-1 row-start-1 size-full overflow-hidden">
         <Image
-          src={intro.image.mobileUrl}
-          alt={intro.image.alt}
+          src={hero.image.mobileUrl}
+          alt={hero.image.alt}
           fill
           priority
           quality={PLP_HERO_IMAGE_QUALITY}
@@ -23,8 +25,8 @@ const GiftingIntroSection = () => {
           className="object-cover object-center md:hidden"
         />
         <Image
-          src={intro.image.desktopUrl}
-          alt={intro.image.alt}
+          src={hero.image.desktopUrl}
+          alt={hero.image.alt}
           fill
           priority
           quality={PLP_HERO_IMAGE_QUALITY}
@@ -37,7 +39,7 @@ const GiftingIntroSection = () => {
         id="gifting-intro-title"
         className="absolute left-1/2 top-[calc(50%+42px)] z-10 -translate-x-1/2 whitespace-nowrap text-center font-larken text-32 font-light leading-110 text-white md:static md:col-start-1 md:row-start-1 md:translate-x-0 md:self-start md:justify-self-center md:pt-[203px] md:text-5xl"
       >
-        {intro.title}
+        {hero.title}
       </h1>
     </section>
   );

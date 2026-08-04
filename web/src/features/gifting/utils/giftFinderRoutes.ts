@@ -106,16 +106,20 @@ export function mapGiftingDiscoverOptions(
     value: slugifyOccasionTitle(option.label),
   }));
 
+  // Experimental: Magento price aggregation buckets. Fall back to static bands if empty.
+  const priceRangesFromMagento = facets.priceBuckets.map((bucket) => ({
+    label: bucket.label,
+    min: bucket.min,
+    max: bucket.max,
+  }));
+
   return {
-    categories:
-      categoriesFromNav.length > 0
-        ? categoriesFromNav
-        : [...discover.categories],
-    occasions:
-      occasionsFromFacets.length > 0
-        ? occasionsFromFacets
-        : [...discover.occasions],
-    priceRanges: [...discover.priceRanges],
+    categories: categoriesFromNav,
+    occasions: occasionsFromFacets,
+    priceRanges:
+      priceRangesFromMagento.length > 0
+        ? priceRangesFromMagento
+        : [...discover.priceRanges],
   };
 }
 

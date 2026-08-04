@@ -2,24 +2,28 @@
 
 import Image from "next/image";
 import Reveal from "@/shared/Animation/Reveal";
-import { giftingPageContent } from "../data/content";
+import type { NormalizedGiftingIntro } from "@/services/gifting/gifting-page.types";
 
-const GiftingWithLoveSection = () => {
-  const { withLove } = giftingPageContent;
+type GiftingWithLoveSectionProps = {
+  intro: NormalizedGiftingIntro;
+};
 
+const GiftingWithLoveSection = ({ intro }: GiftingWithLoveSectionProps) => {
   return (
     <section
       aria-labelledby="gifting-with-love-title"
       className="relative left-1/2 min-h-[280px] w-screen max-w-none -translate-x-1/2 overflow-hidden px-4 py-16 md:min-h-[321px] md:px-10 md:py-100"
     >
-      <Image
-        src={withLove.background.src}
-        alt={withLove.background.alt}
-        fill
-        className="object-cover object-center"
-        sizes="100vw"
-        aria-hidden
-      />
+      {intro.background ? (
+        <Image
+          src={intro.background.desktopUrl}
+          alt={intro.background.alt}
+          fill
+          className="object-cover object-center"
+          sizes="100vw"
+          aria-hidden
+        />
+      ) : null}
       <div
         className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(244,243,238,0)_0%,rgba(251,250,246,1)_100%)]"
         aria-hidden
@@ -32,15 +36,17 @@ const GiftingWithLoveSection = () => {
           direction="up"
           className="font-larken text-5xl font-light leading-110 text-darkblack"
         >
-          {withLove.title}
+          {intro.title}
         </Reveal>
-        <Reveal
-          as="p"
-          direction="up"
-          className="font-gill text-xl font-light leading-110 text-darkblack"
-        >
-          {withLove.description}
-        </Reveal>
+        {intro.description ? (
+          <Reveal
+            as="p"
+            direction="up"
+            className="font-gill text-xl font-light leading-110 text-darkblack"
+          >
+            {intro.description}
+          </Reveal>
+        ) : null}
       </div>
     </section>
   );

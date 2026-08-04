@@ -203,6 +203,56 @@ function parsePriceBounds(
   return { minPrice, maxPrice };
 }
 
+function formatPriceBucketAmount(amount: number): string {
+  return `₹${Math.round(amount).toLocaleString("en-IN")}`;
+}
+
+function formatPriceBucketLabel(min: number, max: number, index: number, count: number): string {
+  if (count === 1) {
+    return `${formatPriceBucketAmount(min)} – ${formatPriceBucketAmount(max)}`;
+  }
+  if (index === 0 && min <= 0) {
+    return `Under ${formatPriceBucketAmount(max)}`;
+  }
+  if (index === count - 1) {
+    return `Above ${formatPriceBucketAmount(min)}`;
+  }
+  return `${formatPriceBucketAmount(min)} – ${formatPriceBucketAmount(max)}`;
+}
+
+/** Map Magento `price` aggregation options (`0-25000`) into gift-finder style bands. */
+function mapPriceBuckets(
+  options: Array<{ label?: string | null }> | null | undefined,
+): JewelleryFilterFacets["priceBuckets"] {
+  const parsed = (options ?? [])
+    .map((option) => {
+      const label = option.label?.trim();
+      if (!label || !label.includes("-")) {
+        return null;
+      }
+
+      const [fromRaw, toRaw] = label.split("-");
+      const min = Number(fromRaw);
+      const max = Number(toRaw);
+
+      if (!Number.isFinite(min) || !Number.isFinite(max) || max < min) {
+        return null;
+      }
+
+      return {
+        min: Math.round(min),
+        max: Math.round(max),
+      };
+    })
+    .filter((bucket): bucket is { min: number; max: number } => bucket != null)
+    .sort((left, right) => left.min - right.min || left.max - right.max);
+
+  return parsed.map((bucket, index) => ({
+    ...bucket,
+    label: formatPriceBucketLabel(bucket.min, bucket.max, index, parsed.length),
+  }));
+}
+
 function mapFacetOptions(
   options: Array<{
     label?: string | null;
@@ -337,6 +387,7 @@ export function mapMagentoAggregationsToFacets(
   );
 
   const priceBounds = parsePriceBounds(priceAggregation?.options);
+  const priceBuckets = mapPriceBuckets(priceAggregation?.options);
 
   const categories = (categoryAggregation?.options ?? [])
     .map((option) => {
@@ -358,6 +409,7 @@ export function mapMagentoAggregationsToFacets(
   return {
     minPrice: priceBounds.minPrice,
     maxPrice: priceBounds.maxPrice,
+    priceBuckets,
     categories,
     metalTypes: mapMetalTypeOptions(metalTypeAggregation?.options),
     metalPurities: mapMetalPurityOptions(purityAggregation?.options),
@@ -377,6 +429,7 @@ export function mapMagentoAggregationsToFacets(
 export const EMPTY_JEWELLERY_FILTER_FACETS: JewelleryFilterFacets = {
   minPrice: 0,
   maxPrice: 0,
+  priceBuckets: [],
   categories: [],
   metalTypes: [],
   metalPurities: [],
