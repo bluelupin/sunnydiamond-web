@@ -46,7 +46,7 @@ const AboutFacesSection = ({ title, description, members }: AboutFacesSectionPro
               key={`${member.name}-${index}`}
               className={cn(
                 "group relative shrink-0 snap-start overflow-hidden",
-                "lg:h-[560px] h-[450px] w-[343px] md:h-full lg:w-auto lg:basis-0 lg:flex-1",
+                "lg:h-[600px] h-[450px] w-[343px] md:h-full lg:w-auto lg:basis-0 lg:flex-1",
                 "lg:hover:grow-[1.6] transition-[flex-grow] duration-500 ease-in-out",
               )}
             >

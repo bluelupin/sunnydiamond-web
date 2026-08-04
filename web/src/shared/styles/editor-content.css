@@ -1,0 +1,902 @@
+/* ==========================================================================
+   CKEditor rich text — scoped under .editor-content only
+   Design tokens align with Sunny Diamonds (Gill Sans body, Larken headings)
+   ========================================================================== */
+
+.editor-content {
+  /* Typography */
+  --ec-font-body: var(--font-gill, "Gill Sans"), system-ui, sans-serif;
+  --ec-font-heading: var(--font-larken, "Larken"), Georgia, serif;
+  --ec-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+
+  /* Colors — project palette */
+  --ec-font-color: #0a0a0a;
+  --ec-heading-color: #0a0a0a;
+  --ec-muted-color: #4d4d4d;
+  --ec-link-color: #ab863b;
+  --ec-link-hover-color: #8a6b2f;
+  --ec-link-visited-color: #722257;
+  --ec-border-color: #cccccc;
+  --ec-bg: transparent;
+  --ec-bg-muted: #f4f3ee;
+  --ec-bg-subtle: #fbfaf6;
+  --ec-code-bg: #fbfaf6;
+  --ec-mark-bg: #fde5bf;
+  --ec-blockquote-border: #ab863b;
+  --ec-table-stripe: #f4f3ee;
+  --ec-table-hover: #ece9e9;
+  --ec-focus-ring: #0a0a0a;
+
+  /* Spacing & shape */
+  --ec-radius: var(--radius, 0.25rem);
+  --ec-spacing-xs: 0.5rem;
+  --ec-spacing-sm: 0.75rem;
+  --ec-spacing-md: 1rem;
+  --ec-spacing-lg: 1.5rem;
+  --ec-spacing-xl: 2rem;
+
+  /* Body — Desktop/Title/t2-20-Regular (Figma) */
+  --ec-body-size: 14px;
+  --ec-body-line: 1.1;
+  --ec-body-weight: 400;
+  --ec-body-letter-spacing: 0;
+
+  /* Heading scale — nested CMS content (smaller than page-level heroes) */
+  --ec-h1-size: 1.5rem;
+  --ec-h2-size: 1.25rem;
+  --ec-h3-size: 1.125rem;
+  --ec-h4-size: 1rem;
+  --ec-h5-size: 0.9375rem;
+  --ec-h6-size: 0.875rem;
+  --ec-heading-weight: 300;
+  --ec-heading-line: 1.1;
+  --ec-heading-gap: 16px;
+  --ec-heading-padding-top: 24px;
+
+  color: var(--ec-font-color);
+  font-family: var(--ec-font-body);
+  font-size: var(--ec-body-size);
+  font-weight: var(--ec-body-weight);
+  line-height: var(--ec-body-line);
+  letter-spacing: var(--ec-body-letter-spacing);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+@media (min-width: 768px) {
+  .editor-content {
+    --ec-body-size: 20px;
+    --ec-h1-size: 1.75rem;
+    --ec-h2-size: 1.5rem;
+    --ec-h3-size: 1.25rem;
+    --ec-h4-size: 1.125rem;
+    --ec-h5-size: 1rem;
+    --ec-h6-size: 0.9375rem;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Base flow                                                                 */
+/* -------------------------------------------------------------------------- */
+
+.editor-content > *:first-child {
+  margin-top: 0;
+}
+
+.editor-content > *:last-child {
+  margin-bottom: 0;
+}
+
+.editor-content ::selection {
+  background-color: rgba(171, 134, 59, 0.25);
+  color: var(--ec-font-color);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Headings                                                                  */
+/* -------------------------------------------------------------------------- */
+
+.editor-content h1,
+.editor-content h2,
+.editor-content h3,
+.editor-content h4,
+.editor-content h5,
+.editor-content h6 {
+  color: var(--ec-heading-color);
+  font-family: var(--ec-font-heading);
+  font-weight: var(--ec-heading-weight);
+  line-height: var(--ec-heading-line);
+  letter-spacing: 0;
+  margin: 0;
+  padding: var(--ec-heading-padding-top) 0 var(--ec-spacing-md);
+}
+
+.editor-content > :is(h1, h2, h3, h4, h5, h6):first-child {
+  padding-top: 0;
+}
+
+.editor-content > :is(h1, h2, h3, h4, h5, h6):last-child {
+  padding-bottom: 0;
+}
+
+.editor-content h1::after,
+.editor-content h2::after,
+.editor-content h3::after,
+.editor-content h4::after,
+.editor-content h5::after,
+.editor-content h6::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 1px;
+  margin-top: var(--ec-heading-gap);
+  background-color: var(--ec-border-color);
+}
+
+.editor-content h1 {
+  font-size: var(--ec-h1-size);
+}
+
+.editor-content h2 {
+  font-size: var(--ec-h2-size);
+}
+
+.editor-content h3 {
+  font-size: var(--ec-h3-size);
+}
+
+.editor-content h4 {
+  font-size: var(--ec-h4-size);
+}
+
+.editor-content h5 {
+  font-size: var(--ec-h5-size);
+}
+
+.editor-content h6 {
+  font-size: var(--ec-h6-size);
+  color: var(--ec-muted-color);
+}
+
+.editor-content h1 a,
+.editor-content h2 a,
+.editor-content h3 a,
+.editor-content h4 a,
+.editor-content h5 a,
+.editor-content h6 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.editor-content h1 a:hover,
+.editor-content h2 a:hover,
+.editor-content h3 a:hover,
+.editor-content h4 a:hover,
+.editor-content h5 a:hover,
+.editor-content h6 a:hover {
+  color: var(--ec-link-color);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Content typography — t2-20-Regular (paragraph, list, table, etc.)         */
+/* -------------------------------------------------------------------------- */
+
+.editor-content p,
+.editor-content li,
+.editor-content td,
+.editor-content th,
+.editor-content dd,
+.editor-content dt,
+.editor-content blockquote,
+.editor-content address,
+.editor-content figcaption,
+.editor-content caption,
+.editor-content label,
+.editor-content summary,
+.editor-content table,
+.editor-content .table,
+.editor-content dl,
+.editor-content ul,
+.editor-content ol {
+  font-family: var(--ec-font-body);
+  font-size: var(--ec-body-size);
+  font-weight: var(--ec-body-weight);
+  line-height: var(--ec-body-line);
+  letter-spacing: var(--ec-body-letter-spacing);
+  color: var(--ec-font-color);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Paragraph                                                                 */
+/* -------------------------------------------------------------------------- */
+
+.editor-content p {
+  margin: 0 0 var(--ec-spacing-md);
+}
+
+.editor-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Links                                                                     */
+/* -------------------------------------------------------------------------- */
+
+.editor-content a {
+  color: var(--ec-link-color);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.editor-content a:hover {
+  color: var(--ec-link-hover-color);
+}
+
+.editor-content a:focus {
+  outline: 2px solid var(--ec-focus-ring);
+  outline-offset: 2px;
+}
+
+.editor-content a:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.editor-content a:focus-visible {
+  outline: 2px solid var(--ec-focus-ring);
+  outline-offset: 2px;
+}
+
+.editor-content a:active {
+  opacity: 0.85;
+}
+
+.editor-content a:visited {
+  color: var(--ec-link-visited-color);
+}
+
+.editor-content a:visited:hover {
+  color: var(--ec-link-hover-color);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Lists                                                                     */
+/* -------------------------------------------------------------------------- */
+
+.editor-content ul,
+.editor-content ol {
+  margin: 0 0 var(--ec-spacing-md);
+  padding-left: 1.3125rem;
+  list-style-position: outside;
+}
+
+@media (min-width: 768px) {
+  .editor-content ul,
+  .editor-content ol {
+    padding-left: 1.875rem;
+  }
+}
+
+.editor-content ul {
+  list-style-type: disc;
+}
+
+.editor-content ol {
+  list-style-type: decimal;
+}
+
+.editor-content li {
+  margin: 0 0 var(--ec-spacing-xs);
+  padding-left: 0.25rem;
+}
+
+.editor-content li > ul,
+.editor-content li > ol {
+  margin-top: var(--ec-spacing-xs);
+  margin-bottom: 0;
+}
+
+.editor-content ul ul {
+  list-style-type: circle;
+}
+
+.editor-content ul ul ul {
+  list-style-type: square;
+}
+
+.editor-content ol ol {
+  list-style-type: lower-alpha;
+}
+
+.editor-content ol ol ol {
+  list-style-type: lower-roman;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Blockquote                                                                */
+/* -------------------------------------------------------------------------- */
+
+.editor-content blockquote {
+  margin: var(--ec-spacing-lg) 0;
+  padding: var(--ec-spacing-md) var(--ec-spacing-lg);
+  border-left: 3px solid var(--ec-blockquote-border);
+  background-color: var(--ec-bg-muted);
+  font-style: italic;
+}
+
+.editor-content blockquote p {
+  margin-bottom: var(--ec-spacing-sm);
+}
+
+.editor-content blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.editor-content blockquote cite {
+  display: block;
+  margin-top: var(--ec-spacing-sm);
+  font-size: 0.875em;
+  font-style: normal;
+  color: var(--ec-font-color);
+}
+
+.editor-content blockquote cite::before {
+  content: "— ";
+}
+
+/* -------------------------------------------------------------------------- */
+/* Horizontal rule                                                           */
+/* -------------------------------------------------------------------------- */
+
+.editor-content hr {
+  margin: var(--ec-spacing-xl) 0;
+  border: 0;
+  border-top: 1px solid var(--ec-border-color);
+  height: 0;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Inline formatting                                                         */
+/* -------------------------------------------------------------------------- */
+
+.editor-content strong,
+.editor-content b {
+  font-weight: 600;
+}
+
+.editor-content em,
+.editor-content i {
+  font-style: italic;
+}
+
+.editor-content u {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.editor-content mark {
+  background-color: var(--ec-mark-bg);
+  color: var(--ec-font-color);
+  padding: 0 0.15em;
+  border-radius: 2px;
+}
+
+.editor-content small {
+  font-size: 0.875em;
+  color: var(--ec-muted-color);
+}
+
+.editor-content del,
+.editor-content s {
+  text-decoration: line-through;
+  color: var(--ec-muted-color);
+}
+
+.editor-content ins {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.editor-content sub,
+.editor-content sup {
+  font-size: 0.75em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+.editor-content sup {
+  top: -0.4em;
+}
+
+.editor-content sub {
+  bottom: -0.2em;
+}
+
+.editor-content abbr[title] {
+  text-decoration: underline dotted;
+  cursor: help;
+}
+
+.editor-content kbd {
+  display: inline-block;
+  padding: 0.125em 0.375em;
+  border: 1px solid var(--ec-border-color);
+  border-radius: var(--ec-radius);
+  background: var(--ec-bg-subtle);
+  font-family: var(--ec-font-mono);
+  font-size: 0.875em;
+  line-height: 1.4;
+}
+
+.editor-content code {
+  font-family: var(--ec-font-mono);
+  font-size: 0.9em;
+  background: var(--ec-code-bg);
+  padding: 0.1em 0.35em;
+  border-radius: var(--ec-radius);
+  word-break: break-all;
+}
+
+.editor-content var {
+  font-style: italic;
+}
+
+.editor-content samp {
+  font-family: var(--ec-font-mono);
+  font-size: 0.9em;
+}
+
+.editor-content dfn {
+  font-style: italic;
+  font-weight: 600;
+}
+
+.editor-content q {
+  quotes: "\201C" "\201D" "\2018" "\2019";
+  font-style: italic;
+}
+
+.editor-content q::before {
+  content: open-quote;
+}
+
+.editor-content q::after {
+  content: close-quote;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Code blocks                                                               */
+/* -------------------------------------------------------------------------- */
+
+.editor-content pre {
+  margin: var(--ec-spacing-lg) 0;
+  padding: var(--ec-spacing-md);
+  overflow-x: auto;
+  border-radius: var(--ec-radius);
+  background: var(--ec-code-bg);
+  border: 1px solid var(--ec-border-color);
+  font-family: var(--ec-font-mono);
+  font-size: 0.875em;
+  line-height: 1.5;
+  tab-size: 2;
+}
+
+.editor-content pre code {
+  display: block;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  font-size: inherit;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Tables                                                                    */
+/* -------------------------------------------------------------------------- */
+
+.editor-content .table-responsive {
+  width: 100%;
+  margin: var(--ec-spacing-lg) 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.editor-content table,
+.editor-content .table {
+  width: 100%;
+  margin: var(--ec-spacing-lg) 0;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.editor-content .table-responsive table,
+.editor-content .table-responsive .table {
+  margin: 0;
+}
+
+.editor-content caption {
+  caption-side: bottom;
+  margin-top: var(--ec-spacing-sm);
+  text-align: left;
+}
+
+.editor-content thead {
+  background-color: var(--ec-bg-muted);
+}
+
+.editor-content th,
+.editor-content td {
+  padding: var(--ec-spacing-sm) var(--ec-spacing-md);
+  border: 1px solid var(--ec-border-color);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.editor-content th {
+  font-weight: 600;
+}
+
+.editor-content tbody tr:nth-child(even) {
+  background-color: var(--ec-table-stripe);
+}
+
+.editor-content tbody tr:hover {
+  background-color: var(--ec-table-hover);
+}
+
+@media (min-width: 768px) {
+  .editor-content thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: var(--ec-bg-muted);
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Images & figures                                                          */
+/* -------------------------------------------------------------------------- */
+
+.editor-content img,
+.editor-content .image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--ec-radius);
+}
+
+.editor-content figure {
+  margin: var(--ec-spacing-lg) 0;
+}
+
+.editor-content figure img {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.editor-content figcaption {
+  margin-top: var(--ec-spacing-sm);
+  font-size: 0.875em;
+  line-height: 1.4;
+  color: var(--ec-muted-color);
+  text-align: center;
+}
+
+.editor-content .image {
+  display: table;
+  clear: both;
+  margin: var(--ec-spacing-lg) 0;
+  max-width: 100%;
+}
+
+.editor-content .image img {
+  display: block;
+  margin: 0 auto;
+}
+
+.editor-content .image-style-align-left,
+.editor-content .image-left,
+.editor-content .image.image-style-block-align-left {
+  float: left;
+  margin: 0 var(--ec-spacing-md) var(--ec-spacing-md) 0;
+  max-width: 50%;
+}
+
+.editor-content .image-style-align-right,
+.editor-content .image-right,
+.editor-content .image.image-style-block-align-right {
+  float: right;
+  margin: 0 0 var(--ec-spacing-md) var(--ec-spacing-md);
+  max-width: 50%;
+}
+
+.editor-content .image-style-side {
+  float: right;
+  margin: 0 0 var(--ec-spacing-md) var(--ec-spacing-md);
+  max-width: 50%;
+}
+
+.editor-content .image-style-align-center,
+.editor-content .image-center,
+.editor-content .image.image_resized {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+.editor-content .image-style-align-center img,
+.editor-content .image-center img {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.editor-content .clearfix::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Text alignment utilities                                                  */
+/* -------------------------------------------------------------------------- */
+
+.editor-content .text-left {
+  text-align: left;
+}
+
+.editor-content .text-center {
+  text-align: center;
+}
+
+.editor-content .text-right {
+  text-align: right;
+}
+
+.editor-content .text-justify {
+  text-align: justify;
+  hyphens: auto;
+}
+
+.editor-content .float-left {
+  float: left;
+  margin: 0 var(--ec-spacing-md) var(--ec-spacing-md) 0;
+}
+
+.editor-content .float-right {
+  float: right;
+  margin: 0 0 var(--ec-spacing-md) var(--ec-spacing-md);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Media embeds                                                              */
+/* -------------------------------------------------------------------------- */
+
+.editor-content .media,
+.editor-content .media embed,
+.editor-content .media iframe,
+.editor-content .media object,
+.editor-content video,
+.editor-content audio,
+.editor-content iframe,
+.editor-content embed,
+.editor-content object {
+  display: block;
+  max-width: 100%;
+}
+
+.editor-content .media {
+  margin: var(--ec-spacing-lg) 0;
+  position: relative;
+}
+
+.editor-content .media iframe,
+.editor-content iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  border-radius: var(--ec-radius);
+}
+
+.editor-content video,
+.editor-content audio {
+  width: 100%;
+  border-radius: var(--ec-radius);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Details / summary                                                         */
+/* -------------------------------------------------------------------------- */
+
+.editor-content details {
+  margin: var(--ec-spacing-md) 0;
+  padding: var(--ec-spacing-sm) var(--ec-spacing-md);
+  border: 1px solid var(--ec-border-color);
+  border-radius: var(--ec-radius);
+  background: var(--ec-bg-subtle);
+}
+
+.editor-content summary {
+  cursor: pointer;
+  font-weight: 600;
+  list-style-position: outside;
+  padding: var(--ec-spacing-xs) 0;
+}
+
+.editor-content summary:focus-visible {
+  outline: 2px solid var(--ec-focus-ring);
+  outline-offset: 2px;
+}
+
+.editor-content details[open] > summary {
+  margin-bottom: var(--ec-spacing-sm);
+  border-bottom: 1px solid var(--ec-border-color);
+  padding-bottom: var(--ec-spacing-sm);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Address                                                                   */
+/* -------------------------------------------------------------------------- */
+
+.editor-content address {
+  margin: var(--ec-spacing-lg) 0;
+  font-style: normal;
+  line-height: inherit;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Definition lists                                                          */
+/* -------------------------------------------------------------------------- */
+
+.editor-content dl {
+  margin: 0 0 var(--ec-spacing-md);
+}
+
+.editor-content dt {
+  margin-top: var(--ec-spacing-sm);
+  font-weight: 600;
+  color: var(--ec-heading-color);
+}
+
+.editor-content dd {
+  margin: var(--ec-spacing-xs) 0 var(--ec-spacing-sm);
+  padding-left: var(--ec-spacing-md);
+  color: var(--ec-font-color);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Forms (CMS embeds)                                                        */
+/* -------------------------------------------------------------------------- */
+
+.editor-content label {
+  display: block;
+  margin-bottom: var(--ec-spacing-xs);
+  font-weight: 600;
+}
+
+.editor-content input,
+.editor-content textarea,
+.editor-content select {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: var(--ec-spacing-sm);
+  padding: var(--ec-spacing-sm);
+  border: 1px solid var(--ec-border-color);
+  border-radius: var(--ec-radius);
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: var(--ec-font-color);
+  background: #ffffff;
+}
+
+.editor-content input:focus,
+.editor-content textarea:focus,
+.editor-content select:focus {
+  outline: 2px solid var(--ec-focus-ring);
+  outline-offset: 1px;
+}
+
+.editor-content button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.5rem;
+  padding: 0 1.75rem;
+  border: 1px solid var(--ec-font-color);
+  border-radius: 0;
+  background: var(--ec-font-color);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  line-height: 1.1;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.editor-content button:hover {
+  opacity: 0.9;
+}
+
+.editor-content fieldset {
+  margin: var(--ec-spacing-lg) 0;
+  padding: var(--ec-spacing-md);
+  border: 1px solid var(--ec-border-color);
+  border-radius: var(--ec-radius);
+}
+
+.editor-content legend {
+  padding: 0 var(--ec-spacing-xs);
+  font-weight: 600;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Responsive — mobile adjustments                                           */
+/* -------------------------------------------------------------------------- */
+
+@media (max-width: 767px) {
+  .editor-content .image-style-align-left,
+  .editor-content .image-style-align-right,
+  .editor-content .image-style-side,
+  .editor-content .image-left,
+  .editor-content .image-right,
+  .editor-content .float-left,
+  .editor-content .float-right {
+    float: none;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .editor-content table {
+    font-size: 0.8125rem;
+  }
+
+  .editor-content th,
+  .editor-content td {
+    padding: var(--ec-spacing-xs) var(--ec-spacing-sm);
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Dark mode (optional — when .dark is on ancestor)                          */
+/* -------------------------------------------------------------------------- */
+
+.dark .editor-content {
+  --ec-font-color: #f4f3ee;
+  --ec-heading-color: #ffffff;
+  --ec-muted-color: #cccccc;
+  --ec-link-color: #d1b57a;
+  --ec-link-hover-color: #decaa0;
+  --ec-link-visited-color: #d9b0cb;
+  --ec-border-color: #4d4d4d;
+  --ec-bg-muted: #292727;
+  --ec-bg-subtle: #1e1e1e;
+  --ec-code-bg: #1e1e1e;
+  --ec-mark-bg: #4d4d4d;
+  --ec-table-stripe: #292727;
+  --ec-table-hover: #333333;
+  --ec-focus-ring: #d1b57a;
+}
+
+.dark .editor-content input,
+.dark .editor-content textarea,
+.dark .editor-content select {
+  background: #1e1e1e;
+  color: var(--ec-font-color);
+}
+
+.dark .editor-content button {
+  background: #ffffff;
+  color: #0a0a0a;
+  border-color: #ffffff;
+}

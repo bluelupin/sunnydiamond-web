@@ -49,10 +49,13 @@ export function PageLoadingProvider({ children }: { children: ReactNode }) {
   return <PageLoadingContext.Provider value={value}>{children}</PageLoadingContext.Provider>;
 }
 
+const noopPageLoading: PageLoadingContextValue = {
+  isPageLoading: false,
+  beginPageLoading: () => {},
+  endPageLoading: () => {},
+};
+
 export function usePageLoading(): PageLoadingContextValue {
   const context = useContext(PageLoadingContext);
-  if (!context) {
-    throw new Error("usePageLoading must be used within PageLoadingProvider");
-  }
-  return context;
+  return context ?? noopPageLoading;
 }

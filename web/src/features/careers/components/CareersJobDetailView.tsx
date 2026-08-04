@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Reveal from "@/shared/Animation/Reveal";
 import { cn } from "@/shared/utils/cn";
+import "@/shared/styles/editor-content.css";
 import type { CareerJobDetailLabels } from "@/services/careers/careersJobDetailLabels";
 import type { CareerJob } from "@/features/careers/types";
 import { getCareerJobPath } from "@/features/careers/constants/careersRoutes";
@@ -24,9 +25,7 @@ function DetailSection({
 }) {
   return (
     <div className={cn("flex flex-col gap-4 bg-gray300 p-4 md:p-6", className)}>
-      <h3 className="font-larken text-xl font-light leading-110 text-darkblack">{heading}</h3>
-      <span className="h-px w-full bg-neutral300" aria-hidden />
-      <div className="w-full font-gill text-sm font-normal leading-110 text-darkblack md:text-xl">
+      <div className="w-full">
         {children}
       </div>
     </div>
@@ -41,7 +40,7 @@ function JobDescriptionContent({ descriptionHtml }: { descriptionHtml: string })
   if (looksLikeHtml(descriptionHtml)) {
     return (
       <div
-        className="flex flex-col gap-2 [&_p]:m-0"
+        className="editor-content"
         dangerouslySetInnerHTML={{ __html: descriptionHtml }}
       />
     );
@@ -50,7 +49,7 @@ function JobDescriptionContent({ descriptionHtml }: { descriptionHtml: string })
   const paragraphs = descriptionHtml.split(/\n\n+/).filter(Boolean);
 
   return (
-    <div className="flex flex-col gap-4 whitespace-pre-line">
+    <div className="editor-content flex flex-col gap-4 whitespace-pre-line">
       {paragraphs.map((paragraph, index) => (
         <p key={`description-paragraph-${index}`} className="m-0">
           {paragraph}
@@ -127,7 +126,7 @@ const CareersJobDetailView = ({
       aria-labelledby="careers-job-detail-title"
       className="bg-white pt-10 pb-100 max-w-[1040px] px-4 mx-auto"
     >
-      <div className="flex w-full flex-col gap-10">
+      <div className="flex w-full flex-col md:gap-10 gap-6">
         <Reveal direction="up">
           <CareersJobPageHeader
             job={job}
