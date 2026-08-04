@@ -143,7 +143,7 @@ const JewelleryProductCard = ({
   return (
     <article
       className={cn(
-        "relative grid h-[227px] min-w-0 w-full grid-cols-1 grid-rows-1 overflow-hidden bg-gray200",
+        "relative grid h-[260px] min-w-0 w-full grid-cols-1 grid-rows-1 overflow-hidden bg-gray200",
         "md:h-[420px] desktop:h-[496px]",
         hasModalImage && "touch-pan-y select-none md:touch-auto md:select-auto",
         isDragging && "cursor-grabbing md:cursor-auto",
@@ -222,7 +222,7 @@ const JewelleryProductCard = ({
       >
         {isBestseller ? (
           <span
-            className="hidden h-9 shrink-0 items-center justify-center bg-white px-3 font-gill text-sm font-semibold leading-110 text-darkblack shadow-[0px_2px_2px_#C5A156] md:flex"
+            className="flex h-9 shrink-0 items-center justify-center bg-white px-3 font-gill md:text-sm text-xs font-semibold leading-110 text-darkblack shadow-[0px_2px_2px_#C5A156]"
           >
             BESTSELLER
           </span>
@@ -237,28 +237,6 @@ const JewelleryProductCard = ({
           )}
         />
       </div>
-
-      {/* Mobile bestseller badge — overlaid top-left, out of card flow */}
-      {isBestseller ? (
-        <div
-          className={cn(
-            "pointer-events-none col-start-1 row-start-1 z-20 flex justify-start self-start md:hidden",
-            isMobileLifestyle && "opacity-0 transition-opacity duration-500",
-          )}
-        >
-          <span
-            className="flex items-center bg-[#C5A156] font-gill leading-110 text-darkblack"
-            style={{
-              height: `${jewelleryListingProductCardMobileSpec.bestsellerHeight}px`,
-              padding: `${jewelleryListingProductCardMobileSpec.bestsellerPadding}px`,
-              fontSize: `${jewelleryListingProductCardMobileSpec.bestsellerFontSize}px`,
-            }}
-          >
-            BESTSELLER
-          </span>
-        </div>
-      ) : null}
-
       <Link
         href={href}
         onClick={handleLinkClick}
@@ -266,7 +244,7 @@ const JewelleryProductCard = ({
         aria-label={`View ${title}`}
       />
 
-      <div className="pointer-events-none col-start-1 row-start-1 z-40 flex justify-end self-start px-[16px] pt-[24px] md:z-50 md:px-[24px] md:pt-10">
+      <div className="pointer-events-none col-start-1 row-start-1 z-40 flex justify-end self-start px-2 md:pt-6 pt-2 md:z-50 md:px-6">
         <button
           type="button"
           aria-label={displayedWishlisted ? "Remove from wishlist" : "Add to wishlist"}
