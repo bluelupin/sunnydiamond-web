@@ -129,11 +129,13 @@ export function mapGenericForm(
 
   const purposeField = findField(
     raw.dynamicFields,
-    (_field, label) => label.includes("purpose"),
+    (_field, label) =>
+      label.includes("purpose") || label.includes("reason") || label.includes("contacting"),
   );
   const notesField = findField(
     raw.dynamicFields,
-    (_field, label) => label.includes("note") || label.includes("describe"),
+    (_field, label) =>
+      label.includes("note") || label.includes("describe") || label.includes("message"),
   );
   const nameField = findField(
     raw.dynamicFields,

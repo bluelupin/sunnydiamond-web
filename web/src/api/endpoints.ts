@@ -12,6 +12,8 @@ export const STRAPI_ENDPOINTS = {
   storeLocatorPage: "api/store-locator-page",
   /** Help & Support / FAQs page — contact options, FAQs, SEO. */
   supportPage: "api/support-page",
+  /** Contact Us page — hero, contact options, enquiry form, Visit Us, SEO. */
+  contactPage: "api/contact-page",
   /** Diamonds for Everyone marketing page — hero, plan, investment, benefits, FAQ, SEO. */
   diamondsForEveryonePage: "api/diamonds-for-everyone-page",
   /** Gifting marketing page — hero, occasions, gift finder, gift card, trust badges, SEO. */
@@ -21,6 +23,8 @@ export const STRAPI_ENDPOINTS = {
   sizeGuides: "api/size-guides",
   genericForms: "api/generic-forms",
   genericSubmissions: "api/generic-submissions",
+  /** Custom CMS action — flat JSON (contact enquiry, Magento-aware Book a Visit). */
+  genericSubmissionsSubmit: "api/generic-submissions/submit",
   productForms: "api/product-forms",
   productSubmissions: "api/product-submissions",
   /** Custom CMS action — accepts multipart `data` + `uploadedImage` (Postman-verified). */

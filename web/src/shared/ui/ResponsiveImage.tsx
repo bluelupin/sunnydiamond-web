@@ -9,6 +9,8 @@ interface ResponsiveImageProps {
   alt: string;
   width?: number;
   height?: number;
+  /** Fill a `position: relative` / sized parent (Visit Us hero backgrounds). */
+  fill?: boolean;
   className?: string;
   priority?: boolean;
   sizes?: string;
@@ -22,6 +24,7 @@ const ResponsiveImage = ({
   alt,
   width,
   height,
+  fill = false,
   className,
   priority = false,
   quality,
@@ -37,16 +40,20 @@ const ResponsiveImage = ({
   const hasDistinctMobile = mobileImage !== null && mobileImage !== desktopImage;
   const hasDistinctRetina = retinaImage !== null && retinaImage !== desktopImage;
 
-  const imageClassName = cn("h-full w-full object-cover", className);
+  const imageClassName = cn(fill ? "object-cover" : "h-full w-full object-cover", className);
   const commonProps = {
     alt,
-    width,
-    height,
     priority,
     loading: priority ? ("eager" as const) : ("lazy" as const),
     fetchPriority: priority ? ("high" as const) : undefined,
     sizes,
     quality,
+    ...(fill
+      ? { fill: true as const }
+      : {
+          width: width ?? 1,
+          height: height ?? 1,
+        }),
   };
 
   if (hasDistinctMobile) {

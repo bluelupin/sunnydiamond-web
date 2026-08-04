@@ -88,7 +88,7 @@ export const contactPageContent = {
   ],
   form: {
     title: "Reach Out to Us",
-    formTag: "contact-us",
+    formTag: "contact-us-enquiry",
     submitLabel: "SUBMIT",
     successTitle: "Message sent",
     successDescription: "We'll get back to you within 24 hours.",
@@ -125,10 +125,6 @@ export const contactPageContent = {
     title: "Visit Us",
     description: "Schedule your store visit and we'll be ready to welcome you.",
     ctaLabel: "BOOK A VISIT",
-    image: {
-      src: "/images/contact/visit-us.png",
-      mobileSrc: "/images/contact/visit-us-mobile.png",
-      alt: "Sunny Diamonds showroom interior",
-    },
+    imageAlt: "Sunny Diamonds showroom interior",
   },
 } as const;

@@ -123,3 +123,15 @@ export type GenericSubmissionPayload = {
   consentAccepted?: boolean;
   workflowStatus?: string;
 };
+
+/** Flat payload for Contact Us → `POST /api/generic-submissions/submit`. */
+export type ContactEnquiryPayload = {
+  formTag: string;
+  fullName: string;
+  phone: string;
+  email?: string;
+  reasonForContact: string;
+  message: string;
+  consentAccepted: boolean;
+  sourcePage?: string;
+};

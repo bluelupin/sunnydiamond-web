@@ -1,28 +1,23 @@
 "use client";
 
 import ProductDetailVisitUsSection from "@/features/products/components/detail/ProductDetailVisitUsSection";
+import type { NormalizedContactPage } from "@/services/contact/contact-page.types";
 import ContactHeroSection from "./ContactHeroSection";
 import ContactInfoSection from "./ContactInfoSection";
 import ContactFormSection from "./ContactFormSection";
-import { contactPageContent } from "../data/content";
 
-const contactVisitUsSection = {
-  title: contactPageContent.visitUs.title,
-  description: contactPageContent.visitUs.description,
-  imageSrc: contactPageContent.visitUs.image.src,
-  mobileImageSrc: contactPageContent.visitUs.image.mobileSrc,
-  imageAlt: contactPageContent.visitUs.image.alt,
-  ctaLabel: contactPageContent.visitUs.ctaLabel,
+type ContactPageProps = {
+  page: NormalizedContactPage;
 };
 
-const ContactPage = () => {
+const ContactPage = ({ page }: ContactPageProps) => {
   return (
     <>
-      <ContactHeroSection />
+      <ContactHeroSection hero={page.hero} />
       <div className="flex flex-col gap-16 px-4 py-16 md:gap-104 md:px-0 md:py-0">
-        <ContactInfoSection />
-        <ContactFormSection />
-        <ProductDetailVisitUsSection visitUs={contactVisitUsSection} />
+        <ContactInfoSection intro={page.intro} infoCards={page.infoCards} />
+        <ContactFormSection form={page.form} />
+        <ProductDetailVisitUsSection visitUs={page.visitUs} />
       </div>
     </>
   );

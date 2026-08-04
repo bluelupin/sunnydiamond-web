@@ -2,11 +2,13 @@
 
 import Image from "next/image";
 import { PLP_HERO_IMAGE_QUALITY } from "@/features/jewellery-product/utils/jewelleryPlpImage";
-import { contactPageContent } from "../data/content";
+import type { NormalizedContactHero } from "@/services/contact/contact-page.types";
 
-const ContactHeroSection = () => {
-  const { hero } = contactPageContent;
+type ContactHeroSectionProps = {
+  hero: NormalizedContactHero;
+};
 
+const ContactHeroSection = ({ hero }: ContactHeroSectionProps) => {
   return (
     <section
       aria-labelledby="contact-hero-title"
@@ -14,7 +16,7 @@ const ContactHeroSection = () => {
     >
       <div className="relative col-start-1 row-start-1 size-full overflow-hidden">
         <Image
-          src={hero.image.desktopUrl}
+          src={hero.image.mobileUrl || hero.image.desktopUrl}
           alt={hero.image.alt}
           fill
           priority

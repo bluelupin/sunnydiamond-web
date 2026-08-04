@@ -15,17 +15,14 @@ import { useAuth } from "@/features/auth/context/AuthContext";
 import {
   APPOINTMENT_COUNTRY_CODES,
 } from "@/shared/constants/appointmentForm";
-import {
-  createGenericSubmission,
-  getGenericFormByTag,
-} from "@/services/forms/generic-form.service";
+import { getGenericFormByTag, submitContactEnquiry } from "@/services/forms/generic-form.service";
+import type { NormalizedContactForm } from "@/services/contact/contact-page.types";
 import {
   invalidFieldClassName,
   invalidFieldContainerClassName,
   sanitizePhoneInput,
 } from "@/shared/utils/formValidation";
 import { cn } from "@/shared/utils/cn";
-import { contactPageContent } from "../data/content";
 
 const consentLinkClassName =
   "border-b border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack";
@@ -100,8 +97,11 @@ const ContactConsentCheckbox = ({ checked, onChange }: ContactConsentCheckboxPro
   </button>
 );
 
-const ContactFormSection = () => {
-  const { form } = contactPageContent;
+type ContactFormSectionProps = {
+  form: NormalizedContactForm;
+};
+
+const ContactFormSection = ({ form }: ContactFormSectionProps) => {
   const { toast } = useToast();
   const { status } = useAuth();
   const isAuthenticated = status === "authenticated";
@@ -116,7 +116,7 @@ const ContactFormSection = () => {
   const [consentAccepted, setConsentAccepted] = useState(false);
   const [hasAppliedProfilePrefill, setHasAppliedProfilePrefill] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [reasonOptions, setReasonOptions] = useState<string[]>([...form.reasonOptions]);
+  const [reasonOptions, setReasonOptions] = useState<string[]>(form.reasonOptions);
   const [submitLabel, setSubmitLabel] = useState<string>(form.submitLabel);
   const [formTag, setFormTag] = useState<string>(form.formTag);
 
@@ -167,6 +167,12 @@ const ContactFormSection = () => {
   }, [profileContact, hasAppliedProfilePrefill, name, email, phone]);
 
   useEffect(() => {
+    setReasonOptions(form.reasonOptions);
+    setSubmitLabel(form.submitLabel);
+    setFormTag(form.formTag);
+  }, [form.formTag, form.reasonOptions, form.submitLabel]);
+
+  useEffect(() => {
     const controller = new AbortController();
 
     getGenericFormByTag(form.formTag, controller.signal)
@@ -181,7 +187,7 @@ const ContactFormSection = () => {
         }
       })
       .catch(() => {
-        // Static fallback content is sufficient when CMS is unavailable.
+        // Page CMS / static fallback content is sufficient when form fetch fails.
       });
 
     return () => controller.abort();
@@ -210,16 +216,15 @@ const ContactFormSection = () => {
       setIsSubmitting(true);
 
       try {
-        const notes = `Reason: ${reason}\n\n${message.trim()}`;
-
-        await createGenericSubmission({
+        await submitContactEnquiry({
           formTag,
           fullName: name.trim(),
           email: email.trim(),
           phone: `${countryCode}${phone.trim()}`,
-          notes,
-          sourcePage: "/contact",
+          reasonForContact: reason.trim(),
+          message: message.trim(),
           consentAccepted: true,
+          sourcePage: "/contact",
         });
 
         toast({

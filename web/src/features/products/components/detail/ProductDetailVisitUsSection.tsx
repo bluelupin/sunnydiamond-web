@@ -25,24 +25,26 @@ const ProductDetailVisitUsSection = ({
     <>
       <section
         aria-labelledby="visit-us-heading"
-        className="grid h-[800px] w-full overflow-hidden md:h-804 [&>*]:col-start-1 [&>*]:row-start-1"
+        className="relative h-[800px] w-full overflow-hidden md:h-804"
       >
-        <ResponsiveImage
-          desktopSrc={content.imageSrc}
-          mobileSrc={content.mobileImageSrc}
-          alt={content.imageAlt ?? ""}
-          width={1440}
-          height={804}
-          sizes="100vw"
-          className="h-full w-full object-cover object-center"
-        />
+        {/* Absolute media layer so non-banner showroom crops don't expand the section and clip copy */}
+        <div className="absolute inset-0">
+          <ResponsiveImage
+            desktopSrc={content.imageSrc}
+            mobileSrc={content.mobileImageSrc}
+            alt={content.imageAlt ?? ""}
+            fill
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+        </div>
 
         <div
           aria-hidden
-          className="pointer-events-none h-400 w-full self-end bg-gradient-to-t from-black/60 from-[45%] to-transparent md:from-black/80 md:from-0%"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-400 bg-gradient-to-t from-black/60 from-[45%] to-transparent md:from-black/80 md:from-0%"
         />
 
-        <div className="z-10 flex self-end justify-center px-4 pb-16 md:px-8 lg:px-10">
+        <div className="relative z-10 flex h-full items-end justify-center px-4 pb-16 md:px-8 lg:px-10">
           <div className="flex w-full max-w-311 flex-col items-center gap-6 lg:max-w-1360 lg:gap-10">
             <div className="flex flex-col items-center gap-6 text-center text-white md:gap-3 lg:gap-4">
               <h2

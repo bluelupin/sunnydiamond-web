@@ -3,6 +3,7 @@ import { apiFetch } from "@/api/fetchClient";
 import { STRAPI_ENDPOINTS } from "@/api/endpoints";
 import { mapGenericForm } from "./generic-form.mapper";
 import type {
+  ContactEnquiryPayload,
   GenericSubmissionPayload,
   NormalizedGenericForm,
   StrapiGenericForm,
@@ -34,7 +35,8 @@ export const getGenericFormByTag = cache(
 
 /**
  * Browser → same-origin BFF → Strapi generic-submissions (Public create).
- * Used by contact + store-locator/nav Book a Visit (`showroom-visit`).
+ * Used by store-locator/nav Book a Visit (`showroom-visit`).
+ * Contact Us enquiry uses `submitContactEnquiry` → `/submit` instead.
  * PDP Visit Us / Try at Home / Video Call use product-submissions instead.
  */
 export async function createGenericSubmission(
@@ -73,4 +75,46 @@ export async function createGenericSubmission(
   }
 }
 
-export type { NormalizedGenericForm, GenericSubmissionPayload };
+/**
+ * Contact Us enquiry → BFF → Strapi `POST /api/generic-submissions/submit`.
+ * Flat JSON body (reasonForContact + message), not collection `{ data: … }`.
+ */
+export async function submitContactEnquiry(
+  payload: ContactEnquiryPayload,
+  signal?: AbortSignal,
+): Promise<void> {
+  const response = await fetch("/api/generic-submissions/submit", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    credentials: "same-origin",
+    body: JSON.stringify(payload),
+    signal,
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    let message = `Contact enquiry failed (${response.status})`;
+    try {
+      const payloadJson = (await response.json()) as {
+        error?: string | { message?: string };
+      };
+      if (typeof payloadJson.error === "string" && payloadJson.error.trim()) {
+        message = payloadJson.error;
+      } else if (
+        payloadJson.error &&
+        typeof payloadJson.error === "object" &&
+        payloadJson.error.message?.trim()
+      ) {
+        message = payloadJson.error.message;
+      }
+    } catch {
+      // ignore parse errors
+    }
+    throw new Error(message);
+  }
+}
+
+export type { NormalizedGenericForm, GenericSubmissionPayload, ContactEnquiryPayload };
