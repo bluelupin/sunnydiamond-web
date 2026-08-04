@@ -29,7 +29,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
                   "flex-1 pt-[calc(4.5rem+env(safe-area-inset-top,0px))] md:landscape:pt-104 lg:landscape:pt-104",
                   isCartCheckoutPage && "max-md:bg-gray300",
                 )
-              : "flex-1"
+              : "flex-1 min-h-screen"
         }
       >
         {children}

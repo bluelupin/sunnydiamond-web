@@ -11,6 +11,7 @@ import {
   restoreScrollPosition,
   saveScrollPosition,
 } from "@/shared/lib/browserBackScrollRestore";
+import { scrollToTopBeforeClientNavigation } from "@/shared/utils/navigation";
 
 const SAVE_DEBOUNCE_MS = 150;
 
@@ -23,6 +24,7 @@ export default function BrowserBackScrollRestore() {
   const cancelRestoreRef = useRef<(() => void) | null>(null);
   const saveTimeoutRef = useRef<number | null>(null);
   const scrollKeyRef = useRef(getCurrentScrollStorageKey(pathname));
+  const hasMountedRef = useRef(false);
 
   scrollKeyRef.current = getCurrentScrollStorageKey(pathname);
 
@@ -109,12 +111,21 @@ export default function BrowserBackScrollRestore() {
     cancelRestoreRef.current?.();
     cancelRestoreRef.current = null;
 
-    if (!consumePopstateRestore()) {
-      return;
+    if (consumePopstateRestore()) {
+      const key = getCurrentScrollStorageKey(pathname);
+      cancelRestoreRef.current = restoreScrollPosition(key);
+
+      return () => {
+        cancelRestoreRef.current?.();
+        cancelRestoreRef.current = null;
+      };
     }
 
-    const key = getCurrentScrollStorageKey(pathname);
-    cancelRestoreRef.current = restoreScrollPosition(key);
+    if (hasMountedRef.current) {
+      scrollToTopBeforeClientNavigation();
+    } else {
+      hasMountedRef.current = true;
+    }
 
     return () => {
       cancelRestoreRef.current?.();
