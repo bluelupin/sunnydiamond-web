@@ -1,15 +1,39 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { constructMetadata } from "@/shared/lib/seo/metadata";
 import DiamondsForEveryonePage from "@/features/diamonds-for-everyone/components/DiamondsForEveryonePage";
-import { diamondsForEveryonePageContent } from "@/features/diamonds-for-everyone/data/content";
+import { footerPages } from "@/features/cms/data/footerPages";
+import {
+  EMPTY_DIAMONDS_FOR_EVERYONE_PAGE,
+  getDiamondsForEveryonePage,
+} from "@/services/diamonds-for-everyone/diamonds-for-everyone-page.service";
 
-export const metadata: Metadata = constructMetadata({
-  title: diamondsForEveryonePageContent.hero.title,
-  description:
-    "Start your Diamonds for Everyone savings plan from ₹1,000 a month. Enjoy the 11+1 plan and redeem your savings for fine jewellery at Sunny Diamonds.",
-  canonicalPath: "/diamonds-for-everyone",
-});
+export const revalidate = 300;
+
+const fallback = footerPages.diamondsForEveryone;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getDiamondsForEveryonePage();
+  const seo = page.seo;
+
+  return constructMetadata({
+    title: seo?.metaTitle || page.hero?.title || fallback.title,
+    description: seo?.metaDescription || fallback.description,
+    canonicalPath: seo?.canonicalPath || "/diamonds-for-everyone",
+    ...(seo?.metaKeywords ? { keywords: seo.metaKeywords } : {}),
+    ...(seo?.ogImageUrl ? { image: seo.ogImageUrl } : {}),
+  });
+}
+
+async function DiamondsForEveryonePageContent() {
+  const page = await getDiamondsForEveryonePage();
+  return <DiamondsForEveryonePage page={page} />;
+}
 
 export default function Page() {
-  return <DiamondsForEveryonePage />;
+  return (
+    <Suspense fallback={<DiamondsForEveryonePage page={EMPTY_DIAMONDS_FOR_EVERYONE_PAGE} />}>
+      <DiamondsForEveryonePageContent />
+    </Suspense>
+  );
 }

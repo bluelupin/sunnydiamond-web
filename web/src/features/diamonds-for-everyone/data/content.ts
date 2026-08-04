@@ -1,34 +1,8 @@
-export const diamondsForEveryoneHeroFigmaSpec = {
-  /** Figma node 1052:66687 — page hero banner (aligned with contact/store locator pattern) */
-  height: {
-    mobile: 240,
-    desktop: 320,
-  },
-  overlayOpacity: 0.4,
-  titleTop: {
-    mobile: 152,
-    desktop: 203,
-  },
-} as const;
-
+/**
+ * DFE calculator + invest-flow copy only.
+ * Marketing page sections (hero, plan, lifestyle, benefits, FAQ) come from CMS.
+ */
 export const diamondsForEveryonePageContent = {
-  hero: {
-    title: "Diamonds for Everyone",
-    image: {
-      desktopUrl: "/images/diamonds-for-everyone/hero.png",
-      mobileUrl: "/images/diamonds-for-everyone/hero.png",
-      alt: "Diamond jewellery at Sunny Diamonds",
-    },
-  },
-  planBanner: {
-    title: "11+1 plan",
-    description:
-      "A smarter way to own fine jewellery, start with Diamond For Everyone at just ₹1,000 a month and enjoy the 12th installment free.",
-    image: {
-      src: "/images/diamonds-for-everyone/plan-banner.png",
-      alt: "",
-    },
-  },
   investment: {
     title: "Plan Your Investment",
     monthlyLabel: "Define your monthly savings amount",
@@ -45,60 +19,6 @@ export const diamondsForEveryonePageContent = {
     defaultMonthly: 5000,
     monthsPaid: 11,
     totalMonths: 12,
-  },
-  lifestyle: {
-    image: {
-      src: "/images/diamonds-for-everyone/lifestyle.png",
-      alt: "Sunny Diamonds lifestyle",
-    },
-  },
-  savingsPlan: {
-    eyebrow: "FLEXIBLE SAVINGS PLAN",
-    title: "Diamonds for Everyone",
-    subtitle: "Start today and take the first step towards owning a Sunny Diamonds creation",
-    steps: [
-      {
-        stepNumber: 1,
-        description: "Begin your journey with monthly instalments starting from ₹1,000.",
-      },
-      {
-        stepNumber: 2,
-        description: "We pay the final instalment for the 12th month on your behalf",
-      },
-      {
-        stepNumber: 3,
-        description: "Use your accumulated savings for a timeless Sunny Diamonds creation.",
-      },
-    ],
-  },
-  faq: {
-    title: "Frequently Asked Questions",
-    items: [
-      {
-        id: "what-is-dfe",
-        question: "What is the Diamonds for Everyone Plan?",
-        answer:
-          "The Diamonds for Everyone Plan is a systematic plan that allows customers to save a fixed amount every month and redeem the accumulated value to purchase jewellery at the end of the scheme period.",
-      },
-      {
-        id: "duration",
-        question: "What is the duration of the scheme?",
-        answer:
-          "The scheme runs for 12 months. You contribute for 11 months and Sunny Diamonds contributes the 12th monthly instalment on your behalf.",
-      },
-      {
-        id: "minimum-instalment",
-        question: "What is the minimum monthly instalment amount?",
-        answer:
-          "You can begin your Diamonds for Everyone journey with monthly instalments starting from ₹1,000.",
-      },
-      {
-        id: "terms",
-        question: "What are the terms and conditions of the plan?",
-        answer:
-          "The accumulated value can be used towards purchasing jewellery from Sunny Diamonds subject to the programme terms. Please review the DFE Terms & Conditions on our Policy & Certifications page for full details.",
-      },
-    ],
   },
   investFlow: {
     /** Figma node 1052:66382 — intro step (first screen after login / START INVESTING) */
