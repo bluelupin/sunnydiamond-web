@@ -237,3 +237,9 @@ export const jewelleryListingGuarantees = [
     label: "Cash on Delivery",
   },
 ] as const;
+
+export const jewelleryListingEmptyStateContent = {
+  filterTitle: "No products found",
+  filterDescription: "Try adjusting your filters to see more products.",
+  clearFiltersLabel: "Clear All Filters",
+} as const;

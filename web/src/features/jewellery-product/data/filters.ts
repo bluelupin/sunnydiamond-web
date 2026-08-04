@@ -2,6 +2,9 @@ import type { JewelleryFilterState, JewellerySortOption } from "../types";
 import type { JewelleryFilterFacets } from "@/types/magento/jewelleryListing";
 
 export const PAGE_SIZE = 9;
+/** Products shown on first PLP paint; fetched via multiple Magento pages at {@link PAGE_SIZE}. */
+export const INITIAL_PLP_PRODUCT_COUNT = 30;
+export const INITIAL_PLP_PAGE_COUNT = Math.ceil(INITIAL_PLP_PRODUCT_COUNT / PAGE_SIZE);
 
 export const DEFAULT_JEWELLERY_LISTING_SORT = "featured";
 

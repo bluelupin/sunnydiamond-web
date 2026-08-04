@@ -9,12 +9,14 @@ import JewelleryCategoryNav from "./JewelleryCategoryNav";
 import JewelleryProductToolbar from "./JewelleryProductToolbar";
 import JewelleryProductGrid from "./JewelleryProductGrid";
 import JewelleryLoadMoreSection from "./JewelleryLoadMoreSection";
+import JewelleryListingEmptyState from "./JewelleryListingEmptyState";
 import JewelleryGuaranteesSection from "./JewelleryGuaranteesSection";
 import JewelleryProductGridSkeleton from "./skeletons/JewelleryProductGridSkeleton";
 import {
   createDefaultFilterState,
   createEmptyFilterState,
   DEFAULT_JEWELLERY_LISTING_SORT,
+  INITIAL_PLP_PRODUCT_COUNT,
   PAGE_SIZE,
   hasActiveFilters,
   hasMagentoFilterFacets,
@@ -273,23 +275,53 @@ const JewelleryProductPage = ({
     [router],
   );
 
-  const handleApplyFilters = (nextFilters: JewelleryFilterState) => {
-    setFilters(nextFilters);
-    setIsFilterOpen(false);
+  const handleApplyFilters = useCallback(
+    (nextFilters: JewelleryFilterState) => {
+      setFilters(nextFilters);
+      setIsFilterOpen(false);
 
-    const clearedToDefault = hasMagentoFilterFacets(facets) && !hasActiveFilters(nextFilters, facets);
-    const hasUrlFilterParams =
-      Boolean(occasionSlug) || minPriceFromUrl != null || maxPriceFromUrl != null;
+      const clearedToDefault =
+        hasMagentoFilterFacets(facets) && !hasActiveFilters(nextFilters, facets);
+      const hasUrlFilterParams =
+        Boolean(occasionSlug) ||
+        Boolean(diamondShapeSlug) ||
+        Boolean(fancyColourSlug) ||
+        minPriceFromUrl != null ||
+        maxPriceFromUrl != null;
 
-    if (clearedToDefault && hasUrlFilterParams && pathname) {
-      const params = new URLSearchParams(searchParams?.toString() ?? "");
-      params.delete("occasion");
-      params.delete("minPrice");
-      params.delete("maxPrice");
-      const query = params.toString();
-      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
-    }
-  };
+      if (clearedToDefault && hasUrlFilterParams && pathname) {
+        const params = new URLSearchParams(searchParams?.toString() ?? "");
+        params.delete("occasion");
+        params.delete("diamondShape");
+        params.delete("fancyColour");
+        params.delete("minPrice");
+        params.delete("maxPrice");
+        const query = params.toString();
+        router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+      }
+    },
+    [
+      facets,
+      occasionSlug,
+      diamondShapeSlug,
+      fancyColourSlug,
+      minPriceFromUrl,
+      maxPriceFromUrl,
+      pathname,
+      router,
+      searchParams,
+    ],
+  );
+
+  const handleClearFilters = useCallback(() => {
+    const cleared = hasMagentoFilterFacets(facets)
+      ? createDefaultFilterState(facets)
+      : createEmptyFilterState();
+    handleApplyFilters(cleared);
+  }, [facets, handleApplyFilters]);
+
+  const showFilterEmptyState =
+    !isLoading && products.length === 0 && hasActiveFilters(filters, facets);
 
   const handleOpenFilters = () => {
     void import("./JewelleryFilterDrawer");
@@ -315,7 +347,9 @@ const JewelleryProductPage = ({
 
       <section className="relative isolate z-0 w-full bg-gray200 pb-0 md:pb-10">
         {isLoading ? (
-          <JewelleryProductGridSkeleton count={PAGE_SIZE} />
+          <JewelleryProductGridSkeleton count={INITIAL_PLP_PRODUCT_COUNT} />
+        ) : showFilterEmptyState ? (
+          <JewelleryListingEmptyState onClearFilters={handleClearFilters} />
         ) : (
           <JewelleryProductGrid
             products={products}
@@ -325,13 +359,15 @@ const JewelleryProductPage = ({
         )}
       </section>
 
-      <JewelleryLoadMoreSection
-        visibleCount={products.length}
-        totalCount={totalCount}
-        hasMore={hasMore}
-        isLoadingMore={isLoadingMore}
-        onLoadMore={loadMore}
-      />
+      {!isLoading && totalCount > 0 ? (
+        <JewelleryLoadMoreSection
+          visibleCount={products.length}
+          totalCount={totalCount}
+          hasMore={hasMore}
+          isLoadingMore={isLoadingMore}
+          onLoadMore={loadMore}
+        />
+      ) : null}
 
       <ScrollReveal delayMs={0}>
         <JewelleryGuaranteesSection />
