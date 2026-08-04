@@ -211,22 +211,25 @@ function CollectionHeroPanel({
   onCollectionCtaClick?: (event: MouseEvent<HTMLAnchorElement>, href: string) => void;
 }) {
   const isMobile = variant === "mobile";
+  const isClickable = Boolean(collectionCta?.href);
 
-  return (
-    <div
-      className={cn(
-        "relative overflow-hidden",
-        isMobile
-          ? "h-[540px] w-full"
-          : "group aspect-square h-auto w-full lg:aspect-auto lg:h-[800px] md:h-[550px]",
-      )}
-    >
+  const panelClassName = cn(
+    "relative block overflow-hidden",
+    isMobile
+      ? "h-[540px] w-full"
+      : "group aspect-square h-auto w-full lg:aspect-auto lg:h-[800px] md:h-[550px]",
+    isClickable &&
+      "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-linkGold focus-visible:ring-offset-2",
+  );
+
+  const panelContent = (
+    <>
       <div className="absolute inset-0 overflow-hidden">
         {isMobile ? (
           <ResponsiveImage
             desktopSrc={desktopImage}
             mobileSrc={mobileImage}
-            alt={imageAlt}
+            alt={isClickable ? "" : imageAlt}
             priority={priority}
             width={375}
             height={540}
@@ -236,7 +239,7 @@ function CollectionHeroPanel({
         ) : (
           <CroppedFillImage
             src={desktopImage}
-            alt={imageAlt}
+            alt={isClickable ? "" : imageAlt}
             cropStyle={ALANKARA_HERO_DESKTOP_CROP}
             sizes="(min-width: 1920px) 50vw, 720px"
             priority={priority}
@@ -268,41 +271,54 @@ function CollectionHeroPanel({
           </div>
         ) : (
           <>
-            {collectionCta &&
-              <Link
-                href={collectionCta.href}
-                onClick={(event) => onCollectionCtaClick?.(event, collectionCta.href)}
-                className="pointer-events-none inline-flex max-h-0 w-fit flex-col items-start overflow-hidden pb-0 pt-0 opacity-0 motion-safe:transition-[max-height,padding,opacity] motion-safe:duration-500 motion-safe:ease-out group-hover:pointer-events-auto group-hover:max-h-[72px] group-hover:pb-16 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:max-h-[72px] group-focus-within:pt-10 group-focus-within:opacity-100"
+            {collectionCta ? (
+              <span
+                aria-hidden
+                className="inline-flex max-h-0 w-fit flex-col items-start overflow-hidden pb-0 pt-0 opacity-0 motion-safe:transition-[max-height,padding,opacity] motion-safe:duration-500 motion-safe:ease-out group-hover:max-h-[72px] group-hover:pb-16 group-hover:opacity-100 group-focus-within:max-h-[72px] group-focus-within:pt-10 group-focus-within:opacity-100"
               >
                 <span className="text-link-underline inline-flex w-fit items-center border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white">
                   {collectionCta.label}
                 </span>
-              </Link>
-            }
-            <div className="w-full max-w-[418px] flex flex-col items-start lg:gap-5 md:gap-3 gap-3 mb-4 desktop:mb-6">
+              </span>
+            ) : null}
+            <div className="mb-4 flex w-full max-w-[418px] flex-col items-start gap-3 md:gap-3 lg:gap-5 desktop:mb-6">
               <h2 className="font-larken text-32 font-light leading-none md:text-3xl lg:text-5xl desktop:whitespace-nowrap">
                 {title}
               </h2>
-              {description && (
+              {description ? (
                 <p className="font-gill text-base font-light leading-[120%] tracking-[1%] md:text-sm lg:text-lg desktop:text-xl">
                   {description}
                 </p>
-              )}
+              ) : null}
             </div>
           </>
         )}
-        {isMobile && collectionCta &&
-          <Link
-            href={collectionCta.href}
-            onClick={(event) => onCollectionCtaClick?.(event, collectionCta.href)}
-            className="text-link-underline inline-flex items-center justify-center border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
+        {isMobile && collectionCta ? (
+          <span
+            aria-hidden
+            className="text-link-underline inline-flex items-center justify-center border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white"
           >
             {collectionCta.label}
-          </Link>
-        }
+          </span>
+        ) : null}
       </div>
-    </div>
+    </>
   );
+
+  if (collectionCta) {
+    return (
+      <Link
+        href={collectionCta.href}
+        onClick={(event) => onCollectionCtaClick?.(event, collectionCta.href)}
+        className={panelClassName}
+        aria-label={`${collectionCta.label}: ${title}`}
+      >
+        {panelContent}
+      </Link>
+    );
+  }
+
+  return <div className={panelClassName}>{panelContent}</div>;
 }
 
 function ProductCarouselPanel({
