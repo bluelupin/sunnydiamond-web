@@ -158,8 +158,17 @@ const BookStoreVisitPanel = ({
     return filterBookStoreVisitStores(stores, storeSearchQuery, storeStateFilter);
   }, [stores, storeSearchQuery, storeStateFilter, variant]);
 
+  // Keep selection inside the filtered list synchronously so search/pincode
+  // results expand immediately (useEffect-only sync left a stale id briefly).
+  const activeStoreId = useMemo(() => {
+    if (displayStores.some((store) => store.id === selectedStoreId)) {
+      return selectedStoreId;
+    }
+    return displayStores[0]?.id ?? (variant === "page" ? "" : selectedStoreId);
+  }, [displayStores, selectedStoreId, variant]);
+
   const selectedStore =
-    displayStores.find((store) => store.id === selectedStoreId) ??
+    displayStores.find((store) => store.id === activeStoreId) ??
     displayStores[0] ??
     stores[0] ??
     (variant === "page" ? undefined : BOOK_STORE_VISIT_STORES[0]);
@@ -169,12 +178,12 @@ const BookStoreVisitPanel = ({
       return;
     }
 
-    if (displayStores.some((store) => store.id === selectedStoreId)) {
+    if (selectedStoreId === activeStoreId) {
       return;
     }
 
-    setSelectedStoreId(displayStores[0]?.id ?? stores[0]?.id ?? "");
-  }, [displayStores, selectedStoreId, stores, variant]);
+    setSelectedStoreId(activeStoreId);
+  }, [activeStoreId, selectedStoreId, variant]);
 
   // Prefill from My Profile once when available; never overwrite fields the user already typed.
   useEffect(() => {
@@ -458,7 +467,7 @@ const BookStoreVisitPanel = ({
     step === "select-store" || !selectedStore ? (
       <StoreSelectionStep
         stores={displayStores}
-        selectedStoreId={selectedStoreId}
+        selectedStoreId={activeStoreId}
         layout={variant === "page" ? "page" : "panel"}
         formTitle={formTitle}
         onSelectStore={setSelectedStoreId}
