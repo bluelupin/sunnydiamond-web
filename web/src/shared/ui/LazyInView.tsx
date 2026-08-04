@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/shared/utils/cn";
+import { shouldEagerLoadHomeSections } from "@/shared/lib/browserBackScrollRestore";
 import { isElementInViewportWithRootMargin } from "@/shared/utils/viewport";
 
 type LazyInViewProps = {
@@ -25,11 +26,18 @@ export function LazyInView({
   threshold = 0,
 }: LazyInViewProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(() => shouldEagerLoadHomeSections());
 
   useLayoutEffect(() => {
+    if (visible) return;
+
+    if (shouldEagerLoadHomeSections()) {
+      setVisible(true);
+      return;
+    }
+
     const node = ref.current;
-    if (!node || visible) return;
+    if (!node) return;
 
     if (isElementInViewportWithRootMargin(node, rootMargin)) {
       setVisible(true);

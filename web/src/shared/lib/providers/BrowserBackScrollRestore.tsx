@@ -5,8 +5,11 @@ import { usePathname } from "next/navigation";
 import {
   consumePopstateRestore,
   getCurrentScrollStorageKey,
+  getSavedScrollPosition,
   isInternalNavigationHref,
+  markHomeEagerSectionLoad,
   markPopstateNavigation,
+  prepareHomeBackNavigationRestore,
   readScrollOffset,
   restoreHomeActiveSection,
   restoreScrollPosition,
@@ -64,11 +67,19 @@ export default function BrowserBackScrollRestore() {
 
     const onPopstate = () => {
       markPopstateNavigation();
+
+      if (isHomePathname(window.location.pathname)) {
+        prepareHomeBackNavigationRestore();
+      }
     };
 
     const onPageShow = (event: PageTransitionEvent) => {
       if (event.persisted) {
         markPopstateNavigation();
+
+        if (isHomePathname(window.location.pathname)) {
+          prepareHomeBackNavigationRestore();
+        }
       }
     };
 
@@ -104,13 +115,21 @@ export default function BrowserBackScrollRestore() {
     document.addEventListener("click", onDocumentClick, true);
 
     const onPageHide = () => persistScrollPosition();
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        persistScrollPosition();
+      }
+    };
+
     window.addEventListener("pagehide", onPageHide);
+    document.addEventListener("visibilitychange", onVisibilityChange);
 
     return () => {
       window.removeEventListener("scroll", onScroll, { capture: true });
       main?.removeEventListener("scroll", onScroll);
       document.removeEventListener("click", onDocumentClick, true);
       window.removeEventListener("pagehide", onPageHide);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
 
       if (saveTimeoutRef.current != null) {
         window.clearTimeout(saveTimeoutRef.current);
@@ -127,10 +146,18 @@ export default function BrowserBackScrollRestore() {
 
     if (consumePopstateRestore()) {
       const key = getCurrentScrollStorageKey(pathname);
-      const cancelScrollRestore = restoreScrollPosition(key);
-      const cancelSectionRestore = isHomePathname(pathname)
-        ? restoreHomeActiveSection(HOME_SIDE_NAV_SECTION_IDS)
-        : () => {};
+      const savedScroll = getSavedScrollPosition(key);
+
+      if (isHomePathname(pathname)) {
+        markHomeEagerSectionLoad();
+      }
+
+      const cancelScrollRestore =
+        savedScroll != null ? restoreScrollPosition(key) : () => {};
+      const cancelSectionRestore =
+        isHomePathname(pathname) && savedScroll == null
+          ? restoreHomeActiveSection(HOME_SIDE_NAV_SECTION_IDS)
+          : () => {};
 
       cancelRestoreRef.current = () => {
         cancelScrollRestore();

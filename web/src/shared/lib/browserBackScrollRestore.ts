@@ -1,7 +1,9 @@
 const STORAGE_KEY = "sd:browser-back-scroll-positions";
 const POPSTATE_RESTORE_FLAG = "sd:pending-popstate-restore";
+const HOME_EAGER_SECTIONS_FLAG = "sd:home-eager-sections";
 const MAX_ENTRIES = 80;
-const RESTORE_RETRY_DELAYS_MS = [0, 50, 150, 300, 600, 1000, 2000, 3500];
+const RESTORE_MAX_DURATION_MS = 5000;
+const RESTORE_FALLBACK_DELAYS_MS = [50, 150, 300, 600, 1000, 2000, 3500];
 
 export const SCROLL_RESTORED_EVENT = "sd:scroll-restored";
 const HOME_ACTIVE_SECTION_KEY = "sd:home-active-section";
@@ -49,6 +51,37 @@ function clearPopstateRestoreFlag(): void {
 
   try {
     window.sessionStorage.removeItem(POPSTATE_RESTORE_FLAG);
+  } catch {
+    /* ignore quota / privacy errors */
+  }
+}
+
+/** Mount below-fold home sections immediately during browser-back restore. */
+export function markHomeEagerSectionLoad(): void {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.sessionStorage.setItem(HOME_EAGER_SECTIONS_FLAG, "1");
+  } catch {
+    /* ignore quota / privacy errors */
+  }
+}
+
+export function shouldEagerLoadHomeSections(): boolean {
+  if (typeof window === "undefined") return false;
+
+  try {
+    return window.sessionStorage.getItem(HOME_EAGER_SECTIONS_FLAG) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function clearHomeEagerSectionLoad(): void {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.sessionStorage.removeItem(HOME_EAGER_SECTIONS_FLAG);
   } catch {
     /* ignore quota / privacy errors */
   }
@@ -134,11 +167,112 @@ export function getSavedHomeActiveSection(): string | null {
   }
 }
 
+function dispatchScrollRestored(): void {
+  if (typeof window === "undefined") return;
+
+  const root = resolveScrollRoot();
+  const target = root === window ? window : root;
+  target.dispatchEvent(new Event("scroll", { bubbles: true }));
+  window.dispatchEvent(new Event(SCROLL_RESTORED_EVENT));
+}
+
+function createScrollRestoreSession(targetY: number) {
+  let cancelled = false;
+  let finished = false;
+  let rafId: number | null = null;
+  let resizeObserver: ResizeObserver | null = null;
+  let stableFrames = 0;
+  const startTime = Date.now();
+  const timers: number[] = [];
+
+  const finish = () => {
+    if (finished || cancelled) return;
+    finished = true;
+    clearHomeEagerSectionLoad();
+    dispatchScrollRestored();
+  };
+
+  const applyRestore = (): boolean => {
+    if (cancelled || finished) return true;
+
+    const root = resolveScrollRoot();
+    const maxScroll = getMaxScrollOffset(root);
+    const nextY = Math.min(targetY, maxScroll);
+    const currentY = readScrollOffset(root);
+
+    if (Math.abs(currentY - nextY) > 1) {
+      writeScrollOffset(nextY, root);
+      stableFrames = 0;
+    } else {
+      stableFrames += 1;
+    }
+
+    const reachedTarget = Math.abs(readScrollOffset(root) - nextY) <= 1;
+    const canReachTarget = maxScroll >= targetY - 1;
+    const timedOut = Date.now() - startTime >= RESTORE_MAX_DURATION_MS;
+
+    if ((reachedTarget && canReachTarget && stableFrames >= 2) || timedOut) {
+      finish();
+      return true;
+    }
+
+    return false;
+  };
+
+  const scheduleFrame = () => {
+    if (cancelled || finished) return;
+
+    rafId = window.requestAnimationFrame(() => {
+      rafId = null;
+      if (applyRestore()) return;
+      scheduleFrame();
+    });
+  };
+
+  applyRestore();
+  scheduleFrame();
+
+  if (typeof ResizeObserver !== "undefined" && typeof document !== "undefined") {
+    resizeObserver = new ResizeObserver(() => {
+      applyRestore();
+    });
+    resizeObserver.observe(document.documentElement);
+    if (document.body) {
+      resizeObserver.observe(document.body);
+    }
+  }
+
+  for (const delay of RESTORE_FALLBACK_DELAYS_MS) {
+    timers.push(
+      window.setTimeout(() => {
+        applyRestore();
+      }, delay),
+    );
+  }
+
+  timers.push(
+    window.setTimeout(() => {
+      finish();
+    }, RESTORE_MAX_DURATION_MS + 50),
+  );
+
+  return () => {
+    cancelled = true;
+    if (rafId != null) {
+      window.cancelAnimationFrame(rafId);
+    }
+    resizeObserver?.disconnect();
+    timers.forEach((timer) => window.clearTimeout(timer));
+  };
+}
+
 export function restoreHomeActiveSection(sectionIds: readonly string[]): () => void {
   const sectionId = getSavedHomeActiveSection();
   if (!sectionId || !sectionIds.includes(sectionId)) {
     return () => {};
   }
+
+  markHomeEagerSectionLoad();
 
   const timers: number[] = [];
   let cancelled = false;
@@ -149,7 +283,6 @@ export function restoreHomeActiveSection(sectionIds: readonly string[]): () => v
     const element = document.getElementById(sectionId);
     if (!element) return;
 
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const isTabletPortrait = window.matchMedia(
       "(min-width: 768px) and (max-width: 1023px) and (orientation: portrait)",
     ).matches;
@@ -158,16 +291,24 @@ export function restoreHomeActiveSection(sectionIds: readonly string[]): () => v
       behavior: "auto",
       block: isTabletPortrait ? "center" : "start",
     });
-
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new Event("scroll", { bubbles: true }));
-      window.dispatchEvent(new Event(SCROLL_RESTORED_EVENT));
-    }
   };
 
-  for (const delay of RESTORE_RETRY_DELAYS_MS) {
-    timers.push(window.setTimeout(applyRestore, delay));
+  const finish = () => {
+    if (cancelled) return;
+    cancelled = true;
+    clearHomeEagerSectionLoad();
+    dispatchScrollRestored();
+  };
+
+  for (const delay of RESTORE_FALLBACK_DELAYS_MS) {
+    timers.push(
+      window.setTimeout(() => {
+        applyRestore();
+      }, delay),
+    );
   }
+
+  timers.push(window.setTimeout(finish, RESTORE_MAX_DURATION_MS + 50));
 
   return () => {
     cancelled = true;
@@ -227,31 +368,7 @@ export function restoreScrollPosition(key: string): () => void {
     return () => {};
   }
 
-  const timers: number[] = [];
-  let cancelled = false;
-
-  const applyRestore = () => {
-    if (cancelled) return;
-
-    const root = resolveScrollRoot();
-    const maxScroll = getMaxScrollOffset(root);
-    writeScrollOffset(Math.min(targetY, maxScroll), root);
-
-    if (typeof window !== "undefined") {
-      const target = root === window ? window : root;
-      target.dispatchEvent(new Event("scroll", { bubbles: true }));
-      window.dispatchEvent(new Event(SCROLL_RESTORED_EVENT));
-    }
-  };
-
-  for (const delay of RESTORE_RETRY_DELAYS_MS) {
-    timers.push(window.setTimeout(applyRestore, delay));
-  }
-
-  return () => {
-    cancelled = true;
-    timers.forEach((timer) => window.clearTimeout(timer));
-  };
+  return createScrollRestoreSession(targetY);
 }
 
 export function getCurrentScrollStorageKey(pathname: string): string {
@@ -285,5 +402,15 @@ export function isInternalNavigationHref(href: string | null): href is string {
     return url.origin === window.location.origin;
   } catch {
     return false;
+  }
+}
+
+export function prepareHomeBackNavigationRestore(): void {
+  if (typeof window === "undefined") return;
+
+  if (getSavedScrollPosition(getScrollStorageKey(window.location.pathname)) != null) {
+    markHomeEagerSectionLoad();
+  } else if (getSavedHomeActiveSection()) {
+    markHomeEagerSectionLoad();
   }
 }
