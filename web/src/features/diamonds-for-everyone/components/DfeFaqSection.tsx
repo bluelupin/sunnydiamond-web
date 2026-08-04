@@ -3,10 +3,13 @@
 import { useState } from "react";
 import Image from "next/image";
 import Reveal from "@/shared/Animation/Reveal";
-import { diamondsForEveryonePageContent } from "../data/content";
+import type { NormalizedDfeFaq } from "@/services/diamonds-for-everyone/diamonds-for-everyone-page.types";
 
-const DfeFaqSection = () => {
-  const { faq } = diamondsForEveryonePageContent;
+type DfeFaqSectionProps = {
+  faq: NormalizedDfeFaq;
+};
+
+const DfeFaqSection = ({ faq }: DfeFaqSectionProps) => {
   const [openId, setOpenId] = useState<string | null>(faq.items[0]?.id ?? null);
 
   return (

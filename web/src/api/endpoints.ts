@@ -12,6 +12,10 @@ export const STRAPI_ENDPOINTS = {
   storeLocatorPage: "api/store-locator-page",
   /** Help & Support / FAQs page — contact options, FAQs, SEO. */
   supportPage: "api/support-page",
+  /** Diamonds for Everyone marketing page — hero, plan, investment, benefits, FAQ, SEO. */
+  diamondsForEveryonePage: "api/diamonds-for-everyone-page",
+  /** Gifting marketing page — hero, occasions, gift finder, gift card, trust badges, SEO. */
+  giftingPage: "api/gifting-page",
   occasions: "api/occasions",
   /** PDP size dropdown + chart drawer — fetch all, match by `name` / category */
   sizeGuides: "api/size-guides",

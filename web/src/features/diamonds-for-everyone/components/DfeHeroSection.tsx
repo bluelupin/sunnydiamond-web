@@ -2,11 +2,13 @@
 
 import Image from "next/image";
 import { PLP_HERO_IMAGE_QUALITY } from "@/features/jewellery-product/utils/jewelleryPlpImage";
-import { diamondsForEveryonePageContent } from "../data/content";
+import type { NormalizedDfeHero } from "@/services/diamonds-for-everyone/diamonds-for-everyone-page.types";
 
-const DfeHeroSection = () => {
-  const { hero } = diamondsForEveryonePageContent;
+type DfeHeroSectionProps = {
+  hero: NormalizedDfeHero;
+};
 
+const DfeHeroSection = ({ hero }: DfeHeroSectionProps) => {
   return (
     <section
       aria-labelledby="dfe-hero-title"
