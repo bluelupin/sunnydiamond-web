@@ -59,8 +59,8 @@ const AboutFacesSection = ({ title, description, members }: AboutFacesSectionPro
                 quality={80}
                 sizes="(max-width: 1023px) 343px, 33vw"
                 className={cn(
-                  "h-full w-full object-cover transition-transform duration-700",
-                  index === 0 ? "lg:group-hover:scale-100" : "lg:group-hover:scale-[1.05]",
+                  "h-full w-full transition-transform duration-700",
+                  index === 0 ? "lg:group-hover:scale-100 object-fill" : "lg:group-hover:scale-[1.05] object-cover",
                 )}
               />
 
