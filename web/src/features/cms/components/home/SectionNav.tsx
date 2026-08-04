@@ -5,6 +5,8 @@ import Image from "next/image";
 import { homeSections } from "@/features/cms/data/content";
 import { useScrollSpy } from "@/shared/hooks/use-scroll-spy";
 import { SectionNavProgressIndicator } from "@/features/cms/components/home/SectionNavProgressIndicator";
+import { saveHomeActiveSection } from "@/shared/lib/browserBackScrollRestore";
+import { scrollToHomeSection } from "@/shared/utils/homeSectionScroll";
 import { cn } from "@/shared/utils/cn";
 
 const NAV_GRADIENT = "/images/navigation/section-nav-gradient.svg";
@@ -16,22 +18,6 @@ const navSections = homeSections.slice(
 );
 
 const sectionIds = navSections.map((section) => section.id);
-
-/** md–lg portrait: SectionNav visible; center target section in viewport on nav click. */
-const TABLET_PORTRAIT_SCROLL_MQ = "(min-width: 768px) and (max-width: 1023px) and (orientation: portrait)";
-
-const scrollToSection = (id: string) => {
-  const element = document.getElementById(id);
-  if (!element) return;
-
-  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const isTabletPortrait = window.matchMedia(TABLET_PORTRAIT_SCROLL_MQ).matches;
-
-  element.scrollIntoView({
-    behavior: prefersReducedMotion ? "auto" : "smooth",
-    block: isTabletPortrait ? "center" : "start",
-  });
-};
 
 const SectionNav = () => {
   const { activeId, isVisible, progress } = useScrollSpy({
@@ -45,7 +31,8 @@ const SectionNav = () => {
   );
 
   const handleClick = (id: string) => {
-    scrollToSection(id);
+    saveHomeActiveSection(id);
+    scrollToHomeSection(id);
   };
 
   return (

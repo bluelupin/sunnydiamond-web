@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import {
   consumePopstateRestore,
@@ -8,10 +8,17 @@ import {
   isInternalNavigationHref,
   markPopstateNavigation,
   readScrollOffset,
+  restoreHomeActiveSection,
   restoreScrollPosition,
+  saveHomeActiveSection,
   saveScrollPosition,
 } from "@/shared/lib/browserBackScrollRestore";
 import { scrollToTopBeforeClientNavigation } from "@/shared/utils/navigation";
+import {
+  HOME_SIDE_NAV_SECTION_IDS,
+  isHomePathname,
+  resolveActiveHomeSection,
+} from "@/shared/utils/homeSectionScroll";
 
 const SAVE_DEBOUNCE_MS = 150;
 
@@ -30,6 +37,13 @@ export default function BrowserBackScrollRestore() {
 
   const persistScrollPosition = () => {
     saveScrollPosition(scrollKeyRef.current, readScrollOffset());
+
+    if (isHomePathname(pathname)) {
+      const activeSection = resolveActiveHomeSection(HOME_SIDE_NAV_SECTION_IDS);
+      if (activeSection) {
+        saveHomeActiveSection(activeSection);
+      }
+    }
   };
 
   const schedulePersistScrollPosition = () => {
@@ -58,11 +72,11 @@ export default function BrowserBackScrollRestore() {
       }
     };
 
-    window.addEventListener("popstate", onPopstate);
+    window.addEventListener("popstate", onPopstate, true);
     window.addEventListener("pageshow", onPageShow);
 
     return () => {
-      window.removeEventListener("popstate", onPopstate);
+      window.removeEventListener("popstate", onPopstate, true);
       window.removeEventListener("pageshow", onPageShow);
     };
   }, []);
@@ -107,13 +121,21 @@ export default function BrowserBackScrollRestore() {
     };
   }, [pathname]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     cancelRestoreRef.current?.();
     cancelRestoreRef.current = null;
 
     if (consumePopstateRestore()) {
       const key = getCurrentScrollStorageKey(pathname);
-      cancelRestoreRef.current = restoreScrollPosition(key);
+      const cancelScrollRestore = restoreScrollPosition(key);
+      const cancelSectionRestore = isHomePathname(pathname)
+        ? restoreHomeActiveSection(HOME_SIDE_NAV_SECTION_IDS)
+        : () => {};
+
+      cancelRestoreRef.current = () => {
+        cancelScrollRestore();
+        cancelSectionRestore();
+      };
 
       return () => {
         cancelRestoreRef.current?.();
