@@ -12,6 +12,8 @@ function blockToSpeechLines(block: BlogContentBlock): string[] {
       );
     case "image_row":
       return block.images.map((image) => image.alt).filter(Boolean);
+    case "html":
+      return [block.html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()].filter(Boolean);
     default:
       return [];
   }

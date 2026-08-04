@@ -21,8 +21,10 @@ import type {
 } from "./blogs.types";
 
 const BLOG_POSTS_LIST_QUERY =
-  "populate[coverImage]=true" +
-  "&populate[heroImage]=true" +
+  "populate[coverImage][populate][desktopImage]=true" +
+  "&populate[coverImage][populate][mobileImage]=true" +
+  "&populate[heroImage][populate][desktopImage]=true" +
+  "&populate[heroImage][populate][mobileImage]=true" +
   "&populate[tags]=true" +
   "&populate[blog_category]=true" +
   "&pagination[pageSize]=100" +

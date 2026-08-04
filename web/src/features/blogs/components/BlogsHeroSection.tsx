@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { PLP_HERO_IMAGE_QUALITY } from "@/features/jewellery-product/utils/jewelleryPlpImage";
 
@@ -5,38 +7,45 @@ type BlogsHeroSectionProps = {
   hero: {
     title: string;
     image: {
-      desktopUrl: string;
-      mobileUrl: string;
+      desktopUrl: string | null;
+      mobileUrl: string | null;
       alt: string;
     };
   };
 };
 
 const BlogsHeroSection = ({ hero }: BlogsHeroSectionProps) => {
+  const mobileUrl = hero.image.mobileUrl || hero.image.desktopUrl;
+  const desktopUrl = hero.image.desktopUrl || hero.image.mobileUrl;
+
   return (
     <section
       aria-labelledby="blogs-hero-title"
       className="relative left-1/2 grid h-[240px] w-screen max-w-none -translate-x-1/2 overflow-hidden md:h-320"
     >
-      <div className="relative col-start-1 row-start-1 size-full overflow-hidden">
-        <Image
-          src={hero.image.mobileUrl}
-          alt={hero.image.alt}
-          fill
-          priority
-          quality={PLP_HERO_IMAGE_QUALITY}
-          sizes="100vw"
-          className="object-cover object-center md:hidden"
-        />
-        <Image
-          src={hero.image.desktopUrl}
-          alt={hero.image.alt}
-          fill
-          priority
-          quality={PLP_HERO_IMAGE_QUALITY}
-          sizes="100vw"
-          className="hidden object-cover object-center md:block"
-        />
+      <div className="relative col-start-1 row-start-1 size-full overflow-hidden bg-darkblack">
+        {mobileUrl ? (
+          <Image
+            src={mobileUrl}
+            alt={hero.image.alt}
+            fill
+            priority
+            quality={PLP_HERO_IMAGE_QUALITY}
+            sizes="100vw"
+            className="object-cover object-center md:hidden"
+          />
+        ) : null}
+        {desktopUrl ? (
+          <Image
+            src={desktopUrl}
+            alt={hero.image.alt}
+            fill
+            priority
+            quality={PLP_HERO_IMAGE_QUALITY}
+            sizes="100vw"
+            className="hidden object-cover object-center md:block"
+          />
+        ) : null}
         <div className="absolute inset-0 bg-black/40" aria-hidden />
       </div>
       <h1

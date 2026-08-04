@@ -12,7 +12,7 @@ export type BlogPost = {
   title: string;
   date: string;
   readTime: string;
-  imageSrc: string;
+  imageSrc: string | null;
   imageAlt: string;
   category: string;
   href: string;
@@ -23,9 +23,9 @@ export type BlogFeaturedPost = {
   date: string;
   readTime: string;
   excerpt: string;
-  imageSrc: string;
+  imageSrc: string | null;
   imageAlt: string;
-  backgroundSrc: string;
+  backgroundSrc: string | null;
   readNowLabel: string;
   href: string;
 };
@@ -49,6 +49,10 @@ export type BlogContentBlock =
       type: "image_row";
       images: Array<{ src: string; alt: string }>;
       mobileHeight?: number;
+    }
+  | {
+      type: "html";
+      html: string;
     };
 
 export type BlogDetailSection = {
@@ -63,7 +67,7 @@ export type BlogDetail = {
   author: string;
   date: string;
   readTime: string;
-  heroImage: { src: string; alt: string };
+  heroImage: { src: string | null; alt: string };
   introParagraphs: string[];
   tableOfContents: BlogTableOfContentsItem[];
   sections: BlogDetailSection[];

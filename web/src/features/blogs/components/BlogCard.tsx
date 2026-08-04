@@ -11,15 +11,17 @@ export function BlogCard({ post }: BlogCardProps) {
     <article className="flex min-w-0 flex-1 flex-col items-start gap-4">
       <Link
         href={post.href}
-        className="relative block h-[280px] w-full shrink-0 overflow-hidden sm:h-[360px] md:h-[496px]"
+        className="relative block h-[280px] w-full shrink-0 overflow-hidden bg-gray300 sm:h-[360px] md:h-[496px]"
       >
-        <Image
-          src={post.imageSrc}
-          alt={post.imageAlt}
-          fill
-          className="object-cover"
-          sizes="(max-width: 768px) 100vw, 33vw"
-        />
+        {post.imageSrc ? (
+          <Image
+            src={post.imageSrc}
+            alt={post.imageAlt}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 33vw"
+          />
+        ) : null}
       </Link>
       <div className="flex w-full flex-col items-start gap-4">
         <Link

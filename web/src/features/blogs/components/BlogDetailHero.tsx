@@ -6,6 +6,10 @@ type BlogDetailHeroProps = {
 };
 
 const BlogDetailHero = ({ heroImage }: BlogDetailHeroProps) => {
+  if (!heroImage.src) {
+    return null;
+  }
+
   return (
     <div className="relative h-[670px] w-full shrink-0 overflow-hidden bg-white md:h-[500px] desktop:h-[700px]">
       <Image

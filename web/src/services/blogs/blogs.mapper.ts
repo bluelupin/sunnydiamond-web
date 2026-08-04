@@ -22,8 +22,6 @@ import type {
   StrapiBlogTag,
 } from "./blogs.types";
 
-const FALLBACK_CARD_IMAGES = [...blogsPageContent.cardImageFallbacks];
-
 const CATEGORY_RULES: Array<{
   id: string;
   patterns: RegExp;
@@ -164,7 +162,7 @@ export function selectRelatedBlogPosts(
 
   return ranked
     .slice(0, limit)
-    .map(({ post, index }) => mapStrapiBlogPostToCard(post, index))
+    .map(({ post }) => mapStrapiBlogPostToCard(post))
     .filter((post): post is BlogPost => Boolean(post));
 }
 
@@ -180,30 +178,52 @@ export function extractMarkdownImageUrls(markdown: string | null | undefined): s
     const url = cleanText(match[1] ?? match[2]);
     if (url) urls.push(url);
   }
+
+  for (const match of body.matchAll(/<img[^>]+src=["']([^"']+)["']/gi)) {
+    const url = cleanText(match[1]);
+    if (url) urls.push(url);
+  }
+
   return urls;
 }
 
-function resolvePostImage(
+function resolveCoverImage(
   post: StrapiBlogPost,
-  fallbackIndex: number,
-): { src: string; alt: string } {
-  const mediaUrl =
-    resolveCmsMediaUrl(post.coverImage) ??
-    resolveCmsMediaUrl(post.heroImage) ??
-    extractMarkdownImageUrls(post.body)[0];
-
-  const fallback = FALLBACK_CARD_IMAGES[fallbackIndex % FALLBACK_CARD_IMAGES.length] ?? {
-    src: "/images/blogs/card-jewellery.png",
-    alt: cleanText(post.title) ?? "Blog post",
-  };
+): { src: string | null; alt: string } {
+  const cover = post.coverImage;
+  const src =
+    resolveCmsMediaUrl(cover?.desktopImage) ??
+    resolveCmsMediaUrl(cover?.mobileImage) ??
+    null;
 
   return {
-    src: mediaUrl ?? fallback.src,
+    src,
     alt:
-      resolveCmsAltText(post.coverImage) ??
-      resolveCmsAltText(post.heroImage) ??
+      cleanText(cover?.altText) ??
+      resolveCmsAltText(cover?.desktopImage) ??
+      resolveCmsAltText(cover?.mobileImage) ??
       cleanText(post.title) ??
-      fallback.alt,
+      "Blog post",
+  };
+}
+
+function resolveHeroImage(
+  post: StrapiBlogPost,
+): { src: string | null; alt: string } {
+  const hero = post.heroImage;
+  const src =
+    resolveCmsMediaUrl(hero?.desktopImage) ??
+    resolveCmsMediaUrl(hero?.mobileImage) ??
+    null;
+
+  return {
+    src,
+    alt:
+      cleanText(hero?.altText) ??
+      resolveCmsAltText(hero?.desktopImage) ??
+      resolveCmsAltText(hero?.mobileImage) ??
+      cleanText(post.title) ??
+      "Blog post",
   };
 }
 
@@ -216,6 +236,127 @@ function stripMarkdownInline(text: string): string {
     .replace(/`([^`]+)`/g, "$1")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function looksLikeHtml(value: string): boolean {
+  return /<\/?(?:p|h[1-6]|ul|ol|li|div|figure|img|strong|em|br|a|span|table|blockquote|section)\b/i.test(
+    value,
+  );
+}
+
+function sanitizeBlogHtml(html: string): string {
+  return html
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?>[\s\S]*?<\/style>/gi, "")
+    .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "");
+}
+
+function stripHtmlToText(html: string): string {
+  return html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(?:p|div|h[1-6]|li|tr)>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\s+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
+}
+
+function mapHtmlBodyToDetailSections(html: string): {
+  introParagraphs: string[];
+  tableOfContents: BlogTableOfContentsItem[];
+  sections: BlogDetailSection[];
+} {
+  const sanitized = sanitizeBlogHtml(html).trim();
+  if (!sanitized) {
+    return { introParagraphs: [], tableOfContents: [], sections: [] };
+  }
+
+  const headingRegex = /<h2(?:\s[^>]*)?>[\s\S]*?<\/h2>/gi;
+  const headingMatches = [...sanitized.matchAll(headingRegex)];
+
+  if (headingMatches.length === 0) {
+    return {
+      introParagraphs: [],
+      tableOfContents: [],
+      sections: [
+        {
+          id: "article",
+          heading: "",
+          blocks: [{ type: "html", html: sanitized }],
+        },
+      ],
+    };
+  }
+
+  const firstHeadingIndex = headingMatches[0]?.index ?? 0;
+  const introHtml = sanitized.slice(0, firstHeadingIndex).trim();
+  const introHasRichMedia = /<(?:img|ul|ol|figure)\b/i.test(introHtml);
+  const introParagraphs =
+    introHtml && !introHasRichMedia
+      ? stripHtmlToText(introHtml)
+          .split(/\n{2,}/)
+          .map((part) => part.trim())
+          .filter(Boolean)
+          .slice(0, 3)
+      : [];
+
+  const sections: BlogDetailSection[] = [];
+  const tableOfContents: BlogTableOfContentsItem[] = [];
+
+  if (introHtml && (introHasRichMedia || introParagraphs.length === 0)) {
+    sections.push({
+      id: "introduction",
+      heading: "",
+      blocks: [{ type: "html", html: introHtml }],
+    });
+  }
+
+  for (let index = 0; index < headingMatches.length; index += 1) {
+    const match = headingMatches[index];
+    if (!match || match.index == null) continue;
+
+    const heading = stripHtmlToText(match[0] ?? "");
+    if (!heading) continue;
+
+    const contentStart = match.index + match[0].length;
+    const contentEnd =
+      index + 1 < headingMatches.length
+        ? (headingMatches[index + 1]?.index ?? sanitized.length)
+        : sanitized.length;
+    const sectionHtml = sanitized.slice(contentStart, contentEnd).trim();
+    if (!sectionHtml) continue;
+
+    const id = slugify(heading) || `section-${sections.length + 1}`;
+    sections.push({
+      id,
+      heading,
+      blocks: [{ type: "html", html: sectionHtml }],
+    });
+    tableOfContents.push({ id, label: heading });
+  }
+
+  if (sections.length === 0) {
+    return {
+      introParagraphs: [],
+      tableOfContents: [],
+      sections: [
+        {
+          id: "article",
+          heading: "",
+          blocks: [{ type: "html", html: sanitized }],
+        },
+      ],
+    };
+  }
+
+  return { introParagraphs, tableOfContents, sections };
 }
 
 function parseMarkdownBlocks(chunk: string): BlogContentBlock[] {
@@ -283,6 +424,11 @@ export function mapMarkdownBodyToDetailSections(body: string | null | undefined)
     return { introParagraphs: [], tableOfContents: [], sections: [] };
   }
 
+  // CMS rich text is stored as HTML — render that path instead of treating tags as markdown.
+  if (looksLikeHtml(markdown)) {
+    return mapHtmlBodyToDetailSections(markdown);
+  }
+
   const parts = markdown.split(/\n(?=##\s+)/);
   const introRaw = parts[0]?.startsWith("## ") ? "" : (parts[0] ?? "");
   const sectionParts = parts[0]?.startsWith("## ") ? parts : parts.slice(1);
@@ -324,13 +470,12 @@ export function mapMarkdownBodyToDetailSections(body: string | null | undefined)
 
 export function mapStrapiBlogPostToCard(
   post: StrapiBlogPost,
-  index = 0,
 ): BlogPost | null {
   const slug = cleanText(post.slug);
   const title = cleanText(post.title);
   if (!slug || !title) return null;
 
-  const image = resolvePostImage(post, index);
+  const image = resolveCoverImage(post);
 
   return {
     id: cleanText(post.documentId) ?? String(post.id ?? slug),
@@ -352,8 +497,7 @@ export function mapStrapiBlogPostToDetail(
   const title = cleanText(post.title);
   if (!slug || !title) return null;
 
-  const image = resolvePostImage(post, 0);
-  const excerpt = cleanText(post.excerpt);
+  const hero = resolveHeroImage(post);
   const { introParagraphs, tableOfContents, sections } = mapMarkdownBodyToDetailSections(
     post.body,
   );
@@ -371,9 +515,9 @@ export function mapStrapiBlogPostToDetail(
     author,
     date: formatBlogDate(post.publishedDate),
     readTime: formatReadTime(post),
-    heroImage: { src: image.src, alt: image.alt },
-    introParagraphs:
-      introParagraphs.length > 0 ? introParagraphs : excerpt ? [excerpt] : [],
+    heroImage: { src: hero.src, alt: hero.alt },
+    // Excerpt is landing/featured-only — never reuse it on the detail page.
+    introParagraphs,
     tableOfContents,
     sections,
     relatedPostIds,
@@ -494,7 +638,7 @@ function mapFeaturedFromPost(
       "Explore expert guidance from Sunny Diamonds on choosing, styling, and caring for diamond jewellery.",
     imageSrc: post.imageSrc,
     imageAlt: post.imageAlt,
-    backgroundSrc: blogsPageContent.featured.backgroundSrc,
+    backgroundSrc: null,
     readNowLabel: blogsPageContent.featured.readNowLabel,
     href: post.href,
     ...overrides,
@@ -507,7 +651,7 @@ export function mapBlogsPageData(input: {
   categories: StrapiBlogCategory[] | null;
 }): NormalizedBlogsPage {
   const cards = input.posts
-    .map((post, index) => mapStrapiBlogPostToCard(post, index))
+    .map((post) => mapStrapiBlogPostToCard(post))
     .filter((post): post is BlogPost => Boolean(post));
 
   const postsBySlug: Record<string, BlogPost> = {};
@@ -527,7 +671,7 @@ export function mapBlogsPageData(input: {
     input.posts[0];
 
   const featuredCard = featuredCms
-    ? mapStrapiBlogPostToCard(featuredCms, 0)
+    ? mapStrapiBlogPostToCard(featuredCms)
     : null;
 
   const featuredBackground =
@@ -543,8 +687,7 @@ export function mapBlogsPageData(input: {
           readNowLabel:
             cleanText(featuredSection?.readNowLabel) ??
             blogsPageContent.featured.readNowLabel,
-          backgroundSrc:
-            featuredBackground ?? blogsPageContent.featured.backgroundSrc,
+          backgroundSrc: featuredBackground ?? null,
         },
       )
     : null;
@@ -553,8 +696,7 @@ export function mapBlogsPageData(input: {
   const heroTitle =
     cleanText(heroSection?.title) ?? blogsPageContent.hero.title;
   const heroDesktop =
-    resolveCmsMediaUrl(heroSection?.backgroundImage?.desktopImage) ??
-    blogsPageContent.hero.image.desktopUrl;
+    resolveCmsMediaUrl(heroSection?.backgroundImage?.desktopImage) ?? null;
   const heroMobile =
     resolveCmsMediaUrl(heroSection?.backgroundImage?.mobileImage) ??
     heroDesktop;
@@ -562,7 +704,7 @@ export function mapBlogsPageData(input: {
     cleanText(heroSection?.backgroundImage?.altText) ??
     resolveCmsAltText(heroSection?.backgroundImage?.desktopImage) ??
     resolveCmsAltText(heroSection?.backgroundImage?.mobileImage) ??
-    blogsPageContent.hero.image.alt;
+    heroTitle;
 
   return {
     hero: {
@@ -590,9 +732,9 @@ export function mapStaticBlogsPage(): NormalizedBlogsPage {
     hero: {
       title: blogsPageContent.hero.title,
       image: {
-        desktopUrl: blogsPageContent.hero.image.desktopUrl,
-        mobileUrl: blogsPageContent.hero.image.mobileUrl,
-        alt: blogsPageContent.hero.image.alt,
+        desktopUrl: null,
+        mobileUrl: null,
+        alt: blogsPageContent.hero.title,
       },
     },
     filterLabel: blogsPageContent.filterLabel,

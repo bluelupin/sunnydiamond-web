@@ -46,8 +46,10 @@ export type StrapiBlogPost = {
   publishedDate?: string | null;
   isFeatured?: boolean | null;
   tags?: StrapiBlogTag[] | null;
-  heroImage?: StrapiImage;
-  coverImage?: StrapiImage;
+  /** Responsive media component: desktopImage / mobileImage */
+  heroImage?: StrapiBlogResponsiveImage | null;
+  /** Responsive media component: desktopImage / mobileImage */
+  coverImage?: StrapiBlogResponsiveImage | null;
   blog_category?: StrapiBlogCategory | null;
   seo?: StrapiBlogSeo | null;
   duration?: string | null;
@@ -84,8 +86,8 @@ export type NormalizedBlogsPage = {
   hero: {
     title: string;
     image: {
-      desktopUrl: string;
-      mobileUrl: string;
+      desktopUrl: string | null;
+      mobileUrl: string | null;
       alt: string;
     };
   };
