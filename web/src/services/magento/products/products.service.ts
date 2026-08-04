@@ -26,6 +26,9 @@ import type { JewelleryFilterState, JewelleryListingProduct } from "@/features/j
 import {
   createEmptyFilterState,
   getJewelleryListingFiltersKey,
+  INITIAL_PLP_PAGE_COUNT,
+  INITIAL_PLP_PRODUCT_COUNT,
+  PAGE_SIZE,
 } from "@/features/jewellery-product/data/filters";
 import { measureJewelleryPlpGraphql } from "@/features/jewellery-product/utils/jewelleryPlpPerformance";
 import { magentoQueryKeys } from "@/hooks/magento/queryKeys";
@@ -326,6 +329,81 @@ async function fetchMagentoJewelleryProducts({
       ...responseFacets,
       occasions: mergeFacetOptions(responseFacets.occasions, facetsForFilter.occasions),
     },
+  };
+}
+
+function appendUniqueListingProducts(
+  current: JewelleryListingProduct[],
+  incoming: JewelleryListingProduct[],
+): JewelleryListingProduct[] {
+  if (incoming.length === 0) {
+    return current;
+  }
+
+  const seen = new Set(current.map((product) => product.id));
+  const uniqueIncoming = incoming.filter((product) => !seen.has(product.id));
+
+  return uniqueIncoming.length > 0 ? [...current, ...uniqueIncoming] : current;
+}
+
+export type MagentoJewelleryInitialListingResult = {
+  listing: JewelleryListingProductsData;
+  pendingProducts: JewelleryListingProduct[];
+};
+
+/** Fetches the first PLP batch (30 products) via multiple Magento pages at {@link PAGE_SIZE}. */
+export async function getMagentoJewelleryInitialListing(
+  params: Omit<GetMagentoJewelleryProductsParams, "page"> & {
+    pageSize?: number;
+  },
+): Promise<MagentoJewelleryInitialListingResult> {
+  const pageSize = params.pageSize ?? PAGE_SIZE;
+
+  const firstPage = await getMagentoJewelleryProducts({
+    ...params,
+    page: 1,
+    pageSize,
+    includeFacets: params.includeFacets !== false,
+  });
+
+  const totalPages = firstPage.totalPages;
+  const lastPageToFetch = Math.min(INITIAL_PLP_PAGE_COUNT, Math.max(totalPages, 1));
+
+  let mergedProducts = firstPage.products;
+
+  if (lastPageToFetch > 1) {
+    const additionalPages = await Promise.all(
+      Array.from({ length: lastPageToFetch - 1 }, (_, index) =>
+        getMagentoJewelleryProducts({
+          ...params,
+          page: index + 2,
+          pageSize,
+          includeFacets: false,
+          facets: firstPage.facets,
+        }),
+      ),
+    );
+
+    mergedProducts = appendUniqueListingProducts(
+      mergedProducts,
+      additionalPages.flatMap((page) => page.products),
+    );
+  }
+
+  const products = mergedProducts.slice(0, INITIAL_PLP_PRODUCT_COUNT);
+  const pendingProducts = mergedProducts.slice(INITIAL_PLP_PRODUCT_COUNT);
+
+  return {
+    listing: {
+      products,
+      totalCount: firstPage.totalCount,
+      totalPages: firstPage.totalPages,
+      pageSize: firstPage.pageSize,
+      currentPage: lastPageToFetch,
+      facets: firstPage.facets,
+      pendingProducts,
+    },
+    pendingProducts,
   };
 }
 

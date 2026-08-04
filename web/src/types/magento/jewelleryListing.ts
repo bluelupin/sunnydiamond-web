@@ -25,4 +25,6 @@ export type JewelleryListingProductsData = {
   pageSize: number;
   totalPages: number;
   facets: JewelleryFilterFacets;
+  /** Overflow from the initial multi-page fetch, shown on subsequent load-more clicks. */
+  pendingProducts?: JewelleryListingProduct[];
 };
