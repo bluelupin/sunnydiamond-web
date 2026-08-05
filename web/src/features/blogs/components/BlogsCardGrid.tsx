@@ -23,11 +23,11 @@ const BlogsCardGrid = ({ posts }: BlogsCardGridProps) => {
   const rows = chunkPosts(posts, 3);
 
   return (
-    <div className="mx-auto flex w-full max-w-1440 flex-col gap-10">
+    <div className="mx-auto flex w-full max-w-1440 flex-col md:gap-10 gap-6">
       {rows.map((row, rowIndex) => (
         <div
           key={`row-${rowIndex}-${row.map((post) => post.id).join("-")}`}
-          className="flex flex-col gap-10 md:flex-row md:items-start md:justify-center md:gap-2"
+          className="flex flex-col md:flex-row md:items-start md:justify-center md:gap-2 gap-6"
         >
           {row.map((post) => (
             <BlogCard key={post.id} post={post} />

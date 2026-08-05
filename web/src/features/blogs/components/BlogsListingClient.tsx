@@ -19,7 +19,7 @@ import BlogsFeaturedSection from "./BlogsFeaturedSection";
 import BlogsLoadMore from "./BlogsLoadMore";
 
 const blogsGridSectionClassName =
-  "bg-gray200 px-4 py-16 md:px-10 md:py-104";
+  "mx-auto w-full 2xl:max-w-1920 max-w-1440 px-4 md:px-8 lg:px-10 2xl:px-[60px] md:bg-gray200 md:pt-10 pt-0 lg:pb-100 pb-16";
 
 type BlogsListingClientProps = {
   filterLabel: string;
@@ -67,29 +67,27 @@ const BlogsListingClient = ({
   return (
     <>
       <BlogsFilterBar filterLabel={filterLabel} categories={categories} />
-
-      {firstRowPosts.length > 0 ? (
-        <section className={blogsGridSectionClassName}>
+      {firstRowPosts.length > 0 &&
+        <section className="mx-auto w-full 2xl:max-w-1920 max-w-1440 px-4 md:px-8 lg:px-10 2xl:px-[60px] md:bg-gray200 md:pt-10 pt-0 lg:pb-100 pb-16">
           <BlogsCardGrid posts={firstRowPosts} />
         </section>
-      ) : null}
-
-      {featured ? <BlogsFeaturedSection featured={featured} /> : null}
+      }
+      {featured && <BlogsFeaturedSection featured={featured} />}
 
       {remainingPosts.length > 0 || showLoadMoreFooter ? (
-        <section className={blogsGridSectionClassName}>
-          <div className="mx-auto flex w-full max-w-1440 flex-col items-center gap-16">
-            {remainingPosts.length > 0 ? (
+        <section className="mx-auto w-full 2xl:max-w-1920 max-w-1440 px-4 md:px-8 lg:px-10 2xl:px-[60px] md:bg-gray200 lg:py-100 py-16">
+          <div className="w-full flex flex-col items-center gap-16">
+            {remainingPosts.length > 0 &&
               <BlogsCardGrid posts={remainingPosts} />
-            ) : null}
-            {showLoadMoreFooter ? (
+            }
+            {showLoadMoreFooter &&
               <BlogsLoadMore
                 limit={limit}
                 total={filteredPosts.length}
                 buttonLabel={loadMoreButtonLabel}
                 onLoadMore={handleLoadMore}
               />
-            ) : null}
+            }
           </div>
         </section>
       ) : null}

@@ -24,7 +24,7 @@ const BlogsListingSection = ({
   return (
     <Suspense
       fallback={
-        <div className="mx-auto w-full max-w-1440 px-4 pt-10 md:px-10 md:pt-16" />
+        <div className="mx-auto w-full 2xl:max-w-1920 max-w-1440 px-4 md:px-8 lg:px-10 2xl:px-[60px] pt-6 md:pt-10 lg:pt-16" />
       }
     >
       <BlogsListingClient

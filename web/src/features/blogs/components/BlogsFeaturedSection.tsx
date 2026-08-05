@@ -1,6 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { BlogFeaturedPost } from "../types";
+import Reveal from "@/shared/Animation/Reveal";
+import ResponsiveImage from "@/shared/ui/ResponsiveImage";
+import ScrollReveal from "@/shared/ui/ScrollReveal";
 
 type BlogsFeaturedSectionProps = {
   featured: BlogFeaturedPost;
@@ -10,76 +12,92 @@ const BlogsFeaturedSection = ({ featured }: BlogsFeaturedSectionProps) => {
   return (
     <section
       aria-labelledby="blogs-featured-title"
-      className="relative overflow-hidden bg-[#F3E6E2]"
+      className="relative w-full overflow-hidden bg-[#F3E6E2] h-auto mx-auto w-full 2xl:max-w-1920 max-w-1440 px-0 md:px-8 lg:px-10 2xl:px-[60px]"
     >
-      <div className="relative mx-auto w-full max-w-1440 overflow-hidden lg:h-[750px]">
-        {featured.backgroundSrc ? (
-          <div
-            className="pointer-events-none absolute left-1/2 top-4 h-[684px] w-[714px] -translate-x-1/2 lg:left-0 lg:top-[calc(50%-59.5px)] lg:h-[1405px] lg:w-full lg:-translate-x-0 lg:-translate-y-1/2"
-            aria-hidden
-          >
-            <Image
-              src={featured.backgroundSrc}
-              alt=""
-              fill
-              loading="lazy"
-              fetchPriority="low"
-              className="object-cover object-center"
-              sizes="100vw"
-            />
-          </div>
-        ) : null}
-
-        <div className="relative z-10 flex flex-col items-center gap-6 px-4 py-16 lg:absolute lg:inset-0 lg:flex-row lg:items-center lg:gap-0 lg:px-10 lg:py-0">
-          <div className="flex w-full max-w-[375px] flex-col items-center gap-6 lg:max-w-[530px] lg:shrink-0 lg:items-start lg:gap-10">
-            <div className="flex w-full flex-col items-center gap-4 text-center lg:items-start lg:gap-6 lg:text-left">
-              <h2
-                id="blogs-featured-title"
-                className="w-full font-larken text-32 font-light leading-110 text-darkblack lg:text-5xl"
+      {featured.backgroundSrc &&
+        <div aria-hidden className="pointer-events-none absolute inset-0 size-full sm:!h-[157%] sm:top-[-300px] top-12 opacity-80">
+          <ResponsiveImage
+            desktopSrc={featured.backgroundSrc}
+            // mobileSrc={backgroundImages.mobileUrl || ''}
+            alt=""
+            width={1440}
+            height={750}
+            sizes="100vw"
+            className="size-full object-cover object-center"
+          />
+        </div>
+      }
+      <div className="flex flex-col items-center md:flex-row lg:items-center lg:justify-between lg:gap-8 gap-4">
+        <div className="flex w-full shrink-0 flex-col md:gap-10 gap-6 md:max-w-[437px] sm:max-w-[500px] max-w-full pt-12 md:pb-12 pb-6">
+          <div className="lg:space-y-6 md:space-y-5 space-y-4">
+            {featured.title &&
+              <Reveal
+                as="h2"
+                direction="up"
+                className="line-clamp-3 md:text-left text-center font-larken lg:text-5xl md:text-4xl sm:text-3xl text-32 font-light leading-110 text-darkblack"
               >
                 {featured.title}
-              </h2>
-              <div className="flex items-center justify-center gap-2 lg:justify-start lg:gap-4">
-                <p className="text-t4-regular text-neutral500 lg:text-base">
+              </Reveal>
+            }
+            <div className="flex items-center justify-center gap-2 md:justify-start lg:gap-4">
+              {featured.date &&
+                <Reveal as="p"
+                  direction="up" className="text-t4-regular text-neutral500 lg:text-base">
                   {featured.date}
-                </p>
-                <span
-                  className="size-1 shrink-0 rounded-full bg-neutral500"
-                  aria-hidden
-                />
-                <p className="text-t4-regular text-neutral500 lg:text-base">
-                  {featured.readTime}
-                </p>
-              </div>
-              <p className="w-full font-gill text-base font-light leading-110 text-neutral500 lg:text-[20px] lg:text-darkblack">
-                {featured.excerpt}
-              </p>
+                </Reveal>
+              }
+              {featured.readTime &&
+                <Reveal direction="up" className="flex items-center justify-center gap-2 lg:justify-start lg:gap-4">
+                  <span
+                    className="size-1 shrink-0 rounded-full bg-neutral500"
+                    aria-hidden
+                  />
+                  <p className="text-t4-regular text-neutral500 lg:text-base">
+                    {featured.readTime}
+                  </p>
+                </Reveal>
+              }
             </div>
-            <Link
-              href={featured.href}
-              className="inline-flex w-fit border-b border-darkblack pb-1 text-t4-regular whitespace-nowrap text-darkblack"
+            {featured.excerpt &&
+              <Reveal
+                as="p"
+                direction="up"
+                className="line-clamp-5 md:text-left text-center font-gill lg:text-xl md:text-lg text-base font-light leading-110 text-neutral500"
+              >
+                {featured.excerpt}
+              </Reveal>
+            }
+          </div>
+          {featured.readNowLabel &&
+            <Reveal
+              direction="up"
+              className="flex md:items-start items-center md:justify-start justify-center"
             >
-              {featured.readNowLabel}
-            </Link>
-          </div>
-
-          <div className="relative h-[357px] w-[324px] shrink-0 bg-gray300 lg:ml-auto lg:h-[750px] lg:min-w-0 lg:flex-1 lg:self-stretch">
-            {featured.imageSrc ? (
-              <div className="absolute left-0 top-[2px] size-full overflow-hidden lg:left-[38px] lg:h-[746px] lg:w-[746px] lg:max-w-[calc(100%-38px)]">
-                <Image
-                  src={featured.imageSrc}
-                  alt={featured.imageAlt}
-                  width={746}
-                  height={932}
-                  loading="lazy"
-                  fetchPriority="low"
-                  className="absolute left-0 top-[0.03%] h-[124.96%] w-full max-w-none object-cover object-top"
-                  sizes="(max-width: 1024px) 100vw, 746px"
-                />
-              </div>
-            ) : null}
-          </div>
+              <Link
+                href={featured.href}
+                className={`relative cursor-pointer border-b-[1.5px] border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-darkMagenta after:transition-all after:duration-300 hover:border-darkMagenta hover:text-darkMagenta hover:after:w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2`}
+              >
+                {featured.readNowLabel}
+              </Link>
+            </Reveal>
+          }
         </div>
+        {featured.imageSrc &&
+          <ScrollReveal
+            delayMs={180}
+            className="relative h-auto w-full max-w-[305px] flex-1 md:max-w-[746px]"
+          >
+            <ResponsiveImage
+              desktopSrc={featured.imageSrc || ''}
+              // mobileSrc={featured.mobileUrl}
+              alt={featured.imageAlt}
+              width={746}
+              height={600}
+              sizes="(max-width: 768px) 305px, 746px"
+              className="size-full object-contain object-right"
+            />
+          </ScrollReveal>
+        }
       </div>
     </section>
   );

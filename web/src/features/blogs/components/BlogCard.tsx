@@ -11,7 +11,7 @@ export function BlogCard({ post }: BlogCardProps) {
     <article className="flex min-w-0 flex-1 flex-col items-start gap-4">
       <Link
         href={post.href}
-        className="relative block h-[280px] w-full shrink-0 overflow-hidden bg-gray300 sm:h-[360px] md:h-[496px]"
+        className="relative block w-full shrink-0 overflow-hidden bg-gray300 xl:h-[496px] lg:h-[400px] md:h-[320px] sm:h-[300px] h-[350px]"
       >
         {post.imageSrc ? (
           <Image
@@ -29,7 +29,7 @@ export function BlogCard({ post }: BlogCardProps) {
           className="w-full min-h-[calc(16px*1.1*2)] md:min-h-[calc(20px*1.1*2)]"
         >
           <h2
-            className="line-clamp-2 break-words leading-110 text-darkblack max-md:font-gill max-md:text-base max-md:font-normal md:text-h4-light"
+            className="line-clamp-2 break-words leading-110 text-darkblack  md:font-larken font-gill lg:text-xl md:text-lg text-base md:font-light font-normal"
           >
             {post.title}
           </h2>
