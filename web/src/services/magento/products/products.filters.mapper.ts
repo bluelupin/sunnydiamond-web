@@ -6,6 +6,7 @@ import { resolveDiamondShapeFacetOption } from "@/features/jewellery-product/uti
 import { resolveFancyColourFacetOption } from "@/features/jewellery-product/utils/fancyColourListing";
 import { resolveOccasionFacetOption } from "@/features/jewellery-product/utils/occasionListing";
 import { formatMagentoFacetLabel, normalizeGemstoneTypeLabel } from "./magentoAttribute.utils";
+import { getMagentoPriceFilterTaxMultiplier } from "@/services/magento/config";
 import {
   isAllCategoriesSelected,
   isAllMetalPuritiesSelected,
@@ -76,25 +77,42 @@ function resolveSelectedGemstoneTypeValues(
     .filter(Boolean);
 }
 
-/** Magento price ranges treat equal bounds as empty; widen `to` by 1 for exact INR matches. */
+/** Convert PLP display / final price → Magento catalog search indexed price. */
+export function toMagentoIndexedPrice(displayPrice: number): number {
+  return displayPrice / getMagentoPriceFilterTaxMultiplier();
+}
+
+/**
+ * Build Magento `price: { from, to }` from UI amounts (final / incl. tax).
+ *
+ * Magento's search index stores excl-tax prices while PLP cards show `final_price`
+ * (incl. tax). Equal from/to also tends to return no hits, so exact matches use a
+ * small band around the indexed amount; the listing then keeps products whose
+ * rounded final price matches the UI.
+ */
 export function buildMagentoPriceFilterRange(
   minPrice: number,
   maxPrice: number,
 ): { from: string; to: string } {
-  const from = Math.round(minPrice);
-  const to = Math.round(maxPrice);
+  const fromDisplay = Math.round(minPrice);
+  const toDisplay = Math.round(maxPrice);
 
-  if (from === to) {
-    // Widen the Magento interval, then refine to an exact price client-side.
+  if (fromDisplay === toDisplay) {
+    const indexed = toMagentoIndexedPrice(fromDisplay);
     return {
-      from: String(from),
-      to: String(from + 1),
+      from: String(Math.max(0, Math.floor(indexed) - 1)),
+      // Exclusive-friendly upper bound around the indexed excl-tax amount.
+      to: String(Math.ceil(indexed) + 1),
     };
   }
 
+  const fromIndexed = toMagentoIndexedPrice(fromDisplay);
+  const toIndexed = toMagentoIndexedPrice(toDisplay);
+
   return {
-    from: String(from),
-    to: String(to),
+    from: String(Math.max(0, Math.floor(fromIndexed))),
+    // `to` is often exclusive in Magento search — pad so display max stays inclusive.
+    to: String(Math.ceil(toIndexed) + 1),
   };
 }
 

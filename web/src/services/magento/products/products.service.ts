@@ -27,6 +27,7 @@ import {
   createEmptyFilterState,
   getExactJewelleryPriceFilter,
   getJewelleryListingFiltersKey,
+  isDefaultPriceRange,
   PAGE_SIZE,
 } from "@/features/jewellery-product/data/filters";
 import { measureJewelleryPlpGraphql } from "@/features/jewellery-product/utils/jewelleryPlpPerformance";
@@ -354,11 +355,23 @@ function refineListingProductsForExactPrice(
   facets: JewelleryFilterFacets,
 ): JewelleryListingProduct[] {
   const exactPrice = getExactJewelleryPriceFilter(filters, facets);
-  if (exactPrice == null) {
+  if (exactPrice != null) {
+    return products.filter((product) => Math.round(product.price) === exactPrice);
+  }
+
+  if (isDefaultPriceRange(filters, facets)) {
     return products;
   }
 
-  return products.filter((product) => Math.round(product.price) === exactPrice);
+  // Magento filters on excl-tax index amounts; keep only products whose displayed
+  // final price falls in the UI range the shopper entered.
+  const minPrice = Math.round(filters.minPrice);
+  const maxPrice = Math.round(filters.maxPrice);
+
+  return products.filter((product) => {
+    const displayPrice = Math.round(product.price);
+    return displayPrice >= minPrice && displayPrice <= maxPrice;
+  });
 }
 
 function resolveListingTotalCount(
@@ -367,7 +380,12 @@ function resolveListingTotalCount(
   filters: JewelleryFilterState,
   facets: JewelleryFilterFacets,
 ): number {
-  return getExactJewelleryPriceFilter(filters, facets) != null ? products.length : apiTotalCount;
+  // Client refine runs for any active price filter (tax index ≠ display price).
+  if (!isDefaultPriceRange(filters, facets)) {
+    return products.length;
+  }
+
+  return apiTotalCount;
 }
 
 /** Fetches the first PLP page ({@link PAGE_SIZE} products) with facets. */

@@ -14,6 +14,16 @@ export function getMagentoGraphqlUrl(): string {
 export const MAGENTO_DEFAULT_STORE_CODE =
   process.env.NEXT_PUBLIC_MAGENTO_STORE_CODE?.trim() || "default";
 
+/**
+ * PLP cards show Magento `final_price` (incl. tax). Catalog search `price`
+ * filters use the indexed excl-tax amount. Sunny Diamonds jewellery GST is 3%,
+ * so display÷1.03 matches the filter index (verified on Diya ring, etc.).
+ */
+export function getMagentoPriceFilterTaxMultiplier(): number {
+  const raw = Number(process.env.NEXT_PUBLIC_MAGENTO_PRICE_FILTER_TAX_MULTIPLIER ?? "1.03");
+  return Number.isFinite(raw) && raw > 0 ? raw : 1.03;
+}
+
 /** Server-side revalidation for Magento catalog reads (categories change infrequently). */
 export const MAGENTO_CATALOG_REVALIDATE_SECONDS = Number(
   process.env.MAGENTO_CATALOG_REVALIDATE_SECONDS ?? 3600,
