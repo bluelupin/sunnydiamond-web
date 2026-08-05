@@ -13,25 +13,36 @@ export function filterBlogPosts(posts: BlogPost[], category: string): BlogPost[]
   return posts.filter((post) => post.category === category);
 }
 
-export function parseBlogsListingQuery(
+export function parseBlogsCategoryFromSearchParams(
   searchParams: SearchParams | undefined,
   categories: BlogCategory[],
-): { category: string; limit: number } {
+): string {
   const validCategoryIds = new Set(categories.map((item) => item.id));
 
   const rawCategory =
     typeof searchParams?.category === "string" ? searchParams.category : "all";
+
+  return rawCategory === "all" || validCategoryIds.has(rawCategory)
+    ? rawCategory
+    : "all";
+}
+
+/** True when URL has faceted listing params that should not be indexed. */
+export function hasBlogsListingFilterParams(
+  searchParams: SearchParams | undefined,
+): boolean {
+  return typeof searchParams?.category === "string" && searchParams.category.length > 0;
+}
+
+export function buildBlogsListingPath(
+  searchParams: SearchParams | undefined,
+): string {
   const category =
-    rawCategory === "all" || validCategoryIds.has(rawCategory) ? rawCategory : "all";
+    typeof searchParams?.category === "string" ? searchParams.category.trim() : "";
 
-  const rawLimit =
-    typeof searchParams?.limit === "string"
-      ? Number.parseInt(searchParams.limit, 10)
-      : BLOGS_INITIAL_VISIBLE;
+  if (!category) {
+    return "/blogs";
+  }
 
-  const limit = Number.isFinite(rawLimit)
-    ? Math.max(BLOGS_INITIAL_VISIBLE, rawLimit)
-    : BLOGS_INITIAL_VISIBLE;
-
-  return { category, limit };
+  return `/blogs?category=${encodeURIComponent(category)}`;
 }

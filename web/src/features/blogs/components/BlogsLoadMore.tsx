@@ -1,44 +1,26 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/shared/utils/cn";
-import {
-  BLOGS_LOAD_MORE_STEP,
-} from "../utils/blogsListingQuery";
 
 type BlogsLoadMoreProps = {
-  category: string;
   limit: number;
   total: number;
   buttonLabel: string;
+  onLoadMore: () => void;
 };
 
 const BlogsLoadMore = ({
-  category,
   limit,
   total,
   buttonLabel,
+  onLoadMore,
 }: BlogsLoadMoreProps) => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
   const shownCount = Math.min(limit, total);
   const hasMore = limit < total;
   const progressWidth = Math.min((shownCount / Math.max(total, 1)) * 360, 360);
 
   const handleLoadMore = () => {
-    const params = new URLSearchParams(searchParams?.toString() ?? "");
-    const nextLimit = Math.min(limit + BLOGS_LOAD_MORE_STEP, total);
-    params.set("limit", String(nextLimit));
-
-    if (category !== "all") {
-      params.set("category", category);
-    } else {
-      params.delete("category");
-    }
-
-    const query = params.toString();
-    router.push(query ? `/blogs?${query}` : "/blogs", { scroll: false });
+    onLoadMore();
   };
 
   if (total === 0) {

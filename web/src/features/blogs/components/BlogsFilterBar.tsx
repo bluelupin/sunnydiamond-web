@@ -15,12 +15,9 @@ const BlogsFilterBar = ({ filterLabel, categories }: BlogsFilterBarProps) => {
   const selectedCategory = searchParams?.get("category") ?? "all";
 
   const handleSelectCategory = (categoryId: string) => {
-    const params = new URLSearchParams(searchParams?.toString() ?? "");
-    params.delete("limit");
+    const params = new URLSearchParams();
 
-    if (categoryId === "all") {
-      params.delete("category");
-    } else {
+    if (categoryId !== "all") {
       params.set("category", categoryId);
     }
 

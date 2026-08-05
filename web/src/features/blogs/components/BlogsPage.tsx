@@ -4,10 +4,9 @@ import type { NormalizedBlogsPage } from "@/services/blogs/blogs.types";
 
 type BlogsPageProps = {
   page: NormalizedBlogsPage;
-  searchParams?: Record<string, string | string[] | undefined>;
 };
 
-const BlogsPage = ({ page, searchParams }: BlogsPageProps) => {
+const BlogsPage = ({ page }: BlogsPageProps) => {
   return (
     <>
       <BlogsHeroSection hero={page.hero} />
@@ -17,7 +16,6 @@ const BlogsPage = ({ page, searchParams }: BlogsPageProps) => {
         posts={page.posts}
         featured={page.featured}
         loadMoreButtonLabel={page.loadMore.buttonLabel}
-        searchParams={searchParams}
       />
     </>
   );
