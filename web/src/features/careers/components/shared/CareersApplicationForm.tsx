@@ -639,8 +639,18 @@ const CareersApplicationForm = () => {
               <CareersSearchIcon />
             </div>
           </FormField>
-
-          <div className="flex flex-col gap-4">
+          {skillSearch.trim() &&
+            <div className="w-full flex items-start justify-start">
+              <button
+                type="button"
+                onClick={addLanguage}
+                className="font-gill text-sm font-light leading-110 text-neutral500 underline-offset-2 hover:underline"
+              >
+                Add &quot;{skillSearch.trim()}&quot; as language
+              </button>
+            </div>
+          }
+          <div className="flex flex-col gap-4 items-start">
             <p className={careersFormLabelClassName}>{fields.skillsLabel}</p>
             <div className="flex flex-wrap gap-2">
               {skills.map((skill) => (
@@ -651,15 +661,6 @@ const CareersApplicationForm = () => {
                 />
               ))}
             </div>
-            {skillSearch.trim() ? (
-              <button
-                type="button"
-                onClick={addLanguage}
-                className="font-gill text-sm font-light leading-110 text-neutral500 underline-offset-2 hover:underline"
-              >
-                Add &quot;{skillSearch.trim()}&quot; as language
-              </button>
-            ) : null}
           </div>
 
           <div className="flex flex-col gap-4">

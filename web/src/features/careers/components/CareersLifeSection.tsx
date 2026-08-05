@@ -14,10 +14,10 @@ const CareersLifeSection = ({ lifeAt }: CareersLifeSectionProps) => {
     <section
       id="life-at-sunny"
       aria-labelledby="careers-life-title"
-      className="md:bg-gray300 px-4 md:px-10 md:pt-100 md:pb-100 mt-0 pb-16"
+      className="md:bg-gray300"
     >
-      <div className="flex w-full flex-col gap-6 md:flex-row md:items-stretch md:gap-10">
-        <div className="flex w-full flex-col gap-6 md:max-w-[474px] md:shrink-0 md:gap-10">
+      <div className="flex w-full 2xl:max-w-1920 mx-auto max-w-1440 2xl:px-[60px] lg:px-10 md:px-8 px-4 md:pt-100 md:pb-100 mt-0 pb-16 flex-col gap-6 lg:flex-row lg:items-stretch lg:gap-10">
+        <div className="flex w-full flex-col gap-6 xl:max-w-[474px] max-w-[300px] lg:shrink-0 lg:gap-10">
           <Reveal direction="up">
             <h2
               id="careers-life-title"
@@ -26,8 +26,7 @@ const CareersLifeSection = ({ lifeAt }: CareersLifeSectionProps) => {
               {lifeAt.title}
             </h2>
           </Reveal>
-
-          <Reveal direction="up" className="relative hidden h-[496px] overflow-hidden md:block">
+          <Reveal direction="up" className="relative hidden xl:h-[496px] h-[350px] overflow-hidden lg:block">
             <Image
               src={lifeAt.leftImage.desktopUrl}
               alt={lifeAt.leftImage.alt}
@@ -46,20 +45,20 @@ const CareersLifeSection = ({ lifeAt }: CareersLifeSectionProps) => {
             {lifeAt.description}
           </p>
           {lifeAt.quote ? (
-            <div className="flex w-full items-end gap-2 md:items-center">
+            <div className="flex w-full items-end gap-2 items-center">
               <span
                 className="h-9 w-px shrink-0 bg-darkMagenta md:h-[38px] md:w-[1.5px]"
                 aria-hidden
               />
-              <p className="max-w-full shrink-0 font-gill text-sm font-light leading-110 text-[#696969] md:max-w-[292px] md:text-base md:text-darkblack">
+              <p className="max-w-full shrink-0 font-gill text-sm font-light leading-110 text-[#696969] lg:max-w-[292px] md:text-base md:text-darkblack">
                 &ldquo;{lifeAt.quote}&rdquo;
               </p>
             </div>
           ) : null}
         </Reveal>
 
-        <Reveal direction="up" className="grid grid-cols-2 w-full items-center gap-4 md:hidden">
-          <div className="sm:h-auto h-[226px] w-full">
+        <Reveal direction="up" className="grid grid-cols-2 w-full items-center gap-4 lg:hidden">
+          <div className="lg:h-auto md:h-[400px] sm:h-[350px] h-[226px] w-full">
             <Image
               src={lifeAt.leftImage.mobileUrl}
               alt={lifeAt.leftImage.alt}
@@ -68,7 +67,7 @@ const CareersLifeSection = ({ lifeAt }: CareersLifeSectionProps) => {
               className="h-full w-full object-cover"
             />
           </div>
-          <div className="sm:h-auto h-[200px] w-full">
+          <div className="lg:h-auto md:h-[380px] sm:h-[330px] h-[200px] w-full">
             <Image
               src={lifeAt.rightImage.mobileUrl}
               alt={lifeAt.rightImage.alt}
@@ -78,10 +77,9 @@ const CareersLifeSection = ({ lifeAt }: CareersLifeSectionProps) => {
             />
           </div>
         </Reveal>
-
         <Reveal
           direction="up"
-          className="relative hidden h-[496px] w-[474px] shrink-0 overflow-hidden md:block md:self-start"
+          className="relative hidden xl:h-[496px] h-[350px] xl:w-[474px] w-[300px] shrink-0 overflow-hidden lg:block lg:self-start"
         >
           <Image
             src={lifeAt.rightImage.desktopUrl}

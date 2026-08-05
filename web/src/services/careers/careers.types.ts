@@ -268,6 +268,30 @@ export type StrapiCareerQualificationGroup = {
   description?: string | null;
 };
 
+export type StrapiCareerJobDescriptionSection = {
+  id?: number | string;
+  sectionTitle?: string | null;
+  sectionContent?: string | null;
+};
+
+export type StrapiCareerQualificationsAndExperience = {
+  id?: number | string;
+  sectionTitle?: string | null;
+  education?: StrapiCareerJobDescriptionSection | null;
+  experience?: StrapiCareerJobDescriptionSection | null;
+};
+
+export type StrapiCareerJobDescription = {
+  id?: number | string;
+  jobSummary?: StrapiCareerJobDescriptionSection | null;
+  rolesAndResponsibilities?: StrapiCareerJobDescriptionSection | null;
+  skills?: StrapiCareerJobDescriptionSection | null;
+  whatWeAreLookingFor?: StrapiCareerJobDescriptionSection | null;
+  whyJoinUs?: StrapiCareerJobDescriptionSection | null;
+  additionalInfo?: StrapiCareerJobDescriptionSection | null;
+  qualificationsAndExperience?: StrapiCareerQualificationsAndExperience | null;
+};
+
 export type StrapiCareerOpeningEntity = {
   id?: number | string;
   documentId?: string | null;
@@ -282,7 +306,7 @@ export type StrapiCareerOpeningEntity = {
   experience?: string | null;
   employmentType?: string | null;
   summary?: string | null;
-  jobDescription?: string | null;
+  jobDescription?: StrapiCareerJobDescription | string | null;
   description?: string | null;
   applyCta?: StrapiCareerCtaButton | string | null;
   applyCtaLabel?: string | null;
@@ -399,8 +423,10 @@ export type NormalizedCareerApplicationFlow = {
     jobSummaryHeading: string;
     rolesHeading: string;
     qualificationsHeading: string;
+    skillsHeading: string;
     lookingForHeading: string;
     whyJoinHeading: string;
+    additionalInfoHeading: string;
     shareLabel: string;
     viewJobLabel: string;
     applyModal: {

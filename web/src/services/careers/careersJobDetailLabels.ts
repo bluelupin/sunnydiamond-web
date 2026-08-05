@@ -6,9 +6,11 @@ const JOB_DETAIL_LABEL_FALLBACKS: CareerJobDetailLabels = {
   applyLabel: "Apply Now",
   jobSummaryHeading: "Job Summary",
   rolesHeading: "Roles & Responsibilities",
-  qualificationsHeading: "Qualifications",
+  qualificationsHeading: "Qualifications & Experience",
+  skillsHeading: "Skills",
   lookingForHeading: "What We're Looking For",
-  whyJoinHeading: "Why Join Us",
+  whyJoinHeading: "Why Join Us?",
+  additionalInfoHeading: "Additional Information",
   shareLabel: "Share",
   viewJobLabel: "View Job",
   applyModal: {
@@ -35,9 +37,12 @@ export function resolveCareerJobDetailLabels(
     rolesHeading: jobDetails.rolesHeading || JOB_DETAIL_LABEL_FALLBACKS.rolesHeading,
     qualificationsHeading:
       jobDetails.qualificationsHeading || JOB_DETAIL_LABEL_FALLBACKS.qualificationsHeading,
+    skillsHeading: jobDetails.skillsHeading || JOB_DETAIL_LABEL_FALLBACKS.skillsHeading,
     lookingForHeading:
       jobDetails.lookingForHeading || JOB_DETAIL_LABEL_FALLBACKS.lookingForHeading,
     whyJoinHeading: jobDetails.whyJoinHeading || JOB_DETAIL_LABEL_FALLBACKS.whyJoinHeading,
+    additionalInfoHeading:
+      jobDetails.additionalInfoHeading || JOB_DETAIL_LABEL_FALLBACKS.additionalInfoHeading,
     shareLabel: jobDetails.shareLabel || JOB_DETAIL_LABEL_FALLBACKS.shareLabel,
     viewJobLabel: jobDetails.viewJobLabel || JOB_DETAIL_LABEL_FALLBACKS.viewJobLabel,
     applyModal: {

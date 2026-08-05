@@ -34,7 +34,7 @@ const CareersBespokeInspirationsSection = ({
       />
       <div
         aria-hidden
-        className="absolute inset-0 bg-[radial-gradient(ellipse_at_34%_61%,rgba(244,243,238,0)_0%,rgba(251,250,246,1)_100%)]"
+        className="section-radial absolute inset-0" 
       />
 
       <div className="relative flex flex-col items-center justify-center px-4 py-16 md:py-104">

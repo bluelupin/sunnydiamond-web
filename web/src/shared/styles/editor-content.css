@@ -121,7 +121,7 @@
   padding-bottom: 0;
 }
 
-.editor-content h1::after,
+/* .editor-content h1::after,
 .editor-content h2::after,
 .editor-content h3::after,
 .editor-content h4::after,
@@ -133,7 +133,7 @@
   height: 1px;
   margin-top: var(--ec-heading-gap);
   background-color: var(--ec-border-color);
-}
+} */
 
 .editor-content h1 {
   font-size: var(--ec-h1-size);

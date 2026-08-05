@@ -30,6 +30,8 @@ import type {
   StrapiCareerFilterSectionItem,
   StrapiCareerOpeningsSection,
   StrapiCareerOpeningEntity,
+  StrapiCareerJobDescription,
+  StrapiCareerJobDescriptionSection,
   StrapiCareerQualificationGroup,
   StrapiCareerResponsiveImage,
   StrapiCareerSeo,
@@ -43,6 +45,48 @@ import {
 const cleanText = (value?: string | null): string | undefined => {
   const trimmed = value?.trim();
   return trimmed || undefined;
+};
+
+const cleanHtml = (value?: string | null): string | undefined => {
+  const trimmed = value?.trim();
+  return trimmed || undefined;
+};
+
+const stripHtmlToPlainText = (value?: string | null): string | undefined => {
+  const html = cleanHtml(value);
+  if (!html) return undefined;
+
+  return (
+    html
+      .replace(/<[^>]+>/g, " ")
+      .replace(/&nbsp;/gi, " ")
+      .replace(/&amp;/gi, "&")
+      .replace(/\s+/g, " ")
+      .trim() || undefined
+  );
+};
+
+const mapJobDescriptionSection = (
+  section?: StrapiCareerJobDescriptionSection | null,
+): { title?: string; html?: string } => {
+  if (!section) {
+    return {};
+  }
+
+  return {
+    title: cleanText(section.sectionTitle),
+    html: cleanHtml(section.sectionContent),
+  };
+};
+
+const resolveStructuredJobDescription = (
+  jobDescription?: StrapiCareerJobDescription | string | null,
+): StrapiCareerJobDescription | null => {
+  if (!jobDescription || typeof jobDescription === "string") {
+    return null;
+  }
+
+  return jobDescription;
 };
 
 const coerceArray = <T>(value: unknown): T[] => {
@@ -172,7 +216,7 @@ const mapQualifications = (
   return coerceArray<StrapiCareerQualificationGroup>(groups)
     .map((group) => {
       const label = cleanText(group.label);
-      const text = cleanText(group.text) ?? cleanText(group.description);
+      const text = cleanHtml(group.text) ?? cleanHtml(group.description);
       if (!label || !text) return null;
       return { label, text };
     })
@@ -215,18 +259,52 @@ export const mapCareerOpening = (
   const experienceLabel =
     cleanText(opening.requiredExperience) ?? cleanText(opening.experience);
   const type = normalizeEmploymentType(opening.employmentType);
-  const summary = cleanText(opening.summary);
   const postedAt = resolvePostedAt(opening);
 
   const workplaceLabel =
     cleanText(opening.workplaceLabel) ?? cleanText(opening.workplaceType) ?? "";
 
-  if (!id || !title || !jobCode || !location || !department || !experienceLabel || !type || !summary || !postedAt) {
+  if (!id || !title || !jobCode || !location || !department || !experienceLabel || !type || !postedAt) {
     return null;
   }
-  const mappedQualifications = mapQualifications(opening.qualifications);
-  const descriptionHtml =
-    cleanText(opening.jobDescription) ?? cleanText(opening.description);
+
+  const structuredDescription = resolveStructuredJobDescription(opening.jobDescription);
+  const jobSummarySection = mapJobDescriptionSection(structuredDescription?.jobSummary);
+  const rolesSection = mapJobDescriptionSection(structuredDescription?.rolesAndResponsibilities);
+  const skillsSection = mapJobDescriptionSection(structuredDescription?.skills);
+  const lookingForSection = mapJobDescriptionSection(structuredDescription?.whatWeAreLookingFor);
+  const whyJoinSection = mapJobDescriptionSection(structuredDescription?.whyJoinUs);
+  const additionalInfoSection = mapJobDescriptionSection(structuredDescription?.additionalInfo);
+  const qualificationsGroup = structuredDescription?.qualificationsAndExperience;
+  const educationSection = mapJobDescriptionSection(qualificationsGroup?.education);
+  const experienceSection = mapJobDescriptionSection(qualificationsGroup?.experience);
+
+  const mappedQualificationsFromNested = [
+    educationSection.title && educationSection.html
+      ? { label: educationSection.title, text: educationSection.html }
+      : null,
+    experienceSection.title && experienceSection.html
+      ? { label: experienceSection.title, text: experienceSection.html }
+      : null,
+  ].filter(Boolean) as NonNullable<NormalizedCareerJob["qualifications"]>;
+
+  const mappedQualifications =
+    mappedQualificationsFromNested.length > 0
+      ? mappedQualificationsFromNested
+      : mapQualifications(opening.qualifications);
+
+  const summary =
+    cleanText(opening.summary) ??
+    stripHtmlToPlainText(jobSummarySection.html) ??
+    "";
+
+  const legacyDescriptionHtml =
+    typeof opening.jobDescription === "string"
+      ? cleanHtml(opening.jobDescription)
+      : cleanText(opening.description);
+
+  const descriptionHtml = legacyDescriptionHtml;
+
   const responsibilities = coerceArray<string>(opening.responsibilities)
     .map((item) => cleanText(item))
     .filter(Boolean) as string[];
@@ -249,13 +327,28 @@ export const mapCareerOpening = (
     workplaceLabel,
     responsibilities,
     requirements,
-    jobSummary: cleanText(opening.jobSummary),
-    rolesAndResponsibilities: cleanText(opening.rolesAndResponsibilities),
+    jobSummary: jobSummarySection.html ?? cleanHtml(opening.jobSummary as string | null | undefined),
+    jobSummaryTitle: jobSummarySection.title,
+    rolesAndResponsibilities:
+      rolesSection.html ??
+      cleanHtml(opening.rolesAndResponsibilities as string | null | undefined),
+    rolesTitle: rolesSection.title,
+    skills: skillsSection.html,
+    skillsTitle: skillsSection.title,
     ...(mappedQualifications && mappedQualifications.length > 0
-      ? { qualifications: mappedQualifications }
+      ? {
+          qualifications: mappedQualifications,
+          qualificationsTitle: cleanText(qualificationsGroup?.sectionTitle),
+        }
       : {}),
-    whatWeAreLookingFor: cleanText(opening.whatWeAreLookingFor),
-    whyJoinUs: cleanText(opening.whyJoinUs),
+    whatWeAreLookingFor:
+      lookingForSection.html ??
+      cleanHtml(opening.whatWeAreLookingFor as string | null | undefined),
+    whatWeAreLookingForTitle: lookingForSection.title,
+    whyJoinUs: whyJoinSection.html ?? cleanHtml(opening.whyJoinUs as string | null | undefined),
+    whyJoinUsTitle: whyJoinSection.title,
+    additionalInfo: additionalInfoSection.html,
+    additionalInfoTitle: additionalInfoSection.title,
     descriptionHtml,
     applyLabel:
       resolveCtaLabel(opening.applyCta) ??
@@ -374,8 +467,10 @@ const mapBenefitItem = (
     cleanText(feature.title);
   const description =
     cleanText(feature.FeatureDescription) ?? cleanText(feature.description);
+  const image = mapBenefitFeatureImage(feature);
   const iconSrc =
     resolveCmsMediaUrl(feature.icon) ??
+    image?.desktopUrl ??
     resolveCmsMediaUrl(feature.featureImage) ??
     resolveCmsMediaUrl(feature.image?.desktopImage) ??
     resolveCmsMediaUrl(feature.image?.mobileImage);
@@ -387,6 +482,7 @@ const mapBenefitItem = (
     label,
     description,
     iconSrc,
+    ...(image ? { image } : {}),
   };
 };
 
@@ -588,8 +684,10 @@ const mapApplicationFlow = (
       jobSummaryHeading: requiredStrings.jobSummaryHeading!,
       rolesHeading: requiredStrings.rolesHeading!,
       qualificationsHeading: requiredStrings.qualificationsHeading!,
+      skillsHeading: requiredStrings.skillsHeading!,
       lookingForHeading: requiredStrings.lookingForHeading!,
       whyJoinHeading: requiredStrings.whyJoinHeading!,
+      additionalInfoHeading: requiredStrings.additionalInfoHeading!,
       shareLabel: requiredStrings.shareLabel!,
       viewJobLabel: requiredStrings.viewJobLabel!,
       applyModal: {

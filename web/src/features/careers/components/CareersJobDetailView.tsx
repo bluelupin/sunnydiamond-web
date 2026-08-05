@@ -16,6 +16,23 @@ export type CareersJobDetailViewProps = {
   shareUrl?: string;
 };
 
+type JobDetailContentSectionProps = {
+  title: string;
+  html: string;
+};
+
+const JobDetailContentSection = ({ title, html }: JobDetailContentSectionProps) => (
+  <div className="bg-gray300 p-4 md:p-6 space-y-4">
+    <div className="space-y-4">
+      <h2 className="font-larken font-light leading-110 text-darkblack text-xl">
+        {title}
+      </h2>
+      <div className="h-px w-full bg-neutral300" aria-hidden />
+    </div>
+    <div className="editor-content" dangerouslySetInnerHTML={{ __html: html }} />
+  </div>
+);
+
 const CareersJobDetailView = ({
   job,
   jobDetails,
@@ -45,6 +62,77 @@ const CareersJobDetailView = ({
     }
   };
 
+  const hasStructuredContent = [
+    job.jobSummary,
+    job.rolesAndResponsibilities,
+    job.skills,
+    job.whatWeAreLookingFor,
+    job.whyJoinUs,
+    job.additionalInfo,
+    ...(job.qualifications?.map((group) => group.text) ?? []),
+  ].some(Boolean);
+
+  const contentSections = [
+    job.jobSummary
+      ? {
+        key: "job-summary",
+        title: job.jobSummaryTitle ?? jobDetails.jobSummaryHeading,
+        html: job.jobSummary,
+      }
+      : null,
+    job.rolesAndResponsibilities
+      ? {
+        key: "roles",
+        title: job.rolesTitle ?? jobDetails.rolesHeading,
+        html: job.rolesAndResponsibilities,
+      }
+      : null,
+    job.qualifications && job.qualifications.length > 0
+      ? {
+        key: "qualifications",
+        title: job.qualificationsTitle ?? jobDetails.qualificationsHeading,
+        html: job.qualifications
+          .map((group) => `<h3>${group.label}</h3>${group.text}`)
+          .join(""),
+      }
+      : null,
+    job.skills
+      ? {
+        key: "skills",
+        title: job.skillsTitle ?? jobDetails.skillsHeading,
+        html: job.skills,
+      }
+      : null,
+    job.whatWeAreLookingFor
+      ? {
+        key: "looking-for",
+        title: job.whatWeAreLookingForTitle ?? jobDetails.lookingForHeading,
+        html: job.whatWeAreLookingFor,
+      }
+      : null,
+    job.whyJoinUs
+      ? {
+        key: "why-join",
+        title: job.whyJoinUsTitle ?? jobDetails.whyJoinHeading,
+        html: job.whyJoinUs,
+      }
+      : null,
+    job.additionalInfo
+      ? {
+        key: "additional-info",
+        title: job.additionalInfoTitle ?? jobDetails.additionalInfoHeading,
+        html: job.additionalInfo,
+      }
+      : null,
+    !hasStructuredContent && job.descriptionHtml
+      ? {
+        key: "legacy-description",
+        title: jobDetails.jobSummaryHeading,
+        html: job.descriptionHtml,
+      }
+      : null,
+  ].filter(Boolean) as Array<{ key: string; title: string; html: string }>;
+
   return (
     <section
       id="job-details"
@@ -61,15 +149,14 @@ const CareersJobDetailView = ({
           />
         </Reveal>
 
-        {job.descriptionHtml ? (
-          <Reveal direction="up">
-            <div className="bg-gray300 p-4 md:p-6">
-              <div
-                className="editor-content"
-                dangerouslySetInnerHTML={{ __html: job.descriptionHtml }}
-              />
-            </div>
-          </Reveal>
+        {contentSections.length > 0 ? (
+          <div className="flex flex-col gap-6">
+            {contentSections.map((section) => (
+              <Reveal key={section.key} direction="up">
+                <JobDetailContentSection title={section.title} html={section.html} />
+              </Reveal>
+            ))}
+          </div>
         ) : null}
 
         <Reveal direction="up" className="flex w-full justify-start">

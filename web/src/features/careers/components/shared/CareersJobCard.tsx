@@ -72,10 +72,10 @@ const CareersJobCard = ({
           cn(
             "gap-6 bg-gray200 p-4 md:bg-gray300 md:p-6",
             isInteractive &&
-              "group cursor-pointer transition-colors md:hover:flex-row md:hover:items-start md:hover:justify-between",
+              "group cursor-pointer transition-colors md:flex-row md:items-start md:justify-between",
           ),
         isListing &&
-          "group cursor-pointer gap-6 bg-gray300 p-4 transition-colors md:bg-gray200 md:p-6 md:hover:flex-row md:hover:items-start md:hover:justify-between md:hover:bg-gray300",
+          "group cursor-pointer gap-6 bg-gray300 p-4 transition-colors md:bg-gray200 md:p-6 md:flex-row md:items-start md:justify-between md:hover:bg-gray300",
         !isLanding && !isListing && "gap-6 bg-gray200 p-4 md:gap-8 md:p-8",
         className,
       )}
@@ -120,8 +120,8 @@ const CareersJobCard = ({
           <CareersPostedLabel
             postedAt={job.postedAt}
             className={cn(
-              isLanding && "hidden md:block",
-              isListing && "hidden md:block",
+              isLanding && "hidden lg:block",
+              isListing && "hidden lg:block",
               isListing ? postedDesktopClass : "",
               !isListing &&
                 (isLanding ? postedDesktopClass : "text-sm text-neutral500 md:text-base"),
@@ -139,7 +139,7 @@ const CareersJobCard = ({
           }}
           className={cn(
             viewJobButtonClass,
-            isInteractive && "md:hidden md:group-hover:inline-flex",
+            isInteractive && "lg:hidden lg:group-hover:inline-flex",
             !isLanding &&
               !isListing &&
               "md:border md:border-darkblack md:bg-transparent md:px-8 md:text-darkblack md:hover:bg-darkblack md:hover:text-white",

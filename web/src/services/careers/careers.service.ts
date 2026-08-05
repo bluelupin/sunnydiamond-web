@@ -90,8 +90,9 @@ export const getCareerOpeningsRaw = cache(async (signal?: AbortSignal) => {
   );
 });
 
-const CAREER_OPENING_BY_JOB_ID_QUERY = (jobId: string) =>
-  `filters[jobID][$eq]=${encodeURIComponent(jobId)}` +
+const CAREER_OPENING_BY_IDENTIFIER_QUERY = (identifier: string) =>
+  `filters[$or][0][jobID][$eq]=${encodeURIComponent(identifier)}` +
+  `&filters[$or][1][slug][$eq]=${encodeURIComponent(identifier)}` +
   "&filters[isActive][$eq]=true" +
   "&populate=*";
 
@@ -102,7 +103,7 @@ export const getCareerOpeningByJobId = cache(
 
     try {
       const openings = await apiFetch<StrapiCareerOpeningEntity[]>(
-        `${STRAPI_ENDPOINTS.careerOpenings}?${CAREER_OPENING_BY_JOB_ID_QUERY(trimmed)}`,
+        `${STRAPI_ENDPOINTS.careerOpenings}?${CAREER_OPENING_BY_IDENTIFIER_QUERY(trimmed)}`,
         { signal },
       );
       const opening = openings[0];

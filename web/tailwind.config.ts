@@ -387,6 +387,7 @@ export default {
       },
       backgroundImage: {
         giftingBg: "url('../assets/giftingBg.png')",
+         "section-radial":"radial-gradient(ellipse 120% 60% at center, rgba(255,255,255,0.45) 0%, #ffffff 35%, rgba(255,255,255,0) 70%, #ffffff 100%)",
       },
       keyframes: {
         "accordion-down": {

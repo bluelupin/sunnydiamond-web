@@ -20,10 +20,19 @@ export type CareerJob = {
   responsibilities: readonly string[];
   requirements: readonly string[];
   jobSummary?: string;
+  jobSummaryTitle?: string;
   rolesAndResponsibilities?: string;
+  rolesTitle?: string;
+  skills?: string;
+  skillsTitle?: string;
   qualifications?: readonly CareerQualificationGroup[];
+  qualificationsTitle?: string;
   whatWeAreLookingFor?: string;
+  whatWeAreLookingForTitle?: string;
   whyJoinUs?: string;
+  whyJoinUsTitle?: string;
+  additionalInfo?: string;
+  additionalInfoTitle?: string;
   descriptionHtml?: string;
   applyLabel?: string;
   isNew?: boolean;
@@ -50,6 +59,13 @@ export type CareerBenefit = {
   label: string;
   description: string;
   iconSrc?: string;
+  image?: {
+    desktopUrl: string;
+    mobileUrl: string;
+    alt: string;
+    width?: number;
+    height?: number;
+  };
 };
 
 export type CareerLifeHighlight = {

@@ -332,7 +332,7 @@
     pointer-events: none;
   }
 
-  .btn-border-slide > * {
+  .btn-border-slide>* {
     position: relative;
     z-index: 1;
     transition: color 0.15s ease;
@@ -368,7 +368,7 @@
     transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  .btn-dark-slide > * {
+  .btn-dark-slide>* {
     position: relative;
     z-index: 2;
     transition: color 0.2s ease;
@@ -389,7 +389,7 @@
       transition-delay: 0.18s, 0s;
     }
 
-    .btn-border-slide:hover > * {
+    .btn-border-slide:hover>* {
       color: var(--btn-border-slide-text) !important;
       transition-delay: 0.18s;
     }
@@ -403,7 +403,7 @@
       transition-delay: 0.18s;
     }
 
-    .btn-dark-slide:hover > * {
+    .btn-dark-slide:hover>* {
       color: var(--btn-dark-slide-text) !important;
       transition-delay: 0.18s;
     }
@@ -431,7 +431,7 @@
       color: var(--btn-border-slide-text) !important;
     }
 
-    .btn-border-slide:hover > * {
+    .btn-border-slide:hover>* {
       color: var(--btn-border-slide-text) !important;
     }
 
@@ -447,7 +447,7 @@
       color: var(--btn-dark-slide-text) !important;
     }
 
-    .btn-dark-slide:hover > * {
+    .btn-dark-slide:hover>* {
       color: var(--btn-dark-slide-text) !important;
     }
   }
@@ -499,11 +499,11 @@
     line-height: 1.45;
   }
 
-  .blog-cms-html > *:first-child {
+  .blog-cms-html>*:first-child {
     margin-top: 0;
   }
 
-  .blog-cms-html > *:last-child {
+  .blog-cms-html>*:last-child {
     margin-bottom: 0;
   }
 
@@ -567,6 +567,7 @@
   }
 
   @media (min-width: 768px) {
+
     .blog-cms-html ul,
     .blog-cms-html ol {
       padding-left: 1.875rem;
@@ -636,6 +637,7 @@
   }
 
   @media (hover: hover) and (pointer: fine) {
+
     .blog-cms-html a:hover,
     .blog-cms-heading a:hover {
       color: var(--link-underline-hover, #ab863b);
@@ -863,4 +865,8 @@
     background-image: url("https://d1gf9vo4d2b63b.cloudfront.net/cms/education_certificate_bg_mobile_d302ab1faa.svg");
     background-position: center bottom;
   }
+}
+
+.section-radial {
+  background: radial-gradient(ellipse 120% 60% at center, #ffffff73 0%, #ffffff 100% 35%, rgba(255, 255, 255, 0) 70%, #ffffff 100%);
 }

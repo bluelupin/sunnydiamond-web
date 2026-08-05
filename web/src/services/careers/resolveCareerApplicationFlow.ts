@@ -95,7 +95,7 @@ const APPLICATION_FLOW_FALLBACKS: NormalizedCareerApplicationFlow = {
     noRoleSelected: "Please select a role to continue your application.",
     shareLabel: "Share",
     fields: APPLICATION_FORM_FIELD_FALLBACKS,
-    genderOptions: ["Male", "Female", "Other", "Prefer not to say"],
+    genderOptions: ["Male", "Female", "Other"],
     workExperienceOptions: ["0-1 years", "1-3 years", "3-5 years", "5+ years"],
     noticePeriodOptions: ["Immediate", "15 days", "30 days", "60 days", "90 days"],
     employeeRelationOptions: ["Yes", "No"],
