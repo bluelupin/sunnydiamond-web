@@ -15,7 +15,7 @@ const blogHeadingClassName =
   "blog-cms-heading font-larken text-2xl font-light leading-110 text-darkblack md:text-32";
 
 const blogHtmlClassName =
-  "blog-cms-html font-gill text-base font-light text-darkblack md:text-[20px]";
+  "blog-cms-html font-gill text-base md:font-light font-normal text-darkblack md:text-xl";
 
 function renderBlock(block: BlogContentBlock) {
   switch (block.type) {

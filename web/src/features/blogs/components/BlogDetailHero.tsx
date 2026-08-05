@@ -11,7 +11,7 @@ const BlogDetailHero = ({ heroImage }: BlogDetailHeroProps) => {
   }
 
   return (
-    <div className="relative w-full shrink-0 overflow-hidden bg-white">
+    <div className="relative w-full shrink-0 overflow-hidden bg-white xl:mb-16 lg:mb-10 mb-6">
       <Image
         src={heroImage.src}
         alt={heroImage.alt}
