@@ -1,6 +1,6 @@
 "use client";
 
-import { Headphones, Share2 } from "lucide-react";
+import { Headphones, Share2, Volume1 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { cn } from "@/shared/utils/cn";
 import { useBrowserTextToSpeech } from "../hooks/useBrowserTextToSpeech";
@@ -138,20 +138,20 @@ const BlogDetailSidebar = ({
           aria-pressed={isSpeaking}
           aria-label={isSpeaking ? "Stop listening to article" : "Listen to article"}
           className={cn(
-            "flex h-14 flex-1 items-center justify-center gap-2 border border-neutral300 px-7 text-t4-regular uppercase leading-110 text-darkblack transition-colors hover:border-darkblack",
+            "flex h-14 flex-1 items-center justify-center gap-2 border border-neutral300 px-7 text-sm uppercase leading-110 text-darkblack transition-colors hover:border-darkblack",
             (!isSupported || !speechText.trim()) && "pointer-events-none opacity-50",
             isSpeaking && "border-darkblack",
           )}
         >
-          <Headphones className="size-6 shrink-0" aria-hidden />
+          <Volume1 className="size-6 shrink-0" strokeWidth="1" aria-hidden />
           {isSpeaking ? "STOP" : "LISTEN"}
         </button>
         <button
           type="button"
           onClick={handleShare}
-          className="flex h-14 flex-1 items-center justify-center gap-2 border border-neutral300 px-7 text-t4-regular uppercase leading-110 text-darkblack transition-colors hover:border-darkblack"
+          className="flex h-14 flex-1 items-center justify-center gap-2 border border-neutral300 px-7 text-sm uppercase leading-110 text-darkblack transition-colors hover:border-darkblack"
         >
-          <Share2 className="size-6 shrink-0" aria-hidden />
+          <Share2 className="size-6 shrink-0" strokeWidth="1" aria-hidden />
           SHARE
         </button>
       </div>
