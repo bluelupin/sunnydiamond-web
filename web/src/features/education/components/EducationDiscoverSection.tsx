@@ -1,9 +1,9 @@
-import Link from "next/link";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { cn } from "@/shared/utils/cn";
 import type { NormalizedEducationCtaBanner } from "@/services/education/learn-about-diamonds-page.types";
 import { educationDiscoverSpec } from "../data/content";
 import Reveal from "@/shared/Animation/Reveal";
+import EducationDiscoverJourneyCta from "./EducationDiscoverJourneyCta";
 
 const spec = educationDiscoverSpec;
 const stepsSpec = spec.steps;
@@ -46,14 +46,13 @@ const DiscoverSteps = ({ steps }: { steps: string[] }) => (
 
 type DiscoverContentProps = Pick<
   NormalizedEducationCtaBanner,
-  "heading" | "subheading" | "ctaLabel" | "ctaHref" | "steps"
+  "heading" | "subheading" | "ctaLabel" | "steps"
 >;
 
 const DiscoverContent = ({
   heading,
   subheading,
   ctaLabel,
-  ctaHref,
   steps,
 }: DiscoverContentProps) => (
   <>
@@ -67,14 +66,7 @@ const DiscoverContent = ({
       {subheading}
     </p>
     {steps.length > 0 ? <DiscoverSteps steps={steps} /> : null}
-    {ctaLabel && ctaHref ? (
-      <Link
-        href={ctaHref}
-        className="btn-border-slide inline-flex h-14 min-w-[199px] shrink-0 items-center justify-center whitespace-nowrap border border-neutral300 bg-white px-7 py-5 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
-      >
-        <span className="relative z-[1]">{ctaLabel}</span>
-      </Link>
-    ) : null}
+    {ctaLabel ? <EducationDiscoverJourneyCta label={ctaLabel} /> : null}
   </>
 );
 
@@ -115,7 +107,6 @@ const EducationDiscoverSection = ({ ctaBanner }: EducationDiscoverSectionProps) 
             heading={ctaBanner.heading}
             subheading={ctaBanner.subheading}
             ctaLabel={ctaBanner.ctaLabel}
-            ctaHref={ctaBanner.ctaHref}
             steps={ctaBanner.steps}
           />
         </Reveal>
