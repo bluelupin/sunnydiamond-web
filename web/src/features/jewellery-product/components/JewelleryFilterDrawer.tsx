@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
@@ -19,6 +19,7 @@ import {
   getAvailableMetalTypeLabels,
   hasFilterChanges,
   hasMagentoFilterFacets,
+  isDefaultPriceRange,
   normalizeJewelleryPriceRange,
   parseJewelleryPriceInput,
 } from "../data/filters";
@@ -83,6 +84,7 @@ const JewelleryFilterDrawer = ({
   const [minInputFocused, setMinInputFocused] = useState(false);
   const [maxInputFocused, setMaxInputFocused] = useState(false);
   const [maxInputValue, setMaxInputValue] = useState("");
+  const wasOpenRef = useRef(false);
 
   const getMaxAmountDisplayValue = (
     maxPrice: number,
@@ -97,10 +99,25 @@ const JewelleryFilterDrawer = ({
   };
 
   useEffect(() => {
-    if (open) {
+    const justOpened = open && !wasOpenRef.current;
+
+    if (justOpened) {
       setDraft(buildDrawerDraft(appliedFilters, facets));
       setMaxInputFocused(false);
+    } else if (open && hasMagentoFilterFacets(facets)) {
+      // Facets can load after the drawer opens — refresh bounds without clearing selections.
+      setDraft((current) => {
+        const defaults = createDefaultFilterState(facets);
+
+        return {
+          ...current,
+          minPrice: isDefaultPriceRange(current, facets) ? defaults.minPrice : current.minPrice,
+          maxPrice: isDefaultPriceRange(current, facets) ? defaults.maxPrice : current.maxPrice,
+        };
+      });
     }
+
+    wasOpenRef.current = open;
   }, [open, appliedFilters, facets]);
 
   useEffect(() => {

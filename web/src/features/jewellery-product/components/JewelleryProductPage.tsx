@@ -19,6 +19,7 @@ import {
   PAGE_SIZE,
   hasActiveFilters,
   hasMagentoFilterFacets,
+  isDefaultPriceRange,
 } from "../data/filters";
 import {
   buildJewelleryCategoryHref,
@@ -219,8 +220,24 @@ const JewelleryProductPage = ({
     const priceParamsChanged = lastPriceParamsRef.current !== priceParamsKey;
     lastPriceParamsRef.current = priceParamsKey;
 
-    const buildFiltersFromUrl = () => {
+    const buildFiltersFromUrl = (preserve?: JewelleryFilterState) => {
       let nextDraft = createDefaultFilterState(facets);
+
+      if (preserve) {
+        nextDraft = {
+          ...nextDraft,
+          categories: preserve.categories,
+          metalTypes: preserve.metalTypes,
+          metalPurities: preserve.metalPurities,
+          gemstoneType: preserve.gemstoneType,
+        };
+
+        if (!isDefaultPriceRange(preserve, facets)) {
+          nextDraft.minPrice = preserve.minPrice;
+          nextDraft.maxPrice = preserve.maxPrice;
+        }
+      }
+
       if (occasionOption) {
         nextDraft.occasion = occasionOption.value;
       }
@@ -251,8 +268,7 @@ const JewelleryProductPage = ({
       fancyColourChanged ||
       priceParamsChanged
     ) {
-      const nextDraft = buildFiltersFromUrl();
-      setFilters(nextDraft);
+      setFilters((current) => buildFiltersFromUrl(current));
     }
   }, [
     facets,
