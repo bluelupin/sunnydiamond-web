@@ -14,6 +14,7 @@ import {
   EMPTY_JEWELLERY_FILTER_FACETS,
   enrichFacetsWithNavCategories,
   mapMagentoAggregationsToFacets,
+  mergeGemstoneTypeFacetOptions,
 } from "./products.filters.mapper";
 import {
   getMagentoProductAttributeOptions,
@@ -208,6 +209,37 @@ async function enrichFacetsWithOccasionAttributeOptions(
   }
 }
 
+async function enrichFacetsWithGemstoneAttributeOptions(
+  filters: JewelleryFilterState,
+  facets: JewelleryFilterFacets,
+  signal?: AbortSignal,
+): Promise<JewelleryFilterFacets> {
+  const gemstoneType = filters.gemstoneType.trim();
+  if (!gemstoneType) {
+    return facets;
+  }
+
+  try {
+    const magentoGemstones = await getMagentoProductAttributeOptions("sd_gemstone_type", signal);
+    return {
+      ...facets,
+      gemstoneTypes: mergeGemstoneTypeFacetOptions(facets.gemstoneTypes, magentoGemstones),
+    };
+  } catch {
+    // Fall through — filter builder uses aggregation values when metadata is unavailable.
+    return facets;
+  }
+}
+
+async function enrichFacetsWithDrawerAttributeOptions(
+  filters: JewelleryFilterState,
+  facets: JewelleryFilterFacets,
+  signal?: AbortSignal,
+): Promise<JewelleryFilterFacets> {
+  const withOccasions = await enrichFacetsWithOccasionAttributeOptions(filters, facets, signal);
+  return enrichFacetsWithGemstoneAttributeOptions(filters, withOccasions, signal);
+}
+
 async function fetchMagentoJewelleryProducts({
   categoryUrlKey,
   page = 1,
@@ -233,8 +265,8 @@ async function fetchMagentoJewelleryProducts({
     ? navCategories.find((category) => category.urlKey === categoryUrlKey)?.categoryId ?? null
     : null;
 
-  // Resolve CMS/URL occasion slugs (e.g. valentine) via live Magento attribute options.
-  const facetsForFilter = await enrichFacetsWithOccasionAttributeOptions(
+  // Resolve CMS/URL slugs and drawer labels via live Magento attribute options.
+  const facetsForFilter = await enrichFacetsWithDrawerAttributeOptions(
     filters,
     facets,
     signal,
@@ -340,6 +372,10 @@ async function fetchMagentoJewelleryProducts({
     facets: {
       ...responseFacets,
       occasions: mergeFacetOptions(responseFacets.occasions, facetsForFilter.occasions),
+      gemstoneTypes: mergeGemstoneTypeFacetOptions(
+        responseFacets.gemstoneTypes,
+        facetsForFilter.gemstoneTypes,
+      ),
     },
   };
 }

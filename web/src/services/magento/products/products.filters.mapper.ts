@@ -1,9 +1,10 @@
 import type { MagentoAggregation } from "./magentoProduct.types";
-import type { JewelleryFilterFacets } from "@/types/magento/jewelleryListing";
+import type { JewelleryFilterFacets, JewelleryFilterFacetOption } from "@/types/magento/jewelleryListing";
 import type { JewelleryFilterState } from "@/features/jewellery-product/types";
 import type { JewelleryNavCategory } from "@/types/magento/jewelleryNav";
 import { resolveDiamondShapeFacetOption } from "@/features/jewellery-product/utils/diamondShapeListing";
 import { resolveFancyColourFacetOption } from "@/features/jewellery-product/utils/fancyColourListing";
+import { resolveGemstoneTypeFacetOption } from "@/features/jewellery-product/utils/gemstoneListing";
 import { resolveOccasionFacetOption } from "@/features/jewellery-product/utils/occasionListing";
 import { formatMagentoFacetLabel, normalizeGemstoneTypeLabel } from "./magentoAttribute.utils";
 import { getMagentoPriceFilterTaxMultiplier } from "@/services/magento/config";
@@ -66,7 +67,7 @@ function resolveSelectedGemstoneTypeValues(
   selectedLabel: string,
   facets: JewelleryFilterFacets,
 ): string[] {
-  const option = facets.gemstoneTypes.find((gemstoneType) => gemstoneType.label === selectedLabel);
+  const option = resolveGemstoneTypeFacetOption(selectedLabel, facets.gemstoneTypes);
   if (!option) {
     return [];
   }
@@ -168,7 +169,14 @@ export function buildMagentoProductsFilter({
   }
 
   if (filters.gemstoneType) {
-    const gemstoneValues = resolveSelectedGemstoneTypeValues(filters.gemstoneType, facets);
+    let gemstoneValues = resolveSelectedGemstoneTypeValues(filters.gemstoneType, facets);
+
+    if (gemstoneValues.length === 0) {
+      const rawGemstone = filters.gemstoneType.trim();
+      if (rawGemstone) {
+        gemstoneValues = [rawGemstone];
+      }
+    }
 
     if (gemstoneValues.length > 0) {
       magentoFilter.sd_gemstone_type = { in: gemstoneValues };
@@ -367,6 +375,44 @@ function mapGemstoneTypeOptions(
       count,
     }))
     .sort((left, right) => left.label.localeCompare(right.label));
+}
+
+/** Merge aggregation facets with live Magento attribute options for filter resolution. */
+export function mergeGemstoneTypeFacetOptions(
+  primary: readonly JewelleryFilterFacetOption[],
+  fallback: readonly JewelleryFilterFacetOption[],
+): JewelleryFilterFacetOption[] {
+  if (fallback.length === 0) {
+    return [...primary];
+  }
+
+  const rawOptions: Array<{ label?: string | null; value?: string | null; count?: number | null }> =
+    [];
+
+  for (const option of primary) {
+    const values = option.value
+      .split(",")
+      .map((entry) => entry.trim())
+      .filter(Boolean);
+
+    if (values.length === 0) {
+      continue;
+    }
+
+    for (const value of values) {
+      rawOptions.push({ label: option.label, value, count: option.count });
+    }
+  }
+
+  for (const option of fallback) {
+    rawOptions.push({
+      label: option.label,
+      value: option.value,
+      count: option.count,
+    });
+  }
+
+  return mapGemstoneTypeOptions(rawOptions);
 }
 
 export function enrichFacetsWithNavCategories(
