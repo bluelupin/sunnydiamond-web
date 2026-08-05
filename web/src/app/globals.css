@@ -491,6 +491,125 @@
     height: 125.973%;
   }
 
+  /**
+   * Blog CMS rich text — keep paragraph gaps / links close to the Strapi editor.
+   * Tailwind preflight zeroes `p` margins; these restore CMS-like spacing.
+   */
+  .blog-cms-html {
+    line-height: 1.45;
+  }
+
+  .blog-cms-html > *:first-child {
+    margin-top: 0;
+  }
+
+  .blog-cms-html > *:last-child {
+    margin-bottom: 0;
+  }
+
+  .blog-cms-html p {
+    margin-bottom: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .blog-cms-html p {
+      margin-bottom: 2rem;
+    }
+
+    .blog-cms-html ul,
+    .blog-cms-html ol,
+    .blog-cms-html figure,
+    .blog-cms-html img {
+      margin-bottom: 2rem;
+    }
+  }
+
+  .blog-cms-html p:last-child {
+    margin-bottom: 0;
+  }
+
+  .blog-cms-html h2,
+  .blog-cms-html h3 {
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+    font-family: var(--font-larken, Georgia, serif);
+    font-weight: 300;
+    line-height: 1.1;
+  }
+
+  .blog-cms-html h2 {
+    font-size: 1.5rem;
+  }
+
+  .blog-cms-html h3 {
+    font-size: 1.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .blog-cms-html h2 {
+      font-size: 2rem;
+    }
+  }
+
+  .blog-cms-html ul,
+  .blog-cms-html ol {
+    margin-bottom: 1.5rem;
+    padding-left: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .blog-cms-html ul {
+    list-style-type: disc;
+  }
+
+  .blog-cms-html ol {
+    list-style-type: decimal;
+  }
+
+  @media (min-width: 768px) {
+    .blog-cms-html ul,
+    .blog-cms-html ol {
+      padding-left: 1.875rem;
+    }
+  }
+
+  .blog-cms-html ul ul,
+  .blog-cms-html ol ol {
+    margin-top: 0.5rem;
+    padding-left: 1.25rem;
+  }
+
+  .blog-cms-html figure,
+  .blog-cms-html img {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    width: 100%;
+    height: auto;
+  }
+
+  .blog-cms-html blockquote {
+    margin: 1.5rem 0;
+    border-left: 1px solid #cccccc;
+    padding-left: 1rem;
+  }
+
+  .blog-cms-html a,
+  .blog-cms-heading a {
+    font-weight: 400;
+    color: #ab863b;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .blog-cms-html a:hover,
+    .blog-cms-heading a:hover {
+      color: var(--link-underline-hover, #ab863b);
+    }
+  }
+
   .text-link-underline {
     transition:
       color 0.2s ease,

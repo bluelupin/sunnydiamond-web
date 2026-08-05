@@ -58,6 +58,8 @@ export type BlogContentBlock =
 export type BlogDetailSection = {
   id: string;
   heading: string;
+  /** CMS heading markup (links/bold). Plain `heading` is used for TOC labels. */
+  headingHtml?: string;
   blocks: BlogContentBlock[];
 };
 

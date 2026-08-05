@@ -81,6 +81,18 @@ function slugify(value: string): string {
     .slice(0, 80);
 }
 
+function allocateSectionId(heading: string, usedIds: Set<string>, fallbackIndex: number): string {
+  const base = slugify(heading) || `section-${fallbackIndex}`;
+  let id = base;
+  let suffix = 2;
+  while (usedIds.has(id)) {
+    id = `${base}-${suffix}`;
+    suffix += 1;
+  }
+  usedIds.add(id);
+  return id;
+}
+
 function tagLabels(tags: StrapiBlogTag[] | null | undefined): string[] {
   if (!Array.isArray(tags)) return [];
   return tags
@@ -238,6 +250,55 @@ function stripMarkdownInline(text: string): string {
     .trim();
 }
 
+/** Keep links/bold/italics as HTML for blog body rendering. */
+function markdownInlineToHtml(text: string): string {
+  const escapeText = (value: string) =>
+    value
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+
+  const safeHref = (raw: string): string | null => {
+    const href = raw.trim().replace(/^<|>$/g, "");
+    if (!href) return null;
+    if (/^(https?:|mailto:|tel:|\/|#)/i.test(href)) {
+      return href.replace(/"/g, "%22");
+    }
+    return null;
+  };
+
+  // Protect markdown links / images before escaping the rest of the line.
+  const tokens: string[] = [];
+  const protect = (html: string) => {
+    tokens.push(html);
+    return `\u0000${tokens.length - 1}\u0000`;
+  };
+
+  let working = text
+    .replace(/!\[[^\]]*]\([^)]*\)/g, "")
+    .replace(/\[([^\]]+)]\(([^)]+)\)/g, (_match, label: string, hrefRaw: string) => {
+      const href = safeHref(String(hrefRaw));
+      if (!href) return escapeText(String(label));
+      return protect(`<a href="${href}">${escapeText(String(label))}</a>`);
+    })
+    .replace(/\*\*([^*]+)\*\*/g, (_match, value: string) =>
+      protect(`<strong>${escapeText(String(value))}</strong>`),
+    )
+    .replace(/\*([^*]+)\*/g, (_match, value: string) =>
+      protect(`<em>${escapeText(String(value))}</em>`),
+    )
+    .replace(/`([^`]+)`/g, (_match, value: string) =>
+      protect(`<code>${escapeText(String(value))}</code>`),
+    );
+
+  working = escapeText(working).replace(/\u0000(\d+)\u0000/g, (_match, index: string) => {
+    return tokens[Number(index)] ?? "";
+  });
+
+  return working;
+}
+
 function looksLikeHtml(value: string): boolean {
   return /<\/?(?:p|h[1-6]|ul|ol|li|div|figure|img|strong|em|br|a|span|table|blockquote|section)\b/i.test(
     value,
@@ -248,7 +309,22 @@ function sanitizeBlogHtml(html: string): string {
   return html
     .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")
     .replace(/<style[\s\S]*?>[\s\S]*?<\/style>/gi, "")
-    .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "");
+    .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "")
+    .replace(
+      /<a\b([^>]*)href\s*=\s*(["'])\s*javascript:[^"']*\2([^>]*)>/gi,
+      "<a$1$3>",
+    );
+}
+
+/**
+ * CMS editors often insert empty headings (`<h2>&nbsp;</h2>`). Treating those as
+ * real H2 boundaries drops all following content until the next real heading.
+ */
+function stripEmptyHeadingTags(html: string): string {
+  return html.replace(
+    /<h([1-6])(?:\s[^>]*)?>\s*(?:&nbsp;|&#160;|&#x0*a0;|<br\s*\/?>|\u00a0|\s)*<\/h\1>/gi,
+    "",
+  );
 }
 
 function stripHtmlToText(html: string): string {
@@ -268,12 +344,48 @@ function stripHtmlToText(html: string): string {
     .trim();
 }
 
+/** Preserve safe inline markup inside CMS headings (links, emphasis). */
+function extractHeadingInnerHtml(h2Tag: string): string | undefined {
+  const match = h2Tag.match(/^<h2(?:\s[^>]*)?>([\s\S]*)<\/h2>$/i);
+  const inner = match?.[1]?.trim();
+  if (!inner || !/<[a-z]/i.test(inner)) {
+    return undefined;
+  }
+
+  const cleaned = sanitizeBlogHtml(inner)
+    // Headings should only keep inline formatting from the CMS.
+    .replace(/<\/?(?!a\b|strong\b|b\b|em\b|i\b|span\b|br\b)[a-z0-9-]+\b[^>]*>/gi, "")
+    .trim();
+
+  return cleaned || undefined;
+}
+
+function appendHtmlToLastSection(sections: BlogDetailSection[], html: string) {
+  const previous = sections[sections.length - 1];
+  if (!previous) {
+    sections.push({
+      id: "introduction",
+      heading: "",
+      blocks: [{ type: "html", html }],
+    });
+    return;
+  }
+
+  const lastBlock = previous.blocks[previous.blocks.length - 1];
+  if (lastBlock?.type === "html") {
+    lastBlock.html = `${lastBlock.html}${html}`;
+    return;
+  }
+
+  previous.blocks.push({ type: "html", html });
+}
+
 function mapHtmlBodyToDetailSections(html: string): {
   introParagraphs: string[];
   tableOfContents: BlogTableOfContentsItem[];
   sections: BlogDetailSection[];
 } {
-  const sanitized = sanitizeBlogHtml(html).trim();
+  const sanitized = stripEmptyHeadingTags(sanitizeBlogHtml(html)).trim();
   if (!sanitized) {
     return { introParagraphs: [], tableOfContents: [], sections: [] };
   }
@@ -297,20 +409,16 @@ function mapHtmlBodyToDetailSections(html: string): {
 
   const firstHeadingIndex = headingMatches[0]?.index ?? 0;
   const introHtml = sanitized.slice(0, firstHeadingIndex).trim();
-  const introHasRichMedia = /<(?:img|ul|ol|figure)\b/i.test(introHtml);
-  const introParagraphs =
-    introHtml && !introHasRichMedia
-      ? stripHtmlToText(introHtml)
-          .split(/\n{2,}/)
-          .map((part) => part.trim())
-          .filter(Boolean)
-          .slice(0, 3)
-      : [];
+
+  // Always keep CMS HTML as HTML (links, paragraph gaps, lists). Do not strip
+  // intro to plain text — that dropped <a> tags and merged adjacent <p>s.
+  const introParagraphs: string[] = [];
 
   const sections: BlogDetailSection[] = [];
   const tableOfContents: BlogTableOfContentsItem[] = [];
+  const usedSectionIds = new Set<string>(["introduction", "article"]);
 
-  if (introHtml && (introHasRichMedia || introParagraphs.length === 0)) {
+  if (introHtml) {
     sections.push({
       id: "introduction",
       heading: "",
@@ -323,20 +431,39 @@ function mapHtmlBodyToDetailSections(html: string): {
     if (!match || match.index == null) continue;
 
     const heading = stripHtmlToText(match[0] ?? "");
-    if (!heading) continue;
-
     const contentStart = match.index + match[0].length;
     const contentEnd =
       index + 1 < headingMatches.length
         ? (headingMatches[index + 1]?.index ?? sanitized.length)
         : sanitized.length;
     const sectionHtml = sanitized.slice(contentStart, contentEnd).trim();
-    if (!sectionHtml) continue;
 
-    const id = slugify(heading) || `section-${sections.length + 1}`;
+    // Empty/whitespace headings must not discard their following body HTML.
+    if (!heading) {
+      if (sectionHtml) {
+        appendHtmlToLastSection(sections, sectionHtml);
+      }
+      continue;
+    }
+
+    const id = allocateSectionId(heading, usedSectionIds, sections.length + 1);
+    const headingHtml = extractHeadingInnerHtml(match[0] ?? "");
+
+    if (!sectionHtml) {
+      sections.push({
+        id,
+        heading,
+        ...(headingHtml ? { headingHtml } : {}),
+        blocks: [],
+      });
+      tableOfContents.push({ id, label: heading });
+      continue;
+    }
+
     sections.push({
       id,
       heading,
+      ...(headingHtml ? { headingHtml } : {}),
       blocks: [{ type: "html", html: sectionHtml }],
     });
     tableOfContents.push({ id, label: heading });
@@ -376,17 +503,13 @@ function parseMarkdownBlocks(chunk: string): BlogContentBlock[] {
     const lines = paragraph.split("\n").map((line) => line.trim()).filter(Boolean);
     const bulletLines = lines.filter((line) => /^[-*]\s+/.test(line));
     if (bulletLines.length > 0 && bulletLines.length === lines.length) {
-      blocks.push({
-        type: "bullet_list",
-        items: bulletLines.map((line) => {
-          const text = stripMarkdownInline(line.replace(/^[-*]\s+/, ""));
-          const labeled = text.match(/^([^:]{2,40}):\s*(.+)$/);
-          if (labeled) {
-            return { lead: `${labeled[1]}: `, text: labeled[2] };
-          }
-          return { text };
-        }),
-      });
+      const itemsHtml = bulletLines
+        .map((line) => {
+          const inline = markdownInlineToHtml(line.replace(/^[-*]\s+/, ""));
+          return `<li>${inline}</li>`;
+        })
+        .join("");
+      blocks.push({ type: "html", html: `<ul>${itemsHtml}</ul>` });
       continue;
     }
 
@@ -397,16 +520,42 @@ function parseMarkdownBlocks(chunk: string): BlogContentBlock[] {
       });
     }
 
-    const text = stripMarkdownInline(paragraph);
-    if (text) {
-      const labeled = text.match(/^([^:]{2,60}):\s*(.+)$/);
-      if (labeled && text.length < 220) {
+    const plain = stripMarkdownInline(paragraph);
+    if (!plain) continue;
+
+    // Preserve links / emphasis as HTML so CMS formatting survives on the UI.
+    const hasInlineMarkup = /\[[^\]]+]\([^)]+\)|\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`/.test(
+      paragraph,
+    );
+    if (hasInlineMarkup) {
+      const htmlLines = lines
+        .filter((line) => !/^!\[/.test(line) && !/^\[[^\]]*!\[[^\]]*]\([^)]*\)[^\]]*]\([^)]*\)$/.test(line))
+        .map((line) => markdownInlineToHtml(line.replace(/^[-*]\s+/, "")));
+      if (htmlLines.length > 0) {
         blocks.push({
-          type: "labeled_lines",
-          lines: [{ label: `${labeled[1]}: `, text: labeled[2] }],
+          type: "html",
+          html: htmlLines.map((line) => `<p>${line}</p>`).join(""),
+        });
+      }
+      continue;
+    }
+
+    const labeled = plain.match(/^([^:]{2,60}):\s*(.+)$/);
+    if (labeled && plain.length < 220) {
+      blocks.push({
+        type: "labeled_lines",
+        lines: [{ label: `${labeled[1]}: `, text: labeled[2] }],
+      });
+    } else {
+      // Separate lines within a markdown block become separate paragraphs
+      // (CMS "line gap" between sentences), not one continuous run-on.
+      if (lines.length > 1) {
+        blocks.push({
+          type: "html",
+          html: lines.map((line) => `<p>${markdownInlineToHtml(line)}</p>`).join(""),
         });
       } else {
-        blocks.push({ type: "paragraph", text, emphasis: "light" });
+        blocks.push({ type: "paragraph", text: plain, emphasis: "light" });
       }
     }
   }
@@ -433,27 +582,45 @@ export function mapMarkdownBodyToDetailSections(body: string | null | undefined)
   const introRaw = parts[0]?.startsWith("## ") ? "" : (parts[0] ?? "");
   const sectionParts = parts[0]?.startsWith("## ") ? parts : parts.slice(1);
 
-  const introParagraphs = introRaw
-    .split(/\n{2,}/)
-    .map((part) => stripMarkdownInline(part))
-    .filter(Boolean)
-    .filter((text) => !/^!\[/.test(text))
-    .slice(0, 3);
+  // Prefer HTML blocks for intro so links / paragraph gaps match the CMS.
+  const introBlocks = introRaw ? parseMarkdownBlocks(introRaw) : [];
+  const introParagraphs: string[] = [];
 
   const sections: BlogDetailSection[] = [];
   const tableOfContents: BlogTableOfContentsItem[] = [];
+  const usedSectionIds = new Set<string>(["introduction", "article"]);
+
+  if (introBlocks.length > 0) {
+    sections.push({
+      id: "introduction",
+      heading: "",
+      blocks: introBlocks,
+    });
+  }
 
   for (const part of sectionParts) {
     const match = part.match(/^##\s+(.+?)(?:\n|$)([\s\S]*)$/);
     if (!match) continue;
 
     const heading = stripMarkdownInline(match[1]);
-    if (!heading) continue;
-
-    const id = slugify(heading) || `section-${sections.length + 1}`;
     const blocks = parseMarkdownBlocks(match[2] ?? "");
+
+    // Empty `##` headings (CMS artifacts) — keep body, skip TOC entry.
+    if (!heading) {
+      if (blocks.length > 0) {
+        const previous = sections[sections.length - 1];
+        if (previous) {
+          previous.blocks.push(...blocks);
+        } else {
+          sections.push({ id: "introduction", heading: "", blocks });
+        }
+      }
+      continue;
+    }
+
     if (blocks.length === 0) continue;
 
+    const id = allocateSectionId(heading, usedSectionIds, sections.length + 1);
     sections.push({ id, heading, blocks });
     tableOfContents.push({ id, label: heading });
   }
