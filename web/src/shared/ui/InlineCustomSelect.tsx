@@ -147,6 +147,13 @@ const InlineCustomSelect = ({
           id={listboxId}
           role="listbox"
           aria-labelledby={labelId}
+          onMouseDown={(event) => {
+            // Keep focus on the trigger until the option click completes.
+            event.preventDefault();
+          }}
+          onClick={(event) => {
+            event.stopPropagation();
+          }}
           className={cn(
             "absolute left-0 right-0 top-full z-[90] mt-1 flex max-h-64 flex-col overflow-y-auto bg-[#F2F2F2] shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
             listClassName,
@@ -161,7 +168,11 @@ const InlineCustomSelect = ({
                 type="button"
                 role="option"
                 aria-selected={selected}
-                onPointerDown={(event) => {
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                }}
+                onClick={(event) => {
                   event.preventDefault();
                   event.stopPropagation();
                   selectOption(option);

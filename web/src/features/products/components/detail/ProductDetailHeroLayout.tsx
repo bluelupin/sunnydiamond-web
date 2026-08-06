@@ -78,7 +78,7 @@ const ProductDetailHeroLayout = ({ product, purchase, details }: ProductDetailHe
       </div>
 
       <div ref={rightColumnRef} className="flex min-w-0 flex-col gap-8 md:mt-8 md:gap-0">
-        <div style={galleryContentHeight ? { height: `${galleryContentHeight}px` } : undefined}>
+        <div style={galleryContentHeight ? { height: `${galleryContentHeight - 250}px` } : undefined}>
           <div className={cn("md:sticky md:self-start", PDP_STICKY_TOP_CLASS)}>{purchase}</div>
         </div>
         <div className="pt-6 md:pt-6">{details}</div>
