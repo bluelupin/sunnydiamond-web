@@ -115,7 +115,6 @@ const BespokeStoryStepPanel = ({
       className={cn(
         "flex shrink-0",
         isDesktop ? "items-center gap-6 w-[970px]" : "w-full flex-col bg-gray300",
-        isDesktop && isFirstSlide && "max-lg:ml-[175px] lg:ml-[350px]",
         isLastSlide && "mr-10",
       )}
       style={!isDesktop ? { gap: "0px" } : undefined}
@@ -157,8 +156,7 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
   }, []);
 
   useSince1997HorizontalScroll(sectionRef, hasHorizontalGallery, {
-    firstStepOffset: bespokeStoryFigmaSpec.firstStepOffset,
-    firstStepOffsetBelowLg: bespokeStoryFigmaSpec.firstStepOffsetBelowLg,
+    firstStepImageWidth: bespokeStoryFigmaSpec.imageWidth,
     trackScrollLeadInRatio: bespokeStoryFigmaSpec.trackScrollLeadInRatio,
   });
 

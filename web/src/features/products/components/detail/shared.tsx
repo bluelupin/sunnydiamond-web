@@ -13,8 +13,10 @@ export const DetailTextLink = ({ children, href, onClick, className, light }: De
   const classes = cn(
     "inline-flex w-fit cursor-pointer",
     "relative shrink-0 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] pb-1 font-gill text-sm font-normal leading-110 sm:pb-1 hover:after:w-full",
-    light ? "text-white hover:border-white hover:text-white after:bg-white border-white" : "text-darkblack hover:border-darkMagenta hover:text-darkMagenta after:bg-darkMagenta border-darkblack",
     className,
+    light
+      ? "text-white border-white hover:border-white hover:text-white after:bg-white"
+      : "text-darkblack border-darkblack hover:border-darkMagenta hover:text-darkMagenta after:bg-darkMagenta",
   );
 
   if (href) {

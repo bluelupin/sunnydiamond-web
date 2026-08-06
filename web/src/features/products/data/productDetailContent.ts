@@ -4,16 +4,16 @@ import { getMetalColorOptions } from "@/features/products/utils/metalColorOption
 
 const benefits = [
   {
-    label: "Cash on Delivery",
-    mobileLabel: "Cash on Delivery*",
-    lines: ["Cash on", "Delivery"] as [string, string],
-    icon: "/images/products/pdp/benefit-cod.svg",
-  },
-  {
     label: "15 Days Return Policy",
     mobileLabel: "15 Days Return Policy",
     lines: ["15 Days", "Return Policy"] as [string, string],
     icon: "/images/products/pdp/benefit-return.svg",
+  },
+  {
+    label: "Cash on Delivery",
+    mobileLabel: "Cash on Delivery*",
+    lines: ["Cash on", "Delivery"] as [string, string],
+    icon: "/images/products/pdp/benefit-cod.svg",
   },
   {
     label: "Pan India Free Shipping",

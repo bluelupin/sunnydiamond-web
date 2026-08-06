@@ -313,26 +313,98 @@ const mapPastCreations = (
   };
 };
 
+const GUARANTEE_ICON_OVERRIDES: Array<{
+  icon: string;
+  matches: (label: string, iconUrl: string) => boolean;
+}> = [
+  {
+    icon: "/images/about/guarantees/moneyback.svg",
+    matches: (label, iconUrl) =>
+      label.includes("moneyback") ||
+      label.includes("money back") ||
+      iconUrl.includes("moneyback"),
+  },
+  {
+    icon: "/images/about/guarantees/cod.svg",
+    matches: (label, iconUrl) =>
+      label.includes("cash on delivery") ||
+      label.includes("cod") ||
+      iconUrl.includes("/cod_") ||
+      iconUrl.endsWith("/cod.svg"),
+  },
+  {
+    icon: "/images/about/guarantees/return.svg",
+    matches: (label, iconUrl) =>
+      label.includes("return") ||
+      label.includes("days return") ||
+      iconUrl.includes("/return_") ||
+      iconUrl.endsWith("/return.svg"),
+  },
+];
+
+const resolveGuaranteeIconSrc = (
+  label?: string | null,
+  cmsUrl?: string | null,
+): string | null => {
+  if (!cmsUrl) return null;
+
+  const normalizedLabel = label?.toLowerCase() ?? "";
+  const normalizedUrl = cmsUrl.toLowerCase();
+
+  const override = GUARANTEE_ICON_OVERRIDES.find((item) =>
+    item.matches(normalizedLabel, normalizedUrl),
+  );
+
+  return override?.icon ?? cmsUrl;
+};
+
 const mapGuaranteeIconSrc = (highlight: StrapiBespokeServiceHighlight): string | null => {
   const icon = highlight.icon;
   if (!icon || typeof icon !== "object") return null;
 
+  let cmsUrl: string | null = null;
+
   if ("desktopImage" in icon || "mobileImage" in icon) {
     const responsive = icon as StrapiBespokeResponsiveImage;
-    return (
+    cmsUrl =
       resolveCmsMediaUrl(responsive.desktopImage) ??
       resolveCmsMediaUrl(responsive.mobileImage) ??
-      null
-    );
+      null;
+  } else {
+    cmsUrl = resolveCmsMediaUrl(icon) ?? null;
   }
 
-  return resolveCmsMediaUrl(icon) ?? null;
+  return resolveGuaranteeIconSrc(highlight.label, cmsUrl);
+};
+
+const isCodGuaranteeLabel = (label: string): boolean => {
+  const normalized = label.toLowerCase();
+  return normalized.includes("cash on delivery") || normalized.includes("cod");
+};
+
+const isReturnGuaranteeLabel = (label: string): boolean => {
+  return label.toLowerCase().includes("return");
+};
+
+const swapCodAndReturnGuarantees = (
+  guarantees: NormalizedBespokeGuarantee[],
+): NormalizedBespokeGuarantee[] => {
+  const result = [...guarantees];
+  const codIndex = result.findIndex((item) => isCodGuaranteeLabel(item.label));
+  const returnIndex = result.findIndex((item) => isReturnGuaranteeLabel(item.label));
+
+  if (codIndex < 0 || returnIndex < 0 || codIndex === returnIndex) {
+    return result;
+  }
+
+  [result[codIndex], result[returnIndex]] = [result[returnIndex], result[codIndex]];
+  return result;
 };
 
 const mapGuarantees = (
   highlights?: StrapiBespokeServiceHighlight[] | null,
 ): NormalizedBespokeGuarantee[] => {
-  return (highlights ?? [])
+  const guarantees = (highlights ?? [])
     .filter((item) => item?.isActive !== false)
     .slice()
     .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
@@ -346,6 +418,8 @@ const mapGuarantees = (
       };
     })
     .filter((item): item is NormalizedBespokeGuarantee => item != null);
+
+  return swapCodAndReturnGuarantees(guarantees);
 };
 
 const mapGetInTouch = (

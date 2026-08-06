@@ -47,6 +47,12 @@ const AUTO_SLIDE_INTERVAL_MS = 2000;
 const SWIPE_THRESHOLD_PX = 48;
 const MOBILE_GALLERY_MEDIA_QUERY = "(max-width: 767px)";
 
+const preloadImageSrc = (src: string) => {
+  if (!src || typeof window === "undefined") return;
+  const image = new window.Image();
+  image.src = src;
+};
+
 type GallerySlot = (typeof GALLERY_SLOTS)[number];
 
 type FeaturedSlideIndex = number;
@@ -182,7 +188,9 @@ const FeaturedGalleryImage = ({
           alt={slide.alt}
           fill
           sizes={isCenter ? "560px" : "400px"}
-          className="object-cover object-center transition-opacity duration-[550ms] ease-in-out"
+          priority={isCenter}
+          loading={Math.abs(slot) <= 1 ? "eager" : "lazy"}
+          className="object-cover object-center"
         />
       </div>
     </figure>
@@ -267,6 +275,8 @@ const FeaturedGalleryBackground = ({
             width={1920}
             height={2074}
             sizes={compact ? "100vw" : "1920px"}
+            priority={index === activeIndex}
+            loading="eager"
             className={cn(
               "absolute left-1/2 top-0 max-w-none -translate-x-1/2 object-cover object-top transition-opacity duration-[550ms] ease-in-out",
               compact ? "inset-0 size-full" : "h-[2074px] w-[1920px]",
@@ -320,6 +330,7 @@ const FeaturedGallerySlider = ({
   const pendingTargetIndex = useRef<number | null>(null);
   const finishTimeoutRef = useRef<number | null>(null);
   const suppressClickRef = useRef(false);
+  const wheelCooldownRef = useRef(false);
 
   const [isAnimating, setIsAnimating] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -332,6 +343,10 @@ const FeaturedGallerySlider = ({
   );
 
   activeIndexRef.current = activeIndex;
+
+  useEffect(() => {
+    slides.forEach((slide) => preloadImageSrc(slide.src));
+  }, [slides]);
 
   useEffect(() => {
     const updateDimensions = () => setGalleryDimensions(getGalleryDimensions(compact));
@@ -367,6 +382,8 @@ const FeaturedGallerySlider = ({
       const currentIndex = activeIndexRef.current;
       if (targetIndex === currentIndex) return;
 
+      onSlideStart?.(targetIndex);
+
       const delta = getShortestIndexDelta(currentIndex, targetIndex, slides.length);
       const slot = -delta as GallerySlot;
       const targetOffset = getSlotOffsetToCenter(slot, galleryDimensions);
@@ -390,7 +407,7 @@ const FeaturedGallerySlider = ({
         }
       }, SLIDE_DURATION_MS + 80);
     },
-    [clearFinishTimeout, finishSlideToIndex, galleryDimensions, slides.length],
+    [clearFinishTimeout, finishSlideToIndex, galleryDimensions, onSlideStart, slides.length],
   );
 
   const goToSlot = useCallback(
@@ -400,13 +417,14 @@ const FeaturedGallerySlider = ({
       const targetIndex = mod(activeIndexRef.current + slot, slides.length);
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduceMotion) {
+        onSlideStart?.(targetIndex);
         onActiveIndexChange(targetIndex);
         return;
       }
 
       startSlideToIndex(targetIndex);
     },
-    [canSlide, isAnimating, onActiveIndexChange, slides.length, startSlideToIndex],
+    [canSlide, isAnimating, onActiveIndexChange, onSlideStart, slides.length, startSlideToIndex],
   );
 
   const handleSlotSelect = useCallback(
@@ -437,14 +455,40 @@ const FeaturedGallerySlider = ({
       const targetIndex = mod(activeIndexRef.current + direction, slides.length);
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduceMotion) {
+        onSlideStart?.(targetIndex);
         onActiveIndexChange(targetIndex);
         return;
       }
 
       startSlideToIndex(targetIndex);
     },
-    [canSlide, isAnimating, onActiveIndexChange, slides.length, startSlideToIndex],
+    [canSlide, isAnimating, onActiveIndexChange, onSlideStart, slides.length, startSlideToIndex],
   );
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track || !canSlide) return;
+
+    const handleWheel = (event: WheelEvent) => {
+      if (isAnimating || dragState.current.active || wheelCooldownRef.current) return;
+
+      const dominantDelta =
+        Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+      if (Math.abs(dominantDelta) < 24) return;
+
+      event.preventDefault();
+      wheelCooldownRef.current = true;
+      window.setTimeout(() => {
+        wheelCooldownRef.current = false;
+      }, SLIDE_DURATION_MS);
+
+      setIsAutoPaused(true);
+      animateSlide(dominantDelta > 0 ? 1 : -1);
+    };
+
+    track.addEventListener("wheel", handleWheel, { passive: false });
+    return () => track.removeEventListener("wheel", handleWheel);
+  }, [animateSlide, canSlide, isAnimating]);
 
   useEffect(() => {
     if (!canSlide || isAutoPaused) return;
@@ -572,7 +616,7 @@ const FeaturedGallerySlider = ({
         className={cn(
           "flex items-center will-change-transform motion-reduce:transform-none",
           compact ? "gap-3" : "gap-4",
-          canSlide && (isDragging ? "cursor-grabbing" : onCenterOpen ? "cursor-default" : "cursor-grab"),
+          canSlide && (isDragging ? "cursor-grabbing" : "cursor-grab"),
           canSlide && "touch-none select-none",
         )}
         style={{
@@ -765,6 +809,9 @@ const BespokeFeaturedStoriesSection = ({
 
   const handleActiveIndexChange = useCallback((index: number) => {
     setActiveIndex(index);
+  }, []);
+
+  const handleSlideStart = useCallback((index: number) => {
     setSelectedIndex(index);
   }, []);
 
@@ -835,6 +882,7 @@ const BespokeFeaturedStoriesSection = ({
     activeIndex,
     selectedIndex,
     onActiveIndexChange: handleActiveIndexChange,
+    onSlideStart: handleSlideStart,
     onCenterOpen: handleCenterOpen,
     title: featuredStories?.title ?? "",
     primaryCtaHref: featuredStories?.primaryCtaHref ?? "/featured-stories",

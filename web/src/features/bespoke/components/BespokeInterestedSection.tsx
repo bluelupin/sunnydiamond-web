@@ -46,7 +46,7 @@ const BespokeInterestedSection = ({ interested }: BespokeInterestedSectionProps)
           </div>
           <Reveal direction="up">
             {interested.ctaLabel ? (
-              <DetailTextLink href={interested.ctaHref} light className="uppercase border-black">
+              <DetailTextLink href={interested.ctaHref} light className="uppercase">
                 {interested.ctaLabel}
               </DetailTextLink>
             ) : null}

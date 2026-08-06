@@ -20,6 +20,13 @@ type Since1997ScrollOptions = {
   /** Initial margin-left below `lg` when different from `firstStepOffset`. */
   firstStepOffsetBelowLg?: number;
   /**
+   * When set, centers the first-step image in the viewport and overrides fixed offsets.
+   * Use with the media width of the first slide image (not the full article width).
+   */
+  firstStepImageWidth?: number;
+  /** `firstStepImageWidth` below `lg` when different. */
+  firstStepImageWidthBelowLg?: number;
+  /**
    * Fraction of vertical scrub (0–1) used for first-step inset only before horizontal
    * track translate begins. Desktop layout only.
    */
@@ -59,10 +66,22 @@ export function useSince1997HorizontalScroll(
     let firstStep: HTMLElement | null = null;
     const firstStepOffsetLg = options?.firstStepOffset ?? 0;
     const firstStepOffsetBelowLg = options?.firstStepOffsetBelowLg ?? firstStepOffsetLg;
+    const firstStepImageWidthLg = options?.firstStepImageWidth ?? 0;
+    const firstStepImageWidthBelowLg =
+      options?.firstStepImageWidthBelowLg ?? firstStepImageWidthLg;
     const trackScrollLeadInRatio = clamp(options?.trackScrollLeadInRatio ?? 0);
 
-    const getActiveFirstStepOffset = () =>
-      lgQuery.matches ? firstStepOffsetLg : firstStepOffsetBelowLg;
+    const getActiveFirstStepOffset = () => {
+      const imageWidth = lgQuery.matches ? firstStepImageWidthLg : firstStepImageWidthBelowLg;
+
+      if (imageWidth > 0 && viewport) {
+        const viewportLeft = viewport.getBoundingClientRect().left;
+        const viewportWidth = window.innerWidth - viewportLeft;
+        return Math.max(0, viewportWidth / 2 - imageWidth / 2);
+      }
+
+      return lgQuery.matches ? firstStepOffsetLg : firstStepOffsetBelowLg;
+    };
 
     const bindActiveElements = () => {
       activeLayout = getActiveLayout(desktopQuery);
@@ -278,6 +297,8 @@ export function useSince1997HorizontalScroll(
     enabled,
     options?.firstStepOffset,
     options?.firstStepOffsetBelowLg,
+    options?.firstStepImageWidth,
+    options?.firstStepImageWidthBelowLg,
     options?.trackScrollLeadInRatio,
     sectionRef,
   ]);
