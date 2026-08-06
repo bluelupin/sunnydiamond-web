@@ -1,6 +1,6 @@
 "use client";
 
-import { Headphones, Share2, Volume1 } from "lucide-react";
+import { Share2, Volume1 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { cn } from "@/shared/utils/cn";
 import { useBrowserTextToSpeech } from "../hooks/useBrowserTextToSpeech";
@@ -11,6 +11,9 @@ type BlogDetailSidebarProps = {
   tableOfContents: BlogTableOfContentsItem[];
   speechText: string;
 };
+
+const sidebarCtaClassName =
+  "btn-border-slide inline-flex h-14 flex-1 items-center justify-center border border-neutral300 px-7 font-gill text-sm uppercase leading-110 text-darkblack";
 
 const BlogDetailSidebar = ({
   title,
@@ -138,21 +141,26 @@ const BlogDetailSidebar = ({
           aria-pressed={isSpeaking}
           aria-label={isSpeaking ? "Stop listening to article" : "Listen to article"}
           className={cn(
-            "flex h-14 flex-1 items-center justify-center gap-2 border border-neutral300 px-7 text-sm uppercase leading-110 text-darkblack transition-colors hover:border-darkblack",
-            (!isSupported || !speechText.trim()) && "pointer-events-none opacity-50",
+            sidebarCtaClassName,
+            (!isSupported || !speechText.trim()) &&
+              "pointer-events-none opacity-50 disabled:cursor-not-allowed",
             isSpeaking && "border-darkblack",
           )}
         >
-          <Volume1 className="size-6 shrink-0" strokeWidth="1" aria-hidden />
-          {isSpeaking ? "STOP" : "LISTEN"}
+          <span className="relative z-10 inline-flex items-center justify-center gap-2">
+            <Volume1 className="size-6 shrink-0" strokeWidth="1" aria-hidden />
+            {isSpeaking ? "STOP" : "LISTEN"}
+          </span>
         </button>
         <button
           type="button"
           onClick={handleShare}
-          className="flex h-14 flex-1 items-center justify-center gap-2 border border-neutral300 px-7 text-sm uppercase leading-110 text-darkblack transition-colors hover:border-darkblack"
+          className={sidebarCtaClassName}
         >
-          <Share2 className="size-6 shrink-0" strokeWidth="1" aria-hidden />
-          SHARE
+          <span className="relative z-10 inline-flex items-center justify-center gap-2">
+            <Share2 className="size-6 shrink-0" strokeWidth="1" aria-hidden />
+            SHARE
+          </span>
         </button>
       </div>
     </aside>
