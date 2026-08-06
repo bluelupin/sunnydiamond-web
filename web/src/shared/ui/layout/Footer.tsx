@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
 import { resolveShellFooterLinkGroups } from "@/shared/lib/shellNavigation";
+import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import TrustBadgeSection from "@/features/cms/components/common/TrustBadges";
 import Reveal from "@/shared/Animation/Reveal";
@@ -24,6 +25,44 @@ type CmsSocialLink = {
   url?: string | null;
   isActive?: boolean | null;
 };
+
+type CmsPaymentMethodLogo = {
+  id?: string | number;
+  alternativeText?: string | null;
+  width?: number | null;
+  height?: number | null;
+};
+
+function resolveShellPaymentMethodLogos(
+  logos: readonly CmsPaymentMethodLogo[] | null | undefined,
+): Array<{ id: string; src: string; alt: string; width: number; height: number }> {
+  if (!logos?.length) {
+    return [];
+  }
+
+  return logos
+    .map((logo, index) => {
+      const src = resolveCmsMediaUrl(logo);
+      if (!src) {
+        return null;
+      }
+
+      const width = typeof logo.width === "number" && logo.width > 0 ? logo.width : 380;
+      const height = typeof logo.height === "number" && logo.height > 0 ? logo.height : 25;
+
+      return {
+        id: String(logo.id ?? `${index}-${src}`),
+        src,
+        alt: resolveCmsAltText(logo) ?? "",
+        width,
+        height,
+      };
+    })
+    .filter(
+      (logo): logo is { id: string; src: string; alt: string; width: number; height: number } =>
+        Boolean(logo),
+    );
+}
 
 function resolveShellSocialLinks(
   cmsSocialLinks: readonly CmsSocialLink[] | null | undefined,
@@ -77,9 +116,17 @@ const Footer = ({ className }: { className?: string }) => {
     [cmsSocialLinks],
   );
 
+  const cmsPaymentMethodLogos = shellData?.global?.paymentMethodLogos;
+  const paymentMethodLogos = useMemo(
+    () => resolveShellPaymentMethodLogos(cmsPaymentMethodLogos as CmsPaymentMethodLogo[] | null | undefined),
+    [cmsPaymentMethodLogos],
+  );
+
   const hasFooterNavigation = footerLinkGroups.length > 0;
   const hasSocialLinks = socialLinks.length > 0;
   const hasCopyright = footerCopyright.length > 0;
+  const hasPaymentMethodLogos = paymentMethodLogos.length > 0;
+  const hasBottomRow = hasSocialLinks || hasCopyright || hasPaymentMethodLogos;
 
   return (
     <footer className={cn(pathName === "/cart" || pathName === "/checkout" ? "bg-gray200" : "bg-gray300", className)}>
@@ -129,46 +176,58 @@ const Footer = ({ className }: { className?: string }) => {
             </nav>
           ) : null}
         </div>
-        <div className="relative flex flex-col items-center gap-8 lg:flex-row lg:items-center lg:justify-between">
-          {hasSocialLinks ? (
-            <div className="flex items-center gap-7">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.id}
-                  href={social.href}
-                  aria-label={social.label}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-opacity hover:opacity-60"
-                >
-                  <Image
-                    src={social.icon}
-                    alt=""
-                    width={24}
-                    height={24}
-                    aria-hidden
-                    className="size-6"
-                  />
-                </a>
-              ))}
-            </div>
-          ) : null}
-          <div className="relative h-[25px] w-[320px] lg:w-[380px]">
-            <Image
-              src="/images/navigation/payment-methods.png"
-              alt="Accepted payment methods: Visa, Mastercard, Amex, Maestro, PayTM, RuPay"
-              fill
-              sizes="(max-width: 1024px) 320px, 380px"
-              className="object-contain object-left"
-            />
-          </div>
+        {hasBottomRow ? (
+          <div className="relative flex flex-col items-center gap-8 lg:flex-row lg:items-center lg:justify-between">
+            {hasSocialLinks ? (
+              <div className="flex items-center gap-7">
+                {socialLinks.map((social) => (
+                  <a
+                    key={social.id}
+                    href={social.href}
+                    aria-label={social.label}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition-opacity hover:opacity-60"
+                  >
+                    <Image
+                      src={social.icon}
+                      alt=""
+                      width={24}
+                      height={24}
+                      aria-hidden
+                      className="size-6"
+                    />
+                  </a>
+                ))}
+              </div>
+            ) : null}
+            {hasPaymentMethodLogos ? (
+              <div className="flex flex-wrap items-center gap-4">
+                {paymentMethodLogos.map((logo) => (
+                  <div
+                    key={logo.id}
+                    className="relative h-[25px]"
+                    style={{ width: `${Math.min(logo.width, 380)}px` }}
+                  >
+                    <Image
+                      src={logo.src}
+                      alt={logo.alt}
+                      fill
+                      sizes="(max-width: 1024px) 320px, 380px"
+                      className="object-contain object-left"
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : null}
 
-          {hasCopyright ? (
-            <p className="text-center font-gill text-sm font-light leading-110 text-neutral500 lg:absolute lg:left-1/2 lg:-translate-x-1/2 lg:whitespace-nowrap">
-              {footerCopyright}
-            </p>
-          ) : null}
-        </div>
+            {hasCopyright ? (
+              <p className="text-center font-gill text-sm font-light leading-110 text-neutral500 lg:absolute lg:left-1/2 lg:-translate-x-1/2 lg:whitespace-nowrap">
+                {footerCopyright}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
       </PageContainer>
     </footer>
   );
