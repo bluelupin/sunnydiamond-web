@@ -308,7 +308,7 @@ const FeaturedStoriesLayout = ({
             </div>
           ) : null}
 
-          <div className="relative z-10 flex flex-col items-center gap-8 px-4 pb-10 pt-8 md:gap-8 md:pb-10 md:pt-20">
+          <div className="relative z-10 flex flex-col items-center gap-8 px-4 pb-10 pt-8 md:gap-8 md:pb-10 md:pt-10">
             {primaryCtaLabel ? (
               <Link
                 href={activePrimaryCtaHref}
