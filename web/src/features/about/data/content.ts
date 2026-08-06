@@ -110,10 +110,18 @@ export const aboutCraftingRarityFigmaSpec = {
   },
 } as const;
 
-/** Figma Component 228 — team card hover overlay */
+/** Figma Component 228 — team card hover overlay; caption Figma 692:27464 */
 export const aboutFacesFigmaSpec = {
   overlay: {
     gradient: "bottom-strong" as const,
+  },
+  caption: {
+    gap: 8,
+    nameSize: 20,
+    roleSize: 16,
+    lineHeight: 1.1,
+    nameColor: "#FFFFFF",
+    roleColor: "#F2F2F2",
   },
 } as const;
 

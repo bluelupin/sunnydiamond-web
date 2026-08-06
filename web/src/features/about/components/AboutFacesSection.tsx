@@ -46,7 +46,7 @@ const AboutFacesSection = ({ title, description, members }: AboutFacesSectionPro
               key={`${member.name}-${index}`}
               className={cn(
                 "group relative shrink-0 snap-start overflow-hidden",
-                "lg:h-[600px] h-[450px] w-[343px] md:h-full lg:w-auto lg:basis-0 lg:flex-1",
+                "lg:h-[600px] h-[450px] w-[343px] md:h-full lg:w-auto lg:min-w-0 lg:basis-0 lg:flex-1",
                 "lg:hover:grow-[1.6] transition-[flex-grow] duration-500 ease-in-out",
               )}
             >
@@ -58,10 +58,7 @@ const AboutFacesSection = ({ title, description, members }: AboutFacesSectionPro
                 height={member.image.height ?? 600}
                 quality={80}
                 sizes="(max-width: 1023px) 343px, 33vw"
-                className={cn(
-                  "h-full w-full transition-transform duration-700",
-                  index === 0 ? "lg:group-hover:scale-100 object-fill" : "lg:group-hover:scale-[1.05] object-cover",
-                )}
+                className="h-full w-full object-cover object-center transition-transform duration-500 ease-out lg:group-hover:scale-[1.03]"
               />
 
               <MediaContentOverlay
@@ -71,14 +68,16 @@ const AboutFacesSection = ({ title, description, members }: AboutFacesSectionPro
                 )}
               />
               <figcaption className="absolute bottom-0 left-0 z-10 w-full text-left opacity-100 transition-all duration-500 lg:translate-y-2 lg:px-10 md:px-9 px-8 lg:py-20 md:py-16 py-12 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100">
-                <p className="font-larken font-light xl:text-2xl lg:text-xl text-xl text-white leading-110">
-                  {member.name}
-                </p>
-                {member.role ? (
-                  <p className="lg:mt-1 mt-2 font-gill font-light leading-[130%] tracking-[0.12em] text-white/80 xl:text-xl lg:text-lg md:text-base text-sm">
-                    {member.role}
+                <div className="flex flex-col items-start gap-2 leading-110">
+                  <p className="font-larken text-xl font-light text-white">
+                    {member.name}
                   </p>
-                ) : null}
+                  {member.role ? (
+                    <p className="font-gill text-base font-light text-aboutInactive">
+                      {member.role}
+                    </p>
+                  ) : null}
+                </div>
               </figcaption>
             </figure>
           ))}
