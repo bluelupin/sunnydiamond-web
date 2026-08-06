@@ -84,14 +84,31 @@ const FeaturedGalleryBackground = ({
   activeIndex,
   backgroundImage,
 }: FeaturedGalleryBackgroundProps) => {
-  const sectionBgSrc = backgroundImage?.desktopUrl || backgroundImage?.mobileUrl || null;
-  const srAlt = backgroundImage?.alt || slides[activeIndex]?.alt || "";
+  const safeIndex = slides.length > 0 ? normalizeIndex(activeIndex, slides.length) : 0;
+  const fallbackBgSrc = backgroundImage?.desktopUrl || backgroundImage?.mobileUrl || null;
+  const srAlt = slides[safeIndex]?.alt || backgroundImage?.alt || "";
 
   return (
     <div className="pointer-events-none absolute inset-x-0 top-0 h-[540px] md:h-[559px]">
-      {sectionBgSrc ? (
+      {slides.length > 0 ? (
+        slides.map((slide, index) => (
+          <Image
+            key={`${slide.src}-${index}`}
+            src={slide.src}
+            alt=""
+            aria-hidden
+            fill
+            sizes="100vw"
+            priority={index === safeIndex}
+            className={cn(
+              "object-cover object-top transition-opacity duration-500",
+              index === safeIndex ? "opacity-100" : "opacity-0",
+            )}
+          />
+        ))
+      ) : fallbackBgSrc ? (
         <Image
-          src={sectionBgSrc}
+          src={fallbackBgSrc}
           alt=""
           aria-hidden
           fill
@@ -99,23 +116,7 @@ const FeaturedGalleryBackground = ({
           sizes="100vw"
           className="object-cover object-top"
         />
-      ) : (
-        slides.map((slide, index) => (
-          <Image
-            key={slide.src}
-            src={slide.src}
-            alt=""
-            aria-hidden
-            fill
-            sizes="100vw"
-            priority={index === activeIndex}
-            className={cn(
-              "object-cover object-top transition-opacity duration-500",
-              index === activeIndex ? "opacity-100" : "opacity-0",
-            )}
-          />
-        ))
-      )}
+      ) : null}
       <div
         aria-hidden
         className="absolute inset-0"
@@ -180,11 +181,16 @@ const FeaturedGallerySlider = ({
     [sourceCount],
   );
 
-  const handleBeforeChange = useCallback(
-    (_current: number, next: number) => {
-      onIndexChange(mapToSourceIndex(next));
+  const handleAfterChange = useCallback(
+    (index: number) => {
+      onIndexChange(mapToSourceIndex(index));
     },
     [mapToSourceIndex, onIndexChange],
+  );
+
+  const initialSlide = useMemo(
+    () => normalizeIndex(currentIndex, renderSlides.length),
+    [slidesKey, renderSlides.length],
   );
 
   const sliderSettings = useMemo<Settings>(
@@ -199,11 +205,11 @@ const FeaturedGallerySlider = ({
       ),
       centerMode: canSlide,
       infinite: showInfinite,
-      centerPadding: "60px",
+      centerPadding: "20px",
       slidesToShow: activeSlidesToShow,
       slidesToScroll: 1,
       speed: SLIDER_SPEED_MS,
-      initialSlide: normalizeIndex(currentIndex, renderSlides.length),
+      initialSlide,
       arrows: false,
       dots: false,
       swipe: canSlide,
@@ -213,9 +219,9 @@ const FeaturedGallerySlider = ({
       autoplaySpeed: 2000,
       pauseOnHover: true,
       pauseOnFocus: true,
-      beforeChange: handleBeforeChange,
+      afterChange: handleAfterChange,
     }),
-    [activeSlidesToShow, canSlide, currentIndex, handleBeforeChange, renderSlides.length, showInfinite],
+    [activeSlidesToShow, canSlide, handleAfterChange, initialSlide, showInfinite],
   );
 
   if (slides.length === 0) {

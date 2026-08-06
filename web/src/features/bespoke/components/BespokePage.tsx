@@ -12,18 +12,18 @@ type BespokePageProps = {
 const BespokePage = ({ page }: BespokePageProps) => {
   return (
     <>
-      {page.hero ? <BespokeHeroSection hero={page.hero} /> : null}
-      {page.story ? (
+      {page.hero && <BespokeHeroSection hero={page.hero} />}
+      {page.story &&
         <BespokeStorySection story={page.story} customDesignForm={page.customDesignForm} />
-      ) : null}
-      {page.featuredStories || page.pastCreations ? (
+      }
+      {(page.featuredStories || page.pastCreations) && (
         <BespokeFeaturedStoriesSection
           featuredStories={page.featuredStories}
           pastCreations={page.pastCreations}
         />
-      ) : null}
-      {page.guarantees.length > 0 ? <BespokeGuaranteesSection guarantees={page.guarantees} /> : null}
-      {page.interested ? <BespokeInterestedSection interested={page.interested} /> : null}
+      )}
+      {page.guarantees.length > 0 && <BespokeGuaranteesSection guarantees={page.guarantees} />}
+      {page.interested && <BespokeInterestedSection interested={page.interested} />}
     </>
   );
 };
