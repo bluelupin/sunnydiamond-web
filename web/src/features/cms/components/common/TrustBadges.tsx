@@ -35,6 +35,10 @@ const TrustBadgeSection = ({
 
   const showSkeleton = isShellLoading && marqueeItems.length === 0;
 
+  if (!showSkeleton && marqueeItems.length === 0) {
+    return null;
+  }
+
   return (
     <section
       id={id}

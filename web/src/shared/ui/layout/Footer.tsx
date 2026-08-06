@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
-import { siteConfig } from "@/shared/lib/siteConfig";
 import { resolveShellFooterLinkGroups } from "@/shared/lib/shellNavigation";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import TrustBadgeSection from "@/features/cms/components/common/TrustBadges";
@@ -20,14 +19,42 @@ const SOCIAL_ICON_MAP: Record<string, string> = {
   linkedin: "/images/navigation/social-linkedin.svg",
 };
 
-const SOCIAL_FALLBACK = [
-  { id: "instagram", label: "Instagram", href: siteConfig.social.instagram, icon: SOCIAL_ICON_MAP.instagram },
-  { id: "facebook", label: "Facebook", href: siteConfig.social.facebook, icon: SOCIAL_ICON_MAP.facebook },
-  { id: "x", label: "X", href: "https://x.com/sunnydiamonds", icon: SOCIAL_ICON_MAP.x },
-  { id: "linkedin", label: "LinkedIn", href: "https://linkedin.com/company/sunnydiamonds", icon: SOCIAL_ICON_MAP.linkedin },
-] satisfies { id: string; label: string; href: string; icon: string }[];
+type CmsSocialLink = {
+  label?: string | null;
+  url?: string | null;
+  isActive?: boolean | null;
+};
 
-const DEFAULT_COPYRIGHT = "© 2026 Sunny Diamonds. All Rights Reserved.";
+function resolveShellSocialLinks(
+  cmsSocialLinks: readonly CmsSocialLink[] | null | undefined,
+): Array<{ id: string; label: string; href: string; icon: string }> {
+  if (!cmsSocialLinks?.length) {
+    return [];
+  }
+
+  return cmsSocialLinks
+    .filter((item) => item?.isActive !== false && item?.url?.trim())
+    .map((item) => {
+      const label = item.label?.trim() ?? "";
+      const href = item.url?.trim() ?? "";
+      const iconKey = label.toLowerCase();
+      const icon = SOCIAL_ICON_MAP[iconKey];
+
+      if (!label || !href || !icon) {
+        return null;
+      }
+
+      return {
+        id: iconKey,
+        label,
+        href,
+        icon,
+      };
+    })
+    .filter((item): item is { id: string; label: string; href: string; icon: string } =>
+      Boolean(item),
+    );
+}
 
 const Footer = ({ className }: { className?: string }) => {
   const pathName = usePathname();
@@ -38,27 +65,21 @@ const Footer = ({ className }: { className?: string }) => {
     [cmsFooterLinkGroups],
   );
 
-  const footerCopyright =
+  const footerCopyright = (
     shellData?.global?.footerCopyright ||
     shellData?.footerCopyright ||
-    DEFAULT_COPYRIGHT;
+    ""
+  ).trim();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const cmsSocialLinks: any[] = shellData?.global?.socialLinks || shellData?.socialLinks || [];
-  const socialLinks = useMemo(() => {
-    if (!cmsSocialLinks.length) return SOCIAL_FALLBACK;
+  const cmsSocialLinks = shellData?.global?.socialLinks || shellData?.socialLinks;
+  const socialLinks = useMemo(
+    () => resolveShellSocialLinks(cmsSocialLinks as CmsSocialLink[] | null | undefined),
+    [cmsSocialLinks],
+  );
 
-    const cmsMap = new Map<string, string>(
-      (cmsSocialLinks as Array<{ label: string; url: string; isActive?: boolean }>)
-        .filter((item) => item?.isActive !== false && item?.url)
-        .map((item) => [item.label.toLowerCase(), item.url]),
-    );
-
-    return SOCIAL_FALLBACK.map((item) => ({
-      ...item,
-      href: cmsMap.get(item.id) ?? cmsMap.get(item.label.toLowerCase()) ?? item.href,
-    }));
-  }, [cmsSocialLinks]);
+  const hasFooterNavigation = footerLinkGroups.length > 0;
+  const hasSocialLinks = socialLinks.length > 0;
+  const hasCopyright = footerCopyright.length > 0;
 
   return (
     <footer className={cn(pathName === "/cart" || pathName === "/checkout" ? "bg-gray200" : "bg-gray300", className)}>
@@ -78,56 +99,60 @@ const Footer = ({ className }: { className?: string }) => {
               />
             </Link>
           </Reveal>
-          <nav
-            aria-label="Footer navigation"
-            className="grid md:grid-cols-4 grid-cols-2 lg:flex lg:w-full xl:max-w-[923px] w-full justify-between lg:gap-4 gap-8"
-          >
-            {footerLinkGroups.map((column) => (
-              <div
-                key={column.id}
-                className="flex w-full flex-col gap-6"
-              >
-                <Reveal as="p" direction="up" className="font-gill lg:text-xl md:text-lg text-base font-normal leading-110 text-darkblack">
-                  {column.title.toUpperCase()}
-                </Reveal>
-                <ul className="flex flex-col gap-[12px]">
-                  {column.links.map((link) => (
-                    <Reveal as="li" direction="up" key={link.id}>
-                      <Link
-                        href={link.url}
-                        className="font-gill text-sm font-light leading-110 text-neutral500 transition-colors hover:text-darkMagenta"
-                      >
-                        {link.label}
-                      </Link>
-                    </Reveal>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </nav>
+          {hasFooterNavigation ? (
+            <nav
+              aria-label="Footer navigation"
+              className="grid md:grid-cols-4 grid-cols-2 lg:flex lg:w-full xl:max-w-[923px] w-full justify-between lg:gap-4 gap-8"
+            >
+              {footerLinkGroups.map((column) => (
+                <div
+                  key={column.id}
+                  className="flex w-full flex-col gap-6"
+                >
+                  <Reveal as="p" direction="up" className="font-gill lg:text-xl md:text-lg text-base font-normal leading-110 text-darkblack">
+                    {column.title.toUpperCase()}
+                  </Reveal>
+                  <ul className="flex flex-col gap-[12px]">
+                    {column.links.map((link) => (
+                      <Reveal as="li" direction="up" key={link.id}>
+                        <Link
+                          href={link.url}
+                          className="font-gill text-sm font-light leading-110 text-neutral500 transition-colors hover:text-darkMagenta"
+                        >
+                          {link.label}
+                        </Link>
+                      </Reveal>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </nav>
+          ) : null}
         </div>
         <div className="relative flex flex-col items-center gap-8 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-7">
-            {socialLinks.map((social) => (
-              <a
-                key={social.id}
-                href={social.href}
-                aria-label={social.label}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="transition-opacity hover:opacity-60"
-              >
-                <Image
-                  src={social.icon}
-                  alt=""
-                  width={24}
-                  height={24}
-                  aria-hidden
-                  className="size-6"
-                />
-              </a>
-            ))}
-          </div>
+          {hasSocialLinks ? (
+            <div className="flex items-center gap-7">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.id}
+                  href={social.href}
+                  aria-label={social.label}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-opacity hover:opacity-60"
+                >
+                  <Image
+                    src={social.icon}
+                    alt=""
+                    width={24}
+                    height={24}
+                    aria-hidden
+                    className="size-6"
+                  />
+                </a>
+              ))}
+            </div>
+          ) : null}
           <div className="relative h-[25px] w-[320px] lg:w-[380px]">
             <Image
               src="/images/navigation/payment-methods.png"
@@ -138,9 +163,11 @@ const Footer = ({ className }: { className?: string }) => {
             />
           </div>
 
-          <p className="text-center font-gill text-sm font-light leading-110 text-neutral500 lg:absolute lg:left-1/2 lg:-translate-x-1/2 lg:whitespace-nowrap">
-            {footerCopyright}
-          </p>
+          {hasCopyright ? (
+            <p className="text-center font-gill text-sm font-light leading-110 text-neutral500 lg:absolute lg:left-1/2 lg:-translate-x-1/2 lg:whitespace-nowrap">
+              {footerCopyright}
+            </p>
+          ) : null}
         </div>
       </PageContainer>
     </footer>

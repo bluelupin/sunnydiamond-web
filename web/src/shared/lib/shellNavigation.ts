@@ -184,6 +184,9 @@ function filterFooterLinks(groups: readonly FooterLinkGroup[]): FooterLinkGroup[
 export function resolveShellFooterLinkGroups(
   cmsGroups: readonly FooterLinkGroup[] | null | undefined,
 ): FooterLinkGroup[] {
-  if (cmsGroups?.length) return filterFooterLinks(cmsGroups);
-  return filterFooterLinks(getFallbackFooterLinkGroups());
+  if (!cmsGroups?.length) {
+    return [];
+  }
+
+  return filterFooterLinks(cmsGroups);
 }
