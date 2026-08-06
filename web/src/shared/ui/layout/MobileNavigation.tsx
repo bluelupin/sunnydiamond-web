@@ -64,7 +64,7 @@ const JewelleryPanel = ({ onBack, onClose }: JewelleryPanelProps) => (
       >
         <span className="inline-flex size-6 shrink-0 items-center justify-center">
           <Image
-            src="/images/navigation/chevron-right.svg"
+            src="/images/icons/chevron-right.svg"
             alt=""
             width={7}
             height={15}
@@ -83,7 +83,7 @@ const JewelleryPanel = ({ onBack, onClose }: JewelleryPanelProps) => (
         className="inline-flex size-6 items-center justify-center"
       >
         <Image
-          src="/images/navigation/menu-close.svg"
+          src="/images/icons/menu-close.svg"
           alt=""
           width={24}
           height={24}
@@ -103,7 +103,7 @@ const JewelleryPanel = ({ onBack, onClose }: JewelleryPanelProps) => (
 const NavChevron = () => (
   <span className="inline-flex size-6 shrink-0 items-center justify-center">
     <Image
-      src="/images/navigation/chevron-right.svg"
+      src="/images/icons/chevron-right.svg"
       alt=""
       width={7}
       height={15}
@@ -232,7 +232,7 @@ const LanguagePanel = ({ selected, onBack, onClose, onApply }: LanguagePanelProp
           >
             <span className="inline-flex size-6 shrink-0 items-center justify-center">
               <Image
-                src="/images/navigation/chevron-right.svg"
+                src="/images/icons/chevron-right.svg"
                 alt=""
                 width={7}
                 height={15}
@@ -252,7 +252,7 @@ const LanguagePanel = ({ selected, onBack, onClose, onApply }: LanguagePanelProp
             className="inline-flex size-6 items-center justify-center"
           >
             <Image
-              src="/images/navigation/menu-close.svg"
+              src="/images/icons/menu-close.svg"
               alt=""
               width={24}
               height={24}
@@ -326,7 +326,7 @@ const CurrencyPanel = ({ selected, onBack, onClose, onApply }: CurrencyPanelProp
           >
             <span className="inline-flex size-6 shrink-0 items-center justify-center">
               <Image
-                src="/images/navigation/chevron-right.svg"
+                src="/images/icons/chevron-right.svg"
                 alt=""
                 width={7}
                 height={15}
@@ -346,7 +346,7 @@ const CurrencyPanel = ({ selected, onBack, onClose, onApply }: CurrencyPanelProp
             className="inline-flex size-6 items-center justify-center"
           >
             <Image
-              src="/images/navigation/menu-close.svg"
+              src="/images/icons/menu-close.svg"
               alt=""
               width={24}
               height={24}
@@ -478,7 +478,7 @@ const MobileNavigation = ({
             className="inline-flex size-6 items-center justify-center"
           >
             <Image
-              src="/images/navigation/menu-close.svg"
+              src="/images/icons/menu-close.svg"
               alt=""
               width={24}
               height={24}
@@ -563,7 +563,7 @@ const MobileNavigation = ({
       <div className="shrink-0 bg-gray200 px-4 py-6">
         <div className="flex flex-col gap-3">
           <UtilityRow
-            iconSrc="/images/navigation/appointment.svg"
+            iconSrc="/images/icons/appointment.svg"
             iconW={20}
             iconH={20}
             label={appointmentLink.label}
@@ -571,7 +571,7 @@ const MobileNavigation = ({
           />
           <NavDivider className="bg-chalk300" />
           <UtilityRow
-            iconSrc="/images/navigation/currency.svg"
+            iconSrc="/images/icons/currency.svg"
             iconW={20}
             iconH={20}
             label="Currency"
@@ -580,7 +580,7 @@ const MobileNavigation = ({
           />
           <NavDivider className="bg-chalk300" />
           <UtilityRow
-            iconSrc="/images/navigation/globe.svg"
+            iconSrc="/images/icons/globe.svg"
             iconW={24}
             iconH={24}
             label="Language"
@@ -589,7 +589,7 @@ const MobileNavigation = ({
           />
           <NavDivider className="bg-chalk300" />
           <UtilityRow
-            iconSrc="/images/navigation/map.svg"
+            iconSrc="/images/icons/map.svg"
             iconW={24}
             iconH={24}
             label="Find a Store"
@@ -600,7 +600,7 @@ const MobileNavigation = ({
         <div className="mt-10 flex items-center justify-center text-center gap-2">
           <span className="inline-flex size-6 shrink-0 items-center justify-center">
             <Image
-              src="/images/navigation/footer-star.svg"
+              src="/images/icons/footer-star.svg"
               alt=""
               width={20}
               height={20}

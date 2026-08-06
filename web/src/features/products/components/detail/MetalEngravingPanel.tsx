@@ -91,7 +91,7 @@ const MetalEngravingPanel = ({
                   className="inline-flex size-8 shrink-0 items-center justify-center"
                 >
                   <Image
-                    src="/images/navigation/menu-close.svg"
+                    src="/images/icons/menu-close.svg"
                     alt=""
                     width={24}
                     height={24}

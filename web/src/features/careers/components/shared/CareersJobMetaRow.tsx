@@ -15,7 +15,7 @@ const figmaMetaItemClass =
 
 const figmaMetaTextClass = "whitespace-nowrap";
 
-const META_DIVIDER_SRC = "/images/careers/icon-meta-divider.svg";
+const META_DIVIDER_SRC = "/images/icons/icon-meta-divider.svg";
 
 function MetaDivider({ className }: { className?: string }) {
   return (

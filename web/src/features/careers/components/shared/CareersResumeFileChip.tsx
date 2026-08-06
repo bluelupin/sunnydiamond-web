@@ -3,9 +3,9 @@
 import { cn } from "@/shared/utils/cn";
 import { formatCareersFileSize } from "@/features/careers/constants/careersApplicationForm";
 
-const DOCUMENT_ICON_SRC = "/images/careers/icon-resume-document.svg";
-const FOLD_ICON_SRC = "/images/careers/icon-resume-fold.svg";
-const REMOVE_ICON_SRC = "/images/careers/icon-resume-remove.svg";
+const DOCUMENT_ICON_SRC = "/images/icons/icon-resume-document.svg";
+const FOLD_ICON_SRC = "/images/icons/icon-resume-fold.svg";
+const REMOVE_ICON_SRC = "/images/icons/icon-resume-remove.svg";
 
 /** Figma 1480:1040 — PDF/document glyph in resume file chip. */
 function CareersResumeFileIcon({ className }: { className?: string }) {

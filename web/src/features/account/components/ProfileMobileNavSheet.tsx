@@ -28,7 +28,7 @@ type ProfileMobileNavSheetProps = {
 const NavChevron = () => (
   <span className="inline-flex size-6 shrink-0 items-center justify-center">
     <Image
-      src="/images/navigation/chevron-right.svg"
+      src="/images/icons/chevron-right.svg"
       alt=""
       width={7}
       height={15}
@@ -57,7 +57,7 @@ function ProfileNavSheetHeader({ onClose, cartCount, firstName }: ProfileNavShee
           className="inline-flex size-6 items-center justify-center"
         >
           <Image
-            src="/images/navigation/menu-close.svg"
+            src="/images/icons/menu-close.svg"
             alt=""
             width={24}
             height={24}

@@ -5,8 +5,6 @@ import ScrollReveal from "@/shared/ui/ScrollReveal";
 import Reveal from "@/shared/Animation/Reveal";
 import type { NormalizedDfeBenefits } from "@/services/diamonds-for-everyone/diamonds-for-everyone-page.types";
 
-const STEPS_LINE = "/images/home/savings-plan-line.svg";
-
 const StepCircle = ({ number }: { number: number }) => (
   <div className="relative z-10 flex size-10 shrink-0 items-center justify-center rounded-full border border-darkblack bg-[#EBDFC6]">
     <span className="font-gill text-xl font-light leading-none tracking-[0.2px] text-darkblack">
@@ -78,7 +76,7 @@ const DfeSavingsPlanSection = ({ benefits }: DfeSavingsPlanSectionProps) => {
             <div className="hidden w-full flex-col items-center gap-6 md:flex">
               <ScrollReveal delayMs={200} className="relative h-10 w-full max-w-[784px]">
                 <div className="pointer-events-none absolute left-1/2 top-1/2 w-full max-w-[784px] -translate-x-1/2 -translate-y-1/2">
-                  <Image src={STEPS_LINE} alt="" width={784} height={1} className="h-px w-full" aria-hidden />
+                  <div className="w-full border-[0.5px] border-dashed border-neutral500"></div>
                 </div>
                 <div className="relative flex h-10 items-center justify-between max-w-[784px] mx-auto px-0">
                   {steps.map((step) => (

@@ -15,8 +15,6 @@ interface DiamondsForEveryoneSectionProps {
 }
 
 const BACKGROUND_TEXTURE = "https://d1gf9vo4d2b63b.cloudfront.net/cms/diamonds_for_everyone_bg_8acd81b417.png";
-const STEPS_LINE = "/images/home/savings-plan-line.svg";
-
 const DEFAULT_STEPS: SavingsPlanStep[] = [
   {
     stepNumber: 1,
@@ -166,7 +164,6 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
         <div className="hidden w-full flex-col items-center gap-6 md:flex">
           <ScrollReveal delayMs={200} className="relative h-10 w-full lg:w-[740px] w-[700px] mx-auto">
             <div className="pointer-events-none absolute left-1/2 top-[calc(50%+1px)] w-full lg:w-[740px] md:w-[510px] w-[530px] mx-auto -translate-x-1/2 -translate-y-1/2">
-              {/* <Image src={STEPS_LINE} alt="" width={784} height={1} className="h-px w-full" aria-hidden /> */}
               <div className="w-full border-[0.5px] border-dashed border-neutral500"></div>
             </div>
             <div className="relative flex h-10 items-center justify-between lg:w-[740px] md:w-[510px] w-[700px] mx-auto px-0">

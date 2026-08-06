@@ -11,13 +11,14 @@ import PageContainer from "@/shared/ui/layout/PageContainer";
 import TrustBadgeSection from "@/features/cms/components/common/TrustBadges";
 import Reveal from "@/shared/Animation/Reveal";
 import { cn } from "@/shared/utils/cn";
+import ResponsiveImage from "../ResponsiveImage";
 
 const SOCIAL_ICON_MAP: Record<string, string> = {
-  instagram: "/images/navigation/social-instagram.svg",
-  facebook: "/images/navigation/social-facebook.svg",
-  x: "/images/navigation/social-x.svg",
-  twitter: "/images/navigation/social-x.svg",
-  linkedin: "/images/navigation/social-linkedin.svg",
+  instagram: "/images/icons/social/instagram.svg",
+  facebook: "/images/icons/social/facebook.svg",
+  x: "/images/icons/social/x.svg",
+  twitter: "/images/icons/social/x.svg",
+  linkedin: "/images/icons/social/linkedin.svg",
 };
 
 type CmsSocialLink = {
@@ -136,7 +137,7 @@ const Footer = ({ className }: { className?: string }) => {
           <Reveal direction="up" className="shrink-0">
             <Link href="/" aria-label="Sunny Diamonds">
               <Image
-                src="/images/brand/logo-desktop.svg"
+                src="/images/logo-desktop.svg"
                 alt="Sunny Diamonds"
                 width={336}
                 height={142}
@@ -146,7 +147,7 @@ const Footer = ({ className }: { className?: string }) => {
               />
             </Link>
           </Reveal>
-          {hasFooterNavigation ? (
+          {hasFooterNavigation &&
             <nav
               aria-label="Footer navigation"
               className="grid md:grid-cols-4 grid-cols-2 lg:flex lg:w-full xl:max-w-[923px] w-full justify-between lg:gap-4 gap-8"
@@ -174,11 +175,11 @@ const Footer = ({ className }: { className?: string }) => {
                 </div>
               ))}
             </nav>
-          ) : null}
+          }
         </div>
-        {hasBottomRow ? (
+        {hasBottomRow &&
           <div className="relative flex flex-col items-center gap-8 lg:flex-row lg:items-center lg:justify-between">
-            {hasSocialLinks ? (
+            {hasSocialLinks &&
               <div className="flex items-center gap-7">
                 {socialLinks.map((social) => (
                   <a
@@ -200,34 +201,33 @@ const Footer = ({ className }: { className?: string }) => {
                   </a>
                 ))}
               </div>
-            ) : null}
-            {hasPaymentMethodLogos ? (
+            }
+            {hasPaymentMethodLogos &&
               <div className="flex flex-wrap items-center gap-4">
                 {paymentMethodLogos.map((logo) => (
                   <div
                     key={logo.id}
-                    className="relative h-[25px]"
-                    style={{ width: `${Math.min(logo.width, 380)}px` }}
+                    className="relative h-5 max-w-auto"
                   >
-                    <Image
-                      src={logo.src}
+                    <ResponsiveImage
+                      desktopSrc={logo.src}
                       alt={logo.alt}
-                      fill
-                      sizes="(max-width: 1024px) 320px, 380px"
-                      className="object-contain object-left"
+                      width={380}
+                      height={25}
+                      quality={80}
+                      className="object-cover"
                     />
                   </div>
                 ))}
               </div>
-            ) : null}
-
-            {hasCopyright ? (
+            }
+            {hasCopyright &&
               <p className="text-center font-gill text-sm font-light leading-110 text-neutral500 lg:absolute lg:left-1/2 lg:-translate-x-1/2 lg:whitespace-nowrap">
                 {footerCopyright}
               </p>
-            ) : null}
+            }
           </div>
-        ) : null}
+        }
       </PageContainer>
     </footer>
   );

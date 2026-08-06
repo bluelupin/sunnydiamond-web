@@ -52,7 +52,7 @@ const TryAtHomeSuccessStep = ({
                 className="inline-flex size-6 shrink-0 items-center justify-self-end"
               >
                 <Image
-                  src="/images/navigation/menu-close.svg"
+                  src="/images/icons/menu-close.svg"
                   alt=""
                   width={24}
                   height={24}

@@ -9,7 +9,7 @@ import { saveHomeActiveSection } from "@/shared/lib/browserBackScrollRestore";
 import { scrollToHomeSection } from "@/shared/utils/homeSectionScroll";
 import { cn } from "@/shared/utils/cn";
 
-const NAV_GRADIENT = "/images/navigation/section-nav-gradient.svg";
+const NAV_GRADIENT = "/images/icons/section-nav-gradient.svg";
 
 const NAV_START_SECTION_ID = "alankara";
 
