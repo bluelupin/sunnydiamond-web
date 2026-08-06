@@ -1,10 +1,4 @@
 import { siteConfig } from "@/shared/lib/siteConfig";
-import {
-  buildPolicyCertificationsHref,
-  resolvePolicyIdFromFooterPath,
-  resolvePolicyIdFromParam,
-} from "@/features/cms/utils/policyCertificationsRoutes";
-import { WORLD_OF_SUNNY_PATH } from "@/shared/utils/navigation";
 
 export type HeaderNavLink = {
   label: string;
@@ -12,15 +6,19 @@ export type HeaderNavLink = {
 };
 
 export type FooterLink = {
-  id: string;
+  id: string | number;
   label: string;
   url: string;
+  isActive?: boolean | null;
+  sortOrder?: number | null;
 };
 
 export type FooterLinkGroup = {
   id: string | number;
   title: string;
   links: FooterLink[];
+  isActive?: boolean | null;
+  sortOrder?: number | null;
 };
 
 export function getFallbackHeaderLinks(): HeaderNavLink[] {
@@ -79,108 +77,6 @@ export function splitShellHeaderNavLinks(links: readonly HeaderNavLink[]): {
   return { primaryLinks, appointmentLink };
 }
 
-const REMOVED_FOOTER_PATHS = new Set([
-  "/help-and-support",
-  "/monthly-plans",
-  "/gift-card",
-  "/finance-options",
-  "/news",
-  "/old-gold-purchase-policy-kerala-only",
-]);
-
-function isRemovedFooterLink(link: FooterLink): boolean {
-  const normalized = link.url.replace(/\/$/, "") || "/";
-  if (REMOVED_FOOTER_PATHS.has(normalized)) {
-    return true;
-  }
-
-  if (normalized.startsWith("/blogs/")) {
-    return false;
-  }
-
-  if (/\bblog(s)?\b/i.test(link.label) && normalized !== "/blogs") {
-    return true;
-  }
-
-  return false;
-}
-
-function normalizeFooterLink(link: FooterLink): FooterLink {
-  const normalizedUrl = link.url.replace(/\/$/, "") || "/";
-  const normalizedLabel = link.label.trim().toLowerCase();
-  const pathOnly = normalizedUrl.split("?")[0] || "/";
-  const policyQueryMatch = link.url.match(/[?&]policy=([^&]+)/);
-  const policyIdFromQuery = resolvePolicyIdFromParam(
-    policyQueryMatch ? decodeURIComponent(policyQueryMatch[1]) : undefined,
-  );
-
-  if (normalizedUrl === "/about" || normalizedLabel === "about us") {
-    return {
-      ...link,
-      label: "World of Sunny",
-      url: WORLD_OF_SUNNY_PATH,
-    };
-  }
-
-  const policyId = policyIdFromQuery ?? resolvePolicyIdFromFooterPath(pathOnly);
-  if (policyId) {
-    return {
-      ...link,
-      label: policyId === "privacy-policy" ? "Privacy Policy" : link.label,
-      url: buildPolicyCertificationsHref(policyId),
-    };
-  }
-
-  if (
-    pathOnly === "/policy-and-certifications" ||
-    pathOnly === "/policy-and-certification" ||
-    pathOnly === "/privacy-policy" ||
-    normalizedLabel === "privacy policy"
-  ) {
-    return {
-      ...link,
-      label: "Privacy Policy",
-      url: buildPolicyCertificationsHref("privacy-policy"),
-    };
-  }
-
-  if (normalizedLabel === "policy & certifications" || normalizedLabel === "policy and certifications") {
-    return {
-      ...link,
-      label: "Privacy Policy",
-      url: buildPolicyCertificationsHref("privacy-policy"),
-    };
-  }
-
-  return link;
-}
-
-function dedupeFooterLinks(links: FooterLink[]): FooterLink[] {
-  const seen = new Set<string>();
-
-  return links.filter((link) => {
-    if (seen.has(link.url)) {
-      return false;
-    }
-
-    seen.add(link.url);
-    return true;
-  });
-}
-
-function filterFooterLinks(groups: readonly FooterLinkGroup[]): FooterLinkGroup[] {
-  return groups
-    .map((group) => ({
-      ...group,
-      links: dedupeFooterLinks(
-        group.links
-          .map(normalizeFooterLink)
-          .filter((link) => !isRemovedFooterLink(link)),
-      ),
-    }))
-    .filter((group) => group.links.length > 0);
-}
-
 export function resolveShellFooterLinkGroups(
   cmsGroups: readonly FooterLinkGroup[] | null | undefined,
 ): FooterLinkGroup[] {
@@ -188,5 +84,25 @@ export function resolveShellFooterLinkGroups(
     return [];
   }
 
-  return filterFooterLinks(cmsGroups);
+  return [...cmsGroups]
+    .filter((group) => group.isActive !== false)
+    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+    .map((group) => ({
+      id: group.id,
+      title: group.title,
+      links: [...group.links]
+        .filter(
+          (link) =>
+            link.isActive !== false &&
+            Boolean(link.label?.trim()) &&
+            Boolean(link.url?.trim()),
+        )
+        .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+        .map((link) => ({
+          id: link.id,
+          label: link.label.trim(),
+          url: link.url.trim(),
+        })),
+    }))
+    .filter((group) => group.links.length > 0);
 }

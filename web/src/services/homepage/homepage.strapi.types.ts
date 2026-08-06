@@ -54,6 +54,7 @@ export type StrapiGlobalShell = {
   footerLinkGroups?: FooterLinkGroup[] | null;
   footerCopyright?: string | null;
   socialLinks?: unknown[] | null;
+  paymentMethodLogos?: unknown[] | null;
   defaultSeo?: HomepageSeo | null;
   /** Site-wide marquee ticker (Global config). */
   footerTickerItems?: StrapiFooterTickerItem[] | null;
