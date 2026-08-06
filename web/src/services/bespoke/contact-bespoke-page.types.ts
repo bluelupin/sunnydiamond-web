@@ -179,6 +179,7 @@ export type NormalizedBespokeFeaturedSlide = {
   modalTitle: string;
   modalDescription: string;
   modalImages: { src: string; alt: string }[];
+  href: string;
 };
 
 export type NormalizedBespokeFeaturedStories = {

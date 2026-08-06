@@ -170,10 +170,30 @@ const mapStory = (section?: StrapiBespokeVisionSection | null): NormalizedBespok
   };
 };
 
+const findPastCreationMatch = (
+  card: StrapiBespokeFeaturedStoryCard,
+  pastCreations?: StrapiBespokePastCreation[] | null,
+): StrapiBespokePastCreation | null => {
+  if (!pastCreations?.length) return null;
+
+  const documentId = cleanText(card.documentId);
+  const slug = cleanText(card.slug);
+  const title = cleanText(card.title)?.toLowerCase();
+
+  return (
+    pastCreations.find((item) => documentId && cleanText(item.documentId) === documentId) ??
+    pastCreations.find((item) => slug && cleanText(item.slug) === slug) ??
+    pastCreations.find((item) => title && cleanText(item.title)?.toLowerCase() === title) ??
+    null
+  );
+};
+
 const mapFeaturedCardToSlide = (
   card: StrapiBespokeFeaturedStoryCard,
   index: number,
-  galleryOverride?: StrapiImagePayload[] | null,
+  galleryOverride: StrapiImagePayload[] | null | undefined,
+  sectionCtaHref: string,
+  pastCreations?: StrapiBespokePastCreation[] | null,
 ): NormalizedBespokeFeaturedSlide | null => {
   if (card.isActive === false) return null;
 
@@ -202,6 +222,8 @@ const mapFeaturedCardToSlide = (
     })
     .filter((item): item is { src: string; alt: string } => item != null);
 
+  const pastCreationMatch = findPastCreationMatch(card, pastCreations);
+
   return {
     documentId: cleanText(card.documentId) || undefined,
     src: coverUrl,
@@ -209,6 +231,7 @@ const mapFeaturedCardToSlide = (
     modalTitle: title,
     modalDescription: description,
     modalImages: galleryImages.length > 0 ? galleryImages : [{ src: coverUrl, alt: coverAlt }],
+    href: cleanText(pastCreationMatch?.cta?.url) ?? sectionCtaHref,
   };
 };
 
@@ -216,18 +239,7 @@ const resolvePastCreationGallery = (
   card: StrapiBespokeFeaturedStoryCard,
   pastCreations?: StrapiBespokePastCreation[] | null,
 ): StrapiImagePayload[] | null => {
-  if (!pastCreations?.length) return null;
-
-  const documentId = cleanText(card.documentId);
-  const slug = cleanText(card.slug);
-  const title = cleanText(card.title)?.toLowerCase();
-
-  const match =
-    pastCreations.find((item) => documentId && cleanText(item.documentId) === documentId) ??
-    pastCreations.find((item) => slug && cleanText(item.slug) === slug) ??
-    pastCreations.find((item) => title && cleanText(item.title)?.toLowerCase() === title);
-
-  const gallery = match?.gallery;
+  const gallery = findPastCreationMatch(card, pastCreations)?.gallery;
   return gallery && gallery.length > 0 ? gallery : null;
 };
 
@@ -238,19 +250,25 @@ const mapFeaturedStories = (
   if (!section || section.showField === false) return null;
 
   const title = cleanText(section.title);
+  const primaryCtaLabel = cleanText(section.cta?.label) ?? "";
+  const primaryCtaHref = cleanText(section.cta?.url) ?? "/featured-stories";
+  const secondaryCtaLabel =
+    cleanText(section.secondaryCta?.label) ?? bespokeUiDefaults.secondaryCtaLabel;
+  const backgroundImage = mapResponsiveImage(section.backgroundImage);
+
   const slides = (section.cards ?? [])
     .slice()
     .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
     .map((card, index) =>
-      mapFeaturedCardToSlide(card, index, resolvePastCreationGallery(card, pastCreations)),
+      mapFeaturedCardToSlide(
+        card,
+        index,
+        resolvePastCreationGallery(card, pastCreations),
+        primaryCtaHref,
+        pastCreations,
+      ),
     )
     .filter((slide): slide is NormalizedBespokeFeaturedSlide => slide != null);
-
-  const backgroundImage = mapResponsiveImage(section.backgroundImage);
-
-  const primaryCtaLabel = cleanText(section.cta?.label) ?? "";
-  const secondaryCtaLabel =
-    cleanText(section.secondaryCta?.label) ?? bespokeUiDefaults.secondaryCtaLabel;
 
   // Keep section if we have a title, backdrop, slides, or any CTA — slides may be empty until CMS cards are added.
   if (!title && slides.length === 0 && !primaryCtaLabel && !backgroundImage) return null;
@@ -261,7 +279,7 @@ const mapFeaturedStories = (
     slides,
     backgroundImage,
     primaryCtaLabel,
-    primaryCtaHref: cleanText(section.cta?.url) ?? "/featured-stories",
+    primaryCtaHref,
     secondaryCtaLabel,
     modalCtaLabel: bespokeUiDefaults.modalCtaLabel,
     modalCtaHref: bespokeUiDefaults.modalCtaHref,
