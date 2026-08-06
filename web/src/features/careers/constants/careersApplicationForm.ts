@@ -1,9 +1,85 @@
 export const CAREERS_RESUME_ACCEPT =
-  ".zip,.pdf,.jpeg,.jpg,.png,application/pdf,application/zip,image/jpeg,image/png";
+  ".zip,.pdf,.jpeg,.jpg,application/pdf,application/zip,application/x-zip-compressed,image/jpeg";
 
 export const CAREERS_RESUME_MAX_BYTES = 5 * 1024 * 1024;
 
+export const CAREERS_RESUME_MAX_SIZE_TOAST_MESSAGE =
+  "File size must not exceed 5 MB.";
+
+export const CAREERS_RESUME_FORMAT_TOAST_MESSAGE =
+  "Only ZIP, PDF, JPEG, and JPG file formats are allowed.";
+
+const CAREERS_RESUME_ALLOWED_EXTENSIONS = new Set([".zip", ".pdf", ".jpeg", ".jpg"]);
+
+const CAREERS_RESUME_ALLOWED_MIME_TYPES = new Set([
+  "application/pdf",
+  "application/zip",
+  "application/x-zip-compressed",
+  "image/jpeg",
+]);
+
+export type CareersResumeValidationError = "size" | "format";
+
+function getCareersResumeFileExtension(fileName: string): string {
+  const parts = fileName.trim().toLowerCase().split(".");
+
+  if (parts.length < 2) {
+    return "";
+  }
+
+  return `.${parts.pop() ?? ""}`;
+}
+
+export function isCareersResumeFileFormatAllowed(file: File): boolean {
+  const extension = getCareersResumeFileExtension(file.name);
+  const mimeType = file.type.trim().toLowerCase();
+
+  if (extension && CAREERS_RESUME_ALLOWED_EXTENSIONS.has(extension)) {
+    if (mimeType && !CAREERS_RESUME_ALLOWED_MIME_TYPES.has(mimeType)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  return Boolean(mimeType && CAREERS_RESUME_ALLOWED_MIME_TYPES.has(mimeType));
+}
+
+export function getCareersResumeValidationError(
+  file: File,
+): CareersResumeValidationError | null {
+  if (file.size > CAREERS_RESUME_MAX_BYTES) {
+    return "size";
+  }
+
+  if (!isCareersResumeFileFormatAllowed(file)) {
+    return "format";
+  }
+
+  return null;
+}
+
 export const CAREERS_SUBMITTING_APPLICATION_LABEL = "Submitting...";
+
+export const CAREERS_NUMERIC_ONLY_ERROR = "Enter numbers only";
+
+export const CAREERS_YEAR_OF_COMPLETION_MAX_LENGTH = 4;
+
+export function sanitizeCareersNumericInput(value: string, maxLength?: number): string {
+  const digitsOnly = value.replace(/\D/g, "");
+
+  if (typeof maxLength === "number") {
+    return digitsOnly.slice(0, maxLength);
+  }
+
+  return digitsOnly;
+}
+
+export function isCareersNumericInput(value: string): boolean {
+  const trimmed = value.trim();
+
+  return trimmed.length > 0 && /^\d+$/.test(trimmed);
+}
 
 export const careersFormLabelClassName =
   "font-gill text-base font-normal leading-110 text-darkblack";

@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { X } from "lucide-react";
+import { useToast } from "@/shared/hooks/use-toast";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import AppointmentDateField from "@/shared/ui/AppointmentDateField";
 import { cn } from "@/shared/utils/cn";
@@ -20,16 +21,22 @@ import { submitCareerApplication } from "@/services/careers/career-submission.se
 import { isValidCtcLpa } from "@/services/careers/career-submission.mapper";
 import { resolveCareerApplicationFlow } from "@/services/careers/resolveCareerApplicationFlow";
 import {
+  CAREERS_NUMERIC_ONLY_ERROR,
   CAREERS_RESUME_ACCEPT,
-  CAREERS_RESUME_MAX_BYTES,
+  CAREERS_RESUME_FORMAT_TOAST_MESSAGE,
+  CAREERS_RESUME_MAX_SIZE_TOAST_MESSAGE,
   CAREERS_SUBMITTING_APPLICATION_LABEL,
+  CAREERS_YEAR_OF_COMPLETION_MAX_LENGTH,
   careersFormFieldClassName,
-  careersFormFieldGridClassName,
   careersFormFieldsStackClassName,
   careersFormLabelClassName,
   careersFormSectionClassName,
   careersFormSectionTitleClassName,
   getCareersBirthDateBounds,
+  getCareersResumeValidationError,
+  isCareersNumericInput,
+  sanitizeCareersNumericInput,
+  type CareersResumeValidationError,
 } from "@/features/careers/constants/careersApplicationForm";
 import CareersApplicationJobHeader from "./CareersApplicationJobHeader";
 import CareersSelectField from "./CareersSelectField";
@@ -49,6 +56,7 @@ type ApplicationField =
   | "areaOfStudy"
   | "yearOfCompletion"
   | "relevantExperience"
+  | "currentCtc"
   | "expectedCtc"
   | "companyRelation"
   | "resume";
@@ -94,6 +102,7 @@ const careersBirthDateBounds = getCareersBirthDateBounds();
 const CareersApplicationForm = () => {
   const { cms, selectedJob, goToSuccess, pendingResumeFile, clearPendingResume } =
     useCareersJobs();
+  const { toast } = useToast();
   const applicationFlow = resolveCareerApplicationFlow(cms.landing.applicationFlow);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -129,8 +138,28 @@ const CareersApplicationForm = () => {
   const [submitted, setSubmitted] = useState(false);
   const [touched, setTouched] = useState<Partial<Record<ApplicationField, boolean>>>({});
 
+  const showResumeValidationToast = useCallback(
+    (error: CareersResumeValidationError) => {
+      toast({
+        title:
+          error === "size"
+            ? CAREERS_RESUME_MAX_SIZE_TOAST_MESSAGE
+            : CAREERS_RESUME_FORMAT_TOAST_MESSAGE,
+        variant: "destructive",
+      });
+    },
+    [toast],
+  );
+
   useEffect(() => {
     if (!pendingResumeFile) {
+      return;
+    }
+
+    const validationError = getCareersResumeValidationError(pendingResumeFile);
+    if (validationError) {
+      showResumeValidationToast(validationError);
+      clearPendingResume();
       return;
     }
 
@@ -143,7 +172,7 @@ const CareersApplicationForm = () => {
     }
 
     clearPendingResume();
-  }, [clearPendingResume, pendingResumeFile]);
+  }, [clearPendingResume, pendingResumeFile, showResumeValidationToast]);
 
   const errors = useMemo(() => {
     const next: Partial<Record<ApplicationField, string>> = {};
@@ -161,12 +190,19 @@ const CareersApplicationForm = () => {
     if (!gender) next.gender = "Gender is required";
     if (!highestDegree.trim()) next.highestDegree = "Highest degree is required";
     if (!areaOfStudy.trim()) next.areaOfStudy = "Area of study is required";
-    if (!yearOfCompletion.trim()) next.yearOfCompletion = "Year of completion is required";
+    if (!yearOfCompletion.trim()) {
+      next.yearOfCompletion = "Year of completion is required";
+    } else if (!isCareersNumericInput(yearOfCompletion)) {
+      next.yearOfCompletion = CAREERS_NUMERIC_ONLY_ERROR;
+    }
     if (!relevantExperience) next.relevantExperience = "Relevant work experience is required";
+    if (currentCtc.trim() && !isCareersNumericInput(currentCtc)) {
+      next.currentCtc = CAREERS_NUMERIC_ONLY_ERROR;
+    }
     if (!expectedCtc.trim()) {
       next.expectedCtc = "Expected CTC is required";
     } else if (!isValidCtcLpa(expectedCtc)) {
-      next.expectedCtc = "Enter expected CTC as a number in LPA";
+      next.expectedCtc = CAREERS_NUMERIC_ONLY_ERROR;
     }
     if (!resumeFile) next.resume = "Resume is required";
     if (hasCompanyRelation === null) {
@@ -177,6 +213,7 @@ const CareersApplicationForm = () => {
   }, [
     areaOfStudy,
     countryCode,
+    currentCtc,
     dateOfBirth,
     email,
     expectedCtc,
@@ -220,9 +257,11 @@ const CareersApplicationForm = () => {
       return;
     }
 
-    if (file.size > CAREERS_RESUME_MAX_BYTES) {
+    const validationError = getCareersResumeValidationError(file);
+    if (validationError) {
       setResumeFile(null);
       event.target.value = "";
+      showResumeValidationToast(validationError);
       return;
     }
 
@@ -542,9 +581,18 @@ const CareersApplicationForm = () => {
             >
               <input
                 type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 placeholder={textPlaceholder}
                 value={yearOfCompletion}
-                onChange={(event) => setYearOfCompletion(event.target.value)}
+                onChange={(event) =>
+                  setYearOfCompletion(
+                    sanitizeCareersNumericInput(
+                      event.target.value,
+                      CAREERS_YEAR_OF_COMPLETION_MAX_LENGTH,
+                    ),
+                  )
+                }
                 onBlur={() => markTouched("yearOfCompletion")}
                 className={cn(
                   careersFormFieldClassName,
@@ -587,13 +635,24 @@ const CareersApplicationForm = () => {
                 className={careersFormFieldClassName}
               />
             </FormField>
-            <FormField label={fields.currentCtcLabel}>
+            <FormField
+              label={fields.currentCtcLabel}
+              error={showError("currentCtc") ? errors.currentCtc : undefined}
+            >
               <input
                 type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 placeholder={textPlaceholder}
                 value={currentCtc}
-                onChange={(event) => setCurrentCtc(event.target.value)}
-                className={careersFormFieldClassName}
+                onChange={(event) =>
+                  setCurrentCtc(sanitizeCareersNumericInput(event.target.value))
+                }
+                onBlur={() => markTouched("currentCtc")}
+                className={cn(
+                  careersFormFieldClassName,
+                  showError("currentCtc") && invalidFieldClassName,
+                )}
               />
             </FormField>
             <FormField
@@ -602,9 +661,13 @@ const CareersApplicationForm = () => {
             >
               <input
                 type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 placeholder={textPlaceholder}
                 value={expectedCtc}
-                onChange={(event) => setExpectedCtc(event.target.value)}
+                onChange={(event) =>
+                  setExpectedCtc(sanitizeCareersNumericInput(event.target.value))
+                }
                 onBlur={() => markTouched("expectedCtc")}
                 className={cn(
                   careersFormFieldClassName,
@@ -692,7 +755,7 @@ const CareersApplicationForm = () => {
           >
             <p className={careersFormLabelClassName}>{fields.companyRelationLabel}</p>
             <div className="flex gap-6">
-              <label className="inline-flex items-center gap-2">
+              <label className="inline-flex items-center gap-2 cursor-pointer">
                 <input
                   type="radio"
                   name="company-relation"
@@ -707,7 +770,7 @@ const CareersApplicationForm = () => {
                   {fields.companyRelationYes}
                 </span>
               </label>
-              <label className="inline-flex items-center gap-2">
+              <label className="inline-flex items-center gap-2 cursor-pointer">
                 <input
                   type="radio"
                   name="company-relation"

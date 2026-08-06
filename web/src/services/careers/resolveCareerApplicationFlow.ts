@@ -69,12 +69,12 @@ const APPLICATION_FLOW_FALLBACKS: NormalizedCareerApplicationFlow = {
   applicationForm: {
     title: "Application Form",
     resumeHeading: "Resume",
-    resumeHint: "File up to 5 mb and (ZIP, PDF, JPEG, PNG) Format Supported.",
+    resumeHint: "*File up to 5 mb and (ZIP, PDF, JPEG, JPG) Format Supported.",
     resumeUploadLabel: "Upload Resume",
     resumeRemoveLabel: "Remove",
     uploadResumeModal: {
       title: "Upload Resume",
-      description: "Upload your resume to autofill your application details.",
+      description: "Please review your details before submitting your application. Our team will come to a decision based on the information provided.",
       onlyUploadLabel: "Upload only",
       autofillResumeLabel: "Autofill with resume",
       closeLabel: "Close",

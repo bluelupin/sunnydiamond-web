@@ -95,7 +95,7 @@ export function isValidCtcLpa(value: string): boolean {
     return false;
   }
 
-  return /\d/.test(trimmed) && parseCtcLpa(trimmed) >= 0;
+  return /^\d+$/.test(trimmed);
 }
 
 function parseNoticePeriodDays(value: string): number {
