@@ -366,13 +366,13 @@ export const educationCertifiedSpec = {
   logos: {
     desktop: {
       maxWidth: 1360,
-      columnMinHeight: 122,
+      logoSlotHeight: 90,
       labelSize: 16,
     },
     mobile: {
       rowGap: 24,
       labelSize: 14,
-      rowMinHeight: 101,
+      logoSlotHeight: 101,
     },
   },
   copy: {

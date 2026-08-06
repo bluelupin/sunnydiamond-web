@@ -67,7 +67,7 @@ const CertificationLabel = ({
   return (
     <p
       className={cn(
-        "text-center font-gill leading-110 text-darkblack",
+        "w-full px-2 text-center font-gill leading-110 text-darkblack",
         mobile ? "text-sm font-light" : "lg:text-base text-sm font-normal",
       )}
     >
@@ -121,11 +121,13 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
           <div className="grid grid-cols-2">
             {mobileCertifications.slice(0, 2).map((cert, index) => (
               <ScrollReveal key={cert.id} delayMs={80 + index * 80}>
-                <div
-                  className="flex flex-col items-center justify-between gap-3"
-                  style={{ minHeight: logosSpec.mobile.rowMinHeight }}
-                >
-                  <CertificationLogo cert={cert} mobile />
+                <div className="flex flex-col items-center gap-3">
+                  <div
+                    className="flex w-full items-center justify-center"
+                    style={{ minHeight: logosSpec.mobile.logoSlotHeight }}
+                  >
+                    <CertificationLogo cert={cert} mobile />
+                  </div>
                   <CertificationLabel cert={cert} mobile />
                 </div>
               </ScrollReveal>
@@ -134,11 +136,13 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
           <div className="grid grid-cols-2">
             {mobileCertifications.slice(2, 4).map((cert, index) => (
               <ScrollReveal key={cert.id} delayMs={240 + index * 80}>
-                <div
-                  className="flex flex-col items-center justify-between gap-3"
-                  style={{ minHeight: logosSpec.mobile.rowMinHeight }}
-                >
-                  <CertificationLogo cert={cert} mobile />
+                <div className="flex flex-col items-center gap-3">
+                  <div
+                    className="flex w-full items-center justify-center"
+                    style={{ minHeight: logosSpec.mobile.logoSlotHeight }}
+                  >
+                    <CertificationLogo cert={cert} mobile />
+                  </div>
                   <CertificationLabel cert={cert} mobile />
                 </div>
               </ScrollReveal>
@@ -149,14 +153,18 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
         {/* Desktop logos — Figma 692:29096 */}
         <div className="mb-10 hidden w-full grid-cols-4 md:grid">
           {certificate.certifications.map((cert, index) => (
-            <ScrollReveal key={cert.id} delayMs={80 + index * 80}>
+            <ScrollReveal
+              key={cert.id}
+              delayMs={80 + index * 80}
+              className="flex w-full flex-col items-center gap-2"
+            >
               <div
-                className="flex flex-col items-center justify-between gap-2"
-                style={{ minHeight: logosSpec.desktop.columnMinHeight }}
+                className="flex w-full items-center justify-center"
+                style={{ minHeight: logosSpec.desktop.logoSlotHeight }}
               >
                 <CertificationLogo cert={cert} />
-                <CertificationLabel cert={cert} />
               </div>
+              <CertificationLabel cert={cert} />
             </ScrollReveal>
           ))}
         </div>

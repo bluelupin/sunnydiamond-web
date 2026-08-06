@@ -49,21 +49,24 @@ function buildRenderItems(items: FeaturedCarouselItem[]) {
   };
 }
 
+const CAROUSEL_TRANSITION_MS = 550;
+const CAROUSEL_EASING = "cubic-bezier(0.4, 0, 0.2, 1)";
+
 type SlideCropVariant = "center" | "left-peek" | "right-peek";
 
 function getSlideVariant(
   slideIndex: number,
-  activeIndex: number,
+  centerIndex: number,
   total: number,
 ): SlideCropVariant {
   if (total <= 1) return "center";
 
   const slide = normalizeIndex(slideIndex, total);
-  const active = normalizeIndex(activeIndex, total);
-  if (slide === active) return "center";
+  const center = normalizeIndex(centerIndex, total);
+  if (slide === center) return "center";
 
-  const prev = normalizeIndex(active - 1, total);
-  const next = normalizeIndex(active + 1, total);
+  const prev = normalizeIndex(center - 1, total);
+  const next = normalizeIndex(center + 1, total);
   if (slide === prev) return "left-peek";
   if (slide === next) return "right-peek";
   return "center";
@@ -85,6 +88,7 @@ function CarouselSlideImage({
       <div
         className={cn(
           "featured-slide-image",
+          variant === "center" && "featured-slide-image--center",
           variant === "left-peek" && "featured-slide-image--left",
           variant === "right-peek" && "featured-slide-image--right",
         )}
@@ -124,6 +128,8 @@ export default function FeaturedProductsCarousel({
   const refreshTimeoutRef = useRef<number | null>(null);
   const initialIndex = renderItems.length >= 3 ? 1 : 0;
   const [activeIndex, setActiveIndex] = useState(initialIndex);
+  const [centerVisualIndex, setCenterVisualIndex] = useState(initialIndex);
+  const [isSliding, setIsSliding] = useState(false);
   const itemsKey = useMemo(
     () => renderItems.map((item) => String(item.id)).join("|"),
     [renderItems],
@@ -154,6 +160,8 @@ export default function FeaturedProductsCarousel({
 
   useLayoutEffect(() => {
     setActiveIndex(renderItems.length >= 3 ? 1 : 0);
+    setCenterVisualIndex(renderItems.length >= 3 ? 1 : 0);
+    setIsSliding(false);
 
     scheduleRefresh();
     const raf = requestAnimationFrame(scheduleRefresh);
@@ -187,14 +195,18 @@ export default function FeaturedProductsCarousel({
 
   const handleBeforeChange = useCallback(
     (_current: number, next: number) => {
-      setActiveIndex(normalizeIndex(next, renderItems.length));
+      setIsSliding(true);
+      setCenterVisualIndex(normalizeIndex(next, renderItems.length));
     },
     [renderItems.length],
   );
 
   const handleAfterChange = useCallback(
     (current: number) => {
-      setActiveIndex(normalizeIndex(current, renderItems.length));
+      const index = normalizeIndex(current, renderItems.length);
+      setActiveIndex(index);
+      setCenterVisualIndex(index);
+      setIsSliding(false);
     },
     [renderItems.length],
   );
@@ -215,8 +227,8 @@ export default function FeaturedProductsCarousel({
       centerPadding: "0px",
       slidesToShow,
       slidesToScroll: 1,
-      speed: 500,
-      cssEase: "ease",
+      speed: CAROUSEL_TRANSITION_MS,
+      cssEase: CAROUSEL_EASING,
       initialSlide: initialIndex,
       arrows: false,
       dots: false,
@@ -307,7 +319,7 @@ export default function FeaturedProductsCarousel({
               <CarouselSlideImage
                 src={item.image}
                 alt={item.name}
-                variant={getSlideVariant(index, activeIndex, renderItems.length)}
+                variant={getSlideVariant(index, centerVisualIndex, renderItems.length)}
                 priority={index === initialIndex}
               />
             </div>
@@ -367,7 +379,12 @@ export default function FeaturedProductsCarousel({
           </button>
         </div>
 
-        <div className="mt-3 flex flex-col items-center gap-4 text-center md:gap-6 !w-[300px]">
+        <div
+          className={cn(
+            "mt-3 flex flex-col items-center gap-4 text-center transition-opacity duration-300 ease-out md:gap-6 !w-[300px]",
+            isSliding && "opacity-60",
+          )}
+        >
           <div className="flex flex-col items-center gap-4 md:min-h-0">
             {activeItem.name ? (
               <p className="font-gill text-base font-normal leading-110 text-darkblack md:text-xl">
