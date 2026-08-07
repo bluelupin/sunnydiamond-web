@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { X } from "lucide-react";
-import { useToast } from "@/shared/hooks/use-toast";
+import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import AppointmentDateField from "@/shared/ui/AppointmentDateField";
 import { cn } from "@/shared/utils/cn";
@@ -102,10 +102,13 @@ const careersBirthDateBounds = getCareersBirthDateBounds();
 const CareersApplicationForm = () => {
   const { cms, selectedJob, goToSuccess, pendingResumeFile, clearPendingResume } =
     useCareersJobs();
-  const { toast } = useToast();
   const applicationFlow = resolveCareerApplicationFlow(cms.landing.applicationFlow);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [resumeValidationToastMessage, setResumeValidationToastMessage] = useState<string | null>(
+    null,
+  );
+  const resumeValidationToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const resumeInputRef = useRef<HTMLInputElement>(null);
 
@@ -138,18 +141,37 @@ const CareersApplicationForm = () => {
   const [submitted, setSubmitted] = useState(false);
   const [touched, setTouched] = useState<Partial<Record<ApplicationField, boolean>>>({});
 
+  const dismissResumeValidationToast = useCallback(() => {
+    if (resumeValidationToastTimeoutRef.current) {
+      clearTimeout(resumeValidationToastTimeoutRef.current);
+      resumeValidationToastTimeoutRef.current = null;
+    }
+    setResumeValidationToastMessage(null);
+  }, []);
+
   const showResumeValidationToast = useCallback(
     (error: CareersResumeValidationError) => {
-      toast({
-        title:
-          error === "size"
-            ? CAREERS_RESUME_MAX_SIZE_TOAST_MESSAGE
-            : CAREERS_RESUME_FORMAT_TOAST_MESSAGE,
-        variant: "destructive",
-      });
+      dismissResumeValidationToast();
+      setResumeValidationToastMessage(
+        error === "size"
+          ? CAREERS_RESUME_MAX_SIZE_TOAST_MESSAGE
+          : CAREERS_RESUME_FORMAT_TOAST_MESSAGE,
+      );
+      resumeValidationToastTimeoutRef.current = setTimeout(() => {
+        setResumeValidationToastMessage(null);
+        resumeValidationToastTimeoutRef.current = null;
+      }, appStatusToastDurationMs);
     },
-    [toast],
+    [dismissResumeValidationToast],
   );
+
+  useEffect(() => {
+    return () => {
+      if (resumeValidationToastTimeoutRef.current) {
+        clearTimeout(resumeValidationToastTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!pendingResumeFile) {
@@ -841,6 +863,11 @@ const CareersApplicationForm = () => {
         onConfirm={handleConfirmSubmit}
         isSubmitting={isSubmitting}
         errorMessage={submitError}
+      />
+
+      <AppStatusToast
+        open={Boolean(resumeValidationToastMessage)}
+        message={resumeValidationToastMessage ?? ""}
       />
     </form>
   );
