@@ -162,7 +162,7 @@ const ProductDetailSidebar = ({
                   <p className="font-gill text-base leading-normal tracking-normal text-darkblack">
                     {sizeGuide?.sizeFieldLabel ?? "Size"}
                   </p>
-                  <DetailTextLink onClick={() => setIsRingSizeChartOpen(true)}>
+                  <DetailTextLink onClick={() => setIsRingSizeChartOpen(true)} className="uppercase">
                     Find your size
                   </DetailTextLink>
                 </div>
@@ -206,7 +206,7 @@ const ProductDetailSidebar = ({
                 </span>
               ) : null}
             </div>
-            <DetailTextLink onClick={() => setIsPriceBreakupOpen(true)}>
+            <DetailTextLink onClick={() => setIsPriceBreakupOpen(true)} className="uppercase">
               View Price Breakup
             </DetailTextLink>
           </div>

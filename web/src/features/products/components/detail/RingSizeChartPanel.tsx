@@ -1,9 +1,8 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Play } from "lucide-react";
-import { useMutedVideoPlayback } from "@/shared/hooks/useMutedVideoPlayback";
 import { PanelFooterGradient } from "@/shared/ui/PanelFooter";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
@@ -15,7 +14,8 @@ type RingSizeChartPanelProps = {
 };
 
 const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) => {
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [hasStartedPlayback, setHasStartedPlayback] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const title = guide?.drawerTitle ?? "Size Chart";
   const subtitle = guide?.drawerSubtitle ?? "Measure Dimensions in millimeters";
@@ -23,7 +23,37 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
   const videoUrl = guide?.tutorialVideoUrl;
   const circumferenceHeaderUrl = guide?.circumferenceHeaderImageUrl;
   const diameterHeaderUrl = guide?.diameterHeaderImageUrl;
-  const videoRef = useMutedVideoPlayback(Boolean(videoUrl));
+
+  useEffect(() => {
+    if (open) {
+      return;
+    }
+
+    setHasStartedPlayback(false);
+    const video = videoRef.current;
+    if (!video) {
+      return;
+    }
+
+    video.pause();
+    video.currentTime = 0;
+  }, [open]);
+
+  useEffect(() => {
+    setHasStartedPlayback(false);
+  }, [videoUrl]);
+
+  const handlePlayVideo = () => {
+    const video = videoRef.current;
+    if (!video) {
+      return;
+    }
+
+    setHasStartedPlayback(true);
+    void video.play().catch(() => {
+      setHasStartedPlayback(false);
+    });
+  };
 
   return (
     <ProductDetailSidePanelShell
@@ -32,8 +62,7 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
       overlayAriaLabel={`Close ${title}`}
       dialogAriaLabel={title}
     >
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        {/* <div className="flex items-center justify-end px-4 pt-6 lg:px-6 lg:pt-10"> */}
+      <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
         <button
           type="button"
           onClick={onClose}
@@ -51,47 +80,41 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
           <div className="flex flex-col gap-6 pb-72">
             {videoUrl ? (
               <div className="relative w-full shrink-0 overflow-hidden bg-white">
-                {isVideoPlaying ? (
-                  <video
-                    ref={videoRef}
-                    src={videoUrl}
-                    className="block h-auto w-full"
-                    controls
-                    autoPlay
-                    muted
-                    playsInline
-                  />
-                ) : (
-                  <div className="relative w-full">
-                    <video
-                      ref={videoRef}
-                      src={videoUrl}
-                      className="block h-auto w-full"
-                      muted
-                      playsInline
-                      preload="metadata"
-                      aria-hidden
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                      <button
-                        type="button"
-                        aria-label={`Play ${title} video`}
-                        onClick={() => setIsVideoPlaying(true)}
-                        className="inline-flex size-8 items-center justify-center"
-                      >
-                        <Play
-                          size={32}
-                          strokeWidth={1.5}
-                          className="fill-white text-white"
-                          aria-hidden
-                        />
-                      </button>
-                    </div>
+                <video
+                  ref={videoRef}
+                  src={videoUrl}
+                  className="block h-auto w-full"
+                  playsInline
+                  preload="metadata"
+                  controls={hasStartedPlayback}
+                  onPlay={() => setHasStartedPlayback(true)}
+                  onEnded={() => {
+                    const video = videoRef.current;
+                    if (video) {
+                      video.currentTime = 0;
+                    }
+                    setHasStartedPlayback(false);
+                  }}
+                />
+                {!hasStartedPlayback ? (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                    <button
+                      type="button"
+                      aria-label={`Play ${title} video`}
+                      onClick={handlePlayVideo}
+                      className="inline-flex size-8 items-center justify-center"
+                    >
+                      <Play
+                        size={32}
+                        strokeWidth={1.5}
+                        className="fill-white text-white"
+                        aria-hidden
+                      />
+                    </button>
                   </div>
-                )}
+                ) : null}
               </div>
             ) : null}
-
             <div className="flex flex-col gap-6 pb-8">
               <div className="flex flex-col items-center gap-3 px-4 text-center lg:px-8">
                 <h2 className="w-full font-larken text-2xl font-light leading-110 text-darkblack">

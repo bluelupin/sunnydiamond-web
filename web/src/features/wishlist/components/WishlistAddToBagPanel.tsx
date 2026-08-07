@@ -228,7 +228,7 @@ const WishlistAddToBagPanel = ({
                   ) : isDetailFetching ? (
                     <div className="h-5 w-40 animate-pulse bg-gray300" aria-hidden />
                   ) : null}
-                  <DetailTextLink href={productHref} className="shrink-0 whitespace-nowrap">
+                  <DetailTextLink href={productHref} className="shrink-0 whitespace-nowrap uppercase">
                     See Details
                   </DetailTextLink>
                 </div>
@@ -282,7 +282,7 @@ const WishlistAddToBagPanel = ({
                     <p className="font-gill text-base leading-normal tracking-normal text-darkblack">
                       {sizeGuide?.sizeFieldLabel ?? "Size"}
                     </p>
-                    <DetailTextLink onClick={() => setIsRingSizeChartOpen(true)}>
+                    <DetailTextLink onClick={() => setIsRingSizeChartOpen(true)} className="uppercase">
                       Find your size
                     </DetailTextLink>
                   </div>
@@ -324,7 +324,7 @@ const WishlistAddToBagPanel = ({
                   ) : null}
                 </div>
                 {isDetailReady ? (
-                  <DetailTextLink onClick={() => setIsPriceBreakupOpen(true)}>
+                  <DetailTextLink onClick={() => setIsPriceBreakupOpen(true)} className="uppercase">
                     View Price Breakup
                   </DetailTextLink>
                 ) : null}

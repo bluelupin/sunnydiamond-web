@@ -66,7 +66,7 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
             <p className="font-gill text-xl font-normal leading-110 text-darkblack">
               {formatCartPrice(totalPrice)}
             </p>
-            <CartTextLink onClick={onBreakupToggle} aria-expanded={breakupOpen}>
+            <CartTextLink onClick={onBreakupToggle} aria-expanded={breakupOpen} className="uppercase">
               View Price Breakup
             </CartTextLink>
           </div>
