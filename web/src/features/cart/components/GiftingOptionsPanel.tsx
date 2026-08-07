@@ -221,13 +221,13 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
   const router = useRouter();
   const { items, applyGiftingSelection } = useCart();
   const { markGiftingOptionsExplored } = useCartUI();
-  const giftItems = useMemo(
-    () => items.filter((item) => item.gifting || item.options.isGift),
+  const cartItemIdsKey = useMemo(
+    () => items.map((item) => item.id).sort().join("|"),
     [items],
   );
-  const giftItemIdsKey = useMemo(
-    () => giftItems.map((item) => item.id).sort().join("|"),
-    [giftItems],
+  const initiallySelectedGiftIds = useMemo(
+    () => items.filter((item) => item.gifting || item.options.isGift).map((item) => item.id),
+    [items],
   );
   const [wrapMode, setWrapMode] = useState<"single" | "separate">(() =>
     items.some((item) => item.gifting?.wrapMode === "separate") ? "separate" : "single",
@@ -244,20 +244,20 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
         .map((item) => [item.id, item.gifting?.note ?? ""]),
     ),
   );
-  const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(() => {
-    return new Set(giftItems.map((item) => item.id));
-  });
+  const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(
+    () => new Set(initiallySelectedGiftIds),
+  );
 
   useEffect(() => {
-    const giftIdSet = new Set(giftItemIdsKey ? giftItemIdsKey.split("|") : []);
+    const cartIdSet = new Set(cartItemIdsKey ? cartItemIdsKey.split("|") : []);
     setSelectedItemIds((previous) => {
-      const validIds = [...previous].filter((id) => giftIdSet.has(id));
+      const validIds = [...previous].filter((id) => cartIdSet.has(id));
       if (validIds.length === previous.size) {
         return previous;
       }
       return new Set(validIds);
     });
-  }, [giftItemIdsKey]);
+  }, [cartItemIdsKey]);
 
   const isSeparate = wrapMode === "separate";
 
@@ -353,7 +353,7 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
 
             {!isSeparate ? (
               <div className="flex flex-col gap-6 bg-gray300 p-4">
-                {giftItems.map((item) => (
+                {items.map((item) => (
                   <div key={item.id} className="flex items-center gap-2">
                     <GiftingItemCheckbox
                       checked={selectedItemIds.has(item.id)}
@@ -366,7 +366,7 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
               </div>
             ) : (
               <div className="flex flex-col gap-6">
-                {giftItems.map((item) => (
+                {items.map((item) => (
                   <div
                     key={item.id}
                     className="flex flex-col gap-4 border border-neutral300 bg-white px-4 py-6 [border-width:0.5px]"

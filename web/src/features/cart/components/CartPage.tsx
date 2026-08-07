@@ -1,18 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/shared/utils/cn";
 import { useMobileStickyFooterClearance } from "@/shared/hooks/use-mobile-sticky-footer-clearance";
 import { MobileStickyFooterSpacer } from "@/shared/ui/layout/MobileStickyFooterSpacer";
 import CartBenefitsSection from "@/features/cart/components/CartBenefitsSection";
+import CartGlobalGiftNote from "@/features/cart/components/CartGlobalGiftNote";
 import CartItem from "@/features/cart/components/CartItem";
 import CartMobileStickyFooter from "@/features/cart/components/CartMobileStickyFooter";
 import CartPriceDetails from "@/features/cart/components/CartPriceDetails";
 import { useCart } from "@/features/cart/context/CartContext";
+import { resolveCartGiftNoteDisplay } from "@/features/cart/utils/cartGiftNotes";
 import { CartPrimaryLink } from "./CartFlowUi";
 
 const CartPage = () => {
   const { items, isHydrating, refreshCart, updateQuantity, removeItem, updateLineItemOptions } = useCart();
+  const giftNoteDisplay = useMemo(() => resolveCartGiftNoteDisplay(items), [items]);
   const [offersOpen, setOffersOpen] = useState(false);
   const [priceBreakupOpen, setPriceBreakupOpen] = useState(false);
   const { footerRef, clearancePx } = useMobileStickyFooterClearance();
@@ -65,10 +68,15 @@ const CartPage = () => {
 
           <div className="grid grid-cols-1 gap-6 md:max-lg:portrait:grid-cols-[minmax(0,1fr)_minmax(0,360px)] md:max-lg:landscape:grid-cols-2 md:max-lg:items-start lg:grid-cols-2 lg:gap-6">
             <div className="flex min-w-0 flex-col gap-6">
+              {giftNoteDisplay.globalNote ? (
+                <CartGlobalGiftNote note={giftNoteDisplay.globalNote} />
+              ) : null}
+
               {items.map((item) => (
                 <CartItem
                   key={item.id}
                   item={item}
+                  giftNoteDisplay={giftNoteDisplay}
                   onUpdateQuantity={updateQuantity}
                   onRemove={removeItem}
                   onUpdateOptions={updateLineItemOptions}

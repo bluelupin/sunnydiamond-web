@@ -12,6 +12,7 @@ import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import { useCart } from "../context/CartContext";
 import type { CartLineItem, CartLineOptions } from "../types/cart.types";
 import { formatCartLineMeta, formatCartPrice, getCartLineDisplayTotal } from "../utils/formatCartLine";
+import { getCartItemGiftNote, type CartGiftNoteDisplay } from "../utils/cartGiftNotes";
 import { useCartUI } from "../context/CartUIContext";
 import { useCartCheckout } from "../hooks/useCartCheckout";
 import {
@@ -27,6 +28,7 @@ import { getProductEditHref } from "@/features/products/utils/productRoutes";
 
 interface CartItemProps {
   item: CartLineItem;
+  giftNoteDisplay: CartGiftNoteDisplay;
   onUpdateQuantity: (lineItemId: string, quantity: number) => void;
   onRemove: (lineItemId: string) => void;
   onUpdateOptions: (lineItemId: string, options: Partial<CartLineOptions>) => void;
@@ -34,7 +36,7 @@ interface CartItemProps {
 
 const ENGRAVING_EMPTY_LABEL = "Metal Engraving (Optional)";
 
-const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
+const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItemProps) => {
   const { buyNow } = useCart();
   const { toggleWishlist, isWishlisted } = useWishlist();
   const { clearGiftingOptionsExplored } = useCartUI();
@@ -47,7 +49,7 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
   const supportsEngraving = isCartLineEngravingEnabled(options);
   const engravingMaxCharacters = options.engravingMaxCharacters ?? DEFAULT_ENGRAVING_MAX_CHARACTERS;
   const hasEngraving = Boolean(options.engraving?.trim());
-  const giftNote = item.gifting?.note?.trim();
+  const itemGiftNote = getCartItemGiftNote(item, giftNoteDisplay);
   const [isEditingEngraving, setIsEditingEngraving] = useState(false);
   const [engravingDraft, setEngravingDraft] = useState(options.engraving ?? "");
   const [movedToWishlist, setMovedToWishlist] = useState(false);
@@ -108,9 +110,9 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
 
   return (
     <article className="relative flex flex-col gap-4 bg-white px-4 lg:gap-6 lg:px-6 py-6">
-      {isGift ? (
+      {/* {isGift ? (
         <CartGiftBadge variant="cart" className="absolute left-0 top-0 z-10" />
-      ) : null}
+      ) : null} */}
 
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 flex-1 gap-4 lg:max-w-[499.5px] lg:gap-6">
@@ -139,11 +141,11 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
 
               <CartMetaRow parts={meta} />
 
-              {giftNote ? (
+              {/* {itemGiftNote ? (
                 <p className="font-gill text-sm font-light leading-110 text-neutral500 lg:text-base">
-                  Gift note: {giftNote}
+                  <span className="font-normal text-darkblack">Gift note:</span> {itemGiftNote}
                 </p>
-              ) : null}
+              ) : null} */}
 
               {quantity > 1 ? (
                 <p className="font-gill text-sm font-light leading-110 text-neutral500">

@@ -292,6 +292,28 @@ function mapServerGifting(
   return { wrapMode, note: note || undefined };
 }
 
+/** Magento may return is_gift without per-line messages in separate mode — keep stored notes. */
+function mergeLineGifting(
+  serverGifting: CartGiftingOptions | undefined,
+  metadataGifting: CartGiftingOptions | undefined,
+): CartGiftingOptions | undefined {
+  if (!serverGifting && !metadataGifting) {
+    return undefined;
+  }
+
+  const wrapMode = serverGifting?.wrapMode ?? metadataGifting?.wrapMode;
+  const note = serverGifting?.note?.trim() || metadataGifting?.note?.trim() || undefined;
+
+  if (!wrapMode && !note) {
+    return serverGifting ?? metadataGifting;
+  }
+
+  return {
+    ...(wrapMode ? { wrapMode } : {}),
+    ...(note ? { note } : {}),
+  };
+}
+
 export function mapMagentoCartItems(
   cart: MagentoCart,
   lineMetadata: StoredCartLineMetadata,
@@ -355,7 +377,7 @@ export function mapMagentoCartItems(
       product,
       quantity,
       options: mergedOptions,
-      gifting: serverGifting ?? metadata.gifting,
+      gifting: mergeLineGifting(serverGifting, metadata.gifting),
       ...(metadata.displayPrice != null && Number.isFinite(metadata.displayPrice)
         ? { displayPrice: metadata.displayPrice }
         : {}),
