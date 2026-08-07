@@ -6,6 +6,7 @@ import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatP
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { getWishlistProductHref } from "@/features/wishlist/utils/wishlistProduct.utils";
+import { prefetchWishlistProductDetail } from "@/features/wishlist/utils/wishlistProductDetailPrefetch";
 import { wishlistPageContent } from "@/features/wishlist/data/content";
 
 type WishlistListItemProps = {
@@ -46,9 +47,14 @@ const WishlistListItem = ({ product, onRemove, onAddToBag }: WishlistListItemPro
           </p>
         </div>
         <div className="flex items-center gap-8">
-          <DetailTextLink onClick={onAddToBag}>
-            {wishlistPageContent.addToBagLabel}
-          </DetailTextLink>
+          <span
+            onPointerEnter={() => prefetchWishlistProductDetail(product.urlKey)}
+            onFocus={() => prefetchWishlistProductDetail(product.urlKey)}
+          >
+            <DetailTextLink onClick={onAddToBag}>
+              {wishlistPageContent.addToBagLabel}
+            </DetailTextLink>
+          </span>
           <DetailTextLink onClick={onRemove}>
             {wishlistPageContent.removeLabel}
           </DetailTextLink>

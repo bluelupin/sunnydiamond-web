@@ -13,9 +13,10 @@ import {
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useLoginModal } from "@/features/auth/context/LoginModalContext";
+import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 import WishlistMovedToast from "@/features/wishlist/components/WishlistMovedToast";
 import { WISHLIST_STORAGE_KEY } from "@/features/wishlist/constants";
-import { wishlistMovedToastDurationMs } from "@/features/wishlist/data/content";
+import { wishlistMovedToastDurationMs, wishlistPageContent } from "@/features/wishlist/data/content";
 import {
   addCustomerWishlistSku,
   getCustomerWishlist,
@@ -43,6 +44,8 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   const toggleGenerationRef = useRef(0);
   const [isMovedToastOpen, setIsMovedToastOpen] = useState(false);
   const movedToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isRemovedToastOpen, setIsRemovedToastOpen] = useState(false);
+  const removedToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   wishlistedIdsRef.current = wishlistedIds;
 
@@ -63,10 +66,30 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     }, wishlistMovedToastDurationMs);
   }, [dismissMovedToast]);
 
+  const dismissRemovedToast = useCallback(() => {
+    if (removedToastTimeoutRef.current) {
+      clearTimeout(removedToastTimeoutRef.current);
+      removedToastTimeoutRef.current = null;
+    }
+    setIsRemovedToastOpen(false);
+  }, []);
+
+  const showRemovedToast = useCallback(() => {
+    dismissRemovedToast();
+    setIsRemovedToastOpen(true);
+    removedToastTimeoutRef.current = setTimeout(() => {
+      setIsRemovedToastOpen(false);
+      removedToastTimeoutRef.current = null;
+    }, appStatusToastDurationMs);
+  }, [dismissRemovedToast]);
+
   useEffect(() => {
     return () => {
       if (movedToastTimeoutRef.current) {
         clearTimeout(movedToastTimeoutRef.current);
+      }
+      if (removedToastTimeoutRef.current) {
+        clearTimeout(removedToastTimeoutRef.current);
       }
     };
   }, []);
@@ -154,6 +177,8 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
       if (!isCurrentlyWishlisted) {
         showMovedToast();
+      } else {
+        showRemovedToast();
       }
 
       void (async () => {
@@ -173,10 +198,14 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
           }
 
           setWishlistedIds(previous);
+
+          if (isCurrentlyWishlisted) {
+            dismissRemovedToast();
+          }
         }
       })();
     },
-    [openLoginModal, pathname, showMovedToast, status],
+    [dismissRemovedToast, openLoginModal, pathname, showMovedToast, showRemovedToast, status],
   );
 
   const value = useMemo(
@@ -193,6 +222,10 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     <WishlistContext.Provider value={value}>
       {children}
       <WishlistMovedToast open={isMovedToastOpen} onClose={dismissMovedToast} />
+      <AppStatusToast
+        open={isRemovedToastOpen}
+        message={wishlistPageContent.removedFromWishlistMessage}
+      />
     </WishlistContext.Provider>
   );
 }

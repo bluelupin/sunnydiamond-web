@@ -4,11 +4,9 @@ import { useState } from "react";
 import JewelleryLoadMoreSection from "@/features/jewellery-product/components/JewelleryLoadMoreSection";
 import { PAGE_SIZE } from "@/features/jewellery-product/data/filters";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
-import { useCart } from "@/features/cart/context/CartContext";
-import { useCartUI } from "@/features/cart/context/CartUIContext";
+import { useAddToBagWithDrawer } from "@/features/cart/hooks/useAddToBagWithDrawer";
 import { useMagentoWishlistProducts } from "@/hooks/magento/useMagentoWishlistProducts";
 import type { WishlistViewMode } from "@/features/wishlist/data/content";
-import type { AddToBagPayload } from "@/features/cart/types/cart.types";
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 import { cn } from "@/shared/utils/cn";
 import WishlistEmptyState from "./WishlistEmptyState";
@@ -16,11 +14,11 @@ import WishlistGrid from "./WishlistGrid";
 import WishlistList from "./WishlistList";
 import WishlistHeading from "./WishlistHeading";
 import WishlistAddToBagPanel from "./WishlistAddToBagPanel";
+import { prefetchWishlistProductDetail } from "@/features/wishlist/utils/wishlistProductDetailPrefetch";
 
 const WishlistPage = () => {
   const { wishlistedIds, toggleWishlist } = useWishlist();
-  const { addItem } = useCart();
-  const { openBagDrawer } = useCartUI();
+  const { addToBagAndOpenDrawer } = useAddToBagWithDrawer();
   const { products: wishlistProducts, isLoading } = useMagentoWishlistProducts(wishlistedIds);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [viewMode, setViewMode] = useState<WishlistViewMode>("grid");
@@ -30,10 +28,14 @@ const WishlistPage = () => {
   const hasMore = visibleCount < wishlistProducts.length;
   const showEmptyState = !isLoading && wishlistProducts.length === 0;
 
-  const handlePanelAddToBag = async (payload: AddToBagPayload) => {
-    const result = await addItem(payload);
+  const handleOpenAddToBag = (product: JewelleryListingProduct) => {
+    prefetchWishlistProductDetail(product.urlKey);
+    setAddToBagProduct(product);
+  };
+
+  const handlePanelAddToBag = async (payload: Parameters<typeof addToBagAndOpenDrawer>[0]) => {
     setAddToBagProduct(null);
-    openBagDrawer(result);
+    await addToBagAndOpenDrawer(payload);
   };
 
   return (
@@ -65,7 +67,7 @@ const WishlistPage = () => {
               <WishlistGrid
                 products={visibleProducts}
                 onRemove={(product) => toggleWishlist(product.sku)}
-                onAddToBag={setAddToBagProduct}
+                onAddToBag={handleOpenAddToBag}
               />
             </div>
 
@@ -74,7 +76,7 @@ const WishlistPage = () => {
                 <WishlistList
                   products={visibleProducts}
                   onRemove={(product) => toggleWishlist(product.sku)}
-                  onAddToBag={setAddToBagProduct}
+                  onAddToBag={handleOpenAddToBag}
                 />
               </div>
             ) : null}

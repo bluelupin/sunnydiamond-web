@@ -120,7 +120,13 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
 
 const CartBagDrawer = () => {
   const { isBagDrawerOpen, closeBagDrawer } = useCartUI();
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+
+    return window.matchMedia("(max-width: 1023px)").matches;
+  });
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 1023px)");

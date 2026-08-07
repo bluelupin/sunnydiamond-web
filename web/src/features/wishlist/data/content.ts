@@ -116,6 +116,7 @@ export const wishlistPageContent = {
   gridViewLabel: "Grid view",
   listViewLabel: "List view",
   movedToWishlistMessage: "Item moved to Wishlist",
+  removedFromWishlistMessage: "Item removed from wishlist",
   movedToWishlistViewLabel: "VIEW",
   movedToWishlistHref: "/profile?section=wishlist",
 } as const;

@@ -8,8 +8,7 @@ import {
   getProductDetailContent,
   getProductDetailPricing,
 } from "@/features/products/data/productDetailContent";
-import { useCart } from "@/features/cart/context/CartContext";
-import { useCartUI } from "@/features/cart/context/CartUIContext";
+import { useAddToBagWithDrawer } from "@/features/cart/hooks/useAddToBagWithDrawer";
 import { ChevronLeft } from "lucide-react";
 import ProductDetailSidebar from "./detail/ProductDetailSidebar";
 import ProductDetailHeroLayout from "./detail/ProductDetailHeroLayout";
@@ -26,8 +25,7 @@ type ProductDetailPageProps = {
 };
 
 const ProductDetailPage = ({ product, sizeGuide = null }: ProductDetailPageProps) => {
-  const { addItem } = useCart();
-  const { openBagDrawer } = useCartUI();
+  const { addToBagAndOpenDrawer } = useAddToBagWithDrawer();
 
   const content = useMemo(() => getProductDetailContent(product), [product]);
   const [selectedMetal, setSelectedMetal] = useState(() =>
@@ -44,9 +42,8 @@ const ProductDetailPage = ({ product, sizeGuide = null }: ProductDetailPageProps
   );
   const pricing = getProductDetailPricing(displayProduct);
 
-  const handleAddToCart = async (payload: Parameters<typeof addItem>[0]) => {
-    const result = await addItem(payload);
-    openBagDrawer(result);
+  const handleAddToCart = async (payload: Parameters<typeof addToBagAndOpenDrawer>[0]) => {
+    await addToBagAndOpenDrawer(payload);
   };
 
   const sidebarProps = {

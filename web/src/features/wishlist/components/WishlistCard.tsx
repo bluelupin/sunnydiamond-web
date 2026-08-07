@@ -6,6 +6,7 @@ import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatP
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { getWishlistProductHref } from "@/features/wishlist/utils/wishlistProduct.utils";
+import { prefetchWishlistProductDetail } from "@/features/wishlist/utils/wishlistProductDetailPrefetch";
 import { wishlistPageContent } from "@/features/wishlist/data/content";
 import DeleteIcon from "@/assets/Icons/DeleteIcon";
 
@@ -54,9 +55,14 @@ const WishlistCard = ({ product, onRemove, onAddToBag }: WishlistCardProps) => {
           </p>
         </div>
         <div className="flex items-center justify-center gap-6">
-          <DetailTextLink onClick={onAddToBag} className="text-sm uppercase md:text-base">
-            {wishlistPageContent.addToBagLabel}
-          </DetailTextLink>
+          <span
+            onPointerEnter={() => prefetchWishlistProductDetail(product.urlKey)}
+            onFocus={() => prefetchWishlistProductDetail(product.urlKey)}
+          >
+            <DetailTextLink onClick={onAddToBag} className="text-sm uppercase md:text-base">
+              {wishlistPageContent.addToBagLabel}
+            </DetailTextLink>
+          </span>
           <DetailTextLink
             onClick={onRemove}
             className="hidden text-sm uppercase md:inline-flex md:text-base"

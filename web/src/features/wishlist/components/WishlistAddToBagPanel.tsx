@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
+import OptimizedImage from "@/shared/ui/OptimizedImage";
 import {
   getProductDetailContent,
   getProductDetailPricing,
@@ -22,7 +23,10 @@ import type { Product } from "@/features/products/data/products";
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 import { wishlistPageContent } from "@/features/wishlist/data/content";
 import { getWishlistProductHref } from "@/features/wishlist/utils/wishlistProduct.utils";
-import { fetchMagentoProductByUrlKey } from "@/services/magento/products/productDetail.service";
+import {
+  fetchWishlistProductDetail,
+  getCachedWishlistProductDetail,
+} from "@/features/wishlist/utils/wishlistProductDetailPrefetch";
 import { getSizeGuideForProduct } from "@/services/size-guide/size-guide.service";
 import { getRingSizeLabels } from "@/features/products/utils/ringSizeOptions.utils";
 import {
@@ -40,7 +44,7 @@ type WishlistAddToBagPanelProps = {
 };
 
 const wishlistAddToBagAsideClassName =
-  "max-w-full max-md:max-h-[calc(100vh-4rem)] md:h-full md:max-h-[812px] md:max-w-[472px]";
+  "max-w-full max-md:h-[calc(100dvh-3rem)] max-md:max-h-[calc(100dvh-3rem)] max-md:min-h-0 md:h-full md:max-h-screen md:max-w-[472px]";
 
 const WishlistAddToBagPanel = ({
   open,
@@ -50,7 +54,7 @@ const WishlistAddToBagPanel = ({
 }: WishlistAddToBagPanelProps) => {
   const [detailProduct, setDetailProduct] = useState<Product | null>(null);
   const [sizeGuide, setSizeGuide] = useState<NormalizedSizeGuide | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isDetailFetching, setIsDetailFetching] = useState(false);
   const [selectedMetal, setSelectedMetal] = useState("gold");
   const [ringSize, setRingSize] = useState("");
   const [isRingSizeChartOpen, setIsRingSizeChartOpen] = useState(false);
@@ -60,34 +64,30 @@ const WishlistAddToBagPanel = ({
     if (!open || !product?.urlKey) {
       setDetailProduct(null);
       setSizeGuide(null);
-      setIsLoading(false);
+      setIsDetailFetching(false);
+      return;
+    }
+
+    const cachedProduct = getCachedWishlistProductDetail(product.urlKey);
+    if (cachedProduct !== undefined) {
+      setDetailProduct(cachedProduct);
+      setIsDetailFetching(false);
       return;
     }
 
     const controller = new AbortController();
-    setIsLoading(true);
+    setDetailProduct(null);
+    setIsDetailFetching(true);
 
-    void fetchMagentoProductByUrlKey(product.urlKey, controller.signal)
-      .then(async (fetchedProduct) => {
-        if (controller.signal.aborted) {
-          return;
-        }
-
-        setDetailProduct(fetchedProduct);
-
-        if (!fetchedProduct) {
-          setSizeGuide(null);
-          return;
-        }
-
-        const guide = await getSizeGuideForProduct(fetchedProduct, controller.signal);
+    void fetchWishlistProductDetail(product.urlKey, controller.signal)
+      .then((fetchedProduct) => {
         if (!controller.signal.aborted) {
-          setSizeGuide(guide);
+          setDetailProduct(fetchedProduct);
         }
       })
       .finally(() => {
         if (!controller.signal.aborted) {
-          setIsLoading(false);
+          setIsDetailFetching(false);
         }
       });
 
@@ -96,14 +96,32 @@ const WishlistAddToBagPanel = ({
     };
   }, [open, product?.urlKey]);
 
+  useEffect(() => {
+    if (!open || !detailProduct) {
+      setSizeGuide(null);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    void getSizeGuideForProduct(detailProduct, controller.signal).then((guide) => {
+      if (!controller.signal.aborted) {
+        setSizeGuide(guide);
+      }
+    });
+
+    return () => {
+      controller.abort();
+    };
+  }, [open, detailProduct]);
+
   const content = detailProduct ? getProductDetailContent(detailProduct) : null;
   const pricing = detailProduct ? getProductDetailPricing(detailProduct) : null;
-  const sizeLabels = detailProduct && content
-    ? getRingSizeLabels(detailProduct, sizeGuide)
-    : [];
+  const sizeLabels = detailProduct && content ? getRingSizeLabels(detailProduct, sizeGuide) : [];
   const showSizeSelector = sizeLabels.length > 0;
   const metalColorSelectable = detailProduct ? isMetalColorSelectable(detailProduct) : false;
   const showMetalColor = (content?.metalColors.length ?? 0) > 0;
+  const isDetailReady = Boolean(detailProduct && content && pricing);
 
   useEffect(() => {
     if (!open || !detailProduct) {
@@ -125,35 +143,20 @@ const WishlistAddToBagPanel = ({
     );
   }
 
-  if (isLoading || !detailProduct || !content || !pricing) {
-    return (
-      <>
-        <ProductDetailSidePanelShell
-          open={open}
-          onClose={onClose}
-          overlayAriaLabel="Close product details"
-          dialogAriaLabel="Product details"
-          asideClassName={wishlistAddToBagAsideClassName}
-        >
-          <div className="flex min-h-[320px] flex-1 items-center justify-center px-6">
-            <p className="sr-only" aria-live="polite">
-              Loading product details
-            </p>
-          </div>
-        </ProductDetailSidePanelShell>
-        <RingSizeChartPanel
-          open={isRingSizeChartOpen}
-          onClose={() => setIsRingSizeChartOpen(false)}
-          guide={sizeGuide}
-        />
-      </>
-    );
-  }
-
-  const activeMetal = content.metalColors.find((metal) => metal.id === selectedMetal);
+  const activeMetal = content?.metalColors.find((metal) => metal.id === selectedMetal);
   const productHref = getWishlistProductHref(product);
+  const displayName = detailProduct?.name ?? product.name;
+  const displayPrice = pricing?.price ?? product.price;
+  const displayOriginalPrice =
+    pricing?.originalPrice != null && pricing.originalPrice > displayPrice
+      ? pricing.originalPrice
+      : null;
 
   const handleAddToBag = () => {
+    if (!detailProduct) {
+      return;
+    }
+
     onAddToBag({
       product: detailProduct,
       options: {
@@ -172,12 +175,28 @@ const WishlistAddToBagPanel = ({
         dialogAriaLabel="Product details"
         asideClassName={wishlistAddToBagAsideClassName}
       >
-        <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           <div className="relative shrink-0">
-            <ProductWishlistDetailGalleryCarousel
-              product={detailProduct}
-              imageMaxWidthClass="max-w-full"
-            />
+            {detailProduct ? (
+              <ProductWishlistDetailGalleryCarousel
+                product={detailProduct}
+                imageMaxWidthClass="max-w-full"
+              />
+            ) : (
+              <div className="grid h-250 w-full shrink-0 overflow-hidden">
+                <div className="flex h-250 w-full items-center justify-center bg-gray300">
+                  <div className="flex h-250 w-full max-w-full items-center justify-center overflow-hidden">
+                    <OptimizedImage
+                      src={product.primaryImage}
+                      alt={product.name}
+                      priority
+                      sizes="(max-width: 768px) 100vw, 472px"
+                      className="object-contain object-center"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
             <button
               type="button"
               onClick={onClose}
@@ -191,35 +210,39 @@ const WishlistAddToBagPanel = ({
             </button>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-8 md:px-6 md:pb-8">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-6 pt-8 md:px-6 md:pb-8">
             <div className="flex flex-col gap-6">
               <div className="flex flex-col gap-3">
                 <div className="flex items-start justify-between gap-4">
-                  <ul className="m-0 flex list-none flex-wrap items-center gap-2 p-0 md:gap-3">
-                    {content.attributes.map((attribute, index) => (
-                      <li key={attribute} className="flex items-center gap-2 md:gap-3">
-                        {index > 0 ? <AttributeSeparator /> : null}
-                        <span className="font-gill text-sm font-light leading-110 text-neutral500 md:text-base">
-                          {attribute}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                  {content ? (
+                    <ul className="m-0 flex list-none flex-wrap items-center gap-2 p-0 md:gap-3">
+                      {content.attributes.map((attribute, index) => (
+                        <li key={attribute} className="flex items-center gap-2 md:gap-3">
+                          {index > 0 ? <AttributeSeparator /> : null}
+                          <span className="font-gill text-sm font-light leading-110 text-neutral500 md:text-base">
+                            {attribute}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : isDetailFetching ? (
+                    <div className="h-5 w-40 animate-pulse bg-gray300" aria-hidden />
+                  ) : null}
                   <DetailTextLink href={productHref} className="shrink-0 whitespace-nowrap">
                     See Details
                   </DetailTextLink>
                 </div>
                 <h2 className="font-larken text-2xl font-light leading-110 text-darkblack lg:text-32">
-                  {detailProduct.name}
+                  {displayName}
                 </h2>
               </div>
 
-              {showMetalColor ? (
+              {isDetailReady && showMetalColor ? (
                 <div className="flex flex-col gap-4">
                   <p className="font-gill text-base leading-110 text-darkblack">Metal Color</p>
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-6">
-                      {content.metalColors.map((metal) =>
+                      {content!.metalColors.map((metal) =>
                         metalColorSelectable ? (
                           <button
                             key={metal.id}
@@ -246,9 +269,14 @@ const WishlistAddToBagPanel = ({
                     <p className="font-gill text-base leading-110 text-neutral500">{activeMetal?.label}</p>
                   </div>
                 </div>
+              ) : isDetailFetching ? (
+                <div className="flex flex-col gap-4" aria-hidden>
+                  <div className="h-5 w-24 animate-pulse bg-gray300" />
+                  <div className="h-[52px] w-[52px] animate-pulse bg-gray300" />
+                </div>
               ) : null}
 
-              {showSizeSelector ? (
+              {isDetailReady && showSizeSelector ? (
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between gap-4">
                     <p className="font-gill text-base leading-normal tracking-normal text-darkblack">
@@ -271,31 +299,42 @@ const WishlistAddToBagPanel = ({
                     optionClassName="text-base"
                   />
                 </div>
+              ) : isDetailFetching ? (
+                <div className="flex flex-col gap-2" aria-hidden>
+                  <div className="h-5 w-16 animate-pulse bg-gray300" />
+                  <div className="h-12 w-full animate-pulse bg-gray300" />
+                </div>
               ) : null}
             </div>
           </div>
 
           <PanelFooter
             showGradient={false}
-            className="relative z-10"
+            className="relative z-10 shrink-0 max-md:pb-[env(safe-area-inset-bottom,0px)]"
             contentClassName="px-6 !border-0 lg:!px-4 md:!px-4 !px-4"
           >
             <div className="flex flex-col gap-4">
               <div className="flex items-end justify-between gap-4">
                 <div className="flex items-center gap-3 font-gill text-2xl leading-110 text-darkblack">
-                  <span>₹{formatJewelleryPrice(pricing.price)}</span>
-                  {pricing.originalPrice != null && pricing.originalPrice > pricing.price ? (
+                  <span>₹{formatJewelleryPrice(displayPrice)}</span>
+                  {displayOriginalPrice != null ? (
                     <span className="text-base text-gray600 line-through">
-                      ₹{formatJewelleryPrice(pricing.originalPrice)}
+                      ₹{formatJewelleryPrice(displayOriginalPrice)}
                     </span>
                   ) : null}
                 </div>
-                <DetailTextLink onClick={() => setIsPriceBreakupOpen(true)}>
-                  View Price Breakup
-                </DetailTextLink>
+                {isDetailReady ? (
+                  <DetailTextLink onClick={() => setIsPriceBreakupOpen(true)}>
+                    View Price Breakup
+                  </DetailTextLink>
+                ) : null}
               </div>
 
-              <DetailDarkButton className="uppercase" onClick={handleAddToBag}>
+              <DetailDarkButton
+                className="uppercase disabled:cursor-not-allowed disabled:border-neutral300 disabled:bg-neutral300 disabled:text-white disabled:opacity-100"
+                onClick={handleAddToBag}
+                disabled={!isDetailReady}
+              >
                 {wishlistPageContent.addToBagLabel}
               </DetailDarkButton>
             </div>
@@ -309,15 +348,17 @@ const WishlistAddToBagPanel = ({
         guide={sizeGuide}
       />
 
-      <PriceBreakupPanel
-        open={isPriceBreakupOpen}
-        onClose={() => setIsPriceBreakupOpen(false)}
-        productName={detailProduct.name}
-        productImage={detailProduct.image}
-        metalLabel={activeMetal?.label}
-        ringSize={ringSize || undefined}
-        pricing={pricing}
-      />
+      {detailProduct && pricing ? (
+        <PriceBreakupPanel
+          open={isPriceBreakupOpen}
+          onClose={() => setIsPriceBreakupOpen(false)}
+          productName={detailProduct.name}
+          productImage={detailProduct.image}
+          metalLabel={activeMetal?.label}
+          ringSize={ringSize || undefined}
+          pricing={pricing}
+        />
+      ) : null}
     </>
   );
 };
