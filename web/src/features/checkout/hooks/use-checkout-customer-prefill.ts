@@ -8,7 +8,8 @@ import { buildCheckoutContactPrefill } from "../utils/checkoutCustomer.utils";
 export function useCheckoutCustomerPrefill() {
   const { status, customer } = useAuth();
   const isAuthenticated = status === "authenticated" && Boolean(customer);
-  const { addresses, isLoading: addressesLoading } = useCustomerAddresses(isAuthenticated);
+  const { addresses, isLoading: addressesLoading, refresh: refreshAddresses } =
+    useCustomerAddresses(isAuthenticated);
 
   const defaultFormPatch = useMemo(() => {
     if (!customer) {
@@ -34,5 +35,6 @@ export function useCheckoutCustomerPrefill() {
     addresses,
     defaultFormPatch,
     defaultShippingAddress,
+    refreshAddresses,
   };
 }

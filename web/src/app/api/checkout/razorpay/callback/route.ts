@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyRazorpayPayment } from "@/features/checkout/services/razorpayCheckout";
+import { getPublicSiteUrl } from "@/api/config";
 
 async function readRazorpayCallbackFields(request: NextRequest): Promise<{
   paymentId: string;
@@ -27,7 +28,9 @@ async function readRazorpayCallbackFields(request: NextRequest): Promise<{
 export async function POST(request: NextRequest) {
   const orderNumber = request.nextUrl.searchParams.get("order")?.trim();
   const { paymentId, signature } = await readRazorpayCallbackFields(request);
-  const origin = request.nextUrl.origin;
+  const origin = process.env.NEXT_PUBLIC_FRONTEND_URL?.trim()
+    ? getPublicSiteUrl()
+    : request.nextUrl.origin;
 
   if (!orderNumber || !paymentId || !signature) {
     return NextResponse.redirect(new URL("/checkout?payment=failed", origin));

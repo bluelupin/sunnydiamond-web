@@ -48,6 +48,8 @@ type ProductDetailSidebarProps = {
   onSelectedMetalChange?: (metalId: string) => void;
   sizeGuide?: NormalizedSizeGuide | null;
   onAddToBag: (payload: AddToBagPayload) => void;
+  initialRingSize?: string;
+  addToBagLabel?: string;
   children?: (sections: {
     purchase: ReactNode;
     details: ReactNode;
@@ -64,6 +66,8 @@ const ProductDetailSidebar = ({
   onSelectedMetalChange,
   sizeGuide = null,
   onAddToBag,
+  initialRingSize,
+  addToBagLabel = "Add to Bag",
   children,
 }: ProductDetailSidebarProps) => {
   const [selectedMetalInternal, setSelectedMetalInternal] = useState(
@@ -71,7 +75,8 @@ const ProductDetailSidebar = ({
   );
   const selectedMetal = selectedMetalProp ?? selectedMetalInternal;
   const setSelectedMetal = onSelectedMetalChange ?? setSelectedMetalInternal;
-  const [ringSize, setRingSize] = useState<string>("");
+  const [ringSize, setRingSize] = useState<string>(() => initialRingSize ?? "");
+  const [ringSizeError, setRingSizeError] = useState<string | null>(null);
   const [engravingSelection, setEngravingSelection] = useState<EngravingSelection | null>(null);
   const [isEngravingOpen, setIsEngravingOpen] = useState(false);
   const [isRingSizeChartOpen, setIsRingSizeChartOpen] = useState(false);
@@ -92,11 +97,12 @@ const ProductDetailSidebar = ({
 
   useEffect(() => {
     setEngravingSelection(null);
-    setRingSize("");
+    setRingSize(initialRingSize ?? "");
+    setRingSizeError(null);
     if (!onSelectedMetalChange) {
       setSelectedMetalInternal(content.metalColors[0]?.id ?? "");
     }
-  }, [product, content.metalColors, onSelectedMetalChange]);
+  }, [product, content.metalColors, onSelectedMetalChange, initialRingSize]);
 
   const activeMetal = content.metalColors.find((color) => color.id === selectedMetal);
   const configurableOptionUids = getConfigurableOptionUidsForMetal(product, selectedMetal);
@@ -173,11 +179,21 @@ const ProductDetailSidebar = ({
                   value={ringSize}
                   options={sizeLabels}
                   placeholder="-select-"
-                  onChange={setRingSize}
+                  onChange={(value) => {
+                    setRingSize(value);
+                    if (value) {
+                      setRingSizeError(null);
+                    }
+                  }}
                   triggerClassName="rounded-none border-0 bg-aboutInactive px-3 text-base text-darkblack"
                   listClassName="bg-aboutInactive"
                   optionClassName="text-base"
                 />
+                {ringSizeError ? (
+                  <p className="font-gill text-sm font-light leading-110 text-[#F91616]">
+                    {ringSizeError}
+                  </p>
+                ) : null}
               </div>
             ) : null}
 
@@ -214,7 +230,12 @@ const ProductDetailSidebar = ({
           <div className="flex gap-2">
             <DetailDarkButton
               className="flex-1 uppercase"
-              onClick={() =>
+              onClick={() => {
+                if (showSizeSelector && !ringSize.trim()) {
+                  setRingSizeError("Please select a ring size.");
+                  return;
+                }
+
                 onAddToBag({
                   product,
                   options: {
@@ -228,10 +249,11 @@ const ProductDetailSidebar = ({
                   ...(configurableOptionUids.length > 0
                     ? { configurableOptionUids }
                     : {}),
-                })
-              }
+                  productCustomOptions: product.customOptions,
+                });
+              }}
             >
-              Add to Bag
+              {addToBagLabel}
             </DetailDarkButton>
             <button
               type="button"

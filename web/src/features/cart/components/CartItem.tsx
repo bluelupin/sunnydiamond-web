@@ -1,11 +1,15 @@
+"use client";
+
 import { useEffect, useState, type KeyboardEvent } from "react";
 import Link from "next/link";
 import { clampEngravingText } from "@/features/products/constants/engraving";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
+import { useCart } from "../context/CartContext";
 import type { CartLineItem, CartLineOptions } from "../types/cart.types";
 import { formatCartLineMeta, formatCartPrice } from "../utils/formatCartLine";
 import { useCartUI } from "../context/CartUIContext";
+import { useCartCheckout } from "../hooks/useCartCheckout";
 import {
   CartDivider,
   CartGiftBadge,
@@ -15,7 +19,7 @@ import {
   CartTextLink,
 } from "./CartFlowUi";
 import DeleteIcon from "@/assets/Icons/DeleteIcon";
-import { getProductHref } from "@/features/products/utils/productRoutes";
+import { getProductEditHref } from "@/features/products/utils/productRoutes";
 
 interface CartItemProps {
   item: CartLineItem;
@@ -27,17 +31,23 @@ interface CartItemProps {
 const ENGRAVING_EMPTY_LABEL = "Metal Engraving (Optional)";
 
 const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
-  const { product, quantity, options } = item;
+  const { buyNow } = useCart();
   const { toggleWishlist, isWishlisted } = useWishlist();
   const { clearGiftingOptionsExplored } = useCartUI();
+  const { navigateToCheckout } = useCartCheckout();
+  const { product, quantity, options } = item;
   const meta = formatCartLineMeta(item);
   const wishlisted = isWishlisted(product.id);
   const isGift =
     options.isGift === false ? false : Boolean(options.isGift || item.gifting);
+  const supportsEngraving = Boolean(options.engravingMaxCharacters);
   const engravingMaxCharacters = options.engravingMaxCharacters;
   const hasEngraving = Boolean(options.engraving?.trim());
+  const giftNote = item.gifting?.note?.trim();
   const [isEditingEngraving, setIsEditingEngraving] = useState(false);
   const [engravingDraft, setEngravingDraft] = useState(options.engraving ?? "");
+  const [movedToWishlist, setMovedToWishlist] = useState(false);
+  const [isBuyingNow, setIsBuyingNow] = useState(false);
 
   const clampDraft = (value: string) =>
     engravingMaxCharacters ? clampEngravingText(value, engravingMaxCharacters) : value;
@@ -72,7 +82,25 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
     }
   };
 
-  const productHref = getProductHref(product);
+  const handleMoveToWishlist = () => {
+    toggleWishlist(product.id);
+    onRemove(item.id);
+    setMovedToWishlist(true);
+  };
+
+  const handleBuyNow = () => {
+    void (async () => {
+      setIsBuyingNow(true);
+      try {
+        await buyNow(item.id);
+        navigateToCheckout();
+      } finally {
+        setIsBuyingNow(false);
+      }
+    })();
+  };
+
+  const productHref = getProductEditHref(product, item.id);
 
   return (
     <article className="relative flex flex-col gap-4 bg-white px-4 lg:gap-6 lg:px-6 py-6">
@@ -107,6 +135,12 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
 
               <CartMetaRow parts={meta} />
 
+              {giftNote ? (
+                <p className="font-gill text-sm font-light leading-110 text-neutral500 lg:text-base">
+                  Gift note: {giftNote}
+                </p>
+              ) : null}
+
               {quantity > 1 ? (
                 <p className="font-gill text-sm font-light leading-110 text-neutral500">
                   Qty: {quantity}
@@ -120,8 +154,17 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
 
             <div className="flex flex-wrap gap-4">
               <CartTextLink href={productHref}>EDIT</CartTextLink>
-              <CartTextLink onClick={() => toggleWishlist(product.id)}>
-                {wishlisted ? "IN WISHLIST" : "MOVE TO WISHLIST"}
+              {movedToWishlist ? (
+                <span className="font-gill text-sm uppercase leading-110 text-neutral500 lg:text-base">
+                  Moved to Wishlist
+                </span>
+              ) : (
+                <CartTextLink onClick={handleMoveToWishlist}>
+                  {wishlisted ? "IN WISHLIST" : "MOVE TO WISHLIST"}
+                </CartTextLink>
+              )}
+              <CartTextLink onClick={handleBuyNow} className={isBuyingNow ? "opacity-50" : ""}>
+                BUY NOW
               </CartTextLink>
             </div>
           </div>
@@ -143,7 +186,6 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
         <CartGiftCheckbox
           checked={isGift}
           onChange={(checked) => {
-            // Newly marked gift should restore the checkout gifting nudge.
             if (checked) {
               clearGiftingOptionsExplored();
             }
@@ -155,54 +197,58 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
         </span>
       </label>
 
-      <CartDivider weight={0.5} />
+      {supportsEngraving ? (
+        <>
+          <CartDivider weight={0.5} />
 
-      <div className="flex flex-col gap-2 self-stretch">
-        <div className="flex items-center justify-between gap-4">
-          <p className="font-gill text-base font-normal leading-110 text-darkblack lg:text-xl">
-            Engraving
-          </p>
-          {isEditingEngraving && engravingMaxCharacters ? (
-            <span className="font-gill text-sm font-light leading-110 text-neutral500">
-              {engravingDraft.length}/{engravingMaxCharacters}
-            </span>
-          ) : null}
-        </div>
-
-        <div className="flex gap-2 self-stretch">
-          <div className="flex h-14 min-w-0 flex-1 items-center bg-aboutInactive px-3">
-            {isEditingEngraving ? (
-              <input
-                type="text"
-                value={engravingDraft}
-                onChange={(event) => setEngravingDraft(clampDraft(event.target.value))}
-                onKeyDown={handleEngravingKeyDown}
-                maxLength={engravingMaxCharacters}
-                aria-label="Engraving text"
-                autoFocus
-                className="h-full w-full min-w-0 border-0 bg-transparent font-gill text-sm leading-110 text-darkblack outline-none placeholder:text-neutral500 lg:text-base"
-              />
-            ) : (
-              <p
-                className={
-                  hasEngraving
-                    ? "truncate font-gill text-sm leading-110 text-darkblack lg:text-base"
-                    : "truncate font-gill text-sm leading-110 text-neutral500 lg:text-base"
-                }
-              >
-                {hasEngraving ? options.engraving!.trim() : ENGRAVING_EMPTY_LABEL}
+          <div className="flex flex-col gap-2 self-stretch">
+            <div className="flex items-center justify-between gap-4">
+              <p className="font-gill text-base font-normal leading-110 text-darkblack lg:text-xl">
+                Engraving
               </p>
-            )}
+              {isEditingEngraving && engravingMaxCharacters ? (
+                <span className="font-gill text-sm font-light leading-110 text-neutral500">
+                  {engravingDraft.length}/{engravingMaxCharacters}
+                </span>
+              ) : null}
+            </div>
+
+            <div className="flex gap-2 self-stretch">
+              <div className="flex h-14 min-w-0 flex-1 items-center bg-aboutInactive px-3">
+                {isEditingEngraving ? (
+                  <input
+                    type="text"
+                    value={engravingDraft}
+                    onChange={(event) => setEngravingDraft(clampDraft(event.target.value))}
+                    onKeyDown={handleEngravingKeyDown}
+                    maxLength={engravingMaxCharacters}
+                    aria-label="Engraving text"
+                    autoFocus
+                    className="h-full w-full min-w-0 border-0 bg-transparent font-gill text-sm leading-110 text-darkblack outline-none placeholder:text-neutral500 lg:text-base"
+                  />
+                ) : (
+                  <p
+                    className={
+                      hasEngraving
+                        ? "truncate font-gill text-sm leading-110 text-darkblack lg:text-base"
+                        : "truncate font-gill text-sm leading-110 text-neutral500 lg:text-base"
+                    }
+                  >
+                    {hasEngraving ? options.engraving!.trim() : ENGRAVING_EMPTY_LABEL}
+                  </p>
+                )}
+              </div>
+              <CartOutlineButton
+                type="button"
+                onClick={handleEngravingAction}
+                className="h-14 w-auto shrink-0 px-5 uppercase lg:px-7"
+              >
+                {isEditingEngraving ? "Save" : hasEngraving ? "Modify" : "Add"}
+              </CartOutlineButton>
+            </div>
           </div>
-          <CartOutlineButton
-            type="button"
-            onClick={handleEngravingAction}
-            className="h-14 w-auto shrink-0 px-5 uppercase lg:px-7"
-          >
-            {isEditingEngraving ? "Save" : hasEngraving ? "Modify" : "Add"}
-          </CartOutlineButton>
-        </div>
-      </div>
+        </>
+      ) : null}
     </article>
   );
 };

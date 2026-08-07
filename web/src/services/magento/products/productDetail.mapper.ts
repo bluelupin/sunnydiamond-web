@@ -359,6 +359,7 @@ export function mapMagentoProductDetailToProduct(
   const metalColor = metalColorRaw ? formatMetalColorLabel(metalColorRaw) : null;
   const caratRaw = getAttributeValue(attributes, "sd_diamond_carat");
   const carat = formatCaratLabel(caratRaw);
+  const gemstoneType = getAttributeValue(attributes, "sd_gemstone_type");
   const ratingRaw = getAttributeValue(attributes, "sd_rating");
   const rating = ratingRaw ? Number(ratingRaw) : 0;
 
@@ -415,6 +416,7 @@ export function mapMagentoProductDetailToProduct(
     clarity ? `${clarity} Grade` : null,
     metalPurity ? `${metalPurity} Metal` : metal,
     carat,
+    gemstoneType ? `Gemstone: ${gemstoneType}` : null,
   ].filter((attribute): attribute is string => Boolean(attribute));
 
   const shortDescription = stripHtml(product.short_description?.html) || name;
@@ -429,7 +431,16 @@ export function mapMagentoProductDetailToProduct(
     product.media_gallery,
     product.image?.url,
   );
-  const detailSections = mapMagentoProductDetailSections(product.custom_attributesV2?.items);
+  let detailSections = mapMagentoProductDetailSections(product.custom_attributesV2?.items);
+  if (gemstoneType) {
+    const gemstoneLine = `Gemstone Type: ${gemstoneType}`;
+    detailSections = {
+      ...detailSections,
+      specifications: detailSections?.specifications
+        ? `${detailSections.specifications}\n${gemstoneLine}`
+        : gemstoneLine,
+    };
+  }
   const jewelleryCategory = resolveJewelleryCategory(product.categories);
   const categorySlug = jewelleryCategory.urlKey
     ? MAGENTO_URL_KEY_TO_SLUG[jewelleryCategory.urlKey]

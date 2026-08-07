@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { formatCartPrice } from "@/features/cart/utils/formatCartLine";
+import { useCart } from "@/features/cart/context/CartContext";
 import {
   findMockGiftCardByCode,
   mockAvailableOffers,
@@ -135,6 +136,7 @@ const OffersAndDealsExpandedContent = ({
   variant = "panel-gray300",
   className,
 }: OffersAndDealsExpandedContentProps) => {
+  const { applyLocalGiftCard, removeLocalGiftCard, appliedLocalGiftCardCode, localGiftCardDiscount } = useCart();
   const [giftCardCode, setGiftCardCode] = useState("");
   const [appliedGiftCard, setAppliedGiftCard] = useState<MockGiftCard | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -148,8 +150,14 @@ const OffersAndDealsExpandedContent = ({
     }
 
     setAppliedGiftCard(match);
+    applyLocalGiftCard(match.code, match.balance);
     setErrorMessage(null);
     setGiftCardCode("");
+  };
+
+  const handleRemoveGiftCard = () => {
+    setAppliedGiftCard(null);
+    removeLocalGiftCard();
   };
 
   const body = (
@@ -177,16 +185,21 @@ const OffersAndDealsExpandedContent = ({
         }}
         onApply={applyGiftCard}
         placeholder="Enter code"
-        disabled={Boolean(appliedGiftCard)}
+        disabled={Boolean(appliedGiftCard || appliedLocalGiftCardCode)}
         hasError={Boolean(errorMessage)}
       />
 
       <FormFieldError message={errorMessage ?? undefined} />
 
-      {appliedGiftCard ? (
+      {(appliedGiftCard || appliedLocalGiftCardCode) ? (
         <AppliedGiftCardSummary
-          giftCard={appliedGiftCard}
-          onRemoveGiftCard={() => setAppliedGiftCard(null)}
+          giftCard={
+            appliedGiftCard ?? {
+              code: appliedLocalGiftCardCode ?? "",
+              balance: localGiftCardDiscount,
+            }
+          }
+          onRemoveGiftCard={handleRemoveGiftCard}
         />
       ) : null}
     </div>

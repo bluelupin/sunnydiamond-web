@@ -372,7 +372,7 @@ export async function syncGuestCartLineOption(
   );
 
   if (!optionPayload) {
-    return fetchGuestCart(cartId, lineMetadata, signal);
+    throw new MagentoGraphqlError("Selected product options could not be synced to the cart");
   }
 
   const data = await magentoGraphqlFetch<MagentoSyncCartItemsOptionsResponse>({

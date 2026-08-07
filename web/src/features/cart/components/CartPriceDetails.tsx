@@ -5,7 +5,7 @@ import { cn } from "@/shared/utils/cn";
 import OffersAndDealsSection from "@/shared/ui/OffersAndDealsSection";
 import { useCart } from "../context/CartContext";
 import { useCartCheckout } from "../hooks/useCartCheckout";
-import { formatCartPrice, getCartShippingLabel } from "../utils/formatCartLine";
+import { formatCartPrice, getCartShippingDisplay, resolveCartDisplayTotal } from "../utils/formatCartLine";
 import PriceDetailsBreakdown from "./PriceDetailsBreakdown";
 import {
   CartOutlineButton,
@@ -40,15 +40,25 @@ const CartPriceDetails = ({
     selectedShippingMethod,
     shippingMethods,
     estimatedShippingMethods,
+    localGiftCardDiscount,
   } = useCart();
   const { proceedToCheckout, openGiftingOptions } = useCartCheckout();
   const [offersOpen, setOffersOpen] = useState(false);
 
-  const shippingLabel = getCartShippingLabel(
+  const shippingDisplay = getCartShippingDisplay(
     shipping,
     selectedShippingMethod,
     shippingMethods,
     estimatedShippingMethods,
+  );
+  const displayTotal = resolveCartDisplayTotal(
+    subtotal,
+    taxes,
+    totalPrice,
+    shippingDisplay,
+    offerDiscount,
+    giftCardDiscount,
+    localGiftCardDiscount,
   );
 
   const showBreakdown = !compact;
@@ -72,11 +82,11 @@ const CartPriceDetails = ({
           offerDiscount={offerDiscount}
           giftCardDiscount={giftCardDiscount}
           taxes={taxes}
-          shippingLabel={shippingLabel}
-          total={totalPrice}
+          shippingLabel={shippingDisplay.label}
+          total={displayTotal}
         />
       ) : (
-        <CartPriceRow label="Total" value={formatCartPrice(totalPrice)} emphasis />
+        <CartPriceRow label="Total" value={formatCartPrice(displayTotal)} emphasis />
       )}
 
       {showOffers ? (

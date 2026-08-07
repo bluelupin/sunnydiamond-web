@@ -221,6 +221,7 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
   const router = useRouter();
   const { items, applyGiftingSelection } = useCart();
   const { markGiftingOptionsExplored } = useCartUI();
+  const giftItems = items.filter((item) => item.gifting || item.options.isGift);
   const [wrapMode, setWrapMode] = useState<"single" | "separate">(() =>
     items.some((item) => item.gifting?.wrapMode === "separate") ? "separate" : "single",
   );
@@ -237,16 +238,15 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
     ),
   );
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(() => {
-    const gifted = items.filter((item) => item.gifting || item.options.isGift);
-    return new Set((gifted.length > 0 ? gifted : items).map((item) => item.id));
+    return new Set(giftItems.map((item) => item.id));
   });
 
   useEffect(() => {
     setSelectedItemIds((previous) => {
-      const validIds = items.filter((item) => previous.has(item.id)).map((item) => item.id);
+      const validIds = giftItems.filter((item) => previous.has(item.id)).map((item) => item.id);
       return new Set(validIds);
     });
-  }, [items]);
+  }, [giftItems]);
 
   const isSeparate = wrapMode === "separate";
 
@@ -342,7 +342,7 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
 
             {!isSeparate ? (
               <div className="flex flex-col gap-6 bg-gray300 p-4">
-                {items.map((item) => (
+                {giftItems.map((item) => (
                   <div key={item.id} className="flex items-center gap-2">
                     <GiftingItemCheckbox
                       checked={selectedItemIds.has(item.id)}
@@ -355,7 +355,7 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
               </div>
             ) : (
               <div className="flex flex-col gap-6">
-                {items.map((item) => (
+                {giftItems.map((item) => (
                   <div
                     key={item.id}
                     className="flex flex-col gap-4 border border-neutral300 bg-white px-4 py-6 [border-width:0.5px]"

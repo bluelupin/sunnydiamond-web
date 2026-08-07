@@ -30,6 +30,7 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
     totalPrice,
     offerDiscount,
     giftCardDiscount,
+    localGiftCardDiscount,
     selectedShippingMethod,
     shippingMethods,
   } = useCart();
@@ -47,6 +48,7 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
     shippingDisplay,
     offerDiscount,
     giftCardDiscount,
+    localGiftCardDiscount,
   );
 
   const toggleOffers = () => setOffersOpen((open) => !open);
@@ -113,7 +115,7 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
             showTitle={false}
             subtotal={subtotal}
             offerDiscount={offerDiscount}
-            giftCardDiscount={giftCardDiscount}
+            giftCardDiscount={giftCardDiscount + localGiftCardDiscount}
             taxes={taxes}
             shippingLabel={shippingDisplay.label}
             total={displayTotal}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import {
@@ -33,6 +33,10 @@ import {
   getDefaultMetalColorId,
   isMetalColorSelectable,
 } from "@/features/products/utils/metalColorOptions.utils";
+import {
+  applySelectedMetalVariant,
+  getConfigurableOptionUidsForMetal,
+} from "@/features/products/utils/productVariant.utils";
 import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
 import { cn } from "@/shared/utils/cn";
 
@@ -57,6 +61,7 @@ const WishlistAddToBagPanel = ({
   const [isDetailFetching, setIsDetailFetching] = useState(false);
   const [selectedMetal, setSelectedMetal] = useState("gold");
   const [ringSize, setRingSize] = useState("");
+  const [ringSizeError, setRingSizeError] = useState<string | null>(null);
   const [isRingSizeChartOpen, setIsRingSizeChartOpen] = useState(false);
   const [isPriceBreakupOpen, setIsPriceBreakupOpen] = useState(false);
 
@@ -131,7 +136,14 @@ const WishlistAddToBagPanel = ({
     const nextContent = getProductDetailContent(detailProduct);
     setSelectedMetal(getDefaultMetalColorId(detailProduct, nextContent.metalColors));
     setRingSize("");
+    setRingSizeError(null);
   }, [open, detailProduct?.id]);
+
+  const displayProduct = useMemo(
+    () => (detailProduct ? applySelectedMetalVariant(detailProduct, selectedMetal) : null),
+    [detailProduct, selectedMetal],
+  );
+  const displayPricing = displayProduct ? getProductDetailPricing(displayProduct) : null;
 
   if (!open || !product) {
     return (
@@ -146,10 +158,10 @@ const WishlistAddToBagPanel = ({
   const activeMetal = content?.metalColors.find((metal) => metal.id === selectedMetal);
   const productHref = getWishlistProductHref(product);
   const displayName = detailProduct?.name ?? product.name;
-  const displayPrice = pricing?.price ?? product.price;
+  const displayPrice = displayPricing?.price ?? product.price;
   const displayOriginalPrice =
-    pricing?.originalPrice != null && pricing.originalPrice > displayPrice
-      ? pricing.originalPrice
+    displayPricing?.originalPrice != null && displayPricing.originalPrice > displayPrice
+      ? displayPricing.originalPrice
       : null;
 
   const handleAddToBag = () => {
@@ -157,12 +169,21 @@ const WishlistAddToBagPanel = ({
       return;
     }
 
+    if (showSizeSelector && !ringSize.trim()) {
+      setRingSizeError("Please select a ring size.");
+      return;
+    }
+
+    const configurableOptionUids = getConfigurableOptionUidsForMetal(detailProduct, selectedMetal);
+
     onAddToBag({
       product: detailProduct,
       options: {
         metal: activeMetal?.label,
         ringSize: ringSize || undefined,
       },
+      ...(configurableOptionUids.length > 0 ? { configurableOptionUids } : {}),
+      productCustomOptions: detailProduct.customOptions,
     });
   };
 
@@ -179,7 +200,7 @@ const WishlistAddToBagPanel = ({
           <div className="relative shrink-0">
             {detailProduct ? (
               <ProductWishlistDetailGalleryCarousel
-                product={detailProduct}
+                product={displayProduct ?? detailProduct}
                 imageMaxWidthClass="max-w-full"
               />
             ) : (
@@ -293,11 +314,21 @@ const WishlistAddToBagPanel = ({
                     value={ringSize}
                     options={sizeLabels}
                     placeholder="-select-"
-                    onChange={setRingSize}
+                    onChange={(value) => {
+                      setRingSize(value);
+                      if (value) {
+                        setRingSizeError(null);
+                      }
+                    }}
                     triggerClassName="rounded-none border-0 bg-aboutInactive px-3 text-base text-darkblack"
                     listClassName="bg-aboutInactive"
                     optionClassName="text-base"
                   />
+                  {ringSizeError ? (
+                    <p className="font-gill text-sm font-light leading-110 text-[#F91616]">
+                      {ringSizeError}
+                    </p>
+                  ) : null}
                 </div>
               ) : isDetailFetching ? (
                 <div className="flex flex-col gap-2" aria-hidden>
@@ -348,15 +379,15 @@ const WishlistAddToBagPanel = ({
         guide={sizeGuide}
       />
 
-      {detailProduct && pricing ? (
+      {detailProduct && displayPricing ? (
         <PriceBreakupPanel
           open={isPriceBreakupOpen}
           onClose={() => setIsPriceBreakupOpen(false)}
           productName={detailProduct.name}
-          productImage={detailProduct.image}
+          productImage={displayProduct?.image ?? detailProduct.image}
           metalLabel={activeMetal?.label}
           ringSize={ringSize || undefined}
-          pricing={pricing}
+          pricing={displayPricing}
         />
       ) : null}
     </>

@@ -74,7 +74,6 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
             <path d="M18 18L6 6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        {/* </div> */}
 
         <div className="min-h-0 flex-1 overflow-y-auto">
           <div className="flex flex-col gap-6 pb-72">
@@ -115,6 +114,7 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
                 ) : null}
               </div>
             ) : null}
+
             <div className="flex flex-col gap-6 pb-8">
               <div className="flex flex-col items-center gap-3 px-4 text-center lg:px-8">
                 <h2 className="w-full font-larken text-2xl font-light leading-110 text-darkblack">

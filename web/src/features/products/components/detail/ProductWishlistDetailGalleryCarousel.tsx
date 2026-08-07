@@ -26,7 +26,7 @@ const ProductWishlistDetailGalleryCarousel = ({
 
     useEffect(() => {
         setActiveSlide(0);
-    }, [product.id]);
+    }, [product.id, product.image]);
 
     const goToNextSlide = () => {
         setActiveSlide((current) => (current + 1) % carouselImages.length);

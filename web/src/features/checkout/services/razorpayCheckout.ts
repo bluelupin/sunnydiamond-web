@@ -103,6 +103,55 @@ async function createRazorpayOrder(orderNumber: string): Promise<MagentoRazorpay
   return { rzpOrderId };
 }
 
+function buildRazorpayCheckoutConfig(method?: "card" | "upi" | "netbanking") {
+  if (method === "upi") {
+    return {
+      display: {
+        blocks: {
+          upi: {
+            name: "Pay via UPI",
+            instruments: [{ method: "upi" }],
+          },
+        },
+        sequence: ["block.upi"],
+        preferences: { show_default_blocks: false },
+      },
+    };
+  }
+
+  if (method === "netbanking") {
+    return {
+      display: {
+        blocks: {
+          netbanking: {
+            name: "Netbanking",
+            instruments: [{ method: "netbanking" }],
+          },
+        },
+        sequence: ["block.netbanking"],
+        preferences: { show_default_blocks: false },
+      },
+    };
+  }
+
+  if (method === "card") {
+    return {
+      display: {
+        blocks: {
+          card: {
+            name: "Pay via Card",
+            instruments: [{ method: "card" }],
+          },
+        },
+        sequence: ["block.card"],
+        preferences: { show_default_blocks: false },
+      },
+    };
+  }
+
+  return undefined;
+}
+
 export async function verifyRazorpayPayment(input: {
   orderNumber: string;
   paymentId: string;
@@ -174,10 +223,14 @@ export async function collectRazorpayPayment(input: {
   }
 
   return new Promise<RazorpayPaymentOutcome>((resolve) => {
-    const callbackUrl = new URL("/api/checkout/razorpay/callback", window.location.origin);
+    const siteOrigin =
+      process.env.NEXT_PUBLIC_FRONTEND_URL?.trim().replace(/\/$/, "") ||
+      window.location.origin;
+    const callbackUrl = new URL("/api/checkout/razorpay/callback", siteOrigin);
     callbackUrl.searchParams.set("order", input.orderNumber);
 
     const usesRedirectFlow = input.method === "netbanking" || input.method === "upi";
+    const checkoutConfig = buildRazorpayCheckoutConfig(input.method);
 
     const razorpay = new window.Razorpay!({
       key: config.keyId,
@@ -186,6 +239,7 @@ export async function collectRazorpayPayment(input: {
       description: `Order #${input.orderNumber}`,
       callback_url: callbackUrl.toString(),
       ...(usesRedirectFlow ? { redirect: true } : {}),
+      ...(checkoutConfig ? { config: checkoutConfig } : {}),
       prefill: {
         ...(input.prefill.name ? { name: input.prefill.name } : {}),
         ...(input.prefill.email ? { email: input.prefill.email } : {}),

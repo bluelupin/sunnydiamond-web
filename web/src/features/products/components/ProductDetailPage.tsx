@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import type { Product } from "@/features/products/data/products";
 import {
@@ -9,6 +10,8 @@ import {
   getProductDetailPricing,
 } from "@/features/products/data/productDetailContent";
 import { useAddToBagWithDrawer } from "@/features/cart/hooks/useAddToBagWithDrawer";
+import { useCart } from "@/features/cart/context/CartContext";
+import type { AddToBagPayload } from "@/features/cart/types/cart.types";
 import { ChevronLeft } from "lucide-react";
 import ProductDetailSidebar from "./detail/ProductDetailSidebar";
 import ProductDetailHeroLayout from "./detail/ProductDetailHeroLayout";
@@ -25,6 +28,10 @@ type ProductDetailPageProps = {
 };
 
 const ProductDetailPage = ({ product, sizeGuide = null }: ProductDetailPageProps) => {
+  const searchParams = useSearchParams();
+  const editLineId = searchParams?.get("editLine")?.trim() ?? "";
+  const { items, replaceLineItem } = useCart();
+  const editingLineItem = editLineId ? items.find((item) => item.id === editLineId) : undefined;
   const { addToBagAndOpenDrawer } = useAddToBagWithDrawer();
 
   const content = useMemo(() => getProductDetailContent(product), [product]);
@@ -42,8 +49,19 @@ const ProductDetailPage = ({ product, sizeGuide = null }: ProductDetailPageProps
   );
   const pricing = getProductDetailPricing(displayProduct);
 
-  const handleAddToCart = async (payload: Parameters<typeof addToBagAndOpenDrawer>[0]) => {
-    await addToBagAndOpenDrawer(payload);
+  const handleAddToCart = async (payload: AddToBagPayload) => {
+    if (editingLineItem) {
+      await replaceLineItem(editingLineItem.id, {
+        ...payload,
+        productCustomOptions: payload.productCustomOptions ?? product.customOptions,
+      });
+      return;
+    }
+
+    await addToBagAndOpenDrawer({
+      ...payload,
+      productCustomOptions: payload.productCustomOptions ?? product.customOptions,
+    });
   };
 
   const sidebarProps = {
@@ -55,6 +73,8 @@ const ProductDetailPage = ({ product, sizeGuide = null }: ProductDetailPageProps
     onSelectedMetalChange: setSelectedMetal,
     sizeGuide,
     onAddToBag: handleAddToCart,
+    initialRingSize: editingLineItem?.options.ringSize,
+    addToBagLabel: editingLineItem ? "Update Bag" : "Add to Bag",
   };
 
   return (

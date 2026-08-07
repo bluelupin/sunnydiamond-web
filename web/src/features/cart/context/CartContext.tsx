@@ -42,7 +42,6 @@ import {
 } from "@/services/magento/cart/cartSession";
 import { findCartItemUidBySku, computeCartTotalQuantity } from "@/services/magento/cart/cart.mapper";
 import { readStoredCartLines, writeStoredCartLines } from "@/features/cart/utils/cartProduct.utils";
-import { cartPageContent } from "@/features/cart/data/cartPageContent";
 import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 import type {
   AddItemResult,
@@ -78,6 +77,12 @@ interface CartContextType {
   offerDiscount: number;
   giftCardDiscount: number;
   appliedGiftCardCode: string | null;
+  localGiftCardDiscount: number;
+  appliedLocalGiftCardCode: string | null;
+  applyLocalGiftCard: (code: string, balance: number) => void;
+  removeLocalGiftCard: () => void;
+  replaceLineItem: (lineItemId: string, payload: AddToBagPayload) => Promise<AddItemResult>;
+  buyNow: (lineItemId: string) => Promise<void>;
   shippingMethods: MagentoShippingMethodOption[];
   estimatedShippingMethods: MagentoShippingMethodOption[];
   selectedShippingMethod: MagentoSelectedShippingMethod | null;
@@ -101,6 +106,45 @@ function resolveLineUidForSku(state: GuestCartState, sku: string): string | null
 
   const matchingItems = state.items.filter((item) => item.product.id === sku);
   return matchingItems.at(-1)?.id ?? null;
+}
+
+function resolveAddedLineUid(
+  previousItems: CartLineItem[],
+  nextState: GuestCartState,
+  sku: string,
+  options: CartLineOptions,
+): string | null {
+  const previousIds = new Set(previousItems.map((item) => item.id));
+  const newLines = nextState.items.filter((item) => !previousIds.has(item.id));
+
+  if (newLines.length === 1) {
+    return newLines[0].id;
+  }
+
+  const ringSize = options.ringSize?.trim();
+  const metal = options.metal?.trim();
+
+  const matchingNew = newLines.find((item) => {
+    if (item.product.id !== sku) {
+      return false;
+    }
+
+    if (ringSize && item.options.ringSize?.trim() !== ringSize) {
+      return false;
+    }
+
+    if (metal && item.options.metal?.trim() !== metal) {
+      return false;
+    }
+
+    return true;
+  });
+
+  if (matchingNew) {
+    return matchingNew.id;
+  }
+
+  return resolveLineUidForSku(nextState, sku);
 }
 
 function upsertLineMetadata(
@@ -148,6 +192,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [isHydrating, setIsHydrating] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isRemovedToastOpen, setIsRemovedToastOpen] = useState(false);
+  const [localGiftCardDiscount, setLocalGiftCardDiscount] = useState(0);
+  const [appliedLocalGiftCardCode, setAppliedLocalGiftCardCode] = useState<string | null>(null);
   const removedToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lineMetadataRef = useRef(lineMetadata);
   const initRef = useRef(false);
@@ -333,6 +379,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     try {
       const cartId = await ensureGuestCartId();
+      const previousItems = cartState?.items ?? [];
       const nextState = await addProductToGuestCart({
         cartId,
         sku,
@@ -343,7 +390,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         lineMetadata: lineMetadataRef.current,
       });
 
-      const lineUid = resolveLineUidForSku(nextState, sku);
+      const lineUid = resolveAddedLineUid(previousItems, nextState, sku, options);
       if (lineUid) {
         const nextMetadata = upsertLineMetadata(
           lineMetadataRef.current,
@@ -400,7 +447,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsUpdating(false);
     }
-  }, [applyCartState]);
+  }, [applyCartState, cartState?.items]);
 
   const removeItem = useCallback(async (lineItemId: string) => {
     const cartId = getGuestCartId();
@@ -438,7 +485,43 @@ export function CartProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsUpdating(false);
     }
-  }, [applyCartState, cartState?.items, showRemovedFromCartToast]);
+  }, [applyCartState, cartState?.items]);
+
+  const replaceLineItem = useCallback(
+    async (lineItemId: string, payload: AddToBagPayload): Promise<AddItemResult> => {
+      await removeItem(lineItemId);
+      return addItem(payload);
+    },
+    [addItem, removeItem],
+  );
+
+  const buyNow = useCallback(
+    async (lineItemId: string) => {
+      const otherLineIds = (cartState?.items ?? [])
+        .filter((item) => item.id !== lineItemId)
+        .map((item) => item.id);
+
+      for (const id of otherLineIds) {
+        await removeItem(id);
+      }
+    },
+    [cartState?.items, removeItem],
+  );
+
+  const applyLocalGiftCard = useCallback((code: string, balance: number) => {
+    const normalizedCode = code.trim();
+    if (!normalizedCode || balance <= 0) {
+      return;
+    }
+
+    setAppliedLocalGiftCardCode(normalizedCode);
+    setLocalGiftCardDiscount(balance);
+  }, []);
+
+  const removeLocalGiftCard = useCallback(() => {
+    setAppliedLocalGiftCardCode(null);
+    setLocalGiftCardDiscount(0);
+  }, []);
 
   const updateQuantity = useCallback(
     async (lineItemId: string, quantity: number) => {
@@ -767,6 +850,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
       offerDiscount,
       giftCardDiscount,
       appliedGiftCardCode,
+      localGiftCardDiscount,
+      appliedLocalGiftCardCode,
+      applyLocalGiftCard,
+      removeLocalGiftCard,
+      replaceLineItem,
+      buyNow,
       shippingMethods,
       estimatedShippingMethods,
       selectedShippingMethod,
@@ -787,6 +876,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
       offerDiscount,
       giftCardDiscount,
       appliedGiftCardCode,
+      localGiftCardDiscount,
+      appliedLocalGiftCardCode,
+      applyLocalGiftCard,
+      removeLocalGiftCard,
+      replaceLineItem,
+      buyNow,
       shippingMethods,
       subtotal,
       taxes,

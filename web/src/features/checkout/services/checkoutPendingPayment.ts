@@ -18,7 +18,9 @@ export function savePendingCheckoutPayment(data: PendingCheckoutPayment): void {
     return;
   }
 
-  window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  const serialized = JSON.stringify(data);
+  window.sessionStorage.setItem(STORAGE_KEY, serialized);
+  window.localStorage.setItem(STORAGE_KEY, serialized);
 }
 
 export function readPendingCheckoutPayment(): PendingCheckoutPayment | null {
@@ -26,7 +28,8 @@ export function readPendingCheckoutPayment(): PendingCheckoutPayment | null {
     return null;
   }
 
-  const raw = window.sessionStorage.getItem(STORAGE_KEY);
+  const raw =
+    window.sessionStorage.getItem(STORAGE_KEY) ?? window.localStorage.getItem(STORAGE_KEY);
   if (!raw) {
     return null;
   }
@@ -44,4 +47,5 @@ export function clearPendingCheckoutPayment(): void {
   }
 
   window.sessionStorage.removeItem(STORAGE_KEY);
+  window.localStorage.removeItem(STORAGE_KEY);
 }

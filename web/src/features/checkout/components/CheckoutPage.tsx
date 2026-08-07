@@ -54,6 +54,7 @@ import {
   readPendingCheckoutPayment,
   savePendingCheckoutPayment,
 } from "../services/checkoutPendingPayment";
+import { isCustomerEmailAvailable } from "@/services/magento/customer/customerEmailAvailability.service";
 
 const CheckoutPage = () => {
   const {
@@ -76,6 +77,7 @@ const CheckoutPage = () => {
     customer,
     defaultFormPatch,
     defaultShippingAddress,
+    refreshAddresses,
   } = useCheckoutCustomerPrefill();
   const contactPrefillAppliedRef = useRef(false);
   const shippingPrefillAppliedRef = useRef(false);
@@ -215,12 +217,16 @@ const CheckoutPage = () => {
     const pending = readPendingCheckoutPayment();
     if (!pending || pending.orderNumber !== paymentOrderNumber) {
       paymentReturnHandledRef.current = true;
+      setPlacedOrderNumber(paymentOrderNumber);
+      setPlacedTotal(totalPrice);
+      setPlacedItems([...items]);
+      setStep("success");
+      clearPendingCheckoutPayment();
+      window.history.replaceState({}, "", "/checkout");
       toast({
         title: "Payment received",
-        description:
-          "Your payment was processed, but we could not restore the order summary. Please check order tracking.",
+        description: `Order #${paymentOrderNumber} was placed successfully.`,
       });
-      window.history.replaceState({}, "", "/checkout");
       return;
     }
 
@@ -234,7 +240,19 @@ const CheckoutPage = () => {
       wasAuthenticated: pending.isAuthenticated,
       guestOtp: pending.guestOtp,
     });
-  }, [finalizeOrderSuccess, isPaymentReturn, paymentOrderNumber, paymentStatus, toast]);
+  }, [finalizeOrderSuccess, isPaymentReturn, paymentOrderNumber, paymentStatus, toast, items, totalPrice]);
+
+  useEffect(() => {
+    const handlePageShow = () => {
+      if (isAuthenticated) {
+        refreshAddresses();
+        shippingPrefillAppliedRef.current = false;
+      }
+    };
+
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, [isAuthenticated, refreshAddresses]);
 
   useEffect(() => {
     if (items.length > 0 && step === "form") {
@@ -366,6 +384,17 @@ const CheckoutPage = () => {
       }
 
       void (async () => {
+        if (!isAuthenticated && contactIsEmail) {
+          const emailAvailable = await isCustomerEmailAvailable(form.phoneOrEmail);
+          if (!emailAvailable) {
+            toast({
+              title: "Email already registered",
+              description: "This email is already registered. Please sign in to continue.",
+            });
+            return;
+          }
+        }
+
         setIsSavingAddresses(true);
 
         try {
@@ -613,7 +642,11 @@ const CheckoutPage = () => {
                 onPaymentChange={updatePayment}
                 onEditPersonal={() => setStep("form")}
                 onEditDelivery={() => setStep("form")}
-                onEditPayment={() => setStep("form")}
+                onEditPayment={() => {
+                  document
+                    .getElementById("checkout-payment-methods")
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
                 validation={paymentValidation}
                 isAuthenticated={isAuthenticated}
               />

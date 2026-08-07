@@ -31,7 +31,7 @@ const CheckoutMobileStickyFooter = forwardRef<HTMLDivElement, CheckoutMobileStic
     },
     ref,
   ) {
-  const { subtotal, taxes, totalPrice, shipping, offerDiscount, giftCardDiscount, selectedShippingMethod, shippingMethods } = useCart();
+  const { subtotal, taxes, totalPrice, shipping, offerDiscount, giftCardDiscount, localGiftCardDiscount, selectedShippingMethod, shippingMethods } = useCart();
   const shippingDisplay = getCheckoutShippingDisplay(
     shipping,
     selectedShippingMethod,
@@ -44,6 +44,7 @@ const CheckoutMobileStickyFooter = forwardRef<HTMLDivElement, CheckoutMobileStic
     shippingDisplay,
     offerDiscount,
     giftCardDiscount,
+    localGiftCardDiscount,
   );
 
   return (

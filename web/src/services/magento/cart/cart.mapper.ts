@@ -25,8 +25,12 @@ function mapCartItemProduct(item: MagentoCartItem): Product | null {
   const name = product?.name?.trim();
   const urlKey = product?.url_key?.trim();
   const unitPrice = item.prices?.price?.value;
+  const rowTotal = item.prices?.row_total?.value;
+  const quantity = item.quantity ?? 1;
+  const resolvedUnitPrice =
+    rowTotal != null && quantity > 0 ? rowTotal / quantity : unitPrice;
 
-  if (!sku || !name || !urlKey || unitPrice == null) {
+  if (!sku || !name || !urlKey || resolvedUnitPrice == null) {
     return null;
   }
 
@@ -42,7 +46,7 @@ function mapCartItemProduct(item: MagentoCartItem): Product | null {
     id: sku,
     urlKey,
     name,
-    price: unitPrice,
+    price: resolvedUnitPrice,
     description: name,
     shortDescription: name,
     category: "",
@@ -155,14 +159,14 @@ export function pickDefaultShippingMethod(
     return null;
   }
 
-  const freeMethods = methods.filter((method) => method.amount === 0);
-  if (freeMethods.length > 0) {
-    return freeMethods[0];
+  const paidMethods = methods.filter((method) => method.amount > 0);
+  if (paidMethods.length > 0) {
+    return paidMethods.reduce((cheapest, method) =>
+      method.amount < cheapest.amount ? method : cheapest,
+    );
   }
 
-  return methods.reduce((cheapest, method) =>
-    method.amount < cheapest.amount ? method : cheapest,
-  );
+  return methods.find((method) => method.amount === 0) ?? methods[0];
 }
 
 export function mapAvailablePaymentMethods(cart: MagentoCart): MagentoPaymentMethodOption[] {

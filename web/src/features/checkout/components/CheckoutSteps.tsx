@@ -17,6 +17,7 @@ import { AmexLogo, MastercardLogo, VisaLogo } from "@/shared/ui/PaymentLogos";
 import { INDIAN_STATES } from "@/features/checkout/constants/indianStates";
 import type { CheckoutFormData, CheckoutPaymentData } from "../types/checkout.types";
 import type { CheckoutFormField, CheckoutPaymentField } from "@/shared/utils/formValidation";
+import { isCheckoutEmailContact } from "@/shared/utils/formValidation";
 
 type CheckoutFormValidationProps = {
   errors: Partial<Record<CheckoutFormField, string | undefined>>;
@@ -364,7 +365,7 @@ export const CheckoutPaymentStep = ({
         <CheckoutSummaryText>
           You are checking out as {form.name || "Guest"}
           {form.phoneOrEmail
-            ? isAuthenticated && form.phoneOrEmail.includes("@")
+            ? isCheckoutEmailContact(form.phoneOrEmail)
               ? `, ${form.phoneOrEmail}`
               : `, +91 ${form.phoneOrEmail}`
             : ""}
@@ -394,7 +395,7 @@ export const CheckoutPaymentStep = ({
       <CheckoutSectionCard gapClassName="gap-6">
         <CheckoutSectionHeading onEdit={onEditPayment}>Payment Mehtod</CheckoutSectionHeading>
 
-        <div className="flex flex-col gap-6">
+        <div id="checkout-payment-methods" className="flex flex-col gap-6">
           <div className="flex items-center justify-between self-stretch">
             <CheckoutRadioRow
               checked={payment.method === "card"}

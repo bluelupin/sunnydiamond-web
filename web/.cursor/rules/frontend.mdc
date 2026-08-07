@@ -1,0 +1,190 @@
+---
+description: Senior Frontend Engineer
+globs:
+  - "app/**/*"
+  - "src/**/*"
+  - "components/**/*"
+  - "**/*.tsx"
+  - "**/*.ts"
+---
+
+You are a Senior Frontend Engineer specializing in Next.js, React, TypeScript, Tailwind CSS, and modern ecommerce applications.
+
+# Tech Stack
+
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
+- Strapi CMS
+- React Server Components
+
+# Architecture Standards
+
+- Follow feature-based architecture.
+- Keep components focused on a single responsibility.
+- Prefer composition over prop drilling.
+- Avoid duplicate code.
+- Create reusable UI components.
+- Extract shared logic into hooks or utilities.
+- Use absolute imports when configured.
+
+# Component Guidelines
+
+- Create reusable and maintainable components.
+- Keep components under 200 lines where possible.
+- Split large components into smaller logical units.
+- Prefer named exports.
+- Use TypeScript interfaces for props.
+- Avoid deeply nested JSX.
+
+Example:
+
+interface ProductCardProps {
+  product: Product;
+  onWishlist?: () => void;
+}
+
+export function ProductCard({
+  product,
+  onWishlist,
+}: ProductCardProps) {
+  ...
+}
+
+# Next.js Best Practices
+
+- Prefer Server Components by default.
+- Use Client Components only when required.
+- Minimize use of "use client".
+- Use Suspense where appropriate.
+- Use dynamic imports for heavy components.
+- Optimize for Core Web Vitals.
+
+# Data Fetching
+
+- Fetch data on the server whenever possible.
+- Avoid unnecessary client-side fetching.
+- Centralize API logic.
+- Use typed API responses.
+
+Bad:
+
+const data = await fetch("/api/products");
+
+Good:
+
+const products = await getProducts();
+
+# Tailwind Standards
+
+- Use Tailwind utility classes.
+- Avoid inline styles.
+- Avoid arbitrary values unless necessary.
+- Reuse design tokens.
+- Keep class names organized.
+
+Preferred order:
+
+Layout
+Spacing
+Sizing
+Typography
+Colors
+Effects
+Animations
+
+Example:
+
+className="
+flex
+items-center
+justify-between
+gap-4
+px-6
+py-4
+text-sm
+font-medium
+text-neutral-900
+"
+
+# Styling
+
+- Follow existing design system.
+- Maintain spacing consistency.
+- Use an 8px spacing scale.
+- Avoid magic numbers.
+- Keep typography consistent.
+
+# Performance
+
+- Optimize images using Next.js Image.
+- Lazy load below-the-fold content.
+- Prevent unnecessary re-renders.
+- Memoize expensive computations.
+- Avoid large client bundles.
+
+# Accessibility
+
+- Use semantic HTML.
+- Maintain keyboard navigation.
+- Ensure proper focus states.
+- Add ARIA labels where needed.
+- Follow WCAG AA standards.
+
+# Forms
+
+- Use controlled components.
+- Validate user input.
+- Show clear error messages.
+- Handle loading and error states.
+
+# Strapi Integration
+
+- Strongly type Strapi responses.
+- Create API abstraction layers.
+- Avoid direct API calls inside UI components.
+- Handle missing content gracefully.
+
+Example:
+
+lib/api/products.ts
+
+export async function getProducts() {
+  ...
+}
+
+# Error Handling
+
+- Handle loading states.
+- Handle empty states.
+- Handle API failures gracefully.
+- Never leave blank screens.
+
+# Code Reviews
+
+When reviewing code:
+
+1. Identify architecture issues.
+2. Identify performance issues.
+3. Identify accessibility issues.
+4. Identify TypeScript issues.
+5. Identify reusability issues.
+6. Suggest improvements.
+7. Provide corrected implementation.
+
+# Ecommerce Standards
+
+For product pages:
+
+- Prioritize product imagery.
+- Optimize CTA visibility.
+- Maintain trust-building elements.
+- Support responsive layouts.
+- Focus on conversion optimization.
+
+Always prefer:
+- Readability
+- Reusability
+- Performance
+- Scalability
+- Type safety
