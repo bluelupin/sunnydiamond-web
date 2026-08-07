@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
+import { useMutedVideoPlayback } from "@/shared/hooks/useMutedVideoPlayback";
 import { aboutHandcraftedFigmaSpec } from "../data/content";
 
 const { hero } = aboutHandcraftedFigmaSpec;
@@ -21,9 +22,9 @@ const AboutHandcraftedHeroMedia = ({
   videoUrl,
   posterUrl,
 }: AboutHandcraftedHeroMediaProps) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
   const [usePosterOnly, setUsePosterOnly] = useState(!videoUrl);
+  const videoRef = useMutedVideoPlayback(shouldLoadVideo && !usePosterOnly && Boolean(videoUrl));
 
   const showPosterOnly = useCallback(() => {
     setUsePosterOnly(true);

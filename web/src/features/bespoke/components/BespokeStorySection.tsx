@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Reveal from "@/shared/Animation/Reveal";
+import { useMutedVideoPlayback } from "@/shared/hooks/useMutedVideoPlayback";
 import { cn } from "@/shared/utils/cn";
 import { useSince1997HorizontalScroll } from "@/features/about/hooks/useSince1997HorizontalScroll";
 import { bespokeStoryFigmaSpec } from "@/features/bespoke/data/content";
@@ -34,8 +35,8 @@ const BespokeStoryStepMedia = ({
   isDesktop: boolean;
 }) => {
   const figureRef = useRef<HTMLElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [useImageFallback, setUseImageFallback] = useState(false);
+  const videoRef = useMutedVideoPlayback(!useImageFallback);
 
   useEffect(() => {
     if (useImageFallback) return;

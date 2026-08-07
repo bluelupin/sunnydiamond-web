@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingBlocks";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import { resolveResponsiveCmsImage } from "@/shared/utils/responsiveCmsImage";
 import Reveal from "@/shared/Animation/Reveal";
+import { useMutedVideoPlayback } from "@/shared/hooks/useMutedVideoPlayback";
 import type { CategoryNavigationImage, GiftingBanner } from "@/types/homepage/categoryNavigation";
 
 interface ForYourValentineSectionProps {
@@ -35,7 +36,6 @@ function getVideoMimeType(url: string) {
 
 const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
   const { data: shoppingData, isLoading } = useHomepageShoppingBlocks();
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
 
   const giftingData =
@@ -87,6 +87,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
   const hasSecondaryCta = Boolean(secondaryCtaUrl && secondaryCtaLabel);
   const hasCtaRow = hasPrimaryCta || hasSecondaryCta;
   const videoMimeType = backgroundVideoUrl ? getVideoMimeType(backgroundVideoUrl) : undefined;
+  const videoRef = useMutedVideoPlayback(shouldLoadVideo && showBackgroundVideo);
 
   useEffect(() => {
     if (!showBackgroundVideo) {

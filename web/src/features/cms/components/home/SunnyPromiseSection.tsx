@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { resolveImageSrcString } from "@/shared/utils/image";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import Reveal from "@/shared/Animation/Reveal";
+import { useMutedVideoPlayback } from "@/shared/hooks/useMutedVideoPlayback";
 
 interface SunnyPromiseSectionProps {
   id?: string;
@@ -21,7 +22,6 @@ const getVideoMimeType = (url: string) => {
 const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
   const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
   const sunnyPromiseData = editorialData?.sunnyPromiseSection ?? null;
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
 
   const sectionTitle = sunnyPromiseData?.sectionTitle?.trim();
@@ -30,6 +30,7 @@ const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
   const ctaLabel = sunnyPromiseData?.cta?.label?.trim();
   const videoUrl = sunnyPromiseData?.videoUrl;
   const posterUrl = resolveCmsMediaUrl(sunnyPromiseData?.posterImage);
+  const videoRef = useMutedVideoPlayback(Boolean(videoUrl && shouldLoadVideo));
 
   useEffect(() => {
     if (!videoUrl) return;

@@ -3,6 +3,7 @@
 import { Fragment, useState } from "react";
 import Image from "next/image";
 import { Play } from "lucide-react";
+import { useMutedVideoPlayback } from "@/shared/hooks/useMutedVideoPlayback";
 import { PanelFooterGradient } from "@/shared/ui/PanelFooter";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
@@ -22,6 +23,7 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
   const videoUrl = guide?.tutorialVideoUrl;
   const circumferenceHeaderUrl = guide?.circumferenceHeaderImageUrl;
   const diameterHeaderUrl = guide?.diameterHeaderImageUrl;
+  const videoRef = useMutedVideoPlayback(Boolean(videoUrl));
 
   return (
     <ProductDetailSidePanelShell
@@ -51,15 +53,18 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
               <div className="relative w-full shrink-0 overflow-hidden bg-white">
                 {isVideoPlaying ? (
                   <video
+                    ref={videoRef}
                     src={videoUrl}
                     className="block h-auto w-full"
                     controls
                     autoPlay
+                    muted
                     playsInline
                   />
                 ) : (
                   <div className="relative w-full">
                     <video
+                      ref={videoRef}
                       src={videoUrl}
                       className="block h-auto w-full"
                       muted

@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
+import { useMutedVideoPlayback } from "@/shared/hooks/useMutedVideoPlayback";
 import { getImageSrc } from "@/shared/utils/image";
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
@@ -19,9 +20,9 @@ const HeroBackgroundMedia = ({
   alt,
   cmsVideoUrl,
 }: HeroBackgroundMediaProps) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const videoRef = useMutedVideoPlayback(shouldLoadVideo && !prefersReducedMotion);
 
   const posterSrc = getImageSrc(mobileImageUrl || desktopImageUrl);
   const hasHeroImage = Boolean(posterSrc);

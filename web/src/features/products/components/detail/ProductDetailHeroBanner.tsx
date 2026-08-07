@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { useMutedVideoPlayback } from "@/shared/hooks/useMutedVideoPlayback";
 
 type ProductDetailHeroBannerProps = {
   imageSrc: string;
@@ -39,6 +40,8 @@ const ProductDetailHeroBanner = ({
   const sectionRef = useRef<HTMLElement>(null);
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
   const [videoFailed, setVideoFailed] = useState(false);
+  const showVideo = Boolean(videoSrc && shouldLoadVideo && !videoFailed);
+  const videoRef = useMutedVideoPlayback(showVideo);
 
   const handleVideoError = useCallback(() => {
     setVideoFailed(true);
@@ -75,14 +78,11 @@ const ProductDetailHeroBanner = ({
   }, [videoSrc]);
 
   const handleVideoCanPlay = useCallback((event: React.SyntheticEvent<HTMLVideoElement>) => {
-    const video = event.currentTarget;
-    video.muted = true;
-    void video.play().catch(() => {
+    void event.currentTarget.play().catch(() => {
       // Autoplay can be blocked transiently; keep the loaded video in place.
     });
   }, []);
 
-  const showVideo = Boolean(videoSrc && shouldLoadVideo && !videoFailed);
   const videoWebmSrc = videoSrc ? resolveCompanionWebmSrc(videoSrc) : undefined;
   const videoMimeType = videoSrc ? resolveVideoMimeType(videoSrc) : "video/mp4";
 
@@ -105,6 +105,7 @@ const ProductDetailHeroBanner = ({
         {showVideo ? (
           <video
             key={videoSrc}
+            ref={videoRef}
             className="h-full w-full object-cover object-top"
             autoPlay
             loop

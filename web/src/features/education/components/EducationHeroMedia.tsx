@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
+import { useMutedVideoPlayback } from "@/shared/hooks/useMutedVideoPlayback";
 import { cn } from "@/shared/utils/cn";
 import { educationHeroFigmaSpec } from "../data/content";
 
@@ -30,9 +31,10 @@ const EducationHeroMedia = ({
   expanded,
   reducedMotion,
 }: EducationHeroMediaProps) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
   const [useFallback, setUseFallback] = useState(!videoUrl);
+  const showVideo = shouldLoadVideo && videoUrl && !useFallback;
+  const videoRef = useMutedVideoPlayback(Boolean(showVideo));
 
   const showImageFallback = useCallback(() => {
     setUseFallback(true);
@@ -65,7 +67,6 @@ const EducationHeroMedia = ({
     }
   }, [shouldLoadVideo, showImageFallback]);
 
-  const showVideo = shouldLoadVideo && videoUrl && !useFallback;
   const videoMimeType = videoUrl ? getVideoMimeType(videoUrl) : undefined;
 
   const imageTransition = reducedMotion
