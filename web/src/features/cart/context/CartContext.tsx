@@ -42,6 +42,8 @@ import {
 } from "@/services/magento/cart/cartSession";
 import { findCartItemUidBySku, computeCartTotalQuantity } from "@/services/magento/cart/cart.mapper";
 import { readStoredCartLines, writeStoredCartLines } from "@/features/cart/utils/cartProduct.utils";
+import { cartPageContent } from "@/features/cart/data/cartPageContent";
+import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 import type {
   AddItemResult,
   AddToBagPayload,
@@ -145,6 +147,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   >([]);
   const [isHydrating, setIsHydrating] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isRemovedToastOpen, setIsRemovedToastOpen] = useState(false);
+  const removedToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lineMetadataRef = useRef(lineMetadata);
   const initRef = useRef(false);
   const shippingEstimateRequestRef = useRef(0);
@@ -155,6 +159,31 @@ export function CartProvider({ children }: { children: ReactNode }) {
       writeCartLineMetadata(lineMetadata);
     }
   }, [isHydrating, lineMetadata]);
+
+  const dismissRemovedFromCartToast = useCallback(() => {
+    if (removedToastTimeoutRef.current) {
+      clearTimeout(removedToastTimeoutRef.current);
+      removedToastTimeoutRef.current = null;
+    }
+    setIsRemovedToastOpen(false);
+  }, []);
+
+  const showRemovedFromCartToast = useCallback(() => {
+    dismissRemovedFromCartToast();
+    setIsRemovedToastOpen(true);
+    removedToastTimeoutRef.current = setTimeout(() => {
+      setIsRemovedToastOpen(false);
+      removedToastTimeoutRef.current = null;
+    }, appStatusToastDurationMs);
+  }, [dismissRemovedFromCartToast]);
+
+  useEffect(() => {
+    return () => {
+      if (removedToastTimeoutRef.current) {
+        clearTimeout(removedToastTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const refreshShippingEstimate = useCallback(async (state: GuestCartState | null) => {
     const requestId = ++shippingEstimateRequestRef.current;
@@ -404,11 +433,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
             },
           ],
         });
+        showRemovedFromCartToast();
       }
     } finally {
       setIsUpdating(false);
     }
-  }, [applyCartState, cartState?.items]);
+  }, [applyCartState, cartState?.items, showRemovedFromCartToast]);
 
   const updateQuantity = useCallback(
     async (lineItemId: string, quantity: number) => {
@@ -768,7 +798,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
     ],
   );
 
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return (
+    <CartContext.Provider value={value}>
+      {children}
+      <AppStatusToast
+        open={isRemovedToastOpen}
+        message={cartPageContent.removedFromCartMessage}
+      />
+    </CartContext.Provider>
+  );
 }
 
 export function useCart() {
