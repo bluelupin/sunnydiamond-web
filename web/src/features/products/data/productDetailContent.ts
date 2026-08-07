@@ -69,6 +69,11 @@ export function getProductDetailPricing(product: Product): ProductDetailPricing 
   return pricing;
 }
 
+/** Canonical product amount — matches Price Breakup popup Total. */
+export function getProductDisplayPrice(product: Product): number {
+  return getProductDetailPricing(product).price;
+}
+
 export function getProductDetailContent(product: Product): ProductDetailContent {
   const metalShort = product.metal.includes("18K") ? "18K Metal" : product.metal;
   const attributes = product.detailAttributes ?? ["IF Grade", metalShort, `${product.carat}`];

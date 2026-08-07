@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import type { StaticImageData } from "next/image";
 import { Info } from "lucide-react";
 import Link from "next/link";
-import { useToast } from "@/shared/hooks/use-toast";
+import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 import { appointmentFieldClassName, appointmentLabelClassName } from "@/shared/constants/appointmentForm";
 import { resolveEngravingFonts, clampEngravingText, type EngravingSelection } from "@/features/products/constants/engraving";
 import {
@@ -38,10 +38,39 @@ const MetalEngravingPanel = ({
   initialValue,
   onSave,
 }: MetalEngravingPanelProps) => {
-  const { toast } = useToast();
   const availableFonts = useMemo(() => resolveEngravingFonts(fonts), [fonts]);
   const [text, setText] = useState("");
   const [font, setFont] = useState<string>(availableFonts[0]);
+  const [statusToastMessage, setStatusToastMessage] = useState<string | null>(null);
+  const statusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const dismissStatusToast = useCallback(() => {
+    if (statusToastTimeoutRef.current) {
+      clearTimeout(statusToastTimeoutRef.current);
+      statusToastTimeoutRef.current = null;
+    }
+    setStatusToastMessage(null);
+  }, []);
+
+  const showStatusToast = useCallback(
+    (message: string) => {
+      dismissStatusToast();
+      setStatusToastMessage(message);
+      statusToastTimeoutRef.current = setTimeout(() => {
+        setStatusToastMessage(null);
+        statusToastTimeoutRef.current = null;
+      }, appStatusToastDurationMs);
+    },
+    [dismissStatusToast],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (statusToastTimeoutRef.current) {
+        clearTimeout(statusToastTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -62,17 +91,13 @@ const MetalEngravingPanel = ({
     const trimmedText = clampEngravingText(text.trim(), maxCharacters);
     const value = trimmedText ? { text: trimmedText, font } : null;
     onSave(value);
-    toast({
-      title: value ? "Engraving saved" : "Engraving removed",
-      description: value
-        ? "Your engraving preferences have been added to this product."
-        : "No engraving will be applied to this product.",
-    });
+    showStatusToast(value ? "Engraving saved" : "Engraving removed");
     onClose();
   };
 
   return (
-    <ProductDetailSidePanelShell
+    <>
+      <ProductDetailSidePanelShell
       open={open}
       onClose={onClose}
       overlayAriaLabel="Close engraving panel"
@@ -190,6 +215,8 @@ const MetalEngravingPanel = ({
         </PanelFooter>
       </div>
     </ProductDetailSidePanelShell>
+      <AppStatusToast open={Boolean(statusToastMessage)} message={statusToastMessage ?? ""} />
+    </>
   );
 };
 

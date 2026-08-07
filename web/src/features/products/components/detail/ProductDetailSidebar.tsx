@@ -15,7 +15,11 @@ import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatP
 import type { Product } from "@/features/products/data/products";
 import type { ProductDetailContent, ProductDetailPricing } from "@/features/products/types/productDetail";
 import type { AddToBagPayload } from "@/features/cart/types/cart.types";
-import type { EngravingSelection } from "@/features/products/constants/engraving";
+import {
+  buildEngravingCartLineOptions,
+  isProductEngravingEnabled,
+  type EngravingSelection,
+} from "@/features/products/constants/engraving";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import PlusIcon from "@/assets/Icons/PlusIcon";
 import WishlistIcon from "@/assets/Icons/WishlistIcon";
@@ -49,6 +53,8 @@ type ProductDetailSidebarProps = {
   sizeGuide?: NormalizedSizeGuide | null;
   onAddToBag: (payload: AddToBagPayload) => void;
   initialRingSize?: string;
+  initialEngravingSelection?: EngravingSelection | null;
+  initialIsGift?: boolean;
   addToBagLabel?: string;
   children?: (sections: {
     purchase: ReactNode;
@@ -67,6 +73,8 @@ const ProductDetailSidebar = ({
   sizeGuide = null,
   onAddToBag,
   initialRingSize,
+  initialEngravingSelection = null,
+  initialIsGift = false,
   addToBagLabel = "Add to Bag",
   children,
 }: ProductDetailSidebarProps) => {
@@ -90,19 +98,28 @@ const ProductDetailSidebar = ({
   const { isWishlisted, toggleWishlist } = useWishlist();
   const wishlisted = isWishlisted(product.id);
   const engravingConfig = product.engraving;
+  const engravingEnabled = isProductEngravingEnabled(engravingConfig);
   const sizeLabels = getRingSizeLabels(product, sizeGuide);
   const showSizeSelector = sizeLabels.length > 0;
   const metalColorSelectable = isMetalColorSelectable(product);
   const showMetalColor = content.metalColors.length > 0;
 
   useEffect(() => {
-    setEngravingSelection(null);
+    setEngravingSelection(initialEngravingSelection);
     setRingSize(initialRingSize ?? "");
+    setIsGift(initialIsGift);
     setRingSizeError(null);
     if (!onSelectedMetalChange) {
       setSelectedMetalInternal(content.metalColors[0]?.id ?? "");
     }
-  }, [product, content.metalColors, onSelectedMetalChange, initialRingSize]);
+  }, [
+    product,
+    content.metalColors,
+    onSelectedMetalChange,
+    initialRingSize,
+    initialEngravingSelection,
+    initialIsGift,
+  ]);
 
   const activeMetal = content.metalColors.find((color) => color.id === selectedMetal);
   const configurableOptionUids = getConfigurableOptionUidsForMetal(product, selectedMetal);
@@ -197,7 +214,7 @@ const ProductDetailSidebar = ({
               </div>
             ) : null}
 
-            {engravingConfig?.enabled ? (
+            {engravingEnabled && engravingConfig ? (
               <button
                 type="button"
                 onClick={() => setIsEngravingOpen(true)}
@@ -237,13 +254,13 @@ const ProductDetailSidebar = ({
                 }
 
                 onAddToBag({
-                  product,
+                  product: displayProduct,
                   options: {
                     metal: activeMetal?.label,
                     ringSize: ringSize || undefined,
-                    engraving: engravingSelection?.text,
-                    engravingFont: engravingSelection?.font,
-                    engravingMaxCharacters: engravingConfig?.maxCharacters,
+                    ...(engravingEnabled && engravingConfig
+                      ? buildEngravingCartLineOptions(engravingConfig, engravingSelection)
+                      : {}),
                     isGift,
                   },
                   ...(configurableOptionUids.length > 0
@@ -463,9 +480,9 @@ const ProductDetailSidebar = ({
 
   const panels = (
     <>
-      {engravingConfig?.enabled && isEngravingOpen ? (
+      {engravingEnabled && engravingConfig ? (
         <MetalEngravingPanel
-          open
+          open={isEngravingOpen}
           onClose={() => setIsEngravingOpen(false)}
           previewImage={engravingConfig.previewImage}
           fonts={engravingConfig.fonts}

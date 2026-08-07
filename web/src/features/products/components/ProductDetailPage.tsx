@@ -21,6 +21,9 @@ import {
   getMetalColorOptions,
 } from "@/features/products/utils/metalColorOptions.utils";
 import { applySelectedMetalVariant } from "@/features/products/utils/productVariant.utils";
+import {
+  resolveCartLineEngravingSelection,
+} from "@/features/products/constants/engraving";
 
 type ProductDetailPageProps = {
   product: Product;
@@ -30,8 +33,9 @@ type ProductDetailPageProps = {
 const ProductDetailPage = ({ product, sizeGuide = null }: ProductDetailPageProps) => {
   const searchParams = useSearchParams();
   const editLineId = searchParams?.get("editLine")?.trim() ?? "";
-  const { items, replaceLineItem } = useCart();
+  const { items, replaceLineItem, getLineItemMetadata } = useCart();
   const editingLineItem = editLineId ? items.find((item) => item.id === editLineId) : undefined;
+  const editingLineMetadata = editLineId ? getLineItemMetadata(editLineId) : undefined;
   const { addToBagAndOpenDrawer } = useAddToBagWithDrawer();
 
   const content = useMemo(() => getProductDetailContent(product), [product]);
@@ -48,6 +52,11 @@ const ProductDetailPage = ({ product, sizeGuide = null }: ProductDetailPageProps
     [product, selectedMetal],
   );
   const pricing = getProductDetailPricing(displayProduct);
+
+  const initialEngravingSelection = useMemo(
+    () => resolveCartLineEngravingSelection(product, editingLineItem, editingLineMetadata),
+    [product, editingLineItem, editingLineMetadata],
+  );
 
   const handleAddToCart = async (payload: AddToBagPayload) => {
     if (editingLineItem) {
@@ -74,6 +83,8 @@ const ProductDetailPage = ({ product, sizeGuide = null }: ProductDetailPageProps
     sizeGuide,
     onAddToBag: handleAddToCart,
     initialRingSize: editingLineItem?.options.ringSize,
+    initialEngravingSelection,
+    initialIsGift: Boolean(editingLineItem?.options.isGift || editingLineItem?.gifting),
     addToBagLabel: editingLineItem ? "Update Bag" : "Add to Bag",
   };
 

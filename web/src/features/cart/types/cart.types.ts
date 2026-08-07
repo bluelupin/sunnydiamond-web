@@ -7,6 +7,8 @@ export type CartLineOptions = {
   engraving?: string;
   engravingFont?: string;
   engravingMaxCharacters?: number;
+  /** Keeps cart engraving UI visible even when text is cleared. */
+  engravingSupported?: boolean;
   isGift?: boolean;
 };
 
@@ -28,6 +30,8 @@ export type CartLineItem = {
   quantity: number;
   options: CartLineOptions;
   gifting?: CartGiftingOptions;
+  /** Catalog final price for UI — matches PDP Price Breakup Total when set. */
+  displayPrice?: number;
 };
 
 export type AddToBagPayload = {

@@ -18,6 +18,10 @@ import type {
 } from "./magentoCart.types";
 import type { CartLineMetadata, StoredCartLineMetadata } from "./cartSession";
 import { mapMagentoCartCustomizableOptionsToLineOptions } from "./cartLineCustomOptions.mapper";
+import {
+  DEFAULT_ENGRAVING_MAX_CHARACTERS,
+  isCartLineEngravingCapable,
+} from "@/features/products/constants/engraving";
 
 function mapCartItemProduct(item: MagentoCartItem): Product | null {
   const product = item.product;
@@ -312,6 +316,33 @@ export function mapMagentoCartItems(
       ...configurableOptions,
     };
 
+    const engravingEnabledForLine = isCartLineEngravingCapable({
+      options: metadata.options,
+      productCustomOptions: metadata.productCustomOptions,
+    });
+
+    if (engravingEnabledForLine) {
+      mergedOptions.engravingSupported = true;
+
+      if ("engraving" in metadata.options) {
+        mergedOptions.engraving = metadata.options.engraving?.trim() || undefined;
+      }
+
+      if ("engravingFont" in metadata.options) {
+        mergedOptions.engravingFont = metadata.options.engravingFont?.trim() || undefined;
+      }
+
+      if (mergedOptions.engravingMaxCharacters == null) {
+        mergedOptions.engravingMaxCharacters =
+          metadata.options.engravingMaxCharacters ?? DEFAULT_ENGRAVING_MAX_CHARACTERS;
+      }
+    } else {
+      delete mergedOptions.engraving;
+      delete mergedOptions.engravingFont;
+      delete mergedOptions.engravingMaxCharacters;
+      delete mergedOptions.engravingSupported;
+    }
+
     // Magento is the source of truth once a gift is saved there; localStorage
     // metadata covers marks that have not been synced yet.
     const serverGifting = mapServerGifting(cart, item);
@@ -325,6 +356,9 @@ export function mapMagentoCartItems(
       quantity,
       options: mergedOptions,
       gifting: serverGifting ?? metadata.gifting,
+      ...(metadata.displayPrice != null && Number.isFinite(metadata.displayPrice)
+        ? { displayPrice: metadata.displayPrice }
+        : {}),
     });
   }
 

@@ -28,10 +28,10 @@ function formatLineMetadataComment(items: CartLineItem[]): string {
     const parts: string[] = [];
     const { options } = item;
 
-    if (options.engraving?.trim()) {
+    if (options.engraving?.trim() && options.engravingSupported) {
       parts.push(`Engraving: ${options.engraving.trim()}`);
     }
-    if (options.engravingFont?.trim()) {
+    if (options.engravingFont?.trim() && options.engravingSupported) {
       parts.push(`Font: ${options.engravingFont.trim()}`);
     }
     if (options.ringSize?.trim()) {

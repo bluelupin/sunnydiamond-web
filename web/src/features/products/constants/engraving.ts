@@ -1,3 +1,7 @@
+import type { CartLineOptions } from "@/features/cart/types/cart.types";
+import type { ProductCustomOptions } from "@/features/products/types/productCustomOptions";
+import type { Product } from "@/features/products/data/products";
+
 export const DEFAULT_ENGRAVING_FONTS = ["Gill Sans", "Larken"] as const;
 
 export const DEFAULT_ENGRAVING_MAX_CHARACTERS = 30;
@@ -42,4 +46,96 @@ export function resolveEngravingMaxCharacters(
 
 export function clampEngravingText(text: string, maxCharacters: number): string {
   return text.slice(0, maxCharacters);
+}
+
+export function isProductEngravingEnabled(
+  engraving?: ProductEngravingConfig | null,
+): boolean {
+  return engraving?.enabled === true;
+}
+
+export function isCartLineEngravingEnabled(
+  options: Pick<CartLineOptions, "engravingSupported">,
+): boolean {
+  return options.engravingSupported === true;
+}
+
+export type CartLineEngravingContext = {
+  options: Pick<CartLineOptions, "engravingSupported">;
+  productCustomOptions?: ProductCustomOptions | null;
+};
+
+/** Whether a cart line should expose engraving UI and persist engraving state. */
+export function isCartLineEngravingCapable(
+  context: CartLineEngravingContext,
+): boolean {
+  if (context.options.engravingSupported !== true) {
+    return false;
+  }
+
+  const catalogOptions = context.productCustomOptions;
+  if (catalogOptions && !catalogOptions.engravingText) {
+    return false;
+  }
+
+  return true;
+}
+
+export function mergeCartLineOptions(
+  lineItemOptions?: CartLineOptions,
+  metadataOptions?: CartLineOptions,
+): CartLineOptions {
+  return {
+    ...(metadataOptions ?? {}),
+    ...(lineItemOptions ?? {}),
+  };
+}
+
+export function resolveCartLineEngravingSelection(
+  product: Pick<Product, "engraving">,
+  lineItem?: { options: CartLineOptions },
+  metadata?: {
+    options?: CartLineOptions;
+    productCustomOptions?: ProductCustomOptions | null;
+  },
+): EngravingSelection | null {
+  if (!isProductEngravingEnabled(product.engraving)) {
+    return null;
+  }
+
+  const mergedOptions = mergeCartLineOptions(lineItem?.options, metadata?.options);
+  const engravingContext: CartLineEngravingContext = {
+    options: mergedOptions,
+    productCustomOptions: metadata?.productCustomOptions,
+  };
+
+  if (!isCartLineEngravingCapable(engravingContext)) {
+    return null;
+  }
+
+  const text = mergedOptions.engraving?.trim();
+  if (!text) {
+    return null;
+  }
+
+  return {
+    text,
+    font: mergedOptions.engravingFont?.trim() || DEFAULT_ENGRAVING_FONTS[0],
+  };
+}
+
+/** Cart line options to persist when adding an engraving-capable product to the bag. */
+export function buildEngravingCartLineOptions(
+  engraving: ProductEngravingConfig,
+  selection: EngravingSelection | null | undefined,
+): Pick<
+  CartLineOptions,
+  "engraving" | "engravingFont" | "engravingMaxCharacters" | "engravingSupported"
+> {
+  return {
+    engraving: selection?.text?.trim() || undefined,
+    engravingFont: selection?.font?.trim() || undefined,
+    engravingMaxCharacters: engraving.maxCharacters,
+    engravingSupported: true,
+  };
 }

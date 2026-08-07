@@ -156,3 +156,10 @@ export const formatCartLineMeta = (item: CartLineItem) => {
   if (item.options.metal) parts.push(item.options.metal);
   return parts;
 };
+
+/** Product amount for cart line UI — aligns with PDP Price Breakup Total when available. */
+export const getCartLineDisplayPrice = (item: CartLineItem): number =>
+  item.displayPrice ?? item.product.price;
+
+export const getCartLineDisplayTotal = (item: CartLineItem): number =>
+  getCartLineDisplayPrice(item) * item.quantity;

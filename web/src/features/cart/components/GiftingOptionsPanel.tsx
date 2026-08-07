@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Check, X } from "lucide-react";
@@ -221,7 +221,14 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
   const router = useRouter();
   const { items, applyGiftingSelection } = useCart();
   const { markGiftingOptionsExplored } = useCartUI();
-  const giftItems = items.filter((item) => item.gifting || item.options.isGift);
+  const giftItems = useMemo(
+    () => items.filter((item) => item.gifting || item.options.isGift),
+    [items],
+  );
+  const giftItemIdsKey = useMemo(
+    () => giftItems.map((item) => item.id).sort().join("|"),
+    [giftItems],
+  );
   const [wrapMode, setWrapMode] = useState<"single" | "separate">(() =>
     items.some((item) => item.gifting?.wrapMode === "separate") ? "separate" : "single",
   );
@@ -242,11 +249,15 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
   });
 
   useEffect(() => {
+    const giftIdSet = new Set(giftItemIdsKey ? giftItemIdsKey.split("|") : []);
     setSelectedItemIds((previous) => {
-      const validIds = giftItems.filter((item) => previous.has(item.id)).map((item) => item.id);
+      const validIds = [...previous].filter((id) => giftIdSet.has(id));
+      if (validIds.length === previous.size) {
+        return previous;
+      }
       return new Set(validIds);
     });
-  }, [giftItems]);
+  }, [giftItemIdsKey]);
 
   const isSeparate = wrapMode === "separate";
 

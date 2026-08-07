@@ -5,7 +5,7 @@ import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
 import { useCart } from "../context/CartContext";
 import { useCartUI } from "../context/CartUIContext";
-import { formatCartLineMeta, formatCartPrice } from "../utils/formatCartLine";
+import { formatCartLineMeta, formatCartPrice, getCartLineDisplayPrice } from "../utils/formatCartLine";
 import {
   Drawer,
   DrawerContent,
@@ -86,7 +86,7 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
                   </p>
                   <CartMetaRow parts={meta} />
                   <p className="font-gill text-base leading-110 text-darkblack">
-                    {formatCartPrice(addedItem.product.price)}
+                    {formatCartPrice(getCartLineDisplayPrice(addedItem))}
                   </p>
                 </div>
               </div>

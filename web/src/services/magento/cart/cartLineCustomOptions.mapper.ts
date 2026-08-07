@@ -20,16 +20,19 @@ export function buildMagentoCartItemOptionPayload(
   const selectedOptions: string[] = [];
   const customizableOptions: Array<{ uid: string; value_string: string }> = [];
 
-  const engraving = lineOptions.engraving?.trim();
-  if (engraving && productCustomOptions.engravingText?.optionUid) {
-    enteredOptions.push({
-      uid: productCustomOptions.engravingText.optionUid,
-      value: engraving,
-    });
-    customizableOptions.push({
-      uid: productCustomOptions.engravingText.optionUid,
-      value_string: engraving,
-    });
+  const engravingOptionUid = productCustomOptions.engravingText?.optionUid;
+  if (engravingOptionUid && lineOptions.engravingSupported) {
+    const engraving = lineOptions.engraving?.trim() ?? "";
+    if (engraving || "engraving" in lineOptions) {
+      enteredOptions.push({
+        uid: engravingOptionUid,
+        value: engraving,
+      });
+      customizableOptions.push({
+        uid: engravingOptionUid,
+        value_string: engraving,
+      });
+    }
   }
 
   const engravingFont = lineOptions.engravingFont?.trim();

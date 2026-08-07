@@ -2,12 +2,16 @@
 
 import { useEffect, useState, type KeyboardEvent } from "react";
 import Link from "next/link";
-import { clampEngravingText } from "@/features/products/constants/engraving";
+import {
+  clampEngravingText,
+  DEFAULT_ENGRAVING_MAX_CHARACTERS,
+  isCartLineEngravingEnabled,
+} from "@/features/products/constants/engraving";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import { useCart } from "../context/CartContext";
 import type { CartLineItem, CartLineOptions } from "../types/cart.types";
-import { formatCartLineMeta, formatCartPrice } from "../utils/formatCartLine";
+import { formatCartLineMeta, formatCartPrice, getCartLineDisplayTotal } from "../utils/formatCartLine";
 import { useCartUI } from "../context/CartUIContext";
 import { useCartCheckout } from "../hooks/useCartCheckout";
 import {
@@ -40,8 +44,8 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
   const wishlisted = isWishlisted(product.id);
   const isGift =
     options.isGift === false ? false : Boolean(options.isGift || item.gifting);
-  const supportsEngraving = Boolean(options.engravingMaxCharacters);
-  const engravingMaxCharacters = options.engravingMaxCharacters;
+  const supportsEngraving = isCartLineEngravingEnabled(options);
+  const engravingMaxCharacters = options.engravingMaxCharacters ?? DEFAULT_ENGRAVING_MAX_CHARACTERS;
   const hasEngraving = Boolean(options.engraving?.trim());
   const giftNote = item.gifting?.note?.trim();
   const [isEditingEngraving, setIsEditingEngraving] = useState(false);
@@ -66,7 +70,7 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
     }
 
     const trimmed = clampDraft(engravingDraft.trim());
-    onUpdateOptions(item.id, { engraving: trimmed || undefined });
+    onUpdateOptions(item.id, { engraving: trimmed });
     setIsEditingEngraving(false);
   };
 
@@ -148,7 +152,7 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
               ) : null}
 
               <p className="font-gill text-sm leading-110 text-darkblack lg:text-base">
-                {formatCartPrice(product.price * quantity)}
+                {formatCartPrice(getCartLineDisplayTotal(item))}
               </p>
             </div>
 
@@ -163,9 +167,9 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
                   {wishlisted ? "IN WISHLIST" : "MOVE TO WISHLIST"}
                 </CartTextLink>
               )}
-              <CartTextLink onClick={handleBuyNow} className={isBuyingNow ? "opacity-50" : ""}>
+              {/* <CartTextLink onClick={handleBuyNow} className={isBuyingNow ? "opacity-50" : ""}>
                 BUY NOW
-              </CartTextLink>
+              </CartTextLink> */}
             </div>
           </div>
         </div>

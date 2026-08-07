@@ -177,7 +177,7 @@ const WishlistAddToBagPanel = ({
     const configurableOptionUids = getConfigurableOptionUidsForMetal(detailProduct, selectedMetal);
 
     onAddToBag({
-      product: detailProduct,
+      product: displayProduct ?? detailProduct,
       options: {
         metal: activeMetal?.label,
         ringSize: ringSize || undefined,

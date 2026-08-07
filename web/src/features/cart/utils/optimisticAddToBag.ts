@@ -1,4 +1,5 @@
 import type { Product } from "@/features/products/data/products";
+import { getProductDisplayPrice } from "@/features/products/data/productDetailContent";
 import type { AddItemResult, AddToBagPayload } from "../types/cart.types";
 
 const isAddToBagPayload = (payload: AddToBagPayload | Product): payload is AddToBagPayload =>
@@ -12,6 +13,7 @@ export function buildOptimisticAddItemResult(
   const product = isAddToBagPayload(payload) ? payload.product : payload;
   const options = isAddToBagPayload(payload) ? (payload.options ?? {}) : {};
   const lineItemId = `optimistic-${product.id}`;
+  const displayPrice = getProductDisplayPrice(product);
 
   return {
     lineItemId,
@@ -20,6 +22,7 @@ export function buildOptimisticAddItemResult(
       product,
       quantity: 1,
       options,
+      displayPrice,
     },
     totalItemsAfterAdd: currentTotalItems + 1,
   };

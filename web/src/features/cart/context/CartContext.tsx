@@ -38,11 +38,18 @@ import {
   getGuestCartId,
   readCartLineMetadata,
   writeCartLineMetadata,
+  type CartLineMetadata,
   type StoredCartLineMetadata,
 } from "@/services/magento/cart/cartSession";
 import { findCartItemUidBySku, computeCartTotalQuantity } from "@/services/magento/cart/cart.mapper";
 import { readStoredCartLines, writeStoredCartLines } from "@/features/cart/utils/cartProduct.utils";
 import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
+import {
+  DEFAULT_ENGRAVING_FONTS,
+  DEFAULT_ENGRAVING_MAX_CHARACTERS,
+  isCartLineEngravingCapable,
+  mergeCartLineOptions,
+} from "@/features/products/constants/engraving";
 import type {
   AddItemResult,
   AddToBagPayload,
@@ -52,6 +59,7 @@ import type {
   CartLineOptions,
 } from "../types/cart.types";
 import type { ProductCustomOptions } from "@/features/products/types/productCustomOptions";
+import { getProductDisplayPrice } from "@/features/products/data/productDetailContent";
 
 /** @deprecated Use CartLineItem from cart.types */
 export type CartItem = CartLineItem;
@@ -83,6 +91,7 @@ interface CartContextType {
   removeLocalGiftCard: () => void;
   replaceLineItem: (lineItemId: string, payload: AddToBagPayload) => Promise<AddItemResult>;
   buyNow: (lineItemId: string) => Promise<void>;
+  getLineItemMetadata: (lineItemId: string) => CartLineMetadata | undefined;
   shippingMethods: MagentoShippingMethodOption[];
   estimatedShippingMethods: MagentoShippingMethodOption[];
   selectedShippingMethod: MagentoSelectedShippingMethod | null;
@@ -152,6 +161,7 @@ function upsertLineMetadata(
   lineUid: string,
   options: CartLineOptions,
   productCustomOptions?: ProductCustomOptions,
+  displayPrice?: number,
 ): StoredCartLineMetadata {
   const previous = current[lineUid] ?? { options: {} };
 
@@ -161,6 +171,7 @@ function upsertLineMetadata(
       ...previous,
       options: { ...previous.options, ...options },
       productCustomOptions: productCustomOptions ?? previous.productCustomOptions,
+      ...(displayPrice != null && Number.isFinite(displayPrice) ? { displayPrice } : {}),
     },
   };
 }
@@ -375,6 +386,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       throw new Error("Cannot add product without SKU to bag");
     }
 
+    const displayPrice = getProductDisplayPrice(product);
+
     setIsUpdating(true);
 
     try {
@@ -397,6 +410,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           lineUid,
           options,
           productCustomOptions,
+          displayPrice,
         );
         lineMetadataRef.current = nextMetadata;
         writeCartLineMetadata(nextMetadata);
@@ -411,6 +425,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
               ? {
                 ...item,
                 options: { ...item.options, ...options },
+                displayPrice,
               }
               : item,
           ),
@@ -554,14 +569,36 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const updateLineItemOptions = useCallback(
     (lineItemId: string, options: Partial<CartLineOptions>) => {
-      const previous = lineMetadataRef.current[lineItemId] ?? { options: {} };
+      const cartLine = cartState?.items.find((item) => item.id === lineItemId);
+      const storedMeta = lineMetadataRef.current[lineItemId];
+      const baseOptions = mergeCartLineOptions(cartLine?.options, storedMeta?.options);
+      const nextOptions: CartLineOptions = { ...baseOptions, ...options };
       const clearingGift = options.isGift === false;
       const togglingGift = typeof options.isGift === "boolean";
-      const nextOptions = { ...previous.options, ...options };
+      const engravingContext = {
+        options: baseOptions,
+        productCustomOptions: storedMeta?.productCustomOptions,
+      };
 
-      const nextLine: (typeof previous) = {
-        ...previous,
+      if ("engraving" in options && isCartLineEngravingCapable(engravingContext)) {
+        const trimmedEngraving = options.engraving?.trim() ?? "";
+        nextOptions.engraving = trimmedEngraving;
+        nextOptions.engravingSupported = true;
+
+        if (nextOptions.engravingMaxCharacters == null) {
+          nextOptions.engravingMaxCharacters = DEFAULT_ENGRAVING_MAX_CHARACTERS;
+        }
+
+        if (trimmedEngraving && !nextOptions.engravingFont?.trim()) {
+          nextOptions.engravingFont =
+            baseOptions.engravingFont?.trim() || DEFAULT_ENGRAVING_FONTS[0];
+        }
+      }
+
+      const nextLine: CartLineMetadata = {
+        ...(storedMeta ?? { options: {} }),
         options: nextOptions,
+        productCustomOptions: storedMeta?.productCustomOptions,
       };
 
       if (clearingGift) {
@@ -593,14 +630,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
             if (clearingGift) {
               return {
                 ...item,
-                options: { ...item.options, ...options, isGift: false },
+                options: { ...nextOptions, isGift: false },
                 gifting: undefined,
               };
             }
 
             return {
               ...item,
-              options: { ...item.options, ...options },
+              options: nextOptions,
             };
           }),
         };
@@ -739,6 +776,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [applyCartState],
   );
 
+  const getLineItemMetadata = useCallback((lineItemId: string) => {
+    return lineMetadataRef.current[lineItemId];
+  }, []);
+
   const clearCart = useCallback(() => {
     clearGuestCartId();
     writeCartLineMetadata({});
@@ -856,6 +897,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeLocalGiftCard,
       replaceLineItem,
       buyNow,
+      getLineItemMetadata,
       shippingMethods,
       estimatedShippingMethods,
       selectedShippingMethod,
@@ -882,6 +924,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeLocalGiftCard,
       replaceLineItem,
       buyNow,
+      getLineItemMetadata,
       shippingMethods,
       subtotal,
       taxes,

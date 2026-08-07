@@ -8,6 +8,8 @@ export type CartLineMetadata = {
   options: CartLineOptions;
   gifting?: CartGiftingOptions;
   productCustomOptions?: ProductCustomOptions;
+  /** Catalog final price shown on PDP / Price Breakup — persisted for cart line display. */
+  displayPrice?: number;
 };
 
 export type StoredCartLineMetadata = Record<string, CartLineMetadata>;
