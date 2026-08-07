@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { cn } from "@/shared/utils/cn";
@@ -15,8 +15,12 @@ import {
 } from "../data/content";
 import type { StaticImageData } from "next/image";
 
-const DESKTOP_HOVER_DELAY_MS = 120;
-const DESKTOP_HOVER_TRANSITION_MS = 320;
+const DESKTOP_HOVER_TRANSITION_CLASS =
+  "motion-safe:transition-[opacity,transform] motion-safe:duration-700 motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)]";
+const DESKTOP_HOVER_COLOR_TRANSITION_CLASS =
+  "motion-safe:transition-colors motion-safe:duration-700 motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)]";
+const DESKTOP_HOVER_IMAGE_TRANSITION_CLASS =
+  "motion-safe:transition-transform motion-safe:duration-[900ms] motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform";
 
 export interface JewelleryProductCardProps {
   title: string;
@@ -43,7 +47,8 @@ const ProductCopy = ({ title, price, href, className }: ProductCopyProps) => (
     className={cn(
       "flex w-full flex-col items-center text-center leading-110",
       "gap-[8px] px-[5px] text-sm md:gap-[12px] md:px-[12px] md:text-xl",
-      "text-darkblack transition-colors duration-300 ease-out",
+      "text-darkblack",
+      DESKTOP_HOVER_COLOR_TRANSITION_CLASS,
       className,
     )}
   >
@@ -111,7 +116,6 @@ const JewelleryProductCard = ({
   const isMobileLifestyle = activeSlide === 1 && hasModalImage;
   const [isDesktopHovered, setIsDesktopHovered] = useState(false);
   const [optimisticWishlisted, setOptimisticWishlisted] = useState<boolean | null>(null);
-  const hoverTimeoutRef = useRef<number | null>(null);
   const showDesktopHover = hasHoverImage && isDesktopHovered;
   const displayedWishlisted = optimisticWishlisted ?? isWishlisted;
 
@@ -119,30 +123,12 @@ const JewelleryProductCard = ({
     setOptimisticWishlisted(null);
   }, [isWishlisted]);
 
-  useEffect(() => {
-    return () => {
-      if (hoverTimeoutRef.current !== null) {
-        window.clearTimeout(hoverTimeoutRef.current);
-      }
-    };
-  }, []);
-
   const handleDesktopHoverStart = () => {
     if (!window.matchMedia("(min-width: 768px)").matches) return;
-    if (hoverTimeoutRef.current !== null) {
-      window.clearTimeout(hoverTimeoutRef.current);
-    }
-    hoverTimeoutRef.current = window.setTimeout(() => {
-      setIsDesktopHovered(true);
-      hoverTimeoutRef.current = null;
-    }, DESKTOP_HOVER_DELAY_MS);
+    setIsDesktopHovered(true);
   };
 
   const handleDesktopHoverEnd = () => {
-    if (hoverTimeoutRef.current !== null) {
-      window.clearTimeout(hoverTimeoutRef.current);
-      hoverTimeoutRef.current = null;
-    }
     setIsDesktopHovered(false);
   };
 
@@ -178,10 +164,10 @@ const JewelleryProductCard = ({
         <div
           className={cn(
             "pointer-events-none absolute inset-0 z-0 hidden overflow-hidden md:block",
-            "transition-opacity ease-out",
+            "transform-gpu [backface-visibility:hidden]",
+            DESKTOP_HOVER_TRANSITION_CLASS,
             showDesktopHover ? "opacity-100" : "opacity-0",
           )}
-          style={{ transitionDuration: `${DESKTOP_HOVER_TRANSITION_MS}ms` }}
           aria-hidden
         >
           <OptimizedImage
@@ -189,12 +175,20 @@ const JewelleryProductCard = ({
             alt=""
             width={PLP_CARD_IMAGE_WIDTH}
             height={PLP_CARD_IMAGE_WIDTH}
-            className="size-full object-cover"
+            className={cn(
+              "size-full object-cover",
+              DESKTOP_HOVER_IMAGE_TRANSITION_CLASS,
+              showDesktopHover ? "scale-100" : "scale-[1.06]",
+            )}
             sizes="33vw"
             quality={PLP_CARD_IMAGE_QUALITY}
           />
           <div
-            className="absolute inset-0 bg-gradient-to-t from-[rgba(0,0,0,0.4)] from-[14%] to-transparent to-[50%]"
+            className={cn(
+              "absolute inset-0 bg-gradient-to-t from-[rgba(0,0,0,0.4)] from-[14%] to-transparent to-[50%]",
+              DESKTOP_HOVER_TRANSITION_CLASS,
+              showDesktopHover ? "opacity-100" : "opacity-0",
+            )}
             aria-hidden
           />
         </div>
@@ -222,17 +216,19 @@ const JewelleryProductCard = ({
       {/* Default product view — image only; copy lives in a shared bottom slot */}
       <div
         className={cn(
-          "col-start-1 row-start-1 z-10 flex w-full flex-col items-center max-md:transition-opacity max-md:duration-500",
-          "px-[16px] pt-[24px] md:px-[24px] md:pt-10 md:transition-opacity md:ease-out",
-          showDesktopHover && "md:pointer-events-none md:opacity-0",
+          "col-start-1 row-start-1 z-10 flex w-full flex-col items-center",
+          "transform-gpu [backface-visibility:hidden]",
+          "max-md:transition-opacity max-md:duration-700 max-md:ease-[cubic-bezier(0.16,1,0.3,1)]",
+          "px-[16px] pt-[24px] md:px-[24px] md:pt-10",
+          DESKTOP_HOVER_TRANSITION_CLASS,
+          showDesktopHover && "md:pointer-events-none md:scale-[0.98] md:opacity-0",
           isMobileLifestyle ? "pointer-events-none opacity-0 md:opacity-100" : "opacity-100",
         )}
-        style={{
-          transitionDuration: `${DESKTOP_HOVER_TRANSITION_MS}ms`,
-          ...(isDragging && hasModalImage
-            ? { transform: `translateX(${dragOffset * 0.15}px)` }
-            : {}),
-        }}
+        style={
+          isDragging && hasModalImage
+            ? { transform: `translate3d(${dragOffset * 0.15}px, 0, 0)` }
+            : undefined
+        }
       >
         <ProductImage src={primaryImage} alt={title} priority={priorityImage} />
       </div>
@@ -283,7 +279,8 @@ const JewelleryProductCard = ({
         >
           <svg width="32" height="32" viewBox="0 0 32 32" fill={displayedWishlisted ? "currentColor" : "none"} xmlns="http://www.w3.org/2000/svg"
             className={cn(
-              "transition-colors ease-out md:w-8 md:h-8 w-6 h-6",
+              "md:w-8 md:h-8 w-6 h-6",
+              DESKTOP_HOVER_COLOR_TRANSITION_CLASS,
               displayedWishlisted
                 ? "fill-[#AB863B] text-linkGold"
                 : isMobileLifestyle
@@ -291,10 +288,9 @@ const JewelleryProductCard = ({
                   : showDesktopHover
                     ? "fill-none text-white"
                     : "fill-none text-darkblack",
-            )}
-            style={{ transitionDuration: `${DESKTOP_HOVER_TRANSITION_MS}ms` }}>
+            )}>
             <path d="M15.6676 27.3342L26.8376 16.0042C28.0098 14.8319 28.6684 13.242 28.6684 11.5842C28.6684 9.92638 28.0098 8.33645 26.8376 7.1642C25.6653 5.99194 24.0754 5.33337 22.4176 5.33337C20.7598 5.33337 19.1698 5.99194 17.9976 7.1642L15.6676 9.3342L13.3376 7.1642C12.1653 5.99194 10.5754 5.33337 8.91757 5.33337C7.25975 5.33337 5.66983 5.99194 4.49757 7.1642C3.32532 8.33645 2.66675 9.92638 2.66675 11.5842C2.66675 13.242 3.32532 14.8319 4.49757 16.0042L15.6676 27.3342Z"
-              stroke={displayedWishlisted ? "currentColor" : "#0A0A0A"} strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
+              stroke="currentColor" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
       </div>

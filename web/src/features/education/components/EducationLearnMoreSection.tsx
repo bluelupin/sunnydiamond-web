@@ -21,6 +21,9 @@ import {
 const tabsSpec = educationLearnMoreSpec.tabs;
 const careSpec = educationLearnMoreSpec.careGrid;
 
+const accordionTransitionClassName =
+  "transition-[grid-template-rows,opacity] duration-500 ease-in-out";
+
 function mapSlidesToCarouselItems(
   tab: NormalizedEducationLearnTab,
   slides: NonNullable<NormalizedEducationLearnTab["slides"]>,
@@ -190,7 +193,10 @@ const LearnAnatomyDetailPanel = ({ detail }: { detail: NormalizedEducationLearnA
             {detail.sections.map((section) => {
               const isOpen = openSectionId === section.id;
               return (
-                <div key={section.id} className="bg-gray300 lg:max-w-[667px] md:max-w-[530px] max-w-full">
+                <div
+                  key={section.id}
+                  className="overflow-hidden bg-gray300 lg:max-w-[667px] md:max-w-[530px] max-w-full"
+                >
                   <button
                     type="button"
                     aria-expanded={isOpen}
@@ -209,34 +215,42 @@ const LearnAnatomyDetailPanel = ({ detail }: { detail: NormalizedEducationLearnA
                   </button>
 
                   <div
-                    id={`anatomy-section-${section.id}`}
-                    role="region"
-                    aria-labelledby={`anatomy-trigger-${section.id}`}
-                    hidden={!isOpen}
-                    className={cn(!isOpen && "hidden")}
+                    className={cn(
+                      "grid min-h-0",
+                      accordionTransitionClassName,
+                      isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+                    )}
+                    aria-hidden={!isOpen}
                   >
-                    <ul className="flex flex-col gap-5 px-6 pb-6 md:gap-4">
-                      {section.traits.map((trait) => (
-                        <li key={trait.id} className="flex items-start gap-[10px]">
-                          <div className="flex items-center gap-[10px]">
-                            <Image
-                              src={educationPageImages.anatomySparkle}
-                              alt=""
-                              width={16}
-                              height={16}
-                              aria-hidden
-                              className="size-4 shrink-0"
-                            />
-                            <p className="font-gill text-sm font-normal leading-130 text-darkblack md:text-xl md:leading-110">
-                              {trait.term}:
+                    <div
+                      id={`anatomy-section-${section.id}`}
+                      role="region"
+                      aria-labelledby={`anatomy-trigger-${section.id}`}
+                      className="overflow-hidden"
+                    >
+                      <ul className="flex flex-col gap-5 px-6 pb-6 md:gap-4">
+                        {section.traits.map((trait) => (
+                          <li key={trait.id} className="flex items-start gap-[10px]">
+                            <div className="flex items-center gap-[10px]">
+                              <Image
+                                src={educationPageImages.anatomySparkle}
+                                alt=""
+                                width={16}
+                                height={16}
+                                aria-hidden
+                                className="size-4 shrink-0"
+                              />
+                              <p className="font-gill text-sm font-normal leading-130 text-darkblack md:text-xl md:leading-110">
+                                {trait.term}:
+                              </p>
+                            </div>
+                            <p className="font-gill text-sm font-light leading-130 text-neutral500 md:text-xl md:leading-110">
+                              {trait.definition}
                             </p>
-                          </div>
-                          <p className="font-gill text-sm font-light leading-130 text-neutral500 md:text-xl md:leading-110">
-                            {trait.definition}
-                          </p>
-                        </li>
-                      ))}
-                    </ul>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 </div>
               );

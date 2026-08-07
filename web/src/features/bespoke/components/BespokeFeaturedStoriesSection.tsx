@@ -1,9 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Slider, { type Settings } from "react-slick";
+import CarouselChevronLeft from "@/assets/Icons/CarouselChevronLeft";
+import CarouselChevronRight from "@/assets/Icons/CarouselChevronRight";
 import { cn } from "@/shared/utils/cn";
 import "slick-carousel/slick/slick.css";
 import {
@@ -60,8 +62,16 @@ type FeaturedGallerySlideProps = {
   slide: FeaturedSlide;
 };
 
+const featuredGallerySlideTransitionClassName =
+  "transition-[height] duration-500 ease-in-out motion-reduce:transition-none";
+
 const FeaturedGallerySlide = ({ slide }: FeaturedGallerySlideProps) => (
-  <div className="featured-gallery-slide relative h-[300px] overflow-hidden bg-white">
+  <div
+    className={cn(
+      "featured-gallery-slide relative h-[300px] overflow-hidden bg-white",
+      featuredGallerySlideTransitionClassName,
+    )}
+  >
     <Image
       src={slide.src}
       alt={slide.alt}
@@ -85,38 +95,41 @@ const FeaturedGalleryBackground = ({
   backgroundImage,
 }: FeaturedGalleryBackgroundProps) => {
   const safeIndex = slides.length > 0 ? normalizeIndex(activeIndex, slides.length) : 0;
+  const activeSlide = slides[safeIndex];
   const fallbackBgSrc = backgroundImage?.desktopUrl || backgroundImage?.mobileUrl || null;
-  const srAlt = slides[safeIndex]?.alt || backgroundImage?.alt || "";
+  const srAlt = activeSlide?.alt || backgroundImage?.alt || "";
 
   return (
     <div className="pointer-events-none absolute inset-x-0 top-0 h-[540px] md:h-[559px]">
-      {slides.length > 0 ? (
-        slides.map((slide, index) => (
+      <div className="relative size-full">
+        {slides.length > 0 ? (
+          slides.map((slide, index) => (
+            <Image
+              key={slide.documentId ?? `${slide.src}-${index}`}
+              src={slide.src}
+              alt=""
+              aria-hidden
+              fill
+              sizes="100vw"
+              priority={index === safeIndex}
+              className={cn(
+                "object-cover object-top transition-opacity duration-500 ease-in-out",
+                index === safeIndex ? "z-[1] opacity-100" : "z-0 opacity-0",
+              )}
+            />
+          ))
+        ) : fallbackBgSrc ? (
           <Image
-            key={`${slide.src}-${index}`}
-            src={slide.src}
+            src={fallbackBgSrc}
             alt=""
             aria-hidden
             fill
+            priority
             sizes="100vw"
-            priority={index === safeIndex}
-            className={cn(
-              "object-cover object-top transition-opacity duration-500",
-              index === safeIndex ? "opacity-100" : "opacity-0",
-            )}
+            className="object-cover object-top"
           />
-        ))
-      ) : fallbackBgSrc ? (
-        <Image
-          src={fallbackBgSrc}
-          alt=""
-          aria-hidden
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-top"
-        />
-      ) : null}
+        ) : null}
+      </div>
       <div
         aria-hidden
         className="absolute inset-0"
@@ -142,6 +155,10 @@ type FeaturedGallerySliderProps = {
 
 const MOBILE_BREAKPOINT_PX = 768;
 const SLIDER_SPEED_MS = 500;
+const MANUAL_SCROLL_COOLDOWN_MS = 500;
+const AUTOPLAY_RESUME_MS = 2000;
+const HORIZONTAL_WHEEL_THRESHOLD_PX = 24;
+const HORIZONTAL_WHEEL_RESET_MS = 120;
 
 /** react-slick responsive only updates on resize; detect viewport on mount. */
 const useIsMobileViewport = (breakpoint: number) => {
@@ -158,12 +175,48 @@ const useIsMobileViewport = (breakpoint: number) => {
   return isMobile;
 };
 
+type CarouselNavButtonProps = {
+  direction: "prev" | "next";
+  onClick: () => void;
+  compact?: boolean;
+  disabled?: boolean;
+};
+
+const CarouselNavButton = ({ direction, onClick, compact, disabled }: CarouselNavButtonProps) => {
+  const Icon = direction === "prev" ? CarouselChevronLeft : CarouselChevronRight;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={direction === "prev" ? "Previous featured story" : "Next featured story"}
+      className={cn(
+        "pointer-events-auto flex items-center justify-center rounded-full border border-white/40 bg-black/20 text-white backdrop-blur-sm transition hover:bg-black/40 disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
+        compact ? "size-10" : "size-12",
+      )}
+    >
+      <Icon
+        className={cn(compact ? "h-[14px] w-[15px]" : "h-[17px] w-[18px] invert")}
+        strokeWidth={1.25}
+      />
+    </button>
+  );
+};
+
 const FeaturedGallerySlider = ({
   slides,
   currentIndex,
   onIndexChange,
 }: FeaturedGallerySliderProps) => {
   const isMobile = useIsMobileViewport(MOBILE_BREAKPOINT_PX);
+  const sliderRef = useRef<Slider | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const manualScrollCooldownRef = useRef(false);
+  const autoplayResumeTimeoutRef = useRef<number | null>(null);
+  const isHoveringRef = useRef(false);
+  const horizontalWheelDeltaRef = useRef(0);
+  const horizontalWheelResetTimeoutRef = useRef<number | null>(null);
   const { renderSlides, sourceCount } = useMemo(() => buildRenderSlides(slides), [slides]);
   const slidesKey = useMemo(
     () => renderSlides.map((slide) => slide.renderKey ?? slide.src).join("|"),
@@ -181,6 +234,13 @@ const FeaturedGallerySlider = ({
     [sourceCount],
   );
 
+  const handleBeforeChange = useCallback(
+    (_current: number, next: number) => {
+      onIndexChange(mapToSourceIndex(next));
+    },
+    [mapToSourceIndex, onIndexChange],
+  );
+
   const handleAfterChange = useCallback(
     (index: number) => {
       onIndexChange(mapToSourceIndex(index));
@@ -190,18 +250,181 @@ const FeaturedGallerySlider = ({
 
   const initialSlide = useMemo(
     () => normalizeIndex(currentIndex, renderSlides.length),
-    [slidesKey, renderSlides.length],
+    [currentIndex, slidesKey, renderSlides.length],
+  );
+
+  const resumeAutoplay = useCallback(() => {
+    if (autoplayResumeTimeoutRef.current !== null) {
+      window.clearTimeout(autoplayResumeTimeoutRef.current);
+    }
+
+    autoplayResumeTimeoutRef.current = window.setTimeout(() => {
+      sliderRef.current?.slickPlay();
+      autoplayResumeTimeoutRef.current = null;
+    }, AUTOPLAY_RESUME_MS);
+  }, []);
+
+  const goPrev = useCallback(() => {
+    if (!canSlide || manualScrollCooldownRef.current) return;
+
+    manualScrollCooldownRef.current = true;
+    sliderRef.current?.slickPause();
+    sliderRef.current?.slickPrev();
+    resumeAutoplay();
+    window.setTimeout(() => {
+      manualScrollCooldownRef.current = false;
+    }, MANUAL_SCROLL_COOLDOWN_MS);
+  }, [canSlide, resumeAutoplay]);
+
+  const goNext = useCallback(() => {
+    if (!canSlide || manualScrollCooldownRef.current) return;
+
+    manualScrollCooldownRef.current = true;
+    sliderRef.current?.slickPause();
+    sliderRef.current?.slickNext();
+    resumeAutoplay();
+    window.setTimeout(() => {
+      manualScrollCooldownRef.current = false;
+    }, MANUAL_SCROLL_COOLDOWN_MS);
+  }, [canSlide, resumeAutoplay]);
+
+  useEffect(() => {
+    const node = containerRef.current;
+    if (!node || !canSlide) return;
+
+    const normalizeWheelDelta = (event: WheelEvent) => {
+      let deltaX = event.deltaX;
+      let deltaY = event.deltaY;
+
+      if (event.deltaMode === WheelEvent.DOM_DELTA_LINE) {
+        deltaX *= 16;
+        deltaY *= 16;
+      } else if (event.deltaMode === WheelEvent.DOM_DELTA_PAGE) {
+        deltaX *= window.innerWidth;
+        deltaY *= window.innerHeight;
+      }
+
+      if (Math.abs(deltaX) >= 1) return deltaX;
+      if (event.shiftKey && Math.abs(deltaY) >= 1) return deltaY;
+      return 0;
+    };
+
+    const resetHorizontalWheelDelta = () => {
+      horizontalWheelDeltaRef.current = 0;
+      if (horizontalWheelResetTimeoutRef.current !== null) {
+        window.clearTimeout(horizontalWheelResetTimeoutRef.current);
+        horizontalWheelResetTimeoutRef.current = null;
+      }
+    };
+
+    const scheduleHorizontalWheelReset = () => {
+      if (horizontalWheelResetTimeoutRef.current !== null) {
+        window.clearTimeout(horizontalWheelResetTimeoutRef.current);
+      }
+
+      horizontalWheelResetTimeoutRef.current = window.setTimeout(() => {
+        horizontalWheelDeltaRef.current = 0;
+        horizontalWheelResetTimeoutRef.current = null;
+      }, HORIZONTAL_WHEEL_RESET_MS);
+    };
+
+    const onPointerEnter = () => {
+      isHoveringRef.current = true;
+    };
+
+    const onPointerLeave = () => {
+      isHoveringRef.current = false;
+      resetHorizontalWheelDelta();
+    };
+
+    const onWheel: EventListener = (event) => {
+      if (!(event instanceof WheelEvent)) return;
+      if (!isHoveringRef.current || manualScrollCooldownRef.current) return;
+
+      const delta = normalizeWheelDelta(event);
+      if (delta === 0) return;
+
+      horizontalWheelDeltaRef.current += delta;
+      scheduleHorizontalWheelReset();
+
+      if (Math.abs(horizontalWheelDeltaRef.current) < HORIZONTAL_WHEEL_THRESHOLD_PX) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (horizontalWheelDeltaRef.current > 0) goNext();
+      else goPrev();
+
+      resetHorizontalWheelDelta();
+    };
+
+    node.addEventListener("pointerenter", onPointerEnter);
+    node.addEventListener("pointerleave", onPointerLeave);
+    node.addEventListener("wheel", onWheel, { passive: false });
+
+    let slickList: Element | null = null;
+    const attachSlickListListener = () => {
+      if (slickList) {
+        slickList.removeEventListener("wheel", onWheel);
+      }
+      slickList = node.querySelector(".slick-list");
+      slickList?.addEventListener("wheel", onWheel, { passive: false });
+    };
+
+    attachSlickListListener();
+    const slickAttachFrame = window.requestAnimationFrame(attachSlickListListener);
+
+    return () => {
+      window.cancelAnimationFrame(slickAttachFrame);
+      node.removeEventListener("pointerenter", onPointerEnter);
+      node.removeEventListener("pointerleave", onPointerLeave);
+      node.removeEventListener("wheel", onWheel);
+      slickList?.removeEventListener("wheel", onWheel);
+      resetHorizontalWheelDelta();
+      isHoveringRef.current = false;
+    };
+  }, [canSlide, goNext, goPrev, isMobile, slidesKey]);
+
+  useEffect(
+    () => () => {
+      if (autoplayResumeTimeoutRef.current !== null) {
+        window.clearTimeout(autoplayResumeTimeoutRef.current);
+      }
+      if (horizontalWheelResetTimeoutRef.current !== null) {
+        window.clearTimeout(horizontalWheelResetTimeoutRef.current);
+      }
+    },
+    [],
+  );
+
+  const onKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (!canSlide) return;
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        goPrev();
+      }
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        goNext();
+      }
+    },
+    [canSlide, goNext, goPrev],
   );
 
   const sliderSettings = useMemo<Settings>(
     () => ({
       className: cn(
-        "center w-full",
+        "center w-full min-h-[360px]",
         /* Figma galleryGap: 16px — 8px padding each side of slide wrapper */
         "[&_.slick-slide>div]:px-2",
-        "[&_.slick-track]:flex [&_.slick-track]:items-center",
+        "[&_.slick-list]:min-h-[360px] [&_.slick-list]:transition-[height,min-height] [&_.slick-list]:duration-500 [&_.slick-list]:ease-in-out",
+        "[&_.slick-track]:flex [&_.slick-track]:min-h-[360px] [&_.slick-track]:items-center",
         "[&_.slick-slide.slick-center_.featured-gallery-slide]:h-[360px]",
         "[&_.slick-slide:not(.slick-center)_.featured-gallery-slide]:h-[300px]",
+        "[&_.featured-gallery-slide]:transition-[height] [&_.featured-gallery-slide]:duration-500 [&_.featured-gallery-slide]:ease-in-out",
       ),
       centerMode: canSlide,
       infinite: showInfinite,
@@ -219,9 +442,10 @@ const FeaturedGallerySlider = ({
       autoplaySpeed: 2000,
       pauseOnHover: true,
       pauseOnFocus: true,
+      beforeChange: handleBeforeChange,
       afterChange: handleAfterChange,
     }),
-    [activeSlidesToShow, canSlide, handleAfterChange, initialSlide, showInfinite],
+    [activeSlidesToShow, canSlide, handleAfterChange, handleBeforeChange, initialSlide, showInfinite],
   );
 
   if (slides.length === 0) {
@@ -234,18 +458,39 @@ const FeaturedGallerySlider = ({
 
   return (
     <div
-      className="relative w-full"
+      ref={containerRef}
+      tabIndex={canSlide ? 0 : undefined}
+      onKeyDown={onKeyDown}
+      className="relative h-[360px] w-full overscroll-x-contain touch-pan-y outline-none transition-[min-height] duration-500 ease-in-out motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
       role="region"
       aria-roledescription="carousel"
       aria-label="Featured story gallery"
     >
-      <Slider key={`${slidesKey}-${isMobile ? "mobile" : "desktop"}`} {...sliderSettings}>
+      {canSlide && !isMobile ? (
+        <div className="pointer-events-none absolute inset-y-0 -left-16 -right-16 z-20 flex items-center justify-between">
+          <CarouselNavButton direction="prev" onClick={goPrev} />
+          <CarouselNavButton direction="next" onClick={goNext} />
+        </div>
+      ) : null}
+
+      <Slider
+        key={`${slidesKey}-${isMobile ? "mobile" : "desktop"}`}
+        ref={sliderRef}
+        {...sliderSettings}
+      >
         {renderSlides.map((slide, index) => (
           <div key={slide.renderKey ?? `${slide.src}-${index}`}>
             <FeaturedGallerySlide slide={slide} />
           </div>
         ))}
       </Slider>
+
+      {canSlide && isMobile ? (
+        <div className="mt-4 flex items-center justify-center gap-6">
+          <CarouselNavButton direction="prev" onClick={goPrev} compact />
+          <CarouselNavButton direction="next" onClick={goNext} compact />
+        </div>
+      ) : null}
     </div>
   );
 };
@@ -372,6 +617,10 @@ const BespokeFeaturedStoriesSection = ({
 }) => {
   const slides = featuredStories?.slides ?? [];
   const defaultSlideIndex = featuredStories?.defaultSlideIndex ?? 0;
+  const slidesIdentity = useMemo(
+    () => slides.map((slide) => slide.documentId ?? slide.src).join("|"),
+    [slides],
+  );
   const [currentIndex, setCurrentIndex] = useState(defaultSlideIndex);
   const [modalOpen, setModalOpen] = useState(false);
   const [pastCreationsOpen, setPastCreationsOpen] = useState(false);
@@ -379,6 +628,10 @@ const BespokeFeaturedStoriesSection = ({
     null,
   );
   const [modalSlideOverride, setModalSlideOverride] = useState<FeaturedStoryModalSlide | null>(null);
+
+  useEffect(() => {
+    setCurrentIndex(defaultSlideIndex);
+  }, [defaultSlideIndex, slidesIdentity]);
 
   const handleCenterOpen = useCallback(() => {
     if (slides.length === 0) return;

@@ -67,16 +67,16 @@ const AboutFacesSection = ({ title, description, members }: AboutFacesSectionPro
                   "opacity-100 transition-opacity duration-500 lg:opacity-0 lg:group-hover:opacity-100",
                 )}
               />
-              <figcaption className="absolute bottom-0 left-0 z-10 w-full text-left opacity-100 transition-all duration-500 lg:translate-y-2 lg:px-10 md:px-9 px-8 lg:py-20 md:py-16 py-12 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100">
+              <figcaption className="absolute bottom-0 left-0 z-10 w-full text-left opacity-100 transition-all duration-500 lg:translate-y-2 lg:px-10 md:px-9 px-8 md:py-16 py-12 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100">
                 <div className="flex flex-col items-start gap-2 leading-110">
-                  <p className="font-larken text-xl font-light text-white">
+                  <p className="font-larken xl:text-3xl lg:text-2xl text-xl font-light text-white">
                     {member.name}
                   </p>
-                  {member.role ? (
-                    <p className="font-gill text-base font-light text-aboutInactive">
+                  {member.role && (
+                    <p className="font-gill xl:text-lg text-base  font-light text-aboutInactive">
                       {member.role}
                     </p>
-                  ) : null}
+                  )}
                 </div>
               </figcaption>
             </figure>
