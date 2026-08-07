@@ -358,16 +358,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
       const hydratedState = lineUid
         ? {
-            ...nextState,
-            items: nextState.items.map((item) =>
-              item.id === lineUid
-                ? {
-                    ...item,
-                    options: { ...item.options, ...options },
-                  }
-                : item,
-            ),
-          }
+          ...nextState,
+          items: nextState.items.map((item) =>
+            item.id === lineUid
+              ? {
+                ...item,
+                options: { ...item.options, ...options },
+              }
+              : item,
+          ),
+        }
         : nextState;
 
       applyCartState(hydratedState);
@@ -600,11 +600,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
           item.lineItemId,
           item.isGift
             ? {
-                wrapMode: selection.mode,
-                note:
-                  (selection.mode === "separate" ? item.note : selection.groupedNote)?.trim() ||
-                  undefined,
-              }
+              wrapMode: selection.mode,
+              note:
+                (selection.mode === "separate" ? item.note : selection.groupedNote)?.trim() ||
+                undefined,
+            }
             : undefined,
         ]),
       );
@@ -632,10 +632,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
           items: current.items.map((item) =>
             giftingByLine.has(item.id)
               ? {
-                  ...item,
-                  options: { ...item.options, isGift: Boolean(giftingByLine.get(item.id)) },
-                  gifting: giftingByLine.get(item.id),
-                }
+                ...item,
+                options: { ...item.options, isGift: Boolean(giftingByLine.get(item.id)) },
+                gifting: giftingByLine.get(item.id),
+              }
               : item,
           ),
         };
@@ -803,7 +803,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       {children}
       <AppStatusToast
         open={isRemovedToastOpen}
-        message={cartPageContent.removedFromCartMessage}
+        message="Item removed from cart"
       />
     </CartContext.Provider>
   );
