@@ -1,13 +1,10 @@
 "use client";
 
 import { useState, type RefObject } from "react";
-import type { StaticImageData } from "next/image";
-import Image from "next/image";
 import { ChevronRight } from "lucide-react";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import type { Product } from "@/features/products/data/products";
 import { cn } from "@/shared/utils/cn";
-import { getImageSrc } from "@/shared/utils/image";
 import {
   PRODUCT_DETAIL_GALLERY_HERO_IMAGE,
   PRODUCT_DETAIL_GALLERY_LIFESTYLE_IMAGE,
@@ -23,81 +20,11 @@ type ProductDetailGalleryProps = {
 
 const GALLERY_SLIDE_COUNT = 5;
 
-const galleryFrameClass =
-  "flex w-full overflow-hidden bg-gray300 px-6 py-12 lg:h-520 md:px-6 md:py-10 lg:h-680 lg:py-12";
+const heroGalleryFrameClass =
+  "relative flex w-full overflow-hidden bg-gray300 md:h-520 lg:h-680";
 
-const thumbFrameClass =
-  "flex min-h-280 flex-1 overflow-hidden bg-gray300 px-4 py-8 sm:min-h-360 md:h-380 md:px-5 md:py-10 lg:h-465 lg:px-6 lg:py-12";
-
-const nestedImageCropStyle = {
-  width: "140.04%",
-  height: "109.16%",
-  marginLeft: "-17.72%",
-} as const;
-
-type CroppedGalleryImageProps = {
-  src: string | StaticImageData;
-  alt: string;
-  sizes: string;
-  maxWidthClass: string;
-  minHeightClass?: string;
-  cropStyle?: typeof nestedImageCropStyle;
-  priority?: boolean;
-  containerClassName?: string;
-  centered?: boolean;
-};
-
-const CroppedGalleryImage = ({
-  src,
-  alt,
-  sizes,
-  maxWidthClass,
-  minHeightClass = "min-h-52",
-  cropStyle = nestedImageCropStyle,
-  priority,
-  containerClassName,
-  centered = false,
-}: CroppedGalleryImageProps) => {
-  const imageSrc = getImageSrc(src);
-  if (!imageSrc) {
-    return null;
-  }
-
-  return (
-    <div
-      className={cn(
-        "mx-auto flex h-full w-full items-center justify-center overflow-hidden",
-        maxWidthClass,
-        minHeightClass,
-        containerClassName,
-      )}
-    >
-      {centered ? (
-        <div className="relative size-full">
-          <Image
-            src={imageSrc}
-            alt={alt}
-            fill
-            priority={priority}
-            sizes={sizes}
-            className="object-cover object-center"
-          />
-        </div>
-      ) : (
-        <Image
-          src={imageSrc}
-          alt={alt}
-          width={800}
-          height={880}
-          priority={priority}
-          sizes={sizes}
-          className="max-w-none object-cover object-center"
-          style={cropStyle}
-        />
-      )}
-    </div>
-  );
-};
+const thumbGalleryFrameClass =
+  "relative flex w-full overflow-hidden bg-gray300 md:h-380 lg:h-465 sm:w-1/2";
 
 const ProductDetailGallery = ({ product, topGalleryRef }: ProductDetailGalleryProps) => {
   const [activeSlide, setActiveSlide] = useState(0);
@@ -163,35 +90,31 @@ const ProductDetailGallery = ({ product, topGalleryRef }: ProductDetailGalleryPr
 
       <div className="hidden min-h-full flex-1 flex-col gap-3 md:flex">
         <div ref={topGalleryRef} className="flex shrink-0 flex-col gap-3">
-          <div className={cn(galleryFrameClass, "items-center justify-center")}>
-            <CroppedGalleryImage
+          <div className={heroGalleryFrameClass}>
+            <OptimizedImage
               src={heroImage ?? product.image}
               alt={`${product.name} — primary view`}
-              sizes="504px"
-              maxWidthClass="w-full max-w-504"
               priority
-              centered
-              containerClassName="aspect-square h-auto shrink-0"
+              sizes="(max-width: 1024px) 100vw, 783px"
+              className="size-full object-cover object-center"
             />
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <div className="flex flex-1 items-center justify-center overflow-hidden bg-gray300 px-4 py-8 md:px-5 md:py-10 lg:h-465 md:h-380 lg:px-6 lg:py-12 sm:w-1/2">
-              <CroppedGalleryImage
+            <div className={cn(thumbGalleryFrameClass, "sm:flex-1")}>
+              <OptimizedImage
                 src={thumbOne ?? product.image}
                 alt={`${product.name} — detail view`}
-                sizes="312px"
-                maxWidthClass="w-full max-w-311"
-                centered
-                containerClassName="aspect-square h-auto shrink-0"
+                sizes="(max-width: 1024px) 50vw, 385px"
+                className="size-full object-cover object-center"
               />
             </div>
-            <div className="flex w-full overflow-hidden md:shrink-0 lg:h-465 md:h-380 sm:w-1/2">
+            <div className={cn(thumbGalleryFrameClass, "md:shrink-0")}>
               <OptimizedImage
                 src={thumbTwo ?? product.image}
                 alt={`${product.name} — alternate view`}
                 sizes="(max-width: 1024px) 50vw, 385px"
-                className="object-cover"
+                className="size-full object-cover object-center"
               />
             </div>
           </div>
