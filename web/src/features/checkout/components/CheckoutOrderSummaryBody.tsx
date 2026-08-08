@@ -60,6 +60,7 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
     localGiftCardDiscount,
     selectedShippingMethod,
     shippingMethods,
+    estimatedShippingMethods,
   } = useCart();
   const [offersOpen, setOffersOpen] = useState(false);
 
@@ -67,6 +68,7 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
     shipping,
     selectedShippingMethod,
     shippingMethods,
+    estimatedShippingMethods,
   );
   const displayTotal = resolveCheckoutDisplayTotal(
     subtotal,

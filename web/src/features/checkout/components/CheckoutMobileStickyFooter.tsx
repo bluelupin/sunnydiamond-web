@@ -31,11 +31,12 @@ const CheckoutMobileStickyFooter = forwardRef<HTMLDivElement, CheckoutMobileStic
     },
     ref,
   ) {
-  const { subtotal, taxes, totalPrice, shipping, offerDiscount, giftCardDiscount, localGiftCardDiscount, selectedShippingMethod, shippingMethods } = useCart();
+  const { subtotal, taxes, totalPrice, shipping, offerDiscount, giftCardDiscount, localGiftCardDiscount, selectedShippingMethod, shippingMethods, estimatedShippingMethods } = useCart();
   const shippingDisplay = getCheckoutShippingDisplay(
     shipping,
     selectedShippingMethod,
     shippingMethods,
+    estimatedShippingMethods,
   );
   const displayTotal = resolveCheckoutDisplayTotal(
     subtotal,

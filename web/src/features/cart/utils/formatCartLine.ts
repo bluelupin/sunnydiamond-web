@@ -104,11 +104,12 @@ export type CheckoutShippingDisplay = {
   isConfirmed: boolean;
 };
 
-/** Checkout must only show Magento rates after the delivery address is on the cart. */
+/** Checkout shows Magento rates from the selected method, cart shipping methods, or cart estimate. */
 export const getCheckoutShippingDisplay = (
   shipping: number,
   selectedShippingMethod: MagentoSelectedShippingMethod | null,
   shippingMethods: MagentoShippingMethodOption[] = [],
+  estimatedShippingMethods: MagentoShippingMethodOption[] = [],
 ): CheckoutShippingDisplay => {
   if (selectedShippingMethod) {
     const amount =
@@ -125,6 +126,20 @@ export const getCheckoutShippingDisplay = (
       label: amount === 0 ? "Free" : formatCartPrice(amount),
       isConfirmed: true,
     };
+  }
+
+  const methods =
+    shippingMethods.length > 0 ? shippingMethods : estimatedShippingMethods;
+
+  if (methods.length > 0) {
+    const defaultMethod = pickDefaultShippingMethod(methods);
+    if (defaultMethod) {
+      return {
+        amount: defaultMethod.amount,
+        label: defaultMethod.amount === 0 ? "Free" : formatCartPrice(defaultMethod.amount),
+        isConfirmed: shippingMethods.length > 0,
+      };
+    }
   }
 
   return {
@@ -145,9 +160,15 @@ export const resolveCheckoutDisplayTotal = (
 ) => {
   const totalDiscount = offerDiscount + giftCardDiscount + localGiftCardDiscount;
 
-  return shippingDisplay.isConfirmed
-    ? grandTotal - localGiftCardDiscount
-    : subtotal - totalDiscount + taxes;
+  if (shippingDisplay.isConfirmed) {
+    return grandTotal - localGiftCardDiscount;
+  }
+
+  if (shippingDisplay.amount != null) {
+    return subtotal - totalDiscount + taxes + shippingDisplay.amount;
+  }
+
+  return subtotal - totalDiscount + taxes;
 };
 
 export const formatCartLineMeta = (item: CartLineItem) => {
