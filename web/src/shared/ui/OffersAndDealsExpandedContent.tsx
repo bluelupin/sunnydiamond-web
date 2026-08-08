@@ -86,7 +86,7 @@ const PromoField = ({
 );
 
 const OfferCard = ({ offer }: { offer: MockOffer }) => (
-  <div className="flex min-h-[100px] w-[214px] min-w-[214px] flex-1 items-start gap-3 border border-gray300 bg-white px-3 py-4 lg:bg-white">
+  <div className="flex h-[100px] w-[214px] min-w-[214px] shrink-0 items-start gap-3 border border-gray300 bg-white px-3 py-4 lg:bg-white">
     <Image
       src="/icons/kotal-bank-icon.svg"
       alt=""
@@ -95,11 +95,15 @@ const OfferCard = ({ offer }: { offer: MockOffer }) => (
       aria-hidden
       className="h-6 w-7 shrink-0"
     />
-    <div className="flex min-w-0 flex-col gap-4">
-      <p className="line-clamp-2 font-gill text-sm font-light leading-110 text-darkblack">
+    <div className="flex min-w-0 flex-1 flex-col gap-4">
+      <p
+        className="line-clamp-2 min-h-[calc(0.875rem*1.1*2)] font-gill text-sm font-light leading-110 text-darkblack"
+      >
         {offer.headline}
       </p>
-      <p className="font-gill text-sm font-light leading-110 text-darkblack">{offer.categoryLabel}</p>
+      <p className="shrink-0 whitespace-nowrap font-gill text-sm font-light leading-110 text-darkblack">
+        {offer.categoryLabel}
+      </p>
     </div>
   </div>
 );

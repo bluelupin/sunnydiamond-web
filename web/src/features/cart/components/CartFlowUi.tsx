@@ -24,8 +24,19 @@ export const CartDivider = ({
   />
 );
 
-export const CartMetaRow = ({ parts }: { parts: string[] }) => {
+export const CartMetaRow = ({
+  parts,
+  variant = "default",
+}: {
+  parts: string[];
+  variant?: "default" | "checkout";
+}) => {
   if (parts.length === 0) return null;
+
+  const labelClassName =
+    variant === "checkout"
+      ? "font-gill text-sm font-light leading-normal tracking-[0.14px] text-darkblack"
+      : "font-gill text-sm font-light leading-110 text-neutral500";
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -34,7 +45,7 @@ export const CartMetaRow = ({ parts }: { parts: string[] }) => {
           {index > 0 ? (
             <span className="h-4 w-[0.5px] shrink-0 bg-neutral300" aria-hidden />
           ) : null}
-          <span className="font-gill text-sm font-light leading-110 text-neutral500">{part}</span>
+          <span className={labelClassName}>{part}</span>
         </span>
       ))}
     </div>
@@ -42,17 +53,19 @@ export const CartMetaRow = ({ parts }: { parts: string[] }) => {
 };
 
 type CartGiftBadgeProps = {
-  variant?: "cart" | "drawer";
+  variant?: "cart" | "drawer" | "checkout";
   className?: string;
 };
 
 export const CartGiftBadge = ({ variant = "cart", className }: CartGiftBadgeProps) => (
   <span
     className={cn(
-      "inline-flex h-[22px] w-[42px] shrink-0 items-center justify-center font-gill leading-110",
+      "inline-flex shrink-0 items-center justify-center font-gill text-darkblack",
       variant === "cart"
-        ? "bg-[#D9B0CB] text-sm text-darkblack"
-        : "bg-[#D9B0CB] text-xs font-light tracking-[0.01em] text-darkblack",
+        ? "h-[22px] w-[42px] bg-[#D9B0CB] text-sm leading-110"
+        : variant === "checkout"
+          ? "bg-[#D9B0CB] px-3 py-1 text-sm font-normal leading-110"
+          : "bg-[#D9B0CB] text-xs font-light leading-110 tracking-[0.01em]",
       className,
     )}
   >
