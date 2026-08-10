@@ -389,9 +389,16 @@ export const validateOptionalPhone = (value: string, countryCode = "+91"): Field
   return validatePhone(value, countryCode);
 };
 
+export const COD_ORDER_TOTAL_LIMIT = 40_000;
+
+export const isCodAvailableForOrderTotal = (
+  orderTotal: number,
+  limit = COD_ORDER_TOTAL_LIMIT,
+): boolean => orderTotal <= limit;
+
 export const validateCodOrderTotal = (
   orderTotal: number,
-  limit = 40_000,
+  limit = COD_ORDER_TOTAL_LIMIT,
 ): FieldValidation => {
   if (orderTotal > limit) {
     return {

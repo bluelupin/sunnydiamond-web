@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/shared/utils/cn";
 import {
   CheckoutAddressBlock,
   CheckoutCheckbox,
@@ -17,7 +18,7 @@ import { AmexLogo, MastercardLogo, VisaLogo } from "@/shared/ui/PaymentLogos";
 import { INDIAN_STATES } from "@/features/checkout/constants/indianStates";
 import type { CheckoutFormData, CheckoutPaymentData } from "../types/checkout.types";
 import type { CheckoutFormField, CheckoutPaymentField } from "@/shared/utils/formValidation";
-import { isCheckoutEmailContact } from "@/shared/utils/formValidation";
+import { isCheckoutEmailContact, isCodAvailableForOrderTotal } from "@/shared/utils/formValidation";
 
 type CheckoutFormValidationProps = {
   errors: Partial<Record<CheckoutFormField, string | undefined>>;
@@ -296,6 +297,7 @@ export const CheckoutFormStep = ({
 type CheckoutPaymentStepProps = {
   form: CheckoutFormData;
   payment: CheckoutPaymentData;
+  orderTotal: number;
   onPaymentChange: (field: keyof CheckoutPaymentData, value: CheckoutPaymentData["method"]) => void;
   onEditPersonal: () => void;
   onEditDelivery: () => void;
@@ -327,6 +329,7 @@ const PaymentCardLogos = () => (
 export const CheckoutPaymentStep = ({
   form,
   payment,
+  orderTotal,
   onPaymentChange,
   onEditPersonal,
   onEditDelivery,
@@ -357,6 +360,8 @@ export const CheckoutPaymentStep = ({
   const billingName = form.billingSameAsShipping
     ? form.shippingName || form.name
     : form.billingName || form.name;
+
+  const isCodAvailable = isCodAvailableForOrderTotal(orderTotal);
 
   return (
     <div className="flex flex-col lg:gap-[33px] gap-6">
@@ -426,13 +431,21 @@ export const CheckoutPaymentStep = ({
           <div className="flex flex-col gap-2">
             <CheckoutRadioRow
               checked={payment.method === "cod"}
+              disabled={!isCodAvailable}
               onChange={() => onPaymentChange("method", "cod")}
               align="start"
               label={
                 <span className="flex flex-col gap-1">
                   <span>Cash On Delivery</span>
-                  <span className="font-gill text-xs font-light leading-110 text-darkblack">
-                    *for orders up to ₹40,000
+                  <span
+                    className={cn(
+                      "font-gill text-xs font-light leading-110",
+                      isCodAvailable ? "text-darkblack" : "text-neutral500",
+                    )}
+                  >
+                    {isCodAvailable
+                      ? "*for orders up to ₹40,000"
+                      : "Not available for orders above ₹40,000"}
                   </span>
                 </span>
               }

@@ -23,7 +23,7 @@ import {
   useCheckoutPaymentValidation,
 } from "@/features/checkout/hooks/use-checkout-validation";
 import { useCheckoutCustomerPrefill } from "@/features/checkout/hooks/use-checkout-customer-prefill";
-import { sanitizePhoneInput, sanitizePincodeInput, isCheckoutEmailContact } from "@/shared/utils/formValidation";
+import { sanitizePhoneInput, sanitizePincodeInput, isCheckoutEmailContact, isCodAvailableForOrderTotal } from "@/shared/utils/formValidation";
 import {
   createEmptyCheckoutForm,
   createEmptyPaymentForm,
@@ -124,8 +124,18 @@ const CheckoutPage = () => {
     field: keyof CheckoutPaymentData,
     value: CheckoutPaymentData["method"],
   ) => {
+    if (field === "method" && value === "cod" && !isCodAvailableForOrderTotal(totalPrice)) {
+      return;
+    }
+
     setPayment((prev) => ({ ...prev, [field]: value }));
   };
+
+  useEffect(() => {
+    if (payment.method === "cod" && !isCodAvailableForOrderTotal(totalPrice)) {
+      setPayment((prev) => ({ ...prev, method: "card" }));
+    }
+  }, [payment.method, totalPrice]);
 
   const finalizeOrderSuccess = useCallback(
     async (input: {
@@ -639,6 +649,7 @@ const CheckoutPage = () => {
               <CheckoutPaymentStep
                 form={form}
                 payment={payment}
+                orderTotal={totalPrice}
                 onPaymentChange={updatePayment}
                 onEditPersonal={() => setStep("form")}
                 onEditDelivery={() => setStep("form")}
