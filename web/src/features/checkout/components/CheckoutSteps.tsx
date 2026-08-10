@@ -37,6 +37,8 @@ type CheckoutFormStepProps = {
   onChange: (field: keyof CheckoutFormData, value: string | boolean) => void;
   phoneVerified: boolean;
   onVerifyPhone: () => void;
+  /** Guest email blur — checks if the account already exists. */
+  onContactBlur?: () => void;
   validation: CheckoutFormValidationProps;
   isAuthenticated?: boolean;
   hasSavedDeliveryAddress?: boolean;
@@ -188,6 +190,7 @@ export const CheckoutFormStep = ({
   onChange,
   phoneVerified,
   onVerifyPhone,
+  onContactBlur,
   validation,
   isAuthenticated = false,
   hasSavedDeliveryAddress = true,
@@ -229,7 +232,10 @@ export const CheckoutFormStep = ({
           mode="phoneOrEmail"
           value={form.phoneOrEmail}
           onChange={(value) => onChange("phoneOrEmail", value)}
-          onBlur={() => validation.markTouched("phoneOrEmail")}
+          onBlur={() => {
+            validation.markTouched("phoneOrEmail");
+            onContactBlur?.();
+          }}
           verified={phoneVerified}
           onVerify={onVerifyPhone}
           invalid={validation.showError("phoneOrEmail")}

@@ -1,5 +1,7 @@
-import { magentoGraphqlFetch } from "@/services/magento/graphqlClient";
-
+/**
+ * Guest-checkout helper: true when the email can be used as a guest.
+ * Calls the server route so registered emails are detected on Magento 2.4.7+.
+ */
 export async function isCustomerEmailAvailable(email: string): Promise<boolean> {
   const normalizedEmail = email.trim().toLowerCase();
   if (!normalizedEmail) {
@@ -7,19 +9,22 @@ export async function isCustomerEmailAvailable(email: string): Promise<boolean> 
   }
 
   try {
-    const data = await magentoGraphqlFetch<{
-      isEmailAvailable?: { is_email_available?: boolean | null };
-    }>({
-      query: `query IsEmailAvailable($email: String!) {
-        isEmailAvailable(email: $email) {
-          is_email_available
-        }
-      }`,
-      variables: { email: normalizedEmail },
+    const response = await fetch("/api/customer/email-availability", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ email: normalizedEmail }),
       cache: "no-store",
     });
 
-    return Boolean(data.isEmailAvailable?.is_email_available);
+    if (!response.ok) {
+      return true;
+    }
+
+    const data = (await response.json()) as { available?: boolean };
+    return data.available !== false;
   } catch {
     return true;
   }

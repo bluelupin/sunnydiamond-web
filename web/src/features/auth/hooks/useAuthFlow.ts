@@ -31,6 +31,7 @@ const RESEND_SECONDS = 60;
 type UseAuthFlowOptions = {
   active: boolean;
   returnUrl?: string;
+  initialIdentifier?: string;
   onComplete: (returnUrl: string) => void;
   onAbort: () => void;
   surface?: "modal" | "standalone";
@@ -107,6 +108,7 @@ export type AuthFlowContentProps = {
 export function useAuthFlow({
   active,
   returnUrl: returnUrlInput,
+  initialIdentifier = "",
   onAbort,
   surface = "standalone",
 }: UseAuthFlowOptions) {
@@ -163,8 +165,20 @@ export function useAuthFlow({
   useEffect(() => {
     if (!active) {
       resetState();
+      return;
     }
-  }, [active, resetState]);
+
+    const seeded = initialIdentifier.trim();
+    if (!seeded) {
+      return;
+    }
+
+    setIdentifier(seeded);
+    setIdentifierError(undefined);
+    if (isEmailIdentifier(seeded)) {
+      setStep("password");
+    }
+  }, [active, initialIdentifier, resetState]);
 
   useEffect(() => {
     if (!active || step !== "otp") return;

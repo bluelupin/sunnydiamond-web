@@ -10,12 +10,13 @@ import AuthFlowSteps from "./AuthFlowSteps";
 
 const LoginModal = () => {
   const router = useRouter();
-  const { isLoginModalOpen, returnUrl, closeLoginModal } = useLoginModal();
+  const { isLoginModalOpen, returnUrl, initialIdentifier, closeLoginModal } = useLoginModal();
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
 
   const { step, contentProps } = useAuthFlow({
     active: isLoginModalOpen,
     returnUrl,
+    initialIdentifier,
     surface: "modal",
     onComplete: (nextReturnUrl) => {
       closeLoginModal();

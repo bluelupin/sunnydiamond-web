@@ -11,11 +11,14 @@ import { sanitizeReturnUrl } from "../utils/authNavigation";
 
 type OpenLoginModalOptions = {
   returnUrl?: string;
+  /** Prefills sign-in when opened from guest checkout email check. */
+  identifier?: string;
 };
 
 type LoginModalContextType = {
   isLoginModalOpen: boolean;
   returnUrl: string;
+  initialIdentifier: string;
   openLoginModal: (options?: OpenLoginModalOptions) => void;
   closeLoginModal: () => void;
 };
@@ -25,20 +28,23 @@ const LoginModalContext = createContext<LoginModalContextType | undefined>(undef
 export function LoginModalProvider({ children }: { children: ReactNode }) {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [returnUrl, setReturnUrl] = useState("/");
+  const [initialIdentifier, setInitialIdentifier] = useState("");
 
   const openLoginModal = useCallback((options?: OpenLoginModalOptions) => {
     setReturnUrl(sanitizeReturnUrl(options?.returnUrl));
+    setInitialIdentifier(options?.identifier?.trim() ?? "");
     setIsLoginModalOpen(true);
   }, []);
 
   const closeLoginModal = useCallback(() => {
     setIsLoginModalOpen(false);
     setReturnUrl("/");
+    setInitialIdentifier("");
   }, []);
 
   return (
     <LoginModalContext.Provider
-      value={{ isLoginModalOpen, returnUrl, openLoginModal, closeLoginModal }}
+      value={{ isLoginModalOpen, returnUrl, initialIdentifier, openLoginModal, closeLoginModal }}
     >
       {children}
     </LoginModalContext.Provider>

@@ -23,7 +23,7 @@ import {
   useCheckoutPaymentValidation,
 } from "@/features/checkout/hooks/use-checkout-validation";
 import { useCheckoutCustomerPrefill } from "@/features/checkout/hooks/use-checkout-customer-prefill";
-import { sanitizePhoneInput, sanitizePincodeInput, isCheckoutEmailContact, isCodAvailableForOrderTotal } from "@/shared/utils/formValidation";
+import { sanitizePhoneInput, sanitizePincodeInput, isCheckoutEmailContact, isCodAvailableForOrderTotal, validateRequiredEmail } from "@/shared/utils/formValidation";
 import {
   createEmptyCheckoutForm,
   createEmptyPaymentForm,
@@ -55,6 +55,7 @@ import {
   savePendingCheckoutPayment,
 } from "../services/checkoutPendingPayment";
 import { isCustomerEmailAvailable } from "@/services/magento/customer/customerEmailAvailability.service";
+import { useLoginModal } from "@/features/auth/context/LoginModalContext";
 
 const CheckoutPage = () => {
   const {
@@ -68,6 +69,7 @@ const CheckoutPage = () => {
   } = useCart();
   const { refresh: refreshAuth } = useAuth();
   const { toast } = useToast();
+  const { openLoginModal } = useLoginModal();
   const searchParams = useSearchParams();
   const paymentReturnHandledRef = useRef(false);
   const {
@@ -82,6 +84,7 @@ const CheckoutPage = () => {
   const contactPrefillAppliedRef = useRef(false);
   const shippingPrefillAppliedRef = useRef(false);
   const verifiedCheckoutOtpRef = useRef<string | null>(null);
+  const lastCheckedGuestEmailRef = useRef("");
 
   const [step, setStep] = useState<CheckoutStep>("form");
   const [showOtpModal, setShowOtpModal] = useState(false);
@@ -373,6 +376,45 @@ const CheckoutPage = () => {
     toast({ title: "Phone verified", description: "Your phone number has been verified." });
   };
 
+  /**
+   * Guest email only — runs when the contact field blurs.
+   * Registered → toast + login modal (after login, saved details prefill).
+   * New email → continue guest checkout (no modal).
+   */
+  const handleGuestContactBlur = () => {
+    if (isAuthenticated) {
+      return;
+    }
+
+    const value = form.phoneOrEmail.trim();
+    if (!isCheckoutEmailContact(value) || validateRequiredEmail(value).error) {
+      return;
+    }
+
+    const normalized = value.toLowerCase();
+    if (lastCheckedGuestEmailRef.current === normalized) {
+      return;
+    }
+
+    void (async () => {
+      const emailAvailable = await isCustomerEmailAvailable(normalized);
+      lastCheckedGuestEmailRef.current = normalized;
+
+      if (emailAvailable) {
+        return;
+      }
+
+      toast({
+        title: "Email already registered",
+        description: "This email is already registered. Please sign in to continue.",
+      });
+      openLoginModal({
+        returnUrl: "/checkout",
+        identifier: normalized,
+      });
+    })();
+  };
+
   const handleContinueToPayment = () => {
     // Must run before form validation: with no saved address the shipping fields are
     // hidden/empty, so validateSubmit fails silently and never reaches this toast.
@@ -394,12 +436,17 @@ const CheckoutPage = () => {
       }
 
       void (async () => {
+        // Guest email checkout only: registered account → message + login modal.
         if (!isAuthenticated && contactIsEmail) {
           const emailAvailable = await isCustomerEmailAvailable(form.phoneOrEmail);
           if (!emailAvailable) {
             toast({
               title: "Email already registered",
               description: "This email is already registered. Please sign in to continue.",
+            });
+            openLoginModal({
+              returnUrl: "/checkout",
+              identifier: form.phoneOrEmail.trim(),
             });
             return;
           }
@@ -601,6 +648,7 @@ const CheckoutPage = () => {
       if (isCheckoutEmailContact(nextValue)) {
         setPhoneVerified(false);
         verifiedCheckoutOtpRef.current = null;
+        lastCheckedGuestEmailRef.current = "";
         updateForm(field, nextValue);
         return;
       }
@@ -641,6 +689,7 @@ const CheckoutPage = () => {
                 onChange={handleFormChange}
                 phoneVerified={phoneVerified}
                 onVerifyPhone={handleVerifyPhone}
+                onContactBlur={handleGuestContactBlur}
                 validation={formValidation}
                 isAuthenticated={isAuthenticated}
                 hasSavedDeliveryAddress={hasDeliveryAddressAvailable}
