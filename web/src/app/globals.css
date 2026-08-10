@@ -870,3 +870,18 @@
 .section-radial {
   background: radial-gradient(ellipse 120% 60% at center, #ffffff73 0%, #ffffff 100% 35%, rgba(255, 255, 255, 0) 70%, #ffffff 100%);
 }
+
+/* SectionNav — Firefox renders mask + gradient scrim darker than Chromium/Safari */
+@supports (-moz-appearance: none) {
+  .section-nav-scrim {
+    mask-image: linear-gradient(to bottom, transparent 0%, rgb(0 0 0 / 72%) 24%, rgb(0 0 0 / 100%) 100%);
+  }
+
+  .section-nav-scrim-image {
+    opacity: 0.9;
+  }
+
+  .section-nav-scrim-overlay {
+    background: linear-gradient(to bottom, rgb(246 239 227 / 18%) 0%, transparent 32%);
+  }
+}

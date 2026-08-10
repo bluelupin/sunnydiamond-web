@@ -49,7 +49,7 @@ const SectionNav = () => {
         <div
           aria-hidden
           className={cn(
-            "pointer-events-none absolute inset-y-0 left-0 w-[min(720px,18vw)]",
+            "section-nav-scrim pointer-events-none absolute inset-y-0 left-0 w-[200px]",
             "[mask-image:linear-gradient(to_bottom,transparent_0%,black_20%,black_100%)]",
             "[-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,black_20%,black_100%)]",
           )}
@@ -59,9 +59,9 @@ const SectionNav = () => {
             alt=""
             fill
             sizes="(max-width: 1440px) 50vw, 720px"
-            className="object-cover object-left object-bottom drop-shadow-[16px_0_40px_rgba(0,0,0,0.08)] drop-shadow-[0_-12px_32px_rgba(0,0,0,0.05)]"
+            className="section-nav-scrim-image object-cover object-left object-bottom drop-shadow-[16px_0_40px_rgba(0,0,0,0.08)] drop-shadow-[0_-12px_32px_rgba(0,0,0,0.05)]"
           />
-          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.05)_0%,transparent_24%)]" />
+          <div className="section-nav-scrim-overlay absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.05)_0%,transparent_24%)]" />
         </div>
 
         {navSections.map((section, index) => {
