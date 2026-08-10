@@ -1,6 +1,8 @@
 import type { CartLineOptions } from "@/features/cart/types/cart.types";
 import type { ProductCustomOptions } from "@/features/products/types/productCustomOptions";
-import { resolveCustomOptionValueUid } from "@/services/magento/products/productCustomOptions.mapper";
+import {
+  resolveCustomOptionValueUid,
+} from "@/services/magento/products/productCustomOptions.mapper";
 
 export type MagentoCartItemOptionPayload = {
   enteredOptions: Array<{ uid: string; value: string }>;
@@ -127,4 +129,53 @@ export function mapMagentoCartCustomizableOptionsToLineOptions(
   }
 
   return mapped;
+}
+
+type AssertResolvableCartLineOptionsInput = {
+  lineOptions: CartLineOptions;
+  productCustomOptions?: ProductCustomOptions;
+  /** When metal is sent as configurable variant UIDs, skip custom-option metal checks. */
+  skipMetal?: boolean;
+};
+
+export function assertResolvableCartLineOptions({
+  lineOptions,
+  productCustomOptions,
+  skipMetal = false,
+}: AssertResolvableCartLineOptionsInput): void {
+  if (!productCustomOptions) {
+    return;
+  }
+
+  const ringSize = lineOptions.ringSize?.trim();
+  if (ringSize && productCustomOptions.ringSize) {
+    const ringSizeUid = resolveCustomOptionValueUid(productCustomOptions.ringSize, ringSize);
+    if (!ringSizeUid) {
+      throw new Error(
+        `Ring size "${ringSize}" could not be matched. Please choose a size from the list.`,
+      );
+    }
+  }
+
+  if (!skipMetal) {
+    const metal = lineOptions.metal?.trim();
+    if (metal && productCustomOptions.metal) {
+      const metalUid = resolveCustomOptionValueUid(productCustomOptions.metal, metal);
+      if (!metalUid) {
+        throw new Error(
+          `Metal "${metal}" could not be matched. Please choose a metal option from the list.`,
+        );
+      }
+    }
+  }
+
+  const engravingFont = lineOptions.engravingFont?.trim();
+  if (engravingFont && productCustomOptions.engravingFont) {
+    const fontUid = resolveCustomOptionValueUid(productCustomOptions.engravingFont, engravingFont);
+    if (!fontUid) {
+      throw new Error(
+        `Engraving font "${engravingFont}" could not be matched. Please choose a font from the list.`,
+      );
+    }
+  }
 }

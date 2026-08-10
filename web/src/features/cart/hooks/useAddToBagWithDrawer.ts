@@ -6,6 +6,7 @@ import { useCart } from "@/features/cart/context/CartContext";
 import { useCartUI } from "@/features/cart/context/CartUIContext";
 import type { AddToBagPayload } from "@/features/cart/types/cart.types";
 import { buildOptimisticAddItemResult } from "@/features/cart/utils/optimisticAddToBag";
+import { formatAddToBagErrorMessage } from "@/features/cart/utils/formatAddToBagError";
 import { toast } from "@/shared/ui/sonner";
 
 export function useAddToBagWithDrawer() {
@@ -22,7 +23,7 @@ export function useAddToBagWithDrawer() {
       } catch (error) {
         closeBagDrawer();
         console.error("Add to bag failed:", error);
-        toast.error("Couldn't add this item to your bag. Please try again.");
+        toast.error(formatAddToBagErrorMessage(error));
       }
     },
     [addItem, closeBagDrawer, openBagDrawer, totalItems],

@@ -60,6 +60,7 @@ import type {
 } from "../types/cart.types";
 import type { ProductCustomOptions } from "@/features/products/types/productCustomOptions";
 import { getProductDisplayPrice } from "@/features/products/data/productDetailContent";
+import { assertResolvableCartLineOptions } from "@/services/magento/cart/cartLineCustomOptions.mapper";
 
 /** @deprecated Use CartLineItem from cart.types */
 export type CartItem = CartLineItem;
@@ -387,6 +388,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
 
     const displayPrice = getProductDisplayPrice(product);
+
+    assertResolvableCartLineOptions({
+      lineOptions: options,
+      productCustomOptions,
+      skipMetal: (configurableOptionUids?.length ?? 0) > 0,
+    });
 
     setIsUpdating(true);
 

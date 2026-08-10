@@ -1,23 +1,21 @@
 import type { Product } from "@/features/products/data/products";
 import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
+import { getCustomOptionDisplayLabels } from "@/services/magento/products/productCustomOptions.mapper";
 
 /**
  * Size dropdown labels for PDP / wishlist.
- * Prefer Strapi size-guide rows for the product category; else Magento
- * custom option values. No hardcoded fallback — categories without a guide
- * or Magento size option (e.g. earrings) must not show Size.
+ * Prefer Magento custom-option titles when present so selected values resolve to
+ * cart UIDs. Fall back to Strapi size-guide labels for display-only categories.
  */
 export function getRingSizeLabels(
   product: Product,
   sizeGuide: NormalizedSizeGuide | null | undefined,
 ): string[] {
-  if (sizeGuide?.sizeLabels?.length) {
-    return sizeGuide.sizeLabels;
+  const magentoLabels = getCustomOptionDisplayLabels(product.customOptions?.ringSize);
+
+  if (magentoLabels.length > 0) {
+    return magentoLabels;
   }
 
-  const magentoSizes = product.customOptions?.ringSize
-    ? Object.keys(product.customOptions.ringSize.valuesByLabel)
-    : [];
-
-  return magentoSizes;
+  return sizeGuide?.sizeLabels ?? [];
 }

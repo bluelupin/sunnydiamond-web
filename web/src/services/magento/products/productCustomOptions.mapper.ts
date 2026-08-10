@@ -40,6 +40,7 @@ function mapChoiceOption(
 
   const values = option.dropDownValues ?? option.radioValues ?? [];
   const valuesByLabel: Record<string, string> = {};
+  const labels: string[] = [];
 
   for (const value of values) {
     const valueUid = value.uid?.trim();
@@ -49,11 +50,13 @@ function mapChoiceOption(
     }
 
     valuesByLabel[normalizeLabel(label)] = valueUid;
+    labels.push(label);
   }
 
   return {
     optionUid,
     valuesByLabel,
+    labels,
   };
 }
 
@@ -119,6 +122,24 @@ export function mapMagentoProductCustomOptions(
   return Object.keys(mapped).length > 0 ? mapped : undefined;
 }
 
+function extractComparableToken(value: string): string {
+  return value.trim().toLowerCase().replace(/[^\da-z.]/g, "");
+}
+
+export function getCustomOptionDisplayLabels(
+  choice: ProductCustomOptionChoice | undefined,
+): string[] {
+  if (!choice) {
+    return [];
+  }
+
+  if (choice.labels.length > 0) {
+    return choice.labels;
+  }
+
+  return Object.keys(choice.valuesByLabel);
+}
+
 export function resolveCustomOptionValueUid(
   choice: ProductCustomOptionChoice | undefined,
   label: string | undefined,
@@ -128,5 +149,27 @@ export function resolveCustomOptionValueUid(
     return null;
   }
 
-  return choice.valuesByLabel[normalizeLabel(normalized)] ?? null;
+  const exact = choice.valuesByLabel[normalizeLabel(normalized)];
+  if (exact) {
+    return exact;
+  }
+
+  const comparable = extractComparableToken(normalized);
+  if (!comparable) {
+    return null;
+  }
+
+  for (const [key, uid] of Object.entries(choice.valuesByLabel)) {
+    if (extractComparableToken(key) === comparable) {
+      return uid;
+    }
+  }
+
+  for (const displayLabel of choice.labels) {
+    if (extractComparableToken(displayLabel) === comparable) {
+      return choice.valuesByLabel[normalizeLabel(displayLabel)] ?? null;
+    }
+  }
+
+  return null;
 }
