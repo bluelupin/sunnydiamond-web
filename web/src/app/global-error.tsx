@@ -21,6 +21,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
           variant="server-unavailable"
           onRetry={reset}
           errorCode={error.digest}
+          autoRetry={false}
           className="min-h-screen"
         />
       </body>

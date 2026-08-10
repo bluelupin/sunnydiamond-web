@@ -252,9 +252,13 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
     const cartIdSet = new Set(cartItemIdsKey ? cartItemIdsKey.split("|") : []);
     setSelectedItemIds((previous) => {
       const validIds = [...previous].filter((id) => cartIdSet.has(id));
-      if (validIds.length === previous.size) {
+      const unchanged =
+        validIds.length === previous.size && validIds.every((id) => previous.has(id));
+
+      if (unchanged) {
         return previous;
       }
+
       return new Set(validIds);
     });
   }, [cartItemIdsKey]);
@@ -488,6 +492,7 @@ const GiftingDesktopModal = ({
 const GiftingOptionsPanel = () => {
   const { isGiftingPanelOpen, closeGiftingPanel, giftingStep, openGiftingPanel } = useCartUI();
   const [isMobile, setIsMobile] = useState(false);
+  const showPersonalisePanel = isGiftingPanelOpen && giftingStep === "personalise";
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 1023px)");
@@ -504,7 +509,9 @@ const GiftingOptionsPanel = () => {
     />
   );
 
-  const personalisePanel = <GiftingPersonalisePanel onClose={closeGiftingPanel} />;
+  const personalisePanel = showPersonalisePanel ? (
+    <GiftingPersonalisePanel onClose={closeGiftingPanel} />
+  ) : null;
 
   if (isMobile) {
     return (

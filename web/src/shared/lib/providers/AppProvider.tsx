@@ -8,6 +8,7 @@ import { CartUIProvider } from '@/features/cart/context/CartUIContext';
 import CartBagDrawer from '@/features/cart/components/CartBagDrawer';
 import GiftingOptionsPanel from '@/features/cart/components/GiftingOptionsPanel';
 import GuestCheckoutModal from '@/features/cart/components/GuestCheckoutModal';
+import { FeatureErrorBoundary } from '@/shared/ui/FeatureErrorBoundary';
 import { WishlistProvider } from '@/features/wishlist/context/WishlistContext';
 import { LoginModalProvider } from '@/features/auth/context/LoginModalContext';
 import LoginModal from '@/features/auth/components/LoginModal';
@@ -24,9 +25,15 @@ export default function AppProvider({ children }: { children: React.ReactNode })
                 <PageLoadingProvider>
                   {children}
                 </PageLoadingProvider>
-                <CartBagDrawer />
-                <GiftingOptionsPanel />
-                <GuestCheckoutModal />
+                <FeatureErrorBoundary featureName="CartBagDrawer">
+                  <CartBagDrawer />
+                </FeatureErrorBoundary>
+                <FeatureErrorBoundary featureName="GiftingOptionsPanel">
+                  <GiftingOptionsPanel />
+                </FeatureErrorBoundary>
+                <FeatureErrorBoundary featureName="GuestCheckoutModal">
+                  <GuestCheckoutModal />
+                </FeatureErrorBoundary>
                 <LoginModal />
               </WishlistProvider>
             </LoginModalProvider>

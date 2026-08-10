@@ -26,7 +26,7 @@ const ErrorPage = ({
   errorCode,
   estimatedMinutes,
   onRetry,
-  autoRetry = true,
+  autoRetry = false,
   retryIntervalMs = AUTO_RETRY_MS,
   showStatusCard = true,
   className,

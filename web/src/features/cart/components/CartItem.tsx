@@ -160,7 +160,7 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
 
             <div className="flex flex-wrap gap-4">
               <CartTextLink href={productHref}>EDIT</CartTextLink>
-              {movedToWishlist ? (
+              {/* {movedToWishlist ? (
                 <span className="font-gill text-sm uppercase leading-110 text-neutral500 lg:text-base">
                   Moved to Wishlist
                 </span>
@@ -168,7 +168,10 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
                 <CartTextLink onClick={handleMoveToWishlist}>
                   {wishlisted ? "IN WISHLIST" : "MOVE TO WISHLIST"}
                 </CartTextLink>
-              )}
+              )} */}
+              <CartTextLink onClick={handleMoveToWishlist}>
+                {!wishlisted && "MOVE TO WISHLIST"}
+              </CartTextLink>
               {/* <CartTextLink onClick={handleBuyNow} className={isBuyingNow ? "opacity-50" : ""}>
                 BUY NOW
               </CartTextLink> */}

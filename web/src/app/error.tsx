@@ -18,6 +18,7 @@ export default function Error({ error, reset }: ErrorProps) {
       variant="unexpected"
       onRetry={reset}
       errorCode={error.digest}
+      autoRetry={false}
     />
   );
 }

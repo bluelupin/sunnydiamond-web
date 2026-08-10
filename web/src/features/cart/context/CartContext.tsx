@@ -801,6 +801,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       try {
         const nextState = await fetchCustomerCart(lineMetadataRef.current);
         applyCartState(nextState);
+      } catch (error) {
+        console.error("Failed to refresh customer cart:", error);
       } finally {
         setIsUpdating(false);
       }
@@ -816,6 +818,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     try {
       await refreshCart(cartId);
+    } catch (error) {
+      console.error("Failed to refresh guest cart:", error);
     } finally {
       setIsUpdating(false);
     }
