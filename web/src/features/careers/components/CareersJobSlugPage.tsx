@@ -5,23 +5,11 @@ import type { NormalizedCareerJob, NormalizedCareersPageData } from "@/services/
 import { resolveCareerJobDetailLabels } from "@/services/careers/careersJobDetailLabels";
 import { getCareerJobPath } from "@/features/careers/constants/careersRoutes";
 import { CareersJobsProvider, useCareersJobs } from "@/features/careers/context/CareersJobsContext";
+import { mergeCareerJobIntoCms } from "@/features/careers/utils/careersJobs";
 import { resetCareersHeaderMode, setCareersHeaderMode } from "@/features/careers/context/careersHeaderBridge";
 import CareersApplicationFormSection from "./CareersApplicationFormSection";
 import CareersApplicationSuccessSection from "./CareersApplicationSuccessSection";
 import CareersJobDetailView from "./CareersJobDetailView";
-
-function mergeJobIntoCms(cms: NormalizedCareersPageData, job: NormalizedCareerJob): NormalizedCareersPageData {
-  const hasJob = cms.jobs.some((entry) => entry.id === job.id || entry.jobCode === job.jobCode);
-
-  if (hasJob) {
-    return cms;
-  }
-
-  return {
-    ...cms,
-    jobs: [...cms.jobs, job],
-  };
-}
 
 function CareersJobSlugFlowContent({ job }: { job: NormalizedCareerJob }) {
   const { flowStep, goToApplication, cms } = useCareersJobs();
@@ -44,7 +32,7 @@ function CareersJobSlugFlowContent({ job }: { job: NormalizedCareerJob }) {
       job={job}
       jobDetails={jobDetails}
       shareUrl={shareUrl}
-      onApply={(entry, resumeFile) => goToApplication(entry, resumeFile)}
+      onApply={(entry, resumeFile) => goToApplication(entry, resumeFile, job.jobCode)}
     />
   );
 }
@@ -55,7 +43,7 @@ type CareersJobSlugPageProps = {
 };
 
 const CareersJobSlugPage = ({ cms, job }: CareersJobSlugPageProps) => {
-  const cmsWithJob = useMemo(() => mergeJobIntoCms(cms, job), [cms, job]);
+  const cmsWithJob = useMemo(() => mergeCareerJobIntoCms(cms, job), [cms, job]);
 
   useLayoutEffect(() => {
     setCareersHeaderMode("solid");

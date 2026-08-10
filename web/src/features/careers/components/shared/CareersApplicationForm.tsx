@@ -17,6 +17,8 @@ import {
   validateRequiredName,
 } from "@/shared/utils/formValidation";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
+import { useAuth } from "@/features/auth/context/AuthContext";
+import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import { submitCareerApplication } from "@/services/careers/career-submission.service";
 import { isValidCtcLpa } from "@/services/careers/career-submission.mapper";
 import { resolveCareerApplicationFlow } from "@/services/careers/resolveCareerApplicationFlow";
@@ -103,6 +105,9 @@ const CareersApplicationForm = () => {
   const { cms, selectedJob, goToSuccess, pendingResumeFile, clearPendingResume } =
     useCareersJobs();
   const applicationFlow = resolveCareerApplicationFlow(cms.landing.applicationFlow);
+  const { status } = useAuth();
+  const isAuthenticated = status === "authenticated";
+  const { contact: profileContact } = useCustomerProfileContact(isAuthenticated);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resumeValidationToastMessage, setResumeValidationToastMessage] = useState<string | null>(
@@ -140,6 +145,7 @@ const CareersApplicationForm = () => {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [touched, setTouched] = useState<Partial<Record<ApplicationField, boolean>>>({});
+  const [hasAppliedProfilePrefill, setHasAppliedProfilePrefill] = useState(false);
 
   const dismissResumeValidationToast = useCallback(() => {
     if (resumeValidationToastTimeoutRef.current) {
@@ -195,6 +201,32 @@ const CareersApplicationForm = () => {
 
     clearPendingResume();
   }, [clearPendingResume, pendingResumeFile, showResumeValidationToast]);
+
+  useEffect(() => {
+    if (!profileContact || hasAppliedProfilePrefill) {
+      return;
+    }
+
+    const profileName = profileContact.fullName?.trim();
+    const profileEmail = profileContact.email?.trim();
+    const profilePhone = profileContact.phone?.trim();
+    const profileCountryCode = profileContact.countryCode?.trim();
+
+    if (profileName && !name.trim()) {
+      setName(profileName);
+    }
+    if (profileEmail && !email.trim()) {
+      setEmail(profileEmail);
+    }
+    if (profilePhone && !phone.trim()) {
+      setPhone(profilePhone);
+    }
+    if (profileCountryCode) {
+      setCountryCode(profileCountryCode);
+    }
+
+    setHasAppliedProfilePrefill(true);
+  }, [profileContact, hasAppliedProfilePrefill, name, email, phone]);
 
   const errors = useMemo(() => {
     const next: Partial<Record<ApplicationField, string>> = {};

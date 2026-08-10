@@ -31,6 +31,10 @@ import HeaderIconBadge from "@/shared/ui/layout/HeaderIconBadge";
 import { useCanHover } from "@/shared/hooks/use-can-hover";
 import { useMobileHeaderLayout } from "@/shared/hooks/use-mobile-header-layout";
 import { useCareersHeaderMode } from "@/features/careers/context/careersHeaderBridge";
+import {
+  CAREERS_ALL_OPENINGS_ROUTE,
+  CAREERS_ROUTE,
+} from "@/features/careers/constants/careersRoutes";
 
 const JewelleryMegaMenu = dynamic(
   () =>
@@ -70,8 +74,10 @@ const Header = () => {
   const menuOpen = mobileMenuOpen || jewelleryMenuOpen;
   const headerHidden = mobileMenuOpen || profileNavOpen;
   const pathnameHeaderVariant = getHeaderVariant(pathname, { menuOpen });
+  const isCareersHeaderManagedRoute =
+    pathname === CAREERS_ROUTE || pathname === CAREERS_ALL_OPENINGS_ROUTE;
   const headerVariant =
-    pathname === "/careers" && careersHeaderMode === "solid"
+    isCareersHeaderManagedRoute && careersHeaderMode === "solid"
       ? "solid"
       : pathnameHeaderVariant;
   const isLoadingHeader = isPageLoading && isHeroOverlayRoute(pathname) && !menuOpen;

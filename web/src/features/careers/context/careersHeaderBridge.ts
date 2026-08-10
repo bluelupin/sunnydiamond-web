@@ -1,4 +1,8 @@
 import { useLayoutEffect, useState } from "react";
+import {
+  CAREERS_ALL_OPENINGS_ROUTE,
+  CAREERS_ROUTE,
+} from "@/features/careers/constants/careersRoutes";
 import type { CareersHeaderMode } from "./CareersJobsContext";
 
 let careersHeaderMode: CareersHeaderMode = "overlay";
@@ -24,25 +28,30 @@ export function subscribeCareersHeaderMode(listener: () => void) {
   };
 }
 
+function isCareersHeaderManagedRoute(pathname: string): boolean {
+  return pathname === CAREERS_ROUTE || pathname === CAREERS_ALL_OPENINGS_ROUTE;
+}
+
 /** Header lives outside CareersJobsProvider; sync header mode on careers routes. */
 export function useCareersHeaderMode(pathname: string): CareersHeaderMode | null {
   const [, setRevision] = useState(0);
-  const isCareersLanding = pathname === "/careers";
-  const isCareersJobDetail = pathname.startsWith("/careers/");
+  const isManagedRoute = isCareersHeaderManagedRoute(pathname);
+  const isCareersJobDetail =
+    pathname.startsWith("/careers/") && pathname !== CAREERS_ALL_OPENINGS_ROUTE;
 
   useLayoutEffect(() => {
-    if (!isCareersLanding) {
+    if (!isManagedRoute) {
       return;
     }
 
     return subscribeCareersHeaderMode(() => setRevision((value) => value + 1));
-  }, [isCareersLanding]);
+  }, [isManagedRoute]);
 
   if (isCareersJobDetail) {
     return "solid";
   }
 
-  if (!isCareersLanding) {
+  if (!isManagedRoute) {
     return null;
   }
 
