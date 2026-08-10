@@ -11,10 +11,14 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import type { NormalizedCareersPageData } from "@/services/careers/careers.types";
-import { getCareerJobPath } from "../constants/careersRoutes";
+import { getCareerApplyPath, getCareerJobPath, CAREERS_ALL_OPENINGS_ROUTE } from "../constants/careersRoutes";
 import type { CareerJob, CareersApplicationEntry, CareersFlowStep } from "../types";
 import { filterCareerJobs } from "../utils/careersFormatting";
-import { getCareerJobById } from "../utils/careersJobs";
+import { getCareerJobById, resolveCareerJobCode } from "../utils/careersJobs";
+import {
+  resolveInitialApplicationIntent,
+  stashCareerApplicationIntent,
+} from "../utils/careersApplicationIntent";
 import { resetCareersHeaderMode, setCareersHeaderMode } from "./careersHeaderBridge";
 
 export type CareersHeaderMode = "overlay" | "solid";
@@ -44,7 +48,11 @@ type CareersJobsContextValue = {
   goToLanding: () => void;
   goToListings: () => void;
   goToDetail: (jobId: string) => void;
-  goToApplication: (entry?: CareersApplicationEntry, resumeFile?: File) => void;
+  goToApplication: (
+    entry?: CareersApplicationEntry,
+    resumeFile?: File,
+    jobCode?: string,
+  ) => void;
   clearPendingResume: () => void;
   goToSuccess: () => void;
   goBackFromApplication: () => void;
@@ -83,8 +91,18 @@ export function CareersJobsProvider({
   const [locationFilter, setLocationFilter] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("");
   const [experienceFilter, setExperienceFilter] = useState("");
-  const [applicationEntry, setApplicationEntry] = useState<CareersApplicationEntry | null>(null);
-  const [pendingResumeFile, setPendingResumeFile] = useState<File | null>(null);
+  const [applicationEntry, setApplicationEntry] = useState<CareersApplicationEntry | null>(() => {
+    const intent = resolveInitialApplicationIntent(initialFlowStep);
+    if (intent) {
+      return intent.entry;
+    }
+
+    return initialFlowStep === "application" ? "manual" : null;
+  });
+  const [pendingResumeFile, setPendingResumeFile] = useState<File | null>(() => {
+    const intent = resolveInitialApplicationIntent(initialFlowStep);
+    return intent?.resumeFile ?? null;
+  });
 
   const filterOptions = cms.listing.filterOptions;
 
@@ -114,10 +132,8 @@ export function CareersJobsProvider({
   }, []);
 
   const goToListings = useCallback(() => {
-    setFlowStep("listings");
-    setCareersHeaderMode("overlay");
-    scrollCareersToTop();
-  }, []);
+    router.push(CAREERS_ALL_OPENINGS_ROUTE);
+  }, [router]);
 
   const goToDetail = useCallback(
     (jobId: string) => {
@@ -136,14 +152,27 @@ export function CareersJobsProvider({
   );
 
   const goToApplication = useCallback(
-    (entry: CareersApplicationEntry = "manual", resumeFile?: File) => {
+    (entry: CareersApplicationEntry = "manual", resumeFile?: File, jobCode?: string) => {
+      const resolvedJobCode = resolveCareerJobCode(jobs, selectedJobId, jobCode);
+
+      if (resolvedJobCode) {
+        stashCareerApplicationIntent(entry, resumeFile);
+        router.push(getCareerApplyPath(resolvedJobCode));
+        return;
+      }
+
+      const job = getCareerJobById(jobs, selectedJobId);
+      if (job) {
+        setSelectedJobId(job.id);
+      }
+
       setApplicationEntry(entry);
       setPendingResumeFile(entry === "resume" && resumeFile ? resumeFile : null);
       setFlowStep("application");
       setCareersHeaderMode("solid");
       scrollCareersToTop();
     },
-    [],
+    [jobs, router, selectedJobId],
   );
 
   const clearPendingResume = useCallback(() => {
@@ -151,12 +180,20 @@ export function CareersJobsProvider({
   }, []);
 
   const goBackFromApplication = useCallback(() => {
+    const job = getCareerJobById(jobs, selectedJobId);
+
     setApplicationEntry(null);
     setPendingResumeFile(null);
+
+    if (job?.jobCode) {
+      router.push(getCareerJobPath(job.jobCode));
+      return;
+    }
+
     setFlowStep("detail");
     setCareersHeaderMode("solid");
     scrollCareersToTop();
-  }, []);
+  }, [jobs, router, selectedJobId]);
 
   const goToSuccess = useCallback(() => {
     setApplicationEntry(null);

@@ -1,4 +1,4 @@
-const shimmerClass = "animate-pulse bg-gray200";
+const shimmerClass = "animate-pulse bg-gray300";
 
 const ProductDetailPageSkeleton = () => (
   <div aria-busy="true" aria-label="Loading product details">

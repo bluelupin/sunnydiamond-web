@@ -17,6 +17,7 @@ const staticRoutes = [
   { url: "/learn-about-diamonds", changeFrequency: "monthly" as const, priority: 0.5 },
   { url: "/diamonds-for-everyone", changeFrequency: "monthly" as const, priority: 0.5 },
   { url: "/careers", changeFrequency: "monthly" as const, priority: 0.5 },
+  { url: "/careers/all-openings", changeFrequency: "weekly" as const, priority: 0.5 },
   { url: "/blogs", changeFrequency: "weekly" as const, priority: 0.6 },
   { url: "/store-locator", changeFrequency: "monthly" as const, priority: 0.6 },
   { url: "/faqs", changeFrequency: "monthly" as const, priority: 0.5 },

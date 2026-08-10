@@ -9,14 +9,13 @@ import CareersBespokeInspirationsSection from "./CareersBespokeInspirationsSecti
 import CareersFaqSection from "./CareersFaqSection";
 import CareersHeroSection from "./CareersHeroSection";
 import CareersJobDetailSection from "./CareersJobDetailSection";
-import CareersJobListingsSection from "./CareersJobListingsSection";
 import CareersLifeSection from "./CareersLifeSection";
 import CareersOpeningsSection from "./CareersOpeningsSection";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
 
 function CareersFlowContent() {
   const { flowStep, cms } = useCareersJobs();
-  const { landing, listing } = cms;
+  const { landing } = cms;
 
   if (flowStep === "detail") {
     return <CareersJobDetailSection />;
@@ -30,22 +29,14 @@ function CareersFlowContent() {
     return <CareersApplicationSuccessSection />;
   }
 
-  const hero = flowStep === "listings" ? (listing.hero ?? landing.hero) : landing.hero;
-
   return (
     <>
-      {hero ? <CareersHeroSection hero={hero} /> : null}
-      {flowStep === "landing" ? (
-        <>
-          {landing.openings ? <CareersOpeningsSection openings={landing.openings} /> : null}
-          {landing.lifeAt ? <CareersLifeSection lifeAt={landing.lifeAt} /> : null}
-          {landing.benefits ? <CareersBenefitsSection benefits={landing.benefits} /> : null}
-          {landing.discover ? <CareersBespokeInspirationsSection discover={landing.discover} /> : null}
-          {landing.faq ? <CareersFaqSection faq={landing.faq} /> : null}
-        </>
-      ) : (
-        <CareersJobListingsSection />
-      )}
+      {landing.hero ? <CareersHeroSection hero={landing.hero} /> : null}
+      {landing.openings ? <CareersOpeningsSection openings={landing.openings} /> : null}
+      {landing.lifeAt ? <CareersLifeSection lifeAt={landing.lifeAt} /> : null}
+      {landing.benefits ? <CareersBenefitsSection benefits={landing.benefits} /> : null}
+      {landing.discover ? <CareersBespokeInspirationsSection discover={landing.discover} /> : null}
+      {landing.faq ? <CareersFaqSection faq={landing.faq} /> : null}
     </>
   );
 }

@@ -223,10 +223,9 @@ export async function collectRazorpayPayment(input: {
   }
 
   return new Promise<RazorpayPaymentOutcome>((resolve) => {
-    const siteOrigin =
-      process.env.NEXT_PUBLIC_FRONTEND_URL?.trim().replace(/\/$/, "") ||
-      window.location.origin;
-    const callbackUrl = new URL("/api/checkout/razorpay/callback", siteOrigin);
+    // Always use the live page origin so UPI/netbanking callbacks return to
+    // this same app (not a stale NEXT_PUBLIC_FRONTEND_URL / wrong port).
+    const callbackUrl = new URL("/api/checkout/razorpay/callback", window.location.origin);
     callbackUrl.searchParams.set("order", input.orderNumber);
 
     const usesRedirectFlow = input.method === "netbanking" || input.method === "upi";

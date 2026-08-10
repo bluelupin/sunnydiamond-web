@@ -6,6 +6,10 @@ import BookStoreVisitPanel from "@/features/products/components/detail/BookStore
 import StoreLocatorHeroSection from "./StoreLocatorHeroSection";
 import StoreLocatorSearchSection from "./StoreLocatorSearchSection";
 import { mapStoreLocatorShowroomToBookStoreVisit } from "@/features/products/utils/bookStoreVisitStores";
+import {
+  filterBookStoreVisitStores,
+  getStoreLocatorPincodeSearchError,
+} from "@/features/stores/utils/storeLocatorFilters";
 import type { NormalizedStoreLocatorPage } from "@/services/store-locator/store-locator-page.types";
 
 type BookStoreVisitPageContentProps = {
@@ -22,6 +26,16 @@ const BookStoreVisitPageContent = ({ page }: BookStoreVisitPageContentProps) => 
     [page?.showrooms],
   );
 
+  const filteredStores = useMemo(
+    () => filterBookStoreVisitStores(initialStores, searchQuery, selectedState),
+    [initialStores, searchQuery, selectedState],
+  );
+
+  const pincodeError = useMemo(
+    () => getStoreLocatorPincodeSearchError(searchQuery, filteredStores.length > 0),
+    [filteredStores.length, searchQuery],
+  );
+
   return (
     <>
       <StoreLocatorHeroSection hero={page?.hero} />
@@ -32,6 +46,7 @@ const BookStoreVisitPageContent = ({ page }: BookStoreVisitPageContentProps) => 
         onSelectedStateChange={setSelectedState}
         searchPlaceholder={page?.searchPlaceholder}
         locationFilters={page?.locationFilters}
+        pincodeError={pincodeError}
       />
       <BookStoreVisitPanel
         variant="page"

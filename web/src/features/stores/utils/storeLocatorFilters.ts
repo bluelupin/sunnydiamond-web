@@ -83,9 +83,12 @@ export function filterBookStoreVisitStores(
 ): BookStoreVisitStore[] {
   const query = searchQuery.trim().toLowerCase();
   const stateFilter = normalizeFilterText(selectedState);
+  // Search must work across state tabs — only apply the tab filter when the
+  // search box is empty.
+  const applyStateFilter = Boolean(stateFilter) && !query;
 
   return stores.filter((store) => {
-    if (stateFilter) {
+    if (applyStateFilter) {
       const storeState = getStoreState(store);
       if (storeState !== stateFilter && !storeState.includes(stateFilter)) {
         return false;
@@ -102,8 +105,66 @@ export function filterBookStoreVisitStores(
       if (pincode.includes(query)) {
         return true;
       }
+      // Digit-only queries are pincode searches — don't fall through to
+      // haystack matching (avoids false hits on phone numbers, etc.).
+      return false;
     }
 
     return getStoreSearchHaystack(store).includes(query);
   });
+}
+
+/** True when the query is a completed digit/pincode attempt (6+ digits). */
+export function isStoreLocatorPincodeSearchQuery(searchQuery: string): boolean {
+  const query = searchQuery.trim();
+  return /^\d+$/.test(query) && query.length >= 6;
+}
+
+/**
+ * Store Locator search — show Figma "Invalid Pincode" when the query is a
+ * completed digit/pincode attempt that is malformed or matches no showrooms.
+ */
+export function getStoreLocatorPincodeSearchError(
+  searchQuery: string,
+  hasMatchingStores: boolean,
+): string | undefined {
+  if (!isStoreLocatorPincodeSearchQuery(searchQuery)) {
+    return undefined;
+  }
+
+  const query = searchQuery.trim();
+
+  if (!/^\d{6}$/.test(query) || query.startsWith("0")) {
+    return "Invalid Pincode";
+  }
+
+  if (!hasMatchingStores) {
+    return "Invalid Pincode";
+  }
+
+  return undefined;
+}
+
+/**
+ * When a pincode search misses, fall back to suggesting nearby showrooms
+ * (state filter still applied when set).
+ */
+export function shouldSuggestNearbyStores(
+  searchQuery: string,
+  matchingStoreCount: number,
+): boolean {
+  return isStoreLocatorPincodeSearchQuery(searchQuery) && matchingStoreCount === 0;
+}
+
+/** Valid 6-digit pincode search that matched one or more showrooms. */
+export function shouldShowPincodeMatchResults(
+  searchQuery: string,
+  matchingStoreCount: number,
+): boolean {
+  if (!isStoreLocatorPincodeSearchQuery(searchQuery) || matchingStoreCount <= 0) {
+    return false;
+  }
+
+  const query = searchQuery.trim();
+  return /^\d{6}$/.test(query) && !query.startsWith("0");
 }
