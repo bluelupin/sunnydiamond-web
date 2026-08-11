@@ -38,10 +38,14 @@ export function BlogCard({ post }: BlogCardProps) {
           <p className="text-t4-regular text-neutral500 md:text-base md:font-normal">
             {post.date}
           </p>
-          <span className="size-1 shrink-0 rounded-full bg-neutral500" aria-hidden />
-          <p className="text-t4-regular text-neutral500 md:text-base md:font-normal">
-            {post.readTime}
-          </p>
+          {post.readTime ? (
+            <>
+              <span className="size-1 shrink-0 rounded-full bg-neutral500" aria-hidden />
+              <p className="text-t4-regular text-neutral500 md:text-base md:font-normal">
+                {post.readTime}
+              </p>
+            </>
+          ) : null}
         </div>
       </div>
     </article>

@@ -26,10 +26,14 @@ const BlogDetailHeader = ({
           <p className="text-sm text-neutral500 md:text-base">
             {date}
           </p>
-          <span className="size-1 shrink-0 rounded-full bg-neutral500" aria-hidden />
-          <p className="text-sm text-neutral500 md:text-base">
-            {readTime}
-          </p>
+          {readTime ? (
+            <>
+              <span className="size-1 shrink-0 rounded-full bg-neutral500" aria-hidden />
+              <p className="text-sm text-neutral500 md:text-base">
+                {readTime}
+              </p>
+            </>
+          ) : null}
         </div>
       </div>
     </header>

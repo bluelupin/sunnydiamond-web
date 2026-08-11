@@ -36,6 +36,13 @@ const BLOG_LANDING_POPULATE_QUERY =
   "&populate[heroSection][populate][backgroundImage][populate][mobileImage]=true" +
   "&populate[featuredBlogSection][populate][backgroundImage][populate][desktopImage]=true" +
   "&populate[featuredBlogSection][populate][backgroundImage][populate][mobileImage]=true" +
+  // CMS oneToOne relation on the landing page (not nested under featuredBlogSection).
+  "&populate[featuredBlog][populate][coverImage][populate][desktopImage]=true" +
+  "&populate[featuredBlog][populate][coverImage][populate][mobileImage]=true" +
+  "&populate[featuredBlog][populate][heroImage][populate][desktopImage]=true" +
+  "&populate[featuredBlog][populate][heroImage][populate][mobileImage]=true" +
+  "&populate[featuredBlog][populate][blog_category]=true" +
+  "&populate[featuredBlog][populate][tags]=true" +
   "&populate[seo][populate]=ogImage" +
   "&populate[blogCategory]=true";
 
