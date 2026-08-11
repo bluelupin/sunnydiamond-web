@@ -137,7 +137,7 @@ const Footer = ({ className }: { className?: string }) => {
           <Reveal direction="up" className="shrink-0">
             <Link href="/" aria-label="Sunny Diamonds">
               <Image
-                src="/images/logo-desktop.svg"
+                src="/logo-desktop.svg"
                 alt="Sunny Diamonds"
                 width={336}
                 height={142}
