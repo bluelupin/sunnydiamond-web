@@ -601,7 +601,7 @@ function ProductCarouselPanel({
             </div>
 
             {total > 1 ? (
-              <div className="pointer-events-none absolute inset-x-4 top-[32px] z-20 flex items-start justify-between max-w-[300px] mx-auto">
+              <div className="pointer-events-none absolute inset-x-4 bottom-4 z-20 flex items-start justify-between max-w-[300px] mx-auto">
                 <CarouselNavButton
                   direction="prev"
                   variant="mobile"

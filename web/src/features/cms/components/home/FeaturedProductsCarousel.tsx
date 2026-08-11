@@ -355,8 +355,8 @@ export default function FeaturedProductsCarousel({
       <div className="featured-products-details flex flex-col items-center">
         <div
           className={cn(
-            "relative z-20 flex w-full items-center justify-between md:hidden !w-[200px]",
-            isEducationPage ? "-top-[90px]" : "top-16",
+            "z-20 flex w-full items-center justify-between md:hidden ",
+            isEducationPage ? "relative -top-[90px] !w-[200px]" : "absolute bottom-4 !w-[300px]",
           )}
         >
           <button

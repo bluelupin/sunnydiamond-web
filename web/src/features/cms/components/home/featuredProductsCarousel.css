@@ -145,7 +145,7 @@
 }
 
 .featured-products-details {
-  width: var(--featured-column-width);
+  /* width: var(--featured-column-width); */
   max-width: 100%;
   margin-inline: auto;
   padding-inline: 16px;
