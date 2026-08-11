@@ -251,6 +251,7 @@ const mapTrustBadges = (
       return {
         label,
         iconSrc: icon.desktopUrl || icon.mobileUrl,
+        alt: icon.alt || "",
       };
     })
     .filter((badge): badge is NormalizedGiftingTrustBadge => badge != null);

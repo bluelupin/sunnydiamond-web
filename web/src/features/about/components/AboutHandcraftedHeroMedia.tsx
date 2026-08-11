@@ -10,6 +10,7 @@ const { hero } = aboutHandcraftedFigmaSpec;
 type AboutHandcraftedHeroMediaProps = {
   videoUrl?: string;
   posterUrl?: string;
+  posterAlt?: string;
 };
 
 const getVideoMimeType = (url: string) => {
@@ -21,6 +22,7 @@ const getVideoMimeType = (url: string) => {
 const AboutHandcraftedHeroMedia = ({
   videoUrl,
   posterUrl,
+  posterAlt = "",
 }: AboutHandcraftedHeroMediaProps) => {
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
   const [usePosterOnly, setUsePosterOnly] = useState(!videoUrl);
@@ -65,7 +67,7 @@ const AboutHandcraftedHeroMedia = ({
     return (
       <ResponsiveImage
         desktopSrc={posterUrl}
-        alt=""
+        alt={posterAlt}
         width={hero.width}
         height={hero.height}
         quality={80}
@@ -82,7 +84,7 @@ const AboutHandcraftedHeroMedia = ({
       {posterUrl ? (
         <ResponsiveImage
           desktopSrc={posterUrl}
-          alt=""
+          alt={posterAlt}
           width={hero.width}
           height={hero.height}
           quality={80}

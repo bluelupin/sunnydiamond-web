@@ -24,15 +24,13 @@ export async function generateMetadata(): Promise<Metadata> {
     const { title, description, canonicalPath, keywords, image } =
       resolveEducationSeoMetadata(page);
 
-    return {
-      ...constructMetadata({
-        title,
-        description,
-        canonicalPath,
-        ...(image ? { image } : {}),
-      }),
+    return constructMetadata({
+      title,
+      description,
+      canonicalPath,
       ...(keywords ? { keywords } : {}),
-    };
+      ...(image ? { image } : {}),
+    });
   } catch {
     return constructMetadata({
       title: siteConfig.brand.name,

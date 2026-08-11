@@ -10,9 +10,16 @@ export function resolveCareersSeoMetadata(cms: NormalizedCareersPageData) {
     return null;
   }
 
+  const title = seo.metaTitle?.trim();
+  const description = seo.metaDescription?.trim();
+
+  if (!title && !description) {
+    return null;
+  }
+
   return {
-    title: seo.metaTitle,
-    description: seo.metaDescription,
+    title: title || undefined,
+    description: description || undefined,
     canonicalPath: seo.canonicalPath || CAREERS_ROUTE,
     keywords: seo.metaKeywords,
     image: seo.ogImageUrl,
@@ -28,12 +35,16 @@ export function resolveCareersAllOpeningsSeoMetadata(cms: NormalizedCareersPageD
     return null;
   }
 
-  const title = listingSeo?.metaTitle ?? seo.metaTitle;
-  const description = listingSeo?.metaDescription ?? seo.metaDescription;
+  const title = (listingSeo?.metaTitle ?? seo.metaTitle)?.trim();
+  const description = (listingSeo?.metaDescription ?? seo.metaDescription)?.trim();
+
+  if (!title && !description) {
+    return null;
+  }
 
   return {
-    title,
-    description,
+    title: title || undefined,
+    description: description || undefined,
     canonicalPath: CAREERS_ALL_OPENINGS_ROUTE,
     keywords: seo.metaKeywords,
     image: seo.ogImageUrl,

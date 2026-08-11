@@ -10,7 +10,7 @@ import {
 } from "@/features/education/data/content";
 import { resolveEducationDiamondShapeHref } from "@/features/jewellery-product/utils/diamondShapeListing";
 import { resolveEducationFancyColourHref } from "@/features/jewellery-product/utils/fancyColourListing";
-import { resolveCmsMediaUrl, resolveCmsMediaUrls } from "@/shared/utils/strapiMedia";
+import { resolveCmsAltText, resolveCmsMediaUrl, resolveCmsMediaUrls } from "@/shared/utils/strapiMedia";
 import type {
   NormalizedEducationCertificateSection,
   NormalizedEducationCertification,
@@ -93,7 +93,13 @@ const mapResponsiveImageUrls = (image?: StrapiEducationResponsiveImage | null) =
   return {
     desktopUrl: desktopUrl ?? "",
     mobileUrl: mobileUrl ?? "",
-    alt: cleanText(image?.altText) ?? cleanText(image?.caption) ?? "",
+    alt:
+      cleanText(image?.altText) ??
+      cleanText(image?.caption) ??
+      resolveCmsAltText(image?.desktopImage) ??
+      resolveCmsAltText(image?.mobileImage) ??
+      resolveCmsAltText(image) ??
+      "",
     hasImage: Boolean(desktopUrl || mobileUrl),
   };
 };
@@ -104,19 +110,20 @@ const mapSeo = (seo?: StrapiEducationSeo | null): NormalizedEducationSeo | null 
   const metaTitle = cleanText(seo.metaTitle);
   const metaDescription = cleanText(seo.metaDescription);
   const canonicalPath = cleanText(seo.canonicalUrl);
-  if (!metaTitle || !metaDescription || !canonicalPath) return null;
+  if (!metaTitle && !metaDescription) return null;
 
   const ogImageUrl = resolveCmsMediaUrl(seo.ogImage);
+  const rawCanonical = canonicalPath ?? "/learn-about-diamonds";
   const normalizedCanonicalPath =
-    canonicalPath === "/education" || canonicalPath === "education"
+    rawCanonical === "/education" || rawCanonical === "education"
       ? "/learn-about-diamonds"
-      : canonicalPath.startsWith("/")
-        ? canonicalPath
-        : `/${canonicalPath}`;
+      : rawCanonical.startsWith("/")
+        ? rawCanonical
+        : `/${rawCanonical}`;
 
   return {
-    metaTitle,
-    metaDescription,
+    metaTitle: metaTitle ?? "",
+    metaDescription: metaDescription ?? "",
     canonicalPath: normalizedCanonicalPath,
     metaKeywords: cleanText(seo.metaKeywords),
     ...(ogImageUrl ? { ogImageUrl } : {}),
@@ -292,16 +299,24 @@ const mapGradeStopToOption = (
       ? resolveCmsMediaUrls(stop.gradeImage?.mobileImage)
       : [];
   const mediaUrls = gradeImageUrls.length > 0 ? gradeImageUrls : mobileOnlyUrls;
+  const gradeAlt =
+    resolveCmsAltText(stop.gradeImage) ??
+    resolveCmsAltText(stop.gradeImage?.desktopImage) ??
+    resolveCmsAltText(stop.gradeImage?.mobileImage) ??
+    "";
 
   if (mediaUrls[0]) {
     option.image = mediaUrls[0];
+    option.imageAlt = gradeAlt;
   } else if (visualImageUrl && panelId !== "cut") {
     option.image = visualImageUrl;
+    option.imageAlt = gradeAlt;
   }
 
   // Cut: CMS often uploads two diamonds per grade for the Figma dual compare layout.
   if (panelId === "cut" && mediaUrls.length >= 2 && mediaUrls[0] && mediaUrls[1]) {
     option.dualImages = [mediaUrls[0], mediaUrls[1]];
+    option.dualImageAlts = [gradeAlt, gradeAlt];
   }
 
   if (labelParts.length === 2) {
@@ -526,9 +541,16 @@ const mapCertificationLab = (
     resolveCmsMediaUrl(lab.labLogo?.mobileImage);
   if (!logoUrl) return null;
 
+  const logoAlt =
+    resolveCmsAltText(lab.labLogo) ??
+    resolveCmsAltText(lab.labLogo?.desktopImage) ??
+    resolveCmsAltText(lab.labLogo?.mobileImage) ??
+    "";
+
   return {
     id,
     logoUrl,
+    logoAlt,
     label,
     logoClassName: staticCert?.logoClassName ?? "size-[79px]",
     mobileLogoClassName: staticCert?.mobileLogoClassName ?? "size-[59.286px]",

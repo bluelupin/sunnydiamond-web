@@ -24,9 +24,15 @@ function normalizeUrl(rawUrl?: string): string | undefined {
   }
 }
 
+/**
+ * Builds page metadata. Titles are absolute so the root layout template
+ * (`%s | Sunny Diamonds`) is never appended on top of CMS titles.
+ * Description/keywords come from the caller (CMS) when provided — we do not
+ * invent SEO text beyond an optional description fallback for non-CMS pages.
+ */
 export function constructMetadata({
   title,
-  description = siteConfig.seo.defaultDescription,
+  description,
   keywords,
   image = siteConfig.seo.ogImage,
   canonicalPath,
@@ -37,16 +43,23 @@ export function constructMetadata({
   imageHeight = 630,
   openGraphType = "website",
 }: SeoConfig): Metadata {
-  const resolvedImage = normalizeUrl(image) ?? `${siteConfig.seo.siteUrl}${image.startsWith("/") ? "" : "/"}${image}`;
+  const resolvedTitle = title.trim();
+  const resolvedDescription = description?.trim() || undefined;
+  const resolvedKeywords = keywords?.trim() || undefined;
+  const resolvedImage =
+    normalizeUrl(image) ??
+    `${siteConfig.seo.siteUrl}${image.startsWith("/") ? "" : "/"}${image}`;
   const resolvedUrl = normalizeUrl(url ?? canonicalPath ?? siteConfig.seo.siteUrl);
 
   return {
-    title,
-    description,
-    ...(keywords ? { keywords } : {}),
+    // Bypass root `title.template` so CMS titles are used exactly as configured.
+    title: { absolute: resolvedTitle },
+    ...(resolvedDescription ? { description: resolvedDescription } : {}),
+    // `null` clears the root layout keywords so pages don't inherit the site-wide list.
+    keywords: resolvedKeywords ?? null,
     openGraph: {
-      title,
-      description,
+      title: resolvedTitle,
+      ...(resolvedDescription ? { description: resolvedDescription } : {}),
       url: resolvedUrl,
       siteName,
       type: openGraphType,
@@ -60,8 +73,8 @@ export function constructMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title,
-      description,
+      title: resolvedTitle,
+      ...(resolvedDescription ? { description: resolvedDescription } : {}),
       images: [resolvedImage],
     },
     icons: {

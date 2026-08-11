@@ -1,5 +1,11 @@
 import { getCmsAssetUrl } from "./cmsAssets";
-import type { StrapiImage, StrapiImagePayload } from "@/types/strapiMedia";
+import type { StrapiImagePayload } from "@/types/strapiMedia";
+
+function cleanAlt(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return trimmed || undefined;
+}
 
 export function extractStrapiImage(image: unknown): StrapiImagePayload {
   if (!image || typeof image !== "object") {
@@ -9,9 +15,20 @@ export function extractStrapiImage(image: unknown): StrapiImagePayload {
   if ("data" in image) {
     const data = (image as { data?: unknown }).data;
 
+    if (Array.isArray(data)) {
+      return extractStrapiImage(data[0]);
+    }
+
     if (data && typeof data === "object" && "attributes" in data) {
       return (data as { attributes?: StrapiImagePayload }).attributes ?? null;
     }
+
+    // Strapi v5 often returns the media file directly under `data`.
+    if (data && typeof data === "object" && "url" in data) {
+      return data as StrapiImagePayload;
+    }
+
+    return null;
   }
 
   return image as StrapiImagePayload;
@@ -44,11 +61,49 @@ export function resolveCmsMediaUrls(image: unknown): string[] {
   return url ? [url] : [];
 }
 
+/**
+ * Resolve CMS alt text from either:
+ * - responsive image component fields (`altText` / `caption`)
+ * - media library file fields (`alternativeText`)
+ * - nested desktop/mobile media
+ */
 export function resolveCmsAltText(image: unknown): string | undefined {
-  const payload = extractStrapiImage(image);
-  if (!payload || typeof payload !== "object") {
+  if (image == null) return undefined;
+
+  if (Array.isArray(image)) {
+    for (const entry of image) {
+      const alt = resolveCmsAltText(entry);
+      if (alt) return alt;
+    }
     return undefined;
   }
 
-  return typeof payload.alternativeText === "string" ? payload.alternativeText : undefined;
+  if (typeof image !== "object") return undefined;
+
+  const record = image as Record<string, unknown>;
+
+  const componentAlt =
+    cleanAlt(record.altText) ?? cleanAlt(record.alt) ?? cleanAlt(record.caption);
+  if (componentAlt) return componentAlt;
+
+  const nestedAlt =
+    resolveCmsAltText(record.desktopImage) ??
+    resolveCmsAltText(record.mobileImage);
+  if (nestedAlt) return nestedAlt;
+
+  const payload = extractStrapiImage(image);
+  if (payload && typeof payload === "object") {
+    const file = payload as {
+      alternativeText?: string | null;
+      altText?: string | null;
+      caption?: string | null;
+    };
+    const fileAlt =
+      cleanAlt(file.alternativeText) ??
+      cleanAlt(file.altText) ??
+      cleanAlt(file.caption);
+    if (fileAlt) return fileAlt;
+  }
+
+  return undefined;
 }

@@ -12,6 +12,7 @@ const AboutHandcraftedSection = ({
   title,
   videoUrl,
   posterUrl,
+  posterAlt,
   overlayOpacity,
   cards,
 }: AboutHandcraftedSectionProps) => (
@@ -23,7 +24,11 @@ const AboutHandcraftedSection = ({
       <PageContainer className="px-0 md:px-0">
         <Reveal direction="up" className="relative h-700 w-full overflow-hidden">
           <div className="absolute inset-0">
-            <AboutHandcraftedHeroMedia videoUrl={videoUrl} posterUrl={posterUrl} />
+            <AboutHandcraftedHeroMedia
+              videoUrl={videoUrl}
+              posterUrl={posterUrl}
+              posterAlt={posterAlt}
+            />
           </div>
           <MediaContentOverlay solidOpacity={overlayOpacity} />
           <div className="absolute inset-x-0 bottom-0 top-16 z-10 flex flex-col items-center justify-center gap-4 px-5 md:top-20">

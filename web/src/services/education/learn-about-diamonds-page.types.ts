@@ -250,6 +250,7 @@ export type NormalizedEducationFourCsSection = {
 export type NormalizedEducationCertification = {
   id: string;
   logoUrl: string;
+  logoAlt: string;
   label: string;
   mobileLabelLines?: readonly [string, string];
   logoClassName: string;

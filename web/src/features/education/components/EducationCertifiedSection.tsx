@@ -32,7 +32,7 @@ const CertificationLogo = ({
     <div className={cn("relative overflow-hidden", logoClassName)}>
       <Image
         src={cert.logoUrl}
-        alt=""
+        alt={cert.logoAlt}
         fill
         className={imageClassName}
         sizes="120px"

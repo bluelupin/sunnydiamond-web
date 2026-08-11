@@ -14,11 +14,12 @@ export const revalidate = 300;
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const page = await getPolicyCertificationsPage();
+    const cmsTitle = page.seo?.metaTitle?.trim();
+    const cmsDescription = page.seo?.metaDescription?.trim();
+
     return constructMetadata({
-      title: page.seo?.metaTitle ?? page.pageTitle,
-      description:
-        page.seo?.metaDescription ??
-        "Review Sunny Diamonds privacy policy, terms, certifications, and business policies including returns, cancellations, and gift vouchers.",
+      title: cmsTitle || page.pageTitle,
+      description: cmsDescription,
       canonicalPath: page.seo?.canonicalPath ?? POLICY_AND_CERTIFICATIONS_PATH,
       ...(page.seo?.keywords ? { keywords: page.seo.keywords } : {}),
       ...(page.seo?.ogImageUrl ? { image: page.seo.ogImageUrl } : {}),
@@ -26,8 +27,6 @@ export async function generateMetadata(): Promise<Metadata> {
   } catch {
     return constructMetadata({
       title: "Policy & Certifications",
-      description:
-        "Review Sunny Diamonds privacy policy, terms, certifications, and business policies including returns, cancellations, and gift vouchers.",
       canonicalPath: POLICY_AND_CERTIFICATIONS_PATH,
     });
   }

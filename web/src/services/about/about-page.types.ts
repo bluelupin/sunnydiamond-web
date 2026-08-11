@@ -209,6 +209,7 @@ export type NormalizedAboutCraft = {
   title: string;
   videoUrl?: string;
   posterUrl?: string;
+  posterAlt?: string;
   overlayOpacity: number;
   centerImage?: NormalizedResponsiveImage;
   cards: NormalizedCraftCard[];

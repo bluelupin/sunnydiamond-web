@@ -210,6 +210,7 @@ export type NormalizedBespokePastCreations = {
 export type NormalizedBespokeGuarantee = {
   iconSrc: string;
   label: string;
+  alt: string;
 };
 
 export type NormalizedBespokeGetInTouch = {

@@ -80,7 +80,6 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
   const cutoutAlt =
     cutoutImages.alt ||
     (giftingData?.cutoutImage as { altText?: string } | undefined)?.altText?.trim() ||
-    sectionTitle ||
     "";
 
   const hasPrimaryCta = Boolean(primaryCtaUrl && primaryCtaLabel);
@@ -163,7 +162,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
           <ResponsiveImage
             desktopSrc={backgroundImages.desktopUrl || backgroundImages.mobileUrl || ""}
             mobileSrc={backgroundImages.mobileUrl}
-            alt=""
+            alt={backgroundImages.alt || ""}
             width={1440}
             height={750}
             sizes="100vw"

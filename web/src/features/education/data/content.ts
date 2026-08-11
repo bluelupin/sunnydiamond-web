@@ -274,8 +274,11 @@ export type EducationSliderOption = {
   highlight?: boolean;
   sublabel?: string | string[];
   image?: string;
+  /** CMS alt for the grade / visual image */
+  imageAlt?: string;
   /** Cut panel: two CMS grade images side-by-side (Figma dual compare). */
   dualImages?: [string, string];
+  dualImageAlts?: [string, string];
   caratWeight?: number;
 };
 

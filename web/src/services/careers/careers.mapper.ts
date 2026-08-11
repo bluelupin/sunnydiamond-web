@@ -1,5 +1,5 @@
 import type { CareerBenefit, CareerJobType } from "@/features/careers/types";
-import { extractStrapiImage, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { extractStrapiImage, resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import type {
   NormalizedCareerApplicationFlow,
   NormalizedCareerBenefitsSection,
@@ -128,6 +128,8 @@ const mapResponsiveImage = (
     alt:
       cleanText(media.altText) ??
       cleanText(media.caption) ??
+      resolveCmsAltText(media.desktopImage) ??
+      resolveCmsAltText(media.mobileImage) ??
       cleanText(desktopFile?.alternativeText) ??
       cleanText(mobileFile?.alternativeText) ??
       "",
@@ -170,7 +172,7 @@ const mapSeo = (seo?: StrapiCareerSeo | null): NormalizedCareerSeo | null => {
   const metaDescription = cleanText(seo?.metaDescription);
   const rawCanonical = cleanText(seo?.canonicalUrl);
 
-  if (!metaTitle || !metaDescription) return null;
+  if (!metaTitle && !metaDescription) return null;
 
   const canonicalPath =
     !rawCanonical || rawCanonical === "/careers"
@@ -182,8 +184,8 @@ const mapSeo = (seo?: StrapiCareerSeo | null): NormalizedCareerSeo | null => {
   const ogImageUrl = resolveCmsMediaUrl(seo?.ogImage);
 
   return {
-    metaTitle,
-    metaDescription,
+    metaTitle: metaTitle ?? "",
+    metaDescription: metaDescription ?? "",
     canonicalPath,
     metaKeywords: cleanText(seo?.metaKeywords),
     ...(ogImageUrl ? { ogImageUrl } : {}),

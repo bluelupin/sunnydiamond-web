@@ -1,6 +1,10 @@
 import { aboutHandcraftedTileLayout } from "@/features/about/data/content";
 import { WORLD_OF_SUNNY_PATH } from "@/shared/utils/navigation";
-import { extractStrapiImage, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import {
+  extractStrapiImage,
+  resolveCmsAltText,
+  resolveCmsMediaUrl,
+} from "@/shared/utils/strapiMedia";
 import type {
   NormalizedAboutCraft,
   NormalizedAboutHero,
@@ -76,6 +80,8 @@ const mapResponsiveImage = (
   const alt =
     cleanText(media.altText) ??
     cleanText(media.caption) ??
+    resolveCmsAltText(media.desktopImage) ??
+    resolveCmsAltText(media.mobileImage) ??
     cleanText(desktopFile?.alternativeText) ??
     cleanText(mobileFile?.alternativeText) ??
     "";
@@ -101,10 +107,8 @@ const mapSeo = (seo?: StrapiAboutSeo | null): NormalizedAboutSeo | null => {
   if (!metaTitle && !metaDescription) return null;
 
   return {
-    metaTitle: metaTitle ?? "Our Story | Sunny Diamonds",
-    metaDescription:
-      metaDescription ??
-      "Learn about Sunny Diamonds' legacy of crafting premium diamond jewellery.",
+    metaTitle: metaTitle ?? "",
+    metaDescription: metaDescription ?? "",
     canonicalPath,
     metaKeywords: cleanText(seo?.metaKeywords ?? undefined),
   };
@@ -305,6 +309,7 @@ const mapCraft = (
     title,
     videoUrl,
     posterUrl,
+    posterAlt: centerImage?.alt || "",
     overlayOpacity:
       typeof craftSection.overlayOpacity === "number"
         ? craftSection.overlayOpacity
@@ -344,7 +349,7 @@ const mapTrustBadge = (
 
   return {
     label,
-    icon: { ...icon, alt: icon.alt || label },
+    icon: { ...icon, alt: icon.alt || "" },
   };
 };
 
