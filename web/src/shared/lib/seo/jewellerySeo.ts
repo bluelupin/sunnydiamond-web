@@ -6,13 +6,15 @@ import {
 } from "@/features/jewellery-product/utils/jewelleryRoutes";
 import { getAbsoluteUrl } from "@/shared/lib/seo/siteConfig";
 
-/** PLP SEO is CMS-first. Global siteConfig is used only if the CMS fetch/SEO block is missing. */
+/** PLP SEO is CMS-first. Site defaults only if the CMS SEO block is missing. */
 export function resolveJewellerySeoMetadata(page: NormalizedProductLandingPage | null) {
   const cmsSeo = page?.seo;
+  const cmsTitle = cmsSeo?.metaTitle?.trim();
+  const cmsDescription = cmsSeo?.metaDescription?.trim();
 
   return {
-    title: cmsSeo?.metaTitle ?? siteConfig.seo.defaultTitle,
-    description: cmsSeo?.metaDescription ?? siteConfig.seo.defaultDescription,
+    title: cmsTitle || siteConfig.seo.defaultTitle,
+    description: cmsDescription || siteConfig.seo.defaultDescription,
     canonicalPath: cmsSeo?.canonicalPath ?? "/jewellery",
     keywords: cmsSeo?.metaKeywords,
     image: cmsSeo?.ogImageUrl,
@@ -37,12 +39,19 @@ export function resolveJewelleryCategorySeoMetadata(
   categoryLabel?: string | null,
 ) {
   const base = resolveJewellerySeoMetadata(page);
+  const cmsSeo = page?.seo;
   const label = categoryLabel?.trim() || formatCategoryLabelFromUrlKey(categoryUrlKey);
   const canonicalPath = buildJewelleryCategoryHref(categoryUrlKey);
 
+  const cmsTitle = cmsSeo?.metaTitle?.trim();
+  const cmsDescription = cmsSeo?.metaDescription?.trim();
+
   return {
-    title: `Shop ${label} | Sunny Diamonds`,
-    description: `Browse our ${label.toLowerCase()} collection — handcrafted diamond jewellery with GIA-certified stones, timeless designs, and premium craftsmanship.`,
+    // Prefer CMS exactly; never append "| Sunny Diamonds" in code.
+    title: cmsTitle || `Shop ${label}`,
+    description:
+      cmsDescription ||
+      `Browse our ${label.toLowerCase()} collection — handcrafted diamond jewellery with GIA-certified stones, timeless designs, and premium craftsmanship.`,
     canonicalPath,
     keywords: base.keywords,
     image: base.image,

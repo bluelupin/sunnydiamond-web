@@ -209,6 +209,7 @@ export type NormalizedGiftingFinishingTouch = {
 export type NormalizedGiftingTrustBadge = {
   iconSrc: string;
   label: string;
+  alt: string;
 };
 
 export type NormalizedGiftingSeo = {

@@ -36,7 +36,7 @@ const GuaranteeIcon = ({ icon }: GuaranteeIconProps) => (
     <ResponsiveImage
       desktopSrc={icon.desktopUrl}
       mobileSrc={icon.mobileUrl}
-      alt=""
+      alt={icon.alt}
       width={icon.desktopUrl ? 64 : 40}
       height={icon.desktopUrl ? 64 : 40}
       className="shrink-0 object-contain md:h-16 md:w-16 h-10 w-10"

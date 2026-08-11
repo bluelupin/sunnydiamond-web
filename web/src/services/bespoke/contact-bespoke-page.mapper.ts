@@ -70,6 +70,8 @@ const mapResponsiveImage = (
     alt:
       cleanText(media?.altText) ??
       cleanText(media?.caption) ??
+      resolveCmsAltText(media?.desktopImage) ??
+      resolveCmsAltText(media?.mobileImage) ??
       cleanText(desktopFile?.alternativeText) ??
       cleanText(mobileFile?.alternativeText) ??
       fallback?.alt ??
@@ -87,7 +89,7 @@ const mapSeo = (seo?: StrapiBespokeSeo | null): NormalizedBespokeSeo | null => {
   const ogImageUrl = resolveCmsMediaUrl(seo.ogImage);
 
   return {
-    metaTitle: metaTitle ?? "Bespoke Jewellery",
+    metaTitle: metaTitle ?? "",
     metaDescription: metaDescription ?? "",
     canonicalPath: cleanText(seo.canonicalUrl) ?? "/bespoke-jewellery",
     metaKeywords: cleanText(seo.metaKeywords),
@@ -376,11 +378,14 @@ const resolveGuaranteeIconSrc = (
   return override?.icon ?? cmsUrl;
 };
 
-const mapGuaranteeIconSrc = (highlight: StrapiBespokeServiceHighlight): string | null => {
+const mapGuaranteeIcon = (
+  highlight: StrapiBespokeServiceHighlight,
+): { src: string; alt: string } | null => {
   const icon = highlight.icon;
   if (!icon || typeof icon !== "object") return null;
 
   let cmsUrl: string | null = null;
+  let cmsAlt: string | undefined;
 
   if ("desktopImage" in icon || "mobileImage" in icon) {
     const responsive = icon as StrapiBespokeResponsiveImage;
@@ -388,11 +393,23 @@ const mapGuaranteeIconSrc = (highlight: StrapiBespokeServiceHighlight): string |
       resolveCmsMediaUrl(responsive.desktopImage) ??
       resolveCmsMediaUrl(responsive.mobileImage) ??
       null;
+    cmsAlt =
+      cleanText(responsive.altText) ??
+      cleanText(responsive.caption) ??
+      resolveCmsAltText(responsive.desktopImage) ??
+      resolveCmsAltText(responsive.mobileImage);
   } else {
     cmsUrl = resolveCmsMediaUrl(icon) ?? null;
+    cmsAlt = resolveCmsAltText(icon);
   }
 
-  return resolveGuaranteeIconSrc(highlight.label, cmsUrl);
+  const src = resolveGuaranteeIconSrc(highlight.label, cmsUrl);
+  if (!src) return null;
+
+  return {
+    src,
+    alt: cmsAlt ?? "",
+  };
 };
 
 const isCodGuaranteeLabel = (label: string): boolean => {
@@ -428,11 +445,12 @@ const mapGuarantees = (
     .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
     .map((item) => {
       const label = cleanText(item.label);
-      const iconSrc = mapGuaranteeIconSrc(item);
-      if (!label || !iconSrc) return null;
+      const icon = mapGuaranteeIcon(item);
+      if (!label || !icon) return null;
       return {
         label,
-        iconSrc,
+        iconSrc: icon.src,
+        alt: icon.alt || "",
       };
     })
     .filter((item): item is NormalizedBespokeGuarantee => item != null);

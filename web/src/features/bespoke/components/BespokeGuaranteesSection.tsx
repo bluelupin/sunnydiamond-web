@@ -29,7 +29,13 @@ const BespokeGuaranteesSection = ({ guarantees }: BespokeGuaranteesSectionProps)
               )}
             >
               <div className="flex lg:size-16 size-10 items-center justify-center">
-                <Image src={item.iconSrc} alt="" width={64} height={64} className="size-full" aria-hidden />
+                <Image
+                  src={item.iconSrc}
+                  alt={item.alt}
+                  width={64}
+                  height={64}
+                  className="size-full"
+                />
               </div>
               <p className="max-w-236 font-gill lg:text-xl md:text-lg text-base font-normal leading-110 text-darkblack">
                 {item.label}

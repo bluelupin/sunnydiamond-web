@@ -45,8 +45,17 @@ export function resolveHomepageSeoMetadata(shellData: HomepageShellData): Homepa
   const homepageSeo = shellData?.homepage?.seo ?? null;
   const globalSeo = shellData?.global?.defaultSeo ?? null;
 
-  const title = resolveSeoString(homepageSeo?.metaTitle, globalSeo?.metaTitle, siteConfig.seo.defaultTitle);
-  const description = resolveSeoString(homepageSeo?.metaDescription, globalSeo?.metaDescription, siteConfig.seo.defaultDescription);
+  // Homepage CMS SEO first, then global CMS defaultSeo — never invent brand suffixes.
+  const title = resolveSeoString(
+    homepageSeo?.metaTitle,
+    globalSeo?.metaTitle,
+    siteConfig.seo.defaultTitle,
+  );
+  const description = resolveSeoString(
+    homepageSeo?.metaDescription,
+    globalSeo?.metaDescription,
+    siteConfig.seo.defaultDescription,
+  );
   const canonicalUrl =
     buildAbsoluteUrl(homepageSeo?.canonicalURL ?? homepageSeo?.canonicalUrl) ??
     buildAbsoluteUrl(globalSeo?.canonicalURL ?? globalSeo?.canonicalUrl) ??

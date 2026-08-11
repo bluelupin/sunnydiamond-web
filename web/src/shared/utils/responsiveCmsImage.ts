@@ -22,8 +22,8 @@ export function resolveCategoryNavImages(cat: CategoryNavigationItem) {
     mobileImageUrl: product.mobileUrl || product.desktopUrl || hover.mobileUrl || hover.desktopUrl,
     hoverDesktopImageUrl: hover.desktopUrl,
     hoverMobileImageUrl: hover.mobileUrl || hover.desktopUrl,
-    imageAlt: product.alt || hover.alt || title,
-    hoverAlt: hover.alt || product.alt || title,
+    imageAlt: product.alt || hover.alt || "",
+    hoverAlt: hover.alt || product.alt || "",
     hasDistinctHover:
       Boolean(hover.desktopUrl || hover.mobileUrl) &&
       (hover.desktopUrl !== product.desktopUrl || hover.mobileUrl !== product.mobileUrl),
@@ -38,10 +38,22 @@ export function resolveResponsiveCmsImage(media: ResponsiveMedia) {
   const mobileImage =
     (record as CategoryNavigationImage)?.mobileImage ?? desktopImage ?? null;
 
+  const blockAlt =
+    typeof (record as { altText?: unknown } | null | undefined)?.altText === "string"
+      ? (record as { altText?: string }).altText?.trim()
+      : undefined;
+  const caption =
+    typeof (record as { caption?: unknown } | null | undefined)?.caption === "string"
+      ? (record as { caption?: string }).caption?.trim()
+      : undefined;
+
   return {
     desktopUrl: resolveCmsMediaUrl(desktopImage),
     mobileUrl: resolveCmsMediaUrl(mobileImage),
     alt:
+      blockAlt ||
+      caption ||
+      resolveCmsAltText(record) ||
       resolveCmsAltText(desktopImage) ||
       resolveCmsAltText(mobileImage) ||
       "",

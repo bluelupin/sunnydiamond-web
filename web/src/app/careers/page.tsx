@@ -22,15 +22,13 @@ export async function generateMetadata(): Promise<Metadata> {
       throw new Error("Careers SEO unavailable");
     }
 
-    return {
-      ...constructMetadata({
-        title: seo.title,
-        description: seo.description,
-        canonicalPath: seo.canonicalPath,
-        ...(seo.image ? { image: seo.image } : {}),
-      }),
+    return constructMetadata({
+      title: seo.title || siteConfig.brand.name,
+      description: seo.description,
+      canonicalPath: seo.canonicalPath,
       ...(seo.keywords ? { keywords: seo.keywords } : {}),
-    };
+      ...(seo.image ? { image: seo.image } : {}),
+    });
   } catch {
     return constructMetadata({
       title: siteConfig.brand.name,
