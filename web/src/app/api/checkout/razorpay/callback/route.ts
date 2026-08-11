@@ -24,9 +24,27 @@ async function readRazorpayCallbackFields(request: NextRequest): Promise<{
   };
 }
 
-/** Prefer the host that received the Razorpay POST (local/prod stay aligned). */
+/**
+ * Prefer the host that received the Razorpay callback.
+ * Force http for localhost — Chrome gets ERR_SSL_PROTOCOL_ERROR on
+ * https://localhost when Next.js is only serving HTTP.
+ */
 function resolveCallbackOrigin(request: NextRequest): string {
-  return request.nextUrl.origin;
+  const forwardedHost = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
+  const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
+  const host = forwardedHost || request.headers.get("host")?.trim() || request.nextUrl.host;
+
+  let protocol = forwardedProto || request.nextUrl.protocol.replace(":", "") || "http";
+  const isLocalHost =
+    host.startsWith("localhost") ||
+    host.startsWith("127.0.0.1") ||
+    host.startsWith("[::1]");
+
+  if (isLocalHost) {
+    protocol = "http";
+  }
+
+  return `${protocol}://${host}`;
 }
 
 /** 303 so browsers follow with GET — Razorpay callbacks are POST. */

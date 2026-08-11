@@ -103,53 +103,25 @@ async function createRazorpayOrder(orderNumber: string): Promise<MagentoRazorpay
   return { rzpOrderId };
 }
 
-function buildRazorpayCheckoutConfig(method?: "card" | "upi" | "netbanking") {
-  if (method === "upi") {
-    return {
-      display: {
-        blocks: {
-          upi: {
-            name: "Pay via UPI",
-            instruments: [{ method: "upi" }],
-          },
-        },
-        sequence: ["block.upi"],
-        preferences: { show_default_blocks: false },
-      },
-    };
+/**
+ * Next.js local dev is HTTP-only. Razorpay sometimes follows callbacks as HTTPS
+ * on localhost, which triggers ERR_SSL_PROTOCOL_ERROR in Chrome.
+ */
+export function resolveBrowserCheckoutOrigin(origin = window.location.origin): string {
+  try {
+    const url = new URL(origin);
+    if (
+      url.hostname === "localhost" ||
+      url.hostname === "127.0.0.1" ||
+      url.hostname === "[::1]"
+    ) {
+      url.protocol = "http:";
+      return url.origin;
+    }
+    return url.origin;
+  } catch {
+    return origin;
   }
-
-  if (method === "netbanking") {
-    return {
-      display: {
-        blocks: {
-          netbanking: {
-            name: "Netbanking",
-            instruments: [{ method: "netbanking" }],
-          },
-        },
-        sequence: ["block.netbanking"],
-        preferences: { show_default_blocks: false },
-      },
-    };
-  }
-
-  if (method === "card") {
-    return {
-      display: {
-        blocks: {
-          card: {
-            name: "Pay via Card",
-            instruments: [{ method: "card" }],
-          },
-        },
-        sequence: ["block.card"],
-        preferences: { show_default_blocks: false },
-      },
-    };
-  }
-
-  return undefined;
 }
 
 export async function verifyRazorpayPayment(input: {
@@ -223,22 +195,14 @@ export async function collectRazorpayPayment(input: {
   }
 
   return new Promise<RazorpayPaymentOutcome>((resolve) => {
-    // Always use the live page origin so UPI/netbanking callbacks return to
-    // this same app (not a stale NEXT_PUBLIC_FRONTEND_URL / wrong port).
-    const callbackUrl = new URL("/api/checkout/razorpay/callback", window.location.origin);
-    callbackUrl.searchParams.set("order", input.orderNumber);
-
-    const usesRedirectFlow = input.method === "netbanking" || input.method === "upi";
-    const checkoutConfig = buildRazorpayCheckoutConfig(input.method);
-
+    // Standard Checkout: show every method enabled on the Razorpay key.
+    // Prefer the in-page handler (no redirect) so localhost never hits
+    // https://localhost → ERR_SSL_PROTOCOL_ERROR after UPI/netbanking.
     const razorpay = new window.Razorpay!({
       key: config.keyId,
       order_id: order.rzpOrderId,
       name: config.merchantName,
       description: `Order #${input.orderNumber}`,
-      callback_url: callbackUrl.toString(),
-      ...(usesRedirectFlow ? { redirect: true } : {}),
-      ...(checkoutConfig ? { config: checkoutConfig } : {}),
       prefill: {
         ...(input.prefill.name ? { name: input.prefill.name } : {}),
         ...(input.prefill.email ? { email: input.prefill.email } : {}),
