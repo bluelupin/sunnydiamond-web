@@ -10,11 +10,6 @@ import {
 import { INDIAN_STATES } from "@/features/checkout/constants/indianStates";
 import { DetailDarkButton, DetailTextLink } from "@/features/products/components/detail/shared";
 import { useCurrentLocationAddress } from "@/shared/hooks/use-current-location-address";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/shared/ui/dialog";
 import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
@@ -306,32 +301,17 @@ export function ProfileAddressFormSheet({
     </form>
   );
 
-  if (isMobile) {
-    return (
-      <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent
-          side="right"
-          overlayClassName="bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
-          className="flex h-screen max-h-screen w-full max-w-[472px] flex-col gap-0 border-0 bg-white p-0 sm:max-w-[472px] [&>button]:hidden"
-        >
-          <SheetTitle className="sr-only">{title}</SheetTitle>
-          {header}
-          {formBody}
-        </SheetContent>
-      </Sheet>
-    );
-  }
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        hideCloseButton
-        className="flex max-h-[90vh] w-full max-w-[520px] flex-col gap-0 border-neutral300 bg-white p-0 sm:max-w-[520px] sm:rounded-none"
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side="right"
+        overlayClassName="bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
+        className="flex h-screen max-h-screen w-full max-w-[472px] flex-col gap-0 border-0 bg-white p-0 sm:max-w-[472px] [&>button]:hidden"
       >
-        <DialogTitle className="sr-only">{title}</DialogTitle>
+        <SheetTitle className="sr-only">{title}</SheetTitle>
         {header}
         {formBody}
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }

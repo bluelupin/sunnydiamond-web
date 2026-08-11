@@ -16,7 +16,7 @@ import { profileTabsContent } from "../data/profileContent";
 import { useCustomerAddresses } from "../hooks/useCustomerAddresses";
 import { ProfileAddressFormSheet } from "./ProfileAddressFormSheet";
 import { ProfileDeleteAddressDialog } from "./ProfileDeleteAddressDialog";
-import { showDefaultAddressChangedToast } from "./ProfileDefaultAddressToast";
+import { useProfileDefaultAddressToast } from "./ProfileDefaultAddressToast";
 import {
   ProfileAddAddressCard,
   ProfileCard,
@@ -144,6 +144,8 @@ function AddressesSkeleton() {
 
 const ProfileAddressesSection = () => {
   const { toast } = useToast();
+  const { showDefaultAddressChangedToast, toast: defaultAddressToast } =
+    useProfileDefaultAddressToast();
   const {
     addresses,
     isLoading,
@@ -340,6 +342,8 @@ const ProfileAddressesSection = () => {
         onConfirmDelete={() => void handleConfirmDelete()}
         isDeleting={isSaving}
       />
+
+      {defaultAddressToast}
     </div>
   );
 };
