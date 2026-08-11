@@ -2,7 +2,7 @@
 
 import { cn } from "@/shared/utils/cn";
 
-const SUCCESS_ICON_SRC = "/images/icons/icon-application-success.svg";
+const SUCCESS_ICON_SRC = "/icons/icon-application-success.svg";
 
 /** Figma 1480:857 — green checkmark for application success. */
 const CareersApplicationSuccessIcon = ({ className }: { className?: string }) => {

@@ -13,7 +13,7 @@ const CareersShareIcon = ({ className }: CareersShareIconProps) => {
       <span
         className="absolute left-[calc(50%+0.25px)] top-[calc(50%-0.25px)] h-[19.5px] w-[16.5px] -translate-x-1/2 -translate-y-1/2"
       >
-        <img src="/images/icons/share-icon.svg" alt="" className="block size-full max-w-none" />
+        <img src="/icons/share-icon.svg" alt="" className="block size-full max-w-none" />
       </span>
     </span>
   );

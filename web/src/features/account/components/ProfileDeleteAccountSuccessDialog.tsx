@@ -9,7 +9,7 @@ import {
 } from "@/shared/ui/dialog";
 import { profileDetailsContent } from "../data/profileContent";
 
-const SUCCESS_ICON_SRC = "/images/icons/icon-application-success.svg";
+const SUCCESS_ICON_SRC = "/icons/icon-application-success.svg";
 
 type ProfileDeleteAccountSuccessDialogProps = {
   open: boolean;

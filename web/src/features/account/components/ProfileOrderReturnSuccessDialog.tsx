@@ -10,7 +10,7 @@ import {
 } from "@/shared/ui/dialog";
 import { profileTabsContent } from "../data/profileContent";
 
-const SUCCESS_ICON_SRC = "/images/icons/icon-application-success.svg";
+const SUCCESS_ICON_SRC = "/icons/icon-application-success.svg";
 
 type ProfileOrderReturnSuccessDialogProps = {
   open: boolean;

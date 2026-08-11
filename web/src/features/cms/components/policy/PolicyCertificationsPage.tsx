@@ -108,7 +108,7 @@ function PolicySearchField({
         <span className="absolute inset-[12.5%]">
           <span className="absolute inset-[-2.78%]">
             <Image
-              src="/images/icons/search-icon.svg"
+              src="/icons/search-icon.svg"
               alt=""
               width={24}
               height={24}

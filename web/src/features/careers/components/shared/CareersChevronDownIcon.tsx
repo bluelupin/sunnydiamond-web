@@ -2,7 +2,7 @@
 
 import { cn } from "@/shared/utils/cn";
 
-const CHEVRON_DOWN_ICON_SRC = "/images/icons/icon-chevron-down.svg";
+const CHEVRON_DOWN_ICON_SRC = "/icons/icon-chevron-down.svg";
 
 /** Figma 1480:3410 — 24px box, 15×7.5px chevron stroke. */
 const CareersChevronDownIcon = ({ className }: { className?: string }) => {
