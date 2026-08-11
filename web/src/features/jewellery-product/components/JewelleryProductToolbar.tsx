@@ -186,7 +186,7 @@ const SortDrawer = ({ open, sortValue, onClose, onSelect }: SortDrawerProps) => 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[70] flex flex-col md:hidden">
+    <div className="fixed inset-0 z-[80] flex flex-col md:hidden">
       <button
         type="button"
         aria-label="Close sort options"
@@ -197,7 +197,7 @@ const SortDrawer = ({ open, sortValue, onClose, onSelect }: SortDrawerProps) => 
         role="dialog"
         aria-modal="true"
         aria-label="Sort products"
-        className="shrink-0 animate-in slide-in-from-bottom duration-300"
+        className="shrink-0 animate-in slide-in-from-bottom duration-300 pb-[env(safe-area-inset-bottom,0px)]"
       >
         <div className="bg-white shadow-2xl">
           <div className="flex items-center justify-between border-b border-neutral300/50 px-6 py-6">
