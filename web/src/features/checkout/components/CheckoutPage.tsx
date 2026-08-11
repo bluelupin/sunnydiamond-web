@@ -11,12 +11,14 @@ import { CartPrimaryLink } from "@/features/cart/components/CartFlowUi";
 import type { CartLineItem } from "@/features/cart/types/cart.types";
 import { useMobileStickyFooterClearance } from "@/shared/hooks/use-mobile-sticky-footer-clearance";
 import { MobileStickyFooterSpacer } from "@/shared/ui/layout/MobileStickyFooterSpacer";
+import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 import CheckoutOrderSummary from "./CheckoutOrderSummary";
 import CheckoutMobileOrderSummaryDrawer from "./CheckoutMobileOrderSummaryDrawer";
 import CheckoutMobileStickyFooter from "./CheckoutMobileStickyFooter";
 import CheckoutOtpModal, { type CheckoutOtpVerifyResult } from "./CheckoutOtpModal";
 import { CheckoutFormStep, CheckoutPaymentStep } from "./CheckoutSteps";
 import CheckoutSuccessView from "./CheckoutSuccessView";
+import CheckoutPageSkeleton from "./skeletons/CheckoutPageSkeleton";
 import { registerGuestCustomerAfterOrder } from "../services/guestCustomerRegistration";
 import {
   useCheckoutFormValidation,
@@ -85,6 +87,7 @@ const CheckoutPage = () => {
   const shippingPrefillAppliedRef = useRef(false);
   const verifiedCheckoutOtpRef = useRef<string | null>(null);
   const lastCheckedGuestEmailRef = useRef("");
+  const orderPlacedToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [step, setStep] = useState<CheckoutStep>("form");
   const [showOtpModal, setShowOtpModal] = useState(false);
@@ -100,6 +103,7 @@ const CheckoutPage = () => {
   const [payment, setPayment] = useState<CheckoutPaymentData>(createEmptyPaymentForm);
   const [offersOpen, setOffersOpen] = useState(false);
   const [orderSummaryOpen, setOrderSummaryOpen] = useState(false);
+  const [orderPlacedToastMessage, setOrderPlacedToastMessage] = useState<string | null>(null);
   const { footerRef, clearancePx } = useMobileStickyFooterClearance();
 
   const formValidation = useCheckoutFormValidation(form);
@@ -118,6 +122,34 @@ const CheckoutPage = () => {
         "Add a delivery address in My Addresses on your profile, then return here to continue.",
     });
   };
+
+  const dismissOrderPlacedToast = useCallback(() => {
+    if (orderPlacedToastTimeoutRef.current) {
+      clearTimeout(orderPlacedToastTimeoutRef.current);
+      orderPlacedToastTimeoutRef.current = null;
+    }
+    setOrderPlacedToastMessage(null);
+  }, []);
+
+  const showOrderPlacedToast = useCallback(
+    (orderNumber: string) => {
+      dismissOrderPlacedToast();
+      setOrderPlacedToastMessage(`Order #${orderNumber} has been placed successfully.`);
+      orderPlacedToastTimeoutRef.current = setTimeout(() => {
+        setOrderPlacedToastMessage(null);
+        orderPlacedToastTimeoutRef.current = null;
+      }, appStatusToastDurationMs);
+    },
+    [dismissOrderPlacedToast],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (orderPlacedToastTimeoutRef.current) {
+        clearTimeout(orderPlacedToastTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const updateForm = (field: keyof CheckoutFormData, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -194,13 +226,10 @@ const CheckoutPage = () => {
       clearPendingCheckoutPayment();
       clearCart();
       setStep("success");
-      toast({
-        title: "Order placed!",
-        description: `Order #${input.orderNumber} has been placed successfully.`,
-      });
+      showOrderPlacedToast(input.orderNumber);
       window.history.replaceState({}, "", "/checkout");
     },
-    [clearCart, refreshAuth, toast],
+    [clearCart, refreshAuth, showOrderPlacedToast],
   );
 
   const paymentStatus = searchParams?.get("payment");
@@ -236,10 +265,7 @@ const CheckoutPage = () => {
       setStep("success");
       clearPendingCheckoutPayment();
       window.history.replaceState({}, "", "/checkout");
-      toast({
-        title: "Payment received",
-        description: `Order #${paymentOrderNumber} was placed successfully.`,
-      });
+      showOrderPlacedToast(paymentOrderNumber);
       return;
     }
 
@@ -253,7 +279,7 @@ const CheckoutPage = () => {
       wasAuthenticated: pending.isAuthenticated,
       guestOtp: pending.guestOtp,
     });
-  }, [finalizeOrderSuccess, isPaymentReturn, paymentOrderNumber, paymentStatus, toast, items, totalPrice]);
+  }, [finalizeOrderSuccess, isPaymentReturn, paymentOrderNumber, paymentStatus, showOrderPlacedToast, items, totalPrice]);
 
   useEffect(() => {
     const handlePageShow = () => {
@@ -316,13 +342,7 @@ const CheckoutPage = () => {
   }, [addressesLoading, defaultShippingAddress, isAuthenticated]);
 
   if (isHydrating || isAuthPrefillLoading) {
-    return (
-      <section className="flex min-h-[60vh] flex-col items-center justify-center bg-gray300 px-4 py-20 text-center">
-        <p className="sr-only" aria-live="polite">
-          Loading checkout
-        </p>
-      </section>
-    );
+    return <CheckoutPageSkeleton />;
   }
 
   if (items.length === 0 && step !== "success" && !isPaymentReturn) {
@@ -338,13 +358,19 @@ const CheckoutPage = () => {
 
   if (step === "success") {
     return (
-      <CheckoutSuccessView
-        contact={form.phoneOrEmail}
-        items={placedItems}
-        totalPrice={placedTotal}
-        orderNumber={placedOrderNumber}
-        isAuthenticated={isAuthenticated || orderSuccessAuthenticated}
-      />
+      <>
+        <CheckoutSuccessView
+          contact={form.phoneOrEmail}
+          items={placedItems}
+          totalPrice={placedTotal}
+          orderNumber={placedOrderNumber}
+          isAuthenticated={isAuthenticated || orderSuccessAuthenticated}
+        />
+        <AppStatusToast
+          open={Boolean(orderPlacedToastMessage)}
+          message={orderPlacedToastMessage ?? ""}
+        />
+      </>
     );
   }
 
