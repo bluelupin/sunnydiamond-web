@@ -349,7 +349,10 @@ const mapTrustBadge = (
 
   return {
     label,
-    icon: { ...icon, alt: icon.alt || "" },
+    icon: {
+      ...icon,
+      alt: cleanText(badge.iconAltText) || icon.alt || "",
+    },
   };
 };
 

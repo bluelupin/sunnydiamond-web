@@ -83,7 +83,10 @@ export function resolveCmsAltText(image: unknown): string | undefined {
   const record = image as Record<string, unknown>;
 
   const componentAlt =
-    cleanAlt(record.altText) ?? cleanAlt(record.alt) ?? cleanAlt(record.caption);
+    cleanAlt(record.altText) ??
+    cleanAlt(record.iconAltText) ??
+    cleanAlt(record.alt) ??
+    cleanAlt(record.caption);
   if (componentAlt) return componentAlt;
 
   const nestedAlt =

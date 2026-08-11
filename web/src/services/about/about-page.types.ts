@@ -102,6 +102,8 @@ export type StrapiAboutBrandTaglineSection = {
 export type StrapiAboutTrustBadge = {
   id?: number;
   label?: string | null;
+  /** Some CMS badge components expose "Icon Alt Text" at the badge level */
+  iconAltText?: string | null;
   icon?: StrapiAboutResponsiveImage | null;
 };
 

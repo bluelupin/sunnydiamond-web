@@ -387,6 +387,9 @@ const mapGuaranteeIcon = (
   let cmsUrl: string | null = null;
   let cmsAlt: string | undefined;
 
+  // CMS field "Icon Alt Text" lives on the highlight itself (not the media file).
+  const highlightAlt = cleanText(highlight.iconAltText);
+
   if ("desktopImage" in icon || "mobileImage" in icon) {
     const responsive = icon as StrapiBespokeResponsiveImage;
     cmsUrl =
@@ -394,13 +397,14 @@ const mapGuaranteeIcon = (
       resolveCmsMediaUrl(responsive.mobileImage) ??
       null;
     cmsAlt =
+      highlightAlt ??
       cleanText(responsive.altText) ??
       cleanText(responsive.caption) ??
       resolveCmsAltText(responsive.desktopImage) ??
       resolveCmsAltText(responsive.mobileImage);
   } else {
     cmsUrl = resolveCmsMediaUrl(icon) ?? null;
-    cmsAlt = resolveCmsAltText(icon);
+    cmsAlt = highlightAlt ?? resolveCmsAltText(icon);
   }
 
   const src = resolveGuaranteeIconSrc(highlight.label, cmsUrl);

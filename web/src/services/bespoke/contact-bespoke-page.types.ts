@@ -98,6 +98,8 @@ export type StrapiBespokeServiceHighlight = {
   label?: string | null;
   sortOrder?: number | null;
   isActive?: boolean | null;
+  /** CMS "Icon Alt Text" on the service-highlight component */
+  iconAltText?: string | null;
   icon?: StrapiBespokeResponsiveImage | StrapiImagePayload | null;
 };
 
