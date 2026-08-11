@@ -227,7 +227,7 @@ const JewelleryFilterDrawer = ({
   }
 
   return (
-    <div className="fixed inset-0 z-[70] flex max-md:flex-col max-md:overflow-hidden md:justify-end">
+    <div className="fixed inset-0 z-[80] flex max-md:flex-col max-md:overflow-hidden md:justify-end">
       <button
         type="button"
         aria-label="Close filters"
