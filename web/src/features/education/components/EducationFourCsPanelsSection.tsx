@@ -117,7 +117,11 @@ const PanelMedia = ({
                   <Image
                     key={`${panel.id}-${activeIndex}-dual-0-${cutDualImages[0]}`}
                     src={cutDualImages[0]}
-                    alt=""
+                    alt={
+                      slider.options[activeIndex]?.dualImageAlts?.[0] ||
+                      slider.options[activeIndex]?.imageAlt ||
+                      ""
+                    }
                     fill
                     className="object-cover"
                     sizes="200px"
@@ -127,7 +131,11 @@ const PanelMedia = ({
                   <Image
                     key={`${panel.id}-${activeIndex}-dual-1-${cutDualImages[1]}`}
                     src={cutDualImages[1]}
-                    alt=""
+                    alt={
+                      slider.options[activeIndex]?.dualImageAlts?.[1] ||
+                      slider.options[activeIndex]?.imageAlt ||
+                      ""
+                    }
                     fill
                     className="object-cover"
                     sizes="200px"
@@ -139,7 +147,7 @@ const PanelMedia = ({
                 <Image
                   key={`${panel.id}-${activeIndex}-${activeImage}`}
                   src={activeImage}
-                  alt=""
+                  alt={slider.options[activeIndex]?.imageAlt || ""}
                   fill
                   className="object-cover"
                   sizes="200px"

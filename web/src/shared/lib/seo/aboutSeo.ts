@@ -11,9 +11,13 @@ export function resolveAboutSeoMetadata(page: NormalizedAboutPage | null) {
       ? WORLD_OF_SUNNY_PATH
       : cmsSeo?.canonicalPath ?? WORLD_OF_SUNNY_PATH;
 
+  const cmsTitle = cmsSeo?.metaTitle?.trim();
+  const cmsDescription = cmsSeo?.metaDescription?.trim();
+
   return {
-    title: cmsSeo?.metaTitle ?? seoContent.about.title,
-    description: cmsSeo?.metaDescription ?? seoContent.about.description,
+    // Prefer CMS exactly; static fallbacks only when CMS SEO is missing.
+    title: cmsTitle || seoContent.about.title,
+    description: cmsDescription || seoContent.about.description,
     canonicalPath,
     keywords: cmsSeo?.metaKeywords,
   };

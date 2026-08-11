@@ -98,6 +98,8 @@ export type StrapiBespokeServiceHighlight = {
   label?: string | null;
   sortOrder?: number | null;
   isActive?: boolean | null;
+  /** CMS "Icon Alt Text" on the service-highlight component */
+  iconAltText?: string | null;
   icon?: StrapiBespokeResponsiveImage | StrapiImagePayload | null;
 };
 
@@ -210,6 +212,7 @@ export type NormalizedBespokePastCreations = {
 export type NormalizedBespokeGuarantee = {
   iconSrc: string;
   label: string;
+  alt: string;
 };
 
 export type NormalizedBespokeGetInTouch = {

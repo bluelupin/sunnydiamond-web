@@ -22,7 +22,6 @@ export const siteConfig = {
   },
   seo: {
     defaultTitle: "Sunny Diamonds — Premium Diamond Jewellery",
-    titleTemplate: "%s | Sunny Diamonds",
     defaultDescription:
       "Handcrafted premium and custom diamond jewellery. Explore GIA-certified diamonds, bespoke designs, and timeless elegance.",
     siteUrl: getPublicSiteUrl(),

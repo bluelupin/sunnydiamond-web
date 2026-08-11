@@ -104,6 +104,7 @@ export type StrapiGiftingFinishingTouchSection = {
 export type StrapiGiftingTrustBadge = {
   id?: number;
   label?: string | null;
+  iconAltText?: string | null;
   icon?: StrapiGiftingResponsiveImage | null;
 };
 
@@ -209,6 +210,7 @@ export type NormalizedGiftingFinishingTouch = {
 export type NormalizedGiftingTrustBadge = {
   iconSrc: string;
   label: string;
+  alt: string;
 };
 
 export type NormalizedGiftingSeo = {

@@ -80,7 +80,6 @@ export function resolveHeroContent(
     heroImage?.altText ||
     resolveCmsAltText(heroImage?.desktopImage ?? heroImage) ||
     resolveCmsAltText(heroImage?.mobileImage ?? heroImage?.desktopImage) ||
-    hero.title ||
     "";
 
   return {
@@ -121,7 +120,6 @@ export function resolveCraftingRarityContent(
   const cutoutAlt =
     cutoutImages.alt ||
     craftingBrilliance?.cutoutImage?.altText?.trim() ||
-    titleSource ||
     "";
 
   return {

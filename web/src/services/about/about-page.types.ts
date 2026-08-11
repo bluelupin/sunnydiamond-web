@@ -102,6 +102,8 @@ export type StrapiAboutBrandTaglineSection = {
 export type StrapiAboutTrustBadge = {
   id?: number;
   label?: string | null;
+  /** Some CMS badge components expose "Icon Alt Text" at the badge level */
+  iconAltText?: string | null;
   icon?: StrapiAboutResponsiveImage | null;
 };
 
@@ -209,6 +211,7 @@ export type NormalizedAboutCraft = {
   title: string;
   videoUrl?: string;
   posterUrl?: string;
+  posterAlt?: string;
   overlayOpacity: number;
   centerImage?: NormalizedResponsiveImage;
   cards: NormalizedCraftCard[];

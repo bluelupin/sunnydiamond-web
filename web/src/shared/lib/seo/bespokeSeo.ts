@@ -6,10 +6,12 @@ const fallback = footerPages.bespokeJewellery;
 
 export function resolveBespokeSeoMetadata(page: NormalizedContactBespokePage | null) {
   const cmsSeo = page?.seo;
+  const cmsTitle = cmsSeo?.metaTitle?.trim();
+  const cmsDescription = cmsSeo?.metaDescription?.trim();
 
   return {
-    title: cmsSeo?.metaTitle ?? fallback.title,
-    description: cmsSeo?.metaDescription ?? fallback.description,
+    title: cmsTitle || fallback.title,
+    description: cmsDescription || fallback.description,
     canonicalPath: cmsSeo?.canonicalPath ?? "/bespoke-jewellery",
     keywords: cmsSeo?.metaKeywords,
     image: cmsSeo?.ogImageUrl ?? page?.hero?.image.desktopUrl,

@@ -14,10 +14,7 @@ export const viewport: Viewport = {
   themeColor: "#C6A87D",
 };
 
-const TITLE = {
-  default: "Sunny Diamonds — Premium Diamond Jewellery",
-  template: "%s | Sunny Diamonds",
-} as const;
+const TITLE = "Sunny Diamonds — Premium Diamond Jewellery";
 
 const DESCRIPTION =
   "Handcrafted premium and custom diamond jewellery. Explore GIA-certified diamonds, bespoke designs, and timeless elegance.";
@@ -25,9 +22,9 @@ const DESCRIPTION =
 const googleSiteVerification = getGoogleSiteVerification();
 
 export const metadata: Metadata = {
+  // No title template — page/CMS titles are applied exactly via constructMetadata.
   title: TITLE,
   description: DESCRIPTION,
-  keywords: ["diamond", "jewelry", "premium", "luxury", "sunny diamonds"],
   authors: [{ name: "Sunny Diamonds" }],
   creator: "Sunny Diamonds",
   applicationName: "Sunny Diamonds",
@@ -37,7 +34,7 @@ export const metadata: Metadata = {
     locale: "en_IN",
     url: siteEnv.baseUrl,
     siteName: "Sunny Diamonds",
-    title: TITLE.default,
+    title: TITLE,
     description: DESCRIPTION,
     images: [
       {
@@ -50,7 +47,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE.default,
+    title: TITLE,
     description: DESCRIPTION,
     images: [getAbsoluteUrl("/og-image.jpg")],
   },

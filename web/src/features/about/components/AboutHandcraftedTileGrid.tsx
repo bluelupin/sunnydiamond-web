@@ -14,8 +14,6 @@ type AboutHandcraftedTileGridProps = {
   cards: NormalizedCraftCard[];
 };
 
-const craftPhotoClass = "h-full w-full bg-cover bg-center";
-
 const STAGGER_MS = 75;
 const REVEAL_DURATION = "duration-700 ease-reveal";
 
@@ -65,10 +63,12 @@ function CraftPhotoTile({
   className,
   imageUrl,
   mobileImageUrl,
+  imageAlt,
 }: {
   className?: string;
   imageUrl?: string;
   mobileImageUrl?: string;
+  imageAlt?: string;
 }) {
   const resolvedUrl = imageUrl ?? mobileImageUrl;
   if (!resolvedUrl) {
@@ -76,11 +76,15 @@ function CraftPhotoTile({
   }
 
   return (
-    <div
-      className={cn(craftPhotoClass, className)}
-      style={{ backgroundImage: `url(${resolvedUrl})` }}
-      aria-hidden
-    />
+    <div className={cn("relative overflow-hidden", className)}>
+      <Image
+        src={resolvedUrl}
+        alt={imageAlt?.trim() || ""}
+        fill
+        className="object-cover object-center"
+        sizes="(max-width: 768px) 50vw, 25vw"
+      />
+    </div>
   );
 }
 
@@ -161,6 +165,7 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
           className={className}
           imageUrl={card.imageUrl}
           mobileImageUrl={card.mobileImageUrl}
+          imageAlt={card.imageAlt}
         />
       );
     }
