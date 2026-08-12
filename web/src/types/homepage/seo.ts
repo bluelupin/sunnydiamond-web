@@ -4,6 +4,7 @@ export type HomepageSeo = {
   id?: number;
   metaTitle?: string;
   metaDescription?: string;
+  metaKeywords?: string;
   shareImage?: StrapiImage;
   ogImage?: StrapiImage;
   canonicalURL?: string;

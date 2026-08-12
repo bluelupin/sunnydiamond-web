@@ -7,6 +7,7 @@ import type {
   DiamondsForEveryoneSectionData,
   SavingsPlanStep,
 } from "@/types/homepage/diamondsForEveryoneSection";
+import { resolveResponsiveCmsImage } from "@/shared/utils/responsiveCmsImage";
 
 export type ResolvedDiamondsForEveryoneSection = {
   isActive?: boolean;
@@ -15,6 +16,9 @@ export type ResolvedDiamondsForEveryoneSection = {
   subtitle?: string;
   steps?: SavingsPlanStep[];
   cta?: DiamondsForEveryoneSectionCta;
+  backgroundDesktopUrl?: string;
+  backgroundMobileUrl?: string;
+  backgroundAlt: string;
   fromCms: boolean;
 };
 
@@ -59,6 +63,9 @@ export function resolveDiamondsForEveryoneSection(
     editorialData?.diamondsForEveryoneSection ?? null;
   const card = findDiamondsForEveryoneCard(editorialData?.bespokeForYouCards);
   const fromCms = Boolean(dedicated || card);
+  const background = resolveResponsiveCmsImage(
+    (dedicated?.backgroundImage ?? null) as Parameters<typeof resolveResponsiveCmsImage>[0],
+  );
 
   return {
     isActive: dedicated?.isActive ?? card?.isActive,
@@ -70,6 +77,9 @@ export function resolveDiamondsForEveryoneSection(
       card?.description,
     steps: dedicated?.steps,
     cta: dedicated?.cta ?? mapCardCta(card ?? {}),
+    backgroundDesktopUrl: background.desktopUrl || undefined,
+    backgroundMobileUrl: background.mobileUrl || undefined,
+    backgroundAlt: background.alt,
     fromCms,
   };
 }

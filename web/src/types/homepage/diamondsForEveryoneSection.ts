@@ -22,6 +22,11 @@ export type DiamondsForEveryoneSectionData = {
   steps?: SavingsPlanStep[];
   cta?: DiamondsForEveryoneSectionCta;
   isActive?: boolean;
+  backgroundImage?: {
+    desktopImage?: unknown;
+    mobileImage?: unknown;
+    altText?: string;
+  } | null;
 };
 
 export type DiamondsForEveryoneSectionResponse = {

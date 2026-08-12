@@ -9,6 +9,9 @@ export type ResolvedCraftsmanshipSection = {
   desktopImageUrl?: string;
   mobileImageUrl?: string;
   imageAlt: string;
+  backgroundDesktopUrl?: string;
+  backgroundMobileUrl?: string;
+  backgroundAlt: string;
   fromCms: boolean;
 };
 
@@ -57,6 +60,20 @@ export function resolveCraftsmanshipSection(
     resolveCmsAltText(mobileSource) ||
     sectionTitle;
 
+  const backgroundMedia = section?.backgroundImage;
+  const backgroundDesktopSource =
+    backgroundMedia?.desktopImage ?? backgroundMedia ?? null;
+  const backgroundMobileSource =
+    backgroundMedia?.mobileImage ?? backgroundMedia?.desktopImage ?? backgroundMedia ?? null;
+  const backgroundDesktopUrl = resolveCmsMediaUrl(backgroundDesktopSource);
+  const backgroundMobileUrl = resolveCmsMediaUrl(backgroundMobileSource);
+  const backgroundAlt =
+    backgroundMedia?.altText?.trim() ||
+    resolveCmsAltText(backgroundMedia) ||
+    resolveCmsAltText(backgroundDesktopSource) ||
+    resolveCmsAltText(backgroundMobileSource) ||
+    "";
+
   return {
     isActive: section?.isActive,
     sectionTitle,
@@ -64,6 +81,9 @@ export function resolveCraftsmanshipSection(
     desktopImageUrl,
     mobileImageUrl,
     imageAlt,
+    backgroundDesktopUrl,
+    backgroundMobileUrl,
+    backgroundAlt,
     fromCms: Boolean(section),
   };
 }
