@@ -120,9 +120,9 @@ export function useAuthFlow({
   const returnUrl = sanitizeReturnUrl(returnUrlInput);
   const [step, setStep] = useState<AuthFlowStep>("sign-in");
   const [identifier, setIdentifier] = useState("");
-  const [countryCode, setCountryCode] = useState(DEFAULT_COUNTRY_CODE);
+  const [countryCode, setCountryCode] = useState<string>(DEFAULT_COUNTRY_CODE);
   const [verifiedPhone, setVerifiedPhone] = useState("");
-  const [verifiedCountryCode, setVerifiedCountryCode] = useState(DEFAULT_COUNTRY_CODE);
+  const [verifiedCountryCode, setVerifiedCountryCode] = useState<string>(DEFAULT_COUNTRY_CODE);
   const [identifierError, setIdentifierError] = useState<string | undefined>();
   const [otp, setOtp] = useState<string[]>(Array(LOGIN_OTP_LENGTH).fill(""));
   const [otpError, setOtpError] = useState<string | undefined>();
