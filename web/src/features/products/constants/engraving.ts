@@ -48,6 +48,37 @@ export function clampEngravingText(text: string, maxCharacters: number): string 
   return text.slice(0, maxCharacters);
 }
 
+/** Tailwind classes for live engraving preview typography. */
+export function resolveEngravingPreviewFontClass(font: string): string {
+  const normalized = font.trim().toLowerCase();
+
+  if (normalized.includes("larken")) {
+    return "font-larken font-light";
+  }
+
+  if (normalized.includes("gill")) {
+    return "font-gill font-normal";
+  }
+
+  return "";
+}
+
+/** Class + inline family so Magento font labels render in the preview. */
+export function resolveEngravingPreviewTypography(font: string): {
+  className: string;
+  style: { fontFamily: string };
+} {
+  const trimmed = font.trim();
+  const fallbackFamily = "Gill Sans, sans-serif";
+
+  return {
+    className: resolveEngravingPreviewFontClass(trimmed),
+    style: {
+      fontFamily: trimmed ? `${trimmed}, sans-serif` : fallbackFamily,
+    },
+  };
+}
+
 export function isProductEngravingEnabled(
   engraving?: ProductEngravingConfig | null,
 ): boolean {

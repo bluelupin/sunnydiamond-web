@@ -487,6 +487,7 @@ const ProductDetailSidebar = ({
           open={isEngravingOpen}
           onClose={() => setIsEngravingOpen(false)}
           previewImage={engravingConfig.previewImage}
+          productImage={displayProduct.image}
           fonts={engravingConfig.fonts}
           maxCharacters={engravingConfig.maxCharacters}
           initialValue={engravingSelection}
