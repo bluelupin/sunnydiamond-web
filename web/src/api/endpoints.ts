@@ -46,8 +46,8 @@ export const STRAPI_ENDPOINTS = {
   blogPosts: "api/blog-posts",
   policyCertificationsPage: "api/policy-certifications-page",
   legalPages: "api/legal-pages",
-  /** @deprecated Legacy single-type slug — prefer split homepage endpoints */
-  homepage: "homepage",
+  /** Homepage single-type — used for SEO fields the shell endpoint omits (metaKeywords). */
+  homepage: "api/homepage",
 } as const;
 
 export type StrapiEndpoint = (typeof STRAPI_ENDPOINTS)[keyof typeof STRAPI_ENDPOINTS];
