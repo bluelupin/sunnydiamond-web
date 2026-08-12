@@ -87,7 +87,7 @@ const CheckoutPage = () => {
   const shippingPrefillAppliedRef = useRef(false);
   const verifiedCheckoutOtpRef = useRef<string | null>(null);
   const lastCheckedGuestEmailRef = useRef("");
-  const orderPlacedToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const checkoutStatusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [step, setStep] = useState<CheckoutStep>("form");
   const [showOtpModal, setShowOtpModal] = useState(false);
@@ -103,7 +103,7 @@ const CheckoutPage = () => {
   const [payment, setPayment] = useState<CheckoutPaymentData>(createEmptyPaymentForm);
   const [offersOpen, setOffersOpen] = useState(false);
   const [orderSummaryOpen, setOrderSummaryOpen] = useState(false);
-  const [orderPlacedToastMessage, setOrderPlacedToastMessage] = useState<string | null>(null);
+  const [checkoutStatusToastMessage, setCheckoutStatusToastMessage] = useState<string | null>(null);
   const { footerRef, clearancePx } = useMobileStickyFooterClearance();
 
   const formValidation = useCheckoutFormValidation(form);
@@ -123,33 +123,47 @@ const CheckoutPage = () => {
     });
   };
 
-  const dismissOrderPlacedToast = useCallback(() => {
-    if (orderPlacedToastTimeoutRef.current) {
-      clearTimeout(orderPlacedToastTimeoutRef.current);
-      orderPlacedToastTimeoutRef.current = null;
+  const dismissCheckoutStatusToast = useCallback(() => {
+    if (checkoutStatusToastTimeoutRef.current) {
+      clearTimeout(checkoutStatusToastTimeoutRef.current);
+      checkoutStatusToastTimeoutRef.current = null;
     }
-    setOrderPlacedToastMessage(null);
+    setCheckoutStatusToastMessage(null);
   }, []);
+
+  const showCheckoutStatusToast = useCallback(
+    (message: string) => {
+      dismissCheckoutStatusToast();
+      setCheckoutStatusToastMessage(message);
+      checkoutStatusToastTimeoutRef.current = setTimeout(() => {
+        setCheckoutStatusToastMessage(null);
+        checkoutStatusToastTimeoutRef.current = null;
+      }, appStatusToastDurationMs);
+    },
+    [dismissCheckoutStatusToast],
+  );
 
   const showOrderPlacedToast = useCallback(
     (orderNumber: string) => {
-      dismissOrderPlacedToast();
-      setOrderPlacedToastMessage(`Order #${orderNumber} has been placed successfully.`);
-      orderPlacedToastTimeoutRef.current = setTimeout(() => {
-        setOrderPlacedToastMessage(null);
-        orderPlacedToastTimeoutRef.current = null;
-      }, appStatusToastDurationMs);
+      showCheckoutStatusToast(`Order #${orderNumber} has been placed successfully.`);
     },
-    [dismissOrderPlacedToast],
+    [showCheckoutStatusToast],
   );
 
   useEffect(() => {
     return () => {
-      if (orderPlacedToastTimeoutRef.current) {
-        clearTimeout(orderPlacedToastTimeoutRef.current);
+      if (checkoutStatusToastTimeoutRef.current) {
+        clearTimeout(checkoutStatusToastTimeoutRef.current);
       }
     };
   }, []);
+
+  const checkoutStatusToast = (
+    <AppStatusToast
+      open={Boolean(checkoutStatusToastMessage)}
+      message={checkoutStatusToastMessage ?? ""}
+    />
+  );
 
   const updateForm = (field: keyof CheckoutFormData, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -244,10 +258,7 @@ const CheckoutPage = () => {
     if (paymentStatus === "failed") {
       paymentReturnHandledRef.current = true;
       clearPendingCheckoutPayment();
-      toast({
-        title: "Payment failed",
-        description: "Your payment could not be completed. Please try again.",
-      });
+      showCheckoutStatusToast("Your payment could not be completed. Please try again.");
       window.history.replaceState({}, "", "/checkout");
       return;
     }
@@ -279,7 +290,7 @@ const CheckoutPage = () => {
       wasAuthenticated: pending.isAuthenticated,
       guestOtp: pending.guestOtp,
     });
-  }, [finalizeOrderSuccess, isPaymentReturn, paymentOrderNumber, paymentStatus, showOrderPlacedToast, items, totalPrice]);
+  }, [finalizeOrderSuccess, isPaymentReturn, paymentOrderNumber, paymentStatus, showCheckoutStatusToast, showOrderPlacedToast, items, totalPrice]);
 
   useEffect(() => {
     const handlePageShow = () => {
@@ -347,12 +358,15 @@ const CheckoutPage = () => {
 
   if (items.length === 0 && step !== "success" && !isPaymentReturn) {
     return (
-      <section className="flex min-h-[60vh] flex-col items-center justify-center gap-4 bg-gray300 px-4 py-20 text-center">
-        <h1 className="font-larken text-2xl font-light leading-110 text-darkblack">
-          No items to checkout
-        </h1>
-        <CartPrimaryLink href="/jewellery" className="w-fit">Continue Shopping</CartPrimaryLink>
-      </section>
+      <>
+        <section className="flex min-h-[60vh] flex-col items-center justify-center gap-4 bg-gray300 px-4 py-20 text-center">
+          <h1 className="font-larken text-2xl font-light leading-110 text-darkblack">
+            No items to checkout
+          </h1>
+          <CartPrimaryLink href="/jewellery" className="w-fit">Continue Shopping</CartPrimaryLink>
+        </section>
+        {checkoutStatusToast}
+      </>
     );
   }
 
@@ -366,10 +380,7 @@ const CheckoutPage = () => {
           orderNumber={placedOrderNumber}
           isAuthenticated={isAuthenticated || orderSuccessAuthenticated}
         />
-        <AppStatusToast
-          open={Boolean(orderPlacedToastMessage)}
-          message={orderPlacedToastMessage ?? ""}
-        />
+        {checkoutStatusToast}
       </>
     );
   }
@@ -593,10 +604,9 @@ const CheckoutPage = () => {
               clearPendingCheckoutPayment();
               await resetRazorpayCart(order.orderNumber);
               await refreshCart();
-              toast({
-                title: "Payment cancelled",
-                description: "Your bag has been kept as it was. You can try again anytime.",
-              });
+              showCheckoutStatusToast(
+                "Payment cancelled. Your bag has been kept as it was. You can try again anytime.",
+              );
               return;
             }
 
@@ -629,10 +639,7 @@ const CheckoutPage = () => {
                 ? error.message
                 : "We could not place your order. Please try again.";
 
-          toast({
-            title: "Order could not be placed",
-            description,
-          });
+          showCheckoutStatusToast(description);
         } finally {
           setSubmitting(false);
         }
@@ -773,6 +780,7 @@ const CheckoutPage = () => {
         onClose={() => setShowOtpModal(false)}
         onVerify={handleOtpVerified}
       />
+      {checkoutStatusToast}
     </section>
   );
 };

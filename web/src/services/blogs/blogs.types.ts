@@ -50,6 +50,7 @@ export type StrapiBlogPost = {
   heroImage?: StrapiBlogResponsiveImage | null;
   /** Responsive media component: desktopImage / mobileImage */
   coverImage?: StrapiBlogResponsiveImage | null;
+  cutoutImage?: StrapiBlogResponsiveImage | null;
   blog_category?: StrapiBlogCategory | null;
   seo?: StrapiBlogSeo | null;
   duration?: string | null;
@@ -61,15 +62,25 @@ export type StrapiBlogPost = {
 export type StrapiBlogLandingPage = {
   heroSection?: {
     title?: string | null;
+    isActive?: boolean | null;
     backgroundImage?: StrapiBlogResponsiveImage | null;
   } | null;
+  /**
+   * Section chrome only: toggle + background texture.
+   * The selected article is `featuredBlog` on the landing page root.
+   */
   featuredBlogSection?: {
+    id?: number;
+    isActive?: boolean | null;
+    backgroundImage?: StrapiBlogResponsiveImage | null;
+    /** Legacy / unused on current CMS schema — kept optional for safety */
     title?: string | null;
     excerpt?: string | null;
     readNowLabel?: string | null;
-    backgroundImage?: StrapiBlogResponsiveImage | null;
     post?: StrapiBlogPost | null;
   } | null;
+  /** CMS oneToOne → blog-post: the article shown in the featured block */
+  featuredBlog?: StrapiBlogPost | null;
   blogCategory?: StrapiBlogCategory[] | null;
   seo?: StrapiBlogSeo | null;
 };

@@ -40,7 +40,7 @@ const CareersSuccessJobIdCopy = ({ jobCode, label, className }: CareersSuccessJo
             <Check className="absolute inset-0 m-auto size-4" strokeWidth={1.5} aria-hidden />
           ) : (
             <span className="absolute inset-[16.67%_14.58%_14.58%_16.67%]">
-              <img src="/images/icons/copy-icon.svg" alt="" className="block size-full max-w-none" />
+              <img src="/icons/copy-icon.svg" alt="" className="block size-full max-w-none" />
             </span>
           )}
         </button>

@@ -26,6 +26,7 @@ export type BlogFeaturedPost = {
   imageSrc: string | null;
   imageAlt: string;
   backgroundSrc: string | null;
+  backgroundAlt?: string;
   readNowLabel: string;
   href: string;
 };

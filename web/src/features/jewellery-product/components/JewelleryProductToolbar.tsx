@@ -209,7 +209,7 @@ const SortDrawer = ({ open, sortValue, onClose, onSelect }: SortDrawerProps) => 
               className="inline-flex size-8 shrink-0 items-center justify-center"
             >
               <Image
-                src="/images/icons/menu-close.svg"
+                src="/icons/menu-close.svg"
                 alt=""
                 width={32}
                 height={32}

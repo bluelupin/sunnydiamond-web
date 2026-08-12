@@ -17,7 +17,7 @@ function CopyIcon({ copied }: { copied: boolean }) {
         <Check className="absolute inset-0 m-auto size-4 text-darkblack" strokeWidth={1.5} />
       ) : (
         <span className="absolute inset-[16.67%_14.58%_14.58%_16.67%]">
-          <img src="/images/icons/copy-icon.svg" alt="" className="block size-full max-w-none" />
+          <img src="/icons/copy-icon.svg" alt="" className="block size-full max-w-none" />
         </span>
       )}
     </span>

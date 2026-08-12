@@ -14,11 +14,11 @@ import { cn } from "@/shared/utils/cn";
 import ResponsiveImage from "../ResponsiveImage";
 
 const SOCIAL_ICON_MAP: Record<string, string> = {
-  instagram: "/images/icons/social/instagram.svg",
-  facebook: "/images/icons/social/facebook.svg",
-  x: "/images/icons/social/x.svg",
-  twitter: "/images/icons/social/x.svg",
-  linkedin: "/images/icons/social/linkedin.svg",
+  instagram: "/icons/social/instagram.svg",
+  facebook: "/icons/social/facebook.svg",
+  x: "/icons/social/x.svg",
+  twitter: "/icons/social/x.svg",
+  linkedin: "/icons/social/linkedin.svg",
 };
 
 type CmsSocialLink = {
@@ -137,7 +137,7 @@ const Footer = ({ className }: { className?: string }) => {
           <Reveal direction="up" className="shrink-0">
             <Link href="/" aria-label="Sunny Diamonds">
               <Image
-                src="/images/logo-desktop.svg"
+                src="/logo-desktop.svg"
                 alt="Sunny Diamonds"
                 width={336}
                 height={142}

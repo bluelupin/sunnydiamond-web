@@ -100,7 +100,7 @@ function JewelleryCategoryMenuItems({
                       />
 
                       <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-4 bg-benefitSurface">
-                        <span className={cn(config.labelClassName, "text-center text-darkblack text-xl font-normal font-gill")}>{item.label}</span>
+                        <span className={cn(config.labelClassName, "text-center text-darkblack md:text-xl text-base font-normal font-gill")}>{item.label}</span>
                       </div>
                     </>
                   )}

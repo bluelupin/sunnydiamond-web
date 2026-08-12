@@ -18,8 +18,7 @@ const BlogsFeaturedSection = ({ featured }: BlogsFeaturedSectionProps) => {
         <div aria-hidden className="pointer-events-none absolute inset-0 size-full sm:!h-[157%] sm:top-[-300px] top-12 opacity-80">
           <ResponsiveImage
             desktopSrc={featured.backgroundSrc}
-            // mobileSrc={backgroundImages.mobileUrl || ''}
-            alt=""
+            alt={featured.backgroundAlt || ""}
             width={1440}
             height={750}
             sizes="100vw"

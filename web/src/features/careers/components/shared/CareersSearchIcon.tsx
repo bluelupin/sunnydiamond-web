@@ -8,7 +8,7 @@ const CareersSearchIcon = ({ className }: { className?: string }) => {
     <span className={cn("relative size-6 shrink-0 overflow-clip", className)} aria-hidden>
       <span className="absolute inset-[12.5%]">
         <span className="absolute inset-[-2.78%]">
-          <img src="/images/icons/search-icon.svg" alt="" className="block size-full max-w-none" />
+          <img src="/icons/search-icon.svg" alt="" className="block size-full max-w-none" />
         </span>
       </span>
     </span>

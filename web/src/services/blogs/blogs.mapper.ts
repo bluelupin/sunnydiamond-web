@@ -67,9 +67,9 @@ export function formatReadTime(post: StrapiBlogPost): string {
   return (
     cleanText(post.readTimeLabel) ??
     cleanText(post.duration) ??
-    (typeof post.readTimeMinutes === "number"
+    (typeof post.readTimeMinutes === "number" && Number.isFinite(post.readTimeMinutes)
       ? `${post.readTimeMinutes} min read`
-      : "5 min read")
+      : "")
   );
 }
 
@@ -806,6 +806,7 @@ function mapFeaturedFromPost(
     imageSrc: post.imageSrc,
     imageAlt: post.imageAlt,
     backgroundSrc: null,
+    backgroundAlt: "",
     readNowLabel: blogsPageContent.featured.readNowLabel,
     href: post.href,
     ...overrides,
@@ -832,29 +833,42 @@ export function mapBlogsPageData(input: {
     (Array.isArray(input.landing?.blogCategory) ? input.landing.blogCategory : null);
 
   const featuredSection = input.landing?.featuredBlogSection;
-  const featuredCms =
-    input.posts.find((post) => post.isFeatured) ??
-    featuredSection?.post ??
-    input.posts[0];
+  const sectionActive = featuredSection?.isActive !== false;
 
-  const featuredCard = featuredCms
-    ? mapStrapiBlogPostToCard(featuredCms)
+  /**
+   * Featured article is CMS-only (`landing.featuredBlog` oneToOne).
+   * No fallback to the latest listing post — if CMS links nothing, hide the block.
+   * Legacy `featuredBlogSection.post` is accepted if present on older payloads.
+   */
+  const featuredCmsPost =
+    sectionActive
+      ? input.landing?.featuredBlog ?? featuredSection?.post ?? null
+      : null;
+
+  const featuredCard = featuredCmsPost
+    ? mapStrapiBlogPostToCard(featuredCmsPost)
     : null;
 
   const featuredBackground =
     resolveCmsMediaUrl(featuredSection?.backgroundImage?.desktopImage) ??
     resolveCmsMediaUrl(featuredSection?.backgroundImage?.mobileImage);
+  const featuredBackgroundAlt =
+    cleanText(featuredSection?.backgroundImage?.altText) ??
+    resolveCmsAltText(featuredSection?.backgroundImage?.desktopImage) ??
+    resolveCmsAltText(featuredSection?.backgroundImage?.mobileImage) ??
+    "";
 
   const featured = featuredCard
     ? mapFeaturedFromPost(
         featuredCard,
-        cleanText(featuredCms?.excerpt) ?? cleanText(featuredSection?.excerpt),
+        cleanText(featuredCmsPost?.excerpt) ?? cleanText(featuredSection?.excerpt),
         {
           title: cleanText(featuredSection?.title) ?? featuredCard.title,
           readNowLabel:
             cleanText(featuredSection?.readNowLabel) ??
             blogsPageContent.featured.readNowLabel,
           backgroundSrc: featuredBackground ?? null,
+          backgroundAlt: featuredBackgroundAlt,
         },
       )
     : null;

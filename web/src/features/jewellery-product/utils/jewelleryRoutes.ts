@@ -104,42 +104,7 @@ export function buildJewelleryHref(category: JewelleryCategorySlug = "all"): str
   return `${JEWELLERY_PATH}?category=${category}`;
 }
 
-export type JewelleryMegaMenuLink = {
-  label: string;
-  category: JewelleryCategorySlug;
-  image: string | null;
-};
-
-export const JEWELLERY_MEGA_MENU_LINKS: JewelleryMegaMenuLink[] = [
-  { label: "Bangles", category: "bangles", image: "/images/navigation/jewellery/bangles.png" },
-  { label: "Necklaces", category: "necklace", image: "/images/navigation/jewellery/necklaces-2.png" },
-  { label: "Rings", category: "rings", image: "/images/navigation/jewellery/rings-1.png" },
-  { label: "Pendants", category: "pendants", image: "/images/navigation/jewellery/pendants.png" },
-  { label: "Nose pins", category: "nosepins", image: "/images/navigation/jewellery/nose-pins.png" },
-  { label: "Earrings", category: "earrings", image: "/images/navigation/jewellery/earrings.png" },
-  { label: "Bracelets", category: "bracelets", image: "/images/navigation/jewellery/bracelets.png" },
-  { label: "All Products", category: "all", image: null },
-];
-
 export type JewelleryNavVariant = "desktop" | "mobile";
-
-/** Desktop mega menu — two rows of four */
-export const JEWELLERY_NAV_DESKTOP_ROWS: JewelleryCategorySlug[][] = [
-  ["bangles", "necklace", "rings", "pendants"],
-  ["nosepins", "earrings", "bracelets", "all"],
-];
-
-/** Mobile jewellery panel — four rows of two */
-export const JEWELLERY_NAV_MOBILE_ROWS: JewelleryCategorySlug[][] = [
-  ["bangles", "necklace"],
-  ["nosepins", "earrings"],
-  ["rings", "pendants"],
-  ["bracelets", "all"],
-];
-
-export function getJewelleryNavRows(variant: JewelleryNavVariant): JewelleryCategorySlug[][] {
-  return variant === "desktop" ? JEWELLERY_NAV_DESKTOP_ROWS : JEWELLERY_NAV_MOBILE_ROWS;
-}
 
 export function buildJewelleryNavRows<T>(items: T[], variant: JewelleryNavVariant): T[][] {
   const chunkSize = variant === "desktop" ? 4 : 2;
@@ -150,21 +115,4 @@ export function buildJewelleryNavRows<T>(items: T[], variant: JewelleryNavVarian
   }
 
   return rows;
-}
-
-export type ResolvedJewelleryNavItem = JewelleryMegaMenuLink & {
-  href: string;
-};
-
-export function resolveJewelleryNavItem(category: JewelleryCategorySlug): ResolvedJewelleryNavItem {
-  const link = JEWELLERY_MEGA_MENU_LINKS.find((item) => item.category === category);
-
-  if (!link) {
-    throw new Error(`Unknown jewellery nav category: ${category}`);
-  }
-
-  return {
-    ...link,
-    href: buildJewelleryHref(category),
-  };
 }

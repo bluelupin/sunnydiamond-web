@@ -104,6 +104,7 @@ export type StrapiGiftingFinishingTouchSection = {
 export type StrapiGiftingTrustBadge = {
   id?: number;
   label?: string | null;
+  iconAltText?: string | null;
   icon?: StrapiGiftingResponsiveImage | null;
 };
 
