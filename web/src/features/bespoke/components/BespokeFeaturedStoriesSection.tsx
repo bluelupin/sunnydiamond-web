@@ -107,8 +107,7 @@ const FeaturedGalleryBackground = ({
             <Image
               key={slide.documentId ?? `${slide.src}-${index}`}
               src={slide.src}
-              alt=""
-              aria-hidden
+              alt={index === safeIndex ? slide.alt || backgroundImage?.alt || "" : ""}
               fill
               sizes="100vw"
               priority={index === safeIndex}
@@ -121,8 +120,7 @@ const FeaturedGalleryBackground = ({
         ) : fallbackBgSrc ? (
           <Image
             src={fallbackBgSrc}
-            alt=""
-            aria-hidden
+            alt={backgroundImage?.alt || ""}
             fill
             priority
             sizes="100vw"
@@ -142,7 +140,9 @@ const FeaturedGalleryBackground = ({
         aria-hidden
         className="absolute inset-x-0 bottom-0 h-[400px] bg-gradient-to-b from-transparent to-black/80 backdrop-blur-[5px]"
       />
-      {srAlt ? <span className="sr-only">{srAlt}</span> : null}
+      {srAlt && slides.length === 0 && fallbackBgSrc ? (
+        <span className="sr-only">{srAlt}</span>
+      ) : null}
     </div>
   );
 };

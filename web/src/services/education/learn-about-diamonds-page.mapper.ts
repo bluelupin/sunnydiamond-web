@@ -269,6 +269,7 @@ const mapGradeStopToOption = (
   panelId: EducationFourCsPanelContent["id"],
   activeGradeCode?: string,
   visualImageUrl?: string,
+  visualImageAlt?: string,
 ): EducationSliderOption | null => {
   const label = cleanText(stop.gradeCode);
   if (!label) return null;
@@ -310,7 +311,7 @@ const mapGradeStopToOption = (
     option.imageAlt = gradeAlt;
   } else if (visualImageUrl && panelId !== "cut") {
     option.image = visualImageUrl;
-    option.imageAlt = gradeAlt;
+    option.imageAlt = visualImageAlt || gradeAlt;
   }
 
   // Cut: CMS often uploads two diamonds per grade for the Figma dual compare layout.
@@ -377,13 +378,14 @@ const mapFourCsPanel = (
   if (!title || !description || !code) return null;
 
   const activeGradeCode = cleanText(info.activeGradeCode);
-  const visualImageUrl =
-    resolveCmsMediaUrl(visual?.visualImage?.desktopImage) ??
-    resolveCmsMediaUrl(visual?.visualImage?.mobileImage);
+  const visualImage = mapResponsiveImageUrls(visual?.visualImage);
+  const visualImageUrl = visualImage.desktopUrl || visualImage.mobileUrl || undefined;
 
   const mappedOptions =
     (visual?.gradeStops ?? [])
-      .map((stop) => mapGradeStopToOption(stop, panelId, activeGradeCode, visualImageUrl))
+      .map((stop) =>
+        mapGradeStopToOption(stop, panelId, activeGradeCode, visualImageUrl, visualImage.alt),
+      )
       .filter((option): option is EducationSliderOption => option != null);
 
   // No static slider/copy fallbacks — require CMS gradeStops.
@@ -396,7 +398,7 @@ const mapFourCsPanel = (
     defaultIndex,
     options,
     ...(visualImageUrl && panelId !== "cut" && panelId !== "carat"
-      ? { image: visualImageUrl }
+      ? { image: visualImageUrl, imageAlt: visualImage.alt }
       : {}),
   };
 
@@ -410,6 +412,7 @@ const mapFourCsPanel = (
     background: panelLayout.background,
     slider,
     sliderSpec: resolveSliderSpec(panelId, options),
+    ...(visualImage.alt ? { panelTextureAlt: visualImage.alt } : {}),
   };
 };
 
@@ -649,6 +652,8 @@ const mapCertificateSection = (
   if (!title || !certifications.length) return null;
   if (!whyTitle && !whyDescription && !howTitle && !howDescription) return null;
 
+  const background = mapResponsiveImageUrls(section.bgImage);
+
   return {
     title,
     certifications,
@@ -657,6 +662,13 @@ const mapCertificateSection = (
     whyDescription,
     howTitle,
     howDescription,
+    ...(background.hasImage
+      ? {
+          backgroundDesktopUrl: background.desktopUrl,
+          backgroundMobileUrl: background.mobileUrl,
+          backgroundAlt: background.alt,
+        }
+      : {}),
   };
 };
 
@@ -786,6 +798,7 @@ const mapCareTips = (
       return {
         id: item.id != null ? String(item.id) : `care-${index}`,
         icon: iconUrls.desktopUrl,
+        ...(iconUrls.alt ? { iconAlt: iconUrls.alt } : {}),
         labelLines: [label],
       };
     })

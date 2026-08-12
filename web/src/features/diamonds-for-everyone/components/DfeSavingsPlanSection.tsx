@@ -21,6 +21,7 @@ const DfeSavingsPlanSection = ({ benefits }: DfeSavingsPlanSectionProps) => {
   const { steps } = benefits;
   const backgroundSrc =
     benefits.backgroundImage?.desktopUrl || benefits.backgroundImage?.mobileUrl;
+  const backgroundAlt = benefits.backgroundImage?.alt ?? "";
 
   return (
     <section
@@ -28,12 +29,23 @@ const DfeSavingsPlanSection = ({ benefits }: DfeSavingsPlanSectionProps) => {
       className="relative overflow-hidden bg-gray300 py-16 md:min-h-[550px] md:py-[104px]"
     >
       {backgroundSrc ? (
-        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute left-1/2 top-1/2 flex h-[651px] w-[max(100vw,1339px)] -translate-x-1/2 -translate-y-1/2 items-center justify-center mix-blend-color-burn md:hidden">
+            <div className="rotate-90">
+              <Image
+                src={benefits.backgroundImage?.mobileUrl || backgroundSrc}
+                alt={backgroundAlt}
+                width={651}
+                height={1339}
+                className="h-[max(100vw,1339px)] w-[651px] object-bottom"
+              />
+            </div>
+          </div>
           <div className="absolute left-1/2 top-1/2 hidden h-[700px] w-[max(100vw,1440px)] -translate-x-1/2 -translate-y-1/2 items-center justify-center mix-blend-color-burn md:flex">
             <div className="rotate-90">
               <Image
                 src={backgroundSrc}
-                alt=""
+                alt={backgroundAlt}
                 width={700}
                 height={1440}
                 className="h-[max(100vw,1440px)] w-[700px] object-bottom"

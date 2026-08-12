@@ -120,6 +120,7 @@ export type NormalizedStoreLocatorLocationFilter = {
   /** Value used for store state filtering (typically state name). */
   value: string;
   iconUrl: string | null;
+  iconAlt?: string;
 };
 
 export type NormalizedStoreLocatorShowroom = {

@@ -18,12 +18,13 @@ import { WORLD_OF_SUNNY_PATH } from "@/shared/utils/navigation";
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const page = await getAboutPage();
-    const { title, description, canonicalPath } = resolveAboutSeoMetadata(page);
+    const { title, description, canonicalPath, keywords } = resolveAboutSeoMetadata(page);
 
     return constructMetadata({
       title,
       description,
       canonicalPath,
+      ...(keywords ? { keywords } : {}),
     });
   } catch {
     return constructMetadata({

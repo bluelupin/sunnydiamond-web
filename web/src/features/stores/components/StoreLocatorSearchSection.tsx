@@ -30,6 +30,7 @@ function mapCmsFiltersToStateFilters(
     id: filter.id,
     label: filter.label,
     iconUrl: filter.iconUrl,
+    iconAlt: filter.iconAlt,
     iconWidth: 64,
     iconHeight: 64,
     mobileIconWidth: 40,

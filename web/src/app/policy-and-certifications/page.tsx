@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { constructMetadata } from "@/shared/lib/seo/metadata";
+import { resolvePolicySeoMetadata } from "@/shared/lib/seo/policySeo";
 import PolicyCertificationsPage from "@/features/cms/components/policy/PolicyCertificationsPage";
 import { POLICY_AND_CERTIFICATIONS_PATH } from "@/shared/utils/navigation";
 import {
@@ -14,15 +15,14 @@ export const revalidate = 300;
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const page = await getPolicyCertificationsPage();
-    const cmsTitle = page.seo?.metaTitle?.trim();
-    const cmsDescription = page.seo?.metaDescription?.trim();
+    const { title, description, canonicalPath, keywords, image } = resolvePolicySeoMetadata(page);
 
     return constructMetadata({
-      title: cmsTitle || page.pageTitle,
-      description: cmsDescription,
-      canonicalPath: page.seo?.canonicalPath ?? POLICY_AND_CERTIFICATIONS_PATH,
-      ...(page.seo?.keywords ? { keywords: page.seo.keywords } : {}),
-      ...(page.seo?.ogImageUrl ? { image: page.seo.ogImageUrl } : {}),
+      title,
+      description,
+      canonicalPath,
+      ...(keywords ? { keywords } : {}),
+      ...(image ? { image } : {}),
     });
   } catch {
     return constructMetadata({

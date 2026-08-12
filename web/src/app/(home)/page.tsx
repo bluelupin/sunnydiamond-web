@@ -21,11 +21,13 @@ export const revalidate = 300;
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const shellData = await getCachedHomepageShell();
-    const { title, description, canonicalUrl, imageUrl, noIndex } = resolveHomepageSeoMetadata(shellData);
+    const { title, description, keywords, canonicalUrl, imageUrl, noIndex } =
+      resolveHomepageSeoMetadata(shellData);
 
     return constructMetadata({
       title,
       description,
+      ...(keywords ? { keywords } : {}),
       canonicalPath: canonicalUrl,
       image: imageUrl,
       url: canonicalUrl,

@@ -1,4 +1,4 @@
-import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import {
   EMPTY_STORE_LOCATOR_PAGE,
   type NormalizedStoreLocatorCta,
@@ -44,6 +44,7 @@ const resolveResponsiveUrls = (image?: StrapiStoreLocatorResponsiveImage | null)
   const mobileUrl =
     resolveCmsMediaUrl(image?.mobileImage) ?? resolveCmsMediaUrl(image?.desktopImage) ?? null;
   const alt =
+    resolveCmsAltText(image) ??
     cleanText(image?.altText) ??
     cleanText(image?.desktopImage?.alternativeText) ??
     cleanText(image?.mobileImage?.alternativeText) ??
@@ -133,6 +134,9 @@ const mapLocationFilter = (
     label,
     value,
     iconUrl: resolveIconUrl(filter.icon),
+    iconAlt: resolveResponsiveUrls(
+      filter.icon as StrapiStoreLocatorResponsiveImage | null | undefined,
+    ).alt || undefined,
   };
 };
 
