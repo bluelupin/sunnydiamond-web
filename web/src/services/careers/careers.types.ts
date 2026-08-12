@@ -25,6 +25,7 @@ export type StrapiCareerSeo = {
   metaDescription?: string | null;
   canonicalUrl?: string | null;
   metaKeywords?: string | null;
+  showField?: boolean | null;
   ogImage?: StrapiCareerResponsiveImage | StrapiCareerMediaFile | null;
 };
 
@@ -198,6 +199,8 @@ export type StrapiCareerApplicationFlowSection = {
 };
 
 export type StrapiCareerLandingPageEntity = {
+  /** Live CMS uses uppercase `SEO` (shared.seo component). */
+  SEO?: StrapiCareerSeo | null;
   seo?: StrapiCareerSeo | null;
   heroSection?: StrapiCareerHero | null;
   FAQs?: StrapiCareerFaqSection | null;
@@ -238,6 +241,8 @@ export type StrapiCareerListingFilterSection = {
 };
 
 export type StrapiCareerListingPageEntity = {
+  /** Live CMS uses uppercase `SEO` (shared.seo component). */
+  SEO?: StrapiCareerSeo | null;
   seo?: StrapiCareerSeo | null;
   hero?: StrapiCareerHero | null;
   heroSection?: StrapiCareerHero | null;

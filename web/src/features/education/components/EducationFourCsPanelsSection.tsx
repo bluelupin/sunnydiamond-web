@@ -15,11 +15,11 @@ import EducationMetricSlider from "./EducationMetricSlider";
 import EducationCaratHandVisual from "./EducationCaratHandVisual";
 import Reveal from "@/shared/Animation/Reveal";
 
-const PanelTexture = ({ panelId }: { panelId: string }) => (
-  <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+const PanelTexture = ({ panelId, alt }: { panelId: string; alt?: string }) => (
+  <div className="pointer-events-none absolute inset-0 overflow-hidden">
     <Image
       src={educationPageImages.panelTexture}
-      alt=""
+      alt={alt || ""}
       fill
       className={cn(
         "object-cover opacity-90",
@@ -76,7 +76,7 @@ const PanelMedia = ({
           : "items-center justify-center max-md:h-auto md:py-5 py-14 md:h-500 lg:h-[633px]",
       )}
     >
-      <PanelTexture panelId={panel.id} />
+      <PanelTexture panelId={panel.id} alt={panel.panelTextureAlt} />
 
       <div
         className={cn(
@@ -147,7 +147,11 @@ const PanelMedia = ({
                 <Image
                   key={`${panel.id}-${activeIndex}-${activeImage}`}
                   src={activeImage}
-                  alt={slider.options[activeIndex]?.imageAlt || ""}
+                  alt={
+                    slider.options[activeIndex]?.imageAlt ||
+                    slider.imageAlt ||
+                    ""
+                  }
                   fill
                   className="object-cover"
                   sizes="200px"

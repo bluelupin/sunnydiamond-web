@@ -167,12 +167,18 @@ const mapFilterOptions = (
   ].sort();
 };
 
+const resolveCareerPageSeo = (
+  raw?: { SEO?: StrapiCareerSeo | null; seo?: StrapiCareerSeo | null } | null,
+): StrapiCareerSeo | null | undefined => raw?.SEO ?? raw?.seo;
+
 const mapSeo = (seo?: StrapiCareerSeo | null): NormalizedCareerSeo | null => {
+  if (!seo || seo.showField === false) return null;
   const metaTitle = cleanText(seo?.metaTitle);
   const metaDescription = cleanText(seo?.metaDescription);
+  const metaKeywords = cleanText(seo?.metaKeywords);
   const rawCanonical = cleanText(seo?.canonicalUrl);
 
-  if (!metaTitle && !metaDescription) return null;
+  if (!metaTitle && !metaDescription && !metaKeywords) return null;
 
   const canonicalPath =
     !rawCanonical || rawCanonical === "/careers"
@@ -755,7 +761,7 @@ export const mapCareerLandingPage = (
     raw.openingsSection ?? raw.currentOpeningsSection ?? null;
 
   return {
-    seo: mapSeo(raw.seo),
+    seo: mapSeo(resolveCareerPageSeo(raw)),
     hero: mapHero(raw.heroSection ?? raw.hero),
     openings: mapOpeningsSection(openingsSection),
     lifeAt: mapLifeSection(raw.moreThanSection ?? raw.moreThanWorkplaceSection ?? raw.lifeAtSection),
@@ -878,7 +884,7 @@ export const mapCareerListingPage = (
     : legacyFilters;
 
   return {
-    seo: mapSeo(raw.seo),
+    seo: mapSeo(resolveCareerPageSeo(raw)),
     hero: mapHero(raw.heroSection ?? raw.hero),
     featuredTitle: cleanText(raw.featuredTitle) ?? null,
     title: cleanText(raw.title) ?? null,

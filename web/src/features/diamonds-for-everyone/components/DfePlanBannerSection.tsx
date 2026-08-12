@@ -21,7 +21,7 @@ const DfePlanBannerSection = ({ planIntro }: DfePlanBannerSectionProps) => {
             <div className="absolute inset-0 overflow-hidden">
               <Image
                 src={planIntro.image.desktopUrl}
-                alt=""
+                alt={planIntro.image.alt}
                 width={1440}
                 height={750}
                 sizes="100vw"

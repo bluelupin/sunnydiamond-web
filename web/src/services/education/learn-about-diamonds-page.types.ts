@@ -135,6 +135,8 @@ export type StrapiEducationCertificateSection = {
   howToVerifyHeading?: string | null;
   howToVerifyDescription?: string | null;
   certificationLabs?: StrapiEducationCertificationLab[] | null;
+  bgImage?: StrapiEducationResponsiveImage | null;
+  cutoutImage?: StrapiEducationResponsiveImage | null;
 };
 
 export type StrapiEducationLearnFeatureItem = {
@@ -241,6 +243,7 @@ export type NormalizedEducationFourCsIntro = {
 
 export type NormalizedEducationFourCsPanel = EducationFourCsPanelContent & {
   sliderSpec?: EducationSliderSpec;
+  panelTextureAlt?: string;
 };
 
 export type NormalizedEducationFourCsSection = {
@@ -268,11 +271,15 @@ export type NormalizedEducationCertificateSection = {
   whyDescription: string;
   howTitle: string;
   howDescription: string;
+  backgroundDesktopUrl?: string;
+  backgroundMobileUrl?: string;
+  backgroundAlt?: string;
 };
 
 export type NormalizedEducationLearnCareTip = {
   id: string;
   icon: string;
+  iconAlt?: string;
   labelLines: string[];
 };
 

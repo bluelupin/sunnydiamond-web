@@ -11,12 +11,16 @@ import type {
 } from "./careers.types";
 import { EMPTY_CAREERS_PAGE_DATA } from "./careers.types";
 
+const CAREER_SEO_POPULATE =
+  "&populate[SEO][populate][ogImage]=true";
+
 /**
  * Deep populate for nested responsive-image media on the live CMS schema.
- * Do not populate `seo` here — career-landing-page has no top-level seo field (returns 400).
+ * Career pages expose SEO under uppercase `SEO` (not `seo`) — must be populated explicitly.
  */
 const CAREER_LANDING_POPULATE_QUERY =
   "populate=*" +
+  CAREER_SEO_POPULATE +
   "&populate[heroSection][populate][backgroundImage][populate][desktopImage]=true" +
   "&populate[heroSection][populate][backgroundImage][populate][mobileImage]=true" +
   "&populate[moreThanSection][populate][featuredImage1][populate][desktopImage]=true" +
@@ -31,12 +35,12 @@ const CAREER_LANDING_POPULATE_QUERY =
   "&populate[openingsSection][populate][career_openings][populate][applyCta]=true" +
   "&populate[FAQs][populate]=faqItems";
 
-const CAREER_LANDING_FALLBACK_QUERY = "populate=*";
+const CAREER_LANDING_FALLBACK_QUERY = "populate=*" + CAREER_SEO_POPULATE;
 
-/** `populate=*` only — deep populate on this type returns CMS 500 (incl. when `heroSection` is null). */
-const CAREER_LISTING_POPULATE_QUERY = "populate=*";
+/** `populate=*` alone does not return uppercase `SEO` — include explicit populate. */
+const CAREER_LISTING_POPULATE_QUERY = "populate=*" + CAREER_SEO_POPULATE;
 
-const CAREER_LISTING_FALLBACK_QUERY = "populate=*";
+const CAREER_LISTING_FALLBACK_QUERY = "populate=*" + CAREER_SEO_POPULATE;
 
 async function fetchCareerListingPage(
   signal?: AbortSignal,

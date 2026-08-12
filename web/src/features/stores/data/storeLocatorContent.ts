@@ -54,6 +54,7 @@ export type StoreLocatorStateFilter = {
   label: string;
   /** CMS icon URL — when set, sprite crop fields are unused. */
   iconUrl?: string | null;
+  iconAlt?: string;
   spriteSrc?: string;
   iconWidth: number;
   iconHeight: number;
