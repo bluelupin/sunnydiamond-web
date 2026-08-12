@@ -1,4 +1,4 @@
-import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import {
   EMPTY_DIAMONDS_FOR_EVERYONE_PAGE,
   type NormalizedDfeBenefitStep,
@@ -47,6 +47,7 @@ const mapResponsiveImage = (
     desktopUrl: desktopUrl ?? mobileUrl ?? "",
     mobileUrl: mobileUrl ?? desktopUrl ?? "",
     alt:
+      resolveCmsAltText(image) ??
       cleanText(image?.altText) ??
       cleanText(image?.desktopImage?.alternativeText) ??
       cleanText(image?.mobileImage?.alternativeText) ??

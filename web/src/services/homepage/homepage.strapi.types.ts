@@ -195,6 +195,7 @@ export type StrapiTextSection = {
   primaryCta?: StrapiHomepageCta | null;
   secondaryCta?: StrapiHomepageCta | null;
   image?: StrapiResponsiveImageBlock | null;
+  backgroundImage?: StrapiResponsiveImageBlock | null;
   cutoutImage?: StrapiResponsiveImageBlock | null;
   gifOrImage?: unknown;
   video?: StrapiHeroVideoBlock | null;

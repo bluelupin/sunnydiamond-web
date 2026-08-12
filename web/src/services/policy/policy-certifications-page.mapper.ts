@@ -222,7 +222,7 @@ function mapSeo(seo: StrapiPolicySeo | null | undefined): PolicyPageSeo | null {
   const keywords = cleanText(seo.metaKeywords);
   const ogImageUrl = resolveCmsMediaUrl(seo.ogImage);
 
-  if (!metaTitle && !metaDescription && !canonicalUrl && !ogImageUrl) return null;
+  if (!metaTitle && !metaDescription && !canonicalUrl && !keywords && !ogImageUrl) return null;
 
   let canonicalPath: string | undefined;
   if (canonicalUrl) {

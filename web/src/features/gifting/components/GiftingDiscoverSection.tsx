@@ -110,12 +110,12 @@ const GiftingDiscoverSection = ({
     <section
       id="discover-ideal-gift"
       aria-labelledby="gifting-discover-title"
-      className="flex flex-col md:flex-row md:items-center md:justify-between md:pl-0 md:pr-10 md:pb-100"
+      className="flex flex-col md:flex-row md:items-center md:justify-between md:pl-0 lg:pr-10 md:pr-6 md:pb-100  pb-16 lg:gap-0 gap-4"
     >
-      {imageSrc ? (
+      {imageSrc &&
         <Reveal
           direction="up"
-          className="relative h-[320px] w-full shrink-0 md:h-[521px] md:w-[732px]"
+          className="relative h-[320px] w-full shrink-0 md:h-[521px] xl:w-[732px] md:w-3/5 md:block hidden"
         >
           <Image
             src={imageSrc}
@@ -125,28 +125,28 @@ const GiftingDiscoverSection = ({
             sizes="(max-width: 768px) 100vw, 732px"
           />
         </Reveal>
-      ) : null}
+      }
 
-      <div className="flex w-full max-w-[530px] flex-col gap-6 px-4 py-16 md:shrink-0 md:gap-10 md:px-0 md:py-0">
-        <div className="flex flex-col gap-6 md:gap-10">
+      <div className="flex w-full xl:max-w-[530px] md:max-w-2/5 flex-col gap-6 px-4 md:gap-10 md:px-0">
+        <div className="flex flex-col gap-6 lg:gap-10 gap-8">
           <div className="flex flex-col gap-3 md:gap-4">
             <Reveal
               as="h2"
               id="gifting-discover-title"
               direction="up"
-              className="font-larken text-[32px] font-light leading-110 text-darkblack md:text-5xl"
+              className="font-larken font-light leading-110 text-darkblack lg:text-5xl md:text-4xl text-32"
             >
               {title}
             </Reveal>
-            {description ? (
+            {description &&
               <Reveal
                 as="p"
                 direction="up"
-                className="max-w-[306px] font-gill text-base font-light leading-110 text-neutral500 md:max-w-none md:text-xl"
+                className="w-full font-gill font-light leading-110 text-neutral500 md:max-w-none lg:text-xl md:text-lg text-base"
               >
                 {description}
               </Reveal>
-            ) : null}
+            }
           </div>
 
           <div className="flex flex-col gap-4 md:gap-6">
@@ -176,7 +176,6 @@ const GiftingDiscoverSection = ({
             />
           </div>
         </div>
-
         <Reveal direction="up">
           <button
             type="button"

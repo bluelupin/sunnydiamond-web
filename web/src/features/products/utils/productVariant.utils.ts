@@ -57,6 +57,7 @@ export function applySelectedMetalVariant(product: Product, metalId: string): Pr
     lifestyleImage: variant.images[1] ?? variant.image,
     inStock: variant.inStock,
     metalColorValue: normalizeMetalKey(metalId),
+    ...(variant.priceBreakup ? { priceBreakup: variant.priceBreakup } : {}),
   };
 }
 

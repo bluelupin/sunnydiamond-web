@@ -365,6 +365,7 @@ function mapTextSectionToDiamondsForEveryone(
     subtitle: cleanText(raw.subtitle),
     description: cleanText(raw.description),
     isActive,
+    backgroundImage: pickResponsiveImage(raw.backgroundImage) as DiamondsForEveryoneSectionData["backgroundImage"],
     steps: Array.isArray(raw.steps)
       ? (raw.steps as DiamondsForEveryoneSectionData["steps"])
       : undefined,
@@ -433,6 +434,9 @@ function mapCraftsmanshipSection(
     image: pickResponsiveImage(raw.image) as NonNullable<
       HomepageEditorialBlocksData["craftsmanshipSection"]
     >["image"],
+    backgroundImage: pickResponsiveImage(raw.backgroundImage) as NonNullable<
+      HomepageEditorialBlocksData["craftsmanshipSection"]
+    >["backgroundImage"],
     steps: mapCraftsmanshipSteps(raw.steps),
   };
 }

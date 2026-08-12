@@ -10,19 +10,20 @@ export function resolveCareersSeoMetadata(cms: NormalizedCareersPageData) {
     return null;
   }
 
-  const title = seo.metaTitle?.trim();
-  const description = seo.metaDescription?.trim();
+  const title = landingSeo?.metaTitle?.trim() ?? seo.metaTitle?.trim();
+  const description = landingSeo?.metaDescription?.trim() ?? seo.metaDescription?.trim();
+  const keywords = landingSeo?.metaKeywords?.trim() ?? seo.metaKeywords?.trim();
 
-  if (!title && !description) {
+  if (!title && !description && !keywords) {
     return null;
   }
 
   return {
     title: title || undefined,
     description: description || undefined,
-    canonicalPath: seo.canonicalPath || CAREERS_ROUTE,
-    keywords: seo.metaKeywords,
-    image: seo.ogImageUrl,
+    canonicalPath: landingSeo?.canonicalPath ?? seo.canonicalPath ?? CAREERS_ROUTE,
+    keywords,
+    image: landingSeo?.ogImageUrl ?? seo.ogImageUrl,
   };
 }
 
@@ -35,10 +36,11 @@ export function resolveCareersAllOpeningsSeoMetadata(cms: NormalizedCareersPageD
     return null;
   }
 
-  const title = (listingSeo?.metaTitle ?? seo.metaTitle)?.trim();
-  const description = (listingSeo?.metaDescription ?? seo.metaDescription)?.trim();
+  const title = listingSeo?.metaTitle?.trim() ?? seo.metaTitle?.trim();
+  const description = listingSeo?.metaDescription?.trim() ?? seo.metaDescription?.trim();
+  const keywords = listingSeo?.metaKeywords?.trim() ?? seo.metaKeywords?.trim();
 
-  if (!title && !description) {
+  if (!title && !description && !keywords) {
     return null;
   }
 
@@ -46,7 +48,7 @@ export function resolveCareersAllOpeningsSeoMetadata(cms: NormalizedCareersPageD
     title: title || undefined,
     description: description || undefined,
     canonicalPath: CAREERS_ALL_OPENINGS_ROUTE,
-    keywords: seo.metaKeywords,
-    image: seo.ogImageUrl,
+    keywords,
+    image: listingSeo?.ogImageUrl ?? seo.ogImageUrl,
   };
 }

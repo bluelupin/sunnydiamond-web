@@ -5,6 +5,7 @@ import type { HomepageSeo } from "@/types/homepage/seo";
 export interface HomepageSeoMetadata {
   title: string;
   description: string;
+  keywords?: string;
   canonicalUrl: string;
   imageUrl: string;
   noIndex: boolean;
@@ -62,10 +63,16 @@ export function resolveHomepageSeoMetadata(shellData: HomepageShellData): Homepa
     siteConfig.seo.siteUrl;
   const imageUrl = resolveSeoImage(homepageSeo, globalSeo);
   const noIndex = homepageSeo?.noIndex === true;
+  const keywords = resolveSeoString(
+    homepageSeo?.metaKeywords,
+    globalSeo?.metaKeywords,
+    "",
+  );
 
   return {
     title,
     description,
+    ...(keywords ? { keywords } : {}),
     canonicalUrl,
     imageUrl,
     noIndex,

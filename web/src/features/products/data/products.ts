@@ -6,6 +6,7 @@ import type { StaticImageData } from "next/image";
 import type { ProductSeo } from "@/shared/lib/seo/productSeo";
 import type { ProductEngravingConfig } from "@/features/products/constants/engraving";
 import type { ProductCustomOptions } from "@/features/products/types/productCustomOptions";
+import type { ProductPriceBreakupComponents } from "@/services/magento/products/productPriceBreakup.utils";
 import { buildProductSeo } from "@/shared/lib/seo/productSeo";
 import {
   PRODUCT_DETAIL_GALLERY_HERO_IMAGE,
@@ -41,6 +42,7 @@ export type ProductConfigurableVariant = {
   attributes: Record<string, string>;
   /** Configurable value UIDs required when adding the parent SKU to cart. */
   optionUids: string[];
+  priceBreakup?: ProductPriceBreakupComponents;
 };
 
 export type ProductConfigurable = {
@@ -79,6 +81,8 @@ export interface Product {
   customOptions?: ProductCustomOptions;
   /** Present when Magento product is ConfigurableProduct (e.g. gold color variants). */
   configurable?: ProductConfigurable;
+  /** Magento component prices for the Price Breakup panel. */
+  priceBreakup?: ProductPriceBreakupComponents;
   productVideoUrl?: string;
   /**
    * PDP accordion copy from Magento product attributes:

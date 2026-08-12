@@ -288,6 +288,7 @@ export type EducationFourCsPanelContent = {
     defaultIndex: number;
     options: EducationSliderOption[];
     image?: string;
+    imageAlt?: string;
     dualImages?: [string, string];
   };
 };

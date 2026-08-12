@@ -14,7 +14,8 @@ interface DiamondsForEveryoneSectionProps {
   id?: string;
 }
 
-const BACKGROUND_TEXTURE = "https://d1gf9vo4d2b63b.cloudfront.net/cms/diamonds_for_everyone_bg_8acd81b417.png";
+const BACKGROUND_TEXTURE_FALLBACK =
+  "https://d1gf9vo4d2b63b.cloudfront.net/cms/diamonds_for_everyone_bg_8acd81b417.png";
 const DEFAULT_STEPS: SavingsPlanStep[] = [
   {
     stepNumber: 1,
@@ -75,6 +76,15 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
     "Save monthly towards fine jewellery within reach";
   const ctaUrl = sectionData.cta?.url || sectionData.cta?.to || "/diamonds-for-everyone";
   const ctaLabel = sectionData.cta?.label?.trim() || "Explore Plans";
+  const backgroundDesktopSrc =
+    sectionData.backgroundDesktopUrl ||
+    sectionData.backgroundMobileUrl ||
+    BACKGROUND_TEXTURE_FALLBACK;
+  const backgroundMobileSrc =
+    sectionData.backgroundMobileUrl ||
+    sectionData.backgroundDesktopUrl ||
+    BACKGROUND_TEXTURE_FALLBACK;
+  const backgroundAlt = sectionData.backgroundAlt;
 
   const steps = useMemo(() => {
     const cmsSteps = (sectionData.steps ?? []) as SavingsPlanStep[];
@@ -119,13 +129,13 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
       aria-label={sectionTitle}
       className="relative w-full overflow-hidden bg-chalkCard py-16 md:bg-gray300 md:py-104 md:min-h-[550px] min-h-auto"
     >
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
         {/* Mobile — Figma 684:3316 / texture full-bleed */}
         <div className="absolute left-1/2 top-0 flex h-[651px] w-[max(100vw,1339px)] -translate-x-1/2 items-center justify-center mix-blend-color-burn md:hidden">
           <div className="rotate-90">
             <Image
-              src={BACKGROUND_TEXTURE}
-              alt=""
+              src={backgroundMobileSrc}
+              alt={backgroundAlt}
               width={651}
               height={1339}
               className="h-[max(100vw,1339px)] w-[651px] object-bottom"
@@ -136,8 +146,8 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
         <div className="absolute left-1/2 top-1/2 hidden h-[700px] w-[max(100vw,1440px)] -translate-x-1/2 -translate-y-1/2 items-center justify-center mix-blend-color-burn md:flex">
           <div className="rotate-90">
             <Image
-              src={BACKGROUND_TEXTURE}
-              alt=""
+              src={backgroundDesktopSrc}
+              alt={backgroundAlt}
               width={700}
               height={1440}
               className="h-[max(100vw,1440px)] w-[700px] object-bottom"

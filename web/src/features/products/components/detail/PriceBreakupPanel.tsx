@@ -3,7 +3,10 @@
 import Image, { type StaticImageData } from "next/image";
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
 import type { ProductDetailPricing } from "@/features/products/types/productDetail";
-import { derivePriceBreakup } from "@/features/products/utils/priceBreakup";
+import {
+  buildPriceBreakup,
+  formatPriceBreakupGstLabel,
+} from "@/features/products/utils/priceBreakup";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { AttributeSeparator, DetailDarkButton } from "./shared";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
@@ -49,7 +52,11 @@ const PriceBreakupPanel = ({
   ringSize,
   pricing,
 }: PriceBreakupPanelProps) => {
-  const breakup = derivePriceBreakup(pricing);
+  if (!pricing.breakup) {
+    return null;
+  }
+
+  const breakup = buildPriceBreakup(pricing.breakup, pricing);
   const formatAmount = (amount: number) => `₹${formatJewelleryPrice(amount)}`;
 
   return (
@@ -123,6 +130,11 @@ const PriceBreakupPanel = ({
             <PriceBreakupRow label="Metal" value={formatAmount(breakup.metal)} />
             <PriceBreakupRow label="Stone" value={formatAmount(breakup.stone)} />
             <PriceBreakupRow label="Making charges" value={formatAmount(breakup.makingCharges)} />
+            {/* <PriceBreakupRow label="Sub Total" value={formatAmount(breakup.subtotal)} /> */}
+            <PriceBreakupRow
+              label={formatPriceBreakupGstLabel(breakup.gstRate)}
+              value={formatAmount(breakup.gst)}
+            />
             {breakup.discount > 0 ? (
               <PriceBreakupRow
                 label="Discount"

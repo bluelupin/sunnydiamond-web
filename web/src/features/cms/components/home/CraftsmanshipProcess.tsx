@@ -19,21 +19,32 @@ interface CraftsmanshipProcessProps {
 }
 
 /** Figma 684:3024 — silk ripple texture behind the scroll-driven diamond. */
-const CRAFTSMANSHIP_BACKGROUND = "/images/home/craftsmanship-bg.webp";
+const CRAFTSMANSHIP_BACKGROUND_FALLBACK = "/images/home/craftsmanship-bg.webp";
 
-function CraftsmanshipSilkLayer({ variant }: { variant: "desktop" | "mobile" }) {
+function CraftsmanshipSilkLayer({
+  variant,
+  desktopSrc,
+  mobileSrc,
+  alt,
+}: {
+  variant: "desktop" | "mobile";
+  desktopSrc: string;
+  mobileSrc: string;
+  alt: string;
+}) {
+  const src = variant === "desktop" ? desktopSrc : mobileSrc;
+
   if (variant === "desktop") {
     const spec = craftsmanshipProcessFigmaSpec.desktop.texture;
 
     return (
       <div
         className="absolute left-1/2 top-[calc(50%+0.08px)] hidden -translate-x-1/2 -translate-y-1/2 items-center justify-center lg:flex"
-      // style={{ height: spec.height, width: `max(100vw, ${spec.minSpan}px)` }}
       >
         <div className="rotate-90">
           <Image
-            src={CRAFTSMANSHIP_BACKGROUND}
-            alt=""
+            src={src}
+            alt={alt}
             width={spec.imageWidth}
             height={spec.imageHeight}
             className="max-w-none object-cover"
@@ -53,12 +64,11 @@ function CraftsmanshipSilkLayer({ variant }: { variant: "desktop" | "mobile" }) 
   return (
     <div
       className="absolute left-1/2 top-0 flex -translate-x-1/2 items-center justify-center lg:hidden"
-    // style={{ height: spec.height, width: `max(100vw, ${spec.minSpan}px)` }}
     >
       <div className="sm:rotate-90 rotate-180 test-2">
         <Image
-          src={CRAFTSMANSHIP_BACKGROUND}
-          alt=""
+          src={src}
+          alt={alt}
           width={spec.imageWidth}
           height={spec.imageHeight}
           className="h-screen w-[651px] max-w-none object-bottom md:max-lg:portrait:h-[85vh]"
@@ -94,11 +104,19 @@ function CraftsmanshipRadialLayer({ variant }: { variant: "desktop" | "mobile" }
   );
 }
 
-function CraftsmanshipBackground() {
+function CraftsmanshipBackground({
+  desktopSrc,
+  mobileSrc,
+  alt,
+}: {
+  desktopSrc: string;
+  mobileSrc: string;
+  alt: string;
+}) {
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      <CraftsmanshipSilkLayer variant="mobile" />
-      <CraftsmanshipSilkLayer variant="desktop" />
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      <CraftsmanshipSilkLayer variant="mobile" desktopSrc={desktopSrc} mobileSrc={mobileSrc} alt={alt} />
+      <CraftsmanshipSilkLayer variant="desktop" desktopSrc={desktopSrc} mobileSrc={mobileSrc} alt={alt} />
       <CraftsmanshipRadialLayer variant="mobile" />
       <CraftsmanshipRadialLayer variant="desktop" />
     </div>
@@ -117,7 +135,10 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
     return resolveCraftsmanshipSection(cmsSection);
   }, [editorialData]);
 
-  const { sectionTitle, steps, desktopImageUrl, mobileImageUrl, imageAlt } = craftsmanship;
+  const { sectionTitle, steps, desktopImageUrl, mobileImageUrl, imageAlt, backgroundDesktopUrl, backgroundMobileUrl, backgroundAlt } = craftsmanship;
+  const silkDesktopSrc = backgroundDesktopUrl || backgroundMobileUrl || CRAFTSMANSHIP_BACKGROUND_FALLBACK;
+  const silkMobileSrc = backgroundMobileUrl || backgroundDesktopUrl || CRAFTSMANSHIP_BACKGROUND_FALLBACK;
+  const silkAlt = backgroundAlt;
   const stepCount = steps.length;
   const hasDiamondImage = Boolean(desktopImageUrl || mobileImageUrl);
   const resolvedDesktopImage = desktopImageUrl ?? mobileImageUrl;
@@ -148,7 +169,11 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
         aria-busy="true"
       >
         <div className="sticky md:top-24 top-10 h-screen overflow-hidden bg-gray200 md:max-lg:portrait:h-[85vh]">
-          <CraftsmanshipBackground />
+          <CraftsmanshipBackground
+            desktopSrc={silkDesktopSrc}
+            mobileSrc={silkMobileSrc}
+            alt={silkAlt}
+          />
           <div className="container relative z-10 h-full">
             <div className="grid h-full grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-12">
               <div className="lg:col-span-5 flex flex-col gap-8 xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20">
@@ -177,7 +202,11 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
       className="craftsmanship-process-section [--craftsmanship-vh-unit:100vh] md:max-lg:portrait:[--craftsmanship-vh-unit:72vh] bg-gray200 py-16 md:py-0 md:pt-20 md:max-lg:portrait:pt-12"
     >
       <div className="sticky lg:top-24 top-10 h-screen overflow-hidden bg-gray200 md:max-lg:portrait:h-[85vh]">
-        <CraftsmanshipBackground />
+        <CraftsmanshipBackground
+          desktopSrc={silkDesktopSrc}
+          mobileSrc={silkMobileSrc}
+          alt={silkAlt}
+        />
         <div className="max-w-1920 mx-auto 2xl:px[60px] md:px-10 px-4 relative z-10 h-full">
           <div className="grid h-full grid-cols-1 lg:grid-cols-12 gap-6 md:gap-0 lg:gap-12">
             {/* Left column: title + steps */}

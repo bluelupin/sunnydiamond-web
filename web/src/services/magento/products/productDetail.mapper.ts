@@ -14,6 +14,7 @@ import {
 } from "./magentoAttribute.utils";
 import { resolveMagentoProductImages } from "./products.mapper";
 import { resolveMagentoProductPricing } from "./productPricing.utils";
+import { resolveMagentoProductPriceBreakup } from "./productPriceBreakup.utils";
 import { mapMagentoProductEngraving } from "./productEngraving.mapper";
 import { mapMagentoProductCustomOptions } from "./productCustomOptions.mapper";
 import { formatMetalColorLabel } from "@/features/products/utils/metalColorOptions.utils";
@@ -201,6 +202,8 @@ function mapConfigurableVariant(
     return null;
   }
 
+  const priceBreakup = resolveMagentoProductPriceBreakup(child.custom_attributesV2?.items);
+
   return {
     sku,
     price: pricing.price,
@@ -210,6 +213,7 @@ function mapConfigurableVariant(
     inStock: child.stock_status === "IN_STOCK",
     attributes,
     optionUids,
+    ...(priceBreakup ? { priceBreakup } : {}),
   };
 }
 
@@ -445,6 +449,7 @@ export function mapMagentoProductDetailToProduct(
   const categorySlug = jewelleryCategory.urlKey
     ? MAGENTO_URL_KEY_TO_SLUG[jewelleryCategory.urlKey]
     : undefined;
+  const priceBreakup = resolveMagentoProductPriceBreakup(product.custom_attributesV2?.items);
 
   return {
     id: sku,
@@ -471,6 +476,7 @@ export function mapMagentoProductDetailToProduct(
     engraving,
     customOptions,
     ...(configurable ? { configurable } : {}),
+    ...(priceBreakup ? { priceBreakup } : {}),
     productVideoUrl,
     ...(detailSections ? { detailSections } : {}),
     seo: buildProductSeo({

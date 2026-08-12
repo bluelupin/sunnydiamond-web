@@ -354,7 +354,7 @@ const WishlistAddToBagPanel = ({
                     </span>
                   ) : null}
                 </div>
-                {isDetailReady ? (
+                {isDetailReady && pricing?.breakup ? (
                   <DetailTextLink onClick={() => setIsPriceBreakupOpen(true)} className="uppercase">
                     View Price Breakup
                   </DetailTextLink>
@@ -379,7 +379,7 @@ const WishlistAddToBagPanel = ({
         guide={sizeGuide}
       />
 
-      {detailProduct && displayPricing ? (
+      {detailProduct && displayPricing?.breakup ? (
         <PriceBreakupPanel
           open={isPriceBreakupOpen}
           onClose={() => setIsPriceBreakupOpen(false)}

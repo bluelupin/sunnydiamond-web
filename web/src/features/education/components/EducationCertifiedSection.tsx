@@ -1,5 +1,6 @@
 import Image from "next/image";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
+import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import type { NormalizedEducationCertificateSection } from "@/services/education/learn-about-diamonds-page.types";
 import { cn } from "@/shared/utils/cn";
 import {
@@ -94,11 +95,25 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
     <section
       aria-labelledby="education-certified-title"
       className={cn(
-        "education-certified-section relative overflow-hidden",
+        "relative overflow-hidden",
+        !(certificate.backgroundDesktopUrl || certificate.backgroundMobileUrl) &&
+          "education-certified-section",
         "min-h-[900px] px-4 py-16",
         "lg:min-h-[791px] md:px-0 md:py-104",
       )}
     >
+      {certificate.backgroundDesktopUrl || certificate.backgroundMobileUrl ? (
+        <div className="pointer-events-none absolute inset-0">
+          <ResponsiveImage
+            desktopSrc={certificate.backgroundDesktopUrl || certificate.backgroundMobileUrl || ""}
+            mobileSrc={certificate.backgroundMobileUrl || certificate.backgroundDesktopUrl}
+            alt={certificate.backgroundAlt || ""}
+            fill
+            className="object-cover object-center"
+            sizes="100vw"
+          />
+        </div>
+      ) : null}
       <div className="relative flex flex-col items-center md:gap[40px] gap-8 mx-auto w-full 2xl:max-w-1920 max-w-1440 px-0 md:px-8 lg:px-10 2xl:px-[60px]">
         <ScrollReveal
           as="h2"

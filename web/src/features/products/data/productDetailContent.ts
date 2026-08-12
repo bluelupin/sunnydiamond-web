@@ -60,6 +60,7 @@ function buildAccordions(product: Product) {
 export function getProductDetailPricing(product: Product): ProductDetailPricing {
   const pricing: ProductDetailPricing = {
     price: product.price,
+    ...(product.priceBreakup ? { breakup: product.priceBreakup } : {}),
   };
 
   if (product.originalPrice != null && product.originalPrice > product.price) {

@@ -115,7 +115,7 @@ const LearnCareTip = ({ tip, mobile = false }: { tip: NormalizedEducationLearnCa
           height: mobile ? mobileSpec.iconSize : desktop.iconSize,
         }}
       >
-        <Image src={tip.icon} alt="" fill className="object-contain" aria-hidden />
+        <Image src={tip.icon} alt={tip.iconAlt || ""} fill className="object-contain" />
       </div>
       <p
         className="font-gill font-light text-base leading-110 text-darkblack md:text-neutral500"
