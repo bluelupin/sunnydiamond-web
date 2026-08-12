@@ -6,8 +6,8 @@ import {
   CartDivider,
   CartPrimaryButton,
 } from "@/features/cart/components/CartFlowUi";
-import FormFieldError from "@/shared/ui/FormFieldError";
 import { cn } from "@/shared/utils/cn";
+import LoginIdentifierField from "./LoginIdentifierField";
 import { isLoginIdentifierReadyForOtp } from "../utils/authValidation";
 
 const socialButtonClassName =
@@ -15,8 +15,10 @@ const socialButtonClassName =
 
 type LoginModalContentProps = {
   identifier: string;
+  countryCode: string;
   identifierError?: string;
   onIdentifierChange: (value: string) => void;
+  onCountryCodeChange: (value: string) => void;
   onContinue: () => void;
   onGoogleContinue: () => void;
   onAppleContinue: () => void;
@@ -41,15 +43,17 @@ const OrDivider = () => (
 
 const LoginModalContent = ({
   identifier,
+  countryCode,
   identifierError,
   onIdentifierChange,
+  onCountryCodeChange,
   onContinue,
   onGoogleContinue,
   onAppleContinue,
   onClose,
   titleClassName,
 }: LoginModalContentProps) => {
-  const canContinue = isLoginIdentifierReadyForOtp(identifier);
+  const canContinue = isLoginIdentifierReadyForOtp(identifier, countryCode);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -80,28 +84,13 @@ const LoginModalContent = ({
 
         <CartDivider />
 
-        <div className="flex flex-col gap-2">
-          <label htmlFor="login-identifier" className="font-gill text-base font-normal leading-110 text-darkblack">
-            Phone Number / Email ID*
-          </label>
-          <input
-            id="login-identifier"
-            type="text"
-            inputMode="text"
-            value={identifier}
-            onChange={(event) => onIdentifierChange(event.target.value)}
-            placeholder="Enter"
-            autoComplete="username"
-            required
-            aria-invalid={identifierError ? true : undefined}
-            aria-describedby={identifierError ? "login-identifier-error" : undefined}
-            className={cn(
-              "h-14 w-full border border-transparent bg-aboutInactive px-3 font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600 focus:border-darkblack",
-              identifierError && "border-[#F91616] bg-[#FEDCDC]",
-            )}
-          />
-          <FormFieldError id="login-identifier-error" message={identifierError} />
-        </div>
+        <LoginIdentifierField
+          identifier={identifier}
+          countryCode={countryCode}
+          error={identifierError}
+          onIdentifierChange={onIdentifierChange}
+          onCountryCodeChange={onCountryCodeChange}
+        />
       </div>
 
       <div className="flex w-full flex-col gap-4">

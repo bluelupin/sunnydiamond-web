@@ -15,6 +15,9 @@ export const APPOINTMENT_COUNTRY_CODES = [
   { code: "+44", country: "GB" },
 ] as const;
 
+/** Default country code for phone inputs (India). */
+export const DEFAULT_COUNTRY_CODE = APPOINTMENT_COUNTRY_CODES[0].code;
+
 export const appointmentFieldClassName =
   "h-14 w-full bg-[#F2F2F2] px-3 font-gill text-base leading-110 text-darkblack placeholder:text-[#999999] outline-none";
 

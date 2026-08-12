@@ -23,3 +23,19 @@ export function normalizePhoneForMagento(phone: string): string {
 
   return digits;
 }
+
+/** Builds E.164 phone for Magento from UI country code + national digits. */
+export function formatLoginPhoneForMagento(countryCode: string, nationalDigits: string): string {
+  const national = nationalDigits.replace(/\D/g, "");
+  const codeDigits = countryCode.replace(/\D/g, "");
+
+  if (!national) {
+    return "";
+  }
+
+  if (!codeDigits) {
+    return normalizePhoneForMagento(national);
+  }
+
+  return `+${codeDigits}${national}`;
+}
