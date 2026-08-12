@@ -8,19 +8,17 @@ import type {
   StrapiCareerLandingPageEntity,
   StrapiCareerListingPageEntity,
   StrapiCareerOpeningEntity,
+  StrapiCareerSeo,
 } from "./careers.types";
 import { EMPTY_CAREERS_PAGE_DATA } from "./careers.types";
 
-const CAREER_SEO_POPULATE =
-  "&populate[SEO][populate][ogImage]=true";
-
 /**
  * Deep populate for nested responsive-image media on the live CMS schema.
- * Career pages expose SEO under uppercase `SEO` (not `seo`) — must be populated explicitly.
+ * Do not combine `populate=*` with `populate[SEO]` — that returns CMS 500.
+ * Page SEO is fetched separately via CAREER_SEO_QUERY.
  */
 const CAREER_LANDING_POPULATE_QUERY =
   "populate=*" +
-  CAREER_SEO_POPULATE +
   "&populate[heroSection][populate][backgroundImage][populate][desktopImage]=true" +
   "&populate[heroSection][populate][backgroundImage][populate][mobileImage]=true" +
   "&populate[moreThanSection][populate][featuredImage1][populate][desktopImage]=true" +
@@ -35,12 +33,15 @@ const CAREER_LANDING_POPULATE_QUERY =
   "&populate[openingsSection][populate][career_openings][populate][applyCta]=true" +
   "&populate[FAQs][populate]=faqItems";
 
-const CAREER_LANDING_FALLBACK_QUERY = "populate=*" + CAREER_SEO_POPULATE;
+const CAREER_LANDING_FALLBACK_QUERY = "populate=*";
 
-/** `populate=*` alone does not return uppercase `SEO` — include explicit populate. */
-const CAREER_LISTING_POPULATE_QUERY = "populate=*" + CAREER_SEO_POPULATE;
+/** `populate=*` only — deep populate on this type returns CMS 500 (incl. when `heroSection` is null). */
+const CAREER_LISTING_POPULATE_QUERY = "populate=*";
 
-const CAREER_LISTING_FALLBACK_QUERY = "populate=*" + CAREER_SEO_POPULATE;
+const CAREER_LISTING_FALLBACK_QUERY = "populate=*";
+
+/** Uppercase `SEO` is omitted by `populate=*` and must be requested on its own. */
+const CAREER_SEO_QUERY = "populate[SEO][populate][ogImage]=true";
 
 async function fetchCareerListingPage(
   signal?: AbortSignal,
@@ -94,6 +95,30 @@ export const getCareerOpeningsRaw = cache(async (signal?: AbortSignal) => {
   );
 });
 
+async function fetchCareerPageSeo(
+  endpoint: string,
+  signal?: AbortSignal,
+): Promise<StrapiCareerSeo | null> {
+  try {
+    const raw = await apiFetch<{ SEO?: StrapiCareerSeo | null; seo?: StrapiCareerSeo | null }>(
+      `${endpoint}?${CAREER_SEO_QUERY}`,
+      { signal },
+    );
+    return raw?.SEO ?? raw?.seo ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function mergeCareerPageSeo<T extends { SEO?: StrapiCareerSeo | null; seo?: StrapiCareerSeo | null }>(
+  page: T | null,
+  seo: StrapiCareerSeo | null,
+): T | null {
+  if (!seo) return page;
+  if (!page) return { SEO: seo, seo } as T;
+  return { ...page, SEO: page.SEO ?? seo, seo: page.seo ?? seo };
+}
+
 const CAREER_OPENING_BY_IDENTIFIER_QUERY = (identifier: string) =>
   `filters[$or][0][jobID][$eq]=${encodeURIComponent(identifier)}` +
   `&filters[$or][1][slug][$eq]=${encodeURIComponent(identifier)}` +
@@ -121,15 +146,27 @@ export const getCareerOpeningByJobId = cache(
 
 export const getCareersPageData = cache(
   async (signal?: AbortSignal): Promise<NormalizedCareersPageData> => {
-    const [landingResult, listingResult, openingsResult] = await Promise.allSettled([
-      getCareerLandingPageRaw(signal),
-      getCareerListingPageRaw(signal),
-      getCareerOpeningsRaw(signal),
-    ]);
+    const [landingResult, listingResult, openingsResult, landingSeoResult, listingSeoResult] =
+      await Promise.allSettled([
+        getCareerLandingPageRaw(signal),
+        getCareerListingPageRaw(signal),
+        getCareerOpeningsRaw(signal),
+        fetchCareerPageSeo(STRAPI_ENDPOINTS.careerLandingPage, signal),
+        fetchCareerPageSeo(STRAPI_ENDPOINTS.careerListingPage, signal),
+      ]);
+
+    const landingSeo = landingSeoResult.status === "fulfilled" ? landingSeoResult.value : null;
+    const listingSeo = listingSeoResult.status === "fulfilled" ? listingSeoResult.value : null;
 
     return mapCareersPageData({
-      landing: landingResult.status === "fulfilled" ? landingResult.value : null,
-      listing: listingResult.status === "fulfilled" ? listingResult.value : null,
+      landing: mergeCareerPageSeo(
+        landingResult.status === "fulfilled" ? landingResult.value : null,
+        landingSeo,
+      ),
+      listing: mergeCareerPageSeo(
+        listingResult.status === "fulfilled" ? listingResult.value : null,
+        listingSeo,
+      ),
       openings: openingsResult.status === "fulfilled" ? openingsResult.value : null,
     });
   },

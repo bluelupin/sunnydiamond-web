@@ -7,6 +7,7 @@ import {
   getCachedHomepageShell,
   prefetchHomepageBundle,
 } from "@/lib/homepage/prefetchHomepageCms";
+import { getHomepageSeo } from "@/services/homepage/seo.service";
 import {
   preloadHeroLcpImages,
   resolveCraftingRarityContent,
@@ -20,9 +21,23 @@ export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    const shellData = await getCachedHomepageShell();
+    const [shellData, homepageSeoData] = await Promise.all([
+      getCachedHomepageShell(),
+      getHomepageSeo(),
+    ]);
+    const cmsSeo = homepageSeoData?.seo;
     const { title, description, keywords, canonicalUrl, imageUrl, noIndex } =
-      resolveHomepageSeoMetadata(shellData);
+      resolveHomepageSeoMetadata({
+        homepage: {
+          seo: {
+            ...shellData?.homepage?.seo,
+            ...cmsSeo,
+            metaKeywords:
+              cmsSeo?.metaKeywords ?? shellData?.homepage?.seo?.metaKeywords,
+          },
+        },
+        global: shellData?.global,
+      });
 
     return constructMetadata({
       title,
