@@ -7,13 +7,9 @@ import {
   errorPageCopy,
   errorPageTheme,
   errorPageVariants,
-  formatErrorPageTime,
-  formatEstimatedAvailability,
 } from "@/features/error/data/errorPageContent";
 import ErrorBrandHeader from "./ErrorBrandHeader";
 import ErrorStatusBadge from "./ErrorStatusBadge";
-import ErrorIllustration from "./ErrorIllustration";
-import ErrorStatusCard from "./ErrorStatusCard";
 import ErrorActionButtons from "./ErrorActionButtons";
 import ErrorFooterMessage from "./ErrorFooterMessage";
 
@@ -65,7 +61,7 @@ const ErrorPage = ({
   return (
     <main
       className={cn(
-        "flex min-h-[calc(100vh-8rem)] w-full items-center justify-center px-4 py-12 md:min-h-[calc(100vh-10rem)] md:px-8 md:py-16",
+        "flex h-screen w-full items-center justify-center px-4 py-12 md:px-8 md:py-16",
         className,
       )}
       style={{ backgroundColor: errorPageTheme.background, color: errorPageTheme.primaryText }}
@@ -75,8 +71,6 @@ const ErrorPage = ({
       <div className="animate-fade-in mx-auto flex w-full max-w-xl flex-col items-center gap-8 text-center md:gap-10">
         <ErrorBrandHeader />
         <ErrorStatusBadge label={errorPageCopy.badge} />
-        {/* <ErrorIllustration /> */}
-
         <div className="flex max-w-lg flex-col gap-3">
           <h1 className="font-larken text-3xl font-light leading-110 text-[#1E1E1E] md:text-4xl">
             {headline}
@@ -88,20 +82,6 @@ const ErrorPage = ({
             {variantContent.statusMessage}
           </p> */}
         </div>
-        {/* 
-        {showStatusCard ? (
-          <ErrorStatusCard
-            statusLabel={variantContent.statusLabel}
-            lastChecked={formatErrorPageTime(lastChecked)}
-            estimatedTime={
-              resolvedEstimate
-                ? formatEstimatedAvailability(resolvedEstimate)
-                : undefined
-            }
-            errorCode={errorCode}
-          />
-        ) : null} */}
-
         <ErrorActionButtons onRetry={onRetry ? handleRetry : undefined} isRetrying={isRetrying} />
         <ErrorFooterMessage />
       </div>

@@ -55,16 +55,3 @@ export const errorPageVariants: Record<
     statusLabel: "Temporary Interruption",
   },
 };
-
-export function formatErrorPageTime(date: Date) {
-  return date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
-}
-
-export function formatEstimatedAvailability(minutes: number) {
-  if (minutes <= 1) return "Shortly";
-  return `${minutes} minutes`;
-}

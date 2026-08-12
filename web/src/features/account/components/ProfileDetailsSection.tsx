@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import InformationIcon from "@/assets/Icons/InformationIcon";
 import { useAuth, type AuthCustomer } from "@/features/auth/context/AuthContext";
 import {
@@ -8,7 +8,7 @@ import {
   DetailOutlineButton,
   DetailTextLink,
 } from "@/features/products/components/detail/shared";
-import { useToast } from "@/shared/hooks/use-toast";
+import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import {
   appointmentFieldClassName,
@@ -27,13 +27,42 @@ type ProfileDetailsSectionProps = {
 /** Figma 1480:20341 — profile personal details, delete account, and logout mobile layout */
 const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
   const { logout } = useAuth();
-  const { toast } = useToast();
   const { contact } = useCustomerProfileContact(true);
   const content = profileDetailsContent;
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteReasonOpen, setDeleteReasonOpen] = useState(false);
   const [deleteSuccessOpen, setDeleteSuccessOpen] = useState(false);
+  const [statusToastMessage, setStatusToastMessage] = useState<string | null>(null);
+  const statusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { isSubmitting, error, clearError, deleteAccount } = useDeleteAccount();
+
+  const dismissStatusToast = useCallback(() => {
+    if (statusToastTimeoutRef.current) {
+      clearTimeout(statusToastTimeoutRef.current);
+      statusToastTimeoutRef.current = null;
+    }
+    setStatusToastMessage(null);
+  }, []);
+
+  const showStatusToast = useCallback(
+    (message: string) => {
+      dismissStatusToast();
+      setStatusToastMessage(message);
+      statusToastTimeoutRef.current = setTimeout(() => {
+        setStatusToastMessage(null);
+        statusToastTimeoutRef.current = null;
+      }, appStatusToastDurationMs);
+    },
+    [dismissStatusToast],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (statusToastTimeoutRef.current) {
+        clearTimeout(statusToastTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const initialFullName = [customer.firstname, customer.lastname].filter(Boolean).join(" ");
   const initialEmail = customer.email ?? "";
@@ -57,17 +86,11 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
   };
 
   const handleSave = () => {
-    toast({
-      title: content.saveUnavailableTitle,
-      description: content.saveUnavailableDescription,
-    });
+    showStatusToast(content.saveUnavailableToastMessage);
   };
 
   const handleVerifyEmail = () => {
-    toast({
-      title: "Email verified",
-      description: "Your email is linked to your Sunny Diamonds account.",
-    });
+    showStatusToast(content.emailVerifiedToastMessage);
   };
 
   const handleProceedToDelete = () => {
@@ -101,8 +124,14 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <>
+      <AppStatusToast
+        open={Boolean(statusToastMessage)}
+        message={statusToastMessage ?? ""}
+      />
+
       <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6">
         <h2 className="font-gill text-xl font-normal leading-110 text-darkblack lg:font-larken lg:text-2xl lg:font-light">
           {content.sectionTitle}
         </h2>
@@ -231,7 +260,8 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
           {content.logout.ctaLabel}
         </DetailDarkButton>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 
