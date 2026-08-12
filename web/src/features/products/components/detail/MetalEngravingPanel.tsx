@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/shared/ui/select";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import EngravingPreviewImage from "./EngravingPreviewImage";
 import { DetailDarkButton } from "./shared";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 
@@ -23,6 +24,7 @@ type MetalEngravingPanelProps = {
   open: boolean;
   onClose: () => void;
   previewImage?: string | StaticImageData;
+  productImage?: string | StaticImageData;
   fonts?: readonly string[];
   maxCharacters: number;
   initialValue?: EngravingSelection | null;
@@ -33,6 +35,7 @@ const MetalEngravingPanel = ({
   open,
   onClose,
   previewImage,
+  productImage,
   fonts,
   maxCharacters,
   initialValue,
@@ -98,123 +101,111 @@ const MetalEngravingPanel = ({
   return (
     <>
       <ProductDetailSidePanelShell
-      open={open}
-      onClose={onClose}
-      overlayAriaLabel="Close engraving panel"
-      dialogAriaLabel="Engraving"
-    >
-      <div className="flex min-h-0 flex-1 flex-col">
-      <div className="min-h-0 flex-1 overflow-y-auto">
-          <div className="flex flex-col gap-6 px-4 pt-6 lg:px-6 lg:pt-10">
-            <div className="flex flex-col gap-6">
-              <div className="flex items-center justify-between gap-4">
-                <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">Engraving</h2>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  aria-label="Close engraving panel"
-                  className="inline-flex size-8 shrink-0 items-center justify-center"
-                >
-                  <Image
-                    src="/icons/menu-close.svg"
-                    alt=""
-                    width={24}
-                    height={24}
-                    aria-hidden
-                  />
-                </button>
-              </div>
-              <div className="h-px w-full bg-neutral300" aria-hidden />
-            </div>
-
-            {previewImage ? (
-              <div className="h-214 w-full overflow-hidden bg-aboutInactive">
-                <Image
-                  src={previewImage}
-                  alt="Engraving preview"
-                  width={480}
-                  height={214}
-                  className="h-full w-full object-cover object-center"
-                  sizes="(max-width: 1024px) 100vw, 480px"
-                />
-              </div>
-            ) : null}
-
-            <div className="flex flex-col gap-6 pb-72">
-              <div className="flex flex-col gap-2">
+        open={open}
+        onClose={onClose}
+        overlayAriaLabel="Close engraving panel"
+        dialogAriaLabel="Engraving"
+      >
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <div className="flex flex-col gap-6 px-6 pt-10">
+              <div className="flex flex-col gap-6">
                 <div className="flex items-center justify-between gap-4">
-                  <label htmlFor="engraving-text" className={appointmentLabelClassName}>
-                    What do you want engraved?
-                  </label>
-                  <span
-                    id="engraving-character-limit"
-                    className="font-gill text-sm font-light leading-110 text-neutral500"
+                  <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">Engraving</h2>
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    aria-label="Close engraving panel"
+                    className="inline-flex size-6 shrink-0 items-center justify-center"
                   >
-                    {text.length}/{maxCharacters}
-                  </span>
+                    <Image
+                      src="/icons/menu-close.svg"
+                      alt=""
+                      width={24}
+                      height={24}
+                      aria-hidden
+                    />
+                  </button>
                 </div>
-                <input
-                  id="engraving-text"
-                  type="text"
-                  value={text}
-                  maxLength={maxCharacters}
-                  onChange={(event) => handleTextChange(event.target.value)}
-                  aria-describedby="engraving-character-limit"
-                  placeholder="Enter"
-                  className={appointmentFieldClassName}
+                <div className="h-px w-full bg-neutral300" aria-hidden />
+              </div>
+
+              <div className="flex flex-col gap-6">
+                <EngravingPreviewImage
+                  previewImage={previewImage}
+                  productImage={productImage}
+                  text={text}
+                  font={font}
                 />
-              </div>
 
-              <div className="flex flex-col gap-2">
-                <label htmlFor="engraving-font" className={appointmentLabelClassName}>
-                  Font*
-                </label>
-                <Select value={font} onValueChange={setFont}>
-                  <SelectTrigger
-                    id="engraving-font"
-                    className="h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0"
-                  >
-                    <SelectValue placeholder="-select-" />
-                  </SelectTrigger>
-                  <SelectContent className="z-[80]">
-                    {availableFonts.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {option}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-1">
-                  <Info size={24} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
-                  <p className="font-gill text-base font-light leading-110 text-darkblack">
-                    For more options or special requests
-                  </p>
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="engraving-text" className={appointmentLabelClassName}>
+                    Type here (Up to {maxCharacters} characters)
+                  </label>
+                  <input
+                    id="engraving-text"
+                    type="text"
+                    value={text}
+                    maxLength={maxCharacters}
+                    onChange={(event) => handleTextChange(event.target.value)}
+                    placeholder="Enter"
+                    className={appointmentFieldClassName}
+                  />
                 </div>
-                <Link
-                  href="/contact"
-                  className="text-link-underline inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
-                >
-                  Contact Our Team
-                </Link>
+
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="engraving-font" className={appointmentLabelClassName}>
+                    Font*
+                  </label>
+                  <Select value={font} onValueChange={setFont}>
+                    <SelectTrigger
+                      id="engraving-font"
+                      className="h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0"
+                    >
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent className="z-[80]">
+                      {availableFonts.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex items-center gap-1">
+                    <Info size={20} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
+                    <p className="font-gill text-base font-light leading-110 text-darkblack">
+                      For more options or special requests,
+                    </p>
+                  </div>
+                  <Link
+                    href="/contact"
+                    className="text-link-underline inline-flex border-b border-darkblack pb-1 font-gill text-sm uppercase leading-110 text-darkblack"
+                  >
+                    Contact Our Team
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <PanelFooter>
-          <DetailDarkButton
-            onClick={handleSave}
-            disabled={!font.trim()}
-            className="uppercase disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Save
-          </DetailDarkButton>
-        </PanelFooter>
-      </div>
-    </ProductDetailSidePanelShell>
+          <PanelFooter contentClassName="flex flex-col items-center gap-4">
+            <p className="text-center font-gill text-sm font-light leading-normal tracking-normal text-neutral500">
+              Our representative will get in touch with you soon
+            </p>
+            <DetailDarkButton
+              onClick={handleSave}
+              disabled={!font.trim()}
+              className="w-full uppercase disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Save
+            </DetailDarkButton>
+          </PanelFooter>
+        </div>
+      </ProductDetailSidePanelShell>
       <AppStatusToast open={Boolean(statusToastMessage)} message={statusToastMessage ?? ""} />
     </>
   );
