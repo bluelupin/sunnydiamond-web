@@ -9,12 +9,13 @@ import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { invalidFieldContainerClassName } from "@/shared/utils/formValidation";
 import { cn } from "@/shared/utils/cn";
 import { buildPolicyCertificationsHref } from "@/features/cms/utils/policyCertificationsRoutes";
-import { isOtpComplete, LOGIN_OTP_LENGTH, normalizeIndianPhoneDigits } from "../utils/authValidation";
+import { formatLoginPhoneDisplay, isOtpComplete, LOGIN_OTP_LENGTH } from "../utils/authValidation";
 
 const OTP_LENGTH = LOGIN_OTP_LENGTH;
 
 type LoginOtpContentProps = {
   phone: string;
+  countryCode: string;
   otp: string[];
   otpError?: string;
   secondsLeft: number;
@@ -36,13 +37,12 @@ const CloseIcon = () => (
   </svg>
 );
 
-const formatPhoneForOtp = (phone: string) => {
-  const normalized = normalizeIndianPhoneDigits(phone);
-  return `+91 ${normalized}`;
-};
+const formatPhoneForOtp = (countryCode: string, phone: string) =>
+  formatLoginPhoneDisplay(countryCode, phone);
 
 const LoginOtpContent = ({
   phone,
+  countryCode,
   otp,
   otpError,
   secondsLeft,
@@ -101,7 +101,7 @@ const LoginOtpContent = ({
         <div className="flex w-full flex-col gap-4">
           <div className="flex flex-wrap items-center gap-3">
             <p className="font-gill text-base font-normal leading-110 text-darkblack">
-              Please enter the OTP sent to {formatPhoneForOtp(phone)}
+              Please enter the OTP sent to {formatPhoneForOtp(countryCode, phone)}
             </p>
             <DetailTextLink onClick={onEdit}>EDIT</DetailTextLink>
           </div>

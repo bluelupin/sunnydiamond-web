@@ -1,9 +1,11 @@
 import {
   type FieldValidation,
+  validatePhone,
   validateRequiredEmail,
   validateRequiredName,
   validateRequiredPassword,
 } from "@/shared/utils/formValidation";
+import { DEFAULT_COUNTRY_CODE } from "@/shared/constants/appointmentForm";
 
 export const LOGIN_OTP_LENGTH = 6;
 
@@ -15,14 +17,32 @@ export const normalizeIndianPhoneDigits = (value: string): string => {
   return digits;
 };
 
+export const normalizeLoginPhoneDigits = (value: string, countryCode: string): string => {
+  if (countryCode === "+91") {
+    return normalizeIndianPhoneDigits(value);
+  }
+
+  return value.replace(/\D/g, "");
+};
+
 export const isEmailIdentifier = (value: string): boolean => value.trim().includes("@");
 
+export const formatLoginPhoneDisplay = (countryCode: string, nationalDigits: string): string => {
+  const national = nationalDigits.replace(/\D/g, "");
+  if (!national) {
+    return countryCode;
+  }
+
+  return `${countryCode} ${national}`;
+};
+
 /**
- * Sign-in identifier validation. Format checks are deferred until Magento auth is wired.
- * Sign-in identifier validation. A phone number continues to the SMS-OTP flow;
- * an email continues to the password flow.
+ * Sign-in identifier validation. Phone numbers continue to SMS OTP; email continues to password.
  */
-export const validateLoginIdentifier = (value: string): FieldValidation => {
+export const validateLoginIdentifier = (
+  value: string,
+  countryCode = DEFAULT_COUNTRY_CODE,
+): FieldValidation => {
   const trimmed = value.trim();
 
   if (!trimmed) {
@@ -33,11 +53,11 @@ export const validateLoginIdentifier = (value: string): FieldValidation => {
     return validateRequiredEmail(trimmed);
   }
 
-  return { valid: true };
+  return validatePhone(trimmed, countryCode);
 };
 
-export const isLoginIdentifierReadyForOtp = (value: string): boolean =>
-  validateLoginIdentifier(value).valid;
+export const isLoginIdentifierReadyForOtp = (value: string, countryCode = DEFAULT_COUNTRY_CODE): boolean =>
+  validateLoginIdentifier(value, countryCode).valid;
 
 export const isOtpComplete = (otp: string[]): boolean =>
   otp.length === LOGIN_OTP_LENGTH && otp.every((digit) => /^\d$/.test(digit));

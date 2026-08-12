@@ -48,7 +48,7 @@ export async function loginWithPassword(
   return { success: true };
 }
 
-/** Sends a login OTP. Phone is 10 national digits; the backend normalizes to +91. */
+/** Sends a login OTP. Phone should be E.164 (e.g. +919876543210); the backend normalizes if needed. */
 export async function requestLoginOtp(phone: string): Promise<RequestOtpResult> {
   const { ok, data } = await postJson("/api/auth/otp/request", { phone });
 

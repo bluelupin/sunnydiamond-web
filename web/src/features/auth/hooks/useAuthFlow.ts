@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type RefObject } from "react";
+import { formatLoginPhoneForMagento } from "@/lib/auth/magentoPhone";
+import { DEFAULT_COUNTRY_CODE } from "@/shared/constants/appointmentForm";
 import { sanitizePhoneInput } from "@/shared/utils/formValidation";
 import {
   createCustomerAccount,
@@ -16,7 +18,7 @@ import {
   isLoginIdentifierReadyForOtp,
   isOtpComplete,
   LOGIN_OTP_LENGTH,
-  normalizeIndianPhoneDigits,
+  normalizeLoginPhoneDigits,
   validateCreateAccountForm,
   validateEmailRegisterForm,
   isEmailRegisterReady,
@@ -42,8 +44,10 @@ export type AuthFlowContentProps = {
   titleClassName?: string;
   signIn: {
     identifier: string;
+    countryCode: string;
     identifierError?: string;
     onIdentifierChange: (value: string) => void;
+    onCountryCodeChange: (value: string) => void;
     onContinue: () => void;
     onGoogleContinue: () => void;
     onAppleContinue: () => void;
@@ -51,6 +55,7 @@ export type AuthFlowContentProps = {
   };
   otp: {
     phone: string;
+    countryCode: string;
     otp: string[];
     otpError?: string;
     secondsLeft: number;
@@ -115,7 +120,9 @@ export function useAuthFlow({
   const returnUrl = sanitizeReturnUrl(returnUrlInput);
   const [step, setStep] = useState<AuthFlowStep>("sign-in");
   const [identifier, setIdentifier] = useState("");
+  const [countryCode, setCountryCode] = useState(DEFAULT_COUNTRY_CODE);
   const [verifiedPhone, setVerifiedPhone] = useState("");
+  const [verifiedCountryCode, setVerifiedCountryCode] = useState(DEFAULT_COUNTRY_CODE);
   const [identifierError, setIdentifierError] = useState<string | undefined>();
   const [otp, setOtp] = useState<string[]>(Array(LOGIN_OTP_LENGTH).fill(""));
   const [otpError, setOtpError] = useState<string | undefined>();
@@ -144,7 +151,9 @@ export function useAuthFlow({
   const resetState = useCallback(() => {
     setStep("sign-in");
     setIdentifier("");
+    setCountryCode(DEFAULT_COUNTRY_CODE);
     setVerifiedPhone("");
+    setVerifiedCountryCode(DEFAULT_COUNTRY_CODE);
     setIdentifierError(undefined);
     setOtp(Array(LOGIN_OTP_LENGTH).fill(""));
     setOtpError(undefined);
@@ -199,12 +208,12 @@ export function useAuthFlow({
   useEffect(() => {
     if (!active) return;
 
-    if (step === "otp" && !isLoginIdentifierReadyForOtp(identifier)) {
+    if (step === "otp" && !isLoginIdentifierReadyForOtp(identifier, countryCode)) {
       setStep("sign-in");
     }
 
     if (step === "create-account" && !verifiedPhone) {
-      setStep(isLoginIdentifierReadyForOtp(identifier) ? "otp" : "sign-in");
+      setStep(isLoginIdentifierReadyForOtp(identifier, countryCode) ? "otp" : "sign-in");
     }
 
     if (step === "password" && !isEmailIdentifier(identifier)) {
@@ -214,24 +223,35 @@ export function useAuthFlow({
     if (step === "email-create-account" && !isEmailIdentifier(identifier)) {
       setStep("sign-in");
     }
-  }, [active, step, identifier, verifiedPhone]);
+  }, [active, step, identifier, countryCode, verifiedPhone]);
 
   const handleClose = useCallback(() => {
     onAbort();
   }, [onAbort]);
 
-  const handleIdentifierChange = useCallback((value: string) => {
-    setIdentifier(value);
-    // Digits-only input is treated as a phone number; anything containing a
-    // letter or @ is left untouched so an email can actually be typed.
-    const nextValue = /[a-zA-Z@]/.test(value) ? value : sanitizePhoneInput(value, "+91");
-    setIdentifier(nextValue);
-    setIdentifierError(undefined);
-  }, []);
+  const handleIdentifierChange = useCallback(
+    (value: string) => {
+      const nextValue = /[a-zA-Z@]/.test(value) ? value : sanitizePhoneInput(value, countryCode);
+      setIdentifier(nextValue);
+      setIdentifierError(undefined);
+    },
+    [countryCode],
+  );
+
+  const handleCountryCodeChange = useCallback(
+    (value: string) => {
+      setCountryCode(value);
+      if (!isEmailIdentifier(identifier)) {
+        setIdentifier(sanitizePhoneInput(identifier, value));
+      }
+      setIdentifierError(undefined);
+    },
+    [identifier],
+  );
 
   const handleContinue = useCallback(async () => {
     if (isSubmitting) return;
-    const validation = validateLoginIdentifier(identifier);
+    const validation = validateLoginIdentifier(identifier, countryCode);
 
     if (!validation.valid) {
       setIdentifierError(validation.error);
@@ -247,9 +267,10 @@ export function useAuthFlow({
       return;
     }
 
-    const phoneDigits = normalizeIndianPhoneDigits(identifier);
+    const phoneDigits = normalizeLoginPhoneDigits(identifier, countryCode);
+    const phoneForApi = formatLoginPhoneForMagento(countryCode, phoneDigits);
     setIsSubmitting(true);
-    const result = await requestLoginOtp(phoneDigits);
+    const result = await requestLoginOtp(phoneForApi);
     setIsSubmitting(false);
 
     if (!result.success) {
@@ -259,11 +280,12 @@ export function useAuthFlow({
 
     cooldownRef.current = result.resendAfterSeconds;
     setIdentifier(phoneDigits);
+    setVerifiedCountryCode(countryCode);
     setIdentifierError(undefined);
     setOtp(Array(LOGIN_OTP_LENGTH).fill(""));
     setOtpError(undefined);
     setStep("otp");
-  }, [identifier, isSubmitting]);
+  }, [countryCode, identifier, isSubmitting]);
 
   const handleBackToSignIn = useCallback(() => {
     setStep("sign-in");
@@ -308,13 +330,16 @@ export function useAuthFlow({
 
   const handleResend = useCallback(async () => {
     if ((!otpError && secondsLeft > 0) || isSubmitting) return;
-    if (!isLoginIdentifierReadyForOtp(identifier)) {
+    if (!isLoginIdentifierReadyForOtp(identifier, countryCode)) {
       setStep("sign-in");
       return;
     }
 
+    const phoneDigits = normalizeLoginPhoneDigits(identifier, countryCode);
+    const phoneForApi = formatLoginPhoneForMagento(countryCode, phoneDigits);
+
     setIsSubmitting(true);
-    const result = await requestLoginOtp(normalizeIndianPhoneDigits(identifier));
+    const result = await requestLoginOtp(phoneForApi);
     setIsSubmitting(false);
 
     if (!result.success) {
@@ -327,19 +352,21 @@ export function useAuthFlow({
     setSecondsLeft(result.resendAfterSeconds);
     setOtp(Array(LOGIN_OTP_LENGTH).fill(""));
     inputRefs.current[0]?.focus();
-  }, [identifier, isSubmitting, otpError, secondsLeft]);
+  }, [countryCode, identifier, isSubmitting, otpError, secondsLeft]);
 
   const handleLogin = useCallback(async () => {
     if (!isOtpComplete(otp) || isSubmitting) return;
-    if (!isLoginIdentifierReadyForOtp(identifier)) {
+    if (!isLoginIdentifierReadyForOtp(identifier, countryCode)) {
       setStep("sign-in");
       setIdentifierError("Phone number or email is required");
       return;
     }
 
+    const phoneDigits = normalizeLoginPhoneDigits(identifier, countryCode);
+    const phoneForApi = formatLoginPhoneForMagento(countryCode, phoneDigits);
+
     setIsSubmitting(true);
-    const phoneDigits = normalizeIndianPhoneDigits(identifier);
-    const result = await verifyLoginOtp(phoneDigits, otp.join(""));
+    const result = await verifyLoginOtp(phoneForApi, otp.join(""));
     setIsSubmitting(false);
 
     if (!result.success) {
@@ -349,6 +376,7 @@ export function useAuthFlow({
 
     setOtpError(undefined);
     setVerifiedPhone(phoneDigits);
+    setVerifiedCountryCode(countryCode);
 
     if (result.requiresAccountSetup) {
       setStep("create-account");
@@ -357,7 +385,7 @@ export function useAuthFlow({
 
     setIsSubmitting(true);
     await completeAuth();
-  }, [completeAuth, identifier, isSubmitting, otp]);
+  }, [completeAuth, countryCode, identifier, isSubmitting, otp]);
 
   const handleCreateAccount = useCallback(async () => {
     if (!verifiedPhone || isSubmitting) return;
@@ -374,9 +402,11 @@ export function useAuthFlow({
 
     if (!valid) return;
 
+    const phoneForApi = formatLoginPhoneForMagento(verifiedCountryCode, verifiedPhone);
+
     setIsSubmitting(true);
     const result = await createCustomerAccount({
-      phone: verifiedPhone,
+      phone: phoneForApi,
       otp: otp.join(""),
       fullName: fullName.trim(),
       email: email.trim(),
@@ -390,7 +420,7 @@ export function useAuthFlow({
     }
 
     await completeAuth();
-  }, [completeAuth, email, fullName, isSubmitting, otp, termsAccepted, verifiedPhone]);
+  }, [completeAuth, email, fullName, isSubmitting, otp, termsAccepted, verifiedCountryCode, verifiedPhone]);
 
   const handlePasswordChange = useCallback((value: string) => {
     setPassword(value);
@@ -535,8 +565,10 @@ export function useAuthFlow({
     step,
     signIn: {
       identifier,
+      countryCode,
       identifierError,
       onIdentifierChange: handleIdentifierChange,
+      onCountryCodeChange: handleCountryCodeChange,
       onContinue: handleContinue,
       onGoogleContinue: handleGoogleContinue,
       onAppleContinue: handleAppleContinue,
@@ -544,6 +576,7 @@ export function useAuthFlow({
     },
     otp: {
       phone: identifier,
+      countryCode,
       otp,
       otpError,
       secondsLeft,
