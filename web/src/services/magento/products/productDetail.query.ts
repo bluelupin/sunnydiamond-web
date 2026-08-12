@@ -18,6 +18,17 @@ const MAGENTO_PRODUCT_DETAIL_CUSTOM_ATTRIBUTES = `
   }
 ` as const;
 
+const MAGENTO_VARIANT_PRICE_BREAKUP_ATTRIBUTES = `
+  custom_attributesV2 {
+    items {
+      code
+      ... on AttributeValue {
+        value
+      }
+    }
+  }
+` as const;
+
 const MAGENTO_PRODUCT_DETAIL_SHARED_EXTENSIONS = `
   special_price
   related_products {
@@ -129,6 +140,7 @@ export const MAGENTO_PRODUCT_BY_URL_KEY_QUERY = `
                 position
                 disabled
               }
+              ${MAGENTO_VARIANT_PRICE_BREAKUP_ATTRIBUTES}
             }
           }
         }

@@ -26,7 +26,10 @@ export type ProductDetailContent = {
   personaliseImage: string;
 };
 
+import type { ProductPriceBreakupComponents } from "@/services/magento/products/productPriceBreakup.utils";
+
 export type ProductDetailPricing = {
   price: number;
   originalPrice?: number;
+  breakup?: ProductPriceBreakupComponents;
 };

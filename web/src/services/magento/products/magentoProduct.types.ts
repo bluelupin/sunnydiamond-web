@@ -89,6 +89,9 @@ export type MagentoConfigurableVariantProduct = {
   price_range?: MagentoProductPriceRange | null;
   image?: { url?: string | null } | null;
   media_gallery?: MagentoMediaGalleryItem[] | null;
+  custom_attributesV2?: {
+    items?: MagentoCustomAttributeItem[] | null;
+  } | null;
 };
 
 export type MagentoConfigurableVariant = {

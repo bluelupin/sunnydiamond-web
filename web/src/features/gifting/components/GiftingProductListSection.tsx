@@ -34,7 +34,7 @@ const GiftingProductListSection = ({ perfectGift }: GiftingProductListSectionPro
     <section
       id="gifting-products"
       aria-labelledby="gifting-products-title"
-      className="overflow-x-clip px-0 py-16 md:py-104"
+      className="overflow-x-clip px-0 py-16 md:py-100"
       aria-label={perfectGift.title}
       aria-busy={isCarouselLoading}
     >

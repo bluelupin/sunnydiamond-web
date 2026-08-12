@@ -239,9 +239,11 @@ const ProductDetailSidebar = ({
                 </span>
               ) : null}
             </div>
-            <DetailTextLink onClick={() => setIsPriceBreakupOpen(true)} className="uppercase">
-              View Price Breakup
-            </DetailTextLink>
+            {pricing.breakup ? (
+              <DetailTextLink onClick={() => setIsPriceBreakupOpen(true)} className="uppercase">
+                View Price Breakup
+              </DetailTextLink>
+            ) : null}
           </div>
 
           <div className="flex gap-2">
@@ -524,7 +526,7 @@ const ProductDetailSidebar = ({
         />
       ) : null}
 
-      {isPriceBreakupOpen ? (
+      {isPriceBreakupOpen && pricing.breakup ? (
         <PriceBreakupPanel
           open
           onClose={() => setIsPriceBreakupOpen(false)}
