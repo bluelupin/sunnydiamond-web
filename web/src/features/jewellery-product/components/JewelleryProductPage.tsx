@@ -41,7 +41,7 @@ import {
 import { useMagentoJewelleryListing, createJewelleryListingPrefetchParams } from "@/hooks/magento/useMagentoJewelleryListing";
 import { useMagentoJewelleryNav } from "@/hooks/magento/useMagentoJewelleryNav";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
-import { resolveActiveCategorySlugFromFilters } from "../utils/plpCategoryNav";
+import { resolveActiveCategorySlugFromFilters, resolveMainCategoryUrlKeyFromDrawerSelection } from "../utils/plpCategoryNav";
 import type { JewelleryCategory, JewelleryFilterState } from "../types";
 import type { JewelleryListingProductsData } from "@/types/magento/jewelleryListing";
 
@@ -181,7 +181,20 @@ const JewelleryProductPage = ({
     });
   }, [isLoading, products.length, pathname, initialListing]);
 
+  const activeNavCategory = useMemo(
+    () => navCategories.find((category) => category.urlKey === categoryUrlKey) ?? null,
+    [navCategories, categoryUrlKey],
+  );
+  const categoryFilterHeading =
+    categoryUrlKey && activeNavCategory && activeNavCategory.children.length > 0
+      ? `${activeNavCategory.label} Categories:`
+      : null;
+
   const activeCategory = useMemo(() => {
+    if (categoryUrlKey) {
+      return categoryFromUrl;
+    }
+
     const fromDrawerCategory = resolveActiveCategorySlugFromFilters(
       filters,
       facets,
@@ -189,7 +202,7 @@ const JewelleryProductPage = ({
     );
 
     return fromDrawerCategory ?? categoryFromUrl;
-  }, [filters, facets, navCategories, categoryFromUrl]);
+  }, [categoryUrlKey, filters, facets, navCategories, categoryFromUrl]);
 
   useEffect(() => {
     if (!hasMagentoFilterFacets(facets)) {
@@ -292,6 +305,23 @@ const JewelleryProductPage = ({
 
   const handleApplyFilters = useCallback(
     (nextFilters: JewelleryFilterState) => {
+      // All-jewellery drawer: selecting one main category should behave like the tabs
+      // so the next open shows that category's subfilters (not the mixed main list).
+      if (!categoryUrlKey) {
+        const mainCategoryUrlKey = resolveMainCategoryUrlKeyFromDrawerSelection(
+          nextFilters.categories,
+          facets,
+          navCategories,
+        );
+
+        if (mainCategoryUrlKey) {
+          setFilters({ ...nextFilters, categories: [] });
+          setIsFilterOpen(false);
+          router.replace(buildJewelleryCategoryHref(mainCategoryUrlKey), { scroll: false });
+          return;
+        }
+      }
+
       setFilters(nextFilters);
       setIsFilterOpen(false);
 
@@ -316,7 +346,9 @@ const JewelleryProductPage = ({
       }
     },
     [
+      categoryUrlKey,
       facets,
+      navCategories,
       occasionSlug,
       diamondShapeSlug,
       fancyColourSlug,
@@ -392,6 +424,7 @@ const JewelleryProductPage = ({
         open={isFilterOpen}
         appliedFilters={filters}
         facets={facets}
+        categoryFilterHeading={categoryFilterHeading}
         onClose={() => setIsFilterOpen(false)}
         onApply={handleApplyFilters}
       />

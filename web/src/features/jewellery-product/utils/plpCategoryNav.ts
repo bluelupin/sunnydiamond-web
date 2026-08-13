@@ -87,3 +87,39 @@ export function resolveActiveCategorySlugFromFilters(
 
   return "all";
 }
+
+/**
+ * When the all-jewellery drawer selects exactly one main PLP category,
+ * return its Magento url_key so apply can navigate like the category tabs.
+ */
+export function resolveMainCategoryUrlKeyFromDrawerSelection(
+  selectedLabels: readonly string[],
+  facets: JewelleryFilterFacets,
+  navCategories: JewelleryNavCategory[],
+): string | null {
+  if (selectedLabels.length !== 1) {
+    return null;
+  }
+
+  const label = selectedLabels[0]?.trim();
+  if (!label) {
+    return null;
+  }
+
+  const facet = facets.categories.find((category) => category.label === label);
+  const navById = new Map(navCategories.map((category) => [category.id, category]));
+  const nav =
+    (facet?.value ? navById.get(facet.value) : undefined) ??
+    navCategories.find(
+      (category) =>
+        Boolean(category.slug) &&
+        category.slug !== "all" &&
+        category.label.trim().toLowerCase() === label.toLowerCase(),
+    );
+
+  if (!nav?.urlKey || !nav.slug || nav.slug === "all") {
+    return null;
+  }
+
+  return nav.urlKey;
+}

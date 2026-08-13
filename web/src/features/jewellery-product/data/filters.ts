@@ -209,6 +209,35 @@ export function parseJewelleryPriceInput(value: string, fallback: number): numbe
   return Math.max(0, Math.round(parsed));
 }
 
+export const JEWELLERY_MAX_AMOUNT_BELOW_MIN_ERROR =
+  "Max amount must be greater than or equal to min amount.";
+
+/** Returns an error when the typed max amount is below the current min amount. */
+export function getMaxAmountBelowMinError(
+  minPrice: number,
+  maxInputValue: string,
+): string | null {
+  const trimmed = maxInputValue.replace(/,/g, "").trim();
+
+  if (!trimmed) {
+    return null;
+  }
+
+  const parsed = Number(trimmed);
+
+  if (!Number.isFinite(parsed)) {
+    return null;
+  }
+
+  const intendedMax = Math.max(0, Math.round(parsed));
+
+  if (intendedMax < Math.round(minPrice)) {
+    return JEWELLERY_MAX_AMOUNT_BELOW_MIN_ERROR;
+  }
+
+  return null;
+}
+
 /** Keeps min/max within facet bounds and ensures max is never below min. */
 export function normalizeJewelleryPriceRange(
   minPrice: number,

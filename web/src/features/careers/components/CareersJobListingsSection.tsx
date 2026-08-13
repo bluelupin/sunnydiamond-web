@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import FilterIcon from "@/assets/Icons/PLP/FilterIcon";
 import Reveal from "@/shared/Animation/Reveal";
 import { cn } from "@/shared/utils/cn";
+import JewelleryLoadMoreSection from "@/features/jewellery-product/components/JewelleryLoadMoreSection";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
 import CareersJobCard from "./shared/CareersJobCard";
 import CareersJobFiltersSidebar from "./shared/CareersJobFiltersSidebar";
@@ -12,6 +13,7 @@ import CareersJobFiltersDrawer from "./shared/CareersJobFiltersDrawer";
 import CareersJobListingsEmptyState from "./shared/CareersJobListingsEmptyState";
 import {
   CAREERS_LISTING_CLEAR_FILTERS_LABEL,
+  CAREERS_LISTING_PAGE_SIZE,
   hasActiveListingFilters,
 } from "@/features/careers/constants/careersListing";
 
@@ -33,6 +35,7 @@ const CareersJobListingsSection = () => {
   } = useCareersJobs();
   const { listing } = cms;
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(CAREERS_LISTING_PAGE_SIZE);
 
   const listingHeading = listing.featuredTitle ?? listing.title;
   const searchPlaceholder = "Search roles";
@@ -43,6 +46,12 @@ const CareersJobListingsSection = () => {
     experienceFilter,
   );
   const showFilterEmptyState = filteredJobs.length === 0 && hasActiveFilters;
+  const visibleJobs = filteredJobs.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredJobs.length;
+
+  useEffect(() => {
+    setVisibleCount(CAREERS_LISTING_PAGE_SIZE);
+  }, [searchQuery, locationFilter, departmentFilter, experienceFilter]);
 
   if (!listingHeading || !searchPlaceholder) {
     return null;
@@ -100,8 +109,8 @@ const CareersJobListingsSection = () => {
             </Reveal>
 
             <div className="flex flex-col gap-4">
-              {filteredJobs.length > 0 ? (
-                filteredJobs.map((job, index) => (
+              {visibleJobs.length > 0 ? (
+                visibleJobs.map((job, index) => (
                   <Reveal key={job.id} direction="up" delay={index * 0.03}>
                     <CareersJobCard
                       job={job}
@@ -123,6 +132,18 @@ const CareersJobListingsSection = () => {
                 </Reveal>
               ) : null}
             </div>
+
+            {filteredJobs.length > 0 ? (
+              <JewelleryLoadMoreSection
+                visibleCount={visibleJobs.length}
+                totalCount={filteredJobs.length}
+                hasMore={hasMore}
+                itemLabel="Openings"
+                onLoadMore={() =>
+                  setVisibleCount((count) => count + CAREERS_LISTING_PAGE_SIZE)
+                }
+              />
+            ) : null}
           </div>
         </div>
       </div>

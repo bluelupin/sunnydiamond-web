@@ -52,6 +52,7 @@ const CareersJobMetaRow = ({
   className,
   iconClassName,
 }: CareersJobMetaRowProps) => {
+  const showExperience = Boolean(job.experienceLabel?.trim());
   const showDepartment = Boolean(job.department?.trim());
 
   return (
@@ -61,12 +62,16 @@ const CareersJobMetaRow = ({
         className,
       )}
     >
-      <FigmaMetaItem
-        icon="experience"
-        label={job.experienceLabel}
-        iconClassName={iconClassName}
-      />
-      <MetaDivider />
+      {showExperience ? (
+        <>
+          <FigmaMetaItem
+            icon="experience"
+            label={job.experienceLabel}
+            iconClassName={iconClassName}
+          />
+          <MetaDivider />
+        </>
+      ) : null}
       <FigmaMetaItem icon="map" label={job.location} iconClassName={iconClassName} />
       {showDepartment ? (
         <>

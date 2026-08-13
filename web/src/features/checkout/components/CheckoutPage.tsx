@@ -53,6 +53,7 @@ import {
 } from "../services/razorpayCheckout";
 import {
   clearPendingCheckoutPayment,
+  getPaidPendingCheckoutPayment,
   readPendingCheckoutPayment,
   savePendingCheckoutPayment,
 } from "../services/checkoutPendingPayment";
@@ -206,6 +207,17 @@ const CheckoutPage = () => {
       wasAuthenticated: boolean;
       guestOtp: string | null;
     }) => {
+      setOrderSuccessAuthenticated(input.wasAuthenticated);
+      setPlacedItems([...input.orderItems]);
+      setPlacedTotal(input.orderTotal);
+      setPlacedOrderNumber(input.orderNumber);
+      setForm(input.orderForm);
+      clearPendingCheckoutPayment();
+      setStep("success");
+      showOrderPlacedToast(input.orderNumber);
+      window.history.replaceState({}, "", "/checkout");
+      clearCart();
+
       try {
         await fetch("/api/magento/orders/line-metadata", {
           method: "POST",
@@ -231,27 +243,14 @@ const CheckoutPage = () => {
         })),
       });
 
-      let completedAsCustomer = input.wasAuthenticated;
-
       if (!input.wasAuthenticated && input.guestOtp) {
         const registered = await registerGuestCustomerAfterOrder(input.orderForm, input.guestOtp);
 
         if (registered) {
           await refreshAuth();
-          completedAsCustomer = true;
+          setOrderSuccessAuthenticated(true);
         }
       }
-
-      setOrderSuccessAuthenticated(completedAsCustomer);
-      setPlacedItems([...input.orderItems]);
-      setPlacedTotal(input.orderTotal);
-      setPlacedOrderNumber(input.orderNumber);
-      setForm(input.orderForm);
-      clearPendingCheckoutPayment();
-      clearCart();
-      setStep("success");
-      showOrderPlacedToast(input.orderNumber);
-      window.history.replaceState({}, "", "/checkout");
     },
     [clearCart, refreshAuth, showOrderPlacedToast],
   );
@@ -599,7 +598,7 @@ const CheckoutPage = () => {
             });
 
             const isEmailContact = form.phoneOrEmail.includes("@");
-            const outcome = await collectRazorpayPayment({
+            let outcome = await collectRazorpayPayment({
               orderNumber: order.orderNumber,
               method: payment.method === "cod" ? undefined : payment.method,
               prefill: {
@@ -611,13 +610,22 @@ const CheckoutPage = () => {
             });
 
             if (outcome.status === "dismissed") {
-              clearPendingCheckoutPayment();
-              await resetRazorpayCart(order.orderNumber);
-              await refreshCart();
-              showCheckoutStatusToast(
-                "Payment cancelled. Your bag has been kept as it was. You can try again anytime.",
-              );
-              return;
+              const paidPending = getPaidPendingCheckoutPayment();
+              if (!paidPending?.paymentId || !paidPending.signature) {
+                clearPendingCheckoutPayment();
+                await resetRazorpayCart(order.orderNumber);
+                await refreshCart();
+                showCheckoutStatusToast(
+                  "Payment cancelled. Your bag has been kept as it was. You can try again anytime.",
+                );
+                return;
+              }
+
+              outcome = {
+                status: "paid",
+                paymentId: paidPending.paymentId,
+                signature: paidPending.signature,
+              };
             }
 
             try {
@@ -630,6 +638,18 @@ const CheckoutPage = () => {
               // Payment is captured on Razorpay's side; Magento's webhook and
               // cron reconcile the order even if this confirmation call fails.
             }
+
+            await finalizeOrderSuccess({
+              orderNumber: order.orderNumber,
+              contact: form.phoneOrEmail,
+              orderItems: [...items],
+              orderTotal: totalPrice,
+              orderForm: { ...form },
+              wasAuthenticated: isAuthenticated,
+              guestOtp: verifiedCheckoutOtpRef.current,
+            });
+
+            return;
           }
 
           await finalizeOrderSuccess({
@@ -744,15 +764,23 @@ const CheckoutPage = () => {
                 orderTotal={totalPrice}
                 hasEngravedItems={hasEngravedItems}
                 onPaymentChange={updatePayment}
-                onEditPersonal={() => setStep("form")}
-                onEditDelivery={() => setStep("form")}
+                onEditPersonal={() => {
+                  if (submitting) return;
+                  setStep("form");
+                }}
+                onEditDelivery={() => {
+                  if (submitting) return;
+                  setStep("form");
+                }}
                 onEditPayment={() => {
+                  if (submitting) return;
                   document
                     .getElementById("checkout-payment-methods")
                     ?.scrollIntoView({ behavior: "smooth", block: "start" });
                 }}
                 validation={paymentValidation}
                 isAuthenticated={isAuthenticated}
+                editDisabled={submitting}
               />
             )}
             <MobileStickyFooterSpacer height={clearancePx} />

@@ -78,7 +78,13 @@ export function filterCareerJobs(
 export function getUniqueCareerFilterOptions(jobs: readonly CareerJob[]) {
   const locations = [...new Set(jobs.map((job) => job.location))].sort();
   const departments = [...new Set(jobs.map((job) => job.department))].sort();
-  const experiences = [...new Set(jobs.map((job) => job.experienceLabel))].sort();
+  const experiences = [
+    ...new Set(
+      jobs
+        .map((job) => job.experienceLabel)
+        .filter((label) => Boolean(label?.trim())),
+    ),
+  ].sort();
 
   return { locations, departments, experiences };
 }
