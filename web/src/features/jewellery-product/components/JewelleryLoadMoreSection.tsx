@@ -76,7 +76,7 @@ const JewelleryLoadMoreSection = ({
             onClick={onLoadMore}
             disabled={isLoadingMore}
             aria-busy={isLoadingMore}
-            className="btn-border-slide inline-flex w-full items-center justify-center border-[0.8px] border-neutral300 font-gill font-normal uppercase leading-110 text-darkblack transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+            className="btn-border-slide inline-flex w-full items-center justify-center border-[0.8px] border-neutral300 font-gill font-normal uppercase leading-110 text-darkblack transition-colors disabled:cursor-not-allowed disabled:opacity-60"
             style={{
               height: `${buttonHeight}px`,
               paddingLeft: `${buttonPaddingX}px`,
@@ -86,7 +86,7 @@ const JewelleryLoadMoreSection = ({
               fontSize: `${buttonFontSize}px`,
             }}
           >
-            <span>{isLoadingMore ? "Loading..." : "Load More"}</span>
+            <span className="relative z-10">{isLoadingMore ? "Loading..." : "Load More"}</span>
           </button>
         ) : null}
       </div>
