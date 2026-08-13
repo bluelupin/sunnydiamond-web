@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { getCustomerOrders } from "@/services/customer/customer-account.client";
+import { recoverPendingPaidCheckoutPayment } from "@/features/checkout/services/razorpayCheckout";
 import type { CustomerOrdersPage } from "@/services/customer/customer-account.types";
 
 type UseCustomerOrdersResult = {
@@ -59,6 +60,7 @@ export function useCustomerOrders(enabled = true, pageSize = 10): UseCustomerOrd
       setError(null);
 
       try {
+        await recoverPendingPaidCheckoutPayment();
         const result = await getCustomerOrders(page, pageSize, controller.signal);
 
         if (!cancelled) {

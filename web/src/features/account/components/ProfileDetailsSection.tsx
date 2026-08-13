@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import InformationIcon from "@/assets/Icons/InformationIcon";
 import { useAuth, type AuthCustomer } from "@/features/auth/context/AuthContext";
+import { validateRequiredName } from "@/shared/utils/formValidation";
 import {
   DetailDarkButton,
   DetailOutlineButton,
@@ -15,6 +16,7 @@ import {
   appointmentLabelClassName,
 } from "@/shared/constants/appointmentForm";
 import { profileDetailsContent } from "../data/profileContent";
+import { formatCustomerFullName } from "../utils/formatAccountData";
 import { useDeleteAccount } from "../hooks/useDeleteAccount";
 import { ProfileDeleteAccountDialog } from "./ProfileDeleteAccountDialog";
 import { ProfileDeleteAccountReasonDialog } from "./ProfileDeleteAccountReasonDialog";
@@ -26,7 +28,7 @@ type ProfileDetailsSectionProps = {
 
 /** Figma 1480:20341 — profile personal details, delete account, and logout mobile layout */
 const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
-  const { logout } = useAuth();
+  const { logout, refresh } = useAuth();
   const { contact } = useCustomerProfileContact(true);
   const content = profileDetailsContent;
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -64,10 +66,11 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
     };
   }, []);
 
-  const initialFullName = [customer.firstname, customer.lastname].filter(Boolean).join(" ");
+  const initialFullName = formatCustomerFullName(customer.firstname, customer.lastname);
   const initialEmail = customer.email ?? "";
 
   const [fullName, setFullName] = useState(initialFullName);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     setFullName(initialFullName);
@@ -86,7 +89,35 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
   };
 
   const handleSave = () => {
-    showStatusToast(content.saveUnavailableToastMessage);
+    const nameValidation = validateRequiredName(fullName);
+    if (!nameValidation.valid) {
+      showStatusToast(nameValidation.error ?? content.saveErrorToastMessage);
+      return;
+    }
+
+    void (async () => {
+      setIsSaving(true);
+
+      try {
+        const response = await fetch("/api/customer/profile", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fullName: fullName.trim() }),
+        });
+        const payload = (await response.json()) as { error?: string };
+
+        if (!response.ok) {
+          throw new Error(payload.error || content.saveErrorToastMessage);
+        }
+
+        await refresh();
+        showStatusToast(content.saveSuccessToastMessage);
+      } catch {
+        showStatusToast(content.saveErrorToastMessage);
+      } finally {
+        setIsSaving(false);
+      }
+    })();
   };
 
   const handleVerifyEmail = () => {
@@ -195,10 +226,10 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
           <DetailDarkButton
             type="button"
             onClick={handleSave}
-            disabled={!hasChanges}
+            disabled={!hasChanges || isSaving}
             className="w-full md:order-2 md:flex-1 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {content.saveLabel}
+            {isSaving ? "SAVING" : content.saveLabel}
           </DetailDarkButton>
           <DetailOutlineButton
             type="button"

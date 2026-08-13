@@ -13,6 +13,8 @@ export type MagentoGraphqlRequest = {
   cache?: RequestCache;
   /** Magento customer token; forces no-store and adds Authorization header. Server-side only. */
   authToken?: string;
+  /** Keep the request alive if the shopper navigates away (payment verify). */
+  keepalive?: boolean;
 };
 
 type MagentoGraphqlResponse<T> = {
@@ -26,6 +28,7 @@ export async function magentoGraphqlFetch<T>({
   signal,
   cache,
   authToken,
+  keepalive,
 }: MagentoGraphqlRequest): Promise<T> {
   const isServer = typeof window === "undefined";
   const endpoint = isServer ? getMagentoGraphqlUrl() : "/api/magento/graphql";
@@ -42,6 +45,7 @@ export async function magentoGraphqlFetch<T>({
     body: JSON.stringify({ query, variables }),
     signal,
     cache: effectiveCache ?? (isServer ? "force-cache" : "default"),
+    ...(keepalive ? { keepalive: true } : {}),
     ...(isServer && effectiveCache !== "no-store"
       ? { next: { revalidate: MAGENTO_CATALOG_REVALIDATE_SECONDS } }
       : {}),
