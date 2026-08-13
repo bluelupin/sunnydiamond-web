@@ -196,6 +196,17 @@ const CheckoutPage = () => {
       wasAuthenticated: boolean;
       guestOtp: string | null;
     }) => {
+      setOrderSuccessAuthenticated(input.wasAuthenticated);
+      setPlacedItems([...input.orderItems]);
+      setPlacedTotal(input.orderTotal);
+      setPlacedOrderNumber(input.orderNumber);
+      setForm(input.orderForm);
+      clearPendingCheckoutPayment();
+      setStep("success");
+      showOrderPlacedToast(input.orderNumber);
+      window.history.replaceState({}, "", "/checkout");
+      clearCart();
+
       try {
         await fetch("/api/magento/orders/line-metadata", {
           method: "POST",
@@ -221,27 +232,14 @@ const CheckoutPage = () => {
         })),
       });
 
-      let completedAsCustomer = input.wasAuthenticated;
-
       if (!input.wasAuthenticated && input.guestOtp) {
         const registered = await registerGuestCustomerAfterOrder(input.orderForm, input.guestOtp);
 
         if (registered) {
           await refreshAuth();
-          completedAsCustomer = true;
+          setOrderSuccessAuthenticated(true);
         }
       }
-
-      setOrderSuccessAuthenticated(completedAsCustomer);
-      setPlacedItems([...input.orderItems]);
-      setPlacedTotal(input.orderTotal);
-      setPlacedOrderNumber(input.orderNumber);
-      setForm(input.orderForm);
-      clearPendingCheckoutPayment();
-      clearCart();
-      setStep("success");
-      showOrderPlacedToast(input.orderNumber);
-      window.history.replaceState({}, "", "/checkout");
     },
     [clearCart, refreshAuth, showOrderPlacedToast],
   );
@@ -610,6 +608,16 @@ const CheckoutPage = () => {
               return;
             }
 
+            await finalizeOrderSuccess({
+              orderNumber: order.orderNumber,
+              contact: form.phoneOrEmail,
+              orderItems: [...items],
+              orderTotal: totalPrice,
+              orderForm: { ...form },
+              wasAuthenticated: isAuthenticated,
+              guestOtp: verifiedCheckoutOtpRef.current,
+            });
+
             try {
               await verifyRazorpayPayment({
                 orderNumber: order.orderNumber,
@@ -620,6 +628,8 @@ const CheckoutPage = () => {
               // Payment is captured on Razorpay's side; Magento's webhook and
               // cron reconcile the order even if this confirmation call fails.
             }
+
+            return;
           }
 
           await finalizeOrderSuccess({
