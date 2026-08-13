@@ -53,6 +53,7 @@ import {
 } from "../services/razorpayCheckout";
 import {
   clearPendingCheckoutPayment,
+  getPaidPendingCheckoutPayment,
   readPendingCheckoutPayment,
   savePendingCheckoutPayment,
 } from "../services/checkoutPendingPayment";
@@ -587,7 +588,7 @@ const CheckoutPage = () => {
             });
 
             const isEmailContact = form.phoneOrEmail.includes("@");
-            const outcome = await collectRazorpayPayment({
+            let outcome = await collectRazorpayPayment({
               orderNumber: order.orderNumber,
               method: payment.method === "cod" ? undefined : payment.method,
               prefill: {
@@ -599,24 +600,23 @@ const CheckoutPage = () => {
             });
 
             if (outcome.status === "dismissed") {
-              clearPendingCheckoutPayment();
-              await resetRazorpayCart(order.orderNumber);
-              await refreshCart();
-              showCheckoutStatusToast(
-                "Payment cancelled. Your bag has been kept as it was. You can try again anytime.",
-              );
-              return;
-            }
+              const paidPending = getPaidPendingCheckoutPayment();
+              if (!paidPending?.paymentId || !paidPending.signature) {
+                clearPendingCheckoutPayment();
+                await resetRazorpayCart(order.orderNumber);
+                await refreshCart();
+                showCheckoutStatusToast(
+                  "Payment cancelled. Your bag has been kept as it was. You can try again anytime.",
+                );
+                return;
+              }
 
-            await finalizeOrderSuccess({
-              orderNumber: order.orderNumber,
-              contact: form.phoneOrEmail,
-              orderItems: [...items],
-              orderTotal: totalPrice,
-              orderForm: { ...form },
-              wasAuthenticated: isAuthenticated,
-              guestOtp: verifiedCheckoutOtpRef.current,
-            });
+              outcome = {
+                status: "paid",
+                paymentId: paidPending.paymentId,
+                signature: paidPending.signature,
+              };
+            }
 
             try {
               await verifyRazorpayPayment({
@@ -628,6 +628,16 @@ const CheckoutPage = () => {
               // Payment is captured on Razorpay's side; Magento's webhook and
               // cron reconcile the order even if this confirmation call fails.
             }
+
+            await finalizeOrderSuccess({
+              orderNumber: order.orderNumber,
+              contact: form.phoneOrEmail,
+              orderItems: [...items],
+              orderTotal: totalPrice,
+              orderForm: { ...form },
+              wasAuthenticated: isAuthenticated,
+              guestOtp: verifiedCheckoutOtpRef.current,
+            });
 
             return;
           }
