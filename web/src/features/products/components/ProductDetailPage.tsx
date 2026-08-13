@@ -20,7 +20,7 @@ import {
   getDefaultMetalColorId,
   getMetalColorOptions,
 } from "@/features/products/utils/metalColorOptions.utils";
-import { applySelectedMetalVariant } from "@/features/products/utils/productVariant.utils";
+import { applySelectedMetalVariant, parsePreferredMetalPurities, getDefaultMetalColorIdForPurities } from "@/features/products/utils/productVariant.utils";
 import {
   resolveCartLineEngravingSelection,
 } from "@/features/products/constants/engraving";
@@ -33,6 +33,11 @@ type ProductDetailPageProps = {
 const ProductDetailPage = ({ product, sizeGuide = null }: ProductDetailPageProps) => {
   const searchParams = useSearchParams();
   const editLineId = searchParams?.get("editLine")?.trim() ?? "";
+  const purityParam = searchParams?.get("purity")?.trim() ?? "";
+  const preferredPurities = useMemo(
+    () => parsePreferredMetalPurities(purityParam),
+    [purityParam],
+  );
   const { items, replaceLineItem, getLineItemMetadata } = useCart();
   const editingLineItem = editLineId ? items.find((item) => item.id === editLineId) : undefined;
   const editingLineMetadata = editLineId ? getLineItemMetadata(editLineId) : undefined;
@@ -40,18 +45,35 @@ const ProductDetailPage = ({ product, sizeGuide = null }: ProductDetailPageProps
 
   const content = useMemo(() => getProductDetailContent(product), [product]);
   const [selectedMetal, setSelectedMetal] = useState(() =>
-    getDefaultMetalColorId(product, content.metalColors),
+    getDefaultMetalColorIdForPurities(
+      product,
+      getDefaultMetalColorId(product, content.metalColors),
+      preferredPurities,
+    ),
   );
 
   useEffect(() => {
-    setSelectedMetal(getDefaultMetalColorId(product, getMetalColorOptions(product)));
-  }, [product]);
+    setSelectedMetal(
+      getDefaultMetalColorIdForPurities(
+        product,
+        getDefaultMetalColorId(product, getMetalColorOptions(product)),
+        preferredPurities,
+      ),
+    );
+  }, [product, preferredPurities]);
 
   const displayProduct = useMemo(
-    () => applySelectedMetalVariant(product, selectedMetal),
-    [product, selectedMetal],
+    () => applySelectedMetalVariant(product, selectedMetal, preferredPurities),
+    [product, selectedMetal, preferredPurities],
   );
   const pricing = getProductDetailPricing(displayProduct);
+  const displayContent = useMemo(
+    () => ({
+      ...content,
+      attributes: getProductDetailContent(displayProduct).attributes,
+    }),
+    [content, displayProduct],
+  );
 
   const initialEngravingSelection = useMemo(
     () => resolveCartLineEngravingSelection(product, editingLineItem, editingLineMetadata),
@@ -76,9 +98,10 @@ const ProductDetailPage = ({ product, sizeGuide = null }: ProductDetailPageProps
   const sidebarProps = {
     product,
     displayProduct,
-    content,
+    content: displayContent,
     pricing,
     selectedMetal,
+    preferredPurities,
     onSelectedMetalChange: setSelectedMetal,
     sizeGuide,
     onAddToBag: handleAddToCart,

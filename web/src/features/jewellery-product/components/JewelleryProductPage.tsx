@@ -20,6 +20,7 @@ import {
   hasActiveFilters,
   hasMagentoFilterFacets,
   isDefaultPriceRange,
+  getSelectedMetalPurityQuery,
 } from "../data/filters";
 import {
   buildJewelleryCategoryHref,
@@ -370,6 +371,11 @@ const JewelleryProductPage = ({
   const showFilterEmptyState =
     !isLoading && products.length === 0 && hasActiveFilters(filters, facets);
 
+  const metalPurityQuery = useMemo(
+    () => getSelectedMetalPurityQuery(filters.metalPurities, facets),
+    [filters.metalPurities, facets],
+  );
+
   const handleOpenFilters = () => {
     void import("./JewelleryFilterDrawer");
     setIsFilterOpen(true);
@@ -402,6 +408,7 @@ const JewelleryProductPage = ({
             products={products}
             isWishlisted={isWishlisted}
             onToggleWishlist={handleToggleWishlist}
+            metalPurityQuery={metalPurityQuery}
           />
         )}
       </section>

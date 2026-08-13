@@ -49,6 +49,7 @@ type ProductDetailSidebarProps = {
   content: ProductDetailContent;
   pricing: ProductDetailPricing;
   selectedMetal?: string;
+  preferredPurities?: readonly string[];
   onSelectedMetalChange?: (metalId: string) => void;
   sizeGuide?: NormalizedSizeGuide | null;
   onAddToBag: (payload: AddToBagPayload) => void;
@@ -69,6 +70,7 @@ const ProductDetailSidebar = ({
   content,
   pricing,
   selectedMetal: selectedMetalProp,
+  preferredPurities = [],
   onSelectedMetalChange,
   sizeGuide = null,
   onAddToBag,
@@ -122,7 +124,11 @@ const ProductDetailSidebar = ({
   ]);
 
   const activeMetal = content.metalColors.find((color) => color.id === selectedMetal);
-  const configurableOptionUids = getConfigurableOptionUidsForMetal(product, selectedMetal);
+  const configurableOptionUids = getConfigurableOptionUidsForMetal(
+    product,
+    selectedMetal,
+    preferredPurities,
+  );
 
   const purchaseSection = (
     <div className="flex flex-col gap-10 px-4 pt-8 md:pt-6 md:px-0 lg:pt-0">

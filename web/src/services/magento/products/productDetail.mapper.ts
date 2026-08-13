@@ -198,6 +198,14 @@ function mapConfigurableVariant(
     }
   }
 
+  const childPurity = getAttributeValue(
+    getAttributeMap(child.custom_attributesV2?.items),
+    "sd_metal_purity",
+  );
+  if (childPurity && !attributes.sd_metal_purity) {
+    attributes.sd_metal_purity = childPurity;
+  }
+
   if (optionUids.length === 0) {
     return null;
   }
