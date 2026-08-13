@@ -62,6 +62,7 @@ async function fetchCareerListingPage(
 /** Job openings use populate=* — `qualifications` is not a valid populate key on this type yet. */
 const CAREER_OPENINGS_POPULATE_QUERY =
   "filters[isActive][$eq]=true" +
+  "&pagination[pageSize]=100" +
   "&sort[0]=sortOrder:asc" +
   "&sort[1]=publishedAt:desc" +
   "&populate=*";

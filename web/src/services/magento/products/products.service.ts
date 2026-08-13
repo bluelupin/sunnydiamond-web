@@ -12,6 +12,7 @@ import {
 import {
   buildMagentoProductsFilter,
   EMPTY_JEWELLERY_FILTER_FACETS,
+  enrichFacetsWithCategoryChildren,
   enrichFacetsWithNavCategories,
   mapMagentoAggregationsToFacets,
   mergeGemstoneTypeFacetOptions,
@@ -349,10 +350,10 @@ async function fetchMagentoJewelleryProducts({
     ),
   ]);
 
-  const responseFacets = enrichFacetsWithNavCategories(
-    mapMagentoAggregationsToFacets(facetScopeData.products?.aggregations),
-    navCategories,
-  );
+  const mappedFacets = mapMagentoAggregationsToFacets(facetScopeData.products?.aggregations);
+  const responseFacets = categoryUrlKey
+    ? enrichFacetsWithCategoryChildren(mappedFacets, navCategories, categoryUrlKey)
+    : enrichFacetsWithNavCategories(mappedFacets, navCategories);
   const rawProducts = mapMagentoProductsToJewelleryListing(data.products?.items);
   const products = refineListingProductsForExactPrice(rawProducts, filters, facetsForFilter);
   const pageInfo = data.products?.page_info;

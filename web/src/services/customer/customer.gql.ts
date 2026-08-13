@@ -38,6 +38,19 @@ export const MAGENTO_CUSTOMER_ME_QUERY = `
   }
 ` as const;
 
+export const MAGENTO_UPDATE_CUSTOMER_MUTATION = `
+  mutation MagentoUpdateCustomer($input: CustomerUpdateInput!) {
+    updateCustomerV2(input: $input) {
+      customer {
+        id
+        firstname
+        lastname
+        email
+      }
+    }
+  }
+` as const;
+
 export const MAGENTO_CUSTOMER_CART_QUERY = `
   query MagentoCustomerCart {
     customerCart {

@@ -8,6 +8,8 @@ interface JewelleryLoadMoreSectionProps {
   onLoadMore: () => void;
   hasMore: boolean;
   isLoadingMore?: boolean;
+  /** Noun used in “X out of Y {itemLabel}”. Defaults to Products. */
+  itemLabel?: string;
 }
 
 const {
@@ -29,6 +31,7 @@ const JewelleryLoadMoreSection = ({
   onLoadMore,
   hasMore,
   isLoadingMore = false,
+  itemLabel = "Products",
 }: JewelleryLoadMoreSectionProps) => {
   const progress = totalCount > 0 ? Math.min(100, (visibleCount / totalCount) * 100) : 0;
 
@@ -49,7 +52,7 @@ const JewelleryLoadMoreSection = ({
             className="w-full text-center font-gill font-light leading-110 text-darkblack"
             style={{ fontSize: `${countFontSize}px` }}
           >
-            {visibleCount} out of {totalCount} Products
+            {visibleCount} out of {totalCount} {itemLabel}
           </p>
 
           <div
@@ -73,7 +76,7 @@ const JewelleryLoadMoreSection = ({
             onClick={onLoadMore}
             disabled={isLoadingMore}
             aria-busy={isLoadingMore}
-            className="btn-border-slide inline-flex w-full items-center justify-center border-[0.8px] border-neutral300 font-gill font-normal uppercase leading-110 text-darkblack transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+            className="btn-border-slide inline-flex w-full items-center justify-center border-[0.8px] border-neutral300 font-gill font-normal uppercase leading-110 text-darkblack transition-colors disabled:cursor-not-allowed disabled:opacity-60"
             style={{
               height: `${buttonHeight}px`,
               paddingLeft: `${buttonPaddingX}px`,
@@ -83,7 +86,7 @@ const JewelleryLoadMoreSection = ({
               fontSize: `${buttonFontSize}px`,
             }}
           >
-            <span>{isLoadingMore ? "Loading..." : "Load More"}</span>
+            <span className="relative z-10">{isLoadingMore ? "Loading..." : "Load More"}</span>
           </button>
         ) : null}
       </div>

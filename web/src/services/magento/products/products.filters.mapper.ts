@@ -415,6 +415,30 @@ export function mergeGemstoneTypeFacetOptions(
   return mapGemstoneTypeOptions(rawOptions);
 }
 
+export function enrichFacetsWithCategoryChildren(
+  facets: JewelleryFilterFacets,
+  navCategories: JewelleryNavCategory[],
+  categoryUrlKey: string,
+): JewelleryFilterFacets {
+  const parent = navCategories.find((category) => category.urlKey === categoryUrlKey);
+  const children = parent?.children ?? [];
+
+  if (children.length === 0) {
+    return {
+      ...facets,
+      categories: [],
+    };
+  }
+
+  return {
+    ...facets,
+    categories: children.map((child) => ({
+      label: child.label,
+      value: child.id,
+    })),
+  };
+}
+
 export function enrichFacetsWithNavCategories(
   facets: JewelleryFilterFacets,
   navCategories: JewelleryNavCategory[],

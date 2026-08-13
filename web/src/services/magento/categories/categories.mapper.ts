@@ -18,6 +18,23 @@ const MAGENTO_URL_KEY_SORT_ORDER: Record<string, number> = {
   "loose-solitaires": 8,
 };
 
+function mapCategoryFilterChildren(
+  nodes: MagentoCategoryNode[] | null | undefined,
+): Array<{ id: string; label: string }> {
+  return (nodes ?? [])
+    .map((node) => {
+      const label = node.name?.trim();
+      const id = String(node.uid ?? node.id ?? "").trim();
+
+      if (!label || !id) {
+        return null;
+      }
+
+      return { id, label };
+    })
+    .filter((child): child is { id: string; label: string } => child != null);
+}
+
 function mapMagentoCategoryNode(node: MagentoCategoryNode): JewelleryNavCategory | null {
   const urlKey = node.url_key?.trim();
   const label = node.name?.trim();
@@ -38,6 +55,7 @@ function mapMagentoCategoryNode(node: MagentoCategoryNode): JewelleryNavCategory
     slug,
     productCount: node.product_count ?? 0,
     sortOrder: MAGENTO_URL_KEY_SORT_ORDER[urlKey] ?? 100,
+    children: mapCategoryFilterChildren(node.children),
   };
 }
 
@@ -68,6 +86,7 @@ export function mapMagentoCategoryListToJewelleryNav(
       slug: "all",
       productCount: root?.product_count ?? 0,
       sortOrder: 999,
+      children: [],
     },
   ];
 }
