@@ -1,4 +1,10 @@
 import { magentoGraphqlFetch } from "@/services/magento/graphqlClient";
+import { MagentoGraphqlError } from "@/services/magento/magento.errors";
+import {
+  clearPendingCheckoutPayment,
+  getPaidPendingCheckoutPayment,
+  markPendingCheckoutPaymentPaid,
+} from "./checkoutPendingPayment";
 
 const RAZORPAY_CHECKOUT_SCRIPT = "https://checkout.razorpay.com/v1/checkout.js";
 
@@ -128,26 +134,66 @@ export async function verifyRazorpayPayment(input: {
   orderNumber: string;
   paymentId: string;
   signature: string;
+  keepalive?: boolean;
 }): Promise<void> {
-  await magentoGraphqlFetch<{
-    setRzpPaymentDetailsForOrder?: { order?: { order_id?: string | null } };
-  }>({
-    query: `mutation VerifyRazorpayPayment($input: SetRzpPaymentDetailsForOrderInput) {
-      setRzpPaymentDetailsForOrder(input: $input) {
-        order {
-          order_id
+  try {
+    await magentoGraphqlFetch<{
+      setRzpPaymentDetailsForOrder?: { order?: { order_id?: string | null } };
+    }>({
+      query: `mutation VerifyRazorpayPayment($input: SetRzpPaymentDetailsForOrderInput) {
+        setRzpPaymentDetailsForOrder(input: $input) {
+          order {
+            order_id
+          }
         }
-      }
-    }`,
-    variables: {
-      input: {
-        order_id: input.orderNumber,
-        rzp_payment_id: input.paymentId,
-        rzp_signature: input.signature,
+      }`,
+      variables: {
+        input: {
+          order_id: input.orderNumber,
+          rzp_payment_id: input.paymentId,
+          rzp_signature: input.signature,
+        },
       },
-    },
-    cache: "no-store",
-  });
+      cache: "no-store",
+      keepalive: input.keepalive,
+    });
+  } catch (error) {
+    if (isRazorpayPaymentAlreadyRecordedError(error)) {
+      return;
+    }
+
+    throw error;
+  }
+}
+
+function isRazorpayPaymentAlreadyRecordedError(error: unknown): boolean {
+  const message =
+    error instanceof MagentoGraphqlError
+      ? error.message
+      : error instanceof Error
+        ? error.message
+        : "";
+
+  return /unique constraint/i.test(message);
+}
+
+export async function recoverPendingPaidCheckoutPayment(): Promise<boolean> {
+  const pending = getPaidPendingCheckoutPayment();
+  if (!pending?.paymentId || !pending.signature) {
+    return false;
+  }
+
+  try {
+    await verifyRazorpayPayment({
+      orderNumber: pending.orderNumber,
+      paymentId: pending.paymentId,
+      signature: pending.signature,
+    });
+    clearPendingCheckoutPayment();
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /** Reactivates the quote behind an unpaid order so the shopper keeps their bag. */
@@ -195,6 +241,16 @@ export async function collectRazorpayPayment(input: {
   }
 
   return new Promise<RazorpayPaymentOutcome>((resolve) => {
+    let settled = false;
+
+    const settle = (outcome: RazorpayPaymentOutcome) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      resolve(outcome);
+    };
+
     // Standard Checkout: show every method enabled on the Razorpay key.
     // Prefer the in-page handler (no redirect) so localhost never hits
     // https://localhost → ERR_SSL_PROTOCOL_ERROR after UPI/netbanking.
@@ -210,14 +266,36 @@ export async function collectRazorpayPayment(input: {
         ...(input.method ? { method: input.method } : {}),
       },
       handler: (response: RazorpayPaymentResponse) => {
-        resolve({
+        const paymentId = response.razorpay_payment_id;
+        const signature = response.razorpay_signature;
+        markPendingCheckoutPaymentPaid({ paymentId, signature });
+        void verifyRazorpayPayment({
+          orderNumber: input.orderNumber,
+          paymentId,
+          signature,
+          keepalive: true,
+        }).catch(() => {
+          // Payment is already captured; Magento webhook/cron reconcile if this fails.
+        });
+        settle({
           status: "paid",
-          paymentId: response.razorpay_payment_id,
-          signature: response.razorpay_signature,
+          paymentId,
+          signature,
         });
       },
       modal: {
-        ondismiss: () => resolve({ status: "dismissed" }),
+        ondismiss: () => {
+          const paidPending = getPaidPendingCheckoutPayment();
+          if (paidPending?.paymentId && paidPending.signature) {
+            settle({
+              status: "paid",
+              paymentId: paidPending.paymentId,
+              signature: paidPending.signature,
+            });
+            return;
+          }
+          settle({ status: "dismissed" });
+        },
       },
     });
 

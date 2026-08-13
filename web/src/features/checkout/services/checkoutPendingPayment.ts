@@ -11,6 +11,9 @@ export type PendingCheckoutPayment = {
   guestOtp: string | null;
   form: CheckoutFormData;
   isAuthenticated: boolean;
+  paid?: boolean;
+  paymentId?: string;
+  signature?: string;
 };
 
 export function savePendingCheckoutPayment(data: PendingCheckoutPayment): void {
@@ -39,6 +42,32 @@ export function readPendingCheckoutPayment(): PendingCheckoutPayment | null {
   } catch {
     return null;
   }
+}
+
+export function markPendingCheckoutPaymentPaid(input: {
+  paymentId: string;
+  signature: string;
+}): void {
+  const pending = readPendingCheckoutPayment();
+  if (!pending) {
+    return;
+  }
+
+  savePendingCheckoutPayment({
+    ...pending,
+    paid: true,
+    paymentId: input.paymentId,
+    signature: input.signature,
+  });
+}
+
+export function getPaidPendingCheckoutPayment(): PendingCheckoutPayment | null {
+  const pending = readPendingCheckoutPayment();
+  if (!pending?.paid || !pending.paymentId || !pending.signature) {
+    return null;
+  }
+
+  return pending;
 }
 
 export function clearPendingCheckoutPayment(): void {
