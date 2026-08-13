@@ -110,6 +110,8 @@ function mapDetailItems(
       imageSrc: imageUrl ?? PLACEHOLDER_RING_IMAGE,
       size: display.size,
       metal: display.metal,
+      engraving: display.engraving,
+      engravingFont: display.engravingFont,
       isGift: item.isGift || display.isGift,
       isBespoke: display.isBespoke,
       useIconPlaceholder: display.isBespoke && !imageUrl,

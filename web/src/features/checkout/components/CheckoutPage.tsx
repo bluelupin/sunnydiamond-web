@@ -106,8 +106,11 @@ const CheckoutPage = () => {
   const [checkoutStatusToastMessage, setCheckoutStatusToastMessage] = useState<string | null>(null);
   const { footerRef, clearancePx } = useMobileStickyFooterClearance();
 
+  // Backend strips cod-family payment methods from carts holding engraved items.
+  const hasEngravedItems = items.some((item) => Boolean(item.options.engraving?.trim()));
+
   const formValidation = useCheckoutFormValidation(form);
-  const paymentValidation = useCheckoutPaymentValidation(payment, totalPrice);
+  const paymentValidation = useCheckoutPaymentValidation(payment, totalPrice, hasEngravedItems);
 
   // Signed-in checkout requires a Magento saved address (fields are hidden otherwise).
   const hasDeliveryAddressAvailable = Boolean(defaultShippingAddress);
@@ -173,7 +176,11 @@ const CheckoutPage = () => {
     field: keyof CheckoutPaymentData,
     value: CheckoutPaymentData["method"],
   ) => {
-    if (field === "method" && value === "cod" && !isCodAvailableForOrderTotal(totalPrice)) {
+    if (
+      field === "method" &&
+      value === "cod" &&
+      (hasEngravedItems || !isCodAvailableForOrderTotal(totalPrice))
+    ) {
       return;
     }
 
@@ -181,10 +188,13 @@ const CheckoutPage = () => {
   };
 
   useEffect(() => {
-    if (payment.method === "cod" && !isCodAvailableForOrderTotal(totalPrice)) {
+    if (
+      payment.method === "cod" &&
+      (hasEngravedItems || !isCodAvailableForOrderTotal(totalPrice))
+    ) {
       setPayment((prev) => ({ ...prev, method: "card" }));
     }
-  }, [payment.method, totalPrice]);
+  }, [hasEngravedItems, payment.method, totalPrice]);
 
   const finalizeOrderSuccess = useCallback(
     async (input: {
@@ -732,6 +742,7 @@ const CheckoutPage = () => {
                 form={form}
                 payment={payment}
                 orderTotal={totalPrice}
+                hasEngravedItems={hasEngravedItems}
                 onPaymentChange={updatePayment}
                 onEditPersonal={() => setStep("form")}
                 onEditDelivery={() => setStep("form")}

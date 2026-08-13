@@ -67,18 +67,19 @@ export const useCheckoutFormValidation = (values: CheckoutFormValues) => {
 export const useCheckoutPaymentValidation = (
   values: CheckoutPaymentValues,
   orderTotal: number,
+  hasEngravedItems = false,
 ) => {
   const [submitted, setSubmitted] = useState(false);
   const [touched, setTouched] = useState<Partial<Record<CheckoutPaymentField, boolean>>>({});
 
   const errors = useMemo(
-    () => getCheckoutPaymentErrors(values, orderTotal),
-    [orderTotal, values],
+    () => getCheckoutPaymentErrors(values, orderTotal, hasEngravedItems),
+    [hasEngravedItems, orderTotal, values],
   );
 
   const isValid = useMemo(
-    () => isCheckoutPaymentValid(values, orderTotal),
-    [orderTotal, values],
+    () => isCheckoutPaymentValid(values, orderTotal, hasEngravedItems),
+    [hasEngravedItems, orderTotal, values],
   );
 
   const markTouched = useCallback((field: CheckoutPaymentField) => {
@@ -95,11 +96,11 @@ export const useCheckoutPaymentValidation = (
     (onValid: () => void) => {
       setSubmitted(true);
 
-      if (isCheckoutPaymentValid(values, orderTotal)) {
+      if (isCheckoutPaymentValid(values, orderTotal, hasEngravedItems)) {
         onValid();
       }
     },
-    [orderTotal, values],
+    [hasEngravedItems, orderTotal, values],
   );
 
   const resetValidation = useCallback(() => {

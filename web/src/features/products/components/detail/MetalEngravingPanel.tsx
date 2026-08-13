@@ -7,7 +7,15 @@ import { Info } from "lucide-react";
 import Link from "next/link";
 import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 import { appointmentFieldClassName, appointmentLabelClassName } from "@/shared/constants/appointmentForm";
-import { resolveEngravingFonts, clampEngravingText, type EngravingSelection } from "@/features/products/constants/engraving";
+import {
+  ENGRAVING_CHARSET_MESSAGE,
+  ENGRAVING_TEXT_PATTERN,
+  ENGRAVING_TEXT_SANITIZE_PATTERN,
+  clampEngravingText,
+  resolveEngravingFonts,
+  type EngravingSelection,
+} from "@/features/products/constants/engraving";
+import FormFieldError from "@/shared/ui/FormFieldError";
 import {
   Select,
   SelectContent,
@@ -42,8 +50,11 @@ const MetalEngravingPanel = ({
   onSave,
 }: MetalEngravingPanelProps) => {
   const availableFonts = useMemo(() => resolveEngravingFonts(fonts), [fonts]);
+  // Fontless products save text-only engravings — "" means no font selection.
+  const requiresFont = availableFonts.length > 0;
   const [text, setText] = useState("");
-  const [font, setFont] = useState<string>(availableFonts[0]);
+  const [font, setFont] = useState<string>(availableFonts[0] ?? "");
+  const [charsetError, setCharsetError] = useState(false);
   const [statusToastMessage, setStatusToastMessage] = useState<string | null>(null);
   const statusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -79,15 +90,25 @@ const MetalEngravingPanel = ({
     if (!open) return;
 
     setText(clampEngravingText(initialValue?.text ?? "", maxCharacters));
-    setFont(initialValue?.font ?? availableFonts[0]);
+    setFont(initialValue?.font ?? availableFonts[0] ?? "");
+    setCharsetError(false);
   }, [open, initialValue, availableFonts, maxCharacters]);
 
   const handleTextChange = (value: string) => {
-    setText(clampEngravingText(value, maxCharacters));
+    // Mirror server charset validation: strip disallowed chars, flag the attempt inline.
+    const isValid = ENGRAVING_TEXT_PATTERN.test(value);
+    setCharsetError(!isValid);
+    const sanitized = isValid ? value : value.replace(ENGRAVING_TEXT_SANITIZE_PATTERN, "");
+    setText(clampEngravingText(sanitized, maxCharacters));
   };
 
   const handleSave = () => {
-    if (!font.trim()) {
+    if (requiresFont && !font.trim()) {
+      return;
+    }
+
+    if (!ENGRAVING_TEXT_PATTERN.test(text)) {
+      setCharsetError(true);
       return;
     }
 
@@ -149,30 +170,38 @@ const MetalEngravingPanel = ({
                     maxLength={maxCharacters}
                     onChange={(event) => handleTextChange(event.target.value)}
                     placeholder="Enter"
+                    aria-invalid={charsetError || undefined}
+                    aria-describedby={charsetError ? "engraving-text-error" : undefined}
                     className={appointmentFieldClassName}
+                  />
+                  <FormFieldError
+                    id="engraving-text-error"
+                    message={charsetError ? ENGRAVING_CHARSET_MESSAGE : undefined}
                   />
                 </div>
 
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="engraving-font" className={appointmentLabelClassName}>
-                    Font*
-                  </label>
-                  <Select value={font} onValueChange={setFont}>
-                    <SelectTrigger
-                      id="engraving-font"
-                      className="h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0"
-                    >
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent className="z-[80]">
-                      {availableFonts.map((option) => (
-                        <SelectItem key={option} value={option}>
-                          {option}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {requiresFont ? (
+                  <div className="flex flex-col gap-2">
+                    <label htmlFor="engraving-font" className={appointmentLabelClassName}>
+                      Font*
+                    </label>
+                    <Select value={font} onValueChange={setFont}>
+                      <SelectTrigger
+                        id="engraving-font"
+                        className="h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0"
+                      >
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent className="z-[80]">
+                        {availableFonts.map((option) => (
+                          <SelectItem key={option} value={option}>
+                            {option}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ) : null}
 
                 <div className="flex flex-wrap items-center gap-2">
                   <div className="flex items-center gap-1">
@@ -198,7 +227,7 @@ const MetalEngravingPanel = ({
             </p>
             <DetailDarkButton
               onClick={handleSave}
-              disabled={!font.trim()}
+              disabled={requiresFont && !font.trim()}
               className="w-full uppercase disabled:cursor-not-allowed disabled:opacity-50"
             >
               Save

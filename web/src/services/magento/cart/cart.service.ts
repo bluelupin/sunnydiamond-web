@@ -28,12 +28,19 @@ import {
   clearGuestCartId,
   getGuestCartId,
   setGuestCartId,
+  writeCartLineMetadata,
   type CartLineMetadata,
   type StoredCartLineMetadata,
 } from "./cartSession";
 import type { CartLineOptions } from "@/features/cart/types/cart.types";
 import type { ProductCustomOptions } from "@/features/products/types/productCustomOptions";
-import { buildMagentoCartItemOptionPayload } from "./cartLineCustomOptions.mapper";
+import {
+  buildMagentoCartItemOptionPayload,
+  buildMagentoCartItemSyncOptions,
+  mapMagentoCartCustomizableOptions,
+  syncOptionsMatchServer,
+  type CartLineServerCustomOptions,
+} from "./cartLineCustomOptions.mapper";
 import type {
   MagentoAddSimpleProductsToCartResponse,
   MagentoAddProductsToCartResponse,
@@ -109,6 +116,37 @@ function mapGuestCartState(cart: MagentoCart, lineMetadata: StoredCartLineMetada
     },
     items,
   };
+}
+
+/** updateCartItems reports option validation failures in errors[], not top-level GraphQL errors. */
+function assertNoUpdateCartItemsErrors(
+  errors: Array<{ code?: string | null; message?: string | null }> | null | undefined,
+): void {
+  const messages = (errors ?? [])
+    .map((error) => error.message?.trim().replace(/^Could not update cart item:\s*/i, ""))
+    .filter((message): message is string => Boolean(message));
+
+  if (messages.length > 0) {
+    throw new MagentoGraphqlError(
+      messages.join("; "),
+      messages.map((message) => ({ message })),
+    );
+  }
+}
+
+function mapServerCustomOptionsByUid(
+  cart: MagentoCart,
+): Map<string, CartLineServerCustomOptions> {
+  const byUid = new Map<string, CartLineServerCustomOptions>();
+
+  for (const item of cart.itemsV2?.items ?? []) {
+    const uid = item.uid?.trim();
+    if (uid) {
+      byUid.set(uid, mapMagentoCartCustomizableOptions(item.customizable_options).serverOptions);
+    }
+  }
+
+  return byUid;
 }
 
 function isCustomerCartRequiredError(error: unknown): boolean {
@@ -315,47 +353,106 @@ export async function syncGuestCartLineOptions(
   lineMetadata: StoredCartLineMetadata,
   signal?: AbortSignal,
 ): Promise<GuestCartState> {
-  const currentState = await fetchGuestCart(cartId, lineMetadata, signal);
+  let metadata = lineMetadata;
+  let metadataChanged = false;
+  let state = await fetchGuestCart(cartId, metadata, signal);
+  // Lines whose sync the server refused — the server-stored value stands.
+  const refused = new Set<string>();
 
-  const cartItems = currentState.items
-    .map((item) => {
-      const metadata = lineMetadata[item.id];
-      if (!metadata) {
-        return null;
+  // One line per mutation: every real update rotates that item's uid, and a
+  // batched call gives no way to pair old uids with new ones for re-keying.
+  for (;;) {
+    const serverOptionsByUid = mapServerCustomOptionsByUid(state.cart);
+    let target: { id: string; quantity: number } | null = null;
+    let targetOptions: ReturnType<typeof buildMagentoCartItemSyncOptions> = null;
+
+    for (const item of state.items) {
+      if (refused.has(item.id)) {
+        continue;
+      }
+      const itemMetadata = metadata[item.id];
+      if (!itemMetadata) {
+        continue;
       }
 
-      const optionPayload = buildMagentoCartItemOptionPayload(
-        metadata.options,
-        metadata.productCustomOptions,
+      const serverOptions = serverOptionsByUid.get(item.id);
+      const syncOptions = buildMagentoCartItemSyncOptions({
+        lineOptions: itemMetadata.options,
+        serverOptions,
+        productCustomOptions: itemMetadata.productCustomOptions,
+      });
+
+      if (!syncOptions) {
+        continue;
+      }
+
+      // A no-op update still rotates the cart item uid and orphans line metadata.
+      if (serverOptions && syncOptionsMatchServer(syncOptions, serverOptions)) {
+        continue;
+      }
+
+      target = item;
+      targetOptions = syncOptions;
+      break;
+    }
+
+    if (!target || !targetOptions) {
+      break;
+    }
+
+    const data = await magentoGraphqlFetch<MagentoSyncCartItemsOptionsResponse>({
+      query: MAGENTO_SYNC_CART_ITEMS_OPTIONS_MUTATION,
+      variables: {
+        cartId,
+        cartItems: [
+          {
+            cart_item_uid: target.id,
+            quantity: target.quantity,
+            customizable_options: targetOptions,
+          },
+        ],
+      },
+      signal,
+      cache: "no-store",
+    });
+
+    const errorMessages = (data.updateCartItems?.errors ?? [])
+      .map((error) => error.message?.trim())
+      .filter(Boolean);
+
+    if (errorMessages.length > 0) {
+      // Stale local options the server rejects must not block checkout — the
+      // quote keeps its stored (valid) values for that line.
+      console.warn(
+        `Cart line option sync refused for ${target.id}: ${errorMessages.join("; ")}`,
       );
+      refused.add(target.id);
+    }
 
-      if (!optionPayload) {
-        return null;
-      }
+    const cart = assertCart(data.updateCartItems?.cart);
 
-      return {
-        cart_item_uid: item.id,
-        quantity: item.quantity,
-        customizable_options: optionPayload.customizableOptions,
-      };
-    })
-    .filter((item): item is NonNullable<typeof item> => item !== null);
+    // Re-key this line's metadata onto the one uid that is new in the response.
+    const previousIds = new Set(state.items.map((item) => item.id));
+    const rotatedUid = (cart.itemsV2?.items ?? [])
+      .map((item) => item.uid?.trim())
+      .find((uid): uid is string => Boolean(uid) && !previousIds.has(uid as string));
 
-  if (cartItems.length === 0) {
-    return currentState;
+    if (rotatedUid && rotatedUid !== target.id && metadata[target.id]) {
+      const rekeyed = { ...metadata };
+      rekeyed[rotatedUid] = rekeyed[target.id];
+      delete rekeyed[target.id];
+      metadata = rekeyed;
+      metadataChanged = true;
+    }
+
+    state = mapGuestCartState(cart, metadata);
   }
 
-  const data = await magentoGraphqlFetch<MagentoSyncCartItemsOptionsResponse>({
-    query: MAGENTO_SYNC_CART_ITEMS_OPTIONS_MUTATION,
-    variables: {
-      cartId,
-      cartItems,
-    },
-    signal,
-    cache: "no-store",
-  });
+  if (metadataChanged) {
+    writeCartLineMetadata(metadata);
+  }
 
-  return mapGuestCartState(assertCart(data.updateCartItems?.cart), lineMetadata);
+  return state;
 }
 
 export async function syncGuestCartLineOption(
@@ -364,15 +461,22 @@ export async function syncGuestCartLineOption(
   metadata: CartLineMetadata,
   quantity: number,
   lineMetadata: StoredCartLineMetadata,
+  serverOptions?: CartLineServerCustomOptions,
   signal?: AbortSignal,
 ): Promise<GuestCartState> {
-  const optionPayload = buildMagentoCartItemOptionPayload(
-    metadata.options,
-    metadata.productCustomOptions,
-  );
+  const syncOptions = buildMagentoCartItemSyncOptions({
+    lineOptions: metadata.options,
+    serverOptions,
+    productCustomOptions: metadata.productCustomOptions,
+  });
 
-  if (!optionPayload) {
+  if (!syncOptions) {
     throw new MagentoGraphqlError("Selected product options could not be synced to the cart");
+  }
+
+  // A no-op update still rotates the cart item uid — skip the mutation entirely.
+  if (serverOptions && syncOptionsMatchServer(syncOptions, serverOptions)) {
+    return fetchGuestCart(cartId, lineMetadata, signal);
   }
 
   const data = await magentoGraphqlFetch<MagentoSyncCartItemsOptionsResponse>({
@@ -383,7 +487,7 @@ export async function syncGuestCartLineOption(
         {
           cart_item_uid: cartItemUid,
           quantity,
-          customizable_options: optionPayload.customizableOptions,
+          customizable_options: syncOptions,
         },
       ],
     },
@@ -391,6 +495,9 @@ export async function syncGuestCartLineOption(
     cache: "no-store",
   });
 
+  assertNoUpdateCartItemsErrors(data.updateCartItems?.errors);
+
+  // Item uids rotate on update — the mutation response is the only reliable post-update state.
   return mapGuestCartState(assertCart(data.updateCartItems?.cart), lineMetadata);
 }
 
@@ -808,7 +915,13 @@ export async function completeGuestCheckout(
   );
 
   if (!paymentCode) {
-    throw new Error("No payment methods are available for this cart");
+    // Engraved carts have cod-family methods stripped by the backend — never
+    // suggest COD here; the resolver already refused to fall back for it.
+    throw new Error(
+      paymentMethod === "cod"
+        ? "Cash on Delivery is not available for this order."
+        : "No payment methods are available for this cart",
+    );
   }
 
   if (paymentCode !== "razorpay" && !isOfflineMagentoPaymentCode(paymentCode)) {
@@ -819,12 +932,15 @@ export async function completeGuestCheckout(
       signal,
     );
     throw new Error(
-      "Online payment is not fully configured in the storefront yet. Please try Cash on Delivery or contact support.",
+      "Online payment is not fully configured in the storefront yet. Please try again or contact support.",
     );
   }
 
-  await setGuestPaymentMethod(cartId, paymentCode, lineMetadata, signal);
+  // Options before payment: a real sync rotates item uids, and doing it after
+  // setPaymentMethodOnCart would leave a selected payment on a cart state the
+  // shopper never confirmed if the sync stalls.
   await syncGuestCartLineOptions(cartId, lineMetadata, signal);
+  await setGuestPaymentMethod(cartId, paymentCode, lineMetadata, signal);
   const order = await placeGuestOrder(cartId, signal);
 
   return {

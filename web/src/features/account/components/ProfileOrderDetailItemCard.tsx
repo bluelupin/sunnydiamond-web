@@ -39,6 +39,13 @@ export function ProfileOrderDetailItemCard({ item }: ProfileOrderDetailItemCardP
       </div>
     ) : null;
 
+  const engravingElement = item.engraving ? (
+    <p className="font-gill text-sm font-light leading-110 text-darkblack lg:text-neutral500">
+      Engraving: “{item.engraving}”
+      {item.engravingFont ? ` (${item.engravingFont})` : null}
+    </p>
+  ) : null;
+
   const priceElement = (
     <p className="font-gill text-base font-normal leading-110 text-darkblack lg:leading-normal lg:tracking-[0.16px]">
       {formatOrderTotal(lineTotal, item.currency)}
@@ -70,6 +77,7 @@ export function ProfileOrderDetailItemCard({ item }: ProfileOrderDetailItemCardP
           <div className="min-w-0 flex flex-col gap-2">
             {nameElement}
             {attributesElement}
+            {engravingElement}
           </div>
         </div>
       ) : (
@@ -80,6 +88,7 @@ export function ProfileOrderDetailItemCard({ item }: ProfileOrderDetailItemCardP
           <div className="min-w-0 flex flex-1 flex-col gap-2">
             {nameElement}
             {attributesElement}
+            {engravingElement}
             {priceElement}
             {item.quantity > 1 ? (
               <p className="font-gill text-sm font-light leading-110 text-neutral500">
@@ -105,6 +114,7 @@ export function ProfileOrderDetailItemCard({ item }: ProfileOrderDetailItemCardP
             <div className="min-w-0 flex flex-col gap-3">
               {nameElement}
               {attributesElement}
+              {engravingElement}
               {item.quantity > 1 ? (
                 <p className="font-gill text-sm font-light leading-110 text-neutral500">
                   Qty: {item.quantity}

@@ -304,6 +304,8 @@ type CheckoutPaymentStepProps = {
   form: CheckoutFormData;
   payment: CheckoutPaymentData;
   orderTotal: number;
+  /** Backend removes cod-family payment methods when the cart holds engraved items. */
+  hasEngravedItems?: boolean;
   onPaymentChange: (field: keyof CheckoutPaymentData, value: CheckoutPaymentData["method"]) => void;
   onEditPersonal: () => void;
   onEditDelivery: () => void;
@@ -336,6 +338,7 @@ export const CheckoutPaymentStep = ({
   form,
   payment,
   orderTotal,
+  hasEngravedItems = false,
   onPaymentChange,
   onEditPersonal,
   onEditDelivery,
@@ -367,7 +370,7 @@ export const CheckoutPaymentStep = ({
     ? form.shippingName || form.name
     : form.billingName || form.name;
 
-  const isCodAvailable = isCodAvailableForOrderTotal(orderTotal);
+  const isCodAvailable = !hasEngravedItems && isCodAvailableForOrderTotal(orderTotal);
 
   return (
     <div className="flex flex-col lg:gap-[33px] gap-6">
@@ -451,7 +454,9 @@ export const CheckoutPaymentStep = ({
                   >
                     {isCodAvailable
                       ? "*for orders up to ₹40,000"
-                      : "Not available for orders above ₹40,000"}
+                      : hasEngravedItems
+                        ? "Not available for engraved items"
+                        : "Not available for orders above ₹40,000"}
                   </span>
                 </span>
               }

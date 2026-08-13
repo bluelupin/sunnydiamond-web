@@ -45,8 +45,9 @@ import { findCartItemUidBySku, computeCartTotalQuantity } from "@/services/magen
 import { readStoredCartLines, writeStoredCartLines } from "@/features/cart/utils/cartProduct.utils";
 import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 import {
-  DEFAULT_ENGRAVING_FONTS,
   DEFAULT_ENGRAVING_MAX_CHARACTERS,
+  ENGRAVING_CHARSET_MESSAGE,
+  ENGRAVING_TEXT_PATTERN,
   isCartLineEngravingCapable,
   mergeCartLineOptions,
 } from "@/features/products/constants/engraving";
@@ -60,7 +61,10 @@ import type {
 } from "../types/cart.types";
 import type { ProductCustomOptions } from "@/features/products/types/productCustomOptions";
 import { getProductDisplayPrice } from "@/features/products/data/productDetailContent";
-import { assertResolvableCartLineOptions } from "@/services/magento/cart/cartLineCustomOptions.mapper";
+import {
+  assertResolvableCartLineOptions,
+  mapMagentoCartCustomizableOptions,
+} from "@/services/magento/cart/cartLineCustomOptions.mapper";
 
 /** @deprecated Use CartLineItem from cart.types */
 export type CartItem = CartLineItem;
@@ -72,7 +76,7 @@ interface CartContextType {
   addItem: (payload: AddToBagPayload | Product) => Promise<AddItemResult>;
   removeItem: (lineItemId: string) => Promise<void>;
   updateQuantity: (lineItemId: string, quantity: number) => Promise<void>;
-  updateLineItemOptions: (lineItemId: string, options: Partial<CartLineOptions>) => void;
+  updateLineItemOptions: (lineItemId: string, options: Partial<CartLineOptions>) => Promise<void>;
   applyGiftingSelection: (selection: CartGiftingSelection) => Promise<void>;
   applyMagentoCartState: (state: GuestCartState) => void;
   refreshCart: () => Promise<void>;
@@ -96,6 +100,7 @@ interface CartContextType {
   shippingMethods: MagentoShippingMethodOption[];
   estimatedShippingMethods: MagentoShippingMethodOption[];
   selectedShippingMethod: MagentoSelectedShippingMethod | null;
+  paymentMethods: MagentoPaymentMethodOption[];
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -575,7 +580,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
 
   const updateLineItemOptions = useCallback(
-    (lineItemId: string, options: Partial<CartLineOptions>) => {
+    async (lineItemId: string, options: Partial<CartLineOptions>): Promise<void> => {
       const cartLine = cartState?.items.find((item) => item.id === lineItemId);
       const storedMeta = lineMetadataRef.current[lineItemId];
       const baseOptions = mergeCartLineOptions(cartLine?.options, storedMeta?.options);
@@ -589,16 +594,35 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
       if ("engraving" in options && isCartLineEngravingCapable(engravingContext)) {
         const trimmedEngraving = options.engraving?.trim() ?? "";
+        const maxCharacters =
+          baseOptions.engravingMaxCharacters ?? DEFAULT_ENGRAVING_MAX_CHARACTERS;
+
+        // Mirror server validation before any optimistic write — the update path
+        // only reports failures via updateCartItems.errors[].
+        if (!ENGRAVING_TEXT_PATTERN.test(trimmedEngraving)) {
+          throw new Error(ENGRAVING_CHARSET_MESSAGE);
+        }
+
+        if (trimmedEngraving.length > maxCharacters) {
+          throw new Error(
+            `Engraving text is too long. Use up to ${maxCharacters} characters.`,
+          );
+        }
+
         nextOptions.engraving = trimmedEngraving;
         nextOptions.engravingSupported = true;
 
         if (nextOptions.engravingMaxCharacters == null) {
-          nextOptions.engravingMaxCharacters = DEFAULT_ENGRAVING_MAX_CHARACTERS;
+          nextOptions.engravingMaxCharacters = maxCharacters;
         }
 
         if (trimmedEngraving && !nextOptions.engravingFont?.trim()) {
+          // Only fall back to a font that actually exists on the product's
+          // native font option — a fontless product stays fontless.
           nextOptions.engravingFont =
-            baseOptions.engravingFont?.trim() || DEFAULT_ENGRAVING_FONTS[0];
+            baseOptions.engravingFont?.trim() ||
+            storedMeta?.productCustomOptions?.engravingFont?.labels?.[0] ||
+            undefined;
         }
       }
 
@@ -656,68 +680,139 @@ export function CartProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      void (async () => {
+      // Gift checkbox is not a Magento customizable option — sync via gift API
+      // so refresh/mapper cannot force the old is_gift flag back on.
+      if (togglingGift) {
         try {
-          // Gift checkbox is not a Magento customizable option — sync via gift API
-          // so refresh/mapper cannot force the old is_gift flag back on.
-          if (togglingGift) {
-            const hasSeparate = lineItems.some((item) => {
+          const hasSeparate = lineItems.some((item) => {
+            const meta = nextMetadata[item.id];
+            return meta?.gifting?.wrapMode === "separate";
+          });
+
+          const selection: CartGiftingSelection = {
+            mode: hasSeparate ? "separate" : "single",
+            groupedNote: undefined,
+            items: lineItems.map((item) => {
               const meta = nextMetadata[item.id];
-              return meta?.gifting?.wrapMode === "separate";
-            });
+              const isGift =
+                item.id === lineItemId
+                  ? options.isGift === true
+                  : Boolean(meta?.options.isGift || meta?.gifting);
 
-            const selection: CartGiftingSelection = {
-              mode: hasSeparate ? "separate" : "single",
-              groupedNote: undefined,
-              items: lineItems.map((item) => {
-                const meta = nextMetadata[item.id];
-                const isGift =
-                  item.id === lineItemId
-                    ? options.isGift === true
-                    : Boolean(meta?.options.isGift || meta?.gifting);
+              return {
+                lineItemId: item.id,
+                isGift,
+                note:
+                  isGift && hasSeparate
+                    ? meta?.gifting?.note?.trim() || undefined
+                    : undefined,
+              };
+            }),
+          };
 
-                return {
-                  lineItemId: item.id,
-                  isGift,
-                  note:
-                    isGift && hasSeparate
-                      ? meta?.gifting?.note?.trim() || undefined
-                      : undefined,
-                };
-              }),
-            };
-
-            if (selection.mode === "single") {
-              const noteOwner = selection.items.find((item) => item.isGift);
-              selection.groupedNote = noteOwner
-                ? nextMetadata[noteOwner.lineItemId]?.gifting?.note?.trim() || undefined
-                : undefined;
-            }
-
-            const syncedState = await setCartGiftOptions(cartId, selection, nextMetadata);
-            applyCartState(syncedState);
-            return;
+          if (selection.mode === "single") {
+            const noteOwner = selection.items.find((item) => item.isGift);
+            selection.groupedNote = noteOwner
+              ? nextMetadata[noteOwner.lineItemId]?.gifting?.note?.trim() || undefined
+              : undefined;
           }
 
-          const lineItem = lineItems.find((item) => item.id === lineItemId);
-          if (!lineItem) {
-            return;
-          }
-
-          const syncedState = await syncGuestCartLineOption(
-            cartId,
-            lineItemId,
-            nextMetadata[lineItemId],
-            lineItem.quantity,
-            nextMetadata,
-          );
+          const syncedState = await setCartGiftOptions(cartId, selection, nextMetadata);
           applyCartState(syncedState);
         } catch {
-          // Keep local metadata even if Magento sync fails.
+          // Keep local gifting state; checkout re-syncs before placing the order.
         }
-      })();
+        return;
+      }
+
+      const lineItem = lineItems.find((item) => item.id === lineItemId);
+      if (!lineItem) {
+        return;
+      }
+
+      try {
+        // Prefer option ids decoded from the line's own server customizable_options;
+        // metadata productCustomOptions covers optimistic/legacy lines.
+        const rawItem = cartState?.cart.itemsV2?.items?.find(
+          (raw) => raw.uid?.trim() === lineItemId,
+        );
+        const serverOptions = rawItem
+          ? mapMagentoCartCustomizableOptions(rawItem.customizable_options).serverOptions
+          : undefined;
+
+        const syncedState = await syncGuestCartLineOption(
+          cartId,
+          lineItemId,
+          nextMetadata[lineItemId],
+          lineItem.quantity,
+          nextMetadata,
+          serverOptions,
+        );
+
+        // The cart item uid rotates on every option update — re-key this line's
+        // metadata onto the one uid that is new in the mutation response.
+        const previousIds = new Set(lineItems.map((item) => item.id));
+        const rotatedItem = syncedState.items.find((item) => !previousIds.has(item.id));
+        let finalState = syncedState;
+
+        if (rotatedItem && rotatedItem.id !== lineItemId) {
+          const lineMeta = lineMetadataRef.current[lineItemId] ?? nextMetadata[lineItemId];
+          const rekeyedMetadata = { ...lineMetadataRef.current };
+          delete rekeyedMetadata[lineItemId];
+          rekeyedMetadata[rotatedItem.id] = lineMeta;
+          lineMetadataRef.current = rekeyedMetadata;
+          writeCartLineMetadata(rekeyedMetadata);
+          setLineMetadata(rekeyedMetadata);
+
+          // The synced state was mapped before the re-key — reapply line metadata.
+          finalState = {
+            ...syncedState,
+            items: syncedState.items.map((item) =>
+              item.id === rotatedItem.id
+                ? {
+                  ...item,
+                  options: { ...lineMeta.options, ...item.options },
+                  ...(lineMeta.displayPrice != null && Number.isFinite(lineMeta.displayPrice)
+                    ? { displayPrice: lineMeta.displayPrice }
+                    : {}),
+                }
+                : item,
+            ),
+          };
+        }
+
+        applyCartState(finalState);
+      } catch (error) {
+        // Magento refused the update — revert the optimistic change and surface it.
+        const revertedMetadata = { ...lineMetadataRef.current };
+        if (storedMeta) {
+          revertedMetadata[lineItemId] = storedMeta;
+        } else {
+          delete revertedMetadata[lineItemId];
+        }
+        lineMetadataRef.current = revertedMetadata;
+        writeCartLineMetadata(revertedMetadata);
+        setLineMetadata(revertedMetadata);
+
+        setCartState((current) => {
+          if (!current || !cartLine) {
+            return current;
+          }
+
+          return {
+            ...current,
+            items: current.items.map((item) =>
+              item.id === lineItemId
+                ? { ...item, options: cartLine.options, gifting: cartLine.gifting }
+                : item,
+            ),
+          };
+        });
+
+        throw error;
+      }
     },
-    [applyCartState, cartState?.items, cartState?.totals.cartId],
+    [applyCartState, cartState?.cart, cartState?.items, cartState?.totals.cartId],
   );
 
   const applyGiftingSelection = useCallback(
@@ -879,6 +974,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const shippingMethods = cartState?.totals.shippingMethods ?? emptyTotals.shippingMethods;
   const selectedShippingMethod =
     cartState?.totals.selectedShippingMethod ?? emptyTotals.selectedShippingMethod;
+  const paymentMethods = cartState?.totals.paymentMethods ?? emptyTotals.paymentMethods;
 
   const value = useMemo(
     () => ({
@@ -912,6 +1008,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       shippingMethods,
       estimatedShippingMethods,
       selectedShippingMethod,
+      paymentMethods,
     }),
     [
       addItem,
@@ -937,6 +1034,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       buyNow,
       getLineItemMetadata,
       shippingMethods,
+      paymentMethods,
       subtotal,
       taxes,
       totalItems,

@@ -45,7 +45,7 @@ const SuccessItemMeta = ({ parts }: { parts: string[] }) => {
 };
 
 const SuccessOrderItem = ({ item }: { item: CartLineItem }) => (
-  <div className="flex h-[68px] items-center gap-6">
+  <div className="flex min-h-[68px] items-center gap-6">
     <div className="relative h-[53px] w-[60px] shrink-0 overflow-hidden bg-gray200">
       <Image src={item.product.image} alt={item.product.name} fill className="object-cover" sizes="60px" />
     </div>
@@ -54,6 +54,12 @@ const SuccessOrderItem = ({ item }: { item: CartLineItem }) => (
         {item.product.name}
       </p>
       <SuccessItemMeta parts={formatCartLineMeta(item)} />
+      {item.options.engraving?.trim() ? (
+        <p className="font-gill text-sm font-light leading-110 tracking-[0.01em] text-darkblack">
+          Engraving: “{item.options.engraving.trim()}”
+          {item.options.engravingFont ? ` (${item.options.engravingFont})` : null}
+        </p>
+      ) : null}
       <p className="font-gill text-base font-normal leading-110 text-darkblack">
         {formatCartPrice(item.product.price * item.quantity)}
       </p>
