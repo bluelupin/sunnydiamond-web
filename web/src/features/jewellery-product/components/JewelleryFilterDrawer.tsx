@@ -30,6 +30,8 @@ interface JewelleryFilterDrawerProps {
   open: boolean;
   appliedFilters: JewelleryFilterState;
   facets: JewelleryFilterFacets;
+  /** When set (category PLP), chips are subcategories and this is the section title. */
+  categoryFilterHeading?: string | null;
   onClose: () => void;
   onApply: (filters: JewelleryFilterState) => void;
 }
@@ -75,6 +77,7 @@ const JewelleryFilterDrawer = ({
   open,
   appliedFilters,
   facets,
+  categoryFilterHeading,
   onClose,
   onApply,
 }: JewelleryFilterDrawerProps) => {
@@ -385,22 +388,35 @@ const JewelleryFilterDrawer = ({
             {categoryOptions.length > 0 ? (
               <section className="flex flex-col gap-[16px]">
                 <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
-                  By Categories:
+                  {categoryFilterHeading ?? "By Categories:"}
                 </h3>
-                <div className="flex flex-col gap-[12px]">
-                  {categoryRows.map((row, rowIndex) => (
-                    <div key={rowIndex} className="flex flex-wrap gap-[7px]">
-                      {row.map((category) => (
-                        <FilterChip
-                          key={category}
-                          label={category}
-                          selected={draft.categories.includes(category)}
-                          onClick={() => toggleListValue("categories", category)}
-                        />
-                      ))}
-                    </div>
-                  ))}
-                </div>
+                {categoryFilterHeading ? (
+                  <div className="flex flex-wrap gap-[7px]">
+                    {categoryOptions.map((category) => (
+                      <FilterChip
+                        key={category}
+                        label={category}
+                        selected={draft.categories.includes(category)}
+                        onClick={() => toggleListValue("categories", category)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-[12px]">
+                    {categoryRows.map((row, rowIndex) => (
+                      <div key={rowIndex} className="flex flex-wrap gap-[7px]">
+                        {row.map((category) => (
+                          <FilterChip
+                            key={category}
+                            label={category}
+                            selected={draft.categories.includes(category)}
+                            onClick={() => toggleListValue("categories", category)}
+                          />
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </section>
             ) : null}
 
@@ -454,7 +470,13 @@ const JewelleryFilterDrawer = ({
                   <SelectTrigger className="h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0">
                     <SelectValue placeholder="-select-" />
                   </SelectTrigger>
-                  <SelectContent className="z-[80]">
+                  <SelectContent
+                    className="z-[90]"
+                    side="bottom"
+                    align="start"
+                    position="popper"
+                    avoidCollisions={false}
+                  >
                     {facets.gemstoneTypes.map((option) => (
                       <SelectItem key={option.label} value={option.label}>
                         {option.label}
