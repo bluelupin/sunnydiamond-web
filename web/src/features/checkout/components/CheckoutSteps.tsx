@@ -310,6 +310,7 @@ type CheckoutPaymentStepProps = {
   onEditPayment: () => void;
   validation: CheckoutPaymentValidationProps;
   isAuthenticated?: boolean;
+  editDisabled?: boolean;
 };
 
 const RazorpaySecureNote = () => (
@@ -342,6 +343,7 @@ export const CheckoutPaymentStep = ({
   onEditPayment,
   validation,
   isAuthenticated = false,
+  editDisabled = false,
 }: CheckoutPaymentStepProps) => {
   const shippingLines = buildAddressLines({
     addressLine1: form.addressLine1,
@@ -372,7 +374,9 @@ export const CheckoutPaymentStep = ({
   return (
     <div className="flex flex-col lg:gap-[33px] gap-6">
       <CheckoutSectionCard>
-        <CheckoutSectionHeading onEdit={onEditPersonal}>Personal Information</CheckoutSectionHeading>
+        <CheckoutSectionHeading onEdit={onEditPersonal} editDisabled={editDisabled}>
+          Personal Information
+        </CheckoutSectionHeading>
         <CheckoutSummaryText>
           You are checking out as {form.name || "Guest"}
           {form.phoneOrEmail
@@ -384,7 +388,9 @@ export const CheckoutPaymentStep = ({
       </CheckoutSectionCard>
 
       <CheckoutSectionCard gapClassName="lg:gap-8 gap-6">
-        <CheckoutSectionHeading onEdit={onEditDelivery}>Delivery Address</CheckoutSectionHeading>
+        <CheckoutSectionHeading onEdit={onEditDelivery} editDisabled={editDisabled}>
+          Delivery Address
+        </CheckoutSectionHeading>
         <div className="flex flex-col gap-4">
           <CheckoutSubheading className="lg:text-xl text-base">SHIPPING ADDRESS</CheckoutSubheading>
           <CheckoutAddressBlock name={form.shippingName || form.name} lines={shippingLines} />
@@ -404,7 +410,9 @@ export const CheckoutPaymentStep = ({
       </CheckoutSectionCard>
 
       <CheckoutSectionCard gapClassName="gap-6">
-        <CheckoutSectionHeading onEdit={onEditPayment}>Payment Mehtod</CheckoutSectionHeading>
+        <CheckoutSectionHeading onEdit={onEditPayment} editDisabled={editDisabled}>
+          Payment Mehtod
+        </CheckoutSectionHeading>
 
         <div id="checkout-payment-methods" className="flex flex-col gap-6">
           <div className="flex items-center justify-between self-stretch">

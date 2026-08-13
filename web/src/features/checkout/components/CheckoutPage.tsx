@@ -733,15 +733,23 @@ const CheckoutPage = () => {
                 payment={payment}
                 orderTotal={totalPrice}
                 onPaymentChange={updatePayment}
-                onEditPersonal={() => setStep("form")}
-                onEditDelivery={() => setStep("form")}
+                onEditPersonal={() => {
+                  if (submitting) return;
+                  setStep("form");
+                }}
+                onEditDelivery={() => {
+                  if (submitting) return;
+                  setStep("form");
+                }}
                 onEditPayment={() => {
+                  if (submitting) return;
                   document
                     .getElementById("checkout-payment-methods")
                     ?.scrollIntoView({ behavior: "smooth", block: "start" });
                 }}
                 validation={paymentValidation}
                 isAuthenticated={isAuthenticated}
+                editDisabled={submitting}
               />
             )}
             <MobileStickyFooterSpacer height={clearancePx} />

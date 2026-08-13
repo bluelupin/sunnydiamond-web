@@ -234,12 +234,24 @@ export const CheckoutSectionCard = ({
 type CheckoutSectionHeadingProps = {
   children: React.ReactNode;
   onEdit?: () => void;
+  editDisabled?: boolean;
 };
 
-export const CheckoutSectionHeading = ({ children, onEdit }: CheckoutSectionHeadingProps) => (
+export const CheckoutSectionHeading = ({
+  children,
+  onEdit,
+  editDisabled = false,
+}: CheckoutSectionHeadingProps) => (
   <div className="flex items-center justify-between gap-4">
     <h2 className="font-gill text-xl font-normal leading-110 text-darkblack lg:text-2xl">{children}</h2>
-    {onEdit ? <DetailTextLink onClick={onEdit}>EDIT</DetailTextLink> : null}
+    {onEdit ? (
+      <DetailTextLink
+        onClick={editDisabled ? undefined : onEdit}
+        className={editDisabled ? "pointer-events-none cursor-not-allowed opacity-40" : undefined}
+      >
+        EDIT
+      </DetailTextLink>
+    ) : null}
   </div>
 );
 
