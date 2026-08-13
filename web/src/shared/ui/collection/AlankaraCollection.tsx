@@ -3,8 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import type { MouseEvent } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import CarouselChevronLeft from "@/assets/Icons/CarouselChevronLeft";
 import CarouselChevronRight from "@/assets/Icons/CarouselChevronRight";
@@ -21,10 +19,6 @@ import {
 } from "./alankaraCollection.types";
 import PageContainer from "../layout/PageContainer";
 import Reveal from "@/shared/Animation/Reveal";
-import {
-  scrollToTopBeforeClientNavigation,
-  shouldPreventClientNavigation,
-} from "@/shared/utils/navigation";
 
 const DEFAULT_PRODUCT_CTA = "Shop Now";
 const SLIDE_DURATION_MS = 500;
@@ -198,7 +192,6 @@ function CollectionHeroPanel({
   collectionCta,
   priority,
   variant,
-  onCollectionCtaClick,
 }: {
   title: string;
   description?: string;
@@ -208,7 +201,6 @@ function CollectionHeroPanel({
   collectionCta?: AlankaraCollectionProps["collectionCta"];
   priority?: boolean;
   variant: "desktop" | "mobile";
-  onCollectionCtaClick?: (event: MouseEvent<HTMLAnchorElement>, href: string) => void;
 }) {
   const isMobile = variant === "mobile";
   const isClickable = Boolean(collectionCta?.href);
@@ -309,7 +301,6 @@ function CollectionHeroPanel({
     return (
       <Link
         href={collectionCta.href}
-        onClick={(event) => onCollectionCtaClick?.(event, collectionCta.href)}
         className={panelClassName}
         aria-label={`${collectionCta.label}: ${title}`}
       >
@@ -640,25 +631,6 @@ export function AlankaraCollection({
 }: AlankaraCollectionProps) {
   const desktopHero = resolveImageSrcString(collectionImage);
   const mobileHero = resolveImageSrcString(collectionImageMobile ?? collectionImage, desktopHero);
-  const router = useRouter();
-
-  const handleCollectionCtaClick = useCallback(
-    (event: MouseEvent<HTMLAnchorElement>, href: string) => {
-      if (shouldPreventClientNavigation(event)) {
-        return;
-      }
-
-      const isInternalPath = href.startsWith("/") && !href.startsWith("//");
-      if (!isInternalPath) {
-        return;
-      }
-
-      event.preventDefault();
-      scrollToTopBeforeClientNavigation();
-      router.push(href);
-    },
-    [router],
-  );
 
   if (!products.length) return null;
 
@@ -685,7 +657,6 @@ export function AlankaraCollection({
             collectionCta={collectionCta}
             priority={priority}
             variant="desktop"
-            onCollectionCtaClick={handleCollectionCtaClick}
           />
         </ScrollReveal>
         <ScrollReveal delayMs={100} className="min-w-0 w-full">
@@ -710,7 +681,6 @@ export function AlankaraCollection({
             collectionCta={collectionCta}
             priority={priority}
             variant="mobile"
-            onCollectionCtaClick={handleCollectionCtaClick}
           />
         </ScrollReveal>
         <ScrollReveal delayMs={100} className="relative z-10 -mt-[51px] w-full">
