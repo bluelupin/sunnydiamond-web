@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import FormFieldError from "@/shared/ui/FormFieldError";
 import {
   Select,
   SelectContent,
@@ -17,6 +18,7 @@ import {
   createEmptyFilterState,
   getAvailableCategoryLabels,
   getAvailableMetalTypeLabels,
+  getMaxAmountBelowMinError,
   hasFilterChanges,
   hasMagentoFilterFacets,
   isDefaultPriceRange,
@@ -206,7 +208,8 @@ const JewelleryFilterDrawer = ({
   const maxPercent = hasPriceRange
     ? ((draft.maxPrice - facets.minPrice) / (facets.maxPrice - facets.minPrice)) * 100
     : 0;
-  const canApplyFilters = hasFilterChanges(draft, appliedFilters, facets);
+  const maxAmountError = getMaxAmountBelowMinError(draft.minPrice, maxInputValue);
+  const canApplyFilters = hasFilterChanges(draft, appliedFilters, facets) && !maxAmountError;
 
   const commitMaxAmountInput = () => {
     const trimmed = maxInputValue.replace(/,/g, "").trim();
@@ -325,65 +328,73 @@ const JewelleryFilterDrawer = ({
               </section>
             ) : null}
 
-            {hasPriceRange ? (
-              <section className="flex gap-[24px]">
-                <label className="flex min-w-0 flex-1 flex-col gap-[8px]">
-                  <span className="font-gill text-base font-normal leading-110 text-darkblack">
-                    Min Amount
-                  </span>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={formatCurrency(draft.minPrice)}
-                    onFocus={() => setMinInputFocused(true)}
-                    onBlur={() => setMinInputFocused(false)}
-                    onChange={(event) =>
-                      updatePriceRange(
-                        parseJewelleryPriceInput(event.target.value, facets.minPrice),
-                        draft.maxPrice,
-                      )
-                    }
-                    className={cn(
-                      "h-[56px] w-full bg-aboutInactive p-[12px] font-gill text-sm font-normal leading-110 text-darkblack outline-none",
-                      minInputFocused && "border border-neutral500",
-                    )}
-                  />
-                </label>
-                <label className="flex min-w-0 flex-1 flex-col gap-[8px]">
-                  <span className="font-gill text-base font-normal leading-110 text-darkblack">
-                    Max Amount
-                  </span>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    placeholder="Enter"
-                    value={maxInputValue}
-                    onFocus={() => {
-                      setMaxInputFocused(true);
-                      setMaxInputValue(
-                        getMaxAmountDisplayValue(draft.maxPrice, draft.minPrice, facets.maxPrice),
-                      );
-                    }}
-                    onBlur={commitMaxAmountInput}
-                    onChange={(event) => {
-                      const nextValue = event.target.value;
-                      setMaxInputValue(nextValue);
-
-                      const trimmed = nextValue.replace(/,/g, "").trim();
-                      if (!trimmed) {
-                        return;
+            {hasPriceRange &&
+              <div className="space-y-4">
+                <section className="flex gap-[24px]">
+                  <label className="flex min-w-0 flex-1 flex-col gap-[8px]">
+                    <span className="font-gill text-base font-normal leading-110 text-darkblack">
+                      Min Amount
+                    </span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={formatCurrency(draft.minPrice)}
+                      onFocus={() => setMinInputFocused(true)}
+                      onBlur={() => setMinInputFocused(false)}
+                      onChange={(event) =>
+                        updatePriceRange(
+                          parseJewelleryPriceInput(event.target.value, facets.minPrice),
+                          draft.maxPrice,
+                        )
                       }
+                      className={cn(
+                        "h-[56px] w-full bg-aboutInactive p-[12px] font-gill text-sm font-normal leading-110 text-darkblack outline-none",
+                        minInputFocused && "border border-neutral500",
+                      )}
+                    />
+                  </label>
+                  <label className="flex min-w-0 flex-1 flex-col gap-[8px]">
+                    <span className="font-gill text-base font-normal leading-110 text-darkblack">
+                      Max Amount
+                    </span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="Enter"
+                      value={maxInputValue}
+                      onFocus={() => {
+                        setMaxInputFocused(true);
+                        setMaxInputValue(
+                          getMaxAmountDisplayValue(draft.maxPrice, draft.minPrice, facets.maxPrice),
+                        );
+                      }}
+                      onBlur={commitMaxAmountInput}
+                      onChange={(event) => {
+                        const nextValue = event.target.value;
+                        setMaxInputValue(nextValue);
 
-                      const parsed = Number(trimmed);
-                      if (Number.isFinite(parsed)) {
-                        updatePriceRange(draft.minPrice, Math.max(0, Math.round(parsed)));
-                      }
-                    }}
-                    className="h-[56px] w-full bg-aboutInactive p-[12px] font-gill text-base font-normal leading-110 text-darkblack placeholder:text-neutral400 outline-none"
-                  />
-                </label>
-              </section>
-            ) : null}
+                        const trimmed = nextValue.replace(/,/g, "").trim();
+                        if (!trimmed) {
+                          return;
+                        }
+
+                        const parsed = Number(trimmed);
+                        if (Number.isFinite(parsed)) {
+                          updatePriceRange(draft.minPrice, Math.max(0, Math.round(parsed)));
+                        }
+                      }}
+                      aria-invalid={Boolean(maxAmountError)}
+                      aria-describedby={maxAmountError ? "jewellery-max-amount-error" : undefined}
+                      className={cn(
+                        "h-[56px] w-full bg-aboutInactive p-[12px] font-gill text-base font-normal leading-110 text-darkblack placeholder:text-neutral400 outline-none",
+                        maxAmountError && "border border-[#F91616]",
+                      )}
+                    />
+                  </label>
+                </section>
+                <FormFieldError id="jewellery-max-amount-error" message={maxAmountError ?? undefined} />
+              </div>
+            }
 
             {categoryOptions.length > 0 ? (
               <section className="flex flex-col gap-[16px]">
