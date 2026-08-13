@@ -41,7 +41,7 @@ export const formatLoginPhoneDisplay = (countryCode: string, nationalDigits: str
  */
 export const validateLoginIdentifier = (
   value: string,
-  countryCode = DEFAULT_COUNTRY_CODE,
+  countryCode: string = DEFAULT_COUNTRY_CODE,
 ): FieldValidation => {
   const trimmed = value.trim();
 
@@ -56,8 +56,10 @@ export const validateLoginIdentifier = (
   return validatePhone(trimmed, countryCode);
 };
 
-export const isLoginIdentifierReadyForOtp = (value: string, countryCode = DEFAULT_COUNTRY_CODE): boolean =>
-  validateLoginIdentifier(value, countryCode).valid;
+export const isLoginIdentifierReadyForOtp = (
+  value: string,
+  countryCode: string = DEFAULT_COUNTRY_CODE,
+): boolean => validateLoginIdentifier(value, countryCode).valid;
 
 export const isOtpComplete = (otp: string[]): boolean =>
   otp.length === LOGIN_OTP_LENGTH && otp.every((digit) => /^\d$/.test(digit));

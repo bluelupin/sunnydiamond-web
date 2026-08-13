@@ -8,6 +8,8 @@ interface JewelleryLoadMoreSectionProps {
   onLoadMore: () => void;
   hasMore: boolean;
   isLoadingMore?: boolean;
+  /** Noun used in “X out of Y {itemLabel}”. Defaults to Products. */
+  itemLabel?: string;
 }
 
 const {
@@ -29,6 +31,7 @@ const JewelleryLoadMoreSection = ({
   onLoadMore,
   hasMore,
   isLoadingMore = false,
+  itemLabel = "Products",
 }: JewelleryLoadMoreSectionProps) => {
   const progress = totalCount > 0 ? Math.min(100, (visibleCount / totalCount) * 100) : 0;
 
@@ -49,7 +52,7 @@ const JewelleryLoadMoreSection = ({
             className="w-full text-center font-gill font-light leading-110 text-darkblack"
             style={{ fontSize: `${countFontSize}px` }}
           >
-            {visibleCount} out of {totalCount} Products
+            {visibleCount} out of {totalCount} {itemLabel}
           </p>
 
           <div

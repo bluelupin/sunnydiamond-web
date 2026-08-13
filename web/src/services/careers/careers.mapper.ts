@@ -265,14 +265,18 @@ export const mapCareerOpening = (
   const location = cleanText(opening.location);
   const department = cleanText(opening.department);
   const experienceLabel =
-    cleanText(opening.requiredExperience) ?? cleanText(opening.experience);
-  const type = normalizeEmploymentType(opening.employmentType);
+    cleanText(opening.requiredExperience) ??
+    cleanText(opening.experience) ??
+    "";
+  const type =
+    normalizeEmploymentType(opening.employmentType) ?? "Full-time";
   const postedAt = resolvePostedAt(opening);
 
   const workplaceLabel =
     cleanText(opening.workplaceLabel) ?? cleanText(opening.workplaceType) ?? "";
 
-  if (!id || !title || !jobCode || !location || !department || !experienceLabel || !type || !postedAt) {
+  // Experience is optional — keep the opening; UI hides the experience field when empty.
+  if (!id || !title || !jobCode || !location || !department || !postedAt) {
     return null;
   }
 
@@ -806,7 +810,13 @@ const mergeCareerOpenings = (
 const deriveFilterOptionsFromJobs = (jobs: readonly NormalizedCareerJob[]) => ({
   locations: [...new Set(jobs.map((job) => job.location))].sort(),
   departments: [...new Set(jobs.map((job) => job.department))].sort(),
-  experiences: [...new Set(jobs.map((job) => job.experienceLabel))].sort(),
+  experiences: [
+    ...new Set(
+      jobs
+        .map((job) => job.experienceLabel)
+        .filter((label) => Boolean(label?.trim())),
+    ),
+  ].sort(),
 });
 
 const mapFilterSectionItems = (
