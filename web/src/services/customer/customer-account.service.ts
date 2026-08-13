@@ -5,6 +5,7 @@ import {
   MAGENTO_CUSTOMER_ORDERS_QUERY,
   MAGENTO_DELETE_CUSTOMER_ADDRESS_MUTATION,
   MAGENTO_UPDATE_CUSTOMER_ADDRESS_MUTATION,
+  MAGENTO_UPDATE_CUSTOMER_MUTATION,
   SUNNY_DELETE_CUSTOMER_MUTATION,
 } from "./customer.gql";
 import {
@@ -86,6 +87,38 @@ export async function deleteCustomerAddress(
   });
 
   return fetchCustomerAddresses(authToken);
+}
+
+export async function updateCustomerName(
+  authToken: string,
+  input: { firstname: string; lastname: string },
+): Promise<{ firstname: string; lastname: string; email: string }> {
+  const data = await magentoGraphqlFetch<{
+    updateCustomerV2?: {
+      customer?: {
+        firstname?: string | null;
+        lastname?: string | null;
+        email?: string | null;
+      } | null;
+    } | null;
+  }>({
+    query: MAGENTO_UPDATE_CUSTOMER_MUTATION,
+    variables: {
+      input: {
+        firstname: input.firstname,
+        lastname: input.lastname,
+      },
+    },
+    authToken,
+  });
+
+  const customer = data.updateCustomerV2?.customer;
+
+  return {
+    firstname: customer?.firstname?.trim() || input.firstname,
+    lastname: customer?.lastname?.trim() || input.lastname,
+    email: customer?.email?.trim() || "",
+  };
 }
 
 /**

@@ -37,6 +37,8 @@ export const profileDetailsContent = {
     "To update your details, please contact our support team or visit a showroom.",
   saveUnavailableToastMessage:
     "To update your details, please contact our support team or visit a showroom.",
+  saveSuccessToastMessage: "Your name has been updated.",
+  saveErrorToastMessage: "We could not update your name. Please try again.",
   emailVerifiedToastMessage: "Your email is linked to your Sunny Diamonds account.",
   deleteAccount: {
     title: "Delete Account",

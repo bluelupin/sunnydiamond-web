@@ -7,6 +7,37 @@ export function getProfileAvatarInitial(firstName?: string | null): string {
   return trimmed.charAt(0).toUpperCase();
 }
 
+function isPlaceholderCustomerLastName(lastname?: string | null): boolean {
+  const trimmed = lastname?.replace(/\u00A0/g, " ").trim() ?? "";
+  return !trimmed || trimmed === "-";
+}
+
+export function formatCustomerFullName(
+  firstname?: string | null,
+  lastname?: string | null,
+): string {
+  const first = firstname?.trim() ?? "";
+  const last = isPlaceholderCustomerLastName(lastname) ? "" : (lastname?.trim() ?? "");
+  return [first, last].filter(Boolean).join(" ");
+}
+
+export function splitProfileFullName(fullName: string): { firstname: string; lastname: string } {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+
+  if (parts.length === 0) {
+    return { firstname: "", lastname: "" };
+  }
+
+  if (parts.length === 1) {
+    return { firstname: parts[0], lastname: "" };
+  }
+
+  return {
+    firstname: parts[0],
+    lastname: parts.slice(1).join(" "),
+  };
+}
+
 export function formatOrderStatus(status: string): string {
   return status
     .split("_")
