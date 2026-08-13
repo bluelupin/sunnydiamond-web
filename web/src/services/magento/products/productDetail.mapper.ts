@@ -18,7 +18,6 @@ import { resolveMagentoProductPriceBreakup } from "./productPriceBreakup.utils";
 import { mapMagentoProductEngraving } from "./productEngraving.mapper";
 import { mapMagentoProductCustomOptions } from "./productCustomOptions.mapper";
 import { formatMetalColorLabel } from "@/features/products/utils/metalColorOptions.utils";
-import type { MagentoEngravingFontOption } from "./engravingFonts.service";
 import { MAGENTO_URL_KEY_TO_SLUG } from "@/features/jewellery-product/utils/jewelleryRoutes";
 import fallBackImage from "@/assets/fallBackImage.png";
 import { getImageSrc } from "@/shared/utils/image";
@@ -345,7 +344,6 @@ function resolveDefaultMetalColorValue(
 
 export function mapMagentoProductDetailToProduct(
   product: MagentoProductDetailItem,
-  options?: { engravingFontOptions?: MagentoEngravingFontOption[] },
 ): Product | null {
   const sku = product.sku?.trim();
   const name = product.name?.trim();
@@ -424,12 +422,11 @@ export function mapMagentoProductDetailToProduct(
   ].filter((attribute): attribute is string => Boolean(attribute));
 
   const shortDescription = stripHtml(product.short_description?.html) || name;
-  const engraving = mapMagentoProductEngraving(product.custom_attributesV2?.items, {
-    fontMetadataOptions: options?.engravingFontOptions ?? [],
+  const customOptions = mapMagentoProductCustomOptions(product.options);
+  const engraving = mapMagentoProductEngraving(customOptions, product.custom_attributesV2?.items, {
     mediaGallery: product.media_gallery,
     referenceImageUrl: product.image?.url,
   });
-  const customOptions = mapMagentoProductCustomOptions(product.options);
   const productVideoUrl = resolveProductVideoUrl(
     product.custom_attributesV2?.items,
     product.media_gallery,

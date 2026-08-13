@@ -2,12 +2,15 @@ import type { CartLineOptions } from "@/features/cart/types/cart.types";
 import type { ProductCustomOptions } from "@/features/products/types/productCustomOptions";
 import type { Product } from "@/features/products/data/products";
 
-export const DEFAULT_ENGRAVING_FONTS = ["Gill Sans", "Larken"] as const;
+export const DEFAULT_ENGRAVING_MAX_CHARACTERS = 10;
 
-export const DEFAULT_ENGRAVING_MAX_CHARACTERS = 30;
+/** Mirrors the Magento engraving charset validation (add path errors loudly, update path only via errors[]). */
+export const ENGRAVING_TEXT_PATTERN = /^[A-Za-z0-9 ./-]*$/;
 
-/** @deprecated Use DEFAULT_ENGRAVING_FONTS */
-export const ENGRAVING_FONTS = DEFAULT_ENGRAVING_FONTS;
+export const ENGRAVING_TEXT_SANITIZE_PATTERN = /[^A-Za-z0-9 ./-]/g;
+
+export const ENGRAVING_CHARSET_MESSAGE =
+  "Only English letters, numbers, spaces, and . / - characters are allowed.";
 
 export type ProductEngravingConfig = {
   enabled: boolean;
@@ -21,12 +24,11 @@ export type EngravingSelection = {
   font: string;
 };
 
+/** No fallback fonts — only backend font values exist as selectable options. */
 export function resolveEngravingFonts(fonts?: readonly string[] | null): string[] {
-  const cleaned = (fonts ?? [])
+  return (fonts ?? [])
     .map((font) => font.trim())
     .filter((font) => font.length > 0);
-
-  return cleaned.length > 0 ? cleaned : [...DEFAULT_ENGRAVING_FONTS];
 }
 
 export function resolveEngravingMaxCharacters(
@@ -151,7 +153,8 @@ export function resolveCartLineEngravingSelection(
 
   return {
     text,
-    font: mergedOptions.engravingFont?.trim() || DEFAULT_ENGRAVING_FONTS[0],
+    // Fall back only to a font the product actually offers — never fabricate one.
+    font: mergedOptions.engravingFont?.trim() || product.engraving?.fonts?.[0] || "",
   };
 }
 

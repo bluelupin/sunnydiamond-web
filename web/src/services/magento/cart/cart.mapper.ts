@@ -17,7 +17,7 @@ import type {
   MappedMagentoCart,
 } from "./magentoCart.types";
 import type { CartLineMetadata, StoredCartLineMetadata } from "./cartSession";
-import { mapMagentoCartCustomizableOptionsToLineOptions } from "./cartLineCustomOptions.mapper";
+import { mapMagentoCartCustomizableOptions } from "./cartLineCustomOptions.mapper";
 import {
   DEFAULT_ENGRAVING_MAX_CHARACTERS,
   isCartLineEngravingCapable,
@@ -330,7 +330,9 @@ export function mapMagentoCartItems(
     }
 
     const metadata: CartLineMetadata = lineMetadata[uid] ?? { options: {} };
-    const magentoOptions = mapMagentoCartCustomizableOptionsToLineOptions(item.customizable_options);
+    const { lineOptions: magentoOptions, serverOptions } = mapMagentoCartCustomizableOptions(
+      item.customizable_options,
+    );
     const configurableOptions = mapMagentoConfigurableOptionsToLineOptions(item.configurable_options);
     const mergedOptions = {
       ...metadata.options,
@@ -338,20 +340,31 @@ export function mapMagentoCartItems(
       ...configurableOptions,
     };
 
-    const engravingEnabledForLine = isCartLineEngravingCapable({
-      options: metadata.options,
-      productCustomOptions: metadata.productCustomOptions,
-    });
+    // Server customizable_options are the engraving source of truth; localStorage
+    // metadata only covers optimistic lines (and capable lines with no text yet —
+    // Magento omits unset options from the response).
+    const serverHasEngraving = Boolean(serverOptions.engravingText || magentoOptions.engraving);
+    // A bare engravingSupported flag without the option-uid record is legacy/ghost
+    // metadata — only structured capability evidence keeps the engraving UI alive.
+    const engravingEnabledForLine =
+      serverHasEngraving ||
+      (Boolean(metadata.productCustomOptions?.engravingText) &&
+        isCartLineEngravingCapable({
+          options: metadata.options,
+          productCustomOptions: metadata.productCustomOptions,
+        }));
 
     if (engravingEnabledForLine) {
       mergedOptions.engravingSupported = true;
 
-      if ("engraving" in metadata.options) {
-        mergedOptions.engraving = metadata.options.engraving?.trim() || undefined;
-      }
+      if (!serverHasEngraving) {
+        if ("engraving" in metadata.options) {
+          mergedOptions.engraving = metadata.options.engraving?.trim() || undefined;
+        }
 
-      if ("engravingFont" in metadata.options) {
-        mergedOptions.engravingFont = metadata.options.engravingFont?.trim() || undefined;
+        if ("engravingFont" in metadata.options) {
+          mergedOptions.engravingFont = metadata.options.engravingFont?.trim() || undefined;
+        }
       }
 
       if (mergedOptions.engravingMaxCharacters == null) {
@@ -359,6 +372,8 @@ export function mapMagentoCartItems(
           metadata.options.engravingMaxCharacters ?? DEFAULT_ENGRAVING_MAX_CHARACTERS;
       }
     } else {
+      // Not engraving-capable per server + structured metadata — scrub any stale
+      // engraving keys so ghost state cannot block COD or render dead UI.
       delete mergedOptions.engraving;
       delete mergedOptions.engravingFont;
       delete mergedOptions.engravingMaxCharacters;

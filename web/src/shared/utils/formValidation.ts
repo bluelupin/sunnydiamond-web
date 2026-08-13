@@ -410,6 +410,17 @@ export const validateCodOrderTotal = (
   return { valid: true };
 };
 
+export const validateCodEngravedCart = (hasEngravedItems: boolean): FieldValidation => {
+  if (hasEngravedItems) {
+    return {
+      valid: false,
+      error: "Cash on Delivery is not available for engraved items. Please use online payment.",
+    };
+  }
+
+  return { valid: true };
+};
+
 export type CheckoutFormField =
   | "name"
   | "phoneOrEmail"
@@ -503,10 +514,14 @@ export const isCheckoutFormValid = (
 export const getCheckoutPaymentErrors = (
   values: CheckoutPaymentValues,
   orderTotal: number,
+  hasEngravedItems = false,
 ): Partial<Record<CheckoutPaymentField, string | undefined>> => {
   if (values.method === "cod") {
     return {
-      cod: validateCodOrderTotal(orderTotal).error,
+      // Engraved-cart restriction wins when both reasons apply.
+      cod:
+        validateCodEngravedCart(hasEngravedItems).error ??
+        validateCodOrderTotal(orderTotal).error,
     };
   }
 
@@ -516,8 +531,11 @@ export const getCheckoutPaymentErrors = (
 export const isCheckoutPaymentValid = (
   values: CheckoutPaymentValues,
   orderTotal: number,
+  hasEngravedItems = false,
 ): boolean =>
-  Object.values(getCheckoutPaymentErrors(values, orderTotal)).every((error) => !error);
+  Object.values(getCheckoutPaymentErrors(values, orderTotal, hasEngravedItems)).every(
+    (error) => !error,
+  );
 
 export type ProfileAddressFormValues = {
   name: string;

@@ -9,6 +9,7 @@ export const MAGENTO_PRODUCT_CUSTOM_OPTIONS_FIELDS = `
       ... on CustomizableFieldOption {
         fieldValue: value {
           uid
+          max_characters
         }
       }
       ... on CustomizableDropDownOption {

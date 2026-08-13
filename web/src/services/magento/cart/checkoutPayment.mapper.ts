@@ -28,6 +28,13 @@ export function resolveMagentoPaymentCode(
     }
   }
 
+  // COD must never fall back to an online gateway — e.g. engraved carts, where
+  // the backend strips all cod-family methods. Null lets the caller surface
+  // "not available" instead of silently opening Razorpay.
+  if (uiMethod === "cod") {
+    return null;
+  }
+
   return availableMethods[0]?.code ?? null;
 }
 

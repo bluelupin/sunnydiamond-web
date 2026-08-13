@@ -1,4 +1,5 @@
 import { formatMetalColorLabel } from "@/features/products/utils/metalColorOptions.utils";
+import { classifyCustomOptionLabel } from "@/services/magento/products/productCustomOptions.mapper";
 import type {
   CustomerOrderItem,
   CustomerOrderItemOption,
@@ -28,6 +29,11 @@ function findOptionValue(
   return undefined;
 }
 
+/** The native "Engraving Text" option — canonical classifier keeps font ordering right. */
+function isEngravingTextLabel(label: string): boolean {
+  return classifyCustomOptionLabel(label) === "engravingText";
+}
+
 function detectBespoke(item: CustomerOrderItem, options: CustomerOrderItemOption[]): boolean {
   const sku = item.productSku?.toLowerCase() ?? "";
   const name = item.productName.toLowerCase();
@@ -40,7 +46,8 @@ function detectBespoke(item: CustomerOrderItem, options: CustomerOrderItemOption
     const label = normalizeKey(option.label);
     const value = normalizeKey(option.value);
 
-    return label.includes("bespoke") || value.includes("bespoke");
+    // Customer-entered engraving text saying "Bespoke" must not flag the item.
+    return label.includes("bespoke") || (!isEngravingTextLabel(label) && value.includes("bespoke"));
   });
 }
 
@@ -52,10 +59,18 @@ export function mapCustomerOrderItemToDisplayFields(
   const size = findOptionValue(options, ["ring size", "size"]);
   const metalRaw = findOptionValue(options, ["metal color", "metal", "color"]);
   const metal = metalRaw ? formatMetalColorLabel(metalRaw) || metalRaw : undefined;
+  const engraving = item.enteredOptions
+    .find((option) => isEngravingTextLabel(normalizeKey(option.label)))
+    ?.value.trim();
+  const engravingFont = item.selectedOptions
+    .find((option) => classifyCustomOptionLabel(option.label) === "engravingFont")
+    ?.value.trim();
 
   return {
     size,
     metal,
+    engraving: engraving || undefined,
+    engravingFont: engravingFont || undefined,
     isGift: isOrderItemGiftMarked(
       giftMetadata,
       item.productName,

@@ -1,13 +1,21 @@
 import type { CartLineOptions } from "@/features/cart/types/cart.types";
-import type { ProductCustomOptions } from "@/features/products/types/productCustomOptions";
+import type {
+  ProductCustomOptionChoice,
+  ProductCustomOptions,
+} from "@/features/products/types/productCustomOptions";
 import {
+  classifyCustomOptionLabel,
+  decodeCustomOptionUid,
+  resolveCustomOptionValueMeta,
   resolveCustomOptionValueUid,
 } from "@/services/magento/products/productCustomOptions.mapper";
+import type { MagentoCartCustomizableOption } from "./magentoCart.types";
+
+export { decodeCustomOptionUid };
 
 export type MagentoCartItemOptionPayload = {
   enteredOptions: Array<{ uid: string; value: string }>;
   selectedOptions: string[];
-  customizableOptions: Array<{ uid: string; value_string: string }>;
 };
 
 export function buildMagentoCartItemOptionPayload(
@@ -20,83 +28,81 @@ export function buildMagentoCartItemOptionPayload(
 
   const enteredOptions: Array<{ uid: string; value: string }> = [];
   const selectedOptions: string[] = [];
-  const customizableOptions: Array<{ uid: string; value_string: string }> = [];
 
   const engravingOptionUid = productCustomOptions.engravingText?.optionUid;
   if (engravingOptionUid && lineOptions.engravingSupported) {
     const engraving = lineOptions.engraving?.trim() ?? "";
-    if (engraving || "engraving" in lineOptions) {
+    // Magento rejects an empty entered value — omit the option entirely instead.
+    if (engraving) {
       enteredOptions.push({
         uid: engravingOptionUid,
         value: engraving,
-      });
-      customizableOptions.push({
-        uid: engravingOptionUid,
-        value_string: engraving,
       });
     }
   }
 
   const engravingFont = lineOptions.engravingFont?.trim();
-  const engravingFontUid = resolveCustomOptionValueUid(
-    productCustomOptions.engravingFont,
-    engravingFont,
-  );
-  if (engravingFontUid && productCustomOptions.engravingFont?.optionUid && engravingFont) {
+  if (engravingFont && productCustomOptions.engravingFont) {
+    const engravingFontUid = resolveCustomOptionValueUid(
+      productCustomOptions.engravingFont,
+      engravingFont,
+    );
+    if (!engravingFontUid) {
+      throw new Error(
+        `Engraving font "${engravingFont}" could not be matched. Please choose a font from the list.`,
+      );
+    }
     selectedOptions.push(engravingFontUid);
-    customizableOptions.push({
-      uid: productCustomOptions.engravingFont.optionUid,
-      value_string: engravingFont,
-    });
   }
 
   const ringSize = lineOptions.ringSize?.trim();
   const ringSizeUid = resolveCustomOptionValueUid(productCustomOptions.ringSize, ringSize);
-  if (ringSizeUid && productCustomOptions.ringSize?.optionUid && ringSize) {
+  if (ringSizeUid && ringSize) {
     selectedOptions.push(ringSizeUid);
-    customizableOptions.push({
-      uid: productCustomOptions.ringSize.optionUid,
-      value_string: ringSize,
-    });
   }
 
   const metal = lineOptions.metal?.trim();
   const metalUid = resolveCustomOptionValueUid(productCustomOptions.metal, metal);
-  if (metalUid && productCustomOptions.metal?.optionUid && metal) {
+  if (metalUid && metal) {
     selectedOptions.push(metalUid);
-    customizableOptions.push({
-      uid: productCustomOptions.metal.optionUid,
-      value_string: metal,
-    });
   }
 
-  if (
-    enteredOptions.length === 0 &&
-    selectedOptions.length === 0 &&
-    customizableOptions.length === 0
-  ) {
+  if (enteredOptions.length === 0 && selectedOptions.length === 0) {
     return null;
   }
 
   return {
     enteredOptions,
     selectedOptions,
-    customizableOptions,
   };
 }
 
-type MagentoCartCustomizableOption = {
-  label?: string | null;
-  values?: Array<{
-    label?: string | null;
-    value?: string | null;
-  }> | null;
+export type CartLineServerCustomOption = {
+  optionId: number;
+  /** updateCartItems value_string: entered text for field options, option_type_id string for selects. */
+  valueString: string;
 };
 
-export function mapMagentoCartCustomizableOptionsToLineOptions(
+/** Option identity decoded from a cart line's own customizable_options response. */
+export type CartLineServerCustomOptions = {
+  engravingText?: CartLineServerCustomOption;
+  engravingFont?: CartLineServerCustomOption;
+  ringSize?: CartLineServerCustomOption;
+  metal?: CartLineServerCustomOption;
+  /** Options outside the classified families — resent verbatim so updates cannot wipe them. */
+  other?: CartLineServerCustomOption[];
+};
+
+export type MappedCartLineCustomOptions = {
+  lineOptions: Partial<CartLineOptions>;
+  serverOptions: CartLineServerCustomOptions;
+};
+
+export function mapMagentoCartCustomizableOptions(
   options: MagentoCartCustomizableOption[] | null | undefined,
-): Partial<CartLineOptions> {
-  const mapped: Partial<CartLineOptions> = {};
+): MappedCartLineCustomOptions {
+  const lineOptions: Partial<CartLineOptions> = {};
+  const serverOptions: CartLineServerCustomOptions = {};
 
   for (const option of options ?? []) {
     const label = option.label?.trim();
@@ -107,28 +113,207 @@ export function mapMagentoCartCustomizableOptionsToLineOptions(
       continue;
     }
 
-    const normalized = label.toLowerCase();
-    if (normalized.includes("engrav")) {
-      mapped.engraving = valueText;
+    const key = classifyCustomOptionLabel(label);
+    if (!key || serverOptions[key]) {
+      // Unclassified (or duplicate-labelled) options still need their identity
+      // preserved — an update payload omitting them wipes them from the quote.
+      const otherId = decodeCustomOptionUid(option.customizable_option_uid);
+      if (otherId != null) {
+        (serverOptions.other ??= []).push({
+          optionId: otherId,
+          valueString: value?.value?.trim() ?? valueText,
+        });
+      }
       continue;
     }
 
-    if (normalized.includes("font")) {
-      mapped.engravingFont = valueLabel || valueText;
-      continue;
+    switch (key) {
+      case "engravingText":
+        lineOptions.engraving = valueText;
+        break;
+      case "engravingFont":
+        lineOptions.engravingFont = valueLabel || valueText;
+        break;
+      case "ringSize":
+        lineOptions.ringSize = valueLabel || valueText;
+        break;
+      case "metal":
+        lineOptions.metal = valueLabel || valueText;
+        break;
     }
 
-    if (normalized.includes("size")) {
-      mapped.ringSize = valueLabel || valueText;
-      continue;
-    }
-
-    if (normalized.includes("metal")) {
-      mapped.metal = valueLabel || valueText;
+    const optionId = decodeCustomOptionUid(option.customizable_option_uid);
+    if (optionId != null) {
+      serverOptions[key] = { optionId, valueString: value?.value?.trim() ?? valueText };
     }
   }
 
-  return mapped;
+  return { lineOptions, serverOptions };
+}
+
+export function mapMagentoCartCustomizableOptionsToLineOptions(
+  options: MagentoCartCustomizableOption[] | null | undefined,
+): Partial<CartLineOptions> {
+  return mapMagentoCartCustomizableOptions(options).lineOptions;
+}
+
+export type MagentoCartItemSyncOption = {
+  id: number;
+  value_string: string;
+};
+
+/** Legacy persisted metadata predates optionId — fall back to decoding the stored uid. */
+function resolveMetadataOptionId(
+  option: { optionId?: number | null; optionUid?: string | null } | undefined,
+): number | null {
+  if (!option) {
+    return null;
+  }
+
+  if (typeof option.optionId === "number" && Number.isFinite(option.optionId)) {
+    return option.optionId;
+  }
+
+  return decodeCustomOptionUid(option.optionUid);
+}
+
+function resolveChoiceOptionTypeId(
+  choice: ProductCustomOptionChoice | undefined,
+  label: string | undefined,
+): string | null {
+  // Legacy persisted metadata may lack valueMetaByLabel entirely.
+  if (!choice?.valueMetaByLabel) {
+    return null;
+  }
+
+  const optionTypeId = resolveCustomOptionValueMeta(choice, label)?.optionTypeId;
+  return optionTypeId != null ? String(optionTypeId) : null;
+}
+
+function appendChoiceSyncOption(
+  target: MagentoCartItemSyncOption[],
+  label: string | undefined,
+  serverOption: CartLineServerCustomOption | undefined,
+  metadataChoice: ProductCustomOptionChoice | undefined,
+): void {
+  const id = serverOption?.optionId ?? resolveMetadataOptionId(metadataChoice);
+  if (id == null) {
+    return;
+  }
+
+  const valueString =
+    resolveChoiceOptionTypeId(metadataChoice, label?.trim()) ||
+    serverOption?.valueString ||
+    null;
+  if (!valueString) {
+    return;
+  }
+
+  target.push({ id, value_string: valueString });
+}
+
+export type BuildMagentoCartItemSyncOptionsInput = {
+  /** Desired state for the line. */
+  lineOptions: CartLineOptions;
+  /** Ids decoded from the line's own server customizable_options — preferred source. */
+  serverOptions?: CartLineServerCustomOptions;
+  /** Stored product option metadata — fallback for optimistic/legacy lines. */
+  productCustomOptions?: ProductCustomOptions;
+};
+
+/**
+ * updateCartItems customizable_options payload. Must use numeric ids (never uid)
+ * and must resend every option on the line — options missing from the payload
+ * are removed by Magento.
+ */
+export function buildMagentoCartItemSyncOptions({
+  lineOptions,
+  serverOptions,
+  productCustomOptions,
+}: BuildMagentoCartItemSyncOptionsInput): MagentoCartItemSyncOption[] | null {
+  const syncOptions: MagentoCartItemSyncOption[] = [];
+
+  const engravingTextId =
+    serverOptions?.engravingText?.optionId ??
+    resolveMetadataOptionId(productCustomOptions?.engravingText);
+  // Key presence distinguishes an explicit clear ("") from engraving never tracked locally.
+  const engravingTracked = lineOptions.engraving !== undefined;
+  const engraving = lineOptions.engraving?.trim() ?? "";
+  const serverEngravingText = serverOptions?.engravingText;
+
+  if (engravingTracked && engravingTextId != null) {
+    // Empty value clears the text; the font is cleared by omitting it below.
+    syncOptions.push({ id: engravingTextId, value_string: engraving });
+
+    if (engraving) {
+      appendChoiceSyncOption(
+        syncOptions,
+        lineOptions.engravingFont,
+        serverOptions?.engravingFont,
+        productCustomOptions?.engravingFont,
+      );
+    }
+  } else if (serverEngravingText) {
+    // Not tracked locally — resend the server's engraving so this update cannot wipe it.
+    syncOptions.push({
+      id: serverEngravingText.optionId,
+      value_string: serverEngravingText.valueString,
+    });
+    appendChoiceSyncOption(
+      syncOptions,
+      lineOptions.engravingFont,
+      serverOptions?.engravingFont,
+      productCustomOptions?.engravingFont,
+    );
+  }
+
+  appendChoiceSyncOption(
+    syncOptions,
+    lineOptions.ringSize,
+    serverOptions?.ringSize,
+    productCustomOptions?.ringSize,
+  );
+  appendChoiceSyncOption(
+    syncOptions,
+    lineOptions.metal,
+    serverOptions?.metal,
+    productCustomOptions?.metal,
+  );
+
+  // Unclassified server options ride along unchanged — omission would wipe them.
+  for (const option of serverOptions?.other ?? []) {
+    syncOptions.push({ id: option.optionId, value_string: option.valueString });
+  }
+
+  return syncOptions.length > 0 ? syncOptions : null;
+}
+
+/** True when the payload would not change the line — skipping avoids a needless cart item uid rotation. */
+export function syncOptionsMatchServer(
+  syncOptions: MagentoCartItemSyncOption[],
+  serverOptions: CartLineServerCustomOptions,
+): boolean {
+  const serverById = new Map<number, string>();
+  const { other, ...classified } = serverOptions;
+  for (const option of Object.values(classified)) {
+    if (option) {
+      serverById.set(option.optionId, option.valueString);
+    }
+  }
+  for (const option of other ?? []) {
+    serverById.set(option.optionId, option.valueString);
+  }
+
+  for (const { id, value_string } of syncOptions) {
+    // An option absent on the server matches only an empty (clearing) value.
+    if ((serverById.get(id) ?? "") !== value_string) {
+      return false;
+    }
+    serverById.delete(id);
+  }
+
+  // Any server option left out of the payload would be wiped — that is a change.
+  return serverById.size === 0;
 }
 
 type AssertResolvableCartLineOptionsInput = {

@@ -40,8 +40,10 @@ export const MAGENTO_CART_FIELDS = `
           message
         }
         customizable_options {
+          customizable_option_uid
           label
           values {
+            customizable_option_value_uid
             label
             value
           }
@@ -53,8 +55,10 @@ export const MAGENTO_CART_FIELDS = `
           message
         }
         customizable_options {
+          customizable_option_uid
           label
           values {
+            customizable_option_value_uid
             label
             value
           }

@@ -3,14 +3,10 @@ import { magentoGraphqlFetch } from "../graphqlClient";
 import { MAGENTO_PRODUCT_BY_URL_KEY_QUERY } from "./productDetail.query";
 import { mapMagentoProductDetailToProduct } from "./productDetail.mapper";
 import { resolveMoreForYouProducts } from "./moreForYou.service";
-import { fetchMagentoEngravingFontOptions } from "./engravingFonts.service";
-import { isMagentoProductEngravingEnabled } from "./productEngraving.mapper";
 import type {
-  MagentoCustomAttributeItem,
   MagentoProductByUrlKeyResponse,
   MagentoProductDetailItem,
 } from "./magentoProduct.types";
-import type { MagentoEngravingFontOption } from "./engravingFonts.service";
 import type { Product } from "@/features/products/data/products";
 import type { MoreForYouCarouselItem } from "@/features/products/data/moreForYouContent";
 
@@ -26,17 +22,6 @@ type MagentoProductDetailCore = {
 
 function normalizeProductUrlKey(urlKey: string): string {
   return urlKey.trim();
-}
-
-async function resolveEngravingFontMetadata(
-  items: MagentoCustomAttributeItem[] | null | undefined,
-  signal?: AbortSignal,
-): Promise<MagentoEngravingFontOption[]> {
-  if (!isMagentoProductEngravingEnabled(items)) {
-    return [];
-  }
-
-  return fetchMagentoEngravingFontOptions(signal);
 }
 
 async function loadMagentoProductDetailCore(
@@ -59,11 +44,7 @@ async function loadMagentoProductDetailCore(
     return null;
   }
 
-  const engravingFontOptions = await resolveEngravingFontMetadata(
-    item.custom_attributesV2?.items,
-    signal,
-  );
-  const product = mapMagentoProductDetailToProduct(item, { engravingFontOptions });
+  const product = mapMagentoProductDetailToProduct(item);
   if (!product) {
     return null;
   }

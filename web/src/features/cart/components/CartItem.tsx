@@ -5,8 +5,10 @@ import Link from "next/link";
 import {
   clampEngravingText,
   DEFAULT_ENGRAVING_MAX_CHARACTERS,
+  ENGRAVING_TEXT_SANITIZE_PATTERN,
   isCartLineEngravingEnabled,
 } from "@/features/products/constants/engraving";
+import FormFieldError from "@/shared/ui/FormFieldError";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import { useCart } from "../context/CartContext";
@@ -31,7 +33,7 @@ interface CartItemProps {
   giftNoteDisplay: CartGiftNoteDisplay;
   onUpdateQuantity: (lineItemId: string, quantity: number) => void;
   onRemove: (lineItemId: string) => void;
-  onUpdateOptions: (lineItemId: string, options: Partial<CartLineOptions>) => void;
+  onUpdateOptions: (lineItemId: string, options: Partial<CartLineOptions>) => Promise<void>;
 }
 
 const ENGRAVING_EMPTY_LABEL = "Metal Engraving (Optional)";
@@ -52,11 +54,19 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
   const itemGiftNote = getCartItemGiftNote(item, giftNoteDisplay);
   const [isEditingEngraving, setIsEditingEngraving] = useState(false);
   const [engravingDraft, setEngravingDraft] = useState(options.engraving ?? "");
+  const [engravingError, setEngravingError] = useState<string | null>(null);
+  const [isSavingEngraving, setIsSavingEngraving] = useState(false);
   const [movedToWishlist, setMovedToWishlist] = useState(false);
   const [isBuyingNow, setIsBuyingNow] = useState(false);
 
+  const engravingFont = options.engravingFont?.trim();
+  const engravingErrorId = `cart-engraving-error-${item.id}`;
+
   const clampDraft = (value: string) =>
     engravingMaxCharacters ? clampEngravingText(value, engravingMaxCharacters) : value;
+
+  const sanitizeDraft = (value: string) =>
+    clampDraft(value.replace(ENGRAVING_TEXT_SANITIZE_PATTERN, ""));
 
   useEffect(() => {
     if (!isEditingEngraving) {
@@ -67,13 +77,33 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
   const handleEngravingAction = () => {
     if (!isEditingEngraving) {
       setEngravingDraft(options.engraving ?? "");
+      setEngravingError(null);
       setIsEditingEngraving(true);
       return;
     }
 
+    if (isSavingEngraving) {
+      return;
+    }
+
     const trimmed = clampDraft(engravingDraft.trim());
-    onUpdateOptions(item.id, { engraving: trimmed });
-    setIsEditingEngraving(false);
+    setIsSavingEngraving(true);
+    void (async () => {
+      try {
+        await onUpdateOptions(item.id, { engraving: trimmed });
+        setEngravingError(null);
+        setIsEditingEngraving(false);
+      } catch (error) {
+        // Keep the edit row open so the shopper can correct and retry.
+        setEngravingError(
+          error instanceof Error && error.message.trim()
+            ? error.message.trim()
+            : "Could not save the engraving. Please try again.",
+        );
+      } finally {
+        setIsSavingEngraving(false);
+      }
+    })();
   };
 
   const handleEngravingKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -84,6 +114,7 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
 
     if (event.key === "Escape") {
       setEngravingDraft(options.engraving ?? "");
+      setEngravingError(null);
       setIsEditingEngraving(false);
     }
   };
@@ -198,7 +229,7 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
             if (checked) {
               clearGiftingOptionsExplored();
             }
-            onUpdateOptions(item.id, { isGift: checked });
+            void onUpdateOptions(item.id, { isGift: checked });
           }}
         />
         <span className="font-gill text-sm leading-4 text-darkblack lg:text-base lg:leading-5">
@@ -228,10 +259,15 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
                   <input
                     type="text"
                     value={engravingDraft}
-                    onChange={(event) => setEngravingDraft(clampDraft(event.target.value))}
+                    onChange={(event) => {
+                      setEngravingDraft(sanitizeDraft(event.target.value));
+                      setEngravingError(null);
+                    }}
                     onKeyDown={handleEngravingKeyDown}
                     maxLength={engravingMaxCharacters}
                     aria-label="Engraving text"
+                    aria-invalid={engravingError ? true : undefined}
+                    aria-describedby={engravingError ? engravingErrorId : undefined}
                     autoFocus
                     className="h-full w-full min-w-0 border-0 bg-transparent font-gill text-sm leading-110 text-darkblack outline-none placeholder:text-neutral500 lg:text-base"
                   />
@@ -250,11 +286,22 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
               <CartOutlineButton
                 type="button"
                 onClick={handleEngravingAction}
+                disabled={isSavingEngraving}
                 className="h-14 w-auto shrink-0 px-5 uppercase lg:px-7"
               >
                 {isEditingEngraving ? "Save" : hasEngraving ? "Modify" : "Add"}
               </CartOutlineButton>
             </div>
+
+            {engravingError ? (
+              <FormFieldError id={engravingErrorId} message={engravingError} />
+            ) : null}
+
+            {hasEngraving && engravingFont ? (
+              <p className="font-gill text-sm font-light leading-110 text-neutral500 lg:text-base">
+                <span className="font-normal text-darkblack">Font:</span> {engravingFont}
+              </p>
+            ) : null}
           </div>
         </>
       ) : null}

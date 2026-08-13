@@ -30,6 +30,10 @@ export const MAGENTO_SYNC_CART_ITEMS_OPTIONS_MUTATION = `
       cart {
         ${MAGENTO_CART_FIELDS}
       }
+      errors {
+        code
+        message
+      }
     }
   }
 ` as const;

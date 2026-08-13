@@ -9,8 +9,10 @@ export type MagentoCartProduct = {
 };
 
 export type MagentoCartCustomizableOption = {
+  customizable_option_uid?: string | null;
   label?: string | null;
   values?: Array<{
+    customizable_option_value_uid?: string | null;
     label?: string | null;
     value?: string | null;
   }> | null;
@@ -120,6 +122,11 @@ export type MagentoAddProductsToCartResponse = {
 export type MagentoSyncCartItemsOptionsResponse = {
   updateCartItems?: {
     cart?: MagentoCart | null;
+    // Option validation failures land here (CartUserInputError), not in top-level GraphQL errors.
+    errors?: Array<{
+      code?: string | null;
+      message?: string | null;
+    }> | null;
   } | null;
 };
 

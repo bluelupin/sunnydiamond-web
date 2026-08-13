@@ -58,6 +58,13 @@ export function ProfileOrderItemRow({ item, price }: ProfileOrderItemRowProps) {
               </div>
             ) : null}
 
+            {item.engraving ? (
+              <p className="font-gill text-sm font-light leading-110 text-darkblack">
+                Engraving: “{item.engraving}”
+                {item.engravingFont ? ` (${item.engravingFont})` : null}
+              </p>
+            ) : null}
+
             {item.quantity > 1 ? (
               <p className="font-gill text-sm font-light leading-110 text-neutral500">
                 Qty: {item.quantity}

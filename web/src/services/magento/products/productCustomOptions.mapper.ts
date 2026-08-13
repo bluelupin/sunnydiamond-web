@@ -1,5 +1,6 @@
 import type {
   ProductCustomOptionChoice,
+  ProductCustomOptionChoiceValue,
   ProductCustomOptionField,
   ProductCustomOptions,
 } from "@/features/products/types/productCustomOptions";
@@ -8,7 +9,7 @@ export type MagentoProductCustomOption = {
   uid?: string | null;
   title?: string | null;
   __typename?: string | null;
-  fieldValue?: { uid?: string | null } | null;
+  fieldValue?: { uid?: string | null; max_characters?: number | null } | null;
   dropDownValues?: Array<{
     uid?: string | null;
     title?: string | null;
@@ -25,9 +26,57 @@ function normalizeLabel(value: string): string {
   return value.trim().toLowerCase();
 }
 
-function matchesTitle(title: string, patterns: RegExp[]): boolean {
-  const normalized = normalizeLabel(title);
-  return patterns.some((pattern) => pattern.test(normalized));
+export type CustomOptionFamily = "engravingFont" | "engravingText" | "ringSize" | "metal";
+
+/**
+ * Canonical option-title classifier shared by the product, cart, and order
+ * mappers. Ordering is load-bearing: "Engraving Font" contains "engrav", so the
+ * font family must match first. The titles themselves ("Engraving Text" /
+ * "Engraving Font") are a published contract with the backend option sync.
+ */
+export function classifyCustomOptionLabel(label: string): CustomOptionFamily | null {
+  const normalized = normalizeLabel(label);
+
+  if (normalized.includes("font")) {
+    return "engravingFont";
+  }
+
+  if (normalized.includes("engrav")) {
+    return "engravingText";
+  }
+
+  if (normalized.includes("size")) {
+    return "ringSize";
+  }
+
+  if (normalized.includes("metal")) {
+    return "metal";
+  }
+
+  return null;
+}
+
+/**
+ * Option uids are base64 of "custom-option/<id>" — updateCartItems needs the
+ * numeric id (the vendor's uid input silently wipes all custom options).
+ * Single canonical decoder for both the product and cart mappers.
+ */
+export function decodeCustomOptionUid(uid: string | null | undefined): number | null {
+  const value = uid?.trim();
+  if (!value) {
+    return null;
+  }
+
+  try {
+    const decoded =
+      typeof atob === "function"
+        ? atob(value)
+        : Buffer.from(value, "base64").toString("utf8");
+    const match = /(\d+)\s*$/.exec(decoded);
+    return match ? Number(match[1]) : null;
+  } catch {
+    return null;
+  }
 }
 
 function mapChoiceOption(
@@ -38,8 +87,14 @@ function mapChoiceOption(
     return null;
   }
 
+  const optionId = decodeCustomOptionUid(optionUid);
+  if (optionId == null) {
+    return null;
+  }
+
   const values = option.dropDownValues ?? option.radioValues ?? [];
   const valuesByLabel: Record<string, string> = {};
+  const valueMetaByLabel: Record<string, ProductCustomOptionChoiceValue> = {};
   const labels: string[] = [];
 
   for (const value of values) {
@@ -50,12 +105,18 @@ function mapChoiceOption(
     }
 
     valuesByLabel[normalizeLabel(label)] = valueUid;
+    valueMetaByLabel[normalizeLabel(label)] = {
+      valueUid,
+      optionTypeId: value.option_type_id ?? null,
+    };
     labels.push(label);
   }
 
   return {
     optionUid,
+    optionId,
     valuesByLabel,
+    valueMetaByLabel,
     labels,
   };
 }
@@ -66,7 +127,18 @@ function mapFieldOption(option: MagentoProductCustomOption): ProductCustomOption
     return null;
   }
 
-  return { optionUid };
+  const optionId = decodeCustomOptionUid(optionUid);
+  if (optionId == null) {
+    return null;
+  }
+
+  const maxRaw = option.fieldValue?.max_characters;
+  const maxCharacters =
+    typeof maxRaw === "number" && Number.isFinite(maxRaw) && maxRaw > 0
+      ? Math.floor(maxRaw)
+      : null;
+
+  return { optionUid, optionId, maxCharacters };
 }
 
 export function mapMagentoProductCustomOptions(
@@ -85,37 +157,39 @@ export function mapMagentoProductCustomOptions(
       continue;
     }
 
-    if (matchesTitle(title, [/engrav/])) {
-      if (option.__typename === "CustomizableFieldOption") {
-        const field = mapFieldOption(option);
-        if (field) {
-          mapped.engravingText = field;
+    switch (classifyCustomOptionLabel(title)) {
+      case "engravingFont": {
+        const choice = mapChoiceOption(option);
+        if (choice) {
+          mapped.engravingFont = choice;
         }
+        break;
       }
-      continue;
-    }
-
-    if (matchesTitle(title, [/font/])) {
-      const choice = mapChoiceOption(option);
-      if (choice) {
-        mapped.engravingFont = choice;
+      case "engravingText": {
+        if (option.__typename === "CustomizableFieldOption") {
+          const field = mapFieldOption(option);
+          if (field) {
+            mapped.engravingText = field;
+          }
+        }
+        break;
       }
-      continue;
-    }
-
-    if (matchesTitle(title, [/ring\s*size/, /^size$/])) {
-      const choice = mapChoiceOption(option);
-      if (choice) {
-        mapped.ringSize = choice;
+      case "ringSize": {
+        const choice = mapChoiceOption(option);
+        if (choice) {
+          mapped.ringSize = choice;
+        }
+        break;
       }
-      continue;
-    }
-
-    if (matchesTitle(title, [/metal/])) {
-      const choice = mapChoiceOption(option);
-      if (choice) {
-        mapped.metal = choice;
+      case "metal": {
+        const choice = mapChoiceOption(option);
+        if (choice) {
+          mapped.metal = choice;
+        }
+        break;
       }
+      default:
+        break;
     }
   }
 
@@ -140,16 +214,16 @@ export function getCustomOptionDisplayLabels(
   return Object.keys(choice.valuesByLabel);
 }
 
-export function resolveCustomOptionValueUid(
+export function resolveCustomOptionValueMeta(
   choice: ProductCustomOptionChoice | undefined,
   label: string | undefined,
-): string | null {
+): ProductCustomOptionChoiceValue | null {
   const normalized = label?.trim();
   if (!choice || !normalized) {
     return null;
   }
 
-  const exact = choice.valuesByLabel[normalizeLabel(normalized)];
+  const exact = choice.valueMetaByLabel[normalizeLabel(normalized)];
   if (exact) {
     return exact;
   }
@@ -159,17 +233,24 @@ export function resolveCustomOptionValueUid(
     return null;
   }
 
-  for (const [key, uid] of Object.entries(choice.valuesByLabel)) {
+  for (const [key, meta] of Object.entries(choice.valueMetaByLabel)) {
     if (extractComparableToken(key) === comparable) {
-      return uid;
+      return meta;
     }
   }
 
   for (const displayLabel of choice.labels) {
     if (extractComparableToken(displayLabel) === comparable) {
-      return choice.valuesByLabel[normalizeLabel(displayLabel)] ?? null;
+      return choice.valueMetaByLabel[normalizeLabel(displayLabel)] ?? null;
     }
   }
 
   return null;
+}
+
+export function resolveCustomOptionValueUid(
+  choice: ProductCustomOptionChoice | undefined,
+  label: string | undefined,
+): string | null {
+  return resolveCustomOptionValueMeta(choice, label)?.valueUid ?? null;
 }

@@ -25,6 +25,8 @@ export type ProfileOrderItemUi = {
   imageSrc: string;
   size?: string;
   metal?: string;
+  engraving?: string;
+  engravingFont?: string;
   isGift?: boolean;
   isBespoke?: boolean;
   useIconPlaceholder?: boolean;
