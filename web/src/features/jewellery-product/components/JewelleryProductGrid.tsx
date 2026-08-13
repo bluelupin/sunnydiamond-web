@@ -8,12 +8,14 @@ interface JewelleryProductGridProps {
   products: JewelleryListingProduct[];
   isWishlisted: (productId: string) => boolean;
   onToggleWishlist?: (productId: string) => void;
+  metalPurityQuery?: string;
 }
 
 const JewelleryProductGrid = ({
   products,
   isWishlisted,
   onToggleWishlist,
+  metalPurityQuery,
 }: JewelleryProductGridProps) => {
   return (
     <div className="grid w-full min-w-0 grid-cols-2 items-start md:grid-cols-3">
@@ -25,7 +27,11 @@ const JewelleryProductGrid = ({
           primaryImage={product.primaryImage}
           modalImage={product.modalImage}
           hoverImage={product.hoverImage}
-          href={`/product/${product.urlKey}`}
+          href={
+            metalPurityQuery
+              ? `/product/${product.urlKey}?purity=${encodeURIComponent(metalPurityQuery)}`
+              : `/product/${product.urlKey}`
+          }
           isBestseller={product.isBestseller}
           isWishlisted={isWishlisted(product.id)}
           priorityImage={index < PLP_PRIORITY_IMAGE_COUNT}

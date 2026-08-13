@@ -15,15 +15,18 @@ type BagDrawerSnapshot = {
   totalItemsAfterAdd: number;
 };
 
+export type BagDrawerMode = "add" | "update";
+
 type CartUIContextType = {
   isBagDrawerOpen: boolean;
+  bagDrawerMode: BagDrawerMode;
   lastAddedLineItemId: string | null;
   bagDrawerSnapshot: BagDrawerSnapshot | null;
   isGiftingPanelOpen: boolean;
   giftingStep: "intro" | "personalise";
   hasExploredGiftingOptions: boolean;
   isGuestCheckoutModalOpen: boolean;
-  openBagDrawer: (result: AddItemResult) => void;
+  openBagDrawer: (result: AddItemResult, options?: { mode?: BagDrawerMode }) => void;
   closeBagDrawer: () => void;
   openGiftingPanel: (step?: "intro" | "personalise") => void;
   closeGiftingPanel: () => void;
@@ -38,6 +41,7 @@ const CartUIContext = createContext<CartUIContextType | undefined>(undefined);
 
 export function CartUIProvider({ children }: { children: ReactNode }) {
   const [isBagDrawerOpen, setIsBagDrawerOpen] = useState(false);
+  const [bagDrawerMode, setBagDrawerMode] = useState<BagDrawerMode>("add");
   const [lastAddedLineItemId, setLastAddedLineItemId] = useState<string | null>(null);
   const [bagDrawerSnapshot, setBagDrawerSnapshot] = useState<BagDrawerSnapshot | null>(null);
   const [isGiftingPanelOpen, setIsGiftingPanelOpen] = useState(false);
@@ -45,18 +49,30 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
   const [hasExploredGiftingOptions, setHasExploredGiftingOptions] = useState(false);
   const [isGuestCheckoutModalOpen, setIsGuestCheckoutModalOpen] = useState(false);
 
-  const openBagDrawer = useCallback((result: AddItemResult) => {
-    setLastAddedLineItemId(result.lineItemId);
-    setBagDrawerSnapshot({
-      lineItemId: result.lineItemId,
-      lineItem: result.lineItem,
-      totalItemsAfterAdd: result.totalItemsAfterAdd,
-    });
-    setIsBagDrawerOpen(true);
-  }, []);
+  const applyBagDrawerResult = useCallback(
+    (result: AddItemResult, options?: { mode?: BagDrawerMode }) => {
+      setBagDrawerMode(options?.mode ?? "add");
+      setLastAddedLineItemId(result.lineItemId);
+      setBagDrawerSnapshot({
+        lineItemId: result.lineItemId,
+        lineItem: result.lineItem,
+        totalItemsAfterAdd: result.totalItemsAfterAdd,
+      });
+    },
+    [],
+  );
+
+  const openBagDrawer = useCallback(
+    (result: AddItemResult, options?: { mode?: BagDrawerMode }) => {
+      applyBagDrawerResult(result, options);
+      setIsBagDrawerOpen(true);
+    },
+    [applyBagDrawerResult],
+  );
 
   const closeBagDrawer = useCallback(() => {
     setIsBagDrawerOpen(false);
+    setBagDrawerMode("add");
   }, []);
 
   const openGiftingPanel = useCallback((step: "intro" | "personalise" = "intro") => {
@@ -89,6 +105,7 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
     <CartUIContext.Provider
       value={{
         isBagDrawerOpen,
+        bagDrawerMode,
         lastAddedLineItemId,
         bagDrawerSnapshot,
         isGiftingPanelOpen,

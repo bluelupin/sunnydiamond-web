@@ -105,6 +105,22 @@ export function isAllMetalPuritiesSelected(
   return metalPurities.length === 0 || metalPurities.length >= available.length;
 }
 
+export function getSelectedMetalPurityQuery(
+  metalPurities: string[],
+  facets: JewelleryFilterFacets,
+): string | undefined {
+  if (isAllMetalPuritiesSelected(metalPurities, facets)) {
+    return undefined;
+  }
+
+  const selected = metalPurities.map((purity) => purity.trim()).filter(Boolean);
+  if (selected.length === 0) {
+    return undefined;
+  }
+
+  return selected.join(",");
+}
+
 export function isDefaultPriceRange(
   filters: JewelleryFilterState,
   facets: Pick<JewelleryFilterFacets, "minPrice" | "maxPrice">,
