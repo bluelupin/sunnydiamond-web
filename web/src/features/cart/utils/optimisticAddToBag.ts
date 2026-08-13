@@ -27,3 +27,14 @@ export function buildOptimisticAddItemResult(
     totalItemsAfterAdd: currentTotalItems + 1,
   };
 }
+
+/** Snapshot for instant bag drawer UI while a cart line update completes. */
+export function buildOptimisticUpdateItemResult(
+  payload: AddToBagPayload | Product,
+  currentTotalItems: number,
+): AddItemResult {
+  return {
+    ...buildOptimisticAddItemResult(payload, currentTotalItems),
+    totalItemsAfterAdd: currentTotalItems,
+  };
+}

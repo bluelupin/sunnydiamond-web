@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Play } from "lucide-react";
 import { PanelFooterGradient } from "@/shared/ui/PanelFooter";
@@ -13,6 +13,20 @@ type RingSizeChartPanelProps = {
   guide?: NormalizedSizeGuide | null;
 };
 
+function resolveVideoMimeType(videoSrc: string): string {
+  const normalized = videoSrc.split("?")[0]?.toLowerCase() ?? "";
+
+  if (normalized.endsWith(".webm")) {
+    return "video/webm";
+  }
+
+  if (normalized.endsWith(".mov")) {
+    return "video/quicktime";
+  }
+
+  return "video/mp4";
+}
+
 const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) => {
   const [hasStartedPlayback, setHasStartedPlayback] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -21,6 +35,7 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
   const subtitle = guide?.drawerSubtitle ?? "Measure Dimensions in millimeters";
   const rows = guide?.rows ?? [];
   const videoUrl = guide?.tutorialVideoUrl;
+  const videoMimeType = videoUrl ? resolveVideoMimeType(videoUrl) : "video/mp4";
   const circumferenceHeaderUrl = guide?.circumferenceHeaderImageUrl;
   const diameterHeaderUrl = guide?.diameterHeaderImageUrl;
 
@@ -43,16 +58,86 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
     setHasStartedPlayback(false);
   }, [videoUrl]);
 
-  const handlePlayVideo = () => {
+  useEffect(() => {
+    if (!open || !videoUrl) {
+      return;
+    }
+
     const video = videoRef.current;
     if (!video) {
       return;
     }
 
-    setHasStartedPlayback(true);
-    void video.play().catch(() => {
-      setHasStartedPlayback(false);
-    });
+    video.setAttribute("playsinline", "");
+    video.setAttribute("webkit-playsinline", "");
+    video.load();
+  }, [open, videoUrl]);
+
+  const handlePlayVideo = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) {
+      return;
+    }
+
+    // iOS requires play() in the same user-gesture turn — do not setState before play().
+    const playPromise = video.play();
+    if (playPromise === undefined) {
+      setHasStartedPlayback(true);
+      return;
+    }
+
+    playPromise
+      .then(() => {
+        setHasStartedPlayback(true);
+      })
+      .catch(() => {
+        setHasStartedPlayback(false);
+      });
+  }, []);
+
+  const renderTutorialVideo = () => {
+    if (!videoUrl) {
+      return null;
+    }
+
+    return (
+      <div className="relative w-full shrink-0 overflow-hidden bg-white">
+        <video
+          ref={videoRef}
+          className="block h-auto w-full"
+          playsInline
+          preload="auto"
+          controls={hasStartedPlayback}
+          onPlay={() => setHasStartedPlayback(true)}
+          onEnded={() => {
+            const video = videoRef.current;
+            if (video) {
+              video.currentTime = 0;
+            }
+            setHasStartedPlayback(false);
+          }}
+        >
+          <source src={videoUrl} type={videoMimeType} />
+        </video>
+        {!hasStartedPlayback ? (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/20">
+            <button
+              type="button"
+              aria-label={`Play ${title} video`}
+              onClick={handlePlayVideo}
+              className="inline-flex size-12 touch-manipulation items-center justify-center"
+            >
+              <Play
+                size={32}
+                strokeWidth={1.5}
+                className="fill-white text-white"
+                aria-hidden
+              />
+            </button>
+          </div>
+        ) : null}
+      </div>
+    );
   };
 
   return (
@@ -67,7 +152,7 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
           type="button"
           onClick={onClose}
           aria-label={`Close ${title}`}
-          className="absolute top-8 right-7 z-10 text-white"
+          className="absolute top-8 right-7 z-20 text-white"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M18 6L6 18" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
@@ -75,46 +160,10 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
           </svg>
         </button>
 
+        {renderTutorialVideo()}
+
         <div className="min-h-0 flex-1 overflow-y-auto">
           <div className="flex flex-col gap-6 pb-72">
-            {videoUrl ? (
-              <div className="relative w-full shrink-0 overflow-hidden bg-white">
-                <video
-                  ref={videoRef}
-                  src={videoUrl}
-                  className="block h-auto w-full"
-                  playsInline
-                  preload="metadata"
-                  controls={hasStartedPlayback}
-                  onPlay={() => setHasStartedPlayback(true)}
-                  onEnded={() => {
-                    const video = videoRef.current;
-                    if (video) {
-                      video.currentTime = 0;
-                    }
-                    setHasStartedPlayback(false);
-                  }}
-                />
-                {!hasStartedPlayback ? (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                    <button
-                      type="button"
-                      aria-label={`Play ${title} video`}
-                      onClick={handlePlayVideo}
-                      className="inline-flex size-8 items-center justify-center"
-                    >
-                      <Play
-                        size={32}
-                        strokeWidth={1.5}
-                        className="fill-white text-white"
-                        aria-hidden
-                      />
-                    </button>
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
-
             <div className="flex flex-col gap-6 pb-8">
               <div className="flex flex-col items-center gap-3 px-4 text-center lg:px-8">
                 <h2 className="w-full font-larken text-2xl font-light leading-110 text-darkblack">

@@ -64,12 +64,16 @@ import { getProductDisplayPrice } from "@/features/products/data/productDetailCo
 /** @deprecated Use CartLineItem from cart.types */
 export type CartItem = CartLineItem;
 
+type RemoveItemOptions = {
+  showToast?: boolean;
+};
+
 interface CartContextType {
   items: CartLineItem[];
   isHydrating: boolean;
   isUpdating: boolean;
   addItem: (payload: AddToBagPayload | Product) => Promise<AddItemResult>;
-  removeItem: (lineItemId: string) => Promise<void>;
+  removeItem: (lineItemId: string, options?: RemoveItemOptions) => Promise<void>;
   updateQuantity: (lineItemId: string, quantity: number) => Promise<void>;
   updateLineItemOptions: (lineItemId: string, options: Partial<CartLineOptions>) => void;
   applyGiftingSelection: (selection: CartGiftingSelection) => Promise<void>;
@@ -202,10 +206,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   >([]);
   const [isHydrating, setIsHydrating] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [isRemovedToastOpen, setIsRemovedToastOpen] = useState(false);
+  const [cartStatusToastMessage, setCartStatusToastMessage] = useState<string | null>(null);
   const [localGiftCardDiscount, setLocalGiftCardDiscount] = useState(0);
   const [appliedLocalGiftCardCode, setAppliedLocalGiftCardCode] = useState<string | null>(null);
-  const removedToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cartStatusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lineMetadataRef = useRef(lineMetadata);
   const initRef = useRef(false);
   const shippingEstimateRequestRef = useRef(0);
@@ -217,27 +221,34 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [isHydrating, lineMetadata]);
 
-  const dismissRemovedFromCartToast = useCallback(() => {
-    if (removedToastTimeoutRef.current) {
-      clearTimeout(removedToastTimeoutRef.current);
-      removedToastTimeoutRef.current = null;
+  const dismissCartStatusToast = useCallback(() => {
+    if (cartStatusToastTimeoutRef.current) {
+      clearTimeout(cartStatusToastTimeoutRef.current);
+      cartStatusToastTimeoutRef.current = null;
     }
-    setIsRemovedToastOpen(false);
+    setCartStatusToastMessage(null);
   }, []);
 
+  const showCartStatusToast = useCallback(
+    (message: string) => {
+      dismissCartStatusToast();
+      setCartStatusToastMessage(message);
+      cartStatusToastTimeoutRef.current = setTimeout(() => {
+        setCartStatusToastMessage(null);
+        cartStatusToastTimeoutRef.current = null;
+      }, appStatusToastDurationMs);
+    },
+    [dismissCartStatusToast],
+  );
+
   const showRemovedFromCartToast = useCallback(() => {
-    dismissRemovedFromCartToast();
-    setIsRemovedToastOpen(true);
-    removedToastTimeoutRef.current = setTimeout(() => {
-      setIsRemovedToastOpen(false);
-      removedToastTimeoutRef.current = null;
-    }, appStatusToastDurationMs);
-  }, [dismissRemovedFromCartToast]);
+    showCartStatusToast("Item removed from cart");
+  }, [showCartStatusToast]);
 
   useEffect(() => {
     return () => {
-      if (removedToastTimeoutRef.current) {
-        clearTimeout(removedToastTimeoutRef.current);
+      if (cartStatusToastTimeoutRef.current) {
+        clearTimeout(cartStatusToastTimeoutRef.current);
       }
     };
   }, []);
@@ -464,13 +475,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [applyCartState, cartState?.items]);
 
-  const removeItem = useCallback(async (lineItemId: string) => {
+  const removeItem = useCallback(async (lineItemId: string, options?: RemoveItemOptions) => {
     const cartId = getGuestCartId();
     if (!cartId) {
       return;
     }
 
     const existingItem = cartState?.items.find((item) => item.id === lineItemId);
+    const shouldShowToast = options?.showToast !== false;
 
     setIsUpdating(true);
 
@@ -495,16 +507,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
             },
           ],
         });
-        showRemovedFromCartToast();
+        if (shouldShowToast) {
+          showRemovedFromCartToast();
+        }
       }
     } finally {
       setIsUpdating(false);
     }
-  }, [applyCartState, cartState?.items]);
+  }, [applyCartState, cartState?.items, showRemovedFromCartToast]);
 
   const replaceLineItem = useCallback(
     async (lineItemId: string, payload: AddToBagPayload): Promise<AddItemResult> => {
-      await removeItem(lineItemId);
+      await removeItem(lineItemId, { showToast: false });
       return addItem(payload);
     },
     [addItem, removeItem],
@@ -517,7 +531,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         .map((item) => item.id);
 
       for (const id of otherLineIds) {
-        await removeItem(id);
+        await removeItem(id, { showToast: false });
       }
     },
     [cartState?.items, removeItem],
@@ -944,8 +958,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     <CartContext.Provider value={value}>
       {children}
       <AppStatusToast
-        open={isRemovedToastOpen}
-        message="Item removed from cart"
+        open={Boolean(cartStatusToastMessage)}
+        message={cartStatusToastMessage ?? ""}
       />
     </CartContext.Provider>
   );

@@ -38,10 +38,10 @@ const ProductDetailPage = ({ product, sizeGuide = null }: ProductDetailPageProps
     () => parsePreferredMetalPurities(purityParam),
     [purityParam],
   );
-  const { items, replaceLineItem, getLineItemMetadata } = useCart();
+  const { items, getLineItemMetadata } = useCart();
   const editingLineItem = editLineId ? items.find((item) => item.id === editLineId) : undefined;
   const editingLineMetadata = editLineId ? getLineItemMetadata(editLineId) : undefined;
-  const { addToBagAndOpenDrawer } = useAddToBagWithDrawer();
+  const { addToBagAndOpenDrawer, updateBagAndOpenDrawer } = useAddToBagWithDrawer();
 
   const content = useMemo(() => getProductDetailContent(product), [product]);
   const [selectedMetal, setSelectedMetal] = useState(() =>
@@ -82,7 +82,7 @@ const ProductDetailPage = ({ product, sizeGuide = null }: ProductDetailPageProps
 
   const handleAddToCart = async (payload: AddToBagPayload) => {
     if (editingLineItem) {
-      await replaceLineItem(editingLineItem.id, {
+      await updateBagAndOpenDrawer(editingLineItem.id, {
         ...payload,
         productCustomOptions: payload.productCustomOptions ?? product.customOptions,
       });

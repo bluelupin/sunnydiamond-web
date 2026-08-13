@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
 import { useCart } from "../context/CartContext";
@@ -26,9 +26,32 @@ import {
 } from "./CartFlowUi";
 import DeleteIcon from "@/assets/Icons/DeleteIcon";
 
+const BAG_DRAWER_SUCCESS_MESSAGES = {
+  add: "Item added to your bag successfully!",
+  update: "Item updated to your bag successfully!",
+} as const;
+
+const BAG_DRAWER_SR_TITLES = {
+  add: "Item added to your bag",
+  update: "Item updated to your bag",
+} as const;
+
+const MOBILE_DRAWER_MEDIA_QUERY = "(max-width: 1023px)";
+
+function subscribeToMobileDrawerViewport(onStoreChange: () => void) {
+  const media = window.matchMedia(MOBILE_DRAWER_MEDIA_QUERY);
+  media.addEventListener("change", onStoreChange);
+  return () => media.removeEventListener("change", onStoreChange);
+}
+
+function getMobileDrawerSnapshot() {
+  return window.matchMedia(MOBILE_DRAWER_MEDIA_QUERY).matches;
+}
+
 const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
   const { items, totalItems, removeItem } = useCart();
-  const { lastAddedLineItemId, bagDrawerSnapshot } = useCartUI();
+  const { lastAddedLineItemId, bagDrawerSnapshot, bagDrawerMode } = useCartUI();
+  const successMessage = BAG_DRAWER_SUCCESS_MESSAGES[bagDrawerMode];
 
   const addedItem = useMemo(() => {
     if (!lastAddedLineItemId) return null;
@@ -57,7 +80,7 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
         <div className="flex flex-col items-center gap-4 text-center">
           <CartSuccessCheck />
           <p className="font-gill text-base font-light leading-110 text-darkblack">
-            Item added to your bag successfully!
+            {successMessage}
           </p>
         </div>
 
@@ -119,28 +142,28 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
 };
 
 const CartBagDrawer = () => {
-  const { isBagDrawerOpen, closeBagDrawer } = useCartUI();
-  const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window === "undefined") {
-      return false;
-    }
-
-    return window.matchMedia("(max-width: 1023px)").matches;
-  });
+  const { isBagDrawerOpen, bagDrawerMode, closeBagDrawer } = useCartUI();
+  const drawerTitle = BAG_DRAWER_SR_TITLES[bagDrawerMode];
+  const isMobile = useSyncExternalStore(
+    subscribeToMobileDrawerViewport,
+    getMobileDrawerSnapshot,
+    () => false,
+  );
+  const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
-    const media = window.matchMedia("(max-width: 1023px)");
-    const update = () => setIsMobile(media.matches);
-    update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
+    setHasMounted(true);
   }, []);
+
+  if (!hasMounted) {
+    return null;
+  }
 
   if (isMobile) {
     return (
       <Drawer open={isBagDrawerOpen} onOpenChange={(open) => !open && closeBagDrawer()}>
         <DrawerContent className="max-h-[85vh] rounded-none border-0 p-0 [&>div:first-child]:hidden">
-          <DrawerTitle className="sr-only">Item added to your bag</DrawerTitle>
+          <DrawerTitle className="sr-only">{drawerTitle}</DrawerTitle>
           <BagDrawerContent onClose={closeBagDrawer} />
         </DrawerContent>
       </Drawer>
@@ -156,7 +179,7 @@ const CartBagDrawer = () => {
           "h-screen max-h-100vh w-full max-w-[472px] border-0 bg-white p-0 sm:max-w-[472px] [&>button]:hidden",
         )}
       >
-        <SheetTitle className="sr-only">Item added to your bag</SheetTitle>
+        <SheetTitle className="sr-only">{drawerTitle}</SheetTitle>
         <BagDrawerContent onClose={closeBagDrawer} />
       </SheetContent>
     </Sheet>
