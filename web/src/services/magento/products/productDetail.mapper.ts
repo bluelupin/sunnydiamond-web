@@ -176,11 +176,12 @@ function mapConfigurableVariant(
   }
 
   const images = buildGalleryImages(child);
-  const image =
+  const rawImage =
     pickFirstRealImage([images[0], child.image?.url]) ?? images[0] ?? child.image?.url?.trim() ?? "";
-  if (!image || isMagentoPlaceholderImage(image)) {
-    return null;
-  }
+  // A variant without its own imagery is still sellable — keep it and let the
+  // PDP fall back to the parent's images instead of dropping the whole variant
+  // (which would strip the metal selector and make the product unaddable).
+  const image = !rawImage || isMagentoPlaceholderImage(rawImage) ? "" : rawImage;
 
   const attributes: Record<string, string> = {};
   const optionUids: string[] = [];

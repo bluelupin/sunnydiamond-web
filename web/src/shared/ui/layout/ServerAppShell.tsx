@@ -4,27 +4,28 @@ import HomepageCmsSeeder from "@/shared/lib/providers/HomepageCmsSeeder";
 import MagentoNavSeeder from "@/shared/lib/providers/MagentoNavSeeder";
 import { getCachedHomepageShell } from "@/lib/homepage/prefetchHomepageCms";
 import { prefetchMagentoJewelleryNav } from "@/lib/magento/prefetchMagento";
+import { fetchAuthFeatureFlags } from "@/features/auth/services/authFeatures.server";
 
 export default async function ServerAppShell({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  let shell: Awaited<ReturnType<typeof getCachedHomepageShell>> | undefined;
-  let jewelleryNav: Awaited<ReturnType<typeof prefetchMagentoJewelleryNav>> | undefined;
+  // allSettled: a CMS/nav prefetch failure must not discard the auth flags (or vice versa).
+  const [shellResult, jewelleryNavResult, authFeaturesResult] = await Promise.allSettled([
+    getCachedHomepageShell(),
+    prefetchMagentoJewelleryNav(),
+    fetchAuthFeatureFlags(),
+  ]);
 
-  try {
-    [shell, jewelleryNav] = await Promise.all([
-      getCachedHomepageShell(),
-      prefetchMagentoJewelleryNav(),
-    ]);
-  } catch {
-    shell = undefined;
-    jewelleryNav = undefined;
-  }
+  const shell = shellResult.status === "fulfilled" ? shellResult.value : undefined;
+  const jewelleryNav =
+    jewelleryNavResult.status === "fulfilled" ? jewelleryNavResult.value : undefined;
+  const authFeatures =
+    authFeaturesResult.status === "fulfilled" ? authFeaturesResult.value : undefined;
 
   return (
-    <AppProvider>
+    <AppProvider authFeatures={authFeatures}>
       <HomepageCmsSeeder shell={shell} />
       <MagentoNavSeeder jewelleryNav={jewelleryNav} />
       <Layout>{children}</Layout>

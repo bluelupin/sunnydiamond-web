@@ -11,6 +11,7 @@ type LoginIdentifierFieldProps = {
   identifier: string;
   countryCode: string;
   error?: string;
+  emailOnly?: boolean;
   onIdentifierChange: (value: string) => void;
   onCountryCodeChange: (value: string) => void;
 };
@@ -19,15 +20,16 @@ const LoginIdentifierField = ({
   identifier,
   countryCode,
   error,
+  emailOnly = false,
   onIdentifierChange,
   onCountryCodeChange,
 }: LoginIdentifierFieldProps) => {
-  const isEmailMode = isEmailIdentifier(identifier);
+  const isEmailMode = emailOnly || isEmailIdentifier(identifier);
 
   return (
     <div className="flex flex-col gap-2">
       <label htmlFor="login-identifier" className="font-gill text-base font-normal leading-110 text-darkblack">
-        Phone Number / Email ID*
+        {emailOnly ? "Email ID*" : "Phone Number / Email ID*"}
       </label>
 
       {isEmailMode ? (

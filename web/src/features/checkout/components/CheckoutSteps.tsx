@@ -37,6 +37,8 @@ type CheckoutFormStepProps = {
   onChange: (field: keyof CheckoutFormData, value: string | boolean) => void;
   phoneVerified: boolean;
   onVerifyPhone: () => void;
+  /** Guest contact VERIFY affordance — pass false when checkout OTP is disabled. */
+  showVerify?: boolean;
   /** Guest email blur — checks if the account already exists. */
   onContactBlur?: () => void;
   validation: CheckoutFormValidationProps;
@@ -200,6 +202,7 @@ export const CheckoutFormStep = ({
   onChange,
   phoneVerified,
   onVerifyPhone,
+  showVerify = true,
   onContactBlur,
   validation,
   isAuthenticated = false,
@@ -251,6 +254,7 @@ export const CheckoutFormStep = ({
           }}
           verified={phoneVerified}
           onVerify={onVerifyPhone}
+          showVerify={showVerify}
           invalid={validation.showError("phoneOrEmail")}
           error={validation.showError("phoneOrEmail") ? validation.errors.phoneOrEmail : undefined}
           disabled={fieldsDisabled}
