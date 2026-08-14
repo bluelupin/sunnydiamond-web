@@ -1,4 +1,4 @@
-import { splitFullName } from "@/services/magento/cart/checkoutAddress.mapper";
+import { formatCustomerFullName, splitFullName } from "@/shared/utils/customerName";
 import {
   getIndiaMagentoRegionId,
   getIndianStateFromMagentoRegionId,
@@ -168,7 +168,7 @@ function mapMagentoCustomerAddress(address: MagentoCustomerAddress): CustomerAdd
 
   return {
     uid: address.uid ?? "",
-    fullName: [address.firstname, address.lastname].filter(Boolean).join(" "),
+    fullName: formatCustomerFullName(address.firstname, address.lastname),
     streetLines: (address.street ?? []).filter(Boolean),
     city: address.city ?? "",
     state: stateFromRegionId ?? address.region?.region ?? "",

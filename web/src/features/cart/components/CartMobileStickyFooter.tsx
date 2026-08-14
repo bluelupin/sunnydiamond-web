@@ -30,7 +30,7 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
   ref,
 ) {
   const { subtotal, taxes, shipping, totalPrice, selectedShippingMethod, shippingMethods, estimatedShippingMethods } = useCart();
-  const { proceedToCheckout, openGiftingOptions } = useCartCheckout();
+  const { proceedToCheckout, openGiftingOptions, isNavigatingToCheckout } = useCartCheckout();
   const shippingLabel = getCartShippingLabel(
     shipping,
     selectedShippingMethod,
@@ -72,13 +72,19 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
           </div>
 
           <div className="flex flex-col gap-4">
-            <CartPrimaryButton type="button" className="uppercase" onClick={proceedToCheckout}>
-              Checkout
+            <CartPrimaryButton
+              type="button"
+              className="uppercase"
+              onClick={proceedToCheckout}
+              disabled={isNavigatingToCheckout}
+            >
+              {isNavigatingToCheckout ? "Continuing..." : "Checkout"}
             </CartPrimaryButton>
             <CartOutlineButton
               type="button"
               className="w-full uppercase"
               onClick={openGiftingOptions}
+              disabled={isNavigatingToCheckout}
             >
               Gifting Options
             </CartOutlineButton>

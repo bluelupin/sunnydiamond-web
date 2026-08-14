@@ -1,23 +1,9 @@
 import type { CheckoutFormData } from "@/features/checkout/types/checkout.types";
 import { getIndiaMagentoRegionId } from "../regions/indiaRegionIds";
 import type { MagentoCartAddressInput } from "./magentoCart.types";
+import { splitFullName } from "@/shared/utils/customerName";
 
-export function splitFullName(fullName: string): { firstname: string; lastname: string } {
-  const parts = fullName.trim().split(/\s+/).filter(Boolean);
-
-  if (parts.length === 0) {
-    return { firstname: "Guest", lastname: "-" };
-  }
-
-  if (parts.length === 1) {
-    return { firstname: parts[0], lastname: "-" };
-  }
-
-  return {
-    firstname: parts[0],
-    lastname: parts.slice(1).join(" "),
-  };
-}
+export { splitFullName } from "@/shared/utils/customerName";
 
 export function resolveGuestCheckoutEmail(phoneOrEmail: string): string {
   const trimmed = phoneOrEmail.trim();

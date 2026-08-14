@@ -7,12 +7,21 @@ type DetailTextLinkProps = {
   onClick?: () => void;
   className?: string;
   light?: boolean;
+  disabled?: boolean;
 };
 
-export const DetailTextLink = ({ children, href, onClick, className, light }: DetailTextLinkProps) => {
+export const DetailTextLink = ({
+  children,
+  href,
+  onClick,
+  className,
+  light,
+  disabled = false,
+}: DetailTextLinkProps) => {
   const classes = cn(
-    "inline-flex w-fit cursor-pointer uppercase",
-    "relative shrink-0 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] pb-1 font-gill text-sm font-normal leading-110 sm:pb-1 hover:after:w-full",
+    "inline-flex w-fit uppercase",
+    "relative shrink-0 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:transition-all after:duration-300 border-b-[1.5px] pb-1 font-gill text-sm font-normal leading-110 sm:pb-1 hover:after:w-full",
+    disabled ? "cursor-not-allowed" : "cursor-pointer",
     className,
     light
       ? "text-white border-white hover:border-white hover:text-white after:bg-white"
@@ -20,15 +29,31 @@ export const DetailTextLink = ({ children, href, onClick, className, light }: De
   );
 
   if (href) {
+    const handleClick =
+      disabled || onClick
+        ? (event: React.MouseEvent<HTMLAnchorElement>) => {
+            if (disabled) {
+              event.preventDefault();
+              return;
+            }
+            onClick?.();
+          }
+        : undefined;
+
     return (
-      <Link href={href} onClick={onClick} className={classes}>
+      <Link
+        href={href}
+        {...(handleClick ? { onClick: handleClick } : {})}
+        aria-disabled={disabled || undefined}
+        className={classes}
+      >
         {children}
       </Link>
     );
   }
 
   return (
-    <button type="button" onClick={onClick} className={classes}>
+    <button type="button" onClick={onClick} disabled={disabled} className={classes}>
       {children}
     </button>
   );

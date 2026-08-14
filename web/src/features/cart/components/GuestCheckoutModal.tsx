@@ -127,7 +127,7 @@ const GuestCheckoutDesktopModal = ({
 const GuestCheckoutModal = () => {
   const router = useRouter();
   const { openLoginModal } = useLoginModal();
-  const { isGuestCheckoutModalOpen, closeGuestCheckoutModal } = useCartUI();
+  const { isGuestCheckoutModalOpen, closeGuestCheckoutModal, startCheckoutNavigation } = useCartUI();
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -139,6 +139,7 @@ const GuestCheckoutModal = () => {
   }, []);
 
   const handleContinueAsGuest = () => {
+    startCheckoutNavigation();
     closeGuestCheckoutModal();
     router.push("/checkout");
   };

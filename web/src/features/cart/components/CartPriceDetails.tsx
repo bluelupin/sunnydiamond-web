@@ -42,7 +42,7 @@ const CartPriceDetails = ({
     estimatedShippingMethods,
     localGiftCardDiscount,
   } = useCart();
-  const { proceedToCheckout, openGiftingOptions } = useCartCheckout();
+  const { proceedToCheckout, openGiftingOptions, isNavigatingToCheckout } = useCartCheckout();
   const [offersOpen, setOffersOpen] = useState(false);
 
   const shippingDisplay = getCartShippingDisplay(
@@ -108,8 +108,13 @@ const CartPriceDetails = ({
           )}
         >
           {showCheckoutCta ? (
-            <CartPrimaryButton type="button" className="uppercase" onClick={proceedToCheckout}>
-              Checkout
+            <CartPrimaryButton
+              type="button"
+              className="uppercase"
+              onClick={proceedToCheckout}
+              disabled={isNavigatingToCheckout}
+            >
+              {isNavigatingToCheckout ? "Continuing..." : "Checkout"}
             </CartPrimaryButton>
           ) : null}
 
@@ -118,6 +123,7 @@ const CartPriceDetails = ({
               type="button"
               className="w-full uppercase"
               onClick={openGiftingOptions}
+              disabled={isNavigatingToCheckout}
             >
               View Gifting Options
             </CartOutlineButton>

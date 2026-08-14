@@ -12,8 +12,10 @@ export function useCartCheckout() {
   const { items } = useCart();
   const {
     hasExploredGiftingOptions,
+    isNavigatingToCheckout,
     openGiftingPanel,
     openGuestCheckoutModal,
+    startCheckoutNavigation,
   } = useCartUI();
 
   const hasExistingGifting = items.some(
@@ -21,7 +23,7 @@ export function useCartCheckout() {
   );
 
   const navigateToCheckout = () => {
-    if (status === "loading") {
+    if (status === "loading" || isNavigatingToCheckout) {
       return;
     }
 
@@ -30,10 +32,15 @@ export function useCartCheckout() {
       return;
     }
 
+    startCheckoutNavigation();
     router.push("/checkout");
   };
 
   const proceedToCheckout = () => {
+    if (isNavigatingToCheckout) {
+      return;
+    }
+
     // Existing flow: gift marked → show gifting modal.
     // Exception only: user already completed View gifting options / personalise
     // (hasExploredGiftingOptions). Newly marked gifts clear that flag.
@@ -46,10 +53,14 @@ export function useCartCheckout() {
   };
 
   const openGiftingOptions = () => {
+    if (isNavigatingToCheckout) {
+      return;
+    }
+
     // Do not mark explored here — only personalise / continue-to-checkout does.
     // Otherwise merely opening the panel would skip the checkout nudge.
     openGiftingPanel("intro");
   };
 
-  return { proceedToCheckout, openGiftingOptions, navigateToCheckout };
+  return { proceedToCheckout, openGiftingOptions, navigateToCheckout, isNavigatingToCheckout };
 }

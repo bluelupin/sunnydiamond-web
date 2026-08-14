@@ -1,5 +1,6 @@
 import type { CustomerAddress } from "./customer-account.types";
 import type { CustomerProfileContact } from "./customer-profile.types";
+import { formatCustomerFullName } from "@/shared/utils/customerName";
 
 type AuthMePayload = {
   customer: {
@@ -56,7 +57,7 @@ export async function getCustomerProfileContact(
     }
 
     const contact: CustomerProfileContact = {
-      fullName: [customer.firstname, customer.lastname].filter(Boolean).join(" ") || null,
+      fullName: formatCustomerFullName(customer.firstname, customer.lastname) || null,
       email: customer.email ?? null,
       phone: null,
       countryCode: null,

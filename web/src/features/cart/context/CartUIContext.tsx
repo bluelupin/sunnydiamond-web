@@ -26,6 +26,7 @@ type CartUIContextType = {
   giftingStep: "intro" | "personalise";
   hasExploredGiftingOptions: boolean;
   isGuestCheckoutModalOpen: boolean;
+  isNavigatingToCheckout: boolean;
   openBagDrawer: (result: AddItemResult, options?: { mode?: BagDrawerMode }) => void;
   closeBagDrawer: () => void;
   openGiftingPanel: (step?: "intro" | "personalise") => void;
@@ -35,6 +36,7 @@ type CartUIContextType = {
   clearGiftingOptionsExplored: () => void;
   openGuestCheckoutModal: () => void;
   closeGuestCheckoutModal: () => void;
+  startCheckoutNavigation: () => void;
 };
 
 const CartUIContext = createContext<CartUIContextType | undefined>(undefined);
@@ -48,6 +50,7 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
   const [giftingStep, setGiftingStep] = useState<"intro" | "personalise">("intro");
   const [hasExploredGiftingOptions, setHasExploredGiftingOptions] = useState(false);
   const [isGuestCheckoutModalOpen, setIsGuestCheckoutModalOpen] = useState(false);
+  const [isNavigatingToCheckout, setIsNavigatingToCheckout] = useState(false);
 
   const applyBagDrawerResult = useCallback(
     (result: AddItemResult, options?: { mode?: BagDrawerMode }) => {
@@ -101,6 +104,10 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
     setIsGuestCheckoutModalOpen(false);
   }, []);
 
+  const startCheckoutNavigation = useCallback(() => {
+    setIsNavigatingToCheckout(true);
+  }, []);
+
   return (
     <CartUIContext.Provider
       value={{
@@ -112,6 +119,7 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
         giftingStep,
         hasExploredGiftingOptions,
         isGuestCheckoutModalOpen,
+        isNavigatingToCheckout,
         openBagDrawer,
         closeBagDrawer,
         openGiftingPanel,
@@ -120,6 +128,7 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
         clearGiftingOptionsExplored,
         openGuestCheckoutModal,
         closeGuestCheckoutModal,
+        startCheckoutNavigation,
       }}
     >
       {children}

@@ -5,8 +5,9 @@ import AlertTriangleIcon from "@/assets/Icons/AlertTriangleIcon";
 import { CartPrimaryLink } from "@/features/cart/components/CartFlowUi";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { maskIdNumber } from "@/features/diamonds-for-everyone/utils/maskIdNumber";
-import { useToast } from "@/shared/hooks/use-toast";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
+import { useToast } from "@/shared/hooks/use-toast";
+import { formatCustomerFullName } from "@/shared/utils/customerName";
 import { MOCK_PROFILE_DFE_PLAN } from "../data/profileDfeMockData";
 import { profileTabsContent } from "../data/profileContent";
 import type { ProfileDfePaymentDueUi, ProfileDfePlanUi } from "../types/profileDfe.types";
@@ -190,7 +191,7 @@ const ProfileDiamondsForEveryoneSection = ({ customer }: ProfileDiamondsForEvery
     });
   };
 
-  const accountFullName = [customer.firstname, customer.lastname].filter(Boolean).join(" ").trim();
+  const accountFullName = formatCustomerFullName(customer.firstname, customer.lastname);
   const accountEmail = customer.email?.trim() ?? "";
 
   const accountPhone = (() => {

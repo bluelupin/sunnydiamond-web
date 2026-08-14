@@ -1,3 +1,5 @@
+import { splitProfileFullName } from "@/shared/utils/customerName";
+
 export type RequestOtpResult =
   | { success: true; resendAfterSeconds: number }
   | { success: false; error: string };
@@ -84,15 +86,14 @@ export async function createCustomerAccount(input: {
   email: string;
   marketingOptIn: boolean;
 }): Promise<CreateAccountResult> {
-  const [firstName, ...rest] = input.fullName.trim().split(/\s+/);
-  const lastName = rest.join(" ") || "Customer";
+  const { firstname, lastname } = splitProfileFullName(input.fullName);
 
   const { ok, data } = await postJson("/api/auth/otp/verify", {
     phone: input.phone,
     otp: input.otp,
     email: input.email,
-    firstName,
-    lastName,
+    firstName: firstname,
+    lastName: lastname,
   });
 
   if (!ok || !data?.ok || data.registrationRequired) {
@@ -121,12 +122,11 @@ export async function registerWithEmail(input: {
   password: string;
   marketingOptIn?: boolean;
 }): Promise<EmailRegisterResult> {
-  const [firstName, ...rest] = input.fullName.trim().split(/\s+/);
-  const lastName = rest.join(" ") || "Customer";
+  const { firstname, lastname } = splitProfileFullName(input.fullName);
 
   const { ok, data } = await postJson("/api/auth/register", {
-    firstname: firstName,
-    lastname: lastName,
+    firstname,
+    lastname,
     email: input.email.trim(),
     password: input.password,
     isSubscribed: Boolean(input.marketingOptIn),
