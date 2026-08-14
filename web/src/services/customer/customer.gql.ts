@@ -42,7 +42,6 @@ export const MAGENTO_UPDATE_CUSTOMER_MUTATION = `
   mutation MagentoUpdateCustomer($input: CustomerUpdateInput!) {
     updateCustomerV2(input: $input) {
       customer {
-        id
         firstname
         lastname
         email

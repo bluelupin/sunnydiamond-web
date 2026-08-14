@@ -420,31 +420,5 @@ export const profileTabsContent = {
       ctaLabel: "SEND AN EMAIL",
     },
     faqTitle: "Frequently Asked Questions",
-    faqItems: [
-      {
-        id: "track-order",
-        question: "How can I track my order?",
-        answer:
-          "You can track your order directly from the Profile section under “My Orders” once your purchase has been shipped.",
-      },
-      {
-        id: "modify-order",
-        question: "Can I modify or cancel my order after placing it?",
-        answer:
-          "Orders can be modified or cancelled before they are shipped. Contact our support team or visit a showroom for assistance.",
-      },
-      {
-        id: "return-exchange",
-        question: "How do I initiate a return or exchange?",
-        answer:
-          "Visit our Returns & Cancellations page or contact customer support within 15 days of delivery for eligible orders.",
-      },
-      {
-        id: "custom-return",
-        question: "Are customised or engraved products returnable?",
-        answer:
-          "Customised and engraved jewellery may not be eligible for return. Our team will confirm eligibility based on your order details.",
-      },
-    ],
   },
 } as const;

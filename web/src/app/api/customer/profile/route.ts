@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { getCustomerToken } from "@/services/auth/session";
+import { getCustomerTokenFromRequest } from "@/services/auth/session";
 import { updateCustomerName } from "@/services/customer/customer-account.service";
 import { splitProfileFullName } from "@/features/account/utils/formatAccountData";
 
 export async function PATCH(request: Request) {
-  const token = await getCustomerToken();
+  const token = await getCustomerTokenFromRequest(request);
 
   if (!token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
