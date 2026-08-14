@@ -27,6 +27,8 @@ export const normalizeLoginPhoneDigits = (value: string, countryCode: string): s
 
 export const isEmailIdentifier = (value: string): boolean => value.trim().includes("@");
 
+export const isIndianCountryCode = (code: string): boolean => code === "+91";
+
 export const formatLoginPhoneDisplay = (countryCode: string, nationalDigits: string): string => {
   const national = nationalDigits.replace(/\D/g, "");
   if (!national) {
@@ -36,14 +38,24 @@ export const formatLoginPhoneDisplay = (countryCode: string, nationalDigits: str
   return `${countryCode} ${national}`;
 };
 
+export type LoginIdentifierOptions = {
+  /** Treat the identifier strictly as email — no phone interpretation (OTP login unavailable). */
+  emailOnly?: boolean;
+};
+
 /**
  * Sign-in identifier validation. Phone numbers continue to SMS OTP; email continues to password.
  */
 export const validateLoginIdentifier = (
   value: string,
   countryCode: string = DEFAULT_COUNTRY_CODE,
+  options?: LoginIdentifierOptions,
 ): FieldValidation => {
   const trimmed = value.trim();
+
+  if (options?.emailOnly) {
+    return validateRequiredEmail(trimmed);
+  }
 
   if (!trimmed) {
     return { valid: false, error: "Phone number or email is required" };
@@ -59,8 +71,9 @@ export const validateLoginIdentifier = (
 export const isLoginIdentifierReadyForOtp = (
   value: string,
   countryCode: string = DEFAULT_COUNTRY_CODE,
+  options?: LoginIdentifierOptions,
 ): boolean =>
-  validateLoginIdentifier(value, countryCode).valid;
+  validateLoginIdentifier(value, countryCode, options).valid;
 
 export const isOtpComplete = (otp: string[]): boolean =>
   otp.length === LOGIN_OTP_LENGTH && otp.every((digit) => /^\d$/.test(digit));

@@ -17,11 +17,16 @@ type LoginModalContentProps = {
   identifier: string;
   countryCode: string;
   identifierError?: string;
+  emailOnly: boolean;
+  otpBlockedForCountry: boolean;
+  showGoogle: boolean;
+  showApple: boolean;
   onIdentifierChange: (value: string) => void;
   onCountryCodeChange: (value: string) => void;
   onContinue: () => void;
   onGoogleContinue: () => void;
   onAppleContinue: () => void;
+  onUseEmailInstead: () => void;
   onClose: () => void;
   titleClassName?: string;
 };
@@ -45,15 +50,22 @@ const LoginModalContent = ({
   identifier,
   countryCode,
   identifierError,
+  emailOnly,
+  otpBlockedForCountry,
+  showGoogle,
+  showApple,
   onIdentifierChange,
   onCountryCodeChange,
   onContinue,
   onGoogleContinue,
   onAppleContinue,
+  onUseEmailInstead,
   onClose,
   titleClassName,
 }: LoginModalContentProps) => {
-  const canContinue = isLoginIdentifierReadyForOtp(identifier, countryCode);
+  const canContinue =
+    !otpBlockedForCountry && isLoginIdentifierReadyForOtp(identifier, countryCode, { emailOnly });
+  const showSocial = showGoogle || showApple;
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -88,9 +100,25 @@ const LoginModalContent = ({
           identifier={identifier}
           countryCode={countryCode}
           error={identifierError}
+          emailOnly={emailOnly}
           onIdentifierChange={onIdentifierChange}
           onCountryCodeChange={onCountryCodeChange}
         />
+
+        {otpBlockedForCountry ? (
+          <div role="status" className="flex flex-col gap-1">
+            <p className="font-gill text-sm font-light leading-110 text-neutral500">
+              OTP login is available for Indian mobile numbers only — please continue with email
+            </p>
+            <button
+              type="button"
+              onClick={onUseEmailInstead}
+              className="self-start font-gill text-sm font-normal leading-110 text-darkblack underline-offset-2 hover:underline"
+            >
+              Use email instead
+            </button>
+          </div>
+        ) : null}
       </div>
 
       <div className="flex w-full flex-col gap-4">
@@ -102,17 +130,21 @@ const LoginModalContent = ({
           CONTINUE
         </CartPrimaryButton>
 
-        <OrDivider />
+        {showSocial ? <OrDivider /> : null}
 
-        <button type="button" className={socialButtonClassName} onClick={onGoogleContinue}>
-          <GoogleIcon className="block size-6 shrink-0" />
-          <span className="relative z-10 leading-none">CONTINUE WITH GOOGLE</span>
-        </button>
+        {showGoogle ? (
+          <button type="button" className={socialButtonClassName} onClick={onGoogleContinue}>
+            <GoogleIcon className="block size-6 shrink-0" />
+            <span className="relative z-10 leading-none">CONTINUE WITH GOOGLE</span>
+          </button>
+        ) : null}
 
-        <button type="button" className={socialButtonClassName} onClick={onAppleContinue}>
-          <AppleIcon className="block size-6 shrink-0 text-darkblack" />
-          <span className="relative z-10 leading-none">CONTINUE WITH APPLE</span>
-        </button>
+        {showApple ? (
+          <button type="button" className={socialButtonClassName} onClick={onAppleContinue}>
+            <AppleIcon className="block size-6 shrink-0 text-darkblack" />
+            <span className="relative z-10 leading-none">CONTINUE WITH APPLE</span>
+          </button>
+        ) : null}
       </div>
     </form>
   );

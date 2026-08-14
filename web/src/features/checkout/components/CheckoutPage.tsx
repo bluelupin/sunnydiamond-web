@@ -58,6 +58,7 @@ import {
 } from "../services/checkoutPendingPayment";
 import { isCustomerEmailAvailable } from "@/services/magento/customer/customerEmailAvailability.service";
 import { useLoginModal } from "@/features/auth/context/LoginModalContext";
+import { useAuthFeatures } from "@/features/auth/context/AuthFeaturesContext";
 
 const CheckoutPage = () => {
   const {
@@ -72,6 +73,7 @@ const CheckoutPage = () => {
   const { refresh: refreshAuth } = useAuth();
   const { toast } = useToast();
   const { openLoginModal } = useLoginModal();
+  const { otpLoginEnabled } = useAuthFeatures();
   const searchParams = useSearchParams();
   const paymentReturnHandledRef = useRef(false);
   const {
@@ -473,7 +475,7 @@ const CheckoutPage = () => {
     formValidation.validateSubmit(() => {
       const contactIsEmail = isCheckoutEmailContact(form.phoneOrEmail);
 
-      if (!isAuthenticated && !contactIsEmail && !phoneVerified) {
+      if (otpLoginEnabled && !isAuthenticated && !contactIsEmail && !phoneVerified) {
         setShowOtpModal(true);
         toast({
           title: "Verification required",
@@ -732,6 +734,7 @@ const CheckoutPage = () => {
                 onChange={handleFormChange}
                 phoneVerified={phoneVerified}
                 onVerifyPhone={handleVerifyPhone}
+                showVerify={otpLoginEnabled}
                 onContactBlur={handleGuestContactBlur}
                 validation={formValidation}
                 isAuthenticated={isAuthenticated}
@@ -785,12 +788,14 @@ const CheckoutPage = () => {
         ctaDisabled={ctaDisabled}
       />
 
-      <CheckoutOtpModal
-        open={showOtpModal}
-        phone={form.phoneOrEmail}
-        onClose={() => setShowOtpModal(false)}
-        onVerify={handleOtpVerified}
-      />
+      {otpLoginEnabled ? (
+        <CheckoutOtpModal
+          open={showOtpModal}
+          phone={form.phoneOrEmail}
+          onClose={() => setShowOtpModal(false)}
+          onVerify={handleOtpVerified}
+        />
+      ) : null}
       {checkoutStatusToast}
     </section>
   );

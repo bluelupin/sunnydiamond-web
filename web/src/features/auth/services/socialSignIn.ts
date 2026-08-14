@@ -64,6 +64,14 @@ async function exchangeIdToken(body: Record<string, unknown>): Promise<SocialSig
   }
 }
 
+export function isGoogleSignInConfigured(): boolean {
+  return Boolean(GOOGLE_CLIENT_ID);
+}
+
+export function isAppleSignInConfigured(): boolean {
+  return Boolean(APPLE_CLIENT_ID);
+}
+
 /**
  * Google Identity Services flow. Resolves after the ID token has been exchanged
  * for a session, or with an error (including "not configured" and prompt dismissal).
