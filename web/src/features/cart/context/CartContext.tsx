@@ -531,9 +531,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const replaceLineItem = useCallback(
     async (lineItemId: string, payload: AddToBagPayload): Promise<AddItemResult> => {
       await removeItem(lineItemId, { showToast: false });
-      return addItem(payload);
+      const result = await addItem(payload);
+      showCartStatusToast("Product updated successfully");
+      return result;
     },
-    [addItem, removeItem],
+    [addItem, removeItem, showCartStatusToast],
   );
 
   const buyNow = useCallback(

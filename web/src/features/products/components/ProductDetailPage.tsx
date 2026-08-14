@@ -81,18 +81,19 @@ const ProductDetailPage = ({ product, sizeGuide = null }: ProductDetailPageProps
   );
 
   const handleAddToCart = async (payload: AddToBagPayload) => {
-    if (editingLineItem) {
-      await updateBagAndOpenDrawer(editingLineItem.id, {
-        ...payload,
-        productCustomOptions: payload.productCustomOptions ?? product.customOptions,
-      });
+    const payloadWithOptions: AddToBagPayload = {
+      ...payload,
+      productCustomOptions: payload.productCustomOptions ?? product.customOptions,
+    };
+
+    // URL `editLine` is the source of truth — do not wait for the line to still
+    // be in local cart state, or Save would add a new item and show the add toast.
+    if (editLineId) {
+      await updateBagAndOpenDrawer(editLineId, payloadWithOptions);
       return;
     }
 
-    await addToBagAndOpenDrawer({
-      ...payload,
-      productCustomOptions: payload.productCustomOptions ?? product.customOptions,
-    });
+    await addToBagAndOpenDrawer(payloadWithOptions);
   };
 
   const sidebarProps = {
@@ -108,7 +109,7 @@ const ProductDetailPage = ({ product, sizeGuide = null }: ProductDetailPageProps
     initialRingSize: editingLineItem?.options.ringSize,
     initialEngravingSelection,
     initialIsGift: Boolean(editingLineItem?.options.isGift || editingLineItem?.gifting),
-    addToBagLabel: editingLineItem ? "Update Bag" : "Add to Bag",
+    addToBagLabel: editLineId ? "Update Bag" : "Add to Bag",
   };
 
   return (

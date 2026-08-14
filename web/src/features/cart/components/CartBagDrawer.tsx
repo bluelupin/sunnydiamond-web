@@ -28,12 +28,12 @@ import DeleteIcon from "@/assets/Icons/DeleteIcon";
 
 const BAG_DRAWER_SUCCESS_MESSAGES = {
   add: "Item added to your bag successfully!",
-  update: "Item updated to your bag successfully!",
+  update: "Product updated successfully",
 } as const;
 
 const BAG_DRAWER_SR_TITLES = {
   add: "Item added to your bag",
-  update: "Item updated to your bag",
+  update: "Product updated successfully",
 } as const;
 
 const MOBILE_DRAWER_MEDIA_QUERY = "(max-width: 1023px)";
