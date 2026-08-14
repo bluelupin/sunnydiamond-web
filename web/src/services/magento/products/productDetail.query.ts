@@ -25,6 +25,12 @@ const MAGENTO_VARIANT_PRICE_BREAKUP_ATTRIBUTES = `
       ... on AttributeValue {
         value
       }
+      ... on AttributeSelectedOptions {
+        selected_options {
+          label
+          value
+        }
+      }
     }
   }
 ` as const;

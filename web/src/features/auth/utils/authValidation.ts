@@ -72,8 +72,7 @@ export const isLoginIdentifierReadyForOtp = (
   value: string,
   countryCode: string = DEFAULT_COUNTRY_CODE,
   options?: LoginIdentifierOptions,
-): boolean =>
-  validateLoginIdentifier(value, countryCode, options).valid;
+): boolean => validateLoginIdentifier(value, countryCode, options).valid;
 
 export const isOtpComplete = (otp: string[]): boolean =>
   otp.length === LOGIN_OTP_LENGTH && otp.every((digit) => /^\d$/.test(digit));

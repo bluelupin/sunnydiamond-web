@@ -13,6 +13,8 @@ export type JewelleryNavCategory = {
   slug: JewelleryCategorySlug | null;
   productCount: number;
   sortOrder: number;
+  /** Magento child categories for category-PLP filter chips. */
+  children: Array<{ id: string; label: string }>;
 };
 
 export type JewelleryNavCategoriesData = {

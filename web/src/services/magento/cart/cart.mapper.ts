@@ -163,14 +163,14 @@ export function pickDefaultShippingMethod(
     return null;
   }
 
-  const paidMethods = methods.filter((method) => method.amount > 0);
-  if (paidMethods.length > 0) {
-    return paidMethods.reduce((cheapest, method) =>
-      method.amount < cheapest.amount ? method : cheapest,
-    );
+  const freeMethod = methods.find((method) => method.amount === 0);
+  if (freeMethod) {
+    return freeMethod;
   }
 
-  return methods.find((method) => method.amount === 0) ?? methods[0];
+  return methods.reduce((cheapest, method) =>
+    method.amount < cheapest.amount ? method : cheapest,
+  );
 }
 
 export function mapAvailablePaymentMethods(cart: MagentoCart): MagentoPaymentMethodOption[] {

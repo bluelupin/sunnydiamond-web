@@ -58,8 +58,8 @@ export const getCartShippingDisplay = (
 
   if (methods.length === 0) {
     return {
-      amount: null,
-      label: "Calculated at checkout",
+      amount: 0,
+      label: "Free",
       isEstimated: false,
     };
   }
@@ -67,8 +67,8 @@ export const getCartShippingDisplay = (
   const defaultMethod = pickDefaultShippingMethod(methods);
   if (!defaultMethod) {
     return {
-      amount: null,
-      label: "Calculated at checkout",
+      amount: 0,
+      label: "Free",
       isEstimated: false,
     };
   }
@@ -144,7 +144,7 @@ export const getCheckoutShippingDisplay = (
 
   return {
     amount: null,
-    label: "Calculated at checkout",
+    label: "Free",
     isConfirmed: false,
   };
 };

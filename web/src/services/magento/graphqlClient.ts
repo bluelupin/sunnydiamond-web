@@ -19,6 +19,8 @@ export type MagentoGraphqlRequest = {
   revalidateSeconds?: number;
   /** Next.js cache tags for on-demand revalidation. Server-side only; ignored for no-store. */
   tags?: string[];
+  /** Keep the request alive if the shopper navigates away (payment verify). */
+  keepalive?: boolean;
 };
 
 type MagentoGraphqlResponse<T> = {
@@ -35,6 +37,7 @@ export async function magentoGraphqlFetch<T>({
   headers,
   revalidateSeconds,
   tags,
+  keepalive,
 }: MagentoGraphqlRequest): Promise<T> {
   const isServer = typeof window === "undefined";
   const endpoint = isServer ? getMagentoGraphqlUrl() : "/api/magento/graphql";
@@ -52,6 +55,7 @@ export async function magentoGraphqlFetch<T>({
     body: JSON.stringify({ query, variables }),
     signal,
     cache: effectiveCache ?? (isServer ? "force-cache" : "default"),
+    ...(keepalive ? { keepalive: true } : {}),
     ...(isServer && effectiveCache !== "no-store"
       ? {
           next: {
