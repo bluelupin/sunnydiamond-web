@@ -105,8 +105,8 @@ export async function updateCustomerName(
     query: MAGENTO_UPDATE_CUSTOMER_MUTATION,
     variables: {
       input: {
-        firstname: input.firstname,
-        lastname: input.lastname,
+        firstname: input.firstname.trim(),
+        lastname: input.lastname.trim() || "-",
       },
     },
     authToken,

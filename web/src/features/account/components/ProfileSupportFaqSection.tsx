@@ -1,10 +1,35 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { fetchSupportPage } from "@/services/support/support-page.fetch";
 import { profileTabsContent } from "../data/profileContent";
 import { ProfileAccordion } from "./profileUi";
 
 const ProfileSupportFaqSection = () => {
-  const { faqTitle, faqItems } = profileTabsContent.support;
+  const fallbackTitle = profileTabsContent.support.faqTitle;
+  const [title, setTitle] = useState<string>(fallbackTitle);
+  const [items, setItems] = useState<Array<{ id: string; question: string; answer: string }>>([]);
+  const [hasLoaded, setHasLoaded] = useState(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    void fetchSupportPage({ signal: controller.signal }).then((page) => {
+      if (controller.signal.aborted) {
+        return;
+      }
+
+      setTitle(page.faq?.title?.trim() || fallbackTitle);
+      setItems(page.faq?.items ?? []);
+      setHasLoaded(true);
+    });
+
+    return () => controller.abort();
+  }, [fallbackTitle]);
+
+  if (!hasLoaded || items.length === 0) {
+    return null;
+  }
 
   return (
     <section
@@ -16,9 +41,9 @@ const ProfileSupportFaqSection = () => {
           id="profile-support-faq"
           className="w-full text-left font-larken text-32 font-light leading-110 text-darkblack md:text-4xl lg:text-center lg:text-5xl"
         >
-          {faqTitle}
+          {title}
         </h2>
-        <ProfileAccordion items={faqItems} />
+        <ProfileAccordion items={items} />
       </div>
     </section>
   );

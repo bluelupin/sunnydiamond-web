@@ -7,9 +7,12 @@ export function getProfileAvatarInitial(firstName?: string | null): string {
   return trimmed.charAt(0).toUpperCase();
 }
 
+/** Magento customer lastname is required; checkout uses the same placeholder. */
+const PLACEHOLDER_CUSTOMER_LAST_NAME = "-";
+
 function isPlaceholderCustomerLastName(lastname?: string | null): boolean {
   const trimmed = lastname?.replace(/\u00A0/g, " ").trim() ?? "";
-  return !trimmed || trimmed === "-";
+  return !trimmed || trimmed === PLACEHOLDER_CUSTOMER_LAST_NAME;
 }
 
 export function formatCustomerFullName(
@@ -25,11 +28,11 @@ export function splitProfileFullName(fullName: string): { firstname: string; las
   const parts = fullName.trim().split(/\s+/).filter(Boolean);
 
   if (parts.length === 0) {
-    return { firstname: "", lastname: "" };
+    return { firstname: "", lastname: PLACEHOLDER_CUSTOMER_LAST_NAME };
   }
 
   if (parts.length === 1) {
-    return { firstname: parts[0], lastname: "" };
+    return { firstname: parts[0], lastname: PLACEHOLDER_CUSTOMER_LAST_NAME };
   }
 
   return {
