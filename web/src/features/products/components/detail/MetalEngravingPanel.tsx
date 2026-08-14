@@ -86,8 +86,15 @@ const MetalEngravingPanel = ({
     };
   }, []);
 
+  const wasOpenRef = useRef(false);
+
   useEffect(() => {
-    if (!open) return;
+    const justOpened = open && !wasOpenRef.current;
+    wasOpenRef.current = open;
+
+    if (!justOpened) {
+      return;
+    }
 
     setText(clampEngravingText(initialValue?.text ?? "", maxCharacters));
     setFont(initialValue?.font ?? availableFonts[0] ?? "");

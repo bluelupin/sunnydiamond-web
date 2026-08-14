@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, type ReactNode } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import {
@@ -87,7 +87,10 @@ const ProductDetailSidebar = ({
   const setSelectedMetal = onSelectedMetalChange ?? setSelectedMetalInternal;
   const [ringSize, setRingSize] = useState<string>(() => initialRingSize ?? "");
   const [ringSizeError, setRingSizeError] = useState<string | null>(null);
-  const [engravingSelection, setEngravingSelection] = useState<EngravingSelection | null>(null);
+  const [engravingSelection, setEngravingSelection] = useState<EngravingSelection | null>(
+    () => initialEngravingSelection,
+  );
+  const hasHydratedEngravingRef = useRef(initialEngravingSelection != null);
   const [isEngravingOpen, setIsEngravingOpen] = useState(false);
   const [isRingSizeChartOpen, setIsRingSizeChartOpen] = useState(false);
   const [isDeliveryStoreOpen, setIsDeliveryStoreOpen] = useState(false);
@@ -107,7 +110,6 @@ const ProductDetailSidebar = ({
   const showMetalColor = content.metalColors.length > 0;
 
   useEffect(() => {
-    setEngravingSelection(initialEngravingSelection);
     setRingSize(initialRingSize ?? "");
     setIsGift(initialIsGift);
     setRingSizeError(null);
@@ -119,9 +121,28 @@ const ProductDetailSidebar = ({
     content.metalColors,
     onSelectedMetalChange,
     initialRingSize,
-    initialEngravingSelection,
     initialIsGift,
   ]);
+
+  useEffect(() => {
+    hasHydratedEngravingRef.current = initialEngravingSelection != null;
+    setEngravingSelection(initialEngravingSelection);
+    // Cart-driven engraving updates must not overwrite text the shopper just saved.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product.id]);
+
+  useEffect(() => {
+    if (hasHydratedEngravingRef.current) {
+      return;
+    }
+
+    if (initialEngravingSelection == null) {
+      return;
+    }
+
+    setEngravingSelection(initialEngravingSelection);
+    hasHydratedEngravingRef.current = true;
+  }, [initialEngravingSelection]);
 
   const activeMetal = content.metalColors.find((color) => color.id === selectedMetal);
   const configurableOptionUids = getConfigurableOptionUidsForMetal(
