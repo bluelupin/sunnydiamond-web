@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { formatCustomerFullName } from "@/shared/utils/customerName";
 import { diamondsForEveryonePageContent } from "../../data/content";
 import { useDfeInvestFlow } from "../../context/DfeInvestFlowContext";
 import { formatInr } from "../../utils/formatInr";
@@ -106,7 +107,7 @@ const DfeInvestReviewStep = () => {
     Math.min(investment.maxMonthly, Math.max(investment.minMonthly, value));
 
   const accountFullName = customer
-    ? [customer.firstname, customer.lastname].filter(Boolean).join(" ").trim()
+    ? formatCustomerFullName(customer.firstname, customer.lastname)
     : "";
   const accountEmail = customer?.email ?? "";
   const accountPhone = "—";

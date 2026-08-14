@@ -10,6 +10,7 @@ import {
 } from "@/features/products/constants/engraving";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
+import { cn } from "@/shared/utils/cn";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import { useCart } from "../context/CartContext";
 import type { CartLineItem, CartLineOptions } from "../types/cart.types";
@@ -42,7 +43,7 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
   const { buyNow } = useCart();
   const { toggleWishlist, isWishlisted } = useWishlist();
   const { clearGiftingOptionsExplored } = useCartUI();
-  const { navigateToCheckout } = useCartCheckout();
+  const { navigateToCheckout, isNavigatingToCheckout } = useCartCheckout();
   const { product, quantity, options } = item;
   const meta = formatCartLineMeta(item);
   const wishlisted = isWishlisted(product.id);
@@ -75,6 +76,10 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
   }, [options.engraving, isEditingEngraving]);
 
   const handleEngravingAction = () => {
+    if (isNavigatingToCheckout) {
+      return;
+    }
+
     if (!isEditingEngraving) {
       setEngravingDraft(options.engraving ?? "");
       setEngravingError(null);
@@ -120,12 +125,14 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
   };
 
   const handleMoveToWishlist = () => {
+    if (isNavigatingToCheckout) return;
     toggleWishlist(product.id);
     onRemove(item.id);
     setMovedToWishlist(true);
   };
 
   const handleBuyNow = () => {
+    if (isNavigatingToCheckout) return;
     void (async () => {
       setIsBuyingNow(true);
       try {
@@ -149,7 +156,14 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
         <div className="flex min-w-0 flex-1 gap-4 lg:max-w-[499.5px] lg:gap-6">
           <Link
             href={productHref}
-            className="relative size-[68px] shrink-0 overflow-hidden bg-white lg:size-[140px]"
+            onClick={(event) => {
+              if (isNavigatingToCheckout) event.preventDefault();
+            }}
+            aria-disabled={isNavigatingToCheckout || undefined}
+            className={cn(
+              "relative size-[68px] shrink-0 overflow-hidden bg-white lg:size-[140px]",
+              isNavigatingToCheckout && "pointer-events-none",
+            )}
           >
             <OptimizedImage
               src={product.image}
@@ -165,7 +179,14 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
             <div className="flex flex-col gap-2 lg:gap-3">
               <Link
                 href={productHref}
-                className="font-gill text-sm leading-110 text-darkblack transition-colors hover:text-darkMagenta lg:text-base"
+                onClick={(event) => {
+                  if (isNavigatingToCheckout) event.preventDefault();
+                }}
+                aria-disabled={isNavigatingToCheckout || undefined}
+                className={cn(
+                  "font-gill text-sm leading-110 text-darkblack transition-colors hover:text-darkMagenta lg:text-base",
+                  isNavigatingToCheckout && "pointer-events-none",
+                )}
               >
                 {product.name}
               </Link>
@@ -190,7 +211,7 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
             </div>
 
             <div className="flex flex-wrap gap-4">
-              <CartTextLink href={productHref}>EDIT</CartTextLink>
+              <CartTextLink href={productHref} disabled={isNavigatingToCheckout}>EDIT</CartTextLink>
               {/* {movedToWishlist ? (
                 <span className="font-gill text-sm uppercase leading-110 text-neutral500 lg:text-base">
                   Moved to Wishlist
@@ -200,7 +221,7 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
                   {wishlisted ? "IN WISHLIST" : "MOVE TO WISHLIST"}
                 </CartTextLink>
               )} */}
-              <CartTextLink onClick={handleMoveToWishlist}>
+              <CartTextLink onClick={handleMoveToWishlist} disabled={isNavigatingToCheckout}>
                 {!wishlisted && "MOVE TO WISHLIST"}
               </CartTextLink>
               {/* <CartTextLink onClick={handleBuyNow} className={isBuyingNow ? "opacity-50" : ""}>
@@ -212,9 +233,13 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
 
         <button
           type="button"
-          onClick={() => onRemove(item.id)}
+          onClick={() => {
+            if (isNavigatingToCheckout) return;
+            onRemove(item.id);
+          }}
+          disabled={isNavigatingToCheckout}
           aria-label={`Remove ${product.name}`}
-          className="shrink-0 text-darkblack transition-opacity hover:opacity-70"
+          className="shrink-0 text-darkblack transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <DeleteIcon className="size-6" />
         </button>
@@ -222,10 +247,12 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
 
       <CartDivider weight={0.5} />
 
-      <label className="inline-flex w-fit cursor-pointer items-center gap-2">
+      <label className={cn("inline-flex w-fit items-center gap-2", isNavigatingToCheckout ? "cursor-not-allowed" : "cursor-pointer")}>
         <CartGiftCheckbox
           checked={isGift}
+          disabled={isNavigatingToCheckout}
           onChange={(checked) => {
+            if (isNavigatingToCheckout) return;
             if (checked) {
               clearGiftingOptionsExplored();
             }
@@ -259,7 +286,9 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
                   <input
                     type="text"
                     value={engravingDraft}
+                    disabled={isNavigatingToCheckout}
                     onChange={(event) => {
+                      if (isNavigatingToCheckout) return;
                       setEngravingDraft(sanitizeDraft(event.target.value));
                       setEngravingError(null);
                     }}
@@ -269,7 +298,7 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
                     aria-invalid={engravingError ? true : undefined}
                     aria-describedby={engravingError ? engravingErrorId : undefined}
                     autoFocus
-                    className="h-full w-full min-w-0 border-0 bg-transparent font-gill text-sm leading-110 text-darkblack outline-none placeholder:text-neutral500 lg:text-base"
+                    className="h-full w-full min-w-0 border-0 bg-transparent font-gill text-sm leading-110 text-darkblack outline-none placeholder:text-neutral500 disabled:cursor-not-allowed lg:text-base"
                   />
                 ) : (
                   <p
@@ -286,7 +315,7 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
               <CartOutlineButton
                 type="button"
                 onClick={handleEngravingAction}
-                disabled={isSavingEngraving}
+                disabled={isSavingEngraving || isNavigatingToCheckout}
                 className="h-14 w-auto shrink-0 px-5 uppercase lg:px-7"
               >
                 {isEditingEngraving ? "Save" : hasEngraving ? "Modify" : "Add"}

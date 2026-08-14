@@ -11,10 +11,12 @@ import CartMobileStickyFooter from "@/features/cart/components/CartMobileStickyF
 import CartPriceDetails from "@/features/cart/components/CartPriceDetails";
 import { useCart } from "@/features/cart/context/CartContext";
 import { resolveCartGiftNoteDisplay } from "@/features/cart/utils/cartGiftNotes";
+import { useCartCheckout } from "@/features/cart/hooks/useCartCheckout";
 import { CartPrimaryLink } from "./CartFlowUi";
 
 const CartPage = () => {
   const { items, isHydrating, refreshCart, updateQuantity, removeItem, updateLineItemOptions } = useCart();
+  const { isNavigatingToCheckout } = useCartCheckout();
   const giftNoteDisplay = useMemo(() => resolveCartGiftNoteDisplay(items), [items]);
   const [offersOpen, setOffersOpen] = useState(false);
   const [priceBreakupOpen, setPriceBreakupOpen] = useState(false);
@@ -66,8 +68,17 @@ const CartPage = () => {
             Your Shopping Bag
           </h1>
 
-          <div className="grid grid-cols-1 gap-6 md:max-lg:portrait:grid-cols-[minmax(0,1fr)_minmax(0,360px)] md:max-lg:landscape:grid-cols-2 md:max-lg:items-start lg:grid-cols-2 lg:gap-6">
-            <div className="flex min-w-0 flex-col gap-6">
+          <div
+            className={cn(
+              "grid grid-cols-1 gap-6 md:max-lg:portrait:grid-cols-[minmax(0,1fr)_minmax(0,360px)] md:max-lg:landscape:grid-cols-2 md:max-lg:items-start lg:grid-cols-2 lg:gap-6",
+              isNavigatingToCheckout && "pointer-events-none",
+            )}
+            aria-busy={isNavigatingToCheckout || undefined}
+          >
+            <div
+              className="flex min-w-0 flex-col gap-6"
+              {...(isNavigatingToCheckout ? { inert: true } : {})}
+            >
               {giftNoteDisplay.globalNote ? (
                 <CartGlobalGiftNote note={giftNoteDisplay.globalNote} />
               ) : null}

@@ -35,6 +35,7 @@ import {
 } from "../types/checkout.types";
 import {
   applyCustomerAddressToCheckoutForm,
+  sanitizeCheckoutFormNames,
 } from "../utils/checkoutCustomer.utils";
 import {
   completeGuestCheckout,
@@ -97,6 +98,8 @@ const CheckoutPage = () => {
   const [phoneVerified, setPhoneVerified] = useState(false);
   const [orderSuccessAuthenticated, setOrderSuccessAuthenticated] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const paymentInFlightRef = useRef(false);
+  const checkoutLockedRef = useRef(false);
   const [isSavingAddresses, setIsSavingAddresses] = useState(false);
   const [placedItems, setPlacedItems] = useState<CartLineItem[]>([]);
   const [placedTotal, setPlacedTotal] = useState(0);
@@ -172,6 +175,7 @@ const CheckoutPage = () => {
   );
 
   const updateForm = (field: keyof CheckoutFormData, value: string | boolean) => {
+    if (checkoutLockedRef.current) return;
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -179,6 +183,8 @@ const CheckoutPage = () => {
     field: keyof CheckoutPaymentData,
     value: CheckoutPaymentData["method"],
   ) => {
+    if (checkoutLockedRef.current) return;
+
     if (
       field === "method" &&
       value === "cod" &&
@@ -341,10 +347,12 @@ const CheckoutPage = () => {
       return;
     }
 
-    setForm((current) => ({
-      ...current,
-      ...defaultFormPatch,
-    }));
+    setForm((current) =>
+      sanitizeCheckoutFormNames({
+        ...current,
+        ...defaultFormPatch,
+      }),
+    );
     setPhoneVerified(true);
     contactPrefillAppliedRef.current = true;
   }, [defaultFormPatch, isAuthPrefillLoading, isAuthenticated]);
@@ -397,7 +405,7 @@ const CheckoutPage = () => {
   }
 
   const handleVerifyPhone = () => {
-    if (isCheckoutEmailContact(form.phoneOrEmail)) {
+    if (checkoutLockedRef.current || isCheckoutEmailContact(form.phoneOrEmail)) {
       return;
     }
 
@@ -430,7 +438,7 @@ const CheckoutPage = () => {
    * New email → continue guest checkout (no modal).
    */
   const handleGuestContactBlur = () => {
-    if (isAuthenticated) {
+    if (checkoutLockedRef.current || isAuthenticated) {
       return;
     }
 
@@ -464,6 +472,8 @@ const CheckoutPage = () => {
   };
 
   const handleContinueToPayment = () => {
+    if (checkoutLockedRef.current) return;
+
     // Must run before form validation: with no saved address the shipping fields are
     // hidden/empty, so validateSubmit fails silently and never reaches this toast.
     if (isAuthenticated && !hasDeliveryAddressAvailable) {
@@ -472,7 +482,8 @@ const CheckoutPage = () => {
     }
 
     formValidation.validateSubmit(() => {
-      const contactIsEmail = isCheckoutEmailContact(form.phoneOrEmail);
+      const submittedForm = { ...form };
+      const contactIsEmail = isCheckoutEmailContact(submittedForm.phoneOrEmail);
 
       if (otpLoginEnabled && !isAuthenticated && !contactIsEmail && !phoneVerified) {
         setShowOtpModal(true);
@@ -483,30 +494,31 @@ const CheckoutPage = () => {
         return;
       }
 
+      checkoutLockedRef.current = true;
+      setIsSavingAddresses(true);
+
       void (async () => {
-        // Guest email checkout only: registered account → message + login modal.
-        if (!isAuthenticated && contactIsEmail) {
-          const emailAvailable = await isCustomerEmailAvailable(form.phoneOrEmail);
-          if (!emailAvailable) {
-            toast({
-              title: "Email already registered",
-              description: "This email is already registered. Please sign in to continue.",
-            });
-            openLoginModal({
-              returnUrl: "/checkout",
-              identifier: form.phoneOrEmail.trim(),
-            });
-            return;
-          }
-        }
-
-        setIsSavingAddresses(true);
-
         try {
+          // Guest email checkout only: registered account → message + login modal.
+          if (!isAuthenticated && contactIsEmail) {
+            const emailAvailable = await isCustomerEmailAvailable(submittedForm.phoneOrEmail);
+            if (!emailAvailable) {
+              toast({
+                title: "Email already registered",
+                description: "This email is already registered. Please sign in to continue.",
+              });
+              openLoginModal({
+                returnUrl: "/checkout",
+                identifier: submittedForm.phoneOrEmail.trim(),
+              });
+              return;
+            }
+          }
+
           const cartId = await ensureGuestCartId();
           const state = await prepareCheckoutForPayment(
             cartId,
-            form,
+            submittedForm,
             readCartLineMetadata(),
             {
               isAuthenticated,
@@ -514,6 +526,7 @@ const CheckoutPage = () => {
             },
           );
           applyMagentoCartState(state);
+          setForm(submittedForm);
           setStep("payment");
           window.scrollTo({ top: 0, behavior: "smooth" });
         } catch (error) {
@@ -529,6 +542,7 @@ const CheckoutPage = () => {
             description,
           });
         } finally {
+          checkoutLockedRef.current = false;
           setIsSavingAddresses(false);
         }
       })();
@@ -536,10 +550,19 @@ const CheckoutPage = () => {
   };
 
   const placeOrder = () => {
-    paymentValidation.validateSubmit(() => {
-      void (async () => {
-        setSubmitting(true);
+    if (checkoutLockedRef.current || paymentInFlightRef.current) return;
 
+    paymentValidation.validateSubmit(() => {
+      const submittedForm = { ...form };
+      const submittedPayment = { ...payment };
+      const submittedItems = [...items];
+      const submittedTotal = totalPrice;
+
+      checkoutLockedRef.current = true;
+      paymentInFlightRef.current = true;
+      setSubmitting(true);
+
+      void (async () => {
         try {
           const cartId = await ensureGuestCartId();
 
@@ -559,7 +582,7 @@ const CheckoutPage = () => {
           // Re-sync the full gifting state onto the Magento cart so the order
           // carries it even when a mark was never saved through the panel.
           try {
-            const giftMode = items.some((item) => item.gifting?.wrapMode === "separate")
+            const giftMode = submittedItems.some((item) => item.gifting?.wrapMode === "separate")
               ? "separate"
               : "single";
             await setCartGiftOptions(
@@ -568,9 +591,9 @@ const CheckoutPage = () => {
                 mode: giftMode,
                 groupedNote:
                   giftMode === "single"
-                    ? items.find((item) => item.gifting?.note)?.gifting?.note
+                    ? submittedItems.find((item) => item.gifting?.note)?.gifting?.note
                     : undefined,
-                items: items.map((item) => ({
+                items: submittedItems.map((item) => ({
                   lineItemId: item.id,
                   isGift: Boolean(item.gifting || item.options.isGift),
                   note: giftMode === "separate" ? item.gifting?.note : undefined,
@@ -584,30 +607,31 @@ const CheckoutPage = () => {
 
           const order = await completeGuestCheckout(
             cartId,
-            payment.method,
+            submittedPayment.method,
             readCartLineMetadata(),
           );
 
           if (order.awaitingOnlinePayment) {
             savePendingCheckoutPayment({
               orderNumber: order.orderNumber,
-              contact: form.phoneOrEmail,
-              totalPrice,
-              placedItems: [...items],
+              contact: submittedForm.phoneOrEmail,
+              totalPrice: submittedTotal,
+              placedItems: submittedItems,
               guestOtp: verifiedCheckoutOtpRef.current,
-              form: { ...form },
+              form: submittedForm,
               isAuthenticated,
             });
 
-            const isEmailContact = form.phoneOrEmail.includes("@");
+            const isEmailContact = submittedForm.phoneOrEmail.includes("@");
             let outcome = await collectRazorpayPayment({
               orderNumber: order.orderNumber,
-              method: payment.method === "cod" ? undefined : payment.method,
+              method: submittedPayment.method === "cod" ? undefined : submittedPayment.method,
               prefill: {
-                name: form.name || undefined,
-                email: isEmailContact ? form.phoneOrEmail : undefined,
+                name: submittedForm.name || undefined,
+                email: isEmailContact ? submittedForm.phoneOrEmail : undefined,
                 contact:
-                  form.shippingPhone || (!isEmailContact ? form.phoneOrEmail : undefined),
+                  submittedForm.shippingPhone ||
+                  (!isEmailContact ? submittedForm.phoneOrEmail : undefined),
               },
             });
 
@@ -643,10 +667,10 @@ const CheckoutPage = () => {
 
             await finalizeOrderSuccess({
               orderNumber: order.orderNumber,
-              contact: form.phoneOrEmail,
-              orderItems: [...items],
-              orderTotal: totalPrice,
-              orderForm: { ...form },
+              contact: submittedForm.phoneOrEmail,
+              orderItems: submittedItems,
+              orderTotal: submittedTotal,
+              orderForm: submittedForm,
               wasAuthenticated: isAuthenticated,
               guestOtp: verifiedCheckoutOtpRef.current,
             });
@@ -656,10 +680,10 @@ const CheckoutPage = () => {
 
           await finalizeOrderSuccess({
             orderNumber: order.orderNumber,
-            contact: form.phoneOrEmail,
-            orderItems: [...items],
-            orderTotal: totalPrice,
-            orderForm: { ...form },
+            contact: submittedForm.phoneOrEmail,
+            orderItems: submittedItems,
+            orderTotal: submittedTotal,
+            orderForm: submittedForm,
             wasAuthenticated: isAuthenticated,
             guestOtp: verifiedCheckoutOtpRef.current,
           });
@@ -673,6 +697,8 @@ const CheckoutPage = () => {
 
           showCheckoutStatusToast(description);
         } finally {
+          checkoutLockedRef.current = false;
+          paymentInFlightRef.current = false;
           setSubmitting(false);
         }
       })();
@@ -697,6 +723,8 @@ const CheckoutPage = () => {
   const handleSidebarCta = step === "payment" ? placeOrder : handleContinueToPayment;
 
   const handleFormChange = (field: keyof CheckoutFormData, value: string | boolean) => {
+    if (checkoutLockedRef.current) return;
+
     if (field === "pincode" || field === "billingPincode") {
       updateForm(field, sanitizePincodeInput(String(value)));
       return;
@@ -759,6 +787,7 @@ const CheckoutPage = () => {
                 validation={formValidation}
                 isAuthenticated={isAuthenticated}
                 hasSavedDeliveryAddress={hasDeliveryAddressAvailable}
+                fieldsDisabled={isSavingAddresses}
               />
             ) : (
               <CheckoutPaymentStep
@@ -768,15 +797,15 @@ const CheckoutPage = () => {
                 hasEngravedItems={hasEngravedItems}
                 onPaymentChange={updatePayment}
                 onEditPersonal={() => {
-                  if (submitting) return;
+                  if (checkoutLockedRef.current || paymentInFlightRef.current) return;
                   setStep("form");
                 }}
                 onEditDelivery={() => {
-                  if (submitting) return;
+                  if (checkoutLockedRef.current || paymentInFlightRef.current) return;
                   setStep("form");
                 }}
                 onEditPayment={() => {
-                  if (submitting) return;
+                  if (checkoutLockedRef.current || paymentInFlightRef.current) return;
                   document
                     .getElementById("checkout-payment-methods")
                     ?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -784,6 +813,7 @@ const CheckoutPage = () => {
                 validation={paymentValidation}
                 isAuthenticated={isAuthenticated}
                 editDisabled={submitting}
+                fieldsDisabled={submitting}
               />
             )}
             <MobileStickyFooterSpacer height={clearancePx} />

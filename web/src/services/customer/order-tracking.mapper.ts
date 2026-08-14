@@ -22,6 +22,7 @@ import type {
   TrackedOrderTotals,
   TrackedOrderTracking,
 } from "./order-tracking.types";
+import { formatCustomerFullName } from "@/shared/utils/customerName";
 
 type MagentoMoney = {
   value?: number | null;
@@ -189,7 +190,7 @@ function mapMagentoOrderAddress(address: MagentoOrderAddress | null | undefined)
   }
 
   return {
-    fullName: [address.firstname, address.lastname].filter(Boolean).join(" "),
+    fullName: formatCustomerFullName(address.firstname, address.lastname),
     streetLines: (address.street ?? []).filter(Boolean),
     city: address.city ?? "",
     region: address.region ?? "",

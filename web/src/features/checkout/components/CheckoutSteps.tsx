@@ -44,6 +44,7 @@ type CheckoutFormStepProps = {
   validation: CheckoutFormValidationProps;
   isAuthenticated?: boolean;
   hasSavedDeliveryAddress?: boolean;
+  fieldsDisabled?: boolean;
 };
 
 type AddressFieldConfig = {
@@ -82,12 +83,14 @@ const CheckoutAddressFields = ({
   form,
   onChange,
   validation,
+  disabled = false,
 }: {
   idPrefix: string;
   fields: AddressFieldConfig;
   form: CheckoutFormData;
   onChange: (field: keyof CheckoutFormData, value: string | boolean) => void;
   validation: CheckoutFormValidationProps;
+  disabled?: boolean;
 }) => (
   <div className="sm:space-y-6 space-y-4">
     <CheckoutField
@@ -98,6 +101,7 @@ const CheckoutAddressFields = ({
       onBlur={() => validation.markTouched(fields.name)}
       invalid={validation.showError(fields.name)}
       error={validation.showError(fields.name) ? validation.errors[fields.name] : undefined}
+      disabled={disabled}
     />
     <CheckoutField
       id={`${idPrefix}-address-1`}
@@ -109,6 +113,7 @@ const CheckoutAddressFields = ({
       error={
         validation.showError(fields.addressLine1) ? validation.errors[fields.addressLine1] : undefined
       }
+      disabled={disabled}
     />
     <CheckoutField
       id={`${idPrefix}-address-2`}
@@ -121,6 +126,7 @@ const CheckoutAddressFields = ({
       error={
         validation.showError(fields.addressLine2) ? validation.errors[fields.addressLine2] : undefined
       }
+      disabled={disabled}
     />
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       <CheckoutField
@@ -131,6 +137,7 @@ const CheckoutAddressFields = ({
         onBlur={() => validation.markTouched(fields.pincode)}
         invalid={validation.showError(fields.pincode)}
         error={validation.showError(fields.pincode) ? validation.errors[fields.pincode] : undefined}
+        disabled={disabled}
       />
       <CheckoutField
         id={`${idPrefix}-city`}
@@ -140,6 +147,7 @@ const CheckoutAddressFields = ({
         onBlur={() => validation.markTouched(fields.city)}
         invalid={validation.showError(fields.city)}
         error={validation.showError(fields.city) ? validation.errors[fields.city] : undefined}
+        disabled={disabled}
       />
     </div>
     <CheckoutSelectField
@@ -151,6 +159,7 @@ const CheckoutAddressFields = ({
       options={INDIAN_STATES.map((state) => ({ value: state, label: state }))}
       invalid={validation.showError(fields.state)}
       error={validation.showError(fields.state) ? validation.errors[fields.state] : undefined}
+      disabled={disabled}
     />
     <CheckoutPhoneField
       id={`${idPrefix}-phone`}
@@ -161,6 +170,7 @@ const CheckoutAddressFields = ({
       showVerify={false}
       invalid={validation.showError(fields.phone)}
       error={validation.showError(fields.phone) ? validation.errors[fields.phone] : undefined}
+      disabled={disabled}
     />
   </div>
 );
@@ -197,6 +207,7 @@ export const CheckoutFormStep = ({
   validation,
   isAuthenticated = false,
   hasSavedDeliveryAddress = true,
+  fieldsDisabled = false,
 }: CheckoutFormStepProps) => (
   <div className="flex flex-col gap-6">
     <CheckoutSectionCard>
@@ -216,6 +227,7 @@ export const CheckoutFormStep = ({
         onBlur={() => validation.markTouched("name")}
         invalid={validation.showError("name")}
         error={validation.showError("name") ? validation.errors.name : undefined}
+        disabled={fieldsDisabled}
       />
       {isAuthenticated ? (
         <CheckoutField
@@ -227,6 +239,7 @@ export const CheckoutFormStep = ({
           onBlur={() => validation.markTouched("phoneOrEmail")}
           invalid={validation.showError("phoneOrEmail")}
           error={validation.showError("phoneOrEmail") ? validation.errors.phoneOrEmail : undefined}
+          disabled={fieldsDisabled}
         />
       ) : (
         <CheckoutPhoneField
@@ -244,6 +257,7 @@ export const CheckoutFormStep = ({
           showVerify={showVerify}
           invalid={validation.showError("phoneOrEmail")}
           error={validation.showError("phoneOrEmail") ? validation.errors.phoneOrEmail : undefined}
+          disabled={fieldsDisabled}
         />
       )}
     </CheckoutSectionCard>
@@ -277,6 +291,7 @@ export const CheckoutFormStep = ({
               form={form}
               onChange={onChange}
               validation={validation}
+              disabled={fieldsDisabled}
             />
           </div>
 
@@ -286,6 +301,7 @@ export const CheckoutFormStep = ({
               checked={form.billingSameAsShipping}
               onChange={(checked) => onChange("billingSameAsShipping", checked)}
               label="My billing address is the same as my shipping address"
+              disabled={fieldsDisabled}
             />
           </div>
 
@@ -296,6 +312,7 @@ export const CheckoutFormStep = ({
               form={form}
               onChange={onChange}
               validation={validation}
+              disabled={fieldsDisabled}
             />
           ) : null}
         </>
@@ -317,6 +334,7 @@ type CheckoutPaymentStepProps = {
   validation: CheckoutPaymentValidationProps;
   isAuthenticated?: boolean;
   editDisabled?: boolean;
+  fieldsDisabled?: boolean;
 };
 
 const RazorpaySecureNote = () => (
@@ -351,6 +369,7 @@ export const CheckoutPaymentStep = ({
   validation,
   isAuthenticated = false,
   editDisabled = false,
+  fieldsDisabled = false,
 }: CheckoutPaymentStepProps) => {
   const shippingLines = buildAddressLines({
     addressLine1: form.addressLine1,
@@ -427,6 +446,7 @@ export const CheckoutPaymentStep = ({
               checked={payment.method === "card"}
               onChange={() => onPaymentChange("method", "card")}
               label="Credit/Debit Card"
+              disabled={fieldsDisabled}
             />
             {payment.method === "card" ? <PaymentCardLogos /> : null}
           </div>
@@ -437,6 +457,7 @@ export const CheckoutPaymentStep = ({
             checked={payment.method === "upi"}
             onChange={() => onPaymentChange("method", "upi")}
             label="UPI"
+            disabled={fieldsDisabled}
           />
 
           {payment.method === "upi" ? <RazorpaySecureNote /> : null}
@@ -445,6 +466,7 @@ export const CheckoutPaymentStep = ({
             checked={payment.method === "netbanking"}
             onChange={() => onPaymentChange("method", "netbanking")}
             label="Net Banking"
+            disabled={fieldsDisabled}
           />
 
           {payment.method === "netbanking" ? <RazorpaySecureNote /> : null}
@@ -452,7 +474,7 @@ export const CheckoutPaymentStep = ({
           <div className="flex flex-col gap-2">
             <CheckoutRadioRow
               checked={payment.method === "cod"}
-              disabled={!isCodAvailable}
+              disabled={fieldsDisabled || !isCodAvailable}
               onChange={() => onPaymentChange("method", "cod")}
               align="start"
               label={

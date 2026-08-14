@@ -77,20 +77,28 @@ type CartGiftCheckboxProps = {
   checked: boolean;
   onChange: (checked: boolean) => void;
   className?: string;
+  disabled?: boolean;
 };
 
-export const CartGiftCheckbox = ({ checked, onChange, className }: CartGiftCheckboxProps) => (
+export const CartGiftCheckbox = ({
+  checked,
+  onChange,
+  className,
+  disabled = false,
+}: CartGiftCheckboxProps) => (
   <span
     className={cn(
       "relative inline-flex size-4 shrink-0 items-center justify-center lg:size-5",
+      disabled && "cursor-not-allowed opacity-60",
       className,
     )}
   >
     <input
       type="checkbox"
       checked={checked}
+      disabled={disabled}
       onChange={(event) => onChange(event.target.checked)}
-      className="absolute inset-0 z-10 m-0 cursor-pointer opacity-0"
+      className="absolute inset-0 z-10 m-0 cursor-pointer opacity-0 disabled:cursor-not-allowed"
       aria-label="Mark this as a gift"
     />
     <span
@@ -118,10 +126,17 @@ type CartTextLinkProps = {
   href?: string;
   onClick?: () => void;
   className?: string;
+  disabled?: boolean;
 };
 
-export const CartTextLink = ({ children, href, onClick, className }: CartTextLinkProps) => (
-  <DetailTextLink href={href} onClick={onClick} className={className}>
+export const CartTextLink = ({
+  children,
+  href,
+  onClick,
+  className,
+  disabled = false,
+}: CartTextLinkProps) => (
+  <DetailTextLink href={href} onClick={onClick} className={className} disabled={disabled}>
     {children}
   </DetailTextLink>
 );
@@ -132,14 +147,17 @@ const cartButtonBase =
 export const CartPrimaryButton = ({
   children,
   className,
+  disabled,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement>) => (
   <button
     type="button"
+    disabled={disabled}
     className={cn(
       cartButtonBase,
       cartButtonSizing,
       "btn-dark-slide border border-black text-white",
+      disabled && "cursor-not-allowed opacity-60",
       className,
     )}
     {...props}
@@ -151,14 +169,17 @@ export const CartPrimaryButton = ({
 export const CartOutlineButton = ({
   children,
   className,
+  disabled,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement>) => (
   <button
     type="button"
+    disabled={disabled}
     className={cn(
       cartButtonBase,
       cartButtonSizing,
       "btn-border-slide border border-neutral300 text-darkblack",
+      disabled && "cursor-not-allowed opacity-60",
       className,
     )}
     {...props}
@@ -226,20 +247,23 @@ type CartQuantityStepperProps = {
   quantity: number;
   onDecrease: () => void;
   onIncrease: () => void;
+  disabled?: boolean;
 };
 
 const quantityButtonClassName =
-  "flex size-4 items-center justify-center border-[0.8px] border-darkblack bg-white font-gill text-xs leading-none text-darkblack";
+  "flex size-4 items-center justify-center border-[0.8px] border-darkblack bg-white font-gill text-xs leading-none text-darkblack disabled:cursor-not-allowed disabled:opacity-60";
 
 export const CartQuantityStepper = ({
   quantity,
   onDecrease,
   onIncrease,
+  disabled = false,
 }: CartQuantityStepperProps) => (
   <div className="flex items-center gap-2">
     <button
       type="button"
       onClick={onDecrease}
+      disabled={disabled}
       aria-label="Decrease quantity"
       className={quantityButtonClassName}
     >
@@ -251,6 +275,7 @@ export const CartQuantityStepper = ({
     <button
       type="button"
       onClick={onIncrease}
+      disabled={disabled}
       aria-label="Increase quantity"
       className={quantityButtonClassName}
     >

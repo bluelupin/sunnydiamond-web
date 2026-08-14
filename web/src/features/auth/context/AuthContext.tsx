@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { WISHLIST_STORAGE_KEY } from "@/features/wishlist/constants";
+import { sanitizeAuthCustomer } from "@/shared/utils/customerName";
 
 export type AuthCustomer = {
   id: number;
@@ -37,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await fetch("/api/auth/me", { cache: "no-store" });
       const data = (await response.json()) as { customer: AuthCustomer | null };
-      setCustomer(data.customer);
+      setCustomer(data.customer ? sanitizeAuthCustomer(data.customer) : null);
       setStatus(data.customer ? "authenticated" : "guest");
     } catch {
       setCustomer(null);

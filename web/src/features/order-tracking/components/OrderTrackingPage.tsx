@@ -14,6 +14,7 @@ import { buildProfileOrderDetailHref } from "@/features/account/utils/profileOrd
 import { trackOrder } from "@/services/customer/order-tracking.client";
 import type { TrackedOrder } from "@/services/customer/order-tracking.types";
 import PageContainer from "@/shared/ui/layout/PageContainer";
+import { isPlaceholderCustomerLastName } from "@/shared/utils/customerName";
 
 type TrackingFormState = {
   number: string;
@@ -47,7 +48,9 @@ const OrderTrackingPage = () => {
     setForm((current) => ({
       ...current,
       email: current.email || customer.email,
-      lastname: current.lastname || customer.lastname,
+      lastname:
+        current.lastname ||
+        (isPlaceholderCustomerLastName(customer.lastname) ? "" : customer.lastname),
     }));
   }, [customer, isAuthenticated]);
 

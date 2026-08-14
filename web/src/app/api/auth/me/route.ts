@@ -4,6 +4,7 @@ import { MagentoGraphqlError } from "@/services/magento/magento.errors";
 import { decodeMagentoEntityId } from "@/services/magento/decodeMagentoEntityId";
 import { MAGENTO_CUSTOMER_ME_QUERY } from "@/services/customer/customer.gql";
 import { clearCustomerTokenCookie, getCustomerToken } from "@/services/auth/session";
+import { mapMagentoCustomerNameForClient } from "@/shared/utils/customerName";
 
 export type AuthMeResponse = {
   customer: {
@@ -65,11 +66,16 @@ export async function GET() {
       );
     }
 
+    const { firstname, lastname } = mapMagentoCustomerNameForClient(
+      customer.firstname,
+      customer.lastname,
+    );
+
     return NextResponse.json({
       customer: {
         id,
-        firstname: customer.firstname,
-        lastname: customer.lastname,
+        firstname,
+        lastname,
         email: customer.email,
       },
     } satisfies AuthMeResponse);

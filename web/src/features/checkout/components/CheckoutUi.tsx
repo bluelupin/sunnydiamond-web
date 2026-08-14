@@ -42,6 +42,7 @@ export type CheckoutFieldProps = {
   type?: string;
   error?: string;
   invalid?: boolean;
+  disabled?: boolean;
 };
 
 export const CheckoutField = ({
@@ -55,6 +56,7 @@ export const CheckoutField = ({
   type = "text",
   error,
   invalid,
+  disabled = false,
 }: CheckoutFieldProps) => (
   <div className="flex flex-col gap-2">
     <CheckoutFieldLabel id={id} label={label} optional={optional} />
@@ -62,6 +64,7 @@ export const CheckoutField = ({
       id={id}
       type={type}
       value={value}
+      disabled={disabled}
       onChange={(event) => onChange(event.target.value)}
       onBlur={onBlur}
       placeholder={placeholder}
@@ -69,6 +72,7 @@ export const CheckoutField = ({
       aria-describedby={error ? `${id}-error` : undefined}
       className={cn(
         "h-14 w-full border border-transparent bg-aboutInactive px-3 font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600 focus:border-darkblack",
+        disabled && "cursor-not-allowed opacity-60",
         invalid && invalidFieldClassName,
       )}
     />
@@ -87,6 +91,7 @@ type CheckoutSelectFieldProps = {
   placeholder?: string;
   error?: string;
   invalid?: boolean;
+  disabled?: boolean;
 };
 
 export const CheckoutSelectField = ({
@@ -100,11 +105,13 @@ export const CheckoutSelectField = ({
   placeholder = "-select-",
   error,
   invalid,
+  disabled = false,
 }: CheckoutSelectFieldProps) => (
   <div className="flex flex-col gap-2">
     <CheckoutFieldLabel id={id} label={label} optional={optional} />
     <Select
       value={value}
+      disabled={disabled}
       onValueChange={(nextValue) => {
         onChange(nextValue);
         onBlur?.();
@@ -146,6 +153,7 @@ type CheckoutPhoneFieldProps = {
   mode?: "phone" | "phoneOrEmail";
   error?: string;
   invalid?: boolean;
+  disabled?: boolean;
 };
 
 export const CheckoutPhoneField = ({
@@ -161,6 +169,7 @@ export const CheckoutPhoneField = ({
   mode = "phone",
   error,
   invalid,
+  disabled = false,
 }: CheckoutPhoneFieldProps) => {
   const isEmailInput = mode === "phoneOrEmail" && /[a-zA-Z@]/.test(value);
   const shouldShowVerify = showVerify && !isEmailInput;
@@ -171,6 +180,7 @@ export const CheckoutPhoneField = ({
     <div
       className={cn(
         "flex h-14 items-center justify-between gap-2 border border-transparent bg-aboutInactive px-3 focus-within:border-darkblack",
+        disabled && "cursor-not-allowed opacity-60",
         invalid && invalidFieldContainerClassName,
       )}
     >
@@ -188,13 +198,17 @@ export const CheckoutPhoneField = ({
           type={isEmailInput ? "email" : "tel"}
           inputMode={isEmailInput ? "email" : "numeric"}
           value={value}
+          disabled={disabled}
           onChange={(event) => onChange(event.target.value)}
           onBlur={onBlur}
           placeholder="Enter"
           autoComplete={isEmailInput ? "email" : "tel"}
           aria-invalid={invalid || undefined}
           aria-describedby={error ? `${id}-error` : undefined}
-          className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600"
+          className={cn(
+            "min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600",
+            disabled && "cursor-not-allowed",
+          )}
         />
       </div>
       {shouldShowVerify ? (
@@ -206,7 +220,7 @@ export const CheckoutPhoneField = ({
             Verified
           </span>
         ) : (
-          <DetailTextLink onClick={onVerify}>VERIFY</DetailTextLink>
+          <DetailTextLink onClick={onVerify} disabled={disabled}>VERIFY</DetailTextLink>
         )
       ) : null}
     </div>
@@ -246,8 +260,9 @@ export const CheckoutSectionHeading = ({
     <h2 className="font-gill text-xl font-normal leading-110 text-darkblack lg:text-2xl">{children}</h2>
     {onEdit ? (
       <DetailTextLink
-        onClick={editDisabled ? undefined : onEdit}
-        className={editDisabled ? "pointer-events-none cursor-not-allowed opacity-40" : undefined}
+        onClick={onEdit}
+        disabled={editDisabled}
+        className={editDisabled ? "opacity-40" : undefined}
       >
         EDIT
       </DetailTextLink>
@@ -272,20 +287,31 @@ type CheckoutCheckboxProps = {
   onChange: (checked: boolean) => void;
   label: string;
   readOnly?: boolean;
+  disabled?: boolean;
 };
 
-export const CheckoutCheckbox = ({ checked, onChange, label, readOnly }: CheckoutCheckboxProps) => (
-  <label className={cn("flex items-center gap-2", readOnly ? "cursor-default" : "cursor-pointer")}>
+export const CheckoutCheckbox = ({
+  checked,
+  onChange,
+  label,
+  readOnly,
+  disabled = false,
+}: CheckoutCheckboxProps) => {
+  const isLocked = Boolean(readOnly || disabled);
+
+  return (
+  <label className={cn("flex items-center gap-2", isLocked ? "cursor-default" : "cursor-pointer")}>
     <button
       type="button"
       role="checkbox"
       aria-checked={checked}
-      onClick={() => !readOnly && onChange(!checked)}
-      disabled={readOnly}
+      onClick={() => !isLocked && onChange(!checked)}
+      disabled={isLocked}
       className={cn(
         "flex size-4 shrink-0 items-center justify-center border-[0.8px] border-darkblack bg-white",
         checked && "border-transparent bg-linkGold",
-        readOnly && "cursor-default",
+        isLocked && "cursor-not-allowed",
+        disabled && "opacity-60",
       )}
     >
       <Check
@@ -295,7 +321,8 @@ export const CheckoutCheckbox = ({ checked, onChange, label, readOnly }: Checkou
     </button>
     <span className="font-gill text-base font-light leading-110 text-darkblack">{label}</span>
   </label>
-);
+  );
+};
 
 type CheckoutRadioOptionProps = {
   checked: boolean;
