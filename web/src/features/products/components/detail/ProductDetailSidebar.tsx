@@ -257,7 +257,9 @@ const ProductDetailSidebar = ({
               className="flex-1 uppercase"
               onClick={() => {
                 if (showSizeSelector && !ringSize.trim()) {
-                  setRingSizeError("Please select a ring size.");
+                  setRingSizeError(
+                    `Please select a ${(sizeGuide?.sizeFieldLabel ?? "size").trim().toLowerCase()}.`,
+                  );
                   return;
                 }
 
