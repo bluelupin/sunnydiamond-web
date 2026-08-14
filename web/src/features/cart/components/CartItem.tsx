@@ -12,6 +12,7 @@ import FormFieldError from "@/shared/ui/FormFieldError";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { cn } from "@/shared/utils/cn";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
+import { useAuth } from "@/features/auth/context/AuthContext";
 import { useCart } from "../context/CartContext";
 import type { CartLineItem, CartLineOptions } from "../types/cart.types";
 import { formatCartLineMeta, formatCartPrice, getCartLineDisplayTotal } from "../utils/formatCartLine";
@@ -42,6 +43,7 @@ const ENGRAVING_EMPTY_LABEL = "Metal Engraving (Optional)";
 const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItemProps) => {
   const { buyNow } = useCart();
   const { toggleWishlist, isWishlisted } = useWishlist();
+  const { status } = useAuth();
   const { clearGiftingOptionsExplored } = useCartUI();
   const { navigateToCheckout, isNavigatingToCheckout } = useCartCheckout();
   const { product, quantity, options } = item;
@@ -127,6 +129,9 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
   const handleMoveToWishlist = () => {
     if (isNavigatingToCheckout) return;
     toggleWishlist(product.id);
+    if (status !== "authenticated") {
+      return;
+    }
     onRemove(item.id);
     setMovedToWishlist(true);
   };
