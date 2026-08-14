@@ -162,14 +162,18 @@ export function applySelectedMetalVariant(
   const purity = getVariantMetalPurity(variant);
   const metalColorLabel = variant.attributes[METAL_ATTRIBUTE_CODE]?.trim();
   const metal = [purity, metalColorLabel].filter(Boolean).join(" ") || product.metal;
+  // Variants without their own imagery keep the parent's images.
+  const hasVariantImagery = Boolean(variant.image);
 
   return {
     ...product,
     price: variant.price,
     originalPrice: variant.originalPrice,
-    image: variant.image,
-    images: variant.images,
-    lifestyleImage: variant.images[1] ?? variant.image,
+    image: hasVariantImagery ? variant.image : product.image,
+    images: hasVariantImagery ? variant.images : product.images,
+    lifestyleImage: hasVariantImagery
+      ? (variant.images[1] ?? variant.image)
+      : product.lifestyleImage,
     inStock: variant.inStock,
     metal,
     metalColorValue: normalizeMetalKey(metalId),
