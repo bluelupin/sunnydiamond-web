@@ -12,9 +12,16 @@ import {
   verifyLoginOtp,
 } from "../services/auth.service";
 import { runPostLoginSync } from "../services/postLoginSync";
-import { signInWithApple, signInWithGoogle } from "../services/socialSignIn";
+import {
+  isAppleSignInConfigured,
+  isGoogleSignInConfigured,
+  signInWithApple,
+  signInWithGoogle,
+} from "../services/socialSignIn";
+import { useAuthFeatures } from "../context/AuthFeaturesContext";
 import {
   isEmailIdentifier,
+  isIndianCountryCode,
   isLoginIdentifierReadyForOtp,
   isOtpComplete,
   LOGIN_OTP_LENGTH,
@@ -46,11 +53,16 @@ export type AuthFlowContentProps = {
     identifier: string;
     countryCode: string;
     identifierError?: string;
+    emailOnly: boolean;
+    otpBlockedForCountry: boolean;
+    showGoogle: boolean;
+    showApple: boolean;
     onIdentifierChange: (value: string) => void;
     onCountryCodeChange: (value: string) => void;
     onContinue: () => void;
     onGoogleContinue: () => void;
     onAppleContinue: () => void;
+    onUseEmailInstead: () => void;
     onClose: () => void;
   };
   otp: {
@@ -118,9 +130,14 @@ export function useAuthFlow({
   surface = "standalone",
 }: UseAuthFlowOptions) {
   const returnUrl = sanitizeReturnUrl(returnUrlInput);
+  const flags = useAuthFeatures();
+  const showGoogle = flags.googleLoginEnabled && isGoogleSignInConfigured();
+  const showApple = flags.appleLoginEnabled && isAppleSignInConfigured();
   const [step, setStep] = useState<AuthFlowStep>("sign-in");
   const [identifier, setIdentifier] = useState("");
   const [countryCode, setCountryCode] = useState<string>(DEFAULT_COUNTRY_CODE);
+  /** Sticky "Use email instead" choice; survives switching country back to +91, cleared on reset. */
+  const [emailModeForced, setEmailModeForced] = useState(false);
   const [verifiedPhone, setVerifiedPhone] = useState("");
   const [verifiedCountryCode, setVerifiedCountryCode] = useState<string>(DEFAULT_COUNTRY_CODE);
   const [identifierError, setIdentifierError] = useState<string | undefined>();
@@ -142,6 +159,10 @@ export function useAuthFlow({
   /** Server-provided resend cooldown; the timer effect reads this on entering the OTP step. */
   const cooldownRef = useRef(RESEND_SECONDS);
 
+  const emailOnly = !flags.otpLoginEnabled || emailModeForced;
+  const otpBlockedForCountry =
+    !emailOnly && !isEmailIdentifier(identifier) && !isIndianCountryCode(countryCode);
+
   /** Session cookie is set — sync guest cart/wishlist, then full navigation so providers reboot. */
   const completeAuth = useCallback(async () => {
     await runPostLoginSync();
@@ -152,6 +173,7 @@ export function useAuthFlow({
     setStep("sign-in");
     setIdentifier("");
     setCountryCode(DEFAULT_COUNTRY_CODE);
+    setEmailModeForced(false);
     setVerifiedPhone("");
     setVerifiedCountryCode(DEFAULT_COUNTRY_CODE);
     setIdentifierError(undefined);
@@ -208,12 +230,12 @@ export function useAuthFlow({
   useEffect(() => {
     if (!active) return;
 
-    if (step === "otp" && !isLoginIdentifierReadyForOtp(identifier, countryCode)) {
+    if (step === "otp" && !isLoginIdentifierReadyForOtp(identifier, countryCode, { emailOnly })) {
       setStep("sign-in");
     }
 
     if (step === "create-account" && !verifiedPhone) {
-      setStep(isLoginIdentifierReadyForOtp(identifier, countryCode) ? "otp" : "sign-in");
+      setStep(isLoginIdentifierReadyForOtp(identifier, countryCode, { emailOnly }) ? "otp" : "sign-in");
     }
 
     if (step === "password" && !isEmailIdentifier(identifier)) {
@@ -223,7 +245,7 @@ export function useAuthFlow({
     if (step === "email-create-account" && !isEmailIdentifier(identifier)) {
       setStep("sign-in");
     }
-  }, [active, step, identifier, countryCode, verifiedPhone]);
+  }, [active, step, identifier, countryCode, verifiedPhone, emailOnly]);
 
   const handleClose = useCallback(() => {
     onAbort();
@@ -231,11 +253,13 @@ export function useAuthFlow({
 
   const handleIdentifierChange = useCallback(
     (value: string) => {
-      const nextValue = /[a-zA-Z@]/.test(value) ? value : sanitizePhoneInput(value, countryCode);
+      // Digits are legitimate email input in email-only mode — never phone-format them.
+      const nextValue =
+        emailOnly || /[a-zA-Z@]/.test(value) ? value : sanitizePhoneInput(value, countryCode);
       setIdentifier(nextValue);
       setIdentifierError(undefined);
     },
-    [countryCode],
+    [countryCode, emailOnly],
   );
 
   const handleCountryCodeChange = useCallback(
@@ -249,16 +273,23 @@ export function useAuthFlow({
     [identifier],
   );
 
+  const handleUseEmailInstead = useCallback(() => {
+    setEmailModeForced(true);
+    setIdentifier("");
+    setIdentifierError(undefined);
+  }, []);
+
   const handleContinue = useCallback(async () => {
-    if (isSubmitting) return;
-    const validation = validateLoginIdentifier(identifier, countryCode);
+    if (isSubmitting || otpBlockedForCountry) return;
+    const validation = validateLoginIdentifier(identifier, countryCode, { emailOnly });
 
     if (!validation.valid) {
       setIdentifierError(validation.error);
       return;
     }
 
-    if (isEmailIdentifier(identifier)) {
+    // emailOnly forces the password branch — requestLoginOtp must never fire with OTP disabled.
+    if (emailOnly || isEmailIdentifier(identifier)) {
       setIdentifier(identifier.trim());
       setIdentifierError(undefined);
       setPassword("");
@@ -285,7 +316,7 @@ export function useAuthFlow({
     setOtp(Array(LOGIN_OTP_LENGTH).fill(""));
     setOtpError(undefined);
     setStep("otp");
-  }, [countryCode, identifier, isSubmitting]);
+  }, [countryCode, emailOnly, identifier, isSubmitting, otpBlockedForCountry]);
 
   const handleBackToSignIn = useCallback(() => {
     setStep("sign-in");
@@ -330,7 +361,7 @@ export function useAuthFlow({
 
   const handleResend = useCallback(async () => {
     if ((!otpError && secondsLeft > 0) || isSubmitting) return;
-    if (!isLoginIdentifierReadyForOtp(identifier, countryCode)) {
+    if (!isLoginIdentifierReadyForOtp(identifier, countryCode, { emailOnly })) {
       setStep("sign-in");
       return;
     }
@@ -352,11 +383,11 @@ export function useAuthFlow({
     setSecondsLeft(result.resendAfterSeconds);
     setOtp(Array(LOGIN_OTP_LENGTH).fill(""));
     inputRefs.current[0]?.focus();
-  }, [countryCode, identifier, isSubmitting, otpError, secondsLeft]);
+  }, [countryCode, emailOnly, identifier, isSubmitting, otpError, secondsLeft]);
 
   const handleLogin = useCallback(async () => {
     if (!isOtpComplete(otp) || isSubmitting) return;
-    if (!isLoginIdentifierReadyForOtp(identifier, countryCode)) {
+    if (!isLoginIdentifierReadyForOtp(identifier, countryCode, { emailOnly })) {
       setStep("sign-in");
       setIdentifierError("Phone number or email is required");
       return;
@@ -385,7 +416,7 @@ export function useAuthFlow({
 
     setIsSubmitting(true);
     await completeAuth();
-  }, [completeAuth, countryCode, identifier, isSubmitting, otp]);
+  }, [completeAuth, countryCode, emailOnly, identifier, isSubmitting, otp]);
 
   const handleCreateAccount = useCallback(async () => {
     if (!verifiedPhone || isSubmitting) return;
@@ -567,11 +598,16 @@ export function useAuthFlow({
       identifier,
       countryCode,
       identifierError,
+      emailOnly,
+      otpBlockedForCountry,
+      showGoogle,
+      showApple,
       onIdentifierChange: handleIdentifierChange,
       onCountryCodeChange: handleCountryCodeChange,
       onContinue: handleContinue,
       onGoogleContinue: handleGoogleContinue,
       onAppleContinue: handleAppleContinue,
+      onUseEmailInstead: handleUseEmailInstead,
       onClose: handleClose,
     },
     otp: {

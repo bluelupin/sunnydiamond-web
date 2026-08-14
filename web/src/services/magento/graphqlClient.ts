@@ -13,6 +13,12 @@ export type MagentoGraphqlRequest = {
   cache?: RequestCache;
   /** Magento customer token; forces no-store and adds Authorization header. Server-side only. */
   authToken?: string;
+  /** Extra request headers; caller wins over defaults, but Content-Type stays JSON. */
+  headers?: Record<string, string>;
+  /** Overrides the default cache lifetime (seconds). Server-side only; ignored for no-store. */
+  revalidateSeconds?: number;
+  /** Next.js cache tags for on-demand revalidation. Server-side only; ignored for no-store. */
+  tags?: string[];
   /** Keep the request alive if the shopper navigates away (payment verify). */
   keepalive?: boolean;
 };
@@ -28,6 +34,9 @@ export async function magentoGraphqlFetch<T>({
   signal,
   cache,
   authToken,
+  headers,
+  revalidateSeconds,
+  tags,
   keepalive,
 }: MagentoGraphqlRequest): Promise<T> {
   const isServer = typeof window === "undefined";
@@ -37,17 +46,23 @@ export async function magentoGraphqlFetch<T>({
   const response = await fetch(endpoint, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
       Accept: "application/json",
       Store: MAGENTO_DEFAULT_STORE_CODE,
       ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+      ...headers,
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({ query, variables }),
     signal,
     cache: effectiveCache ?? (isServer ? "force-cache" : "default"),
     ...(keepalive ? { keepalive: true } : {}),
     ...(isServer && effectiveCache !== "no-store"
-      ? { next: { revalidate: MAGENTO_CATALOG_REVALIDATE_SECONDS } }
+      ? {
+          next: {
+            revalidate: revalidateSeconds ?? MAGENTO_CATALOG_REVALIDATE_SECONDS,
+            ...(tags ? { tags } : {}),
+          },
+        }
       : {}),
   });
 

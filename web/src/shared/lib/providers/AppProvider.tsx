@@ -13,10 +13,21 @@ import { WishlistProvider } from '@/features/wishlist/context/WishlistContext';
 import { LoginModalProvider } from '@/features/auth/context/LoginModalContext';
 import LoginModal from '@/features/auth/components/LoginModal';
 import { PageLoadingProvider } from '@/shared/context/PageLoadingContext';
+import { AuthFeaturesProvider } from '@/features/auth/context/AuthFeaturesContext';
+import {
+  DEFAULT_AUTH_FEATURE_FLAGS,
+  type AuthFeatureFlags,
+} from '@/features/auth/types/authFeatures.types';
 
-export default function AppProvider({ children }: { children: React.ReactNode }) {
+export default function AppProvider({
+  children,
+  authFeatures = DEFAULT_AUTH_FEATURE_FLAGS,
+}: {
+  children: React.ReactNode;
+  authFeatures?: AuthFeatureFlags;
+}) {
   return (
-    <>
+    <AuthFeaturesProvider flags={authFeatures}>
       <AuthProvider>
         <CartProvider>
           <CartUIProvider>
@@ -41,6 +52,6 @@ export default function AppProvider({ children }: { children: React.ReactNode })
         </CartProvider>
       </AuthProvider>
       <Toaster richColors position="top-right" />
-    </>
+    </AuthFeaturesProvider>
   );
 }
