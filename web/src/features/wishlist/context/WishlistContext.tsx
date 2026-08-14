@@ -42,6 +42,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   const syncRequestIdRef = useRef(0);
   const lastLocalMutationAtRef = useRef(0);
   const toggleGenerationRef = useRef(0);
+  const inflightSkusRef = useRef(new Set<string>());
   const [isMovedToastOpen, setIsMovedToastOpen] = useState(false);
   const movedToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isRemovedToastOpen, setIsRemovedToastOpen] = useState(false);
@@ -164,6 +165,10 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         return;
       }
 
+      if (inflightSkusRef.current.has(normalizedSku)) {
+        return;
+      }
+
       const current = wishlistedIdsRef.current;
       const isCurrentlyWishlisted = current.includes(normalizedSku);
       const previous = current;
@@ -171,13 +176,16 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         ? current.filter((id) => id !== normalizedSku)
         : [...current, normalizedSku];
 
+      inflightSkusRef.current.add(normalizedSku);
       const toggleGeneration = ++toggleGenerationRef.current;
       lastLocalMutationAtRef.current = Date.now();
       setWishlistedIds(next);
 
       if (!isCurrentlyWishlisted) {
+        dismissRemovedToast();
         showMovedToast();
       } else {
+        dismissMovedToast();
         showRemovedToast();
       }
 
@@ -202,10 +210,20 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
           if (isCurrentlyWishlisted) {
             dismissRemovedToast();
           }
+        } finally {
+          inflightSkusRef.current.delete(normalizedSku);
         }
       })();
     },
-    [dismissRemovedToast, openLoginModal, pathname, showMovedToast, showRemovedToast, status],
+    [
+      dismissMovedToast,
+      dismissRemovedToast,
+      openLoginModal,
+      pathname,
+      showMovedToast,
+      showRemovedToast,
+      status,
+    ],
   );
 
   const value = useMemo(
