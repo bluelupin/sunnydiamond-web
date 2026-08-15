@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { homeSections } from "@/features/cms/data/content";
 import { useScrollSpy } from "@/shared/hooks/use-scroll-spy";
@@ -24,6 +24,24 @@ const SectionNav = () => {
     sectionIds,
     navStartSectionId: NAV_START_SECTION_ID,
   });
+  const [isFooterIntersecting, setIsFooterIntersecting] = useState(false);
+
+  useEffect(() => {
+    const footer = document.querySelector("footer");
+    if (!footer) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsFooterIntersecting(Boolean(entry?.isIntersecting));
+      },
+      { threshold: 0 },
+    );
+
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
+
+  const showNav = isVisible && !isFooterIntersecting;
 
   const activeIndex = useMemo(
     () => navSections.findIndex((section) => section.id === activeId),
@@ -38,11 +56,11 @@ const SectionNav = () => {
   return (
     <div
       className={cn(
-        "group/nav fixed bottom-0 left-0 z-50 hidden md:block",
+        "group/nav pointer-events-none fixed bottom-0 left-0 z-50 hidden md:block",
         "transition-all duration-500 ease-out will-change-transform",
-        isVisible
+        showNav
           ? "translate-x-0 opacity-100"
-          : "pointer-events-none -translate-x-3 opacity-0",
+          : "-translate-x-3 opacity-0",
       )}
     >
       <nav aria-label="Page sections" className="relative flex flex-col gap-y-5 pb-60 pl-10 pt-10">
@@ -79,6 +97,7 @@ const SectionNav = () => {
                 "flex items-center rounded-sm transition-[gap] duration-500 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-linkGold focus-visible:ring-offset-2",
                 isActive ? "gap-5" : "gap-0",
                 "group-hover/nav:gap-5 group-focus-within/nav:gap-5",
+                showNav ? "pointer-events-auto" : "pointer-events-none",
               )}
             >
               <span className="relative inline-flex size-4 shrink-0 items-center justify-center">

@@ -50,7 +50,6 @@ import { MagentoGraphqlError } from "@/services/magento/magento.errors";
 import {
   collectRazorpayPayment,
   resetRazorpayCart,
-  verifyRazorpayPayment,
 } from "../services/razorpayCheckout";
 import {
   clearPendingCheckoutPayment,
@@ -77,6 +76,9 @@ const CheckoutPage = () => {
   const { openLoginModal } = useLoginModal();
   const { otpLoginEnabled } = useAuthFeatures();
   const searchParams = useSearchParams();
+  const paymentStatus = searchParams?.get("payment");
+  const paymentOrderNumber = searchParams?.get("order");
+  const isPaymentReturn = paymentStatus === "success" && Boolean(paymentOrderNumber);
   const paymentReturnHandledRef = useRef(false);
   const {
     isAuthenticated,
@@ -93,7 +95,7 @@ const CheckoutPage = () => {
   const lastCheckedGuestEmailRef = useRef("");
   const checkoutStatusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [step, setStep] = useState<CheckoutStep>("form");
+  const [step, setStep] = useState<CheckoutStep>(isPaymentReturn ? "success" : "form");
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [phoneVerified, setPhoneVerified] = useState(false);
   const [orderSuccessAuthenticated, setOrderSuccessAuthenticated] = useState(false);
@@ -101,11 +103,31 @@ const CheckoutPage = () => {
   const paymentInFlightRef = useRef(false);
   const checkoutLockedRef = useRef(false);
   const [isSavingAddresses, setIsSavingAddresses] = useState(false);
-  const [placedItems, setPlacedItems] = useState<CartLineItem[]>([]);
-  const [placedTotal, setPlacedTotal] = useState(0);
-  const [placedOrderNumber, setPlacedOrderNumber] = useState<string | null>(null);
+  const [placedItems, setPlacedItems] = useState<CartLineItem[]>(() => {
+    if (!isPaymentReturn || !paymentOrderNumber) {
+      return [];
+    }
+    const pending = readPendingCheckoutPayment();
+    return pending?.orderNumber === paymentOrderNumber ? pending.placedItems : [];
+  });
+  const [placedTotal, setPlacedTotal] = useState(() => {
+    if (!isPaymentReturn || !paymentOrderNumber) {
+      return 0;
+    }
+    const pending = readPendingCheckoutPayment();
+    return pending?.orderNumber === paymentOrderNumber ? pending.totalPrice : 0;
+  });
+  const [placedOrderNumber, setPlacedOrderNumber] = useState<string | null>(
+    isPaymentReturn ? paymentOrderNumber ?? null : null,
+  );
 
-  const [form, setForm] = useState<CheckoutFormData>(createEmptyCheckoutForm);
+  const [form, setForm] = useState<CheckoutFormData>(() => {
+    if (!isPaymentReturn || !paymentOrderNumber) {
+      return createEmptyCheckoutForm();
+    }
+    const pending = readPendingCheckoutPayment();
+    return pending?.orderNumber === paymentOrderNumber ? pending.form : createEmptyCheckoutForm();
+  });
   const [payment, setPayment] = useState<CheckoutPaymentData>(createEmptyPaymentForm);
   const [offersOpen, setOffersOpen] = useState(false);
   const [orderSummaryOpen, setOrderSummaryOpen] = useState(false);
@@ -263,10 +285,6 @@ const CheckoutPage = () => {
     [clearCart, refreshAuth, showOrderPlacedToast],
   );
 
-  const paymentStatus = searchParams?.get("payment");
-  const paymentOrderNumber = searchParams?.get("order");
-  const isPaymentReturn = paymentStatus === "success" && Boolean(paymentOrderNumber);
-
   useEffect(() => {
     if (paymentReturnHandledRef.current) {
       return;
@@ -371,7 +389,7 @@ const CheckoutPage = () => {
     shippingPrefillAppliedRef.current = true;
   }, [addressesLoading, defaultShippingAddress, isAuthenticated]);
 
-  if (isHydrating || isAuthPrefillLoading) {
+  if ((isHydrating || isAuthPrefillLoading) && step !== "success" && !isPaymentReturn) {
     return <CheckoutPageSkeleton />;
   }
 
@@ -654,16 +672,13 @@ const CheckoutPage = () => {
               };
             }
 
-            try {
-              await verifyRazorpayPayment({
-                orderNumber: order.orderNumber,
-                paymentId: outcome.paymentId,
-                signature: outcome.signature,
-              });
-            } catch {
-              // Payment is captured on Razorpay's side; Magento's webhook and
-              // cron reconcile the order even if this confirmation call fails.
-            }
+            // Magento confirm already started in the Razorpay handler. Waiting
+            // here kept the checkout form on screen after payment succeeded.
+            setPlacedItems([...submittedItems]);
+            setPlacedTotal(submittedTotal);
+            setPlacedOrderNumber(order.orderNumber);
+            setForm(submittedForm);
+            setStep("success");
 
             await finalizeOrderSuccess({
               orderNumber: order.orderNumber,

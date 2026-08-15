@@ -126,10 +126,12 @@ const JewelleryFilterDrawer = ({
   }, [open, appliedFilters, facets]);
 
   useEffect(() => {
-    if (!maxInputFocused) {
-      setMaxInputValue(getMaxAmountDisplayValue(draft.maxPrice, draft.minPrice, facets.maxPrice));
+    if (maxInputFocused || getMaxAmountBelowMinError(draft.minPrice, maxInputValue)) {
+      return;
     }
-  }, [draft.maxPrice, draft.minPrice, facets.maxPrice, maxInputFocused]);
+
+    setMaxInputValue(getMaxAmountDisplayValue(draft.maxPrice, draft.minPrice, facets.maxPrice));
+  }, [draft.maxPrice, draft.minPrice, facets.maxPrice, maxInputFocused, maxInputValue]);
 
   useEffect(() => {
     if (!open) return;
@@ -180,6 +182,10 @@ const JewelleryFilterDrawer = ({
   };
 
   const applyDraft = () => {
+    if (getMaxAmountBelowMinError(draft.minPrice, maxInputValue)) {
+      return;
+    }
+
     const normalized = resolveDraftPriceRange();
     onApply({ ...draft, ...normalized });
     setMaxInputFocused(false);
@@ -212,6 +218,11 @@ const JewelleryFilterDrawer = ({
   const canApplyFilters = hasFilterChanges(draft, appliedFilters, facets) && !maxAmountError;
 
   const commitMaxAmountInput = () => {
+    if (getMaxAmountBelowMinError(draft.minPrice, maxInputValue)) {
+      setMaxInputFocused(false);
+      return;
+    }
+
     const trimmed = maxInputValue.replace(/,/g, "").trim();
     const nextMax =
       trimmed === "" ? facets.maxPrice : parseJewelleryPriceInput(maxInputValue, facets.maxPrice);
@@ -380,7 +391,11 @@ const JewelleryFilterDrawer = ({
 
                         const parsed = Number(trimmed);
                         if (Number.isFinite(parsed)) {
-                          updatePriceRange(draft.minPrice, Math.max(0, Math.round(parsed)));
+                          const intendedMax = Math.max(0, Math.round(parsed));
+                          if (intendedMax < Math.round(draft.minPrice)) {
+                            return;
+                          }
+                          updatePriceRange(draft.minPrice, intendedMax);
                         }
                       }}
                       aria-invalid={Boolean(maxAmountError)}
