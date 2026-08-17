@@ -49,7 +49,7 @@ const BlogsFilterBar = ({ filterLabel, categories }: BlogsFilterBarProps) => {
                   "shrink-0 px-4 md:h-[34px] h-[31px] flex justify-center items-center text-center font-gill font-normal leading-110 whitespace-nowrap",
                   "text-sm md:text-base",
                   isSelected
-                    ? "max-md:bg-darkblack max-md:text-white bg-gray300 text-darkblack"
+                    ? "bg-darkblack text-white"
                     : "bg-gray300 text-darkblack",
                 )}
               >
