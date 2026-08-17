@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import Reveal from "@/shared/Animation/Reveal";
+import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { resolveCareerApplicationFlow } from "@/services/careers/resolveCareerApplicationFlow";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
 import CareersApplicationSuccessIcon from "./shared/CareersApplicationSuccessIcon";
@@ -49,12 +49,9 @@ const CareersApplicationSuccessSection = () => {
         ) : null}
 
         <Reveal direction="up">
-          <Link
-            href="/"
-            className="inline-flex flex-col items-center border-b border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
-          >
+          <DetailTextLink href="/" className="flex-col items-center">
             {applicationSuccess.goHomeLabel}
-          </Link>
+          </DetailTextLink>
         </Reveal>
       </div>
     </section>

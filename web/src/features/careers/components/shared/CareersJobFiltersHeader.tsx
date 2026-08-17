@@ -11,9 +11,14 @@ import CareersSectionCta from "./CareersSectionCta";
 type CareersJobFiltersHeaderProps = {
   title: string;
   trailing?: ReactNode;
+  showClearAction?: boolean;
 };
 
-const CareersJobFiltersHeader = ({ title, trailing }: CareersJobFiltersHeaderProps) => {
+const CareersJobFiltersHeader = ({
+  title,
+  trailing,
+  showClearAction = true,
+}: CareersJobFiltersHeaderProps) => {
   const {
     searchQuery,
     locationFilter,
@@ -35,7 +40,7 @@ const CareersJobFiltersHeader = ({ title, trailing }: CareersJobFiltersHeaderPro
         {title}
       </h3>
       <div className="flex shrink-0 items-center gap-4">
-        {hasActiveFilters ? (
+        {showClearAction && hasActiveFilters ? (
           <CareersSectionCta onClick={clearListingFilters} variant="link" className="shrink-0">
             {CAREERS_LISTING_CLEAR_FILTERS_LABEL}
           </CareersSectionCta>

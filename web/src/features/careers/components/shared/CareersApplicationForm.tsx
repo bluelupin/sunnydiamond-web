@@ -40,6 +40,10 @@ import {
   sanitizeCareersNumericInput,
   type CareersResumeValidationError,
 } from "@/features/careers/constants/careersApplicationForm";
+import {
+  careersDarkCtaClassName,
+  careersOutlineCtaClassName,
+} from "@/features/careers/constants/careersCtaStyles";
 import CareersApplicationJobHeader from "./CareersApplicationJobHeader";
 import CareersSelectField from "./CareersSelectField";
 import CareersUploadResumeModal from "./CareersUploadResumeModal";
@@ -489,9 +493,9 @@ const CareersApplicationForm = () => {
               <button
                 type="button"
                 onClick={() => setUploadResumeModalOpen(true)}
-                className="inline-flex h-14 items-center justify-center border border-neutral300 bg-white px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-colors hover:bg-gray300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
+                className={careersOutlineCtaClassName}
               >
-                {applicationForm.resumeUploadLabel}
+                <span className="relative z-10">{applicationForm.resumeUploadLabel}</span>
               </button>
             )}
           </div>
@@ -875,9 +879,11 @@ const CareersApplicationForm = () => {
       <button
         type="submit"
         disabled={!isFormComplete || isSubmitting}
-        className="inline-flex h-14 w-full items-center justify-center bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 md:w-[193px]"
+        className={cn(careersDarkCtaClassName, "w-full md:w-[193px]")}
       >
-        {isSubmitting ? CAREERS_SUBMITTING_APPLICATION_LABEL : applicationForm.submitLabel}
+        <span className="relative z-10">
+          {isSubmitting ? CAREERS_SUBMITTING_APPLICATION_LABEL : applicationForm.submitLabel}
+        </span>
       </button>
 
       <CareersUploadResumeModal

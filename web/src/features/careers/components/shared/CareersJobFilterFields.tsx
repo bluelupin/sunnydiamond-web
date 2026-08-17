@@ -1,6 +1,7 @@
 "use client";
 
 import { appointmentLabelClassName } from "@/shared/constants/appointmentForm";
+import { CAREERS_FILTER_ALL_LABEL } from "@/features/careers/constants/careersListing";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
 import CareersSelectField from "./CareersSelectField";
 
@@ -8,18 +9,17 @@ type FilterFieldProps = {
   id: string;
   label: string;
   value: string;
-  placeholder: string;
   options: string[];
   onChange: (value: string) => void;
 };
 
-const FilterField = ({ id, label, value, placeholder, options, onChange }: FilterFieldProps) => {
+const FilterField = ({ id, label, value, options, onChange }: FilterFieldProps) => {
   return (
     <CareersSelectField
       id={id}
       label={label}
       value={value}
-      placeholder={placeholder.trim() || "-select-"}
+      placeholder={CAREERS_FILTER_ALL_LABEL}
       options={options}
       onChange={onChange}
       labelClassName={appointmentLabelClassName}
@@ -27,18 +27,41 @@ const FilterField = ({ id, label, value, placeholder, options, onChange }: Filte
   );
 };
 
-const CareersJobFilterFields = () => {
+type CareersJobFilterFieldsProps = {
+  locationFilter?: string;
+  departmentFilter?: string;
+  experienceFilter?: string;
+  onLocationFilterChange?: (value: string) => void;
+  onDepartmentFilterChange?: (value: string) => void;
+  onExperienceFilterChange?: (value: string) => void;
+};
+
+const CareersJobFilterFields = ({
+  locationFilter: locationFilterProp,
+  departmentFilter: departmentFilterProp,
+  experienceFilter: experienceFilterProp,
+  onLocationFilterChange,
+  onDepartmentFilterChange,
+  onExperienceFilterChange,
+}: CareersJobFilterFieldsProps = {}) => {
   const {
     cms,
     filterOptions,
-    locationFilter,
-    departmentFilter,
-    experienceFilter,
+    locationFilter: contextLocationFilter,
+    departmentFilter: contextDepartmentFilter,
+    experienceFilter: contextExperienceFilter,
     setLocationFilter,
     setDepartmentFilter,
     setExperienceFilter,
   } = useCareersJobs();
   const { listing } = cms;
+
+  const locationFilter = locationFilterProp ?? contextLocationFilter;
+  const departmentFilter = departmentFilterProp ?? contextDepartmentFilter;
+  const experienceFilter = experienceFilterProp ?? contextExperienceFilter;
+  const handleLocationFilterChange = onLocationFilterChange ?? setLocationFilter;
+  const handleDepartmentFilterChange = onDepartmentFilterChange ?? setDepartmentFilter;
+  const handleExperienceFilterChange = onExperienceFilterChange ?? setExperienceFilter;
 
   if (
     !listing.filterLocationLabel ||
@@ -48,33 +71,28 @@ const CareersJobFilterFields = () => {
     return null;
   }
 
-  const selectPlaceholder = listing.filterSelectPlaceholder ?? "";
-
   return (
     <div className="flex flex-col gap-4">
       <FilterField
         id="careers-filter-location"
         label={listing.filterLocationLabel}
         value={locationFilter}
-        placeholder={selectPlaceholder}
         options={filterOptions.locations}
-        onChange={setLocationFilter}
+        onChange={handleLocationFilterChange}
       />
       <FilterField
         id="careers-filter-department"
         label={listing.filterDepartmentLabel}
         value={departmentFilter}
-        placeholder={selectPlaceholder}
         options={filterOptions.departments}
-        onChange={setDepartmentFilter}
+        onChange={handleDepartmentFilterChange}
       />
       <FilterField
         id="careers-filter-experience"
         label={listing.filterExperienceLabel}
         value={experienceFilter}
-        placeholder={selectPlaceholder}
         options={filterOptions.experiences}
-        onChange={setExperienceFilter}
+        onChange={handleExperienceFilterChange}
       />
     </div>
   );

@@ -2,6 +2,7 @@
 
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import Reveal from "@/shared/Animation/Reveal";
+import { careersDarkCtaClassName } from "@/features/careers/constants/careersCtaStyles";
 import type { NormalizedCareerDiscoverSection } from "@/services/careers/careers.types";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
 
@@ -51,9 +52,9 @@ const CareersBespokeInspirationsSection = ({
             <button
               type="button"
               onClick={goToListings}
-              className={`inline-flex h-14 shrink-0 items-center justify-center bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-90 ${ctaFocusClass}`}
+              className={`${careersDarkCtaClassName} shrink-0 ${ctaFocusClass}`}
             >
-              {discover.ctaLabel}
+              <span className="relative z-10">{discover.ctaLabel}</span>
             </button>
           </Reveal>
         </div>
