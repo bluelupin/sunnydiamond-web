@@ -54,7 +54,19 @@ export async function POST(request: NextRequest) {
   const input = phone ? { phone } : { email };
 
   // Forward the caller's IP so Magento rate-limits per client, not per Next server.
+  // It travels with a shared secret because Magento's GraphQL endpoint is public:
+  // without proof the header came from us, anyone could rotate a made-up IP and
+  // walk straight past the per-IP cap. Magento ignores the IP unless the secret
+  // matches, so a missing secret degrades to one shared bucket, never to none.
   const clientIp = resolveClientIp(request);
+  const forwardedSecret = process.env.MAGENTO_FORWARDED_IP_SECRET;
+  const forwardedHeaders =
+    clientIp && forwardedSecret
+      ? {
+          "X-Sunny-Client-Ip": clientIp,
+          "X-Sunny-Forwarded-Secret": forwardedSecret,
+        }
+      : undefined;
 
   try {
     const data = await magentoGraphqlFetch<{
@@ -68,7 +80,7 @@ export async function POST(request: NextRequest) {
       query: MAGENTO_REQUEST_LOGIN_OTP_MUTATION,
       variables: { input },
       cache: "no-store",
-      ...(clientIp ? { headers: { "X-Forwarded-For": clientIp } } : {}),
+      ...(forwardedHeaders ? { headers: forwardedHeaders } : {}),
     });
 
     return NextResponse.json({
