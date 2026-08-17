@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import type { MoreForYouCarouselItem } from "@/features/products/data/moreForYouContent";
 import type { PrefetchedAlankaraCollection } from "@/features/products/services/prefetchProductDetailAlankara";
 import type { NormalizedVisitUsSection } from "@/services/product-display/product-display-page.service";
-import { homeContent } from "@/features/cms/data/content";
 
 const ProductDetailHeroBanner = dynamic(() => import("./detail/ProductDetailHeroBanner"));
 
@@ -48,7 +47,6 @@ const ProductDetailBelowFoldLazy = ({
     <FeaturedCollectionSection
       id="alankara"
       sectionHeading="Pair it With"
-      description={homeContent.alankara.collection.description}
       prefetchedAlankara={alankaraPrefetch ?? undefined}
     />
     <ProductDetailMoreForYouSection items={moreForYou} />
