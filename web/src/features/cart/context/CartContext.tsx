@@ -65,6 +65,7 @@ import {
   assertResolvableCartLineOptions,
   mapMagentoCartCustomizableOptions,
 } from "@/services/magento/cart/cartLineCustomOptions.mapper";
+import { assignCartLineInstance } from "@/features/cart/utils/cartLineInstance.utils";
 
 /** @deprecated Use CartLineItem from cart.types */
 export type CartItem = CartLineItem;
@@ -135,6 +136,16 @@ function resolveAddedLineUid(
 ): string | null {
   const previousIds = new Set(previousItems.map((item) => item.id));
   const newLines = nextState.items.filter((item) => !previousIds.has(item.id));
+  const lineInstance = options.lineInstance?.trim();
+
+  if (lineInstance) {
+    const matchingInstance = nextState.items.find(
+      (item) => item.options.lineInstance?.trim() === lineInstance,
+    );
+    if (matchingInstance) {
+      return matchingInstance.id;
+    }
+  }
 
   if (newLines.length === 1) {
     return newLines[0].id;
@@ -161,6 +172,10 @@ function resolveAddedLineUid(
 
   if (matchingNew) {
     return matchingNew.id;
+  }
+
+  if (lineInstance) {
+    return newLines[0]?.id ?? null;
   }
 
   return resolveLineUidForSku(nextState, sku);
@@ -391,12 +406,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [applyCartState, isAuthenticated, refreshCart, status]);
 
   const addItem = useCallback(async (payload: AddToBagPayload | Product): Promise<AddItemResult> => {
+    const normalized = normalizePayload(payload);
     const {
       product,
-      options = {},
       productCustomOptions = product.customOptions,
       configurableOptionUids,
-    } = normalizePayload(payload);
+    } = normalized;
+    const options = assignCartLineInstance(
+      normalized.options ?? {},
+      productCustomOptions,
+    );
     const sku = product.id.trim();
 
     if (!sku) {
@@ -530,12 +549,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const replaceLineItem = useCallback(
     async (lineItemId: string, payload: AddToBagPayload): Promise<AddItemResult> => {
+      const preservedLineInstance =
+        lineMetadataRef.current[lineItemId]?.options.lineInstance?.trim() ||
+        cartState?.items.find((item) => item.id === lineItemId)?.options.lineInstance?.trim();
+
       await removeItem(lineItemId, { showToast: false });
-      const result = await addItem(payload);
-      showCartStatusToast("Product updated successfully");
-      return result;
+
+      return addItem({
+        ...payload,
+        options: {
+          ...payload.options,
+          ...(preservedLineInstance ? { lineInstance: preservedLineInstance } : {}),
+        },
+      });
     },
-    [addItem, removeItem, showCartStatusToast],
+    [addItem, cartState?.items, removeItem],
   );
 
   const buyNow = useCallback(

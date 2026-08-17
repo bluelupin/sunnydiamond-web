@@ -26,4 +26,6 @@ export type ProductCustomOptions = {
   engravingFont?: ProductCustomOptionChoice;
   ringSize?: ProductCustomOptionChoice;
   metal?: ProductCustomOptionChoice;
+  /** Hidden Magento field option — dedupes cart lines without showing in PDP UI. */
+  lineInstance?: ProductCustomOptionField;
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback } from "react";
 import type { Product } from "@/features/products/data/products";
 import { useCart } from "@/features/cart/context/CartContext";
 import { useCartUI } from "@/features/cart/context/CartUIContext";
@@ -10,16 +10,13 @@ import { toast } from "@/shared/ui/sonner";
 
 export function useAddToBagWithDrawer() {
   const { addItem, replaceLineItem } = useCart();
-  const { openBagDrawer, closeBagDrawer } = useCartUI();
-  const bagActionInFlightRef = useRef(false);
+  const { openBagDrawer, closeBagDrawer, tryBeginBagAction, endBagAction } = useCartUI();
 
   const addToBagAndOpenDrawer = useCallback(
     async (payload: AddToBagPayload | Product) => {
-      if (bagActionInFlightRef.current) {
+      if (!tryBeginBagAction()) {
         return;
       }
-
-      bagActionInFlightRef.current = true;
 
       try {
         const result = await addItem(payload);
@@ -29,19 +26,17 @@ export function useAddToBagWithDrawer() {
         console.error("Add to bag failed:", error);
         toast.error(formatAddToBagErrorMessage(error));
       } finally {
-        bagActionInFlightRef.current = false;
+        endBagAction();
       }
     },
-    [addItem, closeBagDrawer, openBagDrawer],
+    [addItem, closeBagDrawer, endBagAction, openBagDrawer, tryBeginBagAction],
   );
 
   const updateBagAndOpenDrawer = useCallback(
     async (lineItemId: string, payload: AddToBagPayload) => {
-      if (bagActionInFlightRef.current) {
+      if (!tryBeginBagAction()) {
         return;
       }
-
-      bagActionInFlightRef.current = true;
 
       try {
         const result = await replaceLineItem(lineItemId, payload);
@@ -51,10 +46,10 @@ export function useAddToBagWithDrawer() {
         console.error("Update bag failed:", error);
         toast.error(formatAddToBagErrorMessage(error));
       } finally {
-        bagActionInFlightRef.current = false;
+        endBagAction();
       }
     },
-    [closeBagDrawer, openBagDrawer, replaceLineItem],
+    [closeBagDrawer, endBagAction, openBagDrawer, replaceLineItem, tryBeginBagAction],
   );
 
   return { addToBagAndOpenDrawer, updateBagAndOpenDrawer };
