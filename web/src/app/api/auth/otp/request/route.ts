@@ -11,16 +11,27 @@ type OtpRequestBody = {
 };
 
 /**
- * Real client IP for Magento's per-IP OTP rate caps. Trust only what our own
- * nginx sets: x-real-ip, else the RIGHTMOST x-forwarded-for entry (nginx appends
- * the true peer last — leftmost entries are caller-controlled and spoofable).
+ * Real client IP for Magento's per-IP OTP rate caps.
+ *
+ * CF-Connecting-IP comes first because Cloudflare fronts staging and production:
+ * behind it, nginx's peer is a Cloudflare edge address, so x-real-ip and the
+ * rightmost x-forwarded-for entry both resolve to the PoP rather than the
+ * customer — which would put everyone routed through Mumbai in one bucket.
+ * Cloudflare overwrites this header on every request, so it cannot be spoofed
+ * from outside; the nginx-set values remain the fallback for direct origin hits.
  */
 function resolveClientIp(request: NextRequest): string | null {
+  const cloudflareIp = request.headers.get("cf-connecting-ip")?.trim();
+  if (cloudflareIp && isIP(cloudflareIp)) {
+    return cloudflareIp;
+  }
+
   const realIp = request.headers.get("x-real-ip")?.trim();
   if (realIp && isIP(realIp)) {
     return realIp;
   }
 
+  // nginx appends the true peer last — leftmost entries are caller-supplied.
   const lastForwarded = request.headers
     .get("x-forwarded-for")
     ?.split(",")

@@ -94,7 +94,10 @@ export async function requestLoginOtp(target: OtpTarget): Promise<RequestOtpResu
   return {
     success: true,
     resendAfterSeconds: (data.resendAfterSeconds as number) ?? 60,
-    channel: (data.channel as OtpChannel) ?? (target.kind === "phone" ? "sms" : "email"),
+    // Narrowed, not cast: ?? only catches null/undefined, so an empty or
+    // unexpected channel would flow through and make the OTP screen render an
+    // email address through the phone formatter, which strips it to nothing.
+    channel: data.channel === "email" ? "email" : "sms",
     maskedDestination: (data.maskedDestination as string | null) ?? null,
   };
 }

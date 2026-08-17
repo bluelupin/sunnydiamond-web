@@ -19,6 +19,7 @@ type LoginModalContentProps = {
   identifierError?: string;
   emailOnly: boolean;
   otpBlockedForCountry: boolean;
+  noSignInMethod: boolean;
   showGoogle: boolean;
   showApple: boolean;
   onIdentifierChange: (value: string) => void;
@@ -52,6 +53,7 @@ const LoginModalContent = ({
   identifierError,
   emailOnly,
   otpBlockedForCountry,
+  noSignInMethod,
   showGoogle,
   showApple,
   onIdentifierChange,
@@ -64,7 +66,9 @@ const LoginModalContent = ({
   titleClassName,
 }: LoginModalContentProps) => {
   const canContinue =
-    !otpBlockedForCountry && isLoginIdentifierReadyForOtp(identifier, countryCode, { emailOnly });
+    !noSignInMethod
+    && !otpBlockedForCountry
+    && isLoginIdentifierReadyForOtp(identifier, countryCode, { emailOnly });
   const showSocial = showGoogle || showApple;
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -105,7 +109,16 @@ const LoginModalContent = ({
           onCountryCodeChange={onCountryCodeChange}
         />
 
-        {otpBlockedForCountry ? (
+        {noSignInMethod ? (
+          <div role="status">
+            <p className="font-gill text-sm font-light leading-110 text-neutral500">
+              Sign-in is temporarily unavailable. Please try again shortly, or contact us
+              if you need help with your order.
+            </p>
+          </div>
+        ) : null}
+
+        {!noSignInMethod && otpBlockedForCountry ? (
           <div role="status" className="flex flex-col gap-1">
             {/* Wording fixed by the Authentication & Registration Flow document. */}
             <p className="font-gill text-sm font-light leading-110 text-neutral500">

@@ -44,6 +44,16 @@ const CloseIcon = () => (
 const formatPhoneForOtp = (countryCode: string, phone: string) =>
   formatLoginPhoneDisplay(countryCode, phone);
 
+/**
+ * The cooldown comes from Magento and defaults to 60s, so a hardcoded "00:"
+ * prefix rendered "00:60". Admins can raise it further.
+ */
+const formatCountdown = (totalSeconds: number): string => {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+};
+
 const LoginOtpContent = ({
   phone,
   countryCode,
@@ -109,7 +119,9 @@ const LoginOtpContent = ({
             <p className="font-gill text-base font-normal leading-110 text-darkblack">
               {channel === "email" ? (
                 <>
-                  We&rsquo;ve sent a 6-digit OTP to your registered email{" "}
+                  {/* Not "registered email": the same step serves first-time
+                      sign-ups, whose address has no account behind it yet. */}
+                  We&rsquo;ve sent a {OTP_LENGTH}-digit code to{" "}
                   <span className="font-normal">{maskedDestination ?? phone}</span>
                 </>
               ) : (
@@ -168,7 +180,7 @@ const LoginOtpContent = ({
               {secondsLeft > 0 ? (
                 <>
                   Resend code in{" "}
-                  <span className="font-normal">00:{secondsLeft.toString().padStart(2, "0")}</span>
+                  <span className="font-normal">{formatCountdown(secondsLeft)}</span>
                 </>
               ) : (
                 <button

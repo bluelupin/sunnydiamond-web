@@ -56,6 +56,8 @@ export type AuthFlowContentProps = {
     identifierError?: string;
     emailOnly: boolean;
     otpBlockedForCountry: boolean;
+    /** No code channel and no social provider is available — nothing here can work. */
+    noSignInMethod: boolean;
     showGoogle: boolean;
     showApple: boolean;
     onIdentifierChange: (value: string) => void;
@@ -91,6 +93,8 @@ export type AuthFlowContentProps = {
     fullNameError?: string;
     emailError?: string;
     termsError?: string;
+    /** Failures that belong to no single field — an expired code, a rejected save. */
+    formError?: string;
     onFullNameChange: (value: string) => void;
     onEmailChange: (value: string) => void;
     onTermsAcceptedChange: (value: boolean) => void;
@@ -125,6 +129,9 @@ export function useAuthFlow({
   const [otpTarget, setOtpTarget] = useState<OtpTarget | null>(null);
   const [otpChannel, setOtpChannel] = useState<OtpChannel>("sms");
   const [maskedDestination, setMaskedDestination] = useState<string | null>(null);
+  /** Set only once a code has actually been accepted, which is what the
+   *  create-account step depends on — a code merely being in flight is not enough. */
+  const [otpVerified, setOtpVerified] = useState(false);
   const [verifiedCountryCode, setVerifiedCountryCode] = useState<string>(DEFAULT_COUNTRY_CODE);
   const [identifierError, setIdentifierError] = useState<string | undefined>();
   const [otp, setOtp] = useState<string[]>(Array(LOGIN_OTP_LENGTH).fill(""));
@@ -136,19 +143,23 @@ export function useAuthFlow({
   const [fullNameError, setFullNameError] = useState<string | undefined>();
   const [emailError, setEmailError] = useState<string | undefined>();
   const [termsError, setTermsError] = useState<string | undefined>();
+  const [createAccountFormError, setCreateAccountFormError] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
   /** Server-provided resend cooldown; the timer effect reads this on entering the OTP step. */
   const cooldownRef = useRef(RESEND_SECONDS);
 
   /**
-   * Both post-sign-in steps act on a code that is already in flight, so neither is
-   * reachable without a target. Derived rather than corrected in an effect: the
-   * transitions already maintain the invariant, and this way an inconsistent
-   * state can never be rendered even for one frame.
+   * Each step states its own precondition, so neither can be rendered — even for
+   * one frame — without the thing it acts on. Derived rather than corrected in an
+   * effect, and the create-account guard checks the accepted code rather than just
+   * a sent one, so the screen cannot be reached without a verification.
    */
-  const step: AuthFlowStep =
-    requestedStep !== "sign-in" && !otpTarget ? "sign-in" : requestedStep;
+  const stepIsReachable =
+    requestedStep === "sign-in"
+    || (requestedStep === "otp" && otpTarget !== null)
+    || (requestedStep === "create-account" && otpTarget !== null && otpVerified);
+  const step: AuthFlowStep = stepIsReachable ? requestedStep : "sign-in";
 
   // With SMS off, the field accepts email only — there is no other code to send.
   const emailOnly = !flags.otpLoginEnabled || emailModeForced;
@@ -156,6 +167,13 @@ export function useAuthFlow({
     !emailOnly && !isEmailIdentifier(identifier) && !isIndianCountryCode(countryCode);
   /** Registering by email: the address was already proven, so it is not editable. */
   const emailIsVerifiedIdentifier = otpTarget?.kind === "email";
+  /**
+   * Every channel is off — which is also the fail-closed state when the flag fetch
+   * errors. Without this the form would look usable and could only ever produce an
+   * error, with the social buttons hidden by the same flags.
+   */
+  const noSignInMethod =
+    !flags.otpLoginEnabled && !flags.emailOtpLoginEnabled && !showGoogle && !showApple;
 
   /** Session cookie is set — sync guest cart/wishlist, then full navigation so providers reboot. */
   const completeAuth = useCallback(async () => {
@@ -171,6 +189,7 @@ export function useAuthFlow({
     setOtpTarget(null);
     setOtpChannel("sms");
     setMaskedDestination(null);
+    setOtpVerified(false);
     setVerifiedCountryCode(DEFAULT_COUNTRY_CODE);
     setIdentifierError(undefined);
     setOtp(Array(LOGIN_OTP_LENGTH).fill(""));
@@ -182,6 +201,7 @@ export function useAuthFlow({
     setFullNameError(undefined);
     setEmailError(undefined);
     setTermsError(undefined);
+    setCreateAccountFormError(undefined);
     setIsSubmitting(false);
   }, []);
 
@@ -275,6 +295,7 @@ export function useAuthFlow({
       setOtpTarget(target);
       setOtpChannel(result.channel);
       setMaskedDestination(result.maskedDestination);
+      setOtpVerified(false);
       return { ok: true };
     },
     [],
@@ -295,10 +316,6 @@ export function useAuthFlow({
     // Never call the API for a channel Magento has switched off.
     if (target.kind === "email" && !flags.emailOtpLoginEnabled) {
       setIdentifierError("Email sign-in is unavailable right now. Please try another method.");
-      return;
-    }
-    if (target.kind === "phone" && !flags.otpLoginEnabled) {
-      setIdentifierError("Mobile sign-in is unavailable right now. Please use your email.");
       return;
     }
 
@@ -330,7 +347,12 @@ export function useAuthFlow({
 
   const handleBackToSignIn = useCallback(() => {
     setStep("sign-in");
+    // Clear what was sent and where together: leaving the channel or the masked
+    // address behind would let a later screen describe the wrong destination.
     setOtpTarget(null);
+    setOtpChannel("sms");
+    setMaskedDestination(null);
+    setOtpVerified(false);
     setOtp(Array(LOGIN_OTP_LENGTH).fill(""));
     setOtpError(undefined);
     setSecondsLeft(RESEND_SECONDS);
@@ -407,6 +429,7 @@ export function useAuthFlow({
     }
 
     setOtpError(undefined);
+    setOtpVerified(true);
 
     if (result.requiresAccountSetup) {
       // Registering by email? The verified address is the account address.
@@ -434,6 +457,7 @@ export function useAuthFlow({
     setFullNameError(errors.fullName);
     setEmailError(errors.email);
     setTermsError(errors.terms);
+    setCreateAccountFormError(undefined);
 
     if (!valid) return;
 
@@ -448,7 +472,9 @@ export function useAuthFlow({
 
     if (!result.success) {
       setIsSubmitting(false);
-      setEmailError(result.error);
+      // Not setEmailError: on the email path that field is read-only, so an
+      // expired-code message would land on an input the customer cannot act on.
+      setCreateAccountFormError(result.error);
       return;
     }
 
@@ -498,6 +524,7 @@ export function useAuthFlow({
       identifierError,
       emailOnly,
       otpBlockedForCountry,
+      noSignInMethod,
       showGoogle,
       showApple,
       onIdentifierChange: handleIdentifierChange,
@@ -533,6 +560,7 @@ export function useAuthFlow({
       fullNameError,
       emailError,
       termsError,
+      formError: createAccountFormError,
       onFullNameChange: (value) => {
         setFullName(value);
         setFullNameError(undefined);
