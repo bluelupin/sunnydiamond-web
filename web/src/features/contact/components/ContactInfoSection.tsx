@@ -14,7 +14,7 @@ type ContactInfoSectionProps = {
 
 const ContactInfoSection = ({ intro, infoCards }: ContactInfoSectionProps) => {
   return (
-    <section aria-labelledby="contact-intro" className="w-full md:px-10 xl:px-[150px] md:px-10">
+    <section aria-labelledby="contact-intro" className="w-full md:px-10 xl:px-[150px] md:px-10 px-4">
       <div className="mx-auto flex w-full max-w-1360 flex-col items-center md:gap-10 gap-16 md:pt-16">
         <Reveal
           as="p"
