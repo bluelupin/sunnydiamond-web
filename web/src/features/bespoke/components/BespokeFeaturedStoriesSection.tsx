@@ -633,6 +633,18 @@ const BespokeFeaturedStoriesSection = ({
     setCurrentIndex(defaultSlideIndex);
   }, [defaultSlideIndex, slidesIdentity]);
 
+  useEffect(() => {
+    if (!modalOpen && !pastCreationsOpen) {
+      document.body.style.overflow = "";
+      return;
+    }
+
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [modalOpen, pastCreationsOpen]);
+
   const handleCenterOpen = useCallback(() => {
     if (slides.length === 0) return;
     setModalSlideOverride(null);
