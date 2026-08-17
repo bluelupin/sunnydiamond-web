@@ -1,7 +1,7 @@
 "use client";
 
 import AppleIcon from "@/assets/Icons/AppleIcon";
-import GoogleIcon from "@/assets/Icons/GoogleIcon";
+import GoogleSignInButton from "./GoogleSignInButton";
 import {
   CartDivider,
   CartPrimaryButton,
@@ -25,7 +25,8 @@ type LoginModalContentProps = {
   onIdentifierChange: (value: string) => void;
   onCountryCodeChange: (value: string) => void;
   onContinue: () => void;
-  onGoogleContinue: () => void;
+  /** Called with the ID token from Google's own button — see GoogleSignInButton. */
+  onGoogleCredential: (credential: string) => void;
   onAppleContinue: () => void;
   onUseEmailInstead: () => void;
   onClose: () => void;
@@ -59,7 +60,7 @@ const LoginModalContent = ({
   onIdentifierChange,
   onCountryCodeChange,
   onContinue,
-  onGoogleContinue,
+  onGoogleCredential,
   onAppleContinue,
   onUseEmailInstead,
   onClose,
@@ -148,10 +149,10 @@ const LoginModalContent = ({
         {showSocial ? <OrDivider /> : null}
 
         {showGoogle ? (
-          <button type="button" className={socialButtonClassName} onClick={onGoogleContinue}>
-            <GoogleIcon className="block size-6 shrink-0" />
-            <span className="relative z-10 leading-none">CONTINUE WITH GOOGLE</span>
-          </button>
+          <GoogleSignInButton
+            className={socialButtonClassName}
+            onCredential={onGoogleCredential}
+          />
         ) : null}
 
         {showApple ? (

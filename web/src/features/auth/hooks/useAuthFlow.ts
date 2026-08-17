@@ -13,10 +13,10 @@ import {
 } from "../services/auth.service";
 import { runPostLoginSync } from "../services/postLoginSync";
 import {
+  exchangeGoogleCredential,
   isAppleSignInConfigured,
   isGoogleSignInConfigured,
   signInWithApple,
-  signInWithGoogle,
 } from "../services/socialSignIn";
 import { useAuthFeatures } from "../context/AuthFeaturesContext";
 import {
@@ -63,7 +63,7 @@ export type AuthFlowContentProps = {
     onIdentifierChange: (value: string) => void;
     onCountryCodeChange: (value: string) => void;
     onContinue: () => void;
-    onGoogleContinue: () => void;
+    onGoogleCredential: (credential: string) => void;
     onAppleContinue: () => void;
     onUseEmailInstead: () => void;
     onClose: () => void;
@@ -481,19 +481,22 @@ export function useAuthFlow({
     await completeAuth();
   }, [completeAuth, email, fullName, isSubmitting, otp, otpTarget, termsAccepted]);
 
-  const handleGoogleContinue = useCallback(async () => {
-    if (isSubmitting) return;
-    setIsSubmitting(true);
-    const result = await signInWithGoogle();
+  const handleGoogleCredential = useCallback(
+    async (credential: string) => {
+      if (isSubmitting) return;
+      setIsSubmitting(true);
+      const result = await exchangeGoogleCredential(credential);
 
-    if (!result.success) {
-      setIsSubmitting(false);
-      if (result.error) setIdentifierError(result.error);
-      return;
-    }
+      if (!result.success) {
+        setIsSubmitting(false);
+        if (result.error) setIdentifierError(result.error);
+        return;
+      }
 
-    await completeAuth();
-  }, [completeAuth, isSubmitting]);
+      await completeAuth();
+    },
+    [completeAuth, isSubmitting],
+  );
 
   const handleAppleContinue = useCallback(async () => {
     if (isSubmitting) return;
@@ -530,7 +533,7 @@ export function useAuthFlow({
       onIdentifierChange: handleIdentifierChange,
       onCountryCodeChange: handleCountryCodeChange,
       onContinue: handleContinue,
-      onGoogleContinue: handleGoogleContinue,
+      onGoogleCredential: handleGoogleCredential,
       onAppleContinue: handleAppleContinue,
       onUseEmailInstead: handleUseEmailInstead,
       onClose: handleClose,

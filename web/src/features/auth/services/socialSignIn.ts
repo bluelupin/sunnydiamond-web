@@ -6,7 +6,7 @@ const APPLE_REDIRECT_URI = process.env.NEXT_PUBLIC_APPLE_REDIRECT_URI;
 
 type GoogleAccountsId = {
   initialize: (config: Record<string, unknown>) => void;
-  prompt: () => void;
+  renderButton: (parent: HTMLElement, options: Record<string, unknown>) => void;
 };
 
 type AppleSignInResponse = {
@@ -73,52 +73,82 @@ export function isAppleSignInConfigured(): boolean {
 }
 
 /**
- * Google Identity Services flow. Resolves after the ID token has been exchanged
- * for a session, or with an error (including "not configured" and prompt dismissal).
+ * Google's rendered button has a fixed maximum width; GoogleSignInButton draws it
+ * at that width and scales the result over the storefront button.
  */
-export async function signInWithGoogle(): Promise<SocialSignInResult> {
-  if (!GOOGLE_CLIENT_ID) {
-    return { success: false, error: "Google sign-in is not available yet." };
-  }
+export const GOOGLE_BUTTON_RENDER_WIDTH = 400;
+
+/**
+ * Google keeps a single callback per client, so every mounted button routes
+ * through one dispatcher and the live one registers itself here.
+ */
+let googleCredentialHandler: ((credential: string) => void) | null = null;
+let googleInitialized = false;
+
+async function loadGoogleIdentityServices(): Promise<GoogleAccountsId | null> {
+  if (!GOOGLE_CLIENT_ID) return null;
 
   try {
     await loadScript("https://accounts.google.com/gsi/client");
   } catch {
-    return { success: false, error: "Google sign-in failed to load. Please try again." };
+    return null;
   }
 
   const googleId = window.google?.accounts.id;
-  if (!googleId) {
-    return { success: false, error: "Google sign-in failed to load. Please try again." };
-  }
+  if (!googleId) return null;
 
-  return new Promise<SocialSignInResult>((resolve) => {
-    let settled = false;
-    const settle = (result: SocialSignInResult) => {
-      if (!settled) {
-        settled = true;
-        resolve(result);
-      }
-    };
-
+  if (!googleInitialized) {
     googleId.initialize({
       client_id: GOOGLE_CLIENT_ID,
       callback: (response: { credential?: string }) => {
-        if (!response.credential) {
-          settle({ success: false, error: "Google sign-in failed. Please try again." });
-          return;
-        }
-        void exchangeIdToken({ provider: "GOOGLE", idToken: response.credential }).then(settle);
+        if (response.credential) googleCredentialHandler?.(response.credential);
       },
-      // Fires when the prompt is skipped/dismissed without a credential.
-      prompt_parent_id: undefined,
+      // Never sign someone in from a stored session without them asking.
+      auto_select: false,
     });
-    googleId.prompt();
+    googleInitialized = true;
+  }
 
-    // The GIS prompt has no reliable dismissal callback across UX modes;
-    // time out quietly so the button doesn't hang forever.
-    window.setTimeout(() => settle({ success: false, error: "" }), 90_000);
+  return googleId;
+}
+
+/**
+ * Mounts Google's own button inside `container` — the only supported way to get
+ * an ID token from a click.
+ *
+ * The alternative, One Tap via `prompt()`, cannot back a button: under FedCM it
+ * displays nothing at all for a visitor with no active Google session, and the
+ * callbacks that used to report why are no longer invoked, so the click has
+ * nothing to show and nothing to report.
+ *
+ * @returns false when Google's script is unavailable (blocked, offline, or no
+ *          client ID configured), so the caller can drop the button entirely
+ *          rather than leave a control that cannot work.
+ */
+export async function renderGoogleSignInButton(
+  container: HTMLElement,
+  onCredential: (credential: string) => void,
+): Promise<boolean> {
+  const googleId = await loadGoogleIdentityServices();
+  if (!googleId) return false;
+
+  googleCredentialHandler = onCredential;
+  container.replaceChildren();
+  googleId.renderButton(container, {
+    type: "standard",
+    theme: "outline",
+    size: "large",
+    text: "continue_with",
+    shape: "rectangular",
+    width: GOOGLE_BUTTON_RENDER_WIDTH,
   });
+
+  return true;
+}
+
+/** Exchanges a Google ID token for a storefront session. */
+export function exchangeGoogleCredential(credential: string): Promise<SocialSignInResult> {
+  return exchangeIdToken({ provider: "GOOGLE", idToken: credential });
 }
 
 /** Sign in with Apple popup flow. Nonce is verified server-side against the token. */
