@@ -4,6 +4,12 @@ import type {
   ProductCustomOptions,
 } from "@/features/products/types/productCustomOptions";
 import {
+  embedLineInstanceInEngraving,
+  extractLineInstanceFromEngraving,
+  resolveEngravingFieldMaxCharacters,
+  stripLineInstanceFromEngraving,
+} from "@/features/cart/utils/cartLineInstance.utils";
+import {
   classifyCustomOptionLabel,
   decodeCustomOptionUid,
   resolveCustomOptionValueMeta,
@@ -29,14 +35,29 @@ export function buildMagentoCartItemOptionPayload(
   const enteredOptions: Array<{ uid: string; value: string }> = [];
   const selectedOptions: string[] = [];
 
+  const lineInstance = lineOptions.lineInstance?.trim();
+  const lineInstanceOptionUid = productCustomOptions.lineInstance?.optionUid;
+  if (lineInstanceOptionUid && lineInstance) {
+    enteredOptions.push({
+      uid: lineInstanceOptionUid,
+      value: lineInstance,
+    });
+  }
+
   const engravingOptionUid = productCustomOptions.engravingText?.optionUid;
-  if (engravingOptionUid && lineOptions.engravingSupported) {
+  const shouldUseEngravingCarrier = Boolean(
+    engravingOptionUid && !lineInstanceOptionUid && lineInstance,
+  );
+  if (engravingOptionUid && (lineOptions.engravingSupported || shouldUseEngravingCarrier)) {
     const engraving = lineOptions.engraving?.trim() ?? "";
-    // Magento rejects an empty entered value — omit the option entirely instead.
-    if (engraving) {
+    const engravingMaxCharacters = resolveEngravingFieldMaxCharacters(productCustomOptions);
+
+    if (engraving || shouldUseEngravingCarrier) {
       enteredOptions.push({
         uid: engravingOptionUid,
-        value: engraving,
+        value: shouldUseEngravingCarrier
+          ? embedLineInstanceInEngraving(engraving, lineInstance!, engravingMaxCharacters)
+          : engraving,
       });
     }
   }
@@ -89,6 +110,7 @@ export type CartLineServerCustomOptions = {
   engravingFont?: CartLineServerCustomOption;
   ringSize?: CartLineServerCustomOption;
   metal?: CartLineServerCustomOption;
+  lineInstance?: CartLineServerCustomOption;
   /** Options outside the classified families — resent verbatim so updates cannot wipe them. */
   other?: CartLineServerCustomOption[];
 };
@@ -128,8 +150,16 @@ export function mapMagentoCartCustomizableOptions(
     }
 
     switch (key) {
-      case "engravingText":
-        lineOptions.engraving = valueText;
+      case "engravingText": {
+        const embeddedLineInstance = extractLineInstanceFromEngraving(valueText);
+        lineOptions.engraving = stripLineInstanceFromEngraving(valueText);
+        if (embeddedLineInstance) {
+          lineOptions.lineInstance = embeddedLineInstance;
+        }
+        break;
+      }
+      case "lineInstance":
+        lineOptions.lineInstance = valueText;
         break;
       case "engravingFont":
         lineOptions.engravingFont = valueLabel || valueText;
@@ -233,6 +263,21 @@ export function buildMagentoCartItemSyncOptions({
 }: BuildMagentoCartItemSyncOptionsInput): MagentoCartItemSyncOption[] | null {
   const syncOptions: MagentoCartItemSyncOption[] = [];
 
+  const lineInstanceId =
+    serverOptions?.lineInstance?.optionId ??
+    resolveMetadataOptionId(productCustomOptions?.lineInstance);
+  const lineInstance = lineOptions.lineInstance?.trim();
+  const serverLineInstance = serverOptions?.lineInstance;
+
+  if (lineInstanceId != null && lineInstance) {
+    syncOptions.push({ id: lineInstanceId, value_string: lineInstance });
+  } else if (serverLineInstance) {
+    syncOptions.push({
+      id: serverLineInstance.optionId,
+      value_string: serverLineInstance.valueString,
+    });
+  }
+
   const engravingTextId =
     serverOptions?.engravingText?.optionId ??
     resolveMetadataOptionId(productCustomOptions?.engravingText);
@@ -242,8 +287,18 @@ export function buildMagentoCartItemSyncOptions({
   const serverEngravingText = serverOptions?.engravingText;
 
   if (engravingTracked && engravingTextId != null) {
+    const shouldEmbedLineInstance =
+      lineInstanceId == null && Boolean(lineInstance || serverLineInstance?.valueString);
+    const resolvedLineInstance =
+      lineInstance || extractLineInstanceFromEngraving(serverEngravingText?.valueString ?? "");
+    const engravingMaxCharacters = resolveEngravingFieldMaxCharacters(productCustomOptions);
+    const engravingPayload =
+      shouldEmbedLineInstance && resolvedLineInstance
+        ? embedLineInstanceInEngraving(engraving, resolvedLineInstance, engravingMaxCharacters)
+        : engraving;
+
     // Empty value clears the text; the font is cleared by omitting it below.
-    syncOptions.push({ id: engravingTextId, value_string: engraving });
+    syncOptions.push({ id: engravingTextId, value_string: engravingPayload });
 
     if (engraving) {
       appendChoiceSyncOption(

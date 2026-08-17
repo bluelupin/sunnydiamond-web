@@ -7,6 +7,7 @@ import { MAGENTO_REQUEST_LOGIN_OTP_MUTATION } from "@/services/auth/auth.gql";
 
 type OtpRequestBody = {
   phone?: string;
+  email?: string;
 };
 
 /**
@@ -37,20 +38,35 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
+  // Exactly one identifier reaches Magento. Email takes the phone's place rather
+  // than accompanying it — sending both means "registering this phone under that
+  // address", which is the verify call's job, not this one's.
   const phone = normalizePhoneForMagento(body.phone?.trim() ?? "");
-  if (!phone) {
-    return NextResponse.json({ error: "Phone number is required" }, { status: 400 });
+  const email = body.email?.trim().toLowerCase();
+
+  if (!phone && !email) {
+    return NextResponse.json(
+      { error: "A phone number or email address is required" },
+      { status: 400 },
+    );
   }
+
+  const input = phone ? { phone } : { email };
 
   // Forward the caller's IP so Magento rate-limits per client, not per Next server.
   const clientIp = resolveClientIp(request);
 
   try {
     const data = await magentoGraphqlFetch<{
-      requestLoginOtp: { success: boolean; resend_after_seconds: number };
+      requestLoginOtp: {
+        success: boolean;
+        resend_after_seconds: number;
+        channel: string | null;
+        masked_destination: string | null;
+      };
     }>({
       query: MAGENTO_REQUEST_LOGIN_OTP_MUTATION,
-      variables: { input: { phone } },
+      variables: { input },
       cache: "no-store",
       ...(clientIp ? { headers: { "X-Forwarded-For": clientIp } } : {}),
     });
@@ -58,6 +74,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       ok: data.requestLoginOtp.success,
       resendAfterSeconds: data.requestLoginOtp.resend_after_seconds,
+      channel: data.requestLoginOtp.channel ?? (phone ? "sms" : "email"),
+      maskedDestination: data.requestLoginOtp.masked_destination ?? null,
     });
   } catch (error) {
     const message =

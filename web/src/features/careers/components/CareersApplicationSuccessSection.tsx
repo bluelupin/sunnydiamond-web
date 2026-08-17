@@ -14,7 +14,7 @@ const CareersApplicationSuccessSection = () => {
   return (
     <section
       aria-labelledby="careers-success-title"
-      className="bg-white px-4 md:py-[88px] sm:py-16 py-10 max-w-[560px] mx-auto"
+      className="bg-white md:px-0 px-4 md:py-[88px] sm:py-16 py-10 max-w-[560px] mx-auto"
     >
       <div className="flex w-full flex-col items-center gap-6 text-center">
         <Reveal direction="up" className="flex flex-col items-center gap-6">

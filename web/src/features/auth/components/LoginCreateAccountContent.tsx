@@ -12,6 +12,12 @@ import { isCreateAccountReady } from "../utils/authValidation";
 type LoginCreateAccountContentProps = {
   fullName: string;
   email: string;
+  /**
+   * True when the customer registered by email: the address is the identifier we
+   * just verified, so it is shown for confirmation but must not be editable —
+   * changing it here would create the account under an unproven address.
+   */
+  emailReadOnly?: boolean;
   termsAccepted: boolean;
   fullNameError?: string;
   emailError?: string;
@@ -38,6 +44,7 @@ const fieldInputClassName =
 const LoginCreateAccountContent = ({
   fullName,
   email,
+  emailReadOnly = false,
   termsAccepted,
   fullNameError,
   emailError,
@@ -127,10 +134,12 @@ const LoginCreateAccountContent = ({
                 placeholder="Enter"
                 autoComplete="email"
                 required
+                readOnly={emailReadOnly}
                 aria-invalid={emailError ? true : undefined}
                 aria-describedby={emailError ? "create-account-email-error" : undefined}
                 className={cn(
                   fieldInputClassName,
+                  emailReadOnly && "cursor-not-allowed text-neutral500",
                   emailError && "border-[#F91616] bg-[#FEDCDC]",
                 )}
               />

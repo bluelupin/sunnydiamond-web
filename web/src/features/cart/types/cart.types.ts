@@ -9,6 +9,8 @@ export type CartLineOptions = {
   engravingMaxCharacters?: number;
   /** Keeps cart engraving UI visible even when text is cleared. */
   engravingSupported?: boolean;
+  /** Hidden per-cart-line key so Magento keeps duplicate SKUs as separate lines. */
+  lineInstance?: string;
   isGift?: boolean;
 };
 

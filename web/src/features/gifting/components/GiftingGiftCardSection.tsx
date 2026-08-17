@@ -20,7 +20,7 @@ const GiftingGiftCardSection = ({ giftCard }: GiftingGiftCardSectionProps) => {
       className="relative z-0 left-1/2 w-screen max-w-none -translate-x-1/2 overflow-hidden"
     >
       <div className="relative z-0 w-full py-16 md:h-[520px] md:py-0">
-        {giftCard.background ? (
+        {giftCard.background &&
           <Image
             src={giftCard.background.desktopUrl}
             alt={giftCard.background.alt}
@@ -29,9 +29,9 @@ const GiftingGiftCardSection = ({ giftCard }: GiftingGiftCardSectionProps) => {
             sizes="100vw"
             aria-hidden
           />
-        ) : null}
+        }
         <div
-          className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(251,250,246,0.2)_0%,rgba(251,250,246,1)_100%)]"
+          className="section-radial absolute inset-0"
           aria-hidden
         />
         <div
@@ -73,28 +73,28 @@ const GiftingGiftCardSection = ({ giftCard }: GiftingGiftCardSectionProps) => {
         </div>
 
         {/* Desktop */}
-        <div className="relative mx-auto hidden h-full max-w-1440 flex-col items-center px-4 md:flex md:flex-row md:items-center md:px-10">
-          <div className="flex w-full flex-col gap-10 md:max-w-[619px] md:py-0">
-            <div className="flex flex-col gap-4">
+        <div className="relative mx-auto hidden h-[475px] 2xl:max-w-1920 max-w-1440 flex-col items-center px-4 md:flex md:flex-row md:items-center md:px-10">
+          <div className="w-full md:max-w-[619px] pl-28">
+            {giftCard.title &&
               <Reveal
                 as="h2"
                 id="gifting-gift-card-title"
                 direction="up"
-                className="font-larken text-5xl font-light leading-110 text-darkblack"
+                className="font-larken lg:text-5xl md:text-4xl text-32 font-light leading-110 text-darkblack"
               >
                 {giftCard.title}
               </Reveal>
-              {giftCard.description ? (
-                <Reveal
-                  as="p"
-                  direction="up"
-                  className="font-gill text-xl font-light leading-110 text-neutral500"
-                >
-                  {giftCard.description}
-                </Reveal>
-              ) : null}
-            </div>
-            <Reveal direction="up">
+            }
+            {giftCard.description &&
+              <Reveal
+                as="p"
+                direction="up"
+                className="md:mt-4 mt-3 font-gill lg:text-xl md:text-lg text-base font-light leading-110 md:text-neutral500 text-darkblack"
+              >
+                {giftCard.description}
+              </Reveal>
+            }
+            <Reveal direction="up" className="md:mt-10 mt-8">
               <Link
                 href={giftCard.cta.url}
                 className="inline-flex h-14 items-center justify-center border border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"

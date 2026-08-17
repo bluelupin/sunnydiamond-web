@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
 import { useCart } from "../context/CartContext";
@@ -37,16 +37,6 @@ const BAG_DRAWER_SR_TITLES = {
 } as const;
 
 const MOBILE_DRAWER_MEDIA_QUERY = "(max-width: 1023px)";
-
-function subscribeToMobileDrawerViewport(onStoreChange: () => void) {
-  const media = window.matchMedia(MOBILE_DRAWER_MEDIA_QUERY);
-  media.addEventListener("change", onStoreChange);
-  return () => media.removeEventListener("change", onStoreChange);
-}
-
-function getMobileDrawerSnapshot() {
-  return window.matchMedia(MOBILE_DRAWER_MEDIA_QUERY).matches;
-}
 
 const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
   const { items, totalItems, removeItem } = useCart();
@@ -144,20 +134,16 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
 const CartBagDrawer = () => {
   const { isBagDrawerOpen, bagDrawerMode, closeBagDrawer } = useCartUI();
   const drawerTitle = BAG_DRAWER_SR_TITLES[bagDrawerMode];
-  const isMobile = useSyncExternalStore(
-    subscribeToMobileDrawerViewport,
-    getMobileDrawerSnapshot,
-    () => false,
+  const [isMobile, setIsMobile] = useState(
+    () => window.matchMedia(MOBILE_DRAWER_MEDIA_QUERY).matches,
   );
-  const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
-    setHasMounted(true);
+    const media = window.matchMedia(MOBILE_DRAWER_MEDIA_QUERY);
+    const update = () => setIsMobile(media.matches);
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
   }, []);
-
-  if (!hasMounted) {
-    return null;
-  }
 
   if (isMobile) {
     return (

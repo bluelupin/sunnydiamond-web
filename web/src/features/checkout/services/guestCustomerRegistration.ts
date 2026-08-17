@@ -32,7 +32,7 @@ export async function registerGuestCustomerAfterOrder(
   }
 
   const result = await createCustomerAccount({
-    phone,
+    target: { kind: "phone", phone },
     otp: otpCode,
     fullName,
     email: getCheckoutRegistrationEmail(form),

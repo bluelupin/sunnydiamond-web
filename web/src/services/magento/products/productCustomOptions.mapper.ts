@@ -26,7 +26,12 @@ function normalizeLabel(value: string): string {
   return value.trim().toLowerCase();
 }
 
-export type CustomOptionFamily = "engravingFont" | "engravingText" | "ringSize" | "metal";
+export type CustomOptionFamily =
+  | "engravingFont"
+  | "engravingText"
+  | "ringSize"
+  | "metal"
+  | "lineInstance";
 
 /**
  * Canonical option-title classifier shared by the product, cart, and order
@@ -39,6 +44,14 @@ export function classifyCustomOptionLabel(label: string): CustomOptionFamily | n
 
   if (normalized.includes("font")) {
     return "engravingFont";
+  }
+
+  if (
+    normalized.includes("line instance") ||
+    normalized.includes("cart line") ||
+    normalized.includes("line key")
+  ) {
+    return "lineInstance";
   }
 
   if (normalized.includes("engrav")) {
@@ -185,6 +198,15 @@ export function mapMagentoProductCustomOptions(
         const choice = mapChoiceOption(option);
         if (choice) {
           mapped.metal = choice;
+        }
+        break;
+      }
+      case "lineInstance": {
+        if (option.__typename === "CustomizableFieldOption") {
+          const field = mapFieldOption(option);
+          if (field) {
+            mapped.lineInstance = field;
+          }
         }
         break;
       }

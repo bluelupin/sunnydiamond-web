@@ -1,6 +1,7 @@
 import type { CartLineOptions } from "@/features/cart/types/cart.types";
 import type { ProductCustomOptions } from "@/features/products/types/productCustomOptions";
 import type { Product } from "@/features/products/data/products";
+import { stripLineInstanceFromEngraving } from "@/features/cart/utils/cartLineInstance.utils";
 
 export const DEFAULT_ENGRAVING_MAX_CHARACTERS = 10;
 
@@ -146,7 +147,7 @@ export function resolveCartLineEngravingSelection(
     return null;
   }
 
-  const text = mergedOptions.engraving?.trim();
+  const text = stripLineInstanceFromEngraving(mergedOptions.engraving ?? "").trim();
   if (!text) {
     return null;
   }

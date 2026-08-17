@@ -107,8 +107,10 @@ const LoginModalContent = ({
 
         {otpBlockedForCountry ? (
           <div role="status" className="flex flex-col gap-1">
+            {/* Wording fixed by the Authentication & Registration Flow document. */}
             <p className="font-gill text-sm font-light leading-110 text-neutral500">
-              OTP login is available for Indian mobile numbers only — please continue with email
+              International mobile OTP is currently not supported. Please use your Email
+              Address, Google Sign-In, or Apple Sign-In to continue.
             </p>
             <button
               type="button"

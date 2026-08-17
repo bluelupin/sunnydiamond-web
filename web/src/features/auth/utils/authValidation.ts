@@ -3,7 +3,6 @@ import {
   validatePhone,
   validateRequiredEmail,
   validateRequiredName,
-  validateRequiredPassword,
 } from "@/shared/utils/formValidation";
 import { DEFAULT_COUNTRY_CODE } from "@/shared/constants/appointmentForm";
 
@@ -39,12 +38,13 @@ export const formatLoginPhoneDisplay = (countryCode: string, nationalDigits: str
 };
 
 export type LoginIdentifierOptions = {
-  /** Treat the identifier strictly as email — no phone interpretation (OTP login unavailable). */
+  /** Treat the identifier strictly as email — no phone interpretation (SMS OTP unavailable). */
   emailOnly?: boolean;
 };
 
 /**
- * Sign-in identifier validation. Phone numbers continue to SMS OTP; email continues to password.
+ * Sign-in identifier validation. Both branches lead to a one-time code: phone
+ * numbers to SMS, email addresses to email.
  */
 export const validateLoginIdentifier = (
   value: string,
@@ -86,39 +86,8 @@ export type CreateAccountFormValues = {
 export type CreateAccountFormErrors = {
   fullName?: string;
   email?: string;
-  password?: string;
   terms?: string;
 };
-
-export type EmailRegisterFormValues = {
-  fullName: string;
-  email: string;
-  password: string;
-  termsAccepted: boolean;
-};
-
-export const validateEmailRegisterForm = (
-  values: EmailRegisterFormValues,
-): { valid: boolean; errors: CreateAccountFormErrors } => {
-  const nameValidation = validateRequiredName(values.fullName);
-  const emailValidation = validateRequiredEmail(values.email);
-  const passwordValidation = validateRequiredPassword(values.password);
-
-  const errors: CreateAccountFormErrors = {
-    fullName: nameValidation.valid ? undefined : nameValidation.error,
-    email: emailValidation.valid ? undefined : emailValidation.error,
-    password: passwordValidation.valid ? undefined : passwordValidation.error,
-    terms: values.termsAccepted ? undefined : "Please accept the terms and conditions",
-  };
-
-  return {
-    valid: !errors.fullName && !errors.email && !errors.password && !errors.terms,
-    errors,
-  };
-};
-
-export const isEmailRegisterReady = (values: EmailRegisterFormValues): boolean =>
-  validateEmailRegisterForm(values).valid;
 
 export const validateCreateAccountForm = (
   values: CreateAccountFormValues,

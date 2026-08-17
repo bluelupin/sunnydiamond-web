@@ -15,6 +15,7 @@ const MAGENTO_AUTH_FEATURES_QUERY = `
   query MagentoAuthFeatures {
     storeConfig {
       sd_otp_login_enabled
+      sd_email_otp_login_enabled
       sd_google_login_enabled
       sd_apple_login_enabled
     }
@@ -24,6 +25,7 @@ const MAGENTO_AUTH_FEATURES_QUERY = `
 type MagentoAuthFeaturesResponse = {
   storeConfig: {
     sd_otp_login_enabled: boolean | null;
+    sd_email_otp_login_enabled: boolean | null;
     sd_google_login_enabled: boolean | null;
     sd_apple_login_enabled: boolean | null;
   } | null;
@@ -42,6 +44,7 @@ export async function fetchAuthFeatureFlags(): Promise<AuthFeatureFlags> {
     const config = data.storeConfig;
     return {
       otpLoginEnabled: config?.sd_otp_login_enabled === true,
+      emailOtpLoginEnabled: config?.sd_email_otp_login_enabled === true,
       googleLoginEnabled: config?.sd_google_login_enabled === true,
       appleLoginEnabled: config?.sd_apple_login_enabled === true,
     };

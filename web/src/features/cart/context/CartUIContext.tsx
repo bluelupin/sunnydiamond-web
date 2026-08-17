@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -27,6 +28,8 @@ type CartUIContextType = {
   hasExploredGiftingOptions: boolean;
   isGuestCheckoutModalOpen: boolean;
   isNavigatingToCheckout: boolean;
+  tryBeginBagAction: () => boolean;
+  endBagAction: () => void;
   openBagDrawer: (result: AddItemResult, options?: { mode?: BagDrawerMode }) => void;
   closeBagDrawer: () => void;
   openGiftingPanel: (step?: "intro" | "personalise") => void;
@@ -51,6 +54,22 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
   const [hasExploredGiftingOptions, setHasExploredGiftingOptions] = useState(false);
   const [isGuestCheckoutModalOpen, setIsGuestCheckoutModalOpen] = useState(false);
   const [isNavigatingToCheckout, setIsNavigatingToCheckout] = useState(false);
+  const isBagDrawerOpenRef = useRef(false);
+  const bagActionInFlightRef = useRef(false);
+  const lastBagDrawerOpenRef = useRef<{ lineItemId: string; at: number } | null>(null);
+
+  const tryBeginBagAction = useCallback(() => {
+    if (bagActionInFlightRef.current) {
+      return false;
+    }
+
+    bagActionInFlightRef.current = true;
+    return true;
+  }, []);
+
+  const endBagAction = useCallback(() => {
+    bagActionInFlightRef.current = false;
+  }, []);
 
   const applyBagDrawerResult = useCallback(
     (result: AddItemResult, options?: { mode?: BagDrawerMode }) => {
@@ -67,13 +86,32 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
 
   const openBagDrawer = useCallback(
     (result: AddItemResult, options?: { mode?: BagDrawerMode }) => {
+      const now = Date.now();
+      const lastOpen = lastBagDrawerOpenRef.current;
+      const isDuplicateOpen =
+        isBagDrawerOpenRef.current &&
+        lastOpen?.lineItemId === result.lineItemId &&
+        now - lastOpen.at < 1000;
+
       applyBagDrawerResult(result, options);
-      setIsBagDrawerOpen(true);
+
+      if (isDuplicateOpen) {
+        return;
+      }
+
+      lastBagDrawerOpenRef.current = { lineItemId: result.lineItemId, at: now };
+
+      if (!isBagDrawerOpenRef.current) {
+        isBagDrawerOpenRef.current = true;
+        setIsBagDrawerOpen(true);
+      }
     },
     [applyBagDrawerResult],
   );
 
   const closeBagDrawer = useCallback(() => {
+    isBagDrawerOpenRef.current = false;
+    lastBagDrawerOpenRef.current = null;
     setIsBagDrawerOpen(false);
     setBagDrawerMode("add");
   }, []);
@@ -120,6 +158,8 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
         hasExploredGiftingOptions,
         isGuestCheckoutModalOpen,
         isNavigatingToCheckout,
+        tryBeginBagAction,
+        endBagAction,
         openBagDrawer,
         closeBagDrawer,
         openGiftingPanel,

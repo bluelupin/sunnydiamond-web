@@ -26,9 +26,9 @@ const CheckoutOrderSummaryItem = ({ item }: { item: CartLineItem }) => {
   const isGift = Boolean(item.gifting || item.options.isGift);
 
   return (
-    <div className="relative flex items-start gap-6 border border-aboutInactive bg-gray300 px-4 py-6">
+    <div className="relative flex items-start gap-6 bg-gray300 px-4 py-6">
       {isGift ? (
-        <CartGiftBadge variant="checkout" className="absolute -left-px -top-px z-10" />
+        <CartGiftBadge variant="checkout" className="absolute left-0 top-0 z-10" />
       ) : null}
 
       <div className="relative h-[71px] w-20 shrink-0 overflow-hidden bg-gray200">

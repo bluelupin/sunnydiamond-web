@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
+import dynamic from 'next/dynamic';
 import { Toaster } from 'sonner';
 import { AuthProvider } from '@/features/auth/context/AuthContext';
 import { CartProvider } from '@/features/cart/context/CartContext';
 import { CartUIProvider } from '@/features/cart/context/CartUIContext';
-import CartBagDrawer from '@/features/cart/components/CartBagDrawer';
 import GiftingOptionsPanel from '@/features/cart/components/GiftingOptionsPanel';
 import GuestCheckoutModal from '@/features/cart/components/GuestCheckoutModal';
 import { FeatureErrorBoundary } from '@/shared/ui/FeatureErrorBoundary';
@@ -18,6 +18,11 @@ import {
   DEFAULT_AUTH_FEATURE_FLAGS,
   type AuthFeatureFlags,
 } from '@/features/auth/types/authFeatures.types';
+
+const CartBagDrawer = dynamic(
+  () => import('@/features/cart/components/CartBagDrawer'),
+  { ssr: false },
+);
 
 export default function AppProvider({
   children,
