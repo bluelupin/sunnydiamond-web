@@ -2,6 +2,10 @@
 
 import { cn } from "@/shared/utils/cn";
 import type { CareerJob } from "@/features/careers/types";
+import {
+  careersDarkCtaClassName,
+  careersOutlineCtaClassName,
+} from "@/features/careers/constants/careersCtaStyles";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
 import CareersJobIdChip from "./CareersJobIdChip";
 import CareersJobMetaRow from "./CareersJobMetaRow";
@@ -20,8 +24,15 @@ type CareersJobCardProps = {
   showViewJobButton?: boolean;
 };
 
-const viewJobButtonClass =
-  "inline-flex h-14 w-fit shrink-0 items-center justify-center px-7 font-gill text-sm font-normal uppercase leading-110 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 bg-darkblack text-white hover:opacity-90";
+const viewJobButtonClass = cn(
+  careersDarkCtaClassName,
+  "w-fit shrink-0",
+);
+
+const viewJobOutlineButtonClass = cn(
+  careersOutlineCtaClassName,
+  "w-fit shrink-0 border-darkblack bg-transparent text-darkblack md:px-8",
+);
 
 const CareersJobCard = ({
   job,
@@ -39,6 +50,7 @@ const CareersJobCard = ({
   const isListing = variant === "listing";
   const isInteractive = (isLanding || isListing) && Boolean(onViewJob);
   const shouldShowViewJob = showViewJobButton ?? Boolean(onViewJob);
+  const useOutlineViewJob = !isLanding && !isListing;
 
   const handleCardActivate = () => {
     if (isInteractive && onViewJob) {
@@ -49,7 +61,7 @@ const CareersJobCard = ({
   const postedDesktopClass =
     "font-gill text-base font-light leading-110 text-darkblack";
   const postedMobileListingClass =
-    "font-gill text-xs font-light leading-normal tracking-[0.12px] text-[#7A7A7A]";
+    "font-gill text-sm font-light leading-normal tracking-[0.12px] text-[#7A7A7A]";
 
   return (
     <article
@@ -138,14 +150,11 @@ const CareersJobCard = ({
             onViewJob();
           }}
           className={cn(
-            viewJobButtonClass,
+            useOutlineViewJob ? viewJobOutlineButtonClass : viewJobButtonClass,
             isInteractive && "lg:hidden lg:group-hover:inline-flex",
-            !isLanding &&
-              !isListing &&
-              "md:border md:border-darkblack md:bg-transparent md:px-8 md:text-darkblack md:hover:bg-darkblack md:hover:text-white",
           )}
         >
-          {viewJobLabel}
+          <span className="relative z-10">{viewJobLabel}</span>
         </button>
       ) : null}
 

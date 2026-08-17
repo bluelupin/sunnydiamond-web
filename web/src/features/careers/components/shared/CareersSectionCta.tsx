@@ -1,5 +1,7 @@
 "use client";
 
+import { DetailTextLink } from "@/features/products/components/detail/shared";
+import { careersDarkCtaClassName } from "@/features/careers/constants/careersCtaStyles";
 import { cn } from "@/shared/utils/cn";
 
 type CareersSectionCtaVariant = "button" | "link";
@@ -17,19 +19,27 @@ const CareersSectionCta = ({
   className,
   variant = "button",
 }: CareersSectionCtaProps) => {
+  if (variant === "link") {
+    return (
+      <DetailTextLink onClick={onClick} className={className}>
+        {children}
+      </DetailTextLink>
+    );
+  }
+
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "border-b border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2",
-        variant === "button" &&
-          "md:inline-flex md:h-14 md:items-center md:justify-center md:border-0 md:bg-darkblack md:px-8 md:pb-0 md:text-white md:hover:opacity-90",
-        className,
-      )}
-    >
-      {children}
-    </button>
+    <>
+      <DetailTextLink onClick={onClick} className={cn("md:hidden", className)}>
+        {children}
+      </DetailTextLink>
+      <button
+        type="button"
+        onClick={onClick}
+        className={cn(careersDarkCtaClassName, "hidden md:inline-flex md:px-8", className)}
+      >
+        <span className="relative z-10">{children}</span>
+      </button>
+    </>
   );
 };
 

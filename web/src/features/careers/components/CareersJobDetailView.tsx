@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Reveal from "@/shared/Animation/Reveal";
+import { careersDarkCtaClassName } from "@/features/careers/constants/careersCtaStyles";
+import { cn } from "@/shared/utils/cn";
 import "@/shared/styles/editor-content.css";
 import type { CareerJobDetailLabels } from "@/services/careers/careersJobDetailLabels";
 import type { CareerJob } from "@/features/careers/types";
@@ -163,9 +165,9 @@ const CareersJobDetailView = ({
           <button
             type="button"
             onClick={() => setApplyModalOpen(true)}
-            className="inline-flex h-14 w-fit sm:min-w-[183px] min-w-full items-center justify-center bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
+            className={cn(careersDarkCtaClassName, "w-fit min-w-full sm:min-w-[183px]")}
           >
-            {applyLabel}
+            <span className="relative z-10">{applyLabel}</span>
           </button>
         </Reveal>
       </div>

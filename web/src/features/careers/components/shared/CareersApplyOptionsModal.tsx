@@ -6,6 +6,11 @@ import type { NormalizedCareerApplicationFlow } from "@/services/careers/careers
 import type { CareerJob } from "@/features/careers/types";
 import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
+import { DetailTextLink } from "@/features/products/components/detail/shared";
+import {
+  careersDarkCtaClassName,
+  careersOutlineCtaClassName,
+} from "@/features/careers/constants/careersCtaStyles";
 import { cn } from "@/shared/utils/cn";
 import CareersJobIdChip from "./CareersJobIdChip";
 import CareersJobMetaRow from "./CareersJobMetaRow";
@@ -23,14 +28,9 @@ type CareersApplyOptionsModalProps = {
 const RESUME_ACCEPT =
   ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
-const primaryButtonClass =
-  "inline-flex h-14 w-full items-center justify-center bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2";
+const primaryButtonClass = cn(careersDarkCtaClassName, "w-full");
 
-const secondaryButtonClass =
-  "inline-flex h-14 w-full items-center justify-center border border-neutral300 bg-white px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-colors hover:bg-gray300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2";
-
-const linkedInButtonClass =
-  "inline-flex flex-col items-center border-b border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2";
+const secondaryButtonClass = cn(careersOutlineCtaClassName, "w-full");
 
 type ApplyOptionsActionsProps = {
   applyModal: NormalizedCareerApplicationFlow["jobDetails"]["applyModal"];
@@ -62,14 +62,12 @@ function ApplyOptionsActions({
   const buttons = (
     <>
       <button type="button" onClick={onAutofillClick} className={primaryButtonClass}>
-        {applyModal.autofillResumeLabel}
+        <span className="relative z-10">{applyModal.autofillResumeLabel}</span>
       </button>
       <button type="button" onClick={handleApplyManually} className={secondaryButtonClass}>
-        {applyModal.applyManuallyLabel}
+        <span className="relative z-10">{applyModal.applyManuallyLabel}</span>
       </button>
-      <button type="button" onClick={handleApplyLinkedIn} className={linkedInButtonClass}>
-        {applyModal.applyLinkedInLabel}
-      </button>
+      <DetailTextLink onClick={handleApplyLinkedIn}>{applyModal.applyLinkedInLabel}</DetailTextLink>
     </>
   );
 

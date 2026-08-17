@@ -6,6 +6,10 @@ import type { NormalizedCareerApplicationFlow } from "@/services/careers/careers
 import { CAREERS_SUBMITTING_APPLICATION_LABEL } from "@/features/careers/constants/careersApplicationForm";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/shared/ui/dialog";
 import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from "@/shared/ui/drawer";
+import {
+  careersDarkCtaClassName,
+  careersOutlineCtaClassName,
+} from "@/features/careers/constants/careersCtaStyles";
 import { cn } from "@/shared/utils/cn";
 
 type CareersSubmitConfirmationModalProps = {
@@ -41,11 +45,9 @@ const confirmSubmissionTitleClassName =
 const confirmSubmissionDescriptionClassName =
   "max-w-[464px] font-gill text-base font-light leading-110 text-darkblack";
 
-const submitButtonClassName =
-  "inline-flex h-14 items-center justify-center bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60";
+const submitButtonClassName = careersDarkCtaClassName;
 
-const goBackButtonClassName =
-  "inline-flex h-14 items-center justify-center border border-neutral300 bg-white px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-colors hover:bg-gray300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60";
+const goBackButtonClassName = careersOutlineCtaClassName;
 
 function ConfirmSubmissionActions({
   confirmSubmissionModal,
@@ -65,7 +67,7 @@ function ConfirmSubmissionActions({
       disabled={isSubmitting}
       className={cn(submitButtonClassName, variant === "mobile" ? "w-full" : "flex-1")}
     >
-      {submitLabel}
+      <span className="relative z-10">{submitLabel}</span>
     </button>
   );
 
@@ -76,7 +78,7 @@ function ConfirmSubmissionActions({
       disabled={isSubmitting}
       className={cn(goBackButtonClassName, variant === "mobile" ? "w-full" : "flex-1")}
     >
-      {confirmSubmissionModal.goBackLabel}
+      <span className="relative z-10">{confirmSubmissionModal.goBackLabel}</span>
     </button>
   );
 

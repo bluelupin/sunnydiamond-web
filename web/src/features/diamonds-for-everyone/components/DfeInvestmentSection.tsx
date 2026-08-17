@@ -37,11 +37,11 @@ const DfeInvestmentSection = ({ investmentPlanner }: DfeInvestmentSectionProps) 
   return (
     <section
       aria-labelledby="dfe-investment-title"
-      className="mx-auto max-w-[1440px] px-4 py-16 md:px-[100px] md:py-[104px]"
+      className="mx-auto 2xl:max-w-1920 max-w-[1440px] px-4 py-16 lg:px-100 md:px-16 sm:px-10 px-6 md:py-100"
     >
       <div className="flex flex-col items-center justify-between gap-10 lg:flex-row lg:gap-16">
         {imageSrc ? (
-          <Reveal direction="up" className="relative h-[280px] w-full max-w-[541px] shrink-0 md:h-[422px]">
+          <Reveal direction="up" className="relative h-[280px] w-full xl:max-w-[541px] max-w-[400px] shrink-0 md:h-[422px]">
             <Image
               src={imageSrc}
               alt={investmentPlanner.image?.alt ?? ""}
@@ -52,17 +52,26 @@ const DfeInvestmentSection = ({ investmentPlanner }: DfeInvestmentSectionProps) 
           </Reveal>
         ) : null}
 
-        <div className="flex w-full max-w-[530px] flex-col gap-10">
-          <div className="flex flex-col gap-10">
-            <Reveal
-              as="h2"
-              id="dfe-investment-title"
-              direction="up"
-              className="text-center font-larken text-32 font-light leading-110 text-darkblack md:text-left md:text-5xl"
-            >
-              {investmentPlanner.title}
-            </Reveal>
-
+        <div className="flex w-full max-w-[530px] flex-col md:gap-10 gap-6">
+          <div className="flex flex-col lg:gap-10 md:gap-8 gap-6">
+            <div className="flex flex-col gap-3">
+              <Reveal
+                as="h2"
+                id="dfe-investment-title"
+                direction="up"
+                className="font-larken text-32 font-light leading-110 text-darkblack md:text-left xl:text-5xl md:text-4xl sm:text-3xl"
+              >
+                {investmentPlanner.title}
+              </Reveal>
+              <Reveal
+                as="p"
+                id="dfe-investment-description"
+                direction="up"
+                className="font-gill font-light leading-110 text-darkblack text-base text-neutral500 md:hidden flex"
+              >
+                Find the perfect expression of motion for your loved ones.
+              </Reveal>
+            </div>
             <Reveal direction="up">
               <DfeInvestmentCalculator
                 monthlyAmount={monthlyAmount}
@@ -74,9 +83,9 @@ const DfeInvestmentSection = ({ investmentPlanner }: DfeInvestmentSectionProps) 
           <button
             type="button"
             onClick={handleStartInvesting}
-            className="inline-flex h-14 w-full items-center justify-center bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
+            className="btn-dark-slide inline-flex h-14 w-full items-center justify-center border border-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
           >
-            {ctaLabel}
+            <span className="relative z-10">{ctaLabel}</span>
           </button>
         </div>
       </div>

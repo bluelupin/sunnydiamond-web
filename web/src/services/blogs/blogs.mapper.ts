@@ -800,9 +800,7 @@ function mapFeaturedFromPost(
     title: post.title,
     date: post.date,
     readTime: post.readTime,
-    excerpt:
-      excerpt ??
-      "Explore expert guidance from Sunny Diamonds on choosing, styling, and caring for diamond jewellery.",
+    excerpt: excerpt ?? "",
     imageSrc: post.imageSrc,
     imageAlt: post.imageAlt,
     backgroundSrc: null,
