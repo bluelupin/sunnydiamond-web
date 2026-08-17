@@ -9,7 +9,7 @@ const CareersApplicationSuccessIcon = ({ className }: { className?: string }) =>
   return (
     <span className={cn("relative size-10 shrink-0", className)} aria-hidden>
       <span className="absolute inset-[-2.35%]">
-        <img src={SUCCESS_ICON_SRC} alt="" className="block size-full max-w-none" />
+        <img src={SUCCESS_ICON_SRC} alt="" className="block size-10 max-w-none" />
       </span>
     </span>
   );
