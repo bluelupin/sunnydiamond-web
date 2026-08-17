@@ -1,65 +1,27 @@
 import Image from "next/image";
 import type { NormalizedGiftingFinishingItem, NormalizedGiftingFinishingTouch } from "@/services/gifting/gifting-page.types";
 
-const FinishingTouchCard = ({
-  item,
-  layout,
-}: {
-  item: NormalizedGiftingFinishingItem;
-  layout: "mobile" | "desktop";
-}) => {
-  const isMobile = layout === "mobile";
-
-  return (
-    <article
-      className={
-        isMobile
-          ? "flex w-[328px] shrink-0 snap-start flex-col items-start gap-3"
-          : "flex flex-col items-center gap-4"
-      }
-    >
-      <div
-        className={
-          isMobile
-            ? "relative h-[226px] w-full"
-            : "relative h-[496px] w-full"
-        }
-      >
-        <Image
-          src={item.image.desktopUrl}
-          alt={item.image.alt}
-          fill
-          className="object-cover object-center"
-          sizes={
-            isMobile
-              ? "328px"
-              : "(max-width: 1440px) 33vw, 474px"
-          }
-        />
-      </div>
-      <div
-        className={
-          isMobile
-            ? "flex max-w-[296px] flex-col items-start gap-2 text-left text-darkblack"
-            : "flex flex-col items-center gap-3 px-4 text-center text-darkblack"
-        }
-      >
-        <h3 className="font-larken text-xl font-light leading-110">{item.title}</h3>
-        {item.description ? (
-          <p
-            className={
-              isMobile
-                ? "font-gill text-base font-light leading-normal"
-                : "font-gill text-base font-light leading-110"
-            }
-          >
-            {item.description}
-          </p>
-        ) : null}
-      </div>
-    </article>
-  );
-};
+const FinishingTouchCard = ({ item }: { item: NormalizedGiftingFinishingItem }) => (
+  <article className="flex w-[328px] shrink-0 snap-start flex-col items-start gap-3 md:w-full md:shrink md:snap-align-none md:items-center md:gap-4">
+    <div className="relative h-[226px] w-full lg:h-[496px] md:h-[350px]">
+      <Image
+        src={item.image.desktopUrl}
+        alt={item.image.alt}
+        fill
+        className="object-cover object-center"
+        sizes="(max-width: 767px) 328px, (max-width: 1440px) 33vw, 474px"
+      />
+    </div>
+    <div className="flex max-w-[296px] flex-col items-start gap-2 text-left text-darkblack md:max-w-none md:items-center md:gap-3 md:px-4 md:text-center">
+      <h3 className="font-larken text-xl font-light leading-110">{item.title}</h3>
+      {item.description ? (
+        <p className="font-gill text-base font-light leading-normal md:leading-110">
+          {item.description}
+        </p>
+      ) : null}
+    </div>
+  </article>
+);
 
 type GiftingPromiseSectionProps = {
   finishingTouch: NormalizedGiftingFinishingTouch;
@@ -70,10 +32,10 @@ const GiftingPromiseSection = ({ finishingTouch }: GiftingPromiseSectionProps) =
     <section
       id="the-finishing-touch"
       aria-labelledby="gifting-finishing-title"
-      className="relative z-30 isolate flex flex-col gap-6 bg-gray200 pt-16 pb-16 md:gap-10 md:py-100"
+      className="relative z-30 isolate flex flex-col gap-6 bg-gray200 pt-16 pb-16 md:gap-10 md:py-100 md:px-0 px-2"
     >
-      <div className="mx-auto flex w-full max-w-1440 flex-col items-center gap-6 px-4 md:gap-10 md:px-0">
-        <div className="flex w-full flex-col items-center gap-4 text-center md:px-10">
+      <div className="mx-auto flex w-full max-w-1440 flex-col items-center gap-6 px-0 md:gap-10 md:px-10">
+        <div className="flex w-full flex-col items-center gap-4 text-center">
           <h2
             id="gifting-finishing-title"
             className="font-larken text-[32px] font-light leading-110 text-darkblack md:text-5xl"
@@ -86,31 +48,15 @@ const GiftingPromiseSection = ({ finishingTouch }: GiftingPromiseSectionProps) =
             </p>
           ) : null}
         </div>
-
-        {/* Mobile — Figma 1049:57987 horizontal carousel */}
-        <div
-          className="scrollbar-none flex w-full snap-x snap-mandatory gap-3 overflow-x-auto scroll-pr-4 pb-2 md:hidden"
-          role="list"
-          aria-label={finishingTouch.title}
-        >
-          {finishingTouch.items.map((item) => (
-            <div key={item.id} className="shrink-0" role="listitem">
-              <FinishingTouchCard item={item} layout="mobile" />
-            </div>
-          ))}
-        </div>
       </div>
 
-      {/* Desktop — full-bleed three-column grid (Figma 1049:51053) */}
       <div
-        className="hidden w-full grid-cols-3 gap-2 md:grid"
+        className="scrollbar-none flex w-full snap-x snap-mandatory gap-3 overflow-x-auto px-2 pb-2 scroll-pr-4 md:grid md:grid-cols-3 md:gap-2 md:overflow-visible md:snap-none md:px-0 md:pb-0"
         role="list"
         aria-label={finishingTouch.title}
       >
         {finishingTouch.items.map((item) => (
-          <div key={item.id} role="listitem">
-            <FinishingTouchCard item={item} layout="desktop" />
-          </div>
+          <FinishingTouchCard key={item.id} item={item} />
         ))}
       </div>
     </section>

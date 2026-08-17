@@ -35,7 +35,7 @@ const GuaranteeIcon = ({
       alt={alt}
       width={size}
       height={size}
-      className="size-full object-contain"
+      className="lg:size-16 size-14 object-contain"
     />
   </div>
 );

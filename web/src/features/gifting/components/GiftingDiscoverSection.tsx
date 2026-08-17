@@ -180,9 +180,9 @@ const GiftingDiscoverSection = ({
           <button
             type="button"
             onClick={handleSubmit}
-            className="inline-flex h-14 items-center justify-center self-start bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 md:w-full md:self-auto"
+            className="btn-dark-slide inline-flex h-14 items-center justify-center self-start border border-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 md:w-full md:self-auto"
           >
-            {submitLabel}
+            <span className="relative z-10">{submitLabel}</span>
           </button>
         </Reveal>
       </div>

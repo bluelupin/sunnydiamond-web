@@ -30,13 +30,17 @@ const DfePlanBannerSection = ({ planIntro }: DfePlanBannerSectionProps) => {
             </div>
           ) : null}
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 md:flex hidden"
             style={{ backgroundImage: PLAN_BANNER_GRADIENT, backgroundSize: "100% 100%" }}
+          />
+          <div
+            className="absolute inset-0 md:hidden flex section-radial"
+          // style={{ backgroundImage: PLAN_BANNER_GRADIENT, backgroundSize: "100% 100%" }}
           />
         </div>
 
         <div
-          className="relative mx-auto flex w-full max-w-[528px] flex-col items-center gap-4 text-center leading-110 text-darkblack"
+          className="relative mx-auto flex w-full max-w-[528px] flex-col items-center md:gap-4 gap-3 text-center leading-110 text-darkblack"
         >
           <Reveal
             as="h2"
@@ -50,7 +54,7 @@ const DfePlanBannerSection = ({ planIntro }: DfePlanBannerSectionProps) => {
             <Reveal
               as="p"
               direction="up"
-              className="w-full font-gill text-xl font-light"
+              className="w-full font-gill lg:text-xl md:text-lg sm:text-base font-light md:text-darkblack text-neutral500"
             >
               {planIntro.description}
             </Reveal>

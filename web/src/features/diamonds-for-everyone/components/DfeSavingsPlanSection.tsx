@@ -26,7 +26,7 @@ const DfeSavingsPlanSection = ({ benefits }: DfeSavingsPlanSectionProps) => {
   return (
     <section
       aria-labelledby="dfe-savings-plan-title"
-      className="relative overflow-hidden bg-gray300 py-16 md:min-h-[550px] md:py-[104px]"
+      className="relative overflow-hidden md:bg-gray300 py-16 md:min-h-[550px] md:py-[104px] bg-chalkCard"
     >
       {backgroundSrc ? (
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -56,7 +56,7 @@ const DfeSavingsPlanSection = ({ benefits }: DfeSavingsPlanSectionProps) => {
       ) : null}
 
       <div className="relative mx-auto flex w-full max-w-[1360px] flex-col items-center gap-10 px-4 md:px-10">
-        <div className="flex w-full max-w-[510px] flex-col items-center gap-6 text-center">
+        <div className="flex w-full max-w-[620px] flex-col items-center gap-6 text-center">
           {benefits.eyebrow ? (
             <Reveal as="p" direction="up" className="font-gill text-base font-normal leading-110 text-linkGold">
               {benefits.eyebrow}
@@ -67,7 +67,7 @@ const DfeSavingsPlanSection = ({ benefits }: DfeSavingsPlanSectionProps) => {
               as="h2"
               id="dfe-savings-plan-title"
               direction="up"
-              className="font-larken text-32 font-light leading-110 text-darkblack md:text-5xl"
+              className="font-larken text-32 font-light leading-110 text-darkblack lg:text-5xl md:text-4xl sm:text-3xl"
             >
               {benefits.title}
             </Reveal>
@@ -75,7 +75,7 @@ const DfeSavingsPlanSection = ({ benefits }: DfeSavingsPlanSectionProps) => {
               <Reveal
                 as="p"
                 direction="up"
-                className="font-gill text-lg font-light leading-110 text-neutral500 md:text-xl"
+                className="font-gill text-lg font-light leading-110 text-neutral500 lg:text-xl md:text-lg text-base"
               >
                 {benefits.subtitle}
               </Reveal>
@@ -86,22 +86,22 @@ const DfeSavingsPlanSection = ({ benefits }: DfeSavingsPlanSectionProps) => {
         {steps.length > 0 ? (
           <>
             <div className="hidden w-full flex-col items-center gap-6 md:flex">
-              <ScrollReveal delayMs={200} className="relative h-10 w-full max-w-[784px]">
-                <div className="pointer-events-none absolute left-1/2 top-1/2 w-full max-w-[784px] -translate-x-1/2 -translate-y-1/2">
+              <ScrollReveal delayMs={200} className="relative h-10 w-full lg:max-w-[784px] max-w-[640px]">
+                <div className="pointer-events-none absolute left-1/2 top-1/2 w-full lg:max-w-[784px] max-w-[640px] -translate-x-1/2 -translate-y-1/2">
                   <div className="w-full border-[0.5px] border-dashed border-neutral500"></div>
                 </div>
-                <div className="relative flex h-10 items-center justify-between max-w-[784px] mx-auto px-0">
+                <div className="relative flex h-10 items-center justify-between lg:max-w-[784px] max-w-[640px] mx-auto px-0">
                   {steps.map((step) => (
                     <StepCircle key={step.id} number={step.stepNumber} />
                   ))}
                 </div>
               </ScrollReveal>
-              <div className="flex max-w-[980px] justify-between gap-10">
+              <div className="flex lg:w-[1000px] w-[770px] justify-between gap-6">
                 {steps.map((step, index) => (
                   <ScrollReveal
                     key={step.id}
                     delayMs={280 + index * 80}
-                    className="w-[250px] text-center font-gill text-xl font-light leading-110 text-darkblack"
+                    className="lg:w-[250px] md:w-auto w-[350px] text-center font-gill lg:text-xl md:text-base text-base font-light leading-110 text-darkblack"
                   >
                     {step.description}
                   </ScrollReveal>
