@@ -16,6 +16,10 @@ const OTP_LENGTH = LOGIN_OTP_LENGTH;
 type LoginOtpContentProps = {
   phone: string;
   countryCode: string;
+  /** Which destination the code went to — drives the copy above the digit boxes. */
+  channel: "sms" | "email";
+  /** Obfuscated address for the email variant, e.g. an****@example.com. */
+  maskedDestination: string | null;
   otp: string[];
   otpError?: string;
   secondsLeft: number;
@@ -43,6 +47,8 @@ const formatPhoneForOtp = (countryCode: string, phone: string) =>
 const LoginOtpContent = ({
   phone,
   countryCode,
+  channel,
+  maskedDestination,
   otp,
   otpError,
   secondsLeft,
@@ -101,7 +107,14 @@ const LoginOtpContent = ({
         <div className="flex w-full flex-col gap-4">
           <div className="flex flex-wrap items-center gap-3">
             <p className="font-gill text-base font-normal leading-110 text-darkblack">
-              Please enter the OTP sent to {formatPhoneForOtp(countryCode, phone)}
+              {channel === "email" ? (
+                <>
+                  We&rsquo;ve sent a 6-digit OTP to your registered email{" "}
+                  <span className="font-normal">{maskedDestination ?? phone}</span>
+                </>
+              ) : (
+                <>Please enter the OTP sent to {formatPhoneForOtp(countryCode, phone)}</>
+              )}
             </p>
             <DetailTextLink onClick={onEdit}>EDIT</DetailTextLink>
           </div>
