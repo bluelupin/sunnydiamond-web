@@ -14,7 +14,7 @@ const ContactPage = ({ page }: ContactPageProps) => {
   return (
     <>
       <ContactHeroSection hero={page.hero} />
-      <div className="flex flex-col gap-16 px-4 py-16 md:gap-104 md:px-0 md:py-0">
+      <div className="flex flex-col gap-16 px-4 py-16 md:gap-[100px] md:px-0 md:py-0">
         <ContactInfoSection intro={page.intro} infoCards={page.infoCards} />
         <ContactFormSection form={page.form} />
         <ProductDetailVisitUsSection visitUs={page.visitUs} />
