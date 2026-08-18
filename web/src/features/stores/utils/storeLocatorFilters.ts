@@ -120,25 +120,23 @@ export function isStoreLocatorPincodeSearchQuery(searchQuery: string): boolean {
   return /^\d+$/.test(query) && query.length >= 6;
 }
 
+function isValidIndianPincode(query: string): boolean {
+  return /^\d{6}$/.test(query) && !query.startsWith("0");
+}
+
 /**
- * Store Locator search — show Figma "Invalid Pincode" when the query is a
- * completed digit/pincode attempt that is malformed or matches no showrooms.
+ * Store Locator search — Figma State 3 under the field.
+ * Only malformed digit queries. A valid 6-digit miss is State 4, not this error.
  */
 export function getStoreLocatorPincodeSearchError(
   searchQuery: string,
-  hasMatchingStores: boolean,
 ): string | undefined {
   if (!isStoreLocatorPincodeSearchQuery(searchQuery)) {
     return undefined;
   }
 
   const query = searchQuery.trim();
-
-  if (!/^\d{6}$/.test(query) || query.startsWith("0")) {
-    return "Invalid Pincode";
-  }
-
-  if (!hasMatchingStores) {
+  if (!isValidIndianPincode(query)) {
     return "Invalid Pincode";
   }
 
@@ -146,14 +144,14 @@ export function getStoreLocatorPincodeSearchError(
 }
 
 /**
- * When a pincode search misses, fall back to suggesting nearby showrooms
- * (state filter still applied when set).
+ * Valid 6-digit pincode with no matching showroom — Figma State 4 nearby list.
  */
 export function shouldSuggestNearbyStores(
   searchQuery: string,
   matchingStoreCount: number,
 ): boolean {
-  return isStoreLocatorPincodeSearchQuery(searchQuery) && matchingStoreCount === 0;
+  const query = searchQuery.trim();
+  return isValidIndianPincode(query) && matchingStoreCount === 0;
 }
 
 /** Valid 6-digit pincode search that matched one or more showrooms. */
@@ -166,5 +164,5 @@ export function shouldShowPincodeMatchResults(
   }
 
   const query = searchQuery.trim();
-  return /^\d{6}$/.test(query) && !query.startsWith("0");
+  return isValidIndianPincode(query);
 }

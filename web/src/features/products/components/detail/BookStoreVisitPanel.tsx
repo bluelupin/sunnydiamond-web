@@ -9,12 +9,14 @@ import {
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import { resolveBookStoreVisitStores } from "@/features/products/utils/bookStoreVisitStores";
 import {
+  storeLocatorDefaultListCopy,
+  storeLocatorFoundCopy,
   storeLocatorNearbySuggestionsCopy,
-  storeLocatorPincodeMatchCopy,
+  storeLocatorStatusEyebrowClassName,
 } from "@/features/stores/data/storeLocatorContent";
 import {
   filterBookStoreVisitStores,
-  shouldShowPincodeMatchResults,
+  getStoreLocatorPincodeSearchError,
   shouldSuggestNearbyStores,
 } from "@/features/stores/utils/storeLocatorFilters";
 import { BookStoreVisitLocationDetails } from "./BookStoreVisitLocationDetails";
@@ -47,6 +49,8 @@ import {
 } from "./ProductDetailSidePanelShell";
 
 const SHOWROOM_VISIT_FORM_TAG = "showroom-visit";
+
+type StoreLocatorListStatus = "default" | "search-match" | "no-area";
 
 type BookStoreVisitPanelProps = {
   variant?: "embedded" | "page" | "modal";
@@ -158,59 +162,59 @@ const BookStoreVisitPanel = ({
     };
   }, []);
 
-  const { displayStores, showNearbySuggestions, showPincodeMatch, matchedStores, nearbyStores } =
+  const { displayStores, listStatus, matchedStores } =
     useMemo(() => {
+      const empty = {
+        displayStores: stores,
+        listStatus: "default" as StoreLocatorListStatus,
+        matchedStores: [] as BookStoreVisitStore[],
+      };
+
       if (variant !== "page") {
-        return {
-          displayStores: stores,
-          showNearbySuggestions: false,
-          showPincodeMatch: false,
-          matchedStores: [] as BookStoreVisitStore[],
-          nearbyStores: [] as BookStoreVisitStore[],
-        };
+        return empty;
       }
 
+      const query = storeSearchQuery.trim();
       const filtered = filterBookStoreVisitStores(stores, storeSearchQuery, storeStateFilter);
+      const allStores = filterBookStoreVisitStores(stores, "", null);
+
+      if (getStoreLocatorPincodeSearchError(storeSearchQuery)) {
+        return {
+          displayStores: filterBookStoreVisitStores(stores, "", storeStateFilter),
+          listStatus: "default" as StoreLocatorListStatus,
+          matchedStores: [] as BookStoreVisitStore[],
+        };
+      }
 
       if (shouldSuggestNearbyStores(storeSearchQuery, filtered.length)) {
-        // Pincode miss: suggest all showrooms (ignore state tab) so search works cross-tabs.
-        const nearby = filterBookStoreVisitStores(stores, "", null);
         return {
-          displayStores: nearby,
-          showNearbySuggestions: true,
-          showPincodeMatch: false,
+          displayStores: allStores,
+          listStatus: "no-area" as StoreLocatorListStatus,
           matchedStores: [] as BookStoreVisitStore[],
-          nearbyStores: nearby,
         };
       }
 
-      if (shouldShowPincodeMatchResults(storeSearchQuery, filtered.length)) {
+      if (query && filtered.length > 0) {
         const matchedIds = new Set(filtered.map((store) => store.id));
-        const nearby = filterBookStoreVisitStores(stores, "", null).filter(
-          (store) => !matchedIds.has(store.id),
-        );
+        const rest = allStores.filter((store) => !matchedIds.has(store.id));
         return {
-          displayStores: [...filtered, ...nearby],
-          showNearbySuggestions: false,
-          showPincodeMatch: true,
+          displayStores: [...filtered, ...rest],
+          listStatus: "search-match" as StoreLocatorListStatus,
           matchedStores: filtered,
-          nearbyStores: nearby,
         };
       }
 
       return {
         displayStores: filtered,
-        showNearbySuggestions: false,
-        showPincodeMatch: false,
+        listStatus: "default" as StoreLocatorListStatus,
         matchedStores: [] as BookStoreVisitStore[],
-        nearbyStores: [] as BookStoreVisitStore[],
       };
     }, [stores, storeSearchQuery, storeStateFilter, variant]);
 
   // Keep selection inside the filtered list synchronously so search/pincode
   // results expand immediately (useEffect-only sync left a stale id briefly).
   const activeStoreId = useMemo(() => {
-    if (showPincodeMatch && matchedStores.length > 0) {
+    if (matchedStores.length > 0) {
       if (matchedStores.some((store) => store.id === selectedStoreId)) {
         return selectedStoreId;
       }
@@ -221,7 +225,7 @@ const BookStoreVisitPanel = ({
       return selectedStoreId;
     }
     return displayStores[0]?.id ?? (variant === "page" ? "" : selectedStoreId);
-  }, [displayStores, matchedStores, selectedStoreId, showPincodeMatch, variant]);
+  }, [displayStores, matchedStores, selectedStoreId, variant]);
 
   const selectedStore =
     displayStores.find((store) => store.id === activeStoreId) ??
@@ -523,8 +527,6 @@ const BookStoreVisitPanel = ({
     step === "select-store" || !selectedStore ? (
       <StoreSelectionStep
         stores={displayStores}
-        matchedStores={matchedStores}
-        nearbyStores={nearbyStores}
         selectedStoreId={activeStoreId}
         layout={variant === "page" ? "page" : "panel"}
         formTitle={formTitle}
@@ -535,8 +537,7 @@ const BookStoreVisitPanel = ({
         showBack={showStoreSelectionBack}
         getDirectionsLabel={getDirectionsLabel}
         noResultsMessage={noResultsMessage}
-        showNearbySuggestions={showNearbySuggestions}
-        showPincodeMatch={showPincodeMatch}
+        listStatus={listStatus}
       />
     ) : (
       <BookingFormStep
@@ -648,8 +649,6 @@ const BookStoreVisitPanel = ({
 
 type StoreSelectionStepProps = {
   stores: BookStoreVisitStore[];
-  matchedStores?: BookStoreVisitStore[];
-  nearbyStores?: BookStoreVisitStore[];
   selectedStoreId: string;
   formTitle: string;
   layout?: "panel" | "page";
@@ -660,11 +659,44 @@ type StoreSelectionStepProps = {
   showBack?: boolean;
   getDirectionsLabel?: string | null;
   noResultsMessage?: string | null;
-  /** Invalid pincode search — show nearby suggestions instead of empty state. */
-  showNearbySuggestions?: boolean;
-  /** Valid pincode search with matches — Figma "STORE FOUND" layout. */
-  showPincodeMatch?: boolean;
+  listStatus?: StoreLocatorListStatus;
 };
+
+function StoreLocatorListStatusHeader({ status }: { status: StoreLocatorListStatus }) {
+  if (status === "no-area") {
+    return (
+      <div className="flex flex-col gap-2 px-4 pt-6 lg:px-10 lg:pt-0">
+        <p className="font-gill text-base font-normal uppercase leading-110 text-darkblack">
+          {storeLocatorNearbySuggestionsCopy.title}
+        </p>
+        <p className="font-gill text-base font-normal leading-110 text-darkblack">
+          {storeLocatorNearbySuggestionsCopy.subtitle}
+        </p>
+      </div>
+    );
+  }
+
+  const title =
+    status === "search-match"
+      ? storeLocatorFoundCopy.search
+      : storeLocatorDefaultListCopy.title;
+
+  const isFoundState = status === "search-match";
+
+  return (
+    <div className="flex flex-col gap-4 px-4 pt-6 lg:px-10 lg:pt-0">
+      <p
+        className={
+          isFoundState
+            ? storeLocatorStatusEyebrowClassName
+            : "font-gill text-sm font-normal leading-110 text-neutral500 lg:text-base"
+        }
+      >
+        {title}
+      </p>
+    </div>
+  );
+}
 
 const storeListTitleClassName =
   "font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl";
@@ -726,8 +758,6 @@ function renderStoreRow({
 
 const StoreSelectionStep = ({
   stores,
-  matchedStores = [],
-  nearbyStores = [],
   selectedStoreId,
   formTitle,
   layout = "panel",
@@ -738,22 +768,10 @@ const StoreSelectionStep = ({
   showBack = false,
   getDirectionsLabel,
   noResultsMessage,
-  showNearbySuggestions = false,
-  showPincodeMatch = false,
+  listStatus = "default",
 }: StoreSelectionStepProps) => {
   const selectedStore =
     stores.find((store) => store.id === selectedStoreId) ?? stores[0] ?? null;
-
-  const nearbySuggestionsHeader = showNearbySuggestions ? (
-    <div className="flex flex-col gap-2 px-4 pt-6 lg:px-10 lg:pt-0">
-      <p className="font-gill text-base font-normal uppercase leading-110 text-darkblack">
-        {storeLocatorNearbySuggestionsCopy.title}
-      </p>
-      <p className="font-gill text-base font-normal leading-110 text-darkblack">
-        {storeLocatorNearbySuggestionsCopy.subtitle}
-      </p>
-    </div>
-  ) : null;
 
   const storeList =
     stores.length === 0 ? (
@@ -774,54 +792,6 @@ const StoreSelectionStep = ({
       ))
     );
 
-  const pincodeMatchList =
-    showPincodeMatch && matchedStores.length > 0 ? (
-      <div className="flex flex-col">
-        <div className="flex flex-col gap-4 px-4 pt-6 lg:px-10 lg:pt-0">
-          <p className="font-gill text-sm font-normal uppercase leading-110 text-neutral500 lg:text-base">
-            {storeLocatorPincodeMatchCopy.title}
-          </p>
-        </div>
-
-        <div className="mt-4 flex flex-col">
-          {matchedStores.map((store) => (
-            <div key={store.id} className="w-full">
-              {renderStoreRow({
-                store,
-                isSelected: store.id === selectedStoreId,
-                onSelectStore,
-                getDirectionsLabel,
-              })}
-            </div>
-          ))}
-        </div>
-
-        {nearbyStores.length > 0 ? (
-          <div className="mt-6 flex flex-col gap-4 px-4 lg:px-10">
-            <p className="font-gill text-base font-normal leading-110 text-darkblack">
-              {storeLocatorPincodeMatchCopy.nearbySubtitle}
-            </p>
-            <div className="h-px w-full bg-neutral300" aria-hidden />
-          </div>
-        ) : null}
-
-        {nearbyStores.length > 0 ? (
-          <div className="flex flex-col">
-            {nearbyStores.map((store) => (
-              <div key={store.id} className="w-full">
-                {renderStoreRow({
-                  store,
-                  isSelected: store.id === selectedStoreId,
-                  onSelectStore,
-                  getDirectionsLabel,
-                })}
-              </div>
-            ))}
-          </div>
-        ) : null}
-      </div>
-    ) : null;
-
   if (layout === "page") {
     return (
       <>
@@ -831,18 +801,8 @@ const StoreSelectionStep = ({
               className="w-full shrink-0 lg:w-[593px] lg:border-r lg:border-neutral300"
               aria-label="Showroom locations"
             >
-              {showPincodeMatch ? (
-                pincodeMatchList
-              ) : (
-                <>
-                  {nearbySuggestionsHeader}
-                  {showNearbySuggestions && stores.length > 0 ? (
-                    <div className="mt-4">{storeList}</div>
-                  ) : (
-                    storeList
-                  )}
-                </>
-              )}
+              <StoreLocatorListStatusHeader status={listStatus} />
+              <div className={listStatus === "default" ? undefined : "mt-4"}>{storeList}</div>
             </div>
 
             {selectedStore ? (
