@@ -22,6 +22,7 @@ type LoginCreateAccountContentProps = {
   fullNameError?: string;
   emailError?: string;
   termsError?: string;
+  formError?: string;
   onFullNameChange: (value: string) => void;
   onEmailChange: (value: string) => void;
   onTermsAcceptedChange: (value: boolean) => void;
@@ -49,6 +50,7 @@ const LoginCreateAccountContent = ({
   fullNameError,
   emailError,
   termsError,
+  formError,
   onFullNameChange,
   onEmailChange,
   onTermsAcceptedChange,
@@ -192,6 +194,10 @@ const LoginCreateAccountContent = ({
           </p>
         </div>
       </div>
+
+      {formError ? (
+        <FormFieldError id="create-account-form-error" message={formError} />
+      ) : null}
 
       <CartPrimaryButton
         type="submit"

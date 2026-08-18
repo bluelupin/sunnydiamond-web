@@ -1,3 +1,5 @@
+import type { AuthFlowStep } from "../hooks/useAuthFlow";
+
 const DEFAULT_RETURN_URL = "/";
 
 /**
@@ -11,12 +13,9 @@ export function sanitizeReturnUrl(value: string | null | undefined): string {
   return value;
 }
 
-export function getAuthFlowLabel(
-  step: "sign-in" | "otp" | "create-account" | "password" | "email-create-account",
-): string {
-  if (step === "sign-in" || step === "password") return "Sign In";
+export function getAuthFlowLabel(step: AuthFlowStep): string {
+  if (step === "sign-in") return "Sign In";
   if (step === "otp") return "Enter Code";
-  if (step === "email-create-account") return "Create Account";
   return "Enter Details";
 }
 

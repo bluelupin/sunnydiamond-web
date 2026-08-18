@@ -1,7 +1,7 @@
 "use client";
 
 import AppleIcon from "@/assets/Icons/AppleIcon";
-import GoogleIcon from "@/assets/Icons/GoogleIcon";
+import GoogleSignInButton from "./GoogleSignInButton";
 import {
   CartDivider,
   CartPrimaryButton,
@@ -19,12 +19,14 @@ type LoginModalContentProps = {
   identifierError?: string;
   emailOnly: boolean;
   otpBlockedForCountry: boolean;
+  noSignInMethod: boolean;
   showGoogle: boolean;
   showApple: boolean;
   onIdentifierChange: (value: string) => void;
   onCountryCodeChange: (value: string) => void;
   onContinue: () => void;
-  onGoogleContinue: () => void;
+  /** Called with the ID token from Google's own button — see GoogleSignInButton. */
+  onGoogleCredential: (credential: string) => void;
   onAppleContinue: () => void;
   onUseEmailInstead: () => void;
   onClose: () => void;
@@ -52,19 +54,22 @@ const LoginModalContent = ({
   identifierError,
   emailOnly,
   otpBlockedForCountry,
+  noSignInMethod,
   showGoogle,
   showApple,
   onIdentifierChange,
   onCountryCodeChange,
   onContinue,
-  onGoogleContinue,
+  onGoogleCredential,
   onAppleContinue,
   onUseEmailInstead,
   onClose,
   titleClassName,
 }: LoginModalContentProps) => {
   const canContinue =
-    !otpBlockedForCountry && isLoginIdentifierReadyForOtp(identifier, countryCode, { emailOnly });
+    !noSignInMethod
+    && !otpBlockedForCountry
+    && isLoginIdentifierReadyForOtp(identifier, countryCode, { emailOnly });
   const showSocial = showGoogle || showApple;
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -105,7 +110,16 @@ const LoginModalContent = ({
           onCountryCodeChange={onCountryCodeChange}
         />
 
-        {otpBlockedForCountry ? (
+        {noSignInMethod ? (
+          <div role="status">
+            <p className="font-gill text-sm font-light leading-110 text-neutral500">
+              Sign-in is temporarily unavailable. Please try again shortly, or contact us
+              if you need help with your order.
+            </p>
+          </div>
+        ) : null}
+
+        {!noSignInMethod && otpBlockedForCountry ? (
           <div role="status" className="flex flex-col gap-1">
             {/* Wording fixed by the Authentication & Registration Flow document. */}
             <p className="font-gill text-sm font-light leading-110 text-neutral500">
@@ -135,10 +149,10 @@ const LoginModalContent = ({
         {showSocial ? <OrDivider /> : null}
 
         {showGoogle ? (
-          <button type="button" className={socialButtonClassName} onClick={onGoogleContinue}>
-            <GoogleIcon className="block size-6 shrink-0" />
-            <span className="relative z-10 leading-none">CONTINUE WITH GOOGLE</span>
-          </button>
+          <GoogleSignInButton
+            className={socialButtonClassName}
+            onCredential={onGoogleCredential}
+          />
         ) : null}
 
         {showApple ? (

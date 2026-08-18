@@ -97,18 +97,6 @@ export const validateRequiredEmail = (value: string): FieldValidation => {
   return validateOptionalEmail(trimmed);
 };
 
-export const validateRequiredPassword = (value: string): FieldValidation => {
-  if (!value) {
-    return { valid: false, error: "Password is required" };
-  }
-
-  if (value.length < 8) {
-    return { valid: false, error: "Password must be at least 8 characters" };
-  }
-
-  return { valid: true };
-};
-
 export const validateOptionalDate = (value: string): FieldValidation => {
   if (!value) {
     return { valid: true };
