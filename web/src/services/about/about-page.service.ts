@@ -3,6 +3,7 @@ import { apiFetch } from "@/api/fetchClient";
 import { STRAPI_ENDPOINTS } from "@/api/endpoints";
 import { mapAboutPageData } from "./about-page.mapper";
 import type { NormalizedAboutPage, StrapiAboutPageEntity } from "./about-page.types";
+import { EMPTY_ABOUT_PAGE } from "./about-page.types";
 
 /** Deep populate for nested media — shallow populate=* can leave craft mosaic tile images null. */
 const ABOUT_PAGE_POPULATE_QUERY =
@@ -19,12 +20,16 @@ const ABOUT_PAGE_POPULATE_QUERY =
 
 export const getAboutPage = cache(
   async (signal?: AbortSignal): Promise<NormalizedAboutPage> => {
-    const raw = await apiFetch<StrapiAboutPageEntity>(
-      `${STRAPI_ENDPOINTS.aboutPage}?${ABOUT_PAGE_POPULATE_QUERY}`,
-      { signal },
-    );
+    try {
+      const raw = await apiFetch<StrapiAboutPageEntity>(
+        `${STRAPI_ENDPOINTS.aboutPage}?${ABOUT_PAGE_POPULATE_QUERY}`,
+        { signal },
+      );
 
-    return mapAboutPageData(raw);
+      return mapAboutPageData(raw);
+    } catch {
+      return EMPTY_ABOUT_PAGE;
+    }
   },
 );
 

@@ -1,3 +1,5 @@
+import { normalizeIntersectionRootMargin } from "@/shared/utils/intersectionObserver";
+
 type RevealCallback = () => void;
 
 type ObserverConfig = {
@@ -41,11 +43,16 @@ export function observeScrollReveal(
   callback: RevealCallback,
   config: ObserverConfig,
 ): () => void {
+  const safeConfig = {
+    ...config,
+    rootMargin: normalizeIntersectionRootMargin(config.rootMargin),
+  };
+
   callbacks.set(element, callback);
-  getObserver(config).observe(element);
+  getObserver(safeConfig).observe(element);
 
   return () => {
     callbacks.delete(element);
-    getObserver(config).unobserve(element);
+    getObserver(safeConfig).unobserve(element);
   };
 }

@@ -10,12 +10,16 @@ import type { StrapiHomepageEditorialBlocksEntity } from "./homepage.strapi.type
 
 export const getHomepageEditorialBlocks = cache(
   async (signal?: AbortSignal): Promise<HomepageEditorialBlocksData> => {
-    const raw = await apiFetch<StrapiHomepageEditorialBlocksEntity>(
-      STRAPI_ENDPOINTS.homepageEditorialBlocks,
-      { signal },
-    );
+    try {
+      const raw = await apiFetch<StrapiHomepageEditorialBlocksEntity>(
+        STRAPI_ENDPOINTS.homepageEditorialBlocks,
+        { signal },
+      );
 
-    return mapHomepageEditorialBlocksData(raw);
+      return mapHomepageEditorialBlocksData(raw);
+    } catch {
+      return EMPTY_HOMEPAGE_EDITORIAL;
+    }
   },
 );
 

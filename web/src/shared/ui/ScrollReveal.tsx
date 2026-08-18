@@ -9,6 +9,7 @@ import {
 } from "react";
 import { observeScrollReveal } from "@/shared/lib/scrollRevealObserver";
 import { cn } from "@/shared/utils/cn";
+import { normalizeIntersectionRootMargin } from "@/shared/utils/intersectionObserver";
 import { isElementInViewportWithRootMargin } from "@/shared/utils/viewport";
 
 type ScrollRevealProps = {
@@ -36,20 +37,22 @@ const ScrollReveal = ({
     const node = ref.current;
     if (!node) return;
 
+    const safeRootMargin = normalizeIntersectionRootMargin(rootMargin);
+
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setReducedMotion(true);
       setVisible(true);
       return;
     }
 
-    if (isElementInViewportWithRootMargin(node, rootMargin)) {
+    if (isElementInViewportWithRootMargin(node, safeRootMargin)) {
       setVisible(true);
       return;
     }
 
     return observeScrollReveal(node, () => setVisible(true), {
       threshold,
-      rootMargin,
+      rootMargin: safeRootMargin,
     });
   }, [rootMargin, threshold]);
 

@@ -6,6 +6,7 @@ import type {
   NormalizedLearnAboutDiamondsPage,
   StrapiLearnAboutDiamondsPageEntity,
 } from "./learn-about-diamonds-page.types";
+import { EMPTY_LEARN_ABOUT_DIAMONDS_PAGE } from "./learn-about-diamonds-page.types";
 
 /** Targeted populate — matches Strapi schema field names. */
 const LEARN_ABOUT_DIAMONDS_POPULATE_QUERY =
@@ -40,12 +41,16 @@ const LEARN_ABOUT_DIAMONDS_POPULATE_QUERY =
 
 export const getLearnAboutDiamondsPage = cache(
   async (signal?: AbortSignal): Promise<NormalizedLearnAboutDiamondsPage> => {
-    const raw = await apiFetch<StrapiLearnAboutDiamondsPageEntity>(
-      `${STRAPI_ENDPOINTS.learnAboutDiamondsPage}?${LEARN_ABOUT_DIAMONDS_POPULATE_QUERY}`,
-   { signal },
-    );
+    try {
+      const raw = await apiFetch<StrapiLearnAboutDiamondsPageEntity>(
+        `${STRAPI_ENDPOINTS.learnAboutDiamondsPage}?${LEARN_ABOUT_DIAMONDS_POPULATE_QUERY}`,
+        { signal },
+      );
 
-    return mapLearnAboutDiamondsPage(raw);
+      return mapLearnAboutDiamondsPage(raw);
+    } catch {
+      return EMPTY_LEARN_ABOUT_DIAMONDS_PAGE;
+    }
   },
 );
 
