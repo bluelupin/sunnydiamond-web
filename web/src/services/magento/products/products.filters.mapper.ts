@@ -443,28 +443,34 @@ export function enrichFacetsWithNavCategories(
   facets: JewelleryFilterFacets,
   navCategories: JewelleryNavCategory[],
 ): JewelleryFilterFacets {
-  const categoriesByValue = new Map(facets.categories.map((category) => [category.value, category]));
-
-  for (const navCategory of navCategories) {
-    if (!navCategory.urlKey || navCategory.slug === "all") {
-      continue;
-    }
-
-    const value = navCategory.id.trim();
-    if (!value || categoriesByValue.has(value)) {
-      continue;
-    }
-
-    categoriesByValue.set(value, {
-      label: navCategory.label,
-      value,
-      count: navCategory.productCount > 0 ? navCategory.productCount : undefined,
-    });
-  }
-
-  const categories = Array.from(categoriesByValue.values()).sort((left, right) =>
-    left.label.localeCompare(right.label),
+  // All-jewellery drawer: main nav categories only. Magento category_uid
+  // aggregations also include child IDs, which must not appear as chips here.
+  const aggregationByValue = new Map(
+    facets.categories.map((category) => [category.value, category]),
   );
+
+  const categories = navCategories
+    .filter(
+      (navCategory) =>
+        Boolean(navCategory.urlKey) &&
+        Boolean(navCategory.slug) &&
+        navCategory.slug !== "all",
+    )
+    .slice()
+    .sort((left, right) => left.sortOrder - right.sortOrder || left.label.localeCompare(right.label))
+    .map((navCategory) => {
+      const value = navCategory.id.trim();
+      const aggregation = aggregationByValue.get(value);
+
+      return {
+        label: navCategory.label,
+        value,
+        count:
+          aggregation?.count ??
+          (navCategory.productCount > 0 ? navCategory.productCount : undefined),
+      };
+    })
+    .filter((category) => Boolean(category.value));
 
   return {
     ...facets,

@@ -8,18 +8,28 @@ import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { getWishlistProductHref } from "@/features/wishlist/utils/wishlistProduct.utils";
 import { prefetchWishlistProductDetail } from "@/features/wishlist/utils/wishlistProductDetailPrefetch";
 import { wishlistPageContent } from "@/features/wishlist/data/content";
+import { cn } from "@/shared/utils/cn";
+
+type WishlistListItemLayout = "default" | "profile";
 
 type WishlistListItemProps = {
   product: JewelleryListingProduct;
+  layout?: WishlistListItemLayout;
   onRemove: () => void;
   onAddToBag: () => void;
 };
 
-const WishlistListItem = ({ product, onRemove, onAddToBag }: WishlistListItemProps) => {
+const WishlistListItem = ({
+  product,
+  layout = "default",
+  onRemove,
+  onAddToBag,
+}: WishlistListItemProps) => {
   const href = getWishlistProductHref(product);
+  const isProfileLayout = layout === "profile";
 
   return (
-    <article className="flex flex-col gap-4 px-4 py-6 w-full">
+    <article className={cn("flex w-full flex-col gap-4 px-4 py-6", isProfileLayout && "md:bg-transparent bg-gray200")}>
       <Link
         href={href}
         className="sm:w-[300px] sm:h-[300px] mx-auto w-[160px] h-[160px] flex items-center justify-center"
@@ -37,7 +47,7 @@ const WishlistListItem = ({ product, onRemove, onAddToBag }: WishlistListItemPro
         <div className="flex flex-col gap-2 items-center justify-center">
           <Link
             href={href}
-            className="line-clamp-2 max-w-[153px] font-gill text-sm font-light leading-110 text-darkblack text-center"
+            className="line-clamp-2 max-w-[153px] font-gill text-base font-light leading-110 text-darkblack text-center"
           >
             {product.name}
           </Link>

@@ -59,13 +59,15 @@ const ProfilePage = () => {
 
   return (
     <ProfileAuthGate>
-      {customer ? (
+      {customer &&
         <ProfileBespokeToastProvider>
-          {/* <div className="bg-white"> */}
           <ProfileHeroSection firstName={customer.firstname} />
           <div
             className={cn(
-              "lg:pt-20 md:pt-14 pt-10 2xl:max-w-1920 max-w-1440 2xl:px-[60px] lg:px-10 md:px-8 px-4",
+              "lg:pt-20 md:pt-14 pt-10 2xl:max-w-1920 max-w-1440",
+              activeSection === "wishlist"
+                ? "2xl:px-[60px] lg:px-10"
+                : "2xl:px-[60px] lg:px-10 md:px-8 px-4",
               activeSection === "support" ? "pb-0" : "lg:pb-100 md:pb-20 pb-10",
             )}
           >
@@ -84,9 +86,8 @@ const ProfilePage = () => {
           </div>
           {activeSection === "support" ? <ProfileSupportFaqSection /> : null}
           {activeSection !== "support" ? <ProfilePromoStrip /> : null}
-          {/* </div> */}
         </ProfileBespokeToastProvider>
-      ) : null}
+      }
     </ProfileAuthGate>
   );
 };
