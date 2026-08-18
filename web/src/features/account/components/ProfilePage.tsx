@@ -71,7 +71,12 @@ const ProfilePage = () => {
               activeSection === "support" ? "pb-0" : "lg:pb-100 md:pb-20 pb-10",
             )}
           >
-            {showMobileSectionHeader && <ProfileMobileSectionHeader title={mobileSectionTitle} />}
+            {showMobileSectionHeader ? (
+              <ProfileMobileSectionHeader
+                title={mobileSectionTitle}
+                align={activeSection === "wishlist" ? "center" : "left"}
+              />
+            ) : null}
             <div className="lg:grid lg:grid-cols-[437px_minmax(0,1fr)] lg:gap-6">
               <aside className="hidden lg:block">
                 <ProfileSidebar

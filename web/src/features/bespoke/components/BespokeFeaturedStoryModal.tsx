@@ -11,6 +11,7 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { cn } from "@/shared/utils/cn";
+import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 import { useToast } from "@/shared/hooks/use-toast";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { getLoginHrefForReturn } from "@/features/auth/utils/authNavigation";
@@ -171,7 +172,7 @@ const FeaturedStoryModalCarousel = ({
   const trackOffset = viewportWidth > 0 ? -activeIndex * viewportWidth + dragOffset : 0;
 
   return (
-    <div ref={viewportRef} className="relative h-full min-h-0 w-full flex-1 overflow-hidden max-md:w-full">
+    <div ref={viewportRef} className="relative h-full min-h-0 w-full overflow-hidden max-md:w-full">
       <div
         ref={trackRef}
         className={cn(
@@ -194,7 +195,7 @@ const FeaturedStoryModalCarousel = ({
           {images.map((image, index) => (
             <div
               key={`${image.src}-${index}`}
-              className="relative h-full shrink-0 "
+              className="relative h-full shrink-0"
               style={{ width: viewportWidth > 0 ? viewportWidth : "100%" }}
             >
               <Image
@@ -209,36 +210,51 @@ const FeaturedStoryModalCarousel = ({
           ))}
         </div>
       </div>
+    </div>
+  );
+};
 
-      {canSlide ? (
-        <div className="absolute md:bottom-[230px] bottom-[175px] md:left-6 left-4 z-10 flex items-center gap-2">
-          {images.map((image, index) => {
-            const isActive = index === activeIndex;
+type FeaturedStoryModalPaginationProps = {
+  images: readonly FeaturedStoryModalImage[];
+  activeIndex: number;
+  onSelect: (index: number) => void;
+};
 
-            if (isActive) {
-              return (
-                <span
-                  key={`${image.src}-${index}-active`}
-                  aria-hidden
-                  className="block h-1 bg-white transition-all duration-300 W-12 rounded-[24px]"
-                  style={{ width: spec.paginationActiveWidth }}
-                />
-              );
-            }
+const FeaturedStoryModalPagination = ({
+  images,
+  activeIndex,
+  onSelect,
+}: FeaturedStoryModalPaginationProps) => {
+  if (images.length <= 1) {
+    return null;
+  }
 
-            return (
-              <button
-                key={`${image.src}-${index}`}
-                type="button"
-                aria-label={`View image ${index + 1}`}
-                onClick={() => goToIndex(index)}
-                onPointerDown={(event) => event.stopPropagation()}
-                className="rounded-full bg-neutral300 transition-colors hover:bg-white w-2 h-2"
-              />
-            );
-          })}
-        </div>
-      ) : null}
+  return (
+    <div className="flex items-center gap-2">
+      {images.map((image, index) => {
+        const isActive = index === activeIndex;
+
+        if (isActive) {
+          return (
+            <span
+              key={`${image.src}-${index}-active`}
+              aria-hidden
+              className="block h-1 rounded-[24px] bg-white transition-all duration-300"
+              style={{ width: spec.paginationActiveWidth }}
+            />
+          );
+        }
+
+        return (
+          <button
+            key={`${image.src}-${index}`}
+            type="button"
+            aria-label={`View image ${index + 1}`}
+            onClick={() => onSelect(index)}
+            className="size-2 rounded-full bg-neutral300 transition-colors hover:bg-white"
+          />
+        );
+      })}
     </div>
   );
 };
@@ -249,6 +265,7 @@ type FeaturedStoryModalPanelProps = {
   modalCtaHref: string;
   initialImageIndex?: number;
   onClose: () => void;
+  onShowStatusToast: (message: string) => void;
 };
 
 const FeaturedStoryModalPanel = ({
@@ -256,6 +273,7 @@ const FeaturedStoryModalPanel = ({
   modalCtaLabel,
   initialImageIndex = 0,
   onClose,
+  onShowStatusToast,
 }: FeaturedStoryModalPanelProps) => {
   const router = useRouter();
   const { toast } = useToast();
@@ -296,12 +314,7 @@ const FeaturedStoryModalPanel = ({
     setIsSaving(true);
     try {
       const result = await saveCustomerCreationClient(creationDocumentId);
-      toast({
-        title: result.alreadySaved ? "Already saved" : "Saved as inspiration",
-        description: result.alreadySaved
-          ? "This creation is already in your Bespoke Inspirations."
-          : "Find it anytime under Profile → Bespoke Inspirations.",
-      });
+      onShowStatusToast(result.alreadySaved ? "Already saved" : "Saved as inspiration");
       onClose();
     } catch (error) {
       toast({
@@ -318,51 +331,80 @@ const FeaturedStoryModalPanel = ({
 
   return (
     <div className="relative flex h-full min-h-0 w-full flex-col bg-black max-md:h-[85vh] max-md:w-full">
-      <div className="relative flex min-h-0 flex-1 flex-col max-md:h-full max-md:w-full">
+      <div className="relative min-h-0 flex-1">
         <FeaturedStoryModalCarousel
           images={slide.modalImages}
           activeIndex={activeImageIndex}
           onActiveIndexChange={setActiveImageIndex}
         />
-
         <button
           type="button"
           onClick={onClose}
           aria-label="Close featured story"
-          className="absolute md:right-6 right-4 md:top-10 top-6 z-20 inline-flex size-6 items-center justify-center text-white transition-opacity hover:opacity-70"
+          className="absolute right-4 top-6 z-20 inline-flex size-6 items-center justify-center text-white transition-opacity hover:opacity-70 md:right-6 md:top-10"
         >
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden className="md:w-8 md:h-8 w-6 h-6" >
-            <path d="M24 8L8 24" stroke="white" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M24 24L8 8" stroke="white" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 32 32"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden
+            className="size-6 md:size-8"
+          >
+            <path
+              d="M24 8L8 24"
+              stroke="white"
+              strokeWidth="1.33333"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M24 24L8 8"
+              stroke="white"
+              strokeWidth="1.33333"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </button>
       </div>
 
-      <div className="shrink-0 bg-transparent md:px-6 px-4 pt-5 pb-10 absolute bottom-0 w-full flex flex-col md:gap-10 gap-6"
-        style={{ backgroundImage: "linear-gradient(to bottom, #00000000, #000000B1, #000000)", }}>
+      <div
+        className="absolute inset-x-0 bottom-0 z-10 flex w-full flex-col gap-6 bg-transparent px-4 pb-10 pt-5 md:gap-6 md:px-6"
+        style={{
+          backgroundImage: "linear-gradient(to bottom, #00000000, #000000B1, #000000)",
+        }}
+      >
+        <FeaturedStoryModalPagination
+          images={slide.modalImages}
+          activeIndex={activeImageIndex}
+          onSelect={setActiveImageIndex}
+        />
+
         <div className="flex flex-col gap-2 md:gap-4">
-          <h2
-            className="font-larken font-light leading-110 text-white md:text-32 text-2xl"
-          >
+          <h2 className="font-larken text-2xl font-light leading-110 text-white md:text-32">
             {slide.modalTitle}
           </h2>
           <p
-            className="font-gill font-light leading-110 text-white md:text-xl text-base line-clamp-2"
+            className="line-clamp-2 font-gill text-base font-light leading-110 text-white md:text-xl"
             style={{ fontSize: spec.bodySize }}
           >
             {slide.modalDescription}
           </p>
         </div>
+
         <button
           type="button"
           onClick={() => {
             void handleSaveInspiration();
           }}
           disabled={saveDisabled}
-          className="w-fit inline-flex border-b border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-80 disabled:opacity-60"
+          className="inline-flex w-fit border-b border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-80 disabled:opacity-60"
         >
           {isSaving ? "Saving..." : status === "loading" ? "Loading..." : modalCtaLabel}
         </button>
+
         {!canSave ? (
           <p className="font-gill text-xs font-light leading-110 text-white/70">
             Save unavailable for this item (missing CMS document id).
@@ -382,13 +424,50 @@ const BespokeFeaturedStoryModal = ({
   elevated = false,
   onClose,
 }: BespokeFeaturedStoryModalProps) => {
+  const [statusToastMessage, setStatusToastMessage] = useState<string | null>(null);
+  const statusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const dismissStatusToast = useCallback(() => {
+    if (statusToastTimeoutRef.current) {
+      clearTimeout(statusToastTimeoutRef.current);
+      statusToastTimeoutRef.current = null;
+    }
+    setStatusToastMessage(null);
+  }, []);
+
+  const showStatusToast = useCallback(
+    (message: string) => {
+      dismissStatusToast();
+      setStatusToastMessage(message);
+      statusToastTimeoutRef.current = setTimeout(() => {
+        setStatusToastMessage(null);
+        statusToastTimeoutRef.current = null;
+      }, appStatusToastDurationMs);
+    },
+    [dismissStatusToast],
+  );
+
   useFeaturedStoryModalEffects(open, onClose);
 
+  useEffect(() => {
+    return () => {
+      if (statusToastTimeoutRef.current) {
+        clearTimeout(statusToastTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const statusToast = (
+    <AppStatusToast open={Boolean(statusToastMessage)} message={statusToastMessage ?? ""} />
+  );
+
   if (!open || !slide) {
-    return null;
+    return statusToastMessage ? statusToast : null;
   }
 
   return (
+    <>
+      {statusToast}
     <div
       className={cn(
         "fixed inset-0 flex md:items-stretch md:justify-end max-md:items-end",
@@ -424,9 +503,11 @@ const BespokeFeaturedStoryModal = ({
           modalCtaHref={modalCtaHref}
           initialImageIndex={initialImageIndex}
           onClose={onClose}
+          onShowStatusToast={showStatusToast}
         />
       </aside>
     </div>
+    </>
   );
 };
 
