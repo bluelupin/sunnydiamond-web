@@ -14,6 +14,7 @@ import type {
 } from "@/services/customer/customer-account.types";
 import { profileTabsContent } from "../data/profileContent";
 import { useCustomerAddresses } from "../hooks/useCustomerAddresses";
+import { ProfileAddressesListingSkeleton } from "./ProfileAddressesListingSkeleton";
 import { ProfileAddressFormSheet } from "./ProfileAddressFormSheet";
 import { ProfileDeleteAddressDialog } from "./ProfileDeleteAddressDialog";
 import { useProfileDefaultAddressToast } from "./ProfileDefaultAddressToast";
@@ -56,7 +57,7 @@ function AddressCard({
       <ProfileCard className="flex flex-col gap-6">
         <div className="flex flex-col gap-3 font-gill text-base leading-110 text-darkblack">
           <p className="font-normal">{address.fullName}</p>
-          <div className="font-light">
+          <div className="font-light leading-[145%]">
             {addressLines.map((line) => (
               <p key={line}>{line}</p>
             ))}
@@ -122,23 +123,6 @@ function AddressCard({
         </DetailDarkButton>
       </div>
     </ProfileCard>
-  );
-}
-
-function AddressesSkeleton() {
-  return (
-    <div
-      className="grid grid-cols-1 gap-4 md:grid-cols-2"
-      aria-busy="true"
-      aria-label="Loading addresses"
-    >
-      {Array.from({ length: 2 }).map((_, index) => (
-        <div
-          key={index}
-          className="h-36 animate-pulse rounded-sm border border-neutral300 bg-gray200/60"
-        />
-      ))}
-    </div>
   );
 }
 
@@ -262,7 +246,7 @@ const ProfileAddressesSection = () => {
   };
 
   if (isLoading) {
-    return <AddressesSkeleton />;
+    return <ProfileAddressesListingSkeleton />;
   }
 
   return (
@@ -289,7 +273,7 @@ const ProfileAddressesSection = () => {
           }
         />
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 lg:gap-6 gap-4 md:grid-cols-2">
           {!sheetOpen ? (
             <ProfileAddAddressCard
               label={addressContent.addCardLabel}

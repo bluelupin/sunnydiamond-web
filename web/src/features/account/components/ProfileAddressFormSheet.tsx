@@ -164,7 +164,7 @@ export function ProfileAddressFormSheet({
   };
 
   const header = (
-    <div className={cn(isMobile ? "px-6 pt-10" : "px-6 pt-6")}>
+    <div className={cn("shrink-0", isMobile ? "px-4 pt-6" : "px-6 pt-6")}>
       <div className="flex items-center justify-between gap-4">
         <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">{title}</h2>
         <button
@@ -187,8 +187,13 @@ export function ProfileAddressFormSheet({
       className="flex min-h-0 flex-1 flex-col"
       noValidate
     >
-      <div className="flex-1 overflow-y-auto px-6 pt-6">
-        <div className={cn("flex flex-col items-center gap-6", isMobile ? "pb-72" : "pb-6")}>
+      <div
+        className={cn(
+          "min-h-0 flex-1 overflow-y-auto overscroll-contain pt-6",
+          isMobile ? "px-4" : "px-6",
+        )}
+      >
+        <div className="flex flex-col items-center gap-6 pb-6">
           {!isEditing ? (
             <DetailTextLink
               onClick={isLocating || isSaving ? undefined : handleUseCurrentLocation}
@@ -293,7 +298,12 @@ export function ProfileAddressFormSheet({
         </div>
       </div>
 
-      <PanelFooter contentClassName="px-4 py-6">
+      <PanelFooter
+        contentClassName={cn(
+          "px-4 py-6",
+          isMobile && "pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]",
+        )}
+      >
         <DetailDarkButton type="submit" className="w-full" disabled={isSaving}>
           {isSaving ? "Saving..." : addressContent.saveLabel}
         </DetailDarkButton>
@@ -304,9 +314,14 @@ export function ProfileAddressFormSheet({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
-        side="right"
+        side={isMobile ? "bottom" : "right"}
         overlayClassName="bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
-        className="flex h-screen max-h-screen w-full max-w-[472px] flex-col gap-0 border-0 bg-white p-0 sm:max-w-[472px] [&>button]:hidden"
+        className={cn(
+          "flex flex-col gap-0 border-0 bg-white p-0 [&>button]:hidden",
+          isMobile
+            ? "max-h-[90vh] w-full rounded-none sm:max-w-full"
+            : "h-screen max-h-screen w-full max-w-[472px] sm:max-w-[472px]",
+        )}
       >
         <SheetTitle className="sr-only">{title}</SheetTitle>
         {header}

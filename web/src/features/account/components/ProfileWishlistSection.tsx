@@ -70,14 +70,14 @@ const ProfileWishlistSection = () => {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col items-center gap-6">
+      <div className="md:hidden flex flex-col items-center gap-6">
         <p className="font-gill text-base font-normal leading-110 text-neutral500">
           {wishlistPageContent.productCountLabel(wishlistProducts.length)}
         </p>
         <WishlistViewToggle value={viewMode} onChange={setViewMode} />
       </div>
 
-      <div className="-mx-4 bg-gray200 md:mx-0">
+      <div className="">
         <div className={cn(viewMode === "list" ? "hidden md:block" : "block")}>
           <WishlistGrid
             products={visibleProducts}
