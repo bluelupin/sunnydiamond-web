@@ -15,20 +15,7 @@ import { useMagentoWishlistProducts } from "@/hooks/magento/useMagentoWishlistPr
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 import { cn } from "@/shared/utils/cn";
 import { ProfileWishlistEmptyState } from "./ProfileWishlistEmptyState";
-
-function WishlistSkeleton() {
-  return (
-    <div
-      className="grid grid-cols-2 gap-1 md:grid-cols-2 md:gap-2 lg:grid-cols-3"
-      aria-busy="true"
-      aria-label="Loading wishlist"
-    >
-      {Array.from({ length: 4 }).map((_, index) => (
-        <div key={index} className="h-[280px] animate-pulse bg-gray300 md:h-[420px] lg:h-[496px]" />
-      ))}
-    </div>
-  );
-}
+import { ProfileWishlistListingSkeleton } from "./ProfileWishlistListingSkeleton";
 
 const ProfileWishlistSection = () => {
   const { wishlistedIds, toggleWishlist } = useWishlist();
@@ -53,11 +40,7 @@ const ProfileWishlistSection = () => {
   };
 
   if (isLoading && wishlistedIds.length > 0) {
-    return (
-      <div className="-mx-4 bg-gray200 py-6 md:mx-0">
-        <WishlistSkeleton />
-      </div>
-    );
+    return <ProfileWishlistListingSkeleton />;
   }
 
   if (showEmptyState) {
@@ -86,7 +69,6 @@ const ProfileWishlistSection = () => {
             onAddToBag={handleOpenAddToBag}
           />
         </div>
-
         {viewMode === "list" ? (
           <div className="md:hidden">
             <WishlistList

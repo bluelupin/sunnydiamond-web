@@ -47,7 +47,7 @@ const WishlistListItem = ({
         <div className="flex flex-col gap-2 items-center justify-center">
           <Link
             href={href}
-            className="line-clamp-2 max-w-[153px] font-gill text-sm font-light leading-110 text-darkblack text-center"
+            className="line-clamp-2 max-w-[153px] font-gill text-base font-light leading-110 text-darkblack text-center"
           >
             {product.name}
           </Link>
