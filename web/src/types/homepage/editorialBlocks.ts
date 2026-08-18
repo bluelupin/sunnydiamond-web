@@ -26,6 +26,11 @@ export type DiamondSourcingSectionData = {
     mobileImage?: StrapiMedia;
     altText?: string;
   };
+  gifOrImage?: StrapiMedia & {
+    desktopImage?: StrapiMedia;
+    mobileImage?: StrapiMedia;
+    altText?: string;
+  };
 };
 
 export type CraftsmanshipSectionData = CraftsmanshipStepsSection & {

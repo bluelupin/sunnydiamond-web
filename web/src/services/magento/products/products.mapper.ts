@@ -86,7 +86,7 @@ export function mapMagentoProductToJewelleryListing(
 
   const { primaryImage: resolvedPrimaryImage, lifestyleImage } = resolveMagentoProductImages(
     product.media_gallery,
-    product.image?.url,
+    product.image?.url || product.small_image?.url || product.thumbnail?.url,
     product.model_wear_image,
   );
 

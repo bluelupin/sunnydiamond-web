@@ -17,6 +17,12 @@ export const MAGENTO_PRODUCTS_BY_SKUS_QUERY = `
         image {
           url
         }
+        small_image {
+          url
+        }
+        thumbnail {
+          url
+        }
         media_gallery {
           url
           label
