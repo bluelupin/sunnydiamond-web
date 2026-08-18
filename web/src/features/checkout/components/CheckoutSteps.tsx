@@ -437,7 +437,7 @@ export const CheckoutPaymentStep = ({
 
       <CheckoutSectionCard gapClassName="gap-6">
         <CheckoutSectionHeading onEdit={onEditPayment} editDisabled={editDisabled}>
-          Payment Mehtod
+          Payment Method
         </CheckoutSectionHeading>
 
         <div id="checkout-payment-methods" className="flex flex-col gap-6">

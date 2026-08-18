@@ -157,7 +157,7 @@ function DetailCarousel({
   const trackOffset = viewportWidth > 0 ? -activeIndex * viewportWidth + dragOffset : 0;
 
   return (
-    <div ref={viewportRef} className="relative h-full min-h-0 w-full flex-1 overflow-hidden">
+    <div ref={viewportRef} className="relative h-full min-h-0 w-full overflow-hidden">
       <div
         ref={trackRef}
         className={cn(
@@ -195,36 +195,51 @@ function DetailCarousel({
           ))}
         </div>
       </div>
+    </div>
+  );
+}
 
-      {canSlide ? (
-        <div className="absolute bottom-28 left-4 z-10 flex items-center gap-2 md:bottom-32 md:left-6">
-          {images.map((src, index) => {
-            const isActive = index === activeIndex;
+type DetailCarouselPaginationProps = {
+  images: readonly string[];
+  activeIndex: number;
+  onSelect: (index: number) => void;
+};
 
-            if (isActive) {
-              return (
-                <span
-                  key={`${src}-${index}-active`}
-                  aria-hidden
-                  className="block h-1 rounded-[24px] bg-white transition-all duration-300"
-                  style={{ width: spec.paginationActiveWidth }}
-                />
-              );
-            }
+function DetailCarouselPagination({
+  images,
+  activeIndex,
+  onSelect,
+}: DetailCarouselPaginationProps) {
+  if (images.length <= 1) {
+    return null;
+  }
 
-            return (
-              <button
-                key={`${src}-${index}`}
-                type="button"
-                aria-label={`View image ${index + 1}`}
-                onClick={() => goToIndex(index)}
-                onPointerDown={(event) => event.stopPropagation()}
-                className="size-2 rounded-full bg-neutral300 transition-colors hover:bg-white"
-              />
-            );
-          })}
-        </div>
-      ) : null}
+  return (
+    <div className="flex items-center gap-2">
+      {images.map((src, index) => {
+        const isActive = index === activeIndex;
+
+        if (isActive) {
+          return (
+            <span
+              key={`${src}-${index}-active`}
+              aria-hidden
+              className="block h-1 rounded-[24px] bg-white transition-all duration-300"
+              style={{ width: spec.paginationActiveWidth }}
+            />
+          );
+        }
+
+        return (
+          <button
+            key={`${src}-${index}`}
+            type="button"
+            aria-label={`View image ${index + 1}`}
+            onClick={() => onSelect(index)}
+            className="size-2 rounded-full bg-neutral300 transition-colors hover:bg-white"
+          />
+        );
+      })}
     </div>
   );
 }
@@ -272,59 +287,67 @@ export function ProfileBespokeDetailPanel({
           "md:h-full md:max-w-480 md:shrink-0 md:animate-in md:slide-in-from-right md:duration-300",
         )}
       >
-        <div className="relative flex h-full min-h-0 w-full flex-col bg-black">
-          <DetailCarousel
-            images={images}
-            title={item.title}
-            activeIndex={activeImageIndex}
-            onActiveIndexChange={setActiveImageIndex}
-          />
+        <div className="relative flex h-full min-h-0 w-full flex-col bg-black max-md:h-[85vh]">
+          <div className="relative min-h-0 flex-1">
+            <DetailCarousel
+              images={images}
+              title={item.title}
+              activeIndex={activeImageIndex}
+              onActiveIndexChange={setActiveImageIndex}
+            />
 
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close inspiration"
-            className="absolute right-4 top-6 z-20 inline-flex size-6 items-center justify-center text-white transition-opacity hover:opacity-70 md:right-6 md:top-10"
-          >
-            <svg
-              width="32"
-              height="32"
-              viewBox="0 0 32 32"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden
-              className="h-6 w-6 md:h-8 md:w-8"
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close inspiration"
+              className="absolute right-4 top-6 z-20 inline-flex size-6 items-center justify-center text-white transition-opacity hover:opacity-70 md:right-6 md:top-10"
             >
-              <path
-                d="M24 8L8 24"
-                stroke="white"
-                strokeWidth="1.33333"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M24 24L8 8"
-                stroke="white"
-                strokeWidth="1.33333"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 32 32"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden
+                className="h-6 w-6 md:h-8 md:w-8"
+              >
+                <path
+                  d="M24 8L8 24"
+                  stroke="white"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M24 24L8 8"
+                  stroke="white"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
 
           <div
-            className="absolute bottom-0 w-full px-4 pb-10 pt-16 md:px-6"
+            className="absolute inset-x-0 bottom-0 z-10 flex w-full flex-col gap-6 bg-transparent px-4 pb-10 pt-5 md:px-6"
             style={{
               backgroundImage: "linear-gradient(to bottom, #00000000, #000000B1, #000000)",
             }}
           >
+            <DetailCarouselPagination
+              images={images}
+              activeIndex={activeImageIndex}
+              onSelect={setActiveImageIndex}
+            />
+
             <button
               type="button"
               onClick={() => {
                 onRemove(item);
                 onClose();
               }}
-              className="inline-flex border-b border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-80"
+              className="inline-flex w-fit border-b border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-80"
             >
               {content.removeFromSavedLabel}
             </button>
