@@ -73,6 +73,19 @@ const cleanText = (value?: string | null): string | undefined => {
   return trimmed || undefined;
 };
 
+/** Accepts `#RGB`, `#RRGGBB`, or the same without `#`. Invalid values are ignored. */
+function normalizeCssHexColor(value?: string | null): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) return undefined;
+
+  const hex = trimmed.startsWith("#") ? trimmed : `#${trimmed}`;
+  if (!/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/.test(hex)) {
+    return undefined;
+  }
+
+  return hex;
+}
+
 /** Maps CMS `showField` and legacy `isActive` to a single visibility flag. */
 export function resolveSectionActive(
   isActive?: boolean | null,
@@ -283,6 +296,7 @@ function mapGiftingBanner(raw?: StrapiGiftingBanner | null): GiftingBanner | nul
     primaryCta: mapCta(raw.primaryCta ?? raw.cta),
     secondaryCta: mapCta(raw.secondaryCta ?? raw.secondary),
     secondary: mapCta(raw.secondary),
+    backgroundColor: normalizeCssHexColor(raw.backgroundColor),
     backgroundImage: pickResponsiveImage(raw.backgroundImage),
     backgroundVideoUrl: resolveCmsMediaUrl(raw.backgroundVideo?.heroVideo),
     cutoutImage: pickResponsiveImage(raw.cutoutImage),
@@ -401,6 +415,7 @@ function mapDiamondSourcing(raw?: StrapiTextSection | null): DiamondSourcingSect
     sectionTitle: cleanText(raw.sectionTitle) ?? cleanText(raw.title),
     isActive,
     image: pickResponsiveImage(raw.cutoutImage, raw.image) as DiamondSourcingSectionData["image"],
+    gifOrImage: pickResponsiveImage(raw.gifOrImage) as DiamondSourcingSectionData["gifOrImage"],
   };
 }
 

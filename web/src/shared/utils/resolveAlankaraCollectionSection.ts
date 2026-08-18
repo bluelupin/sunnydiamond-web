@@ -1,9 +1,10 @@
+import type { StaticImageData } from "next/image";
+import fallBackImage from "@/assets/fallBackImage.png";
 import { homeContent } from "@/features/cms/data/content";
 import { products } from "@/features/products/data/products";
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 import {
   ALANKARA_FALLBACK_PRODUCTS,
-  ALANKARA_FALLBACKS,
   ALANKARA_DEFAULT_ACTIVE_INDEX,
   ALANKARA_PRODUCT_COUNT,
   type AlankaraCollectionProduct,
@@ -20,8 +21,8 @@ export type ResolvedAlankaraCollectionSection = {
   isActive?: boolean | null;
   title: string;
   description: string;
-  collectionImage: string;
-  collectionImageMobile: string;
+  collectionImage: string | StaticImageData;
+  collectionImageMobile: string | StaticImageData;
   collectionCta?: { label: string; href: string };
   products: AlankaraCollectionProduct[];
   /** Ordered Magento SKUs from CMS (empty when not configured). */
@@ -43,8 +44,8 @@ function buildFallbackProduct(index: number, productId: string): AlankaraCollect
   return {
     id: productId,
     name: catalogProduct?.name || figmaFallback.name,
-    image: figmaFallback.image,
-    thumbnailImage: figmaFallback.image,
+    image: fallBackImage,
+    thumbnailImage: fallBackImage,
     thumbnailCrop: figmaFallback.thumbnailCrop,
     desktopCrop: figmaFallback.desktopCrop,
     href: `/product/${productId}`,
@@ -76,13 +77,12 @@ function buildCmsProduct(
     : undefined;
   const figmaFallback = getFallbackThumbnailCrop(index);
   const cmsImage = cmsProduct?.image ? resolveCmsMediaUrl(cmsProduct.image) : "";
-  const image = cmsImage || figmaFallback.image;
 
   return {
     id: productId ?? `alankara-cms-${index}`,
     name: name || catalogProduct?.name || figmaFallback.name,
-    image,
-    thumbnailImage: cmsImage || figmaFallback.image,
+    image: cmsImage || fallBackImage,
+    thumbnailImage: cmsImage || fallBackImage,
     thumbnailCrop: figmaFallback.thumbnailCrop,
     desktopCrop: figmaFallback.desktopCrop,
     href: productId ? `/product/${productId}` : "/jewellery",
@@ -142,6 +142,31 @@ export function resolveAlankaraProductSkus(
   return { productSkus: ordered, featuredProductSku };
 }
 
+const placeholderImageSrc = getImageSrc(fallBackImage);
+
+function isGenericPlaceholderImage(source: string | StaticImageData | null | undefined): boolean {
+  if (!source || source === fallBackImage) {
+    return true;
+  }
+
+  const src = getImageSrc(source);
+  return !src || src === placeholderImageSrc;
+}
+
+/** Magento catalog photo first; occasions placeholder only when Magento has none. */
+function resolveAlankaraMagentoProductImage(
+  product: JewelleryListingProduct,
+): string | StaticImageData {
+  for (const candidate of [product.primaryImage, product.modalImage, product.hoverImage]) {
+    if (!candidate || isGenericPlaceholderImage(candidate)) {
+      continue;
+    }
+    return candidate;
+  }
+
+  return fallBackImage;
+}
+
 export function mapMagentoProductsToAlankaraCollection(
   magentoProducts: JewelleryListingProduct[],
   orderedSkus: string[],
@@ -160,7 +185,7 @@ export function mapMagentoProductsToAlankaraCollection(
 
     const index = products.length;
     const figmaFallback = getFallbackThumbnailCrop(index);
-    const image = getImageSrc(magento.primaryImage) || figmaFallback.image;
+    const image = resolveAlankaraMagentoProductImage(magento);
 
     products.push({
       id: magento.sku,
@@ -224,8 +249,8 @@ export function resolveAlankaraCollectionSection(
       descriptionOverride ||
       section?.description?.trim() ||
       COLLECTION_FALLBACK.description,
-    collectionImage: collectionImages.desktopUrl || ALANKARA_FALLBACKS.heroDesktop,
-    collectionImageMobile: collectionImages.mobileUrl || ALANKARA_FALLBACKS.heroMobile,
+    collectionImage: collectionImages.desktopUrl || fallBackImage,
+    collectionImageMobile: collectionImages.mobileUrl || fallBackImage,
     collectionCta: ctaUrl
       ? {
           label: ctaLabel,

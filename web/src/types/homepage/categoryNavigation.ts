@@ -66,6 +66,7 @@ export type GiftingBanner = {
   secondaryCta?: CategoryNavigationCta | null;
   cta?: CategoryNavigationCta | null;
   secondary?: CategoryNavigationCta | null;
+  backgroundColor?: string | null;
   backgroundImage?: (CategoryNavigationImage & { altText?: string }) | StrapiMedia | null;
   /** Resolved CMS background video URL (`backgroundVideo.heroVideo`). */
   backgroundVideoUrl?: string | null;
