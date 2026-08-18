@@ -137,8 +137,10 @@ export function ProfileOrderTrackModal({
       >
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between gap-4">
-            <DialogTitle className="font-larken text-32 font-light leading-110 text-darkblack">
-              {trackDialog.title}
+            <DialogTitle className="font-larken font-light leading-110 text-darkblack">
+              <span className="text-32">
+                {trackDialog.title}
+              </span>
             </DialogTitle>
             <button
               type="button"

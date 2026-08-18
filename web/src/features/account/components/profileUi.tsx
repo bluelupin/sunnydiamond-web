@@ -154,7 +154,7 @@ export function ProfileOrderMobileStatusBadge({
 }
 
 export function ProfileOrderCardDivider() {
-  return <div className="h-px w-full shrink-0 bg-neutral300" aria-hidden />;
+  return <div className="h-[0.5px] w-full shrink-0 bg-neutral300" aria-hidden />;
 }
 
 /** Figma 1536:30206 — mauve pill for gift / bespoke order line items. */
@@ -266,7 +266,7 @@ export function ProfileFilterChips<T extends string>({
 }) {
   const wrapperClass = scrollOnMobile
     ? cn(
-        "-mx-4 flex gap-2 overflow-x-auto px-4 lg:mx-0 lg:flex-nowrap lg:justify-end lg:overflow-visible lg:px-0",
+        "-mx-4 flex gap-2 overflow-x-auto px-4 lg:mx-0 lg:flex-nowrap lg:justify-end lg:overflow-visible lg:px-0 horizontalScrollbar",
         className,
       )
     : cn("flex flex-wrap gap-2", className);
@@ -325,8 +325,8 @@ export function ProfileInfoNote({ children }: { children: React.ReactNode }) {
 
 export function ProfileTabEmptyStateLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex w-full min-h-[min(520px,55vh)] items-center justify-center">
-      <div className="flex w-full max-w-[464px] flex-col items-center gap-6 text-center">
+    <div className="flex w-full min-h-[min(520px,100vh)] items-center justify-center">
+      <div className="flex w-full max-w-[464px] flex-col items-center md:gap-6 gap-4 text-center">
         {children}
       </div>
     </div>

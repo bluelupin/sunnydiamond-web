@@ -299,7 +299,7 @@ export function ProfileOrderCard({
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4 font-gill text-base leading-110 text-darkblack">
-                <span className="inline-flex items-center gap-1 font-light">
+                <span className="inline-flex items-center gap-1 font-light text-darkblack">
                   {content.orderIdLabel}{" "}
                   <span className="font-normal">{order.number}</span>
                   <button

@@ -22,9 +22,9 @@ export function ProfileOrdersEmptyState({
 }: ProfileOrdersEmptyStateProps = {}) {
   return (
     <ProfileTabEmptyStateLayout>
-      <DiamondIcon className="size-16 text-gold500" aria-hidden />
+      <DiamondIcon className="lg:size-16 size-12 text-gold500" aria-hidden />
 
-      <h3 className="w-full font-larken text-32 font-light leading-110 text-darkblack">
+      <h3 className="w-full font-larken lg:text-32 md:text-3xl text-2xl font-light leading-110 text-darkblack">
         {title}
       </h3>
 

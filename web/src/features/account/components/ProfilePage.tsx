@@ -61,37 +61,30 @@ const ProfilePage = () => {
     <ProfileAuthGate>
       {customer ? (
         <ProfileBespokeToastProvider>
-          <div className="bg-white">
-            <ProfileHeroSection firstName={customer.firstname} />
-
-            <div
-              className={cn(
-                "px-4 pt-10 md:px-10 lg:px-10",
-                activeSection === "support" ? "pb-0" : "pb-16",
-              )}
-            >
-              {showMobileSectionHeader ? (
-                <ProfileMobileSectionHeader title={mobileSectionTitle} />
-              ) : null}
-
-              <div className="lg:-mx-10 lg:mt-8 lg:grid lg:grid-cols-[480px_minmax(0,1fr)] lg:gap-6">
-                <aside className="hidden lg:block">
-                  <ProfileSidebar
-                    activeSection={activeSection}
-                    onSectionChange={handleSectionChange}
-                  />
-                </aside>
-
-                <div className="min-w-0 lg:pr-6">
-                  <ProfileSectionContent section={activeSection} customer={customer} />
-                </div>
+          {/* <div className="bg-white"> */}
+          <ProfileHeroSection firstName={customer.firstname} />
+          <div
+            className={cn(
+              "lg:pt-20 md:pt-14 pt-10 2xl:max-w-1920 max-w-1440 2xl:px-[60px] lg:px-10 md:px-8 px-4",
+              activeSection === "support" ? "pb-0" : "lg:pb-100 md:pb-20 pb-10",
+            )}
+          >
+            {showMobileSectionHeader && <ProfileMobileSectionHeader title={mobileSectionTitle} />}
+            <div className="lg:grid lg:grid-cols-[437px_minmax(0,1fr)] lg:gap-6">
+              <aside className="hidden lg:block">
+                <ProfileSidebar
+                  activeSection={activeSection}
+                  onSectionChange={handleSectionChange}
+                />
+              </aside>
+              <div className="min-w-0">
+                <ProfileSectionContent section={activeSection} customer={customer} />
               </div>
             </div>
-
-            {activeSection === "support" ? <ProfileSupportFaqSection /> : null}
-
-            {activeSection !== "support" ? <ProfilePromoStrip /> : null}
           </div>
+          {activeSection === "support" ? <ProfileSupportFaqSection /> : null}
+          {activeSection !== "support" ? <ProfilePromoStrip /> : null}
+          {/* </div> */}
         </ProfileBespokeToastProvider>
       ) : null}
     </ProfileAuthGate>

@@ -37,7 +37,7 @@ export function ProfileOrderTrackTimeline({ steps, className }: ProfileOrderTrac
               <span
                 className={cn(
                   "flex size-10 shrink-0 items-center justify-center rounded-full font-gill text-base font-normal leading-110",
-                  isActive && "bg-gold500 text-white",
+                  isActive && "bg-gold500 text-darkblack",
                   !isActive && "border border-neutral300 bg-gray300 text-neutral500",
                 )}
               >
@@ -46,7 +46,7 @@ export function ProfileOrderTrackTimeline({ steps, className }: ProfileOrderTrac
               {!isLast ? (
                 <div
                   className={cn(
-                    "my-1 w-px flex-1 min-h-10",
+                    "w-px flex-1 min-h-10",
                     isCompleted ? "bg-gold500" : "bg-neutral300",
                   )}
                   aria-hidden

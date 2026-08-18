@@ -29,7 +29,7 @@ export function ProfilePromoStrip() {
           </div>
         </div>
 
-        <div className="h-px w-full bg-neutral300 lg:hidden" aria-hidden />
+        <div className="h-[0.5px] w-full bg-neutral300 lg:hidden" aria-hidden />
 
         <div
           className="hidden w-px shrink-0 self-stretch bg-neutral300 lg:block"

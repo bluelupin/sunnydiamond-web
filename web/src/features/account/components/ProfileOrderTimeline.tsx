@@ -52,7 +52,7 @@ function ProfileOrderTimelineVertical({ steps }: { steps: ProfileTimelineStep[] 
               <span
                 className={cn(
                   "flex size-10 shrink-0 items-center justify-center rounded-full font-gill text-base leading-110",
-                  isActive && "bg-gold500 font-normal text-white",
+                  isActive && "bg-gold500 font-normal text-darkblack",
                   isUpcoming && "border border-neutral300 bg-gray300 font-light text-darkblack",
                 )}
               >
@@ -97,23 +97,37 @@ function ProfileOrderTimelineHorizontal({
     variant === "detail"
       ? getProfileTimelineCompletedThroughIndex(steps)
       : getProfileTimelineFilledThroughIndex(steps);
+  const stepCount = steps.length;
+  const lineInset = stepCount > 1 ? `calc(100% / ${stepCount} / 2)` : undefined;
+  const lineSpan =
+    stepCount > 1 ? `calc(100% - 100% / ${stepCount})` : undefined;
+  const filledLineWidth =
+    stepCount > 1 && filledThroughIndex > 0
+      ? `calc((100% - 100% / ${stepCount}) * ${filledThroughIndex / (stepCount - 1)})`
+      : undefined;
 
   return (
     <div className="hidden p-6 lg:block">
       <div className="relative">
-        <div className="absolute left-5 right-5 top-5 h-px bg-neutral300" aria-hidden />
+        {lineInset && lineSpan ? (
+          <>
+            <div
+              className="absolute top-5 h-px bg-transparent border border-dashed border-neutral300"
+              style={{ left: lineInset, width: lineSpan }}
+              aria-hidden
+            />
 
-        {filledThroughIndex > 0 && steps.length > 1 ? (
-          <div
-            className="absolute left-5 top-5 h-px bg-gold500"
-            style={{
-              width: `calc((100% - 2.5rem) * ${filledThroughIndex / (steps.length - 1)})`,
-            }}
-            aria-hidden
-          />
+            {filledLineWidth ? (
+              <div
+                className="absolute top-5 h-px bg-transparent border border-neutral500"
+                style={{ left: lineInset, width: filledLineWidth }}
+                aria-hidden
+              />
+            ) : null}
+          </>
         ) : null}
 
-        <ol className="relative flex justify-between gap-2">
+        <ol className="relative flex justify-between">
           {steps.map((step) => {
             const isCompleted = step.status === "completed";
             const isCurrent = step.status === "current";
@@ -128,17 +142,17 @@ function ProfileOrderTimelineHorizontal({
                 <span
                   className={cn(
                     "flex size-10 shrink-0 items-center justify-center rounded-full font-gill text-base font-normal leading-110",
-                    variant === "detail" && isCompleted && "bg-gold500 text-white",
+                    variant === "detail" && isCompleted && "bg-gold500 text-darkblack",
                     variant === "detail" &&
-                      isCurrent &&
-                      "border border-gold500 bg-white text-darkblack",
+                    isCurrent &&
+                    "border border-gold500 bg-white text-darkblack",
                     variant === "detail" &&
-                      isUpcoming &&
-                      "border border-neutral300 bg-gray300 text-neutral500",
-                    variant === "default" && isActive && "bg-gold500 text-white",
+                    isUpcoming &&
+                    "border border-neutral300 bg-gray300 text-neutral500",
+                    variant === "default" && isActive && "bg-gold500 text-darkblack",
                     variant === "default" &&
-                      isUpcoming &&
-                      "border border-neutral300 bg-gray300 text-neutral500",
+                    isUpcoming &&
+                    "border border-neutral300 bg-gray300 text-neutral500",
                   )}
                 >
                   {step.step}
