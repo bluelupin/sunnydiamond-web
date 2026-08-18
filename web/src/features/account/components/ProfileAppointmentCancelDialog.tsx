@@ -84,7 +84,9 @@ export function ProfileAppointmentCancelDialog({
       >
         <div className="flex items-start justify-between gap-4 border-b border-neutral300 pb-4">
           <DialogTitle className="font-larken text-32 font-light leading-110 text-darkblack">
-            {content.title}
+            <span className="md:text-32 text-2xl">
+              {content.title}
+            </span>
           </DialogTitle>
           <button
             type="button"

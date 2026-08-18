@@ -35,7 +35,7 @@ export function ProfileOrderReturnDialog({
       >
         <div className="flex items-start justify-between gap-4 border-b border-neutral300 pb-4">
           <DialogTitle className="font-larken font-light leading-110 text-darkblack">
-            <span className="text-32">
+            <span className="md:text-32 text-2xl">
               {content.title}
             </span>
           </DialogTitle>

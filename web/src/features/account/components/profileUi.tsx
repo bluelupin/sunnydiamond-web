@@ -154,7 +154,7 @@ export function ProfileOrderMobileStatusBadge({
 }
 
 export function ProfileOrderCardDivider() {
-  return <div className="h-[0.5px] w-full shrink-0 bg-neutral300" aria-hidden />;
+  return <div className="lg:h-px h-[0.5px] w-full shrink-0 bg-neutral300" aria-hidden />;
 }
 
 /** Figma 1536:30206 — mauve pill for gift / bespoke order line items. */
