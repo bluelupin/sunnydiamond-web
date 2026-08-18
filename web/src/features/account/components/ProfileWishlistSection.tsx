@@ -90,6 +90,7 @@ const ProfileWishlistSection = () => {
         {viewMode === "list" ? (
           <div className="md:hidden">
             <WishlistList
+              variant="profile"
               products={visibleProducts}
               onRemove={(product) => toggleWishlist(product.sku)}
               onAddToBag={handleOpenAddToBag}
