@@ -34,8 +34,10 @@ export function ProfileOrderReturnDialog({
         className="max-w-[520px] gap-6 border-neutral300 bg-white p-6 sm:rounded-none"
       >
         <div className="flex items-start justify-between gap-4 border-b border-neutral300 pb-4">
-          <DialogTitle className="font-larken text-32 font-light leading-110 text-darkblack">
-            {content.title}
+          <DialogTitle className="font-larken font-light leading-110 text-darkblack">
+            <span className="md:text-32 text-2xl">
+              {content.title}
+            </span>
           </DialogTitle>
           <button
             type="button"

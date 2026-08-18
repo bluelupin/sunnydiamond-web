@@ -156,7 +156,7 @@ export function ProfileOrderDetailView({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center lg:gap-3 gap-2">
         <button
           type="button"
           onClick={onBack}
@@ -209,7 +209,7 @@ export function ProfileOrderDetailView({
 
         <div className="hidden flex-col gap-4 lg:flex lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-wrap items-center gap-4 font-gill text-base leading-110 text-darkblack">
-            <span className="inline-flex items-center gap-1 font-light">
+            <span className="inline-flex items-center gap-1 font-light text-darkblack">
               {content.orderIdLabel}{" "}
               <span className="font-normal">{order.number}</span>
               <button
@@ -261,7 +261,7 @@ export function ProfileOrderDetailView({
           </h2>
           <div className="flex flex-col gap-2 font-gill text-base leading-110 text-darkblack">
             <p className="font-normal">{order.shippingAddress.fullName}</p>
-            <div className="font-light">
+            <div className="font-light leading-[145%]">
               {order.shippingAddress.streetLines.filter(Boolean).map((line) => (
                 <p key={line}>{line}</p>
               ))}
@@ -305,7 +305,6 @@ export function ProfileOrderDetailView({
             />
           </span>
         </button>
-
         <div
           id="order-totals-breakdown"
           aria-hidden={!totalsExpanded}

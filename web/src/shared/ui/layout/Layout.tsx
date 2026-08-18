@@ -1,11 +1,12 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
 import BrowserBackScrollRestore from "@/shared/lib/providers/BrowserBackScrollRestore";
 import { usePathname } from "next/navigation";
 import { cn } from "@/shared/utils/cn";
+import { clearTransientErrorAutoRetry } from "@/shared/hooks/useTransientErrorAutoRetry";
 import { isAuthRoute, isCartOrCheckoutRoute, shouldHideFooter, shouldHideFooterOnMobile, shouldOffsetMainForHeader } from "@/shared/utils/navigation";
 
 const Layout = ({ children }: { children: ReactNode }) => {
@@ -15,6 +16,10 @@ const Layout = ({ children }: { children: ReactNode }) => {
   const hideFooterOnMobile = shouldHideFooterOnMobile(pathname);
   const isAuthPage = isAuthRoute(pathname);
   const isCartCheckoutPage = isCartOrCheckoutRoute(pathname);
+
+  useEffect(() => {
+    clearTransientErrorAutoRetry(pathname);
+  }, [pathname]);
 
   return (
     <div className={cn("flex flex-col", isAuthPage ? "h-[100dvh] overflow-hidden" : "min-h-screen")}>

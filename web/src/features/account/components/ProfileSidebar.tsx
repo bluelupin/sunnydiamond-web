@@ -23,13 +23,11 @@ const ProfileSidebar = ({ activeSection, onSectionChange }: ProfileSidebarProps)
             href={item.href}
             className="flex w-full items-center p-6 font-gill text-xl font-light leading-110 text-darkblack transition-colors hover:bg-gray300/60"
           >
-            {item.label}
+            {item.label} test
           </Link>
         );
       }
-
       const isActive = item.id === activeSection;
-
       return (
         <button
           key={item.id}
@@ -40,7 +38,7 @@ const ProfileSidebar = ({ activeSection, onSectionChange }: ProfileSidebarProps)
             "flex w-full items-center p-6 text-left font-gill text-xl leading-110 text-darkblack transition-colors",
             isActive
               ? "border-r-2 border-darkblack bg-gray300 font-normal"
-              : "font-light hover:bg-gray300/60",
+              : "font-light hover:bg-gray300/50",
           )}
         >
           {item.label}

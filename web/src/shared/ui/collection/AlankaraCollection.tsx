@@ -8,7 +8,7 @@ import CarouselChevronLeft from "@/assets/Icons/CarouselChevronLeft";
 import CarouselChevronRight from "@/assets/Icons/CarouselChevronRight";
 import { cn } from "@/shared/utils/cn";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
-import { getImageSrc, resolveImageSrc, resolveImageSrcString } from "@/shared/utils/image";
+import { getImageSrc, resolveImageSrc } from "@/shared/utils/image";
 import {
   ALANKARA_HERO_DESKTOP_CROP,
   ALANKARA_DEFAULT_ACTIVE_INDEX,
@@ -629,8 +629,8 @@ export function AlankaraCollection({
   className,
   "aria-label": ariaLabel,
 }: AlankaraCollectionProps) {
-  const desktopHero = resolveImageSrcString(collectionImage);
-  const mobileHero = resolveImageSrcString(collectionImageMobile ?? collectionImage, desktopHero);
+  const desktopHero = getImageSrc(collectionImage) ?? "";
+  const mobileHero = getImageSrc(collectionImageMobile) ?? desktopHero;
 
   if (!products.length) return null;
 

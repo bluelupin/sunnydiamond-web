@@ -17,6 +17,8 @@ import { ProfileOrderCard } from "./ProfileOrderCard";
 import { ProfileOrderDetailPanel } from "./ProfileOrderDetailPanel";
 import { ProfileOrdersEmptyState } from "./ProfileOrdersEmptyState";
 import { ProfileFilterChips } from "./profileUi";
+import { ProfileOrderCardSkeleton } from "./ProfileOrderCardSkeleton";
+import { ProfileOrdersListingSkeleton } from "./ProfileOrdersListingSkeleton";
 
 const content = profileTabsContent.orders;
 
@@ -58,16 +60,6 @@ function buildOrderOverride(order: TrackedOrder): ProfileOrderOverride {
     showCancel: actions ? actions.canCancel : false,
     showReturn: actions ? actions.canReturn : false,
   };
-}
-
-function OrdersSkeleton() {
-  return (
-    <div className="space-y-4" aria-busy="true" aria-label="Loading orders">
-      {Array.from({ length: 2 }).map((_, index) => (
-        <div key={index} className="h-48 animate-pulse bg-gray300 p-6" />
-      ))}
-    </div>
-  );
 }
 
 const ProfileOrdersSection = () => {
@@ -173,7 +165,7 @@ const ProfileOrdersSection = () => {
   // Only the first load blanks the section. A post-mutation `refresh()` keeps the current
   // tree mounted, so the open detail panel (and its success dialog) survives the refetch.
   if (isLoading && !data) {
-    return <OrdersSkeleton />;
+    return <ProfileOrdersListingSkeleton />;
   }
 
   if (error) {
@@ -249,7 +241,7 @@ const ProfileOrdersSection = () => {
       {hasMore ? <div ref={loadMoreRef} className="h-px w-full shrink-0" aria-hidden /> : null}
 
       {isLoadingMore ? (
-        <div className="h-12 animate-pulse bg-gray300" aria-busy="true" aria-label="Loading more orders" />
+        <ProfileOrderCardSkeleton />
       ) : null}
     </div>
   );

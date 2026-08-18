@@ -10,12 +10,16 @@ import type { StrapiHomepageShoppingBlocksEntity } from "./homepage.strapi.types
 
 export const getHomepageShoppingBlocks = cache(
   async (signal?: AbortSignal): Promise<HomepageShoppingBlocksData> => {
-    const raw = await apiFetch<StrapiHomepageShoppingBlocksEntity>(
-      STRAPI_ENDPOINTS.homepageShoppingBlocks,
-      { signal },
-    );
+    try {
+      const raw = await apiFetch<StrapiHomepageShoppingBlocksEntity>(
+        STRAPI_ENDPOINTS.homepageShoppingBlocks,
+        { signal },
+      );
 
-    return mapHomepageShoppingBlocksData(raw);
+      return mapHomepageShoppingBlocksData(raw);
+    } catch {
+      return EMPTY_HOMEPAGE_SHOPPING;
+    }
   },
 );
 

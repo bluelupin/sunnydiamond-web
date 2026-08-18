@@ -36,6 +36,8 @@ export type MagentoProductListItem = {
     } | null;
   } | null;
   image?: { url?: string | null } | null;
+  small_image?: { url?: string | null } | null;
+  thumbnail?: { url?: string | null } | null;
   media_gallery?: MagentoMediaGalleryItem[] | null;
   categories?: MagentoProductCategory[] | null;
   /** Top-level SimpleProduct field — model/lifestyle shot for PLP hover. */

@@ -146,6 +146,7 @@ export type StrapiGiftingBanner = {
   primaryCta?: StrapiHomepageCta | null;
   secondaryCta?: StrapiHomepageCta | null;
   secondary?: StrapiHomepageCta | null;
+  backgroundColor?: string | null;
   backgroundImage?: StrapiResponsiveImageBlock | null;
   backgroundVideo?: StrapiHeroVideoBlock | null;
   cutoutImage?: StrapiResponsiveImageBlock | null;
@@ -197,7 +198,7 @@ export type StrapiTextSection = {
   image?: StrapiResponsiveImageBlock | null;
   backgroundImage?: StrapiResponsiveImageBlock | null;
   cutoutImage?: StrapiResponsiveImageBlock | null;
-  gifOrImage?: unknown;
+  gifOrImage?: StrapiResponsiveImageBlock | null;
   video?: StrapiHeroVideoBlock | null;
   posterImage?: unknown;
   steps?: StrapiCraftsmanshipStep[] | null;

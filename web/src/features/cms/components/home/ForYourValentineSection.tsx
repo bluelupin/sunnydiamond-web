@@ -122,7 +122,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
     return (
       <section
         id={id}
-        className="relative w-full overflow-hidden bg-[#F3E6E2] lg:h-[750px] lg:py-0"
+        className="relative w-full overflow-hidden lg:h-[750px] lg:py-0"
         aria-busy="true"
         aria-label="Gifting"
       >
@@ -151,11 +151,14 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
     return null;
   }
 
+  const sectionBackgroundColor = giftingData.backgroundColor?.trim();
+
   return (
     <section
       id={id}
       aria-label={sectionTitle || "Gifting"}
-      className="relative w-full overflow-hidden bg-[#F3E6E2]"
+      className="relative w-full overflow-hidden"
+      style={sectionBackgroundColor ? { backgroundColor: sectionBackgroundColor } : undefined}
     >
       {hasBackgroundImage ? (
         <div aria-hidden className={backgroundMediaWrapperClass}>

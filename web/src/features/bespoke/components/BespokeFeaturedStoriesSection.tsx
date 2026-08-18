@@ -101,7 +101,7 @@ const FeaturedGalleryBackground = ({
 
   return (
     <div className="pointer-events-none absolute inset-x-0 top-0 h-[540px] md:h-[559px]">
-      <div className="relative size-full">
+      <div className="absolute inset-0 z-0">
         {slides.length > 0 ? (
           slides.map((slide, index) => (
             <Image
@@ -113,7 +113,7 @@ const FeaturedGalleryBackground = ({
               priority={index === safeIndex}
               className={cn(
                 "object-cover object-top transition-opacity duration-500 ease-in-out",
-                index === safeIndex ? "z-[1] opacity-100" : "z-0 opacity-0",
+                index === safeIndex ? "opacity-100" : "opacity-0",
               )}
             />
           ))
@@ -128,18 +128,21 @@ const FeaturedGalleryBackground = ({
           />
         ) : null}
       </div>
+
       <div
         aria-hidden
-        className="absolute inset-0"
+        className="absolute inset-0 z-[1]"
         style={{
-          backgroundColor: spec.overlayHorizontal,
-          backgroundImage: spec.overlayVertical,
+          backgroundImage: `${spec.overlayHorizontalGradient}, ${spec.overlayVertical}, linear-gradient(to bottom, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.15) 38%, rgba(0, 0, 0, 0) 52%)`,
         }}
       />
+
       <div
         aria-hidden
-        className="absolute inset-x-0 bottom-0 h-[400px] bg-gradient-to-b from-transparent to-black/80 backdrop-blur-[5px]"
+        className="absolute inset-x-0 bottom-0 z-[1] h-[400px] backdrop-blur-[5px]"
+        style={{ backgroundImage: spec.bottomGradient }}
       />
+
       {srAlt && slides.length === 0 && fallbackBgSrc ? (
         <span className="sr-only">{srAlt}</span>
       ) : null}

@@ -14,12 +14,16 @@ import {
  */
 export const getContactBespokePage = cache(
   async (signal?: AbortSignal): Promise<NormalizedContactBespokePage> => {
-    const raw = await apiFetch<StrapiContactBespokePageEntity>(
-      STRAPI_ENDPOINTS.contactBespokePage,
-      { signal },
-    );
+    try {
+      const raw = await apiFetch<StrapiContactBespokePageEntity>(
+        STRAPI_ENDPOINTS.contactBespokePage,
+        { signal },
+      );
 
-    return mapContactBespokePage(raw);
+      return mapContactBespokePage(raw);
+    } catch {
+      return EMPTY_CONTACT_BESPOKE_PAGE;
+    }
   },
 );
 

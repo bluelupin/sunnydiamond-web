@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/shared/utils/cn";
 import { shouldEagerLoadHomeSections } from "@/shared/lib/browserBackScrollRestore";
+import { normalizeIntersectionRootMargin } from "@/shared/utils/intersectionObserver";
 import { isElementInViewportWithRootMargin } from "@/shared/utils/viewport";
 
 type LazyInViewProps = {
@@ -39,7 +40,9 @@ export function LazyInView({
     const node = ref.current;
     if (!node) return;
 
-    if (isElementInViewportWithRootMargin(node, rootMargin)) {
+    const safeRootMargin = normalizeIntersectionRootMargin(rootMargin);
+
+    if (isElementInViewportWithRootMargin(node, safeRootMargin)) {
       setVisible(true);
       return;
     }
@@ -50,7 +53,7 @@ export function LazyInView({
         setVisible(true);
         observer.disconnect();
       },
-      { rootMargin, threshold },
+      { rootMargin: safeRootMargin, threshold },
     );
 
     observer.observe(node);

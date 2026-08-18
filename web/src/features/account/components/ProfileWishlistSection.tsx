@@ -15,20 +15,7 @@ import { useMagentoWishlistProducts } from "@/hooks/magento/useMagentoWishlistPr
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 import { cn } from "@/shared/utils/cn";
 import { ProfileWishlistEmptyState } from "./ProfileWishlistEmptyState";
-
-function WishlistSkeleton() {
-  return (
-    <div
-      className="grid grid-cols-2 gap-1 md:grid-cols-2 md:gap-2 lg:grid-cols-3"
-      aria-busy="true"
-      aria-label="Loading wishlist"
-    >
-      {Array.from({ length: 4 }).map((_, index) => (
-        <div key={index} className="h-[280px] animate-pulse bg-gray300 md:h-[420px] lg:h-[496px]" />
-      ))}
-    </div>
-  );
-}
+import { ProfileWishlistListingSkeleton } from "./ProfileWishlistListingSkeleton";
 
 const ProfileWishlistSection = () => {
   const { wishlistedIds, toggleWishlist } = useWishlist();
@@ -53,11 +40,7 @@ const ProfileWishlistSection = () => {
   };
 
   if (isLoading && wishlistedIds.length > 0) {
-    return (
-      <div className="-mx-4 bg-gray200 py-6 md:mx-0">
-        <WishlistSkeleton />
-      </div>
-    );
+    return <ProfileWishlistListingSkeleton />;
   }
 
   if (showEmptyState) {
@@ -70,25 +53,26 @@ const ProfileWishlistSection = () => {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col items-center gap-6">
+      <div className="md:hidden flex flex-col items-center gap-6">
         <p className="font-gill text-base font-normal leading-110 text-neutral500">
           {wishlistPageContent.productCountLabel(wishlistProducts.length)}
         </p>
         <WishlistViewToggle value={viewMode} onChange={setViewMode} />
       </div>
 
-      <div className="-mx-4 bg-gray200 md:mx-0">
+      <div className="">
         <div className={cn(viewMode === "list" ? "hidden md:block" : "block")}>
           <WishlistGrid
+            variant="profile"
             products={visibleProducts}
             onRemove={(product) => toggleWishlist(product.sku)}
             onAddToBag={handleOpenAddToBag}
           />
         </div>
-
         {viewMode === "list" ? (
           <div className="md:hidden">
             <WishlistList
+              variant="profile"
               products={visibleProducts}
               onRemove={(product) => toggleWishlist(product.sku)}
               onAddToBag={handleOpenAddToBag}
