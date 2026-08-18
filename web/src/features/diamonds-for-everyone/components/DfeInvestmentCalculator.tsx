@@ -31,11 +31,11 @@ const DfeInvestmentCalculator = ({
     Math.min(investment.maxMonthly, Math.max(investment.minMonthly, value));
 
   return (
-    <div className={cn("flex flex-col gap-4", className)}>
-      <p className="font-gill text-base font-normal leading-110 text-[#2B2B2B]">
-        {investment.monthlyLabel}
-      </p>
+    <div className={cn("flex flex-col gap-6", className)}>
       <div className="flex flex-col gap-4">
+        <p className="font-gill text-base font-normal leading-110 text-[#2B2B2B]">
+          {investment.monthlyLabel}
+        </p>
         <div className="relative h-[6px] w-full bg-[#AEAEAE]">
           <div
             className="absolute left-0 top-0 h-[6px] bg-[#666666]"
@@ -75,7 +75,6 @@ const DfeInvestmentCalculator = ({
           />
         </div>
       </div>
-
       <div className="flex flex-col gap-4">
         <p className="font-gill text-base font-normal leading-110 text-[#2B2B2B]">
           {investment.summaryTitle}

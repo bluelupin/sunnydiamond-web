@@ -2,6 +2,7 @@
 
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import Reveal from "@/shared/Animation/Reveal";
+import { DetailTextLink } from "@/features/products/components/detail/shared";
 import type { NormalizedCareerHero } from "@/services/careers/careers.types";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
 
@@ -46,13 +47,9 @@ const CareersHeroSection = ({ hero }: CareersHeroSectionProps) => {
 
         {showCta ? (
           <Reveal direction="up">
-            <button
-              type="button"
-              onClick={goToListings}
-              className={`shrink-0 border-b border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-80 ${ctaFocusClass}`}
-            >
+            <DetailTextLink light onClick={goToListings} className={ctaFocusClass}>
               {hero.ctaLabel}
-            </button>
+            </DetailTextLink>
           </Reveal>
         ) : null}
       </div>

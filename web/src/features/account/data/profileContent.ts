@@ -399,26 +399,4 @@ export const profileTabsContent = {
     removeUnavailableTitle: "Remove",
     removeUnavailableDescription: "Removing saved inspirations will be available soon.",
   },
-  support: {
-    callUs: {
-      title: "Call Us",
-      hours: [
-        { label: "Monday to Saturday", value: "9:00 AM to 7:00 PM" },
-        { label: "Sunday:", value: "9:00 AM to 4:00 PM" },
-      ],
-      phone: "+91 9744355555",
-      phoneHref: "tel:+919744355555",
-      ctaLabel: "CONTACT US",
-      ctaHref: "/contact",
-    },
-    emailUs: {
-      title: "Email Us",
-      description:
-        "Our customer support team would be delighted to help resolve your concerns",
-      email: "customerservice@sunnydiamonds.com",
-      emailHref: "mailto:customerservice@sunnydiamonds.com",
-      ctaLabel: "SEND AN EMAIL",
-    },
-    faqTitle: "Frequently Asked Questions",
-  },
 } as const;

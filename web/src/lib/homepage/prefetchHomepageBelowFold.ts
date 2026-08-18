@@ -1,4 +1,3 @@
-import { homeContent } from "@/features/cms/data/content";
 import type { PrefetchedAlankaraCollection } from "@/features/products/services/prefetchProductDetailAlankara";
 import { getHomepageOccasions } from "@/services/homepage/homepageOccasions.service";
 import type { HomepageShoppingBlocksData } from "@/types/homepage/categoryNavigation";
@@ -24,14 +23,11 @@ function hasEmbeddedOccasions(editorial?: HomepageEditorialBlocksData | null): b
 
 export async function prefetchAlankaraCollectionFromShopping(
   shoppingData?: HomepageShoppingBlocksData | null,
-  descriptionOverride?: string,
 ): Promise<PrefetchedAlankaraCollection | null> {
   const featuredCollectionData =
     shoppingData?.homepage?.featuredCollectionSection ?? shoppingData?.featuredCollectionSection;
 
-  const collectionProps = resolveAlankaraCollectionSection(featuredCollectionData, {
-    descriptionOverride,
-  });
+  const collectionProps = resolveAlankaraCollectionSection(featuredCollectionData);
 
   if (!isSectionActive(collectionProps.isActive)) {
     return null;
@@ -80,10 +76,7 @@ export async function prefetchHomepageBelowFold(
   cms: HomepagePrefetchedCms,
 ): Promise<HomepageBelowFoldPrefetch> {
   const [alankara, standaloneOccasions] = await Promise.all([
-    prefetchAlankaraCollectionFromShopping(
-      cms.shopping,
-      homeContent.alankara.collection.description,
-    ),
+    prefetchAlankaraCollectionFromShopping(cms.shopping),
     prefetchStandaloneOccasions(cms.editorial),
   ]);
 

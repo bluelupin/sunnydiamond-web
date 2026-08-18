@@ -1,73 +1,99 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ContactSupportIcon } from "@/features/contact/components/ContactSupportIcon";
-import { profileTabsContent } from "../data/profileContent";
+import { fetchSupportPage } from "@/services/support/support-page.fetch";
+import type { NormalizedSupportContactOption } from "@/services/support/support-page.types";
 import { cn } from "@/shared/utils/cn";
 
 const outlineCtaClassName =
   "btn-border-slide inline-flex h-14 shrink-0 items-center justify-center border border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack hover:text-white";
 
 const ProfileSupportSection = () => {
-  const { callUs, emailUs } = profileTabsContent.support;
+  const [options, setOptions] = useState<NormalizedSupportContactOption[]>([]);
+  const [hasLoaded, setHasLoaded] = useState(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    void fetchSupportPage({ signal: controller.signal }).then((page) => {
+      if (controller.signal.aborted) {
+        return;
+      }
+
+      setOptions(page.contactOptions);
+      setHasLoaded(true);
+    });
+
+    return () => controller.abort();
+  }, []);
+
+  if (!hasLoaded || options.length === 0) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col gap-10">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div className="flex flex-col items-center gap-6 bg-gray300 p-6 text-center">
-          <h3 className="font-larken text-2xl font-light leading-110 text-darkblack">
-            {callUs.title}
-          </h3>
+        {options.map((option) => {
+          const isPhone = Boolean(option.phoneHref);
+          const valueHref = option.phoneHref ?? option.emailHref;
+          const valueLabel = option.phone ?? option.email;
 
-          <div className="flex flex-col items-center gap-4">
-            <div className="flex flex-col items-center gap-3 text-base leading-110 text-darkblack">
-              {callUs.hours.map((entry) => (
-                <div key={entry.label} className="flex items-center gap-3 whitespace-nowrap">
-                  <span className="font-gill font-light">{entry.label}</span>
-                  <span className="font-gill font-normal">{entry.value}</span>
-                </div>
-              ))}
-            </div>
-
-            <Link
-              href={callUs.phoneHref}
-              className="flex items-center gap-2 font-gill text-base font-normal leading-110 text-darkblack"
+          return (
+            <div
+              key={option.id}
+              className="flex flex-col items-center justify-between gap-6 bg-gray300 p-6 text-center"
             >
-              <ContactSupportIcon name="phone" />
-              {callUs.phone}
-            </Link>
-          </div>
+              <div className="flex w-full flex-col items-center gap-6">
+                <h3 className="font-larken text-2xl font-light leading-110 text-darkblack">
+                  {option.title}
+                </h3>
 
-          <Link href={callUs.ctaHref} className={outlineCtaClassName}>
-            <span>{callUs.ctaLabel}</span>
-          </Link>
-        </div>
+                <div className="flex w-full flex-col items-center gap-4">
+                  {option.hours.length > 0 ? (
+                    <div className="flex flex-col items-center gap-3 text-base leading-110 text-darkblack">
+                      {option.hours.map((entry) => (
+                        <div
+                          key={`${option.id}-${entry.label}-${entry.value}`}
+                          className="flex items-center gap-3 whitespace-nowrap"
+                        >
+                          {entry.label ? (
+                            <span className="font-gill font-light">{entry.label}</span>
+                          ) : null}
+                          <span className="font-gill font-normal">{entry.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
 
-        <div className="flex flex-col items-center justify-between gap-6 bg-gray300 p-6 text-center">
-          <div className="flex w-full flex-col items-center gap-6">
-            <h3 className="font-larken text-2xl font-light leading-110 text-darkblack">
-              {emailUs.title}
-            </h3>
+                  {option.description ? (
+                    <p className="max-w-full font-gill text-base font-light leading-110 text-darkblack">
+                      {option.description}
+                    </p>
+                  ) : null}
 
-            <div className="flex w-full flex-col items-center gap-4">
-              <p className="max-w-full font-gill text-base font-light leading-110 text-darkblack">
-                {emailUs.description}
-              </p>
+                  {valueHref && valueLabel ? (
+                    <Link
+                      href={valueHref}
+                      className="flex flex-wrap items-center justify-center gap-2 font-gill text-base font-normal leading-110 text-darkblack"
+                    >
+                      <ContactSupportIcon name={isPhone ? "phone" : "email"} />
+                      {valueLabel}
+                    </Link>
+                  ) : null}
+                </div>
+              </div>
 
-              <Link
-                href={emailUs.emailHref}
-                className="flex flex-wrap items-center justify-center gap-2 font-gill text-base font-normal leading-110 text-darkblack"
-              >
-                <ContactSupportIcon name="email" />
-                {emailUs.email}
-              </Link>
+              {option.cta ? (
+                <Link href={option.cta.url} className={cn(outlineCtaClassName, "mt-auto")}>
+                  <span>{option.cta.label}</span>
+                </Link>
+              ) : null}
             </div>
-          </div>
-
-          <Link href={emailUs.emailHref} className={cn(outlineCtaClassName, "mt-auto")}>
-            <span>{emailUs.ctaLabel}</span>
-          </Link>
-        </div>
+          );
+        })}
       </div>
     </div>
   );

@@ -36,17 +36,30 @@ export const storeLocatorSearchMobileFigmaSpec = {
   stateLabelSize: 14,
 } as const;
 
-/** Figma — empty pincode search: suggest nearby showrooms instead of blank state. */
-export const storeLocatorNearbySuggestionsCopy = {
-  title: "NO STORE FOUND FOR YOUR SEARCH",
-  subtitle: "Explore nearby stores",
+/** Figma State 1 — default list eyebrow. */
+export const storeLocatorDefaultListCopy = {
+  title: "Explore Our Showrooms",
 } as const;
 
-/** Figma — pincode search with matches. */
-export const storeLocatorPincodeMatchCopy = {
-  title: "STORE FOUND FOR YOUR SEARCH",
-  nearbySubtitle: "Explore nearby stores",
+/** Figma State 2 — store found after search. */
+export const storeLocatorFoundCopy = {
+  search: "STORE FOUND FOR YOUR SEARCH",
 } as const;
+
+/** Figma State 4 — valid area search with no local showroom. */
+export const storeLocatorNearbySuggestionsCopy = {
+  title: "NO SHOWROOM IN THIS AREA YET",
+  subtitle: "Explore the nearest Sunny Diamonds showrooms and plan your visit with ease.",
+} as const;
+
+/** @deprecated Use storeLocatorFoundCopy.search — kept for existing pincode-match imports. */
+export const storeLocatorPincodeMatchCopy = {
+  title: storeLocatorFoundCopy.search,
+  nearbySubtitle: storeLocatorNearbySuggestionsCopy.subtitle,
+} as const;
+
+export const storeLocatorStatusEyebrowClassName =
+  "font-gill text-sm font-normal uppercase leading-110 text-[#5F6F3E] lg:text-base";
 
 /** UI model for location filter chips (CMS icons preferred). */
 export type StoreLocatorStateFilter = {

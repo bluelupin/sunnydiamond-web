@@ -246,7 +246,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
   };
 
   return (
-    <section aria-labelledby="contact-form-title" className="w-full md:px-10">
+    <section aria-labelledby="contact-form-title" className="w-full md:px-10 px-4">
       <div className="mx-auto w-full max-w-[1140px] md:bg-gray200 md:p-6">
         <div className="flex flex-col gap-6">
           <Reveal

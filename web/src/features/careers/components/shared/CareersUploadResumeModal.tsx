@@ -3,6 +3,11 @@
 import { X } from "lucide-react";
 import type { NormalizedCareerApplicationFlow } from "@/services/careers/careers.types";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/shared/ui/dialog";
+import {
+  careersDarkCtaClassName,
+  careersOutlineCtaClassName,
+} from "@/features/careers/constants/careersCtaStyles";
+import { cn } from "@/shared/utils/cn";
 
 type CareersUploadResumeModalProps = {
   uploadResumeModal: NormalizedCareerApplicationFlow["applicationForm"]["uploadResumeModal"];
@@ -51,16 +56,16 @@ const CareersUploadResumeModal = ({
             <button
               type="button"
               onClick={onOnlyUpload}
-              className="inline-flex h-14 flex-1 items-center justify-center border border-neutral300 bg-white px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-colors hover:bg-gray300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
+              className={cn(careersOutlineCtaClassName, "flex-1")}
             >
-              {uploadResumeModal.onlyUploadLabel}
+              <span className="relative z-10">{uploadResumeModal.onlyUploadLabel}</span>
             </button>
             <button
               type="button"
               onClick={onAutofillResume}
-              className="inline-flex h-14 flex-1 items-center justify-center bg-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
+              className={cn(careersDarkCtaClassName, "flex-1")}
             >
-              {uploadResumeModal.autofillResumeLabel}
+              <span className="relative z-10">{uploadResumeModal.autofillResumeLabel}</span>
             </button>
           </div>
         </div>
