@@ -14,6 +14,14 @@ import type {
 const POLICY_LANDING_QUERY = "populate=*&locale=en";
 const LEGAL_PAGES_QUERY = "populate=*&pagination[pageSize]=100";
 
+/** Strapi answers these when a collection is absent, unpublished, or not public. */
+function isMissingContent(error: unknown): boolean {
+  return (
+    error instanceof ApiError &&
+    (error.status === 403 || error.status === 404 || error.status === 400)
+  );
+}
+
 async function softFetch<T>(
   endpoint: string,
   signal?: AbortSignal,
@@ -21,10 +29,7 @@ async function softFetch<T>(
   try {
     return await apiFetch<T>(endpoint, { signal });
   } catch (error) {
-    if (
-      error instanceof ApiError &&
-      (error.status === 403 || error.status === 404 || error.status === 400)
-    ) {
+    if (isMissingContent(error)) {
       return null;
     }
     console.warn(`[policy] Failed to fetch ${endpoint}`, error);
@@ -40,6 +45,11 @@ async function fetchLegalPages(signal?: AbortSignal): Promise<StrapiLegalPage[]>
     );
     return Array.isArray(data) ? data : [];
   } catch (error) {
+    // Same rule as softFetch: Strapi answers 404 for a collection that was never
+    // modelled, which is a content gap rather than a failure worth a line per
+    // render. Strapi has no legal-page type today, so warning here wrote
+    // thousands of identical lines and buried every real error in the log.
+    if (isMissingContent(error)) return [];
     console.warn("[policy] Failed to fetch legal pages", error);
     return [];
   }
