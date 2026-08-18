@@ -10,11 +10,15 @@ import type { StrapiHomepageShellEntity } from "./homepage.strapi.types";
 
 export const getHomepageShell = cache(
   async (signal?: AbortSignal): Promise<NormalizedHomepageShell> => {
-    const raw = await apiFetch<StrapiHomepageShellEntity>(STRAPI_ENDPOINTS.homepageShell, {
-      signal,
-    });
+    try {
+      const raw = await apiFetch<StrapiHomepageShellEntity>(STRAPI_ENDPOINTS.homepageShell, {
+        signal,
+      });
 
-    return mapHomepageShellData(raw);
+      return mapHomepageShellData(raw);
+    } catch {
+      return EMPTY_HOMEPAGE_SHELL;
+    }
   },
 );
 

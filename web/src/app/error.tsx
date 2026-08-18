@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import ErrorPage from "@/features/error/components/ErrorPage";
+import { useTransientErrorAutoRetry } from "@/shared/hooks/useTransientErrorAutoRetry";
 
 interface ErrorProps {
   error: Error & { digest?: string };
@@ -9,6 +10,8 @@ interface ErrorProps {
 }
 
 export default function Error({ error, reset }: ErrorProps) {
+  useTransientErrorAutoRetry(reset, error.digest);
+
   useEffect(() => {
     console.error("Runtime Error Boundary caught:", error);
   }, [error]);
