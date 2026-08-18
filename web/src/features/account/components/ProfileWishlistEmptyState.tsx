@@ -17,12 +17,12 @@ export function ProfileWishlistEmptyState() {
           alt=""
           width={64}
           height={64}
-          className="size-full"
+          className="lg:size-16 size-12"
           aria-hidden
         />
       </div>
 
-      <h3 className="w-full font-larken text-32 font-light leading-110 text-darkblack">
+      <h3 className="w-full font-larken lg:text-32 text-2xl font-light leading-110 text-darkblack">
         {content.emptyTitle}
       </h3>
 

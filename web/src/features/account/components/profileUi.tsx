@@ -38,7 +38,7 @@ export function ProfileCard({
   className?: string;
   children: React.ReactNode;
 }) {
-  return <div className={cn("bg-gray300 p-6", className)}>{children}</div>;
+  return <div className={cn("bg-gray300 md:p-6 p-4", className)}>{children}</div>;
 }
 
 export function ProfileAddAddressCard({
