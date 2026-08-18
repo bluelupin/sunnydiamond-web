@@ -153,7 +153,8 @@ const CheckoutOtpModal = ({ open, phone, onClose, onVerify }: CheckoutOtpModalPr
       return;
     }
 
-    const result = await requestLoginOtp(phoneDigits);
+    // Checkout only ever verifies a mobile number, never an email address.
+    const result = await requestLoginOtp({ kind: "phone", phone: phoneDigits });
     if (!result.success) {
       setOtpError(result.error);
       return;
@@ -229,7 +230,7 @@ const CheckoutOtpModal = ({ open, phone, onClose, onVerify }: CheckoutOtpModalPr
     setIsVerifying(true);
     setOtpError(undefined);
 
-    const result = await verifyLoginOtp(phoneDigits, otp.join(""));
+    const result = await verifyLoginOtp({ kind: "phone", phone: phoneDigits }, otp.join(""));
     setIsVerifying(false);
 
     if (!result.success) {

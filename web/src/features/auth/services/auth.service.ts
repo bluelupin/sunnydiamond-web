@@ -1,7 +1,26 @@
 import { splitProfileFullName } from "@/shared/utils/customerName";
 
+/**
+ * What the login code is sent to. Sign-in is passwordless, so this is the whole
+ * of the customer's identity until the code comes back verified.
+ */
+export type OtpTarget =
+  | { kind: "phone"; phone: string }
+  | { kind: "email"; email: string };
+
+export type OtpChannel = "sms" | "email";
+
+const toRequestBody = (target: OtpTarget): Record<string, unknown> =>
+  target.kind === "phone" ? { phone: target.phone } : { email: target.email };
+
 export type RequestOtpResult =
-  | { success: true; resendAfterSeconds: number }
+  | {
+      success: true;
+      resendAfterSeconds: number;
+      channel: OtpChannel;
+      /** Obfuscated destination for the "we sent a code to…" line, e.g. an****@example.com. */
+      maskedDestination: string | null;
+    }
   | { success: false; error: string };
 
 export type VerifyOtpResult =
@@ -33,6 +52,14 @@ async function postJson(
 
 export type PasswordLoginResult = { success: true } | { success: false; error: string };
 
+/*
+ * Password sign-in and registration below are no longer reachable from the UI —
+ * the storefront is passwordless (see the Authentication & Registration Flow
+ * document). They are kept as a QA and admin escape hatch: /api/auth/login and
+ * /api/auth/register still work for accounts that predate OTP, and for testing
+ * when mail delivery is the thing under investigation.
+ */
+
 /** Email + password sign in against Magento (native generateCustomerToken). */
 export async function loginWithPassword(
   email: string,
@@ -50,23 +77,40 @@ export async function loginWithPassword(
   return { success: true };
 }
 
-/** Sends a login OTP. Phone should be E.164 (e.g. +919876543210); the backend normalizes if needed. */
-export async function requestLoginOtp(phone: string): Promise<RequestOtpResult> {
-  const { ok, data } = await postJson("/api/auth/otp/request", { phone });
+/**
+ * Sends a login OTP by SMS or email. Phone should be E.164 (e.g. +919876543210);
+ * the backend normalizes if needed.
+ */
+export async function requestLoginOtp(target: OtpTarget): Promise<RequestOtpResult> {
+  const { ok, data } = await postJson("/api/auth/otp/request", toRequestBody(target));
 
   if (!ok || !data?.ok) {
     return {
       success: false,
-      error: (data?.error as string) ?? "We could not send the OTP. Please try again.",
+      error: (data?.error as string) ?? "We could not send the code. Please try again.",
     };
   }
 
-  return { success: true, resendAfterSeconds: (data.resendAfterSeconds as number) ?? 60 };
+  return {
+    success: true,
+    resendAfterSeconds: (data.resendAfterSeconds as number) ?? 60,
+    // Narrowed, not cast: ?? only catches null/undefined, so an empty or
+    // unexpected channel would flow through and make the OTP screen render an
+    // email address through the phone formatter, which strips it to nothing.
+    channel: data.channel === "email" ? "email" : "sms",
+    maskedDestination: (data.maskedDestination as string | null) ?? null,
+  };
 }
 
-/** Verifies the OTP for phone-based sign in against Magento. */
-export async function verifyLoginOtp(phone: string, code: string): Promise<VerifyOtpResult> {
-  const { ok, data } = await postJson("/api/auth/otp/verify", { phone, otp: code });
+/** Verifies the OTP for passwordless sign in against Magento. */
+export async function verifyLoginOtp(
+  target: OtpTarget,
+  code: string,
+): Promise<VerifyOtpResult> {
+  const { ok, data } = await postJson("/api/auth/otp/verify", {
+    ...toRequestBody(target),
+    otp: code,
+  });
 
   if (!ok || !data?.ok) {
     return { success: false, error: (data?.error as string) ?? "Incorrect code" };
@@ -76,11 +120,15 @@ export async function verifyLoginOtp(phone: string, code: string): Promise<Verif
 }
 
 /**
- * Completes first-time registration: re-verifies the same OTP with the
- * customer's details, creating the Magento account with the verified phone.
+ * Completes first-time registration: re-verifies the same OTP with the details
+ * from the "Enter Details" screen, creating the Magento account.
+ *
+ * Registering by phone sends both identifiers — the phone is what was verified,
+ * the email is the address for the new account. Registering by email sends only
+ * the email, which is both.
  */
 export async function createCustomerAccount(input: {
-  phone: string;
+  target: OtpTarget;
   otp: string;
   fullName: string;
   email: string;
@@ -88,10 +136,17 @@ export async function createCustomerAccount(input: {
 }): Promise<CreateAccountResult> {
   const { firstname, lastname } = splitProfileFullName(input.fullName);
 
+  // Kept explicit rather than spread-then-override: for an email target the
+  // identifier and the account address are the same field, and a stray second
+  // "email" key would silently decide which one Magento sees.
+  const identity =
+    input.target.kind === "phone"
+      ? { phone: input.target.phone, email: input.email }
+      : { email: input.target.email };
+
   const { ok, data } = await postJson("/api/auth/otp/verify", {
-    phone: input.phone,
+    ...identity,
     otp: input.otp,
-    email: input.email,
     firstName: firstname,
     lastName: lastname,
   });

@@ -6,34 +6,35 @@ import { DEFAULT_COUNTRY_CODE } from "@/shared/constants/appointmentForm";
 import { sanitizePhoneInput } from "@/shared/utils/formValidation";
 import {
   createCustomerAccount,
-  loginWithPassword,
-  registerWithEmail,
   requestLoginOtp,
   verifyLoginOtp,
+  type OtpChannel,
+  type OtpTarget,
 } from "../services/auth.service";
 import { runPostLoginSync } from "../services/postLoginSync";
 import {
+  exchangeGoogleCredential,
   isAppleSignInConfigured,
   isGoogleSignInConfigured,
   signInWithApple,
-  signInWithGoogle,
 } from "../services/socialSignIn";
 import { useAuthFeatures } from "../context/AuthFeaturesContext";
 import {
   isEmailIdentifier,
   isIndianCountryCode,
-  isLoginIdentifierReadyForOtp,
   isOtpComplete,
   LOGIN_OTP_LENGTH,
   normalizeLoginPhoneDigits,
   validateCreateAccountForm,
-  validateEmailRegisterForm,
-  isEmailRegisterReady,
   validateLoginIdentifier,
 } from "../utils/authValidation";
 import { getLoginHrefForReturn, sanitizeReturnUrl } from "../utils/authNavigation";
 
-export type AuthFlowStep = "sign-in" | "otp" | "create-account" | "password" | "email-create-account";
+/**
+ * Sign-in is passwordless: every identifier — mobile or email — leads to a
+ * one-time code. There is no password step.
+ */
+export type AuthFlowStep = "sign-in" | "otp" | "create-account";
 
 const RESEND_SECONDS = 60;
 
@@ -55,12 +56,14 @@ export type AuthFlowContentProps = {
     identifierError?: string;
     emailOnly: boolean;
     otpBlockedForCountry: boolean;
+    /** No code channel and no social provider is available — nothing here can work. */
+    noSignInMethod: boolean;
     showGoogle: boolean;
     showApple: boolean;
     onIdentifierChange: (value: string) => void;
     onCountryCodeChange: (value: string) => void;
     onContinue: () => void;
-    onGoogleContinue: () => void;
+    onGoogleCredential: (credential: string) => void;
     onAppleContinue: () => void;
     onUseEmailInstead: () => void;
     onClose: () => void;
@@ -68,6 +71,8 @@ export type AuthFlowContentProps = {
   otp: {
     phone: string;
     countryCode: string;
+    channel: OtpChannel;
+    maskedDestination: string | null;
     otp: string[];
     otpError?: string;
     secondsLeft: number;
@@ -83,10 +88,13 @@ export type AuthFlowContentProps = {
   createAccount: {
     fullName: string;
     email: string;
+    emailReadOnly: boolean;
     termsAccepted: boolean;
     fullNameError?: string;
     emailError?: string;
     termsError?: string;
+    /** Failures that belong to no single field — an expired code, a rejected save. */
+    formError?: string;
     onFullNameChange: (value: string) => void;
     onEmailChange: (value: string) => void;
     onTermsAcceptedChange: (value: boolean) => void;
@@ -94,33 +102,8 @@ export type AuthFlowContentProps = {
     onClose: () => void;
     onCreateAccount: () => void;
   };
-  password: {
-    email: string;
-    password: string;
-    passwordError?: string;
-    onPasswordChange: (value: string) => void;
-    onBack: () => void;
-    onClose: () => void;
-    onLogin: () => void;
-    onCreateAccount: () => void;
-  };
-  emailCreateAccount: {
-    email: string;
-    fullName: string;
-    password: string;
-    termsAccepted: boolean;
-    fullNameError?: string;
-    emailError?: string;
-    passwordError?: string;
-    termsError?: string;
-    onFullNameChange: (value: string) => void;
-    onPasswordChange: (value: string) => void;
-    onTermsAcceptedChange: (value: boolean) => void;
-    onBack: () => void;
-    onClose: () => void;
-    onCreateAccount: () => void;
-  };
 };
+
 
 export function useAuthFlow({
   active,
@@ -133,35 +116,64 @@ export function useAuthFlow({
   const flags = useAuthFeatures();
   const showGoogle = flags.googleLoginEnabled && isGoogleSignInConfigured();
   const showApple = flags.appleLoginEnabled && isAppleSignInConfigured();
-  const [step, setStep] = useState<AuthFlowStep>("sign-in");
+  const [requestedStep, setStep] = useState<AuthFlowStep>("sign-in");
   const [identifier, setIdentifier] = useState("");
   const [countryCode, setCountryCode] = useState<string>(DEFAULT_COUNTRY_CODE);
   /** Sticky "Use email instead" choice; survives switching country back to +91, cleared on reset. */
   const [emailModeForced, setEmailModeForced] = useState(false);
-  const [verifiedPhone, setVerifiedPhone] = useState("");
+  /**
+   * The destination a code was actually sent to. Set only on a successful request,
+   * and the single source of truth for verify, resend, and registration — so those
+   * calls can never disagree with what the customer was told.
+   */
+  const [otpTarget, setOtpTarget] = useState<OtpTarget | null>(null);
+  const [otpChannel, setOtpChannel] = useState<OtpChannel>("sms");
+  const [maskedDestination, setMaskedDestination] = useState<string | null>(null);
+  /** Set only once a code has actually been accepted, which is what the
+   *  create-account step depends on — a code merely being in flight is not enough. */
+  const [otpVerified, setOtpVerified] = useState(false);
   const [verifiedCountryCode, setVerifiedCountryCode] = useState<string>(DEFAULT_COUNTRY_CODE);
   const [identifierError, setIdentifierError] = useState<string | undefined>();
   const [otp, setOtp] = useState<string[]>(Array(LOGIN_OTP_LENGTH).fill(""));
   const [otpError, setOtpError] = useState<string | undefined>();
   const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
-  const [password, setPassword] = useState("");
-  const [passwordError, setPasswordError] = useState<string | undefined>();
-  const [registerPassword, setRegisterPassword] = useState("");
-  const [registerPasswordError, setRegisterPasswordError] = useState<string | undefined>();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [fullNameError, setFullNameError] = useState<string | undefined>();
   const [emailError, setEmailError] = useState<string | undefined>();
   const [termsError, setTermsError] = useState<string | undefined>();
+  const [createAccountFormError, setCreateAccountFormError] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
   /** Server-provided resend cooldown; the timer effect reads this on entering the OTP step. */
   const cooldownRef = useRef(RESEND_SECONDS);
 
+  /**
+   * Each step states its own precondition, so neither can be rendered — even for
+   * one frame — without the thing it acts on. Derived rather than corrected in an
+   * effect, and the create-account guard checks the accepted code rather than just
+   * a sent one, so the screen cannot be reached without a verification.
+   */
+  const stepIsReachable =
+    requestedStep === "sign-in"
+    || (requestedStep === "otp" && otpTarget !== null)
+    || (requestedStep === "create-account" && otpTarget !== null && otpVerified);
+  const step: AuthFlowStep = stepIsReachable ? requestedStep : "sign-in";
+
+  // With SMS off, the field accepts email only — there is no other code to send.
   const emailOnly = !flags.otpLoginEnabled || emailModeForced;
   const otpBlockedForCountry =
     !emailOnly && !isEmailIdentifier(identifier) && !isIndianCountryCode(countryCode);
+  /** Registering by email: the address was already proven, so it is not editable. */
+  const emailIsVerifiedIdentifier = otpTarget?.kind === "email";
+  /**
+   * Every channel is off — which is also the fail-closed state when the flag fetch
+   * errors. Without this the form would look usable and could only ever produce an
+   * error, with the social buttons hidden by the same flags.
+   */
+  const noSignInMethod =
+    !flags.otpLoginEnabled && !flags.emailOtpLoginEnabled && !showGoogle && !showApple;
 
   /** Session cookie is set — sync guest cart/wishlist, then full navigation so providers reboot. */
   const completeAuth = useCallback(async () => {
@@ -174,22 +186,22 @@ export function useAuthFlow({
     setIdentifier("");
     setCountryCode(DEFAULT_COUNTRY_CODE);
     setEmailModeForced(false);
-    setVerifiedPhone("");
+    setOtpTarget(null);
+    setOtpChannel("sms");
+    setMaskedDestination(null);
+    setOtpVerified(false);
     setVerifiedCountryCode(DEFAULT_COUNTRY_CODE);
     setIdentifierError(undefined);
     setOtp(Array(LOGIN_OTP_LENGTH).fill(""));
     setOtpError(undefined);
     setSecondsLeft(RESEND_SECONDS);
-    setPassword("");
-    setPasswordError(undefined);
-    setRegisterPassword("");
-    setRegisterPasswordError(undefined);
     setFullName("");
     setEmail("");
     setTermsAccepted(false);
     setFullNameError(undefined);
     setEmailError(undefined);
     setTermsError(undefined);
+    setCreateAccountFormError(undefined);
     setIsSubmitting(false);
   }, []);
 
@@ -204,11 +216,10 @@ export function useAuthFlow({
       return;
     }
 
+    // Seed the field only. The customer still has to ask for a code — we cannot
+    // send one on their behalf just because we know their address.
     setIdentifier(seeded);
     setIdentifierError(undefined);
-    if (isEmailIdentifier(seeded)) {
-      setStep("password");
-    }
   }, [active, initialIdentifier, resetState]);
 
   useEffect(() => {
@@ -226,26 +237,6 @@ export function useAuthFlow({
     if (!active || step !== "otp") return;
     inputRefs.current[0]?.focus();
   }, [active, step]);
-
-  useEffect(() => {
-    if (!active) return;
-
-    if (step === "otp" && !isLoginIdentifierReadyForOtp(identifier, countryCode, { emailOnly })) {
-      setStep("sign-in");
-    }
-
-    if (step === "create-account" && !verifiedPhone) {
-      setStep(isLoginIdentifierReadyForOtp(identifier, countryCode, { emailOnly }) ? "otp" : "sign-in");
-    }
-
-    if (step === "password" && !isEmailIdentifier(identifier)) {
-      setStep("sign-in");
-    }
-
-    if (step === "email-create-account" && !isEmailIdentifier(identifier)) {
-      setStep("sign-in");
-    }
-  }, [active, step, identifier, countryCode, verifiedPhone, emailOnly]);
 
   const handleClose = useCallback(() => {
     onAbort();
@@ -279,6 +270,37 @@ export function useAuthFlow({
     setIdentifierError(undefined);
   }, []);
 
+  /** Which destination the typed identifier resolves to, or null if it is unusable. */
+  const buildOtpTarget = useCallback((): OtpTarget | null => {
+    if (emailOnly || isEmailIdentifier(identifier)) {
+      return { kind: "email", email: identifier.trim().toLowerCase() };
+    }
+
+    const phoneDigits = normalizeLoginPhoneDigits(identifier, countryCode);
+    return { kind: "phone", phone: formatLoginPhoneForMagento(countryCode, phoneDigits) };
+  }, [countryCode, emailOnly, identifier]);
+
+  /** Shared by first send and resend: fire the request, then record what was sent where. */
+  const sendOtp = useCallback(
+    async (target: OtpTarget): Promise<{ ok: true } | { ok: false; error: string }> => {
+      setIsSubmitting(true);
+      const result = await requestLoginOtp(target);
+      setIsSubmitting(false);
+
+      if (!result.success) {
+        return { ok: false, error: result.error };
+      }
+
+      cooldownRef.current = result.resendAfterSeconds;
+      setOtpTarget(target);
+      setOtpChannel(result.channel);
+      setMaskedDestination(result.maskedDestination);
+      setOtpVerified(false);
+      return { ok: true };
+    },
+    [],
+  );
+
   const handleContinue = useCallback(async () => {
     if (isSubmitting || otpBlockedForCountry) return;
     const validation = validateLoginIdentifier(identifier, countryCode, { emailOnly });
@@ -288,45 +310,56 @@ export function useAuthFlow({
       return;
     }
 
-    // emailOnly forces the password branch — requestLoginOtp must never fire with OTP disabled.
-    if (emailOnly || isEmailIdentifier(identifier)) {
-      setIdentifier(identifier.trim());
-      setIdentifierError(undefined);
-      setPassword("");
-      setPasswordError(undefined);
-      setStep("password");
+    const target = buildOtpTarget();
+    if (!target) return;
+
+    // Never call the API for a channel Magento has switched off.
+    if (target.kind === "email" && !flags.emailOtpLoginEnabled) {
+      setIdentifierError("Email sign-in is unavailable right now. Please try another method.");
       return;
     }
 
-    const phoneDigits = normalizeLoginPhoneDigits(identifier, countryCode);
-    const phoneForApi = formatLoginPhoneForMagento(countryCode, phoneDigits);
-    setIsSubmitting(true);
-    const result = await requestLoginOtp(phoneForApi);
-    setIsSubmitting(false);
-
-    if (!result.success) {
+    const result = await sendOtp(target);
+    if (!result.ok) {
       setIdentifierError(result.error);
       return;
     }
 
-    cooldownRef.current = result.resendAfterSeconds;
-    setIdentifier(phoneDigits);
-    setVerifiedCountryCode(countryCode);
+    if (target.kind === "phone") {
+      setIdentifier(normalizeLoginPhoneDigits(identifier, countryCode));
+      setVerifiedCountryCode(countryCode);
+    }
     setIdentifierError(undefined);
     setOtp(Array(LOGIN_OTP_LENGTH).fill(""));
     setOtpError(undefined);
     setStep("otp");
-  }, [countryCode, emailOnly, identifier, isSubmitting, otpBlockedForCountry]);
+  }, [
+    buildOtpTarget,
+    countryCode,
+    emailOnly,
+    flags.emailOtpLoginEnabled,
+    flags.otpLoginEnabled,
+    identifier,
+    isSubmitting,
+    otpBlockedForCountry,
+    sendOtp,
+  ]);
 
   const handleBackToSignIn = useCallback(() => {
     setStep("sign-in");
+    // Clear what was sent and where together: leaving the channel or the masked
+    // address behind would let a later screen describe the wrong destination.
+    setOtpTarget(null);
+    setOtpChannel("sms");
+    setMaskedDestination(null);
+    setOtpVerified(false);
     setOtp(Array(LOGIN_OTP_LENGTH).fill(""));
     setOtpError(undefined);
     setSecondsLeft(RESEND_SECONDS);
   }, []);
 
   const handleBackToOtp = useCallback(() => {
-    if (!verifiedPhone) {
+    if (!otpTarget) {
       setStep("sign-in");
       return;
     }
@@ -334,7 +367,7 @@ export function useAuthFlow({
     setFullNameError(undefined);
     setEmailError(undefined);
     setTermsError(undefined);
-  }, [verifiedPhone]);
+  }, [otpTarget]);
 
   const updateDigit = useCallback((index: number, value: string) => {
     const digit = value.replace(/\D/g, "").slice(-1);
@@ -361,43 +394,33 @@ export function useAuthFlow({
 
   const handleResend = useCallback(async () => {
     if ((!otpError && secondsLeft > 0) || isSubmitting) return;
-    if (!isLoginIdentifierReadyForOtp(identifier, countryCode, { emailOnly })) {
+    if (!otpTarget) {
       setStep("sign-in");
       return;
     }
 
-    const phoneDigits = normalizeLoginPhoneDigits(identifier, countryCode);
-    const phoneForApi = formatLoginPhoneForMagento(countryCode, phoneDigits);
-
-    setIsSubmitting(true);
-    const result = await requestLoginOtp(phoneForApi);
-    setIsSubmitting(false);
-
-    if (!result.success) {
+    const result = await sendOtp(otpTarget);
+    if (!result.ok) {
       setOtpError(result.error);
       return;
     }
 
-    cooldownRef.current = result.resendAfterSeconds;
     setOtpError(undefined);
-    setSecondsLeft(result.resendAfterSeconds);
+    setSecondsLeft(cooldownRef.current);
     setOtp(Array(LOGIN_OTP_LENGTH).fill(""));
     inputRefs.current[0]?.focus();
-  }, [countryCode, emailOnly, identifier, isSubmitting, otpError, secondsLeft]);
+  }, [isSubmitting, otpError, otpTarget, secondsLeft, sendOtp]);
 
   const handleLogin = useCallback(async () => {
     if (!isOtpComplete(otp) || isSubmitting) return;
-    if (!isLoginIdentifierReadyForOtp(identifier, countryCode, { emailOnly })) {
+    if (!otpTarget) {
       setStep("sign-in");
       setIdentifierError("Phone number or email is required");
       return;
     }
 
-    const phoneDigits = normalizeLoginPhoneDigits(identifier, countryCode);
-    const phoneForApi = formatLoginPhoneForMagento(countryCode, phoneDigits);
-
     setIsSubmitting(true);
-    const result = await verifyLoginOtp(phoneForApi, otp.join(""));
+    const result = await verifyLoginOtp(otpTarget, otp.join(""));
     setIsSubmitting(false);
 
     if (!result.success) {
@@ -406,170 +429,74 @@ export function useAuthFlow({
     }
 
     setOtpError(undefined);
-    setVerifiedPhone(phoneDigits);
-    setVerifiedCountryCode(countryCode);
+    setOtpVerified(true);
 
     if (result.requiresAccountSetup) {
+      // Registering by email? The verified address is the account address.
+      if (otpTarget.kind === "email") {
+        setEmail(otpTarget.email);
+      }
       setStep("create-account");
       return;
     }
 
     setIsSubmitting(true);
     await completeAuth();
-  }, [completeAuth, countryCode, emailOnly, identifier, isSubmitting, otp]);
+  }, [completeAuth, isSubmitting, otp, otpTarget]);
 
   const handleCreateAccount = useCallback(async () => {
-    if (!verifiedPhone || isSubmitting) return;
+    if (!otpTarget || isSubmitting) return;
 
+    const accountEmail = otpTarget.kind === "email" ? otpTarget.email : email;
     const { valid, errors } = validateCreateAccountForm({
       fullName,
-      email,
+      email: accountEmail,
       termsAccepted,
     });
 
     setFullNameError(errors.fullName);
     setEmailError(errors.email);
     setTermsError(errors.terms);
+    setCreateAccountFormError(undefined);
 
     if (!valid) return;
-
-    const phoneForApi = formatLoginPhoneForMagento(verifiedCountryCode, verifiedPhone);
 
     setIsSubmitting(true);
     const result = await createCustomerAccount({
-      phone: phoneForApi,
+      target: otpTarget,
       otp: otp.join(""),
       fullName: fullName.trim(),
-      email: email.trim(),
+      email: accountEmail.trim(),
       marketingOptIn: termsAccepted,
     });
 
     if (!result.success) {
       setIsSubmitting(false);
-      setEmailError(result.error);
+      // Not setEmailError: on the email path that field is read-only, so an
+      // expired-code message would land on an input the customer cannot act on.
+      setCreateAccountFormError(result.error);
       return;
     }
 
     await completeAuth();
-  }, [completeAuth, email, fullName, isSubmitting, otp, termsAccepted, verifiedCountryCode, verifiedPhone]);
+  }, [completeAuth, email, fullName, isSubmitting, otp, otpTarget, termsAccepted]);
 
-  const handlePasswordChange = useCallback((value: string) => {
-    setPassword(value);
-    setPasswordError(undefined);
-  }, []);
+  const handleGoogleCredential = useCallback(
+    async (credential: string) => {
+      if (isSubmitting) return;
+      setIsSubmitting(true);
+      const result = await exchangeGoogleCredential(credential);
 
-  const handleBackFromPassword = useCallback(() => {
-    setStep("sign-in");
-    setPassword("");
-    setPasswordError(undefined);
-  }, []);
-
-  const handleGoToEmailCreateAccount = useCallback(() => {
-    if (!isEmailIdentifier(identifier)) {
-      setStep("sign-in");
-      return;
-    }
-
-    setEmail(identifier.trim());
-    setFullName("");
-    setRegisterPassword("");
-    setTermsAccepted(false);
-    setFullNameError(undefined);
-    setEmailError(undefined);
-    setRegisterPasswordError(undefined);
-    setTermsError(undefined);
-    setStep("email-create-account");
-  }, [identifier]);
-
-  const handleBackFromEmailCreateAccount = useCallback(() => {
-    setStep("password");
-    setFullNameError(undefined);
-    setEmailError(undefined);
-    setRegisterPasswordError(undefined);
-    setTermsError(undefined);
-  }, []);
-
-  const handleEmailRegister = useCallback(async () => {
-    if (!isEmailIdentifier(identifier) || isSubmitting) return;
-
-    const emailValue = identifier.trim();
-    const { valid, errors } = validateEmailRegisterForm({
-      fullName,
-      email: emailValue,
-      password: registerPassword,
-      termsAccepted,
-    });
-
-    setFullNameError(errors.fullName);
-    setEmailError(errors.email);
-    setRegisterPasswordError(errors.password);
-    setTermsError(errors.terms);
-
-    if (!valid) return;
-
-    setIsSubmitting(true);
-    const result = await registerWithEmail({
-      fullName: fullName.trim(),
-      email: emailValue,
-      password: registerPassword,
-      marketingOptIn: termsAccepted,
-    });
-
-    if (!result.success) {
-      setIsSubmitting(false);
-      if (/same email address/i.test(result.error)) {
-        setEmailError(result.error);
-      } else if (/password/i.test(result.error)) {
-        setRegisterPasswordError(result.error);
-      } else {
-        setEmailError(result.error);
+      if (!result.success) {
+        setIsSubmitting(false);
+        if (result.error) setIdentifierError(result.error);
+        return;
       }
-      return;
-    }
 
-    setIsSubmitting(false);
-    await completeAuth();
-  }, [
-    completeAuth,
-    fullName,
-    identifier,
-    isSubmitting,
-    registerPassword,
-    termsAccepted,
-  ]);
-
-  const handlePasswordLogin = useCallback(async () => {
-    if (isSubmitting) return;
-    if (!password) {
-      setPasswordError("Password is required");
-      return;
-    }
-
-    setIsSubmitting(true);
-    const result = await loginWithPassword(identifier.trim(), password);
-
-    if (!result.success) {
-      setIsSubmitting(false);
-      setPasswordError(result.error);
-      return;
-    }
-
-    await completeAuth();
-  }, [completeAuth, identifier, isSubmitting, password]);
-
-  const handleGoogleContinue = useCallback(async () => {
-    if (isSubmitting) return;
-    setIsSubmitting(true);
-    const result = await signInWithGoogle();
-
-    if (!result.success) {
-      setIsSubmitting(false);
-      if (result.error) setIdentifierError(result.error);
-      return;
-    }
-
-    await completeAuth();
-  }, [completeAuth, isSubmitting]);
+      await completeAuth();
+    },
+    [completeAuth, isSubmitting],
+  );
 
   const handleAppleContinue = useCallback(async () => {
     if (isSubmitting) return;
@@ -600,19 +527,22 @@ export function useAuthFlow({
       identifierError,
       emailOnly,
       otpBlockedForCountry,
+      noSignInMethod,
       showGoogle,
       showApple,
       onIdentifierChange: handleIdentifierChange,
       onCountryCodeChange: handleCountryCodeChange,
       onContinue: handleContinue,
-      onGoogleContinue: handleGoogleContinue,
+      onGoogleCredential: handleGoogleCredential,
       onAppleContinue: handleAppleContinue,
       onUseEmailInstead: handleUseEmailInstead,
       onClose: handleClose,
     },
     otp: {
       phone: identifier,
-      countryCode,
+      countryCode: otpChannel === "sms" ? verifiedCountryCode : countryCode,
+      channel: otpChannel,
+      maskedDestination,
       otp,
       otpError,
       secondsLeft,
@@ -628,15 +558,18 @@ export function useAuthFlow({
     createAccount: {
       fullName,
       email,
+      emailReadOnly: emailIsVerifiedIdentifier,
       termsAccepted,
       fullNameError,
       emailError,
       termsError,
+      formError: createAccountFormError,
       onFullNameChange: (value) => {
         setFullName(value);
         setFullNameError(undefined);
       },
       onEmailChange: (value) => {
+        if (emailIsVerifiedIdentifier) return;
         setEmail(value);
         setEmailError(undefined);
       },
@@ -647,41 +580,6 @@ export function useAuthFlow({
       onBack: handleBackToOtp,
       onClose: handleClose,
       onCreateAccount: handleCreateAccount,
-    },
-    password: {
-      email: identifier,
-      password,
-      passwordError,
-      onPasswordChange: handlePasswordChange,
-      onBack: handleBackFromPassword,
-      onClose: handleClose,
-      onLogin: handlePasswordLogin,
-      onCreateAccount: handleGoToEmailCreateAccount,
-    },
-    emailCreateAccount: {
-      email: identifier.trim(),
-      fullName,
-      password: registerPassword,
-      termsAccepted,
-      fullNameError,
-      emailError,
-      passwordError: registerPasswordError,
-      termsError,
-      onFullNameChange: (value) => {
-        setFullName(value);
-        setFullNameError(undefined);
-      },
-      onPasswordChange: (value) => {
-        setRegisterPassword(value);
-        setRegisterPasswordError(undefined);
-      },
-      onTermsAcceptedChange: (value) => {
-        setTermsAccepted(value);
-        setTermsError(undefined);
-      },
-      onBack: handleBackFromEmailCreateAccount,
-      onClose: handleClose,
-      onCreateAccount: handleEmailRegister,
     },
   };
 

@@ -12,6 +12,8 @@ export const MAGENTO_REQUEST_LOGIN_OTP_MUTATION = `
     requestLoginOtp(input: $input) {
       success
       resend_after_seconds
+      channel
+      masked_destination
     }
   }
 ` as const;
