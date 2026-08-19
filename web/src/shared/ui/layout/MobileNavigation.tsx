@@ -398,7 +398,7 @@ const MobileNavigation = ({
   isOpen,
   onClose,
   navLinks,
-  appointmentLink = { label: "Book an Appointment", url: "/book-an-appointment" },
+  appointmentLink,
   cartCount,
   onProfileOpen,
 }: MobileNavigationProps) => {
@@ -546,7 +546,7 @@ const MobileNavigation = ({
           {navLinks.map((link, index) => {
             const isJewellery = isJewelleryNavLink(link.label);
             return (
-              <Fragment key={link.label}>
+              <Fragment key={link.id ?? link.label}>
                 <MobileNavRow
                   label={link.label}
                   href={resolveHeaderNavHref(link.label, link.url)}
@@ -562,14 +562,18 @@ const MobileNavigation = ({
 
       <div className="shrink-0 bg-gray200 px-4 py-6">
         <div className="flex flex-col gap-3">
-          <UtilityRow
-            iconSrc="/icons/appointment.svg"
-            iconW={20}
-            iconH={20}
-            label={appointmentLink.label}
-            onClick={() => setSubPanel("appointment")}
-          />
-          <NavDivider className="bg-chalk300" />
+          {appointmentLink ? (
+            <>
+              <UtilityRow
+                iconSrc="/icons/appointment.svg"
+                iconW={20}
+                iconH={20}
+                label={appointmentLink.label}
+                onClick={() => setSubPanel("appointment")}
+              />
+              <NavDivider className="bg-chalk300" />
+            </>
+          ) : null}
           <UtilityRow
             iconSrc="/icons/currency.svg"
             iconW={20}

@@ -105,7 +105,7 @@ const StoreLocatorSearchSection = ({
                     onSelectedStateChange(isSelected ? null : filterValue)
                   }
                   className={cn(
-                    "flex h-14 shrink-0 flex-col items-center justify-between transition-opacity hover:opacity-80 md:h-auto md:justify-center md:gap-2",
+                    "flex h-14 shrink-0 flex-col items-center justify-between transition-opacity hover:opacity-80 md:h-auto md:justify-center md:gap-2 gap-1",
                     isSelected && "opacity-100",
                   )}
                   style={{ width: storeLocatorSearchFigmaSpec.stateItemWidth }}
