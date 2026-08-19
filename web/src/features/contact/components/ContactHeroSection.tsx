@@ -37,7 +37,7 @@ const ContactHeroSection = ({ hero }: ContactHeroSectionProps) => {
       </div>
       <h1
         id="contact-hero-title"
-        className="absolute left-1/2 top-[calc(50%+42px)] z-10 -translate-x-1/2 whitespace-nowrap text-center font-larken text-32 font-light leading-110 text-white md:static md:col-start-1 md:row-start-1 md:translate-x-0 md:self-start md:justify-self-center md:pt-[203px] md:text-5xl"
+        className="absolute left-1/2 md:bottom-16 bottom-10 z-10 -translate-x-1/2 whitespace-nowrap text-center font-larken text-32 font-light leading-110 text-white lg:text-5xl md:text-4xl"
       >
         {hero.title}
       </h1>

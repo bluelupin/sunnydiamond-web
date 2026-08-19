@@ -81,7 +81,7 @@ const StoreLocatorSearchSection = ({
 
         {stateFilters.length > 0 ? (
           <div
-            className="flex h-14 items-center gap-6 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] md:h-auto md:gap-8 [&::-webkit-scrollbar]:hidden"
+            className="flex h-14 items-center gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] md:h-auto md:gap-8 [&::-webkit-scrollbar]:hidden"
             role="list"
             aria-label="Filter by state"
           >

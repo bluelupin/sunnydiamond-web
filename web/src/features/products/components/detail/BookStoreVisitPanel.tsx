@@ -9,7 +9,6 @@ import {
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import { resolveBookStoreVisitStores } from "@/features/products/utils/bookStoreVisitStores";
 import {
-  storeLocatorDefaultListCopy,
   storeLocatorFoundCopy,
   storeLocatorNearbySuggestionsCopy,
   storeLocatorStatusEyebrowClassName,
@@ -20,7 +19,10 @@ import {
   shouldSuggestNearbyStores,
 } from "@/features/stores/utils/storeLocatorFilters";
 import { BookStoreVisitLocationDetails } from "./BookStoreVisitLocationDetails";
-import { StoreLocatorMapView } from "@/features/stores/components/StoreLocatorMapView";
+import {
+  mapBookStoreVisitStoreToLayoutItem,
+  ShowroomsLayout,
+} from "@/features/stores/components/ShowroomsLayout";
 import { cn } from "@/shared/utils/cn";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
@@ -61,6 +63,8 @@ type BookStoreVisitPanelProps = {
   storeStateFilter?: string | null;
   /** Prefetched showrooms from `/api/store-locator-page` (page variant). */
   initialStores?: BookStoreVisitStore[];
+  /** Shows showroom layout skeleton while store-locator data is loading. */
+  isShowroomsLoading?: boolean;
   getDirectionsLabel?: string | null;
   noResultsMessage?: string | null;
   /**
@@ -83,6 +87,7 @@ const BookStoreVisitPanel = ({
   storeSearchQuery = "",
   storeStateFilter = null,
   initialStores,
+  isShowroomsLoading = false,
   getDirectionsLabel,
   noResultsMessage,
   submissionFormTag,
@@ -96,6 +101,9 @@ const BookStoreVisitPanel = ({
   const editorialShowrooms = useMemo(
     () => editorialData?.showroomSection?.showrooms ?? [],
     [editorialData?.showroomSection?.showrooms],
+  );
+  const [isResolvingStores, setIsResolvingStores] = useState(
+    () => variant === "page" && !(initialStores && initialStores.length > 0),
   );
   const [step, setStep] = useState<BookVisitStep>("select-store");
   const [stores, setStores] = useState<BookStoreVisitStore[]>(() => {
@@ -369,6 +377,10 @@ const BookStoreVisitPanel = ({
             ? current
             : resolvedStores[0]?.id ?? (variant === "page" ? "" : BOOK_STORE_VISIT_STORES[0].id),
         );
+      } finally {
+        if (variant === "page") {
+          setIsResolvingStores(false);
+        }
       }
     })();
 
@@ -538,6 +550,7 @@ const BookStoreVisitPanel = ({
         getDirectionsLabel={getDirectionsLabel}
         noResultsMessage={noResultsMessage}
         listStatus={listStatus}
+        isShowroomsLoading={isShowroomsLoading || isResolvingStores}
       />
     ) : (
       <BookingFormStep
@@ -660,12 +673,13 @@ type StoreSelectionStepProps = {
   getDirectionsLabel?: string | null;
   noResultsMessage?: string | null;
   listStatus?: StoreLocatorListStatus;
+  isShowroomsLoading?: boolean;
 };
 
 function StoreLocatorListStatusHeader({ status }: { status: StoreLocatorListStatus }) {
   if (status === "no-area") {
     return (
-      <div className="flex flex-col gap-2 px-4 pt-6 lg:px-10 lg:pt-0">
+      <div className="flex flex-col gap-2 pt-6 lg:pt-0">
         <p className="font-gill text-base font-normal uppercase leading-110 text-darkblack">
           {storeLocatorNearbySuggestionsCopy.title}
         </p>
@@ -676,15 +690,12 @@ function StoreLocatorListStatusHeader({ status }: { status: StoreLocatorListStat
     );
   }
 
-  const title =
-    status === "search-match"
-      ? storeLocatorFoundCopy.search
-      : storeLocatorDefaultListCopy.title;
+  const title = status === "search-match" && storeLocatorFoundCopy.search;
 
   const isFoundState = status === "search-match";
 
   return (
-    <div className="flex flex-col gap-4 px-4 pt-6 lg:px-10 lg:pt-0">
+    <div className="flex flex-col gap-4 pt-6 lg:pt-0">
       <p
         className={
           isFoundState
@@ -707,55 +718,6 @@ const selectedStoreCardClassName =
 const unselectedStoreButtonClassName =
   "flex w-full items-center px-4 py-6 text-left font-larken text-xl font-light leading-110 text-darkblack lg:px-10 lg:py-8 lg:text-2xl";
 
-function renderStoreRow({
-  store,
-  isSelected,
-  onSelectStore,
-  getDirectionsLabel,
-}: {
-  store: BookStoreVisitStore;
-  isSelected: boolean;
-  onSelectStore: (storeId: string) => void;
-  getDirectionsLabel?: string | null;
-}) {
-  if (isSelected) {
-    return (
-      <div className={selectedStoreCardClassName}>
-        <p className={storeListTitleClassName}>{store.storeName}</p>
-        <div className="h-px w-full bg-neutral300" aria-hidden />
-        {store.heroImage ? (
-          <div className="relative aspect-[2500/1797] w-full overflow-hidden lg:hidden">
-            <Image
-              src={store.heroImage}
-              alt=""
-              fill
-              className="object-cover"
-              sizes="100vw"
-              aria-hidden
-            />
-          </div>
-        ) : null}
-        <BookStoreVisitLocationDetails
-          store={store}
-          size="page"
-          directionsLabel={getDirectionsLabel}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <button
-      type="button"
-      aria-pressed={false}
-      onClick={() => onSelectStore(store.id)}
-      className={unselectedStoreButtonClassName}
-    >
-      {store.storeName}
-    </button>
-  );
-}
-
 const StoreSelectionStep = ({
   stores,
   selectedStoreId,
@@ -769,150 +731,127 @@ const StoreSelectionStep = ({
   getDirectionsLabel,
   noResultsMessage,
   listStatus = "default",
+  isShowroomsLoading = false,
 }: StoreSelectionStepProps) => {
-  const selectedStore =
-    stores.find((store) => store.id === selectedStoreId) ?? stores[0] ?? null;
-
-  const storeList =
-    stores.length === 0 ? (
-      <p className="px-4 py-6 font-gill text-base font-light leading-110 text-neutral500 lg:px-10 lg:py-8">
-        {noResultsMessage?.trim() ||
-          "No showrooms match your search. Try another location or state."}
-      </p>
-    ) : (
-      stores.map((store) => (
-        <div key={store.id} className="w-full">
-          {renderStoreRow({
-            store,
-            isSelected: store.id === selectedStoreId,
-            onSelectStore,
-            getDirectionsLabel,
-          })}
-        </div>
-      ))
-    );
-
   if (layout === "page") {
-    return (
-      <>
-        <section className="mx-auto w-full max-w-1440 pb-26 pt-0 lg:pt-10">
-          <div className="flex flex-col items-start gap-6 lg:flex-row">
-            <div
-              className="w-full shrink-0 lg:w-[593px] lg:border-r lg:border-neutral300"
-              aria-label="Showroom locations"
-            >
-              <StoreLocatorListStatusHeader status={listStatus} />
-              <div className={listStatus === "default" ? undefined : "mt-4"}>{storeList}</div>
-            </div>
+    const listHeader =
+      listStatus !== "default" ? (
+        <StoreLocatorListStatusHeader status={listStatus} />
+      ) : null;
 
-            {selectedStore ? (
-              <div className="hidden min-w-0 flex-1 self-stretch lg:block">
-                <StoreLocatorMapView store={selectedStore} />
-              </div>
-            ) : null}
-          </div>
-        </section>
-      </>
+    return (
+      <ShowroomsLayout
+        locations={stores.map(mapBookStoreVisitStoreToLayoutItem)}
+        activeId={selectedStoreId || null}
+        onSelect={onSelectStore}
+        getDirectionsLabel={getDirectionsLabel ?? undefined}
+        listHeader={listHeader}
+        isLoading={isShowroomsLoading}
+        emptyMessage={
+          noResultsMessage?.trim() ||
+          "No showrooms match your search. Try another location or state."
+        }
+      />
     );
   }
 
   return (
-  <>
-    <div className="min-h-0 flex-1 overflow-y-auto">
-      <div className="px-4 pt-6 lg:px-6 lg:pt-10">
-        <div className="flex flex-col gap-6">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex min-w-0 items-center gap-2">
-              {showBack ? (
-                <button
-                  type="button"
-                  onClick={onBack}
-                  aria-label="Go back"
-                  className="inline-flex size-6 shrink-0 items-center justify-center"
-                >
-                  <ChevronLeft size={24} strokeWidth={1.25} aria-hidden className="text-darkblack" />
-                </button>
-              ) : null}
-              <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
-                {formTitle}
-              </h2>
-            </div>
-            {onClose ? (
-              <button
-                type="button"
-                onClick={onClose}
-                aria-label="Close"
-                className="inline-flex size-6 shrink-0 items-center justify-center"
-              >
-                <Image
-                  src="/icons/menu-close.svg"
-                  alt=""
-                  width={24}
-                  height={24}
-                  aria-hidden
-                />
-              </button>
-            ) : null}
-          </div>
-          <div className="h-px w-full bg-neutral300" aria-hidden />
-        </div>
-
-        <div
-          className="mt-6 flex flex-col border-r border-neutral300 pb-72"
-          aria-label="Showroom locations"
-        >
-          {stores.length === 0 ? (
-            <p className="px-4 py-8 font-gill text-base font-light leading-110 text-neutral500 lg:px-10">
-              {noResultsMessage?.trim() || "No showrooms match your search. Try another location or state."}
-            </p>
-          ) : (
-            stores.map((store) => {
-            const isSelected = store.id === selectedStoreId;
-
-            return (
-              <div key={store.id} className="w-full">
-                {isSelected ? (
-                  <div className={selectedStoreCardClassName}>
-                    <p className={storeListTitleClassName}>{store.storeName}</p>
-                    <div className="h-px w-full bg-neutral300" aria-hidden />
-                    {store.heroImage ? (
-                      <div className="relative aspect-[2500/1797] w-full overflow-hidden">
-                        <Image
-                          src={store.heroImage}
-                          alt=""
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 480px) 100vw, 480px"
-                          aria-hidden
-                        />
-                      </div>
-                    ) : null}
-                    <BookStoreVisitLocationDetails store={store} size="page" directionsLabel={getDirectionsLabel} />
-                  </div>
-                ) : (
+    <>
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="px-4 pt-6 lg:px-6 lg:pt-10">
+          <div className="flex flex-col gap-6">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex min-w-0 items-center gap-2">
+                {showBack ? (
                   <button
                     type="button"
-                    aria-pressed={false}
-                    onClick={() => onSelectStore(store.id)}
-                    className={unselectedStoreButtonClassName}
+                    onClick={onBack}
+                    aria-label="Go back"
+                    className="inline-flex size-6 shrink-0 items-center justify-center"
                   >
-                    {store.storeName}
+                    <ChevronLeft size={24} strokeWidth={1.25} aria-hidden className="text-darkblack" />
                   </button>
-                )}
+                ) : null}
+                <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
+                  {formTitle}
+                </h2>
               </div>
-            );
-          })
-          )}
+              {onClose ? (
+                <button
+                  type="button"
+                  onClick={onClose}
+                  aria-label="Close"
+                  className="inline-flex size-6 shrink-0 items-center justify-center"
+                >
+                  <Image
+                    src="/icons/menu-close.svg"
+                    alt=""
+                    width={24}
+                    height={24}
+                    aria-hidden
+                  />
+                </button>
+              ) : null}
+            </div>
+            <div className="h-px w-full bg-neutral300" aria-hidden />
+          </div>
+
+          <div
+            className="mt-6 flex flex-col border-r border-neutral300 pb-72"
+            aria-label="Showroom locations"
+          >
+            {stores.length === 0 ? (
+              <p className="px-4 py-8 font-gill text-base font-light leading-110 text-neutral500 lg:px-10">
+                {noResultsMessage?.trim() || "No showrooms match your search. Try another location or state."}
+              </p>
+            ) : (
+              stores.map((store) => {
+                const isSelected = store.id === selectedStoreId;
+
+                return (
+                  <div key={store.id} className="w-full">
+                    {isSelected ? (
+                      <div className={selectedStoreCardClassName}>
+                        <p className={storeListTitleClassName}>{store.storeName}</p>
+                        <div className="h-px w-full bg-neutral300" aria-hidden />
+                        {store.heroImage ? (
+                          <div className="relative aspect-[2500/1797] w-full overflow-hidden">
+                            <Image
+                              src={store.heroImage}
+                              alt=""
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 480px) 100vw, 480px"
+                              aria-hidden
+                            />
+                          </div>
+                        ) : null}
+                        <BookStoreVisitLocationDetails store={store} size="page" directionsLabel={getDirectionsLabel} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        aria-pressed={false}
+                        onClick={() => onSelectStore(store.id)}
+                        className={unselectedStoreButtonClassName}
+                      >
+                        {store.storeName}
+                      </button>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
       </div>
-    </div>
 
-    <PanelFooter>
-      <DetailDarkButton onClick={onProceed} disabled={stores.length === 0}>
-        PROCEED WITH THIS STORE
-      </DetailDarkButton>
-    </PanelFooter>
-  </>
+      <PanelFooter>
+        <DetailDarkButton onClick={onProceed} disabled={stores.length === 0}>
+          PROCEED WITH THIS STORE
+        </DetailDarkButton>
+      </PanelFooter>
+    </>
   );
 };
 

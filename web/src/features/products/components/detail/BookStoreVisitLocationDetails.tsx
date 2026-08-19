@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { cn } from "@/shared/utils/cn";
 import type { BookStoreVisitStore } from "@/features/products/data/bookStoreVisitContent";
 
 const ADDRESS_ICON = "/images/products/delivery-store/address-icon.svg";
@@ -21,52 +20,42 @@ export function BookStoreVisitLocationDetails({
   const textClassName = isPage
     ? "font-gill text-xl font-light leading-110 text-darkblack"
     : "font-gill text-base font-light leading-110 text-darkblack lg:text-xl";
-  const rowGapClassName = "gap-3";
-  const stackGapClassName = "gap-4";
-  const directionsClassName =
-    "inline-flex w-fit border-b border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack";
   const directionsText = directionsLabel?.trim() || "GET DIRECTIONS";
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className={cn("flex flex-col", stackGapClassName)}>
-        {store.address ? (
-          <div className={cn("flex items-start", rowGapClassName)}>
-            <Image
-              src={ADDRESS_ICON}
-              alt=""
-              width={24}
-              height={24}
-              aria-hidden
-              className="size-6 shrink-0"
-            />
-            <p className={textClassName}>
-              {store.address}
-            </p>
-          </div>
-        ) : null}
-        {store.phone ? (
-          <div className={cn("flex items-center", rowGapClassName)}>
-            <Image
-              src={PHONE_ICON}
-              alt=""
-              width={24}
-              height={24}
-              aria-hidden
-              className="size-6 shrink-0"
-            />
-            <p className={textClassName}>
-              {store.phone}
-            </p>
-          </div>
-        ) : null}
-      </div>
+    <div className="flex flex-col gap-4">
+      {store.address ? (
+        <div className="flex items-start gap-3">
+          <Image
+            src={ADDRESS_ICON}
+            alt=""
+            width={24}
+            height={24}
+            aria-hidden
+            className="mt-1.5 size-5 shrink-0 sm:mt-0 lg:size-6"
+          />
+          <p className={textClassName}>{store.address}</p>
+        </div>
+      ) : null}
+      {store.phone ? (
+        <div className="flex items-center gap-3">
+          <Image
+            src={PHONE_ICON}
+            alt=""
+            width={24}
+            height={24}
+            aria-hidden
+            className="size-6 shrink-0"
+          />
+          <p className={textClassName}>{store.phone}</p>
+        </div>
+      ) : null}
       {store.directionsUrl ? (
         <Link
           href={store.directionsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className={directionsClassName}
+          className="inline-flex w-fit border-b border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
         >
           {directionsText}
         </Link>
