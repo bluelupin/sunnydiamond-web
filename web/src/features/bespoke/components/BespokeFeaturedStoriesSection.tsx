@@ -22,6 +22,7 @@ import type {
   NormalizedBespokePastCreations,
 } from "@/services/bespoke/contact-bespoke-page.types";
 import { bespokeUiDefaults } from "@/services/bespoke/bespoke-fallbacks";
+import { getPastCreations } from "@/services/bespoke/featured-stories.service";
 
 type FeaturedSlide = NormalizedBespokeFeaturedSlide;
 
@@ -505,6 +506,7 @@ type FeaturedStoriesLayoutProps = {
   primaryCtaLabel: string;
   secondaryCtaLabel: string;
   onSecondaryCtaClick: () => void;
+  secondaryCtaLoading: boolean;
   backgroundImage?: { desktopUrl: string; mobileUrl: string; alt: string } | null;
   showHero: boolean;
 };
@@ -519,6 +521,7 @@ const FeaturedStoriesLayout = ({
   primaryCtaLabel,
   secondaryCtaLabel,
   onSecondaryCtaClick,
+  secondaryCtaLoading,
   backgroundImage,
   showHero,
 }: FeaturedStoriesLayoutProps) => {
@@ -567,8 +570,12 @@ const FeaturedStoriesLayout = ({
               </Link>
             ) : null}
             {secondaryCtaLabel ? (
-              <DetailTextLink onClick={onSecondaryCtaClick} className="uppercase">
-                {secondaryCtaLabel}
+              <DetailTextLink
+                onClick={onSecondaryCtaClick}
+                disabled={secondaryCtaLoading}
+                className="uppercase"
+              >
+                {secondaryCtaLoading ? "Loading..." : secondaryCtaLabel}
               </DetailTextLink>
             ) : null}
           </div>
@@ -597,8 +604,12 @@ const FeaturedStoriesLayout = ({
               </Link>
             ) : null}
             {secondaryCtaLabel ? (
-              <DetailTextLink onClick={onSecondaryCtaClick} className="uppercase">
-                {secondaryCtaLabel}
+              <DetailTextLink
+                onClick={onSecondaryCtaClick}
+                disabled={secondaryCtaLoading}
+                className="uppercase"
+              >
+                {secondaryCtaLoading ? "Loading..." : secondaryCtaLabel}
               </DetailTextLink>
             ) : null}
           </div>
@@ -608,12 +619,8 @@ const FeaturedStoriesLayout = ({
   );
 };
 
-const BespokeFeaturedStoriesSection = ({
-  featuredStories,
-  pastCreations,
-}: {
+const BespokeFeaturedStoriesSection = ({ featuredStories }: {
   featuredStories: NormalizedBespokeFeaturedStories | null;
-  pastCreations: NormalizedBespokePastCreations | null;
 }) => {
   const slides = featuredStories?.slides ?? [];
   const defaultSlideIndex = featuredStories?.defaultSlideIndex ?? 0;
@@ -624,6 +631,8 @@ const BespokeFeaturedStoriesSection = ({
   const [currentIndex, setCurrentIndex] = useState(defaultSlideIndex);
   const [modalOpen, setModalOpen] = useState(false);
   const [pastCreationsOpen, setPastCreationsOpen] = useState(false);
+  const [pastCreations, setPastCreations] = useState<NormalizedBespokePastCreations | null>(null);
+  const [pastCreationsLoading, setPastCreationsLoading] = useState(false);
   const [modalContext, setModalContext] = useState<{ slideIndex: number; imageIndex: number } | null>(
     null,
   );
@@ -658,9 +667,23 @@ const BespokeFeaturedStoriesSection = ({
     setModalSlideOverride(null);
   }, []);
 
-  const handlePastCreationsOpen = useCallback(() => {
-    setPastCreationsOpen(true);
-  }, []);
+  const handlePastCreationsOpen = useCallback(async () => {
+    if (pastCreations) {
+      setPastCreationsOpen(true);
+      return;
+    }
+
+    setPastCreationsLoading(true);
+    try {
+      const creations = await getPastCreations();
+      setPastCreations(creations);
+      setPastCreationsOpen(Boolean(creations));
+    } catch {
+      setPastCreations(null);
+    } finally {
+      setPastCreationsLoading(false);
+    }
+  }, [pastCreations]);
 
   const handlePastCreationsClose = useCallback(() => {
     setPastCreationsOpen(false);
@@ -717,12 +740,9 @@ const BespokeFeaturedStoriesSection = ({
         title={featuredStories?.title ?? ""}
         primaryCtaHref={featuredStories?.primaryCtaHref ?? "/featured-stories"}
         primaryCtaLabel={featuredStories?.primaryCtaLabel ?? ""}
-        secondaryCtaLabel={
-          pastCreations && pastCreations.images.length > 0
-            ? featuredStories?.secondaryCtaLabel || bespokeUiDefaults.secondaryCtaLabel
-            : ""
-        }
+        secondaryCtaLabel={featuredStories?.secondaryCtaLabel || bespokeUiDefaults.secondaryCtaLabel}
         onSecondaryCtaClick={handlePastCreationsOpen}
+        secondaryCtaLoading={pastCreationsLoading}
         backgroundImage={featuredStories?.backgroundImage ?? null}
         showHero={slides.length > 0 || Boolean(featuredStories?.backgroundImage)}
       />

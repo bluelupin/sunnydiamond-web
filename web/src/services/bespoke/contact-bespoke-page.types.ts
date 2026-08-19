@@ -132,7 +132,6 @@ export type StrapiContactBespokePageEntity = {
   hero?: StrapiBespokeHero | null;
   visionSection?: StrapiBespokeVisionSection | null;
   featuredStoriesSection?: StrapiBespokeFeaturedStoriesSection | null;
-  pastCreations?: StrapiBespokePastCreation[] | null;
   serviceHighlights?: StrapiBespokeServiceHighlight[] | null;
   getInTouchSection?: StrapiBespokeGetInTouchSection | null;
   customDesignForm?: StrapiBespokeCustomDesignForm | null;
@@ -244,7 +243,6 @@ export type NormalizedContactBespokePage = {
   hero: NormalizedBespokeHero | null;
   story: NormalizedBespokeStory | null;
   featuredStories: NormalizedBespokeFeaturedStories | null;
-  pastCreations: NormalizedBespokePastCreations | null;
   guarantees: NormalizedBespokeGuarantee[];
   interested: NormalizedBespokeGetInTouch | null;
   customDesignForm: NormalizedBespokeCustomDesignForm | null;
@@ -255,7 +253,6 @@ export const EMPTY_CONTACT_BESPOKE_PAGE: NormalizedContactBespokePage = {
   hero: null,
   story: null,
   featuredStories: null,
-  pastCreations: null,
   guarantees: [],
   interested: null,
   customDesignForm: null,

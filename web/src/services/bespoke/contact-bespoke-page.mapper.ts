@@ -4,7 +4,6 @@ import {
   resolveCmsAltText,
   resolveCmsMediaUrl,
 } from "@/shared/utils/strapiMedia";
-import type { StrapiImagePayload } from "@/types/strapiMedia";
 import type {
   NormalizedBespokeCustomDesignForm,
   NormalizedBespokeFeaturedSlide,
@@ -172,30 +171,10 @@ const mapStory = (section?: StrapiBespokeVisionSection | null): NormalizedBespok
   };
 };
 
-const findPastCreationMatch = (
-  card: StrapiBespokeFeaturedStoryCard,
-  pastCreations?: StrapiBespokePastCreation[] | null,
-): StrapiBespokePastCreation | null => {
-  if (!pastCreations?.length) return null;
-
-  const documentId = cleanText(card.documentId);
-  const slug = cleanText(card.slug);
-  const title = cleanText(card.title)?.toLowerCase();
-
-  return (
-    pastCreations.find((item) => documentId && cleanText(item.documentId) === documentId) ??
-    pastCreations.find((item) => slug && cleanText(item.slug) === slug) ??
-    pastCreations.find((item) => title && cleanText(item.title)?.toLowerCase() === title) ??
-    null
-  );
-};
-
 const mapFeaturedCardToSlide = (
   card: StrapiBespokeFeaturedStoryCard,
   index: number,
-  galleryOverride: StrapiImagePayload[] | null | undefined,
   sectionCtaHref: string,
-  pastCreations?: StrapiBespokePastCreation[] | null,
 ): NormalizedBespokeFeaturedSlide | null => {
   if (card.isActive === false) return null;
 
@@ -211,20 +190,13 @@ const mapFeaturedCardToSlide = (
   const coverAlt =
     resolveCmsAltText(card.coverImage) ?? cleanText(card.image?.altText) ?? title;
 
-  // Prefer card.gallery; when Strapi omits it on featuredStoriesSection.cards,
-  // reuse gallery from the matching pastCreations entry (same featured-story).
-  const gallerySource =
-    card.gallery && card.gallery.length > 0 ? card.gallery : galleryOverride;
-
-  const galleryImages = (gallerySource ?? [])
+  const galleryImages = (card.gallery ?? [])
     .map((item) => {
       const src = resolveCmsMediaUrl(item);
       if (!src) return null;
       return { src, alt: resolveCmsAltText(item) ?? title };
     })
     .filter((item): item is { src: string; alt: string } => item != null);
-
-  const pastCreationMatch = findPastCreationMatch(card, pastCreations);
 
   return {
     documentId: cleanText(card.documentId) || undefined,
@@ -233,21 +205,12 @@ const mapFeaturedCardToSlide = (
     modalTitle: title,
     modalDescription: description,
     modalImages: galleryImages.length > 0 ? galleryImages : [{ src: coverUrl, alt: coverAlt }],
-    href: cleanText(pastCreationMatch?.cta?.url) ?? sectionCtaHref,
+    href: sectionCtaHref,
   };
-};
-
-const resolvePastCreationGallery = (
-  card: StrapiBespokeFeaturedStoryCard,
-  pastCreations?: StrapiBespokePastCreation[] | null,
-): StrapiImagePayload[] | null => {
-  const gallery = findPastCreationMatch(card, pastCreations)?.gallery;
-  return gallery && gallery.length > 0 ? gallery : null;
 };
 
 const mapFeaturedStories = (
   section?: StrapiBespokeFeaturedStoriesSection | null,
-  pastCreations?: StrapiBespokePastCreation[] | null,
 ): NormalizedBespokeFeaturedStories | null => {
   if (!section || section.showField === false) return null;
 
@@ -261,15 +224,7 @@ const mapFeaturedStories = (
   const slides = (section.cards ?? [])
     .slice()
     .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
-    .map((card, index) =>
-      mapFeaturedCardToSlide(
-        card,
-        index,
-        resolvePastCreationGallery(card, pastCreations),
-        primaryCtaHref,
-        pastCreations,
-      ),
-    )
+    .map((card, index) => mapFeaturedCardToSlide(card, index, primaryCtaHref))
     .filter((slide): slide is NormalizedBespokeFeaturedSlide => slide != null);
 
   // Keep section if we have a title, backdrop, slides, or any CTA — slides may be empty until CMS cards are added.
@@ -306,21 +261,19 @@ const mapMediaToPastCreationImage = (
   };
 };
 
-const mapPastCreations = (
+export const mapPastCreations = (
   items?: StrapiBespokePastCreation[] | null,
 ): NormalizedBespokePastCreations | null => {
   const images: NormalizedBespokePastCreationImage[] = [];
-  const seenUrls = new Set<string>();
 
   for (const item of items ?? []) {
     const alt = cleanText(item.title) ?? "Past creation";
     const documentId = cleanText(item.documentId) || undefined;
-    const mediaList = [item.coverImage, ...(item.gallery ?? [])];
+    const mediaList = item.gallery?.length ? item.gallery : [item.coverImage];
 
     for (const media of mediaList) {
       const mapped = mapMediaToPastCreationImage(media, alt, documentId);
-      if (!mapped || seenUrls.has(mapped.src)) continue;
-      seenUrls.add(mapped.src);
+      if (!mapped) continue;
       images.push(mapped);
     }
   }
@@ -520,8 +473,7 @@ export function mapContactBespokePage(
   return {
     hero: mapHero(raw.hero),
     story: mapStory(raw.visionSection),
-    featuredStories: mapFeaturedStories(raw.featuredStoriesSection, raw.pastCreations),
-    pastCreations: mapPastCreations(raw.pastCreations),
+    featuredStories: mapFeaturedStories(raw.featuredStoriesSection),
     guarantees: mapGuarantees(raw.serviceHighlights),
     interested: mapGetInTouch(raw.getInTouchSection),
     customDesignForm: mapCustomDesignForm(raw.customDesignForm),
