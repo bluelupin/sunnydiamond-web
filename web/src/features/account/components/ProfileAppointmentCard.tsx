@@ -29,7 +29,7 @@ function ProductGallery({ products }: { products: ProfileAppointmentUi["products
   return (
     <div className="-mx-4 flex gap-4 overflow-x-auto px-4 lg:mx-0 lg:flex-wrap lg:justify-center lg:gap-6 lg:overflow-visible lg:px-0">
       {products.map((product) => (
-        <div key={product.id} className="flex w-[100px] shrink-0 flex-col gap-2 lg:w-[176px]">
+        <div key={product.id} className="flex w-[135px] shrink-0 flex-col gap-2 lg:w-[176px]">
           <div className="relative h-[76px] w-full overflow-hidden bg-white lg:h-[135px]">
             <Image
               src={product.imageSrc}
@@ -60,7 +60,7 @@ function ProfileAppointmentPersonalDetails({
   email: string;
 }) {
   return (
-    <div className="flex flex-col gap-6 bg-white p-4 lg:p-6">
+    <div className="flex flex-col lg:gap-4 gap-6 bg-white p-4 lg:p-6">
       <h4 className="font-gill text-xl font-normal leading-110 text-darkblack lg:font-larken lg:text-2xl lg:font-light">
         {title}
       </h4>
@@ -77,7 +77,7 @@ function ProfileAppointmentPersonalDetails({
 
 function ProfileAppointmentNote({ title, note }: { title: string; note: string }) {
   return (
-    <div className="flex flex-col gap-4 bg-white p-4 lg:gap-6 lg:p-6">
+    <div className="flex flex-col lg:gap-4 gap-6 bg-white p-4 lg:p-6">
       <h4 className="font-gill text-xl font-normal leading-110 text-darkblack lg:font-larken lg:text-2xl lg:font-light">
         {title}
       </h4>
@@ -120,8 +120,8 @@ function ProfileAppointmentAddress({
       </p>
 
       <div className="hidden flex-col gap-2 font-gill text-base leading-110 text-darkblack lg:flex">
-        <p className="font-normal">{address.name}</p>
-        <div className="font-light">
+        <p className="font-normal text-darkblack text-base">{address.name}</p>
+        <div className="font-light text-darkblack text-base">
           {address.addressLine1 ? <p>{address.addressLine1}</p> : null}
           {address.addressLine2 ? <p>{address.addressLine2}</p> : null}
           {cityStatePincode ? <p>{cityStatePincode}</p> : null}
@@ -142,8 +142,8 @@ function ProfileAppointmentStoreVisit({
   directionsLabel: string;
 }) {
   return (
-    <div className="flex flex-col gap-6 bg-white p-4 lg:bg-gray300 lg:p-6">
-      <h4 className="font-gill text-xl font-normal leading-110 text-darkblack lg:font-larken lg:text-xl lg:font-light">
+    <div className="flex flex-col lg:gap-4 gap-6 bg-white p-4 lg:p-6">
+      <h4 className="font-gill text-xl font-normal leading-110 text-darkblack lg:font-larken lg:text-2xl lg:font-light">
         {title}
       </h4>
 
@@ -159,7 +159,7 @@ function ProfileAppointmentStoreVisit({
       {storeVisit.directionsHref ? (
         <DetailTextLink
           href={storeVisit.directionsHref}
-          className="text-sm uppercase lg:inline-flex lg:items-center lg:gap-2"
+          className="mt-2 text-sm uppercase lg:inline-flex lg:items-center lg:gap-2"
         >
           {directionsLabel}
           <ChevronRight className="hidden size-4 lg:block" aria-hidden />
@@ -183,7 +183,7 @@ function ProfileAppointmentBookingDetails({
   const content = profileTabsContent.appointments;
 
   return (
-    <div className="flex flex-col gap-6 bg-white p-4 lg:p-6">
+    <div className="flex flex-col lg:gap-4 gap-6 bg-white p-4 lg:p-6">
       <h4 className="font-gill text-xl font-normal leading-110 text-darkblack lg:font-larken lg:text-2xl lg:font-light">
         {content.bookingDetailsTitle}
       </h4>
@@ -234,7 +234,7 @@ export function ProfileAppointmentCard({
       : String(appointment.notes ?? "").trim();
 
   return (
-    <ProfileCard className="relative flex flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+    <ProfileCard className="relative flex flex-col p-4 gap-6 lg:p-6">
       <span
         className="absolute left-0 top-0 bg-mauve300 px-3 py-2 font-gill text-base font-normal leading-110 whitespace-nowrap text-darkblack"
       >
@@ -278,7 +278,7 @@ export function ProfileAppointmentCard({
         <ProfileAppointmentNote title={content.notesLabel} note={notesText} />
       ) : null}
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center">
           <DetailDarkButton
             type="button"
