@@ -4,7 +4,6 @@
  */
 export const bespokeUiDefaults = {
   pastCreationsTitle: "Past Creations",
-  secondaryCtaLabel: "See Past Creations",
   modalCtaLabel: "Save as Inspiration",
   modalCtaHref: "/wishlist",
   visionPlaceholder: "I am looking to get a necklace with a pear shaped diamond pendant",
