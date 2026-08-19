@@ -9,6 +9,7 @@ import { isSectionActive } from "@/shared/utils/cmsSection";
 import { resolveResponsiveCmsImage } from "@/shared/utils/responsiveCmsImage";
 import Reveal from "@/shared/Animation/Reveal";
 import { useMutedVideoPlayback } from "@/shared/hooks/useMutedVideoPlayback";
+import { cn } from "@/shared/utils/cn";
 import type { CategoryNavigationImage, GiftingBanner } from "@/types/homepage/categoryNavigation";
 
 interface ForYourValentineSectionProps {
@@ -16,10 +17,15 @@ interface ForYourValentineSectionProps {
 }
 
 const ctaFocusClass =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2";
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
 
-const backgroundMediaWrapperClass =
+const ctaFocusLightClass = `${ctaFocusClass} focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2`;
+const ctaFocusDarkClass = `${ctaFocusClass} focus-visible:ring-white focus-visible:ring-offset-0`;
+
+const backgroundImageWrapperClass =
   "pointer-events-none absolute inset-0 size-full sm:!h-[157%] sm:top-[-300px] top-12 opacity-80";
+
+const backgroundVideoWrapperClass = "pointer-events-none absolute inset-0 z-0 size-full";
 
 function resolveGiftingCutoutMedia(giftingData: GiftingBanner | null) {
   return (giftingData?.cutoutImage ??
@@ -73,10 +79,12 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
   );
 
   const backgroundVideoUrl = giftingData?.backgroundVideoUrl?.trim() || undefined;
+  const hasBackgroundVideo = Boolean(backgroundVideoUrl);
   const hasBackgroundImage = Boolean(backgroundImages.desktopUrl || backgroundImages.mobileUrl);
-  // Image wins when both are set; video only when image is empty.
-  const showBackgroundVideo = Boolean(backgroundVideoUrl) && !hasBackgroundImage;
+  const showBackgroundVideo = hasBackgroundVideo;
+  const showBackgroundImage = hasBackgroundImage && !hasBackgroundVideo;
   const hasCutoutImage = Boolean(cutoutImages.desktopUrl || cutoutImages.mobileUrl);
+  const showCutoutImage = hasCutoutImage && !hasBackgroundVideo;
   const cutoutAlt =
     cutoutImages.alt ||
     (giftingData?.cutoutImage as { altText?: string } | undefined)?.altText?.trim() ||
@@ -147,21 +155,22 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
     return null;
   }
 
-  if (!sectionTitle && !description && !hasCutoutImage && !hasCtaRow) {
+  if (!sectionTitle && !description && !showCutoutImage && !hasCtaRow && !showBackgroundVideo) {
     return null;
   }
 
   const sectionBackgroundColor = giftingData.backgroundColor?.trim();
+  const isVideoMode = showBackgroundVideo;
 
   return (
     <section
       id={id}
       aria-label={sectionTitle || "Gifting"}
-      className="relative w-full overflow-hidden"
+      className={cn("relative w-full overflow-hidden", isVideoMode && "md:min-h-[750px]")}
       style={sectionBackgroundColor ? { backgroundColor: sectionBackgroundColor } : undefined}
     >
-      {hasBackgroundImage ? (
-        <div aria-hidden className={backgroundMediaWrapperClass}>
+      {showBackgroundImage ? (
+        <div aria-hidden className={backgroundImageWrapperClass}>
           <ResponsiveImage
             desktopSrc={backgroundImages.desktopUrl || backgroundImages.mobileUrl || ""}
             mobileSrc={backgroundImages.mobileUrl}
@@ -173,24 +182,31 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
           />
         </div>
       ) : showBackgroundVideo && backgroundVideoUrl ? (
-        <div aria-hidden className={backgroundMediaWrapperClass}>
-          <video
-            ref={videoRef}
-            className="size-full object-cover object-center"
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload={shouldLoadVideo ? "metadata" : "none"}
-            tabIndex={-1}
-          >
-            {shouldLoadVideo ? (
-              <source src={backgroundVideoUrl} type={videoMimeType} />
-            ) : null}
-          </video>
-        </div>
+        <>
+          <div aria-hidden className={backgroundVideoWrapperClass}>
+            <video
+              ref={videoRef}
+              className="size-full object-cover object-center"
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload={shouldLoadVideo ? "metadata" : "none"}
+              tabIndex={-1}
+            >
+              {shouldLoadVideo ? (
+                <source src={backgroundVideoUrl} type={videoMimeType} />
+              ) : null}
+            </video>
+          </div>
+          <div className="pointer-events-none absolute inset-0 z-[1] bg-black/40" aria-hidden />
+        </>
       ) : null}
-      <div className="flex flex-col items-center py-12 md:flex-row md:min-h-[750px] md:py-16 lg:items-center lg:justify-between lg:gap-8 lg:px-10 md:px-8 px-4 lg:py-100">
+      <div
+        className={cn(
+          "relative z-10 flex flex-col items-center py-12 md:flex-row md:min-h-[750px] md:py-16 lg:items-center lg:justify-between lg:gap-8 lg:px-10 md:px-8 px-4 lg:py-100",
+        )}
+      >
         <div className="order-2 flex w-full shrink-0 flex-col md:gap-10 gap-6 md:order-1 md:max-w-[437px] sm:max-w-[500px] max-w-full">
           {(sectionTitle || description) && (
             <div className="md:space-y-4 space-y-3">
@@ -198,7 +214,10 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
                 <Reveal
                   as="h2"
                   direction="up"
-                  className="md:text-left text-center font-larken lg:text-5xl md:text-4xl sm:text-3xl text-32 font-light leading-110 text-darkblack"
+                  className={cn(
+                    "md:text-left text-center font-larken lg:text-5xl md:text-4xl sm:text-3xl text-32 font-light leading-110",
+                    isVideoMode ? "text-white" : "text-darkblack",
+                  )}
                 >
                   {sectionTitle}
                 </Reveal>
@@ -207,7 +226,10 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
                 <Reveal
                   as="p"
                   direction="up"
-                  className="md:text-left text-center font-gill lg:text-xl md:text-lg text-base font-light leading-110 text-neutral500"
+                  className={cn(
+                    "md:text-left text-center font-gill lg:text-xl md:text-lg text-base font-light leading-110",
+                    isVideoMode ? "text-white/85" : "text-neutral500",
+                  )}
                 >
                   {description}
                 </Reveal>
@@ -224,7 +246,10 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
               {hasPrimaryCta && primaryCtaUrl && primaryCtaLabel ? (
                 <Link
                   href={primaryCtaUrl}
-                  className={`inline-flex h-14 items-center justify-center bg-white px-8 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-90 ${ctaFocusClass}`}
+                  className={cn(
+                    "inline-flex h-14 items-center justify-center bg-white px-8 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-90",
+                    ctaFocusLightClass,
+                  )}
                 >
                   {primaryCtaLabel}
                 </Link>
@@ -232,7 +257,18 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
               {hasSecondaryCta && secondaryCtaUrl && secondaryCtaLabel ? (
                 <Link
                   href={secondaryCtaUrl}
-                  className={`relative cursor-pointer border-b-[1.5px] border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-darkMagenta after:transition-all after:duration-300 hover:border-darkMagenta hover:text-darkMagenta hover:after:w-full ${ctaFocusClass}`}
+                  className={cn(
+                    "relative cursor-pointer border-b-[1.5px] pb-1 font-gill text-sm font-normal uppercase leading-110 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:transition-all after:duration-300 hover:after:w-full",
+                    isVideoMode
+                      ? cn(
+                          "border-white text-white after:bg-white hover:border-white hover:text-white/80",
+                          ctaFocusDarkClass,
+                        )
+                      : cn(
+                          "border-darkblack text-darkblack after:bg-darkMagenta hover:border-darkMagenta hover:text-darkMagenta",
+                          ctaFocusLightClass,
+                        ),
+                  )}
                 >
                   {secondaryCtaLabel}
                 </Link>
@@ -240,7 +276,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
             </Reveal>
           ) : null}
         </div>
-        {hasCutoutImage ? (
+        {showCutoutImage ? (
           <ScrollReveal
             delayMs={180}
             className="relative order-1 m-auto h-[336px] w-full max-w-[305px] flex-1 md:order-2 md:h-[600px] md:max-w-[746px]"
