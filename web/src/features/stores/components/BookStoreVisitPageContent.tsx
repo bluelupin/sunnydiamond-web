@@ -11,9 +11,13 @@ import type { NormalizedStoreLocatorPage } from "@/services/store-locator/store-
 
 type BookStoreVisitPageContentProps = {
   page?: NormalizedStoreLocatorPage | null;
+  isShowroomsLoading?: boolean;
 };
 
-const BookStoreVisitPageContent = ({ page }: BookStoreVisitPageContentProps) => {
+const BookStoreVisitPageContent = ({
+  page,
+  isShowroomsLoading = false,
+}: BookStoreVisitPageContentProps) => {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedState, setSelectedState] = useState<string | null>(null);
@@ -46,6 +50,7 @@ const BookStoreVisitPageContent = ({ page }: BookStoreVisitPageContentProps) => 
         storeSearchQuery={searchQuery}
         storeStateFilter={selectedState}
         initialStores={initialStores}
+        isShowroomsLoading={isShowroomsLoading}
         getDirectionsLabel={page?.getDirectionsLabel}
         noResultsMessage={page?.noResultsMessage}
       />
