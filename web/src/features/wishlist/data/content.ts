@@ -117,8 +117,12 @@ export const wishlistPageContent = {
   listViewLabel: "List view",
   movedToWishlistMessage: "Item moved to Wishlist",
   removedFromWishlistMessage: "Item removed from wishlist",
+  removedFromWishlistUndoLabel: "UNDO",
   movedToWishlistViewLabel: "VIEW",
   movedToWishlistHref: "/profile?section=wishlist",
 } as const;
 
 export const wishlistMovedToastDurationMs = 4000;
+
+/** Longer window so users can undo a wishlist removal. */
+export const wishlistRemovedToastDurationMs = 8000;

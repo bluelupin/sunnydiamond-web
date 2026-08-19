@@ -370,6 +370,8 @@ export const profileTabsContent = {
       unavailableTitle: "Appointment updates",
       unavailableDescription:
         "Rescheduling and cancellation will be available soon. Please contact support for assistance.",
+      unavailableToastMessage:
+        "Rescheduling and cancellation will be available soon. Please contact support for assistance.",
     },
     emptyTitle: "No Appointments Yet",
     emptyDescription: "You haven't booked any appointments yet.",

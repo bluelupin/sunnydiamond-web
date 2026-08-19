@@ -13,10 +13,14 @@ import {
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useLoginModal } from "@/features/auth/context/LoginModalContext";
-import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
+import AppStatusToast from "@/shared/ui/AppStatusToast";
 import WishlistMovedToast from "@/features/wishlist/components/WishlistMovedToast";
 import { WISHLIST_STORAGE_KEY } from "@/features/wishlist/constants";
-import { wishlistMovedToastDurationMs, wishlistPageContent } from "@/features/wishlist/data/content";
+import {
+  wishlistMovedToastDurationMs,
+  wishlistPageContent,
+  wishlistRemovedToastDurationMs,
+} from "@/features/wishlist/data/content";
 import {
   addCustomerWishlistSku,
   getCustomerWishlist,
@@ -46,6 +50,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   const [isMovedToastOpen, setIsMovedToastOpen] = useState(false);
   const movedToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isRemovedToastOpen, setIsRemovedToastOpen] = useState(false);
+  const [removedSkuForUndo, setRemovedSkuForUndo] = useState<string | null>(null);
   const removedToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   wishlistedIdsRef.current = wishlistedIds;
@@ -73,16 +78,54 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       removedToastTimeoutRef.current = null;
     }
     setIsRemovedToastOpen(false);
+    setRemovedSkuForUndo(null);
   }, []);
 
-  const showRemovedToast = useCallback(() => {
+  const showRemovedToast = useCallback(
+    (sku: string) => {
+      dismissRemovedToast();
+      setRemovedSkuForUndo(sku);
+      setIsRemovedToastOpen(true);
+      removedToastTimeoutRef.current = setTimeout(() => {
+        setIsRemovedToastOpen(false);
+        setRemovedSkuForUndo(null);
+        removedToastTimeoutRef.current = null;
+      }, wishlistRemovedToastDurationMs);
+    },
+    [dismissRemovedToast],
+  );
+
+  const undoRemovedFromWishlist = useCallback(() => {
+    const sku = removedSkuForUndo?.trim();
+    if (!sku) {
+      return;
+    }
+
     dismissRemovedToast();
-    setIsRemovedToastOpen(true);
-    removedToastTimeoutRef.current = setTimeout(() => {
-      setIsRemovedToastOpen(false);
-      removedToastTimeoutRef.current = null;
-    }, appStatusToastDurationMs);
-  }, [dismissRemovedToast]);
+
+    const undoGeneration = ++toggleGenerationRef.current;
+    lastLocalMutationAtRef.current = Date.now();
+
+    setWishlistedIds((current) => (current.includes(sku) ? current : [...current, sku]));
+
+    void (async () => {
+      try {
+        const wishlist = await addCustomerWishlistSku(sku);
+
+        if (undoGeneration !== toggleGenerationRef.current) {
+          return;
+        }
+
+        setWishlistedIds(wishlist.skus);
+      } catch {
+        if (undoGeneration !== toggleGenerationRef.current) {
+          return;
+        }
+
+        setWishlistedIds((current) => current.filter((id) => id !== sku));
+      }
+    })();
+  }, [dismissRemovedToast, removedSkuForUndo]);
 
   useEffect(() => {
     return () => {
@@ -186,7 +229,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         showMovedToast();
       } else {
         dismissMovedToast();
-        showRemovedToast();
+        showRemovedToast(normalizedSku);
       }
 
       void (async () => {
@@ -243,6 +286,17 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       <AppStatusToast
         open={isRemovedToastOpen}
         message={wishlistPageContent.removedFromWishlistMessage}
+        action={
+          removedSkuForUndo ? (
+            <button
+              type="button"
+              onClick={undoRemovedFromWishlist}
+              className="shrink-0 border-b border-white pb-1 font-gill text-sm font-normal leading-110 text-white"
+            >
+              {wishlistPageContent.removedFromWishlistUndoLabel}
+            </button>
+          ) : undefined
+        }
       />
     </WishlistContext.Provider>
   );

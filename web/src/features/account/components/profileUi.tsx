@@ -259,16 +259,16 @@ export function ProfileFilterChips<T extends string>({
   className,
 }: {
   options: { key: T; label: string; mobileLabel?: string }[];
-  activeKey: T;
+  activeKey: T | null;
   onChange: (key: T) => void;
   scrollOnMobile?: boolean;
   className?: string;
 }) {
   const wrapperClass = scrollOnMobile
     ? cn(
-        "-mx-4 flex gap-2 overflow-x-auto px-4 lg:mx-0 lg:flex-nowrap lg:justify-end lg:overflow-visible lg:px-0 horizontalScrollbar",
-        className,
-      )
+      "-mx-4 flex gap-2 overflow-x-auto px-4 lg:mx-0 lg:flex-nowrap lg:justify-end lg:overflow-visible lg:px-0 horizontalScrollbar",
+      className,
+    )
     : cn("flex flex-wrap gap-2", className);
 
   return (
@@ -318,7 +318,7 @@ export function ProfileInfoNote({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex w-full items-center gap-2 font-gill text-base font-light leading-110 text-darkblack">
       <InformationIcon className="size-6 shrink-0 text-darkblack" />
-      <p className="min-w-0 flex-1">{children}</p>
+      <p className="min-w-0 flex-1 text-darkblack font-light">{children}</p>
     </div>
   );
 }
