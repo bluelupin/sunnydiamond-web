@@ -10,7 +10,7 @@ import {
 
 /**
  * Custom Strapi controller already deep-populates hero, vision, featured,
- * past creations, service highlights, get-in-touch, form, and SEO.
+ * service highlights, get-in-touch, form, and SEO.
  */
 export const getContactBespokePage = cache(
   async (signal?: AbortSignal): Promise<NormalizedContactBespokePage> => {
