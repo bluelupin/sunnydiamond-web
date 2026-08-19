@@ -62,10 +62,7 @@ export function resolveCmsMediaUrls(image: unknown): string[] {
 }
 
 /**
- * Resolve CMS alt text from either:
- * - responsive image component fields (`altText` / `caption`)
- * - media library file fields (`alternativeText`)
- * - nested desktop/mobile media
+ * Resolve CMS alt text. Media-library text wins over component fallbacks.
  */
 export function resolveCmsAltText(image: unknown): string | undefined {
   if (image == null) return undefined;
@@ -82,31 +79,27 @@ export function resolveCmsAltText(image: unknown): string | undefined {
 
   const record = image as Record<string, unknown>;
 
-  const componentAlt =
-    cleanAlt(record.altText) ??
-    cleanAlt(record.iconAltText) ??
-    cleanAlt(record.alt) ??
-    cleanAlt(record.caption);
-  if (componentAlt) return componentAlt;
+  const payload = extractStrapiImage(image);
+  if (payload && typeof payload === "object") {
+    const file = payload as {
+      alternativeText?: string | null;
+      alternateText?: string | null;
+    };
+    const fileAlt = cleanAlt(file.alternativeText) ?? cleanAlt(file.alternateText);
+    if (fileAlt) return fileAlt;
+  }
 
   const nestedAlt =
     resolveCmsAltText(record.desktopImage) ??
     resolveCmsAltText(record.mobileImage);
   if (nestedAlt) return nestedAlt;
 
-  const payload = extractStrapiImage(image);
-  if (payload && typeof payload === "object") {
-    const file = payload as {
-      alternativeText?: string | null;
-      altText?: string | null;
-      caption?: string | null;
-    };
-    const fileAlt =
-      cleanAlt(file.alternativeText) ??
-      cleanAlt(file.altText) ??
-      cleanAlt(file.caption);
-    if (fileAlt) return fileAlt;
-  }
+  const componentAlt =
+    cleanAlt(record.altText) ??
+    cleanAlt(record.iconAltText) ??
+    cleanAlt(record.alt) ??
+    cleanAlt(record.caption);
+  if (componentAlt) return componentAlt;
 
   return undefined;
 }

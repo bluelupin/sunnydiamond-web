@@ -1,7 +1,6 @@
 "use client";
 
 import { useParallax } from "@/shared/hooks/use-parallax";
-import ScrollReveal from "@/shared/ui/ScrollReveal";
 import diamondSourcingBg from "@/assets/section3-bg.webp";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import { useMemo } from "react";
@@ -32,9 +31,9 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
 
   const imageAlt = useMemo(
     () =>
-      diamondSourcedDataSection?.image?.altText ||
       resolveCmsAltText(diamondSourcedDataSection?.image?.desktopImage ?? diamondSourcedDataSection?.image?.data?.attributes ?? diamondSourcedDataSection?.image) ||
       resolveCmsAltText(diamondSourcedDataSection?.image?.mobileImage ?? diamondSourcedDataSection?.image?.data?.attributes ?? diamondSourcedDataSection?.image) ||
+      diamondSourcedDataSection?.image?.altText ||
       diamondSourcedDataSection?.sectionTitle ||
       "",
     [diamondSourcedDataSection]

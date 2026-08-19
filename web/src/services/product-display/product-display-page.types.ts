@@ -4,9 +4,13 @@ export type StrapiProductDisplayResponsiveImage = {
   caption?: string | null;
   desktopImage?: {
     url?: string | null;
+    alternativeText?: string | null;
+    alternateText?: string | null;
   } | null;
   mobileImage?: {
     url?: string | null;
+    alternativeText?: string | null;
+    alternateText?: string | null;
   } | null;
 };
 

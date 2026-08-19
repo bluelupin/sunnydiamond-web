@@ -77,9 +77,9 @@ export function resolveHeroContent(
     undefined;
 
   const heroAlt =
-    heroImage?.altText ||
     resolveCmsAltText(heroImage?.desktopImage ?? heroImage) ||
     resolveCmsAltText(heroImage?.mobileImage ?? heroImage?.desktopImage) ||
+    heroImage?.altText ||
     "";
 
   return {

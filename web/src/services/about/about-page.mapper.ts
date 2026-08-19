@@ -78,12 +78,12 @@ const mapResponsiveImage = (
   const resolvedMobile = mobileUrl ?? desktopUrl!;
 
   const alt =
-    cleanText(media.altText) ??
-    cleanText(media.caption) ??
     resolveCmsAltText(media.desktopImage) ??
     resolveCmsAltText(media.mobileImage) ??
     cleanText(desktopFile?.alternativeText) ??
     cleanText(mobileFile?.alternativeText) ??
+    cleanText(media.altText) ??
+    cleanText(media.caption) ??
     "";
 
   return {
@@ -348,11 +348,11 @@ const mapTrustBadge = (
   if (!label || !icon) return null;
 
   return {
-    label,
-    icon: {
-      ...icon,
-      alt: cleanText(badge.iconAltText) || icon.alt || "",
-    },
+      label,
+      icon: {
+        ...icon,
+        alt: icon.alt || cleanText(badge.iconAltText) || "",
+      },
   };
 };
 

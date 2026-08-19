@@ -94,11 +94,11 @@ const mapResponsiveImageUrls = (image?: StrapiEducationResponsiveImage | null) =
     desktopUrl: desktopUrl ?? "",
     mobileUrl: mobileUrl ?? "",
     alt:
-      cleanText(image?.altText) ??
-      cleanText(image?.caption) ??
       resolveCmsAltText(image?.desktopImage) ??
       resolveCmsAltText(image?.mobileImage) ??
       resolveCmsAltText(image) ??
+      cleanText(image?.altText) ??
+      cleanText(image?.caption) ??
       "",
     hasImage: Boolean(desktopUrl || mobileUrl),
   };
