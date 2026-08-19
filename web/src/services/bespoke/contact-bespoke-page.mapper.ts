@@ -217,8 +217,7 @@ const mapFeaturedStories = (
   const title = cleanText(section.title);
   const primaryCtaLabel = cleanText(section.cta?.label) ?? "";
   const primaryCtaHref = cleanText(section.cta?.url) ?? "/featured-stories";
-  const secondaryCtaLabel =
-    cleanText(section.secondaryCta?.label) ?? bespokeUiDefaults.secondaryCtaLabel;
+  const secondaryCtaLabel = cleanText(section.secondaryCta?.label) ?? "";
   const backgroundImage = mapResponsiveImage(section.backgroundImage);
 
   const slides = (section.cards ?? [])
