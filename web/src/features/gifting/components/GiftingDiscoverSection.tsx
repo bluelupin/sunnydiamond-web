@@ -115,7 +115,7 @@ const GiftingDiscoverSection = ({
       {imageSrc &&
         <Reveal
           direction="up"
-          className="relative h-[320px] w-full shrink-0 md:h-[521px] xl:w-[732px] md:w-3/5 md:block hidden"
+          className="relative h-[320px] w-full shrink-0 md:h-[521px] xl:w-[732px] lg:w-3/5 md:w-1/2 md:block hidden"
         >
           <Image
             src={imageSrc}
@@ -127,7 +127,7 @@ const GiftingDiscoverSection = ({
         </Reveal>
       }
 
-      <div className="flex w-full xl:max-w-[530px] md:max-w-2/5 flex-col gap-6 px-4 md:gap-10 md:px-0">
+      <div className="flex w-full xl:max-w-[530px] lg:max-w-2/5 w-1/2 flex-col gap-6 px-4 md:gap-10 md:px-0">
         <div className="flex flex-col gap-6 lg:gap-10 gap-8">
           <div className="flex flex-col gap-3 md:gap-4">
             <Reveal

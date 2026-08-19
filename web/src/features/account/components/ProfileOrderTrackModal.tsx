@@ -267,7 +267,7 @@ export function ProfileOrderTrackModal({
           <div className="shrink-0 px-4 pt-6">
             <div className="flex flex-col gap-6">
               <div className="flex items-center justify-between gap-4">
-                <SheetTitle className="font-larken text-2xl font-light leading-110 text-darkblack">
+                <SheetTitle className="font-larken lg:text-32 text-2xl font-light leading-110 text-darkblack">
                   {trackDialog.title}
                 </SheetTitle>
                 <button
@@ -300,7 +300,7 @@ export function ProfileOrderTrackModal({
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between gap-4">
             <DialogTitle className="font-larken font-light leading-110 text-darkblack">
-              <span className="text-32">{trackDialog.title}</span>
+              <span className="lg:text-32 text-2xl">{trackDialog.title}</span>
             </DialogTitle>
             <button
               type="button"

@@ -6,6 +6,7 @@ import { ContactSupportIcon } from "@/features/contact/components/ContactSupport
 import { fetchSupportPage } from "@/services/support/support-page.fetch";
 import type { NormalizedSupportContactOption } from "@/services/support/support-page.types";
 import { cn } from "@/shared/utils/cn";
+import { ProfileSupportListingSkeleton } from "./ProfileSupportListingSkeleton";
 
 const outlineCtaClassName =
   "btn-border-slide inline-flex h-14 shrink-0 items-center justify-center border border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack hover:text-white";
@@ -29,13 +30,17 @@ const ProfileSupportSection = () => {
     return () => controller.abort();
   }, []);
 
-  if (!hasLoaded || options.length === 0) {
+  if (!hasLoaded) {
+    return <ProfileSupportListingSkeleton />;
+  }
+
+  if (options.length === 0) {
     return null;
   }
 
   return (
     <div className="flex flex-col gap-10">
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 lg:grid-cols-1 md:grid-cols-2">
         {options.map((option) => {
           const isPhone = Boolean(option.phoneHref);
           const valueHref = option.phoneHref ?? option.emailHref;
@@ -46,14 +51,14 @@ const ProfileSupportSection = () => {
               key={option.id}
               className="flex flex-col items-center justify-between gap-6 bg-gray300 p-6 text-center"
             >
-              <div className="flex w-full flex-col items-center gap-6">
-                <h3 className="font-larken text-2xl font-light leading-110 text-darkblack">
+              <div className="flex w-full flex-col items-center md:gap-6 gap-4">
+                <h3 className="font-larken md:text-2xl text-xl font-light leading-110 text-darkblack">
                   {option.title}
                 </h3>
 
                 <div className="flex w-full flex-col items-center gap-4">
                   {option.hours.length > 0 ? (
-                    <div className="flex flex-col items-center gap-3 text-base leading-110 text-darkblack">
+                    <div className="flex flex-col items-center gap-4 text-base leading-110 text-darkblack">
                       {option.hours.map((entry) => (
                         <div
                           key={`${option.id}-${entry.label}-${entry.value}`}

@@ -77,7 +77,7 @@ const ProfilePage = () => {
                 align={activeSection === "wishlist" ? "center" : "left"}
               />
             ) : null}
-            <div className="lg:grid lg:grid-cols-[437px_minmax(0,1fr)] lg:gap-6">
+            <div className="lg:grid xl:grid-cols-[437px_minmax(0,1fr)] lg:grid-cols-[400px_minmax(0,1fr)] lg:gap-6">
               <aside className="hidden lg:block">
                 <ProfileSidebar
                   activeSection={activeSection}

@@ -14,7 +14,7 @@ export function ProfileMobileSectionHeader({
   return (
     <h1
       className={cn(
-        "mb-6 font-larken text-32 font-light leading-110 text-darkblack lg:hidden",
+        "mb-6 font-larken !text-32 font-light leading-110 text-darkblack lg:hidden",
         align === "center" ? "text-center" : "text-left",
       )}
     >

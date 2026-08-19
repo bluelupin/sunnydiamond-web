@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { fetchSupportPage } from "@/services/support/support-page.fetch";
 import { ProfileAccordion } from "./profileUi";
+import { ProfileSupportFaqSkeleton } from "./ProfileSupportFaqSkeleton";
 
 const ProfileSupportFaqSection = () => {
   const [title, setTitle] = useState<string>("");
@@ -25,14 +26,18 @@ const ProfileSupportFaqSection = () => {
     return () => controller.abort();
   }, []);
 
-  if (!hasLoaded || items.length === 0) {
+  if (!hasLoaded) {
+    return <ProfileSupportFaqSkeleton />;
+  }
+
+  if (items.length === 0) {
     return null;
   }
 
   return (
     <section
       aria-labelledby="profile-support-faq"
-      className="bg-white px-4 py-16 md:px-10 lg:py-104"
+      className="bg-white px-4 py-16 md:px-10 lg:py-100"
     >
       <div className="mx-auto flex w-full max-w-[910px] flex-col gap-8 lg:items-center lg:gap-10">
         {title ? (
