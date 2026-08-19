@@ -7,6 +7,8 @@ export type CraftsmanshipStep = {
   description?: string;
   sortOrder?: number;
   isActive?: boolean;
+  iconUrl?: string;
+  iconAlt?: string;
 };
 
 export type CraftsmanshipStepsSection = {
