@@ -293,7 +293,7 @@ export const profileTabsContent = {
     defaultAddressUndoLabel: "UNDO",
     markAsDefaultErrorTitle: "Unable to update default address",
     deleteDialog: {
-      title: "Delete Address",
+      title: "Delete Address?",
       description:
         "Deleting this address will permanently remove it from your account. This action cannot be reversed.",
       cancelLabel: "CANCEL",

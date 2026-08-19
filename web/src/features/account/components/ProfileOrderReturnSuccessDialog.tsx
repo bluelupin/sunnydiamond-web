@@ -63,7 +63,7 @@ export function ProfileOrderReturnSuccessDialog({
           </span>
 
           <div className="flex w-full flex-col gap-4">
-            <DialogTitle className="font-larken text-32 font-light leading-110 text-darkblack">
+            <DialogTitle className="font-larken lg:text-32 text-2xl font-light leading-110 text-darkblack">
               {dialog.title}
             </DialogTitle>
             <p className="font-gill text-base font-light leading-110 text-neutral500">

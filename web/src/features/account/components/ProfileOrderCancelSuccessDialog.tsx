@@ -108,7 +108,7 @@ export function ProfileOrderCancelSuccessDialog({
         >
           <div className="px-4 pt-6">
             <div className="relative flex items-center justify-between gap-4">
-              <SheetTitle className="font-larken text-2xl font-light leading-110 text-darkblack">
+              <SheetTitle className="font-larken lg:text-32 text-2xl font-light leading-110 text-darkblack">
                 {dialog.title}
               </SheetTitle>
               <button
@@ -161,7 +161,7 @@ export function ProfileOrderCancelSuccessDialog({
           </span>
 
           <div className="flex w-full flex-col gap-4">
-            <DialogTitle className="font-larken text-32 font-light leading-110 text-darkblack">
+            <DialogTitle className="font-larken lg:text-32 text-2xl font-light leading-110 text-darkblack">
               {dialog.title}
             </DialogTitle>
             <ProfileOrderCancelSuccessDialogBody {...bodyProps} />

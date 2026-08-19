@@ -447,7 +447,7 @@ export function ProfileAccordion({
                 aria-hidden={!isOpen}
               >
                 <div className="overflow-hidden">
-                  <p className="pt-4 font-gill text-sm font-light leading-110 text-neutral500 lg:text-base lg:text-xl">
+                  <p className="md:pb-4 md:pt-0 pt-4 font-gill text-sm font-light leading-110 text-neutral500 lg:text-base lg:text-xl">
                     {item.answer}
                   </p>
                 </div>
