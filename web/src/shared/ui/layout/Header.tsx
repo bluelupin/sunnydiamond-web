@@ -201,7 +201,7 @@ const Header = () => {
                 if (isJewellery) {
                   return (
                     <div
-                      key={link.label}
+                      key={link.id ?? link.label}
                       className="inline-flex items-center"
                       onMouseEnter={canHoverNav ? openJewelleryMenu : undefined}
                       onMouseLeave={canHoverNav ? scheduleCloseJewelleryMenu : undefined}
@@ -220,7 +220,7 @@ const Header = () => {
                 }
                 return (
                   <Link
-                    key={link.label}
+                    key={link.id ?? link.label}
                     href={resolveHeaderNavHref(link.label, link.url)}
                     className={navLinkClass()}
                   >
@@ -228,12 +228,14 @@ const Header = () => {
                   </Link>
                 );
               })}
-              <Link
-                href={resolveHeaderNavHref(appointmentLink.label, appointmentLink.url)}
-                className={navLinkClass()}
-              >
-                {appointmentLink.label}
-              </Link>
+              {appointmentLink ? (
+                <Link
+                  href={resolveHeaderNavHref(appointmentLink.label, appointmentLink.url)}
+                  className={navLinkClass()}
+                >
+                  {appointmentLink.label}
+                </Link>
+              ) : null}
             </nav>
           </div>
           <div className="pointer-events-none absolute inset-x-0 flex justify-center md:landscape:hidden">
