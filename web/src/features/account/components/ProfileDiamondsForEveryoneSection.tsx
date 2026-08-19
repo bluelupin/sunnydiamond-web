@@ -11,6 +11,7 @@ import { formatCustomerFullName } from "@/shared/utils/customerName";
 import { MOCK_PROFILE_DFE_PLAN } from "../data/profileDfeMockData";
 import { profileTabsContent } from "../data/profileContent";
 import type { ProfileDfePaymentDueUi, ProfileDfePlanUi } from "../types/profileDfe.types";
+import { ProfileDiamondsForEveryoneSkeleton } from "./ProfileDiamondsForEveryoneSkeleton";
 import { ProfileDfeReadOnlyField, ProfileDfeSectionCard } from "./profileUi";
 import { ProfileDfeInvestmentSummary } from "./ProfileDfeInvestmentSummary";
 
@@ -49,16 +50,16 @@ function ProfileDfePaymentDueBanner({
   const content = profileTabsContent.diamondsForEveryone;
 
   return (
-    <div className="flex flex-col gap-3 bg-yellow100 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex min-w-0 items-center gap-2">
-        <AlertTriangleIcon className="size-6 shrink-0 text-darkblack" />
+    <div className="bg-yellow100 md:px-6 px-4 py-4 flex gap-2 flex-nowrap">
+      <AlertTriangleIcon className="size-6 shrink-0 text-darkblack" />
+      <div className="flex min-w-0 items-center justify-between gap-3 w-full flex-wrap">
         <p className="font-gill text-base font-normal leading-110 text-darkblack">
           Payment for the month of {paymentDue.monthLabel} due in {paymentDue.daysUntilDue} days
         </p>
+        <DetailTextLink onClick={onPayNow} className="shrink-0 self-start text-sm uppercase sm:self-center">
+          {content.payNowLabel}
+        </DetailTextLink>
       </div>
-      <DetailTextLink onClick={onPayNow} className="shrink-0 self-start text-sm uppercase sm:self-center">
-        {content.payNowLabel}
-      </DetailTextLink>
     </div>
   );
 }
@@ -79,80 +80,80 @@ function ProfileDfePlanView({
   const content = profileTabsContent.diamondsForEveryone;
 
   return (
-    <div className="flex flex-col gap-6">
-      {plan.paymentDue ? (
+    <div className="flex flex-col lg:gap-10 gap-6">
+      {plan.paymentDue &&
         <ProfileDfePaymentDueBanner paymentDue={plan.paymentDue} onPayNow={onPayNow} />
-      ) : null}
-
-      <h1 className="font-larken text-32 font-light leading-110 text-darkblack">
-        {content.pageTitle}
-      </h1>
-
-      <ProfileDfeSectionCard title={content.accountHolderTitle}>
-        <div className="flex flex-col gap-6">
-          <ProfileDfeReadOnlyField
-            label={content.fullNameLabel}
-            value={accountFullName}
-            mutedLabel
-          />
-          <ProfileDfeReadOnlyField label={content.phoneLabel} value={accountPhone} />
-          <ProfileDfeReadOnlyField label={content.emailLabel} value={accountEmail} />
-        </div>
-      </ProfileDfeSectionCard>
-
-      <ProfileDfeSectionCard title={content.investmentDetailsTitle}>
-        <div className="flex flex-col gap-4">
-          <div
-            className="flex h-[50px] w-full items-center gap-2 border border-black px-3 py-2 text-darkblack"
-          >
-            <span className="font-gill text-lg font-light tracking-[0.18px]">₹</span>
-            <span className="font-gill text-base font-normal">
-              {formatInrAmount(plan.monthlyAmount)}
-            </span>
+      }
+      <div className="flex flex-col gap-6">
+        <h1 className="font-larken text-32 font-light leading-110 text-darkblack">
+          {content.pageTitle}
+        </h1>
+        <ProfileDfeSectionCard title={content.accountHolderTitle}>
+          <div className="flex flex-col gap-6">
+            <ProfileDfeReadOnlyField
+              label={content.fullNameLabel}
+              value={accountFullName}
+              mutedLabel
+            />
+            <ProfileDfeReadOnlyField label={content.phoneLabel} value={accountPhone} />
+            <ProfileDfeReadOnlyField label={content.emailLabel} value={accountEmail} />
           </div>
+        </ProfileDfeSectionCard>
 
-          <p className="font-gill text-base font-normal leading-110 text-[#2B2B2B]">
-            {content.summaryTitle}
-          </p>
+        <ProfileDfeSectionCard title={content.investmentDetailsTitle}>
+          <div className="flex flex-col gap-4">
+            <div
+              className="flex h-[50px] w-full items-center gap-2 border border-black px-3 py-2 text-darkblack"
+            >
+              <span className="font-gill text-lg font-light tracking-[0.18px]">₹</span>
+              <span className="font-gill text-base font-normal">
+                {formatInrAmount(plan.monthlyAmount)}
+              </span>
+            </div>
 
-          <ProfileDfeInvestmentSummary
-            contributionLabel={content.contributionLabel}
-            contributionAmount={plan.contribution}
-            freeInstallmentLabel={content.freeInstallmentLabel}
-            freeInstallmentAmount={plan.freeInstallmentAmount}
-            totalValueLabel={content.totalValueLabel}
-            totalValue={plan.totalValue}
-          />
-        </div>
-      </ProfileDfeSectionCard>
+            <p className="font-gill text-base font-normal leading-110 text-[#2B2B2B]">
+              {content.summaryTitle}
+            </p>
 
-      <ProfileDfeSectionCard title={content.idProofTitle}>
-        <div className="flex flex-col gap-6">
-          <ProfileDfeReadOnlyField label={content.idTypeLabel} value={plan.idType} />
-          <ProfileDfeReadOnlyField
-            label={content.idNumberLabel}
-            value={maskIdNumber(plan.idNumber)}
-          />
-          <ProfileDfeAttachmentLink fileName={plan.idFileName} />
-        </div>
-      </ProfileDfeSectionCard>
+            <ProfileDfeInvestmentSummary
+              contributionLabel={content.contributionLabel}
+              contributionAmount={plan.contribution}
+              freeInstallmentLabel={content.freeInstallmentLabel}
+              freeInstallmentAmount={plan.freeInstallmentAmount}
+              totalValueLabel={content.totalValueLabel}
+              totalValue={plan.totalValue}
+            />
+          </div>
+        </ProfileDfeSectionCard>
 
-      <ProfileDfeSectionCard title={content.nomineeDetailsTitle}>
-        <div className="flex flex-col gap-6">
-          <ProfileDfeReadOnlyField
-            label={content.nomineeNameLabel}
-            value={plan.nominee.fullName}
-            mutedLabel
-          />
-          <ProfileDfeReadOnlyField
-            label={content.nomineeRelationshipLabel}
-            value={plan.nominee.relationship}
-            mutedLabel
-          />
-          <ProfileDfeReadOnlyField label={content.nomineePhoneLabel} value={plan.nominee.phone} />
-          <ProfileDfeReadOnlyField label={content.nomineeEmailLabel} value={plan.nominee.email} />
-        </div>
-      </ProfileDfeSectionCard>
+        <ProfileDfeSectionCard title={content.idProofTitle}>
+          <div className="flex flex-col gap-6">
+            <ProfileDfeReadOnlyField label={content.idTypeLabel} value={plan.idType} />
+            <ProfileDfeReadOnlyField
+              label={content.idNumberLabel}
+              value={maskIdNumber(plan.idNumber)}
+            />
+            <ProfileDfeAttachmentLink fileName={plan.idFileName} />
+          </div>
+        </ProfileDfeSectionCard>
+
+        <ProfileDfeSectionCard title={content.nomineeDetailsTitle}>
+          <div className="flex flex-col gap-6">
+            <ProfileDfeReadOnlyField
+              label={content.nomineeNameLabel}
+              value={plan.nominee.fullName}
+              mutedLabel
+            />
+            <ProfileDfeReadOnlyField
+              label={content.nomineeRelationshipLabel}
+              value={plan.nominee.relationship}
+              mutedLabel
+            />
+            <ProfileDfeReadOnlyField label={content.nomineePhoneLabel} value={plan.nominee.phone} />
+            <ProfileDfeReadOnlyField label={content.nomineeEmailLabel} value={plan.nominee.email} />
+          </div>
+        </ProfileDfeSectionCard>
+      </div>
     </div>
   );
 }
@@ -210,9 +211,7 @@ const ProfileDiamondsForEveryoneSection = ({ customer }: ProfileDiamondsForEvery
   const plan: ProfileDfePlanUi | null = MOCK_PROFILE_DFE_PLAN;
 
   if (isLoading) {
-    return (
-      <div className="h-96 animate-pulse bg-gray300" aria-busy="true" aria-label="Loading plan" />
-    );
+    return <ProfileDiamondsForEveryoneSkeleton />;
   }
 
   if (!plan) {
