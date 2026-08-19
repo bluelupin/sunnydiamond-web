@@ -1,6 +1,5 @@
 "use client";
 
-import { PencilLine, Gem, Hammer, PackageCheck, type LucideIcon } from "lucide-react";
 import Image from "next/image";
 import { useStepScroll } from "@/shared/hooks/use-step-scroll";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
@@ -12,6 +11,7 @@ import {
   craftsmanshipProcessFigmaSpec,
   craftsmanshipRadialGradientStyle,
 } from "@/features/cms/data/craftsmanshipProcessFigmaSpec";
+import { cn } from "@/shared/utils/cn";
 import { useMemo } from "react";
 
 interface CraftsmanshipProcessProps {
@@ -123,7 +123,31 @@ function CraftsmanshipBackground({
   );
 }
 
-const stepIcons: LucideIcon[] = [PencilLine, Gem, Hammer, PackageCheck];
+function CraftsmanshipStepIcon({
+  iconUrl,
+  iconAlt,
+  isActiveStep,
+}: {
+  iconUrl?: string;
+  iconAlt?: string;
+  isActiveStep: boolean;
+}) {
+  if (!iconUrl) return null;
+
+  return (
+    <Image
+      src={iconUrl}
+      alt={iconAlt || ""}
+      width={28}
+      height={28}
+      className={cn(
+        "shrink-0 object-contain transition-all duration-500",
+        isActiveStep ? "md:h-7 md:w-7 h-5 w-5" : "h-6 w-6",
+      )}
+      aria-hidden={!iconAlt}
+    />
+  );
+}
 
 const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
   const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
@@ -218,7 +242,6 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
               {/* Active + next upcoming step (faded) */}
               <ol className="space-y-10 lg:space-y-16 relative md:max-lg:portrait:space-y-8">
                 {steps.map((step, i) => {
-                  const Icon = stepIcons[i] ?? PencilLine;
                   const isActiveStep = i === activeIndex;
                   const isNext = i === activeIndex + 1;
                   const isVisible = isActiveStep || isNext;
@@ -242,13 +265,10 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
                       aria-current={isActiveStep ? "step" : undefined}
                       aria-hidden={!isVisible}
                     >
-                      <Icon
-                        className={`transition-all duration-500 ${isActiveStep
-                          ? "text-foreground md:h-7 md:w-7 h-5 w-5"
-                          : "text-foreground h-6 w-6"
-                          }`}
-                        strokeWidth={1.25}
-                        aria-hidden
+                      <CraftsmanshipStepIcon
+                        iconUrl={step.iconUrl}
+                        iconAlt={step.iconAlt}
+                        isActiveStep={isActiveStep}
                       />
                       <h3 className="text-base sm:text-xl md:text-2xl lg:text-32 font-normal tracking-[0%] leading-[100%] text-darkblack font-gill lg:text-left text-center">
                         {step.title || ""}

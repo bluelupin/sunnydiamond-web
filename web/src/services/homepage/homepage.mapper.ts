@@ -20,6 +20,7 @@ import type { FeaturedProductsSection } from "@/types/homepage/featuredProducts"
 import type { OccasionCard, OccasionSection } from "@/types/homepage/occasionSection";
 import { slugifyOccasionTitle } from "@/features/jewellery-product/utils/occasionListing";
 import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { resolveResponsiveCmsImage } from "@/shared/utils/responsiveCmsImage";
 import type { TrustBadge } from "@/types/homepage/trustBadges";
 import type { HomepageSeo } from "@/types/homepage/seo";
 import type {
@@ -424,14 +425,23 @@ function mapCraftsmanshipSteps(rawSteps?: StrapiCraftsmanshipStep[] | null): Cra
 
   return rawSteps
     .filter((step) => step?.isActive !== false)
-    .map((step, index) => ({
-      id: step.id,
-      title: cleanText(step.title),
-      description: cleanText(step.description),
-      sortOrder: typeof step.sortOrder === "number" ? step.sortOrder : undefined,
-      number: String(index + 1).padStart(2, "0"),
-      isActive: step.isActive ?? true,
-    }));
+    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+    .map((step, index) => {
+      const icon = resolveResponsiveCmsImage(
+        (step.icon ?? step.image) as CategoryNavigationImage | null | undefined,
+      );
+
+      return {
+        id: step.id,
+        title: cleanText(step.title),
+        description: cleanText(step.description),
+        sortOrder: typeof step.sortOrder === "number" ? step.sortOrder : undefined,
+        number: String(index + 1).padStart(2, "0"),
+        isActive: step.isActive ?? true,
+        iconUrl: icon.desktopUrl || icon.mobileUrl,
+        iconAlt: icon.alt || undefined,
+      };
+    });
 }
 
 function mapCraftsmanshipSection(
