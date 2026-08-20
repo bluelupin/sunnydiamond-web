@@ -80,7 +80,11 @@ export const validateOptionalEmail = (value: string): FieldValidation => {
     return { valid: true };
   }
 
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+  if (
+    !/^[A-Za-z0-9]+(?:[._%+-][A-Za-z0-9]+)*@[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*(?:\.[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*)+$/.test(
+      trimmed,
+    )
+  ) {
     return { valid: false, error: "Enter a valid email address" };
   }
 

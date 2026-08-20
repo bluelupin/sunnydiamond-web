@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { normalizePhoneForMagento } from "@/lib/auth/magentoPhone";
+import { validateOptionalEmail } from "@/shared/utils/formValidation";
 import { magentoGraphqlFetch } from "@/services/magento/graphqlClient";
 import { MagentoGraphqlError } from "@/services/magento/magento.errors";
 import { MAGENTO_VERIFY_LOGIN_OTP_MUTATION } from "@/services/auth/auth.gql";
@@ -37,6 +38,9 @@ export async function POST(request: NextRequest) {
       { error: "A phone number or email address is required" },
       { status: 400 },
     );
+  }
+  if (email && !validateOptionalEmail(email).valid) {
+    return NextResponse.json({ error: "Enter a valid email address" }, { status: 400 });
   }
 
   // With a phone present the email is the new account's address; without one the
