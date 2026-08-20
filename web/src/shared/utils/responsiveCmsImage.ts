@@ -51,11 +51,11 @@ export function resolveResponsiveCmsImage(media: ResponsiveMedia) {
     desktopUrl: resolveCmsMediaUrl(desktopImage),
     mobileUrl: resolveCmsMediaUrl(mobileImage),
     alt:
-      blockAlt ||
-      caption ||
-      resolveCmsAltText(record) ||
       resolveCmsAltText(desktopImage) ||
       resolveCmsAltText(mobileImage) ||
+      resolveCmsAltText(record) ||
+      blockAlt ||
+      caption ||
       "",
   };
 }

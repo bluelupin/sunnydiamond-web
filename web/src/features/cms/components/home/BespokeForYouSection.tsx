@@ -64,12 +64,13 @@ const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
 
   const imageAlt = useMemo(
     () =>
-      sectionData.image?.altText ||
       resolveCmsAltText(
         sectionData.image?.desktopImage ??
         sectionData.image?.data?.attributes ??
         sectionData.image,
       ) ||
+      resolveCmsAltText(sectionData.image?.mobileImage) ||
+      sectionData.image?.altText ||
       sectionTitle,
     [sectionData.image, sectionTitle],
   );

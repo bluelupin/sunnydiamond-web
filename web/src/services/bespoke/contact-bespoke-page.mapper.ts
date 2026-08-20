@@ -67,12 +67,12 @@ const mapResponsiveImage = (
     desktopUrl: desktopUrl ?? mobileUrl!,
     mobileUrl: mobileUrl ?? desktopUrl!,
     alt:
-      cleanText(media?.altText) ??
-      cleanText(media?.caption) ??
       resolveCmsAltText(media?.desktopImage) ??
       resolveCmsAltText(media?.mobileImage) ??
       cleanText(desktopFile?.alternativeText) ??
       cleanText(mobileFile?.alternativeText) ??
+      cleanText(media?.altText) ??
+      cleanText(media?.caption) ??
       fallback?.alt ??
       "",
   };
@@ -143,8 +143,9 @@ const mapStory = (section?: StrapiBespokeVisionSection | null): NormalizedBespok
         image: {
           src: cmsImage,
           alt:
-            cleanText(card.image?.altText) ??
             resolveCmsAltText(card.media) ??
+            resolveCmsAltText(card.image) ??
+            cleanText(card.image?.altText) ??
             stepTitle,
         },
       };
@@ -349,14 +350,14 @@ const mapGuaranteeIcon = (
       resolveCmsMediaUrl(responsive.mobileImage) ??
       null;
     cmsAlt =
+      resolveCmsAltText(responsive.desktopImage) ??
+      resolveCmsAltText(responsive.mobileImage) ??
       highlightAlt ??
       cleanText(responsive.altText) ??
-      cleanText(responsive.caption) ??
-      resolveCmsAltText(responsive.desktopImage) ??
-      resolveCmsAltText(responsive.mobileImage);
+      cleanText(responsive.caption);
   } else {
     cmsUrl = resolveCmsMediaUrl(icon) ?? null;
-    cmsAlt = highlightAlt ?? resolveCmsAltText(icon);
+    cmsAlt = resolveCmsAltText(icon) ?? highlightAlt;
   }
 
   const src = resolveGuaranteeIconSrc(highlight.label, cmsUrl);

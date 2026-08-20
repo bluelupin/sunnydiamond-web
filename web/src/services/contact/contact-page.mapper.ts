@@ -1,4 +1,4 @@
-import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import { contactPageContent } from "@/features/contact/data/content";
 import {
   VISIT_US_FALLBACK,
@@ -105,10 +105,10 @@ const mapImageAsset = (
   const desktopUrl = resolveCmsMediaUrl(image?.desktopImage);
   const mobileUrl = resolveCmsMediaUrl(image?.mobileImage);
   const alt =
+    resolveCmsAltText(image?.desktopImage) ??
+    resolveCmsAltText(image?.mobileImage) ??
     cleanText(image?.altText) ??
-    cleanText(image?.caption) ??
-    cleanText(image?.desktopImage?.alternativeText) ??
-    cleanText(image?.mobileImage?.alternativeText);
+    cleanText(image?.caption);
 
   return { desktopUrl, mobileUrl, alt };
 };

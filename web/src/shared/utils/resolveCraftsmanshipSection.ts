@@ -55,9 +55,9 @@ export function resolveCraftsmanshipSection(
     "";
 
   const imageAlt =
-    section?.image?.altText ||
     resolveCmsAltText(desktopSource) ||
     resolveCmsAltText(mobileSource) ||
+    section?.image?.altText ||
     sectionTitle;
 
   const backgroundMedia = section?.backgroundImage;
@@ -68,10 +68,10 @@ export function resolveCraftsmanshipSection(
   const backgroundDesktopUrl = resolveCmsMediaUrl(backgroundDesktopSource);
   const backgroundMobileUrl = resolveCmsMediaUrl(backgroundMobileSource);
   const backgroundAlt =
-    backgroundMedia?.altText?.trim() ||
-    resolveCmsAltText(backgroundMedia) ||
     resolveCmsAltText(backgroundDesktopSource) ||
     resolveCmsAltText(backgroundMobileSource) ||
+    resolveCmsAltText(backgroundMedia) ||
+    backgroundMedia?.altText?.trim() ||
     "";
 
   return {

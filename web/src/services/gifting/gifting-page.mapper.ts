@@ -1,5 +1,5 @@
 import { buildOccasionCardHref } from "@/features/jewellery-product/utils/occasionListing";
-import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import {
   EMPTY_GIFTING_PAGE,
   type NormalizedGiftingCta,
@@ -52,9 +52,9 @@ const mapResponsiveImage = (
     desktopUrl: desktopUrl ?? mobileUrl ?? "",
     mobileUrl: mobileUrl ?? desktopUrl ?? "",
     alt:
+      resolveCmsAltText(image?.desktopImage) ??
+      resolveCmsAltText(image?.mobileImage) ??
       cleanText(image?.altText) ??
-      cleanText(image?.desktopImage?.alternativeText) ??
-      cleanText(image?.mobileImage?.alternativeText) ??
       "",
   };
 };
@@ -249,10 +249,10 @@ const mapTrustBadges = (
       const icon = mapResponsiveImage(badge?.icon);
       if (!label || !icon) return null;
       return {
-        label,
-        iconSrc: icon.desktopUrl || icon.mobileUrl,
-        alt: cleanText(badge?.iconAltText) || icon.alt || "",
-      };
+          label,
+          iconSrc: icon.desktopUrl || icon.mobileUrl,
+          alt: icon.alt || cleanText(badge?.iconAltText) || "",
+        };
     })
     .filter((badge): badge is NormalizedGiftingTrustBadge => badge != null);
 
