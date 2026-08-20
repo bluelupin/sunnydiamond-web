@@ -8,16 +8,13 @@ import {
 } from "lucide-react";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import { resolveBookStoreVisitStores } from "@/features/products/utils/bookStoreVisitStores";
-import {
-  storeLocatorFoundCopy,
-  storeLocatorNearbySuggestionsCopy,
-  storeLocatorStatusEyebrowClassName,
-} from "@/features/stores/data/storeLocatorContent";
+import { storeLocatorSearchMatchMessage, storeLocatorStatusEyebrowClassName } from "@/features/stores/data/storeLocatorContent";
 import {
   filterBookStoreVisitStores,
   getStoreLocatorPincodeSearchError,
   shouldSuggestNearbyStores,
 } from "@/features/stores/utils/storeLocatorFilters";
+import type { NormalizedStoreLocatorListCopy } from "@/services/store-locator/store-locator-page.types";
 import { BookStoreVisitLocationDetails } from "./BookStoreVisitLocationDetails";
 import {
   mapBookStoreVisitStoreToLayoutItem,
@@ -67,6 +64,8 @@ type BookStoreVisitPanelProps = {
   isShowroomsLoading?: boolean;
   getDirectionsLabel?: string | null;
   noResultsMessage?: string | null;
+  invalidPincodeMessage?: string | null;
+  listCopy?: NormalizedStoreLocatorListCopy | null;
   /**
    * PDP Visit Us only. When set (e.g. `product-store-visit`), submit via
    * product-submissions so the booking appears under My Appointments.
@@ -90,6 +89,8 @@ const BookStoreVisitPanel = ({
   isShowroomsLoading = false,
   getDirectionsLabel,
   noResultsMessage,
+  invalidPincodeMessage,
+  listCopy,
   submissionFormTag,
   productName,
   productId,
@@ -186,7 +187,7 @@ const BookStoreVisitPanel = ({
       const filtered = filterBookStoreVisitStores(stores, storeSearchQuery, storeStateFilter);
       const allStores = filterBookStoreVisitStores(stores, "", null);
 
-      if (getStoreLocatorPincodeSearchError(storeSearchQuery)) {
+      if (getStoreLocatorPincodeSearchError(storeSearchQuery, invalidPincodeMessage)) {
         return {
           displayStores: filterBookStoreVisitStores(stores, "", storeStateFilter),
           listStatus: "default" as StoreLocatorListStatus,
@@ -549,6 +550,7 @@ const BookStoreVisitPanel = ({
         showBack={showStoreSelectionBack}
         getDirectionsLabel={getDirectionsLabel}
         noResultsMessage={noResultsMessage}
+        listCopy={listCopy}
         listStatus={listStatus}
         isShowroomsLoading={isShowroomsLoading || isResolvingStores}
       />
@@ -672,39 +674,45 @@ type StoreSelectionStepProps = {
   showBack?: boolean;
   getDirectionsLabel?: string | null;
   noResultsMessage?: string | null;
+  listCopy?: NormalizedStoreLocatorListCopy | null;
   listStatus?: StoreLocatorListStatus;
   isShowroomsLoading?: boolean;
 };
 
-function StoreLocatorListStatusHeader({ status }: { status: StoreLocatorListStatus }) {
+function StoreLocatorListStatusHeader({
+  status,
+  listCopy,
+}: {
+  status: StoreLocatorListStatus;
+  listCopy?: NormalizedStoreLocatorListCopy | null;
+}) {
   if (status === "no-area") {
+    if (!listCopy?.noAreaTitle && !listCopy?.noAreaSubtitle) return null;
+
     return (
       <div className="flex flex-col gap-2 pt-6 lg:pt-0">
-        <p className="font-gill text-base font-normal uppercase leading-110 text-darkblack">
-          {storeLocatorNearbySuggestionsCopy.title}
-        </p>
-        <p className="font-gill text-base font-normal leading-110 text-darkblack">
-          {storeLocatorNearbySuggestionsCopy.subtitle}
-        </p>
+        {listCopy.noAreaTitle ? (
+          <p className="font-gill text-base font-normal uppercase leading-110 text-darkblack">
+            {listCopy.noAreaTitle}
+          </p>
+        ) : null}
+        {listCopy.noAreaSubtitle ? (
+          <p className="font-gill text-base font-normal leading-110 text-darkblack">
+            {listCopy.noAreaSubtitle}
+          </p>
+        ) : null}
       </div>
     );
   }
 
-  const title = status === "search-match" && storeLocatorFoundCopy.search;
+  if (status !== "search-match") return null;
 
-  const isFoundState = status === "search-match";
+  const storeFoundMessage =
+    listCopy?.storeFoundMessage?.trim() || storeLocatorSearchMatchMessage;
 
   return (
     <div className="flex flex-col gap-4 pt-6 lg:pt-0">
-      <p
-        className={
-          isFoundState
-            ? storeLocatorStatusEyebrowClassName
-            : "font-gill text-sm font-normal leading-110 text-neutral500 lg:text-base"
-        }
-      >
-        {title}
-      </p>
+      <p className={storeLocatorStatusEyebrowClassName}>{storeFoundMessage}</p>
     </div>
   );
 }
@@ -730,13 +738,14 @@ const StoreSelectionStep = ({
   showBack = false,
   getDirectionsLabel,
   noResultsMessage,
+  listCopy,
   listStatus = "default",
   isShowroomsLoading = false,
 }: StoreSelectionStepProps) => {
   if (layout === "page") {
     const listHeader =
       listStatus !== "default" ? (
-        <StoreLocatorListStatusHeader status={listStatus} />
+        <StoreLocatorListStatusHeader status={listStatus} listCopy={listCopy} />
       ) : null;
 
     return (
@@ -747,10 +756,7 @@ const StoreSelectionStep = ({
         getDirectionsLabel={getDirectionsLabel ?? undefined}
         listHeader={listHeader}
         isLoading={isShowroomsLoading}
-        emptyMessage={
-          noResultsMessage?.trim() ||
-          "No showrooms match your search. Try another location or state."
-        }
+        emptyMessage={noResultsMessage?.trim() || undefined}
       />
     );
   }
@@ -801,9 +807,11 @@ const StoreSelectionStep = ({
             aria-label="Showroom locations"
           >
             {stores.length === 0 ? (
-              <p className="px-4 py-8 font-gill text-base font-light leading-110 text-neutral500 lg:px-10">
-                {noResultsMessage?.trim() || "No showrooms match your search. Try another location or state."}
-              </p>
+              noResultsMessage?.trim() ? (
+                <p className="px-4 py-8 font-gill text-base font-light leading-110 text-neutral500 lg:px-10">
+                  {noResultsMessage.trim()}
+                </p>
+              ) : null
             ) : (
               stores.map((store) => {
                 const isSelected = store.id === selectedStoreId;

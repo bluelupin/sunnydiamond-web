@@ -93,6 +93,10 @@ export type StrapiStoreLocatorPage = {
   locationFilters?: StrapiStoreLocatorLocationFilter[] | null;
   getDirectionsLabel?: string | null;
   noResultsMessage?: string | null;
+  invalidPincodeMessage?: string | null;
+  storeFoundMessage?: string | null;
+  noAreaTitle?: string | null;
+  noAreaSubtitle?: string | null;
   showrooms?: StrapiStoreLocatorShowroom[] | null;
   seo?: StrapiStoreLocatorSeo | null;
   locale?: string | null;
@@ -131,12 +135,20 @@ export type NormalizedStoreLocatorShowroom = {
   address: string;
   city: string | null;
   state: string | null;
-  phone: string;
+  phone: string | null;
   email: string | null;
   mapUrl: string;
   mapEmbed: string | null;
   openingHours: string | null;
-  imageUrl: string;
+  desktopImageUrl: string;
+  mobileImageUrl: string;
+  imageAlt: string;
+};
+
+export type NormalizedStoreLocatorListCopy = {
+  storeFoundMessage?: string;
+  noAreaTitle?: string;
+  noAreaSubtitle?: string;
 };
 
 export type NormalizedStoreLocatorSeo = {
@@ -154,6 +166,8 @@ export type NormalizedStoreLocatorPage = {
   locationFilters: NormalizedStoreLocatorLocationFilter[];
   getDirectionsLabel: string | null;
   noResultsMessage: string | null;
+  invalidPincodeMessage: string | null;
+  listCopy: NormalizedStoreLocatorListCopy | null;
   showrooms: NormalizedStoreLocatorShowroom[];
   seo: NormalizedStoreLocatorSeo | null;
 };
@@ -165,6 +179,8 @@ export const EMPTY_STORE_LOCATOR_PAGE: NormalizedStoreLocatorPage = {
   locationFilters: [],
   getDirectionsLabel: null,
   noResultsMessage: null,
+  invalidPincodeMessage: null,
+  listCopy: null,
   showrooms: [],
   seo: null,
 };

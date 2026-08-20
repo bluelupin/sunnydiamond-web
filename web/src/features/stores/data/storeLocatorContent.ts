@@ -36,28 +36,10 @@ export const storeLocatorSearchMobileFigmaSpec = {
   stateLabelSize: 14,
 } as const;
 
-/** Figma State 1 — default list eyebrow. */
-export const storeLocatorDefaultListCopy = {
-  title: "Explore Our Showrooms",
-} as const;
+/** Figma State 2 — store found after search (used when CMS `storeFoundMessage` is unset). */
+export const storeLocatorSearchMatchMessage = "STORE FOUND FOR YOUR SEARCH";
 
-/** Figma State 2 — store found after search. */
-export const storeLocatorFoundCopy = {
-  search: "STORE FOUND FOR YOUR SEARCH",
-} as const;
-
-/** Figma State 4 — valid area search with no local showroom. */
-export const storeLocatorNearbySuggestionsCopy = {
-  title: "NO SHOWROOM IN THIS AREA YET",
-  subtitle: "Explore the nearest Sunny Diamonds showrooms and plan your visit with ease.",
-} as const;
-
-/** @deprecated Use storeLocatorFoundCopy.search — kept for existing pincode-match imports. */
-export const storeLocatorPincodeMatchCopy = {
-  title: storeLocatorFoundCopy.search,
-  nearbySubtitle: storeLocatorNearbySuggestionsCopy.subtitle,
-} as const;
-
+/** Figma State 2 — store found eyebrow styling. */
 export const storeLocatorStatusEyebrowClassName =
   "font-gill text-sm font-normal uppercase leading-110 text-[#5F6F3E] lg:text-base";
 
@@ -68,14 +50,8 @@ export type StoreLocatorStateFilter = {
   /** CMS icon URL — when set, sprite crop fields are unused. */
   iconUrl?: string | null;
   iconAlt?: string;
-  spriteSrc?: string;
   iconWidth: number;
   iconHeight: number;
   mobileIconWidth?: number;
   mobileIconHeight?: number;
-  imageWidthPct?: number;
-  imageHeightPct?: number;
-  imageLeftPct?: number;
-  imageTopPct?: number;
 };
-

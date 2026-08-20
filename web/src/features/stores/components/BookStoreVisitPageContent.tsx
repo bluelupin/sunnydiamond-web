@@ -28,22 +28,28 @@ const BookStoreVisitPageContent = ({
   );
 
   const pincodeError = useMemo(
-    () => getStoreLocatorPincodeSearchError(searchQuery),
-    [searchQuery],
+    () => getStoreLocatorPincodeSearchError(searchQuery, page?.invalidPincodeMessage),
+    [searchQuery, page?.invalidPincodeMessage],
+  );
+
+  const showSearchSection = Boolean(
+    page?.searchPlaceholder || (page?.locationFilters?.length ?? 0) > 0,
   );
 
   return (
     <>
-      <StoreLocatorHeroSection hero={page?.hero} />
-      <StoreLocatorSearchSection
-        searchQuery={searchQuery}
-        selectedState={selectedState}
-        onSearchQueryChange={setSearchQuery}
-        onSelectedStateChange={setSelectedState}
-        searchPlaceholder={page?.searchPlaceholder}
-        locationFilters={page?.locationFilters}
-        pincodeError={pincodeError}
-      />
+      {page?.hero ? <StoreLocatorHeroSection hero={page.hero} /> : null}
+      {showSearchSection ? (
+        <StoreLocatorSearchSection
+          searchQuery={searchQuery}
+          selectedState={selectedState}
+          onSearchQueryChange={setSearchQuery}
+          onSelectedStateChange={setSelectedState}
+          searchPlaceholder={page?.searchPlaceholder}
+          locationFilters={page?.locationFilters}
+          pincodeError={pincodeError}
+        />
+      ) : null}
       <BookStoreVisitPanel
         variant="page"
         onBack={() => router.back()}
@@ -53,6 +59,8 @@ const BookStoreVisitPageContent = ({
         isShowroomsLoading={isShowroomsLoading}
         getDirectionsLabel={page?.getDirectionsLabel}
         noResultsMessage={page?.noResultsMessage}
+        invalidPincodeMessage={page?.invalidPincodeMessage}
+        listCopy={page?.listCopy}
       />
     </>
   );

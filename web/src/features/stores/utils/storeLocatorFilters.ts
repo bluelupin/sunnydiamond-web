@@ -130,6 +130,7 @@ function isValidIndianPincode(query: string): boolean {
  */
 export function getStoreLocatorPincodeSearchError(
   searchQuery: string,
+  invalidPincodeMessage?: string | null,
 ): string | undefined {
   if (!isStoreLocatorPincodeSearchQuery(searchQuery)) {
     return undefined;
@@ -137,7 +138,7 @@ export function getStoreLocatorPincodeSearchError(
 
   const query = searchQuery.trim();
   if (!isValidIndianPincode(query)) {
-    return "Invalid Pincode";
+    return invalidPincodeMessage?.trim() || undefined;
   }
 
   return undefined;

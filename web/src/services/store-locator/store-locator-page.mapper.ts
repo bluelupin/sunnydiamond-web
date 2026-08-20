@@ -3,6 +3,7 @@ import {
   EMPTY_STORE_LOCATOR_PAGE,
   type NormalizedStoreLocatorCta,
   type NormalizedStoreLocatorHero,
+  type NormalizedStoreLocatorListCopy,
   type NormalizedStoreLocatorLocationFilter,
   type NormalizedStoreLocatorPage,
   type NormalizedStoreLocatorSeo,
@@ -31,6 +32,9 @@ const resolveSectionActive = (
   return true;
 };
 
+const sortByOrder = <T extends { sortOrder?: number | null }>(items: T[]): T[] =>
+  [...items].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+
 const mapCta = (cta?: StrapiStoreLocatorCta | null): NormalizedStoreLocatorCta | null => {
   const label = cleanText(cta?.label);
   const url = cleanText(cta?.url) ?? cleanText(cta?.to);
@@ -43,7 +47,7 @@ const resolveResponsiveUrls = (image?: StrapiStoreLocatorResponsiveImage | null)
     resolveCmsMediaUrl(image?.desktopImage) ?? resolveCmsMediaUrl(image?.mobileImage) ?? null;
   const mobileUrl =
     resolveCmsMediaUrl(image?.mobileImage) ?? resolveCmsMediaUrl(image?.desktopImage) ?? null;
-  const alt = resolveCmsAltText(image?.desktopImage) ?? "";
+  const alt = resolveCmsAltText(image?.desktopImage) ?? resolveCmsAltText(image?.mobileImage) ?? "";
   return { desktopUrl, mobileUrl, alt };
 };
 
@@ -77,11 +81,12 @@ const mapSeo = (seo?: StrapiStoreLocatorSeo | null): NormalizedStoreLocatorSeo |
   if (!metaTitle && !metaDescription) return null;
 
   const ogImageUrl = resolveCmsMediaUrl(seo.ogImage);
+  const canonicalPath = cleanText(seo.canonicalUrl);
 
   return {
-    metaTitle,
-    metaDescription,
-    canonicalPath: cleanText(seo.canonicalUrl) ?? "/store-locator",
+    ...(metaTitle ? { metaTitle } : {}),
+    ...(metaDescription ? { metaDescription } : {}),
+    ...(canonicalPath ? { canonicalPath } : {}),
     metaKeywords: cleanText(seo.metaKeywords),
     ...(ogImageUrl ? { ogImageUrl } : {}),
   };
@@ -96,7 +101,8 @@ const mapHero = (hero?: StrapiStoreLocatorHero | null): NormalizedStoreLocatorHe
     resolveCmsMediaUrl(hero.backgroundVideo?.heroVideo) ??
     null;
   const title = cleanText(hero.title) ?? null;
-  if (!title && !image.desktopUrl && !videoUrl) return null;
+  if (!title) return null;
+  if (!image.desktopUrl && !image.mobileUrl && !videoUrl) return null;
 
   return {
     title,
@@ -143,17 +149,15 @@ const mapShowroom = (
   }
 
   const name = cleanText(showroom.name);
-  if (!name) return null;
+  const address = cleanText(showroom.address);
+  const mapUrl = cleanText(showroom.mapUrl) ?? cleanText(showroom.directionsUrl);
+  const image = resolveResponsiveUrls(showroom.image);
 
-  const image =
-    resolveCmsMediaUrl(showroom.image?.desktopImage) ??
-    resolveCmsMediaUrl(showroom.image?.mobileImage) ??
-    "";
+  if (!name || !address || !mapUrl) return null;
+  if (!image.desktopUrl && !image.mobileUrl) return null;
 
-  const mapUrl =
-    cleanText(showroom.mapUrl) ||
-    cleanText(showroom.directionsUrl) ||
-    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}`;
+  const desktopImageUrl = image.desktopUrl ?? image.mobileUrl!;
+  const mobileImageUrl = image.mobileUrl ?? image.desktopUrl!;
 
   return {
     id:
@@ -163,15 +167,31 @@ const mapShowroom = (
     documentId: cleanText(showroom.documentId),
     name,
     slug: cleanText(showroom.slug) ?? null,
-    address: cleanText(showroom.address) || name,
+    address,
     city: cleanText(showroom.city) ?? null,
     state: cleanText(showroom.state) ?? null,
-    phone: cleanText(showroom.phone) || "",
+    phone: cleanText(showroom.phone) ?? null,
     email: cleanText(showroom.email) ?? null,
     mapUrl,
     mapEmbed: cleanText(showroom.mapEmbed) ?? null,
     openingHours: cleanText(showroom.openingHours) ?? null,
-    imageUrl: image,
+    desktopImageUrl,
+    mobileImageUrl,
+    imageAlt: image.alt,
+  };
+};
+
+const mapListCopy = (raw?: StrapiStoreLocatorPage | null): NormalizedStoreLocatorListCopy | null => {
+  const storeFoundMessage = cleanText(raw?.storeFoundMessage);
+  const noAreaTitle = cleanText(raw?.noAreaTitle);
+  const noAreaSubtitle = cleanText(raw?.noAreaSubtitle);
+
+  if (!storeFoundMessage && !noAreaTitle && !noAreaSubtitle) return null;
+
+  return {
+    ...(storeFoundMessage ? { storeFoundMessage } : {}),
+    ...(noAreaTitle ? { noAreaTitle } : {}),
+    ...(noAreaSubtitle ? { noAreaSubtitle } : {}),
   };
 };
 
@@ -180,11 +200,11 @@ export function mapStoreLocatorPage(
 ): NormalizedStoreLocatorPage {
   if (!raw) return EMPTY_STORE_LOCATOR_PAGE;
 
-  const locationFilters = (raw.locationFilters ?? [])
+  const locationFilters = sortByOrder(raw.locationFilters ?? [])
     .map(mapLocationFilter)
     .filter((item): item is NormalizedStoreLocatorLocationFilter => item != null);
 
-  const showrooms = (raw.showrooms ?? [])
+  const showrooms = sortByOrder(raw.showrooms ?? [])
     .map(mapShowroom)
     .filter((item): item is NormalizedStoreLocatorShowroom => item != null);
 
@@ -195,6 +215,8 @@ export function mapStoreLocatorPage(
     locationFilters,
     getDirectionsLabel: cleanText(raw.getDirectionsLabel) ?? null,
     noResultsMessage: cleanText(raw.noResultsMessage) ?? null,
+    invalidPincodeMessage: cleanText(raw.invalidPincodeMessage) ?? null,
+    listCopy: mapListCopy(raw),
     showrooms,
     seo: mapSeo(raw.seo),
   };

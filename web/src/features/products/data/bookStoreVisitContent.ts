@@ -8,6 +8,8 @@ export type BookStoreVisitStore = {
   phone: string;
   directionsUrl: string;
   heroImage: string;
+  mobileHeroImage?: string;
+  imageAlt?: string;
   city?: string;
   state?: string;
   pincode?: string;

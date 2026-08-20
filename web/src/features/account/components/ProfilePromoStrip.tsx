@@ -10,7 +10,7 @@ export function ProfilePromoStrip() {
   return (
     <section className="bg-gray200 px-4 py-16 lg:py-10">
       <div className="mx-auto flex max-w-1440 flex-col items-center justify-center gap-10 md:px-10 lg:flex-row lg:gap-16 lg:px-10">
-        <div className="flex w-full flex-col items-center gap-6 text-center lg:p-4">
+        <div className="flex w-full max-w-[322px] flex-col items-center gap-6 text-center lg:max-w-[316px] lg:p-4">
           <div className="flex w-full flex-col items-center gap-4">
             <h3 className="font-larken text-xl font-light leading-110 text-darkblack">
               {help.title}

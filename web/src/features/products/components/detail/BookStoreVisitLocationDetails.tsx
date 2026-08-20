@@ -20,7 +20,7 @@ export function BookStoreVisitLocationDetails({
   const textClassName = isPage
     ? "font-gill text-xl font-light leading-110 text-darkblack"
     : "font-gill text-base font-light leading-110 text-darkblack lg:text-xl";
-  const directionsText = directionsLabel?.trim() || "GET DIRECTIONS";
+  const directionsText = directionsLabel?.trim();
 
   return (
     <div className="flex flex-col gap-4">
@@ -50,7 +50,7 @@ export function BookStoreVisitLocationDetails({
           <p className={textClassName}>{store.phone}</p>
         </div>
       ) : null}
-      {store.directionsUrl ? (
+      {directionsText && store.directionsUrl ? (
         <Link
           href={store.directionsUrl}
           target="_blank"

@@ -47,7 +47,7 @@ const StoreLocatorSearchSection = ({
   locationFilters,
   pincodeError,
 }: StoreLocatorSearchSectionProps) => {
-  const placeholder = searchPlaceholder?.trim() || "";
+  const placeholder = searchPlaceholder?.trim() ?? "";
   const stateFilters =
     locationFilters && locationFilters.length > 0
       ? mapCmsFiltersToStateFilters(locationFilters)
@@ -62,7 +62,7 @@ const StoreLocatorSearchSection = ({
       <div className="mx-auto flex w-full max-w-[676px] flex-col gap-6 md:items-center">
         <div className="flex w-full flex-col gap-2">
           <label className="relative block w-full">
-            <span className="sr-only">{placeholder || "Search showrooms"}</span>
+            {placeholder ? <span className="sr-only">{placeholder}</span> : null}
             <div className="flex h-14 w-full items-center gap-2 bg-aboutInactive p-3">
               <SearchIcon className="size-6 shrink-0 text-darkblack" />
               <input
@@ -70,6 +70,7 @@ const StoreLocatorSearchSection = ({
                 value={searchQuery}
                 onChange={(event) => onSearchQueryChange(event.target.value)}
                 placeholder={placeholder}
+                aria-label={placeholder || undefined}
                 aria-invalid={errorMessage ? true : undefined}
                 aria-describedby={errorMessage ? "store-locator-pincode-error" : undefined}
                 className="min-w-0 flex-1 bg-transparent font-gill text-base font-normal leading-110 text-darkblack placeholder:font-normal placeholder:text-gray600 focus:outline-none"
