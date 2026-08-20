@@ -1,28 +1,40 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { constructMetadata } from "@/shared/lib/seo/metadata";
+import { siteConfig } from "@/shared/lib/siteConfig";
 import DiamondsForEveryonePage from "@/features/diamonds-for-everyone/components/DiamondsForEveryonePage";
-import { footerPages } from "@/features/cms/data/footerPages";
-import {
-  EMPTY_DIAMONDS_FOR_EVERYONE_PAGE,
-  getDiamondsForEveryonePage,
-} from "@/services/diamonds-for-everyone/diamonds-for-everyone-page.service";
+import DiamondsForEveryonePageSkeleton from "@/features/diamonds-for-everyone/components/skeletons/DiamondsForEveryonePageSkeleton";
+import { getDiamondsForEveryonePage } from "@/services/diamonds-for-everyone/diamonds-for-everyone-page.service";
 
 export const revalidate = 300;
 
-const fallback = footerPages.diamondsForEveryone;
-
 export async function generateMetadata(): Promise<Metadata> {
-  const page = await getDiamondsForEveryonePage();
-  const seo = page.seo;
+  try {
+    const page = await getDiamondsForEveryonePage();
+    const seo = page.seo;
 
-  return constructMetadata({
-    title: seo?.metaTitle || page.hero?.title || fallback.title,
-    description: seo?.metaDescription || fallback.description,
-    canonicalPath: seo?.canonicalPath || "/diamonds-for-everyone",
-    ...(seo?.metaKeywords ? { keywords: seo.metaKeywords } : {}),
-    ...(seo?.ogImageUrl ? { image: seo.ogImageUrl } : {}),
-  });
+    if (!seo?.metaTitle && !seo?.metaDescription) {
+      return constructMetadata({
+        title: siteConfig.brand.name,
+        description: siteConfig.seo.defaultDescription,
+        canonicalPath: "/diamonds-for-everyone",
+      });
+    }
+
+    return constructMetadata({
+      title: seo.metaTitle ?? siteConfig.brand.name,
+      description: seo.metaDescription ?? siteConfig.seo.defaultDescription,
+      ...(seo.canonicalPath ? { canonicalPath: seo.canonicalPath } : {}),
+      ...(seo.metaKeywords ? { keywords: seo.metaKeywords } : {}),
+      ...(seo.ogImageUrl ? { image: seo.ogImageUrl } : {}),
+    });
+  } catch {
+    return constructMetadata({
+      title: siteConfig.brand.name,
+      description: siteConfig.seo.defaultDescription,
+      canonicalPath: "/diamonds-for-everyone",
+    });
+  }
 }
 
 async function DiamondsForEveryonePageContent() {
@@ -32,7 +44,7 @@ async function DiamondsForEveryonePageContent() {
 
 export default function Page() {
   return (
-    <Suspense fallback={<DiamondsForEveryonePage page={EMPTY_DIAMONDS_FOR_EVERYONE_PAGE} />}>
+    <Suspense fallback={<DiamondsForEveryonePageSkeleton />}>
       <DiamondsForEveryonePageContent />
     </Suspense>
   );

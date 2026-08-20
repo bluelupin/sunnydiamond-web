@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import type { NormalizedDfeEditorialBanner } from "@/services/diamonds-for-everyone/diamonds-for-everyone-page.types";
 
 type DfeLifestyleSectionProps = {
@@ -8,11 +8,16 @@ type DfeLifestyleSectionProps = {
 };
 
 const DfeLifestyleSection = ({ editorialBanner }: DfeLifestyleSectionProps) => {
+  const { image } = editorialBanner;
+
   return (
     <section aria-hidden className="relative h-[320px] w-full overflow-hidden md:h-[550px]">
-      <Image
-        src={editorialBanner.image.desktopUrl}
-        alt={editorialBanner.image.alt}
+      <ResponsiveImage
+        desktopSrc={image.desktopUrl}
+        mobileSrc={image.mobileUrl}
+        alt={image.desktopAlt || image.mobileAlt || ""}
+        desktopAlt={image.desktopAlt}
+        mobileAlt={image.mobileAlt}
         fill
         className="object-cover object-center"
         sizes="100vw"

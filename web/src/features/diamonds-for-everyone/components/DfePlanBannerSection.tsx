@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Reveal from "@/shared/Animation/Reveal";
+import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import type { NormalizedDfePlanIntro } from "@/services/diamonds-for-everyone/diamonds-for-everyone-page.types";
 
 /** Figma 1052:66760 — radial fade from Chalk Beige/200 to Chalk Beige/100 */
@@ -17,15 +17,18 @@ const DfePlanBannerSection = ({ planIntro }: DfePlanBannerSectionProps) => {
     <section aria-labelledby="dfe-plan-banner-title" className="relative w-full overflow-hidden">
       <div className="relative px-4 py-16 md:py-[104px]">
         <div aria-hidden className="pointer-events-none absolute inset-0">
-          {planIntro.image ? (
+          {planIntro.image?.desktopUrl || planIntro.image?.mobileUrl ? (
             <div className="absolute inset-0 overflow-hidden">
-              <Image
-                src={planIntro.image.desktopUrl}
-                alt={planIntro.image.alt}
+              <ResponsiveImage
+                desktopSrc={planIntro.image.desktopUrl}
+                mobileSrc={planIntro.image.mobileUrl}
+                alt={planIntro.image.desktopAlt || planIntro.image.mobileAlt || ""}
+                desktopAlt={planIntro.image.desktopAlt}
+                mobileAlt={planIntro.image.mobileAlt}
                 width={1440}
                 height={750}
                 sizes="100vw"
-                className="absolute left-[-0.03%] top-[-25.8%] h-[218.07%] max-w-none w-full"
+                className="absolute left-[-0.03%] top-[-25.8%] h-[218.07%] max-w-none w-full object-cover"
               />
             </div>
           ) : null}

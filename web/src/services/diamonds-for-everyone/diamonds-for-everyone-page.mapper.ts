@@ -29,7 +29,12 @@ const cleanText = (value?: string | null): string | undefined => {
   return trimmed || undefined;
 };
 
-const resolveSectionActive = (showField?: boolean | null): boolean => {
+/** CMS sections may use `isActive` or `showField`; default visible when unset. */
+const resolveSectionActive = (
+  isActive?: boolean | null,
+  showField?: boolean | null,
+): boolean => {
+  if (typeof isActive === "boolean") return isActive;
   if (typeof showField === "boolean") return showField;
   return true;
 };
@@ -37,28 +42,27 @@ const resolveSectionActive = (showField?: boolean | null): boolean => {
 const mapResponsiveImage = (
   image?: StrapiDfeResponsiveImage | null,
 ): NormalizedDfeResponsiveImage | null => {
-  const desktopUrl =
-    resolveCmsMediaUrl(image?.desktopImage) ?? resolveCmsMediaUrl(image?.mobileImage);
-  const mobileUrl =
-    resolveCmsMediaUrl(image?.mobileImage) ?? resolveCmsMediaUrl(image?.desktopImage);
+  const desktopUrl = resolveCmsMediaUrl(image?.desktopImage) ?? "";
+  const mobileUrl = resolveCmsMediaUrl(image?.mobileImage) ?? "";
   if (!desktopUrl && !mobileUrl) return null;
 
   return {
-    desktopUrl: desktopUrl ?? "",
-    mobileUrl: mobileUrl ?? "",
-    alt: resolveCmsAltText(image?.desktopImage) ?? "",
+    desktopUrl,
+    mobileUrl,
+    desktopAlt: resolveCmsAltText(image?.desktopImage) ?? "",
+    mobileAlt: resolveCmsAltText(image?.mobileImage) ?? "",
   };
 };
 
 const mapCta = (cta?: StrapiDfeCta | null): NormalizedDfeCta | null => {
   const label = cleanText(cta?.label);
-  const url = cleanText(cta?.url) ?? cleanText(cta?.to);
+  const url = cleanText(cta?.url);
   if (!label || !url) return null;
   return { label, url };
 };
 
 const mapSeo = (seo?: StrapiDfeSeo | null): NormalizedDfeSeo | null => {
-  if (!seo || seo.showField === false) return null;
+  if (!seo || !resolveSectionActive(seo.isActive, seo.showField)) return null;
 
   const metaTitle = cleanText(seo.metaTitle);
   const metaDescription = cleanText(seo.metaDescription);
@@ -74,14 +78,14 @@ const mapSeo = (seo?: StrapiDfeSeo | null): NormalizedDfeSeo | null => {
       ? canonical.startsWith("/")
         ? canonical
         : `/${canonical}`
-      : "/diamonds-for-everyone",
+      : "",
     metaKeywords: cleanText(seo.metaKeywords),
     ...(ogImageUrl ? { ogImageUrl } : {}),
   };
 };
 
 const mapHero = (hero?: StrapiDfeHeroSection | null): NormalizedDfeHero | null => {
-  if (!hero || !resolveSectionActive(hero.showField)) return null;
+  if (!hero || !resolveSectionActive(hero.isActive, hero.showField)) return null;
 
   const title = cleanText(hero.title);
   const image = mapResponsiveImage(hero.backgroundImage);
@@ -97,7 +101,7 @@ const mapHero = (hero?: StrapiDfeHeroSection | null): NormalizedDfeHero | null =
 const mapPlanIntro = (
   section?: StrapiDfePlanIntroSection | null,
 ): NormalizedDfePlanIntro | null => {
-  if (!section || !resolveSectionActive(section.showField)) return null;
+  if (!section || !resolveSectionActive(section.isActive, section.showField)) return null;
 
   const title = cleanText(section.title);
   if (!title) return null;
@@ -112,25 +116,23 @@ const mapPlanIntro = (
 const mapInvestmentPlanner = (
   section?: StrapiDfeInvestmentPlannerSection | null,
 ): NormalizedDfeInvestmentPlanner | null => {
-  if (!section || !resolveSectionActive(section.showField)) return null;
+  if (!section || !resolveSectionActive(section.isActive, section.showField)) return null;
 
   const title = cleanText(section.title);
   if (!title) return null;
 
-  const cta = mapCta(section.cta);
-
   return {
     title,
     description: cleanText(section.description),
-    ctaLabel: cta?.label,
-    image: mapResponsiveImage(section.image) ?? mapResponsiveImage(section.backgroundImage),
+    cta: mapCta(section.cta),
+    image: mapResponsiveImage(section.image),
   };
 };
 
 const mapEditorialBanner = (
   section?: StrapiDfeEditorialBannerSection | null,
 ): NormalizedDfeEditorialBanner | null => {
-  if (!section || !resolveSectionActive(section.showField)) return null;
+  if (!section || !resolveSectionActive(section.isActive, section.showField)) return null;
 
   const image = mapResponsiveImage(section.image);
   if (!image) return null;
@@ -151,12 +153,13 @@ const parseStepNumber = (label: string | undefined, index: number): number => {
 const mapBenefits = (
   section?: StrapiDfeBenefitsSection | null,
 ): NormalizedDfeBenefits | null => {
-  if (!section || !resolveSectionActive(section.showField)) return null;
+  if (!section || !resolveSectionActive(section.isActive, section.showField)) return null;
 
   const title = cleanText(section.title);
   if (!title) return null;
 
   const steps: NormalizedDfeBenefitStep[] = (section.steps ?? [])
+    .filter((step) => resolveSectionActive(step?.isActive, step?.showField))
     .map((step, index) => {
       const description = cleanText(step?.description);
       if (!description) return null;
@@ -164,6 +167,9 @@ const mapBenefits = (
         id: step?.id != null ? String(step.id) : `step-${index + 1}`,
         stepNumber: parseStepNumber(cleanText(step?.label), index),
         description,
+        ...(cleanText(step?.highlightedText)
+          ? { highlightedText: cleanText(step.highlightedText) }
+          : {}),
       };
     })
     .filter((step): step is NormalizedDfeBenefitStep => step != null);
@@ -179,10 +185,11 @@ const mapBenefits = (
 };
 
 const mapFaq = (section?: StrapiDfeFaqSection | null): NormalizedDfeFaq | null => {
-  if (!section) return null;
+  if (!section || !resolveSectionActive(section.isActive, section.showField)) return null;
 
   const title = cleanText(section.sectionHeading);
   const items = (section.faqItems ?? [])
+    .filter((item) => resolveSectionActive(item?.isActive, item?.showField))
     .map((item, index) => {
       const question = cleanText(item?.question);
       const answer = cleanText(item?.answer);

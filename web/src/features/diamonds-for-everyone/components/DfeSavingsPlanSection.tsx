@@ -13,45 +13,68 @@ const StepCircle = ({ number }: { number: number }) => (
   </div>
 );
 
+const StepDescription = ({
+  step,
+  className,
+}: {
+  step: NormalizedDfeBenefits["steps"][number];
+  className?: string;
+}) => (
+  <p className={className}>
+    {step.highlightedText ? (
+      <>
+        <span className="font-light">{step.description}</span>
+        <span className="font-normal">{step.highlightedText}</span>
+      </>
+    ) : (
+      <span className="font-light">{step.description}</span>
+    )}
+  </p>
+);
+
 type DfeSavingsPlanSectionProps = {
   benefits: NormalizedDfeBenefits;
 };
 
 const DfeSavingsPlanSection = ({ benefits }: DfeSavingsPlanSectionProps) => {
   const { steps } = benefits;
-  const backgroundSrc =
-    benefits.backgroundImage?.desktopUrl || benefits.backgroundImage?.mobileUrl;
-  const backgroundAlt = benefits.backgroundImage?.alt ?? "";
+  const backgroundImage = benefits.backgroundImage;
+  const desktopBg = backgroundImage?.desktopUrl;
+  const mobileBg = backgroundImage?.mobileUrl;
 
   return (
     <section
       aria-labelledby="dfe-savings-plan-title"
       className="relative overflow-hidden md:bg-gray300 py-16 md:min-h-[550px] md:py-[104px] bg-chalkCard"
     >
-      {backgroundSrc ? (
+      {desktopBg || mobileBg ? (
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute left-1/2 top-1/2 flex h-[651px] w-[max(100vw,1339px)] -translate-x-1/2 -translate-y-1/2 items-center justify-center mix-blend-color-burn md:hidden">
-            <div className="rotate-90">
-              <Image
-                src={benefits.backgroundImage?.mobileUrl || backgroundSrc}
-                alt={backgroundAlt}
-                width={651}
-                height={1339}
-                className="h-[max(100vw,1339px)] w-[651px] object-bottom"
-              />
+          {mobileBg ? (
+            <div className="absolute left-1/2 top-1/2 flex h-[651px] w-[max(100vw,1339px)] -translate-x-1/2 -translate-y-1/2 items-center justify-center mix-blend-color-burn md:hidden">
+              <div className="rotate-90">
+                <Image
+                  src={mobileBg}
+                  alt={backgroundImage?.mobileAlt ?? ""}
+                  width={651}
+                  height={1339}
+                  className="h-[max(100vw,1339px)] w-[651px] object-bottom"
+                />
+              </div>
             </div>
-          </div>
-          <div className="absolute left-1/2 top-1/2 hidden h-[700px] w-[max(100vw,1440px)] -translate-x-1/2 -translate-y-1/2 items-center justify-center mix-blend-color-burn md:flex">
-            <div className="rotate-90">
-              <Image
-                src={backgroundSrc}
-                alt={backgroundAlt}
-                width={700}
-                height={1440}
-                className="h-[max(100vw,1440px)] w-[700px] object-bottom"
-              />
+          ) : null}
+          {desktopBg ? (
+            <div className="absolute left-1/2 top-1/2 hidden h-[700px] w-[max(100vw,1440px)] -translate-x-1/2 -translate-y-1/2 items-center justify-center mix-blend-color-burn md:flex">
+              <div className="rotate-90">
+                <Image
+                  src={desktopBg}
+                  alt={backgroundImage?.desktopAlt ?? ""}
+                  width={700}
+                  height={1440}
+                  className="h-[max(100vw,1440px)] w-[700px] object-bottom"
+                />
+              </div>
             </div>
-          </div>
+          ) : null}
         </div>
       ) : null}
 
@@ -101,9 +124,12 @@ const DfeSavingsPlanSection = ({ benefits }: DfeSavingsPlanSectionProps) => {
                   <ScrollReveal
                     key={step.id}
                     delayMs={280 + index * 80}
-                    className="lg:w-[250px] md:w-auto w-[350px] text-center font-gill lg:text-xl md:text-base text-base font-light leading-110 text-darkblack"
+                    className="lg:w-[250px] md:w-auto w-[350px] text-center"
                   >
-                    {step.description}
+                    <StepDescription
+                      step={step}
+                      className="font-gill lg:text-xl md:text-base text-base font-light leading-110 text-darkblack"
+                    />
                   </ScrollReveal>
                 ))}
               </div>
@@ -117,9 +143,10 @@ const DfeSavingsPlanSection = ({ benefits }: DfeSavingsPlanSectionProps) => {
                   className="flex flex-col items-center gap-4"
                 >
                   <StepCircle number={step.stepNumber} />
-                  <p className="w-[250px] text-center font-gill text-base font-light leading-110 text-darkblack">
-                    {step.description}
-                  </p>
+                  <StepDescription
+                    step={step}
+                    className="w-[250px] text-center font-gill text-base font-light leading-110 text-darkblack"
+                  />
                 </ScrollReveal>
               ))}
             </div>
