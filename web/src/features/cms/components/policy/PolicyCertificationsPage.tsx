@@ -145,7 +145,7 @@ function PolicyDesktopSidebar({
       <div className="flex flex-col gap-6">
         {navGroups.map((group) => (
           <div key={group.id} className="flex w-full flex-col items-start gap-4">
-            <p className="font-gill text-[20px] font-light leading-110 text-darkblack">
+            <p className="font-gill text-xl font-light leading-110 text-darkblack">
               {group.label}
             </p>
             <ul className="flex w-full flex-col items-start">
@@ -160,8 +160,8 @@ function PolicyDesktopSidebar({
                       className={cn(
                         "flex h-[70px] w-full items-center p-6 text-left transition-colors",
                         isActive
-                          ? "border-r-2 border-darkblack bg-gray300 font-gill text-[20px] font-normal leading-110 text-darkblack"
-                          : "font-gill text-[20px] font-light leading-110 text-darkblack hover:bg-gray300/60",
+                          ? "border-r-2 border-darkblack bg-gray300 font-gill text-xl font-normal leading-110 text-darkblack"
+                          : "font-gill text-xl font-light leading-110 text-darkblack hover:bg-gray300/60",
                       )}
                       aria-current={isActive ? "page" : undefined}
                     >
@@ -409,7 +409,7 @@ function PolicyMobileDetailPanel({
   onBack: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-6 pb-16 pt-6">
+    <div className="flex flex-col gap-6 pb-16">
       <div className="flex items-center gap-2">
         <button
           type="button"
@@ -448,7 +448,7 @@ function PolicyContentPanel({
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-6">
-      <h2 className="font-larken text-[32px] font-light leading-110 text-darkblack">
+      <h2 className="font-larken text-32 font-light leading-110 text-darkblack">
         {policy.contentTitle}
       </h2>
       <PolicyAccordions
@@ -478,7 +478,7 @@ function PolicySupportSection({
     >
       <div className="mx-auto flex max-w-[1360px] flex-col items-center justify-center gap-10 lg:flex-row lg:items-center lg:gap-16">
         <div className="flex w-full max-w-[301px] flex-col items-center gap-4 text-center lg:h-[230px] lg:justify-between lg:gap-0 lg:p-4">
-          <h3 className="w-full font-larken text-[20px] font-light leading-110 text-darkblack lg:text-2xl">
+          <h3 className="w-full font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
             {support.callTitle}
           </h3>
           <div className="flex flex-col items-center gap-4 lg:items-start">
@@ -515,7 +515,7 @@ function PolicySupportSection({
 
         <div className="flex w-full max-w-[316px] flex-col items-center gap-4 text-center lg:h-[222px] lg:w-[316px] lg:justify-between lg:gap-0 lg:p-4">
           <div className="flex w-full flex-col items-center gap-4">
-            <h3 className="font-larken text-[20px] font-light leading-110 text-darkblack lg:text-2xl">
+            <h3 className="font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
               {support.emailTitle}
             </h3>
             <div className="flex w-full flex-col items-center gap-4">
@@ -590,7 +590,7 @@ const PolicyCertificationsPage = ({
 
   return (
     <React.Fragment>
-      <section className="mx-auto max-w-[1360px] px-4 md:px-10 md:pt-10 pt-8 md:pb-100 pb-16">
+      <section className="mx-auto 2xl:max-w-1920 max-w-1440 2xl:px-[60px] lg:px-10 md:px-8 px-4 md:pt-10 pt-8 md:pb-100 pb-16">
         <div className="flex flex-col gap-[29px] lg:hidden">
           {mobileShowDetail ? (
             <PolicyMobileDetailPanel

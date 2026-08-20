@@ -47,7 +47,7 @@ const GiftCardSuccessStep = ({ onClose }: GiftCardSuccessStepProps) => {
       <div className="flex min-h-0 flex-1 flex-col items-center gap-6 overflow-y-auto overscroll-contain px-6 pb-6">
         <CartSuccessCheck />
         <div className="flex flex-col items-center gap-4 text-center">
-          <h2 className="font-larken text-[32px] font-light leading-110 text-darkblack">
+          <h2 className="font-larken text-32 font-light leading-110 text-darkblack">
             {success.title}
           </h2>
           <p className="max-w-[360px] font-gill text-base font-light leading-110 text-darkblack">

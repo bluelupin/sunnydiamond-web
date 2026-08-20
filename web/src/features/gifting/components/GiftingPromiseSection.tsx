@@ -38,7 +38,7 @@ const GiftingPromiseSection = ({ finishingTouch }: GiftingPromiseSectionProps) =
         <div className="flex w-full flex-col items-center gap-4 text-center">
           <h2
             id="gifting-finishing-title"
-            className="font-larken text-[32px] font-light leading-110 text-darkblack md:text-5xl"
+            className="font-larken text-32 font-light leading-110 text-darkblack md:text-5xl"
           >
             {finishingTouch.title}
           </h2>

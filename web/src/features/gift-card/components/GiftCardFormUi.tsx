@@ -231,7 +231,7 @@ export const GiftCardPanelHeader = ({ onClose, onBack, title }: GiftCardPanelHea
             <ChevronLeft className="size-6" strokeWidth={1.5} />
           </button>
         ) : null}
-        <h2 className="font-larken text-[32px] font-light leading-110 text-darkblack">{title}</h2>
+        <h2 className="font-larken text-32 font-light leading-110 text-darkblack">{title}</h2>
       </div>
       <button type="button" onClick={onClose} aria-label="Close gift card flow">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
