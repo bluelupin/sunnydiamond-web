@@ -23,7 +23,6 @@ export function HomepageCmsProvider({
   shell,
   editorial,
   shopping,
-  standaloneOccasions,
   alankara,
   children,
 }: HomepageCmsProviderProps) {
@@ -31,12 +30,11 @@ export function HomepageCmsProvider({
 
   if (!seededRef.current) {
     seedHomepageCmsCache(
-      { shell, editorial, shopping, standaloneOccasions },
+      { shell, editorial, shopping },
       {
         shell: homepageQueryKeys.homepageShell,
         editorial: homepageQueryKeys.homePageEditorialBlocks,
         shopping: homepageQueryKeys.homePageShoppingBlocks,
-        occasions: homepageQueryKeys.homePageOccasions,
       },
     );
     seededRef.current = true;
@@ -44,7 +42,7 @@ export function HomepageCmsProvider({
 
   return (
     <HomepageCmsContext.Provider
-      value={{ shell, editorial, shopping, standaloneOccasions, alankara }}
+      value={{ shell, editorial, shopping, alankara }}
     >
       {children}
     </HomepageCmsContext.Provider>

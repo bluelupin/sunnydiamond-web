@@ -3,9 +3,7 @@
 import { useCallback, useRef } from "react";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import OccasionLedCard from "@/shared/ui/OccasionLedCard";
-import { useHomepageCmsPrefetched } from "@/shared/lib/providers/HomepageCmsProvider";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
-import { useHomepageOccasions } from "@/hooks/homepage/useHomepageOccasions";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import { buildOccasionCardHref } from "@/features/jewellery-product/utils/occasionListing";
 import type { OccasionCard } from "@/types/homepage/occasionSection";
@@ -24,15 +22,27 @@ function OccasionCardItem({
   index: number;
   sectionTitle: string;
 }) {
-  const { desktopUrl, mobileUrl, alt } = resolveResponsiveCmsImage(card.image);
+  const { desktopUrl, mobileUrl, alt, desktopAlt, mobileAlt } = resolveResponsiveCmsImage(card.image);
   const href = buildOccasionCardHref({
     title: card.title,
     slug: card.slug,
     filterSlug: card.filterSlug,
     ctaUrl: card?.cta?.url || card?.cta?.to,
   });
-  const ctaLabel = card?.cta?.label?.trim() || "View Collection";
+  const ctaLabel = card?.cta?.label?.trim() || undefined;
   const description = card?.description?.trim() || card?.subtitle?.trim();
+
+  if (!card.title?.trim()) {
+    return null;
+  }
+
+  if (!desktopUrl && !mobileUrl) {
+    return null;
+  }
+
+  if (!href?.trim()) {
+    return null;
+  }
 
   return (
     <OccasionLedCard
@@ -43,6 +53,8 @@ function OccasionCardItem({
       desktopImageUrl={desktopUrl}
       mobileImageUrl={mobileUrl}
       imageAlt={alt || card?.title?.trim()}
+      desktopImageAlt={desktopAlt}
+      mobileImageAlt={mobileAlt}
       index={index}
       sectionTitle={sectionTitle}
     />
@@ -50,25 +62,13 @@ function OccasionCardItem({
 }
 
 const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
-  const homepagePrefetch = useHomepageCmsPrefetched();
   const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
-  const { data: standaloneOccasions, isLoading: isStandaloneLoading } = useHomepageOccasions();
   const occasionSection = editorialData?.occasionSection ?? null;
   const sectionTitle = occasionSection?.sectionTitle?.trim() || undefined;
 
-  const embeddedOccasions = (occasionSection?.occasions ?? []).filter(
+  const occasions = (occasionSection?.occasions ?? []).filter(
     (card) => card?.isActive !== false,
   );
-  const occasions =
-    embeddedOccasions.length > 0
-      ? embeddedOccasions
-      : (standaloneOccasions ?? []).filter((card) => card?.isActive !== false);
-
-  const isLoading =
-    isEditorialLoading ||
-    (embeddedOccasions.length === 0 &&
-      homepagePrefetch?.standaloneOccasions === undefined &&
-      isStandaloneLoading);
 
   const carouselRef = useRef<HTMLDivElement>(null);
 
@@ -99,7 +99,7 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
     return null;
   }
 
-  if (isLoading) {
+  if (isEditorialLoading) {
     return (
       <section
         id={id}
@@ -118,6 +118,23 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
   }
 
   if (!occasions.length) {
+    return null;
+  }
+
+  const visibleOccasions = occasions.filter((card) => {
+    const title = card.title?.trim();
+    const { desktopUrl, mobileUrl } = resolveResponsiveCmsImage(card.image);
+    const href = buildOccasionCardHref({
+      title: card.title,
+      slug: card.slug,
+      filterSlug: card.filterSlug,
+      ctaUrl: card?.cta?.url || card?.cta?.to,
+    });
+
+    return Boolean(title && (desktopUrl || mobileUrl) && href?.trim());
+  });
+
+  if (!visibleOccasions.length) {
     return null;
   }
 
@@ -142,7 +159,7 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
         onKeyDownCapture={handleCarouselKeyDown}
         className="scrollbar-none relative left-1/2 flex w-screen max-w-none -translate-x-1/2 snap-x snap-mandatory gap-3 overflow-x-auto scroll-pl-4 scroll-pr-4 pb-2 md:grid md:grid-cols-2 md:gap-1 md:overflow-visible md:px-0 pl-4 md:pb-0 md:snap-none md:outline-none"
       >
-        {occasions.map((card, index) => (
+        {visibleOccasions.map((card, index) => (
           <ScrollReveal
             key={String(card.id ?? card.slug ?? card.title ?? index)}
             delayMs={80 + index * 80}

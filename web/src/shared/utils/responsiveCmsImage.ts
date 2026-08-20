@@ -23,7 +23,11 @@ export function resolveCategoryNavImages(cat: CategoryNavigationItem) {
     hoverDesktopImageUrl: hover.desktopUrl,
     hoverMobileImageUrl: hover.mobileUrl || hover.desktopUrl,
     imageAlt: product.alt || hover.alt || "",
+    desktopImageAlt: product.desktopAlt,
+    mobileImageAlt: product.mobileAlt,
     hoverAlt: hover.alt || product.alt || "",
+    hoverDesktopAlt: hover.desktopAlt,
+    hoverMobileAlt: hover.mobileAlt,
     hasDistinctHover:
       Boolean(hover.desktopUrl || hover.mobileUrl) &&
       (hover.desktopUrl !== product.desktopUrl || hover.mobileUrl !== product.mobileUrl),
@@ -38,24 +42,14 @@ export function resolveResponsiveCmsImage(media: ResponsiveMedia) {
   const mobileImage =
     (record as CategoryNavigationImage)?.mobileImage ?? desktopImage ?? null;
 
-  const blockAlt =
-    typeof (record as { altText?: unknown } | null | undefined)?.altText === "string"
-      ? (record as { altText?: string }).altText?.trim()
-      : undefined;
-  const caption =
-    typeof (record as { caption?: unknown } | null | undefined)?.caption === "string"
-      ? (record as { caption?: string }).caption?.trim()
-      : undefined;
+  const desktopAlt = resolveCmsAltText(desktopImage) ?? "";
+  const mobileAlt = resolveCmsAltText(mobileImage) ?? "";
 
   return {
     desktopUrl: resolveCmsMediaUrl(desktopImage),
     mobileUrl: resolveCmsMediaUrl(mobileImage),
-    alt:
-      resolveCmsAltText(desktopImage) ||
-      resolveCmsAltText(mobileImage) ||
-      resolveCmsAltText(record) ||
-      blockAlt ||
-      caption ||
-      "",
+    desktopAlt,
+    mobileAlt,
+    alt: desktopAlt || mobileAlt,
   };
 }

@@ -19,7 +19,6 @@ interface CraftsmanshipProcessProps {
 }
 
 /** Figma 684:3024 — silk ripple texture behind the scroll-driven diamond. */
-const CRAFTSMANSHIP_BACKGROUND_FALLBACK = "/images/home/craftsmanship-bg.webp";
 
 function CraftsmanshipSilkLayer({
   variant,
@@ -113,6 +112,11 @@ function CraftsmanshipBackground({
   mobileSrc: string;
   alt: string;
 }) {
+  const hasBackground = Boolean(desktopSrc || mobileSrc);
+  if (!hasBackground) {
+    return null;
+  }
+
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
       <CraftsmanshipSilkLayer variant="mobile" desktopSrc={desktopSrc} mobileSrc={mobileSrc} alt={alt} />
@@ -152,16 +156,14 @@ function CraftsmanshipStepIcon({
 const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
   const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
 
-  const craftsmanship = useMemo(() => {
-    const cmsSection =
-      editorialData?.craftsmanshipSection ||
-      editorialData?.homepage?.craftsmanshipSection;
-    return resolveCraftsmanshipSection(cmsSection);
-  }, [editorialData]);
+  const craftsmanship = useMemo(
+    () => resolveCraftsmanshipSection(editorialData?.craftsmanshipSection),
+    [editorialData?.craftsmanshipSection],
+  );
 
-  const { sectionTitle, steps, desktopImageUrl, mobileImageUrl, imageAlt, backgroundDesktopUrl, backgroundMobileUrl, backgroundAlt } = craftsmanship;
-  const silkDesktopSrc = backgroundDesktopUrl || backgroundMobileUrl || CRAFTSMANSHIP_BACKGROUND_FALLBACK;
-  const silkMobileSrc = backgroundMobileUrl || backgroundDesktopUrl || CRAFTSMANSHIP_BACKGROUND_FALLBACK;
+  const { sectionTitle, steps, desktopImageUrl, mobileImageUrl, imageDesktopAlt, imageMobileAlt, imageAlt, backgroundDesktopUrl, backgroundMobileUrl, backgroundAlt } = craftsmanship;
+  const silkDesktopSrc = backgroundDesktopUrl || backgroundMobileUrl || "";
+  const silkMobileSrc = backgroundMobileUrl || backgroundDesktopUrl || "";
   const silkAlt = backgroundAlt;
   const stepCount = steps.length;
   const hasDiamondImage = Boolean(desktopImageUrl || mobileImageUrl);
@@ -301,6 +303,8 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
                     desktopSrc={resolvedDesktopImage}
                     mobileSrc={resolvedMobileImage}
                     alt={imageAlt}
+                    desktopAlt={imageDesktopAlt}
+                    mobileAlt={imageMobileAlt}
                     width={resolvedDesktopImage ? 550 : 550}
                     height={resolvedMobileImage ? 400 : 400}
                     quality={75}

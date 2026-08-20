@@ -30,6 +30,8 @@ export type AlankaraCollectionProps = {
   description?: string;
   collectionImage: string | StaticImageData;
   collectionImageMobile?: string | StaticImageData;
+  collectionDesktopAlt?: string;
+  collectionMobileAlt?: string;
   collectionCta?: AlankaraCollectionCta;
   products: AlankaraCollectionProduct[];
   /** Initial carousel index (e.g. featuredProductSku). */

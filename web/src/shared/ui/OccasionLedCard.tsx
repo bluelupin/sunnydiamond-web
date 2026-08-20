@@ -2,9 +2,6 @@
 
 import Link from "next/link";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
-import fallBackImage from "@/assets/fallBackImage.png";
-
-const DEFAULT_CTA_LABEL = "View Collection";
 
 export type OccasionLedCardProps = {
   title: string;
@@ -14,6 +11,8 @@ export type OccasionLedCardProps = {
   desktopImageUrl?: string;
   mobileImageUrl?: string;
   imageAlt?: string;
+  desktopImageAlt?: string;
+  mobileImageAlt?: string;
   index?: number;
   sectionTitle?: string;
 };
@@ -22,16 +21,24 @@ export default function OccasionLedCard({
   title,
   description,
   href,
-  ctaLabel = DEFAULT_CTA_LABEL,
+  ctaLabel,
   desktopImageUrl,
   mobileImageUrl,
   imageAlt,
-  index = 0,
-  sectionTitle = "Occasions",
+  desktopImageAlt,
+  mobileImageAlt,
 }: OccasionLedCardProps) {
-  const desktopSrc = desktopImageUrl || fallBackImage;
-  const mobileSrc = mobileImageUrl || desktopImageUrl || fallBackImage;
-  const alt = imageAlt || title || `${sectionTitle} — occasion ${index + 1}`;
+  if (!desktopImageUrl && !mobileImageUrl) {
+    return null;
+  }
+
+  if (!href?.trim()) {
+    return null;
+  }
+
+  const desktopSrc = desktopImageUrl || mobileImageUrl || "";
+  const mobileSrc = mobileImageUrl || desktopImageUrl || desktopSrc;
+  const alt = imageAlt || desktopImageAlt || mobileImageAlt || title;
 
   return (
     <Link
@@ -42,6 +49,8 @@ export default function OccasionLedCard({
         desktopSrc={desktopSrc}
         mobileSrc={mobileSrc}
         alt={alt}
+        desktopAlt={desktopImageAlt}
+        mobileAlt={mobileImageAlt}
         width={desktopImageUrl ? 718 : 328}
         height={desktopImageUrl ? 700 : 400}
         quality={75}
@@ -69,18 +78,22 @@ export default function OccasionLedCard({
               </p>
             ) : null}
           </div>
-          <span className="text-link-underline inline-flex w-fit items-center justify-center border-b-[1.5px] border-white pb-1.5 font-gill text-sm font-normal uppercase tracking-[0.28px] text-white">
-            {ctaLabel}
-          </span>
+          {ctaLabel ? (
+            <span className="text-link-underline inline-flex w-fit items-center justify-center border-b-[1.5px] border-white pb-1.5 font-gill text-sm font-normal uppercase tracking-[0.28px] text-white">
+              {ctaLabel}
+            </span>
+          ) : null}
         </div>
       </div>
 
       <div className="absolute bottom-0 left-10 z-10 hidden max-w-[418px] flex-col-reverse items-start text-white md:flex">
-        <div className="inline-flex max-h-0 w-fit flex-col items-start overflow-hidden pb-0 pt-0 opacity-0 motion-safe:transition-[max-height,padding,opacity] motion-safe:duration-500 motion-safe:ease-out group-hover:max-h-[72px] group-hover:pb-16 group-hover:opacity-100 group-focus-visible:max-h-[72px] group-focus-visible:pb-16 group-focus-visible:opacity-100">
-          <div className="relative cursor-pointer border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all after:duration-300 hover:border-white hover:text-white hover:after:w-full sm:pb-1">
-            {ctaLabel}
+        {ctaLabel ? (
+          <div className="inline-flex max-h-0 w-fit flex-col items-start overflow-hidden pb-0 pt-0 opacity-0 motion-safe:transition-[max-height,padding,opacity] motion-safe:duration-500 motion-safe:ease-out group-hover:max-h-[72px] group-hover:pb-16 group-hover:opacity-100 group-focus-visible:max-h-[72px] group-focus-visible:pb-16 group-focus-visible:opacity-100">
+            <div className="relative cursor-pointer border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all after:duration-300 hover:border-white hover:text-white hover:after:w-full sm:pb-1">
+              {ctaLabel}
+            </div>
           </div>
-        </div>
+        ) : null}
         <div className="mb-16 flex w-full max-w-[418px] flex-col items-start gap-2 group-hover:mb-6 lg:gap-3">
           <h3 className="whitespace-nowrap font-larken text-32 font-light leading-none md:text-2xl lg:text-32">
             {title}

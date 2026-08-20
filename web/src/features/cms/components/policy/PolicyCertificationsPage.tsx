@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { ContactSupportIcon } from "@/features/contact/components/ContactSupportIcon";
 import Link from "next/link";
@@ -589,8 +589,8 @@ const PolicyCertificationsPage = ({
   };
 
   return (
-    <div className="bg-white">
-      <section className="mx-auto max-w-[1360px] px-4 pb-16 pt-10 md:px-10 md:py-16">
+    <React.Fragment>
+      <section className="mx-auto max-w-[1360px] px-4 md:px-10 md:pt-10 pt-8 md:pb-100 pb-16">
         <div className="flex flex-col gap-[29px] lg:hidden">
           {mobileShowDetail ? (
             <PolicyMobileDetailPanel
@@ -621,7 +621,7 @@ const PolicyCertificationsPage = ({
 
         <div className="hidden lg:flex lg:flex-col">
           <div className="flex flex-col items-center gap-10 pb-16">
-            <h1 className="text-center font-larken text-48 font-light leading-110 text-darkblack">
+            <h1 className="text-center font-larken lg:text-5xl md:text-4xl text-32 font-light leading-110 text-darkblack">
               {page.pageTitle}
             </h1>
             <div className="w-full max-w-[623px]">
@@ -647,9 +647,8 @@ const PolicyCertificationsPage = ({
           </div>
         </div>
       </section>
-
       <PolicySupportSection support={page.support} />
-    </div>
+    </React.Fragment>
   );
 };
 

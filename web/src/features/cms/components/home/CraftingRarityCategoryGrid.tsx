@@ -6,7 +6,7 @@ import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { LazyInView } from "@/shared/ui/LazyInView";
 import Reveal from "@/shared/Animation/Reveal";
 import { resolveCategoryNavImages } from "@/shared/utils/responsiveCmsImage";
-import { buildJewelleryHref, JEWELLERY_PATH, parseJewelleryCategorySlug } from "@/features/jewellery-product/utils/jewelleryRoutes";
+import { buildJewelleryHref, parseJewelleryCategorySlug } from "@/features/jewellery-product/utils/jewelleryRoutes";
 import type { CategoryNavigationItem } from "@/types/homepage/categoryNavigation";
 const IMAGE_QUALITY = 75;
 
@@ -25,7 +25,7 @@ const CraftingRarityCategoryCard = ({ category }: CraftingRarityCategoryCardProp
   const categoryLink =
     category?.cta?.url ??
     category?.cta?.to ??
-    (parsedCategory ? buildJewelleryHref(parsedCategory) : JEWELLERY_PATH);
+    (parsedCategory ? buildJewelleryHref(parsedCategory) : "");
 
   const {
     title,
@@ -34,11 +34,19 @@ const CraftingRarityCategoryCard = ({ category }: CraftingRarityCategoryCardProp
     hoverDesktopImageUrl,
     hoverMobileImageUrl,
     imageAlt,
+    desktopImageAlt,
+    mobileImageAlt,
     hoverAlt,
+    hoverDesktopAlt,
+    hoverMobileAlt,
     hasDistinctHover,
   } = resolveCategoryNavImages(category);
 
   const hasProductImage = Boolean(desktopImageUrl || mobileImageUrl);
+
+  if (!categoryLink) {
+    return null;
+  }
 
   return (
     <Link
@@ -52,6 +60,8 @@ const CraftingRarityCategoryCard = ({ category }: CraftingRarityCategoryCardProp
           desktopSrc={hoverDesktopImageUrl}
           mobileSrc={hoverMobileImageUrl || hoverDesktopImageUrl}
           alt={hoverAlt}
+          desktopAlt={hoverDesktopAlt}
+          mobileAlt={hoverMobileAlt}
           width={600}
           height={600}
           quality={IMAGE_QUALITY}
@@ -66,6 +76,8 @@ const CraftingRarityCategoryCard = ({ category }: CraftingRarityCategoryCardProp
             desktopSrc={desktopImageUrl}
             mobileSrc={mobileImageUrl || desktopImageUrl}
             alt={imageAlt}
+            desktopAlt={desktopImageAlt}
+            mobileAlt={mobileImageAlt}
             width={600}
             height={600}
             quality={IMAGE_QUALITY}

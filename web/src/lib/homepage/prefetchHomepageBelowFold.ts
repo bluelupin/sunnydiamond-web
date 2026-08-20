@@ -1,25 +1,15 @@
 import type { PrefetchedAlankaraCollection } from "@/features/products/services/prefetchProductDetailAlankara";
-import { getHomepageOccasions } from "@/services/homepage/homepageOccasions.service";
 import type { HomepageShoppingBlocksData } from "@/types/homepage/categoryNavigation";
-import type { HomepageEditorialBlocksData } from "@/types/homepage/editorialBlocks";
-import type { OccasionCard } from "@/types/homepage/occasionSection";
 import { getMagentoProductsBySkus } from "@/services/magento/products/products.service";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import {
   mapMagentoProductsToAlankaraCollection,
   resolveAlankaraCollectionSection,
 } from "@/shared/utils/resolveAlankaraCollectionSection";
-import type { HomepagePrefetchedCms } from "./cmsCache";
 
 export type HomepageBelowFoldPrefetch = {
   alankara?: PrefetchedAlankaraCollection | null;
-  standaloneOccasions?: OccasionCard[];
 };
-
-function hasEmbeddedOccasions(editorial?: HomepageEditorialBlocksData | null): boolean {
-  const occasions = editorial?.occasionSection?.occasions ?? [];
-  return occasions.some((card) => card?.isActive !== false);
-}
 
 export async function prefetchAlankaraCollectionFromShopping(
   shoppingData?: HomepageShoppingBlocksData | null,
@@ -44,6 +34,7 @@ export async function prefetchAlankaraCollectionFromShopping(
     const items = await getMagentoProductsBySkus(collectionProps.productSkus);
     const mapped = mapMagentoProductsToAlankaraCollection(items, collectionProps.productSkus, {
       featuredProductSku: collectionProps.featuredProductSku,
+      ctaLabel: collectionProps.productCtaLabel,
     });
 
     return {
@@ -58,30 +49,10 @@ export async function prefetchAlankaraCollectionFromShopping(
   }
 }
 
-async function prefetchStandaloneOccasions(
-  editorial?: HomepageEditorialBlocksData | null,
-): Promise<OccasionCard[] | undefined> {
-  if (hasEmbeddedOccasions(editorial)) {
-    return undefined;
-  }
-
-  try {
-    return await getHomepageOccasions();
-  } catch {
-    return undefined;
-  }
-}
-
 export async function prefetchHomepageBelowFold(
-  cms: HomepagePrefetchedCms,
+  cms: { shopping?: HomepageShoppingBlocksData | null },
 ): Promise<HomepageBelowFoldPrefetch> {
-  const [alankara, standaloneOccasions] = await Promise.all([
-    prefetchAlankaraCollectionFromShopping(cms.shopping),
-    prefetchStandaloneOccasions(cms.editorial),
-  ]);
+  const alankara = await prefetchAlankaraCollectionFromShopping(cms.shopping);
 
-  return {
-    alankara,
-    ...(standaloneOccasions !== undefined ? { standaloneOccasions } : {}),
-  };
+  return { alankara };
 }

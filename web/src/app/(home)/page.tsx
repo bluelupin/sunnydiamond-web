@@ -78,7 +78,6 @@ export default async function Page() {
       shell={prefetched.shell}
       editorial={prefetched.editorial}
       shopping={prefetched.shopping}
-      standaloneOccasions={prefetched.standaloneOccasions}
       alankara={prefetched.alankara}
     >
       <JsonLd data={buildHomepageJsonLd({ title, description, url: canonicalUrl, image: imageUrl })} />

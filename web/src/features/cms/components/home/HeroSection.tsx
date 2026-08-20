@@ -1,18 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import TrustBadgeSection from "../common/TrustBadges";
+import { HomepageTrustBadgeSection } from "../common/TrustBadges";
 import HeroBackgroundMedia from "./HeroBackgroundMedia";
 import HeroSectionOverlay from "./HeroSectionOverlay";
 import type { ResolvedHeroContent } from "@/lib/homepage/resolveHomepageAboveFold";
-
-const HERO_FALLBACK = (
-  <section className="relative flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden">
-    <div className="relative min-h-0 flex-1 overflow-hidden">
-      <div className="absolute inset-0 animate-pulse bg-gray200" aria-hidden />
-    </div>
-    <TrustBadgeSection />
-  </section>
-);
 
 type HeroSectionProps = {
   id?: string;
@@ -21,7 +12,7 @@ type HeroSectionProps = {
 
 const HeroSection = ({ id, hero }: HeroSectionProps) => {
   if (!hero) {
-    return HERO_FALLBACK;
+    return null;
   }
 
   return (
@@ -33,7 +24,8 @@ const HeroSection = ({ id, hero }: HeroSectionProps) => {
         <HeroBackgroundMedia
           desktopImageUrl={hero.desktopImageUrl}
           mobileImageUrl={hero.mobileImageUrl}
-          alt={hero.heroAlt}
+          desktopAlt={hero.desktopHeroAlt}
+          mobileAlt={hero.mobileHeroAlt}
           cmsVideoUrl={hero.heroVideoUrl}
         />
         <HeroSectionOverlay />
@@ -64,7 +56,7 @@ const HeroSection = ({ id, hero }: HeroSectionProps) => {
                 ))}
               </h1>
             </div>
-            {hero.primaryCtaUrl ? (
+            {hero.primaryCtaUrl && hero.primaryCtaLabel ? (
               <Link
                 href={hero.primaryCtaUrl}
                 className="bg-white relative flex items-center justify-center px-7 h-14 overflow-hidden font-gill text-sm font-normal uppercase leading-110 group w-fit"
@@ -78,7 +70,7 @@ const HeroSection = ({ id, hero }: HeroSectionProps) => {
           </div>
         </div>
       </div>
-      <TrustBadgeSection />
+      <HomepageTrustBadgeSection />
     </section>
   );
 };

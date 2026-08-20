@@ -183,6 +183,14 @@ export type StrapiCraftsmanshipStep = {
   image?: unknown;
 };
 
+export type StrapiSavingsPlanStep = {
+  id?: number;
+  label?: string | null;
+  description?: string | null;
+  highlightedText?: string | null;
+  isActive?: boolean | null;
+};
+
 export type StrapiTextSection = {
   id?: number;
   title?: string | null;

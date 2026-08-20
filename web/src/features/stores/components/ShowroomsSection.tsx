@@ -11,7 +11,6 @@ import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import ShowroomSectionSkeleton from "@/features/cms/components/SkeletonLoader/ShowroomSectionSkeleton";
 
-import fallBackImage from "@/assets/fallBackImage.png";
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import type { ShowroomSectionLocation } from "@/types/homepage/editorialBlocks";
@@ -24,22 +23,25 @@ const ADDRESS_ICON = "/images/products/delivery-store/address-icon.svg";
 const PHONE_ICON = "/images/products/delivery-store/phone-icon.svg";
 
 function resolveShowroomImages(location: ShowroomSectionLocation | undefined) {
-  const desktopImage =
-    (location?.image?.desktopImage
-      ? resolveCmsMediaUrl(location.image.desktopImage)
-      : undefined) ?? fallBackImage;
+  const desktopImage = location?.image?.desktopImage
+    ? resolveCmsMediaUrl(location.image.desktopImage)
+    : undefined;
 
-  const mobileImage =
-    (location?.image?.mobileImage
-      ? resolveCmsMediaUrl(location.image.mobileImage)
-      : undefined) ?? desktopImage;
+  const mobileImage = location?.image?.mobileImage
+    ? resolveCmsMediaUrl(location.image.mobileImage)
+    : desktopImage;
 
   const imageAlt =
     resolveCmsAltText(location?.image?.desktopImage) ||
     resolveCmsAltText(location?.image?.mobileImage) ||
-    `Sunny Diamonds showroom in ${location?.name}`;
+    (location?.name ? `Sunny Diamonds showroom in ${location.name}` : "");
 
-  return { desktopImage, mobileImage, imageAlt };
+  return {
+    desktopImage,
+    mobileImage,
+    imageAlt,
+    hasImage: Boolean(desktopImage || mobileImage),
+  };
 }
 
 function ShowroomLocationDetails({
@@ -49,7 +51,7 @@ function ShowroomLocationDetails({
   location: ShowroomSectionLocation;
   className?: string;
 }) {
-  const directionsUrl = location.mapUrl ?? location.directionsUrl ?? "#";
+  const directionsUrl = location.mapUrl ?? location.directionsUrl ?? "";
 
   return (
     <div className={cn("flex flex-col gap-6", className)}>
@@ -81,14 +83,16 @@ function ShowroomLocationDetails({
           </p>
         </div>
       </div>
-      <Link
-        href={directionsUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
-      >
-        GET DIRECTIONS
-      </Link>
+      {directionsUrl ? (
+        <Link
+          href={directionsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
+        >
+          GET DIRECTIONS
+        </Link>
+      ) : null}
     </div>
   );
 }
@@ -121,7 +125,7 @@ function ShowroomsMobileAccordion({
       >
         {locations.map((location) => {
           const isSelected = location.id === activeId;
-          const { mobileImage, desktopImage, imageAlt } =
+          const { mobileImage, desktopImage, imageAlt, hasImage } =
             resolveShowroomImages(location);
 
           return (
@@ -135,17 +139,19 @@ function ShowroomsMobileAccordion({
                     className="h-[0.5px] w-full bg-neutral300"
                     aria-hidden
                   />
-                  <div className="relative aspect-[2500/1797] w-full overflow-hidden">
-                    <ResponsiveImage
-                      desktopSrc={desktopImage || fallBackImage}
-                      mobileSrc={mobileImage || fallBackImage}
-                      alt={imageAlt}
-                      width={2500}
-                      height={1797}
-                      quality={90}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
+                  {hasImage && desktopImage && mobileImage ? (
+                    <div className="relative aspect-[2500/1797] w-full overflow-hidden">
+                      <ResponsiveImage
+                        desktopSrc={desktopImage}
+                        mobileSrc={mobileImage}
+                        alt={imageAlt}
+                        width={2500}
+                        height={1797}
+                        quality={90}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  ) : null}
                   <ShowroomLocationDetails location={location} />
                 </div>
               ) : (
@@ -176,6 +182,7 @@ function ShowroomsDesktopLayout({
   desktopImage,
   mobileImage,
   imageAlt,
+  hasImage,
 }: {
   locations: ShowroomSectionLocation[];
   activeId: number | null;
@@ -183,9 +190,10 @@ function ShowroomsDesktopLayout({
   sectionTitle?: string | null;
   description?: string | null;
   activeLocation: ShowroomSectionLocation | undefined;
-  desktopImage: string | StaticImageData;
-  mobileImage: string | StaticImageData;
+  desktopImage?: string | StaticImageData;
+  mobileImage?: string | StaticImageData;
   imageAlt: string;
+  hasImage: boolean;
 }) {
   return (
     <>
@@ -262,14 +270,14 @@ function ShowroomsDesktopLayout({
                           {location.phone}
                         </p>
                       </div>
-                      <Link href={
-                        location.mapUrl ?? location.directionsUrl ?? "#"
-                      }
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="relative after:bg-darkMagenta after:absolute after:h-0.5 after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-darkblack hover:border-darkMagenta sm:pb-1 font-gill md:text-base text-xs uppercase leading-110 tracking-[1.8%] hover:text-darkMagenta">
-                        GET DIRECTIONS
-                      </Link>
+                      {(location.mapUrl ?? location.directionsUrl) ? (
+                        <Link href={location.mapUrl ?? location.directionsUrl ?? ""}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="relative after:bg-darkMagenta after:absolute after:h-0.5 after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-darkblack hover:border-darkMagenta sm:pb-1 font-gill md:text-base text-xs uppercase leading-110 tracking-[1.8%] hover:text-darkMagenta">
+                          GET DIRECTIONS
+                        </Link>
+                      ) : null}
                     </div>
                   )}
                 </div>
@@ -282,18 +290,18 @@ function ShowroomsDesktopLayout({
           delayMs={200}
           className="relative aspect-[350/480] h-478 w-full overflow-hidden px-5 md:aspect-[850/600] md:h-595 md:px-0 lg:aspect-[850/600]"
         >
-          {activeLocation && (
+          {activeLocation && hasImage && desktopImage && mobileImage ? (
             <ResponsiveImage
               key={activeLocation.id}
-              desktopSrc={desktopImage || fallBackImage}
-              mobileSrc={mobileImage || fallBackImage}
+              desktopSrc={desktopImage}
+              mobileSrc={mobileImage}
               alt={imageAlt}
-              width={desktopImage ? 850 : 350}
-              height={desktopImage ? 600 : 480}
+              width={850}
+              height={600}
               quality={90}
               className="w-full h-full object-cover animate-in fade-in zoom-in-105 duration-700 ease-out"
             />
-          )}
+          ) : null}
         </ScrollReveal>
       </div>
     </>
@@ -307,9 +315,7 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
 
   const locations = useMemo(() => {
     return Array.isArray(showroomSection?.showrooms)
-      ? [...showroomSection.showrooms]
-        .filter((item) => item?.isActive)
-        .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
+      ? showroomSection.showrooms.filter((item) => item?.isActive)
       : [];
   }, [showroomSection?.showrooms]);
 
@@ -324,14 +330,14 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
   const activeLocation =
     locations.find((location) => location.id === activeId) ?? locations[0];
 
-  const { desktopImage, mobileImage, imageAlt } =
+  const { desktopImage, mobileImage, imageAlt, hasImage } =
     resolveShowroomImages(activeLocation);
 
   if (isLoading) {
     return <ShowroomSectionSkeleton />;
   }
 
-  if (!isSectionActive(showroomSection?.isActive) || !showroomSection) {
+  if (!isSectionActive(showroomSection?.isActive) || !showroomSection || locations.length === 0) {
     return null;
   }
 
@@ -356,6 +362,7 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
         desktopImage={desktopImage}
         mobileImage={mobileImage}
         imageAlt={imageAlt}
+        hasImage={hasImage}
       />
     </section>
   );

@@ -9,6 +9,7 @@ import { isSectionActive } from "@/shared/utils/cmsSection";
 import { resolveResponsiveCmsImage } from "@/shared/utils/responsiveCmsImage";
 import Reveal from "@/shared/Animation/Reveal";
 import { useMutedVideoPlayback } from "@/shared/hooks/useMutedVideoPlayback";
+import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { cn } from "@/shared/utils/cn";
 import type { CategoryNavigationImage, GiftingBanner } from "@/types/homepage/categoryNavigation";
 
@@ -85,10 +86,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
   const showBackgroundImage = hasBackgroundImage && !hasBackgroundVideo;
   const hasCutoutImage = Boolean(cutoutImages.desktopUrl || cutoutImages.mobileUrl);
   const showCutoutImage = hasCutoutImage && !hasBackgroundVideo;
-  const cutoutAlt =
-    cutoutImages.alt ||
-    (giftingData?.cutoutImage as { altText?: string } | undefined)?.altText?.trim() ||
-    "";
+  const cutoutAlt = cutoutImages.alt;
 
   const hasPrimaryCta = Boolean(primaryCtaUrl && primaryCtaLabel);
   const hasSecondaryCta = Boolean(secondaryCtaUrl && secondaryCtaLabel);
@@ -175,6 +173,8 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
             desktopSrc={backgroundImages.desktopUrl || backgroundImages.mobileUrl || ""}
             mobileSrc={backgroundImages.mobileUrl}
             alt={backgroundImages.alt || ""}
+            desktopAlt={backgroundImages.desktopAlt}
+            mobileAlt={backgroundImages.mobileAlt}
             width={1440}
             height={750}
             sizes="100vw"
@@ -247,31 +247,21 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
                 <Link
                   href={primaryCtaUrl}
                   className={cn(
-                    "inline-flex h-14 items-center justify-center bg-white px-8 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-90",
+                    "btn-border-slide inline-flex h-14 items-center justify-center border border-neutral300 bg-white px-8 font-gill text-sm font-normal uppercase leading-110 text-darkblack",
                     ctaFocusLightClass,
                   )}
                 >
-                  {primaryCtaLabel}
+                  <span className="relative z-10">{primaryCtaLabel}</span>
                 </Link>
               ) : null}
               {hasSecondaryCta && secondaryCtaUrl && secondaryCtaLabel ? (
-                <Link
+                <DetailTextLink
                   href={secondaryCtaUrl}
-                  className={cn(
-                    "relative cursor-pointer border-b-[1.5px] pb-1 font-gill text-sm font-normal uppercase leading-110 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:transition-all after:duration-300 hover:after:w-full",
-                    isVideoMode
-                      ? cn(
-                          "border-white text-white after:bg-white hover:border-white hover:text-white/80",
-                          ctaFocusDarkClass,
-                        )
-                      : cn(
-                          "border-darkblack text-darkblack after:bg-darkMagenta hover:border-darkMagenta hover:text-darkMagenta",
-                          ctaFocusLightClass,
-                        ),
-                  )}
+                  light={isVideoMode}
+                  className={isVideoMode ? ctaFocusDarkClass : ctaFocusLightClass}
                 >
                   {secondaryCtaLabel}
-                </Link>
+                </DetailTextLink>
               ) : null}
             </Reveal>
           ) : null}
@@ -285,6 +275,8 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
               desktopSrc={cutoutImages.desktopUrl || cutoutImages.mobileUrl || ""}
               mobileSrc={cutoutImages.mobileUrl}
               alt={cutoutAlt}
+              desktopAlt={cutoutImages.desktopAlt}
+              mobileAlt={cutoutImages.mobileAlt}
               width={746}
               height={600}
               sizes="(max-width: 768px) 305px, 746px"

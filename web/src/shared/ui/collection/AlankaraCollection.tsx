@@ -11,7 +11,6 @@ import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { getImageSrc, resolveImageSrc } from "@/shared/utils/image";
 import {
   ALANKARA_HERO_DESKTOP_CROP,
-  ALANKARA_DEFAULT_ACTIVE_INDEX,
   ALANKARA_THUMBNAIL_CROPS,
   type AlankaraCollectionProduct,
   type AlankaraCollectionProps,
@@ -20,8 +19,14 @@ import {
 import PageContainer from "../layout/PageContainer";
 import Reveal from "@/shared/Animation/Reveal";
 
-const DEFAULT_PRODUCT_CTA = "Shop Now";
 const SLIDE_DURATION_MS = 500;
+
+function resolveProductCtaLabel(
+  product: AlankaraCollectionProduct,
+  defaultProductCtaLabel?: string,
+): string | undefined {
+  return product.ctaLabel?.trim() || defaultProductCtaLabel?.trim() || undefined;
+}
 
 function CarouselNavButton({
   direction,
@@ -189,6 +194,8 @@ function CollectionHeroPanel({
   desktopImage,
   mobileImage,
   imageAlt,
+  collectionDesktopAlt,
+  collectionMobileAlt,
   collectionCta,
   priority,
   variant,
@@ -198,12 +205,16 @@ function CollectionHeroPanel({
   desktopImage: string;
   mobileImage: string;
   imageAlt: string;
+  collectionDesktopAlt?: string;
+  collectionMobileAlt?: string;
   collectionCta?: AlankaraCollectionProps["collectionCta"];
   priority?: boolean;
   variant: "desktop" | "mobile";
 }) {
   const isMobile = variant === "mobile";
   const isClickable = Boolean(collectionCta?.href);
+  const desktopAlt = collectionDesktopAlt || imageAlt;
+  const mobileAlt = collectionMobileAlt || imageAlt;
 
   const panelClassName = cn(
     "relative block overflow-hidden",
@@ -221,7 +232,9 @@ function CollectionHeroPanel({
           <ResponsiveImage
             desktopSrc={desktopImage}
             mobileSrc={mobileImage}
-            alt={isClickable ? "" : imageAlt}
+            alt={isClickable ? "" : mobileAlt}
+            desktopAlt={isClickable ? "" : desktopAlt}
+            mobileAlt={isClickable ? "" : mobileAlt}
             priority={priority}
             width={375}
             height={540}
@@ -231,7 +244,7 @@ function CollectionHeroPanel({
         ) : (
           <CroppedFillImage
             src={desktopImage}
-            alt={isClickable ? "" : imageAlt}
+            alt={isClickable ? "" : desktopAlt}
             cropStyle={ALANKARA_HERO_DESKTOP_CROP}
             sizes="(min-width: 1920px) 50vw, 720px"
             priority={priority}
@@ -315,12 +328,12 @@ function CollectionHeroPanel({
 function ProductCarouselPanel({
   products,
   defaultProductCtaLabel,
-  defaultActiveIndex = ALANKARA_DEFAULT_ACTIVE_INDEX,
+  defaultActiveIndex = 0,
   variant,
   imagePriority = false,
 }: {
   products: AlankaraCollectionProduct[];
-  defaultProductCtaLabel: string;
+  defaultProductCtaLabel?: string;
   defaultActiveIndex?: number;
   variant: "desktop" | "mobile";
   imagePriority?: boolean;
@@ -427,6 +440,7 @@ function ProductCarouselPanel({
   if (!total) return null;
 
   const activeProduct = products[activeIndex];
+  const activeProductCtaLabel = resolveProductCtaLabel(activeProduct, defaultProductCtaLabel);
   const slideOffsetPercent = total > 0 ? (activeIndex * 100) / total : 0;
   const slideTransform = `translateX(calc(-${slideOffsetPercent}% + ${isDragging ? dragOffset : 0}px))`;
 
@@ -503,15 +517,17 @@ function ProductCarouselPanel({
             <p className="max-w-full truncate px-2 text-center font-gill text-sm font-normal leading-110 text-darkblack md:text-base lg:text-xl">
               {activeProduct.name}
             </p>
-            <Link
-              href={activeProduct.href}
-              className="relative flex h-12 w-fit items-center justify-center overflow-hidden border-2 border-neutral300 bg-white px-6 font-gill text-sm font-normal uppercase leading-110 hover:border-darkblack group desktop:h-14 desktop:px-7"
-            >
-              <div className="absolute left-0 top-full h-14 w-full bg-darkblack transition-all duration-300 group-hover:top-0" />
-              <span className="relative text-darkblack transition-all duration-300 group-hover:text-white">
-                Shop Now
-              </span>
-            </Link>
+            {activeProductCtaLabel ? (
+              <Link
+                href={activeProduct.href}
+                className="relative flex h-12 w-fit items-center justify-center overflow-hidden border-2 border-neutral300 bg-white px-6 font-gill text-sm font-normal uppercase leading-110 hover:border-darkblack group desktop:h-14 desktop:px-7"
+              >
+                <div className="absolute left-0 top-full h-14 w-full bg-darkblack transition-all duration-300 group-hover:top-0" />
+                <span className="relative text-darkblack transition-all duration-300 group-hover:text-white">
+                  {activeProductCtaLabel}
+                </span>
+              </Link>
+            ) : null}
           </div>
 
           {total > 1 ? (
@@ -583,12 +599,14 @@ function ProductCarouselPanel({
               <p className="font-gill text-base font-normal leading-110 text-darkblack">
                 {activeProduct.name}
               </p>
-              <Link
-                href={activeProduct.href}
-                className="btn-border-slide relative inline-flex h-14 items-center justify-center border-[0.8px] border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2"
-              >
-                Shop Now
-              </Link>
+              {activeProductCtaLabel ? (
+                <Link
+                  href={activeProduct.href}
+                  className="btn-border-slide relative inline-flex h-14 items-center justify-center border-[0.8px] border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2"
+                >
+                  {activeProductCtaLabel}
+                </Link>
+              ) : null}
             </div>
 
             {total > 1 ? (
@@ -621,10 +639,12 @@ export function AlankaraCollection({
   description,
   collectionImage,
   collectionImageMobile,
+  collectionDesktopAlt,
+  collectionMobileAlt,
   collectionCta,
   products,
-  defaultActiveIndex = ALANKARA_DEFAULT_ACTIVE_INDEX,
-  defaultProductCtaLabel = DEFAULT_PRODUCT_CTA,
+  defaultActiveIndex = 0,
+  defaultProductCtaLabel,
   priority = false,
   className,
   "aria-label": ariaLabel,
@@ -653,7 +673,9 @@ export function AlankaraCollection({
             description={description}
             desktopImage={desktopHero}
             mobileImage={mobileHero}
-            imageAlt={title}
+            imageAlt={collectionDesktopAlt || collectionMobileAlt || title}
+            collectionDesktopAlt={collectionDesktopAlt}
+            collectionMobileAlt={collectionMobileAlt}
             collectionCta={collectionCta}
             priority={priority}
             variant="desktop"
@@ -677,7 +699,9 @@ export function AlankaraCollection({
             description={description}
             desktopImage={desktopHero}
             mobileImage={mobileHero}
-            imageAlt={title}
+            imageAlt={collectionDesktopAlt || collectionMobileAlt || title}
+            collectionDesktopAlt={collectionDesktopAlt}
+            collectionMobileAlt={collectionMobileAlt}
             collectionCta={collectionCta}
             priority={priority}
             variant="mobile"
