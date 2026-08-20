@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import {
   DEFAULT_PROFILE_SECTION,
@@ -22,8 +22,6 @@ import { cn } from "@/shared/utils/cn";
 
 const ProfilePage = () => {
   const { customer } = useAuth();
-  const router = useRouter();
-  const pathname = usePathname() ?? "/profile";
   const searchParams = useSearchParams();
 
   const activeSection = useMemo<ProfileSectionId>(() => {
@@ -40,22 +38,6 @@ const ProfilePage = () => {
     const orderNumber = searchParams?.get(PROFILE_ORDER_QUERY_PARAM)?.trim();
     return activeSection !== "orders" || !orderNumber;
   }, [activeSection, searchParams]);
-
-  const handleSectionChange = useCallback(
-    (section: ProfileSectionId) => {
-      const params = new URLSearchParams(searchParams?.toString() ?? "");
-      params.delete(PROFILE_ORDER_QUERY_PARAM);
-      if (section === DEFAULT_PROFILE_SECTION) {
-        params.delete("section");
-      } else {
-        params.set("section", section);
-      }
-
-      const query = params.toString();
-      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
-    },
-    [pathname, router, searchParams],
-  );
 
   return (
     <ProfileAuthGate>
@@ -78,11 +60,8 @@ const ProfilePage = () => {
               />
             ) : null}
             <div className="lg:grid xl:grid-cols-[437px_minmax(0,1fr)] lg:grid-cols-[400px_minmax(0,1fr)] lg:gap-6">
-              <aside className="hidden lg:block">
-                <ProfileSidebar
-                  activeSection={activeSection}
-                  onSectionChange={handleSectionChange}
-                />
+              <aside className="relative z-[80] hidden lg:block">
+                <ProfileSidebar activeSection={activeSection} />
               </aside>
               <div className="min-w-0">
                 <ProfileSectionContent section={activeSection} customer={customer} />
