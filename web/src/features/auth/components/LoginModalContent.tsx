@@ -1,5 +1,6 @@
 "use client";
 
+import type { RefObject } from "react";
 import AppleIcon from "@/assets/Icons/AppleIcon";
 import GoogleSignInButton from "./GoogleSignInButton";
 import {
@@ -22,6 +23,8 @@ type LoginModalContentProps = {
   noSignInMethod: boolean;
   showGoogle: boolean;
   showApple: boolean;
+  submitting: boolean;
+  identifierInputRef: RefObject<HTMLInputElement | null>;
   onIdentifierChange: (value: string) => void;
   onCountryCodeChange: (value: string) => void;
   onContinue: () => void;
@@ -57,6 +60,8 @@ const LoginModalContent = ({
   noSignInMethod,
   showGoogle,
   showApple,
+  submitting,
+  identifierInputRef,
   onIdentifierChange,
   onCountryCodeChange,
   onContinue,
@@ -106,6 +111,7 @@ const LoginModalContent = ({
           countryCode={countryCode}
           error={identifierError}
           emailOnly={emailOnly}
+          inputRef={identifierInputRef}
           onIdentifierChange={onIdentifierChange}
           onCountryCodeChange={onCountryCodeChange}
         />
@@ -141,9 +147,9 @@ const LoginModalContent = ({
         <CartPrimaryButton
           type="submit"
           className="w-full uppercase disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={!canContinue}
+          disabled={!canContinue || submitting}
         >
-          CONTINUE
+          {submitting ? "SENDING..." : "CONTINUE"}
         </CartPrimaryButton>
 
         {showSocial ? <OrDivider /> : null}

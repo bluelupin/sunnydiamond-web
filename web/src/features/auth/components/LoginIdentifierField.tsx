@@ -1,5 +1,6 @@
 "use client";
 
+import type { RefObject } from "react";
 import { ChevronDown } from "lucide-react";
 import { APPOINTMENT_COUNTRY_CODES, DEFAULT_COUNTRY_CODE } from "@/shared/constants/appointmentForm";
 import FormFieldError from "@/shared/ui/FormFieldError";
@@ -12,6 +13,7 @@ type LoginIdentifierFieldProps = {
   countryCode: string;
   error?: string;
   emailOnly?: boolean;
+  inputRef?: RefObject<HTMLInputElement | null>;
   onIdentifierChange: (value: string) => void;
   onCountryCodeChange: (value: string) => void;
 };
@@ -21,6 +23,7 @@ const LoginIdentifierField = ({
   countryCode,
   error,
   emailOnly = false,
+  inputRef,
   onIdentifierChange,
   onCountryCodeChange,
 }: LoginIdentifierFieldProps) => {
@@ -34,6 +37,7 @@ const LoginIdentifierField = ({
 
       {isEmailMode ? (
         <input
+          ref={inputRef}
           id="login-identifier"
           type="email"
           inputMode="email"
@@ -80,6 +84,7 @@ const LoginIdentifierField = ({
             />
           </div>
           <input
+            ref={inputRef}
             id="login-identifier"
             type="tel"
             inputMode="numeric"

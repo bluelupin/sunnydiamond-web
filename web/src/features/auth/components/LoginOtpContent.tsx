@@ -23,6 +23,7 @@ type LoginOtpContentProps = {
   otp: string[];
   otpError?: string;
   secondsLeft: number;
+  submitting: boolean;
   inputRefs: MutableRefObject<Array<HTMLInputElement | null>>;
   onDigitChange: (index: number, value: string) => void;
   onKeyDown: (index: number, event: KeyboardEvent<HTMLInputElement>) => void;
@@ -62,6 +63,7 @@ const LoginOtpContent = ({
   otp,
   otpError,
   secondsLeft,
+  submitting,
   inputRefs,
   onDigitChange,
   onKeyDown,
@@ -208,14 +210,14 @@ const LoginOtpContent = ({
         ) : (
           <button
             type="submit"
-            disabled={!isComplete}
+            disabled={!isComplete || submitting}
             className={cn(
               "inline-flex h-14 w-full items-center justify-center px-7 py-5 font-gill text-sm uppercase leading-110 text-white",
               "btn-dark-slide border border-black",
-              !isComplete && "cursor-not-allowed opacity-50",
+              (!isComplete || submitting) && "cursor-not-allowed opacity-50",
             )}
           >
-            <span className="relative z-10">LOG IN</span>
+            <span className="relative z-10">{submitting ? "VERIFYING..." : "LOG IN"}</span>
           </button>
         )}
 

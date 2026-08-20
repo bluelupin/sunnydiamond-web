@@ -28,7 +28,7 @@ import {
   validateCreateAccountForm,
   validateLoginIdentifier,
 } from "../utils/authValidation";
-import { getLoginHrefForReturn, sanitizeReturnUrl } from "../utils/authNavigation";
+import { getLoginHrefForReturn, getPostSignupReturnUrl, sanitizeReturnUrl } from "../utils/authNavigation";
 
 /**
  * Sign-in is passwordless: every identifier — mobile or email — leads to a
@@ -60,6 +60,8 @@ export type AuthFlowContentProps = {
     noSignInMethod: boolean;
     showGoogle: boolean;
     showApple: boolean;
+    submitting: boolean;
+    identifierInputRef: RefObject<HTMLInputElement | null>;
     onIdentifierChange: (value: string) => void;
     onCountryCodeChange: (value: string) => void;
     onContinue: () => void;
@@ -76,6 +78,7 @@ export type AuthFlowContentProps = {
     otp: string[];
     otpError?: string;
     secondsLeft: number;
+    submitting: boolean;
     inputRefs: RefObject<Array<HTMLInputElement | null>>;
     onDigitChange: (index: number, value: string) => void;
     onKeyDown: (index: number, event: KeyboardEvent<HTMLInputElement>) => void;
@@ -95,6 +98,7 @@ export type AuthFlowContentProps = {
     termsError?: string;
     /** Failures that belong to no single field — an expired code, a rejected save. */
     formError?: string;
+    submitting: boolean;
     onFullNameChange: (value: string) => void;
     onEmailChange: (value: string) => void;
     onTermsAcceptedChange: (value: boolean) => void;
@@ -146,6 +150,10 @@ export function useAuthFlow({
   const [createAccountFormError, setCreateAccountFormError] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const identifierInputRef = useRef<HTMLInputElement | null>(null);
+  /** Focus the identifier only on a return to the step — an initial render must
+   *  not steal focus (or pop the keyboard on mobile) on the standalone page. */
+  const hasLeftSignIn = useRef(false);
   /** Server-provided resend cooldown; the timer effect reads this on entering the OTP step. */
   const cooldownRef = useRef(RESEND_SECONDS);
 
@@ -176,10 +184,13 @@ export function useAuthFlow({
     !flags.otpLoginEnabled && !flags.emailOtpLoginEnabled && !showGoogle && !showApple;
 
   /** Session cookie is set — sync guest cart/wishlist, then full navigation so providers reboot. */
-  const completeAuth = useCallback(async () => {
-    await runPostLoginSync();
-    window.location.assign(returnUrl);
-  }, [returnUrl]);
+  const completeAuth = useCallback(
+    async (destination: string = returnUrl) => {
+      await runPostLoginSync();
+      window.location.assign(destination);
+    },
+    [returnUrl],
+  );
 
   const resetState = useCallback(() => {
     setStep("sign-in");
@@ -203,6 +214,7 @@ export function useAuthFlow({
     setTermsError(undefined);
     setCreateAccountFormError(undefined);
     setIsSubmitting(false);
+    hasLeftSignIn.current = false;
   }, []);
 
   useEffect(() => {
@@ -236,6 +248,15 @@ export function useAuthFlow({
   useEffect(() => {
     if (!active || step !== "otp") return;
     inputRefs.current[0]?.focus();
+  }, [active, step]);
+
+  useEffect(() => {
+    if (step !== "sign-in") hasLeftSignIn.current = true;
+  }, [step]);
+
+  useEffect(() => {
+    if (!active || step !== "sign-in" || !hasLeftSignIn.current) return;
+    identifierInputRef.current?.focus();
   }, [active, step]);
 
   const handleClose = useCallback(() => {
@@ -358,17 +379,6 @@ export function useAuthFlow({
     setSecondsLeft(RESEND_SECONDS);
   }, []);
 
-  const handleBackToOtp = useCallback(() => {
-    if (!otpTarget) {
-      setStep("sign-in");
-      return;
-    }
-    setStep("otp");
-    setFullNameError(undefined);
-    setEmailError(undefined);
-    setTermsError(undefined);
-  }, [otpTarget]);
-
   const updateDigit = useCallback((index: number, value: string) => {
     const digit = value.replace(/\D/g, "").slice(-1);
     setOtpError(undefined);
@@ -478,8 +488,8 @@ export function useAuthFlow({
       return;
     }
 
-    await completeAuth();
-  }, [completeAuth, email, fullName, isSubmitting, otp, otpTarget, termsAccepted]);
+    await completeAuth(getPostSignupReturnUrl(returnUrl));
+  }, [completeAuth, email, fullName, isSubmitting, otp, otpTarget, returnUrl, termsAccepted]);
 
   const handleGoogleCredential = useCallback(
     async (credential: string) => {
@@ -493,9 +503,9 @@ export function useAuthFlow({
         return;
       }
 
-      await completeAuth();
+      await completeAuth(result.customerCreated ? getPostSignupReturnUrl(returnUrl) : returnUrl);
     },
-    [completeAuth, isSubmitting],
+    [completeAuth, isSubmitting, returnUrl],
   );
 
   const handleAppleContinue = useCallback(async () => {
@@ -516,7 +526,7 @@ export function useAuthFlow({
       return;
     }
 
-    await completeAuth();
+    await completeAuth(result.customerCreated ? getPostSignupReturnUrl(returnUrl) : returnUrl);
   }, [completeAuth, isSubmitting, onAbort, returnUrl, surface]);
 
   const contentProps: AuthFlowContentProps = {
@@ -530,6 +540,8 @@ export function useAuthFlow({
       noSignInMethod,
       showGoogle,
       showApple,
+      submitting: isSubmitting,
+      identifierInputRef,
       onIdentifierChange: handleIdentifierChange,
       onCountryCodeChange: handleCountryCodeChange,
       onContinue: handleContinue,
@@ -546,6 +558,7 @@ export function useAuthFlow({
       otp,
       otpError,
       secondsLeft,
+      submitting: isSubmitting,
       inputRefs,
       onDigitChange: updateDigit,
       onKeyDown: handleKeyDown,
@@ -564,6 +577,7 @@ export function useAuthFlow({
       emailError,
       termsError,
       formError: createAccountFormError,
+      submitting: isSubmitting,
       onFullNameChange: (value) => {
         setFullName(value);
         setFullNameError(undefined);
@@ -577,7 +591,7 @@ export function useAuthFlow({
         setTermsAccepted(value);
         setTermsError(undefined);
       },
-      onBack: handleBackToOtp,
+      onBack: handleBackToSignIn,
       onClose: handleClose,
       onCreateAccount: handleCreateAccount,
     },

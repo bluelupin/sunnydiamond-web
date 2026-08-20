@@ -1,4 +1,6 @@
-export type SocialSignInResult = { success: true } | { success: false; error: string };
+export type SocialSignInResult =
+  | { success: true; customerCreated: boolean }
+  | { success: false; error: string };
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 const APPLE_CLIENT_ID = process.env.NEXT_PUBLIC_APPLE_CLIENT_ID;
@@ -58,7 +60,10 @@ async function exchangeIdToken(body: Record<string, unknown>): Promise<SocialSig
       const data = (await response.json().catch(() => null)) as { error?: string } | null;
       return { success: false, error: data?.error ?? "Sign-in failed. Please try again." };
     }
-    return { success: true };
+    const data = (await response.json().catch(() => null)) as {
+      customerCreated?: boolean;
+    } | null;
+    return { success: true, customerCreated: Boolean(data?.customerCreated) };
   } catch {
     return { success: false, error: "Sign-in failed. Please try again." };
   }

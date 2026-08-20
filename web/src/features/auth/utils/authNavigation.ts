@@ -13,6 +13,15 @@ export function sanitizeReturnUrl(value: string | null | undefined): string {
   return value;
 }
 
+/**
+ * Where signup lands: a bare default return means nobody asked to go anywhere
+ * specific, so fresh accounts start on the profile. An explicit destination
+ * (e.g. checkout) always wins.
+ */
+export function getPostSignupReturnUrl(returnUrl: string): string {
+  return returnUrl === DEFAULT_RETURN_URL ? "/profile" : returnUrl;
+}
+
 export function getAuthFlowLabel(step: AuthFlowStep): string {
   if (step === "sign-in") return "Sign In";
   if (step === "otp") return "Enter Code";
