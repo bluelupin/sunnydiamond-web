@@ -60,19 +60,24 @@ const AboutHandcraftedHeroMedia = ({
   }, [shouldLoadVideo, showPosterOnly]);
 
   if (usePosterOnly || !videoUrl) {
-    if (!posterUrl) {
-      return null;
+    if (posterUrl) {
+      return (
+        <ResponsiveImage
+          desktopSrc={posterUrl}
+          alt={posterAlt}
+          width={hero.width}
+          height={hero.height}
+          quality={80}
+          sizes="100vw"
+          className="absolute inset-0 h-full w-full object-cover object-center"
+        />
+      );
     }
 
     return (
-      <ResponsiveImage
-        desktopSrc={posterUrl}
-        alt={posterAlt}
-        width={hero.width}
-        height={hero.height}
-        quality={80}
-        sizes="100vw"
-        className="absolute inset-0 h-full w-full object-cover object-center"
+      <div
+        aria-hidden
+        className="absolute inset-0 h-full w-full bg-gray200"
       />
     );
   }
