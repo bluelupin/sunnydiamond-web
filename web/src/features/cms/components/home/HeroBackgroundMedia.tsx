@@ -80,7 +80,7 @@ const HeroBackgroundMedia = ({
       <ResponsiveImage
         desktopSrc={desktopImageUrl || mobileImageUrl || posterSrc || ""}
         mobileSrc={mobileImageUrl}
-        alt={desktopAlt || mobileAlt}
+        alt={desktopAlt}
         desktopAlt={desktopAlt}
         mobileAlt={mobileAlt}
         priority

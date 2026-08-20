@@ -31,10 +31,7 @@ function resolveShowroomImages(location: ShowroomSectionLocation | undefined) {
     ? resolveCmsMediaUrl(location.image.mobileImage)
     : desktopImage;
 
-  const imageAlt =
-    resolveCmsAltText(location?.image?.desktopImage) ||
-    resolveCmsAltText(location?.image?.mobileImage) ||
-    (location?.name ? `Sunny Diamonds showroom in ${location.name}` : "");
+  const imageAlt = resolveCmsAltText(location?.image?.desktopImage) ?? "";
 
   return {
     desktopImage,

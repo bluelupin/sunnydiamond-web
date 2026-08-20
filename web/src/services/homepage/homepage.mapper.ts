@@ -53,7 +53,7 @@ export type NormalizedHomepageHero = {
   isActive?: boolean;
   primaryCta?: CategoryNavigationCta;
   secondaryCta?: CategoryNavigationCta;
-  image?: CategoryNavigationImage & { altText?: string };
+  image?: CategoryNavigationImage;
   videoUrl?: string;
 };
 
@@ -115,19 +115,18 @@ function mapCta(cta?: StrapiHomepageCta | null): CategoryNavigationCta | undefin
 
 function mapResponsiveImage(
   block?: StrapiResponsiveImageBlock | null,
-): (CategoryNavigationImage & { altText?: string }) | undefined {
+): CategoryNavigationImage | undefined {
   if (!block) return undefined;
 
   return {
     desktopImage: block.desktopImage as CategoryNavigationImage["desktopImage"],
     mobileImage: block.mobileImage as CategoryNavigationImage["mobileImage"],
-    altText: cleanText(block.altText),
   };
 }
 
 function pickResponsiveImage(
   ...candidates: Array<StrapiResponsiveImageBlock | null | undefined>
-): (CategoryNavigationImage & { altText?: string }) | undefined {
+): CategoryNavigationImage | undefined {
   for (const candidate of candidates) {
     const mapped = mapResponsiveImage(candidate);
     if (mapped?.desktopImage || mapped?.mobileImage) return mapped;
@@ -203,10 +202,7 @@ function mapFeaturedCollection(
   // New shape: collection-showcase-section with editorial-collection relations
   const collections = Array.isArray(raw.collections) ? raw.collections : [];
   if (collections.length > 0) {
-    const activeCollections = collections
-      .filter((item) => item?.isActive !== false)
-      .slice()
-      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+    const activeCollections = collections.filter((item) => item?.isActive !== false);
 
     const selected =
       activeCollections.find((item) => cleanText(item.slug)?.toLowerCase() === "alankara") ??
@@ -468,7 +464,7 @@ function mapCraftsmanshipSteps(rawSteps?: StrapiCraftsmanshipStep[] | null): Cra
         number: String(index + 1).padStart(2, "0"),
         isActive: step.isActive ?? true,
         iconUrl: icon.desktopUrl || icon.mobileUrl,
-        iconAlt: icon.alt || undefined,
+        iconAlt: icon.desktopAlt || undefined,
       };
     });
 }

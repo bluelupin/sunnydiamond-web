@@ -5,10 +5,6 @@ import { buildFaqPageJsonLd } from "@/shared/lib/seo/schema/faqPage";
 
 function normalizeEducationCanonicalPath(path: string): string {
   const trimmed = path.trim();
-  if (trimmed === "/education" || trimmed === "education") {
-    return learnAboutDiamondsRoute;
-  }
-
   return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
 }
 

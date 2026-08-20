@@ -5,9 +5,9 @@ import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import {
+  educationCaratVisualSpec,
   educationPageImages,
   educationScrollArrowClassName,
-  educationSliderSpecs,
   type EducationFourCsPanelContent,
 } from "../data/content";
 import type { NormalizedEducationFourCsPanel } from "@/services/education/learn-about-diamonds-page.types";
@@ -53,7 +53,7 @@ const PanelMedia = ({
 }) => {
   const { slider } = panel;
   const [activeIndex, setActiveIndex] = useState(slider.defaultIndex);
-  const sliderSpec = panel.sliderSpec ?? educationSliderSpecs[panel.id];
+  const sliderSpec = panel.sliderSpec;
 
   const activeImage = useMemo(
     () => resolveActiveImage(panel, activeIndex),
@@ -61,6 +61,26 @@ const PanelMedia = ({
   );
 
   const activeCarat = slider.options[activeIndex]?.caratWeight ?? 1.0;
+
+  const caratWeightRange = useMemo(() => {
+    const weights = slider.options
+      .map((option) => option.caratWeight)
+      .filter((weight): weight is number => weight != null);
+
+    if (!weights.length) {
+      return {
+        min: educationCaratVisualSpec.minCarat,
+        max: educationCaratVisualSpec.maxCarat,
+      };
+    }
+
+    return {
+      min: Math.min(...weights),
+      max: Math.max(...weights),
+    };
+  }, [slider.options]);
+
+  const activeCaratOption = slider.options[activeIndex];
 
   const cutDualImages =
     panel.id === "cut" ? slider.options[activeIndex]?.dualImages : undefined;
@@ -89,7 +109,18 @@ const PanelMedia = ({
         {panel.id === "carat" ? (
           <div className="flex w-full flex-col items-start gap-10 gap-0">
             <div className="w-full shrink-0 self-start overflow-hidden">
-              <EducationCaratHandVisual activeCarat={activeCarat} />
+              {panel.caratHandImage ? (
+                <EducationCaratHandVisual
+                  activeCarat={activeCarat}
+                  minCarat={caratWeightRange.min}
+                  maxCarat={caratWeightRange.max}
+                  handDesktopUrl={panel.caratHandImage.desktopUrl}
+                  handMobileUrl={panel.caratHandImage.mobileUrl}
+                  handAlt={panel.caratHandImage.alt}
+                  diamondImageUrl={activeCaratOption?.image}
+                  diamondImageAlt={activeCaratOption?.imageAlt}
+                />
+              ) : null}
             </div>
             {sliderSpec ? (
               <div className="flex w-full shrink-0 justify-center">
@@ -117,11 +148,7 @@ const PanelMedia = ({
                   <Image
                     key={`${panel.id}-${activeIndex}-dual-0-${cutDualImages[0]}`}
                     src={cutDualImages[0]}
-                    alt={
-                      slider.options[activeIndex]?.dualImageAlts?.[0] ||
-                      slider.options[activeIndex]?.imageAlt ||
-                      ""
-                    }
+                    alt={slider.options[activeIndex]?.dualImageAlts?.[0] ?? ""}
                     fill
                     className="object-cover"
                     sizes="200px"
@@ -131,11 +158,7 @@ const PanelMedia = ({
                   <Image
                     key={`${panel.id}-${activeIndex}-dual-1-${cutDualImages[1]}`}
                     src={cutDualImages[1]}
-                    alt={
-                      slider.options[activeIndex]?.dualImageAlts?.[1] ||
-                      slider.options[activeIndex]?.imageAlt ||
-                      ""
-                    }
+                    alt={slider.options[activeIndex]?.dualImageAlts?.[1] ?? ""}
                     fill
                     className="object-cover"
                     sizes="200px"
@@ -147,11 +170,7 @@ const PanelMedia = ({
                 <Image
                   key={`${panel.id}-${activeIndex}-${activeImage}`}
                   src={activeImage}
-                  alt={
-                    slider.options[activeIndex]?.imageAlt ||
-                    slider.imageAlt ||
-                    ""
-                  }
+                  alt={slider.options[activeIndex]?.imageAlt ?? ""}
                   fill
                   className="object-cover"
                   sizes="200px"

@@ -98,7 +98,7 @@ const FeaturedGalleryBackground = ({
   const safeIndex = slides.length > 0 ? normalizeIndex(activeIndex, slides.length) : 0;
   const activeSlide = slides[safeIndex];
   const fallbackBgSrc = backgroundImage?.desktopUrl || backgroundImage?.mobileUrl || null;
-  const srAlt = activeSlide?.alt || backgroundImage?.alt || "";
+  const srAlt = activeSlide?.alt ?? "";
 
   return (
     <div className="pointer-events-none absolute inset-x-0 top-0 h-[540px] md:h-[559px]">
@@ -108,7 +108,7 @@ const FeaturedGalleryBackground = ({
             <Image
               key={slide.documentId ?? `${slide.src}-${index}`}
               src={slide.src}
-              alt={index === safeIndex ? slide.alt || backgroundImage?.alt || "" : ""}
+              alt={index === safeIndex ? slide.alt : ""}
               fill
               sizes="100vw"
               priority={index === safeIndex}
@@ -121,7 +121,7 @@ const FeaturedGalleryBackground = ({
         ) : fallbackBgSrc ? (
           <Image
             src={fallbackBgSrc}
-            alt={backgroundImage?.alt || ""}
+            alt={backgroundImage?.alt ?? ""}
             fill
             priority
             sizes="100vw"

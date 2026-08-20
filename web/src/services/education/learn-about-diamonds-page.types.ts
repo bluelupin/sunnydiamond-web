@@ -29,18 +29,24 @@ export type StrapiEducationHero = {
   title?: string | null;
   subtitle?: string | null;
   isActive?: boolean | null;
+  showField?: boolean | null;
   image?: StrapiEducationResponsiveImage | null;
   heroVideo?: StrapiEducationHeroVideo | null;
+  backgroundVideo?: StrapiEducationHeroVideo | null;
 };
 
 export type StrapiEducationFaqItem = {
   id?: number;
   question?: string | null;
   answer?: string | null;
+  isActive?: boolean | null;
+  showField?: boolean | null;
 };
 
 export type StrapiEducationFaqSection = {
   sectionHeading?: string | null;
+  isActive?: boolean | null;
+  showField?: boolean | null;
   faqItems?: StrapiEducationFaqItem[] | null;
 };
 
@@ -50,6 +56,7 @@ export type StrapiEducationDiscoverStep = {
   description?: string | null;
   sortOrder?: number | null;
   isActive?: boolean | null;
+  showField?: boolean | null;
 };
 
 export type StrapiEducationCtaButton = {
@@ -64,6 +71,8 @@ export type StrapiEducationDiscoverSection = {
   subheading?: string | null;
   ctaButtonLabel?: string | null;
   ctaButtonUrl?: string | null;
+  isActive?: boolean | null;
+  showField?: boolean | null;
   steps?: StrapiEducationDiscoverStep[] | null;
   backgroundImage?: StrapiEducationResponsiveImage | null;
 };
@@ -75,16 +84,18 @@ export type StrapiEducationFourCsTag = {
   id?: number;
   label?: string | null;
   sortOrder?: number | null;
+  isActive?: boolean | null;
+  showField?: boolean | null;
 };
 
 export type StrapiEducationFourCsIntro = {
   heading?: string | null;
   body?: string | null;
   mobileHeading?: string | null;
+  isActive?: boolean | null;
+  showField?: boolean | null;
   decorativeImage?: StrapiEducationResponsiveImage | null;
   fourCsTags?: StrapiEducationFourCsTag[] | null;
-  /** @deprecated Legacy field name */
-  image?: StrapiEducationResponsiveImage | null;
 };
 
 export type StrapiEducationGradeStop = {
@@ -115,6 +126,8 @@ export type StrapiEducationFourCsVisualPanel = {
 };
 
 export type StrapiEducationFourCsSection = {
+  isActive?: boolean | null;
+  showField?: boolean | null;
   cInfoPanel?: StrapiEducationFourCsInfoPanel[] | null;
   cVisualPanel?: StrapiEducationFourCsVisualPanel[] | null;
 };
@@ -130,10 +143,8 @@ export type StrapiEducationCertificationLab = {
 export type StrapiEducationCertificateSection = {
   sectionHeading?: string | null;
   sectionDescription?: string | null;
-  whyCertificationHeading?: string | null;
-  whyCertificationDescription?: string | null;
-  howToVerifyHeading?: string | null;
-  howToVerifyDescription?: string | null;
+  isActive?: boolean | null;
+  showField?: boolean | null;
   certificationLabs?: StrapiEducationCertificationLab[] | null;
   bgImage?: StrapiEducationResponsiveImage | null;
   cutoutImage?: StrapiEducationResponsiveImage | null;
@@ -162,6 +173,8 @@ export type StrapiEducationLearnTab = {
   tabLabel?: string | null;
   tabDescription?: string | null;
   layoutType?: string | null;
+  isActive?: boolean | null;
+  showField?: boolean | null;
   featureSubtitle?: string | null;
   featureImage?: StrapiEducationResponsiveImage | null;
   /** @deprecated Prefer featureGroups — kept for older payloads */
@@ -172,6 +185,8 @@ export type StrapiEducationLearnTab = {
 
 export type StrapiEducationLearnMoreSection = {
   sectionHeading?: string | null;
+  isActive?: boolean | null;
+  showField?: boolean | null;
   tabs?: StrapiEducationLearnTab[] | null;
 };
 
@@ -180,6 +195,7 @@ export type StrapiEducationSeo = {
   metaDescription?: string | null;
   canonicalUrl?: string | null;
   metaKeywords?: string | null;
+  isActive?: boolean | null;
   showField?: boolean | null;
   ogImage?: StrapiEducationMediaFile | null;
   structuredData?: unknown;
@@ -233,7 +249,7 @@ export type NormalizedEducationCtaBanner = {
 
 export type NormalizedEducationFourCsIntro = {
   desktopTitle: string;
-  mobileTitle: string;
+  mobileTitle?: string;
   description: string;
   pillars: readonly string[];
   imageDesktopUrl: string;
@@ -241,9 +257,17 @@ export type NormalizedEducationFourCsIntro = {
   imageAlt: string;
 };
 
+export type NormalizedEducationCaratHandImage = {
+  desktopUrl: string;
+  mobileUrl: string;
+  alt: string;
+};
+
 export type NormalizedEducationFourCsPanel = EducationFourCsPanelContent & {
   sliderSpec?: EducationSliderSpec;
   panelTextureAlt?: string;
+  /** Carat panel hand background from CMS `cVisualPanel.visualImage`. */
+  caratHandImage?: NormalizedEducationCaratHandImage;
 };
 
 export type NormalizedEducationFourCsSection = {

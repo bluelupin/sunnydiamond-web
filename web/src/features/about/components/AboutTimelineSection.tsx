@@ -37,16 +37,20 @@ const AboutTimelineSection = ({
     <section ref={sectionRef} aria-label="Company timeline" className="relative">
       <div className="sticky top-0 z-10 h-screen overflow-hidden">
         <div className="absolute inset-0">
-          <ResponsiveImage
-            desktopSrc={backgroundImage.desktopUrl}
-            mobileSrc={backgroundImage.mobileUrl}
-            alt={backgroundImage.alt}
-            width={backgroundImage.width ?? 1440}
-            height={backgroundImage.height ?? 810}
-            quality={80}
-            sizes="(max-width: 1024px) 100vw, 1440px"
-            className="object-cover object-center"
-          />
+          {backgroundImage ? (
+            <ResponsiveImage
+              desktopSrc={backgroundImage.desktopUrl}
+              mobileSrc={backgroundImage.mobileUrl}
+              alt={backgroundImage.alt}
+              width={backgroundImage.width ?? 1440}
+              height={backgroundImage.height ?? 810}
+              quality={80}
+              sizes="(max-width: 1024px) 100vw, 1440px"
+              className="object-cover object-center"
+            />
+          ) : (
+            <div aria-hidden className="size-full bg-gray200" />
+          )}
         </div>
         <MediaContentOverlay
           solidOpacity={aboutTimelineFigmaSpec.overlayOpacity}

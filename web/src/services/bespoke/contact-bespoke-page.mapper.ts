@@ -60,21 +60,10 @@ const mapResponsiveImage = (
     };
   }
 
-  const desktopFile = extractStrapiImage(media?.desktopImage);
-  const mobileFile = extractStrapiImage(media?.mobileImage);
-
   return {
     desktopUrl: desktopUrl ?? mobileUrl!,
     mobileUrl: mobileUrl ?? desktopUrl!,
-    alt:
-      resolveCmsAltText(media?.desktopImage) ??
-      resolveCmsAltText(media?.mobileImage) ??
-      cleanText(desktopFile?.alternativeText) ??
-      cleanText(mobileFile?.alternativeText) ??
-      cleanText(media?.altText) ??
-      cleanText(media?.caption) ??
-      fallback?.alt ??
-      "",
+    alt: resolveCmsAltText(media?.desktopImage) ?? fallback?.alt ?? "",
   };
 };
 
@@ -119,10 +108,7 @@ const mapStory = (section?: StrapiBespokeVisionSection | null): NormalizedBespok
   const title = cleanText(section.title);
   if (!title) return null;
 
-  const cmsCards = (section.cards ?? [])
-    .filter((card) => card?.isActive !== false)
-    .slice()
-    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+  const cmsCards = (section.cards ?? []).filter((card) => card?.isActive !== false);
 
   const steps: NormalizedBespokeStoryStep[] = cmsCards
     .map((card, index) => {
@@ -136,17 +122,17 @@ const mapStory = (section?: StrapiBespokeVisionSection | null): NormalizedBespok
 
       if (!cmsImage) return null;
 
+      const cardImage =
+        card.image?.desktopImage ?? card.image?.mobileImage ?? card.media;
+      const cardAlt = resolveCmsAltText(cardImage) ?? "";
+
       return {
         number: cleanText(card.stepLabel) ?? String(index + 1).padStart(2, "0"),
         title: stepTitle,
         description: cleanText(card.description) ?? "",
         image: {
           src: cmsImage,
-          alt:
-            resolveCmsAltText(card.media) ??
-            resolveCmsAltText(card.image) ??
-            cleanText(card.image?.altText) ??
-            stepTitle,
+          alt: cardAlt,
         },
       };
     })
@@ -188,14 +174,16 @@ const mapFeaturedCardToSlide = (
 
   const title = cleanText(card.title) ?? `Featured Story ${index + 1}`;
   const description = cleanText(card.description) ?? "";
-  const coverAlt =
-    resolveCmsAltText(card.coverImage) ?? cleanText(card.image?.altText) ?? title;
+  const coverFromCoverImage = resolveCmsMediaUrl(card.coverImage);
+  const coverAlt = coverFromCoverImage
+    ? resolveCmsAltText(card.coverImage) ?? ""
+    : resolveCmsAltText(card.image?.desktopImage) ?? "";
 
   const galleryImages = (card.gallery ?? [])
     .map((item) => {
       const src = resolveCmsMediaUrl(item);
       if (!src) return null;
-      return { src, alt: resolveCmsAltText(item) ?? title };
+      return { src, alt: resolveCmsAltText(item) ?? "" };
     })
     .filter((item): item is { src: string; alt: string } => item != null);
 
@@ -222,8 +210,6 @@ const mapFeaturedStories = (
   const backgroundImage = mapResponsiveImage(section.backgroundImage);
 
   const slides = (section.cards ?? [])
-    .slice()
-    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
     .map((card, index) => mapFeaturedCardToSlide(card, index, primaryCtaHref))
     .filter((slide): slide is NormalizedBespokeFeaturedSlide => slide != null);
 
@@ -245,7 +231,6 @@ const mapFeaturedStories = (
 
 const mapMediaToPastCreationImage = (
   media: unknown,
-  fallbackAlt: string,
   documentId?: string,
 ): NormalizedBespokePastCreationImage | null => {
   const file = extractStrapiImage(media);
@@ -255,7 +240,7 @@ const mapMediaToPastCreationImage = (
   return {
     documentId: documentId || undefined,
     src,
-    alt: resolveCmsAltText(media) ?? fallbackAlt,
+    alt: resolveCmsAltText(media) ?? "",
     width: file?.width ?? 400,
     height: file?.height ?? 500,
   };
@@ -267,12 +252,11 @@ export const mapPastCreations = (
   const images: NormalizedBespokePastCreationImage[] = [];
 
   for (const item of items ?? []) {
-    const alt = cleanText(item.title) ?? "Past creation";
     const documentId = cleanText(item.documentId) || undefined;
     const mediaList = item.gallery?.length ? item.gallery : [item.coverImage];
 
     for (const media of mediaList) {
-      const mapped = mapMediaToPastCreationImage(media, alt, documentId);
+      const mapped = mapMediaToPastCreationImage(media, documentId);
       if (!mapped) continue;
       images.push(mapped);
     }
@@ -338,10 +322,7 @@ const mapGuaranteeIcon = (
   if (!icon || typeof icon !== "object") return null;
 
   let cmsUrl: string | null = null;
-  let cmsAlt: string | undefined;
-
-  // CMS field "Icon Alt Text" lives on the highlight itself (not the media file).
-  const highlightAlt = cleanText(highlight.iconAltText);
+  let cmsAlt = "";
 
   if ("desktopImage" in icon || "mobileImage" in icon) {
     const responsive = icon as StrapiBespokeResponsiveImage;
@@ -349,15 +330,10 @@ const mapGuaranteeIcon = (
       resolveCmsMediaUrl(responsive.desktopImage) ??
       resolveCmsMediaUrl(responsive.mobileImage) ??
       null;
-    cmsAlt =
-      resolveCmsAltText(responsive.desktopImage) ??
-      resolveCmsAltText(responsive.mobileImage) ??
-      highlightAlt ??
-      cleanText(responsive.altText) ??
-      cleanText(responsive.caption);
+    cmsAlt = resolveCmsAltText(responsive.desktopImage) ?? "";
   } else {
     cmsUrl = resolveCmsMediaUrl(icon) ?? null;
-    cmsAlt = resolveCmsAltText(icon) ?? highlightAlt;
+    cmsAlt = resolveCmsAltText(icon) ?? "";
   }
 
   const src = resolveGuaranteeIconSrc(highlight.label, cmsUrl);
@@ -365,7 +341,7 @@ const mapGuaranteeIcon = (
 
   return {
     src,
-    alt: cmsAlt ?? "",
+    alt: cmsAlt,
   };
 };
 
@@ -398,8 +374,6 @@ const mapGuarantees = (
 ): NormalizedBespokeGuarantee[] => {
   const guarantees = (highlights ?? [])
     .filter((item) => item?.isActive !== false)
-    .slice()
-    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
     .map((item) => {
       const label = cleanText(item.label);
       const icon = mapGuaranteeIcon(item);

@@ -22,10 +22,10 @@ export function resolveCategoryNavImages(cat: CategoryNavigationItem) {
     mobileImageUrl: product.mobileUrl || product.desktopUrl || hover.mobileUrl || hover.desktopUrl,
     hoverDesktopImageUrl: hover.desktopUrl,
     hoverMobileImageUrl: hover.mobileUrl || hover.desktopUrl,
-    imageAlt: product.alt || hover.alt || "",
+    imageAlt: product.desktopAlt,
     desktopImageAlt: product.desktopAlt,
     mobileImageAlt: product.mobileAlt,
-    hoverAlt: hover.alt || product.alt || "",
+    hoverAlt: hover.desktopAlt,
     hoverDesktopAlt: hover.desktopAlt,
     hoverMobileAlt: hover.mobileAlt,
     hasDistinctHover:
@@ -50,6 +50,6 @@ export function resolveResponsiveCmsImage(media: ResponsiveMedia) {
     mobileUrl: resolveCmsMediaUrl(mobileImage),
     desktopAlt,
     mobileAlt,
-    alt: desktopAlt || mobileAlt,
+    alt: desktopAlt,
   };
 }

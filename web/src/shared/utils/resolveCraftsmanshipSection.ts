@@ -47,7 +47,7 @@ export function resolveCraftsmanshipSection(
     mobileImageUrl: imageMedia.mobileUrl,
     imageDesktopAlt: imageMedia.desktopAlt,
     imageMobileAlt: imageMedia.mobileAlt,
-    imageAlt: imageMedia.alt || sectionTitle,
+    imageAlt: imageMedia.alt,
     backgroundDesktopUrl: backgroundMedia.desktopUrl,
     backgroundMobileUrl: backgroundMedia.mobileUrl,
     backgroundDesktopAlt: backgroundMedia.desktopAlt,

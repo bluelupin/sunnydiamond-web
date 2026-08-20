@@ -37,7 +37,7 @@ const HeroSection = ({ id, hero }: HeroSectionProps) => {
                   <span className="absolute inset-[12.5%_4.17%_15.63%_8.33%]">
                     <span className="absolute inset-[-2.9%_-2.38%]">
                       <Image
-                        src="/images/home/hero-eyebrow-diamond.svg"
+                        src="/images/hero-eyebrow-diamond.svg"
                         alt=""
                         width={24}
                         height={24}

@@ -117,9 +117,7 @@ export function mapGenericForm(
 
   const showrooms =
     raw.showrooms
-      ?.slice()
-      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
-      .map(mapShowroom)
+      ?.map(mapShowroom)
       .filter((item): item is NormalizedGenericFormShowroom => item != null) ?? [];
 
   const timeSlots =

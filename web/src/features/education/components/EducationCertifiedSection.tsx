@@ -102,11 +102,11 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
         "lg:min-h-[791px] md:px-0 md:py-104",
       )}
     >
-      {certificate.backgroundDesktopUrl || certificate.backgroundMobileUrl ? (
+      {certificate.backgroundDesktopUrl ? (
         <div className="pointer-events-none absolute inset-0">
           <ResponsiveImage
-            desktopSrc={certificate.backgroundDesktopUrl || certificate.backgroundMobileUrl || ""}
-            mobileSrc={certificate.backgroundMobileUrl || certificate.backgroundDesktopUrl}
+            desktopSrc={certificate.backgroundDesktopUrl}
+            mobileSrc={certificate.backgroundMobileUrl}
             alt={certificate.backgroundAlt || ""}
             fill
             className="object-cover object-center"

@@ -137,7 +137,6 @@ export type NormalizedStoreLocatorShowroom = {
   mapEmbed: string | null;
   openingHours: string | null;
   imageUrl: string;
-  sortOrder: number;
 };
 
 export type NormalizedStoreLocatorSeo = {

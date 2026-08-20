@@ -50,33 +50,48 @@ const AboutFacesSection = ({ title, description, members }: AboutFacesSectionPro
                 "lg:hover:grow-[1.2] transition-[flex-grow] duration-500 ease-in-out",
               )}
             >
-              <ResponsiveImage
-                desktopSrc={member.image.desktopUrl}
-                mobileSrc={member.image.mobileUrl}
-                alt={member.image.alt || member.name}
-                width={member.image.width ?? 478}
-                height={member.image.height ?? 600}
-                quality={80}
-                sizes="(max-width: 1023px) 343px, 33vw"
-                className="h-full w-full object-cover object-center transition-transform duration-500 ease-out lg:group-hover:scale-[1.03]"
-              />
+              {member.image ? (
+                <ResponsiveImage
+                  desktopSrc={member.image.desktopUrl}
+                  mobileSrc={member.image.mobileUrl}
+                  alt={member.image.alt}
+                  width={member.image.width ?? 478}
+                  height={member.image.height ?? 600}
+                  quality={80}
+                  sizes="(max-width: 1023px) 343px, 33vw"
+                  className="h-full w-full object-cover object-center transition-transform duration-500 ease-out lg:group-hover:scale-[1.03]"
+                />
+              ) : (
+                <div
+                  aria-hidden
+                  className="h-full w-full bg-gray200 transition-transform duration-500 ease-out lg:group-hover:scale-[1.03]"
+                />
+              )}
 
               <MediaContentOverlay
                 gradient={aboutFacesFigmaSpec.overlay.gradient}
                 className={cn(
-                  "opacity-100 transition-opacity duration-500 lg:opacity-0 lg:group-hover:opacity-100",
+                  "opacity-100 transition-opacity duration-500",
+                  member.image && "lg:opacity-0 lg:group-hover:opacity-100",
                 )}
               />
-              <figcaption className="absolute bottom-0 left-0 z-10 w-full text-left opacity-100 transition-all duration-500 lg:translate-y-2 lg:px-10 md:px-9 px-8 md:py-16 py-12 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100">
+              <figcaption
+                className={cn(
+                  "absolute bottom-0 left-0 z-10 w-full text-left px-8 py-12 md:px-9 md:py-16 lg:px-10 transition-all duration-500",
+                  member.image
+                    ? "opacity-100 lg:translate-y-2 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100"
+                    : "opacity-100",
+                )}
+              >
                 <div className="flex flex-col items-start gap-2 leading-110">
                   <p className="font-larken xl:text-3xl lg:text-2xl text-xl font-light text-white">
                     {member.name}
                   </p>
-                  {member.role && (
-                    <p className="font-gill xl:text-lg text-base  font-light text-aboutInactive">
+                  {member.role ? (
+                    <p className="font-gill xl:text-lg text-base font-light text-aboutInactive">
                       {member.role}
                     </p>
-                  )}
+                  ) : null}
                 </div>
               </figcaption>
             </figure>

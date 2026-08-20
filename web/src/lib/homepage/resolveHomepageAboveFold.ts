@@ -80,16 +80,8 @@ export function resolveHeroContent(
     resolveCmsMediaUrl(heroImage?.mobileImage ?? heroImage?.desktopImage ?? heroImage) ??
     undefined;
 
-  const desktopHeroAlt =
-    resolveCmsAltText(heroImage?.desktopImage) ||
-    resolveCmsAltText(heroImage) ||
-    heroImage?.altText ||
-    "";
-  const mobileHeroAlt =
-    resolveCmsAltText(heroImage?.mobileImage) ||
-    resolveCmsAltText(heroImage?.desktopImage) ||
-    heroImage?.altText ||
-    "";
+  const desktopHeroAlt = resolveCmsAltText(heroImage?.desktopImage) ?? "";
+  const mobileHeroAlt = resolveCmsAltText(heroImage?.mobileImage) ?? "";
 
   return {
     eyebrow: hero.eyebrow ?? "",

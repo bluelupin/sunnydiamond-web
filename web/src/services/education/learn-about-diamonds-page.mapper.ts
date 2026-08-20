@@ -1,15 +1,10 @@
 import {
   buildCaratSliderSpecForWeights,
   buildSliderSpecForOptionCount,
-  educationCertificationLogoStyles,
-  educationFourCsPanelLayouts,
   educationSliderSpecs,
   type EducationFourCsPanelContent,
-  type EducationFourCsPanelLayout,
   type EducationSliderOption,
 } from "@/features/education/data/content";
-import { resolveEducationDiamondShapeHref } from "@/features/jewellery-product/utils/diamondShapeListing";
-import { resolveEducationFancyColourHref } from "@/features/jewellery-product/utils/fancyColourListing";
 import { resolveCmsAltText, resolveCmsMediaUrl, resolveCmsMediaUrls } from "@/shared/utils/strapiMedia";
 import type {
   NormalizedEducationCertificateSection,
@@ -48,11 +43,7 @@ import type {
 } from "./learn-about-diamonds-page.types";
 import { EMPTY_LEARN_ABOUT_DIAMONDS_PAGE } from "./learn-about-diamonds-page.types";
 
-const STATIC_LAYOUT_BY_ID = Object.fromEntries(
-  educationFourCsPanelLayouts.map((layout) => [layout.id, layout]),
-) as Record<string, EducationFourCsPanelLayout>;
-
-const PANEL_ID_BY_LABEL: Record<string, EducationFourCsPanelLayout["id"]> = {
+const PANEL_ID_BY_LABEL: Record<string, EducationFourCsPanelContent["id"]> = {
   CLARITY: "clarity",
   CUT: "cut",
   COLOUR: "colour",
@@ -60,52 +51,38 @@ const PANEL_ID_BY_LABEL: Record<string, EducationFourCsPanelLayout["id"]> = {
   CARAT: "carat",
 };
 
-const STATIC_CERTIFICATION_BY_ID = Object.fromEntries(
-  educationCertificationLogoStyles.certifications.map((cert) => [cert.id, cert]),
-) as Record<
-  string,
-  (typeof educationCertificationLogoStyles.certifications)[number]
->;
-
-const LAB_ID_BY_CODE: Record<string, string> = {
-  GIA: "gia",
-  AGS: "ags",
-  HRD: "hrd",
-  TKP: "kimberley",
-  KIMBERLEY: "kimberley",
-  KPCS: "kimberley",
-  "KIMBERLY PROCESS": "kimberley",
-};
+const DEFAULT_LOGO_CLASS = "size-[79px]";
+const DEFAULT_MOBILE_LOGO_CLASS = "size-[59.286px]";
 
 const cleanText = (value?: string | null): string | undefined => {
   const trimmed = value?.trim();
   return trimmed || undefined;
 };
 
+/** CMS sections may use `isActive` or legacy `showField`; default visible when unset. */
+const resolveSectionActive = (
+  isActive?: boolean | null,
+  showField?: boolean | null,
+): boolean => {
+  if (typeof isActive === "boolean") return isActive;
+  if (typeof showField === "boolean") return showField;
+  return true;
+};
+
 const mapResponsiveImageUrls = (image?: StrapiEducationResponsiveImage | null) => {
-  const desktopUrl =
-    resolveCmsMediaUrl(image?.desktopImage) ??
-    resolveCmsMediaUrl(image?.mobileImage);
-  const mobileUrl =
-    resolveCmsMediaUrl(image?.mobileImage) ??
-    resolveCmsMediaUrl(image?.desktopImage);
+  const desktopUrl = resolveCmsMediaUrl(image?.desktopImage) ?? "";
+  const mobileUrl = resolveCmsMediaUrl(image?.mobileImage) ?? "";
 
   return {
-    desktopUrl: desktopUrl ?? "",
-    mobileUrl: mobileUrl ?? "",
-    alt:
-      resolveCmsAltText(image?.desktopImage) ??
-      resolveCmsAltText(image?.mobileImage) ??
-      resolveCmsAltText(image) ??
-      cleanText(image?.altText) ??
-      cleanText(image?.caption) ??
-      "",
+    desktopUrl,
+    mobileUrl,
+    alt: resolveCmsAltText(image?.desktopImage) ?? "",
     hasImage: Boolean(desktopUrl || mobileUrl),
   };
 };
 
 const mapSeo = (seo?: StrapiEducationSeo | null): NormalizedEducationSeo | null => {
-  if (!seo || seo.showField === false) return null;
+  if (!seo || !resolveSectionActive(seo.isActive, seo.showField)) return null;
 
   const metaTitle = cleanText(seo.metaTitle);
   const metaDescription = cleanText(seo.metaDescription);
@@ -113,13 +90,11 @@ const mapSeo = (seo?: StrapiEducationSeo | null): NormalizedEducationSeo | null 
   if (!metaTitle && !metaDescription) return null;
 
   const ogImageUrl = resolveCmsMediaUrl(seo.ogImage);
-  const rawCanonical = canonicalPath ?? "/learn-about-diamonds";
-  const normalizedCanonicalPath =
-    rawCanonical === "/education" || rawCanonical === "education"
-      ? "/learn-about-diamonds"
-      : rawCanonical.startsWith("/")
-        ? rawCanonical
-        : `/${rawCanonical}`;
+  const normalizedCanonicalPath = canonicalPath
+    ? canonicalPath.startsWith("/")
+      ? canonicalPath
+      : `/${canonicalPath}`
+    : "";
 
   return {
     metaTitle: metaTitle ?? "",
@@ -131,7 +106,7 @@ const mapSeo = (seo?: StrapiEducationSeo | null): NormalizedEducationSeo | null 
 };
 
 const mapHero = (hero?: StrapiEducationHero | null): NormalizedEducationHero | null => {
-  if (!hero || hero.isActive === false) return null;
+  if (!hero || !resolveSectionActive(hero.isActive, hero.showField)) return null;
 
   const title = cleanText(hero.title);
   if (!title) return null;
@@ -155,6 +130,8 @@ const mapHero = (hero?: StrapiEducationHero | null): NormalizedEducationHero | n
 const mapFaqItems = (items?: StrapiEducationFaqItem[] | null): NormalizedEducationFaqItem[] =>
   items
     ?.map((item, index) => {
+      if (!resolveSectionActive(item.isActive, item.showField)) return null;
+
       const question = cleanText(item.question);
       const answer = cleanText(item.answer);
       if (!question || !answer) return null;
@@ -170,8 +147,12 @@ const mapFaqItems = (items?: StrapiEducationFaqItem[] | null): NormalizedEducati
 const mapFaqSection = (
   faqSection?: StrapiLearnAboutDiamondsPageEntity["faqSection"],
 ): NormalizedEducationFaqSection | null => {
-  const heading = cleanText(faqSection?.sectionHeading);
-  const items = mapFaqItems(faqSection?.faqItems);
+  if (!faqSection || !resolveSectionActive(faqSection.isActive, faqSection.showField)) {
+    return null;
+  }
+
+  const heading = cleanText(faqSection.sectionHeading);
+  const items = mapFaqItems(faqSection.faqItems);
   if (!heading || !items.length) return null;
 
   return {
@@ -184,15 +165,14 @@ const mapDiscoverSteps = (
   steps?: StrapiEducationDiscoverSection["steps"],
 ): string[] =>
   (steps ?? [])
-    .filter((step) => step.isActive !== false)
-    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+    .filter((step) => resolveSectionActive(step.isActive, step.showField))
     .map((step) => cleanText(step.title))
     .filter((title): title is string => Boolean(title));
 
 const mapDiscoverSection = (
   section?: StrapiEducationDiscoverSection | null,
 ): NormalizedEducationCtaBanner | null => {
-  if (!section) return null;
+  if (!section || !resolveSectionActive(section.isActive, section.showField)) return null;
 
   const heading = cleanText(section.heading);
   const subheading = cleanText(section.subheading);
@@ -233,16 +213,18 @@ const gradesMatch = (left?: string | null, right?: string | null) => {
 };
 
 const resolvePanelId = (
-  fallbackIndex: number,
   sectionLabel?: string | null,
 ): EducationFourCsPanelContent["id"] | null => {
   const labelKey = cleanText(sectionLabel)?.toUpperCase();
-  if (labelKey && PANEL_ID_BY_LABEL[labelKey]) {
-    return PANEL_ID_BY_LABEL[labelKey];
-  }
+  if (!labelKey) return null;
 
-  return educationFourCsPanelLayouts[fallbackIndex]?.id ?? null;
+  return PANEL_ID_BY_LABEL[labelKey] ?? null;
 };
+
+const resolvePanelLayout = (index: number) => ({
+  mediaPosition: (index % 2 === 0 ? "left" : "right") as "left" | "right",
+  background: "chalk" as const,
+});
 
 const parseCaratWeight = (gradeCode: string): number | undefined => {
   const match = gradeCode.match(/([\d.]+)/);
@@ -268,8 +250,6 @@ const mapGradeStopToOption = (
   stop: StrapiEducationGradeStop,
   panelId: EducationFourCsPanelContent["id"],
   activeGradeCode?: string,
-  visualImageUrl?: string,
-  visualImageAlt?: string,
 ): EducationSliderOption | null => {
   const label = cleanText(stop.gradeCode);
   if (!label) return null;
@@ -300,18 +280,11 @@ const mapGradeStopToOption = (
       ? resolveCmsMediaUrls(stop.gradeImage?.mobileImage)
       : [];
   const mediaUrls = gradeImageUrls.length > 0 ? gradeImageUrls : mobileOnlyUrls;
-  const gradeAlt =
-    resolveCmsAltText(stop.gradeImage) ??
-    resolveCmsAltText(stop.gradeImage?.desktopImage) ??
-    resolveCmsAltText(stop.gradeImage?.mobileImage) ??
-    "";
+  const gradeAlt = resolveCmsAltText(stop.gradeImage?.desktopImage) ?? "";
 
   if (mediaUrls[0]) {
     option.image = mediaUrls[0];
     option.imageAlt = gradeAlt;
-  } else if (visualImageUrl && panelId !== "cut") {
-    option.image = visualImageUrl;
-    option.imageAlt = visualImageAlt || gradeAlt;
   }
 
   // Cut: CMS often uploads two diamonds per grade for the Figma dual compare layout.
@@ -366,11 +339,10 @@ const mapFourCsPanel = (
   visual: StrapiEducationFourCsVisualPanel | null,
   index: number,
 ): NormalizedEducationFourCsPanel | null => {
-  const panelId = resolvePanelId(index, info.sectionLabel);
+  const panelId = resolvePanelId(info.sectionLabel);
   if (!panelId) return null;
 
-  const panelLayout = STATIC_LAYOUT_BY_ID[panelId] ?? educationFourCsPanelLayouts[index];
-  if (!panelLayout) return null;
+  const panelLayout = resolvePanelLayout(index);
 
   const title = cleanText(info.sectionLabel);
   const description = cleanText(info.description);
@@ -383,9 +355,7 @@ const mapFourCsPanel = (
 
   const mappedOptions =
     (visual?.gradeStops ?? [])
-      .map((stop) =>
-        mapGradeStopToOption(stop, panelId, activeGradeCode, visualImageUrl, visualImage.alt),
-      )
+      .map((stop) => mapGradeStopToOption(stop, panelId, activeGradeCode))
       .filter((option): option is EducationSliderOption => option != null);
 
   // No static slider/copy fallbacks — require CMS gradeStops.
@@ -413,25 +383,21 @@ const mapFourCsPanel = (
     slider,
     sliderSpec: resolveSliderSpec(panelId, options),
     ...(visualImage.alt ? { panelTextureAlt: visualImage.alt } : {}),
+    ...(panelId === "carat" && visualImage.desktopUrl
+      ? {
+          caratHandImage: {
+            desktopUrl: visualImage.desktopUrl,
+            mobileUrl: visualImage.mobileUrl,
+            alt: visualImage.alt,
+          },
+        }
+      : {}),
   };
-};
-
-const PILLAR_LABEL_OVERRIDES: Record<string, string> = {
-  CLARITY: "Clarity",
-  CUT: "Cut",
-  COLOUR: "Colour",
-  COLOR: "Colour",
-  CARAT: "Carat",
 };
 
 const formatPillarLabel = (label?: string | null) => {
   const cleaned = cleanText(label);
   if (!cleaned) return undefined;
-
-  const key = cleaned.toUpperCase();
-  if (PILLAR_LABEL_OVERRIDES[key]) {
-    return PILLAR_LABEL_OVERRIDES[key];
-  }
 
   return cleaned
     .toLowerCase()
@@ -440,42 +406,29 @@ const formatPillarLabel = (label?: string | null) => {
     .join(" ");
 };
 
-const mapFourCsIntroImage = (intro?: StrapiEducationFourCsIntro | null) => {
-  const image = intro?.decorativeImage ?? intro?.image;
-  return mapResponsiveImageUrls(image);
-};
-
 const mapFourCsIntro = (
   intro?: StrapiEducationFourCsIntro | null,
-  fourCsSection?: StrapiEducationFourCsSection | null,
 ): NormalizedEducationFourCsIntro | null => {
-  if (!intro) return null;
+  if (!intro || !resolveSectionActive(intro.isActive, intro.showField)) return null;
 
-  const image = mapFourCsIntroImage(intro);
+  const image = mapResponsiveImageUrls(intro.decorativeImage);
   const heading = cleanText(intro.heading);
   const description = cleanText(intro.body);
   if (!heading || !description || !image.hasImage) return null;
 
-  const mobileHeading = cleanText(intro.mobileHeading) ?? heading;
+  const mobileHeading = cleanText(intro.mobileHeading);
 
-  // Use CMS list order as returned (Strapi drag-and-drop). Do not re-sort by
-  // sortOrder — those numbers are often stale after drag and would undo the order.
-  const pillarsFromTags =
+  const pillars =
     intro.fourCsTags
-      ?.map((tag) => formatPillarLabel(tag.label))
+      ?.filter((tag) => resolveSectionActive(tag.isActive, tag.showField))
+      .map((tag) => formatPillarLabel(tag.label))
       .filter((label): label is string => Boolean(label)) ?? [];
 
-  const pillarsFromPanels =
-    (fourCsSection?.cInfoPanel ?? [])
-      .map((panel) => formatPillarLabel(panel.sectionLabel))
-      .filter((label): label is string => Boolean(label));
-
-  const pillars = pillarsFromTags.length > 0 ? pillarsFromTags : pillarsFromPanels;
   if (!pillars.length) return null;
 
   return {
     desktopTitle: heading,
-    mobileTitle: mobileHeading,
+    ...(mobileHeading ? { mobileTitle: mobileHeading } : {}),
     description,
     pillars,
     imageDesktopUrl: image.desktopUrl,
@@ -487,6 +440,8 @@ const mapFourCsIntro = (
 const mapFourCsSection = (
   section?: StrapiEducationFourCsSection | null,
 ): NormalizedEducationFourCsSection | null => {
+  if (!section || !resolveSectionActive(section.isActive, section.showField)) return null;
+
   // Preserve Strapi component order (drag-and-drop). Pair info[i] with visual[i].
   const infoPanels = section?.cInfoPanel ?? [];
   if (!infoPanels.length) return null;
@@ -499,68 +454,27 @@ const mapFourCsSection = (
   return panels.length ? { panels } : null;
 };
 
-const resolveLabId = (lab: StrapiEducationCertificationLab, index: number) => {
-  const codeKey = cleanText(lab.labCode)?.toUpperCase();
-  if (codeKey && LAB_ID_BY_CODE[codeKey]) {
-    return LAB_ID_BY_CODE[codeKey];
-  }
-
-  const nameKey = cleanText(lab.labName)?.toUpperCase();
-  if (nameKey && LAB_ID_BY_CODE[nameKey]) {
-    return LAB_ID_BY_CODE[nameKey];
-  }
-  if (nameKey?.includes("GIA")) return "gia";
-  if (nameKey?.includes("AMERICAN GEM")) return "ags";
-  if (nameKey?.includes("HOGE RAADVOOR") || nameKey?.includes("HRD")) return "hrd";
-  if (nameKey?.includes("KIMBER")) return "kimberley";
-
-  const descriptionKey = cleanText(lab.labDescription)?.toUpperCase();
-  if (descriptionKey?.includes("GIA") || descriptionKey?.includes("GEMOLOGICAL")) {
-    return "gia";
-  }
-  if (descriptionKey?.includes("AMERICAN GEM")) return "ags";
-  if (descriptionKey?.includes("HOGE RAADVOOR") || descriptionKey?.includes("HRD")) {
-    return "hrd";
-  }
-  if (descriptionKey?.includes("KIMBER")) return "kimberley";
-
-  return `lab-${index}`;
-};
-
-/** Prefer labDescription under logos (short labName is for CMS ID only). */
 const mapCertificationLab = (
   lab: StrapiEducationCertificationLab,
   index: number,
 ): NormalizedEducationCertification | null => {
-  const id = resolveLabId(lab, index);
-  const staticCert = STATIC_CERTIFICATION_BY_ID[id];
-  const label =
-    cleanText(lab.labDescription) ??
-    cleanText(lab.labName);
+  const id = lab.id != null ? String(lab.id) : `lab-${index}`;
+  const label = cleanText(lab.labDescription);
   if (!label) return null;
 
-  const logoUrl =
-    resolveCmsMediaUrl(lab.labLogo?.desktopImage) ??
-    resolveCmsMediaUrl(lab.labLogo?.mobileImage);
+  const logoUrl = resolveCmsMediaUrl(lab.labLogo?.desktopImage);
   if (!logoUrl) return null;
 
-  const logoAlt =
-    resolveCmsAltText(lab.labLogo) ??
-    resolveCmsAltText(lab.labLogo?.desktopImage) ??
-    resolveCmsAltText(lab.labLogo?.mobileImage) ??
-    "";
+  const logoAlt = resolveCmsAltText(lab.labLogo?.desktopImage) ?? "";
 
   return {
     id,
     logoUrl,
     logoAlt,
     label,
-    logoClassName: staticCert?.logoClassName ?? "size-[79px]",
-    mobileLogoClassName: staticCert?.mobileLogoClassName ?? "size-[59.286px]",
-    imageClassName: staticCert?.imageClassName ?? "size-full object-cover",
-    ...(staticCert && "logoWrapClassName" in staticCert
-      ? { logoWrapClassName: staticCert.logoWrapClassName }
-      : {}),
+    logoClassName: DEFAULT_LOGO_CLASS,
+    mobileLogoClassName: DEFAULT_MOBILE_LOGO_CLASS,
+    imageClassName: "size-full object-contain",
     usesCmsLogo: true,
   };
 };
@@ -626,7 +540,7 @@ const parseCertificateSectionDescription = (raw?: string | null) => {
 const mapCertificateSection = (
   section?: StrapiEducationCertificateSection | null,
 ): NormalizedEducationCertificateSection | null => {
-  if (!section) return null;
+  if (!section || !resolveSectionActive(section.isActive, section.showField)) return null;
 
   const certifications =
     section.certificationLabs
@@ -636,18 +550,10 @@ const mapCertificateSection = (
   const title = cleanText(section.sectionHeading);
   const parsedDescription = parseCertificateSectionDescription(section.sectionDescription);
 
-  const whyTitle =
-    cleanText(section.whyCertificationHeading) ?? parsedDescription?.whyTitle ?? "";
-  const whyDescription =
-    cleanText(section.whyCertificationDescription) ??
-    parsedDescription?.whyDescription ??
-    "";
-  const howTitle =
-    cleanText(section.howToVerifyHeading) ?? parsedDescription?.howTitle ?? "";
-  const howDescription =
-    cleanText(section.howToVerifyDescription) ??
-    parsedDescription?.howDescription ??
-    "";
+  const whyTitle = parsedDescription?.whyTitle ?? "";
+  const whyDescription = parsedDescription?.whyDescription ?? "";
+  const howTitle = parsedDescription?.howTitle ?? "";
+  const howDescription = parsedDescription?.howDescription ?? "";
 
   if (!title || !certifications.length) return null;
   if (!whyTitle && !whyDescription && !howTitle && !howDescription) return null;
@@ -731,24 +637,10 @@ const parseTraitLabel = (label: string, index: number) => {
 
 const mapCarouselSlide = (item: StrapiEducationLearnCarouselImage) => {
   const image = mapResponsiveImageUrls(item.image);
-  if (!image.hasImage) return null;
+  if (!image.desktopUrl) return null;
 
   const ctaLabel = cleanText(item.ctaButton?.label);
-  const shapeHref = resolveEducationDiamondShapeHref({
-    ctaLabel,
-    ctaUrl: item.ctaButton?.url,
-  });
-  const fancyHref = resolveEducationFancyColourHref({
-    ctaLabel,
-    ctaUrl: item.ctaButton?.url,
-  });
-
-  // Prefer an explicit shape/colour deep-link when either resolver produced one.
-  const ctaHref =
-    (shapeHref?.includes("diamondShape=") ? shapeHref : undefined) ??
-    (fancyHref?.includes("fancyColour=") ? fancyHref : undefined) ??
-    fancyHref ??
-    shapeHref;
+  const ctaHref = cleanText(item.ctaButton?.url);
 
   return {
     src: image.desktopUrl,
@@ -758,26 +650,10 @@ const mapCarouselSlide = (item: StrapiEducationLearnCarouselImage) => {
   };
 };
 
-/** Prefer featureGroups (current CMS); fall back to legacy top-level featureItems. */
 const resolveLearnFeatureGroups = (
   tab: StrapiEducationLearnTab,
-): StrapiEducationLearnFeatureGroup[] => {
-  const groups = (tab.featureGroups ?? []).filter(
-    (group) => (group.featureItems?.length ?? 0) > 0,
-  );
-  if (groups.length) return groups;
-
-  if ((tab.featureItems?.length ?? 0) > 0) {
-    return [
-      {
-        featureSubtitle: tab.featureSubtitle,
-        featureItems: tab.featureItems,
-      },
-    ];
-  }
-
-  return [];
-};
+): StrapiEducationLearnFeatureGroup[] =>
+  (tab.featureGroups ?? []).filter((group) => (group.featureItems?.length ?? 0) > 0);
 
 const flattenLearnFeatureItems = (
   tab: StrapiEducationLearnTab,
@@ -819,8 +695,7 @@ const mapAnatomyDetail = (
           })
           .filter((trait): trait is NonNullable<typeof trait> => trait != null) ?? [];
 
-      const title =
-        cleanText(group.featureSubtitle) ?? cleanText(tab.featureSubtitle);
+      const title = cleanText(group.featureSubtitle);
 
       if (!title || !traits.length) return null;
 
@@ -837,19 +712,11 @@ const mapAnatomyDetail = (
   const carouselImage = tab.carouselImage?.[0];
   const featureImage = mapResponsiveImageUrls(tab.featureImage);
   const carouselUrls = mapResponsiveImageUrls(carouselImage?.image);
+  const image = featureImage.hasImage ? featureImage : carouselUrls.hasImage ? carouselUrls : null;
 
-  const image = featureImage.hasImage
-    ? featureImage
-    : carouselUrls.hasImage
-      ? carouselUrls
-      : null;
+  if (!image?.desktopUrl || !sections.length) return null;
 
-  if (!image || !sections.length) return null;
-
-  const imageAlt =
-    image.alt ||
-    cleanText(tab.tabLabel)?.replace(/_/g, " ") ||
-    "Diamond anatomy";
+  const imageAlt = image.alt;
 
   return {
     image: image.desktopUrl,
@@ -862,6 +729,8 @@ const mapLearnTab = (
   tab: StrapiEducationLearnTab,
   index: number,
 ): NormalizedEducationLearnTab | null => {
+  if (!resolveSectionActive(tab.isActive, tab.showField)) return null;
+
   const label = formatTabLabel(tab.tabLabel);
   const description = splitDescription(tab.tabDescription);
   if (!label || !description.length) return null;
@@ -916,7 +785,7 @@ const mapLearnTab = (
 const mapLearnMoreSection = (
   section?: StrapiEducationLearnMoreSection | null,
 ): NormalizedEducationLearnMoreSection | null => {
-  if (!section) return null;
+  if (!section || !resolveSectionActive(section.isActive, section.showField)) return null;
 
   const title = cleanText(section.sectionHeading);
   const tabs =
@@ -937,8 +806,8 @@ export function mapLearnAboutDiamondsPage(
   return {
     hero: mapHero(raw.hero),
     faq: mapFaqSection(raw.faqSection),
-    ctaBanner: mapDiscoverSection(raw.discoverSection ?? raw.ctaBanner),
-    fourCsIntro: mapFourCsIntro(raw.fourCsIntro, raw.fourCsSection),
+    ctaBanner: mapDiscoverSection(raw.discoverSection),
+    fourCsIntro: mapFourCsIntro(raw.fourCsIntro),
     fourCs: mapFourCsSection(raw.fourCsSection),
     certificate: mapCertificateSection(raw.certificateSection),
     learnMore: mapLearnMoreSection(raw.learnMoreSection),

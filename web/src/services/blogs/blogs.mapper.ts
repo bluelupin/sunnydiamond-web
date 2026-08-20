@@ -210,12 +210,7 @@ function resolveCoverImage(
 
   return {
     src,
-    alt:
-      resolveCmsAltText(cover?.desktopImage) ??
-      resolveCmsAltText(cover?.mobileImage) ??
-      cleanText(cover?.altText) ??
-      cleanText(post.title) ??
-      "Blog post",
+    alt: resolveCmsAltText(cover?.desktopImage) ?? "",
   };
 }
 
@@ -230,12 +225,7 @@ function resolveHeroImage(
 
   return {
     src,
-    alt:
-      resolveCmsAltText(hero?.desktopImage) ??
-      resolveCmsAltText(hero?.mobileImage) ??
-      cleanText(hero?.altText) ??
-      cleanText(post.title) ??
-      "Blog post",
+    alt: resolveCmsAltText(hero?.desktopImage) ?? "",
   };
 }
 
@@ -851,10 +841,7 @@ export function mapBlogsPageData(input: {
     resolveCmsMediaUrl(featuredSection?.backgroundImage?.desktopImage) ??
     resolveCmsMediaUrl(featuredSection?.backgroundImage?.mobileImage);
   const featuredBackgroundAlt =
-    resolveCmsAltText(featuredSection?.backgroundImage?.desktopImage) ??
-    resolveCmsAltText(featuredSection?.backgroundImage?.mobileImage) ??
-    cleanText(featuredSection?.backgroundImage?.altText) ??
-    "";
+    resolveCmsAltText(featuredSection?.backgroundImage?.desktopImage) ?? "";
 
   const featured = featuredCard
     ? mapFeaturedFromPost(
@@ -880,10 +867,7 @@ export function mapBlogsPageData(input: {
     resolveCmsMediaUrl(heroSection?.backgroundImage?.mobileImage) ??
     heroDesktop;
   const heroAlt =
-    resolveCmsAltText(heroSection?.backgroundImage?.desktopImage) ??
-    resolveCmsAltText(heroSection?.backgroundImage?.mobileImage) ??
-    cleanText(heroSection?.backgroundImage?.altText) ??
-    heroTitle;
+    resolveCmsAltText(heroSection?.backgroundImage?.desktopImage) ?? "";
 
   return {
     hero: {
