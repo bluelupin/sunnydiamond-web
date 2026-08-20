@@ -80,7 +80,7 @@ const mapResponsiveImage = (
   return {
     desktopUrl: desktopUrl ?? mobileUrl!,
     mobileUrl: mobileUrl ?? desktopUrl!,
-    alt: desktopAlt || mobileAlt,
+    alt: desktopAlt,
     width: desktopFile?.width ?? mobileFile?.width ?? undefined,
     height: desktopFile?.height ?? mobileFile?.height ?? undefined,
   };

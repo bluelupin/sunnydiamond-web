@@ -93,13 +93,7 @@ const mapResponsiveImageUrls = (image?: StrapiEducationResponsiveImage | null) =
   return {
     desktopUrl: desktopUrl ?? "",
     mobileUrl: mobileUrl ?? "",
-    alt:
-      resolveCmsAltText(image?.desktopImage) ??
-      resolveCmsAltText(image?.mobileImage) ??
-      resolveCmsAltText(image) ??
-      cleanText(image?.altText) ??
-      cleanText(image?.caption) ??
-      "",
+    alt: resolveCmsAltText(image?.desktopImage) ?? "",
     hasImage: Boolean(desktopUrl || mobileUrl),
   };
 };
@@ -300,18 +294,14 @@ const mapGradeStopToOption = (
       ? resolveCmsMediaUrls(stop.gradeImage?.mobileImage)
       : [];
   const mediaUrls = gradeImageUrls.length > 0 ? gradeImageUrls : mobileOnlyUrls;
-  const gradeAlt =
-    resolveCmsAltText(stop.gradeImage) ??
-    resolveCmsAltText(stop.gradeImage?.desktopImage) ??
-    resolveCmsAltText(stop.gradeImage?.mobileImage) ??
-    "";
+  const gradeAlt = resolveCmsAltText(stop.gradeImage?.desktopImage) ?? "";
 
   if (mediaUrls[0]) {
     option.image = mediaUrls[0];
     option.imageAlt = gradeAlt;
   } else if (visualImageUrl && panelId !== "cut") {
     option.image = visualImageUrl;
-    option.imageAlt = visualImageAlt || gradeAlt;
+    option.imageAlt = visualImageAlt ?? "";
   }
 
   // Cut: CMS often uploads two diamonds per grade for the Figma dual compare layout.
@@ -544,11 +534,7 @@ const mapCertificationLab = (
     resolveCmsMediaUrl(lab.labLogo?.mobileImage);
   if (!logoUrl) return null;
 
-  const logoAlt =
-    resolveCmsAltText(lab.labLogo) ??
-    resolveCmsAltText(lab.labLogo?.desktopImage) ??
-    resolveCmsAltText(lab.labLogo?.mobileImage) ??
-    "";
+  const logoAlt = resolveCmsAltText(lab.labLogo?.desktopImage) ?? "";
 
   return {
     id,
@@ -846,10 +832,7 @@ const mapAnatomyDetail = (
 
   if (!image || !sections.length) return null;
 
-  const imageAlt =
-    image.alt ||
-    cleanText(tab.tabLabel)?.replace(/_/g, " ") ||
-    "Diamond anatomy";
+  const imageAlt = image.alt;
 
   return {
     image: image.desktopUrl,

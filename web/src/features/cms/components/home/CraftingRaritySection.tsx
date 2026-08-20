@@ -50,7 +50,7 @@ const CraftingRaritySection = ({ id, content }: CraftingRaritySectionProps) => {
               <ResponsiveImage
                 desktopSrc={cutoutDesktopUrl || cutoutMobileUrl || ""}
                 mobileSrc={cutoutMobileUrl}
-                alt={cutoutAlt || cutoutDesktopAlt || cutoutMobileAlt || ""}
+                alt={cutoutDesktopAlt ?? cutoutAlt ?? ""}
                 desktopAlt={cutoutDesktopAlt}
                 mobileAlt={cutoutMobileAlt}
                 width={664}

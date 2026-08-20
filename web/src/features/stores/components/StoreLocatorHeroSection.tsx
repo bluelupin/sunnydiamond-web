@@ -26,7 +26,7 @@ const StoreLocatorHeroSection = ({ hero }: StoreLocatorHeroSectionProps) => {
 
   const mobileUrl = hero?.mobileImageUrl || hero?.desktopImageUrl || null;
 
-  const alt = hero?.imageAlt || title || "Store locator";
+  const alt = hero?.imageAlt ?? "";
 
 
 

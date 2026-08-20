@@ -112,7 +112,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
             <div className="rotate-90">
               <Image
                 src={backgroundMobileSrc}
-                alt={backgroundMobileAlt || backgroundAlt}
+                alt={backgroundMobileAlt}
                 width={651}
                 height={1339}
                 className="h-[max(100vw,1339px)] w-[651px] object-bottom"
@@ -123,7 +123,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
             <div className="rotate-90">
               <Image
                 src={backgroundDesktopSrc}
-                alt={backgroundDesktopAlt || backgroundAlt}
+                alt={backgroundDesktopAlt}
                 width={700}
                 height={1440}
                 className="h-[max(100vw,1440px)] w-[700px] object-bottom"

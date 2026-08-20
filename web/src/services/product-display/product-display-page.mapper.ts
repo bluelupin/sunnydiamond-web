@@ -23,10 +23,7 @@ export function mapVisitUsSection(
   const imageSrc = desktopSrc ?? mobileSrc ?? VISIT_US_FALLBACK.imageSrc;
 
   const imageAlt =
-    resolveCmsAltText(raw.image?.desktopImage) ??
-    resolveCmsAltText(raw.image?.mobileImage) ??
-    cleanText(raw.image?.altText) ??
-    cleanText(raw.image?.caption);
+    resolveCmsAltText(raw.image?.desktopImage) ?? "";
 
   const ctaLabel = cleanText(raw.cta?.label) ?? VISIT_US_FALLBACK.ctaLabel;
   const ctaUrl = cleanText(raw.cta?.url);

@@ -43,12 +43,7 @@ const resolveResponsiveUrls = (image?: StrapiStoreLocatorResponsiveImage | null)
     resolveCmsMediaUrl(image?.desktopImage) ?? resolveCmsMediaUrl(image?.mobileImage) ?? null;
   const mobileUrl =
     resolveCmsMediaUrl(image?.mobileImage) ?? resolveCmsMediaUrl(image?.desktopImage) ?? null;
-  const alt =
-    resolveCmsAltText(image) ??
-    cleanText(image?.altText) ??
-    cleanText(image?.desktopImage?.alternativeText) ??
-    cleanText(image?.mobileImage?.alternativeText) ??
-    "";
+  const alt = resolveCmsAltText(image?.desktopImage) ?? "";
   return { desktopUrl, mobileUrl, alt };
 };
 
@@ -108,7 +103,7 @@ const mapHero = (hero?: StrapiStoreLocatorHero | null): NormalizedStoreLocatorHe
     subtitle: cleanText(hero.subtitle) ?? cleanText(hero.description) ?? null,
     desktopImageUrl: image.desktopUrl,
     mobileImageUrl: image.mobileUrl,
-    imageAlt: image.alt || title || "Store locator",
+    imageAlt: image.alt,
     videoUrl,
     primaryCta: mapCta(hero.primaryCta ?? hero.cta),
     secondaryCta: mapCta(hero.secondaryCta),
@@ -134,9 +129,9 @@ const mapLocationFilter = (
     label,
     value,
     iconUrl: resolveIconUrl(filter.icon),
-    iconAlt: resolveResponsiveUrls(
-      filter.icon as StrapiStoreLocatorResponsiveImage | null | undefined,
-    ).alt || undefined,
+    iconAlt: resolveCmsAltText(
+      (filter.icon as StrapiStoreLocatorResponsiveImage | null | undefined)?.desktopImage,
+    ) ?? undefined,
   };
 };
 

@@ -41,7 +41,7 @@ const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
   const mobileImageUrl = sectionImages.mobileUrl;
   const imageDesktopAlt = sectionImages.desktopAlt;
   const imageMobileAlt = sectionImages.mobileAlt;
-  const imageAlt = sectionImages.alt || sectionTitle;
+  const imageAlt = sectionImages.alt;
   const hasSectionImage = Boolean(desktopImageUrl || mobileImageUrl);
 
   if (!isSectionActive(sectionData.isActive)) return null;

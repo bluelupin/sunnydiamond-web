@@ -49,13 +49,9 @@ const mapResponsiveImage = (
   if (!desktopUrl && !mobileUrl) return null;
 
   return {
-    desktopUrl: desktopUrl ?? mobileUrl ?? "",
-    mobileUrl: mobileUrl ?? desktopUrl ?? "",
-    alt:
-      resolveCmsAltText(image?.desktopImage) ??
-      resolveCmsAltText(image?.mobileImage) ??
-      cleanText(image?.altText) ??
-      "",
+    desktopUrl: desktopUrl ?? "",
+    mobileUrl: mobileUrl ?? "",
+    alt: resolveCmsAltText(image?.desktopImage) ?? "",
   };
 };
 
@@ -251,7 +247,7 @@ const mapTrustBadges = (
       return {
           label,
           iconSrc: icon.desktopUrl || icon.mobileUrl,
-          alt: icon.alt || cleanText(badge?.iconAltText) || "",
+          alt: icon.alt,
         };
     })
     .filter((badge): badge is NormalizedGiftingTrustBadge => badge != null);

@@ -349,7 +349,7 @@ export function ShowroomsLayout({
 
   const desktopImage = activeLocation?.desktopImage ?? fallBackImage;
   const mobileImage = activeLocation?.mobileImage ?? desktopImage;
-  const imageAlt = activeLocation?.imageAlt ?? "Sunny Diamonds showroom";
+  const imageAlt = activeLocation?.imageAlt ?? "";
 
   return (
     <section

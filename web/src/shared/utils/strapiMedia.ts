@@ -61,9 +61,7 @@ export function resolveCmsMediaUrls(image: unknown): string[] {
   return url ? [url] : [];
 }
 
-/**
- * Resolve CMS alt text. Media-library text wins over component fallbacks.
- */
+/** Resolve alt text from a Strapi media file's `alternativeText` only. */
 export function resolveCmsAltText(image: unknown): string | undefined {
   if (image == null) return undefined;
 
@@ -75,31 +73,13 @@ export function resolveCmsAltText(image: unknown): string | undefined {
     return undefined;
   }
 
-  if (typeof image !== "object") return undefined;
-
-  const record = image as Record<string, unknown>;
-
   const payload = extractStrapiImage(image);
-  if (payload && typeof payload === "object") {
-    const file = payload as {
-      alternativeText?: string | null;
-      alternateText?: string | null;
-    };
-    const fileAlt = cleanAlt(file.alternativeText) ?? cleanAlt(file.alternateText);
-    if (fileAlt) return fileAlt;
-  }
+  if (!payload || typeof payload !== "object") return undefined;
 
-  const nestedAlt =
-    resolveCmsAltText(record.desktopImage) ??
-    resolveCmsAltText(record.mobileImage);
-  if (nestedAlt) return nestedAlt;
+  const file = payload as {
+    alternativeText?: string | null;
+    alternateText?: string | null;
+  };
 
-  const componentAlt =
-    cleanAlt(record.altText) ??
-    cleanAlt(record.iconAltText) ??
-    cleanAlt(record.alt) ??
-    cleanAlt(record.caption);
-  if (componentAlt) return componentAlt;
-
-  return undefined;
+  return cleanAlt(file.alternativeText) ?? cleanAlt(file.alternateText);
 }

@@ -104,11 +104,7 @@ const mapImageAsset = (
 ): { desktopUrl?: string; mobileUrl?: string; alt?: string } => {
   const desktopUrl = resolveCmsMediaUrl(image?.desktopImage);
   const mobileUrl = resolveCmsMediaUrl(image?.mobileImage);
-  const alt =
-    resolveCmsAltText(image?.desktopImage) ??
-    resolveCmsAltText(image?.mobileImage) ??
-    cleanText(image?.altText) ??
-    cleanText(image?.caption);
+  const alt = resolveCmsAltText(image?.desktopImage) ?? "";
 
   return { desktopUrl, mobileUrl, alt };
 };
@@ -286,7 +282,7 @@ const mapHero = (hero?: StrapiContactHeroSection | null): NormalizedContactHero 
     image: {
       desktopUrl,
       mobileUrl,
-      alt: fromImage.alt ?? fromBg.alt ?? fallback.image.alt,
+      alt: fromImage.alt ?? fromBg.alt ?? "",
     },
   };
 };
@@ -424,10 +420,7 @@ const mapVisitUs = (section?: StrapiContactVisitSection | null): NormalizedVisit
     description: cleanText(section.description) ?? fallback.description,
     imageSrc,
     mobileImageSrc: mobileUrl ?? fallback.mobileImageSrc,
-    imageAlt:
-      sectionImage.alt ??
-      showroomImage.alt ??
-      fallback.imageAlt,
+    imageAlt: sectionImage.alt ?? showroomImage.alt ?? "",
     ctaLabel,
     ...(ctaUrl ? { ctaUrl } : {}),
   };

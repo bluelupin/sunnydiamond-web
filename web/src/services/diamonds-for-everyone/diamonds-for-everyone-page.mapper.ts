@@ -44,14 +44,9 @@ const mapResponsiveImage = (
   if (!desktopUrl && !mobileUrl) return null;
 
   return {
-    desktopUrl: desktopUrl ?? mobileUrl ?? "",
-    mobileUrl: mobileUrl ?? desktopUrl ?? "",
-    alt:
-      resolveCmsAltText(image) ??
-      cleanText(image?.altText) ??
-      cleanText(image?.desktopImage?.alternativeText) ??
-      cleanText(image?.mobileImage?.alternativeText) ??
-      "",
+    desktopUrl: desktopUrl ?? "",
+    mobileUrl: mobileUrl ?? "",
+    alt: resolveCmsAltText(image?.desktopImage) ?? "",
   };
 };
 

@@ -52,7 +52,7 @@ function OccasionCardItem({
       ctaLabel={ctaLabel}
       desktopImageUrl={desktopUrl}
       mobileImageUrl={mobileUrl}
-      imageAlt={alt || card?.title?.trim()}
+      imageAlt={alt}
       desktopImageAlt={desktopAlt}
       mobileImageAlt={mobileAlt}
       index={index}

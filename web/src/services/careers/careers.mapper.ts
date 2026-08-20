@@ -125,14 +125,7 @@ const mapResponsiveImage = (
   return {
     desktopUrl: desktopUrl ?? mobileUrl!,
     mobileUrl: mobileUrl ?? desktopUrl!,
-    alt:
-      resolveCmsAltText(media.desktopImage) ??
-      resolveCmsAltText(media.mobileImage) ??
-      cleanText(desktopFile?.alternativeText) ??
-      cleanText(mobileFile?.alternativeText) ??
-      cleanText(media.altText) ??
-      cleanText(media.caption) ??
-      "",
+    alt: resolveCmsAltText(media.desktopImage) ?? "",
     width: desktopFile?.width ?? mobileFile?.width ?? undefined,
     height: desktopFile?.height ?? mobileFile?.height ?? undefined,
   };

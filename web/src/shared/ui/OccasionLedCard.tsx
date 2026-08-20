@@ -38,7 +38,7 @@ export default function OccasionLedCard({
 
   const desktopSrc = desktopImageUrl || mobileImageUrl || "";
   const mobileSrc = mobileImageUrl || desktopImageUrl || desktopSrc;
-  const alt = imageAlt || desktopImageAlt || mobileImageAlt || title;
+  const alt = imageAlt ?? desktopImageAlt ?? mobileImageAlt ?? "";
 
   return (
     <Link

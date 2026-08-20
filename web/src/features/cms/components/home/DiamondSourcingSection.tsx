@@ -25,8 +25,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
   );
   const desktopImageUrl = diamondImages.desktopUrl;
   const mobileImageUrl = diamondImages.mobileUrl;
-  const imageAlt =
-    diamondImages.alt || diamondSourcedDataSection?.sectionTitle || "";
+  const imageAlt = diamondImages.alt;
   const imageDesktopAlt = diamondImages.desktopAlt;
   const imageMobileAlt = diamondImages.mobileAlt;
   const hasDiamondImage = Boolean(desktopImageUrl || mobileImageUrl);
