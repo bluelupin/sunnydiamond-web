@@ -100,8 +100,7 @@ export function resolveBookStoreVisitStores(
     return genericFormShowrooms.map(mapGenericFormShowroomToBookStoreVisit);
   }
 
-  const fromEditorial = [...editorialShowrooms]
-    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+  const fromEditorial = editorialShowrooms
     .map(mapEditorialShowroomToBookStoreVisit)
     .filter((store): store is BookStoreVisitStore => store != null);
 

@@ -119,9 +119,8 @@ const mapOccasionGrid = (
 ): NormalizedGiftingOccasionGrid | null => {
   if (!section || !resolveSectionActive(section.showField)) return null;
 
-  const cards = [...(section.occasions ?? [])]
+  const cards = (section.occasions ?? [])
     .filter((occasion) => resolveSectionActive(occasion?.showField))
-    .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
     .map((occasion, index): NormalizedGiftingOccasionCard | null => {
       const title = cleanText(occasion?.title);
       const image = mapResponsiveImage(occasion?.image);
@@ -212,8 +211,7 @@ const mapFinishingTouch = (
   const title = cleanText(section.title);
   if (!title) return null;
 
-  const items = [...(section.services ?? [])]
-    .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
+  const items = (section.services ?? [])
     .map((service, index) => {
       const serviceTitle = cleanText(service?.title);
       const image = mapResponsiveImage(service?.image);

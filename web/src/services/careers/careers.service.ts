@@ -63,8 +63,7 @@ async function fetchCareerListingPage(
 const CAREER_OPENINGS_POPULATE_QUERY =
   "filters[isActive][$eq]=true" +
   "&pagination[pageSize]=100" +
-  "&sort[0]=sortOrder:asc" +
-  "&sort[1]=publishedAt:desc" +
+  "&sort[0]=publishedAt:desc" +
   "&populate=*";
 
 async function fetchCareerLandingPage(signal?: AbortSignal): Promise<StrapiCareerLandingPageEntity> {

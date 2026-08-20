@@ -58,7 +58,7 @@ export function getRelatedCareerJobs(
   return ordered.slice(0, limit);
 }
 
-/** First N jobs from the API-sorted list (sortOrder asc, publishedAt desc). */
+/** First N jobs from the API list in CMS/API order. */
 export function getLandingCareerJobs(
   jobs: readonly CareerJob[],
   limit = 3,

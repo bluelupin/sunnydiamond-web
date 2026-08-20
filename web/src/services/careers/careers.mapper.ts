@@ -359,7 +359,6 @@ export const mapCareerOpening = (
       resolveCtaLabel(opening.applyCta) ??
       cleanText(opening.applyCtaLabel) ??
       cleanText(opening.applyLabel),
-    sortOrder: typeof opening.sortOrder === "number" ? opening.sortOrder : 0,
     isActive: opening.isActive !== false,
     isFeatured: opening.isFeatured === true,
     isNew: opening.isNew === true,
@@ -371,13 +370,7 @@ export const mapCareerOpenings = (
 ): NormalizedCareerJob[] => {
   return coerceArray<StrapiCareerOpeningEntity>(openings)
     .map(mapCareerOpening)
-    .filter(Boolean)
-    .sort((a, b) => {
-      if (a!.sortOrder !== b!.sortOrder) {
-        return a!.sortOrder - b!.sortOrder;
-      }
-      return b!.postedAt.localeCompare(a!.postedAt);
-    }) as NormalizedCareerJob[];
+    .filter(Boolean) as NormalizedCareerJob[];
 };
 
 const mapOpeningsSection = (
@@ -792,12 +785,7 @@ const mergeCareerOpenings = (
     }
   }
 
-  return [...byKey.values()].sort((a, b) => {
-    if (a.sortOrder !== b.sortOrder) {
-      return a.sortOrder - b.sortOrder;
-    }
-    return b.postedAt.localeCompare(a.postedAt);
-  });
+  return [...byKey.values()];
 };
 
 const deriveFilterOptionsFromJobs = (jobs: readonly NormalizedCareerJob[]) => ({

@@ -22,10 +22,6 @@ function cleanText(value: unknown): string | undefined {
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
-function sortByOrder<T extends { sortOrder?: number | null }>(items: T[]): T[] {
-  return [...items].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
-}
-
 function toNavLabel(title: string): string {
   return title.toUpperCase();
 }
@@ -169,7 +165,7 @@ function mapCmsPolicyToDocument(
   const title = cleanText(policy.title);
   if (!slug || !title || policy.isActive === false) return null;
 
-  const accordionSections = sortByOrder(policy.accordionItems ?? [])
+  const accordionSections = (policy.accordionItems ?? [])
     .map((item, index) => parseAnswerToSection(item, index))
     .filter((section): section is PolicyAccordionSection => Boolean(section));
 
@@ -187,9 +183,7 @@ function mapCmsPolicyToDocument(
 function mapSupport(
   options: StrapiPolicyContactOption[] | null | undefined,
 ): PolicySupportContent {
-  const active = sortByOrder(
-    (options ?? []).filter((option) => option.isActive !== false),
-  );
+  const active = (options ?? []).filter((option) => option.isActive !== false);
 
   const phone = active.find((option) => cleanText(option.type)?.toLowerCase() === "phone");
   const email = active.find((option) => cleanText(option.type)?.toLowerCase() === "email");
@@ -282,15 +276,14 @@ export function mapPolicyCertificationsPage(input: {
     legalBySlug.set(slug, page);
   }
 
-  const navGroups = sortByOrder(
-    (landing.policyCategories ?? []).filter((category) => category.isActive !== false),
-  )
+  const navGroups = (landing.policyCategories ?? [])
+    .filter((category) => category.isActive !== false)
     .map((category) => {
       const id = cleanText(category.slug);
       const label = cleanText(category.title);
       if (!id || !label) return null;
 
-      const items = sortByOrder(category.policies ?? [])
+      const items = (category.policies ?? [])
         .map((policy) => mapCmsPolicyToDocument(policy, legalBySlug))
         .filter((policy): policy is PolicyDocument => Boolean(policy));
 

@@ -526,7 +526,6 @@ export type NormalizedCareerJob = CareerJob & {
   slug: string;
   applyLabel?: string;
   descriptionHtml?: string;
-  sortOrder: number;
   isActive: boolean;
 };
 

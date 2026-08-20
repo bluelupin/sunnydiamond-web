@@ -429,10 +429,9 @@ const mapVisitUs = (section?: StrapiContactVisitSection | null): NormalizedVisit
 const mapShowroomVisitImage = (
   showrooms?: StrapiContactVisitShowroom[] | null,
 ): { desktopUrl?: string; mobileUrl?: string; alt?: string } => {
-  const active = (showrooms ?? [])
-    .filter((showroom) => showroom && showroom.isActive !== false)
-    .slice()
-    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+  const active = (showrooms ?? []).filter(
+    (showroom) => showroom && showroom.isActive !== false,
+  );
 
   for (const showroom of active) {
     const mapped = mapImageAsset(showroom.image);

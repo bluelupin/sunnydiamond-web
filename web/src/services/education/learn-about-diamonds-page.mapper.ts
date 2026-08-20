@@ -179,7 +179,6 @@ const mapDiscoverSteps = (
 ): string[] =>
   (steps ?? [])
     .filter((step) => step.isActive !== false)
-    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
     .map((step) => cleanText(step.title))
     .filter((title): title is string => Boolean(title));
 

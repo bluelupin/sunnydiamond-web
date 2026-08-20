@@ -172,7 +172,6 @@ const mapShowroom = (
     mapEmbed: cleanText(showroom.mapEmbed) ?? null,
     openingHours: cleanText(showroom.openingHours) ?? null,
     imageUrl: image,
-    sortOrder: typeof showroom.sortOrder === "number" ? showroom.sortOrder : 0,
   };
 };
 
@@ -187,8 +186,7 @@ export function mapStoreLocatorPage(
 
   const showrooms = (raw.showrooms ?? [])
     .map(mapShowroom)
-    .filter((item): item is NormalizedStoreLocatorShowroom => item != null)
-    .sort((a, b) => a.sortOrder - b.sortOrder);
+    .filter((item): item is NormalizedStoreLocatorShowroom => item != null);
 
   return {
     hero: mapHero(raw.hero),

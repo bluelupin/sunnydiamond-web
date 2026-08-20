@@ -41,7 +41,6 @@ function filterHeaderLinks(links: readonly HeaderNavLink[]): HeaderNavLink[] {
         Boolean(link.url?.trim()) &&
         !REMOVED_HEADER_NAV_LABELS.has(link.label.trim().toLowerCase()),
     )
-    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
     .map((link) => ({
       id: link.id,
       label: link.label.trim(),
@@ -78,18 +77,16 @@ export function resolveShellFooterLinkGroups(
 
   return [...cmsGroups]
     .filter((group) => group.isActive !== false)
-    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
     .map((group) => ({
       id: group.id,
       title: group.title,
-      links: [...group.links]
+      links: group.links
         .filter(
           (link) =>
             link.isActive !== false &&
             Boolean(link.label?.trim()) &&
             Boolean(link.url?.trim()),
         )
-        .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
         .map((link) => ({
           id: link.id,
           label: link.label.trim(),

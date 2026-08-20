@@ -202,10 +202,7 @@ function mapFeaturedCollection(
   // New shape: collection-showcase-section with editorial-collection relations
   const collections = Array.isArray(raw.collections) ? raw.collections : [];
   if (collections.length > 0) {
-    const activeCollections = collections
-      .filter((item) => item?.isActive !== false)
-      .slice()
-      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+    const activeCollections = collections.filter((item) => item?.isActive !== false);
 
     const selected =
       activeCollections.find((item) => cleanText(item.slug)?.toLowerCase() === "alankara") ??

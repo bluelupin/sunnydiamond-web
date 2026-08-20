@@ -108,10 +108,7 @@ const mapStory = (section?: StrapiBespokeVisionSection | null): NormalizedBespok
   const title = cleanText(section.title);
   if (!title) return null;
 
-  const cmsCards = (section.cards ?? [])
-    .filter((card) => card?.isActive !== false)
-    .slice()
-    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+  const cmsCards = (section.cards ?? []).filter((card) => card?.isActive !== false);
 
   const steps: NormalizedBespokeStoryStep[] = cmsCards
     .map((card, index) => {
@@ -213,8 +210,6 @@ const mapFeaturedStories = (
   const backgroundImage = mapResponsiveImage(section.backgroundImage);
 
   const slides = (section.cards ?? [])
-    .slice()
-    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
     .map((card, index) => mapFeaturedCardToSlide(card, index, primaryCtaHref))
     .filter((slide): slide is NormalizedBespokeFeaturedSlide => slide != null);
 
@@ -379,8 +374,6 @@ const mapGuarantees = (
 ): NormalizedBespokeGuarantee[] => {
   const guarantees = (highlights ?? [])
     .filter((item) => item?.isActive !== false)
-    .slice()
-    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
     .map((item) => {
       const label = cleanText(item.label);
       const icon = mapGuaranteeIcon(item);
