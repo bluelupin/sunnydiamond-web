@@ -250,8 +250,8 @@ function PolicyAccordionToggleIcon({ isOpen }: { isOpen: boolean }) {
           <Image
             src={
               isOpen
-                ? "/images/cms/icon-accordion-minus.svg"
-                : "/images/cms/icon-accordion-plus.svg"
+                ? "/icons/icon-accordion-minus.svg"
+                : "/icons/icon-accordion-plus.svg"
             }
             alt=""
             width={18}

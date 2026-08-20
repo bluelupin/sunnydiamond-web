@@ -12,7 +12,7 @@ export function ProfileAppointmentsEmptyState() {
     <ProfileTabEmptyStateLayout>
       <div className="relative size-16 shrink-0 overflow-clip">
         <Image
-          src="/images/profile/wishlist-empty-icon.svg"
+          src="https://d1gf9vo4d2b63b.cloudfront.net/cms/wishlist_empty_icon_21cb231976.svg"
           alt=""
           width={64}
           height={64}
