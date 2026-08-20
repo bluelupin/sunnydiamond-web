@@ -1,6 +1,6 @@
 import { aboutHandcraftedTileLayout } from "@/features/about/data/content";
 import { WORLD_OF_SUNNY_PATH } from "@/shared/utils/navigation";
-import { extractStrapiImage, resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { extractStrapiImage, resolveCmsAltText, resolveCmsCaption, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import type {
   NormalizedAboutCraft,
   NormalizedAboutHero,
@@ -152,7 +152,10 @@ const mapLegacyBlock = (
 
   const description = cleanText(block.description);
   const image = mapResponsiveImage(block.image);
-  const caption = image ? cleanText(image.alt) : undefined;
+  const caption =
+    resolveCmsCaption(block.image?.desktopImage) ??
+    resolveCmsCaption(block.image?.mobileImage) ??
+    cleanText(block.image?.caption);
 
   if (!description && !image) return null;
 

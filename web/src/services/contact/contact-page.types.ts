@@ -20,7 +20,6 @@ export type StrapiContactCta = {
   id?: number;
   label?: string | null;
   url?: string | null;
-  to?: string | null;
   targetType?: string | null;
   openInNewTab?: boolean | null;
 };
@@ -31,6 +30,7 @@ export type StrapiContactHeroSection = {
   title?: string | null;
   subtitle?: string | null;
   isActive?: boolean | null;
+  showField?: boolean | null;
   image?: StrapiContactImageAsset | null;
   bgImage?: StrapiContactImageAsset | null;
   primaryCta?: StrapiContactCta | null;
@@ -48,12 +48,14 @@ export type StrapiContactOption = {
   buttonLabel?: string | null;
   sortOrder?: number | null;
   isActive?: boolean | null;
+  showField?: boolean | null;
 };
 
 export type StrapiContactSupportSection = {
   id?: number;
   heading?: string | null;
   isActive?: boolean | null;
+  showField?: boolean | null;
   contactOptions?: StrapiContactOption[] | null;
 };
 
@@ -88,6 +90,7 @@ export type StrapiContactFormSection = {
   heading?: string | null;
   successMessage?: string | null;
   isActive?: boolean | null;
+  showField?: boolean | null;
   form?: StrapiContactGenericForm | null;
 };
 
@@ -98,6 +101,7 @@ export type StrapiContactVisitShowroom = {
   slug?: string | null;
   sortOrder?: number | null;
   isActive?: boolean | null;
+  showField?: boolean | null;
   image?: StrapiContactImageAsset | null;
 };
 
@@ -106,6 +110,7 @@ export type StrapiContactVisitSection = {
   sectionTitle?: string | null;
   description?: string | null;
   sortOrder?: number | null;
+  isActive?: boolean | null;
   showField?: boolean | null;
   image?: StrapiContactImageAsset | null;
   cta?: StrapiContactCta | null;
@@ -119,6 +124,7 @@ export type StrapiContactSeo = {
   canonicalUrl?: string | null;
   metaKeywords?: string | null;
   ogImage?: StrapiContactMediaFile | null;
+  isActive?: boolean | null;
   showField?: boolean | null;
 };
 
@@ -135,13 +141,16 @@ export type StrapiContactPage = {
   localizations?: unknown;
 };
 
+export type NormalizedContactResponsiveImage = {
+  desktopUrl: string;
+  mobileUrl: string;
+  desktopAlt: string;
+  mobileAlt: string;
+};
+
 export type NormalizedContactHero = {
   title: string;
-  image: {
-    desktopUrl: string;
-    mobileUrl: string;
-    alt: string;
-  };
+  image: NormalizedContactResponsiveImage;
 };
 
 export type NormalizedContactInfoCard = {
@@ -155,34 +164,25 @@ export type NormalizedContactInfoCard = {
 };
 
 export type NormalizedContactFormFields = {
-  nameLabel: string;
-  phoneLabel: string;
-  emailLabel: string;
-  reasonLabel: string;
-  reasonPlaceholder: string;
-  mobileReasonPlaceholder: string;
-  messageLabel: string;
-  messagePlaceholder: string;
-  mobileMessagePlaceholder: string;
-  mobileFieldPlaceholder: string;
+  nameLabel?: string;
+  phoneLabel?: string;
+  emailLabel?: string;
+  reasonLabel?: string;
+  reasonPlaceholder?: string;
+  messageLabel?: string;
+  messagePlaceholder?: string;
+  fieldPlaceholder?: string;
 };
 
 export type NormalizedContactForm = {
   title: string;
   formTag: string;
   submitLabel: string;
-  successTitle: string;
-  successDescription: string;
+  successDescription?: string;
   fields: NormalizedContactFormFields;
   reasonOptions: string[];
-  consentPrefix: string;
-  consentSuffix: string;
-  mobileConsentSuffix: string;
-  termsLabel: string;
-  mobileTermsLabel: string;
-  privacyLabel: string;
-  mobilePrivacyLabel: string;
-  consentError: string;
+  requiresConsent: boolean;
+  consentLabel?: string;
 };
 
 export type NormalizedContactSeo = {
@@ -194,13 +194,22 @@ export type NormalizedContactSeo = {
 };
 
 export type NormalizedContactPage = {
-  hero: NormalizedContactHero;
+  hero: NormalizedContactHero | null;
   intro: {
     description: string;
     mobileDescription: string;
-  };
+  } | null;
   infoCards: NormalizedContactInfoCard[];
-  form: NormalizedContactForm;
-  visitUs: NormalizedVisitUsSection;
+  form: NormalizedContactForm | null;
+  visitUs: NormalizedVisitUsSection | null;
   seo: NormalizedContactSeo | null;
+};
+
+export const EMPTY_CONTACT_PAGE: NormalizedContactPage = {
+  hero: null,
+  intro: null,
+  infoCards: [],
+  form: null,
+  visitUs: null,
+  seo: null,
 };

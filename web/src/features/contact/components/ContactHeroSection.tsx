@@ -15,24 +15,28 @@ const ContactHeroSection = ({ hero }: ContactHeroSectionProps) => {
       className="relative left-1/2 grid h-[240px] w-screen max-w-none -translate-x-1/2 overflow-hidden md:h-320"
     >
       <div className="relative col-start-1 row-start-1 size-full overflow-hidden">
-        <Image
-          src={hero.image.mobileUrl || hero.image.desktopUrl}
-          alt={hero.image.alt}
-          fill
-          priority
-          quality={PLP_HERO_IMAGE_QUALITY}
-          sizes="100vw"
-          className="object-cover object-[70%_50%] md:hidden"
-        />
-        <Image
-          src={hero.image.desktopUrl}
-          alt={hero.image.alt}
-          fill
-          priority
-          quality={PLP_HERO_IMAGE_QUALITY}
-          sizes="100vw"
-          className="hidden object-cover object-[50%_62%] md:block"
-        />
+        {hero.image.mobileUrl ? (
+          <Image
+            src={hero.image.mobileUrl}
+            alt={hero.image.mobileAlt}
+            fill
+            priority
+            quality={PLP_HERO_IMAGE_QUALITY}
+            sizes="100vw"
+            className="object-cover object-[70%_50%] md:hidden"
+          />
+        ) : null}
+        {hero.image.desktopUrl ? (
+          <Image
+            src={hero.image.desktopUrl}
+            alt={hero.image.desktopAlt}
+            fill
+            priority
+            quality={PLP_HERO_IMAGE_QUALITY}
+            sizes="100vw"
+            className="hidden object-cover object-[50%_62%] md:block"
+          />
+        ) : null}
         <div className="absolute inset-0 bg-black/40" aria-hidden />
       </div>
       <h1

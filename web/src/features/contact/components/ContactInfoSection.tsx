@@ -8,23 +8,29 @@ type ContactInfoSectionProps = {
   intro: {
     description: string;
     mobileDescription: string;
-  };
+  } | null;
   infoCards: NormalizedContactInfoCard[];
 };
 
 const ContactInfoSection = ({ intro, infoCards }: ContactInfoSectionProps) => {
   return (
-    <section aria-labelledby="contact-intro" className="w-full md:px-10 xl:px-[150px] md:px-10 px-4">
+    <section
+      aria-labelledby={intro ? "contact-intro" : undefined}
+      className="w-full md:px-10 xl:px-[150px] md:px-10 px-4"
+    >
       <div className="mx-auto flex w-full max-w-1360 flex-col items-center md:gap-10 gap-16 md:pt-16">
-        <Reveal
-          as="p"
-          id="contact-intro"
-          direction="up"
-          className="max-w-[606px] text-center font-gill text-base font-light leading-110 text-[#535353] md:text-xl md:text-darkblack"
-        >
-          <span className="md:hidden">{intro.mobileDescription}</span>
-          <span className="hidden md:inline">{intro.description}</span>
-        </Reveal>
+        {intro ? (
+          <Reveal
+            as="p"
+            id="contact-intro"
+            direction="up"
+            className="max-w-[606px] text-center font-gill text-base font-light leading-110 text-[#535353] md:text-xl md:text-darkblack"
+          >
+            <span className="md:hidden">{intro.mobileDescription}</span>
+            <span className="hidden md:inline">{intro.description}</span>
+          </Reveal>
+        ) : null}
+        {infoCards.length > 0 ? (
         <div className="w-full md:grid-cols-3 grid-cols-1 md:gap-4 gap-4 grid md:items-stretch md:bg-transparent bg-gray300 px-4 py-2">
           {infoCards.map((card, index) => {
             const isExternal =
@@ -93,6 +99,7 @@ const ContactInfoSection = ({ intro, infoCards }: ContactInfoSectionProps) => {
             );
           })}
         </div>
+        ) : null}
       </div>
     </section>
   );

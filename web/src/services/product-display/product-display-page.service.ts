@@ -11,8 +11,7 @@ import { VISIT_US_FALLBACK } from "./product-display-page.types";
 const PRODUCT_DISPLAY_VISIT_US_POPULATE =
   "populate[visitUsSection][populate][image][populate][0]=desktopImage" +
   "&populate[visitUsSection][populate][image][populate][1]=mobileImage" +
-  "&populate[visitUsSection][populate][cta]=true" +
-  "&populate[visitUsSection][populate][formCta]=true";
+  "&populate[visitUsSection][populate][cta]=true";
 
 export const getProductDisplayVisitUs = cache(
   async (signal?: AbortSignal): Promise<NormalizedVisitUsSection> => {

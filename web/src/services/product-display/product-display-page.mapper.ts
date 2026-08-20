@@ -11,6 +11,30 @@ const cleanText = (value?: string | null): string | undefined => {
   return trimmed || undefined;
 };
 
+type VisitUsCtaSource = {
+  cta?: StrapiProductDisplayVisitUsSection["cta"];
+  formCta?: StrapiProductDisplayVisitUsSection["formCta"];
+};
+
+export function resolveVisitUsCtaFields(raw?: VisitUsCtaSource | null): {
+  ctaLabel: string;
+  ctaUrl?: string;
+  bookVisitFormTag?: string;
+} {
+  const ctaLabel =
+    cleanText(raw?.cta?.label) ??
+    cleanText(raw?.formCta?.label) ??
+    VISIT_US_FALLBACK.ctaLabel;
+  const ctaUrl = cleanText(raw?.cta?.url);
+  const bookVisitFormTag = cleanText(raw?.formCta?.modalTag);
+
+  return {
+    ctaLabel,
+    ...(ctaUrl ? { ctaUrl } : {}),
+    ...(bookVisitFormTag ? { bookVisitFormTag } : {}),
+  };
+}
+
 export function mapVisitUsSection(
   raw?: StrapiProductDisplayVisitUsSection | null,
 ): NormalizedVisitUsSection {
@@ -25,8 +49,7 @@ export function mapVisitUsSection(
   const imageAlt =
     resolveCmsAltText(raw.image?.desktopImage) ?? "";
 
-  const ctaLabel = cleanText(raw.cta?.label) ?? VISIT_US_FALLBACK.ctaLabel;
-  const ctaUrl = cleanText(raw.cta?.url);
+  const { ctaLabel, ctaUrl, bookVisitFormTag } = resolveVisitUsCtaFields(raw);
 
   return {
     title: cleanText(raw.sectionTitle) ?? VISIT_US_FALLBACK.title,
@@ -36,7 +59,8 @@ export function mapVisitUsSection(
       mobileSrc && mobileSrc !== imageSrc ? mobileSrc : undefined,
     imageAlt,
     ctaLabel,
-    ctaUrl,
+    ...(ctaUrl ? { ctaUrl } : {}),
+    ...(bookVisitFormTag ? { bookVisitFormTag } : {}),
   };
 }
 

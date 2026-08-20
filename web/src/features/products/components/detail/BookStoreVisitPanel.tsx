@@ -713,7 +713,7 @@ const storeListTitleClassName =
   "font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl";
 
 const selectedStoreCardClassName =
-  "flex flex-col gap-4 bg-gray300 px-4 py-6 lg:px-10 lg:py-8";
+  "flex flex-col gap-4 bg-gray300 px-4 py-6 lg:px-6 lg:py-6";
 
 const unselectedStoreButtonClassName =
   "flex w-full items-center px-4 py-6 text-left font-larken text-xl font-light leading-110 text-darkblack lg:px-10 lg:py-8 lg:text-2xl";

@@ -1,7 +1,7 @@
 "use client";
 
-import ProductDetailVisitUsSection from "@/features/products/components/detail/ProductDetailVisitUsSection";
 import type { NormalizedContactPage } from "@/services/contact/contact-page.types";
+import ProductDetailVisitUsSection from "@/features/products/components/detail/ProductDetailVisitUsSection";
 import ContactHeroSection from "./ContactHeroSection";
 import ContactInfoSection from "./ContactInfoSection";
 import ContactFormSection from "./ContactFormSection";
@@ -11,13 +11,17 @@ type ContactPageProps = {
 };
 
 const ContactPage = ({ page }: ContactPageProps) => {
+  const hasInfoSection = Boolean(page.intro) || page.infoCards.length > 0;
+
   return (
     <>
-      <ContactHeroSection hero={page.hero} />
+      {page.hero ? <ContactHeroSection hero={page.hero} /> : null}
       <div className="flex flex-col gap-16 pt-16 md:gap-[100px] md:px-0 md:py-0">
-        <ContactInfoSection intro={page.intro} infoCards={page.infoCards}/>
-        <ContactFormSection form={page.form} />
-        <ProductDetailVisitUsSection visitUs={page.visitUs} />
+        {hasInfoSection ? (
+          <ContactInfoSection intro={page.intro} infoCards={page.infoCards} />
+        ) : null}
+        {page.form ? <ContactFormSection form={page.form} /> : null}
+        {page.visitUs ? <ProductDetailVisitUsSection visitUs={page.visitUs} /> : null}
       </div>
     </>
   );

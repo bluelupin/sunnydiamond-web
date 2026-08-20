@@ -20,6 +20,10 @@ const ProductDetailVisitUsSection = ({
 }: ProductDetailVisitUsSectionProps) => {
   const [isBookVisitOpen, setIsBookVisitOpen] = useState(false);
   const content = visitUs ?? VISIT_US_FALLBACK;
+  const ctaLabel = content.ctaLabel.trim();
+  const bookVisitFormTag = productId
+    ? "product-store-visit"
+    : content.bookVisitFormTag;
 
   return (
     <>
@@ -57,14 +61,16 @@ const ProductDetailVisitUsSection = ({
                 {content.description}
               </p>
             </div>
-            <DetailTextLink
-              href={content.ctaUrl}
-              onClick={content.ctaUrl ? undefined : () => setIsBookVisitOpen(true)}
-              className="uppercase tracking-caption"
-              light
-            >
-              {content.ctaLabel}
-            </DetailTextLink>
+            {ctaLabel ? (
+              <DetailTextLink
+                href={content.ctaUrl}
+                onClick={content.ctaUrl ? undefined : () => setIsBookVisitOpen(true)}
+                className="uppercase tracking-caption"
+                light
+              >
+                {ctaLabel}
+              </DetailTextLink>
+            ) : null}
           </div>
         </div>
       </section>
@@ -72,7 +78,7 @@ const ProductDetailVisitUsSection = ({
       <BookStoreVisitPanel
         open={isBookVisitOpen}
         onClose={() => setIsBookVisitOpen(false)}
-        submissionFormTag="product-store-visit"
+        submissionFormTag={bookVisitFormTag}
         productName={productName}
         productId={productId}
       />

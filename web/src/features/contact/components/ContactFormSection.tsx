@@ -2,13 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { Check } from "lucide-react";
 import Reveal from "@/shared/Animation/Reveal";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
 import { useToast } from "@/shared/hooks/use-toast";
-import { buildPolicyCertificationsHref } from "@/features/cms/utils/policyCertificationsRoutes";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import { useAuth } from "@/features/auth/context/AuthContext";
@@ -24,10 +22,6 @@ import {
 } from "@/shared/utils/formValidation";
 import { cn } from "@/shared/utils/cn";
 
-const consentLinkClassName =
-  "border-b border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack";
-
-const mobileConsentLinkClassName = "font-gill font-normal text-neutral500";
 
 const contactLabelClassName =
   "font-gill text-base font-normal leading-110 text-darkblack";
@@ -133,13 +127,18 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
   const { errors, isValid, submitted, markTouched, showError, validateSubmit, resetValidation } =
     useAppointmentFormValidation(formValues, validationOptions);
 
+  const reasonRequired = reasonOptions.length > 0 || Boolean(form.fields.reasonLabel);
+
   const isFormReady = useMemo(
-    () => isValid && reason.trim().length > 0 && consentAccepted,
-    [isValid, reason, consentAccepted],
+    () =>
+      isValid &&
+      (!reasonRequired || reason.trim().length > 0) &&
+      (!form.requiresConsent || consentAccepted),
+    [isValid, reason, consentAccepted, form.requiresConsent, reasonRequired],
   );
 
-  const showReasonError = submitted && !reason.trim();
-  const showConsentError = submitted && !consentAccepted;
+  const showReasonError = submitted && reasonRequired && !reason.trim();
+  const showConsentError = submitted && form.requiresConsent && !consentAccepted;
 
   // Prefill from My Profile once when logged in; never overwrite fields the user already typed.
   useEffect(() => {
@@ -180,14 +179,16 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
         if (!cmsForm) return;
 
         setFormTag(cmsForm.formTag);
-        setSubmitLabel(cmsForm.submitButtonText || form.submitLabel);
+        if (cmsForm.submitButtonText) {
+          setSubmitLabel(cmsForm.submitButtonText);
+        }
 
         if (cmsForm.purposeOptions.length > 0) {
           setReasonOptions(cmsForm.purposeOptions);
         }
       })
       .catch(() => {
-        // Page CMS / static fallback content is sufficient when form fetch fails.
+        // Page-level CMS form config is used when live form fetch fails.
       });
 
     return () => controller.abort();
@@ -209,7 +210,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
     event.preventDefault();
 
     validateSubmit(async () => {
-      if (!reason.trim() || !consentAccepted) {
+      if ((reasonRequired && !reason.trim()) || (form.requiresConsent && !consentAccepted)) {
         return;
       }
 
@@ -227,10 +228,9 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
           sourcePage: "/contact",
         });
 
-        toast({
-          title: form.successTitle,
-          description: form.successDescription,
-        });
+        if (form.successDescription) {
+          toast({ description: form.successDescription });
+        }
         resetForm();
       } catch (error) {
         toast({
@@ -264,9 +264,11 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-6">
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="contact-name" className={contactLabelClassName}>
-                    {form.fields.nameLabel}
-                  </label>
+                  {form.fields.nameLabel ? (
+                    <label htmlFor="contact-name" className={contactLabelClassName}>
+                      {form.fields.nameLabel}
+                    </label>
+                  ) : null}
                   <input
                     id="contact-name"
                     type="text"
@@ -274,7 +276,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
                     onChange={(event) => setName(event.target.value)}
                     onBlur={() => markTouched("name")}
                     autoComplete="name"
-                    placeholder={form.fields.mobileFieldPlaceholder}
+                    placeholder={form.fields.fieldPlaceholder}
                     aria-invalid={showError("name") || undefined}
                     aria-describedby={showError("name") ? "contact-name-error" : undefined}
                     className={cn(
@@ -291,9 +293,11 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div>
                     <div className="flex h-[82px] flex-col items-start justify-between md:h-auto md:gap-2">
-                      <label htmlFor="contact-phone" className={contactPhoneLabelClassName}>
-                        {form.fields.phoneLabel}
-                      </label>
+                      {form.fields.phoneLabel ? (
+                        <label htmlFor="contact-phone" className={contactPhoneLabelClassName}>
+                          {form.fields.phoneLabel}
+                        </label>
+                      ) : null}
                       <div
                         className={cn(
                           "flex h-14 w-full items-center gap-2 bg-[#F2F2F2] p-3",
@@ -329,7 +333,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
                           }
                           onBlur={() => markTouched("phone")}
                           autoComplete="tel-national"
-                          placeholder={form.fields.mobileFieldPlaceholder}
+                          placeholder={form.fields.fieldPlaceholder}
                           aria-invalid={showError("phone") || undefined}
                           aria-describedby={showError("phone") ? "contact-phone-error" : undefined}
                           className="min-w-0 flex-1 bg-transparent font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600"
@@ -343,9 +347,11 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <label htmlFor="contact-email" className={contactLabelClassName}>
-                      {form.fields.emailLabel}
-                    </label>
+                    {form.fields.emailLabel ? (
+                      <label htmlFor="contact-email" className={contactLabelClassName}>
+                        {form.fields.emailLabel}
+                      </label>
+                    ) : null}
                     <input
                       id="contact-email"
                       type="email"
@@ -353,7 +359,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
                       onChange={(event) => setEmail(event.target.value)}
                       onBlur={() => markTouched("email")}
                       autoComplete="email"
-                      placeholder={form.fields.mobileFieldPlaceholder}
+                      placeholder={form.fields.fieldPlaceholder}
                       aria-invalid={showError("email") || undefined}
                       aria-describedby={showError("email") ? "contact-email-error" : undefined}
                       className={cn(
@@ -368,17 +374,20 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
                   </div>
                 </div>
 
+                {form.fields.reasonLabel || reasonOptions.length > 0 ? (
                 <div>
                   <div className="flex h-[82px] flex-col items-start justify-between md:h-auto md:gap-2">
-                    <label htmlFor="contact-reason" className={contactLabelClassName}>
-                      {form.fields.reasonLabel}
-                    </label>
+                    {form.fields.reasonLabel ? (
+                      <label htmlFor="contact-reason" className={contactLabelClassName}>
+                        {form.fields.reasonLabel}
+                      </label>
+                    ) : null}
                     <InlineCustomSelect
                       id="contact-reason"
-                      label={form.fields.reasonLabel}
+                      label={form.fields.reasonLabel ?? "Reason"}
                       value={reason}
                       options={reasonOptions}
-                      placeholder={form.fields.mobileReasonPlaceholder}
+                      placeholder={form.fields.reasonPlaceholder}
                       onChange={setReason}
                       hideLabel
                       labelClassName={contactLabelClassName}
@@ -392,17 +401,20 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
                     <FormFieldError id="contact-reason-error" message="Please select a reason" />
                   ) : null}
                 </div>
+                ) : null}
 
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="contact-message" className={contactLabelClassName}>
-                    {form.fields.messageLabel}
-                  </label>
+                  {form.fields.messageLabel ? (
+                    <label htmlFor="contact-message" className={contactLabelClassName}>
+                      {form.fields.messageLabel}
+                    </label>
+                  ) : null}
                   <textarea
                     id="contact-message"
                     value={message}
                     onChange={(event) => setMessage(event.target.value)}
                     onBlur={() => markTouched("note")}
-                    placeholder={form.fields.mobileMessagePlaceholder}
+                    placeholder={form.fields.messagePlaceholder}
                     rows={4}
                     aria-invalid={showError("note") || undefined}
                     aria-describedby={showError("note") ? "contact-message-error" : undefined}
@@ -418,47 +430,22 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
                 </div>
               </div>
 
+              {form.requiresConsent && form.consentLabel ? (
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                   <ContactConsentCheckbox
                     checked={consentAccepted}
                     onChange={setConsentAccepted}
                   />
-                  <p className="hidden min-w-0 flex-1 font-gill text-base font-light leading-110 text-darkblack md:block">
-                    {form.consentPrefix}{" "}
-                    <Link href="/terms-and-conditions" className={consentLinkClassName}>
-                      {form.termsLabel}
-                    </Link>{" "}
-                    <span className="font-gill font-normal">and</span>{" "}
-                    <Link
-                      href={buildPolicyCertificationsHref("privacy-policy")}
-                      className={consentLinkClassName}
-                    >
-                      {form.privacyLabel}
-                    </Link>
-                    {form.consentSuffix}
-                  </p>
-                  <p className="min-w-0 flex-1 font-gill text-sm leading-110 text-neutral500 md:hidden">
-                    <span className="font-light">{form.consentPrefix} </span>
-                    <span className="font-normal">
-                      <Link href="/terms-and-conditions" className={mobileConsentLinkClassName}>
-                        {form.mobileTermsLabel}
-                      </Link>
-                      {" and "}
-                      <Link
-                        href={buildPolicyCertificationsHref("privacy-policy")}
-                        className={mobileConsentLinkClassName}
-                      >
-                        {form.mobilePrivacyLabel}
-                      </Link>
-                      {form.mobileConsentSuffix}
-                    </span>
+                  <p className="min-w-0 flex-1 font-gill text-sm font-light leading-110 text-darkblack md:text-base">
+                    {form.consentLabel}
                   </p>
                 </div>
                 {showConsentError ? (
-                  <FormFieldError message={form.consentError} />
+                  <FormFieldError message="Please accept the terms to continue." />
                 ) : null}
               </div>
+              ) : null}
             </div>
 
             <button

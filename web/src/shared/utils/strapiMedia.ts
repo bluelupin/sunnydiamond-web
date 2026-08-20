@@ -83,3 +83,21 @@ export function resolveCmsAltText(image: unknown): string | undefined {
 
   return cleanAlt(file.alternativeText) ?? cleanAlt(file.alternateText);
 }
+
+/** Resolve visible caption from a Strapi media file's `caption` field only. */
+export function resolveCmsCaption(image: unknown): string | undefined {
+  if (image == null) return undefined;
+
+  if (Array.isArray(image)) {
+    for (const entry of image) {
+      const caption = resolveCmsCaption(entry);
+      if (caption) return caption;
+    }
+    return undefined;
+  }
+
+  const payload = extractStrapiImage(image);
+  if (!payload || typeof payload !== "object") return undefined;
+
+  return cleanAlt((payload as { caption?: string | null }).caption);
+}

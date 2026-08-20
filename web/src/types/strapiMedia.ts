@@ -2,6 +2,7 @@ export type StrapiMediaAttributes = {
   url?: string | null;
   alternativeText?: string | null;
   alternateText?: string | null;
+  caption?: string | null;
   width?: number | null;
   height?: number | null;
 };
