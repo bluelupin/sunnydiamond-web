@@ -6,8 +6,7 @@ import { mapOccasionCards } from "./homepage.mapper";
 import type { StrapiOccasionCard } from "./homepage.strapi.types";
 
 const OCCASIONS_POPULATE_QUERY =
-  "sort[0]=sortOrder:asc" +
-  "&populate[image][populate][desktopImage]=true" +
+  "populate[image][populate][desktopImage]=true" +
   "&populate[image][populate][mobileImage]=true" +
   "&populate[cta]=true";
 

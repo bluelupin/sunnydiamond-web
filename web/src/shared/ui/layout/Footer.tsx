@@ -8,7 +8,7 @@ import { useHomepageShell } from "@/hooks/homepage/useHomepageShell";
 import { resolveShellFooterLinkGroups } from "@/shared/lib/shellNavigation";
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import PageContainer from "@/shared/ui/layout/PageContainer";
-import TrustBadgeSection from "@/features/cms/components/common/TrustBadges";
+import { FooterTrustBadgeSection } from "@/features/cms/components/common/TrustBadges";
 import Reveal from "@/shared/Animation/Reveal";
 import { cn } from "@/shared/utils/cn";
 import ResponsiveImage from "../ResponsiveImage";
@@ -131,7 +131,7 @@ const Footer = ({ className }: { className?: string }) => {
 
   return (
     <footer className={cn(pathName === "/cart" || pathName === "/checkout" ? "bg-gray200" : "bg-gray300", className)}>
-      <TrustBadgeSection />
+      <FooterTrustBadgeSection />
       <PageContainer className="flex flex-col gap-20 lg:gap-[120px] lg:py-100 py-16">
         <div className="flex flex-col items-center xl:gap-12 md:gap-10 gap-8 lg:flex-row lg:items-start lg:justify-start">
           <Reveal direction="up" className="shrink-0">

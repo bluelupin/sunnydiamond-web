@@ -1,12 +1,8 @@
 import type { StaticImageData } from "next/image";
-import fallBackImage from "@/assets/fallBackImage.png";
-import { homeContent } from "@/features/cms/data/content";
-import { products } from "@/features/products/data/products";
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 import {
-  ALANKARA_FALLBACK_PRODUCTS,
-  ALANKARA_DEFAULT_ACTIVE_INDEX,
   ALANKARA_PRODUCT_COUNT,
+  ALANKARA_THUMBNAIL_CROPS,
   type AlankaraCollectionProduct,
 } from "@/shared/ui/collection/alankaraCollection.types";
 import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
@@ -23,97 +19,67 @@ export type ResolvedAlankaraCollectionSection = {
   description: string;
   collectionImage: string | StaticImageData;
   collectionImageMobile: string | StaticImageData;
+  collectionDesktopAlt: string;
+  collectionMobileAlt: string;
   collectionCta?: { label: string; href: string };
   products: AlankaraCollectionProduct[];
   /** Ordered Magento SKUs from CMS (empty when not configured). */
   productSkus: string[];
   featuredProductSku?: string;
   defaultActiveIndex: number;
+  productCtaLabel?: string;
 };
 
-const COLLECTION_FALLBACK = homeContent.alankara.collection;
+const THUMBNAIL_CROPS = [
+  ALANKARA_THUMBNAIL_CROPS.first,
+  ALANKARA_THUMBNAIL_CROPS.second,
+  ALANKARA_THUMBNAIL_CROPS.third,
+  ALANKARA_THUMBNAIL_CROPS.fourth,
+  ALANKARA_THUMBNAIL_CROPS.fifth,
+] as const;
 
-function getFallbackThumbnailCrop(index: number) {
-  return ALANKARA_FALLBACK_PRODUCTS[index % ALANKARA_FALLBACK_PRODUCTS.length];
-}
-
-function buildFallbackProduct(index: number, productId: string): AlankaraCollectionProduct {
-  const catalogProduct = products.find((item) => item.id === productId);
-  const figmaFallback = getFallbackThumbnailCrop(index);
-
-  return {
-    id: productId,
-    name: catalogProduct?.name || figmaFallback.name,
-    image: fallBackImage,
-    thumbnailImage: fallBackImage,
-    thumbnailCrop: figmaFallback.thumbnailCrop,
-    desktopCrop: figmaFallback.desktopCrop,
-    href: `/product/${productId}`,
-    ctaLabel: homeContent.alankara.product.cta.label,
-  };
-}
-
-function getCatalogFallbackProducts(): AlankaraCollectionProduct[] {
-  return homeContent.alankara.productIds
-    .slice(0, ALANKARA_PRODUCT_COUNT)
-    .map((productId, index) => buildFallbackProduct(index, productId));
+function getThumbnailCrop(index: number) {
+  return THUMBNAIL_CROPS[index % THUMBNAIL_CROPS.length];
 }
 
 function buildCmsProduct(
   index: number,
   cmsProduct: FeaturedCollectionImage,
+  ctaLabel?: string,
 ): AlankaraCollectionProduct | null {
   const productId =
     cmsProduct?.id != null && String(cmsProduct.id).trim() !== ""
       ? String(cmsProduct.id)
       : null;
   const name = cmsProduct?.name?.trim();
-  if (!name && !productId) {
+  const cmsImage = cmsProduct?.image ? resolveCmsMediaUrl(cmsProduct.image) : "";
+
+  if (!name || !cmsImage) {
     return null;
   }
 
-  const catalogProduct = productId
-    ? products.find((item) => item.id === productId)
-    : undefined;
-  const figmaFallback = getFallbackThumbnailCrop(index);
-  const cmsImage = cmsProduct?.image ? resolveCmsMediaUrl(cmsProduct.image) : "";
+  const crop = getThumbnailCrop(index);
 
   return {
     id: productId ?? `alankara-cms-${index}`,
-    name: name || catalogProduct?.name || figmaFallback.name,
-    image: cmsImage || fallBackImage,
-    thumbnailImage: cmsImage || fallBackImage,
-    thumbnailCrop: figmaFallback.thumbnailCrop,
-    desktopCrop: figmaFallback.desktopCrop,
-    href: productId ? `/product/${productId}` : "/jewellery",
-    ctaLabel: homeContent.alankara.product.cta.label,
+    name,
+    image: cmsImage,
+    thumbnailImage: cmsImage,
+    thumbnailCrop: crop,
+    desktopCrop: crop,
+    href: productId ? `/product/${productId}` : "",
+    ...(ctaLabel ? { ctaLabel } : {}),
   };
 }
 
 function resolveLegacyCmsProducts(
   cmsProducts: FeaturedCollectionImage[] | null | undefined,
+  ctaLabel?: string,
 ): AlankaraCollectionProduct[] {
-  const cmsMapped = (Array.isArray(cmsProducts) ? cmsProducts : [])
-    .map((product, index) => buildCmsProduct(index, product))
-    .filter((product): product is AlankaraCollectionProduct => product !== null);
-
-  if (cmsMapped.length === 0) {
-    return getCatalogFallbackProducts();
-  }
-
-  if (cmsMapped.length >= ALANKARA_PRODUCT_COUNT) {
-    return cmsMapped.slice(0, ALANKARA_PRODUCT_COUNT);
-  }
-
-  const merged = [...cmsMapped];
-  for (const fallback of getCatalogFallbackProducts()) {
-    if (merged.length >= ALANKARA_PRODUCT_COUNT) break;
-    if (!merged.some((item) => String(item.id) === String(fallback.id))) {
-      merged.push(fallback);
-    }
-  }
-
-  return merged.slice(0, ALANKARA_PRODUCT_COUNT);
+  return (Array.isArray(cmsProducts) ? cmsProducts : [])
+    .map((product, index) => buildCmsProduct(index, product, ctaLabel))
+    .filter((product): product is AlankaraCollectionProduct => product !== null && Boolean(product.href))
+    .slice(0, ALANKARA_PRODUCT_COUNT);
 }
 
 /** Normalize CMS SKU list: productSkus order, featured first, deduped. */
@@ -142,29 +108,17 @@ export function resolveAlankaraProductSkus(
   return { productSkus: ordered, featuredProductSku };
 }
 
-const placeholderImageSrc = getImageSrc(fallBackImage);
-
-function isGenericPlaceholderImage(source: string | StaticImageData | null | undefined): boolean {
-  if (!source || source === fallBackImage) {
-    return true;
-  }
-
-  const src = getImageSrc(source);
-  return !src || src === placeholderImageSrc;
-}
-
-/** Magento catalog photo first; occasions placeholder only when Magento has none. */
 function resolveAlankaraMagentoProductImage(
   product: JewelleryListingProduct,
-): string | StaticImageData {
+): string | null {
   for (const candidate of [product.primaryImage, product.modalImage, product.hoverImage]) {
-    if (!candidate || isGenericPlaceholderImage(candidate)) {
-      continue;
+    const src = candidate ? getImageSrc(candidate) : "";
+    if (src) {
+      return src;
     }
-    return candidate;
   }
 
-  return fallBackImage;
+  return null;
 }
 
 export function mapMagentoProductsToAlankaraCollection(
@@ -176,44 +130,41 @@ export function mapMagentoProductsToAlankaraCollection(
     magentoProducts.map((product) => [product.sku.trim(), product] as const),
   );
 
-  const ctaLabel = options?.ctaLabel ?? homeContent.alankara.product.cta.label;
-  const products: AlankaraCollectionProduct[] = [];
+  const ctaLabel = options?.ctaLabel?.trim();
+  const mappedProducts: AlankaraCollectionProduct[] = [];
 
   for (const sku of orderedSkus) {
     const magento = bySku.get(sku);
     if (!magento) continue;
 
-    const index = products.length;
-    const figmaFallback = getFallbackThumbnailCrop(index);
     const image = resolveAlankaraMagentoProductImage(magento);
+    if (!image) continue;
 
-    products.push({
+    const index = mappedProducts.length;
+    const crop = getThumbnailCrop(index);
+
+    mappedProducts.push({
       id: magento.sku,
       name: magento.name,
       image,
       thumbnailImage: image,
-      thumbnailCrop: figmaFallback.thumbnailCrop,
-      desktopCrop: figmaFallback.desktopCrop,
+      thumbnailCrop: crop,
+      desktopCrop: crop,
       href: `/product/${magento.urlKey}`,
-      ctaLabel,
+      ...(ctaLabel ? { ctaLabel } : {}),
     });
 
-    if (products.length >= ALANKARA_PRODUCT_COUNT) break;
+    if (mappedProducts.length >= ALANKARA_PRODUCT_COUNT) break;
   }
 
   const featuredSku = options?.featuredProductSku?.trim();
-  let defaultActiveIndex = ALANKARA_DEFAULT_ACTIVE_INDEX;
-  if (featuredSku && products.length > 0) {
-    const featuredIndex = products.findIndex((item) => String(item.id) === featuredSku);
-    defaultActiveIndex =
-      featuredIndex >= 0
-        ? featuredIndex
-        : Math.min(ALANKARA_DEFAULT_ACTIVE_INDEX, products.length - 1);
-  } else if (products.length > 0) {
-    defaultActiveIndex = Math.min(ALANKARA_DEFAULT_ACTIVE_INDEX, products.length - 1);
+  let defaultActiveIndex = 0;
+  if (featuredSku && mappedProducts.length > 0) {
+    const featuredIndex = mappedProducts.findIndex((item) => String(item.id) === featuredSku);
+    defaultActiveIndex = featuredIndex >= 0 ? featuredIndex : 0;
   }
 
-  return { products, defaultActiveIndex };
+  return { products: mappedProducts, defaultActiveIndex };
 }
 
 export function resolveAlankaraCollectionSection(
@@ -231,38 +182,37 @@ export function resolveAlankaraCollectionSection(
     media as Parameters<typeof resolveResponsiveCmsImage>[0],
   );
 
-  const ctaUrl =
-    section?.cta?.url ?? section?.cta?.to ?? COLLECTION_FALLBACK.cta.to;
-  const ctaLabel =
-    section?.cta?.label ?? section?.label?.label ?? COLLECTION_FALLBACK.cta.label;
+  const ctaUrl = section?.cta?.url ?? section?.cta?.to ?? "";
+  const ctaLabel = section?.cta?.label ?? section?.label?.label ?? "";
+  const productCtaLabel = section?.label?.label?.trim() || section?.cta?.label?.trim() || undefined;
 
-  // Prefer Magento SKU path; until Magento resolves, keep legacy/static product cards.
-  const fallbackProducts =
-    productSkus.length > 0
-      ? getCatalogFallbackProducts()
-      : resolveLegacyCmsProducts(section?.products);
+  const legacyProducts =
+    productSkus.length === 0
+      ? resolveLegacyCmsProducts(section?.products, productCtaLabel)
+      : [];
+
+  const desktopCollectionImage = collectionImages.desktopUrl || collectionImages.mobileUrl || "";
+  const mobileCollectionImage = collectionImages.mobileUrl || collectionImages.desktopUrl || "";
 
   return {
     isActive: section?.isActive,
-    title: section?.sectionTitle?.trim() || COLLECTION_FALLBACK.title,
-    description:
-      descriptionOverride ||
-      section?.description?.trim() ||
-      COLLECTION_FALLBACK.description,
-    collectionImage: collectionImages.desktopUrl || fallBackImage,
-    collectionImageMobile: collectionImages.mobileUrl || fallBackImage,
-    collectionCta: ctaUrl
-      ? {
-          label: ctaLabel,
-          href: ctaUrl,
-        }
-      : undefined,
-    products: fallbackProducts,
+    title: section?.sectionTitle?.trim() || "",
+    description: descriptionOverride || section?.description?.trim() || "",
+    collectionImage: desktopCollectionImage,
+    collectionImageMobile: mobileCollectionImage,
+    collectionDesktopAlt: collectionImages.desktopAlt,
+    collectionMobileAlt: collectionImages.mobileAlt,
+    collectionCta:
+      ctaUrl && ctaLabel
+        ? {
+            label: ctaLabel.trim(),
+            href: ctaUrl,
+          }
+        : undefined,
+    products: legacyProducts,
     productSkus,
     featuredProductSku,
-    defaultActiveIndex: Math.min(
-      ALANKARA_DEFAULT_ACTIVE_INDEX,
-      Math.max(0, fallbackProducts.length - 1),
-    ),
+    defaultActiveIndex: 0,
+    productCtaLabel,
   };
 }

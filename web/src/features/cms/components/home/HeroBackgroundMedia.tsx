@@ -10,14 +10,16 @@ const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 type HeroBackgroundMediaProps = {
   desktopImageUrl: string;
   mobileImageUrl?: string;
-  alt: string;
+  desktopAlt: string;
+  mobileAlt: string;
   cmsVideoUrl?: string;
 };
 
 const HeroBackgroundMedia = ({
   desktopImageUrl,
   mobileImageUrl,
-  alt,
+  desktopAlt,
+  mobileAlt,
   cmsVideoUrl,
 }: HeroBackgroundMediaProps) => {
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
@@ -78,7 +80,9 @@ const HeroBackgroundMedia = ({
       <ResponsiveImage
         desktopSrc={desktopImageUrl || mobileImageUrl || posterSrc || ""}
         mobileSrc={mobileImageUrl}
-        alt={alt}
+        alt={desktopAlt || mobileAlt}
+        desktopAlt={desktopAlt}
+        mobileAlt={mobileAlt}
         priority
         width={1920}
         height={1080}

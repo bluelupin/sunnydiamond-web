@@ -14,17 +14,21 @@ export type ResolvedHeroContent = {
   primaryCtaLabel: string;
   desktopImageUrl: string;
   mobileImageUrl?: string;
-  heroAlt: string;
+  desktopHeroAlt: string;
+  mobileHeroAlt: string;
   heroVideoUrl?: string;
 };
 
 export type ResolvedCraftingRarityContent = {
+  isActive?: boolean | null;
   subtitleLines: string[];
   secondaryCtaUrl: string;
   secondaryCtaLabel: string;
   categories: CategoryNavigationItem[];
   cutoutDesktopUrl?: string;
   cutoutMobileUrl?: string;
+  cutoutDesktopAlt?: string;
+  cutoutMobileAlt?: string;
   cutoutAlt?: string;
 };
 
@@ -76,11 +80,8 @@ export function resolveHeroContent(
     resolveCmsMediaUrl(heroImage?.mobileImage ?? heroImage?.desktopImage ?? heroImage) ??
     undefined;
 
-  const heroAlt =
-    heroImage?.altText ||
-    resolveCmsAltText(heroImage?.desktopImage ?? heroImage) ||
-    resolveCmsAltText(heroImage?.mobileImage ?? heroImage?.desktopImage) ||
-    "";
+  const desktopHeroAlt = resolveCmsAltText(heroImage?.desktopImage) ?? "";
+  const mobileHeroAlt = resolveCmsAltText(heroImage?.mobileImage) ?? "";
 
   return {
     eyebrow: hero.eyebrow ?? "",
@@ -89,7 +90,8 @@ export function resolveHeroContent(
     primaryCtaLabel: hero.primaryCta?.label ?? "",
     desktopImageUrl,
     mobileImageUrl,
-    heroAlt,
+    desktopHeroAlt,
+    mobileHeroAlt,
     heroVideoUrl: getCmsAssetUrl(hero.videoUrl),
   };
 }
@@ -97,12 +99,11 @@ export function resolveHeroContent(
 function resolveCraftingCategories(
   shopping?: HomepageShoppingBlocksData | null,
 ): CategoryNavigationItem[] {
-  const items = shopping?.categoryNavigation;
+  const items =
+    shopping?.homepage?.categoryNavigation ?? shopping?.categoryNavigation;
   if (!Array.isArray(items)) return [];
 
-  return [...items]
-    .filter((item) => item?.isActive !== false)
-    .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0));
+  return items.filter((item) => item?.isActive !== false);
 }
 
 export function resolveCraftingRarityContent(
@@ -110,36 +111,26 @@ export function resolveCraftingRarityContent(
   editorial?: HomepageEditorialBlocksData | null,
   shopping?: HomepageShoppingBlocksData | null,
 ): ResolvedCraftingRarityContent {
-  const hero = shell?.homepage?.hero || shell?.hero;
   const craftingBrilliance = editorial?.craftingBrillianceSection ?? null;
 
-  const titleSource =
-    craftingBrilliance?.title?.trim() || hero?.subtitle?.trim() || "";
+  const titleSource = craftingBrilliance?.title?.trim() || "";
 
   const cutoutImages = resolveResponsiveCmsImage(craftingBrilliance?.cutoutImage);
-  const cutoutAlt =
-    cutoutImages.alt ||
-    craftingBrilliance?.cutoutImage?.altText?.trim() ||
-    "";
 
   return {
+    isActive: craftingBrilliance?.isActive,
     subtitleLines: splitCraftingTitleLines(titleSource),
     secondaryCtaUrl:
-      craftingBrilliance?.cta?.url ??
-      craftingBrilliance?.cta?.to ??
-      hero?.secondaryCta?.url ??
-      hero?.secondaryCta?.to ??
-      "/jewellery",
-    secondaryCtaLabel:
-      craftingBrilliance?.cta?.label?.trim() ??
-      hero?.secondaryCta?.label ??
-      "Explore Products",
+      craftingBrilliance?.cta?.url ?? craftingBrilliance?.cta?.to ?? "",
+    secondaryCtaLabel: craftingBrilliance?.cta?.label?.trim() ?? "",
     categories: resolveCraftingCategories(shopping),
     ...(cutoutImages.desktopUrl || cutoutImages.mobileUrl
       ? {
           cutoutDesktopUrl: cutoutImages.desktopUrl || cutoutImages.mobileUrl,
           cutoutMobileUrl: cutoutImages.mobileUrl || cutoutImages.desktopUrl,
-          cutoutAlt,
+          cutoutDesktopAlt: cutoutImages.desktopAlt,
+          cutoutMobileAlt: cutoutImages.mobileAlt,
+          cutoutAlt: cutoutImages.alt,
         }
       : {}),
   };

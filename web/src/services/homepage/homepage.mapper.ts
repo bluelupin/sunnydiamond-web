@@ -7,7 +7,7 @@ import type {
   GiftingBanner,
   HomepageShoppingBlocksData,
 } from "@/types/homepage/categoryNavigation";
-import type { DiamondsForEveryoneSectionData } from "@/types/homepage/diamondsForEveryoneSection";
+import type { DiamondsForEveryoneSectionData, SavingsPlanStep } from "@/types/homepage/diamondsForEveryoneSection";
 import type {
   DiamondSourcingSectionData,
   HomepageEditorialBlocksData,
@@ -40,6 +40,7 @@ import type {
   StrapiResponsiveImageBlock,
   StrapiShowroomSection,
   StrapiCraftsmanshipStep,
+  StrapiSavingsPlanStep,
   StrapiTextSection,
   StrapiTrustBadge,
 } from "./homepage.strapi.types";
@@ -361,8 +362,40 @@ function mapTextSectionToBespoke(raw?: StrapiTextSection | null): BespokeForYouS
     isActive,
     primaryCta: mapCta(raw.primaryCta ?? raw.cta),
     secondaryCta: mapCta(raw.secondaryCta),
-    image: pickResponsiveImage(raw.image) as BespokeForYouSectionData["image"],
+    image: pickResponsiveImage(raw.backgroundImage, raw.image) as BespokeForYouSectionData["image"],
   };
+}
+
+function parseSavingsPlanStepNumber(label: string | undefined, index: number): number {
+  if (!label) return index + 1;
+  const digits = label.replace(/\D/g, "");
+  const parsed = Number.parseInt(digits, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : index + 1;
+}
+
+function mapDiamondsForEveryoneSteps(
+  rawSteps?: StrapiSavingsPlanStep[] | null,
+): SavingsPlanStep[] {
+  if (!Array.isArray(rawSteps)) return [];
+
+  const steps: SavingsPlanStep[] = [];
+
+  rawSteps.forEach((step, index) => {
+    if (step?.isActive === false) return;
+
+    const description = cleanText(step.description);
+    if (!description) return;
+
+    steps.push({
+      id: step.id,
+      description,
+      highlightedText: cleanText(step.highlightedText),
+      stepNumber: parseSavingsPlanStepNumber(cleanText(step.label), index),
+      isActive: step.isActive ?? true,
+    });
+  });
+
+  return steps;
 }
 
 function mapTextSectionToDiamondsForEveryone(
@@ -381,9 +414,7 @@ function mapTextSectionToDiamondsForEveryone(
     description: cleanText(raw.description),
     isActive,
     backgroundImage: pickResponsiveImage(raw.backgroundImage) as DiamondsForEveryoneSectionData["backgroundImage"],
-    steps: Array.isArray(raw.steps)
-      ? (raw.steps as DiamondsForEveryoneSectionData["steps"])
-      : undefined,
+    steps: mapDiamondsForEveryoneSteps(raw.steps as StrapiSavingsPlanStep[] | null | undefined),
     cta: mapCta(raw.cta ?? raw.primaryCta),
   };
 }
@@ -425,7 +456,6 @@ function mapCraftsmanshipSteps(rawSteps?: StrapiCraftsmanshipStep[] | null): Cra
 
   return rawSteps
     .filter((step) => step?.isActive !== false)
-    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
     .map((step, index) => {
       const icon = resolveResponsiveCmsImage(
         (step.icon ?? step.image) as CategoryNavigationImage | null | undefined,
@@ -435,7 +465,6 @@ function mapCraftsmanshipSteps(rawSteps?: StrapiCraftsmanshipStep[] | null): Cra
         id: step.id,
         title: cleanText(step.title),
         description: cleanText(step.description),
-        sortOrder: typeof step.sortOrder === "number" ? step.sortOrder : undefined,
         number: String(index + 1).padStart(2, "0"),
         isActive: step.isActive ?? true,
         iconUrl: icon.desktopUrl || icon.mobileUrl,
@@ -514,8 +543,7 @@ export function mapOccasionCards(
 
   return items
     .map(mapOccasionCard)
-    .filter((card): card is OccasionCard => card !== null)
-    .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0));
+    .filter((card): card is OccasionCard => card !== null);
 }
 
 function mapCraftingBrillianceSection(

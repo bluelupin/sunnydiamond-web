@@ -2,6 +2,7 @@ import CraftingRarityCategoryGrid from "@/features/cms/components/home/CraftingR
 import CraftingRarityCopyBlock from "@/features/cms/components/home/CraftingRarityCopyBlock";
 import Reveal from "@/shared/Animation/Reveal";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
+import { isSectionActive } from "@/shared/utils/cmsSection";
 import type { ResolvedCraftingRarityContent } from "@/lib/homepage/resolveHomepageAboveFold";
 
 const IMAGE_QUALITY = 75;
@@ -13,16 +14,29 @@ type CraftingRaritySectionProps = {
 
 const CraftingRaritySection = ({ id, content }: CraftingRaritySectionProps) => {
   const {
+    isActive,
     subtitleLines,
     secondaryCtaUrl,
     secondaryCtaLabel,
     categories,
     cutoutDesktopUrl,
     cutoutMobileUrl,
+    cutoutDesktopAlt,
+    cutoutMobileAlt,
     cutoutAlt,
   } = content;
 
   const hasCmsCutout = Boolean(cutoutDesktopUrl || cutoutMobileUrl);
+  const hasCopy = subtitleLines.length > 0;
+  const hasCategories = categories.length > 0;
+
+  if (!isSectionActive(isActive)) {
+    return null;
+  }
+
+  if (!hasCopy && !hasCategories && !hasCmsCutout) {
+    return null;
+  }
 
   return (
     <section id={id} className="w-full bg-white md:pb-12 pb-16">
@@ -36,7 +50,9 @@ const CraftingRaritySection = ({ id, content }: CraftingRaritySectionProps) => {
               <ResponsiveImage
                 desktopSrc={cutoutDesktopUrl || cutoutMobileUrl || ""}
                 mobileSrc={cutoutMobileUrl}
-                alt={cutoutAlt || ""}
+                alt={cutoutAlt || cutoutDesktopAlt || cutoutMobileAlt || ""}
+                desktopAlt={cutoutDesktopAlt}
+                mobileAlt={cutoutMobileAlt}
                 width={664}
                 height={850}
                 quality={IMAGE_QUALITY}
@@ -46,11 +62,13 @@ const CraftingRaritySection = ({ id, content }: CraftingRaritySectionProps) => {
             </div>
           </Reveal>
         ) : null}
-        <CraftingRarityCopyBlock
-          subtitleLines={subtitleLines}
-          secondaryCtaUrl={secondaryCtaUrl}
-          secondaryCtaLabel={secondaryCtaLabel}
-        />
+        {hasCopy ? (
+          <CraftingRarityCopyBlock
+            subtitleLines={subtitleLines}
+            secondaryCtaUrl={secondaryCtaUrl}
+            secondaryCtaLabel={secondaryCtaLabel}
+          />
+        ) : null}
       </div>
 
       <CraftingRarityCategoryGrid categories={categories} />

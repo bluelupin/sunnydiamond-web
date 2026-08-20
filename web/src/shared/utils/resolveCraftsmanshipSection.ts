@@ -1,6 +1,6 @@
 import type { CraftsmanshipSectionData } from "@/types/homepage/editorialBlocks";
 import type { CraftsmanshipStep } from "@/types/homepage/craftsmanshipSteps";
-import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { resolveResponsiveCmsImage } from "@/shared/utils/responsiveCmsImage";
 
 export type ResolvedCraftsmanshipSection = {
   isActive?: boolean | null;
@@ -8,15 +8,19 @@ export type ResolvedCraftsmanshipSection = {
   steps: CraftsmanshipStep[];
   desktopImageUrl?: string;
   mobileImageUrl?: string;
+  imageDesktopAlt: string;
+  imageMobileAlt: string;
   imageAlt: string;
   backgroundDesktopUrl?: string;
   backgroundMobileUrl?: string;
+  backgroundDesktopAlt: string;
+  backgroundMobileAlt: string;
   backgroundAlt: string;
   fromCms: boolean;
 };
 
 function getCraftsmanshipMedia(section: CraftsmanshipSectionData | null | undefined) {
-  return section?.image ?? section?.diamondImage;
+  return section?.image;
 }
 
 function resolveCraftsmanshipSteps(
@@ -30,60 +34,25 @@ function resolveCraftsmanshipSteps(
 export function resolveCraftsmanshipSection(
   section: CraftsmanshipSectionData | null | undefined,
 ): ResolvedCraftsmanshipSection {
-  const media = getCraftsmanshipMedia(section);
-  const responsiveMedia = media as
-    | (CraftsmanshipSectionData["image"] & {
-        data?: { attributes?: unknown };
-      })
-    | null
-    | undefined;
-  const desktopSource =
-    responsiveMedia?.desktopImage ??
-    responsiveMedia?.data?.attributes ??
-    responsiveMedia;
-  const mobileSource =
-    responsiveMedia?.mobileImage ??
-    responsiveMedia?.data?.attributes ??
-    responsiveMedia;
+  const imageMedia = resolveResponsiveCmsImage(getCraftsmanshipMedia(section));
+  const backgroundMedia = resolveResponsiveCmsImage(section?.backgroundImage);
 
-  const desktopImageUrl = resolveCmsMediaUrl(desktopSource);
-  const mobileImageUrl = resolveCmsMediaUrl(mobileSource);
-
-  const sectionTitle =
-    section?.sectionTitle?.trim() ||
-    section?.title?.trim() ||
-    "";
-
-  const imageAlt =
-    section?.image?.altText ||
-    resolveCmsAltText(desktopSource) ||
-    resolveCmsAltText(mobileSource) ||
-    sectionTitle;
-
-  const backgroundMedia = section?.backgroundImage;
-  const backgroundDesktopSource =
-    backgroundMedia?.desktopImage ?? backgroundMedia ?? null;
-  const backgroundMobileSource =
-    backgroundMedia?.mobileImage ?? backgroundMedia?.desktopImage ?? backgroundMedia ?? null;
-  const backgroundDesktopUrl = resolveCmsMediaUrl(backgroundDesktopSource);
-  const backgroundMobileUrl = resolveCmsMediaUrl(backgroundMobileSource);
-  const backgroundAlt =
-    backgroundMedia?.altText?.trim() ||
-    resolveCmsAltText(backgroundMedia) ||
-    resolveCmsAltText(backgroundDesktopSource) ||
-    resolveCmsAltText(backgroundMobileSource) ||
-    "";
+  const sectionTitle = section?.sectionTitle?.trim() || "";
 
   return {
     isActive: section?.isActive,
     sectionTitle,
     steps: resolveCraftsmanshipSteps(section?.steps),
-    desktopImageUrl,
-    mobileImageUrl,
-    imageAlt,
-    backgroundDesktopUrl,
-    backgroundMobileUrl,
-    backgroundAlt,
+    desktopImageUrl: imageMedia.desktopUrl,
+    mobileImageUrl: imageMedia.mobileUrl,
+    imageDesktopAlt: imageMedia.desktopAlt,
+    imageMobileAlt: imageMedia.mobileAlt,
+    imageAlt: imageMedia.alt || sectionTitle,
+    backgroundDesktopUrl: backgroundMedia.desktopUrl,
+    backgroundMobileUrl: backgroundMedia.mobileUrl,
+    backgroundDesktopAlt: backgroundMedia.desktopAlt,
+    backgroundMobileAlt: backgroundMedia.mobileAlt,
+    backgroundAlt: backgroundMedia.alt,
     fromCms: Boolean(section),
   };
 }

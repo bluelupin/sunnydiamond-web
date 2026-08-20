@@ -43,6 +43,7 @@ const FeaturedCollectionSection = ({
 
   const productSkus = collectionProps.productSkus;
   const featuredProductSku = collectionProps.featuredProductSku;
+  const productCtaLabel = collectionProps.productCtaLabel;
   const skuKey = productSkus.join("|");
 
   const hasServerPrefetch = prefetchedAlankara !== undefined;
@@ -78,6 +79,7 @@ const FeaturedCollectionSection = ({
         if (controller.signal.aborted) return;
         const mapped = mapMagentoProductsToAlankaraCollection(items, skus, {
           featuredProductSku,
+          ctaLabel: productCtaLabel,
         });
         setMagentoProducts(mapped.products.length > 0 ? mapped.products : null);
         setDefaultActiveIndex(mapped.defaultActiveIndex);
@@ -94,10 +96,23 @@ const FeaturedCollectionSection = ({
       });
 
     return () => controller.abort();
-  }, [hasServerPrefetch, skuKey, featuredProductSku, collectionProps.defaultActiveIndex, productSkus.length]);
+  }, [
+    hasServerPrefetch,
+    skuKey,
+    featuredProductSku,
+    productCtaLabel,
+    collectionProps.defaultActiveIndex,
+    productSkus.length,
+  ]);
 
   if (!isSectionActive(collectionProps.isActive)) {
     return null;
+  }
+
+  if (!featuredCollectionData || !collectionProps.title.trim()) {
+    if (!isShoppingLoading) {
+      return null;
+    }
   }
 
   if (isShoppingLoading || (productSkus.length > 0 && isMagentoLoading && !magentoProducts)) {
@@ -123,11 +138,17 @@ const FeaturedCollectionSection = ({
     );
   }
 
+  const displayProducts = magentoProducts ?? collectionProps.products;
+  if (!displayProducts.length) {
+    return null;
+  }
+
   const {
     productSkus: _skus,
     featuredProductSku: _featured,
     defaultActiveIndex: _default,
-    products: fallbackProducts,
+    products: _legacyProducts,
+    productCtaLabel: _productCtaLabel,
     ...alankaraProps
   } = collectionProps;
 
@@ -135,10 +156,10 @@ const FeaturedCollectionSection = ({
     <AlankaraCollection
       id={id}
       sectionHeading={sectionHeading}
-      defaultProductCtaLabel="Shop Now"
+      defaultProductCtaLabel={productCtaLabel}
       defaultActiveIndex={defaultActiveIndex}
       {...alankaraProps}
-      products={magentoProducts ?? fallbackProducts}
+      products={displayProducts}
     />
   );
 };

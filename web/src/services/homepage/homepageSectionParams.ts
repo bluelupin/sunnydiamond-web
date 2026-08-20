@@ -41,6 +41,9 @@ export const homepagePopulateParams = {
   diamondsForEveryoneSection: {
     populate: "diamondsForEveryoneSection",
   },
+  diamondsForEveryone: {
+    populate: "diamondsForEveryone",
+  },
   bespokeForYouCards: {
     populate: "bespokeForYouCards",
   },
