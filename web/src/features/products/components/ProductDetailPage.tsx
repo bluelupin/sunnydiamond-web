@@ -16,6 +16,7 @@ import { ChevronLeft } from "lucide-react";
 import ProductDetailSidebar from "./detail/ProductDetailSidebar";
 import ProductDetailHeroLayout from "./detail/ProductDetailHeroLayout";
 import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
+import type { NormalizedProductDisplayPage } from "@/services/product-display/product-display-page.service";
 import {
   getDefaultMetalColorId,
   getMetalColorOptions,
@@ -30,12 +31,14 @@ type ProductDetailPageProps = {
   sizeGuide?: NormalizedSizeGuide | null;
   /** Server-read MAGENTO_STOCK_ALERT deploy gate for the notify-me action. */
   stockAlertEnabled?: boolean;
+  productDisplay: NormalizedProductDisplayPage;
 };
 
 const ProductDetailPage = ({
   product,
   sizeGuide = null,
   stockAlertEnabled = false,
+  productDisplay,
 }: ProductDetailPageProps) => {
   const searchParams = useSearchParams();
   const editLineId = searchParams?.get("editLine")?.trim() ?? "";
@@ -112,6 +115,7 @@ const ProductDetailPage = ({
     onSelectedMetalChange: setSelectedMetal,
     sizeGuide,
     stockAlertEnabled,
+    productDisplay,
     onAddToBag: handleAddToCart,
     initialRingSize: editingLineItem?.options.ringSize,
     initialEngravingSelection,

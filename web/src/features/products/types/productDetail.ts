@@ -13,17 +13,9 @@ export type ProductDetailAccordion = {
 export type ProductDetailContent = {
   attributes: string[];
   metalColors: MetalColorOption[];
-  benefits: {
-    label: string;
-    mobileLabel: string;
-    lines: [string, string];
-    icon: string;
-  }[];
   accordions: ProductDetailAccordion[];
   heroBannerImage: string;
   heroBannerVideo?: string;
-  visitUsImage: string;
-  personaliseImage: string;
 };
 
 import type { ProductPriceBreakupComponents } from "@/services/magento/products/productPriceBreakup.utils";

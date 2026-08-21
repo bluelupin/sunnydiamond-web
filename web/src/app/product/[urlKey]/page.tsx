@@ -13,12 +13,15 @@ import ProductDetailBelowFoldLazy from "@/features/products/components/ProductDe
 import { getProductDetailContent } from "@/features/products/data/productDetailContent";
 import { prefetchProductDetailAlankaraCollection } from "@/features/products/services/prefetchProductDetailAlankara";
 import { resolveImageSrcString } from "@/shared/utils/image";
-import { getProductDisplayVisitUs } from "@/services/product-display/product-display-page.service";
+import { getProductDisplayPage } from "@/services/product-display/product-display-page.service";
 import { getSizeGuideForProduct } from "@/services/size-guide/size-guide.service";
 import { isMagentoStockAlertEnabled } from "@/services/magento/config";
 
 /** Matches MAGENTO_CATALOG_REVALIDATE_SECONDS default (segment config must be a literal). */
-export const revalidate = 3600;
+// TEMP (Strapi QA): disable PDP ISR — revert to `export const revalidate = 3600;` after testing
+export const revalidate = 0;
+// TEMP (Strapi QA): force fresh server render — remove after testing
+export const dynamic = "force-dynamic";
 
 type PageParams = {
   urlKey: string;
@@ -53,9 +56,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function ProductPage({ params }: PageProps) {
   const { urlKey } = await params;
   const decodedUrlKey = decodeURIComponent(urlKey);
-  const [detailPage, visitUs, alankaraPrefetch] = await Promise.all([
+  const [detailPage, productDisplay, alankaraPrefetch] = await Promise.all([
     fetchMagentoProductDetailPage(decodedUrlKey),
-    getProductDisplayVisitUs(),
+    getProductDisplayPage(),
     prefetchProductDetailAlankaraCollection(),
   ]);
 
@@ -96,6 +99,7 @@ export default async function ProductPage({ params }: PageProps) {
         product={product}
         sizeGuide={sizeGuide}
         stockAlertEnabled={isMagentoStockAlertEnabled()}
+        productDisplay={productDisplay}
       />
       <ProductDetailBelowFoldLazy
         heroBannerImage={content.heroBannerImage}
@@ -103,7 +107,7 @@ export default async function ProductPage({ params }: PageProps) {
         productName={product.name}
         productId={product.id}
         moreForYou={moreForYou}
-        visitUs={visitUs}
+        productDisplay={productDisplay}
         alankaraPrefetch={alankaraPrefetch}
       />
     </>

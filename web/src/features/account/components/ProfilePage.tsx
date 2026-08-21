@@ -60,7 +60,7 @@ const ProfilePage = () => {
               />
             ) : null}
             <div className="lg:grid xl:grid-cols-[437px_minmax(0,1fr)] lg:grid-cols-[400px_minmax(0,1fr)] lg:gap-6">
-              <aside className="relative z-[80] hidden lg:block">
+              <aside className="relative hidden lg:block">
                 <ProfileSidebar activeSection={activeSection} />
               </aside>
               <div className="min-w-0">

@@ -345,6 +345,7 @@ const mapVisitUs = (section?: StrapiContactVisitSection | null): NormalizedVisit
   const { ctaLabel, ctaUrl, bookVisitFormTag } = resolveVisitUsCtaFields(section);
 
   return {
+    isActive: true,
     title,
     description: cleanText(section.description) ?? "",
     imageSrc: desktopUrl,

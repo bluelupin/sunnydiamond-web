@@ -5,25 +5,29 @@ import BookStoreVisitPanel from "./BookStoreVisitPanel";
 import { DetailTextLink } from "./shared";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import type { NormalizedVisitUsSection } from "@/services/product-display/product-display-page.service";
-import { VISIT_US_FALLBACK } from "@/services/product-display/product-display-page.service";
 
 type ProductDetailVisitUsSectionProps = {
-  visitUs?: NormalizedVisitUsSection | null;
+  visitUs: NormalizedVisitUsSection;
   productName?: string;
   productId?: string;
 };
 
 const ProductDetailVisitUsSection = ({
-  visitUs = VISIT_US_FALLBACK,
+  visitUs,
   productName,
   productId,
 }: ProductDetailVisitUsSectionProps) => {
   const [isBookVisitOpen, setIsBookVisitOpen] = useState(false);
-  const content = visitUs ?? VISIT_US_FALLBACK;
-  const ctaLabel = content.ctaLabel.trim();
+
+  if (!visitUs.isActive) {
+    return null;
+  }
+
+  const ctaLabel = visitUs.ctaLabel.trim();
   const bookVisitFormTag = productId
     ? "product-store-visit"
-    : content.bookVisitFormTag;
+    : visitUs.bookVisitFormTag;
+  const hasImage = visitUs.imageSrc.trim().length > 0;
 
   return (
     <>
@@ -33,14 +37,16 @@ const ProductDetailVisitUsSection = ({
       >
         {/* Absolute media layer so non-banner showroom crops don't expand the section and clip copy */}
         <div className="absolute inset-0">
-          <ResponsiveImage
-            desktopSrc={content.imageSrc}
-            mobileSrc={content.mobileImageSrc}
-            alt={content.imageAlt ?? ""}
-            fill
-            sizes="100vw"
-            className="object-cover object-center"
-          />
+          {hasImage ? (
+            <ResponsiveImage
+              desktopSrc={visitUs.imageSrc}
+              mobileSrc={visitUs.mobileImageSrc}
+              alt={visitUs.imageAlt ?? ""}
+              fill
+              sizes="100vw"
+              className="object-cover object-center"
+            />
+          ) : null}
         </div>
 
         <div
@@ -55,16 +61,16 @@ const ProductDetailVisitUsSection = ({
                 id="visit-us-heading"
                 className="font-larken text-32 font-light leading-110 text-[#f8f1f6] lg:text-5xl"
               >
-                {content.title}
+                {visitUs.title}
               </h2>
               <p className="font-gill text-base font-light leading-110 lg:text-xl">
-                {content.description}
+                {visitUs.description}
               </p>
             </div>
             {ctaLabel ? (
               <DetailTextLink
-                href={content.ctaUrl}
-                onClick={content.ctaUrl ? undefined : () => setIsBookVisitOpen(true)}
+                href={visitUs.ctaUrl}
+                onClick={visitUs.ctaUrl ? undefined : () => setIsBookVisitOpen(true)}
                 className="uppercase tracking-caption"
                 light
               >

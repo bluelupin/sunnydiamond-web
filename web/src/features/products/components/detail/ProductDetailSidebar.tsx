@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef, type ReactNode } from "react";
+import { useState, useEffect, useRef, useCallback, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import Link from "next/link";
 import {
   AttributeSeparator,
   DetailDarkButton,
   DetailOutlineButton,
+  DetailOutlineLink,
   DetailTextLink,
 } from "./shared";
 import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
@@ -29,12 +31,20 @@ import Reveal from "@/shared/Animation/Reveal";
 import ProductDetailAccordions from "./ProductDetailAccordions";
 import NotifyWhenAvailableButton from "./NotifyWhenAvailableButton";
 import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
+import type { NormalizedProductDisplayPage } from "@/services/product-display/product-display-page.service";
 import { getRingSizeLabels } from "@/features/products/utils/ringSizeOptions.utils";
 import { isMetalColorSelectable } from "@/features/products/utils/metalColorOptions.utils";
 import {
   findConfigurableVariantForMetal,
   getConfigurableOptionUidsForMetal,
 } from "@/features/products/utils/productVariant.utils";
+import {
+  resolveHereForYouButtonVariant,
+  resolveHereForYouPanelAction,
+  resolvePersonaliseButtonVariant,
+  type HereForYouPanelAction,
+} from "@/features/products/utils/hereForYouCardActions";
+import type { NormalizedProductDisplayCardButton } from "@/services/product-display/product-display-page.types";
 
 const MetalEngravingPanel = dynamic(() => import("./MetalEngravingPanel"), { ssr: false });
 const RingSizeChartPanel = dynamic(() => import("./RingSizeChartPanel"), { ssr: false });
@@ -56,6 +66,7 @@ type ProductDetailSidebarProps = {
   preferredPurities?: readonly string[];
   onSelectedMetalChange?: (metalId: string) => void;
   sizeGuide?: NormalizedSizeGuide | null;
+  productDisplay: NormalizedProductDisplayPage;
   /** Server-read MAGENTO_STOCK_ALERT deploy gate for the notify-me action. */
   stockAlertEnabled?: boolean;
   onAddToBag: (payload: AddToBagPayload) => void;
@@ -79,6 +90,7 @@ const ProductDetailSidebar = ({
   preferredPurities = [],
   onSelectedMetalChange,
   sizeGuide = null,
+  productDisplay,
   stockAlertEnabled = false,
   onAddToBag,
   initialRingSize,
@@ -115,6 +127,151 @@ const ProductDetailSidebar = ({
   const showSizeSelector = sizeLabels.length > 0;
   const metalColorSelectable = isMetalColorSelectable(product);
   const showMetalColor = content.metalColors.length > 0;
+  const { strip, findYourSizeLabel, hereForYou, personalise } = productDisplay;
+  const showBenefitsStrip = strip.items.length > 0 && strip.title.trim().length > 0;
+  const showStripTnc = strip.tnc.label.trim().length > 0 && strip.tnc.href.trim().length > 0;
+  const showFindYourSizeLink = findYourSizeLabel.trim().length > 0;
+
+  const openHereForYouPanel = useCallback((action: HereForYouPanelAction) => {
+    switch (action) {
+      case "video-call":
+        setIsVideoCallOpen(true);
+        break;
+      case "try-at-home":
+        setIsTryAtHomeOpen(true);
+        break;
+      case "personalise":
+        setIsPersonaliseOpen(true);
+        break;
+      default:
+        break;
+    }
+  }, []);
+
+  const renderHereForYouButton = (button: NormalizedProductDisplayCardButton, index: number) => {
+    const panelAction = resolveHereForYouPanelAction(button.modalTag);
+    const handlePanelOpen = panelAction ? () => openHereForYouPanel(panelAction) : undefined;
+    const linkTarget = button.openInNewTab ? "_blank" : undefined;
+    const linkRel = button.openInNewTab ? "noopener noreferrer" : undefined;
+    const key = `${button.label}-${index}`;
+    const variant = resolveHereForYouButtonVariant(button.modalTag, button.style);
+
+    if (variant === "primary") {
+      if (handlePanelOpen) {
+        return (
+          <DetailDarkButton key={key} onClick={handlePanelOpen} className="uppercase">
+            {button.label}
+          </DetailDarkButton>
+        );
+      }
+
+      if (button.url) {
+        return (
+          <Link
+            key={key}
+            href={button.url}
+            target={linkTarget}
+            rel={linkRel}
+            className="btn-dark-slide inline-flex h-14 w-full items-center justify-center border border-black px-7 font-gill text-sm uppercase leading-110 text-white"
+          >
+            {button.label}
+          </Link>
+        );
+      }
+
+      return null;
+    }
+
+    if (handlePanelOpen || button.url) {
+      return (
+        <DetailTextLink
+          key={key}
+          href={button.url}
+          onClick={handlePanelOpen}
+          target={linkTarget}
+          rel={linkRel}
+          className="self-start uppercase"
+        >
+          {button.label}
+        </DetailTextLink>
+      );
+    }
+
+    return null;
+  };
+
+  const renderPersonaliseButton = (button: NormalizedProductDisplayCardButton, index: number) => {
+    const panelAction = resolveHereForYouPanelAction(button.modalTag);
+    const handlePanelOpen = panelAction ? () => openHereForYouPanel(panelAction) : undefined;
+    const linkTarget = button.openInNewTab ? "_blank" : undefined;
+    const linkRel = button.openInNewTab ? "noopener noreferrer" : undefined;
+    const key = `${button.label}-${index}`;
+    const variant = resolvePersonaliseButtonVariant(button.modalTag, button.style);
+    const buttonClassName = "w-fit uppercase";
+
+    if (variant === "outline") {
+      if (handlePanelOpen) {
+        return (
+          <DetailOutlineButton key={key} onClick={handlePanelOpen} className={buttonClassName}>
+            {button.label}
+          </DetailOutlineButton>
+        );
+      }
+
+      if (button.url) {
+        return (
+          <DetailOutlineLink key={key} href={button.url} className={buttonClassName}>
+            {button.label}
+          </DetailOutlineLink>
+        );
+      }
+
+      return null;
+    }
+
+    if (variant === "primary") {
+      if (handlePanelOpen) {
+        return (
+          <DetailDarkButton key={key} onClick={handlePanelOpen} className={buttonClassName}>
+            {button.label}
+          </DetailDarkButton>
+        );
+      }
+
+      if (button.url) {
+        return (
+          <Link
+            key={key}
+            href={button.url}
+            target={linkTarget}
+            rel={linkRel}
+            className="btn-dark-slide inline-flex h-14 w-fit items-center justify-center border border-black px-7 font-gill text-sm uppercase leading-110 text-white"
+          >
+            {button.label}
+          </Link>
+        );
+      }
+
+      return null;
+    }
+
+    if (handlePanelOpen || button.url) {
+      return (
+        <DetailTextLink
+          key={key}
+          href={button.url}
+          onClick={handlePanelOpen}
+          target={linkTarget}
+          rel={linkRel}
+          className={cn("self-start", buttonClassName)}
+        >
+          {button.label}
+        </DetailTextLink>
+      );
+    }
+
+    return null;
+  };
 
   useEffect(() => {
     setRingSize(initialRingSize ?? "");
@@ -229,9 +386,11 @@ const ProductDetailSidebar = ({
                   <p className="font-gill text-base leading-normal tracking-normal text-darkblack">
                     {sizeGuide?.sizeFieldLabel ?? "Size"}
                   </p>
-                  <DetailTextLink onClick={() => setIsRingSizeChartOpen(true)} className="uppercase">
-                    Find your size
-                  </DetailTextLink>
+                  {showFindYourSizeLink ? (
+                    <DetailTextLink onClick={() => setIsRingSizeChartOpen(true)} className="uppercase">
+                      {findYourSizeLabel}
+                    </DetailTextLink>
+                  ) : null}
                 </div>
                 <InlineCustomSelect
                   id="product-ring-size"
@@ -392,142 +551,161 @@ const ProductDetailSidebar = ({
 
   const detailsSection = (
     <div className="flex flex-col gap-10 px-4 md:px-0 md:pb-12 lg:px-0 !pb-0">
-      <section aria-label="Shopping benefits" className="flex flex-col gap-6">
-        <div className="flex items-center justify-between">
-          <h2 className="font-gill text-2xl leading-110 text-darkblack">With Sunny, you get</h2>
-          <DetailTextLink href="/terms-and-conditions">T&amp;C Apply</DetailTextLink>
-        </div>
-        <Reveal direction="up">
-          <ul className="m-0 flex list-none flex-col bg-benefitSurface p-0 max-md:-mx-4 max-md:gap-6 max-md:px-4 max-md:py-10 md:max-desktop:portrait:gap-6 md:max-desktop:portrait:p-6 md:landscape:flex-row md:landscape:items-stretch md:landscape:gap-4 md:landscape:p-6 lg:landscape:gap-4">
-            {content.benefits.flatMap((benefit, index) => {
-              const item = (
-                <li
-                  key={benefit.label}
-                  className={cn(
-                    "flex w-full shrink-0 flex-col items-center justify-center text-center",
-                    "max-md:gap-2 max-md:px-3 max-md:py-4",
-                    "md:max-desktop:portrait:gap-2 md:max-desktop:portrait:px-3 md:max-desktop:portrait:py-4",
-                    "md:landscape:h-136 md:landscape:flex-1 md:landscape:gap-2 md:landscape:p-3",
-                    index > 0 && "md:landscape:border-l md:landscape:border-gray600",
-                  )}
-                >
-                  <div className="flex size-10 shrink-0 items-center justify-center">
-                    <Image
-                      src={benefit.icon}
-                      alt=""
-                      width={40}
-                      height={40}
-                      aria-hidden
-                      className="size-10 object-contain"
-                    />
-                  </div>
-                  <span className="font-gill text-base leading-110 text-darkblack md:landscape:hidden">
-                    {benefit.mobileLabel}
-                  </span>
-                  <span className="hidden font-gill text-base leading-110 text-darkblack md:landscape:block">
-                    {benefit.lines[0]}
-                    <br />
-                    {benefit.lines[1]}
-                  </span>
-                </li>
-              );
-
-              if (index === 0) return [item];
-
-              return [
-                <li
-                  key={`${benefit.label}-divider`}
-                  role="presentation"
-                  aria-hidden
-                  className="block h-[1px] min-h-px w-full shrink-0 bg-[#999999] p-0 md:landscape:hidden"
-                />,
-                item,
-              ];
-            })}
-          </ul>
-        </Reveal>
-      </section>
-
-      <section
-        aria-label="Customer support"
-        className="flex min-h-260 items-center overflow-hidden bg-supportSurface px-6 py-8"
-      >
-        <Reveal direction="up" className="flex max-w-358 flex-col gap-10">
-          <div className="flex flex-col gap-3">
-            <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
-              We&apos;re here for you
-            </h2>
-            <p className="font-gill text-base font-light leading-110 text-darkblack">
-              Our salesperson will personally help you choose the right diamond.
-            </p>
+      {showBenefitsStrip ? (
+        <section aria-label="Shopping benefits" className="flex flex-col gap-6">
+          <div className="flex items-center justify-between">
+            <h2 className="font-gill text-2xl leading-110 text-darkblack">{strip.title}</h2>
+            {showStripTnc ? (
+              <DetailTextLink
+                href={strip.tnc.href}
+                target={strip.tnc.openInNewTab ? "_blank" : undefined}
+                rel={strip.tnc.openInNewTab ? "noopener noreferrer" : undefined}
+              >
+                {strip.tnc.label}
+              </DetailTextLink>
+            ) : null}
           </div>
-          <div className="flex max-w-220 flex-col gap-3">
-            <DetailDarkButton onClick={() => setIsVideoCallOpen(true)} className="uppercase">
-              Schedule a Video Call
-            </DetailDarkButton>
-            <DetailTextLink onClick={() => setIsTryAtHomeOpen(true)} className="self-start uppercase">
-              Try At Home
-            </DetailTextLink>
-          </div>
-        </Reveal>
-      </section>
+          <Reveal direction="up">
+            <ul className="m-0 flex list-none flex-col bg-benefitSurface p-0 max-md:-mx-4 max-md:gap-6 max-md:px-4 max-md:py-10 md:max-desktop:portrait:gap-6 md:max-desktop:portrait:p-6 md:landscape:flex-row md:landscape:items-stretch md:landscape:gap-4 md:landscape:p-6 lg:landscape:gap-4">
+              {strip.items.flatMap((benefit, index) => {
+                const item = (
+                  <li
+                    key={benefit.label}
+                    className={cn(
+                      "flex w-full shrink-0 flex-col items-center justify-center text-center",
+                      "max-md:gap-2 max-md:px-3 max-md:py-4",
+                      "md:max-desktop:portrait:gap-2 md:max-desktop:portrait:px-3 md:max-desktop:portrait:py-4",
+                      "md:landscape:h-136 md:landscape:flex-1 md:landscape:gap-2 md:landscape:p-3",
+                      index > 0 && "md:landscape:border-l md:landscape:border-gray600",
+                    )}
+                  >
+                    <div className="flex size-10 shrink-0 items-center justify-center">
+                      <Image
+                        src={benefit.icon}
+                        alt=""
+                        width={40}
+                        height={40}
+                        aria-hidden
+                        className="size-10 object-contain"
+                      />
+                    </div>
+                    <span className="font-gill text-base leading-110 text-darkblack md:landscape:hidden">
+                      {benefit.mobileLabel}
+                    </span>
+                    <span className="hidden font-gill text-base leading-110 text-darkblack md:landscape:block">
+                      {benefit.lines[0]}
+                      {benefit.lines[1] ? (
+                        <>
+                          <br />
+                          {benefit.lines[1]}
+                        </>
+                      ) : null}
+                    </span>
+                  </li>
+                );
+
+                if (index === 0) return [item];
+
+                return [
+                  <li
+                    key={`${benefit.label}-divider`}
+                    role="presentation"
+                    aria-hidden
+                    className="block h-[1px] min-h-px w-full shrink-0 bg-[#999999] p-0 md:landscape:hidden"
+                  />,
+                  item,
+                ];
+              })}
+            </ul>
+          </Reveal>
+        </section>
+      ) : null}
+
+      {hereForYou.isActive ? (
+        <section
+          aria-label="Customer support"
+          className="flex min-h-260 items-center overflow-hidden bg-supportSurface px-6 py-8"
+        >
+          <Reveal direction="up" className="flex max-w-358 flex-col gap-10">
+            <div className="flex flex-col gap-3">
+              <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
+                {hereForYou.title}
+              </h2>
+              <p className="font-gill text-base font-light leading-110 text-darkblack">
+                {hereForYou.subtitle}
+              </p>
+            </div>
+            {hereForYou.buttons.length > 0 ? (
+              <div className="flex max-w-220 flex-col gap-3">
+                {hereForYou.buttons.map(renderHereForYouButton)}
+              </div>
+            ) : null}
+          </Reveal>
+        </section>
+      ) : null}
 
       <ProductDetailAccordions items={content.accordions} />
 
-      <section
-        aria-label="Personalisation"
-        className={cn(
-          "flex overflow-hidden bg-chalkCard pr-0",
-          "items-end justify-between pl-4 py-6",
-          "max-lg:portrait:flex-col max-lg:portrait:items-stretch max-lg:portrait:justify-start max-lg:portrait:gap-6 max-lg:portrait:py-8 max-lg:portrait:pl-6",
-          "md:landscape:flex-row md:landscape:items-stretch md:landscape:justify-between md:landscape:gap-4 md:landscape:py-6 md:landscape:pl-6",
-          "lg:flex-row lg:items-stretch lg:justify-between lg:gap-4 lg:py-6 lg:pl-6",
-          "desktop:min-h-260 desktop:items-end desktop:gap-0 desktop:py-6",
-        )}
-      >
-        <div
+      {personalise.isActive ? (
+        <section
+          aria-label="Personalisation"
           className={cn(
-            "flex shrink-0 flex-col gap-6",
-            "max-w-[172px] max-md:-mr-[22px]",
-            "max-lg:portrait:max-w-none max-lg:portrait:mr-0",
-            "md:landscape:min-w-0 md:landscape:flex-1 md:landscape:justify-center md:landscape:py-2 md:landscape:max-w-[54%]",
-            "lg:min-w-0 lg:flex-1 lg:justify-center lg:py-2 lg:max-w-[54%]",
-            "desktop:max-w-280 desktop:justify-start desktop:gap-10 desktop:py-0",
+            "flex overflow-hidden bg-chalkCard pr-0",
+            "items-end justify-between pl-4 py-6",
+            "max-lg:portrait:flex-col max-lg:portrait:items-stretch max-lg:portrait:justify-start max-lg:portrait:gap-6 max-lg:portrait:py-8 max-lg:portrait:pl-6",
+            "md:landscape:flex-row md:landscape:items-stretch md:landscape:justify-between md:landscape:gap-4 md:landscape:py-6 md:landscape:pl-6",
+            "lg:flex-row lg:items-stretch lg:justify-between lg:gap-4 lg:py-6 lg:pl-6",
+            "desktop:min-h-260 desktop:items-end desktop:gap-0 desktop:py-6",
           )}
         >
-          <div className="flex flex-col gap-3">
-            <h2 className="font-larken text-xl font-light leading-110 text-darkblack max-lg:portrait:whitespace-normal lg:whitespace-normal desktop:w-max desktop:whitespace-nowrap desktop:text-2xl">
-              Personalise this for you
-            </h2>
-            <p className="font-gill text-sm font-light leading-110 text-darkblack lg:text-base">
-              Change the gemstone and much more to make it truly yours!
-            </p>
+          <div
+            className={cn(
+              "flex shrink-0 flex-col gap-6",
+              "max-w-[172px] max-md:-mr-[22px]",
+              "max-lg:portrait:max-w-none max-lg:portrait:mr-0",
+              "md:landscape:min-w-0 md:landscape:flex-1 md:landscape:justify-center md:landscape:py-2 md:landscape:max-w-[54%]",
+              "lg:min-w-0 lg:flex-1 lg:justify-center lg:py-2 lg:max-w-[54%]",
+              "desktop:max-w-280 desktop:justify-start desktop:gap-10 desktop:py-0",
+            )}
+          >
+            <div className="flex flex-col gap-3">
+              <h2 className="font-larken text-xl font-light leading-110 text-darkblack max-lg:portrait:whitespace-normal lg:whitespace-normal desktop:w-max desktop:whitespace-nowrap desktop:text-2xl">
+                {personalise.title}
+              </h2>
+              <p className="font-gill text-sm font-light leading-110 text-darkblack lg:text-base">
+                {personalise.subtitle}
+              </p>
+            </div>
+            {personalise.buttons.length > 0 ? (
+              <div className="flex flex-col gap-3">
+                {personalise.buttons.map(renderPersonaliseButton)}
+              </div>
+            ) : null}
           </div>
-          <DetailOutlineButton className="w-fit uppercase" onClick={() => setIsPersonaliseOpen(true)}>
-            Get in Touch
-          </DetailOutlineButton>
-        </div>
-        <div
-          className={cn(
-            "relative shrink-0 overflow-hidden",
-            "h-[118px] w-177",
-            "max-lg:portrait:aspect-[322/213] max-lg:portrait:h-auto max-lg:portrait:w-full max-lg:portrait:flex-none",
-            "md:landscape:ml-auto md:landscape:h-auto md:landscape:min-h-[200px] md:landscape:w-auto md:landscape:min-w-[160px] md:landscape:max-w-[46%] md:landscape:flex-1 md:landscape:self-stretch",
-            "lg:ml-auto lg:h-auto lg:min-h-[200px] lg:w-auto lg:min-w-[160px] lg:max-w-[46%] lg:flex-1 lg:self-stretch",
-            "desktop:h-[213px] desktop:w-[322px] desktop:min-h-0 desktop:min-w-0 desktop:max-w-none desktop:flex-none desktop:self-auto",
-          )}
-        >
-          <Image
-            src={content.personaliseImage}
-            alt=""
-            width={322}
-            height={213}
-            aria-hidden
-            className="size-full object-cover object-center max-lg:portrait:object-[center_15%] md:landscape:object-[center_20%] lg:object-[center_20%] desktop:object-[center_-4%]"
-            sizes="(max-width: 1023px) 100vw, 322px"
-          />
-        </div>
-      </section>
+          <div
+            className={cn(
+              "relative shrink-0 overflow-hidden",
+              "h-[118px] w-177",
+              "max-lg:portrait:aspect-[322/213] max-lg:portrait:h-auto max-lg:portrait:w-full max-lg:portrait:flex-none",
+              "md:landscape:ml-auto md:landscape:h-auto md:landscape:min-h-[200px] md:landscape:w-auto md:landscape:min-w-[160px] md:landscape:max-w-[46%] md:landscape:flex-1 md:landscape:self-stretch",
+              "lg:ml-auto lg:h-auto lg:min-h-[200px] lg:w-auto lg:min-w-[160px] lg:max-w-[46%] lg:flex-1 lg:self-stretch",
+              "desktop:h-[213px] desktop:w-[322px] desktop:min-h-0 desktop:min-w-0 desktop:max-w-none desktop:flex-none desktop:self-auto",
+            )}
+          >
+            {personalise.imageSrc ? (
+              <Image
+                src={personalise.imageSrc}
+                alt=""
+                width={322}
+                height={213}
+                aria-hidden
+                className="size-full object-cover object-center max-lg:portrait:object-[center_15%] md:landscape:object-[center_20%] lg:object-[center_20%] desktop:object-[center_-4%]"
+                sizes="(max-width: 1023px) 100vw, 322px"
+              />
+            ) : null}
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 
