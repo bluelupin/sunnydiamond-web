@@ -27,10 +27,14 @@ import VanIcon from "@/assets/Icons/VanIcon";
 import StoreIcon from "@/assets/Icons/StoreIcon";
 import Reveal from "@/shared/Animation/Reveal";
 import ProductDetailAccordions from "./ProductDetailAccordions";
+import NotifyWhenAvailableButton from "./NotifyWhenAvailableButton";
 import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
 import { getRingSizeLabels } from "@/features/products/utils/ringSizeOptions.utils";
 import { isMetalColorSelectable } from "@/features/products/utils/metalColorOptions.utils";
-import { getConfigurableOptionUidsForMetal } from "@/features/products/utils/productVariant.utils";
+import {
+  findConfigurableVariantForMetal,
+  getConfigurableOptionUidsForMetal,
+} from "@/features/products/utils/productVariant.utils";
 
 const MetalEngravingPanel = dynamic(() => import("./MetalEngravingPanel"), { ssr: false });
 const RingSizeChartPanel = dynamic(() => import("./RingSizeChartPanel"), { ssr: false });
@@ -52,6 +56,8 @@ type ProductDetailSidebarProps = {
   preferredPurities?: readonly string[];
   onSelectedMetalChange?: (metalId: string) => void;
   sizeGuide?: NormalizedSizeGuide | null;
+  /** Server-read MAGENTO_STOCK_ALERT deploy gate for the notify-me action. */
+  stockAlertEnabled?: boolean;
   onAddToBag: (payload: AddToBagPayload) => void;
   initialRingSize?: string;
   initialEngravingSelection?: EngravingSelection | null;
@@ -73,6 +79,7 @@ const ProductDetailSidebar = ({
   preferredPurities = [],
   onSelectedMetalChange,
   sizeGuide = null,
+  stockAlertEnabled = false,
   onAddToBag,
   initialRingSize,
   initialEngravingSelection = null,
@@ -150,6 +157,16 @@ const ProductDetailSidebar = ({
     selectedMetal,
     preferredPurities,
   );
+
+  // Notify-me watches the SKU whose stock the shopper is actually seeing: the
+  // selected metal variant when one exists, else the parent product.
+  const selectedVariantSku = findConfigurableVariantForMetal(
+    product,
+    selectedMetal,
+    preferredPurities,
+  )?.sku?.trim();
+  const stockAlertSku = selectedVariantSku || product.id;
+  const showNotifyWhenAvailable = stockAlertEnabled && !displayProduct.inStock;
 
   const purchaseSection = (
     <div className="flex flex-col gap-10 px-4 pt-8 md:pt-6 md:px-0 lg:pt-0">
@@ -274,35 +291,40 @@ const ProductDetailSidebar = ({
           </div>
 
           <div className="flex gap-2">
-            <DetailDarkButton
-              className="flex-1 uppercase"
-              onClick={() => {
-                if (showSizeSelector && !ringSize.trim()) {
-                  setRingSizeError(
-                    `Please select a ${(sizeGuide?.sizeFieldLabel ?? "size").trim().toLowerCase()}.`,
-                  );
-                  return;
-                }
+            {showNotifyWhenAvailable ? (
+              // Keyed by SKU: a metal/purity switch is a different alert, so state resets.
+              <NotifyWhenAvailableButton key={stockAlertSku} sku={stockAlertSku} />
+            ) : (
+              <DetailDarkButton
+                className="flex-1 uppercase"
+                onClick={() => {
+                  if (showSizeSelector && !ringSize.trim()) {
+                    setRingSizeError(
+                      `Please select a ${(sizeGuide?.sizeFieldLabel ?? "size").trim().toLowerCase()}.`,
+                    );
+                    return;
+                  }
 
-                onAddToBag({
-                  product: displayProduct,
-                  options: {
-                    metal: activeMetal?.label,
-                    ringSize: ringSize || undefined,
-                    ...(engravingEnabled && engravingConfig
-                      ? buildEngravingCartLineOptions(engravingConfig, engravingSelection)
+                  onAddToBag({
+                    product: displayProduct,
+                    options: {
+                      metal: activeMetal?.label,
+                      ringSize: ringSize || undefined,
+                      ...(engravingEnabled && engravingConfig
+                        ? buildEngravingCartLineOptions(engravingConfig, engravingSelection)
+                        : {}),
+                      isGift,
+                    },
+                    ...(configurableOptionUids.length > 0
+                      ? { configurableOptionUids }
                       : {}),
-                    isGift,
-                  },
-                  ...(configurableOptionUids.length > 0
-                    ? { configurableOptionUids }
-                    : {}),
-                  productCustomOptions: product.customOptions,
-                });
-              }}
-            >
-              {addToBagLabel}
-            </DetailDarkButton>
+                    productCustomOptions: product.customOptions,
+                  });
+                }}
+              >
+                {addToBagLabel}
+              </DetailDarkButton>
+            )}
             <button
               type="button"
               aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
