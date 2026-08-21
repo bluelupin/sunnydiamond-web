@@ -15,6 +15,7 @@ import { prefetchProductDetailAlankaraCollection } from "@/features/products/ser
 import { resolveImageSrcString } from "@/shared/utils/image";
 import { getProductDisplayVisitUs } from "@/services/product-display/product-display-page.service";
 import { getSizeGuideForProduct } from "@/services/size-guide/size-guide.service";
+import { isMagentoStockAlertEnabled } from "@/services/magento/config";
 
 /** Matches MAGENTO_CATALOG_REVALIDATE_SECONDS default (segment config must be a literal). */
 export const revalidate = 3600;
@@ -91,7 +92,11 @@ export default async function ProductPage({ params }: PageProps) {
         })}
         id={`product-jsonld-${product.id}`}
       />
-      <ProductDetailPageView product={product} sizeGuide={sizeGuide} />
+      <ProductDetailPageView
+        product={product}
+        sizeGuide={sizeGuide}
+        stockAlertEnabled={isMagentoStockAlertEnabled()}
+      />
       <ProductDetailBelowFoldLazy
         heroBannerImage={content.heroBannerImage}
         heroBannerVideo={content.heroBannerVideo}

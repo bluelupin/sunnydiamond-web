@@ -502,3 +502,12 @@ export const SUNNY_DELETE_CUSTOMER_MUTATION = `
     }
   }
 ` as const;
+
+export const SUNNY_SUBSCRIBE_STOCK_ALERT_MUTATION = `
+  mutation SunnySubscribeStockAlert($sku: String!) {
+    sunnySubscribeStockAlert(sku: $sku) {
+      success
+      message
+    }
+  }
+` as const;

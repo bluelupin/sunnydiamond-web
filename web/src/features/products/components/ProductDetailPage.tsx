@@ -28,9 +28,15 @@ import {
 type ProductDetailPageProps = {
   product: Product;
   sizeGuide?: NormalizedSizeGuide | null;
+  /** Server-read MAGENTO_STOCK_ALERT deploy gate for the notify-me action. */
+  stockAlertEnabled?: boolean;
 };
 
-const ProductDetailPage = ({ product, sizeGuide = null }: ProductDetailPageProps) => {
+const ProductDetailPage = ({
+  product,
+  sizeGuide = null,
+  stockAlertEnabled = false,
+}: ProductDetailPageProps) => {
   const searchParams = useSearchParams();
   const editLineId = searchParams?.get("editLine")?.trim() ?? "";
   const purityParam = searchParams?.get("purity")?.trim() ?? "";
@@ -105,6 +111,7 @@ const ProductDetailPage = ({ product, sizeGuide = null }: ProductDetailPageProps
     preferredPurities,
     onSelectedMetalChange: setSelectedMetal,
     sizeGuide,
+    stockAlertEnabled,
     onAddToBag: handleAddToCart,
     initialRingSize: editingLineItem?.options.ringSize,
     initialEngravingSelection,
