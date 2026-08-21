@@ -141,8 +141,8 @@ export function ProfileDeleteAccountReasonDialog({
       <Sheet open={open} onOpenChange={handleOpenChange}>
         <SheetContent
           side="bottom"
-          overlayClassName="bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
-          className="flex max-h-[90vh] w-full flex-col gap-0 rounded-none border-0 bg-white p-0 sm:max-w-full [&>button]:hidden"
+          overlayClassName="z-[90] bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
+          className="z-[90] flex max-h-[90vh] w-full flex-col gap-0 rounded-none border-0 bg-white p-0 sm:max-w-full [&>button]:hidden"
         >
           <div className="shrink-0 px-4 pt-6">
             <div className="flex items-center justify-between gap-4">
@@ -198,6 +198,7 @@ export function ProfileDeleteAccountReasonDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
+        elevated
         hideCloseButton
         className="max-w-[520px] gap-6 border-neutral300 bg-white p-6 sm:rounded-none"
       >

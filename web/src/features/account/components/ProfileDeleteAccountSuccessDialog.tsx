@@ -26,6 +26,7 @@ export function ProfileDeleteAccountSuccessDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
+        elevated
         hideCloseButton
         className="max-w-[520px] gap-6 border-neutral300 bg-white p-6 sm:rounded-none"
       >

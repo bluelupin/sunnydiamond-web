@@ -422,12 +422,12 @@ const ProductDetailSidebar = ({
                     />
                   </div>
                   <span className="font-gill text-base leading-110 text-darkblack md:landscape:hidden">
-                    {benefit.mobileLabel}
+                    {benefit.mobileLabel} tset
                   </span>
                   <span className="hidden font-gill text-base leading-110 text-darkblack md:landscape:block">
-                    {benefit.lines[0]}
+                    {benefit.lines[0]}tset-1
                     <br />
-                    {benefit.lines[1]}
+                    {benefit.lines[1]}test-2
                   </span>
                 </li>
               );
