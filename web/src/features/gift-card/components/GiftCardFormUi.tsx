@@ -3,6 +3,17 @@
 import { Check, ChevronLeft } from "lucide-react";
 import type { InputHTMLAttributes, TextareaHTMLAttributes } from "react";
 import CareersChevronDownIcon from "@/features/careers/components/shared/CareersChevronDownIcon";
+import {
+  CAREERS_SELECT_EMPTY_VALUE,
+  careersSelectTriggerClassName,
+} from "@/features/careers/components/shared/CareersSelectField";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { cn } from "@/shared/utils/cn";
 
 export const giftCardFieldLabelClass =
@@ -107,26 +118,27 @@ export const GiftCardSelectField = ({
   options,
 }: GiftCardSelectFieldProps) => (
   <div className="flex flex-col gap-2">
-    <label className={giftCardFieldLabelClass} htmlFor={id}>{label}</label>
-    <div className="relative">
-      <select
-        id={id}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className={cn(
-          "h-14 w-full appearance-none bg-gray200 p-3 pr-10 font-gill text-base font-normal leading-110 text-darkblack outline-none",
-          !value && "text-gray600",
-        )}
-      >
-        <option value="">{placeholder}</option>
+    <label className={giftCardFieldLabelClass} htmlFor={id}>
+      {label}
+    </label>
+    <Select
+      value={value || CAREERS_SELECT_EMPTY_VALUE}
+      onValueChange={(next) => {
+        onChange(next === CAREERS_SELECT_EMPTY_VALUE ? "" : next);
+      }}
+    >
+      <SelectTrigger id={id} className={careersSelectTriggerClassName}>
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent className="z-[80]">
+        <SelectItem value={CAREERS_SELECT_EMPTY_VALUE}>{placeholder}</SelectItem>
         {options.map((option) => (
-          <option key={option.value} value={option.value}>
+          <SelectItem key={option.value} value={option.value}>
             {option.label}
-          </option>
+          </SelectItem>
         ))}
-      </select>
-      <CareersChevronDownIcon className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" />
-    </div>
+      </SelectContent>
+    </Select>
   </div>
 );
 
