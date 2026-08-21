@@ -8,6 +8,8 @@ type DetailTextLinkProps = {
   className?: string;
   light?: boolean;
   disabled?: boolean;
+  target?: string;
+  rel?: string;
 };
 
 export const DetailTextLink = ({
@@ -17,15 +19,21 @@ export const DetailTextLink = ({
   className,
   light,
   disabled = false,
+  target,
+  rel,
 }: DetailTextLinkProps) => {
   const classes = cn(
     "inline-flex w-fit uppercase",
-    "relative shrink-0 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:transition-all after:duration-300 border-b-[1.5px] pb-1 font-gill text-sm font-normal leading-110 sm:pb-1 hover:after:w-full",
-    disabled ? "cursor-not-allowed" : "cursor-pointer",
+    "relative shrink-0 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:transition-all after:duration-300 border-b-[1.5px] pb-1 font-gill text-sm font-normal leading-110 sm:pb-1",
+    disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:after:w-full",
     className,
-    light
-      ? "text-white border-white hover:border-white hover:text-white after:bg-white"
-      : "text-darkblack border-darkblack hover:border-darkMagenta hover:text-darkMagenta after:bg-darkMagenta",
+    disabled
+      ? light
+        ? "text-white border-white/80"
+        : "text-darkblack border-darkblack"
+      : light
+        ? "text-white border-white/80 hover:border-white hover:text-white after:bg-white"
+        : "text-darkblack border-darkblack hover:border-darkMagenta hover:text-darkMagenta after:bg-darkMagenta",
   );
 
   if (href) {
@@ -43,6 +51,8 @@ export const DetailTextLink = ({
     return (
       <Link
         href={href}
+        target={target}
+        rel={rel}
         {...(handleClick ? { onClick: handleClick } : {})}
         aria-disabled={disabled || undefined}
         className={classes}

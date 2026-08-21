@@ -1,7 +1,7 @@
 "use client";
-import Link from "next/link";
 import Reveal from "@/shared/Animation/Reveal";
 import type { NormalizedContactInfoCard } from "@/services/contact/contact-page.types";
+import { DetailTextLink } from "@/features/products/components/detail/shared";
 import Image from "next/image";
 import React from "react";
 type ContactInfoSectionProps = {
@@ -81,14 +81,14 @@ const ContactInfoSection = ({ intro, infoCards }: ContactInfoSectionProps) => {
                         height={20}
                         aria-hidden
                       />
-                      <Link
+                      <DetailTextLink
                         href={card.link.href}
-                        className="inline-flex border-b border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack break-all"
+                        className="max-w-full break-all"
                         target={isExternal ? "_blank" : undefined}
                         rel={isExternal ? "noopener noreferrer" : undefined}
                       >
-                        {card.link.label}
-                      </Link>
+                        {card.link.label} 
+                      </DetailTextLink>
                     </div>
                   </div>
                 </Reveal>

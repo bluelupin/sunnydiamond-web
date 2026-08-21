@@ -451,7 +451,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
             <button
               type="submit"
               disabled={isSubmitting || !isFormReady}
-              className="btn-dark-slide inline-flex h-14 w-full items-center justify-center border border-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white disabled:cursor-not-allowed disabled:border-darkblack disabled:bg-neutral500 disabled:opacity-50 md:w-auto md:self-start"
+              className="btn-dark-slide inline-flex h-14 w-full items-center justify-center border border-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:border-darkblack disabled:bg-neutral500 disabled:opacity-50 md:w-auto md:self-start"
             >
               <span className="relative z-10">{submitLabel}</span>
             </button>
