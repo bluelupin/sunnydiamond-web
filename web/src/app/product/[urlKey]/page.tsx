@@ -18,10 +18,7 @@ import { getSizeGuideForProduct } from "@/services/size-guide/size-guide.service
 import { isMagentoStockAlertEnabled } from "@/services/magento/config";
 
 /** Matches MAGENTO_CATALOG_REVALIDATE_SECONDS default (segment config must be a literal). */
-// TEMP (Strapi QA): disable PDP ISR — revert to `export const revalidate = 3600;` after testing
-export const revalidate = 0;
-// TEMP (Strapi QA): force fresh server render — remove after testing
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 type PageParams = {
   urlKey: string;

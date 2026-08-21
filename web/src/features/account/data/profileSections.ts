@@ -48,7 +48,7 @@ export type ProfileNavItem =
   | { kind: "link"; href: string; label: string };
 
 export const PROFILE_NAV_ITEMS: ProfileNavItem[] = [
-  { kind: "section", id: "details", label: "PROFILE" },
+  { kind: "section", id: "details", label: "PROFILE-tset" },
   { kind: "section", id: "orders", label: "MY ORDERS" },
   { kind: "section", id: "addresses", label: "MY ADDRESSES" },
   { kind: "section", id: "wishlist", label: "MY WISHLIST" },

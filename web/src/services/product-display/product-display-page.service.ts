@@ -26,11 +26,7 @@ export const getProductDisplayPage = cache(
     try {
       const raw = await apiFetch<StrapiProductDisplayPage>(
         `${STRAPI_ENDPOINTS.productDisplayPage}?${PRODUCT_DISPLAY_PAGE_POPULATE}`,
-        {
-          signal,
-          // TEMP (Strapi QA): bypass fetch cache — remove after testing
-          cache: "no-store",
-        },
+        { signal },
       );
       return mapProductDisplayPage(raw);
     } catch {
