@@ -375,35 +375,35 @@
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .btn-slide-up:hover {
+    .btn-slide-up:not(:disabled):not([aria-disabled="true"]):hover {
       transform: translateY(-3px);
     }
 
-    .btn-border-slide:hover::before {
+    .btn-border-slide:not(:disabled):not([aria-disabled="true"]):hover::before {
       transform: translateY(0);
     }
 
-    .btn-border-slide:hover {
+    .btn-border-slide:not(:disabled):not([aria-disabled="true"]):hover {
       border-color: var(--btn-border-slide-fill);
       color: var(--btn-border-slide-text) !important;
       transition-delay: 0.18s, 0s;
     }
 
-    .btn-border-slide:hover>* {
+    .btn-border-slide:not(:disabled):not([aria-disabled="true"]):hover>* {
       color: var(--btn-border-slide-text) !important;
       transition-delay: 0.18s;
     }
 
-    .btn-dark-slide:hover::before {
+    .btn-dark-slide:not(:disabled):not([aria-disabled="true"]):hover::before {
       transform: translateY(0);
     }
 
-    .btn-dark-slide:hover {
+    .btn-dark-slide:not(:disabled):not([aria-disabled="true"]):hover {
       color: var(--btn-dark-slide-text) !important;
       transition-delay: 0.18s;
     }
 
-    .btn-dark-slide:hover>* {
+    .btn-dark-slide:not(:disabled):not([aria-disabled="true"]):hover>* {
       color: var(--btn-dark-slide-text) !important;
       transition-delay: 0.18s;
     }
@@ -414,7 +414,7 @@
       transition: none;
     }
 
-    .btn-slide-up:hover {
+    .btn-slide-up:not(:disabled):not([aria-disabled="true"]):hover {
       transform: none;
     }
 
@@ -422,16 +422,16 @@
       transition: none;
     }
 
-    .btn-border-slide:hover::before {
+    .btn-border-slide:not(:disabled):not([aria-disabled="true"]):hover::before {
       transform: translateY(0);
     }
 
-    .btn-border-slide:hover {
+    .btn-border-slide:not(:disabled):not([aria-disabled="true"]):hover {
       border-color: var(--btn-border-slide-fill);
       color: var(--btn-border-slide-text) !important;
     }
 
-    .btn-border-slide:hover>* {
+    .btn-border-slide:not(:disabled):not([aria-disabled="true"]):hover>* {
       color: var(--btn-border-slide-text) !important;
     }
 
@@ -439,15 +439,15 @@
       transition: none;
     }
 
-    .btn-dark-slide:hover::before {
+    .btn-dark-slide:not(:disabled):not([aria-disabled="true"]):hover::before {
       transform: translateY(0);
     }
 
-    .btn-dark-slide:hover {
+    .btn-dark-slide:not(:disabled):not([aria-disabled="true"]):hover {
       color: var(--btn-dark-slide-text) !important;
     }
 
-    .btn-dark-slide:hover>* {
+    .btn-dark-slide:not(:disabled):not([aria-disabled="true"]):hover>* {
       color: var(--btn-dark-slide-text) !important;
     }
   }
