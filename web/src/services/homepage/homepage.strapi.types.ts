@@ -49,8 +49,17 @@ export type StrapiFooterTickerItem = {
   showField?: boolean | null;
 };
 
+export type StrapiSidebarNavigationItem = {
+  id?: number;
+  label?: string | null;
+  sectionId?: string | null;
+  isActive?: boolean | null;
+  sortOrder?: number | null;
+};
+
 export type StrapiGlobalShell = {
   headerNavigationLinks?: HeaderNavLink[] | null;
+  sidebarNavigation?: StrapiSidebarNavigationItem[] | null;
   footerLinkGroups?: FooterLinkGroup[] | null;
   footerCopyright?: string | null;
   socialLinks?: unknown[] | null;

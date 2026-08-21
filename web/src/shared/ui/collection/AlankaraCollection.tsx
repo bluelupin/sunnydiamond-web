@@ -277,14 +277,14 @@ function CollectionHeroPanel({
         ) : (
           <>
             {collectionCta ? (
-              <span
+              <div
                 aria-hidden
-                className="inline-flex max-h-0 w-fit flex-col items-start overflow-hidden pb-0 pt-0 opacity-0 motion-safe:transition-[max-height,padding,opacity] motion-safe:duration-500 motion-safe:ease-out group-hover:max-h-[72px] group-hover:pb-16 group-hover:opacity-100 group-focus-within:max-h-[72px] group-focus-within:pt-10 group-focus-within:opacity-100"
+                className="inline-flex max-h-0 w-fit flex-col items-start overflow-hidden pb-0 pt-0 opacity-0 motion-safe:transition-[max-height,padding,opacity] motion-safe:duration-500 motion-safe:ease-out group-hover:max-h-[72px] group-hover:pb-16 group-hover:opacity-100 group-focus-visible:max-h-[72px] group-focus-visible:pb-16 group-focus-visible:opacity-100"
               >
-                <span className="text-link-underline inline-flex w-fit items-center border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white">
+                <div className="relative cursor-pointer border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all after:duration-300 hover:border-white hover:text-white hover:after:w-full sm:pb-1">
                   {collectionCta.label}
-                </span>
-              </span>
+                </div>
+              </div>
             ) : null}
             <div className="mb-4 flex w-full max-w-[418px] flex-col items-start gap-3 md:gap-3 lg:gap-5 desktop:mb-6">
               <h2 className="font-larken text-32 font-light leading-none md:text-3xl lg:text-5xl desktop:whitespace-nowrap">
@@ -301,7 +301,7 @@ function CollectionHeroPanel({
         {isMobile && collectionCta ? (
           <span
             aria-hidden
-            className="text-link-underline inline-flex items-center justify-center border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white"
+            className="relative inline-flex items-center justify-center border-b-[1.5px] border-white pb-1.5 font-gill text-sm font-normal uppercase leading-110 text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all after:duration-300 hover:border-white hover:text-white hover:after:w-full"
           >
             {collectionCta.label}
           </span>

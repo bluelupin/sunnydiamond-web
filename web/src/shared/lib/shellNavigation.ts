@@ -23,6 +23,20 @@ export type FooterLinkGroup = {
   sortOrder?: number | null;
 };
 
+export type SidebarNavigationItem = {
+  id?: string | number;
+  label?: string | null;
+  sectionId?: string | null;
+  isActive?: boolean | null;
+  sortOrder?: number | null;
+};
+
+export type HomeSidebarNavSection = {
+  id: string | number;
+  label: string;
+  sectionId: string;
+};
+
 const REMOVED_HEADER_NAV_LABELS = new Set(["collection"]);
 
 export function isBookAppointmentNavLink(link: HeaderNavLink): boolean {
@@ -66,6 +80,27 @@ export function splitShellHeaderNavLinks(links: readonly HeaderNavLink[]): {
   const appointmentLink = links.find((link) => isBookAppointmentNavLink(link));
   const primaryLinks = links.filter((link) => !isBookAppointmentNavLink(link));
   return { primaryLinks, appointmentLink };
+}
+
+export function resolveShellSidebarNavigation(
+  items: readonly SidebarNavigationItem[] | null | undefined,
+): HomeSidebarNavSection[] {
+  if (!items?.length) {
+    return [];
+  }
+
+  return items
+    .filter(
+      (item) =>
+        item.isActive !== false &&
+        Boolean(item.label?.trim()) &&
+        Boolean(item.sectionId?.trim()),
+    )
+    .map((item) => ({
+      id: item.id ?? item.sectionId!.trim(),
+      label: item.label!.trim(),
+      sectionId: item.sectionId!.trim(),
+    }));
 }
 
 export function resolveShellFooterLinkGroups(

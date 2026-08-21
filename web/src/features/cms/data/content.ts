@@ -1,15 +1,3 @@
-export const homeSections = [
-  { id: "alankara", label: "Collections" },
-  { id: "categories", label: "By Occasions" },
-  { id: "diamond-awaits", label: "Category" },
-  { id: "valentine", label: "Gifting" },
-  { id: "promise", label: "The Sunny Promise" },
-  { id: "bespoke-for-you", label: "For You" },
-  { id: "diamonds-for-everyone", label: "Diamonds for Everyone" },
-  { id: "craftsmanship", label: "Know Your Diamonds" },
-  { id: "showrooms", label: "Showrooms" },
-] as const;
-
 export const homeContent = {
   whyUs: {
     subtitle: "Why Sunny Diamonds",

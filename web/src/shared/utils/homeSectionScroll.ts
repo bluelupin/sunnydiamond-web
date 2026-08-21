@@ -1,19 +1,8 @@
-import { homeSections } from "@/features/cms/data/content";
-
-const NAV_START_SECTION_ID = "alankara";
-
-/** Side nav section ids from Collections onward — matches SectionNav. */
-export const HOME_SIDE_NAV_SECTION_IDS = homeSections
-  .slice(Math.max(0, homeSections.findIndex((section) => section.id === NAV_START_SECTION_ID)))
-  .map((section) => section.id);
-
 const TABLET_PORTRAIT_SCROLL_MQ =
   "(min-width: 768px) and (max-width: 1023px) and (orientation: portrait)";
 
-export function resolveActiveHomeSection(
-  sectionIds: readonly string[] = HOME_SIDE_NAV_SECTION_IDS,
-): string | null {
-  if (typeof window === "undefined") return null;
+export function resolveActiveHomeSection(sectionIds: readonly string[]): string | null {
+  if (typeof window === "undefined" || sectionIds.length === 0) return null;
 
   const viewportH = window.innerHeight;
   const mid = viewportH * 0.4;
