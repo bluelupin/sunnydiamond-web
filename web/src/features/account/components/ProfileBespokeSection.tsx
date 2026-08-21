@@ -12,10 +12,6 @@ import {
 } from "@/services/customer/customer-saved-creations.client";
 import { useToast } from "@/shared/hooks/use-toast";
 import { profileTabsContent } from "../data/profileContent";
-import {
-  MOCK_PROFILE_BESPOKE,
-  PROFILE_PREVIEW_MOCK_WHEN_EMPTY,
-} from "../data/profileMockData";
 import { useCustomerSavedCreations } from "../hooks/useCustomerSavedCreations";
 import type { ProfileBespokeItemUi } from "../types/profileUi.types";
 import { mapSavedCreationToBespokeUi } from "../utils/profileDisplayMappers";
@@ -48,16 +44,9 @@ const ProfileBespokeSection = () => {
   const [selectedItem, setSelectedItem] = useState<ProfileBespokeItemUi | null>(null);
 
   const items =
-    data && data.items.length > 0
-      ? data.items
-          .map((item) => mapSavedCreationToBespokeUi(item))
-          .filter((item): item is NonNullable<typeof item> => item != null)
-      : PROFILE_PREVIEW_MOCK_WHEN_EMPTY
-        ? MOCK_PROFILE_BESPOKE
-        : [];
-
-  const usingMockData =
-    PROFILE_PREVIEW_MOCK_WHEN_EMPTY && (!data || data.items.length === 0);
+    data?.items
+      .map((item) => mapSavedCreationToBespokeUi(item))
+      .filter((item): item is NonNullable<typeof item> => item != null) ?? [];
 
   const displayItems = items.filter((item) => !removedIds.includes(item.id));
 
@@ -75,33 +64,29 @@ const ProfileBespokeSection = () => {
     const undo = async () => {
       restoreItem(item.id);
 
-      if (!usingMockData) {
-        try {
-          await saveCustomerCreationClient(item.creationDocumentId);
-          refresh();
-        } catch (undoError) {
-          setRemovedIds((current) => [...current, item.id]);
-          toast({
-            title: content.removeErrorTitle,
-            description: undoError instanceof Error ? undoError.message : "Please try again.",
-            variant: "destructive",
-          });
-        }
+      try {
+        await saveCustomerCreationClient(item.creationDocumentId);
+        refresh();
+      } catch (undoError) {
+        setRemovedIds((current) => [...current, item.id]);
+        toast({
+          title: content.removeErrorTitle,
+          description: undoError instanceof Error ? undoError.message : "Please try again.",
+          variant: "destructive",
+        });
       }
     };
 
     showBespokeRemovedToast({ onUndo: undo });
 
-    if (!usingMockData) {
-      void deleteCustomerSavedCreationClient(item.creationDocumentId).catch((removeError) => {
-        restoreItem(item.id);
-        toast({
-          title: content.removeErrorTitle,
-          description: removeError instanceof Error ? removeError.message : "Please try again.",
-          variant: "destructive",
-        });
+    void deleteCustomerSavedCreationClient(item.creationDocumentId).catch((removeError) => {
+      restoreItem(item.id);
+      toast({
+        title: content.removeErrorTitle,
+        description: removeError instanceof Error ? removeError.message : "Please try again.",
+        variant: "destructive",
       });
-    }
+    });
   };
 
   if (isLoading) {
@@ -154,7 +139,7 @@ const ProfileBespokeSection = () => {
         ))}
       </ul>
 
-      {!usingMockData && data && data.totalPages > 1 ? (
+      {data && data.totalPages > 1 ? (
         <div className="flex items-center justify-between gap-4 pt-2">
           <CartOutlineButton
             type="button"

@@ -1,6 +1,7 @@
 import type { ProfileBespokeItemUi } from "../types/profileUi.types";
 
-export const PROFILE_PREVIEW_MOCK_WHEN_EMPTY = true;
+/** Dev-only preview data — not used in ProfileBespokeSection (always shows API results). */
+export const PROFILE_PREVIEW_MOCK_WHEN_EMPTY = false;
 
 const PLACEHOLDER_RING_IMAGE = "/images/jewellery/plp/product-ring-transparent.png";
 const PLACEHOLDER_NECKLACE_IMAGE = "/images/jewellery/plp/product-necklace-transparent.png";
