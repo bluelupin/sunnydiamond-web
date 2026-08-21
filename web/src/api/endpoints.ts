@@ -19,6 +19,8 @@ export const STRAPI_ENDPOINTS = {
   diamondsForEveryonePage: "api/diamonds-for-everyone-page",
   /** Gifting marketing page — hero, occasions, gift finder, gift card, trust badges, SEO. */
   giftingPage: "api/gifting-page",
+  /** Profile page — side tabs, hero background, trust badge promo strip. */
+  profilePage: "api/profile-page",
   occasions: "api/occasions",
   /** PDP size dropdown + chart drawer — fetch all, match by `name` / category */
   sizeGuides: "api/size-guides",

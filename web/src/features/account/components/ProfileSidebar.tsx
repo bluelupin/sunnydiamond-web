@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { cn } from "@/shared/utils/cn";
-import { PROFILE_NAV_ITEMS } from "../data/profileSections";
+import type { ProfileNavItem } from "../data/profileSections";
 import type { ProfileSectionId } from "../types";
 import {
   buildProfileSectionHref,
@@ -12,9 +12,10 @@ import {
 
 type ProfileSidebarProps = {
   activeSection: ProfileSectionId;
+  navItems: ProfileNavItem[];
 };
 
-const ProfileSidebar = ({ activeSection }: ProfileSidebarProps) => {
+const ProfileSidebar = ({ activeSection, navItems }: ProfileSidebarProps) => {
   const searchParams = useSearchParams();
   const currentHref = getCurrentProfileHref(searchParams);
 
@@ -23,7 +24,7 @@ const ProfileSidebar = ({ activeSection }: ProfileSidebarProps) => {
       aria-label="Profile sections"
       className="flex w-full flex-col border-r border-neutral300 bg-white"
     >
-      {PROFILE_NAV_ITEMS.map((item) => {
+      {navItems.map((item) => {
         if (item.kind === "link") {
           return (
             <Link

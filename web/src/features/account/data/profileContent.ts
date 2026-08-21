@@ -1,24 +1,3 @@
-export const profileHeroSpec = {
-  image: {
-    src: "/images/profile/hero.png",
-    alt: "Sunny Diamonds profile banner",
-    width: 1440,
-    height: 800,
-  },
-  /** Figma 1480:18126 — mobile hero crop anchors bottom-right ring box */
-  imageCrop: {
-    mobile: "80% 70%",
-    desktop: "50% 30%",
-  },
-  overlayOpacity: {
-    mobile: 0.6,
-    desktop: 0.4,
-  },
-  height: {
-    mobile: 240,
-    desktop: 320,
-  },
-} as const;
 
 export const profileDetailsContent = {
   sectionTitle: "Personal Details",
@@ -85,24 +64,6 @@ export const profileDetailsContent = {
   },
 } as const;
 
-export const profilePromoContent = {
-  help: {
-    title: "We're Here To Help",
-    description:
-      "Reach out to our experts for support with your orders, plans, or jewellery care.",
-    phoneLabel: "+91 9744355555",
-    callHref: "tel:+919744355555",
-    emailLabel: "EMAIL US",
-    emailHref: "mailto:customerservice@sunnydiamonds.com",
-  },
-  returns: {
-    title: "15-Day Return Policy",
-    description:
-      "Hassle-free returns available within 15 days of delivery on eligible orders.",
-    ctaLabel: "SEE RETURN POLICY",
-    ctaHref: "/policy-and-certifications?policy=15-day-return-policy",
-  },
-} as const;
 
 export const profileTabsContent = {
   orders: {

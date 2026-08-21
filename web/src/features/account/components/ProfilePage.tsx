@@ -3,6 +3,8 @@
 import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { mapProfileNavItems } from "@/services/profile/profile-page.mapper";
+import { useProfilePageCms } from "@/shared/lib/providers/ProfilePageCmsProvider";
 import {
   DEFAULT_PROFILE_SECTION,
   getProfileSectionMobileTitle,
@@ -23,6 +25,12 @@ import { cn } from "@/shared/utils/cn";
 const ProfilePage = () => {
   const { customer } = useAuth();
   const searchParams = useSearchParams();
+  const profilePage = useProfilePageCms();
+
+  const navItems = useMemo(
+    () => mapProfileNavItems(profilePage?.sideTabs ?? []),
+    [profilePage?.sideTabs],
+  );
 
   const activeSection = useMemo<ProfileSectionId>(() => {
     const requested = searchParams?.get("section");
@@ -43,7 +51,10 @@ const ProfilePage = () => {
     <ProfileAuthGate>
       {customer &&
         <ProfileBespokeToastProvider>
-          <ProfileHeroSection firstName={customer.firstname} />
+          <ProfileHeroSection
+            firstName={customer.firstname}
+            backgroundImage={profilePage?.backgroundImage ?? null}
+          />
           <div
             className={cn(
               "lg:pt-20 md:pt-14 pt-10 2xl:max-w-1920 max-w-1440",
@@ -61,7 +72,7 @@ const ProfilePage = () => {
             ) : null}
             <div className="lg:grid xl:grid-cols-[437px_minmax(0,1fr)] lg:grid-cols-[400px_minmax(0,1fr)] lg:gap-6">
               <aside className="relative hidden lg:block">
-                <ProfileSidebar activeSection={activeSection} />
+                <ProfileSidebar activeSection={activeSection} navItems={navItems} />
               </aside>
               <div className="min-w-0">
                 <ProfileSectionContent section={activeSection} customer={customer} />
@@ -69,7 +80,9 @@ const ProfilePage = () => {
             </div>
           </div>
           {activeSection === "support" ? <ProfileSupportFaqSection /> : null}
-          {activeSection !== "support" ? <ProfilePromoStrip /> : null}
+          {activeSection !== "support" ? (
+            <ProfilePromoStrip trustBadges={profilePage?.trustBadges ?? []} />
+          ) : null}
         </ProfileBespokeToastProvider>
       }
     </ProfileAuthGate>

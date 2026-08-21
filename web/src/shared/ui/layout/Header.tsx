@@ -26,6 +26,8 @@ import MobileNavigation from "@/shared/ui/layout/MobileNavigation";
 import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
 import AccountMenu from "@/features/auth/components/AccountMenu";
 import { ProfileMobileNavSheet } from "@/features/account/components/ProfileMobileNavSheet";
+import { mapProfileNavItems } from "@/services/profile/profile-page.mapper";
+import { useProfilePageCms } from "@/shared/lib/providers/ProfilePageCmsProvider";
 import MenuIcon from "@/assets/Icons/MenuIcon";
 import HeaderIconBadge from "@/shared/ui/layout/HeaderIconBadge";
 import { useCanHover } from "@/shared/hooks/use-can-hover";
@@ -89,6 +91,11 @@ const Header = () => {
   const themeHeaderVariant = isLoadingHeader ? "solid" : headerVariant;
 
   const { data: shellData } = useHomepageShell();
+  const profilePage = useProfilePageCms();
+  const profileNavItems = useMemo(
+    () => mapProfileNavItems(profilePage?.sideTabs ?? []),
+    [profilePage?.sideTabs],
+  );
   const headerNavigationLinks = useMemo(() => {
     const cmsLinks = shellData?.global?.headerNavigationLinks || shellData?.headerNavigationLinks;
     return resolveShellHeaderLinks(cmsLinks);
@@ -299,6 +306,7 @@ const Header = () => {
       <ProfileMobileNavSheet
         open={profileNavOpen}
         onOpenChange={setProfileNavOpen}
+        navItems={profileNavItems}
         cartCount={cartCount}
       />
     </>
