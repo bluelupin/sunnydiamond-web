@@ -28,6 +28,7 @@ export const profileDetailsContent = {
     phone: "Phone No.",
   },
   verifyLabel: "VERIFY",
+  verifiedLabel: "Verified",
   saveLabel: "SAVE",
   cancelLabel: "CANCEL",
   phoneInfo:

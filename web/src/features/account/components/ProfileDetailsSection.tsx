@@ -17,10 +17,15 @@ import {
 } from "@/shared/constants/appointmentForm";
 import { profileDetailsContent } from "../data/profileContent";
 import { formatCustomerFullName } from "../utils/formatAccountData";
+import {
+  isProfileEmailVerified,
+  persistProfileEmailVerification,
+} from "../utils/profileEmailVerification";
 import { useDeleteAccount } from "../hooks/useDeleteAccount";
 import { ProfileDeleteAccountDialog } from "./ProfileDeleteAccountDialog";
 import { ProfileDeleteAccountReasonDialog } from "./ProfileDeleteAccountReasonDialog";
 import { ProfileDeleteAccountSuccessDialog } from "./ProfileDeleteAccountSuccessDialog";
+import { ProfileEmailVerifiedBadge } from "./profileUi";
 
 type ProfileDetailsSectionProps = {
   customer: AuthCustomer;
@@ -68,6 +73,9 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
 
   const initialFullName = formatCustomerFullName(customer.firstname, customer.lastname);
   const initialEmail = customer.email ?? "";
+  const [isEmailVerified, setIsEmailVerified] = useState(() =>
+    isProfileEmailVerified(customer.id, initialEmail),
+  );
 
   const [fullName, setFullName] = useState(initialFullName);
   const [isSaving, setIsSaving] = useState(false);
@@ -75,6 +83,10 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
   useEffect(() => {
     setFullName(initialFullName);
   }, [initialFullName]);
+
+  useEffect(() => {
+    setIsEmailVerified(isProfileEmailVerified(customer.id, initialEmail));
+  }, [customer.id, initialEmail]);
 
   const phoneDisplay = useMemo(() => {
     if (!contact?.phone) return "";
@@ -122,6 +134,8 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
 
   const handleVerifyEmail = () => {
     showStatusToast(content.emailVerifiedToastMessage);
+    persistProfileEmailVerification(customer.id, initialEmail);
+    setIsEmailVerified(true);
   };
 
   const handleProceedToDelete = () => {
@@ -194,9 +208,13 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
                   readOnly
                   className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none"
                 />
-                <DetailTextLink onClick={handleVerifyEmail} className="shrink-0 text-sm uppercase">
-                  {content.verifyLabel}
-                </DetailTextLink>
+                {isEmailVerified ? (
+                  <ProfileEmailVerifiedBadge label={content.verifiedLabel} />
+                ) : (
+                  <DetailTextLink onClick={handleVerifyEmail} className="shrink-0 text-sm uppercase">
+                    {content.verifyLabel}
+                  </DetailTextLink>
+                )}
               </div>
             </div>
 

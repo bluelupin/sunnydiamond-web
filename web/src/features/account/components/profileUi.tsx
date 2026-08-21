@@ -8,6 +8,29 @@ import { cn } from "@/shared/utils/cn";
 import { profileTabsContent } from "../data/profileContent";
 import type { OrderFilterKey, ProfileOrderSubState } from "../types/profileUi.types";
 
+export function ProfileEmailVerifiedBadge({ label }: { label: string }) {
+  return (
+    <span className="flex shrink-0 items-center gap-1 font-gill text-sm font-normal uppercase leading-110 text-green600">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden
+      >
+        <path
+          d="M1 10.75L6.25 16L18.25 4"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      {label}
+    </span>
+  );
+}
+
 export function ProfileSectionHeader({
   title,
   actionLabel,

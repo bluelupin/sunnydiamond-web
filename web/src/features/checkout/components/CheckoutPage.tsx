@@ -578,7 +578,7 @@ const CheckoutPage = () => {
 
       checkoutLockedRef.current = true;
       paymentInFlightRef.current = true;
-      setSubmitting(true);
+    setSubmitting(true);
 
       void (async () => {
         try {
@@ -714,7 +714,7 @@ const CheckoutPage = () => {
         } finally {
           checkoutLockedRef.current = false;
           paymentInFlightRef.current = false;
-          setSubmitting(false);
+      setSubmitting(false);
         }
       })();
     });

@@ -527,7 +527,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       applyCartState(nextState);
 
       if (existingItem) {
-        trackEvent("remove_from_cart", {
+      trackEvent("remove_from_cart", {
           currency: nextState.totals.currency,
           value: existingItem.product.price * existingItem.quantity,
           items: [
