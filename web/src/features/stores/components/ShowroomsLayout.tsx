@@ -9,8 +9,8 @@ import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { cn } from "@/shared/utils/cn";
 import { ShowroomsLayoutSkeleton } from "./ShowroomsLayoutSkeleton";
 
-const ADDRESS_ICON = "/images/products/delivery-store/address-icon.svg";
-const PHONE_ICON = "/images/products/delivery-store/phone-icon.svg";
+const ADDRESS_ICON = "/icons/address-icon.svg";
+const PHONE_ICON = "/icons/phone-icon.svg";
 
 export type ShowroomLayoutItem = {
   id: string;

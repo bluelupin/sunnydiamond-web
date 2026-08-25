@@ -108,6 +108,8 @@ export async function JewelleryCategoryRoutePage({
         <JewelleryProductPage
           initialListing={initialListing}
           prefetchedCategoryUrlKey={initialListing ? categoryUrlKey : undefined}
+          hero={page.hero}
+          trustBadges={page.trustBadges}
         />
       </Suspense>
     </>

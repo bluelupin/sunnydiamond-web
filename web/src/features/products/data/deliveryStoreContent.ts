@@ -5,9 +5,9 @@ export const DELIVERY_STORE_MAP_IMAGES = {
 } as const;
 
 export const DELIVERY_STORE_ICONS = {
-  store: "/images/products/delivery-store/store-icon.svg",
-  address: "/images/products/delivery-store/address-icon.svg",
-  phone: "/images/products/delivery-store/phone-icon.svg",
+  store: "/icons/store-icon.svg",
+  address: "/icons/address-icon.svg",
+  phone: "/icons/phone-icon.svg",
 } as const;
 
 export type DeliveryStoreLocation = {

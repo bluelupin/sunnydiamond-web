@@ -1,27 +1,3 @@
-/** Figma node 692:4114 — jewellery product list hero banner */
-export const jewelleryListingHeroSpec = {
-  title: "Handcrafted Brilliance",
-  height: {
-    mobile: 240,
-    desktop: 320,
-  },
-  overlayOpacity: 0.4,
-  titleTop: {
-    mobile: 152,
-    desktop: 203,
-  },
-  titleFontSize: {
-    mobile: 32,
-    desktop: 48,
-  },
-} as const;
-
-export const jewelleryListingHeroAssets = {
-  desktop: "/images/jewellery/plp-hero.webp",
-  mobile: "/images/jewellery/plp-hero.webp",
-  alt: "Handcrafted Brilliance — diamond jewellery collection",
-} as const;
-
 /** Figma node 692:4117 — jewellery product list category nav (desktop) */
 export const jewelleryListingCategoryNavSpec = {
   padding: 40,
@@ -205,38 +181,6 @@ export const jewelleryListingFilterDrawerAssets = {
   gemstoneRadioDefaultIcon: "/images/jewellery/filter-radio-default.svg",
   gemstoneRadioSelectedIcon: "/images/jewellery/filter-radio-selected.svg",
 } as const;
-
-/** Figma node 692:4249 — jewellery product list guarantees bar */
-export const jewelleryListingGuaranteesSpec = {
-  height: 264,
-  paddingX: 180,
-  paddingY: 64,
-  itemWidth: 260,
-  itemHeight: 136,
-  itemPadding: 12,
-  itemGap: 12,
-  iconSize: 64,
-  mobileIconSize: 40,
-  labelFontSize: 20,
-  labelColor: "#0A0A0A",
-  dividerColor: "#999999",
-  backgroundColor: "#FBFAF6",
-} as const;
-
-export const jewelleryListingGuarantees = [
-  {
-    iconSrc: "/images/about/guarantees/moneyback.svg",
-    label: "100% Moneyback Guarantee",
-  },
-  {
-    iconSrc: "/images/about/guarantees/return.svg",
-    label: "15 Days Return Policy",
-  },
-  {
-    iconSrc: "/images/about/guarantees/cod.svg",
-    label: "Cash on Delivery",
-  },
-] as const;
 
 export const jewelleryListingEmptyStateContent = {
   filterTitle: "No products found",

@@ -19,8 +19,8 @@ interface ShowroomsSectionProps {
   id?: string;
 }
 
-const ADDRESS_ICON = "/images/products/delivery-store/address-icon.svg";
-const PHONE_ICON = "/images/products/delivery-store/phone-icon.svg";
+const ADDRESS_ICON = "/icons/address-icon.svg";
+const PHONE_ICON = "/icons/phone-icon.svg";
 
 function resolveShowroomImages(location: ShowroomSectionLocation | undefined) {
   const desktopImage = location?.image?.desktopImage

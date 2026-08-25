@@ -71,6 +71,8 @@ export default async function Page({ searchParams }: PageProps) {
         <JewelleryProductPage
           initialListing={initialListing}
           prefetchedCategoryUrlKey={initialListing ? null : undefined}
+          hero={page.hero}
+          trustBadges={page.trustBadges}
         />
       </Suspense>
     </>

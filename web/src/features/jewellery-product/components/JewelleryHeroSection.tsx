@@ -1,37 +1,39 @@
-import Image from "next/image";
-import {
-  jewelleryListingHeroAssets,
-  jewelleryListingHeroSpec,
-} from "../data/content";
-import { PLP_HERO_IMAGE_QUALITY } from "../utils/jewelleryPlpImage";
+"use client";
 
-const JewelleryHeroSection = () => {
-  const { title } = jewelleryListingHeroSpec;
+import HeroBackgroundMedia from "@/features/cms/components/home/HeroBackgroundMedia";
+import type { NormalizedProductLandingHero } from "@/services/product-landing/product-landing-page.types";
+
+type JewelleryHeroSectionProps = NormalizedProductLandingHero;
+
+const JewelleryHeroSection = ({ title, image, videoUrl }: JewelleryHeroSectionProps) => {
+  const imageAlt = image?.alt?.trim() || title;
 
   return (
     <section
       aria-labelledby="jewellery-listing-hero-title"
       className="relative grid h-[240px] w-full overflow-hidden md:h-320"
     >
-      <div className="relative col-start-1 row-start-1 size-full">
-        <Image
-          src={jewelleryListingHeroAssets.desktop}
-          alt={jewelleryListingHeroAssets.alt}
-          fill
-          priority
-          quality={PLP_HERO_IMAGE_QUALITY}
-          sizes="100vw"
-          className="object-cover object-[62%_38%] md:object-[58%_42%]"
+      <div className="relative col-start-1 row-start-1 size-full [&_img]:object-[62%_38%] md:[&_img]:object-[58%_42%] [&_video]:object-[62%_38%] md:[&_video]:object-[58%_42%]">
+        <HeroBackgroundMedia
+          desktopImageUrl={image?.desktopUrl ?? ""}
+          mobileImageUrl={image?.mobileUrl}
+          desktopAlt={imageAlt}
+          mobileAlt={imageAlt}
+          cmsVideoUrl={videoUrl}
         />
       </div>
-      {/* <div className="col-start-1 row-start-1 size-full bg-black/40" aria-hidden /> */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-darkblack/85 via-darkblack/35 to-transparent"></div>
-      <h1
-        id="jewellery-listing-hero-title"
-        className="col-start-1 row-start-1 z-10 flex w-full max-w-440 justify-center self-start justify-self-center whitespace-nowrap pt-[152px] text-center font-larken text-32 font-light leading-110 text-white md:pt-[203px] md:text-5xl"
-      >
-        {title}
-      </h1>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-darkblack/85 via-darkblack/35 to-transparent"
+      />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-10 lg:pb-16">
+        <h1
+          id="jewellery-listing-hero-title"
+          className="w-full text-center font-larken font-light leading-none text-white lg:text-6xl md:text-5xl sm:text-4xl text-32"
+        >
+          {title}
+        </h1>
+      </div>
     </section>
   );
 };

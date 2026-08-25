@@ -2,8 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import type { BookStoreVisitStore } from "@/features/products/data/bookStoreVisitContent";
 
-const ADDRESS_ICON = "/images/products/delivery-store/address-icon.svg";
-const PHONE_ICON = "/images/products/delivery-store/phone-icon.svg";
+const ADDRESS_ICON = "/icons/address-icon.svg";
+const PHONE_ICON = "/icons/phone-icon.svg";
 
 type BookStoreVisitLocationDetailsProps = {
   store: BookStoreVisitStore;

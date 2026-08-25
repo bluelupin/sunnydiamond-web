@@ -45,6 +45,10 @@ import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import { resolveActiveCategorySlugFromFilters, resolveMainCategoryUrlKeyFromDrawerSelection } from "../utils/plpCategoryNav";
 import type { JewelleryCategory, JewelleryFilterState } from "../types";
 import type { JewelleryListingProductsData } from "@/types/magento/jewelleryListing";
+import type {
+  NormalizedProductLandingHero,
+  NormalizedProductLandingTrustBadge,
+} from "@/services/product-landing/product-landing-page.types";
 
 const JewelleryFilterDrawer = dynamic(() => import("./JewelleryFilterDrawer"), {
   ssr: false,
@@ -54,11 +58,15 @@ const JewelleryFilterDrawer = dynamic(() => import("./JewelleryFilterDrawer"), {
 type JewelleryProductPageProps = {
   initialListing?: JewelleryListingProductsData;
   prefetchedCategoryUrlKey?: string | null;
+  hero?: NormalizedProductLandingHero | null;
+  trustBadges?: NormalizedProductLandingTrustBadge[];
 };
 
 const JewelleryProductPage = ({
   initialListing,
   prefetchedCategoryUrlKey,
+  hero,
+  trustBadges = [],
 }: JewelleryProductPageProps) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -387,7 +395,7 @@ const JewelleryProductPage = ({
 
   return (
     <div className="pb-[calc(64px+env(safe-area-inset-bottom,0px))] md:pb-0">
-      <JewelleryHeroSection />
+      {hero ? <JewelleryHeroSection {...hero} /> : null}
       <JewelleryCategoryNav activeCategory={activeCategory} onCategoryChange={handleCategoryChange} />
 
       <JewelleryProductToolbar
@@ -424,7 +432,7 @@ const JewelleryProductPage = ({
       ) : null}
 
       <ScrollReveal delayMs={0}>
-        <JewelleryGuaranteesSection />
+        <JewelleryGuaranteesSection trustBadges={trustBadges} />
       </ScrollReveal>
 
       <JewelleryFilterDrawer
