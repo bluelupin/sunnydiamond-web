@@ -8,6 +8,10 @@ import { EMPTY_ABOUT_PAGE } from "./about-page.types";
 /** Deep populate for nested media — shallow populate=* can leave craft mosaic tile images null. */
 const ABOUT_PAGE_POPULATE_QUERY =
   "populate=*" +
+  "&populate[hero][populate][image][populate][desktopImage]=true" +
+  "&populate[hero][populate][image][populate][mobileImage]=true" +
+  "&populate[hero][populate][heroVideo][populate][heroVideo]=true" +
+  "&populate[hero][populate][videoBackground][populate][heroVideo]=true" +
   "&populate[brillianceSection][populate][featureSlide][populate][image][populate][desktopImage]=true" +
   "&populate[brillianceSection][populate][featureSlide][populate][image][populate][mobileImage]=true" +
   "&populate[craftSection][populate][videoUrl][populate][heroVideo]=true" +

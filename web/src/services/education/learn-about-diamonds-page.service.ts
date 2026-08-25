@@ -11,7 +11,6 @@ import { EMPTY_LEARN_ABOUT_DIAMONDS_PAGE } from "./learn-about-diamonds-page.typ
 /** Targeted populate — matches Strapi schema field names. */
 const LEARN_ABOUT_DIAMONDS_POPULATE_QUERY =
   "populate[hero][populate][heroVideo][populate]=heroVideo" +
-  "&populate[hero][populate][backgroundVideo][populate]=heroVideo" +
   "&populate[hero][populate][image][populate][desktopImage]=true" +
   "&populate[hero][populate][image][populate][mobileImage]=true" +
   "&populate[faqSection][populate]=faqItems" +

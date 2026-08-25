@@ -28,17 +28,19 @@ const EducationFourCsIntroSection = ({ intro }: EducationFourCsIntroSectionProps
           </span>
         </ScrollReveal>
         <div className="flex flex-col items-center gap-6 lg:gap-8">
-          <ScrollReveal delayMs={100} className="relative overflow-hidden lg:h-202 lg:w-250 h-130 w-[160px]">
-            <ResponsiveImage
-              desktopSrc={intro.imageDesktopUrl}
-              mobileSrc={intro.imageMobileUrl}
-              alt={intro.imageAlt}
-              width={intro.imageDesktopUrl ? 250 : 160}
-              height={intro.imageDesktopUrl ? 202 : 130}
-              quality={80}
-              className="object-cover"
-            />
-          </ScrollReveal>
+          {intro.imageDesktopUrl || intro.imageMobileUrl ? (
+            <ScrollReveal delayMs={100} className="relative overflow-hidden lg:h-202 lg:w-250 h-130 w-[160px]">
+              <ResponsiveImage
+                desktopSrc={intro.imageDesktopUrl ?? intro.imageMobileUrl ?? ""}
+                mobileSrc={intro.imageMobileUrl}
+                alt={intro.imageAlt ?? ""}
+                width={intro.imageDesktopUrl ? 250 : 160}
+                height={intro.imageDesktopUrl ? 202 : 130}
+                quality={80}
+                className="object-cover"
+              />
+            </ScrollReveal>
+          ) : null}
           <VerticalScrollLine />
           <ScrollReveal delayMs={220}>
             <p className="max-w-350 text-center font-gill text-base font-light leading-110 text-darkblack lg:max-w-640 lg:text-xl">{intro.description}</p>

@@ -247,7 +247,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
                 <Link
                   href={primaryCtaUrl}
                   className={cn(
-                    "btn-border-slide inline-flex h-14 items-center justify-center border border-neutral300 bg-white px-8 font-gill text-sm font-normal uppercase leading-110 text-darkblack",
+                    "btn-border-slide inline-flex h-14 items-center justify-center border-0 bg-white px-8 font-gill text-sm font-normal uppercase leading-110 text-darkblack",
                     ctaFocusLightClass,
                   )}
                 >

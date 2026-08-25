@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
+import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import FeaturedProductsCarousel, {
   type FeaturedCarouselItem,
 } from "@/features/cms/components/home/FeaturedProductsCarousel";
@@ -115,7 +116,12 @@ const LearnCareTip = ({ tip, mobile = false }: { tip: NormalizedEducationLearnCa
           height: mobile ? mobileSpec.iconSize : desktop.iconSize,
         }}
       >
-        <Image src={tip.icon} alt={tip.iconAlt || ""} fill className="object-contain" />
+        <Image
+          src={mobile && tip.mobileIcon ? tip.mobileIcon : tip.icon}
+          alt={tip.iconAlt || ""}
+          fill
+          className="object-contain"
+        />
       </div>
       <p
         className="font-gill font-light text-base leading-110 text-darkblack md:text-neutral500"
@@ -179,11 +185,12 @@ const LearnAnatomyDetailPanel = ({ detail }: { detail: NormalizedEducationLearnA
       <div className="grid w-full items-start lg:gap-12 gap-6 md:grid-cols-5">
         <div className="md:col-span-2">
           <div className="relative mx-auto h-[200px] w-[200px] shrink-0 mix-blend-darken md:h-[300px] md:w-[300px]">
-            <Image
-              src={detail.image}
+            <ResponsiveImage
+              desktopSrc={detail.imageDesktopUrl}
+              mobileSrc={detail.imageMobileUrl}
               alt={detail.imageAlt}
               fill
-              className="h-full w-full object-cover"
+              className="object-cover"
             />
           </div>
         </div>

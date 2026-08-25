@@ -15,7 +15,7 @@ const StepConnectorLine = ({ className }: { className?: string }) => (
       "pointer-events-none absolute top-1/2 w-px -translate-y-1/2 bg-neutral500",
       className,
     )}
-    style={{ height: stepsSpec.desktop.lineHeight }}
+    style={{ height: "100%" }}
   />
 );
 

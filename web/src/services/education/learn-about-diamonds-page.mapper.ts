@@ -5,7 +5,13 @@ import {
   type EducationFourCsPanelContent,
   type EducationSliderOption,
 } from "@/features/education/data/content";
-import { resolveCmsAltText, resolveCmsMediaUrl, resolveCmsMediaUrls } from "@/shared/utils/strapiMedia";
+import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
+import {
+  extractStrapiImage,
+  resolveCmsAltText,
+  resolveCmsMediaUrl,
+  resolveCmsMediaUrls,
+} from "@/shared/utils/strapiMedia";
 import type {
   NormalizedEducationCertificateSection,
   NormalizedEducationCertification,
@@ -20,6 +26,7 @@ import type {
   NormalizedEducationLearnCareTip,
   NormalizedEducationLearnMoreSection,
   NormalizedEducationLearnTab,
+  NormalizedEducationResponsiveImage,
   NormalizedEducationSeo,
   NormalizedLearnAboutDiamondsPage,
   StrapiEducationCertificateSection,
@@ -58,6 +65,9 @@ const cleanText = (value?: string | null): string | undefined => {
   const trimmed = value?.trim();
   return trimmed || undefined;
 };
+
+const sortByCmsOrder = <T extends { sortOrder?: number | null }>(items: T[]): T[] =>
+  [...items].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
 
 /** CMS sections may use `isActive` or legacy `showField`; default visible when unset. */
 const resolveSectionActive = (
@@ -105,25 +115,50 @@ const mapSeo = (seo?: StrapiEducationSeo | null): NormalizedEducationSeo | null 
   };
 };
 
+const mapResponsiveImage = (
+  media?: StrapiEducationResponsiveImage | null,
+): NormalizedEducationResponsiveImage | null => {
+  if (!media) return null;
+
+  const desktopFile = extractStrapiImage(media.desktopImage);
+  const mobileFile = extractStrapiImage(media.mobileImage);
+
+  const desktopUrl =
+    resolveCmsMediaUrl(media.desktopImage) ??
+    resolveCmsMediaUrl(media.mobileImage);
+  const mobileUrl =
+    resolveCmsMediaUrl(media.mobileImage) ??
+    resolveCmsMediaUrl(media.desktopImage);
+
+  if (!desktopUrl && !mobileUrl) return null;
+
+  const desktopAlt = resolveCmsAltText(media.desktopImage) ?? "";
+  const mobileAlt = resolveCmsAltText(media.mobileImage) ?? "";
+
+  return {
+    desktopUrl: desktopUrl ?? mobileUrl!,
+    mobileUrl: mobileUrl ?? desktopUrl!,
+    alt: desktopAlt || mobileAlt,
+    width: desktopFile?.width ?? mobileFile?.width ?? undefined,
+    height: desktopFile?.height ?? mobileFile?.height ?? undefined,
+  };
+};
+
 const mapHero = (hero?: StrapiEducationHero | null): NormalizedEducationHero | null => {
   if (!hero || !resolveSectionActive(hero.isActive, hero.showField)) return null;
 
   const title = cleanText(hero.title);
   if (!title) return null;
 
-  const image = mapResponsiveImageUrls(hero.image);
-  if (!image.hasImage) return null;
-
-  const videoUrl = resolveCmsMediaUrl(hero.heroVideo?.heroVideo);
+  const image = mapResponsiveImage(hero.image);
+  const videoUrl = getCmsAssetUrl(resolveCmsMediaUrl(hero.heroVideo?.heroVideo));
 
   return {
     title,
     eyebrow: cleanText(hero.eyebrow),
     subtitle: cleanText(hero.subtitle),
+    image,
     videoUrl,
-    posterDesktopUrl: image.desktopUrl,
-    posterMobileUrl: image.mobileUrl,
-    posterAlt: image.alt,
   };
 };
 
@@ -409,12 +444,12 @@ const formatPillarLabel = (label?: string | null) => {
 const mapFourCsIntro = (
   intro?: StrapiEducationFourCsIntro | null,
 ): NormalizedEducationFourCsIntro | null => {
-  if (!intro || !resolveSectionActive(intro.isActive, intro.showField)) return null;
+  if (!intro || intro.isActive === false) return null;
 
-  const image = mapResponsiveImageUrls(intro.decorativeImage);
+  const image = mapResponsiveImage(intro.decorativeImage);
   const heading = cleanText(intro.heading);
   const description = cleanText(intro.body);
-  if (!heading || !description || !image.hasImage) return null;
+  if (!heading || !description) return null;
 
   const mobileHeading = cleanText(intro.mobileHeading);
 
@@ -431,9 +466,13 @@ const mapFourCsIntro = (
     ...(mobileHeading ? { mobileTitle: mobileHeading } : {}),
     description,
     pillars,
-    imageDesktopUrl: image.desktopUrl,
-    imageMobileUrl: image.mobileUrl,
-    imageAlt: image.alt,
+    ...(image
+      ? {
+          imageDesktopUrl: image.desktopUrl,
+          imageMobileUrl: image.mobileUrl,
+          imageAlt: image.alt,
+        }
+      : {}),
   };
 };
 
@@ -636,14 +675,15 @@ const parseTraitLabel = (label: string, index: number) => {
 };
 
 const mapCarouselSlide = (item: StrapiEducationLearnCarouselImage) => {
-  const image = mapResponsiveImageUrls(item.image);
-  if (!image.desktopUrl) return null;
+  const image = mapResponsiveImage(item.image);
+  if (!image) return null;
 
   const ctaLabel = cleanText(item.ctaButton?.label);
   const ctaHref = cleanText(item.ctaButton?.url);
 
   return {
     src: image.desktopUrl,
+    mobileSrc: image.mobileUrl,
     alt: image.alt,
     ctaLabel,
     ctaHref,
@@ -660,6 +700,23 @@ const flattenLearnFeatureItems = (
 ): StrapiEducationLearnFeatureItem[] =>
   resolveLearnFeatureGroups(tab).flatMap((group) => group.featureItems ?? []);
 
+const resolveLearnCareItems = (
+  tab: StrapiEducationLearnTab,
+): StrapiEducationLearnFeatureItem[] => {
+  const groupedItems = flattenLearnFeatureItems(tab);
+  if (groupedItems.length) return groupedItems;
+
+  return tab.featureItems ?? [];
+};
+
+const resolveAnatomyHeroImage = (tab: StrapiEducationLearnTab) => {
+  const featureImage = mapResponsiveImage(tab.featureImage);
+  if (featureImage) return featureImage;
+
+  const firstCarousel = sortByCmsOrder(tab.carouselImage ?? [])[0];
+  return mapResponsiveImage(firstCarousel?.image);
+};
+
 const mapCareTips = (
   items?: StrapiEducationLearnFeatureItem[] | null,
 ): NormalizedEducationLearnCareTip[] =>
@@ -668,13 +725,14 @@ const mapCareTips = (
       const label = cleanText(item.label);
       if (!label) return null;
 
-      const iconUrls = mapResponsiveImageUrls(item.icon);
-      if (!iconUrls.hasImage) return null;
+      const icon = mapResponsiveImage(item.icon);
+      if (!icon) return null;
 
       return {
         id: item.id != null ? String(item.id) : `care-${index}`,
-        icon: iconUrls.desktopUrl,
-        ...(iconUrls.alt ? { iconAlt: iconUrls.alt } : {}),
+        icon: icon.desktopUrl,
+        ...(icon.mobileUrl ? { mobileIcon: icon.mobileUrl } : {}),
+        ...(icon.alt ? { iconAlt: icon.alt } : {}),
         labelLines: [label],
       };
     })
@@ -683,7 +741,7 @@ const mapCareTips = (
 const mapAnatomyDetail = (
   tab: StrapiEducationLearnTab,
 ): NormalizedEducationLearnAnatomyDetail | null => {
-  const groups = resolveLearnFeatureGroups(tab);
+  const groups = sortByCmsOrder(resolveLearnFeatureGroups(tab));
   const sections = groups
     .map((group, groupIndex) => {
       const traits =
@@ -709,18 +767,14 @@ const mapAnatomyDetail = (
       (section): section is NonNullable<typeof section> => section != null,
     );
 
-  const carouselImage = tab.carouselImage?.[0];
-  const featureImage = mapResponsiveImageUrls(tab.featureImage);
-  const carouselUrls = mapResponsiveImageUrls(carouselImage?.image);
-  const image = featureImage.hasImage ? featureImage : carouselUrls.hasImage ? carouselUrls : null;
+  const image = resolveAnatomyHeroImage(tab);
 
-  if (!image?.desktopUrl || !sections.length) return null;
-
-  const imageAlt = image.alt;
+  if (!image || !sections.length) return null;
 
   return {
-    image: image.desktopUrl,
-    imageAlt,
+    imageDesktopUrl: image.desktopUrl,
+    imageMobileUrl: image.mobileUrl,
+    imageAlt: image.alt,
     sections,
   };
 };
@@ -729,7 +783,7 @@ const mapLearnTab = (
   tab: StrapiEducationLearnTab,
   index: number,
 ): NormalizedEducationLearnTab | null => {
-  if (!resolveSectionActive(tab.isActive, tab.showField)) return null;
+  if (tab.isActive === false) return null;
 
   const label = formatTabLabel(tab.tabLabel);
   const description = splitDescription(tab.tabDescription);
@@ -748,7 +802,7 @@ const mapLearnTab = (
   };
 
   if (layout === "care-grid") {
-    const careTips = mapCareTips(flattenLearnFeatureItems(tab));
+    const careTips = mapCareTips(resolveLearnCareItems(tab));
     if (!careTips.length) return null;
     mapped.careTips = careTips;
     return mapped;
@@ -762,15 +816,16 @@ const mapLearnTab = (
   }
 
   const slides =
-    tab.carouselImage
-      ?.map((item) => mapCarouselSlide(item))
+    sortByCmsOrder(tab.carouselImage ?? [])
+      .map((item) => mapCarouselSlide(item))
       .filter((slide): slide is NonNullable<typeof slide> => slide != null) ?? [];
 
   if (!slides.length) return null;
 
   const primaryCta = slides.find((slide) => slide.ctaLabel && slide.ctaHref);
-  mapped.slides = slides.map(({ src, alt, ctaLabel, ctaHref }) => ({
+  mapped.slides = slides.map(({ src, mobileSrc, alt, ctaLabel, ctaHref }) => ({
     src,
+    ...(mobileSrc ? { mobileSrc } : {}),
     alt,
     ...(ctaLabel ? { ctaLabel } : {}),
     ...(ctaHref ? { ctaHref } : {}),
@@ -785,12 +840,12 @@ const mapLearnTab = (
 const mapLearnMoreSection = (
   section?: StrapiEducationLearnMoreSection | null,
 ): NormalizedEducationLearnMoreSection | null => {
-  if (!section || !resolveSectionActive(section.isActive, section.showField)) return null;
+  if (!section || section.isActive === false) return null;
 
   const title = cleanText(section.sectionHeading);
   const tabs =
-    section.tabs
-      ?.map((tab, index) => mapLearnTab(tab, index))
+    sortByCmsOrder(section.tabs ?? [])
+      .map((tab, index) => mapLearnTab(tab, index))
       .filter((tab): tab is NormalizedEducationLearnTab => tab != null) ?? [];
 
   if (!title || !tabs.length) return null;

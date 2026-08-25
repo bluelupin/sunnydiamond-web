@@ -39,20 +39,22 @@ const AboutBrillianceSection = ({
               {heading}
             </Reveal>
           </div>
-          <div data-reveal-mask="image" className="mx-auto w-full overflow-hidden">
-            <Reveal direction="up"
-              className="mx-auto h-[300px] w-[300px] lg:h-354 lg:w-354 2xl:w-400 2xl:h-400">
-              <ResponsiveImage
-                desktopSrc={image.desktopUrl}
-                mobileSrc={image.mobileUrl}
-                alt={image.alt}
-                width={image.width ?? imageSpec.width}
-                height={image.height ?? imageSpec.height}
-                quality={80}
-                className="object-cover"
-              />
-            </Reveal>
-          </div>
+          {image ? (
+            <div data-reveal-mask="image" className="mx-auto w-full overflow-hidden">
+              <Reveal direction="up"
+                className="mx-auto h-[300px] w-[300px] lg:h-354 lg:w-354 2xl:w-400 2xl:h-400">
+                <ResponsiveImage
+                  desktopSrc={image.desktopUrl}
+                  mobileSrc={image.mobileUrl}
+                  alt={image.alt}
+                  width={image.width ?? imageSpec.width}
+                  height={image.height ?? imageSpec.height}
+                  quality={80}
+                  className="object-cover"
+                />
+              </Reveal>
+            </div>
+          ) : null}
           <VerticalScrollLine className="lg:mt-[23px] mt-5" />
           <Reveal as="p" direction="up" className="font-gill text-base font-light leading-110 text-gray600 sm:mt-3 lg:mt-[13px] lg:text-xl 2xl:text-22 mx-auto mt-2.5 max-w-full md:max-w-[450px] lg:max-w-557 2xl:max-w-[620px]">
             {body}

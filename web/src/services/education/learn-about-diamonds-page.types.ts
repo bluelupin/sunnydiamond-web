@@ -152,24 +152,28 @@ export type StrapiEducationCertificateSection = {
 
 export type StrapiEducationLearnFeatureItem = {
   id?: number;
+  sortOrder?: number | null;
   label?: string | null;
   icon?: StrapiEducationResponsiveImage | null;
 };
 
 export type StrapiEducationLearnFeatureGroup = {
   id?: number;
+  sortOrder?: number | null;
   featureSubtitle?: string | null;
   featureItems?: StrapiEducationLearnFeatureItem[] | null;
 };
 
 export type StrapiEducationLearnCarouselImage = {
   id?: number;
+  sortOrder?: number | null;
   ctaButton?: StrapiEducationCtaButton | null;
   image?: StrapiEducationResponsiveImage | null;
 };
 
 export type StrapiEducationLearnTab = {
   id?: number;
+  sortOrder?: number | null;
   tabLabel?: string | null;
   tabDescription?: string | null;
   layoutType?: string | null;
@@ -214,14 +218,20 @@ export type StrapiLearnAboutDiamondsPageEntity = {
   seo?: StrapiEducationSeo | null;
 };
 
+export type NormalizedEducationResponsiveImage = {
+  desktopUrl: string;
+  mobileUrl: string;
+  alt: string;
+  width?: number;
+  height?: number;
+};
+
 export type NormalizedEducationHero = {
   title: string;
   eyebrow?: string;
   subtitle?: string;
+  image: NormalizedEducationResponsiveImage | null;
   videoUrl?: string;
-  posterDesktopUrl: string;
-  posterMobileUrl: string;
-  posterAlt: string;
 };
 
 export type NormalizedEducationFaqItem = {
@@ -252,9 +262,9 @@ export type NormalizedEducationFourCsIntro = {
   mobileTitle?: string;
   description: string;
   pillars: readonly string[];
-  imageDesktopUrl: string;
-  imageMobileUrl: string;
-  imageAlt: string;
+  imageDesktopUrl?: string;
+  imageMobileUrl?: string;
+  imageAlt?: string;
 };
 
 export type NormalizedEducationCaratHandImage = {
@@ -303,6 +313,7 @@ export type NormalizedEducationCertificateSection = {
 export type NormalizedEducationLearnCareTip = {
   id: string;
   icon: string;
+  mobileIcon?: string;
   iconAlt?: string;
   labelLines: string[];
 };
@@ -320,7 +331,8 @@ export type NormalizedEducationLearnAnatomySection = {
 };
 
 export type NormalizedEducationLearnAnatomyDetail = {
-  image: string;
+  imageDesktopUrl: string;
+  imageMobileUrl: string;
   imageAlt: string;
   sections: NormalizedEducationLearnAnatomySection[];
 };
@@ -332,7 +344,7 @@ export type NormalizedEducationLearnTab = {
   layout: "carousel" | "care-grid" | "anatomy-detail";
   ctaLabel?: string;
   ctaHref?: string;
-  slides?: { src: string; alt: string; ctaLabel?: string; ctaHref?: string }[];
+  slides?: { src: string; mobileSrc?: string; alt: string; ctaLabel?: string; ctaHref?: string }[];
   careTips?: NormalizedEducationLearnCareTip[];
   anatomyDetail?: NormalizedEducationLearnAnatomyDetail;
 };

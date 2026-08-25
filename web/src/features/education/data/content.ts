@@ -221,6 +221,9 @@ export const educationHeroFigmaSpec = {
     width: 1498,
     height: 659,
   },
+  overlay: {
+    gradient: "bottom" as const,
+  },
   animation: {
     collapsedWidthRatio: 1360 / 1440,
     collapsedOffsetY: 100,

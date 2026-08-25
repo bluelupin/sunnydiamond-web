@@ -1,5 +1,6 @@
 import { aboutHandcraftedTileLayout } from "@/features/about/data/content";
 import { WORLD_OF_SUNNY_PATH } from "@/shared/utils/navigation";
+import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 import { extractStrapiImage, resolveCmsAltText, resolveCmsCaption, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import type {
   NormalizedAboutCraft,
@@ -109,11 +110,15 @@ const mapHero = (hero?: StrapiAboutHero | null): NormalizedAboutHero | null => {
   if (!hero || !isAboutSectionActive(hero.isActive)) return null;
 
   const title = cleanText(hero.title);
+  if (!title) return null;
+
   const image = mapResponsiveImage(hero.image);
+  const videoUrl = getCmsAssetUrl(
+    resolveCmsMediaUrl(hero.heroVideo?.heroVideo) ??
+      resolveCmsMediaUrl(hero.videoBackground?.heroVideo),
+  );
 
-  if (!title || !image) return null;
-
-  return { title, image };
+  return { title, image, videoUrl };
 };
 
 const mapFeatureSlide = (
@@ -125,7 +130,22 @@ const mapFeatureSlide = (
   const body = cleanText(slide.body);
   const image = mapResponsiveImage(slide.image);
 
-  if (!heading || !body || !image) return null;
+  if (!heading || !body) return null;
+  if (!isUsableDescription(body)) return null;
+
+  return { heading, body, image };
+};
+
+const mapBrillianceLegacySection = (
+  section: NonNullable<StrapiAboutPageEntity["brillianceSection"]>,
+): NormalizedBrillianceSection | null => {
+  const heading = cleanText(section.heading);
+  const body = cleanText(section.description);
+  const image =
+    mapResponsiveImage(section.image) ??
+    mapResponsiveImage(section.pinnedImage);
+
+  if (!heading || !body) return null;
   if (!isUsableDescription(body)) return null;
 
   return { heading, body, image };
@@ -142,7 +162,7 @@ const mapBrillianceSection = (
     if (mapped) return mapped;
   }
 
-  return null;
+  return mapBrillianceLegacySection(section);
 };
 
 const mapLegacyBlock = (
@@ -286,11 +306,10 @@ const mapCraft = (
   const title = cleanText(craftSection.heading);
   if (!title) return null;
 
-  const videoUrl = resolveCmsMediaUrl(craftSection.videoUrl?.heroVideo);
-  const centerImage = mapResponsiveImage(craftSection.backgroundImage);
-  const posterUrl =
-    centerImage?.desktopUrl ??
-    resolveCmsMediaUrl(craftSection.backgroundImage?.desktopImage);
+  const image = mapResponsiveImage(craftSection.backgroundImage);
+  const videoUrl = getCmsAssetUrl(
+    resolveCmsMediaUrl(craftSection.videoUrl?.heroVideo),
+  );
 
   const cards = isAboutSectionActive(mosaicSection?.isActive)
     ? mapCraftCards(mosaicSection)
@@ -298,14 +317,12 @@ const mapCraft = (
 
   return {
     title,
+    image,
     videoUrl,
-    posterUrl,
-    posterAlt: centerImage?.alt ?? "",
     overlayOpacity:
       typeof craftSection.overlayOpacity === "number"
         ? craftSection.overlayOpacity
         : 0.3,
-    centerImage: centerImage ?? undefined,
     cards,
   };
 };

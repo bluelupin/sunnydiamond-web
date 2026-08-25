@@ -22,12 +22,20 @@ export type StrapiAboutSeo = {
   structuredData?: unknown;
 };
 
+export type StrapiAboutHeroVideoBlock = {
+  id?: number;
+  heroVideo?: StrapiAboutMediaFile | null;
+};
+
 export type StrapiAboutHero = {
   eyebrow?: string | null;
   title?: string | null;
   subtitle?: string | null;
   isActive?: boolean | null;
   image?: StrapiAboutResponsiveImage | null;
+  heroVideo?: StrapiAboutHeroVideoBlock | null;
+  /** Shared hero component field name (homepage-aligned). */
+  videoBackground?: StrapiAboutHeroVideoBlock | null;
 };
 
 export type StrapiAboutFeatureSlide = {
@@ -161,13 +169,14 @@ export type NormalizedAboutSeo = {
 
 export type NormalizedAboutHero = {
   title: string;
-  image: NormalizedResponsiveImage;
+  image: NormalizedResponsiveImage | null;
+  videoUrl?: string;
 };
 
 export type NormalizedBrillianceSection = {
   heading: string;
   body: string;
-  image: NormalizedResponsiveImage;
+  image: NormalizedResponsiveImage | null;
 };
 
 export type NormalizedLegacyGalleryItem = {
@@ -208,11 +217,9 @@ export type NormalizedCraftCard = {
 
 export type NormalizedAboutCraft = {
   title: string;
+  image: NormalizedResponsiveImage | null;
   videoUrl?: string;
-  posterUrl?: string;
-  posterAlt?: string;
   overlayOpacity: number;
-  centerImage?: NormalizedResponsiveImage;
   cards: NormalizedCraftCard[];
 };
 
