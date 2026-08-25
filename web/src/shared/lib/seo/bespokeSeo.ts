@@ -14,7 +14,7 @@ export function resolveBespokeSeoMetadata(page: NormalizedContactBespokePage | n
     description: cmsDescription || fallback.description,
     canonicalPath: cmsSeo?.canonicalPath ?? "/bespoke-jewellery",
     keywords: cmsSeo?.metaKeywords,
-    image: cmsSeo?.ogImageUrl ?? page?.hero?.image.desktopUrl,
+    image: cmsSeo?.ogImageUrl ?? page?.hero?.image?.desktopUrl,
   };
 }
 

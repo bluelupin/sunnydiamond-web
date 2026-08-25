@@ -154,7 +154,7 @@ export type NormalizedBespokeSeo = {
 
 export type NormalizedBespokeHero = {
   title: string;
-  image: NormalizedBespokeResponsiveImage;
+  image: NormalizedBespokeResponsiveImage | null;
 };
 
 export type NormalizedBespokeStoryStep = {

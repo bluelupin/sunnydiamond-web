@@ -32,8 +32,7 @@ const ProductDetailGallery = ({ product, topGalleryRef }: ProductDetailGalleryPr
   const heroImage = productHeroImage ?? PRODUCT_DETAIL_GALLERY_HERO_IMAGE;
   const thumbOne = productThumbOne ?? PRODUCT_DETAIL_GALLERY_SECOND_IMAGE;
   const thumbTwo = productThumbTwo ?? PRODUCT_DETAIL_GALLERY_THIRD_IMAGE;
-  const lifestyleImage =
-    product.lifestyleImage ?? product.images[3] ?? PRODUCT_DETAIL_GALLERY_LIFESTYLE_IMAGE;
+  const lifestyleImage = product.lifestyleImage ?? product.images[3] ?? PRODUCT_DETAIL_GALLERY_LIFESTYLE_IMAGE;
 
   const carouselImages = [
     heroImage ?? product.image,

@@ -20,14 +20,15 @@ import { ProfileWishlistListingSkeleton } from "./ProfileWishlistListingSkeleton
 const ProfileWishlistSection = () => {
   const { wishlistedIds, toggleWishlist } = useWishlist();
   const { addToBagAndOpenDrawer } = useAddToBagWithDrawer();
-  const { products: wishlistProducts, isLoading } = useMagentoWishlistProducts(wishlistedIds);
+  const { products: wishlistProducts, isLoading, error } = useMagentoWishlistProducts(wishlistedIds);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [viewMode, setViewMode] = useState<WishlistViewMode>("grid");
   const [addToBagProduct, setAddToBagProduct] = useState<JewelleryListingProduct | null>(null);
 
   const visibleProducts = wishlistProducts.slice(0, visibleCount);
   const hasMore = visibleCount < wishlistProducts.length;
-  const showEmptyState = !isLoading && wishlistProducts.length === 0;
+  const showEmptyState = !isLoading && !error && wishlistProducts.length === 0;
+  const showLoadError = !isLoading && Boolean(error) && wishlistedIds.length > 0;
 
   const handleOpenAddToBag = (product: JewelleryListingProduct) => {
     prefetchWishlistProductDetail(product.urlKey);
@@ -43,12 +44,16 @@ const ProfileWishlistSection = () => {
     return <ProfileWishlistListingSkeleton />;
   }
 
-  if (showEmptyState) {
-    return <ProfileWishlistEmptyState />;
+  if (showLoadError) {
+    return (
+      <p className="font-gill text-base font-light leading-110 text-neutral500" role="alert">
+        {wishlistPageContent.loadErrorMessage}
+      </p>
+    );
   }
 
-  if (wishlistProducts.length === 0) {
-    return null;
+  if (showEmptyState) {
+    return <ProfileWishlistEmptyState />;
   }
 
   return (

@@ -92,7 +92,6 @@ const mapHero = (hero?: StrapiBespokeHero | null): NormalizedBespokeHero | null 
   if (!title) return null;
 
   const image = mapResponsiveImage(hero.backgroundImage);
-  if (!image) return null;
 
   return { title, image };
 };

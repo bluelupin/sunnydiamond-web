@@ -6,7 +6,7 @@ import { PAGE_SIZE } from "@/features/jewellery-product/data/filters";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import { useAddToBagWithDrawer } from "@/features/cart/hooks/useAddToBagWithDrawer";
 import { useMagentoWishlistProducts } from "@/hooks/magento/useMagentoWishlistProducts";
-import type { WishlistViewMode } from "@/features/wishlist/data/content";
+import { wishlistPageContent, type WishlistViewMode } from "@/features/wishlist/data/content";
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 import { cn } from "@/shared/utils/cn";
 import WishlistEmptyState from "./WishlistEmptyState";
@@ -19,14 +19,15 @@ import { prefetchWishlistProductDetail } from "@/features/wishlist/utils/wishlis
 const WishlistPage = () => {
   const { wishlistedIds, toggleWishlist } = useWishlist();
   const { addToBagAndOpenDrawer } = useAddToBagWithDrawer();
-  const { products: wishlistProducts, isLoading } = useMagentoWishlistProducts(wishlistedIds);
+  const { products: wishlistProducts, isLoading, error } = useMagentoWishlistProducts(wishlistedIds);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [viewMode, setViewMode] = useState<WishlistViewMode>("grid");
   const [addToBagProduct, setAddToBagProduct] = useState<JewelleryListingProduct | null>(null);
 
   const visibleProducts = wishlistProducts.slice(0, visibleCount);
   const hasMore = visibleCount < wishlistProducts.length;
-  const showEmptyState = !isLoading && wishlistProducts.length === 0;
+  const showEmptyState = !isLoading && !error && wishlistProducts.length === 0;
+  const showLoadError = !isLoading && Boolean(error) && wishlistedIds.length > 0;
 
   const handleOpenAddToBag = (product: JewelleryListingProduct) => {
     prefetchWishlistProductDetail(product.urlKey);
@@ -46,14 +47,20 @@ const WishlistPage = () => {
         onViewModeChange={setViewMode}
       />
 
-      <div className={cn("bg-gray200", showEmptyState && "mb-[110px]")}>
+      <div className={cn("bg-gray200", (showEmptyState || showLoadError) && "mb-[110px]")}>
         {isLoading && wishlistedIds.length > 0 ? (
           <p className="sr-only" aria-live="polite">
             Loading wishlist products
           </p>
         ) : null}
 
-        {showEmptyState ? (
+        {showLoadError ? (
+          <div className="mx-auto w-full max-w-1440 px-4 py-6 md:px-8 md:py-10 lg:px-10 2xl:max-w-1920 2xl:px-[60px]">
+            <p className="text-center font-gill text-base font-light leading-110 text-neutral500" role="alert">
+              {wishlistPageContent.loadErrorMessage}
+            </p>
+          </div>
+        ) : showEmptyState ? (
           <div className="mx-auto w-full max-w-1440 px-4 py-6 md:px-8 md:py-10 lg:px-10 2xl:max-w-1920 2xl:px-[60px]">
             <WishlistEmptyState />
           </div>
