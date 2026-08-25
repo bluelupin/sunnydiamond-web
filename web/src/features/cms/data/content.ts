@@ -146,6 +146,11 @@ export const seoContent = {
     description:
       "Discover Sunny Diamonds' legacy since 1997 — three generations of internally flawless diamonds, master craftsmanship, and timeless jewellery from Chalakkudy to the world.",
   },
+  bespoke: {
+    title: "Bespoke Jewellery",
+    description:
+      "Commission a one-of-a-kind Sunny Diamonds piece tailored to your vision, occasion, and style.",
+  },
   contact: {
     title: "Contact Us",
     description:

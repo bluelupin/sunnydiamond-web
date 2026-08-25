@@ -60,7 +60,7 @@ export const aboutHeroFigmaSpec = {
 
 /** Local decorative / layout assets only — section content comes from CMS. */
 export const aboutHandcraftedAssets = {
-  flourish: "/images/about/handcrafted-flourish.svg",
+  flourish: "/icons/handcrafted-flourish.svg",
 } as const;
 
 /** Figma node 692:27430 — Crafting Rarity — Reveal V2 */

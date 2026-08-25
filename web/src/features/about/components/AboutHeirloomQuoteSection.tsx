@@ -18,7 +18,7 @@ const AboutHeirloomQuoteSection = ({ quote, iconUrl }: AboutHeirloomQuoteSection
       <PageContainer className="py-16 md:py-20 desktop:py-100">
         <Reveal direction="up" className="flex flex-col items-center justify-center gap-4 lg:flex-row">
           <Image
-            src="/images/about/flourishIcon.svg"
+            src="/icons/flourishIcon.svg"
             alt={quote}
             width={flourishSpec.width}
             height={flourishSpec.height}
@@ -35,7 +35,7 @@ const AboutHeirloomQuoteSection = ({ quote, iconUrl }: AboutHeirloomQuoteSection
           </h2>
 
           <Image
-            src="/images/about/flourishIcon.svg"
+            src="/icons/flourishIcon.svg"
             alt={quote}
             width={flourishSpec.width}
             height={flourishSpec.height}

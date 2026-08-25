@@ -125,7 +125,7 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
             referenceImage,
           });
 
-          showStatusToast(form.successToast.title || "Request submitted");
+          showStatusToast(form.successToast.title);
           handleClose();
         } catch {
           showStatusToast("Could not submit request");
@@ -182,7 +182,7 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
       <ProductDetailSidePanelShell
         open={open}
         onClose={handleClose}
-        overlayAriaLabel={form.closeAriaLabel}
+        overlayAriaLabel={form.dialogAriaLabel}
         dialogAriaLabel={form.dialogAriaLabel}
       >
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
@@ -195,7 +195,7 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
                 <button
                   type="button"
                   onClick={handleClose}
-                  aria-label={form.closeAriaLabel}
+                  aria-label={form.dialogAriaLabel}
                   className="inline-flex size-6 shrink-0 items-center justify-center"
                 >
                   <Image
@@ -233,7 +233,6 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
                 nameLabel={form.fullNameLabel}
                 emailLabel={form.emailLabel}
                 noteLabel={form.visionLabel}
-                notePlaceholder={form.visionPlaceholder}
                 noteLabelClassName={appointmentLabelClassName}
                 noteTextareaClassName="font-gill text-base leading-110"
                 labelClassName={appointmentLabelClassName}

@@ -3,6 +3,7 @@ import { CAREERS_ALL_OPENINGS_ROUTE } from "@/features/careers/constants/careers
 import { isJewelleryCategoryPath } from "@/features/jewellery-product/utils/jewelleryRoutes";
 
 export const WORLD_OF_SUNNY_PATH = "/world-of-sunny";
+export const BESPOKE_JEWELLERY_PATH = "/bespoke-jewellery";
 export const POLICY_AND_CERTIFICATIONS_PATH = "/policy-and-certifications";
 
 export function resolveHeaderNavHref(label: string, url: string): string {

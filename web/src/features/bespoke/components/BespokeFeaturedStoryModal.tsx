@@ -37,8 +37,7 @@ type FeaturedStoryModalSlide = {
 type BespokeFeaturedStoryModalProps = {
   open: boolean;
   slide: FeaturedStoryModalSlide | null;
-  modalCtaLabel: string;
-  modalCtaHref: string;
+  modalCtaLabel?: string;
   initialImageIndex?: number;
   elevated?: boolean;
   onClose: () => void;
@@ -261,8 +260,7 @@ const FeaturedStoryModalPagination = ({
 
 type FeaturedStoryModalPanelProps = {
   slide: FeaturedStoryModalSlide;
-  modalCtaLabel: string;
-  modalCtaHref: string;
+  modalCtaLabel?: string;
   initialImageIndex?: number;
   onClose: () => void;
   onShowStatusToast: (message: string) => void;
@@ -394,16 +392,18 @@ const FeaturedStoryModalPanel = ({
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            void handleSaveInspiration();
-          }}
-          disabled={saveDisabled}
-          className="inline-flex w-fit border-b border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-80 disabled:opacity-60"
-        >
-          {isSaving ? "Saving..." : status === "loading" ? "Loading..." : modalCtaLabel}
-        </button>
+        {modalCtaLabel ? (
+          <button
+            type="button"
+            onClick={() => {
+              void handleSaveInspiration();
+            }}
+            disabled={saveDisabled}
+            className="inline-flex w-fit border-b border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-80 disabled:opacity-60"
+          >
+            {isSaving ? "Saving..." : status === "loading" ? "Loading..." : modalCtaLabel}
+          </button>
+        ) : null}
 
         {!canSave ? (
           <p className="font-gill text-xs font-light leading-110 text-white/70">
@@ -419,7 +419,6 @@ const BespokeFeaturedStoryModal = ({
   open,
   slide,
   modalCtaLabel,
-  modalCtaHref,
   initialImageIndex = 0,
   elevated = false,
   onClose,
@@ -500,7 +499,6 @@ const BespokeFeaturedStoryModal = ({
           key={`${slide.src}-${initialImageIndex}-${slide.modalImages[initialImageIndex]?.src ?? ""}`}
           slide={slide}
           modalCtaLabel={modalCtaLabel}
-          modalCtaHref={modalCtaHref}
           initialImageIndex={initialImageIndex}
           onClose={onClose}
           onShowStatusToast={showStatusToast}

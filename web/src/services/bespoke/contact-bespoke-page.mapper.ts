@@ -1,4 +1,3 @@
-import { bespokeUiDefaults } from "./bespoke-fallbacks";
 import {
   extractStrapiImage,
   resolveCmsAltText,
@@ -42,9 +41,18 @@ const withRequiredAsterisk = (label: string, required: boolean): string => {
   return required ? `${base}*` : base;
 };
 
+/** CMS sections may use `isActive` or `showField`; default visible when unset. */
+const resolveSectionActive = (
+  isActive?: boolean | null,
+  showField?: boolean | null,
+): boolean => {
+  if (typeof isActive === "boolean") return isActive;
+  if (typeof showField === "boolean") return showField;
+  return true;
+};
+
 const mapResponsiveImage = (
   media?: StrapiBespokeResponsiveImage | null,
-  fallback?: { desktop: string; mobile: string; alt: string },
 ): NormalizedBespokeResponsiveImage | null => {
   const desktopUrl =
     resolveCmsMediaUrl(media?.desktopImage) ?? resolveCmsMediaUrl(media?.mobileImage);
@@ -52,35 +60,30 @@ const mapResponsiveImage = (
     resolveCmsMediaUrl(media?.mobileImage) ?? resolveCmsMediaUrl(media?.desktopImage);
 
   if (!desktopUrl && !mobileUrl) {
-    if (!fallback) return null;
-    return {
-      desktopUrl: fallback.desktop,
-      mobileUrl: fallback.mobile,
-      alt: fallback.alt,
-    };
+    return null;
   }
 
   return {
     desktopUrl: desktopUrl ?? mobileUrl!,
     mobileUrl: mobileUrl ?? desktopUrl!,
-    alt: resolveCmsAltText(media?.desktopImage) ?? fallback?.alt ?? "",
+    alt: resolveCmsAltText(media?.desktopImage) ?? resolveCmsAltText(media?.mobileImage) ?? "",
   };
 };
 
 const mapSeo = (seo?: StrapiBespokeSeo | null): NormalizedBespokeSeo | null => {
-  if (!seo || seo.showField === false) return null;
+  const metaTitle = cleanText(seo?.metaTitle);
+  const metaDescription = cleanText(seo?.metaDescription);
+  const rawCanonical = cleanText(seo?.canonicalUrl);
 
-  const metaTitle = cleanText(seo.metaTitle);
-  const metaDescription = cleanText(seo.metaDescription);
   if (!metaTitle && !metaDescription) return null;
 
-  const ogImageUrl = resolveCmsMediaUrl(seo.ogImage);
+  const ogImageUrl = resolveCmsMediaUrl(seo?.ogImage);
 
   return {
     metaTitle: metaTitle ?? "",
     metaDescription: metaDescription ?? "",
-    canonicalPath: cleanText(seo.canonicalUrl) ?? "/bespoke-jewellery",
-    metaKeywords: cleanText(seo.metaKeywords),
+    canonicalPath: rawCanonical ?? "/bespoke-jewellery",
+    metaKeywords: cleanText(seo?.metaKeywords),
     ...(ogImageUrl ? { ogImageUrl } : {}),
   };
 };
@@ -110,9 +113,10 @@ const mapStory = (section?: StrapiBespokeVisionSection | null): NormalizedBespok
   const cmsCards = (section.cards ?? []).filter((card) => card?.isActive !== false);
 
   const steps: NormalizedBespokeStoryStep[] = cmsCards
-    .map((card, index) => {
+    .map((card) => {
       const stepTitle = cleanText(card.title);
-      if (!stepTitle) return null;
+      const stepNumber = cleanText(card.stepLabel);
+      if (!stepTitle || !stepNumber) return null;
 
       const cmsImage =
         resolveCmsMediaUrl(card.image?.desktopImage) ??
@@ -126,7 +130,7 @@ const mapStory = (section?: StrapiBespokeVisionSection | null): NormalizedBespok
       const cardAlt = resolveCmsAltText(cardImage) ?? "";
 
       return {
-        number: cleanText(card.stepLabel) ?? String(index + 1).padStart(2, "0"),
+        number: stepNumber,
         title: stepTitle,
         description: cleanText(card.description) ?? "",
         image: {
@@ -142,25 +146,23 @@ const mapStory = (section?: StrapiBespokeVisionSection | null): NormalizedBespok
   const videoSrc =
     resolveCmsMediaUrl(section.video) ??
     resolveCmsMediaUrl(section.videoUrl?.heroVideo) ??
-    cmsCards.map(resolveVisionCardVideoUrl).find((src): src is string => Boolean(src)) ??
-    "";
+    cmsCards.map(resolveVisionCardVideoUrl).find((src): src is string => Boolean(src));
+
+  const ctaLabel =
+    cleanText(section.cta?.label) ?? cleanText(section.primaryCta?.label);
 
   return {
     title,
     subtitle: cleanText(section.description) ?? "",
-    videoSrc,
+    ...(videoSrc ? { videoSrc } : {}),
     steps,
-    ctaLabel:
-      cleanText(section.cta?.label) ??
-      cleanText(section.primaryCta?.label) ??
-      "",
+    ...(ctaLabel ? { ctaLabel } : {}),
   };
 };
 
 const mapFeaturedCardToSlide = (
   card: StrapiBespokeFeaturedStoryCard,
-  index: number,
-  sectionCtaHref: string,
+  sectionCtaHref?: string,
 ): NormalizedBespokeFeaturedSlide | null => {
   if (card.isActive === false) return null;
 
@@ -171,7 +173,9 @@ const mapFeaturedCardToSlide = (
 
   if (!coverUrl) return null;
 
-  const title = cleanText(card.title) ?? `Featured Story ${index + 1}`;
+  const title = cleanText(card.title);
+  if (!title) return null;
+
   const description = cleanText(card.description) ?? "";
   const coverFromCoverImage = resolveCmsMediaUrl(card.coverImage);
   const coverAlt = coverFromCoverImage
@@ -193,7 +197,7 @@ const mapFeaturedCardToSlide = (
     modalTitle: title,
     modalDescription: description,
     modalImages: galleryImages.length > 0 ? galleryImages : [{ src: coverUrl, alt: coverAlt }],
-    href: sectionCtaHref,
+    ...(sectionCtaHref ? { href: sectionCtaHref } : {}),
   };
 };
 
@@ -203,16 +207,16 @@ const mapFeaturedStories = (
   if (!section || section.showField === false) return null;
 
   const title = cleanText(section.title);
-  const primaryCtaLabel = cleanText(section.cta?.label) ?? "";
-  const primaryCtaHref = cleanText(section.cta?.url) ?? "/featured-stories";
-  const secondaryCtaLabel = cleanText(section.secondaryCta?.label) ?? "";
+  const primaryCtaLabel = cleanText(section.cta?.label);
+  const primaryCtaHref = cleanText(section.cta?.url);
+  const secondaryCtaLabel = cleanText(section.secondaryCta?.label);
+  const modalCtaLabel = cleanText(section.modalCta?.label);
   const backgroundImage = mapResponsiveImage(section.backgroundImage);
 
   const slides = (section.cards ?? [])
-    .map((card, index) => mapFeaturedCardToSlide(card, index, primaryCtaHref))
+    .map((card) => mapFeaturedCardToSlide(card, primaryCtaHref))
     .filter((slide): slide is NormalizedBespokeFeaturedSlide => slide != null);
 
-  // Keep section if we have a title, backdrop, slides, or any CTA — slides may be empty until CMS cards are added.
   if (!title && slides.length === 0 && !primaryCtaLabel && !backgroundImage) return null;
 
   return {
@@ -220,11 +224,10 @@ const mapFeaturedStories = (
     defaultSlideIndex: slides.length > 2 ? 2 : 0,
     slides,
     backgroundImage,
-    primaryCtaLabel,
-    primaryCtaHref,
-    secondaryCtaLabel,
-    modalCtaLabel: bespokeUiDefaults.modalCtaLabel,
-    modalCtaHref: bespokeUiDefaults.modalCtaHref,
+    ...(primaryCtaLabel ? { primaryCtaLabel } : {}),
+    ...(primaryCtaHref ? { primaryCtaHref } : {}),
+    ...(secondaryCtaLabel ? { secondaryCtaLabel } : {}),
+    ...(modalCtaLabel ? { modalCtaLabel } : {}),
   };
 };
 
@@ -247,6 +250,7 @@ const mapMediaToPastCreationImage = (
 
 export const mapPastCreations = (
   items?: StrapiBespokePastCreation[] | null,
+  title?: string,
 ): NormalizedBespokePastCreations | null => {
   const images: NormalizedBespokePastCreationImage[] = [];
 
@@ -261,57 +265,12 @@ export const mapPastCreations = (
     }
   }
 
-  if (images.length === 0) return null;
+  if (images.length === 0 || !title) return null;
 
   return {
-    title: bespokeUiDefaults.pastCreationsTitle,
+    title,
     images,
   };
-};
-
-const GUARANTEE_ICON_OVERRIDES: Array<{
-  icon: string;
-  matches: (label: string, iconUrl: string) => boolean;
-}> = [
-  {
-    icon: "/images/guarantees/moneyback.svg",
-    matches: (label, iconUrl) =>
-      label.includes("moneyback") ||
-      label.includes("money back") ||
-      iconUrl.includes("moneyback"),
-  },
-  {
-    icon: "/images/guarantees/cod.svg",
-    matches: (label, iconUrl) =>
-      label.includes("cash on delivery") ||
-      label.includes("cod") ||
-      iconUrl.includes("/cod_") ||
-      iconUrl.endsWith("/cod.svg"),
-  },
-  {
-    icon: "/images/guarantees/return.svg",
-    matches: (label, iconUrl) =>
-      label.includes("return") ||
-      label.includes("days return") ||
-      iconUrl.includes("/return_") ||
-      iconUrl.endsWith("/return.svg"),
-  },
-];
-
-const resolveGuaranteeIconSrc = (
-  label?: string | null,
-  cmsUrl?: string | null,
-): string | null => {
-  if (!cmsUrl) return null;
-
-  const normalizedLabel = label?.toLowerCase() ?? "";
-  const normalizedUrl = cmsUrl.toLowerCase();
-
-  const override = GUARANTEE_ICON_OVERRIDES.find((item) =>
-    item.matches(normalizedLabel, normalizedUrl),
-  );
-
-  return override?.icon ?? cmsUrl;
 };
 
 const mapGuaranteeIcon = (
@@ -335,43 +294,20 @@ const mapGuaranteeIcon = (
     cmsAlt = resolveCmsAltText(icon) ?? "";
   }
 
-  const src = resolveGuaranteeIconSrc(highlight.label, cmsUrl);
-  if (!src) return null;
+  if (!cmsUrl) return null;
+
+  const alt = cleanText(highlight.iconAltText) ?? cmsAlt;
 
   return {
-    src,
-    alt: cmsAlt,
+    src: cmsUrl,
+    alt,
   };
-};
-
-const isCodGuaranteeLabel = (label: string): boolean => {
-  const normalized = label.toLowerCase();
-  return normalized.includes("cash on delivery") || normalized.includes("cod");
-};
-
-const isReturnGuaranteeLabel = (label: string): boolean => {
-  return label.toLowerCase().includes("return");
-};
-
-const swapCodAndReturnGuarantees = (
-  guarantees: NormalizedBespokeGuarantee[],
-): NormalizedBespokeGuarantee[] => {
-  const result = [...guarantees];
-  const codIndex = result.findIndex((item) => isCodGuaranteeLabel(item.label));
-  const returnIndex = result.findIndex((item) => isReturnGuaranteeLabel(item.label));
-
-  if (codIndex < 0 || returnIndex < 0 || codIndex === returnIndex) {
-    return result;
-  }
-
-  [result[codIndex], result[returnIndex]] = [result[returnIndex], result[codIndex]];
-  return result;
 };
 
 const mapGuarantees = (
   highlights?: StrapiBespokeServiceHighlight[] | null,
 ): NormalizedBespokeGuarantee[] => {
-  const guarantees = (highlights ?? [])
+  return (highlights ?? [])
     .filter((item) => item?.isActive !== false)
     .map((item) => {
       const label = cleanText(item.label);
@@ -380,32 +316,32 @@ const mapGuarantees = (
       return {
         label,
         iconSrc: icon.src,
-        alt: icon.alt || "",
+        alt: icon.alt || label,
       };
     })
     .filter((item): item is NormalizedBespokeGuarantee => item != null);
-
-  return swapCodAndReturnGuarantees(guarantees);
 };
 
 const mapGetInTouch = (
   section?: StrapiBespokeGetInTouchSection | null,
 ): NormalizedBespokeGetInTouch | null => {
-  if (!section || section.showField === false) return null;
+  if (!section || !resolveSectionActive(section.isActive, section.showField)) return null;
 
   const title = cleanText(section.title);
   if (!title) return null;
 
   const image = mapResponsiveImage(section.backgroundImage);
-  if (!image) return null;
+  const description = cleanText(section.description);
+  const ctaLabel = cleanText(section.cta?.label);
+  const ctaHref = cleanText(section.cta?.url);
 
   return {
     id: "bespoke-interested",
     title,
-    description: cleanText(section.description) ?? "",
-    ctaLabel: cleanText(section.cta?.label) ?? "",
-    ctaHref: cleanText(section.cta?.url) ?? "",
-    image,
+    ...(description ? { description } : {}),
+    ...(ctaLabel ? { ctaLabel } : {}),
+    ...(ctaHref ? { ctaHref } : {}),
+    ...(image ? { image } : {}),
   };
 };
 
@@ -415,24 +351,44 @@ const mapCustomDesignForm = (
   if (!form || form.showField === false) return null;
 
   const title = cleanText(form.title);
-  if (!title) return null;
+  const fullNameLabel = cleanText(form.fullNameLabel);
+  const phoneLabel = cleanText(form.phoneLabel);
+  const emailLabel = cleanText(form.emailLabel);
+  const visionLabel = cleanText(form.visionLabel);
+  const referenceImagePrompt = cleanText(form.referenceImagePrompt);
+  const referenceImageButtonText = cleanText(form.referenceImageButtonText);
+  const helperText = cleanText(form.helperText);
+  const submitButtonText = cleanText(form.submitButtonText);
+
+  if (
+    !title ||
+    !fullNameLabel ||
+    !phoneLabel ||
+    !emailLabel ||
+    !visionLabel ||
+    !referenceImagePrompt ||
+    !referenceImageButtonText ||
+    !helperText ||
+    !submitButtonText
+  ) {
+    return null;
+  }
 
   return {
     title,
-    fullNameLabel: withRequiredAsterisk(cleanText(form.fullNameLabel) ?? "Full Name", true),
-    phoneLabel: withRequiredAsterisk(cleanText(form.phoneLabel) ?? "Phone No.", true),
-    emailLabel: withRequiredAsterisk(cleanText(form.emailLabel) ?? "Email ID", true),
-    visionLabel: withRequiredAsterisk(cleanText(form.visionLabel) ?? "Describe your vision", true),
-    visionPlaceholder: bespokeUiDefaults.visionPlaceholder,
-    referenceImagePrompt:
-      cleanText(form.referenceImagePrompt) ?? "Do you have any reference image? (Optional)",
-    referenceImageButtonText: cleanText(form.referenceImageButtonText) ?? "Attach Image",
-    helperText:
-      cleanText(form.helperText) ?? "Our representative will get in touch with you soon",
-    submitButtonText: cleanText(form.submitButtonText) ?? "Confirm Visit",
-    closeAriaLabel: bespokeUiDefaults.formCloseAriaLabel,
+    fullNameLabel: withRequiredAsterisk(fullNameLabel, true),
+    phoneLabel: withRequiredAsterisk(phoneLabel, true),
+    emailLabel: withRequiredAsterisk(emailLabel, true),
+    visionLabel: withRequiredAsterisk(visionLabel, true),
+    referenceImagePrompt,
+    referenceImageButtonText,
+    helperText,
+    submitButtonText,
     dialogAriaLabel: title,
-    successToast: { ...bespokeUiDefaults.formSuccessToast },
+    successToast: {
+      title,
+      description: helperText,
+    },
   };
 };
 
@@ -443,10 +399,13 @@ export function mapContactBespokePage(
     return EMPTY_CONTACT_BESPOKE_PAGE;
   }
 
+  const pastCreationsTitle = cleanText(raw.featuredStoriesSection?.secondaryCta?.label);
+
   return {
     hero: mapHero(raw.hero),
     story: mapStory(raw.visionSection),
     featuredStories: mapFeaturedStories(raw.featuredStoriesSection),
+    pastCreations: mapPastCreations(raw.pastCreations, pastCreationsTitle),
     guarantees: mapGuarantees(raw.serviceHighlights),
     interested: mapGetInTouch(raw.getInTouchSection),
     customDesignForm: mapCustomDesignForm(raw.customDesignForm),

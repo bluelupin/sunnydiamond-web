@@ -19,6 +19,7 @@ const BespokePage = ({ page }: BespokePageProps) => {
       {page.featuredStories && (
         <BespokeFeaturedStoriesSection
           featuredStories={page.featuredStories}
+          pastCreations={page.pastCreations}
         />
       )}
       {page.guarantees.length > 0 && <BespokeGuaranteesSection guarantees={page.guarantees} />}

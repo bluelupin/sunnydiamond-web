@@ -79,6 +79,7 @@ export type StrapiBespokeFeaturedStoriesSection = {
   cards?: StrapiBespokeFeaturedStoryCard[] | null;
   cta?: StrapiBespokeCta | null;
   secondaryCta?: StrapiBespokeCta | null;
+  modalCta?: StrapiBespokeCta | null;
   backgroundImage?: StrapiBespokeResponsiveImage | null;
 };
 
@@ -107,6 +108,7 @@ export type StrapiBespokeGetInTouchSection = {
   id?: number;
   title?: string | null;
   description?: string | null;
+  isActive?: boolean | null;
   showField?: boolean | null;
   backgroundImage?: StrapiBespokeResponsiveImage | null;
   cta?: StrapiBespokeCta | null;
@@ -132,6 +134,7 @@ export type StrapiContactBespokePageEntity = {
   hero?: StrapiBespokeHero | null;
   visionSection?: StrapiBespokeVisionSection | null;
   featuredStoriesSection?: StrapiBespokeFeaturedStoriesSection | null;
+  pastCreations?: StrapiBespokePastCreation[] | null;
   serviceHighlights?: StrapiBespokeServiceHighlight[] | null;
   getInTouchSection?: StrapiBespokeGetInTouchSection | null;
   customDesignForm?: StrapiBespokeCustomDesignForm | null;
@@ -167,9 +170,9 @@ export type NormalizedBespokeStoryStep = {
 export type NormalizedBespokeStory = {
   title: string;
   subtitle: string;
-  videoSrc: string;
+  videoSrc?: string;
   steps: NormalizedBespokeStoryStep[];
-  ctaLabel: string;
+  ctaLabel?: string;
 };
 
 export type NormalizedBespokeFeaturedSlide = {
@@ -180,7 +183,7 @@ export type NormalizedBespokeFeaturedSlide = {
   modalTitle: string;
   modalDescription: string;
   modalImages: { src: string; alt: string }[];
-  href: string;
+  href?: string;
 };
 
 export type NormalizedBespokeFeaturedStories = {
@@ -188,11 +191,10 @@ export type NormalizedBespokeFeaturedStories = {
   defaultSlideIndex: number;
   slides: NormalizedBespokeFeaturedSlide[];
   backgroundImage: NormalizedBespokeResponsiveImage | null;
-  primaryCtaLabel: string;
-  primaryCtaHref: string;
-  secondaryCtaLabel: string;
-  modalCtaLabel: string;
-  modalCtaHref: string;
+  primaryCtaLabel?: string;
+  primaryCtaHref?: string;
+  secondaryCtaLabel?: string;
+  modalCtaLabel?: string;
 };
 
 export type NormalizedBespokePastCreationImage = {
@@ -217,10 +219,10 @@ export type NormalizedBespokeGuarantee = {
 export type NormalizedBespokeGetInTouch = {
   id: string;
   title: string;
-  description: string;
-  ctaLabel: string;
-  ctaHref: string;
-  image: NormalizedBespokeResponsiveImage;
+  description?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+  image?: NormalizedBespokeResponsiveImage | null;
 };
 
 export type NormalizedBespokeCustomDesignForm = {
@@ -229,12 +231,10 @@ export type NormalizedBespokeCustomDesignForm = {
   phoneLabel: string;
   emailLabel: string;
   visionLabel: string;
-  visionPlaceholder: string;
   referenceImagePrompt: string;
   referenceImageButtonText: string;
   helperText: string;
   submitButtonText: string;
-  closeAriaLabel: string;
   dialogAriaLabel: string;
   successToast: { title: string; description: string };
 };
@@ -243,6 +243,7 @@ export type NormalizedContactBespokePage = {
   hero: NormalizedBespokeHero | null;
   story: NormalizedBespokeStory | null;
   featuredStories: NormalizedBespokeFeaturedStories | null;
+  pastCreations: NormalizedBespokePastCreations | null;
   guarantees: NormalizedBespokeGuarantee[];
   interested: NormalizedBespokeGetInTouch | null;
   customDesignForm: NormalizedBespokeCustomDesignForm | null;
@@ -253,6 +254,7 @@ export const EMPTY_CONTACT_BESPOKE_PAGE: NormalizedContactBespokePage = {
   hero: null,
   story: null,
   featuredStories: null,
+  pastCreations: null,
   guarantees: [],
   interested: null,
   customDesignForm: null,

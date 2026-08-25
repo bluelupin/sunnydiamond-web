@@ -20,7 +20,7 @@ type StoryStep = NormalizedBespokeStoryStep;
 type BespokeStoryStepPanelProps = {
   step: StoryStep;
   layout: "desktop" | "mobile";
-  videoSrc: string;
+  videoSrc?: string;
   isLastSlide?: boolean;
   isFirstSlide?: boolean;
 };
@@ -31,15 +31,15 @@ const BespokeStoryStepMedia = ({
   isDesktop,
 }: {
   step: StoryStep;
-  videoSrc: string;
+  videoSrc?: string;
   isDesktop: boolean;
 }) => {
   const figureRef = useRef<HTMLElement>(null);
-  const [useImageFallback, setUseImageFallback] = useState(false);
-  const videoRef = useMutedVideoPlayback(!useImageFallback);
+  const [useImageFallback, setUseImageFallback] = useState(!videoSrc);
+  const videoRef = useMutedVideoPlayback(Boolean(videoSrc) && !useImageFallback);
 
   useEffect(() => {
-    if (useImageFallback) return;
+    if (!videoSrc || useImageFallback) return;
 
     const figure = figureRef.current;
     const video = videoRef.current;
@@ -64,7 +64,7 @@ const BespokeStoryStepMedia = ({
 
     observer.observe(figure);
     return () => observer.disconnect();
-  }, [useImageFallback]);
+  }, [useImageFallback, videoSrc]);
 
   return (
     <figure
@@ -73,7 +73,7 @@ const BespokeStoryStepMedia = ({
         "relative shrink-0 overflow-hidden bg-gray200 h-[400px] w-full lg:h-[496px] lg:w-[658px]",
       )}
     >
-      {useImageFallback ? (
+      {!videoSrc || useImageFallback ? (
         <Image
           src={step.image.src}
           alt={step.image.alt}
@@ -146,7 +146,7 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
   const sectionRef = useRef<HTMLElement>(null);
   const hasHorizontalGallery = story.steps.length > 1;
   const [shareVisionOpen, setShareVisionOpen] = useState(false);
-  const ctaLabel = story.ctaLabel?.trim() || customDesignForm?.title?.trim() || "";
+  const ctaLabel = story.ctaLabel?.trim() ?? "";
 
   const handleShareVisionOpen = useCallback(() => {
     setShareVisionOpen(true);

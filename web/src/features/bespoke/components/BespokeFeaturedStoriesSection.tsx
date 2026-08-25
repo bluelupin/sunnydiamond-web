@@ -21,8 +21,6 @@ import type {
   NormalizedBespokeFeaturedStories,
   NormalizedBespokePastCreations,
 } from "@/services/bespoke/contact-bespoke-page.types";
-import { bespokeUiDefaults } from "@/services/bespoke/bespoke-fallbacks";
-import { getPastCreations } from "@/services/bespoke/featured-stories.service";
 
 type FeaturedSlide = NormalizedBespokeFeaturedSlide;
 
@@ -505,11 +503,10 @@ type FeaturedStoriesLayoutProps = {
   onIndexChange: (index: number) => void;
   onPrimaryCtaClick: () => void;
   title: string;
-  primaryCtaHref: string;
+  primaryCtaHref?: string;
   primaryCtaLabel: string;
   secondaryCtaLabel: string;
   onSecondaryCtaClick: () => void;
-  secondaryCtaLoading: boolean;
   backgroundImage?: { desktopUrl: string; mobileUrl: string; alt: string } | null;
   showHero: boolean;
 };
@@ -524,11 +521,10 @@ const FeaturedStoriesLayout = ({
   primaryCtaLabel,
   secondaryCtaLabel,
   onSecondaryCtaClick,
-  secondaryCtaLoading,
   backgroundImage,
   showHero,
 }: FeaturedStoriesLayoutProps) => {
-  const activePrimaryCtaHref = slides[currentIndex]?.href ?? primaryCtaHref;
+  const activePrimaryCtaHref = slides[currentIndex]?.href ?? primaryCtaHref ?? "#";
 
   return (
     <section aria-labelledby="bespoke-featured-stories-title" className="overflow-hidden bg-gray200 w-full max-w-full">
@@ -575,10 +571,9 @@ const FeaturedStoriesLayout = ({
             {secondaryCtaLabel ? (
               <DetailTextLink
                 onClick={onSecondaryCtaClick}
-                disabled={secondaryCtaLoading}
                 className="uppercase"
               >
-                {secondaryCtaLoading ? "Loading..." : secondaryCtaLabel}
+                {secondaryCtaLabel}
               </DetailTextLink>
             ) : null}
           </div>
@@ -609,10 +604,9 @@ const FeaturedStoriesLayout = ({
             {secondaryCtaLabel ? (
               <DetailTextLink
                 onClick={onSecondaryCtaClick}
-                disabled={secondaryCtaLoading}
                 className="uppercase"
               >
-                {secondaryCtaLoading ? "Loading..." : secondaryCtaLabel}
+                {secondaryCtaLabel}
               </DetailTextLink>
             ) : null}
           </div>
@@ -622,8 +616,12 @@ const FeaturedStoriesLayout = ({
   );
 };
 
-const BespokeFeaturedStoriesSection = ({ featuredStories }: {
+const BespokeFeaturedStoriesSection = ({
+  featuredStories,
+  pastCreations,
+}: {
   featuredStories: NormalizedBespokeFeaturedStories | null;
+  pastCreations: NormalizedBespokePastCreations | null;
 }) => {
   const slides = featuredStories?.slides ?? [];
   const defaultSlideIndex = featuredStories?.defaultSlideIndex ?? 0;
@@ -634,8 +632,6 @@ const BespokeFeaturedStoriesSection = ({ featuredStories }: {
   const [currentIndex, setCurrentIndex] = useState(defaultSlideIndex);
   const [modalOpen, setModalOpen] = useState(false);
   const [pastCreationsOpen, setPastCreationsOpen] = useState(false);
-  const [pastCreations, setPastCreations] = useState<NormalizedBespokePastCreations | null>(null);
-  const [pastCreationsLoading, setPastCreationsLoading] = useState(false);
   const [modalContext, setModalContext] = useState<{ slideIndex: number; imageIndex: number } | null>(
     null,
   );
@@ -670,22 +666,9 @@ const BespokeFeaturedStoriesSection = ({ featuredStories }: {
     setModalSlideOverride(null);
   }, []);
 
-  const handlePastCreationsOpen = useCallback(async () => {
-    if (pastCreations) {
-      setPastCreationsOpen(true);
-      return;
-    }
-
-    setPastCreationsLoading(true);
-    try {
-      const creations = await getPastCreations();
-      setPastCreations(creations);
-      setPastCreationsOpen(Boolean(creations));
-    } catch {
-      setPastCreations(null);
-    } finally {
-      setPastCreationsLoading(false);
-    }
+  const handlePastCreationsOpen = useCallback(() => {
+    if (!pastCreations) return;
+    setPastCreationsOpen(true);
   }, [pastCreations]);
 
   const handlePastCreationsClose = useCallback(() => {
@@ -695,11 +678,13 @@ const BespokeFeaturedStoriesSection = ({ featuredStories }: {
   const handlePastCreationImageClick = useCallback(
     (image: BespokePastCreationImage) => {
       if (slides.length === 0) {
+        if (!pastCreations) return;
+
         setModalSlideOverride({
           documentId: image.documentId,
           src: image.src,
           alt: image.alt,
-          modalTitle: pastCreations?.title || bespokeUiDefaults.pastCreationsTitle,
+          modalTitle: pastCreations.title,
           modalDescription: "",
           modalImages: [{ src: image.src, alt: image.alt }],
         });
@@ -726,7 +711,7 @@ const BespokeFeaturedStoriesSection = ({ featuredStories }: {
 
       setModalOpen(true);
     },
-    [defaultSlideIndex, pastCreations?.title, slides],
+    [defaultSlideIndex, pastCreations, slides],
   );
 
   const modalSlide: FeaturedStoryModalSlide | null =
@@ -741,11 +726,14 @@ const BespokeFeaturedStoriesSection = ({ featuredStories }: {
         onIndexChange={setCurrentIndex}
         onPrimaryCtaClick={handleCenterOpen}
         title={featuredStories?.title ?? ""}
-        primaryCtaHref={featuredStories?.primaryCtaHref ?? "/featured-stories"}
+        primaryCtaHref={featuredStories?.primaryCtaHref}
         primaryCtaLabel={featuredStories?.primaryCtaLabel ?? ""}
-        secondaryCtaLabel={featuredStories?.secondaryCtaLabel ?? ""}
+        secondaryCtaLabel={
+          pastCreations && featuredStories?.secondaryCtaLabel
+            ? featuredStories.secondaryCtaLabel
+            : ""
+        }
         onSecondaryCtaClick={handlePastCreationsOpen}
-        secondaryCtaLoading={pastCreationsLoading}
         backgroundImage={featuredStories?.backgroundImage ?? null}
         showHero={slides.length > 0 || Boolean(featuredStories?.backgroundImage)}
       />
@@ -754,8 +742,7 @@ const BespokeFeaturedStoriesSection = ({ featuredStories }: {
         slide={modalSlide}
         initialImageIndex={modalContext?.imageIndex ?? 0}
         elevated={pastCreationsOpen}
-        modalCtaLabel={featuredStories?.modalCtaLabel ?? bespokeUiDefaults.modalCtaLabel}
-        modalCtaHref={featuredStories?.modalCtaHref ?? bespokeUiDefaults.modalCtaHref}
+        modalCtaLabel={featuredStories?.modalCtaLabel}
         onClose={handleModalClose}
       />
       {pastCreations &&
