@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
 import { constructMetadata } from "@/shared/lib/seo/metadata";
 import JsonLd from "@/shared/lib/seo/JsonLd";
@@ -10,6 +9,9 @@ import {
 } from "@/services/bespoke/contact-bespoke-page.service";
 import { buildBespokeJsonLd, resolveBespokeSeoMetadata } from "@/shared/lib/seo/bespokeSeo";
 import { BESPOKE_JEWELLERY_PATH } from "@/shared/utils/navigation";
+
+/** Refresh CMS-driven bespoke content without a full redeploy. */
+export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
@@ -31,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-async function BespokePageContent() {
+export default async function Page() {
   let page = EMPTY_CONTACT_BESPOKE_PAGE;
 
   try {
@@ -45,13 +47,5 @@ async function BespokePageContent() {
       <JsonLd data={buildBespokeJsonLd(page)} />
       <BespokePage page={page} />
     </>
-  );
-}
-
-export default function Page() {
-  return (
-    <Suspense fallback={null}>
-      <BespokePageContent />
-    </Suspense>
   );
 }

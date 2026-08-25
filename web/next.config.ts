@@ -12,6 +12,9 @@ const JEWELLERY_CATEGORY_DESTINATIONS = [
 ] as const;
 
 const nextConfig: NextConfig = {
+  // Ensure async CMS metadata (title, description, OG tags) is rendered in <head>
+  // instead of streamed into <body> for browser view-source and SEO tooling.
+  htmlLimitedBots: /.*/,
   turbopack: {
     root: process.cwd(),
   },

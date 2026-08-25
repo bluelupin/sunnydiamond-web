@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { getAbsoluteUrl } from "@/shared/lib/seo/siteConfig";
 import { siteConfig } from "@/shared/lib/siteConfig";
 
 interface SeoConfig {
@@ -22,6 +23,12 @@ function normalizeUrl(rawUrl?: string): string | undefined {
   } catch {
     return undefined;
   }
+}
+
+function resolveMetadataUrl(url?: string, canonicalPath?: string): string {
+  const candidate = url ?? canonicalPath;
+  if (!candidate) return siteConfig.seo.siteUrl;
+  return normalizeUrl(candidate) ?? getAbsoluteUrl(candidate);
 }
 
 /**
@@ -49,7 +56,7 @@ export function constructMetadata({
   const resolvedImage =
     normalizeUrl(image) ??
     `${siteConfig.seo.siteUrl}${image.startsWith("/") ? "" : "/"}${image}`;
-  const resolvedUrl = normalizeUrl(url ?? canonicalPath ?? siteConfig.seo.siteUrl);
+  const resolvedUrl = resolveMetadataUrl(url, canonicalPath);
 
   return {
     // Bypass root `title.template` so CMS titles are used exactly as configured.
