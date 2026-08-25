@@ -18,7 +18,7 @@ import { AmexLogo, MastercardLogo, VisaLogo } from "@/shared/ui/PaymentLogos";
 import { INDIAN_STATES } from "@/features/checkout/constants/indianStates";
 import type { CheckoutFormData, CheckoutPaymentData } from "../types/checkout.types";
 import type { CheckoutFormField, CheckoutPaymentField } from "@/shared/utils/formValidation";
-import { isCheckoutEmailContact, isCodAvailableForOrderTotal } from "@/shared/utils/formValidation";
+import { isCheckoutEmailContact } from "@/shared/utils/formValidation";
 
 type CheckoutFormValidationProps = {
   errors: Partial<Record<CheckoutFormField, string | undefined>>;
@@ -324,9 +324,10 @@ export const CheckoutFormStep = ({
 type CheckoutPaymentStepProps = {
   form: CheckoutFormData;
   payment: CheckoutPaymentData;
-  orderTotal: number;
   /** Backend removes cod-family payment methods when the cart holds engraved items. */
   hasEngravedItems?: boolean;
+  /** Whether Magento offers a cod-family method for this cart. The only COD gate. */
+  codOffered: boolean;
   onPaymentChange: (field: keyof CheckoutPaymentData, value: CheckoutPaymentData["method"]) => void;
   onEditPersonal: () => void;
   onEditDelivery: () => void;
@@ -360,8 +361,8 @@ const PaymentCardLogos = () => (
 export const CheckoutPaymentStep = ({
   form,
   payment,
-  orderTotal,
   hasEngravedItems = false,
+  codOffered,
   onPaymentChange,
   onEditPersonal,
   onEditDelivery,
@@ -395,7 +396,10 @@ export const CheckoutPaymentStep = ({
     ? form.shippingName || form.name
     : form.billingName || form.name;
 
-  const isCodAvailable = !hasEngravedItems && isCodAvailableForOrderTotal(orderTotal);
+  // Magento decides, not us: it applies the configured COD order minimum and
+  // maximum and the engraved-item rule, and a second opinion here could only
+  // ever disagree with it. hasEngravedItems is kept for the wording, not the gate.
+  const isCodAvailable = codOffered;
 
   return (
     <div className="flex flex-col lg:gap-[33px] gap-6">
@@ -487,10 +491,10 @@ export const CheckoutPaymentStep = ({
                     )}
                   >
                     {isCodAvailable
-                      ? "*for orders up to ₹40,000"
+                      ? "Pay in cash when your order arrives"
                       : hasEngravedItems
                         ? "Not available for engraved items"
-                        : "Not available for orders above ₹40,000"}
+                        : "Not available for this order value"}
                   </span>
                 </span>
               }

@@ -381,21 +381,19 @@ export const validateOptionalPhone = (value: string, countryCode = "+91"): Field
   return validatePhone(value, countryCode);
 };
 
-export const COD_ORDER_TOTAL_LIMIT = 40_000;
-
-export const isCodAvailableForOrderTotal = (
-  orderTotal: number,
-  limit = COD_ORDER_TOTAL_LIMIT,
-): boolean => orderTotal <= limit;
-
-export const validateCodOrderTotal = (
-  orderTotal: number,
-  limit = COD_ORDER_TOTAL_LIMIT,
-): FieldValidation => {
-  if (orderTotal > limit) {
+/**
+ * The storefront no longer carries its own COD ceiling. Magento holds both the
+ * order minimum and the maximum, and a second copy here could only drift from
+ * them — it did: the client capped COD at ₹40,000 while the backend also
+ * required ₹20,000, so an order below the floor was accepted by the UI and then
+ * silently placed as "Check / Money order". Availability now comes from the
+ * cart's own available_payment_methods (isCodOfferedByBackend).
+ */
+export const validateCodOffered = (codOffered: boolean): FieldValidation => {
+  if (!codOffered) {
     return {
       valid: false,
-      error: "Cash on delivery is available for orders up to ₹40,000",
+      error: "Cash on Delivery is not available for this order. Please use online payment.",
     };
   }
 
@@ -505,15 +503,16 @@ export const isCheckoutFormValid = (
 
 export const getCheckoutPaymentErrors = (
   values: CheckoutPaymentValues,
-  orderTotal: number,
+  codOffered: boolean,
   hasEngravedItems = false,
 ): Partial<Record<CheckoutPaymentField, string | undefined>> => {
   if (values.method === "cod") {
     return {
-      // Engraved-cart restriction wins when both reasons apply.
+      // Engraved-cart restriction wins when both reasons apply: it names the
+      // actual cause, where the generic message only says "not available".
       cod:
         validateCodEngravedCart(hasEngravedItems).error ??
-        validateCodOrderTotal(orderTotal).error,
+        validateCodOffered(codOffered).error,
     };
   }
 
@@ -522,10 +521,10 @@ export const getCheckoutPaymentErrors = (
 
 export const isCheckoutPaymentValid = (
   values: CheckoutPaymentValues,
-  orderTotal: number,
+  codOffered: boolean,
   hasEngravedItems = false,
 ): boolean =>
-  Object.values(getCheckoutPaymentErrors(values, orderTotal, hasEngravedItems)).every(
+  Object.values(getCheckoutPaymentErrors(values, codOffered, hasEngravedItems)).every(
     (error) => !error,
   );
 
