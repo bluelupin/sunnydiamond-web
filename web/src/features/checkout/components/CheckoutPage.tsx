@@ -25,7 +25,8 @@ import {
   useCheckoutPaymentValidation,
 } from "@/features/checkout/hooks/use-checkout-validation";
 import { useCheckoutCustomerPrefill } from "@/features/checkout/hooks/use-checkout-customer-prefill";
-import { sanitizePhoneInput, sanitizePincodeInput, isCheckoutEmailContact, isCodAvailableForOrderTotal, validateRequiredEmail } from "@/shared/utils/formValidation";
+import { sanitizePhoneInput, sanitizePincodeInput, isCheckoutEmailContact, validateRequiredEmail } from "@/shared/utils/formValidation";
+import { isCodOfferedByBackend } from "@/services/magento/cart/checkoutPayment.mapper";
 import {
   createEmptyCheckoutForm,
   createEmptyPaymentForm,
@@ -70,7 +71,11 @@ const CheckoutPage = () => {
     refreshCart,
     isHydrating,
     isUpdating,
+    paymentMethods,
   } = useCart();
+  // Magento is the only authority on whether this cart can be paid in cash: it
+  // holds the order minimum and maximum and the engraved-item rule.
+  const codOffered = isCodOfferedByBackend(paymentMethods);
   const { refresh: refreshAuth } = useAuth();
   const { toast } = useToast();
   const { openLoginModal } = useLoginModal();
@@ -138,7 +143,7 @@ const CheckoutPage = () => {
   const hasEngravedItems = items.some((item) => Boolean(item.options.engraving?.trim()));
 
   const formValidation = useCheckoutFormValidation(form);
-  const paymentValidation = useCheckoutPaymentValidation(payment, totalPrice, hasEngravedItems);
+  const paymentValidation = useCheckoutPaymentValidation(payment, codOffered, hasEngravedItems);
 
   // Signed-in checkout requires a Magento saved address (fields are hidden otherwise).
   const hasDeliveryAddressAvailable = Boolean(defaultShippingAddress);
@@ -207,11 +212,7 @@ const CheckoutPage = () => {
   ) => {
     if (checkoutLockedRef.current) return;
 
-    if (
-      field === "method" &&
-      value === "cod" &&
-      (hasEngravedItems || !isCodAvailableForOrderTotal(totalPrice))
-    ) {
+    if (field === "method" && value === "cod" && !codOffered) {
       return;
     }
 
@@ -219,13 +220,13 @@ const CheckoutPage = () => {
   };
 
   useEffect(() => {
-    if (
-      payment.method === "cod" &&
-      (hasEngravedItems || !isCodAvailableForOrderTotal(totalPrice))
-    ) {
+    // Only act on a definite answer. An empty payment-method list means the cart
+    // has not loaded yet, and switching the customer away from COD on that would
+    // undo a choice they already made.
+    if (paymentMethods.length > 0 && payment.method === "cod" && !codOffered) {
       setPayment((prev) => ({ ...prev, method: "card" }));
     }
-  }, [hasEngravedItems, payment.method, totalPrice]);
+  }, [codOffered, payment.method, paymentMethods.length]);
 
   const finalizeOrderSuccess = useCallback(
     async (input: {
@@ -808,8 +809,8 @@ const CheckoutPage = () => {
               <CheckoutPaymentStep
                 form={form}
                 payment={payment}
-                orderTotal={totalPrice}
                 hasEngravedItems={hasEngravedItems}
+                codOffered={codOffered}
                 onPaymentChange={updatePayment}
                 onEditPersonal={() => {
                   if (checkoutLockedRef.current || paymentInFlightRef.current) return;
