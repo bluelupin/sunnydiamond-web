@@ -1,6 +1,5 @@
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 import type { MagentoProductListItem, MagentoMediaGalleryItem } from "./magentoProduct.types";
-import fallBackImage from "@/assets/fallBackImage.png";
 import {
   formatMagentoFacetLabel,
   getMagentoCustomAttributeValue,
@@ -91,7 +90,7 @@ export function mapMagentoProductToJewelleryListing(
   );
 
   // Keep products that only have Magento's Luma placeholder so PLP count matches the grid.
-  const primaryImage = resolvedPrimaryImage || fallBackImage;
+  const primaryImage = resolvedPrimaryImage;
 
   const customAttributes = product.custom_attributesV2?.items;
   const isBestseller = isMagentoBestSeller(customAttributes);

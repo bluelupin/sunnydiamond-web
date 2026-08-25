@@ -86,32 +86,8 @@ const JewelleryProductPage = ({
   const [sortValue, setSortValue] = useState(DEFAULT_JEWELLERY_LISTING_SORT);
   const [filters, setFilters] = useState<JewelleryFilterState>(() => {
     const initial = createEmptyFilterState();
-    // Keep CMS/URL slug as-is; Magento option ids are resolved from live attribute options.
     if (occasionSlug?.trim()) {
       initial.occasion = occasionSlug.trim();
-    }
-    const shapeOption = resolveDiamondShapeFacetOption(diamondShapeSlug);
-    if (shapeOption) {
-      initial.diamondShape = shapeOption.value;
-    }
-    const colourOption = resolveFancyColourFacetOption(fancyColourSlug);
-    if (colourOption) {
-      initial.fancyColour = colourOption.value;
-    }
-    return initial;
-  });
-  const [draftFilters, setDraftFilters] = useState<JewelleryFilterState>(() => {
-    const initial = createEmptyFilterState();
-    if (occasionSlug?.trim()) {
-      initial.occasion = occasionSlug.trim();
-    }
-    const shapeOption = resolveDiamondShapeFacetOption(diamondShapeSlug);
-    if (shapeOption) {
-      initial.diamondShape = shapeOption.value;
-    }
-    const colourOption = resolveFancyColourFacetOption(fancyColourSlug);
-    if (colourOption) {
-      initial.fancyColour = colourOption.value;
     }
     return initial;
   });

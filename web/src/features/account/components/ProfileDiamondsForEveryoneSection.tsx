@@ -8,7 +8,6 @@ import { maskIdNumber } from "@/features/diamonds-for-everyone/utils/maskIdNumbe
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import { useToast } from "@/shared/hooks/use-toast";
 import { formatCustomerFullName } from "@/shared/utils/customerName";
-import { MOCK_PROFILE_DFE_PLAN } from "../data/profileDfeMockData";
 import { profileTabsContent } from "../data/profileContent";
 import type { ProfileDfePaymentDueUi, ProfileDfePlanUi } from "../types/profileDfe.types";
 import { ProfileDiamondsForEveryoneSkeleton } from "./ProfileDiamondsForEveryoneSkeleton";
@@ -195,20 +194,15 @@ const ProfileDiamondsForEveryoneSection = ({ customer }: ProfileDiamondsForEvery
   const accountFullName = formatCustomerFullName(customer.firstname, customer.lastname);
   const accountEmail = customer.email?.trim() ?? "";
 
-  const accountPhone = (() => {
-    if (!contact?.phone) {
-      return MOCK_PROFILE_DFE_PLAN.nominee.phone;
-    }
+  const accountPhone = contact?.phone
+    ? `${contact.countryCode ?? ""}${contact.phone}`
+    : "";
 
-    const prefix = contact.countryCode ?? "";
-    return `${prefix}${contact.phone}`;
-  })();
+  const displayFullName = accountFullName;
+  const displayEmail = accountEmail;
 
-  const displayFullName = accountFullName || MOCK_PROFILE_DFE_PLAN.nominee.fullName;
-  const displayEmail = accountEmail || MOCK_PROFILE_DFE_PLAN.nominee.email;
-
-  // TODO: replace with customer DFE plan API when available.
-  const plan: ProfileDfePlanUi | null = MOCK_PROFILE_DFE_PLAN;
+  // Customer DFE plan API — show empty state until wired.
+  const plan: ProfileDfePlanUi | null = null;
 
   if (isLoading) {
     return <ProfileDiamondsForEveryoneSkeleton />;

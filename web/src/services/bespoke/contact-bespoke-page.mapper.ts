@@ -275,14 +275,14 @@ const GUARANTEE_ICON_OVERRIDES: Array<{
   matches: (label: string, iconUrl: string) => boolean;
 }> = [
   {
-    icon: "/images/about/guarantees/moneyback.svg",
+    icon: "/images/guarantees/moneyback.svg",
     matches: (label, iconUrl) =>
       label.includes("moneyback") ||
       label.includes("money back") ||
       iconUrl.includes("moneyback"),
   },
   {
-    icon: "/images/about/guarantees/cod.svg",
+    icon: "/images/guarantees/cod.svg",
     matches: (label, iconUrl) =>
       label.includes("cash on delivery") ||
       label.includes("cod") ||
@@ -290,7 +290,7 @@ const GUARANTEE_ICON_OVERRIDES: Array<{
       iconUrl.endsWith("/cod.svg"),
   },
   {
-    icon: "/images/about/guarantees/return.svg",
+    icon: "/images/guarantees/return.svg",
     matches: (label, iconUrl) =>
       label.includes("return") ||
       label.includes("days return") ||

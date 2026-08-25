@@ -10,9 +10,6 @@ import {
   PLP_CARD_IMAGE_QUALITY,
   PLP_CARD_IMAGE_WIDTH,
 } from "../utils/jewelleryPlpImage";
-import {
-  jewelleryListingProductCardMobileSpec,
-} from "../data/content";
 import type { StaticImageData } from "next/image";
 
 const DESKTOP_HOVER_TRANSITION_CLASS =
