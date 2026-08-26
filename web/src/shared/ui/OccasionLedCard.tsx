@@ -79,8 +79,8 @@ export default function OccasionLedCard({
             ) : null}
           </div>
           {ctaLabel ? (
-            <span className="text-link-underline inline-flex w-fit items-center justify-center border-b-[1.5px] border-white pb-1.5 font-gill text-sm font-normal uppercase tracking-[0.28px] text-white">
-              {ctaLabel}
+            <span className="text-tertiary-cta-underline inline-flex w-fit items-center justify-center pb-1.5 font-gill text-sm font-normal uppercase tracking-[0.28px] text-white">
+              {ctaLabel} tset
             </span>
           ) : null}
         </div>
@@ -89,7 +89,7 @@ export default function OccasionLedCard({
       <div className="absolute bottom-0 left-10 z-10 hidden max-w-[418px] flex-col-reverse items-start text-white md:flex">
         {ctaLabel ? (
           <div className="inline-flex max-h-0 w-fit flex-col items-start overflow-hidden pb-0 pt-0 opacity-0 motion-safe:transition-[max-height,padding,opacity] motion-safe:duration-500 motion-safe:ease-out group-hover:max-h-[72px] group-hover:pb-16 group-hover:opacity-100 group-focus-visible:max-h-[72px] group-focus-visible:pb-16 group-focus-visible:opacity-100">
-            <div className="relative cursor-pointer border-b-[1.5px] border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all after:duration-300 hover:border-white hover:text-white hover:after:w-full sm:pb-1">
+            <div className="text-tertiary-cta-underline cursor-pointer pb-1 font-gill text-sm font-normal uppercase leading-110 text-white sm:pb-1">
               {ctaLabel}
             </div>
           </div>

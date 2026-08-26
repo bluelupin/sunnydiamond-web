@@ -104,32 +104,18 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
     <section
       id={id}
       aria-label={sectionTitle}
-      className="relative w-full overflow-hidden bg-chalkCard py-16 md:bg-gray300 md:py-104 md:min-h-[550px] min-h-auto"
+      className="relative w-full overflow-hidden bg-chalkCard py-16 md:bg-transparent md:py-104 md:min-h-[550px] min-h-auto"
     >
       {hasBackgroundTexture ? (
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute left-1/2 top-0 flex h-[651px] w-[max(100vw,1339px)] -translate-x-1/2 items-center justify-center mix-blend-color-burn md:hidden">
-            <div className="rotate-90">
-              <Image
-                src={backgroundMobileSrc}
-                alt={backgroundMobileAlt}
-                width={651}
-                height={1339}
-                className="h-[max(100vw,1339px)] w-[651px] object-bottom"
-              />
-            </div>
-          </div>
-          <div className="absolute left-1/2 top-1/2 hidden h-[700px] w-[max(100vw,1440px)] -translate-x-1/2 -translate-y-1/2 items-center justify-center mix-blend-color-burn md:flex">
-            <div className="rotate-90">
-              <Image
-                src={backgroundDesktopSrc}
-                alt={backgroundDesktopAlt}
-                width={700}
-                height={1440}
-                className="h-[max(100vw,1440px)] w-[700px] object-bottom"
-              />
-            </div>
-          </div>
+        <div className="pointer-events-none absolute inset-0 overflow-hidden md:block hidden">
+          <Image
+            src={backgroundDesktopSrc}
+            alt={backgroundDesktopAlt}
+            width={700}
+            height={1440}
+            className="h-[max(100vw,1440px)] w-full object-cover"
+          />
+          <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-full bg-[#f4f3eee0]"></div>
         </div>
       ) : null}
 

@@ -1,14 +1,24 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { LazyInView } from "@/shared/ui/LazyInView";
 import Reveal from "@/shared/Animation/Reveal";
+import { cn } from "@/shared/utils/cn";
 import { resolveCategoryNavImages } from "@/shared/utils/responsiveCmsImage";
 import { buildJewelleryHref, parseJewelleryCategorySlug } from "@/features/jewellery-product/utils/jewelleryRoutes";
 import type { CategoryNavigationItem } from "@/types/homepage/categoryNavigation";
 const IMAGE_QUALITY = 75;
+
+function preloadImage(url: string): Promise<void> {
+  return new Promise((resolve) => {
+    const img = new window.Image();
+    img.onload = () => resolve();
+    img.onerror = () => resolve();
+    img.src = url;
+  });
+}
 
 type CraftingRarityCategoryCardProps = {
   category: CategoryNavigationItem;
@@ -16,6 +26,7 @@ type CraftingRarityCategoryCardProps = {
 
 const CraftingRarityCategoryCard = ({ category }: CraftingRarityCategoryCardProps) => {
   const [loadHoverImage, setLoadHoverImage] = useState(false);
+  const [hoverImageReady, setHoverImageReady] = useState(false);
   const prefetchHoverImage = useCallback(() => {
     setLoadHoverImage(true);
   }, []);
@@ -44,6 +55,43 @@ const CraftingRarityCategoryCard = ({ category }: CraftingRarityCategoryCardProp
 
   const hasProductImage = Boolean(desktopImageUrl || mobileImageUrl);
 
+  useEffect(() => {
+    if (!loadHoverImage || !hasDistinctHover || hoverImageReady) {
+      return;
+    }
+
+    let cancelled = false;
+    const urls = Array.from(
+      new Set(
+        [hoverDesktopImageUrl, hoverMobileImageUrl].filter(
+          (url): url is string => Boolean(url),
+        ),
+      ),
+    );
+
+    if (urls.length === 0) {
+      return;
+    }
+
+    void Promise.all(urls.map(preloadImage)).then(() => {
+      if (!cancelled) {
+        setHoverImageReady(true);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    hasDistinctHover,
+    hoverDesktopImageUrl,
+    hoverImageReady,
+    hoverMobileImageUrl,
+    loadHoverImage,
+  ]);
+
+  const canCrossfade = hasDistinctHover && hoverImageReady;
+
   if (!categoryLink) {
     return null;
   }
@@ -66,7 +114,12 @@ const CraftingRarityCategoryCard = ({ category }: CraftingRarityCategoryCardProp
           height={600}
           quality={IMAGE_QUALITY}
           sizes="(max-width: 768px) 50vw, 25vw"
-          className="absolute inset-0 h-full w-full object-cover opacity-0 motion-safe:transition-opacity motion-safe:duration-700 motion-safe:ease-in-out group-hover:opacity-100 group-focus-visible:opacity-100"
+          className={cn(
+            "absolute inset-0 z-0 h-full w-full object-cover opacity-0",
+            "motion-safe:transition-opacity motion-safe:ease-in-out",
+            canCrossfade &&
+              "motion-safe:duration-[400ms] group-hover:opacity-100 group-hover:delay-150 group-focus-visible:opacity-100 group-focus-visible:delay-150",
+          )}
         />
       ) : null}
 
@@ -82,7 +135,12 @@ const CraftingRarityCategoryCard = ({ category }: CraftingRarityCategoryCardProp
             height={600}
             quality={IMAGE_QUALITY}
             sizes="(max-width: 768px) 50vw, 25vw"
-            className={`max-h-full max-w-full object-contain motion-safe:transition-opacity motion-safe:duration-700 motion-safe:ease-in-out${hasDistinctHover ? " group-hover:opacity-0 group-focus-visible:opacity-0" : ""}`}
+            className={cn(
+              "max-h-full max-w-full object-contain",
+              "motion-safe:transition-opacity motion-safe:ease-out",
+              canCrossfade &&
+                "motion-safe:duration-[250ms] group-hover:opacity-0 group-focus-visible:opacity-0",
+            )}
           />
         ) : null}
       </div>

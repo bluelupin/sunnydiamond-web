@@ -123,7 +123,10 @@ const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
           ) : null}
           {ctaUrl && ctaLabel ? (
             <Reveal direction="up">
-              <Link href={ctaUrl} className="relative after:bg-darkMagenta after:absolute after:h-0.5 after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-darkblack hover:border-darkMagenta sm:pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack hover:text-darkMagenta">
+              <Link
+                href={ctaUrl}
+                className="text-tertiary-cta-underline shrink-0 cursor-pointer pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack sm:pb-1"
+              >
                 {ctaLabel}
               </Link>
             </Reveal>

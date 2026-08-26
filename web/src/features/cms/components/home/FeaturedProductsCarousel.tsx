@@ -382,7 +382,7 @@ export default function FeaturedProductsCarousel({
         <div
           className={cn(
             "mt-3 flex flex-col items-center gap-4 text-center transition-opacity duration-300 ease-out md:gap-6 !w-[300px]",
-            isSliding && "opacity-60",
+            isSliding && "opacity-100",
           )}
         >
           <div className="flex flex-col items-center gap-4 md:min-h-0">

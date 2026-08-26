@@ -651,6 +651,28 @@
       opacity 0.2s ease,
       text-decoration-color 0.2s ease;
   }
+
+  /* Tertiary CTA: hover out draws left→right; hover in exits left→right toward right edge. */
+  .text-tertiary-cta-underline {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+
+  .text-tertiary-cta-underline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1.5px;
+    background-color: currentColor;
+    transform: scaleX(1);
+    transform-origin: left center;
+    transition: transform 0.3s cubic-bezier(0.86, 0, 0.07, 1);
+    will-change: transform;
+    backface-visibility: hidden;
+  }
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -667,6 +689,24 @@
   button.underline:hover:not(:disabled) {
     color: var(--link-underline-hover);
     text-decoration-color: var(--link-underline-hover);
+  }
+
+  .text-tertiary-cta-underline:hover:not(:disabled)::after,
+  .text-tertiary-cta-underline:focus-visible::after {
+    transform: scaleX(0);
+    transform-origin: right center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .text-tertiary-cta-underline::after {
+    transition: none;
+  }
+
+  .text-tertiary-cta-underline:hover:not(:disabled)::after,
+  .text-tertiary-cta-underline:focus-visible::after {
+    transform: scaleX(0);
+    transform-origin: right center;
   }
 }
 

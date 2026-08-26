@@ -31,7 +31,7 @@ export default function CraftingRarityCopyBlock({
         {secondaryCtaUrl && secondaryCtaLabel ? (
           <Link
             href={secondaryCtaUrl}
-            className="relative shrink-0 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-darkMagenta after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack hover:border-darkMagenta hover:text-darkMagenta sm:pb-1 hover:after:w-full"
+            className="text-tertiary-cta-underline shrink-0 cursor-pointer pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack sm:pb-1"
           >
             {secondaryCtaLabel}
           </Link>
