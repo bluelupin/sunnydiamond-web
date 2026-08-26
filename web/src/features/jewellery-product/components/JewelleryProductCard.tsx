@@ -243,24 +243,28 @@ const JewelleryProductCard = ({
       <div
         className={cn(
           "pointer-events-none col-start-1 row-start-1 z-[70] flex size-full flex-col items-center justify-end md:z-20",
-          "gap-3 px-[16px] pb-[24px] md:px-[24px] md:pb-10",
         )}
       >
-        {isBestseller ? (
-          <span className="flex h-9 shrink-0 items-center justify-center bg-white px-3 font-gill text-xs font-semibold leading-110 text-darkblack shadow-[0px_2px_2px_#C5A156] md:text-sm">
-            BESTSELLER
-          </span>
-        ) : null}
-        <div className="relative w-full shrink-0 pt-2">
-          <span
-            aria-hidden
-            className={cn(
-              "pointer-events-none absolute inset-x-0 -top-3 bottom-0 -z-10 w-full bg-gradient-to-t from-black/80 via-black/45 to-transparent opacity-0",
-              "motion-safe:transition-opacity motion-safe:duration-700 motion-safe:ease-in-out",
-              canCrossfade &&
-                "md:group-hover:opacity-100 md:group-focus-visible:opacity-100",
-            )}
-          />
+        <span
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute inset-x-0 bottom-0 h-[min(52%,220px)] md:h-[min(48%,260px)]",
+            "bg-gradient-to-t from-black/80 via-black/45 to-transparent opacity-0",
+            "motion-safe:transition-opacity motion-safe:duration-700 motion-safe:ease-in-out",
+            canCrossfade &&
+              "md:group-hover:opacity-100 md:group-focus-visible:opacity-100",
+          )}
+        />
+        <div
+          className={cn(
+            "relative z-10 flex w-full flex-col items-center gap-3 px-[16px] pb-[24px] md:px-[24px] md:pb-10",
+          )}
+        >
+          {isBestseller ? (
+            <span className="flex h-9 shrink-0 items-center justify-center bg-white px-3 font-gill text-xs font-semibold leading-110 text-darkblack shadow-[0px_2px_2px_#C5A156] md:text-sm">
+              BESTSELLER
+            </span>
+          ) : null}
           <ProductCopy
             title={title}
             price={price}
