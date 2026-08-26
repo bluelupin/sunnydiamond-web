@@ -91,6 +91,30 @@ export function buildJewelleryCategoryHref(urlKey?: string | null): string {
   return `/${encodeURIComponent(normalized)}`;
 }
 
+export function resolveCategoryUrlKeyFromPathname(pathname: string): string | null {
+  const normalizedPath = pathname.replace(/\/$/, "") || "/";
+
+  if (normalizedPath === JEWELLERY_PATH) {
+    return null;
+  }
+
+  const segment = normalizedPath.replace(/^\//, "").split("/")[0];
+  if (!segment || normalizedPath.includes("/", 1)) {
+    return null;
+  }
+
+  const decoded = decodeURIComponent(segment);
+  return isJewelleryCategoryUrlKey(decoded) ? decoded : null;
+}
+
+export function replaceJewelleryCategoryUrl(urlKey?: string | null): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.history.replaceState(window.history.state, "", buildJewelleryCategoryHref(urlKey));
+}
+
 export function buildJewelleryHref(category: JewelleryCategorySlug = "all"): string {
   if (category === "all") {
     return JEWELLERY_PATH;

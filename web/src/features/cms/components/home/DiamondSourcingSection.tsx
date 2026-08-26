@@ -73,11 +73,11 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
                   width={64}
                   height={64}
                   quality={75}
-                  className="w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 opacity-80 mx-auto"
+                  className="w-10 h-10 mx-auto"
                 />
               </Reveal>
               ) : null}
-              <Reveal as="h2" direction="up" className="mt-6 lg:text-5xl md:text-4xl text-32 font-light text-darkblack font-larken max-w-2xl leading-tight tracking-[0%]">
+              <Reveal as="h2" direction="up" className="md:mt-6 mt-4 lg:text-5xl md:text-4xl text-32 font-light text-darkblack font-larken max-w-2xl leading-tight tracking-[0%]">
                 {sectionTitle}
               </Reveal>
               {hasDiamondImage ? (

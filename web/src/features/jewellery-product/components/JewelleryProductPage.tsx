@@ -23,8 +23,10 @@ import {
   getSelectedMetalPurityQuery,
 } from "../data/filters";
 import {
-  buildJewelleryCategoryHref,
+  isJewelleryCategoryPath,
   parseJewelleryCategorySlug,
+  replaceJewelleryCategoryUrl,
+  resolveCategoryUrlKeyFromPathname,
 } from "../utils/jewelleryRoutes";
 import { resolveDiamondShapeFacetOption } from "../utils/diamondShapeListing";
 import { resolveFancyColourFacetOption } from "../utils/fancyColourListing";
@@ -72,9 +74,9 @@ const JewelleryProductPage = ({
   const pathname = usePathname();
   const params = useParams();
   const searchParams = useSearchParams();
-  const categoryUrlKey =
+  const categoryUrlKeyFromRoute =
     typeof params?.categoryUrl === "string" ? decodeURIComponent(params.categoryUrl) : null;
-  const categoryFromPath = parseJewelleryCategorySlug(categoryUrlKey);
+  const categoryFromPath = parseJewelleryCategorySlug(categoryUrlKeyFromRoute);
   const categoryFromQuery = parseJewelleryCategorySlug(searchParams?.get("category") ?? null);
   const categoryFromUrl = categoryFromPath ?? categoryFromQuery ?? "all";
   const occasionSlug = searchParams?.get("occasion");
@@ -82,6 +84,10 @@ const JewelleryProductPage = ({
   const fancyColourSlug = searchParams?.get("fancyColour");
   const minPriceFromUrl = parseGiftFinderPriceParam(searchParams?.get("minPrice"));
   const maxPriceFromUrl = parseGiftFinderPriceParam(searchParams?.get("maxPrice"));
+
+  const [selectedCategoryUrlKey, setSelectedCategoryUrlKey] = useState<string | null>(
+    categoryUrlKeyFromRoute,
+  );
 
   const [sortValue, setSortValue] = useState(DEFAULT_JEWELLERY_LISTING_SORT);
   const [filters, setFilters] = useState<JewelleryFilterState>(() => {
@@ -117,7 +123,7 @@ const JewelleryProductPage = ({
     hasMore,
     loadMore,
   } = useMagentoJewelleryListing({
-    categoryUrlKey,
+    categoryUrlKey: selectedCategoryUrlKey,
     sortValue,
     filters,
     pageSize: PAGE_SIZE,
@@ -126,13 +132,44 @@ const JewelleryProductPage = ({
   });
 
   useEffect(() => {
+    setSelectedCategoryUrlKey(categoryUrlKeyFromRoute);
+  }, [categoryUrlKeyFromRoute]);
+
+  useEffect(() => {
+    const syncCategoryFromBrowserUrl = () => {
+      const currentPath = window.location.pathname;
+      if (!isJewelleryCategoryPath(currentPath)) {
+        return;
+      }
+
+      const nextUrlKey = resolveCategoryUrlKeyFromPathname(currentPath);
+      setSelectedCategoryUrlKey(nextUrlKey);
+      facetsSyncedRef.current = false;
+    };
+
+    window.addEventListener("popstate", syncCategoryFromBrowserUrl);
+    return () => window.removeEventListener("popstate", syncCategoryFromBrowserUrl);
+  }, []);
+
+  const navigateToCategory = useCallback((urlKey?: string | null) => {
+    const nextUrlKey = urlKey?.trim() || null;
+    setSelectedCategoryUrlKey(nextUrlKey);
+    setFilters((current) => ({
+      ...current,
+      categories: [],
+    }));
+    facetsSyncedRef.current = false;
+    replaceJewelleryCategoryUrl(nextUrlKey);
+  }, []);
+
+  useEffect(() => {
     markJewelleryPlpNavigation();
 
     if (!plpTtfbReportedRef.current) {
       plpTtfbReportedRef.current = true;
       reportJewelleryPlpTtfb();
     }
-  }, [categoryUrlKey]);
+  }, [selectedCategoryUrlKey]);
 
   useEffect(() => {
     if (plpPrefetchReportedRef.current || !initialListing) {
@@ -143,10 +180,10 @@ const JewelleryProductPage = ({
     reportJewelleryPlpProductsReady({
       source: "prefetch",
       productCount: initialListing.products.length,
-      categoryUrlKey: prefetchedCategoryUrlKey ?? categoryUrlKey,
+      categoryUrlKey: prefetchedCategoryUrlKey ?? selectedCategoryUrlKey,
       durationMs: 0,
     });
-  }, [initialListing, prefetchedCategoryUrlKey, categoryUrlKey]);
+  }, [initialListing, prefetchedCategoryUrlKey, selectedCategoryUrlKey]);
 
   useEffect(() => {
     if (isLoading || products.length === 0) {
@@ -167,17 +204,18 @@ const JewelleryProductPage = ({
   }, [isLoading, products.length, pathname, initialListing]);
 
   const activeNavCategory = useMemo(
-    () => navCategories.find((category) => category.urlKey === categoryUrlKey) ?? null,
-    [navCategories, categoryUrlKey],
+    () => navCategories.find((category) => category.urlKey === selectedCategoryUrlKey) ?? null,
+    [navCategories, selectedCategoryUrlKey],
   );
   const categoryFilterHeading =
-    categoryUrlKey && activeNavCategory && activeNavCategory.children.length > 0
+    selectedCategoryUrlKey && activeNavCategory && activeNavCategory.children.length > 0
       ? `${activeNavCategory.label} Categories:`
       : null;
 
   const activeCategory = useMemo(() => {
-    if (categoryUrlKey) {
-      return categoryFromUrl;
+    if (selectedCategoryUrlKey) {
+      const fromSelected = parseJewelleryCategorySlug(selectedCategoryUrlKey);
+      return fromSelected ?? categoryFromUrl;
     }
 
     const fromDrawerCategory = resolveActiveCategorySlugFromFilters(
@@ -187,7 +225,7 @@ const JewelleryProductPage = ({
     );
 
     return fromDrawerCategory ?? categoryFromUrl;
-  }, [categoryUrlKey, filters, facets, navCategories, categoryFromUrl]);
+  }, [selectedCategoryUrlKey, filters, facets, navCategories, categoryFromUrl]);
 
   useEffect(() => {
     if (!hasMagentoFilterFacets(facets)) {
@@ -279,20 +317,16 @@ const JewelleryProductPage = ({
 
   const handleCategoryChange = useCallback(
     (category: JewelleryCategory) => {
-      router.replace(buildJewelleryCategoryHref(category.urlKey), { scroll: false });
-      setFilters((current) => ({
-        ...current,
-        categories: [],
-      }));
+      navigateToCategory(category.urlKey);
     },
-    [router],
+    [navigateToCategory],
   );
 
   const handleApplyFilters = useCallback(
     (nextFilters: JewelleryFilterState) => {
       // All-jewellery drawer: selecting one main category should behave like the tabs
       // so the next open shows that category's subfilters (not the mixed main list).
-      if (!categoryUrlKey) {
+      if (!selectedCategoryUrlKey) {
         const mainCategoryUrlKey = resolveMainCategoryUrlKeyFromDrawerSelection(
           nextFilters.categories,
           facets,
@@ -302,7 +336,7 @@ const JewelleryProductPage = ({
         if (mainCategoryUrlKey) {
           setFilters({ ...nextFilters, categories: [] });
           setIsFilterOpen(false);
-          router.replace(buildJewelleryCategoryHref(mainCategoryUrlKey), { scroll: false });
+          navigateToCategory(mainCategoryUrlKey);
           return;
         }
       }
@@ -331,7 +365,7 @@ const JewelleryProductPage = ({
       }
     },
     [
-      categoryUrlKey,
+      selectedCategoryUrlKey,
       facets,
       navCategories,
       occasionSlug,
@@ -342,6 +376,7 @@ const JewelleryProductPage = ({
       pathname,
       router,
       searchParams,
+      navigateToCategory,
     ],
   );
 
