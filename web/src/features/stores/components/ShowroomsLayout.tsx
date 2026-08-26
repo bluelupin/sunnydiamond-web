@@ -305,7 +305,7 @@ function ShowroomsDesktopLayout({
                             href={location.directionsUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="relative after:bg-darkMagenta after:absolute after:h-0.5 after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-darkblack hover:border-darkMagenta sm:pb-1 font-gill md:text-base text-xs uppercase leading-110 tracking-[1.8%] hover:text-darkMagenta"
+                            className="text-tertiary-cta-underline cursor-pointer sm:pb-1 font-gill md:text-base text-xs uppercase leading-110 tracking-[1.8%]"
                           >
                             {directionsText}
                           </Link>

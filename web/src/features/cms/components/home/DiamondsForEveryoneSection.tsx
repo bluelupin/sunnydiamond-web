@@ -176,7 +176,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
           ))}
         </div>
         {ctaUrl && ctaLabel ? (
-          <Link href={ctaUrl} className="relative after:bg-darkMagenta after:absolute after:h-0.5 after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-darkblack hover:border-darkMagenta sm:pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack hover:text-darkMagenta">
+          <Link href={ctaUrl} className="relative text-tertiary-cta-underline cursor-pointer sm:pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack">
             {ctaLabel}
           </Link>
         ) : null}
