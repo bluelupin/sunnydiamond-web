@@ -58,11 +58,11 @@ const FilterChip = ({
     aria-pressed={selected}
     onClick={onClick}
     className={cn(
-      "flex h-[56px] items-center justify-center px-[24px] py-[12px] font-gill text-base leading-110",
+      "flex h-14 items-center justify-center px-6 py-3 font-gill text-base leading-110 font-normal",
       selected ? "bg-gold300" : "bg-aboutInactive",
     )}
   >
-    <span className={selected ? "font-normal text-darkblack" : "font-light text-gary300 opacity-80"}>{label}</span>
+    <span className={selected ? "text-darkblack" : "text-darkblack"}>{label}</span>
   </button>
 );
 
@@ -359,7 +359,7 @@ const JewelleryFilterDrawer = ({
                         )
                       }
                       className={cn(
-                        "h-[56px] w-full bg-aboutInactive p-[12px] font-gill text-sm font-normal leading-110 text-darkblack outline-none",
+                        "h-14 w-full bg-aboutInactive p-[12px] font-gill text-sm font-normal leading-110 text-darkblack outline-none",
                         minInputFocused && "border border-neutral500",
                       )}
                     />
@@ -401,7 +401,7 @@ const JewelleryFilterDrawer = ({
                       aria-invalid={Boolean(maxAmountError)}
                       aria-describedby={maxAmountError ? "jewellery-max-amount-error" : undefined}
                       className={cn(
-                        "h-[56px] w-full bg-aboutInactive p-[12px] font-gill text-base font-normal leading-110 text-darkblack placeholder:text-neutral400 outline-none",
+                        "h-14 w-full bg-aboutInactive p-[12px] font-gill text-base font-normal leading-110 text-darkblack placeholder:text-neutral400 outline-none",
                         maxAmountError && "border border-[#F91616]",
                       )}
                     />
@@ -524,14 +524,14 @@ const JewelleryFilterDrawer = ({
               type="button"
               onClick={applyDraft}
               disabled={!canApplyFilters}
-              className="btn-dark-slide inline-flex h-[56px] w-full items-center justify-center border border-darkblack px-[28px] py-[20px] font-gill text-sm font-normal uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
+              className="btn-dark-slide inline-flex h-14 w-full items-center justify-center border border-darkblack px-[28px] py-[20px] font-gill text-sm font-normal uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               <span className="relative z-10">Apply Filters</span>
             </button>
             <button
               type="button"
               onClick={handleClearAll}
-              className="btn-border-slide inline-flex h-[56px] w-full items-center justify-center border-[0.8px] border-neutral300 px-[28px] py-[20px] font-gill text-sm font-normal uppercase leading-110 text-darkblack"
+              className="btn-border-slide inline-flex h-14 w-full items-center justify-center border-[0.8px] border-neutral300 px-[28px] py-[20px] font-gill text-sm font-normal uppercase leading-110 text-darkblack"
             >
               <span className="relative z-10">Clear All</span>
             </button>

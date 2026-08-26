@@ -384,7 +384,7 @@ export function ProfileOrderDetailView({
             {order.showDownloadInvoice ? (
               <DetailDarkButton
                 type="button"
-                className="order-1 h-14 min-h-[56px] w-full shrink-0 px-7 py-5 font-normal disabled:cursor-not-allowed disabled:opacity-50 lg:order-2 lg:flex-1"
+                className="order-1 h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal disabled:cursor-not-allowed disabled:opacity-50 lg:order-2 lg:flex-1"
                 onClick={handleDownloadInvoice}
                 disabled={invoiceDisabled}
               >
@@ -397,7 +397,7 @@ export function ProfileOrderDetailView({
             {order.showCancel ? (
               <DetailOutlineButton
                 type="button"
-                className="order-2 h-14 min-h-[56px] w-full shrink-0 px-7 py-5 font-normal lg:order-1 lg:flex-1"
+                className="order-2 h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal lg:order-1 lg:flex-1"
                 onClick={handleCancelOrder}
               >
                 {content.cancelOrderLabel}
@@ -407,7 +407,7 @@ export function ProfileOrderDetailView({
             {order.showReturn ? (
               <DetailOutlineButton
                 type="button"
-                className="order-3 h-14 min-h-[56px] w-full shrink-0 px-7 py-5 font-normal lg:order-1 lg:flex-1"
+                className="order-3 h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal lg:order-1 lg:flex-1"
                 onClick={handleReturnOrder}
               >
                 {content.returnOrderLabel}
@@ -417,7 +417,7 @@ export function ProfileOrderDetailView({
             {order.showContactUs ? (
               <DetailDarkButton
                 type="button"
-                className="h-14 min-h-[56px] w-full shrink-0 px-7 py-5 font-normal lg:flex-1"
+                className="h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal lg:flex-1"
                 onClick={handleContactSupport}
               >
                 {content.contactUsLabel}

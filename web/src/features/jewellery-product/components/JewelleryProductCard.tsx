@@ -219,7 +219,7 @@ const JewelleryProductCard = ({
         className={cn(
           "col-start-1 row-start-1 z-10 flex w-full flex-col items-center",
           "max-md:transition-opacity max-md:duration-700 max-md:ease-[cubic-bezier(0.16,1,0.3,1)]",
-          "px-[16px] pt-[24px] md:px-[24px] md:pt-10",
+          "px-[16px] pt-[24px] md:px-6 md:pt-10",
           isMobileLifestyle ? "pointer-events-none opacity-0 md:opacity-100" : "opacity-100",
         )}
         style={
@@ -257,7 +257,7 @@ const JewelleryProductCard = ({
         />
         <div
           className={cn(
-            "relative z-10 flex w-full flex-col items-center gap-3 px-[16px] pb-[24px] md:px-[24px] md:pb-10",
+            "relative z-10 flex w-full flex-col items-center gap-3 px-[16px] pb-[24px] md:px-6 md:pb-10",
           )}
         >
           {isBestseller ? (
