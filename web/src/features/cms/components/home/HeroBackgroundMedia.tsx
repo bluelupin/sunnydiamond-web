@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { useMutedVideoPlayback } from "@/shared/hooks/useMutedVideoPlayback";
+import { PLP_HERO_IMAGE_QUALITY } from "@/features/jewellery-product/utils/jewelleryPlpImage";
 import { getImageSrc } from "@/shared/utils/image";
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
@@ -13,6 +14,8 @@ type HeroBackgroundMediaProps = {
   desktopAlt: string;
   mobileAlt: string;
   cmsVideoUrl?: string;
+  priority?: boolean;
+  quality?: number;
 };
 
 function getVideoMimeType(url: string): string | undefined {
@@ -27,6 +30,8 @@ const HeroBackgroundMedia = ({
   desktopAlt,
   mobileAlt,
   cmsVideoUrl,
+  priority = true,
+  quality = PLP_HERO_IMAGE_QUALITY,
 }: HeroBackgroundMediaProps) => {
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -92,11 +97,11 @@ const HeroBackgroundMedia = ({
           alt={desktopAlt}
           desktopAlt={desktopAlt}
           mobileAlt={mobileAlt}
-          priority
+          priority={priority}
           width={1920}
           height={1080}
           sizes="100vw"
-          quality={80}
+          quality={quality}
           className="absolute inset-0 h-full w-full object-cover"
         />
       ) : (

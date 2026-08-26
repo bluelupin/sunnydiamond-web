@@ -17,6 +17,7 @@ const CONTACT_PAGE_POPULATE_QUERY =
   "&populate[heroSection][populate][image][populate][mobileImage]=true" +
   "&populate[heroSection][populate][bgImage][populate][desktopImage]=true" +
   "&populate[heroSection][populate][bgImage][populate][mobileImage]=true" +
+  "&populate[heroSection][populate][heroVideo][populate]=heroVideo" +
   "&populate[contactSection][populate][contactOptions]=true" +
   "&populate[formSection][populate][form][populate][dynamicFields][populate][dropdownOptions]=true" +
   "&populate[visitSection][populate][image][populate][desktopImage]=true" +

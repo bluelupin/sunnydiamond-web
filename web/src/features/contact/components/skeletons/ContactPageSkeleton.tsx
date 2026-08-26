@@ -1,8 +1,10 @@
 const ContactPageSkeleton = () => (
   <div aria-busy="true" aria-label="Loading contact page">
-    <section className="relative left-1/2 h-[240px] w-screen max-w-none -translate-x-1/2 overflow-hidden md:h-320">
+    <section className="relative h-[240px] w-full overflow-hidden md:h-320">
       <div className="absolute inset-0 animate-pulse bg-gray200" aria-hidden />
-      <div className="absolute bottom-10 left-1/2 z-10 h-10 w-48 -translate-x-1/2 animate-pulse rounded bg-white/30 md:bottom-16" aria-hidden />
+      <div className="absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-10 lg:pb-16">
+        <div className="h-10 w-48 animate-pulse rounded bg-white/30" aria-hidden />
+      </div>
     </section>
 
     <div className="flex flex-col gap-16 pt-16 md:gap-[100px]">

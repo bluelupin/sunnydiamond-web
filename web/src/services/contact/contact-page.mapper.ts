@@ -1,4 +1,5 @@
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 import { resolveVisitUsCtaFields } from "@/services/product-display/product-display-page.mapper";
 import type { NormalizedVisitUsSection } from "@/services/product-display/product-display-page.types";
 import {
@@ -227,9 +228,13 @@ const mapHero = (hero?: StrapiContactHeroSection | null): NormalizedContactHero 
   if (!title) return null;
 
   const image = mapResponsiveImage(hero.image) ?? mapResponsiveImage(hero.bgImage);
-  if (!image) return null;
+  const videoUrl = getCmsAssetUrl(resolveCmsMediaUrl(hero.heroVideo?.heroVideo));
 
-  return { title, image };
+  return {
+    title,
+    image,
+    ...(videoUrl ? { videoUrl } : {}),
+  };
 };
 
 const mapInfoCards = (

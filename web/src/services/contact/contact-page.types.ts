@@ -24,6 +24,11 @@ export type StrapiContactCta = {
   openInNewTab?: boolean | null;
 };
 
+export type StrapiContactHeroVideo = {
+  altText?: string | null;
+  heroVideo?: StrapiContactMediaFile | null;
+};
+
 export type StrapiContactHeroSection = {
   id?: number;
   eyebrow?: string | null;
@@ -33,6 +38,7 @@ export type StrapiContactHeroSection = {
   showField?: boolean | null;
   image?: StrapiContactImageAsset | null;
   bgImage?: StrapiContactImageAsset | null;
+  heroVideo?: StrapiContactHeroVideo | null;
   primaryCta?: StrapiContactCta | null;
   secondaryCta?: StrapiContactCta | null;
 };
@@ -150,7 +156,8 @@ export type NormalizedContactResponsiveImage = {
 
 export type NormalizedContactHero = {
   title: string;
-  image: NormalizedContactResponsiveImage;
+  image: NormalizedContactResponsiveImage | null;
+  videoUrl?: string;
 };
 
 export type NormalizedContactInfoCard = {

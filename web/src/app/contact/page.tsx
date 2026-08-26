@@ -4,6 +4,7 @@ import { constructMetadata } from "@/shared/lib/seo/metadata";
 import { siteConfig } from "@/shared/lib/siteConfig";
 import ContactPageView from "@/features/contact/components/ContactPage";
 import ContactPageSkeleton from "@/features/contact/components/skeletons/ContactPageSkeleton";
+import { preloadPlpHeroLcpImages } from "@/lib/preloadPlpHeroLcpImages";
 import { getContactPage } from "@/services/contact/contact-page.service";
 
 export const revalidate = 300;
@@ -39,6 +40,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function ContactPageContent() {
   const page = await getContactPage();
+
+  preloadPlpHeroLcpImages({
+    desktopUrl: page.hero?.image?.desktopUrl,
+    mobileUrl: page.hero?.image?.mobileUrl,
+  });
+
   return <ContactPageView page={page} />;
 }
 
