@@ -27,6 +27,8 @@ import {
   parseJewelleryCategorySlug,
   replaceJewelleryCategoryUrl,
   resolveCategoryUrlKeyFromPathname,
+  resolveSelectedCategoryUrlKey,
+  shouldSyncCategoryFromRouterPathname,
 } from "../utils/jewelleryRoutes";
 import { resolveDiamondShapeFacetOption } from "../utils/diamondShapeListing";
 import { resolveFancyColourFacetOption } from "../utils/fancyColourListing";
@@ -76,17 +78,14 @@ const JewelleryProductPage = ({
   const searchParams = useSearchParams();
   const categoryUrlKeyFromRoute =
     typeof params?.categoryUrl === "string" ? decodeURIComponent(params.categoryUrl) : null;
-  const categoryFromPath = parseJewelleryCategorySlug(categoryUrlKeyFromRoute);
-  const categoryFromQuery = parseJewelleryCategorySlug(searchParams?.get("category") ?? null);
-  const categoryFromUrl = categoryFromPath ?? categoryFromQuery ?? "all";
   const occasionSlug = searchParams?.get("occasion");
   const diamondShapeSlug = searchParams?.get("diamondShape");
   const fancyColourSlug = searchParams?.get("fancyColour");
   const minPriceFromUrl = parseGiftFinderPriceParam(searchParams?.get("minPrice"));
   const maxPriceFromUrl = parseGiftFinderPriceParam(searchParams?.get("maxPrice"));
 
-  const [selectedCategoryUrlKey, setSelectedCategoryUrlKey] = useState<string | null>(
-    categoryUrlKeyFromRoute,
+  const [selectedCategoryUrlKey, setSelectedCategoryUrlKey] = useState<string | null>(() =>
+    resolveSelectedCategoryUrlKey(pathname, categoryUrlKeyFromRoute),
   );
 
   const [sortValue, setSortValue] = useState(DEFAULT_JEWELLERY_LISTING_SORT);
@@ -132,8 +131,12 @@ const JewelleryProductPage = ({
   });
 
   useEffect(() => {
-    setSelectedCategoryUrlKey(categoryUrlKeyFromRoute);
-  }, [categoryUrlKeyFromRoute]);
+    if (!shouldSyncCategoryFromRouterPathname(pathname)) {
+      return;
+    }
+
+    setSelectedCategoryUrlKey(resolveSelectedCategoryUrlKey(pathname, categoryUrlKeyFromRoute));
+  }, [pathname, categoryUrlKeyFromRoute]);
 
   useEffect(() => {
     const syncCategoryFromBrowserUrl = () => {
@@ -145,6 +148,15 @@ const JewelleryProductPage = ({
       const nextUrlKey = resolveCategoryUrlKeyFromPathname(currentPath);
       setSelectedCategoryUrlKey(nextUrlKey);
       facetsSyncedRef.current = false;
+
+      if (nextUrlKey === null) {
+        setFilters(createEmptyFilterState());
+      } else {
+        setFilters((current) => ({
+          ...current,
+          categories: [],
+        }));
+      }
     };
 
     window.addEventListener("popstate", syncCategoryFromBrowserUrl);
@@ -154,10 +166,16 @@ const JewelleryProductPage = ({
   const navigateToCategory = useCallback((urlKey?: string | null) => {
     const nextUrlKey = urlKey?.trim() || null;
     setSelectedCategoryUrlKey(nextUrlKey);
-    setFilters((current) => ({
-      ...current,
-      categories: [],
-    }));
+
+    if (nextUrlKey === null) {
+      setFilters(createEmptyFilterState());
+    } else {
+      setFilters((current) => ({
+        ...current,
+        categories: [],
+      }));
+    }
+
     facetsSyncedRef.current = false;
     replaceJewelleryCategoryUrl(nextUrlKey);
   }, []);
@@ -215,7 +233,7 @@ const JewelleryProductPage = ({
   const activeCategory = useMemo(() => {
     if (selectedCategoryUrlKey) {
       const fromSelected = parseJewelleryCategorySlug(selectedCategoryUrlKey);
-      return fromSelected ?? categoryFromUrl;
+      return fromSelected ?? "all";
     }
 
     const fromDrawerCategory = resolveActiveCategorySlugFromFilters(
@@ -224,8 +242,8 @@ const JewelleryProductPage = ({
       navCategories,
     );
 
-    return fromDrawerCategory ?? categoryFromUrl;
-  }, [selectedCategoryUrlKey, filters, facets, navCategories, categoryFromUrl]);
+    return fromDrawerCategory ?? "all";
+  }, [selectedCategoryUrlKey, filters, facets, navCategories]);
 
   useEffect(() => {
     if (!hasMagentoFilterFacets(facets)) {

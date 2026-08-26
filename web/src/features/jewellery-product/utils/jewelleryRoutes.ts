@@ -115,6 +115,39 @@ export function replaceJewelleryCategoryUrl(urlKey?: string | null): void {
   window.history.replaceState(window.history.state, "", buildJewelleryCategoryHref(urlKey));
 }
 
+/** Prefer the live browser URL so client-side tab changes stay in sync after history.replaceState. */
+export function resolveSelectedCategoryUrlKey(
+  pathname: string | null | undefined,
+  categoryUrlKeyFromRoute: string | null,
+): string | null {
+  if (typeof window !== "undefined") {
+    const browserPath = window.location.pathname;
+    if (isJewelleryCategoryPath(browserPath)) {
+      return resolveCategoryUrlKeyFromPathname(browserPath);
+    }
+  }
+
+  const normalizedPath = pathname?.replace(/\/$/, "") ?? "";
+  if (normalizedPath === JEWELLERY_PATH || isJewelleryCategoryPath(normalizedPath)) {
+    return resolveCategoryUrlKeyFromPathname(normalizedPath);
+  }
+
+  return categoryUrlKeyFromRoute;
+}
+
+export function shouldSyncCategoryFromRouterPathname(
+  pathname: string | null | undefined,
+): boolean {
+  if (typeof window === "undefined") {
+    return Boolean(pathname);
+  }
+
+  const browserPath = window.location.pathname.replace(/\/$/, "") || "/";
+  const routerPath = pathname?.replace(/\/$/, "") || "/";
+
+  return browserPath === routerPath;
+}
+
 export function buildJewelleryHref(category: JewelleryCategorySlug = "all"): string {
   if (category === "all") {
     return JEWELLERY_PATH;
