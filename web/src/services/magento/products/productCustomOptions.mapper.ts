@@ -58,7 +58,8 @@ export function classifyCustomOptionLabel(label: string): CustomOptionFamily | n
     return "engravingText";
   }
 
-  if (normalized.includes("size")) {
+  // "length" covers chain-length options on necklaces — same selector family.
+  if (normalized.includes("size") || normalized.includes("length")) {
     return "ringSize";
   }
 
@@ -188,7 +189,10 @@ export function mapMagentoProductCustomOptions(
         break;
       }
       case "ringSize": {
-        const choice = mapChoiceOption(option);
+        // First match wins: the size family matches both "size" and "length", and
+        // the size selector has one slot. Backend sort_order puts the real size
+        // option first, so a later look-alike cannot displace it.
+        const choice = mapped.ringSize ? null : mapChoiceOption(option);
         if (choice) {
           mapped.ringSize = choice;
         }

@@ -27,51 +27,32 @@ function resolveVideoMimeType(videoSrc: string): string {
   return "video/mp4";
 }
 
-const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) => {
+type TutorialVideoProps = {
+  videoUrl: string;
+  mimeType: string;
+  title: string;
+};
+
+/**
+ * Own component so the panel can reset it with a key: closing the drawer or
+ * switching guide throws this away, which stops playback and clears the poster
+ * state without a single state-syncing effect.
+ */
+const TutorialVideo = ({ videoUrl, mimeType, title }: TutorialVideoProps) => {
   const [hasStartedPlayback, setHasStartedPlayback] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const title = guide?.drawerTitle ?? "Size Chart";
-  const subtitle = guide?.drawerSubtitle ?? "Measure Dimensions in millimeters";
-  const rows = guide?.rows ?? [];
-  const videoUrl = guide?.tutorialVideoUrl;
-  const videoMimeType = videoUrl ? resolveVideoMimeType(videoUrl) : "video/mp4";
-  const circumferenceHeaderUrl = guide?.circumferenceHeaderImageUrl;
-  const diameterHeaderUrl = guide?.diameterHeaderImageUrl;
-
   useEffect(() => {
-    if (open) {
-      return;
-    }
-
-    setHasStartedPlayback(false);
     const video = videoRef.current;
     if (!video) {
       return;
     }
 
-    video.pause();
-    video.currentTime = 0;
-  }, [open]);
-
-  useEffect(() => {
-    setHasStartedPlayback(false);
-  }, [videoUrl]);
-
-  useEffect(() => {
-    if (!open || !videoUrl) {
-      return;
-    }
-
-    const video = videoRef.current;
-    if (!video) {
-      return;
-    }
-
+    // iOS keeps playback inline only with both attributes present on the element.
     video.setAttribute("playsinline", "");
     video.setAttribute("webkit-playsinline", "");
     video.load();
-  }, [open, videoUrl]);
+  }, [videoUrl]);
 
   const handlePlayVideo = useCallback(() => {
     const video = videoRef.current;
@@ -95,50 +76,55 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
       });
   }, []);
 
-  const renderTutorialVideo = () => {
-    if (!videoUrl) {
-      return null;
-    }
+  return (
+    <div className="relative w-full shrink-0 overflow-hidden bg-white">
+      <video
+        ref={videoRef}
+        className="block h-auto w-full"
+        playsInline
+        preload="auto"
+        controls={hasStartedPlayback}
+        onPlay={() => setHasStartedPlayback(true)}
+        onEnded={() => {
+          const video = videoRef.current;
+          if (video) {
+            video.currentTime = 0;
+          }
+          setHasStartedPlayback(false);
+        }}
+      >
+        <source src={videoUrl} type={mimeType} />
+      </video>
+      {!hasStartedPlayback ? (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/20">
+          <button
+            type="button"
+            aria-label={`Play ${title} video`}
+            onClick={handlePlayVideo}
+            className="inline-flex size-12 touch-manipulation items-center justify-center"
+          >
+            <Play size={32} strokeWidth={1.5} className="fill-white text-white" aria-hidden />
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+};
 
-    return (
-      <div className="relative w-full shrink-0 overflow-hidden bg-white">
-        <video
-          ref={videoRef}
-          className="block h-auto w-full"
-          playsInline
-          preload="auto"
-          controls={hasStartedPlayback}
-          onPlay={() => setHasStartedPlayback(true)}
-          onEnded={() => {
-            const video = videoRef.current;
-            if (video) {
-              video.currentTime = 0;
-            }
-            setHasStartedPlayback(false);
-          }}
-        >
-          <source src={videoUrl} type={videoMimeType} />
-        </video>
-        {!hasStartedPlayback ? (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/20">
-            <button
-              type="button"
-              aria-label={`Play ${title} video`}
-              onClick={handlePlayVideo}
-              className="inline-flex size-12 touch-manipulation items-center justify-center"
-            >
-              <Play
-                size={32}
-                strokeWidth={1.5}
-                className="fill-white text-white"
-                aria-hidden
-              />
-            </button>
-          </div>
-        ) : null}
-      </div>
-    );
-  };
+const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) => {
+  const title = guide?.drawerTitle ?? "Size Chart";
+  const subtitle = guide?.drawerSubtitle ?? "Measure Dimensions in millimeters";
+  const rows = guide?.rows ?? [];
+  const videoUrl = guide?.tutorialVideoUrl;
+  const videoMimeType = videoUrl ? resolveVideoMimeType(videoUrl) : "video/mp4";
+  const circumferenceHeaderUrl = guide?.circumferenceHeaderImageUrl;
+  const diameterHeaderUrl = guide?.diameterHeaderImageUrl;
+  // Categories measured by a single dimension (e.g. necklace chain lengths)
+  // leave the measurement columns empty — hide any column with no data at all.
+  const showCircumference = rows.some((row) => row.circumference.trim() !== "");
+  const showDiameter = rows.some((row) => row.diameter.trim() !== "");
+  const columnCount = 1 + (showCircumference ? 1 : 0) + (showDiameter ? 1 : 0);
+  const gridColsClass = ["grid-cols-1", "grid-cols-2", "grid-cols-3"][columnCount - 1];
 
   return (
     <ProductDetailSidePanelShell
@@ -160,7 +146,9 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
           </svg>
         </button>
 
-        {renderTutorialVideo()}
+        {videoUrl ? (
+          <TutorialVideo key={videoUrl} videoUrl={videoUrl} mimeType={videoMimeType} title={title} />
+        ) : null}
 
         <div className="min-h-0 flex-1 overflow-y-auto">
           <div className="flex flex-col gap-6 pb-72">
@@ -174,64 +162,91 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
                 </p>
               </div>
 
-              <div className="grid w-full grid-cols-3">
-                {circumferenceHeaderUrl ? (
-                  <Image
-                    src={circumferenceHeaderUrl}
-                    alt="Circumference"
-                    width={1402}
-                    height={1122}
-                    className="aspect-[1402/1122] h-auto w-full object-cover"
-                    sizes="160px"
-                  />
-                ) : (
-                  <div className="aspect-[1402/1122] w-full bg-gray200" aria-hidden />
-                )}
-                {diameterHeaderUrl ? (
-                  <Image
-                    src={diameterHeaderUrl}
-                    alt="Diameter"
-                    width={1402}
-                    height={1122}
-                    className="aspect-[1402/1122] h-auto w-full object-cover object-left-top"
-                    sizes="160px"
-                  />
-                ) : (
-                  <div className="aspect-[1402/1122] w-full bg-gray200" aria-hidden />
-                )}
-                <div className="aspect-[1402/1122] w-full bg-white" aria-hidden />
+              <div className={`grid w-full ${gridColsClass}`}>
+                {showCircumference ? (
+                  circumferenceHeaderUrl ? (
+                    <Image
+                      src={circumferenceHeaderUrl}
+                      alt="Circumference"
+                      width={1402}
+                      height={1122}
+                      className="aspect-[1402/1122] h-auto w-full object-cover"
+                      sizes="160px"
+                    />
+                  ) : (
+                    <div className="aspect-[1402/1122] w-full bg-gray200" aria-hidden />
+                  )
+                ) : null}
+                {showDiameter ? (
+                  diameterHeaderUrl ? (
+                    <Image
+                      src={diameterHeaderUrl}
+                      alt="Diameter"
+                      width={1402}
+                      height={1122}
+                      className="aspect-[1402/1122] h-auto w-full object-cover object-left-top"
+                      sizes="160px"
+                    />
+                  ) : (
+                    <div className="aspect-[1402/1122] w-full bg-gray200" aria-hidden />
+                  )
+                ) : null}
+                {/* Balances the measurement illustrations — with no measurement
+                    column there is nothing to balance, and this would be a tall
+                    blank block above the table. */}
+                {columnCount > 1 ? (
+                  <div className="aspect-[1402/1122] w-full bg-white" aria-hidden />
+                ) : null}
 
+                {showCircumference ? (
+                  <div className="flex h-14 flex-col items-center justify-center gap-0.5 border-b border-aboutInactive bg-gray200">
+                    <p className="font-gill text-sm font-semibold leading-110 text-darkblack">
+                      Circumference
+                    </p>
+                    <p className="font-gill text-xs font-light leading-110 text-neutral500">
+                      in mm
+                    </p>
+                  </div>
+                ) : null}
+                {showDiameter ? (
+                  <div className="flex h-14 flex-col items-center justify-center gap-0.5 border-b border-aboutInactive bg-gray200">
+                    <p className="font-gill text-sm font-semibold leading-110 text-darkblack">
+                      Diameter
+                    </p>
+                    <p className="font-gill text-xs font-light leading-110 text-neutral500">
+                      in mm
+                    </p>
+                  </div>
+                ) : null}
                 <div className="flex h-14 items-center justify-center border-b border-aboutInactive bg-gray200">
                   <p className="font-gill text-sm font-semibold leading-110 text-darkblack">
-                    unit
-                  </p>
-                </div>
-                <div className="flex h-14 flex-col items-center justify-center gap-0.5 border-b border-aboutInactive bg-gray200">
-                  <p className="font-gill text-sm font-semibold leading-110 text-darkblack">
-                    diameter
-                  </p>
-                  <p className="font-gill text-xs font-light leading-110 text-neutral500">
-                    in mm
-                  </p>
-                </div>
-                <div className="flex h-14 items-center justify-center border-b border-aboutInactive bg-gray200">
-                  <p className="font-gill text-sm font-semibold leading-110 text-darkblack">
-                    sizeLabel
+                    Size
                   </p>
                 </div>
 
-                {rows.map((row) => (
-                  <Fragment key={row.size}>
-                    <div className="flex h-14 items-center justify-center border-b border-aboutInactive">
-                      <p className="whitespace-nowrap font-gill text-base leading-110 text-darkblack">
-                        {row.circumference}
-                      </p>
-                    </div>
-                    <div className="flex h-14 items-center justify-center border-b border-aboutInactive">
-                      <p className="whitespace-nowrap font-gill text-base leading-110 text-darkblack">
-                        {row.diameter}
-                      </p>
-                    </div>
+                {rows.map((row, index) => (
+                  <Fragment key={`${row.group}-${row.size}`}>
+                    {row.group && row.group !== rows[index - 1]?.group ? (
+                      <div className="col-span-full flex h-12 items-center justify-center border-b border-aboutInactive bg-white">
+                        <p className="font-gill text-sm font-semibold uppercase leading-110 tracking-wide text-darkblack">
+                          {row.group}
+                        </p>
+                      </div>
+                    ) : null}
+                    {showCircumference ? (
+                      <div className="flex h-14 items-center justify-center border-b border-aboutInactive">
+                        <p className="whitespace-nowrap font-gill text-base leading-110 text-darkblack">
+                          {row.circumference}
+                        </p>
+                      </div>
+                    ) : null}
+                    {showDiameter ? (
+                      <div className="flex h-14 items-center justify-center border-b border-aboutInactive">
+                        <p className="whitespace-nowrap font-gill text-base leading-110 text-darkblack">
+                          {row.diameter}
+                        </p>
+                      </div>
+                    ) : null}
                     <div className="flex h-14 items-center justify-center border-b border-aboutInactive bg-gray200">
                       <p className="whitespace-nowrap font-gill text-base leading-110 text-darkblack">
                         {row.size}
