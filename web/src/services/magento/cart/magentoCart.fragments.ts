@@ -1,4 +1,6 @@
-export const MAGENTO_CART_FIELDS = `
+import { MAGENTO_PRODUCT_CUSTOM_OPTIONS_FIELDS } from "../products/productCustomOptions.fragment";
+
+const cartFields = (productCustomOptions: string) => `
   id
   total_quantity
   gift_mode
@@ -97,6 +99,7 @@ export const MAGENTO_CART_FIELDS = `
             disabled
           }
         }
+        ${productCustomOptions}
       }
       prices {
         price {
@@ -138,4 +141,18 @@ export const MAGENTO_CART_FIELDS = `
     code
     title
   }
-` as const;
+`;
+
+/** Everything the cart UI needs except the catalog's own option lists. */
+export const MAGENTO_CART_FIELDS = cartFields("") as string;
+
+/**
+ * Adds each line's product options (engraving fonts, sizes) — the only source that
+ * works on a device the line was not added from. Reserved for the two cart reads:
+ * a ring carries ~30 size values, which is dead weight on a payment or address
+ * mutation. Responses without them keep the options already known for the SKU
+ * (see CartContext's applyCartState).
+ */
+export const MAGENTO_CART_FIELDS_WITH_PRODUCT_OPTIONS = cartFields(
+  MAGENTO_PRODUCT_CUSTOM_OPTIONS_FIELDS,
+) as string;

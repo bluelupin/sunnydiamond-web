@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type KeyboardEvent } from "react";
+import { useState, type KeyboardEvent } from "react";
 import Link from "next/link";
 import {
   clampEngravingText,
@@ -41,7 +41,7 @@ interface CartItemProps {
 const ENGRAVING_EMPTY_LABEL = "Metal Engraving (Optional)";
 
 const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItemProps) => {
-  const { buyNow } = useCart();
+  const { buyNow, getLineItemMetadata } = useCart();
   const { toggleWishlist, isWishlisted } = useWishlist();
   const { status } = useAuth();
   const { clearGiftingOptionsExplored } = useCartUI();
@@ -63,6 +63,19 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
   const [isBuyingNow, setIsBuyingNow] = useState(false);
 
   const engravingFont = options.engravingFont?.trim();
+  // Catalog list first (works on any device), browser metadata only as the
+  // fallback for optimistic lines the server has not answered for yet.
+  const fontLabels =
+    product.customOptions?.engravingFont?.labels ??
+    getLineItemMetadata(item.id)?.productCustomOptions?.engravingFont?.labels ??
+    [];
+  // A saved font missing from the list (admin rename, stale metadata) must stay
+  // selectable — replacing it silently would change the engraving.
+  const availableEngravingFonts =
+    engravingFont && !fontLabels.includes(engravingFont)
+      ? [engravingFont, ...fontLabels]
+      : fontLabels;
+  const [engravingFontDraft, setEngravingFontDraft] = useState("");
   const engravingErrorId = `cart-engraving-error-${item.id}`;
 
   const clampDraft = (value: string) =>
@@ -71,12 +84,6 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
   const sanitizeDraft = (value: string) =>
     clampDraft(value.replace(ENGRAVING_TEXT_SANITIZE_PATTERN, ""));
 
-  useEffect(() => {
-    if (!isEditingEngraving) {
-      setEngravingDraft(options.engraving ?? "");
-    }
-  }, [options.engraving, isEditingEngraving]);
-
   const handleEngravingAction = () => {
     if (isNavigatingToCheckout) {
       return;
@@ -84,6 +91,7 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
 
     if (!isEditingEngraving) {
       setEngravingDraft(options.engraving ?? "");
+      setEngravingFontDraft(engravingFont || (availableEngravingFonts[0] ?? ""));
       setEngravingError(null);
       setIsEditingEngraving(true);
       return;
@@ -94,10 +102,19 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
     }
 
     const trimmed = clampDraft(engravingDraft.trim());
+    // Only send the font when the shopper's choice differs from what is saved —
+    // a text-only save must never rewrite the line's font.
+    const fontChanged =
+      trimmed !== "" &&
+      engravingFontDraft !== "" &&
+      engravingFontDraft !== (engravingFont ?? "");
     setIsSavingEngraving(true);
     void (async () => {
       try {
-        await onUpdateOptions(item.id, { engraving: trimmed });
+        await onUpdateOptions(item.id, {
+          engraving: trimmed,
+          ...(fontChanged ? { engravingFont: engravingFontDraft } : {}),
+        });
         setEngravingError(null);
         setIsEditingEngraving(false);
       } catch (error) {
@@ -120,7 +137,10 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
     }
 
     if (event.key === "Escape") {
+      // Drop the edit: both drafts are seeded again from the saved line the next
+      // time the row is opened.
       setEngravingDraft(options.engraving ?? "");
+      setEngravingFontDraft(engravingFont ?? "");
       setEngravingError(null);
       setIsEditingEngraving(false);
     }
@@ -326,6 +346,27 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
                 {isEditingEngraving ? "Save" : hasEngraving ? "Modify" : "Add"}
               </CartOutlineButton>
             </div>
+
+            {isEditingEngraving && availableEngravingFonts.length > 0 ? (
+              <label className="flex h-14 items-center gap-3 self-stretch bg-aboutInactive px-3">
+                <span className="shrink-0 font-gill text-sm leading-110 text-neutral500 lg:text-base">
+                  Font
+                </span>
+                <select
+                  value={engravingFontDraft}
+                  disabled={isNavigatingToCheckout || isSavingEngraving}
+                  onChange={(event) => setEngravingFontDraft(event.target.value)}
+                  aria-label="Engraving font"
+                  className="h-full w-full min-w-0 border-0 bg-transparent font-gill text-sm leading-110 text-darkblack outline-none disabled:cursor-not-allowed lg:text-base"
+                >
+                  {availableEngravingFonts.map((font) => (
+                    <option key={font} value={font}>
+                      {font}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
 
             {engravingError ? (
               <FormFieldError id={engravingErrorId} message={engravingError} />

@@ -2,6 +2,7 @@ import type { Product } from "@/features/products/data/products";
 import type { CartGiftingOptions, CartLineItem, CartLineOptions } from "@/features/cart/types/cart.types";
 import { buildProductSeo } from "@/shared/lib/seo/productSeo";
 import { resolveMagentoProductImages } from "../products/products.mapper";
+import { mapMagentoProductCustomOptions } from "../products/productCustomOptions.mapper";
 import fallBackImage from "@/assets/fallBackImage.png";
 import type {
   MagentoCart,
@@ -68,6 +69,9 @@ function mapCartItemProduct(item: MagentoCartItem): Product | null {
       urlKey,
       shortDescription: name,
     }),
+    // Straight from the catalog, so the cart describes its own lines instead of
+    // depending on what this browser happens to remember.
+    customOptions: mapMagentoProductCustomOptions(product?.options),
   };
 }
 
@@ -368,8 +372,12 @@ export function mapMagentoCartItems(
       }
 
       if (mergedOptions.engravingMaxCharacters == null) {
+        // Catalog first: the product's own field length is right on every device,
+        // metadata only knows what this browser stored when the line was added.
         mergedOptions.engravingMaxCharacters =
-          metadata.options.engravingMaxCharacters ?? DEFAULT_ENGRAVING_MAX_CHARACTERS;
+          product.customOptions?.engravingText?.maxCharacters ??
+          metadata.options.engravingMaxCharacters ??
+          DEFAULT_ENGRAVING_MAX_CHARACTERS;
       }
     } else {
       // Not engraving-capable per server + structured metadata — scrub any stale

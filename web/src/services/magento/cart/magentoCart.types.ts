@@ -1,4 +1,5 @@
 import type { MagentoMediaGalleryItem } from "../products/magentoProduct.types";
+import type { MagentoProductCustomOption } from "../products/productCustomOptions.mapper";
 
 export type MagentoCartProduct = {
   sku?: string | null;
@@ -6,6 +7,7 @@ export type MagentoCartProduct = {
   url_key?: string | null;
   image?: { url?: string | null } | null;
   media_gallery?: MagentoMediaGalleryItem[] | null;
+  options?: MagentoProductCustomOption[] | null;
 };
 
 export type MagentoCartCustomizableOption = {

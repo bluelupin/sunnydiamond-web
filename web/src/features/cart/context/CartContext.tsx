@@ -118,6 +118,45 @@ const normalizePayload = (payload: AddToBagPayload | Product): AddToBagPayload =
     ? payload
     : { product: payload, options: {}, productCustomOptions: payload.customOptions };
 
+/**
+ * Only the two cart reads ask Magento for each line's product options; the
+ * mutations leave them out to keep their payloads small. Carry what is already
+ * known for a SKU into the next state so a quantity change or an address save
+ * cannot blank the engraving font list. Pure — it runs inside a state updater.
+ */
+function withKnownProductCustomOptions(
+  previous: GuestCartState | null,
+  next: GuestCartState,
+): GuestCartState {
+  const knownBySku = new Map<string, ProductCustomOptions>();
+  for (const item of previous?.items ?? []) {
+    if (item.product.customOptions) {
+      knownBySku.set(item.product.id, item.product.customOptions);
+    }
+  }
+
+  if (knownBySku.size === 0) {
+    return next;
+  }
+
+  let changed = false;
+  const items = next.items.map((item) => {
+    if (item.product.customOptions) {
+      return item;
+    }
+
+    const known = knownBySku.get(item.product.id);
+    if (!known) {
+      return item;
+    }
+
+    changed = true;
+    return { ...item, product: { ...item.product, customOptions: known } };
+  });
+
+  return changed ? { ...next, items } : next;
+}
+
 function resolveLineUidForSku(state: GuestCartState, sku: string): string | null {
   const fromCart = findCartItemUidBySku(state.cart, sku);
   if (fromCart) {
@@ -303,7 +342,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const applyCartState = useCallback(
     (nextState: GuestCartState) => {
-      setCartState(nextState);
+      setCartState((previous) => withKnownProductCustomOptions(previous, nextState));
       void refreshShippingEstimate(nextState);
     },
     [refreshShippingEstimate],
@@ -631,9 +670,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const nextOptions: CartLineOptions = { ...baseOptions, ...options };
       const clearingGift = options.isGift === false;
       const togglingGift = typeof options.isGift === "boolean";
+      // The catalog options come back with the cart itself, so they are right on
+      // any device; stored metadata only covers lines added in this browser.
+      const productCustomOptions =
+        cartLine?.product.customOptions ?? storedMeta?.productCustomOptions;
       const engravingContext = {
         options: baseOptions,
-        productCustomOptions: storedMeta?.productCustomOptions,
+        productCustomOptions,
       };
 
       if ("engraving" in options && isCartLineEngravingCapable(engravingContext)) {
@@ -665,7 +708,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           // native font option — a fontless product stays fontless.
           nextOptions.engravingFont =
             baseOptions.engravingFont?.trim() ||
-            storedMeta?.productCustomOptions?.engravingFont?.labels?.[0] ||
+            productCustomOptions?.engravingFont?.labels?.[0] ||
             undefined;
         }
       }
@@ -673,7 +716,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const nextLine: CartLineMetadata = {
         ...(storedMeta ?? { options: {} }),
         options: nextOptions,
-        productCustomOptions: storedMeta?.productCustomOptions,
+        productCustomOptions,
       };
 
       if (clearingGift) {

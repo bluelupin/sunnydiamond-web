@@ -96,7 +96,8 @@ export function createLineInstanceKeyForProduct(
     return null;
   }
 
-  if (keyLength >= 32) {
+  // A UUID is 36 characters — only use one when the field actually fits it.
+  if (keyLength >= 36) {
     return createCartLineInstanceId();
   }
 
