@@ -17,10 +17,27 @@ export type AuthMeResponse = {
   reason?: string;
 };
 
-function isUnauthorizedMessage(message: string): boolean {
-  return /isn'?t authorized|not authorized|unauthorized|authentication|login|token/i.test(
-    message,
-  );
+/**
+ * Only a genuine authorization failure may delete the session cookie. Magento
+ * tags those `graphql-authorization`; the message fallback is deliberately
+ * narrow — the old broad regex (authentication|login|token) matched unrelated
+ * Magento errors and destroyed valid sessions on transient failures (QA bug #18).
+ */
+function isAuthorizationFailure(error: unknown, message: string): boolean {
+  if (
+    error instanceof MagentoGraphqlError &&
+    error.errors.some(
+      (entry) =>
+        entry.extensions?.category === "graphql-authorization" ||
+        entry.extensions?.category === "graphql-authentication",
+    )
+  ) {
+    return true;
+  }
+
+  // An expired/revoked token makes Magento answer HTTP 401 before GraphQL runs;
+  // the client surfaces that as "... request failed (401)" with no error entries.
+  return /isn'?t authorized|not authorized|unauthorized/i.test(message) || /\(401\)$/.test(message);
 }
 
 export async function GET() {
@@ -88,7 +105,7 @@ export async function GET() {
           : "Failed to load customer";
 
     // Only drop the session for real auth failures — not schema/network blips.
-    if (isUnauthorizedMessage(message)) {
+    if (isAuthorizationFailure(error, message)) {
       await clearCustomerTokenCookie();
       return NextResponse.json({
         customer: null,

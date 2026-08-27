@@ -403,7 +403,10 @@ export function useAuthFlow({
   );
 
   const handleResend = useCallback(async () => {
-    if ((!otpError && secondsLeft > 0) || isSubmitting) return;
+    // The cooldown holds even after an invalid attempt: resending inside it makes
+    // Magento suppress the send and return the REMAINING seconds of the existing
+    // code, which the client would misread as a fresh timer (QA bug #15).
+    if (secondsLeft > 0 || isSubmitting) return;
     if (!otpTarget) {
       setStep("sign-in");
       return;
@@ -419,7 +422,7 @@ export function useAuthFlow({
     setSecondsLeft(cooldownRef.current);
     setOtp(Array(LOGIN_OTP_LENGTH).fill(""));
     inputRefs.current[0]?.focus();
-  }, [isSubmitting, otpError, otpTarget, secondsLeft, sendOtp]);
+  }, [isSubmitting, otpTarget, secondsLeft, sendOtp]);
 
   const handleLogin = useCallback(async () => {
     if (!isOtpComplete(otp) || isSubmitting) return;

@@ -175,7 +175,14 @@ const LoginOtpContent = ({
                   {otpError}
                 </p>
               </div>
-              <DetailTextLink onClick={onResend}>RESEND CODE</DetailTextLink>
+              {secondsLeft > 0 ? (
+                <p className="shrink-0 text-right font-gill text-base font-light leading-110 text-darkblack">
+                  Resend code in{" "}
+                  <span className="font-normal">{formatCountdown(secondsLeft)}</span>
+                </p>
+              ) : (
+                <DetailTextLink onClick={onResend}>RESEND CODE</DetailTextLink>
+              )}
             </div>
           ) : (
             <p className="w-full text-right font-gill text-base font-light leading-110 text-darkblack">
