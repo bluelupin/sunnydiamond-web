@@ -50,23 +50,27 @@ const AboutFacesSection = ({ title, description, members }: AboutFacesSectionPro
                 "lg:hover:grow-[1.2] transition-[flex-grow] duration-500 ease-in-out",
               )}
             >
-              {member.image ? (
-                <ResponsiveImage
-                  desktopSrc={member.image.desktopUrl}
-                  mobileSrc={member.image.mobileUrl}
-                  alt={member.image.alt}
-                  width={member.image.width ?? 478}
-                  height={member.image.height ?? 600}
-                  quality={80}
-                  sizes="(max-width: 1023px) 343px, 33vw"
-                  className="h-full w-full object-cover object-center transition-transform duration-500 ease-out lg:group-hover:scale-[1.03]"
-                />
-              ) : (
-                <div
-                  aria-hidden
-                  className="h-full w-full bg-gray200 transition-transform duration-500 ease-out lg:group-hover:scale-[1.03]"
-                />
-              )}
+              <div
+                className={cn(
+                  "absolute inset-0",
+                  member.image && "lg:inset-x-auto lg:left-1/2 lg:w-[719px] lg:-translate-x-1/2",
+                )}
+              >
+                {member.image ? (
+                  <ResponsiveImage
+                    desktopSrc={member.image.desktopUrl}
+                    mobileSrc={member.image.mobileUrl}
+                    alt={member.image.alt}
+                    width={member.image.width ?? 478}
+                    height={member.image.height ?? 600}
+                    quality={80}
+                    sizes="(max-width: 1023px) 343px, 33vw"
+                    className="h-full w-full object-cover object-center object-top"
+                  />
+                ) : (
+                  <div aria-hidden className="h-full w-full bg-gray200" />
+                )}
+              </div>
 
               <MediaContentOverlay
                 gradient={aboutFacesFigmaSpec.overlay.gradient}

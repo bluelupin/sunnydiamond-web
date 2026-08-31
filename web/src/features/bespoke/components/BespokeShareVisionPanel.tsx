@@ -10,7 +10,7 @@ import {
   appointmentLabelClassName,
 } from "@/shared/constants/appointmentForm";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
-import { DetailDarkButton } from "@/features/products/components/detail/shared";
+import { DetailDarkButton, DetailTextLink } from "@/features/products/components/detail/shared";
 import { ProductDetailSidePanelShell } from "@/features/products/components/detail/ProductDetailSidePanelShell";
 import { createBespokeSubmission } from "@/services/bespoke/bespoke-submission.service";
 import type { NormalizedBespokeCustomDesignForm } from "@/services/bespoke/contact-bespoke-page.types";
@@ -283,31 +283,23 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
                         {referenceImageName}
                       </p>
                       <div className="flex flex-wrap items-center gap-3">
-                        <button
-                          type="button"
+                        <DetailTextLink
                           onClick={() => referenceImageInputRef.current?.click()}
-                          className="text-link-underline inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
                         >
                           Replace Image
-                        </button>
-                        <button
-                          type="button"
+                        </DetailTextLink>
+                        <DetailTextLink
                           onClick={clearReferenceImage}
-                          className="text-link-underline inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
                         >
                           Remove
-                        </button>
+                        </DetailTextLink>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={() => referenceImageInputRef.current?.click()}
-                    className="text-link-underline inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm uppercase leading-110 text-darkblack"
-                  >
+                  <DetailTextLink onClick={() => referenceImageInputRef.current?.click()}>
                     {form.referenceImageButtonText}
-                  </button>
+                  </DetailTextLink>
                 )}
               </div>
             </div>

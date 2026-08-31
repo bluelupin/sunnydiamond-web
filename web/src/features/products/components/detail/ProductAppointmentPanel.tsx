@@ -25,7 +25,7 @@ import {
   type ProductAppointmentVariant,
 } from "./productAppointmentPanel.config";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
-import { DetailDarkButton } from "./shared";
+import { DetailDarkButton, DetailTextLink } from "./shared";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 
 const PERSONALISE_FORM_TAG = "product-personalisation";
@@ -398,31 +398,17 @@ const ProductAppointmentForm = ({
                         {referenceImageName}
                       </p>
                       <div className="flex flex-wrap items-center gap-3">
-                        <button
-                          type="button"
-                          onClick={() => referenceImageInputRef.current?.click()}
-                          className="text-link-underline inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
-                        >
+                        <DetailTextLink onClick={() => referenceImageInputRef.current?.click()}>
                           Replace Image
-                        </button>
-                        <button
-                          type="button"
-                          onClick={clearReferenceImage}
-                          className="text-link-underline inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
-                        >
-                          Remove
-                        </button>
+                        </DetailTextLink>
+                        <DetailTextLink onClick={clearReferenceImage}>Remove</DetailTextLink>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={() => referenceImageInputRef.current?.click()}
-                    className="text-link-underline inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
-                  >
+                  <DetailTextLink onClick={() => referenceImageInputRef.current?.click()}>
                     Attach Image
-                  </button>
+                  </DetailTextLink>
                 )}
               </div>
             ) : null}

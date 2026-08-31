@@ -112,6 +112,10 @@ export const aboutCraftingRarityFigmaSpec = {
 
 /** Figma Component 228 — team card hover overlay; caption Figma 692:27464 */
 export const aboutFacesFigmaSpec = {
+  card: {
+    /** Expanded card width — image layer stays this wide so hover grow only reveals more, not zoom. */
+    expandedWidth: 719,
+  },
   overlay: {
     gradient: "bottom-strong" as const,
   },

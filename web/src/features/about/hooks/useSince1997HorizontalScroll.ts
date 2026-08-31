@@ -64,6 +64,10 @@ export function useSince1997HorizontalScroll(
     let spacer: HTMLElement | null = null;
     let lastImage: HTMLElement | null = null;
     let firstStep: HTMLElement | null = null;
+    let pageContainer: HTMLElement | null = null;
+    let cachedPageContainer: HTMLElement | null = null;
+    let initialPageContainerPaddingLeft = 0;
+    let appliedPageContainerPaddingLeft = -1;
     const firstStepOffsetLg = options?.firstStepOffset ?? 0;
     const firstStepOffsetBelowLg = options?.firstStepOffsetBelowLg ?? firstStepOffsetLg;
     const firstStepImageWidthLg = options?.firstStepImageWidth ?? 0;
@@ -91,6 +95,13 @@ export function useSince1997HorizontalScroll(
       spacer = root?.querySelector<HTMLElement>("[data-since1997-scroll-spacer]") ?? null;
       lastImage = track?.querySelector<HTMLElement>("[data-since1997-last-image]") ?? null;
       firstStep = track?.querySelector<HTMLElement>("[data-since1997-first-step]") ?? null;
+      pageContainer =
+        root?.querySelector<HTMLElement>("[data-since1997-page-container]") ?? null;
+      if (pageContainer !== cachedPageContainer) {
+        initialPageContainerPaddingLeft = 0;
+        appliedPageContainerPaddingLeft = -1;
+        cachedPageContainer = pageContainer;
+      }
       scrollRoot =
         activeLayout === "mobile"
           ? (root?.querySelector<HTMLElement>("[data-since1997-scroll-zone]") ?? root)
@@ -116,6 +127,56 @@ export function useSince1997HorizontalScroll(
       firstStep.style.marginLeft = `${firstStepOffset * (1 - clamp(marginProgress))}px`;
     };
 
+    const measureInitialPageContainerPadding = () => {
+      if (!pageContainer) {
+        initialPageContainerPaddingLeft = 0;
+        return;
+      }
+
+      pageContainer.style.paddingLeft = "";
+      initialPageContainerPaddingLeft =
+        parseFloat(window.getComputedStyle(pageContainer).paddingLeft) || 0;
+      appliedPageContainerPaddingLeft = -1;
+    };
+
+    const resetPageContainerPadding = () => {
+      if (!pageContainer) return;
+      pageContainer.style.paddingLeft = "";
+      appliedPageContainerPaddingLeft = -1;
+    };
+
+    const setPageContainerPadding = (progress: number) => {
+      if (!pageContainer || initialPageContainerPaddingLeft <= 0) return;
+
+      const nextPadding = initialPageContainerPaddingLeft * (1 - clamp(progress));
+
+      if (Math.abs(nextPadding - appliedPageContainerPaddingLeft) < 0.5) return;
+
+      pageContainer.style.paddingLeft = `${nextPadding.toFixed(2)}px`;
+      appliedPageContainerPaddingLeft = nextPadding;
+    };
+
+    const remeasureViewportMetrics = () => {
+      if (!track || !viewport) return;
+
+      useDesktopLayout = activeLayout === "desktop" && Boolean(lastImage);
+
+      if (useDesktopLayout && lastImage) {
+        const viewportLeft = viewport.getBoundingClientRect().left;
+        const viewportWidth = window.innerWidth - viewportLeft;
+        viewport.style.width = `${viewportWidth}px`;
+
+        const attendingRight = lastImage.offsetLeft + lastImage.offsetWidth;
+        endTranslate = viewportWidth - attendingRight;
+        scrollRange = Math.max(0, -endTranslate);
+        return;
+      }
+
+      viewport.style.width = "";
+      scrollRange = Math.max(0, track.scrollWidth - viewport.clientWidth);
+      endTranslate = -scrollRange;
+    };
+
     const resetInactiveTracks = () => {
       section.querySelectorAll<HTMLElement>("[data-since1997-track]").forEach((node) => {
         if (node !== track) node.style.transform = "";
@@ -134,21 +195,8 @@ export function useSince1997HorizontalScroll(
         return;
       }
 
-      useDesktopLayout = activeLayout === "desktop" && Boolean(lastImage);
-
-      if (useDesktopLayout && lastImage) {
-        const viewportLeft = viewport.getBoundingClientRect().left;
-        const viewportWidth = window.innerWidth - viewportLeft;
-        viewport.style.width = `${viewportWidth}px`;
-
-        const attendingRight = lastImage.offsetLeft + lastImage.offsetWidth;
-        endTranslate = viewportWidth - attendingRight;
-        scrollRange = Math.max(0, -endTranslate);
-      } else {
-        viewport.style.width = "";
-        scrollRange = Math.max(0, track.scrollWidth - viewport.clientWidth);
-        endTranslate = -scrollRange;
-      }
+      measureInitialPageContainerPadding();
+      remeasureViewportMetrics();
 
       const scrollDistance = Math.max(
         window.innerHeight * (activeLayout === "mobile" ? 0.7 : 0.85),
@@ -178,14 +226,34 @@ export function useSince1997HorizontalScroll(
 
       if (!track) return;
 
+      const rootTop = (scrollRoot ?? section).getBoundingClientRect().top;
+      const spacerHeight = spacer?.offsetHeight ?? 0;
+      const scrollProgress =
+        rootTop > 0 || spacerHeight <= 0 ? 0 : clamp(-rootTop / spacerHeight);
+
       if (motionQuery.matches) {
+        if (rootTop <= 0 && pageContainer) {
+          pageContainer.style.paddingLeft = "0px";
+          appliedPageContainerPaddingLeft = 0;
+          remeasureViewportMetrics();
+        } else {
+          resetPageContainerPadding();
+          remeasureViewportMetrics();
+        }
+
         track.style.transform = "";
         if (getActiveFirstStepOffset() > 0) setFirstStepMargin(0);
         else resetFirstStepMargin();
         return;
       }
 
-      const spacerHeight = spacer?.offsetHeight ?? 0;
+      if (scrollProgress <= 0) {
+        resetPageContainerPadding();
+      } else {
+        setPageContainerPadding(scrollProgress);
+      }
+      remeasureViewportMetrics();
+
       if (spacerHeight <= 0 || scrollRange <= 0) {
         track.style.transform = "";
         if (getActiveFirstStepOffset() > 0) setFirstStepMargin(0);
@@ -193,14 +261,13 @@ export function useSince1997HorizontalScroll(
         return;
       }
 
-      const rootTop = (scrollRoot ?? section).getBoundingClientRect().top;
       if (rootTop > 0) {
         track.style.transform = "";
         if (getActiveFirstStepOffset() > 0) setFirstStepMargin(0);
         return;
       }
 
-      const progress = clamp(-rootTop / spacerHeight);
+      const progress = scrollProgress;
 
       if (trackScrollLeadInRatio > 0 && progress < trackScrollLeadInRatio) {
         setFirstStepMargin(progress / trackScrollLeadInRatio);
@@ -291,6 +358,9 @@ export function useSince1997HorizontalScroll(
       });
       section.querySelectorAll<HTMLElement>("[data-since1997-first-step]").forEach((node) => {
         node.style.marginLeft = "";
+      });
+      section.querySelectorAll<HTMLElement>("[data-since1997-page-container]").forEach((node) => {
+        node.style.paddingLeft = "";
       });
     };
   }, [

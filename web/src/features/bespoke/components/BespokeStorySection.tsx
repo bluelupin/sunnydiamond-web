@@ -186,7 +186,7 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
       </div>
       {/* Desktop / tablet — sticky viewport + scroll-driven horizontal slide */}
       <div data-since1997-mode="desktop" className="hidden lg:block">
-        <div className="sticky lg:top-10 top-24 flex min-h-[calc(100dvh-10rem)] flex-col bg-white pb-8">
+        <div className="sticky lg:top-2 top-24 flex min-h-[calc(100dvh-10rem)] flex-col bg-white pb-8">
           <div className="md:mb-12 mb-6 mx-auto max-w-[720px] hidden md:flex w-full flex-col gap-4">
             <Reveal
               as="h2"
@@ -225,6 +225,19 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
                 ))}
               </div>
             </div>
+            <div className="flex justify-center">
+              <div className="lg:mt-12 mt-4 flex justify-center md:w-[284px] mx-auto w-full">
+                {ctaLabel && customDesignForm ? (
+                  <DetailDarkButton
+                    type="button"
+                    onClick={handleShareVisionOpen}
+                    className="w-full uppercase"
+                  >
+                    {ctaLabel}
+                  </DetailDarkButton>
+                ) : null}
+              </div>
+            </div>
           </Reveal>
         </div>
         {hasHorizontalGallery ? (
@@ -232,13 +245,13 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
         ) : null}
       </div>
       {/* Mobile — static vertical stack, no scroll animation (Figma 2083:18264) */}
-      <div className="lg:hidden flex flex-col lg:gap-12 gap-8">
+      <div className="lg:hidden flex flex-col lg:gap-12 md:gap-8 gap-4">
         {story.steps.map((step) => (
           <BespokeStoryStepPanel key={step.number} step={step} layout="mobile" videoSrc={story.videoSrc} />
         ))}
       </div>
-      <Reveal direction="up" className="flex justify-center">
-        <div className="lg:mt-12 mt-4 flex justify-center md:w-[284px] mx-auto w-full">
+      <Reveal direction="up" className="lg:hidden flex justify-center">
+        <div className="lg:mt-12 md:mt-8 mt-4 flex justify-center md:w-[284px] mx-auto w-full">
           {ctaLabel && customDesignForm ? (
             <DetailDarkButton
               type="button"

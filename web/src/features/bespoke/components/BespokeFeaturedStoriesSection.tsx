@@ -138,7 +138,7 @@ const FeaturedGalleryBackground = ({
 
       <div
         aria-hidden
-        className="absolute inset-x-0 bottom-0 z-[1] h-[400px] backdrop-blur-[5px]"
+        className="absolute inset-x-0 bottom-0 z-[1] h-full backdrop-blur-[5px]"
         style={{ backgroundImage: spec.bottomGradient }}
       />
 

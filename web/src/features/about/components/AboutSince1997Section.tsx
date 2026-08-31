@@ -115,7 +115,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
               {title}
             </Reveal>
           </PageContainer>
-          <PageContainer className="xl:pb-100 pb-16 pr-0">
+          <PageContainer data-since1997-page-container className="xl:pb-100 pb-16 pr-0">
             <Reveal direction="up" className="flex min-h-0 flex-1 flex-col">
               <div data-since1997-viewport className="min-h-0 flex-1 w-full overflow-x-hidden overflow-y-visible">
                 <div
@@ -132,14 +132,14 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                       frameClassName="h-600 w-[549px]"
                       captionClassName="text-base"
                     />
-                    {story ? (
+                    {story &&
                       <p className="max-w-358 font-gill lg:text-xl md:text-lg text-base font-light leading-110 text-neutral500">
                         {story}
                       </p>
-                    ) : null}
+                    }
                   </article>
 
-                  {hasHorizontalGallery ? (
+                  {hasHorizontalGallery &&
                     <div className="flex items-center justify-center gap-4 lg:gap-5 2xl:gap-8">
                       <GalleryImage
                         image={event!.image}
@@ -161,7 +161,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                         dataSince1997Last
                       />
                     </div>
-                  ) : null}
+                  }
                 </div>
               </div>
             </Reveal>
@@ -207,7 +207,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
         {hasHorizontalGallery ? (
           <Reveal direction="up" data-since1997-scroll-zone className="relative">
             <div className="sticky sm:top-0 top-[120px] bg-white pb-16 md:pb-20">
-              <PageContainer className="!pr-0 pl-5 pt-0">
+              <PageContainer data-since1997-page-container className="!pr-0 pl-5 pt-0">
                 <div data-since1997-viewport className="overflow-x-hidden overflow-y-visible">
                   <div
                     data-since1997-track

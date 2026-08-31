@@ -225,8 +225,8 @@ const FeaturedStoryModalPagination = ({
             <span
               key={`${image.src}-${index}-active`}
               aria-hidden
-              className="block h-1 rounded-[24px] bg-white transition-all duration-300"
-              style={{ width: spec.paginationActiveWidth }}
+              className="w-12 block h-1 rounded-[24px] bg-white transition-all duration-300"
+              // style={{ width: spec.paginationActiveWidth }}
             />
           );
         }
@@ -237,7 +237,7 @@ const FeaturedStoryModalPagination = ({
             type="button"
             aria-label={`View image ${index + 1}`}
             onClick={() => onSelect(index)}
-            className="size-2 rounded-full bg-neutral300 transition-colors hover:bg-white"
+            className="h-1 w-1 rounded-full bg-neutral300 transition-colors hover:bg-white"
           />
         );
       })}
