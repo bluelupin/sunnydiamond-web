@@ -7,6 +7,7 @@ import { formatCartPrice } from "@/features/cart/utils/formatCartLine";
 import { useCart } from "@/features/cart/context/CartContext";
 import {
   findMockGiftCardByCode,
+  getMockOfferDiscountAmount,
   mockAvailableOffers,
   type MockGiftCard,
   type MockOffer,
@@ -85,8 +86,24 @@ const PromoField = ({
   </div>
 );
 
-const OfferCard = ({ offer }: { offer: MockOffer }) => (
-  <div className="flex h-[100px] w-[214px] min-w-[214px] shrink-0 items-start gap-3 border border-gray300 bg-white px-3 py-4 lg:bg-white">
+const OfferCard = ({
+  offer,
+  selected,
+  onSelect,
+}: {
+  offer: MockOffer;
+  selected: boolean;
+  onSelect: () => void;
+}) => (
+  <button
+    type="button"
+    onClick={onSelect}
+    aria-pressed={selected}
+    className={cn(
+      "flex h-[100px] w-[214px] min-w-[214px] shrink-0 items-start gap-3 border bg-white px-3 py-4 text-left transition-colors lg:bg-white",
+      selected ? "border-linkGold" : "border-gray300 hover:border-neutral500",
+    )}
+  >
     <Image
       src="/icons/kotal-bank-icon.svg"
       alt=""
@@ -105,7 +122,7 @@ const OfferCard = ({ offer }: { offer: MockOffer }) => (
         {offer.categoryLabel}
       </p>
     </div>
-  </div>
+  </button>
 );
 
 const AppliedGiftCardSummary = ({
@@ -140,7 +157,16 @@ const OffersAndDealsExpandedContent = ({
   variant = "panel-gray300",
   className,
 }: OffersAndDealsExpandedContentProps) => {
-  const { applyLocalGiftCard, removeLocalGiftCard, appliedLocalGiftCardCode, localGiftCardDiscount } = useCart();
+  const {
+    applyLocalGiftCard,
+    removeLocalGiftCard,
+    appliedLocalGiftCardCode,
+    localGiftCardDiscount,
+    subtotal,
+    appliedLocalOfferId,
+    applyLocalOffer,
+    removeLocalOffer,
+  } = useCart();
   const [giftCardCode, setGiftCardCode] = useState("");
   const [appliedGiftCard, setAppliedGiftCard] = useState<MockGiftCard | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -164,6 +190,15 @@ const OffersAndDealsExpandedContent = ({
     removeLocalGiftCard();
   };
 
+  const handleOfferSelect = (offer: MockOffer) => {
+    if (appliedLocalOfferId === offer.id) {
+      removeLocalOffer();
+      return;
+    }
+
+    applyLocalOffer(offer.id, getMockOfferDiscountAmount(offer, subtotal));
+  };
+
   const body = (
     <div className="flex flex-col gap-6">
       <div className="h-px w-full shrink-0 bg-neutral300" aria-hidden />
@@ -172,7 +207,12 @@ const OffersAndDealsExpandedContent = ({
         <p className="font-gill text-base font-normal leading-110 text-darkblack">Bank Offers</p>
         <div className="horizontalScroll flex items-start gap-2 overflow-auto">
           {mockAvailableOffers.map((offer) => (
-            <OfferCard key={offer.id} offer={offer} />
+            <OfferCard
+              key={offer.id}
+              offer={offer}
+              selected={appliedLocalOfferId === offer.id}
+              onSelect={() => handleOfferSelect(offer)}
+            />
           ))}
         </div>
       </div>

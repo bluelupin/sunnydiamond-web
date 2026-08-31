@@ -18,7 +18,7 @@ export function AccountAvatarIcon({ firstName, className }: AccountAvatarIconPro
       )}
       aria-hidden
     >
-      {initial}
+      <span className="translate-y-0.5 leading-none">{initial}</span>
     </div>
   );
 }

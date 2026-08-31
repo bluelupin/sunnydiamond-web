@@ -4,7 +4,7 @@ import { forwardRef } from "react";
 import OffersAndDealsSection from "@/shared/ui/OffersAndDealsSection";
 import { useCart } from "../context/CartContext";
 import { useCartCheckout } from "../hooks/useCartCheckout";
-import { formatCartPrice, getCartShippingLabel } from "../utils/formatCartLine";
+import { formatCartDiscountPrice, formatCartPrice, getCartShippingDisplay, getCartShippingLabel, resolveCartDisplayTotal } from "../utils/formatCartLine";
 import {
   CartDivider,
   CartOutlineButton,
@@ -29,13 +29,42 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
   },
   ref,
 ) {
-  const { subtotal, taxes, shipping, totalPrice, selectedShippingMethod, shippingMethods, estimatedShippingMethods } = useCart();
+  const {
+    subtotal,
+    taxes,
+    shipping,
+    totalPrice,
+    offerDiscount,
+    giftCardDiscount,
+    localGiftCardDiscount,
+    localOfferDiscount,
+    selectedShippingMethod,
+    shippingMethods,
+    estimatedShippingMethods,
+  } = useCart();
+  const displayOfferDiscount = offerDiscount + localOfferDiscount;
   const { proceedToCheckout, openGiftingOptions, isNavigatingToCheckout } = useCartCheckout();
   const shippingLabel = getCartShippingLabel(
     shipping,
     selectedShippingMethod,
     shippingMethods,
     estimatedShippingMethods,
+  );
+  const shippingDisplay = getCartShippingDisplay(
+    shipping,
+    selectedShippingMethod,
+    shippingMethods,
+    estimatedShippingMethods,
+  );
+  const displayTotal = resolveCartDisplayTotal(
+    subtotal,
+    taxes,
+    totalPrice,
+    shippingDisplay,
+    offerDiscount,
+    giftCardDiscount,
+    localGiftCardDiscount,
+    localOfferDiscount,
   );
 
   return (
@@ -56,6 +85,12 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
           {breakupOpen ? (
             <div className="flex flex-col gap-3">
               <CartPriceRow label="Subtotal" value={formatCartPrice(subtotal)} />
+              {displayOfferDiscount > 0 ? (
+                <CartPriceRow
+                  label="Offer Discount"
+                  value={formatCartDiscountPrice(displayOfferDiscount)}
+                />
+              ) : null}
               <CartPriceRow label="Taxes" value={formatCartPrice(taxes)} />
               <CartPriceRow label="Shipping" value={shippingLabel} />
               <CartDivider weight={1} />
@@ -64,7 +99,7 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
 
           <div className="flex items-end justify-between gap-4">
             <p className="font-gill text-xl font-normal leading-110 text-darkblack">
-              {formatCartPrice(totalPrice)}
+              {formatCartPrice(displayTotal)}
             </p>
             <CartTextLink onClick={onBreakupToggle} aria-expanded={breakupOpen} className="uppercase">
               View Price Breakup

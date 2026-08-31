@@ -99,6 +99,10 @@ interface CartContextType {
   appliedLocalGiftCardCode: string | null;
   applyLocalGiftCard: (code: string, balance: number) => void;
   removeLocalGiftCard: () => void;
+  localOfferDiscount: number;
+  appliedLocalOfferId: string | null;
+  applyLocalOffer: (offerId: string, discountAmount: number) => void;
+  removeLocalOffer: () => void;
   replaceLineItem: (lineItemId: string, payload: AddToBagPayload) => Promise<AddItemResult>;
   buyNow: (lineItemId: string) => Promise<void>;
   getLineItemMetadata: (lineItemId: string) => CartLineMetadata | undefined;
@@ -269,6 +273,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [cartStatusToastMessage, setCartStatusToastMessage] = useState<string | null>(null);
   const [localGiftCardDiscount, setLocalGiftCardDiscount] = useState(0);
   const [appliedLocalGiftCardCode, setAppliedLocalGiftCardCode] = useState<string | null>(null);
+  const [localOfferDiscount, setLocalOfferDiscount] = useState(0);
+  const [appliedLocalOfferId, setAppliedLocalOfferId] = useState<string | null>(null);
   const cartStatusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lineMetadataRef = useRef(lineMetadata);
   const initRef = useRef(false);
@@ -631,6 +637,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const removeLocalGiftCard = useCallback(() => {
     setAppliedLocalGiftCardCode(null);
     setLocalGiftCardDiscount(0);
+  }, []);
+
+  const applyLocalOffer = useCallback((offerId: string, discountAmount: number) => {
+    const normalizedId = offerId.trim();
+    if (!normalizedId || discountAmount <= 0) {
+      return;
+    }
+
+    setAppliedLocalOfferId(normalizedId);
+    setLocalOfferDiscount(discountAmount);
+  }, []);
+
+  const removeLocalOffer = useCallback(() => {
+    setAppliedLocalOfferId(null);
+    setLocalOfferDiscount(0);
   }, []);
 
   const updateQuantity = useCallback(
@@ -1089,6 +1110,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
       appliedLocalGiftCardCode,
       applyLocalGiftCard,
       removeLocalGiftCard,
+      localOfferDiscount,
+      appliedLocalOfferId,
+      applyLocalOffer,
+      removeLocalOffer,
       replaceLineItem,
       buyNow,
       getLineItemMetadata,
@@ -1117,6 +1142,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
       appliedLocalGiftCardCode,
       applyLocalGiftCard,
       removeLocalGiftCard,
+      localOfferDiscount,
+      appliedLocalOfferId,
+      applyLocalOffer,
+      removeLocalOffer,
       replaceLineItem,
       buyNow,
       getLineItemMetadata,

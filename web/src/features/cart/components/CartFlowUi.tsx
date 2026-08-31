@@ -134,7 +134,7 @@ export const CartTextLink = ({
   </DetailTextLink>
 );
 
-/** Figma cart item actions (2083:8650) — 14px regular, underline, not uppercase */
+/** Cart item actions — standard tertiary text link (DetailTextLink). */
 export const CartActionLink = ({
   children,
   href,
@@ -142,15 +142,7 @@ export const CartActionLink = ({
   className,
   disabled = false,
 }: CartTextLinkProps) => (
-  <DetailTextLink
-    href={href}
-    onClick={onClick}
-    disabled={disabled}
-    className={cn(
-      "pb-1 font-gill text-sm font-normal normal-case leading-110 text-darkblack",
-      className,
-    )}
-  >
+  <DetailTextLink href={href} onClick={onClick} disabled={disabled} className={className}>
     {children}
   </DetailTextLink>
 );

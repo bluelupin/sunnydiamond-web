@@ -41,6 +41,7 @@ const CartPriceDetails = ({
     shippingMethods,
     estimatedShippingMethods,
     localGiftCardDiscount,
+    localOfferDiscount,
   } = useCart();
   const { proceedToCheckout, openGiftingOptions, isNavigatingToCheckout } = useCartCheckout();
   const [offersOpen, setOffersOpen] = useState(false);
@@ -51,6 +52,7 @@ const CartPriceDetails = ({
     shippingMethods,
     estimatedShippingMethods,
   );
+  const displayOfferDiscount = offerDiscount + localOfferDiscount;
   const displayTotal = resolveCartDisplayTotal(
     subtotal,
     taxes,
@@ -59,6 +61,7 @@ const CartPriceDetails = ({
     offerDiscount,
     giftCardDiscount,
     localGiftCardDiscount,
+    localOfferDiscount,
   );
 
   const showBreakdown = !compact;
@@ -79,7 +82,7 @@ const CartPriceDetails = ({
         <PriceDetailsBreakdown
           variant="cart"
           subtotal={subtotal}
-          offerDiscount={offerDiscount}
+          offerDiscount={displayOfferDiscount}
           giftCardDiscount={giftCardDiscount}
           taxes={taxes}
           shippingLabel={shippingDisplay.label}
