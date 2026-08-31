@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLoginModal } from "@/features/auth/context/LoginModalContext";
 import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
-import { cn } from "@/shared/utils/cn";
+import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
+import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
 import { useCartUI } from "../context/CartUIContext";
 import {
   CartDivider,
@@ -12,8 +12,9 @@ import {
   CartTextLink,
 } from "./CartFlowUi";
 
-const modalFadeClassName =
-  "transition-opacity duration-300 ease-out motion-reduce:transition-none";
+const GUEST_CHECKOUT_MOBILE_QUERY = "(max-width: 1023px)";
+
+const GUEST_CHECKOUT_OVERLAY_CLASS = "z-[70] bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]";
 
 const GuestCheckoutContent = ({
   onContinueAsGuest,
@@ -45,98 +46,14 @@ const GuestCheckoutContent = ({
   </div>
 );
 
-const GuestCheckoutDesktopModal = ({
-  open,
-  onClose,
-  children,
-}: {
-  open: boolean;
-  onClose: () => void;
-  children: React.ReactNode;
-}) => {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    if (!open) return;
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open, onClose]);
-
-  useEffect(() => {
-    if (!open) {
-      setIsVisible(false);
-      return;
-    }
-
-    const frame = requestAnimationFrame(() => {
-      setIsVisible(true);
-    });
-
-    return () => {
-      cancelAnimationFrame(frame);
-      setIsVisible(false);
-    };
-  }, [open]);
-
-  if (!open) {
-    return null;
-  }
-
-  return (
-    <div className="fixed inset-0 z-[70]">
-      <div className="pointer-events-none absolute inset-0 backdrop-blur-[4.5px]" aria-hidden />
-      <div
-        className={cn(
-          "relative flex h-full w-full items-center justify-center p-4",
-          modalFadeClassName,
-          isVisible ? "opacity-100" : "opacity-0",
-        )}
-      >
-        <button
-          type="button"
-          aria-label="Close guest checkout"
-          onClick={onClose}
-          className="absolute inset-0 bg-[rgba(30,30,30,0.75)]"
-        />
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Welcome, New User"
-          className="relative z-10 w-full max-w-[560px]"
-        >
-          {children}
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const GuestCheckoutModal = () => {
   const router = useRouter();
   const { openLoginModal } = useLoginModal();
   const { isGuestCheckoutModalOpen, closeGuestCheckoutModal, startCheckoutNavigation } = useCartUI();
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const media = window.matchMedia("(max-width: 1023px)");
-    const update = () => setIsMobile(media.matches);
-    update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
-  }, []);
+  const { showMobileShell } = useResponsiveOverlayShell(
+    isGuestCheckoutModalOpen,
+    GUEST_CHECKOUT_MOBILE_QUERY,
+  );
 
   const handleContinueAsGuest = () => {
     startCheckoutNavigation();
@@ -149,6 +66,12 @@ const GuestCheckoutModal = () => {
     openLoginModal({ returnUrl: "/checkout" });
   };
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      closeGuestCheckoutModal();
+    }
+  };
+
   const content = (
     <GuestCheckoutContent
       onContinueAsGuest={handleContinueAsGuest}
@@ -156,14 +79,17 @@ const GuestCheckoutModal = () => {
     />
   );
 
-  if (isMobile) {
+  if (showMobileShell) {
     return (
       <Drawer
         open={isGuestCheckoutModalOpen}
         shouldScaleBackground={false}
-        onOpenChange={(open) => !open && closeGuestCheckoutModal()}
+        onOpenChange={handleOpenChange}
       >
-        <DrawerContent className="max-h-[90vh] overflow-hidden rounded-none border-0 bg-gray300 p-0 [&>div:first-child]:hidden">
+        <DrawerContent
+          overlayClassName={GUEST_CHECKOUT_OVERLAY_CLASS}
+          className="max-h-[90vh] overflow-hidden rounded-none border-0 bg-gray300 p-0 [&>div:first-child]:hidden"
+        >
           <DrawerTitle className="sr-only">Welcome, New User</DrawerTitle>
           {content}
         </DrawerContent>
@@ -172,12 +98,16 @@ const GuestCheckoutModal = () => {
   }
 
   return (
-    <GuestCheckoutDesktopModal
-      open={isGuestCheckoutModalOpen}
-      onClose={closeGuestCheckoutModal}
-    >
-      {content}
-    </GuestCheckoutDesktopModal>
+    <Dialog open={isGuestCheckoutModalOpen} onOpenChange={handleOpenChange}>
+      <DialogContent
+        hideCloseButton
+        overlayClassName={GUEST_CHECKOUT_OVERLAY_CLASS}
+        className="z-[70] max-w-[560px] gap-0 border-0 bg-transparent p-0 shadow-none sm:rounded-none data-[state=closed]:zoom-out-100 data-[state=open]:zoom-in-100"
+      >
+        <DialogTitle className="sr-only">Welcome, New User</DialogTitle>
+        {content}
+      </DialogContent>
+    </Dialog>
   );
 };
 

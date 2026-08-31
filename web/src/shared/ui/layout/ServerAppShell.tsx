@@ -1,5 +1,4 @@
 import AppProvider from "@/shared/lib/providers/AppProvider";
-import Layout from "@/shared/ui/layout/Layout";
 import HomepageCmsSeeder from "@/shared/lib/providers/HomepageCmsSeeder";
 import MagentoNavSeeder from "@/shared/lib/providers/MagentoNavSeeder";
 import { ProfilePageCmsProvider } from "@/shared/lib/providers/ProfilePageCmsProvider";
@@ -34,9 +33,7 @@ export default async function ServerAppShell({
     <AppProvider authFeatures={authFeatures}>
       <HomepageCmsSeeder shell={shell} />
       <MagentoNavSeeder jewelleryNav={jewelleryNav} />
-      <ProfilePageCmsProvider page={profilePage}>
-        <Layout>{children}</Layout>
-      </ProfilePageCmsProvider>
+      <ProfilePageCmsProvider page={profilePage}>{children}</ProfilePageCmsProvider>
     </AppProvider>
   );
 }

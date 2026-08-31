@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Check, X } from "lucide-react";
@@ -15,6 +15,8 @@ import {
   SheetContent,
   SheetTitle,
 } from "@/shared/ui/sheet";
+import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
+import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
 import { useCart } from "../context/CartContext";
 import { useCartUI } from "../context/CartUIContext";
 import { useCartCheckout } from "../hooks/useCartCheckout";
@@ -28,28 +30,9 @@ import {
 import { giftingContent } from "../data/giftingContent";
 import { cartFlowSpec } from "../data/cartFlowSpec";
 
-const giftingFadeClassName = "transition-opacity duration-300 ease-out motion-reduce:transition-none";
+const GIFTING_OVERLAY_CLASS = "bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]";
 
-const useGiftingModalEffects = (open: boolean, onClose: () => void) => {
-  useEffect(() => {
-    if (!open) return;
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open, onClose]);
-};
+const GIFTING_MOBILE_QUERY = "(max-width: 1023px)";
 
 const GiftingIntroPanel = ({
   onClose,
@@ -427,80 +410,16 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
   );
 };
 
-const GiftingDesktopModal = ({
-  open,
-  onClose,
-  children,
-}: {
-  open: boolean;
-  onClose: () => void;
-  children: ReactNode;
-}) => {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useGiftingModalEffects(open, onClose);
-
-  useEffect(() => {
-    if (!open) {
-      setIsVisible(false);
-      return;
-    }
-
-    const frame = requestAnimationFrame(() => {
-      setIsVisible(true);
-    });
-
-    return () => {
-      cancelAnimationFrame(frame);
-      setIsVisible(false);
-    };
-  }, [open]);
-
-  if (!open) {
-    return null;
-  }
-
-  return (
-    <div className="fixed inset-0 z-[70]">
-      <div className="pointer-events-none absolute inset-0 backdrop-blur-[4.5px]" aria-hidden />
-      <div
-        className={cn(
-          "relative flex h-full w-full items-center justify-center p-4",
-          giftingFadeClassName,
-          isVisible ? "opacity-100" : "opacity-0",
-        )}
-      >
-        <button
-          type="button"
-          aria-label="Close gifting options"
-          onClick={onClose}
-          className="absolute inset-0 bg-[rgba(30,30,30,0.75)]"
-        />
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Gifting options"
-          className="relative z-10 w-full max-w-[560px]"
-        >
-          {children}
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const GiftingOptionsPanel = () => {
   const { isGiftingPanelOpen, closeGiftingPanel, giftingStep, openGiftingPanel } = useCartUI();
-  const [isMobile, setIsMobile] = useState(false);
+  const { showMobileShell } = useResponsiveOverlayShell(isGiftingPanelOpen, GIFTING_MOBILE_QUERY);
   const showPersonalisePanel = isGiftingPanelOpen && giftingStep === "personalise";
 
-  useEffect(() => {
-    const media = window.matchMedia("(max-width: 1023px)");
-    const update = () => setIsMobile(media.matches);
-    update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
-  }, []);
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      closeGiftingPanel();
+    }
+  };
 
   const introPanel = (
     <GiftingIntroPanel
@@ -513,14 +432,15 @@ const GiftingOptionsPanel = () => {
     <GiftingPersonalisePanel onClose={closeGiftingPanel} />
   ) : null;
 
-  if (isMobile) {
+  if (showMobileShell) {
     return (
       <Drawer
         open={isGiftingPanelOpen}
         shouldScaleBackground={false}
-        onOpenChange={(open) => !open && closeGiftingPanel()}
+        onOpenChange={handleOpenChange}
       >
         <DrawerContent
+          overlayClassName={cn("z-[70]", GIFTING_OVERLAY_CLASS)}
           className={cn(
             "flex min-h-0 flex-col overflow-hidden rounded-none border-0 p-0 [&>div:first-child]:hidden",
             giftingStep === "intro"
@@ -541,14 +461,21 @@ const GiftingOptionsPanel = () => {
 
   if (giftingStep === "intro") {
     return (
-      <GiftingDesktopModal open={isGiftingPanelOpen} onClose={closeGiftingPanel}>
-        {introPanel}
-      </GiftingDesktopModal>
+      <Dialog open={isGiftingPanelOpen} onOpenChange={handleOpenChange}>
+        <DialogContent
+          hideCloseButton
+          overlayClassName={cn("z-[70]", GIFTING_OVERLAY_CLASS)}
+          className="z-[70] max-w-[560px] gap-0 border-0 bg-transparent p-0 shadow-none sm:rounded-none data-[state=closed]:zoom-out-100 data-[state=open]:zoom-in-100"
+        >
+          <DialogTitle className="sr-only">Gifting options</DialogTitle>
+          {introPanel}
+        </DialogContent>
+      </Dialog>
     );
   }
 
   return (
-    <Sheet open={isGiftingPanelOpen} onOpenChange={(open) => !open && closeGiftingPanel()}>
+    <Sheet open={isGiftingPanelOpen} onOpenChange={handleOpenChange}>
       <SheetContent
         side="right"
         overlayClassName="bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"

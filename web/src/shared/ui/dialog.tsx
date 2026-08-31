@@ -33,10 +33,11 @@ const DialogContent = React.forwardRef<
     hideCloseButton?: boolean;
     /** Renders above profile sidebar (z-80) and other elevated page chrome. */
     elevated?: boolean;
+    overlayClassName?: string;
   }
->(({ className, children, hideCloseButton = false, elevated = false, ...props }, ref) => (
+>(({ className, children, hideCloseButton = false, elevated = false, overlayClassName, ...props }, ref) => (
   <DialogPortal>
-    <DialogOverlay className={elevated ? "z-[90]" : undefined} />
+    <DialogOverlay className={cn(elevated ? "z-[90]" : undefined, overlayClassName)} />
     <DialogPrimitive.Content
       ref={ref}
       className={cn(

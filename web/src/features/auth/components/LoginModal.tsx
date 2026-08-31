@@ -1,17 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
+import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
+import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
 import { useLoginModal } from "../context/LoginModalContext";
 import { useAuthFlow } from "../hooks/useAuthFlow";
 import { getAuthFlowLabel } from "../utils/authNavigation";
 import AuthFlowSteps from "./AuthFlowSteps";
 
+const LOGIN_MODAL_MOBILE_QUERY = "(max-width: 1023px)";
+
+const LOGIN_MODAL_OVERLAY_CLASS = "z-[70] bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]";
+
 const LoginModal = () => {
   const router = useRouter();
   const { isLoginModalOpen, returnUrl, initialIdentifier, closeLoginModal } = useLoginModal();
-  const [isMobile, setIsMobile] = useState<boolean | null>(null);
+  const { showMobileShell } = useResponsiveOverlayShell(isLoginModalOpen, LOGIN_MODAL_MOBILE_QUERY);
 
   const { step, contentProps } = useAuthFlow({
     active: isLoginModalOpen,
@@ -25,66 +30,46 @@ const LoginModal = () => {
     onAbort: closeLoginModal,
   });
 
-  useEffect(() => {
-    const media = window.matchMedia("(max-width: 1023px)");
-    const update = () => setIsMobile(media.matches);
-    update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
-  }, []);
-
-  const showDesktopModal = isLoginModalOpen && isMobile === false;
-  const showMobileDrawer = isLoginModalOpen && isMobile === true;
   const modalLabel = getAuthFlowLabel(step);
-  const titleClassName = isMobile ? "text-2xl" : undefined;
+  const titleClassName = showMobileShell ? "text-2xl" : undefined;
 
-  useEffect(() => {
-    if (!isLoginModalOpen || isMobile !== false) return;
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      closeLoginModal();
+    }
+  };
 
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [isLoginModalOpen, isMobile]);
-
-  return (
-    <>
-      {showDesktopModal ? (
-        <div className="fixed inset-0 z-[70]">
-          <button
-            type="button"
-            aria-label="Close sign in modal"
-            onClick={closeLoginModal}
-            className="absolute inset-0 bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
-          />
-          <div className="relative flex h-full w-full items-center justify-center px-4">
-            <div
-              role="dialog"
-              aria-modal="true"
-              aria-label={modalLabel}
-              className="relative z-10 w-full max-w-[560px] bg-white p-6"
-            >
-              <AuthFlowSteps {...contentProps} titleClassName={titleClassName} />
-            </div>
-          </div>
-        </div>
-      ) : null}
-
+  if (showMobileShell) {
+    return (
       <Drawer
-        open={showMobileDrawer}
-        onOpenChange={(nextOpen) => !nextOpen && closeLoginModal()}
+        open={isLoginModalOpen}
+        onOpenChange={handleOpenChange}
         shouldScaleBackground={false}
       >
-        <DrawerContent className="z-[80] flex max-h-[90vh] min-h-0 flex-col overflow-hidden rounded-none border-0 bg-white p-0 [&>div:first-child]:hidden">
+        <DrawerContent
+          overlayClassName={LOGIN_MODAL_OVERLAY_CLASS}
+          className="z-[80] flex max-h-[90vh] min-h-0 flex-col overflow-hidden rounded-none border-0 bg-white p-0 [&>div:first-child]:hidden"
+        >
           <DrawerTitle className="sr-only">{modalLabel}</DrawerTitle>
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain md:px-6 py-6 px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] md:px-6">
             <AuthFlowSteps {...contentProps} titleClassName={titleClassName} />
           </div>
         </DrawerContent>
       </Drawer>
-    </>
+    );
+  }
+
+  return (
+    <Dialog open={isLoginModalOpen} onOpenChange={handleOpenChange}>
+      <DialogContent
+        hideCloseButton
+        overlayClassName={LOGIN_MODAL_OVERLAY_CLASS}
+        className="z-[70] max-w-[560px] gap-0 border-0 bg-white p-6 sm:rounded-none data-[state=closed]:zoom-out-100 data-[state=open]:zoom-in-100"
+      >
+        <DialogTitle className="sr-only">{modalLabel}</DialogTitle>
+        <AuthFlowSteps {...contentProps} titleClassName={titleClassName} />
+      </DialogContent>
+    </Dialog>
   );
 };
 

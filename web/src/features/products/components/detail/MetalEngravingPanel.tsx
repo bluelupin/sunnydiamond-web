@@ -136,7 +136,7 @@ const MetalEngravingPanel = ({
       >
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="min-h-0 flex-1 overflow-y-auto">
-            <div className="flex flex-col gap-6 px-6 pt-10">
+            <div className="flex flex-col gap-6 px-6 md:pt-10 pt-6 pb-10">
               <div className="flex flex-col gap-6">
                 <div className="flex items-center justify-between gap-4">
                   <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">Engraving</h2>

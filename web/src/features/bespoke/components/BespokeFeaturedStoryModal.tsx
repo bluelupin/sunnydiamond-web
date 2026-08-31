@@ -11,6 +11,9 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { cn } from "@/shared/utils/cn";
+import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
+import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
+import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
 import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 import { useToast } from "@/shared/hooks/use-toast";
 import { useAuth } from "@/features/auth/context/AuthContext";
@@ -19,6 +22,8 @@ import { saveCustomerCreationClient } from "@/services/customer/customer-saved-c
 import { bespokeFeaturedStoryModalFigmaSpec } from "@/features/bespoke/data/content";
 
 const spec = bespokeFeaturedStoryModalFigmaSpec;
+
+const FEATURED_STORY_MOBILE_QUERY = "(max-width: 767px)";
 
 type FeaturedStoryModalImage = {
   src: string;
@@ -41,24 +46,6 @@ type BespokeFeaturedStoryModalProps = {
   initialImageIndex?: number;
   elevated?: boolean;
   onClose: () => void;
-};
-
-const useFeaturedStoryModalEffects = (open: boolean, onClose: () => void) => {
-  useEffect(() => {
-    if (!open) return;
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open, onClose]);
 };
 
 type FeaturedStoryModalCarouselProps = {
@@ -425,6 +412,10 @@ const BespokeFeaturedStoryModal = ({
 }: BespokeFeaturedStoryModalProps) => {
   const [statusToastMessage, setStatusToastMessage] = useState<string | null>(null);
   const statusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { showMobileShell } = useResponsiveOverlayShell(open && Boolean(slide), FEATURED_STORY_MOBILE_QUERY);
+  const overlayZClass = elevated ? "z-[80]" : "z-[70]";
+  const overlayClassName = cn(overlayZClass, "bg-[rgba(30,30,30,0.75)] backdrop-blur-[10px]");
+  const shellZClass = overlayZClass;
 
   const dismissStatusToast = useCallback(() => {
     if (statusToastTimeoutRef.current) {
@@ -446,8 +437,6 @@ const BespokeFeaturedStoryModal = ({
     [dismissStatusToast],
   );
 
-  useFeaturedStoryModalEffects(open, onClose);
-
   useEffect(() => {
     return () => {
       if (statusToastTimeoutRef.current) {
@@ -464,47 +453,55 @@ const BespokeFeaturedStoryModal = ({
     return statusToastMessage ? statusToast : null;
   }
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      onClose();
+    }
+  };
+
+  const panelBody = (
+    <FeaturedStoryModalPanel
+      key={`${slide.src}-${initialImageIndex}-${slide.modalImages[initialImageIndex]?.src ?? ""}`}
+      slide={slide}
+      modalCtaLabel={modalCtaLabel}
+      initialImageIndex={initialImageIndex}
+      onClose={onClose}
+      onShowStatusToast={showStatusToast}
+    />
+  );
+
   return (
     <>
       {statusToast}
-    <div
-      className={cn(
-        "fixed inset-0 flex md:items-stretch md:justify-end max-md:items-end",
-        elevated ? "z-[80]" : "z-[70]",
+      {showMobileShell ? (
+        <Drawer open={open} onOpenChange={handleOpenChange} shouldScaleBackground={false}>
+          <DrawerContent
+            overlayClassName={overlayClassName}
+            className={cn(
+              shellZClass,
+              "flex max-h-[85vh] min-h-0 flex-col overflow-hidden rounded-none border-0 bg-black p-0 shadow-2xl [&>div:first-child]:hidden",
+            )}
+          >
+            <DrawerTitle className="sr-only">{slide.modalTitle}</DrawerTitle>
+            {panelBody}
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Sheet open={open} onOpenChange={handleOpenChange}>
+          <SheetContent
+            side="right"
+            overlayClassName={overlayClassName}
+            className={cn(
+              shellZClass,
+              "h-dvh max-h-dvh w-full max-w-480 gap-0 border-0 bg-black p-0 shadow-2xl sm:max-w-480",
+              "data-[state=open]:duration-300 data-[state=closed]:duration-300 [&>button]:hidden",
+            )}
+          >
+            <SheetTitle className="sr-only">{slide.modalTitle}</SheetTitle>
+            {panelBody}
+          </SheetContent>
+        </Sheet>
       )}
-    >
-      <button
-        type="button"
-        aria-label="Close featured story"
-        onClick={onClose}
-        className={cn(
-          "animate-in fade-in duration-300 backdrop-blur-[10px]",
-          "max-md:absolute max-md:inset-0 max-md:z-0",
-          "md:h-full md:min-h-0 md:flex-1",
-        )}
-        style={{ backgroundColor: spec.overlayColor }}
-      />
-
-      <aside
-        role="dialog"
-        aria-modal="true"
-        aria-label={slide.modalTitle}
-        className={cn(
-          "relative z-10 flex min-h-0 w-full flex-col overflow-hidden bg-black shadow-2xl",
-          "max-md:h-[85vh] max-md:max-h-[85vh] max-md:max-w-none max-md:animate-in max-md:fade-in max-md:duration-300",
-          "md:h-full md:max-w-480 md:shrink-0 md:animate-in md:slide-in-from-right md:duration-300",
-        )}
-      >
-        <FeaturedStoryModalPanel
-          key={`${slide.src}-${initialImageIndex}-${slide.modalImages[initialImageIndex]?.src ?? ""}`}
-          slide={slide}
-          modalCtaLabel={modalCtaLabel}
-          initialImageIndex={initialImageIndex}
-          onClose={onClose}
-          onShowStatusToast={showStatusToast}
-        />
-      </aside>
-    </div>
     </>
   );
 };

@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import FormFieldError from "@/shared/ui/FormFieldError";
+import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
+import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
 import {
   Select,
   SelectContent,
@@ -75,6 +77,349 @@ function buildDrawerDraft(
     : appliedFilters;
 }
 
+const FILTER_DRAWER_MOBILE_QUERY = "(max-width: 767px)";
+
+const FILTER_DRAWER_OVERLAY_CLASS =
+  "z-[80] bg-[#1E1E1EBF] backdrop-blur-[3px]";
+
+const FILTER_DRAWER_SHELL_CLASS =
+  "z-[80] flex min-h-0 flex-col gap-0 overflow-hidden border-0 bg-white p-0 shadow-2xl";
+
+type FilterDrawerPanelProps = {
+  categoryFilterHeading?: string | null;
+  onClose: () => void;
+  applyDraft: () => void;
+  handleClearAll: () => void;
+  canApplyFilters: boolean;
+  hasPriceRange: boolean;
+  minPercent: number;
+  maxPercent: number;
+  draft: JewelleryFilterState;
+  facets: JewelleryFilterFacets;
+  minInputFocused: boolean;
+  maxInputFocused: boolean;
+  maxInputValue: string;
+  maxAmountError: string | null;
+  categoryOptions: string[];
+  categoryRows: string[][];
+  metalTypeOptions: string[];
+  metalPurityOptions: string[];
+  setMinInputFocused: (value: boolean) => void;
+  setMaxInputFocused: (value: boolean) => void;
+  setMaxInputValue: (value: string) => void;
+  setDraft: Dispatch<SetStateAction<JewelleryFilterState>>;
+  updatePriceRange: (minPrice: number, maxPrice: number) => void;
+  commitMaxAmountInput: () => void;
+  toggleListValue: (key: "categories" | "metalTypes" | "metalPurities", value: string) => void;
+  getMaxAmountDisplayValue: (maxPrice: number, minPrice: number, facetMax: number) => string;
+};
+
+const FilterDrawerPanel = ({
+  categoryFilterHeading,
+  onClose,
+  applyDraft,
+  handleClearAll,
+  canApplyFilters,
+  hasPriceRange,
+  minPercent,
+  maxPercent,
+  draft,
+  facets,
+  minInputFocused,
+  maxInputFocused,
+  maxInputValue,
+  maxAmountError,
+  categoryOptions,
+  categoryRows,
+  metalTypeOptions,
+  metalPurityOptions,
+  setMinInputFocused,
+  setMaxInputFocused,
+  setMaxInputValue,
+  setDraft,
+  updatePriceRange,
+  commitMaxAmountInput,
+  toggleListValue,
+  getMaxAmountDisplayValue,
+}: FilterDrawerPanelProps) => (
+  <div className="flex min-h-0 flex-1 flex-col">
+    <div className="md:px-6 px-4 md:pt-10 pt-6">
+      <div className="mx-auto flex h-[32px] w-full max-w-[424px] items-center justify-between">
+        <h2 className="font-larken text-[24px] font-light leading-110 text-darkblack">Filters</h2>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close filter panel"
+          className="inline-flex size-[32px] shrink-0 items-center justify-center"
+        >
+          <Image
+            src="/images/jewellery/filter-drawer-close.svg"
+            alt=""
+            width={32}
+            height={32}
+            aria-hidden
+            className="size-[32px] object-contain"
+          />
+        </button>
+      </div>
+      <div className="mx-auto mt-6 h-px w-full max-w-[424px] bg-neutral300" aria-hidden />
+    </div>
+
+    <div className="filter-drawer-scroll flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain md:px-6 px-4 pt-6">
+      <div className="mx-auto flex w-full max-w-[424px] flex-col gap-[24px] pb-72">
+        {hasPriceRange ? (
+          <section className="flex flex-col gap-[16px]">
+            <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
+              By Price Range
+            </h3>
+            <div className="flex flex-col gap-[12px]">
+              <div className="grid h-[12px] grid-cols-1 grid-rows-1 items-center">
+                <div
+                  className="col-start-1 row-start-1 h-[4px] rounded-[70px] bg-neutral300"
+                  aria-hidden
+                />
+                <div
+                  className="col-start-1 row-start-1 h-[3px] rounded-[70px] bg-darkblack"
+                  style={{
+                    marginLeft: `${minPercent}%`,
+                    width: `${Math.max(maxPercent - minPercent, 0)}%`,
+                  }}
+                  aria-hidden
+                />
+                <input
+                  type="range"
+                  min={facets.minPrice}
+                  max={facets.maxPrice}
+                  step={500}
+                  value={draft.minPrice}
+                  onChange={(event) =>
+                    updatePriceRange(Number(event.target.value), draft.maxPrice)
+                  }
+                  className={rangeThumbClassName}
+                  aria-label="Minimum price"
+                />
+                <input
+                  type="range"
+                  min={facets.minPrice}
+                  max={facets.maxPrice}
+                  step={500}
+                  value={draft.maxPrice}
+                  onChange={(event) =>
+                    updatePriceRange(draft.minPrice, Number(event.target.value))
+                  }
+                  className={cn(rangeThumbClassName, "z-30")}
+                  aria-label="Maximum price"
+                />
+              </div>
+              <div className="flex items-center justify-between font-gill text-sm font-light leading-110 text-darkblack">
+                <span>₹ {formatCurrency(draft.minPrice)}</span>
+                <span>₹ {formatCurrency(draft.maxPrice)}</span>
+              </div>
+            </div>
+          </section>
+        ) : null}
+
+        {hasPriceRange ? (
+          <div className="space-y-4">
+            <section className="flex gap-[24px]">
+              <label className="flex min-w-0 flex-1 flex-col gap-[8px]">
+                <span className="font-gill text-base font-normal leading-110 text-darkblack">
+                  Min Amount
+                </span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={formatCurrency(draft.minPrice)}
+                  onFocus={() => setMinInputFocused(true)}
+                  onBlur={() => setMinInputFocused(false)}
+                  onChange={(event) =>
+                    updatePriceRange(
+                      parseJewelleryPriceInput(event.target.value, facets.minPrice),
+                      draft.maxPrice,
+                    )
+                  }
+                  className={cn(
+                    "h-14 w-full bg-aboutInactive p-[12px] font-gill text-sm font-normal leading-110 text-darkblack outline-none",
+                    minInputFocused && "border border-neutral500",
+                  )}
+                />
+              </label>
+              <label className="flex min-w-0 flex-1 flex-col gap-[8px]">
+                <span className="font-gill text-base font-normal leading-110 text-darkblack">
+                  Max Amount
+                </span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="Enter"
+                  value={maxInputValue}
+                  onFocus={() => {
+                    setMaxInputFocused(true);
+                    setMaxInputValue(
+                      getMaxAmountDisplayValue(draft.maxPrice, draft.minPrice, facets.maxPrice),
+                    );
+                  }}
+                  onBlur={commitMaxAmountInput}
+                  onChange={(event) => {
+                    const nextValue = event.target.value;
+                    setMaxInputValue(nextValue);
+
+                    const trimmed = nextValue.replace(/,/g, "").trim();
+                    if (!trimmed) {
+                      return;
+                    }
+
+                    const parsed = Number(trimmed);
+                    if (Number.isFinite(parsed)) {
+                      const intendedMax = Math.max(0, Math.round(parsed));
+                      if (intendedMax < Math.round(draft.minPrice)) {
+                        return;
+                      }
+                      updatePriceRange(draft.minPrice, intendedMax);
+                    }
+                  }}
+                  aria-invalid={Boolean(maxAmountError)}
+                  aria-describedby={maxAmountError ? "jewellery-max-amount-error" : undefined}
+                  className={cn(
+                    "h-14 w-full bg-aboutInactive p-[12px] font-gill text-base font-normal leading-110 text-darkblack placeholder:text-neutral400 outline-none",
+                    maxAmountError && "border border-[#F91616]",
+                  )}
+                />
+              </label>
+            </section>
+            <FormFieldError id="jewellery-max-amount-error" message={maxAmountError ?? undefined} />
+          </div>
+        ) : null}
+
+        {categoryOptions.length > 0 ? (
+          <section className="flex flex-col gap-[16px]">
+            <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
+              {categoryFilterHeading ?? "By Categories:"}
+            </h3>
+            {categoryFilterHeading ? (
+              <div className="flex flex-wrap gap-[7px]">
+                {categoryOptions.map((category) => (
+                  <FilterChip
+                    key={category}
+                    label={category}
+                    selected={draft.categories.includes(category)}
+                    onClick={() => toggleListValue("categories", category)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-[12px]">
+                {categoryRows.map((row, rowIndex) => (
+                  <div key={rowIndex} className="flex flex-wrap gap-[7px]">
+                    {row.map((category) => (
+                      <FilterChip
+                        key={category}
+                        label={category}
+                        selected={draft.categories.includes(category)}
+                        onClick={() => toggleListValue("categories", category)}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        ) : null}
+
+        {metalTypeOptions.length > 0 ? (
+          <section className="flex flex-col gap-[16px]">
+            <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
+              Metal Type:
+            </h3>
+            <div className="flex flex-wrap gap-[7px]">
+              {metalTypeOptions.map((metalType) => (
+                <FilterChip
+                  key={metalType}
+                  label={metalType}
+                  selected={draft.metalTypes.includes(metalType)}
+                  onClick={() => toggleListValue("metalTypes", metalType)}
+                />
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {metalPurityOptions.length > 0 ? (
+          <section className="flex flex-col gap-[16px]">
+            <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
+              Metal Purity:
+            </h3>
+            <div className="flex flex-wrap gap-[7px]">
+              {metalPurityOptions.map((purity) => (
+                <FilterChip
+                  key={purity}
+                  label={purity}
+                  selected={draft.metalPurities.includes(purity)}
+                  onClick={() => toggleListValue("metalPurities", purity)}
+                />
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {facets.gemstoneTypes.length > 0 ? (
+          <section className="flex flex-col gap-2">
+            <p className="font-gill text-base leading-normal tracking-normal text-darkblack">
+              Gemstone Type:
+            </p>
+            <Select
+              value={draft.gemstoneType}
+              onValueChange={(gemstoneType) =>
+                setDraft((current) => ({ ...current, gemstoneType }))
+              }
+            >
+              <SelectTrigger className="h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0">
+                <SelectValue placeholder="-select-" />
+              </SelectTrigger>
+              <SelectContent
+                className="z-[90]"
+                side="bottom"
+                align="start"
+                position="popper"
+                avoidCollisions={false}
+              >
+                {facets.gemstoneTypes.map((option) => (
+                  <SelectItem key={option.label} value={option.label}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </section>
+        ) : null}
+      </div>
+    </div>
+
+    <PanelFooter
+      className="max-md:pb-[env(safe-area-inset-bottom,0px)]"
+      contentClassName="border-t-[0.5px] border-neutral300 px-0 py-6 lg:px-6 md:px-6 px-4"
+    >
+      <div className="flex w-full flex-col gap-4">
+        <button
+          type="button"
+          onClick={applyDraft}
+          disabled={!canApplyFilters}
+          className="btn-dark-slide inline-flex h-14 w-full items-center justify-center border border-darkblack px-[28px] py-[20px] font-gill text-sm font-normal uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <span className="relative z-10">Apply Filters</span>
+        </button>
+        <button
+          type="button"
+          onClick={handleClearAll}
+          className="btn-border-slide inline-flex h-14 w-full items-center justify-center border-[0.8px] border-neutral300 px-[28px] py-[20px] font-gill text-sm font-normal uppercase leading-110 text-darkblack"
+        >
+          <span className="relative z-10">Clear All</span>
+        </button>
+      </div>
+    </PanelFooter>
+  </div>
+);
+
 const JewelleryFilterDrawer = ({
   open,
   appliedFilters,
@@ -89,7 +434,19 @@ const JewelleryFilterDrawer = ({
   const [minInputFocused, setMinInputFocused] = useState(false);
   const [maxInputFocused, setMaxInputFocused] = useState(false);
   const [maxInputValue, setMaxInputValue] = useState("");
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== "undefined" && window.matchMedia(FILTER_DRAWER_MOBILE_QUERY).matches,
+  );
+  const [useMobileDrawer, setUseMobileDrawer] = useState(isMobile);
   const wasOpenRef = useRef(false);
+
+  useEffect(() => {
+    const media = window.matchMedia(FILTER_DRAWER_MOBILE_QUERY);
+    const update = () => setIsMobile(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
 
   const getMaxAmountDisplayValue = (
     maxPrice: number,
@@ -107,6 +464,7 @@ const JewelleryFilterDrawer = ({
     const justOpened = open && !wasOpenRef.current;
 
     if (justOpened) {
+      setUseMobileDrawer(isMobile);
       setDraft(buildDrawerDraft(appliedFilters, facets));
       setMaxInputFocused(false);
     } else if (open && hasMagentoFilterFacets(facets)) {
@@ -123,7 +481,13 @@ const JewelleryFilterDrawer = ({
     }
 
     wasOpenRef.current = open;
-  }, [open, appliedFilters, facets]);
+  }, [open, appliedFilters, facets, isMobile]);
+
+  useEffect(() => {
+    if (!open) {
+      setUseMobileDrawer(isMobile);
+    }
+  }, [isMobile, open]);
 
   useEffect(() => {
     if (maxInputFocused || getMaxAmountBelowMinError(draft.minPrice, maxInputValue)) {
@@ -132,24 +496,6 @@ const JewelleryFilterDrawer = ({
 
     setMaxInputValue(getMaxAmountDisplayValue(draft.maxPrice, draft.minPrice, facets.maxPrice));
   }, [draft.maxPrice, draft.minPrice, facets.maxPrice, maxInputFocused, maxInputValue]);
-
-  useEffect(() => {
-    if (!open) return;
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open, onClose]);
 
   const toggleListValue = (key: "categories" | "metalTypes" | "metalPurities", value: string) => {
     setDraft((current) => {
@@ -239,306 +585,76 @@ const JewelleryFilterDrawer = ({
     );
   };
 
-  if (!open) {
-    return null;
+  const panelProps: FilterDrawerPanelProps = {
+    categoryFilterHeading,
+    onClose,
+    applyDraft,
+    handleClearAll,
+    canApplyFilters,
+    hasPriceRange,
+    minPercent,
+    maxPercent,
+    draft,
+    facets,
+    minInputFocused,
+    maxInputFocused,
+    maxInputValue,
+    maxAmountError,
+    categoryOptions,
+    categoryRows,
+    metalTypeOptions,
+    metalPurityOptions,
+    setMinInputFocused,
+    setMaxInputFocused,
+    setMaxInputValue,
+    setDraft,
+    updatePriceRange,
+    commitMaxAmountInput,
+    toggleListValue,
+    getMaxAmountDisplayValue,
+  };
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      onClose();
+    }
+  };
+
+  const showMobileShell = open ? useMobileDrawer : isMobile;
+
+  if (showMobileShell) {
+    return (
+      <Drawer open={open} onOpenChange={handleOpenChange} shouldScaleBackground={false}>
+        <DrawerContent
+          overlayClassName={FILTER_DRAWER_OVERLAY_CLASS}
+          className={cn(
+            FILTER_DRAWER_SHELL_CLASS,
+            "mt-12 max-h-[calc(100dvh-3rem)] w-full rounded-none [&>div:first-child]:hidden",
+          )}
+        >
+          <DrawerTitle className="sr-only">Filters</DrawerTitle>
+          <FilterDrawerPanel {...panelProps} />
+        </DrawerContent>
+      </Drawer>
+    );
   }
 
   return (
-    <div className="fixed inset-0 z-[80] flex max-md:flex-col max-md:overflow-hidden md:justify-end">
-      <button
-        type="button"
-        aria-label="Close filters"
-        className="min-h-0 flex-1 bg-[#1E1E1EBF] backdrop-blur-[3px] animate-in fade-in duration-300 max-md:min-h-12"
-        onClick={onClose}
-      />
-
-      <aside
-        role="dialog"
-        aria-modal="true"
-        aria-label="Filters"
+    <Sheet open={open} onOpenChange={handleOpenChange}>
+      <SheetContent
+        side="right"
+        overlayClassName={FILTER_DRAWER_OVERLAY_CLASS}
         className={cn(
-          "flex min-h-0 flex-col bg-white shadow-2xl",
-          "max-md:w-full max-md:max-h-[calc(100dvh-3rem)] max-md:overflow-hidden",
-          "max-md:animate-in max-md:slide-in-from-bottom max-md:duration-300",
-          "md:h-full md:w-full md:max-w-[474px] md:shrink-0 md:animate-in md:slide-in-from-right md:duration-300",
+          FILTER_DRAWER_SHELL_CLASS,
+          "h-dvh max-h-dvh w-full max-w-[474px] sm:max-w-[474px]",
+          "data-[state=open]:duration-300 data-[state=closed]:duration-300",
+          "[&>button]:hidden",
         )}
       >
-        <div className="md:px-6 px-4 md:pt-10 pt-6">
-          <div className="mx-auto flex h-[32px] w-full max-w-[424px] items-center justify-between">
-            <h2 className="font-larken text-[24px] font-light leading-110 text-darkblack">Filters</h2>
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close filter panel"
-              className="inline-flex size-[32px] shrink-0 items-center justify-center"
-            >
-              <Image
-                src="/images/jewellery/filter-drawer-close.svg"
-                alt=""
-                width={32}
-                height={32}
-                aria-hidden
-                className="size-[32px] object-contain"
-              />
-            </button>
-          </div>
-          <div className="mx-auto mt-6 h-px w-full max-w-[424px] bg-neutral300" aria-hidden />
-        </div>
-
-        <div className="filter-drawer-scroll flex min-h-0 flex-1 flex-col overflow-y-auto md:px-6 px-4 pt-6">
-          <div className="mx-auto flex w-full max-w-[424px] flex-col gap-[24px] pb-72">
-            {hasPriceRange ? (
-              <section className="flex flex-col gap-[16px]">
-                <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
-                  By Price Range
-                </h3>
-                <div className="flex flex-col gap-[12px]">
-                  <div className="grid h-[12px] grid-cols-1 grid-rows-1 items-center">
-                    <div
-                      className="col-start-1 row-start-1 h-[4px] rounded-[70px] bg-neutral300"
-                      aria-hidden
-                    />
-                    <div
-                      className="col-start-1 row-start-1 h-[3px] rounded-[70px] bg-darkblack"
-                      style={{
-                        marginLeft: `${minPercent}%`,
-                        width: `${Math.max(maxPercent - minPercent, 0)}%`,
-                      }}
-                      aria-hidden
-                    />
-                    <input
-                      type="range"
-                      min={facets.minPrice}
-                      max={facets.maxPrice}
-                      step={500}
-                      value={draft.minPrice}
-                      onChange={(event) =>
-                        updatePriceRange(Number(event.target.value), draft.maxPrice)
-                      }
-                      className={rangeThumbClassName}
-                      aria-label="Minimum price"
-                    />
-                    <input
-                      type="range"
-                      min={facets.minPrice}
-                      max={facets.maxPrice}
-                      step={500}
-                      value={draft.maxPrice}
-                      onChange={(event) =>
-                        updatePriceRange(draft.minPrice, Number(event.target.value))
-                      }
-                      className={cn(rangeThumbClassName, "z-30")}
-                      aria-label="Maximum price"
-                    />
-                  </div>
-                  <div className="flex items-center justify-between font-gill text-sm font-light leading-110 text-darkblack">
-                    <span>₹ {formatCurrency(draft.minPrice)}</span>
-                    <span>₹ {formatCurrency(draft.maxPrice)}</span>
-                  </div>
-                </div>
-              </section>
-            ) : null}
-
-            {hasPriceRange &&
-              <div className="space-y-4">
-                <section className="flex gap-[24px]">
-                  <label className="flex min-w-0 flex-1 flex-col gap-[8px]">
-                    <span className="font-gill text-base font-normal leading-110 text-darkblack">
-                      Min Amount
-                    </span>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      value={formatCurrency(draft.minPrice)}
-                      onFocus={() => setMinInputFocused(true)}
-                      onBlur={() => setMinInputFocused(false)}
-                      onChange={(event) =>
-                        updatePriceRange(
-                          parseJewelleryPriceInput(event.target.value, facets.minPrice),
-                          draft.maxPrice,
-                        )
-                      }
-                      className={cn(
-                        "h-14 w-full bg-aboutInactive p-[12px] font-gill text-sm font-normal leading-110 text-darkblack outline-none",
-                        minInputFocused && "border border-neutral500",
-                      )}
-                    />
-                  </label>
-                  <label className="flex min-w-0 flex-1 flex-col gap-[8px]">
-                    <span className="font-gill text-base font-normal leading-110 text-darkblack">
-                      Max Amount
-                    </span>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      placeholder="Enter"
-                      value={maxInputValue}
-                      onFocus={() => {
-                        setMaxInputFocused(true);
-                        setMaxInputValue(
-                          getMaxAmountDisplayValue(draft.maxPrice, draft.minPrice, facets.maxPrice),
-                        );
-                      }}
-                      onBlur={commitMaxAmountInput}
-                      onChange={(event) => {
-                        const nextValue = event.target.value;
-                        setMaxInputValue(nextValue);
-
-                        const trimmed = nextValue.replace(/,/g, "").trim();
-                        if (!trimmed) {
-                          return;
-                        }
-
-                        const parsed = Number(trimmed);
-                        if (Number.isFinite(parsed)) {
-                          const intendedMax = Math.max(0, Math.round(parsed));
-                          if (intendedMax < Math.round(draft.minPrice)) {
-                            return;
-                          }
-                          updatePriceRange(draft.minPrice, intendedMax);
-                        }
-                      }}
-                      aria-invalid={Boolean(maxAmountError)}
-                      aria-describedby={maxAmountError ? "jewellery-max-amount-error" : undefined}
-                      className={cn(
-                        "h-14 w-full bg-aboutInactive p-[12px] font-gill text-base font-normal leading-110 text-darkblack placeholder:text-neutral400 outline-none",
-                        maxAmountError && "border border-[#F91616]",
-                      )}
-                    />
-                  </label>
-                </section>
-                <FormFieldError id="jewellery-max-amount-error" message={maxAmountError ?? undefined} />
-              </div>
-            }
-
-            {categoryOptions.length > 0 ? (
-              <section className="flex flex-col gap-[16px]">
-                <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
-                  {categoryFilterHeading ?? "By Categories:"}
-                </h3>
-                {categoryFilterHeading ? (
-                  <div className="flex flex-wrap gap-[7px]">
-                    {categoryOptions.map((category) => (
-                      <FilterChip
-                        key={category}
-                        label={category}
-                        selected={draft.categories.includes(category)}
-                        onClick={() => toggleListValue("categories", category)}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-[12px]">
-                    {categoryRows.map((row, rowIndex) => (
-                      <div key={rowIndex} className="flex flex-wrap gap-[7px]">
-                        {row.map((category) => (
-                          <FilterChip
-                            key={category}
-                            label={category}
-                            selected={draft.categories.includes(category)}
-                            onClick={() => toggleListValue("categories", category)}
-                          />
-                        ))}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </section>
-            ) : null}
-
-            {metalTypeOptions.length > 0 ? (
-              <section className="flex flex-col gap-[16px]">
-                <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
-                  Metal Type:
-                </h3>
-                <div className="flex flex-wrap gap-[7px]">
-                  {metalTypeOptions.map((metalType) => (
-                    <FilterChip
-                      key={metalType}
-                      label={metalType}
-                      selected={draft.metalTypes.includes(metalType)}
-                      onClick={() => toggleListValue("metalTypes", metalType)}
-                    />
-                  ))}
-                </div>
-              </section>
-            ) : null}
-
-            {metalPurityOptions.length > 0 ? (
-              <section className="flex flex-col gap-[16px]">
-                <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
-                  Metal Purity:
-                </h3>
-                <div className="flex flex-wrap gap-[7px]">
-                  {metalPurityOptions.map((purity) => (
-                    <FilterChip
-                      key={purity}
-                      label={purity}
-                      selected={draft.metalPurities.includes(purity)}
-                      onClick={() => toggleListValue("metalPurities", purity)}
-                    />
-                  ))}
-                </div>
-              </section>
-            ) : null}
-
-            {facets.gemstoneTypes.length > 0 ? (
-              <section className="flex flex-col gap-2">
-                <p className="font-gill text-base leading-normal tracking-normal text-darkblack">
-                  Gemstone Type:
-                </p>
-                <Select
-                  value={draft.gemstoneType}
-                  onValueChange={(gemstoneType) =>
-                    setDraft((current) => ({ ...current, gemstoneType }))
-                  }
-                >
-                  <SelectTrigger className="h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0">
-                    <SelectValue placeholder="-select-" />
-                  </SelectTrigger>
-                  <SelectContent
-                    className="z-[90]"
-                    side="bottom"
-                    align="start"
-                    position="popper"
-                    avoidCollisions={false}
-                  >
-                    {facets.gemstoneTypes.map((option) => (
-                      <SelectItem key={option.label} value={option.label}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </section>
-            ) : null}
-          </div>
-        </div>
-
-        <PanelFooter
-          className="max-md:pb-[env(safe-area-inset-bottom,0px)]"
-          contentClassName="border-t-[0.5px] border-neutral300 px-0 py-6 lg:px-6 md:px-6 px-4"
-        >
-          <div className="flex w-full flex-col gap-4">
-            <button
-              type="button"
-              onClick={applyDraft}
-              disabled={!canApplyFilters}
-              className="btn-dark-slide inline-flex h-14 w-full items-center justify-center border border-darkblack px-[28px] py-[20px] font-gill text-sm font-normal uppercase leading-110 text-white disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <span className="relative z-10">Apply Filters</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleClearAll}
-              className="btn-border-slide inline-flex h-14 w-full items-center justify-center border-[0.8px] border-neutral300 px-[28px] py-[20px] font-gill text-sm font-normal uppercase leading-110 text-darkblack"
-            >
-              <span className="relative z-10">Clear All</span>
-            </button>
-          </div>
-        </PanelFooter>
-      </aside>
-    </div>
+        <SheetTitle className="sr-only">Filters</SheetTitle>
+        <FilterDrawerPanel {...panelProps} />
+      </SheetContent>
+    </Sheet>
   );
 };
 

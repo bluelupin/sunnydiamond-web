@@ -11,7 +11,13 @@ import {
   DrawerContent,
   DrawerTitle,
 } from "@/shared/ui/drawer";
+import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
+import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
+
+const CHECKOUT_OTP_MOBILE_QUERY = "(max-width: 1023px)";
+
+const CHECKOUT_OTP_OVERLAY_CLASS = "z-[70] bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]";
 
 export type CheckoutOtpVerifyResult = {
   otp: string;
@@ -137,13 +143,60 @@ const CheckoutOtpVerifyButton = ({
   </CartPrimaryButton>
 );
 
+const CheckoutOtpDesktopPanel = ({
+  onClose,
+  otpFieldsProps,
+  isComplete,
+  isVerifying,
+  onVerify,
+}: {
+  onClose: () => void;
+  otpFieldsProps: CheckoutOtpFieldsProps;
+  isComplete: boolean;
+  isVerifying: boolean;
+  onVerify: () => void;
+}) => (
+  <div className="flex w-full max-w-[560px] flex-col gap-6 bg-white p-6">
+    <div className="flex items-center justify-between">
+      <div className="flex min-w-0 items-center gap-2">
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Go back"
+          className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+            <path d="M15.5 20L8 12.5L15.5 5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+        <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">Enter OTP</h2>
+      </div>
+      <button type="button" onClick={onClose} aria-label="Close" className="text-darkblack">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+          <path d="M18.5 5L5 18.5" stroke="currentColor" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M18.5 18.5L5 5" stroke="currentColor" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+    </div>
+
+    <CheckoutOtpFields {...otpFieldsProps} variant="desktop" />
+
+    <hr className="border-neutral300" />
+    <CheckoutOtpVerifyButton
+      disabled={!isComplete}
+      loading={isVerifying}
+      onClick={onVerify}
+    />
+  </div>
+);
+
 const CheckoutOtpModal = ({ open, phone, onClose, onVerify }: CheckoutOtpModalProps) => {
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
   const [otpError, setOtpError] = useState<string | undefined>();
   const [isVerifying, setIsVerifying] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const { showMobileShell } = useResponsiveOverlayShell(open, CHECKOUT_OTP_MOBILE_QUERY);
 
   const phoneDigits = phone.replace(/\D/g, "");
 
@@ -165,14 +218,6 @@ const CheckoutOtpModal = ({ open, phone, onClose, onVerify }: CheckoutOtpModalPr
   }, [phoneDigits]);
 
   useEffect(() => {
-    const media = window.matchMedia("(max-width: 1023px)");
-    const update = () => setIsMobile(media.matches);
-    update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
-  }, []);
-
-  useEffect(() => {
     if (!open) {
       setOtp(Array(OTP_LENGTH).fill(""));
       setSecondsLeft(RESEND_SECONDS);
@@ -189,17 +234,6 @@ const CheckoutOtpModal = ({ open, phone, onClose, onVerify }: CheckoutOtpModalPr
 
     return () => window.clearInterval(timer);
   }, [open, sendOtp]);
-
-  useEffect(() => {
-    if (!open || isMobile) return;
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [open, isMobile]);
 
   const updateDigit = (index: number, value: string) => {
     const digit = value.replace(/\D/g, "").slice(-1);
@@ -258,69 +292,23 @@ const CheckoutOtpModal = ({ open, phone, onClose, onVerify }: CheckoutOtpModalPr
     },
   };
 
-  return (
-    <>
-      {open && !isMobile ? (
-        <div className="fixed inset-0 z-[70]">
-          <button
-            type="button"
-            aria-label="Close OTP modal"
-            onClick={onClose}
-            className="absolute inset-0 bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
-          />
-          <div className="relative flex h-full w-full items-start justify-center px-4 pt-[231px]">
-            <div
-              role="dialog"
-              aria-modal="true"
-              aria-label="Enter OTP"
-              className="relative z-10 flex w-full max-w-[560px] flex-col gap-6 bg-white p-6"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex min-w-0 items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    aria-label="Go back"
-                    className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack"
-                  >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                      <path d="M15.5 20L8 12.5L15.5 5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      onClose();
+    }
+  };
 
-                  </button>
-                  <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
-                    Enter OTP
-                  </h2>
-                </div>
-                <button type="button" onClick={onClose} aria-label="Close" className="text-darkblack">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden >
-                    <path d="M18.5 5L5 18.5" stroke="currentColor" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M18.5 18.5L5 5" stroke="currentColor" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
-              </div>
+  const handleVerifyClick = () => {
+    void handleVerify();
+  };
 
-              <CheckoutOtpFields {...otpFieldsProps} variant="desktop" />
-
-              <hr className="border-neutral300" />
-              <CheckoutOtpVerifyButton
-                disabled={!isComplete}
-                loading={isVerifying}
-                onClick={() => {
-                  void handleVerify();
-                }}
-              />
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      <Drawer
-        open={open && isMobile}
-        onOpenChange={(nextOpen) => !nextOpen && onClose()}
-        shouldScaleBackground={false}
-      >
-        <DrawerContent className="flex max-h-[90vh] min-h-0 flex-col overflow-hidden rounded-none border-0 bg-white p-0 [&>div:first-child]:hidden">
+  if (showMobileShell) {
+    return (
+      <Drawer open={open} onOpenChange={handleOpenChange} shouldScaleBackground={false}>
+        <DrawerContent
+          overlayClassName={CHECKOUT_OTP_OVERLAY_CLASS}
+          className="flex max-h-[90vh] min-h-0 flex-col overflow-hidden rounded-none border-0 bg-white p-0 [&>div:first-child]:hidden"
+        >
           <DrawerTitle className="sr-only">Enter OTP</DrawerTitle>
 
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
@@ -336,11 +324,8 @@ const CheckoutOtpModal = ({ open, phone, onClose, onVerify }: CheckoutOtpModalPr
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
                       <path d="M15.5 20L8 12.5L15.5 5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-
                   </button>
-                  <h2 className="font-larken text-xl font-light leading-110 text-darkblack">
-                    Enter OTP
-                  </h2>
+                  <h2 className="font-larken text-xl font-light leading-110 text-darkblack">Enter OTP</h2>
                 </div>
                 <button
                   type="button"
@@ -354,12 +339,9 @@ const CheckoutOtpModal = ({ open, phone, onClose, onVerify }: CheckoutOtpModalPr
                   </svg>
                 </button>
               </div>
-              {/* <div className="mt-6">
-                <CheckoutSummaryDivider />
-              </div> */}
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 lg:pt-6 lg:pb-6 pt-6 pb-4">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-4 pt-6 lg:pb-6 lg:pt-6">
               <CheckoutOtpFields {...otpFieldsProps} variant="mobile" />
             </div>
 
@@ -371,18 +353,35 @@ const CheckoutOtpModal = ({ open, phone, onClose, onVerify }: CheckoutOtpModalPr
               <hr className="mb-6 border-neutral300" />
               <div className="w-full px-4">
                 <CheckoutOtpVerifyButton
-                disabled={!isComplete}
-                loading={isVerifying}
-                onClick={() => {
-                  void handleVerify();
-                }}
-              />
+                  disabled={!isComplete}
+                  loading={isVerifying}
+                  onClick={handleVerifyClick}
+                />
               </div>
             </div>
           </div>
         </DrawerContent>
       </Drawer>
-    </>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent
+        hideCloseButton
+        overlayClassName={CHECKOUT_OTP_OVERLAY_CLASS}
+        className="z-[70] max-w-[560px] gap-0 border-0 bg-transparent p-0 shadow-none sm:rounded-none top-[231px] translate-x-[-50%] translate-y-0 data-[state=closed]:zoom-out-100 data-[state=open]:zoom-in-100 [&>button]:hidden"
+      >
+        <DialogTitle className="sr-only">Enter OTP</DialogTitle>
+        <CheckoutOtpDesktopPanel
+          onClose={onClose}
+          otpFieldsProps={otpFieldsProps}
+          isComplete={isComplete}
+          isVerifying={isVerifying}
+          onVerify={handleVerifyClick}
+        />
+      </DialogContent>
+    </Dialog>
   );
 };
 

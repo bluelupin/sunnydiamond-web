@@ -10,6 +10,9 @@ import {
 } from "react";
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
+import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
+import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
+import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
 import { bespokeFeaturedStoryModalFigmaSpec } from "@/features/bespoke/data/content";
 import { profileTabsContent } from "../data/profileContent";
 import type { ProfileBespokeItemUi } from "../types/profileUi.types";
@@ -17,33 +20,16 @@ import type { ProfileBespokeItemUi } from "../types/profileUi.types";
 const spec = bespokeFeaturedStoryModalFigmaSpec;
 const content = profileTabsContent.bespoke;
 
+const BESPOKE_DETAIL_MOBILE_QUERY = "(max-width: 767px)";
+
+const BESPOKE_DETAIL_OVERLAY_CLASS = "z-[70] bg-[rgba(30,30,30,0.75)] backdrop-blur-[10px]";
+
 type ProfileBespokeDetailPanelProps = {
   open: boolean;
   item: ProfileBespokeItemUi | null;
   onClose: () => void;
   onRemove: (item: ProfileBespokeItemUi) => void;
 };
-
-function useDetailPanelEffects(open: boolean, onClose: () => void) {
-  useEffect(() => {
-    if (!open) return;
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open, onClose]);
-}
 
 type DetailCarouselProps = {
   images: readonly string[];
@@ -250,110 +236,118 @@ export function ProfileBespokeDetailPanel({
   onClose,
   onRemove,
 }: ProfileBespokeDetailPanelProps) {
-  useDetailPanelEffects(open, onClose);
+  const { showMobileShell } = useResponsiveOverlayShell(open && Boolean(item), BESPOKE_DETAIL_MOBILE_QUERY);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   useEffect(() => {
     setActiveImageIndex(0);
   }, [item?.id]);
 
-  if (!open || !item) {
+  if (!item) {
     return null;
   }
 
   const images = item.images.length > 0 ? item.images : [item.imageSrc];
 
-  return (
-    <div className="fixed inset-0 z-[70] flex max-md:items-end md:items-stretch md:justify-end">
-      <button
-        type="button"
-        aria-label="Close inspiration"
-        onClick={onClose}
-        className={cn(
-          "animate-in fade-in duration-300 backdrop-blur-[10px]",
-          "max-md:absolute max-md:inset-0 max-md:z-0",
-          "md:h-full md:min-h-0 md:flex-1",
-        )}
-        style={{ backgroundColor: spec.overlayColor }}
-      />
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      onClose();
+    }
+  };
 
-      <aside
-        role="dialog"
-        aria-modal="true"
-        aria-label={item.title}
-        className={cn(
-          "relative z-10 flex min-h-0 w-full flex-col overflow-hidden bg-black shadow-2xl",
-          "max-md:h-[85vh] max-md:max-h-[85vh] max-md:max-w-none max-md:animate-in max-md:fade-in max-md:duration-300",
-          "md:h-full md:max-w-480 md:shrink-0 md:animate-in md:slide-in-from-right md:duration-300",
-        )}
-      >
-        <div className="relative flex h-full min-h-0 w-full flex-col bg-black max-md:h-[85vh]">
-          <div className="relative min-h-0 flex-1">
-            <DetailCarousel
-              images={images}
-              title={item.title}
-              activeIndex={activeImageIndex}
-              onActiveIndexChange={setActiveImageIndex}
-            />
+  const panelBody = (
+    <div className="relative flex h-full min-h-0 w-full flex-col bg-black max-md:h-[85vh]">
+      <div className="relative min-h-0 flex-1">
+        <DetailCarousel
+          images={images}
+          title={item.title}
+          activeIndex={activeImageIndex}
+          onActiveIndexChange={setActiveImageIndex}
+        />
 
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close inspiration"
-              className="absolute right-4 top-6 z-20 inline-flex size-6 items-center justify-center text-white transition-opacity hover:opacity-70 md:right-6 md:top-10"
-            >
-              <svg
-                width="32"
-                height="32"
-                viewBox="0 0 32 32"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden
-                className="h-6 w-6 md:h-8 md:w-8"
-              >
-                <path
-                  d="M24 8L8 24"
-                  stroke="white"
-                  strokeWidth="1.33333"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M24 24L8 8"
-                  stroke="white"
-                  strokeWidth="1.33333"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-          </div>
-
-          <div
-            className="absolute inset-x-0 bottom-0 z-10 flex w-full flex-col gap-6 bg-transparent px-4 pb-10 pt-5 md:px-6"
-            style={{
-              backgroundImage: "linear-gradient(to bottom, #00000000, #000000B1, #000000)",
-            }}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close inspiration"
+          className="absolute right-4 top-6 z-20 inline-flex size-6 items-center justify-center text-white transition-opacity hover:opacity-70 md:right-6 md:top-10"
+        >
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 32 32"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden
+            className="h-6 w-6 md:h-8 md:w-8"
           >
-            <DetailCarouselPagination
-              images={images}
-              activeIndex={activeImageIndex}
-              onSelect={setActiveImageIndex}
+            <path
+              d="M24 8L8 24"
+              stroke="white"
+              strokeWidth="1.33333"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
+            <path
+              d="M24 24L8 8"
+              stroke="white"
+              strokeWidth="1.33333"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
 
-            <button
-              type="button"
-              onClick={() => {
-                onRemove(item);
-                onClose();
-              }}
-              className="inline-flex w-fit border-b border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-80"
-            >
-              {content.removeFromSavedLabel}
-            </button>
-          </div>
-        </div>
-      </aside>
+      <div
+        className="absolute inset-x-0 bottom-0 z-10 flex w-full flex-col gap-6 bg-transparent px-4 pb-10 pt-5 md:px-6"
+        style={{
+          backgroundImage: "linear-gradient(to bottom, #00000000, #000000B1, #000000)",
+        }}
+      >
+        <DetailCarouselPagination
+          images={images}
+          activeIndex={activeImageIndex}
+          onSelect={setActiveImageIndex}
+        />
+
+        <button
+          type="button"
+          onClick={() => {
+            onRemove(item);
+            onClose();
+          }}
+          className="inline-flex w-fit border-b border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-80"
+        >
+          {content.removeFromSavedLabel}
+        </button>
+      </div>
     </div>
+  );
+
+  if (showMobileShell) {
+    return (
+      <Drawer open={open} onOpenChange={handleOpenChange} shouldScaleBackground={false}>
+        <DrawerContent
+          overlayClassName={BESPOKE_DETAIL_OVERLAY_CLASS}
+          className="z-[70] flex max-h-[85vh] min-h-0 flex-col overflow-hidden rounded-none border-0 bg-black p-0 shadow-2xl [&>div:first-child]:hidden"
+        >
+          <DrawerTitle className="sr-only">{item.title}</DrawerTitle>
+          {panelBody}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Sheet open={open} onOpenChange={handleOpenChange}>
+      <SheetContent
+        side="right"
+        overlayClassName={BESPOKE_DETAIL_OVERLAY_CLASS}
+        className="z-[70] h-dvh max-h-dvh w-full max-w-480 gap-0 border-0 bg-black p-0 shadow-2xl sm:max-w-480 data-[state=open]:duration-300 data-[state=closed]:duration-300 [&>button]:hidden"
+      >
+        <SheetTitle className="sr-only">{item.title}</SheetTitle>
+        {panelBody}
+      </SheetContent>
+    </Sheet>
   );
 }

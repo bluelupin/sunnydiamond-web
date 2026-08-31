@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
@@ -8,6 +8,7 @@ import { useToast } from "@/shared/hooks/use-toast";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
 import { PanelFooter, PanelFooterDualActions } from "@/shared/ui/PanelFooter";
+import { ProductDetailSidePanelShell } from "@/features/products/components/detail/ProductDetailSidePanelShell";
 
 const labelClassName = "font-gill text-sm leading-110 text-darkblack";
 const fieldClassName =
@@ -46,24 +47,6 @@ const BookAnAppointmentPanel = ({
 
   const { isValid, submitted, errors, markTouched, showError, validateSubmit, resetValidation } =
     useAppointmentFormValidation(formValues);
-
-  useEffect(() => {
-    if (variant !== "modal" || !open) return;
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose?.();
-      }
-    };
-
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open, onClose, variant]);
 
   const handleClear = () => {
     setName("");
@@ -211,26 +194,15 @@ const BookAnAppointmentPanel = ({
   }
 
   return (
-    <div className="fixed inset-0 z-[70]">
-      <button
-        type="button"
-        aria-label="Close book an appointment"
-        className="absolute inset-0 bg-[rgba(0,0,0,0.3)] backdrop-blur-[9px] animate-in fade-in duration-300"
-        onClick={onClose}
-      />
-      <aside
-        role="dialog"
-        aria-modal="true"
-        aria-label="Book an appointment"
-        className={cn(
-          "absolute flex flex-col overflow-hidden bg-white shadow-2xl",
-          "inset-x-0 bottom-0 top-12 max-md:animate-in max-md:slide-in-from-bottom max-md:duration-300",
-          "md:inset-x-auto md:inset-y-0 md:right-0 md:top-0 md:w-full md:max-w-[480px] md:animate-in md:slide-in-from-right md:duration-300",
-        )}
-      >
-        {formContent}
-      </aside>
-    </div>
+    <ProductDetailSidePanelShell
+      open={open}
+      onClose={onClose ?? (() => undefined)}
+      overlayAriaLabel="Close book an appointment"
+      dialogAriaLabel="Book an appointment"
+      overlayClassName="bg-[rgba(0,0,0,0.3)] backdrop-blur-[9px]"
+    >
+      {formContent}
+    </ProductDetailSidePanelShell>
   );
 };
 

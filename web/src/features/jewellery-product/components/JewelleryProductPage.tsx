@@ -1,13 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import dynamic from "next/dynamic";
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import JewelleryHeroSection from "./JewelleryHeroSection";
 import JewelleryCategoryNav from "./JewelleryCategoryNav";
 import JewelleryProductToolbar from "./JewelleryProductToolbar";
 import JewelleryProductGrid from "./JewelleryProductGrid";
+import JewelleryFilterDrawer from "./JewelleryFilterDrawer";
 import JewelleryLoadMoreSection from "./JewelleryLoadMoreSection";
 import JewelleryListingEmptyState from "./JewelleryListingEmptyState";
 import JewelleryGuaranteesSection from "./JewelleryGuaranteesSection";
@@ -53,11 +53,6 @@ import type {
   NormalizedProductLandingHero,
   NormalizedProductLandingTrustBadge,
 } from "@/services/product-landing/product-landing-page.types";
-
-const JewelleryFilterDrawer = dynamic(() => import("./JewelleryFilterDrawer"), {
-  ssr: false,
-  loading: () => null,
-});
 
 type JewelleryProductPageProps = {
   initialListing?: JewelleryListingProductsData;
@@ -414,7 +409,6 @@ const JewelleryProductPage = ({
   );
 
   const handleOpenFilters = () => {
-    void import("./JewelleryFilterDrawer");
     setIsFilterOpen(true);
   };
 

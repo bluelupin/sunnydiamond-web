@@ -43,8 +43,7 @@ import { wishlistMovedToastDurationMs } from "@/features/wishlist/data/content";
 import { DetailDarkButton } from "./shared";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import {
-  productDetailSidePanelAsideClassName,
-  productDetailSidePanelOverlayClassName,
+  ProductDetailSidePanelShell,
 } from "./ProductDetailSidePanelShell";
 
 const SHOWROOM_VISIT_FORM_TAG = "showroom-visit";
@@ -613,18 +612,9 @@ const BookStoreVisitPanel = ({
   }
 
   const panelContent = (
-    <aside
-      role="dialog"
-      aria-modal={variant !== "page"}
-      aria-label="Book your store visit"
-      className={cn(
-        "flex flex-col overflow-hidden bg-white",
-        variant === "page" && "mx-auto min-h-[calc(100vh-4rem)] w-full max-w-480",
-        variant === "modal" && cn("shadow-2xl", productDetailSidePanelAsideClassName),
-      )}
-    >
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
       {panelBody}
-    </aside>
+    </div>
   );
 
   if (variant === "page") {
@@ -649,15 +639,14 @@ const BookStoreVisitPanel = ({
   return (
     <>
       {statusToast}
-      <div className="fixed inset-0 z-[70] flex max-md:flex-col md:justify-end">
-        <button
-          type="button"
-          aria-label="Close book a visit"
-          className={productDetailSidePanelOverlayClassName}
-          onClick={handleClose}
-        />
+      <ProductDetailSidePanelShell
+        open={open}
+        onClose={handleClose}
+        overlayAriaLabel="Close book a visit"
+        dialogAriaLabel="Book your store visit"
+      >
         {panelContent}
-      </div>
+      </ProductDetailSidePanelShell>
     </>
   );
 };

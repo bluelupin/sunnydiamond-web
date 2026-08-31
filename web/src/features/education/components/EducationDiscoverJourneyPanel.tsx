@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, TriangleAlert } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
+import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
+import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
 import { categoryIconSrc } from "@/features/jewellery-product/data/categoryIcons";
 import {
   createEmptyFilterState,
@@ -52,10 +54,17 @@ function createFallbackFacets(): JewelleryFilterFacets {
   };
 }
 
+const EDUCATION_JOURNEY_MOBILE_QUERY = "(max-width: 767px)";
+
+const EDUCATION_JOURNEY_OVERLAY_CLASS = "z-[100] bg-[#1E1E1EBF] backdrop-blur-[3px]";
+
+const EDUCATION_JOURNEY_SHELL_CLASS =
+  "z-[100] flex min-h-0 flex-col gap-0 overflow-hidden border-0 bg-white p-0 shadow-2xl";
+
 const EducationDiscoverJourneyPanel = ({ open, onClose }: EducationDiscoverJourneyPanelProps) => {
   const router = useRouter();
   const { data: navData } = useMagentoJewelleryNav();
-  const [mounted, setMounted] = useState(false);
+  const { showMobileShell } = useResponsiveOverlayShell(open, EDUCATION_JOURNEY_MOBILE_QUERY);
 
   const [step, setStep] = useState<JourneyStep>(1);
   const [facets, setFacets] = useState<JewelleryFilterFacets>(createFallbackFacets);
@@ -92,28 +101,6 @@ const EducationDiscoverJourneyPanel = ({ open, onClose }: EducationDiscoverJourn
   const minPercent = ((minPrice - facets.minPrice) / priceSpan) * 100;
   const maxPercent = ((maxPrice - facets.minPrice) / priceSpan) * 100;
   const canProceedFromPrice = hasProducts && !isCheckingProducts;
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!open) return;
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open, onClose]);
 
   useEffect(() => {
     if (!open) {
@@ -277,31 +264,15 @@ const EducationDiscoverJourneyPanel = ({ open, onClose }: EducationDiscoverJourn
     router.push(href);
   };
 
-  if (!open || !mounted) {
-    return null;
-  }
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      onClose();
+    }
+  };
 
-  return createPortal(
-    <div className="fixed inset-0 z-[100] flex max-md:flex-col max-md:overflow-hidden md:justify-end">
-      <button
-        type="button"
-        aria-label="Close discover journey"
-        className="min-h-0 flex-1 bg-[#1E1E1EBF] backdrop-blur-[3px] animate-in fade-in duration-300 max-md:min-h-12"
-        onClick={onClose}
-      />
-
-      <aside
-        role="dialog"
-        aria-modal="true"
-        aria-label="Discover Your Piece"
-        className={cn(
-          "flex min-h-0 flex-col bg-white shadow-2xl",
-          "max-md:w-full max-md:max-h-[calc(100dvh-3rem)] max-md:overflow-hidden",
-          "max-md:animate-in max-md:slide-in-from-bottom max-md:duration-300",
-          "md:h-full md:w-full md:max-w-[440px] md:shrink-0 md:animate-in md:slide-in-from-right md:duration-300",
-        )}
-      >
-        <div className="md:px-6 px-4 md:pt-10 pt-6">
+  const panelBody = (
+    <>
+      <div className="md:px-6 px-4 md:pt-10 pt-6">
           <div className="mx-auto flex h-8 w-full max-w-[392px] items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
               {step > 1 ? (
@@ -577,9 +548,42 @@ const EducationDiscoverJourneyPanel = ({ open, onClose }: EducationDiscoverJourn
             </button>
           </div>
         </PanelFooter>
-      </aside>
-    </div>,
-    document.body,
+    </>
+  );
+
+  if (showMobileShell) {
+    return (
+      <Drawer open={open} onOpenChange={handleOpenChange} shouldScaleBackground={false}>
+        <DrawerContent
+          overlayClassName={EDUCATION_JOURNEY_OVERLAY_CLASS}
+          className={cn(
+            EDUCATION_JOURNEY_SHELL_CLASS,
+            "mt-12 max-h-[calc(100dvh-3rem)] w-full rounded-none [&>div:first-child]:hidden",
+          )}
+        >
+          <DrawerTitle className="sr-only">Discover Your Piece</DrawerTitle>
+          {panelBody}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Sheet open={open} onOpenChange={handleOpenChange}>
+      <SheetContent
+        side="right"
+        overlayClassName={EDUCATION_JOURNEY_OVERLAY_CLASS}
+        className={cn(
+          EDUCATION_JOURNEY_SHELL_CLASS,
+          "h-dvh max-h-dvh w-full max-w-[440px] sm:max-w-[440px]",
+          "data-[state=open]:duration-300 data-[state=closed]:duration-300",
+          "[&>button]:hidden",
+        )}
+      >
+        <SheetTitle className="sr-only">Discover Your Piece</SheetTitle>
+        {panelBody}
+      </SheetContent>
+    </Sheet>
   );
 };
 

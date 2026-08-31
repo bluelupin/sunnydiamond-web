@@ -153,7 +153,7 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
         <div className="min-h-0 flex-1 overflow-y-auto">
           <div className="flex flex-col gap-6 pb-72">
             <div className="flex flex-col gap-6 pb-8">
-              <div className="flex flex-col items-center gap-3 px-4 text-center lg:px-8">
+              <div className="flex flex-col items-center gap-3 px-4 text-center lg:px-8 pt-6">
                 <h2 className="w-full font-larken text-2xl font-light leading-110 text-darkblack">
                   {title}
                 </h2>
@@ -161,7 +161,6 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
                   {subtitle}
                 </p>
               </div>
-
               <div className={`grid w-full ${gridColsClass}`}>
                 {showCircumference ? (
                   circumferenceHeaderUrl ? (
