@@ -41,9 +41,8 @@ export function useCartCheckout() {
       return;
     }
 
-    // Existing flow: gift marked → show gifting modal.
-    // Exception only: user already completed View gifting options / personalise
-    // (hasExploredGiftingOptions). Newly marked gifts clear that flag.
+    // Gift marked in cart but gifting not saved/skipped → intro nudge before checkout.
+    // hasExploredGiftingOptions is set only on Apply in personalise or Continue on intro.
     if (hasExistingGifting && !hasExploredGiftingOptions) {
       openGiftingPanel("intro");
       return;
@@ -57,9 +56,8 @@ export function useCartCheckout() {
       return;
     }
 
-    // Do not mark explored here — only personalise / continue-to-checkout does.
-    // Otherwise merely opening the panel would skip the checkout nudge.
-    openGiftingPanel("intro");
+    // Open personalise drawer directly; explored is set only on Apply or intro Continue.
+    openGiftingPanel("personalise");
   };
 
   return { proceedToCheckout, openGiftingOptions, navigateToCheckout, isNavigatingToCheckout };

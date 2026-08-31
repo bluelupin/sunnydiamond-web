@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback, type ReactNode } from "react"
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   AttributeSeparator,
   DetailDarkButton,
@@ -23,6 +24,7 @@ import {
   type EngravingSelection,
 } from "@/features/products/constants/engraving";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
+import { useAuth } from "@/features/auth/context/AuthContext";
 import PlusIcon from "@/assets/Icons/PlusIcon";
 import WishlistIcon from "@/assets/Icons/WishlistIcon";
 import VanIcon from "@/assets/Icons/VanIcon";
@@ -119,6 +121,8 @@ const ProductDetailSidebar = ({
   const [isTryAtHomeOpen, setIsTryAtHomeOpen] = useState(false);
   const [isPersonaliseOpen, setIsPersonaliseOpen] = useState(false);
   const [isPriceBreakupOpen, setIsPriceBreakupOpen] = useState(false);
+  const router = useRouter();
+  const { status } = useAuth();
   const { isWishlisted, toggleWishlist } = useWishlist();
   const wishlisted = isWishlisted(product.id);
   const engravingConfig = product.engraving;
@@ -488,7 +492,13 @@ const ProductDetailSidebar = ({
               type="button"
               aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
               aria-pressed={wishlisted}
-              onClick={() => toggleWishlist(product.id)}
+              onClick={() => {
+                if (status !== "authenticated") {
+                  router.push("/wishlist");
+                  return;
+                }
+                toggleWishlist(product.id);
+              }}
               className="inline-flex size-14 shrink-0 items-center justify-center bg-aboutInactive"
             >
               <WishlistIcon

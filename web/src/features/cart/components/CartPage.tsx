@@ -5,7 +5,6 @@ import { cn } from "@/shared/utils/cn";
 import { useMobileStickyFooterClearance } from "@/shared/hooks/use-mobile-sticky-footer-clearance";
 import { MobileStickyFooterSpacer } from "@/shared/ui/layout/MobileStickyFooterSpacer";
 import CartBenefitsSection from "@/features/cart/components/CartBenefitsSection";
-import CartGlobalGiftNote from "@/features/cart/components/CartGlobalGiftNote";
 import CartItem from "@/features/cart/components/CartItem";
 import CartMobileStickyFooter from "@/features/cart/components/CartMobileStickyFooter";
 import CartPriceDetails from "@/features/cart/components/CartPriceDetails";
@@ -79,10 +78,6 @@ const CartPage = () => {
               className="flex min-w-0 flex-col gap-6"
               {...(isNavigatingToCheckout ? { inert: true } : {})}
             >
-              {giftNoteDisplay.globalNote ? (
-                <CartGlobalGiftNote note={giftNoteDisplay.globalNote} />
-              ) : null}
-
               {items.map((item) => (
                 <CartItem
                   key={item.id}
