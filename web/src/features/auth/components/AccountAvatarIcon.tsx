@@ -13,7 +13,7 @@ export function AccountAvatarIcon({ firstName, className }: AccountAvatarIconPro
   return (
     <div
       className={cn(
-        "relative inline-flex size-6 shrink-0 overflow-hidden rounded-full bg-lightGold items-center justify-center font-gill text-sm font-normal text-darkblack",
+        "relative inline-flex size-6 shrink-0 overflow-hidden rounded-full bg-gold200 items-center justify-center font-gill text-sm font-normal text-darkblack",
         className,
       )}
       aria-hidden

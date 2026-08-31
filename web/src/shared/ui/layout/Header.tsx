@@ -144,7 +144,7 @@ const Header = () => {
 
   const textClass = isLightOverlay ? "text-white" : "text-darkblack";
   const logoClass = isLightOverlay ? "text-white" : isAuthPage ? "text-darkblack" : "text-darkMagenta";
-  const hoverClass = isLightOverlay ? "hover:text-ivory/70" : "hover:text-neutral500";
+  const hoverClass = isLightOverlay ? "hover:text-linkGold" : "hover:text-linkGold";
   const navLinkClass = (active = false) =>
     cn(
       "inline-flex items-center font-gill uppercase transition-colors",

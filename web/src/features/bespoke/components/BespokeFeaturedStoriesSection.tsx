@@ -136,11 +136,11 @@ const FeaturedGalleryBackground = ({
         }}
       />
 
-      <div
+      {/* <div
         aria-hidden
-        className="absolute inset-x-0 bottom-0 z-[1] h-full backdrop-blur-[5px]"
+        className="absolute inset-x-0 bottom-0 z-[1] h-full"
         style={{ backgroundImage: spec.bottomGradient }}
-      />
+      /> */}
 
       {srAlt && slides.length === 0 && fallbackBgSrc ? (
         <span className="sr-only">{srAlt}</span>

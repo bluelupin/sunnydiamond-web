@@ -127,7 +127,7 @@ const DeliveryStoreJourneyPanel = ({
 
                   <StoreVisitMapBlock variant="availability">
                     <div className="flex flex-col gap-4">
-                      <div className="flex gap-3">
+                      <div className="flex gap-3 items-center">
                         <Image
                           src={DELIVERY_STORE_ICONS.address}
                           alt=""
@@ -140,7 +140,7 @@ const DeliveryStoreJourneyPanel = ({
                           {store.address}
                         </p>
                       </div>
-                      <div className="flex gap-3">
+                      <div className="flex gap-3 items-center">
                         <Image
                           src={DELIVERY_STORE_ICONS.phone}
                           alt=""

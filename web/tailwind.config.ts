@@ -59,6 +59,7 @@ export default {
         yellow600: "#E5930A",
         mauve300: "#D9B0CB",
         lightGold:"#D1B57A",
+        gold200: "#EBDFC6",
         gold300: "#DECAA0",
         goldGrid: "#EFE7D4",
         chalkCard: "#F8F4EC",
