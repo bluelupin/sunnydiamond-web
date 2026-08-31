@@ -211,14 +211,7 @@ export const CheckoutFormStep = ({
 }: CheckoutFormStepProps) => (
   <div className="flex flex-col gap-6">
     <CheckoutSectionCard>
-      <h2 className="font-gill text-xl font-normal leading-110 text-darkblack lg:text-2xl">
-        Personal Information
-      </h2>
-      {isAuthenticated ? (
-        <p className="font-gill text-sm font-light leading-110 text-neutral500">
-          Signed in to your Sunny Diamonds account.
-        </p>
-      ) : null}
+      <CheckoutSectionHeading>Personal Information</CheckoutSectionHeading>
       <CheckoutField
         id="checkout-name"
         label="Your Name*"
@@ -263,7 +256,7 @@ export const CheckoutFormStep = ({
     </CheckoutSectionCard>
 
     <CheckoutSectionCard gapClassName="lg:gap-8 gap-6">
-      <CheckoutSubheading>Delivery Address</CheckoutSubheading>
+      <CheckoutSectionHeading>Delivery Address</CheckoutSectionHeading>
       {isAuthenticated && !hasSavedDeliveryAddress ? (
         <p
           id="checkout-delivery-address-required"
@@ -278,13 +271,8 @@ export const CheckoutFormStep = ({
         </p>
       ) : (
         <>
-          {isAuthenticated ? (
-            <p className="font-gill text-sm font-light leading-130 text-neutral500">
-              Prefilled from your saved address. Any changes here apply to this order only.
-            </p>
-          ) : null}
           <div className="space-y-6">
-            <CheckoutSubheading className="lg:text-xl text-base">SHIPPING ADDRESS</CheckoutSubheading>
+            <CheckoutSubheading>SHIPPING ADDRESS</CheckoutSubheading>
             <CheckoutAddressFields
               idPrefix="checkout-shipping"
               fields={SHIPPING_ADDRESS_FIELDS}
@@ -296,7 +284,7 @@ export const CheckoutFormStep = ({
           </div>
 
           <div className="lg:space-y-6 space-y-4">
-            <CheckoutSubheading className="lg:text-xl text-base">BILLING ADDRESS</CheckoutSubheading>
+            <CheckoutSubheading>BILLING ADDRESS</CheckoutSubheading>
             <CheckoutCheckbox
               checked={form.billingSameAsShipping}
               onChange={(checked) => onChange("billingSameAsShipping", checked)}
@@ -422,11 +410,11 @@ export const CheckoutPaymentStep = ({
           Delivery Address
         </CheckoutSectionHeading>
         <div className="flex flex-col gap-4">
-          <CheckoutSubheading className="lg:text-xl text-base">SHIPPING ADDRESS</CheckoutSubheading>
+          <CheckoutSubheading>SHIPPING ADDRESS</CheckoutSubheading>
           <CheckoutAddressBlock name={form.shippingName || form.name} lines={shippingLines} />
         </div>
         <div className="flex flex-col gap-4">
-          <CheckoutSubheading className="lg:text-xl text-base">BILLING ADDRESS</CheckoutSubheading>
+          <CheckoutSubheading>BILLING ADDRESS</CheckoutSubheading>
           <CheckoutCheckbox
             checked={form.billingSameAsShipping}
             onChange={() => undefined}

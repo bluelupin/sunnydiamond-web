@@ -149,7 +149,7 @@ const OffersAndDealsExpandedContent = ({
   const applyGiftCard = () => {
     const match = findMockGiftCardByCode(giftCardCode);
     if (!match) {
-      setErrorMessage("Gift card not found. Try SUNNYGC1000 or GIFT500.");
+      setErrorMessage("This gift card code doesn't work.");
       return;
     }
 

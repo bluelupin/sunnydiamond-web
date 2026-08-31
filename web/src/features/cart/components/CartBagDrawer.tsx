@@ -81,7 +81,7 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
           <div className="flex min-h-0 flex-1 flex-col justify-between">
             <div className="relative flex items-start justify-between bg-gray300 px-4 py-6">
               {isGift ? (
-                <CartGiftBadge variant="drawer" className="absolute left-0 top-0 z-10" />
+                <CartGiftBadge className="absolute left-0 top-0 z-10" />
               ) : null}
 
               <div className="flex min-w-0 flex-1 items-center lg:gap-4 gap-2 lg:pr-4 pr-2">

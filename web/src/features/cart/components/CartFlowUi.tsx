@@ -53,23 +53,17 @@ export const CartMetaRow = ({
 };
 
 type CartGiftBadgeProps = {
-  variant?: "cart" | "drawer" | "checkout";
   className?: string;
 };
 
-export const CartGiftBadge = ({ variant = "cart", className }: CartGiftBadgeProps) => (
+export const CartGiftBadge = ({ className }: CartGiftBadgeProps) => (
   <span
     className={cn(
-      "inline-flex shrink-0 items-center justify-center font-gill text-darkblack",
-      variant === "cart"
-        ? "h-[22px] w-[42px] bg-[#D9B0CB] text-sm leading-110"
-        : variant === "checkout"
-          ? "bg-[#D9B0CB] px-3 py-1 text-sm font-normal leading-110"
-          : "bg-[#D9B0CB] text-xs font-light leading-110 tracking-[0.01em]",
+      "inline-flex shrink-0 items-center justify-center bg-mauve300 px-3 py-1 font-gill text-sm font-normal leading-110 whitespace-nowrap text-darkblack",
       className,
     )}
   >
-    Gift
+    <span className="translate-y-0.5">Gift</span>
   </span>
 );
 
@@ -88,7 +82,7 @@ export const CartGiftCheckbox = ({
 }: CartGiftCheckboxProps) => (
   <span
     className={cn(
-      "relative inline-flex size-4 shrink-0 items-center justify-center lg:size-5",
+      "relative inline-flex size-5 shrink-0 items-center justify-center",
       disabled && "cursor-not-allowed opacity-60",
       className,
     )}
@@ -99,14 +93,13 @@ export const CartGiftCheckbox = ({
       disabled={disabled}
       onChange={(event) => onChange(event.target.checked)}
       className="absolute inset-0 z-10 m-0 cursor-pointer opacity-0 disabled:cursor-not-allowed"
-      aria-label="Mark this as a gift"
     />
     <span
       className={cn(
-        "flex items-center justify-center transition-colors",
+        "flex size-5 items-center justify-center transition-colors",
         checked
-          ? "size-4 bg-linkGold lg:size-5"
-          : "size-4 border-[0.8px] border-darkblack bg-white lg:size-5",
+          ? "bg-linkGold"
+          : "border-[0.8px] border-darkblack bg-white",
       )}
       aria-hidden
     >
@@ -137,6 +130,27 @@ export const CartTextLink = ({
   disabled = false,
 }: CartTextLinkProps) => (
   <DetailTextLink href={href} onClick={onClick} className={className} disabled={disabled}>
+    {children}
+  </DetailTextLink>
+);
+
+/** Figma cart item actions (2083:8650) — 14px regular, underline, not uppercase */
+export const CartActionLink = ({
+  children,
+  href,
+  onClick,
+  className,
+  disabled = false,
+}: CartTextLinkProps) => (
+  <DetailTextLink
+    href={href}
+    onClick={onClick}
+    disabled={disabled}
+    className={cn(
+      "pb-1 font-gill text-sm font-normal normal-case leading-110 text-darkblack",
+      className,
+    )}
+  >
     {children}
   </DetailTextLink>
 );
@@ -330,7 +344,7 @@ export const CartMoreItemsNote = ({ count }: CartMoreItemsNoteProps) => (
       <span className="inline-flex size-6 shrink-0 items-center justify-center overflow-hidden text-darkblack">
         <ShoppingBagIcon className="size-6" />
       </span>
-      <p className="m-0 flex h-6 items-center font-gill text-base font-light leading-110 text-darkblack whitespace-nowrap">
+      <p className="m-0 flex h-6 translate-y-1 items-center font-gill text-base font-light leading-110 text-darkblack whitespace-nowrap">
         Your bag contains {count} more {count === 1 ? "item" : "items"}
       </p>
     </div>

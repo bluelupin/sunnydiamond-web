@@ -257,7 +257,7 @@ export const CheckoutSectionHeading = ({
   editDisabled = false,
 }: CheckoutSectionHeadingProps) => (
   <div className="flex items-center justify-between gap-4">
-    <h2 className="font-gill text-xl font-normal leading-110 text-darkblack lg:text-2xl">{children}</h2>
+    <h2 className="font-gill text-2xl font-normal leading-110 text-darkblack">{children}</h2>
     {onEdit ? (
       <DetailTextLink
         onClick={onEdit}
@@ -319,7 +319,7 @@ export const CheckoutCheckbox = ({
         strokeWidth={2.5}
       />
     </button>
-    <span className="font-gill text-base font-light leading-110 text-darkblack">{label}</span>
+    <span className="translate-y-0.5 font-gill text-base font-light leading-110 text-darkblack">{label}</span>
   </label>
   );
 };

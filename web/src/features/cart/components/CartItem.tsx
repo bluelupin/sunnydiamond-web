@@ -20,12 +20,12 @@ import { getCartItemGiftNote, type CartGiftNoteDisplay } from "../utils/cartGift
 import { useCartUI } from "../context/CartUIContext";
 import { useCartCheckout } from "../hooks/useCartCheckout";
 import {
+  CartActionLink,
   CartDivider,
   CartGiftBadge,
   CartGiftCheckbox,
   CartMetaRow,
   CartOutlineButton,
-  CartTextLink,
 } from "./CartFlowUi";
 import DeleteIcon from "@/assets/Icons/DeleteIcon";
 import { getProductEditHref } from "@/features/products/utils/productRoutes";
@@ -174,7 +174,7 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
   return (
     <article className="relative flex flex-col gap-4 bg-white px-4 lg:gap-6 lg:px-6 py-6">
       {/* {isGift ? (
-        <CartGiftBadge variant="cart" className="absolute left-0 top-0 z-10" />
+        <CartGiftBadge className="absolute left-0 top-0 z-10" />
       ) : null} */}
 
       <div className="flex items-start justify-between gap-4">
@@ -200,8 +200,8 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
             />
           </Link>
 
-          <div className="flex min-w-0 flex-1 flex-col lg:w-[176px] lg:max-w-[176px] gap-8">
-            <div className="flex flex-col gap-2 lg:gap-3">
+          <div className="flex min-w-0 flex-1 flex-col items-start gap-8 lg:w-[176px] lg:max-w-[176px]">
+            <div className="flex flex-col items-start gap-3">
               <Link
                 href={productHref}
                 onClick={(event) => {
@@ -209,7 +209,7 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
                 }}
                 aria-disabled={isNavigatingToCheckout || undefined}
                 className={cn(
-                  "font-gill text-sm leading-110 text-darkblack transition-colors hover:text-darkMagenta lg:text-base",
+                  "font-gill text-base font-normal leading-110 text-darkblack transition-colors hover:text-darkMagenta",
                   isNavigatingToCheckout && "pointer-events-none",
                 )}
               >
@@ -218,40 +218,30 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
 
               <CartMetaRow parts={meta} />
 
-              {/* {itemGiftNote ? (
-                <p className="font-gill text-sm font-light leading-110 text-neutral500 lg:text-base">
-                  <span className="font-normal text-darkblack">Gift note:</span> {itemGiftNote}
-                </p>
-              ) : null} */}
-
               {quantity > 1 ? (
                 <p className="font-gill text-sm font-light leading-110 text-neutral500">
                   Qty: {quantity}
                 </p>
               ) : null}
 
-              <p className="font-gill text-sm leading-110 text-darkblack lg:text-base">
+              <p className="font-gill text-base font-normal leading-110 text-darkblack">
                 {formatCartPrice(getCartLineDisplayTotal(item))}
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-4">
-              <CartTextLink href={productHref} disabled={isNavigatingToCheckout}>EDIT</CartTextLink>
-              {/* {movedToWishlist ? (
-                <span className="font-gill text-sm uppercase leading-110 text-neutral500 lg:text-base">
-                  Moved to Wishlist
+            <div className="flex items-start gap-4">
+              <CartActionLink href={productHref} disabled={isNavigatingToCheckout}>
+                Edit
+              </CartActionLink>
+              {movedToWishlist ? (
+                <span className="pb-1 font-gill text-sm font-normal leading-110 text-neutral500">
+                  Moved to wishlist
                 </span>
-              ) : (
-                <CartTextLink onClick={handleMoveToWishlist}>
-                  {wishlisted ? "IN WISHLIST" : "MOVE TO WISHLIST"}
-                </CartTextLink>
-              )} */}
-              <CartTextLink onClick={handleMoveToWishlist} disabled={isNavigatingToCheckout}>
-                {!wishlisted && "MOVE TO WISHLIST"}
-              </CartTextLink>
-              {/* <CartTextLink onClick={handleBuyNow} className={isBuyingNow ? "opacity-50" : ""}>
-                BUY NOW
-              </CartTextLink> */}
+              ) : !wishlisted ? (
+                <CartActionLink onClick={handleMoveToWishlist} disabled={isNavigatingToCheckout}>
+                  Move to wishlist
+                </CartActionLink>
+              ) : null}
             </div>
           </div>
         </div>
@@ -272,7 +262,12 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
 
       <CartDivider weight={0.5} />
 
-      <label className={cn("inline-flex w-fit items-center gap-2", isNavigatingToCheckout ? "cursor-not-allowed" : "cursor-pointer")}>
+      <label
+        className={cn(
+          "inline-flex w-fit items-center gap-2",
+          isNavigatingToCheckout ? "cursor-not-allowed" : "cursor-pointer",
+        )}
+      >
         <CartGiftCheckbox
           checked={isGift}
           disabled={isNavigatingToCheckout}
@@ -284,7 +279,7 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
             void onUpdateOptions(item.id, { isGift: checked });
           }}
         />
-        <span className="font-gill text-sm leading-4 text-darkblack lg:text-base lg:leading-5">
+        <span className="flex h-5 translate-y-0.5 items-center font-gill text-base font-normal text-darkblack">
           Mark this as a gift
         </span>
       </label>
