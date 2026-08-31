@@ -42,6 +42,8 @@ import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-c
 import { wishlistMovedToastDurationMs } from "@/features/wishlist/data/content";
 import { DetailDarkButton } from "./shared";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import {
   ProductDetailSidePanelShell,
 } from "./ProductDetailSidePanelShell";
@@ -627,7 +629,7 @@ const BookStoreVisitPanel = ({
           <aside
             role="dialog"
             aria-label="Book your store visit"
-            className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-480 flex-col overflow-hidden bg-white"
+            className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-472 flex-col overflow-hidden bg-white"
           >
             {panelBody}
           </aside>
@@ -753,7 +755,7 @@ const StoreSelectionStep = ({
   return (
     <>
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <div className="px-4 pt-6 lg:px-6 lg:pt-10">
+        <div className={cn(RIGHT_PANEL_HEADER_PADDING_CLASS)}>
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4">
               <div className="flex min-w-0 items-center gap-2">
@@ -772,20 +774,7 @@ const StoreSelectionStep = ({
                 </h2>
               </div>
               {onClose ? (
-                <button
-                  type="button"
-                  onClick={onClose}
-                  aria-label="Close"
-                  className="inline-flex size-6 shrink-0 items-center justify-center"
-                >
-                  <Image
-                    src="/icons/menu-close.svg"
-                    alt=""
-                    width={24}
-                    height={24}
-                    aria-hidden
-                  />
-                </button>
+                <RightPanelCloseButton onClick={onClose} aria-label="Close" />
               ) : null}
             </div>
             <div className="h-px w-full bg-neutral300" aria-hidden />
@@ -944,7 +933,7 @@ const BookingFormStep = ({
   return (
     <>
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <div className="px-4 pt-6 lg:px-6 lg:pt-10">
+        <div className={cn(RIGHT_PANEL_HEADER_PADDING_CLASS)}>
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4">
               <div className="flex min-w-0 items-center gap-2">
@@ -961,20 +950,7 @@ const BookingFormStep = ({
                 </h2>
               </div>
               {onClose ? (
-                <button
-                  type="button"
-                  onClick={onClose}
-                  aria-label="Close"
-                  className="inline-flex size-6 shrink-0 items-center justify-center"
-                >
-                  <Image
-                    src="/icons/menu-close.svg"
-                    alt=""
-                    width={24}
-                    height={24}
-                    aria-hidden
-                  />
-                </button>
+                <RightPanelCloseButton onClick={onClose} aria-label="Close" />
               ) : null}
             </div>
             <div className="h-px w-full bg-neutral300" aria-hidden />

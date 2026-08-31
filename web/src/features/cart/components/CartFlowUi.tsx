@@ -232,15 +232,51 @@ export const CartOutlineLink = ({ children, href, className, onClick }: CartOutl
   </Link>
 );
 
-export const CartSuccessCheck = () => (
-  <span
-    className="flex size-10 shrink-0 items-center justify-center text-[#47CB6C]"
-    aria-hidden
-  >
-    <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M14.9414 20.9414L18.9414 24.9414L26.9414 16.9414M40.9414 20.9414C40.9414 31.9871 31.9871 40.9414 20.9414 40.9414C9.89571 40.9414 0.941406 31.9871 0.941406 20.9414C0.941406 9.89571 9.89571 0.941406 20.9414 0.941406C31.9871 0.941406 40.9414 9.89571 40.9414 20.9414Z" stroke="currentColor" strokeWidth="1.88235" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  </span>
+type CartSuccessCheckProps = {
+  /** Figma bag drawer (2574:58792): 64px; default checkout/gift flows: 40px */
+  size?: "sm" | "lg";
+};
+
+export const CartSuccessCheck = ({ size = "sm" }: CartSuccessCheckProps) => {
+  const isLarge = size === "lg";
+
+  return (
+    <span
+      className={cn(
+        "flex shrink-0 items-center justify-center text-[#47CB6C]",
+        isLarge ? "size-16" : "size-10",
+      )}
+      aria-hidden
+    >
+      <svg
+        width={isLarge ? 64 : 42}
+        height={isLarge ? 64 : 42}
+        viewBox="0 0 42 42"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M14.9414 20.9414L18.9414 24.9414L26.9414 16.9414M40.9414 20.9414C40.9414 31.9871 31.9871 40.9414 20.9414 40.9414C9.89571 40.9414 0.941406 31.9871 0.941406 20.9414C0.941406 9.89571 9.89571 0.941406 20.9414 0.941406C31.9871 0.941406 40.9414 9.89571 40.9414 20.9414Z"
+          stroke="currentColor"
+          strokeWidth="1.88235"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </span>
+  );
+};
+
+type CartBagDrawerSuccessHeaderProps = {
+  message: string;
+};
+
+/** Figma node 2574:58791 — bag drawer add-to-bag success */
+export const CartBagDrawerSuccessHeader = ({ message }: CartBagDrawerSuccessHeaderProps) => (
+  <div className="flex w-full flex-col items-center gap-4 text-center">
+    <CartSuccessCheck size="lg" />
+    <p className="m-0 font-gill text-base font-light leading-110 text-darkblack">{message}</p>
+  </div>
 );
 
 type CartQuantityStepperProps = {
@@ -289,11 +325,15 @@ type CartMoreItemsNoteProps = {
 };
 
 export const CartMoreItemsNote = ({ count }: CartMoreItemsNoteProps) => (
-  <div className="flex items-center gap-2 mb-16">
-    <ShoppingBagIcon className="size-6 shrink-0 text-darkblack" />
-    <p className="font-gill text-base font-light leading-110 text-darkblack">
-      Your bag contains {count} more {count === 1 ? "item" : "items"}
-    </p>
+  <div className="flex w-full items-center">
+    <div className="flex h-6 shrink-0 items-center gap-2">
+      <span className="inline-flex size-6 shrink-0 items-center justify-center overflow-hidden text-darkblack">
+        <ShoppingBagIcon className="size-6" />
+      </span>
+      <p className="m-0 flex h-6 items-center font-gill text-base font-light leading-110 text-darkblack whitespace-nowrap">
+        Your bag contains {count} more {count === 1 ? "item" : "items"}
+      </p>
+    </div>
   </div>
 );
 

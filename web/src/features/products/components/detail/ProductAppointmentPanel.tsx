@@ -25,6 +25,9 @@ import {
   type ProductAppointmentVariant,
 } from "./productAppointmentPanel.config";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
+import { cn } from "@/shared/utils/cn";
 import { DetailDarkButton, DetailTextLink } from "./shared";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 
@@ -275,26 +278,13 @@ const ProductAppointmentForm = ({
   return (
     <>
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-        <div className="flex flex-col gap-6 px-4 pt-6 lg:px-6 lg:pt-10">
+        <div className={cn("flex flex-col gap-6", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4">
               <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
                 {formTitle}
               </h2>
-              <button
-                type="button"
-                onClick={handleClose}
-                aria-label={config.closeAriaLabel}
-                className="inline-flex size-6 shrink-0 items-center justify-center"
-              >
-                <Image
-                  src="/icons/menu-close.svg"
-                  alt=""
-                  width={24}
-                  height={24}
-                  aria-hidden
-                />
-              </button>
+              <RightPanelCloseButton onClick={handleClose} aria-label={config.closeAriaLabel} />
             </div>
             <div className="h-px w-full bg-neutral300" aria-hidden />
           </div>

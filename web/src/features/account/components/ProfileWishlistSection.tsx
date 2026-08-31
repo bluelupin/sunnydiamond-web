@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import JewelleryLoadMoreSection from "@/features/jewellery-product/components/JewelleryLoadMoreSection";
-import { PAGE_SIZE } from "@/features/jewellery-product/data/filters";
+import { WISHLIST_VISIBLE_CAP } from "@/features/wishlist/constants";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import { useAddToBagWithDrawer } from "@/features/cart/hooks/useAddToBagWithDrawer";
 import WishlistAddToBagPanel from "@/features/wishlist/components/WishlistAddToBagPanel";
@@ -21,12 +21,13 @@ const ProfileWishlistSection = () => {
   const { wishlistedIds, toggleWishlist } = useWishlist();
   const { addToBagAndOpenDrawer } = useAddToBagWithDrawer();
   const { products: wishlistProducts, isLoading, error } = useMagentoWishlistProducts(wishlistedIds);
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [visibleCount, setVisibleCount] = useState(WISHLIST_VISIBLE_CAP);
   const [viewMode, setViewMode] = useState<WishlistViewMode>("grid");
   const [addToBagProduct, setAddToBagProduct] = useState<JewelleryListingProduct | null>(null);
 
   const visibleProducts = wishlistProducts.slice(0, visibleCount);
   const hasMore = visibleCount < wishlistProducts.length;
+  const showPagination = wishlistProducts.length > WISHLIST_VISIBLE_CAP;
   const showEmptyState = !isLoading && !error && wishlistProducts.length === 0;
   const showLoadError = !isLoading && Boolean(error) && wishlistedIds.length > 0;
 
@@ -86,12 +87,12 @@ const ProfileWishlistSection = () => {
         ) : null}
       </div>
 
-      {hasMore ? (
+      {showPagination ? (
         <JewelleryLoadMoreSection
           visibleCount={visibleProducts.length}
           totalCount={wishlistProducts.length}
           hasMore={hasMore}
-          onLoadMore={() => setVisibleCount((count) => count + PAGE_SIZE)}
+          onLoadMore={() => setVisibleCount((count) => count + WISHLIST_VISIBLE_CAP)}
         />
       ) : null}
 

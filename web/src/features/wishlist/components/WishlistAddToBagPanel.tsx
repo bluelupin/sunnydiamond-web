@@ -38,6 +38,8 @@ import {
   getConfigurableOptionUidsForMetal,
 } from "@/features/products/utils/productVariant.utils";
 import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
+import { RIGHT_PANEL_ASIDE_MD_CLASS } from "@/shared/ui/rightPanel";
 import { cn } from "@/shared/utils/cn";
 
 type WishlistAddToBagPanelProps = {
@@ -47,8 +49,10 @@ type WishlistAddToBagPanelProps = {
   onAddToBag: (payload: AddToBagPayload) => void;
 };
 
-const wishlistAddToBagAsideClassName =
-  "max-w-full max-md:h-[calc(100dvh-3rem)] max-md:max-h-[calc(100dvh-3rem)] max-md:min-h-0 md:h-full md:max-h-screen md:max-w-[472px]";
+const wishlistAddToBagAsideClassName = cn(
+  "max-w-full max-md:h-[calc(100dvh-3rem)] max-md:max-h-[calc(100dvh-3rem)] max-md:min-h-0 md:h-full md:max-h-screen",
+  RIGHT_PANEL_ASIDE_MD_CLASS,
+);
 
 const WishlistAddToBagPanel = ({
   open,
@@ -88,6 +92,11 @@ const WishlistAddToBagPanel = ({
       .then((fetchedProduct) => {
         if (!controller.signal.aborted) {
           setDetailProduct(fetchedProduct);
+        }
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) {
+          setDetailProduct(null);
         }
       })
       .finally(() => {
@@ -218,17 +227,7 @@ const WishlistAddToBagPanel = ({
                 </div>
               </div>
             )}
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close"
-              className="absolute right-6 top-6 z-10 flex size-6 items-center justify-center text-darkblack"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18.5 5L5 18.5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M18.5 18.5L5 5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
+            <RightPanelCloseButton onClick={onClose} aria-label="Close" variant="absolute" />
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-6 pt-8 md:px-6 md:pb-8">

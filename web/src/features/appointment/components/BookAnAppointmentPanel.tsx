@@ -1,13 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
 import { ChevronLeft } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { useToast } from "@/shared/hooks/use-toast";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
 import { PanelFooter, PanelFooterDualActions } from "@/shared/ui/PanelFooter";
+import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { ProductDetailSidePanelShell } from "@/features/products/components/detail/ProductDetailSidePanelShell";
 
 const labelClassName = "font-gill text-sm leading-110 text-darkblack";
@@ -75,7 +76,13 @@ const BookAnAppointmentPanel = ({
   const formContent = (
     <>
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <div className={cn(variant === "page" ? "mx-auto w-full max-w-[480px] px-4 pt-8 lg:px-8 lg:pt-10" : "px-4 pt-6")}>
+        <div
+          className={cn(
+            variant === "page"
+              ? "mx-auto w-full max-w-[480px] px-4 pt-8 lg:px-8 lg:pt-10"
+              : RIGHT_PANEL_HEADER_PADDING_CLASS,
+          )}
+        >
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4">
               <div className="flex min-w-0 items-center gap-2">
@@ -94,20 +101,10 @@ const BookAnAppointmentPanel = ({
                 </h1>
               </div>
               {showClose ? (
-                <button
-                  type="button"
-                  onClick={onClose}
+                <RightPanelCloseButton
+                  onClick={() => onClose?.()}
                   aria-label="Close"
-                  className="inline-flex size-6 shrink-0 items-center justify-center"
-                >
-                  <Image
-                    src="/icons/menu-close.svg"
-                    alt=""
-                    width={24}
-                    height={24}
-                    aria-hidden
-                  />
-                </button>
+                />
               ) : null}
             </div>
             <div className="h-px w-full bg-neutral300" aria-hidden />

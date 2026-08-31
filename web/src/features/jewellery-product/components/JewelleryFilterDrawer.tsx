@@ -6,6 +6,8 @@ import { cn } from "@/shared/utils/cn";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
+import { RIGHT_PANEL_HEADER_PADDING_CLASS, RIGHT_PANEL_WIDTH_CLASS } from "@/shared/ui/rightPanel";
 import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
 import {
   Select,
@@ -143,24 +145,10 @@ const FilterDrawerPanel = ({
   getMaxAmountDisplayValue,
 }: FilterDrawerPanelProps) => (
   <div className="flex min-h-0 flex-1 flex-col">
-    <div className="md:px-6 px-4 md:pt-10 pt-6">
+    <div className={RIGHT_PANEL_HEADER_PADDING_CLASS}>
       <div className="mx-auto flex h-[32px] w-full max-w-[424px] items-center justify-between">
         <h2 className="font-larken text-[24px] font-light leading-110 text-darkblack">Filters</h2>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close filter panel"
-          className="inline-flex size-[32px] shrink-0 items-center justify-center"
-        >
-          <Image
-            src="/images/jewellery/filter-drawer-close.svg"
-            alt=""
-            width={32}
-            height={32}
-            aria-hidden
-            className="size-[32px] object-contain"
-          />
-        </button>
+        <RightPanelCloseButton onClick={onClose} aria-label="Close filter panel" />
       </div>
       <div className="mx-auto mt-6 h-px w-full max-w-[424px] bg-neutral300" aria-hidden />
     </div>
@@ -646,7 +634,8 @@ const JewelleryFilterDrawer = ({
         overlayClassName={FILTER_DRAWER_OVERLAY_CLASS}
         className={cn(
           FILTER_DRAWER_SHELL_CLASS,
-          "h-dvh max-h-dvh w-full max-w-[474px] sm:max-w-[474px]",
+          "h-dvh max-h-dvh w-full",
+          RIGHT_PANEL_WIDTH_CLASS,
           "data-[state=open]:duration-300 data-[state=closed]:duration-300",
           "[&>button]:hidden",
         )}

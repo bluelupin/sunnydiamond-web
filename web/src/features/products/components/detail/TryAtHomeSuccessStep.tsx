@@ -3,6 +3,7 @@
 import Image from "next/image";
 import type { StaticImageData } from "next/image";
 import { Check, ShoppingBag } from "lucide-react";
+import { cn } from "@/shared/utils/cn";
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
 import type { Product } from "@/features/products/data/products";
 import {
@@ -12,6 +13,8 @@ import {
 } from "@/features/products/utils/tryAtHomeBooking";
 import { DetailDarkButton, DetailOutlineButton } from "./shared";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 
 type TryAtHomeSuccessStepProps = {
   product: Product;
@@ -37,7 +40,7 @@ const TryAtHomeSuccessStep = ({
   return (
     <>
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-        <div className="flex flex-col gap-6 px-4 pb-72 pt-6 lg:px-8 lg:pt-8">
+        <div className={cn("flex flex-col gap-6 pb-72", RIGHT_PANEL_HEADER_PADDING_CLASS, "lg:px-8 lg:pt-8")}>
           <div className="flex flex-col gap-6">
             <div className="grid w-full [&>*]:col-start-1 [&>*]:row-start-1">
               <div className="flex justify-center">
@@ -45,20 +48,11 @@ const TryAtHomeSuccessStep = ({
                   <Check size={22} strokeWidth={2} aria-hidden className="text-white" />
                 </span>
               </div>
-              <button
-                type="button"
+              <RightPanelCloseButton
                 onClick={onClose}
                 aria-label="Close try at home success panel"
-                className="inline-flex size-6 shrink-0 items-center justify-self-end"
-              >
-                <Image
-                  src="/icons/menu-close.svg"
-                  alt=""
-                  width={24}
-                  height={24}
-                  aria-hidden
-                />
-              </button>
+                className="justify-self-end"
+              />
             </div>
 
             <p className="text-center font-gill text-base font-light leading-110 text-darkblack">

@@ -15,6 +15,8 @@ import {
   SheetContent,
   SheetTitle,
 } from "@/shared/ui/sheet";
+import { RIGHT_PANEL_HEADER_PADDING_CLASS, RIGHT_PANEL_WIDTH_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
 import { useCart } from "../context/CartContext";
@@ -307,14 +309,12 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
-      <div className="w-full shrink-0 lg:px-6 px-4 lg:pt-10 pt-6">
+      <div className={cn("w-full shrink-0", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
         <div className="flex h-[26px] items-center justify-between">
           <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
             Gifting Options
           </h2>
-          <button type="button" onClick={onClose} aria-label="Close gifting options">
-            <X className="size-6 text-darkblack" />
-          </button>
+          <RightPanelCloseButton onClick={onClose} aria-label="Close gifting options" />
         </div>
         <div className="mt-6">
           <CartDivider weight={1} />
@@ -480,7 +480,8 @@ const GiftingOptionsPanel = () => {
         side="right"
         overlayClassName="bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
         className={cn(
-          "h-full w-full max-w-[472px] gap-0 border-0 p-0 shadow-none sm:max-w-[472px]",
+          "h-full w-full gap-0 border-0 p-0 shadow-none",
+          RIGHT_PANEL_WIDTH_CLASS,
           "[&>button]:hidden",
         )}
       >

@@ -2,12 +2,15 @@
 
 import Image, { type StaticImageData } from "next/image";
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
+import { cn } from "@/shared/utils/cn";
 import type { ProductDetailPricing } from "@/features/products/types/productDetail";
 import {
   buildPriceBreakup,
   formatPriceBreakupGstLabel,
 } from "@/features/products/utils/priceBreakup";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { RightPanelHeader } from "@/shared/ui/RightPanelHeader";
+import { RIGHT_PANEL_CONTENT_PADDING_CLASS } from "@/shared/ui/rightPanel";
 import { AttributeSeparator, DetailDarkButton } from "./shared";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 
@@ -67,30 +70,19 @@ const PriceBreakupPanel = ({
       dialogAriaLabel="Price Breakup"
     >
       <div className="flex min-h-0 flex-1 flex-col">
-        <div className="flex shrink-0 flex-col gap-6 px-6 md:pt-10 pt-6">
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
-              Price Breakup
-            </h2>
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close price breakup panel"
-              className="inline-flex size-6 shrink-0 items-center justify-center"
-            >
-              <Image
-                src="/icons/menu-close.svg"
-                alt=""
-                width={24}
-                height={24}
-                aria-hidden
-              />
-            </button>
-          </div>
-          <div className="h-px w-full bg-neutral300" aria-hidden />
-        </div>
+        <RightPanelHeader
+          title="Price Breakup"
+          onClose={onClose}
+          closeAriaLabel="Close price breakup panel"
+          alignWithContent
+        />
 
-        <div className="flex min-h-0 flex-1 flex-col justify-between gap-6 px-6 py-6">
+        <div
+          className={cn(
+            "flex min-h-0 flex-1 flex-col justify-between gap-6 py-6",
+            RIGHT_PANEL_CONTENT_PADDING_CLASS,
+          )}
+        >
           <div className="bg-gray300 px-4 py-6">
             <div className="flex items-center gap-4">
               <div className="relative h-[68px] w-[91px] shrink-0 overflow-hidden bg-white">

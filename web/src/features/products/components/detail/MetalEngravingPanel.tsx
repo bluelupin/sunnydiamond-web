@@ -16,6 +16,7 @@ import {
   type EngravingSelection,
 } from "@/features/products/constants/engraving";
 import FormFieldError from "@/shared/ui/FormFieldError";
+import { cn } from "@/shared/utils/cn";
 import {
   Select,
   SelectContent,
@@ -24,6 +25,8 @@ import {
   SelectValue,
 } from "@/shared/ui/select";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import EngravingPreviewImage from "./EngravingPreviewImage";
 import { DetailDarkButton } from "./shared";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
@@ -136,24 +139,11 @@ const MetalEngravingPanel = ({
       >
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="min-h-0 flex-1 overflow-y-auto">
-            <div className="flex flex-col gap-6 px-6 md:pt-10 pt-6 pb-10">
+            <div className={cn("flex flex-col gap-6 pb-10", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
               <div className="flex flex-col gap-6">
                 <div className="flex items-center justify-between gap-4">
                   <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">Engraving</h2>
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    aria-label="Close engraving panel"
-                    className="inline-flex size-6 shrink-0 items-center justify-center"
-                  >
-                    <Image
-                      src="/icons/menu-close.svg"
-                      alt=""
-                      width={24}
-                      height={24}
-                      aria-hidden
-                    />
-                  </button>
+                  <RightPanelCloseButton onClick={onClose} aria-label="Close engraving panel" />
                 </div>
                 <div className="h-px w-full bg-neutral300" aria-hidden />
               </div>

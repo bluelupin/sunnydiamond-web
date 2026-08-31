@@ -16,6 +16,9 @@ import {
 } from "@/features/products/data/deliveryStoreContent";
 import { DetailDarkButton, DetailTextLink } from "./shared";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
+import { cn } from "@/shared/utils/cn";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 import StoreVisitMapBlock from "./StoreVisitMapBlock";
 
@@ -83,26 +86,16 @@ const DeliveryStoreJourneyPanel = ({
       {step === "availability" ? (
           <>
             <div className="min-h-0 flex-1 overflow-y-auto">
-              <div className="px-4 pt-6 lg:px-6 lg:pt-10">
+              <div className={cn(RIGHT_PANEL_HEADER_PADDING_CLASS)}>
                 <div className="flex flex-col gap-6">
                   <div className="flex items-center justify-between gap-4">
                     <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
                       In Store Availabilty
                     </h2>
-                    <button
-                      type="button"
+                    <RightPanelCloseButton
                       onClick={handleClose}
                       aria-label="Close store availability"
-                      className="inline-flex size-6 shrink-0 items-center justify-center"
-                    >
-                      <Image
-                        src="/icons/menu-close.svg"
-                        alt=""
-                        width={24}
-                        height={24}
-                        aria-hidden
-                      />
-                    </button>
+                    />
                   </div>
                   <div className="h-px w-full bg-neutral300" aria-hidden />
                 </div>
@@ -167,7 +160,7 @@ const DeliveryStoreJourneyPanel = ({
         ) : (
           <>
             <div className="min-h-0 flex-1 overflow-y-auto">
-              <div className="px-4 pt-6 lg:px-6 lg:pt-10">
+              <div className={cn(RIGHT_PANEL_HEADER_PADDING_CLASS)}>
                 <div className="flex flex-col gap-6">
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex min-w-0 items-center gap-2">
@@ -183,20 +176,10 @@ const DeliveryStoreJourneyPanel = ({
                         Book Your Store Visit
                       </h2>
                     </div>
-                    <button
-                      type="button"
+                    <RightPanelCloseButton
                       onClick={handleClose}
                       aria-label="Close book your store visit"
-                      className="inline-flex size-6 shrink-0 items-center justify-center"
-                    >
-                      <Image
-                        src="/icons/menu-close.svg"
-                        alt=""
-                        width={24}
-                        height={24}
-                        aria-hidden
-                      />
-                    </button>
+                    />
                   </div>
                   <div className="h-px w-full bg-neutral300" aria-hidden />
                 </div>

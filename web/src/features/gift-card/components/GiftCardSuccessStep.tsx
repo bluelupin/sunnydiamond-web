@@ -7,7 +7,10 @@ import {
   CartPrimaryLink,
   CartSuccessCheck,
 } from "@/features/cart/components/CartFlowUi";
+import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { cn } from "@/shared/utils/cn";
 import { useGiftCardFlow } from "../context/GiftCardFlowContext";
 import { giftCardFlowContent } from "../data/content";
 
@@ -36,12 +39,8 @@ const GiftCardSuccessStep = ({ onClose }: GiftCardSuccessStepProps) => {
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white">
-      <div className="flex shrink-0 justify-end px-6 pt-10">
-        <button type="button" onClick={onClose} aria-label="Close gift card flow">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" strokeWidth="1.5" />
-          </svg>
-        </button>
+      <div className={cn("flex shrink-0 justify-end", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
+        <RightPanelCloseButton onClick={onClose} aria-label="Close gift card flow" />
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col items-center gap-6 overflow-y-auto overscroll-contain px-6 pb-6">

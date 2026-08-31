@@ -16,13 +16,15 @@ import {
   SheetContent,
   SheetTitle,
 } from "@/shared/ui/sheet";
+import { RIGHT_PANEL_HEADER_PADDING_CLASS, RIGHT_PANEL_WIDTH_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import {
+  CartBagDrawerSuccessHeader,
   CartGiftBadge,
   CartMetaRow,
   CartMoreItemsNote,
   CartOutlineLink,
   CartPrimaryLink,
-  CartSuccessCheck,
 } from "./CartFlowUi";
 import DeleteIcon from "@/assets/Icons/DeleteIcon";
 
@@ -66,18 +68,17 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
-      <div className="mx-auto flex w-full flex-1 flex-col gap-6 overflow-y-auto lg:px-6 px-4 pb-5 pt-6 lg:pt-10">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <CartSuccessCheck />
-          <p className="font-gill text-base font-light leading-110 text-darkblack">
-            {successMessage}
-          </p>
-        </div>
+      <div className={cn("flex shrink-0 justify-end", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
+        <RightPanelCloseButton onClick={onClose} aria-label="Close bag drawer" />
+      </div>
+
+      <div className="mx-auto flex w-full flex-1 flex-col gap-6 overflow-y-auto px-4 pb-5 lg:px-6">
+        <CartBagDrawerSuccessHeader message={successMessage} />
 
         <div className="h-px w-full shrink-0 bg-aboutInactive" aria-hidden />
 
         {addedItem ? (
-          <div className="flex min-h-0 flex-1 flex-col justify-between lg:gap-6 gap-4">
+          <div className="flex min-h-0 flex-1 flex-col justify-between">
             <div className="relative flex items-start justify-between bg-gray300 px-4 py-6">
               {isGift ? (
                 <CartGiftBadge variant="drawer" className="absolute left-0 top-0 z-10" />
@@ -162,7 +163,9 @@ const CartBagDrawer = () => {
         side="right"
         overlayClassName="bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
         className={cn(
-          "h-screen max-h-100vh w-full max-w-[472px] border-0 bg-white p-0 sm:max-w-[472px] [&>button]:hidden",
+          "h-screen max-h-100vh w-full border-0 bg-white p-0",
+          RIGHT_PANEL_WIDTH_CLASS,
+          "[&>button]:hidden",
         )}
       >
         <SheetTitle className="sr-only">{drawerTitle}</SheetTitle>

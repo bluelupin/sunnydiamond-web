@@ -4,8 +4,9 @@ import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Play } from "lucide-react";
 import { PanelFooterGradient } from "@/shared/ui/PanelFooter";
-import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
+import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 
 type RingSizeChartPanelProps = {
   open: boolean;
@@ -134,17 +135,12 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
       dialogAriaLabel={title}
     >
       <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
-        <button
-          type="button"
+        <RightPanelCloseButton
           onClick={onClose}
           aria-label={`Close ${title}`}
-          className="absolute top-8 right-7 z-20 text-white"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18 6L6 18" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M18 18L6 6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
+          variant="absolute"
+          light
+        />
 
         {videoUrl ? (
           <TutorialVideo key={videoUrl} videoUrl={videoUrl} mimeType={videoMimeType} title={title} />

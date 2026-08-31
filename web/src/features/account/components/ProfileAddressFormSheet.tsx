@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { X } from "lucide-react";
 import {
   CheckoutCheckbox,
   CheckoutField,
@@ -11,6 +10,8 @@ import { INDIAN_STATES } from "@/features/checkout/constants/indianStates";
 import { DetailDarkButton, DetailTextLink } from "@/features/products/components/detail/shared";
 import { useCurrentLocationAddress } from "@/shared/hooks/use-current-location-address";
 import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
+import { RIGHT_PANEL_HEADER_PADDING_CLASS, RIGHT_PANEL_WIDTH_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { cn } from "@/shared/utils/cn";
@@ -164,17 +165,13 @@ export function ProfileAddressFormSheet({
   };
 
   const header = (
-    <div className={cn("shrink-0", isMobile ? "px-4 pt-6" : "px-6 pt-6")}>
+    <div className={cn("shrink-0", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
       <div className="flex items-center justify-between gap-4">
         <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">{title}</h2>
-        <button
-          type="button"
+        <RightPanelCloseButton
           onClick={() => onOpenChange(false)}
-          className="text-darkblack"
           aria-label="Close address form"
-        >
-          <X className="size-6" strokeWidth={1.5} aria-hidden />
-        </button>
+        />
       </div>
       <div className="mt-5 h-px w-full bg-neutral300" aria-hidden />
     </div>
@@ -320,7 +317,7 @@ export function ProfileAddressFormSheet({
           "flex flex-col gap-0 border-0 bg-white p-0 [&>button]:hidden",
           isMobile
             ? "max-h-[90vh] w-full rounded-none sm:max-w-full"
-            : "h-screen max-h-screen w-full max-w-[472px] sm:max-w-[472px]",
+            : `h-screen max-h-screen w-full ${RIGHT_PANEL_WIDTH_CLASS}`,
         )}
       >
         <SheetTitle className="sr-only">{title}</SheetTitle>

@@ -38,6 +38,8 @@ import {
 } from "@/shared/utils/formValidation";
 import { DetailDarkButton } from "./shared";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 import TryAtHomeSuccessStep from "./TryAtHomeSuccessStep";
 import type { TryAtHomeBookingSummary } from "@/features/products/utils/tryAtHomeBooking";
@@ -132,26 +134,13 @@ const TryAtHomeDetailsStep = ({
   return (
     <>
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-        <div className="flex flex-col gap-6 px-4 pt-6 lg:px-6 lg:pt-10">
+        <div className={cn("flex flex-col gap-6", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4">
               <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
                 {form?.formName ?? "Try At Home"}
               </h2>
-              <button
-                type="button"
-                onClick={onClose}
-                aria-label="Close try at home panel"
-                className="inline-flex size-6 shrink-0 items-center justify-center"
-              >
-                <Image
-                  src="/icons/menu-close.svg"
-                  alt=""
-                  width={24}
-                  height={24}
-                  aria-hidden
-                />
-              </button>
+              <RightPanelCloseButton onClick={onClose} aria-label="Close try at home panel" />
             </div>
             <div className="h-px w-full bg-neutral300" aria-hidden />
           </div>
@@ -329,7 +318,7 @@ const TryAtHomeAddressStep = ({
   return (
     <>
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-        <div className="flex flex-col gap-6 px-4 pt-6 lg:px-6 lg:pt-10">
+        <div className={cn("flex flex-col gap-6", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4">
               <div className="flex min-w-0 items-center gap-2">
@@ -345,20 +334,7 @@ const TryAtHomeAddressStep = ({
                   {formTitle}
                 </h2>
               </div>
-              <button
-                type="button"
-                onClick={onClose}
-                aria-label="Close try at home panel"
-                className="inline-flex size-6 shrink-0 items-center justify-center"
-              >
-                <Image
-                  src="/icons/menu-close.svg"
-                  alt=""
-                  width={24}
-                  height={24}
-                  aria-hidden
-                />
-              </button>
+              <RightPanelCloseButton onClick={onClose} aria-label="Close try at home panel" />
             </div>
             <div className="h-px w-full bg-neutral300" aria-hidden />
           </div>

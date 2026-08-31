@@ -13,6 +13,8 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/shared/utils/cn";
 import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
 import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
+import { RIGHT_PANEL_WIDTH_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
 import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 import { useToast } from "@/shared/hooks/use-toast";
@@ -322,37 +324,13 @@ const FeaturedStoryModalPanel = ({
           activeIndex={activeImageIndex}
           onActiveIndexChange={setActiveImageIndex}
         />
-        <button
-          type="button"
+        <RightPanelCloseButton
           onClick={onClose}
           aria-label="Close featured story"
-          className="absolute right-4 top-6 z-20 inline-flex size-6 items-center justify-center text-white transition-opacity hover:opacity-70 md:right-6 md:top-10"
-        >
-          <svg
-            width="32"
-            height="32"
-            viewBox="0 0 32 32"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden
-            className="size-6 md:size-8"
-          >
-            <path
-              d="M24 8L8 24"
-              stroke="white"
-              strokeWidth="1.33333"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M24 24L8 8"
-              stroke="white"
-              strokeWidth="1.33333"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
+          variant="absolute"
+          light
+          className="z-20 transition-opacity hover:opacity-70"
+        />
       </div>
 
       <div
@@ -493,7 +471,8 @@ const BespokeFeaturedStoryModal = ({
             overlayClassName={overlayClassName}
             className={cn(
               shellZClass,
-              "h-dvh max-h-dvh w-full max-w-480 gap-0 border-0 bg-black p-0 shadow-2xl sm:max-w-480",
+              "h-dvh max-h-dvh w-full gap-0 border-0 bg-black p-0 shadow-2xl",
+              RIGHT_PANEL_WIDTH_CLASS,
               "data-[state=open]:duration-300 data-[state=closed]:duration-300 [&>button]:hidden",
             )}
           >

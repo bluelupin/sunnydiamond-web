@@ -10,9 +10,11 @@ import {
 } from "react";
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
+import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
 import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
 import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
-import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
+import { RIGHT_PANEL_WIDTH_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { bespokeFeaturedStoryModalFigmaSpec } from "@/features/bespoke/data/content";
 import { profileTabsContent } from "../data/profileContent";
 import type { ProfileBespokeItemUi } from "../types/profileUi.types";
@@ -265,37 +267,13 @@ export function ProfileBespokeDetailPanel({
           onActiveIndexChange={setActiveImageIndex}
         />
 
-        <button
-          type="button"
+        <RightPanelCloseButton
           onClick={onClose}
           aria-label="Close inspiration"
-          className="absolute right-4 top-6 z-20 inline-flex size-6 items-center justify-center text-white transition-opacity hover:opacity-70 md:right-6 md:top-10"
-        >
-          <svg
-            width="32"
-            height="32"
-            viewBox="0 0 32 32"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden
-            className="h-6 w-6 md:h-8 md:w-8"
-          >
-            <path
-              d="M24 8L8 24"
-              stroke="white"
-              strokeWidth="1.33333"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M24 24L8 8"
-              stroke="white"
-              strokeWidth="1.33333"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
+          variant="absolute"
+          light
+          className="z-20 transition-opacity hover:opacity-70"
+        />
       </div>
 
       <div
@@ -343,7 +321,11 @@ export function ProfileBespokeDetailPanel({
       <SheetContent
         side="right"
         overlayClassName={BESPOKE_DETAIL_OVERLAY_CLASS}
-        className="z-[70] h-dvh max-h-dvh w-full max-w-480 gap-0 border-0 bg-black p-0 shadow-2xl sm:max-w-480 data-[state=open]:duration-300 data-[state=closed]:duration-300 [&>button]:hidden"
+        className={cn(
+          "z-[70] h-dvh max-h-dvh w-full gap-0 border-0 bg-black p-0 shadow-2xl",
+          RIGHT_PANEL_WIDTH_CLASS,
+          "data-[state=open]:duration-300 data-[state=closed]:duration-300 [&>button]:hidden",
+        )}
       >
         <SheetTitle className="sr-only">{item.title}</SheetTitle>
         {panelBody}

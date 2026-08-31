@@ -81,6 +81,7 @@ const InlineCustomSelect = ({
   const [shouldRenderList, setShouldRenderList] = useState(false);
   const [isListVisible, setIsListVisible] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const labelId = `${id}-label`;
   const listboxId = `${id}-listbox`;
   const valueId = `${id}-value`;
@@ -110,6 +111,26 @@ const InlineCustomSelect = ({
       window.clearTimeout(timeoutId);
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || !isListVisible) {
+      return;
+    }
+
+    let frame2 = 0;
+    const frame1 = window.requestAnimationFrame(() => {
+      frame2 = window.requestAnimationFrame(() => {
+        listRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame1);
+      if (frame2) {
+        window.cancelAnimationFrame(frame2);
+      }
+    };
+  }, [isOpen, isListVisible]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -189,6 +210,7 @@ const InlineCustomSelect = ({
       </button>
       {shouldRenderList ? (
         <div
+          ref={listRef}
           id={listboxId}
           role="listbox"
           aria-labelledby={labelId}
@@ -201,7 +223,7 @@ const InlineCustomSelect = ({
             event.stopPropagation();
           }}
           className={cn(
-            "verticleMobileScrollbar absolute left-0 right-0 top-full z-[90] mt-1 flex max-h-64 flex-col overflow-y-auto bg-[#F2F2F2] shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
+            "verticleMobileScrollbar absolute left-0 right-0 top-full z-[90] mt-1 flex max-h-64 flex-col overflow-y-auto scroll-mb-4 bg-[#F2F2F2] shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
             "motion-safe:transform-gpu motion-safe:transition-[opacity,transform] motion-safe:duration-200 motion-safe:ease-out",
             "motion-safe:origin-top",
             isListVisible

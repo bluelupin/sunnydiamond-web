@@ -15,6 +15,8 @@ import {
   SelectValue,
 } from "@/shared/ui/select";
 import { cn } from "@/shared/utils/cn";
+import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 
 export const giftCardFieldLabelClass =
   "font-gill text-base font-normal leading-110 text-darkblack";
@@ -230,7 +232,7 @@ type GiftCardPanelHeaderProps = {
 };
 
 export const GiftCardPanelHeader = ({ onClose, onBack, title }: GiftCardPanelHeaderProps) => (
-  <div className="shrink-0 px-6 pt-10">
+  <div className={cn("shrink-0", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
     <div className="flex h-[26px] items-center justify-between">
       <div className="flex items-center gap-2">
         {onBack ? (
@@ -245,11 +247,7 @@ export const GiftCardPanelHeader = ({ onClose, onBack, title }: GiftCardPanelHea
         ) : null}
         <h2 className="font-larken text-32 font-light leading-110 text-darkblack">{title}</h2>
       </div>
-      <button type="button" onClick={onClose} aria-label="Close gift card flow">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
-          <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" strokeWidth="1.5" />
-        </svg>
-      </button>
+      <RightPanelCloseButton onClick={onClose} aria-label="Close gift card flow" />
     </div>
     <div className="mt-6 h-px w-full bg-neutral300" aria-hidden />
   </div>

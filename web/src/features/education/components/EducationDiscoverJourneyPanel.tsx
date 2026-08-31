@@ -8,6 +8,8 @@ import { cn } from "@/shared/utils/cn";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
 import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
+import { RIGHT_PANEL_HEADER_PADDING_CLASS, RIGHT_PANEL_WIDTH_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
 import { categoryIconSrc } from "@/features/jewellery-product/data/categoryIcons";
 import {
@@ -272,7 +274,7 @@ const EducationDiscoverJourneyPanel = ({ open, onClose }: EducationDiscoverJourn
 
   const panelBody = (
     <>
-      <div className="md:px-6 px-4 md:pt-10 pt-6">
+      <div className={RIGHT_PANEL_HEADER_PADDING_CLASS}>
           <div className="mx-auto flex h-8 w-full max-w-[392px] items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
               {step > 1 ? (
@@ -289,21 +291,10 @@ const EducationDiscoverJourneyPanel = ({ open, onClose }: EducationDiscoverJourn
                 Discover Your Piece
               </h2>
             </div>
-            <button
-              type="button"
+            <RightPanelCloseButton
               onClick={onClose}
               aria-label="Close discover journey panel"
-              className="inline-flex size-8 shrink-0 items-center justify-center"
-            >
-              <Image
-                src="/images/jewellery/filter-drawer-close.svg"
-                alt=""
-                width={32}
-                height={32}
-                aria-hidden
-                className="size-8 object-contain"
-              />
-            </button>
+            />
           </div>
           <div className="mx-auto mt-6 h-px w-full max-w-[392px] bg-neutral300" aria-hidden />
         </div>
@@ -575,7 +566,8 @@ const EducationDiscoverJourneyPanel = ({ open, onClose }: EducationDiscoverJourn
         overlayClassName={EDUCATION_JOURNEY_OVERLAY_CLASS}
         className={cn(
           EDUCATION_JOURNEY_SHELL_CLASS,
-          "h-dvh max-h-dvh w-full max-w-[440px] sm:max-w-[440px]",
+          "h-dvh max-h-dvh w-full",
+          RIGHT_PANEL_WIDTH_CLASS,
           "data-[state=open]:duration-300 data-[state=closed]:duration-300",
           "[&>button]:hidden",
         )}
