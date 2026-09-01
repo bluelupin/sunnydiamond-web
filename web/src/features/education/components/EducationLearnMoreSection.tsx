@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
@@ -8,6 +8,7 @@ import FeaturedProductsCarousel, {
   type FeaturedCarouselItem,
 } from "@/features/cms/components/home/FeaturedProductsCarousel";
 import { cn } from "@/shared/utils/cn";
+import { useLearnAnatomySectionSync } from "@/features/education/hooks/useLearnAnatomySectionSync";
 import type {
   NormalizedEducationLearnAnatomyDetail,
   NormalizedEducationLearnCareTip,
@@ -174,9 +175,15 @@ const LearnCareTipsGrid = ({ tips }: { tips: NormalizedEducationLearnCareTip[] }
 };
 
 const LearnAnatomyDetailPanel = ({ detail }: { detail: NormalizedEducationLearnAnatomyDetail }) => {
-  const [openSectionId, setOpenSectionId] = useState<string | null>(
-    detail.sections[0]?.id ?? null,
+  const sectionIds = useMemo(
+    () => detail.sections.map((section) => section.id),
+    [detail.sections],
   );
+  const defaultSectionId = detail.sections[0]?.id ?? null;
+  const { openSectionId, handleSectionClick, registerSectionRef } = useLearnAnatomySectionSync({
+    sectionIds,
+    defaultSectionId,
+  });
 
   return (
     <ScrollReveal delayMs={260} className="w-full max-w-1920 2xl:px[60px] lg:px-10 md:px-8 px-4">
@@ -200,6 +207,8 @@ const LearnAnatomyDetailPanel = ({ detail }: { detail: NormalizedEducationLearnA
               return (
                 <div
                   key={section.id}
+                  ref={(element) => registerSectionRef(section.id, element)}
+                  data-anatomy-section-id={section.id}
                   className="overflow-hidden bg-gray300 lg:max-w-[667px] md:max-w-[530px] max-w-full"
                 >
                   <button
@@ -207,11 +216,7 @@ const LearnAnatomyDetailPanel = ({ detail }: { detail: NormalizedEducationLearnA
                     aria-expanded={isOpen}
                     aria-controls={`anatomy-section-${section.id}`}
                     id={`anatomy-trigger-${section.id}`}
-                    onClick={() =>
-                      setOpenSectionId((current) =>
-                        current === section.id ? null : section.id,
-                      )
-                    }
+                    onClick={() => handleSectionClick(section.id)}
                     className="flex w-full items-center px-6 py-5 text-left"
                   >
                     <span className="font-larken text-xl font-light leading-110 text-darkblack md:text-2xl">

@@ -97,8 +97,8 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
       className={cn(
         "relative overflow-hidden",
         !(certificate.backgroundDesktopUrl || certificate.backgroundMobileUrl) &&
-          "education-certified-section",
-        "min-h-[900px] px-4 py-16",
+        "education-certified-section",
+        "md:min-h-[900px] min-h-[1033px] px-4 py-16",
         "lg:min-h-[791px] md:px-0 md:py-104",
       )}
     >
@@ -114,11 +114,11 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
           />
         </div>
       ) : null}
-      <div className="relative flex flex-col items-center md:gap[40px] gap-8 mx-auto w-full 2xl:max-w-1920 max-w-1440 px-0 md:px-8 lg:px-10 2xl:px-[60px]">
+      <div className="relative flex flex-col items-center md:gap[40px] md:gap-10 gap-8 mx-auto w-full 2xl:max-w-1920 max-w-1440 px-0 md:px-8 lg:px-10 2xl:px-[60px]">
         <ScrollReveal
           as="h2"
           delayMs={0}
-          className="mb-8 w-full text-center md:mb-10"
+          className="w-full text-center"
         >
           <span
             id="education-certified-title"
@@ -130,9 +130,7 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
 
         {/* Mobile logos — Figma 692:28735 */}
         <div
-          className="mb-8 flex w-full flex-col md:hidden"
-          style={{ gap: logosSpec.mobile.rowGap }}
-        >
+          className="flex w-full flex-col md:hidden gap-6">
           <div className="grid grid-cols-2">
             {mobileCertifications.slice(0, 2).map((cert, index) => (
               <ScrollReveal key={cert.id} delayMs={80 + index * 80}>
@@ -166,7 +164,7 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
         </div>
 
         {/* Desktop logos — Figma 692:29096 */}
-        <div className="mb-10 hidden w-full grid-cols-4 md:grid">
+        <div className="hidden w-full grid-cols-4 md:grid">
           {certificate.certifications.map((cert, index) => (
             <ScrollReveal
               key={cert.id}
@@ -186,9 +184,7 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
 
         {/* Mobile copy */}
         <div
-          className="flex w-full flex-col md:hidden"
-          style={{ gap: copySpec.mobile.blockGap }}
-        >
+          className="flex w-full flex-col md:hidden gap-8">
           <ScrollReveal delayMs={400}>
             <Image
               src={educationPageImages.certifiedDividerMobile}
@@ -238,8 +234,8 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
 
         {/* Desktop copy + girdle visual — Figma 692:29096 */}
         <div className="relative hidden w-full md:block">
-          <ScrollReveal delayMs={120} className="w-full max-w-[647px]">
-            <div className="flex flex-col" style={{ gap: copySpec.desktop.blockGap }}>
+          <ScrollReveal delayMs={120} className="w-full lg:max-w-[647px] md:max-w-[430px]">
+            <div className="flex flex-col gap-10">
               <div className="h-px w-full">
                 <Image
                   src={educationPageImages.certifiedDivider}
@@ -253,13 +249,13 @@ const EducationCertifiedSection = ({ certificate }: EducationCertifiedSectionPro
 
               <div className="flex flex-col" style={{ gap: copySpec.desktop.itemGap }}>
                 {certificate.whyTitle ? (
-                  <h3 className="font-gill text-2xl font-normal leading-110 text-darkblack">
+                  <h3 className="font-gill lg:text-2xl text-xl font-normal leading-110 text-darkblack">
                     {certificate.whyTitle}
                   </h3>
                 ) : null}
                 {certificate.whyDescription ? (
                   <p
-                    className="font-gill text-xl font-light leading-110 text-neutral500"
+                    className="font-gill lg:text-xl text-lg font-light leading-110 text-neutral500"
                     style={{ maxWidth: copySpec.desktop.bodyMaxWidth }}
                   >
                     {certificate.whyDescription}

@@ -300,7 +300,7 @@ const EducationMetricSlider = ({
   return (
     <div
       ref={sliderRef}
-      className={cn("relative z-20 mx-auto w-full max-w-full cursor-pointer touch-none max-w-400 lg:max-w-400", className)}
+      className={cn("relative z-20 mx-auto w-full cursor-pointer touch-none max-w-[304px] md:max-w-400", className)}
       style={{ width: "100%", height: sliderHeight }}
       role="group"
       aria-label={spec.ariaLabel}
@@ -385,11 +385,11 @@ const EducationMetricSlider = ({
       {showEndpointLabels ? (
         <>
           {options[0] &&
-          !(
-            activeIndex > 0 &&
-            activeIndex < lastDotIndex &&
-            Math.abs((dotCenters[0] ?? 0) - activeDotCenter) < 56
-          ) ? (
+            !(
+              activeIndex > 0 &&
+              activeIndex < lastDotIndex &&
+              Math.abs((dotCenters[0] ?? 0) - activeDotCenter) < 56
+            ) ? (
             <span
               className={cn(
                 "pointer-events-none absolute whitespace-nowrap font-gill font-normal leading-110 transition-colors",
@@ -407,11 +407,11 @@ const EducationMetricSlider = ({
             </span>
           ) : null}
           {options[lastDotIndex] &&
-          !(
-            activeIndex > 0 &&
-            activeIndex < lastDotIndex &&
-            Math.abs((dotCenters[lastDotIndex] ?? 0) - activeDotCenter) < 56
-          ) ? (
+            !(
+              activeIndex > 0 &&
+              activeIndex < lastDotIndex &&
+              Math.abs((dotCenters[lastDotIndex] ?? 0) - activeDotCenter) < 56
+            ) ? (
             <span
               className={cn(
                 "pointer-events-none absolute whitespace-nowrap font-gill font-normal leading-110 transition-colors",
