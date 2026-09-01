@@ -12,7 +12,7 @@ export const RIGHT_PANEL_CONTENT_PADDING_CLASS = "px-4 md:px-6";
 
 /** Absolute close (X) on image/hero overlays — mobile: 24px top, 16px right; desktop: 24px top, 40px right. */
 export const RIGHT_PANEL_CLOSE_ABSOLUTE_CLASS =
-  "absolute top-6 right-4 z-10 flex size-6 items-center justify-center md:right-10";
+  "absolute z-10 flex size-6 items-center justify-center md:top-10 top-6 md:right-6 right-4";
 
 /** Inline close (X) in panel headers — pair with RIGHT_PANEL_HEADER_PADDING_CLASS. */
 export const RIGHT_PANEL_INLINE_CLOSE_CLASS =

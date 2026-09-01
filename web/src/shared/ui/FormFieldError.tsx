@@ -25,7 +25,7 @@ const FormFieldError = forwardRef<HTMLDivElement, FormFieldErrorProps>(
         <span className="inline-flex h-[calc(0.875rem*1.1)] shrink-0 items-center">
           <FormFieldErrorIcon className="size-4 shrink-0" />
         </span>
-        <p className={cn(formFieldErrorClassName, "min-w-0 translate-y-0.5")}>{message}</p>
+        <p className={cn(formFieldErrorClassName, "min-w-0")}>{message}</p>
       </div>
     );
   },

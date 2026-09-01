@@ -71,7 +71,7 @@ type ProductDetailSidebarProps = {
   productDisplay: NormalizedProductDisplayPage;
   /** Server-read MAGENTO_STOCK_ALERT deploy gate for the notify-me action. */
   stockAlertEnabled?: boolean;
-  onAddToBag: (payload: AddToBagPayload) => void;
+  onAddToBag: (payload: AddToBagPayload) => void | Promise<void>;
   initialRingSize?: string;
   initialEngravingSelection?: EngravingSelection | null;
   initialIsGift?: boolean;
@@ -121,6 +121,7 @@ const ProductDetailSidebar = ({
   const [isTryAtHomeOpen, setIsTryAtHomeOpen] = useState(false);
   const [isPersonaliseOpen, setIsPersonaliseOpen] = useState(false);
   const [isPriceBreakupOpen, setIsPriceBreakupOpen] = useState(false);
+  const [isAddingToBag, setIsAddingToBag] = useState(false);
   const router = useRouter();
   const { status } = useAuth();
   const { isWishlisted, toggleWishlist } = useWishlist();
@@ -328,6 +329,37 @@ const ProductDetailSidebar = ({
   )?.sku?.trim();
   const stockAlertSku = selectedVariantSku || product.id;
   const showNotifyWhenAvailable = stockAlertEnabled && !displayProduct.inStock;
+  const addingToBagLabel = addToBagLabel === "Update Bag" ? "Updating…" : "Adding…";
+
+  const handleAddToBagClick = async () => {
+    if (isAddingToBag) return;
+
+    if (showSizeSelector && !ringSize.trim()) {
+      setRingSizeError(
+        `Please select a ${(sizeGuide?.sizeFieldLabel ?? "size").trim().toLowerCase()}.`,
+      );
+      return;
+    }
+
+    setIsAddingToBag(true);
+    try {
+      await onAddToBag({
+        product: displayProduct,
+        options: {
+          metal: activeMetal?.label,
+          ringSize: ringSize || undefined,
+          ...(engravingEnabled && engravingConfig
+            ? buildEngravingCartLineOptions(engravingConfig, engravingSelection)
+            : {}),
+          isGift,
+        },
+        ...(configurableOptionUids.length > 0 ? { configurableOptionUids } : {}),
+        productCustomOptions: product.customOptions,
+      });
+    } finally {
+      setIsAddingToBag(false);
+    }
+  };
 
   const purchaseSection = (
     <div className="flex flex-col gap-10 px-4 pt-8 md:pt-6 md:px-0 lg:pt-0">
@@ -459,33 +491,13 @@ const ProductDetailSidebar = ({
               <NotifyWhenAvailableButton key={stockAlertSku} sku={stockAlertSku} />
             ) : (
               <DetailDarkButton
-                className="flex-1 uppercase"
+                className="flex-1 uppercase disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={() => {
-                  if (showSizeSelector && !ringSize.trim()) {
-                    setRingSizeError(
-                      `Please select a ${(sizeGuide?.sizeFieldLabel ?? "size").trim().toLowerCase()}.`,
-                    );
-                    return;
-                  }
-
-                  onAddToBag({
-                    product: displayProduct,
-                    options: {
-                      metal: activeMetal?.label,
-                      ringSize: ringSize || undefined,
-                      ...(engravingEnabled && engravingConfig
-                        ? buildEngravingCartLineOptions(engravingConfig, engravingSelection)
-                        : {}),
-                      isGift,
-                    },
-                    ...(configurableOptionUids.length > 0
-                      ? { configurableOptionUids }
-                      : {}),
-                    productCustomOptions: product.customOptions,
-                  });
+                  void handleAddToBagClick();
                 }}
+                disabled={isAddingToBag}
               >
-                {addToBagLabel}
+                {isAddingToBag ? addingToBagLabel : addToBagLabel}
               </DetailDarkButton>
             )}
             <button

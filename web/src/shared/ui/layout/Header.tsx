@@ -181,7 +181,7 @@ const Header = () => {
           )}
         >
           {/* Figma 692:6742 — solid PDP header: white bg, py-24, dark nav; mobile bar 64px */}
-          <div className="relative mx-auto flex h-16 w-full max-w-1440 items-center justify-between px-5 max-md:pt-2 md:landscape:h-[104px] md:landscape:px-8 md:landscape:pt-0 lg:landscape:px-10 lg:landscape:py-6 2xl:max-w-1920 2xl:landscape:px-[60px]">
+          <div className="relative mx-auto flex h-16 w-full max-w-1440 items-center justify-between px-5 md:landscape:h-[104px] md:landscape:px-8 md:landscape:pt-0 lg:landscape:px-10 lg:landscape:py-6 2xl:max-w-1920 2xl:landscape:px-[60px]">
             <div className="flex w-[120px] items-center gap-6 md:landscape:hidden">
               <button
                 type="button"

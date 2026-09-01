@@ -253,7 +253,7 @@ const OffersAndDealsExpandedContent = ({
     return <div className={className}>{body}</div>;
   }
 
-  return <div className={cn("bg-gray300 px-4 pb-4", className)}>{body}</div>;
+  return <div className={cn(expandedBackground, "px-4 pb-4", className)}>{body}</div>;
 };
 
 export default OffersAndDealsExpandedContent;
