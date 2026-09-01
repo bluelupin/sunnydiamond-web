@@ -5,6 +5,9 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import type { TimelineYear } from "../hooks/useAboutTimelineScroll";
 
+const mobileNavCollapseTransitionClassName =
+  "grid min-h-0 transition-[grid-template-rows,opacity] duration-500 ease-in-out motion-reduce:transition-none";
+
 type AboutTimelineNavProps = {
   years: readonly string[];
   activeYear: TimelineYear;
@@ -18,6 +21,15 @@ const AboutTimelineNav = ({
 }: AboutTimelineNavProps) => {
   const listId = useId();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isMobileLayout, setIsMobileLayout] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsMobileLayout(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
 
   useEffect(() => {
     setIsExpanded(false);
@@ -63,50 +75,60 @@ const AboutTimelineNav = ({
         <span className="h-px w-full bg-white/40" aria-hidden />
       </div>
 
-      <ol
-        id={listId}
+      <div
+        aria-hidden={isMobileLayout && !isExpanded ? true : undefined}
         className={cn(
-          "flex flex-col items-start gap-4 sm:gap-6 md:gap-8 lg:items-start",
-          isExpanded ? "mt-4 flex" : "hidden",
-          "md:mt-0 md:flex md:items-start lg:items-start",
+          mobileNavCollapseTransitionClassName,
+          "md:contents",
+          isExpanded
+            ? "grid-rows-[1fr] opacity-100"
+            : "pointer-events-none grid-rows-[0fr] opacity-0",
+          "md:pointer-events-auto md:grid-rows-[1fr] md:opacity-100",
         )}
       >
-        {years.map((year) => {
-          const isActive = year === activeYear;
+        <div className="min-h-0 overflow-hidden md:overflow-visible">
+          <ol
+            id={listId}
+            className="mt-4 flex flex-col items-start gap-4 sm:gap-6 md:mt-0 md:gap-8 lg:items-start md:max-h-full max-h-[290px] md:overflow-y-hidden overflow-y-auto"
+          >
+            {years.map((year) => {
+              const isActive = year === activeYear;
 
-          return (
-            <li key={year}>
-              <button
-                type="button"
-                onClick={() => handleYearSelect(year)}
-                className={cn(
-                  "flex w-full items-center justify-end gap-2 text-right transition-opacity duration-500 ease-out motion-reduce:transition-none md:justify-start",
-                  !isActive && "opacity-40 hover:opacity-70",
-                )}
-                aria-current={isActive ? "step" : undefined}
-              >
-                <span
-                  className={cn(
-                    "hidden h-px w-16 shrink-0 transition-colors duration-500 ease-out motion-reduce:transition-none md:block",
-                    isActive ? "bg-white" : "bg-aboutInactive",
-                  )}
-                  aria-hidden
-                />
-                <span
-                  className={cn(
-                    "font-gill leading-110 transition-all duration-500 ease-out motion-reduce:transition-none",
-                    isActive
-                      ? "text-2xl font-semibold text-white"
-                      : "text-xl font-normal text-aboutInactive",
-                  )}
-                >
-                  {year}
-                </span>
-              </button>
-            </li>
-          );
-        })}
-      </ol>
+              return (
+                <li key={year}>
+                  <button
+                    type="button"
+                    onClick={() => handleYearSelect(year)}
+                    className={cn(
+                      "flex w-full items-center justify-end gap-2 text-right transition-opacity duration-500 ease-out motion-reduce:transition-none md:justify-start",
+                      !isActive && "opacity-40 hover:opacity-70",
+                    )}
+                    aria-current={isActive ? "step" : undefined}
+                  >
+                    <span
+                      className={cn(
+                        "hidden h-px w-16 shrink-0 transition-colors duration-500 ease-out motion-reduce:transition-none md:block",
+                        isActive ? "bg-white" : "bg-aboutInactive",
+                      )}
+                      aria-hidden
+                    />
+                    <span
+                      className={cn(
+                        "font-gill leading-110 transition-all duration-500 ease-out motion-reduce:transition-none",
+                        isActive
+                          ? "text-xl font-semibold text-white"
+                          : "text-xl font-normal text-aboutInactive",
+                      )}
+                    >
+                      {year}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      </div>
     </nav>
   );
 };

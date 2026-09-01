@@ -367,9 +367,9 @@ const ProductDetailSidebar = ({
         <div className="flex flex-col gap-6">
           <header className="flex flex-col gap-4">
             <ul className="m-0 flex list-none flex-wrap items-center gap-3 p-0">
-              {content.attributes.map((attribute, index) => (
+              {content.attributes.slice(0, 3).map((attribute, index) => (
                 <li key={attribute} className="flex items-center gap-3">
-                  {index > 0 ? <AttributeSeparator /> : null}
+                  {index > 0 ? <AttributeSeparator className="" /> : null}
                   <span className="font-gill text-base font-light leading-110 text-neutral500">
                     {attribute}
                   </span>

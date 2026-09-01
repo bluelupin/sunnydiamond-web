@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, type RefObject } from "react";
+import { useCallback, useState, type RefObject } from "react";
 import { ChevronRight } from "lucide-react";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import type { Product } from "@/features/products/data/products";
 import { cn } from "@/shared/utils/cn";
+import { useHorizontalCarouselSwipe } from "@/features/products/hooks/useHorizontalCarouselSwipe";
 import {
   PRODUCT_DETAIL_GALLERY_HERO_IMAGE,
   PRODUCT_DETAIL_GALLERY_LIFESTYLE_IMAGE,
@@ -42,13 +43,28 @@ const ProductDetailGallery = ({ product, topGalleryRef }: ProductDetailGalleryPr
     product.image,
   ].slice(0, GALLERY_SLIDE_COUNT);
 
-  const goToNextSlide = () => {
+  const goToNextSlide = useCallback(() => {
     setActiveSlide((current) => (current + 1) % carouselImages.length);
-  };
+  }, [carouselImages.length]);
+
+  const goToPreviousSlide = useCallback(() => {
+    setActiveSlide(
+      (current) => (current - 1 + carouselImages.length) % carouselImages.length,
+    );
+  }, [carouselImages.length]);
+
+  const { swipeProps } = useHorizontalCarouselSwipe({
+    slideCount: carouselImages.length,
+    onNext: goToNextSlide,
+    onPrevious: goToPreviousSlide,
+  });
 
   return (
     <>
-      <div className="grid h-500 w-full shrink-0 grid-rows-[1fr_auto] overflow-hidden md:hidden">
+      <div
+        className="grid h-500 w-full shrink-0 grid-rows-[1fr_auto] overflow-hidden touch-pan-y select-none md:hidden"
+        {...swipeProps}
+      >
         <div className="grid min-h-0 [&>*]:col-start-1 [&>*]:row-start-1">
           <div className="flex items-center justify-center bg-gray300">
             <div className="flex h-500 w-full max-w-375 items-center justify-center overflow-hidden">
@@ -68,7 +84,10 @@ const ProductDetailGallery = ({ product, topGalleryRef }: ProductDetailGalleryPr
               aria-label="Next product image"
               className="inline-flex size-6 items-center justify-center text-darkblack"
             >
-              <ChevronRight size={24} strokeWidth={1.25} aria-hidden />
+              <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 12.5H21M12.5 21L21 12.5L12.5 4" stroke="#0A0A0A" strokeLinejoin="round" />
+              </svg>
+              {/* <ChevronRight size={24} strokeWidth={1.25} aria-hidden /> */}
             </button>
           </div>
         </div>
