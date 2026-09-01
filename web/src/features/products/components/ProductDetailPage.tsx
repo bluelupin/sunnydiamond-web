@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import type { Product } from "@/features/products/data/products";
@@ -12,7 +11,6 @@ import {
 import { useAddToBagWithDrawer } from "@/features/cart/hooks/useAddToBagWithDrawer";
 import { useCart } from "@/features/cart/context/CartContext";
 import type { AddToBagPayload } from "@/features/cart/types/cart.types";
-import { ChevronLeft } from "lucide-react";
 import ProductDetailSidebar from "./detail/ProductDetailSidebar";
 import ProductDetailHeroLayout from "./detail/ProductDetailHeroLayout";
 import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
@@ -125,14 +123,6 @@ const ProductDetailPage = ({
 
   return (
     <PageContainer className="!px-0 md:!px-8 lg:!px-10 2xl:!px-[60px] pb-16 pt-0 lg:pb-[60px]">
-      <Link
-        href="/jewellery"
-        className="mb-6 hidden items-center gap-1 px-4 font-gill text-sm text-neutral500 transition-colors hover:text-darkMagenta md:inline-flex md:px-0 lg:mb-8"
-      >
-        <ChevronLeft size={16} aria-hidden />
-        Back to Jewellery
-      </Link>
-
       <ProductDetailSidebar {...sidebarProps}>
         {({ purchase, details }) => (
           <ProductDetailHeroLayout
