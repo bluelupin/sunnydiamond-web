@@ -113,6 +113,10 @@ export const DetailOutlineLink = ({ children, href, className }: DetailOutlineLi
   </Link>
 );
 
-export const AttributeSeparator = () => (
-  <span aria-hidden className="h-18 w-px shrink-0 bg-neutral300" />
+type AttributeSeparatorProps = {
+  className?: string;
+};
+
+export const AttributeSeparator = ({ className }: AttributeSeparatorProps) => (
+  <span aria-hidden className={cn("h-18 w-px shrink-0 bg-neutral300", className)} />
 );

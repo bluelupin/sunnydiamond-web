@@ -29,7 +29,7 @@ const AboutTimelineContent = ({
     >
       <div className="flex w-full max-w-308 items-center gap-2">
         <div className="flex shrink-0 items-center gap-1">
-          <DiamondIcon className="h-18 w-18 shrink-0 text-darkblack" aria-hidden />
+          <DiamondIcon className="md:h-18 md:w-18 w-5 h-5 shrink-0 text-darkblack" aria-hidden />
           <p className="font-gill text-base font-light leading-110 text-darkblack">
             {activeYear}
           </p>
