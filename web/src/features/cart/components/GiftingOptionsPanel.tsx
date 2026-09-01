@@ -308,7 +308,7 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
-      <div className={cn("w-full shrink-0 pt-6", RIGHT_PANEL_CONTENT_PADDING_CLASS)}>
+      <div className={cn("w-full shrink-0 md:pt-10 pt-6", RIGHT_PANEL_CONTENT_PADDING_CLASS)}>
         <div className="flex h-[26px] items-center justify-between">
           <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
             Gifting Options

@@ -12,6 +12,7 @@ import {
 import { CartGiftBadge, CartMetaRow } from "@/features/cart/components/CartFlowUi";
 import type { CartLineItem } from "@/features/cart/types/cart.types";
 import OffersAndDealsSection, {
+  OffersAndDealsCollapsible,
   OffersAndDealsExpandedContent,
 } from "@/shared/ui/OffersAndDealsSection";
 import PriceDetailsBreakdown from "@/features/cart/components/PriceDetailsBreakdown";
@@ -131,9 +132,9 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
             showExpandedContent={false}
             buttonClassName="flex lg:hidden"
           />
-          {offersOpen ? (
-            <OffersAndDealsExpandedContent variant="panel-gray300" className="lg:hidden" />
-          ) : null}
+          <OffersAndDealsCollapsible open={offersOpen} variant="panel-gray300" className="lg:hidden">
+            <OffersAndDealsExpandedContent variant="panel-gray300" />
+          </OffersAndDealsCollapsible>
 
           <PriceDetailsBreakdown
             variant="checkout"
@@ -153,9 +154,9 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
               showExpandedContent={false}
               buttonClassName="hidden lg:flex"
             />
-            {offersOpen ? (
-              <OffersAndDealsExpandedContent variant="panel-gray300" className="hidden lg:block lg:px-4 lg:pb-4" />
-            ) : null}
+            <OffersAndDealsCollapsible open={offersOpen} variant="panel-gray300" className="hidden lg:grid">
+              <OffersAndDealsExpandedContent variant="panel-gray300" className="lg:px-4 lg:pb-4" />
+            </OffersAndDealsCollapsible>
           </div>
         </div>
       ) : (

@@ -236,7 +236,7 @@ const WishlistAddToBagPanel = ({
                 <div className="flex items-start justify-between gap-4">
                   {content ? (
                     <ul className="m-0 flex list-none flex-wrap items-center gap-2 p-0 md:gap-3">
-                      {content.attributes.map((attribute, index) => (
+                      {content.attributes.slice(0, 3).map((attribute, index) => (
                         <li key={attribute} className="flex items-center gap-2 md:gap-3">
                           {index > 0 ? <AttributeSeparator /> : null}
                           <span className="font-gill text-sm font-light leading-110 text-neutral500 md:text-base">
@@ -252,7 +252,7 @@ const WishlistAddToBagPanel = ({
                     See Details
                   </DetailTextLink>
                 </div>
-                <h2 className="font-larken text-2xl font-light leading-110 text-darkblack lg:text-32">
+                <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
                   {displayName}
                 </h2>
               </div>

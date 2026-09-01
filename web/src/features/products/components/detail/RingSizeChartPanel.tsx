@@ -78,7 +78,7 @@ const TutorialVideo = ({ videoUrl, mimeType, title }: TutorialVideoProps) => {
   }, []);
 
   return (
-    <div className="relative w-full shrink-0 overflow-hidden bg-white">
+    <div className="relative w-full shrink-0 overflow-hidden bg-white z-0">
       <video
         ref={videoRef}
         className="block h-auto w-full"

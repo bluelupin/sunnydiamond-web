@@ -109,22 +109,16 @@ const LearnCareTip = ({ tip, mobile = false }: { tip: NormalizedEducationLearnCa
 
   return (
     <div className="flex flex-col items-center text-center gap-4">
-      <div
-        className="relative shrink-0 w-20 h-20"
-        style={{
-          width: mobile ? mobileSpec.iconSize : desktop.iconSize,
-          height: mobile ? mobileSpec.iconSize : desktop.iconSize,
-        }}
-      >
+      <div className="relative shrink-0 w-20 h-20">
         <Image
           src={mobile && tip.mobileIcon ? tip.mobileIcon : tip.icon}
           alt={tip.iconAlt || ""}
           fill
-          className="object-contain"
+          className="object-contain w-20 h-20"
         />
       </div>
       <p
-        className="font-gill font-light text-base leading-110 text-darkblack md:text-neutral500"
+        className="font-gill font-light md:text-base text-sm leading-110 text-darkblack"
       >
         {tip.labelLines.map((line) => (
           <span key={line} className="block">
@@ -143,19 +137,23 @@ const LearnCareTipsGrid = ({ tips }: { tips: NormalizedEducationLearnCareTip[] }
 
   return (
     <ScrollReveal delayMs={260} className="flex w-full flex-col items-center">
-      <div className="flex w-full flex-col items-center gap-8 md:hidden">
-        {tips.map((tip) => (
-          <LearnCareTip key={tip.id} tip={tip} mobile />
+      <div className="grid grid-cols-2 gap-x-4 gap-y-6 w-full md:hidden px-3">
+        {tips.map((tip, index) => (
+          <div
+            key={tip.id}
+            className={
+              tips.length % 2 !== 0 && index === tips.length - 1
+                ? "col-span-2 flex justify-center"
+                : ""
+            }
+          >
+            <LearnCareTip tip={tip} mobile />
+          </div>
         ))}
       </div>
 
       <div
-        className="hidden w-full grid-cols-6 md:grid"
-        style={{
-          maxWidth: desktop.maxWidth,
-          rowGap: desktop.rowGap,
-        }}
-      >
+        className="hidden w-full grid-cols-6 md:grid gap-y-16 max-w-[906px]">
         {topRow.map((tip) => (
           <div key={tip.id} className="col-span-2 flex justify-center">
             <LearnCareTip tip={tip} />
@@ -361,7 +359,7 @@ const EducationLearnMoreSection = ({ learnMore }: EducationLearnMoreSectionProps
             isCarousel && "gap-10",
           )}
         >
-          <div className={cn(isCarousel && "w-full px-4 md:px-10")}>
+          <div className={cn(isCarousel && "w-full px-4 md:px-10", "px-4 md:px-10")}>
             <LearnTabDescription tab={activeTab} animate={!isCarousel} />
           </div>
 

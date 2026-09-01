@@ -24,7 +24,7 @@ export function RightPanelHeader({
   alignWithContent = false,
 }: RightPanelHeaderProps) {
   const wrapperPadding = alignWithContent
-    ? cn("pt-6", RIGHT_PANEL_CONTENT_PADDING_CLASS)
+    ? cn("md:pt-10 pt-6", RIGHT_PANEL_CONTENT_PADDING_CLASS)
     : RIGHT_PANEL_HEADER_PADDING_CLASS;
 
   return (

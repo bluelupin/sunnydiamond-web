@@ -280,7 +280,7 @@ type CartBagDrawerSuccessHeaderProps = {
 /** Figma node 2574:58791 — bag drawer add-to-bag success */
 export const CartBagDrawerSuccessHeader = ({ message }: CartBagDrawerSuccessHeaderProps) => (
   <div className="flex w-full flex-col items-center gap-4 text-center">
-    <CartSuccessCheck size="lg" />
+    <CartSuccessCheck />
     <p className="m-0 font-gill text-base font-light leading-110 text-darkblack">{message}</p>
   </div>
 );
@@ -332,11 +332,9 @@ type CartMoreItemsNoteProps = {
 
 export const CartMoreItemsNote = ({ count }: CartMoreItemsNoteProps) => (
   <div className="flex w-full items-center">
-    <div className="flex h-6 shrink-0 items-center gap-2">
-      <span className="inline-flex size-6 shrink-0 items-center justify-center overflow-hidden text-darkblack">
-        <ShoppingBagIcon className="size-6" />
-      </span>
-      <p className="m-0 flex h-6 translate-y-1 items-center font-gill text-base font-light leading-110 text-darkblack whitespace-nowrap">
+    <div className="flex items-center gap-2">
+      <ShoppingBagIcon className="size-6 shrink-0" />
+      <p className="m-0 flex items-center font-gill text-base font-light leading-110 text-darkblack">
         Your bag contains {count} more {count === 1 ? "item" : "items"}
       </p>
     </div>

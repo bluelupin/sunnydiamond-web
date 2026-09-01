@@ -14,6 +14,7 @@ import WishlistGrid from "./WishlistGrid";
 import WishlistList from "./WishlistList";
 import WishlistHeading from "./WishlistHeading";
 import WishlistAddToBagPanel from "./WishlistAddToBagPanel";
+import { WishlistPageGridSkeleton } from "./skeletons/WishlistPageSkeleton";
 import { prefetchWishlistProductDetail } from "@/features/wishlist/utils/wishlistProductDetailPrefetch";
 
 const WishlistPage = () => {
@@ -42,6 +43,29 @@ const WishlistPage = () => {
     await addToBagAndOpenDrawer(payload);
   };
 
+  if (isLoading && wishlistedIds.length > 0) {
+    const skeletonCardCount = Math.min(wishlistedIds.length, WISHLIST_VISIBLE_CAP);
+
+    return (
+      <section className="min-h-screen pb-[calc(64px+env(safe-area-inset-bottom,0px))] md:pb-0">
+        <WishlistHeading
+          productCount={wishlistedIds.length}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
+        <div className="bg-gray200">
+          <WishlistPageGridSkeleton cardCount={skeletonCardCount} />
+        </div>
+        <WishlistAddToBagPanel
+          open={Boolean(addToBagProduct)}
+          product={addToBagProduct}
+          onClose={() => setAddToBagProduct(null)}
+          onAddToBag={handlePanelAddToBag}
+        />
+      </section>
+    );
+  }
+
   return (
     <section className="min-h-screen pb-[calc(64px+env(safe-area-inset-bottom,0px))] md:pb-0">
       <WishlistHeading
@@ -53,15 +77,9 @@ const WishlistPage = () => {
       <div
         className={cn(
           "bg-gray200",
-          (showEmptyState || showLoadError || needsFooterMargin) && "mb-[110px]",
+          (showEmptyState || showLoadError || needsFooterMargin) && "md:mb-24 mb-6",
         )}
       >
-        {isLoading && wishlistedIds.length > 0 ? (
-          <p className="sr-only" aria-live="polite">
-            Loading wishlist products
-          </p>
-        ) : null}
-
         {showLoadError ? (
           <div className="mx-auto w-full max-w-1440 px-4 py-6 md:px-8 md:py-10 lg:px-10 2xl:max-w-1920 2xl:px-[60px]">
             <p className="text-center font-gill text-base font-light leading-110 text-neutral500" role="alert">
