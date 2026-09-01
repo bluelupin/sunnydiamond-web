@@ -8,6 +8,7 @@ import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { getWishlistProductHref } from "@/features/wishlist/utils/wishlistProduct.utils";
 import { prefetchWishlistProductDetail } from "@/features/wishlist/utils/wishlistProductDetailPrefetch";
 import { wishlistPageContent } from "@/features/wishlist/data/content";
+import DeleteIcon from "@/assets/Icons/DeleteIcon";
 import { cn } from "@/shared/utils/cn";
 
 type WishlistListItemLayout = "default" | "profile";
@@ -29,7 +30,15 @@ const WishlistListItem = ({
   const isProfileLayout = layout === "profile";
 
   return (
-    <article className={cn("flex w-full flex-col gap-4 px-4 py-6", isProfileLayout && "md:bg-transparent bg-gray200")}>
+    <article className={cn("relative flex w-full flex-col gap-4 px-4 py-6", isProfileLayout && "md:bg-transparent bg-gray200")}>
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label={`Remove ${product.name}`}
+        className="absolute right-2 top-2 flex items-center justify-center md:hidden"
+      >
+        <DeleteIcon className="size-6 text-darkblack" />
+      </button>
       <Link
         href={href}
         className="sm:w-[300px] sm:h-[300px] mx-auto w-[160px] h-[160px] flex items-center justify-center"
@@ -56,7 +65,7 @@ const WishlistListItem = ({
             {formatJewelleryPrice(product.price)}
           </p>
         </div>
-        <div className="flex items-center gap-8">
+        <div className="flex items-center justify-center md:gap-8">
           <span
             onPointerEnter={() => prefetchWishlistProductDetail(product.urlKey)}
             onFocus={() => prefetchWishlistProductDetail(product.urlKey)}
@@ -65,9 +74,11 @@ const WishlistListItem = ({
               {wishlistPageContent.addToBagLabel}
             </DetailTextLink>
           </span>
-          <DetailTextLink onClick={onRemove}>
-            {wishlistPageContent.removeLabel}
-          </DetailTextLink>
+          <span className="max-md:hidden">
+            <DetailTextLink onClick={onRemove}>
+              {wishlistPageContent.removeLabel}
+            </DetailTextLink>
+          </span>
         </div>
       </div>
     </article>

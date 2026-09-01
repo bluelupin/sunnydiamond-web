@@ -82,7 +82,7 @@ const WishlistCard = ({
             {formatJewelleryPrice(product.price)}
           </p>
         </div>
-        <div className="flex items-center justify-center gap-6">
+        <div className="flex items-center justify-center md:gap-6">
           <span
             onPointerEnter={() => prefetchWishlistProductDetail(product.urlKey)}
             onFocus={() => prefetchWishlistProductDetail(product.urlKey)}
@@ -91,12 +91,11 @@ const WishlistCard = ({
               {wishlistPageContent.addToBagLabel}
             </DetailTextLink>
           </span>
-          <DetailTextLink
-            onClick={onRemove}
-            className="hidden text-sm uppercase md:inline-flex md:text-base"
-          >
-            {wishlistPageContent.removeLabel}
-          </DetailTextLink>
+          <span className="max-md:hidden">
+            <DetailTextLink onClick={onRemove} className="text-sm uppercase md:text-base">
+              {wishlistPageContent.removeLabel}
+            </DetailTextLink>
+          </span>
         </div>
       </div>
     </article>
