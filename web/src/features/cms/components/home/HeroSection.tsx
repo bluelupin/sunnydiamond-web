@@ -29,7 +29,7 @@ const HeroSection = ({ id, hero }: HeroSectionProps) => {
           cmsVideoUrl={hero.heroVideoUrl}
         />
         <HeroSectionOverlay />
-        <div className="container relative flex h-full items-end justify-center md:py-16 sm:py-12 py-11 md:px-6 px-4">
+        <div className="container relative flex h-full items-end justify-center md:py-16 sm:py-10 py-6 md:px-6 px-4">
           <div className="flex w-full max-w-886 animate-fade-in flex-col items-center md:gap-8 gap-6 text-center">
             <div className="flex flex-col items-center gap-4">
               <div className="inline-flex items-center gap-2">

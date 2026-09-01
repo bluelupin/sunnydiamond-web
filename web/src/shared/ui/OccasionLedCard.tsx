@@ -80,7 +80,7 @@ export default function OccasionLedCard({
           </div>
           {ctaLabel ? (
             <span className="text-tertiary-cta-underline inline-flex w-fit items-center justify-center pb-1.5 font-gill text-sm font-normal uppercase tracking-[0.28px] text-white">
-              {ctaLabel} tset
+              {ctaLabel}
             </span>
           ) : null}
         </div>

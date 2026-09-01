@@ -59,28 +59,61 @@ const buildRenderSlides = (slides: readonly FeaturedSlide[]) => {
 
 type FeaturedGallerySlideProps = {
   slide: FeaturedSlide;
+  onClick?: () => void;
 };
 
 const featuredGallerySlideTransitionClassName =
   "transition-[height] duration-500 ease-in-out motion-reduce:transition-none";
 
-const FeaturedGallerySlide = ({ slide }: FeaturedGallerySlideProps) => (
-  <div
-    className={cn(
-      "featured-gallery-slide relative h-[300px] overflow-hidden bg-white",
-      featuredGallerySlideTransitionClassName,
-    )}
-  >
-    <Image
-      src={slide.src}
-      alt={slide.alt}
-      fill
-      sizes="(max-width: 768px) 80vw, 33vw"
-      loading="lazy"
-      className="h-full w-full object-cover object-center"
-    />
-  </div>
-);
+const CLICK_DRAG_TOLERANCE_PX = 8;
+
+const FeaturedGallerySlide = ({ slide, onClick }: FeaturedGallerySlideProps) => {
+  const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
+
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!onClick) return;
+    pointerStartRef.current = { x: event.clientX, y: event.clientY };
+  };
+
+  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!onClick) return;
+
+    const start = pointerStartRef.current;
+    pointerStartRef.current = null;
+
+    if (!start) {
+      onClick();
+      return;
+    }
+
+    const deltaX = Math.abs(event.clientX - start.x);
+    const deltaY = Math.abs(event.clientY - start.y);
+
+    if (deltaX <= CLICK_DRAG_TOLERANCE_PX && deltaY <= CLICK_DRAG_TOLERANCE_PX) {
+      onClick();
+    }
+  };
+
+  return (
+    <div
+      className={cn(
+        "featured-gallery-slide relative h-[300px] overflow-hidden bg-white",
+        featuredGallerySlideTransitionClassName,
+      )}
+      onPointerDown={onClick ? handlePointerDown : undefined}
+      onClick={onClick ? handleClick : undefined}
+    >
+      <Image
+        src={slide.src}
+        alt={slide.alt}
+        fill
+        sizes="(max-width: 768px) 80vw, 33vw"
+        loading="lazy"
+        className="h-full w-full object-cover object-center"
+      />
+    </div>
+  );
+};
 
 type FeaturedGalleryBackgroundProps = {
   slides: readonly FeaturedSlide[];
@@ -482,7 +515,7 @@ const FeaturedGallerySlider = ({
       >
         {renderSlides.map((slide, index) => (
           <div key={slide.renderKey ?? `${slide.src}-${index}`}>
-            <FeaturedGallerySlide slide={slide} />
+            <FeaturedGallerySlide slide={slide} onClick={canSlide ? goNext : undefined} />
           </div>
         ))}
       </Slider>

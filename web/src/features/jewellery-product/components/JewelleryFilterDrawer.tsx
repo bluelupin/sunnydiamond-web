@@ -9,13 +9,7 @@ import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { RIGHT_PANEL_HEADER_PADDING_CLASS, RIGHT_PANEL_WIDTH_CLASS } from "@/shared/ui/rightPanel";
 import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select";
+import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
 import {
   chunkFilterOptions,
   createDefaultFilterState,
@@ -355,29 +349,20 @@ const FilterDrawerPanel = ({
             <p className="font-gill text-base leading-normal tracking-normal text-darkblack">
               Gemstone Type:
             </p>
-            <Select
+            <InlineCustomSelect
+              id="jewellery-filter-gemstone-type"
+              label="Gemstone Type"
+              labelClassName="sr-only"
               value={draft.gemstoneType}
-              onValueChange={(gemstoneType) =>
+              options={facets.gemstoneTypes.map((option) => option.label)}
+              placeholder="-select-"
+              onChange={(gemstoneType) =>
                 setDraft((current) => ({ ...current, gemstoneType }))
               }
-            >
-              <SelectTrigger className="h-14 rounded-none border-0 bg-aboutInactive px-3 font-gill text-base text-darkblack focus:ring-0">
-                <SelectValue placeholder="-select-" />
-              </SelectTrigger>
-              <SelectContent
-                className="z-[90]"
-                side="bottom"
-                align="start"
-                position="popper"
-                avoidCollisions={false}
-              >
-                {facets.gemstoneTypes.map((option) => (
-                  <SelectItem key={option.label} value={option.label}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              triggerClassName="rounded-none border-0 bg-aboutInactive px-3 text-base text-darkblack"
+              listClassName="max-h-[280px] bg-aboutInactive"
+              optionClassName="text-base"
+            />
           </section>
         ) : null}
       </div>

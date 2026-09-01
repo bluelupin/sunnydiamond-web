@@ -94,6 +94,9 @@ function ShowroomLocationDetails({
   );
 }
 
+const mobileAccordionCollapseTransitionClassName =
+  "grid min-h-0 transition-[grid-template-rows,opacity] duration-500 ease-in-out motion-reduce:transition-none";
+
 function ShowroomsMobileAccordion({
   locations,
   activeId,
@@ -126,41 +129,52 @@ function ShowroomsMobileAccordion({
             resolveShowroomImages(location);
 
           return (
-            <div key={location.id} className="w-full">
-              {isSelected ? (
-                <div className="flex w-full flex-col gap-4 bg-gray300 px-4 py-6">
-                  <p className="font-larken text-xl font-light leading-110 text-darkblack">
-                    {location.name}
-                  </p>
-                  <div
-                    className="h-[0.5px] w-full bg-neutral300"
-                    aria-hidden
-                  />
-                  {hasImage && desktopImage && mobileImage ? (
-                    <div className="relative aspect-[2500/1797] w-full overflow-hidden">
-                      <ResponsiveImage
-                        desktopSrc={desktopImage}
-                        mobileSrc={mobileImage}
-                        alt={imageAlt}
-                        width={2500}
-                        height={1797}
-                        quality={90}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                  ) : null}
-                  <ShowroomLocationDetails location={location} />
+            <div
+              key={location.id}
+              className={cn("w-full", isSelected && "bg-gray300")}
+            >
+              <button
+                type="button"
+                aria-expanded={isSelected}
+                aria-pressed={isSelected}
+                onClick={() => onSelect(location.id ?? null)}
+                className="flex w-full items-center px-4 py-6 text-left font-larken text-xl font-light leading-110 text-darkblack"
+              >
+                {location.name}
+              </button>
+
+              <div
+                aria-hidden={!isSelected}
+                className={cn(
+                  mobileAccordionCollapseTransitionClassName,
+                  isSelected
+                    ? "grid-rows-[1fr] opacity-100"
+                    : "pointer-events-none grid-rows-[0fr] opacity-0",
+                )}
+              >
+                <div className="min-h-0 overflow-hidden">
+                  <div className="flex flex-col gap-4 px-4 pb-6">
+                    <div
+                      className="h-[0.5px] w-full bg-neutral300"
+                      aria-hidden
+                    />
+                    {hasImage && desktopImage && mobileImage ? (
+                      <div className="relative aspect-[2500/1797] w-full overflow-hidden">
+                        <ResponsiveImage
+                          desktopSrc={desktopImage}
+                          mobileSrc={mobileImage}
+                          alt={imageAlt}
+                          width={2500}
+                          height={1797}
+                          quality={90}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ) : null}
+                    <ShowroomLocationDetails location={location} />
+                  </div>
                 </div>
-              ) : (
-                <button
-                  type="button"
-                  aria-pressed={false}
-                  onClick={() => onSelect(location.id ?? null)}
-                  className="flex w-full items-center px-4 py-6 text-left font-larken text-xl font-light leading-110 text-darkblack"
-                >
-                  {location.name}
-                </button>
-              )}
+              </div>
             </div>
           );
         })}

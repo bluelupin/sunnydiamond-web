@@ -417,7 +417,7 @@ const JewelleryProductPage = ({
   };
 
   return (
-    <div className="pb-[calc(64px+env(safe-area-inset-bottom,0px))] md:pb-0">
+    <div className="pb-0 md:pb-0">
       {hero ? <JewelleryHeroSection {...hero} /> : null}
       <JewelleryCategoryNav activeCategory={activeCategory} onCategoryChange={handleCategoryChange} />
 
