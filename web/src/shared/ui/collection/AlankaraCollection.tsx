@@ -520,7 +520,7 @@ function ProductCarouselPanel({
             {activeProductCtaLabel ? (
               <Link
                 href={activeProduct.href}
-                className="relative flex h-12 w-fit items-center justify-center overflow-hidden border-2 border-neutral300 bg-white px-6 font-gill text-sm font-normal uppercase leading-110 hover:border-darkblack group desktop:h-14 desktop:px-7"
+                className="relative flex h-14 items-center justify-center overflow-hidden border-[1px] border-neutral300 bg-white font-gill text-sm font-normal uppercase leading-110 hover:border-neutral300 group w-[132px]"
               >
                 <div className="absolute left-0 top-full h-14 w-full bg-darkblack transition-all duration-300 group-hover:top-0" />
                 <span className="relative text-darkblack transition-all duration-300 group-hover:text-white">

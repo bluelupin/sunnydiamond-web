@@ -164,7 +164,7 @@ const ProductDetailSidebar = ({
     if (variant === "primary") {
       if (handlePanelOpen) {
         return (
-          <DetailDarkButton key={key} onClick={handlePanelOpen} className="uppercase">
+          <DetailDarkButton key={key} onClick={handlePanelOpen} className="uppercase hover:!border-none">
             {button.label}
           </DetailDarkButton>
         );
@@ -367,9 +367,13 @@ const ProductDetailSidebar = ({
         <div className="flex flex-col gap-6">
           <header className="flex flex-col gap-4">
             <ul className="m-0 flex list-none flex-wrap items-center gap-3 p-0">
-              {content.attributes.slice(0, 3).map((attribute, index) => (
+              {content.attributes.map((attribute, index, attributes) => (
                 <li key={attribute} className="flex items-center gap-3">
-                  {index > 0 ? <AttributeSeparator className="" /> : null}
+                  {index > 0 ? (
+                    <AttributeSeparator
+                      className={index === attributes.length - 1 ? "max-xl:hidden max-md:block max-sm:hidden" : undefined}
+                    />
+                  ) : null}
                   <span className="font-gill text-base font-light leading-110 text-neutral500">
                     {attribute}
                   </span>
