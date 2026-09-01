@@ -634,11 +634,11 @@ const ProductDetailSidebar = ({
       {hereForYou.isActive ? (
         <section
           aria-label="Customer support"
-          className="flex min-h-260 items-center overflow-hidden bg-supportSurface px-6 py-8"
+          className="flex items-center overflow-hidden bg-supportSurface md:px-6 px-4 md:py-8 py-6"
         >
-          <Reveal direction="up" className="flex max-w-358 flex-col gap-10">
+          <Reveal direction="up" className="flex max-w-358 flex-col md:gap-10 gap-6">
             <div className="flex flex-col gap-3">
-              <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
+              <h2 className="font-larken md:text-2xl text-xl font-light leading-110 text-darkblack">
                 {hereForYou.title}
               </h2>
               <p className="font-gill text-base font-light leading-110 text-darkblack">
@@ -646,7 +646,7 @@ const ProductDetailSidebar = ({
               </p>
             </div>
             {hereForYou.buttons.length > 0 ? (
-              <div className="flex max-w-220 flex-col gap-3">
+              <div className="flex w-fit flex-col gap-3">
                 {hereForYou.buttons.map(renderHereForYouButton)}
               </div>
             ) : null}
