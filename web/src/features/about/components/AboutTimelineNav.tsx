@@ -89,7 +89,7 @@ const AboutTimelineNav = ({
         <div className="min-h-0 overflow-hidden md:overflow-visible">
           <ol
             id={listId}
-            className="mt-4 flex flex-col items-start gap-4 sm:gap-6 md:mt-0 md:gap-8 lg:items-start md:max-h-full max-h-[290px] md:overflow-y-hidden overflow-y-auto"
+            className="mt-4 flex flex-col items-start gap-4 sm:gap-6 md:mt-0 md:gap-8 lg:items-start md:max-h-full max-h-[270px] md:overflow-y-hidden overflow-y-auto"
           >
             {years.map((year) => {
               const isActive = year === activeYear;

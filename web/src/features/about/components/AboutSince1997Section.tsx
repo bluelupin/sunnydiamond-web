@@ -175,7 +175,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
 
       {/* Mobile / tablet — original vertical layout; images 2+3 slide on scroll */}
       <div data-since1997-mode="mobile" className="md:hidden">
-        <div className="py-16 md:py-20">
+        <div className="py-6 sm:py-10 md:py-16 lg:py-20">
           <PageContainer className="pb-0">
             <div className="mb-8 space-y-3">
               <Reveal as="h2" direction="up" className="font-larken text-32 font-light leading-110 text-darkblack md:text-40">
@@ -206,7 +206,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
 
         {hasHorizontalGallery ? (
           <Reveal direction="up" data-since1997-scroll-zone className="relative">
-            <div className="sticky sm:top-0 top-[120px] bg-white pb-16 md:pb-20">
+            <div className="sticky sm:top-0 top-10 bg-white pb-16 md:pb-20">
               <PageContainer data-since1997-page-container className="!pr-0 pl-5 pt-0">
                 <div data-since1997-viewport className="overflow-x-hidden overflow-y-visible">
                   <div
@@ -218,7 +218,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                       caption={event!.caption}
                       description={event!.description}
                       sizes="320px"
-                      figureClassName="w-[256px] min-w-[256px] sm:w-[550px] lg:w-[400px] lg:min-w-[400px]"
+                      figureClassName="w-[256px] min-w-[256px] sm:w-[550px] lg:w-[400px] lg:min-w-[400px] mt-[19px]"
                       frameClassName="lg:h-[240px] md:h-[500px] sm:h-[400px] h-[240px]"
                       captionClassName="text-base"
                     />
@@ -236,7 +236,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                 </div>
               </PageContainer>
             </div>
-            <div data-since1997-scroll-spacer aria-hidden className="h-[70vh]" />
+            <div data-since1997-scroll-spacer aria-hidden className="!h-[10vh]" />
           </Reveal>
         ) : null}
       </div>

@@ -113,7 +113,7 @@ function CraftTextTile({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center sm:gap-3 gap-2 bg-chalkCard p-2",
+        "flex flex-col items-center justify-center sm:gap-3 gap-2 bg-chalkCard p-1",
         className,
       )}
     >
@@ -123,11 +123,11 @@ function CraftTextTile({
         width={16}
         height={15}
         aria-hidden
-        className="md:h-[15px] md:w-[15px] w-3 h-3 shrink-0"
+        className="md:h-5 h-4 md:w-5 w-4 shrink-0"
       />
       <Reveal as="h3" direction="up"
         className={cn(
-          "text-center font-larken font-light leading-110 text-darkblack",
+          "text-center md:font-larken font-gill font-light leading-110 text-darkblack",
           compact
             ? "max-w-[79.73%] text-sm md:text-base lg:text-xl xl:text-2xl"
             : "text-sm md:text-base lg:text-xl xl:text-2xl",
