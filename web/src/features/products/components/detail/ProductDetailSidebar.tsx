@@ -674,8 +674,9 @@ const ProductDetailSidebar = ({
           className={cn(
             "flex overflow-hidden bg-chalkCard pr-0",
             "items-end justify-between pl-4 py-6",
-            "max-lg:portrait:flex-col max-lg:portrait:items-stretch max-lg:portrait:justify-start max-lg:portrait:gap-6 max-lg:portrait:py-8 max-lg:portrait:pl-6",
-            "md:landscape:flex-row md:landscape:items-stretch md:landscape:justify-between md:landscape:gap-4 md:landscape:py-6 md:landscape:pl-6",
+            "max-md:-mx-4 max-md:flex-row max-md:items-end max-md:justify-between max-md:pl-4 max-md:py-6",
+            "md:max-lg:portrait:flex-col md:max-lg:portrait:items-stretch md:max-lg:portrait:justify-start md:max-lg:portrait:gap-6 md:max-lg:portrait:py-8 md:max-lg:portrait:pl-6 md:max-lg:portrait:mx-0",
+            "md:landscape:flex-row md:landscape:items-stretch md:landscape:justify-between md:landscape:gap-4 md:landscape:py-6 md:landscape:pl-6 md:landscape:mx-0",
             "lg:flex-row lg:items-stretch lg:justify-between lg:gap-4 lg:py-6 lg:pl-6",
             "desktop:min-h-260 desktop:items-end desktop:gap-0 desktop:py-6",
           )}
@@ -683,18 +684,19 @@ const ProductDetailSidebar = ({
           <div
             className={cn(
               "flex shrink-0 flex-col gap-6",
-              "max-w-[172px] max-md:-mr-[22px]",
-              "max-lg:portrait:max-w-none max-lg:portrait:mr-0",
+              "max-w-[276px]",
+              "max-md:min-w-0 max-md:max-w-[276px] max-md:mr-0",
+              "md:max-lg:portrait:max-w-none md:max-lg:portrait:mr-0 md:max-lg:portrait:flex-none",
               "md:landscape:min-w-0 md:landscape:flex-1 md:landscape:justify-center md:landscape:py-2 md:landscape:max-w-[54%]",
               "lg:min-w-0 lg:flex-1 lg:justify-center lg:py-2 lg:max-w-[54%]",
               "desktop:max-w-280 desktop:justify-start desktop:gap-10 desktop:py-0",
             )}
           >
             <div className="flex flex-col gap-3">
-              <h2 className="font-larken text-xl font-light leading-110 text-darkblack max-lg:portrait:whitespace-normal lg:whitespace-normal desktop:w-max desktop:whitespace-nowrap desktop:text-2xl">
+              <h2 className="font-larken text-xl font-light leading-110 text-darkblack md:max-lg:portrait:whitespace-normal lg:whitespace-normal desktop:w-max desktop:whitespace-nowrap desktop:text-2xl">
                 {personalise.title}
               </h2>
-              <p className="font-gill text-sm font-light leading-110 text-darkblack lg:text-base">
+              <p className="font-gill text-sm font-light leading-110 text-darkblack max-md:max-w-[220px] lg:text-base md:max-lg:portrait:max-w-none">
                 {personalise.subtitle}
               </p>
             </div>
@@ -707,8 +709,9 @@ const ProductDetailSidebar = ({
           <div
             className={cn(
               "relative shrink-0 overflow-hidden",
-              "h-[118px] w-177",
-              "max-lg:portrait:aspect-[322/213] max-lg:portrait:h-auto max-lg:portrait:w-full max-lg:portrait:flex-none",
+              "h-[118px] w-[177px]",
+              "max-md:h-[118px] max-md:w-[177px] max-md:flex-none",
+              "md:max-lg:portrait:aspect-[322/213] md:max-lg:portrait:h-auto md:max-lg:portrait:w-full md:max-lg:portrait:flex-none",
               "md:landscape:ml-auto md:landscape:h-auto md:landscape:min-h-[200px] md:landscape:w-auto md:landscape:min-w-[160px] md:landscape:max-w-[46%] md:landscape:flex-1 md:landscape:self-stretch",
               "lg:ml-auto lg:h-auto lg:min-h-[200px] lg:w-auto lg:min-w-[160px] lg:max-w-[46%] lg:flex-1 lg:self-stretch",
               "desktop:h-[213px] desktop:w-[322px] desktop:min-h-0 desktop:min-w-0 desktop:max-w-none desktop:flex-none desktop:self-auto",
@@ -721,8 +724,8 @@ const ProductDetailSidebar = ({
                 width={322}
                 height={213}
                 aria-hidden
-                className="size-full object-cover object-center max-lg:portrait:object-[center_15%] md:landscape:object-[center_20%] lg:object-[center_20%] desktop:object-[center_-4%]"
-                sizes="(max-width: 1023px) 100vw, 322px"
+                className="size-full object-cover object-center max-md:object-[center_15%] md:max-lg:portrait:object-[center_15%] md:landscape:object-[center_20%] lg:object-[center_20%] desktop:object-[center_-4%]"
+                sizes="(max-width: 767px) 177px, (max-width: 1023px) 100vw, 322px"
               />
             ) : null}
           </div>
