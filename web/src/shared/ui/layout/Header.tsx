@@ -182,98 +182,106 @@ const Header = () => {
         >
           {/* Figma 692:6742 — solid PDP header: white bg, py-24, dark nav; mobile bar 64px */}
           <div className="relative mx-auto flex h-16 w-full max-w-1440 items-center justify-between px-5 max-md:pt-2 md:landscape:h-[104px] md:landscape:px-8 md:landscape:pt-0 lg:landscape:px-10 lg:landscape:py-6 2xl:max-w-1920 2xl:landscape:px-[60px]">
-          <div className="flex w-[120px] items-center gap-6 md:landscape:hidden">
-            <button
-              type="button"
-              className={cn(iconButtonClass, textClass, hoverClass)}
-              onClick={() => setMobileMenuOpen(true)}
-              aria-label="Open menu"
-              aria-expanded={mobileMenuOpen}
-            >
-              <MenuIcon className="size-6" />
-            </button>
-            <Link
-              href={SEARCH_HREF}
-              className={cn(iconButtonClass, textClass, hoverClass)}
-              aria-label="Search"
-            >
-              <SearchIcon className="size-6" />
-            </Link>
-          </div>
-          <div className="hidden md:landscape:flex md:landscape:items-center md:landscape:gap-4 lg:landscape:gap-10">
-            {Logo}
-            <nav className="hidden items-center md:landscape:flex md:landscape:gap-4 lg:landscape:gap-10" aria-label="Main navigation">
-              {primaryLinks.map((link) => {
-                const isJewellery = isJewelleryNavLink(link.label);
-                if (isJewellery) {
-                  return (
-                    <div
-                      key={link.id ?? link.label}
-                      className="inline-flex items-center"
-                      onMouseEnter={canHoverNav ? openJewelleryMenu : undefined}
-                      onMouseLeave={canHoverNav ? scheduleCloseJewelleryMenu : undefined}
-                    >
-                      <Link
-                        href={resolveHeaderNavHref(link.label, link.url)}
-                        className={navLinkClass(jewelleryMenuOpen)}
-                        aria-expanded={jewelleryMenuOpen}
-                        aria-haspopup="true"
-                        onClick={handleJewelleryNavClick}
+            <div className="flex w-[120px] items-center gap-6 md:landscape:hidden">
+              <button
+                type="button"
+                className={cn(iconButtonClass, textClass, hoverClass)}
+                onClick={() => setMobileMenuOpen(true)}
+                aria-label="Open menu"
+                aria-expanded={mobileMenuOpen}
+              >
+                <MenuIcon className="size-6" />
+              </button>
+              <Link
+                href={SEARCH_HREF}
+                className={cn(iconButtonClass, textClass, hoverClass)}
+                aria-label="Search"
+              >
+                <SearchIcon className="size-6" />
+              </Link>
+            </div>
+            <div className="hidden md:landscape:flex md:landscape:items-center md:landscape:gap-4 lg:landscape:gap-10">
+              {Logo}
+              <nav className="hidden items-center md:landscape:flex md:landscape:gap-4 lg:landscape:gap-10" aria-label="Main navigation">
+                {primaryLinks.map((link) => {
+                  const isJewellery = isJewelleryNavLink(link.label);
+                  if (isJewellery) {
+                    return (
+                      <div
+                        key={link.id ?? link.label}
+                        className="inline-flex items-center"
+                        onMouseEnter={canHoverNav ? openJewelleryMenu : undefined}
+                        onMouseLeave={canHoverNav ? scheduleCloseJewelleryMenu : undefined}
                       >
-                        {link.label}
-                      </Link>
-                    </div>
+                        <Link
+                          href={resolveHeaderNavHref(link.label, link.url)}
+                          className={navLinkClass(jewelleryMenuOpen)}
+                          aria-expanded={jewelleryMenuOpen}
+                          aria-haspopup="true"
+                          onClick={handleJewelleryNavClick}
+                        >
+                          {link.label}
+                        </Link>
+                      </div>
+                    );
+                  }
+                  return (
+                    <Link
+                      key={link.id ?? link.label}
+                      href={resolveHeaderNavHref(link.label, link.url)}
+                      className={navLinkClass()}
+                    >
+                      {link.label}
+                    </Link>
                   );
-                }
-                return (
+                })}
+                {appointmentLink ? (
                   <Link
-                    key={link.id ?? link.label}
-                    href={resolveHeaderNavHref(link.label, link.url)}
+                    href={resolveHeaderNavHref(appointmentLink.label, appointmentLink.url)}
                     className={navLinkClass()}
                   >
-                    {link.label}
+                    {appointmentLink.label}
                   </Link>
-                );
-              })}
-              {appointmentLink ? (
-                <Link
-                  href={resolveHeaderNavHref(appointmentLink.label, appointmentLink.url)}
-                  className={navLinkClass()}
-                >
-                  {appointmentLink.label}
-                </Link>
-              ) : null}
-            </nav>
-          </div>
-          <div className="pointer-events-none absolute inset-x-0 flex justify-center md:landscape:hidden">
-            <div className="pointer-events-auto">{Logo}</div>
-          </div>
-          <div className={cn("relative z-10 flex items-center gap-6 lg:gap-[24px]", textClass)}>
-            <Link
-              href={SEARCH_HREF}
-              className={cn("!hidden md:landscape:!flex", iconButtonClass, hoverClass)}
-              aria-label="Search"
-            >
-              <SearchIcon className="size-6" />
-            </Link>
+                ) : null}
+              </nav>
+            </div>
+            <div className="pointer-events-none absolute inset-x-0 flex justify-center md:landscape:hidden">
+              <div className="pointer-events-auto">{Logo}</div>
+            </div>
+            <div className={cn("relative z-10 flex items-center gap-6 lg:gap-[24px]", textClass)}>
+              <Link
+                href={SEARCH_HREF}
+                className={cn("!hidden md:landscape:!flex", iconButtonClass, hoverClass)}
+                aria-label="Search"
+              >
+                <SearchIcon className="size-6" />
+              </Link>
 
-            <WishlistNavLink className={cn(iconButtonClass, hoverClass)} />
+              <WishlistNavLink className={cn(iconButtonClass, hoverClass)} />
 
-            <Link
-              href="/cart"
-              className={cn("relative inline-flex", iconButtonClass, hoverClass)}
-              aria-label={cartCount > 0 ? `Cart, ${cartCount} items` : "Cart"}
-            >
-              <ShoppingBagIcon className="size-6" />
-              <HeaderIconBadge count={cartCount} />
-            </Link>
+              <Link
+                href="/cart"
+                className={cn("relative md:!inline-flex !hidden", iconButtonClass, hoverClass)}
+                aria-label={cartCount > 0 ? `Cart, ${cartCount} items` : "Cart"}
+              >
+                <ShoppingBagIcon className="size-6" />
+                <HeaderIconBadge count={cartCount} />
+              </Link>
 
-            <AccountMenu
-              className={cn("inline-flex", iconButtonClass, hoverClass)}
-              onProfileOpen={isMobileHeader ? openProfileNav : undefined}
-            />
+              <AccountMenu
+                className={cn("inline-flex", iconButtonClass, hoverClass)}
+                onProfileOpen={isMobileHeader ? openProfileNav : undefined}
+              />
+              <Link
+                href="/cart"
+                className={cn("relative md:!hidden !inline-flex", iconButtonClass, hoverClass)}
+                aria-label={cartCount > 0 ? `Cart, ${cartCount} items` : "Cart"}
+              >
+                <ShoppingBagIcon className="size-6" />
+                <HeaderIconBadge count={cartCount} />
+              </Link>
+            </div>
           </div>
-        </div>
 
           {jewelleryMenuOpen && (
             <JewelleryMegaMenu

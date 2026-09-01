@@ -5,10 +5,10 @@ export const RIGHT_PANEL_WIDTH_CLASS = "max-w-472 sm:max-w-472";
 export const RIGHT_PANEL_ASIDE_MD_CLASS = "md:max-w-472";
 
 /** Header padding: mobile 24px top / 16px horizontal; desktop 24px top / 40px horizontal. */
-export const RIGHT_PANEL_HEADER_PADDING_CLASS = "px-4 pt-6 md:px-10 md:pt-6";
+export const RIGHT_PANEL_HEADER_PADDING_CLASS = "px-4 md:px-6 md:pt-10 pt-6";
 
 /** Body/content padding — pairs with headers that align title + divider to content width. */
-export const RIGHT_PANEL_CONTENT_PADDING_CLASS = "px-4 lg:px-6";
+export const RIGHT_PANEL_CONTENT_PADDING_CLASS = "px-4 md:px-6";
 
 /** Absolute close (X) on image/hero overlays — mobile: 24px top, 16px right; desktop: 24px top, 40px right. */
 export const RIGHT_PANEL_CLOSE_ABSOLUTE_CLASS =

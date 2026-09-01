@@ -12,6 +12,7 @@ import { useCart } from "@/features/cart/context/CartContext";
 import { resolveCartGiftNoteDisplay } from "@/features/cart/utils/cartGiftNotes";
 import { useCartCheckout } from "@/features/cart/hooks/useCartCheckout";
 import { CartPrimaryLink } from "./CartFlowUi";
+import CartPageSkeleton from "./skeletons/CartPageSkeleton";
 
 const CartPage = () => {
   const { items, isHydrating, refreshCart, updateQuantity, removeItem, updateLineItemOptions } = useCart();
@@ -28,13 +29,7 @@ const CartPage = () => {
   }, [isHydrating, refreshCart]);
 
   if (isHydrating) {
-    return (
-      <section className="flex min-h-[60vh] flex-col items-center justify-center bg-gray300 px-4 py-20 text-center">
-        <p className="sr-only" aria-live="polite">
-          Loading your shopping bag
-        </p>
-      </section>
-    );
+    return <CartPageSkeleton />;
   }
 
   if (items.length === 0) {
