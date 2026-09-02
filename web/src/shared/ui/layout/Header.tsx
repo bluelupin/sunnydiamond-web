@@ -16,10 +16,8 @@ import {
   getHeaderSurfaceClass,
   getHeaderVariant,
   isAuthRoute,
-  isHeroOverlayRoute,
   isJewelleryNavLink,
 } from "@/shared/utils/navigation";
-import { usePageLoading } from "@/shared/context/PageLoadingContext";
 import MobileThemeColor from "@/shared/ui/layout/MobileThemeColor";
 import { resolveShellHeaderLinks, splitShellHeaderNavLinks } from "@/shared/lib/shellNavigation";
 import MobileNavigation from "@/shared/ui/layout/MobileNavigation";
@@ -31,6 +29,7 @@ import { useProfilePageCms } from "@/shared/lib/providers/ProfilePageCmsProvider
 import MenuIcon from "@/assets/Icons/MenuIcon";
 import HeaderIconBadge from "@/shared/ui/layout/HeaderIconBadge";
 import { useCanHover } from "@/shared/hooks/use-can-hover";
+import { useHeaderScrollReveal } from "@/shared/hooks/use-header-scroll-reveal";
 import { useMobileHeaderLayout } from "@/shared/hooks/use-mobile-header-layout";
 import { useCareersHeaderMode } from "@/features/careers/context/careersHeaderBridge";
 import {
@@ -71,12 +70,19 @@ const Header = () => {
     setProfileNavOpen(true);
   }, []);
 
-  const { isPageLoading } = usePageLoading();
   const careersHeaderMode = useCareersHeaderMode(pathname);
 
   const isAuthPage = isAuthRoute(pathname);
   const menuOpen = mobileMenuOpen || jewelleryMenuOpen;
   const headerHidden = mobileMenuOpen || profileNavOpen;
+  const isHeaderScrollRevealEnabled = !headerHidden && !menuOpen;
+  const { isVisible: isHeaderScrollVisible, isPastTop: isHeaderPastTop } = useHeaderScrollReveal({
+    enabled: isHeaderScrollRevealEnabled,
+    useMainScrollContainer: isAuthPage,
+  });
+  const isHeaderShown = headerHidden || isHeaderScrollVisible;
+  const isScrollReturnSurface =
+    isHeaderScrollVisible && isHeaderPastTop && !headerHidden && !menuOpen;
   const pathnameHeaderVariant = getHeaderVariant(pathname, { menuOpen });
   const isCareersHeaderManagedRoute =
     pathname === CAREERS_ROUTE || pathname === CAREERS_ALL_OPENINGS_ROUTE;
@@ -84,13 +90,12 @@ const Header = () => {
     isCareersHeaderManagedRoute && careersHeaderMode === "solid"
       ? "solid"
       : pathnameHeaderVariant;
-  const isLoadingHeader = isPageLoading && isHeroOverlayRoute(pathname) && !menuOpen;
-  const headerSurfaceClass = isLoadingHeader
-    ? "bg-white"
+  const headerSurfaceClass = isScrollReturnSurface
+    ? "bg-white motion-safe:transition-colors motion-safe:duration-300"
     : getHeaderSurfaceClass(pathname, headerVariant);
   const isOverlay = headerVariant === "overlay";
-  const isLightOverlay = !isLoadingHeader && isOverlay && !isAuthPage;
-  const themeHeaderVariant = isLoadingHeader ? "solid" : headerVariant;
+  const isLightOverlay = isOverlay && !isAuthPage && !isScrollReturnSurface;
+  const themeHeaderVariant = isScrollReturnSurface ? "solid" : headerVariant;
 
   const { data: shellData } = useHomepageShell();
   const profilePage = useProfilePageCms();
@@ -140,6 +145,12 @@ const Header = () => {
     setJewelleryMenuOpen(false);
   }, []);
 
+  useLayoutEffect(() => {
+    if (!isHeaderScrollVisible && jewelleryMenuOpen) {
+      closeJewelleryMenuNow();
+    }
+  }, [isHeaderScrollVisible, jewelleryMenuOpen, closeJewelleryMenuNow]);
+
   const toggleJewelleryMenu = useCallback(() => {
     if (jewelleryMenuOpen) {
       closeJewelleryMenuNow();
@@ -186,8 +197,10 @@ const Header = () => {
       <MobileThemeColor pathname={pathname} headerVariant={themeHeaderVariant} />
       <header
         className={cn(
-          "absolute top-0 inset-x-0 z-50",
+          "fixed top-0 inset-x-0 z-50",
+          "motion-safe:transform-gpu motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-out",
           headerHidden ? "pointer-events-none opacity-0" : "",
+          !headerHidden && !isHeaderShown ? "-translate-y-full" : "translate-y-0",
         )}
         aria-hidden={headerHidden}
       >

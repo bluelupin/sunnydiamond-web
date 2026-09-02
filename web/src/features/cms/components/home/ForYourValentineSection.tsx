@@ -24,7 +24,7 @@ const ctaFocusLightClass = `${ctaFocusClass} focus-visible:ring-[#0a0a0a] focus-
 const ctaFocusDarkClass = `${ctaFocusClass} focus-visible:ring-white focus-visible:ring-offset-0`;
 
 const backgroundImageWrapperClass =
-  "pointer-events-none absolute inset-0 size-full sm:!h-[157%] sm:top-[-300px] top-12 opacity-80";
+  "pointer-events-none absolute inset-0 size-full sm:!h-[157%] sm:top-[-300px] md:top-12 opacity-80";
 
 const backgroundVideoWrapperClass = "pointer-events-none absolute inset-0 z-0 size-full";
 
@@ -204,7 +204,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
       ) : null}
       <div
         className={cn(
-          "relative z-10 flex flex-col items-center py-12 md:flex-row md:min-h-[750px] md:py-16 lg:items-center lg:justify-between lg:gap-8 lg:px-10 md:px-8 px-4 lg:py-100",
+          "relative z-10 flex flex-col items-center py-12 md:flex-row h-[700px] h-[750px] md:py-16 lg:items-center lg:justify-between lg:gap-8 lg:px-10 md:px-8 px-4 lg:py-100",
         )}
       >
         <div className="order-2 flex w-full shrink-0 flex-col md:gap-10 gap-6 md:order-1 md:max-w-[437px] sm:max-w-[500px] max-w-full">
