@@ -191,7 +191,7 @@ const CraftingRarityCategoryGrid = ({
         <Reveal
           direction="up"
           key={category?.id ?? category?.slug ?? category?.title}
-          className="aspect-square w-full xl:h-[424px]"
+          className="aspect-square w-full xl:h-[424px] h-[226px]"
         >
           <CraftingRarityCategoryCard category={category} />
         </Reveal>

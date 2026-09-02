@@ -34,6 +34,15 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
     () => resolveResponsiveCmsImage(diamondSourcedDataSection?.gifOrImage).desktopUrl,
     [diamondSourcedDataSection?.gifOrImage],
   );
+  const backgroundImages = useMemo(
+    () => resolveResponsiveCmsImage(diamondSourcedDataSection?.backgroundImage),
+    [diamondSourcedDataSection?.backgroundImage],
+  );
+  const backgroundDesktopSrc =
+    backgroundImages.desktopUrl || backgroundImages.mobileUrl || "";
+  const backgroundMobileSrc =
+    backgroundImages.mobileUrl || backgroundImages.desktopUrl || "";
+  const hasBackgroundImage = Boolean(backgroundDesktopSrc || backgroundMobileSrc);
 
   if (!isSectionActive(diamondSourcedDataSection?.isActive)) {
     return null;
@@ -53,7 +62,21 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
             className="relative h-auto overflow-hidden bg-white"
           >
             <div className="absolute inset-0 -z-0 will-change-transform" ref={bgParallax}>
-              <div className="w-full h-full bg-gray100" aria-hidden />
+              {hasBackgroundImage ? (
+                <ResponsiveImage
+                  desktopSrc={backgroundDesktopSrc}
+                  mobileSrc={backgroundMobileSrc}
+                  alt={backgroundImages.alt || ""}
+                  desktopAlt={backgroundImages.desktopAlt}
+                  mobileAlt={backgroundImages.mobileAlt}
+                  width={1440}
+                  height={700}
+                  sizes="100vw"
+                  className="size-full object-cover object-center"
+                />
+              ) : (
+                <div className="w-full h-full bg-gray100" aria-hidden />
+              )}
               <div className="absolute inset-0 bg-background/40" aria-hidden />
               <div
                 aria-hidden

@@ -444,6 +444,7 @@ function mapDiamondSourcing(raw?: StrapiTextSection | null): DiamondSourcingSect
     isActive,
     image: pickResponsiveImage(raw.cutoutImage, raw.image) as DiamondSourcingSectionData["image"],
     gifOrImage: pickResponsiveImage(raw.gifOrImage) as DiamondSourcingSectionData["gifOrImage"],
+    backgroundImage: pickResponsiveImage(raw.backgroundImage) as DiamondSourcingSectionData["backgroundImage"],
   };
 }
 
