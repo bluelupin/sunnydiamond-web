@@ -36,6 +36,7 @@ import {
   CAREERS_ALL_OPENINGS_ROUTE,
   CAREERS_ROUTE,
 } from "@/features/careers/constants/careersRoutes";
+import { FeatureErrorBoundary } from "@/shared/ui/FeatureErrorBoundary";
 
 const JewelleryMegaMenu = dynamic(
   () =>
@@ -314,12 +315,14 @@ const Header = () => {
           </div>
 
           {showJewelleryMenuLayer ? (
-            <JewelleryMegaMenu
-              open={jewelleryMenuOpen}
-              onMouseEnter={canHoverNav ? openJewelleryMenu : undefined}
-              onMouseLeave={canHoverNav ? scheduleCloseJewelleryMenu : undefined}
-              onClose={closeJewelleryMenuNow}
-            />
+            <FeatureErrorBoundary featureName="JewelleryMegaMenu">
+              <JewelleryMegaMenu
+                open={jewelleryMenuOpen}
+                onMouseEnter={canHoverNav ? openJewelleryMenu : undefined}
+                onMouseLeave={canHoverNav ? scheduleCloseJewelleryMenu : undefined}
+                onClose={closeJewelleryMenuNow}
+              />
+            </FeatureErrorBoundary>
           ) : null}
         </div>
       </header>

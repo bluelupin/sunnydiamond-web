@@ -50,7 +50,9 @@ export default function AppProvider({
                 <FeatureErrorBoundary featureName="GuestCheckoutModal">
                   <GuestCheckoutModal />
                 </FeatureErrorBoundary>
-                <LoginModal />
+                <FeatureErrorBoundary featureName="LoginModal">
+                  <LoginModal />
+                </FeatureErrorBoundary>
               </WishlistProvider>
             </LoginModalProvider>
           </CartUIProvider>

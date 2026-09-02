@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { cn } from "@/shared/utils/cn";
+import AllTabIcon from "@/assets/Icons/PLP/AllTabIcon";
 import { categoryIconSrc } from "../data/categoryIcons";
 import { mapMagentoCategoriesToPlpNav } from "../utils/plpCategoryNav";
 import { useMagentoJewelleryNav } from "@/hooks/magento/useMagentoJewelleryNav";
@@ -53,10 +54,16 @@ const JewelleryCategoryNav = ({ activeCategory, onCategoryChange }: JewelleryCat
                 >
                   <span className="flex size-6 shrink-0 items-center justify-center overflow-hidden lg:size-10">
                     {(() => {
-                      const Icon = categoryIconSrc[category.slug];
-                      return <Icon className={cn("size-full text-current",
-                        isActive ? "text-neutral500 lg:text-darkblack" : "text-gray600",
-                      )} aria-hidden />;
+                      const Icon = categoryIconSrc[category.slug] ?? AllTabIcon;
+                      return (
+                        <Icon
+                          className={cn(
+                            "size-full text-current",
+                            isActive ? "text-neutral500 lg:text-darkblack" : "text-gray600",
+                          )}
+                          aria-hidden
+                        />
+                      );
                     })()}
                   </span>
                   <span

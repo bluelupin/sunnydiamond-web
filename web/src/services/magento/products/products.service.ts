@@ -1,5 +1,8 @@
 import { magentoGraphqlFetch } from "../graphqlClient";
-import { getMagentoJewelleryNavCategories } from "../categories/categories.service";
+import {
+  EMPTY_JEWELLERY_NAV_CATEGORIES,
+  getMagentoJewelleryNavCategories,
+} from "../categories/categories.service";
 import {
   MAGENTO_JEWELLERY_PRODUCT_FACETS_QUERY,
   MAGENTO_JEWELLERY_PRODUCTS_QUERY,
@@ -128,6 +131,8 @@ async function getJewelleryNavCategoriesCached(signal?: AbortSignal): Promise<Je
         error: error instanceof Error ? error.message : "Failed to load jewellery nav",
         updatedAt: existing?.updatedAt ?? 0,
       });
+
+      return existing?.value ?? EMPTY_JEWELLERY_NAV_CATEGORIES;
     }
 
     throw error;
@@ -252,15 +257,21 @@ async function fetchMagentoJewelleryProducts({
   signal,
 }: GetMagentoJewelleryProductsParams): Promise<JewelleryListingProductsData> {
   const needsNavCategories = includeFacets || Boolean(categoryUrlKey);
-  const navCategories = needsNavCategories
-    ? (
+  let navCategories: JewelleryNavCategoriesData["categories"] = [];
+
+  if (needsNavCategories) {
+    try {
+      navCategories = (
         await measureJewelleryPlpGraphql(
           "nav-categories",
           () => getJewelleryNavCategoriesCached(signal),
           { category: categoryUrlKey ?? "all" },
         )
-      ).categories
-    : [];
+      ).categories;
+    } catch {
+      navCategories = EMPTY_JEWELLERY_NAV_CATEGORIES.categories;
+    }
+  }
 
   const categoryId = categoryUrlKey
     ? navCategories.find((category) => category.urlKey === categoryUrlKey)?.categoryId ?? null
