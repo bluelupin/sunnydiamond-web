@@ -64,7 +64,7 @@ function CraftsmanshipSilkLayer({
     <div
       className="absolute left-1/2 top-0 flex -translate-x-1/2 items-center justify-center lg:hidden"
     >
-      <div className="sm:rotate-90 rotate-180 test-2">
+      <div className="rotate-90">
         <Image
           src={src}
           alt={alt}
@@ -85,6 +85,24 @@ function CraftsmanshipRadialLayer({ variant }: { variant: "desktop" | "mobile" }
       : craftsmanshipProcessFigmaSpec.mobile;
 
   const visibility = variant === "desktop" ? "hidden lg:flex" : "flex lg:hidden";
+
+  if (variant === "mobile") {
+    const { radial } = craftsmanshipProcessFigmaSpec.mobile;
+    const centerXPercent = (radial.centerX / radial.viewWidth) * 100;
+    const centerYPercent = (radial.centerY / radial.viewHeight) * 100;
+    const ellipseWidthPercent = (radial.ellipseWidth / radial.viewWidth) * 100;
+    const ellipseHeightPercent = (radial.ellipseHeight / radial.viewHeight) * 100;
+
+    return (
+      <div
+        className={`absolute inset-0 ${visibility}`}
+        style={{
+          backgroundImage: `radial-gradient(ellipse ${ellipseWidthPercent}% ${ellipseHeightPercent}% at ${centerXPercent}% ${centerYPercent}%, ${radial.from} 0%, ${radial.to} 100%)`,
+        }}
+        aria-hidden
+      />
+    );
+  }
 
   return (
     <div
@@ -201,15 +219,15 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
             alt={silkAlt}
           />
           <div className="container relative z-10 h-full">
-            <div className="grid h-full grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-12">
-              <div className="lg:col-span-5 flex flex-col gap-8 xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20">
+            <div className="flex h-full flex-col lg:grid lg:grid-cols-12 lg:gap-12">
+              <div className="flex shrink-0 flex-col gap-8 lg:col-span-5 xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20">
                 <div className="h-10 w-72 bg-gray300 rounded mx-auto lg:mx-0" aria-hidden />
                 <div className="space-y-12 md:space-y-16 relative">
                   <div className="h-24 w-full bg-gray300/70 rounded" aria-hidden />
                   <div className="h-24 w-full bg-gray300/50 rounded" aria-hidden />
                 </div>
               </div>
-              <div className="lg:col-span-7 relative h-auto flex items-center justify-center">
+              <div className="relative mt-auto flex flex-1 items-end justify-center lg:col-span-7 lg:mt-0 lg:items-center">
                 <div className="w-[80%] aspect-square bg-gray300/70 rounded-full" aria-hidden />
               </div>
             </div>
@@ -234,15 +252,15 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
           alt={silkAlt}
         />
         <div className="max-w-1920 mx-auto 2xl:px[60px] md:px-10 px-4 relative z-10 h-full">
-          <div className="grid h-full grid-cols-1 lg:grid-cols-12 gap-6 md:gap-0 lg:gap-12">
-            {/* Left column: title + steps */}
-            <div className="xl:col-span-5 lg:col-span-6 flex flex-col xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20 gap-8 md:max-lg:portrait:gap-6">
+          <div className="flex h-full flex-col lg:grid lg:grid-cols-12 lg:gap-12">
+            {/* Title + steps — top on mobile, left on desktop */}
+            <div className="flex shrink-0 flex-col gap-8 md:max-lg:portrait:gap-6 lg:col-span-6 xl:col-span-5 xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20">
               <ScrollReveal as="h2" delayMs={0} className="lg:text-5xl md:text-4xl text-32 text-black font-normal font-larken tracking-[0%] lg:text-left text-center">
                 {sectionTitle}
               </ScrollReveal>
 
               {/* Active + next upcoming step (faded) */}
-              <ol className="space-y-10 lg:space-y-16 relative md:max-lg:portrait:space-y-8">
+              <ol className="relative space-y-10 md:max-lg:portrait:space-y-8 lg:space-y-16">
                 {steps.map((step, i) => {
                   const isActiveStep = i === activeIndex;
                   const isNext = i === activeIndex + 1;
@@ -250,7 +268,7 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
                   return (
                     <li
                       key={String(step.id ?? step.number ?? i)}
-                      className="transition-all duration-700 ease-out lg:max-w-auto max-w-420 lg:mx-0 mx-auto mx-auto lg:px-0 px-3 flex flex-col lg:items-start items-center lg:justify-start justify-center gap-4"
+                      className="mx-auto flex max-w-420 flex-col items-center justify-center gap-3 px-3 transition-all duration-700 ease-out lg:mx-0 lg:items-start lg:justify-start lg:gap-4 lg:px-0"
                       style={{
                         opacity: isActiveStep ? 1 : isNext ? 0.1 : 0,
                         maxHeight: isVisible ? "320px" : "0px",
@@ -272,27 +290,26 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
                         iconAlt={step.iconAlt}
                         isActiveStep={isActiveStep}
                       />
-                      <div className="flex flex-col gap-3 lg:items-start items-center">
-                        <h3 className="text-base sm:text-xl md:text-2xl lg:text-32 font-normal tracking-[0%] leading-[100%] text-darkblack font-gill lg:text-left text-center">
-                          {step.title || ""}
-                        </h3>
-                        {isActiveStep && (
-                          <p className="text-base md:text-lg lg:text-xl font-light text-darkblack tracking-[1%] leading-[100%] font-gill animate-fade-in lg:text-left text-center">
-                            {step.description || ""}
-                          </p>
-                        )}
-                      </div>
+                      <h3 className="text-center font-gill text-base font-normal leading-[100%] tracking-[0%] text-darkblack sm:text-xl md:text-2xl lg:text-left lg:text-32">
+                        {step.title || ""}
+                      </h3>
+                      {isActiveStep ? (
+                        <p className="animate-fade-in text-center font-gill text-base font-light leading-[100%] tracking-[1%] text-gray500 md:text-lg lg:text-left lg:text-xl lg:text-darkblack">
+                          {step.description || ""}
+                        </p>
+                      ) : null}
                     </li>
                   );
                 })}
               </ol>
             </div>
-            {/* Right column: 3D scroll-driven diamond */}
+            {/* Diamond — bottom on mobile, right on desktop */}
             <div
-              className="xl:col-span-7 lg:col-span-6 relative h-auto flex items-center justify-center"
+              className="relative mt-auto flex min-h-0 flex-1 items-end justify-center pb-2 pt-4 sm:pb-4 lg:col-span-6 lg:mt-0 lg:items-center lg:pb-0 lg:pt-0 xl:col-span-7"
               style={{ perspective: "1200px", perspectiveOrigin: "center center" }}
             >
-              <div className="lg:w-[550px] lg:h-[550px] lg:aspect-[550/550] md:w-[400px] md:h-[400px] md:aspect-[400/400] md:max-lg:portrait:w-[320px] md:max-lg:portrait:h-[320px] md:max-lg:portrait:aspect-square w-[400px] h-[400px] aspect-[400/400] h-auto will-change-transform"
+              <div
+                className="aspect-square h-auto w-[min(72vw,280px)] will-change-transform sm:w-[min(68vw,320px)] md:h-[400px] md:w-[400px] md:aspect-[400/400] md:max-lg:portrait:h-[320px] md:max-lg:portrait:w-[320px] md:max-lg:portrait:aspect-square lg:h-[550px] lg:w-[550px] lg:aspect-[550/550]"
                 style={{
                   transformStyle: "preserve-3d",
                   transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`,
