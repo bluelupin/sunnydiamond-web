@@ -25,6 +25,34 @@ type MobileNavigationProps = {
   onProfileOpen?: () => void;
 };
 
+const MOBILE_NAV_TRANSITION_MS = 300;
+
+function mobileNavShellMotionClass(visible: boolean) {
+  return cn(
+    "motion-safe:transform-gpu motion-safe:transition-[opacity,transform] motion-safe:duration-300 motion-safe:ease-out",
+    visible
+      ? "motion-safe:translate-x-0 motion-safe:opacity-100"
+      : "motion-safe:-translate-x-full motion-safe:opacity-0",
+  );
+}
+
+function mobileNavSubPanelMotionClass(visible: boolean) {
+  return cn(
+    "motion-safe:transform-gpu motion-safe:transition-[opacity,transform] motion-safe:duration-300 motion-safe:ease-out",
+    visible
+      ? "motion-safe:translate-x-0 motion-safe:opacity-100"
+      : "motion-safe:translate-x-full motion-safe:opacity-0",
+    !visible && "pointer-events-none",
+  );
+}
+
+function mobileNavBackdropMotionClass(visible: boolean) {
+  return cn(
+    "motion-safe:transition-opacity motion-safe:duration-300 motion-safe:ease-out",
+    visible ? "opacity-100" : "pointer-events-none opacity-0",
+  );
+}
+
 const LANGUAGES = [
   { code: "en", label: "English", display: "English" },
   { code: "hi", label: "हिन्दी (Hindi)", display: "Hindi" },
@@ -50,7 +78,7 @@ type JewelleryPanelProps = {
 
 const JewelleryPanel = ({ onBack, onClose }: JewelleryPanelProps) => (
   <div
-    className="absolute inset-0 flex flex-col bg-white"
+    className="absolute inset-0 flex h-full w-full flex-col bg-white"
     role="dialog"
     aria-modal="true"
     aria-label="Jewellery categories"
@@ -217,7 +245,7 @@ const LanguagePanel = ({ selected, onBack, onClose, onApply }: LanguagePanelProp
 
   return (
     <div
-      className="absolute inset-0 flex flex-col bg-white"
+      className="absolute inset-0 flex h-full w-full flex-col bg-white"
       role="dialog"
       aria-modal="true"
       aria-label="Language selection"
@@ -311,7 +339,7 @@ const CurrencyPanel = ({ selected, onBack, onClose, onApply }: CurrencyPanelProp
 
   return (
     <div
-      className="absolute inset-0 flex flex-col bg-white"
+      className="absolute inset-0 flex h-full w-full flex-col bg-white"
       role="dialog"
       aria-modal="true"
       aria-label="Region and currency selection"
@@ -405,6 +433,14 @@ const MobileNavigation = ({
   const [subPanel, setSubPanel] = useState<
     "language" | "currency" | "appointment" | "jewellery" | "store-visit" | null
   >(null);
+  const [displayedSubPanel, setDisplayedSubPanel] = useState<
+    "language" | "currency" | "appointment" | "jewellery" | "store-visit" | null
+  >(null);
+  const [isRendered, setIsRendered] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isSubPanelVisible, setIsSubPanelVisible] = useState(false);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const subPanelCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [language, setLanguage] = useState<LanguageCode>("en");
   const [currency, setCurrency] = useState<CurrencyCode>("INR");
   const [searchQuery, setSearchQuery] = useState("");
@@ -428,9 +464,60 @@ const MobileNavigation = ({
   useEffect(() => {
     if (!isOpen) {
       setSubPanel(null);
+      setDisplayedSubPanel(null);
+      setIsSubPanelVisible(false);
       setSearchQuery("");
-      return;
     }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+
+    if (isOpen) {
+      setIsRendered(true);
+      setIsVisible(false);
+      const frame = requestAnimationFrame(() => {
+        requestAnimationFrame(() => setIsVisible(true));
+      });
+      return () => cancelAnimationFrame(frame);
+    }
+
+    setIsVisible(false);
+    closeTimerRef.current = setTimeout(() => {
+      setIsRendered(false);
+      closeTimerRef.current = null;
+    }, MOBILE_NAV_TRANSITION_MS);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (subPanelCloseTimerRef.current) {
+      clearTimeout(subPanelCloseTimerRef.current);
+      subPanelCloseTimerRef.current = null;
+    }
+
+    if (subPanel) {
+      setDisplayedSubPanel(subPanel);
+      setIsSubPanelVisible(false);
+      const frame = requestAnimationFrame(() => {
+        requestAnimationFrame(() => setIsSubPanelVisible(true));
+      });
+      return () => cancelAnimationFrame(frame);
+    }
+
+    setIsSubPanelVisible(false);
+    subPanelCloseTimerRef.current = setTimeout(() => {
+      setDisplayedSubPanel(null);
+      subPanelCloseTimerRef.current = null;
+    }, MOBILE_NAV_TRANSITION_MS);
+  }, [isOpen, subPanel]);
+
+  useEffect(() => {
+    if (!isRendered) return;
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -438,14 +525,14 @@ const MobileNavigation = ({
     return () => {
       document.body.style.overflow = previousOverflow;
     };
-  }, [isOpen]);
+  }, [isRendered]);
 
   const handleClearSearch = useCallback(() => {
     setSearchQuery("");
     searchInputRef.current?.focus();
   }, []);
 
-  if (!isOpen) return null;
+  if (!isRendered) return null;
 
   const currentLangDisplay = LANGUAGES.find((l) => l.code === language)?.display ?? "English";
   const currentCurrencyDisplay = CURRENCIES.find((c) => c.code === currency)?.display ?? "India · ₹ INR";
@@ -454,20 +541,29 @@ const MobileNavigation = ({
     <>
       <button
         type="button"
-        className="fixed inset-0 z-[59] hidden bg-black/50 md:portrait:block md:landscape:hidden"
+        className={cn(
+          "fixed inset-0 z-[59] bg-black/50 md:landscape:hidden",
+          "hidden md:portrait:block",
+          mobileNavBackdropMotionClass(isVisible),
+        )}
         onClick={handleClose}
         aria-label="Close menu"
+        aria-hidden={!isVisible}
+        tabIndex={isVisible ? 0 : -1}
       />
 
       <div
         className={cn(
-          "fixed z-[60] flex flex-col bg-white md:landscape:hidden",
+          "fixed z-[60] flex flex-col overflow-hidden bg-white md:landscape:hidden",
           "inset-0",
           "md:portrait:inset-x-auto md:portrait:inset-y-0 md:portrait:left-0 md:portrait:w-[60%] md:portrait:max-w-[60%]",
+          mobileNavShellMotionClass(isVisible),
+          !isVisible && "pointer-events-none",
         )}
         role="dialog"
         aria-modal="true"
         aria-label="Mobile navigation"
+        aria-hidden={!isVisible}
       >
       <div className="flex h-16 shrink-0 items-center justify-between px-4 gap-4">
         <div className="flex w-[120px] items-center">
@@ -618,46 +714,68 @@ const MobileNavigation = ({
         </div>
       </div>
 
-      {subPanel === "language" && (
-        <LanguagePanel
-          selected={language}
-          onBack={() => setSubPanel(null)}
-          onClose={handleClose}
-          onApply={handleApplyLanguage}
-        />
-      )}
+      {displayedSubPanel === "language" ? (
+        <div
+          className={cn("absolute inset-0 z-10", mobileNavSubPanelMotionClass(isSubPanelVisible))}
+          aria-hidden={!isSubPanelVisible}
+        >
+          <LanguagePanel
+            selected={language}
+            onBack={() => setSubPanel(null)}
+            onClose={handleClose}
+            onApply={handleApplyLanguage}
+          />
+        </div>
+      ) : null}
 
-      {subPanel === "currency" && (
-        <CurrencyPanel
-          selected={currency}
-          onBack={() => setSubPanel(null)}
-          onClose={handleClose}
-          onApply={handleApplyCurrency}
-        />
-      )}
+      {displayedSubPanel === "currency" ? (
+        <div
+          className={cn("absolute inset-0 z-10", mobileNavSubPanelMotionClass(isSubPanelVisible))}
+          aria-hidden={!isSubPanelVisible}
+        >
+          <CurrencyPanel
+            selected={currency}
+            onBack={() => setSubPanel(null)}
+            onClose={handleClose}
+            onApply={handleApplyCurrency}
+          />
+        </div>
+      ) : null}
 
-      {subPanel === "appointment" && (
-        <BookAnAppointmentPanel
-          variant="embedded"
-          onBack={() => setSubPanel(null)}
-          onClose={handleClose}
-        />
-      )}
+      {displayedSubPanel === "appointment" ? (
+        <div
+          className={cn("absolute inset-0 z-10", mobileNavSubPanelMotionClass(isSubPanelVisible))}
+          aria-hidden={!isSubPanelVisible}
+        >
+          <BookAnAppointmentPanel
+            variant="embedded"
+            onBack={() => setSubPanel(null)}
+            onClose={handleClose}
+          />
+        </div>
+      ) : null}
 
-      {subPanel === "jewellery" && (
-        <JewelleryPanel
-          onBack={() => setSubPanel(null)}
-          onClose={handleClose}
-        />
-      )}
+      {displayedSubPanel === "jewellery" ? (
+        <div
+          className={cn("absolute inset-0 z-10", mobileNavSubPanelMotionClass(isSubPanelVisible))}
+          aria-hidden={!isSubPanelVisible}
+        >
+          <JewelleryPanel onBack={() => setSubPanel(null)} onClose={handleClose} />
+        </div>
+      ) : null}
 
-      {subPanel === "store-visit" && (
-        <BookStoreVisitPanel
-          variant="embedded"
-          onBack={() => setSubPanel(null)}
-          onClose={handleClose}
-        />
-      )}
+      {displayedSubPanel === "store-visit" ? (
+        <div
+          className={cn("absolute inset-0 z-10", mobileNavSubPanelMotionClass(isSubPanelVisible))}
+          aria-hidden={!isSubPanelVisible}
+        >
+          <BookStoreVisitPanel
+            variant="embedded"
+            onBack={() => setSubPanel(null)}
+            onClose={handleClose}
+          />
+        </div>
+      ) : null}
       </div>
     </>
   );

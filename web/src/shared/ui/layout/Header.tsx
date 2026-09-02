@@ -59,6 +59,8 @@ const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileNavOpen, setProfileNavOpen] = useState(false);
   const [jewelleryMenuOpen, setJewelleryMenuOpen] = useState(false);
+  const [jewelleryMenuMounted, setJewelleryMenuMounted] = useState(false);
+  const jewelleryMenuMountedRef = useRef(false);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { totalItems: cartCount } = useCart();
   const pathname = usePathname() ?? "/";
@@ -108,11 +110,24 @@ const Header = () => {
   useLayoutEffect(() => {
     setMobileMenuOpen(false);
     setJewelleryMenuOpen(false);
+    setJewelleryMenuMounted(false);
+    jewelleryMenuMountedRef.current = false;
   }, [pathname]);
 
   const openJewelleryMenu = useCallback(() => {
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     preloadJewelleryMegaMenu();
+
+    if (!jewelleryMenuMountedRef.current) {
+      jewelleryMenuMountedRef.current = true;
+      setJewelleryMenuMounted(true);
+      setJewelleryMenuOpen(false);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setJewelleryMenuOpen(true));
+      });
+      return;
+    }
+
     setJewelleryMenuOpen(true);
   }, []);
 
@@ -132,6 +147,8 @@ const Header = () => {
     }
     openJewelleryMenu();
   }, [closeJewelleryMenuNow, jewelleryMenuOpen, openJewelleryMenu]);
+
+  const showJewelleryMenuLayer = jewelleryMenuMounted;
 
   const handleJewelleryNavClick = useCallback(
     (event: MouseEvent<HTMLAnchorElement>) => {
@@ -283,24 +300,29 @@ const Header = () => {
             </div>
           </div>
 
-          {jewelleryMenuOpen && (
+          {showJewelleryMenuLayer ? (
             <JewelleryMegaMenu
+              open={jewelleryMenuOpen}
               onMouseEnter={canHoverNav ? openJewelleryMenu : undefined}
               onMouseLeave={canHoverNav ? scheduleCloseJewelleryMenu : undefined}
               onClose={closeJewelleryMenuNow}
             />
-          )}
+          ) : null}
         </div>
       </header>
 
-      {jewelleryMenuOpen && (
+      {showJewelleryMenuLayer ? (
         <div
-          className="fixed inset-0 z-40 bg-black/50"
+          className={cn(
+            "fixed inset-0 z-40 bg-black/50",
+            "motion-safe:transition-opacity motion-safe:duration-300 motion-safe:ease-out",
+            jewelleryMenuOpen ? "opacity-100" : "pointer-events-none opacity-0",
+          )}
           onClick={canHoverNav ? undefined : closeJewelleryMenuNow}
           onMouseEnter={canHoverNav ? scheduleCloseJewelleryMenu : undefined}
-          aria-hidden
+          aria-hidden={!jewelleryMenuOpen}
         />
-      )}
+      ) : null}
 
       <MobileNavigation
         isOpen={mobileMenuOpen}
