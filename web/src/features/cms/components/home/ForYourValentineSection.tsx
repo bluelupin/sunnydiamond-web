@@ -204,7 +204,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
       ) : null}
       <div
         className={cn(
-          "relative z-10 flex flex-col items-center py-12 md:flex-row h-[700px] h-[750px] md:py-16 lg:items-center lg:justify-between lg:gap-8 lg:px-10 md:px-8 px-4 lg:py-100",
+          "relative z-10 flex flex-col items-center py-[94px] md:flex-row h-[700px] h-[750px] md:py-16 lg:items-center lg:justify-between lg:gap-8 lg:px-10 md:px-8 px-4 lg:py-100",
         )}
       >
         <div className="order-2 flex w-full shrink-0 flex-col md:gap-10 gap-6 md:order-1 md:max-w-[437px] sm:max-w-[500px] max-w-full">

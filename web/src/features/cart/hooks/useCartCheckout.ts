@@ -18,10 +18,6 @@ export function useCartCheckout() {
     startCheckoutNavigation,
   } = useCartUI();
 
-  const hasExistingGifting = items.some(
-    (item) => Boolean(item.gifting) || Boolean(item.options.isGift),
-  );
-
   const navigateToCheckout = () => {
     if (status === "loading" || isNavigatingToCheckout) {
       return;
@@ -41,9 +37,13 @@ export function useCartCheckout() {
       return;
     }
 
-    // Gift marked in cart but gifting not saved/skipped → intro nudge before checkout.
-    // hasExploredGiftingOptions is set only on Apply in personalise or Continue on intro.
-    if (hasExistingGifting && !hasExploredGiftingOptions) {
+    // Gifting intro on checkout is for logged-in users only.
+    // Guests skip straight to the guest checkout / login modal.
+    if (
+      status === "authenticated" &&
+      items.length > 0 &&
+      !hasExploredGiftingOptions
+    ) {
       openGiftingPanel("intro");
       return;
     }

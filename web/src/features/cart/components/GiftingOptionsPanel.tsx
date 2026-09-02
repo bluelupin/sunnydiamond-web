@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Check, X } from "lucide-react";
@@ -32,6 +32,7 @@ import {
 } from "./CartFlowUi";
 import { giftingContent } from "../data/giftingContent";
 import { cartFlowSpec } from "../data/cartFlowSpec";
+import { isCartLineMarkedGift } from "../utils/cartGiftNotes";
 
 const GIFTING_OVERLAY_CLASS = "bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]";
 
@@ -205,13 +206,22 @@ const GiftingScrollIndicator = () => (
 const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
   const router = useRouter();
   const { items, applyGiftingSelection } = useCart();
-  const { markGiftingOptionsExplored } = useCartUI();
+  const { markGiftingOptionsExplored, isGiftingPanelOpen, giftingStep } = useCartUI();
+  const wasPersonaliseOpenRef = useRef(false);
   const cartItemIdsKey = useMemo(
     () => items.map((item) => item.id).sort().join("|"),
     [items],
   );
+  const cartGiftSelectionKey = useMemo(
+    () =>
+      items
+        .map((item) => `${item.id}:${isCartLineMarkedGift(item) ? "1" : "0"}`)
+        .sort()
+        .join("|"),
+    [items],
+  );
   const initiallySelectedGiftIds = useMemo(
-    () => items.filter((item) => item.gifting || item.options.isGift).map((item) => item.id),
+    () => items.filter(isCartLineMarkedGift).map((item) => item.id),
     [items],
   );
   const [wrapMode, setWrapMode] = useState<"single" | "separate">(() =>
@@ -232,6 +242,16 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(
     () => new Set(initiallySelectedGiftIds),
   );
+
+  useEffect(() => {
+    const isPersonaliseOpen = isGiftingPanelOpen && giftingStep === "personalise";
+
+    if (isPersonaliseOpen && !wasPersonaliseOpenRef.current) {
+      setSelectedItemIds(new Set(items.filter(isCartLineMarkedGift).map((item) => item.id)));
+    }
+
+    wasPersonaliseOpenRef.current = isPersonaliseOpen;
+  }, [isGiftingPanelOpen, giftingStep, cartGiftSelectionKey, items]);
 
   useEffect(() => {
     const cartIdSet = new Set(cartItemIdsKey ? cartItemIdsKey.split("|") : []);
