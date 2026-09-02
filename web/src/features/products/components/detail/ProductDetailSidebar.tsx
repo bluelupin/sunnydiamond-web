@@ -164,7 +164,7 @@ const ProductDetailSidebar = ({
     if (variant === "primary") {
       if (handlePanelOpen) {
         return (
-          <DetailDarkButton key={key} onClick={handlePanelOpen} className="uppercase hover:!border-none">
+          <DetailDarkButton key={key} onClick={handlePanelOpen} className="uppercase hover:!border-white">
             {button.label}
           </DetailDarkButton>
         );
