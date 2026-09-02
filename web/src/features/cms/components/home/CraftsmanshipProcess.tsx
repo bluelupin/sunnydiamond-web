@@ -272,14 +272,16 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
                         iconAlt={step.iconAlt}
                         isActiveStep={isActiveStep}
                       />
-                      <h3 className="text-base sm:text-xl md:text-2xl lg:text-32 font-normal tracking-[0%] leading-[100%] text-darkblack font-gill lg:text-left text-center">
-                        {step.title || ""}
-                      </h3>
-                      {isActiveStep && (
-                        <p className="text-base md:text-lg lg:text-xl font-light text-darkblack tracking-[1%] leading-[100%] font-gill animate-fade-in lg:text-left text-center">
-                          {step.description || ""}
-                        </p>
-                      )}
+                      <div className="flex flex-col gap-3 lg:items-start items-center">
+                        <h3 className="text-base sm:text-xl md:text-2xl lg:text-32 font-normal tracking-[0%] leading-[100%] text-darkblack font-gill lg:text-left text-center">
+                          {step.title || ""}
+                        </h3>
+                        {isActiveStep && (
+                          <p className="text-base md:text-lg lg:text-xl font-light text-darkblack tracking-[1%] leading-[100%] font-gill animate-fade-in lg:text-left text-center">
+                            {step.description || ""}
+                          </p>
+                        )}
+                      </div>
                     </li>
                   );
                 })}
