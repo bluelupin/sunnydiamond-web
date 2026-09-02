@@ -246,7 +246,7 @@ const Header = () => {
                       >
                         <Link
                           href={resolveHeaderNavHref(link.label, link.url)}
-                          className={navLinkClass(jewelleryMenuOpen)}
+                          className={cn(navLinkClass(), jewelleryMenuOpen && "text-linkGold")}
                           aria-expanded={jewelleryMenuOpen}
                           aria-haspopup="true"
                           onClick={handleJewelleryNavClick}
