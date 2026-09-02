@@ -7,6 +7,7 @@ import Slider, { type Settings } from "react-slick";
 import LeftArrow from "@/assets/Icons/LeftArrow";
 import RightArrow from "@/assets/Icons/RightArrow";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import "slick-carousel/slick/slick.css";
 import "./featuredProductsCarousel.css";
 import { learnAboutDiamondsRoute } from "@/features/education/data/content";
@@ -387,7 +388,12 @@ export default function FeaturedProductsCarousel({
         >
           <div className="flex flex-col items-center gap-4 md:min-h-0">
             {activeItem.name ? (
-              <p className="font-gill text-base font-normal leading-110 text-darkblack md:text-xl">
+              <p
+                className={cn(
+                  "font-gill text-base font-normal leading-110 text-darkblack md:text-xl",
+                  productNameDisplayClassName,
+                )}
+              >
                 {activeItem.name}
               </p>
             ) : null}

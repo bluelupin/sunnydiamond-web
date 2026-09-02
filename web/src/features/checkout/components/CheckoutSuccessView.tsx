@@ -11,6 +11,7 @@ import {
   CartTextLink,
 } from "@/features/cart/components/CartFlowUi";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { getExpectedDeliveryDate } from "../types/checkout.types";
 
 type CheckoutSuccessViewProps = {
@@ -50,7 +51,12 @@ const SuccessOrderItem = ({ item }: { item: CartLineItem }) => (
       <Image src={item.product.image} alt={item.product.name} fill className="object-cover" sizes="60px" />
     </div>
     <div className="flex w-full min-w-0 flex-1 flex-col gap-2">
-      <p className="font-gill text-base font-normal leading-110 text-darkblack">
+      <p
+        className={cn(
+          "font-gill text-base font-normal leading-110 text-darkblack",
+          productNameDisplayClassName,
+        )}
+      >
         {item.product.name}
       </p>
       <SuccessItemMeta parts={formatCartLineMeta(item)} />

@@ -17,6 +17,8 @@ import OffersAndDealsSection, {
 } from "@/shared/ui/OffersAndDealsSection";
 import PriceDetailsBreakdown from "@/features/cart/components/PriceDetailsBreakdown";
 import { CheckoutPriceRow, CheckoutSummaryDivider } from "./CheckoutUi";
+import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 
 type CheckoutOrderSummaryBodyProps = {
   compact?: boolean;
@@ -37,7 +39,12 @@ const CheckoutOrderSummaryItem = ({ item }: { item: CartLineItem }) => {
       </div>
 
       <div className="flex w-[214px] max-w-[214px] shrink-0 flex-col gap-2">
-        <p className="font-gill text-base font-normal leading-normal tracking-[0.16px] text-darkblack">
+        <p
+          className={cn(
+            "font-gill text-base font-normal leading-normal tracking-[0.16px] text-darkblack",
+            productNameDisplayClassName,
+          )}
+        >
           {item.product.name}
         </p>
         <CartMetaRow parts={meta} variant="checkout" />
@@ -102,7 +109,12 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
                 <Image src={item.product.image} alt={item.product.name} fill className="object-cover" sizes="60px" />
               </div>
               <div className="flex min-w-0 flex-1 flex-col gap-2">
-                <p className="truncate font-gill text-base font-normal leading-normal tracking-[0.16px] text-darkblack">
+                <p
+                  className={cn(
+                    "truncate font-gill text-base font-normal leading-normal tracking-[0.16px] text-darkblack",
+                    productNameDisplayClassName,
+                  )}
+                >
                   {item.product.name}
                 </p>
                 <p className="font-gill text-base font-normal leading-110 text-darkblack">

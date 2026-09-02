@@ -28,6 +28,7 @@ import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { DetailDarkButton, DetailTextLink } from "./shared";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 
@@ -298,7 +299,14 @@ const ProductAppointmentForm = ({
               className="h-133 w-206 object-contain"
               sizes="206px"
             />
-            <p className="font-gill text-base leading-110 text-darkblack">{product.name}</p>
+            <p
+              className={cn(
+                "font-gill text-base leading-110 text-darkblack",
+                productNameDisplayClassName,
+              )}
+            >
+              {product.name}
+            </p>
           </div>
 
           <div className="flex flex-col gap-6 pb-72">

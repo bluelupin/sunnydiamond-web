@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { formatJewelleryPrice } from "../utils/formatPrice";
 import { useCardImageSwipe } from "../hooks/useCardImageSwipe";
 import {
@@ -55,7 +56,13 @@ const ProductCopy = ({ title, price, href, className }: ProductCopyProps) => (
       className,
     )}
   >
-    <Link href={href} className="max-w-full truncate font-gill text-sm font-light sm:text-base md:text-xl desktop:whitespace-nowrap">
+    <Link
+      href={href}
+      className={cn(
+        "max-w-full truncate font-gill text-sm font-light sm:text-base md:text-xl desktop:whitespace-nowrap",
+        productNameDisplayClassName,
+      )}
+    >
       {title}
     </Link>
     <p className="w-full font-gill font-semibold">

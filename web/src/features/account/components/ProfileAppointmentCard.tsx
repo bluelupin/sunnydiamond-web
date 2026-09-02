@@ -10,6 +10,7 @@ import {
 import { profileTabsContent } from "../data/profileContent";
 import type { ProfileAppointmentUi } from "../types/profileUi.types";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { ProfileCard, ProfileInfoNote } from "./profileUi";
 
 const bookingFieldClassName =
@@ -39,7 +40,12 @@ function ProductGallery({ products }: { products: ProfileAppointmentUi["products
               sizes="176px"
             />
           </div>
-          <p className="font-gill text-base font-normal leading-110 text-darkblack">
+          <p
+            className={cn(
+              "font-gill text-base font-normal leading-110 text-darkblack",
+              productNameDisplayClassName,
+            )}
+          >
             {product.name}
           </p>
         </div>

@@ -41,6 +41,7 @@ import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { RIGHT_PANEL_ASIDE_MD_CLASS } from "@/shared/ui/rightPanel";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 
 type WishlistAddToBagPanelProps = {
   open: boolean;
@@ -256,7 +257,12 @@ const WishlistAddToBagPanel = ({
                     See Details
                   </DetailTextLink>
                 </div>
-                <h2 className="font-larken text-2xl font-light leading-110 text-darkblack capitalize">
+                <h2
+                  className={cn(
+                    "font-larken text-2xl font-light leading-110 text-darkblack",
+                    productNameDisplayClassName,
+                  )}
+                >
                   {displayName}
                 </h2>
               </div>

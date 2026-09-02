@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { useCart } from "../context/CartContext";
 import { useCartUI } from "../context/CartUIContext";
 import { formatCartLineMeta, formatCartPrice, getCartLineDisplayPrice } from "../utils/formatCartLine";
@@ -95,7 +96,12 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
                   />
                 </div>
                 <div className="flex min-w-0 max-w-[176px] flex-col gap-2">
-                  <p className="font-gill text-base leading-110 text-darkblack">
+                  <p
+                    className={cn(
+                      "font-gill text-base leading-110 text-darkblack",
+                      productNameDisplayClassName,
+                    )}
+                  >
                     {addedItem.product.name}
                   </p>
                   <CartMetaRow parts={meta} />

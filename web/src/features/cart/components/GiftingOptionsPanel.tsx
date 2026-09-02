@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Check, X } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import {
   Drawer,
   DrawerContent,
@@ -295,7 +296,12 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
         <Image src={item.product.image} alt={item.product.name} fill className="object-cover" />
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-3">
-        <p className="font-gill text-base font-normal leading-110 text-darkblack">
+        <p
+          className={cn(
+            "font-gill text-base font-normal leading-110 text-darkblack",
+            productNameDisplayClassName,
+          )}
+        >
           {item.product.name}
         </p>
         <CartMetaRow parts={formatCartLineMeta(item)} />

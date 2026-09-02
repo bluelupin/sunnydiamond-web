@@ -14,6 +14,7 @@ import {
 } from "./shared";
 import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
 import type { Product } from "@/features/products/data/products";
 import type { ProductDetailContent, ProductDetailPricing } from "@/features/products/types/productDetail";
@@ -380,7 +381,12 @@ const ProductDetailSidebar = ({
                 </li>
               ))}
             </ul>
-            <h1 className="font-larken text-2xl font-light leading-110 text-darkblack lg:text-32 capitalize">
+            <h1
+              className={cn(
+                "font-larken text-2xl font-light leading-110 text-darkblack lg:text-32",
+                productNameDisplayClassName,
+              )}
+            >
               {product.name}
             </h1>
           </header>

@@ -7,6 +7,7 @@ import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import CarouselChevronLeft from "@/assets/Icons/CarouselChevronLeft";
 import CarouselChevronRight from "@/assets/Icons/CarouselChevronRight";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { getImageSrc, resolveImageSrc } from "@/shared/utils/image";
 import {
@@ -514,7 +515,12 @@ function ProductCarouselPanel({
           </div>
 
           <div className="flex shrink-0 flex-col items-center gap-3 desktop:gap-4">
-            <p className="max-w-full truncate px-2 text-center font-gill text-sm font-normal leading-110 text-darkblack md:text-base lg:text-xl">
+            <p
+              className={cn(
+                "max-w-full truncate px-2 text-center font-gill text-sm font-normal leading-110 text-darkblack md:text-base lg:text-xl",
+                productNameDisplayClassName,
+              )}
+            >
               {activeProduct.name}
             </p>
             {activeProductCtaLabel ? (
@@ -596,7 +602,12 @@ function ProductCarouselPanel({
 
           <div className="relative w-full">
             <div className="flex shrink-0 flex-col items-center gap-4 text-center">
-              <p className="font-gill text-base font-normal leading-110 text-darkblack">
+              <p
+                className={cn(
+                  "font-gill text-base font-normal leading-110 text-darkblack",
+                  productNameDisplayClassName,
+                )}
+              >
                 {activeProduct.name}
               </p>
               {activeProductCtaLabel ? (

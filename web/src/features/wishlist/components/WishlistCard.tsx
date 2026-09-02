@@ -10,6 +10,7 @@ import { prefetchWishlistProductDetail } from "@/features/wishlist/utils/wishlis
 import { wishlistPageContent } from "@/features/wishlist/data/content";
 import DeleteIcon from "@/assets/Icons/DeleteIcon";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 
 type WishlistCardLayout = "default" | "profile";
 
@@ -68,6 +69,7 @@ const WishlistCard = ({
             className={cn(
               "line-clamp-2 max-w-[153px] min-h-[30px] text-center font-gill text-sm font-light leading-110 text-darkblack md:max-w-none md:min-h-0 md:text-xl",
               isProfileLayout && "lg:text-xl",
+              productNameDisplayClassName,
             )}
           >
             {product.name}

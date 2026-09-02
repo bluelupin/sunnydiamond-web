@@ -9,6 +9,7 @@ import { getWishlistProductHref } from "@/features/wishlist/utils/wishlistProduc
 import { prefetchWishlistProductDetail } from "@/features/wishlist/utils/wishlistProductDetailPrefetch";
 import { wishlistPageContent } from "@/features/wishlist/data/content";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 
 type WishlistListItemLayout = "default" | "profile";
 
@@ -55,7 +56,10 @@ const WishlistListItem = ({
         <div className="flex flex-col items-center gap-2 text-center">
           <Link
             href={href}
-            className="line-clamp-2 max-w-full font-gill text-sm font-light leading-110 text-darkblack"
+            className={cn(
+              "line-clamp-2 max-w-full font-gill text-sm font-light leading-110 text-darkblack",
+              productNameDisplayClassName,
+            )}
           >
             {product.name}
           </Link>

@@ -11,6 +11,7 @@ import {
 import FormFieldError from "@/shared/ui/FormFieldError";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useCart } from "../context/CartContext";
@@ -210,6 +211,7 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
                 aria-disabled={isNavigatingToCheckout || undefined}
                 className={cn(
                   "font-gill text-base font-normal leading-110 text-darkblack transition-colors hover:text-darkMagenta",
+                  productNameDisplayClassName,
                   isNavigatingToCheckout && "pointer-events-none",
                 )}
               >

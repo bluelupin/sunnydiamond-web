@@ -6,6 +6,7 @@ import type { StaticImageData } from "next/image";
 import { useRouter } from "next/navigation";
 import { Check, ChevronLeft } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
@@ -154,7 +155,14 @@ const TryAtHomeDetailsStep = ({
               className="h-133 w-206 object-contain"
               sizes="206px"
             />
-            <p className="font-gill text-base leading-110 text-darkblack">{productName}</p>
+            <p
+              className={cn(
+                "font-gill text-base leading-110 text-darkblack",
+                productNameDisplayClassName,
+              )}
+            >
+              {productName}
+            </p>
           </div>
 
           <div className="flex flex-col gap-6 pb-72">

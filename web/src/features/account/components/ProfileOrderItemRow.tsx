@@ -5,6 +5,8 @@ import Link from "next/link";
 import RingsTabIcon from "@/assets/Icons/PLP/RingsTabIcon";
 import type { ProfileOrderItemUi } from "../types/profileUi.types";
 import { ProfileMetaDivider, ProfileOrderItemBadge } from "./profileUi";
+import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 
 type ProfileOrderItemRowProps = {
   item: ProfileOrderItemUi;
@@ -40,12 +42,20 @@ export function ProfileOrderItemRow({ item, price }: ProfileOrderItemRowProps) {
             {item.productUrlKey ? (
               <Link
                 href={`/product/${item.productUrlKey}`}
-                className="font-gill text-base font-normal leading-110 text-darkblack underline-offset-2 hover:underline"
+                className={cn(
+                  "font-gill text-base font-normal leading-110 text-darkblack underline-offset-2 hover:underline",
+                  productNameDisplayClassName,
+                )}
               >
                 {item.name}
               </Link>
             ) : (
-              <p className="font-gill text-base font-normal leading-110 text-darkblack">
+              <p
+                className={cn(
+                  "font-gill text-base font-normal leading-110 text-darkblack",
+                  productNameDisplayClassName,
+                )}
+              >
                 {item.name}
               </p>
             )}

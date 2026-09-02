@@ -4,6 +4,7 @@ import Image from "next/image";
 import type { StaticImageData } from "next/image";
 import { Check, ShoppingBag } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
 import type { Product } from "@/features/products/data/products";
 import {
@@ -87,7 +88,14 @@ const TryAtHomeSuccessStep = ({
                 />
               </div>
               <div className="flex min-w-0 flex-1 flex-col gap-4 pl-3">
-                <p className="font-gill text-base leading-110 text-darkblack">{product.name}</p>
+                <p
+                  className={cn(
+                    "font-gill text-base leading-110 text-darkblack",
+                    productNameDisplayClassName,
+                  )}
+                >
+                  {product.name}
+                </p>
                 <p className="font-gill text-base leading-110 text-darkblack">
                   ₹{formatJewelleryPrice(product.price)}
                 </p>

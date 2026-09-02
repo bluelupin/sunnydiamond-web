@@ -5,6 +5,7 @@ import Link from "next/link";
 import RingsTabIcon from "@/assets/Icons/PLP/RingsTabIcon";
 import { giftingContent } from "@/features/cart/data/giftingContent";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { profileTabsContent } from "../data/profileContent";
 import type { ProfileOrderDetailItemUi } from "../types/profileUi.types";
 import { formatOrderTotal } from "../utils/formatAccountData";
@@ -22,12 +23,22 @@ export function ProfileOrderDetailItemCard({ item }: ProfileOrderDetailItemCardP
   const nameElement = item.productUrlKey ? (
     <Link
       href={`/product/${item.productUrlKey}`}
-      className="font-gill text-base font-normal leading-110 text-darkblack underline-offset-2 hover:underline"
+      className={cn(
+        "font-gill text-base font-normal leading-110 text-darkblack underline-offset-2 hover:underline",
+        productNameDisplayClassName,
+      )}
     >
       {item.name}
     </Link>
   ) : (
-    <p className="font-gill text-base font-normal leading-110 text-darkblack">{item.name}</p>
+    <p
+      className={cn(
+        "font-gill text-base font-normal leading-110 text-darkblack",
+        productNameDisplayClassName,
+      )}
+    >
+      {item.name}
+    </p>
   );
 
   const attributesElement =

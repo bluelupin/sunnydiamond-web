@@ -3,6 +3,7 @@
 import Image, { type StaticImageData } from "next/image";
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import type { ProductDetailPricing } from "@/features/products/types/productDetail";
 import {
   buildPriceBreakup,
@@ -96,7 +97,12 @@ const PriceBreakupPanel = ({
                 />
               </div>
               <div className="flex min-w-0 flex-col gap-2">
-                <p className="font-gill text-base font-normal leading-110 text-darkblack">
+                <p
+                  className={cn(
+                    "font-gill text-base font-normal leading-110 text-darkblack",
+                    productNameDisplayClassName,
+                  )}
+                >
                   {productName}
                 </p>
                 {ringSize || metalLabel ? (
