@@ -530,7 +530,7 @@ function ProductCarouselPanel({
               >
                 <div className="absolute left-0 top-full h-14 w-full bg-darkblack transition-all duration-300 group-hover:top-0" />
                 <span className="relative text-darkblack transition-all duration-300 group-hover:text-white">
-                  {activeProductCtaLabel}
+                  Shop Now
                 </span>
               </Link>
             ) : null}

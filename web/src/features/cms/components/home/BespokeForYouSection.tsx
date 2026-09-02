@@ -124,7 +124,7 @@ const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
               {primaryCtaUrl && primaryCtaLabel ? (
                 <Link
                   href={primaryCtaUrl}
-                  className="btn-border-slide inline-flex h-14 items-center justify-center border border-neutral300 bg-white px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
+                  className="btn-border-slide inline-flex h-14 items-center justify-center border border-neutral300 bg-white px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-transparent focus-visible:ring-offset-2"
                 >
                   <span className="relative z-10">{primaryCtaLabel}</span>
                 </Link>

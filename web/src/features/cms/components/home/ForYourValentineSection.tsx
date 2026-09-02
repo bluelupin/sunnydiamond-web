@@ -24,7 +24,7 @@ const ctaFocusLightClass = `${ctaFocusClass} focus-visible:ring-[#0a0a0a] focus-
 const ctaFocusDarkClass = `${ctaFocusClass} focus-visible:ring-white focus-visible:ring-offset-0`;
 
 const backgroundImageWrapperClass =
-  "pointer-events-none absolute inset-0 size-full sm:!h-[157%] sm:top-[-300px] md:top-12 opacity-80";
+  "pointer-events-none absolute inset-0 size-full sm:!h-[750px] sm:top-[-300px] md:top-0 opacity-80";
 
 const backgroundVideoWrapperClass = "pointer-events-none absolute inset-0 z-0 size-full";
 

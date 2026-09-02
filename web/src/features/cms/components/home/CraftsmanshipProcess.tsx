@@ -11,7 +11,6 @@ import {
   craftsmanshipProcessFigmaSpec,
   craftsmanshipRadialGradientStyle,
 } from "@/features/cms/data/craftsmanshipProcessFigmaSpec";
-import { cn } from "@/shared/utils/cn";
 import { useMemo } from "react";
 
 interface CraftsmanshipProcessProps {
@@ -130,13 +129,17 @@ function CraftsmanshipBackground({
 function CraftsmanshipStepIcon({
   iconUrl,
   iconAlt,
-  isActiveStep,
+  emphasis,
 }: {
   iconUrl?: string;
   iconAlt?: string;
-  isActiveStep: boolean;
+  /** 0 = preview size, 1 = active size */
+  emphasis: number;
 }) {
   if (!iconUrl) return null;
+
+  const clampedEmphasis = Math.max(0, Math.min(1, emphasis));
+  const scale = 0.86 + clampedEmphasis * 0.14;
 
   return (
     <Image
@@ -144,10 +147,8 @@ function CraftsmanshipStepIcon({
       alt={iconAlt || ""}
       width={28}
       height={28}
-      className={cn(
-        "shrink-0 object-contain transition-all duration-500",
-        isActiveStep ? "md:h-7 md:w-7 h-5 w-5" : "h-6 w-6",
-      )}
+      className="h-6 w-6 shrink-0 object-contain md:h-7 md:w-7"
+      style={{ transform: `scale(${scale})`, transformOrigin: "center center" }}
       aria-hidden={!iconAlt}
     />
   );
@@ -169,9 +170,9 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
   const hasDiamondImage = Boolean(desktopImageUrl || mobileImageUrl);
   const resolvedDesktopImage = desktopImageUrl ?? mobileImageUrl;
   const resolvedMobileImage = mobileImageUrl ?? desktopImageUrl;
-  const { activeIndex, progress, containerRef } = useStepScroll(Math.max(stepCount, 1));
+  const { activeIndex, progress, stepBlend, containerRef } = useStepScroll(Math.max(stepCount, 1));
 
-  // Scroll-driven 3D rotation: combines tilt (X), spin (Y), and a touch of Z roll
+  // Scroll-driven 3D rotation: 1:1 with scroll position for fluid motion
   const rotateY = progress * 540;
   const rotateX = 18 - progress * 36;
   const rotateZ = Math.sin(progress * Math.PI * 2) * 8;
@@ -236,7 +237,7 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
         <div className="max-w-1920 mx-auto 2xl:px[60px] md:px-10 px-4 relative z-10 h-full">
           <div className="grid h-full grid-cols-1 lg:grid-cols-12 gap-6 md:gap-0 lg:gap-12">
             {/* Left column: title + steps */}
-            <div className="xl:col-span-5 lg:col-span-6 flex flex-col xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20 gap-8 md:max-lg:portrait:gap-6">
+            <div className="xl:col-span-5 lg:col-span-6 flex flex-col xl:justify-start lg:justify-start lg:gap-[133px] md:gap-20 gap-8 md:max-lg:portrait:gap-6">
               <ScrollReveal as="h2" delayMs={0} className="lg:text-5xl md:text-4xl text-32 text-black font-normal font-larken tracking-[0%] lg:text-left text-center">
                 {sectionTitle}
               </ScrollReveal>
@@ -247,39 +248,53 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
                   const isActiveStep = i === activeIndex;
                   const isNext = i === activeIndex + 1;
                   const isVisible = isActiveStep || isNext;
+                  const fade = stepBlend;
+                  const activeOpacity = 1 - fade * 0.9;
+                  const nextOpacity = 0.1 + fade * 0.9;
+                  const opacity = isActiveStep ? activeOpacity : isNext ? nextOpacity : 0;
+                  const activeLift = fade * 6;
+                  const nextLift = 6 - fade * 6;
+                  const descriptionOpacity = isActiveStep ? Math.max(0, 1 - fade * 1.35) : 0;
+                  const iconEmphasis = isActiveStep ? 1 - fade * 0.35 : isNext ? 0.65 + fade * 0.35 : 0;
+
                   return (
                     <li
                       key={String(step.id ?? step.number ?? i)}
-                      className="transition-all duration-700 ease-out lg:max-w-auto max-w-420 lg:mx-0 mx-auto mx-auto lg:px-0 px-3 flex flex-col lg:items-start items-center lg:justify-start justify-center gap-4"
+                      className="lg:max-w-auto max-w-420 lg:mx-0 mx-auto mx-auto lg:px-0 px-3 flex flex-col lg:items-start items-center lg:justify-start justify-center gap-4"
                       style={{
-                        opacity: isActiveStep ? 1 : isNext ? 0.1 : 0,
+                        opacity,
                         maxHeight: isVisible ? "320px" : "0px",
                         marginTop: isVisible ? undefined : 0,
                         marginBottom: isVisible ? undefined : 0,
                         overflow: "hidden",
                         transform: isActiveStep
-                          ? "translateY(0)"
+                          ? `translate3d(0, ${activeLift}px, 0)`
                           : isNext
-                            ? "translateY(8px)"
-                            : "translateY(20px)",
+                            ? `translate3d(0, ${nextLift}px, 0)`
+                            : "translate3d(0, 12px, 0)",
                         pointerEvents: isVisible ? "auto" : "none",
+                        willChange: isVisible ? "opacity, transform" : undefined,
                       }}
-                      aria-current={isActiveStep ? "step" : undefined}
+                      aria-current={isActiveStep && stepBlend < 0.5 ? "step" : undefined}
                       aria-hidden={!isVisible}
                     >
                       <CraftsmanshipStepIcon
                         iconUrl={step.iconUrl}
                         iconAlt={step.iconAlt}
-                        isActiveStep={isActiveStep}
+                        emphasis={iconEmphasis}
                       />
                       <h3 className="text-base sm:text-xl md:text-2xl lg:text-32 font-normal tracking-[0%] leading-[100%] text-darkblack font-gill lg:text-left text-center">
                         {step.title || ""}
                       </h3>
-                      {isActiveStep && (
-                        <p className="text-base md:text-lg lg:text-xl font-light text-darkblack tracking-[1%] leading-[100%] font-gill animate-fade-in lg:text-left text-center">
+                      {isActiveStep || descriptionOpacity > 0.01 ? (
+                        <p
+                          className="text-base md:text-lg lg:text-xl font-light text-darkblack tracking-[1%] leading-[100%] font-gill lg:text-left text-center"
+                          style={{ opacity: descriptionOpacity }}
+                          aria-hidden={descriptionOpacity < 0.05}
+                        >
                           {step.description || ""}
                         </p>
-                      )}
+                      ) : null}
                     </li>
                   );
                 })}
@@ -290,11 +305,11 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
               className="xl:col-span-7 lg:col-span-6 relative h-auto flex items-center justify-center"
               style={{ perspective: "1200px", perspectiveOrigin: "center center" }}
             >
-              <div className="lg:w-[550px] lg:h-[550px] lg:aspect-[550/550] md:w-[400px] md:h-[400px] md:aspect-[400/400] md:max-lg:portrait:w-[320px] md:max-lg:portrait:h-[320px] md:max-lg:portrait:aspect-square w-[400px] h-[400px] aspect-[400/400] h-auto will-change-transform"
+              <div
+                className="lg:w-[550px] lg:h-[550px] lg:aspect-[550/550] md:w-[400px] md:h-[400px] md:aspect-[400/400] md:max-lg:portrait:w-[320px] md:max-lg:portrait:h-[320px] md:max-lg:portrait:aspect-square w-[400px] h-[400px] aspect-[400/400] h-auto will-change-transform"
                 style={{
                   transformStyle: "preserve-3d",
-                  transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`,
-                  transition: "transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)",
+                  transform: `translate3d(0, 0, 0) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`,
                   filter: "drop-shadow(0 30px 50px hsl(var(--foreground) / 0.18))",
                 }}
               >
