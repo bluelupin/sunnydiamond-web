@@ -256,7 +256,7 @@ const WishlistAddToBagPanel = ({
                     See Details
                   </DetailTextLink>
                 </div>
-                <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
+                <h2 className="font-larken text-2xl font-light leading-110 text-darkblack capitalize">
                   {displayName}
                 </h2>
               </div>

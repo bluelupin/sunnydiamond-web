@@ -15,9 +15,15 @@ const EducationHeroSection = ({ title, image, videoUrl }: EducationHeroSectionPr
     image?.desktopUrl?.trim() || image?.mobileUrl?.trim() || videoUrl?.trim(),
   );
 
-  const heroTransition = reducedMotion
+  const motionTransition = reducedMotion
     ? ""
-    : "transition-[width,top] duration-500 ease-in-out";
+    : "transition-[width,top,bottom,height] duration-500 ease-in-out";
+
+  const overlayTransition = reducedMotion
+    ? ""
+    : "transition-[transform,height] duration-500 ease-in-out";
+
+  const titleTransition = reducedMotion ? "" : "transition-[bottom] duration-500 ease-in-out";
 
   return (
     <section
@@ -28,9 +34,9 @@ const EducationHeroSection = ({ title, image, videoUrl }: EducationHeroSectionPr
       <div className="relative flex-1 overflow-hidden p-0">
         <div
           className={cn(
-            "absolute left-1/2 h-full -translate-x-1/2 overflow-hidden",
-            heroTransition,
-            expanded ? "-top-5 w-full md:top-0 md:w-full w-[92%]" : "w-full",
+            "absolute left-1/2 -translate-x-1/2 overflow-hidden",
+            motionTransition,
+            expanded ? "-top-5 bottom-5 w-[92%]" : "top-0 bottom-0 h-full w-full",
           )}
         >
           <HeroBackgroundMedia
@@ -44,12 +50,16 @@ const EducationHeroSection = ({ title, image, videoUrl }: EducationHeroSectionPr
             gradient={
               hasMedia ? educationHeroFigmaSpec.overlay.gradient : "bottom-strong"
             }
-            className={cn(expanded ? "max-md:h-[632px] md:translate-y-0 -translate-y-3" : "")}
+            className={cn(
+              overlayTransition,
+              expanded ? "-translate-y-3 max-md:h-[632px] md:h-full" : "",
+            )}
           />
           <div
             className={cn(
+              titleTransition,
               "pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-16 lg:pb-75",
-              expanded && "max-md:bottom-5",
+              expanded && "bottom-5",
             )}
           >
             <h1

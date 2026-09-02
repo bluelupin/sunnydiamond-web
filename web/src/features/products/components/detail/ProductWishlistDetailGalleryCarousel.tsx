@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import type { Product } from "@/features/products/data/products";
 import { cn } from "@/shared/utils/cn";
+import { useHorizontalCarouselSwipe } from "@/features/products/hooks/useHorizontalCarouselSwipe";
 import {
     getProductDetailCarouselImages,
     PRODUCT_DETAIL_GALLERY_SLIDE_COUNT,
@@ -28,16 +28,29 @@ const ProductWishlistDetailGalleryCarousel = ({
         setActiveSlide(0);
     }, [product.id, product.image]);
 
-    const goToNextSlide = () => {
+    const goToNextSlide = useCallback(() => {
         setActiveSlide((current) => (current + 1) % carouselImages.length);
-    };
+    }, [carouselImages.length]);
+
+    const goToPreviousSlide = useCallback(() => {
+        setActiveSlide(
+            (current) => (current - 1 + carouselImages.length) % carouselImages.length,
+        );
+    }, [carouselImages.length]);
+
+    const { swipeProps } = useHorizontalCarouselSwipe({
+        slideCount: carouselImages.length,
+        onNext: goToNextSlide,
+        onPrevious: goToPreviousSlide,
+    });
 
     return (
         <div
             className={cn(
-                "grid h-250 w-full shrink-0 grid-rows-[1fr_auto] overflow-hidden",
+                "grid h-250 w-full shrink-0 grid-rows-[1fr_auto] overflow-hidden touch-pan-y select-none",
                 className,
             )}
+            {...swipeProps}
         >
             <div className="grid min-h-0 [&>*]:col-start-1 [&>*]:row-start-1">
                 <div className="flex items-center justify-center bg-gray300">

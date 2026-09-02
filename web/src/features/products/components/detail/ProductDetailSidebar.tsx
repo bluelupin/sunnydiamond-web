@@ -380,7 +380,7 @@ const ProductDetailSidebar = ({
                 </li>
               ))}
             </ul>
-            <h1 className="font-larken text-2xl font-light leading-110 text-darkblack lg:text-32">
+            <h1 className="font-larken text-2xl font-light leading-110 text-darkblack lg:text-32 capitalize">
               {product.name}
             </h1>
           </header>
@@ -652,7 +652,7 @@ const ProductDetailSidebar = ({
           aria-label="Customer support"
           className="flex items-center overflow-hidden bg-supportSurface md:px-6 px-4 md:py-8 py-6"
         >
-          <Reveal direction="up" className="flex max-w-358 flex-col md:gap-10 gap-6">
+          <Reveal direction="up" className="flex max-w-358 flex-col gap-6">
             <div className="flex flex-col gap-3">
               <h2 className="font-larken md:text-2xl text-xl font-light leading-110 text-darkblack">
                 {hereForYou.title}
@@ -678,7 +678,7 @@ const ProductDetailSidebar = ({
           className={cn(
             "flex overflow-hidden bg-chalkCard pr-0",
             "items-end justify-between pl-4 py-6",
-            "max-md:-mx-4 max-md:flex-row max-md:items-end max-md:justify-between max-md:pl-4 max-md:py-6",
+            "max-md:mx-0 max-md:flex-row max-md:items-end max-md:justify-between max-md:pl-4 max-md:py-6",
             "md:max-lg:portrait:flex-col md:max-lg:portrait:items-stretch md:max-lg:portrait:justify-start md:max-lg:portrait:gap-6 md:max-lg:portrait:py-8 md:max-lg:portrait:pl-6 md:max-lg:portrait:mx-0",
             "md:landscape:flex-row md:landscape:items-stretch md:landscape:justify-between md:landscape:gap-4 md:landscape:py-6 md:landscape:pl-6 md:landscape:mx-0",
             "lg:flex-row lg:items-stretch lg:justify-between lg:gap-4 lg:py-6 lg:pl-6",
@@ -687,7 +687,7 @@ const ProductDetailSidebar = ({
         >
           <div
             className={cn(
-              "flex shrink-0 flex-col gap-6",
+              "flex shrink-0 flex-col md:gap-10 gap-6",
               "max-w-[276px]",
               "max-md:min-w-0 max-md:max-w-[276px] max-md:mr-0",
               "md:max-lg:portrait:max-w-none md:max-lg:portrait:mr-0 md:max-lg:portrait:flex-none",
