@@ -174,9 +174,9 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
 
   return (
     <article className="relative flex flex-col gap-4 bg-white px-4 lg:gap-6 lg:px-6 py-6">
-      {/* {isGift ? (
+      {isGift ? (
         <CartGiftBadge className="absolute left-0 top-0 z-10" />
-      ) : null} */}
+      ) : null}
 
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 flex-1 gap-4 lg:max-w-[499.5px] lg:gap-6">
