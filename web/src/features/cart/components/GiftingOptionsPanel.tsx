@@ -347,7 +347,7 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
       </div>
 
       <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain">
-        <div className="flex flex-col gap-6 lg:px-6 px-4 py-6">
+        <div className="flex flex-col gap-6 px-4 pt-6 pb-24 lg:px-6">
           <GiftingBagHero isSeparate={isSeparate} />
 
           {!isSeparate ? (
