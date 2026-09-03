@@ -467,7 +467,7 @@ const GiftingOptionsPanel = () => {
         <DrawerContent
           overlayClassName={cn("z-[70]", GIFTING_OVERLAY_CLASS)}
           className={cn(
-            "flex min-h-0 flex-col overflow-hidden rounded-none border-0 p-0 [&>div:first-child]:hidden",
+            "z-[70] flex min-h-0 flex-col overflow-hidden rounded-none border-0 p-0 [&>div:first-child]:hidden",
             giftingStep === "intro"
               ? "max-h-[90vh] bg-gray300"
               : "h-[90vh] max-h-[90vh] bg-white",

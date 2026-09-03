@@ -88,7 +88,7 @@ const GuestCheckoutModal = () => {
       >
         <DrawerContent
           overlayClassName={GUEST_CHECKOUT_OVERLAY_CLASS}
-          className="max-h-[90vh] overflow-hidden rounded-none border-0 bg-gray300 p-0 [&>div:first-child]:hidden"
+          className="z-[70] max-h-[90vh] overflow-hidden rounded-none border-0 bg-gray300 p-0 [&>div:first-child]:hidden"
         >
           <DrawerTitle className="sr-only">Welcome, New User</DrawerTitle>
           {content}
