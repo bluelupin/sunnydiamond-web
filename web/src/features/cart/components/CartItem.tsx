@@ -281,7 +281,7 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
             void onUpdateOptions(item.id, { isGift: checked });
           }}
         />
-        <span className="flex h-5 translate-y-0.5 items-center font-gill text-base font-normal text-darkblack">
+        <span className="flex h-5 items-center font-gill text-base font-normal leading-none text-darkblack">
           Mark this as a gift
         </span>
       </label>

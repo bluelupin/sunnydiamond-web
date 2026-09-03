@@ -319,7 +319,7 @@ export const CheckoutCheckbox = ({
         strokeWidth={2.5}
       />
     </button>
-    <span className="translate-y-0.5 font-gill text-base font-light leading-110 text-darkblack">{label}</span>
+    <span className="flex h-4 items-center font-gill text-base font-light leading-none text-darkblack">{label}</span>
   </label>
   );
 };

@@ -369,11 +369,11 @@ const ProductDetailSidebar = ({
         <div className="flex flex-col gap-6">
           <header className="flex flex-col gap-4">
             <ul className="m-0 flex list-none flex-wrap items-center gap-3 p-0">
-              {content.attributes.map((attribute, index, attributes) => (
+              {content.attributes.slice(0, 3).map((attribute, index, attributes) => (
                 <li key={attribute} className="flex items-center gap-3">
                   {index > 0 ? (
                     <AttributeSeparator
-                      className={index === attributes.length - 1 ? "max-xl:hidden max-md:block max-sm:hidden" : undefined}
+                    // className={index === attributes.length - 1 ? "max-xl:hidden max-md:block max-sm:hidden" : undefined}
                     />
                   ) : null}
                   <span className="font-gill text-base font-light leading-110 text-neutral500">
@@ -537,9 +537,9 @@ const ProductDetailSidebar = ({
               type="checkbox"
               checked={isGift}
               onChange={(event) => setIsGift(event.target.checked)}
-              className="size-4 border border-darkblack accent-darkblack"
+              className="size-4 shrink-0 border border-darkblack accent-darkblack"
             />
-            <span className="translate-y-0.5 font-gill text-base leading-110 text-darkblack">
+            <span className="flex h-4 items-center font-gill text-base leading-none text-darkblack">
               Mark this as a gift
             </span>
           </span>
@@ -563,16 +563,16 @@ const ProductDetailSidebar = ({
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2">
               <VanIcon className="shrink-0" />
-              <p className="translate-y-0.5 font-gill text-base font-light leading-110 text-darkblack">
+              <p className="font-gill text-base font-light leading-110 text-darkblack">
                 Estimated delivery May 12 2026
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <StoreIcon className="shrink-0" />
-              <p className="translate-y-0.5 font-gill text-base font-light leading-110 text-darkblack">
+              <p className="font-gill text-base font-light leading-110 text-darkblack">
                 Available now at nearest store
               </p>
-              <DetailTextLink className="translate-y-0.5" onClick={() => setIsDeliveryStoreOpen(true)}>
+              <DetailTextLink onClick={() => setIsDeliveryStoreOpen(true)}>
                 Coimbatore
               </DetailTextLink>
             </div>
