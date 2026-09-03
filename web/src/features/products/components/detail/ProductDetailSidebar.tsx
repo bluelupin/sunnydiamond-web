@@ -539,7 +539,9 @@ const ProductDetailSidebar = ({
               onChange={(event) => setIsGift(event.target.checked)}
               className="size-4 border border-darkblack accent-darkblack"
             />
-            <span className="font-gill text-base leading-110 text-darkblack">Mark this as a gift</span>
+            <span className="translate-y-0.5 font-gill text-base leading-110 text-darkblack">
+              Mark this as a gift
+            </span>
           </span>
           <span className="font-gill text-base font-light leading-110 text-darkblack">
             Make this a special with a gift bag and a personalized message.
@@ -561,16 +563,18 @@ const ProductDetailSidebar = ({
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2">
               <VanIcon className="shrink-0" />
-              <p className="font-gill text-base font-light leading-110 text-darkblack">
+              <p className="translate-y-0.5 font-gill text-base font-light leading-110 text-darkblack">
                 Estimated delivery May 12 2026
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <StoreIcon className="shrink-0" />
-              <p className="font-gill text-base font-light leading-110 text-darkblack">
+              <p className="translate-y-0.5 font-gill text-base font-light leading-110 text-darkblack">
                 Available now at nearest store
               </p>
-              <DetailTextLink onClick={() => setIsDeliveryStoreOpen(true)}>Coimbatore</DetailTextLink>
+              <DetailTextLink className="translate-y-0.5" onClick={() => setIsDeliveryStoreOpen(true)}>
+                Coimbatore
+              </DetailTextLink>
             </div>
           </div>
         </div>
