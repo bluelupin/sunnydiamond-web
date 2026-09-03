@@ -25,7 +25,8 @@ export async function prefetchAlankaraCollectionFromShopping(
 
   if (collectionProps.productSkus.length === 0) {
     return {
-      products: null,
+      products:
+        collectionProps.products.length > 0 ? collectionProps.products : null,
       defaultActiveIndex: collectionProps.defaultActiveIndex,
     };
   }

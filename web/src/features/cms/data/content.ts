@@ -25,26 +25,6 @@ export const homeContent = {
       },
     ],
   },
-  alankara: {
-    collection: {
-      title: "Alankara Collection",
-      description:
-        "Guided by tradition and perfected by expertise, our craftsmen bring every diamond to life with",
-      cta: { label: "View Collection", to: "/jewellery" },
-    },
-    productIds: ["1", "3", "5", "6", "2"],
-    product: {
-      cta: { label: "Discover" },
-    },
-    gifting: {
-      title: "For Your Valentine",
-      description:
-        "Honoring a lifetime of connection through rare, masterfully crafted jewelry designed for the moments that matter.",
-      mobileDescription:
-        "Traditional mastery bringing every diamond to radiant, eternal life.",
-      cta: { label: "Shop Now", to: "/jewellery" },
-    },
-  },
   craftsmanship: {
     subtitle: "Our Process",
     title: "From Vision to Masterpiece",

@@ -12,6 +12,7 @@ import {
 import { getMagentoProductsBySkus } from "@/services/magento/products/products.service";
 import type { AlankaraCollectionProduct } from "@/shared/ui/collection/alankaraCollection.types";
 import type { PrefetchedAlankaraCollection } from "@/features/products/services/prefetchProductDetailAlankara";
+import { getImageSrc } from "@/shared/utils/image";
 
 interface FeaturedCollectionSectionProps {
   id?: string;
@@ -138,8 +139,16 @@ const FeaturedCollectionSection = ({
     );
   }
 
-  const displayProducts = magentoProducts ?? collectionProps.products;
+  const displayProducts =
+    productSkus.length > 0 ? (magentoProducts ?? []) : collectionProps.products;
   if (!displayProducts.length) {
+    return null;
+  }
+
+  const hasCollectionHero =
+    Boolean(getImageSrc(collectionProps.collectionImage)) ||
+    Boolean(getImageSrc(collectionProps.collectionImageMobile));
+  if (!hasCollectionHero) {
     return null;
   }
 

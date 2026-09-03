@@ -15,10 +15,8 @@ interface DiamondsForEveryoneSectionProps {
 }
 
 const StepCircle = ({ number }: { number: number }) => (
-  <div className="relative z-10 box-border flex size-10 shrink-0 items-center justify-center rounded-full border-[0.571px] border-solid border-darkblack bg-lightGold">
-    <span className="font-gill text-xl font-light leading-none tracking-[0.2px] text-darkblack">
-      {number}
-    </span>
+  <div className="relative z-10 box-border flex size-10 shrink-0 items-center justify-center rounded-full border-[0.571px] border-solid border-darkblack bg-lightGold font-gill text-xl font-light leading-none tracking-[0.2px] text-darkblack">
+    {number}
   </div>
 );
 

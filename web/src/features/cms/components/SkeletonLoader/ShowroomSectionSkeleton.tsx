@@ -13,7 +13,7 @@ const ShowroomSectionSkeleton = ({ className }: props) => {
           className="mx-auto h-10 w-72 rounded bg-gray300"
           aria-hidden
         />
-        <div className="w-full border-r-[0.5px] border-neutral300 px-4">
+        <div className="w-full lg:border-r-[0.5px] lg:border-neutral300 px-4">
           <div className="flex flex-col gap-4 bg-gray300 py-6" aria-hidden>
             <div className="h-5 w-24 rounded bg-gray50" />
             <div className="h-[0.5px] w-full bg-neutral300" />

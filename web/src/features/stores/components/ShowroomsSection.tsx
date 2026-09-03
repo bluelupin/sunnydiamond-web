@@ -120,7 +120,7 @@ function ShowroomsMobileAccordion({
 
       <ScrollReveal
         delayMs={80}
-        className="w-full border-r-[0.5px] border-neutral300"
+        className="w-full lg:border-r-[0.5px] lg:border-neutral300"
         aria-label="Showroom locations"
       >
         {locations.map((location) => {

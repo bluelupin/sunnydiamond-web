@@ -287,7 +287,7 @@ function CollectionHeroPanel({
                 </div>
               </div>
             ) : null}
-            <div className="mb-4 flex w-full max-w-[418px] flex-col items-start gap-3 md:gap-3 lg:gap-5 desktop:mb-6">
+            <div className="mb-4 flex w-full max-w-[418px] flex-col items-start gap-3 md:gap-3 lg:gap-5 desktop:mb-6 sm:pr-2">
               <h2 className="font-larken text-32 font-light leading-none md:text-3xl lg:text-5xl desktop:whitespace-nowrap">
                 {title}
               </h2>
@@ -530,6 +530,7 @@ function ProductCarouselPanel({
               >
                 <div className="absolute left-0 top-full h-14 w-full bg-darkblack transition-all duration-300 group-hover:top-0" />
                 <span className="relative text-darkblack transition-all duration-300 group-hover:text-white">
+                  {/* {activeProductCtaLabel}  */}
                   Shop Now
                 </span>
               </Link>
@@ -615,7 +616,8 @@ function ProductCarouselPanel({
                   href={activeProduct.href}
                   className="btn-border-slide relative inline-flex h-14 items-center justify-center border-[0.8px] border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2"
                 >
-                  {activeProductCtaLabel}
+                  {/* {activeProductCtaLabel}  */}
+                  Shop Now
                 </Link>
               ) : null}
             </div>

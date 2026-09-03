@@ -407,9 +407,12 @@ export default function FeaturedProductsCarousel({
           {showCta && (activeItem.ctaLabel || ctaLabel) && activeItem.href ? (
             <Link
               href={activeItem.href}
-              className="btn-border-slide inline-flex h-14 min-w-[122px] items-center justify-center border-[0.8px] border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-none text-darkblack hover:!text-white"
+              className="relative flex h-14 items-center justify-center overflow-hidden border-[1px] border-neutral300 bg-white font-gill text-sm font-normal uppercase leading-110 hover:border-neutral300 group min-w-[122px]"
             >
-              <span className="relative z-10">{activeItem.ctaLabel || ctaLabel} </span>
+              <div className="absolute left-0 top-full h-14 w-full bg-darkblack transition-all duration-300 group-hover:top-0" />
+              <span className="relative text-darkblack transition-all duration-300 group-hover:text-white">
+                {activeItem.ctaLabel || ctaLabel}
+              </span>
             </Link>
           ) : null}
         </div>
