@@ -16,6 +16,7 @@ import {
   getHeaderSurfaceClass,
   getHeaderVariant,
   isAuthRoute,
+  isCartOrCheckoutRoute,
   isJewelleryNavLink,
 } from "@/shared/utils/navigation";
 import MobileThemeColor from "@/shared/ui/layout/MobileThemeColor";
@@ -92,7 +93,10 @@ const Header = () => {
       ? "solid"
       : pathnameHeaderVariant;
   const headerSurfaceClass = isScrollReturnSurface
-    ? "bg-white motion-safe:transition-colors motion-safe:duration-300"
+    ? cn(
+        "motion-safe:transition-colors motion-safe:duration-300",
+        isCartOrCheckoutRoute(pathname) ? "bg-gray300" : "bg-white",
+      )
     : getHeaderSurfaceClass(pathname, headerVariant);
   const isOverlay = headerVariant === "overlay";
   const isLightOverlay = isOverlay && !isAuthPage && !isScrollReturnSurface;
