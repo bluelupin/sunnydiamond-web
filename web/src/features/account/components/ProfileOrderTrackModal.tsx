@@ -21,6 +21,7 @@ import { resolveProfileOrderTimelineSteps } from "../utils/orderDeliveryTimeline
 import { mapSunnyTrackingToTimeline } from "../utils/orderFlowSteps.mapper";
 import { ProfileOrderTrackTimeline } from "./ProfileOrderTrackTimeline";
 import { ProfileStatusBadge } from "./profileUi";
+import FormFieldError from "@/shared/ui/FormFieldError";
 
 type ProfileOrderTrackModalProps = {
   open: boolean;
@@ -97,11 +98,7 @@ function ProfileOrderTrackModalBody({
         <ProfileOrderTrackTimeline steps={timelineSteps} />
       ) : null}
 
-      {error ? (
-        <p className="font-gill text-sm font-light leading-110 text-red-700" role="alert">
-          {error}
-        </p>
-      ) : null}
+      <FormFieldError message={error ?? undefined} />
 
       {trackedOrder && trackedOrder.shipments.length > 0 ? (
         <div className="border-t border-neutral300 pt-4">

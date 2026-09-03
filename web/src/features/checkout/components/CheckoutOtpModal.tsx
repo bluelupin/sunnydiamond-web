@@ -14,6 +14,7 @@ import {
 import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
+import FormFieldError from "@/shared/ui/FormFieldError";
 
 const CHECKOUT_OTP_MOBILE_QUERY = "(max-width: 1023px)";
 
@@ -104,9 +105,7 @@ const CheckoutOtpFields = ({
           </div>
         ))}
       </div>
-      {otpError ? (
-        <p className="w-full font-gill text-sm font-light leading-110 text-[#F91616]">{otpError}</p>
-      ) : null}
+      <FormFieldError message={otpError ?? undefined} className="w-full" />
     </div>
     {secondsLeft > 0 ? (
       <p className="font-gill text-base font-light leading-110 text-darkblack">

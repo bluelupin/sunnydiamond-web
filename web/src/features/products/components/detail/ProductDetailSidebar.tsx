@@ -13,6 +13,7 @@ import {
   DetailTextLink,
 } from "./shared";
 import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
+import FormFieldError from "@/shared/ui/FormFieldError";
 import { cn } from "@/shared/utils/cn";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
@@ -455,11 +456,7 @@ const ProductDetailSidebar = ({
                   listClassName="bg-aboutInactive"
                   optionClassName="text-base"
                 />
-                {ringSizeError ? (
-                  <p className="font-gill text-sm font-light leading-110 text-[#F91616]">
-                    {ringSizeError}
-                  </p>
-                ) : null}
+                <FormFieldError message={ringSizeError ?? undefined} />
               </div>
             ) : null}
 

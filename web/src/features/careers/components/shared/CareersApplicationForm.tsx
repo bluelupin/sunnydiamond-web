@@ -548,7 +548,7 @@ const CareersApplicationForm = () => {
                     onBlur={() => markTouched("phone")}
                     className={cn(
                       "min-w-0 flex-1 bg-transparent font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600",
-                      showError("phone") && "text-red-600 placeholder:text-red-600",
+                      showError("phone") && "text-[#F91616] placeholder:text-[#F91616]",
                     )}
                   />
                 </div>
@@ -808,7 +808,7 @@ const CareersApplicationForm = () => {
           <div
             className={cn(
               "flex max-w-[356px] flex-col gap-3",
-              showError("companyRelation") && "rounded-sm ring-1 ring-red-600 p-3 -m-3",
+              showError("companyRelation") && "rounded-sm ring-1 ring-[#F91616] p-3 -m-3",
             )}
           >
             <p className={careersFormLabelClassName}>{fields.companyRelationLabel}</p>

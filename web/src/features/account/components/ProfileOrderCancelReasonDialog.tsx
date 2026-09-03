@@ -12,6 +12,7 @@ import {
 import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { profileTabsContent } from "../data/profileContent";
+import FormFieldError from "@/shared/ui/FormFieldError";
 
 type ProfileOrderCancelReasonDialogProps = {
   open: boolean;
@@ -96,11 +97,7 @@ function ProfileOrderCancelReasonDialogBody({
         </p>
       ) : null}
 
-      {errorMessage ? (
-        <p className="font-gill text-sm font-light leading-110 text-red-700" role="alert">
-          {errorMessage}
-        </p>
-      ) : null}
+      <FormFieldError message={errorMessage ?? undefined} />
 
       <DetailDarkButton
         type="button"

@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/shared/ui/dialog";
 import { profileTabsContent } from "../data/profileContent";
+import FormFieldError from "@/shared/ui/FormFieldError";
 
 type ProfileOrderReturnReasonDialogProps = {
   open: boolean;
@@ -121,11 +122,7 @@ export function ProfileOrderReturnReasonDialog({
           </p>
         ) : null}
 
-        {errorMessage ? (
-          <p className="font-gill text-sm font-light leading-110 text-red-700" role="alert">
-            {errorMessage}
-          </p>
-        ) : null}
+        <FormFieldError message={errorMessage ?? undefined} />
 
         <DetailDarkButton
           type="button"

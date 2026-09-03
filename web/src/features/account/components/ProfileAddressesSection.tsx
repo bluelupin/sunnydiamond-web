@@ -23,6 +23,7 @@ import {
   ProfileCard,
   ProfileEmptyState,
 } from "./profileUi";
+import FormFieldError from "@/shared/ui/FormFieldError";
 import { useToast } from "@/shared/hooks/use-toast";
 
 const addressContent = profileTabsContent.addresses;
@@ -252,9 +253,7 @@ const ProfileAddressesSection = () => {
   return (
     <div className="flex flex-col gap-6">
       {error ? (
-        <p className="font-gill text-sm font-light leading-110 text-red-700" role="alert">
-          {error}
-        </p>
+        <FormFieldError message={error} />
       ) : null}
 
       {addresses.length === 0 && !sheetOpen ? (

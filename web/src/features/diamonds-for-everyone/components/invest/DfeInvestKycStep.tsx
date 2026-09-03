@@ -6,6 +6,7 @@ import Link from "next/link";
 import { cn } from "@/shared/utils/cn";
 import CareersChevronDownIcon from "@/features/careers/components/shared/CareersChevronDownIcon";
 import { careersFormSelectChevronClassName } from "@/features/careers/constants/careersApplicationForm";
+import FormFieldError from "@/shared/ui/FormFieldError";
 import { diamondsForEveryonePageContent } from "../../data/content";
 import { useDfeInvestFlow } from "../../context/DfeInvestFlowContext";
 
@@ -89,20 +90,7 @@ const DfeInvestKycStep = () => {
             onBlur={() => setTouched(true)}
             className={cn(fieldInputClass, idNumberError && fieldErrorClass)}
           />
-          {idNumberError ? (
-            <div className="flex items-center gap-2">
-              <span className="inline-flex size-6 shrink-0 items-center justify-center text-[#F91616]" aria-hidden>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
-                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.125" />
-                  <path d="M12 8V13" stroke="currentColor" strokeWidth="1.125" strokeLinecap="round" />
-                  <circle cx="12" cy="16.5" r="0.75" fill="currentColor" />
-                </svg>
-              </span>
-              <p className="font-gill text-base font-normal leading-110 text-[#F91616]">
-                {idNumberError}
-              </p>
-            </div>
-          ) : null}
+          <FormFieldError message={idNumberError ?? undefined} />
         </div>
 
         <div className="flex flex-col gap-2">

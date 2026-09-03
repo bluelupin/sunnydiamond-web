@@ -7,6 +7,7 @@ import { trackOrder } from "@/services/customer/order-tracking.client";
 import type { TrackedOrder } from "@/services/customer/order-tracking.types";
 import { mapTrackedOrderToProfileDetailUi } from "../utils/orderDetailDisplay.mapper";
 import { ProfileOrderDetailView } from "./ProfileOrderDetailView";
+import FormFieldError from "@/shared/ui/FormFieldError";
 
 function listingImageUrl(image: string | StaticImageData): string {
   return typeof image === "string" ? image : image.src;
@@ -121,9 +122,7 @@ export function ProfileOrderDetailPanel({
   if (error) {
     return (
       <div className="flex flex-col gap-4">
-        <p className="font-gill text-sm font-light leading-110 text-red-700" role="alert">
-          {error}
-        </p>
+        <FormFieldError message={error} />
         <button
           type="button"
           onClick={onBack}

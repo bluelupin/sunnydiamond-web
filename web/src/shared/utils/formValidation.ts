@@ -8,7 +8,7 @@ export const formFieldErrorTextColor = "#F91616";
 export const formFieldErrorBackgroundColor = "#FEDCDC";
 
 export const formFieldErrorClassName =
-  "font-gill text-sm font-light leading-110 text-[#F91616]";
+  "min-w-0 translate-y-0.5 font-gill text-sm font-light leading-110 text-[#F91616]";
 
 export const invalidFieldClassName =
   "border border-[#F91616] bg-[#FEDCDC]";

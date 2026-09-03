@@ -19,6 +19,7 @@ import { ProfileBespokeCard } from "./ProfileBespokeCard";
 import { ProfileBespokeDetailPanel } from "./ProfileBespokeDetailPanel";
 import { useProfileBespokeToast } from "../context/ProfileBespokeToastContext";
 import { ProfileEmptyState } from "./profileUi";
+import FormFieldError from "@/shared/ui/FormFieldError";
 
 const content = profileTabsContent.bespoke;
 
@@ -95,9 +96,7 @@ const ProfileBespokeSection = () => {
 
   if (error) {
     return (
-      <p className="font-gill text-sm font-light leading-110 text-red-700" role="alert">
-        {error}
-      </p>
+      <FormFieldError message={error} />
     );
   }
 

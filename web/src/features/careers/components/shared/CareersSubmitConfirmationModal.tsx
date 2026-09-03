@@ -11,6 +11,7 @@ import {
   careersOutlineCtaClassName,
 } from "@/features/careers/constants/careersCtaStyles";
 import { cn } from "@/shared/utils/cn";
+import FormFieldError from "@/shared/ui/FormFieldError";
 
 type CareersSubmitConfirmationModalProps = {
   confirmSubmissionModal: NormalizedCareerApplicationFlow["applicationForm"]["confirmSubmissionModal"];
@@ -145,11 +146,7 @@ function ConfirmSubmissionContent({
         </DrawerDescription>
       )}
 
-      {errorMessage ? (
-        <p className="font-gill text-sm leading-110 text-red-600" role="alert">
-          {errorMessage}
-        </p>
-      ) : null}
+      <FormFieldError message={errorMessage ?? undefined} />
 
       {variant === "desktop" ? (
         <ConfirmSubmissionActions

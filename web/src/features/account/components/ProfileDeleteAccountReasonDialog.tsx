@@ -11,6 +11,7 @@ import {
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/shared/ui/sheet";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { profileDetailsContent } from "../data/profileContent";
+import FormFieldError from "@/shared/ui/FormFieldError";
 
 type ProfileDeleteAccountReasonDialogProps = {
   open: boolean;
@@ -173,14 +174,7 @@ export function ProfileDeleteAccountReasonDialog({
           </div>
 
           <div className="shrink-0 border-t border-neutral300 px-4 pb-6 pt-6">
-            {errorMessage ? (
-              <p
-                className="mb-4 font-gill text-sm font-light leading-110 text-red-700"
-                role="alert"
-              >
-                {errorMessage}
-              </p>
-            ) : null}
+            <FormFieldError message={errorMessage ?? undefined} className="mb-4" />
             <DetailDarkButton
               type="button"
               className="w-full"
@@ -222,11 +216,7 @@ export function ProfileDeleteAccountReasonDialog({
 
         <DeleteAccountReasonForm {...formProps} />
 
-        {errorMessage ? (
-          <p className="font-gill text-sm font-light leading-110 text-red-700" role="alert">
-            {errorMessage}
-          </p>
-        ) : null}
+        <FormFieldError message={errorMessage ?? undefined} />
 
         <DetailDarkButton
           type="button"

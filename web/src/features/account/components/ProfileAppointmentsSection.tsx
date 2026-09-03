@@ -18,6 +18,7 @@ import { ProfileAppointmentsListingSkeleton } from "./ProfileAppointmentsListing
 import {
   ProfileFilterChips,
 } from "./profileUi";
+import FormFieldError from "@/shared/ui/FormFieldError";
 
 const content = profileTabsContent.appointments;
 
@@ -144,9 +145,7 @@ const ProfileAppointmentsSection = () => {
     return (
       <>
         {statusToast}
-        <p className="font-gill text-sm font-light leading-110 text-red-700" role="alert">
-          {error}
-        </p>
+        <FormFieldError message={error} />
       </>
     );
   }

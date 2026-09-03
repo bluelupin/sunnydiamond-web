@@ -19,6 +19,7 @@ import { ProfileOrdersEmptyState } from "./ProfileOrdersEmptyState";
 import { ProfileFilterChips } from "./profileUi";
 import { ProfileOrderCardSkeleton } from "./ProfileOrderCardSkeleton";
 import { ProfileOrdersListingSkeleton } from "./ProfileOrdersListingSkeleton";
+import FormFieldError from "@/shared/ui/FormFieldError";
 
 const content = profileTabsContent.orders;
 
@@ -170,9 +171,7 @@ const ProfileOrdersSection = () => {
 
   if (error) {
     return (
-      <p className="font-gill text-sm font-light leading-110 text-red-700" role="alert">
-        {error}
-      </p>
+      <FormFieldError message={error} />
     );
   }
 

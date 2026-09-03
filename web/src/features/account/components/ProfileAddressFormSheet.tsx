@@ -14,6 +14,7 @@ import { RIGHT_PANEL_HEADER_PADDING_CLASS, RIGHT_PANEL_WIDTH_CLASS } from "@/sha
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import FormFieldError from "@/shared/ui/FormFieldError";
 import { cn } from "@/shared/utils/cn";
 import {
   getProfileAddressFormErrors,
@@ -286,11 +287,7 @@ export function ProfileAddressFormSheet({
               />
             </div>
 
-            {formError ? (
-              <p className="font-gill text-sm font-light leading-110 text-red-700" role="alert">
-                {formError}
-              </p>
-            ) : null}
+            <FormFieldError message={formError ?? undefined} />
           </div>
         </div>
       </div>

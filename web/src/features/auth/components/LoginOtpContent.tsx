@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { KeyboardEvent, MutableRefObject } from "react";
-import FormFieldErrorIcon from "@/assets/Icons/FormFieldErrorIcon";
+import FormFieldError from "@/shared/ui/FormFieldError";
 import LeftArrow from "@/assets/Icons/LeftArrow";
 import { CartDivider } from "@/features/cart/components/CartFlowUi";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
@@ -169,12 +169,7 @@ const LoginOtpContent = ({
 
           {hasError ? (
             <div className="flex w-full items-center justify-between gap-4">
-              <div className="flex min-w-0 flex-1 items-center gap-2">
-                <FormFieldErrorIcon className="size-6 shrink-0 text-[#F91616]" />
-                <p className="font-gill text-base font-normal leading-110 text-[#F91616]">
-                  {otpError}
-                </p>
-              </div>
+              <FormFieldError message={otpError} className="min-w-0 flex-1" />
               {secondsLeft > 0 ? (
                 <p className="shrink-0 text-right font-gill text-base font-light leading-110 text-darkblack">
                   Resend code in{" "}

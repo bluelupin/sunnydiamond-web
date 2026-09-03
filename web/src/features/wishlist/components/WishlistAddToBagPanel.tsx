@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
+import FormFieldError from "@/shared/ui/FormFieldError";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import {
   getProductDetailContent,
@@ -333,11 +334,7 @@ const WishlistAddToBagPanel = ({
                     listClassName="bg-aboutInactive"
                     optionClassName="text-base"
                   />
-                  {ringSizeError ? (
-                    <p className="font-gill text-sm font-light leading-110 text-[#F91616]">
-                      {ringSizeError}
-                    </p>
-                  ) : null}
+                  <FormFieldError message={ringSizeError ?? undefined} />
                 </div>
               ) : isDetailFetching ? (
                 <div className="flex flex-col gap-2" aria-hidden>

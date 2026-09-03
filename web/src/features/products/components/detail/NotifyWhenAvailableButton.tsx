@@ -6,6 +6,7 @@ import { DetailDarkButton } from "./shared";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useLoginModal } from "@/features/auth/context/LoginModalContext";
 import { subscribeToStockAlert } from "@/services/customer/stock-alert.client";
+import FormFieldError from "@/shared/ui/FormFieldError";
 
 type NotifyWhenAvailableButtonProps = {
   /**
@@ -85,9 +86,7 @@ const NotifyWhenAvailableButton = ({ sku }: NotifyWhenAvailableButtonProps) => {
       >
         {phase === "submitting" ? "SENDING..." : "NOTIFY ME WHEN AVAILABLE"}
       </DetailDarkButton>
-      {error ? (
-        <p className="font-gill text-sm font-light leading-110 text-[#F91616]">{error}</p>
-      ) : null}
+      <FormFieldError message={error ?? undefined} />
     </div>
   );
 };
