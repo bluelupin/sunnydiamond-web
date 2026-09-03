@@ -1,27 +1,27 @@
 "use client";
- 
+
 import Image from "next/image";
 import Link from "next/link";
 import Reveal from "@/shared/Animation/Reveal";
 import type { NormalizedGiftingGiftCard } from "@/services/gifting/gifting-page.types";
- 
+
 type GiftingGiftCardSectionProps = {
   giftCard: NormalizedGiftingGiftCard;
 };
 
 const giftCardCtaClassName =
-  "btn-border-slide inline-flex h-14 items-center justify-center border border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2";
+  "btn-border-slide inline-flex h-14 items-center justify-center border border-neutral300 hover:!border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2";
 
 const GiftCardCta = ({ href, label }: { href: string; label: string }) => (
   <Link href={href} className={giftCardCtaClassName}>
-    <span className="relative z-10">{label}</span>
+    <span className="relative z-10">{label} stet</span>
   </Link>
 );
 
 const GiftingGiftCardSection = ({ giftCard }: GiftingGiftCardSectionProps) => {
   const cutoutSrc = giftCard.image?.desktopUrl;
   const cutoutAlt = giftCard.image?.alt ?? "";
- 
+
   return (
     <section
       id="gift-card"
@@ -73,7 +73,7 @@ const GiftingGiftCardSection = ({ giftCard }: GiftingGiftCardSectionProps) => {
             </Reveal>
           </div>
         </div>
- 
+
         {cutoutSrc &&
           <Reveal
             direction="up"
@@ -95,5 +95,5 @@ const GiftingGiftCardSection = ({ giftCard }: GiftingGiftCardSectionProps) => {
     </section>
   );
 };
- 
+
 export default GiftingGiftCardSection;

@@ -166,8 +166,8 @@ const ProductDetailSidebar = ({
     if (variant === "primary") {
       if (handlePanelOpen) {
         return (
-          <DetailDarkButton key={key} onClick={handlePanelOpen} className="uppercase hover:!border-white">
-            {button.label} test
+          <DetailDarkButton key={key} onClick={handlePanelOpen} className="uppercase hover:!border-transparent" style={{ borderColor: "transparent" }}>
+            {button.label}
           </DetailDarkButton>
         );
       }
@@ -214,7 +214,7 @@ const ProductDetailSidebar = ({
     const linkRel = button.openInNewTab ? "noopener noreferrer" : undefined;
     const key = `${button.label}-${index}`;
     const variant = resolvePersonaliseButtonVariant(button.modalTag, button.style);
-    const buttonClassName = "w-fit uppercase";
+    const buttonClassName = "w-fit uppercase hover:!border-neutral300";
 
     if (variant === "outline") {
       if (handlePanelOpen) {
