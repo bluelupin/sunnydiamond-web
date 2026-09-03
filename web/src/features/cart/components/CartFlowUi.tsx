@@ -59,11 +59,11 @@ type CartGiftBadgeProps = {
 export const CartGiftBadge = ({ className }: CartGiftBadgeProps) => (
   <span
     className={cn(
-      "inline-flex shrink-0 items-center justify-center bg-mauve300 px-3 py-1 font-gill text-sm font-normal leading-110 whitespace-nowrap text-darkblack",
+      "inline-flex shrink-0 items-center justify-center bg-mauve300 px-3 py-1 font-gill text-sm font-normal leading-none whitespace-nowrap text-darkblack",
       className,
     )}
   >
-    <span className="translate-y-0.5">Gift</span>
+    Gift
   </span>
 );
 
