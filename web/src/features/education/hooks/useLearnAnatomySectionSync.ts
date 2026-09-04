@@ -5,22 +5,38 @@ import {
   useEffect,
   useRef,
   useState,
+  type RefObject,
 } from "react";
 
 const ACCORDION_TRANSITION_MS = 550;
 const INTERSECTION_THRESHOLDS = [0, 0.1, 0.25, 0.5, 0.75, 1] as const;
 const INTERSECTION_ROOT_MARGIN = "-35% 0px -35% 0px";
+const PINNED_SCROLL_MIN_WIDTH = "(min-width: 768px)";
 
 type UseLearnAnatomySectionSyncOptions = {
   sectionIds: readonly string[];
   defaultSectionId: string | null;
+  containerRef?: RefObject<HTMLElement | null>;
 };
 
 type UseLearnAnatomySectionSyncResult = {
   openSectionId: string | null;
   handleSectionClick: (sectionId: string) => void;
   registerSectionRef: (sectionId: string, element: HTMLElement | null) => void;
+  usePinnedScroll: boolean;
 };
+
+function isPinnedScrollEnabled(): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    return false;
+  }
+
+  return window.matchMedia(PINNED_SCROLL_MIN_WIDTH).matches;
+}
 
 function pickBestVisibleSection(
   sectionIds: readonly string[],
@@ -59,8 +75,10 @@ function pickBestVisibleSection(
 export function useLearnAnatomySectionSync({
   sectionIds,
   defaultSectionId,
+  containerRef,
 }: UseLearnAnatomySectionSyncOptions): UseLearnAnatomySectionSyncResult {
   const [openSectionId, setOpenSectionId] = useState<string | null>(defaultSectionId);
+  const [usePinnedScroll, setUsePinnedScroll] = useState(false);
   const sectionElementsRef = useRef<Map<string, HTMLElement>>(new Map());
   const visibleRatiosRef = useRef<Map<string, number>>(new Map());
   const clickLockRef = useRef(false);
@@ -74,6 +92,10 @@ export function useLearnAnatomySectionSync({
   }, []);
 
   const registerSectionRef = useCallback((sectionId: string, element: HTMLElement | null) => {
+    if (isPinnedScrollEnabled()) {
+      return;
+    }
+
     const previousElement = sectionElementsRef.current.get(sectionId);
 
     if (previousElement && observerRef.current) {
@@ -90,35 +112,57 @@ export function useLearnAnatomySectionSync({
     visibleRatiosRef.current.delete(sectionId);
   }, []);
 
-  const handleSectionClick = useCallback((sectionId: string) => {
-    setOpenSectionId((current) => {
-      const isCollapsing = current === sectionId;
+  const scrollToPinnedSection = useCallback(
+    (sectionId: string) => {
+      const container = containerRef?.current;
+      if (!container || !isPinnedScrollEnabled()) {
+        return;
+      }
 
-      if (isCollapsing) {
-        collapseSuppressRef.current = true;
-        clickLockRef.current = false;
+      const step = container.querySelector<HTMLElement>(`[data-anatomy-step="${sectionId}"]`);
+      if (!step) {
+        return;
+      }
+
+      step.scrollIntoView({ behavior: "smooth", block: "center" });
+    },
+    [containerRef],
+  );
+
+  const handleSectionClick = useCallback(
+    (sectionId: string) => {
+      setOpenSectionId((current) => {
+        const isCollapsing = current === sectionId;
+
+        if (isCollapsing) {
+          collapseSuppressRef.current = true;
+          clickLockRef.current = false;
+          if (clickLockTimerRef.current !== null) {
+            window.clearTimeout(clickLockTimerRef.current);
+            clickLockTimerRef.current = null;
+          }
+          return null;
+        }
+
+        collapseSuppressRef.current = false;
+        clickLockRef.current = true;
+
         if (clickLockTimerRef.current !== null) {
           window.clearTimeout(clickLockTimerRef.current);
-          clickLockTimerRef.current = null;
         }
-        return null;
-      }
 
-      collapseSuppressRef.current = false;
-      clickLockRef.current = true;
+        clickLockTimerRef.current = window.setTimeout(() => {
+          clickLockRef.current = false;
+          clickLockTimerRef.current = null;
+        }, ACCORDION_TRANSITION_MS);
 
-      if (clickLockTimerRef.current !== null) {
-        window.clearTimeout(clickLockTimerRef.current);
-      }
+        scrollToPinnedSection(sectionId);
 
-      clickLockTimerRef.current = window.setTimeout(() => {
-        clickLockRef.current = false;
-        clickLockTimerRef.current = null;
-      }, ACCORDION_TRANSITION_MS);
-
-      return sectionId;
-    });
-  }, []);
+        return sectionId;
+      });
+    },
+    [scrollToPinnedSection],
+  );
 
   useEffect(() => {
     setOpenSectionId(defaultSectionId);
@@ -129,6 +173,15 @@ export function useLearnAnatomySectionSync({
     if (sectionIds.length === 0 || typeof IntersectionObserver === "undefined") {
       return;
     }
+
+    const widthQuery = window.matchMedia(PINNED_SCROLL_MIN_WIDTH);
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const syncPinnedScrollState = () => {
+      setUsePinnedScroll(isPinnedScrollEnabled());
+    };
+
+    syncPinnedScrollState();
 
     const scheduleActiveSectionUpdate = () => {
       if (clickLockRef.current || collapseSuppressRef.current) {
@@ -154,31 +207,103 @@ export function useLearnAnatomySectionSync({
       });
     };
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          const sectionId = entry.target.getAttribute("data-anatomy-section-id");
+    const setupObserver = () => {
+      observerRef.current?.disconnect();
+      observerRef.current = null;
+      visibleRatiosRef.current.clear();
+
+      const pinned = isPinnedScrollEnabled();
+      setUsePinnedScroll(pinned);
+
+      const container = containerRef?.current;
+
+      if (pinned) {
+        if (!container) {
+          return;
+        }
+
+        const steps = Array.from(
+          container.querySelectorAll<HTMLElement>("[data-anatomy-step]"),
+        );
+
+        if (steps.length === 0) {
+          return;
+        }
+
+        sectionElementsRef.current = new Map(
+          steps.map((step) => {
+            const sectionId = step.getAttribute("data-anatomy-step");
+            return sectionId ? [sectionId, step] : null;
+          }).filter((entry): entry is [string, HTMLElement] => entry !== null),
+        );
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              const sectionId = entry.target.getAttribute("data-anatomy-step");
+              if (!sectionId) {
+                continue;
+              }
+
+              visibleRatiosRef.current.set(sectionId, entry.intersectionRatio);
+            }
+
+            scheduleActiveSectionUpdate();
+          },
+          {
+            root: null,
+            rootMargin: INTERSECTION_ROOT_MARGIN,
+            threshold: [...INTERSECTION_THRESHOLDS],
+          },
+        );
+
+        observerRef.current = observer;
+        steps.forEach((step) => observer.observe(step));
+        return;
+      }
+
+      sectionElementsRef.current.clear();
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            const sectionId = entry.target.getAttribute("data-anatomy-section-id");
+            if (!sectionId) {
+              continue;
+            }
+
+            visibleRatiosRef.current.set(sectionId, entry.intersectionRatio);
+          }
+
+          scheduleActiveSectionUpdate();
+        },
+        {
+          root: null,
+          rootMargin: INTERSECTION_ROOT_MARGIN,
+          threshold: [...INTERSECTION_THRESHOLDS],
+        },
+      );
+
+      observerRef.current = observer;
+
+      if (container) {
+        const sections = Array.from(
+          container.querySelectorAll<HTMLElement>("[data-anatomy-section-id]"),
+        );
+
+        for (const section of sections) {
+          const sectionId = section.getAttribute("data-anatomy-section-id");
           if (!sectionId) {
             continue;
           }
 
-          visibleRatiosRef.current.set(sectionId, entry.intersectionRatio);
+          sectionElementsRef.current.set(sectionId, section);
+          observer.observe(section);
         }
+      }
+    };
 
-        scheduleActiveSectionUpdate();
-      },
-      {
-        root: null,
-        rootMargin: INTERSECTION_ROOT_MARGIN,
-        threshold: [...INTERSECTION_THRESHOLDS],
-      },
-    );
-
-    observerRef.current = observer;
-
-    for (const element of sectionElementsRef.current.values()) {
-      observer.observe(element);
-    }
+    setupObserver();
 
     const onScroll = () => {
       if (collapseSuppressRef.current) {
@@ -187,12 +312,22 @@ export function useLearnAnatomySectionSync({
       }
     };
 
+    const onLayoutChange = () => {
+      setupObserver();
+    };
+
     window.addEventListener("scroll", onScroll, { passive: true });
+    widthQuery.addEventListener("change", onLayoutChange);
+    motionQuery.addEventListener("change", onLayoutChange);
+    window.addEventListener("resize", onLayoutChange);
 
     return () => {
-      observer.disconnect();
+      observerRef.current?.disconnect();
       observerRef.current = null;
       window.removeEventListener("scroll", onScroll);
+      widthQuery.removeEventListener("change", onLayoutChange);
+      motionQuery.removeEventListener("change", onLayoutChange);
+      window.removeEventListener("resize", onLayoutChange);
 
       if (clickLockTimerRef.current !== null) {
         window.clearTimeout(clickLockTimerRef.current);
@@ -204,11 +339,12 @@ export function useLearnAnatomySectionSync({
         rafRef.current = null;
       }
     };
-  }, [sectionIds, setOpenSectionIdIfChanged]);
+  }, [containerRef, sectionIds, setOpenSectionIdIfChanged, usePinnedScroll]);
 
   return {
     openSectionId,
     handleSectionClick,
     registerSectionRef,
+    usePinnedScroll,
   };
 }
