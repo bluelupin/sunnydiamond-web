@@ -100,7 +100,7 @@ const GiftingItemCheckbox = ({
     aria-label={label}
     onClick={() => onChange(!checked)}
     className={cn(
-      "flex size-5 shrink-0 items-center justify-center border-[0.8px] border-darkblack bg-white",
+      "flex size-5 shrink-0 items-center justify-center border border-gray600 bg-transparent",
       checked && "border-transparent bg-linkGold",
     )}
   >

@@ -61,6 +61,7 @@ export const profileDetailsContent = {
     title: "Logout",
     description: "You will need to log in again to access your account and orders.",
     ctaLabel: "LOGOUT",
+    loggingOutLabel: "LOGGING OUT",
   },
 } as const;
 

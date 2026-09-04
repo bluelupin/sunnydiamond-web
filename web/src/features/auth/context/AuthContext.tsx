@@ -10,7 +10,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { WISHLIST_STORAGE_KEY } from "@/features/wishlist/constants";
+import { clearGuestWishlistStorage } from "@/features/wishlist/utils/guestWishlistStorage";
 import { sanitizeAuthCustomer } from "@/shared/utils/customerName";
 
 export type AuthCustomer = {
@@ -108,7 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       applyStatus("guest");
       // Full reload so cart/wishlist providers reset to a clean guest state.
       window.localStorage.removeItem("sunny-guest-cart-id");
-      window.localStorage.removeItem(WISHLIST_STORAGE_KEY);
+      clearGuestWishlistStorage();
       window.location.assign("/");
     }
   }, [applyStatus]);

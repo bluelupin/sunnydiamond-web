@@ -79,6 +79,7 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
 
   const [fullName, setFullName] = useState(initialFullName);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     setFullName(initialFullName);
@@ -98,6 +99,15 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
 
   const handleCancel = () => {
     setFullName(initialFullName);
+  };
+
+  const handleLogout = () => {
+    if (isLoggingOut) {
+      return;
+    }
+
+    setIsLoggingOut(true);
+    void logout();
   };
 
   const handleSave = () => {
@@ -303,10 +313,11 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
           </div>
           <DetailDarkButton
             type="button"
-            onClick={() => void logout()}
-            className="w-full shrink-0 lg:w-auto lg:min-w-[160px]"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className="w-full shrink-0 lg:w-auto lg:min-w-[160px] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {content.logout.ctaLabel}
+            {isLoggingOut ? content.logout.loggingOutLabel : content.logout.ctaLabel}
           </DetailDarkButton>
         </div>
       </div>

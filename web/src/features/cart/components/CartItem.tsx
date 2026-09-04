@@ -13,7 +13,6 @@ import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { cn } from "@/shared/utils/cn";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
-import { useAuth } from "@/features/auth/context/AuthContext";
 import { useCart } from "../context/CartContext";
 import type { CartLineItem, CartLineOptions } from "../types/cart.types";
 import { formatCartLineMeta, formatCartPrice, getCartLineDisplayTotal } from "../utils/formatCartLine";
@@ -42,9 +41,8 @@ interface CartItemProps {
 const ENGRAVING_EMPTY_LABEL = "Metal Engraving (Optional)";
 
 const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItemProps) => {
-  const { buyNow, getLineItemMetadata } = useCart();
-  const { toggleWishlist, isWishlisted } = useWishlist();
-  const { status } = useAuth();
+  const { buyNow, getLineItemMetadata, removeItem } = useCart();
+  const { isWishlisted, addToWishlist } = useWishlist();
   const { clearGiftingOptionsExplored } = useCartUI();
   const { navigateToCheckout, isNavigatingToCheckout } = useCartCheckout();
   const { product, quantity, options } = item;
@@ -62,6 +60,7 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
   const [isSavingEngraving, setIsSavingEngraving] = useState(false);
   const [movedToWishlist, setMovedToWishlist] = useState(false);
   const [isBuyingNow, setIsBuyingNow] = useState(false);
+  const [isMovingToWishlist, setIsMovingToWishlist] = useState(false);
 
   const engravingFont = options.engravingFont?.trim();
   // Catalog list first (works on any device), browser metadata only as the
@@ -148,13 +147,20 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
   };
 
   const handleMoveToWishlist = () => {
-    if (isNavigatingToCheckout) return;
-    toggleWishlist(product.id);
-    if (status !== "authenticated") {
-      return;
-    }
-    onRemove(item.id);
-    setMovedToWishlist(true);
+    if (isNavigatingToCheckout || isMovingToWishlist) return;
+
+    void (async () => {
+      setIsMovingToWishlist(true);
+      try {
+        await addToWishlist(product.id);
+        await removeItem(item.id, { showToast: false });
+        setMovedToWishlist(true);
+      } catch {
+        // Login modal or API failure — keep the cart line unchanged.
+      } finally {
+        setIsMovingToWishlist(false);
+      }
+    })();
   };
 
   const handleBuyNow = () => {
@@ -235,15 +241,24 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
               <CartActionLink href={productHref} disabled={isNavigatingToCheckout}>
                 Edit
               </CartActionLink>
-              {movedToWishlist ? (
+              <CartActionLink
+                onClick={handleMoveToWishlist}
+                disabled={isNavigatingToCheckout || isMovingToWishlist}
+              >
+                Move to wishlist
+              </CartActionLink>
+              {/* {movedToWishlist ? (
                 <span className="pb-1 font-gill text-sm font-normal leading-110 text-neutral500">
                   Moved to wishlist
                 </span>
               ) : !wishlisted ? (
-                <CartActionLink onClick={handleMoveToWishlist} disabled={isNavigatingToCheckout}>
+                <CartActionLink
+                  onClick={handleMoveToWishlist}
+                  disabled={isNavigatingToCheckout || isMovingToWishlist}
+                >
                   Move to wishlist
                 </CartActionLink>
-              ) : null}
+              ) : null} */}
             </div>
           </div>
         </div>

@@ -1,6 +1,8 @@
 import { getGuestCartId, setGuestCartId } from "@/services/magento/cart/cartSession";
-import { WISHLIST_STORAGE_KEY } from "@/features/wishlist/constants";
-import { normalizeWishlistSkus } from "@/features/wishlist/utils/wishlistProduct.utils";
+import {
+  clearGuestWishlistStorage,
+  readGuestWishlistFromStorage,
+} from "@/features/wishlist/utils/guestWishlistStorage";
 import { syncCustomerWishlist } from "@/services/customer/customer-wishlist.client";
 import { magentoGraphqlFetch } from "@/services/magento/graphqlClient";
 import {
@@ -32,23 +34,15 @@ async function mergeGuestCart(): Promise<void> {
   setGuestCartId(customerCartId);
 }
 
-function readLocalWishlistSkus(): string[] {
-  try {
-    const raw = window.localStorage.getItem(WISHLIST_STORAGE_KEY);
-    const parsed = raw ? (JSON.parse(raw) as unknown) : [];
-    return Array.isArray(parsed)
-      ? normalizeWishlistSkus(parsed.filter((sku): sku is string => typeof sku === "string"))
-      : [];
-  } catch {
-    return [];
-  }
-}
-
-/** Merges local wishlist SKUs with Magento and persists the merged list locally. */
+/** Merges local guest wishlist SKUs into Magento, then clears local storage on success. */
 async function syncWishlistAfterLogin(): Promise<void> {
-  const localSkus = readLocalWishlistSkus();
-  const wishlist = await syncCustomerWishlist(localSkus);
-  window.localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(wishlist.skus));
+  const localSkus = readGuestWishlistFromStorage();
+  if (localSkus.length === 0) {
+    return;
+  }
+
+  await syncCustomerWishlist(localSkus);
+  clearGuestWishlistStorage();
 }
 
 /**

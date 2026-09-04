@@ -18,7 +18,7 @@ import { ProfileWishlistEmptyState } from "./ProfileWishlistEmptyState";
 import { ProfileWishlistListingSkeleton } from "./ProfileWishlistListingSkeleton";
 
 const ProfileWishlistSection = () => {
-  const { wishlistedIds, toggleWishlist } = useWishlist();
+  const { wishlistedIds, toggleWishlist, removeFromWishlist } = useWishlist();
   const { addToBagAndOpenDrawer } = useAddToBagWithDrawer();
   const { products: wishlistProducts, isLoading, error } = useMagentoWishlistProducts(wishlistedIds);
   const [visibleCount, setVisibleCount] = useState(WISHLIST_VISIBLE_CAP);
@@ -37,11 +37,21 @@ const ProfileWishlistSection = () => {
   };
 
   const handlePanelAddToBag = async (payload: Parameters<typeof addToBagAndOpenDrawer>[0]) => {
+    const wishlistSku = addToBagProduct?.sku?.trim() ?? null;
     setAddToBagProduct(null);
+
     await addToBagAndOpenDrawer(payload);
+
+    if (wishlistSku) {
+      try {
+        await removeFromWishlist(wishlistSku, { showRemovedToast: false });
+      } catch {
+        // Bag add succeeded; wishlist removal can be retried from the wishlist page.
+      }
+    }
   };
 
-  if (isLoading && wishlistedIds.length > 0) {
+  if (isLoading && wishlistProducts.length === 0 && wishlistedIds.length > 0) {
     return <ProfileWishlistListingSkeleton />;
   }
 
