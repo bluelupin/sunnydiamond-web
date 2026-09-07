@@ -70,7 +70,9 @@ import type {
 } from "./magentoCart.types";
 import type { CartGiftingSelection, CartLineItem } from "@/features/cart/types/cart.types";
 import type { CheckoutFormData, CheckoutPaymentData } from "@/features/checkout/types/checkout.types";
+import type { CustomerAddress } from "@/services/customer/customer-account.types";
 import {
+  buildCheckoutShippingAddressInput,
   mapCheckoutFormToBillingAddress,
   mapCheckoutFormToShippingAddress,
   resolveGuestCheckoutEmail,
@@ -617,15 +619,13 @@ export async function setGuestShippingAddress(
   return mapGuestCartState(assertCart(data.setShippingAddressesOnCart?.cart), lineMetadata);
 }
 
-export async function setCartShippingAddressByUid(
+export async function setCheckoutShippingAddress(
   cartId: string,
-  customerAddressUid: string,
+  shippingAddressInput: MagentoShippingAddressInput,
   lineMetadata: StoredCartLineMetadata,
   signal?: AbortSignal,
 ): Promise<GuestCartState> {
-  const shippingAddresses: MagentoShippingAddressInput[] = [
-    { customer_address_uid: customerAddressUid },
-  ];
+  const shippingAddresses: MagentoShippingAddressInput[] = [shippingAddressInput];
 
   const data = await magentoGraphqlFetch<MagentoSetShippingAddressesOnCartResponse>({
     query: MAGENTO_SET_SHIPPING_ADDRESSES_ON_CART_MUTATION,
@@ -635,6 +635,20 @@ export async function setCartShippingAddressByUid(
   });
 
   return mapGuestCartState(assertCart(data.setShippingAddressesOnCart?.cart), lineMetadata);
+}
+
+export async function setCartShippingAddressByUid(
+  cartId: string,
+  customerAddressUid: string,
+  lineMetadata: StoredCartLineMetadata,
+  signal?: AbortSignal,
+): Promise<GuestCartState> {
+  return setCheckoutShippingAddress(
+    cartId,
+    { customer_address_uid: customerAddressUid },
+    lineMetadata,
+    signal,
+  );
 }
 
 export async function setGuestBillingAddress(
@@ -668,6 +682,7 @@ export async function setGuestBillingAddress(
 export type CheckoutPrepareOptions = {
   isAuthenticated: boolean;
   customerEmail?: string;
+  savedAddresses?: CustomerAddress[];
 };
 
 export async function applyCheckoutAddresses(
@@ -681,8 +696,11 @@ export async function applyCheckoutAddresses(
     await setGuestEmailOnCart(cartId, resolveGuestCheckoutEmail(form.phoneOrEmail), signal);
   }
 
-  const shippingAddress = mapCheckoutFormToShippingAddress(form);
-  let state = await setGuestShippingAddress(cartId, shippingAddress, lineMetadata, signal);
+  const shippingAddressInput = options.isAuthenticated
+    ? buildCheckoutShippingAddressInput(form, options.savedAddresses ?? [])
+    : { address: mapCheckoutFormToShippingAddress(form) };
+
+  let state = await setCheckoutShippingAddress(cartId, shippingAddressInput, lineMetadata, signal);
 
   if (form.billingSameAsShipping) {
     state = await setGuestBillingAddress(cartId, null, true, lineMetadata, signal);

@@ -17,6 +17,7 @@ import FormFieldError from "@/shared/ui/FormFieldError";
 import { AmexLogo, MastercardLogo, VisaLogo } from "@/shared/ui/PaymentLogos";
 import { INDIAN_STATES } from "@/features/checkout/constants/indianStates";
 import type { CheckoutFormData, CheckoutPaymentData } from "../types/checkout.types";
+import type { CustomerAddress } from "@/services/customer/customer-account.types";
 import type { CheckoutFormField, CheckoutPaymentField } from "@/shared/utils/formValidation";
 import { isCheckoutEmailContact } from "@/shared/utils/formValidation";
 
@@ -46,6 +47,8 @@ type CheckoutFormStepProps = {
   validation: CheckoutFormValidationProps;
   isAuthenticated?: boolean;
   hasSavedDeliveryAddress?: boolean;
+  savedAddresses?: CustomerAddress[];
+  onSelectSavedShippingAddress?: (addressUid: string) => void;
   fieldsDisabled?: boolean;
 };
 
@@ -210,6 +213,8 @@ export const CheckoutFormStep = ({
   validation,
   isAuthenticated = false,
   hasSavedDeliveryAddress = true,
+  savedAddresses = [],
+  onSelectSavedShippingAddress,
   fieldsDisabled = false,
 }: CheckoutFormStepProps) => (
   <div className="flex flex-col gap-6">
@@ -274,6 +279,19 @@ export const CheckoutFormStep = ({
         </p>
       ) : (
         <>
+          {isAuthenticated && savedAddresses.length > 1 ? (
+            <CheckoutSelectField
+              id="checkout-saved-shipping-address"
+              label="Saved Address"
+              value={form.selectedShippingAddressUid ?? ""}
+              onChange={(value) => onSelectSavedShippingAddress?.(value)}
+              options={savedAddresses.map((address) => ({
+                value: address.uid,
+                label: `${address.fullName} — ${address.city}`,
+              }))}
+              disabled={fieldsDisabled}
+            />
+          ) : null}
           <div className="space-y-6">
             <CheckoutSubheading>SHIPPING ADDRESS</CheckoutSubheading>
             <CheckoutAddressFields

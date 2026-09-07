@@ -16,6 +16,8 @@ export type CheckoutFormData = {
   billingCity: string;
   billingState: string;
   billingPhone: string;
+  /** Saved profile address uid when checkout shipping matches a saved address. */
+  selectedShippingAddressUid: string | null;
 };
 
 /**
@@ -46,6 +48,7 @@ export const createEmptyCheckoutForm = (): CheckoutFormData => ({
   billingCity: "",
   billingState: "",
   billingPhone: "",
+  selectedShippingAddressUid: null,
 });
 
 export const createEmptyPaymentForm = (): CheckoutPaymentData => ({

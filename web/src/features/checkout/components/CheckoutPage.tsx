@@ -37,6 +37,7 @@ import {
 } from "../types/checkout.types";
 import {
   applyCustomerAddressToCheckoutForm,
+  CHECKOUT_SHIPPING_ADDRESS_FIELDS,
   sanitizeCheckoutFormNames,
 } from "../utils/checkoutCustomer.utils";
 import {
@@ -97,6 +98,7 @@ const CheckoutPage = () => {
     isLoading: isAuthPrefillLoading,
     addressesLoading,
     customer,
+    addresses,
     defaultFormPatch,
     defaultShippingAddress,
     refreshAddresses,
@@ -422,6 +424,22 @@ const CheckoutPage = () => {
     shippingPrefillAppliedRef.current = true;
   }, [addressesLoading, defaultShippingAddress, isAuthenticated]);
 
+  const handleSelectSavedShippingAddress = useCallback(
+    (addressUid: string) => {
+      if (checkoutLockedRef.current) {
+        return;
+      }
+
+      const selectedAddress = addresses.find((address) => address.uid === addressUid);
+      if (!selectedAddress) {
+        return;
+      }
+
+      setForm((current) => applyCustomerAddressToCheckoutForm(current, selectedAddress));
+    },
+    [addresses],
+  );
+
   if ((isHydrating || isAuthPrefillLoading) && step !== "success" && !isPaymentReturn) {
     return <CheckoutPageSkeleton />;
   }
@@ -574,6 +592,7 @@ const CheckoutPage = () => {
             {
               isAuthenticated,
               customerEmail: customer?.email,
+              savedAddresses: addresses,
             },
           );
           applyMagentoCartState(state);
@@ -772,12 +791,24 @@ const CheckoutPage = () => {
     if (checkoutLockedRef.current) return;
 
     if (field === "pincode" || field === "billingPincode") {
-      updateForm(field, sanitizePincodeInput(String(value)));
+      setForm((current) => ({
+        ...current,
+        [field]: sanitizePincodeInput(String(value)),
+        ...(CHECKOUT_SHIPPING_ADDRESS_FIELDS.includes(field)
+          ? { selectedShippingAddressUid: null }
+          : {}),
+      }));
       return;
     }
 
     if (field === "shippingPhone" || field === "billingPhone") {
-      updateForm(field, sanitizePhoneInput(String(value), "+91"));
+      setForm((current) => ({
+        ...current,
+        [field]: sanitizePhoneInput(String(value), "+91"),
+        ...(CHECKOUT_SHIPPING_ADDRESS_FIELDS.includes(field)
+          ? { selectedShippingAddressUid: null }
+          : {}),
+      }));
       return;
     }
 
@@ -800,7 +831,18 @@ const CheckoutPage = () => {
       return;
     }
 
-    updateForm(field, value);
+    setForm((current) => {
+      const next: CheckoutFormData = {
+        ...current,
+        [field]: value as CheckoutFormData[typeof field],
+      };
+
+      if (CHECKOUT_SHIPPING_ADDRESS_FIELDS.includes(field)) {
+        next.selectedShippingAddressUid = null;
+      }
+
+      return next;
+    });
   };
 
   return (
@@ -839,6 +881,8 @@ const CheckoutPage = () => {
                 validation={formValidation}
                 isAuthenticated={isAuthenticated}
                 hasSavedDeliveryAddress={hasDeliveryAddressAvailable}
+                savedAddresses={addresses}
+                onSelectSavedShippingAddress={handleSelectSavedShippingAddress}
                 fieldsDisabled={isSavingAddresses}
               />
             ) : (

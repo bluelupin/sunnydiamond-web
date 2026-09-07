@@ -41,5 +41,16 @@ export function applyCustomerAddressToCheckoutForm(
     city: mapped.city,
     state: mapped.state,
     shippingPhone: mapped.phone,
+    selectedShippingAddressUid: address.uid,
   });
 }
+
+export const CHECKOUT_SHIPPING_ADDRESS_FIELDS: ReadonlyArray<keyof CheckoutFormData> = [
+  "shippingName",
+  "addressLine1",
+  "addressLine2",
+  "pincode",
+  "city",
+  "state",
+  "shippingPhone",
+];

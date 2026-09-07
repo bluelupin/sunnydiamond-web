@@ -1,6 +1,8 @@
 import type { CheckoutFormData } from "@/features/checkout/types/checkout.types";
+import { mapCustomerAddressToFormInput } from "@/services/customer/customer-account.mapper";
+import type { CustomerAddress } from "@/services/customer/customer-account.types";
 import { getIndiaMagentoRegionId } from "../regions/indiaRegionIds";
-import type { MagentoCartAddressInput } from "./magentoCart.types";
+import type { MagentoCartAddressInput, MagentoShippingAddressInput } from "./magentoCart.types";
 import { splitFullName } from "@/shared/utils/customerName";
 
 export { splitFullName } from "@/shared/utils/customerName";
@@ -53,6 +55,7 @@ function mapAddressBlock(input: {
     country_code: "IN",
     region_id: regionId,
     telephone: resolveTelephone(input.phone, input.phoneFallback),
+    save_in_address_book: false,
   };
 }
 
@@ -82,4 +85,56 @@ export function mapCheckoutFormToBillingAddress(form: CheckoutFormData): Magento
     // off, and falling straight back to it would put "0000000000" on the address.
     phoneFallback: form.shippingPhone || form.phoneOrEmail,
   });
+}
+
+function normalizeCheckoutCompareValue(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+function normalizeCheckoutPhone(value: string): string {
+  return value.replace(/\D/g, "");
+}
+
+export function doesCheckoutShippingMatchSavedAddress(
+  form: CheckoutFormData,
+  address: CustomerAddress,
+): boolean {
+  const mapped = mapCustomerAddressToFormInput(address);
+
+  return (
+    normalizeCheckoutCompareValue(form.shippingName) === normalizeCheckoutCompareValue(mapped.name) &&
+    normalizeCheckoutCompareValue(form.addressLine1) ===
+      normalizeCheckoutCompareValue(mapped.addressLine1) &&
+    normalizeCheckoutCompareValue(form.addressLine2) ===
+      normalizeCheckoutCompareValue(mapped.addressLine2 ?? "") &&
+    normalizeCheckoutCompareValue(form.pincode) === normalizeCheckoutCompareValue(mapped.pincode) &&
+    normalizeCheckoutCompareValue(form.city) === normalizeCheckoutCompareValue(mapped.city) &&
+    normalizeCheckoutCompareValue(form.state) === normalizeCheckoutCompareValue(mapped.state) &&
+    normalizeCheckoutPhone(form.shippingPhone) === normalizeCheckoutPhone(mapped.phone)
+  );
+}
+
+/**
+ * Uses a saved customer address by uid only when checkout still matches that address.
+ * Otherwise applies a one-off cart address that must not be saved to the profile.
+ */
+export function buildCheckoutShippingAddressInput(
+  form: CheckoutFormData,
+  savedAddresses: CustomerAddress[] = [],
+): MagentoShippingAddressInput {
+  const selectedUid = form.selectedShippingAddressUid?.trim();
+
+  if (selectedUid) {
+    const selectedAddress = savedAddresses.find((address) => address.uid === selectedUid);
+
+    if (selectedAddress && doesCheckoutShippingMatchSavedAddress(form, selectedAddress)) {
+      return {
+        customer_address_uid: selectedUid,
+      };
+    }
+  }
+
+  return {
+    address: mapCheckoutFormToShippingAddress(form),
+  };
 }

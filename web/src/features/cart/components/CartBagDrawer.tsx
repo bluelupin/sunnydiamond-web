@@ -75,59 +75,63 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
         </div>
 
         <div className="mx-auto flex w-full flex-col gap-6 px-4 pb-5 lg:px-6">
-        <CartBagDrawerSuccessHeader message={successMessage} />
+          <CartBagDrawerSuccessHeader message={successMessage} />
 
-        <div className="h-px w-full shrink-0 bg-aboutInactive" aria-hidden />
+          <div className="h-px w-full shrink-0 bg-aboutInactive" aria-hidden />
 
-        {addedItem ? (
-          <div className="flex min-h-0 flex-1 flex-col justify-between">
-            <div className="relative flex items-start justify-between bg-gray300 px-4 py-6">
-              {isGift ? (
-                <CartGiftBadge className="absolute left-0 top-0 z-10" />
-              ) : null}
+          {addedItem ? (
+            <div className="flex min-h-0 flex-1 flex-col justify-between">
+              <div className="relative flex items-start justify-between bg-gray300 px-4 py-6">
+                {isGift ? (
+                  <CartGiftBadge className="absolute left-0 top-0 z-10" />
+                ) : null}
 
-              <div className="flex min-w-0 flex-1 items-center lg:gap-4 gap-2 lg:pr-4 pr-2">
-                <div className="relative size-[68px] shrink-0 overflow-hidden bg-white lg:size-[91px]">
-                  <Image
-                    src={addedItem.product.image}
-                    alt={addedItem.product.name}
-                    fill
-                    className="object-contain"
-                    sizes="(max-width: 1023px) 68px, 91px"
-                  />
+                <div className="flex min-w-0 flex-1 items-center lg:gap-4 gap-2 lg:pr-4 pr-2">
+                  <div className="relative size-[68px] shrink-0 overflow-hidden bg-white lg:size-[91px]">
+                    <Image
+                      src={addedItem.product.image}
+                      alt={addedItem.product.name}
+                      fill
+                      className="object-contain"
+                      sizes="(max-width: 1023px) 68px, 91px"
+                    />
+                  </div>
+                  <div className="flex min-w-0 max-w-[176px] flex-col gap-2">
+                    <p
+                      className={cn(
+                        "font-gill text-base leading-110 text-darkblack",
+                        productNameDisplayClassName,
+                      )}
+                    >
+                      {addedItem.product.name}
+                    </p>
+                    <CartMetaRow parts={meta} />
+                    <p className="font-gill text-base leading-110 text-darkblack">
+                      {formatCartPrice(getCartLineDisplayPrice(addedItem))}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex min-w-0 max-w-[176px] flex-col gap-2">
-                  <p
-                    className={cn(
-                      "font-gill text-base leading-110 text-darkblack",
-                      productNameDisplayClassName,
-                    )}
-                  >
-                    {addedItem.product.name}
-                  </p>
-                  <CartMetaRow parts={meta} />
-                  <p className="font-gill text-base leading-110 text-darkblack">
-                    {formatCartPrice(getCartLineDisplayPrice(addedItem))}
-                  </p>
-                </div>
+
+                <button
+                  type="button"
+                  onClick={handleRemoveAddedItem}
+                  aria-label={`Remove ${addedItem.product.name} from bag`}
+                  className="shrink-0 text-darkblack transition-opacity hover:opacity-70"
+                >
+                  <DeleteIcon className="size-6" />
+                </button>
               </div>
-
-              <button
-                type="button"
-                onClick={handleRemoveAddedItem}
-                aria-label={`Remove ${addedItem.product.name} from bag`}
-                className="shrink-0 text-darkblack transition-opacity hover:opacity-70"
-              >
-                <DeleteIcon className="size-6" />
-              </button>
+              {/* {otherCount > 0 ? <CartMoreItemsNote count={otherCount} /> : null} */}
             </div>
-
-            {otherCount > 0 ? <CartMoreItemsNote count={otherCount} /> : null}
-          </div>
-        ) : null}
+          ) : null}
         </div>
       </div>
-
+      {addedItem ? (
+        <div className="px-4 md:px-6 md:py-10 py-6">
+          {otherCount > 0 ? <CartMoreItemsNote count={otherCount} /> : null}
+        </div>)
+        : null
+      }
       <div className="mt-auto flex shrink-0 flex-col gap-4 border-t border-neutral300 bg-white px-4 py-6 [border-top-width:0.5px]">
         <CartPrimaryLink href="/cart" onClick={onClose} className="uppercase">
           View Shopping Bag

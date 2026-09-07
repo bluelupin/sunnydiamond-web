@@ -153,6 +153,8 @@ export type MagentoCartAddressInput = {
   country_code: string;
   region_id: number;
   telephone: string;
+  /** When false, Magento must not persist this cart address to the customer address book. */
+  save_in_address_book?: boolean;
 };
 
 export type MagentoEstimateAddressInput = {
