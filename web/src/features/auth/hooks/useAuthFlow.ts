@@ -183,13 +183,27 @@ export function useAuthFlow({
   const noSignInMethod =
     !flags.otpLoginEnabled && !flags.emailOtpLoginEnabled && !showGoogle && !showApple;
 
-  /** Session cookie is set — sync guest cart/wishlist, then full navigation so providers reboot. */
+  /**
+   * Session cookie is set — sync guest cart/wishlist, then full navigation so providers reboot.
+   *
+   * Standalone only: replace, not assign. /login must not stay in history — a pushed entry
+   * sends Back there, and because this is a document navigation the browser restores it from
+   * bfcache with its state intact (otpVerified still true), reopening the completed step.
+   * The modal has no entry of its own: it sits on a real content page, so replacing would
+   * delete the page the customer signed in from (cart, a DFE landing page) instead.
+   */
   const completeAuth = useCallback(
     async (destination: string = returnUrl) => {
       await runPostLoginSync();
+
+      if (surface === "standalone") {
+        window.location.replace(destination);
+        return;
+      }
+
       window.location.assign(destination);
     },
-    [returnUrl],
+    [returnUrl, surface],
   );
 
   const resetState = useCallback(() => {
@@ -233,6 +247,30 @@ export function useAuthFlow({
     setIdentifier(seeded);
     setIdentifierError(undefined);
   }, [active, initialIdentifier, resetState]);
+
+  /**
+   * Back onto /login restores it from bfcache with the state it was left in — a completed
+   * create-account step, verification and all. Reset on restore so a finished registration
+   * can never be reopened out of history.
+   *
+   * Standalone only. The modal is restored on top of an ordinary page and can carry a
+   * seeded identifier (checkout hands it the email it just recognised); the seeding effect
+   * does not re-run on a bfcache restore, so resetting there would just blank the field.
+   */
+  useEffect(() => {
+    if (surface !== "standalone") {
+      return;
+    }
+
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        resetState();
+      }
+    };
+
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, [resetState, surface]);
 
   useEffect(() => {
     if (!active || step !== "otp") return;

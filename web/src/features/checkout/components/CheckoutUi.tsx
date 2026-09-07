@@ -150,7 +150,8 @@ type CheckoutPhoneFieldProps = {
   verified?: boolean;
   onVerify?: () => void;
   showVerify?: boolean;
-  mode?: "phone" | "phoneOrEmail";
+  /** "email" locks the field to an address — no +91 prefix, no VERIFY, no phone parsing. */
+  mode?: "phone" | "phoneOrEmail" | "email";
   error?: string;
   invalid?: boolean;
   disabled?: boolean;
@@ -171,7 +172,7 @@ export const CheckoutPhoneField = ({
   invalid,
   disabled = false,
 }: CheckoutPhoneFieldProps) => {
-  const isEmailInput = mode === "phoneOrEmail" && /[a-zA-Z@]/.test(value);
+  const isEmailInput = mode === "email" || (mode === "phoneOrEmail" && /[a-zA-Z@]/.test(value));
   const shouldShowVerify = showVerify && !isEmailInput;
 
   return (
