@@ -6,10 +6,9 @@ import { useCart } from "@/features/cart/context/CartContext";
 import { useCartUI } from "@/features/cart/context/CartUIContext";
 import type { AddToBagPayload } from "@/features/cart/types/cart.types";
 import { formatAddToBagErrorMessage } from "@/features/cart/utils/formatAddToBagError";
-import { toast } from "@/shared/ui/sonner";
 
 export function useAddToBagWithDrawer() {
-  const { addItem, replaceLineItem } = useCart();
+  const { addItem, replaceLineItem, showCartStatusToast } = useCart();
   const { openBagDrawer, closeBagDrawer, tryBeginBagAction, endBagAction } = useCartUI();
 
   const addToBagAndOpenDrawer = useCallback(
@@ -24,12 +23,12 @@ export function useAddToBagWithDrawer() {
       } catch (error) {
         closeBagDrawer();
         console.error("Add to bag failed:", error);
-        toast.error(formatAddToBagErrorMessage(error));
+        showCartStatusToast(formatAddToBagErrorMessage(error));
       } finally {
         endBagAction();
       }
     },
-    [addItem, closeBagDrawer, endBagAction, openBagDrawer, tryBeginBagAction],
+    [addItem, closeBagDrawer, endBagAction, openBagDrawer, showCartStatusToast, tryBeginBagAction],
   );
 
   const updateBagAndOpenDrawer = useCallback(
@@ -44,12 +43,19 @@ export function useAddToBagWithDrawer() {
       } catch (error) {
         closeBagDrawer();
         console.error("Update bag failed:", error);
-        toast.error(formatAddToBagErrorMessage(error));
+        showCartStatusToast(formatAddToBagErrorMessage(error));
       } finally {
         endBagAction();
       }
     },
-    [closeBagDrawer, endBagAction, openBagDrawer, replaceLineItem, tryBeginBagAction],
+    [
+      closeBagDrawer,
+      endBagAction,
+      openBagDrawer,
+      replaceLineItem,
+      showCartStatusToast,
+      tryBeginBagAction,
+    ],
   );
 
   return { addToBagAndOpenDrawer, updateBagAndOpenDrawer };

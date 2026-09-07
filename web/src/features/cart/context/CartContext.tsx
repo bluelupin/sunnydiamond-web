@@ -105,6 +105,7 @@ interface CartContextType {
   removeLocalOffer: () => void;
   replaceLineItem: (lineItemId: string, payload: AddToBagPayload) => Promise<AddItemResult>;
   buyNow: (lineItemId: string) => Promise<void>;
+  showCartStatusToast: (message: string) => void;
   getLineItemMetadata: (lineItemId: string) => CartLineMetadata | undefined;
   shippingMethods: MagentoShippingMethodOption[];
   estimatedShippingMethods: MagentoShippingMethodOption[];
@@ -1116,6 +1117,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeLocalOffer,
       replaceLineItem,
       buyNow,
+      showCartStatusToast,
       getLineItemMetadata,
       shippingMethods,
       estimatedShippingMethods,
@@ -1148,6 +1150,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeLocalOffer,
       replaceLineItem,
       buyNow,
+      showCartStatusToast,
       getLineItemMetadata,
       shippingMethods,
       paymentMethods,

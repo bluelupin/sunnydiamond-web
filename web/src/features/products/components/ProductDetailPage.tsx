@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import type { Product } from "@/features/products/data/products";
 import {
@@ -38,8 +38,32 @@ const ProductDetailPage = ({
   stockAlertEnabled = false,
   productDisplay,
 }: ProductDetailPageProps) => {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const editLineId = searchParams?.get("editLine")?.trim() ?? "";
+  const editLineFromUrl = searchParams?.get("editLine")?.trim() ?? "";
+  const [editStateCleared, setEditStateCleared] = useState(false);
+
+  useEffect(() => {
+    setEditStateCleared(false);
+  }, [editLineFromUrl]);
+
+  const editLineId = editStateCleared ? "" : editLineFromUrl;
+
+  const clearEditLineFromUrl = useCallback(() => {
+    if (!pathname) {
+      return;
+    }
+
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
+    if (!params.has("editLine")) {
+      return;
+    }
+
+    params.delete("editLine");
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }, [pathname, router, searchParams]);
   const purityParam = searchParams?.get("purity")?.trim() ?? "";
   const preferredPurities = useMemo(
     () => parsePreferredMetalPurities(purityParam),
@@ -97,6 +121,8 @@ const ProductDetailPage = ({
     // be in local cart state, or Save would add a new item and show the add toast.
     if (editLineId) {
       await updateBagAndOpenDrawer(editLineId, payloadWithOptions);
+      setEditStateCleared(true);
+      clearEditLineFromUrl();
       return;
     }
 
@@ -123,7 +149,7 @@ const ProductDetailPage = ({
 
   return (
     <PageContainer className="!px-0 md:!px-8 lg:!px-10 2xl:!px-[60px] pb-16 pt-0 lg:pb-[60px]">
-      <ProductDetailSidebar {...sidebarProps}>
+      <ProductDetailSidebar key={`${product.id}:${editLineId || "new"}`} {...sidebarProps}>
         {({ purchase, details }) => (
           <ProductDetailHeroLayout
             key={selectedMetal || displayProduct.image.toString()}
