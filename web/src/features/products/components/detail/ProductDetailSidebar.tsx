@@ -609,7 +609,7 @@ const ProductDetailSidebar = ({
                       "max-md:gap-2 max-md:px-3 max-md:py-4",
                       "md:max-desktop:portrait:gap-2 md:max-desktop:portrait:px-3 md:max-desktop:portrait:py-4",
                       "md:landscape:h-136 md:landscape:flex-1 md:landscape:gap-2 md:landscape:p-3",
-                      index > 0 && "md:landscape:border-l md:landscape:border-gray600",
+                      index > 0 && "md:landscape:border-l-[0.5px] md:landscape:border-neutral300 border-gray600",
                     )}
                   >
                     <div className="flex size-10 shrink-0 items-center justify-center">
@@ -644,7 +644,7 @@ const ProductDetailSidebar = ({
                     key={`${benefit.label}-divider`}
                     role="presentation"
                     aria-hidden
-                    className="block h-[1px] min-h-px w-full shrink-0 bg-[#999999] p-0 md:landscape:hidden"
+                    className="block h-[0.5px] min-h-[0.5px] w-full shrink-0 bg-[#999999] p-0 md:landscape:hidden"
                   />,
                   item,
                 ];

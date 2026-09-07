@@ -12,11 +12,21 @@ export type TimelineYear = string;
 
 const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 
+const CLICK_LOCK_MS = 700;
+
 export interface AboutTimelineScrollState {
   activeYear: TimelineYear;
   progress: number;
   reducedMotion: boolean;
   scrollToYear: (year: TimelineYear) => void;
+}
+
+function resolveActiveYearIndex(progress: number, yearCount: number): number {
+  if (yearCount <= 1) {
+    return 0;
+  }
+
+  return Math.min(yearCount - 1, Math.max(0, Math.floor(progress * yearCount)));
 }
 
 export function useAboutTimelineScroll(
@@ -30,7 +40,7 @@ export function useAboutTimelineScroll(
   const clickLockRef = useRef(false);
   const clickLockTimerRef = useRef<number | null>(null);
 
-  const updateProgress = useCallback(() => {
+  const syncFromScroll = useCallback(() => {
     const section = sectionRef.current;
     if (!section) return;
 
@@ -38,13 +48,23 @@ export function useAboutTimelineScroll(
     const viewportHeight = window.innerHeight;
     const scrollTrack = section.offsetHeight - viewportHeight;
 
+    let nextProgress = 0;
+
     if (scrollTrack <= 0) {
-      setProgress(rect.top <= viewportHeight * 0.5 ? 1 : 0);
+      nextProgress = rect.top <= viewportHeight * 0.5 ? 1 : 0;
+    } else {
+      nextProgress = clamp(-rect.top / scrollTrack);
+    }
+
+    setProgress(nextProgress);
+
+    if (clickLockRef.current || years.length === 0) {
       return;
     }
 
-    setProgress(clamp(-rect.top / scrollTrack));
-  }, [sectionRef]);
+    const nextYear = years[resolveActiveYearIndex(nextProgress, years.length)];
+    setActiveYear((current) => (current === nextYear ? current : nextYear));
+  }, [sectionRef, years]);
 
   const scrollToYear = useCallback(
     (year: TimelineYear) => {
@@ -65,9 +85,10 @@ export function useAboutTimelineScroll(
       clickLockTimerRef.current = window.setTimeout(() => {
         clickLockRef.current = false;
         clickLockTimerRef.current = null;
-      }, 700);
+        syncFromScroll();
+      }, CLICK_LOCK_MS);
     },
-    [sectionRef],
+    [sectionRef, syncFromScroll],
   );
 
   useEffect(() => {
@@ -87,64 +108,36 @@ export function useAboutTimelineScroll(
       return;
     }
 
-    const steps = Array.from(
-      section.querySelectorAll<HTMLElement>("[data-timeline-step]"),
-    );
-
-    if (steps.length === 0) return;
-
-    const pickActiveFromEntries = (entries: IntersectionObserverEntry[]) => {
-      if (clickLockRef.current) return;
-
-      const visible = entries
-        .filter((entry) => entry.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-
-      const best = visible[0];
-      if (!best?.target) return;
-
-      const year = best.target.getAttribute("data-timeline-step");
-      if (year && years.includes(year)) {
-        setActiveYear(year);
-      }
-    };
-
-    const observer = new IntersectionObserver(pickActiveFromEntries, {
-      root: null,
-      rootMargin: "-40% 0px -40% 0px",
-      threshold: [0, 0.25, 0.5, 0.75, 1],
-    });
-
-    steps.forEach((step) => observer.observe(step));
-
-    const onScroll = () => updateProgress();
-    updateProgress();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    syncFromScroll();
+    window.addEventListener("scroll", syncFromScroll, { passive: true });
+    window.addEventListener("resize", syncFromScroll);
 
     const onMotionChange = () => {
       setReducedMotion(motionQuery.matches);
       if (motionQuery.matches) {
-        observer.disconnect();
-        window.removeEventListener("scroll", onScroll);
-        window.removeEventListener("resize", onScroll);
+        window.removeEventListener("scroll", syncFromScroll);
+        window.removeEventListener("resize", syncFromScroll);
         setActiveYear(defaultYear);
         setProgress(1);
+        return;
       }
+
+      syncFromScroll();
+      window.addEventListener("scroll", syncFromScroll, { passive: true });
+      window.addEventListener("resize", syncFromScroll);
     };
 
     motionQuery.addEventListener("change", onMotionChange);
 
     return () => {
-      observer.disconnect();
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("scroll", syncFromScroll);
+      window.removeEventListener("resize", syncFromScroll);
       motionQuery.removeEventListener("change", onMotionChange);
       if (clickLockTimerRef.current !== null) {
         window.clearTimeout(clickLockTimerRef.current);
       }
     };
-  }, [sectionRef, updateProgress, years, defaultYear]);
+  }, [sectionRef, syncFromScroll, years, defaultYear]);
 
   return {
     activeYear,
