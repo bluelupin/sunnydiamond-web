@@ -8,10 +8,12 @@ import {
   inferStateFromAddress,
 } from "@/features/stores/utils/storeLocatorFilters";
 
-const FALLBACK_HERO_IMAGE = "/images/products/delivery-store/book-visit-hero.png";
-
 function cleanText(value?: string | null): string {
   return value?.trim() ?? "";
+}
+
+export function getDefaultBookStoreVisitStoreId(stores: BookStoreVisitStore[]): string {
+  return stores[0]?.id ?? "";
 }
 
 export function mapStoreLocatorShowroomToBookStoreVisit(
@@ -25,8 +27,8 @@ export function mapStoreLocatorShowroomToBookStoreVisit(
     address: showroom.address,
     phone: showroom.phone ?? "",
     directionsUrl: showroom.mapUrl,
-    heroImage: showroom.desktopImageUrl,
-    mobileHeroImage: showroom.mobileImageUrl,
+    ...(showroom.desktopImageUrl ? { heroImage: showroom.desktopImageUrl } : {}),
+    ...(showroom.mobileImageUrl ? { mobileHeroImage: showroom.mobileImageUrl } : {}),
     imageAlt: showroom.imageAlt,
     city: showroom.city ?? undefined,
     state: showroom.state ?? inferStateFromAddress(showroom.address),
@@ -45,7 +47,7 @@ export function mapGenericFormShowroomToBookStoreVisit(
     address: showroom.address,
     phone: showroom.phone,
     directionsUrl: showroom.directionsUrl,
-    heroImage: showroom.heroImage,
+    ...(showroom.heroImage ? { heroImage: showroom.heroImage } : {}),
     city: showroom.city,
     state: showroom.state ?? inferStateFromAddress(showroom.address),
     pincode: showroom.pincode ?? extractPincodeFromAddress(showroom.address),
@@ -71,8 +73,9 @@ export function mapEditorialShowroomToBookStoreVisit(
 
   const heroImage =
     resolveCmsMediaUrl(location.image?.desktopImage) ??
-    resolveCmsMediaUrl(location.image?.mobileImage) ??
-    FALLBACK_HERO_IMAGE;
+    resolveCmsMediaUrl(location.image?.mobileImage);
+
+  const mobileHeroImage = resolveCmsMediaUrl(location.image?.mobileImage);
 
   const directionsUrl =
     cleanText(location.mapUrl) ||
@@ -88,7 +91,8 @@ export function mapEditorialShowroomToBookStoreVisit(
     address,
     phone: cleanText(location.phone),
     directionsUrl,
-    heroImage,
+    ...(heroImage ? { heroImage } : {}),
+    ...(mobileHeroImage ? { mobileHeroImage } : {}),
     state: inferStateFromAddress(address),
     pincode: extractPincodeFromAddress(address),
   };
@@ -107,4 +111,21 @@ export function resolveBookStoreVisitStores(
     .filter((store): store is BookStoreVisitStore => store != null);
 
   return fromEditorial;
+}
+
+export function resolveBookStoreVisitStoresForPanel(
+  variant: "embedded" | "page" | "modal",
+  initialStores: BookStoreVisitStore[] | undefined,
+  genericFormShowrooms: NormalizedGenericFormShowroom[],
+  editorialShowrooms: ShowroomSectionLocation[],
+): BookStoreVisitStore[] {
+  if (variant === "page") {
+    return initialStores ?? [];
+  }
+
+  if (initialStores && initialStores.length > 0) {
+    return initialStores;
+  }
+
+  return resolveBookStoreVisitStores(genericFormShowrooms, editorialShowrooms);
 }

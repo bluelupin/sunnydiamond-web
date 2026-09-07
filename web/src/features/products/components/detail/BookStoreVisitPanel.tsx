@@ -7,7 +7,10 @@ import {
   Check,
 } from "lucide-react";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
-import { resolveBookStoreVisitStores } from "@/features/products/utils/bookStoreVisitStores";
+import {
+  getDefaultBookStoreVisitStoreId,
+  resolveBookStoreVisitStoresForPanel,
+} from "@/features/products/utils/bookStoreVisitStores";
 import { storeLocatorSearchMatchMessage, storeLocatorStatusEyebrowClassName } from "@/features/stores/data/storeLocatorContent";
 import {
   filterBookStoreVisitStores,
@@ -29,7 +32,6 @@ import {
   APPOINTMENT_TIME_SLOTS,
 } from "@/shared/constants/appointmentForm";
 import {
-  BOOK_STORE_VISIT_STORES,
   type BookStoreVisitStore,
 } from "@/features/products/data/bookStoreVisitContent";
 import {
@@ -105,14 +107,10 @@ const BookStoreVisitPanel = ({
     [editorialData?.showroomSection?.showrooms],
   );
   const [isResolvingStores, setIsResolvingStores] = useState(
-    () => variant === "page" && !(initialStores && initialStores.length > 0),
+    () => !(initialStores && initialStores.length > 0),
   );
   const [step, setStep] = useState<BookVisitStep>("select-store");
-  const [stores, setStores] = useState<BookStoreVisitStore[]>(() => {
-    if (initialStores && initialStores.length > 0) return initialStores;
-    if (variant === "page") return [];
-    return BOOK_STORE_VISIT_STORES;
-  });
+  const [stores, setStores] = useState<BookStoreVisitStore[]>(() => initialStores ?? []);
   const [timeSlots, setTimeSlots] = useState<readonly string[]>(APPOINTMENT_TIME_SLOTS);
   const [purposeOptions, setPurposeOptions] = useState<readonly string[]>([]);
   const [formTitle, setFormTitle] = useState("Book Your Store Visit");
@@ -131,9 +129,7 @@ const BookStoreVisitPanel = ({
   const [formTag, setFormTag] = useState(submissionFormTag ?? SHOWROOM_VISIT_FORM_TAG);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedStoreId, setSelectedStoreId] = useState(
-    () =>
-      initialStores?.[0]?.id ??
-      (variant === "page" ? "" : BOOK_STORE_VISIT_STORES[0]?.id ?? ""),
+    () => getDefaultBookStoreVisitStoreId(initialStores ?? []),
   );
   const [name, setName] = useState("");
   const [countryCode, setCountryCode] = useState("+91");
@@ -240,8 +236,7 @@ const BookStoreVisitPanel = ({
   const selectedStore =
     displayStores.find((store) => store.id === activeStoreId) ??
     displayStores[0] ??
-    stores[0] ??
-    (variant === "page" ? undefined : BOOK_STORE_VISIT_STORES[0]);
+    stores[0];
 
   useEffect(() => {
     if (variant !== "page") {
@@ -288,18 +283,19 @@ const BookStoreVisitPanel = ({
     void (async () => {
       try {
         const form = await getGenericFormByTag(SHOWROOM_VISIT_FORM_TAG, controller.signal);
+        const resolvedStores = resolveBookStoreVisitStoresForPanel(
+          variant,
+          initialStores,
+          form?.showrooms ?? [],
+          editorialShowrooms,
+        );
+
         if (!form) {
-          const resolvedStores =
-            variant === "page"
-              ? (initialStores ?? [])
-              : initialStores && initialStores.length > 0
-                ? initialStores
-                : resolveBookStoreVisitStores([], editorialShowrooms);
           setStores(resolvedStores);
           setSelectedStoreId((current) =>
             resolvedStores.some((store) => store.id === current)
               ? current
-              : resolvedStores[0]?.id ?? (variant === "page" ? "" : BOOK_STORE_VISIT_STORES[0].id),
+              : getDefaultBookStoreVisitStoreId(resolvedStores),
           );
           return;
         }
@@ -354,35 +350,27 @@ const BookStoreVisitPanel = ({
           setNotesPlaceholder(form.notesPlaceholder);
         }
 
-        const resolvedStores =
-          variant === "page"
-            ? (initialStores ?? [])
-            : initialStores && initialStores.length > 0
-              ? initialStores
-              : resolveBookStoreVisitStores(form.showrooms, editorialShowrooms);
         setStores(resolvedStores);
         setSelectedStoreId((current) =>
           resolvedStores.some((store) => store.id === current)
             ? current
-            : resolvedStores[0]?.id ?? (variant === "page" ? "" : BOOK_STORE_VISIT_STORES[0].id),
+            : getDefaultBookStoreVisitStoreId(resolvedStores),
         );
       } catch {
-        const resolvedStores =
-          variant === "page"
-            ? (initialStores ?? [])
-            : initialStores && initialStores.length > 0
-              ? initialStores
-              : resolveBookStoreVisitStores([], editorialShowrooms);
+        const resolvedStores = resolveBookStoreVisitStoresForPanel(
+          variant,
+          initialStores,
+          [],
+          editorialShowrooms,
+        );
         setStores(resolvedStores);
         setSelectedStoreId((current) =>
           resolvedStores.some((store) => store.id === current)
             ? current
-            : resolvedStores[0]?.id ?? (variant === "page" ? "" : BOOK_STORE_VISIT_STORES[0].id),
+            : getDefaultBookStoreVisitStoreId(resolvedStores),
         );
       } finally {
-        if (variant === "page") {
-          setIsResolvingStores(false);
-        }
+        setIsResolvingStores(false);
       }
     })();
 
@@ -430,7 +418,7 @@ const BookStoreVisitPanel = ({
     setSelectedStoreId((current) =>
       stores.some((store) => store.id === current)
         ? current
-        : (stores[0]?.id ?? (variant === "page" ? "" : BOOK_STORE_VISIT_STORES[0].id)),
+        : getDefaultBookStoreVisitStoreId(stores),
     );
   };
 
@@ -784,7 +772,12 @@ const StoreSelectionStep = ({
             className="mt-6 flex flex-col border-r border-neutral300 pb-72"
             aria-label="Showroom locations"
           >
-            {stores.length === 0 ? (
+            {isShowroomsLoading ? (
+              <div className="flex flex-col gap-4 px-4 py-8 lg:px-10" aria-busy="true" aria-label="Loading showrooms">
+                <div className="h-24 animate-pulse bg-gray300" />
+                <div className="h-24 animate-pulse bg-gray300" />
+              </div>
+            ) : stores.length === 0 ? (
               noResultsMessage?.trim() ? (
                 <p className="px-4 py-8 font-gill text-base font-light leading-110 text-neutral500 lg:px-10">
                   {noResultsMessage.trim()}

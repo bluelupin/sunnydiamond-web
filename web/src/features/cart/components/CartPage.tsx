@@ -11,10 +11,15 @@ import CartPriceDetails from "@/features/cart/components/CartPriceDetails";
 import { useCart } from "@/features/cart/context/CartContext";
 import { resolveCartGiftNoteDisplay } from "@/features/cart/utils/cartGiftNotes";
 import { useCartCheckout } from "@/features/cart/hooks/useCartCheckout";
+import type { NormalizedProductDisplayStrip } from "@/services/product-display/product-display-page.types";
 import { CartPrimaryLink } from "./CartFlowUi";
 import CartPageSkeleton from "./skeletons/CartPageSkeleton";
 
-const CartPage = () => {
+type CartPageProps = {
+  benefitsStrip: NormalizedProductDisplayStrip;
+};
+
+const CartPage = ({ benefitsStrip }: CartPageProps) => {
   const { items, isHydrating, refreshCart, updateQuantity, removeItem, updateLineItemOptions } = useCart();
   const { isNavigatingToCheckout } = useCartCheckout();
   const giftNoteDisplay = useMemo(() => resolveCartGiftNoteDisplay(items), [items]);
@@ -85,7 +90,7 @@ const CartPage = () => {
               ))}
 
               <div className="pt-4 md:hidden">
-                <CartBenefitsSection />
+                <CartBenefitsSection strip={benefitsStrip} />
               </div>
 
               <MobileStickyFooterSpacer height={clearancePx} />
@@ -93,7 +98,7 @@ const CartPage = () => {
 
             <aside className="hidden h-fit w-full min-w-0 flex-col gap-0 md:max-lg:sticky md:max-lg:top-12 md:max-lg:flex lg:sticky lg:top-12 lg:flex">
               <CartPriceDetails />
-              <CartBenefitsSection />
+              <CartBenefitsSection strip={benefitsStrip} />
             </aside>
           </div>
         </div>

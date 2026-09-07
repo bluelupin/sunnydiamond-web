@@ -67,7 +67,7 @@ export type NormalizedGenericFormShowroom = {
   address: string;
   phone: string;
   directionsUrl: string;
-  heroImage: string;
+  heroImage?: string;
   city?: string;
   state?: string;
   pincode?: string;

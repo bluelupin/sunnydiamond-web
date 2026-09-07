@@ -9,8 +9,6 @@ import type {
   StrapiGenericFormShowroom,
 } from "./generic-form.types";
 
-const FALLBACK_HERO_IMAGE = "/images/products/delivery-store/book-visit-hero.png";
-
 const cleanText = (value?: string | null): string | undefined => {
   const trimmed = value?.trim();
   return trimmed || undefined;
@@ -87,8 +85,7 @@ const mapShowroom = (
 
   const heroImage =
     toAbsoluteMediaUrl(showroom.image?.desktopImage?.url) ??
-    toAbsoluteMediaUrl(showroom.image?.mobileImage?.url) ??
-    FALLBACK_HERO_IMAGE;
+    toAbsoluteMediaUrl(showroom.image?.mobileImage?.url);
 
   return {
     id,
@@ -100,7 +97,7 @@ const mapShowroom = (
     directionsUrl:
       cleanText(showroom.mapUrl) ??
       `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(storeName)}`,
-    heroImage,
+    ...(heroImage ? { heroImage } : {}),
     city: cleanText(showroom.city),
     state: cleanText(showroom.state),
     pincode: extractPincodeFromAddress(cleanText(showroom.address)),

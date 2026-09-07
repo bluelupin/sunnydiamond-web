@@ -417,7 +417,7 @@ export function mapBookStoreVisitStoreToLayoutItem(store: {
   address: string;
   phone: string;
   directionsUrl: string;
-  heroImage: string;
+  heroImage?: string;
   mobileHeroImage?: string;
   imageAlt?: string;
 }): ShowroomLayoutItem {
