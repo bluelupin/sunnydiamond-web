@@ -39,6 +39,8 @@ type CheckoutFormStepProps = {
   onVerifyPhone: () => void;
   /** Guest contact VERIFY affordance — pass false when checkout OTP is disabled. */
   showVerify?: boolean;
+  /** Mobile sign-in is off, so the guest contact field takes an email address only. */
+  emailOnly?: boolean;
   /** Guest email blur — checks if the account already exists. */
   onContactBlur?: () => void;
   validation: CheckoutFormValidationProps;
@@ -203,6 +205,7 @@ export const CheckoutFormStep = ({
   phoneVerified,
   onVerifyPhone,
   showVerify = true,
+  emailOnly = false,
   onContactBlur,
   validation,
   isAuthenticated = false,
@@ -237,8 +240,8 @@ export const CheckoutFormStep = ({
       ) : (
         <CheckoutPhoneField
           id="checkout-phone-email"
-          label="PhoneNo / Email ID"
-          mode="phoneOrEmail"
+          label={emailOnly ? "Email ID*" : "PhoneNo / Email ID"}
+          mode={emailOnly ? "email" : "phoneOrEmail"}
           value={form.phoneOrEmail}
           onChange={(value) => onChange("phoneOrEmail", value)}
           onBlur={() => {

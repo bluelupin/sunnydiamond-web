@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import {
+  type CheckoutContactOptions,
   type CheckoutFormField,
   type CheckoutFormValues,
   type CheckoutPaymentField,
@@ -14,13 +15,27 @@ import {
 } from "@/shared/utils/formValidation";
 import { INDIAN_STATES } from "@/features/checkout/constants/indianStates";
 
-export const useCheckoutFormValidation = (values: CheckoutFormValues) => {
+export const useCheckoutFormValidation = (
+  values: CheckoutFormValues,
+  /** Contact field mode; email-only when mobile sign-in is switched off. */
+  contactOptions?: CheckoutContactOptions,
+) => {
   const [submitted, setSubmitted] = useState(false);
   const [touched, setTouched] = useState<Partial<Record<CheckoutFormField, boolean>>>({});
+  // Destructured to scalars so the memos below are not invalidated by a fresh
+  // options object on every render.
+  const emailOnly = contactOptions?.emailOnly ?? false;
+  const requireDeliveryPhone = contactOptions?.requireDeliveryPhone ?? false;
 
-  const errors = useMemo(() => getCheckoutFormErrors(values, INDIAN_STATES), [values]);
+  const errors = useMemo(
+    () => getCheckoutFormErrors(values, INDIAN_STATES, { emailOnly, requireDeliveryPhone }),
+    [emailOnly, requireDeliveryPhone, values],
+  );
 
-  const isValid = useMemo(() => isCheckoutFormValid(values, INDIAN_STATES), [values]);
+  const isValid = useMemo(
+    () => isCheckoutFormValid(values, INDIAN_STATES, { emailOnly, requireDeliveryPhone }),
+    [emailOnly, requireDeliveryPhone, values],
+  );
 
   const markTouched = useCallback((field: CheckoutFormField) => {
     setTouched((current) => ({ ...current, [field]: true }));
@@ -36,11 +51,11 @@ export const useCheckoutFormValidation = (values: CheckoutFormValues) => {
     (onValid: () => void) => {
       setSubmitted(true);
 
-      if (isCheckoutFormValid(values, INDIAN_STATES)) {
+      if (isCheckoutFormValid(values, INDIAN_STATES, { emailOnly, requireDeliveryPhone })) {
         onValid();
       }
     },
-    [values],
+    [emailOnly, requireDeliveryPhone, values],
   );
 
   const resetValidation = useCallback(() => {

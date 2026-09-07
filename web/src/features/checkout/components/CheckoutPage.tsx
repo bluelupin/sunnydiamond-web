@@ -80,6 +80,12 @@ const CheckoutPage = () => {
   const { toast } = useToast();
   const { openLoginModal } = useLoginModal();
   const { otpLoginEnabled } = useAuthFeatures();
+  /**
+   * With SMS sign-in off there is no mobile identity to take, so the contact field is an
+   * email address and nothing else — offering "PhoneNo / Email ID" would accept a number
+   * we can neither verify nor mail an order to.
+   */
+  const contactEmailOnly = !otpLoginEnabled;
   const searchParams = useSearchParams();
   const paymentStatus = searchParams?.get("payment");
   const paymentOrderNumber = searchParams?.get("order");
@@ -142,7 +148,10 @@ const CheckoutPage = () => {
   // Backend strips cod-family payment methods from carts holding engraved items.
   const hasEngravedItems = items.some((item) => Boolean(item.options.engraving?.trim()));
 
-  const formValidation = useCheckoutFormValidation(form);
+  const formValidation = useCheckoutFormValidation(form, {
+    emailOnly: contactEmailOnly,
+    requireDeliveryPhone: contactEmailOnly && !isAuthenticated,
+  });
   const paymentValidation = useCheckoutPaymentValidation(payment, codOffered, hasEngravedItems);
 
   // Signed-in checkout requires a Magento saved address (fields are hidden otherwise).
@@ -754,7 +763,7 @@ const CheckoutPage = () => {
     if (field === "phoneOrEmail") {
       const nextValue = String(value);
 
-      if (isCheckoutEmailContact(nextValue)) {
+      if (contactEmailOnly || isCheckoutEmailContact(nextValue)) {
         setPhoneVerified(false);
         verifiedCheckoutOtpRef.current = null;
         lastCheckedGuestEmailRef.current = "";
@@ -799,6 +808,7 @@ const CheckoutPage = () => {
                 phoneVerified={phoneVerified}
                 onVerifyPhone={handleVerifyPhone}
                 showVerify={otpLoginEnabled}
+                emailOnly={contactEmailOnly}
                 onContactBlur={handleGuestContactBlur}
                 validation={formValidation}
                 isAuthenticated={isAuthenticated}

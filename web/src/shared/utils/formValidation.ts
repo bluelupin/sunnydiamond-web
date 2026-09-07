@@ -356,8 +356,27 @@ const parseDateOnly = (value: string): Date | undefined => {
 export const shouldShowFieldError = (touched: boolean, submitted: boolean, error?: string) =>
   Boolean(error && (touched || submitted));
 
-export const validatePhoneOrEmail = (value: string): FieldValidation => {
+export type CheckoutContactOptions = {
+  /** Mirrors the sign-in field: with SMS off there is no phone identity to accept. */
+  emailOnly?: boolean;
+  /**
+   * Make the delivery phone mandatory. Set for guests whose contact field is an email:
+   * that leaves no other number on the order, and Magento would take the placeholder.
+   * Not set for signed-in customers — their number comes from the saved Magento address,
+   * which this form only mirrors, so rejecting it would block a field they cannot edit.
+   */
+  requireDeliveryPhone?: boolean;
+};
+
+export const validatePhoneOrEmail = (
+  value: string,
+  options?: CheckoutContactOptions,
+): FieldValidation => {
   const trimmed = value.trim();
+
+  if (options?.emailOnly) {
+    return validateRequiredEmail(trimmed);
+  }
 
   if (!trimmed) {
     return { valid: false, error: "Phone number or email is required" };
@@ -459,6 +478,7 @@ const getAddressBlockErrors = (
   prefix: "shipping" | "billing",
   values: CheckoutFormValues,
   states: readonly string[],
+  options?: CheckoutContactOptions,
 ): Partial<Record<CheckoutFormField, string | undefined>> => {
   if (prefix === "shipping") {
     return {
@@ -468,7 +488,12 @@ const getAddressBlockErrors = (
       pincode: validateIndianPincode(values.pincode).error,
       city: validateCity(values.city).error,
       state: validateIndianState(values.state, states).error,
-      shippingPhone: validateOptionalPhone(values.shippingPhone).error,
+      // Magento demands a telephone on every address, so an empty one is sent as
+      // "0000000000". When the contact field is an email there is no other number
+      // on the order at all, and a courier has no way to reach the customer.
+      shippingPhone: options?.requireDeliveryPhone
+        ? validatePhone(values.shippingPhone, "+91").error
+        : validateOptionalPhone(values.shippingPhone).error,
     };
   }
 
@@ -486,10 +511,11 @@ const getAddressBlockErrors = (
 export const getCheckoutFormErrors = (
   values: CheckoutFormValues,
   states: readonly string[],
+  options?: CheckoutContactOptions,
 ): Partial<Record<CheckoutFormField, string | undefined>> => ({
   name: validateRequiredName(values.name).error,
-  phoneOrEmail: validatePhoneOrEmail(values.phoneOrEmail).error,
-  ...getAddressBlockErrors("shipping", values, states),
+  phoneOrEmail: validatePhoneOrEmail(values.phoneOrEmail, options).error,
+  ...getAddressBlockErrors("shipping", values, states, options),
   ...(values.billingSameAsShipping
     ? {}
     : getAddressBlockErrors("billing", values, states)),
@@ -498,8 +524,9 @@ export const getCheckoutFormErrors = (
 export const isCheckoutFormValid = (
   values: CheckoutFormValues,
   states: readonly string[],
+  options?: CheckoutContactOptions,
 ): boolean =>
-  Object.values(getCheckoutFormErrors(values, states)).every((error) => !error);
+  Object.values(getCheckoutFormErrors(values, states, options)).every((error) => !error);
 
 export const getCheckoutPaymentErrors = (
   values: CheckoutPaymentValues,

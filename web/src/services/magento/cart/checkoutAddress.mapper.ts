@@ -78,6 +78,8 @@ export function mapCheckoutFormToBillingAddress(form: CheckoutFormData): Magento
     city: form.billingCity,
     state: form.billingState,
     phone: form.billingPhone,
-    phoneFallback: form.phoneOrEmail,
+    // Shipping phone first: the contact field is an email whenever mobile sign-in is
+    // off, and falling straight back to it would put "0000000000" on the address.
+    phoneFallback: form.shippingPhone || form.phoneOrEmail,
   });
 }
