@@ -311,37 +311,39 @@ const CheckoutOtpModal = ({ open, phone, onClose, onVerify }: CheckoutOtpModalPr
           <DrawerTitle className="sr-only">Enter OTP</DrawerTitle>
 
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
-            <div className="w-full shrink-0 px-4 pt-6">
-              <div className="flex h-[26px] items-center justify-between gap-4">
-                <div className="flex min-w-0 items-center gap-2">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain DrawerVerticleScrollbar">
+              <div className="w-full px-4 pt-6">
+                <div className="flex h-[26px] items-center justify-between gap-4">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      aria-label="Go back"
+                      className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack"
+                    >
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                        <path d="M15.5 20L8 12.5L15.5 5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                    <h2 className="font-larken text-xl font-light leading-110 text-darkblack">Enter OTP</h2>
+                  </div>
                   <button
                     type="button"
                     onClick={onClose}
-                    aria-label="Go back"
-                    className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack"
+                    aria-label="Close OTP"
+                    className="inline-flex size-8 shrink-0 items-center justify-center text-darkblack"
                   >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                      <path d="M15.5 20L8 12.5L15.5 5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                      <path d="M24.667 6.66666L6.66699 24.6667" stroke="currentColor" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M24.667 24.6667L6.66699 6.66666" stroke="currentColor" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </button>
-                  <h2 className="font-larken text-xl font-light leading-110 text-darkblack">Enter OTP</h2>
                 </div>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  aria-label="Close OTP"
-                  className="inline-flex size-8 shrink-0 items-center justify-center text-darkblack"
-                >
-                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                    <path d="M24.667 6.66666L6.66699 24.6667" stroke="currentColor" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M24.667 24.6667L6.66699 6.66666" stroke="currentColor" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
               </div>
-            </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-4 pt-6 lg:pb-6 lg:pt-6">
-              <CheckoutOtpFields {...otpFieldsProps} variant="mobile" />
+              <div className="px-4 pb-4 pt-6 lg:pb-6 lg:pt-6">
+                <CheckoutOtpFields {...otpFieldsProps} variant="mobile" />
+              </div>
             </div>
 
             <div className="relative shrink-0 border-t border-neutral300 bg-white pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">

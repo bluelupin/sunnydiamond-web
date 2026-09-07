@@ -146,7 +146,7 @@ const RingSizeChartPanel = ({ open, onClose, guide }: RingSizeChartPanelProps) =
           <TutorialVideo key={videoUrl} videoUrl={videoUrl} mimeType={videoMimeType} title={title} />
         ) : null}
 
-        <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="min-h-0 flex-1 overflow-y-auto DrawerVerticleScrollbar">
           <div className="flex flex-col gap-6 pb-72">
             <div className="flex flex-col gap-6 pb-8">
               <div className="flex flex-col items-center gap-3 px-4 text-center lg:px-8 pt-6">

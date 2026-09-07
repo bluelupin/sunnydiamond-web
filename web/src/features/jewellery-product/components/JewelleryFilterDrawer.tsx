@@ -139,16 +139,16 @@ const FilterDrawerPanel = ({
   getMaxAmountDisplayValue,
 }: FilterDrawerPanelProps) => (
   <div className="flex min-h-0 flex-1 flex-col">
-    <div className={RIGHT_PANEL_HEADER_PADDING_CLASS}>
-      <div className="mx-auto flex w-full items-center justify-between">
-        <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">Filters</h2>
-        <RightPanelCloseButton onClick={onClose} aria-label="Close filter panel" />
-      </div>
-      <div className="mx-auto mt-6 h-px w-full max-w-[424px] bg-neutral300" aria-hidden />
-    </div>
-
     <div className="filter-drawer-scroll flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain md:px-6 px-4 pt-6">
-      <div className="mx-auto flex w-full max-w-[424px] flex-col gap-[24px] pb-72">
+      <div className={RIGHT_PANEL_HEADER_PADDING_CLASS}>
+        <div className="mx-auto flex w-full items-center justify-between">
+          <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">Filters</h2>
+          <RightPanelCloseButton onClick={onClose} aria-label="Close filter panel" />
+        </div>
+        <div className="mx-auto mt-6 h-px w-full max-w-[424px] bg-neutral300" aria-hidden />
+      </div>
+
+      <div className="mx-auto flex w-full max-w-[424px] flex-col gap-[24px] pb-72 pt-6">
         {hasPriceRange ? (
           <section className="flex flex-col gap-[16px]">
             <h3 className="font-gill text-base font-normal leading-110 text-darkblack">

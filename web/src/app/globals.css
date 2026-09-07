@@ -841,6 +841,39 @@
   background: #cccccc;
 }
 
+/* Start DrawerVerticleScrollbar  */
+.DrawerVerticleScrollbar {
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #999999 transparent;
+
+  /* IE / Edge Legacy */
+  -ms-overflow-style: none;
+}
+
+/* Chrome, Edge, Safari, Opera */
+.DrawerVerticleScrollbar::-webkit-scrollbar {
+  width: 3px;
+}
+
+.DrawerVerticleScrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.DrawerVerticleScrollbar::-webkit-scrollbar-thumb {
+  background-color: #999999;
+  border-radius: 10px;
+}
+
+.DrawerVerticleScrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #999999;
+}
+
+/* End DrawerVerticleScrollbar  */
+
 /* For Verticle scroll inside .tabScroll */
 .verticleScrollbar {
   overflow-x: auto;

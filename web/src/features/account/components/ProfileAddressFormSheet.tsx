@@ -11,6 +11,7 @@ import { DetailDarkButton, DetailTextLink } from "@/features/products/components
 import { useCurrentLocationAddress } from "@/shared/hooks/use-current-location-address";
 import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
 import { RIGHT_PANEL_HEADER_PADDING_CLASS, RIGHT_PANEL_WIDTH_CLASS } from "@/shared/ui/rightPanel";
+import { RIGHT_PANEL_SCROLL_AREA_CLASS } from "@/shared/ui/RightPanelScrollLayout";
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
@@ -166,7 +167,7 @@ export function ProfileAddressFormSheet({
   };
 
   const header = (
-    <div className={cn("shrink-0", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
+    <div className={RIGHT_PANEL_HEADER_PADDING_CLASS}>
       <div className="flex items-center justify-between gap-4">
         <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">{title}</h2>
         <RightPanelCloseButton
@@ -182,16 +183,17 @@ export function ProfileAddressFormSheet({
     <form
       id="profile-address-form"
       onSubmit={handleSubmit}
-      className="flex min-h-0 flex-1 flex-col"
+      className="flex min-h-0 flex-1 flex-col overflow-hidden"
       noValidate
     >
       <div
         className={cn(
-          "min-h-0 flex-1 overflow-y-auto overscroll-contain pt-6",
+          RIGHT_PANEL_SCROLL_AREA_CLASS,
           isMobile ? "px-4" : "px-6",
         )}
       >
-        <div className="flex flex-col items-center gap-6 pb-6">
+        {header}
+        <div className="flex flex-col items-center gap-6 pb-6 pt-6">
           {!isEditing ? (
             <DetailTextLink
               onClick={isLocating || isSaving ? undefined : handleUseCurrentLocation}
@@ -318,7 +320,6 @@ export function ProfileAddressFormSheet({
         )}
       >
         <SheetTitle className="sr-only">{title}</SheetTitle>
-        {header}
         {formBody}
       </SheetContent>
     </Sheet>

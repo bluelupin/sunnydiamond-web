@@ -40,7 +40,8 @@ const TryAtHomeSuccessStep = ({
 
   return (
     <>
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain DrawerVerticleScrollbar">
         <div className={cn("flex flex-col gap-6 pb-72", RIGHT_PANEL_HEADER_PADDING_CLASS, "lg:px-8 lg:pt-8")}>
           <div className="flex flex-col gap-6">
             <div className="grid w-full [&>*]:col-start-1 [&>*]:row-start-1">
@@ -121,6 +122,7 @@ const TryAtHomeSuccessStep = ({
           Continue Shopping
         </DetailOutlineButton>
       </PanelFooter>
+      </div>
     </>
   );
 };

@@ -16,6 +16,7 @@ type RightPanelHeaderProps = {
   alignWithContent?: boolean;
 };
 
+/** Place inside the scrollable region of a right panel (not fixed above it). */
 export function RightPanelHeader({
   title,
   onClose,
@@ -28,7 +29,7 @@ export function RightPanelHeader({
     : RIGHT_PANEL_HEADER_PADDING_CLASS;
 
   return (
-    <div className={cn("w-full shrink-0", wrapperPadding, className)}>
+    <div className={cn("w-full", wrapperPadding, className)}>
       <div className="flex h-[26px] items-center justify-between">
         <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">{title}</h2>
         <RightPanelCloseButton onClick={onClose} aria-label={closeAriaLabel} />

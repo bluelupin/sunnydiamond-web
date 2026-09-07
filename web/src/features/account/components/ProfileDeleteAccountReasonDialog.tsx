@@ -145,31 +145,33 @@ export function ProfileDeleteAccountReasonDialog({
           overlayClassName="z-[90] bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
           className="z-[90] flex max-h-[90vh] w-full flex-col gap-0 rounded-none border-0 bg-white p-0 sm:max-w-full [&>button]:hidden"
         >
-          <div className="shrink-0 px-4 pt-6">
-            <div className="flex items-center justify-between gap-4">
-              <SheetTitle className="font-larken lg:text-32 text-2xl font-light leading-110 text-darkblack">
-                {dialog.title}
-              </SheetTitle>
-              <button
-                type="button"
-                onClick={() => handleOpenChange(false)}
-                className="text-darkblack"
-                aria-label="Close"
-                disabled={isSubmitting}
-              >
-                <X className="size-6" strokeWidth={1.5} aria-hidden />
-              </button>
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain DrawerVerticleScrollbar">
+            <div className="px-4 pt-6">
+              <div className="flex items-center justify-between gap-4">
+                <SheetTitle className="font-larken lg:text-32 text-2xl font-light leading-110 text-darkblack">
+                  {dialog.title}
+                </SheetTitle>
+                <button
+                  type="button"
+                  onClick={() => handleOpenChange(false)}
+                  className="text-darkblack"
+                  aria-label="Close"
+                  disabled={isSubmitting}
+                >
+                  <X className="size-6" strokeWidth={1.5} aria-hidden />
+                </button>
+              </div>
+
+              <div className="mt-6 h-px w-full bg-neutral300" aria-hidden />
             </div>
 
-            <div className="mt-6 h-px w-full bg-neutral300" aria-hidden />
-          </div>
-
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-6">
-            <div className="flex flex-col gap-6 pb-6">
-              <SheetDescription className="font-gill text-base font-light leading-110 text-darkblack">
-                {dialog.description}
-              </SheetDescription>
-              <DeleteAccountReasonForm {...formProps} mobile includeDescription={false} />
+            <div className="px-4 pt-6">
+              <div className="flex flex-col gap-6 pb-6">
+                <SheetDescription className="font-gill text-base font-light leading-110 text-darkblack">
+                  {dialog.description}
+                </SheetDescription>
+                <DeleteAccountReasonForm {...formProps} mobile includeDescription={false} />
+              </div>
             </div>
           </div>
 

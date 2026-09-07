@@ -20,22 +20,23 @@ const GiftCardFlowPanel = ({ onClose }: GiftCardFlowPanelProps) => {
   }
 
   const showBack = step === "details" || step === "address";
+  const header = (
+    <GiftCardPanelHeader
+      title={giftCardFlowContent.title}
+      onClose={onClose}
+      onBack={showBack ? goBack : undefined}
+    />
+  );
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white">
-      <GiftCardPanelHeader
-        title={giftCardFlowContent.title}
-        onClose={onClose}
-        onBack={showBack ? goBack : undefined}
-      />
-
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         {step === "configure" ? (
-          <GiftCardConfigureStep onContinue={goToDetails} />
+          <GiftCardConfigureStep header={header} onContinue={goToDetails} />
         ) : step === "details" ? (
-          <GiftCardDetailsStep />
+          <GiftCardDetailsStep header={header} />
         ) : (
-          <GiftCardAddressStep />
+          <GiftCardAddressStep header={header} />
         )}
       </div>
     </div>

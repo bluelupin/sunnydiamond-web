@@ -216,7 +216,7 @@ const CareersSubmitConfirmationModal = ({
     <>
       <Drawer open={showMobileDrawer} onOpenChange={handleOpenChange} shouldScaleBackground={false}>
         <DrawerContent className="z-[80] flex max-h-[90vh] min-h-0 flex-col overflow-hidden rounded-none border-0 bg-white p-0 [&>div:first-child]:hidden">
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-6">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-6 DrawerVerticleScrollbar">
             <ConfirmSubmissionContent
               {...contentProps}
               titleElement="drawer"

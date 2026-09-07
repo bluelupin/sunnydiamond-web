@@ -208,31 +208,32 @@ const WishlistAddToBagPanel = ({
         asideClassName={wishlistAddToBagAsideClassName}
       >
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-          <div className="relative shrink-0">
-            {detailProduct ? (
-              <ProductWishlistDetailGalleryCarousel
-                product={displayProduct ?? detailProduct}
-                imageMaxWidthClass="max-w-full"
-              />
-            ) : (
-              <div className="grid h-250 w-full shrink-0 overflow-hidden">
-                <div className="flex h-250 w-full items-center justify-center bg-gray300">
-                  <div className="flex h-250 w-full max-w-full items-center justify-center overflow-hidden">
-                    <OptimizedImage
-                      src={product.primaryImage}
-                      alt={product.name}
-                      priority
-                      sizes="(max-width: 768px) 100vw, 472px"
-                      className="object-contain object-center"
-                    />
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain DrawerVerticleScrollbar">
+            <div className="relative shrink-0">
+              {detailProduct ? (
+                <ProductWishlistDetailGalleryCarousel
+                  product={displayProduct ?? detailProduct}
+                  imageMaxWidthClass="max-w-full"
+                />
+              ) : (
+                <div className="grid h-250 w-full shrink-0 overflow-hidden">
+                  <div className="flex h-250 w-full items-center justify-center bg-gray300">
+                    <div className="flex h-250 w-full max-w-full items-center justify-center overflow-hidden">
+                      <OptimizedImage
+                        src={product.primaryImage}
+                        alt={product.name}
+                        priority
+                        sizes="(max-width: 768px) 100vw, 472px"
+                        className="object-contain object-center"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-            <RightPanelCloseButton onClick={onClose} aria-label="Close" variant="absolute" />
-          </div>
+              )}
+              <RightPanelCloseButton onClick={onClose} aria-label="Close" variant="absolute" />
+            </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-6 pt-8 md:px-6 md:pb-8">
+            <div className="px-4 pb-6 pt-8 md:px-6 md:pb-8">
             <div className="flex flex-col gap-6">
               <div className="flex flex-col gap-3">
                 <div className="flex items-start justify-between gap-4">
@@ -343,6 +344,7 @@ const WishlistAddToBagPanel = ({
                 </div>
               ) : null}
             </div>
+          </div>
           </div>
 
           <PanelFooter

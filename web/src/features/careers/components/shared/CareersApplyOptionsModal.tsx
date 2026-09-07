@@ -240,7 +240,7 @@ const CareersApplyOptionsModal = ({
           className="z-[80] flex max-h-[90vh] min-h-0 flex-col overflow-hidden rounded-none border-0 bg-white p-0 [&>div:first-child]:hidden"
         >
           <DrawerTitle className="sr-only">{applyModal.title}</DrawerTitle>
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6 DrawerVerticleScrollbar">
             <ApplyOptionsBody
               job={job}
               applyModal={applyModal}

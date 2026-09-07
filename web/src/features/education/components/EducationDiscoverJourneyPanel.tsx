@@ -274,7 +274,8 @@ const EducationDiscoverJourneyPanel = ({ open, onClose }: EducationDiscoverJourn
 
   const panelBody = (
     <>
-      <div className={RIGHT_PANEL_HEADER_PADDING_CLASS}>
+      <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain DrawerVerticleScrollbar">
+        <div className={RIGHT_PANEL_HEADER_PADDING_CLASS}>
           <div className="mx-auto flex h-8 w-full max-w-[392px] items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
               {step > 1 ? (
@@ -299,7 +300,7 @@ const EducationDiscoverJourneyPanel = ({ open, onClose }: EducationDiscoverJourn
           <div className="mx-auto mt-6 h-px w-full max-w-[392px] bg-neutral300" aria-hidden />
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto md:px-6 px-4 pt-6">
+        <div className="md:px-6 px-4 pt-6">
           <div className="mx-auto flex w-full max-w-[392px] flex-col gap-8 pb-72">
             <p className="font-gill text-sm font-light leading-110 text-neutral500">
               {STEP_COPY[step]}
@@ -513,6 +514,7 @@ const EducationDiscoverJourneyPanel = ({ open, onClose }: EducationDiscoverJourn
             ) : null}
           </div>
         </div>
+      </div>
 
         <PanelFooter
           className="max-md:pb-[env(safe-area-inset-bottom,0px)]"

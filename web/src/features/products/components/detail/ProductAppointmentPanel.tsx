@@ -278,7 +278,8 @@ const ProductAppointmentForm = ({
 
   return (
     <>
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain DrawerVerticleScrollbar">
         <div className={cn("flex flex-col gap-6", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4">
@@ -426,6 +427,7 @@ const ProductAppointmentForm = ({
           {isSubmitting ? "SUBMITTING..." : submitLabel}
         </DetailDarkButton>
       </PanelFooter>
+      </div>
     </>
   );
 };

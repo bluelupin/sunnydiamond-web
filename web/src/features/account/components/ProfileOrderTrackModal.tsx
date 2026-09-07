@@ -280,7 +280,7 @@ export function ProfileOrderTrackModal({
             </div>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-6">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-6 DrawerVerticleScrollbar">
             <ProfileOrderTrackModalBody {...bodyProps} />
           </div>
         </SheetContent>

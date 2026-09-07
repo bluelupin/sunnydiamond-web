@@ -12,6 +12,10 @@ import {
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { RightPanelHeader } from "@/shared/ui/RightPanelHeader";
 import { RIGHT_PANEL_CONTENT_PADDING_CLASS } from "@/shared/ui/rightPanel";
+import {
+  RIGHT_PANEL_SCROLL_AREA_CLASS,
+  RIGHT_PANEL_SCROLL_LAYOUT_CLASS,
+} from "@/shared/ui/RightPanelScrollLayout";
 import { AttributeSeparator, DetailDarkButton } from "./shared";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 
@@ -70,20 +74,21 @@ const PriceBreakupPanel = ({
       overlayAriaLabel="Close price breakup panel"
       dialogAriaLabel="Price Breakup"
     >
-      <div className="flex min-h-0 flex-1 flex-col">
-        <RightPanelHeader
-          title="Price Breakup"
-          onClose={onClose}
-          closeAriaLabel="Close price breakup panel"
-          alignWithContent
-        />
+      <div className={RIGHT_PANEL_SCROLL_LAYOUT_CLASS}>
+        <div className={RIGHT_PANEL_SCROLL_AREA_CLASS}>
+          <RightPanelHeader
+            title="Price Breakup"
+            onClose={onClose}
+            closeAriaLabel="Close price breakup panel"
+            alignWithContent
+          />
 
-        <div
-          className={cn(
-            "flex min-h-0 flex-1 flex-col justify-between gap-6 py-6",
-            RIGHT_PANEL_CONTENT_PADDING_CLASS,
-          )}
-        >
+          <div
+            className={cn(
+              "flex flex-col justify-between gap-6 py-6",
+              RIGHT_PANEL_CONTENT_PADDING_CLASS,
+            )}
+          >
           <div className="bg-gray300 px-4 py-6">
             <div className="flex items-center gap-4">
               <div className="relative h-[68px] w-[91px] shrink-0 overflow-hidden bg-white">
@@ -141,6 +146,7 @@ const PriceBreakupPanel = ({
               />
             ) : null}
           </div>
+        </div>
         </div>
 
         <PanelFooter showGradient={false} contentClassName="flex flex-col gap-4 px-4 py-6 lg:px-4">

@@ -138,7 +138,7 @@ const MetalEngravingPanel = ({
         dialogAriaLabel="Engraving"
       >
         <div className="flex min-h-0 flex-1 flex-col">
-          <div className="min-h-0 flex-1 overflow-y-auto">
+          <div className="min-h-0 flex-1 overflow-y-auto DrawerVerticleScrollbar">
             <div className={cn("flex flex-col gap-6 pb-10", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
               <div className="flex flex-col gap-6">
                 <div className="flex items-center justify-between gap-4">

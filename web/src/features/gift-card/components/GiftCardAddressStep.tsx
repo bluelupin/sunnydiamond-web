@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { CartPrimaryButton } from "@/features/cart/components/CartFlowUi";
 import { getExpectedDeliveryDate } from "@/features/checkout/types/checkout.types";
@@ -26,7 +27,7 @@ type AddressField = "addressLine1" | "addressLine2" | "pincode" | "city" | "stat
 const fieldClassName =
   "h-14 w-full bg-gray200 px-3 font-gill text-base font-normal leading-110 text-darkblack placeholder:text-gray600 outline-none";
 
-const GiftCardAddressStep = () => {
+const GiftCardAddressStep = ({ header }: { header: ReactNode }) => {
   const { deliveryAddress, setDeliveryAddress, completeOrder, estimatedDeliveryDate } =
     useGiftCardFlow();
   const { detectAddress, isLocating } = useCurrentLocationAddress();
@@ -94,6 +95,7 @@ const GiftCardAddressStep = () => {
   return (
     <>
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-6 py-6">
+        {header}
         <div className="mb-6 flex justify-center">
           <button
             type="button"

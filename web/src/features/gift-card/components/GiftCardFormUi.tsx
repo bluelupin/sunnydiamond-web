@@ -232,7 +232,7 @@ type GiftCardPanelHeaderProps = {
 };
 
 export const GiftCardPanelHeader = ({ onClose, onBack, title }: GiftCardPanelHeaderProps) => (
-  <div className={cn("shrink-0", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
+  <div className={RIGHT_PANEL_HEADER_PADDING_CLASS}>
     <div className="flex h-[26px] items-center justify-between">
       <div className="flex items-center gap-2">
         {onBack ? (

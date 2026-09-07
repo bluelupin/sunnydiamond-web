@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { CartPrimaryButton } from "@/features/cart/components/CartFlowUi";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { cn } from "@/shared/utils/cn";
@@ -12,7 +13,7 @@ import {
   giftCardSectionHeadingClass,
 } from "./GiftCardFormUi";
 
-const GiftCardDetailsStep = () => {
+const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
   const {
     cardType,
     sender,
@@ -45,6 +46,7 @@ const GiftCardDetailsStep = () => {
   return (
     <>
       <div className="flex min-h-0 flex-1 flex-col gap-10 overflow-y-auto overscroll-contain px-6 py-6">
+        {header}
         <div className="flex flex-col gap-4">
           <p className={giftCardSectionHeadingClass}>{details.senderHeading}</p>
           <GiftCardTextField

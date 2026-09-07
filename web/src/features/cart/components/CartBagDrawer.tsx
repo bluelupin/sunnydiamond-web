@@ -68,12 +68,13 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-white">
-      <div className={cn("flex shrink-0 justify-end", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
-        <RightPanelCloseButton onClick={onClose} aria-label="Close bag drawer" />
-      </div>
+    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain DrawerVerticleScrollbar">
+        <div className={cn("flex justify-end", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
+          <RightPanelCloseButton onClick={onClose} aria-label="Close bag drawer" />
+        </div>
 
-      <div className="mx-auto flex w-full flex-1 flex-col gap-6 overflow-y-auto px-4 pb-5 lg:px-6">
+        <div className="mx-auto flex w-full flex-col gap-6 px-4 pb-5 lg:px-6">
         <CartBagDrawerSuccessHeader message={successMessage} />
 
         <div className="h-px w-full shrink-0 bg-aboutInactive" aria-hidden />
@@ -124,9 +125,10 @@ const BagDrawerContent = ({ onClose }: { onClose: () => void }) => {
             {otherCount > 0 ? <CartMoreItemsNote count={otherCount} /> : null}
           </div>
         ) : null}
+        </div>
       </div>
 
-      <div className="mt-auto flex flex-col gap-4 border-t border-neutral300 bg-white px-4 py-6 [border-top-width:0.5px]">
+      <div className="mt-auto flex shrink-0 flex-col gap-4 border-t border-neutral300 bg-white px-4 py-6 [border-top-width:0.5px]">
         <CartPrimaryLink href="/cart" onClick={onClose} className="uppercase">
           View Shopping Bag
         </CartPrimaryLink>

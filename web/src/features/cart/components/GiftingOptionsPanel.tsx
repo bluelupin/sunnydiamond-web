@@ -17,6 +17,10 @@ import {
   SheetTitle,
 } from "@/shared/ui/sheet";
 import { RIGHT_PANEL_CONTENT_PADDING_CLASS, RIGHT_PANEL_WIDTH_CLASS } from "@/shared/ui/rightPanel";
+import {
+  RIGHT_PANEL_SCROLL_AREA_CLASS,
+  RIGHT_PANEL_SCROLL_LAYOUT_CLASS,
+} from "@/shared/ui/RightPanelScrollLayout";
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
@@ -194,15 +198,6 @@ const GiftingBagHero = ({ isSeparate }: { isSeparate: boolean }) => {
   );
 };
 
-const GiftingScrollIndicator = () => (
-  <div
-    className="pointer-events-none absolute bottom-6 right-0 top-6 flex w-[2px] justify-center rounded-[70px] bg-neutral300"
-    aria-hidden
-  >
-    <div className="h-[246px] w-[3px] bg-gray600" />
-  </div>
-);
-
 const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
   const router = useRouter();
   const { items, applyGiftingSelection } = useCart();
@@ -333,20 +328,20 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
   );
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
-      <div className={cn("w-full shrink-0 md:pt-10 pt-6", RIGHT_PANEL_CONTENT_PADDING_CLASS)}>
-        <div className="flex h-[26px] items-center justify-between">
-          <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
-            Gifting Options
-          </h2>
-          <RightPanelCloseButton onClick={onClose} aria-label="Close gifting options" />
+    <div className={RIGHT_PANEL_SCROLL_LAYOUT_CLASS}>
+      <div className={RIGHT_PANEL_SCROLL_AREA_CLASS}>
+        <div className={cn("w-full shrink-0 md:pt-10 pt-6", RIGHT_PANEL_CONTENT_PADDING_CLASS)}>
+          <div className="flex h-[26px] items-center justify-between">
+            <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
+              Gifting Options
+            </h2>
+            <RightPanelCloseButton onClick={onClose} aria-label="Close gifting options" />
+          </div>
+          <div className="mt-6">
+            <CartDivider weight={1} />
+          </div>
         </div>
-        <div className="mt-6">
-          <CartDivider weight={1} />
-        </div>
-      </div>
 
-      <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain">
         <div className="flex flex-col gap-6 px-4 pt-6 pb-24 lg:px-6">
           <GiftingBagHero isSeparate={isSeparate} />
 
@@ -415,8 +410,6 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
             />
           </div>
         </div>
-
-        <GiftingScrollIndicator />
       </div>
 
       <div className="relative shrink-0 bg-white pb-6 border-t border-neutral300">

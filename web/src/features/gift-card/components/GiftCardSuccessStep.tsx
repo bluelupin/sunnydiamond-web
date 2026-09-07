@@ -39,11 +39,12 @@ const GiftCardSuccessStep = ({ onClose }: GiftCardSuccessStepProps) => {
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white">
-      <div className={cn("flex shrink-0 justify-end", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
-        <RightPanelCloseButton onClick={onClose} aria-label="Close gift card flow" />
-      </div>
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain DrawerVerticleScrollbar">
+        <div className={cn("flex justify-end", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
+          <RightPanelCloseButton onClick={onClose} aria-label="Close gift card flow" />
+        </div>
 
-      <div className="flex min-h-0 flex-1 flex-col items-center gap-6 overflow-y-auto overscroll-contain px-6 pb-6">
+        <div className="flex flex-col items-center gap-6 px-6 pb-6">
         <CartSuccessCheck />
         <div className="flex flex-col items-center gap-4 text-center">
           <h2 className="font-larken text-32 font-light leading-110 text-darkblack">
@@ -62,6 +63,7 @@ const GiftCardSuccessStep = ({ onClose }: GiftCardSuccessStepProps) => {
             className="object-contain object-center"
             sizes="320px"
           />
+        </div>
         </div>
       </div>
 

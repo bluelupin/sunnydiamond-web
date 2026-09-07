@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { CartPrimaryButton } from "@/features/cart/components/CartFlowUi";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
@@ -17,7 +18,13 @@ function formatGiftCardAmount(amount: number): string {
   return `₹ ${amount.toLocaleString("en-IN")}`;
 }
 
-const GiftCardConfigureStep = ({ onContinue }: { onContinue: () => void }) => {
+const GiftCardConfigureStep = ({
+  header,
+  onContinue,
+}: {
+  header: ReactNode;
+  onContinue: () => void;
+}) => {
   const {
     cardType,
     amount,
@@ -46,6 +53,7 @@ const GiftCardConfigureStep = ({ onContinue }: { onContinue: () => void }) => {
   return (
     <>
       <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto overscroll-contain px-6 py-6">
+        {header}
         <div className="flex flex-col gap-2">
           <p className={giftCardFieldLabelClass}>{cardTypes.label}</p>
           <div className="flex gap-2">
