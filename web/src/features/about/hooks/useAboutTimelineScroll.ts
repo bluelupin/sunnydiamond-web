@@ -29,6 +29,11 @@ function resolveActiveYearIndex(progress: number, yearCount: number): number {
   return Math.min(yearCount - 1, Math.max(0, Math.floor(progress * yearCount)));
 }
 
+function resolveYearIndex(years: readonly string[], year: string): number {
+  const index = years.indexOf(year);
+  return index >= 0 ? index : 0;
+}
+
 export function useAboutTimelineScroll(
   sectionRef: RefObject<HTMLElement | null>,
   years: readonly string[],
@@ -39,6 +44,47 @@ export function useAboutTimelineScroll(
   const [reducedMotion, setReducedMotion] = useState(false);
   const clickLockRef = useRef(false);
   const clickLockTimerRef = useRef<number | null>(null);
+  const activeIndexRef = useRef(0);
+  const targetIndexRef = useRef(0);
+  const stepRafRef = useRef<number | null>(null);
+
+  const stopSequentialStepping = useCallback(() => {
+    if (stepRafRef.current !== null) {
+      window.cancelAnimationFrame(stepRafRef.current);
+      stepRafRef.current = null;
+    }
+  }, []);
+
+  const stepTowardTarget = useCallback(() => {
+    stepRafRef.current = null;
+
+    if (clickLockRef.current || years.length === 0) {
+      return;
+    }
+
+    const current = activeIndexRef.current;
+    const target = targetIndexRef.current;
+
+    if (current === target) {
+      return;
+    }
+
+    const next = current + (target > current ? 1 : -1);
+    activeIndexRef.current = next;
+    setActiveYear(years[next]);
+
+    if (next !== target) {
+      stepRafRef.current = window.requestAnimationFrame(stepTowardTarget);
+    }
+  }, [years]);
+
+  const scheduleSequentialStep = useCallback(() => {
+    if (stepRafRef.current !== null) {
+      return;
+    }
+
+    stepRafRef.current = window.requestAnimationFrame(stepTowardTarget);
+  }, [stepTowardTarget]);
 
   const syncFromScroll = useCallback(() => {
     const section = sectionRef.current;
@@ -58,13 +104,21 @@ export function useAboutTimelineScroll(
 
     setProgress(nextProgress);
 
-    if (clickLockRef.current || years.length === 0) {
+    if (years.length === 0) {
       return;
     }
 
-    const nextYear = years[resolveActiveYearIndex(nextProgress, years.length)];
-    setActiveYear((current) => (current === nextYear ? current : nextYear));
-  }, [sectionRef, years]);
+    const targetIndex = resolveActiveYearIndex(nextProgress, years.length);
+    targetIndexRef.current = targetIndex;
+
+    if (clickLockRef.current) {
+      return;
+    }
+
+    if (activeIndexRef.current !== targetIndex) {
+      scheduleSequentialStep();
+    }
+  }, [sectionRef, years, scheduleSequentialStep]);
 
   const scrollToYear = useCallback(
     (year: TimelineYear) => {
@@ -74,7 +128,12 @@ export function useAboutTimelineScroll(
       const step = section.querySelector<HTMLElement>(`[data-timeline-step="${year}"]`);
       if (!step) return;
 
+      const yearIndex = resolveYearIndex(years, year);
+
       clickLockRef.current = true;
+      stopSequentialStepping();
+      activeIndexRef.current = yearIndex;
+      targetIndexRef.current = yearIndex;
       setActiveYear(year);
 
       if (clickLockTimerRef.current !== null) {
@@ -88,12 +147,15 @@ export function useAboutTimelineScroll(
         syncFromScroll();
       }, CLICK_LOCK_MS);
     },
-    [sectionRef, syncFromScroll],
+    [sectionRef, syncFromScroll, stopSequentialStepping, years],
   );
 
   useEffect(() => {
+    const defaultIndex = resolveYearIndex(years, defaultYear);
+    activeIndexRef.current = defaultIndex;
+    targetIndexRef.current = defaultIndex;
     setActiveYear(defaultYear);
-  }, [defaultYear]);
+  }, [defaultYear, years]);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -103,6 +165,9 @@ export function useAboutTimelineScroll(
     setReducedMotion(motionQuery.matches);
 
     if (motionQuery.matches) {
+      const defaultIndex = resolveYearIndex(years, defaultYear);
+      activeIndexRef.current = defaultIndex;
+      targetIndexRef.current = defaultIndex;
       setActiveYear(defaultYear);
       setProgress(1);
       return;
@@ -117,6 +182,10 @@ export function useAboutTimelineScroll(
       if (motionQuery.matches) {
         window.removeEventListener("scroll", syncFromScroll);
         window.removeEventListener("resize", syncFromScroll);
+        stopSequentialStepping();
+        const defaultIndex = resolveYearIndex(years, defaultYear);
+        activeIndexRef.current = defaultIndex;
+        targetIndexRef.current = defaultIndex;
         setActiveYear(defaultYear);
         setProgress(1);
         return;
@@ -133,11 +202,18 @@ export function useAboutTimelineScroll(
       window.removeEventListener("scroll", syncFromScroll);
       window.removeEventListener("resize", syncFromScroll);
       motionQuery.removeEventListener("change", onMotionChange);
+      stopSequentialStepping();
       if (clickLockTimerRef.current !== null) {
         window.clearTimeout(clickLockTimerRef.current);
       }
     };
-  }, [sectionRef, syncFromScroll, years, defaultYear]);
+  }, [
+    sectionRef,
+    syncFromScroll,
+    years,
+    defaultYear,
+    stopSequentialStepping,
+  ]);
 
   return {
     activeYear,
