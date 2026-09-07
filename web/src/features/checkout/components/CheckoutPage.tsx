@@ -12,6 +12,7 @@ import type { CartLineItem } from "@/features/cart/types/cart.types";
 import { useMobileStickyFooterClearance } from "@/shared/hooks/use-mobile-sticky-footer-clearance";
 import { MobileStickyFooterSpacer } from "@/shared/ui/layout/MobileStickyFooterSpacer";
 import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
+import CheckoutPaymentFailedToast from "./CheckoutPaymentFailedToast";
 import CheckoutOrderSummary from "./CheckoutOrderSummary";
 import CheckoutMobileOrderSummaryDrawer from "./CheckoutMobileOrderSummaryDrawer";
 import CheckoutMobileStickyFooter from "./CheckoutMobileStickyFooter";
@@ -143,6 +144,7 @@ const CheckoutPage = () => {
   const [offersOpen, setOffersOpen] = useState(false);
   const [orderSummaryOpen, setOrderSummaryOpen] = useState(false);
   const [checkoutStatusToastMessage, setCheckoutStatusToastMessage] = useState<string | null>(null);
+  const [paymentFailedToastOpen, setPaymentFailedToastOpen] = useState(false);
   const { footerRef, clearancePx } = useMobileStickyFooterClearance();
 
   // Backend strips cod-family payment methods from carts holding engraved items.
@@ -187,6 +189,14 @@ const CheckoutPage = () => {
     },
     [dismissCheckoutStatusToast],
   );
+
+  const showPaymentFailedToast = useCallback(() => {
+    setPaymentFailedToastOpen(true);
+  }, []);
+
+  const dismissPaymentFailedToast = useCallback(() => {
+    setPaymentFailedToastOpen(false);
+  }, []);
 
   const showOrderPlacedToast = useCallback(
     (orderNumber: string) => {
@@ -302,8 +312,21 @@ const CheckoutPage = () => {
 
     if (paymentStatus === "failed") {
       paymentReturnHandledRef.current = true;
+      const pending = readPendingCheckoutPayment();
+      const failedOrderNumber = paymentOrderNumber ?? pending?.orderNumber ?? null;
+
+      if (pending && (!paymentOrderNumber || pending.orderNumber === paymentOrderNumber)) {
+        setForm(pending.form);
+        setStep("payment");
+      }
+
       clearPendingCheckoutPayment();
-      showCheckoutStatusToast("Your payment could not be completed. Please try again.");
+
+      if (failedOrderNumber) {
+        void resetRazorpayCart(failedOrderNumber).then(() => refreshCart());
+      }
+
+      showPaymentFailedToast();
       window.history.replaceState({}, "", "/checkout");
       return;
     }
@@ -335,7 +358,7 @@ const CheckoutPage = () => {
       wasAuthenticated: pending.isAuthenticated,
       guestOtp: pending.guestOtp,
     });
-  }, [finalizeOrderSuccess, isPaymentReturn, paymentOrderNumber, paymentStatus, showCheckoutStatusToast, showOrderPlacedToast, items, totalPrice]);
+  }, [finalizeOrderSuccess, isPaymentReturn, paymentOrderNumber, paymentStatus, refreshCart, showPaymentFailedToast, showOrderPlacedToast, items, totalPrice]);
 
   useEffect(() => {
     const handlePageShow = () => {
@@ -663,15 +686,13 @@ const CheckoutPage = () => {
               },
             });
 
-            if (outcome.status === "dismissed") {
+            if (outcome.status === "dismissed" || outcome.status === "failed") {
               const paidPending = getPaidPendingCheckoutPayment();
               if (!paidPending?.paymentId || !paidPending.signature) {
                 clearPendingCheckoutPayment();
                 await resetRazorpayCart(order.orderNumber);
                 await refreshCart();
-                showCheckoutStatusToast(
-                  "Payment cancelled. Your bag has been kept as it was. You can try again anytime.",
-                );
+                showPaymentFailedToast();
                 return;
               }
 
@@ -791,6 +812,11 @@ const CheckoutPage = () => {
       )}
     >
       <div className="mx-auto w-full px-5 max-md:pt-4 pt-6 md:max-lg:px-8 md:max-lg:landscape:pt-0 lg:px-10 2xl:max-w-1920 2xl:px-[60px]">
+        <CheckoutPaymentFailedToast
+          open={paymentFailedToastOpen}
+          onDismiss={dismissPaymentFailedToast}
+          className="mb-6"
+        />
         <h1 className="mb-6 font-larken text-32 font-light leading-110 text-darkblack lg:mb-10 lg:text-32">
           Complete Checkout
         </h1>

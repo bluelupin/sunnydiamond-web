@@ -16,6 +16,7 @@ type RazorpayPaymentResponse = {
 
 type RazorpayInstance = {
   open: () => void;
+  on: (event: string, handler: () => void) => void;
 };
 
 declare global {
@@ -217,7 +218,8 @@ export async function resetRazorpayCart(orderNumber: string): Promise<boolean> {
 
 export type RazorpayPaymentOutcome =
   | { status: "paid"; paymentId: string; signature: string }
-  | { status: "dismissed" };
+  | { status: "dismissed" }
+  | { status: "failed" };
 
 /**
  * Runs the full Razorpay checkout for an already-placed Magento order:
@@ -297,6 +299,10 @@ export async function collectRazorpayPayment(input: {
           settle({ status: "dismissed" });
         },
       },
+    });
+
+    razorpay.on("payment.failed", () => {
+      settle({ status: "failed" });
     });
 
     razorpay.open();

@@ -65,6 +65,8 @@ export default {
         chalkCard: "#F8F4EC",
         chalk300: "#ECE9E9",
         creamColor: "#9A3A96",
+        red600: "#F91616",
+        red100: "#FEDCDC",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
