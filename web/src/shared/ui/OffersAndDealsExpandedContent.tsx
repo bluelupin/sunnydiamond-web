@@ -3,11 +3,9 @@
 import { useState } from "react";
 import Image from "next/image";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
-import { formatCartPrice } from "@/features/cart/utils/formatCartLine";
 import { useCart } from "@/features/cart/context/CartContext";
 import {
   findMockGiftCardByCode,
-  getMockOfferDiscountAmount,
   mockAvailableOffers,
   type MockGiftCard,
   type MockOffer,
@@ -38,6 +36,7 @@ type PromoFieldProps = {
   applyLabel?: string;
   disabled?: boolean;
   hasError?: boolean;
+  showInput?: boolean;
 };
 
 const PromoField = ({
@@ -50,39 +49,42 @@ const PromoField = ({
   applyLabel = "Apply",
   disabled = false,
   hasError = false,
+  showInput = true,
 }: PromoFieldProps) => (
   <div className="flex flex-col gap-2">
     <label htmlFor={id} className="font-gill text-base font-normal leading-110 text-darkblack">
       {label}
     </label>
-    <div
-      className={cn(
-        "flex h-14 items-center gap-4 border border-transparent bg-white px-3 lg:bg-aboutInactive",
-        hasError && invalidFieldContainerClassName,
-      )}
-    >
-      <input
-        id={id}
-        type="text"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-        disabled={disabled}
-        className={cn(couponFieldClassName, "bg-transparent px-0")}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") {
-            event.preventDefault();
-            onApply();
-          }
-        }}
-      />
-      <DetailTextLink
-        onClick={onApply}
-        className={cn("shrink-0 pb-0.5", disabled && "pointer-events-none opacity-40")}
+    {showInput ? (
+      <div
+        className={cn(
+          "flex h-14 items-center gap-4 border border-transparent bg-white px-3 lg:bg-aboutInactive",
+          hasError && invalidFieldContainerClassName,
+        )}
       >
-        {applyLabel}
-      </DetailTextLink>
-    </div>
+        <input
+          id={id}
+          type="text"
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={placeholder}
+          disabled={disabled}
+          className={cn(couponFieldClassName, "bg-transparent px-0")}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              onApply();
+            }
+          }}
+        />
+        <DetailTextLink
+          onClick={onApply}
+          className={cn("shrink-0 pb-0.5", disabled && "pointer-events-none opacity-40")}
+        >
+          {applyLabel}
+        </DetailTextLink>
+      </div>
+    ) : null}
   </div>
 );
 
@@ -101,7 +103,7 @@ const OfferCard = ({
     aria-pressed={selected}
     className={cn(
       "flex h-[100px] w-[214px] min-w-[214px] shrink-0 items-start gap-3 border bg-white px-3 py-4 text-left transition-colors lg:bg-white",
-      selected ? "border-linkGold" : "border-gray300 hover:border-neutral500",
+      selected ? "border-gray600" : "border-white",
     )}
   >
     <Image
@@ -132,18 +134,13 @@ const AppliedGiftCardSummary = ({
   giftCard: MockGiftCard;
   onRemoveGiftCard: () => void;
 }) => (
-  <div className="flex flex-col gap-3 border border-neutral300 bg-white p-3">
-    <div className="flex items-start justify-between gap-4">
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <p className="font-gill text-base font-normal leading-110 text-darkblack">Gift card</p>
-        <p className="font-gill text-sm font-light leading-110 text-neutral500">
-          {giftCard.code} — {formatCartPrice(giftCard.balance)} balance applied
-        </p>
-      </div>
-      <DetailTextLink onClick={onRemoveGiftCard} className="shrink-0 pb-0.5">
-        Remove
-      </DetailTextLink>
-    </div>
+  <div className="flex items-center justify-between gap-3 border border-white bg-white p-3 h-14">
+    <p className="font-gill text-base font-normal leading-110 text-green600">
+      {giftCard.code} applied
+    </p>
+    <DetailTextLink onClick={onRemoveGiftCard} className="shrink-0 pb-0.5">
+      Remove
+    </DetailTextLink>
   </div>
 );
 
@@ -162,7 +159,6 @@ const OffersAndDealsExpandedContent = ({
     removeLocalGiftCard,
     appliedLocalGiftCardCode,
     localGiftCardDiscount,
-    subtotal,
     appliedLocalOfferId,
     applyLocalOffer,
     removeLocalOffer,
@@ -188,6 +184,7 @@ const OffersAndDealsExpandedContent = ({
   const handleRemoveGiftCard = () => {
     setAppliedGiftCard(null);
     removeLocalGiftCard();
+    setErrorMessage(null);
   };
 
   const handleOfferSelect = (offer: MockOffer) => {
@@ -196,8 +193,10 @@ const OffersAndDealsExpandedContent = ({
       return;
     }
 
-    applyLocalOffer(offer.id, getMockOfferDiscountAmount(offer, subtotal));
+    applyLocalOffer(offer.id);
   };
+
+  const hasAppliedGiftCard = Boolean(appliedGiftCard || appliedLocalGiftCardCode);
 
   const body = (
     <div className="flex flex-col gap-6">
@@ -219,33 +218,35 @@ const OffersAndDealsExpandedContent = ({
 
       <div className="h-px w-full shrink-0 bg-neutral300 md:hidden" aria-hidden />
 
-      <PromoField
-        id="offers-gift-card"
-        label="Have a gift card?"
-        value={giftCardCode}
-        onChange={(value) => {
-          setGiftCardCode(value);
-          if (errorMessage) setErrorMessage(null);
-        }}
-        onApply={applyGiftCard}
-        placeholder="Enter code"
-        disabled={Boolean(appliedGiftCard || appliedLocalGiftCardCode)}
-        hasError={Boolean(errorMessage)}
-      />
-
-      <FormFieldError message={errorMessage ?? undefined} />
-
-      {(appliedGiftCard || appliedLocalGiftCardCode) ? (
-        <AppliedGiftCardSummary
-          giftCard={
-            appliedGiftCard ?? {
-              code: appliedLocalGiftCardCode ?? "",
-              balance: localGiftCardDiscount,
-            }
-          }
-          onRemoveGiftCard={handleRemoveGiftCard}
+      <div className="flex flex-col gap-2">
+        <PromoField
+          id="offers-gift-card"
+          label="Have a gift card?"
+          value={giftCardCode}
+          onChange={(value) => {
+            setGiftCardCode(value);
+            if (errorMessage) setErrorMessage(null);
+          }}
+          onApply={applyGiftCard}
+          placeholder="Enter code"
+          hasError={Boolean(errorMessage)}
+          showInput={!hasAppliedGiftCard}
         />
-      ) : null}
+
+        {hasAppliedGiftCard ? (
+          <AppliedGiftCardSummary
+            giftCard={
+              appliedGiftCard ?? {
+                code: appliedLocalGiftCardCode ?? "",
+                balance: localGiftCardDiscount,
+              }
+            }
+            onRemoveGiftCard={handleRemoveGiftCard}
+          />
+        ) : null}
+
+        {!hasAppliedGiftCard ? <FormFieldError message={errorMessage ?? undefined} /> : null}
+      </div>
     </div>
   );
 

@@ -101,7 +101,7 @@ interface CartContextType {
   removeLocalGiftCard: () => void;
   localOfferDiscount: number;
   appliedLocalOfferId: string | null;
-  applyLocalOffer: (offerId: string, discountAmount: number) => void;
+  applyLocalOffer: (offerId: string) => void;
   removeLocalOffer: () => void;
   replaceLineItem: (lineItemId: string, payload: AddToBagPayload) => Promise<AddItemResult>;
   buyNow: (lineItemId: string) => Promise<void>;
@@ -639,14 +639,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setLocalGiftCardDiscount(0);
   }, []);
 
-  const applyLocalOffer = useCallback((offerId: string, discountAmount: number) => {
+  const applyLocalOffer = useCallback((offerId: string) => {
     const normalizedId = offerId.trim();
-    if (!normalizedId || discountAmount <= 0) {
+    if (!normalizedId) {
       return;
     }
 
+    // Bank offers are a payment preference only — applied at the gateway, not in cart totals.
     setAppliedLocalOfferId(normalizedId);
-    setLocalOfferDiscount(discountAmount);
   }, []);
 
   const removeLocalOffer = useCallback(() => {
