@@ -31,6 +31,7 @@ import PlusIcon from "@/assets/Icons/PlusIcon";
 import WishlistIcon from "@/assets/Icons/WishlistIcon";
 import VanIcon from "@/assets/Icons/VanIcon";
 import StoreIcon from "@/assets/Icons/StoreIcon";
+import GiftingPanelCheckbox from "@/shared/ui/GiftingPanelCheckbox";
 import Reveal from "@/shared/Animation/Reveal";
 import ProductDetailAccordions from "./ProductDetailAccordions";
 import NotifyWhenAvailableButton from "./NotifyWhenAvailableButton";
@@ -532,14 +533,15 @@ const ProductDetailSidebar = ({
         </div>
 
         <label className="flex cursor-pointer flex-col gap-3 bg-aboutInactive p-4">
-          <span className="flex items-center gap-2">
-            <input
-              type="checkbox"
+          <span className="flex items-center gap-3">
+            <GiftingPanelCheckbox
+              id="pdp-mark-as-gift"
+              size="sm"
               checked={isGift}
-              onChange={(event) => setIsGift(event.target.checked)}
-              className="size-4 shrink-0 border border-darkblack accent-darkblack"
+              onChange={setIsGift}
+              aria-label="Mark this as a gift"
             />
-            <span className="flex h-4 items-center font-gill text-base leading-none text-darkblack">
+            <span className="flex items-center font-gill text-base leading-none text-darkblack">
               Mark this as a gift
             </span>
           </span>

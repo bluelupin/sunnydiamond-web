@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Check, X } from "lucide-react";
+import { X } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
+import GiftingPanelCheckbox from "@/shared/ui/GiftingPanelCheckbox";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import {
   Drawer,
@@ -97,22 +98,7 @@ const GiftingItemCheckbox = ({
   onChange: (checked: boolean) => void;
   label: string;
 }) => (
-  <button
-    type="button"
-    role="checkbox"
-    aria-checked={checked}
-    aria-label={label}
-    onClick={() => onChange(!checked)}
-    className={cn(
-      "flex size-5 shrink-0 items-center justify-center border border-gray600 bg-transparent",
-      checked && "border-transparent bg-linkGold",
-    )}
-  >
-    <Check
-      className={cn("size-3 text-white transition-opacity", checked ? "opacity-100" : "opacity-0")}
-      strokeWidth={2.5}
-    />
-  </button>
+  <GiftingPanelCheckbox checked={checked} onChange={onChange} aria-label={label} />
 );
 
 const GiftingNoteField = ({
