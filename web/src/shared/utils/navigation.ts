@@ -38,6 +38,29 @@ export function isJewelleryNavLink(label: string): boolean {
   return normalizedLabel === "jewellery" || normalizedLabel === "jewelry";
 }
 
+export function isHeaderNavLinkActive(
+  pathname: string,
+  label: string,
+  url: string,
+): boolean {
+  if (isJewelleryNavLink(label)) {
+    return isJewelleryCategoryPath(pathname);
+  }
+
+  const href = resolveHeaderNavHref(label, url);
+  const normalizedPath = pathname.replace(/\/$/, "") || "/";
+  const normalizedHref = href.replace(/\/$/, "") || "/";
+
+  if (normalizedHref === "/") {
+    return normalizedPath === "/";
+  }
+
+  return (
+    normalizedPath === normalizedHref ||
+    normalizedPath.startsWith(`${normalizedHref}/`)
+  );
+}
+
 export function isAuthRoute(pathname: string): boolean {
   return pathname === "/login" || pathname === "/sign-up";
 }

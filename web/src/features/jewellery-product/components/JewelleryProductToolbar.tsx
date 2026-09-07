@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Check } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { sortOptions } from "../data/filters";
 import {
@@ -23,6 +23,7 @@ import {
 
 interface JewelleryProductToolbarProps {
   productCount: number;
+  isSearching?: boolean;
   sortValue: string;
   onSortChange: (value: string) => void;
   onFilterOpen: () => void;
@@ -234,6 +235,7 @@ const SortDrawer = ({ open, sortValue, onClose, onSelect }: SortDrawerProps) => 
 
 const JewelleryProductToolbar = ({
   productCount,
+  isSearching = false,
   sortValue,
   onSortChange,
   onFilterOpen,
@@ -259,15 +261,30 @@ const JewelleryProductToolbar = ({
             paddingRight: desktopSpec.paddingX,
           }}
         >
-          <p
-            className="shrink-0 whitespace-nowrap font-gill font-light leading-110"
-            style={{
-              fontSize: desktopSpec.productCountFontSize,
-              color: desktopSpec.productCountColor,
-            }}
-          >
-            {productCount.toLocaleString("en-IN")} Products
-          </p>
+          {isSearching ? (
+            <span
+              className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap font-gill font-light leading-110"
+              style={{
+                fontSize: desktopSpec.productCountFontSize,
+                color: desktopSpec.productCountColor,
+              }}
+              aria-live="polite"
+              aria-busy="true"
+            >
+              {/* <Loader2 className="size-5 shrink-0 animate-spin" aria-hidden /> */}
+              Searching products...
+            </span>
+          ) : (
+            <p
+              className="shrink-0 whitespace-nowrap font-gill font-light leading-110"
+              style={{
+                fontSize: desktopSpec.productCountFontSize,
+                color: desktopSpec.productCountColor,
+              }}
+            >
+              {productCount.toLocaleString("en-IN")} Products
+            </p>
+          )}
 
           <div className="flex shrink-0 items-center gap-8">
             <FilterControl

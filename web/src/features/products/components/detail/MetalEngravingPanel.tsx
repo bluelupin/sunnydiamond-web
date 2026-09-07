@@ -1,10 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Image from "next/image";
 import type { StaticImageData } from "next/image";
 import { Info } from "lucide-react";
-import Link from "next/link";
 import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 import { appointmentFieldClassName, appointmentLabelClassName } from "@/shared/constants/appointmentForm";
 import {
@@ -28,7 +26,7 @@ import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import EngravingPreviewImage from "./EngravingPreviewImage";
-import { DetailDarkButton } from "./shared";
+import { DetailDarkButton, DetailTextLink } from "./shared";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 
 type MetalEngravingPanelProps = {
@@ -207,12 +205,9 @@ const MetalEngravingPanel = ({
                       For more options or special requests,
                     </p>
                   </div>
-                  <Link
-                    href="/contact"
-                    className="text-link-underline inline-flex border-b border-darkblack pb-1 font-gill text-sm uppercase leading-110 text-darkblack"
-                  >
+                  <DetailTextLink href="/contact">
                     Contact Our Team
-                  </Link>
+                  </DetailTextLink>
                 </div>
               </div>
             </div>

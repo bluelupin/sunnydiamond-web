@@ -61,6 +61,18 @@ type JewelleryProductPageProps = {
   trustBadges?: NormalizedProductLandingTrustBadge[];
 };
 
+/** Clears drawer filters while keeping URL-driven listing params (occasion, shape, etc.). */
+function createClearedDrawerFilterState(
+  current: JewelleryFilterState,
+): JewelleryFilterState {
+  return {
+    ...createEmptyFilterState(),
+    occasion: current.occasion,
+    diamondShape: current.diamondShape,
+    fancyColour: current.fancyColour,
+  };
+}
+
 const JewelleryProductPage = ({
   initialListing,
   prefetchedCategoryUrlKey,
@@ -95,6 +107,7 @@ const JewelleryProductPage = ({
   const { data: navData } = useMagentoJewelleryNav();
   const navCategories = navData?.categories ?? [];
   const facetsSyncedRef = useRef(false);
+  const lastFacetsSyncedCategoryRef = useRef<string | null>(selectedCategoryUrlKey);
   const lastOccasionSlugRef = useRef<string | null>(null);
   const lastDiamondShapeSlugRef = useRef<string | null>(null);
   const lastFancyColourSlugRef = useRef<string | null>(null);
@@ -113,6 +126,7 @@ const JewelleryProductPage = ({
     totalCount,
     facets,
     isLoading,
+    isSearching,
     isLoadingMore,
     hasMore,
     loadMore,
@@ -147,10 +161,7 @@ const JewelleryProductPage = ({
       if (nextUrlKey === null) {
         setFilters(createEmptyFilterState());
       } else {
-        setFilters((current) => ({
-          ...current,
-          categories: [],
-        }));
+        setFilters((current) => createClearedDrawerFilterState(current));
       }
     };
 
@@ -165,10 +176,7 @@ const JewelleryProductPage = ({
     if (nextUrlKey === null) {
       setFilters(createEmptyFilterState());
     } else {
-      setFilters((current) => ({
-        ...current,
-        categories: [],
-      }));
+      setFilters((current) => createClearedDrawerFilterState(current));
     }
 
     facetsSyncedRef.current = false;
@@ -304,8 +312,9 @@ const JewelleryProductPage = ({
       );
     };
 
-    if (!facetsSyncedRef.current) {
+    if (!facetsSyncedRef.current || lastFacetsSyncedCategoryRef.current !== selectedCategoryUrlKey) {
       facetsSyncedRef.current = true;
+      lastFacetsSyncedCategoryRef.current = selectedCategoryUrlKey;
       const nextDraft = buildFiltersFromUrl();
       setFilters(nextDraft);
       return;
@@ -321,6 +330,7 @@ const JewelleryProductPage = ({
     }
   }, [
     facets,
+    selectedCategoryUrlKey,
     occasionSlug,
     diamondShapeSlug,
     fancyColourSlug,
@@ -423,6 +433,7 @@ const JewelleryProductPage = ({
 
       <JewelleryProductToolbar
         productCount={totalCount}
+        isSearching={isSearching}
         sortValue={sortValue}
         onSortChange={setSortValue}
         onFilterOpen={handleOpenFilters}
@@ -444,7 +455,7 @@ const JewelleryProductPage = ({
         )}
       </section>
 
-      {!isLoading && totalCount > 0 ? (
+      {!isSearching && !isLoading && totalCount > 0 ? (
         <JewelleryLoadMoreSection
           visibleCount={products.length}
           totalCount={totalCount}

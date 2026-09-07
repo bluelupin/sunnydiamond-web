@@ -17,6 +17,7 @@ import {
   getHeaderVariant,
   isAuthRoute,
   isCartOrCheckoutRoute,
+  isHeaderNavLinkActive,
   isJewelleryNavLink,
 } from "@/shared/utils/navigation";
 import MobileThemeColor from "@/shared/ui/layout/MobileThemeColor";
@@ -183,9 +184,12 @@ const Header = () => {
       "inline-flex items-center font-gill uppercase transition-colors",
       "text-sm font-normal leading-[130%] tracking-[-0.02em]",
       "lg:text-sm lg:font-semibold lg:leading-110 lg:tracking-normal",
-      active ? (isLightOverlay ? "text-primary" : "text-darkblack") : textClass,
-      !active ? hoverClass : "",
+      active ? "text-linkGold" : cn(textClass, hoverClass),
     );
+
+  const isAppointmentActive = appointmentLink
+    ? isHeaderNavLinkActive(pathname, appointmentLink.label, appointmentLink.url)
+    : false;
 
   const Logo = (
     <Link
@@ -240,6 +244,7 @@ const Header = () => {
               <nav className="hidden items-center md:landscape:flex md:landscape:gap-4 lg:landscape:gap-10" aria-label="Main navigation">
                 {primaryLinks.map((link) => {
                   const isJewellery = isJewelleryNavLink(link.label);
+                  const isActive = isHeaderNavLinkActive(pathname, link.label, link.url);
                   if (isJewellery) {
                     return (
                       <div
@@ -250,7 +255,8 @@ const Header = () => {
                       >
                         <Link
                           href={resolveHeaderNavHref(link.label, link.url)}
-                          className={cn(navLinkClass(), jewelleryMenuOpen && "text-linkGold")}
+                          className={navLinkClass(isActive || jewelleryMenuOpen)}
+                          aria-current={isActive ? "page" : undefined}
                           aria-expanded={jewelleryMenuOpen}
                           aria-haspopup="true"
                           onClick={handleJewelleryNavClick}
@@ -264,7 +270,8 @@ const Header = () => {
                     <Link
                       key={link.id ?? link.label}
                       href={resolveHeaderNavHref(link.label, link.url)}
-                      className={navLinkClass()}
+                      className={navLinkClass(isActive)}
+                      aria-current={isActive ? "page" : undefined}
                     >
                       {link.label}
                     </Link>
@@ -273,7 +280,8 @@ const Header = () => {
                 {appointmentLink ? (
                   <Link
                     href={resolveHeaderNavHref(appointmentLink.label, appointmentLink.url)}
-                    className={navLinkClass()}
+                    className={navLinkClass(isAppointmentActive)}
+                    aria-current={isAppointmentActive ? "page" : undefined}
                   >
                     {appointmentLink.label}
                   </Link>

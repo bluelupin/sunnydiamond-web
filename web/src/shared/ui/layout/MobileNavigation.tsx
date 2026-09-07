@@ -3,13 +3,14 @@
 import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
 import SDLogo from "@/assets/Icons/SDLogo";
 import SearchIcon from "@/assets/Icons/SearchIcon";
 import WishlistNavLink from "@/features/wishlist/components/WishlistNavLink";
 import AccountMenu from "@/features/auth/components/AccountMenu";
 import { cn } from "@/shared/utils/cn";
-import { resolveHeaderNavHref, isJewelleryNavLink } from "@/shared/utils/navigation";
+import { resolveHeaderNavHref, isHeaderNavLinkActive, isJewelleryNavLink } from "@/shared/utils/navigation";
 import type { HeaderNavLink } from "@/shared/lib/shellNavigation";
 import BookAnAppointmentPanel from "@/features/appointment/components/BookAnAppointmentPanel";
 import BookStoreVisitPanel from "@/features/products/components/detail/BookStoreVisitPanel";
@@ -158,19 +159,26 @@ const NavDivider = ({ className = "" }: NavDividerProps) => (
 type MobileNavRowProps = {
   label: string;
   href: string;
+  isActive?: boolean;
   onNavigate: () => void;
   onOpenPanel?: () => void;
 };
 
-const MobileNavRow = ({ label, href, onNavigate, onOpenPanel }: MobileNavRowProps) => {
+const MobileNavRow = ({ label, href, isActive = false, onNavigate, onOpenPanel }: MobileNavRowProps) => {
+  const labelClassName = cn(
+    "font-gill text-sm uppercase leading-110",
+    isActive ? "text-linkGold" : "text-darkblack",
+  );
+
   if (onOpenPanel) {
     return (
       <button
         type="button"
         onClick={onOpenPanel}
         className="flex h-4 font-normal w-full items-center justify-between"
+        aria-current={isActive ? "page" : undefined}
       >
-        <span className="font-gill text-sm uppercase leading-110 text-darkblack">{label}</span>
+        <span className={labelClassName}>{label}</span>
         <NavChevron />
       </button>
     );
@@ -180,8 +188,9 @@ const MobileNavRow = ({ label, href, onNavigate, onOpenPanel }: MobileNavRowProp
       href={href}
       onClick={onNavigate}
       className="flex h-4 font-normal w-full items-center justify-between"
+      aria-current={isActive ? "page" : undefined}
     >
-      <span className="font-gill text-sm uppercase leading-110 text-darkblack">{label}</span>
+      <span className={labelClassName}>{label}</span>
       <NavChevron />
     </Link>
   );
@@ -434,6 +443,7 @@ const MobileNavigation = ({
   cartCount,
   onProfileOpen,
 }: MobileNavigationProps) => {
+  const pathname = usePathname() ?? "/";
   const [subPanel, setSubPanel] = useState<SubPanelId | null>(null);
   const [displayedSubPanel, setDisplayedSubPanel] = useState<SubPanelId | null>(null);
   const [isRendered, setIsRendered] = useState(false);
@@ -702,11 +712,13 @@ const MobileNavigation = ({
           <nav aria-label="Main navigation" className="mt-6 flex w-full flex-col gap-4">
             {navLinks.map((link, index) => {
               const isJewellery = isJewelleryNavLink(link.label);
+              const isActive = isHeaderNavLinkActive(pathname, link.label, link.url);
               return (
                 <Fragment key={link.id ?? link.label}>
                   <MobileNavRow
                     label={link.label}
                     href={resolveHeaderNavHref(link.label, link.url)}
+                    isActive={isActive}
                     onNavigate={handleClose}
                     onOpenPanel={isJewellery ? () => setSubPanel("jewellery") : undefined}
                   />

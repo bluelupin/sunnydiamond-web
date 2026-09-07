@@ -189,11 +189,10 @@ export function ProfileAddressFormSheet({
       <div
         className={cn(
           RIGHT_PANEL_SCROLL_AREA_CLASS,
-          isMobile ? "px-4" : "px-6",
         )}
       >
         {header}
-        <div className="flex flex-col items-center gap-6 pb-6 pt-6">
+        <div className="flex flex-col items-center gap-6 pb-16 pt-6 md:px-6 px-4">
           {!isEditing ? (
             <DetailTextLink
               onClick={isLocating || isSaving ? undefined : handleUseCurrentLocation}
