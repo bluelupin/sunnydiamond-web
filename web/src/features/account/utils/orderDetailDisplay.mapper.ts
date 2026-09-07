@@ -25,8 +25,8 @@ import {
   resolveRefundEstimateValue,
   resolveRefundTimeline,
 } from "./profileDisplayMappers";
+import { resolveOrderItemImageUrl } from "./orderItemImage.utils";
 
-const PLACEHOLDER_RING_IMAGE = "/images/jewellery/plp/product-ring-transparent.png";
 const ordersContent = profileTabsContent.orders;
 
 /** Magento payment method codes that collect the money at the door. */
@@ -98,8 +98,7 @@ function mapDetailItems(
     const mapperInput = trackedItemToMapperInput(item);
     const display = mapCustomerOrderItemToDisplayFields(mapperInput, giftMetadata);
     const sku = item.productSku?.trim();
-    const imageFromSku = sku ? imageBySku[sku] : undefined;
-    const imageUrl = imageFromSku?.trim() || null;
+    const imageUrl = resolveOrderItemImageUrl(item.thumbnailUrl, sku, imageBySku);
     // GraphQL gift fields win; the REST comment chain still carries engraving notes.
     const giftNote =
       item.giftMessage ?? getOrderItemGiftNote(giftMetadata, item.productName, item.productSku);
@@ -107,14 +106,14 @@ function mapDetailItems(
     return {
       id: `${order.id}-${item.productSku ?? index}`,
       name: item.productName,
-      imageSrc: imageUrl ?? PLACEHOLDER_RING_IMAGE,
+      ...(imageUrl ? { imageSrc: imageUrl } : {}),
       size: display.size,
       metal: display.metal,
       engraving: display.engraving,
       engravingFont: display.engravingFont,
       isGift: item.isGift || display.isGift,
       isBespoke: display.isBespoke,
-      useIconPlaceholder: display.isBespoke && !imageUrl,
+      useIconPlaceholder: !imageUrl,
       quantity: item.quantity,
       productUrlKey: item.productUrlKey,
       unitPrice: item.unitPrice,

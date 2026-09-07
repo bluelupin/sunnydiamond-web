@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useMagentoWishlistProducts } from "@/hooks/magento/useMagentoWishlistProducts";
 import type { TrackedOrder } from "@/services/customer/order-tracking.types";
 import { profileTabsContent } from "../data/profileContent";
 import { useCustomerOrders } from "../hooks/useCustomerOrders";
@@ -11,6 +12,7 @@ import type {
   ProfileOrderUi,
 } from "../types/profileUi.types";
 import { formatOrderStatusLabel } from "../utils/orderDeliveryTimeline.utils";
+import { buildMagentoProductImageBySku } from "../utils/orderItemImage.utils";
 import { categorizeOrder, mapCustomerOrderToProfileUi } from "../utils/profileDisplayMappers";
 import { PROFILE_ORDER_QUERY_PARAM } from "../utils/profileOrderNavigation";
 import { ProfileOrderCard } from "./ProfileOrderCard";
@@ -101,16 +103,37 @@ const ProfileOrdersSection = () => {
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
   }, [selectedOrderNumber]);
 
+  const orderSkus = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          (data?.orders ?? [])
+            .flatMap((order) =>
+              order.items.map((item) => item.productSku?.trim() ?? ""),
+            )
+            .filter(Boolean),
+        ),
+      ),
+    [data?.orders],
+  );
+
+  const { products: magentoProducts } = useMagentoWishlistProducts(orderSkus);
+
+  const imageBySku = useMemo(
+    () => buildMagentoProductImageBySku(magentoProducts),
+    [magentoProducts],
+  );
+
   const orders = useMemo(
     () =>
       (data?.orders ?? []).map((order) => {
-        const mapped = mapCustomerOrderToProfileUi(order);
+        const mapped = mapCustomerOrderToProfileUi(order, imageBySku);
         const override = orderOverrides[order.id];
 
         // Once a refetch reports the mutated status, the mapped order is authoritative again.
         return override && override.status !== order.status ? { ...mapped, ...override } : mapped;
       }),
-    [data, orderOverrides],
+    [data, orderOverrides, imageBySku],
   );
 
   const filteredOrders = useMemo(

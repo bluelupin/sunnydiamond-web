@@ -1,25 +1,20 @@
 "use client";
 
 import { useCallback, useState, type RefObject } from "react";
-import { ChevronRight } from "lucide-react";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import type { Product } from "@/features/products/data/products";
 import { cn } from "@/shared/utils/cn";
 import { useHorizontalCarouselSwipe } from "@/features/products/hooks/useHorizontalCarouselSwipe";
 import {
-  PRODUCT_DETAIL_GALLERY_HERO_IMAGE,
-  PRODUCT_DETAIL_GALLERY_LIFESTYLE_IMAGE,
-  PRODUCT_DETAIL_GALLERY_SECOND_IMAGE,
-  PRODUCT_DETAIL_GALLERY_THIRD_IMAGE,
-} from "@/features/products/data/productGalleryContent";
+  getProductDetailCarouselImages,
+  getProductDetailGallerySlots,
+} from "./productDetailCarouselImages";
 import { PDP_STICKY_TOP_CLASS } from "./productDetailLayout";
 
 type ProductDetailGalleryProps = {
   product: Product;
   topGalleryRef?: RefObject<HTMLDivElement | null>;
 };
-
-const GALLERY_SLIDE_COUNT = 5;
 
 const heroGalleryFrameClass =
   "relative flex w-full overflow-hidden bg-gray300 md:h-520 lg:h-680";
@@ -29,19 +24,8 @@ const thumbGalleryFrameClass =
 
 const ProductDetailGallery = ({ product, topGalleryRef }: ProductDetailGalleryProps) => {
   const [activeSlide, setActiveSlide] = useState(0);
-  const [productHeroImage, productThumbOne, productThumbTwo] = product.images;
-  const heroImage = productHeroImage ?? PRODUCT_DETAIL_GALLERY_HERO_IMAGE;
-  const thumbOne = productThumbOne ?? PRODUCT_DETAIL_GALLERY_SECOND_IMAGE;
-  const thumbTwo = productThumbTwo ?? PRODUCT_DETAIL_GALLERY_THIRD_IMAGE;
-  const lifestyleImage = product.lifestyleImage ?? product.images[3] ?? PRODUCT_DETAIL_GALLERY_LIFESTYLE_IMAGE;
-
-  const carouselImages = [
-    heroImage ?? product.image,
-    thumbOne ?? product.image,
-    thumbTwo ?? product.image,
-    lifestyleImage,
-    product.image,
-  ].slice(0, GALLERY_SLIDE_COUNT);
+  const { heroImage, thumbOne, thumbTwo, lifestyleImage } = getProductDetailGallerySlots(product);
+  const carouselImages = getProductDetailCarouselImages(product);
 
   const goToNextSlide = useCallback(() => {
     setActiveSlide((current) => (current + 1) % carouselImages.length);
@@ -87,13 +71,12 @@ const ProductDetailGallery = ({ product, topGalleryRef }: ProductDetailGalleryPr
               <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M3 12.5H21M12.5 21L21 12.5L12.5 4" stroke="#0A0A0A" strokeLinejoin="round" />
               </svg>
-              {/* <ChevronRight size={24} strokeWidth={1.25} aria-hidden /> */}
             </button>
           </div>
         </div>
 
         <div className="flex h-0.5">
-          {Array.from({ length: GALLERY_SLIDE_COUNT }, (_, index) => (
+          {Array.from({ length: carouselImages.length }, (_, index) => (
             <div
               key={index}
               className={cn(
@@ -110,7 +93,7 @@ const ProductDetailGallery = ({ product, topGalleryRef }: ProductDetailGalleryPr
         <div ref={topGalleryRef} className="flex shrink-0 flex-col gap-3">
           <div className={heroGalleryFrameClass}>
             <OptimizedImage
-              src={heroImage ?? product.image}
+              src={heroImage}
               alt={`${product.name} — primary view`}
               priority
               sizes="(max-width: 1024px) 100vw, 783px"
@@ -121,7 +104,7 @@ const ProductDetailGallery = ({ product, topGalleryRef }: ProductDetailGalleryPr
           <div className="flex flex-col gap-3 sm:flex-row">
             <div className={cn(thumbGalleryFrameClass, "sm:flex-1")}>
               <OptimizedImage
-                src={thumbOne ?? product.image}
+                src={thumbOne}
                 alt={`${product.name} — detail view`}
                 sizes="(max-width: 1024px) 50vw, 385px"
                 className="size-full object-cover object-center"
@@ -129,7 +112,7 @@ const ProductDetailGallery = ({ product, topGalleryRef }: ProductDetailGalleryPr
             </div>
             <div className={cn(thumbGalleryFrameClass, "md:shrink-0")}>
               <OptimizedImage
-                src={thumbTwo ?? product.image}
+                src={thumbTwo}
                 alt={`${product.name} — alternate view`}
                 sizes="(max-width: 1024px) 50vw, 385px"
                 className="size-full object-cover object-center"

@@ -7,7 +7,6 @@ import { cn } from "@/shared/utils/cn";
 import { useHorizontalCarouselSwipe } from "@/features/products/hooks/useHorizontalCarouselSwipe";
 import {
     getProductDetailCarouselImages,
-    PRODUCT_DETAIL_GALLERY_SLIDE_COUNT,
 } from "./productDetailCarouselImages";
 
 type ProductWishlistDetailGalleryCarouselProps = {
@@ -87,7 +86,7 @@ const ProductWishlistDetailGalleryCarousel = ({
             </div>
 
             <div className="flex h-0.5">
-                {Array.from({ length: PRODUCT_DETAIL_GALLERY_SLIDE_COUNT }, (_, index) => (
+                {Array.from({ length: carouselImages.length }, (_, index) => (
                     <div
                         key={index}
                         className={cn(

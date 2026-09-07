@@ -9,6 +9,7 @@ import {
   type TransitionEvent,
 } from "react";
 import Image from "next/image";
+import RingsTabIcon from "@/assets/Icons/PLP/RingsTabIcon";
 import { cn } from "@/shared/utils/cn";
 import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
 import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
@@ -249,7 +250,7 @@ export function ProfileBespokeDetailPanel({
     return null;
   }
 
-  const images = item.images.length > 0 ? item.images : [item.imageSrc];
+  const images = item.images;
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
@@ -260,12 +261,18 @@ export function ProfileBespokeDetailPanel({
   const panelBody = (
     <div className="relative flex h-full min-h-0 w-full flex-col bg-black max-md:h-[85vh]">
       <div className="relative min-h-0 flex-1">
-        <DetailCarousel
-          images={images}
-          title={item.title}
-          activeIndex={activeImageIndex}
-          onActiveIndexChange={setActiveImageIndex}
-        />
+        {images.length > 0 ? (
+          <DetailCarousel
+            images={images}
+            title={item.title}
+            activeIndex={activeImageIndex}
+            onActiveIndexChange={setActiveImageIndex}
+          />
+        ) : (
+          <div className="flex size-full items-center justify-center bg-black">
+            <RingsTabIcon className="size-16 text-white" />
+          </div>
+        )}
 
         <RightPanelCloseButton
           onClick={onClose}

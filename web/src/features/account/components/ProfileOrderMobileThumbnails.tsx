@@ -2,8 +2,29 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import RingsTabIcon from "@/assets/Icons/PLP/RingsTabIcon";
 import type { ProfileOrderItemUi } from "../types/profileUi.types";
 import { ProfileOrderItemBadge } from "./profileUi";
+
+function ProfileOrderThumbnailImage({ item }: { item: ProfileOrderItemUi }) {
+  if (item.useIconPlaceholder || !item.imageSrc) {
+    return (
+      <div className="flex size-full items-center justify-center bg-white">
+        <RingsTabIcon className="size-12 text-darkblack" />
+      </div>
+    );
+  }
+
+  return (
+    <Image
+      src={item.imageSrc}
+      alt={item.name}
+      fill
+      className="object-cover"
+      sizes="100px"
+    />
+  );
+}
 
 export function ProfileOrderMobileThumbnails({ items }: { items: ProfileOrderItemUi[] }) {
   const thumbnails = items.slice(0, 3);
@@ -15,22 +36,10 @@ export function ProfileOrderMobileThumbnails({ items }: { items: ProfileOrderIte
           {item.isGift ? <ProfileOrderItemBadge label="Gift" /> : null}
           {item.productUrlKey ? (
             <Link href={`/product/${item.productUrlKey}`} className="block size-full">
-              <Image
-                src={item.imageSrc}
-                alt={item.name}
-                fill
-                className="object-cover"
-                sizes="100px"
-              />
+              <ProfileOrderThumbnailImage item={item} />
             </Link>
           ) : (
-            <Image
-              src={item.imageSrc}
-              alt={item.name}
-              fill
-              className="object-cover"
-              sizes="100px"
-            />
+            <ProfileOrderThumbnailImage item={item} />
           )}
         </div>
       ))}

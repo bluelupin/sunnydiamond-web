@@ -22,7 +22,7 @@ export type ProfileTimelineStep = {
 export type ProfileOrderItemUi = {
   id: string;
   name: string;
-  imageSrc: string;
+  imageSrc?: string;
   size?: string;
   metal?: string;
   engraving?: string;
@@ -120,7 +120,7 @@ export type ProfileOrderUi = {
 export type ProfileAppointmentProductUi = {
   id: string;
   name: string;
-  imageSrc: string;
+  imageSrc?: string;
 };
 
 export type ProfileAppointmentUi = {
@@ -158,7 +158,7 @@ export type ProfileBespokeItemUi = {
   id: string;
   creationDocumentId: string;
   title: string;
-  imageSrc: string;
+  imageSrc?: string;
   /** Cover + gallery URLs for the detail panel carousel. */
   images: string[];
   size?: string;

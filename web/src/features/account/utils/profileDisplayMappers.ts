@@ -33,8 +33,8 @@ import {
   formatOrderStatusLabel,
   normalizeOrderStatus,
 } from "./orderDeliveryTimeline.utils";
+import { resolveOrderItemImageUrl } from "./orderItemImage.utils";
 
-const PLACEHOLDER_RING_IMAGE = "/images/jewellery/plp/product-ring-transparent.png";
 const ordersContent = profileTabsContent.orders;
 
 /** Rendered only for orders placed before SunnyDiamonds_OrderFlow went live. */
@@ -234,31 +234,37 @@ function mapAppointmentAddressToUi(
   };
 }
 
-function mapOrderItems(order: CustomerOrder): ProfileOrderItemUi[] {
+function mapOrderItems(
+  order: CustomerOrder,
+  imageBySku?: Record<string, string>,
+): ProfileOrderItemUi[] {
   const giftMetadata = parseOrderGiftMetadataFromComments(order.commentMessages ?? []);
 
   return order.items.map((item, index) => {
     const display = mapCustomerOrderItemToDisplayFields(item, giftMetadata);
-    const imageUrl = item.imageUrl?.trim() || null;
+    const imageUrl = resolveOrderItemImageUrl(item.imageUrl, item.productSku, imageBySku);
 
     return {
       id: `${order.id}-${item.productSku ?? index}`,
       name: item.productName,
-      imageSrc: imageUrl ?? PLACEHOLDER_RING_IMAGE,
+      ...(imageUrl ? { imageSrc: imageUrl } : {}),
       size: display.size,
       metal: display.metal,
       engraving: display.engraving,
       engravingFont: display.engravingFont,
       isGift: display.isGift,
       isBespoke: display.isBespoke,
-      useIconPlaceholder: display.isBespoke && !imageUrl,
+      useIconPlaceholder: !imageUrl,
       quantity: item.quantity,
       productUrlKey: item.productUrlKey,
     };
   });
 }
 
-export function mapCustomerOrderToProfileUi(order: CustomerOrder): ProfileOrderUi {
+export function mapCustomerOrderToProfileUi(
+  order: CustomerOrder,
+  imageBySku?: Record<string, string>,
+): ProfileOrderUi {
   const { category, subState } = categorizeOrder(order.sunnyStatus, order.status);
   const statusLabel = formatOrderStatusLabel(order.status);
   const deliveryBy = resolveOrderDeliveryBy(order.sunnyDelivery);
@@ -278,7 +284,7 @@ export function mapCustomerOrderToProfileUi(order: CustomerOrder): ProfileOrderU
     category,
     ...(subState ? { subState } : {}),
     ...(deliveryBy ? { deliveryBy } : {}),
-    items: mapOrderItems(order),
+    items: mapOrderItems(order, imageBySku),
     grandTotal: order.grandTotal,
     currency: order.currency,
     showTrack: actions ? actions.canTrack : category === "in_progress",
@@ -357,7 +363,7 @@ export function mapCustomerAppointmentToProfileUi(
   const productImage =
     productSku && productImageBySku?.[productSku]
       ? productImageBySku[productSku]
-      : PLACEHOLDER_RING_IMAGE;
+      : undefined;
 
   const products =
     appointment.productName
@@ -365,7 +371,7 @@ export function mapCustomerAppointmentToProfileUi(
           {
             id: appointment.productId ?? appointment.documentId,
             name: appointment.productName,
-            imageSrc: productImage,
+            ...(productImage ? { imageSrc: productImage } : {}),
           },
         ]
       : [];
@@ -424,14 +430,13 @@ export function mapSavedCreationToBespokeUi(
   const images = Array.from(
     new Set([coverUrl, ...galleryUrls].filter(Boolean)),
   );
-  const imageSrc = images[0] ?? PLACEHOLDER_RING_IMAGE;
 
   return {
     id: item.documentId,
     creationDocumentId: creation.documentId,
     title: creation.title,
-    imageSrc,
-    images: images.length > 0 ? images : [imageSrc],
+    ...(images[0] ? { imageSrc: images[0] } : {}),
+    images,
     price: undefined,
     viewHref: creation.cta?.href ?? profileTabsContent.bespoke.emptyCtaHref,
     savedAt: item.savedAt,

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import RingsTabIcon from "@/assets/Icons/PLP/RingsTabIcon";
 import { profileTabsContent } from "../data/profileContent";
 import type { ProfileBespokeItemUi } from "../types/profileUi.types";
 import { cn } from "@/shared/utils/cn";
@@ -25,13 +26,19 @@ export function ProfileBespokeCard({ item, onOpen, onRemove }: ProfileBespokeCar
         className="absolute inset-0 z-0"
         aria-label={`View ${item.title}`}
       >
-        <Image
-          src={item.imageSrc}
-          alt={item.title}
-          fill
-          className="object-cover"
-          sizes="(max-width: 1024px) 50vw, 33vw"
-        />
+        {item.imageSrc ? (
+          <Image
+            src={item.imageSrc}
+            alt={item.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 1024px) 50vw, 33vw"
+          />
+        ) : (
+          <div className="flex size-full items-center justify-center bg-gray300">
+            <RingsTabIcon className="size-16 text-darkblack" />
+          </div>
+        )}
       </button>
 
       <div className={cn("pointer-events-none absolute inset-0 z-10 bg-black/20", overlayVisibility)} aria-hidden />

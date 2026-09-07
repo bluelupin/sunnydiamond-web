@@ -23,7 +23,7 @@ export function ProfileOrderItemRow({ item, price }: ProfileOrderItemRowProps) {
       <div className="flex items-center justify-between gap-6">
         <div className="flex min-w-0 items-center gap-6">
           <div className="relative h-[63px] w-[71px] shrink-0 overflow-hidden bg-white">
-            {item.useIconPlaceholder ? (
+            {item.useIconPlaceholder || !item.imageSrc ? (
               <div className="flex size-full items-center justify-center">
                 <RingsTabIcon className="size-12 text-darkblack" />
               </div>

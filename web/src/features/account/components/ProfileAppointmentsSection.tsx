@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { StaticImageData } from "next/image";
 import {
   CartOutlineButton,
 } from "@/features/cart/components/CartFlowUi";
@@ -10,6 +9,7 @@ import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusT
 import { profileTabsContent } from "../data/profileContent";
 import { useCustomerAppointments } from "../hooks/useCustomerAppointments";
 import type { AppointmentFilterKey } from "../types/profileUi.types";
+import { buildMagentoProductImageBySku } from "../utils/orderItemImage.utils";
 import { mapCustomerAppointmentToProfileUi } from "../utils/profileDisplayMappers";
 import { ProfileAppointmentCard } from "./ProfileAppointmentCard";
 import { ProfileAppointmentCancelDialog } from "./ProfileAppointmentCancelDialog";
@@ -27,10 +27,6 @@ const FILTER_OPTIONS: { key: AppointmentFilterKey; label: string }[] = [
   { key: "try_at_home", label: content.filters.tryAtHome },
   { key: "store_visit", label: content.filters.storeVisit },
 ];
-
-function listingImageUrl(image: string | StaticImageData): string {
-  return typeof image === "string" ? image : image.src;
-}
 
 const ProfileAppointmentsSection = () => {
   const { data, isLoading, error, page, setPage } = useCustomerAppointments(true);
@@ -83,20 +79,10 @@ const ProfileAppointmentsSection = () => {
   const { products: magentoProducts, isLoading: isProductImagesLoading } =
     useMagentoWishlistProducts(appointmentSkus);
 
-  const productImageBySku = useMemo(() => {
-    const images: Record<string, string> = {};
-
-    for (const product of magentoProducts) {
-      const sku = product.sku?.trim();
-      if (!sku) {
-        continue;
-      }
-
-      images[sku] = listingImageUrl(product.primaryImage);
-    }
-
-    return images;
-  }, [magentoProducts]);
+  const productImageBySku = useMemo(
+    () => buildMagentoProductImageBySku(magentoProducts),
+    [magentoProducts],
+  );
 
   const appointments = useMemo(() => {
     if (!data?.appointments.length) {

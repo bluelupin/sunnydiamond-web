@@ -63,7 +63,7 @@ export function ProfileOrderDetailItemCard({ item }: ProfileOrderDetailItemCardP
     </p>
   );
 
-  const imageElement = item.useIconPlaceholder ? (
+  const imageElement = item.useIconPlaceholder || !item.imageSrc ? (
     <div className="flex size-full items-center justify-center">
       <RingsTabIcon className="size-12 text-darkblack" />
     </div>

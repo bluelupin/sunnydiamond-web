@@ -8,12 +8,6 @@ import type { ProductEngravingConfig } from "@/features/products/constants/engra
 import type { ProductCustomOptions } from "@/features/products/types/productCustomOptions";
 import type { ProductPriceBreakupComponents } from "@/services/magento/products/productPriceBreakup.utils";
 import { buildProductSeo } from "@/shared/lib/seo/productSeo";
-import {
-  PRODUCT_DETAIL_GALLERY_HERO_IMAGE,
-  PRODUCT_DETAIL_GALLERY_LIFESTYLE_IMAGE,
-  PRODUCT_DETAIL_GALLERY_SECOND_IMAGE,
-  PRODUCT_DETAIL_GALLERY_THIRD_IMAGE,
-} from "@/features/products/data/productGalleryContent";
 
 export type ProductConfigurableOptionValue = {
   /** Normalized id used by PDP swatches (e.g. rose-gold). */
@@ -121,12 +115,7 @@ export const products: Product[] = [
     shortDescription: "1.5ct round brilliant diamond in 18K rose gold",
     category: "Rings",
     image: productRing,
-    images: [
-      PRODUCT_DETAIL_GALLERY_HERO_IMAGE,
-      PRODUCT_DETAIL_GALLERY_SECOND_IMAGE,
-      PRODUCT_DETAIL_GALLERY_THIRD_IMAGE,
-    ],
-    lifestyleImage: PRODUCT_DETAIL_GALLERY_LIFESTYLE_IMAGE,
+    images: [productRing, productRing, productRing],
     carat: "1.5 ct",
     metal: "18K Rose Gold",
     inStock: true,

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { Calendar, ChevronRight } from "lucide-react";
+import RingsTabIcon from "@/assets/Icons/PLP/RingsTabIcon";
 import {
   DetailDarkButton,
   DetailOutlineButton,
@@ -32,13 +33,19 @@ function ProductGallery({ products }: { products: ProfileAppointmentUi["products
       {products.map((product) => (
         <div key={product.id} className="flex w-[135px] shrink-0 flex-col gap-2 lg:w-[176px]">
           <div className="relative h-[76px] w-full overflow-hidden bg-white lg:h-[135px]">
-            <Image
-              src={product.imageSrc}
-              alt={product.name}
-              fill
-              className="object-cover"
-              sizes="176px"
-            />
+            {product.imageSrc ? (
+              <Image
+                src={product.imageSrc}
+                alt={product.name}
+                fill
+                className="object-cover"
+                sizes="176px"
+              />
+            ) : (
+              <div className="flex size-full items-center justify-center">
+                <RingsTabIcon className="size-12 text-darkblack" />
+              </div>
+            )}
           </div>
           <p
             className={cn(

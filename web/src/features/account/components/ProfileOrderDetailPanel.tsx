@@ -1,17 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { StaticImageData } from "next/image";
 import { useMagentoWishlistProducts } from "@/hooks/magento/useMagentoWishlistProducts";
 import { trackOrder } from "@/services/customer/order-tracking.client";
 import type { TrackedOrder } from "@/services/customer/order-tracking.types";
+import { buildMagentoProductImageBySku } from "../utils/orderItemImage.utils";
 import { mapTrackedOrderToProfileDetailUi } from "../utils/orderDetailDisplay.mapper";
 import { ProfileOrderDetailView } from "./ProfileOrderDetailView";
 import FormFieldError from "@/shared/ui/FormFieldError";
-
-function listingImageUrl(image: string | StaticImageData): string {
-  return typeof image === "string" ? image : image.src;
-}
 
 function OrderDetailSkeleton() {
   return (
@@ -95,20 +91,10 @@ export function ProfileOrderDetailPanel({
 
   const { products: magentoProducts } = useMagentoWishlistProducts(orderSkus);
 
-  const imageBySku = useMemo(() => {
-    const images: Record<string, string> = {};
-
-    for (const product of magentoProducts) {
-      const sku = product.sku?.trim();
-      if (!sku) {
-        continue;
-      }
-
-      images[sku] = listingImageUrl(product.primaryImage);
-    }
-
-    return images;
-  }, [magentoProducts]);
+  const imageBySku = useMemo(
+    () => buildMagentoProductImageBySku(magentoProducts),
+    [magentoProducts],
+  );
 
   const orderDetail = useMemo(
     () => (order ? mapTrackedOrderToProfileDetailUi(order, imageBySku) : null),
