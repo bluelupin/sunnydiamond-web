@@ -1,14 +1,13 @@
 "use client";
 
-import { useState, type KeyboardEvent } from "react";
+import { useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
-  clampEngravingText,
   DEFAULT_ENGRAVING_MAX_CHARACTERS,
-  ENGRAVING_TEXT_SANITIZE_PATTERN,
   isCartLineEngravingEnabled,
+  type EngravingSelection,
 } from "@/features/products/constants/engraving";
-import FormFieldError from "@/shared/ui/FormFieldError";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { cn } from "@/shared/utils/cn";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
@@ -30,6 +29,11 @@ import {
 import DeleteIcon from "@/assets/Icons/DeleteIcon";
 import { getProductEditHref } from "@/features/products/utils/productRoutes";
 
+const MetalEngravingPanel = dynamic(
+  () => import("@/features/products/components/detail/MetalEngravingPanel"),
+  { ssr: false },
+);
+
 interface CartItemProps {
   item: CartLineItem;
   giftNoteDisplay: CartGiftNoteDisplay;
@@ -41,7 +45,7 @@ interface CartItemProps {
 const ENGRAVING_EMPTY_LABEL = "Metal Engraving (Optional)";
 
 const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItemProps) => {
-  const { buyNow, getLineItemMetadata, removeItem } = useCart();
+  const { buyNow, getLineItemMetadata, removeItem, showCartStatusToast } = useCart();
   const { isWishlisted, addToWishlist } = useWishlist();
   const { clearGiftingOptionsExplored } = useCartUI();
   const { navigateToCheckout, isNavigatingToCheckout } = useCartCheckout();
@@ -54,95 +58,69 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
   const engravingMaxCharacters = options.engravingMaxCharacters ?? DEFAULT_ENGRAVING_MAX_CHARACTERS;
   const hasEngraving = Boolean(options.engraving?.trim());
   const itemGiftNote = getCartItemGiftNote(item, giftNoteDisplay);
-  const [isEditingEngraving, setIsEditingEngraving] = useState(false);
-  const [engravingDraft, setEngravingDraft] = useState(options.engraving ?? "");
-  const [engravingError, setEngravingError] = useState<string | null>(null);
+  const [isEngravingOpen, setIsEngravingOpen] = useState(false);
   const [isSavingEngraving, setIsSavingEngraving] = useState(false);
   const [movedToWishlist, setMovedToWishlist] = useState(false);
   const [isBuyingNow, setIsBuyingNow] = useState(false);
   const [isMovingToWishlist, setIsMovingToWishlist] = useState(false);
 
   const engravingFont = options.engravingFont?.trim();
-  // Catalog list first (works on any device), browser metadata only as the
-  // fallback for optimistic lines the server has not answered for yet.
+  const lineMetadata = getLineItemMetadata(item.id);
   const fontLabels =
     product.customOptions?.engravingFont?.labels ??
-    getLineItemMetadata(item.id)?.productCustomOptions?.engravingFont?.labels ??
+    lineMetadata?.productCustomOptions?.engravingFont?.labels ??
     [];
-  // A saved font missing from the list (admin rename, stale metadata) must stay
-  // selectable — replacing it silently would change the engraving.
   const availableEngravingFonts =
     engravingFont && !fontLabels.includes(engravingFont)
       ? [engravingFont, ...fontLabels]
       : fontLabels;
-  const [engravingFontDraft, setEngravingFontDraft] = useState("");
-  const engravingErrorId = `cart-engraving-error-${item.id}`;
 
-  const clampDraft = (value: string) =>
-    engravingMaxCharacters ? clampEngravingText(value, engravingMaxCharacters) : value;
+  const initialEngravingSelection = useMemo<EngravingSelection | null>(() => {
+    if (!hasEngraving) {
+      return null;
+    }
 
-  const sanitizeDraft = (value: string) =>
-    clampDraft(value.replace(ENGRAVING_TEXT_SANITIZE_PATTERN, ""));
+    return {
+      text: options.engraving!.trim(),
+      font: engravingFont || availableEngravingFonts[0] || "",
+    };
+  }, [
+    availableEngravingFonts,
+    engravingFont,
+    hasEngraving,
+    options.engraving,
+  ]);
 
-  const handleEngravingAction = () => {
-    if (isNavigatingToCheckout) {
+  const openEngravingDrawer = () => {
+    if (isNavigatingToCheckout || isSavingEngraving) {
       return;
     }
 
-    if (!isEditingEngraving) {
-      setEngravingDraft(options.engraving ?? "");
-      setEngravingFontDraft(engravingFont || (availableEngravingFonts[0] ?? ""));
-      setEngravingError(null);
-      setIsEditingEngraving(true);
-      return;
-    }
-
-    if (isSavingEngraving) {
-      return;
-    }
-
-    const trimmed = clampDraft(engravingDraft.trim());
-    // Only send the font when the shopper's choice differs from what is saved —
-    // a text-only save must never rewrite the line's font.
-    const fontChanged =
-      trimmed !== "" &&
-      engravingFontDraft !== "" &&
-      engravingFontDraft !== (engravingFont ?? "");
-    setIsSavingEngraving(true);
-    void (async () => {
-      try {
-        await onUpdateOptions(item.id, {
-          engraving: trimmed,
-          ...(fontChanged ? { engravingFont: engravingFontDraft } : {}),
-        });
-        setEngravingError(null);
-        setIsEditingEngraving(false);
-      } catch (error) {
-        // Keep the edit row open so the shopper can correct and retry.
-        setEngravingError(
-          error instanceof Error && error.message.trim()
-            ? error.message.trim()
-            : "Could not save the engraving. Please try again.",
-        );
-      } finally {
-        setIsSavingEngraving(false);
-      }
-    })();
+    setIsEngravingOpen(true);
   };
 
-  const handleEngravingKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      handleEngravingAction();
-    }
+  const handleEngravingSave = async (value: EngravingSelection | null) => {
+    const trimmed = value?.text?.trim() ?? "";
+    const nextFont = value?.font?.trim() ?? "";
+    const fontChanged =
+      trimmed !== "" && nextFont !== "" && nextFont !== (engravingFont ?? "");
 
-    if (event.key === "Escape") {
-      // Drop the edit: both drafts are seeded again from the saved line the next
-      // time the row is opened.
-      setEngravingDraft(options.engraving ?? "");
-      setEngravingFontDraft(engravingFont ?? "");
-      setEngravingError(null);
-      setIsEditingEngraving(false);
+    setIsSavingEngraving(true);
+
+    try {
+      await onUpdateOptions(item.id, {
+        engraving: trimmed,
+        ...(fontChanged ? { engravingFont: nextFont } : {}),
+      });
+    } catch (error) {
+      showCartStatusToast(
+        error instanceof Error && error.message.trim()
+          ? error.message.trim()
+          : "Could not save the engraving. Please try again.",
+      );
+      throw error;
+    } finally {
+      setIsSavingEngraving(false);
     }
   };
 
@@ -247,18 +225,6 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
               >
                 Move to wishlist
               </CartActionLink>
-              {/* {movedToWishlist ? (
-                <span className="pb-1 font-gill text-sm font-normal leading-110 text-neutral500">
-                  Moved to wishlist
-                </span>
-              ) : !wishlisted ? (
-                <CartActionLink
-                  onClick={handleMoveToWishlist}
-                  disabled={isNavigatingToCheckout || isMovingToWishlist}
-                >
-                  Move to wishlist
-                </CartActionLink>
-              ) : null} */}
             </div>
           </div>
         </div>
@@ -306,90 +272,49 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
           <CartDivider weight={0.5} />
 
           <div className="flex flex-col gap-2 self-stretch">
-            <div className="flex items-center justify-between gap-4">
-              <p className="font-gill text-base font-normal leading-110 text-darkblack lg:text-xl">
-                Engraving
-              </p>
-              {isEditingEngraving && engravingMaxCharacters ? (
-                <span className="font-gill text-sm font-light leading-110 text-neutral500">
-                  {engravingDraft.length}/{engravingMaxCharacters}
-                </span>
-              ) : null}
-            </div>
+            <p className="font-gill text-base font-normal leading-110 text-darkblack lg:text-xl">
+              Engraving
+            </p>
 
             <div className="flex gap-2 self-stretch">
               <div className="flex h-14 min-w-0 flex-1 items-center bg-aboutInactive px-3">
-                {isEditingEngraving ? (
-                  <input
-                    type="text"
-                    value={engravingDraft}
-                    disabled={isNavigatingToCheckout}
-                    onChange={(event) => {
-                      if (isNavigatingToCheckout) return;
-                      setEngravingDraft(sanitizeDraft(event.target.value));
-                      setEngravingError(null);
-                    }}
-                    onKeyDown={handleEngravingKeyDown}
-                    maxLength={engravingMaxCharacters}
-                    aria-label="Engraving text"
-                    aria-invalid={engravingError ? true : undefined}
-                    aria-describedby={engravingError ? engravingErrorId : undefined}
-                    autoFocus
-                    className="h-full w-full min-w-0 border-0 bg-transparent font-gill text-sm leading-110 text-darkblack outline-none placeholder:text-neutral500 disabled:cursor-not-allowed lg:text-base"
-                  />
-                ) : (
-                  <p
-                    className={
-                      hasEngraving
-                        ? "truncate font-gill text-sm leading-110 text-darkblack lg:text-base"
-                        : "truncate font-gill text-sm leading-110 text-neutral500 lg:text-base"
-                    }
-                  >
-                    {hasEngraving ? options.engraving!.trim() : ENGRAVING_EMPTY_LABEL}
-                  </p>
-                )}
+                <p
+                  className={
+                    hasEngraving
+                      ? "truncate font-gill text-sm leading-110 text-darkblack lg:text-base"
+                      : "truncate font-gill text-sm leading-110 text-neutral500 lg:text-base"
+                  }
+                >
+                  {hasEngraving ? options.engraving!.trim() : ENGRAVING_EMPTY_LABEL}
+                </p>
               </div>
               <CartOutlineButton
                 type="button"
-                onClick={handleEngravingAction}
+                onClick={openEngravingDrawer}
                 disabled={isSavingEngraving || isNavigatingToCheckout}
                 className="h-14 w-auto shrink-0 px-5 uppercase lg:px-7"
               >
-                {isEditingEngraving ? "Save" : hasEngraving ? "Modify" : "Add"}
+                {hasEngraving ? "Modify" : "Add"}
               </CartOutlineButton>
             </div>
 
-            {isEditingEngraving && availableEngravingFonts.length > 0 ? (
-              <label className="flex h-14 items-center gap-3 self-stretch bg-aboutInactive px-3">
-                <span className="shrink-0 font-gill text-sm leading-110 text-neutral500 lg:text-base">
-                  Font
-                </span>
-                <select
-                  value={engravingFontDraft}
-                  disabled={isNavigatingToCheckout || isSavingEngraving}
-                  onChange={(event) => setEngravingFontDraft(event.target.value)}
-                  aria-label="Engraving font"
-                  className="h-full w-full min-w-0 border-0 bg-transparent font-gill text-sm leading-110 text-darkblack outline-none disabled:cursor-not-allowed lg:text-base"
-                >
-                  {availableEngravingFonts.map((font) => (
-                    <option key={font} value={font}>
-                      {font}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ) : null}
-
-            {engravingError ? (
-              <FormFieldError id={engravingErrorId} message={engravingError} />
-            ) : null}
-
-            {hasEngraving && engravingFont ? (
+            {/* {hasEngraving && engravingFont ? (
               <p className="font-gill text-sm font-light leading-110 text-neutral500 lg:text-base">
                 <span className="font-normal text-darkblack">Font:</span> {engravingFont}
               </p>
-            ) : null}
+            ) : null} */}
           </div>
+
+          <MetalEngravingPanel
+            open={isEngravingOpen}
+            onClose={() => setIsEngravingOpen(false)}
+            previewImage={product.engraving?.previewImage}
+            productImage={product.image}
+            fonts={availableEngravingFonts}
+            maxCharacters={engravingMaxCharacters}
+            initialValue={initialEngravingSelection}
+            onSave={handleEngravingSave}
+          />
         </>
       ) : null}
     </article>

@@ -37,7 +37,7 @@ type MetalEngravingPanelProps = {
   fonts?: readonly string[];
   maxCharacters: number;
   initialValue?: EngravingSelection | null;
-  onSave: (value: EngravingSelection | null) => void;
+  onSave: (value: EngravingSelection | null) => void | Promise<void>;
 };
 
 const MetalEngravingPanel = ({
@@ -56,6 +56,7 @@ const MetalEngravingPanel = ({
   const [text, setText] = useState("");
   const [font, setFont] = useState<string>(availableFonts[0] ?? "");
   const [charsetError, setCharsetError] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [statusToastMessage, setStatusToastMessage] = useState<string | null>(null);
   const statusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -100,6 +101,7 @@ const MetalEngravingPanel = ({
     setText(clampEngravingText(initialValue?.text ?? "", maxCharacters));
     setFont(initialValue?.font ?? availableFonts[0] ?? "");
     setCharsetError(false);
+    setIsSaving(false);
   }, [open, initialValue, availableFonts, maxCharacters]);
 
   const handleTextChange = (value: string) => {
@@ -110,7 +112,11 @@ const MetalEngravingPanel = ({
     setText(clampEngravingText(sanitized, maxCharacters));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (isSaving) {
+      return;
+    }
+
     if (requiresFont && !font.trim()) {
       return;
     }
@@ -122,7 +128,17 @@ const MetalEngravingPanel = ({
 
     const trimmedText = clampEngravingText(text.trim(), maxCharacters);
     const value = trimmedText ? { text: trimmedText, font } : null;
-    onSave(value);
+
+    setIsSaving(true);
+
+    try {
+      await Promise.resolve(onSave(value));
+    } catch {
+      return;
+    } finally {
+      setIsSaving(false);
+    }
+
     showStatusToast(value ? "Engraving saved" : "Engraving removed");
     onClose();
   };
@@ -219,10 +235,10 @@ const MetalEngravingPanel = ({
             </p>
             <DetailDarkButton
               onClick={handleSave}
-              disabled={requiresFont && !font.trim()}
+              disabled={isSaving || (requiresFont && !font.trim())}
               className="w-full uppercase disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Save
+              {isSaving ? "Saving.." : "Save"}
             </DetailDarkButton>
           </PanelFooter>
         </div>
