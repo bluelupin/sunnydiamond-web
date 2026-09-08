@@ -38,6 +38,7 @@ import {
 import { giftingContent } from "../data/giftingContent";
 import { cartFlowSpec } from "../data/cartFlowSpec";
 import { isCartLineMarkedGift } from "../utils/cartGiftNotes";
+import PlusIcon from "@/assets/Icons/PlusIcon";
 
 const GIFTING_OVERLAY_CLASS = "bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]";
 
@@ -113,23 +114,50 @@ const GiftingNoteField = ({
   onChange: (value: string) => void;
   placeholder?: string;
   variant?: "single" | "separate";
-}) => (
-  <div className="flex h-14 items-center gap-4 bg-aboutInactive px-3">
-    <input
-      id={id}
-      type="text"
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-      placeholder={placeholder}
-      className={cn(
-        "h-14 min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none",
-        variant === "single"
-          ? "placeholder:font-normal placeholder:text-gray600"
-          : "placeholder:font-light placeholder:text-darkblack",
-      )}
-    />
-  </div>
-);
+}) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isEditing, setIsEditing] = useState(() => value.trim().length > 0);
+
+  useEffect(() => {
+    if (value.trim().length > 0) {
+      setIsEditing(true);
+    }
+  }, [value]);
+
+  const activateField = () => {
+    setIsEditing(true);
+    requestAnimationFrame(() => inputRef.current?.focus());
+  };
+
+  return (
+    <div className="flex h-14 items-center gap-4 bg-aboutInactive px-3">
+      <input
+        ref={inputRef}
+        id={id}
+        type="text"
+        value={value}
+        readOnly={!isEditing}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        className={cn(
+          "h-14 min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600",
+          !isEditing && "cursor-default",
+        )}
+      />
+      <button
+        type="button"
+        onClick={activateField}
+        aria-label="Add gift note"
+        className="flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 12.25H20.5" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M12.25 4V20.5" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+    </div>
+  );
+};
 
 const GiftingSeparateToggle = ({
   checked,
