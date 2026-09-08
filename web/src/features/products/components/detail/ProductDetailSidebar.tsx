@@ -31,7 +31,9 @@ import PlusIcon from "@/assets/Icons/PlusIcon";
 import WishlistIcon from "@/assets/Icons/WishlistIcon";
 import VanIcon from "@/assets/Icons/VanIcon";
 import StoreIcon from "@/assets/Icons/StoreIcon";
-import GiftingPanelCheckbox from "@/shared/ui/GiftingPanelCheckbox";
+import GiftingPanelCheckbox, {
+  GIFTING_PANEL_CHECKBOX_SIZES,
+} from "@/shared/ui/GiftingPanelCheckbox";
 import Reveal from "@/shared/Animation/Reveal";
 import ProductDetailAccordions from "./ProductDetailAccordions";
 import NotifyWhenAvailableButton from "./NotifyWhenAvailableButton";
@@ -533,7 +535,7 @@ const ProductDetailSidebar = ({
         </div>
 
         <label className="flex cursor-pointer flex-col gap-3 bg-aboutInactive p-4">
-          <span className="flex items-center gap-3">
+          <span className="inline-flex w-fit items-center gap-3">
             <GiftingPanelCheckbox
               id="pdp-mark-as-gift"
               size="sm"
@@ -541,7 +543,12 @@ const ProductDetailSidebar = ({
               onChange={setIsGift}
               aria-label="Mark this as a gift"
             />
-            <span className="flex items-center font-gill text-base leading-none text-darkblack">
+            <span
+              className={cn(
+                "flex items-center font-gill text-base font-normal leading-none text-darkblack",
+                GIFTING_PANEL_CHECKBOX_SIZES.sm.labelRow,
+              )}
+            >
               Mark this as a gift
             </span>
           </span>
@@ -723,7 +730,7 @@ const ProductDetailSidebar = ({
             className={cn(
               "relative shrink-0 overflow-hidden",
               "h-[118px] w-[177px]",
-              "max-md:h-[118px] max-md:w-[177px] max-md:flex-none",
+              "max-md:h-[118px] max-sm:h-auto max-md:w-[177px] max-sm:w-[107px] max-md:flex-none",
               "md:max-lg:portrait:aspect-[322/213] md:max-lg:portrait:h-auto md:max-lg:portrait:w-full md:max-lg:portrait:flex-none",
               "md:landscape:ml-auto md:landscape:h-auto md:landscape:min-h-[200px] md:landscape:w-auto md:landscape:min-w-[160px] md:landscape:max-w-[46%] md:landscape:flex-1 md:landscape:self-stretch",
               "lg:ml-auto lg:h-auto lg:min-h-[200px] lg:w-auto lg:min-w-[160px] lg:max-w-[46%] lg:flex-1 lg:self-stretch",

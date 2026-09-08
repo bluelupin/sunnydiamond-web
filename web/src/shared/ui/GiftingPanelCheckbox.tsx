@@ -4,9 +4,9 @@ import { Check } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 
 export const GIFTING_PANEL_CHECKBOX_SIZES = {
-  sm: { root: "size-4", box: "size-4", icon: "size-2.5" },
-  md: { root: "size-5", box: "size-5", icon: "size-3" },
-  lg: { root: "size-6", box: "size-6", icon: "size-4" },
+  sm: { root: "size-4", box: "size-4", icon: "size-2.5", labelRow: "h-4" },
+  md: { root: "size-5", box: "size-5", icon: "size-3", labelRow: "h-5" },
+  lg: { root: "size-6", box: "size-6", icon: "size-4", labelRow: "h-6" },
 } as const;
 
 export type GiftingPanelCheckboxSize = keyof typeof GIFTING_PANEL_CHECKBOX_SIZES;
@@ -47,7 +47,7 @@ const GiftingPanelCheckbox = ({
   return (
     <span
       className={cn(
-        "relative inline-flex shrink-0 items-center justify-center",
+        "relative inline-flex shrink-0 items-center justify-center leading-none",
         dimensionClass,
         disabled && "cursor-not-allowed opacity-60",
         className,
@@ -60,7 +60,7 @@ const GiftingPanelCheckbox = ({
         disabled={disabled}
         aria-label={ariaLabel}
         onChange={(event) => onChange(event.target.checked)}
-        className="absolute inset-0 z-10 m-0 cursor-pointer opacity-0 disabled:cursor-not-allowed"
+        className="absolute inset-0 z-10 m-0 cursor-pointer appearance-none opacity-0 disabled:cursor-not-allowed"
       />
       <span
         className={cn(
