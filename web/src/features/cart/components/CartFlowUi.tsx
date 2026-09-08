@@ -82,7 +82,7 @@ export const CartGiftCheckbox = ({
 }: CartGiftCheckboxProps) => (
   <span
     className={cn(
-      "relative inline-flex size-5 shrink-0 items-center justify-center",
+      "relative inline-flex size-5 shrink-0 items-center justify-center leading-none",
       disabled && "cursor-not-allowed opacity-60",
       className,
     )}
@@ -92,7 +92,7 @@ export const CartGiftCheckbox = ({
       checked={checked}
       disabled={disabled}
       onChange={(event) => onChange(event.target.checked)}
-      className="absolute inset-0 z-10 m-0 cursor-pointer opacity-0 disabled:cursor-not-allowed"
+      className="absolute inset-0 z-10 m-0 cursor-pointer appearance-none opacity-0 disabled:cursor-not-allowed"
     />
     <span
       className={cn(
