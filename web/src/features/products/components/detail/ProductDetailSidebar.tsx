@@ -31,9 +31,8 @@ import PlusIcon from "@/assets/Icons/PlusIcon";
 import WishlistIcon from "@/assets/Icons/WishlistIcon";
 import VanIcon from "@/assets/Icons/VanIcon";
 import StoreIcon from "@/assets/Icons/StoreIcon";
-import GiftingPanelCheckbox, {
-  GIFTING_PANEL_CHECKBOX_SIZES,
-} from "@/shared/ui/GiftingPanelCheckbox";
+import GiftingPanelCheckbox from "@/shared/ui/GiftingPanelCheckbox";
+import { GiftingCheckboxLabelRow } from "@/shared/ui/GiftingCheckboxLabelRow";
 import Reveal from "@/shared/Animation/Reveal";
 import ProductDetailAccordions from "./ProductDetailAccordions";
 import NotifyWhenAvailableButton from "./NotifyWhenAvailableButton";
@@ -535,23 +534,18 @@ const ProductDetailSidebar = ({
         </div>
 
         <label className="flex cursor-pointer flex-col gap-3 bg-aboutInactive p-4">
-          <span className="inline-flex w-fit items-center gap-3">
-            <GiftingPanelCheckbox
-              id="pdp-mark-as-gift"
-              size="sm"
-              checked={isGift}
-              onChange={setIsGift}
-              aria-label="Mark this as a gift"
-            />
-            <span
-              className={cn(
-                "flex items-center font-gill text-base font-normal leading-none text-darkblack",
-                GIFTING_PANEL_CHECKBOX_SIZES.sm.labelRow,
-              )}
-            >
-              Mark this as a gift
-            </span>
-          </span>
+          <GiftingCheckboxLabelRow
+            gap={2}
+            checkbox={
+              <GiftingPanelCheckbox
+                id="pdp-mark-as-gift"
+                checked={isGift}
+                onChange={setIsGift}
+                aria-label="Mark this as a gift"
+              />
+            }
+            label="Mark this as a gift"
+          />
           <span className="font-gill text-base font-light leading-110 text-darkblack">
             Make this a special with a gift bag and a personalized message.
           </span>

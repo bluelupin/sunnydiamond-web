@@ -1,8 +1,8 @@
 import Link from "next/link";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
-import { Check } from "lucide-react";
 import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
+import GiftingPanelCheckbox from "@/shared/ui/GiftingPanelCheckbox";
 import { cn } from "@/shared/utils/cn";
 
 const cartButtonSizing = "h-14 px-7 py-5";
@@ -80,38 +80,12 @@ export const CartGiftCheckbox = ({
   className,
   disabled = false,
 }: CartGiftCheckboxProps) => (
-  <span
-    className={cn(
-      "relative inline-flex size-5 shrink-0 items-center justify-center leading-none",
-      disabled && "cursor-not-allowed opacity-60",
-      className,
-    )}
-  >
-    <input
-      type="checkbox"
-      checked={checked}
-      disabled={disabled}
-      onChange={(event) => onChange(event.target.checked)}
-      className="absolute inset-0 z-10 m-0 cursor-pointer appearance-none opacity-0 disabled:cursor-not-allowed"
-    />
-    <span
-      className={cn(
-        "flex size-5 items-center justify-center transition-colors",
-        checked
-          ? "bg-linkGold"
-          : "border-[0.8px] border-darkblack bg-white",
-      )}
-      aria-hidden
-    >
-      <Check
-        className={cn(
-          "size-3 transition-opacity",
-          checked ? "text-white opacity-100" : "text-darkblack opacity-0",
-        )}
-        strokeWidth={2.5}
-      />
-    </span>
-  </span>
+  <GiftingPanelCheckbox
+    checked={checked}
+    onChange={onChange}
+    disabled={disabled}
+    className={className}
+  />
 );
 
 type CartTextLinkProps = {

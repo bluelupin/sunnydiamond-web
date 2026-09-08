@@ -27,7 +27,7 @@ import {
   CartOutlineButton,
 } from "./CartFlowUi";
 import DeleteIcon from "@/assets/Icons/DeleteIcon";
-import { GIFTING_PANEL_CHECKBOX_SIZES } from "@/shared/ui/GiftingPanelCheckbox";
+import { GiftingCheckboxLabelRow } from "@/shared/ui/GiftingCheckboxLabelRow";
 import { getProductEditHref } from "@/features/products/utils/productRoutes";
 
 const MetalEngravingPanel = dynamic(
@@ -248,29 +248,26 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
 
       <label
         className={cn(
-          "inline-flex w-fit items-center gap-2 leading-none",
           isNavigatingToCheckout ? "cursor-not-allowed" : "cursor-pointer",
         )}
       >
-        <CartGiftCheckbox
-          checked={isGift}
-          disabled={isNavigatingToCheckout}
-          onChange={(checked) => {
-            if (isNavigatingToCheckout) return;
-            if (checked) {
-              clearGiftingOptionsExplored();
-            }
-            void onUpdateOptions(item.id, { isGift: checked });
-          }}
+        <GiftingCheckboxLabelRow
+          gap={2}
+          checkbox={
+            <CartGiftCheckbox
+              checked={isGift}
+              disabled={isNavigatingToCheckout}
+              onChange={(checked) => {
+                if (isNavigatingToCheckout) return;
+                if (checked) {
+                  clearGiftingOptionsExplored();
+                }
+                void onUpdateOptions(item.id, { isGift: checked });
+              }}
+            />
+          }
+          label="Mark this as a gift"
         />
-        <span
-          className={cn(
-            "flex items-center font-gill text-base font-normal leading-none text-darkblack",
-            GIFTING_PANEL_CHECKBOX_SIZES.md.labelRow,
-          )}
-        >
-          Mark this as a gift
-        </span>
       </label>
 
       {supportsEngraving ? (

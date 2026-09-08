@@ -1,12 +1,20 @@
 "use client";
 
-import { Check } from "lucide-react";
+import GiftingPanelCheckboxIcon from "@/assets/Icons/GiftingPanelCheckboxIcon";
 import { cn } from "@/shared/utils/cn";
 
+const GIFTING_PANEL_CHECKBOX_DIMENSION = {
+  root: "size-[24px]",
+  box: "size-[24px]",
+  icon: "size-[24px]",
+  labelRow: "h-[24px]",
+  labelLeading: "leading-[24px]",
+} as const;
+
 export const GIFTING_PANEL_CHECKBOX_SIZES = {
-  sm: { root: "size-4", box: "size-4", icon: "size-2.5", labelRow: "h-4" },
-  md: { root: "size-5", box: "size-5", icon: "size-3", labelRow: "h-5" },
-  lg: { root: "size-6", box: "size-6", icon: "size-4", labelRow: "h-6" },
+  sm: GIFTING_PANEL_CHECKBOX_DIMENSION,
+  md: GIFTING_PANEL_CHECKBOX_DIMENSION,
+  lg: GIFTING_PANEL_CHECKBOX_DIMENSION,
 } as const;
 
 export type GiftingPanelCheckboxSize = keyof typeof GIFTING_PANEL_CHECKBOX_SIZES;
@@ -21,9 +29,9 @@ type GiftingPanelCheckboxProps = {
   sizeClassName?: string;
   /** Classes for the outer hit-area wrapper. */
   className?: string;
-  /** Classes for the visible checkbox box (e.g. `size-7` for a custom size). */
+  /** Classes for the visible checkbox wrapper. */
   boxClassName?: string;
-  /** Classes for the check icon (e.g. `size-4`). */
+  /** Classes for the checkbox SVG (e.g. `size-4`). */
   iconClassName?: string;
   disabled?: boolean;
   "aria-label"?: string;
@@ -63,22 +71,12 @@ const GiftingPanelCheckbox = ({
         className="absolute inset-0 z-10 m-0 cursor-pointer appearance-none opacity-0 disabled:cursor-not-allowed"
       />
       <span
-        className={cn(
-          "flex items-center justify-center border border-gray600 bg-transparent",
-          dimensionClass,
-          checked && "border-transparent bg-linkGold",
-          boxClassName,
-        )}
+        className={cn("pointer-events-none flex items-center justify-center", dimensionClass, boxClassName)}
         aria-hidden
       >
-        <Check
-          className={cn(
-            "text-white transition-opacity",
-            dimensions.icon,
-            checked ? "opacity-100" : "opacity-0",
-            iconClassName,
-          )}
-          strokeWidth={2.5}
+        <GiftingPanelCheckboxIcon
+          checked={checked}
+          className={cn(dimensions.icon, iconClassName)}
         />
       </span>
     </span>

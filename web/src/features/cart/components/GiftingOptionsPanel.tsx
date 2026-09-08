@@ -38,7 +38,6 @@ import {
 import { giftingContent } from "../data/giftingContent";
 import { cartFlowSpec } from "../data/cartFlowSpec";
 import { isCartLineMarkedGift } from "../utils/cartGiftNotes";
-import PlusIcon from "@/assets/Icons/PlusIcon";
 
 const GIFTING_OVERLAY_CLASS = "bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]";
 
@@ -144,17 +143,19 @@ const GiftingNoteField = ({
           !isEditing && "cursor-default",
         )}
       />
-      <button
-        type="button"
-        onClick={activateField}
-        aria-label="Add gift note"
-        className="flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70"
-      >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M4 12.25H20.5" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M12.25 4V20.5" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
+      {!isEditing ? (
+        <button
+          type="button"
+          onClick={activateField}
+          aria-label="Add gift note"
+          className="flex size-6 shrink-0 items-center justify-center text-darkblack transition-opacity hover:opacity-70"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 12.25H20.5" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M12.25 4V20.5" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+      ) : null}
     </div>
   );
 };
@@ -375,7 +376,7 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
             {!isSeparate ? (
               <div className="flex flex-col gap-6 bg-gray300 p-4">
                 {items.map((item) => (
-                  <div key={item.id} className="flex items-center gap-2">
+                  <div key={item.id} className="flex items-center gap-x-[8px]">
                     <GiftingItemCheckbox
                       checked={selectedItemIds.has(item.id)}
                       onChange={(checked) => toggleItemSelection(item.id, checked)}
@@ -392,7 +393,7 @@ const GiftingPersonalisePanel = ({ onClose }: { onClose: () => void }) => {
                     key={item.id}
                     className="flex flex-col gap-4 border border-neutral300 bg-white px-4 py-6 [border-width:0.5px]"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-x-[8px]">
                       <GiftingItemCheckbox
                         checked={selectedItemIds.has(item.id)}
                         onChange={(checked) => toggleItemSelection(item.id, checked)}
