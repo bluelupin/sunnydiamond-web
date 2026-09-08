@@ -166,7 +166,9 @@ export function useSince1997HorizontalScroll(
         const viewportWidth = window.innerWidth - viewportLeft;
         viewport.style.width = `${viewportWidth}px`;
 
-        const attendingRight = lastImage.offsetLeft + lastImage.offsetWidth;
+        const marginRight =
+          parseFloat(window.getComputedStyle(lastImage).marginRight) || 0;
+        const attendingRight = lastImage.offsetLeft + lastImage.offsetWidth + marginRight;
         endTranslate = viewportWidth - attendingRight;
         scrollRange = Math.max(0, -endTranslate);
         return;

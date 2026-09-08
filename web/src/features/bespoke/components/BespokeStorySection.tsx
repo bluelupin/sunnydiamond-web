@@ -21,7 +21,6 @@ type BespokeStoryStepPanelProps = {
   step: StoryStep;
   layout: "desktop" | "mobile";
   videoSrc?: string;
-  isLastSlide?: boolean;
   isFirstSlide?: boolean;
 };
 
@@ -106,7 +105,6 @@ const BespokeStoryStepPanel = ({
   step,
   layout,
   videoSrc,
-  isLastSlide,
   isFirstSlide,
 }: BespokeStoryStepPanelProps) => {
   const isDesktop = layout === "desktop";
@@ -115,18 +113,17 @@ const BespokeStoryStepPanel = ({
     <article
       className={cn(
         "flex shrink-0",
-        isDesktop ? "items-center gap-6 w-[970px]" : "w-full flex-col bg-gray300",
-        isLastSlide && "mr-10",
+        isDesktop ? "items-center gap-4 w-[970px]" : "w-full flex-col bg-gray300",
       )}
       style={!isDesktop ? { gap: "0px" } : undefined}
       {...(isFirstSlide ? { "data-since1997-first-step": true } : {})}
-      {...(isLastSlide ? { "data-since1997-last-image": true } : {})}>
+    >
       <BespokeStoryStepMedia
         step={step}
         videoSrc={videoSrc}
         isDesktop={isDesktop}
       />
-      <div className={cn("flex flex-col md:gap-3 gap-2 lg:py-0 py-6 lg:px-0 px-4", isDesktop && "max-w-[296px] min-w-[296px]", isLastSlide && "mr-20",)}>
+      <div className={cn("flex flex-col md:gap-3 gap-2 lg:py-0 py-6 lg:px-0 px-4", isDesktop && "max-w-[296px] min-w-[296px]")}>
         <span className="font-larken lg:text-5xl md:text-4xl text-32 font-light leading-110 text-neutral300">{step.number}</span>
         <h3 className="font-larken lg:text-32 md:text-3xl text-2xl font-light leading-110 text-darkblack">{step.title}</h3>
         <p className={cn("font-gill font-light leading-110 text-darkblack lg:text-xl md:text-lg text-base")}>
@@ -207,22 +204,42 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
           <Reveal direction="up" className="flex min-h-[496px] flex-1 flex-col">
             <div
               data-since1997-viewport
-              className="relative left-1/2 min-h-[496px] w-screen max-w-none -translate-x-1/2 overflow-hidden"
+              className="relative left-1/2 min-h-[496px] w-screen max-w-none -translate-x-1/2 overflow-x-hidden overflow-y-visible"
             >
               <div
                 data-since1997-track
                 className="flex min-h-[496px] items-center gap-10 will-change-transform motion-reduce:transform-none"
               >
-                {story.steps.map((step, index) => (
-                  <BespokeStoryStepPanel
-                    key={step.number}
-                    step={step}
-                    layout="desktop"
-                    videoSrc={story.videoSrc}
-                    isFirstSlide={index === 0}
-                    isLastSlide={index === story.steps.length - 1}
-                  />
-                ))}
+                {story.steps.map((step, index) => {
+                  const isLastSlide = index === story.steps.length - 1;
+
+                  if (isLastSlide) {
+                    return (
+                      <div
+                        key={step.number}
+                        className="flex shrink-0 pr-20 mr-10"
+                        data-since1997-last-image
+                      >
+                        <BespokeStoryStepPanel
+                          step={step}
+                          layout="desktop"
+                          videoSrc={story.videoSrc}
+                          isFirstSlide={index === 0}
+                        />
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <BespokeStoryStepPanel
+                      key={step.number}
+                      step={step}
+                      layout="desktop"
+                      videoSrc={story.videoSrc}
+                      isFirstSlide={index === 0}
+                    />
+                  );
+                })}
               </div>
             </div>
             <div className="flex justify-center">

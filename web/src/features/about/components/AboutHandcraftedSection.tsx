@@ -25,7 +25,7 @@ const AboutHandcraftedSection = ({
         aria-labelledby="about-handcrafted-title"
         className="bg-white"
       >
-        <PageContainer className="!px-0 md:px-0">
+        <PageContainer className="mx-auto w-full 2xl:max-w-1920 max-w-1440 !px-0 md:!px-8 lg:!px-10 2xl:!px-[60px]">
           <Reveal direction="up" className="relative h-700 w-full overflow-hidden">
             <div className="absolute inset-0">
               <HeroBackgroundMedia
@@ -43,7 +43,7 @@ const AboutHandcraftedSection = ({
             <div className="absolute inset-x-0 bottom-0 top-16 z-10 flex flex-col items-center justify-center sm:gap-4 gap-3 px-5 md:top-20">
               <Reveal as="h2" direction="up"
                 id="about-handcrafted-title"
-                className="sm:w-full w-[198px] text-center font-larken text-32 font-light leading-110 text-white md:text-[40px] lg:text-5xl sm:border-b border-neutral300 sm:pb-4"
+                className="sm:w-fit w-[198px] text-center font-larken text-32 font-light leading-110 text-white md:text-[40px] lg:text-5xl sm:border-b border-neutral300 sm:pb-4"
               >
                 {title}
               </Reveal>
