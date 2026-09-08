@@ -1,5 +1,6 @@
 import type { Product } from "@/features/products/data/products";
 import type { CartGiftingOptions, CartLineItem, CartLineOptions } from "@/features/cart/types/cart.types";
+import { formatMetalColorLabel } from "@/features/products/utils/metalColorOptions.utils";
 import { buildProductSeo } from "@/shared/lib/seo/productSeo";
 import { resolveMagentoProductImages } from "../products/products.mapper";
 import { mapMagentoProductCustomOptions } from "../products/productCustomOptions.mapper";
@@ -88,7 +89,7 @@ function mapMagentoConfigurableOptionsToLineOptions(
     }
 
     if (optionLabel.includes("metal") || optionLabel.includes("color") || optionLabel.includes("gold")) {
-      mapped.metal = valueLabel;
+      mapped.metal = formatMetalColorLabel(valueLabel) || valueLabel;
     }
   }
 

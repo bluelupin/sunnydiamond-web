@@ -53,6 +53,7 @@ const CartPriceDetails = ({
     estimatedShippingMethods,
   );
   const displayOfferDiscount = offerDiscount + localOfferDiscount;
+  const displayGiftCardDiscount = giftCardDiscount + localGiftCardDiscount;
   const displayTotal = resolveCartDisplayTotal(
     subtotal,
     taxes,
@@ -83,7 +84,7 @@ const CartPriceDetails = ({
           variant="cart"
           subtotal={subtotal}
           offerDiscount={displayOfferDiscount}
-          giftCardDiscount={giftCardDiscount}
+          giftCardDiscount={displayGiftCardDiscount}
           taxes={taxes}
           shippingLabel={shippingDisplay.label}
           total={displayTotal}

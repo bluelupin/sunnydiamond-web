@@ -1,4 +1,5 @@
 import type { CartLineOptions } from "@/features/cart/types/cart.types";
+import { formatMetalColorLabel } from "@/features/products/utils/metalColorOptions.utils";
 import type {
   ProductCustomOptionChoice,
   ProductCustomOptions,
@@ -168,7 +169,8 @@ export function mapMagentoCartCustomizableOptions(
         lineOptions.ringSize = valueLabel || valueText;
         break;
       case "metal":
-        lineOptions.metal = valueLabel || valueText;
+        lineOptions.metal =
+          formatMetalColorLabel(valueLabel || valueText) || valueLabel || valueText;
         break;
     }
 

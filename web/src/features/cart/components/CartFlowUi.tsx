@@ -57,14 +57,14 @@ type CartGiftBadgeProps = {
 };
 
 export const CartGiftBadge = ({ className }: CartGiftBadgeProps) => (
-  <span
+  <div
     className={cn(
-      "inline-flex shrink-0 items-center justify-center bg-mauve300 px-3 py-1 font-gill text-sm font-normal leading-none whitespace-nowrap text-darkblack",
+      "flex items-center justify-center bg-mauve300 px-3 py-1 font-gill text-sm font-normal h-[23px] whitespace-nowrap text-darkblack",
       className,
     )}
   >
     Gift
-  </span>
+  </div>
 );
 
 type CartGiftCheckboxProps = {

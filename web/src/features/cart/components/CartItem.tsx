@@ -207,7 +207,7 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
             />
           </Link>
 
-          <div className="flex min-w-0 flex-1 flex-col items-start gap-8 lg:w-[176px] lg:max-w-[176px]">
+          <div className="flex min-w-0 flex-1 flex-col items-start gap-8 lg:w-[300px] lg:max-w-[300px]">
             <div className="flex flex-col items-start gap-3">
               <Link
                 href={productHref}

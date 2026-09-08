@@ -4,10 +4,12 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useRef,
   useState,
   type ReactNode,
 } from "react";
+import { usePathname } from "next/navigation";
 import type { AddItemResult, CartLineItem } from "../types/cart.types";
 
 type BagDrawerSnapshot = {
@@ -45,6 +47,7 @@ type CartUIContextType = {
 const CartUIContext = createContext<CartUIContextType | undefined>(undefined);
 
 export function CartUIProvider({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
   const [isBagDrawerOpen, setIsBagDrawerOpen] = useState(false);
   const [bagDrawerMode, setBagDrawerMode] = useState<BagDrawerMode>("add");
   const [lastAddedLineItemId, setLastAddedLineItemId] = useState<string | null>(null);
@@ -145,6 +148,12 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
   const startCheckoutNavigation = useCallback(() => {
     setIsNavigatingToCheckout(true);
   }, []);
+
+  useEffect(() => {
+    if (pathname === "/cart") {
+      setIsNavigatingToCheckout(false);
+    }
+  }, [pathname]);
 
   return (
     <CartUIContext.Provider

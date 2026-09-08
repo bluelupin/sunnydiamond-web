@@ -1,4 +1,5 @@
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
+import { formatMetalColorLabel } from "@/features/products/utils/metalColorOptions.utils";
 import type { MagentoSelectedShippingMethod, MagentoShippingMethodOption } from "@/services/magento/cart/magentoCart.types";
 import { pickDefaultShippingMethod } from "@/services/magento/cart/cart.mapper";
 import type { CartLineItem } from "../types/cart.types";
@@ -178,7 +179,9 @@ export const resolveCheckoutDisplayTotal = (
 export const formatCartLineMeta = (item: CartLineItem) => {
   const parts: string[] = [];
   if (item.options.ringSize) parts.push(`Size: ${item.options.ringSize}`);
-  if (item.options.metal) parts.push(item.options.metal);
+  if (item.options.metal) {
+    parts.push(formatMetalColorLabel(item.options.metal) || item.options.metal);
+  }
   return parts;
 };
 

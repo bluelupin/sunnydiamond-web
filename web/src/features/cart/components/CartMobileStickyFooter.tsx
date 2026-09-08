@@ -43,6 +43,7 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
     estimatedShippingMethods,
   } = useCart();
   const displayOfferDiscount = offerDiscount + localOfferDiscount;
+  const displayGiftCardDiscount = giftCardDiscount + localGiftCardDiscount;
   const { proceedToCheckout, openGiftingOptions, isNavigatingToCheckout } = useCartCheckout();
   const shippingLabel = getCartShippingLabel(
     shipping,
@@ -89,6 +90,12 @@ const CartMobileStickyFooter = forwardRef<HTMLDivElement, CartMobileStickyFooter
                 <CartPriceRow
                   label="Offer Discount"
                   value={formatCartDiscountPrice(displayOfferDiscount)}
+                />
+              ) : null}
+              {displayGiftCardDiscount > 0 ? (
+                <CartPriceRow
+                  label="Gift Card Applied"
+                  value={formatCartDiscountPrice(displayGiftCardDiscount)}
                 />
               ) : null}
               <CartPriceRow label="Taxes" value={formatCartPrice(taxes)} />
