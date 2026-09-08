@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import {
   ChevronLeft,
-  Check,
 } from "lucide-react";
+import { useAppStatusToastController } from "@/shared/hooks/useAppStatusToastController";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import {
   getDefaultBookStoreVisitStoreId,
@@ -140,33 +140,9 @@ const BookStoreVisitPanel = ({
   const [purpose, setPurpose] = useState("");
   const [note, setNote] = useState("");
   const [hasAppliedProfilePrefill, setHasAppliedProfilePrefill] = useState(false);
-  const [statusToastMessage, setStatusToastMessage] = useState<string | null>(null);
-  const statusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const dismissStatusToast = () => {
-    if (statusToastTimeoutRef.current) {
-      clearTimeout(statusToastTimeoutRef.current);
-      statusToastTimeoutRef.current = null;
-    }
-    setStatusToastMessage(null);
-  };
-
-  const showStatusToast = (message: string) => {
-    dismissStatusToast();
-    setStatusToastMessage(message);
-    statusToastTimeoutRef.current = setTimeout(() => {
-      setStatusToastMessage(null);
-      statusToastTimeoutRef.current = null;
-    }, wishlistMovedToastDurationMs);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (statusToastTimeoutRef.current) {
-        clearTimeout(statusToastTimeoutRef.current);
-      }
-    };
-  }, []);
+  const { show: showStatusToast, node: statusToast } = useAppStatusToastController(
+    wishlistMovedToastDurationMs,
+  );
 
   const { displayStores, listStatus, matchedStores } =
     useMemo(() => {
@@ -507,19 +483,6 @@ const BookStoreVisitPanel = ({
       setIsSubmitting(false);
     }
   };
-
-  const statusToast = statusToastMessage ? (
-    <div
-      role="status"
-      aria-live="polite"
-      className="pointer-events-auto fixed left-1/2 top-16 z-[80] w-[calc(100%-2rem)] max-w-[300px] -translate-x-1/2 animate-in fade-in slide-in-from-top-2 duration-300 md:top-104"
-    >
-      <div className="flex w-full items-center gap-2 bg-darkblack px-4 py-3">
-        <Check size={18} strokeWidth={1.25} aria-hidden className="shrink-0 text-white" />
-        <p className="font-gill text-sm font-light leading-110 text-white">{statusToastMessage}</p>
-      </div>
-    </div>
-  ) : null;
 
   if (!open && variant !== "page") {
     return statusToast;

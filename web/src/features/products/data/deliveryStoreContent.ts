@@ -19,7 +19,7 @@ export type DeliveryStoreLocation = {
 
 export const DELIVERY_STORE_LOCATIONS: Record<string, DeliveryStoreLocation> = {
   Coimbatore: {
-    cityLabel: "COIMBATORE test",
+    cityLabel: "COIMBATORE",
     address: "Sunny Diamonds Kochi 40/9134 B & C, Rajaji Rd Ernakulam, Kerala 682035",
     phone: "+91 97443 55555",
     collectionHref: "/jewellery",

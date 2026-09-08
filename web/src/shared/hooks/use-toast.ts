@@ -1,15 +1,16 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { toast as sonnerToast } from "sonner";
+import {
+  dismissGlobalAppStatusToast,
+  showGlobalAppStatusToast,
+} from "@/shared/context/AppStatusToastContext";
+import {
+  formatAppStatusToastMessage,
+  type AppStatusToastInput,
+} from "@/shared/lib/appStatusToastMessage";
 
-type ToastInput =
-  | string
-  | {
-      title?: ReactNode;
-      description?: ReactNode;
-      variant?: "default" | "destructive";
-    };
+type ToastInput = AppStatusToastInput;
 
 type ToastResult = {
   id: string;
@@ -17,34 +18,22 @@ type ToastResult = {
   update: (props: { title?: ReactNode; description?: ReactNode }) => void;
 };
 
+const GLOBAL_TOAST_ID = "app-status-toast";
+
 function toast(input: ToastInput): ToastResult {
-  if (typeof input === "string") {
-    const id = sonnerToast(input);
-    return {
-      id: String(id),
-      dismiss: () => sonnerToast.dismiss(id),
-      update: () => undefined,
-    };
-  }
-
-  const title = input.title ?? "Notice";
-  const options = {
-    description: input.description,
-  };
-
-  const id =
-    input.variant === "destructive"
-      ? sonnerToast.error(title, options)
-      : sonnerToast(title, options);
+  const message = formatAppStatusToastMessage(input);
+  showGlobalAppStatusToast(message);
 
   return {
-    id: String(id),
-    dismiss: () => sonnerToast.dismiss(id),
+    id: GLOBAL_TOAST_ID,
+    dismiss: dismissGlobalAppStatusToast,
     update: (props) => {
-      sonnerToast(props.title ?? title, {
-        id,
-        description: props.description ?? input.description,
-      });
+      showGlobalAppStatusToast(
+        formatAppStatusToastMessage({
+          title: props.title,
+          description: props.description,
+        }),
+      );
     },
   };
 }
@@ -53,14 +42,9 @@ function useToast() {
   return {
     toasts: [] as Array<{ id: string }>,
     toast,
-    dismiss: (toastId?: string) => {
-      if (toastId) {
-        sonnerToast.dismiss(toastId);
-        return;
-      }
-      sonnerToast.dismiss();
-    },
+    dismiss: dismissGlobalAppStatusToast,
   };
 }
 
 export { useToast, toast };
+export type { ToastInput };

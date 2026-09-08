@@ -2,6 +2,8 @@
 
 import type { ReactNode } from "react";
 import { Check } from "lucide-react";
+import { DetailTextLink } from "@/features/products/components/detail/shared";
+import { cn } from "@/shared/utils/cn";
 
 export const appStatusToastDurationMs = 4000;
 
@@ -10,6 +12,25 @@ type AppStatusToastProps = {
   message: string;
   action?: ReactNode;
 };
+
+type AppStatusToastActionProps = {
+  children: ReactNode;
+  href?: string;
+  onClick?: () => void;
+  className?: string;
+};
+
+/** Tertiary CTA for dark AppStatusToast — matches DetailTextLink hover underline animation. */
+export const AppStatusToastAction = ({
+  children,
+  href,
+  onClick,
+  className,
+}: AppStatusToastActionProps) => (
+  <DetailTextLink href={href} onClick={onClick} light className={cn("shrink-0", className)}>
+    {children}
+  </DetailTextLink>
+);
 
 /** Top-centered status toast — matches Add to Wishlist notification styling. */
 const AppStatusToast = ({ open, message, action }: AppStatusToastProps) => {

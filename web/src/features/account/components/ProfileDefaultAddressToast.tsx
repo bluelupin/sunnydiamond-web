@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
+import AppStatusToast, { AppStatusToastAction, appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 import { profileTabsContent } from "../data/profileContent";
 
 const content = profileTabsContent.addresses;
@@ -37,8 +37,7 @@ export function useProfileDefaultAddressToast() {
 
       setUndoAction(
         onUndo ? (
-          <button
-            type="button"
+          <AppStatusToastAction
             onClick={() => {
               const undo = undoHandlerRef.current;
               dismiss();
@@ -46,10 +45,9 @@ export function useProfileDefaultAddressToast() {
                 void undo();
               }
             }}
-            className="shrink-0 border-b border-white pb-1 font-gill text-sm font-normal leading-110 text-white"
           >
             {content.defaultAddressUndoLabel}
-          </button>
+          </AppStatusToastAction>
         ) : undefined,
       );
 

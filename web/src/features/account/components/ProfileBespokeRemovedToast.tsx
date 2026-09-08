@@ -1,6 +1,6 @@
 "use client";
 
-import AppStatusToast from "@/shared/ui/AppStatusToast";
+import AppStatusToast, { AppStatusToastAction } from "@/shared/ui/AppStatusToast";
 import { profileTabsContent } from "../data/profileContent";
 import { useProfileBespokeToast } from "../context/ProfileBespokeToastContext";
 
@@ -12,8 +12,7 @@ export function ProfileBespokeRemovedToastBanner() {
 
   const undoAction =
     toast?.onUndo ? (
-      <button
-        type="button"
+      <AppStatusToastAction
         onClick={() => {
           const undo = toast.onUndo;
           dismissBespokeRemovedToast();
@@ -21,10 +20,9 @@ export function ProfileBespokeRemovedToastBanner() {
             void undo();
           }
         }}
-        className="shrink-0 border-b border-white pb-1 font-gill text-sm font-normal leading-110 text-white"
       >
         {content.removedUndoLabel}
-      </button>
+      </AppStatusToastAction>
     ) : undefined;
 
   return (

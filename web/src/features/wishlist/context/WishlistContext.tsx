@@ -13,8 +13,7 @@ import {
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useLoginModal } from "@/features/auth/context/LoginModalContext";
-import AppStatusToast from "@/shared/ui/AppStatusToast";
-import WishlistMovedToast from "@/features/wishlist/components/WishlistMovedToast";
+import AppStatusToast, { AppStatusToastAction } from "@/shared/ui/AppStatusToast";
 import {
   clearGuestWishlistStorage,
   readGuestWishlistFromStorage,
@@ -379,19 +378,23 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   return (
     <WishlistContext.Provider value={value}>
       {children}
-      <WishlistMovedToast open={isMovedToastOpen} onClose={dismissMovedToast} />
+      <AppStatusToast
+        open={isMovedToastOpen}
+        message={wishlistPageContent.movedToWishlistMessage}
+        action={
+          <AppStatusToastAction href={wishlistPageContent.movedToWishlistHref} onClick={dismissMovedToast}>
+            {wishlistPageContent.movedToWishlistViewLabel}
+          </AppStatusToastAction>
+        }
+      />
       <AppStatusToast
         open={isRemovedToastOpen}
         message={wishlistPageContent.removedFromWishlistMessage}
         action={
           removedSkuForUndo ? (
-            <button
-              type="button"
-              onClick={undoRemovedFromWishlist}
-              className="shrink-0 border-b border-white pb-1 font-gill text-sm font-normal leading-110 text-white"
-            >
+            <AppStatusToastAction onClick={undoRemovedFromWishlist}>
               {wishlistPageContent.removedFromWishlistUndoLabel}
-            </button>
+            </AppStatusToastAction>
           ) : undefined
         }
       />

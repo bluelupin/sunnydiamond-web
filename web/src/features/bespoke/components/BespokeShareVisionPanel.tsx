@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import { Check, Info, X } from "lucide-react";
+import { Info, X } from "lucide-react";
+import { useAppStatusToastController } from "@/shared/hooks/useAppStatusToastController";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import ShareYourVisionFields from "@/shared/ui/ShareYourVisionFields";
 import {
@@ -37,10 +38,11 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
   const [referenceImageName, setReferenceImageName] = useState<string | null>(null);
   const [referenceImagePreviewUrl, setReferenceImagePreviewUrl] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [statusToastMessage, setStatusToastMessage] = useState<string | null>(null);
+  const { show: showStatusToast, node: statusToast } = useAppStatusToastController(
+    wishlistMovedToastDurationMs,
+  );
   const referenceImageInputRef = useRef<HTMLInputElement>(null);
   const referenceImagePreviewUrlRef = useRef<string | null>(null);
-  const statusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const formValues = useMemo(
     () => ({ name, countryCode, phone, email, date: "", note }),
@@ -79,31 +81,11 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
     resetValidation();
   };
 
-  const dismissStatusToast = () => {
-    if (statusToastTimeoutRef.current) {
-      clearTimeout(statusToastTimeoutRef.current);
-      statusToastTimeoutRef.current = null;
-    }
-    setStatusToastMessage(null);
-  };
-
-  const showStatusToast = (message: string) => {
-    dismissStatusToast();
-    setStatusToastMessage(message);
-    statusToastTimeoutRef.current = setTimeout(() => {
-      setStatusToastMessage(null);
-      statusToastTimeoutRef.current = null;
-    }, wishlistMovedToastDurationMs);
-  };
-
   useEffect(() => {
     return () => {
       if (referenceImagePreviewUrlRef.current) {
         URL.revokeObjectURL(referenceImagePreviewUrlRef.current);
         referenceImagePreviewUrlRef.current = null;
-      }
-      if (statusToastTimeoutRef.current) {
-        clearTimeout(statusToastTimeoutRef.current);
       }
     };
   }, []);
@@ -161,19 +143,6 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
     setReferenceImage(file);
     setReferenceImageName(file?.name ?? null);
   };
-
-  const statusToast = statusToastMessage ? (
-    <div
-      role="status"
-      aria-live="polite"
-      className="pointer-events-auto fixed left-1/2 top-16 z-[80] w-[calc(100%-2rem)] max-w-[300px] -translate-x-1/2 animate-in fade-in slide-in-from-top-2 duration-300 md:top-104"
-    >
-      <div className="flex w-full items-center gap-2 bg-darkblack px-4 py-3">
-        <Check size={18} strokeWidth={1.25} aria-hidden className="shrink-0 text-white" />
-        <p className="font-gill text-sm font-light leading-110 text-white">{statusToastMessage}</p>
-      </div>
-    </div>
-  ) : null;
 
   if (!open) {
     return statusToast;

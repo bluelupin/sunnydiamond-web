@@ -2,7 +2,7 @@
 
 import React from 'react';
 import dynamic from 'next/dynamic';
-import { Toaster } from 'sonner';
+import { AppStatusToastProvider } from '@/shared/context/AppStatusToastContext';
 import { AuthProvider } from '@/features/auth/context/AuthContext';
 import { CartProvider } from '@/features/cart/context/CartContext';
 import { CartUIProvider } from '@/features/cart/context/CartUIContext';
@@ -32,33 +32,34 @@ export default function AppProvider({
   authFeatures?: AuthFeatureFlags;
 }) {
   return (
-    <AuthFeaturesProvider flags={authFeatures}>
-      <AuthProvider>
-        <CartProvider>
-          <CartUIProvider>
-            <LoginModalProvider>
-              <WishlistProvider>
-                <PageLoadingProvider>
-                  {children}
-                </PageLoadingProvider>
-                <FeatureErrorBoundary featureName="CartBagDrawer">
-                  <CartBagDrawer />
-                </FeatureErrorBoundary>
-                <FeatureErrorBoundary featureName="GiftingOptionsPanel">
-                  <GiftingOptionsPanel />
-                </FeatureErrorBoundary>
-                <FeatureErrorBoundary featureName="GuestCheckoutModal">
-                  <GuestCheckoutModal />
-                </FeatureErrorBoundary>
-                <FeatureErrorBoundary featureName="LoginModal">
-                  <LoginModal />
-                </FeatureErrorBoundary>
-              </WishlistProvider>
-            </LoginModalProvider>
-          </CartUIProvider>
-        </CartProvider>
-      </AuthProvider>
-      <Toaster richColors position="top-right" />
-    </AuthFeaturesProvider>
+    <AppStatusToastProvider>
+      <AuthFeaturesProvider flags={authFeatures}>
+        <AuthProvider>
+          <CartProvider>
+            <CartUIProvider>
+              <LoginModalProvider>
+                <WishlistProvider>
+                  <PageLoadingProvider>
+                    {children}
+                  </PageLoadingProvider>
+                  <FeatureErrorBoundary featureName="CartBagDrawer">
+                    <CartBagDrawer />
+                  </FeatureErrorBoundary>
+                  <FeatureErrorBoundary featureName="GiftingOptionsPanel">
+                    <GiftingOptionsPanel />
+                  </FeatureErrorBoundary>
+                  <FeatureErrorBoundary featureName="GuestCheckoutModal">
+                    <GuestCheckoutModal />
+                  </FeatureErrorBoundary>
+                  <FeatureErrorBoundary featureName="LoginModal">
+                    <LoginModal />
+                  </FeatureErrorBoundary>
+                </WishlistProvider>
+              </LoginModalProvider>
+            </CartUIProvider>
+          </CartProvider>
+        </AuthProvider>
+      </AuthFeaturesProvider>
+    </AppStatusToastProvider>
   );
 }
