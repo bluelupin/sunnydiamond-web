@@ -123,7 +123,7 @@ const JewelleryPanel = ({ onBack, onClose }: JewelleryPanelProps) => (
 
     <div className="mx-4 mt-4 h-px shrink-0 bg-aboutInactive" aria-hidden />
 
-    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-6 pt-4">
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-20 pt-4">
       <JewelleryCategoryMenu variant="mobile" onClose={onClose} />
     </div>
   </div>
