@@ -29,6 +29,7 @@ import {
 import DeleteIcon from "@/assets/Icons/DeleteIcon";
 import { GiftingCheckboxLabelRow } from "@/shared/ui/GiftingCheckboxLabelRow";
 import { getProductEditHref } from "@/features/products/utils/productRoutes";
+import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 
 const MetalEngravingPanel = dynamic(
   () => import("@/features/products/components/detail/MetalEngravingPanel"),
@@ -156,7 +157,7 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
   };
 
   const productHref = getProductEditHref(product, item.id);
-
+  const { windows } = useUiPlatform();
   return (
     <article className="relative flex flex-col gap-4 bg-white px-4 lg:gap-6 lg:px-6 py-6">
       {isGift ? (
@@ -240,7 +241,7 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
           aria-label={`Remove ${product.name}`}
           className="shrink-0 text-darkblack transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <DeleteIcon className="size-6" />
+          <DeleteIcon className={cn(!windows && "-translate-y-1", "size-6")} />
         </button>
       </div>
 

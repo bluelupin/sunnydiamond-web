@@ -9,16 +9,17 @@ import type { SavingsPlanStep } from "@/types/homepage/diamondsForEveryoneSectio
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import { resolveDiamondsForEveryoneSection } from "@/shared/utils/resolveDiamondsForEveryoneSection";
 import Reveal from "@/shared/Animation/Reveal";
+import { StepCircle } from "@/shared/ui/StepCircle";
 
 interface DiamondsForEveryoneSectionProps {
   id?: string;
 }
 
-const StepCircle = ({ number }: { number: number }) => (
-  <div className="relative z-10 box-border flex size-10 shrink-0 items-center justify-center rounded-full border-[0.571px] border-solid border-darkblack bg-lightGold font-gill text-xl font-light leading-none tracking-[0.2px] text-darkblack">
-    {number}
-  </div>
-);
+const savingsPlanStepCircleClassName =
+  "relative z-10 box-border flex size-10 shrink-0 items-center justify-center rounded-full border-[0.571px] border-solid border-darkblack bg-lightGold";
+
+const savingsPlanStepCircleNumberClassName =
+  "font-gill text-xl font-light tracking-[0.2px] text-darkblack";
 
 const StepDescription = ({
   step,
@@ -142,7 +143,12 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
             </div>
             <div className="relative flex h-10 items-center justify-between lg:w-[740px] md:w-[510px] w-[700px] mx-auto px-0">
               {steps.map((step) => (
-                <StepCircle key={step.stepNumber} number={step.stepNumber ?? 0} />
+                <StepCircle
+                  key={step.stepNumber}
+                  number={step.stepNumber ?? 0}
+                  className={savingsPlanStepCircleClassName}
+                  numberClassName={savingsPlanStepCircleNumberClassName}
+                />
               ))}
             </div>
           </ScrollReveal>
@@ -165,7 +171,11 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
               delayMs={240 + index * 80}
               className="flex flex-col items-center gap-4"
             >
-              <StepCircle number={step.stepNumber ?? 0} />
+              <StepCircle
+                number={step.stepNumber ?? 0}
+                className={savingsPlanStepCircleClassName}
+                numberClassName={savingsPlanStepCircleNumberClassName}
+              />
               <StepDescription
                 step={step}
                 className="w-[250px] text-center font-gill text-base font-light leading-110 text-darkblack"

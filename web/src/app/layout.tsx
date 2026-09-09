@@ -4,6 +4,7 @@ import ServerAppShell from "@/shared/ui/layout/ServerAppShell";
 import GoogleAnalytics from "@/infrastructure/analytics/GoogleAnalytics";
 import siteEnv, { getAbsoluteUrl } from "@/shared/lib/seo/siteConfig";
 import { getGoogleSiteVerification } from "@/infrastructure/analytics/gaConfig";
+import { UI_PLATFORM_BOOTSTRAP_SCRIPT } from "@/shared/constants/uiPlatformBootstrapScript";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -91,7 +92,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="antialiased">
+    <html lang="en" className="antialiased" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: UI_PLATFORM_BOOTSTRAP_SCRIPT }} />
+      </head>
       <body className="min-h-screen bg-white font-body" suppressHydrationWarning>
         <GoogleAnalytics />
         <ServerAppShell>{children}</ServerAppShell>

@@ -18,6 +18,7 @@ import {
   DEFAULT_AUTH_FEATURE_FLAGS,
   type AuthFeatureFlags,
 } from '@/features/auth/types/authFeatures.types';
+import { UiPlatformProvider } from '@/shared/context/UiPlatformContext';
 
 const CartBagDrawer = dynamic(
   () => import('@/features/cart/components/CartBagDrawer'),
@@ -32,6 +33,7 @@ export default function AppProvider({
   authFeatures?: AuthFeatureFlags;
 }) {
   return (
+    <UiPlatformProvider>
     <AppStatusToastProvider>
       <AuthFeaturesProvider flags={authFeatures}>
         <AuthProvider>
@@ -61,5 +63,6 @@ export default function AppProvider({
         </AuthProvider>
       </AuthFeaturesProvider>
     </AppStatusToastProvider>
+    </UiPlatformProvider>
   );
 }

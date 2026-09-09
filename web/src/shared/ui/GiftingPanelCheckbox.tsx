@@ -2,6 +2,7 @@
 
 import GiftingPanelCheckboxIcon from "@/assets/Icons/GiftingPanelCheckboxIcon";
 import { cn } from "@/shared/utils/cn";
+import { useUiPlatform } from "../hooks/use-ui-platform";
 
 const GIFTING_PANEL_CHECKBOX_DIMENSION = {
   root: "size-[24px]",
@@ -51,10 +52,10 @@ const GiftingPanelCheckbox = ({
 }: GiftingPanelCheckboxProps) => {
   const dimensions = GIFTING_PANEL_CHECKBOX_SIZES[size];
   const dimensionClass = sizeClassName ?? dimensions.box;
-
+  const { windows } = useUiPlatform();
   return (
     <span
-      className={cn(
+      className={cn(!windows && "-translate-y-0.5",
         "relative inline-flex shrink-0 items-center justify-center leading-none",
         dimensionClass,
         disabled && "cursor-not-allowed opacity-60",

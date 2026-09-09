@@ -14,6 +14,7 @@ import {
 } from "./shared";
 import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
 import FormFieldError from "@/shared/ui/FormFieldError";
+import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 import { cn } from "@/shared/utils/cn";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
@@ -105,6 +106,7 @@ const ProductDetailSidebar = ({
   addToBagLabel = "Add to Bag",
   children,
 }: ProductDetailSidebarProps) => {
+  const { windows } = useUiPlatform();
   const [selectedMetalInternal, setSelectedMetalInternal] = useState(
     () => selectedMetalProp ?? content.metalColors[0]?.id ?? "",
   );
@@ -374,11 +376,11 @@ const ProductDetailSidebar = ({
               {content.attributes.slice(0, 3).map((attribute, index, attributes) => (
                 <li key={attribute} className="flex items-center gap-3">
                   {index > 0 ? (
-                    <AttributeSeparator
+                    <AttributeSeparator className={cn(!windows && "-translate-y-0.5")}
                     // className={index === attributes.length - 1 ? "max-xl:hidden max-md:block max-sm:hidden" : undefined}
                     />
                   ) : null}
-                  <span className="font-gill text-base font-light leading-110 text-neutral500">
+                  <span className={cn("font-gill text-base font-light leading-110 text-neutral500")}>
                     {attribute}
                   </span>
                 </li>
@@ -559,23 +561,29 @@ const ProductDetailSidebar = ({
               value={zipCode}
               onChange={(event) => setZipCode(event.target.value)}
               aria-label="Delivery zip code"
-              className="h-14 min-w-0 flex-1 border border-neutral500 px-6 font-gill text-base text-darkblack outline-none"
+              className="h-14 min-w-0 flex-1 border border-aboutInactive bg-aboutInactive px-6 font-gill text-base text-darkblack outline-none"
             />
             <DetailDarkButton className="w-auto shrink-0 px-7 uppercase">Check</DetailDarkButton>
           </div>
           <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <VanIcon className="shrink-0" />
-              <p className="font-gill text-base font-light leading-110 text-darkblack">
+            <div className="grid w-full grid-cols-[24px_minmax(0,1fr)] items-center gap-x-2">
+              <VanIcon className={cn(
+                "flex size-6 items-center justify-center leading-none",
+                !windows && "-translate-y-0.5",
+              )} />
+              <p className="m-0 min-w-0 self-center font-gill text-base font-light leading-110 text-darkblack">
                 Estimated delivery May 12 2026
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <StoreIcon className="shrink-0" />
-              <p className="font-gill text-base font-light leading-110 text-darkblack">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <StoreIcon className={cn(
+                "flex size-6 shrink-0 items-center justify-center leading-none",
+                !windows && "-translate-y-0.5",
+              )} />
+              <p className="m-0 font-gill text-base font-light leading-110 text-darkblack">
                 Available now at nearest store
               </p>
-              <DetailTextLink onClick={() => setIsDeliveryStoreOpen(true)}>
+              <DetailTextLink onClick={() => setIsDeliveryStoreOpen(true)} className="self-center">
                 Coimbatore
               </DetailTextLink>
             </div>

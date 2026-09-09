@@ -1,9 +1,11 @@
 import Link from "next/link";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
-import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import GiftingPanelCheckbox from "@/shared/ui/GiftingPanelCheckbox";
 import { cn } from "@/shared/utils/cn";
+
+export { CartGiftBadge } from "./CartGiftBadge";
+export { CartMoreItemsNote } from "./CartMoreItemsNote";
 
 const cartButtonSizing = "h-14 px-7 py-5";
 
@@ -51,21 +53,6 @@ export const CartMetaRow = ({
     </div>
   );
 };
-
-type CartGiftBadgeProps = {
-  className?: string;
-};
-
-export const CartGiftBadge = ({ className }: CartGiftBadgeProps) => (
-  <div
-    className={cn(
-      "flex items-center justify-center bg-mauve300 px-3 py-1 font-gill text-sm font-normal h-[23px] whitespace-nowrap text-darkblack",
-      className,
-    )}
-  >
-    Gift
-  </div>
-);
 
 type CartGiftCheckboxProps = {
   checked: boolean;
@@ -297,21 +284,6 @@ export const CartQuantityStepper = ({
     >
       +
     </button>
-  </div>
-);
-
-type CartMoreItemsNoteProps = {
-  count: number;
-};
-
-export const CartMoreItemsNote = ({ count }: CartMoreItemsNoteProps) => (
-  <div className="flex w-full items-center">
-    <div className="flex items-center gap-2">
-      <ShoppingBagIcon className="size-6 shrink-0" />
-      <p className="m-0 flex items-center font-gill text-base font-light leading-110 text-darkblack">
-        Your bag contains {count} more {count === 1 ? "item" : "items"}
-      </p>
-    </div>
   </div>
 );
 

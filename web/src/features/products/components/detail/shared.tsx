@@ -118,5 +118,5 @@ type AttributeSeparatorProps = {
 };
 
 export const AttributeSeparator = ({ className }: AttributeSeparatorProps) => (
-  <span aria-hidden className={cn("h-18 w-px shrink-0 bg-neutral300", className)} />
+  <div aria-hidden className={cn("h-18 w-px shrink-0 bg-neutral300", className)} />
 );

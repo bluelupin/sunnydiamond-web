@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 import { cn } from "@/shared/utils/cn";
 import { diamondsForEveryonePageContent } from "../../data/content";
 import { useDfeInvestFlow, type DfeInvestStep } from "../../context/DfeInvestFlowContext";
@@ -30,6 +31,8 @@ function InvestStepCircle({
   number: number;
   state: "completed" | "active" | "future";
 }) {
+  const { windows } = useUiPlatform();
+
   return (
     <div
       className={cn(
@@ -40,7 +43,7 @@ function InvestStepCircle({
         state === "future" && "border-neutral500 font-light text-neutral500",
       )}
     >
-      {number}
+      <span className={cn("block leading-none", !windows && "translate-y-0.5")}>{number}</span>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { forwardRef, type HTMLAttributes } from "react";
 import FormFieldErrorIcon from "@/assets/Icons/FormFieldErrorIcon";
 import { cn } from "@/shared/utils/cn";
 import { formFieldErrorClassName } from "@/shared/utils/formValidation";
+import { useUiPlatform } from "../hooks/use-ui-platform";
 
 type FormFieldErrorProps = HTMLAttributes<HTMLDivElement> & {
   message?: string;
@@ -13,7 +14,7 @@ const FormFieldError = forwardRef<HTMLDivElement, FormFieldErrorProps>(
     if (!message) {
       return null;
     }
-
+    const { windows } = useUiPlatform();
     return (
       <div
         ref={ref}
@@ -22,7 +23,7 @@ const FormFieldError = forwardRef<HTMLDivElement, FormFieldErrorProps>(
         className={cn("flex items-center gap-2 text-[#F91616]", className)}
         {...props}
       >
-        <FormFieldErrorIcon className="size-4 shrink-0" />
+        <FormFieldErrorIcon className={cn(!windows && "-translate-y-0.5", "size-4 shrink-0")} />
         <p className={formFieldErrorClassName}>{message}</p>
       </div>
     );
