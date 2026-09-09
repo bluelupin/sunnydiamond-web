@@ -160,7 +160,7 @@ const FilterDrawerPanel = ({
         <div className="mx-auto mt-6 h-px w-full max-w-[424px] bg-neutral300" aria-hidden />
       </div>
 
-      <div className="mx-auto flex w-full max-w-[424px] flex-col gap-[24px] pb-72 pt-6">
+      <div className="mx-auto flex w-full max-w-[424px] flex-col gap-6 pb-72 pt-6 md:px-2 px-4">
         {hasPriceRange ? (
           <section className="flex flex-col gap-[16px]">
             <h3 className="font-gill text-base font-normal leading-110 text-darkblack">

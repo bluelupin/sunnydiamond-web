@@ -291,7 +291,7 @@ const Header = () => {
             <div className="pointer-events-none absolute inset-x-0 flex justify-center md:landscape:hidden">
               <div className="pointer-events-auto">{Logo}</div>
             </div>
-            <div className={cn("relative z-10 flex items-center gap-6 lg:gap-[24px]", textClass)}>
+            <div className={cn("relative z-10 flex items-center gap-6 lg:gap-6", textClass)}>
               <Link
                 href={SEARCH_HREF}
                 className={cn("!hidden md:landscape:!flex", iconButtonClass, hoverClass)}

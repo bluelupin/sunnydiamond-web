@@ -143,7 +143,7 @@ const PanelMedia = ({
             )}
           >
             {cutDualImages ? (
-              <div className="flex items-center gap-6 lg:gap-[24px]">
+              <div className="flex items-center gap-6 lg:gap-6">
                 <div className="relative size-[120px] shrink-0 overflow-hidden md:size-[160px] lg:size-[200px]">
                   <Image
                     key={`${panel.id}-${activeIndex}-dual-0-${cutDualImages[0]}`}
@@ -194,7 +194,7 @@ const PanelMedia = ({
         )}
 
         {panel.footnote &&
-          <ScrollReveal delayMs={300} className="mt-10 flex w-full max-w-full flex-col items-center gap-6 max-md:mt-10 max-md:max-w-[317px] mx-auto max-md:gap-6 lg:mt-[64px] lg:gap-[24px]">
+          <ScrollReveal delayMs={300} className="mt-10 flex w-full max-w-full flex-col items-center gap-6 max-md:mt-10 max-md:max-w-[317px] mx-auto max-md:gap-6 lg:mt-[64px] lg:gap-6">
             <p className="text-center font-gill text-sm font-light leading-110 text-neutral500 lg:text-base lg:text-neutral500">
               {panel.footnote}
             </p>

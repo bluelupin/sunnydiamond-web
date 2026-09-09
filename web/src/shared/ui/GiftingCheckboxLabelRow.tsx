@@ -48,7 +48,7 @@ export const GiftingCheckboxLabelRow = ({
         className,
       )}
     >
-      {checkbox}
+      <span className="flex shrink-0 self-center">{checkbox}</span>
       <span
         className={cn(
           "m-0 self-center font-gill text-base font-normal text-darkblack",

@@ -11,7 +11,7 @@ const FilterIcon = ({ className }: props) => {
   const { windows } = useUiPlatform();
 
   return (
-    <div className={cn("block shrink-0", !windows && "-translate-y-0.5", className)}>
+    <div className={cn("shrink-0", !windows && "-translate-y-0.5", className)}>
       <svg
         width="24"
         height="24"

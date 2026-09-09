@@ -28,7 +28,7 @@ import {
 } from "./CartFlowUi";
 import DeleteIcon from "@/assets/Icons/DeleteIcon";
 import { GiftingCheckboxLabelRow } from "@/shared/ui/GiftingCheckboxLabelRow";
-import { getProductEditHref } from "@/features/products/utils/productRoutes";
+import { getProductEditHref, getProductHref } from "@/features/products/utils/productRoutes";
 import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 
 const MetalEngravingPanel = dynamic(
@@ -156,7 +156,8 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
     })();
   };
 
-  const productHref = getProductEditHref(product, item.id);
+  const productViewHref = getProductHref(product);
+  const productEditHref = getProductEditHref(product, item.id);
   const { windows } = useUiPlatform();
   return (
     <article className="relative flex flex-col gap-4 bg-white px-4 lg:gap-6 lg:px-6 py-6">
@@ -167,7 +168,7 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 flex-1 gap-4 lg:max-w-[499.5px] lg:gap-6">
           <Link
-            href={productHref}
+            href={productViewHref}
             onClick={(event) => {
               if (isNavigatingToCheckout) event.preventDefault();
             }}
@@ -190,7 +191,7 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
           <div className="flex min-w-0 flex-1 flex-col items-start gap-8 lg:w-[300px] lg:max-w-[300px]">
             <div className="flex flex-col items-start gap-3">
               <Link
-                href={productHref}
+                href={productViewHref}
                 onClick={(event) => {
                   if (isNavigatingToCheckout) event.preventDefault();
                 }}
@@ -218,7 +219,7 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
             </div>
 
             <div className="flex items-start gap-4">
-              <CartActionLink href={productHref} disabled={isNavigatingToCheckout}>
+              <CartActionLink href={productEditHref} disabled={isNavigatingToCheckout}>
                 Edit
               </CartActionLink>
               <CartActionLink

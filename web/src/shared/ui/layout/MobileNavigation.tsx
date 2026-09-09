@@ -41,6 +41,10 @@ type SubPanelId = "language" | "currency" | "appointment" | "jewellery" | "store
 
 const MOBILE_NAV_TRANSITION_MS = 300;
 
+/** Above page chrome (PLP toolbar z-60, card overlays z-70); below drawers/modals (z-80+). */
+const MOBILE_NAV_BACKDROP_Z_CLASS = "z-[74]";
+const MOBILE_NAV_SHELL_Z_CLASS = "z-[75]";
+
 const SEARCH_HREF = "/coming-soon";
 
 function mobileNavShellMotionClass(visible: boolean) {
@@ -606,7 +610,8 @@ const MobileNavigation = ({
       <button
         type="button"
         className={cn(
-          "fixed inset-0 z-[59] bg-black/50 md:landscape:hidden",
+          "fixed inset-0 h-dvh bg-black/50 md:landscape:hidden",
+          MOBILE_NAV_BACKDROP_Z_CLASS,
           "hidden md:portrait:block",
           mobileNavBackdropMotionClass(isVisible),
         )}
@@ -618,9 +623,9 @@ const MobileNavigation = ({
 
       <div
         className={cn(
-          "fixed z-[60] flex flex-col overflow-hidden overflow-x-hidden bg-white md:landscape:hidden",
-          "inset-0",
-          "md:portrait:inset-x-auto md:portrait:inset-y-0 md:portrait:left-0 md:portrait:w-[60%] md:portrait:max-w-[60%]",
+          "fixed inset-0 flex h-dvh min-h-dvh max-h-dvh flex-col overflow-hidden overflow-x-hidden bg-white md:landscape:hidden",
+          MOBILE_NAV_SHELL_Z_CLASS,
+          "md:portrait:inset-x-auto md:portrait:inset-y-0 md:portrait:left-0 md:portrait:h-dvh md:portrait:min-h-dvh md:portrait:max-h-dvh md:portrait:w-[60%] md:portrait:max-w-[60%]",
           mobileNavShellMotionClass(isVisible),
         )}
         role="dialog"
