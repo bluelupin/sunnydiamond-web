@@ -3,6 +3,7 @@ import Link from "next/link";
 import { HomepageTrustBadgeSection } from "../common/TrustBadges";
 import HeroBackgroundMedia from "./HeroBackgroundMedia";
 import HeroSectionOverlay from "./HeroSectionOverlay";
+import { HeroDiamondIcon } from "./HeroDiamondIcon";
 import type { ResolvedHeroContent } from "@/lib/homepage/resolveHomepageAboveFold";
 
 type HeroSectionProps = {
@@ -33,10 +34,7 @@ const HeroSection = ({ id, hero }: HeroSectionProps) => {
           <div className="flex w-full max-w-886 animate-fade-in flex-col items-center md:gap-8 gap-6 text-center">
             <div className="flex flex-col items-center gap-4">
               <div className="inline-flex items-center gap-2">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 md:w-6 md:h-6 w-5 h-5">
-                  <path d="M7.25 3H17.75L23 9L12.5 20.25L2 9L7.25 3Z" stroke="white" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M12.5 3L12.5 19.5" stroke="white" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                <HeroDiamondIcon />
                 <span className="font-gill text-base font-semibold leading-110 text-white">{hero.eyebrow}</span>
               </div>
               <h1 className="max-w-886 font-larken xl:text-6xl md:text-5xl sm:text-4xl text-32 font-light leading-110 text-white">

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Check, Loader2 } from "lucide-react";
+import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 import { cn } from "@/shared/utils/cn";
 import { sortOptions } from "../data/filters";
 import {
@@ -34,6 +35,7 @@ const desktopSpec = jewelleryListingToolbarSpec;
 const mobileSpec = jewelleryListingMobileFooterSpec;
 
 const SortChevron = ({ size, mobile = false }: { size: number; mobile?: boolean }) => {
+  const { windows } = useUiPlatform();
   const chevronWidth = mobile ? 13.33 : 13.5;
   const chevronHeight = mobile ? 6.67 : 7.5;
 
@@ -42,6 +44,7 @@ const SortChevron = ({ size, mobile = false }: { size: number; mobile?: boolean 
       className={cn(
         "inline-flex shrink-0 items-center justify-center overflow-hidden",
         mobile && "rotate-180",
+        !windows && "-translate-y-0.5",
       )}
       style={{ width: size, height: size }}
     >
