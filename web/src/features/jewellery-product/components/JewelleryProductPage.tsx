@@ -17,10 +17,12 @@ import {
   createEmptyFilterState,
   DEFAULT_JEWELLERY_LISTING_SORT,
   PAGE_SIZE,
+  applyJewelleryPriceSearchParams,
   hasActiveFilters,
   hasMagentoFilterFacets,
   isDefaultPriceRange,
   getSelectedMetalPurityQuery,
+  reconcileJewelleryPriceFilterState,
 } from "../data/filters";
 import {
   isJewelleryCategoryPath,
@@ -112,6 +114,7 @@ const JewelleryProductPage = ({
   const lastDiamondShapeSlugRef = useRef<string | null>(null);
   const lastFancyColourSlugRef = useRef<string | null>(null);
   const lastPriceParamsRef = useRef<string | null>(null);
+  const lastFacetPriceBoundsRef = useRef("");
   const plpTtfbReportedRef = useRef(false);
   const plpPrefetchReportedRef = useRef(false);
   const { isWishlisted, toggleWishlist } = useWishlist();
@@ -312,10 +315,15 @@ const JewelleryProductPage = ({
       );
     };
 
-    if (!facetsSyncedRef.current || lastFacetsSyncedCategoryRef.current !== selectedCategoryUrlKey) {
+    const facetPriceBoundsKey = `${facets.minPrice}|${facets.maxPrice}`;
+    const categoryChanged = lastFacetsSyncedCategoryRef.current !== selectedCategoryUrlKey;
+    const facetBoundsChanged = lastFacetPriceBoundsRef.current !== facetPriceBoundsKey;
+
+    if (!facetsSyncedRef.current || categoryChanged || facetBoundsChanged) {
       facetsSyncedRef.current = true;
       lastFacetsSyncedCategoryRef.current = selectedCategoryUrlKey;
-      const nextDraft = buildFiltersFromUrl();
+      lastFacetPriceBoundsRef.current = facetPriceBoundsKey;
+      const nextDraft = reconcileJewelleryPriceFilterState(buildFiltersFromUrl(), facets);
       setFilters(nextDraft);
       return;
     }
@@ -326,7 +334,9 @@ const JewelleryProductPage = ({
       fancyColourChanged ||
       priceParamsChanged
     ) {
-      setFilters((current) => buildFiltersFromUrl(current));
+      setFilters((current) =>
+        reconcileJewelleryPriceFilterState(buildFiltersFromUrl(current), facets),
+      );
     }
   }, [
     facets,
@@ -369,20 +379,17 @@ const JewelleryProductPage = ({
 
       const clearedToDefault =
         hasMagentoFilterFacets(facets) && !hasActiveFilters(nextFilters, facets);
-      const hasUrlFilterParams =
-        Boolean(occasionSlug) ||
-        Boolean(diamondShapeSlug) ||
-        Boolean(fancyColourSlug) ||
-        minPriceFromUrl != null ||
-        maxPriceFromUrl != null;
 
-      if (clearedToDefault && hasUrlFilterParams && pathname) {
+      if (pathname) {
         const params = new URLSearchParams(searchParams?.toString() ?? "");
-        params.delete("occasion");
-        params.delete("diamondShape");
-        params.delete("fancyColour");
-        params.delete("minPrice");
-        params.delete("maxPrice");
+        applyJewelleryPriceSearchParams(params, nextFilters, facets);
+
+        if (clearedToDefault) {
+          params.delete("occasion");
+          params.delete("diamondShape");
+          params.delete("fancyColour");
+        }
+
         const query = params.toString();
         router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
       }
@@ -392,10 +399,6 @@ const JewelleryProductPage = ({
       facets,
       navCategories,
       occasionSlug,
-      diamondShapeSlug,
-      fancyColourSlug,
-      minPriceFromUrl,
-      maxPriceFromUrl,
       pathname,
       router,
       searchParams,

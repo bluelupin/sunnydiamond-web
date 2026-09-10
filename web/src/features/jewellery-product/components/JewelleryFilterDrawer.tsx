@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
-import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import FormFieldError from "@/shared/ui/FormFieldError";
@@ -22,15 +21,23 @@ import {
   createEmptyFilterState,
   getAvailableCategoryLabels,
   getAvailableMetalTypeLabels,
-  getMaxAmountBelowMinError,
+  getJewelleryMaxAmountDisplayValue,
+  getJewelleryMinAmountDisplayValue,
+  getJewelleryPriceInputErrors,
+  getJewelleryPriceSliderStep,
   hasFilterChanges,
+  hasJewelleryPriceFacet,
   hasMagentoFilterFacets,
-  isDefaultPriceRange,
+  isJewelleryPriceSliderInteractive,
+  isJewellerySingleCatalogPrice,
   normalizeJewelleryPriceRange,
   parseJewelleryPriceInput,
+  reconcileJewelleryPriceFilterState,
+  resolveJewelleryDraftPriceRange,
 } from "../data/filters";
 import type { JewelleryFilterState } from "../types";
 import type { JewelleryFilterFacets } from "@/types/magento/jewelleryListing";
+import { formatJewelleryPrice } from "../utils/formatPrice";
 
 interface JewelleryFilterDrawerProps {
   open: boolean;
@@ -41,9 +48,6 @@ interface JewelleryFilterDrawerProps {
   onClose: () => void;
   onApply: (filters: JewelleryFilterState) => void;
 }
-
-const formatCurrency = (value: number) =>
-  new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(value);
 
 const rangeThumbClassName =
   "pointer-events-none col-start-1 row-start-1 z-20 h-[12px] w-full appearance-none bg-transparent [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:size-[12px] [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-darkblack [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:size-[12px] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-darkblack";
@@ -74,9 +78,16 @@ function buildDrawerDraft(
   appliedFilters: JewelleryFilterState,
   facets: JewelleryFilterFacets,
 ): JewelleryFilterState {
-  return hasMagentoFilterFacets(facets)
-    ? { ...createDefaultFilterState(facets), ...appliedFilters }
-    : appliedFilters;
+  if (!hasMagentoFilterFacets(facets)) {
+    return appliedFilters;
+  }
+
+  const merged = {
+    ...createDefaultFilterState(facets),
+    ...appliedFilters,
+  };
+
+  return reconcileJewelleryPriceFilterState(merged, facets);
 }
 
 const FILTER_DRAWER_MOBILE_QUERY = "(max-width: 767px)";
@@ -99,14 +110,19 @@ type FilterDrawerPanelProps = {
   applyDraft: () => void;
   handleClearAll: () => void;
   canApplyFilters: boolean;
-  hasPriceRange: boolean;
+  hasPriceFacet: boolean;
+  showPriceSlider: boolean;
+  isSingleCatalogPrice: boolean;
+  priceSliderStep: number;
   minPercent: number;
   maxPercent: number;
   draft: JewelleryFilterState;
   facets: JewelleryFilterFacets;
   minInputFocused: boolean;
   maxInputFocused: boolean;
+  minInputValue: string;
   maxInputValue: string;
+  minAmountError: string | null;
   maxAmountError: string | null;
   categoryOptions: string[];
   categoryRows: string[][];
@@ -114,12 +130,13 @@ type FilterDrawerPanelProps = {
   metalPurityOptions: string[];
   setMinInputFocused: (value: boolean) => void;
   setMaxInputFocused: (value: boolean) => void;
+  setMinInputValue: (value: string) => void;
   setMaxInputValue: (value: string) => void;
   setDraft: Dispatch<SetStateAction<JewelleryFilterState>>;
   updatePriceRange: (minPrice: number, maxPrice: number) => void;
+  commitMinAmountInput: () => void;
   commitMaxAmountInput: () => void;
   toggleListValue: (key: "categories" | "metalTypes" | "metalPurities", value: string) => void;
-  getMaxAmountDisplayValue: (maxPrice: number, minPrice: number, facetMax: number) => string;
 };
 
 const FilterDrawerPanel = ({
@@ -128,14 +145,19 @@ const FilterDrawerPanel = ({
   applyDraft,
   handleClearAll,
   canApplyFilters,
-  hasPriceRange,
+  hasPriceFacet,
+  showPriceSlider,
+  isSingleCatalogPrice,
+  priceSliderStep,
   minPercent,
   maxPercent,
   draft,
   facets,
   minInputFocused,
   maxInputFocused,
+  minInputValue,
   maxInputValue,
+  minAmountError,
   maxAmountError,
   categoryOptions,
   categoryRows,
@@ -143,12 +165,13 @@ const FilterDrawerPanel = ({
   metalPurityOptions,
   setMinInputFocused,
   setMaxInputFocused,
+  setMinInputValue,
   setMaxInputValue,
   setDraft,
   updatePriceRange,
+  commitMinAmountInput,
   commitMaxAmountInput,
   toggleListValue,
-  getMaxAmountDisplayValue,
 }: FilterDrawerPanelProps) => (
   <div className="flex min-h-0 flex-1 flex-col">
     <div className="filter-drawer-scroll flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
@@ -161,59 +184,80 @@ const FilterDrawerPanel = ({
       </div>
 
       <div className="mx-auto flex w-full max-w-[424px] flex-col gap-6 pb-72 pt-6 md:px-2 px-4">
-        {hasPriceRange ? (
+        {hasPriceFacet ? (
           <section className="flex flex-col gap-[16px]">
             <h3 className="font-gill text-base font-normal leading-110 text-darkblack">
               By Price Range
             </h3>
-            <div className="flex flex-col gap-[12px]">
-              <div className="grid h-[12px] grid-cols-1 grid-rows-1 items-center">
-                <div
-                  className="col-start-1 row-start-1 h-[4px] rounded-[70px] bg-neutral300"
-                  aria-hidden
-                />
-                <div
-                  className="col-start-1 row-start-1 h-[3px] rounded-[70px] bg-darkblack"
-                  style={{
-                    marginLeft: `${minPercent}%`,
-                    width: `${Math.max(maxPercent - minPercent, 0)}%`,
-                  }}
-                  aria-hidden
-                />
-                <input
-                  type="range"
-                  min={facets.minPrice}
-                  max={facets.maxPrice}
-                  step={500}
-                  value={draft.minPrice}
-                  onChange={(event) =>
-                    updatePriceRange(Number(event.target.value), draft.maxPrice)
-                  }
-                  className={rangeThumbClassName}
-                  aria-label="Minimum price"
-                />
-                <input
-                  type="range"
-                  min={facets.minPrice}
-                  max={facets.maxPrice}
-                  step={500}
-                  value={draft.maxPrice}
-                  onChange={(event) =>
-                    updatePriceRange(draft.minPrice, Number(event.target.value))
-                  }
-                  className={cn(rangeThumbClassName, "z-30")}
-                  aria-label="Maximum price"
-                />
+            {isSingleCatalogPrice ? (
+              <p className="font-gill text-sm font-light leading-110 text-darkblack">
+                All products in this category are priced at ₹{" "}
+                {formatJewelleryPrice(facets.minPrice)}
+              </p>
+            ) : (
+              <div className="flex flex-col gap-[12px]">
+                <div className="grid h-[12px] grid-cols-1 grid-rows-1 items-center">
+                  <div
+                    className="col-start-1 row-start-1 h-[4px] rounded-[70px] bg-neutral300"
+                    aria-hidden
+                  />
+                  {showPriceSlider ? (
+                    <>
+                      <div
+                        className="col-start-1 row-start-1 h-[3px] rounded-[70px] bg-darkblack"
+                        style={{
+                          marginLeft: `${minPercent}%`,
+                          width: `${Math.max(maxPercent - minPercent, 0)}%`,
+                        }}
+                        aria-hidden
+                      />
+                      <input
+                        type="range"
+                        min={facets.minPrice}
+                        max={facets.maxPrice}
+                        step={priceSliderStep}
+                        value={draft.minPrice}
+                        onChange={(event) =>
+                          updatePriceRange(Number(event.target.value), draft.maxPrice)
+                        }
+                        className={rangeThumbClassName}
+                        aria-label="Minimum price"
+                      />
+                      <input
+                        type="range"
+                        min={facets.minPrice}
+                        max={facets.maxPrice}
+                        step={priceSliderStep}
+                        value={draft.maxPrice}
+                        onChange={(event) =>
+                          updatePriceRange(draft.minPrice, Number(event.target.value))
+                        }
+                        className={cn(rangeThumbClassName, "z-30")}
+                        aria-label="Maximum price"
+                      />
+                    </>
+                  ) : (
+                    <div
+                      className="col-start-1 row-start-1 h-[3px] rounded-[70px] bg-darkblack"
+                      aria-hidden
+                    />
+                  )}
+                </div>
+                <div className="flex items-center justify-between font-gill text-sm font-light leading-110 text-darkblack">
+                  <span>₹ {formatJewelleryPrice(facets.minPrice)}</span>
+                  <span>₹ {formatJewelleryPrice(facets.maxPrice)}</span>
+                </div>
+                {!showPriceSlider ? (
+                  <p className="font-gill text-xs font-light leading-110 text-neutral500">
+                    Use Min and Max Amount below to refine your range.
+                  </p>
+                ) : null}
               </div>
-              <div className="flex items-center justify-between font-gill text-sm font-light leading-110 text-darkblack">
-                <span>₹ {formatCurrency(draft.minPrice)}</span>
-                <span>₹ {formatCurrency(draft.maxPrice)}</span>
-              </div>
-            </div>
+            )}
           </section>
         ) : null}
 
-        {hasPriceRange ? (
+        {hasPriceFacet && !isSingleCatalogPrice ? (
           <div className="space-y-4">
             <section className="flex gap-[24px]">
               <label className="flex min-w-0 flex-1 flex-col gap-[8px]">
@@ -223,18 +267,36 @@ const FilterDrawerPanel = ({
                 <input
                   type="text"
                   inputMode="numeric"
-                  value={formatCurrency(draft.minPrice)}
-                  onFocus={() => setMinInputFocused(true)}
-                  onBlur={() => setMinInputFocused(false)}
-                  onChange={(event) =>
-                    updatePriceRange(
-                      parseJewelleryPriceInput(event.target.value, facets.minPrice),
-                      draft.maxPrice,
-                    )
-                  }
+                  value={minInputFocused ? minInputValue : getJewelleryMinAmountDisplayValue(draft.minPrice)}
+                  onFocus={() => {
+                    setMinInputFocused(true);
+                    setMinInputValue(getJewelleryMinAmountDisplayValue(draft.minPrice));
+                  }}
+                  onBlur={commitMinAmountInput}
+                  onChange={(event) => {
+                    const nextValue = event.target.value;
+                    setMinInputValue(nextValue);
+
+                    const trimmed = nextValue.replace(/,/g, "").trim();
+                    if (!trimmed) {
+                      return;
+                    }
+
+                    const parsed = Number(trimmed);
+                    if (Number.isFinite(parsed)) {
+                      const intendedMin = Math.max(0, Math.round(parsed));
+                      if (intendedMin > Math.round(draft.maxPrice)) {
+                        return;
+                      }
+                      updatePriceRange(intendedMin, draft.maxPrice);
+                    }
+                  }}
+                  aria-invalid={Boolean(minAmountError)}
+                  aria-describedby={minAmountError ? "jewellery-min-amount-error" : undefined}
                   className={cn(
                     "h-14 w-full bg-aboutInactive p-[12px] font-gill text-sm font-normal leading-110 text-darkblack outline-none",
-                    minInputFocused && "border border-neutral500",
+                    minInputFocused && !minAmountError && "border border-neutral500",
+                    minAmountError && "border border-[#F91616]",
                   )}
                 />
               </label>
@@ -246,11 +308,19 @@ const FilterDrawerPanel = ({
                   type="text"
                   inputMode="numeric"
                   placeholder="Enter"
-                  value={maxInputValue}
+                  value={maxInputFocused ? maxInputValue : getJewelleryMaxAmountDisplayValue(
+                    draft.maxPrice,
+                    draft.minPrice,
+                    facets.maxPrice,
+                  )}
                   onFocus={() => {
                     setMaxInputFocused(true);
                     setMaxInputValue(
-                      getMaxAmountDisplayValue(draft.maxPrice, draft.minPrice, facets.maxPrice),
+                      getJewelleryMaxAmountDisplayValue(
+                        draft.maxPrice,
+                        draft.minPrice,
+                        facets.maxPrice,
+                      ),
                     );
                   }}
                   onBlur={commitMaxAmountInput}
@@ -276,11 +346,13 @@ const FilterDrawerPanel = ({
                   aria-describedby={maxAmountError ? "jewellery-max-amount-error" : undefined}
                   className={cn(
                     "h-14 w-full bg-aboutInactive p-[12px] font-gill text-base font-normal leading-110 text-darkblack placeholder:text-neutral400 outline-none",
+                    maxInputFocused && !maxAmountError && "border border-neutral500",
                     maxAmountError && "border border-[#F91616]",
                   )}
                 />
               </label>
             </section>
+            <FormFieldError id="jewellery-min-amount-error" message={minAmountError ?? undefined} />
             <FormFieldError id="jewellery-max-amount-error" message={maxAmountError ?? undefined} />
           </div>
         ) : null}
@@ -432,6 +504,7 @@ const JewelleryFilterDrawer = ({
   );
   const [minInputFocused, setMinInputFocused] = useState(false);
   const [maxInputFocused, setMaxInputFocused] = useState(false);
+  const [minInputValue, setMinInputValue] = useState("");
   const [maxInputValue, setMaxInputValue] = useState("");
   const [isMobile, setIsMobile] = useState(
     () => typeof window !== "undefined" && window.matchMedia(FILTER_DRAWER_MOBILE_QUERY).matches,
@@ -447,36 +520,33 @@ const JewelleryFilterDrawer = ({
     return () => media.removeEventListener("change", update);
   }, []);
 
-  const getMaxAmountDisplayValue = (
-    maxPrice: number,
-    minPrice: number,
-    facetMax: number,
-  ): string => {
-    if (maxPrice === facetMax && minPrice !== maxPrice) {
-      return "";
-    }
-
-    return formatCurrency(maxPrice);
-  };
-
   useEffect(() => {
     const justOpened = open && !wasOpenRef.current;
 
     if (justOpened) {
       setUseMobileDrawer(isMobile);
       setDraft(buildDrawerDraft(appliedFilters, facets));
+      setMinInputFocused(false);
       setMaxInputFocused(false);
     } else if (open && hasMagentoFilterFacets(facets)) {
-      // Facets can load after the drawer opens — refresh bounds without clearing selections.
-      setDraft((current) => {
-        const defaults = createDefaultFilterState(facets);
-
-        return {
-          ...current,
-          minPrice: isDefaultPriceRange(current, facets) ? defaults.minPrice : current.minPrice,
-          maxPrice: isDefaultPriceRange(current, facets) ? defaults.maxPrice : current.maxPrice,
-        };
-      });
+      // Facets can load after category change — realign price bounds without clearing chip selections.
+      setDraft((current) =>
+        reconcileJewelleryPriceFilterState(
+          {
+            ...current,
+            categories: appliedFilters.categories,
+            metalTypes: appliedFilters.metalTypes,
+            metalPurities: appliedFilters.metalPurities,
+            gemstoneType: appliedFilters.gemstoneType,
+            occasion: appliedFilters.occasion,
+            diamondShape: appliedFilters.diamondShape,
+            fancyColour: appliedFilters.fancyColour,
+          },
+          facets,
+        ),
+      );
+      setMinInputFocused(false);
+      setMaxInputFocused(false);
     }
 
     wasOpenRef.current = open;
@@ -489,12 +559,22 @@ const JewelleryFilterDrawer = ({
   }, [isMobile, open]);
 
   useEffect(() => {
-    if (maxInputFocused || getMaxAmountBelowMinError(draft.minPrice, maxInputValue)) {
+    if (minInputFocused) {
       return;
     }
 
-    setMaxInputValue(getMaxAmountDisplayValue(draft.maxPrice, draft.minPrice, facets.maxPrice));
-  }, [draft.maxPrice, draft.minPrice, facets.maxPrice, maxInputFocused, maxInputValue]);
+    setMinInputValue(getJewelleryMinAmountDisplayValue(draft.minPrice));
+  }, [draft.minPrice, minInputFocused]);
+
+  useEffect(() => {
+    if (maxInputFocused) {
+      return;
+    }
+
+    setMaxInputValue(
+      getJewelleryMaxAmountDisplayValue(draft.maxPrice, draft.minPrice, facets.maxPrice),
+    );
+  }, [draft.maxPrice, draft.minPrice, facets.maxPrice, maxInputFocused]);
 
   const toggleListValue = (key: "categories" | "metalTypes" | "metalPurities", value: string) => {
     setDraft((current) => {
@@ -516,26 +596,36 @@ const JewelleryFilterDrawer = ({
     }));
   };
 
-  const resolveDraftPriceRange = () => {
-    const trimmedMax = maxInputValue.replace(/,/g, "").trim();
-    const draftMax =
-      trimmedMax === ""
-        ? draft.maxPrice
-        : parseJewelleryPriceInput(maxInputValue, facets.maxPrice);
-
-    return normalizeJewelleryPriceRange(draft.minPrice, draftMax, facets);
-  };
+  const priceInputErrors = getJewelleryPriceInputErrors({
+    draftMinPrice: draft.minPrice,
+    draftMaxPrice: draft.maxPrice,
+    minInputValue: minInputFocused ? minInputValue : getJewelleryMinAmountDisplayValue(draft.minPrice),
+    maxInputValue: maxInputFocused
+      ? maxInputValue
+      : getJewelleryMaxAmountDisplayValue(draft.maxPrice, draft.minPrice, facets.maxPrice),
+    facets,
+  });
 
   const applyDraft = () => {
-    if (getMaxAmountBelowMinError(draft.minPrice, maxInputValue)) {
+    if (priceInputErrors.minError || priceInputErrors.maxError) {
       return;
     }
 
-    const normalized = resolveDraftPriceRange();
+    const normalized = resolveJewelleryDraftPriceRange(
+      draft.minPrice,
+      draft.maxPrice,
+      minInputFocused ? minInputValue : getJewelleryMinAmountDisplayValue(draft.minPrice),
+      maxInputFocused
+        ? maxInputValue
+        : getJewelleryMaxAmountDisplayValue(draft.maxPrice, draft.minPrice, facets.maxPrice),
+      facets,
+    );
     onApply({ ...draft, ...normalized });
+    setMinInputFocused(false);
     setMaxInputFocused(false);
+    setMinInputValue(getJewelleryMinAmountDisplayValue(normalized.minPrice));
     setMaxInputValue(
-      getMaxAmountDisplayValue(normalized.maxPrice, normalized.minPrice, facets.maxPrice),
+      getJewelleryMaxAmountDisplayValue(normalized.maxPrice, normalized.minPrice, facets.maxPrice),
     );
   };
 
@@ -544,6 +634,12 @@ const JewelleryFilterDrawer = ({
       ? createDefaultFilterState(facets)
       : createEmptyFilterState();
     setDraft(cleared);
+    setMinInputFocused(false);
+    setMaxInputFocused(false);
+    setMinInputValue(getJewelleryMinAmountDisplayValue(cleared.minPrice));
+    setMaxInputValue(
+      getJewelleryMaxAmountDisplayValue(cleared.maxPrice, cleared.minPrice, facets.maxPrice),
+    );
     onApply(cleared);
   };
 
@@ -551,26 +647,72 @@ const JewelleryFilterDrawer = ({
   const categoryRows = chunkFilterOptions(categoryOptions, 3);
   const metalTypeOptions = getAvailableMetalTypeLabels(facets);
   const metalPurityOptions = facets.metalPurities.map((option) => option.label);
-  const hasPriceRange = facets.maxPrice > facets.minPrice;
+  const hasPriceFacet = hasJewelleryPriceFacet(facets);
+  const showPriceSlider = isJewelleryPriceSliderInteractive(facets);
+  const isSingleCatalogPrice = isJewellerySingleCatalogPrice(facets);
+  const priceSliderStep = getJewelleryPriceSliderStep(facets);
+  const facetPriceSpan = facets.maxPrice - facets.minPrice;
 
-  const minPercent = hasPriceRange
-    ? ((draft.minPrice - facets.minPrice) / (facets.maxPrice - facets.minPrice)) * 100
+  const minPercent = showPriceSlider && facetPriceSpan > 0
+    ? ((draft.minPrice - facets.minPrice) / facetPriceSpan) * 100
     : 0;
-  const maxPercent = hasPriceRange
-    ? ((draft.maxPrice - facets.minPrice) / (facets.maxPrice - facets.minPrice)) * 100
+  const maxPercent = showPriceSlider && facetPriceSpan > 0
+    ? ((draft.maxPrice - facets.minPrice) / facetPriceSpan) * 100
     : 0;
-  const maxAmountError = getMaxAmountBelowMinError(draft.minPrice, maxInputValue);
-  const canApplyFilters = hasFilterChanges(draft, appliedFilters, facets) && !maxAmountError;
+  const minAmountError = priceInputErrors.minError;
+  const maxAmountError = priceInputErrors.maxError;
+  const canApplyFilters =
+    hasFilterChanges(draft, appliedFilters, facets) && !minAmountError && !maxAmountError;
+
+  const commitMinAmountInput = () => {
+    const errors = getJewelleryPriceInputErrors({
+      draftMinPrice: draft.minPrice,
+      draftMaxPrice: draft.maxPrice,
+      minInputValue,
+      maxInputValue: maxInputFocused
+        ? maxInputValue
+        : getJewelleryMaxAmountDisplayValue(draft.maxPrice, draft.minPrice, facets.maxPrice),
+      facets,
+    });
+
+    if (errors.minError) {
+      setMinInputFocused(false);
+      return;
+    }
+
+    const trimmed = minInputValue.replace(/,/g, "").trim();
+    const nextMin = trimmed
+      ? parseJewelleryPriceInput(minInputValue, draft.minPrice)
+      : draft.minPrice;
+    const normalized = normalizeJewelleryPriceRange(nextMin, draft.maxPrice, facets);
+
+    setDraft((current) => ({
+      ...current,
+      minPrice: normalized.minPrice,
+      maxPrice: normalized.maxPrice,
+    }));
+    setMinInputFocused(false);
+    setMinInputValue(getJewelleryMinAmountDisplayValue(normalized.minPrice));
+  };
 
   const commitMaxAmountInput = () => {
-    if (getMaxAmountBelowMinError(draft.minPrice, maxInputValue)) {
+    const errors = getJewelleryPriceInputErrors({
+      draftMinPrice: draft.minPrice,
+      draftMaxPrice: draft.maxPrice,
+      minInputValue: minInputFocused
+        ? minInputValue
+        : getJewelleryMinAmountDisplayValue(draft.minPrice),
+      maxInputValue,
+      facets,
+    });
+
+    if (errors.maxError) {
       setMaxInputFocused(false);
       return;
     }
 
     const trimmed = maxInputValue.replace(/,/g, "").trim();
-    const nextMax =
-      trimmed === "" ? facets.maxPrice : parseJewelleryPriceInput(maxInputValue, facets.maxPrice);
+    const nextMax = trimmed === "" ? facets.maxPrice : parseJewelleryPriceInput(maxInputValue, facets.maxPrice);
     const normalized = normalizeJewelleryPriceRange(draft.minPrice, nextMax, facets);
 
     setDraft((current) => ({
@@ -580,7 +722,7 @@ const JewelleryFilterDrawer = ({
     }));
     setMaxInputFocused(false);
     setMaxInputValue(
-      getMaxAmountDisplayValue(normalized.maxPrice, normalized.minPrice, facets.maxPrice),
+      getJewelleryMaxAmountDisplayValue(normalized.maxPrice, normalized.minPrice, facets.maxPrice),
     );
   };
 
@@ -590,14 +732,19 @@ const JewelleryFilterDrawer = ({
     applyDraft,
     handleClearAll,
     canApplyFilters,
-    hasPriceRange,
+    hasPriceFacet,
+    showPriceSlider,
+    isSingleCatalogPrice,
+    priceSliderStep,
     minPercent,
     maxPercent,
     draft,
     facets,
     minInputFocused,
     maxInputFocused,
+    minInputValue,
     maxInputValue,
+    minAmountError,
     maxAmountError,
     categoryOptions,
     categoryRows,
@@ -605,12 +752,13 @@ const JewelleryFilterDrawer = ({
     metalPurityOptions,
     setMinInputFocused,
     setMaxInputFocused,
+    setMinInputValue,
     setMaxInputValue,
     setDraft,
     updatePriceRange,
+    commitMinAmountInput,
     commitMaxAmountInput,
     toggleListValue,
-    getMaxAmountDisplayValue,
   };
 
   const handleOpenChange = (nextOpen: boolean) => {

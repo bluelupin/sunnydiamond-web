@@ -279,7 +279,7 @@ export const CheckoutFormStep = ({
         </p>
       ) : (
         <>
-          {isAuthenticated && savedAddresses.length > 1 ? (
+          {/* {isAuthenticated && savedAddresses.length > 1 ? (
             <CheckoutSelectField
               id="checkout-saved-shipping-address"
               label="Saved Address"
@@ -291,7 +291,7 @@ export const CheckoutFormStep = ({
               }))}
               disabled={fieldsDisabled}
             />
-          ) : null}
+          ) : null} */}
           <div className="space-y-6">
             <CheckoutSubheading>SHIPPING ADDRESS</CheckoutSubheading>
             <CheckoutAddressFields

@@ -1,5 +1,6 @@
 import type { JewelleryFilterState, JewellerySortOption } from "../types";
 import type { JewelleryFilterFacets } from "@/types/magento/jewelleryListing";
+import { formatJewelleryPrice } from "../utils/formatPrice";
 
 export const PAGE_SIZE = 9;
 
@@ -28,9 +29,47 @@ export function getAvailableGemstoneTypeLabels(facets: JewelleryFilterFacets): s
   return facets.gemstoneTypes.map((gemstoneType) => gemstoneType.label);
 }
 
+export const JEWELLERY_PRICE_SLIDER_STEP = 500;
+export const JEWELLERY_PRICE_SLIDER_MIN_SPAN = 500;
+
+export function getJewelleryFacetPriceSpan(
+  facets: Pick<JewelleryFilterFacets, "minPrice" | "maxPrice">,
+): number {
+  return Math.max(0, facets.maxPrice - facets.minPrice);
+}
+
+export function isJewellerySingleCatalogPrice(
+  facets: Pick<JewelleryFilterFacets, "minPrice" | "maxPrice">,
+): boolean {
+  return facets.maxPrice > 0 && facets.maxPrice === facets.minPrice;
+}
+
+export function hasJewelleryPriceFacet(
+  facets: Pick<JewelleryFilterFacets, "minPrice" | "maxPrice">,
+): boolean {
+  return facets.maxPrice > facets.minPrice || isJewellerySingleCatalogPrice(facets);
+}
+
+export function isJewelleryPriceSliderInteractive(
+  facets: Pick<JewelleryFilterFacets, "minPrice" | "maxPrice">,
+): boolean {
+  return getJewelleryFacetPriceSpan(facets) >= JEWELLERY_PRICE_SLIDER_MIN_SPAN;
+}
+
+export function getJewelleryPriceSliderStep(
+  facets: Pick<JewelleryFilterFacets, "minPrice" | "maxPrice">,
+): number {
+  const span = getJewelleryFacetPriceSpan(facets);
+  if (span <= 0) {
+    return 1;
+  }
+
+  return Math.max(1, Math.min(JEWELLERY_PRICE_SLIDER_STEP, Math.floor(span / 20)));
+}
+
 export function hasMagentoFilterFacets(facets: JewelleryFilterFacets): boolean {
   return (
-    facets.maxPrice > facets.minPrice ||
+    hasJewelleryPriceFacet(facets) ||
     getAvailableCategoryLabels(facets).length > 0 ||
     facets.metalTypes.length > 0 ||
     facets.metalPurities.length > 0 ||
@@ -141,6 +180,59 @@ export function isDefaultPriceRange(
   return filters.minPrice <= facets.minPrice && filters.maxPrice >= facets.maxPrice;
 }
 
+export function priceRangeFitsFacets(
+  filters: Pick<JewelleryFilterState, "minPrice" | "maxPrice">,
+  facets: Pick<JewelleryFilterFacets, "minPrice" | "maxPrice">,
+): boolean {
+  if (facets.maxPrice <= facets.minPrice) {
+    return true;
+  }
+
+  return (
+    filters.minPrice >= facets.minPrice &&
+    filters.maxPrice <= facets.maxPrice &&
+    filters.minPrice <= filters.maxPrice
+  );
+}
+
+/** Resets or clamps price bounds when the catalog range changes (e.g. category switch). */
+export function reconcileJewelleryPriceFilterState(
+  filters: JewelleryFilterState,
+  facets: Pick<JewelleryFilterFacets, "minPrice" | "maxPrice">,
+): JewelleryFilterState {
+  if (isJewellerySingleCatalogPrice(facets)) {
+    return {
+      ...filters,
+      minPrice: facets.minPrice,
+      maxPrice: facets.maxPrice,
+    };
+  }
+
+  if (facets.maxPrice <= facets.minPrice) {
+    return filters;
+  }
+
+  if (isDefaultPriceRange(filters, facets) || !priceRangeFitsFacets(filters, facets)) {
+    return {
+      ...filters,
+      minPrice: facets.minPrice,
+      maxPrice: facets.maxPrice,
+    };
+  }
+
+  const normalized = normalizeJewelleryPriceRange(
+    filters.minPrice,
+    filters.maxPrice,
+    facets,
+  );
+
+  return {
+    ...filters,
+    minPrice: normalized.minPrice,
+    maxPrice: normalized.maxPrice,
+  };
+}
+
 /** When set, PLP should show only products whose rounded price equals this value. */
 export function getExactJewelleryPriceFilter(
   filters: JewelleryFilterState,
@@ -225,15 +317,18 @@ export function parseJewelleryPriceInput(value: string, fallback: number): numbe
   return Math.max(0, Math.round(parsed));
 }
 
-export const JEWELLERY_MAX_AMOUNT_BELOW_MIN_ERROR =
-  "Max amount must be greater than or equal to min amount.";
+export const JEWELLERY_MIN_ABOVE_MAX_ERROR =
+  "Minimum amount cannot be greater than maximum amount.";
 
-/** Returns an error when the typed max amount is below the current min amount. */
-export function getMaxAmountBelowMinError(
-  minPrice: number,
-  maxInputValue: string,
-): string | null {
-  const trimmed = maxInputValue.replace(/,/g, "").trim();
+export const JEWELLERY_MAX_AMOUNT_BELOW_MIN_ERROR = JEWELLERY_MIN_ABOVE_MAX_ERROR;
+
+export type JewelleryPriceInputErrors = {
+  minError: string | null;
+  maxError: string | null;
+};
+
+function parseTrimmedJewelleryPriceInput(value: string): number | null {
+  const trimmed = value.replace(/,/g, "").trim();
 
   if (!trimmed) {
     return null;
@@ -245,13 +340,137 @@ export function getMaxAmountBelowMinError(
     return null;
   }
 
-  const intendedMax = Math.max(0, Math.round(parsed));
+  return Math.max(0, Math.round(parsed));
+}
 
-  if (intendedMax < Math.round(minPrice)) {
-    return JEWELLERY_MAX_AMOUNT_BELOW_MIN_ERROR;
+export function getJewelleryMaxAmountDisplayValue(
+  maxPrice: number,
+  minPrice: number,
+  facetMax: number,
+): string {
+  if (maxPrice === facetMax && minPrice !== maxPrice) {
+    return "";
+  }
+
+  return formatJewelleryPrice(maxPrice);
+}
+
+export function getJewelleryMinAmountDisplayValue(minPrice: number): string {
+  return formatJewelleryPrice(minPrice);
+}
+
+/** Returns an error when the typed max amount is below the current min amount. */
+export function getMaxAmountBelowMinError(
+  minPrice: number,
+  maxInputValue: string,
+): string | null {
+  const parsedMax = parseTrimmedJewelleryPriceInput(maxInputValue);
+
+  if (parsedMax === null) {
+    return null;
+  }
+
+  if (parsedMax < Math.round(minPrice)) {
+    return JEWELLERY_MIN_ABOVE_MAX_ERROR;
   }
 
   return null;
+}
+
+export function getJewelleryPriceInputErrors({
+  draftMinPrice,
+  draftMaxPrice,
+  minInputValue,
+  maxInputValue,
+  facets,
+}: {
+  draftMinPrice: number;
+  draftMaxPrice: number;
+  minInputValue: string;
+  maxInputValue: string;
+  facets: Pick<JewelleryFilterFacets, "minPrice" | "maxPrice">;
+}): JewelleryPriceInputErrors {
+  const facetMin = facets.minPrice;
+  const facetMax = facets.maxPrice;
+  const minTrimmed = minInputValue.replace(/,/g, "").trim();
+  const maxTrimmed = maxInputValue.replace(/,/g, "").trim();
+  const parsedMin = parseTrimmedJewelleryPriceInput(minInputValue);
+  const parsedMax = parseTrimmedJewelleryPriceInput(maxInputValue);
+  const intendedMin = parsedMin ?? draftMinPrice;
+  const intendedMax = maxTrimmed === "" ? facetMax : parsedMax ?? draftMaxPrice;
+
+  let minError: string | null = null;
+  let maxError: string | null = null;
+
+  if (minTrimmed && parsedMin === null) {
+    minError = "Enter a valid minimum amount.";
+  } else if (parsedMin !== null) {
+    if (parsedMin < facetMin) {
+      minError = `Minimum amount cannot be below ₹${formatJewelleryPrice(facetMin)}.`;
+    } else if (parsedMin > facetMax) {
+      minError = `Minimum amount cannot exceed ₹${formatJewelleryPrice(facetMax)}.`;
+    }
+  }
+
+  if (maxTrimmed && parsedMax === null) {
+    maxError = "Enter a valid maximum amount.";
+  } else if (parsedMax !== null) {
+    if (parsedMax < facetMin) {
+      maxError = `Maximum amount cannot be below ₹${formatJewelleryPrice(facetMin)}.`;
+    } else if (parsedMax > facetMax) {
+      maxError = `Maximum amount cannot exceed ₹${formatJewelleryPrice(facetMax)}.`;
+    }
+  }
+
+  if (!minError && !maxError && intendedMin > intendedMax) {
+    maxError = JEWELLERY_MIN_ABOVE_MAX_ERROR;
+  }
+
+  return { minError, maxError };
+}
+
+export function resolveJewelleryDraftPriceRange(
+  draftMinPrice: number,
+  draftMaxPrice: number,
+  minInputValue: string,
+  maxInputValue: string,
+  facets: Pick<JewelleryFilterFacets, "minPrice" | "maxPrice">,
+): { minPrice: number; maxPrice: number } {
+  const minTrimmed = minInputValue.replace(/,/g, "").trim();
+  const maxTrimmed = maxInputValue.replace(/,/g, "").trim();
+
+  const nextMin = minTrimmed
+    ? parseJewelleryPriceInput(minInputValue, draftMinPrice)
+    : draftMinPrice;
+  const nextMax = maxTrimmed
+    ? parseJewelleryPriceInput(maxInputValue, draftMaxPrice)
+    : facets.maxPrice;
+
+  return normalizeJewelleryPriceRange(nextMin, nextMax, facets);
+}
+
+export function applyJewelleryPriceSearchParams(
+  params: URLSearchParams,
+  filters: JewelleryFilterState,
+  facets: Pick<JewelleryFilterFacets, "minPrice" | "maxPrice">,
+): void {
+  params.delete("minPrice");
+  params.delete("maxPrice");
+
+  if (isDefaultPriceRange(filters, facets)) {
+    return;
+  }
+
+  const min = Math.round(filters.minPrice);
+  const max = Math.round(filters.maxPrice);
+
+  if (min > facets.minPrice) {
+    params.set("minPrice", String(min));
+  }
+
+  if (max < facets.maxPrice) {
+    params.set("maxPrice", String(max));
+  }
 }
 
 /** Keeps min/max within facet bounds and ensures max is never below min. */
