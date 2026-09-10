@@ -42,7 +42,7 @@ export const validatePhone = (value: string, countryCode: string): FieldValidati
   const digits = value.replace(/\D/g, "");
 
   if (!digits) {
-    return { valid: false, error: "Phone number is required" };
+    return { valid: false, error: "Please enter a valid phone number" };
   }
 
   if (countryCode === "+91") {
@@ -85,7 +85,7 @@ export const validateOptionalEmail = (value: string): FieldValidation => {
       trimmed,
     )
   ) {
-    return { valid: false, error: "Enter a valid email address" };
+    return { valid: false, error: "Please enter a valid email" };
   }
 
   return { valid: true };

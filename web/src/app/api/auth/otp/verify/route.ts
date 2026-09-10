@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     );
   }
   if (email && !validateOptionalEmail(email).valid) {
-    return NextResponse.json({ error: "Enter a valid email address" }, { status: 400 });
+    return NextResponse.json({ error: "Please enter a valid email" }, { status: 400 });
   }
 
   // With a phone present the email is the new account's address; without one the

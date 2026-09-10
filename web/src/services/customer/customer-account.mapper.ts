@@ -196,7 +196,7 @@ export function mapCustomerAddressInputToMagento(input: CustomerAddressInput) {
 
   const phone = input.phone.replace(/\D/g, "");
   if (!phone) {
-    throw new Error("Phone number is required");
+    throw new Error("Please enter a valid phone number");
   }
 
   return {

@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
 
   if (email && !validateOptionalEmail(email).valid) {
     return NextResponse.json(
-      { error: "Enter a valid email address" },
+      { error: "Please enter a valid email" },
       { status: 400 },
     );
   }

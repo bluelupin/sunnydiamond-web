@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { Check } from "lucide-react";
 import Reveal from "@/shared/Animation/Reveal";
+import GiftingPanelCheckbox from "@/shared/ui/GiftingPanelCheckbox";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
 import { useToast } from "@/shared/hooks/use-toast";
@@ -21,6 +21,7 @@ import {
   sanitizePhoneInput,
 } from "@/shared/utils/formValidation";
 import { cn } from "@/shared/utils/cn";
+import ContactConsentLabel from "./ContactConsentLabel";
 
 
 const contactLabelClassName =
@@ -52,43 +53,6 @@ const ContactPhoneChevron = () => (
       style={{ width: 7.038, height: 14.651 }}
     />
   </span>
-);
-
-type ContactConsentCheckboxProps = {
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-};
-
-const ContactConsentCheckbox = ({ checked, onChange }: ContactConsentCheckboxProps) => (
-  <button
-    type="button"
-    role="checkbox"
-    aria-checked={checked}
-    onClick={() => onChange(!checked)}
-    className={cn(
-      "relative size-6 shrink-0",
-      checked
-        ? "flex items-center justify-center border border-transparent bg-linkGold"
-        : "overflow-clip md:flex md:items-center md:justify-center md:border md:border-darkblack md:bg-white",
-    )}
-  >
-    {checked ? (
-      <Check className="size-4 text-white" strokeWidth={2.5} aria-hidden />
-    ) : (
-      <>
-        <span className="absolute left-1/2 top-1/2 size-[18px] -translate-x-1/2 -translate-y-1/2 md:hidden">
-          <span className="absolute inset-[-2.78%]">
-            <img
-              src="/images/contact/icon-checkbox-off.svg"
-              alt=""
-              className="block size-full max-w-none"
-            />
-          </span>
-        </span>
-        <Check className="hidden size-4 opacity-0 md:block" strokeWidth={2.5} aria-hidden />
-      </>
-    )}
-  </button>
 );
 
 type ContactFormSectionProps = {
@@ -291,7 +255,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <div>
+                  <div className="flex flex-col gap-2">
                     <div className="flex h-[82px] flex-col items-start justify-between md:h-auto md:gap-2">
                       {form.fields.phoneLabel ? (
                         <label htmlFor="contact-phone" className={contactPhoneLabelClassName}>
@@ -375,7 +339,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
                 </div>
 
                 {form.fields.reasonLabel || reasonOptions.length > 0 ? (
-                <div>
+                <div className="flex flex-col gap-2">
                   <div className="flex h-[82px] flex-col items-start justify-between md:h-auto md:gap-2">
                     {form.fields.reasonLabel ? (
                       <label htmlFor="contact-reason" className={contactLabelClassName}>
@@ -433,12 +397,13 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
               {form.requiresConsent && form.consentLabel ? (
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
-                  <ContactConsentCheckbox
+                  <GiftingPanelCheckbox
                     checked={consentAccepted}
                     onChange={setConsentAccepted}
+                    aria-label="Accept terms and privacy policy"
                   />
                   <p className="min-w-0 flex-1 font-gill text-sm font-light leading-110 text-darkblack md:text-base">
-                    {form.consentLabel}
+                    <ContactConsentLabel label={form.consentLabel} />
                   </p>
                 </div>
                 {showConsentError ? (

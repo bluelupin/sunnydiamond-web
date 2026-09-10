@@ -4,6 +4,7 @@ import type { NormalizedContactInfoCard } from "@/services/contact/contact-page.
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import Image from "next/image";
 import React from "react";
+import ContactPhoneLink from "./ContactPhoneLink";
 type ContactInfoSectionProps = {
   intro: {
     description: string;
@@ -81,14 +82,22 @@ const ContactInfoSection = ({ intro, infoCards }: ContactInfoSectionProps) => {
                         height={20}
                         aria-hidden
                       />
-                      <DetailTextLink
-                        href={card.link.href}
-                        className="max-w-full break-all"
-                        target={isExternal ? "_blank" : undefined}
-                        rel={isExternal ? "noopener noreferrer" : undefined}
-                      >
-                        {card.link.label} 
-                      </DetailTextLink>
+                      {card.variant === "phone" ? (
+                        <ContactPhoneLink
+                          href={card.link.href}
+                          label={card.link.label}
+                          className="max-w-full break-all"
+                        />
+                      ) : (
+                        <DetailTextLink
+                          href={card.link.href}
+                          className="max-w-full break-all"
+                          target={isExternal ? "_blank" : undefined}
+                          rel={isExternal ? "noopener noreferrer" : undefined}
+                        >
+                          {card.link.label}
+                        </DetailTextLink>
+                      )}
                     </div>
                   </div>
                 </Reveal>
