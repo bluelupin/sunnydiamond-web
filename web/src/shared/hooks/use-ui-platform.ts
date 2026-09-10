@@ -18,7 +18,7 @@ export function useUiPlatform() {
   }
 
   if (typeof navigator === "undefined") {
-    return { windows: false, platform: "other" };
+    return { windows: false, platform: "other" as const };
   }
 
   const platform = detectUiPlatform(

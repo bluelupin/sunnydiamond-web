@@ -18,9 +18,9 @@ export type UiPlatformContextValue = {
 
 const UiPlatformContext = createContext<UiPlatformContextValue | null>(null);
 
-function readPlatformFromDocument(): UiPlatform {
+function readPlatformFromDocument(fallback: UiPlatform): UiPlatform {
   if (typeof document === "undefined") {
-    return "other";
+    return fallback;
   }
 
   const fromDom = document.documentElement.getAttribute("data-ui-platform");
@@ -35,8 +35,19 @@ function readPlatformFromDocument(): UiPlatform {
   );
 }
 
-export function UiPlatformProvider({ children }: { children: ReactNode }) {
-  const [platform, setPlatform] = useState<UiPlatform>(readPlatformFromDocument);
+type UiPlatformProviderProps = {
+  children: ReactNode;
+  /** Server-detected platform so SSR markup matches the first client render. */
+  initialPlatform?: UiPlatform;
+};
+
+export function UiPlatformProvider({
+  children,
+  initialPlatform = "other",
+}: UiPlatformProviderProps) {
+  const [platform, setPlatform] = useState<UiPlatform>(() =>
+    readPlatformFromDocument(initialPlatform),
+  );
 
   useLayoutEffect(() => {
     const detected = detectUiPlatform(

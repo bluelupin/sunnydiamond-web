@@ -481,7 +481,7 @@ const ProductDetailSidebar = ({
 
         <div className="flex flex-col gap-4">
           <div className="flex items-end justify-between gap-4">
-            <div className="flex items-center gap-3 font-gill text-2xl leading-110 text-darkblack">
+            <div className="flex items-center gap-3 font-gill md:text-2xl text-xl leading-110 text-darkblack">
               <span>₹{formatJewelleryPrice(pricing.price)}</span>
               {pricing.originalPrice != null && pricing.originalPrice > pricing.price ? (
                 <span className="text-gray600 line-through">
@@ -598,7 +598,7 @@ const ProductDetailSidebar = ({
       {showBenefitsStrip ? (
         <section aria-label="Shopping benefits" className="flex flex-col gap-6">
           <div className="flex items-center justify-between">
-            <h2 className="font-gill text-2xl leading-110 text-darkblack">{strip.title}</h2>
+            <h2 className="font-gill md:text-2xl text-xl leading-110 text-darkblack">{strip.title}</h2>
             {showStripTnc ? (
               <DetailTextLink
                 href={strip.tnc.href}
@@ -610,7 +610,7 @@ const ProductDetailSidebar = ({
             ) : null}
           </div>
           <Reveal direction="up">
-            <ul className="m-0 flex list-none flex-col bg-benefitSurface p-0 max-md:-mx-4 max-md:gap-6 max-md:px-4 max-md:py-10 md:max-desktop:portrait:gap-6 md:max-desktop:portrait:p-6 md:landscape:flex-row md:landscape:items-stretch md:landscape:gap-4 md:landscape:p-6 lg:landscape:gap-4">
+            <ul className="m-0 flex list-none flex-col bg-benefitSurface p-0 max-md:-mx-4 max-md:gap-6 max-md:px-4 max-md:py-10 md:max-desktop:portrait:gap-6 md:max-desktop:portrait:p-6 md:landscape:flex-row md:landscape:items-stretch md:landscape:gap-4 md:landscape:p-3 lg:landscape:p-6 lg:landscape:gap-4">
               {strip.items.flatMap((benefit, index) => {
                 const item = (
                   <li
@@ -668,7 +668,7 @@ const ProductDetailSidebar = ({
       {hereForYou.isActive ? (
         <section
           aria-label="Customer support"
-          className="flex items-center overflow-hidden bg-supportSurface md:px-6 px-4 md:py-8 py-6"
+          className="flex items-center overflow-hidden bg-supportSurface md:px-6 px-4 py-6"
         >
           <Reveal direction="up" className="flex max-w-358 flex-col gap-6">
             <div className="flex flex-col gap-3">

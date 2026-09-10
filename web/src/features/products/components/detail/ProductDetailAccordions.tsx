@@ -33,23 +33,22 @@ const ProductDetailAccordions = ({ items }: ProductDetailAccordionsProps) => {
               aria-controls={`product-accordion-${accordion.id}`}
               id={`product-accordion-trigger-${accordion.id}`}
               onClick={() => toggleAccordion(accordion.id)}
-              className="flex h-10 items-center justify-between text-left lg:h-14"
+              className="flex h-10 items-center justify-between text-left"
             >
-              <span className="font-gill text-xl font-normal leading-110 text-darkblack lg:text-2xl">
+              <span className="font-gill text-xl font-normal leading-110 text-darkblack">
                 {accordion.title}
               </span>
               <span className="inline-flex size-[32px] shrink-0 items-center justify-center p-[6px]" aria-hidden>
-                <Image
-                  src={
-                    isOpen
-                      ? "/images/products/pdp/accordion-minus.svg"
-                      : "/images/products/pdp/accordion-plus.svg"
-                  }
-                  alt=""
-                  width={12}
-                  height={12}
-                  className="size-[12px] object-contain"
-                />
+                {isOpen ?
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 12.25H20.5" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  :
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 12.25H20.5" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M12.25 4V20.5" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                }
               </span>
             </button>
             <div
@@ -58,7 +57,7 @@ const ProductDetailAccordions = ({ items }: ProductDetailAccordionsProps) => {
               aria-labelledby={`product-accordion-trigger-${accordion.id}`}
               aria-hidden={!isOpen}
               className={cn(
-                "grid min-h-0 transition-[grid-template-rows,opacity] duration-500 ease-in-out",
+                "grid min-h-0 transition-[grid-template-rows,opacity] duration-500 ease-in-out md:pb-3 pb-4",
                 isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
               )}
             >
@@ -68,7 +67,7 @@ const ProductDetailAccordions = ({ items }: ProductDetailAccordionsProps) => {
                 </p>
               </div>
             </div>
-            <div className="h-px bg-neutral300" aria-hidden />
+            <div className="h-[0.5px] bg-neutral300" aria-hidden />
           </div>
         );
       })}

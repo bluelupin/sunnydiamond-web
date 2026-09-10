@@ -1,15 +1,11 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import type { Product } from "@/features/products/data/products";
-import { TABLET_UP_MEDIA_QUERY } from "@/shared/lib/breakpoints";
 import { cn } from "@/shared/utils/cn";
 import ProductDetailGallery from "./ProductDetailGallery";
-import {
-  getPdpLifestyleHeightPx,
-  PDP_GALLERY_SECTION_GAP_PX,
-  PDP_STICKY_TOP_CLASS,
-} from "./productDetailLayout";
+import { usePdpPurchaseStickySync } from "@/features/products/hooks/usePdpPurchaseStickySync";
+import { PDP_STICKY_TOP_CLASS } from "./productDetailLayout";
 
 type ProductDetailHeroLayoutProps = {
   product: Product;
@@ -18,70 +14,47 @@ type ProductDetailHeroLayoutProps = {
 };
 
 const ProductDetailHeroLayout = ({ product, purchase, details }: ProductDetailHeroLayoutProps) => {
-  const topGalleryRef = useRef<HTMLDivElement>(null);
-  const rightColumnRef = useRef<HTMLDivElement>(null);
-  const [galleryContentHeight, setGalleryContentHeight] = useState<number | null>(null);
-  const [rightColumnHeight, setRightColumnHeight] = useState<number | null>(null);
+  const galleryRef = useRef<HTMLDivElement>(null);
+  const purchaseRef = useRef<HTMLDivElement>(null);
+  const { stickyRegionHeight, stickyRunwayHeight, isBottomAligned } = usePdpPurchaseStickySync({
+    galleryRef,
+    purchaseRef,
+    productId: product.id,
+  });
 
-  useLayoutEffect(() => {
-    const topGalleryNode = topGalleryRef.current;
-    const rightColumnNode = rightColumnRef.current;
-    if (!topGalleryNode || !rightColumnNode) return;
-
-    const mediaQuery = window.matchMedia(TABLET_UP_MEDIA_QUERY);
-
-    const updateHeights = () => {
-      if (!mediaQuery.matches) {
-        setGalleryContentHeight(null);
-        setRightColumnHeight(null);
-        return;
-      }
-
-      const topGalleryHeight = topGalleryNode.getBoundingClientRect().height;
-      const lifestyleHeight = getPdpLifestyleHeightPx();
-      setGalleryContentHeight(topGalleryHeight + lifestyleHeight + PDP_GALLERY_SECTION_GAP_PX);
-      setRightColumnHeight(rightColumnNode.getBoundingClientRect().height);
-    };
-
-    updateHeights();
-
-    const resizeObserver = new ResizeObserver(updateHeights);
-    resizeObserver.observe(topGalleryNode);
-    resizeObserver.observe(rightColumnNode);
-    mediaQuery.addEventListener("change", updateHeights);
-    window.addEventListener("resize", updateHeights);
-
-    return () => {
-      resizeObserver.disconnect();
-      mediaQuery.removeEventListener("change", updateHeights);
-      window.removeEventListener("resize", updateHeights);
-    };
-  }, []);
-
-  const leftColumnMinHeight =
-    galleryContentHeight && rightColumnHeight
-      ? Math.max(galleryContentHeight, rightColumnHeight)
-      : null;
+  const rightColumnStyle =
+    stickyRegionHeight > 0
+      ? { gridTemplateRows: `${stickyRegionHeight}px auto` }
+      : undefined;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-[minmax(0,783fr)_minmax(0,553fr)] md:items-start md:gap-4 lg:gap-6">
-      <div
-        className="flex min-w-0 flex-col md:self-stretch"
-        style={leftColumnMinHeight ? { minHeight: `${leftColumnMinHeight}px` } : undefined}
-      >
-        <div className="flex min-h-full flex-1 flex-col">
-          <ProductDetailGallery
-            product={product}
-            topGalleryRef={topGalleryRef}
-          />
-        </div>
+      <div className="flex min-w-0 flex-col">
+        <ProductDetailGallery product={product} galleryRef={galleryRef} />
       </div>
 
-      <div ref={rightColumnRef} className="flex min-w-0 flex-col gap-8 md:mt-8 md:gap-0">
-        <div style={galleryContentHeight ? { height: `${galleryContentHeight - 250}px` } : undefined}>
-          <div className={cn("md:sticky md:self-start", PDP_STICKY_TOP_CLASS)}>{purchase}</div>
+      <div
+        className="grid min-w-0 grid-cols-1 gap-8 md:mt-8 md:gap-0"
+        data-pdp-right-column
+        data-pdp-sticky-aligned={isBottomAligned ? "true" : "false"}
+        style={rightColumnStyle}
+      >
+        <div
+          ref={purchaseRef}
+          className={cn("row-start-1 min-w-0 md:sticky md:self-start", PDP_STICKY_TOP_CLASS)}
+        >
+          {purchase}
+          <div
+            className="row-start-2 min-w-0 md:mt-10 mt-6"
+          // style={
+          //   stickyRunwayHeight > 0
+          //     ? { marginTop: `-${stickyRunwayHeight}px` }
+          //     : undefined
+          // }
+          >
+            {details}
+          </div>
         </div>
-        <div className="pt-6 md:pt-6">{details}</div>
       </div>
     </div>
   );

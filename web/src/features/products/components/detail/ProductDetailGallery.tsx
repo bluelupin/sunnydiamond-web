@@ -8,12 +8,13 @@ import { useHorizontalCarouselSwipe } from "@/features/products/hooks/useHorizon
 import {
   getProductDetailCarouselImages,
   getProductDetailGallerySlots,
+  getProductDetailLifestyleImages,
+  lifestyleGalleryFrameClass,
 } from "./productDetailCarouselImages";
-import { PDP_STICKY_TOP_CLASS } from "./productDetailLayout";
-
 type ProductDetailGalleryProps = {
   product: Product;
-  topGalleryRef?: RefObject<HTMLDivElement | null>;
+  /** Desktop gallery/image block — bottom edge used for sticky sync. */
+  galleryRef?: RefObject<HTMLDivElement | null>;
 };
 
 const heroGalleryFrameClass =
@@ -22,10 +23,11 @@ const heroGalleryFrameClass =
 const thumbGalleryFrameClass =
   "relative flex w-full overflow-hidden bg-gray300 md:h-380 lg:h-465 sm:w-1/2";
 
-const ProductDetailGallery = ({ product, topGalleryRef }: ProductDetailGalleryProps) => {
+const ProductDetailGallery = ({ product, galleryRef }: ProductDetailGalleryProps) => {
   const [activeSlide, setActiveSlide] = useState(0);
-  const { heroImage, thumbOne, thumbTwo, lifestyleImage } = getProductDetailGallerySlots(product);
+  const { heroImage, thumbOne, thumbTwo } = getProductDetailGallerySlots(product);
   const carouselImages = getProductDetailCarouselImages(product);
+  const lifestyleImages = getProductDetailLifestyleImages(product);
 
   const goToNextSlide = useCallback(() => {
     setActiveSlide((current) => (current + 1) % carouselImages.length);
@@ -89,8 +91,8 @@ const ProductDetailGallery = ({ product, topGalleryRef }: ProductDetailGalleryPr
         </div>
       </div>
 
-      <div className="hidden min-h-full flex-1 flex-col gap-3 md:flex">
-        <div ref={topGalleryRef} className="flex shrink-0 flex-col gap-3">
+      <div ref={galleryRef} className="hidden flex-col gap-3 md:flex">
+        <div className="flex shrink-0 flex-col gap-3">
           <div className={heroGalleryFrameClass}>
             <OptimizedImage
               src={heroImage}
@@ -121,20 +123,22 @@ const ProductDetailGallery = ({ product, topGalleryRef }: ProductDetailGalleryPr
           </div>
         </div>
 
-        <div className="relative min-h-520 flex-1 lg:min-h-680">
-          <div
-            className={cn(
-              "relative flex h-420 w-full md:sticky md:z-10 md:self-start md:h-520 lg:h-680",
-              PDP_STICKY_TOP_CLASS,
-            )}
-          >
-            <OptimizedImage
-              src={lifestyleImage}
-              alt={`${product.name} — lifestyle`}
-              sizes="(max-width: 1024px) 100vw, 783px"
-              className="size-full object-cover object-center"
-            />
-          </div>
+        <div className="flex flex-col gap-3">
+          {lifestyleImages.map((image, index) => (
+            <div
+              key={`${String(image)}-${index}`}
+              className={cn(
+                lifestyleGalleryFrameClass,
+              )}
+            >
+              <OptimizedImage
+                src={image}
+                alt={`${product.name} — lifestyle${lifestyleImages.length > 1 ? ` ${index + 1}` : ""}`}
+                sizes="(max-width: 1024px) 100vw, 783px"
+                className="size-full object-cover object-center"
+              />
+            </div>
+          ))}
         </div>
       </div>
     </>

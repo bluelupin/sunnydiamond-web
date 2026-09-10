@@ -32,3 +32,21 @@ export const getProductDetailCarouselImages = (product: Product) => {
     product.image,
   ].slice(0, PRODUCT_DETAIL_GALLERY_SLIDE_COUNT);
 };
+
+const lifestyleGalleryFrameClass =
+  "relative flex w-full overflow-hidden bg-gray300 md:h-520 lg:h-680";
+
+/** Desktop lifestyle column — one or more images, each in its own frame. */
+export function getProductDetailLifestyleImages(product: Product): Product["image"][] {
+  const { heroImage, thumbOne, thumbTwo, lifestyleImage } = getProductDetailGallerySlots(product);
+  const heroKeys = new Set([String(heroImage), String(thumbOne), String(thumbTwo)]);
+  const lifestyleStack = product.images.filter((image) => !heroKeys.has(String(image)));
+
+  if (lifestyleStack.length > 0) {
+    return lifestyleStack;
+  }
+
+  return [lifestyleImage];
+}
+
+export { lifestyleGalleryFrameClass };

@@ -19,6 +19,7 @@ import {
   type AuthFeatureFlags,
 } from '@/features/auth/types/authFeatures.types';
 import { UiPlatformProvider } from '@/shared/context/UiPlatformContext';
+import type { UiPlatform } from '@/shared/utils/detectUiPlatform';
 
 const CartBagDrawer = dynamic(
   () => import('@/features/cart/components/CartBagDrawer'),
@@ -28,12 +29,14 @@ const CartBagDrawer = dynamic(
 export default function AppProvider({
   children,
   authFeatures = DEFAULT_AUTH_FEATURE_FLAGS,
+  initialUiPlatform = "other",
 }: {
   children: React.ReactNode;
   authFeatures?: AuthFeatureFlags;
+  initialUiPlatform?: UiPlatform;
 }) {
   return (
-    <UiPlatformProvider>
+    <UiPlatformProvider initialPlatform={initialUiPlatform}>
     <AppStatusToastProvider>
       <AuthFeaturesProvider flags={authFeatures}>
         <AuthProvider>

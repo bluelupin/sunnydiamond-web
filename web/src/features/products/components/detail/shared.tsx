@@ -35,12 +35,12 @@ export const DetailTextLink = ({
     const handleClick =
       disabled || onClick
         ? (event: React.MouseEvent<HTMLAnchorElement>) => {
-            if (disabled) {
-              event.preventDefault();
-              return;
-            }
-            onClick?.();
+          if (disabled) {
+            event.preventDefault();
+            return;
           }
+          onClick?.();
+        }
         : undefined;
 
     return (
@@ -118,5 +118,5 @@ type AttributeSeparatorProps = {
 };
 
 export const AttributeSeparator = ({ className }: AttributeSeparatorProps) => (
-  <span aria-hidden className={cn("h-18 w-px shrink-0 bg-neutral300", className)} />
+  <div aria-hidden className={cn("h-18 w-px shrink-0 bg-neutral300", className)} />
 );

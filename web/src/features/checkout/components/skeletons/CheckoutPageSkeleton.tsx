@@ -48,7 +48,7 @@ function SkeletonOrderSummaryItem() {
 function SkeletonOrderSummaryAside() {
   return (
     <aside className="h-fit w-full min-w-0 md:sticky md:top-12 max-md:hidden">
-      <div className="flex flex-col gap-6 bg-white p-6">
+      <div className="flex flex-col gap-6 bg-white lg:p-6 md:p-5 p-6">
         <div className="flex flex-col gap-6">
           <SkeletonBlock className="h-7 w-40 lg:h-8 lg:w-44" />
           <div className="h-px w-full bg-neutral300" aria-hidden />

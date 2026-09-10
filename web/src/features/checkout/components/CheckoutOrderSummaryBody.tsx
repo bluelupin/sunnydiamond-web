@@ -137,16 +137,18 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
             <CheckoutSummaryDivider />
           </div>
 
-          <OffersAndDealsSection
-            variant="panel-gray300"
-            open={offersOpen}
-            onToggle={toggleOffers}
-            showExpandedContent={false}
-            buttonClassName="flex lg:hidden"
-          />
-          <OffersAndDealsCollapsible open={offersOpen} variant="panel-gray300" className="lg:hidden">
-            <OffersAndDealsExpandedContent variant="panel-gray300" />
-          </OffersAndDealsCollapsible>
+          <div className="flex flex-col overflow-hidden bg-gray300 md:hidden">
+            <OffersAndDealsSection
+              variant="panel-gray300"
+              open={offersOpen}
+              onToggle={toggleOffers}
+              showExpandedContent={false}
+              buttonClassName="flex w-full md:hidden"
+            />
+            <OffersAndDealsCollapsible open={offersOpen} variant="panel-gray300" className="md:hidden">
+              <OffersAndDealsExpandedContent variant="panel-gray300" className="px-4 pb-4" />
+            </OffersAndDealsCollapsible>
+          </div>
 
           <PriceDetailsBreakdown
             variant="checkout"
@@ -158,16 +160,16 @@ const CheckoutOrderSummaryBody = ({ compact = false }: CheckoutOrderSummaryBodyP
             shippingLabel={shippingDisplay.label}
             total={displayTotal}
           />
-          <div className="lg:bg-gray300">
+          <div className="md:bg-gray300">
             <OffersAndDealsSection
               variant="panel-gray300"
               open={offersOpen}
               onToggle={toggleOffers}
               showExpandedContent={false}
-              buttonClassName="hidden lg:flex"
+              buttonClassName="hidden md:flex"
             />
-            <OffersAndDealsCollapsible open={offersOpen} variant="panel-gray300" className="hidden lg:grid">
-              <OffersAndDealsExpandedContent variant="panel-gray300" className="lg:px-4 lg:pb-4" />
+            <OffersAndDealsCollapsible open={offersOpen} variant="panel-gray300" className="hidden md:grid">
+              <OffersAndDealsExpandedContent variant="panel-gray300" className="md:px-4 md:pb-4" />
             </OffersAndDealsCollapsible>
           </div>
         </div>
