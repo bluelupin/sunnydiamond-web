@@ -13,11 +13,21 @@ export const getCachedMagentoJewelleryNavCategories = cache(async () =>
 );
 
 export const getCachedJewelleryListing = cache(
-  async (categoryUrlKey: string | null): Promise<JewelleryListingProductsData> => {
+  async (
+    categoryUrlKey: string | null,
+    collectionSlug?: string | null,
+  ): Promise<JewelleryListingProductsData> => {
+    const filters = createEmptyFilterState();
+    const collection = collectionSlug?.trim();
+
+    if (collection) {
+      filters.collection = collection;
+    }
+
     const { listing } = await getMagentoJewelleryInitialListing({
       categoryUrlKey,
       sortValue: DEFAULT_JEWELLERY_LISTING_SORT,
-      filters: createEmptyFilterState(),
+      filters,
       includeFacets: true,
     });
 
@@ -33,11 +43,14 @@ export async function prefetchMagentoJewelleryNav() {
   }
 }
 
-export async function prefetchJewelleryListing(categoryUrlKey: string | null) {
+export async function prefetchJewelleryListing(
+  categoryUrlKey: string | null,
+  collectionSlug?: string | null,
+) {
   try {
     return await measureJewelleryPlpGraphql(
       "server-listing-prefetch",
-      () => getCachedJewelleryListing(categoryUrlKey),
+      () => getCachedJewelleryListing(categoryUrlKey, collectionSlug),
       { category: categoryUrlKey ?? "all" },
     );
   } catch {

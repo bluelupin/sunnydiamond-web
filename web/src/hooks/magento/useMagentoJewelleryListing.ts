@@ -6,9 +6,11 @@ import {
   createEmptyFilterState,
   getExactJewelleryPriceFilter,
   getJewelleryListingFiltersKey,
+  hasActiveFilters,
   DEFAULT_JEWELLERY_LISTING_SORT,
 } from "@/features/jewellery-product/data/filters";
 import {
+  clearMagentoJewelleryListingCache,
   getMagentoJewelleryInitialListing,
   getMagentoJewelleryProducts,
   seedMagentoJewelleryListingCache,
@@ -26,6 +28,7 @@ export type JewelleryListingPrefetchParams = {
   categoryUrlKey: string | null;
   sortValue: string;
   pageSize: number;
+  filters?: JewelleryFilterState;
 };
 
 type UseMagentoJewelleryListingParams = {
@@ -35,6 +38,8 @@ type UseMagentoJewelleryListingParams = {
   pageSize?: number;
   initialListing?: JewelleryListingProductsData;
   initialListingParams?: JewelleryListingPrefetchParams;
+  /** Increment to force a full listing refetch (e.g. after Clear All). */
+  listingResetNonce?: number;
 };
 
 const MAX_EMPTY_PAGE_SKIPS = 10;
@@ -104,7 +109,7 @@ function seedInitialListingPageCaches(
         page,
         pageSize: params.pageSize,
         sortValue: params.sortValue,
-        filters: createEmptyFilterState(),
+        filters: params.filters ?? createEmptyFilterState(),
         facets,
         includeFacets: page === 1,
       },
@@ -122,11 +127,20 @@ function seedInitialListingPageCaches(
 
 export function createJewelleryListingPrefetchParams(
   categoryUrlKey: string | null,
+  collectionSlug?: string | null,
 ): JewelleryListingPrefetchParams {
+  const filters = createEmptyFilterState();
+  const collection = collectionSlug?.trim();
+
+  if (collection) {
+    filters.collection = collection;
+  }
+
   return {
     categoryUrlKey,
     sortValue: DEFAULT_JEWELLERY_LISTING_SORT,
     pageSize: PAGE_SIZE,
+    filters,
   };
 }
 
@@ -137,6 +151,7 @@ export function useMagentoJewelleryListing({
   pageSize = PAGE_SIZE,
   initialListing,
   initialListingParams,
+  listingResetNonce = 0,
 }: UseMagentoJewelleryListingParams): UseMagentoJewelleryListingState {
   const prefetchedScopeKey = initialListingParams
     ? buildListingScopeKey(
@@ -190,6 +205,7 @@ export function useMagentoJewelleryListing({
   );
   const consumePrefetchedListingRef = useRef(Boolean(initialListing && initialListingParams));
   const seededListingCacheRef = useRef(false);
+  const lastListingResetNonceRef = useRef(listingResetNonce);
 
   useEffect(() => {
     facetsRef.current = facets;
@@ -277,20 +293,27 @@ export function useMagentoJewelleryListing({
     } finally {
       if (requestId === requestIdRef.current) {
         setIsLoading(false);
-        setResolvedListingQueryKey(
-          buildListingQueryKey(
-            categoryUrlKey,
-            sortValue,
-            pageSize,
-            filtersRef.current,
-            facetsRef.current,
-          ),
+        const resolvedKey = buildListingQueryKey(
+          categoryUrlKey,
+          sortValue,
+          pageSize,
+          filtersRef.current,
+          facetsRef.current,
         );
+        appliedFiltersKeyRef.current = getJewelleryListingFiltersKey(
+          filtersRef.current,
+          facetsRef.current,
+        );
+        setResolvedListingQueryKey(resolvedKey);
       }
     }
   }, [applyInitialListing, categoryUrlKey, pageSize, sortValue]);
 
   useEffect(() => {
+    if (listingResetNonce !== lastListingResetNonceRef.current) {
+      return;
+    }
+
     const currentScopeKey = buildListingScopeKey(categoryUrlKey, sortValue, pageSize);
 
     if (
@@ -299,8 +322,10 @@ export function useMagentoJewelleryListing({
       prefetchedScopeKey === currentScopeKey
     ) {
       consumePrefetchedListingRef.current = false;
-      const emptyFiltersKey = getJewelleryListingFiltersKey(
-        createEmptyFilterState(),
+      const prefetchedFiltersForKey =
+        initialListingParams?.filters ?? createEmptyFilterState();
+      const prefetchedFiltersKey = getJewelleryListingFiltersKey(
+        prefetchedFiltersForKey,
         initialListing.facets,
       );
       const liveFiltersKey = getJewelleryListingFiltersKey(
@@ -309,7 +334,7 @@ export function useMagentoJewelleryListing({
       );
       facetsRef.current = initialListing.facets;
 
-      if (liveFiltersKey === emptyFiltersKey) {
+      if (liveFiltersKey === prefetchedFiltersKey) {
         appliedFiltersKeyRef.current = liveFiltersKey;
         setResolvedListingQueryKey(
           buildListingQueryKey(
@@ -323,7 +348,7 @@ export function useMagentoJewelleryListing({
         return;
       }
 
-      appliedFiltersKeyRef.current = emptyFiltersKey;
+      appliedFiltersKeyRef.current = prefetchedFiltersKey;
     }
 
     currentPageRef.current = 1;
@@ -331,9 +356,21 @@ export function useMagentoJewelleryListing({
     pendingProductsRef.current = [];
     setPendingCount(0);
     void fetchInitialListing();
-  }, [categoryUrlKey, sortValue, pageSize, fetchInitialListing, initialListing, prefetchedScopeKey]);
+  }, [
+    categoryUrlKey,
+    sortValue,
+    pageSize,
+    fetchInitialListing,
+    initialListing,
+    prefetchedScopeKey,
+    listingResetNonce,
+  ]);
 
   useEffect(() => {
+    if (listingResetNonce !== lastListingResetNonceRef.current) {
+      return;
+    }
+
     const nextKey = getJewelleryListingFiltersKey(filters, facetsRef.current);
     if (nextKey === appliedFiltersKeyRef.current) {
       return;
@@ -345,7 +382,31 @@ export function useMagentoJewelleryListing({
     pendingProductsRef.current = [];
     setPendingCount(0);
     void fetchInitialListing();
-  }, [filters, fetchInitialListing]);
+  }, [filters, fetchInitialListing, listingResetNonce]);
+
+  useEffect(() => {
+    if (listingResetNonce === lastListingResetNonceRef.current) {
+      return;
+    }
+
+    lastListingResetNonceRef.current = listingResetNonce;
+    consumePrefetchedListingRef.current = false;
+    clearMagentoJewelleryListingCache();
+    facetsRef.current = EMPTY_JEWELLERY_FILTER_FACETS;
+    appliedFiltersKeyRef.current = getJewelleryListingFiltersKey(
+      filtersRef.current,
+      EMPTY_JEWELLERY_FILTER_FACETS,
+    );
+    currentPageRef.current = 1;
+    setCurrentPage(1);
+    pendingProductsRef.current = [];
+    setPendingCount(0);
+    setProducts([]);
+    setTotalCount(0);
+    setTotalPages(0);
+    totalPagesRef.current = 0;
+    void fetchInitialListing();
+  }, [listingResetNonce, fetchInitialListing]);
 
   const loadMore = useCallback(() => {
     if (isLoadingMoreRef.current) {

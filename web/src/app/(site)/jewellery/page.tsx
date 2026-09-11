@@ -9,7 +9,7 @@ import { buildJewelleryListingBreadcrumbJsonLd } from "@/shared/lib/seo/schema/b
 import { getProductLandingPage } from "@/services/product-landing/product-landing-page.service";
 import { prefetchJewelleryListing } from "@/lib/magento/prefetchMagento";
 import { hasGiftFinderSearchParams } from "@/features/gifting/utils/giftFinderRoutes";
-import { hasCollectionListingSearchParams } from "@/features/jewellery-product/utils/collectionListing";
+import { resolveCategoryUrlKeyFromQueryParam } from "@/features/jewellery-product/utils/jewelleryRoutes";
 import JewelleryProductPage from "@/features/jewellery-product/components/JewelleryProductPage";
 import JsonLd from "@/shared/lib/seo/JsonLd";
 import { resolveImageSrcString } from "@/shared/utils/image";
@@ -29,7 +29,7 @@ type PageProps = {
 };
 
 function shouldSkipJewelleryListingPrefetch(searchParams: JewelleryListingSearchParams): boolean {
-  return hasGiftFinderSearchParams(searchParams) || hasCollectionListingSearchParams(searchParams);
+  return hasGiftFinderSearchParams(searchParams);
 }
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
@@ -50,9 +50,12 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
 
 export default async function Page({ searchParams }: PageProps) {
   const params = await searchParams;
+  const prefetchedCategoryUrlKey = params.collection
+    ? resolveCategoryUrlKeyFromQueryParam(params.category)
+    : null;
   const initialListing = shouldSkipJewelleryListingPrefetch(params)
     ? undefined
-    : await prefetchJewelleryListing(null);
+    : await prefetchJewelleryListing(prefetchedCategoryUrlKey, params.collection);
   const page = await getProductLandingPage();
   const seo = resolveJewellerySeoMetadata(page);
 
@@ -78,7 +81,7 @@ export default async function Page({ searchParams }: PageProps) {
       <Suspense fallback={null}>
         <JewelleryProductPage
           initialListing={initialListing}
-          prefetchedCategoryUrlKey={initialListing ? null : undefined}
+          prefetchedCategoryUrlKey={initialListing ? prefetchedCategoryUrlKey : undefined}
           hero={page.hero}
           trustBadges={page.trustBadges}
         />

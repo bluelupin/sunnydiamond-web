@@ -25,10 +25,15 @@ import {
   reconcileJewelleryPriceFilterState,
 } from "../data/filters";
 import {
+  hasCollectionListingContext,
   isJewelleryCategoryPath,
+  JEWELLERY_PATH,
   parseJewelleryCategorySlug,
-  replaceJewelleryCategoryUrl,
+  preserveJewelleryListingSearchParams,
+  readJewelleryListingUrlParams,
+  replaceJewelleryListingUrl,
   resolveCategoryUrlKeyFromPathname,
+  resolveCategoryUrlKeyFromQueryParam,
   resolveSelectedCategoryUrlKey,
   shouldSyncCategoryFromRouterPathname,
 } from "../utils/jewelleryRoutes";
@@ -93,11 +98,12 @@ const JewelleryProductPage = ({
   const diamondShapeSlug = searchParams?.get("diamondShape");
   const fancyColourSlug = searchParams?.get("fancyColour");
   const collectionSlug = searchParams?.get("collection");
+  const categorySlugFromUrl = searchParams?.get("category");
   const minPriceFromUrl = parseGiftFinderPriceParam(searchParams?.get("minPrice"));
   const maxPriceFromUrl = parseGiftFinderPriceParam(searchParams?.get("maxPrice"));
 
   const [selectedCategoryUrlKey, setSelectedCategoryUrlKey] = useState<string | null>(() =>
-    resolveSelectedCategoryUrlKey(pathname, categoryUrlKeyFromRoute),
+    resolveSelectedCategoryUrlKey(pathname, categoryUrlKeyFromRoute, searchParams?.toString()),
   );
 
   const [sortValue, setSortValue] = useState(DEFAULT_JEWELLERY_LISTING_SORT);
@@ -122,13 +128,16 @@ const JewelleryProductPage = ({
   const lastCollectionSlugRef = useRef<string | null>(null);
   const lastPriceParamsRef = useRef<string | null>(null);
   const lastFacetPriceBoundsRef = useRef("");
+  const suppressFacetUrlSyncRef = useRef(false);
+  const awaitingClearListingRef = useRef(false);
   const plpTtfbReportedRef = useRef(false);
   const plpPrefetchReportedRef = useRef(false);
+  const [listingResetNonce, setListingResetNonce] = useState(0);
   const { isWishlisted, toggleWishlist } = useWishlist();
 
   const initialListingParams =
     initialListing && prefetchedCategoryUrlKey !== undefined
-      ? createJewelleryListingPrefetchParams(prefetchedCategoryUrlKey)
+      ? createJewelleryListingPrefetchParams(prefetchedCategoryUrlKey, collectionSlug)
       : undefined;
 
   const {
@@ -147,6 +156,7 @@ const JewelleryProductPage = ({
     pageSize: PAGE_SIZE,
     initialListing,
     initialListingParams,
+    listingResetNonce,
   });
 
   useEffect(() => {
@@ -154,22 +164,52 @@ const JewelleryProductPage = ({
       return;
     }
 
-    setSelectedCategoryUrlKey(resolveSelectedCategoryUrlKey(pathname, categoryUrlKeyFromRoute));
-  }, [pathname, categoryUrlKeyFromRoute]);
+    setSelectedCategoryUrlKey(
+      resolveSelectedCategoryUrlKey(pathname, categoryUrlKeyFromRoute, searchParams?.toString()),
+    );
+  }, [pathname, categoryUrlKeyFromRoute, searchParams]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    if (!hasCollectionListingContext(params)) {
+      return;
+    }
+
+    const pathCategoryUrlKey = resolveCategoryUrlKeyFromPathname(window.location.pathname);
+    if (!pathCategoryUrlKey) {
+      return;
+    }
+
+    replaceJewelleryListingUrl(pathCategoryUrlKey, params);
+    setSelectedCategoryUrlKey(pathCategoryUrlKey);
+    lastFacetsSyncedCategoryRef.current = pathCategoryUrlKey;
+    facetsSyncedRef.current = true;
+  }, []);
 
   useEffect(() => {
     const syncCategoryFromBrowserUrl = () => {
       const currentPath = window.location.pathname;
-      if (!isJewelleryCategoryPath(currentPath)) {
+      const params = new URLSearchParams(window.location.search);
+      const preserved = preserveJewelleryListingSearchParams(params);
+      const collectionFromUrl = preserved.get("collection")?.trim() ?? "";
+
+      const nextUrlKey = hasCollectionListingContext(preserved)
+        ? resolveCategoryUrlKeyFromQueryParam(params.get("category"))
+        : isJewelleryCategoryPath(currentPath)
+          ? resolveCategoryUrlKeyFromPathname(currentPath)
+          : null;
+
+      if (!hasCollectionListingContext(preserved) && !isJewelleryCategoryPath(currentPath)) {
         return;
       }
 
-      const nextUrlKey = resolveCategoryUrlKeyFromPathname(currentPath);
       setSelectedCategoryUrlKey(nextUrlKey);
-      facetsSyncedRef.current = false;
-
-      const params = new URLSearchParams(window.location.search);
-      const collectionFromUrl = params.get("collection")?.trim() ?? "";
+      lastFacetsSyncedCategoryRef.current = nextUrlKey;
+      facetsSyncedRef.current = true;
 
       if (nextUrlKey === null) {
         setFilters({
@@ -185,24 +225,31 @@ const JewelleryProductPage = ({
     return () => window.removeEventListener("popstate", syncCategoryFromBrowserUrl);
   }, []);
 
-  const navigateToCategory = useCallback((urlKey?: string | null) => {
-    const nextUrlKey = urlKey?.trim() || null;
-    setSelectedCategoryUrlKey(nextUrlKey);
+  const navigateToCategory = useCallback(
+    (urlKey?: string | null) => {
+      const nextUrlKey = urlKey?.trim() || null;
+      setSelectedCategoryUrlKey(nextUrlKey);
 
-    const collectionFromUrl = searchParams?.get("collection")?.trim() ?? "";
+      const preservedSearchParams = preserveJewelleryListingSearchParams(
+        searchParams?.toString() ?? window.location.search,
+      );
+      const collectionFromUrl = preservedSearchParams.get("collection")?.trim() ?? "";
 
-    if (nextUrlKey === null) {
-      setFilters({
-        ...createEmptyFilterState(),
-        ...(collectionFromUrl ? { collection: collectionFromUrl } : {}),
-      });
-    } else {
-      setFilters((current) => createClearedDrawerFilterState(current));
-    }
+      if (nextUrlKey === null) {
+        setFilters({
+          ...createEmptyFilterState(),
+          ...(collectionFromUrl ? { collection: collectionFromUrl } : {}),
+        });
+      } else {
+        setFilters((current) => createClearedDrawerFilterState(current));
+      }
 
-    facetsSyncedRef.current = false;
-    replaceJewelleryCategoryUrl(nextUrlKey);
-  }, [searchParams]);
+      lastFacetsSyncedCategoryRef.current = nextUrlKey;
+      facetsSyncedRef.current = true;
+      replaceJewelleryListingUrl(nextUrlKey, preservedSearchParams);
+    },
+    [searchParams],
+  );
 
   useEffect(() => {
     markJewelleryPlpNavigation();
@@ -269,39 +316,87 @@ const JewelleryProductPage = ({
     return fromDrawerCategory ?? "all";
   }, [selectedCategoryUrlKey, filters, facets, navCategories]);
 
+  const resetPlpListingScope = useCallback(() => {
+    suppressFacetUrlSyncRef.current = true;
+    awaitingClearListingRef.current = true;
+    setSelectedCategoryUrlKey(null);
+    lastFacetsSyncedCategoryRef.current = null;
+    lastCollectionSlugRef.current = null;
+    lastOccasionSlugRef.current = null;
+    lastDiamondShapeSlugRef.current = null;
+    lastFancyColourSlugRef.current = null;
+    lastPriceParamsRef.current = "|";
+    facetsSyncedRef.current = true;
+    replaceJewelleryListingUrl(null, new URLSearchParams());
+
+    const currentPath =
+      typeof window !== "undefined" ? window.location.pathname : pathname ?? JEWELLERY_PATH;
+    if (currentPath !== JEWELLERY_PATH && currentPath !== `${JEWELLERY_PATH}/`) {
+      router.replace(JEWELLERY_PATH, { scroll: false });
+    }
+
+    setListingResetNonce((nonce) => nonce + 1);
+  }, [pathname, router]);
+
   useEffect(() => {
+    if (!awaitingClearListingRef.current || isLoading) {
+      return;
+    }
+
+    awaitingClearListingRef.current = false;
+    suppressFacetUrlSyncRef.current = true;
+  }, [isLoading]);
+
+  useEffect(() => {
+    if (suppressFacetUrlSyncRef.current) {
+      suppressFacetUrlSyncRef.current = false;
+      return;
+    }
+
+    if (awaitingClearListingRef.current) {
+      return;
+    }
+
     if (!hasMagentoFilterFacets(facets)) {
       return;
     }
 
-    const occasionOption = resolveOccasionFacetOption(occasionSlug, facets.occasions);
-    const occasionChanged = lastOccasionSlugRef.current !== (occasionSlug ?? null);
-    lastOccasionSlugRef.current = occasionSlug ?? null;
+    const liveUrlParams = readJewelleryListingUrlParams(searchParams?.toString());
+    const liveOccasionSlug = liveUrlParams.get("occasion");
+    const liveDiamondShapeSlug = liveUrlParams.get("diamondShape");
+    const liveFancyColourSlug = liveUrlParams.get("fancyColour");
+    const liveCollectionSlug = liveUrlParams.get("collection");
+    const liveMinPriceFromUrl = parseGiftFinderPriceParam(liveUrlParams.get("minPrice"));
+    const liveMaxPriceFromUrl = parseGiftFinderPriceParam(liveUrlParams.get("maxPrice"));
+
+    const occasionOption = resolveOccasionFacetOption(liveOccasionSlug, facets.occasions);
+    const occasionChanged = lastOccasionSlugRef.current !== (liveOccasionSlug ?? null);
+    lastOccasionSlugRef.current = liveOccasionSlug ?? null;
 
     const diamondShapeOption = resolveDiamondShapeFacetOption(
-      diamondShapeSlug,
+      liveDiamondShapeSlug,
       facets.diamondShapes,
     );
     const diamondShapeChanged =
-      lastDiamondShapeSlugRef.current !== (diamondShapeSlug ?? null);
-    lastDiamondShapeSlugRef.current = diamondShapeSlug ?? null;
+      lastDiamondShapeSlugRef.current !== (liveDiamondShapeSlug ?? null);
+    lastDiamondShapeSlugRef.current = liveDiamondShapeSlug ?? null;
 
     const fancyColourOption = resolveFancyColourFacetOption(
-      fancyColourSlug,
+      liveFancyColourSlug,
       facets.fancyColours,
     );
     const fancyColourChanged =
-      lastFancyColourSlugRef.current !== (fancyColourSlug ?? null);
-    lastFancyColourSlugRef.current = fancyColourSlug ?? null;
+      lastFancyColourSlugRef.current !== (liveFancyColourSlug ?? null);
+    lastFancyColourSlugRef.current = liveFancyColourSlug ?? null;
 
     const collectionOption = resolveCollectionFacetOption(
-      collectionSlug,
+      liveCollectionSlug,
       facets.collections,
     );
-    const collectionChanged = lastCollectionSlugRef.current !== (collectionSlug ?? null);
-    lastCollectionSlugRef.current = collectionSlug ?? null;
+    const collectionChanged = lastCollectionSlugRef.current !== (liveCollectionSlug ?? null);
+    lastCollectionSlugRef.current = liveCollectionSlug ?? null;
 
-    const priceParamsKey = `${minPriceFromUrl}|${maxPriceFromUrl}`;
+    const priceParamsKey = `${liveMinPriceFromUrl}|${liveMaxPriceFromUrl}`;
     const priceParamsChanged = lastPriceParamsRef.current !== priceParamsKey;
     lastPriceParamsRef.current = priceParamsKey;
 
@@ -334,14 +429,14 @@ const JewelleryProductPage = ({
       }
       if (collectionOption) {
         nextDraft.collection = collectionOption.value;
-      } else if (collectionSlug?.trim()) {
-        nextDraft.collection = collectionSlug.trim();
+      } else if (liveCollectionSlug?.trim()) {
+        nextDraft.collection = liveCollectionSlug.trim();
       }
       return applyGiftFinderPriceToFilterState(
         nextDraft,
         facets,
-        minPriceFromUrl,
-        maxPriceFromUrl,
+        liveMinPriceFromUrl,
+        liveMaxPriceFromUrl,
       );
     };
 
@@ -353,7 +448,10 @@ const JewelleryProductPage = ({
       facetsSyncedRef.current = true;
       lastFacetsSyncedCategoryRef.current = selectedCategoryUrlKey;
       lastFacetPriceBoundsRef.current = facetPriceBoundsKey;
-      const nextDraft = reconcileJewelleryPriceFilterState(buildFiltersFromUrl(), facets);
+      const nextDraft = reconcileJewelleryPriceFilterState(
+        buildFiltersFromUrl(filters),
+        facets,
+      );
       setFilters(nextDraft);
       return;
     }
@@ -369,16 +467,7 @@ const JewelleryProductPage = ({
         reconcileJewelleryPriceFilterState(buildFiltersFromUrl(current), facets),
       );
     }
-  }, [
-    facets,
-    selectedCategoryUrlKey,
-    occasionSlug,
-    diamondShapeSlug,
-    fancyColourSlug,
-    collectionSlug,
-    minPriceFromUrl,
-    maxPriceFromUrl,
-  ]);
+  }, [facets, selectedCategoryUrlKey, searchParams]);
 
   const handleCategoryChange = useCallback(
     (category: JewelleryCategory) => {
@@ -406,25 +495,29 @@ const JewelleryProductPage = ({
         }
       }
 
-      setFilters(nextFilters);
-      setIsFilterOpen(false);
-
       const clearedToDefault =
         hasMagentoFilterFacets(facets) && !hasActiveFilters(nextFilters, facets);
 
+      if (clearedToDefault) {
+        setFilters(createEmptyFilterState());
+        setIsFilterOpen(false);
+        resetPlpListingScope();
+        return;
+      }
+
+      setFilters(nextFilters);
+      setIsFilterOpen(false);
+
       if (pathname) {
-        const params = new URLSearchParams(searchParams?.toString() ?? "");
+        const params = readJewelleryListingUrlParams(searchParams?.toString());
         applyJewelleryPriceSearchParams(params, nextFilters, facets);
 
-        if (clearedToDefault) {
-          params.delete("occasion");
-          params.delete("diamondShape");
-          params.delete("fancyColour");
-          params.delete("collection");
+        if (hasCollectionListingContext(params) || nextFilters.collection.trim()) {
+          replaceJewelleryListingUrl(selectedCategoryUrlKey, params);
+        } else {
+          const query = params.toString();
+          router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
         }
-
-        const query = params.toString();
-        router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
       }
     },
     [
@@ -436,15 +529,13 @@ const JewelleryProductPage = ({
       router,
       searchParams,
       navigateToCategory,
+      resetPlpListingScope,
     ],
   );
 
   const handleClearFilters = useCallback(() => {
-    const cleared = hasMagentoFilterFacets(facets)
-      ? createDefaultFilterState(facets)
-      : createEmptyFilterState();
-    handleApplyFilters(cleared);
-  }, [facets, handleApplyFilters]);
+    handleApplyFilters(createEmptyFilterState());
+  }, [handleApplyFilters]);
 
   const showFilterEmptyState =
     !isLoading && products.length === 0 && hasActiveFilters(filters, facets);

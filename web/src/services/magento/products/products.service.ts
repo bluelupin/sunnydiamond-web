@@ -195,12 +195,22 @@ export async function getMagentoJewelleryProducts(
 
   if (typeof window !== "undefined") {
     listingInFlight.set(key, promise);
-    void promise.finally(() => {
+    void promise.catch(() => undefined).finally(() => {
       listingInFlight.delete(key);
     });
   }
 
   return promise;
+}
+
+/** Clears client-side PLP listing cache (e.g. after Clear All). */
+export function clearMagentoJewelleryListingCache(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  listingResultCache.clear();
+  listingInFlight.clear();
 }
 
 /** Seeds the client listing cache after a server prefetch so hydration does not refetch. */

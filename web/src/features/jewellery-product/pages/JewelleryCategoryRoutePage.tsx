@@ -15,7 +15,6 @@ import {
   isJewelleryCategoryUrlKey,
 } from "@/features/jewellery-product/utils/jewelleryRoutes";
 import { hasGiftFinderSearchParams } from "@/features/gifting/utils/giftFinderRoutes";
-import { hasCollectionListingSearchParams } from "@/features/jewellery-product/utils/collectionListing";
 import JsonLd from "@/shared/lib/seo/JsonLd";
 import { resolveImageSrcString } from "@/shared/utils/image";
 
@@ -37,7 +36,7 @@ function shouldSkipJewelleryListingPrefetch(
     ? T
     : never,
 ): boolean {
-  return hasGiftFinderSearchParams(searchParams) || hasCollectionListingSearchParams(searchParams);
+  return hasGiftFinderSearchParams(searchParams);
 }
 
 export async function generateJewelleryCategoryMetadata({
@@ -81,7 +80,7 @@ export async function JewelleryCategoryRoutePage({
   const [initialListing, page, nav] = await Promise.all([
     shouldSkipJewelleryListingPrefetch(query)
       ? Promise.resolve(undefined)
-      : prefetchJewelleryListing(categoryUrlKey),
+      : prefetchJewelleryListing(categoryUrlKey, query.collection),
     getProductLandingPage(),
     getMagentoJewelleryNavCategories(),
   ]);
