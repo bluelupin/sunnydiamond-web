@@ -25,7 +25,7 @@ import {
   reconcileJewelleryPriceFilterState,
 } from "../data/filters";
 import {
-  hasCollectionListingContext,
+  hasPrimaryListingContext,
   isJewelleryCategoryPath,
   JEWELLERY_PATH,
   parseJewelleryCategorySlug,
@@ -137,7 +137,10 @@ const JewelleryProductPage = ({
 
   const initialListingParams =
     initialListing && prefetchedCategoryUrlKey !== undefined
-      ? createJewelleryListingPrefetchParams(prefetchedCategoryUrlKey, collectionSlug)
+      ? createJewelleryListingPrefetchParams(prefetchedCategoryUrlKey, {
+          collectionSlug,
+          occasionSlug,
+        })
       : undefined;
 
   const {
@@ -175,7 +178,7 @@ const JewelleryProductPage = ({
     }
 
     const params = new URLSearchParams(window.location.search);
-    if (!hasCollectionListingContext(params)) {
+    if (!hasPrimaryListingContext(params)) {
       return;
     }
 
@@ -196,14 +199,15 @@ const JewelleryProductPage = ({
       const params = new URLSearchParams(window.location.search);
       const preserved = preserveJewelleryListingSearchParams(params);
       const collectionFromUrl = preserved.get("collection")?.trim() ?? "";
+      const occasionFromUrl = preserved.get("occasion")?.trim() ?? "";
 
-      const nextUrlKey = hasCollectionListingContext(preserved)
+      const nextUrlKey = hasPrimaryListingContext(preserved)
         ? resolveCategoryUrlKeyFromQueryParam(params.get("category"))
         : isJewelleryCategoryPath(currentPath)
           ? resolveCategoryUrlKeyFromPathname(currentPath)
           : null;
 
-      if (!hasCollectionListingContext(preserved) && !isJewelleryCategoryPath(currentPath)) {
+      if (!hasPrimaryListingContext(preserved) && !isJewelleryCategoryPath(currentPath)) {
         return;
       }
 
@@ -215,6 +219,7 @@ const JewelleryProductPage = ({
         setFilters({
           ...createEmptyFilterState(),
           ...(collectionFromUrl ? { collection: collectionFromUrl } : {}),
+          ...(occasionFromUrl ? { occasion: occasionFromUrl } : {}),
         });
       } else {
         setFilters((current) => createClearedDrawerFilterState(current));
@@ -234,11 +239,13 @@ const JewelleryProductPage = ({
         searchParams?.toString() ?? window.location.search,
       );
       const collectionFromUrl = preservedSearchParams.get("collection")?.trim() ?? "";
+      const occasionFromUrl = preservedSearchParams.get("occasion")?.trim() ?? "";
 
       if (nextUrlKey === null) {
         setFilters({
           ...createEmptyFilterState(),
           ...(collectionFromUrl ? { collection: collectionFromUrl } : {}),
+          ...(occasionFromUrl ? { occasion: occasionFromUrl } : {}),
         });
       } else {
         setFilters((current) => createClearedDrawerFilterState(current));
@@ -512,7 +519,11 @@ const JewelleryProductPage = ({
         const params = readJewelleryListingUrlParams(searchParams?.toString());
         applyJewelleryPriceSearchParams(params, nextFilters, facets);
 
-        if (hasCollectionListingContext(params) || nextFilters.collection.trim()) {
+        if (
+          hasPrimaryListingContext(params) ||
+          nextFilters.collection.trim() ||
+          nextFilters.occasion.trim()
+        ) {
           replaceJewelleryListingUrl(selectedCategoryUrlKey, params);
         } else {
           const query = params.toString();

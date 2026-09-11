@@ -130,15 +130,65 @@ export function preserveJewelleryListingSearchParams(
 
 export const JEWELLERY_CATEGORY_QUERY_PARAM = "category";
 
-export function hasCollectionListingContext(
-  searchParams?: URLSearchParams | string | null,
-): boolean {
-  const params =
-    typeof searchParams === "string"
-      ? new URLSearchParams(searchParams)
-      : searchParams ?? new URLSearchParams();
+type JewelleryListingSearchParamsInput =
+  | URLSearchParams
+  | string
+  | { collection?: string | null; occasion?: string | null }
+  | null
+  | undefined;
 
+function toJewelleryListingSearchParams(
+  searchParams?: JewelleryListingSearchParamsInput,
+): URLSearchParams {
+  if (!searchParams) {
+    return new URLSearchParams();
+  }
+
+  if (typeof searchParams === "string") {
+    return new URLSearchParams(searchParams);
+  }
+
+  if (searchParams instanceof URLSearchParams) {
+    return searchParams;
+  }
+
+  const params = new URLSearchParams();
+  const collection = searchParams.collection?.trim();
+  const occasion = searchParams.occasion?.trim();
+
+  if (collection) {
+    params.set("collection", collection);
+  }
+
+  if (occasion) {
+    params.set("occasion", occasion);
+  }
+
+  return params;
+}
+
+export function hasCollectionListingContext(
+  searchParams?: JewelleryListingSearchParamsInput,
+): boolean {
+  const params = toJewelleryListingSearchParams(searchParams);
   return Boolean(params.get("collection")?.trim());
+}
+
+export function hasOccasionListingContext(
+  searchParams?: JewelleryListingSearchParamsInput,
+): boolean {
+  const params = toJewelleryListingSearchParams(searchParams);
+  return Boolean(params.get("occasion")?.trim());
+}
+
+/**
+ * Collection- or occasion-first PLP URLs stay on `/jewellery` and encode category
+ * as `?category=` so primary filters persist across tab changes.
+ */
+export function hasPrimaryListingContext(
+  searchParams?: JewelleryListingSearchParamsInput,
+): boolean {
+  return hasCollectionListingContext(searchParams) || hasOccasionListingContext(searchParams);
 }
 
 export function resolveCategoryUrlKeyFromQueryParam(
@@ -172,9 +222,9 @@ export function buildJewelleryListingHref(options: {
   searchParams?: URLSearchParams | string | null;
 }): string {
   const preserved = preserveJewelleryListingSearchParams(options.searchParams);
-  const collectionActive = hasCollectionListingContext(preserved);
+  const primaryListingActive = hasPrimaryListingContext(preserved);
 
-  if (collectionActive) {
+  if (primaryListingActive) {
     const categorySlug = resolveCategoryQueryParamFromUrlKey(options.categoryUrlKey);
     if (categorySlug) {
       preserved.set(JEWELLERY_CATEGORY_QUERY_PARAM, categorySlug);
@@ -250,7 +300,7 @@ function resolveCategoryUrlKeyFromSearch(
       ? new URLSearchParams(searchParams)
       : searchParams ?? new URLSearchParams();
 
-  if (!hasCollectionListingContext(params)) {
+  if (!hasPrimaryListingContext(params)) {
     return null;
   }
 
@@ -266,9 +316,9 @@ export function resolveSelectedCategoryUrlKey(
   const browserSearch =
     typeof window !== "undefined" ? window.location.search : (typeof search === "string" ? search : search?.toString() ?? "");
 
-  const fromCollectionCategory = resolveCategoryUrlKeyFromSearch(browserSearch);
-  if (fromCollectionCategory != null || hasCollectionListingContext(browserSearch)) {
-    return fromCollectionCategory;
+  const fromPrimaryListingCategory = resolveCategoryUrlKeyFromSearch(browserSearch);
+  if (fromPrimaryListingCategory != null || hasPrimaryListingContext(browserSearch)) {
+    return fromPrimaryListingCategory;
   }
 
   if (typeof window !== "undefined") {

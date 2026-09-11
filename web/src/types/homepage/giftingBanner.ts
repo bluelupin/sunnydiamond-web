@@ -8,6 +8,8 @@ export type GiftingBanner = {
   mobileDescription?: string;
   mobileSubtitle?: string;
   isActive?: boolean;
+  filterSlug?: string;
+  filterType?: "collection" | "occasion";
   primaryCta?: { label?: string; url?: string; to?: string };
   secondaryCta?: { label?: string; url?: string; to?: string };
   cta?: { label?: string; url?: string; to?: string };

@@ -275,6 +275,11 @@ function mapGiftingBanner(raw?: StrapiGiftingBanner | null): GiftingBanner | nul
     subtitle: cleanText(raw.subtitle),
     mobileDescription: cleanText(raw.mobileDescription),
     mobileSubtitle: cleanText(raw.mobileSubtitle),
+    filterSlug: cleanText(raw.filterSlug),
+    filterType:
+      raw.filterType === "collection" || raw.filterType === "occasion"
+        ? raw.filterType
+        : undefined,
     isActive,
     cta: mapCta(raw.cta),
     primaryCta: mapCta(raw.primaryCta ?? raw.cta),

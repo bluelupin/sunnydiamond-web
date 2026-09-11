@@ -142,6 +142,8 @@ export type StrapiGiftingBanner = {
   subtitle?: string | null;
   mobileDescription?: string | null;
   mobileSubtitle?: string | null;
+  filterSlug?: string | null;
+  filterType?: "collection" | "occasion" | null;
   isActive?: boolean | null;
   showField?: boolean | null;
   cta?: StrapiHomepageCta | null;

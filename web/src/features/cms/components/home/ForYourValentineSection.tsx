@@ -10,6 +10,7 @@ import { resolveResponsiveCmsImage } from "@/shared/utils/responsiveCmsImage";
 import Reveal from "@/shared/Animation/Reveal";
 import { useMutedVideoPlayback } from "@/shared/hooks/useMutedVideoPlayback";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
+import { buildJewelleryListingCtaHref } from "@/features/jewellery-product/utils/listingCta";
 import { cn } from "@/shared/utils/cn";
 import type { CategoryNavigationImage, GiftingBanner } from "@/types/homepage/categoryNavigation";
 
@@ -52,7 +53,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
   const description =
     giftingData?.description?.trim() || giftingData?.subtitle?.trim() || undefined;
 
-  const primaryCtaUrl =
+  const primaryCtaSourceUrl =
     giftingData?.primaryCta?.url ||
     giftingData?.primaryCta?.to ||
     giftingData?.cta?.url ||
@@ -60,7 +61,7 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
   const primaryCtaLabel =
     giftingData?.primaryCta?.label?.trim() || giftingData?.cta?.label?.trim();
 
-  const secondaryCtaUrl =
+  const secondaryCtaSourceUrl =
     giftingData?.secondaryCta?.url ||
     giftingData?.secondaryCta?.to ||
     giftingData?.secondary?.url ||
@@ -68,6 +69,32 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
   const secondaryCtaLabel =
     giftingData?.secondaryCta?.label?.trim() ||
     giftingData?.secondary?.label?.trim();
+
+  const listingCtaOptions = useMemo(
+    () => ({
+      filterSlug: giftingData?.filterSlug,
+      filterType: giftingData?.filterType,
+    }),
+    [giftingData?.filterSlug, giftingData?.filterType],
+  );
+
+  const primaryCtaUrl = useMemo(
+    () =>
+      buildJewelleryListingCtaHref({
+        ctaUrl: primaryCtaSourceUrl,
+        ...listingCtaOptions,
+      }),
+    [listingCtaOptions, primaryCtaSourceUrl],
+  );
+
+  const secondaryCtaUrl = useMemo(
+    () =>
+      buildJewelleryListingCtaHref({
+        ctaUrl: secondaryCtaSourceUrl,
+        ...listingCtaOptions,
+      }),
+    [listingCtaOptions, secondaryCtaSourceUrl],
+  );
 
   const backgroundImages = useMemo(
     () => resolveResponsiveCmsImage(giftingData?.backgroundImage as CategoryNavigationImage),

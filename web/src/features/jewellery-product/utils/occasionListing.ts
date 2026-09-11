@@ -112,6 +112,11 @@ export function buildOccasionCardHref({
   filterSlug?: string | null;
   ctaUrl?: string | null;
 }): string {
+  const magentoOccasionSlug = filterSlug?.trim() || slug?.trim();
+  if (magentoOccasionSlug) {
+    return buildJewelleryOccasionHref(magentoOccasionSlug);
+  }
+
   const normalizedCtaUrl = ctaUrl?.trim();
   if (normalizedCtaUrl && !GENERIC_PRODUCT_LISTING_PATHS.has(normalizedCtaUrl.toLowerCase())) {
     // Prefer CMS deep links, but always clean `?occasion=` when present.
@@ -121,7 +126,5 @@ export function buildOccasionCardHref({
     return normalizedCtaUrl;
   }
 
-  const occasionSlug =
-    filterSlug?.trim() || slug?.trim() || slugifyOccasionTitle(title);
-  return buildJewelleryOccasionHref(occasionSlug);
+  return buildJewelleryOccasionHref(slugifyOccasionTitle(title));
 }

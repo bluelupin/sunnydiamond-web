@@ -58,6 +58,9 @@ export type GiftingBanner = {
   mobileDescription?: string | null;
   mobileSubtitle?: string | null;
   isActive?: boolean | null;
+  /** Magento `sd_collection` or `sd_occasions` slug for PLP Shop Now CTAs. */
+  filterSlug?: string | null;
+  filterType?: "collection" | "occasion" | null;
   primaryCta?: CategoryNavigationCta | null;
   secondaryCta?: CategoryNavigationCta | null;
   cta?: CategoryNavigationCta | null;

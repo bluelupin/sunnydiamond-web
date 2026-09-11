@@ -127,13 +127,18 @@ function seedInitialListingPageCaches(
 
 export function createJewelleryListingPrefetchParams(
   categoryUrlKey: string | null,
-  collectionSlug?: string | null,
+  options?: { collectionSlug?: string | null; occasionSlug?: string | null },
 ): JewelleryListingPrefetchParams {
   const filters = createEmptyFilterState();
-  const collection = collectionSlug?.trim();
+  const collection = options?.collectionSlug?.trim();
+  const occasion = options?.occasionSlug?.trim();
 
   if (collection) {
     filters.collection = collection;
+  }
+
+  if (occasion) {
+    filters.occasion = occasion;
   }
 
   return {

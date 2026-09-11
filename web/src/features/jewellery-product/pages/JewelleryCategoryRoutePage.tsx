@@ -14,6 +14,7 @@ import JewelleryProductPage from "@/features/jewellery-product/components/Jewell
 import {
   isJewelleryCategoryUrlKey,
 } from "@/features/jewellery-product/utils/jewelleryRoutes";
+import type { JewelleryListingPrefetchFilters } from "@/lib/magento/prefetchMagento";
 import { hasGiftFinderSearchParams } from "@/features/gifting/utils/giftFinderRoutes";
 import JsonLd from "@/shared/lib/seo/JsonLd";
 import { resolveImageSrcString } from "@/shared/utils/image";
@@ -80,7 +81,10 @@ export async function JewelleryCategoryRoutePage({
   const [initialListing, page, nav] = await Promise.all([
     shouldSkipJewelleryListingPrefetch(query)
       ? Promise.resolve(undefined)
-      : prefetchJewelleryListing(categoryUrlKey, query.collection),
+      : prefetchJewelleryListing(categoryUrlKey, {
+          collection: query.collection,
+          occasion: query.occasion,
+        } satisfies JewelleryListingPrefetchFilters),
     getProductLandingPage(),
     getMagentoJewelleryNavCategories(),
   ]);

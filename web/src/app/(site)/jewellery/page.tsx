@@ -9,7 +9,10 @@ import { buildJewelleryListingBreadcrumbJsonLd } from "@/shared/lib/seo/schema/b
 import { getProductLandingPage } from "@/services/product-landing/product-landing-page.service";
 import { prefetchJewelleryListing } from "@/lib/magento/prefetchMagento";
 import { hasGiftFinderSearchParams } from "@/features/gifting/utils/giftFinderRoutes";
-import { resolveCategoryUrlKeyFromQueryParam } from "@/features/jewellery-product/utils/jewelleryRoutes";
+import {
+  hasPrimaryListingContext,
+  resolveCategoryUrlKeyFromQueryParam,
+} from "@/features/jewellery-product/utils/jewelleryRoutes";
 import JewelleryProductPage from "@/features/jewellery-product/components/JewelleryProductPage";
 import JsonLd from "@/shared/lib/seo/JsonLd";
 import { resolveImageSrcString } from "@/shared/utils/image";
@@ -50,12 +53,15 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
 
 export default async function Page({ searchParams }: PageProps) {
   const params = await searchParams;
-  const prefetchedCategoryUrlKey = params.collection
+  const prefetchedCategoryUrlKey = hasPrimaryListingContext(params)
     ? resolveCategoryUrlKeyFromQueryParam(params.category)
     : null;
   const initialListing = shouldSkipJewelleryListingPrefetch(params)
     ? undefined
-    : await prefetchJewelleryListing(prefetchedCategoryUrlKey, params.collection);
+    : await prefetchJewelleryListing(prefetchedCategoryUrlKey, {
+        collection: params.collection,
+        occasion: params.occasion,
+      });
   const page = await getProductLandingPage();
   const seo = resolveJewellerySeoMetadata(page);
 
