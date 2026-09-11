@@ -80,6 +80,15 @@ function filterNavGroups(
     .filter((group) => group.items.length > 0);
 }
 
+function getMatchingPolicyIds(
+  navGroups: PolicyNavGroup[],
+  query: string,
+): string[] {
+  return filterNavGroups(navGroups, query).flatMap((group) =>
+    group.items.map((policy) => policy.id),
+  );
+}
+
 function resolveActivePolicyId(
   page: NormalizedPolicyCertificationsPage,
   candidate: string | undefined,
@@ -131,26 +140,38 @@ function PolicySearchField({
 function PolicyDesktopSidebar({
   navGroups,
   activePolicyId,
+  searchQuery,
+  matchingPolicyIds,
   onSelect,
 }: {
   navGroups: PolicyNavGroup[];
   activePolicyId: string;
+  searchQuery: string;
+  matchingPolicyIds: string[];
   onSelect: (policyId: string) => void;
 }) {
+  const hasSearch = searchQuery.trim().length > 0;
+  const matchingPolicyIdSet = useMemo(
+    () => new Set(matchingPolicyIds),
+    [matchingPolicyIds],
+  );
+
   return (
     <nav
       aria-label="Policy categories"
-      className="hidden w-full shrink-0 border-r border-neutral300 lg:block lg:w-[435px]"
+      className="box-border hidden w-full shrink-0 border-r border-neutral300 lg:block lg:w-[435px] lg:min-w-[435px] lg:max-w-[435px]"
     >
-      <div className="flex flex-col gap-6">
+      <div className="flex w-full flex-col gap-6">
         {navGroups.map((group) => (
           <div key={group.id} className="flex w-full flex-col items-start gap-4">
-            <p className="font-gill text-xl font-light leading-110 text-darkblack">
+            <p className="whitespace-nowrap font-gill text-xl font-light leading-110 text-darkblack">
               {group.label}
             </p>
             <ul className="flex w-full flex-col items-start">
               {group.items.map((policy) => {
                 const isActive = policy.id === activePolicyId;
+                const isSearchMatch = hasSearch && matchingPolicyIdSet.has(policy.id);
+                const isHighlighted = hasSearch ? isSearchMatch : isActive;
 
                 return (
                   <li key={policy.id} className="w-full">
@@ -159,13 +180,13 @@ function PolicyDesktopSidebar({
                       onClick={() => onSelect(policy.id)}
                       className={cn(
                         "flex h-[70px] w-full items-center p-6 text-left transition-colors",
-                        isActive
+                        isHighlighted
                           ? "border-r-2 border-darkblack bg-gray300 font-gill text-xl font-normal leading-110 text-darkblack"
                           : "font-gill text-xl font-light leading-110 text-darkblack hover:bg-gray300/60",
                       )}
                       aria-current={isActive ? "page" : undefined}
                     >
-                      {policy.navLabel}
+                      <span className="whitespace-nowrap">{policy.navLabel}</span>
                     </button>
                   </li>
                 );
@@ -493,13 +514,10 @@ function PolicySupportSection({
                 </div>
               ))}
             </div>
-            <Link
-              href={support.phoneHref}
-              className="flex w-full items-center justify-center gap-2 font-gill text-base font-normal leading-110 text-darkblack"
-            >
+            <span className="flex w-full items-center justify-center gap-2 font-gill text-base font-normal leading-110 text-darkblack">
               <ContactSupportIcon name="phone" />
               {support.phoneLabel}
-            </Link>
+            </span>
           </div>
           <Link href={support.contactHref} className={cn(ctaClassName, "hidden lg:inline-flex")}>
             {support.contactCtaLabel}
@@ -522,13 +540,10 @@ function PolicySupportSection({
               <p className="w-full font-gill text-base font-light leading-110 text-darkblack">
                 {support.emailDescription}
               </p>
-              <Link
-                href={support.emailHref}
-                className="flex w-full items-center justify-center gap-2 font-gill text-base font-normal leading-110 text-darkblack"
-              >
+              <span className="flex w-full items-center justify-center gap-2 font-gill text-base font-normal leading-110 text-darkblack">
                 <ContactSupportIcon name="email" />
                 {support.emailLabel}
-              </Link>
+              </span>
             </div>
           </div>
           <Link href={support.emailHref} className={cn(ctaClassName, "hidden lg:inline-flex")}>
@@ -554,6 +569,20 @@ const PolicyCertificationsPage = ({
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileShowDetail, setMobileShowDetail] = useState(Boolean(policyFromUrl));
+
+  const matchingPolicyIds = useMemo(
+    () => getMatchingPolicyIds(page.navGroups, searchQuery),
+    [page.navGroups, searchQuery],
+  );
+
+  useEffect(() => {
+    const normalized = searchQuery.trim();
+    if (!normalized || matchingPolicyIds.length === 0) {
+      return;
+    }
+
+    setActivePolicyId(matchingPolicyIds[0]);
+  }, [searchQuery, matchingPolicyIds]);
 
   useEffect(() => {
     const resolvedFromUrl = resolvePolicyIdFromParam(
@@ -585,7 +614,6 @@ const PolicyCertificationsPage = ({
 
   const handleDesktopPolicySelect = (policyId: string) => {
     setActivePolicyId(policyId);
-    setSearchQuery("");
   };
 
   return (
@@ -637,6 +665,8 @@ const PolicyCertificationsPage = ({
             <PolicyDesktopSidebar
               navGroups={page.navGroups}
               activePolicyId={activePolicyId}
+              searchQuery={searchQuery}
+              matchingPolicyIds={matchingPolicyIds}
               onSelect={handleDesktopPolicySelect}
             />
             <PolicyContentPanel
