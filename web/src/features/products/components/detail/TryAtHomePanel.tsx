@@ -26,6 +26,7 @@ import {
   type NormalizedProductForm,
 } from "@/services/forms/product-form.service";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { buildProfileSectionHref } from "@/features/account/utils/profileSectionNavigation";
 import { wishlistMovedToastDurationMs } from "@/features/wishlist/data/content";
 import {
   invalidFieldClassName,
@@ -38,7 +39,7 @@ import {
   validateOptionalAddressLine2,
   shouldShowFieldError,
 } from "@/shared/utils/formValidation";
-import { DetailDarkButton } from "./shared";
+import { DetailDarkButton, DetailTextLink } from "./shared";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
@@ -145,7 +146,7 @@ const TryAtHomeDetailsStep = ({
               </h2>
               <RightPanelCloseButton onClick={onClose} aria-label="Close try at home panel" />
             </div>
-            <div className="h-px w-full bg-neutral300" aria-hidden />
+            <div className="h-[1px] w-full bg-neutral300" aria-hidden />
           </div>
 
           <div className="flex flex-col items-center gap-2 pb-4">
@@ -348,18 +349,16 @@ const TryAtHomeAddressStep = ({
               </div>
               <RightPanelCloseButton onClick={onClose} aria-label="Close try at home panel" />
             </div>
-            <div className="h-px w-full bg-neutral300" aria-hidden />
+            <div className="h-[1px] w-full bg-neutral300" aria-hidden />
           </div>
 
           <div className="flex justify-center">
-            <button
-              type="button"
+            <DetailTextLink
               onClick={handleUseCurrentLocation}
               disabled={isLocating}
-              className="text-link-underline inline-flex border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isLocating ? "DETECTING LOCATION..." : "USE CURRENT LOCATION"}
-            </button>
+            </DetailTextLink>
           </div>
 
           <div className="flex flex-col gap-6 pb-72">
@@ -643,6 +642,7 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
 
   const handleViewBooking = () => {
     handleClose();
+    router.push(buildProfileSectionHref("appointments"));
   };
 
   const handleContinueShopping = () => {

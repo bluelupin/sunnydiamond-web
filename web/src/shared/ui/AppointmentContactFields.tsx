@@ -58,12 +58,18 @@ type AppointmentContactFieldsProps = {
   emailLabel?: string;
   emailPlaceholder?: string;
   dateLabel?: string;
+  dateRequired?: boolean;
   timeSlotsLabel?: string;
+  timeSlotRequired?: boolean;
   noteLabel?: string;
   notePlaceholder?: string;
   noteLabelClassName?: string;
   noteTextareaClassName?: string;
 };
+
+function formatRequiredFieldLabel(label: string): string {
+  return label.endsWith("*") ? label : `${label}*`;
+}
 
 const AppointmentContactFields = ({
   idPrefix,
@@ -103,7 +109,9 @@ const AppointmentContactFields = ({
   emailLabel = "Email",
   emailPlaceholder = "Enter",
   dateLabel = "Date",
+  dateRequired = false,
   timeSlotsLabel = "Time Slots",
+  timeSlotRequired = false,
   noteLabel = "Describe more about your visit",
   notePlaceholder = "Enter",
   noteLabelClassName,
@@ -213,7 +221,7 @@ const AppointmentContactFields = ({
       {showDate ? (
         <div className="flex flex-col gap-2">
           <label htmlFor={`${idPrefix}-date`} className={labelClassName}>
-            {dateLabel}
+            {dateRequired ? formatRequiredFieldLabel(dateLabel) : dateLabel}
           </label>
           <AppointmentDateField
             id={`${idPrefix}-date`}
@@ -232,7 +240,9 @@ const AppointmentContactFields = ({
 
       {showTimeSlots && onSelectedSlotChange && slots.length > 0 ? (
         <div className="flex flex-col gap-2">
-          <span className={labelClassName}>{timeSlotsLabel}</span>
+          <span className={labelClassName}>
+            {timeSlotRequired ? formatRequiredFieldLabel(timeSlotsLabel) : timeSlotsLabel}
+          </span>
           <div className="flex flex-col gap-3">
             {Array.from({ length: Math.ceil(slots.length / 2) }, (_, row) => (
               <div key={row} className="flex gap-2">

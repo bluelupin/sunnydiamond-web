@@ -1,7 +1,10 @@
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
-import { resolveVisitUsCtaFields } from "@/services/product-display/product-display-page.mapper";
-import type { NormalizedVisitUsSection } from "@/services/product-display/product-display-page.types";
+import { mapVisitUsSection } from "@/services/product-display/product-display-page.mapper";
+import type {
+  NormalizedVisitUsSection,
+  StrapiProductDisplayVisitUsSection,
+} from "@/services/product-display/product-display-page.types";
 import {
   EMPTY_CONTACT_PAGE,
   type NormalizedContactForm,
@@ -319,47 +322,41 @@ const mapForm = (section?: StrapiContactFormSection | null): NormalizedContactFo
   };
 };
 
-const mapShowroomVisitImage = (
-  showrooms?: StrapiContactVisitShowroom[] | null,
-): NormalizedContactResponsiveImage | null => {
-  for (const showroom of showrooms ?? []) {
-    if (!showroom || !resolveSectionActive(showroom.isActive, showroom.showField)) continue;
+const adaptContactVisitSectionForPdpMapper = (
+  section: StrapiContactVisitSection,
+): StrapiProductDisplayVisitUsSection => ({
+  id: section.id,
+  sectionTitle: section.sectionTitle,
+  description: section.description,
+  sortOrder: section.sortOrder,
+  showField: section.showField,
+  cta: section.cta,
+  formCta: section.formCta,
+  showrooms: section.showrooms
+    ?.filter((showroom): showroom is StrapiContactVisitShowroom =>
+      Boolean(showroom && resolveSectionActive(showroom.isActive, showroom.showField)),
+    )
+    .map((showroom) => ({
+      id: typeof showroom.id === "number" ? showroom.id : undefined,
+      name: showroom.name,
+      slug: showroom.slug,
+      isActive: true,
+      image: showroom.image,
+    })),
+});
 
-    const mapped = mapResponsiveImage(showroom.image);
-    if (mapped) return mapped;
+/** Uses the same mapper as PDP so imagery, CTA, and Book a Visit behavior stay aligned. */
+const mapVisitUs = (section?: StrapiContactVisitSection | null): NormalizedVisitUsSection | null => {
+  if (!section || !resolveSectionActive(section.isActive, section.showField)) {
+    return null;
   }
 
-  return null;
-};
+  const mapped = mapVisitUsSection(adaptContactVisitSectionForPdpMapper(section));
+  if (!mapped.isActive || !mapped.title.trim()) {
+    return null;
+  }
 
-const mapVisitUs = (section?: StrapiContactVisitSection | null): NormalizedVisitUsSection | null => {
-  if (!section || !resolveSectionActive(section.isActive, section.showField)) return null;
-
-  const title = cleanText(section.sectionTitle);
-  if (!title) return null;
-
-  const sectionImage = mapResponsiveImage(section.image);
-  const showroomImage = mapShowroomVisitImage(section.showrooms);
-  const image = sectionImage ?? showroomImage;
-  if (!image) return null;
-
-  const desktopUrl = image.desktopUrl;
-  const mobileUrl = image.mobileUrl;
-  if (!desktopUrl && !mobileUrl) return null;
-
-  const { ctaLabel, ctaUrl, bookVisitFormTag } = resolveVisitUsCtaFields(section);
-
-  return {
-    isActive: true,
-    title,
-    description: cleanText(section.description) ?? "",
-    imageSrc: desktopUrl,
-    mobileImageSrc: mobileUrl,
-    imageAlt: image.desktopAlt || image.mobileAlt || "",
-    ctaLabel,
-    ...(ctaUrl ? { ctaUrl } : {}),
-    ...(bookVisitFormTag ? { bookVisitFormTag } : {}),
-  };
+  return mapped;
 };
 
 const mapSeo = (seo?: StrapiContactSeo | null): NormalizedContactSeo | null => {

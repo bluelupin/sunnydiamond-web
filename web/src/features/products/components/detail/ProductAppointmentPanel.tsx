@@ -36,6 +36,10 @@ import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 const PERSONALISE_FORM_TAG = "product-personalisation";
 const SCHEDULE_VIDEO_CALL_FORM_TAG = "product-video-call";
 
+function formatRequiredFieldLabel(label: string): string {
+  return label.endsWith("*") ? label : `${label}*`;
+}
+
 type ProductAppointmentPanelProps = {
   open: boolean;
   onClose: () => void;
@@ -95,7 +99,7 @@ const ProductAppointmentForm = ({
   const [phonePlaceholder, setPhonePlaceholder] = useState<string | undefined>(undefined);
   const [emailLabel, setEmailLabel] = useState("Email");
   const [emailPlaceholder, setEmailPlaceholder] = useState("Enter");
-  const [dateLabel, setDateLabel] = useState("Date");
+  const [dateLabel, setDateLabel] = useState(isScheduleVideoCall ? "Date*" : "Date");
   const [notesLabel, setNotesLabel] = useState(config.noteLabel);
   const [notesPlaceholder, setNotesPlaceholder] = useState(config.notePlaceholder);
   const [notesRequired, setNotesRequired] = useState(config.noteRequired);
@@ -165,13 +169,25 @@ const ProductAppointmentForm = ({
         setFormTag(form.formTag || cmsFormTag);
         if (form.formName) setFormTitle(form.formName);
         if (form.submitButtonText) setSubmitLabel(form.submitButtonText);
-        if (form.nameLabel) setNameLabel(form.nameLabel);
+        if (form.nameLabel) {
+          setNameLabel(
+            isScheduleVideoCall ? formatRequiredFieldLabel(form.nameLabel) : form.nameLabel,
+          );
+        }
         if (form.namePlaceholder) setNamePlaceholder(form.namePlaceholder);
-        if (form.phoneLabel) setPhoneLabel(form.phoneLabel);
+        if (form.phoneLabel) {
+          setPhoneLabel(
+            isScheduleVideoCall ? formatRequiredFieldLabel(form.phoneLabel) : form.phoneLabel,
+          );
+        }
         if (form.phonePlaceholder) setPhonePlaceholder(form.phonePlaceholder);
         if (form.emailLabel) setEmailLabel(form.emailLabel);
         if (form.emailPlaceholder) setEmailPlaceholder(form.emailPlaceholder);
-        if (form.dateLabel) setDateLabel(form.dateLabel);
+        if (form.dateLabel) {
+          setDateLabel(
+            isScheduleVideoCall ? formatRequiredFieldLabel(form.dateLabel) : form.dateLabel,
+          );
+        }
         if (form.notesLabel) setNotesLabel(form.notesLabel);
         if (form.notesPlaceholder) setNotesPlaceholder(form.notesPlaceholder);
         setNotesRequired(form.notesRequired);
@@ -289,7 +305,7 @@ const ProductAppointmentForm = ({
               </h2>
               <RightPanelCloseButton onClick={handleClose} aria-label={config.closeAriaLabel} />
             </div>
-            <div className="h-px w-full bg-neutral300" aria-hidden />
+            <div className="h-[1px] w-full bg-neutral300" aria-hidden />
           </div>
 
           <div className="flex flex-col items-center gap-2 pb-4">
@@ -341,6 +357,8 @@ const ProductAppointmentForm = ({
               emailLabel={emailLabel}
               emailPlaceholder={emailPlaceholder}
               dateLabel={dateLabel}
+              dateRequired={isScheduleVideoCall && config.showTimeSlots}
+              timeSlotRequired={isScheduleVideoCall && config.showTimeSlots}
               noteLabel={notesLabel}
               notePlaceholder={notesPlaceholder}
               noteLabelClassName={config.noteLabelClassName}
