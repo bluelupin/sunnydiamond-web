@@ -76,7 +76,8 @@ export function hasMagentoFilterFacets(facets: JewelleryFilterFacets): boolean {
     facets.gemstoneTypes.length > 0 ||
     facets.occasions.length > 0 ||
     facets.diamondShapes.length > 0 ||
-    facets.fancyColours.length > 0
+    facets.fancyColours.length > 0 ||
+    facets.collections.length > 0
   );
 }
 
@@ -91,6 +92,7 @@ export function createEmptyFilterState(): JewelleryFilterState {
     occasion: "",
     diamondShape: "",
     fancyColour: "",
+    collection: "",
   };
 }
 
@@ -105,6 +107,7 @@ export function createDefaultFilterState(facets: JewelleryFilterFacets): Jewelle
     occasion: "",
     diamondShape: "",
     fancyColour: "",
+    collection: "",
   };
 }
 
@@ -297,7 +300,8 @@ export function hasActiveFilters(
     filters.gemstoneType.trim().length > 0 ||
     filters.occasion.trim().length > 0 ||
     filters.diamondShape.trim().length > 0 ||
-    filters.fancyColour.trim().length > 0
+    filters.fancyColour.trim().length > 0 ||
+    filters.collection.trim().length > 0
   );
 }
 

@@ -148,7 +148,7 @@ const ProductDetailPage = ({
   };
 
   return (
-    <PageContainer className="!px-0 md:!px-8 lg:!px-10 2xl:!px-[60px] pb-16 pt-0 lg:pb-[60px]">
+    <PageContainer className="md:mt-6 !px-0 md:!px-8 lg:!px-10 2xl:!px-[60px] pb-16 pt-0 lg:pb-[60px]">
       <ProductDetailSidebar key={`${product.id}:${editLineId || "new"}`} {...sidebarProps}>
         {({ purchase, details }) => (
           <ProductDetailHeroLayout

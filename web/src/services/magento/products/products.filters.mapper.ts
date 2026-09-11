@@ -5,7 +5,9 @@ import type { JewelleryNavCategory } from "@/types/magento/jewelleryNav";
 import { resolveDiamondShapeFacetOption } from "@/features/jewellery-product/utils/diamondShapeListing";
 import { resolveFancyColourFacetOption } from "@/features/jewellery-product/utils/fancyColourListing";
 import { resolveGemstoneTypeFacetOption } from "@/features/jewellery-product/utils/gemstoneListing";
+import { resolveCollectionFacetOption } from "@/features/jewellery-product/utils/collectionListing";
 import { resolveOccasionFacetOption } from "@/features/jewellery-product/utils/occasionListing";
+import { resolveMagentoCollectionValue } from "./collectionProducts.service";
 import { formatMagentoFacetLabel, normalizeGemstoneTypeLabel } from "./magentoAttribute.utils";
 import { getMagentoPriceFilterTaxMultiplier } from "@/services/magento/config";
 import {
@@ -211,6 +213,16 @@ export function buildMagentoProductsFilter({
     );
     const colourValue = colourOption?.value ?? filters.fancyColour.trim();
     magentoFilter.sd_fancy_colour = { in: [colourValue] };
+  }
+
+  if (filters.collection.trim()) {
+    const collectionOption = resolveCollectionFacetOption(
+      filters.collection,
+      facets.collections,
+    );
+    const collectionValue =
+      collectionOption?.value ?? resolveMagentoCollectionValue(filters.collection);
+    magentoFilter.sd_collection = { in: [collectionValue] };
   }
 
   return Object.keys(magentoFilter).length > 0 ? magentoFilter : undefined;
@@ -498,6 +510,9 @@ export function mapMagentoAggregationsToFacets(
   const fancyColourAggregation = aggregationList.find(
     (item) => item?.attribute_code === "sd_fancy_colour",
   );
+  const collectionsAggregation = aggregationList.find(
+    (item) => item?.attribute_code === "sd_collection",
+  );
 
   const priceBounds = parsePriceBounds(priceAggregation?.options);
   const priceBuckets = mapPriceBuckets(priceAggregation?.options);
@@ -536,6 +551,7 @@ export function mapMagentoAggregationsToFacets(
       fancyColourAggregation?.options,
       (label) => formatMagentoFacetLabel(label) ?? label,
     ),
+    collections: mapFacetOptions(collectionsAggregation?.options),
   };
 }
 
@@ -550,4 +566,5 @@ export const EMPTY_JEWELLERY_FILTER_FACETS: JewelleryFilterFacets = {
   occasions: [],
   diamondShapes: [],
   fancyColours: [],
+  collections: [],
 };

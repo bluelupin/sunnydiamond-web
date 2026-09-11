@@ -15,6 +15,7 @@ import {
   isJewelleryCategoryUrlKey,
 } from "@/features/jewellery-product/utils/jewelleryRoutes";
 import { hasGiftFinderSearchParams } from "@/features/gifting/utils/giftFinderRoutes";
+import { hasCollectionListingSearchParams } from "@/features/jewellery-product/utils/collectionListing";
 import JsonLd from "@/shared/lib/seo/JsonLd";
 import { resolveImageSrcString } from "@/shared/utils/image";
 
@@ -24,11 +25,20 @@ type JewelleryCategoryRoutePageProps = {
     occasion?: string;
     diamondShape?: string;
     fancyColour?: string;
+    collection?: string;
     category?: string;
     minPrice?: string;
     maxPrice?: string;
   }>;
 };
+
+function shouldSkipJewelleryListingPrefetch(
+  searchParams: JewelleryCategoryRoutePageProps["searchParams"] extends Promise<infer T>
+    ? T
+    : never,
+): boolean {
+  return hasGiftFinderSearchParams(searchParams) || hasCollectionListingSearchParams(searchParams);
+}
 
 export async function generateJewelleryCategoryMetadata({
   params,
@@ -69,7 +79,7 @@ export async function JewelleryCategoryRoutePage({
   }
 
   const [initialListing, page, nav] = await Promise.all([
-    hasGiftFinderSearchParams(query)
+    shouldSkipJewelleryListingPrefetch(query)
       ? Promise.resolve(undefined)
       : prefetchJewelleryListing(categoryUrlKey),
     getProductLandingPage(),

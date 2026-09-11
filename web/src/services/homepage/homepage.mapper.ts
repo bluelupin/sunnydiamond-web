@@ -204,20 +204,10 @@ function mapFeaturedCollection(
   if (collections.length > 0) {
     const activeCollections = collections.filter((item) => item?.isActive !== false);
 
-    const selected =
-      activeCollections.find((item) => cleanText(item.slug)?.toLowerCase() === "alankara") ??
-      activeCollections[0] ??
-      collections.find((item) => cleanText(item.slug)?.toLowerCase() === "alankara") ??
-      collections[0];
+    const selected = activeCollections[0] ?? collections[0];
 
     if (!selected) return null;
     if (selected.isActive === false) return null;
-
-    const productSkus = (selected.productSkus ?? [])
-      .map((item) => cleanText(item?.sku))
-      .filter((sku): sku is string => Boolean(sku));
-
-    const featuredProductSku = cleanText(selected.featuredProductSku);
 
     return {
       id: selected.id ?? raw.id,
@@ -229,8 +219,6 @@ function mapFeaturedCollection(
       primaryImage: selected.backgroundImage as FeaturedCollectionSection["primaryImage"],
       backgroundImage: selected.backgroundImage as FeaturedCollectionSection["backgroundImage"],
       image: selected.backgroundImage as FeaturedCollectionSection["image"],
-      productSkus,
-      featuredProductSku: featuredProductSku ?? null,
       products: null,
     };
   }
@@ -251,8 +239,6 @@ function mapFeaturedCollection(
     products: Array.isArray(raw.products)
       ? (raw.products as FeaturedCollectionSection["products"])
       : null,
-    productSkus: null,
-    featuredProductSku: null,
   };
 }
 

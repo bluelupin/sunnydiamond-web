@@ -1,9 +1,10 @@
 import type { PrefetchedAlankaraCollection } from "@/features/products/services/prefetchProductDetailAlankara";
 import type { HomepageShoppingBlocksData } from "@/types/homepage/categoryNavigation";
-import { getMagentoProductsBySkus } from "@/services/magento/products/products.service";
+import { ALANKARA_PRODUCT_COUNT } from "@/shared/ui/collection/alankaraCollection.types";
+import { getMagentoProductsByCollection } from "@/services/magento/products/collectionProducts.service";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import {
-  mapMagentoProductsToAlankaraCollection,
+  mapMagentoProductsToAlankaraCollectionList,
   resolveAlankaraCollectionSection,
 } from "@/shared/utils/resolveAlankaraCollectionSection";
 
@@ -23,24 +24,26 @@ export async function prefetchAlankaraCollectionFromShopping(
     return null;
   }
 
-  if (collectionProps.productSkus.length === 0) {
+  const magentoCollectionSlug = collectionProps.magentoCollectionSlug;
+  if (!magentoCollectionSlug) {
     return {
-      products:
-        collectionProps.products.length > 0 ? collectionProps.products : null,
+      products: null,
       defaultActiveIndex: collectionProps.defaultActiveIndex,
     };
   }
 
   try {
-    const items = await getMagentoProductsBySkus(collectionProps.productSkus);
-    const mapped = mapMagentoProductsToAlankaraCollection(items, collectionProps.productSkus, {
-      featuredProductSku: collectionProps.featuredProductSku,
+    const items = await getMagentoProductsByCollection(
+      magentoCollectionSlug,
+      ALANKARA_PRODUCT_COUNT,
+    );
+    const mapped = mapMagentoProductsToAlankaraCollectionList(items, {
       ctaLabel: collectionProps.productCtaLabel,
     });
 
     return {
-      products: mapped.products.length > 0 ? mapped.products : null,
-      defaultActiveIndex: mapped.defaultActiveIndex,
+      products: mapped.length > 0 ? mapped : null,
+      defaultActiveIndex: collectionProps.defaultActiveIndex,
     };
   } catch {
     return {

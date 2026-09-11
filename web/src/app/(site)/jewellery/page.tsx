@@ -9,20 +9,28 @@ import { buildJewelleryListingBreadcrumbJsonLd } from "@/shared/lib/seo/schema/b
 import { getProductLandingPage } from "@/services/product-landing/product-landing-page.service";
 import { prefetchJewelleryListing } from "@/lib/magento/prefetchMagento";
 import { hasGiftFinderSearchParams } from "@/features/gifting/utils/giftFinderRoutes";
+import { hasCollectionListingSearchParams } from "@/features/jewellery-product/utils/collectionListing";
 import JewelleryProductPage from "@/features/jewellery-product/components/JewelleryProductPage";
 import JsonLd from "@/shared/lib/seo/JsonLd";
 import { resolveImageSrcString } from "@/shared/utils/image";
 
-type PageProps = {
-  searchParams: Promise<{
-    occasion?: string;
-    diamondShape?: string;
-    fancyColour?: string;
-    category?: string;
-    minPrice?: string;
-    maxPrice?: string;
-  }>;
+type JewelleryListingSearchParams = {
+  occasion?: string;
+  diamondShape?: string;
+  fancyColour?: string;
+  collection?: string;
+  category?: string;
+  minPrice?: string;
+  maxPrice?: string;
 };
+
+type PageProps = {
+  searchParams: Promise<JewelleryListingSearchParams>;
+};
+
+function shouldSkipJewelleryListingPrefetch(searchParams: JewelleryListingSearchParams): boolean {
+  return hasGiftFinderSearchParams(searchParams) || hasCollectionListingSearchParams(searchParams);
+}
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   const query = await searchParams;
@@ -42,7 +50,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
 
 export default async function Page({ searchParams }: PageProps) {
   const params = await searchParams;
-  const initialListing = hasGiftFinderSearchParams(params)
+  const initialListing = shouldSkipJewelleryListingPrefetch(params)
     ? undefined
     : await prefetchJewelleryListing(null);
   const page = await getProductLandingPage();

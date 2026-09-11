@@ -91,11 +91,6 @@ export type StrapiCategoryCard = {
   cta?: StrapiHomepageCta | null;
 };
 
-export type StrapiProductSkuItem = {
-  id?: number;
-  sku?: string | null;
-};
-
 export type StrapiEditorialCollection = {
   id?: number;
   documentId?: string;
@@ -103,11 +98,9 @@ export type StrapiEditorialCollection = {
   title?: string | null;
   slug?: string | null;
   description?: string | null;
-  featuredProductSku?: string | null;
   sortOrder?: number | null;
   isActive?: boolean | null;
   cta?: StrapiHomepageCta | null;
-  productSkus?: StrapiProductSkuItem[] | null;
   backgroundImage?: StrapiResponsiveImageBlock | null;
 };
 

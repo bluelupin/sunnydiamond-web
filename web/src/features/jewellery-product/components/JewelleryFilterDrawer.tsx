@@ -541,6 +541,7 @@ const JewelleryFilterDrawer = ({
             occasion: appliedFilters.occasion,
             diamondShape: appliedFilters.diamondShape,
             fancyColour: appliedFilters.fancyColour,
+            collection: appliedFilters.collection,
           },
           facets,
         ),

@@ -34,7 +34,7 @@ export type AlankaraCollectionProps = {
   collectionMobileAlt?: string;
   collectionCta?: AlankaraCollectionCta;
   products: AlankaraCollectionProduct[];
-  /** Initial carousel index (e.g. featuredProductSku). */
+  /** Initial carousel index. */
   defaultActiveIndex?: number;
   defaultProductCtaLabel?: string;
   priority?: boolean;
