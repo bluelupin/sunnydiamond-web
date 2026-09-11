@@ -34,6 +34,7 @@ import {
 } from "../utils/jewelleryRoutes";
 import { resolveDiamondShapeFacetOption } from "../utils/diamondShapeListing";
 import { resolveFancyColourFacetOption } from "../utils/fancyColourListing";
+import { resolveCollectionFacetOption } from "../utils/collectionListing";
 import { resolveOccasionFacetOption } from "../utils/occasionListing";
 import {
   applyGiftFinderPriceToFilterState,
@@ -72,6 +73,7 @@ function createClearedDrawerFilterState(
     occasion: current.occasion,
     diamondShape: current.diamondShape,
     fancyColour: current.fancyColour,
+    collection: current.collection,
   };
 }
 
@@ -90,6 +92,7 @@ const JewelleryProductPage = ({
   const occasionSlug = searchParams?.get("occasion");
   const diamondShapeSlug = searchParams?.get("diamondShape");
   const fancyColourSlug = searchParams?.get("fancyColour");
+  const collectionSlug = searchParams?.get("collection");
   const minPriceFromUrl = parseGiftFinderPriceParam(searchParams?.get("minPrice"));
   const maxPriceFromUrl = parseGiftFinderPriceParam(searchParams?.get("maxPrice"));
 
@@ -103,6 +106,9 @@ const JewelleryProductPage = ({
     if (occasionSlug?.trim()) {
       initial.occasion = occasionSlug.trim();
     }
+    if (collectionSlug?.trim()) {
+      initial.collection = collectionSlug.trim();
+    }
     return initial;
   });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -113,6 +119,7 @@ const JewelleryProductPage = ({
   const lastOccasionSlugRef = useRef<string | null>(null);
   const lastDiamondShapeSlugRef = useRef<string | null>(null);
   const lastFancyColourSlugRef = useRef<string | null>(null);
+  const lastCollectionSlugRef = useRef<string | null>(null);
   const lastPriceParamsRef = useRef<string | null>(null);
   const lastFacetPriceBoundsRef = useRef("");
   const plpTtfbReportedRef = useRef(false);
@@ -161,8 +168,14 @@ const JewelleryProductPage = ({
       setSelectedCategoryUrlKey(nextUrlKey);
       facetsSyncedRef.current = false;
 
+      const params = new URLSearchParams(window.location.search);
+      const collectionFromUrl = params.get("collection")?.trim() ?? "";
+
       if (nextUrlKey === null) {
-        setFilters(createEmptyFilterState());
+        setFilters({
+          ...createEmptyFilterState(),
+          ...(collectionFromUrl ? { collection: collectionFromUrl } : {}),
+        });
       } else {
         setFilters((current) => createClearedDrawerFilterState(current));
       }
@@ -176,15 +189,20 @@ const JewelleryProductPage = ({
     const nextUrlKey = urlKey?.trim() || null;
     setSelectedCategoryUrlKey(nextUrlKey);
 
+    const collectionFromUrl = searchParams?.get("collection")?.trim() ?? "";
+
     if (nextUrlKey === null) {
-      setFilters(createEmptyFilterState());
+      setFilters({
+        ...createEmptyFilterState(),
+        ...(collectionFromUrl ? { collection: collectionFromUrl } : {}),
+      });
     } else {
       setFilters((current) => createClearedDrawerFilterState(current));
     }
 
     facetsSyncedRef.current = false;
     replaceJewelleryCategoryUrl(nextUrlKey);
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     markJewelleryPlpNavigation();
@@ -276,6 +294,13 @@ const JewelleryProductPage = ({
       lastFancyColourSlugRef.current !== (fancyColourSlug ?? null);
     lastFancyColourSlugRef.current = fancyColourSlug ?? null;
 
+    const collectionOption = resolveCollectionFacetOption(
+      collectionSlug,
+      facets.collections,
+    );
+    const collectionChanged = lastCollectionSlugRef.current !== (collectionSlug ?? null);
+    lastCollectionSlugRef.current = collectionSlug ?? null;
+
     const priceParamsKey = `${minPriceFromUrl}|${maxPriceFromUrl}`;
     const priceParamsChanged = lastPriceParamsRef.current !== priceParamsKey;
     lastPriceParamsRef.current = priceParamsKey;
@@ -307,6 +332,11 @@ const JewelleryProductPage = ({
       if (fancyColourOption) {
         nextDraft.fancyColour = fancyColourOption.value;
       }
+      if (collectionOption) {
+        nextDraft.collection = collectionOption.value;
+      } else if (collectionSlug?.trim()) {
+        nextDraft.collection = collectionSlug.trim();
+      }
       return applyGiftFinderPriceToFilterState(
         nextDraft,
         facets,
@@ -332,6 +362,7 @@ const JewelleryProductPage = ({
       occasionChanged ||
       diamondShapeChanged ||
       fancyColourChanged ||
+      collectionChanged ||
       priceParamsChanged
     ) {
       setFilters((current) =>
@@ -344,6 +375,7 @@ const JewelleryProductPage = ({
     occasionSlug,
     diamondShapeSlug,
     fancyColourSlug,
+    collectionSlug,
     minPriceFromUrl,
     maxPriceFromUrl,
   ]);
@@ -388,6 +420,7 @@ const JewelleryProductPage = ({
           params.delete("occasion");
           params.delete("diamondShape");
           params.delete("fancyColour");
+          params.delete("collection");
         }
 
         const query = params.toString();

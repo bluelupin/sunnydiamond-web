@@ -6,10 +6,11 @@ import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingB
 import { AlankaraCollection } from "@/shared/ui/collection/AlankaraCollection";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import {
-  mapMagentoProductsToAlankaraCollection,
+  mapMagentoProductsToAlankaraCollectionList,
   resolveAlankaraCollectionSection,
 } from "@/shared/utils/resolveAlankaraCollectionSection";
-import { getMagentoProductsBySkus } from "@/services/magento/products/products.service";
+import { getMagentoProductsByCollection } from "@/services/magento/products/collectionProducts.service";
+import { ALANKARA_PRODUCT_COUNT } from "@/shared/ui/collection/alankaraCollection.types";
 import type { AlankaraCollectionProduct } from "@/shared/ui/collection/alankaraCollection.types";
 import type { PrefetchedAlankaraCollection } from "@/features/products/services/prefetchProductDetailAlankara";
 import { getImageSrc } from "@/shared/utils/image";
@@ -18,7 +19,7 @@ interface FeaturedCollectionSectionProps {
   id?: string;
   sectionHeading?: string;
   description?: string;
-  /** When set, skips the client-side Magento SKU fetch (server-prefetched on homepage/PDP). */
+  /** When set, skips the client-side Magento fetch (server-prefetched on homepage/PDP). */
   prefetchedAlankara?: PrefetchedAlankaraCollection | null;
 }
 
@@ -42,10 +43,8 @@ const FeaturedCollectionSection = ({
     [descriptionProp, featuredCollectionData],
   );
 
-  const productSkus = collectionProps.productSkus;
-  const featuredProductSku = collectionProps.featuredProductSku;
+  const magentoCollectionSlug = collectionProps.magentoCollectionSlug;
   const productCtaLabel = collectionProps.productCtaLabel;
-  const skuKey = productSkus.join("|");
 
   const hasServerPrefetch = prefetchedAlankara !== undefined;
 
@@ -58,11 +57,11 @@ const FeaturedCollectionSection = ({
       : collectionProps.defaultActiveIndex,
   );
   const [isMagentoLoading, setIsMagentoLoading] = useState(
-    !hasServerPrefetch && productSkus.length > 0,
+    !hasServerPrefetch && Boolean(magentoCollectionSlug),
   );
 
   useEffect(() => {
-    if (hasServerPrefetch || productSkus.length === 0) {
+    if (hasServerPrefetch || !magentoCollectionSlug) {
       if (!hasServerPrefetch) {
         setMagentoProducts(null);
         setDefaultActiveIndex(collectionProps.defaultActiveIndex);
@@ -72,18 +71,20 @@ const FeaturedCollectionSection = ({
     }
 
     const controller = new AbortController();
-    const skus = skuKey.split("|").filter(Boolean);
     setIsMagentoLoading(true);
 
-    void getMagentoProductsBySkus(skus, controller.signal)
+    void getMagentoProductsByCollection(
+      magentoCollectionSlug,
+      ALANKARA_PRODUCT_COUNT,
+      controller.signal,
+    )
       .then((items) => {
         if (controller.signal.aborted) return;
-        const mapped = mapMagentoProductsToAlankaraCollection(items, skus, {
-          featuredProductSku,
+        const mapped = mapMagentoProductsToAlankaraCollectionList(items, {
           ctaLabel: productCtaLabel,
         });
-        setMagentoProducts(mapped.products.length > 0 ? mapped.products : null);
-        setDefaultActiveIndex(mapped.defaultActiveIndex);
+        setMagentoProducts(mapped.length > 0 ? mapped : null);
+        setDefaultActiveIndex(collectionProps.defaultActiveIndex);
       })
       .catch(() => {
         if (controller.signal.aborted) return;
@@ -99,11 +100,9 @@ const FeaturedCollectionSection = ({
     return () => controller.abort();
   }, [
     hasServerPrefetch,
-    skuKey,
-    featuredProductSku,
+    magentoCollectionSlug,
     productCtaLabel,
     collectionProps.defaultActiveIndex,
-    productSkus.length,
   ]);
 
   if (!isSectionActive(collectionProps.isActive)) {
@@ -116,7 +115,10 @@ const FeaturedCollectionSection = ({
     }
   }
 
-  if (isShoppingLoading || (productSkus.length > 0 && isMagentoLoading && !magentoProducts)) {
+  if (
+    isShoppingLoading ||
+    (magentoCollectionSlug && isMagentoLoading && !magentoProducts)
+  ) {
     return (
       <section
         id={id}
@@ -139,8 +141,7 @@ const FeaturedCollectionSection = ({
     );
   }
 
-  const displayProducts =
-    productSkus.length > 0 ? (magentoProducts ?? []) : collectionProps.products;
+  const displayProducts = magentoProducts ?? [];
   if (!displayProducts.length) {
     return null;
   }
@@ -153,10 +154,8 @@ const FeaturedCollectionSection = ({
   }
 
   const {
-    productSkus: _skus,
-    featuredProductSku: _featured,
+    magentoCollectionSlug: _slug,
     defaultActiveIndex: _default,
-    products: _legacyProducts,
     productCtaLabel: _productCtaLabel,
     ...alankaraProps
   } = collectionProps;

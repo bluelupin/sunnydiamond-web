@@ -5,13 +5,12 @@ import {
   ALANKARA_THUMBNAIL_CROPS,
   type AlankaraCollectionProduct,
 } from "@/shared/ui/collection/alankaraCollection.types";
-import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import { resolveResponsiveCmsImage } from "@/shared/utils/responsiveCmsImage";
 import { getImageSrc } from "@/shared/utils/image";
-import type {
-  FeaturedCollectionImage,
-  FeaturedCollectionSection,
-} from "@/types/homepage/categoryNavigation";
+import { buildJewelleryCollectionHref } from "@/features/jewellery-product/utils/collectionListing";
+import type { FeaturedCollectionSection } from "@/types/homepage/categoryNavigation";
+
+const DEFAULT_COLLECTION_CTA_LABEL = "VIEW COLLECTION";
 
 export type ResolvedAlankaraCollectionSection = {
   isActive?: boolean | null;
@@ -22,10 +21,8 @@ export type ResolvedAlankaraCollectionSection = {
   collectionDesktopAlt: string;
   collectionMobileAlt: string;
   collectionCta?: { label: string; href: string };
-  products: AlankaraCollectionProduct[];
-  /** Ordered Magento SKUs from CMS (empty when not configured). */
-  productSkus: string[];
-  featuredProductSku?: string;
+  /** Strapi collection slug used to match Magento `sd_collection`. */
+  magentoCollectionSlug?: string;
   defaultActiveIndex: number;
   productCtaLabel?: string;
 };
@@ -42,72 +39,6 @@ function getThumbnailCrop(index: number) {
   return THUMBNAIL_CROPS[index % THUMBNAIL_CROPS.length];
 }
 
-function buildCmsProduct(
-  index: number,
-  cmsProduct: FeaturedCollectionImage,
-  ctaLabel?: string,
-): AlankaraCollectionProduct | null {
-  const productId =
-    cmsProduct?.id != null && String(cmsProduct.id).trim() !== ""
-      ? String(cmsProduct.id)
-      : null;
-  const name = cmsProduct?.name?.trim();
-  const cmsImage = cmsProduct?.image ? resolveCmsMediaUrl(cmsProduct.image) : "";
-
-  if (!name || !cmsImage) {
-    return null;
-  }
-
-  const crop = getThumbnailCrop(index);
-
-  return {
-    id: productId ?? `alankara-cms-${index}`,
-    name,
-    image: cmsImage,
-    thumbnailImage: cmsImage,
-    thumbnailCrop: crop,
-    desktopCrop: crop,
-    href: productId ? `/product/${productId}` : "",
-    ...(ctaLabel ? { ctaLabel } : {}),
-  };
-}
-
-function resolveLegacyCmsProducts(
-  cmsProducts: FeaturedCollectionImage[] | null | undefined,
-  ctaLabel?: string,
-): AlankaraCollectionProduct[] {
-  return (Array.isArray(cmsProducts) ? cmsProducts : [])
-    .map((product, index) => buildCmsProduct(index, product, ctaLabel))
-    .filter((product): product is AlankaraCollectionProduct => product !== null && Boolean(product.href))
-    .slice(0, ALANKARA_PRODUCT_COUNT);
-}
-
-/** Normalize CMS SKU list: productSkus order, featured first, deduped. */
-export function resolveAlankaraProductSkus(
-  section: FeaturedCollectionSection | null | undefined,
-): { productSkus: string[]; featuredProductSku?: string } {
-  const featuredProductSku = section?.featuredProductSku?.trim() || undefined;
-  const fromList = (section?.productSkus ?? [])
-    .map((sku) => sku.trim())
-    .filter(Boolean);
-
-  const ordered: string[] = [];
-  const seen = new Set<string>();
-
-  const push = (sku?: string) => {
-    if (!sku || seen.has(sku)) return;
-    seen.add(sku);
-    ordered.push(sku);
-  };
-
-  push(featuredProductSku);
-  for (const sku of fromList) {
-    push(sku);
-  }
-
-  return { productSkus: ordered, featuredProductSku };
-}
-
 function resolveAlankaraMagentoProductImage(
   product: JewelleryListingProduct,
 ): string | null {
@@ -121,22 +52,14 @@ function resolveAlankaraMagentoProductImage(
   return null;
 }
 
-export function mapMagentoProductsToAlankaraCollection(
+export function mapMagentoProductsToAlankaraCollectionList(
   magentoProducts: JewelleryListingProduct[],
-  orderedSkus: string[],
-  options?: { featuredProductSku?: string; ctaLabel?: string },
-): { products: AlankaraCollectionProduct[]; defaultActiveIndex: number } {
-  const bySku = new Map(
-    magentoProducts.map((product) => [product.sku.trim(), product] as const),
-  );
-
+  options?: { ctaLabel?: string },
+): AlankaraCollectionProduct[] {
   const ctaLabel = options?.ctaLabel?.trim();
   const mappedProducts: AlankaraCollectionProduct[] = [];
 
-  for (const sku of orderedSkus) {
-    const magento = bySku.get(sku);
-    if (!magento) continue;
-
+  for (const magento of magentoProducts) {
     const image = resolveAlankaraMagentoProductImage(magento);
     if (!image) continue;
 
@@ -157,14 +80,7 @@ export function mapMagentoProductsToAlankaraCollection(
     if (mappedProducts.length >= ALANKARA_PRODUCT_COUNT) break;
   }
 
-  const featuredSku = options?.featuredProductSku?.trim();
-  let defaultActiveIndex = 0;
-  if (featuredSku && mappedProducts.length > 0) {
-    const featuredIndex = mappedProducts.findIndex((item) => String(item.id) === featuredSku);
-    defaultActiveIndex = featuredIndex >= 0 ? featuredIndex : 0;
-  }
-
-  return { products: mappedProducts, defaultActiveIndex };
+  return mappedProducts;
 }
 
 export function resolveAlankaraCollectionSection(
@@ -172,7 +88,7 @@ export function resolveAlankaraCollectionSection(
   options?: { descriptionOverride?: string },
 ): ResolvedAlankaraCollectionSection {
   const descriptionOverride = options?.descriptionOverride?.trim();
-  const { productSkus, featuredProductSku } = resolveAlankaraProductSkus(section);
+  const magentoCollectionSlug = section?.slug?.trim() || undefined;
 
   const media =
     (section as { primaryImage?: unknown; image?: unknown } | null | undefined)?.primaryImage ??
@@ -185,11 +101,17 @@ export function resolveAlankaraCollectionSection(
   const ctaUrl = section?.cta?.url ?? section?.cta?.to ?? "";
   const ctaLabel = section?.cta?.label ?? section?.label?.label ?? "";
   const productCtaLabel = section?.label?.label?.trim() || section?.cta?.label?.trim() || undefined;
-
-  const legacyProducts =
-    productSkus.length === 0
-      ? resolveLegacyCmsProducts(section?.products, productCtaLabel)
-      : [];
+  const resolvedCollectionCta = magentoCollectionSlug
+    ? {
+        label: ctaLabel.trim() || DEFAULT_COLLECTION_CTA_LABEL,
+        href: buildJewelleryCollectionHref(magentoCollectionSlug),
+      }
+    : ctaUrl && ctaLabel
+      ? {
+          label: ctaLabel.trim(),
+          href: ctaUrl,
+        }
+      : undefined;
 
   const desktopCollectionImage = collectionImages.desktopUrl || collectionImages.mobileUrl || "";
   const mobileCollectionImage = collectionImages.mobileUrl || collectionImages.desktopUrl || "";
@@ -202,16 +124,8 @@ export function resolveAlankaraCollectionSection(
     collectionImageMobile: mobileCollectionImage,
     collectionDesktopAlt: collectionImages.desktopAlt,
     collectionMobileAlt: collectionImages.mobileAlt,
-    collectionCta:
-      ctaUrl && ctaLabel
-        ? {
-            label: ctaLabel.trim(),
-            href: ctaUrl,
-          }
-        : undefined,
-    products: legacyProducts,
-    productSkus,
-    featuredProductSku,
+    collectionCta: resolvedCollectionCta,
+    magentoCollectionSlug,
     defaultActiveIndex: 0,
     productCtaLabel,
   };

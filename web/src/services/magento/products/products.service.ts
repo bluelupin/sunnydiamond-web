@@ -24,7 +24,10 @@ import {
   getMagentoProductAttributeOptions,
   mergeFacetOptions,
 } from "./productAttributeOptions.service";
+import { resolveCollectionFacetOption } from "@/features/jewellery-product/utils/collectionListing";
 import { resolveOccasionFacetOption } from "@/features/jewellery-product/utils/occasionListing";
+import { getMagentoProductsByCollection } from "./collectionProducts.service";
+import { MAGENTO_PRODUCT_COLLECTION_ATTRIBUTE } from "./magentoAttribute.utils";
 import type { MagentoProductListItem, MagentoProductsResponse } from "./magentoProduct.types";
 import type { JewelleryFilterFacets, JewelleryListingProductsData } from "@/types/magento/jewelleryListing";
 import type { JewelleryFilterState, JewelleryListingProduct } from "@/features/jewellery-product/types";
@@ -46,6 +49,33 @@ import {
 import type { JewelleryNavCategoriesData } from "@/types/magento/jewelleryNav";
 
 const WISHLIST_SKU_BATCH_SIZE = 50;
+const COLLECTION_PLP_SCAN_LIMIT = 120;
+
+async function fetchMagentoJewelleryCollectionPage(
+  filters: JewelleryFilterState,
+  page: number,
+  pageSize: number,
+  signal?: AbortSignal,
+): Promise<{
+  products: JewelleryListingProduct[];
+  totalCount: number;
+  totalPages: number;
+}> {
+  const collectionProducts = await getMagentoProductsByCollection(
+    filters.collection,
+    COLLECTION_PLP_SCAN_LIMIT,
+    signal,
+  );
+  const totalCount = collectionProducts.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const start = (page - 1) * pageSize;
+
+  return {
+    products: collectionProducts.slice(start, start + pageSize),
+    totalCount,
+    totalPages,
+  };
+}
 
 type MagentoProductsBySkusResponse = {
   products?: {
@@ -215,6 +245,34 @@ async function enrichFacetsWithOccasionAttributeOptions(
   }
 }
 
+async function enrichFacetsWithCollectionAttributeOptions(
+  filters: JewelleryFilterState,
+  facets: JewelleryFilterFacets,
+  signal?: AbortSignal,
+): Promise<JewelleryFilterFacets> {
+  const collection = filters.collection.trim();
+  if (!collection) {
+    return facets;
+  }
+
+  if (resolveCollectionFacetOption(collection, facets.collections)) {
+    return facets;
+  }
+
+  try {
+    const magentoCollections = await getMagentoProductAttributeOptions(
+      MAGENTO_PRODUCT_COLLECTION_ATTRIBUTE,
+      signal,
+    );
+    return {
+      ...facets,
+      collections: mergeFacetOptions(facets.collections, magentoCollections),
+    };
+  } catch {
+    return facets;
+  }
+}
+
 async function enrichFacetsWithGemstoneAttributeOptions(
   filters: JewelleryFilterState,
   facets: JewelleryFilterFacets,
@@ -243,7 +301,12 @@ async function enrichFacetsWithDrawerAttributeOptions(
   signal?: AbortSignal,
 ): Promise<JewelleryFilterFacets> {
   const withOccasions = await enrichFacetsWithOccasionAttributeOptions(filters, facets, signal);
-  return enrichFacetsWithGemstoneAttributeOptions(filters, withOccasions, signal);
+  const withCollections = await enrichFacetsWithCollectionAttributeOptions(
+    filters,
+    withOccasions,
+    signal,
+  );
+  return enrichFacetsWithGemstoneAttributeOptions(filters, withCollections, signal);
 }
 
 async function fetchMagentoJewelleryProducts({
@@ -384,6 +447,7 @@ async function fetchMagentoJewelleryProducts({
     facets: {
       ...responseFacets,
       occasions: mergeFacetOptions(responseFacets.occasions, facetsForFilter.occasions),
+      collections: mergeFacetOptions(responseFacets.collections, facetsForFilter.collections),
       gemstoneTypes: mergeGemstoneTypeFacetOptions(
         responseFacets.gemstoneTypes,
         facetsForFilter.gemstoneTypes,
