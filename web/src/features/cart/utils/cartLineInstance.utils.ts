@@ -91,7 +91,20 @@ export function createLineInstanceKeyForProduct(
   productCustomOptions?: ProductCustomOptions,
   displayEngraving = "",
 ): string | null {
+  const hasDedicatedLineInstanceField = Boolean(productCustomOptions?.lineInstance);
   const keyLength = resolveLineInstanceKeyLength(productCustomOptions, displayEngraving);
+
+  if (hasDedicatedLineInstanceField) {
+    const effectiveLength =
+      keyLength != null && keyLength >= MIN_LINE_INSTANCE_KEY_LENGTH ? keyLength : 36;
+
+    if (effectiveLength >= 36) {
+      return createCartLineInstanceId();
+    }
+
+    return createShortCartLineInstanceId(effectiveLength);
+  }
+
   if (keyLength == null || keyLength < MIN_LINE_INSTANCE_KEY_LENGTH) {
     return null;
   }
@@ -197,10 +210,16 @@ export function assignCartLineInstance(
     return options;
   }
 
+  if (!supportsCartLineInstance(productCustomOptions)) {
+    return options;
+  }
+
   const displayEngraving = stripLineInstanceFromEngraving(options.engraving ?? "").trim();
   const lineInstance = createLineInstanceKeyForProduct(productCustomOptions, displayEngraving);
   if (!lineInstance) {
-    return options;
+    throw new Error(
+      "Could not add this item as a separate bag line because the engraving field is full.",
+    );
   }
 
   return {

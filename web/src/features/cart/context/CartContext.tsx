@@ -191,6 +191,13 @@ function resolveAddedLineUid(
     }
   }
 
+  if (lineInstance && newLines.length > 0) {
+    const skuMatches = newLines.filter((item) => item.product.id === sku);
+    if (skuMatches.length === 1) {
+      return skuMatches[0].id;
+    }
+  }
+
   if (newLines.length === 1) {
     return newLines[0].id;
   }
@@ -458,8 +465,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
       productCustomOptions = product.customOptions,
       configurableOptionUids,
     } = normalized;
+    const incomingOptions = normalized.options ?? {};
     const options = assignCartLineInstance(
-      normalized.options ?? {},
+      incomingOptions.lineInstance?.trim()
+        ? incomingOptions
+        : { ...incomingOptions, lineInstance: undefined },
       productCustomOptions,
     );
     const sku = product.id.trim();

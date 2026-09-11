@@ -89,6 +89,12 @@ export function buildMagentoCartItemOptionPayload(
     selectedOptions.push(metalUid);
   }
 
+  if (lineInstance && enteredOptions.length === 0) {
+    throw new Error(
+      "Could not add this item as a separate bag line because the product is missing a line-key custom option.",
+    );
+  }
+
   if (enteredOptions.length === 0 && selectedOptions.length === 0) {
     return null;
   }

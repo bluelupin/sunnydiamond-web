@@ -49,7 +49,9 @@ export function classifyCustomOptionLabel(label: string): CustomOptionFamily | n
   if (
     normalized.includes("line instance") ||
     normalized.includes("cart line") ||
-    normalized.includes("line key")
+    normalized.includes("line key") ||
+    normalized.includes("linekey") ||
+    normalized.includes("line_key")
   ) {
     return "lineInstance";
   }

@@ -43,7 +43,7 @@ export default function OccasionLedCard({
   return (
     <Link
       href={href}
-      className="group relative block h-[400px] w-[328px] shrink-0 snap-start overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2 lg:h-[700px] md:h-[500px] md:w-full md:min-w-0 md:shrink"
+      className="group relative block shrink-0 snap-start overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2 lg:h-[600px] md:h-[500px] h-[400px] lg:w-full md:w-[351px] w-[328px]"
     >
       <ResponsiveImage
         desktopSrc={desktopSrc}
