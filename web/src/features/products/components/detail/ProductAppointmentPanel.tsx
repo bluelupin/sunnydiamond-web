@@ -30,15 +30,12 @@ import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { cn } from "@/shared/utils/cn";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
+import { formatRequiredFieldLabel } from "@/shared/utils/formValidation";
 import { DetailDarkButton, DetailTextLink } from "./shared";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
 
 const PERSONALISE_FORM_TAG = "product-personalisation";
 const SCHEDULE_VIDEO_CALL_FORM_TAG = "product-video-call";
-
-function formatRequiredFieldLabel(label: string): string {
-  return label.endsWith("*") ? label : `${label}*`;
-}
 
 type ProductAppointmentPanelProps = {
   open: boolean;

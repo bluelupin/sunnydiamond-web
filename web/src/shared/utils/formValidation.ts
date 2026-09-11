@@ -3,6 +3,10 @@ export type FieldValidation = {
   error?: string;
 };
 
+export function formatRequiredFieldLabel(label: string): string {
+  return label.endsWith("*") ? label : `${label}*`;
+}
+
 /** Figma 2556:10875 — form field error state */
 export const formFieldErrorTextColor = "#F91616";
 export const formFieldErrorBackgroundColor = "#FEDCDC";

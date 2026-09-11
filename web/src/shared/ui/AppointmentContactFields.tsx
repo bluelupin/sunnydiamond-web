@@ -16,6 +16,7 @@ import {
   getMinSelectableDate,
   invalidFieldClassName,
   invalidFieldContainerClassName,
+  formatRequiredFieldLabel,
   sanitizePhoneInput,
   type AppointmentContactField,
 } from "@/shared/utils/formValidation";
@@ -66,10 +67,6 @@ type AppointmentContactFieldsProps = {
   noteLabelClassName?: string;
   noteTextareaClassName?: string;
 };
-
-function formatRequiredFieldLabel(label: string): string {
-  return label.endsWith("*") ? label : `${label}*`;
-}
 
 const AppointmentContactFields = ({
   idPrefix,
