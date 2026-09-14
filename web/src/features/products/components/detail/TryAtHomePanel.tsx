@@ -10,6 +10,8 @@ import { cn } from "@/shared/utils/cn";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
+import { useMobileStickyFooterClearance } from "@/shared/hooks/use-mobile-sticky-footer-clearance";
+import { usePanelInputFocusScroll } from "@/shared/hooks/use-panel-input-focus-scroll";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import {
@@ -133,11 +135,17 @@ const TryAtHomeDetailsStep = ({
   }, [profileContact, hasAppliedProfilePrefill, name, email, phone]);
 
   const timeSlots = form?.timeSlots?.length ? form.timeSlots : undefined;
+  const { footerRef, clearancePx } = useMobileStickyFooterClearance();
+  const { scrollRef, handleFocusCapture } = usePanelInputFocusScroll();
 
   return (
     <>
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain DrawerVerticleScrollbar">
+        <div
+          ref={scrollRef}
+          onFocusCapture={handleFocusCapture}
+          className="min-h-0 flex-1 overflow-y-auto overscroll-contain DrawerVerticleScrollbar"
+        >
         <div className={cn("flex flex-col gap-6", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4">
@@ -168,7 +176,7 @@ const TryAtHomeDetailsStep = ({
             </p>
           </div>
 
-          <div className="flex flex-col gap-6 pb-72">
+          <div className="flex flex-col gap-6" style={{ paddingBottom: clearancePx }}>
             <AppointmentContactFields
               idPrefix="try-at-home"
               name={name}
@@ -207,7 +215,7 @@ const TryAtHomeDetailsStep = ({
         </div>
       </div>
 
-      <PanelFooter contentClassName="flex flex-col items-center gap-4">
+      <PanelFooter footerRef={footerRef} contentClassName="flex flex-col items-center gap-4">
         <p className="text-center font-gill text-sm font-light leading-normal tracking-normal text-neutral500">
           Our representative will get in touch with you soon
         </p>
@@ -327,10 +335,17 @@ const TryAtHomeAddressStep = ({
     onSubmit({ addressLine1, addressLine2, pincode, city, state });
   };
 
+  const { footerRef, clearancePx } = useMobileStickyFooterClearance();
+  const { scrollRef, handleFocusCapture } = usePanelInputFocusScroll();
+
   return (
     <>
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain DrawerVerticleScrollbar">
+        <div
+          ref={scrollRef}
+          onFocusCapture={handleFocusCapture}
+          className="min-h-0 flex-1 overflow-y-auto overscroll-contain DrawerVerticleScrollbar"
+        >
         <div className={cn("flex flex-col gap-6", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4">
@@ -361,7 +376,7 @@ const TryAtHomeAddressStep = ({
             </DetailTextLink>
           </div>
 
-          <div className="flex flex-col gap-6 pb-72">
+          <div className="flex flex-col gap-6" style={{ paddingBottom: clearancePx }}>
             <div className="flex flex-col gap-2">
               <label htmlFor="try-at-home-address-line-1" className={appointmentLabelClassName}>
                 {form?.addressLine1Label ?? "Address Line 1"}
@@ -524,7 +539,7 @@ const TryAtHomeAddressStep = ({
         </div>
       </div>
 
-      <PanelFooter contentClassName="flex flex-col items-center gap-4">
+      <PanelFooter footerRef={footerRef} contentClassName="flex flex-col items-center gap-4">
         <p className="text-center font-gill text-sm font-light leading-normal tracking-normal text-neutral500">
           Our representative will get in touch with you soon
         </p>

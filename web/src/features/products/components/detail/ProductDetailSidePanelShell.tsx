@@ -5,6 +5,7 @@ import { cn } from "@/shared/utils/cn";
 import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
 import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
 import { RIGHT_PANEL_ASIDE_MD_CLASS, RIGHT_PANEL_WIDTH_CLASS } from "@/shared/ui/rightPanel";
+import { useMobileDrawerMaxHeight } from "@/shared/hooks/use-mobile-drawer-max-height";
 import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
 
 export const productDetailSidePanelOverlayClassName =
@@ -39,6 +40,7 @@ export function ProductDetailSidePanelShell({
   overlayClassName,
 }: ProductDetailSidePanelShellProps) {
   const { showMobileShell } = useResponsiveOverlayShell(open, PDP_SIDE_PANEL_MOBILE_QUERY);
+  const mobileDrawerMaxHeight = useMobileDrawerMaxHeight(open, showMobileShell);
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
@@ -51,13 +53,19 @@ export function ProductDetailSidePanelShell({
 
   if (showMobileShell) {
     return (
-      <Drawer open={open} onOpenChange={handleOpenChange} shouldScaleBackground={false}>
+      <Drawer
+        open={open}
+        onOpenChange={handleOpenChange}
+        shouldScaleBackground={false}
+        repositionInputs={false}
+      >
         <DrawerContent
           overlayClassName={overlayClass}
           className={cn(
             panelClassName,
             "mt-12 max-h-[calc(100dvh-3rem)] w-full rounded-none [&>div:first-child]:hidden",
           )}
+          style={mobileDrawerMaxHeight ? { maxHeight: mobileDrawerMaxHeight } : undefined}
         >
           <DrawerTitle className="sr-only">{dialogAriaLabel}</DrawerTitle>
           {children}

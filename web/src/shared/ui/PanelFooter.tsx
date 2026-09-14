@@ -42,6 +42,7 @@ type PanelFooterProps = {
   className?: string;
   contentClassName?: string;
   showGradient?: boolean;
+  footerRef?: React.Ref<HTMLDivElement>;
 };
 
 export function PanelFooter({
@@ -49,9 +50,10 @@ export function PanelFooter({
   className,
   contentClassName,
   showGradient = true,
+  footerRef,
 }: PanelFooterProps) {
   return (
-    <div className={cn("relative shrink-0", className)}>
+    <div ref={footerRef} className={cn("relative shrink-0", className)}>
       {showGradient ? <PanelFooterGradient overlay /> : null}
       <div className={cn(panelFooterContentClassName, contentClassName)}>{children}</div>
     </div>
