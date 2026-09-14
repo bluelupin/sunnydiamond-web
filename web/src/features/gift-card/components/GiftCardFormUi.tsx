@@ -28,12 +28,6 @@ export const giftCardSectionHeadingClass =
 export const giftCardFieldClassName =
   "h-14 w-full bg-[#F2F2F2] px-3 font-gill text-base font-normal leading-110 text-darkblack placeholder:text-[#999999] outline-none";
 
-export const giftCardPrimaryButtonClassName = (disabled: boolean) =>
-  cn(
-    disabled &&
-      "!border-neutral500 !bg-neutral500 !opacity-100 hover:!border-neutral500 hover:!bg-neutral500",
-  );
-
 type GiftCardTextFieldProps = {
   id: string;
   label: string;

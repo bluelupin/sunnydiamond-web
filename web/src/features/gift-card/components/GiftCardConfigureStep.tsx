@@ -16,7 +16,6 @@ import {
   GiftCardTextAreaField,
   GiftCardToggleOption,
   giftCardFieldLabelClass,
-  giftCardPrimaryButtonClassName,
 } from "./GiftCardFormUi";
 
 function formatGiftCardAmount(amount: number): string {
@@ -72,7 +71,6 @@ const GiftCardConfigureStep = ({ header }: { header: ReactNode }) => {
             type="button"
             disabled={!canContinue}
             onClick={handleContinue}
-            className={giftCardPrimaryButtonClassName(!canContinue)}
           >
             {giftCardFlowContent.cta.addDetails}
           </CartPrimaryButton>

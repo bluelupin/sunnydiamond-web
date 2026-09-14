@@ -16,7 +16,6 @@ import {
   GiftCardCheckbox,
   GiftCardPhoneField,
   GiftCardTextField,
-  giftCardPrimaryButtonClassName,
   giftCardSectionHeadingClass,
 } from "./GiftCardFormUi";
 
@@ -103,7 +102,6 @@ const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
               type="button"
               disabled={!canContinue || isPaying}
               onClick={handleContinue}
-              className={giftCardPrimaryButtonClassName(!canContinue || isPaying)}
             >
               {cardType === "digital" ? cta.payNow : cta.addAddress}
             </CartPrimaryButton>

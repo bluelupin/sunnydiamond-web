@@ -26,7 +26,6 @@ import { giftCardFlowContent } from "../data/content";
 import {
   giftCardFieldClassName,
   giftCardFieldLabelClass,
-  giftCardPrimaryButtonClassName,
   giftCardSectionHeadingClass,
 } from "./GiftCardFormUi";
 
@@ -109,7 +108,6 @@ const GiftCardAddressStep = ({ header }: { header: ReactNode }) => {
                 type="button"
                 disabled={!isValid || isPaying}
                 onClick={handlePayNow}
-                className={giftCardPrimaryButtonClassName(!isValid || isPaying)}
               >
                 {address.payNowLabel}
               </CartPrimaryButton>
