@@ -41,7 +41,6 @@ const ContactInfoSection = ({ intro, infoCards }: ContactInfoSectionProps) => {
           {infoCards.map((card, index) => {
             const isExternal =
               card.variant === "link" && /^https?:\/\//i.test(card.link.href);
-            const isCompactCard = card.variant === "email" || card.variant === "link";
             return (
               <React.Fragment key={card.id}>
                 <Reveal
@@ -50,7 +49,7 @@ const ContactInfoSection = ({ intro, infoCards }: ContactInfoSectionProps) => {
                   data-cms-option-id={card.id}
                   className={cn(
                     contactCardLayoutClasses.card,
-                    isCompactCard && contactCardLayoutClasses.cardCompact,
+                    contactCardLayoutClasses.cardCompact,
                   )}
                 >
                   <h2 className="w-full text-center font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">

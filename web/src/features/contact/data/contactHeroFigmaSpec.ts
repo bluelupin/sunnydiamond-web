@@ -51,7 +51,7 @@ export const contactHeroFigmaSpec = {
     /** Gap between cards (node 4285:103120) */
     gapPx: 12,
     paddingPx: 24,
-    /** Email / Personal Concierge fixed height (nodes 4285:103100, 4285:103108) */
+    /** All contact cards share fixed height (nodes 4285:103087–4285:103108) */
     compactHeightPx: 189,
     hoursRowGapPx: 12,
     ctaFontSizePx: 14,
