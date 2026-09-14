@@ -9,11 +9,8 @@ import type { StrapiImage } from "@/types/strapiMedia";
 export type StrapiBlogSeo = {
   metaTitle?: string | null;
   metaDescription?: string | null;
-  canonicalUrl?: string | null;
   metaKeywords?: string | null;
   ogImage?: StrapiImage;
-  /** CMS show/hide for SEO component — omit/false hides CMS SEO. */
-  showField?: boolean | null;
 };
 
 export type StrapiBlogTag = {
@@ -28,6 +25,8 @@ export type StrapiBlogCategory = {
   Title?: string | null;
   value?: string | null;
   Value?: string | null;
+  /** CMS-provided post tally on landing `blogCategory` entries. */
+  count?: number | null;
 };
 
 export type StrapiBlogResponsiveImage = {
@@ -91,7 +90,6 @@ export type StrapiBlogLandingPage = {
 export type BlogsPageSeo = {
   metaTitle?: string;
   metaDescription?: string;
-  canonicalPath?: string;
   keywords?: string;
   ogImageUrl?: string;
 };

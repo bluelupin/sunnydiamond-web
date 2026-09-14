@@ -15,7 +15,6 @@ import {
 import type {
   NormalizedBlogDetailResult,
   NormalizedBlogsPage,
-  StrapiBlogCategory,
   StrapiBlogLandingPage,
   StrapiBlogPost,
 } from "./blogs.types";
@@ -106,13 +105,12 @@ async function fetchRelatedBlogPostsBySlug(
 
 export const getBlogsPageData = cache(
   async (signal?: AbortSignal): Promise<NormalizedBlogsPage> => {
-    const [posts, landing, categories] = await Promise.all([
+    const [posts, landing] = await Promise.all([
       fetchBlogPosts(signal),
       softFetch<StrapiBlogLandingPage>(
         `${STRAPI_ENDPOINTS.blogLandingPage}?${BLOG_LANDING_POPULATE_QUERY}`,
         signal,
       ),
-      softFetch<StrapiBlogCategory[]>(STRAPI_ENDPOINTS.blogCategories, signal),
     ]);
 
     if (posts.length === 0) {
@@ -122,7 +120,6 @@ export const getBlogsPageData = cache(
     return mapBlogsPageData({
       posts,
       landing,
-      categories: Array.isArray(categories) ? categories : null,
     });
   },
 );

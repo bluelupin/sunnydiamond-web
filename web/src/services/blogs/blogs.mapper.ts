@@ -696,7 +696,8 @@ export function mapStrapiBlogPostToCard(
     readTime: formatReadTime(post),
     imageSrc: image.src,
     imageAlt: image.alt,
-    category: inferBlogCategory(post),
+    // Listing chips/counts use CMS `blog_category` only (no FE inference).
+    category: categoryValue(post.blog_category ?? undefined) ?? "",
     href: `/blogs/${slug}`,
   };
 }
@@ -741,32 +742,18 @@ export function mapStrapiBlogPostToDetail(
 }
 
 export function mapStrapiSeo(seo: StrapiBlogSeo | null | undefined): BlogsPageSeo | null {
-  if (!seo || seo.showField === false) return null;
+  if (!seo) return null;
 
   const metaTitle = cleanText(seo.metaTitle);
   const metaDescription = cleanText(seo.metaDescription);
-  const canonicalUrl = cleanText(seo.canonicalUrl);
   const keywords = cleanText(seo.metaKeywords);
   const ogImageUrl = resolveCmsMediaUrl(seo.ogImage);
 
-  if (!metaTitle && !metaDescription && !canonicalUrl && !ogImageUrl) return null;
-
-  let canonicalPath: string | undefined;
-  if (canonicalUrl) {
-    try {
-      const url = new URL(canonicalUrl);
-      canonicalPath = url.pathname.replace(/\/$/, "") || "/blogs";
-    } catch {
-      canonicalPath = canonicalUrl.startsWith("/")
-        ? canonicalUrl.replace(/\/$/, "") || "/blogs"
-        : undefined;
-    }
-  }
+  if (!metaTitle && !metaDescription && !ogImageUrl) return null;
 
   return {
     ...(metaTitle ? { metaTitle } : {}),
     ...(metaDescription ? { metaDescription } : {}),
-    ...(canonicalPath ? { canonicalPath } : {}),
     ...(keywords ? { keywords } : {}),
     ...(ogImageUrl ? { ogImageUrl } : {}),
   };
@@ -776,68 +763,49 @@ function buildCategoriesFromPosts(
   posts: BlogPost[],
   cmsCategories: StrapiBlogCategory[] | null,
 ): BlogCategory[] {
-  const counts = new Map<string, number>();
-  for (const post of posts) {
-    counts.set(post.category, (counts.get(post.category) ?? 0) + 1);
+  const allChip: BlogCategory = {
+    id: "all",
+    label: formatCategoryLabel("All", posts.length),
+    count: posts.length,
+  };
+
+  // Chips from landing `blogCategory`; per-chip count from CMS `count`.
+  if (!cmsCategories || cmsCategories.length === 0) {
+    return [allChip];
   }
 
-  if (cmsCategories && cmsCategories.length > 0) {
-    const mapped = cmsCategories
-      .map((category) => {
-        const id = categoryValue(category);
-        const title = categoryTitle(category);
-        if (!id || !title) return null;
-        const count = counts.get(id) ?? 0;
-        return {
-          id,
-          label: formatCategoryLabel(title, count),
-          count,
-        } satisfies BlogCategory;
-      })
-      .filter((category): category is BlogCategory => Boolean(category));
+  const mapped = cmsCategories
+    .map((category) => {
+      const id = categoryValue(category);
+      const title = categoryTitle(category);
+      if (!id || !title) return null;
+      const count =
+        typeof category.count === "number" && Number.isFinite(category.count)
+          ? Math.max(0, Math.floor(category.count))
+          : 0;
+      return {
+        id,
+        label: formatCategoryLabel(title, count),
+        count,
+      } satisfies BlogCategory;
+    })
+    .filter((category): category is BlogCategory => Boolean(category));
 
-    return [
-      {
-        id: "all",
-        label: formatCategoryLabel("All", posts.length),
-        count: posts.length,
-      },
-      ...mapped,
-    ];
-  }
-
-  const knownOrder = [...blogsPageContent.categoryOrder];
-
-  const dynamicIds = Array.from(counts.keys()).filter(
-    (id) => !(knownOrder as readonly string[]).includes(id),
+  // Figma chip order for known ids; any new CMS categories append after.
+  const preferredIndex = new Map<string, number>(
+    blogsPageContent.categoryOrder.map((id, index) => [id, index]),
   );
+  const ordered = mapped
+    .map((category, index) => ({ category, index }))
+    .sort((a, b) => {
+      const aRank = preferredIndex.get(a.category.id) ?? Number.MAX_SAFE_INTEGER;
+      const bRank = preferredIndex.get(b.category.id) ?? Number.MAX_SAFE_INTEGER;
+      if (aRank !== bRank) return aRank - bRank;
+      return a.index - b.index;
+    })
+    .map(({ category }) => category);
 
-  const orderedIds = [...knownOrder, ...dynamicIds];
-
-  return [
-    {
-      id: "all",
-      label: formatCategoryLabel("All", posts.length),
-      count: posts.length,
-    },
-    ...orderedIds
-      .map((id) => {
-        const count = counts.get(id) ?? 0;
-        if (count === 0) return null;
-        const title =
-          blogsPageContent.categoryLabels[id] ??
-          id
-            .split("-")
-            .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-            .join(" ");
-        return {
-          id,
-          label: formatCategoryLabel(title, count),
-          count,
-        } satisfies BlogCategory;
-      })
-      .filter((category): category is BlogCategory => Boolean(category)),
-  ];
+  return [allChip, ...ordered];
 }
 
 function mapFeaturedFromPost(
@@ -856,6 +824,7 @@ function mapFeaturedFromPost(
     backgroundAlt: "",
     readNowLabel: blogsPageContent.featured.readNowLabel,
     href: post.href,
+    category: post.category,
     ...overrides,
   };
 }
@@ -863,7 +832,6 @@ function mapFeaturedFromPost(
 export function mapBlogsPageData(input: {
   posts: StrapiBlogPost[];
   landing: StrapiBlogLandingPage | null;
-  categories: StrapiBlogCategory[] | null;
 }): NormalizedBlogsPage {
   const cards = input.posts
     .map((post) => mapStrapiBlogPostToCard(post))
@@ -875,9 +843,10 @@ export function mapBlogsPageData(input: {
     postsBySlug[slug] = post;
   }
 
-  const landingCategories =
-    input.categories ??
-    (Array.isArray(input.landing?.blogCategory) ? input.landing.blogCategory : null);
+  // Chips + counts from landing `blogCategory` (`count` from CMS).
+  const landingCategories = Array.isArray(input.landing?.blogCategory)
+    ? input.landing.blogCategory
+    : null;
 
   const featuredSection = input.landing?.featuredBlogSection;
   const sectionActive = featuredSection?.isActive !== false;

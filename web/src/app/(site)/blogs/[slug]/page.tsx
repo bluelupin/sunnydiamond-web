@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         result.seo?.metaDescription ??
         result.detail.introParagraphs[0] ??
         result.detail.title,
-      canonicalPath: result.seo?.canonicalPath ?? `/blogs/${slug}`,
+      canonicalPath: `/blogs/${slug}`,
       ...(result.seo?.keywords ? { keywords: result.seo.keywords } : {}),
       ...(result.seo?.ogImageUrl ? { image: result.seo.ogImageUrl } : {}),
     });

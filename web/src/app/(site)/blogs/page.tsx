@@ -30,7 +30,7 @@ export async function generateMetadata({
     return constructMetadata({
       title: blogsPage.seo?.metaTitle ?? page.title,
       description: blogsPage.seo?.metaDescription ?? page.description,
-      canonicalPath: blogsPage.seo?.canonicalPath ?? "/blogs",
+      canonicalPath: "/blogs",
       noIndex,
       ...(blogsPage.seo?.keywords ? { keywords: blogsPage.seo.keywords } : {}),
       ...(blogsPage.seo?.ogImageUrl ? { image: blogsPage.seo.ogImageUrl } : {}),
