@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test:signup": "node scripts/test-signup-flow.mjs",
-    "test:signup:smoke": "node scripts/test-signup-flow.mjs --smoke"
+    "test:signup:smoke": "node scripts/test-signup-flow.mjs --smoke",
+    "test:contact": "node scripts/verify-contact-module.mjs"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.3",

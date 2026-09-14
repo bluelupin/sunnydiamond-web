@@ -2,6 +2,7 @@
 import Reveal from "@/shared/Animation/Reveal";
 import type { NormalizedContactInfoCard } from "@/services/contact/contact-page.types";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
+import { useIsMobile } from "@/shared/hooks/use-mobile";
 import Image from "next/image";
 import React from "react";
 import ContactPhoneLink from "./ContactPhoneLink";
@@ -14,10 +15,12 @@ type ContactInfoSectionProps = {
 };
 
 const ContactInfoSection = ({ intro, infoCards }: ContactInfoSectionProps) => {
+  const isMobile = useIsMobile();
+
   return (
     <section
       aria-labelledby={intro ? "contact-intro" : undefined}
-      className="w-full md:px-10 xl:px-[150px] md:px-10 px-4"
+      className="w-full px-4 md:px-10 xl:px-[150px]"
     >
       <div className="mx-auto flex w-full max-w-1360 flex-col items-center md:gap-10 gap-16 md:pt-16">
         {intro ? (
@@ -45,7 +48,7 @@ const ContactInfoSection = ({ intro, infoCards }: ContactInfoSectionProps) => {
                   className="flex h-full flex-col items-center self-stretch bg-gray300 xl:py-6 xl:px-6 md:py-5 md:px-5 py-4 xl:gap-6 gap-4"
                 >
                   <h2 className="w-full text-center font-larken lg:text-2xl text-xl font-light leading-110 text-darkblack">
-                    {card.title}
+                    {isMobile && card.mobileTitle ? card.mobileTitle : card.title}
                   </h2>
 
                   <div className="flex w-full flex-1 flex-col items-center justify-between xl:gap-6 gap-4">

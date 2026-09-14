@@ -13,7 +13,10 @@ import { useAuth } from "@/features/auth/context/AuthContext";
 import {
   APPOINTMENT_COUNTRY_CODES,
 } from "@/shared/constants/appointmentForm";
-import { getGenericFormByTag, submitContactEnquiry } from "@/services/forms/generic-form.service";
+import {
+  fetchGenericFormByTag,
+  submitContactEnquiry,
+} from "@/services/forms/generic-form.service";
 import type { NormalizedContactForm } from "@/services/contact/contact-page.types";
 import {
   invalidFieldClassName,
@@ -38,6 +41,7 @@ const contactSelectTriggerClassName = "text-base font-normal";
 const contactSelectPlaceholderClassName = "font-normal text-gray600";
 
 const SELECT_CHEVRON_ICON = "/images/jewellery/chevron-down-filter.svg";
+const MESSAGE_MAX_LENGTH = 500;
 
 const ContactPhoneChevron = () => (
   <span
@@ -88,21 +92,14 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
     [],
   );
 
-  const { errors, isValid, submitted, markTouched, showError, validateSubmit, resetValidation } =
+  const { errors, submitted, markTouched, showError, validateSubmit, resetValidation } =
     useAppointmentFormValidation(formValues, validationOptions);
 
-  const reasonRequired = reasonOptions.length > 0 || Boolean(form.fields.reasonLabel);
-
-  const isFormReady = useMemo(
-    () =>
-      isValid &&
-      (!reasonRequired || reason.trim().length > 0) &&
-      (!form.requiresConsent || consentAccepted),
-    [isValid, reason, consentAccepted, form.requiresConsent, reasonRequired],
-  );
+  const reasonRequired = reasonOptions.length > 0;
+  const consentRequired = form.requiresConsent && Boolean(form.consentLabel);
 
   const showReasonError = submitted && reasonRequired && !reason.trim();
-  const showConsentError = submitted && form.requiresConsent && !consentAccepted;
+  const showConsentError = submitted && consentRequired && !consentAccepted;
 
   // Prefill from My Profile once when logged in; never overwrite fields the user already typed.
   useEffect(() => {
@@ -138,7 +135,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
   useEffect(() => {
     const controller = new AbortController();
 
-    getGenericFormByTag(form.formTag, controller.signal)
+    fetchGenericFormByTag(form.formTag, controller.signal)
       .then((cmsForm) => {
         if (!cmsForm) return;
 
@@ -160,7 +157,6 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
 
   const resetForm = () => {
     setName("");
-    setCountryCode("+91");
     setPhone("");
     setEmail("");
     setReason("");
@@ -174,7 +170,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
     event.preventDefault();
 
     validateSubmit(async () => {
-      if ((reasonRequired && !reason.trim()) || (form.requiresConsent && !consentAccepted)) {
+      if ((reasonRequired && !reason.trim()) || (consentRequired && !consentAccepted)) {
         return;
       }
 
@@ -188,12 +184,15 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
           phone: `${countryCode}${phone.trim()}`,
           reasonForContact: reason.trim(),
           message: message.trim(),
-          consentAccepted: true,
+          consentAccepted: consentRequired ? consentAccepted : false,
           sourcePage: "/contact",
         });
 
         if (form.successDescription) {
-          toast({ description: form.successDescription });
+          toast({
+            title: "Message sent",
+            description: form.successDescription,
+          });
         }
         resetForm();
       } catch (error) {
@@ -240,7 +239,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
                     onChange={(event) => setName(event.target.value)}
                     onBlur={() => markTouched("name")}
                     autoComplete="name"
-                    placeholder={form.fields.fieldPlaceholder}
+                    placeholder={form.fields.namePlaceholder ?? form.fields.fieldPlaceholder}
                     aria-invalid={showError("name") || undefined}
                     aria-describedby={showError("name") ? "contact-name-error" : undefined}
                     className={cn(
@@ -297,7 +296,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
                           }
                           onBlur={() => markTouched("phone")}
                           autoComplete="tel-national"
-                          placeholder={form.fields.fieldPlaceholder}
+                          placeholder={form.fields.phonePlaceholder ?? "Phone number"}
                           aria-invalid={showError("phone") || undefined}
                           aria-describedby={showError("phone") ? "contact-phone-error" : undefined}
                           className="min-w-0 flex-1 bg-transparent font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600"
@@ -323,7 +322,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
                       onChange={(event) => setEmail(event.target.value)}
                       onBlur={() => markTouched("email")}
                       autoComplete="email"
-                      placeholder={form.fields.fieldPlaceholder}
+                      placeholder={form.fields.emailPlaceholder ?? "Email address"}
                       aria-invalid={showError("email") || undefined}
                       aria-describedby={showError("email") ? "contact-email-error" : undefined}
                       className={cn(
@@ -380,6 +379,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
                     onBlur={() => markTouched("note")}
                     placeholder={form.fields.messagePlaceholder}
                     rows={4}
+                    maxLength={MESSAGE_MAX_LENGTH}
                     aria-invalid={showError("note") || undefined}
                     aria-describedby={showError("note") ? "contact-message-error" : undefined}
                     className={cn(
@@ -394,7 +394,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
                 </div>
               </div>
 
-              {form.requiresConsent && form.consentLabel ? (
+              {consentRequired ? (
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                   <GiftingPanelCheckbox
@@ -415,7 +415,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
 
             <button
               type="submit"
-              disabled={isSubmitting || !isFormReady}
+              disabled={isSubmitting}
               className="btn-dark-slide inline-flex h-14 w-full items-center justify-center border border-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:border-darkblack disabled:bg-neutral500 disabled:opacity-50 md:w-auto md:self-start"
             >
               <span className="relative z-10">{submitLabel}</span>

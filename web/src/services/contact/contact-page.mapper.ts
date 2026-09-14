@@ -31,6 +31,15 @@ const cleanText = (value?: string | null): string | undefined => {
   return trimmed || undefined;
 };
 
+/** Correct common CMS copy typos without requiring a CMS republish. */
+const normalizeContactCopy = (value?: string | null): string | undefined => {
+  const text = cleanText(value);
+  if (!text) return undefined;
+  return text
+    .replace(/\bassisstance\b/gi, "assistance")
+    .replace(/\bmember of our team\b/gi, "member of the team");
+};
+
 /** CMS sections may use `isActive` or `showField`; default visible when unset. */
 const resolveSectionActive = (
   isActive?: boolean | null,
@@ -97,6 +106,13 @@ const isGenericButtonLabel = (label?: string): boolean => {
   );
 };
 
+/** Normalize garbled CMS email strings (e.g. "GET INTOUCH@SUNNTDIAMONDS.COM") for display. */
+const formatEmailDisplay = (value: string): string => {
+  const compact = value.replace(/\s+/g, "");
+  const match = compact.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+  return match ? match[0].toLowerCase() : value.trim();
+};
+
 const resolveLinkLabel = (
   buttonLabel: string | undefined,
   value: string | undefined,
@@ -150,7 +166,7 @@ const mapContactOption = (
   const type = cleanText(option.type)?.toLowerCase() ?? "";
   const rawValue = cleanText(option.value);
   const buttonLabel = cleanText(option.buttonLabel);
-  const description = cleanText(option.description);
+  const description = normalizeContactCopy(option.description);
   const hours = mapAvailabilityHours(option.availability);
   const lowerButton = buttonLabel?.toLowerCase() ?? "";
   const lowerValue = rawValue?.toLowerCase() ?? "";
@@ -172,9 +188,9 @@ const mapContactOption = (
     href = toTelHref(rawValue);
     label = resolveLinkLabel(buttonLabel, rawValue, rawValue);
   } else if (variant === "email" && rawValue) {
-    const email = rawValue.replace(/\s+/g, "");
+    const email = formatEmailDisplay(rawValue);
     href = `mailto:${email}`;
-    label = resolveLinkLabel(buttonLabel, rawValue, rawValue);
+    label = resolveLinkLabel(buttonLabel, email, email);
   } else if (rawValue) {
     const isWhatsApp =
       lowerButton.includes("whatsapp") ||
@@ -193,10 +209,10 @@ const mapContactOption = (
     } else if (/^https?:\/\//i.test(rawValue) || rawValue.startsWith("/")) {
       href = rawValue;
     } else if (rawValue.includes("@")) {
-      const email = rawValue.replace(/\s+/g, "");
+      const email = formatEmailDisplay(rawValue);
       href = `mailto:${email}`;
       variant = "email";
-      label = resolveLinkLabel(buttonLabel, rawValue, rawValue);
+      label = resolveLinkLabel(buttonLabel, email, email);
     } else if (isActionableContactTarget(rawValue)) {
       href = toWhatsAppHref(rawValue);
     } else {
@@ -298,8 +314,9 @@ const mapForm = (section?: StrapiContactFormSection | null): NormalizedContactFo
   );
 
   const reasonOptions = mapFieldOptions(reasonField);
-  const requiresConsent = cmsForm?.requiresConsent !== false;
   const consentLabel = cleanText(cmsForm?.consentLabel);
+  const requiresConsent = cmsForm?.requiresConsent !== false && Boolean(consentLabel);
+  const namePlaceholder = cleanText(nameField?.placeholder);
 
   return {
     title,
@@ -314,7 +331,10 @@ const mapForm = (section?: StrapiContactFormSection | null): NormalizedContactFo
       reasonPlaceholder: cleanText(reasonField?.placeholder),
       messageLabel: formatFieldLabel(messageField),
       messagePlaceholder: cleanText(messageField?.placeholder),
-      fieldPlaceholder: cleanText(nameField?.placeholder),
+      namePlaceholder,
+      phonePlaceholder: cleanText(phoneField?.placeholder),
+      emailPlaceholder: cleanText(emailField?.placeholder),
+      fieldPlaceholder: namePlaceholder,
     },
     reasonOptions,
     requiresConsent,

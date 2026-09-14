@@ -45,7 +45,7 @@ export const getContactPage = cache(
 
       return mapContactPage(raw);
     } catch {
-      return EMPTY_CONTACT_PAGE;
+      return { ...EMPTY_CONTACT_PAGE, loadError: true };
     }
   },
 );

@@ -178,6 +178,10 @@ export type NormalizedContactFormFields = {
   reasonPlaceholder?: string;
   messageLabel?: string;
   messagePlaceholder?: string;
+  namePlaceholder?: string;
+  phonePlaceholder?: string;
+  emailPlaceholder?: string;
+  /** @deprecated Use namePlaceholder — kept for backward compatibility */
   fieldPlaceholder?: string;
 };
 
@@ -210,6 +214,7 @@ export type NormalizedContactPage = {
   form: NormalizedContactForm | null;
   visitUs: NormalizedVisitUsSection | null;
   seo: NormalizedContactSeo | null;
+  loadError?: boolean;
 };
 
 export const EMPTY_CONTACT_PAGE: NormalizedContactPage = {

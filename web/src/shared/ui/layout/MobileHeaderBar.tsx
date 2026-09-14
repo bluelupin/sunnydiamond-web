@@ -49,7 +49,7 @@ const MobileHeaderBar = ({
           <HeaderIconBadge count={cartCount} />
         </Link>
 
-        <Link href="/contact" aria-label="Account" className={iconButtonClass} onClick={onNavigate}>
+        <Link href="/profile" aria-label="Account" className={iconButtonClass} onClick={onNavigate}>
           <UserIcon className="size-6" />
         </Link>
       </div>

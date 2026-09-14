@@ -33,6 +33,35 @@ export const getGenericFormByTag = cache(
   },
 );
 
+/** Client-safe generic form fetch via same-origin BFF (Contact Us live form refresh). */
+export async function fetchGenericFormByTag(
+  formTag: string,
+  signal?: AbortSignal,
+): Promise<NormalizedGenericForm | null> {
+  const response = await fetch(
+    `/api/generic-forms?formTag=${encodeURIComponent(formTag)}`,
+    {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      credentials: "same-origin",
+      signal,
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to load generic form (${response.status})`);
+  }
+
+  const payload = (await response.json()) as {
+    data?: StrapiGenericForm[] | StrapiGenericForm;
+  };
+
+  const raw = payload?.data;
+  const entity = Array.isArray(raw) ? raw[0] : raw;
+  return mapGenericForm(entity);
+}
+
 /**
  * Browser → same-origin BFF → Strapi generic-submissions (Public create).
  * Used by store-locator/nav Book a Visit (`showroom-visit`).
