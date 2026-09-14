@@ -29,6 +29,8 @@ export type BlogFeaturedPost = {
   backgroundAlt?: string;
   readNowLabel: string;
   href: string;
+  /** CMS category id — used to show featured only on All / matching chip. */
+  category: string;
 };
 
 export type BlogTableOfContentsItem = {

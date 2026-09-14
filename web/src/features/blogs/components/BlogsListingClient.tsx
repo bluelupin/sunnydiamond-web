@@ -57,7 +57,10 @@ const BlogsListingClient = ({
     ? posts.filter((post) => post.href !== featured.href)
     : posts;
   const filteredPosts = filterBlogPosts(gridPosts, category);
-  const showFeatured = Boolean(featured);
+  // Featured on All, or only on the chip that matches the featured post category.
+  const showFeatured =
+    Boolean(featured) &&
+    (category === "all" || featured?.category === category);
   const firstRowPosts = showFeatured ? filteredPosts.slice(0, 3) : [];
   const remainingPosts = showFeatured
     ? filteredPosts.slice(3, limit)
