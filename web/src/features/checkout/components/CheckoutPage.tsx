@@ -21,6 +21,7 @@ import { CheckoutFormStep, CheckoutPaymentStep } from "./CheckoutSteps";
 import CheckoutSuccessView from "./CheckoutSuccessView";
 import CheckoutPageSkeleton from "./skeletons/CheckoutPageSkeleton";
 import { registerGuestCustomerAfterOrder } from "../services/guestCustomerRegistration";
+import { persistGuestCheckoutAddresses } from "../services/persistGuestCheckoutAddresses";
 import {
   useCheckoutFormValidation,
   useCheckoutPaymentValidation,
@@ -295,13 +296,20 @@ const CheckoutPage = () => {
         })),
       });
 
+      let accountReady = input.wasAuthenticated;
+
       if (!input.wasAuthenticated && input.guestOtp) {
         const registered = await registerGuestCustomerAfterOrder(input.orderForm, input.guestOtp);
 
         if (registered) {
           await refreshAuth();
           setOrderSuccessAuthenticated(true);
+          accountReady = true;
         }
+      }
+
+      if (accountReady) {
+        await persistGuestCheckoutAddresses(input.orderForm);
       }
     },
     [clearCart, refreshAuth, showOrderPlacedToast],

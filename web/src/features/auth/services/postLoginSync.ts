@@ -3,6 +3,7 @@ import {
   clearGuestWishlistStorage,
   readGuestWishlistFromStorage,
 } from "@/features/wishlist/utils/guestWishlistStorage";
+import { syncCustomerAddressFromLatestOrder } from "@/services/customer/customer-account.client";
 import { syncCustomerWishlist } from "@/services/customer/customer-wishlist.client";
 import { magentoGraphqlFetch } from "@/services/magento/graphqlClient";
 import {
@@ -45,18 +46,29 @@ async function syncWishlistAfterLogin(): Promise<void> {
   clearGuestWishlistStorage();
 }
 
+/** Backfill address book from the latest order when guest checkout was not persisted. */
+async function syncGuestCheckoutAddressAfterLogin(): Promise<void> {
+  await syncCustomerAddressFromLatestOrder();
+}
+
 /**
  * Post-login side effects. Login must succeed even when these fail —
  * callers should not await-and-throw on this.
  */
-export async function runPostLoginSync(): Promise<{ cartMerged: boolean; wishlistPushed: boolean }> {
-  const [cartResult, wishlistResult] = await Promise.allSettled([
+export async function runPostLoginSync(): Promise<{
+  cartMerged: boolean;
+  wishlistPushed: boolean;
+  addressSynced: boolean;
+}> {
+  const [cartResult, wishlistResult, addressResult] = await Promise.allSettled([
     mergeGuestCart(),
     syncWishlistAfterLogin(),
+    syncGuestCheckoutAddressAfterLogin(),
   ]);
 
   return {
     cartMerged: cartResult.status === "fulfilled",
     wishlistPushed: wishlistResult.status === "fulfilled",
+    addressSynced: addressResult.status === "fulfilled",
   };
 }

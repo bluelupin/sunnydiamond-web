@@ -254,6 +254,27 @@ export const MAGENTO_CUSTOMER_ORDERS_QUERY = `
   }
 ` as const;
 
+export const MAGENTO_CUSTOMER_LATEST_ORDER_SHIPPING_QUERY = `
+  query MagentoCustomerLatestOrderShipping {
+    customer {
+      orders(pageSize: 1, currentPage: 1) {
+        items {
+          number
+          shipping_address {
+            firstname
+            lastname
+            street
+            city
+            region
+            postcode
+            telephone
+          }
+        }
+      }
+    }
+  }
+` as const;
+
 export const MAGENTO_CUSTOMER_ADDRESSES_QUERY = `
   query MagentoCustomerAddresses {
     customer {
