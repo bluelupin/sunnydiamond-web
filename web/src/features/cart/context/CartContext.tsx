@@ -48,6 +48,7 @@ import {
   DEFAULT_ENGRAVING_MAX_CHARACTERS,
   ENGRAVING_CHARSET_MESSAGE,
   ENGRAVING_TEXT_PATTERN,
+  ensureEngravingCartLineOptions,
   isCartLineEngravingCapable,
   mergeCartLineOptions,
 } from "@/features/products/constants/engraving";
@@ -466,11 +467,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
       configurableOptionUids,
     } = normalized;
     const incomingOptions = normalized.options ?? {};
-    const options = assignCartLineInstance(
-      incomingOptions.lineInstance?.trim()
-        ? incomingOptions
-        : { ...incomingOptions, lineInstance: undefined },
+    const options = ensureEngravingCartLineOptions(
+      assignCartLineInstance(
+        incomingOptions.lineInstance?.trim()
+          ? incomingOptions
+          : { ...incomingOptions, lineInstance: undefined },
+        productCustomOptions,
+      ),
       productCustomOptions,
+      product.engraving,
     );
     const sku = product.id.trim();
 

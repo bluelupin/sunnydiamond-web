@@ -22,7 +22,7 @@ import type { CartLineMetadata, StoredCartLineMetadata } from "./cartSession";
 import { mapMagentoCartCustomizableOptions } from "./cartLineCustomOptions.mapper";
 import {
   DEFAULT_ENGRAVING_MAX_CHARACTERS,
-  isCartLineEngravingCapable,
+  hasCatalogEngravingText,
 } from "@/features/products/constants/engraving";
 
 function mapCartItemProduct(item: MagentoCartItem): Product | null {
@@ -349,15 +349,10 @@ export function mapMagentoCartItems(
     // metadata only covers optimistic lines (and capable lines with no text yet —
     // Magento omits unset options from the response).
     const serverHasEngraving = Boolean(serverOptions.engravingText || magentoOptions.engraving);
-    // A bare engravingSupported flag without the option-uid record is legacy/ghost
-    // metadata — only structured capability evidence keeps the engraving UI alive.
-    const engravingEnabledForLine =
-      serverHasEngraving ||
-      (Boolean(metadata.productCustomOptions?.engravingText) &&
-        isCartLineEngravingCapable({
-          options: metadata.options,
-          productCustomOptions: metadata.productCustomOptions,
-        }));
+    const catalogSupportsEngraving = hasCatalogEngravingText(
+      product.customOptions ?? metadata.productCustomOptions,
+    );
+    const engravingEnabledForLine = serverHasEngraving || catalogSupportsEngraving;
 
     if (engravingEnabledForLine) {
       mergedOptions.engravingSupported = true;

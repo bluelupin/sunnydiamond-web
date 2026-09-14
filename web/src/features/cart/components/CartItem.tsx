@@ -56,7 +56,11 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
   const wishlisted = isWishlisted(product.id);
   const isGift =
     options.isGift === false ? false : Boolean(options.isGift || item.gifting);
-  const supportsEngraving = isCartLineEngravingEnabled(options);
+  const lineMetadata = getLineItemMetadata(item.id);
+  const supportsEngraving = isCartLineEngravingEnabled(
+    options,
+    product.customOptions ?? lineMetadata?.productCustomOptions,
+  );
   const engravingMaxCharacters = options.engravingMaxCharacters ?? DEFAULT_ENGRAVING_MAX_CHARACTERS;
   const hasEngraving = Boolean(options.engraving?.trim());
   const itemGiftNote = getCartItemGiftNote(item, giftNoteDisplay);
@@ -67,7 +71,6 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
   const [isMovingToWishlist, setIsMovingToWishlist] = useState(false);
 
   const engravingFont = options.engravingFont?.trim();
-  const lineMetadata = getLineItemMetadata(item.id);
   const fontLabels =
     product.customOptions?.engravingFont?.labels ??
     lineMetadata?.productCustomOptions?.engravingFont?.labels ??
