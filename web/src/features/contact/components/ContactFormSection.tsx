@@ -19,6 +19,7 @@ import {
 } from "@/services/forms/generic-form.service";
 import type { NormalizedContactForm } from "@/services/contact/contact-page.types";
 import {
+  formatRequiredFieldLabel,
   invalidFieldClassName,
   invalidFieldContainerClassName,
   sanitizePhoneInput,
@@ -230,7 +231,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
                 <div className="flex flex-col gap-2">
                   {form.fields.nameLabel ? (
                     <label htmlFor="contact-name" className={contactLabelClassName}>
-                      {form.fields.nameLabel}
+                      {formatRequiredFieldLabel(form.fields.nameLabel)}
                     </label>
                   ) : null}
                   <input
@@ -259,7 +260,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
                     <div className="flex h-[82px] flex-col items-start justify-between md:h-auto md:gap-2">
                       {form.fields.phoneLabel ? (
                         <label htmlFor="contact-phone" className={contactPhoneLabelClassName}>
-                          {form.fields.phoneLabel}
+                          {formatRequiredFieldLabel(form.fields.phoneLabel)}
                         </label>
                       ) : null}
                       <div
@@ -313,7 +314,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
                   <div className="flex flex-col gap-2">
                     {form.fields.emailLabel ? (
                       <label htmlFor="contact-email" className={contactLabelClassName}>
-                        {form.fields.emailLabel}
+                        {formatRequiredFieldLabel(form.fields.emailLabel)}
                       </label>
                     ) : null}
                     <input
@@ -343,7 +344,9 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
                   <div className="flex h-[82px] flex-col items-start justify-between md:h-auto md:gap-2">
                     {form.fields.reasonLabel ? (
                       <label htmlFor="contact-reason" className={contactLabelClassName}>
-                        {form.fields.reasonLabel}
+                        {reasonRequired
+                          ? formatRequiredFieldLabel(form.fields.reasonLabel)
+                          : form.fields.reasonLabel}
                       </label>
                     ) : null}
                     <InlineCustomSelect
@@ -370,7 +373,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
                 <div className="flex flex-col gap-2">
                   {form.fields.messageLabel ? (
                     <label htmlFor="contact-message" className={contactLabelClassName}>
-                      {form.fields.messageLabel}
+                      {formatRequiredFieldLabel(form.fields.messageLabel)}
                     </label>
                   ) : null}
                   <textarea
