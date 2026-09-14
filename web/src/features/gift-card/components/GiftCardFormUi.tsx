@@ -1,12 +1,13 @@
 "use client";
 
-import { Check, ChevronLeft } from "lucide-react";
-import type { InputHTMLAttributes, TextareaHTMLAttributes } from "react";
+import { ChevronLeft } from "lucide-react";
+import type { InputHTMLAttributes } from "react";
 import CareersChevronDownIcon from "@/features/careers/components/shared/CareersChevronDownIcon";
 import {
   CAREERS_SELECT_EMPTY_VALUE,
   careersSelectTriggerClassName,
 } from "@/features/careers/components/shared/CareersSelectField";
+import GiftingPanelCheckbox from "@/shared/ui/GiftingPanelCheckbox";
 import {
   Select,
   SelectContent,
@@ -15,7 +16,7 @@ import {
   SelectValue,
 } from "@/shared/ui/select";
 import { cn } from "@/shared/utils/cn";
-import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
+import { RIGHT_PANEL_CONTENT_PADDING_CLASS } from "@/shared/ui/rightPanel";
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 
 export const giftCardFieldLabelClass =
@@ -23,6 +24,9 @@ export const giftCardFieldLabelClass =
 
 export const giftCardSectionHeadingClass =
   "font-larken text-xl font-light leading-110 text-darkblack";
+
+export const giftCardFieldClassName =
+  "h-14 w-full bg-[#F2F2F2] px-3 font-gill text-base font-normal leading-110 text-darkblack placeholder:text-[#999999] outline-none";
 
 export const giftCardPrimaryButtonClassName = (disabled: boolean) =>
   cn(
@@ -38,7 +42,6 @@ type GiftCardTextFieldProps = {
   placeholder?: string;
   type?: InputHTMLAttributes<HTMLInputElement>["type"];
   inputMode?: InputHTMLAttributes<HTMLInputElement>["inputMode"];
-  focused?: boolean;
 };
 
 export const GiftCardTextField = ({
@@ -49,25 +52,18 @@ export const GiftCardTextField = ({
   placeholder = "Enter",
   type = "text",
   inputMode,
-  focused = false,
 }: GiftCardTextFieldProps) => (
   <div className="flex flex-col gap-2">
     <label className={giftCardFieldLabelClass} htmlFor={id}>{label}</label>
-    <div
-      className={cn(
-        "flex h-14 items-center bg-gray200 p-3 focus-within:border focus-within:border-darkblack",
-      )}
-    >
-      <input
-        id={id}
-        type={type}
-        inputMode={inputMode}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-        className="min-w-0 flex-1 bg-transparent font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:text-gray600"
-      />
-    </div>
+    <input
+      id={id}
+      type={type}
+      inputMode={inputMode}
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      placeholder={placeholder}
+      className={giftCardFieldClassName}
+    />
   </div>
 );
 
@@ -86,11 +82,7 @@ export const GiftCardPhoneField = ({
 }: GiftCardPhoneFieldProps) => (
   <div className="flex flex-col gap-2">
     <label className={giftCardFieldLabelClass} htmlFor={id}>{label}</label>
-    <div
-      className={cn(
-        "flex h-14 items-center gap-2 bg-gray200 p-3 focus-within:border focus-within:border-darkblack",
-      )}
-    >
+    <div className="flex h-14 items-center gap-2 bg-[#F2F2F2] px-3">
       <div className="flex shrink-0 items-center gap-2">
         <span className="font-gill text-base font-normal leading-110 text-darkblack">+91</span>
         <CareersChevronDownIcon />
@@ -102,7 +94,7 @@ export const GiftCardPhoneField = ({
         value={value}
         onChange={(event) => onChange(event.target.value.replace(/\D/g, ""))}
         placeholder="Enter"
-        className="min-w-0 flex-1 bg-transparent font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:text-gray600"
+        className="min-w-0 flex-1 bg-transparent font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:text-[#999999]"
       />
     </div>
   </div>
@@ -180,7 +172,7 @@ export const GiftCardTextAreaField = ({
         placeholder={placeholder}
         rows={4}
         className={cn(
-          "min-h-[100px] w-full resize-none bg-gray200 p-3 font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:text-gray600",
+          "min-h-[100px] w-full resize-none bg-[#F2F2F2] p-3 font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:text-[#999999]",
           hasValue && "border border-darkblack",
         )}
       />
@@ -200,7 +192,7 @@ export const GiftCardToggleOption = ({ label, selected, onSelect }: GiftCardTogg
     onClick={onSelect}
     className={cn(
       "flex h-14 flex-1 items-center justify-center p-3 font-gill text-base font-normal leading-110 text-darkblack transition-colors",
-      selected ? "bg-gold300" : "bg-gray200",
+      selected ? "bg-gold300" : "bg-[#F2F2F2]",
     )}
   >
     {label}
@@ -215,21 +207,7 @@ type GiftCardCheckboxProps = {
 
 export const GiftCardCheckbox = ({ checked, onChange, label }: GiftCardCheckboxProps) => (
   <label className="flex cursor-pointer items-center gap-2">
-    <button
-      type="button"
-      role="checkbox"
-      aria-checked={checked}
-      onClick={() => onChange(!checked)}
-      className={cn(
-        "flex size-6 shrink-0 items-center justify-center border-[0.8px] border-darkblack bg-white",
-        checked && "border-transparent bg-linkGold",
-      )}
-    >
-      <Check
-        className={cn("size-3.5 text-white transition-opacity", checked ? "opacity-100" : "opacity-0")}
-        strokeWidth={2.5}
-      />
-    </button>
+    <GiftingPanelCheckbox checked={checked} onChange={onChange} aria-label={label} />
     <span className="font-gill text-base font-light leading-110 text-darkblack">{label}</span>
   </label>
 );
@@ -241,20 +219,20 @@ type GiftCardPanelHeaderProps = {
 };
 
 export const GiftCardPanelHeader = ({ onClose, onBack, title }: GiftCardPanelHeaderProps) => (
-  <div className={RIGHT_PANEL_HEADER_PADDING_CLASS}>
+  <div className={cn("w-full shrink-0 md:pt-10 pt-6", RIGHT_PANEL_CONTENT_PADDING_CLASS)}>
     <div className="flex h-[26px] items-center justify-between">
-      <div className="flex items-center gap-2">
+      <div className="flex min-w-0 items-center gap-2">
         {onBack ? (
           <button
             type="button"
             onClick={onBack}
             aria-label="Back"
-            className="flex size-6 items-center justify-center text-darkblack"
+            className="inline-flex size-6 shrink-0 items-center justify-center"
           >
-            <ChevronLeft className="size-6" strokeWidth={1.5} />
+            <ChevronLeft size={24} strokeWidth={1.25} aria-hidden className="text-darkblack" />
           </button>
         ) : null}
-        <h2 className="font-larken text-32 font-light leading-110 text-darkblack">{title}</h2>
+        <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">{title}</h2>
       </div>
       <RightPanelCloseButton onClick={onClose} aria-label="Close gift card flow" />
     </div>

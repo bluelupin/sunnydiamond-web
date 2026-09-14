@@ -18,7 +18,7 @@ export const giftCardFlowContent = {
   occasion: {
     label: "Occasion*",
     placeholder: "Select Occasion",
-    options: [
+    fallbackOptions: [
       { label: "Wedding", value: "wedding" },
       { label: "Anniversary", value: "anniversary" },
       { label: "Birthday", value: "birthday" },
@@ -32,7 +32,7 @@ export const giftCardFlowContent = {
   details: {
     senderHeading: "Sender's Details",
     receiverHeading: "Receiver's Details",
-    sameAsSenderLabel: "Same address as sender's details",
+    sameAsSenderLabel: "Same as Sender",
     fullNameLabel: "Full Name*",
     phoneLabel: "Phone No.*",
     emailLabel: "Email ID",
@@ -69,5 +69,6 @@ export const giftCardFlowContent = {
   cta: {
     addDetails: "ADD DETAILS",
     addAddress: "ADD ADDRESS",
+    payNow: "PAY NOW",
   },
 };

@@ -1,9 +1,14 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useMemo } from "react";
+import { usePathname } from "next/navigation";
+import { useAuth } from "@/features/auth/context/AuthContext";
+import { useLoginModal } from "@/features/auth/context/LoginModalContext";
 import { CartPrimaryButton } from "@/features/cart/components/CartFlowUi";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { RIGHT_PANEL_CONTENT_PADDING_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelScrollLayout } from "@/shared/ui/RightPanelScrollLayout";
+import { cn } from "@/shared/utils/cn";
 import { useGiftCardFlow } from "../context/GiftCardFlowContext";
 import { giftCardFlowContent } from "../data/content";
 import {
@@ -18,42 +23,64 @@ function formatGiftCardAmount(amount: number): string {
   return `₹ ${amount.toLocaleString("en-IN")}`;
 }
 
-const GiftCardConfigureStep = ({
-  header,
-  onContinue,
-}: {
-  header: ReactNode;
-  onContinue: () => void;
-}) => {
+const GiftCardConfigureStep = ({ header }: { header: ReactNode }) => {
+  const pathname = usePathname() ?? "/";
+  const { status } = useAuth();
+  const { openLoginModal } = useLoginModal();
   const {
     cardType,
     amount,
     occasion,
     message,
+    occasionOptions,
     setCardType,
     setAmount,
     setOccasion,
     setMessage,
+    requestDetailsStep,
+    beginGuestAuthForDetails,
+    persistFlowState,
   } = useGiftCardFlow();
 
   const { amount: amountConfig, cardTypes, occasion: occasionConfig, message: messageConfig } =
     giftCardFlowContent;
-
-  const sliderFillPercent = useMemo(() => {
-    const range = amountConfig.max - amountConfig.min;
-    if (range <= 0) return 0;
-    return ((amount - amountConfig.min) / range) * 100;
-  }, [amount, amountConfig.max, amountConfig.min]);
 
   const clampAmount = (value: number) =>
     Math.min(amountConfig.max, Math.max(amountConfig.min, value));
 
   const canContinue = occasion.trim().length > 0;
 
+  const handleContinue = () => {
+    if (!canContinue) return;
+
+    persistFlowState();
+
+    if (status === "authenticated") {
+      requestDetailsStep();
+      return;
+    }
+
+    beginGuestAuthForDetails();
+    openLoginModal({ returnUrl: pathname });
+  };
+
   return (
-    <>
-      <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto overscroll-contain px-6 py-6">
-        {header}
+    <RightPanelScrollLayout
+      footer={
+        <PanelFooter>
+          <CartPrimaryButton
+            type="button"
+            disabled={!canContinue}
+            onClick={handleContinue}
+            className={giftCardPrimaryButtonClassName(!canContinue)}
+          >
+            {giftCardFlowContent.cta.addDetails}
+          </CartPrimaryButton>
+        </PanelFooter>
+      }
+    >
+      {header}
+      <div className={cn("flex flex-col gap-6 pt-6 pb-24", RIGHT_PANEL_CONTENT_PADDING_CLASS)}>
         <div className="flex flex-col gap-2">
           <p className={giftCardFieldLabelClass}>{cardTypes.label}</p>
           <div className="flex gap-2">
@@ -77,7 +104,7 @@ const GiftCardConfigureStep = ({
               <div className="relative h-1 w-full rounded-full bg-neutral300">
                 <div
                   className="absolute left-0 top-0 h-[3px] bg-darkblack"
-                  style={{ width: `${sliderFillPercent}%` }}
+                  style={{ width: `${((amount - amountConfig.min) / (amountConfig.max - amountConfig.min)) * 100}%` }}
                   aria-hidden
                 />
                 <input
@@ -92,11 +119,13 @@ const GiftCardConfigureStep = ({
                 />
                 <div
                   className="pointer-events-none absolute top-1/2 size-3 -translate-y-1/2 rounded-full bg-darkblack shadow-[0_2px_4px_rgba(0,0,0,0.25)]"
-                  style={{ left: `calc(${sliderFillPercent}% - 6px)` }}
+                  style={{
+                    left: `calc(${((amount - amountConfig.min) / (amountConfig.max - amountConfig.min)) * 100}% - 6px)`,
+                  }}
                   aria-hidden
                 />
               </div>
-              <div className="flex h-14 items-center bg-gray200 p-3">
+              <div className="flex h-14 items-center bg-[#F2F2F2] px-3">
                 <input
                   type="text"
                   inputMode="numeric"
@@ -134,7 +163,7 @@ const GiftCardConfigureStep = ({
           value={occasion}
           onChange={setOccasion}
           placeholder={occasionConfig.placeholder}
-          options={occasionConfig.options}
+          options={occasionOptions}
         />
 
         <GiftCardTextAreaField
@@ -145,18 +174,7 @@ const GiftCardConfigureStep = ({
           placeholder={messageConfig.placeholder}
         />
       </div>
-
-      <PanelFooter contentClassName="px-4 py-6">
-        <CartPrimaryButton
-          type="button"
-          disabled={!canContinue}
-          onClick={onContinue}
-          className={giftCardPrimaryButtonClassName(!canContinue)}
-        >
-          {giftCardFlowContent.cta.addDetails}
-        </CartPrimaryButton>
-      </PanelFooter>
-    </>
+    </RightPanelScrollLayout>
   );
 };
 

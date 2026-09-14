@@ -9,6 +9,11 @@ import { isSectionActive } from "@/shared/utils/cmsSection";
 import { resolveResponsiveCmsImage } from "@/shared/utils/responsiveCmsImage";
 import Reveal from "@/shared/Animation/Reveal";
 import { useMutedVideoPlayback } from "@/shared/hooks/useMutedVideoPlayback";
+import { useGiftCardFlow } from "@/features/gift-card/context/GiftCardFlowContext";
+import {
+  isGiftCardFlowCtaLabel,
+  isGiftCardFlowCtaUrl,
+} from "@/features/gift-card/utils/giftCardCta.utils";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { buildJewelleryListingCtaHref } from "@/features/jewellery-product/utils/listingCta";
 import { cn } from "@/shared/utils/cn";
@@ -43,6 +48,7 @@ function getVideoMimeType(url: string) {
 }
 
 const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
+  const { openPanel } = useGiftCardFlow();
   const { data: shoppingData, isLoading } = useHomepageShoppingBlocks();
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
 
@@ -94,6 +100,13 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
         ...listingCtaOptions,
       }),
     [listingCtaOptions, secondaryCtaSourceUrl],
+  );
+
+  const isGiftCardSecondaryCta = useMemo(
+    () =>
+      isGiftCardFlowCtaUrl(secondaryCtaSourceUrl) ||
+      isGiftCardFlowCtaLabel(secondaryCtaLabel),
+    [secondaryCtaLabel, secondaryCtaSourceUrl],
   );
 
   const backgroundImages = useMemo(
@@ -281,9 +294,10 @@ const ForYourValentineSection = ({ id }: ForYourValentineSectionProps) => {
                   <span className="relative z-10">{primaryCtaLabel}</span>
                 </Link>
               ) : null}
-              {hasSecondaryCta && secondaryCtaUrl && secondaryCtaLabel ? (
+              {hasSecondaryCta && secondaryCtaLabel ? (
                 <DetailTextLink
-                  href={secondaryCtaUrl}
+                  href={isGiftCardSecondaryCta ? undefined : secondaryCtaUrl}
+                  onClick={isGiftCardSecondaryCta ? openPanel : undefined}
                   light={isVideoMode}
                   className={isVideoMode ? ctaFocusDarkClass : ctaFocusLightClass}
                 >

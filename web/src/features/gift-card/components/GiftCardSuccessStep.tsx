@@ -7,9 +7,10 @@ import {
   CartPrimaryLink,
   CartSuccessCheck,
 } from "@/features/cart/components/CartFlowUi";
-import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
+import { RIGHT_PANEL_CONTENT_PADDING_CLASS } from "@/shared/ui/rightPanel";
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { RightPanelScrollLayout } from "@/shared/ui/RightPanelScrollLayout";
 import { cn } from "@/shared/utils/cn";
 import { useGiftCardFlow } from "../context/GiftCardFlowContext";
 import { giftCardFlowContent } from "../data/content";
@@ -38,16 +39,28 @@ const GiftCardSuccessStep = ({ onClose }: GiftCardSuccessStepProps) => {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white">
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain DrawerVerticleScrollbar">
-        <div className={cn("flex justify-end", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
-          <RightPanelCloseButton onClick={onClose} aria-label="Close gift card flow" />
-        </div>
+    <RightPanelScrollLayout
+      footer={
+        <PanelFooter>
+          <div className="flex flex-col gap-4">
+            <CartPrimaryLink href={trackingHref} className="w-full uppercase">
+              {success.trackOrderLabel}
+            </CartPrimaryLink>
+            <CartOutlineButton type="button" className="w-full uppercase" onClick={handleBackToShopping}>
+              {success.backToShoppingLabel}
+            </CartOutlineButton>
+          </div>
+        </PanelFooter>
+      }
+    >
+      <div className={cn("flex justify-end md:pt-10 pt-6", RIGHT_PANEL_CONTENT_PADDING_CLASS)}>
+        <RightPanelCloseButton onClick={onClose} aria-label="Close gift card flow" />
+      </div>
 
-        <div className="flex flex-col items-center gap-6 px-6 pb-6">
+      <div className={cn("flex flex-col items-center gap-6 pb-24 pt-6", RIGHT_PANEL_CONTENT_PADDING_CLASS)}>
         <CartSuccessCheck />
         <div className="flex flex-col items-center gap-4 text-center">
-          <h2 className="font-larken text-32 font-light leading-110 text-darkblack">
+          <h2 className="font-larken text-2xl font-light leading-110 text-darkblack lg:text-32">
             {success.title}
           </h2>
           <p className="max-w-[360px] font-gill text-base font-light leading-110 text-darkblack">
@@ -64,20 +77,8 @@ const GiftCardSuccessStep = ({ onClose }: GiftCardSuccessStepProps) => {
             sizes="320px"
           />
         </div>
-        </div>
       </div>
-
-      <PanelFooter contentClassName="px-4 py-6">
-        <div className="flex flex-col gap-4">
-          <CartPrimaryLink href={trackingHref} className="w-full uppercase">
-            {success.trackOrderLabel}
-          </CartPrimaryLink>
-          <CartOutlineButton type="button" className="w-full uppercase" onClick={handleBackToShopping}>
-            {success.backToShoppingLabel}
-          </CartOutlineButton>
-        </div>
-      </PanelFooter>
-    </div>
+    </RightPanelScrollLayout>
   );
 };
 

@@ -18,6 +18,7 @@ import {
   DEFAULT_AUTH_FEATURE_FLAGS,
   type AuthFeatureFlags,
 } from '@/features/auth/types/authFeatures.types';
+import GiftingGiftCardFlowRoot from '@/features/gift-card/components/GiftingGiftCardFlowRoot';
 import { UiPlatformProvider } from '@/shared/context/UiPlatformContext';
 import type { UiPlatform } from '@/shared/utils/detectUiPlatform';
 
@@ -44,9 +45,13 @@ export default function AppProvider({
             <CartUIProvider>
               <LoginModalProvider>
                 <WishlistProvider>
-                  <PageLoadingProvider>
-                    {children}
-                  </PageLoadingProvider>
+                  <FeatureErrorBoundary featureName="GiftingGiftCardFlowRoot">
+                    <GiftingGiftCardFlowRoot>
+                      <PageLoadingProvider>
+                        {children}
+                      </PageLoadingProvider>
+                    </GiftingGiftCardFlowRoot>
+                  </FeatureErrorBoundary>
                   <FeatureErrorBoundary featureName="CartBagDrawer">
                     <CartBagDrawer />
                   </FeatureErrorBoundary>

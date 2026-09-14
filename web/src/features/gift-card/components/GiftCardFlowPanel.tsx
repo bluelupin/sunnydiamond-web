@@ -13,7 +13,7 @@ type GiftCardFlowPanelProps = {
 };
 
 const GiftCardFlowPanel = ({ onClose }: GiftCardFlowPanelProps) => {
-  const { step, goToDetails, goBack } = useGiftCardFlow();
+  const { step, goBack } = useGiftCardFlow();
 
   if (step === "success") {
     return <GiftCardSuccessStep onClose={onClose} />;
@@ -28,19 +28,15 @@ const GiftCardFlowPanel = ({ onClose }: GiftCardFlowPanelProps) => {
     />
   );
 
-  return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white">
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        {step === "configure" ? (
-          <GiftCardConfigureStep header={header} onContinue={goToDetails} />
-        ) : step === "details" ? (
-          <GiftCardDetailsStep header={header} />
-        ) : (
-          <GiftCardAddressStep header={header} />
-        )}
-      </div>
-    </div>
-  );
+  if (step === "configure") {
+    return <GiftCardConfigureStep header={header} />;
+  }
+
+  if (step === "details") {
+    return <GiftCardDetailsStep header={header} />;
+  }
+
+  return <GiftCardAddressStep header={header} />;
 };
 
 export default GiftCardFlowPanel;

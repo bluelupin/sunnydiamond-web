@@ -1,27 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
 import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
+import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay-shell";
 import { RIGHT_PANEL_WIDTH_CLASS } from "@/shared/ui/rightPanel";
 import { cn } from "@/shared/utils/cn";
 import { useGiftCardFlow } from "../context/GiftCardFlowContext";
 import GiftCardFlowPanel from "./GiftCardFlowPanel";
 
+const GIFT_CARD_OVERLAY_CLASS = "bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]";
+const GIFT_CARD_MOBILE_QUERY = "(max-width: 1023px)";
+
 const GiftCardFlowShell = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { isPanelOpen, closePanel, resetFlow } = useGiftCardFlow();
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const media = window.matchMedia("(max-width: 1023px)");
-    const update = () => setIsMobile(media.matches);
-    update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
-  }, []);
+  const { showMobileShell } = useResponsiveOverlayShell(isPanelOpen, GIFT_CARD_MOBILE_QUERY);
 
   const handleClose = () => {
     closePanel();
@@ -38,11 +33,12 @@ const GiftCardFlowShell = () => {
     }
   };
 
-  if (isMobile) {
+  if (showMobileShell) {
     return (
       <Drawer open={isPanelOpen} shouldScaleBackground={false} onOpenChange={handleOpenChange}>
         <DrawerContent
-          className="flex min-h-0 max-h-[90vh] flex-col overflow-hidden rounded-none border-0 bg-white p-0 [&>div:first-child]:hidden"
+          overlayClassName={cn("z-[70]", GIFT_CARD_OVERLAY_CLASS)}
+          className="z-[70] flex h-[90vh] min-h-0 max-h-[90vh] flex-col overflow-hidden rounded-none border-0 bg-white p-0 [&>div:first-child]:hidden"
         >
           <DrawerTitle className="sr-only">Gift card</DrawerTitle>
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -57,9 +53,9 @@ const GiftCardFlowShell = () => {
     <Sheet open={isPanelOpen} onOpenChange={handleOpenChange}>
       <SheetContent
         side="right"
-        overlayClassName="bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
+        overlayClassName={cn("z-[70]", GIFT_CARD_OVERLAY_CLASS)}
         className={cn(
-          "h-full w-full gap-0 border-0 p-0 shadow-none",
+          "z-[70] h-full w-full gap-0 border-0 p-0 shadow-none",
           RIGHT_PANEL_WIDTH_CLASS,
           "[&>button]:hidden",
         )}

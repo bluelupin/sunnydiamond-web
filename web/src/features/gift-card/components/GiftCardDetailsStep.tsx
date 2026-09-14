@@ -1,9 +1,16 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/features/auth/context/AuthContext";
 import { CartPrimaryButton } from "@/features/cart/components/CartFlowUi";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { RIGHT_PANEL_CONTENT_PADDING_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelScrollLayout } from "@/shared/ui/RightPanelScrollLayout";
+import { cn } from "@/shared/utils/cn";
+import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import { useGiftCardFlow } from "../context/GiftCardFlowContext";
+import { useGiftCardPayment } from "../hooks/useGiftCardPayment";
 import { giftCardFlowContent } from "../data/content";
 import {
   GiftCardCheckbox,
@@ -14,6 +21,11 @@ import {
 } from "./GiftCardFormUi";
 
 const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
+  const { status, customer } = useAuth();
+  const { contact: profileContact } = useCustomerProfileContact(status === "authenticated");
+  const { initiatePayment, isPaying, statusToastNode } = useGiftCardPayment();
+  const [hasAppliedProfilePrefill, setHasAppliedProfilePrefill] = useState(false);
+
   const {
     cardType,
     sender,
@@ -23,10 +35,46 @@ const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
     setReceiver,
     setReceiverSameAsSender,
     goToAddress,
-    completeOrder,
+    isPanelOpen,
   } = useGiftCardFlow();
 
   const { details, cta } = giftCardFlowContent;
+
+  useEffect(() => {
+    if (!isPanelOpen) {
+      setHasAppliedProfilePrefill(false);
+    }
+  }, [isPanelOpen]);
+
+  useEffect(() => {
+    if (hasAppliedProfilePrefill) return;
+
+    const profileName = profileContact?.fullName?.trim();
+    const profileEmail = profileContact?.email?.trim() || customer?.email?.trim();
+    const profilePhone = profileContact?.phone?.trim();
+
+    if (profileName && !sender.fullName.trim()) {
+      setSender({ fullName: profileName });
+    }
+    if (profileEmail && !sender.email.trim()) {
+      setSender({ email: profileEmail });
+    }
+    if (profilePhone && !sender.phone.trim()) {
+      setSender({ phone: profilePhone });
+    }
+
+    if (profileName || profileEmail || profilePhone || customer) {
+      setHasAppliedProfilePrefill(true);
+    }
+  }, [
+    customer,
+    hasAppliedProfilePrefill,
+    profileContact,
+    sender.email,
+    sender.fullName,
+    sender.phone,
+    setSender,
+  ]);
 
   const canContinue =
     sender.fullName.trim().length > 0 &&
@@ -34,24 +82,36 @@ const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
     (receiverSameAsSender ||
       (receiver.fullName.trim().length > 0 && receiver.phone.trim().length >= 10));
 
-  const handleContinue = () => {
-    if (!canContinue) return;
+  const handleContinue = async () => {
+    if (!canContinue || isPaying) return;
+
     if (cardType === "physical") {
       goToAddress();
       return;
     }
-    completeOrder();
-  };
 
-  const continueLabel =
-    cardType === "physical" && !receiverSameAsSender
-      ? cta.addAddress
-      : cta.addDetails;
+    await initiatePayment();
+  };
 
   return (
     <>
-      <div className="flex min-h-0 flex-1 flex-col gap-10 overflow-y-auto overscroll-contain px-6 py-6">
+      {statusToastNode}
+      <RightPanelScrollLayout
+        footer={
+          <PanelFooter>
+            <CartPrimaryButton
+              type="button"
+              disabled={!canContinue || isPaying}
+              onClick={handleContinue}
+              className={giftCardPrimaryButtonClassName(!canContinue || isPaying)}
+            >
+              {cardType === "digital" ? cta.payNow : cta.addAddress}
+            </CartPrimaryButton>
+          </PanelFooter>
+        }
+      >
         {header}
+        <div className={cn("flex flex-col gap-10 pt-6 pb-24", RIGHT_PANEL_CONTENT_PADDING_CLASS)}>
         <div className="flex flex-col gap-4">
           <p className={giftCardSectionHeadingClass}>{details.senderHeading}</p>
           <GiftCardTextField
@@ -110,18 +170,8 @@ const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
             </div>
           ) : null}
         </div>
-      </div>
-
-      <PanelFooter contentClassName="px-4 py-6">
-        <CartPrimaryButton
-          type="button"
-          disabled={!canContinue}
-          onClick={handleContinue}
-          className={giftCardPrimaryButtonClassName(!canContinue)}
-        >
-          {continueLabel}
-        </CartPrimaryButton>
-      </PanelFooter>
+        </div>
+      </RightPanelScrollLayout>
     </>
   );
 };
