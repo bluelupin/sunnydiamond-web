@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
+import { resolveGuaranteeIconSrc } from "@/shared/utils/guaranteeIcons";
 
 export type GuaranteeBarItem = {
   iconSrc: string;
@@ -19,10 +20,12 @@ export const guaranteeBarSpec = {
 
 const GuaranteeIcon = ({
   iconSrc,
+  label,
   alt,
   size,
 }: {
   iconSrc: string;
+  label: string;
   alt: string;
   size: number;
 }) => (
@@ -31,7 +34,7 @@ const GuaranteeIcon = ({
     style={{ width: `${size}px`, height: `${size}px` }}
   >
     <Image
-      src={iconSrc}
+      src={resolveGuaranteeIconSrc(iconSrc, label)}
       alt={alt}
       width={size}
       height={size}
@@ -71,6 +74,7 @@ const GuaranteeItem = ({ iconSrc, label, alt }: GuaranteeBarItem) => (
   >
     <GuaranteeIcon
       iconSrc={iconSrc}
+      label={label}
       alt={alt?.trim() || ""}
       size={guaranteeBarSpec.iconSize}
     />
@@ -108,6 +112,7 @@ const GuaranteesBar = ({
             >
               <GuaranteeIcon
                 iconSrc={iconSrc}
+                label={label}
                 alt={alt?.trim() || ""}
                 size={guaranteeBarSpec.mobileIconSize}
               />
