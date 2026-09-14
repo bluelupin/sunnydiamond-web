@@ -14,7 +14,7 @@ const giftCardCtaClassName =
 
 const GiftCardCta = ({ href, label }: { href: string; label: string }) => (
   <Link href={href} className={giftCardCtaClassName}>
-    <span className="relative z-10">{label} stet</span>
+    <span className="relative z-10">{label}</span>
   </Link>
 );
 

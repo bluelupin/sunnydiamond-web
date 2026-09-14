@@ -4,7 +4,7 @@ import GiftingDiscoverOptionsLoader from "./GiftingDiscoverOptionsLoader";
 import GiftingDiscoverSection from "./GiftingDiscoverSection";
 import GiftingGiftCardSection from "./GiftingGiftCardSection";
 import GiftingGuaranteesSection from "./GiftingGuaranteesSection";
-import GiftingIntroSection from "./GiftingIntroSection";
+import GiftingHeroSection from "./GiftingHeroSection";
 import GiftingOccasionSection from "./GiftingOccasionSection";
 import GiftingProductListSection from "./GiftingProductListSection";
 import GiftingPromiseSection from "./GiftingPromiseSection";
@@ -17,8 +17,8 @@ type GiftingPageProps = {
 const GiftingPage = ({ page }: GiftingPageProps) => {
   return (
     <>
-      {page.hero ? <GiftingIntroSection hero={page.hero} /> : null}
-      {page.intro ? <GiftingWithLoveSection intro={page.intro} /> : null}
+      {page.hero && <GiftingHeroSection hero={page.hero} />}
+      {page.intro && <GiftingWithLoveSection intro={page.intro} />}
       {page.occasionGrid?.cards.length ? (
         <GiftingOccasionSection cards={page.occasionGrid.cards} />
       ) : null}

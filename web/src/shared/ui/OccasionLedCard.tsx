@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
+import { cn } from "@/shared/utils/cn";
 
 export type OccasionLedCardProps = {
   title: string;
@@ -28,6 +30,8 @@ export default function OccasionLedCard({
   desktopImageAlt,
   mobileImageAlt,
 }: OccasionLedCardProps) {
+  const pathname = usePathname();
+
   if (!desktopImageUrl && !mobileImageUrl) {
     return null;
   }
@@ -43,7 +47,12 @@ export default function OccasionLedCard({
   return (
     <Link
       href={href}
-      className="group relative block shrink-0 snap-start overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2 lg:h-[600px] md:h-[500px] h-[400px] lg:w-full md:w-[351px] w-[328px]"
+      className={cn(
+        "group relative block shrink-0 snap-start overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2",
+        pathname === "/gifting" ?
+          "h-[400px] w-[328px] md:h-[500px] md:w-[351px] xl:h-[600px] xl:w-full xl:shrink" :
+          "h-[400px] w-[328px] lg:h-[700px] md:h-[500px] md:w-full md:min-w-0 md:shrink",
+      )}
     >
       <ResponsiveImage
         desktopSrc={desktopSrc}
@@ -68,8 +77,12 @@ export default function OccasionLedCard({
 
       <div className="absolute inset-x-0 bottom-0 z-10 px-4 pb-8 md:hidden">
         <div className="flex max-w-[296px] flex-col gap-4">
-          <div className="flex flex-col gap-2 text-white md:gap-3">
-            <h3 className="font-larken text-2xl font-light leading-110 md:text-3xl lg:text-32">
+          <div className={cn("flex flex-col text-white",
+            pathname === "/gifting" ? "gap-2" : "md:gap-3 gap-2",
+          )}>
+            <h3 className={cn("font-larken font-light leading-110",
+              pathname === "/gifting" ? "text-2xl" : "lg:text-32 md:text-3xl text-2xl",
+            )}>
               {title}
             </h3>
             {description ? (
@@ -80,22 +93,28 @@ export default function OccasionLedCard({
           </div>
           {ctaLabel ? (
             <span className="text-tertiary-cta-underline inline-flex w-fit items-center justify-center pb-1.5 font-gill text-sm font-normal uppercase tracking-[0.28px] text-white">
-              {ctaLabel}
+              {pathname === "/gifting" ? "Explore" : ctaLabel}
             </span>
           ) : null}
         </div>
       </div>
 
-      <div className="absolute bottom-0 left-10 z-10 hidden max-w-[418px] flex-col-reverse items-start text-white md:flex">
+      <div className={cn("absolute bottom-0 z-10 hidden max-w-[418px] flex-col-reverse items-start text-white md:flex",
+        pathname === "/gifting" ? "md:left-8 left-4" : "md:left-10 left-4",
+      )}>
         {ctaLabel ? (
           <div className="inline-flex max-h-0 w-fit flex-col items-start overflow-hidden pb-0 pt-0 opacity-0 motion-safe:transition-[max-height,padding,opacity] motion-safe:duration-500 motion-safe:ease-out group-hover:max-h-[72px] group-hover:pb-16 group-hover:opacity-100 group-focus-visible:max-h-[72px] group-focus-visible:pb-16 group-focus-visible:opacity-100">
             <div className="text-tertiary-cta-underline cursor-pointer pb-1 font-gill text-sm font-normal uppercase leading-110 text-white sm:pb-1">
-              {ctaLabel}
+              {pathname === "/gifting" ? "Explore" : ctaLabel}
             </div>
           </div>
         ) : null}
-        <div className="mb-16 flex w-full max-w-[418px] flex-col items-start gap-2 group-hover:mb-6 lg:gap-3">
-          <h3 className="whitespace-nowrap font-larken text-32 font-light leading-none md:text-2xl lg:text-32">
+        <div className={cn("mb-16 flex w-full max-w-[418px] flex-col items-start group-hover:mb-6",
+          pathname === "/gifting" ? "gap-2" : "lg:gap-3 gap-2",
+        )}>
+          <h3 className={cn("whitespace-nowrap font-larken font-light leading-none ",
+            pathname === "/gifting" ? "text-2xl" : "lg:text-32 md:text-2xl text-32",
+          )}>
             {title}
           </h3>
           {description ? (

@@ -89,25 +89,28 @@ export function buildGiftFinderHref({
 }
 
 export function mapGiftingDiscoverOptions(
-  nav: JewelleryNavCategoriesData,
-  facets: JewelleryFilterFacets,
+  nav: JewelleryNavCategoriesData | null | undefined,
+  facets: JewelleryFilterFacets | null | undefined,
 ): GiftingDiscoverOptions {
   const { discover } = giftingPageContent;
 
-  const categoriesFromNav = nav.categories
+  const categoriesFromNav = (nav?.categories ?? [])
     .filter((category) => category.urlKey && isJewelleryCategoryUrlKey(category.urlKey))
     .map((category) => ({
       label: category.label,
       value: category.urlKey!,
     }));
 
-  const occasionsFromFacets = facets.occasions.map((option) => ({
-    label: option.label,
-    value: slugifyOccasionTitle(option.label),
-  }));
+  const occasionsFromFacets = (facets?.occasions ?? []).map((option) => {
+    const slug = slugifyOccasionTitle(option.label);
+    return {
+      label: option.label,
+      value: slug || option.value,
+    };
+  });
 
-  // Experimental: Magento price aggregation buckets. Fall back to static bands if empty.
-  const priceRangesFromMagento = facets.priceBuckets.map((bucket) => ({
+  // Magento price aggregation buckets when available; otherwise static UI bands.
+  const priceRangesFromMagento = (facets?.priceBuckets ?? []).map((bucket) => ({
     label: bucket.label,
     min: bucket.min,
     max: bucket.max,

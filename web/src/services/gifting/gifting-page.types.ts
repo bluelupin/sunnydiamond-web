@@ -141,6 +141,8 @@ export type NormalizedGiftingResponsiveImage = {
   desktopUrl: string;
   mobileUrl: string;
   alt: string;
+  width?: number;
+  height?: number;
 };
 
 export type NormalizedGiftingCta = {
@@ -156,7 +158,7 @@ export type NormalizedGiftingHero = {
 
 export type NormalizedGiftingIntro = {
   title: string;
-  description?: string;
+  description: string;
   background: NormalizedGiftingResponsiveImage | null;
 };
 

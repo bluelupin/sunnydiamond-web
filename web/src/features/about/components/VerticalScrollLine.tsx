@@ -19,7 +19,7 @@ const VerticalScrollLine = ({
   lineFill: lineFillProp,
   reducedMotion: reducedMotionProp,
   visible: visibleProp,
-  lineHeight = 105,
+  lineHeight = 80,
 }: VerticalScrollLineProps) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const externalLineFill = lineFillProp !== undefined;

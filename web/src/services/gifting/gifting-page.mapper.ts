@@ -1,5 +1,9 @@
 import { buildOccasionCardHref } from "@/features/jewellery-product/utils/occasionListing";
-import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import {
+  extractStrapiImage,
+  resolveCmsAltText,
+  resolveCmsMediaUrl,
+} from "@/shared/utils/strapiMedia";
 import {
   EMPTY_GIFTING_PAGE,
   type NormalizedGiftingCta,
@@ -49,9 +53,13 @@ const mapResponsiveImage = (
   if (!desktopUrl && !mobileUrl) return null;
 
   return {
-    desktopUrl: desktopUrl ?? "",
-    mobileUrl: mobileUrl ?? "",
-    alt: resolveCmsAltText(image?.desktopImage) ?? "",
+    desktopUrl: desktopUrl ?? mobileUrl!,
+    mobileUrl: mobileUrl ?? desktopUrl!,
+    alt:
+      cleanText(image?.altText) ??
+      resolveCmsAltText(image?.desktopImage) ??
+      resolveCmsAltText(image?.mobileImage) ??
+      "",
   };
 };
 
@@ -105,11 +113,12 @@ const mapIntro = (
   if (!section || !resolveSectionActive(section.showField)) return null;
 
   const title = cleanText(section.title);
-  if (!title) return null;
+  const description = cleanText(section.description);
+  if (!title || !description) return null;
 
   return {
     title,
-    description: cleanText(section.description),
+    description,
     background: mapResponsiveImage(section.backgroundImage),
   };
 };

@@ -58,7 +58,7 @@ const GiftingOccasionSection = ({ cards }: GiftingOccasionSectionProps) => {
         aria-label={sectionTitle}
         tabIndex={-1}
         onKeyDownCapture={handleCarouselKeyDown}
-        className="scrollbar-none relative left-1/2 flex w-screen max-w-none -translate-x-1/2 snap-x snap-mandatory gap-3 overflow-x-auto scroll-pl-4 scroll-pr-4 pb-2 pl-4 md:grid lg:grid-cols-4 lg:gap-3 md:overflow-visible md:px-0 md:pb-0 md:snap-none md:outline-none"
+        className="scrollbar-none relative left-1/2 flex w-screen max-w-none -translate-x-1/2 snap-x snap-mandatory gap-3 overflow-x-auto scroll-pl-4 scroll-pr-4 pl-4 xl:grid xl:grid-cols-4 xl:gap-3 xl:overflow-visible xl:px-0 xl:pb-0 xl:snap-none xl:outline-none"
       >
         {cards.map((card, index) => (
           <ScrollReveal

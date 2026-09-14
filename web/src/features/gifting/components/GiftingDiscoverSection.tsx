@@ -3,20 +3,26 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { cn } from "@/shared/utils/cn";
-import CareersChevronDownIcon from "@/features/careers/components/shared/CareersChevronDownIcon";
-import { careersFormSelectChevronClassName } from "@/features/careers/constants/careersApplicationForm";
+import {
+  CAREERS_SELECT_EMPTY_VALUE,
+  careersSelectTriggerClassName,
+} from "@/features/careers/components/shared/CareersSelectField";
+import { careersFormLabelClassName } from "@/features/careers/constants/careersApplicationForm";
 import Reveal from "@/shared/Animation/Reveal";
+import { cn } from "@/shared/utils/cn";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import type { NormalizedGiftingGiftFinder } from "@/services/gifting/gifting-page.types";
 import { giftingPageContent } from "../data/content";
 import {
   buildGiftFinderHref,
   type GiftingDiscoverOptions,
 } from "../utils/giftFinderRoutes";
-
-const fieldLabelClass = "font-gill text-base font-normal leading-110 text-[#2B2B2B]";
-const fieldSelectClass =
-  "h-14 w-full appearance-none bg-aboutInactive p-3 pr-10 font-gill text-base font-normal leading-110 text-darkblack outline-none";
 
 type GiftingDiscoverFieldProps = {
   id: string;
@@ -36,21 +42,33 @@ const GiftingDiscoverField = ({
   options,
 }: GiftingDiscoverFieldProps) => (
   <div className="flex flex-col gap-2">
-    <label className={fieldLabelClass} htmlFor={id}>{label}</label>
-    <div className="relative">
-      <select
+    <label className={careersFormLabelClassName} htmlFor={id}>
+      {label}
+    </label>
+    <Select
+      value={value || undefined}
+      onValueChange={(next) => {
+        onChange(next === CAREERS_SELECT_EMPTY_VALUE ? "" : next);
+      }}
+    >
+      <SelectTrigger
         id={id}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className={cn(fieldSelectClass, !value && "text-gray600")}
+        className={cn(
+          careersSelectTriggerClassName,
+          !value && "!text-[#999999]",
+        )}
       >
-        <option value="">{placeholder}</option>
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent className="z-[80]">
+        <SelectItem value={CAREERS_SELECT_EMPTY_VALUE}>{placeholder}</SelectItem>
         {options.map((option) => (
-          <option key={option.value} value={option.value}>{option.label}</option>
+          <SelectItem key={option.value} value={option.value}>
+            {option.label}
+          </SelectItem>
         ))}
-      </select>
-      <CareersChevronDownIcon className={careersFormSelectChevronClassName} />
-    </div>
+      </SelectContent>
+    </Select>
   </div>
 );
 

@@ -1,5 +1,8 @@
+"use client";
+
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { cn } from "@/shared/utils/cn";
+import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 import type { NormalizedEducationCtaBanner } from "@/services/education/learn-about-diamonds-page.types";
 import { educationDiscoverSpec } from "../data/content";
 import Reveal from "@/shared/Animation/Reveal";
@@ -19,8 +22,11 @@ const StepConnectorLine = ({ className }: { className?: string }) => (
   />
 );
 
-const DiscoverSteps = ({ steps }: { steps: string[] }) => (
-  <div className="lg:mb-10 mb-8 w-full items-start gap-4 flex">
+const DiscoverSteps = ({ steps }: { steps: string[] }) => {
+  const { windows } = useUiPlatform();
+
+  return (
+    <div className="lg:mb-10 mb-8 w-full items-start gap-4 flex">
     <div className="relative flex shrink-0 flex-col items-start gap-10">
       <StepConnectorLine className="left-2" />
       {steps.map((_, index) => (
@@ -28,7 +34,7 @@ const DiscoverSteps = ({ steps }: { steps: string[] }) => (
           key={index}
           className="relative z-10 flex h-[26px] w-4 shrink-0 items-center justify-center rounded-full border-[0.4px] border-darkblack bg-white p-1"
         >
-          <span className="font-gill text-sm font-light leading-none tracking-[0.14px] text-darkblack">
+          <span className={cn(!windows && "translate-y-0.5", "font-gill text-sm font-light leading-none tracking-[0.14px] text-darkblack")}>
             {index + 1}
           </span>
         </div>
@@ -41,8 +47,9 @@ const DiscoverSteps = ({ steps }: { steps: string[] }) => (
         </li>
       ))}
     </ol>
-  </div>
-);
+    </div>
+  );
+};
 
 type DiscoverContentProps = Pick<
   NormalizedEducationCtaBanner,
