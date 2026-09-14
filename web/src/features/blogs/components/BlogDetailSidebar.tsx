@@ -25,7 +25,15 @@ const BlogDetailSidebar = ({
   const [activeId, setActiveId] = useState(
     tableOfContents[0]?.id ?? "",
   );
-  const { isSupported, isSpeaking, toggle } = useBrowserTextToSpeech(speechText);
+  const { isSupported, isSpeaking, isPaused, isActive, toggle } =
+    useBrowserTextToSpeech(speechText);
+
+  const listenLabel = isPaused ? "RESUME" : isSpeaking ? "PAUSE" : "LISTEN";
+  const listenAriaLabel = isPaused
+    ? "Resume listening to article"
+    : isSpeaking
+      ? "Pause listening to article"
+      : "Listen to article";
 
   useEffect(() => {
     if (tableOfContents.length === 0) {
@@ -148,18 +156,18 @@ const BlogDetailSidebar = ({
           type="button"
           onClick={toggle}
           disabled={!isSupported || !speechText.trim()}
-          aria-pressed={isSpeaking}
-          aria-label={isSpeaking ? "Stop listening to article" : "Listen to article"}
+          aria-pressed={isActive}
+          aria-label={listenAriaLabel}
           className={cn(
             sidebarCtaClassName,
             (!isSupported || !speechText.trim()) &&
               "pointer-events-none opacity-50 disabled:cursor-not-allowed",
-            isSpeaking && "border-darkblack",
+            isActive && "border-darkblack",
           )}
         >
           <span className="relative z-10 inline-flex items-center justify-center gap-2">
             <Volume1 className="size-6 shrink-0" strokeWidth="1" aria-hidden />
-            {isSpeaking ? "STOP" : "LISTEN"}
+            {listenLabel}
           </span>
         </button>
         <button

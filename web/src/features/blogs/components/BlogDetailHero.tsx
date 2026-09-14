@@ -14,17 +14,19 @@ const BlogDetailHero = ({ heroImage }: BlogDetailHeroProps) => {
   }
 
   return (
-    <div className="relative w-full shrink-0 overflow-hidden bg-white xl:mb-16 lg:mb-10 mb-6">
-      <ResponsiveImage
-        desktopSrc={desktopUrl ?? ""}
-        mobileSrc={mobileUrl ?? undefined}
-        alt={heroImage.alt}
-        width={1920}
-        height={1080}
-        priority
-        sizes="100vw"
-        className="h-auto w-full object-cover"
-      />
+    <div className="relative mx-auto w-full shrink-0 overflow-hidden bg-white xl:mb-16 lg:mb-10 mb-6">
+      {/* Figma 1480:178788 — desktop 1000×515 centered; mobile 343×599 crop */}
+      <div className="relative aspect-[343/599] w-full md:mx-auto md:aspect-[1000/515] md:max-w-[1000px]">
+        <ResponsiveImage
+          desktopSrc={desktopUrl ?? ""}
+          mobileSrc={mobileUrl ?? undefined}
+          alt={heroImage.alt}
+          fill
+          priority
+          sizes="(max-width: 767px) 100vw, 1000px"
+          className="object-cover"
+        />
+      </div>
     </div>
   );
 };
