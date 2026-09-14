@@ -24,6 +24,12 @@ export const giftCardFieldLabelClass =
 export const giftCardSectionHeadingClass =
   "font-larken text-xl font-light leading-110 text-darkblack";
 
+export const giftCardPrimaryButtonClassName = (disabled: boolean) =>
+  cn(
+    disabled &&
+      "!border-neutral500 !bg-neutral500 !opacity-100 hover:!border-neutral500 hover:!bg-neutral500",
+  );
+
 type GiftCardTextFieldProps = {
   id: string;
   label: string;
@@ -124,12 +130,15 @@ export const GiftCardSelectField = ({
       {label}
     </label>
     <Select
-      value={value || CAREERS_SELECT_EMPTY_VALUE}
+      value={value || undefined}
       onValueChange={(next) => {
         onChange(next === CAREERS_SELECT_EMPTY_VALUE ? "" : next);
       }}
     >
-      <SelectTrigger id={id} className={careersSelectTriggerClassName}>
+      <SelectTrigger
+        id={id}
+        className={cn(careersSelectTriggerClassName, !value && "!text-[#999999]")}
+      >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent className="z-[80]">

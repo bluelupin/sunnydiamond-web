@@ -856,7 +856,6 @@ function mapFeaturedFromPost(
     backgroundAlt: "",
     readNowLabel: blogsPageContent.featured.readNowLabel,
     href: post.href,
-    category: post.category,
     ...overrides,
   };
 }

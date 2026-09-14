@@ -3,13 +3,13 @@
 import type { ReactNode } from "react";
 import { CartPrimaryButton } from "@/features/cart/components/CartFlowUi";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
-import { cn } from "@/shared/utils/cn";
 import { useGiftCardFlow } from "../context/GiftCardFlowContext";
 import { giftCardFlowContent } from "../data/content";
 import {
   GiftCardCheckbox,
   GiftCardPhoneField,
   GiftCardTextField,
+  giftCardPrimaryButtonClassName,
   giftCardSectionHeadingClass,
 } from "./GiftCardFormUi";
 
@@ -42,6 +42,11 @@ const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
     }
     completeOrder();
   };
+
+  const continueLabel =
+    cardType === "physical" && !receiverSameAsSender
+      ? cta.addAddress
+      : cta.addDetails;
 
   return (
     <>
@@ -112,9 +117,9 @@ const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
           type="button"
           disabled={!canContinue}
           onClick={handleContinue}
-          className={cn(!canContinue && "opacity-50")}
+          className={giftCardPrimaryButtonClassName(!canContinue)}
         >
-          {cta.addDetails}
+          {continueLabel}
         </CartPrimaryButton>
       </PanelFooter>
     </>

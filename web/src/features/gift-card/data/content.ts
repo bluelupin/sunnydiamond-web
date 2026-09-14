@@ -30,8 +30,8 @@ export const giftCardFlowContent = {
     placeholder: "Write a personalised note here",
   },
   details: {
-    senderHeading: "Sender's Address",
-    receiverHeading: "Receiver's Address",
+    senderHeading: "Sender's Details",
+    receiverHeading: "Receiver's Details",
     sameAsSenderLabel: "Same address as sender's details",
     fullNameLabel: "Full Name*",
     phoneLabel: "Phone No.*",
@@ -68,5 +68,6 @@ export const giftCardFlowContent = {
   },
   cta: {
     addDetails: "ADD DETAILS",
+    addAddress: "ADD ADDRESS",
   },
 };

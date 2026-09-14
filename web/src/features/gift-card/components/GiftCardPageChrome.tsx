@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import GiftCardFlowShell from "./GiftCardFlowShell";
 
-/** Scrolls to the gift-card section and opens the gift-card flow panel. */
+/** Scrolls to the gift-card section when landing on /gift-card. */
 const GiftCardPageChrome = () => {
   useEffect(() => {
     const section = document.getElementById("gift-card");
@@ -12,7 +11,7 @@ const GiftCardPageChrome = () => {
     }
   }, []);
 
-  return <GiftCardFlowShell defaultOpen />;
+  return null;
 };
 
 export default GiftCardPageChrome;

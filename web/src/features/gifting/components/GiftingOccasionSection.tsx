@@ -43,13 +43,13 @@ const GiftingOccasionSection = ({ cards }: GiftingOccasionSectionProps) => {
       aria-label={sectionTitle}
       className="flex w-full flex-col items-center gap-8 bg-white px-0 pt-16 md:gap-10 md:pt-100"
     >
-      <ScrollReveal
+      {/* <ScrollReveal
         as="h2"
         delayMs={0}
         className="max-w-sm text-center font-larken text-32 font-light leading-110 text-darkblack md:max-w-none md:text-4xl lg:text-5xl lg:whitespace-nowrap"
       >
         {sectionTitle}
-      </ScrollReveal>
+      </ScrollReveal> */}
 
       <div
         ref={carouselRef}

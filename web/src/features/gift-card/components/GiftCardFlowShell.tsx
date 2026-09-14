@@ -1,22 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
 import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
 import { RIGHT_PANEL_WIDTH_CLASS } from "@/shared/ui/rightPanel";
 import { cn } from "@/shared/utils/cn";
-import { GiftCardFlowProvider, useGiftCardFlow } from "../context/GiftCardFlowContext";
+import { useGiftCardFlow } from "../context/GiftCardFlowContext";
 import GiftCardFlowPanel from "./GiftCardFlowPanel";
 
-type GiftCardFlowShellProps = {
-  defaultOpen?: boolean;
-};
-
-const GiftCardFlowShellInner = ({ defaultOpen = true }: GiftCardFlowShellProps) => {
+const GiftCardFlowShell = () => {
   const router = useRouter();
-  const { resetFlow } = useGiftCardFlow();
-  const [open, setOpen] = useState(defaultOpen);
+  const pathname = usePathname();
+  const { isPanelOpen, closePanel, resetFlow } = useGiftCardFlow();
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -28,9 +24,11 @@ const GiftCardFlowShellInner = ({ defaultOpen = true }: GiftCardFlowShellProps) 
   }, []);
 
   const handleClose = () => {
-    setOpen(false);
+    closePanel();
     resetFlow();
-    router.push("/gifting#gift-card");
+    if (pathname === "/gift-card") {
+      router.push("/gifting#gift-card");
+    }
   };
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -38,12 +36,11 @@ const GiftCardFlowShellInner = ({ defaultOpen = true }: GiftCardFlowShellProps) 
       handleClose();
       return;
     }
-    setOpen(true);
   };
 
   if (isMobile) {
     return (
-      <Drawer open={open} shouldScaleBackground={false} onOpenChange={handleOpenChange}>
+      <Drawer open={isPanelOpen} shouldScaleBackground={false} onOpenChange={handleOpenChange}>
         <DrawerContent
           className="flex min-h-0 max-h-[90vh] flex-col overflow-hidden rounded-none border-0 bg-white p-0 [&>div:first-child]:hidden"
         >
@@ -57,7 +54,7 @@ const GiftCardFlowShellInner = ({ defaultOpen = true }: GiftCardFlowShellProps) 
   }
 
   return (
-    <Sheet open={open} onOpenChange={handleOpenChange}>
+    <Sheet open={isPanelOpen} onOpenChange={handleOpenChange}>
       <SheetContent
         side="right"
         overlayClassName="bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
@@ -75,11 +72,5 @@ const GiftCardFlowShellInner = ({ defaultOpen = true }: GiftCardFlowShellProps) 
     </Sheet>
   );
 };
-
-const GiftCardFlowShell = (props: GiftCardFlowShellProps) => (
-  <GiftCardFlowProvider>
-    <GiftCardFlowShellInner {...props} />
-  </GiftCardFlowProvider>
-);
 
 export default GiftCardFlowShell;

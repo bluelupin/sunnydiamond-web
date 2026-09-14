@@ -30,8 +30,7 @@ const GuaranteeIcon = ({
   size: number;
 }) => (
   <div
-    className="flex shrink-0 items-center justify-center"
-    style={{ width: `${size}px`, height: `${size}px` }}
+    className="flex shrink-0 items-center justify-center md:w-16 md:h-16 w-10 h-10"
   >
     <Image
       src={resolveGuaranteeIconSrc(iconSrc, label)}

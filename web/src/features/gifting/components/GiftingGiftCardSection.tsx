@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import Reveal from "@/shared/Animation/Reveal";
+import { useGiftCardFlow } from "@/features/gift-card/context/GiftCardFlowContext";
 import type { NormalizedGiftingGiftCard } from "@/services/gifting/gifting-page.types";
 
 type GiftingGiftCardSectionProps = {
@@ -12,15 +12,17 @@ type GiftingGiftCardSectionProps = {
 const giftCardCtaClassName =
   "btn-border-slide inline-flex h-14 items-center justify-center border border-neutral300 hover:!border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2";
 
-const GiftCardCta = ({ href, label }: { href: string; label: string }) => (
-  <Link href={href} className={giftCardCtaClassName}>
+const GiftCardCta = ({ label, onClick }: { label: string; onClick: () => void }) => (
+  <button type="button" onClick={onClick} className={giftCardCtaClassName}>
     <span className="relative z-10">{label}</span>
-  </Link>
+  </button>
 );
 
 const GiftingGiftCardSection = ({ giftCard }: GiftingGiftCardSectionProps) => {
+  const { openPanel } = useGiftCardFlow();
   const cutoutSrc = giftCard.image?.desktopUrl;
   const cutoutAlt = giftCard.image?.alt ?? "";
+  const ctaLabel = giftCard.cta.label;
 
   return (
     <section
@@ -69,7 +71,7 @@ const GiftingGiftCardSection = ({ giftCard }: GiftingGiftCardSectionProps) => {
               </Reveal>
             }
             <Reveal direction="up" className="md:mt-10 mt-8 md:block hidden">
-              <GiftCardCta href={giftCard.cta.url} label={giftCard.cta.label} />
+              <GiftCardCta label={ctaLabel} onClick={openPanel} />
             </Reveal>
           </div>
         </div>
@@ -89,7 +91,7 @@ const GiftingGiftCardSection = ({ giftCard }: GiftingGiftCardSectionProps) => {
           </Reveal>
         }
         <Reveal direction="up" className="md:mt-0 mt-6 md:hidden block relative flex items-center justify-center">
-          <GiftCardCta href={giftCard.cta.url} label={giftCard.cta.label} />
+          <GiftCardCta label={ctaLabel} onClick={openPanel} />
         </Reveal>
       </div>
     </section>

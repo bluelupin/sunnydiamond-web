@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { CartPrimaryButton } from "@/features/cart/components/CartFlowUi";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
-import { cn } from "@/shared/utils/cn";
 import { useGiftCardFlow } from "../context/GiftCardFlowContext";
 import { giftCardFlowContent } from "../data/content";
 import {
@@ -12,6 +11,7 @@ import {
   GiftCardTextAreaField,
   GiftCardToggleOption,
   giftCardFieldLabelClass,
+  giftCardPrimaryButtonClassName,
 } from "./GiftCardFormUi";
 
 function formatGiftCardAmount(amount: number): string {
@@ -151,7 +151,7 @@ const GiftCardConfigureStep = ({
           type="button"
           disabled={!canContinue}
           onClick={onContinue}
-          className={cn(!canContinue && "opacity-50")}
+          className={giftCardPrimaryButtonClassName(!canContinue)}
         >
           {giftCardFlowContent.cta.addDetails}
         </CartPrimaryButton>

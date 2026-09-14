@@ -15,7 +15,7 @@ export const wishlistPageContent = {
   removedFromWishlistMessage: "Item removed from wishlist",
   removedFromWishlistUndoLabel: "UNDO",
   movedToWishlistViewLabel: "VIEW",
-  movedToWishlistHref: "/wishlist",
+  movedToWishlistHref: "/profile?section=wishlist",
   loadErrorMessage: "Unable to load wishlist products. Please try again.",
 } as const;
 

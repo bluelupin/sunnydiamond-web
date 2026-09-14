@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { footerPages } from "@/features/cms/data/footerPages";
 import GiftCardPageChrome from "@/features/gift-card/components/GiftCardPageChrome";
+import GiftingGiftCardFlowRoot from "@/features/gift-card/components/GiftingGiftCardFlowRoot";
 import GiftingPage from "@/features/gifting/components/GiftingPage";
 import { constructMetadata } from "@/shared/lib/seo/metadata";
 import {
@@ -24,10 +25,10 @@ export async function generateMetadata(): Promise<Metadata> {
 async function GiftCardPageContent() {
   const page = await getGiftingPage();
   return (
-    <>
+    <GiftingGiftCardFlowRoot defaultPanelOpen>
       <GiftingPage page={page} />
       <GiftCardPageChrome />
-    </>
+    </GiftingGiftCardFlowRoot>
   );
 }
 
@@ -35,10 +36,10 @@ export default function Page() {
   return (
     <Suspense
       fallback={
-        <>
+        <GiftingGiftCardFlowRoot defaultPanelOpen>
           <GiftingPage page={EMPTY_GIFTING_PAGE} />
           <GiftCardPageChrome />
-        </>
+        </GiftingGiftCardFlowRoot>
       }
     >
       <GiftCardPageContent />

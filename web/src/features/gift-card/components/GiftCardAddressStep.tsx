@@ -20,7 +20,11 @@ import {
 import { INDIAN_STATES } from "@/features/checkout/constants/indianStates";
 import { useGiftCardFlow } from "../context/GiftCardFlowContext";
 import { giftCardFlowContent } from "../data/content";
-import { giftCardFieldLabelClass, giftCardSectionHeadingClass } from "./GiftCardFormUi";
+import {
+  giftCardFieldLabelClass,
+  giftCardPrimaryButtonClassName,
+  giftCardSectionHeadingClass,
+} from "./GiftCardFormUi";
 
 type AddressField = "addressLine1" | "addressLine2" | "pincode" | "city" | "state";
 
@@ -209,7 +213,12 @@ const GiftCardAddressStep = ({ header }: { header: ReactNode }) => {
           <p className="text-center font-gill text-sm font-light leading-110 text-neutral500">
             {address.estimatedDeliveryPrefix} {deliveryEstimate}
           </p>
-          <CartPrimaryButton type="button" onClick={handlePayNow}>
+          <CartPrimaryButton
+            type="button"
+            disabled={!isValid}
+            onClick={handlePayNow}
+            className={giftCardPrimaryButtonClassName(!isValid)}
+          >
             {address.payNowLabel}
           </CartPrimaryButton>
         </div>

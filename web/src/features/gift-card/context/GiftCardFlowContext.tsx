@@ -43,6 +43,9 @@ const emptyAddress: GiftCardDeliveryAddress = {
 };
 
 type GiftCardFlowContextValue = {
+  isPanelOpen: boolean;
+  openPanel: () => void;
+  closePanel: () => void;
   step: GiftCardFlowStep;
   cardType: GiftCardType;
   amount: number;
@@ -71,7 +74,16 @@ type GiftCardFlowContextValue = {
 
 const GiftCardFlowContext = createContext<GiftCardFlowContextValue | undefined>(undefined);
 
-export function GiftCardFlowProvider({ children }: { children: ReactNode }) {
+type GiftCardFlowProviderProps = {
+  children: ReactNode;
+  defaultPanelOpen?: boolean;
+};
+
+export function GiftCardFlowProvider({
+  children,
+  defaultPanelOpen = false,
+}: GiftCardFlowProviderProps) {
+  const [isPanelOpen, setIsPanelOpen] = useState(defaultPanelOpen);
   const [step, setStep] = useState<GiftCardFlowStep>("configure");
   const [cardType, setCardType] = useState<GiftCardType>("physical");
   const [amount, setAmount] = useState(giftCardFlowContent.amount.default);
@@ -94,6 +106,12 @@ export function GiftCardFlowProvider({ children }: { children: ReactNode }) {
 
   const setDeliveryAddress = useCallback((address: Partial<GiftCardDeliveryAddress>) => {
     setDeliveryAddressState((current) => ({ ...current, ...address }));
+  }, []);
+
+  const openPanel = useCallback(() => setIsPanelOpen(true), []);
+
+  const closePanel = useCallback(() => {
+    setIsPanelOpen(false);
   }, []);
 
   const resetFlow = useCallback(() => {
@@ -129,6 +147,9 @@ export function GiftCardFlowProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(
     () => ({
+      isPanelOpen,
+      openPanel,
+      closePanel,
       step,
       cardType,
       amount,
@@ -157,14 +178,17 @@ export function GiftCardFlowProvider({ children }: { children: ReactNode }) {
     [
       amount,
       cardType,
+      closePanel,
       completeOrder,
       deliveryAddress,
       estimatedDeliveryDate,
       goBack,
       goToAddress,
       goToDetails,
+      isPanelOpen,
       message,
       occasion,
+      openPanel,
       orderNumber,
       receiver,
       receiverSameAsSender,
