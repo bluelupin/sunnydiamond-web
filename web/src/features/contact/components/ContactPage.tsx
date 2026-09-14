@@ -5,6 +5,7 @@ import ProductDetailVisitUsSection from "@/features/products/components/detail/P
 import ContactHeroSection from "./ContactHeroSection";
 import ContactInfoSection from "./ContactInfoSection";
 import ContactFormSection from "./ContactFormSection";
+import { contactPageLayoutClasses } from "../data/contactHeroFigmaSpec";
 
 type ContactPageProps = {
   page: NormalizedContactPage;
@@ -41,12 +42,20 @@ const ContactPage = ({ page }: ContactPageProps) => {
         </section>
       ) : null}
       {page.hero ? <ContactHeroSection hero={page.hero} /> : null}
-      <div className="flex flex-col gap-16 pt-16 md:gap-[100px] md:px-0 md:py-0">
-        {hasInfoSection ? (
-          <ContactInfoSection intro={page.intro} infoCards={page.infoCards} />
+      <div className={contactPageLayoutClasses.afterHero}>
+        {(hasInfoSection || page.form) ? (
+          <div className={contactPageLayoutClasses.shell}>
+            <div className={contactPageLayoutClasses.inner}>
+              {hasInfoSection ? (
+                <ContactInfoSection intro={page.intro} infoCards={page.infoCards} />
+              ) : null}
+              {page.form ? <ContactFormSection form={page.form} /> : null}
+            </div>
+          </div>
         ) : null}
-        {page.form ? <ContactFormSection form={page.form} /> : null}
-        {page.visitUs ? <ProductDetailVisitUsSection visitUs={page.visitUs} /> : null}
+        {page.visitUs ? (
+          <ProductDetailVisitUsSection visitUs={page.visitUs} variant="contact" />
+        ) : null}
       </div>
     </>
   );

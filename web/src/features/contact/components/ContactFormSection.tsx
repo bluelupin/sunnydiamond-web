@@ -25,6 +25,7 @@ import {
 } from "@/shared/utils/formValidation";
 import { cn } from "@/shared/utils/cn";
 import ContactConsentLabel from "./ContactConsentLabel";
+import { contactFormLayoutClasses } from "../data/contactHeroFigmaSpec";
 
 
 const contactLabelClassName =
@@ -210,21 +211,20 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
   };
 
   return (
-    <section aria-labelledby="contact-form-title" className="w-full md:px-10 px-4">
-      <div className="mx-auto w-full max-w-[1140px] md:bg-gray200 md:p-6">
-        <div className="flex flex-col gap-6">
-          <Reveal
-            as="h2"
-            id="contact-form-title"
-            direction="up"
-            className="font-larken text-2xl font-light leading-110 text-darkblack md:text-32"
-          >
-            {form.title}
-          </Reveal>
+    <section aria-labelledby="contact-form-title" className="w-full">
+      <div className={contactFormLayoutClasses.shell}>
+        <Reveal
+          as="h2"
+          id="contact-form-title"
+          direction="up"
+          className={contactFormLayoutClasses.title}
+        >
+          {form.title}
+        </Reveal>
 
-          <div className="h-px w-full bg-neutral300 md:hidden" aria-hidden />
+        <div className="h-px w-full bg-neutral300 md:hidden" aria-hidden />
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        <form onSubmit={handleSubmit} className={contactFormLayoutClasses.form}>
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-6">
                 <div className="flex flex-col gap-2">
@@ -397,13 +397,14 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
 
               {consentRequired ? (
               <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
+                <div className={contactFormLayoutClasses.consentRow}>
                   <GiftingPanelCheckbox
                     checked={consentAccepted}
                     onChange={setConsentAccepted}
                     aria-label="Accept terms and privacy policy"
+                    className="translate-y-0"
                   />
-                  <p className="min-w-0 flex-1 font-gill text-sm font-light leading-110 text-darkblack md:text-base">
+                  <p className={contactFormLayoutClasses.consentText}>
                     <ContactConsentLabel label={consentLabel} />
                   </p>
                 </div>
@@ -417,12 +418,11 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="btn-dark-slide inline-flex h-14 w-full items-center justify-center border border-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:border-darkblack disabled:bg-neutral500 disabled:opacity-50 md:w-auto md:self-start"
+              className={contactFormLayoutClasses.submit}
             >
-              <span className="relative z-10">{submitLabel}</span>
+              {submitLabel}
             </button>
           </form>
-        </div>
       </div>
     </section>
   );

@@ -183,7 +183,9 @@ const Header = () => {
     cn(
       "inline-flex items-center font-gill uppercase transition-colors",
       "text-sm font-normal leading-[130%] tracking-[-0.02em]",
-      "lg:text-sm lg:font-semibold lg:leading-110 lg:tracking-normal",
+      isLightOverlay
+        ? "md:landscape:text-sm md:landscape:font-semibold md:landscape:leading-110 md:landscape:tracking-normal"
+        : "lg:text-sm lg:font-semibold lg:leading-110 lg:tracking-normal",
       active ? "text-linkGold" : cn(textClass, hoverClass),
     );
 
@@ -220,7 +222,7 @@ const Header = () => {
           )}
         >
           {/* Figma 692:6742 — solid PDP header: white bg, py-24, dark nav; mobile bar 64px */}
-          <div className="relative mx-auto flex h-16 w-full max-w-1440 items-center justify-between px-5 md:landscape:h-[104px] md:landscape:px-8 md:landscape:pt-0 lg:landscape:px-10 lg:landscape:py-6 2xl:max-w-1920 2xl:landscape:px-[60px]">
+          <div className="relative mx-auto flex h-16 w-full max-w-1440 items-center justify-between px-5 md:landscape:h-[104px] md:landscape:px-10 md:landscape:py-6 md:landscape:pt-0 2xl:max-w-1920 2xl:landscape:px-[60px]">
             <div className="flex w-[120px] items-center gap-6 md:landscape:hidden">
               <button
                 type="button"
@@ -239,9 +241,9 @@ const Header = () => {
                 <SearchIcon className="size-6" />
               </Link>
             </div>
-            <div className="hidden md:landscape:flex md:landscape:items-center md:landscape:gap-4 lg:landscape:gap-10">
+            <div className="hidden md:landscape:flex md:landscape:items-center md:landscape:gap-10">
               {Logo}
-              <nav className="hidden items-center md:landscape:flex md:landscape:gap-4 lg:landscape:gap-10" aria-label="Main navigation">
+              <nav className="hidden items-center md:landscape:flex md:landscape:gap-10" aria-label="Main navigation">
                 {primaryLinks.map((link) => {
                   const isJewellery = isJewelleryNavLink(link.label);
                   const isActive = isHeaderNavLinkActive(pathname, link.label, link.url);

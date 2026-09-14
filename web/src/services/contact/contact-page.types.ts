@@ -138,6 +138,8 @@ export type StrapiContactPage = {
   id?: number;
   documentId?: string;
   introText?: string | null;
+  /** Page-level CTA used by Visit Us when visitSection.cta is unset in CMS. */
+  cta?: StrapiContactCta | null;
   heroSection?: StrapiContactHeroSection | null;
   contactSection?: StrapiContactSupportSection | null;
   formSection?: StrapiContactFormSection | null;

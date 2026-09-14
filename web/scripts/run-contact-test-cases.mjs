@@ -227,15 +227,15 @@ async function runStaticChecks() {
     "CONTACT-140",
     "email normalization",
     mapperTs,
-    "formatEmailDisplay",
+    "formatEmailAddress",
     "Mapper normalizes garbled email CTA text",
   );
   assertSource(
     "CONTACT-141",
-    "copy normalization",
+    "CMS copy passthrough",
     mapperTs,
-    "normalizeContactCopy",
-    "Mapper fixes assisstance typo in card copy",
+    "cleanText(option.description)",
+    "Card descriptions render CMS copy without mapper rewrites",
   );
   assertSource(
     "CONTACT-150",
@@ -464,11 +464,14 @@ async function runLiveChecks(baseUrl) {
       : "Email CTA displays normalized email address",
   );
 
-  if (!/assisstance/i.test(contactHtml)) {
-    record("CONTACT-141", "Pass", "Card copy typo normalized in rendered HTML");
-  } else {
-    record("CONTACT-141", "Fail", "Spelling typo 'assisstance' still present on page");
-  }
+  const hasConciergeCopy = /member of our team/i.test(contactHtml);
+  record(
+    "CONTACT-141",
+    hasConciergeCopy ? "Pass" : "Fail",
+    hasConciergeCopy
+      ? "Personal Concierge description reflects CMS copy"
+      : "Personal Concierge CMS description not found in rendered HTML",
+  );
 
   const hasIntro = contactHtml.includes("contact-intro");
   record(

@@ -1,6 +1,6 @@
 "use client";
 
-import { DetailTextLink } from "@/features/products/components/detail/shared";
+import ContactCardCtaLink from "./ContactCardCtaLink";
 import { useToast } from "@/shared/hooks/use-toast";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 
@@ -39,16 +39,16 @@ const ContactPhoneLink = ({ href, label, className }: ContactPhoneLinkProps) => 
 
   if (isMobile) {
     return (
-      <DetailTextLink href={href} className={className}>
+      <ContactCardCtaLink href={href} className={className}>
         {label}
-      </DetailTextLink>
+      </ContactCardCtaLink>
     );
   }
 
   return (
-    <DetailTextLink onClick={handleCopyPhoneNumber} className={className}>
+    <ContactCardCtaLink onClick={handleCopyPhoneNumber} className={className}>
       {label}
-    </DetailTextLink>
+    </ContactCardCtaLink>
   );
 };
 

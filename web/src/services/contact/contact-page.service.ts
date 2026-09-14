@@ -25,6 +25,7 @@ const CONTACT_PAGE_POPULATE_QUERY =
   "&populate[visitSection][populate][showrooms][populate][image][populate][desktopImage]=true" +
   "&populate[visitSection][populate][showrooms][populate][image][populate][mobileImage]=true" +
   "&populate[visitSection][populate][cta]=true" +
+  "&populate[cta]=true" +
   "&populate[seo][populate][ogImage]=true";
 
 export const getContactPage = cache(

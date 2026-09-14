@@ -1,10 +1,12 @@
 "use client";
 import Reveal from "@/shared/Animation/Reveal";
 import type { NormalizedContactInfoCard } from "@/services/contact/contact-page.types";
-import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import Image from "next/image";
 import React from "react";
+import { cn } from "@/shared/utils/cn";
+import { contactCardLayoutClasses } from "../data/contactHeroFigmaSpec";
+import ContactCardCtaLink from "./ContactCardCtaLink";
 import ContactPhoneLink from "./ContactPhoneLink";
 type ContactInfoSectionProps = {
   intro: {
@@ -20,9 +22,9 @@ const ContactInfoSection = ({ intro, infoCards }: ContactInfoSectionProps) => {
   return (
     <section
       aria-labelledby={intro ? "contact-intro" : undefined}
-      className="w-full px-4 md:px-10 xl:px-[150px]"
+      className="w-full"
     >
-      <div className="mx-auto flex w-full max-w-1360 flex-col items-center md:gap-10 gap-16 md:pt-16">
+      <div className="mx-auto flex w-full flex-col items-center gap-16 md:gap-10">
         {intro ? (
           <Reveal
             as="p"
@@ -35,35 +37,43 @@ const ContactInfoSection = ({ intro, infoCards }: ContactInfoSectionProps) => {
           </Reveal>
         ) : null}
         {infoCards.length > 0 ? (
-        <div className="w-full md:grid-cols-3 grid-cols-1 md:gap-4 gap-4 grid md:items-stretch md:bg-transparent bg-gray300 px-4 py-2">
+        <div className={contactCardLayoutClasses.grid}>
           {infoCards.map((card, index) => {
             const isExternal =
               card.variant === "link" && /^https?:\/\//i.test(card.link.href);
+            const isCompactCard = card.variant === "email" || card.variant === "link";
             return (
               <React.Fragment key={card.id}>
                 <Reveal
-                  // key={card.id}
                   direction="up"
                   delay={index * 0.05}
-                  className="flex h-full flex-col items-center self-stretch bg-gray300 xl:py-6 xl:px-6 md:py-5 md:px-5 py-4 xl:gap-6 gap-4"
+                  data-cms-option-id={card.id}
+                  className={cn(
+                    contactCardLayoutClasses.card,
+                    isCompactCard && contactCardLayoutClasses.cardCompact,
+                  )}
                 >
-                  <h2 className="w-full text-center font-larken lg:text-2xl text-xl font-light leading-110 text-darkblack">
+                  <h2 className="w-full text-center font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
                     {isMobile && card.mobileTitle ? card.mobileTitle : card.title}
                   </h2>
 
-                  <div className="flex w-full flex-1 flex-col items-center justify-between xl:gap-6 gap-4">
+                  <div className="flex w-full flex-1 flex-col items-center justify-between gap-4 md:gap-6">
                     <div className="flex w-full flex-col items-center justify-center text-center">
                       {card.variant === "phone" && card.hours.length > 0 ? (
                         <div className="flex flex-col items-center gap-3 text-base leading-110 text-darkblack">
                           {card.hours.map((entry) => (
                             <div
                               key={`${entry.label}-${entry.value}`}
-                              className="flex flex-wrap items-center justify-center gap-3"
+                              className={contactCardLayoutClasses.hoursRow}
                             >
                               {entry.label ? (
-                                <span className="font-gill font-light">{entry.label}</span>
+                                <span className={contactCardLayoutClasses.hoursLabel}>
+                                  {entry.label}
+                                </span>
                               ) : null}
-                              <span className="font-gill font-normal">{entry.value}</span>
+                              <span className={contactCardLayoutClasses.hoursValue}>
+                                {entry.value}
+                              </span>
                             </div>
                           ))}
                         </div>
@@ -74,7 +84,8 @@ const ContactInfoSection = ({ intro, infoCards }: ContactInfoSectionProps) => {
                       ) : null}
                     </div>
                     <div className="flex w-full items-center justify-center gap-2">
-                      <Image className="shrink-0 md:hidden"
+                      <Image
+                        className="shrink-0 md:hidden"
                         src={
                           card.variant === "email"
                             ? "/images/contact/icon-email.svg"
@@ -86,20 +97,15 @@ const ContactInfoSection = ({ intro, infoCards }: ContactInfoSectionProps) => {
                         aria-hidden
                       />
                       {card.variant === "phone" ? (
-                        <ContactPhoneLink
-                          href={card.link.href}
-                          label={card.link.label}
-                          className="max-w-full break-all"
-                        />
+                        <ContactPhoneLink href={card.link.href} label={card.link.label} />
                       ) : (
-                        <DetailTextLink
+                        <ContactCardCtaLink
                           href={card.link.href}
-                          className="max-w-full break-all"
                           target={isExternal ? "_blank" : undefined}
                           rel={isExternal ? "noopener noreferrer" : undefined}
                         >
                           {card.link.label}
-                        </DetailTextLink>
+                        </ContactCardCtaLink>
                       )}
                     </div>
                   </div>

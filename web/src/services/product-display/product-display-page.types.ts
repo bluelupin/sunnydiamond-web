@@ -142,6 +142,7 @@ export type NormalizedVisitUsSection = {
   ctaLabel: string;
   /** When set, CTA navigates; when omitted, UI opens Book a Visit panel. */
   ctaUrl?: string;
+  ctaOpenInNewTab?: boolean;
   /** Optional generic-form tag when CTA opens the book-visit panel (non-PDP). */
   bookVisitFormTag?: string;
 };

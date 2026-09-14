@@ -22,6 +22,7 @@ import {
   type StrapiContactPage,
   type StrapiContactSeo,
   type StrapiContactSupportSection,
+  type StrapiContactCta,
   type StrapiContactVisitSection,
   type StrapiContactVisitShowroom,
 } from "./contact-page.types";
@@ -29,15 +30,6 @@ import {
 const cleanText = (value?: string | null): string | undefined => {
   const trimmed = value?.trim();
   return trimmed || undefined;
-};
-
-/** Correct common CMS copy typos without requiring a CMS republish. */
-const normalizeContactCopy = (value?: string | null): string | undefined => {
-  const text = cleanText(value);
-  if (!text) return undefined;
-  return text
-    .replace(/\bassisstance\b/gi, "assistance")
-    .replace(/\bmember of our team\b/gi, "member of the team");
 };
 
 /** CMS sections may use `isActive` or `showField`; default visible when unset. */
@@ -106,11 +98,32 @@ const isGenericButtonLabel = (label?: string): boolean => {
   );
 };
 
-/** Normalize garbled CMS email strings (e.g. "GET INTOUCH@SUNNTDIAMONDS.COM") for display. */
-const formatEmailDisplay = (value: string): string => {
+/** Normalize garbled CMS email strings for mailto hrefs. */
+const formatEmailAddress = (value: string): string => {
   const compact = value.replace(/\s+/g, "");
   const match = compact.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
-  return match ? match[0].toLowerCase() : value.trim();
+  if (!match) return value.trim();
+
+  return match[0]
+    .toLowerCase()
+    .replace("@sunntdiamonds.com", "@sunnydiamonds.com");
+};
+
+/** Preserve CMS email CTA copy; only fix known domain typos. */
+const sanitizeEmailLinkLabel = (label: string): string =>
+  label.replace(/@sunntdiamonds\.com/gi, "@SUNNYDIAMONDS.COM");
+
+/** Fallback when CMS omits a usable email buttonLabel. */
+const formatEmailLinkDisplay = (email: string): string => {
+  const [localPart, domain = ""] = email.split("@");
+  return `${localPart.toUpperCase()}@${domain.toUpperCase()}`;
+};
+
+const resolveWhatsAppLinkLabel = (buttonLabel: string | undefined): string => {
+  const cmsLabel = cleanText(buttonLabel);
+  if (cmsLabel) return cmsLabel;
+
+  return "WHATSAPP";
 };
 
 const resolveLinkLabel = (
@@ -122,18 +135,18 @@ const resolveLinkLabel = (
   return value ?? title ?? buttonLabel ?? "";
 };
 
-/** Prefer normalized email for display when CMS stores garbled text in buttonLabel. */
+/** Prefer CMS buttonLabel; fall back to normalized value only when CMS label is missing/generic. */
 const resolveEmailLinkLabel = (
   buttonLabel: string | undefined,
   email: string,
 ): string => {
-  if (buttonLabel && !isGenericButtonLabel(buttonLabel) && !buttonLabel.includes("@")) {
-    return buttonLabel;
+  const cmsLabel = cleanText(buttonLabel);
+
+  if (cmsLabel && !isGenericButtonLabel(cmsLabel)) {
+    return cmsLabel.includes("@") ? sanitizeEmailLinkLabel(cmsLabel) : cmsLabel;
   }
-  if (buttonLabel?.includes("@")) {
-    return formatEmailDisplay(buttonLabel);
-  }
-  return email;
+
+  return formatEmailLinkDisplay(email);
 };
 
 const isActionableContactTarget = (value: string): boolean => {
@@ -180,7 +193,7 @@ const mapContactOption = (
   const type = cleanText(option.type)?.toLowerCase() ?? "";
   const rawValue = cleanText(option.value);
   const buttonLabel = cleanText(option.buttonLabel);
-  const description = normalizeContactCopy(option.description);
+  const description = cleanText(option.description);
   const hours = mapAvailabilityHours(option.availability);
   const lowerButton = buttonLabel?.toLowerCase() ?? "";
   const lowerValue = rawValue?.toLowerCase() ?? "";
@@ -202,7 +215,7 @@ const mapContactOption = (
     href = toTelHref(rawValue);
     label = resolveLinkLabel(buttonLabel, rawValue, rawValue);
   } else if (variant === "email" && rawValue) {
-    const email = formatEmailDisplay(rawValue);
+    const email = formatEmailAddress(rawValue);
     href = `mailto:${email}`;
     label = resolveEmailLinkLabel(buttonLabel, email);
   } else if (rawValue) {
@@ -219,11 +232,11 @@ const mapContactOption = (
       } else {
         return null;
       }
-      label = resolveLinkLabel(buttonLabel, rawValue, "WHATSAPP");
+      label = resolveWhatsAppLinkLabel(buttonLabel);
     } else if (/^https?:\/\//i.test(rawValue) || rawValue.startsWith("/")) {
       href = rawValue;
     } else if (rawValue.includes("@")) {
-      const email = formatEmailDisplay(rawValue);
+      const email = formatEmailAddress(rawValue);
       href = `mailto:${email}`;
       variant = "email";
       label = resolveEmailLinkLabel(buttonLabel, email);
@@ -356,15 +369,53 @@ const mapForm = (section?: StrapiContactFormSection | null): NormalizedContactFo
   };
 };
 
+const normalizeContactCtaHref = (url: string): string => {
+  const trimmed = url.trim();
+  if (!trimmed) return "";
+
+  if (
+    trimmed.startsWith("tel:") ||
+    trimmed.startsWith("mailto:") ||
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("/")
+  ) {
+    return trimmed;
+  }
+
+  if (trimmed.includes("@")) {
+    return `mailto:${trimmed}`;
+  }
+
+  return `https://${trimmed}`;
+};
+
+const resolveContactVisitCta = (
+  section?: StrapiContactVisitSection | null,
+  pageCta?: StrapiContactCta | null,
+): StrapiContactCta | null | undefined => {
+  const sectionCta = section?.cta;
+  if (sectionCta && cleanText(sectionCta.label)) {
+    return sectionCta;
+  }
+
+  if (pageCta && cleanText(pageCta.label)) {
+    return pageCta;
+  }
+
+  return sectionCta ?? pageCta;
+};
+
 const adaptContactVisitSectionForPdpMapper = (
   section: StrapiContactVisitSection,
+  pageCta?: StrapiContactCta | null,
 ): StrapiProductDisplayVisitUsSection => ({
   id: section.id,
   sectionTitle: section.sectionTitle,
   description: section.description,
   sortOrder: section.sortOrder,
   showField: section.showField,
-  cta: section.cta,
+  cta: resolveContactVisitCta(section, pageCta),
   formCta: section.formCta,
   showrooms: section.showrooms
     ?.filter((showroom): showroom is StrapiContactVisitShowroom =>
@@ -380,17 +431,29 @@ const adaptContactVisitSectionForPdpMapper = (
 });
 
 /** Uses the same mapper as PDP so imagery, CTA, and Book a Visit behavior stay aligned. */
-const mapVisitUs = (section?: StrapiContactVisitSection | null): NormalizedVisitUsSection | null => {
+const mapVisitUs = (
+  section?: StrapiContactVisitSection | null,
+  pageCta?: StrapiContactCta | null,
+): NormalizedVisitUsSection | null => {
   if (!section || !resolveSectionActive(section.isActive, section.showField)) {
     return null;
   }
 
-  const mapped = mapVisitUsSection(adaptContactVisitSectionForPdpMapper(section));
+  const resolvedCta = resolveContactVisitCta(section, pageCta);
+  const mapped = mapVisitUsSection(
+    adaptContactVisitSectionForPdpMapper(section, pageCta),
+  );
   if (!mapped.isActive || !mapped.title.trim()) {
     return null;
   }
 
-  return mapped;
+  const ctaUrl = mapped.ctaUrl ? normalizeContactCtaHref(mapped.ctaUrl) : undefined;
+
+  return {
+    ...mapped,
+    ...(ctaUrl ? { ctaUrl } : {}),
+    ...(resolvedCta?.openInNewTab === true ? { ctaOpenInNewTab: true } : {}),
+  };
 };
 
 const mapSeo = (seo?: StrapiContactSeo | null): NormalizedContactSeo | null => {
@@ -428,7 +491,7 @@ export function mapContactPage(raw?: StrapiContactPage | null): NormalizedContac
       : null,
     infoCards: mapInfoCards(raw.contactSection),
     form: mapForm(raw.formSection),
-    visitUs: mapVisitUs(raw.visitSection),
+    visitUs: mapVisitUs(raw.visitSection, raw.cta),
     seo: mapSeo(raw.seo),
   };
 }
