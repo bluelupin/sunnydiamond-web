@@ -8,6 +8,7 @@ import {
   careersSelectTriggerClassName,
 } from "@/features/careers/components/shared/CareersSelectField";
 import { careersFormLabelClassName } from "@/features/careers/constants/careersApplicationForm";
+import { careersDarkCtaClassName } from "@/features/careers/constants/careersCtaStyles";
 import Reveal from "@/shared/Animation/Reveal";
 import { cn } from "@/shared/utils/cn";
 import {
@@ -104,7 +105,13 @@ const GiftingDiscoverSection = ({
   const [priceRangeLabel, setPriceRangeLabel] = useState("");
   const [occasion, setOccasion] = useState("");
 
+  const hasAnySelection = Boolean(
+    category.trim() || priceRangeLabel.trim() || occasion.trim(),
+  );
+
   const handleSubmit = () => {
+    if (!hasAnySelection) return;
+
     const selectedPriceRange = options.priceRanges.find(
       (range) => range.label === priceRangeLabel,
     );
@@ -197,8 +204,9 @@ const GiftingDiscoverSection = ({
         <Reveal direction="up">
           <button
             type="button"
+            disabled={!hasAnySelection}
             onClick={handleSubmit}
-            className="btn-dark-slide inline-flex h-14 items-center justify-center self-start border border-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 md:w-full md:self-auto"
+            className={cn(careersDarkCtaClassName, "self-start md:w-full md:self-auto")}
           >
             <span className="relative z-10">{submitLabel}</span>
           </button>
