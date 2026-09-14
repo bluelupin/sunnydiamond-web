@@ -64,6 +64,11 @@ const BlogsListingClient = ({
     : filteredPosts.slice(0, limit);
   const showLoadMoreFooter =
     filteredPosts.length > 0 && limit < filteredPosts.length;
+  // Featured is de-duped from the grid but still counts as a blog in the footer.
+  const featuredCount = showFeatured ? 1 : 0;
+  const loadMoreTotal = filteredPosts.length + featuredCount;
+  const loadMoreShown =
+    Math.min(limit, filteredPosts.length) + featuredCount;
 
   const handleLoadMore = () => {
     setLimit((current) =>
@@ -97,8 +102,8 @@ const BlogsListingClient = ({
             }
             {showLoadMoreFooter &&
               <BlogsLoadMore
-                limit={limit}
-                total={filteredPosts.length}
+                limit={loadMoreShown}
+                total={loadMoreTotal}
                 buttonLabel={loadMoreButtonLabel}
                 onLoadMore={handleLoadMore}
               />
