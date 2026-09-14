@@ -88,10 +88,44 @@ export function isProductEngravingEnabled(
   return engraving?.enabled === true;
 }
 
+export function hasCatalogEngravingText(
+  productCustomOptions?: ProductCustomOptions | null,
+): boolean {
+  return Boolean(productCustomOptions?.engravingText);
+}
+
+/** Ensures engraving flags are set whenever the catalog exposes an engraving text option. */
+export function ensureEngravingCartLineOptions(
+  options: CartLineOptions,
+  productCustomOptions?: ProductCustomOptions | null,
+  engraving?: ProductEngravingConfig | null,
+): CartLineOptions {
+  if (!hasCatalogEngravingText(productCustomOptions) && !isProductEngravingEnabled(engraving)) {
+    return options;
+  }
+
+  const maxCharacters =
+    options.engravingMaxCharacters ??
+    resolveEngravingMaxCharacters(productCustomOptions?.engravingText?.maxCharacters) ??
+    engraving?.maxCharacters ??
+    DEFAULT_ENGRAVING_MAX_CHARACTERS;
+
+  return {
+    ...options,
+    engravingSupported: true,
+    engravingMaxCharacters: maxCharacters,
+  };
+}
+
 export function isCartLineEngravingEnabled(
   options: Pick<CartLineOptions, "engravingSupported">,
+  productCustomOptions?: ProductCustomOptions | null,
 ): boolean {
-  return options.engravingSupported === true;
+  if (options.engravingSupported === true) {
+    return true;
+  }
+
+  return hasCatalogEngravingText(productCustomOptions);
 }
 
 export type CartLineEngravingContext = {
@@ -103,16 +137,7 @@ export type CartLineEngravingContext = {
 export function isCartLineEngravingCapable(
   context: CartLineEngravingContext,
 ): boolean {
-  if (context.options.engravingSupported !== true) {
-    return false;
-  }
-
-  const catalogOptions = context.productCustomOptions;
-  if (catalogOptions && !catalogOptions.engravingText) {
-    return false;
-  }
-
-  return true;
+  return hasCatalogEngravingText(context.productCustomOptions);
 }
 
 export function mergeCartLineOptions(
