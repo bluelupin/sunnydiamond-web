@@ -149,11 +149,40 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
     setIsNavigatingToCheckout(true);
   }, []);
 
+  const clearCheckoutNavigation = useCallback(() => {
+    setIsNavigatingToCheckout(false);
+  }, []);
+
+  // Clear once checkout is no longer the active route (covers browser Back to cart).
   useEffect(() => {
-    if (pathname === "/cart") {
-      setIsNavigatingToCheckout(false);
+    if (pathname !== "/checkout") {
+      clearCheckoutNavigation();
     }
-  }, [pathname]);
+  }, [pathname, clearCheckoutNavigation]);
+
+  // bfcache can restore /cart without a pathname change, leaving the flag stuck true
+  // after startCheckoutNavigation() ran right before router.push("/checkout").
+  useEffect(() => {
+    const resetIfOnCart = () => {
+      if (window.location.pathname === "/cart") {
+        clearCheckoutNavigation();
+      }
+    };
+
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        resetIfOnCart();
+      }
+    };
+
+    window.addEventListener("popstate", resetIfOnCart, true);
+    window.addEventListener("pageshow", onPageShow);
+
+    return () => {
+      window.removeEventListener("popstate", resetIfOnCart, true);
+      window.removeEventListener("pageshow", onPageShow);
+    };
+  }, [clearCheckoutNavigation]);
 
   return (
     <CartUIContext.Provider
