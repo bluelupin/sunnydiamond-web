@@ -37,7 +37,7 @@ function scheduleEnterAnimation(onEnter: () => void) {
   };
 }
 
-type SubPanelId = "language" | "currency" | "appointment" | "jewellery" | "store-visit";
+type SubPanelId = "appointment" | "jewellery" | "store-visit";
 
 const MOBILE_NAV_TRANSITION_MS = 300;
 
@@ -71,24 +71,6 @@ function mobileNavBackdropMotionClass(visible: boolean) {
     visible ? "opacity-100" : "opacity-0",
   );
 }
-
-const LANGUAGES = [
-  { code: "en", label: "English", display: "English" },
-  { code: "hi", label: "हिन्दी (Hindi)", display: "Hindi" },
-  { code: "gu", label: "ગુજરાતી (Gujarati)", display: "Gujarati" },
-  { code: "te", label: "తెలుగు (Telugu)", display: "Telugu" },
-] as const;
-
-type LanguageCode = (typeof LANGUAGES)[number]["code"];
-
-const CURRENCIES = [
-  { code: "INR", country: "India", symbol: "₹", display: "India · ₹ INR" },
-  { code: "USD", country: "United States", symbol: "$", display: "US · $ USD" },
-  { code: "GBP", country: "United Kingdom", symbol: "£", display: "UK · £ GBP" },
-  { code: "EUR", country: "European Union", symbol: "€", display: "EU · € EUR" },
-] as const;
-
-type CurrencyCode = (typeof CURRENCIES)[number]["code"];
 
 type JewelleryPanelProps = {
   onBack: () => void;
@@ -250,195 +232,6 @@ const UtilityRow = ({ iconSrc, iconW, iconH, label, href, value, onNavigate, onC
   return <div className={rowClassName}>{content}</div>;
 };
 
-type LanguagePanelProps = {
-  selected: LanguageCode;
-  onBack: () => void;
-  onClose: () => void;
-  onApply: (lang: LanguageCode) => void;
-};
-
-const LanguagePanel = ({ selected, onBack, onClose, onApply }: LanguagePanelProps) => {
-  const [draft, setDraft] = useState<LanguageCode>(selected);
-
-  return (
-    <div
-      className="absolute inset-0 flex h-full w-full flex-col bg-white"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Language selection"
-    >
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pt-6">
-        <div className="flex items-center justify-between">
-          <button
-            type="button"
-            onClick={onBack}
-            aria-label="Go back"
-            className="flex items-center gap-2"
-          >
-            <span className="inline-flex size-6 shrink-0 items-center justify-center">
-              <Image
-                src="/icons/chevron-right.svg"
-                alt=""
-                width={7}
-                height={15}
-                aria-hidden
-                className="-scale-x-100"
-              />
-            </span>
-            <span className="font-larken text-2xl font-light leading-110 text-darkblack">
-              Language
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close menu"
-            className="inline-flex size-6 items-center justify-center"
-          >
-            <Image
-              src="/icons/menu-close.svg"
-              alt=""
-              width={24}
-              height={24}
-              aria-hidden
-            />
-          </button>
-        </div>
-
-        <div className="mt-6 h-px w-full bg-aboutInactive" aria-hidden />
-
-        <div className="mt-6 flex flex-col">
-          {LANGUAGES.map((lang) => {
-            const isSelected = draft === lang.code;
-            return (
-              <button
-                key={lang.code}
-                type="button"
-                onClick={() => setDraft(lang.code)}
-                className={cn(
-                  "flex h-14 w-full items-center px-3 text-left font-gill text-sm leading-110",
-                  isSelected ? "bg-[#DECAA0] text-darkblack" : "text-[#999999]",
-                )}
-              >
-                {lang.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="shrink-0">
-        <div className="pointer-events-none h-[71px] bg-gradient-to-b from-transparent to-white" aria-hidden />
-        <div className="border-t border-[#CCCCCC]/50 bg-white px-4 py-6">
-          <button
-            type="button"
-            onClick={() => onApply(draft)}
-            className="flex h-14 w-full items-center justify-center bg-darkblack font-gill text-sm uppercase leading-110 text-white"
-          >
-            Apply
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-type CurrencyPanelProps = {
-  selected: CurrencyCode;
-  onBack: () => void;
-  onClose: () => void;
-  onApply: (code: CurrencyCode) => void;
-};
-
-const CurrencyPanel = ({ selected, onBack, onClose, onApply }: CurrencyPanelProps) => {
-  const [draft, setDraft] = useState<CurrencyCode>(selected);
-
-  return (
-    <div
-      className="absolute inset-0 flex h-full w-full flex-col bg-white"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Region and currency selection"
-    >
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pt-6">
-        <div className="flex items-center justify-between">
-          <button
-            type="button"
-            onClick={onBack}
-            aria-label="Go back"
-            className="flex items-center gap-2"
-          >
-            <span className="inline-flex size-6 shrink-0 items-center justify-center">
-              <Image
-                src="/icons/chevron-right.svg"
-                alt=""
-                width={7}
-                height={15}
-                aria-hidden
-                className="-scale-x-100"
-              />
-            </span>
-            <span className="font-larken text-2xl font-light leading-110 text-darkblack">
-              Region &amp; Currency
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close menu"
-            className="inline-flex size-6 items-center justify-center"
-          >
-            <Image
-              src="/icons/menu-close.svg"
-              alt=""
-              width={24}
-              height={24}
-              aria-hidden
-            />
-          </button>
-        </div>
-
-        <div className="mt-6 h-px w-full bg-aboutInactive" aria-hidden />
-
-        <div className="mt-6 flex flex-col">
-          {CURRENCIES.map((currency) => {
-            const isSelected = draft === currency.code;
-            return (
-              <button
-                key={currency.code}
-                type="button"
-                onClick={() => setDraft(currency.code)}
-                className={cn(
-                  "flex h-14 w-full items-center justify-between px-3 font-gill text-sm leading-110",
-                  isSelected ? "bg-[#DECAA0] text-darkblack" : "text-[#999999]",
-                )}
-              >
-                <span>{currency.country}</span>
-                <span>{currency.symbol} {currency.code}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="shrink-0">
-        <div className="pointer-events-none h-[71px] bg-gradient-to-b from-transparent to-white" aria-hidden />
-        <div className="border-t border-[#CCCCCC]/50 bg-white px-4 py-6">
-          <button
-            type="button"
-            onClick={() => onApply(draft)}
-            className="flex h-14 w-full items-center justify-center bg-darkblack font-gill text-sm uppercase leading-110 text-white"
-          >
-            Apply
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const MobileNavigation = ({
   isOpen,
   onClose,
@@ -459,20 +252,8 @@ const MobileNavigation = ({
   const displayedSubPanelRef = useRef<SubPanelId | null>(null);
   const isSubPanelVisibleRef = useRef(false);
   const cancelEnterAnimationRef = useRef<(() => void) | null>(null);
-  const [language, setLanguage] = useState<LanguageCode>("en");
-  const [currency, setCurrency] = useState<CurrencyCode>("INR");
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
-
-  const handleApplyLanguage = useCallback((lang: LanguageCode) => {
-    setLanguage(lang);
-    setSubPanel(null);
-  }, []);
-
-  const handleApplyCurrency = useCallback((code: CurrencyCode) => {
-    setCurrency(code);
-    setSubPanel(null);
-  }, []);
 
   const handleClose = useCallback(() => {
     setSubPanel(null);
@@ -601,9 +382,6 @@ const MobileNavigation = ({
   }, []);
 
   if (!isRendered) return null;
-
-  const currentLangDisplay = LANGUAGES.find((l) => l.code === language)?.display ?? "English";
-  const currentCurrencyDisplay = CURRENCIES.find((c) => c.code === currency)?.display ?? "India · ₹ INR";
 
   return (
     <>
@@ -749,24 +527,6 @@ const MobileNavigation = ({
               </>
             ) : null}
             <UtilityRow
-              iconSrc="/icons/currency.svg"
-              iconW={20}
-              iconH={20}
-              label="Currency"
-              value={currentCurrencyDisplay}
-              onClick={() => setSubPanel("currency")}
-            />
-            <NavDivider className="bg-chalk300" />
-            <UtilityRow
-              iconSrc="/icons/globe.svg"
-              iconW={24}
-              iconH={24}
-              label="Language"
-              value={currentLangDisplay}
-              onClick={() => setSubPanel("language")}
-            />
-            <NavDivider className="bg-chalk300" />
-            <UtilityRow
               iconSrc="/icons/map.svg"
               iconW={24}
               iconH={24}
@@ -791,34 +551,6 @@ const MobileNavigation = ({
             </p>
           </div>
         </div>
-
-        {displayedSubPanel === "language" ? (
-          <div
-            className={cn("absolute inset-0 z-10", mobileNavSubPanelMotionClass(isSubPanelVisible))}
-            aria-hidden={!isSubPanelVisible}
-          >
-            <LanguagePanel
-              selected={language}
-              onBack={() => setSubPanel(null)}
-              onClose={handleClose}
-              onApply={handleApplyLanguage}
-            />
-          </div>
-        ) : null}
-
-        {displayedSubPanel === "currency" ? (
-          <div
-            className={cn("absolute inset-0 z-10", mobileNavSubPanelMotionClass(isSubPanelVisible))}
-            aria-hidden={!isSubPanelVisible}
-          >
-            <CurrencyPanel
-              selected={currency}
-              onBack={() => setSubPanel(null)}
-              onClose={handleClose}
-              onApply={handleApplyCurrency}
-            />
-          </div>
-        ) : null}
 
         {displayedSubPanel === "appointment" ? (
           <div
