@@ -1,7 +1,9 @@
 import type { BlogCategory, BlogPost } from "../types";
 
+/** Spec: 9 grid cards initially (featured is separate and de-duplicated). */
 export const BLOGS_INITIAL_VISIBLE = 9;
-export const BLOGS_LOAD_MORE_STEP = 3;
+/** Spec: Load More appends 9 posts per click. */
+export const BLOGS_LOAD_MORE_STEP = 9;
 
 type SearchParams = Record<string, string | string[] | undefined>;
 

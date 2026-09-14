@@ -52,9 +52,16 @@ const BlogsListingClient = ({
     }
   }, [category]);
 
-  const filteredPosts = filterBlogPosts(posts, category);
-  const firstRowPosts = filteredPosts.slice(0, 3);
-  const remainingPosts = filteredPosts.slice(3, limit);
+  // Spec: featured post must not also appear in the regular card grid.
+  const gridPosts = featured?.href
+    ? posts.filter((post) => post.href !== featured.href)
+    : posts;
+  const filteredPosts = filterBlogPosts(gridPosts, category);
+  const showFeatured = Boolean(featured);
+  const firstRowPosts = showFeatured ? filteredPosts.slice(0, 3) : [];
+  const remainingPosts = showFeatured
+    ? filteredPosts.slice(3, limit)
+    : filteredPosts.slice(0, limit);
   const showLoadMoreFooter =
     filteredPosts.length > 0 && limit < filteredPosts.length;
 
@@ -67,15 +74,23 @@ const BlogsListingClient = ({
   return (
     <>
       <BlogsFilterBar filterLabel={filterLabel} categories={categories} />
-      {firstRowPosts.length > 0 &&
+      {showFeatured && firstRowPosts.length > 0 ? (
         <section className="mx-auto w-full 2xl:max-w-1920 max-w-1440 px-4 md:px-8 lg:px-10 2xl:px-[60px] md:bg-gray200 md:pt-10 pt-0 lg:pb-100 pb-16">
           <BlogsCardGrid posts={firstRowPosts} />
         </section>
-      }
-      {featured && <BlogsFeaturedSection featured={featured} />}
+      ) : null}
+      {showFeatured && featured ? (
+        <BlogsFeaturedSection featured={featured} />
+      ) : null}
 
       {remainingPosts.length > 0 || showLoadMoreFooter ? (
-        <section className="mx-auto w-full 2xl:max-w-1920 max-w-1440 px-4 md:px-8 lg:px-10 2xl:px-[60px] md:bg-gray200 lg:py-100 py-16">
+        <section
+          className={
+            showFeatured
+              ? "mx-auto w-full 2xl:max-w-1920 max-w-1440 px-4 md:px-8 lg:px-10 2xl:px-[60px] md:bg-gray200 lg:py-100 py-16"
+              : "mx-auto w-full 2xl:max-w-1920 max-w-1440 px-4 md:px-8 lg:px-10 2xl:px-[60px] md:bg-gray200 md:pt-10 pt-0 lg:pb-100 pb-16"
+          }
+        >
           <div className="w-full flex flex-col items-center gap-16">
             {remainingPosts.length > 0 &&
               <BlogsCardGrid posts={remainingPosts} />

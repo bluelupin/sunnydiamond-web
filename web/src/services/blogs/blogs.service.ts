@@ -10,7 +10,7 @@ import {
   mapStaticBlogsPage,
   mapStrapiBlogPostToDetail,
   mapStrapiSeo,
-  selectRelatedBlogPosts,
+  mapRelatedBlogPostsFromApi,
 } from "./blogs.mapper";
 import type {
   NormalizedBlogDetailResult,
@@ -25,26 +25,20 @@ const BLOG_POSTS_LIST_QUERY =
   "&populate[coverImage][populate][mobileImage]=true" +
   "&populate[heroImage][populate][desktopImage]=true" +
   "&populate[heroImage][populate][mobileImage]=true" +
+  "&populate[cutoutImage][populate][desktopImage]=true" +
+  "&populate[cutoutImage][populate][mobileImage]=true" +
   "&populate[tags]=true" +
   "&populate[blog_category]=true" +
   "&pagination[pageSize]=100" +
   "&sort=publishedDate:desc";
 
-/** Targeted populate — `populate=*` 400s on this single-type. */
-const BLOG_LANDING_POPULATE_QUERY =
-  "populate[heroSection][populate][backgroundImage][populate][desktopImage]=true" +
-  "&populate[heroSection][populate][backgroundImage][populate][mobileImage]=true" +
-  "&populate[featuredBlogSection][populate][backgroundImage][populate][desktopImage]=true" +
-  "&populate[featuredBlogSection][populate][backgroundImage][populate][mobileImage]=true" +
-  // CMS oneToOne relation on the landing page (not nested under featuredBlogSection).
-  "&populate[featuredBlog][populate][coverImage][populate][desktopImage]=true" +
-  "&populate[featuredBlog][populate][coverImage][populate][mobileImage]=true" +
-  "&populate[featuredBlog][populate][heroImage][populate][desktopImage]=true" +
-  "&populate[featuredBlog][populate][heroImage][populate][mobileImage]=true" +
-  "&populate[featuredBlog][populate][blog_category]=true" +
-  "&populate[featuredBlog][populate][tags]=true" +
-  "&populate[seo][populate]=ogImage" +
-  "&populate[blogCategory]=true";
+const BLOG_RELATED_POPULATE_QUERY =
+  "populate[coverImage][populate][desktopImage]=true" +
+  "&populate[coverImage][populate][mobileImage]=true" +
+  "&populate[blog_category]=true";
+
+/** Current CMS single-type accepts shallow `populate=*`; deep `featuredBlog` paths 400. */
+const BLOG_LANDING_POPULATE_QUERY = "populate=*";
 
 async function softFetch<T>(
   endpoint: string,
@@ -94,6 +88,22 @@ async function fetchBlogPostBySlug(
   }
 }
 
+async function fetchRelatedBlogPostsBySlug(
+  slug: string,
+  signal?: AbortSignal,
+): Promise<StrapiBlogPost[]> {
+  try {
+    const data = await apiFetch<StrapiBlogPost[]>(
+      `${STRAPI_ENDPOINTS.blogPosts}/${encodeURIComponent(slug)}/related?${BLOG_RELATED_POPULATE_QUERY}`,
+      { signal },
+    );
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.warn(`[blogs] Failed to fetch related posts slug=${slug}`, error);
+    return [];
+  }
+}
+
 export const getBlogsPageData = cache(
   async (signal?: AbortSignal): Promise<NormalizedBlogsPage> => {
     const [posts, landing, categories] = await Promise.all([
@@ -122,13 +132,13 @@ export const getBlogDetailBySlug = cache(
     slug: string,
     signal?: AbortSignal,
   ): Promise<NormalizedBlogDetailResult | null> => {
-    const [cmsPost, allPosts] = await Promise.all([
+    const [cmsPost, relatedRaw] = await Promise.all([
       fetchBlogPostBySlug(slug, signal),
-      fetchBlogPosts(signal),
+      fetchRelatedBlogPostsBySlug(slug, signal),
     ]);
 
     if (cmsPost) {
-      const relatedPosts = selectRelatedBlogPosts(cmsPost, allPosts, 3);
+      const relatedPosts = mapRelatedBlogPostsFromApi(relatedRaw, 3);
 
       const detail = mapStrapiBlogPostToDetail(
         cmsPost,

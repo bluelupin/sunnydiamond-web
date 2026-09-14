@@ -96,7 +96,8 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
     useAppointmentFormValidation(formValues, validationOptions);
 
   const reasonRequired = reasonOptions.length > 0;
-  const consentRequired = form.requiresConsent && Boolean(form.consentLabel);
+  const consentLabel = form.consentLabel?.trim() ?? "";
+  const consentRequired = form.requiresConsent && Boolean(consentLabel);
 
   const showReasonError = submitted && reasonRequired && !reason.trim();
   const showConsentError = submitted && consentRequired && !consentAccepted;
@@ -403,7 +404,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
                     aria-label="Accept terms and privacy policy"
                   />
                   <p className="min-w-0 flex-1 font-gill text-sm font-light leading-110 text-darkblack md:text-base">
-                    <ContactConsentLabel label={form.consentLabel} />
+                    <ContactConsentLabel label={consentLabel} />
                   </p>
                 </div>
                 {showConsentError ? (

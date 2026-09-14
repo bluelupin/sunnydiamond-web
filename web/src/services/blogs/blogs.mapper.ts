@@ -128,8 +128,8 @@ export function inferBlogCategory(post: StrapiBlogPost): string {
 }
 
 /**
- * Prefer same category, then shared tags, then recent posts.
- * `blog_category` relation is used when set; otherwise inferred category.
+ * Spec: closest tag overlap first, then latest date within that tier.
+ * Category is a mild secondary signal only.
  */
 export function selectRelatedBlogPosts(
   current: StrapiBlogPost,
@@ -151,15 +151,14 @@ export function selectRelatedBlogPosts(
     const slug = cleanText(post.slug);
     if (!slug || slug === currentSlug) return;
 
-    let score = 0;
-    if (inferBlogCategory(post) === currentCategory) {
-      score += 100;
-    }
-
     const sharedTags = tagLabels(post.tags).filter((label) =>
       currentTags.has(label.toLowerCase()),
     ).length;
-    score += sharedTags * 10;
+
+    let score = sharedTags * 100;
+    if (inferBlogCategory(post) === currentCategory) {
+      score += 10;
+    }
 
     // Mild recency preference (list is already date-desc).
     score += Math.max(0, 5 - Math.min(index, 5));
@@ -175,6 +174,28 @@ export function selectRelatedBlogPosts(
   return ranked
     .slice(0, limit)
     .map(({ post }) => mapStrapiBlogPostToCard(post))
+    .filter((post): post is BlogPost => Boolean(post));
+}
+
+function relatedPostPublishedMs(post: StrapiBlogPost): number {
+  const raw =
+    typeof post.publishedDate === "string" ? post.publishedDate.trim() : "";
+  if (!raw) return 0;
+  const date = new Date(raw.includes("T") ? raw : `${raw}T00:00:00Z`);
+  return Number.isNaN(date.getTime()) ? 0 : date.getTime();
+}
+
+/** CMS `GET /blog-posts/:slug/related` — show up to 3, newest `publishedDate` first. */
+export function mapRelatedBlogPostsFromApi(
+  posts: StrapiBlogPost[],
+  limit = 3,
+): BlogPost[] {
+  if (limit <= 0) return [];
+
+  return [...posts]
+    .sort((a, b) => relatedPostPublishedMs(b) - relatedPostPublishedMs(a))
+    .slice(0, limit)
+    .map((post) => mapStrapiBlogPostToCard(post))
     .filter((post): post is BlogPost => Boolean(post));
 }
 
@@ -202,30 +223,64 @@ export function extractMarkdownImageUrls(markdown: string | null | undefined): s
 function resolveCoverImage(
   post: StrapiBlogPost,
 ): { src: string | null; alt: string } {
-  const cover = post.coverImage;
-  const src =
-    resolveCmsMediaUrl(cover?.desktopImage) ??
-    resolveCmsMediaUrl(cover?.mobileImage) ??
-    null;
+  const responsive = resolveCoverImageResponsive(post);
+  const src = responsive.desktopUrl ?? responsive.mobileUrl;
 
   return {
     src,
-    alt: resolveCmsAltText(cover?.desktopImage) ?? "",
+    alt: responsive.alt,
   };
 }
 
-function resolveHeroImage(
+function resolveCoverImageResponsive(post: StrapiBlogPost): {
+  desktopUrl: string | null;
+  mobileUrl: string | null;
+  alt: string;
+} {
+  const cover = post.coverImage;
+  const desktopUrl = resolveCmsMediaUrl(cover?.desktopImage) ?? null;
+  const mobileUrl = resolveCmsMediaUrl(cover?.mobileImage) ?? null;
+
+  return {
+    desktopUrl,
+    mobileUrl,
+    alt:
+      resolveCmsAltText(cover?.desktopImage) ??
+      resolveCmsAltText(cover?.mobileImage) ??
+      "",
+  };
+}
+
+function resolveCutoutImage(
   post: StrapiBlogPost,
 ): { src: string | null; alt: string } {
-  const hero = post.heroImage;
+  const cutout = post.cutoutImage;
   const src =
-    resolveCmsMediaUrl(hero?.desktopImage) ??
-    resolveCmsMediaUrl(hero?.mobileImage) ??
+    resolveCmsMediaUrl(cutout?.desktopImage) ??
+    resolveCmsMediaUrl(cutout?.mobileImage) ??
     null;
 
   return {
     src,
-    alt: resolveCmsAltText(hero?.desktopImage) ?? "",
+    alt: resolveCmsAltText(cutout?.desktopImage) ?? "",
+  };
+}
+
+/** Detail banner — CMS `heroImage` only (desktop + mobile); no cover fallback. */
+function resolveHeroImage(
+  post: StrapiBlogPost,
+): { desktopUrl: string | null; mobileUrl: string | null; alt: string } {
+  const hero = post.heroImage;
+  const desktopUrl = resolveCmsMediaUrl(hero?.desktopImage) ?? null;
+  const mobileUrl = resolveCmsMediaUrl(hero?.mobileImage) ?? null;
+
+  return {
+    desktopUrl,
+    mobileUrl,
+    alt:
+      resolveCmsAltText(hero?.desktopImage) ??
+      resolveCmsAltText(hero?.mobileImage) ??
+      "",
   };
 }
 
@@ -672,7 +727,11 @@ export function mapStrapiBlogPostToDetail(
     author,
     date: formatBlogDate(post.publishedDate),
     readTime: formatReadTime(post),
-    heroImage: { src: hero.src, alt: hero.alt },
+    heroImage: {
+      desktopUrl: hero.desktopUrl,
+      mobileUrl: hero.mobileUrl,
+      alt: hero.alt,
+    },
     // Excerpt is landing/featured-only — never reuse it on the detail page.
     introParagraphs,
     tableOfContents,
@@ -682,7 +741,7 @@ export function mapStrapiBlogPostToDetail(
 }
 
 export function mapStrapiSeo(seo: StrapiBlogSeo | null | undefined): BlogsPageSeo | null {
-  if (!seo) return null;
+  if (!seo || seo.showField === false) return null;
 
   const metaTitle = cleanText(seo.metaTitle);
   const metaDescription = cleanText(seo.metaDescription);
@@ -824,17 +883,27 @@ export function mapBlogsPageData(input: {
   const sectionActive = featuredSection?.isActive !== false;
 
   /**
-   * Featured article is CMS-only (`landing.featuredBlog` oneToOne).
+   * Featured article is CMS-only.
+   * Current schema: `featuredBlogSection.featuredBlog`.
+   * Legacy: root `featuredBlog` or `featuredBlogSection.post`.
    * No fallback to the latest listing post — if CMS links nothing, hide the block.
-   * Legacy `featuredBlogSection.post` is accepted if present on older payloads.
    */
   const featuredCmsPost =
     sectionActive
-      ? input.landing?.featuredBlog ?? featuredSection?.post ?? null
+      ? featuredSection?.featuredBlog ??
+        input.landing?.featuredBlog ??
+        featuredSection?.post ??
+        null
       : null;
 
+  const featuredSlug = cleanText(featuredCmsPost?.slug);
+  const featuredMediaPost =
+    (featuredSlug
+      ? input.posts.find((post) => cleanText(post.slug) === featuredSlug)
+      : null) ?? featuredCmsPost;
+
   const featuredCard = featuredCmsPost
-    ? mapStrapiBlogPostToCard(featuredCmsPost)
+    ? mapStrapiBlogPostToCard(featuredMediaPost ?? featuredCmsPost)
     : null;
 
   const featuredBackground =
@@ -842,6 +911,8 @@ export function mapBlogsPageData(input: {
     resolveCmsMediaUrl(featuredSection?.backgroundImage?.mobileImage);
   const featuredBackgroundAlt =
     resolveCmsAltText(featuredSection?.backgroundImage?.desktopImage) ?? "";
+
+  const cutout = featuredMediaPost ? resolveCutoutImage(featuredMediaPost) : { src: null, alt: "" };
 
   const featured = featuredCard
     ? mapFeaturedFromPost(
@@ -854,30 +925,36 @@ export function mapBlogsPageData(input: {
             blogsPageContent.featured.readNowLabel,
           backgroundSrc: featuredBackground ?? null,
           backgroundAlt: featuredBackgroundAlt,
+          // Spec: cutout only — no cover/hero fallback; hide image if CMS has none.
+          imageSrc: cutout.src,
+          imageAlt: cutout.alt || "",
         },
       )
     : null;
 
   const heroSection = input.landing?.heroSection;
-  const heroTitle =
-    cleanText(heroSection?.title) ?? blogsPageContent.hero.title;
-  const heroDesktop =
-    resolveCmsMediaUrl(heroSection?.backgroundImage?.desktopImage) ?? null;
-  const heroMobile =
-    resolveCmsMediaUrl(heroSection?.backgroundImage?.mobileImage) ??
-    heroDesktop;
-  const heroAlt =
-    resolveCmsAltText(heroSection?.backgroundImage?.desktopImage) ?? "";
+  const heroActive = heroSection?.isActive !== false;
+  const hero = heroActive
+    ? {
+        title: cleanText(heroSection?.title) ?? blogsPageContent.hero.title,
+        image: {
+          desktopUrl:
+            resolveCmsMediaUrl(heroSection?.backgroundImage?.desktopImage) ??
+            null,
+          mobileUrl:
+            resolveCmsMediaUrl(heroSection?.backgroundImage?.mobileImage) ??
+            resolveCmsMediaUrl(heroSection?.backgroundImage?.desktopImage) ??
+            null,
+          alt:
+            resolveCmsAltText(heroSection?.backgroundImage?.desktopImage) ??
+            resolveCmsAltText(heroSection?.backgroundImage?.mobileImage) ??
+            "",
+        },
+      }
+    : null;
 
   return {
-    hero: {
-      title: heroTitle,
-      image: {
-        desktopUrl: heroDesktop,
-        mobileUrl: heroMobile,
-        alt: heroAlt,
-      },
-    },
+    hero,
     filterLabel: blogsPageContent.filterLabel,
     loadMore: {
       buttonLabel: blogsPageContent.loadMore.buttonLabel,

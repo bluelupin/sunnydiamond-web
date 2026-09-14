@@ -3,7 +3,7 @@ export const blogsPageContent = {
   hero: {
     title: "The Diamond Guide",
   },
-  filterLabel: "Filter by:",
+  filterLabel: "Explore Topics",
   loadMore: {
     buttonLabel: "LOAD MORE",
   },

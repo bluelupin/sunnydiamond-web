@@ -3,6 +3,7 @@
 import { Share2, Volume1 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { cn } from "@/shared/utils/cn";
+import { useToast } from "@/shared/hooks/use-toast";
 import { useBrowserTextToSpeech } from "../hooks/useBrowserTextToSpeech";
 import type { BlogTableOfContentsItem } from "../types";
 
@@ -20,6 +21,7 @@ const BlogDetailSidebar = ({
   tableOfContents,
   speechText,
 }: BlogDetailSidebarProps) => {
+  const { toast } = useToast();
   const [activeId, setActiveId] = useState(
     tableOfContents[0]?.id ?? "",
   );
@@ -65,21 +67,29 @@ const BlogDetailSidebar = ({
       url: window.location.href,
     };
 
-    if (navigator.share) {
+    // Spec: native share sheet on mobile / Web-Share-capable touch devices only.
+    const preferNativeShare =
+      typeof navigator.share === "function" &&
+      (navigator.maxTouchPoints > 0 ||
+        /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent));
+
+    if (preferNativeShare) {
       try {
         await navigator.share(shareData);
         return;
       } catch {
-        // User dismissed share sheet.
+        // User dismissed share sheet — fall through to clipboard on capable devices only if needed.
       }
     }
 
+    // Spec (desktop): copy URL + toast "Link copied."
     try {
       await navigator.clipboard.writeText(window.location.href);
+      toast({ title: "Link copied." });
     } catch {
       // Clipboard unavailable.
     }
-  }, [title]);
+  }, [title, toast]);
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
