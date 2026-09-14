@@ -10,7 +10,15 @@ const JewelleryGuaranteesSection = ({ trustBadges }: JewelleryGuaranteesSectionP
 
   return (
     <GuaranteesBar
-      items={trustBadges}
+      items={trustBadges.map((badge) => ({
+        label: badge.label,
+        alt: badge.alt,
+        icon: {
+          desktopUrl: badge.iconSrc,
+          mobileUrl: badge.iconSrc,
+          alt: badge.alt,
+        },
+      }))}
       ariaLabel="Sunny Diamonds guarantees"
     />
   );

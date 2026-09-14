@@ -210,9 +210,8 @@ export type NormalizedGiftingFinishingTouch = {
 };
 
 export type NormalizedGiftingTrustBadge = {
-  iconSrc: string;
   label: string;
-  alt: string;
+  icon: NormalizedGiftingResponsiveImage;
 };
 
 export type NormalizedGiftingSeo = {

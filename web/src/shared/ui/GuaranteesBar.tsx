@@ -1,12 +1,17 @@
 import { Fragment } from "react";
-import Image from "next/image";
+import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { cn } from "@/shared/utils/cn";
-import { resolveGuaranteeIconSrc } from "@/shared/utils/guaranteeIcons";
+
+export type GuaranteeBarIcon = {
+  desktopUrl: string;
+  mobileUrl: string;
+  alt: string;
+};
 
 export type GuaranteeBarItem = {
-  iconSrc: string;
   label: string;
   alt?: string;
+  icon: GuaranteeBarIcon;
 };
 
 export const guaranteeBarSpec = {
@@ -18,29 +23,35 @@ export const guaranteeBarSpec = {
   dividerColor: "#999999",
 } as const;
 
+const hasIcon = (icon?: GuaranteeBarIcon): icon is GuaranteeBarIcon =>
+  Boolean(icon?.desktopUrl?.trim() || icon?.mobileUrl?.trim());
+
+const isRenderableGuaranteeItem = (item: GuaranteeBarItem): boolean => hasIcon(item.icon);
+
 const GuaranteeIcon = ({
-  iconSrc,
-  label,
-  alt,
+  item,
   size,
 }: {
-  iconSrc: string;
-  label: string;
-  alt: string;
+  item: GuaranteeBarItem;
   size: number;
-}) => (
-  <div
-    className="flex shrink-0 items-center justify-center md:w-16 md:h-16 w-10 h-10"
-  >
-    <Image
-      src={resolveGuaranteeIconSrc(iconSrc, label)}
-      alt={alt}
-      width={size}
-      height={size}
-      className="lg:size-16 size-14 object-contain"
-    />
-  </div>
-);
+}) => {
+  if (!hasIcon(item.icon)) return null;
+
+  const alt = item.alt?.trim() || item.icon.alt.trim() || "";
+
+  return (
+    <div className="flex shrink-0 items-center justify-center md:h-16 md:w-16 h-10 w-10">
+      <ResponsiveImage
+        desktopSrc={item.icon.desktopUrl}
+        mobileSrc={item.icon.mobileUrl}
+        alt={alt}
+        width={size}
+        height={size}
+        className="size-14 object-contain lg:size-16"
+      />
+    </div>
+  );
+};
 
 const GuaranteeDivider = ({ orientation }: { orientation: "vertical" | "horizontal" }) => (
   <li
@@ -62,7 +73,7 @@ const GuaranteeDivider = ({ orientation }: { orientation: "vertical" | "horizont
   </li>
 );
 
-const GuaranteeItem = ({ iconSrc, label, alt }: GuaranteeBarItem) => (
+const GuaranteeItem = (item: GuaranteeBarItem) => (
   <li
     className="list-none flex w-[200px] shrink-0 flex-col items-center justify-center text-center desktop:w-[260px]"
     style={{
@@ -71,14 +82,9 @@ const GuaranteeItem = ({ iconSrc, label, alt }: GuaranteeBarItem) => (
       padding: `${guaranteeBarSpec.itemPadding}px`,
     }}
   >
-    <GuaranteeIcon
-      iconSrc={iconSrc}
-      label={label}
-      alt={alt?.trim() || ""}
-      size={guaranteeBarSpec.iconSize}
-    />
+    <GuaranteeIcon item={item} size={guaranteeBarSpec.iconSize} />
     <p className="whitespace-nowrap font-gill text-15 font-normal leading-110 text-darkblack desktop:text-xl desktop:whitespace-normal">
-      {label}
+      {item.label}
     </p>
   </li>
 );
@@ -94,13 +100,14 @@ const GuaranteesBar = ({
   ariaLabel = "Shopping guarantees",
   className,
 }: GuaranteesBarProps) => {
-  if (items.length === 0) return null;
+  const visibleItems = items.filter(isRenderableGuaranteeItem);
+  if (visibleItems.length === 0) return null;
 
   return (
     <section aria-label={ariaLabel} className={cn("relative z-10 bg-gray200", className)}>
       <ul className="m-0 flex list-none flex-col items-center p-0 px-4 py-10 md:hidden">
-        {items.map(({ iconSrc, label, alt }, index) => (
-          <Fragment key={label}>
+        {visibleItems.map((item, index) => (
+          <Fragment key={`${item.label}-${index}`}>
             {index > 0 ? <GuaranteeDivider orientation="horizontal" /> : null}
             <li
               className="list-none flex w-full flex-col items-center justify-center text-center"
@@ -109,13 +116,8 @@ const GuaranteesBar = ({
                 padding: `${guaranteeBarSpec.itemPadding}px`,
               }}
             >
-              <GuaranteeIcon
-                iconSrc={iconSrc}
-                label={label}
-                alt={alt?.trim() || ""}
-                size={guaranteeBarSpec.mobileIconSize}
-              />
-              <p className="font-gill text-base font-normal leading-110 text-darkblack">{label}</p>
+              <GuaranteeIcon item={item} size={guaranteeBarSpec.mobileIconSize} />
+              <p className="font-gill text-base font-normal leading-110 text-darkblack">{item.label}</p>
             </li>
           </Fragment>
         ))}
@@ -128,10 +130,10 @@ const GuaranteesBar = ({
           "desktop:justify-between desktop:px-[180px] desktop:py-16",
         )}
       >
-        {items.map(({ iconSrc, label, alt }, index) => (
-          <Fragment key={label}>
+        {visibleItems.map((item, index) => (
+          <Fragment key={`${item.label}-${index}`}>
             {index > 0 ? <GuaranteeDivider orientation="vertical" /> : null}
-            <GuaranteeItem iconSrc={iconSrc} label={label} alt={alt} />
+            <GuaranteeItem {...item} />
           </Fragment>
         ))}
       </ul>

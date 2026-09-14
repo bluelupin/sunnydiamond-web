@@ -10,7 +10,11 @@ const GiftingGuaranteesSection = ({ trustBadges }: GiftingGuaranteesSectionProps
 
   return (
     <GuaranteesBar
-      items={trustBadges}
+      items={trustBadges.map((badge) => ({
+        label: badge.label,
+        icon: badge.icon,
+        alt: badge.icon.alt,
+      }))}
       ariaLabel="Sunny Diamonds guarantees"
     />
   );
