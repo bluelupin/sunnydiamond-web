@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import Slider, { type Settings } from "react-slick";
@@ -16,6 +17,7 @@ import {
 import BespokeFeaturedStoryModal from "@/features/bespoke/components/BespokeFeaturedStoryModal";
 import BespokePastCreationsModal from "@/features/bespoke/components/BespokePastCreationsModal";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
+import { unlockBodyScroll, useBodyScrollLock } from "@/shared/hooks/use-body-scroll-lock";
 import type {
   NormalizedBespokeFeaturedSlide,
   NormalizedBespokeFeaturedStories,
@@ -649,6 +651,8 @@ const FeaturedStoriesLayout = ({
   );
 };
 
+const BESPOKE_PAGE_PATH = "/bespoke-jewellery";
+
 const BespokeFeaturedStoriesSection = ({
   featuredStories,
   pastCreations,
@@ -656,6 +660,7 @@ const BespokeFeaturedStoriesSection = ({
   featuredStories: NormalizedBespokeFeaturedStories | null;
   pastCreations: NormalizedBespokePastCreations | null;
 }) => {
+  const pathname = usePathname() ?? BESPOKE_PAGE_PATH;
   const slides = featuredStories?.slides ?? [];
   const defaultSlideIndex = featuredStories?.defaultSlideIndex ?? 0;
   const slidesIdentity = useMemo(
@@ -669,44 +674,141 @@ const BespokeFeaturedStoriesSection = ({
     null,
   );
   const [modalSlideOverride, setModalSlideOverride] = useState<FeaturedStoryModalSlide | null>(null);
+  const modalHistoryDepthRef = useRef(0);
+  const skipHistoryPopRef = useRef(false);
+  const modalOpenRef = useRef(modalOpen);
+  const pastCreationsOpenRef = useRef(pastCreationsOpen);
+
+  modalOpenRef.current = modalOpen;
+  pastCreationsOpenRef.current = pastCreationsOpen;
 
   useEffect(() => {
     setCurrentIndex(defaultSlideIndex);
   }, [defaultSlideIndex, slidesIdentity]);
 
-  useEffect(() => {
-    if (!modalOpen && !pastCreationsOpen) {
-      document.body.style.overflow = "";
-      return;
-    }
+  const isOverlayOpen = modalOpen || pastCreationsOpen;
+  useBodyScrollLock(isOverlayOpen);
 
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [modalOpen, pastCreationsOpen]);
+  const pushModalHistory = useCallback(() => {
+    window.history.pushState({ sdBespokeFeaturedModal: true }, "");
+    modalHistoryDepthRef.current += 1;
+  }, []);
 
-  const handleCenterOpen = useCallback(() => {
-    if (slides.length === 0) return;
+  const popModalHistory = useCallback(() => {
+    if (modalHistoryDepthRef.current <= 0) return;
+
+    skipHistoryPopRef.current = true;
+    modalHistoryDepthRef.current -= 1;
+    window.history.back();
+  }, []);
+
+  const resetModalState = useCallback(() => {
+    modalHistoryDepthRef.current = 0;
+    setModalOpen(false);
+    setPastCreationsOpen(false);
+    setModalContext(null);
     setModalSlideOverride(null);
-    setModalContext({ slideIndex: currentIndex, imageIndex: 0 });
-    setModalOpen(true);
-  }, [currentIndex, slides.length]);
+    unlockBodyScroll();
+  }, []);
+
+  useEffect(() => {
+    if (pathname !== BESPOKE_PAGE_PATH) {
+      resetModalState();
+    }
+  }, [pathname, resetModalState]);
+
+  useEffect(() => {
+    const onPageShow = () => {
+      if (!modalOpenRef.current && !pastCreationsOpenRef.current) {
+        unlockBodyScroll();
+        return;
+      }
+
+      resetModalState();
+    };
+
+    const onPopState = () => {
+      if (skipHistoryPopRef.current) {
+        skipHistoryPopRef.current = false;
+        return;
+      }
+
+      if (modalHistoryDepthRef.current > 0) {
+        modalHistoryDepthRef.current -= 1;
+      }
+
+      if (modalOpenRef.current) {
+        setModalOpen(false);
+        setModalContext(null);
+        setModalSlideOverride(null);
+        if (!pastCreationsOpenRef.current) {
+          unlockBodyScroll();
+        }
+        return;
+      }
+
+      if (pastCreationsOpenRef.current) {
+        setPastCreationsOpen(false);
+        unlockBodyScroll();
+      }
+    };
+
+    window.addEventListener("pageshow", onPageShow);
+    window.addEventListener("popstate", onPopState);
+
+    return () => {
+      window.removeEventListener("pageshow", onPageShow);
+      window.removeEventListener("popstate", onPopState);
+    };
+  }, [resetModalState]);
 
   const handleModalClose = useCallback(() => {
     setModalOpen(false);
     setModalContext(null);
     setModalSlideOverride(null);
+    if (!pastCreationsOpenRef.current) {
+      unlockBodyScroll();
+    }
   }, []);
-
-  const handlePastCreationsOpen = useCallback(() => {
-    if (!pastCreations) return;
-    setPastCreationsOpen(true);
-  }, [pastCreations]);
 
   const handlePastCreationsClose = useCallback(() => {
     setPastCreationsOpen(false);
+    if (!modalOpenRef.current) {
+      unlockBodyScroll();
+    }
   }, []);
+
+  const closeStoryModal = useCallback(() => {
+    if (modalOpen) {
+      popModalHistory();
+    }
+    handleModalClose();
+  }, [handleModalClose, modalOpen, popModalHistory]);
+
+  const closePastCreationsModal = useCallback(() => {
+    if (pastCreationsOpen) {
+      popModalHistory();
+    }
+    handlePastCreationsClose();
+  }, [handlePastCreationsClose, pastCreationsOpen, popModalHistory]);
+
+  const openStoryModal = useCallback(() => {
+    pushModalHistory();
+    setModalOpen(true);
+  }, [pushModalHistory]);
+
+  const handleCenterOpen = useCallback(() => {
+    if (slides.length === 0) return;
+    setModalSlideOverride(null);
+    setModalContext({ slideIndex: currentIndex, imageIndex: 0 });
+    openStoryModal();
+  }, [currentIndex, openStoryModal, slides.length]);
+
+  const handlePastCreationsOpen = useCallback(() => {
+    if (!pastCreations) return;
+    pushModalHistory();
+    setPastCreationsOpen(true);
+  }, [pastCreations, pushModalHistory]);
 
   const handlePastCreationImageClick = useCallback(
     (image: BespokePastCreationImage) => {
@@ -722,7 +824,7 @@ const BespokeFeaturedStoriesSection = ({
           modalImages: [{ src: image.src, alt: image.alt }],
         });
         setModalContext({ slideIndex: 0, imageIndex: 0 });
-        setModalOpen(true);
+        openStoryModal();
         return;
       }
 
@@ -742,9 +844,9 @@ const BespokeFeaturedStoriesSection = ({
         setModalContext({ slideIndex: resolved.slideIndex, imageIndex: 0 });
       }
 
-      setModalOpen(true);
+      openStoryModal();
     },
-    [defaultSlideIndex, pastCreations, slides],
+    [defaultSlideIndex, openStoryModal, pastCreations, slides],
   );
 
   const modalSlide: FeaturedStoryModalSlide | null =
@@ -776,13 +878,13 @@ const BespokeFeaturedStoriesSection = ({
         initialImageIndex={modalContext?.imageIndex ?? 0}
         elevated={pastCreationsOpen}
         modalCtaLabel={featuredStories?.modalCtaLabel}
-        onClose={handleModalClose}
+        onClose={closeStoryModal}
       />
       {pastCreations &&
         <BespokePastCreationsModal
           open={pastCreationsOpen}
           images={pastCreations.images}
-          onClose={handlePastCreationsClose}
+          onClose={closePastCreationsModal}
           onImageClick={handlePastCreationImageClick}
           suppressEscape={modalOpen}
         />
