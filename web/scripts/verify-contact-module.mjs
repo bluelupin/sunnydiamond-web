@@ -18,6 +18,17 @@ const normalizeContactCopy = (value) => {
     .replace(/\bmember of our team\b/gi, "member of the team");
 };
 
+const resolveEmailLinkLabel = (buttonLabel, email) => {
+  const generic = ["phone", "email", "whatsapp", "link", "call", "cta", "button"];
+  if (buttonLabel && !generic.includes(buttonLabel.toLowerCase()) && !buttonLabel.includes("@")) {
+    return buttonLabel;
+  }
+  if (buttonLabel?.includes("@")) {
+    return formatEmailDisplay(buttonLabel);
+  }
+  return email;
+};
+
 let passed = 0;
 let failed = 0;
 
@@ -42,6 +53,15 @@ assert(
 assert(
   normalizeContactCopy("") === undefined,
   "empty copy returns undefined",
+);
+assert(
+  resolveEmailLinkLabel("GET INTOUCH@SUNNTDIAMONDS.COM", "getintouch@sunntdiamonds.com") ===
+    "getintouch@sunntdiamonds.com",
+  "garbled CMS buttonLabel normalized for email display",
+);
+assert(
+  resolveEmailLinkLabel("Email Us", "getintouch@sunntdiamonds.com") === "Email Us",
+  "custom non-email buttonLabel preserved",
 );
 
 console.log(`Contact module checks: ${passed} passed, ${failed} failed`);

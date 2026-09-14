@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Add Contact Us test cases and issues sheets to Sunny Diamonds Test Cases workbook."""
 
+import json
 from pathlib import Path
 
 from openpyxl import load_workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 
 WORKBOOK_PATH = Path(__file__).resolve().parents[1] / "Sunny Diamonds Test Cases .xlsx"
+RESULTS_PATH = Path(__file__).resolve().parents[1] / "contact-test-results.json"
 TEST_SHEET = "Contact Us"
 ISSUES_SHEET = "Contact Us Issues"
 
@@ -56,7 +58,7 @@ TEST_CASES = [
     ("CONTACT-002", "A. Page Load", "ISR revalidation", "Check page.tsx revalidate setting", "revalidate = 300 (5 min ISR)", "P2", "Technical", "—", "—", ""),
     ("CONTACT-003", "A. Page Load", "Sitemap inclusion", "Open /sitemap.xml", "/contact URL listed", "P2", "SEO", "—", "—", ""),
     ("CONTACT-004", "A. Page Load", "Inbound navigation links", "Click Contact Us from footer, profile orders, error page", "All links route to /contact", "P1", "Navigation", "PRE-01", "—", ""),
-    ("CONTACT-005", "A. Page Load", "CMS fetch failure", "Simulate Strapi outage for contact-page", "Page renders without sections; no crash; metadata uses site defaults", "P1", "Resilience", "PRE-01", "CMS inactive", "No user-facing error message"),
+    ("CONTACT-005", "A. Page Load", "CMS fetch failure", "Simulate Strapi outage for contact-page", "User-facing load error with retry; metadata uses site defaults", "P1", "Resilience", "PRE-01", "CMS inactive", "Fixed SD-176"),
     ("CONTACT-006", "A. Page Load", "All sections disabled in CMS", "Disable hero, contact, form, visit in CMS", "Minimal empty page without console errors", "P1", "CMS", "PRE-01", "CMS inactive sections", ""),
     ("CONTACT-007", "A. Page Load", "Loading skeleton", "Hard refresh /contact on slow network", "ContactPageSkeleton shown with aria-busy=true", "P2", "UX", "PRE-01", "—", ""),
 
@@ -79,7 +81,7 @@ TEST_CASES = [
     ("CONTACT-029", "C. Contact Cards", "Card stack layout mobile", "View cards at <768px", "Stacked cards with dividers and icons", "P2", "UI", "PRE-03", "—", ""),
     ("CONTACT-030", "C. Contact Cards", "Inactive card omitted", "Set contactOption.isActive=false for one card", "Card not shown; remaining cards render", "P1", "CMS", "PRE-01", "—", ""),
     ("CONTACT-031", "C. Contact Cards", "Card without actionable value", "Card with empty/invalid value", "Card skipped by mapper", "P2", "CMS", "PRE-01", "—", ""),
-    ("CONTACT-032", "C. Contact Cards", "Mobile title variant", "Check email card on mobile", "Uses card.title (mobileTitle from mapper not applied)", "P2", "UI Gap", "PRE-03", "—", "ISSUE: mobileTitle unused"),
+    ("CONTACT-032", "C. Contact Cards", "Mobile title variant", "Check email card on mobile", "Uses mobileTitle on mobile viewport", "P2", "UI", "PRE-03", "—", "Fixed SD-168"),
 
     # D. Enquiry form — fields & UI
     ("CONTACT-040", "D. Form UI", "Form section renders", "Scroll to enquiry form", "Form title, all fields, consent, submit button visible", "P0", "Functional", "PRE-01, PRE-02", "—", ""),
@@ -88,14 +90,14 @@ TEST_CASES = [
     ("CONTACT-043", "D. Form UI", "Field labels from CMS", "Inspect form labels", "Name, Phone, Email, Reason, Message labels match CMS dynamicFields", "P1", "CMS", "PRE-02", "—", ""),
     ("CONTACT-044", "D. Form UI", "Phone country code select", "Open country code dropdown", "Options: +91, +1, +44; aria-label='Country code'", "P1", "Functional", "PRE-01", "—", ""),
     ("CONTACT-045", "D. Form UI", "Reason dropdown options", "Open reason dropdown", "CMS options shown (e.g. Product enquiry, Order Support, Other)", "P0", "Functional", "PRE-02", "—", "Verified: 6 options in browser"),
-    ("CONTACT-046", "D. Form UI", "Field placeholders", "Inspect phone and email placeholders", "Field-specific placeholders from CMS", "P1", "UI", "PRE-02", "—", "FAIL: both show 'Full Name'"),
+    ("CONTACT-046", "D. Form UI", "Field placeholders", "Inspect phone and email placeholders", "Field-specific placeholders from CMS", "P1", "UI", "PRE-02", "—", "Fixed SD-163"),
     ("CONTACT-047", "D. Form UI", "Message placeholder", "Inspect message textarea placeholder", "CMS message placeholder shown", "P2", "UI", "PRE-02", "—", ""),
     ("CONTACT-048", "D. Form UI", "Desktop 2-column phone/email", "View form at >=768px", "Phone and email fields side by side", "P2", "Responsive", "PRE-03", "—", ""),
     ("CONTACT-049", "D. Form UI", "Submit button full width mobile", "View submit at <768px", "Submit button spans full width", "P2", "Responsive", "PRE-03", "—", ""),
     ("CONTACT-050", "D. Form UI", "Live form config refresh", "Update generic-forms reason options in CMS", "Client fetches updated options without republishing contact page", "P2", "CMS", "PRE-02", "—", ""),
 
     # E. Form validation
-    ("CONTACT-060", "E. Validation", "Submit empty form", "Click Submit with all fields empty", "Inline validation errors on all required fields", "P0", "Validation", "PRE-01", "—", "FAIL: Submit disabled"),
+    ("CONTACT-060", "E. Validation", "Submit empty form", "Click Submit with all fields empty", "Inline validation errors on all required fields", "P0", "Validation", "PRE-01", "—", "Fixed SD-162"),
     ("CONTACT-061", "E. Validation", "Name required", "Leave name empty; blur field", "Error shown after blur", "P0", "Validation", "PRE-01", "—", ""),
     ("CONTACT-062", "E. Validation", "Name min length", "Enter 1 char name; submit", "Error: min 2 characters", "P1", "Validation", "PRE-01", "A", ""),
     ("CONTACT-063", "E. Validation", "Name max length", "Enter 81+ char name", "Error or input limited to 80 chars", "P2", "Validation", "PRE-01", "—", ""),
@@ -110,7 +112,7 @@ TEST_CASES = [
     ("CONTACT-072", "E. Validation", "Reason required", "Fill all fields except reason; enable submit; submit", "Error: Please select a reason", "P0", "Validation", "PRE-02", "—", ""),
     ("CONTACT-073", "E. Validation", "Message required", "Leave message empty; submit", "Message required error", "P0", "Validation", "PRE-01", "—", ""),
     ("CONTACT-074", "E. Validation", "Message min length", "Enter <10 char message", "Min 10 characters error", "P1", "Validation", "PRE-01", "short", ""),
-    ("CONTACT-075", "E. Validation", "Message max length", "Enter 501+ char message and submit", "Max 500 characters error", "P1", "Validation", "PRE-01", "Long message", "No maxlength on textarea"),
+    ("CONTACT-075", "E. Validation", "Message max length", "Enter 501+ char message and submit", "Max 500 characters error; textarea maxlength=500", "P1", "Validation", "PRE-01", "Long message", "Fixed SD-170"),
     ("CONTACT-076", "E. Validation", "Consent required", "Fill form but leave consent unchecked; submit", "Error: Please accept the terms to continue", "P0", "Validation", "PRE-01", "—", ""),
     ("CONTACT-077", "E. Validation", "Errors on blur", "Tab through fields leaving invalid values", "Errors appear per field on blur before submit", "P1", "UX", "PRE-01", "—", ""),
     ("CONTACT-078", "E. Validation", "aria-invalid on errors", "Trigger field error", "aria-invalid=true and aria-describedby linked to error element", "P1", "Accessibility", "PRE-01", "—", ""),
@@ -120,8 +122,8 @@ TEST_CASES = [
     ("CONTACT-081", "F. Submission", "Submit payload shape", "Inspect network request on submit", "JSON: formTag, fullName, phone (+code), email, reasonForContact, message, consentAccepted, sourcePage", "P1", "API", "PRE-02", "Valid enquiry", ""),
     ("CONTACT-082", "F. Submission", "Submit loading state", "Submit valid form", "Submit button disabled during isSubmitting", "P1", "UX", "PRE-02", "Valid enquiry", ""),
     ("CONTACT-083", "F. Submission", "Submit network failure", "Block API; submit valid form", "Destructive toast 'Unable to send message' with error detail", "P0", "Resilience", "PRE-02", "Valid enquiry", ""),
-    ("CONTACT-084", "F. Submission", "Success message from CMS", "Submit successfully", "Toast shows CMS successMessage as description", "P1", "CMS", "PRE-02", "Valid enquiry", "No toast title on success"),
-    ("CONTACT-085", "F. Submission", "Form reset after success", "Submit successfully", "All fields cleared; consent unchecked", "P1", "Functional", "PRE-02", "Valid enquiry", "Country code resets to +91"),
+    ("CONTACT-084", "F. Submission", "Success message from CMS", "Submit successfully", "Toast shows title + CMS successMessage as description", "P1", "CMS", "PRE-02", "Valid enquiry", "Fixed SD-173"),
+    ("CONTACT-085", "F. Submission", "Form reset after success", "Submit successfully", "All fields cleared; consent unchecked; country code preserved", "P1", "Functional", "PRE-02", "Valid enquiry", "Fixed SD-172"),
     ("CONTACT-086", "F. Submission", "Double submit prevention", "Rapidly click submit twice", "Only one submission sent", "P1", "Functional", "PRE-02", "Valid enquiry", ""),
 
     # G. Consent & policies
@@ -129,7 +131,7 @@ TEST_CASES = [
     ("CONTACT-091", "G. Consent", "Terms link navigation", "Click TERMS & CONDITIONS in consent", "Navigates to /terms-and-conditions", "P0", "Navigation", "PRE-01", "—", ""),
     ("CONTACT-092", "G. Consent", "Privacy link navigation", "Click PRIVACY POLICY in consent", "Navigates to policy hub privacy-policy route", "P0", "Navigation", "PRE-01", "—", ""),
     ("CONTACT-093", "G. Consent", "Checkbox matches cart style", "Compare checkbox with cart page", "Same GiftingPanelCheckbox component/style", "P2", "UI", "PRE-01", "—", ""),
-    ("CONTACT-094", "G. Consent", "Consent without label dead end", "CMS: requiresConsent=true, consentLabel empty", "Consent UI hidden but submit permanently disabled", "P1", "Edge Case", "PRE-01", "—", "Known bug"),
+    ("CONTACT-094", "G. Consent", "Consent without label dead end", "CMS: requiresConsent=true, consentLabel empty", "Consent not required when label missing; form submittable", "P1", "Edge Case", "PRE-01", "—", "Fixed SD-165"),
 
     # H. Auth prefill
     ("CONTACT-100", "H. Prefill", "Logged-in prefill", "Sign in; open /contact", "Name, email, phone prefilled from Magento profile", "P0", "Functional", "PRE-05", "Logged-in user", ""),
@@ -153,25 +155,50 @@ TEST_CASES = [
     # K. Accessibility & mobile header
     ("CONTACT-130", "K. Accessibility", "Heading hierarchy", "Inspect page structure", "h1 hero, h2 form/cards/visit", "P1", "Accessibility", "PRE-01", "—", ""),
     ("CONTACT-131", "K. Accessibility", "Form field labels", "Screen reader / accessibility tree", "All inputs have associated labels", "P1", "Accessibility", "PRE-01", "—", ""),
-    ("CONTACT-132", "K. Accessibility", "Mobile header account icon", "On mobile, tap user icon in header", "Should navigate to account/profile; aria-label matches destination", "P0", "Accessibility", "PRE-03", "—", "FAIL: links to /contact, label 'Account'"),
+    ("CONTACT-132", "K. Accessibility", "Mobile header account icon", "On mobile, tap user icon in header", "Navigates to /profile; aria-label matches destination", "P0", "Accessibility", "PRE-03", "—", "Fixed SD-164"),
     ("CONTACT-133", "K. Accessibility", "Keyboard form navigation", "Tab through form fields and submit", "Logical tab order; focus visible", "P1", "Accessibility", "PRE-01", "—", ""),
 
     # L. CMS content quality
-    ("CONTACT-140", "L. CMS Content", "Email CTA text accuracy", "Review Email Us card link text", "Properly formatted email address as link label", "P1", "Content", "PRE-01", "—", "FAIL: GET INTOUCH@SUNNTDIAMONDS.COM"),
-    ("CONTACT-141", "L. CMS Content", "Spelling in card descriptions", "Review all card copy", "No spelling/grammar errors", "P2", "Content", "PRE-01", "—", "FAIL: 'assisstance' typo"),
+    ("CONTACT-140", "L. CMS Content", "Email CTA text accuracy", "Review Email Us card link text", "Properly formatted email address as link label", "P1", "Content", "PRE-01", "—", "Fixed SD-166 (mapper normalization)"),
+    ("CONTACT-141", "L. CMS Content", "Spelling in card descriptions", "Review all card copy", "No spelling/grammar errors", "P2", "Content", "PRE-01", "—", "Fixed SD-167 (mapper normalization)"),
     ("CONTACT-142", "L. CMS Content", "WhatsApp CTA label", "Review WhatsApp link text", "User-friendly label (not generic 'Whatsapp')", "P2", "Content", "PRE-01", "—", ""),
 
     # M. Security & architecture
     ("CONTACT-150", "M. Architecture", "BFF proxy for submit", "Inspect submit network call", "POST goes to /api/generic-submissions/submit (not direct Strapi)", "P1", "Security", "PRE-02", "—", ""),
-    ("CONTACT-151", "M. Architecture", "Direct Strapi form fetch", "Inspect generic-forms client call", "Client calls Strapi directly for form refresh", "P2", "Architecture", "PRE-02", "—", "Inconsistent with BFF pattern"),
+    ("CONTACT-151", "M. Architecture", "Direct Strapi form fetch", "Inspect generic-forms client call", "Client calls BFF /api/generic-forms for form refresh", "P2", "Architecture", "PRE-02", "—", "Fixed SD-169"),
     ("CONTACT-152", "M. Architecture", "No server-side validation on BFF", "POST invalid payload to BFF", "BFF proxies to Strapi without validation", "P2", "Security", "—", "—", ""),
     ("CONTACT-153", "M. Architecture", "No rate limiting", "Rapid repeated submissions", "No client or BFF rate limiting", "P2", "Security", "PRE-02", "—", ""),
 
     # N. Known gaps
-    ("CONTACT-160", "N. Known Gaps", "Automated tests", "Search codebase for contact tests", "No unit/e2e tests for contact module", "P2", "Gap", "—", "—", ""),
-    ("CONTACT-161", "N. Known Gaps", "Reason label without options", "CMS reason label set, no dropdown options", "Form permanently unsubmittable", "P1", "Gap", "PRE-01", "—", ""),
+    ("CONTACT-160", "N. Known Gaps", "Automated tests", "Run npm run test:contact", "verify-contact-module.mjs passes mapper/helper checks", "P2", "Gap", "—", "—", "Partial SD-175"),
+    ("CONTACT-161", "N. Known Gaps", "Reason label without options", "CMS reason label set, no dropdown options", "Reason not required when no options configured", "P1", "Gap", "PRE-01", "—", "Fixed SD-177"),
     ("CONTACT-162", "N. Known Gaps", "Static content dead code", "Check features/contact/data/content.ts usage", "File not imported; CMS-only design confirmed", "P3", "Gap", "—", "—", ""),
 ]
+
+# Fallback when contact-test-results.json is missing (manual overrides only).
+TEST_STATUS_FALLBACK: dict[str, tuple[str, str]] = {}
+
+DEFAULT_STATUS = ("Not Tested", "")
+
+_LOADED_RESULTS: dict | None = None
+
+
+def load_test_results() -> dict:
+    global _LOADED_RESULTS
+    if _LOADED_RESULTS is not None:
+        return _LOADED_RESULTS
+
+    if not RESULTS_PATH.exists():
+        _LOADED_RESULTS = {}
+        return _LOADED_RESULTS
+
+    try:
+        payload = json.loads(RESULTS_PATH.read_text(encoding="utf-8"))
+        _LOADED_RESULTS = payload.get("results", {})
+    except (json.JSONDecodeError, OSError):
+        _LOADED_RESULTS = {}
+
+    return _LOADED_RESULTS
 
 ISSUES_HEADER = (
     "Issue ID",
@@ -196,10 +223,10 @@ ISSUES = [
         "Submit uses disabled={isSubmitting || !isFormReady}, preventing users from clicking Submit on an empty form. PRD test #9 expects inline validation on empty submit. Users only see errors field-by-field on blur.",
         "P0",
         "Bug",
-        "Open",
+        "Fixed",
         "CONTACT-060",
         "SD-162",
-        "ContactFormSection.tsx line 418",
+        "ContactFormSection.tsx — submit no longer disabled when invalid",
     ),
     (
         "CONTACT-ISSUE-002",
@@ -209,10 +236,10 @@ ISSUES = [
         "ContactFormSection reuses form.fields.fieldPlaceholder (mapped from name field only) for phone and email inputs instead of field-specific placeholders.",
         "P1",
         "Bug",
-        "Open",
+        "Fixed",
         "CONTACT-046",
         "SD-163",
-        "contact-page.mapper.ts maps only nameField.placeholder",
+        "Separate name/phone/email placeholders in mapper",
     ),
     (
         "CONTACT-ISSUE-003",
@@ -222,10 +249,10 @@ ISSUES = [
         "MobileHeaderBar links UserIcon to /contact with aria-label='Account'. Screen readers announce 'Account' but user lands on Contact Us.",
         "P0",
         "Bug",
-        "Open",
+        "Fixed",
         "CONTACT-132",
         "SD-164",
-        "MobileHeaderBar.tsx line 52",
+        "MobileHeaderBar links UserIcon to /profile",
     ),
     (
         "CONTACT-ISSUE-004",
@@ -235,10 +262,10 @@ ISSUES = [
         "If requiresConsent=true and consentLabel is empty, checkbox UI is hidden but isFormReady still requires consentAccepted. Submit stays permanently disabled.",
         "P1",
         "Bug",
-        "Open",
+        "Fixed",
         "CONTACT-094",
         "SD-165",
-        "PRD section 14 documents this edge case",
+        "consentRequired only when label present",
     ),
     (
         "CONTACT-ISSUE-005",
@@ -248,10 +275,10 @@ ISSUES = [
         "Email Us card displays 'GET INTOUCH@SUNNTDIAMONDS.COM' instead of a properly formatted email address.",
         "P1",
         "Content",
-        "Open",
+        "Fixed",
         "CONTACT-140",
         "SD-166",
-        "CMS configuration issue",
+        "resolveEmailLinkLabel() normalizes garbled CMS buttonLabel for display",
     ),
     (
         "CONTACT-ISSUE-006",
@@ -261,10 +288,10 @@ ISSUES = [
         "Description reads 'Get quick assisstance from our dedicated member of our team' — typo and grammar issues.",
         "P2",
         "Content",
-        "Open",
+        "Fixed",
         "CONTACT-141",
         "SD-167",
-        "CMS copy fix",
+        "normalizeContactCopy() fixes typo/grammar in mapper",
     ),
     (
         "CONTACT-ISSUE-007",
@@ -274,10 +301,10 @@ ISSUES = [
         "contact-page.mapper sets mobileTitle for email cards but ContactInfoSection always renders card.title.",
         "P2",
         "Gap",
-        "Open",
+        "Fixed",
         "CONTACT-032",
         "SD-168",
-        "",
+        "ContactInfoSection uses mobileTitle on mobile",
     ),
     (
         "CONTACT-ISSUE-008",
@@ -287,10 +314,10 @@ ISSUES = [
         "getGenericFormByTag calls Strapi from browser via apiFetch instead of BFF. Exposes CMS URL; depends on CORS.",
         "P2",
         "Architecture",
-        "Open",
+        "Fixed",
         "CONTACT-151",
         "SD-169",
-        "",
+        "BFF route /api/generic-forms added",
     ),
     (
         "CONTACT-ISSUE-009",
@@ -300,10 +327,10 @@ ISSUES = [
         "500-char limit validated only on submit; user can type beyond limit without immediate feedback.",
         "P2",
         "UX",
-        "Open",
+        "Fixed",
         "CONTACT-075",
         "SD-170",
-        "",
+        "maxLength=500 on message textarea",
     ),
     (
         "CONTACT-ISSUE-010",
@@ -313,10 +340,10 @@ ISSUES = [
         "Submit payload hardcodes consentAccepted: true regardless of CMS requiresConsent setting.",
         "P2",
         "Gap",
-        "Open",
+        "Fixed",
         "CONTACT-081",
         "SD-171",
-        "",
+        "Payload sends actual consentAccepted value",
     ),
     (
         "CONTACT-ISSUE-011",
@@ -326,10 +353,10 @@ ISSUES = [
         "resetForm() always sets countryCode to +91; profile prefill flag resets so non-+91 users lose their code until remount.",
         "P2",
         "Bug",
-        "Open",
+        "Fixed",
         "CONTACT-085",
         "SD-172",
-        "",
+        "resetForm preserves country code",
     ),
     (
         "CONTACT-ISSUE-012",
@@ -339,10 +366,10 @@ ISSUES = [
         "Success path only passes description to toast; error toast includes title 'Unable to send message'.",
         "P3",
         "UX",
-        "Open",
+        "Fixed",
         "CONTACT-084",
         "SD-173",
-        "",
+        "Success toast includes title",
     ),
     (
         "CONTACT-ISSUE-013",
@@ -352,10 +379,10 @@ ISSUES = [
         "Section className includes md:px-10 twice (xl:px-[150px] md:px-10 md:px-10).",
         "P3",
         "Code Quality",
-        "Open",
+        "Fixed",
         "—",
         "SD-174",
-        "ContactInfoSection.tsx line 20",
+        "Duplicate md:px-10 classes removed",
     ),
     (
         "CONTACT-ISSUE-014",
@@ -365,10 +392,10 @@ ISSUES = [
         "No unit, integration, or e2e tests found for contact page, form, or submission.",
         "P2",
         "Gap",
-        "Open",
+        "Partial",
         "CONTACT-160",
         "SD-175",
-        "",
+        "verify-contact-module.mjs added; full e2e still pending",
     ),
     (
         "CONTACT-ISSUE-015",
@@ -378,10 +405,10 @@ ISSUES = [
         "getContactPage catch returns EMPTY_CONTACT_PAGE silently; no retry or error UI for users.",
         "P2",
         "UX",
-        "Open",
+        "Fixed",
         "CONTACT-005",
         "SD-176",
-        "",
+        "ContactPage shows loadError UI with retry",
     ),
     (
         "CONTACT-ISSUE-016",
@@ -391,10 +418,10 @@ ISSUES = [
         "If CMS sets reason label but no options, reasonRequired=true and form cannot be submitted.",
         "P1",
         "Bug",
-        "Open",
+        "Fixed",
         "CONTACT-161",
         "SD-177",
-        "",
+        "reasonRequired only when options exist",
     ),
 ]
 
@@ -445,6 +472,23 @@ def style_section_title(ws, row: int, title: str, merge_cols: int = 6) -> None:
     ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=merge_cols)
 
 
+def get_test_status(tc_id: str) -> tuple[str, str]:
+    result = load_test_results().get(tc_id)
+    if result:
+        return (result.get("status", DEFAULT_STATUS[0]), result.get("actual", ""))
+    return TEST_STATUS_FALLBACK.get(tc_id, DEFAULT_STATUS)
+
+
+def build_status_summary() -> list[tuple[str, int]]:
+    counts: dict[str, int] = {}
+    for case in TEST_CASES:
+        tc_id = case[0]
+        status, _ = get_test_status(tc_id)
+        counts[status] = counts.get(status, 0) + 1
+    order = ("Pass", "Fail", "Blocked", "Partial", "Not Tested")
+    return [(status, counts[status]) for status in order if counts.get(status)]
+
+
 def write_test_cases_sheet(wb) -> None:
     if TEST_SHEET in wb.sheetnames:
         del wb[TEST_SHEET]
@@ -462,7 +506,30 @@ def write_test_cases_sheet(wb) -> None:
     ws.cell(row=row, column=2, value=DATA_SOURCE)
     ws.cell(row=row, column=3, value="PRD:")
     ws.cell(row=row, column=4, value=PRD)
+    row += 1
+    results_meta = {}
+    if RESULTS_PATH.exists():
+        try:
+            results_meta = json.loads(RESULTS_PATH.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            results_meta = {}
+    ws.cell(row=row, column=1, value="Last Updated:")
+    ws.cell(row=row, column=2, value=(results_meta.get("generatedAt", "2026-09-14") or "2026-09-14")[:10])
+    ws.cell(row=row, column=3, value="Test Run:")
+    ws.cell(row=row, column=4, value=results_meta.get("baseUrl", "—"))
     row += 2
+
+    style_section_title(ws, row, "TEST STATUS SUMMARY")
+    row += 1
+    ws.cell(row=row, column=1, value="Status")
+    ws.cell(row=row, column=2, value="Count")
+    style_header_row(ws, row, 2)
+    row += 1
+    for status, count in build_status_summary():
+        ws.cell(row=row, column=1, value=status)
+        ws.cell(row=row, column=2, value=count)
+        row += 1
+    row += 1
 
     style_section_title(ws, row, "GLOBAL PRECONDITIONS")
     row += 1
@@ -498,7 +565,23 @@ def write_test_cases_sheet(wb) -> None:
 
     wrap = Alignment(vertical="top", wrap_text=True)
     for case in TEST_CASES:
-        values = (*case, "", "")
+        tc_id, area, scenario, steps, expected, priority, typ, preconds, test_data, notes = case
+        status, actual = get_test_status(tc_id)
+        values = (
+            tc_id,
+            MODULE,
+            area,
+            scenario,
+            steps,
+            expected,
+            priority,
+            typ,
+            preconds,
+            test_data,
+            status,
+            actual,
+            notes,
+        )
         for col, value in enumerate(values, start=1):
             cell = ws.cell(row=row, column=col, value=value)
             cell.alignment = wrap
@@ -524,7 +607,23 @@ def write_issues_sheet(wb) -> None:
     ws.cell(row=row, column=4, value=len(ISSUES))
     row += 2
 
-    style_section_title(ws, row, "ISSUE SUMMARY")
+    style_section_title(ws, row, "RESOLUTION SUMMARY")
+    row += 1
+    ws.cell(row=row, column=1, value="Status")
+    ws.cell(row=row, column=2, value="Count")
+    style_header_row(ws, row, 2)
+    row += 1
+    resolution_counts: dict[str, int] = {}
+    for issue in ISSUES:
+        resolution_counts[issue[7]] = resolution_counts.get(issue[7], 0) + 1
+    for status in ("Fixed", "Partial", "Open", "Fail"):
+        if resolution_counts.get(status):
+            ws.cell(row=row, column=1, value=status)
+            ws.cell(row=row, column=2, value=resolution_counts[status])
+            row += 1
+    row += 1
+
+    style_section_title(ws, row, "SEVERITY SUMMARY")
     row += 1
     p0 = sum(1 for i in ISSUES if i[5] == "P0")
     p1 = sum(1 for i in ISSUES if i[5] == "P1")
@@ -562,7 +661,8 @@ def main() -> None:
     write_test_cases_sheet(wb)
     write_issues_sheet(wb)
     wb.save(WORKBOOK_PATH)
-    print(f"Updated '{TEST_SHEET}' with {len(TEST_CASES)} test cases")
+    summary = ", ".join(f"{status}={count}" for status, count in build_status_summary())
+    print(f"Updated '{TEST_SHEET}' with {len(TEST_CASES)} test cases ({summary})")
     print(f"Updated '{ISSUES_SHEET}' with {len(ISSUES)} issues")
     print(f"File: {WORKBOOK_PATH}")
 

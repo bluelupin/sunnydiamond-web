@@ -122,6 +122,20 @@ const resolveLinkLabel = (
   return value ?? title ?? buttonLabel ?? "";
 };
 
+/** Prefer normalized email for display when CMS stores garbled text in buttonLabel. */
+const resolveEmailLinkLabel = (
+  buttonLabel: string | undefined,
+  email: string,
+): string => {
+  if (buttonLabel && !isGenericButtonLabel(buttonLabel) && !buttonLabel.includes("@")) {
+    return buttonLabel;
+  }
+  if (buttonLabel?.includes("@")) {
+    return formatEmailDisplay(buttonLabel);
+  }
+  return email;
+};
+
 const isActionableContactTarget = (value: string): boolean => {
   if (/^https?:\/\//i.test(value) || value.startsWith("/") || value.includes("wa.me")) {
     return true;
@@ -190,7 +204,7 @@ const mapContactOption = (
   } else if (variant === "email" && rawValue) {
     const email = formatEmailDisplay(rawValue);
     href = `mailto:${email}`;
-    label = resolveLinkLabel(buttonLabel, email, email);
+    label = resolveEmailLinkLabel(buttonLabel, email);
   } else if (rawValue) {
     const isWhatsApp =
       lowerButton.includes("whatsapp") ||
@@ -212,7 +226,7 @@ const mapContactOption = (
       const email = formatEmailDisplay(rawValue);
       href = `mailto:${email}`;
       variant = "email";
-      label = resolveLinkLabel(buttonLabel, email, email);
+      label = resolveEmailLinkLabel(buttonLabel, email);
     } else if (isActionableContactTarget(rawValue)) {
       href = toWhatsAppHref(rawValue);
     } else {
