@@ -3,8 +3,12 @@
 import Reveal from "@/shared/Animation/Reveal";
 import type { NormalizedCareerOpeningsSection } from "@/services/careers/careers.types";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
-import { getLandingCareerJobs } from "@/features/careers/utils/careersJobs";
+import {
+  getLandingCareerJobs,
+  getRelatedCareerJobs,
+} from "@/features/careers/utils/careersJobs";
 import CareersJobCard from "./shared/CareersJobCard";
+import CareersOpeningsEmptyState from "./shared/CareersOpeningsEmptyState";
 import CareersSectionCta from "./shared/CareersSectionCta";
 
 type CareersOpeningsSectionProps = {

@@ -29,7 +29,7 @@ export const giftCardFlowContent = {
     sameAsSenderLabel: "Same as Sender",
     fullNameLabel: "Full Name*",
     phoneLabel: "Phone No.*",
-    emailLabel: "Email ID",
+    emailLabel: "Email ID*",
     placeholder: "Enter",
   },
   address: {

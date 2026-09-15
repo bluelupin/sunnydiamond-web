@@ -8,6 +8,11 @@ import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { RIGHT_PANEL_CONTENT_PADDING_CLASS } from "@/shared/ui/rightPanel";
 import { RightPanelScrollLayout } from "@/shared/ui/RightPanelScrollLayout";
 import { cn } from "@/shared/utils/cn";
+import {
+  validatePhone,
+  validateRequiredEmail,
+  validateRequiredName,
+} from "@/shared/utils/formValidation";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import { useGiftCardFlow } from "../context/GiftCardFlowContext";
 import { useGiftCardPayment } from "../hooks/useGiftCardPayment";
@@ -18,6 +23,12 @@ import {
   GiftCardTextField,
   giftCardSectionHeadingClass,
 } from "./GiftCardFormUi";
+import type { GiftCardPartyDetails } from "../context/GiftCardFlowContext";
+
+const isGiftCardPartyComplete = (party: GiftCardPartyDetails): boolean =>
+  validateRequiredName(party.fullName).valid &&
+  validatePhone(party.phone, "+91").valid &&
+  validateRequiredEmail(party.email).valid;
 
 const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
   const { status, customer } = useAuth();
@@ -76,10 +87,8 @@ const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
   ]);
 
   const canContinue =
-    sender.fullName.trim().length > 0 &&
-    sender.phone.trim().length >= 10 &&
-    (receiverSameAsSender ||
-      (receiver.fullName.trim().length > 0 && receiver.phone.trim().length >= 10));
+    isGiftCardPartyComplete(sender) &&
+    (receiverSameAsSender || isGiftCardPartyComplete(receiver));
 
   const handleContinue = async () => {
     if (!canContinue || isPaying) return;
