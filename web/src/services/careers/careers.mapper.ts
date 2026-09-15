@@ -1,4 +1,5 @@
 import type { CareerBenefit, CareerJobType } from "@/features/careers/types";
+import { formatCareerJobTitle } from "@/features/careers/utils/careersFormatting";
 import { extractStrapiImage, resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import type {
   NormalizedCareerApplicationFlow,
@@ -253,7 +254,8 @@ export const mapCareerOpening = (
 ): NormalizedCareerJob | null => {
   const slug = cleanText(opening.slug);
   const id = resolveOpeningId(opening);
-  const title = cleanText(opening.jobTitle) ?? cleanText(opening.title);
+  const rawTitle = cleanText(opening.jobTitle) ?? cleanText(opening.title);
+  const title = rawTitle ? formatCareerJobTitle(rawTitle) : undefined;
   const jobCode = cleanText(opening.jobID) ?? cleanText(opening.jobId);
   const location = cleanText(opening.location);
   const department = cleanText(opening.department);

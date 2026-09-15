@@ -173,34 +173,8 @@ const mapPerfectGift = (
   };
 };
 
-const mapOccasionSelectOptions = (
-  section?: StrapiGiftingOccasionGridSection | null,
-): NormalizedGiftingOccasionSelectOption[] => {
-  if (!section || !resolveSectionActive(section.isActive, section.showField)) return [];
-
-  const seenValues = new Set<string>();
-  const options: NormalizedGiftingOccasionSelectOption[] = [];
-
-  for (const occasion of section.occasions ?? []) {
-    if (!resolveSectionActive(occasion?.isActive, occasion?.showField)) continue;
-
-    const title = cleanText(occasion?.title);
-    if (!title) continue;
-
-    const filterSlug = cleanText(occasion?.filterSlug);
-    const value = slugifyOccasionTitle(filterSlug ?? title);
-    if (!value || seenValues.has(value)) continue;
-
-    seenValues.add(value);
-    options.push({ label: title, value });
-  }
-
-  return options;
-};
-
 const mapGiftFinder = (
   section?: StrapiGiftingGiftFinderSection | null,
-  occasionSection?: StrapiGiftingOccasionGridSection | null,
 ): NormalizedGiftingGiftFinder | null => {
   if (!section || !resolveSectionActive(section.isActive, section.showField)) return null;
 

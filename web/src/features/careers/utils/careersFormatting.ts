@@ -1,5 +1,15 @@
 import type { CareerJob } from "../types";
 
+/** Present CMS job titles in title case across careers UI. */
+export function formatCareerJobTitle(title: string): string {
+  return title
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
+
 export function formatPostedAbsolute(postedAt: string): string {
   const [year, month, day] = postedAt.split("-").map(Number);
   const date = new Date(Date.UTC(year, month - 1, day));

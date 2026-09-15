@@ -226,7 +226,7 @@ export const GiftCardPanelHeader = ({ onClose, onBack, title }: GiftCardPanelHea
             <ChevronLeft size={24} strokeWidth={1.25} aria-hidden className="text-darkblack" />
           </button>
         ) : null}
-        <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">{title}</h2>
+        <h2 className="font-larken md:text-32 text-2xl font-light leading-110 text-darkblack">{title}</h2>
       </div>
       <RightPanelCloseButton onClick={onClose} aria-label="Close gift card flow" />
     </div>
