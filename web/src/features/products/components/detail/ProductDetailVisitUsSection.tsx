@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import BookStoreVisitPanel from "./BookStoreVisitPanel";
 import { DetailTextLink } from "./shared";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
@@ -34,29 +33,20 @@ const ProductDetailVisitUsSection = ({
     ? "product-store-visit"
     : visitUs.bookVisitFormTag;
   const hasImage = visitUs.imageSrc.trim().length > 0;
+  const welcomeNote = visitUs.welcomeNote?.trim() ?? "";
   const openBookVisit = () => setIsBookVisitOpen(true);
 
   const renderCta = () => {
     if (!ctaLabel) return null;
 
     if (isContactVariant) {
-      const ctaClassName = contactVisitUsLayoutClasses.cta;
-
-      if (visitUs.ctaUrl) {
-        return (
-          <Link
-            href={visitUs.ctaUrl}
-            className={ctaClassName}
-            target={visitUs.ctaOpenInNewTab ? "_blank" : undefined}
-            rel={visitUs.ctaOpenInNewTab ? "noopener noreferrer" : undefined}
-          >
-            {ctaLabel}
-          </Link>
-        );
-      }
-
+      // Same as PDP Book a Visit: open BookStoreVisitPanel (PDP uses null cta.url).
       return (
-        <button type="button" onClick={openBookVisit} className={ctaClassName}>
+        <button
+          type="button"
+          onClick={openBookVisit}
+          className={contactVisitUsLayoutClasses.cta}
+        >
           {ctaLabel}
         </button>
       );
@@ -114,7 +104,9 @@ const ProductDetailVisitUsSection = ({
                 <h2 id="visit-us-heading" className={contactVisitUsLayoutClasses.title}>
                   {visitUs.title}
                 </h2>
-                <p className={contactVisitUsLayoutClasses.description}>{visitUs.description}</p>
+                {welcomeNote ? (
+                  <p className={contactVisitUsLayoutClasses.description}>{welcomeNote}</p>
+                ) : null}
               </div>
               {renderCta()}
             </div>

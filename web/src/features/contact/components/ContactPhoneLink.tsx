@@ -5,18 +5,18 @@ import { useToast } from "@/shared/hooks/use-toast";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 
 type ContactPhoneLinkProps = {
-  href: string;
+  href?: string;
   label: string;
   className?: string;
 };
 
-const getClipboardPhoneValue = (href: string, label: string): string => {
+const getClipboardPhoneValue = (href: string | undefined, label: string): string => {
   const trimmedLabel = label.trim();
   if (trimmedLabel) {
     return trimmedLabel;
   }
 
-  return href.replace(/^tel:/i, "").trim();
+  return href?.replace(/^tel:/i, "").trim() ?? "";
 };
 
 const ContactPhoneLink = ({ href, label, className }: ContactPhoneLinkProps) => {
@@ -37,9 +37,17 @@ const ContactPhoneLink = ({ href, label, className }: ContactPhoneLinkProps) => 
     }
   };
 
-  if (isMobile) {
+  if (isMobile && href) {
     return (
       <ContactCardCtaLink href={href} className={className}>
+        {label}
+      </ContactCardCtaLink>
+    );
+  }
+
+  if (!href) {
+    return (
+      <ContactCardCtaLink className={className}>
         {label}
       </ContactCardCtaLink>
     );

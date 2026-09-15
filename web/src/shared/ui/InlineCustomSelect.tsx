@@ -199,10 +199,11 @@ const InlineCustomSelect = ({
           "motion-safe:transition-[border-color,background-color] motion-safe:duration-200 motion-safe:ease-in-out",
           isOpen ? "border border-darkblack" : "border border-transparent",
           invalid && !isOpen && invalidFieldClassName,
+          triggerClassName,
+          // Placeholder/value colour must win over triggerClassName text colour.
           showPlaceholder
             ? (placeholderClassName ?? "font-light text-neutral400")
             : "font-normal text-darkblack",
-          triggerClassName,
         )}
       >
         <span id={valueId}>{triggerLabel}</span>

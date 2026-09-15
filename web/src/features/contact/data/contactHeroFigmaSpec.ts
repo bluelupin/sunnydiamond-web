@@ -77,6 +77,7 @@ export const contactVisitUsLayoutClasses = {
   textBlock: "flex flex-col items-center gap-4 text-center text-white",
   title: "font-larken text-[48px] font-light leading-110 text-white",
   description: "max-w-[606px] font-gill text-xl font-light leading-110 text-white",
+  welcomeNote: "max-w-[606px] font-gill text-base font-light leading-110 text-white/90",
   cta:
     "inline-flex w-fit border-b border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white",
 } as const;
@@ -90,7 +91,9 @@ export const contactFormLayoutClasses = {
   consentText: "min-w-0 flex-1 font-gill text-base font-light leading-110 text-neutral500",
   consentLink: "font-gill text-base font-normal leading-110 text-neutral500",
   submit:
-    "mx-auto inline-flex h-14 w-full items-center justify-center bg-neutral500 px-7 font-gill text-sm font-normal uppercase leading-110 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:w-[308px]",
+    "mx-auto inline-flex h-14 w-full items-center justify-center px-7 font-gill text-sm font-normal uppercase leading-110 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 disabled:cursor-not-allowed md:w-[308px]",
+  submitReady: "bg-darkblack",
+  submitMuted: "bg-neutral500",
 } as const;
 
 export const contactCardLayoutClasses = {

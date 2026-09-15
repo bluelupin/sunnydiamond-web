@@ -136,13 +136,17 @@ export type NormalizedVisitUsSection = {
   isActive: boolean;
   title: string;
   description: string;
+  /** Contact Visit Us optional CMS note — shown only when provided. */
+  welcomeNote?: string;
   imageSrc: string;
   mobileImageSrc?: string;
   imageAlt?: string;
   ctaLabel: string;
-  /** When set, CTA navigates; when omitted, UI opens Book a Visit panel. */
+  /** When set, CTA navigates; when omitted, UI opens Book a Visit panel (PDP). */
   ctaUrl?: string;
   ctaOpenInNewTab?: boolean;
+  /** CMS CTA `targetType` when provided (`internal` | `external`). */
+  ctaTargetType?: string;
   /** Optional generic-form tag when CTA opens the book-visit panel (non-PDP). */
   bookVisitFormTag?: string;
 };

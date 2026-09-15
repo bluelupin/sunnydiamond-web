@@ -52,6 +52,8 @@ export type StrapiContactOption = {
   availability?: string | null;
   value?: string | null;
   buttonLabel?: string | null;
+  /** Current CMS schema stores label/url on nested CTA. */
+  cta?: StrapiContactCta | null;
   sortOrder?: number | null;
   isActive?: boolean | null;
   showField?: boolean | null;
@@ -115,11 +117,14 @@ export type StrapiContactVisitSection = {
   id?: number;
   sectionTitle?: string | null;
   description?: string | null;
+  welcomeNote?: string | null;
+  /** Visit CTA label (CMS field). */
+  appointmentLabel?: string | null;
   sortOrder?: number | null;
   isActive?: boolean | null;
   showField?: boolean | null;
   image?: StrapiContactImageAsset | null;
-  cta?: StrapiContactCta | null;
+  backgroundImage?: StrapiContactImageAsset | null;
   formCta?: { label?: string | null; modalTag?: string | null } | null;
   showrooms?: StrapiContactVisitShowroom[] | null;
 };
@@ -138,8 +143,6 @@ export type StrapiContactPage = {
   id?: number;
   documentId?: string;
   introText?: string | null;
-  /** Page-level CTA used by Visit Us when visitSection.cta is unset in CMS. */
-  cta?: StrapiContactCta | null;
   heroSection?: StrapiContactHeroSection | null;
   contactSection?: StrapiContactSupportSection | null;
   formSection?: StrapiContactFormSection | null;
@@ -169,7 +172,15 @@ export type NormalizedContactInfoCard = {
   mobileTitle?: string;
   description?: string;
   hours: Array<{ label: string; value: string }>;
-  link: { label: string; href: string };
+  link: {
+    label: string;
+    /** Present only when CMS provides `value` / `cta.url` — never invented from label. */
+    href?: string;
+    /** CMS CTA `targetType` when provided (`internal` | `external`). */
+    targetType?: string;
+    /** CMS CTA `openInNewTab` when provided. */
+    openInNewTab?: boolean;
+  };
 };
 
 export type NormalizedContactFormFields = {

@@ -94,7 +94,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
     [],
   );
 
-  const { errors, submitted, markTouched, showError, validateSubmit, resetValidation } =
+  const { errors, submitted, markTouched, showError, validateSubmit, resetValidation, isValid } =
     useAppointmentFormValidation(formValues, validationOptions);
 
   const reasonRequired = reasonOptions.length > 0;
@@ -103,6 +103,11 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
 
   const showReasonError = submitted && reasonRequired && !reason.trim();
   const showConsentError = submitted && consentRequired && !consentAccepted;
+
+  const isFormReady =
+    isValid &&
+    (!reasonRequired || Boolean(reason.trim())) &&
+    (!consentRequired || consentAccepted);
 
   // Prefill from My Profile once when logged in; never overwrite fields the user already typed.
   useEffect(() => {
@@ -191,12 +196,9 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
           sourcePage: "/contact",
         });
 
-        if (form.successDescription) {
-          toast({
-            title: "Message sent",
-            description: form.successDescription,
-          });
-        }
+        toast({
+          title: "Thank you",
+        });
         resetForm();
       } catch (error) {
         toast({
@@ -420,8 +422,13 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
 
             <button
               type="submit"
-              disabled={isSubmitting}
-              className={contactFormLayoutClasses.submit}
+              disabled={isSubmitting || !isFormReady}
+              className={cn(
+                contactFormLayoutClasses.submit,
+                isFormReady
+                  ? contactFormLayoutClasses.submitReady
+                  : contactFormLayoutClasses.submitMuted,
+              )}
             >
               {submitLabel}
             </button>

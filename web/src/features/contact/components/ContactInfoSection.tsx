@@ -39,8 +39,27 @@ const ContactInfoSection = ({ intro, infoCards }: ContactInfoSectionProps) => {
         {infoCards.length > 0 ? (
         <div className={contactCardLayoutClasses.grid}>
           {infoCards.map((card, index) => {
-            const isExternal =
-              card.variant === "link" && /^https?:\/\//i.test(card.link.href);
+            // Previously (FE-only heuristic — restore if CMS CTA flags are removed):
+            // const isExternal =
+            //   card.variant === "link" && /^https?:\/\//i.test(card.link.href);
+
+            const cmsOpenInNewTab = card.link.openInNewTab;
+            const cmsTargetType = card.link.targetType?.toLowerCase();
+            const hasCmsOpenInNewTab = typeof cmsOpenInNewTab === "boolean";
+            const hasCmsTargetType =
+              cmsTargetType === "internal" || cmsTargetType === "external";
+
+            const openInNewTab = hasCmsOpenInNewTab
+              ? cmsOpenInNewTab
+              : hasCmsTargetType
+                ? cmsTargetType === "external"
+                : // FE fallback when CMS omits both CTA flags:
+                  Boolean(
+                    card.link.href &&
+                      card.variant === "link" &&
+                      /^https?:\/\//i.test(card.link.href),
+                  );
+
             return (
               <React.Fragment key={card.id}>
                 <Reveal
@@ -82,6 +101,7 @@ const ContactInfoSection = ({ intro, infoCards }: ContactInfoSectionProps) => {
                         </p>
                       ) : null}
                     </div>
+                    {card.link.href && card.link.label ? (
                     <div className="flex w-full items-center justify-center gap-2">
                       <Image
                         className="shrink-0 md:hidden"
@@ -100,13 +120,14 @@ const ContactInfoSection = ({ intro, infoCards }: ContactInfoSectionProps) => {
                       ) : (
                         <ContactCardCtaLink
                           href={card.link.href}
-                          target={isExternal ? "_blank" : undefined}
-                          rel={isExternal ? "noopener noreferrer" : undefined}
+                          target={openInNewTab ? "_blank" : undefined}
+                          rel={openInNewTab ? "noopener noreferrer" : undefined}
                         >
                           {card.link.label}
                         </ContactCardCtaLink>
                       )}
                     </div>
+                    ) : null}
                   </div>
                 </Reveal>
                 {index !== infoCards.length - 1 && (

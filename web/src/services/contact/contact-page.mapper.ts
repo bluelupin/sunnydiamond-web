@@ -1,10 +1,6 @@
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
-import { mapVisitUsSection } from "@/services/product-display/product-display-page.mapper";
-import type {
-  NormalizedVisitUsSection,
-  StrapiProductDisplayVisitUsSection,
-} from "@/services/product-display/product-display-page.types";
+import type { NormalizedVisitUsSection } from "@/services/product-display/product-display-page.types";
 import {
   EMPTY_CONTACT_PAGE,
   type NormalizedContactForm,
@@ -22,9 +18,7 @@ import {
   type StrapiContactPage,
   type StrapiContactSeo,
   type StrapiContactSupportSection,
-  type StrapiContactCta,
   type StrapiContactVisitSection,
-  type StrapiContactVisitShowroom,
 } from "./contact-page.types";
 
 const cleanText = (value?: string | null): string | undefined => {
@@ -183,7 +177,6 @@ const formatFieldLabel = (
 
 const mapContactOption = (
   option: StrapiContactOption | null | undefined,
-  phoneFallback?: string | null,
 ): NormalizedContactInfoCard | null => {
   if (!option || !resolveSectionActive(option.isActive, option.showField)) return null;
 
@@ -191,68 +184,78 @@ const mapContactOption = (
   if (!title) return null;
 
   const type = cleanText(option.type)?.toLowerCase() ?? "";
-  const rawValue = cleanText(option.value);
-  const buttonLabel = cleanText(option.buttonLabel);
+  // CTA requires both CMS URL and label — never invent either from the other.
+  const linkUrl = cleanText(option.value) ?? cleanText(option.cta?.url);
+  const buttonLabel = cleanText(option.buttonLabel) ?? cleanText(option.cta?.label);
   const description = cleanText(option.description);
   const hours = mapAvailabilityHours(option.availability);
   const lowerButton = buttonLabel?.toLowerCase() ?? "";
-  const lowerValue = rawValue?.toLowerCase() ?? "";
+  const lowerUrl = linkUrl?.toLowerCase() ?? "";
 
   let variant: NormalizedContactInfoCard["variant"] = "link";
   if (type === "phone") variant = "phone";
   else if (type === "email") variant = "email";
-  else if (rawValue?.includes("@")) variant = "email";
-  else if (rawValue && /^[\d+\s()-]+$/.test(rawValue) && !rawValue.includes("@")) {
+  else if (linkUrl && (linkUrl.includes("@") || linkUrl.startsWith("mailto:"))) {
+    variant = "email";
+  } else if (linkUrl && /^tel:/i.test(linkUrl)) {
     variant = "phone";
   }
 
-  if (!rawValue && variant !== "phone") return null;
+  let href: string | undefined;
+  let label: string | undefined;
 
-  let href: string | null = null;
-  let label = resolveLinkLabel(buttonLabel, rawValue, title);
+  if (linkUrl && buttonLabel) {
+    label = buttonLabel;
 
-  if (variant === "phone" && rawValue) {
-    href = toTelHref(rawValue);
-    label = resolveLinkLabel(buttonLabel, rawValue, rawValue);
-  } else if (variant === "email" && rawValue) {
-    const email = formatEmailAddress(rawValue);
-    href = `mailto:${email}`;
-    label = resolveEmailLinkLabel(buttonLabel, email);
-  } else if (rawValue) {
-    const isWhatsApp =
-      lowerButton.includes("whatsapp") ||
-      lowerValue.includes("whatsapp") ||
-      lowerValue.includes("wa.me");
-
-    if (isWhatsApp) {
-      if (isActionableContactTarget(rawValue)) {
-        href = /^https?:\/\//i.test(rawValue) ? rawValue : toWhatsAppHref(rawValue);
-      } else if (phoneFallback) {
-        href = toWhatsAppHref(phoneFallback);
-      } else {
-        return null;
+    if (variant === "phone") {
+      href = /^tel:/i.test(linkUrl) ? linkUrl : toTelHref(linkUrl);
+    } else if (variant === "email") {
+      const emailSource = linkUrl.replace(/^mailto:/i, "");
+      const email = formatEmailAddress(emailSource);
+      href = /^mailto:/i.test(linkUrl) ? linkUrl : `mailto:${email}`;
+      if (buttonLabel.includes("@")) {
+        label = sanitizeEmailLinkLabel(buttonLabel);
       }
-      label = resolveWhatsAppLinkLabel(buttonLabel);
-    } else if (/^https?:\/\//i.test(rawValue) || rawValue.startsWith("/")) {
-      href = rawValue;
-    } else if (rawValue.includes("@")) {
-      const email = formatEmailAddress(rawValue);
-      href = `mailto:${email}`;
-      variant = "email";
-      label = resolveEmailLinkLabel(buttonLabel, email);
-    } else if (isActionableContactTarget(rawValue)) {
-      href = toWhatsAppHref(rawValue);
     } else {
-      return null;
+      const isWhatsApp =
+        lowerButton.includes("whatsapp") ||
+        lowerUrl.includes("whatsapp") ||
+        lowerUrl.includes("wa.me");
+
+      if (isWhatsApp) {
+        if (isActionableContactTarget(linkUrl)) {
+          href = /^https?:\/\//i.test(linkUrl) ? linkUrl : toWhatsAppHref(linkUrl);
+        }
+      } else if (/^https?:\/\//i.test(linkUrl) || linkUrl.startsWith("/")) {
+        href = linkUrl;
+      } else if (linkUrl.includes("@")) {
+        const email = formatEmailAddress(linkUrl);
+        href = `mailto:${email}`;
+        variant = "email";
+        if (buttonLabel.includes("@")) {
+          label = sanitizeEmailLinkLabel(buttonLabel);
+        }
+      } else if (isActionableContactTarget(linkUrl)) {
+        href = toWhatsAppHref(linkUrl);
+      }
+    }
+
+    // Invalid/unusable URL → hide CTA entirely (no hanging label).
+    if (!href) {
+      label = undefined;
     }
   }
-
-  if (!href) return null;
 
   const id =
     option.id != null
       ? String(option.id)
       : title.toLowerCase().replace(/\s+/g, "-");
+
+  const ctaTargetType = cleanText(option.cta?.targetType)?.toLowerCase();
+  const ctaOpenInNewTab =
+    typeof option.cta?.openInNewTab === "boolean"
+      ? option.cta.openInNewTab
+      : undefined;
 
   return {
     id,
@@ -263,7 +266,14 @@ const mapContactOption = (
       : undefined,
     description,
     hours,
-    link: { label, href },
+    link: {
+      label: label ?? "",
+      ...(href ? { href } : {}),
+      ...(ctaTargetType ? { targetType: ctaTargetType } : {}),
+      ...(typeof ctaOpenInNewTab === "boolean"
+        ? { openInNewTab: ctaOpenInNewTab }
+        : {}),
+    },
   };
 };
 
@@ -273,8 +283,11 @@ const mapHero = (hero?: StrapiContactHeroSection | null): NormalizedContactHero 
   const title = cleanText(hero.title);
   if (!title) return null;
 
+  // Banner (`image`, else `bgImage`) wins when present; video only if banner is empty.
   const image = mapResponsiveImage(hero.image) ?? mapResponsiveImage(hero.bgImage);
-  const videoUrl = getCmsAssetUrl(resolveCmsMediaUrl(hero.heroVideo?.heroVideo));
+  const videoUrl = image
+    ? undefined
+    : getCmsAssetUrl(resolveCmsMediaUrl(hero.heroVideo?.heroVideo));
 
   return {
     title,
@@ -291,20 +304,9 @@ const mapInfoCards = (
   }
 
   const rawOptions = section.contactOptions ?? [];
-  const phoneFallback =
-    rawOptions
-      .map((option) => {
-        if (!resolveSectionActive(option?.isActive, option?.showField)) return null;
-        const type = cleanText(option?.type)?.toLowerCase();
-        const value = cleanText(option?.value);
-        if (type === "phone" && value) return value;
-        if (value && /^[\d+\s()-]+$/.test(value) && !value.includes("@")) return value;
-        return null;
-      })
-      .find((value): value is string => Boolean(value)) ?? null;
 
   return rawOptions
-    .map((option) => mapContactOption(option, phoneFallback))
+    .map((option) => mapContactOption(option))
     .filter((card): card is NormalizedContactInfoCard => card != null);
 };
 
@@ -369,90 +371,49 @@ const mapForm = (section?: StrapiContactFormSection | null): NormalizedContactFo
   };
 };
 
-const normalizeContactCtaHref = (url: string): string => {
-  const trimmed = url.trim();
-  if (!trimmed) return "";
-
-  if (
-    trimmed.startsWith("tel:") ||
-    trimmed.startsWith("mailto:") ||
-    trimmed.startsWith("http://") ||
-    trimmed.startsWith("https://") ||
-    trimmed.startsWith("/")
-  ) {
-    return trimmed;
-  }
-
-  if (trimmed.includes("@")) {
-    return `mailto:${trimmed}`;
-  }
-
-  return `https://${trimmed}`;
-};
-
-const resolveContactVisitCta = (
-  section?: StrapiContactVisitSection | null,
-  pageCta?: StrapiContactCta | null,
-): StrapiContactCta | null | undefined => {
-  const sectionCta = section?.cta;
-  if (sectionCta && cleanText(sectionCta.label)) {
-    return sectionCta;
-  }
-
-  if (pageCta && cleanText(pageCta.label)) {
-    return pageCta;
-  }
-
-  return sectionCta ?? pageCta;
-};
-
-const adaptContactVisitSectionForPdpMapper = (
-  section: StrapiContactVisitSection,
-  pageCta?: StrapiContactCta | null,
-): StrapiProductDisplayVisitUsSection => ({
-  id: section.id,
-  sectionTitle: section.sectionTitle,
-  description: section.description,
-  sortOrder: section.sortOrder,
-  showField: section.showField,
-  cta: resolveContactVisitCta(section, pageCta),
-  formCta: section.formCta,
-  showrooms: section.showrooms
-    ?.filter((showroom): showroom is StrapiContactVisitShowroom =>
-      Boolean(showroom && resolveSectionActive(showroom.isActive, showroom.showField)),
-    )
-    .map((showroom) => ({
-      id: typeof showroom.id === "number" ? showroom.id : undefined,
-      name: showroom.name,
-      slug: showroom.slug,
-      isActive: true,
-      image: showroom.image,
-    })),
-});
-
-/** Uses the same mapper as PDP so imagery, CTA, and Book a Visit behavior stay aligned. */
+/**
+ * Contact Visit Us — fields matching CMS editor only:
+ * title, welcomeNote, backgroundImage (or image if present), cta, showField.
+ * Ignores leftover API `description` (not in Contact Visit CMS UI).
+ * CTA opens Book a Visit panel (same as PDP when cta.url is null).
+ */
 const mapVisitUs = (
   section?: StrapiContactVisitSection | null,
-  pageCta?: StrapiContactCta | null,
 ): NormalizedVisitUsSection | null => {
   if (!section || !resolveSectionActive(section.isActive, section.showField)) {
     return null;
   }
 
-  const resolvedCta = resolveContactVisitCta(section, pageCta);
-  const mapped = mapVisitUsSection(
-    adaptContactVisitSectionForPdpMapper(section, pageCta),
-  );
-  if (!mapped.isActive || !mapped.title.trim()) {
-    return null;
-  }
+  const title = cleanText(section.sectionTitle);
+  if (!title) return null;
 
-  const ctaUrl = mapped.ctaUrl ? normalizeContactCtaHref(mapped.ctaUrl) : undefined;
+  const welcomeNote = cleanText(section.welcomeNote);
+
+  // Prefer explicit `image` if CMS sets it; else section `backgroundImage`.
+  const sectionImage =
+    mapResponsiveImage(section.image) ?? mapResponsiveImage(section.backgroundImage);
+  const imageSrc = sectionImage?.desktopUrl || sectionImage?.mobileUrl || "";
+  const mobileImageSrc =
+    sectionImage?.mobileUrl && sectionImage.mobileUrl !== imageSrc
+      ? sectionImage.mobileUrl
+      : undefined;
+  const imageAlt = sectionImage?.desktopAlt || sectionImage?.mobileAlt || "";
+
+  const ctaLabel = cleanText(section.appointmentLabel);
+  // Contact Visit CTA matches PDP Book a Visit: open panel (label only — no URL / openInNewTab).
+  const bookVisitFormTag = cleanText(section.formCta?.modalTag);
 
   return {
-    ...mapped,
-    ...(ctaUrl ? { ctaUrl } : {}),
-    ...(resolvedCta?.openInNewTab === true ? { ctaOpenInNewTab: true } : {}),
+    isActive: true,
+    title,
+    // Do not map API `description` — not exposed in Contact Visit CMS UI.
+    description: "",
+    ...(welcomeNote ? { welcomeNote } : {}),
+    imageSrc,
+    ...(mobileImageSrc ? { mobileImageSrc } : {}),
+    ...(imageAlt ? { imageAlt } : {}),
+    ctaLabel: ctaLabel ?? "",
+    ...(bookVisitFormTag ? { bookVisitFormTag } : {}),
   };
 };
 
@@ -491,7 +452,7 @@ export function mapContactPage(raw?: StrapiContactPage | null): NormalizedContac
       : null,
     infoCards: mapInfoCards(raw.contactSection),
     form: mapForm(raw.formSection),
-    visitUs: mapVisitUs(raw.visitSection, raw.cta),
+    visitUs: mapVisitUs(raw.visitSection),
     seo: mapSeo(raw.seo),
   };
 }

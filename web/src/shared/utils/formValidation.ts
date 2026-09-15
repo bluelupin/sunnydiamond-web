@@ -44,34 +44,35 @@ export const validateRequiredName = (value: string): FieldValidation => {
 
 export const validatePhone = (value: string, countryCode: string): FieldValidation => {
   const digits = value.replace(/\D/g, "");
+  const invalidPhoneError = "Please enter a valid phone number";
 
   if (!digits) {
-    return { valid: false, error: "Please enter a valid phone number" };
+    return { valid: false, error: invalidPhoneError };
   }
 
   if (countryCode === "+91") {
     if (!/^[6-9]\d{9}$/.test(digits)) {
-      return { valid: false, error: "Enter a valid 10-digit mobile number" };
+      return { valid: false, error: invalidPhoneError };
     }
     return { valid: true };
   }
 
   if (countryCode === "+1") {
     if (!/^\d{10}$/.test(digits)) {
-      return { valid: false, error: "Enter a valid 10-digit phone number" };
+      return { valid: false, error: invalidPhoneError };
     }
     return { valid: true };
   }
 
   if (countryCode === "+44") {
     if (digits.length < 10 || digits.length > 11) {
-      return { valid: false, error: "Enter a valid UK phone number" };
+      return { valid: false, error: invalidPhoneError };
     }
     return { valid: true };
   }
 
   if (digits.length < 7 || digits.length > 15) {
-    return { valid: false, error: "Enter a valid phone number" };
+    return { valid: false, error: invalidPhoneError };
   }
 
   return { valid: true };

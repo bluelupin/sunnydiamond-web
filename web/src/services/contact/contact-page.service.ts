@@ -10,7 +10,8 @@ import {
 
 /**
  * Deep populate for nested responsive-image media on the live CMS schema.
- * `populate=*` alone returns CMS 400 on contact-page — use explicit nested populate.
+ * Do not request root `populate[cta]` — that field is gone and returns CMS 400.
+ * Prefer this over `populate=*` for stable nested media (both currently work).
  */
 const CONTACT_PAGE_POPULATE_QUERY =
   "populate[heroSection][populate][image][populate][desktopImage]=true" +
@@ -18,14 +19,14 @@ const CONTACT_PAGE_POPULATE_QUERY =
   "&populate[heroSection][populate][bgImage][populate][desktopImage]=true" +
   "&populate[heroSection][populate][bgImage][populate][mobileImage]=true" +
   "&populate[heroSection][populate][heroVideo][populate]=heroVideo" +
-  "&populate[contactSection][populate][contactOptions]=true" +
+  "&populate[contactSection][populate][contactOptions][populate][cta]=true" +
   "&populate[formSection][populate][form][populate][dynamicFields][populate][dropdownOptions]=true" +
   "&populate[visitSection][populate][image][populate][desktopImage]=true" +
   "&populate[visitSection][populate][image][populate][mobileImage]=true" +
+  "&populate[visitSection][populate][backgroundImage][populate][desktopImage]=true" +
+  "&populate[visitSection][populate][backgroundImage][populate][mobileImage]=true" +
   "&populate[visitSection][populate][showrooms][populate][image][populate][desktopImage]=true" +
   "&populate[visitSection][populate][showrooms][populate][image][populate][mobileImage]=true" +
-  "&populate[visitSection][populate][cta]=true" +
-  "&populate[cta]=true" +
   "&populate[seo][populate][ogImage]=true";
 
 export const getContactPage = cache(
