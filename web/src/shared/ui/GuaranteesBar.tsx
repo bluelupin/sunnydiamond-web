@@ -47,7 +47,7 @@ const GuaranteeIcon = ({
         alt={alt}
         width={size}
         height={size}
-        className="size-14 object-contain lg:size-16"
+        className="md:h-16 md:w-16 h-10 w-10 object-contain"
       />
     </div>
   );
@@ -60,13 +60,13 @@ const GuaranteeDivider = ({ orientation }: { orientation: "vertical" | "horizont
       "flex list-none items-center justify-center",
       orientation === "vertical"
         ? "self-stretch px-4 max-desktop:flex-none desktop:min-w-0 desktop:flex-1 desktop:px-0"
-        : "w-full shrink-0 py-4",
+        : "w-full shrink-0 my-6",
     )}
   >
     <span
       className={cn(
         "shrink-0",
-        orientation === "vertical" ? "h-[136px] w-hairline" : "h-px w-full",
+        orientation === "vertical" ? "h-[136px] w-hairline" : "h-[0.5px] w-full",
       )}
       style={{ backgroundColor: guaranteeBarSpec.dividerColor }}
     />
@@ -110,11 +110,7 @@ const GuaranteesBar = ({
           <Fragment key={`${item.label}-${index}`}>
             {index > 0 ? <GuaranteeDivider orientation="horizontal" /> : null}
             <li
-              className="list-none flex w-full flex-col items-center justify-center text-center"
-              style={{
-                gap: `${guaranteeBarSpec.itemGap}px`,
-                padding: `${guaranteeBarSpec.itemPadding}px`,
-              }}
+              className="list-none flex w-full flex-col items-center justify-center text-center md:gap3 gap-2 md:py-5 py-4 px-4"
             >
               <GuaranteeIcon item={item} size={guaranteeBarSpec.mobileIconSize} />
               <p className="font-gill text-base font-normal leading-110 text-darkblack">{item.label}</p>

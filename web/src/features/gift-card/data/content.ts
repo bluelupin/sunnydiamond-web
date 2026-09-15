@@ -18,12 +18,6 @@ export const giftCardFlowContent = {
   occasion: {
     label: "Occasion*",
     placeholder: "Select Occasion",
-    fallbackOptions: [
-      { label: "Wedding", value: "wedding" },
-      { label: "Anniversary", value: "anniversary" },
-      { label: "Birthday", value: "birthday" },
-      { label: "Festive", value: "festive" },
-    ],
   },
   message: {
     label: "Add a Message",

@@ -1,6 +1,5 @@
 import { slugifyOccasionTitle } from "@/features/jewellery-product/utils/occasionListing";
 import type { JewelleryFilterFacetOption } from "@/types/magento/jewelleryListing";
-import { giftCardFlowContent } from "../data/content";
 
 export type GiftCardOccasionOption = {
   label: string;
@@ -10,17 +9,14 @@ export type GiftCardOccasionOption = {
 export function mapMagentoOccasionsToGiftCardOptions(
   options: JewelleryFilterFacetOption[],
 ): GiftCardOccasionOption[] {
-  const mapped = options.map((option) => {
-    const slug = slugifyOccasionTitle(option.label);
-    return {
-      label: option.label,
-      value: slug || option.value,
-    };
-  });
+  return options
+    .map((option) => {
+      const slug = slugifyOccasionTitle(option.label);
+      const value = slug || option.value?.trim();
+      const label = option.label?.trim();
+      if (!label || !value) return null;
 
-  if (mapped.length > 0) {
-    return mapped;
-  }
-
-  return giftCardFlowContent.occasion.fallbackOptions.map((option) => ({ ...option }));
+      return { label, value };
+    })
+    .filter((option): option is GiftCardOccasionOption => option !== null);
 }

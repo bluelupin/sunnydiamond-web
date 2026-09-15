@@ -119,9 +119,7 @@ export function GiftCardFlowProvider({
   );
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
   const [estimatedDeliveryDate, setEstimatedDeliveryDate] = useState(getExpectedDeliveryDate());
-  const [occasionOptions, setOccasionOptions] = useState<GiftCardOccasionOption[]>(
-    giftCardFlowContent.occasion.fallbackOptions.map((option) => ({ ...option })),
-  );
+  const [occasionOptions, setOccasionOptions] = useState<GiftCardOccasionOption[]>([]);
   const [isOccasionsLoading, setIsOccasionsLoading] = useState(false);
   const [pendingAuthAfterConfigure, setPendingAuthAfterConfigure] = useState(
     persisted?.pendingAuthAfterConfigure ?? false,

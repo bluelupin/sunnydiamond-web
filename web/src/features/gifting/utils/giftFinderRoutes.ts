@@ -101,13 +101,20 @@ export function mapGiftingDiscoverOptions(
       value: category.urlKey!,
     }));
 
-  const occasionsFromFacets = (facets?.occasions ?? []).map((option) => {
+  const seenOccasionValues = new Set<string>();
+  const occasionsFromFacets: GiftingDiscoverSelectOption[] = [];
+
+  for (const option of facets?.occasions ?? []) {
+    const label = option.label?.trim();
+    if (!label) continue;
+
     const slug = slugifyOccasionTitle(option.label);
-    return {
-      label: option.label,
-      value: slug || option.value,
-    };
-  });
+    const value = slug || option.value?.trim();
+    if (!value || seenOccasionValues.has(value)) continue;
+
+    seenOccasionValues.add(value);
+    occasionsFromFacets.push({ label, value });
+  }
 
   // Magento price aggregation buckets when available; otherwise static UI bands.
   const priceRangesFromMagento = (facets?.priceBuckets ?? []).map((bucket) => ({
