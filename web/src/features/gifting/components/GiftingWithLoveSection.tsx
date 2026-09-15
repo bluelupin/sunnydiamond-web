@@ -59,13 +59,15 @@ const GiftingWithLoveSection = ({ intro }: GiftingWithLoveSectionProps) => {
             </div>
           ) : null}
           <CraftingRarityScrollLine className="mt-5 lg:mt-[23px]" />
-          <Reveal
-            as="p"
-            direction="up"
-            className="mx-auto mt-2.5 max-w-full font-gill text-base font-light leading-110 text-darkblack sm:mt-3 md:max-w-[450px] lg:mt-[13px] lg:text-xl lg:max-w-[650px] 2xl:text-22"
-          >
-            {intro.description}
-          </Reveal>
+          {intro.description ? (
+            <Reveal
+              as="p"
+              direction="up"
+              className="mx-auto mt-2.5 max-w-full font-gill text-base font-light leading-110 text-darkblack sm:mt-3 md:max-w-[450px] lg:mt-[13px] lg:text-xl lg:max-w-[650px] 2xl:text-22"
+            >
+              {intro.description}
+            </Reveal>
+          ) : null}
         </div>
       </PageContainer>
     </section>

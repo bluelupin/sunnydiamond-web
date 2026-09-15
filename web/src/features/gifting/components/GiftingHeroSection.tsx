@@ -9,7 +9,7 @@ type GiftingHeroSectionProps = {
 };
 
 const GiftingHeroSection = ({ hero }: GiftingHeroSectionProps) => {
-  const imageAlt = hero.image.alt?.trim() || hero.title;
+  const imageAlt = hero.image?.alt?.trim() || hero.title;
 
   return (
     <section
@@ -18,8 +18,8 @@ const GiftingHeroSection = ({ hero }: GiftingHeroSectionProps) => {
     >
       <div className="relative col-start-1 row-start-1 size-full [&_img]:object-[62%_38%] md:[&_img]:object-[58%_42%] [&_video]:object-[62%_38%] md:[&_video]:object-[58%_42%]">
         <HeroBackgroundMedia
-          desktopImageUrl={hero.image.desktopUrl}
-          mobileImageUrl={hero.image.mobileUrl}
+          desktopImageUrl={hero.image?.desktopUrl ?? ""}
+          mobileImageUrl={hero.image?.mobileUrl}
           desktopAlt={imageAlt}
           mobileAlt={imageAlt}
         />

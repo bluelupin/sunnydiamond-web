@@ -24,8 +24,8 @@ export type StrapiGiftingCta = {
 
 export type StrapiGiftingHeroSection = {
   id?: number;
-  eyebrow?: string | null;
   title?: string | null;
+  isActive?: boolean | null;
   showField?: boolean | null;
   backgroundImage?: StrapiGiftingResponsiveImage | null;
 };
@@ -34,6 +34,7 @@ export type StrapiGiftingIntroSection = {
   id?: number;
   title?: string | null;
   description?: string | null;
+  isActive?: boolean | null;
   showField?: boolean | null;
   backgroundImage?: StrapiGiftingResponsiveImage | null;
 };
@@ -68,18 +69,18 @@ export type StrapiGiftingGiftFinderSection = {
   title?: string | null;
   description?: string | null;
   submitLabel?: string | null;
-  resultsUrl?: string | null;
+  isActive?: boolean | null;
   showField?: boolean | null;
   image?: StrapiGiftingResponsiveImage | null;
 };
 
 export type StrapiGiftingGiftCardSection = {
   id?: number;
-  eyebrow?: string | null;
   title?: string | null;
   description?: string | null;
+  buttonLabel?: string | null;
+  isActive?: boolean | null;
   showField?: boolean | null;
-  cta?: StrapiGiftingCta | null;
   backgroundImage?: StrapiGiftingResponsiveImage | null;
   cutOutImage?: StrapiGiftingResponsiveImage | null;
 };
@@ -89,7 +90,6 @@ export type StrapiGiftingFinishingService = {
   title?: string | null;
   description?: string | null;
   sortOrder?: number | null;
-  cta?: StrapiGiftingCta | null;
   image?: StrapiGiftingResponsiveImage | null;
 };
 
@@ -97,6 +97,7 @@ export type StrapiGiftingFinishingTouchSection = {
   id?: number;
   title?: string | null;
   description?: string | null;
+  isActive?: boolean | null;
   showField?: boolean | null;
   services?: StrapiGiftingFinishingService[] | null;
 };
@@ -105,11 +106,13 @@ export type StrapiGiftingTrustBadge = {
   id?: number;
   label?: string | null;
   iconAltText?: string | null;
+  isActive?: boolean | null;
   icon?: StrapiGiftingResponsiveImage | null;
 };
 
 export type StrapiGiftingTrustBadgesSection = {
   id?: number;
+  isActive?: boolean | null;
   trustBadge?: StrapiGiftingTrustBadge[] | null;
 };
 
@@ -151,14 +154,13 @@ export type NormalizedGiftingCta = {
 };
 
 export type NormalizedGiftingHero = {
-  eyebrow?: string;
   title: string;
-  image: NormalizedGiftingResponsiveImage;
+  image: NormalizedGiftingResponsiveImage | null;
 };
 
 export type NormalizedGiftingIntro = {
   title: string;
-  description: string;
+  description?: string;
   background: NormalizedGiftingResponsiveImage | null;
 };
 
@@ -188,10 +190,9 @@ export type NormalizedGiftingGiftFinder = {
 };
 
 export type NormalizedGiftingGiftCard = {
-  eyebrow?: string;
   title: string;
   description?: string;
-  cta: NormalizedGiftingCta;
+  buttonLabel?: string;
   background: NormalizedGiftingResponsiveImage | null;
   image: NormalizedGiftingResponsiveImage | null;
 };

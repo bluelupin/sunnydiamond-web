@@ -34,7 +34,9 @@ const GiftingPage = ({ page }: GiftingPageProps) => {
       {page.finishingTouch ? (
         <GiftingPromiseSection finishingTouch={page.finishingTouch} />
       ) : null}
-      <GiftingGuaranteesSection trustBadges={page.trustBadges} />
+      {page.trustBadges.length > 0 ? (
+        <GiftingGuaranteesSection trustBadges={page.trustBadges} />
+      ) : null}
     </>
   );
 };

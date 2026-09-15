@@ -87,9 +87,9 @@ const GiftingDiscoverSection = ({
 
   const title = giftFinder.title;
   const description = giftFinder.description;
-  const submitLabel = giftFinder.submitLabel ?? "FIND PRODUCTS";
-  const imageSrc = giftFinder.image?.desktopUrl;
-  const imageAlt = giftFinder.image?.alt ?? "";
+  const submitLabel = giftFinder.submitLabel?.trim() || "FIND PRODUCTS";
+  const imageSrc = giftFinder.image?.desktopUrl ?? giftFinder.image?.mobileUrl;
+  const imageAlt = giftFinder.image?.alt?.trim() || title;
 
   const options = useMemo(
     () =>

@@ -1,27 +1,32 @@
 import Image from "next/image";
 import type { NormalizedGiftingFinishingItem, NormalizedGiftingFinishingTouch } from "@/services/gifting/gifting-page.types";
 
-const FinishingTouchCard = ({ item }: { item: NormalizedGiftingFinishingItem }) => (
-  <article className="flex w-[328px] shrink-0 snap-start flex-col items-start gap-3 md:w-full md:shrink md:snap-align-none md:items-center md:gap-4">
-    <div className="relative h-[226px] w-full lg:h-[496px] md:h-[350px]">
-      <Image
-        src={item.image.desktopUrl}
-        alt={item.image.alt}
-        fill
-        className="object-cover object-center"
-        sizes="(max-width: 767px) 328px, (max-width: 1440px) 33vw, 474px"
-      />
-    </div>
-    <div className="flex max-w-[296px] flex-col items-start gap-2 text-left text-darkblack md:max-w-none md:items-center md:gap-3 md:px-4 md:text-center">
-      <h3 className="font-larken text-xl font-light leading-110">{item.title}</h3>
-      {item.description ? (
-        <p className="font-gill text-base font-light leading-normal md:leading-110">
-          {item.description}
-        </p>
-      ) : null}
-    </div>
-  </article>
-);
+const FinishingTouchCard = ({ item }: { item: NormalizedGiftingFinishingItem }) => {
+  const imageSrc = item.image.desktopUrl ?? item.image.mobileUrl;
+  const imageAlt = item.image.alt?.trim() || item.title;
+
+  return (
+    <article className="flex w-[328px] shrink-0 snap-start flex-col items-start gap-3 md:w-full md:shrink md:snap-align-none md:items-center md:gap-4">
+      <div className="relative h-[226px] w-full lg:h-[496px] md:h-[350px]">
+        <Image
+          src={imageSrc}
+          alt={imageAlt}
+          fill
+          className="object-cover object-center"
+          sizes="(max-width: 767px) 328px, (max-width: 1440px) 33vw, 474px"
+        />
+      </div>
+      <div className="flex max-w-[296px] flex-col items-start gap-2 text-left text-darkblack md:max-w-none md:items-center md:gap-3 md:px-4 md:text-center">
+        <h3 className="font-larken text-xl font-light leading-110">{item.title}</h3>
+        {item.description ? (
+          <p className="font-gill text-base font-light leading-normal md:leading-110">
+            {item.description}
+          </p>
+        ) : null}
+      </div>
+    </article>
+  );
+};
 
 type GiftingPromiseSectionProps = {
   finishingTouch: NormalizedGiftingFinishingTouch;

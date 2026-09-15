@@ -20,9 +20,9 @@ const GiftCardCta = ({ label, onClick }: { label: string; onClick: () => void })
 
 const GiftingGiftCardSection = ({ giftCard }: GiftingGiftCardSectionProps) => {
   const { openPanel } = useGiftCardFlow();
-  const cutoutSrc = giftCard.image?.desktopUrl;
-  const cutoutAlt = giftCard.image?.alt ?? "";
-  const ctaLabel = giftCard.cta.label;
+  const cutoutSrc = giftCard.image?.desktopUrl ?? giftCard.image?.mobileUrl;
+  const cutoutAlt = giftCard.image?.alt?.trim() || giftCard.title;
+  const buttonLabel = giftCard.buttonLabel?.trim() || "SEND A GIFT CARD";
 
   return (
     <section
@@ -33,8 +33,8 @@ const GiftingGiftCardSection = ({ giftCard }: GiftingGiftCardSectionProps) => {
       <div className="relative z-0 w-full lg:h-[520px] md:h-[350px] md:py-0 py-16">
         {giftCard.background &&
           <Image
-            src={giftCard.background.desktopUrl}
-            alt={giftCard.background.alt}
+            src={giftCard.background.desktopUrl ?? giftCard.background.mobileUrl}
+            alt={giftCard.background.alt?.trim() || giftCard.title}
             fill
             className="object-cover object-center"
             sizes="100vw"
@@ -71,7 +71,7 @@ const GiftingGiftCardSection = ({ giftCard }: GiftingGiftCardSectionProps) => {
               </Reveal>
             }
             <Reveal direction="up" className="md:mt-10 mt-8 md:block hidden">
-              <GiftCardCta label={ctaLabel} onClick={openPanel} />
+              <GiftCardCta label={buttonLabel} onClick={openPanel} />
             </Reveal>
           </div>
         </div>
@@ -91,7 +91,7 @@ const GiftingGiftCardSection = ({ giftCard }: GiftingGiftCardSectionProps) => {
           </Reveal>
         }
         <Reveal direction="up" className="md:mt-0 mt-6 md:hidden block relative flex items-center justify-center">
-          <GiftCardCta label={ctaLabel} onClick={openPanel} />
+          <GiftCardCta label={buttonLabel} onClick={openPanel} />
         </Reveal>
       </div>
     </section>
