@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import Slider, { type Settings } from "react-slick";
@@ -59,11 +60,39 @@ function getSlideVariant(
   slideIndex: number,
   centerIndex: number,
   total: number,
+  pendingCenterIndex: number | null,
 ): SlideCropVariant {
   if (total <= 1) return "center";
 
   const slide = normalizeIndex(slideIndex, total);
   const center = normalizeIndex(centerIndex, total);
+
+  if (pendingCenterIndex != null) {
+    const pending = normalizeIndex(pendingCenterIndex, total);
+
+    if (slide === pending) return "center";
+
+    const pendingPrev = normalizeIndex(pending - 1, total);
+    const pendingNext = normalizeIndex(pending + 1, total);
+    if (slide === pendingPrev) return "left-peek";
+    if (slide === pendingNext) return "right-peek";
+
+    // Outgoing center adopts its peek role immediately so crop motion matches the track.
+    if (slide === center) {
+      const goingForward = pending === normalizeIndex(center + 1, total);
+      const goingBack = pending === normalizeIndex(center - 1, total);
+      if (goingForward) return "left-peek";
+      if (goingBack) return "right-peek";
+    }
+
+    const currentPrev = normalizeIndex(center - 1, total);
+    const currentNext = normalizeIndex(center + 1, total);
+    if (slide === currentPrev) return "left-peek";
+    if (slide === currentNext) return "right-peek";
+
+    return "center";
+  }
+
   if (slide === center) return "center";
 
   const prev = normalizeIndex(center - 1, total);
@@ -130,6 +159,7 @@ export default function FeaturedProductsCarousel({
   const initialIndex = renderItems.length >= 3 ? 1 : 0;
   const [activeIndex, setActiveIndex] = useState(initialIndex);
   const [centerVisualIndex, setCenterVisualIndex] = useState(initialIndex);
+  const [pendingCenterIndex, setPendingCenterIndex] = useState<number | null>(null);
   const [isSliding, setIsSliding] = useState(false);
   const itemsKey = useMemo(
     () => renderItems.map((item) => String(item.id)).join("|"),
@@ -162,6 +192,7 @@ export default function FeaturedProductsCarousel({
   useLayoutEffect(() => {
     setActiveIndex(renderItems.length >= 3 ? 1 : 0);
     setCenterVisualIndex(renderItems.length >= 3 ? 1 : 0);
+    setPendingCenterIndex(null);
     setIsSliding(false);
 
     scheduleRefresh();
@@ -196,8 +227,10 @@ export default function FeaturedProductsCarousel({
 
   const handleBeforeChange = useCallback(
     (_current: number, next: number) => {
-      setIsSliding(true);
-      setCenterVisualIndex(normalizeIndex(next, renderItems.length));
+      flushSync(() => {
+        setIsSliding(true);
+        setPendingCenterIndex(normalizeIndex(next, renderItems.length));
+      });
     },
     [renderItems.length],
   );
@@ -207,6 +240,7 @@ export default function FeaturedProductsCarousel({
       const index = normalizeIndex(current, renderItems.length);
       setActiveIndex(index);
       setCenterVisualIndex(index);
+      setPendingCenterIndex(null);
       setIsSliding(false);
     },
     [renderItems.length],
@@ -222,6 +256,7 @@ export default function FeaturedProductsCarousel({
         "center featured-products-slider",
         !showInfinite && "featured-products-slider--single",
         showThreeUp && "featured-products-slider--triple",
+        isSliding && "featured-products-slider--sliding",
       ),
       centerMode: sourceCount > 1,
       infinite: showInfinite,
@@ -280,6 +315,7 @@ export default function FeaturedProductsCarousel({
       handleBeforeChange,
       handleInit,
       initialIndex,
+      isSliding,
       showInfinite,
       showThreeUp,
       slidesToShow,
@@ -320,7 +356,12 @@ export default function FeaturedProductsCarousel({
               <CarouselSlideImage
                 src={item.image}
                 alt={item.name}
-                variant={getSlideVariant(index, centerVisualIndex, renderItems.length)}
+                variant={getSlideVariant(
+                  index,
+                  centerVisualIndex,
+                  renderItems.length,
+                  pendingCenterIndex,
+                )}
                 priority={index === initialIndex}
               />
             </div>
