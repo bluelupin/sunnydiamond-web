@@ -47,7 +47,8 @@ const GiftCardConfigureStep = ({ header }: { header: ReactNode }) => {
   const clampAmount = (value: number) =>
     Math.min(amountConfig.max, Math.max(amountConfig.min, value));
 
-  const canContinue = occasion.trim().length > 0;
+  const hasOccasionOptions = occasionOptions.length > 0;
+  const canContinue = hasOccasionOptions ? occasion.trim().length > 0 : true;
 
   const handleContinue = () => {
     if (!canContinue) return;
@@ -155,14 +156,16 @@ const GiftCardConfigureStep = ({ header }: { header: ReactNode }) => {
           </div>
         </div>
 
-        <GiftCardSelectField
-          id="gift-card-occasion"
-          label={occasionConfig.label}
-          value={occasion}
-          onChange={setOccasion}
-          placeholder={occasionConfig.placeholder}
-          options={occasionOptions}
-        />
+        {hasOccasionOptions ? (
+          <GiftCardSelectField
+            id="gift-card-occasion"
+            label={occasionConfig.label}
+            value={occasion}
+            onChange={setOccasion}
+            placeholder={occasionConfig.placeholder}
+            options={occasionOptions}
+          />
+        ) : null}
 
         <GiftCardTextAreaField
           id="gift-card-message"

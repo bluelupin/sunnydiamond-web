@@ -63,8 +63,8 @@ const GiftingDiscoverField = ({
       </SelectTrigger>
       <SelectContent className="z-[80]">
         <SelectItem value={CAREERS_SELECT_EMPTY_VALUE}>{placeholder}</SelectItem>
-        {options.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
+        {options.map((option, index) => (
+          <SelectItem key={`${option.value}-${index}`} value={option.value}>
             {option.label}
           </SelectItem>
         ))}
@@ -191,14 +191,16 @@ const GiftingDiscoverSection = ({
               onChange={setPriceRangeLabel}
               options={priceOptions}
             />
-            <GiftingDiscoverField
-              id="gifting-finder-occasion"
-              label={discover.occasionLabel}
-              placeholder={discover.occasionPlaceholder}
-              value={occasion}
-              onChange={setOccasion}
-              options={options.occasions}
-            />
+            {options.occasions.length > 0 ? (
+              <GiftingDiscoverField
+                id="gifting-finder-occasion"
+                label={discover.occasionLabel}
+                placeholder={discover.occasionPlaceholder}
+                value={occasion}
+                onChange={setOccasion}
+                options={options.occasions}
+              />
+            ) : null}
           </div>
         </div>
         <Reveal direction="up">
