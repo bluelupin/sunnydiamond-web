@@ -56,20 +56,6 @@ export function buildJewelleryOccasionHref(
   return `${JEWELLERY_PATH}?occasion=${encodeURIComponent(slug)}`;
 }
 
-const GENERIC_PRODUCT_LISTING_PATHS = new Set([
-  "/products",
-  "/products/",
-  "/jewellery",
-  "/jewellery/",
-  "/diamond-bangles",
-  "/diamond-necklaces",
-  "/diamond-rings",
-  "/diamond-pendants",
-  "/diamond-nose-pins",
-  "/diamond-earrings",
-  "/diamond-bracelets",
-]);
-
 /** If a CMS CTA already has `?occasion=…`, rewrite it to a clean hyphen slug. */
 export function normalizeJewelleryOccasionCtaUrl(ctaUrl: string): string {
   const trimmed = ctaUrl.trim();
@@ -102,29 +88,18 @@ export function normalizeJewelleryOccasionCtaUrl(ctaUrl: string): string {
 }
 
 export function buildOccasionCardHref({
-  title,
-  slug,
-  filterSlug,
   ctaUrl,
 }: {
-  title?: string | null;
-  slug?: string | null;
-  filterSlug?: string | null;
   ctaUrl?: string | null;
 }): string {
-  const magentoOccasionSlug = filterSlug?.trim() || slug?.trim();
-  if (magentoOccasionSlug) {
-    return buildJewelleryOccasionHref(magentoOccasionSlug);
+  const magentoOccasionSlug = ctaUrl?.trim();
+  if (!magentoOccasionSlug) {
+    return "";
   }
 
-  const normalizedCtaUrl = ctaUrl?.trim();
-  if (normalizedCtaUrl && !GENERIC_PRODUCT_LISTING_PATHS.has(normalizedCtaUrl.toLowerCase())) {
-    // Prefer CMS deep links, but always clean `?occasion=` when present.
-    if (normalizedCtaUrl.includes("occasion=")) {
-      return normalizeJewelleryOccasionCtaUrl(normalizedCtaUrl);
-    }
-    return normalizedCtaUrl;
+  if (magentoOccasionSlug.includes("occasion=")) {
+    return normalizeJewelleryOccasionCtaUrl(magentoOccasionSlug);
   }
 
-  return buildJewelleryOccasionHref(slugifyOccasionTitle(title));
+  return buildJewelleryOccasionHref(magentoOccasionSlug);
 }

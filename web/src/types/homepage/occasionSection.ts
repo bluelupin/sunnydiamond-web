@@ -3,8 +3,6 @@ import type { CategoryNavigationCta, CategoryNavigationImage } from "./categoryN
 export type OccasionCard = {
   id?: string | number | null;
   slug?: string | null;
-  /** Magento `sd_occasions` label/slug used for PLP `?occasion=` filtering. */
-  filterSlug?: string | null;
   title?: string | null;
   description?: string | null;
   subtitle?: string | null;

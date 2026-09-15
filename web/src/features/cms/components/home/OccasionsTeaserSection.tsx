@@ -24,9 +24,7 @@ function OccasionCardItem({
 }) {
   const { desktopUrl, mobileUrl, alt, desktopAlt, mobileAlt } = resolveResponsiveCmsImage(card.image);
   const href = buildOccasionCardHref({
-    title: card.title,
-    slug: card.slug,
-    filterSlug: card.filterSlug,
+    ctaUrl: card.cta?.url ?? card.cta?.to,
   });
   const ctaLabel = card.ctaLabel?.trim() || undefined;
   const description = card?.description?.trim() || card?.subtitle?.trim();
@@ -124,9 +122,7 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
     const title = card.title?.trim();
     const { desktopUrl, mobileUrl } = resolveResponsiveCmsImage(card.image);
     const href = buildOccasionCardHref({
-      title: card.title,
-      slug: card.slug,
-      filterSlug: card.filterSlug,
+      ctaUrl: card.cta?.url ?? card.cta?.to,
     });
 
     return Boolean(title && (desktopUrl || mobileUrl) && href?.trim());

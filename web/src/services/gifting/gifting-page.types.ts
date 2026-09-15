@@ -48,7 +48,6 @@ export type StrapiGiftingOccasion = {
   sortOrder?: number | null;
   isActive?: boolean | null;
   showField?: boolean | null;
-  filterSlug?: string | null;
   cta?: StrapiGiftingCta | null;
   image?: StrapiGiftingResponsiveImage | null;
 };

@@ -135,12 +135,10 @@ const mapOccasionGrid = (
       const image = mapResponsiveImage(occasion?.image);
       if (!title || !image) return null;
 
-      const filterSlug = cleanText(occasion?.filterSlug);
-      const href = buildOccasionCardHref({
-        title,
-        slug: filterSlug,
-        filterSlug,
-      });
+      const ctaUrl = cleanText(occasion?.cta?.url) ?? cleanText(occasion?.cta?.to);
+      if (!ctaUrl) return null;
+
+      const href = buildOccasionCardHref({ ctaUrl });
 
       return {
         id:

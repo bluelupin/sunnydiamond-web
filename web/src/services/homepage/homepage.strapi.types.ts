@@ -243,7 +243,6 @@ export type StrapiOccasionCard = {
   description?: string | null;
   subtitle?: string | null;
   slug?: string | null;
-  filterSlug?: string | null;
   sortOrder?: number | null;
   isActive?: boolean | null;
   showField?: boolean | null;
