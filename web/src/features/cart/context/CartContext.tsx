@@ -41,7 +41,12 @@ import {
   type CartLineMetadata,
   type StoredCartLineMetadata,
 } from "@/services/magento/cart/cartSession";
-import { findCartItemUidBySku, computeCartTotalQuantity } from "@/services/magento/cart/cart.mapper";
+import {
+  applyCartLineDisplayImage,
+  findCartItemUidBySku,
+  computeCartTotalQuantity,
+} from "@/services/magento/cart/cart.mapper";
+import { getImageSrc } from "@/shared/utils/image";
 import { readStoredCartLines, writeStoredCartLines } from "@/features/cart/utils/cartProduct.utils";
 import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 import {
@@ -239,6 +244,7 @@ function upsertLineMetadata(
   options: CartLineOptions,
   productCustomOptions?: ProductCustomOptions,
   displayPrice?: number,
+  displayImage?: string,
 ): StoredCartLineMetadata {
   const previous = current[lineUid] ?? { options: {} };
 
@@ -249,6 +255,7 @@ function upsertLineMetadata(
       options: { ...previous.options, ...options },
       productCustomOptions: productCustomOptions ?? previous.productCustomOptions,
       ...(displayPrice != null && Number.isFinite(displayPrice) ? { displayPrice } : {}),
+      ...(displayImage?.trim() ? { displayImage: displayImage.trim() } : {}),
     },
   };
 }
@@ -484,6 +491,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
 
     const displayPrice = getProductDisplayPrice(product);
+    const displayImage = getImageSrc(product.image) ?? undefined;
 
     assertResolvableCartLineOptions({
       lineOptions: options,
@@ -514,6 +522,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           options,
           productCustomOptions,
           displayPrice,
+          displayImage,
         );
         lineMetadataRef.current = nextMetadata;
         writeCartLineMetadata(nextMetadata);
@@ -529,6 +538,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
                 ...item,
                 options: { ...item.options, ...options },
                 displayPrice,
+                product: applyCartLineDisplayImage(item.product, displayImage),
               }
               : item,
           ),
@@ -899,6 +909,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
                   ...(lineMeta.displayPrice != null && Number.isFinite(lineMeta.displayPrice)
                     ? { displayPrice: lineMeta.displayPrice }
                     : {}),
+                  product: applyCartLineDisplayImage(item.product, lineMeta.displayImage),
                 }
                 : item,
             ),

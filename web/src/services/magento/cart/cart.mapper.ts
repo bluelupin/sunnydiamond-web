@@ -25,6 +25,22 @@ import {
   hasCatalogEngravingText,
 } from "@/features/products/constants/engraving";
 
+export function applyCartLineDisplayImage(
+  product: Product,
+  displayImage?: string | null,
+): Product {
+  const trimmed = displayImage?.trim();
+  if (!trimmed) {
+    return product;
+  }
+
+  return {
+    ...product,
+    image: trimmed,
+    images: [trimmed],
+  };
+}
+
 function mapCartItemProduct(item: MagentoCartItem): Product | null {
   const product = item.product;
   const sku = product?.sku?.trim();
@@ -393,7 +409,7 @@ export function mapMagentoCartItems(
 
     items.push({
       id: uid,
-      product,
+      product: applyCartLineDisplayImage(product, metadata.displayImage),
       quantity,
       options: mergedOptions,
       gifting: mergeLineGifting(serverGifting, metadata.gifting),
