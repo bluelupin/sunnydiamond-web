@@ -1,8 +1,8 @@
 "use client";
 
 import { useRef } from "react";
+import CraftingRarityScrollLine from "@/features/about/components/CraftingRarityScrollLine";
 import { useCraftingRarityScrollReveal } from "@/features/about/hooks/useCraftingRarityScrollReveal";
-import VerticalScrollLine from "@/features/about/components/VerticalScrollLine";
 import Reveal from "@/shared/Animation/Reveal";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import PageContainer from "@/shared/ui/layout/PageContainer";
@@ -22,7 +22,7 @@ const GiftingWithLoveSection = ({ intro }: GiftingWithLoveSectionProps) => {
     <section
       ref={sectionRef}
       aria-labelledby="gifting-with-love-title"
-      className="bg-white pt-10 sm:pt-16 lg:pt-100"
+      className="bg-white pt-10 sm:pt-16 lg:min-h-[700px] lg:pt-100"
     >
       <PageContainer className="flex w-full justify-center">
         <div className="flex w-full max-w-[700px] flex-col items-center text-center lg:max-w-[950px]">
@@ -40,23 +40,25 @@ const GiftingWithLoveSection = ({ intro }: GiftingWithLoveSectionProps) => {
             </Reveal>
           </div>
           {intro.background ? (
-            <Reveal
-              direction="up"
-              className="mx-auto h-[300px] w-[300px] lg:h-[350px] lg:w-[350px]"
-            >
-              <ResponsiveImage
-                desktopSrc={intro.background.desktopUrl}
-                mobileSrc={intro.background.mobileUrl}
-                alt={imageAlt}
-                width={intro.background.width ?? 354}
-                height={intro.background.height ?? 354}
-                quality={80}
-                sizes="(max-width: 1536px) 300px, 400px"
-                className="object-contain object-center lg:object-cover"
-              />
-            </Reveal>
+            <div data-reveal-mask="image" className="mx-auto w-full overflow-hidden">
+              <Reveal
+                direction="up"
+                className="mx-auto h-[300px] w-[300px] lg:h-[350px] lg:w-[350px]"
+              >
+                <ResponsiveImage
+                  desktopSrc={intro.background.desktopUrl}
+                  mobileSrc={intro.background.mobileUrl}
+                  alt={imageAlt}
+                  width={intro.background.width ?? 354}
+                  height={intro.background.height ?? 354}
+                  quality={80}
+                  sizes="(max-width: 1536px) 300px, 400px"
+                  className="object-contain object-center lg:object-cover"
+                />
+              </Reveal>
+            </div>
           ) : null}
-          <VerticalScrollLine className="mt-5 lg:mt-[23px]" />
+          <CraftingRarityScrollLine className="mt-5 lg:mt-[23px]" />
           <Reveal
             as="p"
             direction="up"

@@ -129,7 +129,7 @@ const GiftCardAddressStep = ({ header }: { header: ReactNode }) => {
           </div>
 
           <div className="flex flex-col gap-4">
-            <p className={giftCardSectionHeadingClass}>{address.heading}</p>
+            <p className={cn("mb-2", giftCardSectionHeadingClass)}>{address.heading}</p>
 
             <div className="flex flex-col gap-2">
               <label className={giftCardFieldLabelClass} htmlFor="gift-card-address-line-1">

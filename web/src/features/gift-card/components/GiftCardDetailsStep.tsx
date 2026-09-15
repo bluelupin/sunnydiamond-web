@@ -110,64 +110,66 @@ const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
       >
         {header}
         <div className={cn("flex flex-col gap-10 pt-6 pb-24", RIGHT_PANEL_CONTENT_PADDING_CLASS)}>
-        <div className="flex flex-col gap-4">
-          <p className={giftCardSectionHeadingClass}>{details.senderHeading}</p>
-          <GiftCardTextField
-            id="gift-card-sender-name"
-            label={details.fullNameLabel}
-            value={sender.fullName}
-            onChange={(value) => setSender({ fullName: value })}
-            placeholder={details.placeholder}
-          />
-          <GiftCardPhoneField
-            id="gift-card-sender-phone"
-            label={details.phoneLabel}
-            value={sender.phone}
-            onChange={(value) => setSender({ phone: value })}
-          />
-          <GiftCardTextField
-            id="gift-card-sender-email"
-            label={details.emailLabel}
-            value={sender.email}
-            onChange={(value) => setSender({ email: value })}
-            placeholder={details.placeholder}
-            type="email"
-          />
-        </div>
+          <div className="flex flex-col gap-4">
+            <p className={cn("mb-2", giftCardSectionHeadingClass)}>
+              {details.senderHeading}
+            </p>
+            <GiftCardTextField
+              id="gift-card-sender-name"
+              label={details.fullNameLabel}
+              value={sender.fullName}
+              onChange={(value) => setSender({ fullName: value })}
+              placeholder={details.placeholder}
+            />
+            <GiftCardPhoneField
+              id="gift-card-sender-phone"
+              label={details.phoneLabel}
+              value={sender.phone}
+              onChange={(value) => setSender({ phone: value })}
+            />
+            <GiftCardTextField
+              id="gift-card-sender-email"
+              label={details.emailLabel}
+              value={sender.email}
+              onChange={(value) => setSender({ email: value })}
+              placeholder={details.placeholder}
+              type="email"
+            />
+          </div>
 
-        <div className="flex flex-col gap-4">
-          <p className={giftCardSectionHeadingClass}>{details.receiverHeading}</p>
-          <GiftCardCheckbox
-            checked={receiverSameAsSender}
-            onChange={setReceiverSameAsSender}
-            label={details.sameAsSenderLabel}
-          />
-          {!receiverSameAsSender ? (
-            <div className="flex flex-col gap-4">
-              <GiftCardTextField
-                id="gift-card-receiver-name"
-                label={details.fullNameLabel}
-                value={receiver.fullName}
-                onChange={(value) => setReceiver({ fullName: value })}
-                placeholder={details.placeholder}
-              />
-              <GiftCardPhoneField
-                id="gift-card-receiver-phone"
-                label={details.phoneLabel}
-                value={receiver.phone}
-                onChange={(value) => setReceiver({ phone: value })}
-              />
-              <GiftCardTextField
-                id="gift-card-receiver-email"
-                label={details.emailLabel}
-                value={receiver.email}
-                onChange={(value) => setReceiver({ email: value })}
-                placeholder={details.placeholder}
-                type="email"
-              />
-            </div>
-          ) : null}
-        </div>
+          <div className="flex flex-col gap-4">
+            <p className={cn("mb-2", giftCardSectionHeadingClass)}>{details.receiverHeading}</p>
+            <GiftCardCheckbox
+              checked={receiverSameAsSender}
+              onChange={setReceiverSameAsSender}
+              label={details.sameAsSenderLabel}
+            />
+            {!receiverSameAsSender ? (
+              <div className="flex flex-col gap-4">
+                <GiftCardTextField
+                  id="gift-card-receiver-name"
+                  label={details.fullNameLabel}
+                  value={receiver.fullName}
+                  onChange={(value) => setReceiver({ fullName: value })}
+                  placeholder={details.placeholder}
+                />
+                <GiftCardPhoneField
+                  id="gift-card-receiver-phone"
+                  label={details.phoneLabel}
+                  value={receiver.phone}
+                  onChange={(value) => setReceiver({ phone: value })}
+                />
+                <GiftCardTextField
+                  id="gift-card-receiver-email"
+                  label={details.emailLabel}
+                  value={receiver.email}
+                  onChange={(value) => setReceiver({ email: value })}
+                  placeholder={details.placeholder}
+                  type="email"
+                />
+              </div>
+            ) : null}
+          </div>
         </div>
       </RightPanelScrollLayout>
     </>

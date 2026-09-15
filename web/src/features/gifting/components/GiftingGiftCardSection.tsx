@@ -50,7 +50,7 @@ const GiftingGiftCardSection = ({ giftCard }: GiftingGiftCardSectionProps) => {
           aria-hidden
         />
         <div className="relative mx-auto lg:h-[475px] md:h-[330px] 2xl:max-w-1920 max-w-1440 flex-col items-center px-4 md:flex md:flex-row md:items-center md:px-10">
-          <div className="w-full lg:max-w-[619px] md:w-[450px] xl:pl-28 lg:pl-16">
+          <div className="w-full xl:w-[490px] lg:w-[400px] md:w-[450px] xl:ml-28 md:ml-10 sm:ml-8 ml-6">
             {giftCard.title &&
               <Reveal
                 as="h2"
