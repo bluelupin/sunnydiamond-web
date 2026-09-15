@@ -93,7 +93,7 @@ export default function OccasionLedCard({
           </div>
           {ctaLabel ? (
             <span className="text-tertiary-cta-underline inline-flex w-fit items-center justify-center pb-1.5 font-gill text-sm font-normal uppercase tracking-[0.28px] text-white">
-              {pathname === "/gifting" ? "Explore" : ctaLabel}
+              {ctaLabel}
             </span>
           ) : null}
         </div>
@@ -105,7 +105,7 @@ export default function OccasionLedCard({
         {ctaLabel ? (
           <div className="inline-flex max-h-0 w-fit flex-col items-start overflow-hidden pb-0 pt-0 opacity-0 motion-safe:transition-[max-height,padding,opacity] motion-safe:duration-500 motion-safe:ease-out group-hover:max-h-[72px] group-hover:pb-16 group-hover:opacity-100 group-focus-visible:max-h-[72px] group-focus-visible:pb-16 group-focus-visible:opacity-100">
             <div className="text-tertiary-cta-underline cursor-pointer pb-1 font-gill text-sm font-normal uppercase leading-110 text-white sm:pb-1">
-              {pathname === "/gifting" ? "Explore" : ctaLabel}
+              {ctaLabel}
             </div>
           </div>
         ) : null}

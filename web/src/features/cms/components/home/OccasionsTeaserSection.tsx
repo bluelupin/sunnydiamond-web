@@ -27,9 +27,8 @@ function OccasionCardItem({
     title: card.title,
     slug: card.slug,
     filterSlug: card.filterSlug,
-    ctaUrl: card?.cta?.url || card?.cta?.to,
   });
-  const ctaLabel = card?.cta?.label?.trim() || undefined;
+  const ctaLabel = card.ctaLabel?.trim() || undefined;
   const description = card?.description?.trim() || card?.subtitle?.trim();
 
   if (!card.title?.trim()) {
@@ -128,7 +127,6 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
       title: card.title,
       slug: card.slug,
       filterSlug: card.filterSlug,
-      ctaUrl: card?.cta?.url || card?.cta?.to,
     });
 
     return Boolean(title && (desktopUrl || mobileUrl) && href?.trim());

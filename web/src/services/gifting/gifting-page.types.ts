@@ -16,6 +16,7 @@ export type StrapiGiftingResponsiveImage = {
 export type StrapiGiftingCta = {
   id?: number;
   label?: string | null;
+  additionalLabel?: string | null;
   url?: string | null;
   to?: string | null;
   targetType?: string | null;
@@ -45,6 +46,7 @@ export type StrapiGiftingOccasion = {
   title?: string | null;
   description?: string | null;
   sortOrder?: number | null;
+  isActive?: boolean | null;
   showField?: boolean | null;
   filterSlug?: string | null;
   cta?: StrapiGiftingCta | null;
@@ -53,6 +55,7 @@ export type StrapiGiftingOccasion = {
 
 export type StrapiGiftingOccasionGridSection = {
   id?: number;
+  isActive?: boolean | null;
   showField?: boolean | null;
   occasions?: StrapiGiftingOccasion[] | null;
 };
@@ -169,7 +172,7 @@ export type NormalizedGiftingOccasionCard = {
   title: string;
   description?: string;
   href: string;
-  ctaLabel: string;
+  ctaLabel?: string;
   image: NormalizedGiftingResponsiveImage;
 };
 

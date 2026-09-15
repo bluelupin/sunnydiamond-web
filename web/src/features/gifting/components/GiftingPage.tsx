@@ -19,7 +19,7 @@ const GiftingPage = ({ page }: GiftingPageProps) => {
     <>
       {page.hero && <GiftingHeroSection hero={page.hero} />}
       {page.intro && <GiftingWithLoveSection intro={page.intro} />}
-      {page.occasionGrid?.cards.length ? (
+      {page.occasionGrid ? (
         <GiftingOccasionSection cards={page.occasionGrid.cards} />
       ) : null}
       {page.perfectGift ? (

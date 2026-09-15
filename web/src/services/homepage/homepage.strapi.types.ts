@@ -6,6 +6,7 @@ import type { FooterLinkGroup, HeaderNavLink } from "@/shared/lib/shellNavigatio
 export type StrapiHomepageCta = {
   id?: number;
   label?: string | null;
+  additionalLabel?: string | null;
   url?: string | null;
   targetType?: string | null;
   openInNewTab?: boolean | null;

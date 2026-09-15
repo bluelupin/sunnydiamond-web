@@ -519,6 +519,7 @@ export function mapOccasionCard(raw?: StrapiOccasionCard | null): OccasionCard |
     slug: cleanText(raw.filterSlug) ?? cleanText(raw.slug) ?? slugifyOccasionTitle(title),
     sortOrder: raw.sortOrder ?? undefined,
     isActive,
+    ctaLabel: cleanText(raw.cta?.label),
     cta: mapCta(raw.cta),
     image: pickResponsiveImage(raw.image),
   };

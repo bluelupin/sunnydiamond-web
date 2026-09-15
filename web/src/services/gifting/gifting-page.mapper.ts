@@ -6,7 +6,6 @@ import {
 } from "@/shared/utils/strapiMedia";
 import {
   EMPTY_GIFTING_PAGE,
-  type NormalizedGiftingCta,
   type NormalizedGiftingFinishingTouch,
   type NormalizedGiftingGiftCard,
   type NormalizedGiftingGiftFinder,
@@ -19,7 +18,6 @@ import {
   type NormalizedGiftingResponsiveImage,
   type NormalizedGiftingSeo,
   type NormalizedGiftingTrustBadge,
-  type StrapiGiftingCta,
   type StrapiGiftingFinishingTouchSection,
   type StrapiGiftingGiftCardSection,
   type StrapiGiftingGiftFinderSection,
@@ -70,13 +68,6 @@ const mapResponsiveImage = (
     width: desktopFile?.width ?? mobileFile?.width ?? undefined,
     height: desktopFile?.height ?? mobileFile?.height ?? undefined,
   };
-};
-
-const mapCta = (cta?: StrapiGiftingCta | null): NormalizedGiftingCta | null => {
-  const label = cleanText(cta?.label);
-  const url = cleanText(cta?.url) ?? cleanText(cta?.to);
-  if (!label || !url) return null;
-  return { label, url };
 };
 
 const mapSeo = (seo?: StrapiGiftingSeo | null): NormalizedGiftingSeo | null => {
@@ -134,24 +125,21 @@ const mapIntro = (
 const mapOccasionGrid = (
   section?: StrapiGiftingOccasionGridSection | null,
 ): NormalizedGiftingOccasionGrid | null => {
-  if (!section || !resolveSectionActive(undefined, section.showField)) return null;
+  if (!section || !resolveSectionActive(section.isActive, section.showField)) return null;
 
-  const cards = (section.occasions ?? [])
-    .filter((occasion) => resolveSectionActive(undefined, occasion?.showField))
+  const cards = [...(section.occasions ?? [])]
+    .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
+    .filter((occasion) => resolveSectionActive(occasion?.isActive, occasion?.showField))
     .map((occasion, index): NormalizedGiftingOccasionCard | null => {
       const title = cleanText(occasion?.title);
       const image = mapResponsiveImage(occasion?.image);
       if (!title || !image) return null;
 
       const filterSlug = cleanText(occasion?.filterSlug);
-      const cta = mapCta(occasion?.cta);
-      // Same resolution as homepage OccasionsTeaserSection:
-      // prefer real CMS deep links; for generic `/products` use filterSlug → /jewellery?occasion=
       const href = buildOccasionCardHref({
         title,
         slug: filterSlug,
         filterSlug,
-        ctaUrl: cta?.url ?? cleanText(occasion?.cta?.url) ?? cleanText(occasion?.cta?.to),
       });
 
       return {
@@ -161,7 +149,7 @@ const mapOccasionGrid = (
         title,
         description: cleanText(occasion?.description),
         href,
-        ctaLabel: cta?.label ?? "View Collection",
+        ctaLabel: cleanText(occasion?.cta?.additionalLabel),
         image,
       };
     })
