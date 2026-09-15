@@ -355,7 +355,7 @@ export type NormalizedCareerSeo = {
 export type NormalizedCareerHero = {
   title: string;
   ctaLabel: string;
-  image: NormalizedCareerResponsiveImage;
+  image: NormalizedCareerResponsiveImage | null;
 };
 
 export type NormalizedCareerOpeningsSection = {

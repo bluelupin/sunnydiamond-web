@@ -199,7 +199,7 @@ const mapHero = (hero?: StrapiCareerHero | null): NormalizedCareerHero | null =>
   const image =
     mapResponsiveImage(hero?.backgroundImage) ?? mapResponsiveImage(hero?.image);
 
-  if (!title || !ctaLabel || !image) return null;
+  if (!title || !ctaLabel) return null;
 
   return { title, ctaLabel, image };
 };
