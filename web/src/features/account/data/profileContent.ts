@@ -273,8 +273,6 @@ export const profileTabsContent = {
     emptyDescriptionSecondary: "Add your favourites here to revisit them anytime.",
     emptyPrimaryCta: "START EXPLORING",
     emptyPrimaryCtaHref: "/jewellery",
-    emptySecondaryCta: "DISCOVER JEWELLERY",
-    emptySecondaryCtaHref: "/jewellery",
   },
   diamondsForEveryone: {
     pageTitle: "Your Instalment Summary",

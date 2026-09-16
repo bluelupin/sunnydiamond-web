@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { CartPrimaryLink } from "@/features/cart/components/CartFlowUi";
-import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { profileTabsContent } from "../data/profileContent";
 import { ProfileTabEmptyStateLayout } from "./profileUi";
 
@@ -31,14 +30,9 @@ export function ProfileWishlistEmptyState() {
         <p>{content.emptyDescriptionSecondary}</p>
       </div>
 
-      <div className="flex flex-col items-center gap-6">
-        <CartPrimaryLink href={content.emptyPrimaryCtaHref} className="shrink-0">
-          {content.emptyPrimaryCta}
-        </CartPrimaryLink>
-        <DetailTextLink href={content.emptySecondaryCtaHref} className="text-sm uppercase">
-          {content.emptySecondaryCta}
-        </DetailTextLink>
-      </div>
+      <CartPrimaryLink href={content.emptyPrimaryCtaHref} className="shrink-0">
+        {content.emptyPrimaryCta}
+      </CartPrimaryLink>
     </ProfileTabEmptyStateLayout>
   );
 }
