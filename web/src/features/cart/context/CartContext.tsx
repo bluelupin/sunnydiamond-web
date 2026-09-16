@@ -72,6 +72,7 @@ import {
   mapMagentoCartCustomizableOptions,
 } from "@/services/magento/cart/cartLineCustomOptions.mapper";
 import { assignCartLineInstance } from "@/features/cart/utils/cartLineInstance.utils";
+import { formatCartRefreshError } from "@/features/cart/utils/formatCartRefreshError";
 
 /** @deprecated Use CartLineItem from cart.types */
 export type CartItem = CartLineItem;
@@ -84,6 +85,7 @@ interface CartContextType {
   items: CartLineItem[];
   isHydrating: boolean;
   isUpdating: boolean;
+  cartRefreshError: string | null;
   addItem: (payload: AddToBagPayload | Product) => Promise<AddItemResult>;
   removeItem: (lineItemId: string, options?: RemoveItemOptions) => Promise<void>;
   updateQuantity: (lineItemId: string, quantity: number) => Promise<void>;
@@ -286,6 +288,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   >([]);
   const [isHydrating, setIsHydrating] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [cartRefreshError, setCartRefreshError] = useState<string | null>(null);
   const [cartStatusToastMessage, setCartStatusToastMessage] = useState<string | null>(null);
   const [localGiftCardDiscount, setLocalGiftCardDiscount] = useState(0);
   const [appliedLocalGiftCardCode, setAppliedLocalGiftCardCode] = useState<string | null>(null);
@@ -453,11 +456,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
         }
 
         await refreshCart(cartId);
-      } catch {
+      } catch (error) {
+        console.error("Failed to initialize cart:", error);
         clearGuestCartId();
         shippingEstimateRequestRef.current += 1;
         setCartState(null);
         setEstimatedShippingMethods([]);
+        setCartRefreshError(formatCartRefreshError());
       } finally {
         setIsHydrating(false);
       }
@@ -1032,6 +1037,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [applyCartState]);
 
   const refreshCartFromMagento = useCallback(async () => {
+    setCartRefreshError(null);
+
     if (isAuthenticated) {
       setIsUpdating(true);
 
@@ -1040,6 +1047,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         applyCartState(nextState);
       } catch (error) {
         console.error("Failed to refresh customer cart:", error);
+        setCartRefreshError(formatCartRefreshError());
       } finally {
         setIsUpdating(false);
       }
@@ -1057,6 +1065,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       await refreshCart(cartId);
     } catch (error) {
       console.error("Failed to refresh guest cart:", error);
+      setCartRefreshError(formatCartRefreshError());
     } finally {
       setIsUpdating(false);
     }
@@ -1116,6 +1125,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       items,
       isHydrating,
       isUpdating,
+      cartRefreshError,
       addItem,
       removeItem,
       updateQuantity,
@@ -1156,6 +1166,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       refreshCartFromMagento,
       clearCart,
       estimatedShippingMethods,
+      cartRefreshError,
       isHydrating,
       isUpdating,
       items,

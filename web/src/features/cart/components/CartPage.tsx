@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/shared/utils/cn";
 import { useMobileStickyFooterClearance } from "@/shared/hooks/use-mobile-sticky-footer-clearance";
 import { MobileStickyFooterSpacer } from "@/shared/ui/layout/MobileStickyFooterSpacer";
@@ -9,10 +9,10 @@ import CartItem from "@/features/cart/components/CartItem";
 import CartMobileStickyFooter from "@/features/cart/components/CartMobileStickyFooter";
 import CartPriceDetails from "@/features/cart/components/CartPriceDetails";
 import { useCart } from "@/features/cart/context/CartContext";
-import { resolveCartGiftNoteDisplay } from "@/features/cart/utils/cartGiftNotes";
 import { useCartCheckout } from "@/features/cart/hooks/useCartCheckout";
 import type { NormalizedProductDisplayStrip } from "@/services/product-display/product-display-page.types";
 import { CartPrimaryLink } from "./CartFlowUi";
+import CartRefreshErrorState from "./CartRefreshErrorState";
 import CartPageSkeleton from "./skeletons/CartPageSkeleton";
 
 type CartPageProps = {
@@ -20,9 +20,16 @@ type CartPageProps = {
 };
 
 const CartPage = ({ benefitsStrip }: CartPageProps) => {
-  const { items, isHydrating, refreshCart, updateQuantity, removeItem, updateLineItemOptions } = useCart();
+  const {
+    items,
+    isHydrating,
+    isUpdating,
+    cartRefreshError,
+    refreshCart,
+    removeItem,
+    updateLineItemOptions,
+  } = useCart();
   const { isNavigatingToCheckout } = useCartCheckout();
-  const giftNoteDisplay = useMemo(() => resolveCartGiftNoteDisplay(items), [items]);
   const [offersOpen, setOffersOpen] = useState(false);
   const [priceBreakupOpen, setPriceBreakupOpen] = useState(false);
   const { footerRef, clearancePx } = useMobileStickyFooterClearance();
@@ -33,8 +40,18 @@ const CartPage = ({ benefitsStrip }: CartPageProps) => {
     }
   }, [isHydrating, refreshCart]);
 
+  const handleRetryCartRefresh = () => {
+    void refreshCart();
+  };
+
   if (isHydrating) {
     return <CartPageSkeleton />;
+  }
+
+  if (cartRefreshError && items.length === 0) {
+    return (
+      <CartRefreshErrorState message={cartRefreshError} onRetry={handleRetryCartRefresh} />
+    );
   }
 
   if (items.length === 0) {
@@ -67,12 +84,22 @@ const CartPage = ({ benefitsStrip }: CartPageProps) => {
             Your Shopping Bag
           </h1>
 
+          {cartRefreshError ? (
+            <div className="mb-6">
+              <CartRefreshErrorState
+                variant="banner"
+                message={cartRefreshError}
+                onRetry={handleRetryCartRefresh}
+              />
+            </div>
+          ) : null}
+
           <div
             className={cn(
               "grid grid-cols-1 gap-6 md:max-lg:portrait:grid-cols-[minmax(0,1fr)_minmax(0,360px)] md:max-lg:landscape:grid-cols-2 md:max-lg:items-start lg:grid-cols-[minmax(0,783fr)_minmax(0,553fr)] lg:gap-6",
               isNavigatingToCheckout && "pointer-events-none",
             )}
-            aria-busy={isNavigatingToCheckout || undefined}
+            aria-busy={isNavigatingToCheckout || isUpdating || undefined}
           >
             <div
               className="flex min-w-0 flex-col gap-6"
@@ -82,8 +109,6 @@ const CartPage = ({ benefitsStrip }: CartPageProps) => {
                 <CartItem
                   key={item.id}
                   item={item}
-                  giftNoteDisplay={giftNoteDisplay}
-                  onUpdateQuantity={updateQuantity}
                   onRemove={removeItem}
                   onUpdateOptions={updateLineItemOptions}
                 />

@@ -15,7 +15,6 @@ import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import { useCart } from "../context/CartContext";
 import type { CartLineItem, CartLineOptions } from "../types/cart.types";
 import { formatCartLineMeta, formatCartPrice, getCartLineDisplayTotal } from "../utils/formatCartLine";
-import { getCartItemGiftNote, type CartGiftNoteDisplay } from "../utils/cartGiftNotes";
 import { useCartUI } from "../context/CartUIContext";
 import { useCartCheckout } from "../hooks/useCartCheckout";
 import {
@@ -38,15 +37,13 @@ const MetalEngravingPanel = dynamic(
 
 interface CartItemProps {
   item: CartLineItem;
-  giftNoteDisplay: CartGiftNoteDisplay;
-  onUpdateQuantity: (lineItemId: string, quantity: number) => void;
   onRemove: (lineItemId: string) => void;
   onUpdateOptions: (lineItemId: string, options: Partial<CartLineOptions>) => Promise<void>;
 }
 
 const ENGRAVING_EMPTY_LABEL = "Metal Engraving (Optional)";
 
-const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItemProps) => {
+const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
   const { buyNow, getLineItemMetadata, removeItem, showCartStatusToast } = useCart();
   const { isWishlisted, addToWishlist } = useWishlist();
   const { clearGiftingOptionsExplored } = useCartUI();
@@ -63,7 +60,6 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
   );
   const engravingMaxCharacters = options.engravingMaxCharacters ?? DEFAULT_ENGRAVING_MAX_CHARACTERS;
   const hasEngraving = Boolean(options.engraving?.trim());
-  const itemGiftNote = getCartItemGiftNote(item, giftNoteDisplay);
   const [isEngravingOpen, setIsEngravingOpen] = useState(false);
   const [isSavingEngraving, setIsSavingEngraving] = useState(false);
   const [movedToWishlist, setMovedToWishlist] = useState(false);

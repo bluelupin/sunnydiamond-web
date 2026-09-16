@@ -6,9 +6,13 @@ import { useCart } from "@/features/cart/context/CartContext";
 import { useCartUI } from "@/features/cart/context/CartUIContext";
 import type { AddToBagPayload } from "@/features/cart/types/cart.types";
 import { formatAddToBagErrorMessage } from "@/features/cart/utils/formatAddToBagError";
+import {
+  buildOptimisticAddItemResult,
+  buildOptimisticUpdateItemResult,
+} from "@/features/cart/utils/optimisticAddToBag";
 
 export function useAddToBagWithDrawer() {
-  const { addItem, replaceLineItem, showCartStatusToast } = useCart();
+  const { addItem, replaceLineItem, showCartStatusToast, totalItems } = useCart();
   const { openBagDrawer, closeBagDrawer, tryBeginBagAction, endBagAction } = useCartUI();
 
   const addToBagAndOpenDrawer = useCallback(
@@ -16,6 +20,8 @@ export function useAddToBagWithDrawer() {
       if (!tryBeginBagAction()) {
         return;
       }
+
+      openBagDrawer(buildOptimisticAddItemResult(payload, totalItems));
 
       try {
         const result = await addItem(payload);
@@ -28,7 +34,15 @@ export function useAddToBagWithDrawer() {
         endBagAction();
       }
     },
-    [addItem, closeBagDrawer, endBagAction, openBagDrawer, showCartStatusToast, tryBeginBagAction],
+    [
+      addItem,
+      closeBagDrawer,
+      endBagAction,
+      openBagDrawer,
+      showCartStatusToast,
+      totalItems,
+      tryBeginBagAction,
+    ],
   );
 
   const updateBagAndOpenDrawer = useCallback(
@@ -36,6 +50,8 @@ export function useAddToBagWithDrawer() {
       if (!tryBeginBagAction()) {
         return;
       }
+
+      openBagDrawer(buildOptimisticUpdateItemResult(payload, totalItems), { mode: "update" });
 
       try {
         const result = await replaceLineItem(lineItemId, payload);
@@ -54,6 +70,7 @@ export function useAddToBagWithDrawer() {
       openBagDrawer,
       replaceLineItem,
       showCartStatusToast,
+      totalItems,
       tryBeginBagAction,
     ],
   );
