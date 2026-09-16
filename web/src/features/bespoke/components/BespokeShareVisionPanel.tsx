@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { Info, X } from "lucide-react";
 import { useAppStatusToastController } from "@/shared/hooks/useAppStatusToastController";
@@ -18,7 +18,13 @@ import { DetailDarkButton, DetailTextLink } from "@/features/products/components
 import { ProductDetailSidePanelShell } from "@/features/products/components/detail/ProductDetailSidePanelShell";
 import { createBespokeSubmission } from "@/services/bespoke/bespoke-submission.service";
 import type { NormalizedBespokeCustomDesignForm } from "@/services/bespoke/contact-bespoke-page.types";
+import {
+  formatBespokeSubmissionError,
+  parseBespokeSubmissionFieldErrors,
+} from "@/features/bespoke/utils/formatBespokeSubmissionError";
 import { wishlistMovedToastDurationMs } from "@/features/wishlist/data/content";
+import FormFieldError from "@/shared/ui/FormFieldError";
+import type { AppointmentContactField } from "@/shared/utils/formValidation";
 
 const MAX_REFERENCE_IMAGE_BYTES = 5 * 1024 * 1024;
 
@@ -38,6 +44,10 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
   const [referenceImageName, setReferenceImageName] = useState<string | null>(null);
   const [referenceImagePreviewUrl, setReferenceImagePreviewUrl] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [apiFieldErrors, setApiFieldErrors] = useState<
+    Partial<Record<AppointmentContactField, string>>
+  >({});
+  const [referenceImageError, setReferenceImageError] = useState<string | null>(null);
   const { show: showStatusToast, node: statusToast } = useAppStatusToastController(
     wishlistMovedToastDurationMs,
   );
@@ -57,6 +67,28 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
   const { isValid, submitted, errors, markTouched, showError, validateSubmit, resetValidation } =
     useAppointmentFormValidation(formValues, validationOptions);
 
+  const displayErrors = useMemo(
+    () => ({ ...errors, ...apiFieldErrors }),
+    [apiFieldErrors, errors],
+  );
+
+  const showFieldError = useCallback(
+    (field: AppointmentContactField) => Boolean(apiFieldErrors[field]) || showError(field),
+    [apiFieldErrors, showError],
+  );
+
+  const clearApiFieldError = useCallback((field: AppointmentContactField) => {
+    setApiFieldErrors((current) => {
+      if (!current[field]) {
+        return current;
+      }
+
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
+  }, []);
+
   const clearReferenceImage = () => {
     if (referenceImagePreviewUrlRef.current) {
       URL.revokeObjectURL(referenceImagePreviewUrlRef.current);
@@ -65,6 +97,7 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
     setReferenceImagePreviewUrl(null);
     setReferenceImage(null);
     setReferenceImageName(null);
+    setReferenceImageError(null);
     if (referenceImageInputRef.current) {
       referenceImageInputRef.current.value = "";
     }
@@ -78,6 +111,8 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
     setNote("");
     clearReferenceImage();
     setIsSubmitting(false);
+    setApiFieldErrors({});
+    setReferenceImageError(null);
     resetValidation();
   };
 
@@ -112,8 +147,21 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
 
           showStatusToast(form.successToast.title);
           handleClose();
-        } catch {
-          showStatusToast("Could not submit request");
+        } catch (error) {
+          const { fieldErrors, referenceImageError: imageError } =
+            parseBespokeSubmissionFieldErrors(error);
+
+          if (Object.keys(fieldErrors).length > 0) {
+            setApiFieldErrors(fieldErrors);
+            return;
+          }
+
+          if (imageError) {
+            setReferenceImageError(imageError);
+            return;
+          }
+
+          showStatusToast(formatBespokeSubmissionError(error));
         } finally {
           setIsSubmitting(false);
         }
@@ -125,7 +173,7 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
     const file = event.target.files?.[0] ?? null;
 
     if (file && file.size > MAX_REFERENCE_IMAGE_BYTES) {
-      showStatusToast("Image must be 5 MB or smaller");
+      setReferenceImageError("Image must be 5 MB or smaller");
       if (referenceImageInputRef.current) {
         referenceImageInputRef.current.value = "";
       }
@@ -142,6 +190,7 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
     setReferenceImagePreviewUrl(previewUrl);
     setReferenceImage(file);
     setReferenceImageName(file?.name ?? null);
+    setReferenceImageError(null);
   };
 
   if (!open) {
@@ -179,14 +228,29 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
                 email={email}
                 date=""
                 note={note}
-                onNameChange={setName}
-                onCountryCodeChange={setCountryCode}
-                onPhoneChange={setPhone}
-                onEmailChange={setEmail}
+                onNameChange={(value) => {
+                  clearApiFieldError("name");
+                  setName(value);
+                }}
+                onCountryCodeChange={(value) => {
+                  clearApiFieldError("phone");
+                  setCountryCode(value);
+                }}
+                onPhoneChange={(value) => {
+                  clearApiFieldError("phone");
+                  setPhone(value);
+                }}
+                onEmailChange={(value) => {
+                  clearApiFieldError("email");
+                  setEmail(value);
+                }}
                 onDateChange={() => undefined}
-                onNoteChange={setNote}
-                errors={errors}
-                showError={showError}
+                onNoteChange={(value) => {
+                  clearApiFieldError("note");
+                  setNote(value);
+                }}
+                errors={displayErrors}
+                showError={showFieldError}
                 markTouched={markTouched}
                 showDate={false}
                 showTimeSlots={false}
@@ -261,6 +325,7 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
                     {form.referenceImageButtonText}
                   </DetailTextLink>
                 )}
+                <FormFieldError id="bespoke-reference-image-error" message={referenceImageError} />
               </div>
             </div>
           </div>

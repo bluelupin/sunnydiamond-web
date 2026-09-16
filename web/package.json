@@ -13,7 +13,8 @@
     "test:contact:all": "node scripts/run-contact-test-cases.mjs",
     "test:world-of-sunny": "node scripts/run-world-of-sunny-test-cases.mjs",
     "test:plp": "node scripts/run-plp-test-cases.mjs",
-    "test:cart": "node scripts/run-cart-test-cases.mjs"
+    "test:cart": "node scripts/run-cart-test-cases.mjs",
+    "test:bespoke": "node scripts/run-bespoke-test-cases.mjs"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.3",
