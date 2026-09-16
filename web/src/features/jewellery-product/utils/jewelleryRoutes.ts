@@ -192,6 +192,39 @@ export function hasPrimaryListingContext(
   return hasCollectionListingContext(searchParams) || hasOccasionListingContext(searchParams);
 }
 
+type JewelleryCategoryQuerySearchParams = JewelleryListingSearchParamsInput & {
+  category?: string | null;
+};
+
+function getCategoryQueryParam(
+  searchParams?: JewelleryCategoryQuerySearchParams,
+): string | null {
+  if (!searchParams) {
+    return null;
+  }
+
+  if (typeof searchParams === "string") {
+    return new URLSearchParams(searchParams).get(JEWELLERY_CATEGORY_QUERY_PARAM)?.trim() ?? null;
+  }
+
+  if (searchParams instanceof URLSearchParams) {
+    return searchParams.get(JEWELLERY_CATEGORY_QUERY_PARAM)?.trim() ?? null;
+  }
+
+  return searchParams.category?.trim() ?? null;
+}
+
+/** `?category=` duplicates `/rings` unless collection or occasion is the primary listing filter. */
+export function shouldNoIndexJewelleryCategoryQueryParam(
+  searchParams?: JewelleryCategoryQuerySearchParams,
+): boolean {
+  if (!getCategoryQueryParam(searchParams)) {
+    return false;
+  }
+
+  return !hasPrimaryListingContext(searchParams);
+}
+
 export function resolveCategoryUrlKeyFromQueryParam(
   categoryParam: string | null | undefined,
 ): string | null {

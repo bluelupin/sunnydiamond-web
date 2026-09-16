@@ -13,6 +13,7 @@ import { prefetchJewelleryListing } from "@/lib/magento/prefetchMagento";
 import JewelleryProductPage from "@/features/jewellery-product/components/JewelleryProductPage";
 import {
   isJewelleryCategoryUrlKey,
+  shouldNoIndexJewelleryCategoryQueryParam,
 } from "@/features/jewellery-product/utils/jewelleryRoutes";
 import type { JewelleryListingPrefetchFilters } from "@/lib/magento/prefetchMagento";
 import { hasGiftFinderSearchParams } from "@/features/gifting/utils/giftFinderRoutes";
@@ -57,7 +58,8 @@ export async function generateJewelleryCategoryMetadata({
     canonicalPath,
     keywords,
     ...(image ? { image } : {}),
-    noIndex: hasGiftFinderSearchParams(query) || Boolean(query.category),
+    noIndex:
+      hasGiftFinderSearchParams(query) || shouldNoIndexJewelleryCategoryQueryParam(query),
   });
 }
 

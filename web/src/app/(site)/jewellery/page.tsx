@@ -12,6 +12,7 @@ import { hasGiftFinderSearchParams } from "@/features/gifting/utils/giftFinderRo
 import {
   hasPrimaryListingContext,
   resolveCategoryUrlKeyFromQueryParam,
+  shouldNoIndexJewelleryCategoryQueryParam,
 } from "@/features/jewellery-product/utils/jewelleryRoutes";
 import JewelleryProductPage from "@/features/jewellery-product/components/JewelleryProductPage";
 import JsonLd from "@/shared/lib/seo/JsonLd";
@@ -45,7 +46,8 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
     canonicalPath,
     keywords,
     ...(image ? { image } : {}),
-    noIndex: hasGiftFinderSearchParams(query) || Boolean(query.category),
+    noIndex:
+      hasGiftFinderSearchParams(query) || shouldNoIndexJewelleryCategoryQueryParam(query),
   });
 }
 

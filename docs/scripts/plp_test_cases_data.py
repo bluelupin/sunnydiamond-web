@@ -75,10 +75,10 @@ ISSUES = [
         "PLP",
         "SEO",
         "noIndex on ?category= primary listing URLs",
-        "generateMetadata sets noIndex: true when ?category= is present on /jewellery — collection/occasion filtered PLPs may be excluded from indexing.",
+        "Fixed: only noindex standalone ?category= duplicates; primary listing URLs with collection/occasion remain indexable.",
         "P2",
-        "Open",
-        "PLP-082",
+        "Resolved",
+        "PLP-094",
         "",
     ),
     (
@@ -235,7 +235,7 @@ TEST_CASES = [
     ("PLP-091", "K. SEO", "Meta description from CMS", "Inspect meta description", "CMS description used", "P1", "SEO", PRE_02, "Route: /jewellery", ""),
     ("PLP-092", "K. SEO", "Canonical URL", "Inspect canonical link", "Points to /jewellery (or CMS canonical)", "P1", "SEO", PRE_02, "Route: /jewellery", ""),
     ("PLP-093", "K. SEO", "noIndex on gift-finder params", "Open PLP with gift-finder search params", "robots noindex set", "P2", "SEO", PRE_01, "Gift finder URL", ""),
-    ("PLP-094", "K. SEO", "noIndex on ?category= mode", "Open /jewellery?collection=x&category=rings", "noIndex: true in metadata", "P2", "SEO", PRE_01, "?category=rings", "PLP-ISSUE-005"),
+    ("PLP-094", "K. SEO", "Primary listing ?category= indexable", "Open /jewellery?collection=x&category=rings", "robots index allowed; no noindex meta", "P2", "SEO", PRE_01, "?collection=&category=rings", ""),
     # L. Mobile & Responsive
     ("PLP-095", "L. Responsive", "Mobile layout", "View PLP at 375px", "No horizontal scroll; cards stack correctly", "P0", "UI", PRE_03, "375px", ""),
     ("PLP-096", "L. Responsive", "Mobile filter drawer", "Open filters on mobile", "Bottom drawer; Apply/Clear reachable", "P0", "UI", PRE_03, "Mobile", ""),

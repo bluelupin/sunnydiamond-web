@@ -197,7 +197,13 @@ async function runStaticChecks() {
   // K. SEO
   assertSource("PLP-090", "CMS SEO metadata", jewelleryPage, "resolveJewellerySeoMetadata", "CMS SEO metadata resolver");
   assertSource("PLP-093", "noIndex gift finder", jewelleryPage, "hasGiftFinderSearchParams", "noIndex for gift-finder params");
-  assertSource("PLP-094", "noIndex ?category=", jewelleryPage, "query.category", "noIndex when ?category= present");
+  assertSource(
+    "PLP-094",
+    "primary listing indexable",
+    jewelleryPage,
+    "shouldNoIndexJewelleryCategoryQueryParam",
+    "Primary listing ?category= URLs use scoped noindex rule",
+  );
 
   // L. Responsive
   assertSource("PLP-095", "responsive grid", grid, "grid", "Responsive product grid");
@@ -311,12 +317,12 @@ async function runLiveChecks(baseUrl) {
       robots ? `robots=${robots}` : "noindex meta not found in static HTML (may be client-only)",
     );
 
-    const categoryNoIndex = await fetchText(baseUrl, "/jewellery?collection=alankara&category=rings");
-    const catRobots = extractMetaRobots(categoryNoIndex.text);
+    const primaryListing = await fetchText(baseUrl, "/jewellery?collection=alankara&category=rings");
+    const primaryRobots = extractMetaRobots(primaryListing.text);
     record(
       "PLP-094",
-      catRobots.includes("noindex") ? "Pass" : "Partial",
-      catRobots ? `robots=${catRobots}` : "noindex for ?category= not in static HTML",
+      primaryRobots.includes("noindex") ? "Fail" : "Pass",
+      primaryRobots ? `robots=${primaryRobots}` : "Primary listing ?category= is indexable",
     );
   } catch (err) {
     record("PLP-001", "Blocked", `Dev server unreachable at ${baseUrl}: ${err.message}`);
