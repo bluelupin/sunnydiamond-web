@@ -27,7 +27,6 @@ TEST_DATA_NOTES = [
 KNOWN_GAPS = [
     "No error/retry UI when Magento listing fetch fails (hook returns error, page ignores it)",
     "Sort selection lost on full page refresh (not in URL)",
-    "Active price filter totalCount reflects page-1 refined count, not full Magento total",
     "Gift-finder entry skips SSR prefetch (slower first paint)",
     "PLP hero LCP preload utility exists but is not wired to jewellery PLP",
     "fetchMagentoJewelleryCollectionPage() defined but never called",
@@ -68,7 +67,7 @@ ISSUES = [
         "Price total count inaccurate with active filter",
         "When price filter is active, totalCount uses client-refined page-1 length rather than Magento total_count — progress bar may under-report.",
         "P2",
-        "Open",
+        "Resolved",
         "PLP-023, PLP-036",
         "",
     ),

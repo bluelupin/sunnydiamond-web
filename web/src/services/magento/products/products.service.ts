@@ -396,6 +396,7 @@ async function fetchMagentoJewelleryProducts({
         data.products?.total_count ?? 0,
         filters,
         facetsForFilter,
+        rawProducts.length,
       ),
       currentPage: pageInfo?.current_page ?? page,
       pageSize: pageInfo?.page_size ?? pageSize,
@@ -449,6 +450,7 @@ async function fetchMagentoJewelleryProducts({
       data.products?.total_count ?? 0,
       filters,
       facetsForFilter,
+      rawProducts.length,
     ),
     currentPage: pageInfo?.current_page ?? page,
     pageSize: pageInfo?.page_size ?? pageSize,
@@ -501,13 +503,28 @@ function resolveListingTotalCount(
   apiTotalCount: number,
   filters: JewelleryFilterState,
   facets: JewelleryFilterFacets,
+  rawProductCount = products.length,
 ): number {
-  // Client refine runs for any active price filter (tax index ≠ display price).
-  if (!isDefaultPriceRange(filters, facets)) {
+  if (isDefaultPriceRange(filters, facets)) {
+    return apiTotalCount;
+  }
+
+  const exactPrice = getExactJewelleryPriceFilter(filters, facets);
+  if (exactPrice != null) {
+    // Exact display-price totals are accumulated incrementally in the listing hook.
     return products.length;
   }
 
-  return apiTotalCount;
+  // Magento price filters use ex-tax index values; client refine aligns to display price.
+  // Use Magento's total_count, scaled when page-1 refinement drops products from the page.
+  if (rawProductCount > 0 && products.length < rawProductCount && apiTotalCount > 0) {
+    return Math.max(
+      products.length,
+      Math.round(apiTotalCount * (products.length / rawProductCount)),
+    );
+  }
+
+  return Math.max(products.length, apiTotalCount);
 }
 
 /** Fetches the first PLP page ({@link PAGE_SIZE} products) with facets. */
@@ -526,21 +543,10 @@ export async function getMagentoJewelleryInitialListing(
     includeFacets: params.includeFacets !== false,
   });
 
-  const products = refineListingProductsForExactPrice(
-    firstPage.products,
-    filters,
-    firstPage.facets,
-  );
-
   return {
     listing: {
-      products,
-      totalCount: resolveListingTotalCount(
-        products,
-        firstPage.totalCount,
-        filters,
-        firstPage.facets,
-      ),
+      products: firstPage.products,
+      totalCount: firstPage.totalCount,
       totalPages: firstPage.totalPages,
       pageSize: firstPage.pageSize,
       currentPage: 1,
