@@ -28,7 +28,6 @@ KNOWN_GAPS = [
     "No error/retry UI when Magento listing fetch fails (hook returns error, page ignores it)",
     "Sort selection lost on full page refresh (not in URL)",
     "Gift-finder entry skips SSR prefetch (slower first paint)",
-    "PLP hero LCP preload utility exists but is not wired to jewellery PLP",
     "fetchMagentoJewelleryCollectionPage() defined but never called",
     "Canonical URL points to CMS dev domain (sunnydiamonds-cms-dev.on-forge.com)",
 ]
@@ -103,8 +102,8 @@ ISSUES = [
         "Hero LCP preload not wired to PLP",
         "preloadPlpHeroLcpImages used on Contact page but not jewellery PLP hero — missed LCP optimization.",
         "P3",
-        "Open",
-        "PLP-091",
+        "Resolved",
+        "PLP-114",
         "",
     ),
     (
