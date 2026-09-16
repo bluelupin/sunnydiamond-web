@@ -1,479 +1,194 @@
 {
-  "generatedAt": "2026-09-14T07:31:00.796Z",
+  "generatedAt": "2026-09-16T09:45:08.519Z",
   "baseUrl": "http://localhost:3000",
   "summary": {
-    "total": 93,
-    "pass": 52,
-    "fail": 0,
-    "blocked": 41,
+    "total": 36,
+    "pass": 32,
+    "fail": 4,
+    "blocked": 0,
     "partial": 0,
-    "notTested": 0
+    "notTested": 57
   },
   "results": {
     "CONTACT-002": {
       "status": "Pass",
       "actual": "page.tsx sets revalidate = 300",
-      "testedAt": "2026-09-14T07:30:58.840Z"
+      "testedAt": "2026-09-16T09:40:06.719Z"
     },
     "CONTACT-003": {
       "status": "Pass",
-      "actual": "/contact found in sitemap.xml",
-      "testedAt": "2026-09-14T07:31:00.792Z"
+      "actual": "/contact listed in sitemap.ts",
+      "testedAt": "2026-09-16T09:40:06.721Z"
     },
     "CONTACT-005": {
       "status": "Pass",
       "actual": "getContactPage returns loadError on CMS failure",
-      "testedAt": "2026-09-14T07:30:58.842Z"
+      "testedAt": "2026-09-16T09:40:06.721Z"
     },
     "CONTACT-007": {
       "status": "Pass",
       "actual": "ContactPageSkeleton has aria-busy=true",
-      "testedAt": "2026-09-14T07:30:58.841Z"
+      "testedAt": "2026-09-16T09:40:06.721Z"
     },
     "CONTACT-013": {
       "status": "Pass",
       "actual": "Hero LCP preload wired in contact page",
-      "testedAt": "2026-09-14T07:30:58.841Z"
+      "testedAt": "2026-09-16T09:40:06.721Z"
     },
     "CONTACT-032": {
       "status": "Pass",
       "actual": "ContactInfoSection uses mobileTitle on mobile",
-      "testedAt": "2026-09-14T07:30:58.841Z"
+      "testedAt": "2026-09-16T09:40:06.721Z"
     },
     "CONTACT-046": {
       "status": "Pass",
-      "actual": "Phone placeholder='Phone No.', email placeholder='Email ID'",
-      "testedAt": "2026-09-14T07:31:00.793Z"
+      "actual": "Phone field uses phonePlaceholder",
+      "testedAt": "2026-09-16T09:40:06.721Z"
     },
     "CONTACT-048": {
       "status": "Pass",
       "actual": "Phone and email in md:grid-cols-2 layout",
-      "testedAt": "2026-09-14T07:30:58.841Z"
+      "testedAt": "2026-09-16T09:40:06.721Z"
     },
     "CONTACT-049": {
       "status": "Pass",
       "actual": "Submit button uses w-full on mobile",
-      "testedAt": "2026-09-14T07:30:58.841Z"
+      "testedAt": "2026-09-16T09:40:06.721Z"
     },
     "CONTACT-060": {
       "status": "Pass",
       "actual": "Empty submit shows inline errors on all required fields (browser)",
-      "testedAt": "2026-09-14T07:31:00.795Z"
+      "testedAt": "2026-09-16T09:45:08.519Z"
     },
     "CONTACT-075": {
       "status": "Pass",
       "actual": "Message textarea maxlength=500",
-      "testedAt": "2026-09-14T07:30:58.841Z"
+      "testedAt": "2026-09-16T09:40:06.721Z"
     },
     "CONTACT-078": {
       "status": "Pass",
       "actual": "Fields marked invalid (aria-invalid) after empty submit (browser)",
-      "testedAt": "2026-09-14T07:31:00.795Z"
+      "testedAt": "2026-09-16T09:45:08.519Z"
     },
     "CONTACT-081": {
       "status": "Pass",
       "actual": "Payload sends actual consentAccepted value",
-      "testedAt": "2026-09-14T07:30:58.841Z"
+      "testedAt": "2026-09-16T09:40:06.721Z"
     },
     "CONTACT-082": {
-      "status": "Pass",
-      "actual": "Submit disabled while isSubmitting",
-      "testedAt": "2026-09-14T07:30:58.842Z"
+      "status": "Fail",
+      "actual": "Expected: submit loading state",
+      "testedAt": "2026-09-16T09:40:06.721Z"
     },
     "CONTACT-084": {
-      "status": "Pass",
-      "actual": "Success toast includes title",
-      "testedAt": "2026-09-14T07:30:58.842Z"
+      "status": "Fail",
+      "actual": "Expected: success toast title",
+      "testedAt": "2026-09-16T09:40:06.721Z"
     },
     "CONTACT-085": {
       "status": "Pass",
       "actual": "resetForm clears fields without resetting countryCode",
-      "testedAt": "2026-09-14T07:30:58.842Z"
+      "testedAt": "2026-09-16T09:40:06.721Z"
     },
     "CONTACT-094": {
-      "status": "Pass",
-      "actual": "Consent required only when label exists",
-      "testedAt": "2026-09-14T07:30:58.842Z"
+      "status": "Fail",
+      "actual": "Expected: consent only with label",
+      "testedAt": "2026-09-16T09:40:06.721Z"
     },
     "CONTACT-113": {
       "status": "Pass",
       "actual": "Contact page reuses ProductDetailVisitUsSection",
-      "testedAt": "2026-09-14T07:30:58.842Z"
+      "testedAt": "2026-09-16T09:40:06.721Z"
     },
     "CONTACT-132": {
       "status": "Pass",
       "actual": "Mobile header user icon links to /profile",
-      "testedAt": "2026-09-14T07:30:58.842Z"
+      "testedAt": "2026-09-16T09:40:06.721Z"
     },
     "CONTACT-140": {
       "status": "Pass",
-      "actual": "Email CTA displays normalized email address",
-      "testedAt": "2026-09-14T07:31:00.794Z"
+      "actual": "Mapper normalizes garbled email CTA text",
+      "testedAt": "2026-09-16T09:40:06.721Z"
     },
     "CONTACT-141": {
       "status": "Pass",
       "actual": "Personal Concierge copy shows 'assistance' not 'assisstance' (browser)",
-      "testedAt": "2026-09-14T07:31:00.795Z"
+      "testedAt": "2026-09-16T09:45:08.519Z"
     },
     "CONTACT-150": {
       "status": "Pass",
       "actual": "Submit uses BFF /api/generic-submissions/submit",
-      "testedAt": "2026-09-14T07:30:58.842Z"
+      "testedAt": "2026-09-16T09:40:06.721Z"
     },
     "CONTACT-151": {
       "status": "Pass",
       "actual": "Client fetches generic forms via BFF",
-      "testedAt": "2026-09-14T07:30:58.842Z"
+      "testedAt": "2026-09-16T09:40:06.721Z"
     },
     "CONTACT-152": {
       "status": "Pass",
       "actual": "BFF route /api/generic-forms exists",
-      "testedAt": "2026-09-14T07:30:58.842Z"
+      "testedAt": "2026-09-16T09:40:06.721Z"
     },
     "CONTACT-161": {
       "status": "Pass",
       "actual": "Reason required only when dropdown options exist",
-      "testedAt": "2026-09-14T07:30:58.842Z"
+      "testedAt": "2026-09-16T09:40:06.721Z"
     },
     "CONTACT-160": {
       "status": "Pass",
       "actual": "verify-contact-module.mjs passed (mapper helper checks)",
-      "testedAt": "2026-09-14T07:30:58.919Z"
+      "testedAt": "2026-09-16T09:40:06.792Z"
     },
     "CONTACT-162": {
       "status": "Pass",
       "actual": "content.ts not imported; CMS-only design confirmed",
-      "testedAt": "2026-09-14T07:30:59.220Z"
+      "testedAt": "2026-09-16T09:40:07.122Z"
     },
     "CONTACT-001": {
-      "status": "Pass",
-      "actual": "GET /contact returned 200",
-      "testedAt": "2026-09-14T07:30:59.933Z"
-    },
-    "CONTACT-120": {
-      "status": "Pass",
-      "actual": "Live page title: Contact Us | Sunny Diamonds (browser)",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-121": {
-      "status": "Pass",
-      "actual": "Meta description present (Get in touch with Sunny Diamonds for jewellery enquiries, appointments, and pers…)",
-      "testedAt": "2026-09-14T07:31:00.792Z"
-    },
-    "CONTACT-122": {
-      "status": "Pass",
-      "actual": "Canonical: https://sunnydiamonds-cms-dev.on-forge.com/contact",
-      "testedAt": "2026-09-14T07:31:00.792Z"
-    },
-    "CONTACT-010": {
-      "status": "Pass",
-      "actual": "Hero h1 present on live page",
-      "testedAt": "2026-09-14T07:31:00.792Z"
-    },
-    "CONTACT-040": {
-      "status": "Pass",
-      "actual": "Enquiry form section rendered",
-      "testedAt": "2026-09-14T07:31:00.792Z"
-    },
-    "CONTACT-044": {
-      "status": "Pass",
-      "actual": "Country code select with aria-label present",
-      "testedAt": "2026-09-14T07:31:00.792Z"
-    },
-    "CONTACT-047": {
-      "status": "Pass",
-      "actual": "Message textarea present",
-      "testedAt": "2026-09-14T07:31:00.793Z"
-    },
-    "CONTACT-090": {
-      "status": "Pass",
-      "actual": "Consent checkbox rendered",
-      "testedAt": "2026-09-14T07:31:00.793Z"
-    },
-    "CONTACT-091": {
-      "status": "Pass",
-      "actual": "Terms link present in consent label",
-      "testedAt": "2026-09-14T07:31:00.793Z"
-    },
-    "CONTACT-092": {
-      "status": "Pass",
-      "actual": "Privacy policy link present in consent label",
-      "testedAt": "2026-09-14T07:31:00.793Z"
-    },
-    "CONTACT-130": {
-      "status": "Pass",
-      "actual": "Heading hierarchy: 1 h1, 5 h2",
-      "testedAt": "2026-09-14T07:31:00.793Z"
-    },
-    "CONTACT-131": {
-      "status": "Pass",
-      "actual": "Form inputs have associated labels/ids",
-      "testedAt": "2026-09-14T07:31:00.793Z"
-    },
-    "CONTACT-110": {
-      "status": "Pass",
-      "actual": "Visit Us section text present",
-      "testedAt": "2026-09-14T07:31:00.793Z"
-    },
-    "CONTACT-021": {
-      "status": "Pass",
-      "actual": "Call Us card / tel link present",
-      "testedAt": "2026-09-14T07:31:00.794Z"
-    },
-    "CONTACT-026": {
-      "status": "Pass",
-      "actual": "Email card / mailto link present",
-      "testedAt": "2026-09-14T07:31:00.794Z"
-    },
-    "CONTACT-027": {
-      "status": "Pass",
-      "actual": "WhatsApp CTA present",
-      "testedAt": "2026-09-14T07:31:00.794Z"
-    },
-    "CONTACT-020": {
-      "status": "Pass",
-      "actual": "Intro text section rendered",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-004": {
-      "status": "Blocked",
-      "actual": "Manual: verify footer/profile/error links to /contact",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-006": {
-      "status": "Blocked",
-      "actual": "Manual: disable all CMS sections",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-011": {
-      "status": "Blocked",
-      "actual": "Manual: set heroSection.isActive=false in CMS",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-012": {
-      "status": "Blocked",
-      "actual": "Manual: remove hero title in CMS",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-022": {
-      "status": "Blocked",
-      "actual": "Manual: desktop clipboard interaction",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-023": {
-      "status": "Blocked",
-      "actual": "Manual: mobile dialer interaction",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-024": {
-      "status": "Blocked",
-      "actual": "Manual: viewport resize phone behavior",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-025": {
-      "status": "Blocked",
-      "actual": "Manual: clipboard permission denied",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-028": {
-      "status": "Blocked",
-      "actual": "Manual: desktop 3-column card grid visual check",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-029": {
-      "status": "Blocked",
-      "actual": "Manual: mobile card stack visual check",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-030": {
-      "status": "Blocked",
-      "actual": "Manual: deactivate card in CMS",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-031": {
-      "status": "Blocked",
-      "actual": "Manual: card with empty value in CMS",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-041": {
-      "status": "Blocked",
-      "actual": "Manual: disable formSection in CMS",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-042": {
-      "status": "Blocked",
-      "actual": "Manual: remove formTag in CMS",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-043": {
-      "status": "Blocked",
-      "actual": "Manual: compare labels to CMS dynamicFields",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-050": {
-      "status": "Blocked",
-      "actual": "Manual: update CMS reason options live",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-062": {
-      "status": "Blocked",
-      "actual": "Manual: name min length interaction",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-063": {
-      "status": "Blocked",
-      "actual": "Manual: name max length interaction",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-064": {
-      "status": "Blocked",
-      "actual": "Manual: invalid name chars interaction",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-066": {
-      "status": "Blocked",
-      "actual": "Manual: +91 phone format interaction",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-067": {
-      "status": "Blocked",
-      "actual": "Manual: +1 phone format interaction",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-068": {
-      "status": "Blocked",
-      "actual": "Manual: +44 phone format interaction",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-069": {
-      "status": "Blocked",
-      "actual": "Manual: phone digit sanitization interaction",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-071": {
-      "status": "Blocked",
-      "actual": "Manual: email format interaction",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-074": {
-      "status": "Blocked",
-      "actual": "Manual: message min length interaction",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-077": {
-      "status": "Blocked",
-      "actual": "Manual: blur validation UX",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-080": {
-      "status": "Blocked",
-      "actual": "Manual: valid form submit (needs live API)",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-083": {
-      "status": "Blocked",
-      "actual": "Manual: network failure simulation",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-086": {
-      "status": "Blocked",
-      "actual": "Manual: double submit interaction",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-093": {
-      "status": "Blocked",
-      "actual": "Manual: compare checkbox style with cart",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-100": {
-      "status": "Blocked",
-      "actual": "Manual: logged-in Magento prefill",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-101": {
-      "status": "Blocked",
-      "actual": "Manual: prefill does not overwrite typed data",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-102": {
-      "status": "Blocked",
-      "actual": "Manual: prefill once only",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-103": {
-      "status": "Blocked",
-      "actual": "Manual: profile fetch failure simulation",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-111": {
-      "status": "Blocked",
-      "actual": "Manual: disable visitSection in CMS",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-112": {
-      "status": "Blocked",
-      "actual": "Manual: Visit Us CTA click",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-123": {
-      "status": "Blocked",
-      "actual": "Manual: og:image when configured in CMS",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-124": {
-      "status": "Blocked",
-      "actual": "Manual: empty CMS SEO fields",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-133": {
-      "status": "Blocked",
-      "actual": "Manual: keyboard tab order",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-142": {
-      "status": "Blocked",
-      "actual": "Manual: WhatsApp CTA label review",
-      "testedAt": "2026-09-14T07:31:00.795Z"
-    },
-    "CONTACT-153": {
-      "status": "Blocked",
-      "actual": "Manual: rate limiting check",
-      "testedAt": "2026-09-14T07:31:00.795Z"
+      "status": "Fail",
+      "actual": "Could not reach /contact: fetch failed",
+      "testedAt": "2026-09-16T09:45:08.517Z"
     },
     "CONTACT-045": {
       "status": "Pass",
       "actual": "Reason dropdown opens with CMS options (browser)",
-      "testedAt": "2026-09-14T07:31:00.795Z"
+      "testedAt": "2026-09-16T09:45:08.518Z"
     },
     "CONTACT-061": {
       "status": "Pass",
       "actual": "Name is required error shown on empty submit (browser)",
-      "testedAt": "2026-09-14T07:31:00.795Z"
+      "testedAt": "2026-09-16T09:45:08.519Z"
     },
     "CONTACT-065": {
       "status": "Pass",
       "actual": "Phone validation error on empty submit (browser)",
-      "testedAt": "2026-09-14T07:31:00.795Z"
+      "testedAt": "2026-09-16T09:45:08.519Z"
     },
     "CONTACT-070": {
       "status": "Pass",
       "actual": "Email is required error on empty submit (browser)",
-      "testedAt": "2026-09-14T07:31:00.795Z"
+      "testedAt": "2026-09-16T09:45:08.519Z"
     },
     "CONTACT-072": {
       "status": "Pass",
       "actual": "Please select a reason error on empty submit (browser)",
-      "testedAt": "2026-09-14T07:31:00.795Z"
+      "testedAt": "2026-09-16T09:45:08.519Z"
     },
     "CONTACT-073": {
       "status": "Pass",
       "actual": "Message required error on empty submit (browser)",
-      "testedAt": "2026-09-14T07:31:00.795Z"
+      "testedAt": "2026-09-16T09:45:08.519Z"
     },
     "CONTACT-076": {
       "status": "Pass",
       "actual": "Consent error shown when unchecked on submit (browser)",
-      "testedAt": "2026-09-14T07:31:00.795Z"
+      "testedAt": "2026-09-16T09:45:08.519Z"
+    },
+    "CONTACT-120": {
+      "status": "Pass",
+      "actual": "Live page title: Contact Us | Sunny Diamonds (browser)",
+      "testedAt": "2026-09-16T09:45:08.519Z"
     }
   }
 }

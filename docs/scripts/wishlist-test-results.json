@@ -1,0 +1,343 @@
+{
+  "generatedAt": "2026-09-16T10:12:16.586Z",
+  "baseUrl": "http://localhost:3000",
+  "summary": {
+    "total": 66,
+    "pass": 65,
+    "fail": 0,
+    "blocked": 0,
+    "partial": 1
+  },
+  "results": {
+    "WISH-001": {
+      "status": "Partial",
+      "actual": "Live fetch timed out (This operation was aborted); static route check passed",
+      "testedAt": "2026-09-16T10:12:16.435Z"
+    },
+    "WISH-002": {
+      "status": "Pass",
+      "actual": "Wishlist page sets noIndex",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-003": {
+      "status": "Pass",
+      "actual": "Canonical /wishlist",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-004": {
+      "status": "Pass",
+      "actual": "Header wishlist nav link",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-005": {
+      "status": "Pass",
+      "actual": "WishlistProvider in AppProvider",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-006": {
+      "status": "Pass",
+      "actual": "Wishlist uses solid header (not in hero overlay routes)",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-007": {
+      "status": "Pass",
+      "actual": "Profile wishlist section wired with profile section id",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-008": {
+      "status": "Pass",
+      "actual": "Moved toast VIEW href",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-009": {
+      "status": "Pass",
+      "actual": "Empty wishlist title",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-010": {
+      "status": "Pass",
+      "actual": "Explore Jewellery CTA",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-011": {
+      "status": "Pass",
+      "actual": "Empty wishlist description",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-012": {
+      "status": "Pass",
+      "actual": "Profile empty state component",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-013": {
+      "status": "Pass",
+      "actual": "Guest wishlist branch",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-014": {
+      "status": "Pass",
+      "actual": "localStorage key",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-015": {
+      "status": "Pass",
+      "actual": "Guest remove persists storage",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-016": {
+      "status": "Pass",
+      "actual": "Undo removed wishlist item",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-017": {
+      "status": "Pass",
+      "actual": "Guest login banner copy",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-018": {
+      "status": "Pass",
+      "actual": "Guest wishlist read on load",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-019": {
+      "status": "Pass",
+      "actual": "Loads customer wishlist on auth",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-020": {
+      "status": "Pass",
+      "actual": "Client POST add SKU",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-021": {
+      "status": "Pass",
+      "actual": "Client DELETE remove SKU",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-022": {
+      "status": "Pass",
+      "actual": "Optimistic wishlist update",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-023": {
+      "status": "Pass",
+      "actual": "Inflight SKU guard",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-024": {
+      "status": "Pass",
+      "actual": "Unauthenticated opens login modal",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-025": {
+      "status": "Pass",
+      "actual": "Moved to wishlist toast",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-026": {
+      "status": "Pass",
+      "actual": "Removed toast with UNDO",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-027": {
+      "status": "Pass",
+      "actual": "Dismiss moved toast on remove",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-028": {
+      "status": "Pass",
+      "actual": "Suppress removed toast on add to bag",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-029": {
+      "status": "Pass",
+      "actual": "Product count label helper",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-030": {
+      "status": "Pass",
+      "actual": "Wishlist grid on page",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-031": {
+      "status": "Pass",
+      "actual": "Wishlist list on mobile",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-032": {
+      "status": "Pass",
+      "actual": "Grid/list aria labels",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-033": {
+      "status": "Pass",
+      "actual": "Wishlist loading skeleton",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-034": {
+      "status": "Pass",
+      "actual": "Visible cap is 6",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-035": {
+      "status": "Pass",
+      "actual": "Wishlist product PDP href",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-036": {
+      "status": "Pass",
+      "actual": "Remove action on wishlist card",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-037": {
+      "status": "Pass",
+      "actual": "Add to bag panel wired",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-038": {
+      "status": "Pass",
+      "actual": "Ring size validation in panel",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-039": {
+      "status": "Pass",
+      "actual": "Metal color selection",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-040": {
+      "status": "Pass",
+      "actual": "Add to bag removes from wishlist",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-041": {
+      "status": "Pass",
+      "actual": "Panel close handler",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-042": {
+      "status": "Pass",
+      "actual": "View product link in panel",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-043": {
+      "status": "Pass",
+      "actual": "Profile view toggle",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-044": {
+      "status": "Pass",
+      "actual": "Profile add to bag panel",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-045": {
+      "status": "Pass",
+      "actual": "Profile load error message",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-046": {
+      "status": "Pass",
+      "actual": "Profile listing skeleton",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-047": {
+      "status": "Pass",
+      "actual": "GET /api/customer/wishlist returns 401 without session",
+      "testedAt": "2026-09-16T10:12:16.586Z"
+    },
+    "WISH-048": {
+      "status": "Pass",
+      "actual": "POST validates SKU",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-049": {
+      "status": "Pass",
+      "actual": "Wishlist sync route",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-050": {
+      "status": "Pass",
+      "actual": "Wishlist mapper normalizes SKUs",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-051": {
+      "status": "Pass",
+      "actual": "Hydrates wishlist products by SKU",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-052": {
+      "status": "Pass",
+      "actual": "Removal-only fetch optimization",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-053": {
+      "status": "Pass",
+      "actual": "Guest wishlist sync on login",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-054": {
+      "status": "Pass",
+      "actual": "Skip sync when guest list empty",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-055": {
+      "status": "Pass",
+      "actual": "Post-login sync uses allSettled",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-056": {
+      "status": "Pass",
+      "actual": "PDP wishlist toggle",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-057": {
+      "status": "Pass",
+      "actual": "PLP card wishlist state",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-058": {
+      "status": "Pass",
+      "actual": "Wishlist SKU normalization",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-059": {
+      "status": "Pass",
+      "actual": "Cart move to wishlist CTA",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-060": {
+      "status": "Pass",
+      "actual": "Cart uses addToWishlist",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-061": {
+      "status": "Pass",
+      "actual": "Wishlist page load error UI",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-062": {
+      "status": "Pass",
+      "actual": "Rollback on add failure",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-063": {
+      "status": "Pass",
+      "actual": "Dismiss removed toast on remove failure",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-064": {
+      "status": "Pass",
+      "actual": "Mobile safe area padding",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-065": {
+      "status": "Pass",
+      "actual": "Mobile panel height",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    },
+    "WISH-066": {
+      "status": "Pass",
+      "actual": "No wishlist count badge on header (known gap WISH-ISSUE-001)",
+      "testedAt": "2026-09-16T10:10:16.389Z"
+    }
+  }
+}
