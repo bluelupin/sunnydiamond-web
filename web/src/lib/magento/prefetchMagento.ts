@@ -1,7 +1,7 @@
 import { cache } from "react";
 import {
   createEmptyFilterState,
-  DEFAULT_JEWELLERY_LISTING_SORT,
+  parseJewelleryListingSortParam,
 } from "@/features/jewellery-product/data/filters";
 import { measureJewelleryPlpGraphql } from "@/features/jewellery-product/utils/jewelleryPlpPerformance";
 import { getMagentoJewelleryNavCategories } from "@/services/magento/categories/categories.service";
@@ -15,6 +15,7 @@ export const getCachedMagentoJewelleryNavCategories = cache(async () =>
 export type JewelleryListingPrefetchFilters = {
   collection?: string | null;
   occasion?: string | null;
+  sort?: string | null;
 };
 
 export const getCachedJewelleryListing = cache(
@@ -36,7 +37,7 @@ export const getCachedJewelleryListing = cache(
 
     const { listing } = await getMagentoJewelleryInitialListing({
       categoryUrlKey,
-      sortValue: DEFAULT_JEWELLERY_LISTING_SORT,
+      sortValue: parseJewelleryListingSortParam(listingFilters?.sort),
       filters,
       includeFacets: true,
     });

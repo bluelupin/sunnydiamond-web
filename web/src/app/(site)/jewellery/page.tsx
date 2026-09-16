@@ -25,6 +25,7 @@ type JewelleryListingSearchParams = {
   category?: string;
   minPrice?: string;
   maxPrice?: string;
+  sort?: string;
 };
 
 type PageProps = {
@@ -61,6 +62,7 @@ export default async function Page({ searchParams }: PageProps) {
     : await prefetchJewelleryListing(prefetchedCategoryUrlKey, {
         collection: params.collection,
         occasion: params.occasion,
+        sort: params.sort,
       });
   const page = await getProductLandingPage();
   const seo = resolveJewellerySeoMetadata(page);

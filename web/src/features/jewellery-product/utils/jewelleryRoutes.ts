@@ -90,6 +90,7 @@ export const PRESERVED_JEWELLERY_LISTING_SEARCH_PARAMS = [
   "fancyColour",
   "minPrice",
   "maxPrice",
+  "sort",
 ] as const;
 
 /** Prefer the live browser query string — tab changes use `replaceState`, so Next `searchParams` can be stale. */

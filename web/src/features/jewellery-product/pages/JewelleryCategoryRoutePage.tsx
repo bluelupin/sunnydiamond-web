@@ -29,6 +29,7 @@ type JewelleryCategoryRoutePageProps = {
     category?: string;
     minPrice?: string;
     maxPrice?: string;
+    sort?: string;
   }>;
 };
 
@@ -84,6 +85,7 @@ export async function JewelleryCategoryRoutePage({
       : prefetchJewelleryListing(categoryUrlKey, {
           collection: query.collection,
           occasion: query.occasion,
+          sort: query.sort,
         } satisfies JewelleryListingPrefetchFilters),
     getProductLandingPage(),
     getMagentoJewelleryNavCategories(),

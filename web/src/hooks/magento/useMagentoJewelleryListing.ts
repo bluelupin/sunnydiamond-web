@@ -7,7 +7,7 @@ import {
   getExactJewelleryPriceFilter,
   getJewelleryListingFiltersKey,
   hasActiveFilters,
-  DEFAULT_JEWELLERY_LISTING_SORT,
+  parseJewelleryListingSortParam,
 } from "@/features/jewellery-product/data/filters";
 import {
   clearMagentoJewelleryListingCache,
@@ -127,7 +127,11 @@ function seedInitialListingPageCaches(
 
 export function createJewelleryListingPrefetchParams(
   categoryUrlKey: string | null,
-  options?: { collectionSlug?: string | null; occasionSlug?: string | null },
+  options?: {
+    collectionSlug?: string | null;
+    occasionSlug?: string | null;
+    sortSlug?: string | null;
+  },
 ): JewelleryListingPrefetchParams {
   const filters = createEmptyFilterState();
   const collection = options?.collectionSlug?.trim();
@@ -143,7 +147,7 @@ export function createJewelleryListingPrefetchParams(
 
   return {
     categoryUrlKey,
-    sortValue: DEFAULT_JEWELLERY_LISTING_SORT,
+    sortValue: parseJewelleryListingSortParam(options?.sortSlug),
     pageSize: PAGE_SIZE,
     filters,
   };

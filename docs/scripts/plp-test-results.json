@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-09-16T03:11:59.798Z",
+  "generatedAt": "2026-09-16T05:23:13.097Z",
   "baseUrl": "http://localhost:3001",
   "summary": {
     "total": 78,
-    "pass": 70,
-    "fail": 8,
+    "pass": 71,
+    "fail": 7,
     "blocked": 0,
     "partial": 0
   },
@@ -12,392 +12,392 @@
     "PLP-001": {
       "status": "Pass",
       "actual": "GET /jewellery returned 200",
-      "testedAt": "2026-09-16T03:11:54.215Z"
+      "testedAt": "2026-09-16T05:23:09.624Z"
     },
     "PLP-002": {
       "status": "Pass",
       "actual": "GET /diamond-rings returned 200",
-      "testedAt": "2026-09-16T03:11:56.940Z"
+      "testedAt": "2026-09-16T05:23:10.136Z"
     },
     "PLP-003": {
       "status": "Pass",
       "actual": "GET /jewellery/diamond-rings returned 200",
-      "testedAt": "2026-09-16T03:11:57.325Z"
+      "testedAt": "2026-09-16T05:23:10.737Z"
     },
     "PLP-004": {
       "status": "Pass",
       "actual": "/jewellery-product returned redirect status 308",
-      "testedAt": "2026-09-16T03:11:57.327Z"
+      "testedAt": "2026-09-16T05:23:10.740Z"
     },
     "PLP-005": {
       "status": "Pass",
       "actual": "Hero section component wired",
-      "testedAt": "2026-09-16T03:11:53.221Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-006": {
       "status": "Pass",
       "actual": "Guarantees/trust badges section wired",
-      "testedAt": "2026-09-16T03:11:53.221Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-007": {
       "status": "Pass",
       "actual": "Grid skeleton during isLoading",
-      "testedAt": "2026-09-16T03:11:53.221Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-008": {
       "status": "Pass",
       "actual": "Route-level loading skeleton exists",
-      "testedAt": "2026-09-16T03:11:53.221Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-009": {
       "status": "Pass",
       "actual": "JSON-LD script present",
-      "testedAt": "2026-09-16T03:11:59.798Z"
+      "testedAt": "2026-09-16T05:23:13.097Z"
     },
     "PLP-010": {
       "status": "Pass",
       "actual": "JSON-LD present in HTML",
-      "testedAt": "2026-09-16T03:11:59.798Z"
+      "testedAt": "2026-09-16T05:23:13.097Z"
     },
     "PLP-011": {
       "status": "Pass",
       "actual": "PLP HTML payload received",
-      "testedAt": "2026-09-16T03:11:59.798Z"
+      "testedAt": "2026-09-16T05:23:13.097Z"
     },
     "PLP-019": {
       "status": "Pass",
       "actual": "collection in PRESERVED_JEWELLERY_LISTING_SEARCH_PARAMS",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-020": {
       "status": "Pass",
       "actual": "occasion in preserved params",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-021": {
       "status": "Pass",
       "actual": "minPrice in preserved params",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-022": {
       "status": "Pass",
       "actual": "Browser back/forward sync via popstate",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-023": {
       "status": "Pass",
       "actual": "Primary listing ?category= mode implemented",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-024": {
       "status": "Pass",
       "actual": "Drawer single category triggers tab nav",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-025": {
       "status": "Pass",
       "actual": "Filter drawer component wired",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-028": {
       "status": "Pass",
       "actual": "Filter drawer uses Apply pattern",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-029": {
       "status": "Pass",
       "actual": "Clear All in filter drawer",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-030": {
       "status": "Pass",
       "actual": "Metal Type filter section exists",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-031": {
       "status": "Pass",
       "actual": "Subcategory heading on category PLP",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-032": {
       "status": "Pass",
       "actual": "Gemstone Type dropdown exists",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-034": {
       "status": "Pass",
       "actual": "Price facet detection implemented",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-040": {
       "status": "Pass",
       "actual": "Price validation helper exists",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-043": {
       "status": "Pass",
       "actual": "PLP with minPrice/maxPrice URL params returns 200",
-      "testedAt": "2026-09-16T03:11:58.051Z"
+      "testedAt": "2026-09-16T05:23:11.769Z"
     },
     "PLP-044": {
       "status": "Pass",
       "actual": "maxPrice read from URL",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-046": {
       "status": "Pass",
       "actual": "Single-price catalog handling",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-047": {
       "status": "Pass",
       "actual": "Narrow span hides slider",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-048": {
       "status": "Pass",
       "actual": "Price reconciled on category change",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-049": {
       "status": "Pass",
       "actual": "Client-side price refinement for tax mismatch",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-050": {
       "status": "Pass",
       "actual": "Collection PLP loads; collection param in page",
-      "testedAt": "2026-09-16T03:11:57.716Z"
+      "testedAt": "2026-09-16T05:23:11.196Z"
     },
     "PLP-051": {
       "status": "Pass",
       "actual": "occasion slug from URL",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-052": {
       "status": "Pass",
       "actual": "diamondShape slug from URL",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-053": {
       "status": "Pass",
       "actual": "fancyColour slug from URL",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.663Z"
     },
     "PLP-054": {
       "status": "Fail",
       "actual": "No collection control in filter drawer (URL-only) — PLP-ISSUE-003",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-055": {
       "status": "Fail",
       "actual": "No occasion control in filter drawer (URL-only) — PLP-ISSUE-003",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-057": {
       "status": "Pass",
       "actual": "Primary listing ?collection=&category= returned 200",
-      "testedAt": "2026-09-16T03:11:58.854Z"
+      "testedAt": "2026-09-16T05:23:12.200Z"
     },
     "PLP-058": {
       "status": "Pass",
       "actual": "Featured sort option defined",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-059": {
       "status": "Pass",
       "actual": "Price Low to High option",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-060": {
       "status": "Pass",
       "actual": "Price High to Low option",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-061": {
       "status": "Pass",
       "actual": "Name A-Z option",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-062": {
       "status": "Pass",
       "actual": "Sort passed to listing hook",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-063": {
       "status": "Pass",
       "actual": "Searching overlay state wired",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-064": {
-      "status": "Fail",
+      "status": "Pass",
       "actual": "Sort not in URL preserved params — lost on refresh (PLP-ISSUE-002)",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-067": {
       "status": "Pass",
       "actual": "PAGE_SIZE is 9",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-068": {
       "status": "Pass",
       "actual": "Load more section wired",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-069": {
       "status": "Pass",
       "actual": "Product dedup on append",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-070": {
       "status": "Pass",
       "actual": "Filters included in query key",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-072": {
       "status": "Pass",
       "actual": "Load more hidden during search/load",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-073": {
       "status": "Pass",
       "actual": "Load more aria-live region",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-075": {
       "status": "Pass",
       "actual": "Product cards in grid",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-078": {
       "status": "Fail",
       "actual": "Expected: PDP link",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-079": {
       "status": "Pass",
       "actual": "Metal purity appended to PDP links",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-082": {
       "status": "Pass",
       "actual": "Wishlist toggle on PLP cards",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-085": {
       "status": "Pass",
       "actual": "Empty state component exists",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-086": {
       "status": "Pass",
       "actual": "Clear filters from empty state",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-088": {
       "status": "Fail",
       "actual": "Hook returns error but JewelleryProductPage never renders it (PLP-ISSUE-001)",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-089": {
       "status": "Fail",
       "actual": "No retry mechanism on listing fetch failure (PLP-ISSUE-001)",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-090": {
       "status": "Pass",
       "actual": "Page title: Handcrafted Brilliance",
-      "testedAt": "2026-09-16T03:11:59.798Z"
+      "testedAt": "2026-09-16T05:23:13.097Z"
     },
     "PLP-093": {
       "status": "Pass",
       "actual": "robots=noindex, nofollow",
-      "testedAt": "2026-09-16T03:11:59.411Z"
+      "testedAt": "2026-09-16T05:23:12.636Z"
     },
     "PLP-094": {
       "status": "Pass",
       "actual": "robots=noindex, nofollow",
-      "testedAt": "2026-09-16T03:11:59.798Z"
+      "testedAt": "2026-09-16T05:23:13.096Z"
     },
     "PLP-095": {
       "status": "Pass",
       "actual": "Responsive product grid",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-096": {
       "status": "Pass",
       "actual": "Mobile drawer breakpoint",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-097": {
       "status": "Pass",
       "actual": "Desktop sheet panel",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-099": {
       "status": "Pass",
       "actual": "Product count in toolbar",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-100": {
       "status": "Pass",
       "actual": "SSR listing prefetch",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-101": {
       "status": "Pass",
       "actual": "Gift-finder skips SSR prefetch",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-102": {
       "status": "Pass",
       "actual": "Collection/occasion passed to prefetch",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-103": {
       "status": "Pass",
       "actual": "PLP performance reporting",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-104": {
       "status": "Pass",
       "actual": "Client listing cache seeding",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-105": {
       "status": "Pass",
       "actual": "Homepage/gifting CTA href builder",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.664Z"
     },
     "PLP-106": {
       "status": "Pass",
       "actual": "Gift finder price params",
-      "testedAt": "2026-09-16T03:11:53.222Z"
+      "testedAt": "2026-09-16T05:23:08.665Z"
     },
     "PLP-114": {
       "status": "Fail",
       "actual": "preloadPlpHeroLcpImages not wired to jewellery PLP (PLP-ISSUE-007)",
-      "testedAt": "2026-09-16T03:11:53.223Z"
+      "testedAt": "2026-09-16T05:23:08.665Z"
     },
     "PLP-113": {
       "status": "Fail",
       "actual": "fetchMagentoJewelleryCollectionPage defined but never called (PLP-ISSUE-008)",
-      "testedAt": "2026-09-16T03:11:53.223Z"
+      "testedAt": "2026-09-16T05:23:08.665Z"
     },
     "PLP-092": {
       "status": "Pass",
-      "actual": "Canonical: https://sunnydiamonds-cms-dev.on-forge.com/jewellery",
-      "testedAt": "2026-09-16T03:11:59.798Z"
+      "actual": "Canonical: http://localhost:3000/jewellery",
+      "testedAt": "2026-09-16T05:23:13.097Z"
     },
     "PLP-091": {
       "status": "Pass",
       "actual": "Meta description present (Explore Sunny Diamonds jewellery collections including rings…)",
-      "testedAt": "2026-09-16T03:11:59.798Z"
+      "testedAt": "2026-09-16T05:23:13.097Z"
     },
     "PLP-012": {
       "status": "Pass",
-      "actual": "Rings PLP HTML length: 241584",
-      "testedAt": "2026-09-16T03:11:59.798Z"
+      "actual": "Rings PLP HTML length: 240967",
+      "testedAt": "2026-09-16T05:23:13.097Z"
     }
   }
 }

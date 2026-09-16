@@ -6,12 +6,38 @@ export const PAGE_SIZE = 9;
 
 export const DEFAULT_JEWELLERY_LISTING_SORT = "featured";
 
+export const JEWELLERY_LISTING_SORT_QUERY_PARAM = "sort";
+
 export const sortOptions: JewellerySortOption[] = [
   { value: "featured", label: "Featured" },
   { value: "price-asc", label: "Price: Low to High" },
   { value: "price-desc", label: "Price: High to Low" },
   { value: "name-asc", label: "Name: A to Z" },
 ];
+
+export function isValidJewelleryListingSort(value: string | null | undefined): boolean {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    return false;
+  }
+
+  return sortOptions.some((option) => option.value === trimmed);
+}
+
+export function parseJewelleryListingSortParam(value: string | null | undefined): string {
+  return isValidJewelleryListingSort(value) ? value!.trim() : DEFAULT_JEWELLERY_LISTING_SORT;
+}
+
+export function applyJewelleryListingSortParam(
+  params: URLSearchParams,
+  sortValue: string,
+): void {
+  params.delete(JEWELLERY_LISTING_SORT_QUERY_PARAM);
+
+  if (sortValue !== DEFAULT_JEWELLERY_LISTING_SORT) {
+    params.set(JEWELLERY_LISTING_SORT_QUERY_PARAM, sortValue);
+  }
+}
 
 export function getAvailableCategoryLabels(facets: JewelleryFilterFacets): string[] {
   return facets.categories.filter((category) => category.value).map((category) => category.label);

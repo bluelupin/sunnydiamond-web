@@ -15,13 +15,14 @@ import JewelleryProductGridSkeleton from "./skeletons/JewelleryProductGridSkelet
 import {
   createDefaultFilterState,
   createEmptyFilterState,
-  DEFAULT_JEWELLERY_LISTING_SORT,
   PAGE_SIZE,
   applyJewelleryPriceSearchParams,
+  applyJewelleryListingSortParam,
   hasActiveFilters,
   hasMagentoFilterFacets,
   isDefaultPriceRange,
   getSelectedMetalPurityQuery,
+  parseJewelleryListingSortParam,
   reconcileJewelleryPriceFilterState,
 } from "../data/filters";
 import {
@@ -106,7 +107,9 @@ const JewelleryProductPage = ({
     resolveSelectedCategoryUrlKey(pathname, categoryUrlKeyFromRoute, searchParams?.toString()),
   );
 
-  const [sortValue, setSortValue] = useState(DEFAULT_JEWELLERY_LISTING_SORT);
+  const [sortValue, setSortValue] = useState(() =>
+    parseJewelleryListingSortParam(searchParams?.get("sort")),
+  );
   const [filters, setFilters] = useState<JewelleryFilterState>(() => {
     const initial = createEmptyFilterState();
     if (occasionSlug?.trim()) {
@@ -140,6 +143,7 @@ const JewelleryProductPage = ({
       ? createJewelleryListingPrefetchParams(prefetchedCategoryUrlKey, {
           collectionSlug,
           occasionSlug,
+          sortSlug: searchParams?.get("sort"),
         })
       : undefined;
 
@@ -171,6 +175,11 @@ const JewelleryProductPage = ({
       resolveSelectedCategoryUrlKey(pathname, categoryUrlKeyFromRoute, searchParams?.toString()),
     );
   }, [pathname, categoryUrlKeyFromRoute, searchParams]);
+
+  useEffect(() => {
+    const sortFromUrl = parseJewelleryListingSortParam(searchParams?.get("sort"));
+    setSortValue((current) => (current === sortFromUrl ? current : sortFromUrl));
+  }, [searchParams]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -214,6 +223,7 @@ const JewelleryProductPage = ({
       setSelectedCategoryUrlKey(nextUrlKey);
       lastFacetsSyncedCategoryRef.current = nextUrlKey;
       facetsSyncedRef.current = true;
+      setSortValue(parseJewelleryListingSortParam(params.get("sort")));
 
       if (nextUrlKey === null) {
         setFilters({
@@ -548,6 +558,36 @@ const JewelleryProductPage = ({
     handleApplyFilters(createEmptyFilterState());
   }, [handleApplyFilters]);
 
+  const updateListingUrlParams = useCallback(
+    (mutate: (params: URLSearchParams) => void) => {
+      const params = readJewelleryListingUrlParams(searchParams?.toString());
+      mutate(params);
+
+      const currentPath =
+        typeof window !== "undefined" ? window.location.pathname : pathname ?? JEWELLERY_PATH;
+
+      if (hasPrimaryListingContext(params) || isJewelleryCategoryPath(currentPath)) {
+        replaceJewelleryListingUrl(selectedCategoryUrlKey, params);
+        return;
+      }
+
+      if (pathname) {
+        const query = params.toString();
+        router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+      }
+    },
+    [pathname, router, searchParams, selectedCategoryUrlKey],
+  );
+
+  const handleSortChange = useCallback(
+    (nextSort: string) => {
+      const normalized = parseJewelleryListingSortParam(nextSort);
+      setSortValue(normalized);
+      updateListingUrlParams((params) => applyJewelleryListingSortParam(params, normalized));
+    },
+    [updateListingUrlParams],
+  );
+
   const showFilterEmptyState =
     !isLoading && products.length === 0 && hasActiveFilters(filters, facets);
 
@@ -573,7 +613,7 @@ const JewelleryProductPage = ({
         productCount={totalCount}
         isSearching={isSearching}
         sortValue={sortValue}
-        onSortChange={setSortValue}
+        onSortChange={handleSortChange}
         onFilterOpen={handleOpenFilters}
         isFilterOpen={isFilterOpen}
       />
