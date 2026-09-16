@@ -142,6 +142,10 @@ const resolveCtaLabel = (
   return cleanText(cta?.label) ?? cleanText(fallback);
 };
 
+const resolveCtaUrl = (cta?: StrapiCareerCtaButton | null): string | undefined => {
+  return cleanText(cta?.url);
+};
+
 const mapFilterOptions = (
   filters?: Array<{ label?: string | null; value?: string | null }> | string[] | null,
 ): string[] => {
@@ -319,6 +323,8 @@ export const mapCareerOpening = (
     .map((item) => cleanText(item))
     .filter(Boolean) as string[];
 
+  const linkedinApplyUrl = resolveCtaUrl(opening.linkedinCta);
+
   return {
     id,
     slug: slug ?? id,
@@ -361,6 +367,12 @@ export const mapCareerOpening = (
       resolveCtaLabel(opening.applyCta) ??
       cleanText(opening.applyCtaLabel) ??
       cleanText(opening.applyLabel),
+    ...(linkedinApplyUrl
+      ? {
+          linkedinApplyUrl,
+          linkedinApplyOpenInNewTab: opening.linkedinCta?.openInNewTab === true,
+        }
+      : {}),
     isActive: opening.isActive !== false,
     isFeatured: opening.isFeatured === true,
     isNew: opening.isNew === true,

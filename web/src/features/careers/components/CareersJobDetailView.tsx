@@ -10,6 +10,7 @@ import type { CareerJob } from "@/features/careers/types";
 import { getCareerJobPath } from "@/features/careers/constants/careersRoutes";
 import CareersJobPageHeader from "./shared/CareersJobPageHeader";
 import CareersApplyOptionsModal from "./shared/CareersApplyOptionsModal";
+import { openCareerLinkedInApply } from "../utils/openCareerLinkedInApply";
 
 export type CareersJobDetailViewProps = {
   job: CareerJob;
@@ -179,7 +180,13 @@ const CareersJobDetailView = ({
         onOpenChange={setApplyModalOpen}
         onAutofillResume={(file) => onApply?.("resume", file)}
         onApplyManually={() => onApply?.("manual")}
-        onApplyLinkedIn={() => onApply?.("linkedin")}
+        onApplyLinkedIn={() => {
+          if (!job.linkedinApplyUrl) {
+            return;
+          }
+
+          openCareerLinkedInApply(job.linkedinApplyUrl, job.linkedinApplyOpenInNewTab);
+        }}
       />
     </section>
   );

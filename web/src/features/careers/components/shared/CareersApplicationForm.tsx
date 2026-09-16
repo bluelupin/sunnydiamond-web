@@ -21,7 +21,18 @@ import { useAuth } from "@/features/auth/context/AuthContext";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import { submitCareerApplication } from "@/services/careers/career-submission.service";
 import { isValidCtcLpa } from "@/services/careers/career-submission.mapper";
+import {
+  mergeCareerResumePrefill,
+  type CareerFormSnapshot,
+} from "@/services/careers/career-resume-parse.mapper";
+import { parseCareerResume } from "@/services/careers/career-resume-parse.service";
 import { resolveCareerApplicationFlow } from "@/services/careers/resolveCareerApplicationFlow";
+import { toast } from "@/shared/hooks/use-toast";
+import {
+  CAREERS_RESUME_PARSE_ERROR_MESSAGE,
+  CAREERS_RESUME_PARSE_LOADING_MESSAGE,
+  CAREERS_RESUME_PARSE_SUCCESS_MESSAGE,
+} from "@/features/careers/constants/careersCopy";
 import {
   CAREERS_NUMERIC_ONLY_ERROR,
   CAREERS_RESUME_ACCEPT,
@@ -106,18 +117,27 @@ const TagChip = ({ label, onRemove }: { label: string; onRemove: () => void }) =
 const careersBirthDateBounds = getCareersBirthDateBounds();
 
 const CareersApplicationForm = () => {
-  const { cms, selectedJob, goToSuccess, pendingResumeFile, clearPendingResume } =
-    useCareersJobs();
+  const {
+    cms,
+    selectedJob,
+    goToSuccess,
+    pendingResumeFile,
+    clearPendingResume,
+    applicationEntry,
+  } = useCareersJobs();
   const applicationFlow = resolveCareerApplicationFlow(cms.landing.applicationFlow);
   const { status } = useAuth();
   const isAuthenticated = status === "authenticated";
   const { contact: profileContact } = useCustomerProfileContact(isAuthenticated);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isParsingResume, setIsParsingResume] = useState(false);
   const [resumeValidationToastMessage, setResumeValidationToastMessage] = useState<string | null>(
     null,
   );
   const resumeValidationToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const resumeAutofillRequestedRef = useRef(false);
+  const parsedResumeKeyRef = useRef<string | null>(null);
 
   const resumeInputRef = useRef<HTMLInputElement>(null);
 
@@ -183,6 +203,110 @@ const CareersApplicationForm = () => {
     };
   }, []);
 
+  const attachResumeFile = useCallback((file: File) => {
+    setResumeFile(file);
+
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    if (resumeInputRef.current) {
+      resumeInputRef.current.files = dataTransfer.files;
+    }
+  }, []);
+
+  const getFormSnapshot = useCallback(
+    (): CareerFormSnapshot => ({
+      name,
+      countryCode,
+      phone,
+      email,
+      dateOfBirth,
+      gender,
+      highestDegree,
+      areaOfStudy,
+      yearOfCompletion,
+      relevantExperience,
+      currentCompany,
+      currentJobTitle,
+      currentCtc,
+      expectedCtc,
+      noticePeriod,
+      skills,
+      languages,
+    }),
+    [
+      areaOfStudy,
+      countryCode,
+      currentCompany,
+      currentCtc,
+      currentJobTitle,
+      dateOfBirth,
+      email,
+      expectedCtc,
+      gender,
+      highestDegree,
+      languages,
+      name,
+      noticePeriod,
+      phone,
+      relevantExperience,
+      skills,
+      yearOfCompletion,
+    ],
+  );
+
+  const applyFormSnapshot = useCallback((snapshot: CareerFormSnapshot) => {
+    setName(snapshot.name);
+    setCountryCode(snapshot.countryCode);
+    setPhone(snapshot.phone);
+    setEmail(snapshot.email);
+    setDateOfBirth(snapshot.dateOfBirth);
+    setGender(snapshot.gender);
+    setHighestDegree(snapshot.highestDegree);
+    setAreaOfStudy(snapshot.areaOfStudy);
+    setYearOfCompletion(snapshot.yearOfCompletion);
+    setRelevantExperience(snapshot.relevantExperience);
+    setCurrentCompany(snapshot.currentCompany);
+    setCurrentJobTitle(snapshot.currentJobTitle);
+    setCurrentCtc(snapshot.currentCtc);
+    setExpectedCtc(snapshot.expectedCtc);
+    setNoticePeriod(snapshot.noticePeriod);
+    setSkills(snapshot.skills);
+    setLanguages(snapshot.languages);
+  }, []);
+
+  const autofillFromResume = useCallback(
+    async (file: File) => {
+      const fileKey = `${file.name}:${file.size}:${file.lastModified}`;
+      if (parsedResumeKeyRef.current === fileKey) {
+        return;
+      }
+
+      setIsParsingResume(true);
+      toast({ title: CAREERS_RESUME_PARSE_LOADING_MESSAGE });
+
+      try {
+        const prefill = await parseCareerResume(file);
+        const merged = mergeCareerResumePrefill(prefill, getFormSnapshot(), {
+          genderOptions: applicationFlow.applicationForm.genderOptions,
+          workExperienceOptions: applicationFlow.applicationForm.workExperienceOptions,
+          noticePeriodOptions: applicationFlow.applicationForm.noticePeriodOptions,
+        });
+
+        applyFormSnapshot(merged);
+        parsedResumeKeyRef.current = fileKey;
+        toast({ title: CAREERS_RESUME_PARSE_SUCCESS_MESSAGE });
+      } catch (error) {
+        toast({
+          title: CAREERS_RESUME_PARSE_ERROR_MESSAGE,
+          description: error instanceof Error ? error.message : undefined,
+        });
+      } finally {
+        setIsParsingResume(false);
+      }
+    },
+    [applicationFlow.applicationForm, applyFormSnapshot, getFormSnapshot],
+  );
+
   useEffect(() => {
     if (!pendingResumeFile) {
       return;
@@ -195,16 +319,21 @@ const CareersApplicationForm = () => {
       return;
     }
 
-    setResumeFile(pendingResumeFile);
-
-    const dataTransfer = new DataTransfer();
-    dataTransfer.items.add(pendingResumeFile);
-    if (resumeInputRef.current) {
-      resumeInputRef.current.files = dataTransfer.files;
-    }
-
+    attachResumeFile(pendingResumeFile);
+    const shouldAutofill = applicationEntry === "resume";
     clearPendingResume();
-  }, [clearPendingResume, pendingResumeFile, showResumeValidationToast]);
+
+    if (shouldAutofill) {
+      void autofillFromResume(pendingResumeFile);
+    }
+  }, [
+    applicationEntry,
+    attachResumeFile,
+    autofillFromResume,
+    clearPendingResume,
+    pendingResumeFile,
+    showResumeValidationToast,
+  ]);
 
   useEffect(() => {
     if (!profileContact || hasAppliedProfilePrefill) {
@@ -312,27 +441,36 @@ const CareersApplicationForm = () => {
     const file = event.target.files?.[0];
     if (!file) {
       setResumeFile(null);
+      parsedResumeKeyRef.current = null;
       return;
     }
 
     const validationError = getCareersResumeValidationError(file);
     if (validationError) {
       setResumeFile(null);
+      parsedResumeKeyRef.current = null;
       event.target.value = "";
       showResumeValidationToast(validationError);
       return;
     }
 
-    setResumeFile(file);
+    attachResumeFile(file);
     setUploadResumeModalOpen(false);
+
+    if (resumeAutofillRequestedRef.current) {
+      resumeAutofillRequestedRef.current = false;
+      void autofillFromResume(file);
+    }
   };
 
-  const openResumeFilePicker = () => {
+  const openResumeFilePicker = (shouldAutofill = false) => {
+    resumeAutofillRequestedRef.current = shouldAutofill;
     resumeInputRef.current?.click();
   };
 
   const removeResume = () => {
     setResumeFile(null);
+    parsedResumeKeyRef.current = null;
     if (resumeInputRef.current) {
       resumeInputRef.current.value = "";
     }
@@ -501,6 +639,11 @@ const CareersApplicationForm = () => {
           </div>
         </div>
         {showError("resume") ? <FormFieldError message={errors.resume!} /> : null}
+        {isParsingResume ? (
+          <p className="font-gill text-sm font-light leading-110 text-neutral500">
+            {CAREERS_RESUME_PARSE_LOADING_MESSAGE}
+          </p>
+        ) : null}
 
         <section className={careersFormSectionClassName}>
           <h2 className={careersFormSectionTitleClassName}>
@@ -878,8 +1021,8 @@ const CareersApplicationForm = () => {
 
       <button
         type="submit"
-        disabled={!isFormComplete || isSubmitting}
-        className={cn(careersDarkCtaClassName, "w-full md:w-[193px]")}
+        disabled={!isFormComplete || isSubmitting || isParsingResume}
+        className={cn(careersDarkCtaClassName, "w-full md:w-fit")}
       >
         <span className="relative z-10">
           {isSubmitting ? CAREERS_SUBMITTING_APPLICATION_LABEL : applicationForm.submitLabel}
@@ -890,8 +1033,8 @@ const CareersApplicationForm = () => {
         uploadResumeModal={applicationForm.uploadResumeModal}
         open={uploadResumeModalOpen}
         onOpenChange={setUploadResumeModalOpen}
-        onOnlyUpload={openResumeFilePicker}
-        onAutofillResume={openResumeFilePicker}
+        onOnlyUpload={() => openResumeFilePicker(false)}
+        onAutofillResume={() => openResumeFilePicker(true)}
       />
 
       <CareersSubmitConfirmationModal

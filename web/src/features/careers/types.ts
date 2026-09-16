@@ -35,6 +35,10 @@ export type CareerJob = {
   additionalInfoTitle?: string;
   descriptionHtml?: string;
   applyLabel?: string;
+  /** LinkedIn job posting URL from CMS `linkedinCta.url`. */
+  linkedinApplyUrl?: string;
+  /** When true, open the LinkedIn posting in a new tab. */
+  linkedinApplyOpenInNewTab?: boolean;
   isNew?: boolean;
   isFeatured?: boolean;
 };

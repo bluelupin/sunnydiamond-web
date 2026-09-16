@@ -316,6 +316,7 @@ export type StrapiCareerOpeningEntity = {
   applyCta?: StrapiCareerCtaButton | string | null;
   applyCtaLabel?: string | null;
   applyLabel?: string | null;
+  linkedinCta?: StrapiCareerCtaButton | null;
   sortOrder?: number | null;
   isActive?: boolean | null;
   isFeatured?: boolean | null;

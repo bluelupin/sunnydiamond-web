@@ -34,6 +34,7 @@ const secondaryButtonClass = cn(careersOutlineCtaClassName, "w-full");
 
 type ApplyOptionsActionsProps = {
   applyModal: NormalizedCareerApplicationFlow["jobDetails"]["applyModal"];
+  linkedinApplyUrl?: string;
   onAutofillClick: () => void;
   onApplyManually: () => void;
   onApplyLinkedIn: () => void;
@@ -43,6 +44,7 @@ type ApplyOptionsActionsProps = {
 
 function ApplyOptionsActions({
   applyModal,
+  linkedinApplyUrl,
   onAutofillClick,
   onApplyManually,
   onApplyLinkedIn,
@@ -67,7 +69,9 @@ function ApplyOptionsActions({
       <button type="button" onClick={handleApplyManually} className={secondaryButtonClass}>
         <span className="relative z-10">{applyModal.applyManuallyLabel}</span>
       </button>
-      <DetailTextLink onClick={handleApplyLinkedIn}>{applyModal.applyLinkedInLabel}</DetailTextLink>
+      {linkedinApplyUrl ? (
+        <DetailTextLink onClick={handleApplyLinkedIn}>{applyModal.applyLinkedInLabel}</DetailTextLink>
+      ) : null}
     </>
   );
 
@@ -222,6 +226,7 @@ const CareersApplyOptionsModal = ({
 
   const actionProps = {
     applyModal,
+    linkedinApplyUrl: job.linkedinApplyUrl,
     onAutofillClick: handleAutofillClick,
     onApplyManually,
     onApplyLinkedIn,
