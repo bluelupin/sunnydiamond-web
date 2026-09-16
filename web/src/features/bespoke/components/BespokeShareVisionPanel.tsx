@@ -325,7 +325,10 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
                     {form.referenceImageButtonText}
                   </DetailTextLink>
                 )}
-                <FormFieldError id="bespoke-reference-image-error" message={referenceImageError} />
+                <FormFieldError
+                  id="bespoke-reference-image-error"
+                  message={referenceImageError ?? undefined}
+                />
               </div>
             </div>
           </div>
