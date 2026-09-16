@@ -26,7 +26,6 @@ import {
 } from "./productAttributeOptions.service";
 import { resolveCollectionFacetOption } from "@/features/jewellery-product/utils/collectionListing";
 import { resolveOccasionFacetOption } from "@/features/jewellery-product/utils/occasionListing";
-import { getMagentoProductsByCollection } from "./collectionProducts.service";
 import { MAGENTO_PRODUCT_COLLECTION_ATTRIBUTE } from "./magentoAttribute.utils";
 import type { MagentoProductListItem, MagentoProductsResponse } from "./magentoProduct.types";
 import type { JewelleryFilterFacets, JewelleryListingProductsData } from "@/types/magento/jewelleryListing";
@@ -49,33 +48,6 @@ import {
 import type { JewelleryNavCategoriesData } from "@/types/magento/jewelleryNav";
 
 const WISHLIST_SKU_BATCH_SIZE = 50;
-const COLLECTION_PLP_SCAN_LIMIT = 120;
-
-async function fetchMagentoJewelleryCollectionPage(
-  filters: JewelleryFilterState,
-  page: number,
-  pageSize: number,
-  signal?: AbortSignal,
-): Promise<{
-  products: JewelleryListingProduct[];
-  totalCount: number;
-  totalPages: number;
-}> {
-  const collectionProducts = await getMagentoProductsByCollection(
-    filters.collection,
-    COLLECTION_PLP_SCAN_LIMIT,
-    signal,
-  );
-  const totalCount = collectionProducts.length;
-  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
-  const start = (page - 1) * pageSize;
-
-  return {
-    products: collectionProducts.slice(start, start + pageSize),
-    totalCount,
-    totalPages,
-  };
-}
 
 type MagentoProductsBySkusResponse = {
   products?: {

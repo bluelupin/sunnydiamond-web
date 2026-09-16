@@ -28,7 +28,6 @@ KNOWN_GAPS = [
     "No error/retry UI when Magento listing fetch fails (hook returns error, page ignores it)",
     "Sort selection lost on full page refresh (not in URL)",
     "Gift-finder entry skips SSR prefetch (slower first paint)",
-    "fetchMagentoJewelleryCollectionPage() defined but never called",
     "Canonical URL points to CMS dev domain (sunnydiamonds-cms-dev.on-forge.com)",
 ]
 
@@ -114,7 +113,7 @@ ISSUES = [
         "Dead collection fetch helper",
         "fetchMagentoJewelleryCollectionPage() in products.service.ts is defined but never called.",
         "P3",
-        "Open",
+        "Resolved",
         "PLP-113",
         "",
     ),
