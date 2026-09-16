@@ -35,22 +35,22 @@ function FeaturedProductsHeader({
   return (
     <div className="flex w-full flex-col items-center gap-4 px-4 text-center md:px-0">
       {title ? (
-        <Reveal
-          as="h2"
+      <Reveal
+        as="h2"
           id={titleId}
-          direction="up"
+        direction="up"
           className="font-larken text-32 font-light leading-110 text-darkblack md:text-[40px] lg:text-5xl"
-        >
-          {title}
-        </Reveal>
+      >
+        {title}
+      </Reveal>
       ) : null}
       {description ? (
-        <Reveal
-          direction="up"
+      <Reveal
+        direction="up"
           className="max-w-[306px] font-gill text-base font-light leading-110 text-neutral500 lg:max-w-none lg:text-xl"
-        >
-          {description}
-        </Reveal>
+      >
+        {description}
+      </Reveal>
       ) : null}
     </div>
   );
@@ -61,8 +61,8 @@ export { FeaturedProductsHeader };
 const FeaturedCarouselSkeleton = () => (
   <div className="relative h-[275px] w-full sm:h-[303px] md:h-[411px]">
     <div className="absolute left-1/2 top-0 h-[155px] w-[200px] -translate-x-1/2 animate-pulse rounded bg-gray200 sm:h-[170px] sm:w-[260px] md:h-[259px] md:w-[600px]" aria-hidden />
-  </div>
-);
+    </div>
+  );
 
 export { FeaturedCarouselSkeleton };
 
@@ -120,17 +120,17 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
     >
       <div className="flex w-full max-w-full flex-col items-center gap-10 overflow-x-clip">
         {sectionTitle || description ? (
-          <FeaturedProductsHeader title={sectionTitle} description={description} />
+        <FeaturedProductsHeader title={sectionTitle} description={description} />
         ) : null}
         {isCarouselLoading ? (
           <FeaturedCarouselSkeleton />
         ) : (
-          <FeaturedProductsCarousel
-            items={items}
-            ctaLabel={ctaLabel}
+        <FeaturedProductsCarousel
+          items={items}
+          ctaLabel={ctaLabel}
             sectionLabel={sectionTitle || "Featured products"}
             showCta={Boolean(ctaLabel)}
-          />
+        />
         )}
       </div>
     </section>

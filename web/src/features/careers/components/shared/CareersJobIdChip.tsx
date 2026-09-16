@@ -3,6 +3,7 @@
 import { Check } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/shared/utils/cn";
+import { copyCareerJobId } from "@/features/careers/utils/copyCareerJobId";
 type CareersJobIdChipProps = {
   jobCode: string;
   className?: string;
@@ -35,13 +36,14 @@ const CareersJobIdChip = ({
   const handleCopy = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
 
-    try {
-      await navigator.clipboard.writeText(jobCode);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
+    const didCopy = await copyCareerJobId(jobCode);
+    if (!didCopy) {
       setCopied(false);
+      return;
     }
+
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2000);
   };
 
   if (alwaysInline) {

@@ -3,12 +3,8 @@
 import Reveal from "@/shared/Animation/Reveal";
 import type { NormalizedCareerOpeningsSection } from "@/services/careers/careers.types";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
-import {
-  getLandingCareerJobs,
-  getRelatedCareerJobs,
-} from "@/features/careers/utils/careersJobs";
+import { getRelatedCareerJobs } from "@/features/careers/utils/careersJobs";
 import CareersJobCard from "./shared/CareersJobCard";
-import CareersOpeningsEmptyState from "./shared/CareersOpeningsEmptyState";
 import CareersSectionCta from "./shared/CareersSectionCta";
 
 type CareersOpeningsSectionProps = {
@@ -17,7 +13,7 @@ type CareersOpeningsSectionProps = {
 
 const CareersOpeningsSection = ({ openings }: CareersOpeningsSectionProps) => {
   const { jobs, goToDetail, goToListings } = useCareersJobs();
-  const recentJobs = getLandingCareerJobs(jobs, 3);
+  const recentJobs = getRelatedCareerJobs(jobs, openings.relatedJobIds, 3);
 
   if (recentJobs.length === 0) {
     return null;

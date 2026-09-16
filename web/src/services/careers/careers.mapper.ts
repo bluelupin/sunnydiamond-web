@@ -766,30 +766,6 @@ export const mapCareerLandingPage = (
   };
 };
 
-const mergeCareerOpenings = (
-  primary?: StrapiCareerOpeningEntity[] | null,
-  embedded?: StrapiCareerOpeningEntity[] | null,
-): NormalizedCareerJob[] => {
-  const combined = [
-    ...coerceArray<StrapiCareerOpeningEntity>(primary),
-    ...coerceArray<StrapiCareerOpeningEntity>(embedded),
-  ];
-
-  const byKey = new Map<string, NormalizedCareerJob>();
-
-  for (const opening of combined) {
-    if (opening.isActive === false) continue;
-    const mapped = mapCareerOpening(opening);
-    if (!mapped) continue;
-    const key = mapped.slug || mapped.id;
-    if (!byKey.has(key)) {
-      byKey.set(key, mapped);
-    }
-  }
-
-  return [...byKey.values()];
-};
-
 const deriveFilterOptionsFromJobs = (jobs: readonly NormalizedCareerJob[]) => ({
   locations: [...new Set(jobs.map((job) => job.location))].sort(),
   departments: [...new Set(jobs.map((job) => job.department))].sort(),
@@ -917,13 +893,7 @@ export const mapCareersPageData = ({
 }): NormalizedCareersPageData => {
   const mappedLanding = mapCareerLandingPage(landing);
   const mappedListing = mapCareerListingPage(listing);
-  const embeddedOpenings =
-    landing?.openingsSection?.career_openings ??
-    landing?.openingsSection?.careerOpenings ??
-    landing?.openingsSection?.relatedCareerOpenings ??
-    landing?.currentOpeningsSection?.relatedCareerOpenings ??
-    null;
-  const mappedJobs = mergeCareerOpenings(openings, embeddedOpenings);
+  const mappedJobs = mapCareerOpenings(openings);
 
   const derivedFilters = deriveFilterOptionsFromJobs(mappedJobs);
   const listingWithFilters =

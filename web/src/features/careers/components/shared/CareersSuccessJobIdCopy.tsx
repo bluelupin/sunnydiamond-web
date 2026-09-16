@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
+import { copyCareerJobId } from "@/features/careers/utils/copyCareerJobId";
 
 type CareersSuccessJobIdCopyProps = {
   jobCode: string;
@@ -14,13 +15,14 @@ const CareersSuccessJobIdCopy = ({ jobCode, label, className }: CareersSuccessJo
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(jobCode);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
+    const didCopy = await copyCareerJobId(jobCode);
+    if (!didCopy) {
       setCopied(false);
+      return;
     }
+
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2000);
   };
 
   return (

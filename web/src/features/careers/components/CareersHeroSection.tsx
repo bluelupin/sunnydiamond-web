@@ -15,8 +15,9 @@ type CareersHeroSectionProps = {
 };
 
 const CareersHeroSection = ({ hero }: CareersHeroSectionProps) => {
-  const { flowStep, goToListings } = useCareersJobs();
-  const showCta = flowStep === "landing";
+  const { flowStep, goToListings, jobs } = useCareersJobs();
+  const hasOpenings = jobs.length > 0;
+  const showCta = flowStep === "landing" && hasOpenings && Boolean(hero.ctaLabel?.trim());
   const imageAlt = hero.image?.alt?.trim() || hero.title;
 
   return (

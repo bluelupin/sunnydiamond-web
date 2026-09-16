@@ -11,6 +11,7 @@ import CareersJobCard from "./shared/CareersJobCard";
 import CareersJobFiltersSidebar from "./shared/CareersJobFiltersSidebar";
 import CareersJobFiltersDrawer from "./shared/CareersJobFiltersDrawer";
 import CareersJobListingsEmptyState from "./shared/CareersJobListingsEmptyState";
+import CareersOpeningsEmptyState from "./shared/CareersOpeningsEmptyState";
 import {
   CAREERS_LISTING_CLEAR_FILTERS_LABEL,
   CAREERS_LISTING_PAGE_SIZE,
@@ -23,6 +24,7 @@ const LISTING_FILTER_EMPTY_DESCRIPTION =
 
 const CareersJobListingsSection = () => {
   const {
+    jobs,
     filteredJobs,
     searchQuery,
     setSearchQuery,
@@ -53,6 +55,18 @@ const CareersJobListingsSection = () => {
     setVisibleCount(CAREERS_LISTING_PAGE_SIZE);
   }, [searchQuery, locationFilter, departmentFilter, experienceFilter]);
 
+  if (jobs.length === 0) {
+    return (
+      <section
+        id="job-listing"
+        aria-labelledby="careers-openings-empty-title"
+        className="bg-white px-4 py-10 md:px-10 md:py-104"
+      >
+        <CareersOpeningsEmptyState />
+      </section>
+    );
+  }
+
   if (!listingHeading || !searchPlaceholder) {
     return null;
   }
@@ -64,9 +78,7 @@ const CareersJobListingsSection = () => {
       className="bg-white px-4 py-10 md:px-10 md:py-104"
     >
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-6">
-        <Reveal direction="up" className="hidden lg:block">
-          <CareersJobFiltersSidebar />
-        </Reveal>
+        <CareersJobFiltersSidebar />
 
         <div className="flex min-w-0 flex-1 flex-col gap-6">
           <Reveal direction="up">

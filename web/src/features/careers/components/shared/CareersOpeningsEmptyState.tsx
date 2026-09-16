@@ -9,7 +9,7 @@ import { WORLD_OF_SUNNY_PATH } from "@/shared/utils/navigation";
 const careersOpeningsEmptyStateContent = {
   title: "No Current Openings",
   description:
-    "There are no open roles at the moment. In the meantime, discover more about our story and what we stand for.",
+    "There are no open roles at the moment. In the meantime, discover more about our story and what we stand for:",
   ctaLabel: "LEARN MORE ABOUT US",
 } as const;
 
@@ -21,29 +21,27 @@ const CareersOpeningsEmptyState = () => {
 
   return (
     <div className="flex w-full items-center justify-center py-8 md:py-12">
-      <div className="flex w-full max-w-[464px] flex-col items-center gap-6 text-center md:gap-8">
+      <div className="flex w-full max-w-[464px] flex-col items-center gap-4 text-center md:gap-6">
         <Reveal direction="up">
-          <DiamondIcon className="size-8 text-gold500 md:size-10" />
+          <DiamondIcon className="size-10 text-gold500 md:size-16" />
         </Reveal>
-
-        <div className="flex w-full flex-col gap-3 md:gap-4">
+        <div className="flex w-full flex-col gap-4 md:gap-6">
           <Reveal
             as="h2"
             id="careers-openings-empty-title"
             direction="up"
-            className="font-larken text-32 font-light leading-110 text-darkblack md:text-4xl lg:text-5xl"
+            className="font-larken text-32 font-light leading-110 text-darkblack"
           >
             {title}
           </Reveal>
           <Reveal
             as="p"
             direction="up"
-            className="font-gill text-base font-light leading-110 text-neutral500 md:text-xl"
+            className="font-gill text-sm font-light leading-110 text-neutral500 md:text-base"
           >
             {description}
           </Reveal>
         </div>
-
         <Reveal direction="up">
           <Link
             href={WORLD_OF_SUNNY_PATH}
