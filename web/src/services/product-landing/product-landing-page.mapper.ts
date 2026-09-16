@@ -22,6 +22,25 @@ const cleanText = (value?: string | null): string | undefined => {
   return trimmed || undefined;
 };
 
+/** CMS may store a full Strapi host URL — always normalize to a site-relative path. */
+const normalizeCanonicalPath = (
+  canonicalUrl?: string | null,
+  fallback = "/jewellery",
+): string => {
+  const cleaned = cleanText(canonicalUrl);
+  if (!cleaned) return fallback;
+
+  try {
+    const pathname = new URL(cleaned).pathname.replace(/\/$/, "") || fallback;
+    return pathname.startsWith("/") ? pathname : `/${pathname}`;
+  } catch {
+    if (cleaned.startsWith("/")) {
+      return cleaned.replace(/\/$/, "") || fallback;
+    }
+    return fallback;
+  }
+};
+
 const resolveSectionActive = (
   isActive?: boolean | null,
   showField?: boolean | null,
@@ -67,7 +86,7 @@ const mapSeo = (seo?: StrapiProductLandingSeo | null): NormalizedProductLandingS
   return {
     metaTitle,
     metaDescription,
-    canonicalPath: cleanText(seo.canonicalUrl) ?? "/jewellery",
+    canonicalPath: normalizeCanonicalPath(seo.canonicalUrl),
     metaKeywords: cleanText(seo.metaKeywords),
     ...(ogImageUrl ? { ogImageUrl } : {}),
   };
