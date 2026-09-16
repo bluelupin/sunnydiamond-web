@@ -5,9 +5,10 @@ import EducationDiscoverJourneyPanel from "./EducationDiscoverJourneyPanel";
 
 type EducationDiscoverJourneyCtaProps = {
   label: string;
+  steps?: string[];
 };
 
-const EducationDiscoverJourneyCta = ({ label }: EducationDiscoverJourneyCtaProps) => {
+const EducationDiscoverJourneyCta = ({ label, steps = [] }: EducationDiscoverJourneyCtaProps) => {
   const [open, setOpen] = useState(false);
 
   return (
@@ -20,7 +21,11 @@ const EducationDiscoverJourneyCta = ({ label }: EducationDiscoverJourneyCtaProps
         <span className="relative z-[1]">{label}</span>
       </button>
 
-      <EducationDiscoverJourneyPanel open={open} onClose={() => setOpen(false)} />
+      <EducationDiscoverJourneyPanel
+        open={open}
+        onClose={() => setOpen(false)}
+        steps={steps}
+      />
     </>
   );
 };

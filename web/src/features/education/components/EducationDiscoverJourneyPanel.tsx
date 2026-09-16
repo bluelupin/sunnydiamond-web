@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, TriangleAlert } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
@@ -14,9 +13,11 @@ import { useResponsiveOverlayShell } from "@/shared/hooks/use-responsive-overlay
 import { categoryIconSrc } from "@/features/jewellery-product/data/categoryIcons";
 import {
   createEmptyFilterState,
+  getJewelleryPriceSliderStep,
   normalizeJewelleryPriceRange,
   parseJewelleryPriceInput,
 } from "@/features/jewellery-product/data/filters";
+import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
 import { mapMagentoCategoriesToPlpNav } from "@/features/jewellery-product/utils/plpCategoryNav";
 import { DIAMOND_SHAPE_OPTIONS } from "@/features/jewellery-product/utils/diamondShapeListing";
 import type { JewelleryCategory, JewelleryCategorySlug } from "@/features/jewellery-product/types";
@@ -25,28 +26,25 @@ import { useMagentoJewelleryNav } from "@/hooks/magento/useMagentoJewelleryNav";
 import { getMagentoJewelleryProducts } from "@/services/magento/products/products.service";
 import { EMPTY_JEWELLERY_FILTER_FACETS } from "@/services/magento/products/products.filters.mapper";
 import { diamondShapeIconByValue } from "../data/diamondShapeIcons";
+import {
+  DISCOVER_JOURNEY_PANEL_CONTENT_MAX_CLASS,
+  resolveDiscoverJourneyStepLabels,
+} from "../data/discoverJourney";
 import { buildEducationJourneyHref } from "../utils/educationJourneyRoutes";
+import EducationDiscoverJourneyStepper from "./EducationDiscoverJourneyStepper";
 
 type EducationDiscoverJourneyPanelProps = {
   open: boolean;
   onClose: () => void;
+  steps?: string[];
 };
 
 type JourneyStep = 1 | 2 | 3;
 
 const FALLBACK_MAX_PRICE = 300_000;
 
-const formatCurrency = (value: number) =>
-  new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(value);
-
 const rangeThumbClassName =
   "pointer-events-none col-start-1 row-start-1 z-20 h-[12px] w-full appearance-none bg-transparent [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:size-[12px] [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-darkblack [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:size-[12px] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-darkblack";
-
-const STEP_COPY: Record<JourneyStep, string> = {
-  1: "Step 1. Define your price range",
-  2: "Step 2. Choose your jewellery type",
-  3: "Step 3. Pick your preferred diamond shape",
-};
 
 function createFallbackFacets(): JewelleryFilterFacets {
   return {
@@ -63,17 +61,23 @@ const EDUCATION_JOURNEY_OVERLAY_CLASS = "z-[100] bg-[#1E1E1EBF] backdrop-blur-[3
 const EDUCATION_JOURNEY_SHELL_CLASS =
   "z-[100] flex min-h-0 flex-col gap-0 overflow-hidden border-0 bg-white p-0 shadow-2xl";
 
-const EducationDiscoverJourneyPanel = ({ open, onClose }: EducationDiscoverJourneyPanelProps) => {
+const EducationDiscoverJourneyPanel = ({
+  open,
+  onClose,
+  steps,
+}: EducationDiscoverJourneyPanelProps) => {
   const router = useRouter();
   const { data: navData } = useMagentoJewelleryNav();
   const { showMobileShell } = useResponsiveOverlayShell(open, EDUCATION_JOURNEY_MOBILE_QUERY);
+
+  const journeySteps = useMemo(() => resolveDiscoverJourneyStepLabels(steps), [steps]);
 
   const [step, setStep] = useState<JourneyStep>(1);
   const [facets, setFacets] = useState<JewelleryFilterFacets>(createFallbackFacets);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(FALLBACK_MAX_PRICE);
   const [minInputValue, setMinInputValue] = useState("0");
-  const [maxInputValue, setMaxInputValue] = useState(formatCurrency(FALLBACK_MAX_PRICE));
+  const [maxInputValue, setMaxInputValue] = useState(formatJewelleryPrice(FALLBACK_MAX_PRICE));
   const [minInputFocused, setMinInputFocused] = useState(false);
   const [maxInputFocused, setMaxInputFocused] = useState(false);
   const [categorySlug, setCategorySlug] = useState<JewelleryCategorySlug>("all");
@@ -102,6 +106,7 @@ const EducationDiscoverJourneyPanel = ({ open, onClose }: EducationDiscoverJourn
   const priceSpan = Math.max(facets.maxPrice - facets.minPrice, 1);
   const minPercent = ((minPrice - facets.minPrice) / priceSpan) * 100;
   const maxPercent = ((maxPrice - facets.minPrice) / priceSpan) * 100;
+  const priceSliderStep = getJewelleryPriceSliderStep(facets);
   const canProceedFromPrice = hasProducts && !isCheckingProducts;
 
   useEffect(() => {
@@ -135,8 +140,8 @@ const EducationDiscoverJourneyPanel = ({ open, onClose }: EducationDiscoverJourn
         setFacets(nextFacets);
         setMinPrice(nextFacets.minPrice);
         setMaxPrice(nextFacets.maxPrice);
-        setMinInputValue(formatCurrency(nextFacets.minPrice));
-        setMaxInputValue(formatCurrency(nextFacets.maxPrice));
+        setMinInputValue(formatJewelleryPrice(nextFacets.minPrice));
+        setMaxInputValue(formatJewelleryPrice(nextFacets.maxPrice));
         setHasProducts(data.totalCount > 0);
       } catch {
         if (cancelled) return;
@@ -144,8 +149,8 @@ const EducationDiscoverJourneyPanel = ({ open, onClose }: EducationDiscoverJourn
         setFacets(fallback);
         setMinPrice(fallback.minPrice);
         setMaxPrice(fallback.maxPrice);
-        setMinInputValue(formatCurrency(fallback.minPrice));
-        setMaxInputValue(formatCurrency(fallback.maxPrice));
+        setMinInputValue(formatJewelleryPrice(fallback.minPrice));
+        setMaxInputValue(formatJewelleryPrice(fallback.maxPrice));
         setHasProducts(true);
       }
     })();
@@ -202,10 +207,10 @@ const EducationDiscoverJourneyPanel = ({ open, onClose }: EducationDiscoverJourn
     setMinPrice(normalized.minPrice);
     setMaxPrice(normalized.maxPrice);
     if (!minInputFocused) {
-      setMinInputValue(formatCurrency(normalized.minPrice));
+      setMinInputValue(formatJewelleryPrice(normalized.minPrice));
     }
     if (!maxInputFocused) {
-      setMaxInputValue(formatCurrency(normalized.maxPrice));
+      setMaxInputValue(formatJewelleryPrice(normalized.maxPrice));
     }
   };
 
@@ -217,8 +222,8 @@ const EducationDiscoverJourneyPanel = ({ open, onClose }: EducationDiscoverJourn
 
     setMinPrice(normalized.minPrice);
     setMaxPrice(normalized.maxPrice);
-    setMinInputValue(formatCurrency(normalized.minPrice));
-    setMaxInputValue(formatCurrency(normalized.maxPrice));
+    setMinInputValue(formatJewelleryPrice(normalized.minPrice));
+    setMaxInputValue(formatJewelleryPrice(normalized.maxPrice));
     setMinInputFocused(false);
   };
 
@@ -230,8 +235,8 @@ const EducationDiscoverJourneyPanel = ({ open, onClose }: EducationDiscoverJourn
 
     setMinPrice(normalized.minPrice);
     setMaxPrice(normalized.maxPrice);
-    setMinInputValue(formatCurrency(normalized.minPrice));
-    setMaxInputValue(formatCurrency(normalized.maxPrice));
+    setMinInputValue(formatJewelleryPrice(normalized.minPrice));
+    setMaxInputValue(formatJewelleryPrice(normalized.maxPrice));
     setMaxInputFocused(false);
   };
 
@@ -276,7 +281,7 @@ const EducationDiscoverJourneyPanel = ({ open, onClose }: EducationDiscoverJourn
     <>
       <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain DrawerVerticleScrollbar">
         <div className={RIGHT_PANEL_HEADER_PADDING_CLASS}>
-          <div className="mx-auto flex h-8 w-full max-w-[392px] items-center justify-between gap-3">
+          <div className="mx-auto flex w-full items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
               {step > 1 ? (
                 <button
@@ -297,136 +302,148 @@ const EducationDiscoverJourneyPanel = ({ open, onClose }: EducationDiscoverJourn
               aria-label="Close discover journey panel"
             />
           </div>
-          <div className="mx-auto mt-6 h-px w-full max-w-[392px] bg-neutral300" aria-hidden />
+          {/* <div
+            className={cn("mx-auto mt-6 h-px w-full bg-neutral300", DISCOVER_JOURNEY_PANEL_CONTENT_MAX_CLASS)}
+            aria-hidden
+          /> */}
+          <div className={cn("mx-auto mt-6 w-full", DISCOVER_JOURNEY_PANEL_CONTENT_MAX_CLASS)}>
+            <EducationDiscoverJourneyStepper steps={journeySteps} activeStep={step} />
+          </div>
         </div>
 
-        <div className="md:px-6 px-4 pt-6">
-          <div className="mx-auto flex w-full max-w-[392px] flex-col gap-8 pb-72">
-            <p className="font-gill text-sm font-light leading-110 text-neutral500">
-              {STEP_COPY[step]}
-            </p>
-
-            {step === 1 && hasPriceRange ? (
-              <div className="flex flex-col gap-6">
-                <div className="flex flex-col gap-3">
-                  <div className="grid h-3 grid-cols-1 grid-rows-1 items-center">
-                    <div
-                      className="col-start-1 row-start-1 h-1 rounded-[70px] bg-neutral300"
-                      aria-hidden
-                    />
-                    <div
-                      className="col-start-1 row-start-1 h-[3px] rounded-[70px] bg-darkblack"
-                      style={{
-                        marginLeft: `${minPercent}%`,
-                        width: `${Math.max(maxPercent - minPercent, 0)}%`,
-                      }}
-                      aria-hidden
-                    />
-                    <input
-                      type="range"
-                      min={facets.minPrice}
-                      max={facets.maxPrice}
-                      step={500}
-                      value={minPrice}
-                      onChange={(event) =>
-                        updatePriceRange(Number(event.target.value), maxPrice)
-                      }
-                      className={rangeThumbClassName}
-                      aria-label="Minimum price"
-                    />
-                    <input
-                      type="range"
-                      min={facets.minPrice}
-                      max={facets.maxPrice}
-                      step={500}
-                      value={maxPrice}
-                      onChange={(event) =>
-                        updatePriceRange(minPrice, Number(event.target.value))
-                      }
-                      className={cn(rangeThumbClassName, "z-30")}
-                      aria-label="Maximum price"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <label className="flex min-w-0 flex-1 flex-col">
-                    <span className="sr-only">Minimum price</span>
-                    <span
-                      className={cn(
-                        "flex h-14 items-center gap-1 bg-aboutInactive px-3 font-gill text-sm font-normal leading-110 text-darkblack",
-                        minInputFocused && "border border-neutral500",
-                      )}
-                    >
-                      <span aria-hidden>₹</span>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        value={minInputFocused ? minInputValue : formatCurrency(minPrice)}
-                        onFocus={() => {
-                          setMinInputFocused(true);
-                          setMinInputValue(String(minPrice));
-                        }}
-                        onBlur={commitMinAmountInput}
-                        onChange={(event) => {
-                          const nextValue = event.target.value.replace(/[^\d,]/g, "");
-                          setMinInputValue(nextValue);
-
-                          const trimmed = nextValue.replace(/,/g, "").trim();
-                          if (!trimmed) {
-                            return;
-                          }
-
-                          const parsed = Number(trimmed);
-                          if (Number.isFinite(parsed)) {
-                            updatePriceRange(Math.max(0, Math.round(parsed)), maxPrice);
-                          }
-                        }}
-                        className="min-w-0 flex-1 bg-transparent outline-none"
-                      />
-                    </span>
-                  </label>
-                  <label className="flex min-w-0 flex-1 flex-col">
-                    <span className="sr-only">Maximum price</span>
-                    <span
-                      className={cn(
-                        "flex h-14 items-center gap-1 bg-aboutInactive px-3 font-gill text-sm font-normal leading-110 text-darkblack",
-                        maxInputFocused && "border border-neutral500",
-                      )}
-                    >
-                      <span aria-hidden>₹</span>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        value={maxInputFocused ? maxInputValue : formatCurrency(maxPrice)}
-                        onFocus={() => {
-                          setMaxInputFocused(true);
-                          setMaxInputValue(String(maxPrice));
-                        }}
-                        onBlur={commitMaxAmountInput}
-                        onChange={(event) => {
-                          const nextValue = event.target.value.replace(/[^\d,]/g, "");
-                          setMaxInputValue(nextValue);
-
-                          const trimmed = nextValue.replace(/,/g, "").trim();
-                          if (!trimmed) {
-                            return;
-                          }
-
-                          const parsed = Number(trimmed);
-                          if (Number.isFinite(parsed)) {
-                            updatePriceRange(minPrice, Math.max(0, Math.round(parsed)));
-                          }
-                        }}
-                        className="min-w-0 flex-1 bg-transparent outline-none"
-                      />
-                    </span>
-                  </label>
-                </div>
+        <div
+          className={cn(
+            "mx-auto flex w-full flex-col gap-6 pb-72 pt-6 md:px-2 px-4",
+            DISCOVER_JOURNEY_PANEL_CONTENT_MAX_CLASS,
+          )}
+        >
+          {step === 1 && hasPriceRange ? (
+            <section className="flex flex-col gap-6">
+              <div className="grid h-[12px] grid-cols-1 grid-rows-1 items-center">
+                <div
+                  className="col-start-1 row-start-1 h-[4px] rounded-[70px] bg-neutral300"
+                  aria-hidden
+                />
+                <div
+                  className="col-start-1 row-start-1 h-[3px] rounded-[70px] bg-darkblack"
+                  style={{
+                    marginLeft: `${minPercent}%`,
+                    width: `${Math.max(maxPercent - minPercent, 0)}%`,
+                  }}
+                  aria-hidden
+                />
+                <input
+                  type="range"
+                  min={facets.minPrice}
+                  max={facets.maxPrice}
+                  step={priceSliderStep}
+                  value={minPrice}
+                  onChange={(event) =>
+                    updatePriceRange(Number(event.target.value), maxPrice)
+                  }
+                  className={rangeThumbClassName}
+                  aria-label="Minimum price"
+                />
+                <input
+                  type="range"
+                  min={facets.minPrice}
+                  max={facets.maxPrice}
+                  step={priceSliderStep}
+                  value={maxPrice}
+                  onChange={(event) =>
+                    updatePriceRange(minPrice, Number(event.target.value))
+                  }
+                  className={cn(rangeThumbClassName, "z-30")}
+                  aria-label="Maximum price"
+                />
               </div>
-            ) : null}
 
-            {step === 2 ? (
+              <div className="flex items-center gap-3">
+                <label className="flex min-w-0 flex-1">
+                  <span className="sr-only">Minimum price</span>
+                  <span
+                    className={cn(
+                      "flex h-14 w-full items-center gap-1 bg-aboutInactive px-3 font-gill text-sm font-normal leading-110 text-darkblack",
+                      minInputFocused && "border border-neutral500",
+                    )}
+                  >
+                    <span aria-hidden>₹</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={
+                        minInputFocused ? minInputValue : formatJewelleryPrice(minPrice)
+                      }
+                      onFocus={() => {
+                        setMinInputFocused(true);
+                        setMinInputValue(formatJewelleryPrice(minPrice));
+                      }}
+                      onBlur={commitMinAmountInput}
+                      onChange={(event) => {
+                        const nextValue = event.target.value;
+                        setMinInputValue(nextValue);
+
+                        const trimmed = nextValue.replace(/,/g, "").trim();
+                        if (!trimmed) {
+                          return;
+                        }
+
+                        const parsed = Number(trimmed);
+                        if (Number.isFinite(parsed)) {
+                          updatePriceRange(Math.max(0, Math.round(parsed)), maxPrice);
+                        }
+                      }}
+                      className="min-w-0 flex-1 bg-transparent outline-none"
+                    />
+                  </span>
+                </label>
+                <span className="shrink-0 font-gill text-sm font-light leading-110 text-darkblack" aria-hidden>
+                  —
+                </span>
+                <label className="flex min-w-0 flex-1">
+                  <span className="sr-only">Maximum price</span>
+                  <span
+                    className={cn(
+                      "flex h-14 w-full items-center gap-1 bg-aboutInactive px-3 font-gill text-sm font-normal leading-110 text-darkblack",
+                      maxInputFocused && "border border-neutral500",
+                    )}
+                  >
+                    <span aria-hidden>₹</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={
+                        maxInputFocused ? maxInputValue : formatJewelleryPrice(maxPrice)
+                      }
+                      onFocus={() => {
+                        setMaxInputFocused(true);
+                        setMaxInputValue(formatJewelleryPrice(maxPrice));
+                      }}
+                      onBlur={commitMaxAmountInput}
+                      onChange={(event) => {
+                        const nextValue = event.target.value;
+                        setMaxInputValue(nextValue);
+
+                        const trimmed = nextValue.replace(/,/g, "").trim();
+                        if (!trimmed) {
+                          return;
+                        }
+
+                        const parsed = Number(trimmed);
+                        if (Number.isFinite(parsed)) {
+                          updatePriceRange(minPrice, Math.max(0, Math.round(parsed)));
+                        }
+                      }}
+                      className="min-w-0 flex-1 bg-transparent outline-none"
+                    />
+                  </span>
+                </label>
+              </div>
+            </section>
+          ) : null}
+
+          {step === 2 ? (
+            <section className="flex flex-col gap-4">
               <div className="grid grid-cols-4 gap-x-3 gap-y-6">
                 {(categories.length > 0
                   ? categories
@@ -446,7 +463,7 @@ const EducationDiscoverJourneyPanel = ({ open, onClose }: EducationDiscoverJourn
                       <span
                         className={cn(
                           "flex size-14 items-center justify-center rounded-full",
-                          isSelected ? "bg-aboutInactive" : "bg-transparent",
+                          isSelected ? "bg-gold300" : "bg-transparent",
                         )}
                       >
                         <Icon
@@ -471,9 +488,11 @@ const EducationDiscoverJourneyPanel = ({ open, onClose }: EducationDiscoverJourn
                   );
                 })}
               </div>
-            ) : null}
+            </section>
+          ) : null}
 
-            {step === 3 ? (
+          {step === 3 ? (
+            <section className="flex flex-col gap-4">
               <div className="grid grid-cols-4 gap-x-3 gap-y-6">
                 {DIAMOND_SHAPE_OPTIONS.map((option) => {
                   const isSelected = option.value === diamondShapeValue;
@@ -487,7 +506,12 @@ const EducationDiscoverJourneyPanel = ({ open, onClose }: EducationDiscoverJourn
                       aria-pressed={isSelected}
                       className="flex flex-col items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
                     >
-                      <span className="flex size-14 items-center justify-center">
+                      <span
+                        className={cn(
+                          "flex size-14 items-center justify-center rounded-full",
+                          isSelected ? "bg-gold300" : "bg-transparent",
+                        )}
+                      >
                         {Icon ? (
                           <Icon
                             className={cn(
@@ -511,36 +535,41 @@ const EducationDiscoverJourneyPanel = ({ open, onClose }: EducationDiscoverJourn
                   );
                 })}
               </div>
-            ) : null}
-          </div>
+            </section>
+          ) : null}
         </div>
       </div>
 
-        <PanelFooter
-          className="max-md:pb-[env(safe-area-inset-bottom,0px)]"
-          contentClassName="border-t-[0.5px] border-neutral300 px-0 py-6 lg:px-6 md:px-6 px-4"
+      <PanelFooter
+        className="max-md:pb-[env(safe-area-inset-bottom,0px)]"
+        contentClassName="border-t-[0.5px] border-neutral300 px-0 py-6 lg:px-6 md:px-6 px-4"
+      >
+        <div
+          className={cn(
+            "mx-auto flex w-full flex-col gap-4",
+            DISCOVER_JOURNEY_PANEL_CONTENT_MAX_CLASS,
+          )}
         >
-          <div className="mx-auto flex w-full max-w-[392px] flex-col gap-4">
-            {step === 1 && !hasProducts ? (
-              <div
-                role="status"
-                className="flex items-center gap-2 bg-yellow100 px-3 py-3 font-gill text-sm font-normal leading-110 text-darkblack"
-              >
-                <TriangleAlert className="size-4 shrink-0 text-yellow600" aria-hidden />
-                <span>No products found for this price range.</span>
-              </div>
-            ) : null}
-
-            <button
-              type="button"
-              onClick={handlePrimaryAction}
-              disabled={step === 1 && !canProceedFromPrice}
-              className="btn-dark-slide inline-flex h-14 w-full items-center justify-center border border-darkblack px-7 py-5 font-gill text-sm font-normal uppercase leading-110 text-white disabled:cursor-not-allowed disabled:border-neutral300 disabled:bg-neutral300 disabled:text-white disabled:opacity-100"
+          {step === 1 && !hasProducts ? (
+            <div
+              role="status"
+              className="flex items-center gap-2 bg-yellow100 px-3 py-3 font-gill text-sm font-normal leading-110 text-darkblack"
             >
-              <span className="relative z-10">{step === 3 ? "View Products" : "Proceed"}</span>
-            </button>
-          </div>
-        </PanelFooter>
+              <TriangleAlert className="size-4 shrink-0 text-yellow600" aria-hidden />
+              <span>No products found for this price range.</span>
+            </div>
+          ) : null}
+
+          <button
+            type="button"
+            onClick={handlePrimaryAction}
+            disabled={step === 1 && !canProceedFromPrice}
+            className="btn-dark-slide inline-flex h-14 w-full items-center justify-center border border-darkblack px-7 py-5 font-gill text-sm font-normal uppercase leading-110 text-white disabled:cursor-not-allowed disabled:border-neutral300 disabled:bg-neutral300 disabled:text-white disabled:opacity-100"
+          >
+            <span className="relative z-10">{step === 3 ? "View Products" : "Proceed"}</span>
+          </button>
+        </div>
+      </PanelFooter>
     </>
   );
 
