@@ -10,6 +10,7 @@ import JewelleryProductGrid from "./JewelleryProductGrid";
 import JewelleryFilterDrawer from "./JewelleryFilterDrawer";
 import JewelleryLoadMoreSection from "./JewelleryLoadMoreSection";
 import JewelleryListingEmptyState from "./JewelleryListingEmptyState";
+import JewelleryListingErrorState from "./JewelleryListingErrorState";
 import JewelleryGuaranteesSection from "./JewelleryGuaranteesSection";
 import JewelleryProductGridSkeleton from "./skeletons/JewelleryProductGridSkeleton";
 import {
@@ -192,8 +193,10 @@ const JewelleryProductPage = ({
     isLoading,
     isSearching,
     isLoadingMore,
+    error,
     hasMore,
     loadMore,
+    retryListing,
   } = useMagentoJewelleryListing({
     categoryUrlKey: selectedCategoryUrlKey,
     sortValue,
@@ -626,8 +629,10 @@ const JewelleryProductPage = ({
     [updateListingUrlParams],
   );
 
+  const showListingError = !isLoading && Boolean(error) && products.length === 0;
+  const showLoadMoreError = Boolean(error) && products.length > 0;
   const showFilterEmptyState =
-    !isLoading && products.length === 0 && hasActiveFilters(filters, facets);
+    !isLoading && !showListingError && products.length === 0 && hasActiveFilters(filters, facets);
 
   const metalPurityQuery = useMemo(
     () => getSelectedMetalPurityQuery(filters.metalPurities, facets),
@@ -659,6 +664,8 @@ const JewelleryProductPage = ({
       <section className="relative isolate z-0 w-full bg-gray200 pb-0 md:pb-10">
         {isLoading ? (
           <JewelleryProductGridSkeleton count={PAGE_SIZE} />
+        ) : showListingError ? (
+          <JewelleryListingErrorState message={error} onRetry={retryListing} />
         ) : showFilterEmptyState ? (
           <JewelleryListingEmptyState onClearFilters={handleClearFilters} />
         ) : (
@@ -678,6 +685,8 @@ const JewelleryProductPage = ({
           hasMore={hasMore}
           isLoadingMore={isLoadingMore}
           onLoadMore={loadMore}
+          loadMoreError={showLoadMoreError ? error : undefined}
+          onRetryLoadMore={loadMore}
         />
       ) : null}
 

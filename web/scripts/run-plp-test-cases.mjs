@@ -183,16 +183,14 @@ async function runStaticChecks() {
   // J. Empty State & Errors
   assertSource("PLP-085", "filter empty state", emptyState, "JewelleryListingEmptyState", "Empty state component exists");
   assertSource("PLP-086", "clear from empty state", plpComponent, "handleClearFilters", "Clear filters from empty state");
-  record(
+  assertSource(
     "PLP-088",
-    plpComponent.includes("error") && plpComponent.includes("{error") ? "Pass" : "Fail",
-    plpComponent.includes("{error") ? "Error UI rendered" : "Hook returns error but JewelleryProductPage never renders it (PLP-ISSUE-001)",
+    "listing error UI",
+    plpComponent,
+    "JewelleryListingErrorState",
+    "Error UI rendered on listing fetch failure",
   );
-  record(
-    "PLP-089",
-    plpComponent.includes("retry") || plpComponent.includes("onRetry") ? "Pass" : "Fail",
-    "No retry mechanism on listing fetch failure (PLP-ISSUE-001)",
-  );
+  assertSource("PLP-089", "retry listing", plpComponent, "retryListing", "Retry mechanism on listing fetch failure");
 
   // K. SEO
   assertSource("PLP-090", "CMS SEO metadata", jewelleryPage, "resolveJewellerySeoMetadata", "CMS SEO metadata resolver");
@@ -389,9 +387,6 @@ async function runLiveChecks(baseUrl) {
 function applyKnownGapFindings() {
   if (!results["PLP-064"]) {
     record("PLP-064", "Fail", "Sort not persisted in URL — PLP-ISSUE-002");
-  }
-  if (!results["PLP-088"]) {
-    record("PLP-088", "Fail", "No error UI on listing failure — PLP-ISSUE-001");
   }
 }
 

@@ -285,14 +285,14 @@
       "testedAt": "2026-09-16T05:57:01.310Z"
     },
     "PLP-088": {
-      "status": "Fail",
-      "actual": "Hook returns error but JewelleryProductPage never renders it (PLP-ISSUE-001)",
-      "testedAt": "2026-09-16T05:57:01.311Z"
+      "status": "Pass",
+      "actual": "Error UI rendered on listing fetch failure",
+      "testedAt": "2026-09-16T06:12:00.000Z"
     },
     "PLP-089": {
-      "status": "Fail",
-      "actual": "No retry mechanism on listing fetch failure (PLP-ISSUE-001)",
-      "testedAt": "2026-09-16T05:57:01.311Z"
+      "status": "Pass",
+      "actual": "Retry mechanism on listing fetch failure",
+      "testedAt": "2026-09-16T06:12:00.000Z"
     },
     "PLP-090": {
       "status": "Pass",

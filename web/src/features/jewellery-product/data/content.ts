@@ -56,3 +56,11 @@ export const jewelleryListingEmptyStateContent = {
   filterDescription: "Try adjusting your filters to see more products.",
   clearFiltersLabel: "Clear All Filters",
 } as const;
+
+export const jewelleryListingErrorStateContent = {
+  listingTitle: "Unable to load products",
+  listingDescription: "We couldn't load the product listing right now. Please try again in a moment.",
+  loadMoreTitle: "Couldn't load more products",
+  loadMoreDescription: "Something went wrong while loading more products. Please try again.",
+  retryLabel: "Try Again",
+} as const;

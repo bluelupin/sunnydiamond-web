@@ -55,6 +55,7 @@ type UseMagentoJewelleryListingState = {
   error?: string;
   hasMore: boolean;
   loadMore: () => void;
+  retryListing: () => void;
 };
 
 function appendUniqueProducts(
@@ -423,6 +424,11 @@ export function useMagentoJewelleryListing({
     void fetchInitialListing();
   }, [listingResetNonce, fetchInitialListing]);
 
+  const retryListing = useCallback(() => {
+    setError(undefined);
+    void fetchInitialListing();
+  }, [fetchInitialListing]);
+
   const loadMore = useCallback(() => {
     if (isLoadingMoreRef.current) {
       return;
@@ -436,6 +442,7 @@ export function useMagentoJewelleryListing({
     const requestId = ++requestIdRef.current;
     isLoadingMoreRef.current = true;
     setIsLoadingMore(true);
+    setError(undefined);
 
     void (async () => {
       try {
@@ -562,5 +569,6 @@ export function useMagentoJewelleryListing({
     error,
     hasMore,
     loadMore,
+    retryListing,
   };
 }

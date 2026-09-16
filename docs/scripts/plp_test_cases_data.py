@@ -39,10 +39,10 @@ ISSUES = [
         "PLP",
         "Error handling",
         "No error UI on listing fetch failure",
-        "useMagentoJewelleryListing exposes error state but JewelleryProductPage never renders it. Users see empty skeleton or stale grid on API failure.",
+        "Fixed: JewelleryListingErrorState with retryListing for initial fetch failures and load-more retry in pagination section.",
         "P0",
-        "Open",
-        "PLP-029, PLP-030, PLP-088",
+        "Resolved",
+        "PLP-088, PLP-089",
         "",
     ),
     (
