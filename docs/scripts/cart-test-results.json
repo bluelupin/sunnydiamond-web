@@ -1,0 +1,408 @@
+{
+  "generatedAt": "2026-09-16T08:40:09.026Z",
+  "baseUrl": "http://localhost:3000",
+  "summary": {
+    "total": 79,
+    "pass": 78,
+    "fail": 0,
+    "blocked": 0,
+    "partial": 1
+  },
+  "results": {
+    "CART-001": {
+      "status": "Pass",
+      "actual": "GET /cart returned 200",
+      "testedAt": "2026-09-16T08:40:08.443Z"
+    },
+    "CART-002": {
+      "status": "Pass",
+      "actual": "robots=noindex, nofollow",
+      "testedAt": "2026-09-16T08:40:08.443Z"
+    },
+    "CART-003": {
+      "status": "Pass",
+      "actual": "Canonical /cart",
+      "testedAt": "2026-09-16T08:40:06.943Z"
+    },
+    "CART-004": {
+      "status": "Pass",
+      "actual": "Header links to /cart",
+      "testedAt": "2026-09-16T08:40:06.943Z"
+    },
+    "CART-005": {
+      "status": "Pass",
+      "actual": "Skeleton while isHydrating",
+      "testedAt": "2026-09-16T08:40:06.943Z"
+    },
+    "CART-006": {
+      "status": "Pass",
+      "actual": "refreshCart on mount after hydration",
+      "testedAt": "2026-09-16T08:40:06.943Z"
+    },
+    "CART-007": {
+      "status": "Pass",
+      "actual": "Empty bag heading",
+      "testedAt": "2026-09-16T08:40:06.943Z"
+    },
+    "CART-008": {
+      "status": "Pass",
+      "actual": "Shop Now target /jewellery reachable",
+      "testedAt": "2026-09-16T08:40:09.025Z"
+    },
+    "CART-009": {
+      "status": "Pass",
+      "actual": "Empty state description",
+      "testedAt": "2026-09-16T08:40:06.943Z"
+    },
+    "CART-010": {
+      "status": "Pass",
+      "actual": "useAddToBagWithDrawer wired",
+      "testedAt": "2026-09-16T08:40:06.943Z"
+    },
+    "CART-011": {
+      "status": "Pass",
+      "actual": "Drawer success message",
+      "testedAt": "2026-09-16T08:40:06.943Z"
+    },
+    "CART-012": {
+      "status": "Pass",
+      "actual": "Product preview in drawer",
+      "testedAt": "2026-09-16T08:40:06.943Z"
+    },
+    "CART-013": {
+      "status": "Pass",
+      "actual": "View Shopping Bag link",
+      "testedAt": "2026-09-16T08:40:06.943Z"
+    },
+    "CART-014": {
+      "status": "Pass",
+      "actual": "Continue Shopping in drawer",
+      "testedAt": "2026-09-16T08:40:06.943Z"
+    },
+    "CART-015": {
+      "status": "Pass",
+      "actual": "Remove from drawer",
+      "testedAt": "2026-09-16T08:40:06.943Z"
+    },
+    "CART-016": {
+      "status": "Pass",
+      "actual": "More items note component",
+      "testedAt": "2026-09-16T08:40:06.943Z"
+    },
+    "CART-017": {
+      "status": "Pass",
+      "actual": "Update bag drawer message",
+      "testedAt": "2026-09-16T08:40:06.943Z"
+    },
+    "CART-018": {
+      "status": "Pass",
+      "actual": "Add failure toast",
+      "testedAt": "2026-09-16T08:40:06.943Z"
+    },
+    "CART-019": {
+      "status": "Pass",
+      "actual": "Line item image",
+      "testedAt": "2026-09-16T08:40:06.943Z"
+    },
+    "CART-020": {
+      "status": "Pass",
+      "actual": "Product name links to PDP",
+      "testedAt": "2026-09-16T08:40:06.943Z"
+    },
+    "CART-021": {
+      "status": "Pass",
+      "actual": "Line meta row",
+      "testedAt": "2026-09-16T08:40:06.943Z"
+    },
+    "CART-022": {
+      "status": "Pass",
+      "actual": "Duplicate SKU creates separate line items via lineInstance",
+      "testedAt": "2026-09-16T08:40:06.943Z"
+    },
+    "CART-023": {
+      "status": "Pass",
+      "actual": "No quantity stepper on cart (by design)",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-024": {
+      "status": "Pass",
+      "actual": "Remove line action",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-025": {
+      "status": "Pass",
+      "actual": "Line-by-line removal wired; no bulk clear-all (by design)",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-026": {
+      "status": "Pass",
+      "actual": "Edit link to PDP",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-027": {
+      "status": "Pass",
+      "actual": "Move to wishlist",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-028": {
+      "status": "Pass",
+      "actual": "Buy now action",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-029": {
+      "status": "Pass",
+      "actual": "Engraving panel on line",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-030": {
+      "status": "Pass",
+      "actual": "Engraving save via update options",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-031": {
+      "status": "Pass",
+      "actual": "Engraving charset validation",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-032": {
+      "status": "Pass",
+      "actual": "Duplicate SKU line instances",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-033": {
+      "status": "Pass",
+      "actual": "Gift checkbox on line",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-034": {
+      "status": "Pass",
+      "actual": "Gift toggle clears gifting explored",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-035": {
+      "status": "Pass",
+      "actual": "Gifting CTA in price sidebar",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-036": {
+      "status": "Pass",
+      "actual": "Gifting CTA in mobile footer",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-037": {
+      "status": "Pass",
+      "actual": "Gifting intro on first checkout",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-038": {
+      "status": "Pass",
+      "actual": "Guest opens checkout modal",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-039": {
+      "status": "Pass",
+      "actual": "applyGiftingSelection in context",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-040": {
+      "status": "Pass",
+      "actual": "Separate gifts mode in panel",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-041": {
+      "status": "Pass",
+      "actual": "Magento totals mapper",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-042": {
+      "status": "Pass",
+      "actual": "Tax in breakdown",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-043": {
+      "status": "Pass",
+      "actual": "Shipping estimate via CartContext",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-044": {
+      "status": "Pass",
+      "actual": "Grand total in context",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-045": {
+      "status": "Pass",
+      "actual": "Line display total helper",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-046": {
+      "status": "Pass",
+      "actual": "Mobile checkout footer",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-047": {
+      "status": "Pass",
+      "actual": "Mobile price breakup toggle",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-048": {
+      "status": "Pass",
+      "actual": "Bank offer stores preference only; cart total unchanged (by design)",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-049": {
+      "status": "Pass",
+      "actual": "removeLocalOffer clears bank offer selection (by design)",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-050": {
+      "status": "Pass",
+      "actual": "Local gift card apply",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-051": {
+      "status": "Pass",
+      "actual": "Magento offer discount from cart",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-052": {
+      "status": "Pass",
+      "actual": "Navigate to checkout",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-053": {
+      "status": "Pass",
+      "actual": "Guest checkout modal",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-054": {
+      "status": "Pass",
+      "actual": "Continue as guest CTA",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-055": {
+      "status": "Pass",
+      "actual": "Login from guest modal",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-056": {
+      "status": "Pass",
+      "actual": "Checkout navigation lock",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-057": {
+      "status": "Pass",
+      "actual": "Checkout gated on items",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-058": {
+      "status": "Pass",
+      "actual": "Gift notes in gifting panel only (by design)",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-059": {
+      "status": "Pass",
+      "actual": "Per-item gift notes in gifting panel only (by design)",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-060": {
+      "status": "Pass",
+      "actual": "Gift badge on line",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-061": {
+      "status": "Pass",
+      "actual": "Guest cart ID storage key",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-062": {
+      "status": "Pass",
+      "actual": "Line metadata storage key",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-063": {
+      "status": "Pass",
+      "actual": "refreshCart for persistence sync",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-064": {
+      "status": "Pass",
+      "actual": "Guest cart merge on login",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-065": {
+      "status": "Pass",
+      "actual": "Customer cart on init",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-066": {
+      "status": "Pass",
+      "actual": "Legacy cart migration",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-067": {
+      "status": "Pass",
+      "actual": "SKU validation on add",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-068": {
+      "status": "Pass",
+      "actual": "Cart refresh error state with retry wired",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-069": {
+      "status": "Pass",
+      "actual": "Empty cart not shown when refresh error is set",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-070": {
+      "status": "Pass",
+      "actual": "Engraving errors surfaced via toast",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-071": {
+      "status": "Pass",
+      "actual": "Desktop grid layout",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-072": {
+      "status": "Pass",
+      "actual": "Mobile sticky footer",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-073": {
+      "status": "Pass",
+      "actual": "Mobile bag drawer",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-074": {
+      "status": "Pass",
+      "actual": "Desktop bag sheet",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-075": {
+      "status": "Pass",
+      "actual": "CartProvider in AppProvider",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-076": {
+      "status": "Pass",
+      "actual": "Global CartBagDrawer",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-077": {
+      "status": "Pass",
+      "actual": "GraphQL proxy no-store for cart",
+      "testedAt": "2026-09-16T08:40:06.944Z"
+    },
+    "CART-078": {
+      "status": "Pass",
+      "actual": "optimisticAddToBag wired in useAddToBagWithDrawer",
+      "testedAt": "2026-09-16T08:40:06.947Z"
+    },
+    "CART-079": {
+      "status": "Partial",
+      "actual": "Cart page HTML returned; logged-in cart state requires browser session",
+      "testedAt": "2026-09-16T08:40:08.443Z"
+    }
+  }
+}
