@@ -34,14 +34,6 @@ type JewelleryCategoryRoutePageProps = {
   }>;
 };
 
-function shouldSkipJewelleryListingPrefetch(
-  searchParams: JewelleryCategoryRoutePageProps["searchParams"] extends Promise<infer T>
-    ? T
-    : never,
-): boolean {
-  return hasGiftFinderSearchParams(searchParams);
-}
-
 export async function generateJewelleryCategoryMetadata({
   params,
   searchParams,
@@ -81,13 +73,15 @@ export async function JewelleryCategoryRoutePage({
   }
 
   const [initialListing, page, nav] = await Promise.all([
-    shouldSkipJewelleryListingPrefetch(query)
-      ? Promise.resolve(undefined)
-      : prefetchJewelleryListing(categoryUrlKey, {
-          collection: query.collection,
-          occasion: query.occasion,
-          sort: query.sort,
-        } satisfies JewelleryListingPrefetchFilters),
+    prefetchJewelleryListing(categoryUrlKey, {
+      collection: query.collection,
+      occasion: query.occasion,
+      diamondShape: query.diamondShape,
+      fancyColour: query.fancyColour,
+      minPrice: query.minPrice,
+      maxPrice: query.maxPrice,
+      sort: query.sort,
+    } satisfies JewelleryListingPrefetchFilters),
     getProductLandingPage(),
     getMagentoJewelleryNavCategories(),
   ]);

@@ -33,10 +33,6 @@ type PageProps = {
   searchParams: Promise<JewelleryListingSearchParams>;
 };
 
-function shouldSkipJewelleryListingPrefetch(searchParams: JewelleryListingSearchParams): boolean {
-  return hasGiftFinderSearchParams(searchParams);
-}
-
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   const query = await searchParams;
   const page = await getProductLandingPage();
@@ -58,13 +54,15 @@ export default async function Page({ searchParams }: PageProps) {
   const prefetchedCategoryUrlKey = hasPrimaryListingContext(params)
     ? resolveCategoryUrlKeyFromQueryParam(params.category)
     : null;
-  const initialListing = shouldSkipJewelleryListingPrefetch(params)
-    ? undefined
-    : await prefetchJewelleryListing(prefetchedCategoryUrlKey, {
-        collection: params.collection,
-        occasion: params.occasion,
-        sort: params.sort,
-      });
+  const initialListing = await prefetchJewelleryListing(prefetchedCategoryUrlKey, {
+    collection: params.collection,
+    occasion: params.occasion,
+    diamondShape: params.diamondShape,
+    fancyColour: params.fancyColour,
+    minPrice: params.minPrice,
+    maxPrice: params.maxPrice,
+    sort: params.sort,
+  });
   const page = await getProductLandingPage();
   preloadPlpHeroLcpImages({
     desktopUrl: page.hero?.image?.desktopUrl,

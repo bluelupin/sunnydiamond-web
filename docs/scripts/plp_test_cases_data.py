@@ -87,10 +87,10 @@ ISSUES = [
         "PLP",
         "Performance",
         "Gift-finder entry skips SSR prefetch",
-        "shouldSkipJewelleryListingPrefetch returns true for gift-finder params — intentional but causes slower first paint vs standard PLP.",
+        "Fixed: gift-finder URL params (occasion, shape, colour, price) are now passed to prefetchJewelleryListing with matching client filter state.",
         "P2",
-        "Open",
-        "PLP-090",
+        "Resolved",
+        "PLP-101",
         "",
     ),
     (
@@ -244,7 +244,7 @@ TEST_CASES = [
     ("PLP-099", "L. Responsive", "Toolbar product count", "View toolbar", "X Products count displayed", "P2", "UI", PRE_01, "Route: /jewellery", ""),
     # M. SSR & Performance
     ("PLP-100", "M. Performance", "SSR prefetch on /jewellery", "Load /jewellery (no gift-finder params)", "initialListing passed; no hydration refetch flash", "P1", "Performance", PRE_01, "Standard PLP", ""),
-    ("PLP-101", "M. Performance", "Gift-finder skips prefetch", "Open PLP via gift-finder URL", "No SSR prefetch; client fetch only", "P2", "Performance", PRE_01, "Gift finder URL", "PLP-ISSUE-006"),
+    ("PLP-101", "M. Performance", "Gift-finder SSR prefetch", "Open PLP via gift-finder URL", "initialListing prefetched with gift-finder filters applied", "P2", "Performance", PRE_01, "Gift finder URL", ""),
     ("PLP-102", "M. Performance", "Collection prefetch on SSR", "Open /jewellery?collection=alankara", "Server prefetches with collection filter", "P1", "Performance", PRE_01, "?collection=", ""),
     ("PLP-103", "M. Performance", "PLP performance marks", "Load PLP; check GA/network", "plp_performance events fired (TTFB, grid paint)", "P3", "Performance", PRE_01, "DevTools", ""),
     ("PLP-104", "M. Performance", "Listing client cache", "Navigate away and back within 60s", "Cached listing reused (no duplicate fetch)", "P2", "Performance", PRE_01, "60s TTL", ""),

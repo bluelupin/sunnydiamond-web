@@ -9,6 +9,7 @@ import {
   hasActiveFilters,
   parseJewelleryListingSortParam,
 } from "@/features/jewellery-product/data/filters";
+import { buildGiftFinderListingFiltersFromUrl } from "@/features/gifting/utils/giftFinderRoutes";
 import {
   clearMagentoJewelleryListingCache,
   getMagentoJewelleryInitialListing,
@@ -130,20 +131,25 @@ export function createJewelleryListingPrefetchParams(
   options?: {
     collectionSlug?: string | null;
     occasionSlug?: string | null;
+    diamondShapeSlug?: string | null;
+    fancyColourSlug?: string | null;
+    minPrice?: number;
+    maxPrice?: number;
     sortSlug?: string | null;
+    facets?: JewelleryFilterFacets;
   },
 ): JewelleryListingPrefetchParams {
-  const filters = createEmptyFilterState();
-  const collection = options?.collectionSlug?.trim();
-  const occasion = options?.occasionSlug?.trim();
-
-  if (collection) {
-    filters.collection = collection;
-  }
-
-  if (occasion) {
-    filters.occasion = occasion;
-  }
+  const filters = buildGiftFinderListingFiltersFromUrl(
+    {
+      collection: options?.collectionSlug,
+      occasion: options?.occasionSlug,
+      diamondShape: options?.diamondShapeSlug,
+      fancyColour: options?.fancyColourSlug,
+      minPrice: options?.minPrice ? String(options.minPrice) : undefined,
+      maxPrice: options?.maxPrice ? String(options.maxPrice) : undefined,
+    },
+    options?.facets,
+  );
 
   return {
     categoryUrlKey,
@@ -176,7 +182,7 @@ export function useMagentoJewelleryListing({
           initialListingParams.categoryUrlKey,
           initialListingParams.sortValue,
           initialListingParams.pageSize,
-          createEmptyFilterState(),
+          initialListingParams.filters ?? createEmptyFilterState(),
           initialListing.facets,
         )
       : null;

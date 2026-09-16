@@ -207,7 +207,13 @@ async function runStaticChecks() {
 
   // M. Performance
   assertSource("PLP-100", "SSR prefetch", jewelleryPage, "prefetchJewelleryListing", "SSR listing prefetch");
-  assertSource("PLP-101", "gift finder skip prefetch", jewelleryPage, "shouldSkipJewelleryListingPrefetch", "Gift-finder skips SSR prefetch");
+  assertSource(
+    "PLP-101",
+    "gift finder SSR prefetch",
+    prefetchTs,
+    "buildGiftFinderListingFiltersFromUrl",
+    "Gift-finder filters included in SSR prefetch",
+  );
   assertSource("PLP-102", "collection prefetch params", jewelleryPage, "hasPrimaryListingContext", "Collection/occasion passed to prefetch");
   assertSource("PLP-103", "performance marks", perfTs, "reportJewelleryPlp", "PLP performance reporting");
   assertSource("PLP-104", "listing cache", listingHook, "seedMagentoJewelleryListingCache", "Client listing cache seeding");

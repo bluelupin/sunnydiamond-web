@@ -1,3 +1,4 @@
+import { createEmptyFilterState } from "@/features/jewellery-product/data/filters";
 import { buildJewelleryCategoryHref, isJewelleryCategoryUrlKey } from "@/features/jewellery-product/utils/jewelleryRoutes";
 import { slugifyOccasionTitle } from "@/features/jewellery-product/utils/occasionListing";
 import type { JewelleryFilterState } from "@/features/jewellery-product/types";
@@ -35,13 +36,60 @@ export function parseGiftFinderPriceParam(value: string | null | undefined): num
   return Math.round(parsed);
 }
 
-export function hasGiftFinderSearchParams(searchParams: {
-  occasion?: string;
-  diamondShape?: string;
-  fancyColour?: string;
-  minPrice?: string;
-  maxPrice?: string;
-}): boolean {
+export type GiftFinderSearchParams = {
+  occasion?: string | null;
+  diamondShape?: string | null;
+  fancyColour?: string | null;
+  collection?: string | null;
+  minPrice?: string | null;
+  maxPrice?: string | null;
+};
+
+export function buildGiftFinderListingFiltersFromUrl(
+  searchParams: GiftFinderSearchParams,
+  facets?: Pick<JewelleryFilterFacets, "minPrice" | "maxPrice">,
+): JewelleryFilterState {
+  const filters = createEmptyFilterState();
+
+  const occasion = searchParams.occasion?.trim();
+  if (occasion) {
+    filters.occasion = occasion;
+  }
+
+  const diamondShape = searchParams.diamondShape?.trim();
+  if (diamondShape) {
+    filters.diamondShape = diamondShape;
+  }
+
+  const fancyColour = searchParams.fancyColour?.trim();
+  if (fancyColour) {
+    filters.fancyColour = fancyColour;
+  }
+
+  const collection = searchParams.collection?.trim();
+  if (collection) {
+    filters.collection = collection;
+  }
+
+  const minFromUrl = parseGiftFinderPriceParam(searchParams.minPrice);
+  const maxFromUrl = parseGiftFinderPriceParam(searchParams.maxPrice);
+
+  if (facets && (minFromUrl > 0 || maxFromUrl > 0)) {
+    return applyGiftFinderPriceToFilterState(filters, facets, minFromUrl, maxFromUrl);
+  }
+
+  if (minFromUrl > 0) {
+    filters.minPrice = minFromUrl;
+  }
+
+  if (maxFromUrl > 0) {
+    filters.maxPrice = maxFromUrl;
+  }
+
+  return filters;
+}
+
+export function hasGiftFinderSearchParams(searchParams: GiftFinderSearchParams): boolean {
   return Boolean(
     searchParams.occasion?.trim() ||
       searchParams.diamondShape?.trim() ||

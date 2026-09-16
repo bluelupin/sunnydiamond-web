@@ -44,6 +44,7 @@ import { resolveCollectionFacetOption } from "../utils/collectionListing";
 import { resolveOccasionFacetOption } from "../utils/occasionListing";
 import {
   applyGiftFinderPriceToFilterState,
+  buildGiftFinderListingFiltersFromUrl,
   parseGiftFinderPriceParam,
 } from "@/features/gifting/utils/giftFinderRoutes";
 import {
@@ -111,6 +112,20 @@ const JewelleryProductPage = ({
     parseJewelleryListingSortParam(searchParams?.get("sort")),
   );
   const [filters, setFilters] = useState<JewelleryFilterState>(() => {
+    if (initialListing?.facets) {
+      return buildGiftFinderListingFiltersFromUrl(
+        {
+          occasion: occasionSlug,
+          diamondShape: diamondShapeSlug,
+          fancyColour: fancyColourSlug,
+          collection: collectionSlug,
+          minPrice: searchParams?.get("minPrice"),
+          maxPrice: searchParams?.get("maxPrice"),
+        },
+        initialListing.facets,
+      );
+    }
+
     const initial = createEmptyFilterState();
     if (occasionSlug?.trim()) {
       initial.occasion = occasionSlug.trim();
@@ -118,19 +133,37 @@ const JewelleryProductPage = ({
     if (collectionSlug?.trim()) {
       initial.collection = collectionSlug.trim();
     }
+    if (diamondShapeSlug?.trim()) {
+      initial.diamondShape = diamondShapeSlug.trim();
+    }
+    if (fancyColourSlug?.trim()) {
+      initial.fancyColour = fancyColourSlug.trim();
+    }
     return initial;
   });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const { data: navData } = useMagentoJewelleryNav();
   const navCategories = navData?.categories ?? [];
-  const facetsSyncedRef = useRef(false);
+  const facetsSyncedRef = useRef(Boolean(initialListing));
   const lastFacetsSyncedCategoryRef = useRef<string | null>(selectedCategoryUrlKey);
-  const lastOccasionSlugRef = useRef<string | null>(null);
-  const lastDiamondShapeSlugRef = useRef<string | null>(null);
-  const lastFancyColourSlugRef = useRef<string | null>(null);
-  const lastCollectionSlugRef = useRef<string | null>(null);
-  const lastPriceParamsRef = useRef<string | null>(null);
-  const lastFacetPriceBoundsRef = useRef("");
+  const lastOccasionSlugRef = useRef<string | null>(initialListing ? (occasionSlug ?? null) : null);
+  const lastDiamondShapeSlugRef = useRef<string | null>(
+    initialListing ? (diamondShapeSlug ?? null) : null,
+  );
+  const lastFancyColourSlugRef = useRef<string | null>(
+    initialListing ? (fancyColourSlug ?? null) : null,
+  );
+  const lastCollectionSlugRef = useRef<string | null>(
+    initialListing ? (collectionSlug ?? null) : null,
+  );
+  const lastPriceParamsRef = useRef<string | null>(
+    initialListing ? `${minPriceFromUrl}|${maxPriceFromUrl}` : null,
+  );
+  const lastFacetPriceBoundsRef = useRef(
+    initialListing?.facets
+      ? `${initialListing.facets.minPrice}|${initialListing.facets.maxPrice}`
+      : "",
+  );
   const suppressFacetUrlSyncRef = useRef(false);
   const awaitingClearListingRef = useRef(false);
   const plpTtfbReportedRef = useRef(false);
@@ -143,7 +176,12 @@ const JewelleryProductPage = ({
       ? createJewelleryListingPrefetchParams(prefetchedCategoryUrlKey, {
           collectionSlug,
           occasionSlug,
+          diamondShapeSlug,
+          fancyColourSlug,
+          minPrice: minPriceFromUrl,
+          maxPrice: maxPriceFromUrl,
           sortSlug: searchParams?.get("sort"),
+          facets: initialListing.facets,
         })
       : undefined;
 
