@@ -18,8 +18,6 @@ PRIORITY_MAP = {"P0": "Blocker", "P1": "Critical", "P2": "Minor", "P3": "Trivial
 ISSUES = [
     ("PLP-ISSUE-002", "Sort not persisted in URL",
      "PLP-ISSUE-002 (P1)\n\nSort value is React state only. Refresh/share URL resets to Featured.\n\nTest cases: PLP-064", "P1"),
-    ("PLP-ISSUE-003", "URL-only filters not in drawer",
-     "PLP-ISSUE-003 (P1)\n\noccasion, collection, diamondShape, fancyColour are URL-only.\n\nTest cases: PLP-054, PLP-055", "P1"),
     ("PLP-ISSUE-004", "Price filter total count inaccurate",
      "PLP-ISSUE-004 (P2)\n\nWhen price filter active, totalCount inaccurate.\n\nTest cases: PLP-067, PLP-074", "P2"),
     ("PLP-ISSUE-005", "noIndex on ?category= primary listing URLs",

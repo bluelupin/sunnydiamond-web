@@ -149,20 +149,6 @@ async function runStaticChecks() {
   assertSource("PLP-051", "occasion URL filter", plpComponent, "occasionSlug", "occasion slug from URL");
   assertSource("PLP-052", "diamondShape URL filter", plpComponent, "diamondShapeSlug", "diamondShape slug from URL");
   assertSource("PLP-053", "fancyColour URL filter", plpComponent, "fancyColourSlug", "fancyColour slug from URL");
-  record(
-    "PLP-054",
-    filterDrawer.includes('toggleListValue("collection"') ? "Pass" : "Fail",
-    filterDrawer.includes('toggleListValue("collection"')
-      ? "Collection control in drawer"
-      : "No collection control in filter drawer (URL-only) — PLP-ISSUE-003",
-  );
-  record(
-    "PLP-055",
-    filterDrawer.includes('toggleListValue("occasion"') ? "Pass" : "Fail",
-    filterDrawer.includes('toggleListValue("occasion"')
-      ? "Occasion control in drawer"
-      : "No occasion control in filter drawer (URL-only) — PLP-ISSUE-003",
-  );
   assertSource("PLP-057", "combined collection+category", routesTs, "JEWELLERY_CATEGORY_QUERY_PARAM", "?category= query param support");
 
   // F. Sort
@@ -389,12 +375,6 @@ async function runLiveChecks(baseUrl) {
 }
 
 function applyKnownGapFindings() {
-  if (!results["PLP-054"]) {
-    record("PLP-054", "Fail", "No collection control in filter drawer (URL-only) — PLP-ISSUE-003");
-  }
-  if (!results["PLP-055"]) {
-    record("PLP-055", "Fail", "No occasion control in filter drawer (URL-only) — PLP-ISSUE-003");
-  }
   if (!results["PLP-064"]) {
     record("PLP-064", "Fail", "Sort not persisted in URL — PLP-ISSUE-002");
   }

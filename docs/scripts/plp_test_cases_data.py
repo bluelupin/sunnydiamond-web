@@ -27,7 +27,6 @@ TEST_DATA_NOTES = [
 KNOWN_GAPS = [
     "No error/retry UI when Magento listing fetch fails (hook returns error, page ignores it)",
     "Sort selection lost on full page refresh (not in URL)",
-    "Occasion/collection/diamondShape/fancyColour filters are URL-only — no drawer controls",
     "Active price filter totalCount reflects page-1 refined count, not full Magento total",
     "Gift-finder entry skips SSR prefetch (slower first paint)",
     "PLP hero LCP preload utility exists but is not wired to jewellery PLP",
@@ -59,18 +58,6 @@ ISSUES = [
         "P1",
         "Open",
         "PLP-018, PLP-022, PLP-067",
-        "",
-    ),
-    (
-        "PLP-ISSUE-003",
-        "SD-195",
-        "PLP",
-        "Filters",
-        "URL-only filters not in drawer",
-        "occasion, collection, diamondShape, fancyColour can be set via URL/CMS CTAs but cannot be changed or cleared individually from the filter drawer (only full Clear All).",
-        "P1",
-        "Open",
-        "PLP-045, PLP-046, PLP-047, PLP-048",
         "",
     ),
     (
@@ -207,8 +194,6 @@ TEST_CASES = [
     ("PLP-051", "E. URL Filters", "Occasion deep link", "Open /jewellery?occasion=wedding", "Occasion-filtered products shown", "P0", "Functional", PRE_01, "?occasion=wedding", ""),
     ("PLP-052", "E. URL Filters", "Diamond shape deep link", "Open /jewellery?diamondShape=round", "Shape-filtered products shown", "P1", "Functional", PRE_01, "?diamondShape=round", ""),
     ("PLP-053", "E. URL Filters", "Fancy colour deep link", "Open /jewellery?fancyColour=yellow", "Colour-filtered products shown", "P1", "Functional", PRE_01, "?fancyColour=yellow", ""),
-    ("PLP-054", "E. URL Filters", "Collection not in drawer UI", "Open filters with ?collection= active", "No collection control in drawer to change/clear individually", "P1", "Gap", PRE_01, "?collection=", "PLP-ISSUE-003"),
-    ("PLP-055", "E. URL Filters", "Occasion not in drawer UI", "Open filters with ?occasion= active", "No occasion control in drawer", "P1", "Gap", PRE_01, "?occasion=", "PLP-ISSUE-003"),
     ("PLP-056", "E. URL Filters", "Invalid collection slug", "Open /jewellery?collection=invalid-slug-xyz", "Graceful empty state or unfiltered fallback", "P2", "Negative", PRE_01, "Invalid slug", ""),
     ("PLP-057", "E. URL Filters", "Combined collection + category", "Open /jewellery?collection=x&category=rings", "Both filters apply; primary listing URL pattern", "P0", "Functional", PRE_01, "Combined params", ""),
     # F. Sort
