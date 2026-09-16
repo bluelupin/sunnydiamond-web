@@ -2,11 +2,12 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { ContactSupportIcon } from "@/features/contact/components/ContactSupportIcon";
+import ContactPhoneLink from "@/features/contact/components/ContactPhoneLink";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
+import { contactCardLayoutClasses } from "@/features/contact/data/contactHeroFigmaSpec";
 import {
   POLICY_QUERY_PARAM,
   resolvePolicyIdFromParam,
@@ -218,11 +219,11 @@ function PolicyMobileNav({
   );
 
   if (filteredGroups.length === 0) {
-    return (
+    return emptySearchLabel ? (
       <p className="font-gill text-base font-light leading-110 text-neutral500">
         {emptySearchLabel}
       </p>
-    );
+    ) : null;
   }
 
   return (
@@ -386,11 +387,11 @@ function PolicyAccordions({
   }, [openSectionId, sections]);
 
   if (sections.length === 0) {
-    return (
+    return emptySearchLabel ? (
       <p className="font-gill text-base font-light leading-110 text-neutral500">
         {emptySearchLabel}
       </p>
-    );
+    ) : null;
   }
 
   return (
@@ -485,71 +486,91 @@ function PolicySupportSection({
 }: {
   support: NormalizedPolicyCertificationsPage["support"];
 }) {
-  if (!support.phoneLabel && !support.emailLabel) {
+  const showCall =
+    Boolean(support.callTitle) ||
+    support.hours.length > 0 ||
+    Boolean(support.phoneLabel);
+  const showEmail =
+    Boolean(support.emailTitle) ||
+    Boolean(support.emailDescription) ||
+    Boolean(support.emailLabel);
+
+  if (!showCall && !showEmail) {
     return null;
   }
 
-  const ctaClassName =
-    "inline-flex h-14 items-center justify-center border border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-colors hover:bg-white";
+  // Figma: one underlined clickable value per card (no icon row + second CTA).
+  const linkClassName = contactCardLayoutClasses.cta;
 
   return (
     <section
       aria-label="Customer support"
       className="bg-gray300 px-4 py-10 lg:bg-gray200 lg:py-10"
     >
-      <div className="mx-auto flex max-w-[1360px] flex-col items-center justify-center gap-10 lg:flex-row lg:items-center lg:gap-16">
-        <div className="flex w-full max-w-[301px] flex-col items-center gap-4 text-center lg:h-[230px] lg:justify-between lg:gap-0 lg:p-4">
-          <h3 className="w-full font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
-            {support.callTitle}
-          </h3>
-          <div className="flex flex-col items-center gap-4 lg:items-start">
-            <div className="flex flex-col items-center gap-2 whitespace-nowrap text-base leading-110 text-darkblack">
-              {support.hours.map((entry) => (
-                <div
-                  key={`${entry.label}-${entry.value}`}
-                  className="flex items-center gap-3"
-                >
-                  <span className="font-gill font-light">{entry.label}</span>
-                  <span className="font-gill font-normal">{entry.value}</span>
-                </div>
-              ))}
-            </div>
-            <span className="flex w-full items-center justify-center gap-2 font-gill text-base font-normal leading-110 text-darkblack">
-              <ContactSupportIcon name="phone" />
-              {support.phoneLabel}
-            </span>
+      <div className="mx-auto flex max-w-[1360px] flex-col items-center justify-center gap-8 lg:flex-row lg:items-stretch lg:gap-10">
+        {showCall ? (
+          <div className="flex w-full max-w-[301px] flex-col items-center gap-4 text-center lg:p-4">
+            {support.callTitle ? (
+              <h3 className="w-full font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
+                {support.callTitle}
+              </h3>
+            ) : null}
+            {support.hours.length > 0 ? (
+              <div className="flex flex-col items-center gap-1 whitespace-nowrap text-base leading-110 text-darkblack">
+                {support.hours.map((entry) => (
+                  <div
+                    key={entry.label + "-" + entry.value}
+                    className="flex items-center gap-3"
+                  >
+                    {entry.label ? (
+                      <span className="font-gill font-light">{entry.label}</span>
+                    ) : null}
+                    {entry.value ? (
+                      <span className="font-gill font-normal">{entry.value}</span>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            ) : null}
+            {support.phoneLabel ? (
+              <ContactPhoneLink
+                href={support.phoneHref || support.contactHref || undefined}
+                label={support.phoneLabel}
+                className={linkClassName}
+              />
+            ) : null}
           </div>
-          <Link href={support.contactHref} className={cn(ctaClassName, "hidden lg:inline-flex")}>
-            {support.contactCtaLabel}
-          </Link>
-        </div>
+        ) : null}
 
-        <div className="h-px w-full shrink-0 bg-neutral300 lg:hidden" aria-hidden />
+        {showCall && showEmail ? (
+          <>
+            <div className="h-px w-full shrink-0 bg-neutral300 lg:hidden" aria-hidden />
+            <div
+              className="hidden w-px shrink-0 self-stretch bg-neutral300 lg:block"
+              aria-hidden
+            />
+          </>
+        ) : null}
 
-        <div
-          className="hidden w-px shrink-0 self-stretch bg-neutral300 lg:block lg:h-[230px]"
-          aria-hidden
-        />
-
-        <div className="flex w-full max-w-[316px] flex-col items-center gap-4 text-center lg:h-[222px] lg:w-[316px] lg:justify-between lg:gap-0 lg:p-4">
-          <div className="flex w-full flex-col items-center gap-4">
-            <h3 className="font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
-              {support.emailTitle}
-            </h3>
-            <div className="flex w-full flex-col items-center gap-4">
+        {showEmail ? (
+          <div className="flex w-full max-w-[316px] flex-col items-center gap-4 text-center lg:w-[316px] lg:p-4">
+            {support.emailTitle ? (
+              <h3 className="font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
+                {support.emailTitle}
+              </h3>
+            ) : null}
+            {support.emailDescription ? (
               <p className="w-full font-gill text-base font-light leading-110 text-darkblack">
                 {support.emailDescription}
               </p>
-              <span className="flex w-full items-center justify-center gap-2 font-gill text-base font-normal leading-110 text-darkblack">
-                <ContactSupportIcon name="email" />
+            ) : null}
+            {support.emailLabel && support.emailHref ? (
+              <Link href={support.emailHref} className={linkClassName}>
                 {support.emailLabel}
-              </span>
-            </div>
+              </Link>
+            ) : null}
           </div>
-          <Link href={support.emailHref} className={cn(ctaClassName, "hidden lg:inline-flex")}>
-            {support.emailCtaLabel}
-          </Link>
-        </div>
+        ) : null}
       </div>
     </section>
   );
@@ -628,14 +649,18 @@ const PolicyCertificationsPage = ({
             />
           ) : (
             <>
-              <h1 className="font-larken text-32 font-light leading-110 text-darkblack">
-                {page.pageTitle}
-              </h1>
-              <PolicySearchField
-                value={searchQuery}
-                onChange={setSearchQuery}
-                placeholder={page.searchPlaceholder}
-              />
+              {page.pageTitle ? (
+                <h1 className="font-larken text-32 font-light leading-110 text-darkblack">
+                  {page.pageTitle}
+                </h1>
+              ) : null}
+              {page.searchPlaceholder ? (
+                <PolicySearchField
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder={page.searchPlaceholder}
+                />
+              ) : null}
               <PolicyMobileNav
                 navGroups={page.navGroups}
                 emptySearchLabel={page.emptySearchLabel}
@@ -648,18 +673,24 @@ const PolicyCertificationsPage = ({
         </div>
 
         <div className="hidden lg:flex lg:flex-col">
-          <div className="flex flex-col items-center gap-10 pb-16">
-            <h1 className="text-center font-larken lg:text-5xl md:text-4xl text-32 font-light leading-110 text-darkblack">
-              {page.pageTitle}
-            </h1>
-            <div className="w-full max-w-[623px]">
-              <PolicySearchField
-                value={searchQuery}
-                onChange={setSearchQuery}
-                placeholder={page.searchPlaceholder}
-              />
+          {(page.pageTitle || page.searchPlaceholder) ? (
+            <div className="flex flex-col items-center gap-10 pb-16">
+              {page.pageTitle ? (
+                <h1 className="text-center font-larken lg:text-5xl md:text-4xl text-32 font-light leading-110 text-darkblack">
+                  {page.pageTitle}
+                </h1>
+              ) : null}
+              {page.searchPlaceholder ? (
+                <div className="w-full max-w-[623px]">
+                  <PolicySearchField
+                    value={searchQuery}
+                    onChange={setSearchQuery}
+                    placeholder={page.searchPlaceholder}
+                  />
+                </div>
+              ) : null}
             </div>
-          </div>
+          ) : null}
 
           <div className="flex flex-row gap-6">
             <PolicyDesktopSidebar

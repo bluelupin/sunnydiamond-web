@@ -12,7 +12,6 @@ import type {
 } from "./policy-certifications-page.types";
 
 const POLICY_LANDING_QUERY = "populate=*&locale=en";
-const LEGAL_PAGES_QUERY = "populate=*&pagination[pageSize]=100";
 
 /** Strapi answers these when a collection is absent, unpublished, or not public. */
 function isMissingContent(error: unknown): boolean {
@@ -37,38 +36,14 @@ async function softFetch<T>(
   }
 }
 
-async function fetchLegalPages(signal?: AbortSignal): Promise<StrapiLegalPage[]> {
-  try {
-    const data = await apiFetch<StrapiLegalPage[]>(
-      `${STRAPI_ENDPOINTS.legalPages}?${LEGAL_PAGES_QUERY}`,
-      { signal },
-    );
-    return Array.isArray(data) ? data : [];
-  } catch (error) {
-    // Same rule as softFetch: Strapi answers 404 for a collection that was never
-    // modelled, which is a content gap rather than a failure worth a line per
-    // render. Strapi has no legal-page type today, so warning here wrote
-    // thousands of identical lines and buried every real error in the log.
-    if (isMissingContent(error)) return [];
-    console.warn("[policy] Failed to fetch legal pages", error);
-    return [];
-  }
-}
-
 export const getPolicyCertificationsPage = cache(
   async (signal?: AbortSignal): Promise<NormalizedPolicyCertificationsPage> => {
-    const [landing, legalPages] = await Promise.all([
-      softFetch<StrapiPolicyCertificationsPage>(
-        `${STRAPI_ENDPOINTS.policyCertificationsPage}?${POLICY_LANDING_QUERY}`,
-        signal,
-      ),
-      fetchLegalPages(signal),
-    ]);
+    const landing = await softFetch<StrapiPolicyCertificationsPage>(
+      `${STRAPI_ENDPOINTS.policyCertificationsPage}?${POLICY_LANDING_QUERY}`,
+      signal,
+    );
 
-    return mapPolicyCertificationsPage({
-      landing,
-      legalPages,
-    });
+    return mapPolicyCertificationsPage(landing);
   },
 );
 

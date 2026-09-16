@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
     const { title, description, canonicalPath, keywords, image } = resolvePolicySeoMetadata(page);
 
     return constructMetadata({
-      title,
+      title: title || "Sunny Diamonds",
       description,
       canonicalPath,
       ...(keywords ? { keywords } : {}),
@@ -26,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
     });
   } catch {
     return constructMetadata({
-      title: "Policy & Certifications",
+      title: "Sunny Diamonds",
       canonicalPath: POLICY_AND_CERTIFICATIONS_PATH,
     });
   }
