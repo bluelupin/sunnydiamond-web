@@ -144,7 +144,7 @@ const BlogDetailSidebar = ({
 
   return (
     <aside
-      className="flex w-full flex-col gap-6 border-r border-neutral300 bg-gray300 p-4 desktop:w-[437px] desktop:shrink-0 desktop:gap-10 desktop:p-6"
+      className="flex w-full flex-col gap-6 border-r border-neutral300 bg-gray300 p-6 shadow-[0px_4px_2px_rgba(0,0,0,0.1)] desktop:w-[437px] desktop:shrink-0"
       aria-label="Blog navigation"
     >
       <div className="flex flex-col gap-6">
@@ -153,16 +153,16 @@ const BlogDetailSidebar = ({
         </p>
 
         {tableOfContents.length > 0 ? (
-          <nav className="desktop:relative desktop:border-l-2 desktop:border-neutral300">
-            <ul className="flex flex-col gap-6 desktop:gap-8">
+          <nav className="relative border-l-2 border-neutral300">
+            <ul className="flex flex-col gap-8">
               {tableOfContents.map((item) => {
                 const isActive = item.id === activeId;
 
                 return (
-                  <li key={item.id} className="relative desktop:pl-4">
+                  <li key={item.id} className="relative pl-4">
                     {isActive ? (
                       <span
-                        className="absolute -left-0.5 top-0 hidden h-[78px] w-0.5 bg-darkblack desktop:block"
+                        className="absolute -left-[2px] top-0 bottom-0 w-0.5 bg-darkblack"
                         aria-hidden
                       />
                     ) : null}
@@ -170,10 +170,10 @@ const BlogDetailSidebar = ({
                       type="button"
                       onClick={() => scrollToSection(item.id)}
                       className={cn(
-                        "w-full text-left font-gill text-base leading-110",
+                        "w-full text-left font-gill text-xl leading-110",
                         isActive
-                          ? "font-semibold text-darkblack"
-                          : "font-normal text-neutral500",
+                          ? "font-normal text-darkblack"
+                          : "font-light text-neutral500",
                       )}
                     >
                       {item.label}
@@ -186,7 +186,7 @@ const BlogDetailSidebar = ({
         ) : null}
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex gap-2">
         <button
           type="button"
           onClick={toggle}
