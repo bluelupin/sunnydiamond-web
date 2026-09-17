@@ -11,10 +11,17 @@ import {
   getDefaultBookStoreVisitStoreId,
   resolveBookStoreVisitStoresForPanel,
 } from "@/features/products/utils/bookStoreVisitStores";
-import { storeLocatorSearchMatchMessage, storeLocatorStatusEyebrowClassName } from "@/features/stores/data/storeLocatorContent";
+import {
+  storeLocatorExploreShowroomsTitle,
+  storeLocatorListHeadingClassName,
+  storeLocatorNoAreaSubtitle,
+  storeLocatorNoAreaTitle,
+  storeLocatorSearchMatchMessage,
+} from "@/features/stores/data/storeLocatorContent";
 import {
   filterBookStoreVisitStores,
   getStoreLocatorPincodeSearchError,
+  shouldShowPincodeMatchResults,
   shouldSuggestNearbyStores,
 } from "@/features/stores/utils/storeLocatorFilters";
 import type { NormalizedStoreLocatorListCopy } from "@/services/store-locator/store-locator-page.types";
@@ -157,18 +164,35 @@ const BookStoreVisitPanel = ({
       }
 
       const query = storeSearchQuery.trim();
-      const filtered = filterBookStoreVisitStores(stores, storeSearchQuery, storeStateFilter);
       const allStores = filterBookStoreVisitStores(stores, "", null);
+      const stateMatched = storeStateFilter
+        ? filterBookStoreVisitStores(stores, "", storeStateFilter)
+        : [];
+      const searchMatched = filterBookStoreVisitStores(
+        stores,
+        storeSearchQuery,
+        null,
+      );
 
       if (getStoreLocatorPincodeSearchError(storeSearchQuery, invalidPincodeMessage)) {
+        // Empty state tab still uses no-area UX; invalid message stays under the field.
+        if (storeStateFilter?.trim() && stateMatched.length === 0) {
+          return {
+            displayStores: allStores,
+            listStatus: "no-area" as StoreLocatorListStatus,
+            matchedStores: [] as BookStoreVisitStore[],
+          };
+        }
+
         return {
-          displayStores: filterBookStoreVisitStores(stores, "", storeStateFilter),
+          displayStores: allStores,
           listStatus: "default" as StoreLocatorListStatus,
-          matchedStores: [] as BookStoreVisitStore[],
+          // Keep full list; highlight state tab match in place when selected.
+          matchedStores: stateMatched,
         };
       }
 
-      if (shouldSuggestNearbyStores(storeSearchQuery, filtered.length)) {
+      if (shouldSuggestNearbyStores(storeSearchQuery, searchMatched.length)) {
         return {
           displayStores: allStores,
           listStatus: "no-area" as StoreLocatorListStatus,
@@ -176,36 +200,61 @@ const BookStoreVisitPanel = ({
         };
       }
 
-      if (query && filtered.length > 0) {
-        const matchedIds = new Set(filtered.map((store) => store.id));
-        const rest = allStores.filter((store) => !matchedIds.has(store.id));
+      const isPincodeMatch = shouldShowPincodeMatchResults(
+        storeSearchQuery,
+        searchMatched.length,
+      );
+      const isLocationNameMatch =
+        Boolean(query) && !/^\d+$/.test(query) && searchMatched.length > 0;
+
+      if (isPincodeMatch || isLocationNameMatch) {
         return {
-          displayStores: [...filtered, ...rest],
+          displayStores: allStores,
           listStatus: "search-match" as StoreLocatorListStatus,
-          matchedStores: filtered,
+          matchedStores: searchMatched,
         };
       }
 
-      return {
-        displayStores: filtered,
-        listStatus: "default" as StoreLocatorListStatus,
-        matchedStores: [] as BookStoreVisitStore[],
-      };
-    }, [stores, storeSearchQuery, storeStateFilter, variant]);
-
-  // Keep selection inside the filtered list synchronously so search/pincode
-  // results expand immediately (useEffect-only sync left a stale id briefly).
-  const activeStoreId = useMemo(() => {
-    if (matchedStores.length > 0) {
-      if (matchedStores.some((store) => store.id === selectedStoreId)) {
-        return selectedStoreId;
+      // Text location search with no hits (e.g. "dehradun") — same no-area UX as
+      // a pincode miss. Do not fall through to a sticky state tab (which was
+      // wrongly showing "Explore Our Showrooms" + that state's store active).
+      if (Boolean(query) && !/^\d+$/.test(query) && searchMatched.length === 0) {
+        return {
+          displayStores: allStores,
+          listStatus: "no-area" as StoreLocatorListStatus,
+          matchedStores: [] as BookStoreVisitStore[],
+        };
       }
-      return matchedStores[0]?.id ?? "";
-    }
 
+      // Empty state tab (Karnataka / Telangana / Maharashtra / New Delhi, etc.) —
+      // same UX as valid pincode miss: no-area copy + full default listing.
+      if (storeStateFilter?.trim() && stateMatched.length === 0) {
+        return {
+          displayStores: allStores,
+          listStatus: "no-area" as StoreLocatorListStatus,
+          matchedStores: [] as BookStoreVisitStore[],
+        };
+      }
+
+      // State tab (or idle): never remove locations — only activate matches in place.
+      return {
+        displayStores: allStores,
+        listStatus: "default" as StoreLocatorListStatus,
+        matchedStores: stateMatched,
+      };
+    }, [stores, storeSearchQuery, storeStateFilter, variant, invalidPincodeMessage]);
+
+  // Honor any in-list selection so nearby / non-matched rows stay clickable.
+  // Fall back to the first match (or first listed store) only when the current id is gone.
+  const activeStoreId = useMemo(() => {
     if (displayStores.some((store) => store.id === selectedStoreId)) {
       return selectedStoreId;
     }
+
+    if (matchedStores.length > 0) {
+      return matchedStores[0]?.id ?? "";
+    }
+
     return displayStores[0]?.id ?? (variant === "page" ? "" : selectedStoreId);
   }, [displayStores, matchedStores, selectedStoreId, variant]);
 
@@ -214,17 +263,27 @@ const BookStoreVisitPanel = ({
     displayStores[0] ??
     stores[0];
 
+  // When search/state filter changes, activate the first match in place.
+  // Do not lock selection to matches — clicking Coimbatore (or any nearby row) must stick.
   useEffect(() => {
     if (variant !== "page") {
       return;
     }
 
-    if (selectedStoreId === activeStoreId) {
+    if (matchedStores.length > 0) {
+      setSelectedStoreId((current) =>
+        matchedStores.some((store) => store.id === current)
+          ? current
+          : (matchedStores[0]?.id ?? current),
+      );
       return;
     }
 
-    setSelectedStoreId(activeStoreId);
-  }, [activeStoreId, selectedStoreId, variant]);
+    // State tab with no showrooms: don't leave another state's store expanded.
+    if (storeStateFilter?.trim()) {
+      setSelectedStoreId(displayStores[0]?.id ?? "");
+    }
+  }, [variant, storeSearchQuery, storeStateFilter, matchedStores, displayStores]);
 
   // Prefill from My Profile once when available; never overwrite fields the user already typed.
   useEffect(() => {
@@ -629,32 +688,38 @@ function StoreLocatorListStatusHeader({
   listCopy?: NormalizedStoreLocatorListCopy | null;
 }) {
   if (status === "no-area") {
-    if (!listCopy?.noAreaTitle && !listCopy?.noAreaSubtitle) return null;
+    const title = listCopy?.noAreaTitle?.trim() || storeLocatorNoAreaTitle;
+    const subtitle = listCopy?.noAreaSubtitle?.trim() || storeLocatorNoAreaSubtitle;
 
     return (
       <div className="flex flex-col gap-2 pt-6 lg:pt-0">
-        {listCopy.noAreaTitle ? (
-          <p className="font-gill text-base font-normal uppercase leading-110 text-darkblack">
-            {listCopy.noAreaTitle}
-          </p>
-        ) : null}
-        {listCopy.noAreaSubtitle ? (
-          <p className="font-gill text-base font-normal leading-110 text-darkblack">
-            {listCopy.noAreaSubtitle}
-          </p>
-        ) : null}
+        <p className="font-gill text-base font-normal uppercase leading-110 text-darkblack">
+          {title}
+        </p>
+        <p className="font-gill text-base font-normal leading-110 text-darkblack">
+          {subtitle}
+        </p>
       </div>
     );
   }
 
-  if (status !== "search-match") return null;
+  if (status === "search-match") {
+    const storeFoundMessage =
+      listCopy?.storeFoundMessage?.trim() || storeLocatorSearchMatchMessage;
 
-  const storeFoundMessage =
-    listCopy?.storeFoundMessage?.trim() || storeLocatorSearchMatchMessage;
+    return (
+      <div className="flex flex-col gap-4 pt-6 lg:pt-0">
+        <p className={storeLocatorListHeadingClassName}>{storeFoundMessage}</p>
+      </div>
+    );
+  }
 
+  // Default + invalid pincode fallback listing (Figma).
   return (
     <div className="flex flex-col gap-4 pt-6 lg:pt-0">
-      <p className={storeLocatorStatusEyebrowClassName}>{storeFoundMessage}</p>
+      <p className={storeLocatorListHeadingClassName}>
+        {storeLocatorExploreShowroomsTitle}
+      </p>
     </div>
   );
 }
@@ -685,10 +750,9 @@ const StoreSelectionStep = ({
   isShowroomsLoading = false,
 }: StoreSelectionStepProps) => {
   if (layout === "page") {
-    const listHeader =
-      listStatus !== "default" ? (
-        <StoreLocatorListStatusHeader status={listStatus} listCopy={listCopy} />
-      ) : null;
+    const listHeader = (
+      <StoreLocatorListStatusHeader status={listStatus} listCopy={listCopy} />
+    );
 
     return (
       <ShowroomsLayout

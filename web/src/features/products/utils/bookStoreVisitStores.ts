@@ -32,7 +32,9 @@ export function mapStoreLocatorShowroomToBookStoreVisit(
     imageAlt: showroom.imageAlt,
     city: showroom.city ?? undefined,
     state: showroom.state ?? inferStateFromAddress(showroom.address),
-    pincode: extractPincodeFromAddress(showroom.address),
+    pincode:
+      showroom.pincode ??
+      extractPincodeFromAddress(showroom.address),
   };
 }
 

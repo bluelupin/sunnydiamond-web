@@ -1,4 +1,5 @@
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { extractPincodeFromAddress } from "@/features/stores/utils/storeLocatorFilters";
 import {
   EMPTY_STORE_LOCATOR_PAGE,
   type NormalizedStoreLocatorCta,
@@ -148,16 +149,15 @@ const mapShowroom = (
     return null;
   }
 
-  const name = cleanText(showroom.name);
+  const name = cleanText(showroom.city);
   const address = cleanText(showroom.address);
   const mapUrl = cleanText(showroom.mapUrl) ?? cleanText(showroom.directionsUrl);
   const image = resolveResponsiveUrls(showroom.image);
 
   if (!name || !address || !mapUrl) return null;
-  if (!image.desktopUrl && !image.mobileUrl) return null;
 
-  const desktopImageUrl = image.desktopUrl ?? image.mobileUrl!;
-  const mobileImageUrl = image.mobileUrl ?? image.desktopUrl!;
+  const desktopImageUrl = image.desktopUrl ?? image.mobileUrl ?? "";
+  const mobileImageUrl = image.mobileUrl ?? image.desktopUrl ?? "";
 
   return {
     id:
@@ -172,6 +172,10 @@ const mapShowroom = (
     state: cleanText(showroom.state) ?? null,
     phone: cleanText(showroom.phone) ?? null,
     email: cleanText(showroom.email) ?? null,
+    pincode:
+      cleanText(showroom.pincode) ??
+      extractPincodeFromAddress(address) ??
+      null,
     mapUrl,
     mapEmbed: cleanText(showroom.mapEmbed) ?? null,
     openingHours: cleanText(showroom.openingHours) ?? null,

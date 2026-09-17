@@ -36,12 +36,29 @@ export const storeLocatorSearchMobileFigmaSpec = {
   stateLabelSize: 14,
 } as const;
 
-/** Figma State 2 — store found after search (used when CMS `storeFoundMessage` is unset). */
-export const storeLocatorSearchMatchMessage = "STORE FOUND FOR YOUR SEARCH";
+/** Figma — default list heading (default + invalid states). */
+export const storeLocatorExploreShowroomsTitle = "Explore Our Showrooms";
 
-/** Figma State 2 — store found eyebrow styling. */
-export const storeLocatorStatusEyebrowClassName =
-  "font-gill text-sm font-normal uppercase leading-110 text-[#5F6F3E] lg:text-base";
+/** Figma / Spec — pincode match list heading. */
+export const storeLocatorSearchMatchMessage = "We Found a Showroom Near You";
+
+/** Figma desktop — label above non-matched stores after a search hit. */
+export const storeLocatorExploreNearbyStoresLabel = "Explore nearby stores";
+
+/** Figma / Spec — valid pincode with no showroom match. */
+export const storeLocatorNoAreaTitle = "NO SHOWROOM IN THIS AREA YET";
+export const storeLocatorNoAreaSubtitle =
+  "Explore the nearest Sunny Diamonds showrooms and plan your visit with ease.";
+
+/** Figma / Spec — malformed pincode under the search field. */
+export const storeLocatorInvalidPincodeMessage = "Please enter a valid pin code";
+
+/** Match / explore heading styling (Figma — dark title, not green eyebrow). */
+export const storeLocatorListHeadingClassName =
+  "font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl";
+
+/** @deprecated kept for imports — use storeLocatorListHeadingClassName */
+export const storeLocatorStatusEyebrowClassName = storeLocatorListHeadingClassName;
 
 /** UI model for location filter chips (CMS icons preferred). */
 export type StoreLocatorStateFilter = {

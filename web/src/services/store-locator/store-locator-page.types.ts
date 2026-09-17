@@ -65,6 +65,7 @@ export type StrapiStoreLocatorShowroom = {
   state?: string | null;
   phone?: string | null;
   email?: string | null;
+  pincode?: string | null;
   mapUrl?: string | null;
   mapEmbed?: string | null;
   directionsUrl?: string | null;
@@ -137,6 +138,7 @@ export type NormalizedStoreLocatorShowroom = {
   state: string | null;
   phone: string | null;
   email: string | null;
+  pincode: string | null;
   mapUrl: string;
   mapEmbed: string | null;
   openingHours: string | null;

@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 import type { StaticImageData } from "next/image";
 import Link from "next/link";
+import ContactPhoneLink from "@/features/contact/components/ContactPhoneLink";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import { cn } from "@/shared/utils/cn";
@@ -11,6 +12,14 @@ import { ShowroomsLayoutSkeleton } from "./ShowroomsLayoutSkeleton";
 
 const ADDRESS_ICON = "/icons/address-icon.svg";
 const PHONE_ICON = "/icons/phone-icon.svg";
+
+const showroomPhoneLinkClassName =
+  "border-0 pb-0 font-gill text-lg font-light leading-110 text-darkblack lg:text-xl";
+
+function toShowroomTelHref(phone: string): string | undefined {
+  const digits = phone.replace(/[^\d+]/g, "");
+  return digits ? `tel:${digits}` : undefined;
+}
 
 export type ShowroomLayoutItem = {
   id: string;
@@ -30,10 +39,37 @@ export type ShowroomsLayoutProps = {
   description?: string | null;
   getDirectionsLabel?: string;
   listHeader?: ReactNode;
+  /** Desktop-only: ids of search-matched stores (shown above nearby label). */
+  matchedStoreIds?: string[];
+  /** Desktop-only: Figma “Explore nearby stores” label. */
+  nearbyStoresLabel?: string;
   emptyMessage?: string;
   className?: string;
   isLoading?: boolean;
 };
+
+function ShowroomPhoneRow({ phone }: { phone: string }) {
+  const href = toShowroomTelHref(phone);
+  if (!phone.trim()) return null;
+
+  return (
+    <div className="flex items-center gap-3">
+      <Image
+        src={PHONE_ICON}
+        alt=""
+        width={24}
+        height={24}
+        aria-hidden
+        className="size-6 shrink-0"
+      />
+      <ContactPhoneLink
+        href={href}
+        label={phone}
+        className={showroomPhoneLinkClassName}
+      />
+    </div>
+  );
+}
 
 function ShowroomLocationDetails({
   location,
@@ -63,21 +99,7 @@ function ShowroomLocationDetails({
           </p>
         </div>
       ) : null}
-      {location.phone ? (
-        <div className="flex items-center gap-3">
-          <Image
-            src={PHONE_ICON}
-            alt=""
-            width={24}
-            height={24}
-            aria-hidden
-            className="size-6 shrink-0"
-          />
-          <p className="font-gill lg:text-xl text-lg font-light leading-110 text-darkblack">
-            {location.phone}
-          </p>
-        </div>
-      ) : null}
+      {location.phone ? <ShowroomPhoneRow phone={location.phone} /> : null}
       {directionsText && location.directionsUrl ? (
         <Link
           href={location.directionsUrl}
@@ -194,6 +216,8 @@ function ShowroomsDesktopLayout({
   getDirectionsLabel,
   listHeader,
   emptyMessage,
+  matchedStoreIds,
+  nearbyStoresLabel,
   activeLocation,
   desktopImage,
   mobileImage,
@@ -207,6 +231,8 @@ function ShowroomsDesktopLayout({
   | "getDirectionsLabel"
   | "listHeader"
   | "emptyMessage"
+  | "matchedStoreIds"
+  | "nearbyStoresLabel"
 > & {
   activeLocation: ShowroomLayoutItem | undefined;
   desktopImage?: string | StaticImageData;
@@ -215,6 +241,10 @@ function ShowroomsDesktopLayout({
 }) {
   const directionsText = getDirectionsLabel?.trim();
   const hasHeaderContent = Boolean(description || listHeader);
+  const matchedCount = matchedStoreIds?.length ?? 0;
+  const showNearbyLabel = Boolean(
+    nearbyStoresLabel?.trim() && matchedCount > 0 && locations.length > matchedCount,
+  );
 
   return (
     <>
@@ -246,86 +276,71 @@ function ShowroomsDesktopLayout({
                 </p>
               ) : null
             ) : (
-              locations.map((location) => {
+              locations.map((location, index) => {
                 const isSelected = location.id === activeId;
+                const insertNearbyLabel = showNearbyLabel && index === matchedCount;
 
                 return (
-                  <div
-                    key={location.id}
-                    className={cn(
-                      "2xl:pl-24 lg:pl-10 lg:w-full w-fit lg:pr-4 border-b-[3px] lg:border-b-0 transition-all duration-300",
-                      isSelected ? "border-black bg-gray300" : "border-transparent",
-                    )}
-                  >
-                    <button
-                      type="button"
-                      aria-pressed={isSelected}
-                      onClick={() => onSelect(location.id)}
+                  <div key={location.id} className="contents">
+                    {insertNearbyLabel ? (
+                      <p className="2xl:pl-24 lg:pl-10 hidden w-full px-4 py-4 font-gill text-base font-normal leading-110 text-neutral500 lg:block">
+                        {nearbyStoresLabel}
+                      </p>
+                    ) : null}
+                    <div
                       className={cn(
-                        "font-light w-full lg:h-73 h-50 lg:px-0 px-6 flex items-center lg:justify-start justify-center lg:text-left text-center font-larken text-base md:text-xl lg:text-2xl text-darkblack transition-all duration-300",
-                        isSelected && "border-b border-gray50",
+                        "2xl:pl-24 lg:pl-10 lg:w-full w-fit lg:pr-4 border-b-[3px] lg:border-b-0 transition-all duration-300",
+                        isSelected ? "border-black bg-gray300" : "border-transparent",
                       )}
                     >
-                      {location.name}
-                    </button>
+                      <button
+                        type="button"
+                        aria-pressed={isSelected}
+                        onClick={() => onSelect(location.id)}
+                        className={cn(
+                          "font-light w-full lg:h-73 h-50 lg:px-0 px-6 flex items-center lg:justify-start justify-center lg:text-left text-center font-larken text-base md:text-xl lg:text-2xl text-darkblack transition-all duration-300",
+                          isSelected && "border-b border-gray50",
+                        )}
+                      >
+                        {location.name}
+                      </button>
 
-                    {isSelected ? (
-                      <div className="lg:pt-4 lg:pb-8 py-5 lg:px-0 px-5 lg:w-full sm:w-311 w-[80%] animate-in fade-in duration-300 lg:static absolute bottom-3 left-8 z-10 bg-gray300">
-                        {location.address ? (
-                          <div className="flex gap-3 items-start">
-                            <Image
-                              src={ADDRESS_ICON}
-                              alt=""
-                              width={24}
-                              height={24}
-                              aria-hidden
-                              className="sm:size-5 w-5 h-5 shrink-0 sm:mt-0 mt-1.5"
-                            />
-                            <p className="lg:text-xl md:text-lg text-base text-darkblack font-light tracking-[2%] leading-130 font-gill">
-                              {location.address}
-                            </p>
-                          </div>
-                        ) : null}
+                      {isSelected ? (
+                        <div className="lg:pt-4 lg:pb-8 py-5 lg:px-0 px-5 lg:w-full sm:w-311 w-[80%] animate-in fade-in duration-300 lg:static absolute bottom-3 left-8 z-10 bg-gray300">
+                          {location.address ? (
+                            <div className="flex gap-3 items-start">
+                              <Image
+                                src={ADDRESS_ICON}
+                                alt=""
+                                width={24}
+                                height={24}
+                                aria-hidden
+                                className="sm:size-5 w-5 h-5 shrink-0 sm:mt-0 mt-1.5"
+                              />
+                              <p className="lg:text-xl md:text-lg text-base text-darkblack font-light tracking-[2%] leading-130 font-gill">
+                                {location.address}
+                              </p>
+                            </div>
+                          ) : null}
 
-                        {location.phone ? (
-                          <div className="mt-4 lg:mb-6 mb-8 flex gap-3 items-center">
-                            <svg
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="text-black flex-shrink-0"
-                              aria-hidden
+                          {location.phone ? (
+                            <div className="mt-4 lg:mb-6 mb-8">
+                              <ShowroomPhoneRow phone={location.phone} />
+                            </div>
+                          ) : null}
+                          {directionsText && location.directionsUrl ? (
+                            <Link
+                              href={location.directionsUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-tertiary-cta-underline cursor-pointer sm:pb-1 font-gill md:text-base text-xs uppercase leading-110 tracking-[1.8%]"
                             >
-                              <path
-                                d="M18 20V3.5C18 2.67157 17.3284 2 16.5 2L7.5 2C6.67157 2 6 2.67157 6 3.5L6 20C6 20.8284 6.67157 21.5 7.5 21.5H16.5C17.3284 21.5 18 20.8284 18 20Z"
-                                stroke="#0A0A0A"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              <path
-                                d="M12 6.3125C12.5178 6.3125 12.9375 5.89277 12.9375 5.375C12.9375 4.85723 12.5178 4.4375 12 4.4375C11.4822 4.4375 11.0625 4.85723 11.0625 5.375C11.0625 5.89277 11.4822 6.3125 12 6.3125Z"
-                                fill="#0A0A0A"
-                              />
-                            </svg>
-                            <p className="lg:text-xl md:text-lg text-base text-darkblack font-light tracking-[2%] leading-130 font-gill">
-                              {location.phone}
-                            </p>
-                          </div>
-                        ) : null}
-                        {directionsText && location.directionsUrl ? (
-                          <Link
-                            href={location.directionsUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-tertiary-cta-underline cursor-pointer sm:pb-1 font-gill md:text-base text-xs uppercase leading-110 tracking-[1.8%]"
-                          >
-                            {directionsText}
-                          </Link>
-                        ) : null}
-                      </div>
-                    ) : null}
+                              {directionsText}
+                            </Link>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </div>
                   </div>
                 );
               })
@@ -362,6 +377,8 @@ export function ShowroomsLayout({
   description,
   getDirectionsLabel,
   listHeader,
+  matchedStoreIds,
+  nearbyStoresLabel,
   emptyMessage,
   className,
   isLoading = false,
@@ -402,6 +419,8 @@ export function ShowroomsLayout({
         getDirectionsLabel={getDirectionsLabel}
         listHeader={listHeader}
         emptyMessage={emptyMessage}
+        matchedStoreIds={matchedStoreIds}
+        nearbyStoresLabel={nearbyStoresLabel}
         activeLocation={activeLocation}
         desktopImage={desktopImage}
         mobileImage={mobileImage}
