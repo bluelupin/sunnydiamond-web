@@ -23,6 +23,8 @@ export function useGiftCardPayment() {
         cardType: flow.cardType,
         amount: flow.amount,
         occasion: flow.occasion,
+        digitalDeliveryDate:
+          flow.cardType === "digital" ? flow.digitalDeliveryDate.trim() : undefined,
         message: flow.message,
         sender: flow.sender,
         receiverSameAsSender: flow.receiverSameAsSender,

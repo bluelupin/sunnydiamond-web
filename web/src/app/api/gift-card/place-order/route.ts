@@ -24,6 +24,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Receiver details are required" }, { status: 400 });
   }
 
+  if (payload.cardType === "digital" && !payload.digitalDeliveryDate?.trim()) {
+    return NextResponse.json({ error: "Delivery date is required for digital gift cards" }, { status: 400 });
+  }
+
   if (payload.cardType === "physical") {
     const address = payload.deliveryAddress;
     if (

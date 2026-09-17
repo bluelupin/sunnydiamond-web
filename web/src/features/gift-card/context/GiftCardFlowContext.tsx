@@ -57,6 +57,7 @@ type GiftCardFlowContextValue = {
   cardType: GiftCardType;
   amount: number;
   occasion: string;
+  digitalDeliveryDate: string;
   message: string;
   sender: GiftCardPartyDetails;
   receiverSameAsSender: boolean;
@@ -70,6 +71,7 @@ type GiftCardFlowContextValue = {
   setCardType: (type: GiftCardType) => void;
   setAmount: (amount: number) => void;
   setOccasion: (occasion: string) => void;
+  setDigitalDeliveryDate: (date: string) => void;
   setMessage: (message: string) => void;
   setSender: (details: Partial<GiftCardPartyDetails>) => void;
   setReceiverSameAsSender: (value: boolean) => void;
@@ -106,6 +108,9 @@ export function GiftCardFlowProvider({
   const [cardType, setCardType] = useState<GiftCardType>(persisted?.cardType ?? "physical");
   const [amount, setAmount] = useState(persisted?.amount ?? giftCardFlowContent.amount.default);
   const [occasion, setOccasion] = useState(persisted?.occasion ?? "");
+  const [digitalDeliveryDate, setDigitalDeliveryDate] = useState(
+    persisted?.digitalDeliveryDate ?? "",
+  );
   const [message, setMessage] = useState(persisted?.message ?? "");
   const [sender, setSenderState] = useState<GiftCardPartyDetails>(persisted?.sender ?? emptyParty);
   const [receiverSameAsSender, setReceiverSameAsSender] = useState(
@@ -137,6 +142,13 @@ export function GiftCardFlowProvider({
     setDeliveryAddressState((current) => ({ ...current, ...address }));
   }, []);
 
+  const updateCardType = useCallback((type: GiftCardType) => {
+    setCardType(type);
+    if (type === "physical") {
+      setDigitalDeliveryDate("");
+    }
+  }, []);
+
   const persistFlowState = useCallback(
     (overrides?: Partial<{ pendingAuthAfterConfigure: boolean; step: GiftCardFlowStep }>) => {
       writeGiftCardFlowStorage({
@@ -144,6 +156,7 @@ export function GiftCardFlowProvider({
         cardType,
         amount,
         occasion,
+        digitalDeliveryDate,
         message,
         sender,
         receiverSameAsSender,
@@ -159,6 +172,7 @@ export function GiftCardFlowProvider({
       deliveryAddress,
       message,
       occasion,
+      digitalDeliveryDate,
       pendingAuthAfterConfigure,
       receiver,
       receiverSameAsSender,
@@ -188,6 +202,7 @@ export function GiftCardFlowProvider({
     setCardType("physical");
     setAmount(giftCardFlowContent.amount.default);
     setOccasion("");
+    setDigitalDeliveryDate("");
     setMessage("");
     setSenderState(emptyParty);
     setReceiverSameAsSender(true);
@@ -245,6 +260,7 @@ export function GiftCardFlowProvider({
       cardType,
       amount,
       occasion,
+      digitalDeliveryDate,
       message,
       sender,
       receiverSameAsSender,
@@ -255,9 +271,10 @@ export function GiftCardFlowProvider({
       occasionOptions,
       isOccasionsLoading,
       pendingAuthAfterConfigure,
-      setCardType,
+      setCardType: updateCardType,
       setAmount,
       setOccasion,
+      setDigitalDeliveryDate,
       setMessage,
       setSender,
       setReceiverSameAsSender,
@@ -281,6 +298,7 @@ export function GiftCardFlowProvider({
       cardType,
       closePanel,
       deliveryAddress,
+      digitalDeliveryDate,
       estimatedDeliveryDate,
       goBack,
       goToAddress,
@@ -302,6 +320,7 @@ export function GiftCardFlowProvider({
       resumeAfterAuth,
       sender,
       step,
+      updateCardType,
     ],
   );
 

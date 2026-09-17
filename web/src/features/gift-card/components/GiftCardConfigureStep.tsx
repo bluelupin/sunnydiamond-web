@@ -8,15 +8,19 @@ import { CartPrimaryButton } from "@/features/cart/components/CartFlowUi";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { RIGHT_PANEL_CONTENT_PADDING_CLASS } from "@/shared/ui/rightPanel";
 import { RightPanelScrollLayout } from "@/shared/ui/RightPanelScrollLayout";
+import AppointmentDateField from "@/shared/ui/AppointmentDateField";
 import { cn } from "@/shared/utils/cn";
 import { useGiftCardFlow } from "../context/GiftCardFlowContext";
 import { giftCardFlowContent } from "../data/content";
+import { getGiftCardDigitalDateBounds } from "../utils/giftCardDigitalDateBounds";
 import {
   GiftCardSelectField,
   GiftCardTextAreaField,
   GiftCardToggleOption,
   giftCardFieldLabelClass,
 } from "./GiftCardFormUi";
+
+const giftCardDigitalDateBounds = getGiftCardDigitalDateBounds();
 
 function formatGiftCardAmount(amount: number): string {
   return `₹ ${amount.toLocaleString("en-IN")}`;
@@ -30,25 +34,35 @@ const GiftCardConfigureStep = ({ header }: { header: ReactNode }) => {
     cardType,
     amount,
     occasion,
+    digitalDeliveryDate,
     message,
     occasionOptions,
     setCardType,
     setAmount,
     setOccasion,
+    setDigitalDeliveryDate,
     setMessage,
     requestDetailsStep,
     beginGuestAuthForDetails,
     persistFlowState,
   } = useGiftCardFlow();
 
-  const { amount: amountConfig, cardTypes, occasion: occasionConfig, message: messageConfig } =
-    giftCardFlowContent;
+  const {
+    amount: amountConfig,
+    cardTypes,
+    occasion: occasionConfig,
+    date: dateConfig,
+    message: messageConfig,
+  } = giftCardFlowContent;
 
   const clampAmount = (value: number) =>
     Math.min(amountConfig.max, Math.max(amountConfig.min, value));
 
   const hasOccasionOptions = occasionOptions.length > 0;
-  const canContinue = hasOccasionOptions ? occasion.trim().length > 0 : true;
+  const hasRequiredOccasion = hasOccasionOptions ? occasion.trim().length > 0 : true;
+  const hasRequiredDigitalDate =
+    cardType === "digital" ? digitalDeliveryDate.trim().length > 0 : true;
+  const canContinue = hasRequiredOccasion && hasRequiredDigitalDate;
 
   const handleContinue = () => {
     if (!canContinue) return;
@@ -165,6 +179,23 @@ const GiftCardConfigureStep = ({ header }: { header: ReactNode }) => {
             placeholder={occasionConfig.placeholder}
             options={occasionOptions}
           />
+        ) : null}
+
+        {cardType === "digital" ? (
+          <div className="flex flex-col gap-2">
+            <label className={giftCardFieldLabelClass} htmlFor="gift-card-digital-date">
+              {dateConfig.label}
+            </label>
+            <AppointmentDateField
+              id="gift-card-digital-date"
+              value={digitalDeliveryDate}
+              minDate={giftCardDigitalDateBounds.minDate}
+              maxDate={giftCardDigitalDateBounds.maxDate}
+              onChange={setDigitalDeliveryDate}
+              placeholder={dateConfig.placeholder}
+              displayFormat="dd/mm/yyyy"
+            />
+          </div>
         ) : null}
 
         <GiftCardTextAreaField

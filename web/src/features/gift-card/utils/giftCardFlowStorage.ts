@@ -12,6 +12,7 @@ export type PersistedGiftCardFlowState = {
   cardType: GiftCardType;
   amount: number;
   occasion: string;
+  digitalDeliveryDate: string;
   message: string;
   sender: GiftCardPartyDetails;
   receiverSameAsSender: boolean;
