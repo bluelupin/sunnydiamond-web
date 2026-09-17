@@ -45,7 +45,7 @@ const BlogDetailSidebar = ({
     tableOfContents[0]?.id ?? "",
   );
   const isNavigatingRef = useRef(false);
-  const navigationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const navigationTimeoutRef = useRef<number | null>(null);
   const scrollRafRef = useRef<number | null>(null);
   const { isSupported, isSpeaking, isPaused, isActive, toggle } =
     useBrowserTextToSpeech(speechText);
