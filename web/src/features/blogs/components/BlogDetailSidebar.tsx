@@ -1,7 +1,7 @@
 "use client";
 
 import { Share2, Volume1 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/shared/utils/cn";
 import { sharePageUrl } from "@/shared/utils/sharePageUrl";
 import { useBrowserTextToSpeech } from "../hooks/useBrowserTextToSpeech";
@@ -16,6 +16,26 @@ type BlogDetailSidebarProps = {
 const sidebarCtaClassName =
   "btn-border-slide inline-flex h-14 flex-1 items-center justify-center border border-neutral300 px-7 font-gill text-sm uppercase leading-110 text-darkblack";
 
+const NAV_SCROLL_LOCK_MS = 1000;
+
+function resolveActiveSectionId(sectionIds: readonly string[]): string {
+  const viewportMid = window.innerHeight * 0.4;
+  let active = sectionIds[0] ?? "";
+
+  for (const id of sectionIds) {
+    const element = document.getElementById(id);
+    if (!element) {
+      continue;
+    }
+
+    if (element.getBoundingClientRect().top <= viewportMid) {
+      active = id;
+    }
+  }
+
+  return active;
+}
+
 const BlogDetailSidebar = ({
   title,
   tableOfContents,
@@ -24,6 +44,9 @@ const BlogDetailSidebar = ({
   const [activeId, setActiveId] = useState(
     tableOfContents[0]?.id ?? "",
   );
+  const isNavigatingRef = useRef(false);
+  const navigationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollRafRef = useRef<number | null>(null);
   const { isSupported, isSpeaking, isPaused, isActive, toggle } =
     useBrowserTextToSpeech(speechText);
 
@@ -39,33 +62,43 @@ const BlogDetailSidebar = ({
       return;
     }
 
-    const sectionElements = tableOfContents
-      .map((item) => document.getElementById(item.id))
-      .filter((element): element is HTMLElement => Boolean(element));
+    const sectionIds = tableOfContents.map((item) => item.id);
 
-    if (sectionElements.length === 0) {
-      return;
-    }
+    const updateActiveSection = () => {
+      if (isNavigatingRef.current) {
+        return;
+      }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+      setActiveId(resolveActiveSectionId(sectionIds));
+    };
 
-        if (visible[0]?.target.id) {
-          setActiveId(visible[0].target.id);
-        }
-      },
-      {
-        rootMargin: "-20% 0px -55% 0px",
-        threshold: [0, 0.25, 0.5, 0.75, 1],
-      },
-    );
+    const onScroll = () => {
+      if (scrollRafRef.current != null) {
+        return;
+      }
 
-    sectionElements.forEach((element) => observer.observe(element));
+      scrollRafRef.current = window.requestAnimationFrame(() => {
+        scrollRafRef.current = null;
+        updateActiveSection();
+      });
+    };
 
-    return () => observer.disconnect();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    updateActiveSection();
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+
+      if (scrollRafRef.current != null) {
+        window.cancelAnimationFrame(scrollRafRef.current);
+      }
+
+      if (navigationTimeoutRef.current != null) {
+        window.clearTimeout(navigationTimeoutRef.current);
+      }
+    };
   }, [tableOfContents]);
 
   const handleShare = useCallback(() => {
@@ -74,10 +107,39 @@ const BlogDetailSidebar = ({
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-      setActiveId(id);
+    if (!element) {
+      return;
     }
+
+    isNavigatingRef.current = true;
+    setActiveId(id);
+
+    if (navigationTimeoutRef.current != null) {
+      window.clearTimeout(navigationTimeoutRef.current);
+    }
+
+    element.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    const releaseNavigationLock = () => {
+      isNavigatingRef.current = false;
+      setActiveId(resolveActiveSectionId(tableOfContents.map((item) => item.id)));
+    };
+
+    const onScrollEnd = () => {
+      window.removeEventListener("scrollend", onScrollEnd);
+      if (navigationTimeoutRef.current != null) {
+        window.clearTimeout(navigationTimeoutRef.current);
+        navigationTimeoutRef.current = null;
+      }
+      releaseNavigationLock();
+    };
+
+    window.addEventListener("scrollend", onScrollEnd);
+    navigationTimeoutRef.current = window.setTimeout(() => {
+      window.removeEventListener("scrollend", onScrollEnd);
+      navigationTimeoutRef.current = null;
+      releaseNavigationLock();
+    }, NAV_SCROLL_LOCK_MS);
   };
 
   return (
