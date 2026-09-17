@@ -16,7 +16,10 @@
     "test:cart": "node scripts/run-cart-test-cases.mjs",
     "test:bespoke": "node scripts/run-bespoke-test-cases.mjs",
     "test:blogs": "node scripts/run-blogs-test-cases.mjs",
-    "test:wishlist": "node scripts/run-wishlist-test-cases.mjs"
+    "test:wishlist": "node scripts/run-wishlist-test-cases.mjs",
+    "test:homepage": "node scripts/run-homepage-test-cases.mjs",
+    "test:learn-about-diamonds": "node scripts/run-learn-about-diamonds-test-cases.mjs",
+    "test:careers": "node scripts/run-careers-test-cases.mjs"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.3",

@@ -40,14 +40,19 @@ const AboutHandcraftedSection = ({
               solidOpacity={hasMedia ? overlayOpacity : undefined}
               gradient={hasMedia ? undefined : "bottom-strong"}
             />
-            <div className="absolute inset-x-0 bottom-0 top-16 z-10 flex flex-col items-center justify-center sm:gap-4 gap-3 px-5 md:top-20">
-              <Reveal as="h2" direction="up"
-                id="about-handcrafted-title"
-                className="sm:w-fit w-[198px] text-center font-larken text-32 font-light leading-110 text-white md:text-[40px] lg:text-5xl sm:border-b border-neutral300 sm:pb-4"
-              >
-                {title}
-              </Reveal>
-              <span className="sm:hidden h-px w-full max-w-[98px] bg-neutral300" aria-hidden />
+            <div className="absolute inset-x-0 bottom-0 top-16 z-10 flex flex-col items-center justify-center px-5 md:top-20">
+              {/* aboutHandcraftedFigmaSpec.hero.mobile — Figma 2556:36067 */}
+              <div className="flex flex-col items-center max-sm:w-[186px] max-sm:gap-3 sm:w-full sm:max-w-[440px] sm:gap-4">
+                <Reveal
+                  as="h2"
+                  direction="up"
+                  id="about-handcrafted-title"
+                  className="w-full break-words text-center font-larken text-32 font-light leading-110 text-white md:text-[40px] lg:text-5xl"
+                >
+                  {title}
+                </Reveal>
+                <span className="h-px w-full bg-neutral300" aria-hidden />
+              </div>
             </div>
           </Reveal>
         </PageContainer>

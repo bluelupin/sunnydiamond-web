@@ -1,15 +1,17 @@
 import { seoContent } from "@/features/cms/data/content";
+import { normalizeCanonicalPath } from "@/shared/lib/seo/normalizeCanonicalPath";
 import { siteConfig } from "@/shared/lib/siteConfig";
 import { WORLD_OF_SUNNY_PATH } from "@/shared/utils/navigation";
 import type { NormalizedAboutPage } from "@/services/about/about-page.types";
 
 export function resolveAboutSeoMetadata(page: NormalizedAboutPage | null) {
   const cmsSeo = page?.seo;
-  const cmsCanonical = cmsSeo?.canonicalPath?.replace(/\/$/, "") || "";
+  const normalizedCanonical = normalizeCanonicalPath(
+    cmsSeo?.canonicalPath,
+    WORLD_OF_SUNNY_PATH,
+  );
   const canonicalPath =
-    cmsCanonical === "/about" || !cmsCanonical
-      ? WORLD_OF_SUNNY_PATH
-      : cmsSeo?.canonicalPath ?? WORLD_OF_SUNNY_PATH;
+    normalizedCanonical === "/about" ? WORLD_OF_SUNNY_PATH : normalizedCanonical;
 
   const cmsTitle = cmsSeo?.metaTitle?.trim();
   const cmsDescription = cmsSeo?.metaDescription?.trim();

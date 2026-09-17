@@ -1,4 +1,5 @@
 import { aboutHandcraftedTileLayout } from "@/features/about/data/content";
+import { normalizeCanonicalPath } from "@/shared/lib/seo/normalizeCanonicalPath";
 import { WORLD_OF_SUNNY_PATH } from "@/shared/utils/navigation";
 import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 import { extractStrapiImage, resolveCmsAltText, resolveCmsCaption, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
@@ -91,10 +92,9 @@ const mapSeo = (seo?: StrapiAboutSeo | null): NormalizedAboutSeo | null => {
   const metaTitle = cleanText(seo?.metaTitle);
   const metaDescription = cleanText(seo?.metaDescription);
   const rawCanonical = cleanText(seo?.canonicalUrl);
+  const normalizedCanonical = normalizeCanonicalPath(rawCanonical, WORLD_OF_SUNNY_PATH);
   const canonicalPath =
-    !rawCanonical || rawCanonical.replace(/\/$/, "") === "/about"
-      ? WORLD_OF_SUNNY_PATH
-      : rawCanonical;
+    normalizedCanonical === "/about" ? WORLD_OF_SUNNY_PATH : normalizedCanonical;
 
   if (!metaTitle && !metaDescription) return null;
 

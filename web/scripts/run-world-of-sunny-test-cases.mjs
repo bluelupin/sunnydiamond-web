@@ -160,10 +160,10 @@ async function runStaticChecks() {
   assertSource("WOS-061", "text card titles", tileGridTsx, "CraftTextTile", "Handcrafted mosaic renders text card titles");
   assertSource(
     "WOS-063",
-    "handcrafted mobile divider",
+    "handcrafted divider",
     handcraftedTsx,
-    "sm:hidden h-px",
-    "Handcrafted uses separate mobile divider element",
+    "max-sm:w-[186px]",
+    "Handcrafted mobile divider matches Figma 2556:36067 (186px, 12px gap)",
   );
   assertSource(
     "WOS-066",
@@ -422,11 +422,15 @@ function applyKnownIssueFindings() {
   }
 
   const handcraftedTsx = readSrc("src/features/about/components/AboutHandcraftedSection.tsx");
-  if (handcraftedTsx.includes("sm:border-b") && handcraftedTsx.includes("sm:hidden h-px")) {
+  if (
+    handcraftedTsx.includes("sm:border-b") ||
+    handcraftedTsx.includes("sm:hidden h-px") ||
+    !handcraftedTsx.includes("max-sm:w-[186px]")
+  ) {
     record(
       "WOS-063",
       "Fail",
-      "Handcrafted divider differs: desktop border-b vs mobile h-px span (SD-141)",
+      "Handcrafted divider does not match Figma spec (SD-141)",
     );
   }
 

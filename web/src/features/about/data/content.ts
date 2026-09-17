@@ -165,6 +165,14 @@ export const aboutHandcraftedFigmaSpec = {
     titleFontSize: 48,
     titleColor: "#FFFFFF",
     lineColor: "#CCCCCC",
+    /** Figma node 2556:36067 — mobile title + divider (375px artboard) */
+    mobile: {
+      titleWidth: 186,
+      titleGap: 12,
+      lineWidth: 186,
+      titleFontSize: 32,
+      lineHeight: 1.1,
+    },
   },
   cardsGroup: {
     width: 1160,

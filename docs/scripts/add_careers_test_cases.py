@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Add World of Sunny (About) module test cases to Sunny Diamonds Test Cases workbook."""
+"""Add Careers module test cases to Sunny Diamonds Test Cases workbook."""
 
 from __future__ import annotations
 
@@ -9,7 +9,9 @@ from pathlib import Path
 from openpyxl import load_workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
-from world_of_sunny_test_cases_data import (
+from careers_test_cases_data import (
+    ISSUES,
+    KNOWN_GAPS,
     PRECONDITIONS_LIST,
     TEST_CASES,
     TEST_DATA_NOTES,
@@ -18,13 +20,13 @@ from world_of_sunny_test_cases_data import (
 SCRIPT_DIR = Path(__file__).resolve().parent
 DOCS_DIR = SCRIPT_DIR.parent
 WORKBOOK_PATH = DOCS_DIR / "Sunny Diamonds Test Cases .xlsx"
-RESULTS_JSON = SCRIPT_DIR / "world-of-sunny-test-results.json"
+RESULTS_JSON = SCRIPT_DIR / "careers-test-results.json"
 
-SHEET_NAME = "World of Sunny"
-ISSUES_SHEET_NAME = "World of Sunny Issues"
-MODULE = "World of Sunny"
-ROUTES = "/world-of-sunny (/about redirects here)"
-DATA_SOURCE = "Strapi CMS (about-page single type)"
+SHEET_NAME = "Careers"
+ISSUES_SHEET_NAME = "Careers Issues"
+MODULE = "Careers"
+ROUTES = "/careers, /careers/all-openings, /careers/{jobCode}, /careers/apply/{jobCode}"
+DATA_SOURCE = "Strapi CMS (career-landing-page, career listings, openings collection)"
 
 HEADER = [
     "Test Case ID",
@@ -44,7 +46,7 @@ HEADER = [
 
 COLUMN_WIDTHS = {
     "A": 14,
-    "B": 16,
+    "B": 12,
     "C": 22,
     "D": 42,
     "E": 52,
@@ -72,9 +74,9 @@ ISSUES_HEADER = [
 ]
 
 ISSUES_COLUMN_WIDTHS = {
-    "A": 12,
+    "A": 16,
     "B": 12,
-    "C": 16,
+    "C": 10,
     "D": 22,
     "E": 36,
     "F": 48,
@@ -84,41 +86,23 @@ ISSUES_COLUMN_WIDTHS = {
     "J": 32,
 }
 
-KNOWN_GAPS = [
-    "SD-1: Faces section hover over-zoom on desktop",
-    "SD-2/SD-3: Since 1997 section description copy gaps",
-    "SD-4: Handcrafted text card titles mismatch",
-    "SD-5: Timeline default year should be 1997 (first milestone)",
-    "SD-6: Hero animation not matching Figma",
-    "SD-7: Faces mobile name/role visibility",
-    "SD-8: Mobile second hero banner size",
-    "SD-133: Mobile icon/text alignment in sections",
-    "SD-141: Handcrafted divider vs Figma",
-]
 
-ISSUES = [
-    ("WOS-ISSUE-001", "SD-1", MODULE, "F. Faces", "Faces hover over-zoom", "Desktop face cards zoom too aggressively on hover compared to Figma.", "P2", "Reopened", "WOS-053", "Assigned to Aman Kumar"),
-    ("WOS-ISSUE-002", "SD-2", MODULE, "E. Since 1997", "Since 1997 description copy (1)", "First description block does not match approved CMS/Figma copy.", "P2", "Reopened", "WOS-041", "Assigned to Aman Kumar"),
-    ("WOS-ISSUE-003", "SD-3", MODULE, "E. Since 1997", "Since 1997 description copy (2)", "Second description block does not match approved CMS/Figma copy.", "P2", "Reopened", "WOS-041", "Assigned to Aman Kumar"),
-    ("WOS-ISSUE-004", "SD-4", MODULE, "G. Handcrafted", "Handcrafted card titles", "Text card titles in Handcrafted section do not match Figma.", "P0", "Reopened", "WOS-061", "Assigned to Aman Kumar"),
-    ("WOS-ISSUE-005", "SD-5", MODULE, "H. Timeline", "Timeline default year", "Timeline should default to 1997 (first milestone); currently defaults to first CMS array item.", "P1", "Reopened", "WOS-071", "Assigned to Aman Kumar"),
-    ("WOS-ISSUE-006", "SD-6", MODULE, "C. Hero", "Hero animation", "Hero entrance/animation does not match Figma motion design.", "P3", "Reopened", "WOS-025", "Assigned to Aman Kumar"),
-    ("WOS-ISSUE-007", "SD-7", MODULE, "F. Faces", "Mobile name/role visibility", "On mobile, team member name and role are not consistently visible without hover.", "P1", "Reopened", "WOS-052", "Assigned to Aman Kumar; latest test passed"),
-    ("WOS-ISSUE-008", "SD-8", MODULE, "E. Since 1997", "Mobile second hero banner", "Second hero banner size on mobile does not match Figma dimensions.", "P2", "Reopened", "WOS-044", "Assigned to Aman Kumar"),
-    ("WOS-ISSUE-009", "SD-133", MODULE, "G. Handcrafted", "Mobile icon/text alignment", "Icons and text misaligned on mobile in handcrafted section.", "P2", "Reopened", "WOS-066", "Assigned to Aman Kumar"),
-    ("WOS-ISSUE-010", "SD-141", MODULE, "G. Handcrafted", "Handcrafted divider", "Section divider styling does not match Figma.", "P3", "Reopened", "WOS-063", "Assigned to Aman Kumar"),
-    ("WOS-ISSUE-011", "SD-205", MODULE, "A. Page Load", "Invalid slug returns 200", "Invalid /world-of-sunny-* slug should return 404.", "P2", "Open", "WOS-016", "Assigned to Aman Kumar"),
-    ("WOS-ISSUE-012", "SD-206", MODULE, "H. Timeline", "Timeline CMS copy duplicate", "Timeline milestone copy contains duplicate phrase.", "P3", "Open", "WOS-NEW-001", "Assigned to Aman Kumar"),
-    ("WOS-ISSUE-013", "SD-207", MODULE, "E. Since 1997", "Since 1997 CMS grammar", "Since 1997 story copy has grammar error in CMS.", "P3", "Open", "WOS-NEW-002", "Assigned to Aman Kumar"),
-]
-
-
-def load_status_overrides() -> dict[str, str]:
+def load_status_overrides() -> dict[str, dict[str, str]]:
     if not RESULTS_JSON.exists():
         return {}
     try:
         data = json.loads(RESULTS_JSON.read_text(encoding="utf-8"))
-        return {k: v.get("status", "") for k, v in data.items() if isinstance(v, dict)}
+        results = data.get("results", data)
+        if not isinstance(results, dict):
+            return {}
+        out: dict[str, dict[str, str]] = {}
+        for k, v in results.items():
+            if isinstance(v, dict):
+                out[k] = {
+                    "status": v.get("status", ""),
+                    "actual": v.get("actual", ""),
+                }
+        return out
     except (json.JSONDecodeError, OSError):
         return {}
 
@@ -147,18 +131,25 @@ def style_section_title(ws, row: int, title: str) -> None:
     cell.fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
 
 
-def write_summary_block(ws, start_row: int) -> int:
+def write_summary_block(ws, start_row: int, status_overrides: dict[str, dict[str, str]]) -> int:
     row = start_row
     ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=len(HEADER))
     ws.cell(row=row, column=1, value=f"{MODULE} — Test Case Summary").font = Font(bold=True, size=16)
     row += 2
+
+    pass_count = sum(1 for v in status_overrides.values() if v.get("status") == "Pass")
+    fail_count = sum(1 for v in status_overrides.values() if v.get("status") == "Fail")
+    partial_count = sum(1 for v in status_overrides.values() if v.get("status") == "Partial")
+    blocked_count = sum(1 for v in status_overrides.values() if v.get("status") == "Blocked")
 
     for label, value in [
         ("Module", MODULE),
         ("Routes", ROUTES),
         ("Data Source", DATA_SOURCE),
         ("Total Test Cases", str(len(TEST_CASES))),
-        ("Known Gaps / Jira", str(len(KNOWN_GAPS))),
+        ("Automated Results", f"Pass: {pass_count}, Fail: {fail_count}, Partial: {partial_count}, Blocked: {blocked_count}"),
+        ("Known Gaps", str(len(KNOWN_GAPS))),
+        ("Tracked Issues", str(len(ISSUES))),
     ]:
         ws.cell(row=row, column=1, value=label).font = Font(bold=True)
         ws.cell(row=row, column=2, value=value)
@@ -168,7 +159,7 @@ def write_summary_block(ws, start_row: int) -> int:
     ws.cell(row=row, column=1, value="Preconditions:").font = Font(bold=True)
     row += 1
     for pre_id, pre_desc in PRECONDITIONS_LIST:
-        ws.cell(row=row, column=1, value=f"{pre_id}")
+        ws.cell(row=row, column=1, value=pre_id)
         ws.cell(row=row, column=2, value=pre_desc)
         row += 1
     row += 1
@@ -188,11 +179,11 @@ def write_summary_block(ws, start_row: int) -> int:
     return row + 1
 
 
-def populate_test_cases_sheet(ws, status_overrides: dict[str, str]) -> None:
+def populate_test_cases_sheet(ws, status_overrides: dict[str, dict[str, str]]) -> None:
     if ws.max_row > 0:
         ws.delete_rows(1, ws.max_row)
 
-    row = write_summary_block(ws, 1)
+    row = write_summary_block(ws, 1, status_overrides)
     style_section_title(ws, row, "TEST CASES")
     row += 1
 
@@ -205,10 +196,23 @@ def populate_test_cases_sheet(ws, status_overrides: dict[str, str]) -> None:
     wrap = Alignment(vertical="top", wrap_text=True)
     for case in TEST_CASES:
         tc_id, area, scenario, steps, expected, priority, typ, preconds, test_data, notes = case
-        status = status_overrides.get(tc_id, "")
+        override = status_overrides.get(tc_id, {})
+        status = override.get("status", "")
+        actual = override.get("actual", "")
         values = (
-            tc_id, MODULE, area, scenario, steps, expected,
-            priority, typ, preconds, test_data, status, "", notes,
+            tc_id,
+            MODULE,
+            area,
+            scenario,
+            steps,
+            expected,
+            priority,
+            typ,
+            preconds,
+            test_data,
+            status,
+            actual,
+            notes,
         )
         for col, value in enumerate(values, start=1):
             cell = ws.cell(row=row, column=col, value=value)
@@ -227,7 +231,7 @@ def populate_issues_sheet(ws) -> None:
 
     row = 1
     ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=len(ISSUES_HEADER))
-    ws.cell(row=row, column=1, value=f"{MODULE} — Tracked Issues").font = Font(bold=True, size=16)
+    ws.cell(row=row, column=1, value=f"{MODULE} — Tracked Issues / Gaps").font = Font(bold=True, size=16)
     row += 2
 
     header_row = row

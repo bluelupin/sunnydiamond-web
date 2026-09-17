@@ -1,0 +1,208 @@
+{
+  "generatedAt": "2026-09-17T08:05:08.809Z",
+  "baseUrl": "http://localhost:3001",
+  "summary": {
+    "total": 39,
+    "pass": 39,
+    "fail": 0,
+    "partial": 0,
+    "blocked": 0
+  },
+  "results": {
+    "CAREER-001": {
+      "status": "Pass",
+      "actual": "GET /careers → 200",
+      "testedAt": "2026-09-17T08:05:05.788Z"
+    },
+    "CAREER-002": {
+      "status": "Pass",
+      "actual": "GET /careers/all-openings → 200",
+      "testedAt": "2026-09-17T08:05:07.066Z"
+    },
+    "CAREER-003": {
+      "status": "Pass",
+      "actual": "Job slug route",
+      "testedAt": "2026-09-17T08:04:46.491Z"
+    },
+    "CAREER-004": {
+      "status": "Pass",
+      "actual": "Apply route",
+      "testedAt": "2026-09-17T08:04:46.491Z"
+    },
+    "CAREER-005": {
+      "status": "Pass",
+      "actual": "Sitemap lists /careers",
+      "testedAt": "2026-09-17T08:05:08.809Z"
+    },
+    "CAREER-006": {
+      "status": "Pass",
+      "actual": "Loading skeleton",
+      "testedAt": "2026-09-17T08:04:46.491Z"
+    },
+    "CAREER-007": {
+      "status": "Pass",
+      "actual": "ISR revalidate",
+      "testedAt": "2026-09-17T08:04:46.491Z"
+    },
+    "CAREER-008": {
+      "status": "Pass",
+      "actual": "Landing SEO",
+      "testedAt": "2026-09-17T08:04:46.491Z"
+    },
+    "CAREER-009": {
+      "status": "Pass",
+      "actual": "All openings SEO",
+      "testedAt": "2026-09-17T08:04:46.491Z"
+    },
+    "CAREER-010": {
+      "status": "Pass",
+      "actual": "Job slug metadata",
+      "testedAt": "2026-09-17T08:04:46.491Z"
+    },
+    "CAREER-011": {
+      "status": "Pass",
+      "actual": "SEO fallback",
+      "testedAt": "2026-09-17T08:04:46.491Z"
+    },
+    "CAREER-012": {
+      "status": "Pass",
+      "actual": "Hero section",
+      "testedAt": "2026-09-17T08:04:46.491Z"
+    },
+    "CAREER-013": {
+      "status": "Pass",
+      "actual": "Openings section",
+      "testedAt": "2026-09-17T08:04:46.491Z"
+    },
+    "CAREER-014": {
+      "status": "Pass",
+      "actual": "Life section",
+      "testedAt": "2026-09-17T08:04:46.491Z"
+    },
+    "CAREER-015": {
+      "status": "Pass",
+      "actual": "Benefits section",
+      "testedAt": "2026-09-17T08:04:46.491Z"
+    },
+    "CAREER-016": {
+      "status": "Pass",
+      "actual": "Bespoke inspirations",
+      "testedAt": "2026-09-17T08:04:46.491Z"
+    },
+    "CAREER-017": {
+      "status": "Pass",
+      "actual": "FAQ section",
+      "testedAt": "2026-09-17T08:04:46.491Z"
+    },
+    "CAREER-018": {
+      "status": "Pass",
+      "actual": "Job listings section",
+      "testedAt": "2026-09-17T08:04:46.491Z"
+    },
+    "CAREER-021": {
+      "status": "Pass",
+      "actual": "Mobile filter drawer",
+      "testedAt": "2026-09-17T08:04:46.491Z"
+    },
+    "CAREER-022": {
+      "status": "Pass",
+      "actual": "Empty listings state",
+      "testedAt": "2026-09-17T08:04:46.491Z"
+    },
+    "CAREER-023": {
+      "status": "Pass",
+      "actual": "Job card component",
+      "testedAt": "2026-09-17T08:04:46.501Z"
+    },
+    "CAREER-024": {
+      "status": "Pass",
+      "actual": "In-page job detail",
+      "testedAt": "2026-09-17T08:04:46.501Z"
+    },
+    "CAREER-025": {
+      "status": "Pass",
+      "actual": "Apply options modal",
+      "testedAt": "2026-09-17T08:04:46.501Z"
+    },
+    "CAREER-026": {
+      "status": "Pass",
+      "actual": "Copy job ID util",
+      "testedAt": "2026-09-17T08:04:46.501Z"
+    },
+    "CAREER-027": {
+      "status": "Pass",
+      "actual": "Application form",
+      "testedAt": "2026-09-17T08:04:46.501Z"
+    },
+    "CAREER-028": {
+      "status": "Pass",
+      "actual": "Resume upload modal",
+      "testedAt": "2026-09-17T08:04:46.501Z"
+    },
+    "CAREER-029": {
+      "status": "Pass",
+      "actual": "Education submission mapping",
+      "testedAt": "2026-09-17T08:04:46.501Z"
+    },
+    "CAREER-030": {
+      "status": "Pass",
+      "actual": "Submit confirmation modal",
+      "testedAt": "2026-09-17T08:04:46.501Z"
+    },
+    "CAREER-031": {
+      "status": "Pass",
+      "actual": "Success section",
+      "testedAt": "2026-09-17T08:04:46.501Z"
+    },
+    "CAREER-032": {
+      "status": "Pass",
+      "actual": "Submission mapper",
+      "testedAt": "2026-09-17T08:04:46.501Z"
+    },
+    "CAREER-033": {
+      "status": "Pass",
+      "actual": "Jobs provider",
+      "testedAt": "2026-09-17T08:04:46.501Z"
+    },
+    "CAREER-034": {
+      "status": "Pass",
+      "actual": "Flow step state",
+      "testedAt": "2026-09-17T08:04:46.501Z"
+    },
+    "CAREER-035": {
+      "status": "Pass",
+      "actual": "Careers header mode",
+      "testedAt": "2026-09-17T08:04:46.501Z"
+    },
+    "CAREER-036": {
+      "status": "Pass",
+      "actual": "Careers CMS service",
+      "testedAt": "2026-09-17T08:04:46.501Z"
+    },
+    "CAREER-037": {
+      "status": "Pass",
+      "actual": "Careers mapper",
+      "testedAt": "2026-09-17T08:04:46.501Z"
+    },
+    "CAREER-038": {
+      "status": "Pass",
+      "actual": "Empty CMS fallback",
+      "testedAt": "2026-09-17T08:04:46.501Z"
+    },
+    "CAREER-039": {
+      "status": "Pass",
+      "actual": "Job opening mapper",
+      "testedAt": "2026-09-17T08:04:46.501Z"
+    },
+    "CAREER-040": {
+      "status": "Pass",
+      "actual": "Header careers route",
+      "testedAt": "2026-09-17T08:04:46.501Z"
+    },
+    "CAREER-041": {
+      "status": "Pass",
+      "actual": "All openings route constant",
+      "testedAt": "2026-09-17T08:04:46.501Z"
+    }
+  }
+}

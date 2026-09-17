@@ -1,0 +1,303 @@
+{
+  "generatedAt": "2026-09-17T07:47:49.259Z",
+  "baseUrl": "http://localhost:3001",
+  "summary": {
+    "total": 58,
+    "pass": 58,
+    "fail": 0,
+    "blocked": 0,
+    "partial": 0
+  },
+  "results": {
+    "HOME-001": {
+      "status": "Pass",
+      "actual": "GET / returned 200",
+      "testedAt": "2026-09-17T07:47:49.258Z"
+    },
+    "HOME-002": {
+      "status": "Pass",
+      "actual": "Route loading.tsx skeleton",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-003": {
+      "status": "Pass",
+      "actual": "ISR revalidate = 300",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-004": {
+      "status": "Pass",
+      "actual": "HomepageCmsProvider wraps page",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-005": {
+      "status": "Pass",
+      "actual": "prefetchHomepageBundle on server",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-006": {
+      "status": "Pass",
+      "actual": "preloadHeroLcpImages called",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-007": {
+      "status": "Pass",
+      "actual": "FeatureErrorBoundary on SectionNav",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-008": {
+      "status": "Pass",
+      "actual": "HomepagePerformanceReporter wired",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-009": {
+      "status": "Pass",
+      "actual": "generateMetadata exported",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-013": {
+      "status": "Pass",
+      "actual": "resolveHomepageSeoMetadata",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-014": {
+      "status": "Pass",
+      "actual": "Fallback metadata on CMS error",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-015": {
+      "status": "Pass",
+      "actual": "CMS share/OG image resolution",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-012": {
+      "status": "Pass",
+      "actual": "WebSite JSON-LD in HTML",
+      "testedAt": "2026-09-17T07:47:49.258Z"
+    },
+    "HOME-016": {
+      "status": "Pass",
+      "actual": "Hero section present in HTML",
+      "testedAt": "2026-09-17T07:47:49.259Z"
+    },
+    "HOME-017": {
+      "status": "Pass",
+      "actual": "Hero null guard",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-018": {
+      "status": "Pass",
+      "actual": "HeroBackgroundMedia",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-019": {
+      "status": "Pass",
+      "actual": "Hero overlay + CTA",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-020": {
+      "status": "Pass",
+      "actual": "Trust badges in hero",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-021": {
+      "status": "Pass",
+      "actual": "Full viewport hero height",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-022": {
+      "status": "Pass",
+      "actual": "Hero h1 present",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-023": {
+      "status": "Pass",
+      "actual": "CraftingRaritySection wired",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-024": {
+      "status": "Pass",
+      "actual": "Category grid",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-025": {
+      "status": "Pass",
+      "actual": "Copy block + CTA",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-026": {
+      "status": "Pass",
+      "actual": "isSectionActive guard",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-027": {
+      "status": "Pass",
+      "actual": "ResponsiveImage in crafting rarity",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-028": {
+      "status": "Pass",
+      "actual": "SectionNav dynamic import",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-029": {
+      "status": "Pass",
+      "actual": "useScrollSpy wired",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-030": {
+      "status": "Pass",
+      "actual": "scrollToHomeSection on click",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-031": {
+      "status": "Pass",
+      "actual": "Nav hides at footer",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-032": {
+      "status": "Pass",
+      "actual": "Progress indicator",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-033": {
+      "status": "Pass",
+      "actual": "Empty nav guard",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-034": {
+      "status": "Pass",
+      "actual": "DiamondSourcingSection lazy",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-035": {
+      "status": "Pass",
+      "actual": "FeaturedCollectionSection",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-036": {
+      "status": "Pass",
+      "actual": "OccasionsTeaserSection",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-037": {
+      "status": "Pass",
+      "actual": "FeaturedProductsSection",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-038": {
+      "status": "Pass",
+      "actual": "ForYourValentineSection",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-039": {
+      "status": "Pass",
+      "actual": "SunnyPromiseSection",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-040": {
+      "status": "Pass",
+      "actual": "BespokeForYouSection",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-041": {
+      "status": "Pass",
+      "actual": "DiamondsForEveryoneSection",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-042": {
+      "status": "Pass",
+      "actual": "CraftsmanshipProcess",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-043": {
+      "status": "Pass",
+      "actual": "ShowroomsSection",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-044": {
+      "status": "Pass",
+      "actual": "lazyImportWithRetry",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-045": {
+      "status": "Pass",
+      "actual": "SectionFallback placeholders",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-046": {
+      "status": "Pass",
+      "actual": "homepage shell service",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-047": {
+      "status": "Pass",
+      "actual": "editorial blocks service",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-048": {
+      "status": "Pass",
+      "actual": "shopping blocks service",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-049": {
+      "status": "Pass",
+      "actual": "homepage.mapper.ts exists",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-050": {
+      "status": "Pass",
+      "actual": "CMS cache seeding",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-051": {
+      "status": "Pass",
+      "actual": "Partial CMS failure tolerance",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-052": {
+      "status": "Pass",
+      "actual": "homepage query keys",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-053": {
+      "status": "Pass",
+      "actual": "prefetchHomepageBelowFold",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-054": {
+      "status": "Pass",
+      "actual": "LazyAnimatedSection",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-055": {
+      "status": "Pass",
+      "actual": "Header jewellery nav wired",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-056": {
+      "status": "Pass",
+      "actual": "Hero CTA Link",
+      "testedAt": "2026-09-17T07:47:46.036Z"
+    },
+    "HOME-057": {
+      "status": "Pass",
+      "actual": "Category grid links",
+      "testedAt": "2026-09-17T07:47:46.037Z"
+    },
+    "HOME-058": {
+      "status": "Pass",
+      "actual": "Gifting banner section id",
+      "testedAt": "2026-09-17T07:47:46.037Z"
+    },
+    "HOME-010": {
+      "status": "Pass",
+      "actual": "Canonical: http://localhost:3000",
+      "testedAt": "2026-09-17T07:47:49.258Z"
+    },
+    "HOME-011": {
+      "status": "Pass",
+      "actual": "Title: Sunny Diamonds | Home of Internally Flawless Diamonds",
+      "testedAt": "2026-09-17T07:47:49.258Z"
+    }
+  }
+}
