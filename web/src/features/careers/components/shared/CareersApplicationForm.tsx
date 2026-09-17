@@ -6,9 +6,8 @@ import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusT
 import FormFieldError from "@/shared/ui/FormFieldError";
 import AppointmentDateField from "@/shared/ui/AppointmentDateField";
 import { cn } from "@/shared/utils/cn";
-import {
-  APPOINTMENT_COUNTRY_CODES,
-} from "@/shared/constants/appointmentForm";
+
+import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
 import {
   invalidFieldClassName,
   sanitizePhoneInput,
@@ -28,6 +27,7 @@ import {
 import { parseCareerResume } from "@/services/careers/career-resume-parse.service";
 import { resolveCareerApplicationFlow } from "@/services/careers/resolveCareerApplicationFlow";
 import { toast } from "@/shared/hooks/use-toast";
+import { sharePageUrl } from "@/shared/utils/sharePageUrl";
 import {
   CAREERS_RESUME_PARSE_ERROR_MESSAGE,
   CAREERS_RESUME_PARSE_LOADING_MESSAGE,
@@ -58,7 +58,6 @@ import {
 import CareersApplicationJobHeader from "./CareersApplicationJobHeader";
 import CareersSelectField from "./CareersSelectField";
 import CareersUploadResumeModal from "./CareersUploadResumeModal";
-import CareersChevronDownIcon from "./CareersChevronDownIcon";
 import CareersResumeFileChip from "./CareersResumeFileChip";
 import CareersSearchIcon from "./CareersSearchIcon";
 import CareersSubmitConfirmationModal from "./CareersSubmitConfirmationModal";
@@ -423,18 +422,12 @@ const CareersApplicationForm = () => {
     setTouched((current) => ({ ...current, [field]: true }));
   };
 
-  const handleShare = async () => {
-    if (!selectedJob) return;
-    const url = `${window.location.origin}/careers`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: selectedJob.title, url });
-        return;
-      }
-      await navigator.clipboard.writeText(url);
-    } catch {
-      // User cancelled share or clipboard unavailable.
+  const handleShare = () => {
+    if (!selectedJob) {
+      return;
     }
+
+    void sharePageUrl({ title: selectedJob.title });
   };
 
   const handleResumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -671,21 +664,15 @@ const CareersApplicationForm = () => {
               </FormField>
               <FormField label={fields.phoneLabel} error={showError("phone") ? errors.phone : undefined}>
                 <div className="flex h-14 items-center gap-2 bg-[#F2F2F2] p-3">
-                  <div className="flex shrink-0 items-center">
-                    <select
-                      aria-label="Country code"
-                      value={countryCode}
-                      onChange={(event) => setCountryCode(event.target.value)}
-                      className="appearance-none bg-transparent font-gill text-base font-normal leading-110 text-darkblack outline-none"
-                    >
-                      {APPOINTMENT_COUNTRY_CODES.map((entry) => (
-                        <option key={entry.code} value={entry.code}>
-                          {entry.code}
-                        </option>
-                      ))}
-                    </select>
-                    <CareersChevronDownIcon />
-                  </div>
+                  <PhoneCountryCodeSelect
+                    id="careers-country-code"
+                    value={countryCode}
+                    onChange={(nextCode) => {
+                      setCountryCode(nextCode);
+                      setPhone(sanitizePhoneInput(phone, nextCode));
+                    }}
+                    onBlur={() => markTouched("phone")}
+                  />
                   <input
                     type="tel"
                     autoComplete="tel"

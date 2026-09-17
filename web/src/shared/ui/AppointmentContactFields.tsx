@@ -1,15 +1,14 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import {
-  APPOINTMENT_COUNTRY_CODES,
   APPOINTMENT_TIME_SLOTS,
   appointmentFieldClassName,
   appointmentLabelClassName,
 } from "@/shared/constants/appointmentForm";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
+import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
 import AppointmentDateField from "@/shared/ui/AppointmentDateField";
 import {
   getMaxSelectableDate,
@@ -159,30 +158,16 @@ const AppointmentContactFields = ({
             showError("phone") && invalidFieldContainerClassName,
           )}
         >
-          <div className="relative flex shrink-0 items-center">
-            <select
-              value={countryCode}
-              onChange={(event) => {
-                onCountryCodeChange(event.target.value);
-                onPhoneChange(sanitizePhoneInput(phone, event.target.value));
-                markTouched("phone");
-              }}
-              aria-label="Country code"
-              className="appearance-none bg-transparent pr-5 font-gill text-base leading-110 text-darkblack outline-none"
-            >
-              {APPOINTMENT_COUNTRY_CODES.map((entry) => (
-                <option key={entry.code} value={entry.code}>
-                  {entry.code}
-                </option>
-              ))}
-            </select>
-            <ChevronDown
-              size={16}
-              strokeWidth={1.5}
-              aria-hidden
-              className="pointer-events-none absolute right-0 text-darkblack"
-            />
-          </div>
+          <PhoneCountryCodeSelect
+            id={`${idPrefix}-country-code`}
+            value={countryCode}
+            onChange={(nextCode) => {
+              onCountryCodeChange(nextCode);
+              onPhoneChange(sanitizePhoneInput(phone, nextCode));
+              markTouched("phone");
+            }}
+            onBlur={() => markTouched("phone")}
+          />
           <input
             id={`${idPrefix}-phone`}
             type="tel"

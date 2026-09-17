@@ -2,12 +2,13 @@
 
 import { ChevronLeft } from "lucide-react";
 import type { InputHTMLAttributes } from "react";
-import CareersChevronDownIcon from "@/features/careers/components/shared/CareersChevronDownIcon";
 import {
   CAREERS_SELECT_EMPTY_VALUE,
   careersSelectTriggerClassName,
 } from "@/features/careers/components/shared/CareersSelectField";
 import GiftingPanelCheckbox from "@/shared/ui/GiftingPanelCheckbox";
+import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
+import { sanitizePhoneInput } from "@/shared/utils/formValidation";
 import {
   Select,
   SelectContent,
@@ -65,28 +66,36 @@ type GiftCardPhoneFieldProps = {
   id: string;
   label: string;
   value: string;
+  countryCode: string;
   onChange: (value: string) => void;
+  onCountryCodeChange: (value: string) => void;
 };
 
 export const GiftCardPhoneField = ({
   id,
   label,
   value,
+  countryCode,
   onChange,
+  onCountryCodeChange,
 }: GiftCardPhoneFieldProps) => (
   <div className="flex flex-col gap-2">
     <label className={giftCardFieldLabelClass} htmlFor={id}>{label}</label>
     <div className="flex h-14 items-center gap-2 bg-[#F2F2F2] px-3">
-      <div className="flex shrink-0 items-center gap-2">
-        <span className="font-gill text-base font-normal leading-110 text-darkblack">+91</span>
-        <CareersChevronDownIcon />
-      </div>
+      <PhoneCountryCodeSelect
+        id={`${id}-country-code`}
+        value={countryCode}
+        onChange={(nextCode) => {
+          onCountryCodeChange(nextCode);
+          onChange(sanitizePhoneInput(value, nextCode));
+        }}
+      />
       <input
         id={id}
         type="tel"
         inputMode="numeric"
         value={value}
-        onChange={(event) => onChange(event.target.value.replace(/\D/g, ""))}
+        onChange={(event) => onChange(sanitizePhoneInput(event.target.value, countryCode))}
         placeholder="Enter"
         className="min-w-0 flex-1 bg-transparent font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:text-[#999999]"
       />

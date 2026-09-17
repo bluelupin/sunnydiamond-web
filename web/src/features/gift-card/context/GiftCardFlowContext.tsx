@@ -24,6 +24,7 @@ export type GiftCardFlowStep = "configure" | "details" | "address" | "success";
 export type GiftCardPartyDetails = {
   fullName: string;
   phone: string;
+  countryCode: string;
   email: string;
 };
 
@@ -38,8 +39,17 @@ export type GiftCardDeliveryAddress = {
 const emptyParty: GiftCardPartyDetails = {
   fullName: "",
   phone: "",
+  countryCode: "+91",
   email: "",
 };
+
+const normalizePartyDetails = (
+  party: Partial<GiftCardPartyDetails> | undefined,
+): GiftCardPartyDetails => ({
+  ...emptyParty,
+  ...party,
+  countryCode: party?.countryCode ?? "+91",
+});
 
 const emptyAddress: GiftCardDeliveryAddress = {
   addressLine1: "",
@@ -112,12 +122,14 @@ export function GiftCardFlowProvider({
     persisted?.digitalDeliveryDate ?? "",
   );
   const [message, setMessage] = useState(persisted?.message ?? "");
-  const [sender, setSenderState] = useState<GiftCardPartyDetails>(persisted?.sender ?? emptyParty);
+  const [sender, setSenderState] = useState<GiftCardPartyDetails>(
+    normalizePartyDetails(persisted?.sender),
+  );
   const [receiverSameAsSender, setReceiverSameAsSender] = useState(
     persisted?.receiverSameAsSender ?? true,
   );
   const [receiver, setReceiverState] = useState<GiftCardPartyDetails>(
-    persisted?.receiver ?? emptyParty,
+    normalizePartyDetails(persisted?.receiver),
   );
   const [deliveryAddress, setDeliveryAddressState] = useState<GiftCardDeliveryAddress>(
     persisted?.deliveryAddress ?? emptyAddress,

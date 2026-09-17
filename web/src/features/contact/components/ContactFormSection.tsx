@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import Reveal from "@/shared/Animation/Reveal";
 import GiftingPanelCheckbox from "@/shared/ui/GiftingPanelCheckbox";
 import FormFieldError from "@/shared/ui/FormFieldError";
@@ -10,9 +9,7 @@ import { useToast } from "@/shared/hooks/use-toast";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import { useAuth } from "@/features/auth/context/AuthContext";
-import {
-  APPOINTMENT_COUNTRY_CODES,
-} from "@/shared/constants/appointmentForm";
+import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
 import {
   fetchGenericFormByTag,
   submitContactEnquiry,
@@ -42,24 +39,7 @@ const contactSelectTriggerClassName = "text-base font-normal";
 
 const contactSelectPlaceholderClassName = "font-normal text-gray600";
 
-const SELECT_CHEVRON_ICON = "/images/jewellery/chevron-down-filter.svg";
 const MESSAGE_MAX_LENGTH = 500;
-
-const ContactPhoneChevron = () => (
-  <span
-    className="pointer-events-none inline-flex size-6 shrink-0 items-center justify-center"
-    aria-hidden
-  >
-    <Image
-      src={SELECT_CHEVRON_ICON}
-      alt=""
-      width={7}
-      height={15}
-      className="rotate-90 shrink-0 object-contain"
-      style={{ width: 7.038, height: 14.651 }}
-    />
-  </span>
-);
 
 type ContactFormSectionProps = {
   form: NormalizedContactForm;
@@ -271,25 +251,16 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
                           showError("phone") && invalidFieldContainerClassName,
                         )}
                       >
-                        <div className="flex shrink-0 items-center">
-                          <select
-                            value={countryCode}
-                            onChange={(event) => {
-                              setCountryCode(event.target.value);
-                              setPhone(sanitizePhoneInput(phone, event.target.value));
-                              markTouched("phone");
-                            }}
-                            aria-label="Country code"
-                            className="appearance-none bg-transparent font-gill text-base font-normal leading-110 text-darkblack outline-none"
-                          >
-                            {APPOINTMENT_COUNTRY_CODES.map((entry) => (
-                              <option key={entry.code} value={entry.code}>
-                                {entry.code}
-                              </option>
-                            ))}
-                          </select>
-                          <ContactPhoneChevron />
-                        </div>
+                        <PhoneCountryCodeSelect
+                          id="contact-country-code"
+                          value={countryCode}
+                          onChange={(nextCode) => {
+                            setCountryCode(nextCode);
+                            setPhone(sanitizePhoneInput(phone, nextCode));
+                            markTouched("phone");
+                          }}
+                          onBlur={() => markTouched("phone")}
+                        />
                         <input
                           id="contact-phone"
                           type="tel"

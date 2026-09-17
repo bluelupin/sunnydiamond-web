@@ -27,7 +27,7 @@ import type { GiftCardPartyDetails } from "../context/GiftCardFlowContext";
 
 const isGiftCardPartyComplete = (party: GiftCardPartyDetails): boolean =>
   validateRequiredName(party.fullName).valid &&
-  validatePhone(party.phone, "+91").valid &&
+  validatePhone(party.phone, party.countryCode).valid &&
   validateRequiredEmail(party.email).valid;
 
 const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
@@ -134,7 +134,9 @@ const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
               id="gift-card-sender-phone"
               label={details.phoneLabel}
               value={sender.phone}
+              countryCode={sender.countryCode}
               onChange={(value) => setSender({ phone: value })}
+              onCountryCodeChange={(value) => setSender({ countryCode: value })}
             />
             <GiftCardTextField
               id="gift-card-sender-email"
@@ -166,7 +168,9 @@ const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
                   id="gift-card-receiver-phone"
                   label={details.phoneLabel}
                   value={receiver.phone}
+                  countryCode={receiver.countryCode}
                   onChange={(value) => setReceiver({ phone: value })}
+                  onCountryCodeChange={(value) => setReceiver({ countryCode: value })}
                 />
                 <GiftCardTextField
                   id="gift-card-receiver-email"
