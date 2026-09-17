@@ -22,7 +22,7 @@ const GiftingWithLoveSection = ({ intro }: GiftingWithLoveSectionProps) => {
     <section
       ref={sectionRef}
       aria-labelledby="gifting-with-love-title"
-      className="bg-white pt-10 sm:pt-16 lg:min-h-[700px] lg:pt-100"
+      className="bg-white pt-10 sm:pt-16 lg:min-h-[700px] lg:pt-104"
     >
       <PageContainer className="flex w-full justify-center">
         <div className="flex w-full max-w-[700px] flex-col items-center text-center lg:max-w-[950px]">

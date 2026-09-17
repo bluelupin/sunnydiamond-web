@@ -1,12 +1,16 @@
-import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import {
+  extractStrapiImage,
+  resolveCmsAltText,
+  resolveCmsMediaUrl,
+} from "@/shared/utils/strapiMedia";
 import {
   EMPTY_DIAMONDS_FOR_EVERYONE_PAGE,
   type NormalizedDfeBenefitStep,
   type NormalizedDfeBenefits,
   type NormalizedDfeCta,
-  type NormalizedDfeEditorialBanner,
   type NormalizedDfeFaq,
   type NormalizedDfeHero,
+  type NormalizedDfeHeroImage,
   type NormalizedDfeInvestmentPlanner,
   type NormalizedDfePlanIntro,
   type NormalizedDfeResponsiveImage,
@@ -14,7 +18,6 @@ import {
   type NormalizedDiamondsForEveryonePage,
   type StrapiDfeBenefitsSection,
   type StrapiDfeCta,
-  type StrapiDfeEditorialBannerSection,
   type StrapiDfeFaqSection,
   type StrapiDfeHeroSection,
   type StrapiDfeInvestmentPlannerSection,
@@ -37,6 +40,30 @@ const resolveSectionActive = (
   if (typeof isActive === "boolean") return isActive;
   if (typeof showField === "boolean") return showField;
   return true;
+};
+
+const mapHeroImage = (
+  image?: StrapiDfeResponsiveImage | null,
+): NormalizedDfeHeroImage | null => {
+  const desktopFile = extractStrapiImage(image?.desktopImage);
+  const mobileFile = extractStrapiImage(image?.mobileImage);
+  const desktopUrl =
+    resolveCmsMediaUrl(image?.desktopImage) ?? resolveCmsMediaUrl(image?.mobileImage);
+  const mobileUrl =
+    resolveCmsMediaUrl(image?.mobileImage) ?? resolveCmsMediaUrl(image?.desktopImage);
+  if (!desktopUrl && !mobileUrl) return null;
+
+  return {
+    desktopUrl: desktopUrl ?? mobileUrl!,
+    mobileUrl: mobileUrl ?? desktopUrl!,
+    alt:
+      cleanText(image?.altText) ??
+      resolveCmsAltText(image?.desktopImage) ??
+      resolveCmsAltText(image?.mobileImage) ??
+      "",
+    width: desktopFile?.width ?? mobileFile?.width ?? undefined,
+    height: desktopFile?.height ?? mobileFile?.height ?? undefined,
+  };
 };
 
 const mapResponsiveImage = (
@@ -88,13 +115,12 @@ const mapHero = (hero?: StrapiDfeHeroSection | null): NormalizedDfeHero | null =
   if (!hero || !resolveSectionActive(hero.isActive, hero.showField)) return null;
 
   const title = cleanText(hero.title);
-  const image = mapResponsiveImage(hero.backgroundImage);
-  if (!title || !image) return null;
+  if (!title) return null;
 
   return {
     title,
     eyebrow: cleanText(hero.eyebrow),
-    image,
+    image: mapHeroImage(hero.backgroundImage),
   };
 };
 
@@ -106,10 +132,13 @@ const mapPlanIntro = (
   const title = cleanText(section.title);
   if (!title) return null;
 
+  const description = cleanText(section.description);
+
   return {
     title,
-    description: cleanText(section.description),
-    image: mapResponsiveImage(section.backgroundImage),
+    ...(description ? { description } : {}),
+    backgroundImage: mapResponsiveImage(section.backgroundImage),
+    textureImage: mapResponsiveImage(section.textureImage),
   };
 };
 
@@ -121,33 +150,24 @@ const mapInvestmentPlanner = (
   const title = cleanText(section.title);
   if (!title) return null;
 
+  const description = cleanText(section.description);
+  const monthlySummary = cleanText(section.monthlySummary);
+  const buttonLabel = cleanText(section.buttonLabel);
+
   return {
     title,
-    description: cleanText(section.description),
+    ...(description ? { description } : {}),
+    ...(monthlySummary ? { monthlySummary } : {}),
+    ...(buttonLabel ? { buttonLabel } : {}),
     cta: mapCta(section.cta),
     image: mapResponsiveImage(section.image),
   };
 };
 
-const mapEditorialBanner = (
-  section?: StrapiDfeEditorialBannerSection | null,
-): NormalizedDfeEditorialBanner | null => {
-  if (!section || !resolveSectionActive(section.isActive, section.showField)) return null;
-
-  const image = mapResponsiveImage(section.image);
-  if (!image) return null;
-
-  return {
-    image,
-    cta: mapCta(section.cta),
-  };
-};
-
-const parseStepNumber = (label: string | undefined, index: number): number => {
-  if (!label) return index + 1;
-  const digits = label.replace(/\D/g, "");
-  const parsed = Number.parseInt(digits, 10);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : index + 1;
+const resolveStepTitle = (label: string | undefined): string | undefined => {
+  const cleaned = cleanText(label);
+  if (!cleaned || /^\d+$/.test(cleaned)) return undefined;
+  return cleaned;
 };
 
 const mapBenefits = (
@@ -163,9 +183,14 @@ const mapBenefits = (
     .map((step, index) => {
       const description = cleanText(step?.description);
       if (!description) return null;
+
+      const label = cleanText(step?.label);
+      const title = resolveStepTitle(label);
+
       return {
         id: step?.id != null ? String(step.id) : `step-${index + 1}`,
-        stepNumber: parseStepNumber(cleanText(step?.label), index),
+        stepNumber: index + 1,
+        ...(title ? { title } : {}),
         description,
         ...(cleanText(step?.highlightedText)
           ? { highlightedText: cleanText(step.highlightedText) }
@@ -216,7 +241,6 @@ export function mapDiamondsForEveryonePage(
     hero: mapHero(raw.heroSection),
     planIntro: mapPlanIntro(raw.planIntroSection),
     investmentPlanner: mapInvestmentPlanner(raw.investmentPlannerSection),
-    editorialBanner: mapEditorialBanner(raw.editorialBannerSection),
     benefits: mapBenefits(raw.benefitsSection),
     faq: mapFaq(raw.faqSection),
     seo: mapSeo(raw.seo),

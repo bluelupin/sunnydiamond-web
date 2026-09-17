@@ -37,20 +37,15 @@ export type StrapiDfePlanIntroSection = {
   isActive?: boolean | null;
   showField?: boolean | null;
   backgroundImage?: StrapiDfeResponsiveImage | null;
+  textureImage?: StrapiDfeResponsiveImage | null;
 };
 
 export type StrapiDfeInvestmentPlannerSection = {
   id?: number;
   title?: string | null;
   description?: string | null;
-  isActive?: boolean | null;
-  showField?: boolean | null;
-  cta?: StrapiDfeCta | null;
-  image?: StrapiDfeResponsiveImage | null;
-};
-
-export type StrapiDfeEditorialBannerSection = {
-  id?: number;
+  monthlySummary?: string | null;
+  buttonLabel?: string | null;
   isActive?: boolean | null;
   showField?: boolean | null;
   cta?: StrapiDfeCta | null;
@@ -111,7 +106,6 @@ export type StrapiDiamondsForEveryonePage = {
   heroSection?: StrapiDfeHeroSection | null;
   planIntroSection?: StrapiDfePlanIntroSection | null;
   investmentPlannerSection?: StrapiDfeInvestmentPlannerSection | null;
-  editorialBannerSection?: StrapiDfeEditorialBannerSection | null;
   benefitsSection?: StrapiDfeBenefitsSection | null;
   faqSection?: StrapiDfeFaqSection | null;
   seo?: StrapiDfeSeo | null;
@@ -129,33 +123,42 @@ export type NormalizedDfeCta = {
   url: string;
 };
 
+export type NormalizedDfeHeroImage = {
+  desktopUrl: string;
+  mobileUrl: string;
+  alt: string;
+  width?: number;
+  height?: number;
+};
+
 export type NormalizedDfeHero = {
   eyebrow?: string;
   title: string;
-  image: NormalizedDfeResponsiveImage;
+  image: NormalizedDfeHeroImage | null;
 };
 
 export type NormalizedDfePlanIntro = {
   title: string;
   description?: string;
-  image: NormalizedDfeResponsiveImage | null;
+  /** Desktop center product image. */
+  backgroundImage: NormalizedDfeResponsiveImage | null;
+  /** Mobile full-bleed texture background. */
+  textureImage: NormalizedDfeResponsiveImage | null;
 };
 
 export type NormalizedDfeInvestmentPlanner = {
   title: string;
   description?: string;
+  monthlySummary?: string;
+  buttonLabel?: string;
   cta?: NormalizedDfeCta | null;
   image: NormalizedDfeResponsiveImage | null;
-};
-
-export type NormalizedDfeEditorialBanner = {
-  image: NormalizedDfeResponsiveImage;
-  cta?: NormalizedDfeCta | null;
 };
 
 export type NormalizedDfeBenefitStep = {
   id: string;
   stepNumber: number;
+  title?: string;
   description: string;
   highlightedText?: string;
 };
@@ -192,7 +195,6 @@ export type NormalizedDiamondsForEveryonePage = {
   hero: NormalizedDfeHero | null;
   planIntro: NormalizedDfePlanIntro | null;
   investmentPlanner: NormalizedDfeInvestmentPlanner | null;
-  editorialBanner: NormalizedDfeEditorialBanner | null;
   benefits: NormalizedDfeBenefits | null;
   faq: NormalizedDfeFaq | null;
   seo: NormalizedDfeSeo | null;
@@ -202,7 +204,6 @@ export const EMPTY_DIAMONDS_FOR_EVERYONE_PAGE: NormalizedDiamondsForEveryonePage
   hero: null,
   planIntro: null,
   investmentPlanner: null,
-  editorialBanner: null,
   benefits: null,
   faq: null,
   seo: null,

@@ -1,15 +1,14 @@
 /**
  * DFE calculator + invest-flow copy only.
- * Marketing page sections (hero, plan, lifestyle, benefits, FAQ) come from CMS.
+ * Marketing page sections (hero, plan, benefits, FAQ) come from CMS.
  */
 export const diamondsForEveryonePageContent = {
   investment: {
     title: "Plan Your Investment",
-    monthlyLabel: "Define your monthly savings amount",
-    summaryTitle: "Your 12 Month Investments Summary",
+    monthlyLabel: "Choose how much you'd like to contribute each month.",
+    summaryTitle: "Your 12-Month Summary",
     contributionLabel: "Your Contribution",
-    freeInstallmentLabel: "12th Instalment",
-    freeInstallmentValue: "Free",
+    freeInstallmentLabel: "Bonus",
     totalLabel: "Total Value",
     ctaLabel: "START INVESTING",
     investPath: "/diamonds-for-everyone/invest",
