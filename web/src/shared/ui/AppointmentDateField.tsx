@@ -206,6 +206,7 @@ const AppointmentDateField = ({
       <PopoverContent
         align="end"
         sideOffset={8}
+        onOpenAutoFocus={(event) => event.preventDefault()}
         className="z-[80] w-[320px] rounded-none border-neutral300 bg-white p-4 font-gill shadow-lg"
       >
         <div className="flex items-center justify-between gap-2 pb-4">
