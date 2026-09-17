@@ -12,7 +12,7 @@ const BlogsFeaturedSection = ({ featured }: BlogsFeaturedSectionProps) => {
   return (
     <section
       aria-labelledby="blogs-featured-title"
-      className="relative w-full overflow-hidden bg-[#F3E6E2] h-auto mx-auto w-full 2xl:max-w-1920 max-w-1440 px-0 md:px-8 lg:px-10 2xl:px-[60px]"
+      className="relative mx-auto h-auto w-full max-w-1440 overflow-hidden bg-[#F3E6E2] px-4 md:px-8 lg:px-10 2xl:max-w-1920 2xl:px-[60px]"
     >
       {featured.backgroundSrc &&
         <div aria-hidden className="pointer-events-none absolute inset-0 z-0 opacity-80">
@@ -31,6 +31,7 @@ const BlogsFeaturedSection = ({ featured }: BlogsFeaturedSectionProps) => {
             {featured.title &&
               <Reveal
                 as="h2"
+                id="blogs-featured-title"
                 direction="up"
                 className="md:text-left text-center font-larken lg:text-5xl md:text-4xl sm:text-3xl text-32 font-light leading-110 text-darkblack"
               >
