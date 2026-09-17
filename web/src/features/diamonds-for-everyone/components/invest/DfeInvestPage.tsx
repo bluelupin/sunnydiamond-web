@@ -1,7 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { DfeInvestFlowProvider, useDfeInvestFlow } from "../../context/DfeInvestFlowContext";
+import type { NormalizedDfeResponsiveImage } from "@/services/diamonds-for-everyone/diamonds-for-everyone-page.types";
+import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import DfeInvestAuthGate from "./DfeInvestAuthGate";
 import DfeInvestKycStep from "./DfeInvestKycStep";
 import DfeInvestNomineeStep from "./DfeInvestNomineeStep";
@@ -32,56 +33,109 @@ function DfeInvestStepContent() {
   return <DfeInvestKycStep />;
 }
 
-const DfeInvestPageContent = ({ monthlyAmount }: { monthlyAmount: number }) => {
+type DfeInvestPageContentProps = {
+  monthlyAmount: number;
+  investmentPlannerImage: NormalizedDfeResponsiveImage | null;
+};
+
+const DfeInvestPageContent = ({
+  monthlyAmount,
+  investmentPlannerImage,
+}: DfeInvestPageContentProps) => {
   return (
     <DfeInvestFlowProvider initialMonthlyAmount={monthlyAmount}>
-      <DfeInvestPageLayout />
+      <DfeInvestPageLayout investmentPlannerImage={investmentPlannerImage} />
     </DfeInvestFlowProvider>
   );
 };
 
-function DfeInvestPageLayout() {
+type DfeInvestPageLayoutProps = {
+  investmentPlannerImage: NormalizedDfeResponsiveImage | null;
+};
+
+function DfeInvestPageLayout({ investmentPlannerImage }: DfeInvestPageLayoutProps) {
   const { step } = useDfeInvestFlow();
   const isStandaloneStep = step === "intro" || step === "success";
   const showStepper = !isStandaloneStep;
   const showInvestHeader = !isStandaloneStep;
 
+  const desktopImageUrl =
+    investmentPlannerImage?.desktopUrl?.trim() ||
+    investmentPlannerImage?.mobileUrl?.trim() ||
+    "";
+  const mobileImageUrl =
+    investmentPlannerImage?.mobileUrl?.trim() ||
+    investmentPlannerImage?.desktopUrl?.trim() ||
+    "";
+  const hasInvestmentPlannerImage = Boolean(desktopImageUrl);
+  const imageAlt =
+    investmentPlannerImage?.desktopAlt?.trim() ||
+    investmentPlannerImage?.mobileAlt?.trim() ||
+    "";
+
   return (
     <section
       className={
         step === "review"
-          ? "relative flex min-h-[calc(100dvh-4.5rem-env(safe-area-inset-top,0px))] flex-col items-center justify-start bg-gray300 py-8 md:landscape:min-h-[calc(100dvh-104px)] lg:landscape:min-h-[calc(100dvh-104px)]"
-          : "relative flex min-h-[calc(100dvh-4.5rem-env(safe-area-inset-top,0px))] flex-col items-center justify-center bg-gray300 py-8 md:landscape:min-h-[calc(100dvh-104px)] lg:landscape:min-h-[calc(100dvh-104px)]"
+          ? "relative flex min-h-[calc(100dvh-4.5rem-env(safe-area-inset-top,0px))] flex-col items-center justify-start bg-gray300 lg:py-[106px] md:py-16 py-10 md:landscape:min-h-[calc(100dvh-104px)] lg:landscape:min-h-[calc(100dvh-104px)]"
+          : "relative flex min-h-[calc(100dvh-4.5rem-env(safe-area-inset-top,0px))] flex-col items-center justify-center bg-gray300 lg:py-[106px] md:py-16 py-10 md:landscape:min-h-[calc(100dvh-104px)] lg:landscape:min-h-[calc(100dvh-104px)]"
       }
     >
-      <div className="relative mx-auto flex w-full max-w-[601px] flex-col items-center gap-10 px-4">
-        {showInvestHeader ? <DfeInvestHeader /> : null}
-        {showStepper ? <DfeInvestStepper /> : null}
-        <div className={isStandaloneStep ? "w-full" : "w-full bg-gray200 p-6"}>
+      <div className="relative mx-auto flex w-full max-w-[601px] flex-col items-center px-4">
+        {isStandaloneStep ? (
           <DfeInvestStepContent />
-        </div>
+        ) : (
+          <>
+            <div className="mb-10 flex w-full flex-col gap-6">
+              {showInvestHeader ? <DfeInvestHeader /> : null}
+              {showStepper ? <DfeInvestStepper /> : null}
+            </div>
+            <div className="flex w-full justify-center bg-gray200 p-3 lg:p-6">
+              <DfeInvestStepContent />
+            </div>
+          </>
+        )}
       </div>
 
-      <div
-        className="pointer-events-none absolute bottom-0 right-0 hidden h-[425px] w-[522px] overflow-hidden lg:block"
-        aria-hidden
-      >
-        <Image
-          src="/images/diamonds-for-everyone/invest-decorative.png"
-          alt=""
-          fill
-          className="object-cover object-center"
-          sizes="522px"
-        />
-      </div>
+      {hasInvestmentPlannerImage && step !== "success" ? (
+        <div
+          className={
+            step === "intro"
+              ? "pointer-events-none absolute -right-[191px] bottom-0 hidden h-[468px] w-[575px] overflow-hidden lg:block"
+              : "pointer-events-none absolute -right-[173px] bottom-0 hidden h-[425px] w-[522px] overflow-hidden lg:block"
+          }
+          aria-hidden
+        >
+          <div className="absolute left-0 top-[-42.07%] h-[184.31%] w-full">
+            <ResponsiveImage
+              desktopSrc={desktopImageUrl}
+              mobileSrc={mobileImageUrl}
+              alt={imageAlt}
+              desktopAlt={investmentPlannerImage?.desktopAlt}
+              mobileAlt={investmentPlannerImage?.mobileAlt}
+              fill
+              className="object-cover object-left-top"
+              sizes={step === "intro" ? "575px" : "522px"}
+            />
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
 
-const DfeInvestPage = ({ monthlyAmount }: { monthlyAmount: number }) => {
+type DfeInvestPageProps = {
+  monthlyAmount: number;
+  investmentPlannerImage: NormalizedDfeResponsiveImage | null;
+};
+
+const DfeInvestPage = ({ monthlyAmount, investmentPlannerImage }: DfeInvestPageProps) => {
   return (
     <DfeInvestAuthGate>
-      <DfeInvestPageContent monthlyAmount={monthlyAmount} />
+      <DfeInvestPageContent
+        monthlyAmount={monthlyAmount}
+        investmentPlannerImage={investmentPlannerImage}
+      />
     </DfeInvestAuthGate>
   );
 };

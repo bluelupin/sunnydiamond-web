@@ -20,7 +20,7 @@ export const diamondsForEveryonePageContent = {
     totalMonths: 12,
   },
   investFlow: {
-    /** Figma node 1052:66382 — intro step (first screen after login / START INVESTING) */
+    /** Figma nodes 4453:33669 (desktop) / 4453:39061 (mobile) — invest intro step */
     pageTitle: "Your Investment Plan",
     backLabel: "Back to Diamonds for Everyone",
     cancelLabel: "CANCEL",
@@ -29,19 +29,19 @@ export const diamondsForEveryonePageContent = {
     intro: {
       title: "Diamonds for Everyone",
       subtitle:
-        "Keep the following things ready and set your account in 3 simple steps",
+        "Keep the following ready and set up your account in 3 simple steps.",
       steps: [
         {
-          label: "Verify your identity",
-          detail: "Your government ID proof",
+          label: "Verify Your Identity",
+          detail: "Your government-issued ID",
         },
         {
-          label: "Assign a nominee",
+          label: "Add a Nominee",
           detail: "Details of your chosen nominee",
         },
         {
-          label: "Pay the 1st Instalment",
-          detail: "Payment method and details",
+          label: "Make Your First Contribution",
+          detail: "Your payment method and details",
         },
       ],
       openAccountLabel: "OPEN YOUR ACCOUNT",
@@ -57,7 +57,7 @@ export const diamondsForEveryonePageContent = {
       idTypeOptions: ["Aadhaar", "PAN", "Passport"],
       idNumberLabel: "ID Number*",
       idUploadLabel: "ID Card Copy*",
-      uploadButtonLabel: "UPLOAD",
+      uploadButtonLabel: "ATTACH IMAGE",
       removeFileLabel: "REMOVE",
       aadhaarError: "Enter Valid Aadhar Number",
     },

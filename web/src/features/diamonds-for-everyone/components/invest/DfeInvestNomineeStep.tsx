@@ -40,7 +40,7 @@ const DfeInvestNomineeStep = () => {
   };
 
   return (
-    <div className="w-full max-w-[553px] border border-linkGold bg-gray200 p-6 md:p-10">
+    <div className="mx-auto flex w-full max-w-[553px] flex-col gap-6 border border-linkGold bg-gray200 p-4 lg:gap-10 lg:p-10">
       <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
         {nominee.title}
       </h2>

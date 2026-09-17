@@ -4,6 +4,7 @@ import { constructMetadata } from "@/shared/lib/seo/metadata";
 import DfeInvestPage from "@/features/diamonds-for-everyone/components/invest/DfeInvestPage";
 import { diamondsForEveryonePageContent } from "@/features/diamonds-for-everyone/data/content";
 import { parseDfeInvestAmount } from "@/features/diamonds-for-everyone/utils/investRoutes";
+import { getDiamondsForEveryonePage } from "@/services/diamonds-for-everyone/diamonds-for-everyone-page.service";
 
 export const metadata: Metadata = constructMetadata({
   title: diamondsForEveryonePageContent.investFlow.pageTitle,
@@ -19,10 +20,14 @@ type PageProps = {
 export default async function Page({ searchParams }: PageProps) {
   const params = await searchParams;
   const monthlyAmount = parseDfeInvestAmount(params.amount);
+  const page = await getDiamondsForEveryonePage();
 
   return (
     <Suspense fallback={null}>
-      <DfeInvestPage monthlyAmount={monthlyAmount} />
+      <DfeInvestPage
+        monthlyAmount={monthlyAmount}
+        investmentPlannerImage={page.investmentPlanner?.image ?? null}
+      />
     </Suspense>
   );
 }
