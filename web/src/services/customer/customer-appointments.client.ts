@@ -1,4 +1,8 @@
-import type { CustomerAppointmentsPage } from "./customer-appointments.types";
+import type {
+  CustomerAppointment,
+  CustomerAppointmentsPage,
+} from "./customer-appointments.types";
+import type { RescheduleCustomerAppointmentInput } from "./customer-appointments.service";
 
 type ApiErrorPayload = {
   error?: string;
@@ -39,4 +43,27 @@ export async function getCustomerAppointments(
   }
 
   return (await response.json()) as CustomerAppointmentsPage;
+}
+
+export async function rescheduleCustomerAppointment(
+  documentId: string,
+  input: RescheduleCustomerAppointmentInput,
+): Promise<CustomerAppointment> {
+  const response = await fetch(`/api/customer/appointments/${encodeURIComponent(documentId)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+    cache: "no-store",
+    credentials: "same-origin",
+  });
+
+  if (response.status === 401) {
+    throw new Error("Please sign in again to reschedule this appointment.");
+  }
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response));
+  }
+
+  return (await response.json()) as CustomerAppointment;
 }

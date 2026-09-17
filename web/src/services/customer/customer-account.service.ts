@@ -141,7 +141,7 @@ export async function syncCustomerAddressFromLatestOrder(
   return createCustomerAddress(authToken, {
     ...input,
     defaultShipping: isFirstAddress || !existingAddresses.some((address) => address.isDefaultShipping),
-    defaultBilling: isFirstAddress || !existingAddresses.some((address) => address.isDefaultBilling),
+    defaultBilling: false,
   });
 }
 

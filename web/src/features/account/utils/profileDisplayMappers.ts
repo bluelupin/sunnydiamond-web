@@ -19,6 +19,10 @@ import type {
   ProfileTimelineStep,
 } from "../types/profileUi.types";
 import {
+  canModifyAppointmentBeforeDeadline,
+  formatTryAtHomeAddItemsDeadline,
+} from "@/features/products/utils/tryAtHomeBooking";
+import {
   formatAppointmentDate,
   formatOrderDate,
 } from "./formatAccountData";
@@ -377,14 +381,19 @@ export function mapCustomerAppointmentToProfileUi(
       : [];
 
   const canModify = canModifyAppointment(appointment.workflowStatus);
+  const canReschedule =
+    canModify && canModifyAppointmentBeforeDeadline(appointment.requestedDate);
+  const rescheduleDeadline = formatTryAtHomeAddItemsDeadline(appointment.requestedDate);
 
   const base: ProfileAppointmentUi = {
     id: appointment.documentId,
+    formTag: appointment.formTag,
     type,
     typeLabel,
     customerName: appointment.customerName,
     customerPhone: appointment.customerPhone,
     customerEmail: appointment.customerEmail,
+    requestedDate: appointment.requestedDate,
     products,
     bookingDate: appointment.requestedDate
       ? formatAppointmentDate(appointment.requestedDate)
@@ -392,8 +401,13 @@ export function mapCustomerAppointmentToProfileUi(
     bookingTime: appointment.selectedTimeSlot,
     notesLabel: profileTabsContent.appointments.notesLabel,
     notes: appointment.customerMessage ?? "",
-    rescheduleNote: profileTabsContent.appointments.rescheduleNotePlaceholder,
-    canReschedule: canModify,
+    rescheduleNote: rescheduleDeadline
+      ? profileTabsContent.appointments.rescheduleNoteTemplate.replace(
+          "{date}",
+          rescheduleDeadline,
+        )
+      : undefined,
+    canReschedule,
     canCancel: canModify,
   };
 

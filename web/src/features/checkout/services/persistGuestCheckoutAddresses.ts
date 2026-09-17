@@ -6,7 +6,6 @@ import { doesCustomerAddressMatchInput } from "@/services/customer/customer-acco
 import type { CustomerAddress, CustomerAddressInput } from "@/services/customer/customer-account.types";
 import {
   doesCheckoutShippingMatchSavedAddress,
-  mapCheckoutFormToBillingCustomerAddressInput,
   mapCheckoutFormToCustomerAddressInput,
 } from "@/services/magento/cart/checkoutAddress.mapper";
 import type { CheckoutFormData } from "../types/checkout.types";
@@ -21,7 +20,7 @@ function hasMatchingSavedAddress(
 async function saveAddressIfMissing(
   input: CustomerAddressInput,
   addresses: CustomerAddress[],
-  defaults: Pick<CustomerAddressInput, "defaultShipping" | "defaultBilling">,
+  defaultShipping: boolean,
 ): Promise<CustomerAddress[]> {
   if (hasMatchingSavedAddress(input, addresses)) {
     return addresses;
@@ -29,7 +28,8 @@ async function saveAddressIfMissing(
 
   return saveCustomerAddress({
     ...input,
-    ...defaults,
+    defaultShipping,
+    defaultBilling: false,
   });
 }
 
@@ -49,26 +49,12 @@ export async function persistGuestCheckoutAddresses(form: CheckoutFormData): Pro
 
     if (!shippingAlreadySaved) {
       const isFirstAddress = addresses.length === 0;
-      addresses = await saveAddressIfMissing(shippingInput, addresses, {
-        defaultShipping: isFirstAddress || !addresses.some((address) => address.isDefaultShipping),
-        defaultBilling:
-          form.billingSameAsShipping &&
-          (isFirstAddress || !addresses.some((address) => address.isDefaultBilling)),
-      });
+      addresses = await saveAddressIfMissing(
+        shippingInput,
+        addresses,
+        isFirstAddress || !addresses.some((address) => address.isDefaultShipping),
+      );
     }
-
-    if (form.billingSameAsShipping) {
-      return;
-    }
-
-    const billingInput = mapCheckoutFormToBillingCustomerAddressInput(form);
-    if (!billingInput) {
-      return;
-    }
-
-    await saveAddressIfMissing(billingInput, addresses, {
-      defaultBilling: !addresses.some((address) => address.isDefaultBilling),
-    });
   } catch {
     // Order already succeeded; address persistence must not block checkout success.
   }

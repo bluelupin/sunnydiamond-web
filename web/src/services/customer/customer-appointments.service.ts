@@ -1,10 +1,17 @@
 import { getStrapiBaseUrl } from "@/api/config";
 import { STRAPI_ENDPOINTS } from "@/api/endpoints";
-import { mapCustomerAppointmentsPage } from "./customer-appointments.mapper";
+import { mapCustomerAppointment, mapCustomerAppointmentsPage } from "./customer-appointments.mapper";
 import type {
+  CustomerAppointment,
   CustomerAppointmentsPage,
+  StrapiCustomerAppointment,
   StrapiCustomerAppointmentsResponse,
 } from "./customer-appointments.types";
+
+export type RescheduleCustomerAppointmentInput = {
+  requestedDate: string;
+  selectedTimeSlot: string;
+};
 
 export class CustomerAppointmentsApiError extends Error {
   status: number;
@@ -94,4 +101,46 @@ export async function fetchCustomerAppointments(
 
   const payload = (await response.json()) as StrapiCustomerAppointmentsResponse;
   return mapCustomerAppointmentsPage(payload);
+}
+
+export async function rescheduleCustomerAppointment(
+  authToken: string,
+  documentId: string,
+  input: RescheduleCustomerAppointmentInput,
+  signal?: AbortSignal,
+): Promise<CustomerAppointment> {
+  const safeId = documentId.trim();
+
+  if (!safeId) {
+    throw new CustomerAppointmentsApiError("Missing appointment id", 400);
+  }
+
+  const url = `${getStrapiBaseUrl()}/${STRAPI_ENDPOINTS.customerAppointments}/${encodeURIComponent(safeId)}`;
+  const response = await fetch(url, {
+    method: "PATCH",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${authToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(input),
+    cache: "no-store",
+    signal,
+  });
+
+  if (!response.ok) {
+    throw new CustomerAppointmentsApiError(await parseErrorMessage(response), response.status);
+  }
+
+  const payload = (await response.json()) as {
+    data?: StrapiCustomerAppointment | null;
+  };
+
+  const mapped = mapCustomerAppointment(payload.data ?? {});
+
+  if (!mapped) {
+    throw new CustomerAppointmentsApiError("Invalid appointment response", 502);
+  }
+
+  return mapped;
 }

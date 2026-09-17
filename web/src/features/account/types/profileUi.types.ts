@@ -125,11 +125,13 @@ export type ProfileAppointmentProductUi = {
 
 export type ProfileAppointmentUi = {
   id: string;
+  formTag: string;
   type: AppointmentFilterKey;
   typeLabel: string;
   customerName: string;
   customerPhone: string;
   customerEmail: string;
+  requestedDate: string;
   products: ProfileAppointmentProductUi[];
   appointmentAddress?: {
     name: string;

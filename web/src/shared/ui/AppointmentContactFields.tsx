@@ -44,6 +44,7 @@ type AppointmentContactFieldsProps = {
   markTouched: (field: AppointmentContactField) => void;
   labelClassName?: string;
   fieldClassName?: string;
+  showContactDetails?: boolean;
   showDate?: boolean;
   showTimeSlots?: boolean;
   timeSlots?: readonly string[];
@@ -91,6 +92,7 @@ const AppointmentContactFields = ({
   markTouched,
   labelClassName = appointmentLabelClassName,
   fieldClassName = appointmentFieldClassName,
+  showContactDetails = true,
   showDate = true,
   showTimeSlots = true,
   timeSlots,
@@ -121,6 +123,8 @@ const AppointmentContactFields = ({
 
   return (
     <>
+      {showContactDetails ? (
+      <>
       <div className="flex flex-col gap-2">
         <label htmlFor={`${idPrefix}-name`} className={labelClassName}>
           {nameLabel}
@@ -214,6 +218,8 @@ const AppointmentContactFields = ({
         />
         <FormFieldError id={`${idPrefix}-email-error`} message={showError("email") ? errors.email : undefined} />
       </div>
+      </>
+      ) : null}
 
       {showDate ? (
         <div className="flex flex-col gap-2">
@@ -240,7 +246,12 @@ const AppointmentContactFields = ({
           <span className={labelClassName}>
             {timeSlotRequired ? formatRequiredFieldLabel(timeSlotsLabel) : timeSlotsLabel}
           </span>
-          <div className="flex flex-col gap-3">
+          <div
+            className="flex flex-col gap-3"
+            role="group"
+            aria-invalid={showError("selectedSlot") || undefined}
+            aria-describedby={showError("selectedSlot") ? `${idPrefix}-time-slot-error` : undefined}
+          >
             {Array.from({ length: Math.ceil(slots.length / 2) }, (_, row) => (
               <div key={row} className="flex gap-2">
                 {[slots[row * 2], slots[row * 2 + 1]].filter(Boolean).map((slot) => {
@@ -260,7 +271,10 @@ const AppointmentContactFields = ({
                           ? selectedSlotStyle === "gold"
                             ? "bg-[#DECAA0] font-normal text-darkblack"
                             : "bg-darkblack font-normal text-white"
-                          : "bg-[#F2F2F2] font-light text-darkblack",
+                          : cn(
+                              "bg-[#F2F2F2] font-light text-darkblack",
+                              showError("selectedSlot") && invalidFieldContainerClassName,
+                            ),
                       )}
                     >
                       {slot}
@@ -297,6 +311,7 @@ const AppointmentContactFields = ({
         </div>
       ) : null}
 
+      {showContactDetails ? (
       <div className="flex flex-col gap-2">
         <label htmlFor={`${idPrefix}-note`} className={noteLabelClassName ?? labelClassName}>
           {noteLabel}
@@ -319,6 +334,7 @@ const AppointmentContactFields = ({
         />
         <FormFieldError id={`${idPrefix}-note-error`} message={showError("note") ? errors.note : undefined} />
       </div>
+      ) : null}
     </>
   );
 };

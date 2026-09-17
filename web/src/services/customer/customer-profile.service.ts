@@ -25,7 +25,6 @@ function mapCountryCodeToPhonePrefix(countryCode: string): string {
 function pickProfileAddressPhone(addresses: CustomerAddress[]): CustomerProfileContact | null {
   const preferred =
     addresses.find((address) => address.isDefaultShipping && address.phone.trim()) ??
-    addresses.find((address) => address.isDefaultBilling && address.phone.trim()) ??
     addresses.find((address) => address.phone.trim());
 
   if (!preferred) {

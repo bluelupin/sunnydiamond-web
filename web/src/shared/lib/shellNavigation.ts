@@ -1,3 +1,5 @@
+import { resolveFooterLinkHref } from "@/features/cms/utils/policyCertificationsRoutes";
+
 export type HeaderNavLink = {
   id?: string | number;
   label: string;
@@ -125,7 +127,7 @@ export function resolveShellFooterLinkGroups(
         .map((link) => ({
           id: link.id,
           label: link.label.trim(),
-          url: link.url.trim(),
+          url: resolveFooterLinkHref(link.url.trim()),
         })),
     }))
     .filter((group) => group.links.length > 0);

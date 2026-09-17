@@ -19,7 +19,46 @@ export const LEGAL_FOOTER_PATH_TO_POLICY_ID: Record<string, string> = {
   "/cash-on-delivery-policy": "cash-on-delivery",
   "/privacy-policy": "privacy-policy",
   "/terms-and-conditions": "terms-and-conditions",
+  /** CMS typo — singular "certification" (see sunnydiamond-cms seeder). */
+  "/policy-and-certification": "privacy-policy",
 };
+
+function normalizeFooterPath(path: string): string {
+  const withoutQuery = path.split("?")[0]?.split("#")[0] ?? path;
+  const withLeadingSlash = withoutQuery.startsWith("/")
+    ? withoutQuery
+    : `/${withoutQuery}`;
+  return withLeadingSlash.replace(/\/$/, "") || "/";
+}
+
+/** Rewrites legacy legal footer paths to the policy hub route (client-safe). */
+export function resolveFooterLinkHref(url: string): string {
+  const trimmed = url.trim();
+  if (!trimmed) {
+    return trimmed;
+  }
+
+  if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith("mailto:") || trimmed.startsWith("tel:")) {
+    try {
+      const parsed = new URL(trimmed);
+      const policyId = resolvePolicyIdFromFooterPath(parsed.pathname);
+      if (policyId) {
+        const next = buildPolicyCertificationsHref(policyId);
+        return `${parsed.origin}${next}`;
+      }
+    } catch {
+      return trimmed;
+    }
+    return trimmed;
+  }
+
+  const policyId = resolvePolicyIdFromFooterPath(normalizeFooterPath(trimmed));
+  if (policyId) {
+    return buildPolicyCertificationsHref(policyId);
+  }
+
+  return trimmed;
+}
 
 export function buildPolicyCertificationsHref(policyId: string): string {
   const resolved = resolvePolicyIdFromParam(policyId) ?? policyId;

@@ -1,11 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  CheckoutCheckbox,
-  CheckoutField,
-  CheckoutSelectField,
-} from "@/features/checkout/components/CheckoutUi";
+import { CheckoutField, CheckoutSelectField } from "@/features/checkout/components/CheckoutUi";
 import { INDIAN_STATES } from "@/features/checkout/constants/indianStates";
 import { DetailDarkButton, DetailTextLink } from "@/features/products/components/detail/shared";
 import { useCurrentLocationAddress } from "@/shared/hooks/use-current-location-address";
@@ -38,8 +34,6 @@ const emptyAddressForm = (): CustomerAddressInput => ({
   city: "",
   state: "",
   phone: "",
-  defaultShipping: false,
-  defaultBilling: false,
 });
 
 const stateOptions = INDIAN_STATES.map((state) => ({ value: state, label: state }));
@@ -112,7 +106,7 @@ export function ProfileAddressFormSheet({
     setTouched((current) => ({ ...current, [field]: true }));
   };
 
-  const handleChange = (field: keyof CustomerAddressInput, value: string | boolean) => {
+  const handleChange = (field: keyof CustomerAddressInput, value: string) => {
     if (field === "pincode" && typeof value === "string") {
       setForm((current) => ({ ...current, pincode: sanitizePincodeInput(value) }));
       return;
@@ -275,19 +269,6 @@ export function ProfileAddressFormSheet({
               invalid={showError("phone")}
               error={showError("phone") ? errors.phone : undefined}
             />
-            <div className="space-y-3">
-              <CheckoutCheckbox
-                label="Set as default shipping address"
-                checked={Boolean(form.defaultShipping)}
-                onChange={(checked) => handleChange("defaultShipping", checked)}
-              />
-              <CheckoutCheckbox
-                label="Set as default billing address"
-                checked={Boolean(form.defaultBilling)}
-                onChange={(checked) => handleChange("defaultBilling", checked)}
-              />
-            </div>
-
             <FormFieldError message={formError ?? undefined} />
           </div>
         </div>

@@ -9,6 +9,13 @@ const cleanText = (value?: string | null): string | undefined => {
   return trimmed || undefined;
 };
 
+const normalizePlaceholder = (value?: string | null): string | undefined => {
+  const trimmed = cleanText(value);
+  if (!trimmed) return undefined;
+  if (trimmed.toLowerCase() === "enter") return "Enter";
+  return trimmed;
+};
+
 const findField = (
   fields: StrapiProductFormDynamicField[] | null | undefined,
   match: (field: StrapiProductFormDynamicField, label: string, fieldType: string) => boolean,
@@ -107,23 +114,23 @@ export function mapProductForm(
     timeSlots,
     stateOptions,
     nameLabel: formatFieldLabel(nameField),
-    namePlaceholder: cleanText(nameField?.placeholder),
+    namePlaceholder: normalizePlaceholder(nameField?.placeholder),
     phoneLabel: formatFieldLabel(phoneField),
-    phonePlaceholder: cleanText(phoneField?.placeholder),
+    phonePlaceholder: normalizePlaceholder(phoneField?.placeholder),
     emailLabel: formatFieldLabel(emailField),
-    emailPlaceholder: cleanText(emailField?.placeholder),
+    emailPlaceholder: normalizePlaceholder(emailField?.placeholder),
     dateLabel: formatFieldLabel(dateField),
     notesLabel: formatFieldLabel(notesField) ?? cleanText(notesField?.label),
-    notesPlaceholder: cleanText(notesField?.placeholder),
+    notesPlaceholder: normalizePlaceholder(notesField?.placeholder),
     notesRequired: Boolean(notesField?.isRequired),
     addressLine1Label: formatFieldLabel(addressLine1Field) ?? cleanText(addressLine1Field?.label),
-    addressLine1Placeholder: cleanText(addressLine1Field?.placeholder),
+    addressLine1Placeholder: normalizePlaceholder(addressLine1Field?.placeholder),
     addressLine2Label: cleanText(addressLine2Field?.label),
-    addressLine2Placeholder: cleanText(addressLine2Field?.placeholder),
+    addressLine2Placeholder: normalizePlaceholder(addressLine2Field?.placeholder),
     pincodeLabel: formatFieldLabel(pincodeField) ?? cleanText(pincodeField?.label),
-    pincodePlaceholder: cleanText(pincodeField?.placeholder),
+    pincodePlaceholder: normalizePlaceholder(pincodeField?.placeholder),
     cityLabel: formatFieldLabel(cityField) ?? cleanText(cityField?.label),
-    cityPlaceholder: cleanText(cityField?.placeholder),
+    cityPlaceholder: normalizePlaceholder(cityField?.placeholder),
     stateLabel: formatFieldLabel(stateField) ?? cleanText(stateField?.label),
     statePlaceholder: cleanText(stateField?.placeholder),
   };

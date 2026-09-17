@@ -28,7 +28,9 @@ import {
   type NormalizedProductForm,
 } from "@/services/forms/product-form.service";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { useCustomerAddresses } from "@/features/account/hooks/useCustomerAddresses";
 import { buildProfileSectionHref } from "@/features/account/utils/profileSectionNavigation";
+import { mapCustomerAddressToFormInput } from "@/services/customer/customer-account.mapper";
 import { wishlistMovedToastDurationMs } from "@/features/wishlist/data/content";
 import {
   invalidFieldClassName,
@@ -94,15 +96,25 @@ const TryAtHomeDetailsStep = ({
   const [note, setNote] = useState("");
   const [hasAppliedProfilePrefill, setHasAppliedProfilePrefill] = useState(false);
 
+  const timeSlots = form?.timeSlots?.length ? form.timeSlots : undefined;
+  const hasTimeSlots = Boolean(timeSlots?.length ?? true);
+
   const formValues = useMemo(
-    () => ({ name, countryCode, phone, email, date, note }),
-    [name, countryCode, phone, email, date, note],
+    () => ({ name, countryCode, phone, email, date, note, selectedSlot }),
+    [name, countryCode, phone, email, date, note, selectedSlot],
+  );
+
+  const validationOptions = useMemo(
+    () => ({
+      noteRequired: form?.notesRequired ?? false,
+      dateRequired: true,
+      selectedSlotRequired: hasTimeSlots,
+    }),
+    [form?.notesRequired, hasTimeSlots],
   );
 
   const { errors, isValid, markTouched, showError, validateSubmit, resetValidation } =
-    useAppointmentFormValidation(formValues, {
-      noteRequired: form?.notesRequired ?? false,
-    });
+    useAppointmentFormValidation(formValues, validationOptions);
 
   useEffect(() => {
     if (!open) {
@@ -134,7 +146,6 @@ const TryAtHomeDetailsStep = ({
     setHasAppliedProfilePrefill(true);
   }, [profileContact, hasAppliedProfilePrefill, name, email, phone]);
 
-  const timeSlots = form?.timeSlots?.length ? form.timeSlots : undefined;
   const { footerRef, clearancePx } = useMobileStickyFooterClearance();
   const { scrollRef, handleFocusCapture } = usePanelInputFocusScroll();
 
@@ -206,6 +217,8 @@ const TryAtHomeDetailsStep = ({
               emailLabel={form?.emailLabel}
               emailPlaceholder={form?.emailPlaceholder}
               dateLabel={form?.dateLabel}
+              dateRequired
+              timeSlotRequired={hasTimeSlots}
               noteLabel={form?.notesLabel ?? "What are you looking for?"}
               notePlaceholder={
                 form?.notesPlaceholder ?? "Eg: I am looking for an engagement ring"
@@ -234,6 +247,7 @@ const TryAtHomeDetailsStep = ({
             )
           }
           disabled={!isValid}
+          className="disabled:cursor-not-allowed disabled:opacity-50"
         >
           {form?.stepOneButtonText ?? "Add Address"}
         </DetailDarkButton>
@@ -270,6 +284,9 @@ const TryAtHomeAddressStep = ({
   onClose,
   onSubmit,
 }: TryAtHomeAddressStepProps) => {
+  const { status, customer } = useAuth();
+  const isAuthenticated = status === "authenticated" && Boolean(customer);
+  const { addresses } = useCustomerAddresses(isAuthenticated);
   const { detectAddress, isLocating } = useCurrentLocationAddress();
   const [addressLine1, setAddressLine1] = useState("");
   const [addressLine2, setAddressLine2] = useState("");
@@ -277,9 +294,33 @@ const TryAtHomeAddressStep = ({
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [touched, setTouched] = useState<Partial<Record<AddressField, boolean>>>({});
+  const [hasAppliedAddressPrefill, setHasAppliedAddressPrefill] = useState(false);
 
   const stateOptions =
     form?.stateOptions?.length ? form.stateOptions : [...TRY_AT_HOME_INDIAN_STATES];
+
+  const defaultShippingAddress = useMemo(() => {
+    if (addresses.length === 0) {
+      return null;
+    }
+
+    return addresses.find((address) => address.isDefaultShipping) ?? addresses[0];
+  }, [addresses]);
+
+  useEffect(() => {
+    if (!defaultShippingAddress || hasAppliedAddressPrefill) {
+      return;
+    }
+
+    const mapped = mapCustomerAddressToFormInput(defaultShippingAddress);
+
+    setAddressLine1(mapped.addressLine1);
+    setAddressLine2(mapped.addressLine2 ?? "");
+    setPincode(mapped.pincode);
+    setCity(mapped.city);
+    setState(mapped.state);
+    setHasAppliedAddressPrefill(true);
+  }, [defaultShippingAddress, hasAppliedAddressPrefill]);
 
   const errors = useMemo(
     () => ({
@@ -562,10 +603,7 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
   const [step, setStep] = useState<TryAtHomeStep>("details");
   const [cmsForm, setCmsForm] = useState<NormalizedProductForm | null>(null);
   const [details, setDetails] = useState<TryAtHomeDetailsData | null>(null);
-  const [bookingSummary, setBookingSummary] = useState<TryAtHomeBookingSummary>({
-    date: "",
-    selectedSlot: null,
-  });
+  const [submittedBooking, setSubmittedBooking] = useState<TryAtHomeBookingSummary | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { show: showStatusToast, node: statusToast } = useAppStatusToastController(
     wishlistMovedToastDurationMs,
@@ -576,7 +614,7 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
     if (!open) {
       setStep("details");
       setDetails(null);
-      setBookingSummary({ date: "", selectedSlot: null });
+      setSubmittedBooking(null);
       setIsSubmitting(false);
       return;
     }
@@ -598,7 +636,7 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
   const handleClose = () => {
     setStep("details");
     setDetails(null);
-    setBookingSummary({ date: "", selectedSlot: null });
+    setSubmittedBooking(null);
     setIsSubmitting(false);
     onClose();
   };
@@ -614,6 +652,11 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
 
     setIsSubmitting(true);
     try {
+      const booking: TryAtHomeBookingSummary = {
+        date: details.date,
+        selectedSlot: details.selectedSlot,
+      };
+
       const requestDetails = [
         details.note.trim(),
         address.state.trim() ? `State: ${address.state.trim()}` : "",
@@ -630,8 +673,8 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
         customerEmail: details.email.trim() || undefined,
         ...(customer?.id != null ? { magentoCustomerId: customer.id } : {}),
         requestDetails: requestDetails || undefined,
-        requestedDate: details.date || undefined,
-        selectedTimeSlot: details.selectedSlot ?? undefined,
+        requestedDate: booking.date,
+        selectedTimeSlot: booking.selectedSlot ?? undefined,
         addressLine1: address.addressLine1.trim(),
         addressLine2: address.addressLine2.trim() || undefined,
         pincode: address.pincode.trim(),
@@ -642,10 +685,7 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
         workflowStatus: "New",
       });
 
-      setBookingSummary({
-        date: details.date,
-        selectedSlot: details.selectedSlot,
-      });
+      setSubmittedBooking(booking);
       setStep("success");
       showStatusToast("Try at home request received");
     } catch {
@@ -687,10 +727,6 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
             onClose={handleClose}
             onProceed={(nextDetails) => {
               setDetails(nextDetails);
-              setBookingSummary({
-                date: nextDetails.date,
-                selectedSlot: nextDetails.selectedSlot,
-              });
               setStep("address");
             }}
           />
@@ -706,16 +742,16 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
               void handleAddressSubmit(address);
             }}
           />
-        ) : (
+        ) : submittedBooking ? (
           <TryAtHomeSuccessStep
             product={product}
             productImage={productImage}
-            booking={bookingSummary}
+            booking={submittedBooking}
             onClose={handleClose}
             onViewBooking={handleViewBooking}
             onContinueShopping={handleContinueShopping}
           />
-        )}
+        ) : null}
       </ProductDetailSidePanelShell>
     </>
   );

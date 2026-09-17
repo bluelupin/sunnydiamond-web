@@ -212,7 +212,7 @@ export function mapCustomerAddressInputToMagento(input: CustomerAddressInput) {
     },
     telephone: phone,
     default_shipping: Boolean(input.defaultShipping),
-    default_billing: Boolean(input.defaultBilling),
+    default_billing: false,
   };
 }
 
@@ -226,7 +226,7 @@ export function mapCustomerAddressToFormInput(address: CustomerAddress): Custome
     state: address.state,
     phone: address.phone,
     defaultShipping: address.isDefaultShipping,
-    defaultBilling: address.isDefaultBilling,
+    defaultBilling: false,
   };
 }
 

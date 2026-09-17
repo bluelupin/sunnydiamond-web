@@ -8,11 +8,12 @@ import { useMagentoWishlistProducts } from "@/hooks/magento/useMagentoWishlistPr
 import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 import { profileTabsContent } from "../data/profileContent";
 import { useCustomerAppointments } from "../hooks/useCustomerAppointments";
-import type { AppointmentFilterKey } from "../types/profileUi.types";
+import type { AppointmentFilterKey, ProfileAppointmentUi } from "../types/profileUi.types";
 import { buildMagentoProductImageBySku } from "../utils/orderItemImage.utils";
 import { mapCustomerAppointmentToProfileUi } from "../utils/profileDisplayMappers";
 import { ProfileAppointmentCard } from "./ProfileAppointmentCard";
 import { ProfileAppointmentCancelDialog } from "./ProfileAppointmentCancelDialog";
+import { ProfileAppointmentReschedulePanel } from "./ProfileAppointmentReschedulePanel";
 import { ProfileAppointmentsEmptyState } from "./ProfileAppointmentsEmptyState";
 import { ProfileAppointmentsListingSkeleton } from "./ProfileAppointmentsListingSkeleton";
 import {
@@ -29,9 +30,15 @@ const FILTER_OPTIONS: { key: AppointmentFilterKey; label: string }[] = [
 ];
 
 const ProfileAppointmentsSection = () => {
-  const { data, isLoading, error, page, setPage } = useCustomerAppointments(true);
+  const { data, isLoading, error, page, setPage, refresh } = useCustomerAppointments(true);
   const [activeFilter, setActiveFilter] = useState<AppointmentFilterKey | null>(null);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<ProfileAppointmentUi | null>(
+    null,
+  );
+  const [rescheduleAppointment, setRescheduleAppointment] = useState<ProfileAppointmentUi | null>(
+    null,
+  );
   const [statusToastMessage, setStatusToastMessage] = useState<string | null>(null);
   const statusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -104,7 +111,27 @@ const ProfileAppointmentsSection = () => {
     return appointments.filter((appointment) => appointment.type === activeFilter);
   }, [appointments, activeFilter]);
 
+  const showRescheduleSuccessToast = useCallback(() => {
+    dismissStatusToast();
+    setStatusToastMessage(content.reschedulePanel.successToast);
+    statusToastTimeoutRef.current = setTimeout(() => {
+      setStatusToastMessage(null);
+      statusToastTimeoutRef.current = null;
+    }, appStatusToastDurationMs);
+  }, [dismissStatusToast]);
+
+  const openReschedulePanel = useCallback((appointment: ProfileAppointmentUi) => {
+    setCancelDialogOpen(false);
+    setSelectedAppointment(null);
+    setRescheduleAppointment(appointment);
+  }, []);
+
   const handleReschedule = () => {
+    if (selectedAppointment) {
+      openReschedulePanel(selectedAppointment);
+      return;
+    }
+
     showAppointmentUpdatesToast();
     setCancelDialogOpen(false);
   };
@@ -171,8 +198,9 @@ const ProfileAppointmentsSection = () => {
               <li key={appointment.id}>
                 <ProfileAppointmentCard
                   appointment={appointment}
-                  onReschedule={handleReschedule}
+                  onReschedule={() => openReschedulePanel(appointment)}
                   onCancel={() => {
+                    setSelectedAppointment(appointment);
                     setCancelDialogOpen(true);
                   }}
                 />
@@ -207,9 +235,24 @@ const ProfileAppointmentsSection = () => {
 
         <ProfileAppointmentCancelDialog
           open={cancelDialogOpen}
-          onOpenChange={setCancelDialogOpen}
+          onOpenChange={(open) => {
+            setCancelDialogOpen(open);
+            if (!open) {
+              setSelectedAppointment(null);
+            }
+          }}
           onReschedule={handleReschedule}
           onConfirmCancel={handleConfirmCancel}
+        />
+
+        <ProfileAppointmentReschedulePanel
+          open={rescheduleAppointment !== null}
+          appointment={rescheduleAppointment}
+          onClose={() => setRescheduleAppointment(null)}
+          onRescheduled={() => {
+            refresh();
+            showRescheduleSuccessToast();
+          }}
         />
       </div>
     </>

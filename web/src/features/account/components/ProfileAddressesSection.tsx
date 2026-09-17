@@ -42,18 +42,13 @@ function AddressCard({
   onMarkAsDefault: () => void;
 }) {
   const isDefaultShipping = address.isDefaultShipping;
-  const isDefaultBilling = address.isDefaultBilling;
-  const showDefaultLabel = isDefaultShipping || isDefaultBilling;
-  const defaultLabel = isDefaultShipping
-    ? addressContent.defaultShippingLabel
-    : addressContent.defaultBillingLabel;
 
   const addressLines = [
     ...address.streetLines.filter(Boolean),
     [address.city, address.pincode].filter(Boolean).join(", "),
   ].filter(Boolean);
 
-  if (showDefaultLabel) {
+  if (isDefaultShipping) {
     return (
       <ProfileCard className="flex flex-col gap-6">
         <div className="flex flex-col gap-3 font-gill text-base leading-110 text-darkblack">
@@ -65,7 +60,7 @@ function AddressCard({
           </div>
         </div>
         <p className="font-gill text-base font-normal leading-110 text-gold500">
-          {defaultLabel}
+          {addressContent.defaultShippingLabel}
         </p>
         <div className="flex items-center gap-4">
           <DetailOutlineButton
@@ -165,7 +160,14 @@ const ProfileAddressesSection = () => {
   };
 
   const handleCreate = async (input: CustomerAddressInput) => {
-    await createAddress(input);
+    const shouldBeDefault =
+      addresses.length === 0 || !addresses.some((address) => address.isDefaultShipping);
+
+    await createAddress({
+      ...input,
+      defaultShipping: shouldBeDefault,
+      defaultBilling: false,
+    });
     closeForm();
   };
 
@@ -174,7 +176,11 @@ const ProfileAddressesSection = () => {
       return;
     }
 
-    await updateAddress(editingUid, input);
+    await updateAddress(editingUid, {
+      ...input,
+      defaultShipping: editingAddress?.isDefaultShipping ?? false,
+      defaultBilling: false,
+    });
     closeForm();
   };
 
