@@ -33,6 +33,7 @@ import HeaderIconBadge from "@/shared/ui/layout/HeaderIconBadge";
 import { useCanHover } from "@/shared/hooks/use-can-hover";
 import { useHeaderScrollReveal } from "@/shared/hooks/use-header-scroll-reveal";
 import { useMobileHeaderLayout } from "@/shared/hooks/use-mobile-header-layout";
+import { useMounted } from "@/shared/hooks/use-mounted";
 import { useCareersHeaderMode } from "@/features/careers/context/careersHeaderBridge";
 import {
   CAREERS_ALL_OPENINGS_ROUTE,
@@ -65,6 +66,8 @@ const Header = () => {
   const jewelleryMenuMountedRef = useRef(false);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { totalItems: cartCount } = useCart();
+  const mounted = useMounted();
+  const displayCartCount = mounted ? cartCount : 0;
   const pathname = usePathname() ?? "/";
   const canHoverNav = useCanHover();
   const isMobileHeader = useMobileHeaderLayout();
@@ -307,10 +310,10 @@ const Header = () => {
               <Link
                 href="/cart"
                 className={cn("relative md:!inline-flex !hidden", iconButtonClass, hoverClass)}
-                aria-label={cartCount > 0 ? `Cart, ${cartCount} items` : "Cart"}
+                aria-label={displayCartCount > 0 ? `Cart, ${displayCartCount} items` : "Cart"}
               >
                 <ShoppingBagIcon className="size-6" />
-                <HeaderIconBadge count={cartCount} />
+                <HeaderIconBadge count={displayCartCount} />
               </Link>
 
               <AccountMenu
@@ -320,10 +323,10 @@ const Header = () => {
               <Link
                 href="/cart"
                 className={cn("relative md:!hidden !inline-flex", iconButtonClass, hoverClass)}
-                aria-label={cartCount > 0 ? `Cart, ${cartCount} items` : "Cart"}
+                aria-label={displayCartCount > 0 ? `Cart, ${displayCartCount} items` : "Cart"}
               >
                 <ShoppingBagIcon className="size-6" />
-                <HeaderIconBadge count={cartCount} />
+                <HeaderIconBadge count={displayCartCount} />
               </Link>
             </div>
           </div>
@@ -359,7 +362,7 @@ const Header = () => {
         onClose={() => setMobileMenuOpen(false)}
         navLinks={primaryLinks}
         appointmentLink={appointmentLink}
-        cartCount={cartCount}
+        cartCount={displayCartCount}
         onProfileOpen={isMobileHeader ? openProfileNav : undefined}
       />
 
@@ -367,7 +370,7 @@ const Header = () => {
         open={profileNavOpen}
         onOpenChange={setProfileNavOpen}
         navItems={profileNavItems}
-        cartCount={cartCount}
+        cartCount={displayCartCount}
       />
     </>
   );

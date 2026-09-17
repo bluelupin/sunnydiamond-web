@@ -10,16 +10,31 @@ export function formatCareerJobTitle(title: string): string {
     .join(" ");
 }
 
+const POSTED_MONTH_LABELS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+] as const;
+
+/** Deterministic date label — avoids SSR/client Intl mismatches. */
 export function formatPostedAbsolute(postedAt: string): string {
   const [year, month, day] = postedAt.split("-").map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day));
+  const monthLabel = POSTED_MONTH_LABELS[month - 1];
 
-  return new Intl.DateTimeFormat("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(date);
+  if (!monthLabel || !year || !day) {
+    return postedAt;
+  }
+
+  return `${day} ${monthLabel} ${year}`;
 }
 
 export function formatPostedRelative(postedAt: string): string {

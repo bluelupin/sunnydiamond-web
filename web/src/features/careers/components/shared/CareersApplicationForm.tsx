@@ -894,7 +894,7 @@ const CareersApplicationForm = () => {
         <section className={careersFormSectionClassName}>
           <h2 className={careersFormSectionTitleClassName}>Skills & Languages</h2>
           <FormField label="" className="max-w-[356px]" arial-hidden>
-            <p className="md:text-base text-sm font-gill font-normal font-darkblack">Add skils and known language to your application</p>
+            <p className="md:text-base text-sm font-gill font-normal font-darkblack">Add skills and known languages to your application</p>
             <div className="relative">
               <div className="flex h-14 items-center justify-between bg-[#F2F2F2] p-3">
                 <input
