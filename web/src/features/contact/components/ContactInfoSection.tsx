@@ -118,6 +118,7 @@ const ContactInfoSection = ({ intro, infoCards }: ContactInfoSectionProps) => {
                               href={card.link.href}
                               target={openInNewTab ? "_blank" : undefined}
                               rel={openInNewTab ? "noopener noreferrer" : undefined}
+                              className="break-all"
                             >
                               {card.link.label}
                             </DetailTextLink>
