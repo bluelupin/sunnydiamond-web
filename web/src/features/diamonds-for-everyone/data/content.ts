@@ -62,45 +62,49 @@ export const diamondsForEveryonePageContent = {
       aadhaarError: "Enter Valid Aadhar Number",
     },
     nominee: {
-      /** Figma node 1052:66453 */
+      /** Figma 4453:33830 desktop, 4453:38279 mobile */
       title: "Nominee Details",
+      mobileTitle: "Add a Nominee",
+      subtitle: "Add the details of your chosen nominee.",
       nameLabel: "Full Name*",
       relationshipLabel: "Relationship*",
       relationshipOptions: ["Spouse", "Parent", "Child", "Sister", "Other"],
       phoneLabel: "Phone No.*",
       emailLabel: "Email ID",
+      phoneError: "Please enter a valid phone number",
+      emailError: "Please enter a valid email",
       reviewAndPayLabel: "REVIEW AND PAY",
     },
     review: {
-      /** Figma node 1052:66514 */
-      title: "Your Investment Summary",
+      /** Figma 4453:33877 desktop, 4453:39217 mobile */
+      title: "Your Plan Summary",
       accountHolderTitle: "Account Holder",
       fullNameLabel: "Full Name",
       phoneLabel: "Phone No.",
       emailLabel: "Email ID",
-      investmentDetailsTitle: "Investment Details",
+      instalmentAmountTitle: "Instalment Amount",
+      summarySectionTitle: "Your 12-Month Summary",
       reminderText:
         "We'll send you a reminder every month on your registered email before your installment is due.",
-      summaryTitle: "Your 12 Month Investments Summary",
       contributionLabel: "Your Contribution",
-      sunnyContributionLabel: "The Sunny Contribution",
+      bonusLabel: "Bonus",
       totalLabel: "Total Value",
       idProofTitle: "ID Proof",
       nomineeDetailsTitle: "Nominee Details",
       editLabel: "EDIT",
       idTypeLabel: "ID Type",
       idNumberLabel: "ID Number",
-      idCardCopyLabel: "ID Card Copy*",
-      nomineeNameLabel: "Full Name*",
+      idCardCopyLabel: "ID Card Copy",
+      nomineeNameLabel: "Full Name",
       nomineeRelationshipLabel: "Relationship",
-      nomineePhoneLabel: "Phone No.*",
+      nomineePhoneLabel: "Phone No.",
       nomineeEmailLabel: "Email ID",
     },
     success: {
-      /** Figma node 1052:66596 */
-      title: "11+1 Plan Activated",
+      /** Figma 4453:33975 desktop, 4453:39314 mobile */
+      title: "Welcome to Diamonds for Everyone",
       subtitle:
-        "Monthly installment reminders will be sent to your registered email address.",
+        "You're all set. Monthly instalment reminders will be sent to your registered email address.",
       managePaymentsLabel: "MANAGE PAYMENTS",
       managePaymentsHref: "/profile",
       backToShoppingLabel: "GO BACK TO SHOPPING",

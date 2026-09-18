@@ -58,6 +58,9 @@ function DfeInvestPageLayout({ investmentPlannerImage }: DfeInvestPageLayoutProp
   const isStandaloneStep = step === "intro" || step === "success";
   const showStepper = !isStandaloneStep;
   const showInvestHeader = !isStandaloneStep;
+  /** Figma: KYC column 601px; nominee/review column 648px (600px card + 24px outer pad). */
+  const flowContentMaxWidth =
+    step === "kyc" ? "max-w-[601px]" : "max-w-[648px]";
 
   const desktopImageUrl =
     investmentPlannerImage?.desktopUrl?.trim() ||
@@ -81,12 +84,20 @@ function DfeInvestPageLayout({ investmentPlannerImage }: DfeInvestPageLayoutProp
           : "relative flex min-h-[calc(100dvh-4.5rem-env(safe-area-inset-top,0px))] flex-col items-center justify-center bg-gray300 lg:py-[106px] md:py-16 py-10 md:landscape:min-h-[calc(100dvh-104px)] lg:landscape:min-h-[calc(100dvh-104px)]"
       }
     >
-      <div className="relative mx-auto flex w-full max-w-[601px] flex-col items-center px-4">
+      <div
+        className={`relative mx-auto flex w-full flex-col items-center px-4 ${
+          step === "success"
+            ? "max-w-[601px]"
+            : isStandaloneStep
+              ? "max-w-[648px]"
+              : flowContentMaxWidth
+        }`}
+      >
         {isStandaloneStep ? (
           <DfeInvestStepContent />
         ) : (
           <>
-            <div className="mb-10 flex w-full flex-col gap-6">
+            <div className="md:mb-10 mb-6 flex w-full flex-col gap-6">
               {showInvestHeader ? <DfeInvestHeader /> : null}
               {showStepper ? <DfeInvestStepper /> : null}
             </div>

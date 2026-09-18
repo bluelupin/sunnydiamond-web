@@ -8,6 +8,7 @@ import CareersSelectField from "@/features/careers/components/shared/CareersSele
 import FormFieldError from "@/shared/ui/FormFieldError";
 import { diamondsForEveryonePageContent } from "../../data/content";
 import { useDfeInvestFlow } from "../../context/DfeInvestFlowContext";
+import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 
 const fieldLabelClass = "font-gill text-base font-normal leading-110 text-darkblack";
 const fieldInputClass =
@@ -46,7 +47,7 @@ const DfeInvestKycStep = () => {
     if (!canProceed) return;
     goNext();
   };
-
+  const { windows } = useUiPlatform();
   return (
     <div className="mx-auto flex w-full max-w-[553px] flex-col gap-6 border border-linkGold bg-gray200 p-4 lg:gap-10 lg:p-10">
       <div className="flex w-full flex-col gap-6">
@@ -95,14 +96,12 @@ const DfeInvestKycStep = () => {
             {idFile ? (
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <Image
-                    src="/icons/icon-resume-document.svg"
-                    alt=""
-                    width={20}
-                    height={22}
-                    aria-hidden
-                  />
-                  <span className="font-gill text-base font-normal leading-110 text-darkblack">
+                  <svg width="20" height="22" viewBox="0 0 20 22" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn(!windows && "-translate-y-0.5", "shrink-0")}>
+                    <path d="M16.4585 4.10254H3.9585C3.61332 4.10254 3.3335 4.37806 3.3335 4.71792V17.0256C3.3335 17.3655 3.61332 17.641 3.9585 17.641H16.4585C16.8037 17.641 17.0835 17.3655 17.0835 17.0256V4.71792C17.0835 4.37806 16.8037 4.10254 16.4585 4.10254Z" stroke="#0A0A0A" strokeWidth="0.9375" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M7.7085 9.64025C8.39885 9.64025 8.9585 9.08922 8.9585 8.40948C8.9585 7.72975 8.39885 7.17871 7.7085 7.17871C7.01814 7.17871 6.4585 7.72975 6.4585 8.40948C6.4585 9.08922 7.01814 9.64025 7.7085 9.64025Z" stroke="#0A0A0A" strokeWidth="0.9375" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M4.63721 17.6403L13.2036 9.2049C13.2617 9.14768 13.3306 9.10229 13.4065 9.07132C13.4823 9.04035 13.5637 9.02441 13.6458 9.02441C13.7279 9.02441 13.8093 9.04035 13.8851 9.07132C13.961 9.10229 14.0299 9.14768 14.088 9.2049L17.0833 12.1549" stroke="#0A0A0A" strokeWidth="0.9375" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <span className="font-gill text-base font-normal leading-110 text-darkblack truncate-1 md:max-w-[200px] max-w-[170px] text-ellipsis overflow-hidden whitespace-nowrap">
                     {idFile.name}
                   </span>
                 </div>

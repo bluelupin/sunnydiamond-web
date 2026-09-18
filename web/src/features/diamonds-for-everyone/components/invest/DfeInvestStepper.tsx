@@ -49,7 +49,12 @@ const DfeInvestStepper = () => {
 
   return (
     <div className="flex w-full flex-col items-center gap-3 lg:gap-6 lg:px-10">
-      <div className="flex w-full items-center justify-between px-7">
+      <div
+        className={cn(
+          "flex w-full items-center justify-between px-7",
+          (step === "nominee" || step === "review") && "lg:px-10",
+        )}
+      >
         {steps.map((stepItem, index) => {
           const isLast = index === steps.length - 1;
           const circleState =
@@ -80,13 +85,19 @@ const DfeInvestStepper = () => {
           const isActive = index === activeIndex;
           const isFuture = index > activeIndex;
 
+          const isFinalStep = activeIndex === steps.length - 1;
+
           return (
             <p
               key={stepItem.id}
               className={cn(
-                "shrink-0",
-                isActive || isCompleted ? "font-normal text-darkblack" : "font-light",
-                isFuture && "text-neutral500",
+                "w-[104px] shrink-0 lg:w-auto",
+                isActive && "font-normal text-darkblack",
+                isCompleted &&
+                  (isFinalStep
+                    ? "font-light text-darkblack"
+                    : "font-light text-darkblack lg:font-normal"),
+                isFuture && "font-light text-neutral500",
               )}
             >
               {stepItem.label}
