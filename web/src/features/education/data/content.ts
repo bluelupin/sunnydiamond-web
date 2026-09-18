@@ -1,7 +1,7 @@
 export const learnAboutDiamondsRoute = "/learn-about-diamonds" as const;
 
 export const educationPageImages = {
-  panelTexture: "/images/verticle-texture.png",
+  panelTexture: "/images/education/panel-texture.png",
   certifiedDivider: "/images/education/certified-divider.svg",
   certifiedDividerMobile: "/images/education/certified-divider-mobile.svg",
   anatomySparkle: "/images/education/scroll-arrow.svg",
