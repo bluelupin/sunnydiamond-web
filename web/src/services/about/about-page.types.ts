@@ -58,6 +58,7 @@ export type StrapiAboutBrillianceSection = {
 export type StrapiAboutLegacyImageBlock = {
   id?: number;
   description?: string | null;
+  caption?: string | null;
   image?: StrapiAboutResponsiveImage | null;
 };
 

@@ -94,18 +94,6 @@ const ContactInfoSection = ({ intro, infoCards }: ContactInfoSectionProps) => {
                       </div>
                       {card.link.href && card.link.label ? (
                         <div className="flex w-full items-center justify-center gap-2">
-                          <Image
-                            className="shrink-0 md:hidden"
-                            src={
-                              card.variant === "email"
-                                ? "/images/contact/icon-email.svg"
-                                : "/images/contact/icon-whatsapp.svg"
-                            }
-                            alt=""
-                            width={20}
-                            height={20}
-                            aria-hidden
-                          />
                           {card.variant === "phone" ? (
                             <ContactPhoneLink
                               href={card.link.href}

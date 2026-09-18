@@ -2,7 +2,7 @@ import { aboutHandcraftedTileLayout } from "@/features/about/data/content";
 import { normalizeCanonicalPath } from "@/shared/lib/seo/normalizeCanonicalPath";
 import { WORLD_OF_SUNNY_PATH } from "@/shared/utils/navigation";
 import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
-import { extractStrapiImage, resolveCmsAltText, resolveCmsCaption, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { extractStrapiImage, resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import type {
   NormalizedAboutCraft,
   NormalizedAboutHero,
@@ -172,10 +172,7 @@ const mapLegacyBlock = (
 
   const description = cleanText(block.description);
   const image = mapResponsiveImage(block.image);
-  const caption =
-    resolveCmsCaption(block.image?.desktopImage) ??
-    resolveCmsCaption(block.image?.mobileImage) ??
-    cleanText(block.image?.caption);
+  const caption = cleanText(block.caption);
 
   if (!description && !image) return null;
 
