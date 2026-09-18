@@ -1,0 +1,983 @@
+---
+description: Implement a production-ready Price Range filter for the PLP, synchronized between range slider, Min/Max inputs, URL/filter state, and Magento/API without breaking existing UI or functionality.
+globs:
+  - "**/*Price*Filter*.*"
+  - "**/*price*filter*.*"
+  - "**/*Filter*.*"
+  - "**/*filter*.*"
+  - "**/app/**"
+  - "**/features/**"
+  - "**/components/**"
+alwaysApply: false
+---
+
+# Price Range Filter — Implementation Rules
+
+## Objective
+
+Implement or update the PLP "By Price Range" filter according to the approved design:
+
+- A dual-thumb price range slider.
+- Min Amount input.
+- Max Amount input.
+- Currency displayed as Indian Rupee (₹).
+- Available minimum and maximum price must come from the existing product/catalog/API filter data whenever available.
+- Do not hardcode the catalog maximum such as ₹9,00,000 unless the existing business/API contract explicitly requires it.
+- Slider, inputs, filter state, URL/query state, and API request must remain synchronized.
+- Do not break any existing PLP filters, sorting, pagination, product cards, layout, responsive behavior, or existing Magento integration.
+
+## Mandatory First Step: Inspect Before Changing
+
+Before writing code:
+
+1. Review the complete existing PLP implementation.
+2. Identify:
+   - Current PLP route/page.
+   - Existing filter architecture.
+   - Existing filter state/store/hooks.
+   - Existing URL/query-param handling.
+   - Existing Magento/API service functions.
+   - Existing product price fields and price aggregations.
+   - Existing mobile filter drawer.
+   - Existing Apply/Reset behavior, if any.
+   - Existing loading/skeleton implementation.
+   - Existing toast/validation/error patterns.
+   - Existing reusable input, slider, button, drawer, and currency components.
+3. Search the project for existing price/range filter implementations before creating new components.
+4. Reuse existing architecture and utilities wherever possible.
+5. Do not introduce a new state-management pattern if the project already has one.
+
+Do not start implementation based only on this rule file. Adapt the implementation to the actual repository.
+
+---
+
+# Functional Requirements
+
+## 1. Single Source of Truth
+
+Treat price filtering as ONE logical filter.
+
+Do NOT maintain unrelated slider state and input state that can become inconsistent.
+
+Preferred conceptual model:
+
+```ts
+type PriceRange = {
+  min: number;
+  max: number;
+};
+
+type PriceFilter = {
+  min?: number;
+  max?: number;
+};
+```
+
+Use the project's existing types/state architecture if an equivalent already exists.
+
+### Distinguish:
+
+- `availableRange`: complete price range supported by the catalog/API.
+- `selectedRange`: range currently selected by the user.
+
+Example:
+
+```ts
+availableRange = {
+  min: 0,
+  max: 900000,
+};
+
+selectedRange = {
+  min: 100000,
+  max: 500000,
+};
+```
+
+Do not confuse the available range with the selected range.
+
+---
+
+# 2. Slider Behavior
+
+The slider must be a dual-thumb range slider.
+
+Example:
+
+```text
+₹0 ─────────────── ₹9,00,000
+ ●                       ●
+```
+
+If the user moves the minimum thumb:
+
+```text
+₹1,00,000 ───────────── ₹9,00,000
+```
+
+the Min Amount input must immediately reflect:
+
+```text
+₹1,00,000
+```
+
+If the maximum thumb moves:
+
+```text
+₹1,00,000 ───────────── ₹5,00,000
+```
+
+the Max Amount input must reflect:
+
+```text
+₹5,00,000
+```
+
+The slider must never allow:
+
+```text
+min > max
+```
+
+Do not create two independent sliders unless the existing component architecture specifically requires it.
+
+---
+
+# 3. Min Amount Input
+
+Default behavior should follow the existing design/API contract.
+
+For an available range of:
+
+```text
+₹0 → ₹9,00,000
+```
+
+the default displayed minimum is:
+
+```text
+0
+```
+
+When the user enters:
+
+```text
+100000
+```
+
+the selected range becomes:
+
+```text
+100000 → currentMax
+```
+
+and the slider must move accordingly.
+
+### Input rules
+
+- Accept numeric values only.
+- Reject negative values.
+- Do not store the currency symbol (`₹`) as part of the numeric state.
+- Internal value should be numeric.
+- Display formatting can use Indian numbering.
+- Avoid API requests for every keystroke.
+- Validate before applying the filter.
+
+Preferred internal representation:
+
+```ts
+100000
+```
+
+Display representation:
+
+```text
+₹1,00,000
+```
+
+Use existing currency/number-format utilities if available.
+
+---
+
+# 4. Max Amount Input
+
+The Max Amount field may be empty if the existing business/API contract supports an open-ended upper bound.
+
+Example:
+
+```text
+Min: ₹2,00,000
+Max: empty
+```
+
+means:
+
+```text
+price >= 200000
+```
+
+Do NOT convert an empty max value into:
+
+```ts
+max: 0
+```
+
+unless the backend explicitly requires that behavior.
+
+If the user enters:
+
+```text
+300000
+```
+
+the slider must update to:
+
+```text
+₹0/selectedMin ───────── ₹3,00,000
+```
+
+and the API/filter state must use:
+
+```ts
+max: 300000
+```
+
+---
+
+# 5. Validation
+
+Before applying the filter, validate all values.
+
+## Required validations
+
+### A. Minimum greater than maximum
+
+Invalid:
+
+```text
+Min = ₹5,00,000
+Max = ₹2,00,000
+```
+
+Do not call the API.
+
+Use the project's existing validation/error UI.
+
+Preferred message:
+
+```text
+Minimum amount cannot be greater than maximum amount.
+```
+
+### B. Negative value
+
+Invalid:
+
+```text
+-1000
+```
+
+Do not allow it.
+
+### C. Value above available maximum
+
+If the available catalog maximum is:
+
+```text
+₹9,00,000
+```
+
+and the user enters:
+
+```text
+₹12,00,000
+```
+
+follow the existing product/business validation convention.
+
+Prefer explicit validation over silently changing the user's value.
+
+Possible message:
+
+```text
+Maximum amount cannot exceed ₹9,00,000.
+```
+
+### D. Value below available minimum
+
+Apply the same validation strategy.
+
+### E. Empty values
+
+If both values are empty or equivalent to the default unfiltered state:
+
+- Remove the price filter.
+- Do not send unnecessary price parameters.
+
+---
+
+# 6. Apply Behavior
+
+For a mobile filter drawer, prefer deferred API execution if the existing PLP architecture supports it.
+
+Recommended flow:
+
+```text
+User moves slider/types value
+        ↓
+Update local filter UI state
+        ↓
+Validate
+        ↓
+User clicks Apply Filters
+        ↓
+Update global/URL filter state
+        ↓
+Call/revalidate PLP API
+        ↓
+Show existing PLP loading/skeleton
+        ↓
+Render filtered products
+        ↓
+Close drawer if that is the existing UX
+```
+
+Do NOT make a network request for every slider movement unless the existing PLP architecture intentionally uses immediate filtering.
+
+If the desktop implementation already uses immediate filtering, preserve that behavior consistently.
+
+---
+
+# 7. URL / Query Parameters
+
+If the existing PLP uses URL query parameters, the price filter must be reflected there.
+
+Example:
+
+```text
+/plp?minPrice=100000&maxPrice=500000
+```
+
+Use the project's existing query parameter naming convention.
+
+Do NOT invent a second URL/filter format.
+
+Requirements:
+
+- Refreshing the page must restore the selected price filter.
+- Browser Back/Forward should restore the appropriate filter state.
+- Existing non-price filters must remain intact.
+- Removing the price filter must remove its query parameters.
+- Do not duplicate query parameters.
+
+If the project does not currently persist filters in the URL, do not introduce URL behavior blindly. Follow the existing architecture and document the decision.
+
+---
+
+# 8. API / Magento Integration
+
+Before changing API code:
+
+1. Find the existing PLP product request.
+2. Find how category/filter attributes are passed.
+3. Find how price filtering is currently represented, if at all.
+4. Reuse the existing API client/service.
+5. Reuse existing Magento query/filter conventions.
+
+Do NOT create a separate API client.
+
+Do NOT use Axios if the project standard is Fetch API.
+
+Do NOT hardcode product data.
+
+Do NOT use static/dummy fallback products.
+
+The price filter must affect real product data.
+
+Conceptually:
+
+```ts
+{
+  minPrice: 100000,
+  maxPrice: 500000
+}
+```
+
+must be translated into the project's actual Magento/API query format.
+
+Do not assume Magento's exact query syntax without inspecting the existing implementation.
+
+---
+
+# 9. Available Price Range
+
+Do not hardcode:
+
+```ts
+max: 900000
+```
+
+unless explicitly required by the existing API/business contract.
+
+Prefer:
+
+```text
+API/catalog aggregation
+        ↓
+availableMin
+availableMax
+        ↓
+Price Range UI
+```
+
+If the catalog maximum changes to:
+
+```text
+₹12,50,000
+```
+
+the component should automatically support:
+
+```text
+₹0 → ₹12,50,000
+```
+
+If the existing API does not provide a price aggregation, inspect how the current PLP obtains product price information and determine the safest architecture.
+
+Do not make an expensive client-side scan of the entire catalog if a backend aggregation/filter endpoint already exists.
+
+---
+
+# 10. Formatting
+
+Use Indian currency formatting.
+
+Examples:
+
+```text
+0
+₹0
+
+1000
+₹1,000
+
+100000
+₹1,00,000
+
+900000
+₹9,00,000
+
+1250000
+₹12,50,000
+```
+
+Keep raw numeric values separate from display formatting.
+
+Do not store:
+
+```ts
+"₹9,00,000"
+```
+
+as the filter value.
+
+Store:
+
+```ts
+900000
+```
+
+and format only at the UI boundary.
+
+Use an existing shared formatting utility if one exists.
+
+---
+
+# 11. Reset Behavior
+
+If the PLP has an existing Reset/Clear All mechanism, price range must integrate with it.
+
+Reset should restore:
+
+```text
+Min = availableMin/default minimum
+Max = availableMax/default maximum
+```
+
+and remove the price filter from the active filter state.
+
+Do not reset unrelated filters.
+
+If the filter drawer has a dedicated Reset CTA, follow the existing design system.
+
+---
+
+# 12. Filter Drawer UX
+
+Match the existing filter drawer design.
+
+The target design is conceptually:
+
+```text
+Filters                                      ×
+
+By Price Range
+
+●────────────────────────────────────●
+
+₹0                              ₹9,00,000
+
+Min Amount                    Max Amount
+
+[ 0 ]                         [ Enter ]
+
+
+                 Reset     Apply Filters
+```
+
+Requirements:
+
+- Keep spacing consistent with the existing UI.
+- Reuse existing typography.
+- Reuse existing input/button components.
+- Reuse existing close icon/drawer behavior.
+- Do not introduce inline styles.
+- Use existing Tailwind utility conventions.
+- Preserve responsive behavior.
+- Ensure keyboard accessibility.
+- Ensure visible focus states.
+
+If the existing drawer already has sticky bottom actions, use them.
+
+Do not create a second competing Apply/Reset footer.
+
+---
+
+# 13. Loading State
+
+Use the existing PLP loading/skeleton behavior.
+
+Do not introduce a new spinner/loading architecture unless necessary.
+
+Expected flow:
+
+```text
+Apply filter
+    ↓
+Existing loading state
+    ↓
+Existing product skeleton
+    ↓
+API response
+    ↓
+Filtered product grid
+```
+
+Do not show stale filtered content as if it were the new result.
+
+---
+
+# 14. Error Handling
+
+Use the project's existing error/toast pattern.
+
+Do not create a new toast component.
+
+Do not change unrelated toast designs.
+
+Validation errors should be shown near the relevant control when possible.
+
+API errors should use the existing PLP/API error handling.
+
+Do not expose raw backend errors to users.
+
+---
+
+# 15. Accessibility
+
+The price filter must be keyboard accessible.
+
+Requirements:
+
+- Both slider thumbs must be keyboard accessible.
+- Inputs must have accessible labels.
+- Do not rely only on placeholder text.
+- Use appropriate ARIA semantics where required.
+- Ensure focus is visible.
+- Ensure the two slider thumbs can be distinguished.
+- Error messages must be associated with the relevant input.
+- The close button must have an accessible name.
+- Decorative elements must be `aria-hidden` where appropriate.
+
+Do not remove existing accessibility attributes.
+
+---
+
+# 16. Responsive Behavior
+
+The provided design is a mobile filter drawer.
+
+Verify at minimum:
+
+- Mobile narrow width.
+- Standard mobile width.
+- Tablet if the component is shared.
+- Desktop if the same filter component is reused.
+
+Check:
+
+- Input widths.
+- Slider thumb visibility.
+- Label wrapping.
+- Drawer overflow.
+- Sticky Apply/Reset actions.
+- Keyboard navigation.
+- Touch target size.
+
+Do not introduce horizontal scrolling.
+
+---
+
+# 17. TypeScript Rules
+
+Use strict, meaningful TypeScript types.
+
+Avoid:
+
+```ts
+any
+```
+
+Do not add unnecessary type assertions.
+
+Handle:
+
+```ts
+undefined
+null
+empty string
+0
+```
+
+according to the existing API contract.
+
+Be especially careful not to treat:
+
+```ts
+0
+```
+
+as a missing value.
+
+For example:
+
+```ts
+if (minPrice) {
+```
+
+may incorrectly treat `0` as absent.
+
+Prefer explicit checks when required:
+
+```ts
+if (minPrice !== undefined) {
+```
+
+Adapt this to the actual project's types.
+
+---
+
+# 18. Component Architecture
+
+Before creating files, inspect existing components.
+
+Prefer a structure similar to:
+
+```text
+PriceRangeFilter
+├── Range Slider
+├── Min Amount Input
+├── Max Amount Input
+└── Validation
+```
+
+If the project already has reusable components for:
+
+- Range slider
+- Numeric input
+- Filter section
+- Drawer
+- Currency formatting
+
+reuse them.
+
+Do not duplicate existing functionality.
+
+Keep business/API logic out of purely presentational components where the project's architecture separates those concerns.
+
+---
+
+# 19. Do Not Break Existing Functionality
+
+This is mandatory.
+
+Do not change:
+
+- Existing PLP layout.
+- Product cards.
+- Product links.
+- Sorting.
+- Pagination.
+- Existing filters.
+- Category selection.
+- Search behavior.
+- Wishlist behavior.
+- Cart behavior.
+- Magento integration unrelated to price filtering.
+- Existing mobile navigation.
+- Existing responsive layout.
+
+Only change code required for the price filter.
+
+If an existing implementation is fragile, make the smallest safe refactor necessary and explain why.
+
+---
+
+# 20. No Fallback / Dummy Data
+
+Do NOT implement:
+
+```ts
+const maxPrice = apiMaxPrice || 900000;
+```
+
+if the requirement is to use real catalog data.
+
+Do NOT implement:
+
+```ts
+const products = apiProducts || dummyProducts;
+```
+
+Do NOT invent prices.
+
+If required API data is missing:
+
+- Handle the missing/null state according to existing project conventions.
+- Hide/disable the relevant UI where appropriate.
+- Do not fabricate data.
+
+---
+
+# 21. Testing Scenarios
+
+After implementation, test all of these.
+
+## Default
+
+```text
+Available: ₹0 → ₹9,00,000
+Selected: default/unfiltered
+```
+
+## Slider minimum
+
+```text
+Min slider → ₹1,00,000
+```
+
+Verify:
+
+- Min input updates.
+- API/filter state updates only according to existing Apply/immediate behavior.
+- Product results are correct.
+
+## Slider maximum
+
+```text
+Max slider → ₹5,00,000
+```
+
+Verify:
+
+- Max input updates.
+- Products above ₹5,00,000 are excluded.
+
+## Manual minimum
+
+```text
+Min = ₹2,00,000
+```
+
+Verify slider synchronization.
+
+## Manual maximum
+
+```text
+Max = ₹3,00,000
+```
+
+Verify slider synchronization.
+
+## Invalid range
+
+```text
+Min = ₹5,00,000
+Max = ₹2,00,000
+```
+
+Verify:
+
+- Validation shown.
+- API is not called.
+- Existing valid filter is not corrupted.
+
+## Empty maximum
+
+```text
+Min = ₹2,00,000
+Max = empty
+```
+
+Verify open-ended behavior if supported.
+
+## Clear filter
+
+Verify both values return to default/unfiltered state.
+
+## Refresh
+
+Verify URL/state restoration if URL filters are supported.
+
+## Back/Forward
+
+Verify browser navigation restores the correct price state if URL filters are supported.
+
+## Existing filters
+
+Test price together with:
+
+- Category
+- Metal
+- Gender
+- Collection
+- Other existing PLP filters
+
+Ensure filters combine correctly.
+
+## Sorting and pagination
+
+After applying price filter, verify:
+
+- Sorting still works.
+- Pagination still works.
+- Page resets appropriately if that is the existing behavior.
+
+---
+
+# 22. Performance
+
+Avoid unnecessary API calls.
+
+Avoid expensive rerenders while dragging.
+
+Do not recreate large objects/functions unnecessarily if it causes measurable performance issues.
+
+Do not fetch the entire catalog just to calculate a price range if the backend already provides an aggregation.
+
+Use existing caching/revalidation patterns.
+
+---
+
+# 23. Code Quality
+
+Before finalizing:
+
+- Remove unused imports.
+- Remove temporary console logs.
+- Remove debugging code.
+- Remove duplicate state.
+- Remove dead code.
+- Use existing naming conventions.
+- Follow existing folder structure.
+- Follow existing Tailwind conventions.
+- Do not introduce unnecessary dependencies.
+
+Do not modify unrelated files.
+
+---
+
+# 24. Verification Checklist
+
+Before reporting completion, run the repository's relevant checks, such as:
+
+```bash
+npm run lint
+npm run typecheck
+npm run build
+```
+
+Only run commands that actually exist in the project.
+
+Also manually verify the affected PLP/filter flow.
+
+If a check fails:
+
+1. Identify whether the failure is caused by your change.
+2. Fix it if it is related.
+3. Do not hide or bypass the failure.
+4. Report unrelated pre-existing failures separately.
+
+---
+
+# 25. Final Implementation Report
+
+After implementation, provide:
+
+### Changed files
+
+List every changed file and explain why.
+
+### Behavior implemented
+
+Summarize:
+
+- Slider behavior.
+- Min/Max input behavior.
+- Validation.
+- URL synchronization.
+- API/Magento integration.
+- Apply/Reset behavior.
+- Loading/error handling.
+
+### Verification
+
+Report:
+
+- Lint result.
+- TypeScript result.
+- Build result.
+- Manual scenarios tested.
+
+### Important assumptions
+
+Explicitly mention any assumption made because the repository/API did not provide enough information.
+
+Do not claim a test passed unless it was actually run.
+
+---
+
+# Cursor Agent Execution Rule
+
+When asked to implement this requirement:
+
+1. Inspect first.
+2. Reuse existing architecture.
+3. Implement the smallest safe change.
+4. Do not ask unnecessary questions if the repository already provides the answer.
+5. Do not invent API contracts.
+6. Do not use dummy/static fallback data.
+7. Do not break existing UI/functionality.
+8. Validate the complete user flow.
+9. Run available checks.
+10. Report exactly what changed and what was verified.
