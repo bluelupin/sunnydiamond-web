@@ -43,28 +43,39 @@ export async function magentoGraphqlFetch<T>({
   const endpoint = isServer ? getMagentoGraphqlUrl() : "/api/magento/graphql";
   const effectiveCache = authToken ? "no-store" : cache;
 
-  const response = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      Store: MAGENTO_DEFAULT_STORE_CODE,
-      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-      ...headers,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ query, variables }),
-    signal,
-    cache: effectiveCache ?? (isServer ? "force-cache" : "default"),
-    ...(keepalive ? { keepalive: true } : {}),
-    ...(isServer && effectiveCache !== "no-store"
-      ? {
-          next: {
-            revalidate: revalidateSeconds ?? MAGENTO_CATALOG_REVALIDATE_SECONDS,
-            ...(tags ? { tags } : {}),
-          },
-        }
-      : {}),
-  });
+  let response: Response;
+  try {
+    response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        Store: MAGENTO_DEFAULT_STORE_CODE,
+        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+        ...headers,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query, variables }),
+      signal,
+      cache: effectiveCache ?? (isServer ? "force-cache" : "default"),
+      ...(keepalive ? { keepalive: true } : {}),
+      ...(isServer && effectiveCache !== "no-store"
+        ? {
+            next: {
+              revalidate: revalidateSeconds ?? MAGENTO_CATALOG_REVALIDATE_SECONDS,
+              ...(tags ? { tags } : {}),
+            },
+          }
+        : {}),
+    });
+  } catch (error) {
+    // Network / DNS / TLS failures throw TypeError("fetch failed") — convert so
+    // callers' existing MagentoGraphqlError handling can keep the page up.
+    const message =
+      error instanceof Error && error.message.trim()
+        ? error.message
+        : "Magento GraphQL network request failed";
+    throw new MagentoGraphqlError(message);
+  }
 
   if (!response.ok) {
     throw new MagentoGraphqlError(`Magento GraphQL request failed (${response.status})`);

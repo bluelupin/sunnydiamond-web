@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback, type ReactNode } from "react"
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   AttributeSeparator,
   DetailDarkButton,
@@ -28,6 +28,7 @@ import {
 } from "@/features/products/constants/engraving";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { useLoginModal } from "@/features/auth/context/LoginModalContext";
 import PlusIcon from "@/assets/Icons/PlusIcon";
 import WishlistIcon from "@/assets/Icons/WishlistIcon";
 import VanIcon from "@/assets/Icons/VanIcon";
@@ -129,7 +130,9 @@ const ProductDetailSidebar = ({
   const [isPriceBreakupOpen, setIsPriceBreakupOpen] = useState(false);
   const [isAddingToBag, setIsAddingToBag] = useState(false);
   const router = useRouter();
+  const pathname = usePathname() ?? "/";
   const { status } = useAuth();
+  const { openLoginModal } = useLoginModal();
   const { isWishlisted, toggleWishlist } = useWishlist();
   const wishlisted = isWishlisted(product.id);
   const engravingConfig = product.engraving;
@@ -142,22 +145,46 @@ const ProductDetailSidebar = ({
   const showBenefitsStrip = strip.items.length > 0 && strip.title.trim().length > 0;
   const showStripTnc = strip.tnc.label.trim().length > 0 && strip.tnc.href.trim().length > 0;
   const showFindYourSizeLink = findYourSizeLabel.trim().length > 0;
+  const [pendingHereForYouPanel, setPendingHereForYouPanel] = useState<
+    "video-call" | "try-at-home" | null
+  >(null);
 
-  const openHereForYouPanel = useCallback((action: HereForYouPanelAction) => {
-    switch (action) {
-      case "video-call":
-        setIsVideoCallOpen(true);
-        break;
-      case "try-at-home":
-        setIsTryAtHomeOpen(true);
-        break;
-      case "personalise":
+  const openHereForYouPanel = useCallback(
+    (action: HereForYouPanelAction) => {
+      if (action === "video-call" || action === "try-at-home") {
+        if (status !== "authenticated") {
+          setPendingHereForYouPanel(action);
+          openLoginModal({ returnUrl: pathname });
+          return;
+        }
+
+        if (action === "video-call") {
+          setIsVideoCallOpen(true);
+        } else {
+          setIsTryAtHomeOpen(true);
+        }
+        return;
+      }
+
+      if (action === "personalise") {
         setIsPersonaliseOpen(true);
-        break;
-      default:
-        break;
+      }
+    },
+    [openLoginModal, pathname, status],
+  );
+
+  useEffect(() => {
+    if (status !== "authenticated" || !pendingHereForYouPanel) {
+      return;
     }
-  }, []);
+
+    if (pendingHereForYouPanel === "video-call") {
+      setIsVideoCallOpen(true);
+    } else {
+      setIsTryAtHomeOpen(true);
+    }
+    setPendingHereForYouPanel(null);
+  }, [pendingHereForYouPanel, status]);
 
   const renderHereForYouButton = (button: NormalizedProductDisplayCardButton, index: number) => {
     const panelAction = resolveHereForYouPanelAction(button.modalTag);

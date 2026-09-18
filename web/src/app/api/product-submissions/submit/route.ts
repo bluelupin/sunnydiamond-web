@@ -1,12 +1,25 @@
 import { NextResponse } from "next/server";
-import { getStrapiBaseUrl } from "@/api/config";
+import { getStrapiApiToken, getStrapiBaseUrl } from "@/api/config";
 import { STRAPI_ENDPOINTS } from "@/api/endpoints";
-import { getCustomerToken } from "@/services/auth/session";
+import { getSessionMagentoCustomerId } from "@/services/auth/getSessionMagentoCustomerId";
+
+const AUTH_REQUIRED_FORM_TAGS = new Set([
+  "try-at-home",
+  "try-at-home-form",
+  "schedule-video-call",
+  "product-video-call",
+]);
+
+function requiresAuthenticatedCustomer(formTag: unknown): boolean {
+  if (typeof formTag !== "string") return false;
+  return AUTH_REQUIRED_FORM_TAGS.has(formTag.trim().toLowerCase());
+}
 
 /**
  * Browser → same-origin BFF → Strapi product-submissions/submit.
- * Forwards multipart as-is and attaches Magento customer Bearer when signed in
- * so CMS can link the submission to My Appointments.
+ * Authorization: CMS API token (server-only).
+ * magentoCustomerId is injected from the Magento session when present,
+ * and required for Try at Home / Video Call.
  */
 export async function POST(request: Request) {
   let formData: FormData;
@@ -22,7 +35,31 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing data field" }, { status: 400 });
   }
 
-  const customerToken = await getCustomerToken();
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(dataField) as Record<string, unknown>;
+  } catch {
+    return NextResponse.json({ error: "Invalid data JSON" }, { status: 400 });
+  }
+
+  const magentoCustomerId = await getSessionMagentoCustomerId(request);
+  const needsAuth = requiresAuthenticatedCustomer(parsed.formTag);
+
+  if (needsAuth && magentoCustomerId == null) {
+    return NextResponse.json(
+      { error: "Unauthorized", reason: "no_session" },
+      { status: 401 },
+    );
+  }
+
+  // Never trust client-supplied customer id.
+  delete parsed.magentoCustomerId;
+  if (magentoCustomerId != null) {
+    parsed.magentoCustomerId = magentoCustomerId;
+  }
+
+  formData.set("data", JSON.stringify(parsed));
+
   const url = `${getStrapiBaseUrl()}/${STRAPI_ENDPOINTS.productSubmissionsSubmit}`;
 
   try {
@@ -30,7 +67,7 @@ export async function POST(request: Request) {
       method: "POST",
       headers: {
         Accept: "application/json",
-        ...(customerToken ? { Authorization: `Bearer ${customerToken}` } : {}),
+        Authorization: `Bearer ${getStrapiApiToken()}`,
       },
       body: formData,
       cache: "no-store",

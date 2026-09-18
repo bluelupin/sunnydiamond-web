@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import type { StaticImageData } from "next/image";
-import { Check, ShoppingBag } from "lucide-react";
+import { Check } from "lucide-react";
+import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
 import { cn } from "@/shared/utils/cn";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
@@ -22,6 +23,7 @@ type TryAtHomeSuccessStepProps = {
   productImage: string | StaticImageData;
   booking: TryAtHomeBookingSummary;
   additionalItemsCount?: number;
+  successMessage?: string;
   onClose: () => void;
   onViewBooking: () => void;
   onContinueShopping: () => void;
@@ -32,6 +34,7 @@ const TryAtHomeSuccessStep = ({
   productImage,
   booking,
   additionalItemsCount = 0,
+  successMessage = "Item added to your Try at Home booking!",
   onClose,
   onViewBooking,
   onContinueShopping,
@@ -52,13 +55,13 @@ const TryAtHomeSuccessStep = ({
               </div>
               <RightPanelCloseButton
                 onClick={onClose}
-                aria-label="Close try at home success panel"
+                aria-label="Close booking success panel"
                 className="justify-self-end"
               />
             </div>
 
             <p className="text-center font-gill text-base font-light leading-110 text-darkblack">
-              Item added to your try at home booking !
+              {successMessage}
             </p>
           </div>
 
@@ -105,7 +108,7 @@ const TryAtHomeSuccessStep = ({
 
             {additionalItemsCount > 0 ? (
               <div className="flex items-center gap-1">
-                <ShoppingBag size={20} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
+                <ShoppingBagIcon className="size-5 shrink-0 text-darkblack" />
                 <p className="font-gill text-base font-light leading-110 text-darkblack">
                   Your booking has {additionalItemsCount} more{" "}
                   {additionalItemsCount === 1 ? "item" : "items"}

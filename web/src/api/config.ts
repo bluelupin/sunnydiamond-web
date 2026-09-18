@@ -26,6 +26,25 @@ export function getStrapiBaseUrl(): string {
   return normalizeBaseUrl(raw);
 }
 
+/**
+ * Server-only Strapi API token for appointment booking endpoints.
+ * Never expose to the browser — CMS trusts magentoCustomerId from the caller.
+ */
+export function getStrapiApiToken(): string {
+  const token =
+    process.env.STRAPI_API_TOKEN?.trim() ||
+    process.env.CMS_API_TOKEN?.trim() ||
+    "";
+
+  if (!token) {
+    throw new Error(
+      "Missing CMS API token. Set STRAPI_API_TOKEN (or CMS_API_TOKEN) on the server.",
+    );
+  }
+
+  return token;
+}
+
 type AppEnv = "local" | "qa" | "production";
 
 const APP_ENV_DEFAULT_SITE_URL: Record<AppEnv, string> = {

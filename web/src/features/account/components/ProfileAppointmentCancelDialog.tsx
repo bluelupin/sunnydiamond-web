@@ -19,6 +19,8 @@ type ProfileAppointmentCancelDialogProps = {
   onOpenChange: (open: boolean) => void;
   onReschedule: () => void;
   onConfirmCancel: () => void;
+  /** When false, Reschedule in this popup stays disabled (same as the card button). */
+  canReschedule?: boolean;
 };
 
 /** Figma 1480:20323 — cancel appointment bottom sheet on mobile */
@@ -27,6 +29,7 @@ export function ProfileAppointmentCancelDialog({
   onOpenChange,
   onReschedule,
   onConfirmCancel,
+  canReschedule = true,
 }: ProfileAppointmentCancelDialogProps) {
   const isMobile = useIsMobile();
   const content = profileTabsContent.appointments.cancelDialog;
@@ -66,7 +69,12 @@ export function ProfileAppointmentCancelDialog({
               <DetailDarkButton type="button" className="w-full" onClick={onConfirmCancel}>
                 {content.confirmLabel}
               </DetailDarkButton>
-              <DetailOutlineButton type="button" className="w-full" onClick={onReschedule}>
+              <DetailOutlineButton
+                type="button"
+                className="w-full disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={onReschedule}
+                disabled={!canReschedule}
+              >
                 {content.rescheduleLabel}
               </DetailOutlineButton>
             </div>
@@ -103,7 +111,12 @@ export function ProfileAppointmentCancelDialog({
         </p>
 
         <div className="flex flex-col gap-4 sm:flex-row">
-          <DetailOutlineButton type="button" className="w-full sm:flex-1" onClick={onReschedule}>
+          <DetailOutlineButton
+            type="button"
+            className="w-full sm:flex-1 disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={onReschedule}
+            disabled={!canReschedule}
+          >
             {content.rescheduleLabel}
           </DetailOutlineButton>
           <DetailDarkButton type="button" className="w-full sm:flex-1" onClick={onConfirmCancel}>

@@ -29,6 +29,7 @@ import {
   validateLoginIdentifier,
 } from "../utils/authValidation";
 import { getLoginHrefForReturn, getPostSignupReturnUrl, sanitizeReturnUrl } from "../utils/authNavigation";
+import { setAuthLoginIdentifierKind } from "../utils/authLoginIdentifier";
 
 /**
  * Sign-in is passwordless: every identifier — mobile or email — leads to a
@@ -491,6 +492,7 @@ export function useAuthFlow({
       return;
     }
 
+    setAuthLoginIdentifierKind(otpTarget.kind === "email" ? "email" : "phone");
     setIsSubmitting(true);
     await completeAuth();
   }, [completeAuth, isSubmitting, otp, otpTarget]);
@@ -529,6 +531,7 @@ export function useAuthFlow({
       return;
     }
 
+    setAuthLoginIdentifierKind(otpTarget.kind === "email" ? "email" : "phone");
     await completeAuth(getPostSignupReturnUrl(returnUrl));
   }, [completeAuth, email, fullName, isSubmitting, otp, otpTarget, returnUrl, termsAccepted]);
 
@@ -544,6 +547,7 @@ export function useAuthFlow({
         return;
       }
 
+      setAuthLoginIdentifierKind("email");
       await completeAuth(result.customerCreated ? getPostSignupReturnUrl(returnUrl) : returnUrl);
     },
     [completeAuth, isSubmitting, returnUrl],
@@ -567,6 +571,7 @@ export function useAuthFlow({
       return;
     }
 
+    setAuthLoginIdentifierKind("email");
     await completeAuth(result.customerCreated ? getPostSignupReturnUrl(returnUrl) : returnUrl);
   }, [completeAuth, isSubmitting, onAbort, returnUrl, surface]);
 

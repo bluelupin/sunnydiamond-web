@@ -2,10 +2,13 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   ChevronLeft,
 } from "lucide-react";
 import { useAppStatusToastController } from "@/shared/hooks/useAppStatusToastController";
+import { AppStatusToastAction } from "@/shared/ui/AppStatusToast";
+import { buildProfileSectionHref } from "@/features/account/utils/profileSectionNavigation";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import {
   getDefaultBookStoreVisitStoreId,
@@ -105,6 +108,7 @@ const BookStoreVisitPanel = ({
   productName,
   productId,
 }: BookStoreVisitPanelProps) => {
+  const router = useRouter();
   const profileEnabled = variant !== "modal" || open;
   const { customer } = useAuth();
   const { contact: profileContact } = useCustomerProfileContact(profileEnabled);
@@ -534,7 +538,17 @@ const BookStoreVisitPanel = ({
         });
       }
 
-      showStatusToast("Visit booked");
+      showStatusToast("Visit booked successfully.", {
+        action: (
+          <AppStatusToastAction
+            onClick={() => {
+              router.push(buildProfileSectionHref("appointments"));
+            }}
+          >
+            View Here
+          </AppStatusToastAction>
+        ),
+      });
       handleClose();
     } catch {
       showStatusToast("Could not book visit");

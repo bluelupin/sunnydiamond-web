@@ -188,7 +188,8 @@ const mapContactOption = (
   const linkUrl = cleanText(option.value) ?? cleanText(option.cta?.url);
   const buttonLabel = cleanText(option.buttonLabel) ?? cleanText(option.cta?.label);
   const description = cleanText(option.description);
-  const hours = mapAvailabilityHours(option.availability);
+  // CMS removed `availability`; Call Us hours now live on `description` (same key as email/WhatsApp).
+  const hours = mapAvailabilityHours(option.description ?? option.availability);
   const lowerButton = buttonLabel?.toLowerCase() ?? "";
   const lowerUrl = linkUrl?.toLowerCase() ?? "";
 

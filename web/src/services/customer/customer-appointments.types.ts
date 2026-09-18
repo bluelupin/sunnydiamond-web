@@ -6,11 +6,22 @@ export type CustomerAppointmentShowroom = {
   state: string;
 };
 
+export type CustomerAppointmentProduct = {
+  documentId: string;
+  productId: string | null;
+  productName: string | null;
+  requestedDate: string;
+  selectedTimeSlot: string;
+  workflowStatus: string;
+};
+
 export type CustomerAppointment = {
   documentId: string;
+  appointmentGroupId: string | null;
   formTag: string;
   productName: string | null;
   productId: string | null;
+  products: CustomerAppointmentProduct[];
   customerName: string;
   customerPhone: string;
   customerEmail: string;
@@ -44,11 +55,22 @@ export type StrapiCustomerAppointmentShowroom = {
   state?: string | null;
 };
 
+export type StrapiCustomerAppointmentProduct = {
+  documentId?: string | null;
+  productId?: string | number | null;
+  productName?: string | null;
+  requestedDate?: string | null;
+  selectedTimeSlot?: string | null;
+  workflowStatus?: string | null;
+};
+
 export type StrapiCustomerAppointment = {
   documentId?: string | null;
+  appointmentGroupId?: string | null;
   formTag?: string | null;
   productName?: string | null;
-  productId?: string | null;
+  productId?: string | number | null;
+  products?: StrapiCustomerAppointmentProduct[] | null;
   customerName?: string | null;
   customerPhone?: string | null;
   customerEmail?: string | null;
@@ -78,5 +100,19 @@ export type StrapiCustomerAppointmentsResponse = {
       pageCount?: number | null;
       total?: number | null;
     } | null;
+  } | null;
+};
+
+export type StrapiAppointmentMutationResponse = {
+  data?: {
+    documentId?: string | null;
+    appointmentGroupId?: string | null;
+    requestedDate?: string | null;
+    selectedTimeSlot?: string | null;
+    workflowStatus?: string | null;
+    affectedProductDocumentIds?: string[] | null;
+  } | null;
+  meta?: {
+    changed?: boolean | null;
   } | null;
 };

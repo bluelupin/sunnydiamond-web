@@ -10,11 +10,16 @@ import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-for
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
 import {
+  getAppointmentContactLocks,
+  getAuthLoginIdentifierKind,
+} from "@/features/auth/utils/authLoginIdentifier";
+import {
   appointmentFieldClassName,
   appointmentLabelClassName,
 } from "@/shared/constants/appointmentForm";
 import type { Product } from "@/features/products/data/products";
 import { getProductHref } from "@/features/products/utils/productRoutes";
+import type { TryAtHomeBookingSummary } from "@/features/products/utils/tryAtHomeBooking";
 import {
   createProductSubmission,
   getProductFormByTag,
@@ -25,6 +30,7 @@ import {
   PRODUCT_APPOINTMENT_PANEL_CONFIG,
   type ProductAppointmentVariant,
 } from "./productAppointmentPanel.config";
+import TryAtHomeSuccessStep from "./TryAtHomeSuccessStep";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
@@ -33,6 +39,8 @@ import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { formatRequiredFieldLabel } from "@/shared/utils/formValidation";
 import { DetailDarkButton, DetailTextLink } from "./shared";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
+import { useRouter } from "next/navigation";
+import { buildProfileSectionHref } from "@/features/account/utils/profileSectionNavigation";
 
 const PERSONALISE_FORM_TAG = "product-personalisation";
 const SCHEDULE_VIDEO_CALL_FORM_TAG = "product-video-call";
@@ -53,6 +61,7 @@ type ProductAppointmentFormProps = {
   onClose: () => void;
   onSubmitSuccess: (message: string) => void;
   onSubmitError: (message: string) => void;
+  onVideoCallBooked?: (booking: TryAtHomeBookingSummary) => void;
 };
 
 const ProductAppointmentForm = ({
@@ -64,11 +73,15 @@ const ProductAppointmentForm = ({
   onClose,
   onSubmitSuccess,
   onSubmitError,
+  onVideoCallBooked,
 }: ProductAppointmentFormProps) => {
   const isPersonalise = variant === "personalise";
   const isScheduleVideoCall = variant === "schedule-video-call";
   const { customer } = useAuth();
   const { contact: profileContact } = useCustomerProfileContact(open);
+  const { phoneLocked, emailLocked } = getAppointmentContactLocks(
+    getAuthLoginIdentifierKind(),
+  );
 
   const [name, setName] = useState("");
   const [countryCode, setCountryCode] = useState("+91");
@@ -278,6 +291,12 @@ const ProductAppointmentForm = ({
           onSubmitSuccess(
             isScheduleVideoCall ? config.successToast.title : "Request submitted",
           );
+
+          if (isScheduleVideoCall && onVideoCallBooked) {
+            onVideoCallBooked({ date, selectedSlot });
+            return;
+          }
+
           handleClose();
         } catch {
           onSubmitError(
@@ -362,6 +381,8 @@ const ProductAppointmentForm = ({
               noteTextareaClassName={config.noteTextareaClassName}
               labelClassName={appointmentLabelClassName}
               fieldClassName={appointmentFieldClassName}
+              phoneLocked={phoneLocked}
+              emailLocked={emailLocked}
             />
 
             {allowImageUpload ? (
@@ -454,16 +475,33 @@ const ProductAppointmentPanel = ({
   product,
   variant,
 }: ProductAppointmentPanelProps) => {
+  const router = useRouter();
   const { toast } = useToast();
   const config = PRODUCT_APPOINTMENT_PANEL_CONFIG[variant];
   const productImage = product.images[0] ?? product.image;
   const { show: showStatusToast, node: statusToast } = useAppStatusToastController(
     wishlistMovedToastDurationMs,
   );
+  const [videoBooking, setVideoBooking] = useState<TryAtHomeBookingSummary | null>(null);
+
+  useEffect(() => {
+    if (!open) {
+      setVideoBooking(null);
+    }
+  }, [open]);
+
+  const handleClose = () => {
+    setVideoBooking(null);
+    onClose();
+  };
 
   const handleLegacySuccess = (message: string) => {
     if (variant === "personalise") {
       showStatusToast(message);
+      return;
+    }
+
+    if (variant === "schedule-video-call") {
       return;
     }
 
@@ -479,20 +517,39 @@ const ProductAppointmentPanel = ({
       {statusToast}
       <ProductDetailSidePanelShell
         open={open}
-        onClose={onClose}
+        onClose={handleClose}
         overlayAriaLabel={config.closeAriaLabel}
         dialogAriaLabel={config.dialogAriaLabel}
       >
-        <ProductAppointmentForm
-          config={config}
-          product={product}
-          productImage={productImage}
-          variant={variant}
-          open={open}
-          onClose={onClose}
-          onSubmitSuccess={handleLegacySuccess}
-          onSubmitError={showStatusToast}
-        />
+        {variant === "schedule-video-call" && videoBooking ? (
+          <TryAtHomeSuccessStep
+            product={product}
+            productImage={productImage}
+            booking={videoBooking}
+            successMessage="Video call scheduled"
+            onClose={handleClose}
+            onViewBooking={() => {
+              handleClose();
+              router.push(buildProfileSectionHref("appointments"));
+            }}
+            onContinueShopping={() => {
+              handleClose();
+              router.push("/jewellery");
+            }}
+          />
+        ) : (
+          <ProductAppointmentForm
+            config={config}
+            product={product}
+            productImage={productImage}
+            variant={variant}
+            open={open}
+            onClose={handleClose}
+            onSubmitSuccess={handleLegacySuccess}
+            onSubmitError={showStatusToast}
+            onVideoCallBooked={setVideoBooking}
+          />
+        )}
       </ProductDetailSidePanelShell>
     </>
   );

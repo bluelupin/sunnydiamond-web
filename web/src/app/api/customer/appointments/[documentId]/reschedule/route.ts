@@ -58,8 +58,12 @@ function toRescheduleInput(body: RescheduleBody): RescheduleCustomerAppointmentI
   };
 }
 
-/** @deprecated Prefer POST .../reschedule. Kept as a thin alias. */
-export async function PATCH(request: Request, context: RouteContext) {
+/**
+ * POST /api/customer/appointments/:documentId/reschedule
+ * Body: requestedDate, selectedTimeSlot, optional customerName/Phone/Email/requestDetails.
+ * BFF injects trusted magentoCustomerId and calls CMS with API token.
+ */
+export async function POST(request: Request, context: RouteContext) {
   const magentoCustomerId = await getSessionMagentoCustomerId(request);
 
   if (magentoCustomerId == null) {
