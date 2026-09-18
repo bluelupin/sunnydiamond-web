@@ -97,16 +97,16 @@ const ProductDetailVisitUsSection = ({
 
         {isContactVariant ? (
           <div className="absolute inset-x-0 bottom-10 z-10 flex justify-center px-4 md:px-10">
-            <div className="flex w-full max-w-[1360px] flex-col items-center gap-8">
-              <div className="flex flex-col items-center gap-4 text-center text-white">
+            <div className="flex w-full max-w-[1360px] flex-col items-center md:gap-8 gap-6">
+              <div className="flex flex-col items-center md:gap-4 gap-3 text-center text-white">
                 <h2
                   id="visit-us-heading"
-                  className="font-larken text-[48px] font-light leading-110 text-white"
+                  className="font-larken lg:text-5xl md:text-4xl text-32 font-light leading-110 text-white"
                 >
                   {visitUs.title}
                 </h2>
                 {welcomeNote ? (
-                  <p className="max-w-[606px] font-gill text-xl font-light leading-110 text-white">
+                  <p className="max-w-[606px] font-gill md:text-xl font-light leading-110 text-white">
                     {welcomeNote}
                   </p>
                 ) : null}
