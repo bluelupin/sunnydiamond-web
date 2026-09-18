@@ -94,9 +94,9 @@ const DfeInvestStepper = () => {
                 "w-[104px] shrink-0 lg:w-auto",
                 isActive && "font-normal text-darkblack",
                 isCompleted &&
-                  (isFinalStep
-                    ? "font-light text-darkblack"
-                    : "font-light text-darkblack lg:font-normal"),
+                (isFinalStep
+                  ? "font-light text-darkblack"
+                  : "font-light text-darkblack lg:font-normal"),
                 isFuture && "font-light text-neutral500",
               )}
             >
@@ -121,13 +121,16 @@ const DfeInvestHeader = () => {
         className="inline-flex size-6 shrink-0 items-center justify-center"
         aria-label={backLabel}
       >
-        <Image
-          src="/images/diamonds-for-everyone/icon-back.svg"
-          alt=""
-          width={24}
-          height={24}
-          aria-hidden
-        />
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g clipPath="url(#clip0_4453_33746)">
+            <path d="M15 19.5L7.5 12L15 4.5" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+          </g>
+          <defs>
+            <clipPath id="clip0_4453_33746">
+              <rect width="24" height="24" fill="white" />
+            </clipPath>
+          </defs>
+        </svg>
       </button>
       <h1 className="font-larken text-2xl font-light leading-110 text-darkblack lg:text-32">
         {intro.title}
