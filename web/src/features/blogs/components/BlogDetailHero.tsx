@@ -16,7 +16,7 @@ const BlogDetailHero = ({ heroImage }: BlogDetailHeroProps) => {
   return (
     <div className="relative mx-auto w-full shrink-0 overflow-hidden bg-white xl:mb-16 lg:mb-10 mb-6">
       {/* Figma 1480:178788 — desktop 1000×515 centered; mobile 343×599 crop */}
-      <div className="relative aspect-[343/599] w-full md:mx-auto md:aspect-[1000/515] md:max-w-[1000px]">
+      <div className="relative w-full h-auto">
         <ResponsiveImage
           desktopSrc={desktopUrl ?? ""}
           mobileSrc={mobileUrl ?? undefined}
@@ -24,7 +24,7 @@ const BlogDetailHero = ({ heroImage }: BlogDetailHeroProps) => {
           fill
           priority
           sizes="(max-width: 767px) 100vw, 1000px"
-          className="object-cover"
+          className="object-cover w-full h-full !relative"
         />
       </div>
     </div>
