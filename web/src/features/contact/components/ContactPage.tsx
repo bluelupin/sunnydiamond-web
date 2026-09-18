@@ -5,8 +5,6 @@ import ProductDetailVisitUsSection from "@/features/products/components/detail/P
 import ContactHeroSection from "./ContactHeroSection";
 import ContactInfoSection from "./ContactInfoSection";
 import ContactFormSection from "./ContactFormSection";
-import { contactPageLayoutClasses } from "../data/contactHeroFigmaSpec";
-
 type ContactPageProps = {
   page: NormalizedContactPage;
 };
@@ -42,21 +40,17 @@ const ContactPage = ({ page }: ContactPageProps) => {
         </section>
       ) : null}
       {page.hero ? <ContactHeroSection hero={page.hero} /> : null}
-      <div className={contactPageLayoutClasses.afterHero}>
-        {(hasInfoSection || page.form) ? (
-          <div className={contactPageLayoutClasses.shell}>
-            <div className={contactPageLayoutClasses.inner}>
-              {hasInfoSection ? (
-                <ContactInfoSection intro={page.intro} infoCards={page.infoCards} />
-              ) : null}
-              {page.form ? <ContactFormSection form={page.form} /> : null}
-            </div>
-          </div>
-        ) : null}
-        {page.visitUs ? (
-          <ProductDetailVisitUsSection visitUs={page.visitUs} variant="contact" />
-        ) : null}
-      </div>
+      {(hasInfoSection || page.form) ? (
+        <div className="mx-auto flex w-full max-w-[1200px] flex-col xl:px-0 md:px-10 px-4">
+          {hasInfoSection ? (
+            <ContactInfoSection intro={page.intro} infoCards={page.infoCards} />
+          ) : null}
+          {page.form ? <ContactFormSection form={page.form} /> : null}
+        </div>
+      ) : null}
+      {page.visitUs ? (
+        <ProductDetailVisitUsSection visitUs={page.visitUs} variant="contact" />
+      ) : null}
     </>
   );
 };

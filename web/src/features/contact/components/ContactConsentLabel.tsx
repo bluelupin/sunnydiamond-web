@@ -1,7 +1,6 @@
 import { Fragment } from "react";
 import Link from "next/link";
 import { buildPolicyCertificationsHref } from "@/features/cms/utils/policyCertificationsRoutes";
-import { contactFormLayoutClasses } from "../data/contactHeroFigmaSpec";
 
 type ConsentLabelSegment =
   | { type: "text"; value: string }
@@ -90,7 +89,7 @@ const ContactConsentLabel = ({ label }: ContactConsentLabelProps) => {
           <Link
             key={`link-${index}`}
             href={segment.href}
-            className={`${contactFormLayoutClasses.consentLink} inline align-baseline`}
+            className="inline align-baseline font-gill text-base font-normal leading-110 text-neutral500"
           >
             {segment.label}
           </Link>

@@ -1,5 +1,3 @@
-import { contactPageLayoutClasses } from "../../data/contactHeroFigmaSpec";
-
 const ContactPageSkeleton = () => (
   <div aria-busy="true" aria-label="Loading contact page">
     <section className="relative h-[240px] w-full overflow-hidden md:h-320">
@@ -9,9 +7,9 @@ const ContactPageSkeleton = () => (
       </div>
     </section>
 
-    <div className={contactPageLayoutClasses.afterHero}>
-      <div className={contactPageLayoutClasses.shell}>
-        <div className={contactPageLayoutClasses.inner}>
+    <div className="pt-16">
+      <div className="w-full px-4 md:px-10 md:pb-104 lg:px-[100px] xl:px-[120px]">
+        <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-16 md:gap-104">
       <section className="w-full">
         <div className="mx-auto flex w-full flex-col items-center gap-10">
           <div className="h-6 w-full max-w-[606px] animate-pulse rounded bg-gray200" aria-hidden />

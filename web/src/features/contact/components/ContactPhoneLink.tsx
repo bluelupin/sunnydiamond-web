@@ -1,6 +1,7 @@
 "use client";
 
 import ContactCardCtaLink from "./ContactCardCtaLink";
+import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { useToast } from "@/shared/hooks/use-toast";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 
@@ -8,6 +9,8 @@ type ContactPhoneLinkProps = {
   href?: string;
   label: string;
   className?: string;
+  /** Matches DetailTextLink styling used on Contact info cards; default keeps ContactCardCtaLink. */
+  variant?: "card" | "detail";
 };
 
 const getClipboardPhoneValue = (href: string | undefined, label: string): string => {
@@ -19,7 +22,12 @@ const getClipboardPhoneValue = (href: string | undefined, label: string): string
   return href?.replace(/^tel:/i, "").trim() ?? "";
 };
 
-const ContactPhoneLink = ({ href, label, className }: ContactPhoneLinkProps) => {
+const ContactPhoneLink = ({
+  href,
+  label,
+  className,
+  variant = "card",
+}: ContactPhoneLinkProps) => {
   const isMobile = useIsMobile();
   const { toast } = useToast();
 
@@ -36,6 +44,30 @@ const ContactPhoneLink = ({ href, label, className }: ContactPhoneLinkProps) => 
       });
     }
   };
+
+  if (variant === "detail") {
+    if (isMobile && href) {
+      return (
+        <DetailTextLink href={href} className={className}>
+          {label}
+        </DetailTextLink>
+      );
+    }
+
+    if (!href) {
+      return (
+        <DetailTextLink className={className} disabled>
+          {label}
+        </DetailTextLink>
+      );
+    }
+
+    return (
+      <DetailTextLink onClick={handleCopyPhoneNumber} className={className}>
+        {label}
+      </DetailTextLink>
+    );
+  }
 
   if (isMobile && href) {
     return (

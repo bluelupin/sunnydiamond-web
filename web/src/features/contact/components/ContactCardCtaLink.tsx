@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { contactCardLayoutClasses } from "../data/contactHeroFigmaSpec";
 import { cn } from "@/shared/utils/cn";
 
 type ContactCardCtaLinkProps = {
@@ -21,7 +20,10 @@ const ContactCardCtaLink = ({
   target,
   rel,
 }: ContactCardCtaLinkProps) => {
-  const classes = cn(contactCardLayoutClasses.cta, className);
+  const classes = cn(
+    "inline-flex w-fit max-w-full break-all border-b border-darkblack pb-1 font-gill text-sm font-normal leading-110 text-darkblack",
+    className,
+  );
 
   if (href) {
     return (

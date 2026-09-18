@@ -4,7 +4,6 @@ import { useState } from "react";
 import BookStoreVisitPanel from "./BookStoreVisitPanel";
 import { DetailTextLink } from "./shared";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
-import { contactVisitUsLayoutClasses } from "@/features/contact/data/contactHeroFigmaSpec";
 import { cn } from "@/shared/utils/cn";
 import type { NormalizedVisitUsSection } from "@/services/product-display/product-display-page.service";
 
@@ -40,15 +39,14 @@ const ProductDetailVisitUsSection = ({
     if (!ctaLabel) return null;
 
     if (isContactVariant) {
-      // Same as PDP Book a Visit: open BookStoreVisitPanel (PDP uses null cta.url).
       return (
-        <button
-          type="button"
+        <DetailTextLink
           onClick={openBookVisit}
-          className={contactVisitUsLayoutClasses.cta}
+          className="uppercase tracking-caption"
+          light
         >
           {ctaLabel}
-        </button>
+        </DetailTextLink>
       );
     }
 
@@ -70,7 +68,7 @@ const ProductDetailVisitUsSection = ({
         aria-labelledby="visit-us-heading"
         className={cn(
           isContactVariant
-            ? contactVisitUsLayoutClasses.section
+            ? "relative h-[320px] w-full overflow-hidden md:h-[387px]"
             : "relative h-[800px] w-full overflow-hidden md:h-804",
         )}
       >
@@ -89,7 +87,7 @@ const ProductDetailVisitUsSection = ({
         </div>
 
         {isContactVariant ? (
-          <div aria-hidden className={contactVisitUsLayoutClasses.overlay} />
+          <div aria-hidden className="pointer-events-none absolute inset-0 bg-black/30" />
         ) : (
           <div
             aria-hidden
@@ -98,14 +96,19 @@ const ProductDetailVisitUsSection = ({
         )}
 
         {isContactVariant ? (
-          <div className={contactVisitUsLayoutClasses.contentShell}>
-            <div className={contactVisitUsLayoutClasses.contentInner}>
-              <div className={contactVisitUsLayoutClasses.textBlock}>
-                <h2 id="visit-us-heading" className={contactVisitUsLayoutClasses.title}>
+          <div className="absolute inset-x-0 bottom-10 z-10 flex justify-center px-4 md:px-10">
+            <div className="flex w-full max-w-[1360px] flex-col items-center gap-8">
+              <div className="flex flex-col items-center gap-4 text-center text-white">
+                <h2
+                  id="visit-us-heading"
+                  className="font-larken text-[48px] font-light leading-110 text-white"
+                >
                   {visitUs.title}
                 </h2>
                 {welcomeNote ? (
-                  <p className={contactVisitUsLayoutClasses.description}>{welcomeNote}</p>
+                  <p className="max-w-[606px] font-gill text-xl font-light leading-110 text-white">
+                    {welcomeNote}
+                  </p>
                 ) : null}
               </div>
               {renderCta()}

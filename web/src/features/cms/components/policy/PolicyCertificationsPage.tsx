@@ -7,7 +7,6 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
-import { contactCardLayoutClasses } from "@/features/contact/data/contactHeroFigmaSpec";
 import {
   POLICY_QUERY_PARAM,
   resolvePolicyIdFromParam,
@@ -500,7 +499,8 @@ function PolicySupportSection({
   }
 
   // Figma: one underlined clickable value per card (no icon row + second CTA).
-  const linkClassName = contactCardLayoutClasses.cta;
+  const linkClassName =
+    "inline-flex w-fit max-w-full break-all border-b border-darkblack pb-1 font-gill text-sm font-normal leading-110 text-darkblack";
 
   return (
     <section

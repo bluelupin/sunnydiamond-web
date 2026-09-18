@@ -4,10 +4,8 @@ import type { NormalizedContactInfoCard } from "@/services/contact/contact-page.
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import Image from "next/image";
 import React from "react";
-import { cn } from "@/shared/utils/cn";
-import { contactCardLayoutClasses } from "../data/contactHeroFigmaSpec";
-import ContactCardCtaLink from "./ContactCardCtaLink";
 import ContactPhoneLink from "./ContactPhoneLink";
+import { DetailTextLink } from "@/features/products/components/detail/shared";
 type ContactInfoSectionProps = {
   intro: {
     description: string;
@@ -22,9 +20,9 @@ const ContactInfoSection = ({ intro, infoCards }: ContactInfoSectionProps) => {
   return (
     <section
       aria-labelledby={intro ? "contact-intro" : undefined}
-      className="w-full"
+      className="w-full lg:pt-16 lg:pb-[104px] md:pt-10 md:pb-20 pt-10 pb-16"
     >
-      <div className="mx-auto flex w-full flex-col items-center gap-16 md:gap-10">
+      <div className="flex w-full flex-col items-center md:gap-10 gap-6">
         {intro ? (
           <Reveal
             as="p"
@@ -37,106 +35,104 @@ const ContactInfoSection = ({ intro, infoCards }: ContactInfoSectionProps) => {
           </Reveal>
         ) : null}
         {infoCards.length > 0 ? (
-        <div className={contactCardLayoutClasses.grid}>
-          {infoCards.map((card, index) => {
-            // Previously (FE-only heuristic — restore if CMS CTA flags are removed):
-            // const isExternal =
-            //   card.variant === "link" && /^https?:\/\//i.test(card.link.href);
+          <div className="w-full md:grid-cols-3 grid-cols-1 md:gap-3 gap-5 grid md:items-stretch md:bg-transparent bg-gray300 py-2">
+            {infoCards.map((card, index) => {
+              const cmsOpenInNewTab = card.link.openInNewTab;
+              const cmsTargetType = card.link.targetType?.toLowerCase();
+              const hasCmsOpenInNewTab = typeof cmsOpenInNewTab === "boolean";
+              const hasCmsTargetType =
+                cmsTargetType === "internal" || cmsTargetType === "external";
 
-            const cmsOpenInNewTab = card.link.openInNewTab;
-            const cmsTargetType = card.link.targetType?.toLowerCase();
-            const hasCmsOpenInNewTab = typeof cmsOpenInNewTab === "boolean";
-            const hasCmsTargetType =
-              cmsTargetType === "internal" || cmsTargetType === "external";
-
-            const openInNewTab = hasCmsOpenInNewTab
-              ? cmsOpenInNewTab
-              : hasCmsTargetType
-                ? cmsTargetType === "external"
-                : // FE fallback when CMS omits both CTA flags:
+              const openInNewTab = hasCmsOpenInNewTab
+                ? cmsOpenInNewTab
+                : hasCmsTargetType
+                  ? cmsTargetType === "external"
+                  :
                   Boolean(
                     card.link.href &&
-                      card.variant === "link" &&
-                      /^https?:\/\//i.test(card.link.href),
+                    card.variant === "link" &&
+                    /^https?:\/\//i.test(card.link.href),
                   );
 
-            return (
-              <React.Fragment key={card.id}>
-                <Reveal
-                  direction="up"
-                  delay={index * 0.05}
-                  data-cms-option-id={card.id}
-                  className={cn(
-                    contactCardLayoutClasses.card,
-                    contactCardLayoutClasses.cardCompact,
-                  )}
-                >
-                  <h2 className="w-full text-center font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
-                    {isMobile && card.mobileTitle ? card.mobileTitle : card.title}
-                  </h2>
+              return (
+                <React.Fragment key={card.id}>
+                  <Reveal
+                    direction="up"
+                    delay={index * 0.05}
+                    data-cms-option-id={card.id}
+                    className="flex h-full flex-col items-center self-stretch bg-gray300 xl:py-6 xl:px-6 md:py-5 md:px-5 px-4 py-4 lg:gap-6 gap-4"
+                  >
+                    <h2 className="w-full text-center font-larken lg:text-2xl text-xl font-light leading-110 text-darkblack">
+                      {isMobile && card.mobileTitle ? card.mobileTitle : card.title}
+                    </h2>
 
-                  <div className="flex w-full flex-1 flex-col items-center justify-between gap-4 md:gap-6">
-                    <div className="flex w-full flex-col items-center justify-center text-center">
-                      {card.variant === "phone" && card.hours.length > 0 ? (
-                        <div className="flex flex-col items-center gap-3 text-base leading-110 text-darkblack">
-                          {card.hours.map((entry) => (
-                            <div
-                              key={`${entry.label}-${entry.value}`}
-                              className={contactCardLayoutClasses.hoursRow}
-                            >
-                              {entry.label ? (
-                                <span className={contactCardLayoutClasses.hoursLabel}>
-                                  {entry.label}
+                    <div className="flex w-full flex-1 flex-col items-center justify-between lg:gap-6 gap-4">
+                      <div className="flex w-full flex-col items-center justify-center text-center">
+                        {card.variant === "phone" && card.hours.length > 0 ? (
+                          <div className="flex flex-col items-center gap-3 text-base leading-110 text-darkblack">
+                            {card.hours.map((entry) => (
+                              <div
+                                key={`${entry.label}-${entry.value}`}
+                                className="flex flex-wrap items-center justify-center gap-3"
+                              >
+                                {entry.label ? (
+                                  <span className="font-gill font-light">
+                                    {entry.label}
+                                  </span>
+                                ) : null}
+                                <span className="font-gill font-normal">
+                                  {entry.value}
                                 </span>
-                              ) : null}
-                              <span className={contactCardLayoutClasses.hoursValue}>
-                                {entry.value}
-                              </span>
-                            </div>
-                          ))}
+                              </div>
+                            ))}
+                          </div>
+                        ) : card.description ? (
+                          <p className="font-gill text-base font-light leading-110 text-darkblack">
+                            {card.description}
+                          </p>
+                        ) : null}
+                      </div>
+                      {card.link.href && card.link.label ? (
+                        <div className="flex w-full items-center justify-center gap-2">
+                          <Image
+                            className="shrink-0 md:hidden"
+                            src={
+                              card.variant === "email"
+                                ? "/images/contact/icon-email.svg"
+                                : "/images/contact/icon-whatsapp.svg"
+                            }
+                            alt=""
+                            width={20}
+                            height={20}
+                            aria-hidden
+                          />
+                          {card.variant === "phone" ? (
+                            <ContactPhoneLink
+                              href={card.link.href}
+                              label={card.link.label}
+                              variant="detail"
+                              className="max-w-full break-all"
+                            />
+                          ) : (
+                            <DetailTextLink
+                              href={card.link.href}
+                              target={openInNewTab ? "_blank" : undefined}
+                              rel={openInNewTab ? "noopener noreferrer" : undefined}
+                            >
+                              {card.link.label}
+                            </DetailTextLink>
+                          )}
                         </div>
-                      ) : card.description ? (
-                        <p className="font-gill text-base font-light leading-110 text-darkblack">
-                          {card.description}
-                        </p>
                       ) : null}
                     </div>
-                    {card.link.href && card.link.label ? (
-                    <div className="flex w-full items-center justify-center gap-2">
-                      <Image
-                        className="shrink-0 md:hidden"
-                        src={
-                          card.variant === "email"
-                            ? "/images/contact/icon-email.svg"
-                            : "/images/contact/icon-whatsapp.svg"
-                        }
-                        alt=""
-                        width={20}
-                        height={20}
-                        aria-hidden
-                      />
-                      {card.variant === "phone" ? (
-                        <ContactPhoneLink href={card.link.href} label={card.link.label} />
-                      ) : (
-                        <ContactCardCtaLink
-                          href={card.link.href}
-                          target={openInNewTab ? "_blank" : undefined}
-                          rel={openInNewTab ? "noopener noreferrer" : undefined}
-                        >
-                          {card.link.label}
-                        </ContactCardCtaLink>
-                      )}
-                    </div>
-                    ) : null}
-                  </div>
-                </Reveal>
-                {index !== infoCards.length - 1 && (
-                  <div className="h-px w-full bg-gray50 md:hidden" aria-hidden />
-                )}
-              </React.Fragment>
-            );
-          })}
-        </div>
+                  </Reveal>
+                  {index !== infoCards.length - 1 && (
+                    <div className="h-px w-full bg-gray50 md:hidden" aria-hidden />
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </div>
         ) : null}
       </div>
     </section>

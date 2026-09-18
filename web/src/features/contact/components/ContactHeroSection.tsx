@@ -3,7 +3,6 @@
 import HeroBackgroundMedia from "@/features/cms/components/home/HeroBackgroundMedia";
 import MediaContentOverlay from "@/shared/ui/MediaContentOverlay";
 import type { NormalizedContactHero } from "@/services/contact/contact-page.types";
-import { contactHeroFigmaSpec } from "../data/contactHeroFigmaSpec";
 
 type ContactHeroSectionProps = {
   hero: NormalizedContactHero;
@@ -26,14 +25,12 @@ const ContactHeroSection = ({ hero }: ContactHeroSectionProps) => {
           mobileAlt={mobileAlt}
           cmsVideoUrl={hero.videoUrl}
         />
-        <MediaContentOverlay solidOpacity={contactHeroFigmaSpec.overlayOpacity} />
+        <MediaContentOverlay gradient="bottom-strong" />
       </div>
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-10 md:inset-x-auto md:left-1/2 md:top-[203px] md:bottom-auto md:-translate-x-1/2 md:px-0 md:pb-0"
-      >
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-10 lg:pb-16">
         <h1
           id="contact-hero-title"
-          className="w-full text-center font-larken text-32 font-light leading-110 text-white md:w-auto md:text-[48px] md:whitespace-nowrap"
+          className="w-full text-center font-larken font-light leading-none text-white lg:text-5xl md:text-4xl text-32"
         >
           {hero.title}
         </h1>
