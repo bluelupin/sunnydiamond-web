@@ -42,7 +42,7 @@ const AboutHandcraftedSection = ({
             />
             <div className="absolute inset-x-0 bottom-0 top-16 z-10 flex flex-col items-center justify-center px-5 md:top-20">
               {/* aboutHandcraftedFigmaSpec.hero.mobile — Figma 2556:36067 */}
-              <div className="flex flex-col items-center max-sm:w-[186px] max-sm:gap-3 sm:w-full sm:max-w-[440px] sm:gap-4">
+              <div className="flex flex-col items-center max-sm:w-[186px] max-sm:gap-3 w-fit sm:max-w-[440px] sm:gap-4">
                 <Reveal
                   as="h2"
                   direction="up"
@@ -51,7 +51,7 @@ const AboutHandcraftedSection = ({
                 >
                   {title}
                 </Reveal>
-                <span className="h-px w-full bg-neutral300" aria-hidden />
+                <span className="h-px sm:w-full w-[98px] bg-neutral300" aria-hidden />
               </div>
             </div>
           </Reveal>

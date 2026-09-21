@@ -21,7 +21,7 @@ const AboutGuaranteeDivider = ({ orientation = "vertical" }: { orientation?: "ve
     <span
       className={cn(
         "shrink-0 bg-gray600",
-        orientation === "vertical" ? "h-136 w-hairline" : "h-px w-full",
+        orientation === "vertical" ? "h-136 w-hairline" : "h-[0.5px] w-full",
       )}
     />
   </Reveal>

@@ -35,14 +35,14 @@ const AboutBrillianceSection = ({
           >
             <Reveal as="h2" direction="up"
               id="about-crafting-rarity-title"
-              className="whitespace-pre-line font-larken text-40 font-light leading-110 text-darkblack sm:text-56 md:text-7xl lg:text-90">
+              className="whitespace-pre-line font-larken text-32 font-light leading-110 text-darkblack sm:text-56 md:text-7xl lg:text-90">
               {heading}
             </Reveal>
           </div>
           {image ? (
             <div data-reveal-mask="image" className="mx-auto w-full overflow-hidden">
               <Reveal direction="up"
-                className="mx-auto h-[300px] w-[300px] lg:h-354 lg:w-354 2xl:w-400 2xl:h-400">
+                className="mx-auto w-[230px] h-[270px] md:h-[300px] md:w-[300px] lg:h-354 lg:w-354">
                 <ResponsiveImage
                   desktopSrc={image.desktopUrl}
                   mobileSrc={image.mobileUrl}
