@@ -2,16 +2,31 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ContactSupportIcon } from "@/features/contact/components/ContactSupportIcon";
+import ContactCardCtaLink from "@/features/contact/components/ContactCardCtaLink";
+import ContactPhoneLink from "@/features/contact/components/ContactPhoneLink";
 import { fetchSupportPage } from "@/services/support/support-page.fetch";
 import type { NormalizedSupportContactOption } from "@/services/support/support-page.types";
+import { useIsMobile } from "@/shared/hooks/use-mobile";
+import { useToast } from "@/shared/hooks/use-toast";
 import { cn } from "@/shared/utils/cn";
 import { ProfileSupportListingSkeleton } from "./ProfileSupportListingSkeleton";
 
+/** Figma 1480:39360 — Help & Support contact cards */
 const outlineCtaClassName =
-  "btn-border-slide inline-flex h-14 shrink-0 items-center justify-center border border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack hover:text-white";
+  "btn-border-slide inline-flex h-14 w-fit shrink-0 items-center justify-center border border-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack hover:text-white";
+
+const contactLinkClassName =
+  "font-gill text-base font-normal leading-110 text-darkblack";
+
+function getClipboardPhoneValue(href: string, fallbackLabel?: string): string {
+  const fromHref = href.replace(/^tel:/i, "").trim();
+  if (fromHref) return fromHref;
+  return fallbackLabel?.trim() ?? "";
+}
 
 const ProfileSupportSection = () => {
+  const isMobile = useIsMobile();
+  const { toast } = useToast();
   const [options, setOptions] = useState<NormalizedSupportContactOption[]>([]);
   const [hasLoaded, setHasLoaded] = useState(false);
 
@@ -30,6 +45,18 @@ const ProfileSupportSection = () => {
     return () => controller.abort();
   }, []);
 
+  const handleDesktopTelClick = async (href: string, phoneLabel?: string | null) => {
+    try {
+      await navigator.clipboard.writeText(getClipboardPhoneValue(href, phoneLabel ?? undefined));
+      toast({ title: "Phone number copied" });
+    } catch {
+      toast({
+        title: "Unable to copy",
+        description: "Please copy the phone number manually.",
+      });
+    }
+  };
+
   if (!hasLoaded) {
     return <ProfileSupportListingSkeleton />;
   }
@@ -40,29 +67,31 @@ const ProfileSupportSection = () => {
 
   return (
     <div className="flex flex-col gap-10">
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 lg:grid-cols-1 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-2 lg:grid-cols-1">
         {options.map((option) => {
           const isPhone = Boolean(option.phoneHref);
           const valueHref = option.phoneHref ?? option.emailHref;
           const valueLabel = option.phone ?? option.email;
+          const ctaIsTel = Boolean(option.cta?.url && /^tel:/i.test(option.cta.url));
 
           return (
             <div
               key={option.id}
-              className="flex flex-col items-center justify-between gap-6 bg-gray300 p-6 text-center"
+              className="flex flex-col justify-between gap-8 bg-gray300 p-6 text-left"
             >
-              <div className="flex w-full flex-col items-center md:gap-6 gap-4">
-                <h3 className="font-larken md:text-2xl text-xl font-light leading-110 text-darkblack">
+              {/* Title → body/link stack (Figma: clear gap under heading, tighter body) */}
+              <div className="flex w-full flex-col items-start gap-6">
+                <h3 className="font-larken text-xl font-light leading-110 text-darkblack md:text-2xl">
                   {option.title}
                 </h3>
 
-                <div className="flex w-full flex-col items-center gap-4">
-                  {option.hours.length > 0 ? (
-                    <div className="flex flex-col items-center gap-4 text-base leading-110 text-darkblack">
+                <div className="flex w-full flex-col items-start gap-4">
+                  {isPhone && option.hours.length > 0 ? (
+                    <div className="flex flex-col items-start gap-1 text-base leading-110 text-darkblack">
                       {option.hours.map((entry) => (
                         <div
                           key={`${option.id}-${entry.label}-${entry.value}`}
-                          className="flex items-center gap-3 whitespace-nowrap"
+                          className="flex flex-wrap items-center gap-3"
                         >
                           {entry.label ? (
                             <span className="font-gill font-light">{entry.label}</span>
@@ -71,30 +100,42 @@ const ProfileSupportSection = () => {
                         </div>
                       ))}
                     </div>
-                  ) : null}
-
-                  {option.description ? (
+                  ) : option.description ? (
                     <p className="max-w-full font-gill text-base font-light leading-110 text-darkblack">
                       {option.description}
                     </p>
                   ) : null}
 
-                  {valueHref && valueLabel ? (
-                    <Link
+                  {isPhone && valueHref && valueLabel ? (
+                    <ContactPhoneLink
                       href={valueHref}
-                      className="flex flex-wrap items-center justify-center gap-2 font-gill text-base font-normal leading-110 text-darkblack"
-                    >
-                      <ContactSupportIcon name={isPhone ? "phone" : "email"} />
+                      label={valueLabel}
+                      className={contactLinkClassName}
+                    />
+                  ) : valueHref && valueLabel ? (
+                    <ContactCardCtaLink href={valueHref} className={contactLinkClassName}>
                       {valueLabel}
-                    </Link>
+                    </ContactCardCtaLink>
                   ) : null}
                 </div>
               </div>
 
               {option.cta ? (
-                <Link href={option.cta.url} className={cn(outlineCtaClassName, "mt-auto")}>
-                  <span>{option.cta.label}</span>
-                </Link>
+                ctaIsTel && !isMobile ? (
+                  <button
+                    type="button"
+                    className={cn(outlineCtaClassName, "mt-auto")}
+                    onClick={() =>
+                      void handleDesktopTelClick(option.cta!.url, option.phone)
+                    }
+                  >
+                    <span>{option.cta.label}</span>
+                  </button>
+                ) : (
+                  <Link href={option.cta.url} className={cn(outlineCtaClassName, "mt-auto")}>
+                    <span>{option.cta.label}</span>
+                  </Link>
+                )
               ) : null}
             </div>
           );

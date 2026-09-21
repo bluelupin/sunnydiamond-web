@@ -109,10 +109,17 @@ const AppStatusToast = ({ open, message, action }: AppStatusToastProps) => {
             "animate-out fade-out slide-out-to-top-4 duration-300 ease-in",
         )}
       >
-        <div className="flex w-full items-center justify-between gap-3 bg-darkblack px-4 py-3">
+        <div
+          className={cn(
+            "flex w-full items-center gap-3 bg-darkblack px-4 py-3",
+            displayContent.action ? "justify-between" : "justify-center",
+          )}
+        >
           <div className="flex min-w-0 items-center gap-2">
             <Check size={18} strokeWidth={1.25} aria-hidden className="shrink-0 text-white" />
-            <p className="font-gill text-sm font-light leading-110 text-white">{displayContent.message}</p>
+            <p className="min-w-0 text-center font-gill text-sm font-light leading-110 text-white">
+              {displayContent.message}
+            </p>
           </div>
           {displayContent.action}
         </div>

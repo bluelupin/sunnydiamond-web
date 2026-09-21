@@ -60,6 +60,12 @@ const mapAvailabilityHours = (
 const mapHours = (
   option: StrapiSupportContactOption,
 ): Array<{ label: string; value: string }> => {
+  // CMS removed `availability`; Call Us hours now live on `description` (same as contact/policy).
+  const fromDescription = mapAvailabilityHours(option.description);
+  if (fromDescription.length > 0) {
+    return fromDescription;
+  }
+
   const hours = option.hours;
   if (hours) {
     if (typeof hours === "string") {
@@ -85,49 +91,91 @@ const toTelHref = (phone: string): string => {
   return digits ? `tel:${digits}` : `tel:${phone}`;
 };
 
+const toMailtoHref = (email: string): string => {
+  if (/^mailto:/i.test(email)) return email;
+  return `mailto:${email}`;
+};
+
 const resolveContactValue = (
   option: StrapiSupportContactOption,
-): { phone: string | null; email: string | null } => {
+): {
+  phone: string | null;
+  email: string | null;
+  phoneHref: string | null;
+  emailHref: string | null;
+} => {
   const type = cleanText(option.type)?.toLowerCase();
   const value = cleanText(option.value) ?? null;
   const explicitPhone = cleanText(option.phone) ?? null;
   const explicitEmail = cleanText(option.email) ?? null;
+  // Live CMS: contact link lives on nested CTA (label + tel/mailto url).
+  const cta = option.primaryCta ?? option.cta;
+  const ctaUrl = cleanText(cta?.url) ?? cleanText(cta?.to);
+  const ctaLabel = cleanText(cta?.label);
+
+  let phone = explicitPhone;
+  let email = explicitEmail;
+  let phoneHref: string | null = null;
+  let emailHref: string | null = null;
 
   if (type === "phone") {
-    return { phone: explicitPhone ?? value, email: explicitEmail };
-  }
-  if (type === "email") {
-    return { phone: explicitPhone, email: explicitEmail ?? value };
+    phone =
+      phone ??
+      value ??
+      (ctaLabel && !ctaLabel.includes("@") ? ctaLabel.replace(/^tel:/i, "").trim() : null);
+    if (ctaUrl && /^tel:/i.test(ctaUrl)) {
+      phoneHref = ctaUrl;
+    }
+  } else if (type === "email") {
+    email =
+      email ??
+      value ??
+      (ctaLabel?.includes("@")
+        ? ctaLabel.replace(/^mailto:/i, "").trim()
+        : ctaUrl && /^mailto:/i.test(ctaUrl)
+          ? ctaUrl.replace(/^mailto:/i, "").trim()
+          : null);
+    if (ctaUrl && /^mailto:/i.test(ctaUrl)) {
+      emailHref = ctaUrl;
+    }
+  } else if (explicitPhone || explicitEmail) {
+    // keep explicit
+  } else if (value?.includes("@")) {
+    email = value;
+  } else if (value) {
+    phone = value;
+  } else if (ctaUrl && /^tel:/i.test(ctaUrl)) {
+    phone = ctaLabel?.replace(/^tel:/i, "").trim() ?? ctaUrl.replace(/^tel:/i, "");
+    phoneHref = ctaUrl;
+  } else if (ctaUrl && /^mailto:/i.test(ctaUrl)) {
+    email = ctaLabel?.replace(/^mailto:/i, "").trim() ?? ctaUrl.replace(/^mailto:/i, "");
+    emailHref = ctaUrl;
   }
 
-  if (explicitPhone || explicitEmail) {
-    return { phone: explicitPhone, email: explicitEmail };
-  }
-
-  if (value?.includes("@")) {
-    return { phone: null, email: value };
-  }
-  if (value) {
-    return { phone: value, email: null };
-  }
-
-  return { phone: null, email: null };
+  return {
+    phone,
+    email,
+    phoneHref: phoneHref ?? (phone ? toTelHref(phone) : null),
+    emailHref: emailHref ?? (email ? toMailtoHref(email) : null),
+  };
 };
 
+/** Outline button: `buttonLabel` + contact href. Nested CTA is the contact link, not this button. */
 const mapButtonCta = (
   option: StrapiSupportContactOption,
   phone: string | null,
   email: string | null,
+  phoneHref: string | null,
+  emailHref: string | null,
 ): NormalizedSupportCta | null => {
-  const fromStructured = mapCta(option.primaryCta ?? option.cta);
-  if (fromStructured) return fromStructured;
-
   const label = cleanText(option.buttonLabel);
-  if (!label) return null;
+  if (label) {
+    if (phone && phoneHref) return { label, url: phoneHref };
+    if (email && emailHref) return { label, url: emailHref };
+  }
 
-  if (phone) return { label, url: toTelHref(phone) };
-  if (email) return { label, url: `mailto:${email}` };
-  return null;
+  // Legacy fallback when CMS only provides structured CTA (no buttonLabel).
+  return mapCta(option.primaryCta ?? option.cta);
 };
 
 const mapContactOption = (
@@ -140,18 +188,18 @@ const mapContactOption = (
   const title = cleanText(option.title) ?? cleanText(option.heading);
   if (!title) return null;
 
-  const { phone, email } = resolveContactValue(option);
+  const { phone, email, phoneHref, emailHref } = resolveContactValue(option);
 
   return {
     id: option.id != null ? String(option.id) : title.toLowerCase().replace(/\s+/g, "-"),
     title,
     description: cleanText(option.description) ?? cleanText(option.body) ?? null,
     phone,
-    phoneHref: phone ? toTelHref(phone) : null,
+    phoneHref,
     email,
-    emailHref: email ? `mailto:${email}` : null,
+    emailHref,
     hours: mapHours(option),
-    cta: mapButtonCta(option, phone, email),
+    cta: mapButtonCta(option, phone, email, phoneHref, emailHref),
   };
 };
 

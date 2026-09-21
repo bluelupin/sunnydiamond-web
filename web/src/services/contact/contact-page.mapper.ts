@@ -3,9 +3,11 @@ import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
 import type { NormalizedVisitUsSection } from "@/services/product-display/product-display-page.types";
 import {
   EMPTY_CONTACT_PAGE,
+  type NormalizedContactDropdownField,
   type NormalizedContactForm,
   type NormalizedContactHero,
   type NormalizedContactInfoCard,
+  type NormalizedContactOrderedField,
   type NormalizedContactPage,
   type NormalizedContactResponsiveImage,
   type NormalizedContactSeo,
@@ -175,6 +177,110 @@ const formatFieldLabel = (
   return label.endsWith("*") ? label : `${label}*`;
 };
 
+/** Dropdowns: fieldType dropdown/select, or CMS text fields that still ship options. */
+const isDropdownField = (field: StrapiContactFormDynamicField): boolean => {
+  const fieldType = cleanText(field.fieldType)?.toLowerCase() ?? "";
+  if (fieldType === "dropdown" || fieldType === "select") return true;
+  return mapFieldOptions(field).length > 0;
+};
+
+const mapDropdownFields = (
+  fields: StrapiContactFormDynamicField[] | null | undefined,
+): NormalizedContactDropdownField[] => {
+  if (!fields?.length) return [];
+
+  const mapped: NormalizedContactDropdownField[] = [];
+  for (const [index, field] of fields.entries()) {
+    if (!isDropdownField(field)) continue;
+    const options = mapFieldOptions(field);
+    if (options.length === 0) continue;
+
+    const label = cleanText(field.label) ?? `Option ${index + 1}`;
+    const placeholder = cleanText(field.placeholder);
+    mapped.push({
+      id: field.id != null ? String(field.id) : `dropdown-${index}`,
+      label,
+      ...(placeholder ? { placeholder } : {}),
+      options,
+      isRequired: Boolean(field.isRequired),
+    });
+  }
+  return mapped;
+};
+
+/** Preserve CMS `dynamicFields` array order (drag-and-drop). No label whitelist — every field renders. */
+const mapOrderedFields = (
+  fields: StrapiContactFormDynamicField[] | null | undefined,
+): NormalizedContactOrderedField[] => {
+  if (!fields?.length) return [];
+
+  const ordered: NormalizedContactOrderedField[] = [];
+  const seen = new Set<string>();
+
+  for (const [index, field] of fields.entries()) {
+    const label = cleanText(field.label);
+    const labelLower = label?.toLowerCase() ?? "";
+    const fieldType = cleanText(field.fieldType)?.toLowerCase() ?? "";
+    const id = field.id != null ? String(field.id) : `field-${index}`;
+
+    if (isDropdownField(field)) {
+      const options = mapFieldOptions(field);
+      if (options.length === 0) continue;
+      ordered.push({ kind: "dropdown", id });
+      continue;
+    }
+
+    if (fieldType === "phone" && !seen.has("phone")) {
+      seen.add("phone");
+      ordered.push({ kind: "phone" });
+      continue;
+    }
+
+    if (fieldType === "email" && !seen.has("email")) {
+      seen.add("email");
+      ordered.push({ kind: "email" });
+      continue;
+    }
+
+    // Bind known submit fields once; any other text/textarea still renders.
+    if (
+      !seen.has("name") &&
+      fieldType === "text" &&
+      (labelLower.includes("name") || labelLower.includes("full"))
+    ) {
+      seen.add("name");
+      ordered.push({ kind: "name" });
+      continue;
+    }
+
+    if (
+      !seen.has("message") &&
+      (fieldType === "textarea" || fieldType === "text") &&
+      (labelLower.includes("message") ||
+        labelLower.includes("note") ||
+        labelLower.includes("describe"))
+    ) {
+      seen.add("message");
+      ordered.push({ kind: "message" });
+      continue;
+    }
+
+    // Newly added CMS fields (any label / type) — always surface on UI.
+    if (!label) continue;
+    const placeholder = cleanText(field.placeholder);
+    ordered.push({
+      kind: "text",
+      id,
+      label,
+      ...(placeholder ? { placeholder } : {}),
+      isRequired: Boolean(field.isRequired),
+      multiline: fieldType === "textarea",
+    });
+  }
+
+  return ordered;
+};
+
 const mapContactOption = (
   option: StrapiContactOption | null | undefined,
 ): NormalizedContactInfoCard | null => {
@@ -335,17 +441,32 @@ const mapForm = (section?: StrapiContactFormSection | null): NormalizedContactFo
       fieldType === "dropdown" &&
       (label.includes("reason") || label.includes("purpose") || label.includes("contact")),
   );
-  const messageField = findField(
-    fields,
-    (label, fieldType) =>
+  const messageField = fields?.find((field) => {
+    if (isDropdownField(field)) return false;
+    const label = cleanText(field.label)?.toLowerCase() ?? "";
+    const fieldType = cleanText(field.fieldType)?.toLowerCase() ?? "";
+    return (
       (fieldType === "textarea" || fieldType === "text") &&
-      (label.includes("message") || label.includes("note") || label.includes("describe")),
-  );
+      (label.includes("message") || label.includes("note") || label.includes("describe"))
+    );
+  });
 
-  const reasonOptions = mapFieldOptions(reasonField);
+  const dropdownFields = mapDropdownFields(fields);
+  const primaryDropdown = dropdownFields[0];
+  const reasonOptions =
+    mapFieldOptions(reasonField).length > 0
+      ? mapFieldOptions(reasonField)
+      : (primaryDropdown?.options ?? []);
   const consentLabel = cleanText(cmsForm?.consentLabel);
   const requiresConsent = cmsForm?.requiresConsent !== false && Boolean(consentLabel);
   const namePlaceholder = cleanText(nameField?.placeholder);
+  const reasonLabel =
+    formatFieldLabel(reasonField) ??
+    (primaryDropdown
+      ? primaryDropdown.isRequired && !primaryDropdown.label.endsWith("*")
+        ? `${primaryDropdown.label}*`
+        : primaryDropdown.label
+      : undefined);
 
   return {
     title,
@@ -356,8 +477,9 @@ const mapForm = (section?: StrapiContactFormSection | null): NormalizedContactFo
       nameLabel: formatFieldLabel(nameField),
       phoneLabel: formatFieldLabel(phoneField),
       emailLabel: formatFieldLabel(emailField),
-      reasonLabel: formatFieldLabel(reasonField),
-      reasonPlaceholder: cleanText(reasonField?.placeholder),
+      reasonLabel,
+      reasonPlaceholder:
+        cleanText(reasonField?.placeholder) ?? primaryDropdown?.placeholder,
       messageLabel: formatFieldLabel(messageField),
       messagePlaceholder: cleanText(messageField?.placeholder),
       namePlaceholder,
@@ -365,6 +487,8 @@ const mapForm = (section?: StrapiContactFormSection | null): NormalizedContactFo
       emailPlaceholder: cleanText(emailField?.placeholder),
       fieldPlaceholder: namePlaceholder,
     },
+    dropdownFields,
+    orderedFields: mapOrderedFields(fields),
     reasonOptions,
     requiresConsent,
     ...(consentLabel ? { consentLabel } : {}),

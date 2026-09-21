@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Reveal from "@/shared/Animation/Reveal";
 import GiftingPanelCheckbox from "@/shared/ui/GiftingPanelCheckbox";
 import FormFieldError from "@/shared/ui/FormFieldError";
@@ -50,12 +50,14 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
   const [countryCode, setCountryCode] = useState("+91");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [reason, setReason] = useState("");
+  const [dropdownValues, setDropdownValues] = useState<Record<string, string>>({});
+  const [extraFieldValues, setExtraFieldValues] = useState<Record<string, string>>({});
   const [message, setMessage] = useState("");
   const [consentAccepted, setConsentAccepted] = useState(false);
   const [hasAppliedProfilePrefill, setHasAppliedProfilePrefill] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [reasonOptions, setReasonOptions] = useState<string[]>(form.reasonOptions);
+  const [dropdownFields, setDropdownFields] = useState(form.dropdownFields ?? []);
+  const [orderedFields, setOrderedFields] = useState(form.orderedFields ?? []);
   const [submitLabel, setSubmitLabel] = useState<string>(form.submitLabel);
   const [formTag, setFormTag] = useState<string>(form.formTag);
 
@@ -72,16 +74,24 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
   const { errors, submitted, markTouched, showError, validateSubmit, resetValidation, isValid } =
     useAppointmentFormValidation(formValues, validationOptions);
 
-  const reasonRequired = reasonOptions.length > 0;
   const consentLabel = form.consentLabel?.trim() ?? "";
   const consentRequired = form.requiresConsent && Boolean(consentLabel);
 
-  const showReasonError = submitted && reasonRequired && !reason.trim();
+  const missingRequiredDropdown = dropdownFields.some(
+    (field) => field.isRequired && !(dropdownValues[field.id] ?? "").trim(),
+  );
+  const missingRequiredExtra = orderedFields.some(
+    (field) =>
+      field.kind === "text" &&
+      field.isRequired &&
+      !(extraFieldValues[field.id] ?? "").trim(),
+  );
   const showConsentError = submitted && consentRequired && !consentAccepted;
 
   const isFormReady =
     isValid &&
-    (!reasonRequired || Boolean(reason.trim())) &&
+    !missingRequiredDropdown &&
+    !missingRequiredExtra &&
     (!consentRequired || consentAccepted);
 
   // Prefill from My Profile once when logged in; never overwrite fields the user already typed.
@@ -110,10 +120,12 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
   }, [profileContact, hasAppliedProfilePrefill, name, email, phone]);
 
   useEffect(() => {
-    setReasonOptions(form.reasonOptions);
+    setDropdownFields(form.dropdownFields ?? []);
+    setOrderedFields(form.orderedFields ?? []);
+    setExtraFieldValues({});
     setSubmitLabel(form.submitLabel);
     setFormTag(form.formTag);
-  }, [form.formTag, form.reasonOptions, form.submitLabel]);
+  }, [form.dropdownFields, form.orderedFields, form.formTag, form.submitLabel]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -127,8 +139,16 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
           setSubmitLabel(cmsForm.submitButtonText);
         }
 
-        if (cmsForm.purposeOptions.length > 0) {
-          setReasonOptions(cmsForm.purposeOptions);
+        // Keep page-mapped dropdownFields; only refresh options for the primary reason field
+        // when live CMS returns purpose options.
+        if (cmsForm.purposeOptions.length > 0 && form.dropdownFields.length > 0) {
+          setDropdownFields((current) =>
+            current.map((field, index) =>
+              index === 0
+                ? { ...field, options: cmsForm.purposeOptions }
+                : field,
+            ),
+          );
         }
       })
       .catch(() => {
@@ -136,13 +156,306 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
       });
 
     return () => controller.abort();
-  }, [form.formTag, form.submitLabel]);
+  }, [form.dropdownFields, form.formTag, form.submitLabel, form.orderedFields]);
+
+  const dropdownById = useMemo(() => {
+    const map = new Map(dropdownFields.map((field) => [field.id, field]));
+    return map;
+  }, [dropdownFields]);
+
+  const renderNameField = () => (
+    <div className="flex flex-col gap-2">
+      {form.fields.nameLabel ? (
+        <label htmlFor="contact-name" className={contactLabelClassName}>
+          {formatRequiredFieldLabel(form.fields.nameLabel)}
+        </label>
+      ) : null}
+      <input
+        id="contact-name"
+        type="text"
+        value={name}
+        onChange={(event) => setName(event.target.value)}
+        onBlur={() => markTouched("name")}
+        autoComplete="name"
+        placeholder={form.fields.namePlaceholder ?? form.fields.fieldPlaceholder}
+        aria-invalid={showError("name") || undefined}
+        aria-describedby={showError("name") ? "contact-name-error" : undefined}
+        className={cn(
+          contactFieldClassName,
+          showError("name") && invalidFieldClassName,
+        )}
+      />
+      <FormFieldError
+        id="contact-name-error"
+        message={showError("name") ? errors.name : undefined}
+      />
+    </div>
+  );
+
+  const renderPhoneField = () => (
+    <div className="flex flex-col gap-2">
+      <div className="flex h-[82px] flex-col items-start justify-between md:h-auto md:gap-2">
+        {form.fields.phoneLabel ? (
+          <label htmlFor="contact-phone" className={contactPhoneLabelClassName}>
+            {formatRequiredFieldLabel(form.fields.phoneLabel)}
+          </label>
+        ) : null}
+        <div
+          className={cn(
+            "flex h-14 w-full items-center gap-2 bg-[#F2F2F2] p-3",
+            showError("phone") && invalidFieldContainerClassName,
+          )}
+        >
+          <PhoneCountryCodeSelect
+            id="contact-country-code"
+            value={countryCode}
+            onChange={(nextCode) => {
+              setCountryCode(nextCode);
+              setPhone(sanitizePhoneInput(phone, nextCode));
+              markTouched("phone");
+            }}
+            onBlur={() => markTouched("phone")}
+          />
+          <input
+            id="contact-phone"
+            type="tel"
+            inputMode="numeric"
+            value={phone}
+            onChange={(event) =>
+              setPhone(sanitizePhoneInput(event.target.value, countryCode))
+            }
+            onBlur={() => markTouched("phone")}
+            autoComplete="tel-national"
+            placeholder={form.fields.phonePlaceholder ?? "Phone number"}
+            aria-invalid={showError("phone") || undefined}
+            aria-describedby={showError("phone") ? "contact-phone-error" : undefined}
+            className="min-w-0 flex-1 bg-transparent font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600"
+          />
+        </div>
+      </div>
+      <FormFieldError
+        id="contact-phone-error"
+        message={showError("phone") ? errors.phone : undefined}
+      />
+    </div>
+  );
+
+  const renderEmailField = () => (
+    <div className="flex flex-col gap-2">
+      {form.fields.emailLabel ? (
+        <label htmlFor="contact-email" className={contactLabelClassName}>
+          {formatRequiredFieldLabel(form.fields.emailLabel)}
+        </label>
+      ) : null}
+      <input
+        id="contact-email"
+        type="email"
+        value={email}
+        onChange={(event) => setEmail(event.target.value)}
+        onBlur={() => markTouched("email")}
+        autoComplete="email"
+        placeholder={form.fields.emailPlaceholder ?? "Email address"}
+        aria-invalid={showError("email") || undefined}
+        aria-describedby={showError("email") ? "contact-email-error" : undefined}
+        className={cn(
+          contactFieldClassName,
+          showError("email") && invalidFieldClassName,
+        )}
+      />
+      <FormFieldError
+        id="contact-email-error"
+        message={showError("email") ? errors.email : undefined}
+      />
+    </div>
+  );
+
+  const renderMessageField = () => (
+    <div className="flex flex-col gap-2">
+      {form.fields.messageLabel ? (
+        <label htmlFor="contact-message" className={contactLabelClassName}>
+          {formatRequiredFieldLabel(form.fields.messageLabel)}
+        </label>
+      ) : null}
+      <textarea
+        id="contact-message"
+        value={message}
+        onChange={(event) => setMessage(event.target.value)}
+        onBlur={() => markTouched("note")}
+        placeholder={form.fields.messagePlaceholder}
+        rows={4}
+        maxLength={MESSAGE_MAX_LENGTH}
+        aria-invalid={showError("note") || undefined}
+        aria-describedby={showError("note") ? "contact-message-error" : undefined}
+        className={cn(
+          "h-[100px] w-full resize-none bg-[#F2F2F2] p-3 font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600",
+          showError("note") && invalidFieldClassName,
+        )}
+      />
+      <FormFieldError
+        id="contact-message-error"
+        message={showError("note") ? errors.note : undefined}
+      />
+    </div>
+  );
+
+  const renderDropdownField = (fieldId: string) => {
+    const field = dropdownById.get(fieldId);
+    if (!field) return null;
+
+    const value = dropdownValues[field.id] ?? "";
+    const showFieldError = submitted && field.isRequired && !value.trim();
+
+    return (
+      <CareersSelectField
+        key={field.id}
+        id={`contact-dropdown-${field.id}`}
+        label={
+          field.isRequired ? formatRequiredFieldLabel(field.label) : field.label
+        }
+        value={value}
+        options={field.options}
+        placeholder={field.placeholder}
+        onChange={(next) =>
+          setDropdownValues((current) => ({
+            ...current,
+            [field.id]: next,
+          }))
+        }
+        labelClassName={contactLabelClassName}
+        error={showFieldError ? "Please select an option" : undefined}
+      />
+    );
+  };
+
+  const renderExtraTextField = (field: {
+    id: string;
+    label: string;
+    placeholder?: string;
+    isRequired: boolean;
+    multiline?: boolean;
+  }) => {
+    const value = extraFieldValues[field.id] ?? "";
+    const showFieldError = submitted && field.isRequired && !value.trim();
+    const inputId = `contact-extra-${field.id}`;
+    const label = field.isRequired
+      ? formatRequiredFieldLabel(field.label)
+      : field.label;
+
+    return (
+      <div key={field.id} className="flex flex-col gap-2">
+        <label htmlFor={inputId} className={contactLabelClassName}>
+          {label}
+        </label>
+        {field.multiline ? (
+          <textarea
+            id={inputId}
+            value={value}
+            onChange={(event) =>
+              setExtraFieldValues((current) => ({
+                ...current,
+                [field.id]: event.target.value,
+              }))
+            }
+            placeholder={field.placeholder}
+            rows={4}
+            maxLength={MESSAGE_MAX_LENGTH}
+            aria-invalid={showFieldError || undefined}
+            aria-describedby={showFieldError ? `${inputId}-error` : undefined}
+            className={cn(
+              "h-[100px] w-full resize-none bg-[#F2F2F2] p-3 font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600",
+              showFieldError && invalidFieldClassName,
+            )}
+          />
+        ) : (
+          <input
+            id={inputId}
+            type="text"
+            value={value}
+            onChange={(event) =>
+              setExtraFieldValues((current) => ({
+                ...current,
+                [field.id]: event.target.value,
+              }))
+            }
+            placeholder={field.placeholder}
+            aria-invalid={showFieldError || undefined}
+            aria-describedby={showFieldError ? `${inputId}-error` : undefined}
+            className={cn(
+              contactFieldClassName,
+              showFieldError && invalidFieldClassName,
+            )}
+          />
+        )}
+        <FormFieldError
+          id={`${inputId}-error`}
+          message={showFieldError ? "This field is required" : undefined}
+        />
+      </div>
+    );
+  };
+
+  const renderedFields: ReactNode[] = [];
+  for (let index = 0; index < orderedFields.length; index += 1) {
+    const field = orderedFields[index];
+    const next = orderedFields[index + 1];
+
+    // Keep phone + email side-by-side when CMS lists them consecutively.
+    if (field.kind === "phone" && next?.kind === "email") {
+      renderedFields.push(
+        <div key="phone-email" className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {renderPhoneField()}
+          {renderEmailField()}
+        </div>,
+      );
+      index += 1;
+      continue;
+    }
+
+    if (field.kind === "email" && next?.kind === "phone") {
+      renderedFields.push(
+        <div key="email-phone" className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {renderEmailField()}
+          {renderPhoneField()}
+        </div>,
+      );
+      index += 1;
+      continue;
+    }
+
+    if (field.kind === "name") {
+      renderedFields.push(<div key="name">{renderNameField()}</div>);
+    } else if (field.kind === "phone") {
+      renderedFields.push(<div key="phone">{renderPhoneField()}</div>);
+    } else if (field.kind === "email") {
+      renderedFields.push(<div key="email">{renderEmailField()}</div>);
+    } else if (field.kind === "message") {
+      renderedFields.push(<div key="message">{renderMessageField()}</div>);
+    } else if (field.kind === "dropdown") {
+      renderedFields.push(renderDropdownField(field.id));
+    } else if (field.kind === "text") {
+      renderedFields.push(renderExtraTextField(field));
+    }
+  }
+
+  // Fallback if CMS order is empty — previous hard-coded sequence.
+  if (renderedFields.length === 0) {
+    renderedFields.push(
+      <div key="name">{renderNameField()}</div>,
+      <div key="phone-email" className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        {renderPhoneField()}
+        {renderEmailField()}
+      </div>,
+      ...dropdownFields.map((field) => renderDropdownField(field.id)),
+      <div key="message">{renderMessageField()}</div>,
+    );
+  }
 
   const resetForm = () => {
     setName("");
     setPhone("");
     setEmail("");
-    setReason("");
+    setDropdownValues({});
+    setExtraFieldValues({});
     setMessage("");
     setConsentAccepted(false);
     setHasAppliedProfilePrefill(false);
@@ -153,26 +466,92 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
     event.preventDefault();
 
     validateSubmit(async () => {
-      if ((reasonRequired && !reason.trim()) || (consentRequired && !consentAccepted)) {
+      if (
+        missingRequiredDropdown ||
+        missingRequiredExtra ||
+        (consentRequired && !consentAccepted)
+      ) {
         return;
       }
 
       setIsSubmitting(true);
 
       try {
+        const selectedDropdowns = dropdownFields
+          .map((field) => {
+            const value = (dropdownValues[field.id] ?? "").trim();
+            return value
+              ? {
+                  id: field.id,
+                  label: field.label.replace(/\*$/, "").trim(),
+                  fieldType: "dropdown",
+                  value,
+                }
+              : null;
+          })
+          .filter(
+            (
+              entry,
+            ): entry is {
+              id: string;
+              label: string;
+              fieldType: string;
+              value: string;
+            } => entry != null,
+          );
+
+        const primaryReason = selectedDropdowns[0]?.value ?? "";
+        const extraDropdownEntries = selectedDropdowns.slice(1);
+        const extraTextEntries = orderedFields
+          .filter(
+            (field): field is Extract<typeof field, { kind: "text" }> =>
+              field.kind === "text",
+          )
+          .map((field) => {
+            const value = (extraFieldValues[field.id] ?? "").trim();
+            if (!value) return null;
+            return {
+              id: field.id,
+              label: field.label.replace(/\*$/, "").trim(),
+              fieldType: field.multiline ? "textarea" : "text",
+              value,
+            };
+          })
+          .filter(
+            (
+              entry,
+            ): entry is {
+              id: string;
+              label: string;
+              fieldType: string;
+              value: string;
+            } => entry != null,
+          );
+
+        const dynamicFieldPayload = [...extraDropdownEntries, ...extraTextEntries];
+        const extraNotes = dynamicFieldPayload
+          .map((entry) => `${entry.label}: ${entry.value}`)
+          .join("\n");
+        const composedMessage = [message.trim(), extraNotes]
+          .filter(Boolean)
+          .join("\n");
+
         await submitContactEnquiry({
           formTag,
           fullName: name.trim(),
           email: email.trim(),
           phone: `${countryCode}${phone.trim()}`,
-          reasonForContact: reason.trim(),
-          message: message.trim(),
+          reasonForContact: primaryReason,
+          message: composedMessage,
           consentAccepted: consentRequired ? consentAccepted : false,
           sourcePage: "/contact",
+          ...(dynamicFieldPayload.length > 0
+            ? { dynamicFields: dynamicFieldPayload }
+            : {}),
         });
 
         toast({
-          title: "Thank you",
+          title: "Your request has been submitted successfully.",
         });
         resetForm();
       } catch (error) {
@@ -201,155 +580,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
       <div className="h-px w-full bg-neutral300 md:hidden" aria-hidden />
       <form onSubmit={handleSubmit} className="flex w-full flex-col gap-6">
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-2">
-              {form.fields.nameLabel ? (
-                <label htmlFor="contact-name" className={contactLabelClassName}>
-                  {formatRequiredFieldLabel(form.fields.nameLabel)}
-                </label>
-              ) : null}
-              <input
-                id="contact-name"
-                type="text"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                onBlur={() => markTouched("name")}
-                autoComplete="name"
-                placeholder={form.fields.namePlaceholder ?? form.fields.fieldPlaceholder}
-                aria-invalid={showError("name") || undefined}
-                aria-describedby={showError("name") ? "contact-name-error" : undefined}
-                className={cn(
-                  contactFieldClassName,
-                  showError("name") && invalidFieldClassName,
-                )}
-              />
-              <FormFieldError
-                id="contact-name-error"
-                message={showError("name") ? errors.name : undefined}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <div className="flex flex-col gap-2">
-                <div className="flex h-[82px] flex-col items-start justify-between md:h-auto md:gap-2">
-                  {form.fields.phoneLabel ? (
-                    <label htmlFor="contact-phone" className={contactPhoneLabelClassName}>
-                      {formatRequiredFieldLabel(form.fields.phoneLabel)}
-                    </label>
-                  ) : null}
-                  <div
-                    className={cn(
-                      "flex h-14 w-full items-center gap-2 bg-[#F2F2F2] p-3",
-                      showError("phone") && invalidFieldContainerClassName,
-                    )}
-                  >
-                    <PhoneCountryCodeSelect
-                      id="contact-country-code"
-                      value={countryCode}
-                      onChange={(nextCode) => {
-                        setCountryCode(nextCode);
-                        setPhone(sanitizePhoneInput(phone, nextCode));
-                        markTouched("phone");
-                      }}
-                      onBlur={() => markTouched("phone")}
-                    />
-                    <input
-                      id="contact-phone"
-                      type="tel"
-                      inputMode="numeric"
-                      value={phone}
-                      onChange={(event) =>
-                        setPhone(sanitizePhoneInput(event.target.value, countryCode))
-                      }
-                      onBlur={() => markTouched("phone")}
-                      autoComplete="tel-national"
-                      placeholder={form.fields.phonePlaceholder ?? "Phone number"}
-                      aria-invalid={showError("phone") || undefined}
-                      aria-describedby={showError("phone") ? "contact-phone-error" : undefined}
-                      className="min-w-0 flex-1 bg-transparent font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600"
-                    />
-                  </div>
-                </div>
-                <FormFieldError
-                  id="contact-phone-error"
-                  message={showError("phone") ? errors.phone : undefined}
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                {form.fields.emailLabel ? (
-                  <label htmlFor="contact-email" className={contactLabelClassName}>
-                    {formatRequiredFieldLabel(form.fields.emailLabel)}
-                  </label>
-                ) : null}
-                <input
-                  id="contact-email"
-                  type="email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  onBlur={() => markTouched("email")}
-                  autoComplete="email"
-                  placeholder={form.fields.emailPlaceholder ?? "Email address"}
-                  aria-invalid={showError("email") || undefined}
-                  aria-describedby={showError("email") ? "contact-email-error" : undefined}
-                  className={cn(
-                    contactFieldClassName,
-                    showError("email") && invalidFieldClassName,
-                  )}
-                />
-                <FormFieldError
-                  id="contact-email-error"
-                  message={showError("email") ? errors.email : undefined}
-                />
-              </div>
-            </div>
-
-            {form.fields.reasonLabel || reasonOptions.length > 0 ? (
-              <CareersSelectField
-                id="contact-reason"
-                label={
-                  form.fields.reasonLabel
-                    ? reasonRequired
-                      ? formatRequiredFieldLabel(form.fields.reasonLabel)
-                      : form.fields.reasonLabel
-                    : "Reason"
-                }
-                value={reason}
-                options={reasonOptions}
-                placeholder={form.fields.reasonPlaceholder}
-                onChange={setReason}
-                labelClassName={contactLabelClassName}
-                error={showReasonError ? "Please select a reason" : undefined}
-              />
-            ) : null}
-
-            <div className="flex flex-col gap-2">
-              {form.fields.messageLabel ? (
-                <label htmlFor="contact-message" className={contactLabelClassName}>
-                  {formatRequiredFieldLabel(form.fields.messageLabel)}
-                </label>
-              ) : null}
-              <textarea
-                id="contact-message"
-                value={message}
-                onChange={(event) => setMessage(event.target.value)}
-                onBlur={() => markTouched("note")}
-                placeholder={form.fields.messagePlaceholder}
-                rows={4}
-                maxLength={MESSAGE_MAX_LENGTH}
-                aria-invalid={showError("note") || undefined}
-                aria-describedby={showError("note") ? "contact-message-error" : undefined}
-                className={cn(
-                  "h-[100px] w-full resize-none bg-[#F2F2F2] p-3 font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600",
-                  showError("note") && invalidFieldClassName,
-                )}
-              />
-              <FormFieldError
-                id="contact-message-error"
-                message={showError("note") ? errors.note : undefined}
-              />
-            </div>
-          </div>
+          <div className="flex flex-col gap-6">{renderedFields}</div>
 
           {consentRequired ? (
             <div className="flex flex-col gap-2">

@@ -27,32 +27,30 @@ const SupportContactOptionsSection = ({ options }: SupportContactOptionsSectionP
               <h2 className="font-larken text-32 font-light leading-110 text-darkblack md:text-4xl">
                 {option.title}
               </h2>
-              {option.description ? (
+              {option.phoneHref && option.hours.length > 0 ? (
+                <ul className="flex flex-col gap-2">
+                  {option.hours.map((hour) => (
+                    <li
+                      key={`${option.id}-${hour.label}-${hour.value}`}
+                      className="font-gill text-base font-light leading-110 text-darkblack"
+                    >
+                      {hour.label ? (
+                        <>
+                          <span className="font-normal">{hour.label}</span>{" "}
+                          <span>{hour.value}</span>
+                        </>
+                      ) : (
+                        hour.value
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              ) : option.description ? (
                 <p className="font-gill text-base font-light leading-110 text-neutral500 md:text-lg">
                   {option.description}
                 </p>
               ) : null}
             </div>
-
-            {option.hours.length > 0 ? (
-              <ul className="flex flex-col gap-2">
-                {option.hours.map((hour) => (
-                  <li
-                    key={`${option.id}-${hour.label}-${hour.value}`}
-                    className="font-gill text-base font-light leading-110 text-darkblack"
-                  >
-                    {hour.label ? (
-                      <>
-                        <span className="font-normal">{hour.label}</span>{" "}
-                        <span>{hour.value}</span>
-                      </>
-                    ) : (
-                      hour.value
-                    )}
-                  </li>
-                ))}
-              </ul>
-            ) : null}
 
             {option.phone && option.phoneHref ? (
               <a

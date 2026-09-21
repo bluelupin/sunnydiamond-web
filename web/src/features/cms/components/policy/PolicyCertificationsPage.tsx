@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import ContactPhoneLink from "@/features/contact/components/ContactPhoneLink";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import {
@@ -24,71 +24,6 @@ type PolicyCertificationsPageProps = {
   initialPolicyId?: string;
 };
 
-function filterSections(
-  sections: PolicyAccordionSection[],
-  query: string,
-): PolicyAccordionSection[] {
-  const normalized = query.trim().toLowerCase();
-  if (!normalized) {
-    return sections;
-  }
-
-  return sections.filter((section) => {
-    const haystack = [
-      section.title,
-      section.intro,
-      section.body,
-      section.listItems?.join(" "),
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-
-    return haystack.includes(normalized);
-  });
-}
-
-function filterNavGroups(
-  navGroups: PolicyNavGroup[],
-  query: string,
-): PolicyNavGroup[] {
-  const normalized = query.trim().toLowerCase();
-  if (!normalized) {
-    return navGroups;
-  }
-
-  return navGroups
-    .map((group) => ({
-      ...group,
-      items: group.items.filter((policy) => {
-        const labelHaystack = [
-          policy.navLabel,
-          policy.mobileNavLabel,
-          policy.contentTitle,
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
-
-        if (labelHaystack.includes(normalized)) {
-          return true;
-        }
-
-        return filterSections(policy.sections, query).length > 0;
-      }),
-    }))
-    .filter((group) => group.items.length > 0);
-}
-
-function getMatchingPolicyIds(
-  navGroups: PolicyNavGroup[],
-  query: string,
-): string[] {
-  return filterNavGroups(navGroups, query).flatMap((group) =>
-    group.items.map((policy) => policy.id),
-  );
-}
-
 function resolveActivePolicyId(
   page: NormalizedPolicyCertificationsPage,
   candidate: string | undefined,
@@ -102,60 +37,15 @@ function resolveActivePolicyId(
   return page.navGroups[0]?.items[0]?.id ?? page.defaultPolicyId;
 }
 
-function PolicySearchField({
-  value,
-  onChange,
-  placeholder,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-}) {
-  return (
-    <label className="flex h-14 w-full items-center gap-2 bg-aboutInactive p-3">
-      <span className="relative size-6 shrink-0 overflow-clip" aria-hidden>
-        <span className="absolute inset-[12.5%]">
-          <span className="absolute inset-[-2.78%]">
-            <Image
-              src="/icons/search-icon.svg"
-              alt=""
-              width={24}
-              height={24}
-              className="block size-full max-w-none"
-            />
-          </span>
-        </span>
-      </span>
-      <input
-        type="search"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-        className="min-w-0 flex-1 bg-transparent font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600"
-      />
-    </label>
-  );
-}
-
 function PolicyDesktopSidebar({
   navGroups,
   activePolicyId,
-  searchQuery,
-  matchingPolicyIds,
   onSelect,
 }: {
   navGroups: PolicyNavGroup[];
   activePolicyId: string;
-  searchQuery: string;
-  matchingPolicyIds: string[];
   onSelect: (policyId: string) => void;
 }) {
-  const hasSearch = searchQuery.trim().length > 0;
-  const matchingPolicyIdSet = useMemo(
-    () => new Set(matchingPolicyIds),
-    [matchingPolicyIds],
-  );
-
   return (
     <nav
       aria-label="Policy categories"
@@ -170,8 +60,6 @@ function PolicyDesktopSidebar({
             <ul className="flex w-full flex-col items-start">
               {group.items.map((policy) => {
                 const isActive = policy.id === activePolicyId;
-                const isSearchMatch = hasSearch && matchingPolicyIdSet.has(policy.id);
-                const isHighlighted = hasSearch ? isSearchMatch : isActive;
 
                 return (
                   <li key={policy.id} className="w-full">
@@ -180,7 +68,7 @@ function PolicyDesktopSidebar({
                       onClick={() => onSelect(policy.id)}
                       className={cn(
                         "flex h-[70px] w-full items-center p-6 text-left transition-colors",
-                        isHighlighted
+                        isActive
                           ? "border-r-2 border-darkblack bg-gray300 font-gill text-xl font-normal leading-110 text-darkblack"
                           : "font-gill text-xl font-light leading-110 text-darkblack hover:bg-gray300/60",
                       )}
@@ -201,33 +89,20 @@ function PolicyDesktopSidebar({
 
 function PolicyMobileNav({
   navGroups,
-  emptySearchLabel,
   activePolicyId,
-  searchQuery,
   onSelect,
 }: {
   navGroups: PolicyNavGroup[];
-  emptySearchLabel: string;
   activePolicyId: string;
-  searchQuery: string;
   onSelect: (policyId: string) => void;
 }) {
-  const filteredGroups = useMemo(
-    () => filterNavGroups(navGroups, searchQuery),
-    [navGroups, searchQuery],
-  );
-
-  if (filteredGroups.length === 0) {
-    return emptySearchLabel ? (
-      <p className="font-gill text-base font-light leading-110 text-neutral500">
-        {emptySearchLabel}
-      </p>
-    ) : null;
+  if (navGroups.length === 0) {
+    return null;
   }
 
   return (
     <nav aria-label="Policy categories" className="flex w-full flex-col gap-[29px]">
-      {filteredGroups.map((group) => (
+      {navGroups.map((group) => (
         <div key={group.id} className="flex w-full flex-col gap-6">
           <p className="font-gill text-base font-light leading-110 text-darkblack">
             {group.label}
@@ -367,30 +242,31 @@ function PolicyAccordionItem({
 
 function PolicyAccordions({
   sections,
-  emptySearchLabel,
   variant = "desktop",
 }: {
   sections: PolicyAccordionSection[];
-  emptySearchLabel: string;
   variant?: "desktop" | "mobile";
 }) {
   const isMobile = variant === "mobile";
+  // Mobile (Figma): all accordion items start collapsed; expand on tap.
+  // Desktop: first item open by default.
   const [openSectionId, setOpenSectionId] = useState<string | null>(
-    sections[0]?.id ?? null,
+    isMobile ? null : (sections[0]?.id ?? null),
   );
 
+  // If the open section disappears (policy switch), fall back appropriately.
+  // `null` means collapsed — do not force-reopen.
   useEffect(() => {
-    if (!sections.some((section) => section.id === openSectionId)) {
-      setOpenSectionId(sections[0]?.id ?? null);
+    if (openSectionId == null) {
+      return;
     }
-  }, [openSectionId, sections]);
+    if (!sections.some((section) => section.id === openSectionId)) {
+      setOpenSectionId(isMobile ? null : (sections[0]?.id ?? null));
+    }
+  }, [openSectionId, sections, isMobile]);
 
   if (sections.length === 0) {
-    return emptySearchLabel ? (
-      <p className="font-gill text-base font-light leading-110 text-neutral500">
-        {emptySearchLabel}
-      </p>
-    ) : null;
+    return null;
   }
 
   return (
@@ -422,11 +298,9 @@ function PolicyAccordions({
 
 function PolicyMobileDetailPanel({
   policy,
-  emptySearchLabel,
   onBack,
 }: {
   policy: PolicyDocument;
-  emptySearchLabel: string;
   onBack: () => void;
 }) {
   return (
@@ -445,37 +319,21 @@ function PolicyMobileDetailPanel({
         </h1>
       </div>
       <PolicyAccordions
+        key={policy.id}
         sections={policy.sections}
-        emptySearchLabel={emptySearchLabel}
         variant="mobile"
       />
     </div>
   );
 }
 
-function PolicyContentPanel({
-  policy,
-  searchQuery,
-  emptySearchLabel,
-}: {
-  policy: PolicyDocument;
-  searchQuery: string;
-  emptySearchLabel: string;
-}) {
-  const filteredSections = useMemo(
-    () => filterSections(policy.sections, searchQuery),
-    [policy.sections, searchQuery],
-  );
-
+function PolicyContentPanel({ policy }: { policy: PolicyDocument }) {
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-6">
       <h2 className="font-larken text-32 font-light leading-110 text-darkblack">
         {policy.contentTitle}
       </h2>
-      <PolicyAccordions
-        sections={filteredSections}
-        emptySearchLabel={emptySearchLabel}
-      />
+      <PolicyAccordions key={policy.id} sections={policy.sections} />
     </div>
   );
 }
@@ -580,6 +438,8 @@ const PolicyCertificationsPage = ({
   page,
   initialPolicyId,
 }: PolicyCertificationsPageProps) => {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const policyFromUrl = resolvePolicyIdFromParam(
     searchParams?.get(POLICY_QUERY_PARAM),
@@ -588,35 +448,38 @@ const PolicyCertificationsPage = ({
   const [activePolicyId, setActivePolicyId] = useState(() =>
     resolveActivePolicyId(page, policyFromUrl ?? initialPolicyId),
   );
-  const [searchQuery, setSearchQuery] = useState("");
   const [mobileShowDetail, setMobileShowDetail] = useState(Boolean(policyFromUrl));
 
-  const matchingPolicyIds = useMemo(
-    () => getMatchingPolicyIds(page.navGroups, searchQuery),
-    [page.navGroups, searchQuery],
+  /** Keep the address bar on the CMS policy slug (`?policy=`). */
+  const syncPolicySlugToUrl = useCallback(
+    (policyId: string) => {
+      const current = searchParams?.get(POLICY_QUERY_PARAM) ?? "";
+      if (current === policyId) {
+        return;
+      }
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
+      params.set(POLICY_QUERY_PARAM, policyId);
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [pathname, router, searchParams],
   );
 
   useEffect(() => {
-    const normalized = searchQuery.trim();
-    if (!normalized || matchingPolicyIds.length === 0) {
-      return;
-    }
-
-    setActivePolicyId(matchingPolicyIds[0]);
-  }, [searchQuery, matchingPolicyIds]);
-
-  useEffect(() => {
-    const resolvedFromUrl = resolvePolicyIdFromParam(
-      searchParams?.get(POLICY_QUERY_PARAM),
-    );
+    const rawParam = searchParams?.get(POLICY_QUERY_PARAM);
+    const resolvedFromUrl = resolvePolicyIdFromParam(rawParam);
     if (!resolvedFromUrl) {
       return;
     }
 
+    const resolvedPolicy = getPolicyFromPage(page, resolvedFromUrl);
     setActivePolicyId(resolveActivePolicyId(page, resolvedFromUrl));
-    setSearchQuery("");
     setMobileShowDetail(true);
-  }, [page, searchParams]);
+
+    // Alias / stale query → rewrite URL to the live CMS slug.
+    if (resolvedPolicy && rawParam?.trim() !== resolvedPolicy.id) {
+      syncPolicySlugToUrl(resolvedPolicy.id);
+    }
+  }, [page, searchParams, syncPolicySlugToUrl]);
 
   const activePolicy =
     getPolicyFromPage(page, activePolicyId) ??
@@ -629,12 +492,13 @@ const PolicyCertificationsPage = ({
 
   const handlePolicySelect = (policyId: string) => {
     setActivePolicyId(policyId);
-    setSearchQuery("");
     setMobileShowDetail(true);
+    syncPolicySlugToUrl(policyId);
   };
 
   const handleDesktopPolicySelect = (policyId: string) => {
     setActivePolicyId(policyId);
+    syncPolicySlugToUrl(policyId);
   };
 
   return (
@@ -644,7 +508,6 @@ const PolicyCertificationsPage = ({
           {mobileShowDetail ? (
             <PolicyMobileDetailPanel
               policy={activePolicy}
-              emptySearchLabel={page.emptySearchLabel}
               onBack={() => setMobileShowDetail(false)}
             />
           ) : (
@@ -654,18 +517,9 @@ const PolicyCertificationsPage = ({
                   {page.pageTitle}
                 </h1>
               ) : null}
-              {page.searchPlaceholder ? (
-                <PolicySearchField
-                  value={searchQuery}
-                  onChange={setSearchQuery}
-                  placeholder={page.searchPlaceholder}
-                />
-              ) : null}
               <PolicyMobileNav
                 navGroups={page.navGroups}
-                emptySearchLabel={page.emptySearchLabel}
                 activePolicyId={activePolicyId}
-                searchQuery={searchQuery}
                 onSelect={handlePolicySelect}
               />
             </>
@@ -673,22 +527,11 @@ const PolicyCertificationsPage = ({
         </div>
 
         <div className="hidden lg:flex lg:flex-col">
-          {(page.pageTitle || page.searchPlaceholder) ? (
+          {page.pageTitle ? (
             <div className="flex flex-col items-center gap-10 pb-16">
-              {page.pageTitle ? (
-                <h1 className="text-center font-larken lg:text-5xl md:text-4xl text-32 font-light leading-110 text-darkblack">
-                  {page.pageTitle}
-                </h1>
-              ) : null}
-              {page.searchPlaceholder ? (
-                <div className="w-full max-w-[623px]">
-                  <PolicySearchField
-                    value={searchQuery}
-                    onChange={setSearchQuery}
-                    placeholder={page.searchPlaceholder}
-                  />
-                </div>
-              ) : null}
+              <h1 className="text-center font-larken lg:text-5xl md:text-4xl text-32 font-light leading-110 text-darkblack">
+                {page.pageTitle}
+              </h1>
             </div>
           ) : null}
 
@@ -696,15 +539,9 @@ const PolicyCertificationsPage = ({
             <PolicyDesktopSidebar
               navGroups={page.navGroups}
               activePolicyId={activePolicyId}
-              searchQuery={searchQuery}
-              matchingPolicyIds={matchingPolicyIds}
               onSelect={handleDesktopPolicySelect}
             />
-            <PolicyContentPanel
-              policy={activePolicy}
-              searchQuery={searchQuery}
-              emptySearchLabel={page.emptySearchLabel}
-            />
+            <PolicyContentPanel policy={activePolicy} />
           </div>
         </div>
       </section>

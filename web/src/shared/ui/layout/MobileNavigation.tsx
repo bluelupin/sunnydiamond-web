@@ -586,6 +586,9 @@ const MobileNavigation = ({
               variant="embedded"
               onBack={() => setSubPanel(null)}
               onClose={handleClose}
+              submissionFormTag="product-store-visit"
+              productName="Store Visit"
+              productId="store-visit"
             />
           </div>
         ) : null}

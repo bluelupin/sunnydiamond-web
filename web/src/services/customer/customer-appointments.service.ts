@@ -67,21 +67,45 @@ async function parseErrorMessage(response: Response): Promise<string> {
   return `Request failed (${response.status})`;
 }
 
+function getStrapiApiToken(): string | null {
+  const token =
+    process.env.STRAPI_API_TOKEN?.trim() || process.env.CMS_API_TOKEN?.trim();
+  return token || null;
+}
+
 /**
- * Strapi customer appointments — Magento customer token as Bearer.
- * Call only from server (BFF) with token from httpOnly cookie.
+ * Strapi customer appointments list.
+ * CMS expects server CMS API token as Bearer + `magentoCustomerId` query
+ * (Magento customer Bearer alone returns "Missing or invalid credentials").
+ * Call only from server (BFF) after resolving the Magento customer id.
  */
 export async function fetchCustomerAppointments(
-  authToken: string,
   page = 1,
   pageSize = 20,
-  signal?: AbortSignal,
+  options: {
+    magentoCustomerId: number;
+    signal?: AbortSignal;
+  },
 ): Promise<CustomerAppointmentsPage> {
+  const cmsToken = getStrapiApiToken();
+  if (!cmsToken) {
+    throw new CustomerAppointmentsApiError(
+      "CMS API token is not configured",
+      503,
+    );
+  }
+
+  const magentoCustomerId = options.magentoCustomerId;
+  if (!Number.isFinite(magentoCustomerId) || magentoCustomerId <= 0) {
+    throw new CustomerAppointmentsApiError("Missing magentoCustomerId", 400);
+  }
+
   const safePage = Math.max(1, page);
   const safePageSize = Math.min(100, Math.max(1, pageSize));
   const params = new URLSearchParams({
     page: String(safePage),
     pageSize: String(safePageSize),
+    magentoCustomerId: String(magentoCustomerId),
   });
 
   const url = `${getStrapiBaseUrl()}/${STRAPI_ENDPOINTS.customerAppointments}?${params.toString()}`;
@@ -89,10 +113,10 @@ export async function fetchCustomerAppointments(
     method: "GET",
     headers: {
       Accept: "application/json",
-      Authorization: `Bearer ${authToken}`,
+      Authorization: `Bearer ${cmsToken}`,
     },
     cache: "no-store",
-    signal,
+    signal: options.signal,
   });
 
   if (!response.ok) {

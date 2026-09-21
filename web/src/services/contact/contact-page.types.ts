@@ -183,6 +183,31 @@ export type NormalizedContactInfoCard = {
   };
 };
 
+export type NormalizedContactDropdownField = {
+  id: string;
+  label: string;
+  placeholder?: string;
+  options: string[];
+  isRequired: boolean;
+};
+
+/** CMS `dynamicFields` drag order — UI renders in this sequence. */
+export type NormalizedContactOrderedField =
+  | { kind: "name" }
+  | { kind: "phone" }
+  | { kind: "email" }
+  | { kind: "message" }
+  | { kind: "dropdown"; id: string }
+  /** Any other CMS text/textarea (or unknown) field — rendered as-is. */
+  | {
+      kind: "text";
+      id: string;
+      label: string;
+      placeholder?: string;
+      isRequired: boolean;
+      multiline?: boolean;
+    };
+
 export type NormalizedContactFormFields = {
   nameLabel?: string;
   phoneLabel?: string;
@@ -204,6 +229,10 @@ export type NormalizedContactForm = {
   submitLabel: string;
   successDescription?: string;
   fields: NormalizedContactFormFields;
+  /** All CMS dropdown fields (not limited to reason/purpose labels). */
+  dropdownFields: NormalizedContactDropdownField[];
+  /** Field sequence from CMS drag order. */
+  orderedFields: NormalizedContactOrderedField[];
   reasonOptions: string[];
   requiresConsent: boolean;
   consentLabel?: string;

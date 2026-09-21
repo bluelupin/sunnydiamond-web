@@ -1,15 +1,49 @@
 import { NextResponse } from "next/server";
-import { getCustomerToken } from "@/services/auth/session";
+import { getCustomerTokenFromRequest } from "@/services/auth/session";
+import { magentoGraphqlFetch } from "@/services/magento/graphqlClient";
+import { decodeMagentoEntityId } from "@/services/magento/decodeMagentoEntityId";
+import { MAGENTO_CUSTOMER_ME_QUERY } from "@/services/customer/customer.gql";
 import {
   CustomerAppointmentsApiError,
   fetchCustomerAppointments,
 } from "@/services/customer/customer-appointments.service";
 
+async function resolveMagentoCustomerId(authToken: string): Promise<number | null> {
+  try {
+    const data = await magentoGraphqlFetch<{
+      customer: { id: number | string } | null;
+    }>({
+      query: MAGENTO_CUSTOMER_ME_QUERY,
+      authToken,
+    });
+
+    return decodeMagentoEntityId(data.customer?.id);
+  } catch {
+    return null;
+  }
+}
+
 export async function GET(request: Request) {
-  const token = await getCustomerToken();
+  // Same session read as reschedule — cookie store + Cookie header fallback.
+  const token = await getCustomerTokenFromRequest(request);
 
   if (!token) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Unauthorized", reason: "no_session" },
+      { status: 401 },
+    );
+  }
+
+  // Same Magento customer id used on Book a Visit / product submits.
+  const magentoCustomerId = await resolveMagentoCustomerId(token);
+  if (magentoCustomerId == null) {
+    return NextResponse.json(
+      {
+        error: "Missing or invalid credentials",
+        reason: "invalid_magento_token",
+      },
+      { status: 401 },
+    );
   }
 
   const { searchParams } = new URL(request.url);
@@ -17,7 +51,9 @@ export async function GET(request: Request) {
   const pageSize = Math.min(100, Math.max(1, Number(searchParams.get("pageSize") ?? "20") || 20));
 
   try {
-    const appointments = await fetchCustomerAppointments(token, page, pageSize);
+    const appointments = await fetchCustomerAppointments(page, pageSize, {
+      magentoCustomerId,
+    });
     return NextResponse.json(appointments);
   } catch (error) {
     if (error instanceof CustomerAppointmentsApiError) {

@@ -42,10 +42,9 @@ import {
   type BookStoreVisitStore,
 } from "@/features/products/data/bookStoreVisitContent";
 import {
-  createGenericSubmission,
-  getGenericFormByTag,
-} from "@/services/forms/generic-form.service";
-import { createProductSubmission } from "@/services/forms/product-form.service";
+  createProductSubmission,
+  getProductFormByTag,
+} from "@/services/forms/product-form.service";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import { wishlistMovedToastDurationMs } from "@/features/wishlist/data/content";
@@ -57,7 +56,10 @@ import {
   ProductDetailSidePanelShell,
 } from "./ProductDetailSidePanelShell";
 
-const SHOWROOM_VISIT_FORM_TAG = "showroom-visit";
+const PRODUCT_STORE_VISIT_FORM_TAG = "product-store-visit";
+/** Fallback product identity when booking outside PDP (store locator / nav). */
+const STORE_VISIT_PRODUCT_NAME = "Store Visit";
+const STORE_VISIT_PRODUCT_ID = "store-visit";
 
 type StoreLocatorListStatus = "default" | "search-match" | "no-area";
 
@@ -77,9 +79,8 @@ type BookStoreVisitPanelProps = {
   invalidPincodeMessage?: string | null;
   listCopy?: NormalizedStoreLocatorListCopy | null;
   /**
-   * PDP Visit Us only. When set (e.g. `product-store-visit`), submit via
-   * product-submissions so the booking appears under My Appointments.
-   * Store locator / mobile nav omit this — existing generic flow unchanged.
+   * Overrides the default `product-store-visit` form tag.
+   * Submit always uses product-submissions (My Appointments).
    */
   submissionFormTag?: string;
   productName?: string;
@@ -133,7 +134,9 @@ const BookStoreVisitPanel = ({
   const [notesLabel, setNotesLabel] = useState("Describe more about your visit");
   const [notesPlaceholder, setNotesPlaceholder] = useState("Enter");
   const [submitButtonText, setSubmitButtonText] = useState("BOOK A VISIT");
-  const [formTag, setFormTag] = useState(submissionFormTag ?? SHOWROOM_VISIT_FORM_TAG);
+  const [formTag, setFormTag] = useState(
+    submissionFormTag ?? PRODUCT_STORE_VISIT_FORM_TAG,
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedStoreId, setSelectedStoreId] = useState(
     () => getDefaultBookStoreVisitStoreId(initialStores ?? []),
@@ -317,11 +320,12 @@ const BookStoreVisitPanel = ({
 
     void (async () => {
       try {
-        const form = await getGenericFormByTag(SHOWROOM_VISIT_FORM_TAG, controller.signal);
+        const activeFormTag = submissionFormTag ?? PRODUCT_STORE_VISIT_FORM_TAG;
+        const form = await getProductFormByTag(activeFormTag, controller.signal);
         const resolvedStores = resolveBookStoreVisitStoresForPanel(
           variant,
           initialStores,
-          form?.showrooms ?? [],
+          [],
           editorialShowrooms,
         );
 
@@ -335,10 +339,7 @@ const BookStoreVisitPanel = ({
           return;
         }
 
-        // Keep PDP submission tag; only adopt CMS tag for generic Book a Visit.
-        if (!submissionFormTag) {
-          setFormTag(form.formTag || SHOWROOM_VISIT_FORM_TAG);
-        }
+        setFormTag(form.formTag || activeFormTag);
         if (form.formName) {
           setFormTitle(form.formName);
         }
@@ -347,9 +348,6 @@ const BookStoreVisitPanel = ({
         }
         if (form.timeSlots.length > 0) {
           setTimeSlots(form.timeSlots);
-        }
-        if (form.purposeOptions.length > 0) {
-          setPurposeOptions(form.purposeOptions);
         }
         if (form.nameLabel) {
           setNameLabel(form.nameLabel);
@@ -371,12 +369,6 @@ const BookStoreVisitPanel = ({
         }
         if (form.dateLabel) {
           setDateLabel(form.dateLabel);
-        }
-        if (form.purposeLabel) {
-          setPurposeLabel(form.purposeLabel);
-        }
-        if (form.purposePlaceholder) {
-          setPurposePlaceholder(form.purposePlaceholder);
         }
         if (form.notesLabel) {
           setNotesLabel(form.notesLabel);
@@ -413,9 +405,7 @@ const BookStoreVisitPanel = ({
   }, [open, variant, editorialShowrooms, submissionFormTag, initialStores]);
 
   useEffect(() => {
-    if (submissionFormTag) {
-      setFormTag(submissionFormTag);
-    }
+    setFormTag(submissionFormTag ?? PRODUCT_STORE_VISIT_FORM_TAG);
   }, [submissionFormTag]);
 
   useEffect(() => {
@@ -492,47 +482,23 @@ const BookStoreVisitPanel = ({
       const preferredShowroom =
         selectedStore.documentId ?? selectedStore.id;
 
-      // PDP Visit Us only — store locator / mobile nav keep generic-submissions.
-      const isProductStoreVisit =
-        Boolean(submissionFormTag) &&
-        Boolean(productName?.trim()) &&
-        Boolean(productId?.trim());
-
-      if (isProductStoreVisit) {
-        await createProductSubmission({
-          formTag: submissionFormTag!,
-          productName: productName!.trim(),
-          productId: productId!.trim(),
-          customerName: name.trim(),
-          customerPhone: `${countryCode} ${phone}`.trim(),
-          customerEmail: email.trim() || undefined,
-          ...(customer?.id != null ? { magentoCustomerId: customer.id } : {}),
-          requestDetails: composedNotes || undefined,
-          requestedDate: date || undefined,
-          selectedTimeSlot: selectedSlot ?? undefined,
-          preferredShowroom,
-          sourcePage:
-            typeof window !== "undefined" ? window.location.pathname : undefined,
-          consentAccepted: true,
-          workflowStatus: "New",
-        });
-      } else {
-        await createGenericSubmission({
-          formTag,
-          fullName: name.trim(),
-          email: email.trim() || undefined,
-          phone: `${countryCode} ${phone}`.trim(),
-          preferredShowroom,
-          preferredDate: date || undefined,
-          selectedTimeSlot: selectedSlot ?? undefined,
-          notes: composedNotes || undefined,
-          ...(customer?.id != null ? { magentoCustomerId: customer.id } : {}),
-          sourcePage:
-            typeof window !== "undefined" ? window.location.pathname : "/store-locator",
-          consentAccepted: true,
-          workflowStatus: "New",
-        });
-      }
+      await createProductSubmission({
+        formTag: formTag || PRODUCT_STORE_VISIT_FORM_TAG,
+        productName: productName?.trim() || STORE_VISIT_PRODUCT_NAME,
+        productId: productId?.trim() || STORE_VISIT_PRODUCT_ID,
+        customerName: name.trim(),
+        customerPhone: `${countryCode} ${phone}`.trim(),
+        customerEmail: email.trim() || undefined,
+        ...(customer?.id != null ? { magentoCustomerId: customer.id } : {}),
+        requestDetails: composedNotes || undefined,
+        requestedDate: date || undefined,
+        selectedTimeSlot: selectedSlot ?? undefined,
+        preferredShowroom,
+        sourcePage:
+          typeof window !== "undefined" ? window.location.pathname : undefined,
+        consentAccepted: true,
+        workflowStatus: "New",
+      });
 
       showStatusToast("Visit booked");
       handleClose();
