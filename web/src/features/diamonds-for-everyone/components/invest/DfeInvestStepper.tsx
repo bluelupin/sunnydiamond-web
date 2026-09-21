@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
+import type { NormalizedDfeStepperStep } from "@/services/diamonds-for-everyone/diamonds-for-everyone-page.types";
 import { diamondsForEveryonePageContent } from "../../data/content";
 import { useDfeInvestFlow, type DfeInvestStep } from "../../context/DfeInvestFlowContext";
 import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
@@ -42,10 +42,15 @@ function InvestStepCircle({
   );
 }
 
-const DfeInvestStepper = () => {
+type DfeInvestStepperProps = {
+  steps: NormalizedDfeStepperStep[];
+};
+
+const DfeInvestStepper = ({ steps }: DfeInvestStepperProps) => {
   const { step } = useDfeInvestFlow();
-  const { steps } = diamondsForEveryonePageContent.investFlow;
   const activeIndex = STEP_IDS.indexOf(step);
+
+  if (steps.length === 0) return null;
 
   return (
     <div className="flex w-full flex-col items-center gap-3 lg:gap-6 lg:px-10">
@@ -109,8 +114,8 @@ const DfeInvestStepper = () => {
   );
 };
 
-const DfeInvestHeader = () => {
-  const { intro, backLabel } = diamondsForEveryonePageContent.investFlow;
+const DfeInvestHeader = ({ heading }: { heading?: string }) => {
+  const { backLabel } = diamondsForEveryonePageContent.investFlow;
   const { goBack } = useDfeInvestFlow();
 
   return (
@@ -132,9 +137,11 @@ const DfeInvestHeader = () => {
           </defs>
         </svg>
       </button>
-      <h1 className="font-larken text-2xl font-light leading-110 text-darkblack lg:text-32">
-        {intro.title}
-      </h1>
+      {heading ? (
+        <h1 className="font-larken text-2xl font-light leading-110 text-darkblack lg:text-32">
+          {heading}
+        </h1>
+      ) : null}
       <div className="hidden size-10 shrink-0 lg:block" aria-hidden />
     </div>
   );

@@ -15,10 +15,10 @@ import { useDfeInvestFlow } from "../../context/DfeInvestFlowContext";
 
 const fieldLabelClass = "font-gill text-base font-normal leading-110 text-darkblack";
 const fieldInputClass =
-  "h-14 w-full bg-aboutInactive p-3 font-gill text-base font-normal leading-110 text-darkblack outline-none";
+  "h-14 w-full bg-aboutInactive p-3 font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600";
 
 const DfeInvestNomineeStep = () => {
-  const { nominee, cancelLabel } = diamondsForEveryonePageContent.investFlow;
+  const { nominee } = diamondsForEveryonePageContent.investFlow;
   const {
     nomineeName,
     nomineeRelationship,
@@ -29,6 +29,7 @@ const DfeInvestNomineeStep = () => {
     setNomineePhone,
     setNomineeEmail,
     goNext,
+    cancelButtonLabel,
   } = useDfeInvestFlow();
 
   const [touched, setTouched] = useState(false);
@@ -89,6 +90,7 @@ const DfeInvestNomineeStep = () => {
               value={nomineeName}
               onChange={(event) => setNomineeName(event.target.value)}
               onBlur={() => setTouched(true)}
+              placeholder={nominee.namePlaceholder}
               className={fieldInputClass}
             />
           </div>
@@ -100,6 +102,7 @@ const DfeInvestNomineeStep = () => {
             onChange={setNomineeRelationship}
             onBlur={() => setTouched(true)}
             options={nominee.relationshipOptions}
+            placeholder={nominee.relationshipPlaceholder}
             labelClassName={fieldLabelClass}
           />
 
@@ -110,11 +113,13 @@ const DfeInvestNomineeStep = () => {
             <input
               id="dfe-nominee-phone"
               type="tel"
+              inputMode="numeric"
               value={nomineePhone}
               onChange={(event) =>
                 setNomineePhone(event.target.value.replace(/\D/g, "").slice(0, 10))
               }
               onBlur={() => setTouched(true)}
+              placeholder={nominee.phonePlaceholder}
               className={cn(fieldInputClass, phoneError && invalidFieldClassName)}
             />
             <FormFieldError message={phoneError} />
@@ -130,6 +135,7 @@ const DfeInvestNomineeStep = () => {
               value={nomineeEmail}
               onChange={(event) => setNomineeEmail(event.target.value)}
               onBlur={() => setTouched(true)}
+              placeholder={nominee.emailPlaceholder}
               className={cn(fieldInputClass, emailError && invalidFieldClassName)}
             />
             <FormFieldError message={emailError} />
@@ -155,12 +161,14 @@ const DfeInvestNomineeStep = () => {
             nominee.reviewAndPayLabel
           )}
         </button>
-        <Link
-          href="/diamonds-for-everyone"
-          className="text-tertiary-cta-underline cursor-pointer pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
-        >
-          {cancelLabel}
-        </Link>
+        {cancelButtonLabel ? (
+          <Link
+            href="/diamonds-for-everyone"
+            className="text-tertiary-cta-underline cursor-pointer pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
+          >
+            {cancelButtonLabel}
+          </Link>
+        ) : null}
       </div>
     </div>
   );

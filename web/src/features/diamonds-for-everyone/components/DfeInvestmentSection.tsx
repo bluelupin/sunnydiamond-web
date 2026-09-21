@@ -40,10 +40,9 @@ const DfeInvestmentSection = ({ investmentPlanner }: DfeInvestmentSectionProps) 
   const imageAlt =
     image?.desktopAlt?.trim() ||
     image?.mobileAlt?.trim() ||
-    investmentPlanner.title;
+    "";
   const buttonLabel = investmentPlanner.buttonLabel?.trim();
-  const monthlyDescription =
-    investmentPlanner.description?.trim() || investment.monthlyLabel;
+  const monthlyDescription = investmentPlanner.description?.trim();
   const monthlySummary = investmentPlanner.monthlySummary?.trim();
 
   return (

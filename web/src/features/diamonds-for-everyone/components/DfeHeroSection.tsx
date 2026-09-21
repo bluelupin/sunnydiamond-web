@@ -9,22 +9,28 @@ type DfeHeroSectionProps = {
 };
 
 const DfeHeroSection = ({ hero }: DfeHeroSectionProps) => {
-  const imageAlt = hero.image?.alt?.trim() || hero.title;
+  const heroImage = hero.image;
+  const hasHeroImage = Boolean(
+    heroImage?.desktopUrl?.trim() || heroImage?.mobileUrl?.trim(),
+  );
+  const imageAlt = heroImage?.alt?.trim() || "";
 
   return (
     <section
       aria-labelledby="dfe-hero-title"
       className="relative grid h-[240px] w-full overflow-hidden bg-white md:h-320"
     >
-      <div className="relative col-start-1 row-start-1 size-full [&_img]:object-[62%_38%] md:[&_img]:object-[58%_42%] [&_video]:object-[62%_38%] md:[&_video]:object-[58%_42%]">
-        <HeroBackgroundMedia
-          desktopImageUrl={hero.image?.desktopUrl ?? ""}
-          mobileImageUrl={hero.image?.mobileUrl}
-          desktopAlt={imageAlt}
-          mobileAlt={imageAlt}
-        />
-        <MediaContentOverlay gradient="bottom-strong" />
-      </div>
+      {hasHeroImage ? (
+        <div className="relative col-start-1 row-start-1 size-full [&_img]:object-[62%_38%] md:[&_img]:object-[58%_42%] [&_video]:object-[62%_38%] md:[&_video]:object-[58%_42%]">
+          <HeroBackgroundMedia
+            desktopImageUrl={heroImage!.desktopUrl}
+            mobileImageUrl={heroImage!.mobileUrl}
+            desktopAlt={imageAlt}
+            mobileAlt={imageAlt}
+          />
+          <MediaContentOverlay gradient="bottom-strong" />
+        </div>
+      ) : null}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-10 lg:pb-16">
         <h1
           id="dfe-hero-title"

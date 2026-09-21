@@ -11,19 +11,27 @@ import {
   type NormalizedDfeFaq,
   type NormalizedDfeHero,
   type NormalizedDfeHeroImage,
+  type NormalizedDfeAccountSetup,
+  type NormalizedDfeAccountSetupStep,
   type NormalizedDfeInvestmentPlanner,
+  type NormalizedDfeStepperStep,
   type NormalizedDfePlanIntro,
   type NormalizedDfeResponsiveImage,
   type NormalizedDfeSeo,
+  type NormalizedDfeSuccessScreen,
   type NormalizedDiamondsForEveryonePage,
+  type StrapiDfeAccountSetupStep,
   type StrapiDfeBenefitsSection,
   type StrapiDfeCta,
   type StrapiDfeFaqSection,
   type StrapiDfeHeroSection,
   type StrapiDfeInvestmentPlannerSection,
+  type StrapiDfeMediaFile,
   type StrapiDfePlanIntroSection,
   type StrapiDfeResponsiveImage,
   type StrapiDfeSeo,
+  type StrapiDfeStepperStep,
+  type StrapiDfeSuccessScreen,
   type StrapiDiamondsForEveryonePage,
 } from "./diamonds-for-everyone-page.types";
 
@@ -142,6 +150,57 @@ const mapPlanIntro = (
   };
 };
 
+const mapAccountSetupSteps = (
+  steps?: StrapiDfeAccountSetupStep[] | null,
+): NormalizedDfeAccountSetupStep[] =>
+  (steps ?? [])
+    .map((step, index) => {
+      const label = cleanText(step?.label);
+      const description = cleanText(step?.description);
+      if (!label || !description) return null;
+
+      return {
+        id: step?.id != null ? String(step.id) : `account-setup-${index + 1}`,
+        label,
+        description,
+      };
+    })
+    .filter((step): step is NormalizedDfeAccountSetupStep => step != null);
+
+const mapStepperSteps = (
+  steps?: StrapiDfeStepperStep[] | null,
+): NormalizedDfeStepperStep[] =>
+  (steps ?? [])
+    .map((step, index) => {
+      const label = cleanText(step?.label);
+      if (!label) return null;
+
+      return {
+        id: step?.id != null ? String(step.id) : `stepper-${index + 1}`,
+        label,
+      };
+    })
+    .filter((step): step is NormalizedDfeStepperStep => step != null);
+
+const mapAccountSetup = (
+  section: StrapiDfeInvestmentPlannerSection,
+): NormalizedDfeAccountSetup | null => {
+  const heading = cleanText(section.accountSetupHeading);
+  if (!heading) return null;
+
+  const description = cleanText(section.accountSetupDescription);
+  const openAccountButtonLabel = cleanText(section.openAccountButtonLabel);
+  const cancelButtonLabel = cleanText(section.cancelButtonLabel);
+
+  return {
+    heading,
+    ...(description ? { description } : {}),
+    ...(openAccountButtonLabel ? { openAccountButtonLabel } : {}),
+    ...(cancelButtonLabel ? { cancelButtonLabel } : {}),
+    steps: mapAccountSetupSteps(section.accountSetupSteps),
+  };
+};
+
 const mapInvestmentPlanner = (
   section?: StrapiDfeInvestmentPlannerSection | null,
 ): NormalizedDfeInvestmentPlanner | null => {
@@ -161,6 +220,9 @@ const mapInvestmentPlanner = (
     ...(buttonLabel ? { buttonLabel } : {}),
     cta: mapCta(section.cta),
     image: mapResponsiveImage(section.image),
+    backgroundImage: mapResponsiveImage(section.backgroundImage),
+    accountSetup: mapAccountSetup(section),
+    stepperSteps: mapStepperSteps(section.stepperSteps),
   };
 };
 
@@ -209,6 +271,62 @@ const mapBenefits = (
   };
 };
 
+const normalizeCmsLinkUrl = (value?: string | null): string | undefined => {
+  const cleaned = cleanText(value);
+  if (!cleaned) return undefined;
+  if (/^https?:\/\//i.test(cleaned)) return cleaned;
+  return cleaned.startsWith("/") ? cleaned : `/${cleaned}`;
+};
+
+const isResponsiveImage = (
+  media: StrapiDfeResponsiveImage | StrapiDfeMediaFile,
+): media is StrapiDfeResponsiveImage =>
+  "desktopImage" in media || "mobileImage" in media || "altText" in media;
+
+const mapSuccessMedia = (
+  media?: StrapiDfeResponsiveImage | StrapiDfeMediaFile | null,
+): NormalizedDfeResponsiveImage | null => {
+  if (!media) return null;
+  if (isResponsiveImage(media)) return mapResponsiveImage(media);
+
+  const url = resolveCmsMediaUrl(media);
+  if (!url) return null;
+
+  const alt = resolveCmsAltText(media) ?? "";
+  return {
+    desktopUrl: url,
+    mobileUrl: url,
+    desktopAlt: alt,
+    mobileAlt: alt,
+  };
+};
+
+const mapSuccessScreen = (
+  screen?: StrapiDfeSuccessScreen | null,
+): NormalizedDfeSuccessScreen | null => {
+  if (!screen) return null;
+
+  const heading = cleanText(screen.heading);
+  if (!heading) return null;
+
+  const description = cleanText(screen.description);
+  const managePaymentsButtonLabel = cleanText(screen.managePaymentsButtonLabel);
+  const managePaymentsUrl = normalizeCmsLinkUrl(screen.managePaymentsUrl);
+  const shoppingLinkLabel = cleanText(screen.shoppingLinkLabel);
+  const shoppingUrl = normalizeCmsLinkUrl(screen.shoppingUrl);
+
+  return {
+    heading,
+    ...(description ? { description } : {}),
+    ...(managePaymentsButtonLabel ? { managePaymentsButtonLabel } : {}),
+    ...(managePaymentsUrl ? { managePaymentsUrl } : {}),
+    ...(shoppingLinkLabel ? { shoppingLinkLabel } : {}),
+    ...(shoppingUrl ? { shoppingUrl } : {}),
+    icon: mapSuccessMedia(screen.successIcon),
+    image: mapResponsiveImage(screen.image),
+  };
+};
+
 const mapFaq = (section?: StrapiDfeFaqSection | null): NormalizedDfeFaq | null => {
   if (!section || !resolveSectionActive(section.isActive, section.showField)) return null;
 
@@ -243,6 +361,7 @@ export function mapDiamondsForEveryonePage(
     investmentPlanner: mapInvestmentPlanner(raw.investmentPlannerSection),
     benefits: mapBenefits(raw.benefitsSection),
     faq: mapFaq(raw.faqSection),
+    successScreen: mapSuccessScreen(raw.successScreen),
     seo: mapSeo(raw.seo),
   };
 }

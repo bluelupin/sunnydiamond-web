@@ -1,17 +1,22 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { constructMetadata } from "@/shared/lib/seo/metadata";
+import { siteConfig } from "@/shared/lib/siteConfig";
 import DfeInvestPage from "@/features/diamonds-for-everyone/components/invest/DfeInvestPage";
-import { diamondsForEveryonePageContent } from "@/features/diamonds-for-everyone/data/content";
 import { parseDfeInvestAmount } from "@/features/diamonds-for-everyone/utils/investRoutes";
 import { getDiamondsForEveryonePage } from "@/services/diamonds-for-everyone/diamonds-for-everyone-page.service";
 
-export const metadata: Metadata = constructMetadata({
-  title: diamondsForEveryonePageContent.investFlow.pageTitle,
-  description:
-    "Open your Diamonds for Everyone account, complete KYC, add a nominee, and review your savings plan with Sunny Diamonds.",
-  canonicalPath: "/diamonds-for-everyone/invest",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getDiamondsForEveryonePage();
+  const title = page.investmentPlanner?.accountSetup?.heading;
+  const description = page.investmentPlanner?.accountSetup?.description;
+
+  return constructMetadata({
+    title: title ?? siteConfig.brand.name,
+    ...(description ? { description } : {}),
+    canonicalPath: "/diamonds-for-everyone/invest",
+  });
+}
 
 type PageProps = {
   searchParams: Promise<{ amount?: string }>;
@@ -27,6 +32,9 @@ export default async function Page({ searchParams }: PageProps) {
       <DfeInvestPage
         monthlyAmount={monthlyAmount}
         investmentPlannerImage={page.investmentPlanner?.image ?? null}
+        accountSetup={page.investmentPlanner?.accountSetup ?? null}
+        stepperSteps={page.investmentPlanner?.stepperSteps ?? []}
+        successScreen={page.successScreen}
       />
     </Suspense>
   );

@@ -40,16 +40,34 @@ export type StrapiDfePlanIntroSection = {
   textureImage?: StrapiDfeResponsiveImage | null;
 };
 
+export type StrapiDfeAccountSetupStep = {
+  id?: number;
+  label?: string | null;
+  description?: string | null;
+};
+
+export type StrapiDfeStepperStep = {
+  id?: number;
+  label?: string | null;
+};
+
 export type StrapiDfeInvestmentPlannerSection = {
   id?: number;
   title?: string | null;
   description?: string | null;
   monthlySummary?: string | null;
   buttonLabel?: string | null;
+  accountSetupHeading?: string | null;
+  accountSetupDescription?: string | null;
+  openAccountButtonLabel?: string | null;
+  cancelButtonLabel?: string | null;
+  accountSetupSteps?: StrapiDfeAccountSetupStep[] | null;
+  stepperSteps?: StrapiDfeStepperStep[] | null;
   isActive?: boolean | null;
   showField?: boolean | null;
   cta?: StrapiDfeCta | null;
   image?: StrapiDfeResponsiveImage | null;
+  backgroundImage?: StrapiDfeResponsiveImage | null;
 };
 
 export type StrapiDfeBenefitStep = {
@@ -99,6 +117,18 @@ export type StrapiDfeSeo = {
   showField?: boolean | null;
 };
 
+export type StrapiDfeSuccessScreen = {
+  id?: number;
+  heading?: string | null;
+  description?: string | null;
+  managePaymentsButtonLabel?: string | null;
+  managePaymentsUrl?: string | null;
+  shoppingLinkLabel?: string | null;
+  shoppingUrl?: string | null;
+  successIcon?: StrapiDfeResponsiveImage | StrapiDfeMediaFile | null;
+  image?: StrapiDfeResponsiveImage | null;
+};
+
 export type StrapiDiamondsForEveryonePage = {
   id?: number;
   documentId?: string | null;
@@ -108,6 +138,7 @@ export type StrapiDiamondsForEveryonePage = {
   investmentPlannerSection?: StrapiDfeInvestmentPlannerSection | null;
   benefitsSection?: StrapiDfeBenefitsSection | null;
   faqSection?: StrapiDfeFaqSection | null;
+  successScreen?: StrapiDfeSuccessScreen | null;
   seo?: StrapiDfeSeo | null;
 };
 
@@ -146,6 +177,25 @@ export type NormalizedDfePlanIntro = {
   textureImage: NormalizedDfeResponsiveImage | null;
 };
 
+export type NormalizedDfeAccountSetupStep = {
+  id: string;
+  label: string;
+  description: string;
+};
+
+export type NormalizedDfeAccountSetup = {
+  heading: string;
+  description?: string;
+  openAccountButtonLabel?: string;
+  cancelButtonLabel?: string;
+  steps: NormalizedDfeAccountSetupStep[];
+};
+
+export type NormalizedDfeStepperStep = {
+  id: string;
+  label: string;
+};
+
 export type NormalizedDfeInvestmentPlanner = {
   title: string;
   description?: string;
@@ -153,6 +203,9 @@ export type NormalizedDfeInvestmentPlanner = {
   buttonLabel?: string;
   cta?: NormalizedDfeCta | null;
   image: NormalizedDfeResponsiveImage | null;
+  backgroundImage: NormalizedDfeResponsiveImage | null;
+  accountSetup: NormalizedDfeAccountSetup | null;
+  stepperSteps: NormalizedDfeStepperStep[];
 };
 
 export type NormalizedDfeBenefitStep = {
@@ -191,12 +244,24 @@ export type NormalizedDfeSeo = {
   ogImageUrl?: string;
 };
 
+export type NormalizedDfeSuccessScreen = {
+  heading: string;
+  description?: string;
+  managePaymentsButtonLabel?: string;
+  managePaymentsUrl?: string;
+  shoppingLinkLabel?: string;
+  shoppingUrl?: string;
+  icon: NormalizedDfeResponsiveImage | null;
+  image: NormalizedDfeResponsiveImage | null;
+};
+
 export type NormalizedDiamondsForEveryonePage = {
   hero: NormalizedDfeHero | null;
   planIntro: NormalizedDfePlanIntro | null;
   investmentPlanner: NormalizedDfeInvestmentPlanner | null;
   benefits: NormalizedDfeBenefits | null;
   faq: NormalizedDfeFaq | null;
+  successScreen: NormalizedDfeSuccessScreen | null;
   seo: NormalizedDfeSeo | null;
 };
 
@@ -206,5 +271,6 @@ export const EMPTY_DIAMONDS_FOR_EVERYONE_PAGE: NormalizedDiamondsForEveryonePage
   investmentPlanner: null,
   benefits: null,
   faq: null,
+  successScreen: null,
   seo: null,
 };

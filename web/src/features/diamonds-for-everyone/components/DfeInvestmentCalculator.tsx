@@ -38,9 +38,11 @@ const DfeInvestmentCalculator = ({
   return (
     <div className={cn("flex flex-col gap-6", className)}>
       <div className="flex flex-col gap-6">
-        <p className="font-gill text-base font-normal leading-110 text-[#2B2B2B]">
-          {monthlyDescription ?? investment.monthlyLabel}
-        </p>
+        {monthlyDescription ? (
+          <p className="font-gill text-base font-normal leading-110 text-[#2B2B2B]">
+            {monthlyDescription}
+          </p>
+        ) : null}
         <div className="flex flex-col gap-6">
           <div className="relative h-[6px] w-full bg-neutral300">
             <div

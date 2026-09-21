@@ -1,6 +1,6 @@
 import { formatInr } from "@/features/diamonds-for-everyone/utils/formatInr";
 
-const SUMMARY_DIVIDER_SRC = "/images/diamonds-for-everyone/invest-review-divider.svg";
+const SUMMARY_DIVIDER_SRC = "/icons/invest-review-divider.svg";
 
 type ProfileDfeInvestmentSummaryProps = {
   contributionLabel: string;

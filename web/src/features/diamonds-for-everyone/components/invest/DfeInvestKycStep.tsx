@@ -20,8 +20,8 @@ function isValidAadhaar(value: string): boolean {
 }
 
 const DfeInvestKycStep = () => {
-  const { kyc, cancelLabel, nextLabel } = diamondsForEveryonePageContent.investFlow;
-  const { idType, idNumber, idFile, setIdType, setIdNumber, setIdFile, goNext } =
+  const { kyc, nextLabel } = diamondsForEveryonePageContent.investFlow;
+  const { idType, idNumber, idFile, setIdType, setIdNumber, setIdFile, goNext, cancelButtonLabel } =
     useDfeInvestFlow();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -145,12 +145,14 @@ const DfeInvestKycStep = () => {
         >
           {canProceed ? <span className="relative z-10">{nextLabel}</span> : nextLabel}
         </button>
-        <Link
-          href="/diamonds-for-everyone"
-          className="text-tertiary-cta-underline cursor-pointer pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
-        >
-          {cancelLabel}
-        </Link>
+        {cancelButtonLabel ? (
+          <Link
+            href="/diamonds-for-everyone"
+            className="text-tertiary-cta-underline cursor-pointer pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
+          >
+            {cancelButtonLabel}
+          </Link>
+        ) : null}
       </div>
     </div>
   );

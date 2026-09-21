@@ -38,7 +38,7 @@ const DfePlanBannerSection = ({ planIntro }: DfePlanBannerSectionProps) => {
   const desktopProductAlt =
     background?.desktopAlt?.trim() ||
     background?.mobileAlt?.trim() ||
-    planIntro.title;
+    "";
   const hasMobileTexture = Boolean(textureMobileUrl);
   const hasDesktopProduct = Boolean(desktopProductUrl);
 

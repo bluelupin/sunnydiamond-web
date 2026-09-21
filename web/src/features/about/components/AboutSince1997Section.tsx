@@ -39,7 +39,7 @@ function GalleryImage({
   captionClassName,
   dataSince1997Last,
 }: GalleryImageProps) {
-  const overlayLabel = caption ?? description;
+  const overlayLabel = caption;
 
   return (
     <figure

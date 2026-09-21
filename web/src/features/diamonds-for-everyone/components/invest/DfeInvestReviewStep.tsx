@@ -12,7 +12,7 @@ import { maskIdNumber } from "../../utils/maskIdNumber";
 import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 import { cn } from "@/shared/utils/cn";
 
-const DIVIDER_SRC = "/images/diamonds-for-everyone/invest-review-divider.svg";
+const DIVIDER_SRC = "/icons/invest-review-divider.svg";
 const INFO_ICON_SRC = "/images/diamonds-for-everyone/invest-review-info.svg";
 
 function ReviewDivider() {
@@ -78,7 +78,7 @@ function SectionEditHeader({
 
 const DfeInvestReviewStep = () => {
   const { investment } = diamondsForEveryonePageContent;
-  const { review, cancelLabel, payLabel } = diamondsForEveryonePageContent.investFlow;
+  const { review, payLabel } = diamondsForEveryonePageContent.investFlow;
   const { customer } = useAuth();
   const {
     monthlyAmount,
@@ -94,6 +94,7 @@ const DfeInvestReviewStep = () => {
     nomineeEmail,
     goToStep,
     completeEnrollment,
+    cancelButtonLabel,
   } = useDfeInvestFlow();
 
   const bonus = monthlyAmount;
@@ -287,12 +288,14 @@ const DfeInvestReviewStep = () => {
         >
           <span className="relative z-10">{payLabel}</span>
         </button>
-        <Link
-          href="/diamonds-for-everyone"
-          className="text-tertiary-cta-underline cursor-pointer pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
-        >
-          {cancelLabel}
-        </Link>
+        {cancelButtonLabel ? (
+          <Link
+            href="/diamonds-for-everyone"
+            className="text-tertiary-cta-underline cursor-pointer pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
+          >
+            {cancelButtonLabel}
+          </Link>
+        ) : null}
       </div>
     </div>
   );

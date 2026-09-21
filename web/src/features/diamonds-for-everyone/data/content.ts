@@ -5,7 +5,6 @@
 export const diamondsForEveryonePageContent = {
   investment: {
     title: "Plan Your Investment",
-    monthlyLabel: "Choose how much you'd like to contribute each month.",
     summaryTitle: "Your 12-Month Summary",
     contributionLabel: "Your Contribution",
     freeInstallmentLabel: "Bonus",
@@ -20,37 +19,9 @@ export const diamondsForEveryonePageContent = {
     totalMonths: 12,
   },
   investFlow: {
-    /** Figma nodes 4453:33669 (desktop) / 4453:39061 (mobile) — invest intro step */
-    pageTitle: "Your Investment Plan",
     backLabel: "Back to Diamonds for Everyone",
-    cancelLabel: "CANCEL",
     nextLabel: "NEXT",
     payLabel: "PAY NOW",
-    intro: {
-      title: "Diamonds for Everyone",
-      subtitle:
-        "Keep the following ready and set up your account in 3 simple steps.",
-      steps: [
-        {
-          label: "Verify Your Identity",
-          detail: "Your government-issued ID",
-        },
-        {
-          label: "Add a Nominee",
-          detail: "Details of your chosen nominee",
-        },
-        {
-          label: "Make Your First Contribution",
-          detail: "Your payment method and details",
-        },
-      ],
-      openAccountLabel: "OPEN YOUR ACCOUNT",
-    },
-    steps: [
-      { id: "kyc", label: "Quick KYC" },
-      { id: "nominee", label: "Add a Nominee" },
-      { id: "review", label: "Review & Pay" },
-    ],
     kyc: {
       title: "Complete Quick KYC",
       idTypeLabel: "ID Type*",
@@ -67,10 +38,14 @@ export const diamondsForEveryonePageContent = {
       mobileTitle: "Add a Nominee",
       subtitle: "Add the details of your chosen nominee.",
       nameLabel: "Full Name*",
+      namePlaceholder: "Enter full name",
       relationshipLabel: "Relationship*",
+      relationshipPlaceholder: "Select relationship",
       relationshipOptions: ["Spouse", "Parent", "Child", "Sister", "Other"],
       phoneLabel: "Phone No.*",
+      phonePlaceholder: "Enter phone number",
       emailLabel: "Email ID",
+      emailPlaceholder: "Enter email address",
       phoneError: "Please enter a valid phone number",
       emailError: "Please enter a valid email",
       reviewAndPayLabel: "REVIEW AND PAY",
@@ -99,20 +74,6 @@ export const diamondsForEveryonePageContent = {
       nomineeRelationshipLabel: "Relationship",
       nomineePhoneLabel: "Phone No.",
       nomineeEmailLabel: "Email ID",
-    },
-    success: {
-      /** Figma 4453:33975 desktop, 4453:39314 mobile */
-      title: "Welcome to Diamonds for Everyone",
-      subtitle:
-        "You're all set. Monthly instalment reminders will be sent to your registered email address.",
-      managePaymentsLabel: "MANAGE PAYMENTS",
-      managePaymentsHref: "/profile",
-      backToShoppingLabel: "GO BACK TO SHOPPING",
-      backToShoppingHref: "/",
-      image: {
-        src: "/images/diamonds-for-everyone/invest-success-rings.png",
-        alt: "Diamond rings",
-      },
     },
   },
 } as const;
