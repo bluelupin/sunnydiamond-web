@@ -20,8 +20,10 @@ import type {
 } from "../types/profileUi.types";
 import {
   canModifyAppointmentBeforeDeadline,
-  formatTryAtHomeAddItemsDeadline,
+  formatTryAtHomeRescheduleDeadline,
 } from "@/features/products/utils/tryAtHomeBooking";
+import { canCancelAppointmentUntilOneMinuteBefore } from "@/features/products/utils/appointmentCancelDeadline";
+import { APPOINTMENT_COUNTRY_CODES } from "@/shared/constants/appointmentForm";
 import {
   formatAppointmentDate,
   formatOrderDate,
@@ -205,13 +207,41 @@ function inferAppointmentType(formTag: string): AppointmentFilterKey {
 }
 
 function canModifyAppointment(workflowStatus: string): boolean {
-  const normalized = workflowStatus.toLowerCase();
+  const normalized = workflowStatus.trim().toLowerCase();
+  if (!normalized) {
+    return true;
+  }
+
   return (
     !normalized.includes("cancel") &&
     !normalized.includes("complete") &&
     !normalized.includes("done") &&
     !normalized.includes("closed")
   );
+}
+
+function resolveAppointmentWorkflowStatus(
+  appointment: CustomerAppointment,
+): string {
+  const topLevel = appointment.workflowStatus?.trim() ?? "";
+  if (topLevel) {
+    return topLevel;
+  }
+
+  const productStatuses = appointment.products
+    .map((product) => product.workflowStatus?.trim())
+    .filter(Boolean);
+
+  if (productStatuses.length === 0) {
+    return "";
+  }
+
+  // If every product is cancelled/closed, treat the card as non-modifiable.
+  if (productStatuses.every((status) => !canModifyAppointment(status))) {
+    return productStatuses[0] ?? "Cancelled";
+  }
+
+  return productStatuses[0] ?? "";
 }
 
 function mapAppointmentAddressToUi(
@@ -234,8 +264,47 @@ function mapAppointmentAddressToUi(
     city,
     state,
     pincode,
-    phone: appointment.customerPhone,
+    phone: formatAppointmentPhoneDisplay(appointment.customerPhone),
   };
+}
+
+/** Figma Personal Details: "+91 9898989989" (country code + space + national number). */
+function formatAppointmentPhoneDisplay(rawPhone: string): string {
+  const trimmed = rawPhone.trim();
+  if (!trimmed) {
+    return "";
+  }
+
+  if (/^\+\d{1,3}\s+\d+$/.test(trimmed)) {
+    return trimmed;
+  }
+
+  const sortedCodes = [...APPOINTMENT_COUNTRY_CODES]
+    .map((entry) => entry.code)
+    .sort((a, b) => b.length - a.length);
+
+  for (const code of sortedCodes) {
+    if (trimmed.startsWith(code)) {
+      const national = trimmed.slice(code.length).replace(/\D/g, "");
+      return national ? `${code} ${national}` : code;
+    }
+  }
+
+  const spaced = /^(\+\d{1,3})\s*(.*)$/.exec(trimmed);
+  if (spaced) {
+    const national = spaced[2].replace(/\D/g, "");
+    return national ? `${spaced[1]} ${national}` : spaced[1];
+  }
+
+  const digits = trimmed.replace(/\D/g, "");
+  if (digits.length === 10) {
+    return `+91 ${digits}`;
+  }
+  if (digits.length === 12 && digits.startsWith("91")) {
+    return `+91 ${digits.slice(2)}`;
+  }
+
+  return trimmed;
 }
 
 function mapOrderItems(
@@ -363,27 +432,52 @@ export function mapCustomerAppointmentToProfileUi(
     appointment.preferredShowroom?.state,
   ].filter((part): part is string => Boolean(part));
 
-  const productSku = appointment.productId?.trim();
-  const productImage =
-    productSku && productImageBySku?.[productSku]
-      ? productImageBySku[productSku]
-      : undefined;
-
   const products =
-    appointment.productName
-      ? [
-          {
-            id: appointment.productId ?? appointment.documentId,
-            name: appointment.productName,
-            ...(productImage ? { imageSrc: productImage } : {}),
-          },
-        ]
-      : [];
+    appointment.products.length > 0
+      ? appointment.products.map((product, index) => {
+          const productSku = product.productId?.trim() ?? "";
+          const productImage =
+            productSku && productImageBySku?.[productSku]
+              ? productImageBySku[productSku]
+              : undefined;
 
-  const canModify = canModifyAppointment(appointment.workflowStatus);
+          return {
+            // Prefer CMS documentId — Magento productId can repeat across clubbed rows.
+            id:
+              product.documentId ||
+              product.productId ||
+              `${appointment.documentId}-${index}`,
+            name: product.productName ?? appointment.productName ?? "Product",
+            ...(productImage ? { imageSrc: productImage } : {}),
+          };
+        })
+      : (() => {
+          if (!appointment.productName) return [];
+          const productSku = appointment.productId?.trim() ?? "";
+          const productImage =
+            productSku && productImageBySku?.[productSku]
+              ? productImageBySku[productSku]
+              : undefined;
+          return [
+            {
+              id: appointment.documentId,
+              name: appointment.productName,
+              ...(productImage ? { imageSrc: productImage } : {}),
+            },
+          ];
+        })();
+
+  const workflowStatus = resolveAppointmentWorkflowStatus(appointment);
+  const canModify = canModifyAppointment(workflowStatus);
   const canReschedule =
     canModify && canModifyAppointmentBeforeDeadline(appointment.requestedDate);
-  const rescheduleDeadline = formatTryAtHomeAddItemsDeadline(appointment.requestedDate);
+  const canCancel =
+    canModify &&
+    canCancelAppointmentUntilOneMinuteBefore(
+      appointment.requestedDate,
+      appointment.selectedTimeSlot,
+    );
+  const rescheduleDeadline = formatTryAtHomeRescheduleDeadline(appointment.requestedDate);
 
   const base: ProfileAppointmentUi = {
     id: appointment.documentId,
@@ -391,7 +485,7 @@ export function mapCustomerAppointmentToProfileUi(
     type,
     typeLabel,
     customerName: appointment.customerName,
-    customerPhone: appointment.customerPhone,
+    customerPhone: formatAppointmentPhoneDisplay(appointment.customerPhone),
     customerEmail: appointment.customerEmail,
     requestedDate: appointment.requestedDate,
     products,
@@ -408,7 +502,7 @@ export function mapCustomerAppointmentToProfileUi(
         )
       : undefined,
     canReschedule,
-    canCancel: canModify,
+    canCancel,
   };
 
   if (type === "try_at_home") {

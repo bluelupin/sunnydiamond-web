@@ -188,7 +188,8 @@ function mapSupport(
     phoneLabel,
     phoneHref,
     emailLabel,
-    hours: parseAvailabilityHours(phone?.availability),
+    // CMS removed `availability`; Call Us hours now live on `description` (same key as email).
+    hours: parseAvailabilityHours(phone?.description ?? phone?.availability),
   };
 }
 

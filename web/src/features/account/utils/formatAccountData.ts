@@ -104,7 +104,20 @@ export function formatAddressLines(lines: string[]): string {
 }
 
 export function formatAppointmentDate(requestedDate: string): string {
-  return formatOrderDate(requestedDate);
+  const trimmed = requestedDate.trim();
+  if (!trimmed) {
+    return requestedDate;
+  }
+
+  const date = parseOrderDateValue(trimmed);
+  if (!date) {
+    return trimmed;
+  }
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
 }
 
 export function formatAppointmentFormTag(formTag: string): string {

@@ -324,7 +324,14 @@ export const isAppointmentContactValid = (
 
 export const sanitizePhoneInput = (value: string, countryCode: string): string => {
   const digits = value.replace(/\D/g, "");
-  const maxLength = countryCode === "+91" || countryCode === "+1" ? 10 : 15;
+  const trimmedCode = countryCode.trim();
+  const normalizedCode = trimmedCode
+    ? trimmedCode.startsWith("+")
+      ? trimmedCode
+      : `+${trimmedCode}`
+    : "+91";
+  // Appointment / form mobiles: India & US = 10; UK = 11; default hard-cap 10.
+  const maxLength = normalizedCode === "+44" ? 11 : 10;
   return digits.slice(0, maxLength);
 };
 

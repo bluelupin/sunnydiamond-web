@@ -154,6 +154,8 @@ export type ProfileAppointmentUi = {
   rescheduleNote?: string;
   canReschedule: boolean;
   canCancel: boolean;
+  /** When clubbed, cancel/reschedule applies to all underlying appointment ids. */
+  clubbedAppointmentIds?: string[];
 };
 
 export type ProfileBespokeItemUi = {

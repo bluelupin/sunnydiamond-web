@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 
 /** Local AppStatusToast state for panels that must show feedback after closing. */
 export function useAppStatusToastController(durationMs = appStatusToastDurationMs) {
   const [message, setMessage] = useState<string | null>(null);
+  const [action, setAction] = useState<ReactNode>(undefined);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const dismiss = useCallback(() => {
@@ -15,10 +16,11 @@ export function useAppStatusToastController(durationMs = appStatusToastDurationM
     }
 
     setMessage(null);
+    setAction(undefined);
   }, []);
 
   const show = useCallback(
-    (nextMessage: string) => {
+    (nextMessage: string, options?: { action?: ReactNode }) => {
       const trimmed = nextMessage.trim();
       if (!trimmed) {
         return;
@@ -26,8 +28,10 @@ export function useAppStatusToastController(durationMs = appStatusToastDurationM
 
       dismiss();
       setMessage(trimmed);
+      setAction(options?.action);
       timeoutRef.current = setTimeout(() => {
         setMessage(null);
+        setAction(undefined);
         timeoutRef.current = null;
       }, durationMs);
     },
@@ -43,7 +47,9 @@ export function useAppStatusToastController(durationMs = appStatusToastDurationM
     [],
   );
 
-  const node = <AppStatusToast open={Boolean(message)} message={message ?? ""} />;
+  const node = (
+    <AppStatusToast open={Boolean(message)} message={message ?? ""} action={action} />
+  );
 
   return { show, dismiss, node };
 }

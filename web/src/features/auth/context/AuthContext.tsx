@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { clearGuestWishlistStorage } from "@/features/wishlist/utils/guestWishlistStorage";
+import { clearAuthLoginIdentifierKind } from "@/features/auth/utils/authLoginIdentifier";
 import { sanitizeAuthCustomer } from "@/shared/utils/customerName";
 
 export type AuthCustomer = {
@@ -109,6 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Full reload so cart/wishlist providers reset to a clean guest state.
       window.localStorage.removeItem("sunny-guest-cart-id");
       clearGuestWishlistStorage();
+      clearAuthLoginIdentifierKind();
       window.location.assign("/");
     }
   }, [applyStatus]);

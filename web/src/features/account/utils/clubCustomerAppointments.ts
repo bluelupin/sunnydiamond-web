@@ -1,0 +1,86 @@
+import type { ProfileAppointmentUi } from "../types/profileUi.types";
+
+function normalizeClubPart(value?: string | null): string {
+  return value?.trim().toLowerCase() ?? "";
+}
+
+function getAppointmentAddressClubKey(appointment: ProfileAppointmentUi): string {
+  if (appointment.appointmentAddress) {
+    const a = appointment.appointmentAddress;
+    return [
+      normalizeClubPart(a.addressLine1),
+      normalizeClubPart(a.addressLine2),
+      normalizeClubPart(a.city),
+      normalizeClubPart(a.state),
+      normalizeClubPart(a.pincode),
+    ].join("|");
+  }
+
+  if (appointment.storeVisit) {
+    return [
+      normalizeClubPart(appointment.storeVisit.city),
+      ...appointment.storeVisit.lines.map(normalizeClubPart),
+    ].join("|");
+  }
+
+  return "";
+}
+
+/**
+ * Same date + time + address (or showroom) → one clubbed list item.
+ * Video calls stay individual (CMS does not group them; no address key).
+ */
+export function getAppointmentClubKey(appointment: ProfileAppointmentUi): string {
+  if (appointment.type === "video_call") {
+    return `video_call::${appointment.id}`;
+  }
+
+  return [
+    appointment.type,
+    normalizeClubPart(appointment.requestedDate),
+    normalizeClubPart(appointment.bookingTime),
+    getAppointmentAddressClubKey(appointment),
+  ].join("::");
+}
+
+export function clubProfileAppointments(
+  appointments: ProfileAppointmentUi[],
+): ProfileAppointmentUi[] {
+  const grouped = new Map<string, ProfileAppointmentUi>();
+
+  for (const appointment of appointments) {
+    const key = getAppointmentClubKey(appointment);
+    const existing = grouped.get(key);
+
+    if (!existing) {
+      grouped.set(key, {
+        ...appointment,
+        products: [...appointment.products],
+        clubbedAppointmentIds: [appointment.id],
+      });
+      continue;
+    }
+
+    const productIds = new Set(existing.products.map((product) => product.id));
+    for (const product of appointment.products) {
+      if (!productIds.has(product.id)) {
+        existing.products.push(product);
+        productIds.add(product.id);
+      }
+    }
+
+    existing.clubbedAppointmentIds = [
+      ...(existing.clubbedAppointmentIds ?? [existing.id]),
+      appointment.id,
+    ];
+
+    if (appointment.canCancel === false) {
+      existing.canCancel = false;
+    }
+    if (appointment.canReschedule === false) {
+      existing.canReschedule = false;
+    }
+  }
+
+  return Array.from(grouped.values());
+}

@@ -1,8 +1,10 @@
 import type {
   CustomerAppointment,
+  CustomerAppointmentProduct,
   CustomerAppointmentShowroom,
   CustomerAppointmentsPage,
   StrapiCustomerAppointment,
+  StrapiCustomerAppointmentProduct,
   StrapiCustomerAppointmentShowroom,
   StrapiCustomerAppointmentsResponse,
 } from "./customer-appointments.types";
@@ -60,7 +62,6 @@ function normalizeAppointmentRaw(raw: unknown): StrapiCustomerAppointment & Reco
 }
 
 const CUSTOMER_MESSAGE_KEYS = [
-  // Try at Home / product submissions store "What are you looking for?" here.
   "requestDetails",
   "request_details",
   "customerMessage",
@@ -77,7 +78,6 @@ const CUSTOMER_MESSAGE_KEYS = [
   "details",
 ] as const;
 
-/** Drop FE-appended "State: …" lines so Note shows the looking-for text. */
 function normalizeCustomerMessageText(value: string): string {
   const withoutStateLines = value
     .split(/\r?\n/)
@@ -165,6 +165,27 @@ function mapAppointmentAddressFields(
   };
 }
 
+function mapAppointmentProduct(
+  product: StrapiCustomerAppointmentProduct,
+  fallback: {
+    requestedDate: string;
+    selectedTimeSlot: string;
+    workflowStatus: string;
+  },
+): CustomerAppointmentProduct | null {
+  const documentId = cleanText(product.documentId);
+  if (!documentId) return null;
+
+  return {
+    documentId,
+    productId: cleanText(product.productId) || null,
+    productName: cleanText(product.productName) || null,
+    requestedDate: cleanText(product.requestedDate) || fallback.requestedDate,
+    selectedTimeSlot: cleanText(product.selectedTimeSlot) || fallback.selectedTimeSlot,
+    workflowStatus: cleanText(product.workflowStatus) || fallback.workflowStatus,
+  };
+}
+
 export function mapCustomerAppointment(
   item: StrapiCustomerAppointment,
 ): CustomerAppointment | null {
@@ -173,13 +194,54 @@ export function mapCustomerAppointment(
   if (!documentId) return null;
 
   const addressFields = mapAppointmentAddressFields(normalized);
+  const requestedDate =
+    cleanText(normalized.requestedDate) ||
+    pickTextField(normalized, ["preferredDate", "preferred_date", "bookingDate"]) ||
+    "";
+  const selectedTimeSlot =
+    cleanText(normalized.selectedTimeSlot) ||
+    pickTextField(normalized, ["selected_time_slot", "timeSlot", "time_slot"]) ||
+    "";
+  const workflowStatus = cleanText(normalized.workflowStatus) || "New";
+
+  const productsFromApi = Array.isArray(normalized.products)
+    ? normalized.products
+        .map((product) =>
+          mapAppointmentProduct(product, {
+            requestedDate,
+            selectedTimeSlot,
+            workflowStatus,
+          }),
+        )
+        .filter((product): product is CustomerAppointmentProduct => product != null)
+    : [];
+
+  const productName = cleanText(normalized.productName) || null;
+  const productId = cleanText(normalized.productId) || null;
+
+  const products =
+    productsFromApi.length > 0
+      ? productsFromApi
+      : productName || productId
+        ? [
+            {
+              documentId,
+              productId,
+              productName,
+              requestedDate,
+              selectedTimeSlot,
+              workflowStatus,
+            },
+          ]
+        : [];
 
   return {
     documentId,
+    appointmentGroupId: cleanText(normalized.appointmentGroupId) || null,
     formTag: cleanText(normalized.formTag),
-    productName: cleanText(normalized.productName) || null,
-    productId: cleanText(normalized.productId) || null,
-    // Product forms use customer*; Book a Visit (showroom-visit) uses fullName/phone/email/preferredDate.
+    productName: productName || products[0]?.productName || null,
+    productId: productId || products[0]?.productId || null,
+    products,
     customerName:
       cleanText(normalized.customerName) ||
       pickTextField(normalized, ["fullName", "name", "full_name"]) ||
@@ -192,15 +254,9 @@ export function mapCustomerAppointment(
       cleanText(normalized.customerEmail) ||
       pickTextField(normalized, ["email", "customer_email"]) ||
       "",
-    requestedDate:
-      cleanText(normalized.requestedDate) ||
-      pickTextField(normalized, ["preferredDate", "preferred_date", "bookingDate"]) ||
-      "",
-    selectedTimeSlot:
-      cleanText(normalized.selectedTimeSlot) ||
-      pickTextField(normalized, ["selected_time_slot", "timeSlot", "time_slot"]) ||
-      "",
-    workflowStatus: cleanText(normalized.workflowStatus) || "New",
+    requestedDate,
+    selectedTimeSlot,
+    workflowStatus,
     customerMessage: mapCustomerMessage(normalized),
     addressLine1: addressFields.addressLine1,
     addressLine2: addressFields.addressLine2,

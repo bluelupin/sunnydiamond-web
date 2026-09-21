@@ -13,6 +13,10 @@ import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-c
 import { useMobileStickyFooterClearance } from "@/shared/hooks/use-mobile-sticky-footer-clearance";
 import { usePanelInputFocusScroll } from "@/shared/hooks/use-panel-input-focus-scroll";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
+import {
+  getAppointmentContactLocks,
+  getAuthLoginIdentifierKind,
+} from "@/features/auth/utils/authLoginIdentifier";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import {
   appointmentFieldClassName,
@@ -48,8 +52,12 @@ import { PanelFooter } from "@/shared/ui/PanelFooter";
 import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
+import {
+  countAdditionalTryAtHomeItemsForSlot,
+  type TryAtHomeBookingSummary,
+} from "@/features/products/utils/tryAtHomeBooking";
 import TryAtHomeSuccessStep from "./TryAtHomeSuccessStep";
-import type { TryAtHomeBookingSummary } from "@/features/products/utils/tryAtHomeBooking";
+import { getCustomerAppointments } from "@/services/customer/customer-appointments.client";
 
 const TRY_AT_HOME_FORM_TAG = "try-at-home-form";
 
@@ -98,6 +106,9 @@ const TryAtHomeDetailsStep = ({
 
   const timeSlots = form?.timeSlots?.length ? form.timeSlots : undefined;
   const hasTimeSlots = Boolean(timeSlots?.length ?? true);
+  const { phoneLocked, emailLocked } = getAppointmentContactLocks(
+    getAuthLoginIdentifierKind(),
+  );
 
   const formValues = useMemo(
     () => ({ name, countryCode, phone, email, date, note, selectedSlot }),
@@ -223,6 +234,8 @@ const TryAtHomeDetailsStep = ({
               notePlaceholder={
                 form?.notesPlaceholder ?? "Eg: I am looking for an engagement ring"
               }
+              phoneLocked={phoneLocked}
+              emailLocked={emailLocked}
             />
           </div>
         </div>
@@ -604,6 +617,7 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
   const [cmsForm, setCmsForm] = useState<NormalizedProductForm | null>(null);
   const [details, setDetails] = useState<TryAtHomeDetailsData | null>(null);
   const [submittedBooking, setSubmittedBooking] = useState<TryAtHomeBookingSummary | null>(null);
+  const [additionalItemsCount, setAdditionalItemsCount] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { show: showStatusToast, node: statusToast } = useAppStatusToastController(
     wishlistMovedToastDurationMs,
@@ -615,6 +629,7 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
       setStep("details");
       setDetails(null);
       setSubmittedBooking(null);
+      setAdditionalItemsCount(0);
       setIsSubmitting(false);
       return;
     }
@@ -637,6 +652,7 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
     setStep("details");
     setDetails(null);
     setSubmittedBooking(null);
+    setAdditionalItemsCount(0);
     setIsSubmitting(false);
     onClose();
   };
@@ -685,6 +701,28 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
         workflowStatus: "New",
       });
 
+      let moreItems = 0;
+      try {
+        const page = await getCustomerAppointments(1, 50);
+        if (page?.appointments?.length) {
+          moreItems = countAdditionalTryAtHomeItemsForSlot(page.appointments, {
+            date: booking.date,
+            selectedSlot: booking.selectedSlot,
+            address: {
+              addressLine1: address.addressLine1.trim(),
+              addressLine2: address.addressLine2.trim() || undefined,
+              pincode: address.pincode.trim(),
+              city: address.city.trim(),
+              state: address.state.trim() || undefined,
+            },
+            currentProductId: product.id,
+          });
+        }
+      } catch {
+        moreItems = 0;
+      }
+
+      setAdditionalItemsCount(moreItems);
       setSubmittedBooking(booking);
       setStep("success");
       showStatusToast("Try at home request received");
@@ -747,6 +785,7 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
             product={product}
             productImage={productImage}
             booking={submittedBooking}
+            additionalItemsCount={additionalItemsCount}
             onClose={handleClose}
             onViewBooking={handleViewBooking}
             onContinueShopping={handleContinueShopping}

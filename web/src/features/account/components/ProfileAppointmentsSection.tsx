@@ -6,9 +6,11 @@ import {
 } from "@/features/cart/components/CartFlowUi";
 import { useMagentoWishlistProducts } from "@/hooks/magento/useMagentoWishlistProducts";
 import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
+import { cancelCustomerAppointment } from "@/services/customer/customer-appointments.client";
 import { profileTabsContent } from "../data/profileContent";
 import { useCustomerAppointments } from "../hooks/useCustomerAppointments";
 import type { AppointmentFilterKey, ProfileAppointmentUi } from "../types/profileUi.types";
+import { clubProfileAppointments } from "../utils/clubCustomerAppointments";
 import { buildMagentoProductImageBySku } from "../utils/orderItemImage.utils";
 import { mapCustomerAppointmentToProfileUi } from "../utils/profileDisplayMappers";
 import { ProfileAppointmentCard } from "./ProfileAppointmentCard";
@@ -39,6 +41,10 @@ const ProfileAppointmentsSection = () => {
   const [rescheduleAppointment, setRescheduleAppointment] = useState<ProfileAppointmentUi | null>(
     null,
   );
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [cancelledAppointmentIds, setCancelledAppointmentIds] = useState<Set<string>>(
+    () => new Set(),
+  );
   const [statusToastMessage, setStatusToastMessage] = useState<string | null>(null);
   const statusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -50,14 +56,17 @@ const ProfileAppointmentsSection = () => {
     setStatusToastMessage(null);
   }, []);
 
-  const showAppointmentUpdatesToast = useCallback(() => {
-    dismissStatusToast();
-    setStatusToastMessage(content.cancelDialog.unavailableToastMessage);
-    statusToastTimeoutRef.current = setTimeout(() => {
-      setStatusToastMessage(null);
-      statusToastTimeoutRef.current = null;
-    }, appStatusToastDurationMs);
-  }, [dismissStatusToast]);
+  const showStatusToast = useCallback(
+    (message: string) => {
+      dismissStatusToast();
+      setStatusToastMessage(message);
+      statusToastTimeoutRef.current = setTimeout(() => {
+        setStatusToastMessage(null);
+        statusToastTimeoutRef.current = null;
+      }, appStatusToastDurationMs);
+    },
+    [dismissStatusToast],
+  );
 
   useEffect(() => {
     return () => {
@@ -66,22 +75,21 @@ const ProfileAppointmentsSection = () => {
       }
     };
   }, []);
-  const appointmentSkus = useMemo(
-    () =>
-      (data?.appointments ?? [])
-        .map((appointment) => {
-          const productId = appointment.productId;
-          if (typeof productId === "string") {
-            return productId.trim();
-          }
-          if (productId == null) {
-            return "";
-          }
-          return String(productId).trim();
-        })
-        .filter(Boolean),
-    [data],
-  );
+  const appointmentSkus = useMemo(() => {
+    const skus = new Set<string>();
+
+    for (const appointment of data?.appointments ?? []) {
+      for (const product of appointment.products ?? []) {
+        const sku = product.productId?.trim();
+        if (sku) skus.add(sku);
+      }
+
+      const fallback = appointment.productId?.trim();
+      if (fallback) skus.add(fallback);
+    }
+
+    return Array.from(skus);
+  }, [data]);
 
   const { products: magentoProducts, isLoading: isProductImagesLoading } =
     useMagentoWishlistProducts(appointmentSkus);
@@ -96,12 +104,27 @@ const ProfileAppointmentsSection = () => {
       return [];
     }
 
-    return data.appointments
+    const mapped = data.appointments
       .map((appointment) =>
         mapCustomerAppointmentToProfileUi(appointment, productImageBySku),
       )
-      .filter((appointment): appointment is NonNullable<typeof appointment> => appointment != null);
-  }, [data, productImageBySku]);
+      .filter((appointment): appointment is NonNullable<typeof appointment> => appointment != null)
+      .map((appointment) => {
+        if (!cancelledAppointmentIds.has(appointment.id)) {
+          return appointment;
+        }
+
+        // Immediately after cancel (before list refresh settles), both actions stay off.
+        return {
+          ...appointment,
+          canCancel: false,
+          canReschedule: false,
+        };
+      });
+
+    // CMS already groups try-at-home via products[]; FE clubbing covers legacy / store-visit rows.
+    return clubProfileAppointments(mapped);
+  }, [cancelledAppointmentIds, data, productImageBySku]);
 
   const filteredAppointments = useMemo(() => {
     if (activeFilter === null) {
@@ -112,13 +135,8 @@ const ProfileAppointmentsSection = () => {
   }, [appointments, activeFilter]);
 
   const showRescheduleSuccessToast = useCallback(() => {
-    dismissStatusToast();
-    setStatusToastMessage(content.reschedulePanel.successToast);
-    statusToastTimeoutRef.current = setTimeout(() => {
-      setStatusToastMessage(null);
-      statusToastTimeoutRef.current = null;
-    }, appStatusToastDurationMs);
-  }, [dismissStatusToast]);
+    showStatusToast(content.reschedulePanel.successToast);
+  }, [showStatusToast]);
 
   const openReschedulePanel = useCallback((appointment: ProfileAppointmentUi) => {
     setCancelDialogOpen(false);
@@ -127,18 +145,39 @@ const ProfileAppointmentsSection = () => {
   }, []);
 
   const handleReschedule = () => {
-    if (selectedAppointment) {
+    if (selectedAppointment?.canReschedule) {
       openReschedulePanel(selectedAppointment);
-      return;
     }
-
-    showAppointmentUpdatesToast();
-    setCancelDialogOpen(false);
   };
 
   const handleConfirmCancel = () => {
-    showAppointmentUpdatesToast();
-    setCancelDialogOpen(false);
+    if (!selectedAppointment || isCancelling) {
+      return;
+    }
+
+    void (async () => {
+      setIsCancelling(true);
+      try {
+        // Guide: use top-level listing documentId once — CMS cancels the whole group.
+        await cancelCustomerAppointment(selectedAppointment.id);
+        setCancelledAppointmentIds((current) => {
+          const next = new Set(current);
+          next.add(selectedAppointment.id);
+          for (const id of selectedAppointment.clubbedAppointmentIds ?? []) {
+            next.add(id);
+          }
+          return next;
+        });
+        setCancelDialogOpen(false);
+        setSelectedAppointment(null);
+        refresh();
+        showStatusToast(content.cancelDialog.cancelSuccessToast);
+      } catch {
+        showStatusToast(content.cancelDialog.cancelErrorToast);
+      } finally {
+        setIsCancelling(false);
+      }
+    })();
   };
 
   const statusToast = (
@@ -241,6 +280,7 @@ const ProfileAppointmentsSection = () => {
               setSelectedAppointment(null);
             }
           }}
+          canReschedule={selectedAppointment?.canReschedule ?? false}
           onReschedule={handleReschedule}
           onConfirmCancel={handleConfirmCancel}
         />
