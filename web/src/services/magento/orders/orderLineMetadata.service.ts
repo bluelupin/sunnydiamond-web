@@ -145,7 +145,7 @@ export async function attachLineMetadataToMagentoOrder(
   return true;
 }
 
-function isStorefrontLineMetadataComment(comment: string): boolean {
+export function isStorefrontLineMetadataComment(comment: string): boolean {
   return (
     comment.includes(STOREFRONT_LINE_METADATA_MARKER) || comment.includes("Gift wrap: Yes")
   );

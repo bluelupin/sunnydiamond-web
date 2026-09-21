@@ -1,34 +1,52 @@
 import { magentoGraphqlFetch } from "@/services/magento/graphqlClient";
-import { fetchStorefrontLineMetadataComments } from "@/services/magento/orders/orderLineMetadata.service";
+import {
+  fetchStorefrontLineMetadataComments,
+  isStorefrontLineMetadataComment,
+} from "@/services/magento/orders/orderLineMetadata.service";
 import {
   MAGENTO_CUSTOMER_ORDER_BY_NUMBER_QUERY,
   MAGENTO_GUEST_ORDER_QUERY,
 } from "./customer.gql";
 import {
+  dedupeTrackedOrderComments,
   mapMagentoOrderDetail,
+  normalizeOrderCommentKey,
   type MagentoCustomerOrderByNumberResponse,
   type MagentoGuestOrderResponse,
 } from "./order-tracking.mapper";
 import type { GuestOrderLookupInput, TrackedOrder, TrackedOrderComment } from "./order-tracking.types";
 
 export async function enrichTrackedOrderComments(order: TrackedOrder): Promise<TrackedOrder> {
-  const storefrontComments = await fetchStorefrontLineMetadataComments(order.number);
-  if (storefrontComments.length === 0) {
-    return order;
+  const comments = dedupeTrackedOrderComments(order.comments);
+
+  const hasStorefrontMetadata = comments.some((comment) =>
+    isStorefrontLineMetadataComment(comment.message),
+  );
+
+  if (hasStorefrontMetadata) {
+    return comments.length === order.comments.length ? order : { ...order, comments };
   }
 
-  const existingMessages = new Set(order.comments.map((comment) => comment.message));
+  const storefrontComments = await fetchStorefrontLineMetadataComments(order.number);
+  if (storefrontComments.length === 0) {
+    return comments.length === order.comments.length ? order : { ...order, comments };
+  }
+
+  const existingMessages = new Set(comments.map((comment) => normalizeOrderCommentKey(comment.message)));
   const additional: TrackedOrderComment[] = storefrontComments
-    .filter((message) => !existingMessages.has(message))
-    .map((message) => ({ message, timestamp: null }));
+    .filter((message) => {
+      const key = normalizeOrderCommentKey(message);
+      return key && !existingMessages.has(key);
+    })
+    .map((message) => ({ message: message.trim(), timestamp: null }));
 
   if (additional.length === 0) {
-    return order;
+    return comments.length === order.comments.length ? order : { ...order, comments };
   }
 
   return {
     ...order,
-    comments: [...order.comments, ...additional],
+    comments: dedupeTrackedOrderComments([...comments, ...additional]),
   };
 }
 
