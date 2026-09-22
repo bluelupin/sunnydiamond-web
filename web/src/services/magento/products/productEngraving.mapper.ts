@@ -1,5 +1,6 @@
 import {
   DEFAULT_ENGRAVING_MAX_CHARACTERS,
+  RING_ENGRAVING_PREVIEW_IMAGE,
   type ProductEngravingConfig,
 } from "@/features/products/constants/engraving";
 import type { ProductCustomOptions } from "@/features/products/types/productCustomOptions";
@@ -36,7 +37,7 @@ export function mapMagentoProductEngraving(
     getMagentoCustomAttributeValue(items, "sd_engraving_preview_image");
   const previewImage =
     resolveMagentoModelWearImageUrl(previewImageRaw, mediaGallery, referenceImageUrl) ||
-    undefined;
+    RING_ENGRAVING_PREVIEW_IMAGE;
 
   return {
     enabled: true,

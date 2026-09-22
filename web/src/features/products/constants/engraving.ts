@@ -5,6 +5,33 @@ import { stripLineInstanceFromEngraving } from "@/features/cart/utils/cartLineIn
 
 export const DEFAULT_ENGRAVING_MAX_CHARACTERS = 10;
 
+/** Figma `4903:44931` — default ring close-up when Magento has no preview image. */
+export const RING_ENGRAVING_PREVIEW_IMAGE = "/images/products/pdp/ring-engraving-preview.png";
+
+/** Figma `4903:44930` preview frame. */
+export const RING_ENGRAVING_PREVIEW_VIEWBOX = { width: 343, height: 214 } as const;
+
+/**
+ * Inner-band arc calibrated to Figma `4903:44987` ("Diya Gupta" placement).
+ * Quadratic path bows upward at center to match the ring perspective.
+ */
+export const RING_ENGRAVING_TEXT_ARC_PATH = "M 137 92 Q 174 84 210 92";
+
+export function resolveEngravingPreviewFontSize(text: string): number {
+  const length = text.trim().length;
+  if (length <= 5) return 14;
+  if (length <= 8) return 13.5;
+  if (length <= 12) return 12.5;
+  return 11.5;
+}
+
+export function resolveRingEngravingPreviewImage(
+  previewImage?: string | null,
+): string {
+  const trimmed = previewImage?.trim();
+  return trimmed || RING_ENGRAVING_PREVIEW_IMAGE;
+}
+
 /** Mirrors the Magento engraving charset validation (add path errors loudly, update path only via errors[]). */
 export const ENGRAVING_TEXT_PATTERN = /^[A-Za-z0-9 ./-]*$/;
 

@@ -33,7 +33,6 @@ type MetalEngravingPanelProps = {
   open: boolean;
   onClose: () => void;
   previewImage?: string | StaticImageData;
-  productImage?: string | StaticImageData;
   fonts?: readonly string[];
   maxCharacters: number;
   initialValue?: EngravingSelection | null;
@@ -44,7 +43,6 @@ const MetalEngravingPanel = ({
   open,
   onClose,
   previewImage,
-  productImage,
   fonts,
   maxCharacters,
   initialValue,
@@ -163,16 +161,11 @@ const MetalEngravingPanel = ({
               </div>
 
               <div className="flex flex-col gap-6">
-                <EngravingPreviewImage
-                  previewImage={previewImage}
-                  productImage={productImage}
-                  text={text}
-                  font={font}
-                />
+                <EngravingPreviewImage previewImage={previewImage} text={text} font={font} />
 
                 <div className="flex flex-col gap-2">
                   <label htmlFor="engraving-text" className={appointmentLabelClassName}>
-                    Type here (Up to {maxCharacters} characters)
+                    What do you want engraved?
                   </label>
                   <input
                     id="engraving-text"
