@@ -217,6 +217,26 @@ export type StrapiTextSection = {
   steps?: StrapiCraftsmanshipStep[] | null;
 };
 
+export type StrapiHomepageShowroom = {
+  id?: number | string;
+  documentId?: string | null;
+  name?: string | null;
+  slug?: string | null;
+  address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  pincode?: string | null;
+  mapUrl?: string | null;
+  directionsUrl?: string | null;
+  openingHours?: string | null;
+  sortOrder?: number | null;
+  isActive?: boolean | null;
+  showField?: boolean | null;
+  image?: StrapiResponsiveImageBlock | null;
+};
+
 export type StrapiShowroomSection = {
   id?: number;
   sectionTitle?: string | null;
@@ -225,7 +245,7 @@ export type StrapiShowroomSection = {
   showField?: boolean | null;
   cta?: StrapiHomepageCta | null;
   image?: StrapiResponsiveImageBlock | null;
-  showrooms?: unknown[] | null;
+  showrooms?: StrapiHomepageShowroom[] | null;
   sortOrder?: number | null;
 };
 

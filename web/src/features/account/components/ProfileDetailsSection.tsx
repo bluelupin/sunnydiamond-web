@@ -237,7 +237,7 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
                   aria-label={content.phoneInfo}
                   title={content.phoneInfo}
                 >
-                  <InformationIcon className="size-6 shrink-0 text-darkblack" aria-hidden />
+                  <InformationIcon className="w-[18px] h-[18px] shrink-0 text-darkblack" aria-hidden />
                 </button>
               </div>
               <input

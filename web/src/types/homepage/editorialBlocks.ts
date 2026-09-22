@@ -76,7 +76,9 @@ export type BespokeForYouCard = {
 
 export type ShowroomSectionLocation = {
   id?: number | null;
+  documentId?: string | null;
   name?: string | null;
+  city?: string | null;
   address?: string | null;
   phone?: string | null;
   directionsUrl?: string | null;

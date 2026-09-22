@@ -12,6 +12,7 @@ import type {
   DiamondSourcingSectionData,
   HomepageEditorialBlocksData,
   ShowroomSectionData,
+  ShowroomSectionLocation,
   SunnyPromiseSectionData,
 } from "@/types/homepage/editorialBlocks";
 import type { CraftingBrillianceSectionData } from "@/types/homepage/craftingBrillianceSection";
@@ -38,6 +39,7 @@ import type {
   StrapiOccasionSection,
   StrapiOccasionCard,
   StrapiResponsiveImageBlock,
+  StrapiHomepageShowroom,
   StrapiShowroomSection,
   StrapiCraftsmanshipStep,
   StrapiSavingsPlanStep,
@@ -558,20 +560,61 @@ function mapCraftingBrillianceSection(
   };
 }
 
+const sortShowroomsByOrder = <T extends { sortOrder?: number | null }>(items: T[]): T[] =>
+  [...items].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+
+/** Aligns with store-locator `mapShowroom` — CMS showrooms use `city` as the display name. */
+function mapShowroomSectionLocation(
+  showroom?: StrapiHomepageShowroom | null,
+): ShowroomSectionLocation | null {
+  if (!showroom || resolveSectionActive(showroom.isActive, showroom.showField) === false) {
+    return null;
+  }
+
+  const name = cleanText(showroom.city) ?? cleanText(showroom.name);
+  const address = cleanText(showroom.address);
+  const mapUrl = cleanText(showroom.mapUrl) ?? cleanText(showroom.directionsUrl);
+
+  if (!name || !address || !mapUrl) {
+    return null;
+  }
+
+  const image = pickResponsiveImage(showroom.image);
+  const id = typeof showroom.id === "number" ? showroom.id : undefined;
+
+  return {
+    ...(id != null ? { id } : {}),
+    documentId: cleanText(showroom.documentId),
+    name,
+    city: cleanText(showroom.city),
+    address,
+    phone: cleanText(showroom.phone),
+    mapUrl,
+    directionsUrl: mapUrl,
+    sortOrder: showroom.sortOrder ?? undefined,
+    isActive: true,
+    ...(image ? { image } : {}),
+  };
+}
+
 function mapShowroomSection(raw?: StrapiShowroomSection | null): ShowroomSectionData | null {
   if (!raw) return null;
 
   const isActive = resolveSectionActive(raw.isActive, raw.showField);
   if (isActive === false) return null;
 
+  const showrooms = sortShowroomsByOrder(
+    (Array.isArray(raw.showrooms) ? raw.showrooms : [])
+      .map(mapShowroomSectionLocation)
+      .filter((item): item is ShowroomSectionLocation => item != null),
+  );
+
   return {
     id: raw.id,
     sectionTitle: cleanText(raw.sectionTitle),
     description: cleanText(raw.description),
     isActive,
-    showrooms: Array.isArray(raw.showrooms)
-      ? (raw.showrooms as ShowroomSectionData["showrooms"])
-      : null,
+    showrooms: showrooms.length > 0 ? showrooms : null,
   };
 }
 

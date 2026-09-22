@@ -57,7 +57,7 @@ const ProfilePage = () => {
           />
           <div
             className={cn(
-              "lg:pt-20 md:pt-14 pt-10 2xl:max-w-1920 max-w-1440",
+              "lg:pt-16 md:pt-14 pt-10 2xl:max-w-1920 max-w-1440",
               activeSection === "wishlist"
                 ? "2xl:px-[60px] lg:px-10"
                 : "2xl:px-[60px] lg:px-10 md:px-8 px-4",

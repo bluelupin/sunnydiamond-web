@@ -63,7 +63,7 @@ export function mapEditorialShowroomToBookStoreVisit(
     return null;
   }
 
-  const storeName = cleanText(location.name);
+  const storeName = cleanText(location.name) || cleanText(location.city);
   if (!storeName) {
     return null;
   }
@@ -86,8 +86,11 @@ export function mapEditorialShowroomToBookStoreVisit(
 
   const address = cleanText(location.address) || storeName;
 
+  const documentId = cleanText(location.documentId);
+
   return {
     id,
+    ...(documentId ? { documentId } : {}),
     tabLabel: storeName.toUpperCase(),
     storeName,
     address,
