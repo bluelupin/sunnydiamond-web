@@ -4,6 +4,7 @@ import { formatMetalColorLabel } from "@/features/products/utils/metalColorOptio
 import { buildProductSeo } from "@/shared/lib/seo/productSeo";
 import { resolveMagentoProductImages } from "../products/products.mapper";
 import { mapMagentoProductCustomOptions } from "../products/productCustomOptions.mapper";
+import { mapMagentoProductEngraving } from "../products/productEngraving.mapper";
 import fallBackImage from "@/assets/fallBackImage.png";
 import type {
   MagentoCart,
@@ -63,6 +64,15 @@ function mapCartItemProduct(item: MagentoCartItem): Product | null {
     variant?.image?.url ?? product?.image?.url,
   );
   const image = primaryImage || fallBackImage;
+  const customOptions = mapMagentoProductCustomOptions(product?.options);
+  const engraving = mapMagentoProductEngraving(
+    customOptions,
+    product?.custom_attributesV2?.items,
+    {
+      mediaGallery: variant?.media_gallery ?? product?.media_gallery,
+      referenceImageUrl: variant?.image?.url ?? product?.image?.url,
+    },
+  );
 
   return {
     id: sku,
@@ -88,7 +98,8 @@ function mapCartItemProduct(item: MagentoCartItem): Product | null {
     }),
     // Straight from the catalog, so the cart describes its own lines instead of
     // depending on what this browser happens to remember.
-    customOptions: mapMagentoProductCustomOptions(product?.options),
+    customOptions,
+    ...(engraving ? { engraving } : {}),
   };
 }
 

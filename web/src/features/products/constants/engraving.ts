@@ -25,11 +25,47 @@ export function resolveEngravingPreviewFontSize(text: string): number {
   return 11.5;
 }
 
-export function resolveRingEngravingPreviewImage(
-  previewImage?: string | null,
-): string {
+const CATALOG_PRODUCT_IMAGE_PATTERN = /\/catalog\/product\//i;
+
+/**
+ * Ring engraving preview asset for all engraving-enabled products.
+ * Ignores Magento catalog product shots — only dedicated preview assets pass through.
+ */
+export function resolveEngravingPreviewImage(previewImage?: string | null): string {
   const trimmed = previewImage?.trim();
-  return trimmed || RING_ENGRAVING_PREVIEW_IMAGE;
+  if (trimmed && !CATALOG_PRODUCT_IMAGE_PATTERN.test(trimmed)) {
+    return trimmed;
+  }
+
+  return RING_ENGRAVING_PREVIEW_IMAGE;
+}
+
+/** @deprecated Use resolveEngravingPreviewImage */
+export const resolveRingEngravingPreviewImage = resolveEngravingPreviewImage;
+
+/** Normalize engraving config for PDP, cart, and any engraving drawer entry point. */
+export function resolveProductEngravingConfig(
+  product: Pick<Product, "engraving" | "customOptions">,
+): ProductEngravingConfig | undefined {
+  if (isProductEngravingEnabled(product.engraving)) {
+    return {
+      ...product.engraving!,
+      previewImage: resolveEngravingPreviewImage(product.engraving!.previewImage),
+    };
+  }
+
+  if (!hasCatalogEngravingText(product.customOptions)) {
+    return undefined;
+  }
+
+  return {
+    enabled: true,
+    maxCharacters:
+      resolveEngravingMaxCharacters(product.customOptions?.engravingText?.maxCharacters) ??
+      DEFAULT_ENGRAVING_MAX_CHARACTERS,
+    fonts: product.customOptions?.engravingFont?.labels ?? [],
+    previewImage: RING_ENGRAVING_PREVIEW_IMAGE,
+  };
 }
 
 /** Mirrors the Magento engraving charset validation (add path errors loudly, update path only via errors[]). */
