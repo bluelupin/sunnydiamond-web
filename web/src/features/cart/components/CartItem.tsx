@@ -6,6 +6,7 @@ import Link from "next/link";
 import {
   DEFAULT_ENGRAVING_MAX_CHARACTERS,
   isCartLineEngravingEnabled,
+  resolveProductEngravingConfig,
   type EngravingSelection,
 } from "@/features/products/constants/engraving";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
@@ -75,6 +76,10 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
     engravingFont && !fontLabels.includes(engravingFont)
       ? [engravingFont, ...fontLabels]
       : fontLabels;
+  const engravingConfig = useMemo(
+    () => resolveProductEngravingConfig(product),
+    [product],
+  );
 
   const initialEngravingSelection = useMemo<EngravingSelection | null>(() => {
     if (!hasEngraving) {
@@ -312,9 +317,9 @@ const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
           <MetalEngravingPanel
             open={isEngravingOpen}
             onClose={() => setIsEngravingOpen(false)}
-            previewImage={product.engraving?.previewImage}
-            fonts={availableEngravingFonts}
-            maxCharacters={engravingMaxCharacters}
+            previewImage={engravingConfig?.previewImage}
+            fonts={engravingConfig?.fonts ?? availableEngravingFonts}
+            maxCharacters={engravingConfig?.maxCharacters ?? engravingMaxCharacters}
             initialValue={initialEngravingSelection}
             onSave={handleEngravingSave}
           />

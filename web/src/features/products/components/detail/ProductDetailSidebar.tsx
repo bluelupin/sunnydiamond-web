@@ -24,6 +24,7 @@ import type { AddToBagPayload } from "@/features/cart/types/cart.types";
 import {
   buildEngravingCartLineOptions,
   isProductEngravingEnabled,
+  resolveProductEngravingConfig,
   type EngravingSelection,
 } from "@/features/products/constants/engraving";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
@@ -135,7 +136,7 @@ const ProductDetailSidebar = ({
   const { openLoginModal } = useLoginModal();
   const { isWishlisted, toggleWishlist } = useWishlist();
   const wishlisted = isWishlisted(product.id);
-  const engravingConfig = product.engraving;
+  const engravingConfig = resolveProductEngravingConfig(product);
   const engravingEnabled = isProductEngravingEnabled(engravingConfig);
   const sizeLabels = getRingSizeLabels(product, sizeGuide);
   const showSizeSelector = sizeLabels.length > 0;
@@ -476,7 +477,7 @@ const ProductDetailSidebar = ({
                   labelClassName="sr-only"
                   value={ringSize}
                   options={sizeLabels}
-                  placeholder="-select-"
+                  placeholder="Select"
                   onChange={(value) => {
                     setRingSize(value);
                     if (value) {

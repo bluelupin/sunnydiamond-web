@@ -98,6 +98,14 @@ const cartFields = (productCustomOptions: string) => `
             position
             disabled
           }
+          custom_attributesV2 {
+            items {
+              code
+              ... on AttributeValue {
+                value
+              }
+            }
+          }
         }
         ${productCustomOptions}
       }

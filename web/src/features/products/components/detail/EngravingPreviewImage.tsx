@@ -7,8 +7,8 @@ import {
   RING_ENGRAVING_PREVIEW_VIEWBOX,
   RING_ENGRAVING_TEXT_ARC_PATH,
   resolveEngravingPreviewFontSize,
+  resolveEngravingPreviewImage,
   resolveEngravingPreviewTypography,
-  resolveRingEngravingPreviewImage,
 } from "@/features/products/constants/engraving";
 
 type EngravingPreviewImageProps = {
@@ -28,8 +28,8 @@ const EngravingPreviewImage = ({
   const arcId = useId().replace(/:/g, "");
   const imageSrc =
     typeof previewImage === "string"
-      ? resolveRingEngravingPreviewImage(previewImage)
-      : previewImage ?? resolveRingEngravingPreviewImage();
+      ? resolveEngravingPreviewImage(previewImage)
+      : previewImage ?? resolveEngravingPreviewImage();
   const fontSize = resolveEngravingPreviewFontSize(displayText);
 
   return (
