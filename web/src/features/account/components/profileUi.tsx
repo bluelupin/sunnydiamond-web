@@ -1,8 +1,8 @@
 "use client";
 
 import { Fragment, useState } from "react";
-import { Plus } from "lucide-react";
 import InformationIcon from "@/assets/Icons/InformationIcon";
+import PlusIcon from "@/assets/Icons/PlusIcon";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { cn } from "@/shared/utils/cn";
 import { profileTabsContent } from "../data/profileContent";
@@ -86,8 +86,8 @@ export function ProfileAddAddressCard({
         className,
       )}
     >
-      <span className="flex size-16 shrink-0 items-center justify-center rounded-full bg-white">
-        <Plus className="size-10 shrink-0" strokeWidth={1.5} aria-hidden />
+      <span className="flex md:size-16 size-10 shrink-0 items-center justify-center rounded-full bg-white">
+        <PlusIcon className="md:size-6 size-4 shrink-0 text-darkblack" />
       </span>
       <span className="font-gill text-base font-light leading-110">{label}</span>
     </button>

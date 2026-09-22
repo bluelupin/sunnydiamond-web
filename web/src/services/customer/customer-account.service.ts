@@ -12,6 +12,7 @@ import {
 import {
   doesCustomerAddressMatchInput,
   mapCustomerAddressInputToMagento,
+  mapCustomerAddressToFormInput,
   mapMagentoCustomerAddresses,
   mapMagentoCustomerOrders,
   mapOrderShippingAddressToCustomerAddressInput,
@@ -74,6 +75,54 @@ export async function updateCustomerAddress(
       input: mapCustomerAddressInputToMagento(input),
     },
     authToken,
+  });
+
+  return fetchCustomerAddresses(authToken);
+}
+
+/** Mark one address as the sole default shipping address (never default billing). */
+export async function setCustomerDefaultShippingAddress(
+  authToken: string,
+  uid: string,
+): Promise<CustomerAddress[]> {
+  const addresses = await fetchCustomerAddresses(authToken);
+  const target = addresses.find((address) => address.uid === uid);
+
+  if (!target) {
+    throw new Error("Address not found");
+  }
+
+  if (target.isDefaultShipping) {
+    return addresses;
+  }
+
+  const previousDefault = addresses.find(
+    (address) => address.isDefaultShipping && address.uid !== uid,
+  );
+
+  await updateCustomerAddress(authToken, uid, {
+    ...mapCustomerAddressToFormInput(target),
+    defaultShipping: true,
+    defaultBilling: false,
+  });
+
+  if (!previousDefault) {
+    return fetchCustomerAddresses(authToken);
+  }
+
+  const refreshed = await fetchCustomerAddresses(authToken);
+  const previousStillDefault = refreshed.some(
+    (address) => address.uid === previousDefault.uid && address.isDefaultShipping,
+  );
+
+  if (!previousStillDefault) {
+    return refreshed;
+  }
+
+  await updateCustomerAddress(authToken, previousDefault.uid, {
+    ...mapCustomerAddressToFormInput(previousDefault),
+    defaultShipping: false,
+    defaultBilling: false,
   });
 
   return fetchCustomerAddresses(authToken);

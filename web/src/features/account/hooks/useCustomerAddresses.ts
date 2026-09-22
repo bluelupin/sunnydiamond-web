@@ -5,6 +5,7 @@ import {
   getCustomerAddresses,
   removeCustomerAddress,
   saveCustomerAddress,
+  setCustomerDefaultShippingAddress,
 } from "@/services/customer/customer-account.client";
 import type {
   CustomerAddress,
@@ -20,6 +21,7 @@ type UseCustomerAddressesResult = {
   createAddress: (input: CustomerAddressInput) => Promise<void>;
   updateAddress: (uid: string, input: CustomerAddressInput) => Promise<void>;
   deleteAddress: (uid: string) => Promise<void>;
+  setDefaultShippingAddress: (uid: string) => Promise<void>;
 };
 
 export function useCustomerAddresses(enabled = true): UseCustomerAddressesResult {
@@ -134,6 +136,23 @@ export function useCustomerAddresses(enabled = true): UseCustomerAddressesResult
     }
   }, []);
 
+  const setDefaultShippingAddress = useCallback(async (uid: string) => {
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      const nextAddresses = await setCustomerDefaultShippingAddress(uid);
+      setAddresses(nextAddresses);
+    } catch (defaultError) {
+      const message =
+        defaultError instanceof Error ? defaultError.message : "Failed to set default address";
+      setError(message);
+      throw defaultError;
+    } finally {
+      setIsSaving(false);
+    }
+  }, []);
+
   return {
     addresses,
     isLoading,
@@ -143,5 +162,6 @@ export function useCustomerAddresses(enabled = true): UseCustomerAddressesResult
     createAddress,
     updateAddress,
     deleteAddress,
+    setDefaultShippingAddress,
   };
 }

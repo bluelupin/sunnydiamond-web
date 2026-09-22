@@ -23,7 +23,7 @@ export const profileDetailsContent = {
   deleteAccount: {
     title: "Delete Account",
     description:
-      "Deleting your Sunny Diamonds account will permanently remove your profile and saved addresses, and you will lose access to your orders, wishlist, and plan details. This action cannot be undone.",
+      "Deleting your Sunny Diamonds account will permanently remove your profile, saved addresses, orders, wishlist, and plan details. This action cannot be undone.",
     ctaLabel: "DELETE MY ACCOUNT",
     contactHref: "/contact",
     dialog: {
@@ -34,8 +34,11 @@ export const profileDetailsContent = {
       confirmLabel: "DELETE",
     },
     reasonDialog: {
-      title: "Delete Account",
+      title: "Delete Account?",
+      titleMobile: "Delete Account",
       description:
+        "We're sorry to see you cancel. Please share your reason so we can serve you better next time.",
+      descriptionMobile:
         "We're sorry to see you go. Please share your reason so we can serve you better next time.",
       reasonLabel: "Select Reason",
       reasons: [
@@ -246,6 +249,11 @@ export const profileTabsContent = {
     editFormTitle: "Edit Address",
     useCurrentLocationLabel: "USE CURRENT LOCATION",
     saveLabel: "SAVE",
+    savingLabel: "SAVING...",
+    addSuccessToast: "New Address is Added Successfully",
+    editSuccessToast: "Address updated successfully",
+    deleteSuccessToast: "Address deleted successfully",
+    saveErrorToast: "We could not save your address. Please try again.",
     fullNameLabel: "Full Name",
     defaultShippingLabel: "Default Shipping Address",
     editLabel: "EDIT",
@@ -263,8 +271,10 @@ export const profileTabsContent = {
       errorTitle: "Unable to delete address",
     },
     emptyTitle: "No Addresses Yet",
-    emptyDescription: "Add a delivery address to speed up checkout on your next purchase.",
-    emptyCta: "Add New Address",
+    emptyDescription: "You haven't added any addresses yet.",
+    emptyCta: "ADD NEW ADDRESS",
+    emptySecondaryCta: "CONTINUE SHOPPING",
+    emptySecondaryCtaHref: "/jewellery",
   },
   wishlist: {
     emptyTitle: "Your Wishlist Is Empty",

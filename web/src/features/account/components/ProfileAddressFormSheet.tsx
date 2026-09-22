@@ -144,8 +144,21 @@ export function ProfileAddressFormSheet({
     }));
   };
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen && isSaving) {
+      return;
+    }
+
+    onOpenChange(nextOpen);
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (isSaving) {
+      return;
+    }
+
     setFormError(null);
     setSubmitted(true);
 
@@ -156,7 +169,7 @@ export function ProfileAddressFormSheet({
     try {
       await onSubmit(form);
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : "Unable to save address");
+      setFormError(error instanceof Error ? error.message : addressContent.saveErrorToast);
     }
   };
 
@@ -165,11 +178,12 @@ export function ProfileAddressFormSheet({
       <div className="flex items-center justify-between gap-4">
         <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">{title}</h2>
         <RightPanelCloseButton
-          onClick={() => onOpenChange(false)}
+          onClick={() => handleOpenChange(false)}
           aria-label="Close address form"
+          className={isSaving ? "pointer-events-none opacity-50" : undefined}
         />
       </div>
-      <div className="mt-5 h-px w-full bg-neutral300" aria-hidden />
+      <div className="mt-6 h-px w-full bg-neutral300" aria-hidden />
     </div>
   );
 
@@ -208,6 +222,7 @@ export function ProfileAddressFormSheet({
               onBlur={() => markTouched("name")}
               invalid={showError("name")}
               error={showError("name") ? errors.name : undefined}
+              disabled={isSaving}
             />
             <CheckoutField
               id="profile-address-line-1"
@@ -217,6 +232,7 @@ export function ProfileAddressFormSheet({
               onBlur={() => markTouched("addressLine1")}
               invalid={showError("addressLine1")}
               error={showError("addressLine1") ? errors.addressLine1 : undefined}
+              disabled={isSaving}
             />
             <CheckoutField
               id="profile-address-line-2"
@@ -227,6 +243,7 @@ export function ProfileAddressFormSheet({
               onBlur={() => markTouched("addressLine2")}
               invalid={showError("addressLine2")}
               error={showError("addressLine2") ? errors.addressLine2 : undefined}
+              disabled={isSaving}
             />
             <div className="grid grid-cols-2 gap-6">
               <CheckoutField
@@ -237,6 +254,7 @@ export function ProfileAddressFormSheet({
                 onBlur={() => markTouched("pincode")}
                 invalid={showError("pincode")}
                 error={showError("pincode") ? errors.pincode : undefined}
+                disabled={isSaving}
               />
               <CheckoutField
                 id="profile-address-city"
@@ -246,6 +264,7 @@ export function ProfileAddressFormSheet({
                 onBlur={() => markTouched("city")}
                 invalid={showError("city")}
                 error={showError("city") ? errors.city : undefined}
+                disabled={isSaving}
               />
             </div>
             <CheckoutSelectField
@@ -258,6 +277,7 @@ export function ProfileAddressFormSheet({
               error={showError("state") ? errors.state : undefined}
               options={stateOptions}
               placeholder="Select"
+              disabled={isSaving}
             />
             <CheckoutField
               id="profile-address-phone"
@@ -268,6 +288,7 @@ export function ProfileAddressFormSheet({
               onBlur={() => markTouched("phone")}
               invalid={showError("phone")}
               error={showError("phone") ? errors.phone : undefined}
+              disabled={isSaving}
             />
             <FormFieldError message={formError ?? undefined} />
           </div>
@@ -280,15 +301,19 @@ export function ProfileAddressFormSheet({
           isMobile && "pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]",
         )}
       >
-        <DetailDarkButton type="submit" className="w-full" disabled={isSaving}>
-          {isSaving ? "Saving..." : addressContent.saveLabel}
+        <DetailDarkButton
+          type="submit"
+          className="w-full disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={isSaving}
+        >
+          {isSaving ? addressContent.savingLabel : addressContent.saveLabel}
         </DetailDarkButton>
       </PanelFooter>
     </form>
   );
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent
         side={isMobile ? "bottom" : "right"}
         overlayClassName="bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"

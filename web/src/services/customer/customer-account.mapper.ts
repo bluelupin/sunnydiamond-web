@@ -153,12 +153,31 @@ function mapMagentoCustomerOrder(order: MagentoCustomerOrder): CustomerOrder {
   };
 }
 
+function normalizeDefaultShippingExclusive(addresses: CustomerAddress[]): CustomerAddress[] {
+  let defaultAssigned = false;
+
+  return addresses.map((address) => {
+    if (!address.isDefaultShipping) {
+      return address;
+    }
+
+    if (defaultAssigned) {
+      return { ...address, isDefaultShipping: false };
+    }
+
+    defaultAssigned = true;
+    return address;
+  });
+}
+
 export function mapMagentoCustomerAddresses(
   data: MagentoCustomerAddressesResponse,
 ): CustomerAddress[] {
-  return (data.customer?.addresses ?? [])
+  const mapped = (data.customer?.addresses ?? [])
     .filter((address): address is MagentoCustomerAddress & { uid: string } => Boolean(address?.uid))
     .map(mapMagentoCustomerAddress);
+
+  return normalizeDefaultShippingExclusive(mapped);
 }
 
 function mapMagentoCustomerAddress(address: MagentoCustomerAddress): CustomerAddress {

@@ -112,6 +112,20 @@ export async function removeCustomerAddress(uid: string): Promise<CustomerAddres
   return payload.addresses;
 }
 
+export async function setCustomerDefaultShippingAddress(uid: string): Promise<CustomerAddress[]> {
+  const response = await fetch(`/api/customer/addresses/${encodeURIComponent(uid)}/default`, {
+    method: "POST",
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response));
+  }
+
+  const payload = (await response.json()) as { addresses: CustomerAddress[] };
+  return payload.addresses;
+}
+
 /** Backfill profile addresses from the customer's most recent order shipping address. */
 export async function syncCustomerAddressFromLatestOrder(
   signal?: AbortSignal,
