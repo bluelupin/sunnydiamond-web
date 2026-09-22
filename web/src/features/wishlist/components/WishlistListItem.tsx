@@ -57,7 +57,7 @@ const WishlistListItem = ({
           <Link
             href={href}
             className={cn(
-              "line-clamp-2 max-w-full font-gill text-sm font-light leading-110 text-darkblack",
+              "line-clamp-2 max-w-full font-gill text-base font-light leading-110 text-darkblack",
               productNameDisplayClassName,
             )}
           >
@@ -68,7 +68,6 @@ const WishlistListItem = ({
             {formatJewelleryPrice(product.price)}
           </p>
         </div>
-
         <div className="flex w-full items-start justify-center gap-6">
           <span
             onPointerEnter={() => prefetchWishlistProductDetail(product.urlKey)}

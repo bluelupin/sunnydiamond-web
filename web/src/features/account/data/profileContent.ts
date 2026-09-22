@@ -278,10 +278,12 @@ export const profileTabsContent = {
   },
   wishlist: {
     emptyTitle: "Your Wishlist Is Empty",
-    emptyDescriptionPrimary: "You haven't saved any pieces yet.",
-    emptyDescriptionSecondary: "Add your favourites here to revisit them anytime.",
+    emptyDescription:
+      "Your wishlist is waiting. Save the pieces you love and come back to them whenever you're ready.",
     emptyPrimaryCta: "START EXPLORING",
     emptyPrimaryCtaHref: "/jewellery",
+    emptySecondaryCta: "DISCOVER JEWELLERY",
+    emptySecondaryCtaHref: "/jewellery",
   },
   diamondsForEveryone: {
     pageTitle: "Your Instalment Summary",

@@ -62,7 +62,7 @@ const WishlistCard = ({
           className="h-full w-full object-cover"
         />
       </Link>
-      <div className={cn("pointer-events-auto flex flex-col items-center gap-6", isProfileLayout && "lg:gap-4")}>
+      <div className={cn("testing pointer-events-auto flex flex-col items-center gap-6", isProfileLayout && "gap-6")}>
         <div className="flex flex-col items-center gap-2 md:gap-3">
           <Link
             href={href}

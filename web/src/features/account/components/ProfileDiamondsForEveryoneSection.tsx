@@ -15,6 +15,7 @@ import { ProfileDfeReadOnlyField, ProfileDfeSectionCard } from "./profileUi";
 import { ProfileDfeInvestmentSummary } from "./ProfileDfeInvestmentSummary";
 import { cn } from "@/shared/utils/cn";
 import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
+import { useProfileSectionEmptyState } from "../context/ProfileSectionEmptyStateContext";
 
 function formatInrAmount(amount: number): string {
   return amount.toLocaleString("en-IN");
@@ -163,6 +164,7 @@ function ProfileDfePlanView({
 
 function ProfileDfeEmptyState() {
   const content = profileTabsContent.diamondsForEveryone;
+  useProfileSectionEmptyState(true);
 
   return (
     <div className="flex flex-col gap-4 bg-gray300 p-6">

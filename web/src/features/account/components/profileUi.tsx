@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useState } from "react";
+import { useProfileSectionEmptyState } from "../context/ProfileSectionEmptyStateContext";
 import InformationIcon from "@/assets/Icons/InformationIcon";
 import PlusIcon from "@/assets/Icons/PlusIcon";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
@@ -347,8 +348,10 @@ export function ProfileInfoNote({ children }: { children: React.ReactNode }) {
 }
 
 export function ProfileTabEmptyStateLayout({ children }: { children: React.ReactNode }) {
+  useProfileSectionEmptyState(true);
+
   return (
-    <div className="flex w-full min-h-[min(520px,100vh)] items-center justify-center">
+    <div className="flex w-full lg:min-h-[min(520px,100vh)] lg:pt-0 pt-10 items-center justify-center">
       <div className="flex w-full max-w-[464px] flex-col items-center md:gap-6 gap-4 text-center">
         {children}
       </div>
