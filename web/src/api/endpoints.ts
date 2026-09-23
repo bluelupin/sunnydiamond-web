@@ -38,6 +38,8 @@ export const STRAPI_ENDPOINTS = {
   customerAppointments: "api/customer/appointments",
   /** Authenticated customer saved bespoke creations. */
   customerSavedCreations: "api/customer/saved-creations",
+  /** Showroom collection — address, mapUrl, city (used to enrich appointment preferredShowroom). */
+  showrooms: "api/showrooms",
   careerLandingPage: "api/career-landing-page",
   careerListingPage: "api/career-listing-page",
   careerOpenings: "api/career-openings",

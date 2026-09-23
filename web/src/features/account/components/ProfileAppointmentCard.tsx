@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
-import { ChevronRight } from "lucide-react";
 import RingsTabIcon from "@/assets/Icons/PLP/RingsTabIcon";
 import RightArrow from "@/assets/Icons/RightArrow";
 import {
@@ -181,13 +180,46 @@ function ProfileAppointmentPersonalDetails({
   );
 }
 
-function ProfileAppointmentNote({ title, note }: { title: string; note: string }) {
+function ProfileAppointmentNote({
+  title,
+  note,
+  purposeOfVisit,
+  yourRequirement,
+  purposeLabel,
+  requirementLabel,
+}: {
+  title: string;
+  note: string;
+  purposeOfVisit?: string;
+  yourRequirement?: string;
+  purposeLabel?: string;
+  requirementLabel?: string;
+}) {
+  const hasStructuredNote = Boolean(purposeOfVisit || yourRequirement);
+
   return (
     <div className={sectionCardClassName}>
       <h4 className={sectionTitleClassName}>{title}</h4>
-      <p className="font-gill text-base font-light leading-110 whitespace-pre-line text-darkblack">
-        {note}
-      </p>
+      {hasStructuredNote ? (
+        <div className="flex flex-col gap-4 font-gill text-base leading-110 text-darkblack">
+          {purposeOfVisit ? (
+            <div className="flex flex-col gap-2">
+              <p className="font-normal">{purposeLabel ?? "Purpose of Visit"}</p>
+              <p className="font-light">{purposeOfVisit}</p>
+            </div>
+          ) : null}
+          {yourRequirement ? (
+            <div className="flex flex-col gap-2">
+              <p className="font-normal">{requirementLabel ?? "Your Requirement"}</p>
+              <p className="font-light whitespace-pre-line">{yourRequirement}</p>
+            </div>
+          ) : null}
+        </div>
+      ) : (
+        <p className="font-gill text-base font-light leading-110 whitespace-pre-line text-darkblack">
+          {note}
+        </p>
+      )}
     </div>
   );
 }
@@ -229,7 +261,7 @@ function ProfileAppointmentStoreVisit({
       <h4 className={sectionTitleClassName}>{title}</h4>
 
       <div className="flex flex-col gap-2 font-gill text-base leading-110 text-darkblack">
-        <p className="font-normal">{storeVisit.city}</p>
+        {storeVisit.city ? <p className="font-normal">{storeVisit.city}</p> : null}
         <div className="font-light">
           {storeVisit.lines.map((line, index) => (
             <p key={`${index}-${line}`}>{line}</p>
@@ -240,10 +272,12 @@ function ProfileAppointmentStoreVisit({
       {storeVisit.directionsHref ? (
         <DetailTextLink
           href={storeVisit.directionsHref}
-          className="mt-2 inline-flex items-center gap-2 text-sm uppercase"
+          className="mt-2 text-sm uppercase"
+          {...(storeVisit.directionsHref.startsWith("http")
+            ? { target: "_blank", rel: "noopener noreferrer" }
+            : {})}
         >
           {directionsLabel}
-          <ChevronRight className="size-4" aria-hidden />
         </DetailTextLink>
       ) : null}
     </div>
@@ -291,6 +325,9 @@ export function ProfileAppointmentCard({
     typeof appointment.notes === "string"
       ? appointment.notes.trim()
       : String(appointment.notes ?? "").trim();
+  const purposeOfVisit = appointment.purposeOfVisit?.trim() ?? "";
+  const yourRequirement = appointment.yourRequirement?.trim() ?? notesText;
+  const showNoteSection = Boolean(purposeOfVisit || yourRequirement || notesText);
 
   return (
     <ProfileCard className="relative flex flex-col gap-4 lg:gap-6">
@@ -298,9 +335,13 @@ export function ProfileAppointmentCard({
         {appointment.typeLabel}
       </span>
 
-      <div className="pt-7 lg:pt-8">
-        <ProductGallery products={appointment.products} />
-      </div>
+      {appointment.type !== "store_visit" && appointment.products.length > 0 ? (
+        <div className="pt-7 lg:pt-8">
+          <ProductGallery products={appointment.products} />
+        </div>
+      ) : (
+        <div className="pt-7 lg:pt-8" aria-hidden />
+      )}
 
       <ProfileAppointmentPersonalDetails
         title={content.personalDetailsTitle}
@@ -331,8 +372,19 @@ export function ProfileAppointmentCard({
         bookingTime={appointment.bookingTime}
       />
 
-      {notesText ? (
-        <ProfileAppointmentNote title={content.notesLabel} note={notesText} />
+      {showNoteSection ? (
+        <ProfileAppointmentNote
+          title={content.notesLabel}
+          note={notesText}
+          purposeOfVisit={
+            appointment.type === "store_visit" ? purposeOfVisit || undefined : undefined
+          }
+          yourRequirement={
+            appointment.type === "store_visit" ? yourRequirement || undefined : undefined
+          }
+          purposeLabel={content.purposeOfVisitLabel}
+          requirementLabel={content.yourRequirementLabel}
+        />
       ) : null}
 
       <div className="flex flex-col gap-4">

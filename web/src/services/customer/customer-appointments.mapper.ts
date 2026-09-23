@@ -28,15 +28,34 @@ function mapShowroom(
   if (!showroom) return null;
 
   const documentId = cleanText(showroom.documentId);
-  const name = cleanText(showroom.name);
-  if (!documentId || !name) return null;
+  if (!documentId) return null;
+
+  const record = showroom as StrapiCustomerAppointmentShowroom & Record<string, unknown>;
+  const city = cleanText(showroom.city);
+  const slug = cleanText(showroom.slug);
+  // CMS showrooms often omit `name` — fall back to city/slug (verified on /api/showrooms).
+  const name = cleanText(showroom.name) || city || slug;
+  if (!name) return null;
 
   return {
     documentId,
     name,
-    slug: cleanText(showroom.slug),
-    city: cleanText(showroom.city),
+    slug,
+    city,
     state: cleanText(showroom.state),
+    address:
+      cleanText(showroom.address) ||
+      cleanText(record.fullAddress as string | null | undefined) ||
+      cleanText(record.street as string | null | undefined),
+    mapUrl:
+      cleanText(showroom.mapUrl) ||
+      cleanText(showroom.directionsUrl) ||
+      cleanText(record.googleMapsUrl as string | null | undefined) ||
+      cleanText(record.mapsUrl as string | null | undefined),
+    pincode:
+      cleanText(showroom.pincode) ||
+      cleanText(record.postalCode as string | null | undefined) ||
+      cleanText(record.zip as string | null | undefined),
   };
 }
 
@@ -128,6 +147,54 @@ function mapCustomerMessage(
   }
 
   return null;
+}
+
+function mapPurposeOfVisit(
+  item: StrapiCustomerAppointment & Record<string, unknown>,
+  customerMessage: string | null,
+): string | null {
+  const dedicated =
+    pickTextField(item, [
+      "purposeOfVisit",
+      "purpose_of_visit",
+      "purpose",
+      "visitPurpose",
+      "visit_purpose",
+    ]) || null;
+
+  if (dedicated) {
+    return dedicated;
+  }
+
+  if (!customerMessage) {
+    return null;
+  }
+
+  const purposeMatch = customerMessage.match(/^\s*Purpose\s*:\s*(.+)$/im);
+  return purposeMatch?.[1]?.trim() || null;
+}
+
+function stripPurposePrefixFromMessage(message: string | null, purpose: string | null): string | null {
+  if (!message) {
+    return null;
+  }
+
+  const withoutPurposeLine = message
+    .split(/\r?\n/)
+    .filter((line) => !/^\s*Purpose\s*:/i.test(line))
+    .join("\n")
+    .trim();
+
+  if (withoutPurposeLine) {
+    return withoutPurposeLine;
+  }
+
+  // Message was only "Purpose: X" — requirement empty.
+  if (purpose && message.trim().toLowerCase() === `purpose: ${purpose}`.toLowerCase()) {
+    return null;
+  }
+
+  return message.trim() || null;
 }
 
 function pickTextField(
@@ -257,7 +324,14 @@ export function mapCustomerAppointment(
     requestedDate,
     selectedTimeSlot,
     workflowStatus,
-    customerMessage: mapCustomerMessage(normalized),
+    ...(() => {
+      const rawMessage = mapCustomerMessage(normalized);
+      const purposeOfVisit = mapPurposeOfVisit(normalized, rawMessage);
+      return {
+        customerMessage: stripPurposePrefixFromMessage(rawMessage, purposeOfVisit),
+        purposeOfVisit,
+      };
+    })(),
     addressLine1: addressFields.addressLine1,
     addressLine2: addressFields.addressLine2,
     pincode: addressFields.pincode,

@@ -329,6 +329,8 @@ export const profileTabsContent = {
     bookingDateLabel: "Date",
     bookingTimeLabel: "Time Slot",
     notesLabel: "Note",
+    purposeOfVisitLabel: "Purpose of Visit",
+    yourRequirementLabel: "Your Requirement",
     rescheduleLabel: "RESCHEDULE",
     cancelLabel: "CANCEL APPOINTMENT",
     rescheduleNoteTemplate: "Appointment can be rescheduled before {date}",

@@ -144,6 +144,7 @@ export type ProfileAppointmentUi = {
   };
   storeVisit?: {
     city: string;
+    storeName: string;
     lines: string[];
     directionsHref?: string;
   };
@@ -151,6 +152,9 @@ export type ProfileAppointmentUi = {
   bookingTime: string;
   notesLabel: string;
   notes: string;
+  /** Store-visit note layout (Figma): purpose + requirement. */
+  purposeOfVisit?: string;
+  yourRequirement?: string;
   rescheduleNote?: string;
   canReschedule: boolean;
   canCancel: boolean;

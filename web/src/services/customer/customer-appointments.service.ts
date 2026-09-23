@@ -3,6 +3,7 @@ import { STRAPI_ENDPOINTS } from "@/api/endpoints";
 import { mapCustomerAppointment, mapCustomerAppointmentsPage } from "./customer-appointments.mapper";
 import type {
   CustomerAppointment,
+  CustomerAppointmentShowroom,
   CustomerAppointmentsPage,
   StrapiAppointmentMutationResponse,
   StrapiCustomerAppointment,
@@ -82,6 +83,114 @@ function cmsAuthHeaders(extra?: HeadersInit): HeadersInit {
   };
 }
 
+type ShowroomLookup = {
+  name: string;
+  city: string;
+  state: string;
+  address: string;
+  mapUrl: string;
+  pincode: string;
+  slug: string;
+};
+
+function cleanLookupText(value?: unknown): string {
+  if (typeof value === "string") {
+    return value.trim();
+  }
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value).trim();
+  }
+  return "";
+}
+
+/**
+ * Appointments `preferredShowroom` only returns documentId/slug/city/state.
+ * Full address + mapUrl live on `/api/showrooms` — merge for Store Visit Details (Figma).
+ */
+async function fetchShowroomLookupByDocumentId(
+  signal?: AbortSignal,
+): Promise<Map<string, ShowroomLookup>> {
+  const lookup = new Map<string, ShowroomLookup>();
+  const params = new URLSearchParams({
+    "pagination[pageSize]": "100",
+  });
+  const url = `${getStrapiBaseUrl()}/${STRAPI_ENDPOINTS.showrooms}?${params.toString()}`;
+
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+      signal,
+    });
+    if (!response.ok) {
+      return lookup;
+    }
+
+    const payload = (await response.json()) as {
+      data?: Array<Record<string, unknown> | null> | null;
+    };
+
+    for (const item of payload.data ?? []) {
+      if (!item || typeof item !== "object") continue;
+      const documentId = cleanLookupText(item.documentId);
+      if (!documentId) continue;
+
+      const city = cleanLookupText(item.city);
+      const slug = cleanLookupText(item.slug);
+      lookup.set(documentId, {
+        name: cleanLookupText(item.name) || city || slug,
+        city,
+        state: cleanLookupText(item.state),
+        address: cleanLookupText(item.address),
+        mapUrl:
+          cleanLookupText(item.mapUrl) ||
+          cleanLookupText(item.directionsUrl),
+        pincode: cleanLookupText(item.pincode),
+        slug,
+      });
+    }
+  } catch {
+    // Enrichment is best-effort — listing still works with city/state alone.
+  }
+
+  return lookup;
+}
+
+function mergeShowroomDetails(
+  showroom: CustomerAppointmentShowroom | null,
+  lookup: Map<string, ShowroomLookup>,
+): CustomerAppointmentShowroom | null {
+  if (!showroom) return null;
+  const details = lookup.get(showroom.documentId);
+  if (!details) return showroom;
+
+  return {
+    documentId: showroom.documentId,
+    slug: showroom.slug || details.slug,
+    city: showroom.city || details.city,
+    state: showroom.state || details.state,
+    name: showroom.name || details.name,
+    address: showroom.address || details.address,
+    mapUrl: showroom.mapUrl || details.mapUrl,
+    pincode: showroom.pincode || details.pincode,
+  };
+}
+
+function enrichAppointmentsWithShowrooms(
+  appointments: CustomerAppointment[],
+  lookup: Map<string, ShowroomLookup>,
+): CustomerAppointment[] {
+  if (lookup.size === 0) {
+    return appointments;
+  }
+
+  return appointments.map((appointment) => ({
+    ...appointment,
+    preferredShowroom: mergeShowroomDetails(appointment.preferredShowroom, lookup),
+  }));
+}
+
 /**
  * Strapi customer appointments — CMS API token as Bearer + magentoCustomerId.
  * Call only from server (BFF). Customer id must come from the Magento session.
@@ -113,7 +222,22 @@ export async function fetchCustomerAppointments(
   }
 
   const payload = (await response.json()) as StrapiCustomerAppointmentsResponse;
-  return mapCustomerAppointmentsPage(payload);
+  const pageData = mapCustomerAppointmentsPage(payload);
+
+  const needsShowroomEnrichment = pageData.appointments.some((appointment) => {
+    const showroom = appointment.preferredShowroom;
+    return Boolean(showroom?.documentId) && (!showroom?.address || !showroom?.mapUrl);
+  });
+
+  if (!needsShowroomEnrichment) {
+    return pageData;
+  }
+
+  const lookup = await fetchShowroomLookupByDocumentId(signal);
+  return {
+    ...pageData,
+    appointments: enrichAppointmentsWithShowrooms(pageData.appointments, lookup),
+  };
 }
 
 export async function rescheduleCustomerAppointment(

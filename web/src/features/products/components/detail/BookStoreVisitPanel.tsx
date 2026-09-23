@@ -704,15 +704,6 @@ function StoreLocatorListStatusHeader({
   );
 }
 
-const storeListTitleClassName =
-  "font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl";
-
-const selectedStoreCardClassName =
-  "flex flex-col gap-4 bg-gray300 px-4 py-6 lg:px-6 lg:py-6";
-
-const unselectedStoreButtonClassName =
-  "flex w-full items-center px-4 py-6 text-left font-larken text-xl font-light leading-110 text-darkblack lg:px-10 lg:py-8 lg:text-2xl";
-
 const StoreSelectionStep = ({
   stores,
   selectedStoreId,
@@ -747,6 +738,10 @@ const StoreSelectionStep = ({
     );
   }
 
+  const selectedStore =
+    stores.find((store) => store.id === selectedStoreId) ?? stores[0] ?? null;
+  const heroImage = selectedStore?.heroImage || selectedStore?.mobileHeroImage;
+
   return (
     <>
       <div className="min-h-0 flex-1 overflow-y-auto DrawerVerticleScrollbar">
@@ -775,58 +770,76 @@ const StoreSelectionStep = ({
             <div className="h-px w-full bg-neutral300" aria-hidden />
           </div>
 
-          <div
-            className="mt-6 flex flex-col border-r border-neutral300 pb-72"
-            aria-label="Showroom locations"
-          >
+          <div className="mt-6 flex flex-col gap-6 pb-72" aria-label="Showroom locations">
             {isShowroomsLoading ? (
-              <div className="flex flex-col gap-4 px-4 py-8 lg:px-10" aria-busy="true" aria-label="Loading showrooms">
-                <div className="h-24 animate-pulse bg-gray300" />
-                <div className="h-24 animate-pulse bg-gray300" />
+              <div className="flex flex-col gap-4" aria-busy="true" aria-label="Loading showrooms">
+                <div className="h-8 animate-pulse bg-gray300" />
+                <div className="aspect-[4/5] animate-pulse bg-gray300" />
               </div>
             ) : stores.length === 0 ? (
               noResultsMessage?.trim() ? (
-                <p className="px-4 py-8 font-gill text-base font-light leading-110 text-neutral500 lg:px-10">
+                <p className="py-8 font-gill text-base font-light leading-110 text-neutral500">
                   {noResultsMessage.trim()}
                 </p>
               ) : null
             ) : (
-              stores.map((store) => {
-                const isSelected = store.id === selectedStoreId;
+              <>
+                <div
+                  role="tablist"
+                  aria-label="Store locations"
+                  className="flex gap-6 overflow-x-auto horizontalScrollbar"
+                >
+                  {stores.map((store) => {
+                    const isSelected = store.id === (selectedStore?.id ?? "");
+                    return (
+                      <button
+                        key={store.id}
+                        type="button"
+                        role="tab"
+                        aria-selected={isSelected}
+                        onClick={() => onSelectStore(store.id)}
+                        className={cn(
+                          "shrink-0 border-b-[1.5px] pb-2 font-gill text-sm font-normal uppercase leading-110 tracking-normal transition-colors",
+                          isSelected
+                            ? "border-linkGold text-linkGold"
+                            : "border-transparent text-darkblack",
+                        )}
+                      >
+                        {store.tabLabel || store.storeName.toUpperCase()}
+                      </button>
+                    );
+                  })}
+                </div>
 
-                return (
-                  <div key={store.id} className="w-full">
-                    {isSelected ? (
-                      <div className={selectedStoreCardClassName}>
-                        <p className={storeListTitleClassName}>{store.storeName}</p>
-                        <div className="h-px w-full bg-neutral300" aria-hidden />
-                        {store.heroImage ? (
-                          <div className="relative aspect-[2500/1797] w-full overflow-hidden">
-                            <Image
-                              src={store.heroImage}
-                              alt=""
-                              fill
-                              className="object-cover"
-                              sizes="(max-width: 480px) 100vw, 480px"
-                              aria-hidden
-                            />
-                          </div>
-                        ) : null}
-                        <BookStoreVisitLocationDetails store={store} size="page" directionsLabel={getDirectionsLabel} />
+                {selectedStore ? (
+                  <div className="relative w-full">
+                    {heroImage ? (
+                      <div className="relative aspect-[3/4] min-h-[420px] w-full">
+                        <Image
+                          src={heroImage}
+                          alt={selectedStore.imageAlt || selectedStore.storeName}
+                          fill
+                          className="object-cover object-center"
+                          sizes="(max-width: 480px) 100vw, 480px"
+                        />
                       </div>
                     ) : (
-                      <button
-                        type="button"
-                        aria-pressed={false}
-                        onClick={() => onSelectStore(store.id)}
-                        className={unselectedStoreButtonClassName}
-                      >
-                        {store.storeName}
-                      </button>
+                      <div className="aspect-[3/4] min-h-[420px] w-full bg-gray300" aria-hidden />
                     )}
+                    <div className="absolute inset-x-0 bottom-0 bg-gray300 px-4 py-6 lg:px-6">
+                      <div className="flex flex-col gap-4">
+                        <p className="font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
+                          {selectedStore.storeName}
+                        </p>
+                        <BookStoreVisitLocationDetails
+                          store={selectedStore}
+                          directionsLabel={getDirectionsLabel}
+                        />
+                      </div>
+                    </div>
                   </div>
-                );
-              })
+                ) : null}
+              </>
             )}
           </div>
         </div>

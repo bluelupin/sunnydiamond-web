@@ -27,8 +27,20 @@ function getAppointmentAddressClubKey(appointment: ProfileAppointmentUi): string
 }
 
 /**
+ * Open (cancellable/reschedulable) vs closed (cancelled/completed) must not share a club key,
+ * otherwise a re-book on the same slot merges into the cancelled card.
+ */
+function getAppointmentClubLifecycle(appointment: ProfileAppointmentUi): "open" | "closed" {
+  if (appointment.canCancel || appointment.canReschedule) {
+    return "open";
+  }
+  return "closed";
+}
+
+/**
  * Same date + time + address (or showroom) → one clubbed list item.
  * Video calls stay individual (CMS does not group them; no address key).
+ * Cancelled/completed rows never club with an active booking on the same slot.
  */
 export function getAppointmentClubKey(appointment: ProfileAppointmentUi): string {
   if (appointment.type === "video_call") {
@@ -37,6 +49,7 @@ export function getAppointmentClubKey(appointment: ProfileAppointmentUi): string
 
   return [
     appointment.type,
+    getAppointmentClubLifecycle(appointment),
     normalizeClubPart(appointment.requestedDate),
     normalizeClubPart(appointment.bookingTime),
     getAppointmentAddressClubKey(appointment),

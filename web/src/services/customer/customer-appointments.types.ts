@@ -4,6 +4,9 @@ export type CustomerAppointmentShowroom = {
   slug: string;
   city: string;
   state: string;
+  address: string;
+  mapUrl: string;
+  pincode: string;
 };
 
 export type CustomerAppointmentProduct = {
@@ -29,6 +32,8 @@ export type CustomerAppointment = {
   selectedTimeSlot: string;
   workflowStatus: string;
   customerMessage: string | null;
+  /** Dedicated purpose field when CMS returns one; otherwise parsed from customerMessage. */
+  purposeOfVisit: string | null;
   addressLine1: string | null;
   addressLine2: string | null;
   pincode: string | null;
@@ -53,6 +58,11 @@ export type StrapiCustomerAppointmentShowroom = {
   slug?: string | null;
   city?: string | null;
   state?: string | null;
+  address?: string | null;
+  mapUrl?: string | null;
+  directionsUrl?: string | null;
+  pincode?: string | null;
+  phone?: string | null;
 };
 
 export type StrapiCustomerAppointmentProduct = {
@@ -81,6 +91,8 @@ export type StrapiCustomerAppointment = {
   notes?: string | null;
   message?: string | null;
   customerMessage?: string | null;
+  purposeOfVisit?: string | null;
+  purpose?: string | null;
   addressLine1?: string | null;
   addressLine2?: string | null;
   pincode?: string | null;

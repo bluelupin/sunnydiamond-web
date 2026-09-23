@@ -192,6 +192,108 @@ export function resolveRefundTimeline(
   return { steps: order.sunnyStatus ? [] : legacySteps, fromServer: false };
 }
 
+function splitShowroomAddressLines(address: string): string[] {
+  const trimmed = address.trim();
+  if (!trimmed) {
+    return [];
+  }
+
+  const byNewline = trimmed
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (byNewline.length > 1) {
+    return byNewline;
+  }
+
+  return trimmed
+    .split(/,\s*/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function resolveStoreVisitDisplayName(showroom: {
+  name: string;
+  city: string;
+  address: string;
+}): string {
+  const city = showroom.city.trim();
+  const name = showroom.name.trim();
+  if (name && (!city || name.toLowerCase() !== city.toLowerCase())) {
+    return name;
+  }
+
+  const address = showroom.address.trim();
+  const sunnyMatch = address.match(/^(Sunny Diamonds[^,]*)/i);
+  if (sunnyMatch?.[1]) {
+    return sunnyMatch[1].trim();
+  }
+
+  return name || city;
+}
+
+function mapStoreVisitDetails(
+  appointment: CustomerAppointment,
+): ProfileAppointmentUi["storeVisit"] | undefined {
+  const showroom = appointment.preferredShowroom;
+  if (!showroom) {
+    return undefined;
+  }
+
+  const city = showroom.city.trim() || showroom.name.trim();
+  const storeName = resolveStoreVisitDisplayName(showroom);
+  let remainingAddress = showroom.address.trim();
+  if (
+    storeName &&
+    remainingAddress.toLowerCase().startsWith(storeName.toLowerCase())
+  ) {
+    remainingAddress = remainingAddress.slice(storeName.length).replace(/^[,\s]+/, "");
+  }
+
+  const lines = [
+    ...(storeName && storeName.toLowerCase() !== city.toLowerCase() ? [storeName] : []),
+    ...splitShowroomAddressLines(remainingAddress).filter(
+      (line) =>
+        line.toLowerCase() !== storeName.toLowerCase() &&
+        line.toLowerCase() !== city.toLowerCase(),
+    ),
+  ];
+
+  const pincode = showroom.pincode.trim();
+  const state = showroom.state.trim();
+  if (pincode) {
+    const stateLineIndex = lines.findIndex(
+      (line) => state && line.toLowerCase() === state.toLowerCase(),
+    );
+    if (stateLineIndex >= 0) {
+      if (!lines[stateLineIndex].includes(pincode)) {
+        lines[stateLineIndex] = `${lines[stateLineIndex]} ${pincode}`;
+      }
+    } else if (!lines.some((line) => line.includes(pincode))) {
+      lines.push([state, pincode].filter(Boolean).join(" "));
+    }
+  } else if (
+    state &&
+    !lines.some((line) => line.toLowerCase().includes(state.toLowerCase()))
+  ) {
+    lines.push(state);
+  }
+
+  if (!city && lines.length === 0) {
+    return undefined;
+  }
+
+  const directionsHref = showroom.mapUrl.trim() || undefined;
+
+  return {
+    city: city || storeName,
+    storeName,
+    lines,
+    ...(directionsHref ? { directionsHref } : {}),
+  };
+}
+
 function inferAppointmentType(formTag: string): AppointmentFilterKey {
   const normalized = formTag.toLowerCase();
 
@@ -426,12 +528,6 @@ export function mapCustomerAppointmentToProfileUi(
         ? typeLabels.tryAtHome
         : typeLabels.storeVisit;
 
-  const showroomParts = [
-    appointment.preferredShowroom?.name,
-    appointment.preferredShowroom?.city,
-    appointment.preferredShowroom?.state,
-  ].filter((part): part is string => Boolean(part));
-
   const products =
     appointment.products.length > 0
       ? appointment.products.map((product, index) => {
@@ -495,6 +591,12 @@ export function mapCustomerAppointmentToProfileUi(
     bookingTime: appointment.selectedTimeSlot,
     notesLabel: profileTabsContent.appointments.notesLabel,
     notes: appointment.customerMessage ?? "",
+    ...(appointment.purposeOfVisit
+      ? { purposeOfVisit: appointment.purposeOfVisit }
+      : {}),
+    ...(appointment.customerMessage
+      ? { yourRequirement: appointment.customerMessage }
+      : {}),
     rescheduleNote: rescheduleDeadline
       ? profileTabsContent.appointments.rescheduleNoteTemplate.replace(
           "{date}",
@@ -511,15 +613,9 @@ export function mapCustomerAppointmentToProfileUi(
     return appointmentAddress ? { ...base, appointmentAddress } : base;
   }
 
-  if (type === "store_visit" && showroomParts.length > 0) {
-    return {
-      ...base,
-      storeVisit: {
-        city: appointment.preferredShowroom?.city ?? showroomParts[0] ?? "",
-        lines: showroomParts,
-        directionsHref: "/store-locator",
-      },
-    };
+  if (type === "store_visit") {
+    const storeVisit = mapStoreVisitDetails(appointment);
+    return storeVisit ? { ...base, storeVisit } : base;
   }
 
   return base;
