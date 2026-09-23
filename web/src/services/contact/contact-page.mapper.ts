@@ -64,11 +64,19 @@ const mapAvailabilityHours = (
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => {
-      const separatorIndex = line.indexOf(":");
-      if (separatorIndex > 0 && separatorIndex < line.length - 1) {
-        const label = line.slice(0, separatorIndex).trim();
-        const value = line.slice(separatorIndex + 1).trim();
-        if (label && value) return { label, value };
+      // Split day label from time; keep CMS colon on the label when present (Figma: "Sunday:").
+      const match = line.match(
+        /^(.+?)(\s*:)?\s+(\d{1,2}:\d{2}\s*[AaPp][Mm]\b.*)$/,
+      );
+      if (match) {
+        const dayPart = match[1].trim();
+        const value = match[3].trim();
+        if (dayPart && value) {
+          return {
+            label: match[2] ? `${dayPart}:` : dayPart,
+            value,
+          };
+        }
       }
       return { label: "", value: line };
     });

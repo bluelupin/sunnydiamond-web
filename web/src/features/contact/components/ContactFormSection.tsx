@@ -34,8 +34,6 @@ const contactPhoneLabelClassName =
 const contactFieldClassName =
   "h-14 w-full bg-[#F2F2F2] p-3 font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600";
 
-const MESSAGE_MAX_LENGTH = 500;
-
 type ContactFormSectionProps = {
   form: NormalizedContactForm;
 };
@@ -283,7 +281,6 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
         onBlur={() => markTouched("note")}
         placeholder={form.fields.messagePlaceholder}
         rows={4}
-        maxLength={MESSAGE_MAX_LENGTH}
         aria-invalid={showError("note") || undefined}
         aria-describedby={showError("note") ? "contact-message-error" : undefined}
         className={cn(
@@ -322,6 +319,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
           }))
         }
         labelClassName={contactLabelClassName}
+        triggerClassName={!value ? "text-gray600" : undefined}
         error={showFieldError ? "Please select an option" : undefined}
       />
     );
@@ -358,7 +356,6 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
             }
             placeholder={field.placeholder}
             rows={4}
-            maxLength={MESSAGE_MAX_LENGTH}
             aria-invalid={showFieldError || undefined}
             aria-describedby={showFieldError ? `${inputId}-error` : undefined}
             className={cn(
@@ -551,7 +548,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
         });
 
         toast({
-          title: "Your request has been submitted successfully.",
+          title: "Enquiry Sent Successfully",
         });
         resetForm();
       } catch (error) {
