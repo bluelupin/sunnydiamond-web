@@ -357,8 +357,8 @@ export const profileTabsContent = {
       cancelErrorToast: "Could not cancel appointment",
     },
     emptyTitle: "No Appointments Yet",
-    emptyDescription: "You haven't booked any appointments yet.",
-    emptyDescriptionSecondary: "Schedule a visit for personalised jewellery guidance.",
+    emptyDescription:
+      "You haven't booked any appointments yet. Schedule a visit, and we'll help you find the piece that's right for you.",
     emptyCta: "BOOK AN APPOINTMENT",
     emptyCtaHref: "/book-an-appointment",
     bookAnotherLabel: "BOOK ANOTHER",

@@ -16,11 +16,12 @@ import type { ProfileAppointmentUi } from "../types/profileUi.types";
 import { cn } from "@/shared/utils/cn";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { ProfileCard, ProfileInfoNote } from "./profileUi";
+import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 
 const sectionTitleClassName =
-  "font-larken text-2xl font-light leading-110 text-darkblack";
+  "font-larken md:text-2xl text-xl font-light leading-110 text-darkblack";
 
-const sectionCardClassName = "flex flex-col gap-4 bg-white p-4 lg:gap-4 lg:p-6";
+const sectionCardClassName = "flex flex-col gap-4 bg-white p-4 lg:p-6";
 
 /** Figma desktop: 3 tiles; mobile uses PDP-style 1-up slider. */
 const PRODUCT_GALLERY_DESKTOP_VISIBLE = 3;
@@ -171,7 +172,7 @@ function ProfileAppointmentPersonalDetails({
       <h4 className={sectionTitleClassName}>{title}</h4>
       <div className="flex w-full flex-col gap-2 font-gill text-base leading-110 text-darkblack">
         <p className="font-normal">{name}</p>
-        <div className="font-light">
+        <div className="font-light sm:space-y-2 space-y-1">
           {phone ? <p>{phone}</p> : null}
           {email ? <p>{email}</p> : null}
         </div>
@@ -216,7 +217,7 @@ function ProfileAppointmentNote({
           ) : null}
         </div>
       ) : (
-        <p className="font-gill text-base font-light leading-110 whitespace-pre-line text-darkblack">
+        <p className="font-gill text-base md:font-light font-normal leading-110 whitespace-pre-line text-darkblack">
           {note}
         </p>
       )}
@@ -301,14 +302,14 @@ function ProfileAppointmentBookingDetails({
     <div className={sectionCardClassName}>
       <h4 className={sectionTitleClassName}>{content.bookingDetailsTitle}</h4>
 
-      <div className="grid w-full grid-cols-2 gap-4 font-gill text-base leading-110 text-darkblack">
+      <div className="grid w-full sm:grid-cols-2 grid-cols-1 gap-4 font-gill text-base leading-110 text-darkblack">
         <div className="flex min-w-0 flex-col gap-2">
           <p className="font-normal">{dateLabel}</p>
-          <p className="font-light">{bookingDate}</p>
+          <p className="font-normal">{bookingDate}</p>
         </div>
         <div className="flex min-w-0 flex-col gap-2">
           <p className="font-normal">{timeLabel}</p>
-          <p className="font-light">{bookingTime}</p>
+          <p className="font-normal">{bookingTime}</p>
         </div>
       </div>
     </div>
@@ -328,19 +329,17 @@ export function ProfileAppointmentCard({
   const purposeOfVisit = appointment.purposeOfVisit?.trim() ?? "";
   const yourRequirement = appointment.yourRequirement?.trim() ?? notesText;
   const showNoteSection = Boolean(purposeOfVisit || yourRequirement || notesText);
-
+  const { windows } = useUiPlatform();
   return (
-    <ProfileCard className="relative flex flex-col gap-4 lg:gap-6">
-      <span className="absolute left-0 top-0 bg-mauve300 px-3 py-1 font-gill text-sm font-normal leading-110 whitespace-nowrap text-darkblack">
-        {appointment.typeLabel}
-      </span>
+    <ProfileCard className="relative flex flex-col gap-6 !py-6 md:!px-6 px-4">
+      <div className={cn("absolute left-0 top-0 bg-mauve300 px-3 py-2 font-gill text-base font-normal whitespace-nowrap text-darkblack")}>
+        <span className={cn(!windows && "-translate-y-0.5")}>{appointment.typeLabel}</span>
+      </div>
 
       {appointment.type !== "store_visit" && appointment.products.length > 0 ? (
-        <div className="pt-7 lg:pt-8">
-          <ProductGallery products={appointment.products} />
-        </div>
+        <ProductGallery products={appointment.products} />
       ) : (
-        <div className="pt-7 lg:pt-8" aria-hidden />
+        null
       )}
 
       <ProfileAppointmentPersonalDetails
@@ -388,10 +387,10 @@ export function ProfileAppointmentCard({
       ) : null}
 
       <div className="flex flex-col gap-4">
-        <div className="flex flex-row items-stretch gap-3 sm:gap-4">
+        <div className="grid md:grid-cols-2 gap-4 md:gap-6">
           <DetailOutlineButton
             type="button"
-            className="min-w-0 flex-1 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full disabled:cursor-not-allowed disabled:opacity-50"
             onClick={onCancel}
             disabled={!appointment.canCancel}
           >
@@ -399,7 +398,7 @@ export function ProfileAppointmentCard({
           </DetailOutlineButton>
           <DetailDarkButton
             type="button"
-            className="min-w-0 flex-1 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full disabled:cursor-not-allowed disabled:opacity-50"
             onClick={onReschedule}
             disabled={!appointment.canReschedule}
           >

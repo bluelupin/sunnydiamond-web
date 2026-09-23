@@ -8,6 +8,7 @@ import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { cn } from "@/shared/utils/cn";
 import { profileTabsContent } from "../data/profileContent";
 import type { OrderFilterKey, ProfileOrderSubState } from "../types/profileUi.types";
+import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 
 export function ProfileEmailVerifiedBadge({ label }: { label: string }) {
   return (
@@ -294,7 +295,7 @@ export function ProfileFilterChips<T extends string>({
       className,
     )
     : cn("flex flex-wrap gap-2", className);
-
+  const { windows } = useUiPlatform();
   return (
     <div className={wrapperClass}>
       {options.map((option) => {
@@ -307,11 +308,11 @@ export function ProfileFilterChips<T extends string>({
             type="button"
             onClick={() => onChange(option.key)}
             className={cn(
-              "shrink-0 px-4 py-2 font-gill text-base leading-110 text-darkblack transition-colors",
+              "shrink-0 px-4 py-2 font-gill md:text-base text-sm text-darkblack transition-colors",
               isActive ? "font-normal bg-lightGold" : "font-light bg-gray300",
             )}
           >
-            {chipLabel}
+            <span>{chipLabel}</span>
           </button>
         );
       })}
