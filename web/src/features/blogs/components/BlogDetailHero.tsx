@@ -15,8 +15,7 @@ const BlogDetailHero = ({ heroImage }: BlogDetailHeroProps) => {
 
   return (
     <div className="relative mx-auto w-full shrink-0 overflow-hidden bg-white xl:mb-16 lg:mb-10 mb-6">
-      {/* Figma 1480:178788 — desktop 1000×515 centered; mobile 343×599 crop */}
-      <div className="relative w-full h-auto">
+      <div className="relative w-full max-w-[1000px] mx-auto h-full md:max-h-[500px] max-h-[600px]">
         <ResponsiveImage
           desktopSrc={desktopUrl ?? ""}
           mobileSrc={mobileUrl ?? undefined}
