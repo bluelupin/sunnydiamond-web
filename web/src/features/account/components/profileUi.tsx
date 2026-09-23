@@ -201,7 +201,7 @@ export function ProfileDfeSectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex w-full flex-col gap-6 bg-gray300 md:p-6 p-4">
+    <div className="flex w-full flex-col gap-6 bg-gray200 md:p-6 p-4">
       <h2 className="font-gill text-xl font-normal leading-110 text-darkblack">{title}</h2>
       {children}
     </div>

@@ -2,20 +2,23 @@
 
 import type { AuthCustomer } from "@/features/auth/context/AuthContext";
 import AlertTriangleIcon from "@/assets/Icons/AlertTriangleIcon";
-import { CartPrimaryLink } from "@/features/cart/components/CartFlowUi";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { maskIdNumber } from "@/features/diamonds-for-everyone/utils/maskIdNumber";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import { useToast } from "@/shared/hooks/use-toast";
 import { formatCustomerFullName } from "@/shared/utils/customerName";
+import {
+  PROFILE_DFE_USE_DUMMY_PLAN,
+  profileDfeDummyPlan,
+} from "../data/profileDfeDummyPlan";
 import { profileTabsContent } from "../data/profileContent";
 import type { ProfileDfePaymentDueUi, ProfileDfePlanUi } from "../types/profileDfe.types";
+import { ProfileDiamondsForEveryoneEmptyState } from "./ProfileDiamondsForEveryoneEmptyState";
 import { ProfileDiamondsForEveryoneSkeleton } from "./ProfileDiamondsForEveryoneSkeleton";
 import { ProfileDfeReadOnlyField, ProfileDfeSectionCard } from "./profileUi";
 import { ProfileDfeInvestmentSummary } from "./ProfileDfeInvestmentSummary";
 import { cn } from "@/shared/utils/cn";
 import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
-import { useProfileSectionEmptyState } from "../context/ProfileSectionEmptyStateContext";
 
 function formatInrAmount(amount: number): string {
   return amount.toLocaleString("en-IN");
@@ -52,10 +55,10 @@ function ProfileDfePaymentDueBanner({
   onPayNow: () => void;
 }) {
   const content = profileTabsContent.diamondsForEveryone;
-
+  const { windows } = useUiPlatform();
   return (
     <div className="bg-yellow100 md:px-6 px-4 py-4 flex gap-2 flex-nowrap">
-      <AlertTriangleIcon className="size-6 shrink-0 text-darkblack" />
+      <AlertTriangleIcon className={cn(!windows && "md:-translate-y-1", "size-6 shrink-0 text-darkblack")} />
       <div className="flex min-w-0 items-center justify-between gap-3 w-full flex-wrap">
         <p className="font-gill text-base font-normal leading-110 text-darkblack">
           Payment for the month of {paymentDue.monthLabel} due in {paymentDue.daysUntilDue} days
@@ -84,7 +87,7 @@ function ProfileDfePlanView({
   const content = profileTabsContent.diamondsForEveryone;
 
   return (
-    <div className="flex flex-col lg:gap-10 gap-6">
+    <div className="flex flex-col gap-6">
       {plan.paymentDue &&
         <ProfileDfePaymentDueBanner paymentDue={plan.paymentDue} onPayNow={onPayNow} />
       }
@@ -105,20 +108,19 @@ function ProfileDfePlanView({
         </ProfileDfeSectionCard>
 
         <ProfileDfeSectionCard title={content.investmentDetailsTitle}>
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col md:gap-4 gap-6">
             <div
-              className="flex h-[50px] w-full items-center gap-2 border border-black px-3 py-2 text-darkblack"
+              className="flex md:h-[50px] h-14 w-full items-center gap-2 md:border-[0.4px] border-black md:py-2 px-3 py-3 text-darkblack md:bg-transparent bg-aboutInactive"
             >
               <span className="font-gill text-lg font-light tracking-[0.18px]">₹</span>
               <span className="font-gill text-base font-normal">
                 {formatInrAmount(plan.monthlyAmount)}
               </span>
             </div>
-
             <p className="font-gill text-base font-normal leading-110 text-[#2B2B2B]">
               {content.summaryTitle}
             </p>
-
+            <span className="h-px md:hidden w-full bg-neutral300" aria-hidden />
             <ProfileDfeInvestmentSummary
               contributionLabel={content.contributionLabel}
               contributionAmount={plan.contribution}
@@ -162,25 +164,6 @@ function ProfileDfePlanView({
   );
 }
 
-function ProfileDfeEmptyState() {
-  const content = profileTabsContent.diamondsForEveryone;
-  useProfileSectionEmptyState(true);
-
-  return (
-    <div className="flex flex-col gap-4 bg-gray300 p-6">
-      <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
-        {content.emptyTitle}
-      </h2>
-      <p className="font-gill text-base font-light leading-110 text-darkblack">
-        {content.emptyDescription}
-      </p>
-      <CartPrimaryLink href={content.emptyCtaHref} className="w-full max-w-xs">
-        {content.emptyCta}
-      </CartPrimaryLink>
-    </div>
-  );
-}
-
 type ProfileDiamondsForEveryoneSectionProps = {
   customer: AuthCustomer;
 };
@@ -207,15 +190,15 @@ const ProfileDiamondsForEveryoneSection = ({ customer }: ProfileDiamondsForEvery
   const displayFullName = accountFullName;
   const displayEmail = accountEmail;
 
-  // Customer DFE plan API — show empty state until wired.
-  const plan: ProfileDfePlanUi | null = null;
+  // Customer DFE plan API — replace dummy plan when integration is ready.
+  const plan: ProfileDfePlanUi | null = PROFILE_DFE_USE_DUMMY_PLAN ? profileDfeDummyPlan : null;
 
   if (isLoading) {
     return <ProfileDiamondsForEveryoneSkeleton />;
   }
 
   if (!plan) {
-    return <ProfileDfeEmptyState />;
+    return <ProfileDiamondsForEveryoneEmptyState />;
   }
 
   return (
