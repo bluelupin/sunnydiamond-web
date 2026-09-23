@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search } from "lucide-react";
 import FilterIcon from "@/assets/Icons/PLP/FilterIcon";
+import CareersSearchIcon from "@/features/careers/components/shared/CareersSearchIcon";
 import Reveal from "@/shared/Animation/Reveal";
 import { cn } from "@/shared/utils/cn";
 import JewelleryLoadMoreSection from "@/features/jewellery-product/components/JewelleryLoadMoreSection";
@@ -40,7 +40,7 @@ const CareersJobListingsSection = () => {
   const [visibleCount, setVisibleCount] = useState(CAREERS_LISTING_PAGE_SIZE);
 
   const listingHeading = listing.featuredTitle ?? listing.title;
-  const searchPlaceholder = "Search roles";
+  const searchPlaceholder = "Search Roles";
   const hasActiveFilters = hasActiveListingFilters(
     searchQuery,
     locationFilter,
@@ -92,19 +92,19 @@ const CareersJobListingsSection = () => {
 
           <div className="flex flex-col gap-6">
             <Reveal direction="up" className="flex items-center gap-3">
-              <div className="relative min-w-0 flex-1">
-                <Search
-                  className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-darkblack"
-                  aria-hidden
-                />
+              <div
+                className={cn(
+                  "flex h-12 min-w-0 flex-1 items-center gap-4 border border-[#F2F2F2] bg-[#F2F2F2] p-3",
+                  "focus-within:outline-none focus-within:ring-2 focus-within:ring-darkblack focus-within:ring-offset-2",
+                )}
+              >
+                <CareersSearchIcon className="h-[22px] w-6 shrink-0" />
                 <input
                   type="search"
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
                   placeholder={searchPlaceholder}
-                  className={cn(
-                    "h-12 w-full border border-[#F2F2F2] bg-[#F2F2F2] p-3 pl-12 font-gill text-sm font-light leading-110 text-darkblack placeholder:text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2",
-                  )}
+                  className="min-w-0 flex-1 bg-transparent font-gill text-sm font-light leading-110 text-darkblack placeholder:text-darkblack outline-none"
                   aria-label={searchPlaceholder}
                 />
               </div>

@@ -10,6 +10,27 @@ export function formatCareerJobTitle(title: string): string {
     .join(" ");
 }
 
+/** e.g. `HR & ADMINISTRATION` → `HR & Administration`, `SALES` → `Sales` */
+export function formatCareerDepartmentLabel(department: string): string {
+  return department
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => {
+      if (word.length <= 1) {
+        return word;
+      }
+
+      // Keep two-letter acronyms (HR, IT); title-case longer tokens (SALES, ADMINISTRATION).
+      if (/^[A-Z]{2}$/.test(word)) {
+        return word;
+      }
+
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(" ");
+}
+
 const POSTED_MONTH_LABELS = [
   "Jan",
   "Feb",
