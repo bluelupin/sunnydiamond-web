@@ -295,9 +295,14 @@ const CareersApplicationForm = () => {
         parsedResumeKeyRef.current = fileKey;
         toast({ title: CAREERS_RESUME_PARSE_SUCCESS_MESSAGE });
       } catch (error) {
+        const rawMessage = error instanceof Error ? error.message.trim() : "";
+        const isPayloadTooLarge =
+          /\b413\b/.test(rawMessage) || /too large/i.test(rawMessage);
+
         toast({
-          title: CAREERS_RESUME_PARSE_ERROR_MESSAGE,
-          description: error instanceof Error ? error.message : undefined,
+          title: isPayloadTooLarge
+            ? CAREERS_RESUME_MAX_SIZE_TOAST_MESSAGE
+            : CAREERS_RESUME_PARSE_ERROR_MESSAGE,
         });
       } finally {
         setIsParsingResume(false);

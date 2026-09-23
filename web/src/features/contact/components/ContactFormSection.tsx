@@ -588,7 +588,7 @@ const ContactFormSection = ({ form }: ContactFormSectionProps) => {
                   aria-label="Accept terms and privacy policy"
                   className="translate-y-0"
                 />
-                <p className="min-w-0 flex-1 font-gill text-base font-light leading-110 text-neutral500">
+                <p className="min-w-0 flex-1 font-gill md:text-base text-sm font-light leading-110 text-neutral500">
                   <ContactConsentLabel label={consentLabel} />
                 </p>
               </div>

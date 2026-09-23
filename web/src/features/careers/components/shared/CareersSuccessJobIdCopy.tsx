@@ -28,10 +28,10 @@ const CareersSuccessJobIdCopy = ({ jobCode, label, className }: CareersSuccessJo
   return (
     <div className={cn("flex items-center gap-2 justify-between", className)}>
       <p className="font-gill md:text-base text-sm font-light leading-110 text-darkblack">
-        <span>{label} </span>
+        <span>{label}</span>
       </p>
       <div className="flex items-center gap-2">
-        <p className="font-gill md:text-base text-sm font-light leading-110 text-darkblack">{jobCode}</p>
+        <p className="font-gill md:text-base text-sm font-normal leading-110 text-darkblack">{jobCode}</p>
         <button
           type="button"
           onClick={handleCopy}

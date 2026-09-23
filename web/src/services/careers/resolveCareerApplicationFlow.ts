@@ -102,12 +102,13 @@ const APPLICATION_FLOW_FALLBACKS: NormalizedCareerApplicationFlow = {
   },
   applicationSuccess: {
     title: "Application Submitted",
-    descriptionLine1: "Thank you for applying. Your application has been received and is now under review.",
-    descriptionLine2: "We will get back to you shortly.",
+    descriptionLine1:
+      "Thank you for applying. We've received your application and our team will review it.",
+    descriptionLine2: "We'll be in touch once there's an update.",
     appliedJobDetailsHeading: "Applied Job Details",
     jobTitleLabel: "Job Title:",
     jobIdLabel: "Job ID:",
-    goHomeLabel: "Go to Homepage",
+    goHomeLabel: "GO TO HOME",
   },
 };
 

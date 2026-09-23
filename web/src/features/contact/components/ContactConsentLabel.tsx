@@ -89,7 +89,7 @@ const ContactConsentLabel = ({ label }: ContactConsentLabelProps) => {
           <Link
             key={`link-${index}`}
             href={segment.href}
-            className="inline align-baseline font-gill text-base font-normal leading-110 text-neutral500"
+            className="inline align-baseline font-gill md:text-base text-sm font-normal leading-110 text-neutral500"
           >
             {segment.label}
           </Link>
