@@ -42,6 +42,7 @@ export type StrapiCareerHero = {
   ctaLabel?: string | null;
   /** CMS typo — live API uses `CtaLable` */
   CtaLable?: string | null;
+  isActive?: boolean | null;
   backgroundImage?: StrapiCareerResponsiveImage | null;
   image?: StrapiCareerResponsiveImage | null;
 };
@@ -55,6 +56,7 @@ export type StrapiCareerFaqItem = {
 export type StrapiCareerFaqSection = {
   sectionHeading?: string | null;
   heading?: string | null;
+  isActive?: boolean | null;
   faqItems?: StrapiCareerFaqItem[] | null;
 };
 
@@ -74,6 +76,7 @@ export type StrapiCareerBenefitsSection = {
   sectionTitle?: string | null;
   title?: string | null;
   InvestingTitle?: string | null;
+  isActive?: boolean | null;
   sectionImage?: StrapiCareerResponsiveImage | null;
   image?: StrapiCareerResponsiveImage | null;
   features?: StrapiCareerBenefitFeature[] | null;
@@ -90,6 +93,7 @@ export type StrapiCareerLifeSection = {
   featuredBody?: string | null;
   quote?: string | null;
   featuredDescription?: string | null;
+  isActive?: boolean | null;
   leftImage?: StrapiCareerResponsiveImage | null;
   rightImage?: StrapiCareerResponsiveImage | null;
   featuredImage1?: StrapiCareerResponsiveImage | null;
@@ -102,6 +106,7 @@ export type StrapiCareerDiscoverSection = {
   heading?: string | null;
   ctaLabel?: string | null;
   ctaButtonLabel?: string | null;
+  isActive?: boolean | null;
   cta?: StrapiCareerCtaButton | null;
   backgroundImage?: StrapiCareerResponsiveImage | null;
 };
@@ -118,6 +123,7 @@ export type StrapiCareerOpeningsSection = {
   ctaLabel?: string | null;
   viewAllLabel?: string | null;
   CtaLable?: string | null;
+  isActive?: boolean | null;
   relatedCareerOpenings?: StrapiCareerOpeningEntity[] | null;
   careerOpenings?: StrapiCareerOpeningEntity[] | null;
   career_openings?: StrapiCareerOpeningEntity[] | null;
@@ -235,6 +241,7 @@ export type StrapiCareerListingFilterSection = {
   /** CMS typo — live API uses `fiterTitle` */
   fiterTitle?: string | null;
   filterTitle?: string | null;
+  isActive?: boolean | null;
   Location?: StrapiCareerFilterSectionGroup | null;
   Department?: StrapiCareerFilterSectionGroup | null;
   Experience?: StrapiCareerFilterSectionGroup | null;
