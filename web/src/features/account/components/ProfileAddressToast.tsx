@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type AnimationEvent } from "react";
+import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { cn } from "@/shared/utils/cn";
 
 export const profileAddressToastDurationMs = 4000;
@@ -128,13 +129,13 @@ export function ProfileAddressToast({
               {displayContent.message}
             </p>
             {showUndo ? (
-              <button
-                type="button"
+              <DetailTextLink
+                light
                 onClick={displayContent.onUndo}
-                className="shrink-0 border-b border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white"
+                className="shrink-0 uppercase"
               >
                 {displayContent.undoLabel}
-              </button>
+              </DetailTextLink>
             ) : null}
           </div>
           <button

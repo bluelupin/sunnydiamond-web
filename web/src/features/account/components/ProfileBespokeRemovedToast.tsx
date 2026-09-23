@@ -1,35 +1,32 @@
 "use client";
 
-import AppStatusToast, { AppStatusToastAction } from "@/shared/ui/AppStatusToast";
+import { ProfileAddressToast } from "./ProfileAddressToast";
 import { profileTabsContent } from "../data/profileContent";
 import { useProfileBespokeToast } from "../context/ProfileBespokeToastContext";
 
 const content = profileTabsContent.bespoke;
 
-/** Bespoke remove confirmation — uses shared AppStatusToast layout (top-centered). */
+/** Bespoke remove confirmation — Figma 4210:54478 (message, UNDO, close). */
 export function ProfileBespokeRemovedToastBanner() {
   const { toast, dismissBespokeRemovedToast } = useProfileBespokeToast();
 
-  const undoAction =
-    toast?.onUndo ? (
-      <AppStatusToastAction
-        onClick={() => {
-          const undo = toast.onUndo;
-          dismissBespokeRemovedToast();
-          if (undo) {
-            void undo();
-          }
-        }}
-      >
-        {content.removedUndoLabel}
-      </AppStatusToastAction>
-    ) : undefined;
+  const handleUndo = toast?.onUndo
+    ? () => {
+        const undo = toast.onUndo;
+        dismissBespokeRemovedToast();
+        if (undo) {
+          void undo();
+        }
+      }
+    : undefined;
 
   return (
-    <AppStatusToast
+    <ProfileAddressToast
       open={Boolean(toast)}
       message={content.removedToastMessage}
-      action={undoAction}
+      undoLabel={toast?.onUndo ? content.removedUndoLabel : undefined}
+      onUndo={handleUndo}
+      onDismiss={dismissBespokeRemovedToast}
     />
   );
 }

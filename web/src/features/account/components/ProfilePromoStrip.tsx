@@ -1,23 +1,44 @@
 "use client";
 
+import ContactPhoneLink from "@/features/contact/components/ContactPhoneLink";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
-import type { NormalizedProfileTrustBadge } from "@/services/profile/profile-page.types";
+import type {
+  NormalizedProfileCta,
+  NormalizedProfileTrustBadge,
+} from "@/services/profile/profile-page.types";
 import { cn } from "@/shared/utils/cn";
 
 type ProfilePromoStripProps = {
   trustBadges: NormalizedProfileTrustBadge[];
 };
 
-function resolveCtaClassName(href: string, index: number): string {
-  if (href.startsWith("tel:")) {
-    return "text-sm normal-case";
+function isPhoneCtaHref(href: string): boolean {
+  return /^tel:/i.test(href);
+}
+
+/** Matches Contact info cards — phone uses ContactPhoneLink; email uses mailto DetailTextLink. */
+function ProfilePromoStripCta({ cta }: { cta: NormalizedProfileCta }) {
+  if (isPhoneCtaHref(cta.href)) {
+    return (
+      <ContactPhoneLink
+        href={cta.href}
+        label={cta.label}
+        variant="detail"
+        className="max-w-full break-all"
+      />
+    );
   }
 
-  if (index === 0 && !href.startsWith("/")) {
-    return "text-sm normal-case";
-  }
-
-  return "text-sm uppercase";
+  return (
+    <DetailTextLink
+      href={cta.href}
+      target={cta.openInNewTab ? "_blank" : undefined}
+      rel={cta.openInNewTab ? "noopener noreferrer" : undefined}
+      className="break-all"
+    >
+      {cta.label}
+    </DetailTextLink>
+  );
 }
 
 /** Figma 1480:20015 — profile promo strip mobile spacing and typography */
@@ -46,7 +67,7 @@ export function ProfilePromoStrip({ trustBadges }: ProfilePromoStripProps) {
                 <h3 className="font-larken text-xl font-light leading-110 text-darkblack">
                   {badge.title}
                 </h3>
-                <p className="w-full font-gill text-sm font-light leading-110 text-darkblack lg:max-w-[284px] lg:text-base lg:text-neutral500">
+                <p className="w-full font-gill text-base font-light leading-110 text-darkblack lg:max-w-[284px] lg:text-base lg:text-neutral500">
                   {badge.description}
                 </p>
               </div>
@@ -57,16 +78,8 @@ export function ProfilePromoStrip({ trustBadges }: ProfilePromoStripProps) {
                     badge.callsToAction.length === 1 && "w-full",
                   )}
                 >
-                  {badge.callsToAction.map((cta, ctaIndex) => (
-                    <DetailTextLink
-                      key={cta.id}
-                      href={cta.href}
-                      target={cta.openInNewTab ? "_blank" : undefined}
-                      rel={cta.openInNewTab ? "noopener noreferrer" : undefined}
-                      className={resolveCtaClassName(cta.href, ctaIndex)}
-                    >
-                      {cta.label}
-                    </DetailTextLink>
+                  {badge.callsToAction.map((cta) => (
+                    <ProfilePromoStripCta key={cta.id} cta={cta} />
                   ))}
                 </div>
               ) : null}

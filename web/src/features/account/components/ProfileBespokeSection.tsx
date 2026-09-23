@@ -1,11 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  CartOutlineButton,
-  CartPrimaryLink,
-} from "@/features/cart/components/CartFlowUi";
-import { DetailTextLink } from "@/features/products/components/detail/shared";
+import { CartOutlineButton } from "@/features/cart/components/CartFlowUi";
 import {
   deleteCustomerSavedCreationClient,
   saveCustomerCreationClient,
@@ -18,7 +14,7 @@ import { mapSavedCreationToBespokeUi } from "../utils/profileDisplayMappers";
 import { ProfileBespokeCard } from "./ProfileBespokeCard";
 import { ProfileBespokeDetailPanel } from "./ProfileBespokeDetailPanel";
 import { useProfileBespokeToast } from "../context/ProfileBespokeToastContext";
-import { ProfileEmptyState } from "./profileUi";
+import { ProfileBespokeEmptyState } from "./ProfileBespokeEmptyState";
 import FormFieldError from "@/shared/ui/FormFieldError";
 
 const content = profileTabsContent.bespoke;
@@ -101,32 +97,12 @@ const ProfileBespokeSection = () => {
   }
 
   if (displayItems.length === 0) {
-    return (
-      <ProfileEmptyState
-        title={content.emptyTitle}
-        description={
-          <>
-            <span className="block">{content.emptyDescription}</span>
-            <span className="mt-2 block">{content.emptyDescriptionSecondary}</span>
-          </>
-        }
-        action={
-          <div className="flex flex-col items-start gap-6">
-            <CartPrimaryLink href={content.emptyCtaHref} className="w-full max-w-xs">
-              {content.emptyCta}
-            </CartPrimaryLink>
-            <DetailTextLink href={content.emptyCtaHref} className="text-sm uppercase">
-              {content.emptySecondaryCta}
-            </DetailTextLink>
-          </div>
-        }
-      />
-    );
+    return <ProfileBespokeEmptyState />;
   }
 
   return (
     <div className="flex flex-col gap-6">
-      <ul className="grid grid-cols-2 gap-2 lg:grid-cols-3 lg:gap-4 lg:items-start">
+      <ul className="grid grid-cols-2 gap-2 lg:grid-cols-3 lg:items-start">
         {displayItems.map((item) => (
           <li key={item.id} className="min-w-0">
             <ProfileBespokeCard

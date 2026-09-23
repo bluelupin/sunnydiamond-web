@@ -55,13 +55,35 @@ function mapBackgroundImage(
   };
 }
 
+function toTelHref(phone: string): string {
+  const digits = phone.replace(/[^\d+]/g, "");
+  return digits ? `tel:${digits}` : `tel:${phone}`;
+}
+
+function formatEmailAddress(value: string): string {
+  const compact = value.replace(/\s+/g, "");
+  const match = compact.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+  if (!match) return value.trim();
+
+  return match[0]
+    .toLowerCase()
+    .replace("@sunntdiamonds.com", "@sunnydiamonds.com");
+}
+
 function normalizeCtaHref(url: string): string {
   const trimmed = url.trim();
   if (!trimmed) return "#";
 
+  if (/^tel:/i.test(trimmed)) {
+    return toTelHref(trimmed.replace(/^tel:/i, ""));
+  }
+
+  if (/^mailto:/i.test(trimmed)) {
+    const email = formatEmailAddress(trimmed.replace(/^mailto:/i, ""));
+    return `mailto:${email}`;
+  }
+
   if (
-    trimmed.startsWith("tel:") ||
-    trimmed.startsWith("mailto:") ||
     trimmed.startsWith("http://") ||
     trimmed.startsWith("https://") ||
     trimmed.startsWith("/")
@@ -70,7 +92,11 @@ function normalizeCtaHref(url: string): string {
   }
 
   if (trimmed.includes("@")) {
-    return `mailto:${trimmed}`;
+    return `mailto:${formatEmailAddress(trimmed)}`;
+  }
+
+  if (/^[\d\s()+-]+$/.test(trimmed) && /\d/.test(trimmed)) {
+    return toTelHref(trimmed);
   }
 
   return trimmed;

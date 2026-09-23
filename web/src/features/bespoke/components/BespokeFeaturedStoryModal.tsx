@@ -21,6 +21,7 @@ import { useToast } from "@/shared/hooks/use-toast";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { getLoginHrefForReturn } from "@/features/auth/utils/authNavigation";
 import { saveCustomerCreationClient } from "@/services/customer/customer-saved-creations.client";
+import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { bespokeFeaturedStoryModalFigmaSpec } from "@/features/bespoke/data/content";
 
 const spec = bespokeFeaturedStoryModalFigmaSpec;
@@ -173,7 +174,7 @@ const FeaturedStoryModalCarousel = ({
         onPointerCancel={endDrag}
       >
         <div
-          className="flex h-full touch-none select-none will-change-transform"
+          className="bespoke flex h-full touch-none select-none will-change-transform"
           style={{
             transform: canSlide ? `translate3d(${trackOffset}px, 0, 0)` : undefined,
             transition: enableTransition ? `transform ${spec.slideDurationMs}ms ease-out` : "none",
@@ -315,6 +316,7 @@ const FeaturedStoryModalPanel = ({
 
   const canSave = Boolean(slide.documentId?.trim());
   const saveDisabled = isSaving || status === "loading";
+  const saveInspirationLabel = modalCtaLabel?.trim() || spec.saveInspirationLabel;
 
   return (
     <div className="relative flex h-full min-h-0 w-full flex-col bg-black max-md:h-[85vh] max-md:w-full">
@@ -357,18 +359,16 @@ const FeaturedStoryModalPanel = ({
           </p>
         </div>
 
-        {modalCtaLabel ? (
-          <button
-            type="button"
-            onClick={() => {
-              void handleSaveInspiration();
-            }}
-            disabled={saveDisabled}
-            className="inline-flex w-fit border-b border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-80 disabled:opacity-60"
-          >
-            {isSaving ? "Saving..." : status === "loading" ? "Loading..." : modalCtaLabel}
-          </button>
-        ) : null}
+        <DetailTextLink
+          light
+          disabled={saveDisabled}
+          onClick={() => {
+            void handleSaveInspiration();
+          }}
+          className="uppercase"
+        >
+          {isSaving ? "Saving..." : status === "loading" ? "Loading..." : saveInspirationLabel}
+        </DetailTextLink>
 
         {!canSave ? (
           <p className="font-gill text-xs font-light leading-110 text-white/70">

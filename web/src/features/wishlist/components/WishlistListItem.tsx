@@ -39,9 +39,9 @@ const WishlistListItem = ({
     >
       <Link
         href={href}
-        className="flex h-[140px] w-full items-center justify-center"
+        className="flex w-full items-center justify-center"
       >
-        <div className="relative h-[70px] w-[94px] shrink-0">
+        <div className="relative h-auto max-w-[153px] w-full shrink-0">
           <OptimizedImage
             src={product.primaryImage}
             alt={product.name}
@@ -57,13 +57,13 @@ const WishlistListItem = ({
           <Link
             href={href}
             className={cn(
-              "line-clamp-2 max-w-full font-gill text-base font-light leading-110 text-darkblack",
+              "md:line-clamp-2 line-clamp-1 max-w-full font-gill text-base font-light md:leading-110 leading-[115%] text-darkblack",
               productNameDisplayClassName,
             )}
           >
             {product.name}
           </Link>
-          <p className="font-gill text-sm font-normal leading-110 text-darkblack">
+          <p className="font-gill text-base font-normal leading-110 text-darkblack">
             <span aria-hidden>₹ </span>
             {formatJewelleryPrice(product.price)}
           </p>

@@ -16,6 +16,7 @@ import { Drawer, DrawerContent, DrawerTitle } from "@/shared/ui/drawer";
 import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
 import { RIGHT_PANEL_WIDTH_CLASS } from "@/shared/ui/rightPanel";
 import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
+import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { bespokeFeaturedStoryModalFigmaSpec } from "@/features/bespoke/data/content";
 import { profileTabsContent } from "../data/profileContent";
 import type { ProfileBespokeItemUi } from "../types/profileUi.types";
@@ -213,8 +214,7 @@ function DetailCarouselPagination({
             <span
               key={`${src}-${index}-active`}
               aria-hidden
-              className="block h-1 rounded-[24px] bg-white transition-all duration-300"
-              style={{ width: spec.paginationActiveWidth }}
+              className="block h-1 w-12 rounded-[24px] bg-white transition-all duration-300"
             />
           );
         }
@@ -225,7 +225,7 @@ function DetailCarouselPagination({
             type="button"
             aria-label={`View image ${index + 1}`}
             onClick={() => onSelect(index)}
-            className="size-2 rounded-full bg-neutral300 transition-colors hover:bg-white"
+            className="h-1 w-1 rounded-full bg-neutral300 transition-colors hover:bg-white"
           />
         );
       })}
@@ -295,16 +295,16 @@ export function ProfileBespokeDetailPanel({
           onSelect={setActiveImageIndex}
         />
 
-        <button
-          type="button"
+        <DetailTextLink
+          light
           onClick={() => {
             onRemove(item);
             onClose();
           }}
-          className="inline-flex w-fit border-b border-white pb-1 font-gill text-sm font-normal uppercase leading-110 text-white transition-opacity hover:opacity-80"
+          className="uppercase"
         >
           {content.removeFromSavedLabel}
-        </button>
+        </DetailTextLink>
       </div>
     </div>
   );

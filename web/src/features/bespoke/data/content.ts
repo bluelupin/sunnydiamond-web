@@ -95,6 +95,7 @@ export const bespokeFeaturedStoryModalFigmaSpec = {
   paginationDotSize: 6,
   slideDurationMs: 400,
   swipeThresholdPx: 48,
+  saveInspirationLabel: "Save as Inspiration",
 } as const;
 
 /** Figma — Past Creations full-screen masonry gallery */

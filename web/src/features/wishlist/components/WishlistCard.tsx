@@ -33,8 +33,8 @@ const WishlistCard = ({
   return (
     <article
       className={cn(
-        "relative grid grid-cols-1 grid-rows-1 gap-4 overflow-hidden px-4 py-6 md:gap-6 md:px-6 md:py-10",
-        isProfileLayout && "bg-gray200 lg:gap-4 lg:px-4 lg:py-6",
+        "relative grid grid-cols-1 grid-rows-1 overflow-hidden md:gap-6 gap-4",
+        isProfileLayout ? "bg-gray200 px-4 py-10 md:py-10" : "py-6 md:py-10 md:px-6 px-4 md:py-10 py-6",
       )}
     >
       <button
@@ -48,10 +48,10 @@ const WishlistCard = ({
       <Link
         href={href}
         className={cn(
-          "pointer-events-auto mx-auto block h-[110px] w-[110px] sm:h-[240px] sm:w-[240px] md:h-[240px] md:w-[240px]",
+          "pointer-events-auto mx-auto block",
           isProfileLayout
-            ? "lg:h-auto lg:w-full lg:max-w-full lg:aspect-[372/287]"
-            : "lg:h-[303px] lg:w-[303px]",
+            ? "h-auto w-full lg:max-w-[400px] md:max-w-[300px] sm:max-w-[240px] max-w-[155px] aspect-[400/300]"
+            : "h-auto w-full lg:max-w-[426px] md:max-w-[300px] sm:max-w-[240px] max-w-[155px]",
         )}
       >
         <OptimizedImage
@@ -62,12 +62,12 @@ const WishlistCard = ({
           className="h-full w-full object-cover"
         />
       </Link>
-      <div className={cn("testing pointer-events-auto flex flex-col items-center gap-6", isProfileLayout && "gap-6")}>
+      <div className={cn("pointer-events-auto flex flex-col items-center gap-6 lg:gap-6", isProfileLayout && "gap-6")}>
         <div className="flex flex-col items-center gap-2 md:gap-3">
           <Link
             href={href}
             className={cn(
-              "line-clamp-2 max-w-[153px] min-h-[30px] text-center font-gill text-sm font-light leading-110 text-darkblack md:max-w-none md:min-h-0 md:text-xl",
+              "md:line-clamp-2 line-clamp-1 max-w-[153px] text-center font-gill text-base font-light md:leading-110 leading-[115%] text-darkblack md:max-w-none md:min-h-0 md:text-xl",
               isProfileLayout && "lg:text-xl",
               productNameDisplayClassName,
             )}

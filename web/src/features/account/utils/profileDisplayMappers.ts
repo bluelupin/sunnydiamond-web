@@ -642,7 +642,7 @@ export function mapSavedCreationToBespokeUi(
     ...(images[0] ? { imageSrc: images[0] } : {}),
     images,
     price: undefined,
-    viewHref: creation.cta?.href ?? profileTabsContent.bespoke.emptyCtaHref,
+    viewHref: creation.cta?.href ?? profileTabsContent.bespoke.emptyPrimaryCtaHref,
     savedAt: item.savedAt,
   };
 }
