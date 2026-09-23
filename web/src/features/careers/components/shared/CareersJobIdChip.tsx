@@ -52,14 +52,11 @@ const CareersJobIdChip = ({
         type="button"
         onClick={handleCopy}
         className={cn(
-          "inline-flex shrink-0 items-center gap-1.5 px-3 py-1 bg-white",
-          "font-gill text-base font-light leading-110 text-darkblack",
-          "transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2",
-          surface === "muted" &&
-            "bg-[#ECE9E9] text-sm font-light hover:bg-[#ECE9E9] md:bg-white md:text-base",
-          surface === "listing" &&
-            "bg-[#ECE9E9] text-sm font-light hover:bg-[#ECE9E9] md:text-base",
-          surface === "white" && "bg-white hover:bg-white",
+          // Figma mobile `1480:2770` (14px) + desktop `4137:155580` (16px); white chip, 8px gap, 12×4 padding.
+          "inline-flex shrink-0 items-center gap-2 bg-white px-3 py-1",
+          "font-gill text-sm font-light leading-110 text-darkblack md:text-base",
+          "transition-colors hover:bg-white",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2",
           className,
         )}
         aria-label={`Copy job ID ${jobCode}`}

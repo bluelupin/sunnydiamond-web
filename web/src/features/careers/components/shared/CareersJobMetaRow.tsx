@@ -2,6 +2,10 @@
 
 import { cn } from "@/shared/utils/cn";
 import type { CareerJob } from "@/features/careers/types";
+import {
+  formatCareerDepartmentLabel,
+  formatCareerJobTitle,
+} from "@/features/careers/utils/careersFormatting";
 import CareersJobMetaIcon from "./CareersJobMetaIcon";
 
 type CareersJobMetaRowProps = {
@@ -72,13 +76,17 @@ const CareersJobMetaRow = ({
           <MetaDivider />
         </>
       ) : null}
-      <FigmaMetaItem icon="map" label={job.location} iconClassName={iconClassName} />
+      <FigmaMetaItem
+        icon="map"
+        label={formatCareerJobTitle(job.location)}
+        iconClassName={iconClassName}
+      />
       {showDepartment ? (
         <>
           <MetaDivider />
           <FigmaMetaItem
             icon="department"
-            label={job.department}
+            label={formatCareerDepartmentLabel(job.department)}
             iconClassName={iconClassName}
           />
         </>
