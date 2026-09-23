@@ -3,6 +3,7 @@
 import { Check, ChevronDown } from "lucide-react";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import FormFieldError from "@/shared/ui/FormFieldError";
+import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
 import {
   Select,
   SelectContent,
@@ -12,6 +13,7 @@ import {
 } from "@/shared/ui/select";
 import { cn } from "@/shared/utils/cn";
 import { invalidFieldClassName, invalidFieldContainerClassName } from "@/shared/utils/formValidation";
+import { DEFAULT_COUNTRY_CODE } from "@/shared/constants/appointmentForm";
 import ChevronDownIcon from "@/assets/Icons/ChevronDownIcon";
 
 function formatRequiredFieldLabel(label: string): string {
@@ -147,10 +149,12 @@ type CheckoutPhoneFieldProps = {
   value: string;
   onChange: (value: string) => void;
   onBlur?: () => void;
+  countryCode?: string;
+  onCountryCodeChange?: (code: string) => void;
   verified?: boolean;
   onVerify?: () => void;
   showVerify?: boolean;
-  /** "email" locks the field to an address — no +91 prefix, no VERIFY, no phone parsing. */
+  /** "email" locks the field to an address — no country prefix, no VERIFY, no phone parsing. */
   mode?: "phone" | "phoneOrEmail" | "email";
   error?: string;
   invalid?: boolean;
@@ -164,6 +168,8 @@ export const CheckoutPhoneField = ({
   value,
   onChange,
   onBlur,
+  countryCode = DEFAULT_COUNTRY_CODE,
+  onCountryCodeChange,
   verified,
   onVerify,
   showVerify = true,
@@ -180,19 +186,19 @@ export const CheckoutPhoneField = ({
     <CheckoutFieldLabel id={id} label={label} optional={optional} />
     <div
       className={cn(
-        "flex h-14 items-center justify-between gap-2 border border-transparent bg-aboutInactive px-3 focus-within:border-darkblack",
+        "relative flex h-14 items-center justify-between gap-2 border border-transparent bg-aboutInactive px-3 focus-within:border-darkblack",
         disabled && "cursor-not-allowed opacity-60",
         invalid && invalidFieldContainerClassName,
       )}
     >
       <div className="flex min-w-0 flex-1 items-center gap-2">
         {!isEmailInput ? (
-          <>
-            <span className="shrink-0 font-gill text-base font-normal leading-110 text-darkblack">+91</span>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 text-darkblack">
-              <path fillRule="evenodd" clipRule="evenodd" d="M2.13134 7.6664C2.17617 7.62638 2.23002 7.59412 2.28982 7.57145C2.34963 7.54879 2.4142 7.53616 2.47986 7.53431C2.54552 7.53245 2.61097 7.54139 2.67248 7.56063C2.73399 7.57986 2.79035 7.60901 2.83833 7.6464L9.99833 13.2131L17.1583 7.6464C17.2553 7.57092 17.3842 7.53063 17.5168 7.53438C17.6494 7.53813 17.7748 7.58562 17.8653 7.6664C17.9559 7.74718 18.0043 7.85463 17.9998 7.96513C17.9953 8.07562 17.9383 8.18009 17.8413 8.25557L10.3413 14.0889C10.2488 14.1608 10.1269 14.2008 10.0003 14.2008C9.87376 14.2008 9.7519 14.1608 9.65933 14.0889L2.15933 8.25557C2.11124 8.21826 2.07245 8.17343 2.04516 8.12362C2.01787 8.07382 2.00263 8.02002 2.00031 7.9653C1.99799 7.91058 2.00863 7.85602 2.03163 7.80474C2.05462 7.75345 2.08953 7.70644 2.13433 7.6664H2.13134Z" fill="currentColor" />
-            </svg>
-          </>
+          <PhoneCountryCodeSelect
+            id={`${id}-country-code`}
+            value={countryCode}
+            onChange={(code) => onCountryCodeChange?.(code)}
+            disabled={disabled || !onCountryCodeChange}
+          />
         ) : null}
         <input
           id={id}

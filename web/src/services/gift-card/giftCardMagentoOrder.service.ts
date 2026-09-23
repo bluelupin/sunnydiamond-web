@@ -29,6 +29,7 @@ function mapGiftCardPayloadToCheckoutForm(payload: GiftCardOrderPayload): Checko
   return {
     name: payload.sender.fullName.trim(),
     phoneOrEmail: contact,
+    contactCountryCode: "+91",
     shippingName: receiver.fullName.trim() || payload.sender.fullName.trim(),
     addressLine1: payload.deliveryAddress.addressLine1.trim() || "Digital Delivery",
     addressLine2: payload.deliveryAddress.addressLine2.trim(),
@@ -36,6 +37,7 @@ function mapGiftCardPayloadToCheckoutForm(payload: GiftCardOrderPayload): Checko
     city: payload.deliveryAddress.city.trim() || "NA",
     state: payload.deliveryAddress.state.trim() || "NA",
     shippingPhone: receiver.phone.trim() || payload.sender.phone.trim(),
+    shippingCountryCode: "+91",
     billingSameAsShipping: true,
     billingName: payload.sender.fullName.trim(),
     billingAddressLine1: payload.deliveryAddress.addressLine1.trim() || "Digital Delivery",
@@ -44,6 +46,7 @@ function mapGiftCardPayloadToCheckoutForm(payload: GiftCardOrderPayload): Checko
     billingCity: payload.deliveryAddress.city.trim() || "NA",
     billingState: payload.deliveryAddress.state.trim() || "NA",
     billingPhone: payload.sender.phone.trim(),
+    billingCountryCode: "+91",
     selectedShippingAddressUid: null,
   };
 }

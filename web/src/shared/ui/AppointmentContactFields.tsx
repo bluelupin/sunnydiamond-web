@@ -59,6 +59,7 @@ type AppointmentContactFieldsProps = {
   phonePlaceholder?: string;
   emailLabel?: string;
   emailPlaceholder?: string;
+  emailRequired?: boolean;
   dateLabel?: string;
   dateRequired?: boolean;
   timeSlotsLabel?: string;
@@ -111,6 +112,7 @@ const AppointmentContactFields = ({
   phonePlaceholder,
   emailLabel = "Email",
   emailPlaceholder = "Enter",
+  emailRequired = false,
   dateLabel = "Date",
   dateRequired = false,
   timeSlotsLabel = "Time Slots",
@@ -217,7 +219,7 @@ const AppointmentContactFields = ({
 
       <div className="flex flex-col gap-2">
         <label htmlFor={`${idPrefix}-email`} className={labelClassName}>
-          {emailLabel}
+          {emailRequired ? formatRequiredFieldLabel(emailLabel) : emailLabel}
         </label>
         <input
           id={`${idPrefix}-email`}
@@ -230,6 +232,7 @@ const AppointmentContactFields = ({
           readOnly={isEmailLocked}
           aria-readonly={isEmailLocked || undefined}
           aria-invalid={showError("email") || undefined}
+          aria-required={emailRequired || undefined}
           aria-describedby={showError("email") ? `${idPrefix}-email-error` : undefined}
           className={cn(
             fieldClassName,

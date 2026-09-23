@@ -141,7 +141,17 @@ const CheckoutPage = () => {
       return createEmptyCheckoutForm();
     }
     const pending = readPendingCheckoutPayment();
-    return pending?.orderNumber === paymentOrderNumber ? pending.form : createEmptyCheckoutForm();
+    if (pending?.orderNumber !== paymentOrderNumber) {
+      return createEmptyCheckoutForm();
+    }
+    const defaults = createEmptyCheckoutForm();
+    return {
+      ...defaults,
+      ...pending.form,
+      contactCountryCode: pending.form.contactCountryCode || defaults.contactCountryCode,
+      shippingCountryCode: pending.form.shippingCountryCode || defaults.shippingCountryCode,
+      billingCountryCode: pending.form.billingCountryCode || defaults.billingCountryCode,
+    };
   });
   const [payment, setPayment] = useState<CheckoutPaymentData>(createEmptyPaymentForm);
   const [offersOpen, setOffersOpen] = useState(false);
@@ -810,13 +820,52 @@ const CheckoutPage = () => {
     }
 
     if (field === "shippingPhone" || field === "billingPhone") {
-      setForm((current) => ({
-        ...current,
-        [field]: sanitizePhoneInput(String(value), "+91"),
-        ...(CHECKOUT_SHIPPING_ADDRESS_FIELDS.includes(field)
-          ? { selectedShippingAddressUid: null }
-          : {}),
-      }));
+      setForm((current) => {
+        const countryCode =
+          field === "shippingPhone" ? current.shippingCountryCode : current.billingCountryCode;
+        return {
+          ...current,
+          [field]: sanitizePhoneInput(String(value), countryCode),
+          ...(CHECKOUT_SHIPPING_ADDRESS_FIELDS.includes(field)
+            ? { selectedShippingAddressUid: null }
+            : {}),
+        };
+      });
+      return;
+    }
+
+    if (
+      field === "shippingCountryCode" ||
+      field === "billingCountryCode" ||
+      field === "contactCountryCode"
+    ) {
+      const phoneField =
+        field === "shippingCountryCode"
+          ? "shippingPhone"
+          : field === "billingCountryCode"
+            ? "billingPhone"
+            : "phoneOrEmail";
+      setForm((current) => {
+        const nextCode = String(value);
+        const phoneValue = current[phoneField];
+        const shouldResanitizePhone =
+          phoneField !== "phoneOrEmail" || !isCheckoutEmailContact(String(phoneValue));
+
+        return {
+          ...current,
+          [field]: nextCode,
+          ...(shouldResanitizePhone
+            ? { [phoneField]: sanitizePhoneInput(String(phoneValue), nextCode) }
+            : {}),
+          ...(field === "shippingCountryCode"
+            ? { selectedShippingAddressUid: null }
+            : {}),
+        };
+      });
+      if (field === "contactCountryCode" && phoneVerified) {
+        setPhoneVerified(false);
+        verifiedCheckoutOtpRef.current = null;
+      }
       return;
     }
 
@@ -831,7 +880,7 @@ const CheckoutPage = () => {
         return;
       }
 
-      updateForm(field, sanitizePhoneInput(nextValue, "+91"));
+      updateForm(field, sanitizePhoneInput(nextValue, form.contactCountryCode || "+91"));
       if (phoneVerified) {
         setPhoneVerified(false);
         verifiedCheckoutOtpRef.current = null;

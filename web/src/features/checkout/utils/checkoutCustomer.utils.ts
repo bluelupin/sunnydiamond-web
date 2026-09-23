@@ -53,4 +53,5 @@ export const CHECKOUT_SHIPPING_ADDRESS_FIELDS: ReadonlyArray<keyof CheckoutFormD
   "city",
   "state",
   "shippingPhone",
+  "shippingCountryCode",
 ];

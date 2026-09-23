@@ -120,6 +120,8 @@ const TryAtHomeDetailsStep = ({
       noteRequired: form?.notesRequired ?? false,
       dateRequired: true,
       selectedSlotRequired: hasTimeSlots,
+      // Auth is email-based — Try at Home must collect a valid email.
+      emailRequired: true,
     }),
     [form?.notesRequired, hasTimeSlots],
   );
@@ -227,6 +229,7 @@ const TryAtHomeDetailsStep = ({
               phonePlaceholder={form?.phonePlaceholder}
               emailLabel={form?.emailLabel}
               emailPlaceholder={form?.emailPlaceholder}
+              emailRequired
               dateLabel={form?.dateLabel}
               dateRequired
               timeSlotRequired={hasTimeSlots}

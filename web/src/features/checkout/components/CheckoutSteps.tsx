@@ -60,6 +60,7 @@ type AddressFieldConfig = {
   city: CheckoutFormField;
   state: CheckoutFormField;
   phone: CheckoutFormField;
+  countryCode: keyof CheckoutFormData;
 };
 
 const SHIPPING_ADDRESS_FIELDS: AddressFieldConfig = {
@@ -70,6 +71,7 @@ const SHIPPING_ADDRESS_FIELDS: AddressFieldConfig = {
   city: "city",
   state: "state",
   phone: "shippingPhone",
+  countryCode: "shippingCountryCode",
 };
 
 const BILLING_ADDRESS_FIELDS: AddressFieldConfig = {
@@ -80,6 +82,7 @@ const BILLING_ADDRESS_FIELDS: AddressFieldConfig = {
   city: "billingCity",
   state: "billingState",
   phone: "billingPhone",
+  countryCode: "billingCountryCode",
 };
 
 const CheckoutAddressFields = ({
@@ -172,6 +175,8 @@ const CheckoutAddressFields = ({
       value={form[fields.phone] as string}
       onChange={(value) => onChange(fields.phone, value)}
       onBlur={() => validation.markTouched(fields.phone)}
+      countryCode={form[fields.countryCode] as string}
+      onCountryCodeChange={(code) => onChange(fields.countryCode, code)}
       showVerify={false}
       invalid={validation.showError(fields.phone)}
       error={validation.showError(fields.phone) ? validation.errors[fields.phone] : undefined}
@@ -187,6 +192,7 @@ const buildAddressLines = ({
   state,
   pincode,
   phone,
+  countryCode = "+91",
 }: {
   addressLine1: string;
   addressLine2: string;
@@ -194,12 +200,13 @@ const buildAddressLines = ({
   state: string;
   pincode: string;
   phone: string;
+  countryCode?: string;
 }) =>
   [
     addressLine1,
     addressLine2,
     `${city}, ${state}, ${pincode}`,
-    phone ? `+91 ${phone}` : "",
+    phone ? `${countryCode} ${phone}` : "",
   ].filter(Boolean);
 
 export const CheckoutFormStep = ({
@@ -253,6 +260,8 @@ export const CheckoutFormStep = ({
             validation.markTouched("phoneOrEmail");
             onContactBlur?.();
           }}
+          countryCode={form.contactCountryCode}
+          onCountryCodeChange={(code) => onChange("contactCountryCode", code)}
           verified={phoneVerified}
           onVerify={onVerifyPhone}
           showVerify={showVerify}
@@ -388,6 +397,7 @@ export const CheckoutPaymentStep = ({
     state: form.state,
     pincode: form.pincode,
     phone: form.shippingPhone,
+    countryCode: form.shippingCountryCode,
   });
 
   const billingLines = form.billingSameAsShipping
@@ -399,6 +409,7 @@ export const CheckoutPaymentStep = ({
       state: form.billingState,
       pincode: form.billingPincode,
       phone: form.billingPhone,
+      countryCode: form.billingCountryCode,
     });
 
   const billingName = form.billingSameAsShipping
@@ -421,7 +432,7 @@ export const CheckoutPaymentStep = ({
           {form.phoneOrEmail
             ? isCheckoutEmailContact(form.phoneOrEmail)
               ? `, ${form.phoneOrEmail}`
-              : `, +91 ${form.phoneOrEmail}`
+              : `, ${form.contactCountryCode} ${form.phoneOrEmail}`
             : ""}
         </CheckoutSummaryText>
       </CheckoutSectionCard>

@@ -378,6 +378,8 @@ export type CheckoutContactOptions = {
    * which this form only mirrors, so rejecting it would block a field they cannot edit.
    */
   requireDeliveryPhone?: boolean;
+  /** Dial code used when the contact field holds a phone number. */
+  countryCode?: string;
 };
 
 export const validatePhoneOrEmail = (
@@ -398,7 +400,7 @@ export const validatePhoneOrEmail = (
     return validateRequiredEmail(trimmed);
   }
 
-  return validatePhone(trimmed, "+91");
+  return validatePhone(trimmed, options?.countryCode ?? "+91");
 };
 
 /** True when the contact field is being used as an email address (not a phone). */
@@ -465,6 +467,7 @@ export type CheckoutPaymentField = "cod";
 export type CheckoutFormValues = {
   name: string;
   phoneOrEmail: string;
+  contactCountryCode?: string;
   shippingName: string;
   addressLine1: string;
   addressLine2: string;
@@ -472,6 +475,7 @@ export type CheckoutFormValues = {
   city: string;
   state: string;
   shippingPhone: string;
+  shippingCountryCode?: string;
   billingSameAsShipping: boolean;
   billingName: string;
   billingAddressLine1: string;
@@ -480,6 +484,7 @@ export type CheckoutFormValues = {
   billingCity: string;
   billingState: string;
   billingPhone: string;
+  billingCountryCode?: string;
 };
 
 export type CheckoutPaymentValues = {
@@ -504,8 +509,8 @@ const getAddressBlockErrors = (
       // "0000000000". When the contact field is an email there is no other number
       // on the order at all, and a courier has no way to reach the customer.
       shippingPhone: options?.requireDeliveryPhone
-        ? validatePhone(values.shippingPhone, "+91").error
-        : validateOptionalPhone(values.shippingPhone).error,
+        ? validatePhone(values.shippingPhone, values.shippingCountryCode ?? "+91").error
+        : validateOptionalPhone(values.shippingPhone, values.shippingCountryCode ?? "+91").error,
     };
   }
 
@@ -516,7 +521,10 @@ const getAddressBlockErrors = (
     billingPincode: validateIndianPincode(values.billingPincode).error,
     billingCity: validateCity(values.billingCity).error,
     billingState: validateIndianState(values.billingState, states).error,
-    billingPhone: validateOptionalPhone(values.billingPhone).error,
+    billingPhone: validateOptionalPhone(
+      values.billingPhone,
+      values.billingCountryCode ?? "+91",
+    ).error,
   };
 };
 
@@ -526,7 +534,10 @@ export const getCheckoutFormErrors = (
   options?: CheckoutContactOptions,
 ): Partial<Record<CheckoutFormField, string | undefined>> => ({
   name: validateRequiredName(values.name).error,
-  phoneOrEmail: validatePhoneOrEmail(values.phoneOrEmail, options).error,
+  phoneOrEmail: validatePhoneOrEmail(values.phoneOrEmail, {
+    ...options,
+    countryCode: values.contactCountryCode ?? options?.countryCode ?? "+91",
+  }).error,
   ...getAddressBlockErrors("shipping", values, states, options),
   ...(values.billingSameAsShipping
     ? {}
