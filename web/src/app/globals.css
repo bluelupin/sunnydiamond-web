@@ -583,7 +583,7 @@
   .blog-cms-html figure {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: start;
     width: 100%;
     margin-top: 1.5rem;
     margin-bottom: 1.5rem;
