@@ -77,12 +77,18 @@ function ProfilePageContent() {
           activeSection === "support" ? "pb-0" : "lg:pb-100 md:pb-20 pb-10",
         )}
       >
-        {showMobileSectionHeader ? (
-          <ProfileMobileSectionHeader
-            title={mobileSectionTitle}
-            align={activeSection === "wishlist" ? "center" : "left"}
-          />
-        ) : null}
+        {
+          activeSection !== "diamonds_for_everyone" && (
+            <>
+              {showMobileSectionHeader && (
+                <ProfileMobileSectionHeader
+                  title={mobileSectionTitle}
+                  align={activeSection === "wishlist" ? "center" : "left"}
+                />
+              )}
+            </>
+          )
+        }
         <div className="lg:grid xl:grid-cols-[437px_minmax(0,1fr)] lg:grid-cols-[400px_minmax(0,1fr)] lg:gap-6">
           <aside className="relative hidden lg:block">
             <ProfileSidebar activeSection={activeSection} navItems={navItems} />
