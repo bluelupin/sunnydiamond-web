@@ -17,8 +17,8 @@ const CareersBenefitsSection = ({ benefits }: CareersBenefitsSectionProps) => {
     const activeItem =
       benefits.items.find((item) => item.id === activeId) ?? benefits.items[0];
 
-    return activeItem?.image ?? benefits.image;
-  }, [activeId, benefits.image, benefits.items]);
+    return activeItem?.image ?? null;
+  }, [activeId, benefits.items]);
 
   return (
     <section
