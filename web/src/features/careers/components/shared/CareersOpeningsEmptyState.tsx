@@ -39,7 +39,9 @@ const CareersOpeningsEmptyState = () => {
             direction="up"
             className="font-gill text-sm font-light leading-110 text-neutral500 md:text-base"
           >
-            {description}
+            {/* {description} */}
+            There are no open roles at the moment.<br />
+            In the meantime, discover more about our story and what we stand for.
           </Reveal>
         </div>
         <Reveal direction="up">
