@@ -1,5 +1,8 @@
 export const CAREERS_RESUME_ACCEPT =
-  ".zip,.pdf,.jpeg,.jpg,application/pdf,application/zip,application/x-zip-compressed,image/jpeg";
+  ".zip,.pdf,.doc,.docx,.jpeg,.jpg,.png,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/zip,application/x-zip-compressed,image/jpeg,image/png";
+
+export const CAREERS_AUTOFILL_RESUME_ACCEPT =
+  ".pdf,.docx,.jpeg,.jpg,.png,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png";
 
 export const CAREERS_RESUME_MAX_BYTES = 5 * 1024 * 1024;
 
@@ -7,15 +10,19 @@ export const CAREERS_RESUME_MAX_SIZE_TOAST_MESSAGE =
   "File size must not exceed 5 MB.";
 
 export const CAREERS_RESUME_FORMAT_TOAST_MESSAGE =
-  "Only ZIP, PDF, JPEG, and JPG file formats are allowed.";
+  "Only ZIP, PDF, DOC, DOCX, JPEG, JPG, and PNG file formats are allowed.";
 
-const CAREERS_RESUME_ALLOWED_EXTENSIONS = new Set([".zip", ".pdf", ".jpeg", ".jpg"]);
+const CAREERS_RESUME_ALLOWED_EXTENSIONS = new Set([".zip", ".pdf", ".doc", ".docx", ".jpeg", ".jpg", ".png"]);
+const CAREERS_AUTOFILL_ALLOWED_EXTENSIONS = new Set([".pdf", ".docx", ".jpeg", ".jpg", ".png"]);
 
 const CAREERS_RESUME_ALLOWED_MIME_TYPES = new Set([
   "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   "application/zip",
   "application/x-zip-compressed",
   "image/jpeg",
+  "image/png",
 ]);
 
 export type CareersResumeValidationError = "size" | "format";
@@ -57,6 +64,11 @@ export function getCareersResumeValidationError(
   }
 
   return null;
+}
+
+export function isCareersAutofillFileSupported(file: File): boolean {
+  const extension = getCareersResumeFileExtension(file.name);
+  return CAREERS_AUTOFILL_ALLOWED_EXTENSIONS.has(extension) && isCareersResumeFileFormatAllowed(file);
 }
 
 export const CAREERS_SUBMITTING_APPLICATION_LABEL = "Submitting...";

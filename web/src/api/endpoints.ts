@@ -42,6 +42,8 @@ export const STRAPI_ENDPOINTS = {
   jobOpeningSubmissions: "api/submissions-job-openings",
   /** Custom CMS action — multipart `data` + `resume` (Postman-verified). */
   jobOpeningSubmissionsSubmit: "api/submissions-job-openings/submit",
+  /** Resume autofill — multipart `resume`, returns suggestions without submitting. */
+  careerResumeParse: "api/careers/parse-resume",
   blogLandingPage: "api/blog-landing-page",
   blogCategories: "api/blog-categories",
   blogPosts: "api/blog-posts",
