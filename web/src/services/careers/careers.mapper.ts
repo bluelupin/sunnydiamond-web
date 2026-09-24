@@ -442,6 +442,7 @@ const mapLifeSection = (
     cleanText(section.featuredBody) ??
     cleanText(section.description) ??
     cleanText(section.content);
+  const additionalDescription = cleanText(section.additionalFeatureBody) ?? undefined;
   const quote = cleanText(section.featuredDescription) ?? cleanText(section.quote);
   const featuredImages = coerceArray<StrapiCareerResponsiveImage>(section.featuredImages)
     .map(mapResponsiveImage)
@@ -464,6 +465,7 @@ const mapLifeSection = (
   return {
     title,
     description,
+    ...(additionalDescription ? { additionalDescription } : {}),
     quote,
     leftImage,
     rightImage,

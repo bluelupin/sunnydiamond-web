@@ -44,6 +44,11 @@ const CareersLifeSection = ({ lifeAt }: CareersLifeSectionProps) => {
           <p className="w-full font-gill text-sm font-light leading-110 text-neutral500 md:text-xl md:font-normal md:text-darkblack">
             {lifeAt.description}
           </p>
+          {lifeAt.additionalDescription ? (
+            <p className="w-full font-gill text-sm font-light leading-110 text-neutral500 md:text-xl md:font-normal md:text-darkblack">
+              {lifeAt.additionalDescription}
+            </p>
+          ) : null}
           {lifeAt.quote ? (
             <div className="flex w-full items-end gap-2 items-center">
               <span

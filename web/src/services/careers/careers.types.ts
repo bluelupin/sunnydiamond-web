@@ -91,6 +91,8 @@ export type StrapiCareerLifeSection = {
   description?: string | null;
   content?: string | null;
   featuredBody?: string | null;
+  /** Second body paragraph under Featured Body (CMS: Additional Feature Body). */
+  additionalFeatureBody?: string | null;
   quote?: string | null;
   featuredDescription?: string | null;
   isActive?: boolean | null;
@@ -376,7 +378,10 @@ export type NormalizedCareerOpeningsSection = {
 
 export type NormalizedCareerLifeSection = {
   title: string;
+  /** CMS Featured Body — first paragraph. */
   description: string;
+  /** CMS Additional Feature Body — second paragraph when present. */
+  additionalDescription?: string;
   quote?: string;
   leftImage: NormalizedCareerResponsiveImage;
   rightImage: NormalizedCareerResponsiveImage;
