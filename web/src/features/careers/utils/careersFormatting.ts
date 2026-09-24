@@ -116,7 +116,7 @@ export function filterCareerJobs(
       return true;
     }
 
-    const haystack = `${job.title} ${job.department} ${job.location} ${job.summary}`.toLowerCase();
+    const haystack = job.title.toLowerCase();
     return haystack.includes(normalized);
   });
 }

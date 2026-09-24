@@ -52,15 +52,13 @@ const BlogsListingClient = ({
     }
   }, [category]);
 
-  // Spec: featured post must not also appear in the regular card grid.
-  const gridPosts = featured?.href
-    ? posts.filter((post) => post.href !== featured.href)
-    : posts;
+  // Spec: featured post must not also appear in the regular card grid (All only).
+  const showFeatured = Boolean(featured) && category === "all";
+  const gridPosts =
+    showFeatured && featured?.href
+      ? posts.filter((post) => post.href !== featured.href)
+      : posts;
   const filteredPosts = filterBlogPosts(gridPosts, category);
-  // Featured on All, or only on the chip that matches the featured post category.
-  const showFeatured =
-    Boolean(featured) &&
-    (category === "all" || featured?.category === category);
   const firstRowPosts = showFeatured ? filteredPosts.slice(0, 3) : [];
   const remainingPosts = showFeatured
     ? filteredPosts.slice(3, limit)

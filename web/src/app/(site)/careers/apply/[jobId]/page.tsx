@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return constructMetadata({
     title: `Apply — ${job.title} | Careers | ${siteConfig.brand.name}`,
     description: `Apply for ${job.title} at ${siteConfig.brand.name}.`,
-    canonicalPath: getCareerApplyPath(job.jobCode),
+    canonicalPath: getCareerApplyPath(job.slug),
     noIndex: true,
   });
 }

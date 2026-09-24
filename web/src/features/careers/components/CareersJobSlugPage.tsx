@@ -25,7 +25,7 @@ function CareersJobSlugFlowContent({ job }: { job: NormalizedCareerJob }) {
     <CareersJobDetailView
       job={job}
       jobDetails={jobDetails}
-      onApply={(entry, resumeFile) => goToApplication(entry, resumeFile, job.jobCode)}
+      onApply={(entry, resumeFile) => goToApplication(entry, resumeFile, job.slug)}
     />
   );
 }

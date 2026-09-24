@@ -177,23 +177,14 @@ export function selectRelatedBlogPosts(
     .filter((post): post is BlogPost => Boolean(post));
 }
 
-function relatedPostPublishedMs(post: StrapiBlogPost): number {
-  const raw =
-    typeof post.publishedDate === "string" ? post.publishedDate.trim() : "";
-  if (!raw) return 0;
-  const date = new Date(raw.includes("T") ? raw : `${raw}T00:00:00Z`);
-  return Number.isNaN(date.getTime()) ? 0 : date.getTime();
-}
-
-/** CMS `GET /blog-posts/:slug/related` — show up to 3, newest `publishedDate` first. */
+/** CMS `GET /blog-posts/:slug/related` — first 3 from the API response order. */
 export function mapRelatedBlogPostsFromApi(
   posts: StrapiBlogPost[],
   limit = 3,
 ): BlogPost[] {
   if (limit <= 0) return [];
 
-  return [...posts]
-    .sort((a, b) => relatedPostPublishedMs(b) - relatedPostPublishedMs(a))
+  return posts
     .slice(0, limit)
     .map((post) => mapStrapiBlogPostToCard(post))
     .filter((post): post is BlogPost => Boolean(post));

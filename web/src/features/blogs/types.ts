@@ -29,7 +29,7 @@ export type BlogFeaturedPost = {
   backgroundAlt?: string;
   readNowLabel: string;
   href: string;
-  /** CMS category id — used to show featured only on All / matching chip. */
+  /** CMS category id — featured chrome is shown on All only. */
   category: string;
 };
 

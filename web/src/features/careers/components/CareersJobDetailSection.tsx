@@ -17,7 +17,7 @@ const CareersJobDetailSection = () => {
     <CareersJobDetailView
       job={selectedJob}
       jobDetails={jobDetails}
-      onApply={(entry, resumeFile) => goToApplication(entry, resumeFile, selectedJob.jobCode)}
+      onApply={(entry, resumeFile) => goToApplication(entry, resumeFile, selectedJob.slug)}
     />
   );
 };
