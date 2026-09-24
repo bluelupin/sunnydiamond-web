@@ -11,6 +11,7 @@ import FormFieldError from "@/shared/ui/FormFieldError";
 import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
 import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
 import AppointmentDateField from "@/shared/ui/AppointmentDateField";
+import { isAppointmentTimeSlotAvailable } from "@/shared/utils/appointmentTimeSlots";
 import {
   getMaxSelectableDate,
   getMinSelectableDate,
@@ -141,6 +142,17 @@ const AppointmentContactFields = ({
       onPhoneChange(next);
     }
   }, [phone, countryCode, onPhoneChange]);
+
+  // Clear selection if the chosen slot is no longer bookable for the selected date.
+  useEffect(() => {
+    if (!onSelectedSlotChange || !selectedSlot || !date.trim()) {
+      return;
+    }
+
+    if (!isAppointmentTimeSlotAvailable(selectedSlot, date)) {
+      onSelectedSlotChange(null);
+    }
+  }, [date, onSelectedSlotChange, selectedSlot]);
 
   return (
     <>
@@ -280,25 +292,33 @@ const AppointmentContactFields = ({
               <div key={row} className="flex gap-2">
                 {[slots[row * 2], slots[row * 2 + 1]].filter(Boolean).map((slot) => {
                   const isSelected = selectedSlot === slot;
+                  const isSlotAvailable =
+                    !date.trim() || isAppointmentTimeSlotAvailable(slot, date);
 
                   return (
                     <button
                       key={slot}
                       type="button"
+                      disabled={!isSlotAvailable}
+                      aria-disabled={!isSlotAvailable || undefined}
                       onClick={() => {
+                        if (!isSlotAvailable) return;
                         onSelectedSlotChange(isSelected ? null : slot);
                         markTouched("selectedSlot");
                       }}
                       className={cn(
                         "flex h-14 min-w-0 flex-1 items-center justify-center px-3 font-gill text-base leading-110",
-                        isSelected
-                          ? selectedSlotStyle === "gold"
-                            ? "bg-[#DECAA0] font-normal text-darkblack"
-                            : "bg-darkblack font-normal text-white"
-                          : cn(
-                              "bg-[#F2F2F2] font-light text-darkblack",
-                              showError("selectedSlot") && invalidFieldContainerClassName,
-                            ),
+                        !isSlotAvailable
+                          ? "cursor-not-allowed bg-[#F2F2F2] font-light text-darkblack opacity-40"
+                          : isSelected
+                            ? selectedSlotStyle === "gold"
+                              ? "bg-[#DECAA0] font-normal text-darkblack"
+                              : "bg-darkblack font-normal text-white"
+                            : cn(
+                                "bg-[#F2F2F2] font-light text-darkblack",
+                                showError("selectedSlot") &&
+                                  invalidFieldContainerClassName,
+                              ),
                       )}
                     >
                       {slot}
