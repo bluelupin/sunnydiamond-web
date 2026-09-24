@@ -1,4 +1,4 @@
-/** Figma nodes 1049:49593, 1049:49826, 1049:50059, delivery & success screens */
+/** Figma nodes 1049:49593, 1049:49826, 1049:50059, 4903:106197, 4903:100405 */
 export const giftCardFlowContent = {
   title: "Gift Card",
   cardTypes: {
@@ -51,13 +51,13 @@ export const giftCardFlowContent = {
     payNowLabel: "PAY NOW",
   },
   success: {
-    title: "Gift Card Confirmed",
+    title: "Your Gift Card Is on Its Way",
     physicalMessage:
       "Your physical gift card order has been placed and will be delivered to the recipient by",
     digitalMessage:
       "Your digital gift card has been sent to the recipient and will be available shortly.",
     image: {
-      src: "/images/gifting/gift-cards.png",
+      src: "/images/gifting/gift-card-success.png",
       alt: "Sunny Diamonds gift card",
     },
     trackOrderLabel: "TRACK ORDER",

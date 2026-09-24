@@ -31,7 +31,7 @@ const isGiftCardPartyComplete = (party: GiftCardPartyDetails): boolean =>
   validateRequiredEmail(party.email).valid;
 
 const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
-  const { status, customer } = useAuth();
+  const { status } = useAuth();
   const { contact: profileContact } = useCustomerProfileContact(status === "authenticated");
   const { initiatePayment, isPaying, statusToastNode } = useGiftCardPayment();
   const [hasAppliedProfilePrefill, setHasAppliedProfilePrefill] = useState(false);
@@ -56,12 +56,14 @@ const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
     }
   }, [isPanelOpen]);
 
+  // Prefill sender from My Profile once when logged in; never overwrite fields the user typed.
   useEffect(() => {
-    if (hasAppliedProfilePrefill) return;
+    if (!profileContact || hasAppliedProfilePrefill) return;
 
-    const profileName = profileContact?.fullName?.trim();
-    const profileEmail = profileContact?.email?.trim() || customer?.email?.trim();
-    const profilePhone = profileContact?.phone?.trim();
+    const profileName = profileContact.fullName?.trim();
+    const profileEmail = profileContact.email?.trim();
+    const profilePhone = profileContact.phone?.trim();
+    const profileCountryCode = profileContact.countryCode?.trim();
 
     if (profileName && !sender.fullName.trim()) {
       setSender({ fullName: profileName });
@@ -72,12 +74,12 @@ const GiftCardDetailsStep = ({ header }: { header: ReactNode }) => {
     if (profilePhone && !sender.phone.trim()) {
       setSender({ phone: profilePhone });
     }
-
-    if (profileName || profileEmail || profilePhone || customer) {
-      setHasAppliedProfilePrefill(true);
+    if (profileCountryCode) {
+      setSender({ countryCode: profileCountryCode });
     }
+
+    setHasAppliedProfilePrefill(true);
   }, [
-    customer,
     hasAppliedProfilePrefill,
     profileContact,
     sender.email,

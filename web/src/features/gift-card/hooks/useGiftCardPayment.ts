@@ -7,6 +7,10 @@ import {
   verifyRazorpayPayment,
 } from "@/features/checkout/services/razorpayCheckout";
 import { useGiftCardFlow } from "../context/GiftCardFlowContext";
+import {
+  GIFT_CARD_PREVIEW_ORDER_NUMBER,
+  GIFT_CARD_SKIP_PAYMENT_FOR_PREVIEW,
+} from "../config/giftCardPreviewConfig";
 import { placeGiftCardOrder } from "../services/giftCardOrder.service";
 
 export function useGiftCardPayment() {
@@ -19,6 +23,11 @@ export function useGiftCardPayment() {
 
     setIsPaying(true);
     try {
+      if (GIFT_CARD_SKIP_PAYMENT_FOR_PREVIEW) {
+        flow.markOrderComplete(GIFT_CARD_PREVIEW_ORDER_NUMBER);
+        return true;
+      }
+
       const placedOrder = await placeGiftCardOrder({
         cardType: flow.cardType,
         amount: flow.amount,

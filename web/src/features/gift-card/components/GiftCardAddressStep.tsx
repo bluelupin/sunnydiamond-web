@@ -1,7 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/features/auth/context/AuthContext";
+import { useCustomerAddresses } from "@/features/account/hooks/useCustomerAddresses";
+import { mapCustomerAddressToFormInput } from "@/services/customer/customer-account.mapper";
 import { CartPrimaryButton } from "@/features/cart/components/CartFlowUi";
 import { getExpectedDeliveryDate } from "@/features/checkout/types/checkout.types";
 import FormFieldError from "@/shared/ui/FormFieldError";
@@ -32,13 +35,62 @@ import {
 type AddressField = "addressLine1" | "addressLine2" | "pincode" | "city" | "state";
 
 const GiftCardAddressStep = ({ header }: { header: ReactNode }) => {
+  const { status } = useAuth();
+  const isAuthenticated = status === "authenticated";
+  const { addresses, isLoading: addressesLoading } = useCustomerAddresses(isAuthenticated);
   const { deliveryAddress, setDeliveryAddress, estimatedDeliveryDate } = useGiftCardFlow();
   const { initiatePayment, isPaying, statusToastNode } = useGiftCardPayment();
   const { detectAddress, isLocating } = useCurrentLocationAddress();
   const [touched, setTouched] = useState<Partial<Record<AddressField, boolean>>>({});
+  const [hasAppliedAddressPrefill, setHasAppliedAddressPrefill] = useState(false);
 
   const { address } = giftCardFlowContent;
   const stateOptions = INDIAN_STATES;
+
+  const defaultShippingAddress = useMemo(() => {
+    if (addresses.length === 0) {
+      return null;
+    }
+
+    return addresses.find((address) => address.isDefaultShipping) ?? addresses[0];
+  }, [addresses]);
+
+  // Prefill delivery address from the saved default shipping address once when logged in.
+  useEffect(() => {
+    if (!isAuthenticated || addressesLoading || hasAppliedAddressPrefill) {
+      return;
+    }
+
+    if (!defaultShippingAddress) {
+      setHasAppliedAddressPrefill(true);
+      return;
+    }
+
+    const mapped = mapCustomerAddressToFormInput(defaultShippingAddress);
+    setDeliveryAddress({
+      ...(mapped.addressLine1 && !deliveryAddress.addressLine1.trim()
+        ? { addressLine1: mapped.addressLine1 }
+        : {}),
+      ...(mapped.addressLine2 && !deliveryAddress.addressLine2.trim()
+        ? { addressLine2: mapped.addressLine2 }
+        : {}),
+      ...(mapped.pincode && !deliveryAddress.pincode.trim() ? { pincode: mapped.pincode } : {}),
+      ...(mapped.city && !deliveryAddress.city.trim() ? { city: mapped.city } : {}),
+      ...(mapped.state && !deliveryAddress.state.trim() ? { state: mapped.state } : {}),
+    });
+    setHasAppliedAddressPrefill(true);
+  }, [
+    addressesLoading,
+    defaultShippingAddress,
+    deliveryAddress.addressLine1,
+    deliveryAddress.addressLine2,
+    deliveryAddress.city,
+    deliveryAddress.pincode,
+    deliveryAddress.state,
+    hasAppliedAddressPrefill,
+    isAuthenticated,
+    setDeliveryAddress,
+  ]);
 
   const errors = useMemo(() => {
     const pincodeValidation = validateIndianPincode(deliveryAddress.pincode);
