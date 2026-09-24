@@ -19,7 +19,13 @@ import { useOrderActions } from "../hooks/useOrderActions";
 import { useOrderInvoiceDownload } from "../hooks/useOrderInvoiceDownload";
 import type { ProfileOrderUi } from "../types/profileUi.types";
 import { formatOrderDate, formatOrderTotal } from "../utils/formatAccountData";
-import { resolveProfileOrderTimelineSteps } from "../utils/orderDeliveryTimeline.utils";
+import {
+  DIGITAL_GIFT_CARD_CONTACT_CTA_CLASS,
+  isDigitalGiftCardContactUsOnlyOrder,
+  isDigitalGiftCardProfileOrder,
+  isGiftCardProfileOrder,
+  resolveProfileOrderTimelineSteps,
+} from "../utils/orderDeliveryTimeline.utils";
 import { formatRefundNote } from "../utils/profileDisplayMappers";
 import { ProfileOrderMobileThumbnails } from "./ProfileOrderMobileThumbnails";
 import { ProfileOrderItemRow } from "./ProfileOrderItemRow";
@@ -108,25 +114,28 @@ export function ProfileOrderCard({
     setLocalResolvedStatus(null);
   }, [order.id, order.status]);
 
-  const timelineSteps = useMemo(
-    () =>
-      resolveProfileOrderTimelineSteps(
-        resolvedStatus ?? localResolvedStatus ?? order.status,
-        order.timeline,
-        order.timelineFromServer ? order.timeline : null,
-      ),
-    [
-      resolvedStatus,
-      localResolvedStatus,
-      order.status,
+  const timelineSteps = useMemo(() => {
+    if (isDigitalGiftCardProfileOrder(order)) {
+      return [];
+    }
+
+    return resolveProfileOrderTimelineSteps(
+      resolvedStatus ?? localResolvedStatus ?? order.status,
       order.timeline,
-      order.timelineFromServer,
-    ],
-  );
+      order.timelineFromServer ? order.timeline : null,
+    );
+  }, [
+    order,
+    resolvedStatus,
+    localResolvedStatus,
+  ]);
 
   const mobileDeliveryMeta = getMobileDeliveryMeta(order);
   const mobileStatusLabel =
     order.category === "in_progress" ? content.statusInProgress : order.statusLabel;
+  const giftCardDeliveredBadge =
+    order.category === "delivered" && isGiftCardProfileOrder(order);
+  const isDigitalGiftCardContactOnly = isDigitalGiftCardContactUsOnlyOrder(order);
 
   const handleCopyOrderId = async () => {
     try {
@@ -143,6 +152,14 @@ export function ProfileOrderCard({
   };
 
   const handleDownloadInvoice = () => {
+    if (order.isDummyPreview) {
+      toast({
+        title: "Preview order",
+        description: "Invoice download is not available for preview gift card orders.",
+      });
+      return;
+    }
+
     void download(order.number);
   };
 
@@ -173,6 +190,15 @@ export function ProfileOrderCard({
   };
 
   const handleConfirmCancellation = async (payload: { reason: string; comments: string }) => {
+    if (order.isDummyPreview) {
+      setCancelReasonDialogOpen(false);
+      toast({
+        title: "Preview order",
+        description: "Cancellation is not available for preview gift card orders.",
+      });
+      return;
+    }
+
     try {
       const freshOrder = await cancelOrder(order.number, {
         orderId: order.id,
@@ -190,6 +216,15 @@ export function ProfileOrderCard({
   };
 
   const handleConfirmReturn = async (payload: { reason: string; comments: string }) => {
+    if (order.isDummyPreview) {
+      setReturnReasonDialogOpen(false);
+      toast({
+        title: "Preview order",
+        description: "Returns are not available for preview gift card orders.",
+      });
+      return;
+    }
+
     try {
       const freshOrder = await returnOrder(order.number, {
         orderId: order.id,
@@ -238,6 +273,7 @@ export function ProfileOrderCard({
                 label={mobileStatusLabel}
                 category={order.category}
                 subState={order.subState}
+                giftCardDelivered={giftCardDeliveredBadge}
               />
 
               <div className="flex flex-col gap-2">
@@ -250,7 +286,7 @@ export function ProfileOrderCard({
                     className="text-darkblack"
                     aria-label={content.copyOrderIdLabel}
                   >
-                    <CopyIcon className="size-5" />
+                    <CopyIcon className="size-4" />
                   </button>
                 </span>
 
@@ -282,7 +318,7 @@ export function ProfileOrderCard({
             {content.viewDetailsLabel}
           </DetailDarkButton>
 
-          {order.showContactUs ? (
+          {order.showContactUs && !isDigitalGiftCardContactOnly ? (
             <DetailDarkButton type="button" className="w-full" onClick={handleContactSupport}>
               {content.contactUsLabel}
             </DetailDarkButton>
@@ -295,22 +331,25 @@ export function ProfileOrderCard({
               label={order.statusLabel}
               category={order.category}
               subState={order.subState}
+              giftCardDelivered={giftCardDeliveredBadge}
             />
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4 font-gill text-base leading-110 text-darkblack">
-                <span className="inline-flex items-center gap-1 font-light text-darkblack">
-                  {content.orderIdLabel}{" "}
-                  <span className="font-normal">{order.number}</span>
+                <div className="inline-flex items-center gap-2 font-light text-darkblack">
+                  <div className="inline-flex items-center gap-1">
+                    {content.orderIdLabel}{" "}
+                    <span className="font-normal">{order.number}</span>
+                  </div>
                   <button
                     type="button"
                     onClick={() => void handleCopyOrderId()}
                     className="text-darkblack"
                     aria-label={content.copyOrderIdLabel}
                   >
-                    <CopyIcon className="size-5" />
+                    <CopyIcon className="size-4" />
                   </button>
-                </span>
+                </div>
                 <ProfileMetaDivider className="h-4 self-center" />
                 <span className="font-light">
                   {content.placedOnLabel}{" "}
@@ -374,31 +413,43 @@ export function ProfileOrderCard({
 
           <CartDivider />
 
-          <div className="flex gap-6">
-            {order.showCancel ? (
-              <DetailOutlineButton type="button" className="flex-1" onClick={handleCancelOrder}>
-                {content.cancelOrderLabel}
-              </DetailOutlineButton>
-            ) : null}
-
-            {order.showTrack ? (
-              <DetailDarkButton type="button" className="flex-1" onClick={handleTrackOrder}>
-                {content.trackOrderLabel}
-              </DetailDarkButton>
-            ) : null}
-
-            {order.showReturn ? (
-              <DetailOutlineButton type="button" className="flex-1" onClick={handleReturnOrder}>
-                {content.returnOrderLabel}
-              </DetailOutlineButton>
-            ) : null}
-
-            {order.showContactUs ? (
-              <DetailDarkButton type="button" className="flex-1" onClick={handleContactSupport}>
+          {isDigitalGiftCardContactOnly ? (
+            <div className="flex justify-end">
+              <DetailDarkButton
+                type="button"
+                className={DIGITAL_GIFT_CARD_CONTACT_CTA_CLASS}
+                onClick={handleContactSupport}
+              >
                 {content.contactUsLabel}
               </DetailDarkButton>
-            ) : null}
-          </div>
+            </div>
+          ) : (
+            <div className="flex gap-6">
+              {order.showCancel ? (
+                <DetailOutlineButton type="button" className="flex-1" onClick={handleCancelOrder}>
+                  {content.cancelOrderLabel}
+                </DetailOutlineButton>
+              ) : null}
+
+              {order.showTrack ? (
+                <DetailDarkButton type="button" className="flex-1" onClick={handleTrackOrder}>
+                  {content.trackOrderLabel}
+                </DetailDarkButton>
+              ) : null}
+
+              {order.showReturn ? (
+                <DetailOutlineButton type="button" className="flex-1" onClick={handleReturnOrder}>
+                  {content.returnOrderLabel}
+                </DetailOutlineButton>
+              ) : null}
+
+              {order.showContactUs ? (
+                <DetailDarkButton type="button" className="flex-1" onClick={handleContactSupport}>
+                  {content.contactUsLabel}
+                </DetailDarkButton>
+              ) : null}
+            </div>
+          )}
 
           {order.footnote ? (
             <div className="flex items-center gap-2 font-gill text-base font-light leading-110 text-darkblack">

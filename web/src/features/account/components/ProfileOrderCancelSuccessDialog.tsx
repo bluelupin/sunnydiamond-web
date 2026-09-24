@@ -57,7 +57,7 @@ function ProfileOrderCancelSuccessDialogBody({
           className="text-darkblack"
           aria-label={content.copyOrderIdLabel}
         >
-          <CopyIcon className="size-5" />
+          <CopyIcon className="size-4" />
         </button>
       </span>
     </>

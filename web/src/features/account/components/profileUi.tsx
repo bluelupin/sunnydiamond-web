@@ -122,6 +122,13 @@ const STATUS_BADGE_VARIANTS: Record<
   },
 };
 
+/** Figma UI-Production 4858:124118 — delivered gift card order badge. */
+const GIFT_CARD_DELIVERED_BADGE_VARIANT = {
+  background: "bg-[#C7EFD3]",
+  dot: "bg-green600",
+  labelWeight: "font-normal",
+};
+
 /** Copy shown while Magento is still processing a cancellation/return. */
 const SUB_STATE_LABELS: Record<ProfileOrderSubState, string> = {
   cancellation_in_progress: profileTabsContent.orders.statusCancellationInProgress,
@@ -132,23 +139,28 @@ export function ProfileStatusBadge({
   label,
   category = "in_progress",
   subState,
+  giftCardDelivered = false,
 }: {
   label: string;
   category?: OrderFilterKey;
   subState?: ProfileOrderSubState;
+  /** Figma 4858:124118 — green delivered pill for gift card orders only. */
+  giftCardDelivered?: boolean;
 }) {
-  const variant = STATUS_BADGE_VARIANTS[category];
-
+  const variant = giftCardDelivered
+    ? GIFT_CARD_DELIVERED_BADGE_VARIANT
+    : STATUS_BADGE_VARIANTS[category];
+  const { windows } = useUiPlatform();
   return (
     <span
       className={cn(
-        "inline-flex w-fit shrink-0 items-center gap-2 self-start px-4 py-2 font-gill text-base leading-110 whitespace-nowrap text-darkblack",
+        "inline-flex w-fit shrink-0 items-center gap-2 self-start px-4 py-2 font-gill md:text-base text-sm whitespace-nowrap text-darkblack",
         variant.background,
         variant.labelWeight,
       )}
     >
       <span className={cn("size-2 shrink-0 rounded-full", variant.dot)} aria-hidden />
-      {subState ? SUB_STATE_LABELS[subState] : label}
+      <span className={cn(!windows && "translate-y-0.5")}>{subState ? SUB_STATE_LABELS[subState] : label}</span>
     </span>
   );
 }
@@ -158,22 +170,26 @@ export function ProfileOrderMobileStatusBadge({
   label,
   category = "in_progress",
   subState,
+  giftCardDelivered = false,
 }: {
   label: string;
   category?: OrderFilterKey;
   subState?: ProfileOrderSubState;
+  giftCardDelivered?: boolean;
 }) {
-  const variant = STATUS_BADGE_VARIANTS[category];
-
+  const variant = giftCardDelivered
+    ? GIFT_CARD_DELIVERED_BADGE_VARIANT
+    : STATUS_BADGE_VARIANTS[category];
+  const { windows } = useUiPlatform();
   return (
     <span
       className={cn(
-        "inline-flex w-fit shrink-0 items-center gap-2 px-3 py-2 font-gill text-sm font-normal leading-110 text-darkblack",
+        "px-4 py-2 inline-flex w-fit shrink-0 items-center gap-2 font-gill text-darkblack md:text-base text-sm font-normal whitespace-nowrap",
         variant.background,
       )}
     >
       <span className={cn("size-2 shrink-0 rounded-full", variant.dot)} aria-hidden />
-      {subState ? SUB_STATE_LABELS[subState] : label}
+      <span className={cn(!windows && "translate-y-0.5")}>{subState ? SUB_STATE_LABELS[subState] : label}</span>
     </span>
   );
 }

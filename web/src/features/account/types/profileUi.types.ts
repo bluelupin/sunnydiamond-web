@@ -23,6 +23,8 @@ export type ProfileOrderItemUi = {
   id: string;
   name: string;
   imageSrc?: string;
+  /** Gift card variant label, e.g. "Digital Card" / "Physical Card" (Figma 4858:124116). */
+  subtitle?: string;
   size?: string;
   metal?: string;
   engraving?: string;
@@ -86,6 +88,7 @@ export type ProfileOrderDetailUi = {
   /** Invoice button stays visible but inert until Magento has an invoice. */
   invoiceDisabled?: boolean;
   showCancelNote: boolean;
+  isDummyPreview?: boolean;
 };
 
 export type ProfileOrderUi = {
@@ -115,6 +118,8 @@ export type ProfileOrderUi = {
   /** Invoice button stays visible but inert until Magento has an invoice. */
   invoiceDisabled?: boolean;
   showCancelNote: boolean;
+  /** UI-only preview row — disables order mutations (gift card dummy orders). */
+  isDummyPreview?: boolean;
 };
 
 export type ProfileAppointmentProductUi = {

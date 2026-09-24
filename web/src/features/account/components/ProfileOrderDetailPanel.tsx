@@ -4,6 +4,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useMagentoWishlistProducts } from "@/hooks/magento/useMagentoWishlistProducts";
 import { trackOrder } from "@/services/customer/order-tracking.client";
 import type { TrackedOrder } from "@/services/customer/order-tracking.types";
+import {
+  getProfileGiftCardDummyDetailOrder,
+  isProfileGiftCardDummyOrderNumber,
+} from "../data/profileGiftCardDummyOrders";
 import { buildMagentoProductImageBySku } from "../utils/orderItemImage.utils";
 import { mapTrackedOrderToProfileDetailUi } from "../utils/orderDetailDisplay.mapper";
 import { ProfileOrderDetailView } from "./ProfileOrderDetailView";
@@ -31,12 +35,20 @@ export function ProfileOrderDetailPanel({
   onTrackedStatusChange,
   onOrderChanged,
 }: ProfileOrderDetailPanelProps) {
+  const dummyOrderDetail = useMemo(
+    () =>
+      isProfileGiftCardDummyOrderNumber(orderNumber)
+        ? getProfileGiftCardDummyDetailOrder(orderNumber)
+        : null,
+    [orderNumber],
+  );
+
   const [order, setOrder] = useState<TrackedOrder | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!dummyOrderDetail);
 
   useEffect(() => {
-    if (!orderNumber) {
+    if (!orderNumber || dummyOrderDetail) {
       return;
     }
 
@@ -100,6 +112,10 @@ export function ProfileOrderDetailPanel({
     () => (order ? mapTrackedOrderToProfileDetailUi(order, imageBySku) : null),
     [order, imageBySku],
   );
+
+  if (dummyOrderDetail) {
+    return <ProfileOrderDetailView order={dummyOrderDetail} onBack={onBack} />;
+  }
 
   if (isLoading) {
     return <OrderDetailSkeleton />;

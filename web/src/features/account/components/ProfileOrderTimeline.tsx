@@ -119,7 +119,7 @@ function ProfileOrderTimelineHorizontal({
 
             {filledLineWidth ? (
               <div
-                className="absolute top-5 h-px bg-transparent border border-neutral500"
+                className="absolute top-5 h-px bg-transparent border border-gold500"
                 style={{ left: lineInset, width: filledLineWidth }}
                 aria-hidden
               />

@@ -18,7 +18,12 @@ import { useOrderActions } from "../hooks/useOrderActions";
 import { useOrderInvoiceDownload } from "../hooks/useOrderInvoiceDownload";
 import type { ProfileOrderDetailUi } from "../types/profileUi.types";
 import { formatOrderDate, formatOrderTotal } from "../utils/formatAccountData";
-import { resolveProfileOrderTimelineSteps } from "../utils/orderDeliveryTimeline.utils";
+import {
+  DIGITAL_GIFT_CARD_CONTACT_CTA_CLASS,
+  isDigitalGiftCardContactUsOnlyOrder,
+  isDigitalGiftCardProfileOrder,
+  resolveProfileOrderTimelineSteps,
+} from "../utils/orderDeliveryTimeline.utils";
 import { formatRefundNote } from "../utils/profileDisplayMappers";
 import { ProfileOrderDetailItemCard } from "./ProfileOrderDetailItemCard";
 import { ProfileOrderCancelDialog } from "./ProfileOrderCancelDialog";
@@ -72,6 +77,14 @@ export function ProfileOrderDetailView({
   };
 
   const handleDownloadInvoice = () => {
+    if (order.isDummyPreview) {
+      toast({
+        title: "Preview order",
+        description: "Invoice download is not available for preview gift card orders.",
+      });
+      return;
+    }
+
     void download(order.number);
   };
 
@@ -102,6 +115,15 @@ export function ProfileOrderDetailView({
   };
 
   const handleConfirmCancellation = async (payload: { reason: string; comments: string }) => {
+    if (order.isDummyPreview) {
+      setCancelReasonDialogOpen(false);
+      toast({
+        title: "Preview order",
+        description: "Cancellation is not available for preview gift card orders.",
+      });
+      return;
+    }
+
     try {
       const freshOrder = await cancelOrder(order.number, {
         orderId: order.id,
@@ -122,6 +144,15 @@ export function ProfileOrderDetailView({
   };
 
   const handleConfirmReturn = async (payload: { reason: string; comments: string }) => {
+    if (order.isDummyPreview) {
+      setReturnReasonDialogOpen(false);
+      toast({
+        title: "Preview order",
+        description: "Returns are not available for preview gift card orders.",
+      });
+      return;
+    }
+
     try {
       const freshOrder = await returnOrder(order.number, {
         orderId: order.id,
@@ -144,15 +175,18 @@ export function ProfileOrderDetailView({
   const { priceBreakdown } = order;
   const hasDiscount = priceBreakdown.orderDiscount > 0;
   const hasShipping = typeof priceBreakdown.shipping === "number";
-  const timelineSteps = useMemo(
-    () =>
-      resolveProfileOrderTimelineSteps(
-        order.status,
-        order.timeline,
-        order.timelineFromServer ? order.timeline : null,
-      ),
-    [order.status, order.timeline, order.timelineFromServer],
-  );
+  const isDigitalGiftCardContactOnly = isDigitalGiftCardContactUsOnlyOrder(order);
+  const timelineSteps = useMemo(() => {
+    if (isDigitalGiftCardProfileOrder(order)) {
+      return [];
+    }
+
+    return resolveProfileOrderTimelineSteps(
+      order.status,
+      order.timeline,
+      order.timelineFromServer ? order.timeline : null,
+    );
+  }, [order]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -184,7 +218,7 @@ export function ProfileOrderDetailView({
                 className="text-darkblack"
                 aria-label={content.copyOrderIdLabel}
               >
-                <CopyIcon className="size-5" />
+                <CopyIcon className="size-4" />
               </button>
             </span>
           </div>
@@ -218,7 +252,7 @@ export function ProfileOrderDetailView({
                 className="text-darkblack"
                 aria-label={content.copyOrderIdLabel}
               >
-                <CopyIcon className="size-5" />
+                <CopyIcon className="size-4" />
               </button>
             </span>
             <ProfileMetaDivider className="h-4 self-center" />
@@ -378,52 +412,64 @@ export function ProfileOrderDetailView({
         </div>
       ) : null}
 
-      {(order.showCancel || order.showReturn || order.showDownloadInvoice || order.showContactUs) ? (
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
-            {order.showDownloadInvoice ? (
-              <DetailDarkButton
-                type="button"
-                className="order-1 h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal disabled:cursor-not-allowed disabled:opacity-50 lg:order-2 lg:flex-1"
-                onClick={handleDownloadInvoice}
-                disabled={invoiceDisabled}
-              >
-                {isDownloadingInvoice
-                  ? content.downloadingInvoiceLabel
-                  : content.downloadInvoiceLabel}
-              </DetailDarkButton>
-            ) : null}
-
-            {order.showCancel ? (
-              <DetailOutlineButton
-                type="button"
-                className="order-2 h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal lg:order-1 lg:flex-1"
-                onClick={handleCancelOrder}
-              >
-                {content.cancelOrderLabel}
-              </DetailOutlineButton>
-            ) : null}
-
-            {order.showReturn ? (
-              <DetailOutlineButton
-                type="button"
-                className="order-3 h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal lg:order-1 lg:flex-1"
-                onClick={handleReturnOrder}
-              >
-                {content.returnOrderLabel}
-              </DetailOutlineButton>
-            ) : null}
-
-            {order.showContactUs ? (
-              <DetailDarkButton
-                type="button"
-                className="h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal lg:flex-1"
-                onClick={handleContactSupport}
-              >
-                {content.contactUsLabel}
-              </DetailDarkButton>
-            ) : null}
+      {isDigitalGiftCardContactOnly ? (
+        <div className="hidden flex-col gap-4 lg:flex">
+          <div className="flex justify-end">
+            <DetailDarkButton
+              type="button"
+              className={DIGITAL_GIFT_CARD_CONTACT_CTA_CLASS}
+              onClick={handleContactSupport}
+            >
+              {content.contactUsLabel}
+            </DetailDarkButton>
           </div>
+        </div>
+      ) : (order.showCancel || order.showReturn || order.showDownloadInvoice || order.showContactUs) ? (
+        <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
+              {order.showDownloadInvoice ? (
+                <DetailDarkButton
+                  type="button"
+                  className="order-1 h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal disabled:cursor-not-allowed disabled:opacity-50 lg:order-2 lg:flex-1"
+                  onClick={handleDownloadInvoice}
+                  disabled={invoiceDisabled}
+                >
+                  {isDownloadingInvoice
+                    ? content.downloadingInvoiceLabel
+                    : content.downloadInvoiceLabel}
+                </DetailDarkButton>
+              ) : null}
+
+              {order.showCancel ? (
+                <DetailOutlineButton
+                  type="button"
+                  className="order-2 h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal lg:order-1 lg:flex-1"
+                  onClick={handleCancelOrder}
+                >
+                  {content.cancelOrderLabel}
+                </DetailOutlineButton>
+              ) : null}
+
+              {order.showReturn ? (
+                <DetailOutlineButton
+                  type="button"
+                  className="order-3 h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal lg:order-1 lg:flex-1"
+                  onClick={handleReturnOrder}
+                >
+                  {content.returnOrderLabel}
+                </DetailOutlineButton>
+              ) : null}
+
+              {order.showContactUs ? (
+                <DetailDarkButton
+                  type="button"
+                  className="h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal lg:flex-1"
+                  onClick={handleContactSupport}
+                >
+                  {content.contactUsLabel}
+                </DetailDarkButton>
+              ) : null}
+            </div>
 
           {order.showCancelNote && order.footnote ? (
             <div className="flex items-center gap-2">

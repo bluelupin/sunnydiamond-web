@@ -81,7 +81,7 @@ function ProfileOrderTrackModalBody({
             className="text-darkblack"
             aria-label={content.copyOrderIdLabel}
           >
-            <CopyIcon className="size-5" />
+            <CopyIcon className="size-4" />
           </button>
         </span>
       </div>
@@ -162,7 +162,7 @@ export function ProfileOrderTrackModal({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!open) {
+    if (!open || order.isDummyPreview) {
       return;
     }
 
@@ -194,7 +194,7 @@ export function ProfileOrderTrackModal({
       cancelled = true;
       controller.abort();
     };
-  }, [open, order.number]);
+  }, [open, order.isDummyPreview, order.number]);
 
   const onTrackedStatusChangeRef = useRef(onTrackedStatusChange);
   onTrackedStatusChangeRef.current = onTrackedStatusChange;

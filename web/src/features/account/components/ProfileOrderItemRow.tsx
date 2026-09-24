@@ -15,6 +15,7 @@ type ProfileOrderItemRowProps = {
 
 export function ProfileOrderItemRow({ item, price }: ProfileOrderItemRowProps) {
   const badgeLabel = item.isGift ? "Gift" : item.isBespoke ? "Bespoke" : null;
+  const isGiftCardItem = Boolean(item.subtitle?.trim());
 
   return (
     <div className="relative border border-aboutInactive bg-white p-4">
@@ -22,7 +23,12 @@ export function ProfileOrderItemRow({ item, price }: ProfileOrderItemRowProps) {
 
       <div className="flex items-center justify-between gap-6">
         <div className="flex min-w-0 items-center gap-6">
-          <div className="relative h-[63px] w-[71px] shrink-0 overflow-hidden bg-white">
+          <div
+            className={cn(
+              "relative shrink-0 overflow-hidden bg-white",
+              isGiftCardItem ? "h-[62px] w-[99px]" : "h-[63px] w-[71px]",
+            )}
+          >
             {item.useIconPlaceholder || !item.imageSrc ? (
               <div className="flex size-full items-center justify-center">
                 <RingsTabIcon className="size-12 text-darkblack" />
@@ -32,13 +38,13 @@ export function ProfileOrderItemRow({ item, price }: ProfileOrderItemRowProps) {
                 src={item.imageSrc}
                 alt={item.name}
                 fill
-                className="object-cover"
-                sizes="71px"
+                className={isGiftCardItem ? "object-contain object-center" : "object-cover"}
+                sizes={isGiftCardItem ? "99px" : "71px"}
               />
             )}
           </div>
 
-          <div className="min-w-0 flex flex-col gap-2">
+          <div className={cn("min-w-0 flex flex-col", isGiftCardItem ? "gap-3" : "gap-2")}>
             {item.productUrlKey ? (
               <Link
                 href={`/product/${item.productUrlKey}`}
@@ -59,6 +65,12 @@ export function ProfileOrderItemRow({ item, price }: ProfileOrderItemRowProps) {
                 {item.name}
               </p>
             )}
+
+            {item.subtitle ? (
+              <p className="font-gill text-sm font-light leading-110 text-neutral500">
+                {item.subtitle}
+              </p>
+            ) : null}
 
             {item.size || item.metal ? (
               <div className="flex items-center gap-2 font-gill text-sm font-light leading-110 text-darkblack">
