@@ -105,12 +105,24 @@ export const careersFormFieldsStackClassName = "flex w-full flex-col gap-6";
 export const careersFormFieldGridClassName =
   "grid gap-6 md:grid-cols-2 lg:grid-cols-3";
 
-export function getCareersBirthDateBounds(): { minDate: string; maxDate: string } {
-  const today = new Date();
+/** Oldest DOB allowed in the careers date picker (years before today). */
+export const CAREERS_DOB_MAX_AGE_YEARS = 100;
+
+/**
+ * DOB must be strictly before today (today / future dates are invalid).
+ * Picker max is yesterday so those dates cannot be selected.
+ */
+export function getCareersBirthDateBounds(
+  referenceDate = new Date(),
+): { minDate: string; maxDate: string } {
+  const today = new Date(referenceDate);
   today.setHours(0, 0, 0, 0);
 
+  const max = new Date(today);
+  max.setDate(max.getDate() - 1);
+
   const min = new Date(today);
-  min.setFullYear(min.getFullYear() - 100);
+  min.setFullYear(min.getFullYear() - CAREERS_DOB_MAX_AGE_YEARS);
 
   const toDateValue = (date: Date) => {
     const year = date.getFullYear();
@@ -119,7 +131,39 @@ export function getCareersBirthDateBounds(): { minDate: string; maxDate: string 
     return `${year}-${month}-${day}`;
   };
 
-  return { minDate: toDateValue(min), maxDate: toDateValue(today) };
+  return { minDate: toDateValue(min), maxDate: toDateValue(max) };
+}
+
+/** Returns an error message when DOB is missing or not strictly before today. */
+export function getCareersDateOfBirthError(
+  value: string,
+  referenceDate = new Date(),
+): string | undefined {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return "Date of birth is required";
+  }
+
+  const parsed = new Date(`${trimmed}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) {
+    return "Enter a valid date of birth";
+  }
+
+  const today = new Date(referenceDate);
+  today.setHours(0, 0, 0, 0);
+  parsed.setHours(0, 0, 0, 0);
+
+  if (parsed.getTime() >= today.getTime()) {
+    return "Date of birth must be before today";
+  }
+
+  const { minDate } = getCareersBirthDateBounds(referenceDate);
+  const min = new Date(`${minDate}T00:00:00`);
+  if (parsed.getTime() < min.getTime()) {
+    return "Enter a valid date of birth";
+  }
+
+  return undefined;
 }
 
 export function formatCareersFileSize(bytes: number): string {

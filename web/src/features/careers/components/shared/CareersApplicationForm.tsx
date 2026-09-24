@@ -10,9 +10,10 @@ import { cn } from "@/shared/utils/cn";
 import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
 import {
   invalidFieldClassName,
+  invalidFieldContainerClassName,
   sanitizePhoneInput,
+  validateOptionalEmail,
   validatePhone,
-  validateRequiredEmail,
   validateRequiredName,
 } from "@/shared/utils/formValidation";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
@@ -46,6 +47,7 @@ import {
   careersFormSectionClassName,
   careersFormSectionTitleClassName,
   getCareersBirthDateBounds,
+  getCareersDateOfBirthError,
   getCareersResumeValidationError,
   isCareersNumericInput,
   sanitizeCareersNumericInput,
@@ -371,13 +373,20 @@ const CareersApplicationForm = () => {
     const nameValidation = validateRequiredName(name);
     if (!nameValidation.valid) next.name = nameValidation.error;
 
-    const emailValidation = validateRequiredEmail(email);
-    if (!emailValidation.valid) next.email = emailValidation.error;
+    const emailTrimmed = email.trim();
+    if (!emailTrimmed) {
+      // Figma careers form: same copy for empty + invalid (matches phone pattern).
+      next.email = "Please enter a valid email";
+    } else {
+      const emailValidation = validateOptionalEmail(emailTrimmed);
+      if (!emailValidation.valid) next.email = emailValidation.error;
+    }
 
     const phoneValidation = validatePhone(phone, countryCode);
     if (!phoneValidation.valid) next.phone = phoneValidation.error;
 
-    if (!dateOfBirth.trim()) next.dateOfBirth = "Date of birth is required";
+    const dobError = getCareersDateOfBirthError(dateOfBirth);
+    if (dobError) next.dateOfBirth = dobError;
     if (!gender) next.gender = "Gender is required";
     if (!highestDegree.trim()) next.highestDegree = "Highest degree is required";
     if (!areaOfStudy.trim()) next.areaOfStudy = "Area of study is required";
@@ -668,7 +677,12 @@ const CareersApplicationForm = () => {
                 />
               </FormField>
               <FormField label={fields.phoneLabel} error={showError("phone") ? errors.phone : undefined}>
-                <div className="flex h-14 items-center gap-2 bg-[#F2F2F2] p-3">
+                <div
+                  className={cn(
+                    "flex h-14 w-full items-center gap-2 border border-transparent bg-[#F2F2F2] p-3",
+                    showError("phone") && invalidFieldContainerClassName,
+                  )}
+                >
                   <PhoneCountryCodeSelect
                     id="careers-country-code"
                     value={countryCode}
@@ -685,10 +699,8 @@ const CareersApplicationForm = () => {
                     value={phone}
                     onChange={(event) => setPhone(sanitizePhoneInput(event.target.value, countryCode))}
                     onBlur={() => markTouched("phone")}
-                    className={cn(
-                      "min-w-0 flex-1 bg-transparent font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600",
-                      showError("phone") && "text-[#F91616] placeholder:text-[#F91616]",
-                    )}
+                    aria-invalid={showError("phone") || undefined}
+                    className="min-w-0 flex-1 bg-transparent font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600"
                   />
                 </div>
               </FormField>

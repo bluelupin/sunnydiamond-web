@@ -80,10 +80,11 @@ const APPLICATION_FLOW_FALLBACKS: NormalizedCareerApplicationFlow = {
       closeLabel: "Close",
     },
     confirmSubmissionModal: {
-      title: "Confirm Submission",
-      description: "Please review your details before submitting your application.",
-      goBackLabel: "Go Back",
-      submitLabel: "Submit",
+      title: "Ready to Submit Your Application?",
+      description:
+        "Give your details one last look before you submit your application. Once we receive it, our team will review it and be in touch.",
+      goBackLabel: "Go Back And Review",
+      submitLabel: "Submit Application",
       closeLabel: "Close",
     },
     personalDetailsHeading: "Personal Details",

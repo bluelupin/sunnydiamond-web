@@ -85,7 +85,7 @@ function ConfirmSubmissionActions({
 
   if (variant === "mobile") {
     return (
-      <div className="shrink-0 border-t border-neutral300 px-4 py-6">
+      <div className="shrink-0  border-neutral300 px-4 py-6">
         <div className="flex w-full flex-col gap-4">
           {submitButton}
           {goBackButton}
