@@ -170,6 +170,7 @@ export type StrapiCareerApplicationFlowSection = {
   shareLabel?: string | null;
   viewJobLabel?: string | null;
   applyModalTitle?: string | null;
+  applyModalSubtitle?: string | null;
   autofillResumeLabel?: string | null;
   applyManuallyLabel?: string | null;
   applyLinkedInLabel?: string | null;
@@ -449,6 +450,7 @@ export type NormalizedCareerApplicationFlow = {
     viewJobLabel: string;
     applyModal: {
       title: string;
+      subtitle: string;
       autofillResumeLabel: string;
       applyManuallyLabel: string;
       applyLinkedInLabel: string;

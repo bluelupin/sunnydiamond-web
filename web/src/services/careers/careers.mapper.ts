@@ -707,6 +707,8 @@ const mapApplicationFlow = (
       viewJobLabel: requiredStrings.viewJobLabel!,
       applyModal: {
         title: requiredStrings.applyModalTitle!,
+        subtitle:
+          cleanText(section.applyModalSubtitle) ?? "Choose how you'd like to apply.",
         autofillResumeLabel: requiredStrings.autofillResumeLabel!,
         applyManuallyLabel: requiredStrings.applyManuallyLabel!,
         applyLinkedInLabel: requiredStrings.applyLinkedInLabel!,
