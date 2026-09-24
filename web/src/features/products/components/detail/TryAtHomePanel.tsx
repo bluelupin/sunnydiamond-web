@@ -676,12 +676,7 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
         selectedSlot: details.selectedSlot,
       };
 
-      const requestDetails = [
-        details.note.trim(),
-        address.state.trim() ? `State: ${address.state.trim()}` : "",
-      ]
-        .filter(Boolean)
-        .join("\n");
+      const requestDetails = details.note.trim() || undefined;
 
       await createProductSubmission({
         formTag: cmsForm?.formTag ?? TRY_AT_HOME_FORM_TAG,
@@ -691,13 +686,14 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
         customerPhone: `${details.countryCode} ${details.phone}`.trim(),
         customerEmail: details.email.trim() || undefined,
         ...(customer?.id != null ? { magentoCustomerId: customer.id } : {}),
-        requestDetails: requestDetails || undefined,
+        requestDetails,
         requestedDate: booking.date,
         selectedTimeSlot: booking.selectedSlot ?? undefined,
         addressLine1: address.addressLine1.trim(),
         addressLine2: address.addressLine2.trim() || undefined,
         pincode: address.pincode.trim(),
         city: address.city.trim(),
+        ...(address.state.trim() ? { state: address.state.trim() } : {}),
         sourcePage:
           typeof window !== "undefined" ? window.location.pathname : getProductHref(product),
         consentAccepted: true,

@@ -37,6 +37,10 @@ import { cn } from "@/shared/utils/cn";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
 import {
+  getAppointmentContactLocks,
+  getAuthLoginIdentifierKind,
+} from "@/features/auth/utils/authLoginIdentifier";
+import {
   appointmentFieldClassName,
   appointmentLabelClassName,
   APPOINTMENT_TIME_SLOTS,
@@ -933,14 +937,22 @@ const BookingFormStep = ({
   onNoteChange,
   onSubmit,
 }: BookingFormStepProps) => {
-  const formValues = useMemo(
-    () => ({ name, countryCode, phone, email, date, note, purpose }),
-    [name, countryCode, phone, email, date, note, purpose],
+  const { phoneLocked, emailLocked } = getAppointmentContactLocks(
+    getAuthLoginIdentifierKind(),
   );
+
+  const formValues = useMemo(
+    () => ({ name, countryCode, phone, email, date, note, purpose, selectedSlot }),
+    [name, countryCode, phone, email, date, note, purpose, selectedSlot],
+  );
+
+  const hasTimeSlots = timeSlots.length > 0;
 
   const { isValid, errors, markTouched, showError, validateSubmit } =
     useAppointmentFormValidation(formValues, {
       validatePurpose: purposeOptions.length > 0,
+      dateRequired: true,
+      selectedSlotRequired: hasTimeSlots,
     });
 
   return (
@@ -1013,10 +1025,14 @@ const BookingFormStep = ({
                 emailLabel={emailLabel}
                 emailPlaceholder={emailPlaceholder}
                 dateLabel={dateLabel}
+                dateRequired
+                timeSlotRequired={hasTimeSlots}
                 purposeLabel={purposeLabel}
                 purposePlaceholder={purposePlaceholder}
                 noteLabel={notesLabel}
                 notePlaceholder={notesPlaceholder}
+                phoneLocked={phoneLocked}
+                emailLocked={emailLocked}
               />
             </div>
           </div>

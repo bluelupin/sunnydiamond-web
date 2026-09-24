@@ -38,15 +38,12 @@ function getAppointmentClubLifecycle(appointment: ProfileAppointmentUi): "open" 
 }
 
 /**
- * Same date + time + address (or showroom) → one clubbed list item.
- * Video calls stay individual (CMS does not group them; no address key).
- * Cancelled/completed rows never club with an active booking on the same slot.
+ * Same type + date + time + address (or showroom) → one clubbed list item.
+ * Video calls club on date + time (address key is empty); try-at-home / store visit
+ * also include address. Cancelled/completed rows never club with an active booking
+ * on the same slot.
  */
 export function getAppointmentClubKey(appointment: ProfileAppointmentUi): string {
-  if (appointment.type === "video_call") {
-    return `video_call::${appointment.id}`;
-  }
-
   return [
     appointment.type,
     getAppointmentClubLifecycle(appointment),

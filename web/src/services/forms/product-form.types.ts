@@ -90,6 +90,7 @@ export type ProductSubmissionPayload = {
   addressLine2?: string;
   pincode?: string;
   city?: string;
+  state?: string;
   sourcePage?: string;
   utmSource?: string;
   utmMedium?: string;

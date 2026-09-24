@@ -97,14 +97,23 @@ const CUSTOMER_MESSAGE_KEYS = [
   "details",
 ] as const;
 
+/** Strip `State: …` lines that were historically packed into requestDetails. */
 function normalizeCustomerMessageText(value: string): string {
-  const withoutStateLines = value
+  return value
     .split(/\r?\n/)
     .filter((line) => !/^\s*State\s*:/i.test(line))
     .join("\n")
     .trim();
+}
 
-  return withoutStateLines || value.trim();
+function extractStateFromMessageText(value: string): string {
+  for (const line of value.split(/\r?\n/)) {
+    const match = line.match(/^\s*State\s*:\s*(.+)\s*$/i);
+    if (match?.[1]?.trim()) {
+      return match[1].trim();
+    }
+  }
+  return "";
 }
 
 function coerceMessageValue(value: unknown): string {
@@ -122,8 +131,10 @@ function mapCustomerMessage(
 ): string | null {
   for (const key of CUSTOMER_MESSAGE_KEYS) {
     const value = coerceMessageValue(item[key]);
-    if (value) {
-      return normalizeCustomerMessageText(value);
+    if (!value) continue;
+    const normalized = normalizeCustomerMessageText(value);
+    if (normalized) {
+      return normalized;
     }
   }
 
@@ -142,7 +153,10 @@ function mapCustomerMessage(
       normalizedKey.includes("detail") ||
       normalizedKey.includes("message")
     ) {
-      return normalizeCustomerMessageText(text);
+      const normalized = normalizeCustomerMessageText(text);
+      if (normalized) {
+        return normalized;
+      }
     }
   }
 
@@ -217,6 +231,15 @@ function mapAppointmentAddressFields(
   CustomerAppointment,
   "addressLine1" | "addressLine2" | "pincode" | "city" | "state"
 > {
+  const stateFromField = pickTextField(item, ["state", "region", "province"]);
+  // Legacy try-at-home submissions packed `State: …` into requestDetails.
+  const stateFromMessage = extractStateFromMessageText(
+    coerceMessageValue(item.requestDetails) ||
+      coerceMessageValue(item.notes) ||
+      coerceMessageValue(item.customerMessage) ||
+      "",
+  );
+
   return {
     addressLine1: pickTextField(item, [
       "addressLine1",
@@ -228,7 +251,7 @@ function mapAppointmentAddressFields(
     addressLine2: pickTextField(item, ["addressLine2", "address_line_2", "streetLine2"]),
     pincode: pickTextField(item, ["pincode", "postcode", "postalCode", "zip"]),
     city: pickTextField(item, ["city"]),
-    state: pickTextField(item, ["state", "region", "province"]),
+    state: stateFromField || stateFromMessage || "",
   };
 }
 
