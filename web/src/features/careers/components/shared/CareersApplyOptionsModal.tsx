@@ -198,9 +198,9 @@ const CareersApplyOptionsModal = ({
       return;
     }
 
+    event.target.value = "";
     onAutofillResume(file);
     onOpenChange(false);
-    event.target.value = "";
   };
 
   const handleAutofillClick = () => {
