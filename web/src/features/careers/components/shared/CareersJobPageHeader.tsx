@@ -49,7 +49,7 @@ const CareersJobPageHeader = ({
         <CareersJobMetaRow job={job} className="w-full" />
 
         <div className="flex items-center justify-between gap-4">
-          <CareersJobIdChip jobCode={job.jobCode} alwaysInline surface="listing" />
+          <CareersJobIdChip jobCode={job.jobCode} alwaysInline surface="muted" />
           <CareersPostedLabel
             postedAt={job.postedAt}
             className="shrink-0 font-gill text-sm font-light leading-110 text-neutral500"

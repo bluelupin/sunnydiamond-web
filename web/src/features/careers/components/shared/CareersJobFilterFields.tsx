@@ -21,6 +21,8 @@ const FilterField = ({ id, label, value, options, onChange }: FilterFieldProps) 
       options={options}
       onChange={onChange}
       labelClassName={appointmentLabelClassName}
+      // Figma: unselected "Select" is muted grey (not darkblack selected text).
+      triggerClassName={!value ? "text-gray600 [&>span]:text-gray600" : undefined}
     />
   );
 };

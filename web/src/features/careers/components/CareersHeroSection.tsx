@@ -25,17 +25,17 @@ const CareersHeroSection = ({ hero }: CareersHeroSectionProps) => {
       aria-labelledby="careers-hero-title"
       className="relative grid h-[240px] w-full overflow-hidden bg-white md:h-320"
     >
-      <div className="relative col-start-1 row-start-1 size-full [&_img]:object-[62%_38%] md:[&_img]:object-[58%_42%] [&_video]:object-[62%_38%] md:[&_video]:object-[58%_42%]">
+      <div className="relative col-start-1 row-start-1 size-full [&_img]:object-center [&_video]:object-center">
         <HeroBackgroundMedia
           desktopImageUrl={hero.image?.desktopUrl ?? ""}
           mobileImageUrl={hero.image?.mobileUrl}
           desktopAlt={imageAlt}
           mobileAlt={imageAlt}
         />
-        <MediaContentOverlay gradient="bottom-strong" />
+        <MediaContentOverlay solidOpacity={0.2} />
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-6 md:pb-10 lg:pb-16">
+      <div className="pointer-events-none absolute inset-0 z-10 flex items-end justify-center px-5 md:pb-16 pb-10">
         <div className="flex w-full flex-col items-center gap-6">
           <h1
             id="careers-hero-title"

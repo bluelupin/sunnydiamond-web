@@ -47,15 +47,23 @@ const CareersJobIdChip = ({
   };
 
   if (alwaysInline) {
+    // Open Roles listing: white chip on beige cards.
+    // Job detail header (`muted`): grey chip on white page.
+    const surfaceClassName =
+      surface === "muted"
+        ? "bg-chalk300 hover:bg-[#e2dede]"
+        : "bg-white hover:bg-white";
+
     return (
       <button
         type="button"
         onClick={handleCopy}
         className={cn(
-          // Figma mobile `1480:2770` (14px) + desktop `4137:155580` (16px); white chip, 8px gap, 12×4 padding.
-          "inline-flex shrink-0 items-center gap-2 bg-white px-3 py-1",
+          // Figma: 8px gap, 12×4 padding (`px-3 py-1`).
+          "inline-flex shrink-0 items-center gap-2 px-3 py-1",
+          surfaceClassName,
           "font-gill text-sm font-light leading-110 text-darkblack md:text-base",
-          "transition-colors hover:bg-white",
+          "transition-colors",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2",
           className,
         )}

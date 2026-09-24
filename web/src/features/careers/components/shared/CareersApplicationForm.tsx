@@ -28,7 +28,6 @@ import {
 import { parseCareerResume } from "@/services/careers/career-resume-parse.service";
 import { resolveCareerApplicationFlow } from "@/services/careers/resolveCareerApplicationFlow";
 import { toast } from "@/shared/hooks/use-toast";
-import { sharePageUrl } from "@/shared/utils/sharePageUrl";
 import {
   CAREERS_RESUME_PARSE_ERROR_MESSAGE,
   CAREERS_RESUME_PARSE_LOADING_MESSAGE,
@@ -436,14 +435,6 @@ const CareersApplicationForm = () => {
     setTouched((current) => ({ ...current, [field]: true }));
   };
 
-  const handleShare = () => {
-    if (!selectedJob) {
-      return;
-    }
-
-    void sharePageUrl({ title: selectedJob.title });
-  };
-
   const handleResumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
@@ -588,7 +579,7 @@ const CareersApplicationForm = () => {
     }
   };
 
-  const { applicationForm, jobDetails } = applicationFlow;
+  const { applicationForm } = applicationFlow;
 
   if (!selectedJob) {
     return (
@@ -608,11 +599,7 @@ const CareersApplicationForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-10" noValidate>
-      <CareersApplicationJobHeader
-        job={selectedJob}
-        shareLabel={jobDetails.shareLabel}
-        onShare={handleShare}
-      />
+      <CareersApplicationJobHeader job={selectedJob} />
 
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-6 bg-gray200 md:p-6 p-4 md:flex-row md:items-center md:justify-between">
@@ -896,9 +883,13 @@ const CareersApplicationForm = () => {
         </section>
 
         <section className={careersFormSectionClassName}>
-          <h2 className={careersFormSectionTitleClassName}>Skills & Languages</h2>
+          <h2 className={careersFormSectionTitleClassName}>
+            {applicationForm.skillsHeading}
+          </h2>
           <FormField label="" className="max-w-[356px]" arial-hidden>
-            <p className="md:text-base text-sm font-gill font-normal font-darkblack">Add skills and known languages to your application</p>
+            <p className="md:text-base text-sm font-gill font-normal text-darkblack">
+              Add skills and known languages to your application
+            </p>
             <div className="relative">
               <div className="flex h-14 items-center justify-between bg-[#F2F2F2] p-3">
                 <input
@@ -942,33 +933,41 @@ const CareersApplicationForm = () => {
               ) : null}
             </div>
           </FormField>
-          <div className="flex flex-col gap-4 items-start">
-            <p className={careersFormLabelClassName}>{fields.skillsLabel}</p>
-            <div className="flex flex-wrap gap-2">
-              {skills.map((skill) => (
-                <TagChip
-                  key={skill}
-                  label={skill}
-                  onRemove={() => setSkills((current) => current.filter((item) => item !== skill))}
-                />
-              ))}
+          {skills.length > 0 ? (
+            <div className="flex flex-col gap-4 items-start">
+              <p className={careersFormLabelClassName}>{fields.skillsLabel}</p>
+              <div className="flex flex-wrap gap-2">
+                {skills.map((skill) => (
+                  <TagChip
+                    key={skill}
+                    label={skill}
+                    onRemove={() =>
+                      setSkills((current) => current.filter((item) => item !== skill))
+                    }
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          ) : null}
 
-          <div className="flex flex-col gap-4">
-            <p className={careersFormLabelClassName}>{fields.languagesLabel}</p>
-            <div className="flex flex-wrap gap-2">
-              {languages.map((language) => (
-                <TagChip
-                  key={language}
-                  label={language}
-                  onRemove={() =>
-                    setLanguages((current) => current.filter((item) => item !== language))
-                  }
-                />
-              ))}
+          {languages.length > 0 ? (
+            <div className="flex flex-col gap-4">
+              <p className={careersFormLabelClassName}>{fields.languagesLabel}</p>
+              <div className="flex flex-wrap gap-2">
+                {languages.map((language) => (
+                  <TagChip
+                    key={language}
+                    label={language}
+                    onRemove={() =>
+                      setLanguages((current) =>
+                        current.filter((item) => item !== language),
+                      )
+                    }
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          ) : null}
         </section>
 
         <section className={careersFormSectionClassName}>

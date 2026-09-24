@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import FilterIcon from "@/assets/Icons/PLP/FilterIcon";
 import CareersSearchIcon from "@/features/careers/components/shared/CareersSearchIcon";
 import Reveal from "@/shared/Animation/Reveal";
 import { cn } from "@/shared/utils/cn";
-import JewelleryLoadMoreSection from "@/features/jewellery-product/components/JewelleryLoadMoreSection";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
 import CareersJobCard from "./shared/CareersJobCard";
 import CareersJobFiltersSidebar from "./shared/CareersJobFiltersSidebar";
@@ -14,7 +13,6 @@ import CareersJobListingsEmptyState from "./shared/CareersJobListingsEmptyState"
 import CareersOpeningsEmptyState from "./shared/CareersOpeningsEmptyState";
 import {
   CAREERS_LISTING_CLEAR_FILTERS_LABEL,
-  CAREERS_LISTING_PAGE_SIZE,
   hasActiveListingFilters,
 } from "@/features/careers/constants/careersListing";
 
@@ -37,7 +35,6 @@ const CareersJobListingsSection = () => {
   } = useCareersJobs();
   const { listing } = cms;
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(CAREERS_LISTING_PAGE_SIZE);
 
   const listingHeading = listing.featuredTitle ?? listing.title;
   const searchPlaceholder = "Search Roles";
@@ -48,12 +45,6 @@ const CareersJobListingsSection = () => {
     experienceFilter,
   );
   const showFilterEmptyState = filteredJobs.length === 0 && hasActiveFilters;
-  const visibleJobs = filteredJobs.slice(0, visibleCount);
-  const hasMore = visibleCount < filteredJobs.length;
-
-  useEffect(() => {
-    setVisibleCount(CAREERS_LISTING_PAGE_SIZE);
-  }, [searchQuery, locationFilter, departmentFilter, experienceFilter]);
 
   if (jobs.length === 0) {
     return (
@@ -91,10 +82,10 @@ const CareersJobListingsSection = () => {
           </Reveal>
 
           <div className="flex flex-col gap-6">
-            <Reveal direction="up" className="flex items-center gap-3">
+            <Reveal direction="up">
               <div
                 className={cn(
-                  "flex h-12 min-w-0 flex-1 items-center gap-4 border border-[#F2F2F2] bg-[#F2F2F2] p-3",
+                  "flex h-12 w-full items-center gap-4 border border-[#F2F2F2] bg-[#F2F2F2] p-3",
                   "focus-within:outline-none focus-within:ring-2 focus-within:ring-darkblack focus-within:ring-offset-2",
                 )}
               >
@@ -108,21 +99,11 @@ const CareersJobListingsSection = () => {
                   aria-label={searchPlaceholder}
                 />
               </div>
-              {(listing.openFiltersLabel ?? listing.filtersTitle) ? (
-                <button
-                  type="button"
-                  onClick={() => setFiltersOpen(true)}
-                  className="inline-flex size-12 shrink-0 items-center justify-center border border-[#F2F2F2] bg-[#F2F2F2] text-darkblack transition-colors hover:bg-gray300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 lg:hidden"
-                  aria-label={listing.openFiltersLabel ?? listing.filtersTitle ?? "Filters"}
-                >
-                  <FilterIcon className="size-6" />
-                </button>
-              ) : null}
             </Reveal>
 
             <div className="flex flex-col gap-4">
-              {visibleJobs.length > 0 ? (
-                visibleJobs.map((job, index) => (
+              {filteredJobs.length > 0 ? (
+                filteredJobs.map((job, index) => (
                   <Reveal key={job.id} direction="up" delay={index * 0.03}>
                     <CareersJobCard
                       job={job}
@@ -144,21 +125,23 @@ const CareersJobListingsSection = () => {
                 </Reveal>
               ) : null}
             </div>
-
-            {filteredJobs.length > 0 ? (
-              <JewelleryLoadMoreSection
-                visibleCount={visibleJobs.length}
-                totalCount={filteredJobs.length}
-                hasMore={hasMore}
-                itemLabel="Openings"
-                onLoadMore={() =>
-                  setVisibleCount((count) => count + CAREERS_LISTING_PAGE_SIZE)
-                }
-              />
-            ) : null}
           </div>
         </div>
       </div>
+
+      {(listing.openFiltersLabel ?? listing.filtersTitle) && !filtersOpen ? (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral300/60 bg-white pb-[env(safe-area-inset-bottom,0px)] lg:hidden">
+          <button
+            type="button"
+            onClick={() => setFiltersOpen(true)}
+            className="flex h-14 w-full items-center justify-center gap-2 font-gill text-sm font-normal uppercase leading-110 text-darkblack transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2"
+            aria-label={listing.openFiltersLabel ?? listing.filtersTitle ?? "Filter"}
+          >
+            <span>{listing.openFiltersLabel ?? "Filter"}</span>
+            <FilterIcon className="size-6" />
+          </button>
+        </div>
+      ) : null}
 
       {listing.filtersTitle ? (
         <CareersJobFiltersDrawer open={filtersOpen} onOpenChange={setFiltersOpen} />
