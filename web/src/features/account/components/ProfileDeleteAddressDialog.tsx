@@ -49,7 +49,7 @@ export function ProfileDeleteAddressDialog({
         >
           <div className="px-4 pt-6">
             <div className="flex items-center justify-between gap-4">
-              <SheetTitle className="font-larken text-2xl font-light leading-110 text-darkblack">
+              <SheetTitle className="font-larken lg:text-32 text-2xl font-light leading-110 text-darkblack">
                 {content.title}
               </SheetTitle>
               <button
@@ -103,7 +103,7 @@ export function ProfileDeleteAddressDialog({
       >
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between gap-4">
-            <DialogTitle className="font-larken text-32 font-light leading-110 text-darkblack">
+            <DialogTitle className="font-larken lg:text-32 text-2xl font-light leading-110 text-darkblack">
               {content.title}
             </DialogTitle>
             <button

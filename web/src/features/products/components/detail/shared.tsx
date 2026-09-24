@@ -8,6 +8,8 @@ type DetailTextLinkProps = {
   className?: string;
   light?: boolean;
   disabled?: boolean;
+  target?: string;
+  rel?: string;
 };
 
 export const DetailTextLink = ({
@@ -17,32 +19,35 @@ export const DetailTextLink = ({
   className,
   light,
   disabled = false,
+  target,
+  rel,
 }: DetailTextLinkProps) => {
   const classes = cn(
-    "inline-flex w-fit uppercase",
-    "relative shrink-0 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:transition-all after:duration-300 border-b-[1.5px] pb-1 font-gill text-sm font-normal leading-110 sm:pb-1 hover:after:w-full",
-    disabled ? "cursor-not-allowed" : "cursor-pointer",
+    "text-tertiary-cta-underline w-fit pb-1 font-gill text-sm font-normal uppercase leading-110 sm:pb-1",
+    disabled
+      ? "pointer-events-none cursor-not-allowed opacity-50"
+      : "cursor-pointer",
+    light ? "text-white" : "text-darkblack",
     className,
-    light
-      ? "text-white border-white hover:border-white hover:text-white after:bg-white"
-      : "text-darkblack border-darkblack hover:border-darkMagenta hover:text-darkMagenta after:bg-darkMagenta",
   );
 
   if (href) {
     const handleClick =
       disabled || onClick
         ? (event: React.MouseEvent<HTMLAnchorElement>) => {
-            if (disabled) {
-              event.preventDefault();
-              return;
-            }
-            onClick?.();
+          if (disabled) {
+            event.preventDefault();
+            return;
           }
+          onClick?.();
+        }
         : undefined;
 
     return (
       <Link
         href={href}
+        target={target}
+        rel={rel}
         {...(handleClick ? { onClick: handleClick } : {})}
         aria-disabled={disabled || undefined}
         className={classes}
@@ -108,6 +113,10 @@ export const DetailOutlineLink = ({ children, href, className }: DetailOutlineLi
   </Link>
 );
 
-export const AttributeSeparator = () => (
-  <span aria-hidden className="h-18 w-px shrink-0 bg-neutral300" />
+type AttributeSeparatorProps = {
+  className?: string;
+};
+
+export const AttributeSeparator = ({ className }: AttributeSeparatorProps) => (
+  <div aria-hidden className={cn("h-18 w-px shrink-0 bg-neutral300", className)} />
 );

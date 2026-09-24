@@ -140,6 +140,55 @@ export function getProfileTimelineStepDescription(label: string): string | undef
   ];
 }
 
+function isGiftCardSubtitle(subtitle?: string): boolean {
+  const value = subtitle?.trim();
+  return value === "Digital Card" || value === "Physical Card";
+}
+
+export function isGiftCardProfileOrder(order: {
+  items: Array<{ subtitle?: string }>;
+}): boolean {
+  return order.items.some((item) => isGiftCardSubtitle(item.subtitle));
+}
+
+/** Delivery stepper applies to physical gift cards and product orders — not digital gift cards. */
+export function isDigitalGiftCardProfileOrder(order: {
+  items: Array<{ subtitle?: string }>;
+}): boolean {
+  if (order.items.length === 0) {
+    return false;
+  }
+
+  return order.items.every((item) => item.subtitle?.trim() === "Digital Card");
+}
+
+/** Figma UI-Production 4858:124270 — right-aligned contact CTA width on desktop. */
+export const DIGITAL_GIFT_CARD_CONTACT_CTA_CLASS =
+  "h-14 min-h-14 w-full shrink-0 px-7 py-5 font-normal lg:w-[414px] lg:max-w-[414px]";
+
+type DigitalGiftCardContactUsOrder = {
+  items: Array<{ subtitle?: string }>;
+  showContactUs?: boolean;
+  showCancel: boolean;
+  showReturn: boolean;
+  showTrack?: boolean;
+  showDownloadInvoice?: boolean;
+};
+
+/** Digital gift card orders expose Contact Us as the sole action (no track/cancel/return/invoice). */
+export function isDigitalGiftCardContactUsOnlyOrder(
+  order: DigitalGiftCardContactUsOrder,
+): boolean {
+  return (
+    Boolean(order.showContactUs) &&
+    isDigitalGiftCardProfileOrder(order) &&
+    !order.showCancel &&
+    !order.showReturn &&
+    !order.showTrack &&
+    !order.showDownloadInvoice
+  );
+}
+
 /** Display label for ProfileStatusBadge — uses canonical timeline label when status matches. */
 export function formatOrderStatusLabel(status: string): string {
   const normalized = normalizeOrderStatus(status);

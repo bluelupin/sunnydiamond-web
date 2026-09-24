@@ -1,12 +1,37 @@
 "use client";
 
 import { Fragment, useState } from "react";
-import { Plus } from "lucide-react";
+import { useProfileSectionEmptyState } from "../context/ProfileSectionEmptyStateContext";
 import InformationIcon from "@/assets/Icons/InformationIcon";
+import PlusIcon from "@/assets/Icons/PlusIcon";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
 import { cn } from "@/shared/utils/cn";
 import { profileTabsContent } from "../data/profileContent";
 import type { OrderFilterKey, ProfileOrderSubState } from "../types/profileUi.types";
+import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
+
+export function ProfileEmailVerifiedBadge({ label }: { label: string }) {
+  return (
+    <span className="flex shrink-0 items-center gap-1 font-gill text-sm font-normal uppercase leading-110 text-green600">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden
+      >
+        <path
+          d="M1 10.75L6.25 16L18.25 4"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      {label}
+    </span>
+  );
+}
 
 export function ProfileSectionHeader({
   title,
@@ -63,8 +88,8 @@ export function ProfileAddAddressCard({
         className,
       )}
     >
-      <span className="flex size-16 shrink-0 items-center justify-center rounded-full bg-white">
-        <Plus className="size-10 shrink-0" strokeWidth={1.5} aria-hidden />
+      <span className="flex md:size-16 size-10 shrink-0 items-center justify-center rounded-full bg-white">
+        <PlusIcon className="md:size-6 size-4 shrink-0 text-darkblack" />
       </span>
       <span className="font-gill text-base font-light leading-110">{label}</span>
     </button>
@@ -97,6 +122,13 @@ const STATUS_BADGE_VARIANTS: Record<
   },
 };
 
+/** Figma UI-Production 4858:124118 — delivered gift card order badge. */
+const GIFT_CARD_DELIVERED_BADGE_VARIANT = {
+  background: "bg-[#C7EFD3]",
+  dot: "bg-green600",
+  labelWeight: "font-normal",
+};
+
 /** Copy shown while Magento is still processing a cancellation/return. */
 const SUB_STATE_LABELS: Record<ProfileOrderSubState, string> = {
   cancellation_in_progress: profileTabsContent.orders.statusCancellationInProgress,
@@ -107,23 +139,28 @@ export function ProfileStatusBadge({
   label,
   category = "in_progress",
   subState,
+  giftCardDelivered = false,
 }: {
   label: string;
   category?: OrderFilterKey;
   subState?: ProfileOrderSubState;
+  /** Figma 4858:124118 — green delivered pill for gift card orders only. */
+  giftCardDelivered?: boolean;
 }) {
-  const variant = STATUS_BADGE_VARIANTS[category];
-
+  const variant = giftCardDelivered
+    ? GIFT_CARD_DELIVERED_BADGE_VARIANT
+    : STATUS_BADGE_VARIANTS[category];
+  const { windows } = useUiPlatform();
   return (
     <span
       className={cn(
-        "inline-flex w-fit shrink-0 items-center gap-2 self-start px-4 py-2 font-gill text-base leading-110 whitespace-nowrap text-darkblack",
+        "inline-flex w-fit shrink-0 items-center gap-2 self-start px-4 py-2 font-gill md:text-base text-sm whitespace-nowrap text-darkblack",
         variant.background,
         variant.labelWeight,
       )}
     >
       <span className={cn("size-2 shrink-0 rounded-full", variant.dot)} aria-hidden />
-      {subState ? SUB_STATE_LABELS[subState] : label}
+      <span className={cn(!windows && "translate-y-0.5")}>{subState ? SUB_STATE_LABELS[subState] : label}</span>
     </span>
   );
 }
@@ -133,22 +170,26 @@ export function ProfileOrderMobileStatusBadge({
   label,
   category = "in_progress",
   subState,
+  giftCardDelivered = false,
 }: {
   label: string;
   category?: OrderFilterKey;
   subState?: ProfileOrderSubState;
+  giftCardDelivered?: boolean;
 }) {
-  const variant = STATUS_BADGE_VARIANTS[category];
-
+  const variant = giftCardDelivered
+    ? GIFT_CARD_DELIVERED_BADGE_VARIANT
+    : STATUS_BADGE_VARIANTS[category];
+  const { windows } = useUiPlatform();
   return (
     <span
       className={cn(
-        "inline-flex w-fit shrink-0 items-center gap-2 px-3 py-2 font-gill text-sm font-normal leading-110 text-darkblack",
+        "px-4 py-2 inline-flex w-fit shrink-0 items-center gap-2 font-gill text-darkblack md:text-base text-sm font-normal whitespace-nowrap",
         variant.background,
       )}
     >
       <span className={cn("size-2 shrink-0 rounded-full", variant.dot)} aria-hidden />
-      {subState ? SUB_STATE_LABELS[subState] : label}
+      <span className={cn(!windows && "translate-y-0.5")}>{subState ? SUB_STATE_LABELS[subState] : label}</span>
     </span>
   );
 }
@@ -176,7 +217,7 @@ export function ProfileDfeSectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex w-full flex-col gap-6 bg-gray300 p-6">
+    <div className="flex w-full flex-col gap-6 bg-gray200 md:p-6 p-4">
       <h2 className="font-gill text-xl font-normal leading-110 text-darkblack">{title}</h2>
       {children}
     </div>
@@ -259,18 +300,18 @@ export function ProfileFilterChips<T extends string>({
   className,
 }: {
   options: { key: T; label: string; mobileLabel?: string }[];
-  activeKey: T;
+  activeKey: T | null;
   onChange: (key: T) => void;
   scrollOnMobile?: boolean;
   className?: string;
 }) {
   const wrapperClass = scrollOnMobile
     ? cn(
-        "-mx-4 flex gap-2 overflow-x-auto px-4 lg:mx-0 lg:flex-nowrap lg:justify-end lg:overflow-visible lg:px-0 horizontalScrollbar",
-        className,
-      )
+      "-mx-4 flex gap-2 overflow-x-auto px-4 lg:mx-0 lg:flex-nowrap lg:justify-end lg:overflow-visible lg:px-0 horizontalScrollbar",
+      className,
+    )
     : cn("flex flex-wrap gap-2", className);
-
+  const { windows } = useUiPlatform();
   return (
     <div className={wrapperClass}>
       {options.map((option) => {
@@ -283,11 +324,11 @@ export function ProfileFilterChips<T extends string>({
             type="button"
             onClick={() => onChange(option.key)}
             className={cn(
-              "shrink-0 px-4 py-2 font-gill text-base leading-110 text-darkblack transition-colors",
+              "shrink-0 px-4 py-2 font-gill md:text-base text-sm text-darkblack transition-colors",
               isActive ? "font-normal bg-lightGold" : "font-light bg-gray300",
             )}
           >
-            {chipLabel}
+            <span>{chipLabel}</span>
           </button>
         );
       })}
@@ -318,14 +359,16 @@ export function ProfileInfoNote({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex w-full items-center gap-2 font-gill text-base font-light leading-110 text-darkblack">
       <InformationIcon className="size-6 shrink-0 text-darkblack" />
-      <p className="min-w-0 flex-1">{children}</p>
+      <p className="min-w-0 flex-1 text-darkblack font-light">{children}</p>
     </div>
   );
 }
 
 export function ProfileTabEmptyStateLayout({ children }: { children: React.ReactNode }) {
+  useProfileSectionEmptyState(true);
+
   return (
-    <div className="flex w-full min-h-[min(520px,100vh)] items-center justify-center">
+    <div className="flex w-full lg:min-h-[min(520px,100vh)] lg:pt-0 pt-10 items-center justify-center">
       <div className="flex w-full max-w-[464px] flex-col items-center md:gap-6 gap-4 text-center">
         {children}
       </div>
@@ -447,7 +490,7 @@ export function ProfileAccordion({
                 aria-hidden={!isOpen}
               >
                 <div className="overflow-hidden">
-                  <p className="pt-4 font-gill text-sm font-light leading-110 text-neutral500 lg:text-base lg:text-xl">
+                  <p className="md:pb-4 md:pt-0 pt-4 font-gill text-sm font-light leading-110 text-neutral500 lg:text-base lg:text-xl">
                     {item.answer}
                   </p>
                 </div>

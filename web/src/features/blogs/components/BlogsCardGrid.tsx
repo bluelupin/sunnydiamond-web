@@ -27,11 +27,23 @@ const BlogsCardGrid = ({ posts }: BlogsCardGridProps) => {
       {rows.map((row, rowIndex) => (
         <div
           key={`row-${rowIndex}-${row.map((post) => post.id).join("-")}`}
-          className="flex flex-col md:flex-row md:items-start md:justify-center md:gap-2 gap-6"
+          className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-2"
         >
-          {row.map((post) => (
-            <BlogCard key={post.id} post={post} />
-          ))}
+          {Array.from({ length: 3 }, (_, slotIndex) => {
+            const post = row[slotIndex];
+
+            if (!post) {
+              return (
+                <div
+                  key={`empty-${rowIndex}-${slotIndex}`}
+                  className="hidden min-w-0 md:block"
+                  aria-hidden
+                />
+              );
+            }
+
+            return <BlogCard key={post.id} post={post} />;
+          })}
         </div>
       ))}
     </div>

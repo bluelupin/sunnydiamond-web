@@ -1,23 +1,19 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
 import { cn } from "@/shared/utils/cn";
+import type { NormalizedDfeStepperStep } from "@/services/diamonds-for-everyone/diamonds-for-everyone-page.types";
 import { diamondsForEveryonePageContent } from "../../data/content";
 import { useDfeInvestFlow, type DfeInvestStep } from "../../context/DfeInvestFlowContext";
+import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 
 const STEP_IDS: DfeInvestStep[] = ["kyc", "nominee", "review"];
-const INVEST_STEP_LINE_SRC = "/images/diamonds-for-everyone/invest-step-line.svg";
 
 function InvestStepConnector() {
   return (
     <div className="flex min-w-0 flex-1 items-center justify-center">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={INVEST_STEP_LINE_SRC}
-        alt=""
-        className="block h-[0.5px] w-full max-w-none"
+      <div
         aria-hidden
+        className="h-0 w-full border-t border-dashed border-neutral500 [border-top-width:0.5px]"
       />
     </div>
   );
@@ -30,29 +26,40 @@ function InvestStepCircle({
   number: number;
   state: "completed" | "active" | "future";
 }) {
+  const { windows } = useUiPlatform();
   return (
     <div
       className={cn(
         "flex size-6 shrink-0 items-center justify-center rounded-full border border-solid font-gill text-sm leading-110",
         state === "completed" &&
-          "border-darkblack bg-[#EBDFC6] font-normal text-darkblack",
-        state === "active" && "border-darkblack font-normal text-darkblack",
-        state === "future" && "border-neutral500 font-light text-neutral500",
+        "border-darkblack bg-[#EBDFC6] font-normal text-darkblack",
+        state === "active" && "border-darkblack bg-white font-normal text-darkblack",
+        state === "future" && "border-neutral500 bg-white font-light text-neutral500",
       )}
     >
-      {number}
+      <span className={cn(!windows && "translate-y-0.5", "block leading-none")}>{number}</span>
     </div>
   );
 }
 
-const DfeInvestStepper = () => {
+type DfeInvestStepperProps = {
+  steps: NormalizedDfeStepperStep[];
+};
+
+const DfeInvestStepper = ({ steps }: DfeInvestStepperProps) => {
   const { step } = useDfeInvestFlow();
-  const { steps } = diamondsForEveryonePageContent.investFlow;
   const activeIndex = STEP_IDS.indexOf(step);
 
+  if (steps.length === 0) return null;
+
   return (
-    <div className="flex w-full flex-col items-center justify-center gap-6 px-10">
-      <div className="flex w-full items-center justify-between px-7">
+    <div className="flex w-full flex-col items-center gap-3 lg:gap-6 lg:px-10">
+      <div
+        className={cn(
+          "flex w-full items-center justify-between px-7",
+          (step === "nominee" || step === "review") && "lg:px-10",
+        )}
+      >
         {steps.map((stepItem, index) => {
           const isLast = index === steps.length - 1;
           const circleState =
@@ -77,20 +84,25 @@ const DfeInvestStepper = () => {
         })}
       </div>
 
-      <div
-        className="flex w-full items-start justify-between whitespace-nowrap text-center font-gill text-xl leading-110 text-darkblack"
-      >
+      <div className="flex w-full items-start justify-between whitespace-nowrap text-center font-gill text-base leading-110 text-darkblack lg:text-xl">
         {steps.map((stepItem, index) => {
+          const isCompleted = index < activeIndex;
           const isActive = index === activeIndex;
           const isFuture = index > activeIndex;
+
+          const isFinalStep = activeIndex === steps.length - 1;
 
           return (
             <p
               key={stepItem.id}
               className={cn(
-                "shrink-0",
-                isActive ? "font-normal" : "font-light",
-                isFuture && "text-neutral500",
+                "w-[104px] shrink-0 lg:w-auto",
+                isActive && "font-normal text-darkblack",
+                isCompleted &&
+                (isFinalStep
+                  ? "font-light text-darkblack"
+                  : "font-light text-darkblack lg:font-normal"),
+                isFuture && "font-light text-neutral500",
               )}
             >
               {stepItem.label}
@@ -102,28 +114,35 @@ const DfeInvestStepper = () => {
   );
 };
 
-const DfeInvestHeader = () => {
-  const { pageTitle, backLabel } = diamondsForEveryonePageContent.investFlow;
+const DfeInvestHeader = ({ heading }: { heading?: string }) => {
+  const { backLabel } = diamondsForEveryonePageContent.investFlow;
+  const { goBack } = useDfeInvestFlow();
 
   return (
-    <div className="flex w-full items-center justify-center gap-3">
-      <Link
-        href="/diamonds-for-everyone"
+    <div className="flex w-full items-center gap-2 lg:justify-center lg:gap-3">
+      <button
+        type="button"
+        onClick={goBack}
         className="inline-flex size-6 shrink-0 items-center justify-center"
         aria-label={backLabel}
       >
-        <Image
-          src="/images/diamonds-for-everyone/icon-back.svg"
-          alt=""
-          width={24}
-          height={24}
-          aria-hidden
-        />
-      </Link>
-      <h1 className="font-larken text-32 font-light leading-110 text-darkblack">
-        {pageTitle}
-      </h1>
-      <div className="size-10 shrink-0" aria-hidden />
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g clipPath="url(#clip0_4453_33746)">
+            <path d="M15 19.5L7.5 12L15 4.5" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+          </g>
+          <defs>
+            <clipPath id="clip0_4453_33746">
+              <rect width="24" height="24" fill="white" />
+            </clipPath>
+          </defs>
+        </svg>
+      </button>
+      {heading ? (
+        <h1 className="font-larken text-2xl font-light leading-110 text-darkblack lg:text-32">
+          {heading}
+        </h1>
+      ) : null}
+      <div className="hidden size-10 shrink-0 lg:block" aria-hidden />
     </div>
   );
 };

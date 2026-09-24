@@ -55,7 +55,7 @@ export function resolveFancyColourFacetOption(
       );
     }) ?? null;
 
-  return matchIn(fancyColours) ?? matchIn(FANCY_COLOUR_OPTIONS);
+  return matchIn(fancyColours);
 }
 
 export function buildJewelleryFancyColourHref(
@@ -134,8 +134,7 @@ export function resolveEducationFancyColourHref({
     const hasColourParam = hasFancyColourParamInUrl(normalizedCtaUrl);
 
     if (hasColourParam) {
-      // Valid CMS deep-link → keep as-is (CMS priority).
-      if (fromUrl && resolveFancyColourFacetOption(fromUrl)) {
+      if (fromUrl) {
         return buildJewelleryFancyColourHref(fromUrl);
       }
 

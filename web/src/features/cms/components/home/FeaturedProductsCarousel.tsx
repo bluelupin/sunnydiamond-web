@@ -1,12 +1,14 @@
 "use client";
 
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import Slider, { type Settings } from "react-slick";
 import LeftArrow from "@/assets/Icons/LeftArrow";
 import RightArrow from "@/assets/Icons/RightArrow";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import "slick-carousel/slick/slick.css";
 import "./featuredProductsCarousel.css";
 import { learnAboutDiamondsRoute } from "@/features/education/data/content";
@@ -58,11 +60,39 @@ function getSlideVariant(
   slideIndex: number,
   centerIndex: number,
   total: number,
+  pendingCenterIndex: number | null,
 ): SlideCropVariant {
   if (total <= 1) return "center";
 
   const slide = normalizeIndex(slideIndex, total);
   const center = normalizeIndex(centerIndex, total);
+
+  if (pendingCenterIndex != null) {
+    const pending = normalizeIndex(pendingCenterIndex, total);
+
+    if (slide === pending) return "center";
+
+    const pendingPrev = normalizeIndex(pending - 1, total);
+    const pendingNext = normalizeIndex(pending + 1, total);
+    if (slide === pendingPrev) return "left-peek";
+    if (slide === pendingNext) return "right-peek";
+
+    // Outgoing center adopts its peek role immediately so crop motion matches the track.
+    if (slide === center) {
+      const goingForward = pending === normalizeIndex(center + 1, total);
+      const goingBack = pending === normalizeIndex(center - 1, total);
+      if (goingForward) return "left-peek";
+      if (goingBack) return "right-peek";
+    }
+
+    const currentPrev = normalizeIndex(center - 1, total);
+    const currentNext = normalizeIndex(center + 1, total);
+    if (slide === currentPrev) return "left-peek";
+    if (slide === currentNext) return "right-peek";
+
+    return "center";
+  }
+
   if (slide === center) return "center";
 
   const prev = normalizeIndex(center - 1, total);
@@ -129,6 +159,7 @@ export default function FeaturedProductsCarousel({
   const initialIndex = renderItems.length >= 3 ? 1 : 0;
   const [activeIndex, setActiveIndex] = useState(initialIndex);
   const [centerVisualIndex, setCenterVisualIndex] = useState(initialIndex);
+  const [pendingCenterIndex, setPendingCenterIndex] = useState<number | null>(null);
   const [isSliding, setIsSliding] = useState(false);
   const itemsKey = useMemo(
     () => renderItems.map((item) => String(item.id)).join("|"),
@@ -161,6 +192,7 @@ export default function FeaturedProductsCarousel({
   useLayoutEffect(() => {
     setActiveIndex(renderItems.length >= 3 ? 1 : 0);
     setCenterVisualIndex(renderItems.length >= 3 ? 1 : 0);
+    setPendingCenterIndex(null);
     setIsSliding(false);
 
     scheduleRefresh();
@@ -195,8 +227,10 @@ export default function FeaturedProductsCarousel({
 
   const handleBeforeChange = useCallback(
     (_current: number, next: number) => {
-      setIsSliding(true);
-      setCenterVisualIndex(normalizeIndex(next, renderItems.length));
+      flushSync(() => {
+        setIsSliding(true);
+        setPendingCenterIndex(normalizeIndex(next, renderItems.length));
+      });
     },
     [renderItems.length],
   );
@@ -206,6 +240,7 @@ export default function FeaturedProductsCarousel({
       const index = normalizeIndex(current, renderItems.length);
       setActiveIndex(index);
       setCenterVisualIndex(index);
+      setPendingCenterIndex(null);
       setIsSliding(false);
     },
     [renderItems.length],
@@ -221,6 +256,7 @@ export default function FeaturedProductsCarousel({
         "center featured-products-slider",
         !showInfinite && "featured-products-slider--single",
         showThreeUp && "featured-products-slider--triple",
+        isSliding && "featured-products-slider--sliding",
       ),
       centerMode: sourceCount > 1,
       infinite: showInfinite,
@@ -279,6 +315,7 @@ export default function FeaturedProductsCarousel({
       handleBeforeChange,
       handleInit,
       initialIndex,
+      isSliding,
       showInfinite,
       showThreeUp,
       slidesToShow,
@@ -319,7 +356,12 @@ export default function FeaturedProductsCarousel({
               <CarouselSlideImage
                 src={item.image}
                 alt={item.name}
-                variant={getSlideVariant(index, centerVisualIndex, renderItems.length)}
+                variant={getSlideVariant(
+                  index,
+                  centerVisualIndex,
+                  renderItems.length,
+                  pendingCenterIndex,
+                )}
                 priority={index === initialIndex}
               />
             </div>
@@ -382,12 +424,17 @@ export default function FeaturedProductsCarousel({
         <div
           className={cn(
             "mt-3 flex flex-col items-center gap-4 text-center transition-opacity duration-300 ease-out md:gap-6 !w-[300px]",
-            isSliding && "opacity-60",
+            isSliding && "opacity-100",
           )}
         >
           <div className="flex flex-col items-center gap-4 md:min-h-0">
             {activeItem.name ? (
-              <p className="font-gill text-base font-normal leading-110 text-darkblack md:text-xl">
+              <p
+                className={cn(
+                  "font-gill text-base font-normal leading-110 text-darkblack md:text-xl",
+                  productNameDisplayClassName,
+                )}
+              >
                 {activeItem.name}
               </p>
             ) : null}
@@ -401,9 +448,12 @@ export default function FeaturedProductsCarousel({
           {showCta && (activeItem.ctaLabel || ctaLabel) && activeItem.href ? (
             <Link
               href={activeItem.href}
-              className="btn-border-slide inline-flex h-14 min-w-[122px] items-center justify-center border-[0.8px] border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-none text-darkblack"
+              className="relative flex h-14 px-7 items-center justify-center overflow-hidden border-[1px] border-neutral300 bg-white font-gill text-sm font-normal uppercase leading-110 hover:border-neutral300 group min-w-[122px]"
             >
-              <span className="relative z-10">{activeItem.ctaLabel || ctaLabel}</span>
+              <div className="absolute left-0 top-full h-14 w-full bg-darkblack transition-all duration-300 group-hover:top-0" />
+              <span className="relative text-darkblack transition-all duration-300 group-hover:text-white">
+                {activeItem.ctaLabel || ctaLabel}
+              </span>
             </Link>
           ) : null}
         </div>

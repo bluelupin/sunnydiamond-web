@@ -1,6 +1,9 @@
 import { getGuestCartId, setGuestCartId } from "@/services/magento/cart/cartSession";
-import { WISHLIST_STORAGE_KEY } from "@/features/wishlist/constants";
-import { normalizeWishlistSkus } from "@/features/wishlist/utils/wishlistProduct.utils";
+import {
+  clearGuestWishlistStorage,
+  readGuestWishlistFromStorage,
+} from "@/features/wishlist/utils/guestWishlistStorage";
+import { syncCustomerAddressFromLatestOrder } from "@/services/customer/customer-account.client";
 import { syncCustomerWishlist } from "@/services/customer/customer-wishlist.client";
 import { magentoGraphqlFetch } from "@/services/magento/graphqlClient";
 import {
@@ -32,37 +35,40 @@ async function mergeGuestCart(): Promise<void> {
   setGuestCartId(customerCartId);
 }
 
-function readLocalWishlistSkus(): string[] {
-  try {
-    const raw = window.localStorage.getItem(WISHLIST_STORAGE_KEY);
-    const parsed = raw ? (JSON.parse(raw) as unknown) : [];
-    return Array.isArray(parsed)
-      ? normalizeWishlistSkus(parsed.filter((sku): sku is string => typeof sku === "string"))
-      : [];
-  } catch {
-    return [];
+/** Merges local guest wishlist SKUs into Magento, then clears local storage on success. */
+async function syncWishlistAfterLogin(): Promise<void> {
+  const localSkus = readGuestWishlistFromStorage();
+  if (localSkus.length === 0) {
+    return;
   }
+
+  await syncCustomerWishlist(localSkus);
+  clearGuestWishlistStorage();
 }
 
-/** Merges local wishlist SKUs with Magento and persists the merged list locally. */
-async function syncWishlistAfterLogin(): Promise<void> {
-  const localSkus = readLocalWishlistSkus();
-  const wishlist = await syncCustomerWishlist(localSkus);
-  window.localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(wishlist.skus));
+/** Backfill address book from the latest order when guest checkout was not persisted. */
+async function syncGuestCheckoutAddressAfterLogin(): Promise<void> {
+  await syncCustomerAddressFromLatestOrder();
 }
 
 /**
  * Post-login side effects. Login must succeed even when these fail —
  * callers should not await-and-throw on this.
  */
-export async function runPostLoginSync(): Promise<{ cartMerged: boolean; wishlistPushed: boolean }> {
-  const [cartResult, wishlistResult] = await Promise.allSettled([
+export async function runPostLoginSync(): Promise<{
+  cartMerged: boolean;
+  wishlistPushed: boolean;
+  addressSynced: boolean;
+}> {
+  const [cartResult, wishlistResult, addressResult] = await Promise.allSettled([
     mergeGuestCart(),
     syncWishlistAfterLogin(),
+    syncGuestCheckoutAddressAfterLogin(),
   ]);
 
   return {
     cartMerged: cartResult.status === "fulfilled",
     wishlistPushed: wishlistResult.status === "fulfilled",
+    addressSynced: addressResult.status === "fulfilled",
   };
 }

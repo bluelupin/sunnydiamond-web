@@ -21,6 +21,7 @@ import { resolveProfileOrderTimelineSteps } from "../utils/orderDeliveryTimeline
 import { mapSunnyTrackingToTimeline } from "../utils/orderFlowSteps.mapper";
 import { ProfileOrderTrackTimeline } from "./ProfileOrderTrackTimeline";
 import { ProfileStatusBadge } from "./profileUi";
+import FormFieldError from "@/shared/ui/FormFieldError";
 
 type ProfileOrderTrackModalProps = {
   open: boolean;
@@ -80,7 +81,7 @@ function ProfileOrderTrackModalBody({
             className="text-darkblack"
             aria-label={content.copyOrderIdLabel}
           >
-            <CopyIcon className="size-5" />
+            <CopyIcon className="size-4" />
           </button>
         </span>
       </div>
@@ -97,11 +98,7 @@ function ProfileOrderTrackModalBody({
         <ProfileOrderTrackTimeline steps={timelineSteps} />
       ) : null}
 
-      {error ? (
-        <p className="font-gill text-sm font-light leading-110 text-red-700" role="alert">
-          {error}
-        </p>
-      ) : null}
+      <FormFieldError message={error ?? undefined} />
 
       {trackedOrder && trackedOrder.shipments.length > 0 ? (
         <div className="border-t border-neutral300 pt-4">
@@ -165,7 +162,7 @@ export function ProfileOrderTrackModal({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!open) {
+    if (!open || order.isDummyPreview) {
       return;
     }
 
@@ -197,7 +194,7 @@ export function ProfileOrderTrackModal({
       cancelled = true;
       controller.abort();
     };
-  }, [open, order.number]);
+  }, [open, order.isDummyPreview, order.number]);
 
   const onTrackedStatusChangeRef = useRef(onTrackedStatusChange);
   onTrackedStatusChangeRef.current = onTrackedStatusChange;
@@ -267,7 +264,7 @@ export function ProfileOrderTrackModal({
           <div className="shrink-0 px-4 pt-6">
             <div className="flex flex-col gap-6">
               <div className="flex items-center justify-between gap-4">
-                <SheetTitle className="font-larken text-2xl font-light leading-110 text-darkblack">
+                <SheetTitle className="font-larken lg:text-32 text-2xl font-light leading-110 text-darkblack">
                   {trackDialog.title}
                 </SheetTitle>
                 <button
@@ -283,7 +280,7 @@ export function ProfileOrderTrackModal({
             </div>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-6">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-6 DrawerVerticleScrollbar">
             <ProfileOrderTrackModalBody {...bodyProps} />
           </div>
         </SheetContent>
@@ -300,7 +297,7 @@ export function ProfileOrderTrackModal({
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between gap-4">
             <DialogTitle className="font-larken font-light leading-110 text-darkblack">
-              <span className="text-32">{trackDialog.title}</span>
+              <span className="lg:text-32 text-2xl">{trackDialog.title}</span>
             </DialogTitle>
             <button
               type="button"

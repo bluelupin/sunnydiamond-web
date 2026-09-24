@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { CartMetaRow, CartPrimaryLink } from "@/features/cart/components/CartFlowUi";
 import { formatOrderDate, formatOrderTotal, formatAddressLines } from "@/features/account/utils/formatAccountData";
 import { buildOrderDeliveryTimelineFromStatus } from "@/features/account/utils/orderDeliveryTimeline.utils";
@@ -135,7 +137,12 @@ const OrderDetailView = ({
           >
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <p className="font-gill text-base font-normal leading-110 text-darkblack">
+                <p
+                  className={cn(
+                    "font-gill text-base font-normal leading-110 text-darkblack",
+                    productNameDisplayClassName,
+                  )}
+                >
                   {item.productUrlKey ? (
                     <Link href={`/product/${item.productUrlKey}`} className="hover:underline">
                       {item.productName}

@@ -1,10 +1,8 @@
 import { aboutHandcraftedTileLayout } from "@/features/about/data/content";
+import { normalizeCanonicalPath } from "@/shared/lib/seo/normalizeCanonicalPath";
 import { WORLD_OF_SUNNY_PATH } from "@/shared/utils/navigation";
-import {
-  extractStrapiImage,
-  resolveCmsAltText,
-  resolveCmsMediaUrl,
-} from "@/shared/utils/strapiMedia";
+import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
+import { extractStrapiImage, resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import type {
   NormalizedAboutCraft,
   NormalizedAboutHero,
@@ -44,6 +42,10 @@ const cleanText = (value?: string | null): string | undefined => {
 const isUsableDescription = (value?: string): boolean =>
   Boolean(value && value.toLowerCase() !== "to be added");
 
+/** CMS sections render only when isActive is explicitly true. */
+const isAboutSectionActive = (isActive?: boolean | null): boolean =>
+  isActive === true;
+
 const coerceComponentArray = <T>(value: unknown): T[] => {
   if (!value) return [];
   if (Array.isArray(value)) return value as T[];
@@ -74,22 +76,13 @@ const mapResponsiveImage = (
 
   if (!desktopUrl && !mobileUrl) return null;
 
-  const resolvedDesktop = desktopUrl ?? mobileUrl!;
-  const resolvedMobile = mobileUrl ?? desktopUrl!;
-
-  const alt =
-    resolveCmsAltText(media.desktopImage) ??
-    resolveCmsAltText(media.mobileImage) ??
-    cleanText(desktopFile?.alternativeText) ??
-    cleanText(mobileFile?.alternativeText) ??
-    cleanText(media.altText) ??
-    cleanText(media.caption) ??
-    "";
+  const desktopAlt = resolveCmsAltText(media.desktopImage) ?? "";
+  const mobileAlt = resolveCmsAltText(media.mobileImage) ?? "";
 
   return {
-    desktopUrl: resolvedDesktop,
-    mobileUrl: resolvedMobile,
-    alt,
+    desktopUrl: desktopUrl ?? mobileUrl!,
+    mobileUrl: mobileUrl ?? desktopUrl!,
+    alt: desktopAlt,
     width: desktopFile?.width ?? mobileFile?.width ?? undefined,
     height: desktopFile?.height ?? mobileFile?.height ?? undefined,
   };
@@ -99,10 +92,9 @@ const mapSeo = (seo?: StrapiAboutSeo | null): NormalizedAboutSeo | null => {
   const metaTitle = cleanText(seo?.metaTitle);
   const metaDescription = cleanText(seo?.metaDescription);
   const rawCanonical = cleanText(seo?.canonicalUrl);
+  const normalizedCanonical = normalizeCanonicalPath(rawCanonical, WORLD_OF_SUNNY_PATH);
   const canonicalPath =
-    !rawCanonical || rawCanonical.replace(/\/$/, "") === "/about"
-      ? WORLD_OF_SUNNY_PATH
-      : rawCanonical;
+    normalizedCanonical === "/about" ? WORLD_OF_SUNNY_PATH : normalizedCanonical;
 
   if (!metaTitle && !metaDescription) return null;
 
@@ -115,14 +107,18 @@ const mapSeo = (seo?: StrapiAboutSeo | null): NormalizedAboutSeo | null => {
 };
 
 const mapHero = (hero?: StrapiAboutHero | null): NormalizedAboutHero | null => {
-  if (!hero || hero.isActive === false) return null;
+  if (!hero || !isAboutSectionActive(hero.isActive)) return null;
 
-  const title = cleanText(hero.title) ?? cleanText(hero.eyebrow);
+  const title = cleanText(hero.title);
+  if (!title) return null;
+
   const image = mapResponsiveImage(hero.image);
+  const videoUrl = getCmsAssetUrl(
+    resolveCmsMediaUrl(hero.heroVideo?.heroVideo) ??
+      resolveCmsMediaUrl(hero.videoBackground?.heroVideo),
+  );
 
-  if (!title || !image) return null;
-
-  return { title, image };
+  return { title, image, videoUrl };
 };
 
 const mapFeatureSlide = (
@@ -131,10 +127,25 @@ const mapFeatureSlide = (
   if (!slide) return null;
 
   const heading = cleanText(slide.heading);
-  const body = cleanText(slide.body) ?? cleanText(slide.description);
+  const body = cleanText(slide.body);
   const image = mapResponsiveImage(slide.image);
 
-  if (!heading || !body || !image) return null;
+  if (!heading || !body) return null;
+  if (!isUsableDescription(body)) return null;
+
+  return { heading, body, image };
+};
+
+const mapBrillianceLegacySection = (
+  section: NonNullable<StrapiAboutPageEntity["brillianceSection"]>,
+): NormalizedBrillianceSection | null => {
+  const heading = cleanText(section.heading);
+  const body = cleanText(section.description);
+  const image =
+    mapResponsiveImage(section.image) ??
+    mapResponsiveImage(section.pinnedImage);
+
+  if (!heading || !body) return null;
   if (!isUsableDescription(body)) return null;
 
   return { heading, body, image };
@@ -143,7 +154,7 @@ const mapFeatureSlide = (
 const mapBrillianceSection = (
   section: StrapiAboutPageEntity["brillianceSection"],
 ): NormalizedBrillianceSection | null => {
-  if (!section) return null;
+  if (!section || !isAboutSectionActive(section.isActive)) return null;
 
   const slides = coerceComponentArray<StrapiAboutFeatureSlide>(section.featureSlide);
   for (const slide of slides) {
@@ -151,7 +162,7 @@ const mapBrillianceSection = (
     if (mapped) return mapped;
   }
 
-  return null;
+  return mapBrillianceLegacySection(section);
 };
 
 const mapLegacyBlock = (
@@ -159,22 +170,23 @@ const mapLegacyBlock = (
 ): NormalizedLegacyGalleryItem | null => {
   if (!block) return null;
 
+  const description = cleanText(block.description);
   const image = mapResponsiveImage(block.image);
-  if (!image) return null;
+  const caption = cleanText(block.caption);
 
-  const caption = cleanText(block.image?.caption);
+  if (!description && !image) return null;
 
   return {
-    description: cleanText(block.description),
+    description,
     caption,
-    image,
+    image: image ?? null,
   };
 };
 
 const mapLegacy = (
   section: StrapiAboutPageEntity["legacySection"],
 ): NormalizedAboutLegacy | null => {
-  if (!section) return null;
+  if (!section || !isAboutSectionActive(section.isActive)) return null;
 
   const title = cleanText(section.heading);
   if (!title) return null;
@@ -188,11 +200,7 @@ const mapLegacy = (
   const storyDescription = cleanText(gallery[0]?.description);
   const story = isUsableDescription(storyDescription) ? storyDescription : undefined;
 
-  const galleryWithCaptions = gallery.map((item, index) =>
-    index === 0 ? item : { ...item, caption: item.description },
-  );
-
-  return { title, story, gallery: galleryWithCaptions };
+  return { title, story, gallery };
 };
 
 const mapTeamMember = (
@@ -204,19 +212,19 @@ const mapTeamMember = (
   const role = cleanText(member.role);
   const image = mapResponsiveImage(member.image);
 
-  if (!name || !image) return null;
+  if (!name) return null;
 
   return {
     name,
     role: role && isUsableDescription(role) ? role : "",
-    image,
+    image: image ?? null,
   };
 };
 
 const mapTeam = (
   section: StrapiAboutPageEntity["teamSection"],
 ): NormalizedAboutTeam | null => {
-  if (!section) return null;
+  if (!section || !isAboutSectionActive(section.isActive)) return null;
 
   const title = cleanText(section.heading);
   if (!title) return null;
@@ -282,7 +290,7 @@ const mapCraftCards = (
         return Boolean(card.title);
       }
 
-      return Boolean(card.imageUrl);
+      return card.type === "image";
     });
 };
 
@@ -290,31 +298,28 @@ const mapCraft = (
   craftSection?: StrapiAboutCraftSection | null,
   mosaicSection?: StrapiAboutCraftMosaicSection | null,
 ): NormalizedAboutCraft | null => {
-  if (!craftSection) return null;
+  if (!craftSection || !isAboutSectionActive(craftSection.isActive)) return null;
 
   const title = cleanText(craftSection.heading);
   if (!title) return null;
 
-  const videoUrl = resolveCmsMediaUrl(craftSection.videoUrl?.heroVideo);
-  const centerImage = mapResponsiveImage(craftSection.backgroundImage);
-  const posterUrl =
-    centerImage?.desktopUrl ??
-    resolveCmsMediaUrl(craftSection.backgroundImage?.desktopImage);
+  const image = mapResponsiveImage(craftSection.backgroundImage);
+  const videoUrl = getCmsAssetUrl(
+    resolveCmsMediaUrl(craftSection.videoUrl?.heroVideo),
+  );
 
-  const cards = mapCraftCards(mosaicSection);
-
-  if (!videoUrl && !centerImage && cards.length === 0) return null;
+  const cards = isAboutSectionActive(mosaicSection?.isActive)
+    ? mapCraftCards(mosaicSection)
+    : [];
 
   return {
     title,
+    image,
     videoUrl,
-    posterUrl,
-    posterAlt: centerImage?.alt || "",
     overlayOpacity:
       typeof craftSection.overlayOpacity === "number"
         ? craftSection.overlayOpacity
         : 0.3,
-    centerImage: centerImage ?? undefined,
     cards,
   };
 };
@@ -322,14 +327,12 @@ const mapCraft = (
 const mapBrandTagline = (
   section: StrapiAboutPageEntity["brandTaglineSection"],
 ): NormalizedBrandTagline | null => {
-  if (!section) return null;
+  if (!section || !isAboutSectionActive(section.isActive)) return null;
 
   const quote = cleanText(section.tagline);
   if (!quote) return null;
 
-  const iconUrl =
-    resolveCmsMediaUrl(section.icon?.desktopImage) ??
-    resolveCmsMediaUrl(section.icon?.mobileImage);
+  const iconUrl = resolveCmsMediaUrl(section.icon?.desktopImage);
 
   return {
     quote,
@@ -348,11 +351,8 @@ const mapTrustBadge = (
   if (!label || !icon) return null;
 
   return {
-      label,
-      icon: {
-        ...icon,
-        alt: icon.alt || cleanText(badge.iconAltText) || "",
-      },
+    label,
+    icon,
   };
 };
 
@@ -379,11 +379,8 @@ const mapTimelineMilestone = (
       ? String(yearValue).trim()
       : undefined;
 
-  const title = cleanText(item.title) ?? cleanText(item.heading);
-  const description =
-    cleanText(item.body) ??
-    cleanText(item.description) ??
-    cleanText(item.content);
+  const title = cleanText(item.heading);
+  const description = cleanText(item.body);
 
   if (!year || !title || !description) return null;
   if (!isUsableDescription(description)) return null;
@@ -391,43 +388,23 @@ const mapTimelineMilestone = (
   return { year, title, description };
 };
 
-const sortTimelineMilestones = (
-  milestones: NormalizedTimelineMilestone[],
-): NormalizedTimelineMilestone[] =>
-  [...milestones].sort((a, b) => {
-    const yearA = Number.parseInt(a.year, 10);
-    const yearB = Number.parseInt(b.year, 10);
-
-    if (Number.isFinite(yearA) && Number.isFinite(yearB) && yearA !== yearB) {
-      return yearA - yearB;
-    }
-
-    return a.year.localeCompare(b.year);
-  });
-
 const mapTimeline = (
   section: StrapiAboutPageEntity["timelineSection"],
 ): NormalizedAboutTimeline | null => {
-  if (!section) return null;
+  if (!section || !isAboutSectionActive(section.isActive)) return null;
 
   const backgroundImage = mapResponsiveImage(section.backgroundImage);
-  if (!backgroundImage) return null;
 
-  const rawMilestones =
-    section.timelineMilestone ?? section.milestones ?? [];
-
-  const milestones = sortTimelineMilestones(
-    rawMilestones
-      .map(mapTimelineMilestone)
-      .filter((item): item is NormalizedTimelineMilestone => item !== null),
-  );
+  const milestones = (section.timelineMilestone ?? [])
+    .map(mapTimelineMilestone)
+    .filter((item): item is NormalizedTimelineMilestone => item !== null);
 
   if (milestones.length === 0) return null;
 
   const years = milestones.map((milestone) => milestone.year);
 
   return {
-    backgroundImage,
+    backgroundImage: backgroundImage ?? null,
     milestones,
     years,
     defaultYear: years[0],

@@ -17,10 +17,15 @@ import {
 } from "@/shared/constants/appointmentForm";
 import { profileDetailsContent } from "../data/profileContent";
 import { formatCustomerFullName } from "../utils/formatAccountData";
+import {
+  isProfileEmailVerified,
+  persistProfileEmailVerification,
+} from "../utils/profileEmailVerification";
 import { useDeleteAccount } from "../hooks/useDeleteAccount";
 import { ProfileDeleteAccountDialog } from "./ProfileDeleteAccountDialog";
 import { ProfileDeleteAccountReasonDialog } from "./ProfileDeleteAccountReasonDialog";
 import { ProfileDeleteAccountSuccessDialog } from "./ProfileDeleteAccountSuccessDialog";
+import { ProfileEmailVerifiedBadge } from "./profileUi";
 
 type ProfileDetailsSectionProps = {
   customer: AuthCustomer;
@@ -68,13 +73,21 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
 
   const initialFullName = formatCustomerFullName(customer.firstname, customer.lastname);
   const initialEmail = customer.email ?? "";
+  const [isEmailVerified, setIsEmailVerified] = useState(() =>
+    isProfileEmailVerified(customer.id, initialEmail),
+  );
 
   const [fullName, setFullName] = useState(initialFullName);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     setFullName(initialFullName);
   }, [initialFullName]);
+
+  useEffect(() => {
+    setIsEmailVerified(isProfileEmailVerified(customer.id, initialEmail));
+  }, [customer.id, initialEmail]);
 
   const phoneDisplay = useMemo(() => {
     if (!contact?.phone) return "";
@@ -86,6 +99,15 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
 
   const handleCancel = () => {
     setFullName(initialFullName);
+  };
+
+  const handleLogout = () => {
+    if (isLoggingOut) {
+      return;
+    }
+
+    setIsLoggingOut(true);
+    void logout();
   };
 
   const handleSave = () => {
@@ -122,6 +144,8 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
 
   const handleVerifyEmail = () => {
     showStatusToast(content.emailVerifiedToastMessage);
+    persistProfileEmailVerification(customer.id, initialEmail);
+    setIsEmailVerified(true);
   };
 
   const handleProceedToDelete = () => {
@@ -194,9 +218,13 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
                   readOnly
                   className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none"
                 />
-                <DetailTextLink onClick={handleVerifyEmail} className="shrink-0 text-sm uppercase">
-                  {content.verifyLabel}
-                </DetailTextLink>
+                {isEmailVerified ? (
+                  <ProfileEmailVerifiedBadge label={content.verifiedLabel} />
+                ) : (
+                  <DetailTextLink onClick={handleVerifyEmail} className="shrink-0 text-sm uppercase">
+                    {content.verifyLabel}
+                  </DetailTextLink>
+                )}
               </div>
             </div>
 
@@ -209,7 +237,7 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
                   aria-label={content.phoneInfo}
                   title={content.phoneInfo}
                 >
-                  <InformationIcon className="size-6 shrink-0 text-darkblack" aria-hidden />
+                  <InformationIcon className="w-[18px] h-[18px] shrink-0 text-darkblack" aria-hidden />
                 </button>
               </div>
               <input
@@ -285,10 +313,11 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
           </div>
           <DetailDarkButton
             type="button"
-            onClick={() => void logout()}
-            className="w-full shrink-0 lg:w-auto lg:min-w-[160px]"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className="w-full shrink-0 lg:w-auto lg:min-w-[160px] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {content.logout.ctaLabel}
+            {isLoggingOut ? content.logout.loggingOutLabel : content.logout.ctaLabel}
           </DetailDarkButton>
         </div>
       </div>

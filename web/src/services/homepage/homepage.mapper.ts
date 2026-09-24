@@ -7,11 +7,12 @@ import type {
   GiftingBanner,
   HomepageShoppingBlocksData,
 } from "@/types/homepage/categoryNavigation";
-import type { DiamondsForEveryoneSectionData } from "@/types/homepage/diamondsForEveryoneSection";
+import type { DiamondsForEveryoneSectionData, SavingsPlanStep } from "@/types/homepage/diamondsForEveryoneSection";
 import type {
   DiamondSourcingSectionData,
   HomepageEditorialBlocksData,
   ShowroomSectionData,
+  ShowroomSectionLocation,
   SunnyPromiseSectionData,
 } from "@/types/homepage/editorialBlocks";
 import type { CraftingBrillianceSectionData } from "@/types/homepage/craftingBrillianceSection";
@@ -20,6 +21,7 @@ import type { FeaturedProductsSection } from "@/types/homepage/featuredProducts"
 import type { OccasionCard, OccasionSection } from "@/types/homepage/occasionSection";
 import { slugifyOccasionTitle } from "@/features/jewellery-product/utils/occasionListing";
 import { resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { resolveResponsiveCmsImage } from "@/shared/utils/responsiveCmsImage";
 import type { TrustBadge } from "@/types/homepage/trustBadges";
 import type { HomepageSeo } from "@/types/homepage/seo";
 import type {
@@ -37,8 +39,10 @@ import type {
   StrapiOccasionSection,
   StrapiOccasionCard,
   StrapiResponsiveImageBlock,
+  StrapiHomepageShowroom,
   StrapiShowroomSection,
   StrapiCraftsmanshipStep,
+  StrapiSavingsPlanStep,
   StrapiTextSection,
   StrapiTrustBadge,
 } from "./homepage.strapi.types";
@@ -51,7 +55,7 @@ export type NormalizedHomepageHero = {
   isActive?: boolean;
   primaryCta?: CategoryNavigationCta;
   secondaryCta?: CategoryNavigationCta;
-  image?: CategoryNavigationImage & { altText?: string };
+  image?: CategoryNavigationImage;
   videoUrl?: string;
 };
 
@@ -113,19 +117,18 @@ function mapCta(cta?: StrapiHomepageCta | null): CategoryNavigationCta | undefin
 
 function mapResponsiveImage(
   block?: StrapiResponsiveImageBlock | null,
-): (CategoryNavigationImage & { altText?: string }) | undefined {
+): CategoryNavigationImage | undefined {
   if (!block) return undefined;
 
   return {
     desktopImage: block.desktopImage as CategoryNavigationImage["desktopImage"],
     mobileImage: block.mobileImage as CategoryNavigationImage["mobileImage"],
-    altText: cleanText(block.altText),
   };
 }
 
 function pickResponsiveImage(
   ...candidates: Array<StrapiResponsiveImageBlock | null | undefined>
-): (CategoryNavigationImage & { altText?: string }) | undefined {
+): CategoryNavigationImage | undefined {
   for (const candidate of candidates) {
     const mapped = mapResponsiveImage(candidate);
     if (mapped?.desktopImage || mapped?.mobileImage) return mapped;
@@ -201,25 +204,12 @@ function mapFeaturedCollection(
   // New shape: collection-showcase-section with editorial-collection relations
   const collections = Array.isArray(raw.collections) ? raw.collections : [];
   if (collections.length > 0) {
-    const activeCollections = collections
-      .filter((item) => item?.isActive !== false)
-      .slice()
-      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+    const activeCollections = collections.filter((item) => item?.isActive !== false);
 
-    const selected =
-      activeCollections.find((item) => cleanText(item.slug)?.toLowerCase() === "alankara") ??
-      activeCollections[0] ??
-      collections.find((item) => cleanText(item.slug)?.toLowerCase() === "alankara") ??
-      collections[0];
+    const selected = activeCollections[0] ?? collections[0];
 
     if (!selected) return null;
     if (selected.isActive === false) return null;
-
-    const productSkus = (selected.productSkus ?? [])
-      .map((item) => cleanText(item?.sku))
-      .filter((sku): sku is string => Boolean(sku));
-
-    const featuredProductSku = cleanText(selected.featuredProductSku);
 
     return {
       id: selected.id ?? raw.id,
@@ -231,8 +221,6 @@ function mapFeaturedCollection(
       primaryImage: selected.backgroundImage as FeaturedCollectionSection["primaryImage"],
       backgroundImage: selected.backgroundImage as FeaturedCollectionSection["backgroundImage"],
       image: selected.backgroundImage as FeaturedCollectionSection["image"],
-      productSkus,
-      featuredProductSku: featuredProductSku ?? null,
       products: null,
     };
   }
@@ -253,8 +241,6 @@ function mapFeaturedCollection(
     products: Array.isArray(raw.products)
       ? (raw.products as FeaturedCollectionSection["products"])
       : null,
-    productSkus: null,
-    featuredProductSku: null,
   };
 }
 
@@ -291,6 +277,11 @@ function mapGiftingBanner(raw?: StrapiGiftingBanner | null): GiftingBanner | nul
     subtitle: cleanText(raw.subtitle),
     mobileDescription: cleanText(raw.mobileDescription),
     mobileSubtitle: cleanText(raw.mobileSubtitle),
+    filterSlug: cleanText(raw.filterSlug),
+    filterType:
+      raw.filterType === "collection" || raw.filterType === "occasion"
+        ? raw.filterType
+        : undefined,
     isActive,
     cta: mapCta(raw.cta),
     primaryCta: mapCta(raw.primaryCta ?? raw.cta),
@@ -360,8 +351,40 @@ function mapTextSectionToBespoke(raw?: StrapiTextSection | null): BespokeForYouS
     isActive,
     primaryCta: mapCta(raw.primaryCta ?? raw.cta),
     secondaryCta: mapCta(raw.secondaryCta),
-    image: pickResponsiveImage(raw.image) as BespokeForYouSectionData["image"],
+    image: pickResponsiveImage(raw.backgroundImage, raw.image) as BespokeForYouSectionData["image"],
   };
+}
+
+function parseSavingsPlanStepNumber(label: string | undefined, index: number): number {
+  if (!label) return index + 1;
+  const digits = label.replace(/\D/g, "");
+  const parsed = Number.parseInt(digits, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : index + 1;
+}
+
+function mapDiamondsForEveryoneSteps(
+  rawSteps?: StrapiSavingsPlanStep[] | null,
+): SavingsPlanStep[] {
+  if (!Array.isArray(rawSteps)) return [];
+
+  const steps: SavingsPlanStep[] = [];
+
+  rawSteps.forEach((step, index) => {
+    if (step?.isActive === false) return;
+
+    const description = cleanText(step.description);
+    if (!description) return;
+
+    steps.push({
+      id: step.id,
+      description,
+      highlightedText: cleanText(step.highlightedText),
+      stepNumber: parseSavingsPlanStepNumber(cleanText(step.label), index),
+      isActive: step.isActive ?? true,
+    });
+  });
+
+  return steps;
 }
 
 function mapTextSectionToDiamondsForEveryone(
@@ -380,9 +403,7 @@ function mapTextSectionToDiamondsForEveryone(
     description: cleanText(raw.description),
     isActive,
     backgroundImage: pickResponsiveImage(raw.backgroundImage) as DiamondsForEveryoneSectionData["backgroundImage"],
-    steps: Array.isArray(raw.steps)
-      ? (raw.steps as DiamondsForEveryoneSectionData["steps"])
-      : undefined,
+    steps: mapDiamondsForEveryoneSteps(raw.steps as StrapiSavingsPlanStep[] | null | undefined),
     cta: mapCta(raw.cta ?? raw.primaryCta),
   };
 }
@@ -416,6 +437,7 @@ function mapDiamondSourcing(raw?: StrapiTextSection | null): DiamondSourcingSect
     isActive,
     image: pickResponsiveImage(raw.cutoutImage, raw.image) as DiamondSourcingSectionData["image"],
     gifOrImage: pickResponsiveImage(raw.gifOrImage) as DiamondSourcingSectionData["gifOrImage"],
+    backgroundImage: pickResponsiveImage(raw.backgroundImage) as DiamondSourcingSectionData["backgroundImage"],
   };
 }
 
@@ -424,14 +446,21 @@ function mapCraftsmanshipSteps(rawSteps?: StrapiCraftsmanshipStep[] | null): Cra
 
   return rawSteps
     .filter((step) => step?.isActive !== false)
-    .map((step, index) => ({
-      id: step.id,
-      title: cleanText(step.title),
-      description: cleanText(step.description),
-      sortOrder: typeof step.sortOrder === "number" ? step.sortOrder : undefined,
-      number: String(index + 1).padStart(2, "0"),
-      isActive: step.isActive ?? true,
-    }));
+    .map((step, index) => {
+      const icon = resolveResponsiveCmsImage(
+        (step.icon ?? step.image) as CategoryNavigationImage | null | undefined,
+      );
+
+      return {
+        id: step.id,
+        title: cleanText(step.title),
+        description: cleanText(step.description),
+        number: String(index + 1).padStart(2, "0"),
+        isActive: step.isActive ?? true,
+        iconUrl: icon.desktopUrl || icon.mobileUrl,
+        iconAlt: icon.desktopAlt || undefined,
+      };
+    });
 }
 
 function mapCraftsmanshipSection(
@@ -488,10 +517,13 @@ export function mapOccasionCard(raw?: StrapiOccasionCard | null): OccasionCard |
     title,
     description: cleanText(raw.description),
     subtitle: cleanText(raw.subtitle),
-    filterSlug: cleanText(raw.filterSlug),
-    slug: cleanText(raw.filterSlug) ?? cleanText(raw.slug) ?? slugifyOccasionTitle(title),
+    slug:
+      cleanText(raw.cta?.url) ??
+      cleanText(raw.slug) ??
+      slugifyOccasionTitle(title),
     sortOrder: raw.sortOrder ?? undefined,
     isActive,
+    ctaLabel: cleanText(raw.cta?.label),
     cta: mapCta(raw.cta),
     image: pickResponsiveImage(raw.image),
   };
@@ -504,8 +536,7 @@ export function mapOccasionCards(
 
   return items
     .map(mapOccasionCard)
-    .filter((card): card is OccasionCard => card !== null)
-    .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0));
+    .filter((card): card is OccasionCard => card !== null);
 }
 
 function mapCraftingBrillianceSection(
@@ -529,20 +560,61 @@ function mapCraftingBrillianceSection(
   };
 }
 
+const sortShowroomsByOrder = <T extends { sortOrder?: number | null }>(items: T[]): T[] =>
+  [...items].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+
+/** Aligns with store-locator `mapShowroom` — CMS showrooms use `city` as the display name. */
+function mapShowroomSectionLocation(
+  showroom?: StrapiHomepageShowroom | null,
+): ShowroomSectionLocation | null {
+  if (!showroom || resolveSectionActive(showroom.isActive, showroom.showField) === false) {
+    return null;
+  }
+
+  const name = cleanText(showroom.city) ?? cleanText(showroom.name);
+  const address = cleanText(showroom.address);
+  const mapUrl = cleanText(showroom.mapUrl) ?? cleanText(showroom.directionsUrl);
+
+  if (!name || !address || !mapUrl) {
+    return null;
+  }
+
+  const image = pickResponsiveImage(showroom.image);
+  const id = typeof showroom.id === "number" ? showroom.id : undefined;
+
+  return {
+    ...(id != null ? { id } : {}),
+    documentId: cleanText(showroom.documentId),
+    name,
+    city: cleanText(showroom.city),
+    address,
+    phone: cleanText(showroom.phone),
+    mapUrl,
+    directionsUrl: mapUrl,
+    sortOrder: showroom.sortOrder ?? undefined,
+    isActive: true,
+    ...(image ? { image } : {}),
+  };
+}
+
 function mapShowroomSection(raw?: StrapiShowroomSection | null): ShowroomSectionData | null {
   if (!raw) return null;
 
   const isActive = resolveSectionActive(raw.isActive, raw.showField);
   if (isActive === false) return null;
 
+  const showrooms = sortShowroomsByOrder(
+    (Array.isArray(raw.showrooms) ? raw.showrooms : [])
+      .map(mapShowroomSectionLocation)
+      .filter((item): item is ShowroomSectionLocation => item != null),
+  );
+
   return {
     id: raw.id,
     sectionTitle: cleanText(raw.sectionTitle),
     description: cleanText(raw.description),
     isActive,
-    showrooms: Array.isArray(raw.showrooms)
-      ? (raw.showrooms as ShowroomSectionData["showrooms"])
-      : null,
+    showrooms: showrooms.length > 0 ? showrooms : null,
   };
 }
 

@@ -254,6 +254,27 @@ export const MAGENTO_CUSTOMER_ORDERS_QUERY = `
   }
 ` as const;
 
+export const MAGENTO_CUSTOMER_LATEST_ORDER_SHIPPING_QUERY = `
+  query MagentoCustomerLatestOrderShipping {
+    customer {
+      orders(pageSize: 1, currentPage: 1) {
+        items {
+          number
+          shipping_address {
+            firstname
+            lastname
+            street
+            city
+            region
+            postcode
+            telephone
+          }
+        }
+      }
+    }
+  }
+` as const;
+
 export const MAGENTO_CUSTOMER_ADDRESSES_QUERY = `
   query MagentoCustomerAddresses {
     customer {
@@ -499,6 +520,15 @@ export const SUNNY_DELETE_CUSTOMER_MUTATION = `
   mutation SunnyDeleteCustomer($input: SunnyDeleteCustomerInput) {
     sunnyDeleteCustomer(input: $input) {
       success
+    }
+  }
+` as const;
+
+export const SUNNY_SUBSCRIBE_STOCK_ALERT_MUTATION = `
+  mutation SunnySubscribeStockAlert($sku: String!) {
+    sunnySubscribeStockAlert(sku: $sku) {
+      success
+      message
     }
   }
 ` as const;

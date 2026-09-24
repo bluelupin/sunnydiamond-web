@@ -1,9 +1,11 @@
 import Link from "next/link";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
-import { Check } from "lucide-react";
-import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
+import GiftingPanelCheckbox from "@/shared/ui/GiftingPanelCheckbox";
 import { cn } from "@/shared/utils/cn";
+
+export { CartGiftBadge } from "./CartGiftBadge";
+export { CartMoreItemsNote } from "./CartMoreItemsNote";
 
 const cartButtonSizing = "h-14 px-7 py-5";
 
@@ -52,27 +54,6 @@ export const CartMetaRow = ({
   );
 };
 
-type CartGiftBadgeProps = {
-  variant?: "cart" | "drawer" | "checkout";
-  className?: string;
-};
-
-export const CartGiftBadge = ({ variant = "cart", className }: CartGiftBadgeProps) => (
-  <span
-    className={cn(
-      "inline-flex shrink-0 items-center justify-center font-gill text-darkblack",
-      variant === "cart"
-        ? "h-[22px] w-[42px] bg-[#D9B0CB] text-sm leading-110"
-        : variant === "checkout"
-          ? "bg-[#D9B0CB] px-3 py-1 text-sm font-normal leading-110"
-          : "bg-[#D9B0CB] text-xs font-light leading-110 tracking-[0.01em]",
-      className,
-    )}
-  >
-    Gift
-  </span>
-);
-
 type CartGiftCheckboxProps = {
   checked: boolean;
   onChange: (checked: boolean) => void;
@@ -86,39 +67,12 @@ export const CartGiftCheckbox = ({
   className,
   disabled = false,
 }: CartGiftCheckboxProps) => (
-  <span
-    className={cn(
-      "relative inline-flex size-4 shrink-0 items-center justify-center lg:size-5",
-      disabled && "cursor-not-allowed opacity-60",
-      className,
-    )}
-  >
-    <input
-      type="checkbox"
-      checked={checked}
-      disabled={disabled}
-      onChange={(event) => onChange(event.target.checked)}
-      className="absolute inset-0 z-10 m-0 cursor-pointer opacity-0 disabled:cursor-not-allowed"
-      aria-label="Mark this as a gift"
-    />
-    <span
-      className={cn(
-        "flex items-center justify-center transition-colors",
-        checked
-          ? "size-4 bg-linkGold lg:size-5"
-          : "size-4 border-[0.8px] border-darkblack bg-white lg:size-5",
-      )}
-      aria-hidden
-    >
-      <Check
-        className={cn(
-          "size-3 transition-opacity",
-          checked ? "text-white opacity-100" : "text-darkblack opacity-0",
-        )}
-        strokeWidth={2.5}
-      />
-    </span>
-  </span>
+  <GiftingPanelCheckbox
+    checked={checked}
+    onChange={onChange}
+    disabled={disabled}
+    className={className}
+  />
 );
 
 type CartTextLinkProps = {
@@ -137,6 +91,19 @@ export const CartTextLink = ({
   disabled = false,
 }: CartTextLinkProps) => (
   <DetailTextLink href={href} onClick={onClick} className={className} disabled={disabled}>
+    {children}
+  </DetailTextLink>
+);
+
+/** Cart item actions — standard tertiary text link (DetailTextLink). */
+export const CartActionLink = ({
+  children,
+  href,
+  onClick,
+  className,
+  disabled = false,
+}: CartTextLinkProps) => (
+  <DetailTextLink href={href} onClick={onClick} disabled={disabled} className={className}>
     {children}
   </DetailTextLink>
 );
@@ -232,15 +199,51 @@ export const CartOutlineLink = ({ children, href, className, onClick }: CartOutl
   </Link>
 );
 
-export const CartSuccessCheck = () => (
-  <span
-    className="flex size-10 shrink-0 items-center justify-center text-[#47CB6C]"
-    aria-hidden
-  >
-    <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M14.9414 20.9414L18.9414 24.9414L26.9414 16.9414M40.9414 20.9414C40.9414 31.9871 31.9871 40.9414 20.9414 40.9414C9.89571 40.9414 0.941406 31.9871 0.941406 20.9414C0.941406 9.89571 9.89571 0.941406 20.9414 0.941406C31.9871 0.941406 40.9414 9.89571 40.9414 20.9414Z" stroke="currentColor" strokeWidth="1.88235" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  </span>
+type CartSuccessCheckProps = {
+  /** Figma bag drawer (2574:58792): 64px; default checkout/gift flows: 40px */
+  size?: "sm" | "lg";
+};
+
+export const CartSuccessCheck = ({ size = "sm" }: CartSuccessCheckProps) => {
+  const isLarge = size === "lg";
+
+  return (
+    <span
+      className={cn(
+        "flex shrink-0 items-center justify-center text-[#47CB6C]",
+        isLarge ? "size-16" : "size-10",
+      )}
+      aria-hidden
+    >
+      <svg
+        width={isLarge ? 64 : 42}
+        height={isLarge ? 64 : 42}
+        viewBox="0 0 42 42"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M14.9414 20.9414L18.9414 24.9414L26.9414 16.9414M40.9414 20.9414C40.9414 31.9871 31.9871 40.9414 20.9414 40.9414C9.89571 40.9414 0.941406 31.9871 0.941406 20.9414C0.941406 9.89571 9.89571 0.941406 20.9414 0.941406C31.9871 0.941406 40.9414 9.89571 40.9414 20.9414Z"
+          stroke="currentColor"
+          strokeWidth="1.88235"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </span>
+  );
+};
+
+type CartBagDrawerSuccessHeaderProps = {
+  message: string;
+};
+
+/** Figma node 2574:58791 — bag drawer add-to-bag success */
+export const CartBagDrawerSuccessHeader = ({ message }: CartBagDrawerSuccessHeaderProps) => (
+  <div className="flex w-full flex-col items-center gap-4 text-center">
+    <CartSuccessCheck />
+    <p className="m-0 font-gill text-base font-light leading-110 text-darkblack">{message}</p>
+  </div>
 );
 
 type CartQuantityStepperProps = {
@@ -281,19 +284,6 @@ export const CartQuantityStepper = ({
     >
       +
     </button>
-  </div>
-);
-
-type CartMoreItemsNoteProps = {
-  count: number;
-};
-
-export const CartMoreItemsNote = ({ count }: CartMoreItemsNoteProps) => (
-  <div className="flex items-center gap-2 mb-16">
-    <ShoppingBagIcon className="size-6 shrink-0 text-darkblack" />
-    <p className="font-gill text-base font-light leading-110 text-darkblack">
-      Your bag contains {count} more {count === 1 ? "item" : "items"}
-    </p>
   </div>
 );
 

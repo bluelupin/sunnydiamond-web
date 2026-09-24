@@ -1,0 +1,342 @@
+# Project Migration Rules (React/Vite → Next.js)
+
+## Objective
+
+Convert the complete project to the latest stable Next.js with TypeScript while preserving all existing functionality, UI, UX, responsiveness, animations, routing behavior, and business logic.
+
+The migrated application should behave exactly like the original project.
+
+Do NOT redesign, refactor unnecessarily, or change the user experience.
+
+---
+
+# Primary Rule
+
+The migration must be **feature parity** with the existing project.
+
+Everything currently working must continue working after migration.
+
+If any functionality cannot be migrated directly, explain why before making changes.
+
+---
+
+# Migration Strategy
+
+Never migrate the entire project in one step.
+
+Work incrementally.
+
+Complete one feature/module at a time.
+
+Verify each module before proceeding to the next.
+
+---
+
+# Preserve Existing Behavior
+
+Do NOT change:
+
+- UI
+- UX
+- Layout
+- Styling
+- Colors
+- Fonts
+- Responsive behavior
+- Business logic
+- API contracts
+- Validation
+- Animations
+- Navigation flow
+- User interactions
+- Existing component behavior
+
+Pixel-perfect parity is expected.
+
+---
+
+# Next.js Standards
+
+Use:
+
+- Latest stable Next.js
+- App Router
+- TypeScript
+- Server Components where appropriate
+- Client Components only when required
+- next/image
+- next/link
+- Metadata API
+- Route Groups only when necessary
+- Dynamic Imports where beneficial
+
+Avoid deprecated APIs.
+
+---
+
+# Folder Structure
+
+Organize according to Next.js best practices.
+
+Example:
+
+app/
+components/
+features/
+services/
+hooks/
+contexts/
+providers/
+types/
+constants/
+utils/
+styles/
+public/
+
+Do not create unnecessary folders.
+
+---
+
+# Routing Migration
+
+Convert routing carefully.
+
+Preserve all URLs whenever possible.
+
+Replace:
+
+React Router
+
+↓
+
+Next.js App Router
+
+Maintain:
+
+- Nested routes
+- Dynamic routes
+- Route parameters
+- Navigation flow
+- Redirects
+
+---
+
+# Components
+
+Reuse existing components.
+
+Do not rewrite working components unless necessary.
+
+Split oversized components only if it improves maintainability without changing behavior.
+
+---
+
+# State Management
+
+Preserve the existing state management solution.
+
+Do not replace Redux/Zustand/Context/etc. unless explicitly requested.
+
+---
+
+# API Layer
+
+Preserve existing API architecture.
+
+Do not modify request/response contracts.
+
+Keep existing services reusable.
+
+---
+
+# Styling
+
+Preserve styling exactly.
+
+Support:
+
+- Tailwind CSS
+- CSS Modules
+- Styled Components
+- Existing global styles
+
+Do not change spacing, typography, or colors.
+
+---
+
+# Assets
+
+Move static assets to the appropriate Next.js `public/` directory when required.
+
+Update imports safely.
+
+---
+
+# Images
+
+Replace standard image tags with:
+
+next/image
+
+only where appropriate.
+
+Maintain image quality and aspect ratio.
+
+---
+
+# Environment Variables
+
+Convert environment variables correctly.
+
+Expose only public variables using NEXT_PUBLIC_.
+
+Never expose secrets.
+
+---
+
+# Performance
+
+Optimize only when behavior remains identical.
+
+Possible improvements:
+
+- Image optimization
+- Code splitting
+- Lazy loading
+- Dynamic imports
+
+Do not introduce regressions.
+
+---
+
+# Accessibility
+
+Maintain or improve:
+
+- Keyboard navigation
+- Semantic HTML
+- ARIA attributes
+- Focus management
+- Color contrast
+
+---
+
+# SEO
+
+Where applicable:
+
+- Metadata API
+- Open Graph
+- Canonical URLs
+- Sitemap
+- Robots
+
+Without affecting existing pages.
+
+---
+
+# Code Quality
+
+Follow:
+
+- Modular architecture
+- Reusable components
+- Strong TypeScript typing
+- Clean imports
+- Consistent naming
+
+Avoid duplicate code.
+
+---
+
+# Migration Process
+
+For every module:
+
+1. Analyze the current implementation.
+2. Explain the migration approach.
+3. List affected files.
+4. Migrate.
+5. Verify functionality.
+6. Verify UI.
+7. Verify responsiveness.
+8. Verify APIs.
+9. Verify TypeScript.
+10. Continue to the next module.
+
+---
+
+# Validation Checklist
+
+After each migration ensure:
+
+✓ No TypeScript errors
+
+✓ No ESLint errors
+
+✓ No build errors
+
+✓ No hydration issues
+
+✓ No broken imports
+
+✓ No missing assets
+
+✓ No routing issues
+
+✓ No UI regressions
+
+✓ No functionality regressions
+
+✓ No responsiveness issues
+
+✓ Existing APIs still work
+
+---
+
+# Safety Rules
+
+Never:
+
+- Break existing functionality
+- Break UI
+- Break layout
+- Change business logic
+- Remove working code unnecessarily
+- Install unnecessary packages
+- Rename files without reason
+- Modify unrelated modules
+
+---
+
+# Before Every Change
+
+Always explain:
+
+- What will be changed
+- Why it is required
+- Which files are affected
+- Possible risks
+
+Wait for confirmation if a major architectural change is needed.
+
+---
+
+# Final Verification
+
+Before marking migration complete:
+
+- Build succeeds
+- All routes work
+- All pages render correctly
+- APIs function correctly
+- Authentication works
+- Forms work
+- Responsive design matches the original
+- Animations behave the same
+- Performance is acceptable
+- No console errors
+- No hydration errors
+- No broken links
+
+Only after all checks pass should the migration be considered complete.

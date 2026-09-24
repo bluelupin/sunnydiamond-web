@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import type { Product } from "@/features/products/data/products";
 import {
@@ -12,10 +11,10 @@ import {
 import { useAddToBagWithDrawer } from "@/features/cart/hooks/useAddToBagWithDrawer";
 import { useCart } from "@/features/cart/context/CartContext";
 import type { AddToBagPayload } from "@/features/cart/types/cart.types";
-import { ChevronLeft } from "lucide-react";
 import ProductDetailSidebar from "./detail/ProductDetailSidebar";
 import ProductDetailHeroLayout from "./detail/ProductDetailHeroLayout";
 import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
+import type { NormalizedProductDisplayPage } from "@/services/product-display/product-display-page.service";
 import {
   getDefaultMetalColorId,
   getMetalColorOptions,
@@ -28,11 +27,43 @@ import {
 type ProductDetailPageProps = {
   product: Product;
   sizeGuide?: NormalizedSizeGuide | null;
+  /** Server-read MAGENTO_STOCK_ALERT deploy gate for the notify-me action. */
+  stockAlertEnabled?: boolean;
+  productDisplay: NormalizedProductDisplayPage;
 };
 
-const ProductDetailPage = ({ product, sizeGuide = null }: ProductDetailPageProps) => {
+const ProductDetailPage = ({
+  product,
+  sizeGuide = null,
+  stockAlertEnabled = false,
+  productDisplay,
+}: ProductDetailPageProps) => {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const editLineId = searchParams?.get("editLine")?.trim() ?? "";
+  const editLineFromUrl = searchParams?.get("editLine")?.trim() ?? "";
+  const [editStateCleared, setEditStateCleared] = useState(false);
+
+  useEffect(() => {
+    setEditStateCleared(false);
+  }, [editLineFromUrl]);
+
+  const editLineId = editStateCleared ? "" : editLineFromUrl;
+
+  const clearEditLineFromUrl = useCallback(() => {
+    if (!pathname) {
+      return;
+    }
+
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
+    if (!params.has("editLine")) {
+      return;
+    }
+
+    params.delete("editLine");
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }, [pathname, router, searchParams]);
   const purityParam = searchParams?.get("purity")?.trim() ?? "";
   const preferredPurities = useMemo(
     () => parsePreferredMetalPurities(purityParam),
@@ -90,6 +121,8 @@ const ProductDetailPage = ({ product, sizeGuide = null }: ProductDetailPageProps
     // be in local cart state, or Save would add a new item and show the add toast.
     if (editLineId) {
       await updateBagAndOpenDrawer(editLineId, payloadWithOptions);
+      setEditStateCleared(true);
+      clearEditLineFromUrl();
       return;
     }
 
@@ -105,6 +138,8 @@ const ProductDetailPage = ({ product, sizeGuide = null }: ProductDetailPageProps
     preferredPurities,
     onSelectedMetalChange: setSelectedMetal,
     sizeGuide,
+    stockAlertEnabled,
+    productDisplay,
     onAddToBag: handleAddToCart,
     initialRingSize: editingLineItem?.options.ringSize,
     initialEngravingSelection,
@@ -113,16 +148,8 @@ const ProductDetailPage = ({ product, sizeGuide = null }: ProductDetailPageProps
   };
 
   return (
-    <PageContainer className="!px-0 md:!px-8 lg:!px-10 2xl:!px-[60px] pb-16 pt-0 lg:pb-[60px]">
-      <Link
-        href="/jewellery"
-        className="mb-6 hidden items-center gap-1 px-4 font-gill text-sm text-neutral500 transition-colors hover:text-darkMagenta md:inline-flex md:px-0 lg:mb-8"
-      >
-        <ChevronLeft size={16} aria-hidden />
-        Back to Jewellery
-      </Link>
-
-      <ProductDetailSidebar {...sidebarProps}>
+    <PageContainer className="md:mt-6 !px-0 md:!px-8 lg:!px-10 2xl:!px-[60px] pb-16 pt-0 lg:pb-[60px]">
+      <ProductDetailSidebar key={`${product.id}:${editLineId || "new"}`} {...sidebarProps}>
         {({ purchase, details }) => (
           <ProductDetailHeroLayout
             key={selectedMetal || displayProduct.image.toString()}

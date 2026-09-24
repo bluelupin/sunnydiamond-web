@@ -1,48 +1,11 @@
+"use client";
+
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { cn } from "@/shared/utils/cn";
 import type { NormalizedEducationCtaBanner } from "@/services/education/learn-about-diamonds-page.types";
-import { educationDiscoverSpec } from "../data/content";
 import Reveal from "@/shared/Animation/Reveal";
 import EducationDiscoverJourneyCta from "./EducationDiscoverJourneyCta";
-
-const spec = educationDiscoverSpec;
-const stepsSpec = spec.steps;
-
-const StepConnectorLine = ({ className }: { className?: string }) => (
-  <div
-    aria-hidden
-    className={cn(
-      "pointer-events-none absolute top-1/2 w-px -translate-y-1/2 bg-neutral500",
-      className,
-    )}
-    style={{ height: stepsSpec.desktop.lineHeight }}
-  />
-);
-
-const DiscoverSteps = ({ steps }: { steps: string[] }) => (
-  <div className="lg:mb-10 mb-8 w-full items-start gap-4 flex">
-    <div className="relative flex shrink-0 flex-col items-start gap-10">
-      <StepConnectorLine className="left-2" />
-      {steps.map((_, index) => (
-        <div
-          key={index}
-          className="relative z-10 flex h-[26px] w-4 shrink-0 items-center justify-center rounded-full border-[0.4px] border-darkblack bg-white p-1"
-        >
-          <span className="font-gill text-sm font-light leading-none tracking-[0.14px] text-darkblack">
-            {index + 1}
-          </span>
-        </div>
-      ))}
-    </div>
-    <ol className="flex flex-col justify-between self-stretch font-gill lg:text-xl md:text-lg text-base font-light leading-110 text-darkblack">
-      {steps.map((step) => (
-        <li key={step} className="whitespace-nowrap">
-          {step}
-        </li>
-      ))}
-    </ol>
-  </div>
-);
+import EducationDiscoverStepsList from "./EducationDiscoverStepsList";
 
 type DiscoverContentProps = Pick<
   NormalizedEducationCtaBanner,
@@ -65,8 +28,10 @@ const DiscoverContent = ({
     <p className="lg:mb-10 mb-8 font-gill font-light leading-110 lg:text-xl md:text-lg text-base lg:text-neutral500 text-darkblack">
       {subheading}
     </p>
-    {steps.length > 0 ? <DiscoverSteps steps={steps} /> : null}
-    {ctaLabel ? <EducationDiscoverJourneyCta label={ctaLabel} /> : null}
+    {steps.length > 0 ? (
+      <EducationDiscoverStepsList steps={steps} className="lg:mb-10 mb-8" />
+    ) : null}
+    {ctaLabel ? <EducationDiscoverJourneyCta label={ctaLabel} steps={steps} /> : null}
   </>
 );
 

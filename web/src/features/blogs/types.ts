@@ -29,6 +29,8 @@ export type BlogFeaturedPost = {
   backgroundAlt?: string;
   readNowLabel: string;
   href: string;
+  /** CMS category id — featured chrome is shown on All only. */
+  category: string;
 };
 
 export type BlogTableOfContentsItem = {
@@ -70,7 +72,12 @@ export type BlogDetail = {
   author: string;
   date: string;
   readTime: string;
-  heroImage: { src: string | null; alt: string };
+  /** Detail banner — CMS `heroImage` (desktop + mobile). Landing cards use `coverImage`. */
+  heroImage: {
+    desktopUrl: string | null;
+    mobileUrl: string | null;
+    alt: string;
+  };
   introParagraphs: string[];
   tableOfContents: BlogTableOfContentsItem[];
   sections: BlogDetailSection[];

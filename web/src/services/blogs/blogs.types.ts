@@ -9,7 +9,6 @@ import type { StrapiImage } from "@/types/strapiMedia";
 export type StrapiBlogSeo = {
   metaTitle?: string | null;
   metaDescription?: string | null;
-  canonicalUrl?: string | null;
   metaKeywords?: string | null;
   ogImage?: StrapiImage;
 };
@@ -26,6 +25,8 @@ export type StrapiBlogCategory = {
   Title?: string | null;
   value?: string | null;
   Value?: string | null;
+  /** CMS-provided post tally on landing `blogCategory` entries. */
+  count?: number | null;
 };
 
 export type StrapiBlogResponsiveImage = {
@@ -66,20 +67,21 @@ export type StrapiBlogLandingPage = {
     backgroundImage?: StrapiBlogResponsiveImage | null;
   } | null;
   /**
-   * Section chrome only: toggle + background texture.
-   * The selected article is `featuredBlog` on the landing page root.
+   * Featured chrome + selected post (`featuredBlog` nested under the section
+   * in current CMS). Root `featuredBlog` / section `post` kept for older payloads.
    */
   featuredBlogSection?: {
     id?: number;
     isActive?: boolean | null;
     backgroundImage?: StrapiBlogResponsiveImage | null;
+    featuredBlog?: StrapiBlogPost | null;
     /** Legacy / unused on current CMS schema — kept optional for safety */
     title?: string | null;
     excerpt?: string | null;
     readNowLabel?: string | null;
     post?: StrapiBlogPost | null;
   } | null;
-  /** CMS oneToOne → blog-post: the article shown in the featured block */
+  /** Legacy root oneToOne → blog-post (older CMS payloads) */
   featuredBlog?: StrapiBlogPost | null;
   blogCategory?: StrapiBlogCategory[] | null;
   seo?: StrapiBlogSeo | null;
@@ -88,12 +90,12 @@ export type StrapiBlogLandingPage = {
 export type BlogsPageSeo = {
   metaTitle?: string;
   metaDescription?: string;
-  canonicalPath?: string;
   keywords?: string;
   ogImageUrl?: string;
 };
 
 export type NormalizedBlogsPage = {
+  /** Null when CMS `heroSection.isActive` is false. */
   hero: {
     title: string;
     image: {
@@ -101,7 +103,7 @@ export type NormalizedBlogsPage = {
       mobileUrl: string | null;
       alt: string;
     };
-  };
+  } | null;
   filterLabel: string;
   loadMore: {
     buttonLabel: string;

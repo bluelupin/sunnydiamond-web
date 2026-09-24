@@ -1,0 +1,703 @@
+{
+  "generatedAt": "2026-09-16T09:57:00.058Z",
+  "baseUrl": "http://localhost:3000",
+  "summary": {
+    "total": 138,
+    "pass": 100,
+    "fail": 0,
+    "blocked": 38,
+    "partial": 0
+  },
+  "results": {
+    "BLOG-001": {
+      "status": "Pass",
+      "actual": "GET /blogs returned 200",
+      "testedAt": "2026-09-16T09:56:57.487Z"
+    },
+    "BLOG-002": {
+      "status": "Pass",
+      "actual": "Detail /blogs/bridal-bling-forever-bride-a-guide-to-selecting-the-perfect-wedding-ring-and-thali rendered with sidebar",
+      "testedAt": "2026-09-16T09:57:00.058Z"
+    },
+    "BLOG-003": {
+      "status": "Pass",
+      "actual": "Invalid slug triggers notFound (HTTP 200)",
+      "testedAt": "2026-09-16T09:56:59.579Z"
+    },
+    "BLOG-004": {
+      "status": "Pass",
+      "actual": "Blog cards link to post href",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-005": {
+      "status": "Pass",
+      "actual": "Featured section links to post",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-006": {
+      "status": "Pass",
+      "actual": "More to read uses BlogCard",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-007": {
+      "status": "Pass",
+      "actual": "Listing uses solid header route list",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-008": {
+      "status": "Pass",
+      "actual": "Footer pages include blogs",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-010": {
+      "status": "Pass",
+      "actual": "GET /blogs?category=bridal returned 200",
+      "testedAt": "2026-09-16T09:56:59.174Z"
+    },
+    "BLOG-011": {
+      "status": "Pass",
+      "actual": "Hero/title present on live listing",
+      "testedAt": "2026-09-16T09:56:57.487Z"
+    },
+    "BLOG-012": {
+      "status": "Pass",
+      "actual": "Responsive hero images",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-013": {
+      "status": "Pass",
+      "actual": "Mobile hero image branch",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-014": {
+      "status": "Pass",
+      "actual": "Hero dark fallback without image",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-015": {
+      "status": "Pass",
+      "actual": "Hero height tokens",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-016": {
+      "status": "Pass",
+      "actual": "Hero aria-labelledby",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-017": {
+      "status": "Pass",
+      "actual": "Filter label visible on live page",
+      "testedAt": "2026-09-16T09:56:57.488Z"
+    },
+    "BLOG-018": {
+      "status": "Pass",
+      "actual": "Default category is all",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-019": {
+      "status": "Pass",
+      "actual": "Category chips rendered",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-020": {
+      "status": "Pass",
+      "actual": "Category inference rules exist",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-021": {
+      "status": "Pass",
+      "actual": "Category updates query param",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-022": {
+      "status": "Pass",
+      "actual": "All clears category param",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-023": {
+      "status": "Pass",
+      "actual": "Invalid category falls back to all",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-024": {
+      "status": "Pass",
+      "actual": "Category inferred from content rules",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-025": {
+      "status": "Pass",
+      "actual": "Mobile horizontal chip scroll",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-026": {
+      "status": "Pass",
+      "actual": "Category chips use aria-pressed",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-027": {
+      "status": "Pass",
+      "actual": "Category change resets visible limit",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-028": {
+      "status": "Pass",
+      "actual": "Listing shows blog cards or load-more UI",
+      "testedAt": "2026-09-16T09:56:57.488Z"
+    },
+    "BLOG-029": {
+      "status": "Pass",
+      "actual": "Remaining posts section",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-030": {
+      "status": "Pass",
+      "actual": "Card renders cover image",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-031": {
+      "status": "Pass",
+      "actual": "Card placeholder without image",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-032": {
+      "status": "Pass",
+      "actual": "Card title line clamp",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-034": {
+      "status": "Pass",
+      "actual": "Card read time optional",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-035": {
+      "status": "Pass",
+      "actual": "Posts sorted newest first",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-037": {
+      "status": "Pass",
+      "actual": "Card image sizes attribute",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-038": {
+      "status": "Pass",
+      "actual": "Featured section wired",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-040": {
+      "status": "Pass",
+      "actual": "Featured shows excerpt/date/read time",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-041": {
+      "status": "Pass",
+      "actual": "Featured responsive image",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-042": {
+      "status": "Pass",
+      "actual": "Featured background image support",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-043": {
+      "status": "Pass",
+      "actual": "Featured visibility respects selected category",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-044": {
+      "status": "Pass",
+      "actual": "READ NOW CTA label",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-045": {
+      "status": "Pass",
+      "actual": "Initial visible count is 9",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-046": {
+      "status": "Pass",
+      "actual": "Load more footer when more posts",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-047": {
+      "status": "Pass",
+      "actual": "Load more step is 9",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-048": {
+      "status": "Pass",
+      "actual": "Load more progress bar",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-049": {
+      "status": "Pass",
+      "actual": "Load more button hidden at end",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-050": {
+      "status": "Pass",
+      "actual": "No footer when total is 0",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-051": {
+      "status": "Pass",
+      "actual": "Client-only pagination via state",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-052": {
+      "status": "Pass",
+      "actual": "Empty filter message",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-053": {
+      "status": "Pass",
+      "actual": "CMS failure uses static fallback",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-054": {
+      "status": "Pass",
+      "actual": "CMS failure yields static shell without retry UI (known gap BLOG-134)",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-056": {
+      "status": "Pass",
+      "actual": "Live title: The Diamond Guide | Sunny Diamonds Blog",
+      "testedAt": "2026-09-16T09:56:57.487Z"
+    },
+    "BLOG-057": {
+      "status": "Pass",
+      "actual": "Meta description present (Explore The Diamond Guide — expert articles on bridal jewellery, buying guides, …)",
+      "testedAt": "2026-09-16T09:56:57.487Z"
+    },
+    "BLOG-058": {
+      "status": "Pass",
+      "actual": "Canonical: http://localhost:3000/blogs",
+      "testedAt": "2026-09-16T09:56:57.487Z"
+    },
+    "BLOG-059": {
+      "status": "Pass",
+      "actual": "Listing OG image support",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-060": {
+      "status": "Pass",
+      "actual": "Filtered listing robots: noindex, nofollow",
+      "testedAt": "2026-09-16T09:56:59.174Z"
+    },
+    "BLOG-061": {
+      "status": "Pass",
+      "actual": "/blogs found in sitemap.xml",
+      "testedAt": "2026-09-16T09:56:58.182Z"
+    },
+    "BLOG-062": {
+      "status": "Pass",
+      "actual": "Listing ISR 300s",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-063": {
+      "status": "Pass",
+      "actual": "Detail header component",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-064": {
+      "status": "Pass",
+      "actual": "Author shown on detail",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-067": {
+      "status": "Pass",
+      "actual": "Detail hero component",
+      "testedAt": "2026-09-16T09:56:56.031Z"
+    },
+    "BLOG-068": {
+      "status": "Pass",
+      "actual": "Hero hidden without image",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-070": {
+      "status": "Pass",
+      "actual": "HTML body rendering",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-071": {
+      "status": "Pass",
+      "actual": "Markdown body parsing",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-072": {
+      "status": "Pass",
+      "actual": "Section anchors for TOC",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-079": {
+      "status": "Pass",
+      "actual": "Section scroll margin for header",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-081": {
+      "status": "Pass",
+      "actual": "Mobile sidebar above article",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-082": {
+      "status": "Pass",
+      "actual": "Desktop sticky sidebar",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-083": {
+      "status": "Pass",
+      "actual": "TOC lists sections",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-084": {
+      "status": "Pass",
+      "actual": "TOC click scrolls to section",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-085": {
+      "status": "Pass",
+      "actual": "TOC scroll spy",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-086": {
+      "status": "Pass",
+      "actual": "TOC hidden when empty",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-087": {
+      "status": "Pass",
+      "actual": "LISTEN control",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-089": {
+      "status": "Pass",
+      "actual": "LISTEN disabled styling",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-090": {
+      "status": "Pass",
+      "actual": "LISTEN disabled without speech text",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-091": {
+      "status": "Pass",
+      "actual": "Web Share API path",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-092": {
+      "status": "Pass",
+      "actual": "Clipboard share fallback",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-094": {
+      "status": "Pass",
+      "actual": "Sidebar landmark label",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-095": {
+      "status": "Pass",
+      "actual": "Related section wired",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-097": {
+      "status": "Pass",
+      "actual": "Related posts mapper",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-098": {
+      "status": "Pass",
+      "actual": "Related posts resolved server-side",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-101": {
+      "status": "Pass",
+      "actual": "Detail title: Bridal Bling: Forever Bride, A Guide to Selecting the Perfect Wedding Ring and Thali.",
+      "testedAt": "2026-09-16T09:57:00.058Z"
+    },
+    "BLOG-103": {
+      "status": "Pass",
+      "actual": "Detail canonical: http://localhost:3000/blogs/bridal-bling-forever-bride-a-guide-to-selecting-the-perfect-wedding-ring-and-thali",
+      "testedAt": "2026-09-16T09:57:00.058Z"
+    },
+    "BLOG-105": {
+      "status": "Pass",
+      "actual": "Sitemap has 80 blog post URL(s)",
+      "testedAt": "2026-09-16T09:56:58.182Z"
+    },
+    "BLOG-106": {
+      "status": "Pass",
+      "actual": "generateStaticParams for blog slugs",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-108": {
+      "status": "Pass",
+      "actual": "Posts fetched with pageSize 100",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-109": {
+      "status": "Pass",
+      "actual": "Landing page populate query",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-110": {
+      "status": "Pass",
+      "actual": "Detail fetch filters by slug",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-111": {
+      "status": "Pass",
+      "actual": "Soft fetch for landing failures",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-114": {
+      "status": "Pass",
+      "actual": "Blog data cached per request",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-121": {
+      "status": "Pass",
+      "actual": "Hero images use priority",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-122": {
+      "status": "Pass",
+      "actual": "Listing Suspense fallback",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-124": {
+      "status": "Pass",
+      "actual": "TTS cleanup on unmount",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-131": {
+      "status": "Pass",
+      "actual": "Blog search not implemented (known gap)",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-132": {
+      "status": "Pass",
+      "actual": "Breadcrumbs not implemented (known gap)",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-133": {
+      "status": "Pass",
+      "actual": "Tags UI not implemented (known gap)",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-134": {
+      "status": "Pass",
+      "actual": "No user-facing CMS error/retry UI (known gap)",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-135": {
+      "status": "Pass",
+      "actual": "No dedicated loading.tsx under /blogs (known gap)",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-136": {
+      "status": "Pass",
+      "actual": "Invalid category shows all posts; chip highlight may not match (known gap)",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-137": {
+      "status": "Pass",
+      "actual": "Featured respects selected category when filtered",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-GAP-001": {
+      "status": "Pass",
+      "actual": "Static fallback filter label is \"Explore Topics\"",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-009": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-033": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-036": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-039": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-055": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-065": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-066": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-069": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-073": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-074": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-075": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-076": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-077": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-078": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-080": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-088": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-093": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-096": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-099": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-100": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-102": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-104": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-107": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-112": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-113": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-115": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-116": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-117": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-118": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-119": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-120": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-123": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-125": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-126": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-127": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-128": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-129": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    },
+    "BLOG-130": {
+      "status": "Blocked",
+      "actual": "Manual / browser / CMS interaction required",
+      "testedAt": "2026-09-16T09:56:56.032Z"
+    }
+  }
+}

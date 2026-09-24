@@ -2,7 +2,7 @@
 
 import React from 'react';
 import dynamic from 'next/dynamic';
-import { Toaster } from 'sonner';
+import { AppStatusToastProvider } from '@/shared/context/AppStatusToastContext';
 import { AuthProvider } from '@/features/auth/context/AuthContext';
 import { CartProvider } from '@/features/cart/context/CartContext';
 import { CartUIProvider } from '@/features/cart/context/CartUIContext';
@@ -18,6 +18,9 @@ import {
   DEFAULT_AUTH_FEATURE_FLAGS,
   type AuthFeatureFlags,
 } from '@/features/auth/types/authFeatures.types';
+import GiftingGiftCardFlowRoot from '@/features/gift-card/components/GiftingGiftCardFlowRoot';
+import { UiPlatformProvider } from '@/shared/context/UiPlatformContext';
+import type { UiPlatform } from '@/shared/utils/detectUiPlatform';
 
 const CartBagDrawer = dynamic(
   () => import('@/features/cart/components/CartBagDrawer'),
@@ -27,36 +30,47 @@ const CartBagDrawer = dynamic(
 export default function AppProvider({
   children,
   authFeatures = DEFAULT_AUTH_FEATURE_FLAGS,
+  initialUiPlatform = "other",
 }: {
   children: React.ReactNode;
   authFeatures?: AuthFeatureFlags;
+  initialUiPlatform?: UiPlatform;
 }) {
   return (
-    <AuthFeaturesProvider flags={authFeatures}>
-      <AuthProvider>
-        <CartProvider>
-          <CartUIProvider>
-            <LoginModalProvider>
-              <WishlistProvider>
-                <PageLoadingProvider>
-                  {children}
-                </PageLoadingProvider>
-                <FeatureErrorBoundary featureName="CartBagDrawer">
-                  <CartBagDrawer />
-                </FeatureErrorBoundary>
-                <FeatureErrorBoundary featureName="GiftingOptionsPanel">
-                  <GiftingOptionsPanel />
-                </FeatureErrorBoundary>
-                <FeatureErrorBoundary featureName="GuestCheckoutModal">
-                  <GuestCheckoutModal />
-                </FeatureErrorBoundary>
-                <LoginModal />
-              </WishlistProvider>
-            </LoginModalProvider>
-          </CartUIProvider>
-        </CartProvider>
-      </AuthProvider>
-      <Toaster richColors position="top-right" />
-    </AuthFeaturesProvider>
+    <UiPlatformProvider initialPlatform={initialUiPlatform}>
+    <AppStatusToastProvider>
+      <AuthFeaturesProvider flags={authFeatures}>
+        <AuthProvider>
+          <CartProvider>
+            <CartUIProvider>
+              <LoginModalProvider>
+                <WishlistProvider>
+                  <FeatureErrorBoundary featureName="GiftingGiftCardFlowRoot">
+                    <GiftingGiftCardFlowRoot>
+                      <PageLoadingProvider>
+                        {children}
+                      </PageLoadingProvider>
+                    </GiftingGiftCardFlowRoot>
+                  </FeatureErrorBoundary>
+                  <FeatureErrorBoundary featureName="CartBagDrawer">
+                    <CartBagDrawer />
+                  </FeatureErrorBoundary>
+                  <FeatureErrorBoundary featureName="GiftingOptionsPanel">
+                    <GiftingOptionsPanel />
+                  </FeatureErrorBoundary>
+                  <FeatureErrorBoundary featureName="GuestCheckoutModal">
+                    <GuestCheckoutModal />
+                  </FeatureErrorBoundary>
+                  <FeatureErrorBoundary featureName="LoginModal">
+                    <LoginModal />
+                  </FeatureErrorBoundary>
+                </WishlistProvider>
+              </LoginModalProvider>
+            </CartUIProvider>
+          </CartProvider>
+        </AuthProvider>
+      </AuthFeaturesProvider>
+    </AppStatusToastProvider>
+    </UiPlatformProvider>
   );
 }

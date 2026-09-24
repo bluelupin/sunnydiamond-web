@@ -14,7 +14,7 @@ const JewelleryListingEmptyState = ({ onClearFilters }: JewelleryListingEmptySta
     <div className="flex w-full min-h-[min(400px,45vh)] items-center justify-center px-4 py-12 md:py-16">
       <div className="flex w-full max-w-[464px] flex-col items-center gap-6 text-center md:gap-8">
         <div className="flex size-16 items-center justify-center rounded-full bg-benefitSurface md:size-20" aria-hidden>
-          <FilterIcon className="size-8 text-neutral500 md:size-10" />
+          <FilterIcon className="text-neutral500" />
         </div>
 
         <div className="flex w-full flex-col gap-3">

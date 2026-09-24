@@ -1,4 +1,4 @@
-import Image from "next/image";
+import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import type { BlogDetail } from "../types";
 
 type BlogDetailHeroProps = {
@@ -6,21 +6,26 @@ type BlogDetailHeroProps = {
 };
 
 const BlogDetailHero = ({ heroImage }: BlogDetailHeroProps) => {
-  if (!heroImage.src) {
+  const desktopUrl = heroImage.desktopUrl || heroImage.mobileUrl;
+  const mobileUrl = heroImage.mobileUrl || heroImage.desktopUrl;
+
+  if (!desktopUrl && !mobileUrl) {
     return null;
   }
 
   return (
-    <div className="relative w-full shrink-0 overflow-hidden bg-white xl:mb-16 lg:mb-10 mb-6">
-      <Image
-        src={heroImage.src}
-        alt={heroImage.alt}
-        width={1920}
-        height={1080}
-        priority
-        className="h-auto w-full"
-        sizes="100vw"
-      />
+    <div className="relative mx-auto w-full shrink-0 overflow-hidden bg-white xl:mb-16 lg:mb-10 mb-6">
+      <div className="relative w-full max-w-[1000px] mx-auto h-full md:max-h-[515px] max-h-[600px]">
+        <ResponsiveImage
+          desktopSrc={desktopUrl ?? ""}
+          mobileSrc={mobileUrl ?? undefined}
+          alt={heroImage.alt}
+          fill
+          priority
+          sizes="(max-width: 767px) 100vw, 1000px"
+          className="object-cover w-full h-full !relative"
+        />
+      </div>
     </div>
   );
 };

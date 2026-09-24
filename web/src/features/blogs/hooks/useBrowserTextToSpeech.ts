@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useSyncExternalStore } from "react";
 
-type SpeechState = "idle" | "speaking";
+type SpeechState = "idle" | "speaking" | "paused";
 
 const subscribers = new Set<() => void>();
 let globalState: SpeechState = "idle";
@@ -78,27 +78,60 @@ export function useBrowserTextToSpeech(text: string) {
     window.speechSynthesis.speak(utterance);
   }, [isSupported, text]);
 
+  const pause = useCallback(() => {
+    if (!isSupported || globalState !== "speaking") {
+      return;
+    }
+
+    window.speechSynthesis.pause();
+    setGlobalState("paused");
+  }, [isSupported]);
+
+  const resume = useCallback(() => {
+    if (!isSupported || globalState !== "paused") {
+      return;
+    }
+
+    window.speechSynthesis.resume();
+    setGlobalState("speaking");
+  }, [isSupported]);
+
   const toggle = useCallback(() => {
-    if (state === "speaking") {
-      stop();
+    if (globalState === "speaking") {
+      pause();
+      return;
+    }
+
+    if (globalState === "paused") {
+      resume();
       return;
     }
 
     speak();
-  }, [state, speak, stop]);
+  }, [pause, resume, speak]);
 
   useEffect(() => {
     return () => {
-      if (globalState === "speaking") {
+      if (globalState !== "idle") {
         window.speechSynthesis?.cancel();
         setGlobalState("idle");
       }
     };
   }, []);
 
+  useEffect(() => {
+    if (globalState !== "idle") {
+      stop();
+    }
+  }, [text, stop]);
+
+  const isActive = state === "speaking" || state === "paused";
+
   return {
     isSupported,
     isSpeaking: state === "speaking",
+    isPaused: state === "paused",
+    isActive,
     toggle,
     stop,
   };

@@ -1,27 +1,29 @@
 "use client";
- 
+
 import Image from "next/image";
-import Link from "next/link";
 import Reveal from "@/shared/Animation/Reveal";
+import { useGiftCardFlow } from "@/features/gift-card/context/GiftCardFlowContext";
 import type { NormalizedGiftingGiftCard } from "@/services/gifting/gifting-page.types";
- 
+
 type GiftingGiftCardSectionProps = {
   giftCard: NormalizedGiftingGiftCard;
 };
 
 const giftCardCtaClassName =
-  "btn-border-slide inline-flex h-14 items-center justify-center border border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2";
+  "btn-border-slide inline-flex h-14 items-center justify-center border border-neutral300 hover:!border-neutral300 px-7 font-gill text-sm font-normal uppercase leading-110 text-darkblack focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2";
 
-const GiftCardCta = ({ href, label }: { href: string; label: string }) => (
-  <Link href={href} className={giftCardCtaClassName}>
+const GiftCardCta = ({ label, onClick }: { label: string; onClick: () => void }) => (
+  <button type="button" onClick={onClick} className={giftCardCtaClassName}>
     <span className="relative z-10">{label}</span>
-  </Link>
+  </button>
 );
 
 const GiftingGiftCardSection = ({ giftCard }: GiftingGiftCardSectionProps) => {
-  const cutoutSrc = giftCard.image?.desktopUrl;
-  const cutoutAlt = giftCard.image?.alt ?? "";
- 
+  const { openPanel } = useGiftCardFlow();
+  const cutoutSrc = giftCard.image?.desktopUrl ?? giftCard.image?.mobileUrl;
+  const cutoutAlt = giftCard.image?.alt?.trim() || giftCard.title;
+  const buttonLabel = giftCard.buttonLabel?.trim() || "SEND A GIFT CARD";
+
   return (
     <section
       id="gift-card"
@@ -31,8 +33,8 @@ const GiftingGiftCardSection = ({ giftCard }: GiftingGiftCardSectionProps) => {
       <div className="relative z-0 w-full lg:h-[520px] md:h-[350px] md:py-0 py-16">
         {giftCard.background &&
           <Image
-            src={giftCard.background.desktopUrl}
-            alt={giftCard.background.alt}
+            src={giftCard.background.desktopUrl ?? giftCard.background.mobileUrl}
+            alt={giftCard.background.alt?.trim() || giftCard.title}
             fill
             className="object-cover object-center"
             sizes="100vw"
@@ -48,7 +50,7 @@ const GiftingGiftCardSection = ({ giftCard }: GiftingGiftCardSectionProps) => {
           aria-hidden
         />
         <div className="relative mx-auto lg:h-[475px] md:h-[330px] 2xl:max-w-1920 max-w-1440 flex-col items-center px-4 md:flex md:flex-row md:items-center md:px-10">
-          <div className="w-full lg:max-w-[619px] md:w-[450px] xl:pl-28 lg:pl-16">
+          <div className="w-full xl:w-[490px] lg:w-[400px] md:w-[450px] xl:ml-28 md:ml-10 sm:ml-8 ml-6">
             {giftCard.title &&
               <Reveal
                 as="h2"
@@ -69,11 +71,11 @@ const GiftingGiftCardSection = ({ giftCard }: GiftingGiftCardSectionProps) => {
               </Reveal>
             }
             <Reveal direction="up" className="md:mt-10 mt-8 md:block hidden">
-              <GiftCardCta href={giftCard.cta.url} label={giftCard.cta.label} />
+              <GiftCardCta label={buttonLabel} onClick={openPanel} />
             </Reveal>
           </div>
         </div>
- 
+
         {cutoutSrc &&
           <Reveal
             direction="up"
@@ -89,11 +91,11 @@ const GiftingGiftCardSection = ({ giftCard }: GiftingGiftCardSectionProps) => {
           </Reveal>
         }
         <Reveal direction="up" className="md:mt-0 mt-6 md:hidden block relative flex items-center justify-center">
-          <GiftCardCta href={giftCard.cta.url} label={giftCard.cta.label} />
+          <GiftCardCta label={buttonLabel} onClick={openPanel} />
         </Reveal>
       </div>
     </section>
   );
 };
- 
+
 export default GiftingGiftCardSection;

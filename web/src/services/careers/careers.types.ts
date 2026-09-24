@@ -42,6 +42,7 @@ export type StrapiCareerHero = {
   ctaLabel?: string | null;
   /** CMS typo — live API uses `CtaLable` */
   CtaLable?: string | null;
+  isActive?: boolean | null;
   backgroundImage?: StrapiCareerResponsiveImage | null;
   image?: StrapiCareerResponsiveImage | null;
 };
@@ -55,6 +56,7 @@ export type StrapiCareerFaqItem = {
 export type StrapiCareerFaqSection = {
   sectionHeading?: string | null;
   heading?: string | null;
+  isActive?: boolean | null;
   faqItems?: StrapiCareerFaqItem[] | null;
 };
 
@@ -74,6 +76,7 @@ export type StrapiCareerBenefitsSection = {
   sectionTitle?: string | null;
   title?: string | null;
   InvestingTitle?: string | null;
+  isActive?: boolean | null;
   sectionImage?: StrapiCareerResponsiveImage | null;
   image?: StrapiCareerResponsiveImage | null;
   features?: StrapiCareerBenefitFeature[] | null;
@@ -88,8 +91,11 @@ export type StrapiCareerLifeSection = {
   description?: string | null;
   content?: string | null;
   featuredBody?: string | null;
+  /** Second body paragraph under Featured Body (CMS: Additional Feature Body). */
+  additionalFeatureBody?: string | null;
   quote?: string | null;
   featuredDescription?: string | null;
+  isActive?: boolean | null;
   leftImage?: StrapiCareerResponsiveImage | null;
   rightImage?: StrapiCareerResponsiveImage | null;
   featuredImage1?: StrapiCareerResponsiveImage | null;
@@ -102,6 +108,7 @@ export type StrapiCareerDiscoverSection = {
   heading?: string | null;
   ctaLabel?: string | null;
   ctaButtonLabel?: string | null;
+  isActive?: boolean | null;
   cta?: StrapiCareerCtaButton | null;
   backgroundImage?: StrapiCareerResponsiveImage | null;
 };
@@ -118,6 +125,7 @@ export type StrapiCareerOpeningsSection = {
   ctaLabel?: string | null;
   viewAllLabel?: string | null;
   CtaLable?: string | null;
+  isActive?: boolean | null;
   relatedCareerOpenings?: StrapiCareerOpeningEntity[] | null;
   careerOpenings?: StrapiCareerOpeningEntity[] | null;
   career_openings?: StrapiCareerOpeningEntity[] | null;
@@ -162,6 +170,7 @@ export type StrapiCareerApplicationFlowSection = {
   shareLabel?: string | null;
   viewJobLabel?: string | null;
   applyModalTitle?: string | null;
+  applyModalSubtitle?: string | null;
   autofillResumeLabel?: string | null;
   applyManuallyLabel?: string | null;
   applyLinkedInLabel?: string | null;
@@ -235,6 +244,7 @@ export type StrapiCareerListingFilterSection = {
   /** CMS typo — live API uses `fiterTitle` */
   fiterTitle?: string | null;
   filterTitle?: string | null;
+  isActive?: boolean | null;
   Location?: StrapiCareerFilterSectionGroup | null;
   Department?: StrapiCareerFilterSectionGroup | null;
   Experience?: StrapiCareerFilterSectionGroup | null;
@@ -316,6 +326,7 @@ export type StrapiCareerOpeningEntity = {
   applyCta?: StrapiCareerCtaButton | string | null;
   applyCtaLabel?: string | null;
   applyLabel?: string | null;
+  linkedinCta?: StrapiCareerCtaButton | null;
   sortOrder?: number | null;
   isActive?: boolean | null;
   isFeatured?: boolean | null;
@@ -355,7 +366,7 @@ export type NormalizedCareerSeo = {
 export type NormalizedCareerHero = {
   title: string;
   ctaLabel: string;
-  image: NormalizedCareerResponsiveImage;
+  image: NormalizedCareerResponsiveImage | null;
 };
 
 export type NormalizedCareerOpeningsSection = {
@@ -368,7 +379,10 @@ export type NormalizedCareerOpeningsSection = {
 
 export type NormalizedCareerLifeSection = {
   title: string;
+  /** CMS Featured Body — first paragraph. */
   description: string;
+  /** CMS Additional Feature Body — second paragraph when present. */
+  additionalDescription?: string;
   quote?: string;
   leftImage: NormalizedCareerResponsiveImage;
   rightImage: NormalizedCareerResponsiveImage;
@@ -436,6 +450,7 @@ export type NormalizedCareerApplicationFlow = {
     viewJobLabel: string;
     applyModal: {
       title: string;
+      subtitle: string;
       autofillResumeLabel: string;
       applyManuallyLabel: string;
       applyLinkedInLabel: string;
@@ -526,7 +541,6 @@ export type NormalizedCareerJob = CareerJob & {
   slug: string;
   applyLabel?: string;
   descriptionHtml?: string;
-  sortOrder: number;
   isActive: boolean;
 };
 

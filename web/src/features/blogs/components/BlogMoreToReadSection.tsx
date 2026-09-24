@@ -6,7 +6,9 @@ type BlogMoreToReadSectionProps = {
 };
 
 const BlogMoreToReadSection = ({ posts }: BlogMoreToReadSectionProps) => {
-  if (posts.length === 0) {
+  const visiblePosts = posts.slice(0, 3);
+
+  if (visiblePosts.length === 0) {
     return null;
   }
 
@@ -22,7 +24,7 @@ const BlogMoreToReadSection = ({ posts }: BlogMoreToReadSectionProps) => {
         More to read
       </h2>
       <div className="horizontalScrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-3 md:gap-2 md:overflow-visible md:px-0 md:pb-0">
-        {posts.map((post) => (
+        {visiblePosts.map((post) => (
           <div
             key={post.id}
             className="w-[min(328px,calc(100vw-32px))] shrink-0 md:w-auto md:shrink"

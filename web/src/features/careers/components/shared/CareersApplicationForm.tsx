@@ -6,14 +6,14 @@ import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusT
 import FormFieldError from "@/shared/ui/FormFieldError";
 import AppointmentDateField from "@/shared/ui/AppointmentDateField";
 import { cn } from "@/shared/utils/cn";
-import {
-  APPOINTMENT_COUNTRY_CODES,
-} from "@/shared/constants/appointmentForm";
+
+import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
 import {
   invalidFieldClassName,
+  invalidFieldContainerClassName,
   sanitizePhoneInput,
+  validateOptionalEmail,
   validatePhone,
-  validateRequiredEmail,
   validateRequiredName,
 } from "@/shared/utils/formValidation";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
@@ -28,6 +28,12 @@ import {
   type ParsedResumePosition,
 } from "@/services/careers/career-resume-parser.service";
 import { resolveCareerApplicationFlow } from "@/services/careers/resolveCareerApplicationFlow";
+import { toast } from "@/shared/hooks/use-toast";
+import {
+  CAREERS_RESUME_PARSE_ERROR_MESSAGE,
+  CAREERS_RESUME_PARSE_LOADING_MESSAGE,
+  CAREERS_RESUME_PARSE_SUCCESS_MESSAGE,
+} from "@/features/careers/constants/careersCopy";
 import {
   CAREERS_NUMERIC_ONLY_ERROR,
   CAREERS_AUTOFILL_RESUME_ACCEPT,
@@ -42,6 +48,7 @@ import {
   careersFormSectionClassName,
   careersFormSectionTitleClassName,
   getCareersBirthDateBounds,
+  getCareersDateOfBirthError,
   getCareersResumeValidationError,
   isCareersAutofillFileSupported,
   isCareersNumericInput,
@@ -55,7 +62,6 @@ import {
 import CareersApplicationJobHeader from "./CareersApplicationJobHeader";
 import CareersSelectField from "./CareersSelectField";
 import CareersUploadResumeModal from "./CareersUploadResumeModal";
-import CareersChevronDownIcon from "./CareersChevronDownIcon";
 import CareersResumeFileChip from "./CareersResumeFileChip";
 import CareersSearchIcon from "./CareersSearchIcon";
 import CareersSubmitConfirmationModal from "./CareersSubmitConfirmationModal";
@@ -125,10 +131,13 @@ const CareersApplicationForm = () => {
   const { contact: profileContact } = useCustomerProfileContact(isAuthenticated);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isParsingResume, setIsParsingResume] = useState(false);
   const [resumeValidationToastMessage, setResumeValidationToastMessage] = useState<string | null>(
     null,
   );
   const resumeValidationToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const resumeAutofillRequestedRef = useRef(false);
+  const parsedResumeKeyRef = useRef<string | null>(null);
 
   const resumeInputRef = useRef<HTMLInputElement>(null);
 
@@ -261,6 +270,115 @@ const CareersApplicationForm = () => {
     };
   }, []);
 
+  const attachResumeFile = useCallback((file: File) => {
+    setResumeFile(file);
+
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    if (resumeInputRef.current) {
+      resumeInputRef.current.files = dataTransfer.files;
+    }
+  }, []);
+
+  const getFormSnapshot = useCallback(
+    (): CareerFormSnapshot => ({
+      name,
+      countryCode,
+      phone,
+      email,
+      dateOfBirth,
+      gender,
+      highestDegree,
+      areaOfStudy,
+      yearOfCompletion,
+      relevantExperience,
+      currentCompany,
+      currentJobTitle,
+      currentCtc,
+      expectedCtc,
+      noticePeriod,
+      skills,
+      languages,
+    }),
+    [
+      areaOfStudy,
+      countryCode,
+      currentCompany,
+      currentCtc,
+      currentJobTitle,
+      dateOfBirth,
+      email,
+      expectedCtc,
+      gender,
+      highestDegree,
+      languages,
+      name,
+      noticePeriod,
+      phone,
+      relevantExperience,
+      skills,
+      yearOfCompletion,
+    ],
+  );
+
+  const applyFormSnapshot = useCallback((snapshot: CareerFormSnapshot) => {
+    setName(snapshot.name);
+    setCountryCode(snapshot.countryCode);
+    setPhone(snapshot.phone);
+    setEmail(snapshot.email);
+    setDateOfBirth(snapshot.dateOfBirth);
+    setGender(snapshot.gender);
+    setHighestDegree(snapshot.highestDegree);
+    setAreaOfStudy(snapshot.areaOfStudy);
+    setYearOfCompletion(snapshot.yearOfCompletion);
+    setRelevantExperience(snapshot.relevantExperience);
+    setCurrentCompany(snapshot.currentCompany);
+    setCurrentJobTitle(snapshot.currentJobTitle);
+    setCurrentCtc(snapshot.currentCtc);
+    setExpectedCtc(snapshot.expectedCtc);
+    setNoticePeriod(snapshot.noticePeriod);
+    setSkills(snapshot.skills);
+    setLanguages(snapshot.languages);
+  }, []);
+
+  const autofillFromResume = useCallback(
+    async (file: File) => {
+      const fileKey = `${file.name}:${file.size}:${file.lastModified}`;
+      if (parsedResumeKeyRef.current === fileKey) {
+        return;
+      }
+
+      setIsParsingResume(true);
+      toast({ title: CAREERS_RESUME_PARSE_LOADING_MESSAGE });
+
+      try {
+        const prefill = await parseCareerResume(file);
+        const merged = mergeCareerResumePrefill(prefill, getFormSnapshot(), {
+          genderOptions: applicationFlow.applicationForm.genderOptions,
+          workExperienceOptions: applicationFlow.applicationForm.workExperienceOptions,
+          noticePeriodOptions: applicationFlow.applicationForm.noticePeriodOptions,
+        });
+
+        applyFormSnapshot(merged);
+        parsedResumeKeyRef.current = fileKey;
+        toast({ title: CAREERS_RESUME_PARSE_SUCCESS_MESSAGE });
+      } catch (error) {
+        const rawMessage = error instanceof Error ? error.message.trim() : "";
+        const isPayloadTooLarge =
+          /\b413\b/.test(rawMessage) || /too large/i.test(rawMessage);
+
+        toast({
+          title: isPayloadTooLarge
+            ? CAREERS_RESUME_MAX_SIZE_TOAST_MESSAGE
+            : CAREERS_RESUME_PARSE_ERROR_MESSAGE,
+        });
+      } finally {
+        setIsParsingResume(false);
+      }
+    },
+    [applicationFlow.applicationForm, applyFormSnapshot, getFormSnapshot],
+  );
+
   useEffect(() => {
     if (!pendingResumeFile) {
       return;
@@ -273,12 +391,12 @@ const CareersApplicationForm = () => {
       return;
     }
 
-    setResumeFile(pendingResumeFile);
+    attachResumeFile(pendingResumeFile);
+    const shouldAutofill = applicationEntry === "resume";
+    clearPendingResume();
 
-    const dataTransfer = new DataTransfer();
-    dataTransfer.items.add(pendingResumeFile);
-    if (resumeInputRef.current) {
-      resumeInputRef.current.files = dataTransfer.files;
+    if (shouldAutofill) {
+      void autofillFromResume(pendingResumeFile);
     }
 
     if (applicationEntry === "resume") {
@@ -323,13 +441,20 @@ const CareersApplicationForm = () => {
     const nameValidation = validateRequiredName(name);
     if (!nameValidation.valid) next.name = nameValidation.error;
 
-    const emailValidation = validateRequiredEmail(email);
-    if (!emailValidation.valid) next.email = emailValidation.error;
+    const emailTrimmed = email.trim();
+    if (!emailTrimmed) {
+      // Figma careers form: same copy for empty + invalid (matches phone pattern).
+      next.email = "Please enter a valid email";
+    } else {
+      const emailValidation = validateOptionalEmail(emailTrimmed);
+      if (!emailValidation.valid) next.email = emailValidation.error;
+    }
 
     const phoneValidation = validatePhone(phone, countryCode);
     if (!phoneValidation.valid) next.phone = phoneValidation.error;
 
-    if (!dateOfBirth.trim()) next.dateOfBirth = "Date of birth is required";
+    const dobError = getCareersDateOfBirthError(dateOfBirth);
+    if (dobError) next.dateOfBirth = dobError;
     if (!gender) next.gender = "Gender is required";
     if (!highestDegree.trim()) next.highestDegree = "Highest degree is required";
     if (!areaOfStudy.trim()) next.areaOfStudy = "Area of study is required";
@@ -379,20 +504,6 @@ const CareersApplicationForm = () => {
     setTouched((current) => ({ ...current, [field]: true }));
   };
 
-  const handleShare = async () => {
-    if (!selectedJob) return;
-    const url = `${window.location.origin}/careers`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: selectedJob.title, url });
-        return;
-      }
-      await navigator.clipboard.writeText(url);
-    } catch {
-      // User cancelled share or clipboard unavailable.
-    }
-  };
-
   const handleResumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     const shouldAutofill = autofillNextFileRef.current;
@@ -410,6 +521,7 @@ const CareersApplicationForm = () => {
     const validationError = getCareersResumeValidationError(file);
     if (validationError) {
       setResumeFile(null);
+      parsedResumeKeyRef.current = null;
       event.target.value = "";
       showResumeValidationToast(validationError);
       return;
@@ -557,7 +669,7 @@ const CareersApplicationForm = () => {
     }
   };
 
-  const { applicationForm, jobDetails } = applicationFlow;
+  const { applicationForm } = applicationFlow;
 
   if (!selectedJob) {
     return (
@@ -570,14 +682,14 @@ const CareersApplicationForm = () => {
   const fields = applicationForm.fields;
   const textPlaceholder = fields.fieldPlaceholder;
   const selectPlaceholder = fields.selectPlaceholder;
+  const skillSearchTerm = skillSearch.trim();
+  const showSkillSearchDropdown = skillSearchTerm.length > 0;
+  const skillsLabelText = fields.skillsLabel.replace(/\*+$/, "").trim();
+  const languagesLabelText = fields.languagesLabel.replace(/\*+$/, "").trim();
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-10" noValidate>
-      <CareersApplicationJobHeader
-        job={selectedJob}
-        shareLabel={jobDetails.shareLabel}
-        onShare={handleShare}
-      />
+      <CareersApplicationJobHeader job={selectedJob} />
 
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-6 bg-gray200 md:p-6 p-4 md:flex-row md:items-center md:justify-between">
@@ -658,22 +770,21 @@ const CareersApplicationForm = () => {
                 />
               </FormField>
               <FormField label={fields.phoneLabel} error={showError("phone") ? errors.phone : undefined}>
-                <div className="flex h-14 items-center gap-2 bg-[#F2F2F2] p-3">
-                  <div className="flex shrink-0 items-center">
-                    <select
-                      aria-label="Country code"
-                      value={countryCode}
-                      onChange={(event) => setCountryCode(event.target.value)}
-                      className="appearance-none bg-transparent font-gill text-base font-normal leading-110 text-darkblack outline-none"
-                    >
-                      {APPOINTMENT_COUNTRY_CODES.map((entry) => (
-                        <option key={entry.code} value={entry.code}>
-                          {entry.code}
-                        </option>
-                      ))}
-                    </select>
-                    <CareersChevronDownIcon />
-                  </div>
+                <div
+                  className={cn(
+                    "flex h-14 w-full items-center gap-2 border border-transparent bg-[#F2F2F2] p-3",
+                    showError("phone") && invalidFieldContainerClassName,
+                  )}
+                >
+                  <PhoneCountryCodeSelect
+                    id="careers-country-code"
+                    value={countryCode}
+                    onChange={(nextCode) => {
+                      setCountryCode(nextCode);
+                      setPhone(sanitizePhoneInput(phone, nextCode));
+                    }}
+                    onBlur={() => markTouched("phone")}
+                  />
                   <input
                     type="tel"
                     autoComplete="tel"
@@ -681,10 +792,8 @@ const CareersApplicationForm = () => {
                     value={phone}
                     onChange={(event) => setPhone(sanitizePhoneInput(event.target.value, countryCode))}
                     onBlur={() => markTouched("phone")}
-                    className={cn(
-                      "min-w-0 flex-1 bg-transparent font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600",
-                      showError("phone") && "text-red-600 placeholder:text-red-600",
-                    )}
+                    aria-invalid={showError("phone") || undefined}
+                    className="min-w-0 flex-1 bg-transparent font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:font-normal placeholder:text-gray600"
                   />
                 </div>
               </FormField>
@@ -894,59 +1003,91 @@ const CareersApplicationForm = () => {
         </section>
 
         <section className={careersFormSectionClassName}>
-          <h2 className={careersFormSectionTitleClassName}>Skills & Languages</h2>
+          <h2 className={careersFormSectionTitleClassName}>
+            {applicationForm.skillsHeading}
+          </h2>
           <FormField label="" className="max-w-[356px]" arial-hidden>
-            <p className="md:text-base text-sm font-gill font-normal font-darkblack">Add skils and known language to your application</p>
-            <div className="flex h-14 items-center justify-between bg-[#F2F2F2] p-3">
-              <input
-                type="text"
-                value={skillSearch}
-                placeholder={fields.skillsSearchPlaceholder}
-                onChange={(event) => setSkillSearch(event.target.value)}
-                onKeyDown={handleSkillSearchKeyDown}
-                className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:text-[#999999]"
-              />
-              <CareersSearchIcon />
+            <p className="md:text-base text-sm font-gill font-normal text-darkblack">
+              Add skills and known languages to your application
+            </p>
+            <div className="relative">
+              <div className="flex h-14 items-center justify-between bg-[#F2F2F2] p-3">
+                <input
+                  type="text"
+                  value={skillSearch}
+                  placeholder={fields.skillsSearchPlaceholder}
+                  onChange={(event) => setSkillSearch(event.target.value)}
+                  onKeyDown={handleSkillSearchKeyDown}
+                  className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:text-[#999999]"
+                  aria-expanded={showSkillSearchDropdown}
+                  aria-controls="careers-skills-languages-search-options"
+                />
+                <CareersSearchIcon />
+              </div>
+              {showSkillSearchDropdown ? (
+                <div
+                  id="careers-skills-languages-search-options"
+                  role="listbox"
+                  aria-label="Add search result"
+                  className="absolute left-0 right-0 top-full z-[90] mt-1 flex flex-col bg-[#F2F2F2] shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
+                >
+                  <button
+                    type="button"
+                    role="option"
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={addSkill}
+                    className="flex h-14 w-full items-center p-3 text-left font-gill text-sm font-normal leading-110 text-darkblack transition-colors hover:bg-[#DECAA0]"
+                  >
+                    Add &quot;{skillSearchTerm}&quot; as {skillsLabelText}
+                  </button>
+                  <button
+                    type="button"
+                    role="option"
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={addLanguage}
+                    className="flex h-14 w-full items-center p-3 text-left font-gill text-sm font-normal leading-110 text-darkblack transition-colors hover:bg-[#DECAA0]"
+                  >
+                    Add &quot;{skillSearchTerm}&quot; as {languagesLabelText}
+                  </button>
+                </div>
+              ) : null}
             </div>
           </FormField>
-          {skillSearch.trim() &&
-            <div className="w-full flex items-start justify-start">
-              <button
-                type="button"
-                onClick={addLanguage}
-                className="font-gill text-sm font-light leading-110 text-neutral500 underline-offset-2 hover:underline"
-              >
-                Add &quot;{skillSearch.trim()}&quot; as language
-              </button>
+          {skills.length > 0 ? (
+            <div className="flex flex-col gap-4 items-start">
+              <p className={careersFormLabelClassName}>{fields.skillsLabel}</p>
+              <div className="flex flex-wrap gap-2">
+                {skills.map((skill) => (
+                  <TagChip
+                    key={skill}
+                    label={skill}
+                    onRemove={() =>
+                      setSkills((current) => current.filter((item) => item !== skill))
+                    }
+                  />
+                ))}
+              </div>
             </div>
-          }
-          <div className="flex flex-col gap-4 items-start">
-            <p className={careersFormLabelClassName}>{fields.skillsLabel}</p>
-            <div className="flex flex-wrap gap-2">
-              {skills.map((skill) => (
-                <TagChip
-                  key={skill}
-                  label={skill}
-                  onRemove={() => setSkills((current) => current.filter((item) => item !== skill))}
-                />
-              ))}
-            </div>
-          </div>
+          ) : null}
 
-          <div className="flex flex-col gap-4">
-            <p className={careersFormLabelClassName}>{fields.languagesLabel}</p>
-            <div className="flex flex-wrap gap-2">
-              {languages.map((language) => (
-                <TagChip
-                  key={language}
-                  label={language}
-                  onRemove={() =>
-                    setLanguages((current) => current.filter((item) => item !== language))
-                  }
-                />
-              ))}
+          {languages.length > 0 ? (
+            <div className="flex flex-col gap-4">
+              <p className={careersFormLabelClassName}>{fields.languagesLabel}</p>
+              <div className="flex flex-wrap gap-2">
+                {languages.map((language) => (
+                  <TagChip
+                    key={language}
+                    label={language}
+                    onRemove={() =>
+                      setLanguages((current) =>
+                        current.filter((item) => item !== language),
+                      )
+                    }
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          ) : null}
         </section>
 
         <section className={careersFormSectionClassName}>
@@ -957,7 +1098,7 @@ const CareersApplicationForm = () => {
           <div
             className={cn(
               "flex max-w-[356px] flex-col gap-3",
-              showError("companyRelation") && "rounded-sm ring-1 ring-red-600 p-3 -m-3",
+              showError("companyRelation") && "rounded-sm ring-1 ring-[#F91616] p-3 -m-3",
             )}
           >
             <p className={careersFormLabelClassName}>{fields.companyRelationLabel}</p>
@@ -1039,6 +1180,8 @@ const CareersApplicationForm = () => {
         uploadResumeModal={applicationForm.uploadResumeModal}
         open={uploadResumeModalOpen}
         onOpenChange={setUploadResumeModalOpen}
+        onOnlyUpload={() => openResumeFilePicker(false)}
+        onAutofillResume={() => openResumeFilePicker(true)}
         onOnlyUpload={() => openResumeFilePicker(false)}
         onAutofillResume={() => openResumeFilePicker(true)}
       />

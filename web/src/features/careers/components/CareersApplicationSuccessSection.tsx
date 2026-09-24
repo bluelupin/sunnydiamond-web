@@ -16,7 +16,7 @@ const CareersApplicationSuccessSection = () => {
       aria-labelledby="careers-success-title"
       className="bg-white md:px-0 px-4 md:py-[88px] sm:py-16 py-10 max-w-[560px] mx-auto"
     >
-      <div className="flex w-full flex-col items-center gap-6 text-center">
+          <div className="flex w-full flex-col items-center gap-6 text-center">
         <Reveal direction="up" className="flex flex-col items-center gap-6">
           <CareersApplicationSuccessIcon />
           <h1
@@ -25,21 +25,27 @@ const CareersApplicationSuccessSection = () => {
           >
             {applicationSuccess.title}
           </h1>
-          <div className="flex w-full flex-col gap-4">
-            <p className="font-gill md:text-base text-sm leading-110 text-darkblack">{applicationSuccess.descriptionLine1}</p>
-            <p className="font-gill md:text-base text-sm leading-110 text-darkblack">{applicationSuccess.descriptionLine2}</p>
+          <div className="flex w-full flex-col gap-0">
+            <p className="font-gill md:text-base text-sm font-light leading-110 text-darkblack">
+              {applicationSuccess.descriptionLine1}
+            </p>
+            {applicationSuccess.descriptionLine2 ? (
+              <p className="font-gill md:text-base text-sm font-light leading-110 text-darkblack">
+                {applicationSuccess.descriptionLine2}
+              </p>
+            ) : null}
           </div>
         </Reveal>
 
         {selectedJob ? (
           <Reveal direction="up" className="flex w-full flex-col gap-4 bg-gray300 p-6 text-left">
             <h2 className="font-larken md:text-xl text-base font-light leading-110 text-darkblack">
-              {applicationSuccess.appliedJobDetailsHeading} 
+              {applicationSuccess.appliedJobDetailsHeading}
             </h2>
             <div className="h-px w-full bg-neutral300" aria-hidden />
             <p className="font-gill md:text-base text-sm leading-110 text-darkblack flex items-center justify-between gap-2 w-full">
-              <span className="font-light">{applicationSuccess.jobTitleLabel} </span>
-              <span className="font-normal">{selectedJob.title}</span>
+              <span className="font-light">{applicationSuccess.jobTitleLabel}</span>
+              <span className="font-normal text-right">{selectedJob.title}</span>
             </p>
             <CareersSuccessJobIdCopy
               jobCode={selectedJob.jobCode}

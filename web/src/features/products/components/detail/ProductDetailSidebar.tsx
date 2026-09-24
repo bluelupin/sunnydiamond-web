@@ -1,16 +1,22 @@
 "use client";
 
-import { useState, useEffect, useRef, type ReactNode } from "react";
+import { useState, useEffect, useRef, useCallback, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import {
   AttributeSeparator,
   DetailDarkButton,
   DetailOutlineButton,
+  DetailOutlineLink,
   DetailTextLink,
 } from "./shared";
 import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
+import FormFieldError from "@/shared/ui/FormFieldError";
+import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
 import type { Product } from "@/features/products/data/products";
 import type { ProductDetailContent, ProductDetailPricing } from "@/features/products/types/productDetail";
@@ -18,19 +24,36 @@ import type { AddToBagPayload } from "@/features/cart/types/cart.types";
 import {
   buildEngravingCartLineOptions,
   isProductEngravingEnabled,
+  resolveProductEngravingConfig,
   type EngravingSelection,
 } from "@/features/products/constants/engraving";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
+import { useAuth } from "@/features/auth/context/AuthContext";
+import { useLoginModal } from "@/features/auth/context/LoginModalContext";
 import PlusIcon from "@/assets/Icons/PlusIcon";
 import WishlistIcon from "@/assets/Icons/WishlistIcon";
 import VanIcon from "@/assets/Icons/VanIcon";
 import StoreIcon from "@/assets/Icons/StoreIcon";
+import GiftingPanelCheckbox from "@/shared/ui/GiftingPanelCheckbox";
+import { GiftingCheckboxLabelRow } from "@/shared/ui/GiftingCheckboxLabelRow";
 import Reveal from "@/shared/Animation/Reveal";
 import ProductDetailAccordions from "./ProductDetailAccordions";
+import NotifyWhenAvailableButton from "./NotifyWhenAvailableButton";
 import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
+import type { NormalizedProductDisplayPage } from "@/services/product-display/product-display-page.service";
 import { getRingSizeLabels } from "@/features/products/utils/ringSizeOptions.utils";
 import { isMetalColorSelectable } from "@/features/products/utils/metalColorOptions.utils";
-import { getConfigurableOptionUidsForMetal } from "@/features/products/utils/productVariant.utils";
+import {
+  findConfigurableVariantForMetal,
+  getConfigurableOptionUidsForMetal,
+} from "@/features/products/utils/productVariant.utils";
+import {
+  resolveHereForYouButtonVariant,
+  resolveHereForYouPanelAction,
+  resolvePersonaliseButtonVariant,
+  type HereForYouPanelAction,
+} from "@/features/products/utils/hereForYouCardActions";
+import type { NormalizedProductDisplayCardButton } from "@/services/product-display/product-display-page.types";
 
 const MetalEngravingPanel = dynamic(() => import("./MetalEngravingPanel"), { ssr: false });
 const RingSizeChartPanel = dynamic(() => import("./RingSizeChartPanel"), { ssr: false });
@@ -52,7 +75,10 @@ type ProductDetailSidebarProps = {
   preferredPurities?: readonly string[];
   onSelectedMetalChange?: (metalId: string) => void;
   sizeGuide?: NormalizedSizeGuide | null;
-  onAddToBag: (payload: AddToBagPayload) => void;
+  productDisplay: NormalizedProductDisplayPage;
+  /** Server-read MAGENTO_STOCK_ALERT deploy gate for the notify-me action. */
+  stockAlertEnabled?: boolean;
+  onAddToBag: (payload: AddToBagPayload) => void | Promise<void>;
   initialRingSize?: string;
   initialEngravingSelection?: EngravingSelection | null;
   initialIsGift?: boolean;
@@ -73,6 +99,8 @@ const ProductDetailSidebar = ({
   preferredPurities = [],
   onSelectedMetalChange,
   sizeGuide = null,
+  productDisplay,
+  stockAlertEnabled = false,
   onAddToBag,
   initialRingSize,
   initialEngravingSelection = null,
@@ -80,6 +108,7 @@ const ProductDetailSidebar = ({
   addToBagLabel = "Add to Bag",
   children,
 }: ProductDetailSidebarProps) => {
+  const { windows } = useUiPlatform();
   const [selectedMetalInternal, setSelectedMetalInternal] = useState(
     () => selectedMetalProp ?? content.metalColors[0]?.id ?? "",
   );
@@ -100,14 +129,188 @@ const ProductDetailSidebar = ({
   const [isTryAtHomeOpen, setIsTryAtHomeOpen] = useState(false);
   const [isPersonaliseOpen, setIsPersonaliseOpen] = useState(false);
   const [isPriceBreakupOpen, setIsPriceBreakupOpen] = useState(false);
+  const [isAddingToBag, setIsAddingToBag] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname() ?? "/";
+  const { status } = useAuth();
+  const { openLoginModal } = useLoginModal();
   const { isWishlisted, toggleWishlist } = useWishlist();
   const wishlisted = isWishlisted(product.id);
-  const engravingConfig = product.engraving;
+  const engravingConfig = resolveProductEngravingConfig(product);
   const engravingEnabled = isProductEngravingEnabled(engravingConfig);
   const sizeLabels = getRingSizeLabels(product, sizeGuide);
   const showSizeSelector = sizeLabels.length > 0;
   const metalColorSelectable = isMetalColorSelectable(product);
   const showMetalColor = content.metalColors.length > 0;
+  const { strip, findYourSizeLabel, hereForYou, personalise } = productDisplay;
+  const showBenefitsStrip = strip.items.length > 0 && strip.title.trim().length > 0;
+  const showStripTnc = strip.tnc.label.trim().length > 0 && strip.tnc.href.trim().length > 0;
+  const showFindYourSizeLink = findYourSizeLabel.trim().length > 0;
+  const [pendingHereForYouPanel, setPendingHereForYouPanel] = useState<
+    "video-call" | "try-at-home" | null
+  >(null);
+
+  const openHereForYouPanel = useCallback(
+    (action: HereForYouPanelAction) => {
+      if (action === "video-call" || action === "try-at-home") {
+        if (status !== "authenticated") {
+          setPendingHereForYouPanel(action);
+          openLoginModal({ returnUrl: pathname });
+          return;
+        }
+
+        if (action === "video-call") {
+          setIsVideoCallOpen(true);
+        } else {
+          setIsTryAtHomeOpen(true);
+        }
+        return;
+      }
+
+      if (action === "personalise") {
+        setIsPersonaliseOpen(true);
+      }
+    },
+    [openLoginModal, pathname, status],
+  );
+
+  useEffect(() => {
+    if (status !== "authenticated" || !pendingHereForYouPanel) {
+      return;
+    }
+
+    if (pendingHereForYouPanel === "video-call") {
+      setIsVideoCallOpen(true);
+    } else {
+      setIsTryAtHomeOpen(true);
+    }
+    setPendingHereForYouPanel(null);
+  }, [pendingHereForYouPanel, status]);
+
+  const renderHereForYouButton = (button: NormalizedProductDisplayCardButton, index: number) => {
+    const panelAction = resolveHereForYouPanelAction(button.modalTag);
+    const handlePanelOpen = panelAction ? () => openHereForYouPanel(panelAction) : undefined;
+    const linkTarget = button.openInNewTab ? "_blank" : undefined;
+    const linkRel = button.openInNewTab ? "noopener noreferrer" : undefined;
+    const key = `${button.label}-${index}`;
+    const variant = resolveHereForYouButtonVariant(button.modalTag, button.style);
+
+    if (variant === "primary") {
+      if (handlePanelOpen) {
+        return (
+          <DetailDarkButton key={key} onClick={handlePanelOpen} className="uppercase hover:!border-transparent" style={{ borderColor: "transparent" }}>
+            {button.label}
+          </DetailDarkButton>
+        );
+      }
+
+      if (button.url) {
+        return (
+          <Link
+            key={key}
+            href={button.url}
+            target={linkTarget}
+            rel={linkRel}
+            className="btn-dark-slide inline-flex h-14 w-full items-center justify-center border border-black px-7 font-gill text-sm uppercase leading-110 text-white"
+          >
+            {button.label}
+          </Link>
+        );
+      }
+
+      return null;
+    }
+
+    if (handlePanelOpen || button.url) {
+      return (
+        <DetailTextLink
+          key={key}
+          href={button.url}
+          onClick={handlePanelOpen}
+          target={linkTarget}
+          rel={linkRel}
+          className="self-start uppercase"
+        >
+          {button.label}
+        </DetailTextLink>
+      );
+    }
+
+    return null;
+  };
+
+  const renderPersonaliseButton = (button: NormalizedProductDisplayCardButton, index: number) => {
+    const panelAction = resolveHereForYouPanelAction(button.modalTag);
+    const handlePanelOpen = panelAction ? () => openHereForYouPanel(panelAction) : undefined;
+    const linkTarget = button.openInNewTab ? "_blank" : undefined;
+    const linkRel = button.openInNewTab ? "noopener noreferrer" : undefined;
+    const key = `${button.label}-${index}`;
+    const variant = resolvePersonaliseButtonVariant(button.modalTag, button.style);
+    const buttonClassName = "w-fit uppercase hover:!border-neutral300";
+
+    if (variant === "outline") {
+      if (handlePanelOpen) {
+        return (
+          <DetailOutlineButton key={key} onClick={handlePanelOpen} className={buttonClassName}>
+            {button.label}
+          </DetailOutlineButton>
+        );
+      }
+
+      if (button.url) {
+        return (
+          <DetailOutlineLink key={key} href={button.url} className={buttonClassName}>
+            {button.label}
+          </DetailOutlineLink>
+        );
+      }
+
+      return null;
+    }
+
+    if (variant === "primary") {
+      if (handlePanelOpen) {
+        return (
+          <DetailDarkButton key={key} onClick={handlePanelOpen} className={buttonClassName}>
+            {button.label}
+          </DetailDarkButton>
+        );
+      }
+
+      if (button.url) {
+        return (
+          <Link
+            key={key}
+            href={button.url}
+            target={linkTarget}
+            rel={linkRel}
+            className="btn-dark-slide inline-flex h-14 w-fit items-center justify-center border border-black px-7 font-gill text-sm uppercase leading-110 text-white"
+          >
+            {button.label}
+          </Link>
+        );
+      }
+
+      return null;
+    }
+
+    if (handlePanelOpen || button.url) {
+      return (
+        <DetailTextLink
+          key={key}
+          href={button.url}
+          onClick={handlePanelOpen}
+          target={linkTarget}
+          rel={linkRel}
+          className={cn("self-start", buttonClassName)}
+        >
+          {button.label}
+        </DetailTextLink>
+      );
+    }
+
+    return null;
+  };
 
   useEffect(() => {
     setRingSize(initialRingSize ?? "");
@@ -151,22 +354,72 @@ const ProductDetailSidebar = ({
     preferredPurities,
   );
 
+  // Notify-me watches the SKU whose stock the shopper is actually seeing: the
+  // selected metal variant when one exists, else the parent product.
+  const selectedVariantSku = findConfigurableVariantForMetal(
+    product,
+    selectedMetal,
+    preferredPurities,
+  )?.sku?.trim();
+  const stockAlertSku = selectedVariantSku || product.id;
+  const showNotifyWhenAvailable = stockAlertEnabled && !displayProduct.inStock;
+  const addingToBagLabel = addToBagLabel === "Update Bag" ? "Updating…" : "Adding…";
+
+  const handleAddToBagClick = async () => {
+    if (isAddingToBag) return;
+
+    if (showSizeSelector && !ringSize.trim()) {
+      setRingSizeError(
+        `Please select a ${(sizeGuide?.sizeFieldLabel ?? "size").trim().toLowerCase()}.`,
+      );
+      return;
+    }
+
+    setIsAddingToBag(true);
+    try {
+      await onAddToBag({
+        product: displayProduct,
+        options: {
+          metal: activeMetal?.label,
+          ringSize: ringSize || undefined,
+          ...(engravingEnabled && engravingConfig
+            ? buildEngravingCartLineOptions(engravingConfig, engravingSelection)
+            : {}),
+          isGift,
+        },
+        ...(configurableOptionUids.length > 0 ? { configurableOptionUids } : {}),
+        productCustomOptions: product.customOptions,
+      });
+    } finally {
+      setIsAddingToBag(false);
+    }
+  };
+
   const purchaseSection = (
     <div className="flex flex-col gap-10 px-4 pt-8 md:pt-6 md:px-0 lg:pt-0">
       <div className="flex flex-col gap-10">
         <div className="flex flex-col gap-6">
           <header className="flex flex-col gap-4">
             <ul className="m-0 flex list-none flex-wrap items-center gap-3 p-0">
-              {content.attributes.map((attribute, index) => (
+              {content.attributes.slice(0, 3).map((attribute, index, attributes) => (
                 <li key={attribute} className="flex items-center gap-3">
-                  {index > 0 ? <AttributeSeparator /> : null}
-                  <span className="font-gill text-base font-light leading-110 text-neutral500">
+                  {index > 0 ? (
+                    <AttributeSeparator className={cn(!windows && "-translate-y-0.5")}
+                    // className={index === attributes.length - 1 ? "max-xl:hidden max-md:block max-sm:hidden" : undefined}
+                    />
+                  ) : null}
+                  <span className={cn("font-gill text-base font-light leading-110 text-neutral500")}>
                     {attribute}
                   </span>
                 </li>
               ))}
             </ul>
-            <h1 className="font-larken text-2xl font-light leading-110 text-darkblack lg:text-32">
+            <h1
+              className={cn(
+                "font-larken text-2xl font-light leading-110 text-darkblack lg:text-32",
+                productNameDisplayClassName,
+              )}
+            >
               {product.name}
             </h1>
           </header>
@@ -212,9 +465,11 @@ const ProductDetailSidebar = ({
                   <p className="font-gill text-base leading-normal tracking-normal text-darkblack">
                     {sizeGuide?.sizeFieldLabel ?? "Size"}
                   </p>
-                  <DetailTextLink onClick={() => setIsRingSizeChartOpen(true)} className="uppercase">
-                    Find your size
-                  </DetailTextLink>
+                  {showFindYourSizeLink ? (
+                    <DetailTextLink onClick={() => setIsRingSizeChartOpen(true)} className="uppercase">
+                      {findYourSizeLabel}
+                    </DetailTextLink>
+                  ) : null}
                 </div>
                 <InlineCustomSelect
                   id="product-ring-size"
@@ -222,7 +477,7 @@ const ProductDetailSidebar = ({
                   labelClassName="sr-only"
                   value={ringSize}
                   options={sizeLabels}
-                  placeholder="-select-"
+                  placeholder="Select"
                   onChange={(value) => {
                     setRingSize(value);
                     if (value) {
@@ -233,11 +488,7 @@ const ProductDetailSidebar = ({
                   listClassName="bg-aboutInactive"
                   optionClassName="text-base"
                 />
-                {ringSizeError ? (
-                  <p className="font-gill text-sm font-light leading-110 text-[#F91616]">
-                    {ringSizeError}
-                  </p>
-                ) : null}
+                <FormFieldError message={ringSizeError ?? undefined} />
               </div>
             ) : null}
 
@@ -258,7 +509,7 @@ const ProductDetailSidebar = ({
 
         <div className="flex flex-col gap-4">
           <div className="flex items-end justify-between gap-4">
-            <div className="flex items-center gap-3 font-gill text-2xl leading-110 text-darkblack">
+            <div className="flex items-center gap-3 font-gill md:text-2xl text-xl leading-110 text-darkblack">
               <span>₹{formatJewelleryPrice(pricing.price)}</span>
               {pricing.originalPrice != null && pricing.originalPrice > pricing.price ? (
                 <span className="text-gray600 line-through">
@@ -274,40 +525,31 @@ const ProductDetailSidebar = ({
           </div>
 
           <div className="flex gap-2">
-            <DetailDarkButton
-              className="flex-1 uppercase"
-              onClick={() => {
-                if (showSizeSelector && !ringSize.trim()) {
-                  setRingSizeError(
-                    `Please select a ${(sizeGuide?.sizeFieldLabel ?? "size").trim().toLowerCase()}.`,
-                  );
-                  return;
-                }
-
-                onAddToBag({
-                  product: displayProduct,
-                  options: {
-                    metal: activeMetal?.label,
-                    ringSize: ringSize || undefined,
-                    ...(engravingEnabled && engravingConfig
-                      ? buildEngravingCartLineOptions(engravingConfig, engravingSelection)
-                      : {}),
-                    isGift,
-                  },
-                  ...(configurableOptionUids.length > 0
-                    ? { configurableOptionUids }
-                    : {}),
-                  productCustomOptions: product.customOptions,
-                });
-              }}
-            >
-              {addToBagLabel}
-            </DetailDarkButton>
+            {showNotifyWhenAvailable ? (
+              // Keyed by SKU: a metal/purity switch is a different alert, so state resets.
+              <NotifyWhenAvailableButton key={stockAlertSku} sku={stockAlertSku} />
+            ) : (
+              <DetailDarkButton
+                className="flex-1 uppercase disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => {
+                  void handleAddToBagClick();
+                }}
+                disabled={isAddingToBag}
+              >
+                {isAddingToBag ? addingToBagLabel : addToBagLabel}
+              </DetailDarkButton>
+            )}
             <button
               type="button"
               aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
               aria-pressed={wishlisted}
-              onClick={() => toggleWishlist(product.id)}
+              onClick={() => {
+                if (status !== "authenticated") {
+                  router.push("/wishlist");
+                  return;
+                }
+                toggleWishlist(product.id);
+              }}
               className="inline-flex size-14 shrink-0 items-center justify-center bg-aboutInactive"
             >
               <WishlistIcon
@@ -322,15 +564,18 @@ const ProductDetailSidebar = ({
         </div>
 
         <label className="flex cursor-pointer flex-col gap-3 bg-aboutInactive p-4">
-          <span className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={isGift}
-              onChange={(event) => setIsGift(event.target.checked)}
-              className="size-4 border border-darkblack accent-darkblack"
-            />
-            <span className="font-gill text-base leading-110 text-darkblack">Mark this as a gift</span>
-          </span>
+          <GiftingCheckboxLabelRow
+            gap={2}
+            checkbox={
+              <GiftingPanelCheckbox
+                id="pdp-mark-as-gift"
+                checked={isGift}
+                onChange={setIsGift}
+                aria-label="Mark this as a gift"
+              />
+            }
+            label="Mark this as a gift"
+          />
           <span className="font-gill text-base font-light leading-110 text-darkblack">
             Make this a special with a gift bag and a personalized message.
           </span>
@@ -344,23 +589,31 @@ const ProductDetailSidebar = ({
               value={zipCode}
               onChange={(event) => setZipCode(event.target.value)}
               aria-label="Delivery zip code"
-              className="h-14 min-w-0 flex-1 border border-neutral500 px-6 font-gill text-base text-darkblack outline-none"
+              className="h-14 min-w-0 flex-1 border border-aboutInactive bg-aboutInactive px-6 font-gill text-base text-darkblack outline-none"
             />
             <DetailDarkButton className="w-auto shrink-0 px-7 uppercase">Check</DetailDarkButton>
           </div>
           <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <VanIcon className="shrink-0" />
-              <p className="font-gill text-base font-light leading-110 text-darkblack">
+            <div className="grid w-full grid-cols-[24px_minmax(0,1fr)] items-center gap-x-2">
+              <VanIcon className={cn(
+                "flex size-6 items-center justify-center leading-none",
+                !windows && "-translate-y-0.5",
+              )} />
+              <p className="m-0 min-w-0 self-center font-gill text-base font-light leading-110 text-darkblack">
                 Estimated delivery May 12 2026
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <StoreIcon className="shrink-0" />
-              <p className="font-gill text-base font-light leading-110 text-darkblack">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <StoreIcon className={cn(
+                "flex size-6 shrink-0 items-center justify-center leading-none",
+                !windows && "-translate-y-0.5",
+              )} />
+              <p className="m-0 font-gill text-base font-light leading-110 text-darkblack">
                 Available now at nearest store
               </p>
-              <DetailTextLink onClick={() => setIsDeliveryStoreOpen(true)}>Coimbatore</DetailTextLink>
+              <DetailTextLink onClick={() => setIsDeliveryStoreOpen(true)} className="self-center">
+                Coimbatore
+              </DetailTextLink>
             </div>
           </div>
         </div>
@@ -370,142 +623,164 @@ const ProductDetailSidebar = ({
 
   const detailsSection = (
     <div className="flex flex-col gap-10 px-4 md:px-0 md:pb-12 lg:px-0 !pb-0">
-      <section aria-label="Shopping benefits" className="flex flex-col gap-6">
-        <div className="flex items-center justify-between">
-          <h2 className="font-gill text-2xl leading-110 text-darkblack">With Sunny, you get</h2>
-          <DetailTextLink href="/terms-and-conditions">T&amp;C Apply</DetailTextLink>
-        </div>
-        <Reveal direction="up">
-          <ul className="m-0 flex list-none flex-col bg-benefitSurface p-0 max-md:-mx-4 max-md:gap-6 max-md:px-4 max-md:py-10 md:max-desktop:portrait:gap-6 md:max-desktop:portrait:p-6 md:landscape:flex-row md:landscape:items-stretch md:landscape:gap-4 md:landscape:p-6 lg:landscape:gap-4">
-            {content.benefits.flatMap((benefit, index) => {
-              const item = (
-                <li
-                  key={benefit.label}
-                  className={cn(
-                    "flex w-full shrink-0 flex-col items-center justify-center text-center",
-                    "max-md:gap-2 max-md:px-3 max-md:py-4",
-                    "md:max-desktop:portrait:gap-2 md:max-desktop:portrait:px-3 md:max-desktop:portrait:py-4",
-                    "md:landscape:h-136 md:landscape:flex-1 md:landscape:gap-2 md:landscape:p-3",
-                    index > 0 && "md:landscape:border-l md:landscape:border-gray600",
-                  )}
-                >
-                  <div className="flex size-10 shrink-0 items-center justify-center">
-                    <Image
-                      src={benefit.icon}
-                      alt=""
-                      width={40}
-                      height={40}
-                      aria-hidden
-                      className="size-10 object-contain"
-                    />
-                  </div>
-                  <span className="font-gill text-base leading-110 text-darkblack md:landscape:hidden">
-                    {benefit.mobileLabel}
-                  </span>
-                  <span className="hidden font-gill text-base leading-110 text-darkblack md:landscape:block">
-                    {benefit.lines[0]}
-                    <br />
-                    {benefit.lines[1]}
-                  </span>
-                </li>
-              );
-
-              if (index === 0) return [item];
-
-              return [
-                <li
-                  key={`${benefit.label}-divider`}
-                  role="presentation"
-                  aria-hidden
-                  className="block h-[1px] min-h-px w-full shrink-0 bg-[#999999] p-0 md:landscape:hidden"
-                />,
-                item,
-              ];
-            })}
-          </ul>
-        </Reveal>
-      </section>
-
-      <section
-        aria-label="Customer support"
-        className="flex min-h-260 items-center overflow-hidden bg-supportSurface px-6 py-8"
-      >
-        <Reveal direction="up" className="flex max-w-358 flex-col gap-10">
-          <div className="flex flex-col gap-3">
-            <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
-              We&apos;re here for you
-            </h2>
-            <p className="font-gill text-base font-light leading-110 text-darkblack">
-              Our salesperson will personally help you choose the right diamond.
-            </p>
+      {showBenefitsStrip ? (
+        <section aria-label="Shopping benefits" className="flex flex-col gap-6">
+          <div className="flex items-center justify-between">
+            <h2 className="font-gill md:text-2xl text-xl leading-110 text-darkblack">{strip.title}</h2>
+            {showStripTnc ? (
+              <DetailTextLink
+                href={strip.tnc.href}
+                target={strip.tnc.openInNewTab ? "_blank" : undefined}
+                rel={strip.tnc.openInNewTab ? "noopener noreferrer" : undefined}
+              >
+                {strip.tnc.label}
+              </DetailTextLink>
+            ) : null}
           </div>
-          <div className="flex max-w-220 flex-col gap-3">
-            <DetailDarkButton onClick={() => setIsVideoCallOpen(true)} className="uppercase">
-              Schedule a Video Call
-            </DetailDarkButton>
-            <DetailTextLink onClick={() => setIsTryAtHomeOpen(true)} className="self-start uppercase">
-              Try At Home
-            </DetailTextLink>
-          </div>
-        </Reveal>
-      </section>
+          <Reveal direction="up">
+            <ul className="m-0 flex list-none flex-col bg-benefitSurface p-0 max-md:-mx-4 max-md:gap-6 max-md:px-4 max-md:py-10 md:max-desktop:portrait:gap-6 md:max-desktop:portrait:p-6 md:landscape:flex-row md:landscape:items-stretch md:landscape:gap-4 md:landscape:p-3 lg:landscape:p-6 lg:landscape:gap-4">
+              {strip.items.flatMap((benefit, index) => {
+                const item = (
+                  <li
+                    key={benefit.label}
+                    className={cn(
+                      "flex w-full shrink-0 flex-col items-center justify-center text-center",
+                      "max-md:gap-2 max-md:px-3 max-md:py-4",
+                      "md:max-desktop:portrait:gap-2 md:max-desktop:portrait:px-3 md:max-desktop:portrait:py-4",
+                      "md:landscape:h-136 md:landscape:flex-1 md:landscape:gap-2 md:landscape:p-3",
+                      index > 0 && "md:landscape:border-l-[0.5px] md:landscape:border-neutral300 border-gray600",
+                    )}
+                  >
+                    <div className="flex size-10 shrink-0 items-center justify-center">
+                      <Image
+                        src={benefit.icon}
+                        alt=""
+                        width={40}
+                        height={40}
+                        aria-hidden
+                        className="size-10 object-contain"
+                      />
+                    </div>
+                    <span className="font-gill text-base leading-110 text-darkblack md:landscape:hidden">
+                      {benefit.mobileLabel}
+                    </span>
+                    <span className="hidden font-gill text-base leading-110 text-darkblack md:landscape:block">
+                      {benefit.lines[0]}
+                      {benefit.lines[1] ? (
+                        <>
+                          <br />
+                          {benefit.lines[1]}
+                        </>
+                      ) : null}
+                    </span>
+                  </li>
+                );
+
+                if (index === 0) return [item];
+
+                return [
+                  <li
+                    key={`${benefit.label}-divider`}
+                    role="presentation"
+                    aria-hidden
+                    className="block h-[0.5px] min-h-[0.5px] w-full shrink-0 bg-[#999999] p-0 md:landscape:hidden"
+                  />,
+                  item,
+                ];
+              })}
+            </ul>
+          </Reveal>
+        </section>
+      ) : null}
+
+      {hereForYou.isActive ? (
+        <section
+          aria-label="Customer support"
+          className="flex items-center overflow-hidden bg-supportSurface md:px-6 px-4 py-6"
+        >
+          <Reveal direction="up" className="flex max-w-358 flex-col gap-6">
+            <div className="flex flex-col gap-3">
+              <h2 className="font-larken md:text-2xl text-xl font-light leading-110 text-darkblack">
+                {hereForYou.title}
+              </h2>
+              <p className="font-gill text-base font-light leading-110 text-darkblack">
+                {hereForYou.subtitle}
+              </p>
+            </div>
+            {hereForYou.buttons.length > 0 ? (
+              <div className="flex w-fit flex-col gap-3">
+                {hereForYou.buttons.map(renderHereForYouButton)}
+              </div>
+            ) : null}
+          </Reveal>
+        </section>
+      ) : null}
 
       <ProductDetailAccordions items={content.accordions} />
 
-      <section
-        aria-label="Personalisation"
-        className={cn(
-          "flex overflow-hidden bg-chalkCard pr-0",
-          "items-end justify-between pl-4 py-6",
-          "max-lg:portrait:flex-col max-lg:portrait:items-stretch max-lg:portrait:justify-start max-lg:portrait:gap-6 max-lg:portrait:py-8 max-lg:portrait:pl-6",
-          "md:landscape:flex-row md:landscape:items-stretch md:landscape:justify-between md:landscape:gap-4 md:landscape:py-6 md:landscape:pl-6",
-          "lg:flex-row lg:items-stretch lg:justify-between lg:gap-4 lg:py-6 lg:pl-6",
-          "desktop:min-h-260 desktop:items-end desktop:gap-0 desktop:py-6",
-        )}
-      >
-        <div
+      {personalise.isActive ? (
+        <section
+          aria-label="Personalisation"
           className={cn(
-            "flex shrink-0 flex-col gap-6",
-            "max-w-[172px] max-md:-mr-[22px]",
-            "max-lg:portrait:max-w-none max-lg:portrait:mr-0",
-            "md:landscape:min-w-0 md:landscape:flex-1 md:landscape:justify-center md:landscape:py-2 md:landscape:max-w-[54%]",
-            "lg:min-w-0 lg:flex-1 lg:justify-center lg:py-2 lg:max-w-[54%]",
-            "desktop:max-w-280 desktop:justify-start desktop:gap-10 desktop:py-0",
+            "flex overflow-hidden bg-chalkCard pr-0",
+            "items-end justify-between pl-4 py-6",
+            "max-md:mx-0 max-md:flex-row max-md:items-end max-md:justify-between max-md:pl-4 max-md:py-6",
+            "md:max-lg:portrait:flex-col md:max-lg:portrait:items-stretch md:max-lg:portrait:justify-start md:max-lg:portrait:gap-6 md:max-lg:portrait:py-8 md:max-lg:portrait:pl-6 md:max-lg:portrait:mx-0",
+            "md:landscape:flex-row md:landscape:items-stretch md:landscape:justify-between md:landscape:gap-4 md:landscape:py-6 md:landscape:pl-6 md:landscape:mx-0",
+            "lg:flex-row lg:items-stretch lg:justify-between lg:gap-4 lg:py-6 lg:pl-6",
+            "desktop:min-h-260 desktop:items-end desktop:gap-0 desktop:py-6",
           )}
         >
-          <div className="flex flex-col gap-3">
-            <h2 className="font-larken text-xl font-light leading-110 text-darkblack max-lg:portrait:whitespace-normal lg:whitespace-normal desktop:w-max desktop:whitespace-nowrap desktop:text-2xl">
-              Personalise this for you
-            </h2>
-            <p className="font-gill text-sm font-light leading-110 text-darkblack lg:text-base">
-              Change the gemstone and much more to make it truly yours!
-            </p>
+          <div
+            className={cn(
+              "flex shrink-0 flex-col md:gap-10 gap-6",
+              "max-w-[276px]",
+              "max-md:min-w-0 max-md:max-w-[276px] max-md:mr-0",
+              "md:max-lg:portrait:max-w-none md:max-lg:portrait:mr-0 md:max-lg:portrait:flex-none",
+              "md:landscape:min-w-0 md:landscape:flex-1 md:landscape:justify-center md:landscape:py-2 md:landscape:max-w-[54%]",
+              "lg:min-w-0 lg:flex-1 lg:justify-center lg:py-2 lg:max-w-[54%]",
+              "desktop:max-w-280 desktop:justify-start desktop:gap-10 desktop:py-0",
+            )}
+          >
+            <div className="flex flex-col gap-3">
+              <h2 className="font-larken text-xl font-light leading-110 text-darkblack md:max-lg:portrait:whitespace-normal lg:whitespace-normal desktop:w-max desktop:whitespace-nowrap desktop:text-2xl">
+                {personalise.title}
+              </h2>
+              <p className="font-gill text-sm font-light leading-110 text-darkblack max-md:max-w-[220px] lg:text-base md:max-lg:portrait:max-w-none">
+                {personalise.subtitle}
+              </p>
+            </div>
+            {personalise.buttons.length > 0 ? (
+              <div className="flex flex-col gap-3">
+                {personalise.buttons.map(renderPersonaliseButton)}
+              </div>
+            ) : null}
           </div>
-          <DetailOutlineButton className="w-fit uppercase" onClick={() => setIsPersonaliseOpen(true)}>
-            Get in Touch
-          </DetailOutlineButton>
-        </div>
-        <div
-          className={cn(
-            "relative shrink-0 overflow-hidden",
-            "h-[118px] w-177",
-            "max-lg:portrait:aspect-[322/213] max-lg:portrait:h-auto max-lg:portrait:w-full max-lg:portrait:flex-none",
-            "md:landscape:ml-auto md:landscape:h-auto md:landscape:min-h-[200px] md:landscape:w-auto md:landscape:min-w-[160px] md:landscape:max-w-[46%] md:landscape:flex-1 md:landscape:self-stretch",
-            "lg:ml-auto lg:h-auto lg:min-h-[200px] lg:w-auto lg:min-w-[160px] lg:max-w-[46%] lg:flex-1 lg:self-stretch",
-            "desktop:h-[213px] desktop:w-[322px] desktop:min-h-0 desktop:min-w-0 desktop:max-w-none desktop:flex-none desktop:self-auto",
-          )}
-        >
-          <Image
-            src={content.personaliseImage}
-            alt=""
-            width={322}
-            height={213}
-            aria-hidden
-            className="size-full object-cover object-center max-lg:portrait:object-[center_15%] md:landscape:object-[center_20%] lg:object-[center_20%] desktop:object-[center_-4%]"
-            sizes="(max-width: 1023px) 100vw, 322px"
-          />
-        </div>
-      </section>
+          <div
+            className={cn(
+              "relative shrink-0 overflow-hidden",
+              "h-[118px] w-[177px]",
+              "max-md:h-[118px] max-sm:h-auto max-md:w-[177px] max-sm:w-[107px] max-md:flex-none",
+              "md:max-lg:portrait:aspect-[322/213] md:max-lg:portrait:h-auto md:max-lg:portrait:w-full md:max-lg:portrait:flex-none",
+              "md:landscape:ml-auto md:landscape:h-auto md:landscape:min-h-[200px] md:landscape:w-auto md:landscape:min-w-[160px] md:landscape:max-w-[46%] md:landscape:flex-1 md:landscape:self-stretch",
+              "lg:ml-auto lg:h-auto lg:min-h-[200px] lg:w-auto lg:min-w-[160px] lg:max-w-[46%] lg:flex-1 lg:self-stretch",
+              "desktop:h-[213px] desktop:w-[322px] desktop:min-h-0 desktop:min-w-0 desktop:max-w-none desktop:flex-none desktop:self-auto",
+            )}
+          >
+            {personalise.imageSrc ? (
+              <Image
+                src={personalise.imageSrc}
+                alt=""
+                width={322}
+                height={213}
+                aria-hidden
+                className="size-full object-cover object-center max-md:object-[center_15%] md:max-lg:portrait:object-[center_15%] md:landscape:object-[center_20%] lg:object-[center_20%] desktop:object-[center_-4%]"
+                sizes="(max-width: 767px) 177px, (max-width: 1023px) 100vw, 322px"
+              />
+            ) : null}
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 
@@ -516,7 +791,6 @@ const ProductDetailSidebar = ({
           open={isEngravingOpen}
           onClose={() => setIsEngravingOpen(false)}
           previewImage={engravingConfig.previewImage}
-          productImage={displayProduct.image}
           fonts={engravingConfig.fonts}
           maxCharacters={engravingConfig.maxCharacters}
           initialValue={engravingSelection}

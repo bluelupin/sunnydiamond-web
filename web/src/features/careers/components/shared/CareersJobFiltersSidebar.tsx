@@ -13,7 +13,7 @@ const CareersJobFiltersSidebar = () => {
   }
 
   return (
-    <aside className="w-full shrink-0 bg-gray200 lg:w-[437px]">
+    <aside className="hidden h-fit w-full shrink-0 self-start bg-gray200 lg:sticky lg:top-28 lg:block lg:max-h-[calc(100dvh-7rem)] lg:w-[437px] lg:overflow-y-auto">
       <div className="flex flex-col gap-6 p-6">
         <div className="flex flex-col gap-6">
           <CareersJobFiltersHeader title={filtersTitle} />

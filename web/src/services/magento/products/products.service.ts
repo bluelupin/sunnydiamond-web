@@ -1,5 +1,8 @@
 import { magentoGraphqlFetch } from "../graphqlClient";
-import { getMagentoJewelleryNavCategories } from "../categories/categories.service";
+import {
+  EMPTY_JEWELLERY_NAV_CATEGORIES,
+  getMagentoJewelleryNavCategories,
+} from "../categories/categories.service";
 import {
   MAGENTO_JEWELLERY_PRODUCT_FACETS_QUERY,
   MAGENTO_JEWELLERY_PRODUCTS_QUERY,
@@ -21,7 +24,9 @@ import {
   getMagentoProductAttributeOptions,
   mergeFacetOptions,
 } from "./productAttributeOptions.service";
+import { resolveCollectionFacetOption } from "@/features/jewellery-product/utils/collectionListing";
 import { resolveOccasionFacetOption } from "@/features/jewellery-product/utils/occasionListing";
+import { MAGENTO_PRODUCT_COLLECTION_ATTRIBUTE } from "./magentoAttribute.utils";
 import type { MagentoProductListItem, MagentoProductsResponse } from "./magentoProduct.types";
 import type { JewelleryFilterFacets, JewelleryListingProductsData } from "@/types/magento/jewelleryListing";
 import type { JewelleryFilterState, JewelleryListingProduct } from "@/features/jewellery-product/types";
@@ -128,6 +133,8 @@ async function getJewelleryNavCategoriesCached(signal?: AbortSignal): Promise<Je
         error: error instanceof Error ? error.message : "Failed to load jewellery nav",
         updatedAt: existing?.updatedAt ?? 0,
       });
+
+      return existing?.value ?? EMPTY_JEWELLERY_NAV_CATEGORIES;
     }
 
     throw error;
@@ -160,12 +167,22 @@ export async function getMagentoJewelleryProducts(
 
   if (typeof window !== "undefined") {
     listingInFlight.set(key, promise);
-    void promise.finally(() => {
+    void promise.catch(() => undefined).finally(() => {
       listingInFlight.delete(key);
     });
   }
 
   return promise;
+}
+
+/** Clears client-side PLP listing cache (e.g. after Clear All). */
+export function clearMagentoJewelleryListingCache(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  listingResultCache.clear();
+  listingInFlight.clear();
 }
 
 /** Seeds the client listing cache after a server prefetch so hydration does not refetch. */
@@ -210,6 +227,34 @@ async function enrichFacetsWithOccasionAttributeOptions(
   }
 }
 
+async function enrichFacetsWithCollectionAttributeOptions(
+  filters: JewelleryFilterState,
+  facets: JewelleryFilterFacets,
+  signal?: AbortSignal,
+): Promise<JewelleryFilterFacets> {
+  const collection = filters.collection.trim();
+  if (!collection) {
+    return facets;
+  }
+
+  if (resolveCollectionFacetOption(collection, facets.collections)) {
+    return facets;
+  }
+
+  try {
+    const magentoCollections = await getMagentoProductAttributeOptions(
+      MAGENTO_PRODUCT_COLLECTION_ATTRIBUTE,
+      signal,
+    );
+    return {
+      ...facets,
+      collections: mergeFacetOptions(facets.collections, magentoCollections),
+    };
+  } catch {
+    return facets;
+  }
+}
+
 async function enrichFacetsWithGemstoneAttributeOptions(
   filters: JewelleryFilterState,
   facets: JewelleryFilterFacets,
@@ -238,7 +283,12 @@ async function enrichFacetsWithDrawerAttributeOptions(
   signal?: AbortSignal,
 ): Promise<JewelleryFilterFacets> {
   const withOccasions = await enrichFacetsWithOccasionAttributeOptions(filters, facets, signal);
-  return enrichFacetsWithGemstoneAttributeOptions(filters, withOccasions, signal);
+  const withCollections = await enrichFacetsWithCollectionAttributeOptions(
+    filters,
+    withOccasions,
+    signal,
+  );
+  return enrichFacetsWithGemstoneAttributeOptions(filters, withCollections, signal);
 }
 
 async function fetchMagentoJewelleryProducts({
@@ -252,15 +302,21 @@ async function fetchMagentoJewelleryProducts({
   signal,
 }: GetMagentoJewelleryProductsParams): Promise<JewelleryListingProductsData> {
   const needsNavCategories = includeFacets || Boolean(categoryUrlKey);
-  const navCategories = needsNavCategories
-    ? (
+  let navCategories: JewelleryNavCategoriesData["categories"] = [];
+
+  if (needsNavCategories) {
+    try {
+      navCategories = (
         await measureJewelleryPlpGraphql(
           "nav-categories",
           () => getJewelleryNavCategoriesCached(signal),
           { category: categoryUrlKey ?? "all" },
         )
-      ).categories
-    : [];
+      ).categories;
+    } catch {
+      navCategories = EMPTY_JEWELLERY_NAV_CATEGORIES.categories;
+    }
+  }
 
   const categoryId = categoryUrlKey
     ? navCategories.find((category) => category.urlKey === categoryUrlKey)?.categoryId ?? null
@@ -312,6 +368,7 @@ async function fetchMagentoJewelleryProducts({
         data.products?.total_count ?? 0,
         filters,
         facetsForFilter,
+        rawProducts.length,
       ),
       currentPage: pageInfo?.current_page ?? page,
       pageSize: pageInfo?.page_size ?? pageSize,
@@ -365,6 +422,7 @@ async function fetchMagentoJewelleryProducts({
       data.products?.total_count ?? 0,
       filters,
       facetsForFilter,
+      rawProducts.length,
     ),
     currentPage: pageInfo?.current_page ?? page,
     pageSize: pageInfo?.page_size ?? pageSize,
@@ -373,6 +431,7 @@ async function fetchMagentoJewelleryProducts({
     facets: {
       ...responseFacets,
       occasions: mergeFacetOptions(responseFacets.occasions, facetsForFilter.occasions),
+      collections: mergeFacetOptions(responseFacets.collections, facetsForFilter.collections),
       gemstoneTypes: mergeGemstoneTypeFacetOptions(
         responseFacets.gemstoneTypes,
         facetsForFilter.gemstoneTypes,
@@ -416,13 +475,28 @@ function resolveListingTotalCount(
   apiTotalCount: number,
   filters: JewelleryFilterState,
   facets: JewelleryFilterFacets,
+  rawProductCount = products.length,
 ): number {
-  // Client refine runs for any active price filter (tax index ≠ display price).
-  if (!isDefaultPriceRange(filters, facets)) {
+  if (isDefaultPriceRange(filters, facets)) {
+    return apiTotalCount;
+  }
+
+  const exactPrice = getExactJewelleryPriceFilter(filters, facets);
+  if (exactPrice != null) {
+    // Exact display-price totals are accumulated incrementally in the listing hook.
     return products.length;
   }
 
-  return apiTotalCount;
+  // Magento price filters use ex-tax index values; client refine aligns to display price.
+  // Use Magento's total_count, scaled when page-1 refinement drops products from the page.
+  if (rawProductCount > 0 && products.length < rawProductCount && apiTotalCount > 0) {
+    return Math.max(
+      products.length,
+      Math.round(apiTotalCount * (products.length / rawProductCount)),
+    );
+  }
+
+  return Math.max(products.length, apiTotalCount);
 }
 
 /** Fetches the first PLP page ({@link PAGE_SIZE} products) with facets. */
@@ -441,21 +515,10 @@ export async function getMagentoJewelleryInitialListing(
     includeFacets: params.includeFacets !== false,
   });
 
-  const products = refineListingProductsForExactPrice(
-    firstPage.products,
-    filters,
-    firstPage.facets,
-  );
-
   return {
     listing: {
-      products,
-      totalCount: resolveListingTotalCount(
-        products,
-        firstPage.totalCount,
-        filters,
-        firstPage.facets,
-      ),
+      products: firstPage.products,
+      totalCount: firstPage.totalCount,
       totalPages: firstPage.totalPages,
       pageSize: firstPage.pageSize,
       currentPage: 1,

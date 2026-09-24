@@ -1,11 +1,18 @@
 "use client";
 
-import { useMemo } from "react";
+import type { ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import { useAuth } from "@/features/auth/context/AuthContext";
+import { useLoginModal } from "@/features/auth/context/LoginModalContext";
 import { CartPrimaryButton } from "@/features/cart/components/CartFlowUi";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { RIGHT_PANEL_CONTENT_PADDING_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelScrollLayout } from "@/shared/ui/RightPanelScrollLayout";
+import AppointmentDateField from "@/shared/ui/AppointmentDateField";
 import { cn } from "@/shared/utils/cn";
 import { useGiftCardFlow } from "../context/GiftCardFlowContext";
 import { giftCardFlowContent } from "../data/content";
+import { getGiftCardDigitalDateBounds } from "../utils/giftCardDigitalDateBounds";
 import {
   GiftCardSelectField,
   GiftCardTextAreaField,
@@ -13,39 +20,80 @@ import {
   giftCardFieldLabelClass,
 } from "./GiftCardFormUi";
 
+const giftCardDigitalDateBounds = getGiftCardDigitalDateBounds();
+
 function formatGiftCardAmount(amount: number): string {
   return `₹ ${amount.toLocaleString("en-IN")}`;
 }
 
-const GiftCardConfigureStep = ({ onContinue }: { onContinue: () => void }) => {
+const GiftCardConfigureStep = ({ header }: { header: ReactNode }) => {
+  const pathname = usePathname() ?? "/";
+  const { status } = useAuth();
+  const { openLoginModal } = useLoginModal();
   const {
     cardType,
     amount,
     occasion,
+    digitalDeliveryDate,
     message,
+    occasionOptions,
     setCardType,
     setAmount,
     setOccasion,
+    setDigitalDeliveryDate,
     setMessage,
+    requestDetailsStep,
+    beginGuestAuthForDetails,
+    persistFlowState,
   } = useGiftCardFlow();
 
-  const { amount: amountConfig, cardTypes, occasion: occasionConfig, message: messageConfig } =
-    giftCardFlowContent;
-
-  const sliderFillPercent = useMemo(() => {
-    const range = amountConfig.max - amountConfig.min;
-    if (range <= 0) return 0;
-    return ((amount - amountConfig.min) / range) * 100;
-  }, [amount, amountConfig.max, amountConfig.min]);
+  const {
+    amount: amountConfig,
+    cardTypes,
+    occasion: occasionConfig,
+    date: dateConfig,
+    message: messageConfig,
+  } = giftCardFlowContent;
 
   const clampAmount = (value: number) =>
     Math.min(amountConfig.max, Math.max(amountConfig.min, value));
 
-  const canContinue = occasion.trim().length > 0;
+  const hasOccasionOptions = occasionOptions.length > 0;
+  const hasRequiredOccasion = hasOccasionOptions ? occasion.trim().length > 0 : true;
+  const hasRequiredDigitalDate =
+    cardType === "digital" ? digitalDeliveryDate.trim().length > 0 : true;
+  const canContinue = hasRequiredOccasion && hasRequiredDigitalDate;
+
+  const handleContinue = () => {
+    if (!canContinue) return;
+
+    persistFlowState();
+
+    if (status === "authenticated") {
+      requestDetailsStep();
+      return;
+    }
+
+    beginGuestAuthForDetails();
+    openLoginModal({ returnUrl: pathname });
+  };
 
   return (
-    <>
-      <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto overscroll-contain px-6 py-6">
+    <RightPanelScrollLayout
+      footer={
+        <PanelFooter>
+          <CartPrimaryButton
+            type="button"
+            disabled={!canContinue}
+            onClick={handleContinue}
+          >
+            {giftCardFlowContent.cta.addDetails}
+          </CartPrimaryButton>
+        </PanelFooter>
+      }
+    >
+      {header}
+      <div className={cn("flex flex-col gap-6 pt-6 pb-24", RIGHT_PANEL_CONTENT_PADDING_CLASS)}>
         <div className="flex flex-col gap-2">
           <p className={giftCardFieldLabelClass}>{cardTypes.label}</p>
           <div className="flex gap-2">
@@ -69,7 +117,7 @@ const GiftCardConfigureStep = ({ onContinue }: { onContinue: () => void }) => {
               <div className="relative h-1 w-full rounded-full bg-neutral300">
                 <div
                   className="absolute left-0 top-0 h-[3px] bg-darkblack"
-                  style={{ width: `${sliderFillPercent}%` }}
+                  style={{ width: `${((amount - amountConfig.min) / (amountConfig.max - amountConfig.min)) * 100}%` }}
                   aria-hidden
                 />
                 <input
@@ -84,11 +132,13 @@ const GiftCardConfigureStep = ({ onContinue }: { onContinue: () => void }) => {
                 />
                 <div
                   className="pointer-events-none absolute top-1/2 size-3 -translate-y-1/2 rounded-full bg-darkblack shadow-[0_2px_4px_rgba(0,0,0,0.25)]"
-                  style={{ left: `calc(${sliderFillPercent}% - 6px)` }}
+                  style={{
+                    left: `calc(${((amount - amountConfig.min) / (amountConfig.max - amountConfig.min)) * 100}% - 6px)`,
+                  }}
                   aria-hidden
                 />
               </div>
-              <div className="flex h-14 items-center bg-gray200 p-3">
+              <div className="flex h-14 items-center bg-[#F2F2F2] px-3">
                 <input
                   type="text"
                   inputMode="numeric"
@@ -120,14 +170,33 @@ const GiftCardConfigureStep = ({ onContinue }: { onContinue: () => void }) => {
           </div>
         </div>
 
-        <GiftCardSelectField
-          id="gift-card-occasion"
-          label={occasionConfig.label}
-          value={occasion}
-          onChange={setOccasion}
-          placeholder={occasionConfig.placeholder}
-          options={occasionConfig.options}
-        />
+        {hasOccasionOptions ? (
+          <GiftCardSelectField
+            id="gift-card-occasion"
+            label={occasionConfig.label}
+            value={occasion}
+            onChange={setOccasion}
+            placeholder={occasionConfig.placeholder}
+            options={occasionOptions}
+          />
+        ) : null}
+
+        {cardType === "digital" ? (
+          <div className="flex flex-col gap-2">
+            <label className={giftCardFieldLabelClass} htmlFor="gift-card-digital-date">
+              {dateConfig.label}
+            </label>
+            <AppointmentDateField
+              id="gift-card-digital-date"
+              value={digitalDeliveryDate}
+              minDate={giftCardDigitalDateBounds.minDate}
+              maxDate={giftCardDigitalDateBounds.maxDate}
+              onChange={setDigitalDeliveryDate}
+              placeholder={dateConfig.placeholder}
+              displayFormat="dd/mm/yyyy"
+            />
+          </div>
+        ) : null}
 
         <GiftCardTextAreaField
           id="gift-card-message"
@@ -137,18 +206,7 @@ const GiftCardConfigureStep = ({ onContinue }: { onContinue: () => void }) => {
           placeholder={messageConfig.placeholder}
         />
       </div>
-
-      <PanelFooter contentClassName="px-4 py-6">
-        <CartPrimaryButton
-          type="button"
-          disabled={!canContinue}
-          onClick={onContinue}
-          className={cn(!canContinue && "opacity-50")}
-        >
-          {giftCardFlowContent.cta.addDetails}
-        </CartPrimaryButton>
-      </PanelFooter>
-    </>
+    </RightPanelScrollLayout>
   );
 };
 

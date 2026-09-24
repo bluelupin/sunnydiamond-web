@@ -2,7 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useMagentoWishlistProducts } from "@/hooks/magento/useMagentoWishlistProducts";
 import type { TrackedOrder } from "@/services/customer/order-tracking.types";
+import {
+  PROFILE_GIFT_CARD_USE_DUMMY_ORDERS,
+  profileGiftCardDummyOrders,
+} from "../data/profileGiftCardDummyOrders";
 import { profileTabsContent } from "../data/profileContent";
 import { useCustomerOrders } from "../hooks/useCustomerOrders";
 import type {
@@ -11,6 +16,7 @@ import type {
   ProfileOrderUi,
 } from "../types/profileUi.types";
 import { formatOrderStatusLabel } from "../utils/orderDeliveryTimeline.utils";
+import { buildMagentoProductImageBySku } from "../utils/orderItemImage.utils";
 import { categorizeOrder, mapCustomerOrderToProfileUi } from "../utils/profileDisplayMappers";
 import { PROFILE_ORDER_QUERY_PARAM } from "../utils/profileOrderNavigation";
 import { ProfileOrderCard } from "./ProfileOrderCard";
@@ -19,6 +25,7 @@ import { ProfileOrdersEmptyState } from "./ProfileOrdersEmptyState";
 import { ProfileFilterChips } from "./profileUi";
 import { ProfileOrderCardSkeleton } from "./ProfileOrderCardSkeleton";
 import { ProfileOrdersListingSkeleton } from "./ProfileOrdersListingSkeleton";
+import FormFieldError from "@/shared/ui/FormFieldError";
 
 const content = profileTabsContent.orders;
 
@@ -100,17 +107,49 @@ const ProfileOrdersSection = () => {
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
   }, [selectedOrderNumber]);
 
-  const orders = useMemo(
+  const orderSkus = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          (data?.orders ?? [])
+            .flatMap((order) =>
+              order.items.map((item) => item.productSku?.trim() ?? ""),
+            )
+            .filter(Boolean),
+        ),
+      ),
+    [data?.orders],
+  );
+
+  const { products: magentoProducts } = useMagentoWishlistProducts(orderSkus);
+
+  const imageBySku = useMemo(
+    () => buildMagentoProductImageBySku(magentoProducts),
+    [magentoProducts],
+  );
+
+  const apiOrders = useMemo(
     () =>
       (data?.orders ?? []).map((order) => {
-        const mapped = mapCustomerOrderToProfileUi(order);
+        const mapped = mapCustomerOrderToProfileUi(order, imageBySku);
         const override = orderOverrides[order.id];
 
         // Once a refetch reports the mutated status, the mapped order is authoritative again.
         return override && override.status !== order.status ? { ...mapped, ...override } : mapped;
       }),
-    [data, orderOverrides],
+    [data, orderOverrides, imageBySku],
   );
+
+  const orders = useMemo(() => {
+    if (!PROFILE_GIFT_CARD_USE_DUMMY_ORDERS) {
+      return apiOrders;
+    }
+
+    const dummyNumbers = new Set(profileGiftCardDummyOrders.map((order) => order.number));
+    const realOrders = apiOrders.filter((order) => !dummyNumbers.has(order.number));
+
+    return [...profileGiftCardDummyOrders, ...realOrders];
+  }, [apiOrders]);
 
   const filteredOrders = useMemo(
     () => orders.filter((order) => order.category === activeFilter),
@@ -162,21 +201,22 @@ const ProfileOrdersSection = () => {
     [refresh],
   );
 
+  const hasDummyOrders =
+    PROFILE_GIFT_CARD_USE_DUMMY_ORDERS && profileGiftCardDummyOrders.length > 0;
+  const hasOrdersToShow = orders.length > 0;
+
   // Only the first load blanks the section. A post-mutation `refresh()` keeps the current
   // tree mounted, so the open detail panel (and its success dialog) survives the refetch.
-  if (isLoading && !data) {
+  // Dummy gift card orders stay visible for UI review even when the orders API fails.
+  if (isLoading && !data && !hasDummyOrders) {
     return <ProfileOrdersListingSkeleton />;
   }
 
-  if (error) {
-    return (
-      <p className="font-gill text-sm font-light leading-110 text-red-700" role="alert">
-        {error}
-      </p>
-    );
+  if (error && !hasOrdersToShow) {
+    return <FormFieldError message={error} />;
   }
 
-  if (!data || data.orders.length === 0) {
+  if (!hasOrdersToShow) {
     return <ProfileOrdersEmptyState />;
   }
 
@@ -199,6 +239,10 @@ const ProfileOrdersSection = () => {
 
   return (
     <div className="flex flex-col gap-6">
+      {error && hasDummyOrders ? (
+        <FormFieldError message={error} />
+      ) : null}
+
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <p className="shrink-0 font-gill text-base font-normal leading-110 text-darkblack">
           {content.filterLabel}

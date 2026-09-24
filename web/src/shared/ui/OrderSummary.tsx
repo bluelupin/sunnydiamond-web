@@ -1,5 +1,7 @@
 import type { CartLineItem } from "@/features/cart/types/cart.types";
 import { formatCartPrice } from "@/features/cart/utils/formatCartLine";
+import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 
 interface OrderSummaryProps {
   items: CartLineItem[];
@@ -29,7 +31,7 @@ const OrderSummary = ({
         <div className="space-y-3">
           {items.map(({ product, quantity, id }) => (
             <div key={id} className="flex justify-between font-gill text-sm">
-              <span className="text-muted-foreground">
+              <span className={cn("text-muted-foreground", productNameDisplayClassName)}>
                 {product.name} × {quantity}
               </span>
               <span className="text-foreground">

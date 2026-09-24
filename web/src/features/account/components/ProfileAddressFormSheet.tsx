@@ -1,18 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { X } from "lucide-react";
-import {
-  CheckoutCheckbox,
-  CheckoutField,
-  CheckoutSelectField,
-} from "@/features/checkout/components/CheckoutUi";
+import { CheckoutField, CheckoutSelectField } from "@/features/checkout/components/CheckoutUi";
 import { INDIAN_STATES } from "@/features/checkout/constants/indianStates";
 import { DetailDarkButton, DetailTextLink } from "@/features/products/components/detail/shared";
 import { useCurrentLocationAddress } from "@/shared/hooks/use-current-location-address";
 import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
+import { RIGHT_PANEL_HEADER_PADDING_CLASS, RIGHT_PANEL_WIDTH_CLASS } from "@/shared/ui/rightPanel";
+import { RIGHT_PANEL_SCROLL_AREA_CLASS } from "@/shared/ui/RightPanelScrollLayout";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import FormFieldError from "@/shared/ui/FormFieldError";
 import { cn } from "@/shared/utils/cn";
 import {
   getProfileAddressFormErrors,
@@ -35,8 +34,6 @@ const emptyAddressForm = (): CustomerAddressInput => ({
   city: "",
   state: "",
   phone: "",
-  defaultShipping: false,
-  defaultBilling: false,
 });
 
 const stateOptions = INDIAN_STATES.map((state) => ({ value: state, label: state }));
@@ -109,7 +106,7 @@ export function ProfileAddressFormSheet({
     setTouched((current) => ({ ...current, [field]: true }));
   };
 
-  const handleChange = (field: keyof CustomerAddressInput, value: string | boolean) => {
+  const handleChange = (field: keyof CustomerAddressInput, value: string) => {
     if (field === "pincode" && typeof value === "string") {
       setForm((current) => ({ ...current, pincode: sanitizePincodeInput(value) }));
       return;
@@ -147,8 +144,21 @@ export function ProfileAddressFormSheet({
     }));
   };
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen && isSaving) {
+      return;
+    }
+
+    onOpenChange(nextOpen);
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (isSaving) {
+      return;
+    }
+
     setFormError(null);
     setSubmitted(true);
 
@@ -159,24 +169,21 @@ export function ProfileAddressFormSheet({
     try {
       await onSubmit(form);
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : "Unable to save address");
+      setFormError(error instanceof Error ? error.message : addressContent.saveErrorToast);
     }
   };
 
   const header = (
-    <div className={cn("shrink-0", isMobile ? "px-4 pt-6" : "px-6 pt-6")}>
+    <div className={RIGHT_PANEL_HEADER_PADDING_CLASS}>
       <div className="flex items-center justify-between gap-4">
         <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">{title}</h2>
-        <button
-          type="button"
-          onClick={() => onOpenChange(false)}
-          className="text-darkblack"
+        <RightPanelCloseButton
+          onClick={() => handleOpenChange(false)}
           aria-label="Close address form"
-        >
-          <X className="size-6" strokeWidth={1.5} aria-hidden />
-        </button>
+          className={isSaving ? "pointer-events-none opacity-50" : undefined}
+        />
       </div>
-      <div className="mt-5 h-px w-full bg-neutral300" aria-hidden />
+      <div className="mt-6 h-px w-full bg-neutral300" aria-hidden />
     </div>
   );
 
@@ -184,16 +191,16 @@ export function ProfileAddressFormSheet({
     <form
       id="profile-address-form"
       onSubmit={handleSubmit}
-      className="flex min-h-0 flex-1 flex-col"
+      className="flex min-h-0 flex-1 flex-col overflow-hidden"
       noValidate
     >
       <div
         className={cn(
-          "min-h-0 flex-1 overflow-y-auto overscroll-contain pt-6",
-          isMobile ? "px-4" : "px-6",
+          RIGHT_PANEL_SCROLL_AREA_CLASS,
         )}
       >
-        <div className="flex flex-col items-center gap-6 pb-6">
+        {header}
+        <div className="flex flex-col items-center gap-6 pb-16 pt-6 md:px-6 px-4">
           {!isEditing ? (
             <DetailTextLink
               onClick={isLocating || isSaving ? undefined : handleUseCurrentLocation}
@@ -215,6 +222,7 @@ export function ProfileAddressFormSheet({
               onBlur={() => markTouched("name")}
               invalid={showError("name")}
               error={showError("name") ? errors.name : undefined}
+              disabled={isSaving}
             />
             <CheckoutField
               id="profile-address-line-1"
@@ -224,6 +232,7 @@ export function ProfileAddressFormSheet({
               onBlur={() => markTouched("addressLine1")}
               invalid={showError("addressLine1")}
               error={showError("addressLine1") ? errors.addressLine1 : undefined}
+              disabled={isSaving}
             />
             <CheckoutField
               id="profile-address-line-2"
@@ -234,6 +243,7 @@ export function ProfileAddressFormSheet({
               onBlur={() => markTouched("addressLine2")}
               invalid={showError("addressLine2")}
               error={showError("addressLine2") ? errors.addressLine2 : undefined}
+              disabled={isSaving}
             />
             <div className="grid grid-cols-2 gap-6">
               <CheckoutField
@@ -244,6 +254,7 @@ export function ProfileAddressFormSheet({
                 onBlur={() => markTouched("pincode")}
                 invalid={showError("pincode")}
                 error={showError("pincode") ? errors.pincode : undefined}
+                disabled={isSaving}
               />
               <CheckoutField
                 id="profile-address-city"
@@ -253,6 +264,7 @@ export function ProfileAddressFormSheet({
                 onBlur={() => markTouched("city")}
                 invalid={showError("city")}
                 error={showError("city") ? errors.city : undefined}
+                disabled={isSaving}
               />
             </div>
             <CheckoutSelectField
@@ -265,6 +277,7 @@ export function ProfileAddressFormSheet({
               error={showError("state") ? errors.state : undefined}
               options={stateOptions}
               placeholder="Select"
+              disabled={isSaving}
             />
             <CheckoutField
               id="profile-address-phone"
@@ -275,25 +288,9 @@ export function ProfileAddressFormSheet({
               onBlur={() => markTouched("phone")}
               invalid={showError("phone")}
               error={showError("phone") ? errors.phone : undefined}
+              disabled={isSaving}
             />
-            <div className="space-y-3">
-              <CheckoutCheckbox
-                label="Set as default shipping address"
-                checked={Boolean(form.defaultShipping)}
-                onChange={(checked) => handleChange("defaultShipping", checked)}
-              />
-              <CheckoutCheckbox
-                label="Set as default billing address"
-                checked={Boolean(form.defaultBilling)}
-                onChange={(checked) => handleChange("defaultBilling", checked)}
-              />
-            </div>
-
-            {formError ? (
-              <p className="font-gill text-sm font-light leading-110 text-red-700" role="alert">
-                {formError}
-              </p>
-            ) : null}
+            <FormFieldError message={formError ?? undefined} />
           </div>
         </div>
       </div>
@@ -304,15 +301,19 @@ export function ProfileAddressFormSheet({
           isMobile && "pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]",
         )}
       >
-        <DetailDarkButton type="submit" className="w-full" disabled={isSaving}>
-          {isSaving ? "Saving..." : addressContent.saveLabel}
+        <DetailDarkButton
+          type="submit"
+          className="w-full disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={isSaving}
+        >
+          {isSaving ? addressContent.savingLabel : addressContent.saveLabel}
         </DetailDarkButton>
       </PanelFooter>
     </form>
   );
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent
         side={isMobile ? "bottom" : "right"}
         overlayClassName="bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
@@ -320,11 +321,10 @@ export function ProfileAddressFormSheet({
           "flex flex-col gap-0 border-0 bg-white p-0 [&>button]:hidden",
           isMobile
             ? "max-h-[90vh] w-full rounded-none sm:max-w-full"
-            : "h-screen max-h-screen w-full max-w-[472px] sm:max-w-[472px]",
+            : `h-screen max-h-screen w-full ${RIGHT_PANEL_WIDTH_CLASS}`,
         )}
       >
         <SheetTitle className="sr-only">{title}</SheetTitle>
-        {header}
         {formBody}
       </SheetContent>
     </Sheet>

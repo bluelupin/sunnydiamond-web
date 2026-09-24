@@ -26,7 +26,7 @@ export function PanelFooterGradient({ className, overlay }: PanelFooterGradientP
 }
 
 /** Horizontal row for paired panel footer actions (e.g. Clear + Apply). */
-export const panelFooterDualActionsClassName = "flex w-full gap-[24px]";
+export const panelFooterDualActionsClassName = "flex w-full gap-6";
 
 type PanelFooterDualActionsProps = {
   children: React.ReactNode;
@@ -42,6 +42,7 @@ type PanelFooterProps = {
   className?: string;
   contentClassName?: string;
   showGradient?: boolean;
+  footerRef?: React.Ref<HTMLDivElement>;
 };
 
 export function PanelFooter({
@@ -49,9 +50,10 @@ export function PanelFooter({
   className,
   contentClassName,
   showGradient = true,
+  footerRef,
 }: PanelFooterProps) {
   return (
-    <div className={cn("relative shrink-0", className)}>
+    <div ref={footerRef} className={cn("relative shrink-0", className)}>
       {showGradient ? <PanelFooterGradient overlay /> : null}
       <div className={cn(panelFooterContentClassName, contentClassName)}>{children}</div>
     </div>

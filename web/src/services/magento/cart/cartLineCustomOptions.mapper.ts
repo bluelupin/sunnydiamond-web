@@ -1,4 +1,5 @@
 import type { CartLineOptions } from "@/features/cart/types/cart.types";
+import { formatMetalColorLabel } from "@/features/products/utils/metalColorOptions.utils";
 import type {
   ProductCustomOptionChoice,
   ProductCustomOptions,
@@ -88,6 +89,12 @@ export function buildMagentoCartItemOptionPayload(
     selectedOptions.push(metalUid);
   }
 
+  if (lineInstance && enteredOptions.length === 0) {
+    throw new Error(
+      "Could not add this item as a separate bag line because the product is missing a line-key custom option.",
+    );
+  }
+
   if (enteredOptions.length === 0 && selectedOptions.length === 0) {
     return null;
   }
@@ -168,7 +175,8 @@ export function mapMagentoCartCustomizableOptions(
         lineOptions.ringSize = valueLabel || valueText;
         break;
       case "metal":
-        lineOptions.metal = valueLabel || valueText;
+        lineOptions.metal =
+          formatMetalColorLabel(valueLabel || valueText) || valueLabel || valueText;
         break;
     }
 

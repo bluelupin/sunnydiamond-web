@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
+import FormFieldError from "@/shared/ui/FormFieldError";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import {
   getProductDetailContent,
@@ -38,7 +39,10 @@ import {
   getConfigurableOptionUidsForMetal,
 } from "@/features/products/utils/productVariant.utils";
 import type { NormalizedSizeGuide } from "@/services/size-guide/size-guide.types";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
+import { RIGHT_PANEL_ASIDE_MD_CLASS } from "@/shared/ui/rightPanel";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 
 type WishlistAddToBagPanelProps = {
   open: boolean;
@@ -47,8 +51,10 @@ type WishlistAddToBagPanelProps = {
   onAddToBag: (payload: AddToBagPayload) => void;
 };
 
-const wishlistAddToBagAsideClassName =
-  "max-w-full max-md:h-[calc(100dvh-3rem)] max-md:max-h-[calc(100dvh-3rem)] max-md:min-h-0 md:h-full md:max-h-screen md:max-w-[472px]";
+const wishlistAddToBagAsideClassName = cn(
+  "max-w-full max-md:h-[calc(100dvh-3rem)] max-md:max-h-[calc(100dvh-3rem)] max-md:min-h-0 md:h-full md:max-h-screen",
+  RIGHT_PANEL_ASIDE_MD_CLASS,
+);
 
 const WishlistAddToBagPanel = ({
   open,
@@ -88,6 +94,11 @@ const WishlistAddToBagPanel = ({
       .then((fetchedProduct) => {
         if (!controller.signal.aborted) {
           setDetailProduct(fetchedProduct);
+        }
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) {
+          setDetailProduct(null);
         }
       })
       .finally(() => {
@@ -197,49 +208,44 @@ const WishlistAddToBagPanel = ({
         asideClassName={wishlistAddToBagAsideClassName}
       >
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-          <div className="relative shrink-0">
-            {detailProduct ? (
-              <ProductWishlistDetailGalleryCarousel
-                product={displayProduct ?? detailProduct}
-                imageMaxWidthClass="max-w-full"
-              />
-            ) : (
-              <div className="grid h-250 w-full shrink-0 overflow-hidden">
-                <div className="flex h-250 w-full items-center justify-center bg-gray300">
-                  <div className="flex h-250 w-full max-w-full items-center justify-center overflow-hidden">
-                    <OptimizedImage
-                      src={product.primaryImage}
-                      alt={product.name}
-                      priority
-                      sizes="(max-width: 768px) 100vw, 472px"
-                      className="object-contain object-center"
-                    />
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain DrawerVerticleScrollbar">
+            <div className="relative shrink-0">
+              {detailProduct ? (
+                <ProductWishlistDetailGalleryCarousel
+                  product={displayProduct ?? detailProduct}
+                  imageMaxWidthClass="max-w-full"
+                />
+              ) : (
+                <div className="grid h-250 w-full shrink-0 overflow-hidden">
+                  <div className="flex h-250 w-full items-center justify-center bg-gray300">
+                    <div className="flex h-250 w-full max-w-full items-center justify-center overflow-hidden">
+                      <OptimizedImage
+                        src={product.primaryImage}
+                        alt={product.name}
+                        priority
+                        sizes="(max-width: 768px) 100vw, 472px"
+                        className="object-contain object-center"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close"
-              className="absolute right-6 top-6 z-10 flex size-6 items-center justify-center text-darkblack"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18.5 5L5 18.5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M18.5 18.5L5 5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-          </div>
+              )}
+              <RightPanelCloseButton onClick={onClose} aria-label="Close" variant="absolute" />
+            </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-6 pt-8 md:px-6 md:pb-8">
+            <div className="px-4 pb-6 pt-8 md:px-6 md:pb-8">
             <div className="flex flex-col gap-6">
               <div className="flex flex-col gap-3">
                 <div className="flex items-start justify-between gap-4">
                   {content ? (
                     <ul className="m-0 flex list-none flex-wrap items-center gap-2 p-0 md:gap-3">
-                      {content.attributes.map((attribute, index) => (
+                      {content.attributes.slice(0, 3).map((attribute, index, attributes) => (
                         <li key={attribute} className="flex items-center gap-2 md:gap-3">
-                          {index > 0 ? <AttributeSeparator /> : null}
+                          {index > 0 ? (
+                            <AttributeSeparator
+                            // className={index === attributes.length - 1 ? "hidden" : undefined}
+                            />
+                          ) : null}
                           <span className="font-gill text-sm font-light leading-110 text-neutral500 md:text-base">
                             {attribute}
                           </span>
@@ -253,7 +259,12 @@ const WishlistAddToBagPanel = ({
                     See Details
                   </DetailTextLink>
                 </div>
-                <h2 className="font-larken text-2xl font-light leading-110 text-darkblack lg:text-32">
+                <h2
+                  className={cn(
+                    "font-larken text-2xl font-light leading-110 text-darkblack",
+                    productNameDisplayClassName,
+                  )}
+                >
                   {displayName}
                 </h2>
               </div>
@@ -324,11 +335,7 @@ const WishlistAddToBagPanel = ({
                     listClassName="bg-aboutInactive"
                     optionClassName="text-base"
                   />
-                  {ringSizeError ? (
-                    <p className="font-gill text-sm font-light leading-110 text-[#F91616]">
-                      {ringSizeError}
-                    </p>
-                  ) : null}
+                  <FormFieldError message={ringSizeError ?? undefined} />
                 </div>
               ) : isDetailFetching ? (
                 <div className="flex flex-col gap-2" aria-hidden>
@@ -337,6 +344,7 @@ const WishlistAddToBagPanel = ({
                 </div>
               ) : null}
             </div>
+          </div>
           </div>
 
           <PanelFooter

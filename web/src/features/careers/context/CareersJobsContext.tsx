@@ -14,7 +14,7 @@ import type { NormalizedCareersPageData } from "@/services/careers/careers.types
 import { getCareerApplyPath, getCareerJobPath, CAREERS_ALL_OPENINGS_ROUTE } from "../constants/careersRoutes";
 import type { CareerJob, CareersApplicationEntry, CareersFlowStep } from "../types";
 import { filterCareerJobs } from "../utils/careersFormatting";
-import { getCareerJobById, resolveCareerJobCode } from "../utils/careersJobs";
+import { getCareerJobById, resolveCareerJobSlug } from "../utils/careersJobs";
 import {
   resolveInitialApplicationIntent,
   stashCareerApplicationIntent,
@@ -51,7 +51,7 @@ type CareersJobsContextValue = {
   goToApplication: (
     entry?: CareersApplicationEntry,
     resumeFile?: File,
-    jobCode?: string,
+    slug?: string,
   ) => void;
   clearPendingResume: () => void;
   goToSuccess: () => void;
@@ -138,8 +138,8 @@ export function CareersJobsProvider({
   const goToDetail = useCallback(
     (jobId: string) => {
       const job = getCareerJobById(jobs, jobId);
-      if (job?.jobCode) {
-        router.push(getCareerJobPath(job.jobCode));
+      if (job?.slug) {
+        router.push(getCareerJobPath(job.slug));
         return;
       }
 
@@ -152,12 +152,12 @@ export function CareersJobsProvider({
   );
 
   const goToApplication = useCallback(
-    (entry: CareersApplicationEntry = "manual", resumeFile?: File, jobCode?: string) => {
-      const resolvedJobCode = resolveCareerJobCode(jobs, selectedJobId, jobCode);
+    (entry: CareersApplicationEntry = "manual", resumeFile?: File, slug?: string) => {
+      const resolvedSlug = resolveCareerJobSlug(jobs, selectedJobId, slug);
 
-      if (resolvedJobCode) {
+      if (resolvedSlug) {
         stashCareerApplicationIntent(entry, resumeFile);
-        router.push(getCareerApplyPath(resolvedJobCode));
+        router.push(getCareerApplyPath(resolvedSlug));
         return;
       }
 
@@ -185,8 +185,8 @@ export function CareersJobsProvider({
     setApplicationEntry(null);
     setPendingResumeFile(null);
 
-    if (job?.jobCode) {
-      router.push(getCareerJobPath(job.jobCode));
+    if (job?.slug) {
+      router.push(getCareerJobPath(job.slug));
       return;
     }
 

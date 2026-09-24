@@ -148,6 +148,7 @@ function mapRow(row: StrapiSizeGuideRow | null | undefined): NormalizedSizeGuide
     circumference: cleanText(row.circumference) ?? "",
     diameter: cleanText(row.diameter) ?? "",
     size,
+    group: cleanText(row.groupLabel) ?? "",
   };
 }
 

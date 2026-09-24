@@ -15,6 +15,7 @@ const JOB_DETAIL_LABEL_FALLBACKS: CareerJobDetailLabels = {
   viewJobLabel: "View Job",
   applyModal: {
     title: "Start your Application",
+    subtitle: "Choose how you'd like to apply.",
     autofillResumeLabel: "Autofill with resume",
     applyManuallyLabel: "Apply manually",
     applyLinkedInLabel: "Apply with LinkedIn",
@@ -47,6 +48,8 @@ export function resolveCareerJobDetailLabels(
     viewJobLabel: jobDetails.viewJobLabel || JOB_DETAIL_LABEL_FALLBACKS.viewJobLabel,
     applyModal: {
       title: jobDetails.applyModal.title || JOB_DETAIL_LABEL_FALLBACKS.applyModal.title,
+      subtitle:
+        jobDetails.applyModal.subtitle || JOB_DETAIL_LABEL_FALLBACKS.applyModal.subtitle,
       autofillResumeLabel:
         jobDetails.applyModal.autofillResumeLabel ||
         JOB_DETAIL_LABEL_FALLBACKS.applyModal.autofillResumeLabel,

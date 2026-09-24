@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Image from "next/image";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
-import { formatCartPrice } from "@/features/cart/utils/formatCartLine";
 import { useCart } from "@/features/cart/context/CartContext";
 import {
   findMockGiftCardByCode,
@@ -37,6 +36,7 @@ type PromoFieldProps = {
   applyLabel?: string;
   disabled?: boolean;
   hasError?: boolean;
+  showInput?: boolean;
 };
 
 const PromoField = ({
@@ -49,44 +49,63 @@ const PromoField = ({
   applyLabel = "Apply",
   disabled = false,
   hasError = false,
+  showInput = true,
 }: PromoFieldProps) => (
   <div className="flex flex-col gap-2">
     <label htmlFor={id} className="font-gill text-base font-normal leading-110 text-darkblack">
       {label}
     </label>
-    <div
-      className={cn(
-        "flex h-14 items-center gap-4 border border-transparent bg-white px-3 lg:bg-aboutInactive",
-        hasError && invalidFieldContainerClassName,
-      )}
-    >
-      <input
-        id={id}
-        type="text"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-        disabled={disabled}
-        className={cn(couponFieldClassName, "bg-transparent px-0")}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") {
-            event.preventDefault();
-            onApply();
-          }
-        }}
-      />
-      <DetailTextLink
-        onClick={onApply}
-        className={cn("shrink-0 pb-0.5", disabled && "pointer-events-none opacity-40")}
+    {showInput ? (
+      <div
+        className={cn(
+          "flex h-14 items-center gap-4 border border-transparent bg-white px-3 lg:bg-aboutInactive",
+          hasError && invalidFieldContainerClassName,
+        )}
       >
-        {applyLabel}
-      </DetailTextLink>
-    </div>
+        <input
+          id={id}
+          type="text"
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={placeholder}
+          disabled={disabled}
+          className={cn(couponFieldClassName, "bg-transparent px-0")}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              onApply();
+            }
+          }}
+        />
+        <DetailTextLink
+          onClick={onApply}
+          className={cn("shrink-0 pb-0.5", disabled && "pointer-events-none opacity-40")}
+        >
+          {applyLabel}
+        </DetailTextLink>
+      </div>
+    ) : null}
   </div>
 );
 
-const OfferCard = ({ offer }: { offer: MockOffer }) => (
-  <div className="flex h-[100px] w-[214px] min-w-[214px] shrink-0 items-start gap-3 border border-gray300 bg-white px-3 py-4 lg:bg-white">
+const OfferCard = ({
+  offer,
+  selected,
+  onSelect,
+}: {
+  offer: MockOffer;
+  selected: boolean;
+  onSelect: () => void;
+}) => (
+  <button
+    type="button"
+    onClick={onSelect}
+    aria-pressed={selected}
+    className={cn(
+      "flex h-[100px] w-[214px] min-w-[214px] shrink-0 items-start gap-3 border bg-white px-3 py-4 text-left transition-colors lg:bg-white",
+      selected ? "border-gray600" : "border-white",
+    )}
+  >
     <Image
       src="/icons/kotal-bank-icon.svg"
       alt=""
@@ -105,7 +124,7 @@ const OfferCard = ({ offer }: { offer: MockOffer }) => (
         {offer.categoryLabel}
       </p>
     </div>
-  </div>
+  </button>
 );
 
 const AppliedGiftCardSummary = ({
@@ -115,18 +134,13 @@ const AppliedGiftCardSummary = ({
   giftCard: MockGiftCard;
   onRemoveGiftCard: () => void;
 }) => (
-  <div className="flex flex-col gap-3 border border-neutral300 bg-white p-3">
-    <div className="flex items-start justify-between gap-4">
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <p className="font-gill text-base font-normal leading-110 text-darkblack">Gift card</p>
-        <p className="font-gill text-sm font-light leading-110 text-neutral500">
-          {giftCard.code} — {formatCartPrice(giftCard.balance)} balance applied
-        </p>
-      </div>
-      <DetailTextLink onClick={onRemoveGiftCard} className="shrink-0 pb-0.5">
-        Remove
-      </DetailTextLink>
-    </div>
+  <div className="flex items-center justify-between gap-3 border border-white bg-white p-3 h-14">
+    <p className="font-gill text-base font-normal leading-110 text-green600">
+      {giftCard.code} applied
+    </p>
+    <DetailTextLink onClick={onRemoveGiftCard} className="shrink-0 pb-0.5">
+      Remove
+    </DetailTextLink>
   </div>
 );
 
@@ -140,7 +154,15 @@ const OffersAndDealsExpandedContent = ({
   variant = "panel-gray300",
   className,
 }: OffersAndDealsExpandedContentProps) => {
-  const { applyLocalGiftCard, removeLocalGiftCard, appliedLocalGiftCardCode, localGiftCardDiscount } = useCart();
+  const {
+    applyLocalGiftCard,
+    removeLocalGiftCard,
+    appliedLocalGiftCardCode,
+    localGiftCardDiscount,
+    appliedLocalOfferId,
+    applyLocalOffer,
+    removeLocalOffer,
+  } = useCart();
   const [giftCardCode, setGiftCardCode] = useState("");
   const [appliedGiftCard, setAppliedGiftCard] = useState<MockGiftCard | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -149,7 +171,7 @@ const OffersAndDealsExpandedContent = ({
   const applyGiftCard = () => {
     const match = findMockGiftCardByCode(giftCardCode);
     if (!match) {
-      setErrorMessage("Gift card not found. Try SUNNYGC1000 or GIFT500.");
+      setErrorMessage("This gift card code doesn't work.");
       return;
     }
 
@@ -162,7 +184,19 @@ const OffersAndDealsExpandedContent = ({
   const handleRemoveGiftCard = () => {
     setAppliedGiftCard(null);
     removeLocalGiftCard();
+    setErrorMessage(null);
   };
+
+  const handleOfferSelect = (offer: MockOffer) => {
+    if (appliedLocalOfferId === offer.id) {
+      removeLocalOffer();
+      return;
+    }
+
+    applyLocalOffer(offer.id);
+  };
+
+  const hasAppliedGiftCard = Boolean(appliedGiftCard || appliedLocalGiftCardCode);
 
   const body = (
     <div className="flex flex-col gap-6">
@@ -172,40 +206,47 @@ const OffersAndDealsExpandedContent = ({
         <p className="font-gill text-base font-normal leading-110 text-darkblack">Bank Offers</p>
         <div className="horizontalScroll flex items-start gap-2 overflow-auto">
           {mockAvailableOffers.map((offer) => (
-            <OfferCard key={offer.id} offer={offer} />
+            <OfferCard
+              key={offer.id}
+              offer={offer}
+              selected={appliedLocalOfferId === offer.id}
+              onSelect={() => handleOfferSelect(offer)}
+            />
           ))}
         </div>
       </div>
 
       <div className="h-px w-full shrink-0 bg-neutral300 md:hidden" aria-hidden />
 
-      <PromoField
-        id="offers-gift-card"
-        label="Have a gift card?"
-        value={giftCardCode}
-        onChange={(value) => {
-          setGiftCardCode(value);
-          if (errorMessage) setErrorMessage(null);
-        }}
-        onApply={applyGiftCard}
-        placeholder="Enter code"
-        disabled={Boolean(appliedGiftCard || appliedLocalGiftCardCode)}
-        hasError={Boolean(errorMessage)}
-      />
-
-      <FormFieldError message={errorMessage ?? undefined} />
-
-      {(appliedGiftCard || appliedLocalGiftCardCode) ? (
-        <AppliedGiftCardSummary
-          giftCard={
-            appliedGiftCard ?? {
-              code: appliedLocalGiftCardCode ?? "",
-              balance: localGiftCardDiscount,
-            }
-          }
-          onRemoveGiftCard={handleRemoveGiftCard}
+      <div className="flex flex-col gap-2">
+        <PromoField
+          id="offers-gift-card"
+          label="Have a gift card?"
+          value={giftCardCode}
+          onChange={(value) => {
+            setGiftCardCode(value);
+            if (errorMessage) setErrorMessage(null);
+          }}
+          onApply={applyGiftCard}
+          placeholder="Enter code"
+          hasError={Boolean(errorMessage)}
+          showInput={!hasAppliedGiftCard}
         />
-      ) : null}
+
+        {hasAppliedGiftCard ? (
+          <AppliedGiftCardSummary
+            giftCard={
+              appliedGiftCard ?? {
+                code: appliedLocalGiftCardCode ?? "",
+                balance: localGiftCardDiscount,
+              }
+            }
+            onRemoveGiftCard={handleRemoveGiftCard}
+          />
+        ) : null}
+
+        {!hasAppliedGiftCard ? <FormFieldError message={errorMessage ?? undefined} /> : null}
+      </div>
     </div>
   );
 
@@ -213,7 +254,7 @@ const OffersAndDealsExpandedContent = ({
     return <div className={className}>{body}</div>;
   }
 
-  return <div className={cn("bg-gray300 px-4 pb-4", className)}>{body}</div>;
+  return <div className={cn(expandedBackground, "px-4 pb-4", className)}>{body}</div>;
 };
 
 export default OffersAndDealsExpandedContent;

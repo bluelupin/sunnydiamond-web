@@ -37,3 +37,14 @@ export function getMagentoIntegrationAccessToken(): string | null {
   const token = process.env.MAGENTO_INTEGRATION_ACCESS_TOKEN?.trim();
   return token || null;
 }
+
+/**
+ * `sunnySubscribeStockAlert` only exists once SunnyDiamonds_TransactionalEmail is
+ * deployed, and GraphQL hard-fails on unknown fields — so the notify-me flow stays
+ * dark until `MAGENTO_STOCK_ALERT=true` (same deploy-gating idiom as
+ * `MAGENTO_ORDER_FLOW_FIELDS`). Intentionally not `NEXT_PUBLIC_`: the PDP server
+ * component and the stock-alert route handler are the only readers.
+ */
+export function isMagentoStockAlertEnabled(): boolean {
+  return process.env.MAGENTO_STOCK_ALERT === "true";
+}

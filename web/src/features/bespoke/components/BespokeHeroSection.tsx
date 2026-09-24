@@ -1,8 +1,7 @@
 "use client";
 
-import ResponsiveImage from "@/shared/ui/ResponsiveImage";
-import Reveal from "@/shared/Animation/Reveal";
-import { bespokePageFigmaSpec } from "@/features/bespoke/data/content";
+import HeroBackgroundMedia from "@/features/cms/components/home/HeroBackgroundMedia";
+import MediaContentOverlay from "@/shared/ui/MediaContentOverlay";
 import type { NormalizedBespokeHero } from "@/services/bespoke/contact-bespoke-page.types";
 
 type BespokeHeroSectionProps = {
@@ -10,32 +9,30 @@ type BespokeHeroSectionProps = {
 };
 
 const BespokeHeroSection = ({ hero }: BespokeHeroSectionProps) => {
+  const imageAlt = hero.image?.alt?.trim() || hero.title;
+
   return (
     <section
       aria-labelledby="bespoke-hero-title"
-      className="relative h-240 w-full overflow-hidden md:h-320"
+      className="relative grid h-[240px] w-full overflow-hidden bg-white md:h-320"
     >
-      <ResponsiveImage
-        desktopSrc={hero.image.desktopUrl}
-        mobileSrc={hero.image.mobileUrl}
-        alt={hero.image.alt}
-        width={1440}
-        height={bespokePageFigmaSpec.heroDesktopHeight}
-        priority
-        sizes="100vw"
-        className="absolute inset-0 size-full object-cover object-center"
-      />
-
-      <div aria-hidden className="absolute inset-0 bg-[#00000066]" />
-
-      <Reveal
-        as="h1"
-        id="bespoke-hero-title"
-        direction="up"
-        className="absolute md:bottom-16 bottom-11 left-0 w-full text-center whitespace-nowrap text-center font-larken lg:text-5xl md:text-4xl text-32 font-light leading-110 text-white"
-      >
-        {hero.title}
-      </Reveal>
+      <div className="relative col-start-1 row-start-1 size-full [&_img]:object-[62%_38%] md:[&_img]:object-[58%_42%] [&_video]:object-[62%_38%] md:[&_video]:object-[58%_42%]">
+        <HeroBackgroundMedia
+          desktopImageUrl={hero.image?.desktopUrl ?? ""}
+          mobileImageUrl={hero.image?.mobileUrl}
+          desktopAlt={imageAlt}
+          mobileAlt={imageAlt}
+        />
+        <MediaContentOverlay gradient="bottom-strong" />
+      </div>
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-10 lg:pb-16">
+        <h1
+          id="bespoke-hero-title"
+          className="w-full text-center font-larken font-light leading-none text-white lg:text-6xl md:text-5xl sm:text-4xl text-32"
+        >
+          {hero.title}
+        </h1>
+      </div>
     </section>
   );
 };

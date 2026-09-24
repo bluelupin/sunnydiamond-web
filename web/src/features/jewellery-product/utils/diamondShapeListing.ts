@@ -53,7 +53,7 @@ export function resolveDiamondShapeFacetOption(
       );
     }) ?? null;
 
-  return matchIn(diamondShapes) ?? matchIn(DIAMOND_SHAPE_OPTIONS);
+  return matchIn(diamondShapes);
 }
 
 export function buildJewelleryDiamondShapeHref(
@@ -127,8 +127,7 @@ export function resolveEducationDiamondShapeHref({
     const hasShapeParam = hasDiamondShapeParamInUrl(normalizedCtaUrl);
 
     if (hasShapeParam) {
-      // Valid CMS deep-link → keep as-is (CMS priority).
-      if (fromUrl && resolveDiamondShapeFacetOption(fromUrl)) {
+      if (fromUrl) {
         return buildJewelleryDiamondShapeHref(fromUrl);
       }
 

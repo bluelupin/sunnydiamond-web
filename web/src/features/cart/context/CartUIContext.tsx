@@ -4,10 +4,12 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useRef,
   useState,
   type ReactNode,
 } from "react";
+import { usePathname } from "next/navigation";
 import type { AddItemResult, CartLineItem } from "../types/cart.types";
 
 type BagDrawerSnapshot = {
@@ -45,6 +47,7 @@ type CartUIContextType = {
 const CartUIContext = createContext<CartUIContextType | undefined>(undefined);
 
 export function CartUIProvider({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
   const [isBagDrawerOpen, setIsBagDrawerOpen] = useState(false);
   const [bagDrawerMode, setBagDrawerMode] = useState<BagDrawerMode>("add");
   const [lastAddedLineItemId, setLastAddedLineItemId] = useState<string | null>(null);
@@ -145,6 +148,41 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
   const startCheckoutNavigation = useCallback(() => {
     setIsNavigatingToCheckout(true);
   }, []);
+
+  const clearCheckoutNavigation = useCallback(() => {
+    setIsNavigatingToCheckout(false);
+  }, []);
+
+  // Clear once checkout is no longer the active route (covers browser Back to cart).
+  useEffect(() => {
+    if (pathname !== "/checkout") {
+      clearCheckoutNavigation();
+    }
+  }, [pathname, clearCheckoutNavigation]);
+
+  // bfcache can restore /cart without a pathname change, leaving the flag stuck true
+  // after startCheckoutNavigation() ran right before router.push("/checkout").
+  useEffect(() => {
+    const resetIfOnCart = () => {
+      if (window.location.pathname === "/cart") {
+        clearCheckoutNavigation();
+      }
+    };
+
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        resetIfOnCart();
+      }
+    };
+
+    window.addEventListener("popstate", resetIfOnCart, true);
+    window.addEventListener("pageshow", onPageShow);
+
+    return () => {
+      window.removeEventListener("popstate", resetIfOnCart, true);
+      window.removeEventListener("pageshow", onPageShow);
+    };
+  }, [clearCheckoutNavigation]);
 
   return (
     <CartUIContext.Provider

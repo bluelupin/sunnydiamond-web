@@ -12,6 +12,7 @@ import {
 import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { profileTabsContent } from "../data/profileContent";
+import FormFieldError from "@/shared/ui/FormFieldError";
 
 type ProfileOrderCancelReasonDialogProps = {
   open: boolean;
@@ -96,11 +97,7 @@ function ProfileOrderCancelReasonDialogBody({
         </p>
       ) : null}
 
-      {errorMessage ? (
-        <p className="font-gill text-sm font-light leading-110 text-red-700" role="alert">
-          {errorMessage}
-        </p>
-      ) : null}
+      <FormFieldError message={errorMessage ?? undefined} />
 
       <DetailDarkButton
         type="button"
@@ -175,7 +172,7 @@ export function ProfileOrderCancelReasonDialog({
           <div className="shrink-0 px-4 pt-6">
             <div className="flex flex-col gap-6">
               <div className="flex items-center justify-between gap-4">
-                <SheetTitle className="font-larken text-2xl font-light leading-110 text-darkblack">
+                <SheetTitle className="font-larken lg:text-32 text-2xl font-light leading-110 text-darkblack">
                   {dialog.title}
                 </SheetTitle>
                 <button
@@ -208,7 +205,7 @@ export function ProfileOrderCancelReasonDialog({
       >
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between gap-4">
-            <DialogTitle className="font-larken text-32 font-light leading-110 text-darkblack">
+            <DialogTitle className="font-larken lg:text-32 text-2xl font-light leading-110 text-darkblack">
               {dialog.title}
             </DialogTitle>
             <button

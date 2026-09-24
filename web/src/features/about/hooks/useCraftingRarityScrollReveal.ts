@@ -121,7 +121,7 @@ export function useCraftingRarityScrollReveal(
       if (bodyMask) {
         applyMaskReveal(
           bodyMask,
-          segmentReveal(progress, segments.image.start, segments.image.end),
+          segmentReveal(progress, segments.body.start, segments.body.end),
         );
       }
       if (lineFill) {

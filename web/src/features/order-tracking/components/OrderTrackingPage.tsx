@@ -15,6 +15,7 @@ import { trackOrder } from "@/services/customer/order-tracking.client";
 import type { TrackedOrder } from "@/services/customer/order-tracking.types";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import { isPlaceholderCustomerLastName } from "@/shared/utils/customerName";
+import FormFieldError from "@/shared/ui/FormFieldError";
 
 type TrackingFormState = {
   number: string;
@@ -183,9 +184,7 @@ const OrderTrackingPage = () => {
             )}
 
             {error ? (
-              <p className="font-gill text-sm font-light leading-110 text-red-700" role="alert">
-                {error}
-              </p>
+              <FormFieldError message={error} />
             ) : null}
 
             <div className="flex flex-col gap-3 sm:flex-row">

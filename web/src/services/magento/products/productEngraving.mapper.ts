@@ -1,5 +1,6 @@
 import {
   DEFAULT_ENGRAVING_MAX_CHARACTERS,
+  resolveEngravingPreviewImage,
   type ProductEngravingConfig,
 } from "@/features/products/constants/engraving";
 import type { ProductCustomOptions } from "@/features/products/types/productCustomOptions";
@@ -34,9 +35,9 @@ export function mapMagentoProductEngraving(
   const previewImageRaw =
     getMagentoCustomAttributeValue(items, "engraving_preview_image") ??
     getMagentoCustomAttributeValue(items, "sd_engraving_preview_image");
-  const previewImage =
-    resolveMagentoModelWearImageUrl(previewImageRaw, mediaGallery, referenceImageUrl) ||
-    undefined;
+  const previewImage = resolveEngravingPreviewImage(
+    resolveMagentoModelWearImageUrl(previewImageRaw, mediaGallery, referenceImageUrl) || undefined,
+  );
 
   return {
     enabled: true,

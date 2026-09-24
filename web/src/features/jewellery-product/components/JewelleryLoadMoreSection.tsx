@@ -1,6 +1,7 @@
 "use client";
 
 import { jewelleryListingPaginationSpec } from "../data/content";
+import JewelleryListingErrorState from "./JewelleryListingErrorState";
 
 interface JewelleryLoadMoreSectionProps {
   visibleCount: number;
@@ -8,6 +9,8 @@ interface JewelleryLoadMoreSectionProps {
   onLoadMore: () => void;
   hasMore: boolean;
   isLoadingMore?: boolean;
+  loadMoreError?: string;
+  onRetryLoadMore?: () => void;
   /** Noun used in “X out of Y {itemLabel}”. Defaults to Products. */
   itemLabel?: string;
 }
@@ -31,6 +34,8 @@ const JewelleryLoadMoreSection = ({
   onLoadMore,
   hasMore,
   isLoadingMore = false,
+  loadMoreError,
+  onRetryLoadMore,
   itemLabel = "Products",
 }: JewelleryLoadMoreSectionProps) => {
   const progress = totalCount > 0 ? Math.min(100, (visibleCount / totalCount) * 100) : 0;
@@ -70,7 +75,13 @@ const JewelleryLoadMoreSection = ({
           </div>
         </div>
 
-        {hasMore ? (
+        {loadMoreError && onRetryLoadMore ? (
+          <JewelleryListingErrorState
+            variant="loadMore"
+            message={loadMoreError}
+            onRetry={onRetryLoadMore}
+          />
+        ) : hasMore ? (
           <button
             type="button"
             onClick={onLoadMore}

@@ -153,12 +153,31 @@ function mapMagentoCustomerOrder(order: MagentoCustomerOrder): CustomerOrder {
   };
 }
 
+function normalizeDefaultShippingExclusive(addresses: CustomerAddress[]): CustomerAddress[] {
+  let defaultAssigned = false;
+
+  return addresses.map((address) => {
+    if (!address.isDefaultShipping) {
+      return address;
+    }
+
+    if (defaultAssigned) {
+      return { ...address, isDefaultShipping: false };
+    }
+
+    defaultAssigned = true;
+    return address;
+  });
+}
+
 export function mapMagentoCustomerAddresses(
   data: MagentoCustomerAddressesResponse,
 ): CustomerAddress[] {
-  return (data.customer?.addresses ?? [])
+  const mapped = (data.customer?.addresses ?? [])
     .filter((address): address is MagentoCustomerAddress & { uid: string } => Boolean(address?.uid))
     .map(mapMagentoCustomerAddress);
+
+  return normalizeDefaultShippingExclusive(mapped);
 }
 
 function mapMagentoCustomerAddress(address: MagentoCustomerAddress): CustomerAddress {
@@ -196,7 +215,7 @@ export function mapCustomerAddressInputToMagento(input: CustomerAddressInput) {
 
   const phone = input.phone.replace(/\D/g, "");
   if (!phone) {
-    throw new Error("Phone number is required");
+    throw new Error("Please enter a valid phone number");
   }
 
   return {
@@ -212,7 +231,7 @@ export function mapCustomerAddressInputToMagento(input: CustomerAddressInput) {
     },
     telephone: phone,
     default_shipping: Boolean(input.defaultShipping),
-    default_billing: Boolean(input.defaultBilling),
+    default_billing: false,
   };
 }
 
@@ -226,6 +245,78 @@ export function mapCustomerAddressToFormInput(address: CustomerAddress): Custome
     state: address.state,
     phone: address.phone,
     defaultShipping: address.isDefaultShipping,
-    defaultBilling: address.isDefaultBilling,
+    defaultBilling: false,
+  };
+}
+
+function normalizeAddressCompareValue(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+function normalizeAddressPhone(value: string): string {
+  return value.replace(/\D/g, "");
+}
+
+export function doesCustomerAddressMatchInput(
+  input: CustomerAddressInput,
+  address: CustomerAddress,
+): boolean {
+  const mapped = mapCustomerAddressToFormInput(address);
+
+  return (
+    normalizeAddressCompareValue(input.name) === normalizeAddressCompareValue(mapped.name) &&
+    normalizeAddressCompareValue(input.addressLine1) ===
+      normalizeAddressCompareValue(mapped.addressLine1) &&
+    normalizeAddressCompareValue(input.addressLine2 ?? "") ===
+      normalizeAddressCompareValue(mapped.addressLine2 ?? "") &&
+    normalizeAddressCompareValue(input.pincode) === normalizeAddressCompareValue(mapped.pincode) &&
+    normalizeAddressCompareValue(input.city) === normalizeAddressCompareValue(mapped.city) &&
+    normalizeAddressCompareValue(input.state) === normalizeAddressCompareValue(mapped.state) &&
+    normalizeAddressPhone(input.phone) === normalizeAddressPhone(mapped.phone)
+  );
+}
+
+type MagentoOrderShippingAddress = {
+  firstname?: string | null;
+  lastname?: string | null;
+  street?: string[] | null;
+  city?: string | null;
+  region?: string | null;
+  postcode?: string | null;
+  telephone?: string | null;
+};
+
+export function mapOrderShippingAddressToCustomerAddressInput(
+  address: MagentoOrderShippingAddress | null | undefined,
+): CustomerAddressInput | null {
+  if (!address) {
+    return null;
+  }
+
+  const name = formatCustomerFullName(address.firstname, address.lastname).trim();
+  const streetLines = (address.street ?? []).map((line) => line?.trim() ?? "").filter(Boolean);
+  const addressLine1 = streetLines[0] ?? "";
+  const addressLine2 = streetLines.slice(1).join(", ");
+  const city = address.city?.trim() ?? "";
+  const state = address.region?.trim() ?? "";
+  const pincode = address.postcode?.trim() ?? "";
+  const phone = address.telephone?.replace(/\D/g, "") ?? "";
+
+  if (!name || !addressLine1 || !city || !state || !pincode || !phone) {
+    return null;
+  }
+
+  if (!getIndiaMagentoRegionId(state)) {
+    return null;
+  }
+
+  return {
+    name,
+    addressLine1,
+    addressLine2,
+    city,
+    state,
+    pincode,
+    phone,
   };
 }

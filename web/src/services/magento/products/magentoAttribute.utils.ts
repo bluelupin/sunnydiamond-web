@@ -107,6 +107,29 @@ export function isMagentoTrending(
   return isMagentoBooleanTruthy(getMagentoCustomAttributeValue(items, "sd_trending"));
 }
 
+export const MAGENTO_PRODUCT_COLLECTION_ATTRIBUTE = "sd_collection";
+
+export function productMatchesMagentoCollection(
+  items: MagentoCustomAttributeItem[] | null | undefined,
+  collectionValue: string,
+): boolean {
+  const target = collectionValue.trim().toLowerCase();
+  if (!target) {
+    return false;
+  }
+
+  const selectedValues = getMagentoCustomAttributeSelectedValues(
+    items,
+    MAGENTO_PRODUCT_COLLECTION_ATTRIBUTE,
+  );
+  if (selectedValues.some((value) => value.toLowerCase() === target)) {
+    return true;
+  }
+
+  const rawValue = getMagentoCustomAttributeValue(items, MAGENTO_PRODUCT_COLLECTION_ATTRIBUTE);
+  return rawValue?.trim().toLowerCase() === target;
+}
+
 function getActiveGalleryUrls(
   mediaGallery: MagentoMediaGalleryItem[] | null | undefined,
 ): string[] {

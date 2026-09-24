@@ -103,8 +103,27 @@ const AppointmentDateField = ({
     maxSelectableDate.setHours(0, 0, 0, 0);
   }
 
+  const getDefaultViewMonth = (): Date => {
+    if (selectedDate) {
+      return selectedDate;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (today >= minSelectableDate && (maxSelectableDate == null || today <= maxSelectableDate)) {
+      return today;
+    }
+
+    if (today < minSelectableDate) {
+      return minSelectableDate;
+    }
+
+    return maxSelectableDate ?? minSelectableDate;
+  };
+
   const [open, setOpen] = useState(false);
-  const [viewMonth, setViewMonth] = useState(() => selectedDate ?? minSelectableDate);
+  const [viewMonth, setViewMonth] = useState(() => getDefaultViewMonth());
 
   const minMonthStart = startOfMonth(minSelectableDate);
   const maxMonthStart = maxSelectableDate ? startOfMonth(maxSelectableDate) : null;
@@ -129,7 +148,7 @@ const AppointmentDateField = ({
     setOpen(nextOpen);
 
     if (nextOpen) {
-      setViewMonth(selectedDate ?? maxSelectableDate ?? minSelectableDate);
+      setViewMonth(getDefaultViewMonth());
       return;
     }
 
@@ -187,6 +206,7 @@ const AppointmentDateField = ({
       <PopoverContent
         align="end"
         sideOffset={8}
+        onOpenAutoFocus={(event) => event.preventDefault()}
         className="z-[80] w-[320px] rounded-none border-neutral300 bg-white p-4 font-gill shadow-lg"
       >
         <div className="flex items-center justify-between gap-2 pb-4">

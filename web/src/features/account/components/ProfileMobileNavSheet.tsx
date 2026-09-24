@@ -12,7 +12,6 @@ import HeaderIconBadge from "@/shared/ui/layout/HeaderIconBadge";
 import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
 import {
   DEFAULT_PROFILE_SECTION,
-  PROFILE_NAV_ITEMS,
   type ProfileNavItem,
 } from "../data/profileSections";
 import type { ProfileSectionId } from "../types";
@@ -20,6 +19,7 @@ import type { ProfileSectionId } from "../types";
 type ProfileMobileNavSheetProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  navItems: ProfileNavItem[];
   activeSection?: ProfileSectionId;
   onSectionChange?: (section: ProfileSectionId) => void;
   cartCount?: number;
@@ -100,6 +100,7 @@ function ProfileNavSheetHeader({ onClose, cartCount, firstName }: ProfileNavShee
 export function ProfileMobileNavSheet({
   open,
   onOpenChange,
+  navItems,
   activeSection,
   onSectionChange,
   cartCount = 0,
@@ -148,7 +149,7 @@ export function ProfileMobileNavSheet({
         />
 
         <nav aria-label="Profile sections" className="flex flex-col gap-4 px-4 pb-8">
-          {PROFILE_NAV_ITEMS.map((item, index) => {
+          {navItems.map((item, index) => {
             const key = item.kind === "link" ? item.href : item.id;
             const isActive = item.kind === "section" && item.id === activeSection;
 
@@ -163,7 +164,7 @@ export function ProfileMobileNavSheet({
                   <span>{item.label}</span>
                   <NavChevron />
                 </button>
-                {index < PROFILE_NAV_ITEMS.length - 1 ? <NavDivider /> : null}
+                {index < navItems.length - 1 ? <NavDivider /> : null}
               </div>
             );
           })}

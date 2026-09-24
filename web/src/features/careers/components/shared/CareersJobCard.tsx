@@ -115,7 +115,7 @@ const CareersJobCard = ({
             <CareersJobIdChip
               jobCode={job.jobCode}
               alwaysInline={isLanding || isListing}
-              surface={isListing ? "listing" : isLanding ? "muted" : "white"}
+              surface={isLanding || isListing ? "listing" : "white"}
             />
           </div>
 

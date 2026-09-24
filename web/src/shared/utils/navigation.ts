@@ -3,6 +3,7 @@ import { CAREERS_ALL_OPENINGS_ROUTE } from "@/features/careers/constants/careers
 import { isJewelleryCategoryPath } from "@/features/jewellery-product/utils/jewelleryRoutes";
 
 export const WORLD_OF_SUNNY_PATH = "/world-of-sunny";
+export const BESPOKE_JEWELLERY_PATH = "/bespoke-jewellery";
 export const POLICY_AND_CERTIFICATIONS_PATH = "/policy-and-certifications";
 
 export function resolveHeaderNavHref(label: string, url: string): string {
@@ -35,6 +36,29 @@ export function resolveHeaderNavHref(label: string, url: string): string {
 export function isJewelleryNavLink(label: string): boolean {
   const normalizedLabel = label.trim().toLowerCase();
   return normalizedLabel === "jewellery" || normalizedLabel === "jewelry";
+}
+
+export function isHeaderNavLinkActive(
+  pathname: string,
+  label: string,
+  url: string,
+): boolean {
+  if (isJewelleryNavLink(label)) {
+    return isJewelleryCategoryPath(pathname);
+  }
+
+  const href = resolveHeaderNavHref(label, url);
+  const normalizedPath = pathname.replace(/\/$/, "") || "/";
+  const normalizedHref = href.replace(/\/$/, "") || "/";
+
+  if (normalizedHref === "/") {
+    return normalizedPath === "/";
+  }
+
+  return (
+    normalizedPath === normalizedHref ||
+    normalizedPath.startsWith(`${normalizedHref}/`)
+  );
 }
 
 export function isAuthRoute(pathname: string): boolean {

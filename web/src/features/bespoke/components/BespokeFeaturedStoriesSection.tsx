@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import Slider, { type Settings } from "react-slick";
@@ -16,13 +17,12 @@ import {
 import BespokeFeaturedStoryModal from "@/features/bespoke/components/BespokeFeaturedStoryModal";
 import BespokePastCreationsModal from "@/features/bespoke/components/BespokePastCreationsModal";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
+import { unlockBodyScroll, useBodyScrollLock } from "@/shared/hooks/use-body-scroll-lock";
 import type {
   NormalizedBespokeFeaturedSlide,
   NormalizedBespokeFeaturedStories,
   NormalizedBespokePastCreations,
 } from "@/services/bespoke/contact-bespoke-page.types";
-import { bespokeUiDefaults } from "@/services/bespoke/bespoke-fallbacks";
-import { getPastCreations } from "@/services/bespoke/featured-stories.service";
 
 type FeaturedSlide = NormalizedBespokeFeaturedSlide;
 
@@ -61,28 +61,61 @@ const buildRenderSlides = (slides: readonly FeaturedSlide[]) => {
 
 type FeaturedGallerySlideProps = {
   slide: FeaturedSlide;
+  onClick?: () => void;
 };
 
 const featuredGallerySlideTransitionClassName =
   "transition-[height] duration-500 ease-in-out motion-reduce:transition-none";
 
-const FeaturedGallerySlide = ({ slide }: FeaturedGallerySlideProps) => (
-  <div
-    className={cn(
-      "featured-gallery-slide relative h-[300px] overflow-hidden bg-white",
-      featuredGallerySlideTransitionClassName,
-    )}
-  >
-    <Image
-      src={slide.src}
-      alt={slide.alt}
-      fill
-      sizes="(max-width: 768px) 80vw, 33vw"
-      loading="lazy"
-      className="h-full w-full object-cover object-center"
-    />
-  </div>
-);
+const CLICK_DRAG_TOLERANCE_PX = 8;
+
+const FeaturedGallerySlide = ({ slide, onClick }: FeaturedGallerySlideProps) => {
+  const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
+
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!onClick) return;
+    pointerStartRef.current = { x: event.clientX, y: event.clientY };
+  };
+
+  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!onClick) return;
+
+    const start = pointerStartRef.current;
+    pointerStartRef.current = null;
+
+    if (!start) {
+      onClick();
+      return;
+    }
+
+    const deltaX = Math.abs(event.clientX - start.x);
+    const deltaY = Math.abs(event.clientY - start.y);
+
+    if (deltaX <= CLICK_DRAG_TOLERANCE_PX && deltaY <= CLICK_DRAG_TOLERANCE_PX) {
+      onClick();
+    }
+  };
+
+  return (
+    <div
+      className={cn(
+        "featured-gallery-slide relative h-[300px] overflow-hidden bg-white",
+        featuredGallerySlideTransitionClassName,
+      )}
+      onPointerDown={onClick ? handlePointerDown : undefined}
+      onClick={onClick ? handleClick : undefined}
+    >
+      <Image
+        src={slide.src}
+        alt={slide.alt}
+        fill
+        sizes="(max-width: 768px) 80vw, 33vw"
+        loading="lazy"
+        className="h-full w-full object-cover object-center"
+      />
+    </div>
+  );
+};
 
 type FeaturedGalleryBackgroundProps = {
   slides: readonly FeaturedSlide[];
@@ -98,30 +131,30 @@ const FeaturedGalleryBackground = ({
   const safeIndex = slides.length > 0 ? normalizeIndex(activeIndex, slides.length) : 0;
   const activeSlide = slides[safeIndex];
   const fallbackBgSrc = backgroundImage?.desktopUrl || backgroundImage?.mobileUrl || null;
-  const srAlt = activeSlide?.alt || backgroundImage?.alt || "";
+  const srAlt = activeSlide?.alt ?? "";
 
   return (
     <div className="pointer-events-none absolute inset-x-0 top-0 h-[540px] md:h-[559px]">
-      <div className="relative size-full">
+      <div className="absolute inset-0 z-0">
         {slides.length > 0 ? (
           slides.map((slide, index) => (
             <Image
               key={slide.documentId ?? `${slide.src}-${index}`}
               src={slide.src}
-              alt={index === safeIndex ? slide.alt || backgroundImage?.alt || "" : ""}
+              alt={index === safeIndex ? slide.alt : ""}
               fill
               sizes="100vw"
               priority={index === safeIndex}
               className={cn(
                 "object-cover object-top transition-opacity duration-500 ease-in-out",
-                index === safeIndex ? "z-[1] opacity-100" : "z-0 opacity-0",
+                index === safeIndex ? "opacity-100" : "opacity-0",
               )}
             />
           ))
         ) : fallbackBgSrc ? (
           <Image
             src={fallbackBgSrc}
-            alt={backgroundImage?.alt || ""}
+            alt={backgroundImage?.alt ?? ""}
             fill
             priority
             sizes="100vw"
@@ -129,18 +162,21 @@ const FeaturedGalleryBackground = ({
           />
         ) : null}
       </div>
+
       <div
         aria-hidden
-        className="absolute inset-0"
+        className="absolute inset-0 z-[1]"
         style={{
-          backgroundColor: spec.overlayHorizontal,
-          backgroundImage: spec.overlayVertical,
+          backgroundImage: `${spec.overlayHorizontalGradient}, ${spec.overlayVertical}, linear-gradient(to bottom, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.15) 38%, rgba(0, 0, 0, 0) 52%)`,
         }}
       />
-      <div
+
+      {/* <div
         aria-hidden
-        className="absolute inset-x-0 bottom-0 h-[400px] bg-gradient-to-b from-transparent to-black/80 backdrop-blur-[5px]"
-      />
+        className="absolute inset-x-0 bottom-0 z-[1] h-full"
+        style={{ backgroundImage: spec.bottomGradient }}
+      /> */}
+
       {srAlt && slides.length === 0 && fallbackBgSrc ? (
         <span className="sr-only">{srAlt}</span>
       ) : null}
@@ -481,7 +517,7 @@ const FeaturedGallerySlider = ({
       >
         {renderSlides.map((slide, index) => (
           <div key={slide.renderKey ?? `${slide.src}-${index}`}>
-            <FeaturedGallerySlide slide={slide} />
+            <FeaturedGallerySlide slide={slide} onClick={canSlide ? goNext : undefined} />
           </div>
         ))}
       </Slider>
@@ -502,11 +538,10 @@ type FeaturedStoriesLayoutProps = {
   onIndexChange: (index: number) => void;
   onPrimaryCtaClick: () => void;
   title: string;
-  primaryCtaHref: string;
+  primaryCtaHref?: string;
   primaryCtaLabel: string;
   secondaryCtaLabel: string;
   onSecondaryCtaClick: () => void;
-  secondaryCtaLoading: boolean;
   backgroundImage?: { desktopUrl: string; mobileUrl: string; alt: string } | null;
   showHero: boolean;
 };
@@ -521,11 +556,10 @@ const FeaturedStoriesLayout = ({
   primaryCtaLabel,
   secondaryCtaLabel,
   onSecondaryCtaClick,
-  secondaryCtaLoading,
   backgroundImage,
   showHero,
 }: FeaturedStoriesLayoutProps) => {
-  const activePrimaryCtaHref = slides[currentIndex]?.href ?? primaryCtaHref;
+  const activePrimaryCtaHref = slides[currentIndex]?.href ?? primaryCtaHref ?? "#";
 
   return (
     <section aria-labelledby="bespoke-featured-stories-title" className="overflow-hidden bg-gray200 w-full max-w-full">
@@ -572,10 +606,9 @@ const FeaturedStoriesLayout = ({
             {secondaryCtaLabel ? (
               <DetailTextLink
                 onClick={onSecondaryCtaClick}
-                disabled={secondaryCtaLoading}
                 className="uppercase"
               >
-                {secondaryCtaLoading ? "Loading..." : secondaryCtaLabel}
+                {secondaryCtaLabel}
               </DetailTextLink>
             ) : null}
           </div>
@@ -606,10 +639,9 @@ const FeaturedStoriesLayout = ({
             {secondaryCtaLabel ? (
               <DetailTextLink
                 onClick={onSecondaryCtaClick}
-                disabled={secondaryCtaLoading}
                 className="uppercase"
               >
-                {secondaryCtaLoading ? "Loading..." : secondaryCtaLabel}
+                {secondaryCtaLabel}
               </DetailTextLink>
             ) : null}
           </div>
@@ -619,9 +651,16 @@ const FeaturedStoriesLayout = ({
   );
 };
 
-const BespokeFeaturedStoriesSection = ({ featuredStories }: {
+const BESPOKE_PAGE_PATH = "/bespoke-jewellery";
+
+const BespokeFeaturedStoriesSection = ({
+  featuredStories,
+  pastCreations,
+}: {
   featuredStories: NormalizedBespokeFeaturedStories | null;
+  pastCreations: NormalizedBespokePastCreations | null;
 }) => {
+  const pathname = usePathname() ?? BESPOKE_PAGE_PATH;
   const slides = featuredStories?.slides ?? [];
   const defaultSlideIndex = featuredStories?.defaultSlideIndex ?? 0;
   const slidesIdentity = useMemo(
@@ -631,77 +670,161 @@ const BespokeFeaturedStoriesSection = ({ featuredStories }: {
   const [currentIndex, setCurrentIndex] = useState(defaultSlideIndex);
   const [modalOpen, setModalOpen] = useState(false);
   const [pastCreationsOpen, setPastCreationsOpen] = useState(false);
-  const [pastCreations, setPastCreations] = useState<NormalizedBespokePastCreations | null>(null);
-  const [pastCreationsLoading, setPastCreationsLoading] = useState(false);
   const [modalContext, setModalContext] = useState<{ slideIndex: number; imageIndex: number } | null>(
     null,
   );
   const [modalSlideOverride, setModalSlideOverride] = useState<FeaturedStoryModalSlide | null>(null);
+  const modalHistoryDepthRef = useRef(0);
+  const skipHistoryPopRef = useRef(false);
+  const modalOpenRef = useRef(modalOpen);
+  const pastCreationsOpenRef = useRef(pastCreationsOpen);
+
+  modalOpenRef.current = modalOpen;
+  pastCreationsOpenRef.current = pastCreationsOpen;
 
   useEffect(() => {
     setCurrentIndex(defaultSlideIndex);
   }, [defaultSlideIndex, slidesIdentity]);
 
-  useEffect(() => {
-    if (!modalOpen && !pastCreationsOpen) {
-      document.body.style.overflow = "";
-      return;
-    }
+  const isOverlayOpen = modalOpen || pastCreationsOpen;
+  useBodyScrollLock(isOverlayOpen);
 
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [modalOpen, pastCreationsOpen]);
+  const pushModalHistory = useCallback(() => {
+    window.history.pushState({ sdBespokeFeaturedModal: true }, "");
+    modalHistoryDepthRef.current += 1;
+  }, []);
 
-  const handleCenterOpen = useCallback(() => {
-    if (slides.length === 0) return;
+  const popModalHistory = useCallback(() => {
+    if (modalHistoryDepthRef.current <= 0) return;
+
+    skipHistoryPopRef.current = true;
+    modalHistoryDepthRef.current -= 1;
+    window.history.back();
+  }, []);
+
+  const resetModalState = useCallback(() => {
+    modalHistoryDepthRef.current = 0;
+    setModalOpen(false);
+    setPastCreationsOpen(false);
+    setModalContext(null);
     setModalSlideOverride(null);
-    setModalContext({ slideIndex: currentIndex, imageIndex: 0 });
-    setModalOpen(true);
-  }, [currentIndex, slides.length]);
+    unlockBodyScroll();
+  }, []);
+
+  useEffect(() => {
+    if (pathname !== BESPOKE_PAGE_PATH) {
+      resetModalState();
+    }
+  }, [pathname, resetModalState]);
+
+  useEffect(() => {
+    const onPageShow = () => {
+      if (!modalOpenRef.current && !pastCreationsOpenRef.current) {
+        unlockBodyScroll();
+        return;
+      }
+
+      resetModalState();
+    };
+
+    const onPopState = () => {
+      if (skipHistoryPopRef.current) {
+        skipHistoryPopRef.current = false;
+        return;
+      }
+
+      if (modalHistoryDepthRef.current > 0) {
+        modalHistoryDepthRef.current -= 1;
+      }
+
+      if (modalOpenRef.current) {
+        setModalOpen(false);
+        setModalContext(null);
+        setModalSlideOverride(null);
+        if (!pastCreationsOpenRef.current) {
+          unlockBodyScroll();
+        }
+        return;
+      }
+
+      if (pastCreationsOpenRef.current) {
+        setPastCreationsOpen(false);
+        unlockBodyScroll();
+      }
+    };
+
+    window.addEventListener("pageshow", onPageShow);
+    window.addEventListener("popstate", onPopState);
+
+    return () => {
+      window.removeEventListener("pageshow", onPageShow);
+      window.removeEventListener("popstate", onPopState);
+    };
+  }, [resetModalState]);
 
   const handleModalClose = useCallback(() => {
     setModalOpen(false);
     setModalContext(null);
     setModalSlideOverride(null);
+    if (!pastCreationsOpenRef.current) {
+      unlockBodyScroll();
+    }
   }, []);
-
-  const handlePastCreationsOpen = useCallback(async () => {
-    if (pastCreations) {
-      setPastCreationsOpen(true);
-      return;
-    }
-
-    setPastCreationsLoading(true);
-    try {
-      const creations = await getPastCreations();
-      setPastCreations(creations);
-      setPastCreationsOpen(Boolean(creations));
-    } catch {
-      setPastCreations(null);
-    } finally {
-      setPastCreationsLoading(false);
-    }
-  }, [pastCreations]);
 
   const handlePastCreationsClose = useCallback(() => {
     setPastCreationsOpen(false);
+    if (!modalOpenRef.current) {
+      unlockBodyScroll();
+    }
   }, []);
+
+  const closeStoryModal = useCallback(() => {
+    if (modalOpen) {
+      popModalHistory();
+    }
+    handleModalClose();
+  }, [handleModalClose, modalOpen, popModalHistory]);
+
+  const closePastCreationsModal = useCallback(() => {
+    if (pastCreationsOpen) {
+      popModalHistory();
+    }
+    handlePastCreationsClose();
+  }, [handlePastCreationsClose, pastCreationsOpen, popModalHistory]);
+
+  const openStoryModal = useCallback(() => {
+    pushModalHistory();
+    setModalOpen(true);
+  }, [pushModalHistory]);
+
+  const handleCenterOpen = useCallback(() => {
+    if (slides.length === 0) return;
+    setModalSlideOverride(null);
+    setModalContext({ slideIndex: currentIndex, imageIndex: 0 });
+    openStoryModal();
+  }, [currentIndex, openStoryModal, slides.length]);
+
+  const handlePastCreationsOpen = useCallback(() => {
+    if (!pastCreations) return;
+    pushModalHistory();
+    setPastCreationsOpen(true);
+  }, [pastCreations, pushModalHistory]);
 
   const handlePastCreationImageClick = useCallback(
     (image: BespokePastCreationImage) => {
       if (slides.length === 0) {
+        if (!pastCreations) return;
+
         setModalSlideOverride({
           documentId: image.documentId,
           src: image.src,
           alt: image.alt,
-          modalTitle: pastCreations?.title || bespokeUiDefaults.pastCreationsTitle,
+          modalTitle: pastCreations.title,
           modalDescription: "",
           modalImages: [{ src: image.src, alt: image.alt }],
         });
         setModalContext({ slideIndex: 0, imageIndex: 0 });
-        setModalOpen(true);
+        openStoryModal();
         return;
       }
 
@@ -721,9 +844,9 @@ const BespokeFeaturedStoriesSection = ({ featuredStories }: {
         setModalContext({ slideIndex: resolved.slideIndex, imageIndex: 0 });
       }
 
-      setModalOpen(true);
+      openStoryModal();
     },
-    [defaultSlideIndex, pastCreations?.title, slides],
+    [defaultSlideIndex, openStoryModal, pastCreations, slides],
   );
 
   const modalSlide: FeaturedStoryModalSlide | null =
@@ -738,11 +861,14 @@ const BespokeFeaturedStoriesSection = ({ featuredStories }: {
         onIndexChange={setCurrentIndex}
         onPrimaryCtaClick={handleCenterOpen}
         title={featuredStories?.title ?? ""}
-        primaryCtaHref={featuredStories?.primaryCtaHref ?? "/featured-stories"}
+        primaryCtaHref={featuredStories?.primaryCtaHref}
         primaryCtaLabel={featuredStories?.primaryCtaLabel ?? ""}
-        secondaryCtaLabel={featuredStories?.secondaryCtaLabel || bespokeUiDefaults.secondaryCtaLabel}
+        secondaryCtaLabel={
+          pastCreations && featuredStories?.secondaryCtaLabel
+            ? featuredStories.secondaryCtaLabel
+            : ""
+        }
         onSecondaryCtaClick={handlePastCreationsOpen}
-        secondaryCtaLoading={pastCreationsLoading}
         backgroundImage={featuredStories?.backgroundImage ?? null}
         showHero={slides.length > 0 || Boolean(featuredStories?.backgroundImage)}
       />
@@ -751,15 +877,14 @@ const BespokeFeaturedStoriesSection = ({ featuredStories }: {
         slide={modalSlide}
         initialImageIndex={modalContext?.imageIndex ?? 0}
         elevated={pastCreationsOpen}
-        modalCtaLabel={featuredStories?.modalCtaLabel ?? bespokeUiDefaults.modalCtaLabel}
-        modalCtaHref={featuredStories?.modalCtaHref ?? bespokeUiDefaults.modalCtaHref}
-        onClose={handleModalClose}
+        modalCtaLabel={featuredStories?.modalCtaLabel}
+        onClose={closeStoryModal}
       />
       {pastCreations &&
         <BespokePastCreationsModal
           open={pastCreationsOpen}
           images={pastCreations.images}
-          onClose={handlePastCreationsClose}
+          onClose={closePastCreationsModal}
           onImageClick={handlePastCreationImageClick}
           suppressEscape={modalOpen}
         />

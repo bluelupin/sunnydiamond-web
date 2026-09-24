@@ -24,8 +24,8 @@ function renderBlock(block: BlogContentBlock) {
         <p
           className={
             block.emphasis === "regular"
-              ? "mb-6 font-gill text-base font-normal leading-[1.45] text-darkblack last:mb-0 md:mb-8 md:text-[20px]"
-              : "mb-6 font-gill text-base font-light leading-[1.45] text-darkblack last:mb-0 md:mb-8 md:text-[20px]"
+              ? "mb-6 font-gill text-base font-normal leading-[1.45] text-darkblack last:mb-0 md:mb-8 md:text-xl"
+              : "mb-6 font-gill text-base font-light leading-[1.45] text-darkblack last:mb-0 md:mb-8 md:text-xl"
           }
         >
           {block.text}
@@ -38,7 +38,7 @@ function renderBlock(block: BlogContentBlock) {
           {block.lines.map((line) => (
             <p
               key={`${line.label}-${line.text}`}
-              className="font-gill text-base font-light leading-[1.45] text-darkblack md:text-[20px]"
+              className="font-gill text-base font-light leading-[1.45] text-darkblack md:text-xl"
             >
               <span className="font-normal">{line.label}</span>
               {line.text}
@@ -53,7 +53,7 @@ function renderBlock(block: BlogContentBlock) {
           {block.items.map((item) => (
             <li
               key={item.text}
-              className="ms-6 list-disc font-gill text-base font-light leading-[1.45] text-darkblack md:ms-[30px] md:text-[20px]"
+              className="ms-6 list-disc font-gill text-base font-light leading-[1.45] text-darkblack md:ms-[30px] md:text-xl"
             >
               {item.lead ? (
                 <>
@@ -121,7 +121,7 @@ const BlogDetailArticle = ({ introParagraphs, sections }: BlogDetailArticleProps
     <article className="min-w-0 flex-1 desktop:max-w-[875px]">
       <div className="flex flex-col gap-6 md:gap-10">
         {introParagraphs.length > 0 ? (
-          <div className="flex flex-col gap-6 font-gill text-base font-normal leading-[1.45] text-darkblack md:gap-8 md:text-[20px] md:font-light">
+          <div className="flex flex-col gap-6 font-gill text-base font-normal leading-[1.45] text-darkblack md:gap-8 md:text-xl md:font-light">
             {introParagraphs.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
             ))}

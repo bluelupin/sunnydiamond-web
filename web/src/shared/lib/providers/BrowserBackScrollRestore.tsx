@@ -17,11 +17,8 @@ import {
   saveScrollPosition,
 } from "@/shared/lib/browserBackScrollRestore";
 import { scrollToTopBeforeClientNavigation } from "@/shared/utils/navigation";
-import {
-  HOME_SIDE_NAV_SECTION_IDS,
-  isHomePathname,
-  resolveActiveHomeSection,
-} from "@/shared/utils/homeSectionScroll";
+import { useHomeSidebarSectionIds } from "@/hooks/homepage/useHomeSidebarNavigation";
+import { isHomePathname, resolveActiveHomeSection } from "@/shared/utils/homeSectionScroll";
 
 const SAVE_DEBOUNCE_MS = 150;
 
@@ -31,6 +28,7 @@ const SAVE_DEBOUNCE_MS = 150;
  */
 export default function BrowserBackScrollRestore() {
   const pathname = usePathname() ?? "/";
+  const sidebarSectionIds = useHomeSidebarSectionIds();
   const cancelRestoreRef = useRef<(() => void) | null>(null);
   const saveTimeoutRef = useRef<number | null>(null);
   const scrollKeyRef = useRef(getCurrentScrollStorageKey(pathname));
@@ -41,8 +39,8 @@ export default function BrowserBackScrollRestore() {
   const persistScrollPosition = () => {
     saveScrollPosition(scrollKeyRef.current, readScrollOffset());
 
-    if (isHomePathname(pathname)) {
-      const activeSection = resolveActiveHomeSection(HOME_SIDE_NAV_SECTION_IDS);
+    if (isHomePathname(pathname) && sidebarSectionIds.length > 0) {
+      const activeSection = resolveActiveHomeSection(sidebarSectionIds);
       if (activeSection) {
         saveHomeActiveSection(activeSection);
       }
@@ -138,7 +136,7 @@ export default function BrowserBackScrollRestore() {
 
       persistScrollPosition();
     };
-  }, [pathname]);
+  }, [pathname, sidebarSectionIds]);
 
   useLayoutEffect(() => {
     cancelRestoreRef.current?.();
@@ -155,8 +153,8 @@ export default function BrowserBackScrollRestore() {
       const cancelScrollRestore =
         savedScroll != null ? restoreScrollPosition(key) : () => {};
       const cancelSectionRestore =
-        isHomePathname(pathname) && savedScroll == null
-          ? restoreHomeActiveSection(HOME_SIDE_NAV_SECTION_IDS)
+        isHomePathname(pathname) && savedScroll == null && sidebarSectionIds.length > 0
+          ? restoreHomeActiveSection(sidebarSectionIds)
           : () => {};
 
       cancelRestoreRef.current = () => {
@@ -180,7 +178,7 @@ export default function BrowserBackScrollRestore() {
       cancelRestoreRef.current?.();
       cancelRestoreRef.current = null;
     };
-  }, [pathname]);
+  }, [pathname, sidebarSectionIds]);
 
   useEffect(
     () => () => {

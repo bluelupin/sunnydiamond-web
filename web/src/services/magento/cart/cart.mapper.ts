@@ -1,7 +1,10 @@
 import type { Product } from "@/features/products/data/products";
 import type { CartGiftingOptions, CartLineItem, CartLineOptions } from "@/features/cart/types/cart.types";
+import { formatMetalColorLabel } from "@/features/products/utils/metalColorOptions.utils";
 import { buildProductSeo } from "@/shared/lib/seo/productSeo";
 import { resolveMagentoProductImages } from "../products/products.mapper";
+import { mapMagentoProductCustomOptions } from "../products/productCustomOptions.mapper";
+import { mapMagentoProductEngraving } from "../products/productEngraving.mapper";
 import fallBackImage from "@/assets/fallBackImage.png";
 import type {
   MagentoCart,
@@ -20,8 +23,24 @@ import type { CartLineMetadata, StoredCartLineMetadata } from "./cartSession";
 import { mapMagentoCartCustomizableOptions } from "./cartLineCustomOptions.mapper";
 import {
   DEFAULT_ENGRAVING_MAX_CHARACTERS,
-  isCartLineEngravingCapable,
+  hasCatalogEngravingText,
 } from "@/features/products/constants/engraving";
+
+export function applyCartLineDisplayImage(
+  product: Product,
+  displayImage?: string | null,
+): Product {
+  const trimmed = displayImage?.trim();
+  if (!trimmed) {
+    return product;
+  }
+
+  return {
+    ...product,
+    image: trimmed,
+    images: [trimmed],
+  };
+}
 
 function mapCartItemProduct(item: MagentoCartItem): Product | null {
   const product = item.product;
@@ -45,6 +64,15 @@ function mapCartItemProduct(item: MagentoCartItem): Product | null {
     variant?.image?.url ?? product?.image?.url,
   );
   const image = primaryImage || fallBackImage;
+  const customOptions = mapMagentoProductCustomOptions(product?.options);
+  const engraving = mapMagentoProductEngraving(
+    customOptions,
+    product?.custom_attributesV2?.items,
+    {
+      mediaGallery: variant?.media_gallery ?? product?.media_gallery,
+      referenceImageUrl: variant?.image?.url ?? product?.image?.url,
+    },
+  );
 
   return {
     id: sku,
@@ -68,6 +96,10 @@ function mapCartItemProduct(item: MagentoCartItem): Product | null {
       urlKey,
       shortDescription: name,
     }),
+    // Straight from the catalog, so the cart describes its own lines instead of
+    // depending on what this browser happens to remember.
+    customOptions,
+    ...(engraving ? { engraving } : {}),
   };
 }
 
@@ -84,7 +116,7 @@ function mapMagentoConfigurableOptionsToLineOptions(
     }
 
     if (optionLabel.includes("metal") || optionLabel.includes("color") || optionLabel.includes("gold")) {
-      mapped.metal = valueLabel;
+      mapped.metal = formatMetalColorLabel(valueLabel) || valueLabel;
     }
   }
 
@@ -344,15 +376,10 @@ export function mapMagentoCartItems(
     // metadata only covers optimistic lines (and capable lines with no text yet —
     // Magento omits unset options from the response).
     const serverHasEngraving = Boolean(serverOptions.engravingText || magentoOptions.engraving);
-    // A bare engravingSupported flag without the option-uid record is legacy/ghost
-    // metadata — only structured capability evidence keeps the engraving UI alive.
-    const engravingEnabledForLine =
-      serverHasEngraving ||
-      (Boolean(metadata.productCustomOptions?.engravingText) &&
-        isCartLineEngravingCapable({
-          options: metadata.options,
-          productCustomOptions: metadata.productCustomOptions,
-        }));
+    const catalogSupportsEngraving = hasCatalogEngravingText(
+      product.customOptions ?? metadata.productCustomOptions,
+    );
+    const engravingEnabledForLine = serverHasEngraving || catalogSupportsEngraving;
 
     if (engravingEnabledForLine) {
       mergedOptions.engravingSupported = true;
@@ -368,8 +395,12 @@ export function mapMagentoCartItems(
       }
 
       if (mergedOptions.engravingMaxCharacters == null) {
+        // Catalog first: the product's own field length is right on every device,
+        // metadata only knows what this browser stored when the line was added.
         mergedOptions.engravingMaxCharacters =
-          metadata.options.engravingMaxCharacters ?? DEFAULT_ENGRAVING_MAX_CHARACTERS;
+          product.customOptions?.engravingText?.maxCharacters ??
+          metadata.options.engravingMaxCharacters ??
+          DEFAULT_ENGRAVING_MAX_CHARACTERS;
       }
     } else {
       // Not engraving-capable per server + structured metadata — scrub any stale
@@ -389,7 +420,7 @@ export function mapMagentoCartItems(
 
     items.push({
       id: uid,
-      product,
+      product: applyCartLineDisplayImage(product, metadata.displayImage),
       quantity,
       options: mergedOptions,
       gifting: mergeLineGifting(serverGifting, metadata.gifting),

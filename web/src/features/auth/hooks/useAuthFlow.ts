@@ -28,7 +28,8 @@ import {
   validateCreateAccountForm,
   validateLoginIdentifier,
 } from "../utils/authValidation";
-import { getLoginHrefForReturn, sanitizeReturnUrl } from "../utils/authNavigation";
+import { getLoginHrefForReturn, getPostSignupReturnUrl, sanitizeReturnUrl } from "../utils/authNavigation";
+import { setAuthLoginIdentifierKind } from "../utils/authLoginIdentifier";
 
 /**
  * Sign-in is passwordless: every identifier — mobile or email — leads to a
@@ -60,6 +61,8 @@ export type AuthFlowContentProps = {
     noSignInMethod: boolean;
     showGoogle: boolean;
     showApple: boolean;
+    submitting: boolean;
+    identifierInputRef: RefObject<HTMLInputElement | null>;
     onIdentifierChange: (value: string) => void;
     onCountryCodeChange: (value: string) => void;
     onContinue: () => void;
@@ -76,6 +79,7 @@ export type AuthFlowContentProps = {
     otp: string[];
     otpError?: string;
     secondsLeft: number;
+    submitting: boolean;
     inputRefs: RefObject<Array<HTMLInputElement | null>>;
     onDigitChange: (index: number, value: string) => void;
     onKeyDown: (index: number, event: KeyboardEvent<HTMLInputElement>) => void;
@@ -95,6 +99,7 @@ export type AuthFlowContentProps = {
     termsError?: string;
     /** Failures that belong to no single field — an expired code, a rejected save. */
     formError?: string;
+    submitting: boolean;
     onFullNameChange: (value: string) => void;
     onEmailChange: (value: string) => void;
     onTermsAcceptedChange: (value: boolean) => void;
@@ -146,6 +151,10 @@ export function useAuthFlow({
   const [createAccountFormError, setCreateAccountFormError] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const identifierInputRef = useRef<HTMLInputElement | null>(null);
+  /** Focus the identifier only on a return to the step — an initial render must
+   *  not steal focus (or pop the keyboard on mobile) on the standalone page. */
+  const hasLeftSignIn = useRef(false);
   /** Server-provided resend cooldown; the timer effect reads this on entering the OTP step. */
   const cooldownRef = useRef(RESEND_SECONDS);
 
@@ -175,11 +184,28 @@ export function useAuthFlow({
   const noSignInMethod =
     !flags.otpLoginEnabled && !flags.emailOtpLoginEnabled && !showGoogle && !showApple;
 
-  /** Session cookie is set — sync guest cart/wishlist, then full navigation so providers reboot. */
-  const completeAuth = useCallback(async () => {
-    await runPostLoginSync();
-    window.location.assign(returnUrl);
-  }, [returnUrl]);
+  /**
+   * Session cookie is set — sync guest cart/wishlist, then full navigation so providers reboot.
+   *
+   * Standalone only: replace, not assign. /login must not stay in history — a pushed entry
+   * sends Back there, and because this is a document navigation the browser restores it from
+   * bfcache with its state intact (otpVerified still true), reopening the completed step.
+   * The modal has no entry of its own: it sits on a real content page, so replacing would
+   * delete the page the customer signed in from (cart, a DFE landing page) instead.
+   */
+  const completeAuth = useCallback(
+    async (destination: string = returnUrl) => {
+      await runPostLoginSync();
+
+      if (surface === "standalone") {
+        window.location.replace(destination);
+        return;
+      }
+
+      window.location.assign(destination);
+    },
+    [returnUrl, surface],
+  );
 
   const resetState = useCallback(() => {
     setStep("sign-in");
@@ -203,6 +229,7 @@ export function useAuthFlow({
     setTermsError(undefined);
     setCreateAccountFormError(undefined);
     setIsSubmitting(false);
+    hasLeftSignIn.current = false;
   }, []);
 
   useEffect(() => {
@@ -222,6 +249,30 @@ export function useAuthFlow({
     setIdentifierError(undefined);
   }, [active, initialIdentifier, resetState]);
 
+  /**
+   * Back onto /login restores it from bfcache with the state it was left in — a completed
+   * create-account step, verification and all. Reset on restore so a finished registration
+   * can never be reopened out of history.
+   *
+   * Standalone only. The modal is restored on top of an ordinary page and can carry a
+   * seeded identifier (checkout hands it the email it just recognised); the seeding effect
+   * does not re-run on a bfcache restore, so resetting there would just blank the field.
+   */
+  useEffect(() => {
+    if (surface !== "standalone") {
+      return;
+    }
+
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        resetState();
+      }
+    };
+
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, [resetState, surface]);
+
   useEffect(() => {
     if (!active || step !== "otp") return;
 
@@ -236,6 +287,15 @@ export function useAuthFlow({
   useEffect(() => {
     if (!active || step !== "otp") return;
     inputRefs.current[0]?.focus();
+  }, [active, step]);
+
+  useEffect(() => {
+    if (step !== "sign-in") hasLeftSignIn.current = true;
+  }, [step]);
+
+  useEffect(() => {
+    if (!active || step !== "sign-in" || !hasLeftSignIn.current) return;
+    identifierInputRef.current?.focus();
   }, [active, step]);
 
   const handleClose = useCallback(() => {
@@ -358,17 +418,6 @@ export function useAuthFlow({
     setSecondsLeft(RESEND_SECONDS);
   }, []);
 
-  const handleBackToOtp = useCallback(() => {
-    if (!otpTarget) {
-      setStep("sign-in");
-      return;
-    }
-    setStep("otp");
-    setFullNameError(undefined);
-    setEmailError(undefined);
-    setTermsError(undefined);
-  }, [otpTarget]);
-
   const updateDigit = useCallback((index: number, value: string) => {
     const digit = value.replace(/\D/g, "").slice(-1);
     setOtpError(undefined);
@@ -393,7 +442,10 @@ export function useAuthFlow({
   );
 
   const handleResend = useCallback(async () => {
-    if ((!otpError && secondsLeft > 0) || isSubmitting) return;
+    // The cooldown holds even after an invalid attempt: resending inside it makes
+    // Magento suppress the send and return the REMAINING seconds of the existing
+    // code, which the client would misread as a fresh timer (QA bug #15).
+    if (secondsLeft > 0 || isSubmitting) return;
     if (!otpTarget) {
       setStep("sign-in");
       return;
@@ -409,7 +461,7 @@ export function useAuthFlow({
     setSecondsLeft(cooldownRef.current);
     setOtp(Array(LOGIN_OTP_LENGTH).fill(""));
     inputRefs.current[0]?.focus();
-  }, [isSubmitting, otpError, otpTarget, secondsLeft, sendOtp]);
+  }, [isSubmitting, otpTarget, secondsLeft, sendOtp]);
 
   const handleLogin = useCallback(async () => {
     if (!isOtpComplete(otp) || isSubmitting) return;
@@ -440,6 +492,7 @@ export function useAuthFlow({
       return;
     }
 
+    setAuthLoginIdentifierKind(otpTarget.kind === "email" ? "email" : "phone");
     setIsSubmitting(true);
     await completeAuth();
   }, [completeAuth, isSubmitting, otp, otpTarget]);
@@ -478,8 +531,9 @@ export function useAuthFlow({
       return;
     }
 
-    await completeAuth();
-  }, [completeAuth, email, fullName, isSubmitting, otp, otpTarget, termsAccepted]);
+    setAuthLoginIdentifierKind(otpTarget.kind === "email" ? "email" : "phone");
+    await completeAuth(getPostSignupReturnUrl(returnUrl));
+  }, [completeAuth, email, fullName, isSubmitting, otp, otpTarget, returnUrl, termsAccepted]);
 
   const handleGoogleCredential = useCallback(
     async (credential: string) => {
@@ -493,9 +547,10 @@ export function useAuthFlow({
         return;
       }
 
-      await completeAuth();
+      setAuthLoginIdentifierKind("email");
+      await completeAuth(result.customerCreated ? getPostSignupReturnUrl(returnUrl) : returnUrl);
     },
-    [completeAuth, isSubmitting],
+    [completeAuth, isSubmitting, returnUrl],
   );
 
   const handleAppleContinue = useCallback(async () => {
@@ -516,7 +571,8 @@ export function useAuthFlow({
       return;
     }
 
-    await completeAuth();
+    setAuthLoginIdentifierKind("email");
+    await completeAuth(result.customerCreated ? getPostSignupReturnUrl(returnUrl) : returnUrl);
   }, [completeAuth, isSubmitting, onAbort, returnUrl, surface]);
 
   const contentProps: AuthFlowContentProps = {
@@ -530,6 +586,8 @@ export function useAuthFlow({
       noSignInMethod,
       showGoogle,
       showApple,
+      submitting: isSubmitting,
+      identifierInputRef,
       onIdentifierChange: handleIdentifierChange,
       onCountryCodeChange: handleCountryCodeChange,
       onContinue: handleContinue,
@@ -546,6 +604,7 @@ export function useAuthFlow({
       otp,
       otpError,
       secondsLeft,
+      submitting: isSubmitting,
       inputRefs,
       onDigitChange: updateDigit,
       onKeyDown: handleKeyDown,
@@ -564,6 +623,7 @@ export function useAuthFlow({
       emailError,
       termsError,
       formError: createAccountFormError,
+      submitting: isSubmitting,
       onFullNameChange: (value) => {
         setFullName(value);
         setFullNameError(undefined);
@@ -577,7 +637,7 @@ export function useAuthFlow({
         setTermsAccepted(value);
         setTermsError(undefined);
       },
-      onBack: handleBackToOtp,
+      onBack: handleBackToSignIn,
       onClose: handleClose,
       onCreateAccount: handleCreateAccount,
     },

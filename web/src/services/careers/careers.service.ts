@@ -31,6 +31,7 @@ const CAREER_LANDING_POPULATE_QUERY =
   "&populate[investingSection][populate][InvestingFeatures][populate][featureImage][populate][desktopImage]=true" +
   "&populate[investingSection][populate][InvestingFeatures][populate][featureImage][populate][mobileImage]=true" +
   "&populate[openingsSection][populate][career_openings][populate][applyCta]=true" +
+  "&populate[openingsSection][populate][career_openings][populate][linkedinCta]=true" +
   "&populate[FAQs][populate]=faqItems";
 
 const CAREER_LANDING_FALLBACK_QUERY = "populate=*";
@@ -63,8 +64,6 @@ async function fetchCareerListingPage(
 const CAREER_OPENINGS_POPULATE_QUERY =
   "filters[isActive][$eq]=true" +
   "&pagination[pageSize]=100" +
-  "&sort[0]=sortOrder:asc" +
-  "&sort[1]=publishedAt:desc" +
   "&populate=*";
 
 async function fetchCareerLandingPage(signal?: AbortSignal): Promise<StrapiCareerLandingPageEntity> {

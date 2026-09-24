@@ -21,17 +21,17 @@ export function mergeCareerJobIntoCms(
   };
 }
 
-export function resolveCareerJobCode(
+export function resolveCareerJobSlug(
   jobs: readonly CareerJob[],
   selectedJobId: string | null | undefined,
-  jobCodeOverride?: string,
+  slugOverride?: string,
 ): string | null {
-  const trimmedOverride = jobCodeOverride?.trim();
+  const trimmedOverride = slugOverride?.trim();
   if (trimmedOverride) {
     return trimmedOverride;
   }
 
-  return getCareerJobById(jobs, selectedJobId)?.jobCode?.trim() ?? null;
+  return getCareerJobById(jobs, selectedJobId)?.slug?.trim() ?? null;
 }
 
 export function getCareerJobById(
@@ -39,7 +39,11 @@ export function getCareerJobById(
   jobId: string | null | undefined,
 ): CareerJob | null {
   if (!jobId) return null;
-  return jobs.find((job) => job.id === jobId || job.jobCode === jobId) ?? null;
+  return (
+    jobs.find(
+      (job) => job.id === jobId || job.jobCode === jobId || job.slug === jobId,
+    ) ?? null
+  );
 }
 
 export function getRelatedCareerJobs(
@@ -58,10 +62,3 @@ export function getRelatedCareerJobs(
   return ordered.slice(0, limit);
 }
 
-/** First N jobs from the API-sorted list (sortOrder asc, publishedAt desc). */
-export function getLandingCareerJobs(
-  jobs: readonly CareerJob[],
-  limit = 3,
-): CareerJob[] {
-  return jobs.slice(0, limit);
-}

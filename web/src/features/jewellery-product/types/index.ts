@@ -30,6 +30,8 @@ export interface JewelleryFilterState {
   diamondShape: string;
   /** Magento `sd_fancy_colour` option value (e.g. "71"). */
   fancyColour: string;
+  /** Magento `sd_collection` option value (e.g. "diwali"). */
+  collection: string;
 }
 
 export interface JewellerySortOption {

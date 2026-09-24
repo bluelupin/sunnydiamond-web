@@ -4,35 +4,65 @@ import { useEffect, useRef } from "react";
 
 const RETRY_TTL_MS = 30_000;
 
+export type TransientRecoveryOutcome = "retry-scheduled" | "skipped" | "exhausted";
+
 function getRetryStorageKey(pathname: string, digest?: string) {
   return `sd:auto-error-retry:${pathname}:${digest ?? "generic"}`;
+}
+
+export function attemptTransientRouteRecovery({
+  reset,
+  errorDigest,
+  onExhausted,
+}: {
+  reset: () => void;
+  errorDigest?: string;
+  onExhausted?: () => void;
+}): TransientRecoveryOutcome {
+  if (typeof window === "undefined") {
+    return "skipped";
+  }
+
+  const key = getRetryStorageKey(window.location.pathname, errorDigest);
+  const previous = sessionStorage.getItem(key);
+  const now = Date.now();
+
+  if (previous && now - Number(previous) < RETRY_TTL_MS) {
+    onExhausted?.();
+    return "exhausted";
+  }
+
+  sessionStorage.setItem(key, String(now));
+
+  window.setTimeout(() => {
+    reset();
+  }, 50);
+
+  return "retry-scheduled";
 }
 
 /**
  * Silently retries once when a route error boundary mounts — mimics a refresh for
  * transient CMS/network/chunk failures without looping on persistent errors.
  */
-export function useTransientErrorAutoRetry(reset: () => void, errorDigest?: string) {
+export function useTransientErrorAutoRetry(
+  reset: () => void,
+  errorDigest?: string,
+  enabled = true,
+) {
   const resetRef = useRef(reset);
   resetRef.current = reset;
 
   useEffect(() => {
-    const key = getRetryStorageKey(window.location.pathname, errorDigest);
-    const previous = sessionStorage.getItem(key);
-    const now = Date.now();
-
-    if (previous && now - Number(previous) < RETRY_TTL_MS) {
+    if (!enabled) {
       return;
     }
 
-    sessionStorage.setItem(key, String(now));
-
-    const timer = window.setTimeout(() => {
-      resetRef.current();
-    }, 50);
-
-    return () => window.clearTimeout(timer);
-  }, [errorDigest]);
+    attemptTransientRouteRecovery({
+      reset: () => resetRef.current(),
+      errorDigest,
+    });
+  }, [enabled, errorDigest]);
 }
 
 export function clearTransientErrorAutoRetry(pathname: string) {

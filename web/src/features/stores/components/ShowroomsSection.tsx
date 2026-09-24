@@ -1,45 +1,39 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import type { StaticImageData } from "next/image";
 import Link from "next/link";
-import { Phone } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import ShowroomSectionSkeleton from "@/features/cms/components/SkeletonLoader/ShowroomSectionSkeleton";
 
-import fallBackImage from "@/assets/fallBackImage.png";
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import type { ShowroomSectionLocation } from "@/types/homepage/editorialBlocks";
+import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 
 interface ShowroomsSectionProps {
   id?: string;
 }
-
-const ADDRESS_ICON = "/images/products/delivery-store/address-icon.svg";
-const PHONE_ICON = "/images/products/delivery-store/phone-icon.svg";
-
 function resolveShowroomImages(location: ShowroomSectionLocation | undefined) {
-  const desktopImage =
-    (location?.image?.desktopImage
-      ? resolveCmsMediaUrl(location.image.desktopImage)
-      : undefined) ?? fallBackImage;
+  const desktopImage = location?.image?.desktopImage
+    ? resolveCmsMediaUrl(location.image.desktopImage)
+    : undefined;
 
-  const mobileImage =
-    (location?.image?.mobileImage
-      ? resolveCmsMediaUrl(location.image.mobileImage)
-      : undefined) ?? desktopImage;
+  const mobileImage = location?.image?.mobileImage
+    ? resolveCmsMediaUrl(location.image.mobileImage)
+    : desktopImage;
 
-  const imageAlt =
-    resolveCmsAltText(location?.image?.desktopImage) ||
-    resolveCmsAltText(location?.image?.mobileImage) ||
-    `Sunny Diamonds showroom in ${location?.name}`;
+  const imageAlt = resolveCmsAltText(location?.image?.desktopImage) ?? "";
 
-  return { desktopImage, mobileImage, imageAlt };
+  return {
+    desktopImage,
+    mobileImage,
+    imageAlt,
+    hasImage: Boolean(desktopImage || mobileImage),
+  };
 }
 
 function ShowroomLocationDetails({
@@ -49,49 +43,45 @@ function ShowroomLocationDetails({
   location: ShowroomSectionLocation;
   className?: string;
 }) {
-  const directionsUrl = location.mapUrl ?? location.directionsUrl ?? "#";
-
+  const directionsUrl = location.mapUrl ?? location.directionsUrl ?? "";
+  const { windows } = useUiPlatform();
   return (
     <div className={cn("flex flex-col gap-6", className)}>
       <div className="flex flex-col gap-4">
         <div className="flex items-start gap-3">
-          <Image
-            src={ADDRESS_ICON}
-            alt=""
-            width={24}
-            height={24}
-            aria-hidden
-            className="lg:size-6 size-5 shrink-0 sm:mt-0 mt-1.5"
-          />
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn(!windows && "-translate-y-2", "lg:size-6 size-5 shrink-0 sm:mt-0 mt-1.5")}>
+            <path d="M11.2541 12.7421L3.53381 10.5859C3.38249 10.5395 3.24971 10.4465 3.15449 10.3201C3.05926 10.1936 3.00646 10.0403 3.00365 9.8821C3.00084 9.72386 3.04817 9.56878 3.13885 9.43907C3.22953 9.30935 3.35892 9.21165 3.5085 9.15994L20.0085 3.03994C20.1409 2.99493 20.2832 2.9878 20.4194 3.01937C20.5556 3.05095 20.6802 3.11996 20.7793 3.21863C20.8783 3.31729 20.9478 3.44168 20.98 3.57775C21.0121 3.71382 21.0055 3.85616 20.961 3.98869L14.841 20.4887C14.7893 20.6383 14.6916 20.7677 14.5619 20.8584C14.4322 20.949 14.2771 20.9964 14.1188 20.9935C13.9606 20.9907 13.8073 20.9379 13.6809 20.8427C13.5545 20.7475 13.4614 20.6147 13.4151 20.4634L11.2541 12.7421Z" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
           <p className="font-gill lg:text-xl text-lg font-light leading-110 text-darkblack">
             {location.address}
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Image
-            src={PHONE_ICON}
-            alt=""
-            width={24}
-            height={24}
-            aria-hidden
-            className="size-6 shrink-0"
-          />
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn(!windows && "-translate-y-0.5", "size-6 shrink-0")}>
+            <path d="M18 20V3.5C18 2.67157 17.3284 2 16.5 2L7.5 2C6.67157 2 6 2.67157 6 3.5L6 20C6 20.8284 6.67157 21.5 7.5 21.5H16.5C17.3284 21.5 18 20.8284 18 20Z" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M12 6.3125C12.5178 6.3125 12.9375 5.89277 12.9375 5.375C12.9375 4.85723 12.5178 4.4375 12 4.4375C11.4822 4.4375 11.0625 4.85723 11.0625 5.375C11.0625 5.89277 11.4822 6.3125 12 6.3125Z" fill="#0A0A0A" />
+          </svg>
           <p className="font-gill lg:text-xl text-lg font-light leading-110 text-darkblack">
             {location.phone}
           </p>
         </div>
       </div>
-      <Link
-        href={directionsUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
-      >
-        GET DIRECTIONS
-      </Link>
+      {directionsUrl ? (
+        <Link
+          href={directionsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack"
+        >
+          GET DIRECTIONS
+        </Link>
+      ) : null}
     </div>
   );
 }
+
+const mobileAccordionCollapseTransitionClassName =
+  "grid min-h-0 transition-[grid-template-rows,opacity] duration-500 ease-in-out motion-reduce:transition-none";
 
 function ShowroomsMobileAccordion({
   locations,
@@ -116,48 +106,61 @@ function ShowroomsMobileAccordion({
 
       <ScrollReveal
         delayMs={80}
-        className="w-full border-r-[0.5px] border-neutral300"
+        className="w-full lg:border-r-[0.5px] lg:border-neutral300"
         aria-label="Showroom locations"
       >
         {locations.map((location) => {
           const isSelected = location.id === activeId;
-          const { mobileImage, desktopImage, imageAlt } =
+          const { mobileImage, desktopImage, imageAlt, hasImage } =
             resolveShowroomImages(location);
 
           return (
-            <div key={location.id} className="w-full">
-              {isSelected ? (
-                <div className="flex w-full flex-col gap-4 bg-gray300 px-4 py-6">
-                  <p className="font-larken text-xl font-light leading-110 text-darkblack">
-                    {location.name}
-                  </p>
-                  <div
-                    className="h-[0.5px] w-full bg-neutral300"
-                    aria-hidden
-                  />
-                  <div className="relative aspect-[2500/1797] w-full overflow-hidden">
-                    <ResponsiveImage
-                      desktopSrc={desktopImage || fallBackImage}
-                      mobileSrc={mobileImage || fallBackImage}
-                      alt={imageAlt}
-                      width={2500}
-                      height={1797}
-                      quality={90}
-                      className="h-full w-full object-cover"
+            <div
+              key={location.id}
+              className={cn("w-full", isSelected && "bg-gray300")}
+            >
+              <button
+                type="button"
+                aria-expanded={isSelected}
+                aria-pressed={isSelected}
+                onClick={() => onSelect(location.id ?? null)}
+                className="flex w-full items-center px-4 py-6 text-left font-larken text-xl font-light leading-110 text-darkblack"
+              >
+                {location.name}
+              </button>
+
+              <div
+                aria-hidden={!isSelected}
+                className={cn(
+                  mobileAccordionCollapseTransitionClassName,
+                  isSelected
+                    ? "grid-rows-[1fr] opacity-100"
+                    : "pointer-events-none grid-rows-[0fr] opacity-0",
+                )}
+              >
+                <div className="min-h-0 overflow-hidden">
+                  <div className="flex flex-col gap-4 px-4 pb-6">
+                    <div
+                      className="h-[0.5px] w-full bg-neutral300"
+                      aria-hidden
                     />
+                    {hasImage && desktopImage && mobileImage ? (
+                      <div className="relative aspect-[2500/1797] w-full overflow-hidden">
+                        <ResponsiveImage
+                          desktopSrc={desktopImage}
+                          mobileSrc={mobileImage}
+                          alt={imageAlt}
+                          width={2500}
+                          height={1797}
+                          quality={90}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ) : null}
+                    <ShowroomLocationDetails location={location} />
                   </div>
-                  <ShowroomLocationDetails location={location} />
                 </div>
-              ) : (
-                <button
-                  type="button"
-                  aria-pressed={false}
-                  onClick={() => onSelect(location.id ?? null)}
-                  className="flex w-full items-center px-4 py-6 text-left font-larken text-xl font-light leading-110 text-darkblack"
-                >
-                  {location.name}
-                </button>
-              )}
+              </div>
             </div>
           );
         })}
@@ -176,6 +179,7 @@ function ShowroomsDesktopLayout({
   desktopImage,
   mobileImage,
   imageAlt,
+  hasImage,
 }: {
   locations: ShowroomSectionLocation[];
   activeId: number | null;
@@ -183,10 +187,12 @@ function ShowroomsDesktopLayout({
   sectionTitle?: string | null;
   description?: string | null;
   activeLocation: ShowroomSectionLocation | undefined;
-  desktopImage: string | StaticImageData;
-  mobileImage: string | StaticImageData;
+  desktopImage?: string | StaticImageData;
+  mobileImage?: string | StaticImageData;
   imageAlt: string;
+  hasImage: boolean;
 }) {
+  const { windows } = useUiPlatform();
   return (
     <>
       <div className="hidden lg:block 2xl:pl-24 lg:pl-10 pl-5 lg:pr-0 pr-5">
@@ -240,21 +246,16 @@ function ShowroomsDesktopLayout({
                   {isSelected && (
                     <div className="lg:pt-4 lg:pb-8 py-5 lg:px-0 px-5 lg:w-full sm:w-311 w-[80%] animate-in fade-in duration-300 lg:static absolute bottom-3 left-8 z-10 bg-gray300">
                       <div className="flex gap-3 items-start">
-                        <Image
-                          src={ADDRESS_ICON}
-                          alt=""
-                          width={24}
-                          height={24}
-                          aria-hidden
-                          className="sm:size-5 w-5 h-5 shrink-0 sm:mt-0 mt-1.5"
-                        />
-                        <p className="lg:text-xl md:text-lg text-base text-darkblack font-light tracking-[2%] leading-130 font-gill">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn(!windows && "-translate-y-0.5", "sm:size-5 w-5 h-5 shrink-0 mt-1")}>
+                          <path d="M11.2541 12.7421L3.53381 10.5859C3.38249 10.5395 3.24971 10.4465 3.15449 10.3201C3.05926 10.1936 3.00646 10.0403 3.00365 9.8821C3.00084 9.72386 3.04817 9.56878 3.13885 9.43907C3.22953 9.30935 3.35892 9.21165 3.5085 9.15994L20.0085 3.03994C20.1409 2.99493 20.2832 2.9878 20.4194 3.01937C20.5556 3.05095 20.6802 3.11996 20.7793 3.21863C20.8783 3.31729 20.9478 3.44168 20.98 3.57775C21.0121 3.71382 21.0055 3.85616 20.961 3.98869L14.841 20.4887C14.7893 20.6383 14.6916 20.7677 14.5619 20.8584C14.4322 20.949 14.2771 20.9964 14.1188 20.9935C13.9606 20.9907 13.8073 20.9379 13.6809 20.8427C13.5545 20.7475 13.4614 20.6147 13.4151 20.4634L11.2541 12.7421Z" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        <p className="lg:text-xl md:text-lg text-base text-darkblack font-light tracking-[0%] leading-130 font-gill">
                           {location.address}
                         </p>
                       </div>
 
                       <div className="mt-4 lg:mb-6 mb-8 flex gap-3 items-center">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-black flex-shrink-0">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn(!windows && "-translate-y-0.5", "text-black flex-shrink-0")}>
                           <path d="M18 20V3.5C18 2.67157 17.3284 2 16.5 2L7.5 2C6.67157 2 6 2.67157 6 3.5L6 20C6 20.8284 6.67157 21.5 7.5 21.5H16.5C17.3284 21.5 18 20.8284 18 20Z" stroke="#0A0A0A" strokeLinecap="round" strokeLinejoin="round" />
                           <path d="M12 6.3125C12.5178 6.3125 12.9375 5.89277 12.9375 5.375C12.9375 4.85723 12.5178 4.4375 12 4.4375C11.4822 4.4375 11.0625 4.85723 11.0625 5.375C11.0625 5.89277 11.4822 6.3125 12 6.3125Z" fill="#0A0A0A" />
                         </svg>
@@ -262,14 +263,14 @@ function ShowroomsDesktopLayout({
                           {location.phone}
                         </p>
                       </div>
-                      <Link href={
-                        location.mapUrl ?? location.directionsUrl ?? "#"
-                      }
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="relative after:bg-darkMagenta after:absolute after:h-0.5 after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer border-b-[1.5px] border-darkblack hover:border-darkMagenta sm:pb-1 font-gill md:text-base text-xs uppercase leading-110 tracking-[1.8%] hover:text-darkMagenta">
-                        GET DIRECTIONS
-                      </Link>
+                      {(location.mapUrl ?? location.directionsUrl) ? (
+                        <Link href={location.mapUrl ?? location.directionsUrl ?? ""}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-tertiary-cta-underline cursor-pointer sm:pb-1 font-gill md:text-base text-xs uppercase leading-110 tracking-[1.8%]">
+                          GET DIRECTIONS
+                        </Link>
+                      ) : null}
                     </div>
                   )}
                 </div>
@@ -282,18 +283,18 @@ function ShowroomsDesktopLayout({
           delayMs={200}
           className="relative aspect-[350/480] h-478 w-full overflow-hidden px-5 md:aspect-[850/600] md:h-595 md:px-0 lg:aspect-[850/600]"
         >
-          {activeLocation && (
+          {activeLocation && hasImage && desktopImage && mobileImage ? (
             <ResponsiveImage
               key={activeLocation.id}
-              desktopSrc={desktopImage || fallBackImage}
-              mobileSrc={mobileImage || fallBackImage}
+              desktopSrc={desktopImage}
+              mobileSrc={mobileImage}
               alt={imageAlt}
-              width={desktopImage ? 850 : 350}
-              height={desktopImage ? 600 : 480}
+              width={850}
+              height={600}
               quality={90}
               className="w-full h-full object-cover animate-in fade-in zoom-in-105 duration-700 ease-out"
             />
-          )}
+          ) : null}
         </ScrollReveal>
       </div>
     </>
@@ -307,9 +308,7 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
 
   const locations = useMemo(() => {
     return Array.isArray(showroomSection?.showrooms)
-      ? [...showroomSection.showrooms]
-        .filter((item) => item?.isActive)
-        .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
+      ? showroomSection.showrooms.filter((item) => item?.isActive)
       : [];
   }, [showroomSection?.showrooms]);
 
@@ -324,14 +323,14 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
   const activeLocation =
     locations.find((location) => location.id === activeId) ?? locations[0];
 
-  const { desktopImage, mobileImage, imageAlt } =
+  const { desktopImage, mobileImage, imageAlt, hasImage } =
     resolveShowroomImages(activeLocation);
 
   if (isLoading) {
     return <ShowroomSectionSkeleton />;
   }
 
-  if (!isSectionActive(showroomSection?.isActive) || !showroomSection) {
+  if (!isSectionActive(showroomSection?.isActive) || !showroomSection || locations.length === 0) {
     return null;
   }
 
@@ -356,6 +355,7 @@ const ShowroomsSection = ({ id }: ShowroomsSectionProps) => {
         desktopImage={desktopImage}
         mobileImage={mobileImage}
         imageAlt={imageAlt}
+        hasImage={hasImage}
       />
     </section>
   );

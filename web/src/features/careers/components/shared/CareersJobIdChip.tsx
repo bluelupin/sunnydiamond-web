@@ -3,6 +3,7 @@
 import { Check } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/shared/utils/cn";
+import { copyCareerJobId } from "@/features/careers/utils/copyCareerJobId";
 type CareersJobIdChipProps = {
   jobCode: string;
   className?: string;
@@ -35,29 +36,35 @@ const CareersJobIdChip = ({
   const handleCopy = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
 
-    try {
-      await navigator.clipboard.writeText(jobCode);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
+    const didCopy = await copyCareerJobId(jobCode);
+    if (!didCopy) {
       setCopied(false);
+      return;
     }
+
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2000);
   };
 
   if (alwaysInline) {
+    // Open Roles listing: white chip on beige cards.
+    // Job detail header (`muted`): grey chip on white page.
+    const surfaceClassName =
+      surface === "muted"
+        ? "bg-chalk300 hover:bg-[#e2dede]"
+        : "bg-white hover:bg-white";
+
     return (
       <button
         type="button"
         onClick={handleCopy}
         className={cn(
-          "inline-flex shrink-0 items-center gap-1.5 px-3 py-1 bg-white",
-          "font-gill text-base font-light leading-110 text-darkblack",
-          "transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2",
-          surface === "muted" &&
-            "bg-[#ECE9E9] text-sm font-light hover:bg-[#ECE9E9] md:bg-white md:text-base",
-          surface === "listing" &&
-            "bg-[#ECE9E9] text-sm font-light hover:bg-[#ECE9E9] md:text-base",
-          surface === "white" && "bg-white hover:bg-white",
+          // Figma: 8px gap, 12×4 padding (`px-3 py-1`).
+          "inline-flex shrink-0 items-center gap-2 px-3 py-1",
+          surfaceClassName,
+          "font-gill text-sm font-light leading-110 text-darkblack md:text-base",
+          "transition-colors",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2",
           className,
         )}
         aria-label={`Copy job ID ${jobCode}`}

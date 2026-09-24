@@ -1,14 +1,22 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import type { StaticImageData } from "next/image";
 import { useRouter } from "next/navigation";
-import { Check, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
+import { useAppStatusToastController } from "@/shared/hooks/useAppStatusToastController";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
+import { useMobileStickyFooterClearance } from "@/shared/hooks/use-mobile-sticky-footer-clearance";
+import { usePanelInputFocusScroll } from "@/shared/hooks/use-panel-input-focus-scroll";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
+import {
+  getAppointmentContactLocks,
+  getAuthLoginIdentifierKind,
+} from "@/features/auth/utils/authLoginIdentifier";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import {
   appointmentFieldClassName,
@@ -24,6 +32,9 @@ import {
   type NormalizedProductForm,
 } from "@/services/forms/product-form.service";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { useCustomerAddresses } from "@/features/account/hooks/useCustomerAddresses";
+import { buildProfileSectionHref } from "@/features/account/utils/profileSectionNavigation";
+import { mapCustomerAddressToFormInput } from "@/services/customer/customer-account.mapper";
 import { wishlistMovedToastDurationMs } from "@/features/wishlist/data/content";
 import {
   invalidFieldClassName,
@@ -36,11 +47,17 @@ import {
   validateOptionalAddressLine2,
   shouldShowFieldError,
 } from "@/shared/utils/formValidation";
-import { DetailDarkButton } from "./shared";
+import { DetailDarkButton, DetailTextLink } from "./shared";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
+import {
+  countAdditionalTryAtHomeItemsForSlot,
+  type TryAtHomeBookingSummary,
+} from "@/features/products/utils/tryAtHomeBooking";
 import TryAtHomeSuccessStep from "./TryAtHomeSuccessStep";
-import type { TryAtHomeBookingSummary } from "@/features/products/utils/tryAtHomeBooking";
+import { getCustomerAppointments } from "@/services/customer/customer-appointments.client";
 
 const TRY_AT_HOME_FORM_TAG = "try-at-home-form";
 
@@ -87,15 +104,30 @@ const TryAtHomeDetailsStep = ({
   const [note, setNote] = useState("");
   const [hasAppliedProfilePrefill, setHasAppliedProfilePrefill] = useState(false);
 
+  const timeSlots = form?.timeSlots?.length ? form.timeSlots : undefined;
+  const hasTimeSlots = Boolean(timeSlots?.length ?? true);
+  const { phoneLocked, emailLocked } = getAppointmentContactLocks(
+    getAuthLoginIdentifierKind(),
+  );
+
   const formValues = useMemo(
-    () => ({ name, countryCode, phone, email, date, note }),
-    [name, countryCode, phone, email, date, note],
+    () => ({ name, countryCode, phone, email, date, note, selectedSlot }),
+    [name, countryCode, phone, email, date, note, selectedSlot],
+  );
+
+  const validationOptions = useMemo(
+    () => ({
+      noteRequired: form?.notesRequired ?? false,
+      dateRequired: true,
+      selectedSlotRequired: hasTimeSlots,
+      // Auth is email-based — Try at Home must collect a valid email.
+      emailRequired: true,
+    }),
+    [form?.notesRequired, hasTimeSlots],
   );
 
   const { errors, isValid, markTouched, showError, validateSubmit, resetValidation } =
-    useAppointmentFormValidation(formValues, {
-      noteRequired: form?.notesRequired ?? false,
-    });
+    useAppointmentFormValidation(formValues, validationOptions);
 
   useEffect(() => {
     if (!open) {
@@ -127,33 +159,26 @@ const TryAtHomeDetailsStep = ({
     setHasAppliedProfilePrefill(true);
   }, [profileContact, hasAppliedProfilePrefill, name, email, phone]);
 
-  const timeSlots = form?.timeSlots?.length ? form.timeSlots : undefined;
+  const { footerRef, clearancePx } = useMobileStickyFooterClearance();
+  const { scrollRef, handleFocusCapture } = usePanelInputFocusScroll();
 
   return (
     <>
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-        <div className="flex flex-col gap-6 px-4 pt-6 lg:px-6 lg:pt-10">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div
+          ref={scrollRef}
+          onFocusCapture={handleFocusCapture}
+          className="min-h-0 flex-1 overflow-y-auto overscroll-contain DrawerVerticleScrollbar"
+        >
+        <div className={cn("flex flex-col gap-6", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4">
               <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
                 {form?.formName ?? "Try At Home"}
               </h2>
-              <button
-                type="button"
-                onClick={onClose}
-                aria-label="Close try at home panel"
-                className="inline-flex size-6 shrink-0 items-center justify-center"
-              >
-                <Image
-                  src="/icons/menu-close.svg"
-                  alt=""
-                  width={24}
-                  height={24}
-                  aria-hidden
-                />
-              </button>
+              <RightPanelCloseButton onClick={onClose} aria-label="Close try at home panel" />
             </div>
-            <div className="h-px w-full bg-neutral300" aria-hidden />
+            <div className="h-[1px] w-full bg-neutral300" aria-hidden />
           </div>
 
           <div className="flex flex-col items-center gap-2 pb-4">
@@ -165,10 +190,17 @@ const TryAtHomeDetailsStep = ({
               className="h-133 w-206 object-contain"
               sizes="206px"
             />
-            <p className="font-gill text-base leading-110 text-darkblack">{productName}</p>
+            <p
+              className={cn(
+                "font-gill text-base leading-110 text-darkblack",
+                productNameDisplayClassName,
+              )}
+            >
+              {productName}
+            </p>
           </div>
 
-          <div className="flex flex-col gap-6 pb-72">
+          <div className="flex flex-col gap-6" style={{ paddingBottom: clearancePx }}>
             <AppointmentContactFields
               idPrefix="try-at-home"
               name={name}
@@ -197,17 +229,22 @@ const TryAtHomeDetailsStep = ({
               phonePlaceholder={form?.phonePlaceholder}
               emailLabel={form?.emailLabel}
               emailPlaceholder={form?.emailPlaceholder}
+              emailRequired
               dateLabel={form?.dateLabel}
+              dateRequired
+              timeSlotRequired={hasTimeSlots}
               noteLabel={form?.notesLabel ?? "What are you looking for?"}
               notePlaceholder={
                 form?.notesPlaceholder ?? "Eg: I am looking for an engagement ring"
               }
+              phoneLocked={phoneLocked}
+              emailLocked={emailLocked}
             />
           </div>
         </div>
       </div>
 
-      <PanelFooter contentClassName="flex flex-col items-center gap-4">
+      <PanelFooter footerRef={footerRef} contentClassName="flex flex-col items-center gap-4">
         <p className="text-center font-gill text-sm font-light leading-normal tracking-normal text-neutral500">
           Our representative will get in touch with you soon
         </p>
@@ -226,10 +263,12 @@ const TryAtHomeDetailsStep = ({
             )
           }
           disabled={!isValid}
+          className="disabled:cursor-not-allowed disabled:opacity-50"
         >
           {form?.stepOneButtonText ?? "Add Address"}
         </DetailDarkButton>
       </PanelFooter>
+      </div>
     </>
   );
 };
@@ -261,6 +300,9 @@ const TryAtHomeAddressStep = ({
   onClose,
   onSubmit,
 }: TryAtHomeAddressStepProps) => {
+  const { status, customer } = useAuth();
+  const isAuthenticated = status === "authenticated" && Boolean(customer);
+  const { addresses } = useCustomerAddresses(isAuthenticated);
   const { detectAddress, isLocating } = useCurrentLocationAddress();
   const [addressLine1, setAddressLine1] = useState("");
   const [addressLine2, setAddressLine2] = useState("");
@@ -268,9 +310,33 @@ const TryAtHomeAddressStep = ({
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [touched, setTouched] = useState<Partial<Record<AddressField, boolean>>>({});
+  const [hasAppliedAddressPrefill, setHasAppliedAddressPrefill] = useState(false);
 
   const stateOptions =
     form?.stateOptions?.length ? form.stateOptions : [...TRY_AT_HOME_INDIAN_STATES];
+
+  const defaultShippingAddress = useMemo(() => {
+    if (addresses.length === 0) {
+      return null;
+    }
+
+    return addresses.find((address) => address.isDefaultShipping) ?? addresses[0];
+  }, [addresses]);
+
+  useEffect(() => {
+    if (!defaultShippingAddress || hasAppliedAddressPrefill) {
+      return;
+    }
+
+    const mapped = mapCustomerAddressToFormInput(defaultShippingAddress);
+
+    setAddressLine1(mapped.addressLine1);
+    setAddressLine2(mapped.addressLine2 ?? "");
+    setPincode(mapped.pincode);
+    setCity(mapped.city);
+    setState(mapped.state);
+    setHasAppliedAddressPrefill(true);
+  }, [defaultShippingAddress, hasAppliedAddressPrefill]);
 
   const errors = useMemo(
     () => ({
@@ -326,10 +392,18 @@ const TryAtHomeAddressStep = ({
     onSubmit({ addressLine1, addressLine2, pincode, city, state });
   };
 
+  const { footerRef, clearancePx } = useMobileStickyFooterClearance();
+  const { scrollRef, handleFocusCapture } = usePanelInputFocusScroll();
+
   return (
     <>
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-        <div className="flex flex-col gap-6 px-4 pt-6 lg:px-6 lg:pt-10">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div
+          ref={scrollRef}
+          onFocusCapture={handleFocusCapture}
+          className="min-h-0 flex-1 overflow-y-auto overscroll-contain DrawerVerticleScrollbar"
+        >
+        <div className={cn("flex flex-col gap-6", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4">
               <div className="flex min-w-0 items-center gap-2">
@@ -345,36 +419,21 @@ const TryAtHomeAddressStep = ({
                   {formTitle}
                 </h2>
               </div>
-              <button
-                type="button"
-                onClick={onClose}
-                aria-label="Close try at home panel"
-                className="inline-flex size-6 shrink-0 items-center justify-center"
-              >
-                <Image
-                  src="/icons/menu-close.svg"
-                  alt=""
-                  width={24}
-                  height={24}
-                  aria-hidden
-                />
-              </button>
+              <RightPanelCloseButton onClick={onClose} aria-label="Close try at home panel" />
             </div>
-            <div className="h-px w-full bg-neutral300" aria-hidden />
+            <div className="h-[1px] w-full bg-neutral300" aria-hidden />
           </div>
 
           <div className="flex justify-center">
-            <button
-              type="button"
+            <DetailTextLink
               onClick={handleUseCurrentLocation}
               disabled={isLocating}
-              className="text-link-underline inline-flex border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isLocating ? "DETECTING LOCATION..." : "USE CURRENT LOCATION"}
-            </button>
+            </DetailTextLink>
           </div>
 
-          <div className="flex flex-col gap-6 pb-72">
+          <div className="flex flex-col gap-6" style={{ paddingBottom: clearancePx }}>
             <div className="flex flex-col gap-2">
               <label htmlFor="try-at-home-address-line-1" className={appointmentLabelClassName}>
                 {form?.addressLine1Label ?? "Address Line 1"}
@@ -537,7 +596,7 @@ const TryAtHomeAddressStep = ({
         </div>
       </div>
 
-      <PanelFooter contentClassName="flex flex-col items-center gap-4">
+      <PanelFooter footerRef={footerRef} contentClassName="flex flex-col items-center gap-4">
         <p className="text-center font-gill text-sm font-light leading-normal tracking-normal text-neutral500">
           Our representative will get in touch with you soon
         </p>
@@ -549,6 +608,7 @@ const TryAtHomeAddressStep = ({
           {isSubmitting ? "SUBMITTING..." : submitLabel}
         </DetailDarkButton>
       </PanelFooter>
+      </div>
     </>
   );
 };
@@ -559,45 +619,20 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
   const [step, setStep] = useState<TryAtHomeStep>("details");
   const [cmsForm, setCmsForm] = useState<NormalizedProductForm | null>(null);
   const [details, setDetails] = useState<TryAtHomeDetailsData | null>(null);
-  const [bookingSummary, setBookingSummary] = useState<TryAtHomeBookingSummary>({
-    date: "",
-    selectedSlot: null,
-  });
+  const [submittedBooking, setSubmittedBooking] = useState<TryAtHomeBookingSummary | null>(null);
+  const [additionalItemsCount, setAdditionalItemsCount] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [statusToastMessage, setStatusToastMessage] = useState<string | null>(null);
-  const statusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { show: showStatusToast, node: statusToast } = useAppStatusToastController(
+    wishlistMovedToastDurationMs,
+  );
   const productImage = product.image || product.images[0];
-
-  const dismissStatusToast = () => {
-    if (statusToastTimeoutRef.current) {
-      clearTimeout(statusToastTimeoutRef.current);
-      statusToastTimeoutRef.current = null;
-    }
-    setStatusToastMessage(null);
-  };
-
-  const showStatusToast = (message: string) => {
-    dismissStatusToast();
-    setStatusToastMessage(message);
-    statusToastTimeoutRef.current = setTimeout(() => {
-      setStatusToastMessage(null);
-      statusToastTimeoutRef.current = null;
-    }, wishlistMovedToastDurationMs);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (statusToastTimeoutRef.current) {
-        clearTimeout(statusToastTimeoutRef.current);
-      }
-    };
-  }, []);
 
   useEffect(() => {
     if (!open) {
       setStep("details");
       setDetails(null);
-      setBookingSummary({ date: "", selectedSlot: null });
+      setSubmittedBooking(null);
+      setAdditionalItemsCount(0);
       setIsSubmitting(false);
       return;
     }
@@ -619,7 +654,8 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
   const handleClose = () => {
     setStep("details");
     setDetails(null);
-    setBookingSummary({ date: "", selectedSlot: null });
+    setSubmittedBooking(null);
+    setAdditionalItemsCount(0);
     setIsSubmitting(false);
     onClose();
   };
@@ -635,12 +671,12 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
 
     setIsSubmitting(true);
     try {
-      const requestDetails = [
-        details.note.trim(),
-        address.state.trim() ? `State: ${address.state.trim()}` : "",
-      ]
-        .filter(Boolean)
-        .join("\n");
+      const booking: TryAtHomeBookingSummary = {
+        date: details.date,
+        selectedSlot: details.selectedSlot,
+      };
+
+      const requestDetails = details.note.trim() || undefined;
 
       await createProductSubmission({
         formTag: cmsForm?.formTag ?? TRY_AT_HOME_FORM_TAG,
@@ -650,23 +686,43 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
         customerPhone: `${details.countryCode} ${details.phone}`.trim(),
         customerEmail: details.email.trim() || undefined,
         ...(customer?.id != null ? { magentoCustomerId: customer.id } : {}),
-        requestDetails: requestDetails || undefined,
-        requestedDate: details.date || undefined,
-        selectedTimeSlot: details.selectedSlot ?? undefined,
+        requestDetails,
+        requestedDate: booking.date,
+        selectedTimeSlot: booking.selectedSlot ?? undefined,
         addressLine1: address.addressLine1.trim(),
         addressLine2: address.addressLine2.trim() || undefined,
         pincode: address.pincode.trim(),
         city: address.city.trim(),
+        ...(address.state.trim() ? { state: address.state.trim() } : {}),
         sourcePage:
           typeof window !== "undefined" ? window.location.pathname : getProductHref(product),
         consentAccepted: true,
         workflowStatus: "New",
       });
 
-      setBookingSummary({
-        date: details.date,
-        selectedSlot: details.selectedSlot,
-      });
+      let moreItems = 0;
+      try {
+        const page = await getCustomerAppointments(1, 50);
+        if (page?.appointments?.length) {
+          moreItems = countAdditionalTryAtHomeItemsForSlot(page.appointments, {
+            date: booking.date,
+            selectedSlot: booking.selectedSlot,
+            address: {
+              addressLine1: address.addressLine1.trim(),
+              addressLine2: address.addressLine2.trim() || undefined,
+              pincode: address.pincode.trim(),
+              city: address.city.trim(),
+              state: address.state.trim() || undefined,
+            },
+            currentProductId: product.id,
+          });
+        }
+      } catch {
+        moreItems = 0;
+      }
+
+      setAdditionalItemsCount(moreItems);
+      setSubmittedBooking(booking);
       setStep("success");
       showStatusToast("Try at home request received");
     } catch {
@@ -678,25 +734,13 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
 
   const handleViewBooking = () => {
     handleClose();
+    router.push(buildProfileSectionHref("appointments"));
   };
 
   const handleContinueShopping = () => {
     handleClose();
     router.push("/jewellery");
   };
-
-  const statusToast = statusToastMessage ? (
-    <div
-      role="status"
-      aria-live="polite"
-      className="pointer-events-auto fixed left-1/2 top-16 z-[80] w-[calc(100%-2rem)] max-w-[300px] -translate-x-1/2 animate-in fade-in slide-in-from-top-2 duration-300 md:top-104"
-    >
-      <div className="flex w-full items-center gap-2 bg-darkblack px-4 py-3">
-        <Check size={18} strokeWidth={1.25} aria-hidden className="shrink-0 text-white" />
-        <p className="font-gill text-sm font-light leading-110 text-white">{statusToastMessage}</p>
-      </div>
-    </div>
-  ) : null;
 
   if (!open) {
     return statusToast;
@@ -720,10 +764,6 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
             onClose={handleClose}
             onProceed={(nextDetails) => {
               setDetails(nextDetails);
-              setBookingSummary({
-                date: nextDetails.date,
-                selectedSlot: nextDetails.selectedSlot,
-              });
               setStep("address");
             }}
           />
@@ -739,16 +779,17 @@ const TryAtHomePanel = ({ open, onClose, product }: TryAtHomePanelProps) => {
               void handleAddressSubmit(address);
             }}
           />
-        ) : (
+        ) : submittedBooking ? (
           <TryAtHomeSuccessStep
             product={product}
             productImage={productImage}
-            booking={bookingSummary}
+            booking={submittedBooking}
+            additionalItemsCount={additionalItemsCount}
             onClose={handleClose}
             onViewBooking={handleViewBooking}
             onContinueShopping={handleContinueShopping}
           />
-        )}
+        ) : null}
       </ProductDetailSidePanelShell>
     </>
   );

@@ -1,24 +1,30 @@
 "use client";
 
+import HeroBackgroundMedia from "@/features/cms/components/home/HeroBackgroundMedia";
 import MediaContentOverlay from "@/shared/ui/MediaContentOverlay";
+import {
+  getHeroScrollCollapseFrameStyle,
+  getHeroScrollCollapseTitleStyle,
+  heroScrollCollapseFrameBaseClass,
+  heroScrollCollapseTitleBaseClass,
+} from "@/shared/ui/heroScrollCollapseStyles";
 import { cn } from "@/shared/utils/cn";
 import type { NormalizedEducationHero } from "@/services/education/learn-about-diamonds-page.types";
-import EducationHeroMedia from "./EducationHeroMedia";
+import { educationHeroFigmaSpec } from "../data/content";
 import { useEducationHeroLoadAnimation } from "../hooks/useEducationHeroLoadAnimation";
+
 type EducationHeroSectionProps = NormalizedEducationHero;
 
-const EducationHeroSection = ({
-  title,
-  videoUrl,
-  posterDesktopUrl,
-  posterMobileUrl,
-  posterAlt,
-}: EducationHeroSectionProps) => {
-  const { expanded, reducedMotion } = useEducationHeroLoadAnimation();
+const EducationHeroSection = ({ title, image, videoUrl }: EducationHeroSectionProps) => {
+  const { progress, reducedMotion } = useEducationHeroLoadAnimation();
+  const hasMedia = Boolean(
+    image?.desktopUrl?.trim() || image?.mobileUrl?.trim() || videoUrl?.trim(),
+  );
 
-  const heroTransition = reducedMotion
-    ? ""
-    : "transition-[width,top] duration-500 ease-in-out";
+  const frameStyle = reducedMotion
+    ? { top: 0, right: 0, bottom: 0, left: 0 }
+    : getHeroScrollCollapseFrameStyle(progress);
+  const titleStyle = reducedMotion ? { bottom: 0 } : getHeroScrollCollapseTitleStyle(progress);
 
   return (
     <section
@@ -28,27 +34,24 @@ const EducationHeroSection = ({
     >
       <div className="relative flex-1 overflow-hidden p-0">
         <div
-          className={cn(
-            "absolute left-1/2 h-full -translate-x-1/2 overflow-hidden",
-            heroTransition,
-            expanded ? "-top-5 w-full md:top-0 md:w-full w-[92%]" : "w-full",
-          )}
+          className={heroScrollCollapseFrameBaseClass}
+          style={frameStyle}
         >
-          <EducationHeroMedia
-            videoUrl={videoUrl}
-            posterDesktopUrl={posterDesktopUrl}
-            posterMobileUrl={posterMobileUrl}
-            posterAlt={posterAlt}
-            expanded={expanded}
-            reducedMotion={reducedMotion}
+          <HeroBackgroundMedia
+            desktopImageUrl={image?.desktopUrl ?? ""}
+            mobileImageUrl={image?.mobileUrl}
+            desktopAlt={image?.alt ?? title}
+            mobileAlt={image?.alt ?? title}
+            cmsVideoUrl={videoUrl}
           />
-
           <MediaContentOverlay
-            gradient="bottom-strong"
-            className={cn(expanded ? "max-md:h-[632px] md:translate-y-0 -translate-y-3" : "")}
+            gradient={
+              hasMedia ? educationHeroFigmaSpec.overlay.gradient : "bottom-strong"
+            }
           />
-
-          <div className={cn("pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-16 lg:pb-75", expanded && "max-md:bottom-5")}
+          <div
+            className={cn(heroScrollCollapseTitleBaseClass, "pb-16")}
+            // style={titleStyle}
           >
             <h1
               id="education-hero-title"

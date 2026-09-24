@@ -8,7 +8,18 @@
     "start": "next start",
     "lint": "eslint",
     "test:signup": "node scripts/test-signup-flow.mjs",
-    "test:signup:smoke": "node scripts/test-signup-flow.mjs --smoke"
+    "test:signup:smoke": "node scripts/test-signup-flow.mjs --smoke",
+    "test:contact": "node scripts/verify-contact-module.mjs",
+    "test:contact:all": "node scripts/run-contact-test-cases.mjs",
+    "test:world-of-sunny": "node scripts/run-world-of-sunny-test-cases.mjs",
+    "test:plp": "node scripts/run-plp-test-cases.mjs",
+    "test:cart": "node scripts/run-cart-test-cases.mjs",
+    "test:bespoke": "node scripts/run-bespoke-test-cases.mjs",
+    "test:blogs": "node scripts/run-blogs-test-cases.mjs",
+    "test:wishlist": "node scripts/run-wishlist-test-cases.mjs",
+    "test:homepage": "node scripts/run-homepage-test-cases.mjs",
+    "test:learn-about-diamonds": "node scripts/run-learn-about-diamonds-test-cases.mjs",
+    "test:careers": "node scripts/run-careers-test-cases.mjs"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.3",

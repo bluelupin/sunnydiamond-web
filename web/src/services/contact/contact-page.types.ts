@@ -20,9 +20,13 @@ export type StrapiContactCta = {
   id?: number;
   label?: string | null;
   url?: string | null;
-  to?: string | null;
   targetType?: string | null;
   openInNewTab?: boolean | null;
+};
+
+export type StrapiContactHeroVideo = {
+  altText?: string | null;
+  heroVideo?: StrapiContactMediaFile | null;
 };
 
 export type StrapiContactHeroSection = {
@@ -31,8 +35,10 @@ export type StrapiContactHeroSection = {
   title?: string | null;
   subtitle?: string | null;
   isActive?: boolean | null;
+  showField?: boolean | null;
   image?: StrapiContactImageAsset | null;
   bgImage?: StrapiContactImageAsset | null;
+  heroVideo?: StrapiContactHeroVideo | null;
   primaryCta?: StrapiContactCta | null;
   secondaryCta?: StrapiContactCta | null;
 };
@@ -46,14 +52,18 @@ export type StrapiContactOption = {
   availability?: string | null;
   value?: string | null;
   buttonLabel?: string | null;
+  /** Current CMS schema stores label/url on nested CTA. */
+  cta?: StrapiContactCta | null;
   sortOrder?: number | null;
   isActive?: boolean | null;
+  showField?: boolean | null;
 };
 
 export type StrapiContactSupportSection = {
   id?: number;
   heading?: string | null;
   isActive?: boolean | null;
+  showField?: boolean | null;
   contactOptions?: StrapiContactOption[] | null;
 };
 
@@ -88,6 +98,7 @@ export type StrapiContactFormSection = {
   heading?: string | null;
   successMessage?: string | null;
   isActive?: boolean | null;
+  showField?: boolean | null;
   form?: StrapiContactGenericForm | null;
 };
 
@@ -98,6 +109,7 @@ export type StrapiContactVisitShowroom = {
   slug?: string | null;
   sortOrder?: number | null;
   isActive?: boolean | null;
+  showField?: boolean | null;
   image?: StrapiContactImageAsset | null;
 };
 
@@ -105,10 +117,14 @@ export type StrapiContactVisitSection = {
   id?: number;
   sectionTitle?: string | null;
   description?: string | null;
+  welcomeNote?: string | null;
+  /** Visit CTA label (CMS field). */
+  appointmentLabel?: string | null;
   sortOrder?: number | null;
+  isActive?: boolean | null;
   showField?: boolean | null;
   image?: StrapiContactImageAsset | null;
-  cta?: StrapiContactCta | null;
+  backgroundImage?: StrapiContactImageAsset | null;
   formCta?: { label?: string | null; modalTag?: string | null } | null;
   showrooms?: StrapiContactVisitShowroom[] | null;
 };
@@ -119,6 +135,7 @@ export type StrapiContactSeo = {
   canonicalUrl?: string | null;
   metaKeywords?: string | null;
   ogImage?: StrapiContactMediaFile | null;
+  isActive?: boolean | null;
   showField?: boolean | null;
 };
 
@@ -135,13 +152,17 @@ export type StrapiContactPage = {
   localizations?: unknown;
 };
 
+export type NormalizedContactResponsiveImage = {
+  desktopUrl: string;
+  mobileUrl: string;
+  desktopAlt: string;
+  mobileAlt: string;
+};
+
 export type NormalizedContactHero = {
   title: string;
-  image: {
-    desktopUrl: string;
-    mobileUrl: string;
-    alt: string;
-  };
+  image: NormalizedContactResponsiveImage | null;
+  videoUrl?: string;
 };
 
 export type NormalizedContactInfoCard = {
@@ -151,38 +172,70 @@ export type NormalizedContactInfoCard = {
   mobileTitle?: string;
   description?: string;
   hours: Array<{ label: string; value: string }>;
-  link: { label: string; href: string };
+  link: {
+    label: string;
+    /** Present only when CMS provides `value` / `cta.url` — never invented from label. */
+    href?: string;
+    /** CMS CTA `targetType` when provided (`internal` | `external`). */
+    targetType?: string;
+    /** CMS CTA `openInNewTab` when provided. */
+    openInNewTab?: boolean;
+  };
 };
 
+export type NormalizedContactDropdownField = {
+  id: string;
+  label: string;
+  placeholder?: string;
+  options: string[];
+  isRequired: boolean;
+};
+
+/** CMS `dynamicFields` drag order — UI renders in this sequence. */
+export type NormalizedContactOrderedField =
+  | { kind: "name" }
+  | { kind: "phone" }
+  | { kind: "email" }
+  | { kind: "message" }
+  | { kind: "dropdown"; id: string }
+  /** Any other CMS text/textarea (or unknown) field — rendered as-is. */
+  | {
+      kind: "text";
+      id: string;
+      label: string;
+      placeholder?: string;
+      isRequired: boolean;
+      multiline?: boolean;
+    };
+
 export type NormalizedContactFormFields = {
-  nameLabel: string;
-  phoneLabel: string;
-  emailLabel: string;
-  reasonLabel: string;
-  reasonPlaceholder: string;
-  mobileReasonPlaceholder: string;
-  messageLabel: string;
-  messagePlaceholder: string;
-  mobileMessagePlaceholder: string;
-  mobileFieldPlaceholder: string;
+  nameLabel?: string;
+  phoneLabel?: string;
+  emailLabel?: string;
+  reasonLabel?: string;
+  reasonPlaceholder?: string;
+  messageLabel?: string;
+  messagePlaceholder?: string;
+  namePlaceholder?: string;
+  phonePlaceholder?: string;
+  emailPlaceholder?: string;
+  /** @deprecated Use namePlaceholder — kept for backward compatibility */
+  fieldPlaceholder?: string;
 };
 
 export type NormalizedContactForm = {
   title: string;
   formTag: string;
   submitLabel: string;
-  successTitle: string;
-  successDescription: string;
+  successDescription?: string;
   fields: NormalizedContactFormFields;
+  /** All CMS dropdown fields (not limited to reason/purpose labels). */
+  dropdownFields: NormalizedContactDropdownField[];
+  /** Field sequence from CMS drag order. */
+  orderedFields: NormalizedContactOrderedField[];
   reasonOptions: string[];
-  consentPrefix: string;
-  consentSuffix: string;
-  mobileConsentSuffix: string;
-  termsLabel: string;
-  mobileTermsLabel: string;
-  privacyLabel: string;
-  mobilePrivacyLabel: string;
-  consentError: string;
+  requiresConsent: boolean;
+  consentLabel?: string;
 };
 
 export type NormalizedContactSeo = {
@@ -194,13 +247,23 @@ export type NormalizedContactSeo = {
 };
 
 export type NormalizedContactPage = {
-  hero: NormalizedContactHero;
+  hero: NormalizedContactHero | null;
   intro: {
     description: string;
     mobileDescription: string;
-  };
+  } | null;
   infoCards: NormalizedContactInfoCard[];
-  form: NormalizedContactForm;
-  visitUs: NormalizedVisitUsSection;
+  form: NormalizedContactForm | null;
+  visitUs: NormalizedVisitUsSection | null;
   seo: NormalizedContactSeo | null;
+  loadError?: boolean;
+};
+
+export const EMPTY_CONTACT_PAGE: NormalizedContactPage = {
+  hero: null,
+  intro: null,
+  infoCards: [],
+  form: null,
+  visitUs: null,
+  seo: null,
 };

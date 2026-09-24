@@ -6,7 +6,8 @@ import { STRAPI_ENDPOINTS } from "@/api/endpoints";
  * Browser → same-origin BFF → Strapi `POST /api/generic-submissions/submit`.
  *
  * Contact Us enquiry uses a flat JSON body (no `{ data }` wrapper):
- * formTag, fullName, phone, email, reasonForContact, message, consentAccepted, sourcePage.
+ * formTag, fullName, phone, email, reasonForContact, message, consentAccepted, sourcePage,
+ * plus optional `dynamicFields` for any extra CMS fields.
  *
  * Book a Visit / other collection creates continue to use `/api/generic-submissions`.
  */

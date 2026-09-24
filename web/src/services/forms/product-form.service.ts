@@ -30,8 +30,8 @@ export async function getProductFormByTag(
 }
 
 /**
- * Browser posts to same-origin BFF so the Magento session cookie can be attached
- * as Bearer for CMS customer linking (My Appointments).
+ * Browser posts to same-origin BFF. BFF attaches the CMS API token and injects
+ * magentoCustomerId from the Magento session (required for Try at Home / Video Call).
  *
  * BFF → POST /api/product-submissions/submit (multipart data + uploadedImage).
  */

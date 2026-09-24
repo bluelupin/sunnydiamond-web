@@ -1,29 +1,30 @@
 "use client";
 
-import ResponsiveImage from "@/shared/ui/ResponsiveImage";
+import HeroBackgroundMedia from "@/features/cms/components/home/HeroBackgroundMedia";
 import MediaContentOverlay from "@/shared/ui/MediaContentOverlay";
+import {
+  getHeroScrollCollapseFrameStyle,
+  getHeroScrollCollapseTitleStyle,
+  heroScrollCollapseFrameBaseClass,
+  heroScrollCollapseTitleBaseClass,
+} from "@/shared/ui/heroScrollCollapseStyles";
 import { cn } from "@/shared/utils/cn";
 import { aboutHeroFigmaSpec } from "../data/content";
 import { useAboutHeroLoadAnimation } from "../hooks/useAboutHeroLoadAnimation";
 import type { NormalizedAboutHero } from "@/services/about/about-page.types";
-const { animation: heroAnimation } = aboutHeroFigmaSpec;
-const collapsedWidthPercent = `${heroAnimation.collapsedWidthRatio * 100}%`;
+
 type AboutHeroSectionProps = NormalizedAboutHero;
 
-const AboutHeroSection = ({ title, image }: AboutHeroSectionProps) => {
-  const { expanded, titleVisible, reducedMotion } = useAboutHeroLoadAnimation();
+const AboutHeroSection = ({ title, image, videoUrl }: AboutHeroSectionProps) => {
+  const { progress, reducedMotion } = useAboutHeroLoadAnimation();
+  const hasMedia = Boolean(
+    image?.desktopUrl?.trim() || image?.mobileUrl?.trim() || videoUrl?.trim(),
+  );
 
-  const heroTransition = reducedMotion
-    ? ""
-    : "transition-[width,top] duration-500 ease-in-out";
-
-  const imageTransition = reducedMotion
-    ? ""
-    : "transition-transform duration-500 ease-in-out lg:transition-none";
-
-  const titleTransition = reducedMotion
-    ? ""
-    : "transition-[opacity,transform] duration-500 ease-out";
+  const frameStyle = reducedMotion
+    ? { top: 0, right: 0, bottom: 0, left: 0 }
+    : getHeroScrollCollapseFrameStyle(progress);
+  const titleStyle = reducedMotion ? { bottom: 0 } : getHeroScrollCollapseTitleStyle(progress);
 
   return (
     <section
@@ -33,34 +34,26 @@ const AboutHeroSection = ({ title, image }: AboutHeroSectionProps) => {
     >
       <div className="relative flex-1 overflow-hidden p-0">
         <div
-          className={cn(
-            "absolute left-1/2 h-full -translate-x-1/2 overflow-hidden",
-            heroTransition,
-            expanded ? "-top-5 w-full md:top-0 md:w-full w-[92%]" : "w-full",
-          )}
+          className={heroScrollCollapseFrameBaseClass}
+          style={frameStyle}
         >
-          <ResponsiveImage
-            desktopSrc={image.desktopUrl}
-            mobileSrc={image.mobileUrl}
-            alt={image.alt}
-            priority
-            width={image.width ?? 1802}
-            height={image.height ?? 1802}
-            quality={85}
-            sizes="100vw"
-            className={cn(
-              "absolute inset-0 h-full w-full object-cover object-center",
-              imageTransition,
-              expanded ? "md:translate-y-0 -translate-y-5 h-full md:h-full" : "",
-            )}
+          <HeroBackgroundMedia
+            desktopImageUrl={image?.desktopUrl ?? ""}
+            mobileImageUrl={image?.mobileUrl}
+            desktopAlt={image?.alt ?? title}
+            mobileAlt={image?.alt ?? title}
+            cmsVideoUrl={videoUrl}
           />
-          <MediaContentOverlay gradient={aboutHeroFigmaSpec.overlay.gradient} className={cn(expanded ? "max-md:h-[632px] md:translate-y-0 -translate-y-3" : "",)} />
-          <div className={cn("pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-16 lg:pb-75", expanded && "max-md:bottom-5")}>
+          <MediaContentOverlay
+            gradient={hasMedia ? aboutHeroFigmaSpec.overlay.gradient : "bottom-strong"}
+          />
+          <div
+            className={cn(heroScrollCollapseTitleBaseClass, "pb-16 lg:pb-75")}
+            // style={titleStyle}
+          >
             <h1
               id="about-hero-title"
-              className={cn(
-                "w-full max-w-886 text-center font-larken text-32 font-light leading-110 text-white sm:text-4xl lg:text-5xl 2xl:text-5xl",
-              )}
+              className="w-full max-w-886 text-center font-larken text-32 font-light leading-110 text-white lg:text-6xl md:text-5xl text-4xl"
             >
               {title}
             </h1>

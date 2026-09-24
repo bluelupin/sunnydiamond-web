@@ -2,10 +2,10 @@ export const CAREERS_ROUTE = "/careers";
 
 export const CAREERS_ALL_OPENINGS_ROUTE = "/careers/all-openings";
 
-export function getCareerJobPath(jobCode: string): string {
-  return `${CAREERS_ROUTE}/${encodeURIComponent(jobCode)}`;
+export function getCareerJobPath(slug: string): string {
+  return `${CAREERS_ROUTE}/${encodeURIComponent(slug)}`;
 }
 
-export function getCareerApplyPath(jobCode: string): string {
-  return `${CAREERS_ROUTE}/apply/${encodeURIComponent(jobCode)}`;
+export function getCareerApplyPath(slug: string): string {
+  return `${CAREERS_ROUTE}/apply/${encodeURIComponent(slug)}`;
 }

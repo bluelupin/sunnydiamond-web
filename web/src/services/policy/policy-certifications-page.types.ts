@@ -11,6 +11,8 @@ export type StrapiPolicySeo = {
   canonicalUrl?: string | null;
   metaKeywords?: string | null;
   ogImage?: StrapiImage;
+  isActive?: boolean | null;
+  showField?: boolean | null;
 };
 
 export type StrapiPolicyAccordionItem = {
@@ -19,6 +21,8 @@ export type StrapiPolicyAccordionItem = {
   answer?: string | null;
   isOpenByDefault?: boolean | null;
   sortOrder?: number | null;
+  isActive?: boolean | null;
+  showField?: boolean | null;
 };
 
 export type StrapiPolicy = {
@@ -27,6 +31,7 @@ export type StrapiPolicy = {
   slug?: string | null;
   sortOrder?: number | null;
   isActive?: boolean | null;
+  showField?: boolean | null;
   accordionItems?: StrapiPolicyAccordionItem[] | null;
 };
 
@@ -36,7 +41,16 @@ export type StrapiPolicyCategory = {
   slug?: string | null;
   sortOrder?: number | null;
   isActive?: boolean | null;
+  showField?: boolean | null;
   policies?: StrapiPolicy[] | null;
+};
+
+export type StrapiPolicyContactCta = {
+  id?: number;
+  label?: string | null;
+  url?: string | null;
+  targetType?: string | null;
+  openInNewTab?: boolean | null;
 };
 
 export type StrapiPolicyContactOption = {
@@ -45,10 +59,13 @@ export type StrapiPolicyContactOption = {
   heading?: string | null;
   description?: string | null;
   availability?: string | null;
+  /** Legacy flat fields — prefer nested `cta` when present. */
   value?: string | null;
   buttonLabel?: string | null;
+  cta?: StrapiPolicyContactCta | null;
   sortOrder?: number | null;
   isActive?: boolean | null;
+  showField?: boolean | null;
 };
 
 export type StrapiPolicyCertificationsPage = {
@@ -56,11 +73,14 @@ export type StrapiPolicyCertificationsPage = {
     heading?: string | null;
     searchPlaceholder?: string | null;
     emptySearchMessage?: string | null;
+    isActive?: boolean | null;
+    showField?: boolean | null;
   } | null;
   policyCategories?: StrapiPolicyCategory[] | null;
   contactSection?: {
     heading?: string | null;
     isActive?: boolean | null;
+    showField?: boolean | null;
     contactOptions?: StrapiPolicyContactOption[] | null;
   } | null;
   seo?: StrapiPolicySeo | null;
@@ -75,6 +95,7 @@ export type StrapiLegalPage = {
   body?: string | null;
   effectiveDate?: string | null;
   isActive?: boolean | null;
+  showField?: boolean | null;
   seo?: StrapiPolicySeo | null;
 };
 

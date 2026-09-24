@@ -12,7 +12,14 @@ import type {
 } from "./policy-certifications-page.types";
 
 const POLICY_LANDING_QUERY = "populate=*&locale=en";
-const LEGAL_PAGES_QUERY = "populate=*&pagination[pageSize]=100";
+
+/** Strapi answers these when a collection is absent, unpublished, or not public. */
+function isMissingContent(error: unknown): boolean {
+  return (
+    error instanceof ApiError &&
+    (error.status === 403 || error.status === 404 || error.status === 400)
+  );
+}
 
 async function softFetch<T>(
   endpoint: string,
@@ -21,10 +28,7 @@ async function softFetch<T>(
   try {
     return await apiFetch<T>(endpoint, { signal });
   } catch (error) {
-    if (
-      error instanceof ApiError &&
-      (error.status === 403 || error.status === 404 || error.status === 400)
-    ) {
+    if (isMissingContent(error)) {
       return null;
     }
     console.warn(`[policy] Failed to fetch ${endpoint}`, error);
@@ -32,33 +36,14 @@ async function softFetch<T>(
   }
 }
 
-async function fetchLegalPages(signal?: AbortSignal): Promise<StrapiLegalPage[]> {
-  try {
-    const data = await apiFetch<StrapiLegalPage[]>(
-      `${STRAPI_ENDPOINTS.legalPages}?${LEGAL_PAGES_QUERY}`,
-      { signal },
-    );
-    return Array.isArray(data) ? data : [];
-  } catch (error) {
-    console.warn("[policy] Failed to fetch legal pages", error);
-    return [];
-  }
-}
-
 export const getPolicyCertificationsPage = cache(
   async (signal?: AbortSignal): Promise<NormalizedPolicyCertificationsPage> => {
-    const [landing, legalPages] = await Promise.all([
-      softFetch<StrapiPolicyCertificationsPage>(
-        `${STRAPI_ENDPOINTS.policyCertificationsPage}?${POLICY_LANDING_QUERY}`,
-        signal,
-      ),
-      fetchLegalPages(signal),
-    ]);
+    const landing = await softFetch<StrapiPolicyCertificationsPage>(
+      `${STRAPI_ENDPOINTS.policyCertificationsPage}?${POLICY_LANDING_QUERY}`,
+      signal,
+    );
 
-    return mapPolicyCertificationsPage({
-      landing,
-      legalPages,
-    });
+    return mapPolicyCertificationsPage(landing);
   },
 );
 

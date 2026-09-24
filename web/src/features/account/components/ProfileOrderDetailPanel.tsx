@@ -1,16 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { StaticImageData } from "next/image";
 import { useMagentoWishlistProducts } from "@/hooks/magento/useMagentoWishlistProducts";
 import { trackOrder } from "@/services/customer/order-tracking.client";
 import type { TrackedOrder } from "@/services/customer/order-tracking.types";
+import {
+  getProfileGiftCardDummyDetailOrder,
+  isProfileGiftCardDummyOrderNumber,
+} from "../data/profileGiftCardDummyOrders";
+import { buildMagentoProductImageBySku } from "../utils/orderItemImage.utils";
 import { mapTrackedOrderToProfileDetailUi } from "../utils/orderDetailDisplay.mapper";
 import { ProfileOrderDetailView } from "./ProfileOrderDetailView";
-
-function listingImageUrl(image: string | StaticImageData): string {
-  return typeof image === "string" ? image : image.src;
-}
+import FormFieldError from "@/shared/ui/FormFieldError";
 
 function OrderDetailSkeleton() {
   return (
@@ -34,12 +35,20 @@ export function ProfileOrderDetailPanel({
   onTrackedStatusChange,
   onOrderChanged,
 }: ProfileOrderDetailPanelProps) {
+  const dummyOrderDetail = useMemo(
+    () =>
+      isProfileGiftCardDummyOrderNumber(orderNumber)
+        ? getProfileGiftCardDummyDetailOrder(orderNumber)
+        : null,
+    [orderNumber],
+  );
+
   const [order, setOrder] = useState<TrackedOrder | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!dummyOrderDetail);
 
   useEffect(() => {
-    if (!orderNumber) {
+    if (!orderNumber || dummyOrderDetail) {
       return;
     }
 
@@ -94,25 +103,19 @@ export function ProfileOrderDetailPanel({
 
   const { products: magentoProducts } = useMagentoWishlistProducts(orderSkus);
 
-  const imageBySku = useMemo(() => {
-    const images: Record<string, string> = {};
-
-    for (const product of magentoProducts) {
-      const sku = product.sku?.trim();
-      if (!sku) {
-        continue;
-      }
-
-      images[sku] = listingImageUrl(product.primaryImage);
-    }
-
-    return images;
-  }, [magentoProducts]);
+  const imageBySku = useMemo(
+    () => buildMagentoProductImageBySku(magentoProducts),
+    [magentoProducts],
+  );
 
   const orderDetail = useMemo(
     () => (order ? mapTrackedOrderToProfileDetailUi(order, imageBySku) : null),
     [order, imageBySku],
   );
+
+  if (dummyOrderDetail) {
+    return <ProfileOrderDetailView order={dummyOrderDetail} onBack={onBack} />;
+  }
 
   if (isLoading) {
     return <OrderDetailSkeleton />;
@@ -121,9 +124,7 @@ export function ProfileOrderDetailPanel({
   if (error) {
     return (
       <div className="flex flex-col gap-4">
-        <p className="font-gill text-sm font-light leading-110 text-red-700" role="alert">
-          {error}
-        </p>
+        <FormFieldError message={error} />
         <button
           type="button"
           onClick={onBack}

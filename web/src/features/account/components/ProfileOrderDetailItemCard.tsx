@@ -5,6 +5,7 @@ import Link from "next/link";
 import RingsTabIcon from "@/assets/Icons/PLP/RingsTabIcon";
 import { giftingContent } from "@/features/cart/data/giftingContent";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { profileTabsContent } from "../data/profileContent";
 import type { ProfileOrderDetailItemUi } from "../types/profileUi.types";
 import { formatOrderTotal } from "../utils/formatAccountData";
@@ -17,18 +18,33 @@ type ProfileOrderDetailItemCardProps = {
 export function ProfileOrderDetailItemCard({ item }: ProfileOrderDetailItemCardProps) {
   const content = profileTabsContent.orders.detail;
   const badgeLabel = item.isGift ? "Gift" : item.isBespoke ? "Bespoke" : null;
+  const isGiftCardItem = Boolean(item.subtitle?.trim());
   const lineTotal = item.unitPrice * item.quantity;
 
   const nameElement = item.productUrlKey ? (
     <Link
       href={`/product/${item.productUrlKey}`}
-      className="font-gill text-base font-normal leading-110 text-darkblack underline-offset-2 hover:underline"
+      className={cn(
+        "font-gill text-base font-normal leading-110 text-darkblack underline-offset-2 hover:underline",
+        productNameDisplayClassName,
+      )}
     >
       {item.name}
     </Link>
   ) : (
-    <p className="font-gill text-base font-normal leading-110 text-darkblack">{item.name}</p>
+    <p
+      className={cn(
+        "font-gill text-base font-normal leading-110 text-darkblack",
+        productNameDisplayClassName,
+      )}
+    >
+      {item.name}
+    </p>
   );
+
+  const subtitleElement = item.subtitle ? (
+    <p className="font-gill text-sm font-light leading-110 text-neutral500">{item.subtitle}</p>
+  ) : null;
 
   const attributesElement =
     item.size || item.metal ? (
@@ -52,12 +68,18 @@ export function ProfileOrderDetailItemCard({ item }: ProfileOrderDetailItemCardP
     </p>
   );
 
-  const imageElement = item.useIconPlaceholder ? (
+  const imageElement = item.useIconPlaceholder || !item.imageSrc ? (
     <div className="flex size-full items-center justify-center">
       <RingsTabIcon className="size-12 text-darkblack" />
     </div>
   ) : (
-    <Image src={item.imageSrc} alt={item.name} fill className="object-cover" sizes="112px" />
+    <Image
+      src={item.imageSrc}
+      alt={item.name}
+      fill
+      className={isGiftCardItem ? "object-contain object-center" : "object-cover"}
+      sizes={isGiftCardItem ? "99px" : "112px"}
+    />
   );
 
   return (
@@ -82,11 +104,17 @@ export function ProfileOrderDetailItemCard({ item }: ProfileOrderDetailItemCardP
         </div>
       ) : (
         <div className="flex items-center gap-2 lg:hidden">
-          <div className="relative h-[84px] w-[112px] shrink-0 overflow-hidden bg-white">
+          <div
+            className={cn(
+              "relative shrink-0 overflow-hidden bg-white",
+              isGiftCardItem ? "h-[84px] w-[120px]" : "h-[84px] w-[112px]",
+            )}
+          >
             {imageElement}
           </div>
-          <div className="min-w-0 flex flex-1 flex-col gap-2">
+          <div className={cn("min-w-0 flex flex-1 flex-col", isGiftCardItem ? "gap-3" : "gap-2")}>
             {nameElement}
+            {subtitleElement}
             {attributesElement}
             {engravingElement}
             {priceElement}
@@ -105,7 +133,7 @@ export function ProfileOrderDetailItemCard({ item }: ProfileOrderDetailItemCardP
             <div
               className={cn(
                 "relative shrink-0 overflow-hidden bg-white",
-                item.isBespoke ? "h-[62px] w-[83px]" : "h-[62px] w-[83px]",
+                isGiftCardItem ? "h-[62px] w-[99px]" : "h-[62px] w-[83px]",
               )}
             >
               {imageElement}
@@ -113,6 +141,7 @@ export function ProfileOrderDetailItemCard({ item }: ProfileOrderDetailItemCardP
 
             <div className="min-w-0 flex flex-col gap-3">
               {nameElement}
+              {subtitleElement}
               {attributesElement}
               {engravingElement}
               {item.quantity > 1 ? (

@@ -3,17 +3,23 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import type { StaticImageData } from "next/image";
-import { Check, Info, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useToast } from "@/shared/hooks/use-toast";
+import { useAppStatusToastController } from "@/shared/hooks/useAppStatusToastController";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
+import {
+  getAppointmentContactLocks,
+  getAuthLoginIdentifierKind,
+} from "@/features/auth/utils/authLoginIdentifier";
 import {
   appointmentFieldClassName,
   appointmentLabelClassName,
 } from "@/shared/constants/appointmentForm";
 import type { Product } from "@/features/products/data/products";
 import { getProductHref } from "@/features/products/utils/productRoutes";
+import type { TryAtHomeBookingSummary } from "@/features/products/utils/tryAtHomeBooking";
 import {
   createProductSubmission,
   getProductFormByTag,
@@ -24,9 +30,17 @@ import {
   PRODUCT_APPOINTMENT_PANEL_CONFIG,
   type ProductAppointmentVariant,
 } from "./productAppointmentPanel.config";
+import TryAtHomeSuccessStep from "./TryAtHomeSuccessStep";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
-import { DetailDarkButton } from "./shared";
+import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
+import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
+import { formatRequiredFieldLabel } from "@/shared/utils/formValidation";
+import { DetailDarkButton, DetailTextLink } from "./shared";
 import { ProductDetailSidePanelShell } from "./ProductDetailSidePanelShell";
+import { useRouter } from "next/navigation";
+import { buildProfileSectionHref } from "@/features/account/utils/profileSectionNavigation";
 
 const PERSONALISE_FORM_TAG = "product-personalisation";
 const SCHEDULE_VIDEO_CALL_FORM_TAG = "product-video-call";
@@ -47,6 +61,7 @@ type ProductAppointmentFormProps = {
   onClose: () => void;
   onSubmitSuccess: (message: string) => void;
   onSubmitError: (message: string) => void;
+  onVideoCallBooked?: (booking: TryAtHomeBookingSummary) => void;
 };
 
 const ProductAppointmentForm = ({
@@ -58,11 +73,15 @@ const ProductAppointmentForm = ({
   onClose,
   onSubmitSuccess,
   onSubmitError,
+  onVideoCallBooked,
 }: ProductAppointmentFormProps) => {
   const isPersonalise = variant === "personalise";
   const isScheduleVideoCall = variant === "schedule-video-call";
   const { customer } = useAuth();
   const { contact: profileContact } = useCustomerProfileContact(open);
+  const { phoneLocked, emailLocked } = getAppointmentContactLocks(
+    getAuthLoginIdentifierKind(),
+  );
 
   const [name, setName] = useState("");
   const [countryCode, setCountryCode] = useState("+91");
@@ -90,7 +109,7 @@ const ProductAppointmentForm = ({
   const [phonePlaceholder, setPhonePlaceholder] = useState<string | undefined>(undefined);
   const [emailLabel, setEmailLabel] = useState("Email");
   const [emailPlaceholder, setEmailPlaceholder] = useState("Enter");
-  const [dateLabel, setDateLabel] = useState("Date");
+  const [dateLabel, setDateLabel] = useState(isScheduleVideoCall ? "Date*" : "Date");
   const [notesLabel, setNotesLabel] = useState(config.noteLabel);
   const [notesPlaceholder, setNotesPlaceholder] = useState(config.notePlaceholder);
   const [notesRequired, setNotesRequired] = useState(config.noteRequired);
@@ -160,13 +179,25 @@ const ProductAppointmentForm = ({
         setFormTag(form.formTag || cmsFormTag);
         if (form.formName) setFormTitle(form.formName);
         if (form.submitButtonText) setSubmitLabel(form.submitButtonText);
-        if (form.nameLabel) setNameLabel(form.nameLabel);
+        if (form.nameLabel) {
+          setNameLabel(
+            isScheduleVideoCall ? formatRequiredFieldLabel(form.nameLabel) : form.nameLabel,
+          );
+        }
         if (form.namePlaceholder) setNamePlaceholder(form.namePlaceholder);
-        if (form.phoneLabel) setPhoneLabel(form.phoneLabel);
+        if (form.phoneLabel) {
+          setPhoneLabel(
+            isScheduleVideoCall ? formatRequiredFieldLabel(form.phoneLabel) : form.phoneLabel,
+          );
+        }
         if (form.phonePlaceholder) setPhonePlaceholder(form.phonePlaceholder);
         if (form.emailLabel) setEmailLabel(form.emailLabel);
         if (form.emailPlaceholder) setEmailPlaceholder(form.emailPlaceholder);
-        if (form.dateLabel) setDateLabel(form.dateLabel);
+        if (form.dateLabel) {
+          setDateLabel(
+            isScheduleVideoCall ? formatRequiredFieldLabel(form.dateLabel) : form.dateLabel,
+          );
+        }
         if (form.notesLabel) setNotesLabel(form.notesLabel);
         if (form.notesPlaceholder) setNotesPlaceholder(form.notesPlaceholder);
         setNotesRequired(form.notesRequired);
@@ -260,6 +291,12 @@ const ProductAppointmentForm = ({
           onSubmitSuccess(
             isScheduleVideoCall ? config.successToast.title : "Request submitted",
           );
+
+          if (isScheduleVideoCall && onVideoCallBooked) {
+            onVideoCallBooked({ date, selectedSlot });
+            return;
+          }
+
           handleClose();
         } catch {
           onSubmitError(
@@ -274,29 +311,17 @@ const ProductAppointmentForm = ({
 
   return (
     <>
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-        <div className="flex flex-col gap-6 px-4 pt-6 lg:px-6 lg:pt-10">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain DrawerVerticleScrollbar">
+        <div className={cn("flex flex-col gap-6", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4">
               <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
                 {formTitle}
               </h2>
-              <button
-                type="button"
-                onClick={handleClose}
-                aria-label={config.closeAriaLabel}
-                className="inline-flex size-6 shrink-0 items-center justify-center"
-              >
-                <Image
-                  src="/icons/menu-close.svg"
-                  alt=""
-                  width={24}
-                  height={24}
-                  aria-hidden
-                />
-              </button>
+              <RightPanelCloseButton onClick={handleClose} aria-label={config.closeAriaLabel} />
             </div>
-            <div className="h-px w-full bg-neutral300" aria-hidden />
+            <div className="h-[1px] w-full bg-neutral300" aria-hidden />
           </div>
 
           <div className="flex flex-col items-center gap-2 pb-4">
@@ -308,7 +333,14 @@ const ProductAppointmentForm = ({
               className="h-133 w-206 object-contain"
               sizes="206px"
             />
-            <p className="font-gill text-base leading-110 text-darkblack">{product.name}</p>
+            <p
+              className={cn(
+                "font-gill text-base leading-110 text-darkblack",
+                productNameDisplayClassName,
+              )}
+            >
+              {product.name}
+            </p>
           </div>
 
           <div className="flex flex-col gap-6 pb-72">
@@ -341,18 +373,26 @@ const ProductAppointmentForm = ({
               emailLabel={emailLabel}
               emailPlaceholder={emailPlaceholder}
               dateLabel={dateLabel}
+              dateRequired={isScheduleVideoCall && config.showTimeSlots}
+              timeSlotRequired={isScheduleVideoCall && config.showTimeSlots}
               noteLabel={notesLabel}
               notePlaceholder={notesPlaceholder}
               noteLabelClassName={config.noteLabelClassName}
               noteTextareaClassName={config.noteTextareaClassName}
               labelClassName={appointmentLabelClassName}
               fieldClassName={appointmentFieldClassName}
+              phoneLocked={phoneLocked}
+              emailLocked={emailLocked}
             />
 
             {allowImageUpload ? (
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-1">
-                  <Info size={24} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 text-darkblack md:size-6 size-5">
+                    <path d="M11.25 11.25C11.4489 11.25 11.6397 11.329 11.7803 11.4697C11.921 11.6103 12 11.8011 12 12V15.75C12 15.9489 12.079 16.1397 12.2197 16.2803C12.3603 16.421 12.5511 16.5 12.75 16.5" stroke="#0A0A0A" strokeWidth="1.125" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M11.625 8.8125C12.1428 8.8125 12.5625 8.39277 12.5625 7.875C12.5625 7.35723 12.1428 6.9375 11.625 6.9375C11.1072 6.9375 10.6875 7.35723 10.6875 7.875C10.6875 8.39277 11.1072 8.8125 11.625 8.8125Z" fill="#0A0A0A" />
+                    <path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z" stroke="#0A0A0A" strokeWidth="1.125" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                   <p className="font-gill text-base font-light leading-110 text-darkblack">
                     Do you have any reference image? (Optional)
                   </p>
@@ -394,31 +434,17 @@ const ProductAppointmentForm = ({
                         {referenceImageName}
                       </p>
                       <div className="flex flex-wrap items-center gap-3">
-                        <button
-                          type="button"
-                          onClick={() => referenceImageInputRef.current?.click()}
-                          className="text-link-underline inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
-                        >
+                        <DetailTextLink onClick={() => referenceImageInputRef.current?.click()}>
                           Replace Image
-                        </button>
-                        <button
-                          type="button"
-                          onClick={clearReferenceImage}
-                          className="text-link-underline inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
-                        >
-                          Remove
-                        </button>
+                        </DetailTextLink>
+                        <DetailTextLink onClick={clearReferenceImage}>Remove</DetailTextLink>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={() => referenceImageInputRef.current?.click()}
-                    className="text-link-underline inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
-                  >
+                  <DetailTextLink onClick={() => referenceImageInputRef.current?.click()}>
                     Attach Image
-                  </button>
+                  </DetailTextLink>
                 )}
               </div>
             ) : null}
@@ -438,6 +464,7 @@ const ProductAppointmentForm = ({
           {isSubmitting ? "SUBMITTING..." : submitLabel}
         </DetailDarkButton>
       </PanelFooter>
+      </div>
     </>
   );
 };
@@ -448,36 +475,25 @@ const ProductAppointmentPanel = ({
   product,
   variant,
 }: ProductAppointmentPanelProps) => {
+  const router = useRouter();
   const { toast } = useToast();
   const config = PRODUCT_APPOINTMENT_PANEL_CONFIG[variant];
   const productImage = product.images[0] ?? product.image;
-  const [statusToastMessage, setStatusToastMessage] = useState<string | null>(null);
-  const statusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const dismissStatusToast = () => {
-    if (statusToastTimeoutRef.current) {
-      clearTimeout(statusToastTimeoutRef.current);
-      statusToastTimeoutRef.current = null;
-    }
-    setStatusToastMessage(null);
-  };
-
-  const showStatusToast = (message: string) => {
-    dismissStatusToast();
-    setStatusToastMessage(message);
-    statusToastTimeoutRef.current = setTimeout(() => {
-      setStatusToastMessage(null);
-      statusToastTimeoutRef.current = null;
-    }, wishlistMovedToastDurationMs);
-  };
+  const { show: showStatusToast, node: statusToast } = useAppStatusToastController(
+    wishlistMovedToastDurationMs,
+  );
+  const [videoBooking, setVideoBooking] = useState<TryAtHomeBookingSummary | null>(null);
 
   useEffect(() => {
-    return () => {
-      if (statusToastTimeoutRef.current) {
-        clearTimeout(statusToastTimeoutRef.current);
-      }
-    };
-  }, []);
+    if (!open) {
+      setVideoBooking(null);
+    }
+  }, [open]);
+
+  const handleClose = () => {
+    setVideoBooking(null);
+    onClose();
+  };
 
   const handleLegacySuccess = (message: string) => {
     if (variant === "personalise") {
@@ -485,21 +501,12 @@ const ProductAppointmentPanel = ({
       return;
     }
 
+    if (variant === "schedule-video-call") {
+      return;
+    }
+
     toast(config.successToast);
   };
-
-  const statusToast = statusToastMessage ? (
-    <div
-      role="status"
-      aria-live="polite"
-      className="pointer-events-auto fixed left-1/2 top-16 z-[80] w-[calc(100%-2rem)] max-w-[300px] -translate-x-1/2 animate-in fade-in slide-in-from-top-2 duration-300 md:top-104"
-    >
-      <div className="flex w-full items-center gap-2 bg-darkblack px-4 py-3">
-        <Check size={18} strokeWidth={1.25} aria-hidden className="shrink-0 text-white" />
-        <p className="font-gill text-sm font-light leading-110 text-white">{statusToastMessage}</p>
-      </div>
-    </div>
-  ) : null;
 
   if (!open) {
     return statusToast;
@@ -510,20 +517,39 @@ const ProductAppointmentPanel = ({
       {statusToast}
       <ProductDetailSidePanelShell
         open={open}
-        onClose={onClose}
+        onClose={handleClose}
         overlayAriaLabel={config.closeAriaLabel}
         dialogAriaLabel={config.dialogAriaLabel}
       >
-        <ProductAppointmentForm
-          config={config}
-          product={product}
-          productImage={productImage}
-          variant={variant}
-          open={open}
-          onClose={onClose}
-          onSubmitSuccess={handleLegacySuccess}
-          onSubmitError={showStatusToast}
-        />
+        {variant === "schedule-video-call" && videoBooking ? (
+          <TryAtHomeSuccessStep
+            product={product}
+            productImage={productImage}
+            booking={videoBooking}
+            successMessage="Video call scheduled"
+            onClose={handleClose}
+            onViewBooking={() => {
+              handleClose();
+              router.push(buildProfileSectionHref("appointments"));
+            }}
+            onContinueShopping={() => {
+              handleClose();
+              router.push("/jewellery");
+            }}
+          />
+        ) : (
+          <ProductAppointmentForm
+            config={config}
+            product={product}
+            productImage={productImage}
+            variant={variant}
+            open={open}
+            onClose={handleClose}
+            onSubmitSuccess={handleLegacySuccess}
+            onSubmitError={showStatusToast}
+            onVideoCallBooked={setVideoBooking}
+          />
+        )}
       </ProductDetailSidePanelShell>
     </>
   );

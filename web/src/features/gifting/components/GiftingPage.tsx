@@ -4,7 +4,7 @@ import GiftingDiscoverOptionsLoader from "./GiftingDiscoverOptionsLoader";
 import GiftingDiscoverSection from "./GiftingDiscoverSection";
 import GiftingGiftCardSection from "./GiftingGiftCardSection";
 import GiftingGuaranteesSection from "./GiftingGuaranteesSection";
-import GiftingIntroSection from "./GiftingIntroSection";
+import GiftingHeroSection from "./GiftingHeroSection";
 import GiftingOccasionSection from "./GiftingOccasionSection";
 import GiftingProductListSection from "./GiftingProductListSection";
 import GiftingPromiseSection from "./GiftingPromiseSection";
@@ -17,9 +17,9 @@ type GiftingPageProps = {
 const GiftingPage = ({ page }: GiftingPageProps) => {
   return (
     <>
-      {page.hero ? <GiftingIntroSection hero={page.hero} /> : null}
-      {page.intro ? <GiftingWithLoveSection intro={page.intro} /> : null}
-      {page.occasionGrid?.cards.length ? (
+      {page.hero && <GiftingHeroSection hero={page.hero} />}
+      {page.intro && <GiftingWithLoveSection intro={page.intro} />}
+      {page.occasionGrid ? (
         <GiftingOccasionSection cards={page.occasionGrid.cards} />
       ) : null}
       {page.perfectGift ? (
@@ -34,7 +34,9 @@ const GiftingPage = ({ page }: GiftingPageProps) => {
       {page.finishingTouch ? (
         <GiftingPromiseSection finishingTouch={page.finishingTouch} />
       ) : null}
-      <GiftingGuaranteesSection trustBadges={page.trustBadges} />
+      {page.trustBadges.length > 0 ? (
+        <GiftingGuaranteesSection trustBadges={page.trustBadges} />
+      ) : null}
     </>
   );
 };

@@ -1,14 +1,12 @@
 export const learnAboutDiamondsRoute = "/learn-about-diamonds" as const;
 
 export const educationPageImages = {
-  panelTexture: "/images/education/panel-texture.png",
-  certifiedHandBg: "/images/education/certified-hand-bg.png",
+  panelTexture: "/images/verticle-texture.png",
   certifiedDivider: "/images/education/certified-divider.svg",
   certifiedDividerMobile: "/images/education/certified-divider-mobile.svg",
   anatomySparkle: "/images/education/scroll-arrow.svg",
   scrollArrow: "/images/education/scroll-arrow.svg",
   claritySliderThumb: "/images/education/clarity-slider-thumb.svg",
-  caratDiamond: "/images/education/carat-diamond.png",
 } as const;
 
 /** Figma 692:29026 / 692:29042 / 692:29044 — C4 carat hand + diamond */
@@ -222,6 +220,9 @@ export const educationHeroFigmaSpec = {
   image: {
     width: 1498,
     height: 659,
+  },
+  overlay: {
+    gradient: "bottom" as const,
   },
   animation: {
     collapsedWidthRatio: 1360 / 1440,

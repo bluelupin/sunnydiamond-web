@@ -5,6 +5,69 @@ import { stripLineInstanceFromEngraving } from "@/features/cart/utils/cartLineIn
 
 export const DEFAULT_ENGRAVING_MAX_CHARACTERS = 10;
 
+/** Figma `4903:44931` — default ring close-up when Magento has no preview image. */
+export const RING_ENGRAVING_PREVIEW_IMAGE = "/images/products/pdp/ring-engraving-preview.png";
+
+/** Figma `4903:44930` preview frame. */
+export const RING_ENGRAVING_PREVIEW_VIEWBOX = { width: 343, height: 214 } as const;
+
+/**
+ * Inner-band arc calibrated to Figma `4903:44987` ("Diya Gupta" placement).
+ * Quadratic path bows upward at center to match the ring perspective.
+ */
+export const RING_ENGRAVING_TEXT_ARC_PATH = "M 137 92 Q 174 84 210 92";
+
+export function resolveEngravingPreviewFontSize(text: string): number {
+  const length = text.trim().length;
+  if (length <= 5) return 14;
+  if (length <= 8) return 13.5;
+  if (length <= 12) return 12.5;
+  return 11.5;
+}
+
+const CATALOG_PRODUCT_IMAGE_PATTERN = /\/catalog\/product\//i;
+
+/**
+ * Ring engraving preview asset for all engraving-enabled products.
+ * Ignores Magento catalog product shots — only dedicated preview assets pass through.
+ */
+export function resolveEngravingPreviewImage(previewImage?: string | null): string {
+  const trimmed = previewImage?.trim();
+  if (trimmed && !CATALOG_PRODUCT_IMAGE_PATTERN.test(trimmed)) {
+    return trimmed;
+  }
+
+  return RING_ENGRAVING_PREVIEW_IMAGE;
+}
+
+/** @deprecated Use resolveEngravingPreviewImage */
+export const resolveRingEngravingPreviewImage = resolveEngravingPreviewImage;
+
+/** Normalize engraving config for PDP, cart, and any engraving drawer entry point. */
+export function resolveProductEngravingConfig(
+  product: Pick<Product, "engraving" | "customOptions">,
+): ProductEngravingConfig | undefined {
+  if (isProductEngravingEnabled(product.engraving)) {
+    return {
+      ...product.engraving!,
+      previewImage: resolveEngravingPreviewImage(product.engraving!.previewImage),
+    };
+  }
+
+  if (!hasCatalogEngravingText(product.customOptions)) {
+    return undefined;
+  }
+
+  return {
+    enabled: true,
+    maxCharacters:
+      resolveEngravingMaxCharacters(product.customOptions?.engravingText?.maxCharacters) ??
+      DEFAULT_ENGRAVING_MAX_CHARACTERS,
+    fonts: product.customOptions?.engravingFont?.labels ?? [],
+    previewImage: RING_ENGRAVING_PREVIEW_IMAGE,
+  };
+}
+
 /** Mirrors the Magento engraving charset validation (add path errors loudly, update path only via errors[]). */
 export const ENGRAVING_TEXT_PATTERN = /^[A-Za-z0-9 ./-]*$/;
 
@@ -88,10 +151,44 @@ export function isProductEngravingEnabled(
   return engraving?.enabled === true;
 }
 
+export function hasCatalogEngravingText(
+  productCustomOptions?: ProductCustomOptions | null,
+): boolean {
+  return Boolean(productCustomOptions?.engravingText);
+}
+
+/** Ensures engraving flags are set whenever the catalog exposes an engraving text option. */
+export function ensureEngravingCartLineOptions(
+  options: CartLineOptions,
+  productCustomOptions?: ProductCustomOptions | null,
+  engraving?: ProductEngravingConfig | null,
+): CartLineOptions {
+  if (!hasCatalogEngravingText(productCustomOptions) && !isProductEngravingEnabled(engraving)) {
+    return options;
+  }
+
+  const maxCharacters =
+    options.engravingMaxCharacters ??
+    resolveEngravingMaxCharacters(productCustomOptions?.engravingText?.maxCharacters) ??
+    engraving?.maxCharacters ??
+    DEFAULT_ENGRAVING_MAX_CHARACTERS;
+
+  return {
+    ...options,
+    engravingSupported: true,
+    engravingMaxCharacters: maxCharacters,
+  };
+}
+
 export function isCartLineEngravingEnabled(
   options: Pick<CartLineOptions, "engravingSupported">,
+  productCustomOptions?: ProductCustomOptions | null,
 ): boolean {
-  return options.engravingSupported === true;
+  if (options.engravingSupported === true) {
+    return true;
+  }
+
+  return hasCatalogEngravingText(productCustomOptions);
 }
 
 export type CartLineEngravingContext = {
@@ -103,16 +200,7 @@ export type CartLineEngravingContext = {
 export function isCartLineEngravingCapable(
   context: CartLineEngravingContext,
 ): boolean {
-  if (context.options.engravingSupported !== true) {
-    return false;
-  }
-
-  const catalogOptions = context.productCustomOptions;
-  if (catalogOptions && !catalogOptions.engravingText) {
-    return false;
-  }
-
-  return true;
+  return hasCatalogEngravingText(context.productCustomOptions);
 }
 
 export function mergeCartLineOptions(

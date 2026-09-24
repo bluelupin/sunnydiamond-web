@@ -9,8 +9,10 @@ import {
   DialogTitle,
 } from "@/shared/ui/dialog";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/shared/ui/sheet";
+import FormRadioOption from "@/shared/ui/FormRadioOption";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { profileDetailsContent } from "../data/profileContent";
+import FormFieldError from "@/shared/ui/FormFieldError";
 
 type ProfileDeleteAccountReasonDialogProps = {
   open: boolean;
@@ -28,7 +30,6 @@ type ReasonFormProps = {
   onCommentsChange: (comments: string) => void;
   isSubmitting: boolean;
   mobile?: boolean;
-  includeDescription?: boolean;
 };
 
 function DeleteAccountReasonForm({
@@ -39,21 +40,20 @@ function DeleteAccountReasonForm({
   onCommentsChange,
   isSubmitting,
   mobile = false,
-  includeDescription = true,
 }: ReasonFormProps) {
+  const description = mobile ? dialog.descriptionMobile : dialog.description;
+
   return (
-    <>
-      {includeDescription ? (
-        <p
-          className={
-            mobile
-              ? "font-gill text-base font-light leading-110 text-darkblack"
-              : "font-gill text-base font-light leading-110 text-neutral500"
-          }
-        >
-          {dialog.description}
-        </p>
-      ) : null}
+    <div className="flex flex-col gap-6">
+      <p
+        className={
+          mobile
+            ? "font-gill text-base font-light leading-110 text-darkblack"
+            : "font-gill text-base font-light leading-110 text-neutral500"
+        }
+      >
+        {description}
+      </p>
 
       <div className="flex flex-col gap-4">
         <p
@@ -67,21 +67,18 @@ function DeleteAccountReasonForm({
         </p>
         <div className={mobile ? "flex flex-col gap-3" : "flex flex-col gap-4"}>
           {dialog.reasons.map((reason) => (
-            <label
+            <FormRadioOption
               key={reason}
-              className="flex items-center gap-2 font-gill text-base leading-110 text-darkblack"
-            >
-              <input
-                type="radio"
-                name="delete-account-reason"
-                value={reason}
-                checked={selectedReason === reason}
-                onChange={() => onSelectReason(reason)}
-                disabled={isSubmitting}
-                className="size-6 shrink-0 accent-darkblack"
-              />
-              <span className="font-light">{reason}</span>
-            </label>
+              name="delete-account-reason"
+              value={reason}
+              label={reason}
+              checked={selectedReason === reason}
+              disabled={isSubmitting}
+              onSelect={onSelectReason}
+              labelClassName={
+                mobile ? "text-darkblack" : "text-[#2B2B2B]"
+              }
+            />
           ))}
         </div>
       </div>
@@ -94,11 +91,11 @@ function DeleteAccountReasonForm({
         disabled={isSubmitting}
         className="h-[100px] w-full resize-none bg-aboutInactive p-3 font-gill text-base font-normal leading-110 text-darkblack outline-none placeholder:text-gray600"
       />
-    </>
+    </div>
   );
 }
 
-/** Figma 1480:21033 — delete account reason bottom sheet on mobile */
+/** Figma 1480:58423 desktop / 1480:21033 mobile — delete account reason drawer */
 export function ProfileDeleteAccountReasonDialog({
   open,
   onOpenChange,
@@ -110,6 +107,8 @@ export function ProfileDeleteAccountReasonDialog({
   const dialog = profileDetailsContent.deleteAccount.reasonDialog;
   const [selectedReason, setSelectedReason] = useState<string>(dialog.reasons[0]);
   const [comments, setComments] = useState("");
+
+  const dialogTitle = isMobile ? dialog.titleMobile : dialog.title;
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen && isSubmitting) {
@@ -141,46 +140,40 @@ export function ProfileDeleteAccountReasonDialog({
       <Sheet open={open} onOpenChange={handleOpenChange}>
         <SheetContent
           side="bottom"
-          overlayClassName="bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
-          className="flex max-h-[90vh] w-full flex-col gap-0 rounded-none border-0 bg-white p-0 sm:max-w-full [&>button]:hidden"
+          overlayClassName="z-[90] bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
+          className="z-[90] flex max-h-[90vh] w-full flex-col gap-0 rounded-none border-0 bg-white p-0 sm:max-w-full [&>button]:hidden"
         >
-          <div className="shrink-0 px-4 pt-6">
-            <div className="flex items-center justify-between gap-4">
-              <SheetTitle className="font-larken text-2xl font-light leading-110 text-darkblack">
-                {dialog.title}
-              </SheetTitle>
-              <button
-                type="button"
-                onClick={() => handleOpenChange(false)}
-                className="text-darkblack"
-                aria-label="Close"
-                disabled={isSubmitting}
-              >
-                <X className="size-6" strokeWidth={1.5} aria-hidden />
-              </button>
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain DrawerVerticleScrollbar">
+            <div className="px-4 pt-6">
+              <div className="flex flex-col gap-6">
+                <div className="flex items-center justify-between gap-4">
+                  <SheetTitle className="font-larken text-2xl font-light leading-110 text-darkblack">
+                    {dialogTitle}
+                  </SheetTitle>
+                  <button
+                    type="button"
+                    onClick={() => handleOpenChange(false)}
+                    className="text-darkblack"
+                    aria-label="Close"
+                    disabled={isSubmitting}
+                  >
+                    <X className="size-6" strokeWidth={1.5} aria-hidden />
+                  </button>
+                </div>
+                <div className="h-px w-full bg-neutral300" aria-hidden />
+              </div>
             </div>
 
-            <div className="mt-6 h-px w-full bg-neutral300" aria-hidden />
-          </div>
-
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-6">
-            <div className="flex flex-col gap-6 pb-6">
-              <SheetDescription className="font-gill text-base font-light leading-110 text-darkblack">
-                {dialog.description}
-              </SheetDescription>
-              <DeleteAccountReasonForm {...formProps} mobile includeDescription={false} />
+            <div className="px-4 pt-6">
+              <SheetDescription className="sr-only">{dialog.descriptionMobile}</SheetDescription>
+              <DeleteAccountReasonForm {...formProps} mobile />
             </div>
           </div>
+
+          <div className="pointer-events-none h-[71px] shrink-0 bg-gradient-to-b from-transparent to-white" aria-hidden />
 
           <div className="shrink-0 border-t border-neutral300 px-4 pb-6 pt-6">
-            {errorMessage ? (
-              <p
-                className="mb-4 font-gill text-sm font-light leading-110 text-red-700"
-                role="alert"
-              >
-                {errorMessage}
-              </p>
-            ) : null}
+            <FormFieldError message={errorMessage ?? undefined} className="mb-4" />
             <DetailDarkButton
               type="button"
               className="w-full"
@@ -198,43 +191,45 @@ export function ProfileDeleteAccountReasonDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
+        elevated
         hideCloseButton
-        className="max-w-[520px] gap-6 border-neutral300 bg-white p-6 sm:rounded-none"
+        className="max-w-[520px] gap-0 border-neutral300 bg-white p-6 sm:rounded-none"
       >
-        <div className="flex flex-col gap-6">
-          <div className="flex items-center justify-between gap-4">
-            <DialogTitle className="font-larken text-32 font-light leading-110 text-darkblack">
-              {dialog.title}
-            </DialogTitle>
-            <button
+        <div className="flex flex-col gap-10">
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-6">
+              <div className="flex items-center justify-between gap-4">
+                <DialogTitle className="font-larken text-[32px] font-light leading-110 text-darkblack">
+                  {dialogTitle}
+                </DialogTitle>
+                <button
+                  type="button"
+                  onClick={() => handleOpenChange(false)}
+                  className="text-darkblack"
+                  aria-label="Close"
+                  disabled={isSubmitting}
+                >
+                  <X className="size-6" strokeWidth={1.5} aria-hidden />
+                </button>
+              </div>
+              <div className="h-px w-full bg-neutral300" aria-hidden />
+            </div>
+
+            <DeleteAccountReasonForm {...formProps} />
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <FormFieldError message={errorMessage ?? undefined} />
+            <DetailDarkButton
               type="button"
-              onClick={() => handleOpenChange(false)}
-              className="text-darkblack"
-              aria-label="Close"
+              className="w-full"
+              onClick={handleConfirm}
               disabled={isSubmitting}
             >
-              <X className="size-6" strokeWidth={1.5} aria-hidden />
-            </button>
+              {isSubmitting ? "Submitting..." : dialog.confirmLabel}
+            </DetailDarkButton>
           </div>
-          <div className="h-px w-full bg-neutral300" aria-hidden />
         </div>
-
-        <DeleteAccountReasonForm {...formProps} />
-
-        {errorMessage ? (
-          <p className="font-gill text-sm font-light leading-110 text-red-700" role="alert">
-            {errorMessage}
-          </p>
-        ) : null}
-
-        <DetailDarkButton
-          type="button"
-          className="w-full"
-          onClick={handleConfirm}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Submitting..." : dialog.confirmLabel}
-        </DetailDarkButton>
       </DialogContent>
     </Dialog>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment } from "react";
+import { Fragment, type ReactNode } from "react";
 import ChevronDownIcon from "@/assets/Icons/ChevronDownIcon";
 import type { OffersAndDealsVariant } from "@/shared/data/offersAndDealsSpec";
 import { cn } from "@/shared/utils/cn";
@@ -11,6 +11,50 @@ import OffersAndDealsExpandedContent, {
 export { OFFERS_EMPTY_MESSAGE };
 
 export type { OffersAndDealsVariant } from "@/shared/data/offersAndDealsSpec";
+
+const offersCollapseTransitionClassName =
+  "grid min-h-0 overflow-hidden transition-[grid-template-rows] duration-500 ease-in-out motion-reduce:transition-none";
+
+const collapsibleBackgroundByVariant: Record<OffersAndDealsVariant, string | null> = {
+  "sticky-gray200": "bg-gray200",
+  "sticky-gray300": "bg-gray300",
+  "panel-gray300": "bg-gray300",
+};
+
+const sectionShellBackgroundByVariant: Record<OffersAndDealsVariant, string> = {
+  "sticky-gray200": "bg-gray200",
+  "sticky-gray300": "bg-gray300",
+  "panel-gray300": "md:bg-gray300",
+};
+
+export type OffersAndDealsCollapsibleProps = {
+  open: boolean;
+  children: ReactNode;
+  variant?: OffersAndDealsVariant;
+  className?: string;
+  contentClassName?: string;
+};
+
+/** Smooth height collapse wrapper shared by cart, checkout, and panel layouts. */
+export const OffersAndDealsCollapsible = ({
+  open,
+  children,
+  variant = "panel-gray300",
+  className,
+  contentClassName,
+}: OffersAndDealsCollapsibleProps) => (
+  <div
+    aria-hidden={!open}
+    className={cn(
+      offersCollapseTransitionClassName,
+      collapsibleBackgroundByVariant[variant],
+      open ? "grid-rows-[1fr]" : "grid-rows-[0fr] pointer-events-none",
+      className,
+    )}
+  >
+    <div className={cn("min-h-0 overflow-hidden", contentClassName)}>{children}</div>
+  </div>
+);
 
 export type OffersAndDealsSectionProps = {
   open: boolean;
@@ -62,7 +106,7 @@ const OffersAndDealsSection = ({
 
   return (
     <Wrapper {...wrapperProps}>
-      <div className="md:bg-gray300">
+      <div className={cn("overflow-hidden", sectionShellBackgroundByVariant[variant])}>
         <button
           type="button"
           onClick={onToggle}
@@ -84,13 +128,15 @@ const OffersAndDealsSection = ({
           <ChevronDownIcon
             aria-hidden
             className={cn(
-              "size-6 shrink-0 text-darkblack transition-transform",
+              "size-6 shrink-0 text-darkblack transition-transform duration-500 ease-in-out motion-reduce:transition-none",
               open && "rotate-180",
             )}
           />
         </button>
-        {showExpandedContent && open ? (
-          <OffersAndDealsExpandedContent variant={variant} className="md:px-4 md:pb-4" />
+        {showExpandedContent ? (
+          <OffersAndDealsCollapsible open={open} variant={variant}>
+            <OffersAndDealsExpandedContent variant={variant} className="md:px-4 md:pb-4" />
+          </OffersAndDealsCollapsible>
         ) : null}
       </div>
     </Wrapper>

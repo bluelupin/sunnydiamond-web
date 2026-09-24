@@ -67,7 +67,7 @@ export type NormalizedGenericFormShowroom = {
   address: string;
   phone: string;
   directionsUrl: string;
-  heroImage: string;
+  heroImage?: string;
   city?: string;
   state?: string;
   pincode?: string;
@@ -134,4 +134,14 @@ export type ContactEnquiryPayload = {
   message: string;
   consentAccepted: boolean;
   sourcePage?: string;
+  /**
+   * Answers for CMS `dynamicFields` beyond the core contact keys
+   * (extra dropdowns, text fields, etc.). BFF proxies these through as-is.
+   */
+  dynamicFields?: Array<{
+    id: string;
+    label: string;
+    fieldType: string;
+    value: string;
+  }>;
 };

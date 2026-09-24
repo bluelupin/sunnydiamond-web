@@ -12,6 +12,7 @@ import type { CartLineItem } from "@/features/cart/types/cart.types";
 import { useMobileStickyFooterClearance } from "@/shared/hooks/use-mobile-sticky-footer-clearance";
 import { MobileStickyFooterSpacer } from "@/shared/ui/layout/MobileStickyFooterSpacer";
 import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
+import CheckoutPaymentFailedToast from "./CheckoutPaymentFailedToast";
 import CheckoutOrderSummary from "./CheckoutOrderSummary";
 import CheckoutMobileOrderSummaryDrawer from "./CheckoutMobileOrderSummaryDrawer";
 import CheckoutMobileStickyFooter from "./CheckoutMobileStickyFooter";
@@ -20,12 +21,14 @@ import { CheckoutFormStep, CheckoutPaymentStep } from "./CheckoutSteps";
 import CheckoutSuccessView from "./CheckoutSuccessView";
 import CheckoutPageSkeleton from "./skeletons/CheckoutPageSkeleton";
 import { registerGuestCustomerAfterOrder } from "../services/guestCustomerRegistration";
+import { persistGuestCheckoutAddresses } from "../services/persistGuestCheckoutAddresses";
 import {
   useCheckoutFormValidation,
   useCheckoutPaymentValidation,
 } from "@/features/checkout/hooks/use-checkout-validation";
 import { useCheckoutCustomerPrefill } from "@/features/checkout/hooks/use-checkout-customer-prefill";
-import { sanitizePhoneInput, sanitizePincodeInput, isCheckoutEmailContact, isCodAvailableForOrderTotal, validateRequiredEmail } from "@/shared/utils/formValidation";
+import { sanitizePhoneInput, sanitizePincodeInput, isCheckoutEmailContact, validateRequiredEmail } from "@/shared/utils/formValidation";
+import { isCodOfferedByBackend } from "@/services/magento/cart/checkoutPayment.mapper";
 import {
   createEmptyCheckoutForm,
   createEmptyPaymentForm,
@@ -35,6 +38,7 @@ import {
 } from "../types/checkout.types";
 import {
   applyCustomerAddressToCheckoutForm,
+  CHECKOUT_SHIPPING_ADDRESS_FIELDS,
   sanitizeCheckoutFormNames,
 } from "../utils/checkoutCustomer.utils";
 import {
@@ -70,11 +74,21 @@ const CheckoutPage = () => {
     refreshCart,
     isHydrating,
     isUpdating,
+    paymentMethods,
   } = useCart();
+  // Magento is the only authority on whether this cart can be paid in cash: it
+  // holds the order minimum and maximum and the engraved-item rule.
+  const codOffered = isCodOfferedByBackend(paymentMethods);
   const { refresh: refreshAuth } = useAuth();
   const { toast } = useToast();
   const { openLoginModal } = useLoginModal();
   const { otpLoginEnabled } = useAuthFeatures();
+  /**
+   * With SMS sign-in off there is no mobile identity to take, so the contact field is an
+   * email address and nothing else — offering "PhoneNo / Email ID" would accept a number
+   * we can neither verify nor mail an order to.
+   */
+  const contactEmailOnly = !otpLoginEnabled;
   const searchParams = useSearchParams();
   const paymentStatus = searchParams?.get("payment");
   const paymentOrderNumber = searchParams?.get("order");
@@ -85,6 +99,7 @@ const CheckoutPage = () => {
     isLoading: isAuthPrefillLoading,
     addressesLoading,
     customer,
+    addresses,
     defaultFormPatch,
     defaultShippingAddress,
     refreshAddresses,
@@ -126,19 +141,33 @@ const CheckoutPage = () => {
       return createEmptyCheckoutForm();
     }
     const pending = readPendingCheckoutPayment();
-    return pending?.orderNumber === paymentOrderNumber ? pending.form : createEmptyCheckoutForm();
+    if (pending?.orderNumber !== paymentOrderNumber) {
+      return createEmptyCheckoutForm();
+    }
+    const defaults = createEmptyCheckoutForm();
+    return {
+      ...defaults,
+      ...pending.form,
+      contactCountryCode: pending.form.contactCountryCode || defaults.contactCountryCode,
+      shippingCountryCode: pending.form.shippingCountryCode || defaults.shippingCountryCode,
+      billingCountryCode: pending.form.billingCountryCode || defaults.billingCountryCode,
+    };
   });
   const [payment, setPayment] = useState<CheckoutPaymentData>(createEmptyPaymentForm);
   const [offersOpen, setOffersOpen] = useState(false);
   const [orderSummaryOpen, setOrderSummaryOpen] = useState(false);
   const [checkoutStatusToastMessage, setCheckoutStatusToastMessage] = useState<string | null>(null);
+  const [paymentFailedToastOpen, setPaymentFailedToastOpen] = useState(false);
   const { footerRef, clearancePx } = useMobileStickyFooterClearance();
 
   // Backend strips cod-family payment methods from carts holding engraved items.
   const hasEngravedItems = items.some((item) => Boolean(item.options.engraving?.trim()));
 
-  const formValidation = useCheckoutFormValidation(form);
-  const paymentValidation = useCheckoutPaymentValidation(payment, totalPrice, hasEngravedItems);
+  const formValidation = useCheckoutFormValidation(form, {
+    emailOnly: contactEmailOnly,
+    requireDeliveryPhone: contactEmailOnly && !isAuthenticated,
+  });
+  const paymentValidation = useCheckoutPaymentValidation(payment, codOffered, hasEngravedItems);
 
   // Signed-in checkout requires a Magento saved address (fields are hidden otherwise).
   const hasDeliveryAddressAvailable = Boolean(defaultShippingAddress);
@@ -174,6 +203,14 @@ const CheckoutPage = () => {
     [dismissCheckoutStatusToast],
   );
 
+  const showPaymentFailedToast = useCallback(() => {
+    setPaymentFailedToastOpen(true);
+  }, []);
+
+  const dismissPaymentFailedToast = useCallback(() => {
+    setPaymentFailedToastOpen(false);
+  }, []);
+
   const showOrderPlacedToast = useCallback(
     (orderNumber: string) => {
       showCheckoutStatusToast(`Order #${orderNumber} has been placed successfully.`);
@@ -207,11 +244,7 @@ const CheckoutPage = () => {
   ) => {
     if (checkoutLockedRef.current) return;
 
-    if (
-      field === "method" &&
-      value === "cod" &&
-      (hasEngravedItems || !isCodAvailableForOrderTotal(totalPrice))
-    ) {
+    if (field === "method" && value === "cod" && !codOffered) {
       return;
     }
 
@@ -219,13 +252,13 @@ const CheckoutPage = () => {
   };
 
   useEffect(() => {
-    if (
-      payment.method === "cod" &&
-      (hasEngravedItems || !isCodAvailableForOrderTotal(totalPrice))
-    ) {
+    // Only act on a definite answer. An empty payment-method list means the cart
+    // has not loaded yet, and switching the customer away from COD on that would
+    // undo a choice they already made.
+    if (paymentMethods.length > 0 && payment.method === "cod" && !codOffered) {
       setPayment((prev) => ({ ...prev, method: "card" }));
     }
-  }, [hasEngravedItems, payment.method, totalPrice]);
+  }, [codOffered, payment.method, paymentMethods.length]);
 
   const finalizeOrderSuccess = useCallback(
     async (input: {
@@ -273,13 +306,20 @@ const CheckoutPage = () => {
         })),
       });
 
+      let accountReady = input.wasAuthenticated;
+
       if (!input.wasAuthenticated && input.guestOtp) {
         const registered = await registerGuestCustomerAfterOrder(input.orderForm, input.guestOtp);
 
         if (registered) {
           await refreshAuth();
           setOrderSuccessAuthenticated(true);
+          accountReady = true;
         }
+      }
+
+      if (accountReady) {
+        await persistGuestCheckoutAddresses(input.orderForm);
       }
     },
     [clearCart, refreshAuth, showOrderPlacedToast],
@@ -292,8 +332,21 @@ const CheckoutPage = () => {
 
     if (paymentStatus === "failed") {
       paymentReturnHandledRef.current = true;
+      const pending = readPendingCheckoutPayment();
+      const failedOrderNumber = paymentOrderNumber ?? pending?.orderNumber ?? null;
+
+      if (pending && (!paymentOrderNumber || pending.orderNumber === paymentOrderNumber)) {
+        setForm(pending.form);
+        setStep("payment");
+      }
+
       clearPendingCheckoutPayment();
-      showCheckoutStatusToast("Your payment could not be completed. Please try again.");
+
+      if (failedOrderNumber) {
+        void resetRazorpayCart(failedOrderNumber).then(() => refreshCart());
+      }
+
+      showPaymentFailedToast();
       window.history.replaceState({}, "", "/checkout");
       return;
     }
@@ -325,7 +378,7 @@ const CheckoutPage = () => {
       wasAuthenticated: pending.isAuthenticated,
       guestOtp: pending.guestOtp,
     });
-  }, [finalizeOrderSuccess, isPaymentReturn, paymentOrderNumber, paymentStatus, showCheckoutStatusToast, showOrderPlacedToast, items, totalPrice]);
+  }, [finalizeOrderSuccess, isPaymentReturn, paymentOrderNumber, paymentStatus, refreshCart, showPaymentFailedToast, showOrderPlacedToast, items, totalPrice]);
 
   useEffect(() => {
     const handlePageShow = () => {
@@ -388,6 +441,22 @@ const CheckoutPage = () => {
     setForm((current) => applyCustomerAddressToCheckoutForm(current, defaultShippingAddress));
     shippingPrefillAppliedRef.current = true;
   }, [addressesLoading, defaultShippingAddress, isAuthenticated]);
+
+  const handleSelectSavedShippingAddress = useCallback(
+    (addressUid: string) => {
+      if (checkoutLockedRef.current) {
+        return;
+      }
+
+      const selectedAddress = addresses.find((address) => address.uid === addressUid);
+      if (!selectedAddress) {
+        return;
+      }
+
+      setForm((current) => applyCustomerAddressToCheckoutForm(current, selectedAddress));
+    },
+    [addresses],
+  );
 
   if ((isHydrating || isAuthPrefillLoading) && step !== "success" && !isPaymentReturn) {
     return <CheckoutPageSkeleton />;
@@ -541,6 +610,7 @@ const CheckoutPage = () => {
             {
               isAuthenticated,
               customerEmail: customer?.email,
+              savedAddresses: addresses,
             },
           );
           applyMagentoCartState(state);
@@ -578,7 +648,7 @@ const CheckoutPage = () => {
 
       checkoutLockedRef.current = true;
       paymentInFlightRef.current = true;
-      setSubmitting(true);
+    setSubmitting(true);
 
       void (async () => {
         try {
@@ -653,15 +723,13 @@ const CheckoutPage = () => {
               },
             });
 
-            if (outcome.status === "dismissed") {
+            if (outcome.status === "dismissed" || outcome.status === "failed") {
               const paidPending = getPaidPendingCheckoutPayment();
               if (!paidPending?.paymentId || !paidPending.signature) {
                 clearPendingCheckoutPayment();
                 await resetRazorpayCart(order.orderNumber);
                 await refreshCart();
-                showCheckoutStatusToast(
-                  "Payment cancelled. Your bag has been kept as it was. You can try again anytime.",
-                );
+                showPaymentFailedToast();
                 return;
               }
 
@@ -714,7 +782,7 @@ const CheckoutPage = () => {
         } finally {
           checkoutLockedRef.current = false;
           paymentInFlightRef.current = false;
-          setSubmitting(false);
+      setSubmitting(false);
         }
       })();
     });
@@ -741,19 +809,70 @@ const CheckoutPage = () => {
     if (checkoutLockedRef.current) return;
 
     if (field === "pincode" || field === "billingPincode") {
-      updateForm(field, sanitizePincodeInput(String(value)));
+      setForm((current) => ({
+        ...current,
+        [field]: sanitizePincodeInput(String(value)),
+        ...(CHECKOUT_SHIPPING_ADDRESS_FIELDS.includes(field)
+          ? { selectedShippingAddressUid: null }
+          : {}),
+      }));
       return;
     }
 
     if (field === "shippingPhone" || field === "billingPhone") {
-      updateForm(field, sanitizePhoneInput(String(value), "+91"));
+      setForm((current) => {
+        const countryCode =
+          field === "shippingPhone" ? current.shippingCountryCode : current.billingCountryCode;
+        return {
+          ...current,
+          [field]: sanitizePhoneInput(String(value), countryCode),
+          ...(CHECKOUT_SHIPPING_ADDRESS_FIELDS.includes(field)
+            ? { selectedShippingAddressUid: null }
+            : {}),
+        };
+      });
+      return;
+    }
+
+    if (
+      field === "shippingCountryCode" ||
+      field === "billingCountryCode" ||
+      field === "contactCountryCode"
+    ) {
+      const phoneField =
+        field === "shippingCountryCode"
+          ? "shippingPhone"
+          : field === "billingCountryCode"
+            ? "billingPhone"
+            : "phoneOrEmail";
+      setForm((current) => {
+        const nextCode = String(value);
+        const phoneValue = current[phoneField];
+        const shouldResanitizePhone =
+          phoneField !== "phoneOrEmail" || !isCheckoutEmailContact(String(phoneValue));
+
+        return {
+          ...current,
+          [field]: nextCode,
+          ...(shouldResanitizePhone
+            ? { [phoneField]: sanitizePhoneInput(String(phoneValue), nextCode) }
+            : {}),
+          ...(field === "shippingCountryCode"
+            ? { selectedShippingAddressUid: null }
+            : {}),
+        };
+      });
+      if (field === "contactCountryCode" && phoneVerified) {
+        setPhoneVerified(false);
+        verifiedCheckoutOtpRef.current = null;
+      }
       return;
     }
 
     if (field === "phoneOrEmail") {
       const nextValue = String(value);
 
-      if (isCheckoutEmailContact(nextValue)) {
+      if (contactEmailOnly || isCheckoutEmailContact(nextValue)) {
         setPhoneVerified(false);
         verifiedCheckoutOtpRef.current = null;
         lastCheckedGuestEmailRef.current = "";
@@ -761,7 +880,7 @@ const CheckoutPage = () => {
         return;
       }
 
-      updateForm(field, sanitizePhoneInput(nextValue, "+91"));
+      updateForm(field, sanitizePhoneInput(nextValue, form.contactCountryCode || "+91"));
       if (phoneVerified) {
         setPhoneVerified(false);
         verifiedCheckoutOtpRef.current = null;
@@ -769,7 +888,18 @@ const CheckoutPage = () => {
       return;
     }
 
-    updateForm(field, value);
+    setForm((current) => {
+      const next: CheckoutFormData = {
+        ...current,
+        [field]: value as CheckoutFormData[typeof field],
+      };
+
+      if (CHECKOUT_SHIPPING_ADDRESS_FIELDS.includes(field)) {
+        next.selectedShippingAddressUid = null;
+      }
+
+      return next;
+    });
   };
 
   return (
@@ -781,6 +911,11 @@ const CheckoutPage = () => {
       )}
     >
       <div className="mx-auto w-full px-5 max-md:pt-4 pt-6 md:max-lg:px-8 md:max-lg:landscape:pt-0 lg:px-10 2xl:max-w-1920 2xl:px-[60px]">
+        <CheckoutPaymentFailedToast
+          open={paymentFailedToastOpen}
+          onDismiss={dismissPaymentFailedToast}
+          className="mb-6"
+        />
         <h1 className="mb-6 font-larken text-32 font-light leading-110 text-darkblack lg:mb-10 lg:text-32">
           Complete Checkout
         </h1>
@@ -798,18 +933,21 @@ const CheckoutPage = () => {
                 phoneVerified={phoneVerified}
                 onVerifyPhone={handleVerifyPhone}
                 showVerify={otpLoginEnabled}
+                emailOnly={contactEmailOnly}
                 onContactBlur={handleGuestContactBlur}
                 validation={formValidation}
                 isAuthenticated={isAuthenticated}
                 hasSavedDeliveryAddress={hasDeliveryAddressAvailable}
+                savedAddresses={addresses}
+                onSelectSavedShippingAddress={handleSelectSavedShippingAddress}
                 fieldsDisabled={isSavingAddresses}
               />
             ) : (
               <CheckoutPaymentStep
                 form={form}
                 payment={payment}
-                orderTotal={totalPrice}
                 hasEngravedItems={hasEngravedItems}
+                codOffered={codOffered}
                 onPaymentChange={updatePayment}
                 onEditPersonal={() => {
                   if (checkoutLockedRef.current || paymentInFlightRef.current) return;

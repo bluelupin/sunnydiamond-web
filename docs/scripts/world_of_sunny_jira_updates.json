@@ -1,0 +1,179 @@
+{
+  "assigneeId": "6000353f208dbf0107fe50e4",
+  "versionId": "12630",
+  "reopenTransitionId": "3",
+  "updates": [
+    {
+      "key": "SD-1",
+      "issueId": "WOS-ISSUE-001",
+      "reopen": true,
+      "priority": "Minor",
+      "labels": ["world-of-sunny", "WOS-ISSUE-001", "P2", "severity-P2", "component-AboutFacesSection"],
+      "summary": "About Us || Faces Behind the Brilliance || Image gets excessively zoomed on hover",
+      "component": "AboutFacesSection",
+      "severity": "P2",
+      "testCase": "WOS-053",
+      "steps": "1. Open https://sunnydiamonds-web-dev.on-forge.com/world-of-sunny on desktop (≥1280px).\n2. Scroll to the Faces Behind the Brilliance section.\n3. Hover over any team member card.\n4. Measure card width vs image container width.",
+      "expected": "Subtle grow effect on hover; image is not excessively cropped and matches Figma (SD-1).",
+      "actual": "Desktop hover: card is ~477px wide but image container expands to ~719px — over-zoom/crop observed in automated browser test."
+    },
+    {
+      "key": "SD-2",
+      "issueId": "WOS-ISSUE-002",
+      "reopen": true,
+      "priority": "Minor",
+      "labels": ["world-of-sunny", "WOS-ISSUE-002", "P2", "severity-P2", "component-AboutSince1997Section"],
+      "summary": "About Us || Since 1997 || First gallery description not mapped correctly",
+      "component": "AboutSince1997Section / about-page.mapper",
+      "severity": "P2",
+      "testCase": "WOS-041, WOS-041-CODE",
+      "steps": "1. Open /world-of-sunny.\n2. Scroll to the Since 1997 gallery.\n3. Inspect the first gallery block in CMS (image + description fields).\n4. Compare rendered caption/description on the first image.",
+      "expected": "Each gallery image shows its own CMS caption/description (SD-2).",
+      "actual": "Code only renders caption when both image and caption exist; description field is ignored when an image is present — risk of missing copy on first block."
+    },
+    {
+      "key": "SD-3",
+      "issueId": "WOS-ISSUE-003",
+      "reopen": true,
+      "priority": "Minor",
+      "labels": ["world-of-sunny", "WOS-ISSUE-003", "P2", "severity-P2", "component-AboutSince1997Section"],
+      "summary": "About Us || Since 1997 || 2nd and 3rd image descriptions not displayed from CMS",
+      "component": "AboutSince1997Section / about-page.mapper",
+      "severity": "P2",
+      "testCase": "WOS-041, WOS-041-CODE",
+      "steps": "1. Open /world-of-sunny.\n2. Scroll to the Since 1997 gallery.\n3. Review CMS descriptions for the 2nd and 3rd gallery blocks.\n4. Compare with text rendered below/on each image.",
+      "expected": "Second and third gallery images each show their own CMS description (SD-3).",
+      "actual": "Mapper prefers caption over description when image exists; CMS description copy may not surface for blocks 2 and 3."
+    },
+    {
+      "key": "SD-4",
+      "issueId": "WOS-ISSUE-004",
+      "reopen": true,
+      "priority": "Minor",
+      "labels": ["world-of-sunny", "WOS-ISSUE-004", "P0", "severity-P0", "component-AboutHandcraftedSection"],
+      "summary": "About Us || Handcrafted Brilliance || Text card titles mismatch / duplicate",
+      "component": "AboutHandcraftedSection",
+      "severity": "P0",
+      "testCase": "WOS-061",
+      "steps": "1. Open /world-of-sunny.\n2. Scroll to Handcrafted Brilliance mosaic.\n3. Inspect text-card tiles with CMS titles configured.\n4. Compare titles against Figma and CMS values.",
+      "expected": "Each text-card tile displays the correct unique title from CMS/Figma (SD-4).",
+      "actual": "Titles render, but CMS currently has duplicate titles (e.g. Pinnacle… ×2, Highest Level… ×2) — Partial pass in latest test run."
+    },
+    {
+      "key": "SD-5",
+      "issueId": "WOS-ISSUE-005",
+      "reopen": true,
+      "priority": "Critical",
+      "labels": ["world-of-sunny", "WOS-ISSUE-005", "P1", "severity-P1", "component-AboutTimelineSection"],
+      "summary": "About Us || Timeline defaults via years[0] instead of explicit 1997",
+      "component": "AboutTimelineSection / about-page.mapper",
+      "severity": "P1",
+      "testCase": "WOS-071, WOS-071-CODE",
+      "steps": "1. Open /world-of-sunny.\n2. Scroll to the Timeline section.\n3. Note the active year on load.\n4. Inspect about-page.mapper defaultYear logic.",
+      "expected": "Timeline opens on first milestone year 1997 regardless of CMS array order (SD-5).",
+      "actual": "Live page currently shows 1997 with present CMS order, but code sets defaultYear = years[0] — fragile; breaks if CMS reorders milestones."
+    },
+    {
+      "key": "SD-6",
+      "issueId": "WOS-ISSUE-006",
+      "reopen": true,
+      "priority": "Trivial",
+      "labels": ["world-of-sunny", "WOS-ISSUE-006", "P3", "severity-P3", "component-AboutHeroSection"],
+      "summary": "About Us || Hero section animation does not match Figma",
+      "component": "AboutHeroSection",
+      "severity": "P3",
+      "testCase": "WOS-025",
+      "steps": "1. Open /world-of-sunny on desktop.\n2. Load the hero and scroll slightly.\n3. Compare hero title collapse/scroll animation with Figma motion spec.",
+      "expected": "Hero load/scroll animation matches Figma motion design (SD-6).",
+      "actual": "Hero titleStyle animation is commented out — scroll title animation not applied."
+    },
+    {
+      "key": "SD-8",
+      "issueId": "WOS-ISSUE-008",
+      "reopen": true,
+      "priority": "Minor",
+      "labels": ["world-of-sunny", "WOS-ISSUE-008", "P2", "severity-P2", "component-AboutSince1997Section"],
+      "summary": "About Us || Responsive || Second hero banner size does not match Figma",
+      "component": "AboutSince1997Section",
+      "severity": "P2",
+      "testCase": "WOS-044",
+      "steps": "1. Open /world-of-sunny on mobile (≤390px).\n2. Scroll to the Since 1997 section.\n3. Inspect the second hero banner dimensions.\n4. Compare with approved Figma mobile spec.",
+      "expected": "Second hero banner dimensions match Figma on mobile (SD-8).",
+      "actual": "Banner size on mobile does not match Figma — needs visual QA confirmation on QA environment."
+    },
+    {
+      "key": "SD-133",
+      "issueId": "WOS-ISSUE-009",
+      "reopen": true,
+      "priority": "Minor",
+      "labels": ["world-of-sunny", "WOS-ISSUE-009", "P2", "severity-P2", "component-AboutHandcraftedSection"],
+      "summary": "World of Sunny || Mobile icon and text misaligned in Handcrafted section",
+      "component": "AboutHandcraftedSection",
+      "severity": "P2",
+      "testCase": "WOS-066",
+      "steps": "1. Open /world-of-sunny on mobile (≤390px).\n2. Scroll to Handcrafted Brilliance text/utility tiles.\n3. Inspect icon and text alignment on each tile.",
+      "expected": "Icon and text aligned per Figma on mobile (SD-133).",
+      "actual": "Text tiles use font-gill on mobile vs font-larken on md+ — icon/text alignment risk observed."
+    },
+    {
+      "key": "SD-141",
+      "issueId": "WOS-ISSUE-010",
+      "reopen": true,
+      "priority": "Trivial",
+      "labels": ["world-of-sunny", "WOS-ISSUE-010", "P3", "severity-P3", "component-AboutHandcraftedSection"],
+      "summary": "About Us || Handcrafted Brilliance || Divider does not match Figma",
+      "component": "AboutHandcraftedSection",
+      "severity": "P3",
+      "testCase": "WOS-063",
+      "steps": "1. Open /world-of-sunny on desktop and mobile.\n2. Scroll to Handcrafted Brilliance.\n3. Compare the divider below the section heading/text with Figma.",
+      "expected": "Divider styling matches Figma across breakpoints (SD-141).",
+      "actual": "Handcrafted divider differs: desktop uses border-b while mobile uses h-px span."
+    }
+  ],
+  "create": [
+    {
+      "issueId": "WOS-ISSUE-011",
+      "priority": "Minor",
+      "labels": ["world-of-sunny", "WOS-ISSUE-011", "P2", "severity-P2", "component-AboutPageRoute"],
+      "summary": "[World of Sunny] Invalid slug /world-of-sunny-invalid returns 200 instead of 404",
+      "component": "About page route",
+      "severity": "P2",
+      "testCase": "WOS-016",
+      "steps": "1. Navigate to /world-of-sunny-invalid.\n2. Observe HTTP status and page content.",
+      "expected": "Site returns 404 page for invalid World of Sunny slug.",
+      "actual": "GET /world-of-sunny-invalid returned HTTP 200 with page layout instead of 404."
+    },
+    {
+      "issueId": "WOS-ISSUE-012",
+      "priority": "Trivial",
+      "labels": ["world-of-sunny", "WOS-ISSUE-012", "P3", "severity-P3", "component-CMS-about-page"],
+      "summary": "[World of Sunny] Timeline milestone copy has duplicate phrase in CMS",
+      "component": "CMS about-page / Timeline",
+      "severity": "P3",
+      "testCase": "WOS-NEW-001",
+      "steps": "1. Open /world-of-sunny.\n2. Scroll to Timeline section.\n3. Read milestone body copy for affected year.",
+      "expected": "Timeline milestone copy is grammatically correct with no duplicated phrases.",
+      "actual": "Timeline milestone copy contains duplicate phrase: 'for those for those'."
+    },
+    {
+      "issueId": "WOS-ISSUE-013",
+      "priority": "Trivial",
+      "labels": ["world-of-sunny", "WOS-ISSUE-013", "P3", "severity-P3", "component-CMS-about-page"],
+      "summary": "[World of Sunny] Since 1997 story copy grammar error in CMS",
+      "component": "CMS about-page / Since 1997",
+      "severity": "P3",
+      "testCase": "WOS-NEW-002",
+      "steps": "1. Open /world-of-sunny.\n2. Scroll to Since 1997 story copy.\n3. Review paragraph grammar.",
+      "expected": "Since 1997 story copy is grammatically correct and matches approved content.",
+      "actual": "Story copy grammar issue: 'primarily because we the fine craftsmanship'."
+    }
+  ],
+  "assignOnly": [
+    {
+      "key": "SD-7",
+      "issueId": "WOS-ISSUE-007",
+      "labels": ["world-of-sunny", "WOS-ISSUE-007", "P1", "severity-P1", "component-AboutFacesSection"],
+      "comment": "Latest automated test WOS-052 passed — mobile face cards show name + role without hover. Assigned to Aman for confirmation on QA devices."
+    }
+  ]
+}

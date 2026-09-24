@@ -9,6 +9,7 @@ import { getWishlistProductHref } from "@/features/wishlist/utils/wishlistProduc
 import { prefetchWishlistProductDetail } from "@/features/wishlist/utils/wishlistProductDetailPrefetch";
 import { wishlistPageContent } from "@/features/wishlist/data/content";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 
 type WishlistListItemLayout = "default" | "profile";
 
@@ -19,6 +20,7 @@ type WishlistListItemProps = {
   onAddToBag: () => void;
 };
 
+/** Mobile list row — Figma 2574:57451 (chalk card, image, ADD TO BAG + REMOVE). */
 const WishlistListItem = ({
   product,
   layout = "default",
@@ -29,43 +31,53 @@ const WishlistListItem = ({
   const isProfileLayout = layout === "profile";
 
   return (
-    <article className={cn("flex w-full flex-col gap-4 px-4 py-6", isProfileLayout && "md:bg-transparent bg-gray200")}>
+    <article
+      className={cn(
+        "flex w-full flex-col items-center gap-4 bg-gray200 px-4 py-10",
+        isProfileLayout && "bg-gray200",
+      )}
+    >
       <Link
         href={href}
-        className="sm:w-[300px] sm:h-[300px] mx-auto w-[160px] h-[160px] flex items-center justify-center"
+        className="flex w-full items-center justify-center"
       >
-        <OptimizedImage
-          src={product.primaryImage}
-          alt={product.name}
-          width={120}
-          height={120}
-          className="w-full h-full object-cover"
-        />
+        <div className="relative h-auto max-w-[153px] w-full shrink-0">
+          <OptimizedImage
+            src={product.primaryImage}
+            alt={product.name}
+            width={94}
+            height={70}
+            className="h-full w-full object-contain"
+          />
+        </div>
       </Link>
 
-      <div className="flex flex-col justify-center gap-6 max-w-[345px] mx-auto">
-        <div className="flex flex-col gap-2 items-center justify-center">
+      <div className="flex flex-col items-center gap-6">
+        <div className="flex flex-col items-center gap-2 text-center">
           <Link
             href={href}
-            className="line-clamp-2 max-w-[153px] font-gill text-base font-light leading-110 text-darkblack text-center"
+            className={cn(
+              "md:line-clamp-2 line-clamp-1 max-w-full font-gill text-base font-light md:leading-110 leading-[115%] text-darkblack",
+              productNameDisplayClassName,
+            )}
           >
             {product.name}
           </Link>
-          <p className="font-gill text-sm font-normal leading-110 text-darkblack text-center">
+          <p className="font-gill text-base font-normal leading-110 text-darkblack">
             <span aria-hidden>₹ </span>
             {formatJewelleryPrice(product.price)}
           </p>
         </div>
-        <div className="flex items-center gap-8">
+        <div className="flex w-full items-start justify-center gap-6">
           <span
             onPointerEnter={() => prefetchWishlistProductDetail(product.urlKey)}
             onFocus={() => prefetchWishlistProductDetail(product.urlKey)}
           >
-            <DetailTextLink onClick={onAddToBag}>
+            <DetailTextLink onClick={onAddToBag} className="text-sm uppercase">
               {wishlistPageContent.addToBagLabel}
             </DetailTextLink>
           </span>
-          <DetailTextLink onClick={onRemove}>
+          <DetailTextLink onClick={onRemove} className="text-sm uppercase">
             {wishlistPageContent.removeLabel}
           </DetailTextLink>
         </div>

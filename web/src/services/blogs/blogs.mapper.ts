@@ -128,8 +128,8 @@ export function inferBlogCategory(post: StrapiBlogPost): string {
 }
 
 /**
- * Prefer same category, then shared tags, then recent posts.
- * `blog_category` relation is used when set; otherwise inferred category.
+ * Spec: closest tag overlap first, then latest date within that tier.
+ * Category is a mild secondary signal only.
  */
 export function selectRelatedBlogPosts(
   current: StrapiBlogPost,
@@ -151,15 +151,14 @@ export function selectRelatedBlogPosts(
     const slug = cleanText(post.slug);
     if (!slug || slug === currentSlug) return;
 
-    let score = 0;
-    if (inferBlogCategory(post) === currentCategory) {
-      score += 100;
-    }
-
     const sharedTags = tagLabels(post.tags).filter((label) =>
       currentTags.has(label.toLowerCase()),
     ).length;
-    score += sharedTags * 10;
+
+    let score = sharedTags * 100;
+    if (inferBlogCategory(post) === currentCategory) {
+      score += 10;
+    }
 
     // Mild recency preference (list is already date-desc).
     score += Math.max(0, 5 - Math.min(index, 5));
@@ -175,6 +174,19 @@ export function selectRelatedBlogPosts(
   return ranked
     .slice(0, limit)
     .map(({ post }) => mapStrapiBlogPostToCard(post))
+    .filter((post): post is BlogPost => Boolean(post));
+}
+
+/** CMS `GET /blog-posts/:slug/related` — first 3 from the API response order. */
+export function mapRelatedBlogPostsFromApi(
+  posts: StrapiBlogPost[],
+  limit = 3,
+): BlogPost[] {
+  if (limit <= 0) return [];
+
+  return posts
+    .slice(0, limit)
+    .map((post) => mapStrapiBlogPostToCard(post))
     .filter((post): post is BlogPost => Boolean(post));
 }
 
@@ -202,40 +214,64 @@ export function extractMarkdownImageUrls(markdown: string | null | undefined): s
 function resolveCoverImage(
   post: StrapiBlogPost,
 ): { src: string | null; alt: string } {
-  const cover = post.coverImage;
-  const src =
-    resolveCmsMediaUrl(cover?.desktopImage) ??
-    resolveCmsMediaUrl(cover?.mobileImage) ??
-    null;
+  const responsive = resolveCoverImageResponsive(post);
+  const src = responsive.desktopUrl ?? responsive.mobileUrl;
 
   return {
     src,
-    alt:
-      resolveCmsAltText(cover?.desktopImage) ??
-      resolveCmsAltText(cover?.mobileImage) ??
-      cleanText(cover?.altText) ??
-      cleanText(post.title) ??
-      "Blog post",
+    alt: responsive.alt,
   };
 }
 
-function resolveHeroImage(
+function resolveCoverImageResponsive(post: StrapiBlogPost): {
+  desktopUrl: string | null;
+  mobileUrl: string | null;
+  alt: string;
+} {
+  const cover = post.coverImage;
+  const desktopUrl = resolveCmsMediaUrl(cover?.desktopImage) ?? null;
+  const mobileUrl = resolveCmsMediaUrl(cover?.mobileImage) ?? null;
+
+  return {
+    desktopUrl,
+    mobileUrl,
+    alt:
+      resolveCmsAltText(cover?.desktopImage) ??
+      resolveCmsAltText(cover?.mobileImage) ??
+      "",
+  };
+}
+
+function resolveCutoutImage(
   post: StrapiBlogPost,
 ): { src: string | null; alt: string } {
-  const hero = post.heroImage;
+  const cutout = post.cutoutImage;
   const src =
-    resolveCmsMediaUrl(hero?.desktopImage) ??
-    resolveCmsMediaUrl(hero?.mobileImage) ??
+    resolveCmsMediaUrl(cutout?.desktopImage) ??
+    resolveCmsMediaUrl(cutout?.mobileImage) ??
     null;
 
   return {
     src,
+    alt: resolveCmsAltText(cutout?.desktopImage) ?? "",
+  };
+}
+
+/** Detail banner — CMS `heroImage` only (desktop + mobile); no cover fallback. */
+function resolveHeroImage(
+  post: StrapiBlogPost,
+): { desktopUrl: string | null; mobileUrl: string | null; alt: string } {
+  const hero = post.heroImage;
+  const desktopUrl = resolveCmsMediaUrl(hero?.desktopImage) ?? null;
+  const mobileUrl = resolveCmsMediaUrl(hero?.mobileImage) ?? null;
+
+  return {
+    desktopUrl,
+    mobileUrl,
     alt:
       resolveCmsAltText(hero?.desktopImage) ??
       resolveCmsAltText(hero?.mobileImage) ??
-      cleanText(hero?.altText) ??
-      cleanText(post.title) ??
-      "Blog post",
+      "",
   };
 }
 
@@ -651,7 +687,8 @@ export function mapStrapiBlogPostToCard(
     readTime: formatReadTime(post),
     imageSrc: image.src,
     imageAlt: image.alt,
-    category: inferBlogCategory(post),
+    // Listing chips/counts use CMS `blog_category` only (no FE inference).
+    category: categoryValue(post.blog_category ?? undefined) ?? "",
     href: `/blogs/${slug}`,
   };
 }
@@ -682,7 +719,11 @@ export function mapStrapiBlogPostToDetail(
     author,
     date: formatBlogDate(post.publishedDate),
     readTime: formatReadTime(post),
-    heroImage: { src: hero.src, alt: hero.alt },
+    heroImage: {
+      desktopUrl: hero.desktopUrl,
+      mobileUrl: hero.mobileUrl,
+      alt: hero.alt,
+    },
     // Excerpt is landing/featured-only — never reuse it on the detail page.
     introParagraphs,
     tableOfContents,
@@ -696,28 +737,14 @@ export function mapStrapiSeo(seo: StrapiBlogSeo | null | undefined): BlogsPageSe
 
   const metaTitle = cleanText(seo.metaTitle);
   const metaDescription = cleanText(seo.metaDescription);
-  const canonicalUrl = cleanText(seo.canonicalUrl);
   const keywords = cleanText(seo.metaKeywords);
   const ogImageUrl = resolveCmsMediaUrl(seo.ogImage);
 
-  if (!metaTitle && !metaDescription && !canonicalUrl && !ogImageUrl) return null;
-
-  let canonicalPath: string | undefined;
-  if (canonicalUrl) {
-    try {
-      const url = new URL(canonicalUrl);
-      canonicalPath = url.pathname.replace(/\/$/, "") || "/blogs";
-    } catch {
-      canonicalPath = canonicalUrl.startsWith("/")
-        ? canonicalUrl.replace(/\/$/, "") || "/blogs"
-        : undefined;
-    }
-  }
+  if (!metaTitle && !metaDescription && !ogImageUrl) return null;
 
   return {
     ...(metaTitle ? { metaTitle } : {}),
     ...(metaDescription ? { metaDescription } : {}),
-    ...(canonicalPath ? { canonicalPath } : {}),
     ...(keywords ? { keywords } : {}),
     ...(ogImageUrl ? { ogImageUrl } : {}),
   };
@@ -727,68 +754,49 @@ function buildCategoriesFromPosts(
   posts: BlogPost[],
   cmsCategories: StrapiBlogCategory[] | null,
 ): BlogCategory[] {
-  const counts = new Map<string, number>();
-  for (const post of posts) {
-    counts.set(post.category, (counts.get(post.category) ?? 0) + 1);
+  const allChip: BlogCategory = {
+    id: "all",
+    label: formatCategoryLabel("All", posts.length),
+    count: posts.length,
+  };
+
+  // Chips from landing `blogCategory`; per-chip count from CMS `count`.
+  if (!cmsCategories || cmsCategories.length === 0) {
+    return [allChip];
   }
 
-  if (cmsCategories && cmsCategories.length > 0) {
-    const mapped = cmsCategories
-      .map((category) => {
-        const id = categoryValue(category);
-        const title = categoryTitle(category);
-        if (!id || !title) return null;
-        const count = counts.get(id) ?? 0;
-        return {
-          id,
-          label: formatCategoryLabel(title, count),
-          count,
-        } satisfies BlogCategory;
-      })
-      .filter((category): category is BlogCategory => Boolean(category));
+  const mapped = cmsCategories
+    .map((category) => {
+      const id = categoryValue(category);
+      const title = categoryTitle(category);
+      if (!id || !title) return null;
+      const count =
+        typeof category.count === "number" && Number.isFinite(category.count)
+          ? Math.max(0, Math.floor(category.count))
+          : 0;
+      return {
+        id,
+        label: formatCategoryLabel(title, count),
+        count,
+      } satisfies BlogCategory;
+    })
+    .filter((category): category is BlogCategory => Boolean(category));
 
-    return [
-      {
-        id: "all",
-        label: formatCategoryLabel("All", posts.length),
-        count: posts.length,
-      },
-      ...mapped,
-    ];
-  }
-
-  const knownOrder = [...blogsPageContent.categoryOrder];
-
-  const dynamicIds = Array.from(counts.keys()).filter(
-    (id) => !(knownOrder as readonly string[]).includes(id),
+  // Figma chip order for known ids; any new CMS categories append after.
+  const preferredIndex = new Map<string, number>(
+    blogsPageContent.categoryOrder.map((id, index) => [id, index]),
   );
+  const ordered = mapped
+    .map((category, index) => ({ category, index }))
+    .sort((a, b) => {
+      const aRank = preferredIndex.get(a.category.id) ?? Number.MAX_SAFE_INTEGER;
+      const bRank = preferredIndex.get(b.category.id) ?? Number.MAX_SAFE_INTEGER;
+      if (aRank !== bRank) return aRank - bRank;
+      return a.index - b.index;
+    })
+    .map(({ category }) => category);
 
-  const orderedIds = [...knownOrder, ...dynamicIds];
-
-  return [
-    {
-      id: "all",
-      label: formatCategoryLabel("All", posts.length),
-      count: posts.length,
-    },
-    ...orderedIds
-      .map((id) => {
-        const count = counts.get(id) ?? 0;
-        if (count === 0) return null;
-        const title =
-          blogsPageContent.categoryLabels[id] ??
-          id
-            .split("-")
-            .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-            .join(" ");
-        return {
-          id,
-          label: formatCategoryLabel(title, count),
-          count,
-        } satisfies BlogCategory;
-      })
-      .filter((category): category is BlogCategory => Boolean(category)),
-  ];
+  return [allChip, ...ordered];
 }
 
 function mapFeaturedFromPost(
@@ -807,6 +815,7 @@ function mapFeaturedFromPost(
     backgroundAlt: "",
     readNowLabel: blogsPageContent.featured.readNowLabel,
     href: post.href,
+    category: post.category,
     ...overrides,
   };
 }
@@ -814,7 +823,6 @@ function mapFeaturedFromPost(
 export function mapBlogsPageData(input: {
   posts: StrapiBlogPost[];
   landing: StrapiBlogLandingPage | null;
-  categories: StrapiBlogCategory[] | null;
 }): NormalizedBlogsPage {
   const cards = input.posts
     .map((post) => mapStrapiBlogPostToCard(post))
@@ -826,35 +834,45 @@ export function mapBlogsPageData(input: {
     postsBySlug[slug] = post;
   }
 
-  const landingCategories =
-    input.categories ??
-    (Array.isArray(input.landing?.blogCategory) ? input.landing.blogCategory : null);
+  // Chips + counts from landing `blogCategory` (`count` from CMS).
+  const landingCategories = Array.isArray(input.landing?.blogCategory)
+    ? input.landing.blogCategory
+    : null;
 
   const featuredSection = input.landing?.featuredBlogSection;
   const sectionActive = featuredSection?.isActive !== false;
 
   /**
-   * Featured article is CMS-only (`landing.featuredBlog` oneToOne).
+   * Featured article is CMS-only.
+   * Current schema: `featuredBlogSection.featuredBlog`.
+   * Legacy: root `featuredBlog` or `featuredBlogSection.post`.
    * No fallback to the latest listing post — if CMS links nothing, hide the block.
-   * Legacy `featuredBlogSection.post` is accepted if present on older payloads.
    */
   const featuredCmsPost =
     sectionActive
-      ? input.landing?.featuredBlog ?? featuredSection?.post ?? null
+      ? featuredSection?.featuredBlog ??
+        input.landing?.featuredBlog ??
+        featuredSection?.post ??
+        null
       : null;
 
+  const featuredSlug = cleanText(featuredCmsPost?.slug);
+  const featuredMediaPost =
+    (featuredSlug
+      ? input.posts.find((post) => cleanText(post.slug) === featuredSlug)
+      : null) ?? featuredCmsPost;
+
   const featuredCard = featuredCmsPost
-    ? mapStrapiBlogPostToCard(featuredCmsPost)
+    ? mapStrapiBlogPostToCard(featuredMediaPost ?? featuredCmsPost)
     : null;
 
   const featuredBackground =
     resolveCmsMediaUrl(featuredSection?.backgroundImage?.desktopImage) ??
     resolveCmsMediaUrl(featuredSection?.backgroundImage?.mobileImage);
   const featuredBackgroundAlt =
-    resolveCmsAltText(featuredSection?.backgroundImage?.desktopImage) ??
-    resolveCmsAltText(featuredSection?.backgroundImage?.mobileImage) ??
-    cleanText(featuredSection?.backgroundImage?.altText) ??
-    "";
+    resolveCmsAltText(featuredSection?.backgroundImage?.desktopImage) ?? "";
+
+  const cutout = featuredMediaPost ? resolveCutoutImage(featuredMediaPost) : { src: null, alt: "" };
 
   const featured = featuredCard
     ? mapFeaturedFromPost(
@@ -867,33 +885,36 @@ export function mapBlogsPageData(input: {
             blogsPageContent.featured.readNowLabel,
           backgroundSrc: featuredBackground ?? null,
           backgroundAlt: featuredBackgroundAlt,
+          // Spec: cutout only — no cover/hero fallback; hide image if CMS has none.
+          imageSrc: cutout.src,
+          imageAlt: cutout.alt || "",
         },
       )
     : null;
 
   const heroSection = input.landing?.heroSection;
-  const heroTitle =
-    cleanText(heroSection?.title) ?? blogsPageContent.hero.title;
-  const heroDesktop =
-    resolveCmsMediaUrl(heroSection?.backgroundImage?.desktopImage) ?? null;
-  const heroMobile =
-    resolveCmsMediaUrl(heroSection?.backgroundImage?.mobileImage) ??
-    heroDesktop;
-  const heroAlt =
-    resolveCmsAltText(heroSection?.backgroundImage?.desktopImage) ??
-    resolveCmsAltText(heroSection?.backgroundImage?.mobileImage) ??
-    cleanText(heroSection?.backgroundImage?.altText) ??
-    heroTitle;
+  const heroActive = heroSection?.isActive !== false;
+  const hero = heroActive
+    ? {
+        title: cleanText(heroSection?.title) ?? blogsPageContent.hero.title,
+        image: {
+          desktopUrl:
+            resolveCmsMediaUrl(heroSection?.backgroundImage?.desktopImage) ??
+            null,
+          mobileUrl:
+            resolveCmsMediaUrl(heroSection?.backgroundImage?.mobileImage) ??
+            resolveCmsMediaUrl(heroSection?.backgroundImage?.desktopImage) ??
+            null,
+          alt:
+            resolveCmsAltText(heroSection?.backgroundImage?.desktopImage) ??
+            resolveCmsAltText(heroSection?.backgroundImage?.mobileImage) ??
+            "",
+        },
+      }
+    : null;
 
   return {
-    hero: {
-      title: heroTitle,
-      image: {
-        desktopUrl: heroDesktop,
-        mobileUrl: heroMobile,
-        alt: heroAlt,
-      },
-    },
+    hero,
     filterLabel: blogsPageContent.filterLabel,
     loadMore: {
       buttonLabel: blogsPageContent.loadMore.buttonLabel,

@@ -1,13 +1,13 @@
 "use client";
 
 import { useParallax } from "@/shared/hooks/use-parallax";
-import diamondSourcingBg from "@/assets/section3-bg.webp";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
 import { useMemo } from "react";
-import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import { resolveResponsiveCmsImage } from "@/shared/utils/responsiveCmsImage";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import Reveal from "@/shared/Animation/Reveal";
+
 interface DiamondSourcingSectionProps {
   id?: string;
 }
@@ -19,37 +19,36 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
   const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
   const diamondSourcedDataSection = editorialData?.diamondSourcingSection ?? null;
   const sectionTitle = diamondSourcedDataSection?.sectionTitle?.trim();
-  const desktopImageUrl = useMemo(
-    () => resolveCmsMediaUrl(diamondSourcedDataSection?.image?.desktopImage ?? diamondSourcedDataSection?.image?.data?.attributes ?? diamondSourcedDataSection?.image),
-    [diamondSourcedDataSection]
+  const diamondImages = useMemo(
+    () => resolveResponsiveCmsImage(diamondSourcedDataSection?.image),
+    [diamondSourcedDataSection?.image],
   );
-
-  const mobileImageUrl = useMemo(
-    () => resolveCmsMediaUrl(diamondSourcedDataSection?.image?.mobileImage ?? diamondSourcedDataSection?.image?.data?.attributes ?? diamondSourcedDataSection?.image),
-    [diamondSourcedDataSection]
-  );
-
-  const imageAlt = useMemo(
-    () =>
-      resolveCmsAltText(diamondSourcedDataSection?.image?.desktopImage ?? diamondSourcedDataSection?.image?.data?.attributes ?? diamondSourcedDataSection?.image) ||
-      resolveCmsAltText(diamondSourcedDataSection?.image?.mobileImage ?? diamondSourcedDataSection?.image?.data?.attributes ?? diamondSourcedDataSection?.image) ||
-      diamondSourcedDataSection?.image?.altText ||
-      diamondSourcedDataSection?.sectionTitle ||
-      "",
-    [diamondSourcedDataSection]
-  );
+  const desktopImageUrl = diamondImages.desktopUrl;
+  const mobileImageUrl = diamondImages.mobileUrl;
+  const imageAlt = diamondImages.alt;
+  const imageDesktopAlt = diamondImages.desktopAlt;
+  const imageMobileAlt = diamondImages.mobileAlt;
+  const hasDiamondImage = Boolean(desktopImageUrl || mobileImageUrl);
 
   const gifUrl = useMemo(
-    () =>
-      resolveCmsMediaUrl(
-        diamondSourcedDataSection?.gifOrImage?.desktopImage ??
-          diamondSourcedDataSection?.gifOrImage?.mobileImage ??
-          diamondSourcedDataSection?.gifOrImage,
-      ),
-    [diamondSourcedDataSection],
+    () => resolveResponsiveCmsImage(diamondSourcedDataSection?.gifOrImage).desktopUrl,
+    [diamondSourcedDataSection?.gifOrImage],
   );
+  const backgroundImages = useMemo(
+    () => resolveResponsiveCmsImage(diamondSourcedDataSection?.backgroundImage),
+    [diamondSourcedDataSection?.backgroundImage],
+  );
+  const backgroundDesktopSrc =
+    backgroundImages.desktopUrl || backgroundImages.mobileUrl || "";
+  const backgroundMobileSrc =
+    backgroundImages.mobileUrl || backgroundImages.desktopUrl || "";
+  const hasBackgroundImage = Boolean(backgroundDesktopSrc || backgroundMobileSrc);
 
   if (!isSectionActive(diamondSourcedDataSection?.isActive)) {
+    return null;
+  }
+
+  if (!isEditorialLoading && (!diamondSourcedDataSection || !sectionTitle)) {
     return null;
   }
 
@@ -59,18 +58,25 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
         !isEditorialLoading ?
           <section
             id={id}
-            aria-label="Internally flawless diamonds"
-            className="relative h-auto overflow-hidden"
+            aria-label={sectionTitle || "Internally flawless diamonds"}
+            className="relative h-auto overflow-hidden bg-white"
           >
             <div className="absolute inset-0 -z-0 will-change-transform" ref={bgParallax}>
-              <ResponsiveImage
-                desktopSrc={diamondSourcingBg || ""}
-                alt={imageAlt}
-                width={1920}
-                height={1080}
-                quality={75}
-                className="w-full h-full object-cover opacity-90 scale-110"
-              />
+              {hasBackgroundImage ? (
+                <ResponsiveImage
+                  desktopSrc={backgroundDesktopSrc}
+                  mobileSrc={backgroundMobileSrc}
+                  alt={backgroundImages.alt || ""}
+                  desktopAlt={backgroundImages.desktopAlt}
+                  mobileAlt={backgroundImages.mobileAlt}
+                  width={1440}
+                  height={700}
+                  sizes="100vw"
+                  className="size-full object-cover object-center"
+                />
+              ) : (
+                <div className="w-full h-full bg-gray100" aria-hidden />
+              )}
               <div className="absolute inset-0 bg-background/40" aria-hidden />
               <div
                 aria-hidden
@@ -90,26 +96,30 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
                   width={64}
                   height={64}
                   quality={75}
-                  className="w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 opacity-80 mx-auto"
+                  className="w-10 h-10 mx-auto"
                 />
               </Reveal>
               ) : null}
-              <Reveal as="h2" direction="up" className="mt-6 lg:text-5xl md:text-4xl text-32 font-light text-darkblack font-larken max-w-2xl leading-tight tracking-[0%]">
+              <Reveal as="h2" direction="up" className="md:mt-6 mt-4 lg:text-5xl md:text-4xl text-32 font-light text-darkblack font-larken max-w-2xl leading-tight tracking-[0%]">
                 {sectionTitle}
               </Reveal>
-              <Reveal direction="up" className="md:mt-26 mt-76 md:w-290 md:h-290 w-[243px] h-[293px]">
-                <div ref={diamondParallax} className="size-full">
-                  <ResponsiveImage
-                    desktopSrc={desktopImageUrl || "/image-placeholder.png"}
-                    mobileSrc={mobileImageUrl}
-                    alt={imageAlt}
-                    width={1024}
-                    height={1024}
-                    quality={75}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </Reveal>
+              {hasDiamondImage ? (
+                <Reveal direction="up" className="md:mt-26 mt-76 md:w-290 md:h-290 w-[243px] h-[293px]">
+                  <div ref={diamondParallax} className="size-full">
+                    <ResponsiveImage
+                      desktopSrc={desktopImageUrl || mobileImageUrl || ""}
+                      mobileSrc={mobileImageUrl}
+                      alt={imageAlt}
+                      desktopAlt={imageDesktopAlt}
+                      mobileAlt={imageMobileAlt}
+                      width={1024}
+                      height={1024}
+                      quality={75}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </Reveal>
+              ) : null}
             </div>
           </section>
           :
@@ -142,4 +152,3 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
 };
 
 export default DiamondSourcingSection;
-

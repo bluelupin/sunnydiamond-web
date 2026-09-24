@@ -2,13 +2,13 @@
 export type StrapiAboutMediaFile = {
   url?: string | null;
   alternativeText?: string | null;
+  caption?: string | null;
   width?: number | null;
   height?: number | null;
 };
 
 /** Responsive image component from Strapi */
 export type StrapiAboutResponsiveImage = {
-  altText?: string | null;
   caption?: string | null;
   desktopImage?: StrapiAboutMediaFile | null;
   mobileImage?: StrapiAboutMediaFile | null;
@@ -22,23 +22,31 @@ export type StrapiAboutSeo = {
   structuredData?: unknown;
 };
 
+export type StrapiAboutHeroVideoBlock = {
+  id?: number;
+  heroVideo?: StrapiAboutMediaFile | null;
+};
+
 export type StrapiAboutHero = {
   eyebrow?: string | null;
   title?: string | null;
   subtitle?: string | null;
   isActive?: boolean | null;
   image?: StrapiAboutResponsiveImage | null;
+  heroVideo?: StrapiAboutHeroVideoBlock | null;
+  /** Shared hero component field name (homepage-aligned). */
+  videoBackground?: StrapiAboutHeroVideoBlock | null;
 };
 
 export type StrapiAboutFeatureSlide = {
   id?: number;
   heading?: string | null;
   body?: string | null;
-  description?: string | null;
   image?: StrapiAboutResponsiveImage | null;
 };
 
 export type StrapiAboutBrillianceSection = {
+  isActive?: boolean | null;
   pinnedImage?: StrapiAboutResponsiveImage | null;
   featureSlide?: StrapiAboutFeatureSlide[] | null;
   /** @deprecated legacy flat fields */
@@ -50,11 +58,13 @@ export type StrapiAboutBrillianceSection = {
 export type StrapiAboutLegacyImageBlock = {
   id?: number;
   description?: string | null;
+  caption?: string | null;
   image?: StrapiAboutResponsiveImage | null;
 };
 
 export type StrapiAboutLegacySection = {
   heading?: string | null;
+  isActive?: boolean | null;
   legacyImageBlock?: StrapiAboutLegacyImageBlock[] | null;
 };
 
@@ -70,6 +80,7 @@ export type StrapiAboutTeamSection = {
   heading?: string | null;
   subheading?: string | null;
   displayStyle?: string | null;
+  isActive?: boolean | null;
   teamMember?: StrapiAboutTeamMember[] | null;
 };
 
@@ -77,6 +88,7 @@ export type StrapiAboutCraftSection = {
   heading?: string | null;
   subheading?: string | null;
   overlayOpacity?: number | null;
+  isActive?: boolean | null;
   backgroundImage?: StrapiAboutResponsiveImage | null;
   videoUrl?: {
     heroVideo?: StrapiAboutMediaFile | null;
@@ -91,19 +103,19 @@ export type StrapiAboutCraftMosaicTile = {
 };
 
 export type StrapiAboutCraftMosaicSection = {
+  isActive?: boolean | null;
   tile?: StrapiAboutCraftMosaicTile[] | null;
 };
 
 export type StrapiAboutBrandTaglineSection = {
   tagline?: string | null;
+  isActive?: boolean | null;
   icon?: StrapiAboutResponsiveImage | null;
 };
 
 export type StrapiAboutTrustBadge = {
   id?: number;
   label?: string | null;
-  /** Some CMS badge components expose "Icon Alt Text" at the badge level */
-  iconAltText?: string | null;
   icon?: StrapiAboutResponsiveImage | null;
 };
 
@@ -114,19 +126,15 @@ export type StrapiAboutTrustBadgesSection = {
 export type StrapiAboutTimelineMilestone = {
   id?: number;
   year?: string | number | null;
-  title?: string | null;
   heading?: string | null;
   body?: string | null;
-  description?: string | null;
-  content?: string | null;
-  sortOrder?: number | null;
 };
 
 export type StrapiAboutTimelineSection = {
   heading?: string | null;
+  isActive?: boolean | null;
   backgroundImage?: StrapiAboutResponsiveImage | null;
   timelineMilestone?: StrapiAboutTimelineMilestone[] | null;
-  milestones?: StrapiAboutTimelineMilestone[] | null;
 };
 
 /** Entity returned by apiFetch after normalizeResponse */
@@ -162,19 +170,20 @@ export type NormalizedAboutSeo = {
 
 export type NormalizedAboutHero = {
   title: string;
-  image: NormalizedResponsiveImage;
+  image: NormalizedResponsiveImage | null;
+  videoUrl?: string;
 };
 
 export type NormalizedBrillianceSection = {
   heading: string;
   body: string;
-  image: NormalizedResponsiveImage;
+  image: NormalizedResponsiveImage | null;
 };
 
 export type NormalizedLegacyGalleryItem = {
   description?: string;
   caption?: string;
-  image: NormalizedResponsiveImage;
+  image?: NormalizedResponsiveImage | null;
 };
 
 export type NormalizedAboutLegacy = {
@@ -186,7 +195,7 @@ export type NormalizedAboutLegacy = {
 export type NormalizedTeamMember = {
   name: string;
   role: string;
-  image: NormalizedResponsiveImage;
+  image?: NormalizedResponsiveImage | null;
 };
 
 export type NormalizedAboutTeam = {
@@ -209,11 +218,9 @@ export type NormalizedCraftCard = {
 
 export type NormalizedAboutCraft = {
   title: string;
+  image: NormalizedResponsiveImage | null;
   videoUrl?: string;
-  posterUrl?: string;
-  posterAlt?: string;
   overlayOpacity: number;
-  centerImage?: NormalizedResponsiveImage;
   cards: NormalizedCraftCard[];
 };
 
@@ -234,7 +241,7 @@ export type NormalizedTimelineMilestone = {
 };
 
 export type NormalizedAboutTimeline = {
-  backgroundImage: NormalizedResponsiveImage;
+  backgroundImage?: NormalizedResponsiveImage | null;
   milestones: NormalizedTimelineMilestone[];
   years: string[];
   defaultYear: string;

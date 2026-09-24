@@ -1,0 +1,194 @@
+{
+  "generatedAt": "2026-09-16T09:45:08.519Z",
+  "baseUrl": "http://localhost:3000",
+  "summary": {
+    "total": 36,
+    "pass": 32,
+    "fail": 4,
+    "blocked": 0,
+    "partial": 0,
+    "notTested": 57
+  },
+  "results": {
+    "CONTACT-002": {
+      "status": "Pass",
+      "actual": "page.tsx sets revalidate = 300",
+      "testedAt": "2026-09-16T09:40:06.719Z"
+    },
+    "CONTACT-003": {
+      "status": "Pass",
+      "actual": "/contact listed in sitemap.ts",
+      "testedAt": "2026-09-16T09:40:06.721Z"
+    },
+    "CONTACT-005": {
+      "status": "Pass",
+      "actual": "getContactPage returns loadError on CMS failure",
+      "testedAt": "2026-09-16T09:40:06.721Z"
+    },
+    "CONTACT-007": {
+      "status": "Pass",
+      "actual": "ContactPageSkeleton has aria-busy=true",
+      "testedAt": "2026-09-16T09:40:06.721Z"
+    },
+    "CONTACT-013": {
+      "status": "Pass",
+      "actual": "Hero LCP preload wired in contact page",
+      "testedAt": "2026-09-16T09:40:06.721Z"
+    },
+    "CONTACT-032": {
+      "status": "Pass",
+      "actual": "ContactInfoSection uses mobileTitle on mobile",
+      "testedAt": "2026-09-16T09:40:06.721Z"
+    },
+    "CONTACT-046": {
+      "status": "Pass",
+      "actual": "Phone field uses phonePlaceholder",
+      "testedAt": "2026-09-16T09:40:06.721Z"
+    },
+    "CONTACT-048": {
+      "status": "Pass",
+      "actual": "Phone and email in md:grid-cols-2 layout",
+      "testedAt": "2026-09-16T09:40:06.721Z"
+    },
+    "CONTACT-049": {
+      "status": "Pass",
+      "actual": "Submit button uses w-full on mobile",
+      "testedAt": "2026-09-16T09:40:06.721Z"
+    },
+    "CONTACT-060": {
+      "status": "Pass",
+      "actual": "Empty submit shows inline errors on all required fields (browser)",
+      "testedAt": "2026-09-16T09:45:08.519Z"
+    },
+    "CONTACT-075": {
+      "status": "Pass",
+      "actual": "Message textarea maxlength=500",
+      "testedAt": "2026-09-16T09:40:06.721Z"
+    },
+    "CONTACT-078": {
+      "status": "Pass",
+      "actual": "Fields marked invalid (aria-invalid) after empty submit (browser)",
+      "testedAt": "2026-09-16T09:45:08.519Z"
+    },
+    "CONTACT-081": {
+      "status": "Pass",
+      "actual": "Payload sends actual consentAccepted value",
+      "testedAt": "2026-09-16T09:40:06.721Z"
+    },
+    "CONTACT-082": {
+      "status": "Fail",
+      "actual": "Expected: submit loading state",
+      "testedAt": "2026-09-16T09:40:06.721Z"
+    },
+    "CONTACT-084": {
+      "status": "Fail",
+      "actual": "Expected: success toast title",
+      "testedAt": "2026-09-16T09:40:06.721Z"
+    },
+    "CONTACT-085": {
+      "status": "Pass",
+      "actual": "resetForm clears fields without resetting countryCode",
+      "testedAt": "2026-09-16T09:40:06.721Z"
+    },
+    "CONTACT-094": {
+      "status": "Fail",
+      "actual": "Expected: consent only with label",
+      "testedAt": "2026-09-16T09:40:06.721Z"
+    },
+    "CONTACT-113": {
+      "status": "Pass",
+      "actual": "Contact page reuses ProductDetailVisitUsSection",
+      "testedAt": "2026-09-16T09:40:06.721Z"
+    },
+    "CONTACT-132": {
+      "status": "Pass",
+      "actual": "Mobile header user icon links to /profile",
+      "testedAt": "2026-09-16T09:40:06.721Z"
+    },
+    "CONTACT-140": {
+      "status": "Pass",
+      "actual": "Mapper normalizes garbled email CTA text",
+      "testedAt": "2026-09-16T09:40:06.721Z"
+    },
+    "CONTACT-141": {
+      "status": "Pass",
+      "actual": "Personal Concierge copy shows 'assistance' not 'assisstance' (browser)",
+      "testedAt": "2026-09-16T09:45:08.519Z"
+    },
+    "CONTACT-150": {
+      "status": "Pass",
+      "actual": "Submit uses BFF /api/generic-submissions/submit",
+      "testedAt": "2026-09-16T09:40:06.721Z"
+    },
+    "CONTACT-151": {
+      "status": "Pass",
+      "actual": "Client fetches generic forms via BFF",
+      "testedAt": "2026-09-16T09:40:06.721Z"
+    },
+    "CONTACT-152": {
+      "status": "Pass",
+      "actual": "BFF route /api/generic-forms exists",
+      "testedAt": "2026-09-16T09:40:06.721Z"
+    },
+    "CONTACT-161": {
+      "status": "Pass",
+      "actual": "Reason required only when dropdown options exist",
+      "testedAt": "2026-09-16T09:40:06.721Z"
+    },
+    "CONTACT-160": {
+      "status": "Pass",
+      "actual": "verify-contact-module.mjs passed (mapper helper checks)",
+      "testedAt": "2026-09-16T09:40:06.792Z"
+    },
+    "CONTACT-162": {
+      "status": "Pass",
+      "actual": "content.ts not imported; CMS-only design confirmed",
+      "testedAt": "2026-09-16T09:40:07.122Z"
+    },
+    "CONTACT-001": {
+      "status": "Fail",
+      "actual": "Could not reach /contact: fetch failed",
+      "testedAt": "2026-09-16T09:45:08.517Z"
+    },
+    "CONTACT-045": {
+      "status": "Pass",
+      "actual": "Reason dropdown opens with CMS options (browser)",
+      "testedAt": "2026-09-16T09:45:08.518Z"
+    },
+    "CONTACT-061": {
+      "status": "Pass",
+      "actual": "Name is required error shown on empty submit (browser)",
+      "testedAt": "2026-09-16T09:45:08.519Z"
+    },
+    "CONTACT-065": {
+      "status": "Pass",
+      "actual": "Phone validation error on empty submit (browser)",
+      "testedAt": "2026-09-16T09:45:08.519Z"
+    },
+    "CONTACT-070": {
+      "status": "Pass",
+      "actual": "Email is required error on empty submit (browser)",
+      "testedAt": "2026-09-16T09:45:08.519Z"
+    },
+    "CONTACT-072": {
+      "status": "Pass",
+      "actual": "Please select a reason error on empty submit (browser)",
+      "testedAt": "2026-09-16T09:45:08.519Z"
+    },
+    "CONTACT-073": {
+      "status": "Pass",
+      "actual": "Message required error on empty submit (browser)",
+      "testedAt": "2026-09-16T09:45:08.519Z"
+    },
+    "CONTACT-076": {
+      "status": "Pass",
+      "actual": "Consent error shown when unchecked on submit (browser)",
+      "testedAt": "2026-09-16T09:45:08.519Z"
+    },
+    "CONTACT-120": {
+      "status": "Pass",
+      "actual": "Live page title: Contact Us | Sunny Diamonds (browser)",
+      "testedAt": "2026-09-16T09:45:08.519Z"
+    }
+  }
+}

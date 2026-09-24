@@ -1,15 +1,3 @@
-export const homeSections = [
-  { id: "alankara", label: "Collections" },
-  { id: "categories", label: "By Occasions" },
-  { id: "diamond-awaits", label: "Category" },
-  { id: "valentine", label: "Gifting" },
-  { id: "promise", label: "The Sunny Promise" },
-  { id: "bespoke-for-you", label: "For You" },
-  { id: "diamonds-for-everyone", label: "Diamonds for Everyone" },
-  { id: "craftsmanship", label: "Know Your Diamonds" },
-  { id: "showrooms", label: "Showrooms" },
-] as const;
-
 export const homeContent = {
   whyUs: {
     subtitle: "Why Sunny Diamonds",
@@ -36,26 +24,6 @@ export const homeContent = {
         description: "Every purchase is backed by our comprehensive lifetime warranty and complimentary maintenance.",
       },
     ],
-  },
-  alankara: {
-    collection: {
-      title: "Alankara Collection",
-      description:
-        "Guided by tradition and perfected by expertise, our craftsmen bring every diamond to life with",
-      cta: { label: "View Collection", to: "/jewellery" },
-    },
-    productIds: ["1", "3", "5", "6", "2"],
-    product: {
-      cta: { label: "Discover" },
-    },
-    gifting: {
-      title: "For Your Valentine",
-      description:
-        "Honoring a lifetime of connection through rare, masterfully crafted jewelry designed for the moments that matter.",
-      mobileDescription:
-        "Traditional mastery bringing every diamond to radiant, eternal life.",
-      cta: { label: "Shop Now", to: "/jewellery" },
-    },
   },
   craftsmanship: {
     subtitle: "Our Process",
@@ -157,6 +125,11 @@ export const seoContent = {
     title: "Our Story",
     description:
       "Discover Sunny Diamonds' legacy since 1997 — three generations of internally flawless diamonds, master craftsmanship, and timeless jewellery from Chalakkudy to the world.",
+  },
+  bespoke: {
+    title: "Bespoke Jewellery",
+    description:
+      "Commission a one-of-a-kind Sunny Diamonds piece tailored to your vision, occasion, and style.",
   },
   contact: {
     title: "Contact Us",

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
+import { copyCareerJobId } from "@/features/careers/utils/copyCareerJobId";
 
 type CareersSuccessJobIdCopyProps = {
   jobCode: string;
@@ -14,22 +15,23 @@ const CareersSuccessJobIdCopy = ({ jobCode, label, className }: CareersSuccessJo
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(jobCode);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
+    const didCopy = await copyCareerJobId(jobCode);
+    if (!didCopy) {
       setCopied(false);
+      return;
     }
+
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2000);
   };
 
   return (
     <div className={cn("flex items-center gap-2 justify-between", className)}>
       <p className="font-gill md:text-base text-sm font-light leading-110 text-darkblack">
-        <span>{label} </span>
+        <span>{label}</span>
       </p>
       <div className="flex items-center gap-2">
-        <p className="font-gill md:text-base text-sm font-light leading-110 text-darkblack">{jobCode}</p>
+        <p className="font-gill md:text-base text-sm font-normal leading-110 text-darkblack">{jobCode}</p>
         <button
           type="button"
           onClick={handleCopy}

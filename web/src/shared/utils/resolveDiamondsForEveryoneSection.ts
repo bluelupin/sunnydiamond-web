@@ -1,10 +1,6 @@
-import type {
-  BespokeForYouCard,
-  HomepageEditorialBlocksData,
-} from "@/types/homepage/editorialBlocks";
+import type { HomepageEditorialBlocksData } from "@/types/homepage/editorialBlocks";
 import type {
   DiamondsForEveryoneSectionCta,
-  DiamondsForEveryoneSectionData,
   SavingsPlanStep,
 } from "@/types/homepage/diamondsForEveryoneSection";
 import { resolveResponsiveCmsImage } from "@/shared/utils/responsiveCmsImage";
@@ -18,68 +14,32 @@ export type ResolvedDiamondsForEveryoneSection = {
   cta?: DiamondsForEveryoneSectionCta;
   backgroundDesktopUrl?: string;
   backgroundMobileUrl?: string;
+  backgroundDesktopAlt: string;
+  backgroundMobileAlt: string;
   backgroundAlt: string;
   fromCms: boolean;
 };
 
-const DIAMONDS_FOR_EVERYONE_TITLE = "diamonds for everyone";
-
-function findDiamondsForEveryoneCard(
-  cards: BespokeForYouCard[] | null | undefined,
-): BespokeForYouCard | null {
-  if (!cards?.length) return null;
-
-  const activeCards = cards.filter((card) => card?.isActive !== false);
-
-  const byTitle = activeCards.find((card) =>
-    card.title?.trim().toLowerCase().includes(DIAMONDS_FOR_EVERYONE_TITLE),
-  );
-  if (byTitle) return byTitle;
-
-  const bySortOrder = activeCards.find((card) => card.sortOrder === 2);
-  if (bySortOrder) return bySortOrder;
-
-  const sorted = [...activeCards].sort(
-    (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0),
-  );
-  return sorted[1] ?? null;
-}
-
-function mapCardCta(
-  card: BespokeForYouCard,
-): DiamondsForEveryoneSectionCta | undefined {
-  if (!card.cta) return undefined;
-
-  return {
-    label: card.cta.label,
-    url: card.cta.url,
-  };
-}
-
 export function resolveDiamondsForEveryoneSection(
   editorialData?: HomepageEditorialBlocksData | null,
 ): ResolvedDiamondsForEveryoneSection {
-  const dedicated: DiamondsForEveryoneSectionData | null =
-    editorialData?.diamondsForEveryoneSection ?? null;
-  const card = findDiamondsForEveryoneCard(editorialData?.bespokeForYouCards);
-  const fromCms = Boolean(dedicated || card);
+  const section = editorialData?.diamondsForEveryoneSection ?? null;
   const background = resolveResponsiveCmsImage(
-    (dedicated?.backgroundImage ?? null) as Parameters<typeof resolveResponsiveCmsImage>[0],
+    (section?.backgroundImage ?? null) as Parameters<typeof resolveResponsiveCmsImage>[0],
   );
 
   return {
-    isActive: dedicated?.isActive ?? card?.isActive,
-    eyebrow: dedicated?.eyebrow ?? card?.eyebrow ?? card?.subtitle,
-    sectionTitle: dedicated?.sectionTitle ?? card?.title,
-    subtitle:
-      dedicated?.subtitle ??
-      dedicated?.description ??
-      card?.description,
-    steps: dedicated?.steps,
-    cta: dedicated?.cta ?? mapCardCta(card ?? {}),
+    isActive: section?.isActive,
+    eyebrow: section?.eyebrow,
+    sectionTitle: section?.sectionTitle,
+    subtitle: section?.subtitle ?? section?.description,
+    steps: section?.steps,
+    cta: section?.cta,
     backgroundDesktopUrl: background.desktopUrl || undefined,
     backgroundMobileUrl: background.mobileUrl || undefined,
+    backgroundDesktopAlt: background.desktopAlt,
+    backgroundMobileAlt: background.mobileAlt,
     backgroundAlt: background.alt,
-    fromCms,
+    fromCms: Boolean(section),
   };
 }

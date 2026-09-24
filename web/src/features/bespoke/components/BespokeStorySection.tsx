@@ -20,8 +20,7 @@ type StoryStep = NormalizedBespokeStoryStep;
 type BespokeStoryStepPanelProps = {
   step: StoryStep;
   layout: "desktop" | "mobile";
-  videoSrc: string;
-  isLastSlide?: boolean;
+  videoSrc?: string;
   isFirstSlide?: boolean;
 };
 
@@ -31,15 +30,15 @@ const BespokeStoryStepMedia = ({
   isDesktop,
 }: {
   step: StoryStep;
-  videoSrc: string;
+  videoSrc?: string;
   isDesktop: boolean;
 }) => {
   const figureRef = useRef<HTMLElement>(null);
-  const [useImageFallback, setUseImageFallback] = useState(false);
-  const videoRef = useMutedVideoPlayback(!useImageFallback);
+  const [useImageFallback, setUseImageFallback] = useState(!videoSrc);
+  const videoRef = useMutedVideoPlayback(Boolean(videoSrc) && !useImageFallback);
 
   useEffect(() => {
-    if (useImageFallback) return;
+    if (!videoSrc || useImageFallback) return;
 
     const figure = figureRef.current;
     const video = videoRef.current;
@@ -64,7 +63,7 @@ const BespokeStoryStepMedia = ({
 
     observer.observe(figure);
     return () => observer.disconnect();
-  }, [useImageFallback]);
+  }, [useImageFallback, videoSrc]);
 
   return (
     <figure
@@ -73,7 +72,7 @@ const BespokeStoryStepMedia = ({
         "relative shrink-0 overflow-hidden bg-gray200 h-[400px] w-full lg:h-[496px] lg:w-[658px]",
       )}
     >
-      {useImageFallback ? (
+      {!videoSrc || useImageFallback ? (
         <Image
           src={step.image.src}
           alt={step.image.alt}
@@ -106,7 +105,6 @@ const BespokeStoryStepPanel = ({
   step,
   layout,
   videoSrc,
-  isLastSlide,
   isFirstSlide,
 }: BespokeStoryStepPanelProps) => {
   const isDesktop = layout === "desktop";
@@ -115,18 +113,17 @@ const BespokeStoryStepPanel = ({
     <article
       className={cn(
         "flex shrink-0",
-        isDesktop ? "items-center gap-6 w-[970px]" : "w-full flex-col bg-gray300",
-        isLastSlide && "mr-10",
+        isDesktop ? "items-center gap-4 w-[970px]" : "w-full flex-col bg-gray300",
       )}
       style={!isDesktop ? { gap: "0px" } : undefined}
       {...(isFirstSlide ? { "data-since1997-first-step": true } : {})}
-      {...(isLastSlide ? { "data-since1997-last-image": true } : {})}>
+    >
       <BespokeStoryStepMedia
         step={step}
         videoSrc={videoSrc}
         isDesktop={isDesktop}
       />
-      <div className={cn("flex flex-col md:gap-3 gap-2 lg:py-0 py-6 lg:px-0 px-4", isDesktop && "max-w-[296px] min-w-[296px]", isLastSlide && "mr-20",)}>
+      <div className={cn("flex flex-col md:gap-3 gap-2 lg:py-0 py-6 lg:px-0 px-4", isDesktop && "max-w-[296px] min-w-[296px]")}>
         <span className="font-larken lg:text-5xl md:text-4xl text-32 font-light leading-110 text-neutral300">{step.number}</span>
         <h3 className="font-larken lg:text-32 md:text-3xl text-2xl font-light leading-110 text-darkblack">{step.title}</h3>
         <p className={cn("font-gill font-light leading-110 text-darkblack lg:text-xl md:text-lg text-base")}>
@@ -146,7 +143,7 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
   const sectionRef = useRef<HTMLElement>(null);
   const hasHorizontalGallery = story.steps.length > 1;
   const [shareVisionOpen, setShareVisionOpen] = useState(false);
-  const ctaLabel = story.ctaLabel?.trim() || customDesignForm?.title?.trim() || "";
+  const ctaLabel = story.ctaLabel?.trim() ?? "";
 
   const handleShareVisionOpen = useCallback(() => {
     setShareVisionOpen(true);
@@ -186,7 +183,7 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
       </div>
       {/* Desktop / tablet — sticky viewport + scroll-driven horizontal slide */}
       <div data-since1997-mode="desktop" className="hidden lg:block">
-        <div className="sticky lg:top-10 top-24 flex min-h-[calc(100dvh-10rem)] flex-col bg-white pb-8">
+        <div className="sticky lg:top-2 top-24 flex min-h-[calc(100dvh-10rem)] flex-col bg-white pb-8">
           <div className="md:mb-12 mb-6 mx-auto max-w-[720px] hidden md:flex w-full flex-col gap-4">
             <Reveal
               as="h2"
@@ -207,22 +204,55 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
           <Reveal direction="up" className="flex min-h-[496px] flex-1 flex-col">
             <div
               data-since1997-viewport
-              className="relative left-1/2 min-h-[496px] w-screen max-w-none -translate-x-1/2 overflow-hidden"
+              className="relative left-1/2 min-h-[496px] w-screen max-w-none -translate-x-1/2 overflow-x-hidden overflow-y-visible"
             >
               <div
                 data-since1997-track
                 className="flex min-h-[496px] items-center gap-10 will-change-transform motion-reduce:transform-none"
               >
-                {story.steps.map((step, index) => (
-                  <BespokeStoryStepPanel
-                    key={step.number}
-                    step={step}
-                    layout="desktop"
-                    videoSrc={story.videoSrc}
-                    isFirstSlide={index === 0}
-                    isLastSlide={index === story.steps.length - 1}
-                  />
-                ))}
+                {story.steps.map((step, index) => {
+                  const isLastSlide = index === story.steps.length - 1;
+
+                  if (isLastSlide) {
+                    return (
+                      <div
+                        key={step.number}
+                        className="flex shrink-0 pr-20 mr-10"
+                        data-since1997-last-image
+                      >
+                        <BespokeStoryStepPanel
+                          step={step}
+                          layout="desktop"
+                          videoSrc={story.videoSrc}
+                          isFirstSlide={index === 0}
+                        />
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <BespokeStoryStepPanel
+                      key={step.number}
+                      step={step}
+                      layout="desktop"
+                      videoSrc={story.videoSrc}
+                      isFirstSlide={index === 0}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+            <div className="flex justify-center">
+              <div className="lg:mt-12 mt-4 flex justify-center md:w-[284px] mx-auto w-full">
+                {ctaLabel && customDesignForm ? (
+                  <DetailDarkButton
+                    type="button"
+                    onClick={handleShareVisionOpen}
+                    className="w-full uppercase"
+                  >
+                    {ctaLabel}
+                  </DetailDarkButton>
+                ) : null}
               </div>
             </div>
           </Reveal>
@@ -232,13 +262,13 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
         ) : null}
       </div>
       {/* Mobile — static vertical stack, no scroll animation (Figma 2083:18264) */}
-      <div className="lg:hidden flex flex-col lg:gap-12 gap-8">
+      <div className="lg:hidden flex flex-col lg:gap-12 md:gap-8 gap-4">
         {story.steps.map((step) => (
           <BespokeStoryStepPanel key={step.number} step={step} layout="mobile" videoSrc={story.videoSrc} />
         ))}
       </div>
-      <Reveal direction="up" className="flex justify-center">
-        <div className="lg:mt-12 mt-4 flex justify-center md:w-[284px] mx-auto w-full">
+      <Reveal direction="up" className="lg:hidden flex justify-center">
+        <div className="lg:mt-12 md:mt-8 mt-4 flex justify-center md:w-[284px] mx-auto w-full">
           {ctaLabel && customDesignForm ? (
             <DetailDarkButton
               type="button"

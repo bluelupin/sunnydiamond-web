@@ -60,7 +60,7 @@ export const aboutHeroFigmaSpec = {
 
 /** Local decorative / layout assets only — section content comes from CMS. */
 export const aboutHandcraftedAssets = {
-  flourish: "/images/about/handcrafted-flourish.svg",
+  flourish: "/icons/handcrafted-flourish.svg",
 } as const;
 
 /** Figma node 692:27430 — Crafting Rarity — Reveal V2 */
@@ -112,6 +112,10 @@ export const aboutCraftingRarityFigmaSpec = {
 
 /** Figma Component 228 — team card hover overlay; caption Figma 692:27464 */
 export const aboutFacesFigmaSpec = {
+  card: {
+    /** Expanded card width — image layer stays this wide so hover grow only reveals more, not zoom. */
+    expandedWidth: 719,
+  },
   overlay: {
     gradient: "bottom-strong" as const,
   },
@@ -161,6 +165,14 @@ export const aboutHandcraftedFigmaSpec = {
     titleFontSize: 48,
     titleColor: "#FFFFFF",
     lineColor: "#CCCCCC",
+    /** Figma node 2556:36067 — mobile title + divider (375px artboard) */
+    mobile: {
+      titleWidth: 186,
+      titleGap: 12,
+      lineWidth: 186,
+      titleFontSize: 32,
+      lineHeight: 1.1,
+    },
   },
   cardsGroup: {
     width: 1160,

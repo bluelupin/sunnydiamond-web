@@ -29,6 +29,7 @@ type CareersSelectFieldProps = {
   error?: string;
   placeholder?: string;
   labelClassName?: string;
+  triggerClassName?: string;
   className?: string;
 };
 
@@ -42,6 +43,7 @@ const CareersSelectField = ({
   error,
   placeholder = "Select",
   labelClassName = careersFormLabelClassName,
+  triggerClassName,
   className,
 }: CareersSelectFieldProps) => {
   const selectPlaceholder = placeholder.trim() || "Select";
@@ -65,7 +67,11 @@ const CareersSelectField = ({
       >
         <SelectTrigger
           id={id}
-          className={cn(careersSelectTriggerClassName, error && invalidFieldClassName)}
+          className={cn(
+            careersSelectTriggerClassName,
+            error && invalidFieldClassName,
+            triggerClassName,
+          )}
         >
           <SelectValue placeholder={selectPlaceholder} />
         </SelectTrigger>

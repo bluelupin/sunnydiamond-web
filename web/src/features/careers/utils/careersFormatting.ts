@@ -1,15 +1,61 @@
 import type { CareerJob } from "../types";
 
+/** Present CMS job titles in title case across careers UI. */
+export function formatCareerJobTitle(title: string): string {
+  return title
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
+
+/** e.g. `HR & ADMINISTRATION` → `HR & Administration`, `SALES` → `Sales` */
+export function formatCareerDepartmentLabel(department: string): string {
+  return department
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => {
+      if (word.length <= 1) {
+        return word;
+      }
+
+      // Keep two-letter acronyms (HR, IT); title-case longer tokens (SALES, ADMINISTRATION).
+      if (/^[A-Z]{2}$/.test(word)) {
+        return word;
+      }
+
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(" ");
+}
+
+const POSTED_MONTH_LABELS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+] as const;
+
+/** Deterministic date label — avoids SSR/client Intl mismatches. */
 export function formatPostedAbsolute(postedAt: string): string {
   const [year, month, day] = postedAt.split("-").map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day));
+  const monthLabel = POSTED_MONTH_LABELS[month - 1];
 
-  return new Intl.DateTimeFormat("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(date);
+  if (!monthLabel || !year || !day) {
+    return postedAt;
+  }
+
+  return `${day} ${monthLabel} ${year}`;
 }
 
 export function formatPostedRelative(postedAt: string): string {
@@ -70,7 +116,7 @@ export function filterCareerJobs(
       return true;
     }
 
-    const haystack = `${job.title} ${job.department} ${job.location} ${job.summary}`.toLowerCase();
+    const haystack = job.title.toLowerCase();
     return haystack.includes(normalized);
   });
 }

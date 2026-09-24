@@ -3,12 +3,16 @@ export type FieldValidation = {
   error?: string;
 };
 
+export function formatRequiredFieldLabel(label: string): string {
+  return label.endsWith("*") ? label : `${label}*`;
+}
+
 /** Figma 2556:10875 — form field error state */
 export const formFieldErrorTextColor = "#F91616";
 export const formFieldErrorBackgroundColor = "#FEDCDC";
 
 export const formFieldErrorClassName =
-  "font-gill text-sm font-light leading-110 text-[#F91616]";
+  "min-w-0 font-gill text-sm font-light leading-none text-[#F91616]";
 
 export const invalidFieldClassName =
   "border border-[#F91616] bg-[#FEDCDC]";
@@ -40,34 +44,35 @@ export const validateRequiredName = (value: string): FieldValidation => {
 
 export const validatePhone = (value: string, countryCode: string): FieldValidation => {
   const digits = value.replace(/\D/g, "");
+  const invalidPhoneError = "Please enter a valid phone number";
 
   if (!digits) {
-    return { valid: false, error: "Phone number is required" };
+    return { valid: false, error: invalidPhoneError };
   }
 
   if (countryCode === "+91") {
     if (!/^[6-9]\d{9}$/.test(digits)) {
-      return { valid: false, error: "Enter a valid 10-digit mobile number" };
+      return { valid: false, error: invalidPhoneError };
     }
     return { valid: true };
   }
 
   if (countryCode === "+1") {
     if (!/^\d{10}$/.test(digits)) {
-      return { valid: false, error: "Enter a valid 10-digit phone number" };
+      return { valid: false, error: invalidPhoneError };
     }
     return { valid: true };
   }
 
   if (countryCode === "+44") {
     if (digits.length < 10 || digits.length > 11) {
-      return { valid: false, error: "Enter a valid UK phone number" };
+      return { valid: false, error: invalidPhoneError };
     }
     return { valid: true };
   }
 
   if (digits.length < 7 || digits.length > 15) {
-    return { valid: false, error: "Enter a valid phone number" };
+    return { valid: false, error: invalidPhoneError };
   }
 
   return { valid: true };
@@ -80,8 +85,12 @@ export const validateOptionalEmail = (value: string): FieldValidation => {
     return { valid: true };
   }
 
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-    return { valid: false, error: "Enter a valid email address" };
+  if (
+    !/^[A-Za-z0-9]+(?:[._%+-][A-Za-z0-9]+)*@[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*(?:\.[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*)+$/.test(
+      trimmed,
+    )
+  ) {
+    return { valid: false, error: "Please enter a valid email" };
   }
 
   return { valid: true };
@@ -315,7 +324,14 @@ export const isAppointmentContactValid = (
 
 export const sanitizePhoneInput = (value: string, countryCode: string): string => {
   const digits = value.replace(/\D/g, "");
-  const maxLength = countryCode === "+91" || countryCode === "+1" ? 10 : 15;
+  const trimmedCode = countryCode.trim();
+  const normalizedCode = trimmedCode
+    ? trimmedCode.startsWith("+")
+      ? trimmedCode
+      : `+${trimmedCode}`
+    : "+91";
+  // Appointment / form mobiles: India & US = 10; UK = 11; default hard-cap 10.
+  const maxLength = normalizedCode === "+44" ? 11 : 10;
   return digits.slice(0, maxLength);
 };
 
@@ -352,8 +368,29 @@ const parseDateOnly = (value: string): Date | undefined => {
 export const shouldShowFieldError = (touched: boolean, submitted: boolean, error?: string) =>
   Boolean(error && (touched || submitted));
 
-export const validatePhoneOrEmail = (value: string): FieldValidation => {
+export type CheckoutContactOptions = {
+  /** Mirrors the sign-in field: with SMS off there is no phone identity to accept. */
+  emailOnly?: boolean;
+  /**
+   * Make the delivery phone mandatory. Set for guests whose contact field is an email:
+   * that leaves no other number on the order, and Magento would take the placeholder.
+   * Not set for signed-in customers — their number comes from the saved Magento address,
+   * which this form only mirrors, so rejecting it would block a field they cannot edit.
+   */
+  requireDeliveryPhone?: boolean;
+  /** Dial code used when the contact field holds a phone number. */
+  countryCode?: string;
+};
+
+export const validatePhoneOrEmail = (
+  value: string,
+  options?: CheckoutContactOptions,
+): FieldValidation => {
   const trimmed = value.trim();
+
+  if (options?.emailOnly) {
+    return validateRequiredEmail(trimmed);
+  }
 
   if (!trimmed) {
     return { valid: false, error: "Phone number or email is required" };
@@ -363,7 +400,7 @@ export const validatePhoneOrEmail = (value: string): FieldValidation => {
     return validateRequiredEmail(trimmed);
   }
 
-  return validatePhone(trimmed, "+91");
+  return validatePhone(trimmed, options?.countryCode ?? "+91");
 };
 
 /** True when the contact field is being used as an email address (not a phone). */
@@ -377,21 +414,19 @@ export const validateOptionalPhone = (value: string, countryCode = "+91"): Field
   return validatePhone(value, countryCode);
 };
 
-export const COD_ORDER_TOTAL_LIMIT = 40_000;
-
-export const isCodAvailableForOrderTotal = (
-  orderTotal: number,
-  limit = COD_ORDER_TOTAL_LIMIT,
-): boolean => orderTotal <= limit;
-
-export const validateCodOrderTotal = (
-  orderTotal: number,
-  limit = COD_ORDER_TOTAL_LIMIT,
-): FieldValidation => {
-  if (orderTotal > limit) {
+/**
+ * The storefront no longer carries its own COD ceiling. Magento holds both the
+ * order minimum and the maximum, and a second copy here could only drift from
+ * them — it did: the client capped COD at ₹40,000 while the backend also
+ * required ₹20,000, so an order below the floor was accepted by the UI and then
+ * silently placed as "Check / Money order". Availability now comes from the
+ * cart's own available_payment_methods (isCodOfferedByBackend).
+ */
+export const validateCodOffered = (codOffered: boolean): FieldValidation => {
+  if (!codOffered) {
     return {
       valid: false,
-      error: "Cash on delivery is available for orders up to ₹40,000",
+      error: "Cash on Delivery is not available for this order. Please use online payment.",
     };
   }
 
@@ -432,6 +467,7 @@ export type CheckoutPaymentField = "cod";
 export type CheckoutFormValues = {
   name: string;
   phoneOrEmail: string;
+  contactCountryCode?: string;
   shippingName: string;
   addressLine1: string;
   addressLine2: string;
@@ -439,6 +475,7 @@ export type CheckoutFormValues = {
   city: string;
   state: string;
   shippingPhone: string;
+  shippingCountryCode?: string;
   billingSameAsShipping: boolean;
   billingName: string;
   billingAddressLine1: string;
@@ -447,6 +484,7 @@ export type CheckoutFormValues = {
   billingCity: string;
   billingState: string;
   billingPhone: string;
+  billingCountryCode?: string;
 };
 
 export type CheckoutPaymentValues = {
@@ -457,6 +495,7 @@ const getAddressBlockErrors = (
   prefix: "shipping" | "billing",
   values: CheckoutFormValues,
   states: readonly string[],
+  options?: CheckoutContactOptions,
 ): Partial<Record<CheckoutFormField, string | undefined>> => {
   if (prefix === "shipping") {
     return {
@@ -466,7 +505,12 @@ const getAddressBlockErrors = (
       pincode: validateIndianPincode(values.pincode).error,
       city: validateCity(values.city).error,
       state: validateIndianState(values.state, states).error,
-      shippingPhone: validateOptionalPhone(values.shippingPhone).error,
+      // Magento demands a telephone on every address, so an empty one is sent as
+      // "0000000000". When the contact field is an email there is no other number
+      // on the order at all, and a courier has no way to reach the customer.
+      shippingPhone: options?.requireDeliveryPhone
+        ? validatePhone(values.shippingPhone, values.shippingCountryCode ?? "+91").error
+        : validateOptionalPhone(values.shippingPhone, values.shippingCountryCode ?? "+91").error,
     };
   }
 
@@ -477,17 +521,24 @@ const getAddressBlockErrors = (
     billingPincode: validateIndianPincode(values.billingPincode).error,
     billingCity: validateCity(values.billingCity).error,
     billingState: validateIndianState(values.billingState, states).error,
-    billingPhone: validateOptionalPhone(values.billingPhone).error,
+    billingPhone: validateOptionalPhone(
+      values.billingPhone,
+      values.billingCountryCode ?? "+91",
+    ).error,
   };
 };
 
 export const getCheckoutFormErrors = (
   values: CheckoutFormValues,
   states: readonly string[],
+  options?: CheckoutContactOptions,
 ): Partial<Record<CheckoutFormField, string | undefined>> => ({
   name: validateRequiredName(values.name).error,
-  phoneOrEmail: validatePhoneOrEmail(values.phoneOrEmail).error,
-  ...getAddressBlockErrors("shipping", values, states),
+  phoneOrEmail: validatePhoneOrEmail(values.phoneOrEmail, {
+    ...options,
+    countryCode: values.contactCountryCode ?? options?.countryCode ?? "+91",
+  }).error,
+  ...getAddressBlockErrors("shipping", values, states, options),
   ...(values.billingSameAsShipping
     ? {}
     : getAddressBlockErrors("billing", values, states)),
@@ -496,20 +547,22 @@ export const getCheckoutFormErrors = (
 export const isCheckoutFormValid = (
   values: CheckoutFormValues,
   states: readonly string[],
+  options?: CheckoutContactOptions,
 ): boolean =>
-  Object.values(getCheckoutFormErrors(values, states)).every((error) => !error);
+  Object.values(getCheckoutFormErrors(values, states, options)).every((error) => !error);
 
 export const getCheckoutPaymentErrors = (
   values: CheckoutPaymentValues,
-  orderTotal: number,
+  codOffered: boolean,
   hasEngravedItems = false,
 ): Partial<Record<CheckoutPaymentField, string | undefined>> => {
   if (values.method === "cod") {
     return {
-      // Engraved-cart restriction wins when both reasons apply.
+      // Engraved-cart restriction wins when both reasons apply: it names the
+      // actual cause, where the generic message only says "not available".
       cod:
         validateCodEngravedCart(hasEngravedItems).error ??
-        validateCodOrderTotal(orderTotal).error,
+        validateCodOffered(codOffered).error,
     };
   }
 
@@ -518,10 +571,10 @@ export const getCheckoutPaymentErrors = (
 
 export const isCheckoutPaymentValid = (
   values: CheckoutPaymentValues,
-  orderTotal: number,
+  codOffered: boolean,
   hasEngravedItems = false,
 ): boolean =>
-  Object.values(getCheckoutPaymentErrors(values, orderTotal, hasEngravedItems)).every(
+  Object.values(getCheckoutPaymentErrors(values, codOffered, hasEngravedItems)).every(
     (error) => !error,
   );
 

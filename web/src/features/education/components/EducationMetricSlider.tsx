@@ -89,7 +89,7 @@ const SliderLabel = ({
   const colorClass = isActive ? "text-linkGold" : "text-darkblack";
   const font = labelFontProps(useMobileLayout, mobileLabelFontSize);
   const labelAlignClass =
-    centeredLabelLayout && useMobileLayout
+    centeredLabelLayout
       ? "-translate-x-1/2 text-center"
       : endpointLabelAlignClass(index, total);
 
@@ -300,7 +300,7 @@ const EducationMetricSlider = ({
   return (
     <div
       ref={sliderRef}
-      className={cn("relative z-20 mx-auto w-full max-w-full cursor-pointer touch-none max-w-400 lg:max-w-400", className)}
+      className={cn("relative z-20 mx-auto w-full cursor-pointer touch-none max-w-[304px] md:max-w-400", className)}
       style={{ width: "100%", height: sliderHeight }}
       role="group"
       aria-label={spec.ariaLabel}
@@ -385,11 +385,11 @@ const EducationMetricSlider = ({
       {showEndpointLabels ? (
         <>
           {options[0] &&
-          !(
-            activeIndex > 0 &&
-            activeIndex < lastDotIndex &&
-            Math.abs((dotCenters[0] ?? 0) - activeDotCenter) < 56
-          ) ? (
+            !(
+              activeIndex > 0 &&
+              activeIndex < lastDotIndex &&
+              Math.abs((dotCenters[0] ?? 0) - activeDotCenter) < 56
+            ) ? (
             <span
               className={cn(
                 "pointer-events-none absolute whitespace-nowrap font-gill font-normal leading-110 transition-colors",
@@ -407,11 +407,11 @@ const EducationMetricSlider = ({
             </span>
           ) : null}
           {options[lastDotIndex] &&
-          !(
-            activeIndex > 0 &&
-            activeIndex < lastDotIndex &&
-            Math.abs((dotCenters[lastDotIndex] ?? 0) - activeDotCenter) < 56
-          ) ? (
+            !(
+              activeIndex > 0 &&
+              activeIndex < lastDotIndex &&
+              Math.abs((dotCenters[lastDotIndex] ?? 0) - activeDotCenter) < 56
+            ) ? (
             <span
               className={cn(
                 "pointer-events-none absolute whitespace-nowrap font-gill font-normal leading-110 transition-colors",
@@ -489,7 +489,6 @@ const EducationMetricSlider = ({
 
       {hasSublabels
         ? options.map((option, index) => {
-          const sublabelLeft = spec.sublabelLeft?.[index] ?? spec.sublabelLeft?.[0] ?? 0;
           const dotCenter = dotCenters[index] ?? dotCenters[0];
           const isActive = index === activeIndex;
 
@@ -499,17 +498,12 @@ const EducationMetricSlider = ({
             <span
               key={`${option.label}-sublabel`}
               className={cn(
-                "pointer-events-none absolute max-w-[80px] font-gill font-light leading-110",
-                useMobileLayout
-                  ? cn(
-                    "text-[12px]",
-                    endpointLabelAlignClass(index, options.length),
-                  )
-                  : "text-center text-sm",
+                "pointer-events-none absolute max-w-[80px] -translate-x-1/2 text-center font-gill font-light leading-110",
+                useMobileLayout ? "text-[12px]" : "text-sm",
                 isActive ? "text-linkGold" : "text-darkblack",
               )}
               style={{
-                left: toPercent(useMobileLayout ? dotCenter : sublabelLeft, spec.width),
+                left: toPercent(dotCenter, spec.width),
                 top: spec.sublabelTop,
               }}
             >

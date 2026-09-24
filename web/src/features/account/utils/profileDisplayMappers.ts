@@ -19,6 +19,12 @@ import type {
   ProfileTimelineStep,
 } from "../types/profileUi.types";
 import {
+  canModifyAppointmentBeforeDeadline,
+  formatTryAtHomeRescheduleDeadline,
+} from "@/features/products/utils/tryAtHomeBooking";
+import { canCancelAppointmentUntilOneMinuteBefore } from "@/features/products/utils/appointmentCancelDeadline";
+import { APPOINTMENT_COUNTRY_CODES } from "@/shared/constants/appointmentForm";
+import {
   formatAppointmentDate,
   formatOrderDate,
 } from "./formatAccountData";
@@ -33,8 +39,8 @@ import {
   formatOrderStatusLabel,
   normalizeOrderStatus,
 } from "./orderDeliveryTimeline.utils";
+import { resolveOrderItemImageUrl } from "./orderItemImage.utils";
 
-const PLACEHOLDER_RING_IMAGE = "/images/jewellery/plp/product-ring-transparent.png";
 const ordersContent = profileTabsContent.orders;
 
 /** Rendered only for orders placed before SunnyDiamonds_OrderFlow went live. */
@@ -186,6 +192,108 @@ export function resolveRefundTimeline(
   return { steps: order.sunnyStatus ? [] : legacySteps, fromServer: false };
 }
 
+function splitShowroomAddressLines(address: string): string[] {
+  const trimmed = address.trim();
+  if (!trimmed) {
+    return [];
+  }
+
+  const byNewline = trimmed
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (byNewline.length > 1) {
+    return byNewline;
+  }
+
+  return trimmed
+    .split(/,\s*/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function resolveStoreVisitDisplayName(showroom: {
+  name: string;
+  city: string;
+  address: string;
+}): string {
+  const city = showroom.city.trim();
+  const name = showroom.name.trim();
+  if (name && (!city || name.toLowerCase() !== city.toLowerCase())) {
+    return name;
+  }
+
+  const address = showroom.address.trim();
+  const sunnyMatch = address.match(/^(Sunny Diamonds[^,]*)/i);
+  if (sunnyMatch?.[1]) {
+    return sunnyMatch[1].trim();
+  }
+
+  return name || city;
+}
+
+function mapStoreVisitDetails(
+  appointment: CustomerAppointment,
+): ProfileAppointmentUi["storeVisit"] | undefined {
+  const showroom = appointment.preferredShowroom;
+  if (!showroom) {
+    return undefined;
+  }
+
+  const city = showroom.city.trim() || showroom.name.trim();
+  const storeName = resolveStoreVisitDisplayName(showroom);
+  let remainingAddress = showroom.address.trim();
+  if (
+    storeName &&
+    remainingAddress.toLowerCase().startsWith(storeName.toLowerCase())
+  ) {
+    remainingAddress = remainingAddress.slice(storeName.length).replace(/^[,\s]+/, "");
+  }
+
+  const lines = [
+    ...(storeName && storeName.toLowerCase() !== city.toLowerCase() ? [storeName] : []),
+    ...splitShowroomAddressLines(remainingAddress).filter(
+      (line) =>
+        line.toLowerCase() !== storeName.toLowerCase() &&
+        line.toLowerCase() !== city.toLowerCase(),
+    ),
+  ];
+
+  const pincode = showroom.pincode.trim();
+  const state = showroom.state.trim();
+  if (pincode) {
+    const stateLineIndex = lines.findIndex(
+      (line) => state && line.toLowerCase() === state.toLowerCase(),
+    );
+    if (stateLineIndex >= 0) {
+      if (!lines[stateLineIndex].includes(pincode)) {
+        lines[stateLineIndex] = `${lines[stateLineIndex]} ${pincode}`;
+      }
+    } else if (!lines.some((line) => line.includes(pincode))) {
+      lines.push([state, pincode].filter(Boolean).join(" "));
+    }
+  } else if (
+    state &&
+    !lines.some((line) => line.toLowerCase().includes(state.toLowerCase()))
+  ) {
+    lines.push(state);
+  }
+
+  if (!city && lines.length === 0) {
+    return undefined;
+  }
+
+  const directionsHref = showroom.mapUrl.trim() || undefined;
+
+  return {
+    city: city || storeName,
+    storeName,
+    lines,
+    ...(directionsHref ? { directionsHref } : {}),
+  };
+}
+
 function inferAppointmentType(formTag: string): AppointmentFilterKey {
   const normalized = formTag.toLowerCase();
 
@@ -201,13 +309,41 @@ function inferAppointmentType(formTag: string): AppointmentFilterKey {
 }
 
 function canModifyAppointment(workflowStatus: string): boolean {
-  const normalized = workflowStatus.toLowerCase();
+  const normalized = workflowStatus.trim().toLowerCase();
+  if (!normalized) {
+    return true;
+  }
+
   return (
     !normalized.includes("cancel") &&
     !normalized.includes("complete") &&
     !normalized.includes("done") &&
     !normalized.includes("closed")
   );
+}
+
+function resolveAppointmentWorkflowStatus(
+  appointment: CustomerAppointment,
+): string {
+  const topLevel = appointment.workflowStatus?.trim() ?? "";
+  if (topLevel) {
+    return topLevel;
+  }
+
+  const productStatuses = appointment.products
+    .map((product) => product.workflowStatus?.trim())
+    .filter(Boolean);
+
+  if (productStatuses.length === 0) {
+    return "";
+  }
+
+  // If every product is cancelled/closed, treat the card as non-modifiable.
+  if (productStatuses.every((status) => !canModifyAppointment(status))) {
+    return productStatuses[0] ?? "Cancelled";
+  }
+
+  return productStatuses[0] ?? "";
 }
 
 function mapAppointmentAddressToUi(
@@ -230,35 +366,80 @@ function mapAppointmentAddressToUi(
     city,
     state,
     pincode,
-    phone: appointment.customerPhone,
+    phone: formatAppointmentPhoneDisplay(appointment.customerPhone),
   };
 }
 
-function mapOrderItems(order: CustomerOrder): ProfileOrderItemUi[] {
+/** Figma Personal Details: "+91 9898989989" (country code + space + national number). */
+function formatAppointmentPhoneDisplay(rawPhone: string): string {
+  const trimmed = rawPhone.trim();
+  if (!trimmed) {
+    return "";
+  }
+
+  if (/^\+\d{1,3}\s+\d+$/.test(trimmed)) {
+    return trimmed;
+  }
+
+  const sortedCodes = [...APPOINTMENT_COUNTRY_CODES]
+    .map((entry) => entry.code)
+    .sort((a, b) => b.length - a.length);
+
+  for (const code of sortedCodes) {
+    if (trimmed.startsWith(code)) {
+      const national = trimmed.slice(code.length).replace(/\D/g, "");
+      return national ? `${code} ${national}` : code;
+    }
+  }
+
+  const spaced = /^(\+\d{1,3})\s*(.*)$/.exec(trimmed);
+  if (spaced) {
+    const national = spaced[2].replace(/\D/g, "");
+    return national ? `${spaced[1]} ${national}` : spaced[1];
+  }
+
+  const digits = trimmed.replace(/\D/g, "");
+  if (digits.length === 10) {
+    return `+91 ${digits}`;
+  }
+  if (digits.length === 12 && digits.startsWith("91")) {
+    return `+91 ${digits.slice(2)}`;
+  }
+
+  return trimmed;
+}
+
+function mapOrderItems(
+  order: CustomerOrder,
+  imageBySku?: Record<string, string>,
+): ProfileOrderItemUi[] {
   const giftMetadata = parseOrderGiftMetadataFromComments(order.commentMessages ?? []);
 
   return order.items.map((item, index) => {
     const display = mapCustomerOrderItemToDisplayFields(item, giftMetadata);
-    const imageUrl = item.imageUrl?.trim() || null;
+    const imageUrl = resolveOrderItemImageUrl(item.imageUrl, item.productSku, imageBySku);
 
     return {
       id: `${order.id}-${item.productSku ?? index}`,
       name: item.productName,
-      imageSrc: imageUrl ?? PLACEHOLDER_RING_IMAGE,
+      ...(imageUrl ? { imageSrc: imageUrl } : {}),
       size: display.size,
       metal: display.metal,
       engraving: display.engraving,
       engravingFont: display.engravingFont,
       isGift: display.isGift,
       isBespoke: display.isBespoke,
-      useIconPlaceholder: display.isBespoke && !imageUrl,
+      useIconPlaceholder: !imageUrl,
       quantity: item.quantity,
       productUrlKey: item.productUrlKey,
     };
   });
 }
 
-export function mapCustomerOrderToProfileUi(order: CustomerOrder): ProfileOrderUi {
+export function mapCustomerOrderToProfileUi(
+  order: CustomerOrder,
+  imageBySku?: Record<string, string>,
+): ProfileOrderUi {
   const { category, subState } = categorizeOrder(order.sunnyStatus, order.status);
   const statusLabel = formatOrderStatusLabel(order.status);
   const deliveryBy = resolveOrderDeliveryBy(order.sunnyDelivery);
@@ -278,7 +459,7 @@ export function mapCustomerOrderToProfileUi(order: CustomerOrder): ProfileOrderU
     category,
     ...(subState ? { subState } : {}),
     ...(deliveryBy ? { deliveryBy } : {}),
-    items: mapOrderItems(order),
+    items: mapOrderItems(order, imageBySku),
     grandTotal: order.grandTotal,
     currency: order.currency,
     showTrack: actions ? actions.canTrack : category === "in_progress",
@@ -347,38 +528,62 @@ export function mapCustomerAppointmentToProfileUi(
         ? typeLabels.tryAtHome
         : typeLabels.storeVisit;
 
-  const showroomParts = [
-    appointment.preferredShowroom?.name,
-    appointment.preferredShowroom?.city,
-    appointment.preferredShowroom?.state,
-  ].filter((part): part is string => Boolean(part));
-
-  const productSku = appointment.productId?.trim();
-  const productImage =
-    productSku && productImageBySku?.[productSku]
-      ? productImageBySku[productSku]
-      : PLACEHOLDER_RING_IMAGE;
-
   const products =
-    appointment.productName
-      ? [
-          {
-            id: appointment.productId ?? appointment.documentId,
-            name: appointment.productName,
-            imageSrc: productImage,
-          },
-        ]
-      : [];
+    appointment.products.length > 0
+      ? appointment.products.map((product, index) => {
+          const productSku = product.productId?.trim() ?? "";
+          const productImage =
+            productSku && productImageBySku?.[productSku]
+              ? productImageBySku[productSku]
+              : undefined;
 
-  const canModify = canModifyAppointment(appointment.workflowStatus);
+          return {
+            // Prefer CMS documentId — Magento productId can repeat across clubbed rows.
+            id:
+              product.documentId ||
+              product.productId ||
+              `${appointment.documentId}-${index}`,
+            name: product.productName ?? appointment.productName ?? "Product",
+            ...(productImage ? { imageSrc: productImage } : {}),
+          };
+        })
+      : (() => {
+          if (!appointment.productName) return [];
+          const productSku = appointment.productId?.trim() ?? "";
+          const productImage =
+            productSku && productImageBySku?.[productSku]
+              ? productImageBySku[productSku]
+              : undefined;
+          return [
+            {
+              id: appointment.documentId,
+              name: appointment.productName,
+              ...(productImage ? { imageSrc: productImage } : {}),
+            },
+          ];
+        })();
+
+  const workflowStatus = resolveAppointmentWorkflowStatus(appointment);
+  const canModify = canModifyAppointment(workflowStatus);
+  const canReschedule =
+    canModify && canModifyAppointmentBeforeDeadline(appointment.requestedDate);
+  const canCancel =
+    canModify &&
+    canCancelAppointmentUntilOneMinuteBefore(
+      appointment.requestedDate,
+      appointment.selectedTimeSlot,
+    );
+  const rescheduleDeadline = formatTryAtHomeRescheduleDeadline(appointment.requestedDate);
 
   const base: ProfileAppointmentUi = {
     id: appointment.documentId,
+    formTag: appointment.formTag,
     type,
     typeLabel,
     customerName: appointment.customerName,
-    customerPhone: appointment.customerPhone,
+    customerPhone: formatAppointmentPhoneDisplay(appointment.customerPhone),
     customerEmail: appointment.customerEmail,
+    requestedDate: appointment.requestedDate,
     products,
     bookingDate: appointment.requestedDate
       ? formatAppointmentDate(appointment.requestedDate)
@@ -386,9 +591,20 @@ export function mapCustomerAppointmentToProfileUi(
     bookingTime: appointment.selectedTimeSlot,
     notesLabel: profileTabsContent.appointments.notesLabel,
     notes: appointment.customerMessage ?? "",
-    rescheduleNote: profileTabsContent.appointments.rescheduleNotePlaceholder,
-    canReschedule: canModify,
-    canCancel: canModify,
+    ...(appointment.purposeOfVisit
+      ? { purposeOfVisit: appointment.purposeOfVisit }
+      : {}),
+    ...(appointment.customerMessage
+      ? { yourRequirement: appointment.customerMessage }
+      : {}),
+    rescheduleNote: rescheduleDeadline
+      ? profileTabsContent.appointments.rescheduleNoteTemplate.replace(
+          "{date}",
+          rescheduleDeadline,
+        )
+      : undefined,
+    canReschedule,
+    canCancel,
   };
 
   if (type === "try_at_home") {
@@ -397,15 +613,9 @@ export function mapCustomerAppointmentToProfileUi(
     return appointmentAddress ? { ...base, appointmentAddress } : base;
   }
 
-  if (type === "store_visit" && showroomParts.length > 0) {
-    return {
-      ...base,
-      storeVisit: {
-        city: appointment.preferredShowroom?.city ?? showroomParts[0] ?? "",
-        lines: showroomParts,
-        directionsHref: "/store-locator",
-      },
-    };
+  if (type === "store_visit") {
+    const storeVisit = mapStoreVisitDetails(appointment);
+    return storeVisit ? { ...base, storeVisit } : base;
   }
 
   return base;
@@ -424,16 +634,15 @@ export function mapSavedCreationToBespokeUi(
   const images = Array.from(
     new Set([coverUrl, ...galleryUrls].filter(Boolean)),
   );
-  const imageSrc = images[0] ?? PLACEHOLDER_RING_IMAGE;
 
   return {
     id: item.documentId,
     creationDocumentId: creation.documentId,
     title: creation.title,
-    imageSrc,
-    images: images.length > 0 ? images : [imageSrc],
+    ...(images[0] ? { imageSrc: images[0] } : {}),
+    images,
     price: undefined,
-    viewHref: creation.cta?.href ?? profileTabsContent.bespoke.emptyCtaHref,
+    viewHref: creation.cta?.href ?? profileTabsContent.bespoke.emptyPrimaryCtaHref,
     savedAt: item.savedAt,
   };
 }

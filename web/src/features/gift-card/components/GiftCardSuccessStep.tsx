@@ -3,11 +3,15 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
-  CartOutlineButton,
   CartPrimaryLink,
   CartSuccessCheck,
+  CartTextLink,
 } from "@/features/cart/components/CartFlowUi";
+import { RIGHT_PANEL_CONTENT_PADDING_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { RightPanelScrollLayout } from "@/shared/ui/RightPanelScrollLayout";
+import { cn } from "@/shared/utils/cn";
 import { useGiftCardFlow } from "../context/GiftCardFlowContext";
 import { giftCardFlowContent } from "../data/content";
 
@@ -15,6 +19,7 @@ type GiftCardSuccessStepProps = {
   onClose: () => void;
 };
 
+/** Figma 4903:106197 (desktop) / 4903:100405 (mobile) — gift card success panel */
 const GiftCardSuccessStep = ({ onClose }: GiftCardSuccessStepProps) => {
   const router = useRouter();
   const { cardType, orderNumber, estimatedDeliveryDate } = useGiftCardFlow();
@@ -35,48 +40,63 @@ const GiftCardSuccessStep = ({ onClose }: GiftCardSuccessStepProps) => {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white">
-      <div className="flex shrink-0 justify-end px-6 pt-10">
-        <button type="button" onClick={onClose} aria-label="Close gift card flow">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" strokeWidth="1.5" />
-          </svg>
-        </button>
-      </div>
-
-      <div className="flex min-h-0 flex-1 flex-col items-center gap-6 overflow-y-auto overscroll-contain px-6 pb-6">
-        <CartSuccessCheck />
-        <div className="flex flex-col items-center gap-4 text-center">
-          <h2 className="font-larken text-[32px] font-light leading-110 text-darkblack">
-            {success.title}
-          </h2>
-          <p className="max-w-[360px] font-gill text-base font-light leading-110 text-darkblack">
-            {message}
-          </p>
-        </div>
-
-        <div className="relative h-[200px] w-full max-w-[320px] shrink-0">
-          <Image
-            src={success.image.src}
-            alt={success.image.alt}
-            fill
-            className="object-contain object-center"
-            sizes="320px"
-          />
-        </div>
-      </div>
-
-      <PanelFooter contentClassName="px-4 py-6">
-        <div className="flex flex-col gap-4">
+    <RightPanelScrollLayout
+      footer={
+        <PanelFooter contentClassName="flex flex-col items-center gap-4">
           <CartPrimaryLink href={trackingHref} className="w-full uppercase">
             {success.trackOrderLabel}
           </CartPrimaryLink>
-          <CartOutlineButton type="button" className="w-full uppercase" onClick={handleBackToShopping}>
+          <CartTextLink
+            href={success.backToShoppingHref}
+            onClick={handleBackToShopping}
+            className="uppercase"
+          >
             {success.backToShoppingLabel}
-          </CartOutlineButton>
+          </CartTextLink>
+        </PanelFooter>
+      }
+    >
+      <div
+        className={cn(
+          "flex flex-col items-center gap-10 pb-24 pt-6 md:pt-10",
+          RIGHT_PANEL_CONTENT_PADDING_CLASS,
+        )}
+      >
+        <div className="flex w-full flex-col items-center gap-6">
+          <div className="grid w-full [&>*]:col-start-1 [&>*]:row-start-1">
+            <div className="flex justify-center">
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="md:size-16 size-10">
+                <path d="M22 34L28 40L42 26" stroke="#47CB6C" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M32 56C45.2548 56 56 45.2548 56 32C56 18.7452 45.2548 8 32 8C18.7452 8 8 18.7452 8 32C8 45.2548 18.7452 56 32 56Z" stroke="#47CB6C" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <RightPanelCloseButton
+              onClick={onClose}
+              aria-label="Close gift card flow"
+              className="justify-self-end"
+            />
+          </div>
+
+          <div className="flex w-full flex-col items-center gap-3 text-center text-darkblack">
+            <h2 className="font-larken text-2xl font-light leading-110 lg:text-32">
+              {success.title}
+            </h2>
+            <p className="w-full font-gill text-sm font-light leading-110 lg:text-base">
+              {message}
+            </p>
+          </div>
         </div>
-      </PanelFooter>
-    </div>
+
+        <div className="relative md:max-[424px] max-w[343px] aspect-[424/265] w-full shrink-0 overflow-hidden">
+          <Image
+            src="/images/gifting/gift-card-success.png"
+            alt={success.image.alt}
+            fill
+            className="w-full h-full object-cover object-center"
+          />
+        </div>
+      </div>
+    </RightPanelScrollLayout>
   );
 };
 

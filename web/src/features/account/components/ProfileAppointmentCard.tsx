@@ -1,19 +1,32 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
-import { Calendar, ChevronRight } from "lucide-react";
+import RingsTabIcon from "@/assets/Icons/PLP/RingsTabIcon";
+import RightArrow from "@/assets/Icons/RightArrow";
 import {
   DetailDarkButton,
   DetailOutlineButton,
   DetailTextLink,
 } from "@/features/products/components/detail/shared";
+import { useHorizontalCarouselSwipe } from "@/features/products/hooks/useHorizontalCarouselSwipe";
+import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { profileTabsContent } from "../data/profileContent";
 import type { ProfileAppointmentUi } from "../types/profileUi.types";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { ProfileCard, ProfileInfoNote } from "./profileUi";
+import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 
-const bookingFieldClassName =
-  "flex h-14 w-full items-center bg-aboutInactive p-3 font-gill text-base font-normal leading-110 text-darkblack";
+const sectionTitleClassName =
+  "font-larken md:text-2xl text-xl font-light leading-110 text-darkblack";
+
+const sectionCardClassName = "flex flex-col gap-4 bg-white p-4 lg:p-6";
+
+/** Figma desktop: 3 tiles; mobile uses PDP-style 1-up slider. */
+const PRODUCT_GALLERY_DESKTOP_VISIBLE = 3;
+const PRODUCT_GALLERY_TILE_PX = 176;
+const PRODUCT_GALLERY_GAP_PX = 40;
 
 type ProfileAppointmentCardProps = {
   appointment: ProfileAppointmentUi;
@@ -21,29 +34,124 @@ type ProfileAppointmentCardProps = {
   onCancel: () => void;
 };
 
+function ProductGalleryTile({
+  product,
+}: {
+  product: ProfileAppointmentUi["products"][number];
+}) {
+  return (
+    <div className="flex w-[176px] shrink-0 flex-col items-start gap-1.5">
+      <div className="relative h-[135px] w-[176px] overflow-hidden">
+        {product.imageSrc ? (
+          <Image
+            src={product.imageSrc}
+            alt={product.name}
+            fill
+            className="object-contain"
+            sizes="176px"
+          />
+        ) : (
+          <div className="flex size-full items-center justify-center">
+            <RingsTabIcon className="size-12 text-darkblack" />
+          </div>
+        )}
+      </div>
+      <p
+        className={cn(
+          "max-w-full truncate font-gill text-base font-normal leading-110 tracking-[0.01em] text-darkblack",
+          productNameDisplayClassName,
+        )}
+      >
+        {product.name}
+      </p>
+    </div>
+  );
+}
+
 function ProductGallery({ products }: { products: ProfileAppointmentUi["products"] }) {
+  const isMobile = useIsMobile();
+  const visibleCount = isMobile ? 1 : PRODUCT_GALLERY_DESKTOP_VISIBLE;
+  const maxIndex = Math.max(0, products.length - visibleCount);
+  const showSlider = products.length > visibleCount;
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [products]);
+
+  useEffect(() => {
+    setActiveIndex((current) => Math.min(current, maxIndex));
+  }, [maxIndex]);
+
+  const goToNext = useCallback(() => {
+    setActiveIndex((current) => (current >= maxIndex ? 0 : current + 1));
+  }, [maxIndex]);
+
+  const goToPrevious = useCallback(() => {
+    setActiveIndex((current) => (current <= 0 ? maxIndex : current - 1));
+  }, [maxIndex]);
+
+  const { swipeProps } = useHorizontalCarouselSwipe({
+    slideCount: showSlider ? maxIndex + 1 : 1,
+    onNext: goToNext,
+    onPrevious: goToPrevious,
+    enabled: showSlider,
+  });
+
   if (products.length === 0) {
     return null;
   }
 
+  const visibleProducts = products.slice(activeIndex, activeIndex + visibleCount);
+  const viewportMaxWidth =
+    PRODUCT_GALLERY_TILE_PX * visibleCount +
+    PRODUCT_GALLERY_GAP_PX * Math.max(0, visibleCount - 1);
+
   return (
-    <div className="-mx-4 flex gap-4 overflow-x-auto px-4 lg:mx-0 lg:flex-wrap lg:justify-center lg:gap-6 lg:overflow-visible lg:px-0">
-      {products.map((product) => (
-        <div key={product.id} className="flex w-[100px] shrink-0 flex-col gap-2 lg:w-[176px]">
-          <div className="relative h-[76px] w-full overflow-hidden bg-white lg:h-[135px]">
-            <Image
-              src={product.imageSrc}
-              alt={product.name}
-              fill
-              className="object-cover"
-              sizes="176px"
-            />
+    <div className="flex w-full flex-col gap-3">
+      <div
+        className={cn(
+          "flex w-full items-center touch-pan-y select-none",
+          showSlider ? "justify-between" : "justify-center",
+        )}
+        {...swipeProps}
+      >
+        <div className={cn("flex min-w-0", showSlider ? "flex-1 justify-center" : "justify-center")}>
+          <div className="flex gap-10" style={{ maxWidth: viewportMaxWidth }}>
+            {visibleProducts.map((product, index) => (
+              <ProductGalleryTile
+                key={`${product.id}-${activeIndex + index}`}
+                product={product}
+              />
+            ))}
           </div>
-          <p className="font-gill text-base font-normal leading-110 text-darkblack">
-            {product.name}
-          </p>
         </div>
-      ))}
+        {showSlider ? (
+          <button
+            type="button"
+            onClick={goToNext}
+            aria-label="Next products"
+            className="inline-flex size-6 shrink-0 items-center justify-center text-darkblack"
+          >
+            <RightArrow className="size-6" />
+          </button>
+        ) : null}
+      </div>
+
+      {showSlider && isMobile ? (
+        <div className="flex h-0.5 w-full">
+          {Array.from({ length: maxIndex + 1 }, (_, index) => (
+            <div
+              key={index}
+              className={cn(
+                "h-0.5 min-w-0 flex-1",
+                index === activeIndex ? "bg-darkblack" : "bg-neutral300",
+              )}
+              aria-hidden
+            />
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -60,32 +168,59 @@ function ProfileAppointmentPersonalDetails({
   email: string;
 }) {
   return (
-    <div className="flex flex-col gap-6 bg-white p-4 lg:p-6">
-      <h4 className="font-gill text-xl font-normal leading-110 text-darkblack lg:font-larken lg:text-2xl lg:font-light">
-        {title}
-      </h4>
+    <div className={sectionCardClassName}>
+      <h4 className={sectionTitleClassName}>{title}</h4>
       <div className="flex w-full flex-col gap-2 font-gill text-base leading-110 text-darkblack">
         <p className="font-normal">{name}</p>
-        <div className="font-light">
-          <p>{phone}</p>
-          <p>{email}</p>
+        <div className="font-light sm:space-y-2 space-y-1">
+          {phone ? <p>{phone}</p> : null}
+          {email ? <p>{email}</p> : null}
         </div>
       </div>
     </div>
   );
 }
 
-function ProfileAppointmentNote({ title, note }: { title: string; note: string }) {
+function ProfileAppointmentNote({
+  title,
+  note,
+  purposeOfVisit,
+  yourRequirement,
+  purposeLabel,
+  requirementLabel,
+}: {
+  title: string;
+  note: string;
+  purposeOfVisit?: string;
+  yourRequirement?: string;
+  purposeLabel?: string;
+  requirementLabel?: string;
+}) {
+  const hasStructuredNote = Boolean(purposeOfVisit || yourRequirement);
+
   return (
-    <div className="flex flex-col gap-4 bg-white p-4 lg:gap-6 lg:p-6">
-      <h4 className="font-gill text-xl font-normal leading-110 text-darkblack lg:font-larken lg:text-2xl lg:font-light">
-        {title}
-      </h4>
-      {note.trim() ? (
-        <p className="font-gill text-sm font-normal leading-110 whitespace-pre-line text-darkblack lg:text-base lg:font-light">
+    <div className={sectionCardClassName}>
+      <h4 className={sectionTitleClassName}>{title}</h4>
+      {hasStructuredNote ? (
+        <div className="flex flex-col gap-4 font-gill text-base leading-110 text-darkblack">
+          {purposeOfVisit ? (
+            <div className="flex flex-col gap-2">
+              <p className="font-normal">{purposeLabel ?? "Purpose of Visit"}</p>
+              <p className="font-light">{purposeOfVisit}</p>
+            </div>
+          ) : null}
+          {yourRequirement ? (
+            <div className="flex flex-col gap-2">
+              <p className="font-normal">{requirementLabel ?? "Your Requirement"}</p>
+              <p className="font-light whitespace-pre-line">{yourRequirement}</p>
+            </div>
+          ) : null}
+        </div>
+      ) : (
+        <p className="font-gill text-base md:font-light font-normal leading-110 whitespace-pre-line text-darkblack">
           {note}
         </p>
-      ) : null}
+      )}
     </div>
   );
 }
@@ -101,32 +236,13 @@ function ProfileAppointmentAddress({
     .filter((part): part is string => Boolean(part))
     .join(", ");
 
-  const addressLines = [address.addressLine1, address.addressLine2, cityStatePincode].filter(
-    Boolean,
-  );
-
-  const mobileAddressText = [address.name, ...addressLines, address.phone]
-    .filter((part): part is string => Boolean(part))
-    .join("\n");
-
   return (
-    <div className="flex flex-col gap-6 bg-white p-4 lg:gap-4 lg:p-6">
-      <h4 className="font-gill text-xl font-normal leading-110 text-darkblack lg:font-larken lg:text-2xl lg:font-light">
-        {title}
-      </h4>
-
-      <p className="font-gill text-base font-light leading-110 whitespace-pre-line text-darkblack lg:hidden">
-        {mobileAddressText}
-      </p>
-
-      <div className="hidden flex-col gap-2 font-gill text-base leading-110 text-darkblack lg:flex">
-        <p className="font-normal">{address.name}</p>
-        <div className="font-light">
-          {address.addressLine1 ? <p>{address.addressLine1}</p> : null}
-          {address.addressLine2 ? <p>{address.addressLine2}</p> : null}
-          {cityStatePincode ? <p>{cityStatePincode}</p> : null}
-          {address.phone ? <p>{address.phone}</p> : null}
-        </div>
+    <div className={sectionCardClassName}>
+      <h4 className={sectionTitleClassName}>{title}</h4>
+      <div className="flex flex-col gap-1 font-gill text-base font-light leading-110 text-darkblack">
+        {address.addressLine1 ? <p>{address.addressLine1}</p> : null}
+        {address.addressLine2 ? <p>{address.addressLine2}</p> : null}
+        {cityStatePincode ? <p>{cityStatePincode}</p> : null}
       </div>
     </div>
   );
@@ -142,13 +258,11 @@ function ProfileAppointmentStoreVisit({
   directionsLabel: string;
 }) {
   return (
-    <div className="flex flex-col gap-6 bg-white p-4 lg:bg-gray300 lg:p-6">
-      <h4 className="font-gill text-xl font-normal leading-110 text-darkblack lg:font-larken lg:text-xl lg:font-light">
-        {title}
-      </h4>
+    <div className={sectionCardClassName}>
+      <h4 className={sectionTitleClassName}>{title}</h4>
 
       <div className="flex flex-col gap-2 font-gill text-base leading-110 text-darkblack">
-        <p className="font-normal">{storeVisit.city}</p>
+        {storeVisit.city ? <p className="font-normal">{storeVisit.city}</p> : null}
         <div className="font-light">
           {storeVisit.lines.map((line, index) => (
             <p key={`${index}-${line}`}>{line}</p>
@@ -159,10 +273,12 @@ function ProfileAppointmentStoreVisit({
       {storeVisit.directionsHref ? (
         <DetailTextLink
           href={storeVisit.directionsHref}
-          className="text-sm uppercase lg:inline-flex lg:items-center lg:gap-2"
+          className="mt-2 text-sm uppercase"
+          {...(storeVisit.directionsHref.startsWith("http")
+            ? { target: "_blank", rel: "noopener noreferrer" }
+            : {})}
         >
           {directionsLabel}
-          <ChevronRight className="hidden size-4 lg:block" aria-hidden />
         </DetailTextLink>
       ) : null}
     </div>
@@ -183,39 +299,17 @@ function ProfileAppointmentBookingDetails({
   const content = profileTabsContent.appointments;
 
   return (
-    <div className="flex flex-col gap-6 bg-white p-4 lg:p-6">
-      <h4 className="font-gill text-xl font-normal leading-110 text-darkblack lg:font-larken lg:text-2xl lg:font-light">
-        {content.bookingDetailsTitle}
-      </h4>
+    <div className={sectionCardClassName}>
+      <h4 className={sectionTitleClassName}>{content.bookingDetailsTitle}</h4>
 
-      <div className="flex w-full flex-col gap-4 font-gill text-base font-normal leading-110 text-darkblack lg:hidden">
-        <div className="flex w-full flex-col gap-2">
-          <p>{dateLabel}</p>
-          <p>{bookingDate}</p>
+      <div className="grid w-full sm:grid-cols-2 grid-cols-1 gap-4 font-gill text-base leading-110 text-darkblack">
+        <div className="flex min-w-0 flex-col gap-2">
+          <p className="font-normal">{dateLabel}</p>
+          <p className="font-normal">{bookingDate}</p>
         </div>
-        <div className="flex w-full flex-col gap-2">
-          <p>{timeLabel}</p>
-          <p>{bookingTime}</p>
-        </div>
-      </div>
-
-      <div className="hidden flex-col gap-4 lg:flex lg:flex-row">
-        <div className="flex min-h-[82px] flex-1 flex-col justify-between gap-2 lg:gap-0">
-          <span className="font-gill text-base font-normal leading-110 text-darkblack">
-            {dateLabel}
-          </span>
-          <div className={cn(bookingFieldClassName, "justify-between")}>
-            <span className="truncate">{bookingDate}</span>
-            <Calendar className="size-6 shrink-0" strokeWidth={1.5} aria-hidden />
-          </div>
-        </div>
-        <div className="flex flex-1 flex-col gap-2">
-          <span className="font-gill text-base font-normal leading-110 text-darkblack">
-            {timeLabel}
-          </span>
-          <div className={bookingFieldClassName}>
-            <span className="truncate">{bookingTime}</span>
-          </div>
+        <div className="flex min-w-0 flex-col gap-2">
+          <p className="font-normal">{timeLabel}</p>
+          <p className="font-normal">{bookingTime}</p>
         </div>
       </div>
     </div>
@@ -232,18 +326,21 @@ export function ProfileAppointmentCard({
     typeof appointment.notes === "string"
       ? appointment.notes.trim()
       : String(appointment.notes ?? "").trim();
-
+  const purposeOfVisit = appointment.purposeOfVisit?.trim() ?? "";
+  const yourRequirement = appointment.yourRequirement?.trim() ?? notesText;
+  const showNoteSection = Boolean(purposeOfVisit || yourRequirement || notesText);
+  const { windows } = useUiPlatform();
   return (
-    <ProfileCard className="relative flex flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-      <span
-        className="absolute left-0 top-0 bg-mauve300 px-3 py-2 font-gill text-base font-normal leading-110 whitespace-nowrap text-darkblack"
-      >
-        {appointment.typeLabel}
-      </span>
-
-      <div className="pt-8">
-        <ProductGallery products={appointment.products} />
+    <ProfileCard className="relative flex flex-col gap-6 !py-6 md:!px-6 px-4">
+      <div className={cn("absolute left-0 top-0 bg-mauve300 px-3 py-2 font-gill text-base font-normal whitespace-nowrap text-darkblack")}>
+        <span className={cn(!windows && "-translate-y-0.5")}>{appointment.typeLabel}</span>
       </div>
+
+      {appointment.type !== "store_visit" && appointment.products.length > 0 ? (
+        <ProductGallery products={appointment.products} />
+      ) : (
+        null
+      )}
 
       <ProfileAppointmentPersonalDetails
         title={content.personalDetailsTitle}
@@ -274,31 +371,42 @@ export function ProfileAppointmentCard({
         bookingTime={appointment.bookingTime}
       />
 
-      {notesText ? (
-        <ProfileAppointmentNote title={content.notesLabel} note={notesText} />
+      {showNoteSection ? (
+        <ProfileAppointmentNote
+          title={content.notesLabel}
+          note={notesText}
+          purposeOfVisit={
+            appointment.type === "store_visit" ? purposeOfVisit || undefined : undefined
+          }
+          yourRequirement={
+            appointment.type === "store_visit" ? yourRequirement || undefined : undefined
+          }
+          purposeLabel={content.purposeOfVisitLabel}
+          requirementLabel={content.yourRequirementLabel}
+        />
       ) : null}
 
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center">
-          <DetailDarkButton
-            type="button"
-            className="w-full lg:order-2 lg:min-w-0 lg:flex-1"
-            onClick={onReschedule}
-            disabled={!appointment.canReschedule}
-          >
-            {content.rescheduleLabel}
-          </DetailDarkButton>
+        <div className="grid md:grid-cols-2 gap-4 md:gap-6">
           <DetailOutlineButton
             type="button"
-            className="w-full lg:order-1 lg:min-w-0 lg:flex-1"
+            className="w-full disabled:cursor-not-allowed disabled:opacity-50"
             onClick={onCancel}
             disabled={!appointment.canCancel}
           >
             {content.cancelLabel}
           </DetailOutlineButton>
+          <DetailDarkButton
+            type="button"
+            className="w-full disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={onReschedule}
+            disabled={!appointment.canReschedule}
+          >
+            {content.rescheduleLabel}
+          </DetailDarkButton>
         </div>
 
-        {appointment.rescheduleNote ? (
+        {appointment.canReschedule && appointment.rescheduleNote ? (
           <ProfileInfoNote>{appointment.rescheduleNote}</ProfileInfoNote>
         ) : null}
       </div>

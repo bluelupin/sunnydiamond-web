@@ -1,26 +1,26 @@
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
-import { contactPageContent } from "@/features/contact/data/content";
+import { getCmsAssetUrl } from "@/shared/utils/cmsAssets";
+import type { NormalizedVisitUsSection } from "@/services/product-display/product-display-page.types";
 import {
-  VISIT_US_FALLBACK,
-  type NormalizedVisitUsSection,
-} from "@/services/product-display/product-display-page.types";
-import type {
-  NormalizedContactForm,
-  NormalizedContactHero,
-  NormalizedContactInfoCard,
-  NormalizedContactPage,
-  NormalizedContactSeo,
-  StrapiContactFormDynamicField,
-  StrapiContactFormSection,
-  StrapiContactGenericForm,
-  StrapiContactHeroSection,
-  StrapiContactImageAsset,
-  StrapiContactOption,
-  StrapiContactPage,
-  StrapiContactSeo,
-  StrapiContactSupportSection,
-  StrapiContactVisitSection,
-  StrapiContactVisitShowroom,
+  EMPTY_CONTACT_PAGE,
+  type NormalizedContactDropdownField,
+  type NormalizedContactForm,
+  type NormalizedContactHero,
+  type NormalizedContactInfoCard,
+  type NormalizedContactOrderedField,
+  type NormalizedContactPage,
+  type NormalizedContactResponsiveImage,
+  type NormalizedContactSeo,
+  type StrapiContactFormDynamicField,
+  type StrapiContactFormSection,
+  type StrapiContactGenericForm,
+  type StrapiContactHeroSection,
+  type StrapiContactImageAsset,
+  type StrapiContactOption,
+  type StrapiContactPage,
+  type StrapiContactSeo,
+  type StrapiContactSupportSection,
+  type StrapiContactVisitSection,
 } from "./contact-page.types";
 
 const cleanText = (value?: string | null): string | undefined => {
@@ -28,6 +28,7 @@ const cleanText = (value?: string | null): string | undefined => {
   return trimmed || undefined;
 };
 
+/** CMS sections may use `isActive` or `showField`; default visible when unset. */
 const resolveSectionActive = (
   isActive?: boolean | null,
   showField?: boolean | null,
@@ -35,6 +36,21 @@ const resolveSectionActive = (
   if (typeof isActive === "boolean") return isActive;
   if (typeof showField === "boolean") return showField;
   return true;
+};
+
+const mapResponsiveImage = (
+  image?: StrapiContactImageAsset | null,
+): NormalizedContactResponsiveImage | null => {
+  const desktopUrl = resolveCmsMediaUrl(image?.desktopImage) ?? "";
+  const mobileUrl = resolveCmsMediaUrl(image?.mobileImage) ?? "";
+  if (!desktopUrl && !mobileUrl) return null;
+
+  return {
+    desktopUrl,
+    mobileUrl,
+    desktopAlt: resolveCmsAltText(image?.desktopImage) ?? "",
+    mobileAlt: resolveCmsAltText(image?.mobileImage) ?? "",
+  };
 };
 
 const mapAvailabilityHours = (
@@ -48,11 +64,19 @@ const mapAvailabilityHours = (
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => {
-      const separatorIndex = line.indexOf(":");
-      if (separatorIndex > 0 && separatorIndex < line.length - 1) {
-        const label = line.slice(0, separatorIndex).trim();
-        const value = line.slice(separatorIndex + 1).trim();
-        if (label && value) return { label, value };
+      // Split day label from time; keep CMS colon on the label when present (Figma: "Sunday:").
+      const match = line.match(
+        /^(.+?)(\s*:)?\s+(\d{1,2}:\d{2}\s*[AaPp][Mm]\b.*)$/,
+      );
+      if (match) {
+        const dayPart = match[1].trim();
+        const value = match[3].trim();
+        if (dayPart && value) {
+          return {
+            label: match[2] ? `${dayPart}:` : dayPart,
+            value,
+          };
+        }
       }
       return { label: "", value: line };
     });
@@ -78,13 +102,55 @@ const isGenericButtonLabel = (label?: string): boolean => {
   );
 };
 
+/** Normalize garbled CMS email strings for mailto hrefs. */
+const formatEmailAddress = (value: string): string => {
+  const compact = value.replace(/\s+/g, "");
+  const match = compact.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+  if (!match) return value.trim();
+
+  return match[0]
+    .toLowerCase()
+    .replace("@sunntdiamonds.com", "@sunnydiamonds.com");
+};
+
+/** Preserve CMS email CTA copy; only fix known domain typos. */
+const sanitizeEmailLinkLabel = (label: string): string =>
+  label.replace(/@sunntdiamonds\.com/gi, "@SUNNYDIAMONDS.COM");
+
+/** Fallback when CMS omits a usable email buttonLabel. */
+const formatEmailLinkDisplay = (email: string): string => {
+  const [localPart, domain = ""] = email.split("@");
+  return `${localPart.toUpperCase()}@${domain.toUpperCase()}`;
+};
+
+const resolveWhatsAppLinkLabel = (buttonLabel: string | undefined): string => {
+  const cmsLabel = cleanText(buttonLabel);
+  if (cmsLabel) return cmsLabel;
+
+  return "WHATSAPP";
+};
+
 const resolveLinkLabel = (
   buttonLabel: string | undefined,
   value: string | undefined,
-  fallback: string,
+  title: string,
 ): string => {
   if (buttonLabel && !isGenericButtonLabel(buttonLabel)) return buttonLabel;
-  return value ?? buttonLabel ?? fallback;
+  return value ?? title ?? buttonLabel ?? "";
+};
+
+/** Prefer CMS buttonLabel; fall back to normalized value only when CMS label is missing/generic. */
+const resolveEmailLinkLabel = (
+  buttonLabel: string | undefined,
+  email: string,
+): string => {
+  const cmsLabel = cleanText(buttonLabel);
+
+  if (cmsLabel && !isGenericButtonLabel(cmsLabel)) {
+    return cmsLabel.includes("@") ? sanitizeEmailLinkLabel(cmsLabel) : cmsLabel;
+  }
+
+  return formatEmailLinkDisplay(email);
 };
 
 const isActionableContactTarget = (value: string): boolean => {
@@ -93,24 +159,6 @@ const isActionableContactTarget = (value: string): boolean => {
   }
   if (value.includes("@")) return true;
   return /\d{8,}/.test(value);
-};
-
-const FALLBACK_WHATSAPP_HREF =
-  contactPageContent.infoCards.find((card) => card.id === "concierge")?.link.href ??
-  "https://wa.me/919744355555";
-
-const mapImageAsset = (
-  image?: StrapiContactImageAsset | null,
-): { desktopUrl?: string; mobileUrl?: string; alt?: string } => {
-  const desktopUrl = resolveCmsMediaUrl(image?.desktopImage);
-  const mobileUrl = resolveCmsMediaUrl(image?.mobileImage);
-  const alt =
-    resolveCmsAltText(image?.desktopImage) ??
-    resolveCmsAltText(image?.mobileImage) ??
-    cleanText(image?.altText) ??
-    cleanText(image?.caption);
-
-  return { desktopUrl, mobileUrl, alt };
 };
 
 const findField = (
@@ -129,109 +177,187 @@ const mapFieldOptions = (field?: StrapiContactFormDynamicField): string[] =>
     .filter((option): option is string => Boolean(option)) ?? [];
 
 const formatFieldLabel = (
-  field: StrapiContactFormDynamicField | undefined,
-  fallback: string,
-): string => {
+  field?: StrapiContactFormDynamicField,
+): string | undefined => {
   const label = cleanText(field?.label);
-  if (!label) return fallback;
+  if (!label) return undefined;
   if (!field?.isRequired) return label;
   return label.endsWith("*") ? label : `${label}*`;
 };
 
-const fallbackInfoCards = (): NormalizedContactInfoCard[] =>
-  contactPageContent.infoCards.map((card) => {
-    if (card.id === "call") {
-      return {
-        id: card.id,
-        variant: "phone" as const,
-        title: card.title,
-        hours: card.hours.map((entry) => ({ ...entry })),
-        link: { ...card.link },
-      };
+/** Dropdowns: fieldType dropdown/select, or CMS text fields that still ship options. */
+const isDropdownField = (field: StrapiContactFormDynamicField): boolean => {
+  const fieldType = cleanText(field.fieldType)?.toLowerCase() ?? "";
+  if (fieldType === "dropdown" || fieldType === "select") return true;
+  return mapFieldOptions(field).length > 0;
+};
+
+const mapDropdownFields = (
+  fields: StrapiContactFormDynamicField[] | null | undefined,
+): NormalizedContactDropdownField[] => {
+  if (!fields?.length) return [];
+
+  const mapped: NormalizedContactDropdownField[] = [];
+  for (const [index, field] of fields.entries()) {
+    if (!isDropdownField(field)) continue;
+    const options = mapFieldOptions(field);
+    if (options.length === 0) continue;
+
+    const label = cleanText(field.label) ?? `Option ${index + 1}`;
+    const placeholder = cleanText(field.placeholder);
+    mapped.push({
+      id: field.id != null ? String(field.id) : `dropdown-${index}`,
+      label,
+      ...(placeholder ? { placeholder } : {}),
+      options,
+      isRequired: Boolean(field.isRequired),
+    });
+  }
+  return mapped;
+};
+
+/** Preserve CMS `dynamicFields` array order (drag-and-drop). No label whitelist — every field renders. */
+const mapOrderedFields = (
+  fields: StrapiContactFormDynamicField[] | null | undefined,
+): NormalizedContactOrderedField[] => {
+  if (!fields?.length) return [];
+
+  const ordered: NormalizedContactOrderedField[] = [];
+  const seen = new Set<string>();
+
+  for (const [index, field] of fields.entries()) {
+    const label = cleanText(field.label);
+    const labelLower = label?.toLowerCase() ?? "";
+    const fieldType = cleanText(field.fieldType)?.toLowerCase() ?? "";
+    const id = field.id != null ? String(field.id) : `field-${index}`;
+
+    if (isDropdownField(field)) {
+      const options = mapFieldOptions(field);
+      if (options.length === 0) continue;
+      ordered.push({ kind: "dropdown", id });
+      continue;
     }
-    if (card.id === "email") {
-      return {
-        id: card.id,
-        variant: "email" as const,
-        title: card.title,
-        mobileTitle: card.mobileTitle,
-        description: card.description,
-        hours: [],
-        link: { ...card.link },
-      };
+
+    if (fieldType === "phone" && !seen.has("phone")) {
+      seen.add("phone");
+      ordered.push({ kind: "phone" });
+      continue;
     }
-    return {
-      id: card.id,
-      variant: "link" as const,
-      title: card.title,
-      description: card.description,
-      hours: [],
-      link: { ...card.link },
-    };
-  });
+
+    if (fieldType === "email" && !seen.has("email")) {
+      seen.add("email");
+      ordered.push({ kind: "email" });
+      continue;
+    }
+
+    // Bind known submit fields once; any other text/textarea still renders.
+    if (
+      !seen.has("name") &&
+      fieldType === "text" &&
+      (labelLower.includes("name") || labelLower.includes("full"))
+    ) {
+      seen.add("name");
+      ordered.push({ kind: "name" });
+      continue;
+    }
+
+    if (
+      !seen.has("message") &&
+      (fieldType === "textarea" || fieldType === "text") &&
+      (labelLower.includes("message") ||
+        labelLower.includes("note") ||
+        labelLower.includes("describe"))
+    ) {
+      seen.add("message");
+      ordered.push({ kind: "message" });
+      continue;
+    }
+
+    // Newly added CMS fields (any label / type) — always surface on UI.
+    if (!label) continue;
+    const placeholder = cleanText(field.placeholder);
+    ordered.push({
+      kind: "text",
+      id,
+      label,
+      ...(placeholder ? { placeholder } : {}),
+      isRequired: Boolean(field.isRequired),
+      multiline: fieldType === "textarea",
+    });
+  }
+
+  return ordered;
+};
 
 const mapContactOption = (
   option: StrapiContactOption | null | undefined,
-  phoneFallback?: string | null,
 ): NormalizedContactInfoCard | null => {
-  if (!option || !resolveSectionActive(option.isActive)) return null;
+  if (!option || !resolveSectionActive(option.isActive, option.showField)) return null;
 
   const title = cleanText(option.heading) ?? cleanText(option.title);
   if (!title) return null;
 
   const type = cleanText(option.type)?.toLowerCase() ?? "";
-  const rawValue = cleanText(option.value);
-  const buttonLabel = cleanText(option.buttonLabel);
+  // CTA requires both CMS URL and label — never invent either from the other.
+  const linkUrl = cleanText(option.value) ?? cleanText(option.cta?.url);
+  const buttonLabel = cleanText(option.buttonLabel) ?? cleanText(option.cta?.label);
   const description = cleanText(option.description);
-  const hours = mapAvailabilityHours(option.availability);
+  // CMS removed `availability`; Call Us hours now live on `description` (same key as email/WhatsApp).
+  const hours = mapAvailabilityHours(option.description ?? option.availability);
   const lowerButton = buttonLabel?.toLowerCase() ?? "";
-  const lowerValue = rawValue?.toLowerCase() ?? "";
+  const lowerUrl = linkUrl?.toLowerCase() ?? "";
 
   let variant: NormalizedContactInfoCard["variant"] = "link";
   if (type === "phone") variant = "phone";
   else if (type === "email") variant = "email";
-  else if (rawValue?.includes("@")) variant = "email";
-  else if (rawValue && /^[\d+\s()-]+$/.test(rawValue) && !rawValue.includes("@")) {
+  else if (linkUrl && (linkUrl.includes("@") || linkUrl.startsWith("mailto:"))) {
+    variant = "email";
+  } else if (linkUrl && /^tel:/i.test(linkUrl)) {
     variant = "phone";
   }
 
-  let href = "#";
-  let label = resolveLinkLabel(buttonLabel, rawValue, title);
+  let href: string | undefined;
+  let label: string | undefined;
 
-  if (variant === "phone" && rawValue) {
-    href = toTelHref(rawValue);
-    label = resolveLinkLabel(buttonLabel, rawValue, rawValue);
-  } else if (variant === "email" && rawValue) {
-    const email = rawValue.replace(/\s+/g, "");
-    href = `mailto:${email}`;
-    label = resolveLinkLabel(buttonLabel, rawValue, rawValue);
-  } else if (rawValue) {
-    const isWhatsApp =
-      lowerButton.includes("whatsapp") ||
-      lowerValue.includes("whatsapp") ||
-      lowerValue.includes("wa.me");
+  if (linkUrl && buttonLabel) {
+    label = buttonLabel;
 
-    if (isWhatsApp) {
-      if (isActionableContactTarget(rawValue)) {
-        href = /^https?:\/\//i.test(rawValue) ? rawValue : toWhatsAppHref(rawValue);
-      } else if (phoneFallback) {
-        href = toWhatsAppHref(phoneFallback);
-      } else {
-        href = FALLBACK_WHATSAPP_HREF;
+    if (variant === "phone") {
+      href = /^tel:/i.test(linkUrl) ? linkUrl : toTelHref(linkUrl);
+    } else if (variant === "email") {
+      const emailSource = linkUrl.replace(/^mailto:/i, "");
+      const email = formatEmailAddress(emailSource);
+      href = /^mailto:/i.test(linkUrl) ? linkUrl : `mailto:${email}`;
+      if (buttonLabel.includes("@")) {
+        label = sanitizeEmailLinkLabel(buttonLabel);
       }
-      label = resolveLinkLabel(buttonLabel, rawValue, "WHATSAPP");
-    } else if (/^https?:\/\//i.test(rawValue) || rawValue.startsWith("/")) {
-      href = rawValue;
-    } else if (rawValue.includes("@")) {
-      const email = rawValue.replace(/\s+/g, "");
-      href = `mailto:${email}`;
-      variant = "email";
-      label = resolveLinkLabel(buttonLabel, rawValue, rawValue);
-    } else if (isActionableContactTarget(rawValue)) {
-      href = toWhatsAppHref(rawValue);
     } else {
-      href = FALLBACK_WHATSAPP_HREF;
-      label = resolveLinkLabel(buttonLabel, rawValue, "WHATSAPP");
+      const isWhatsApp =
+        lowerButton.includes("whatsapp") ||
+        lowerUrl.includes("whatsapp") ||
+        lowerUrl.includes("wa.me");
+
+      if (isWhatsApp) {
+        if (isActionableContactTarget(linkUrl)) {
+          href = /^https?:\/\//i.test(linkUrl) ? linkUrl : toWhatsAppHref(linkUrl);
+        }
+      } else if (/^https?:\/\//i.test(linkUrl) || linkUrl.startsWith("/")) {
+        href = linkUrl;
+      } else if (linkUrl.includes("@")) {
+        const email = formatEmailAddress(linkUrl);
+        href = `mailto:${email}`;
+        variant = "email";
+        if (buttonLabel.includes("@")) {
+          label = sanitizeEmailLinkLabel(buttonLabel);
+        }
+      } else if (isActionableContactTarget(linkUrl)) {
+        href = toWhatsAppHref(linkUrl);
+      }
+    }
+
+    // Invalid/unusable URL → hide CTA entirely (no hanging label).
+    if (!href) {
+      label = undefined;
     }
   }
 
@@ -239,6 +365,12 @@ const mapContactOption = (
     option.id != null
       ? String(option.id)
       : title.toLowerCase().replace(/\s+/g, "-");
+
+  const ctaTargetType = cleanText(option.cta?.targetType)?.toLowerCase();
+  const ctaOpenInNewTab =
+    typeof option.cta?.openInNewTab === "boolean"
+      ? option.cta.openInNewTab
+      : undefined;
 
   return {
     id,
@@ -249,78 +381,60 @@ const mapContactOption = (
       : undefined,
     description,
     hours,
-    link: { label, href },
+    link: {
+      label: label ?? "",
+      ...(href ? { href } : {}),
+      ...(ctaTargetType ? { targetType: ctaTargetType } : {}),
+      ...(typeof ctaOpenInNewTab === "boolean"
+        ? { openInNewTab: ctaOpenInNewTab }
+        : {}),
+    },
   };
 };
 
-const mapHero = (hero?: StrapiContactHeroSection | null): NormalizedContactHero => {
-  const fallback = contactPageContent.hero;
-  if (!hero || !resolveSectionActive(hero.isActive)) {
-    return {
-      title: fallback.title,
-      image: {
-        desktopUrl: fallback.image.desktopUrl,
-        mobileUrl: fallback.image.mobileUrl,
-        alt: fallback.image.alt,
-      },
-    };
-  }
+const mapHero = (hero?: StrapiContactHeroSection | null): NormalizedContactHero | null => {
+  if (!hero || !resolveSectionActive(hero.isActive, hero.showField)) return null;
 
-  const fromImage = mapImageAsset(hero.image);
-  const fromBg = mapImageAsset(hero.bgImage);
-  const desktopUrl =
-    fromImage.desktopUrl ??
-    fromBg.desktopUrl ??
-    fromImage.mobileUrl ??
-    fromBg.mobileUrl ??
-    fallback.image.desktopUrl;
-  const mobileUrl =
-    fromImage.mobileUrl ??
-    fromBg.mobileUrl ??
-    fromImage.desktopUrl ??
-    fromBg.desktopUrl ??
-    fallback.image.mobileUrl;
+  const title = cleanText(hero.title);
+  if (!title) return null;
+
+  // Banner (`image`, else `bgImage`) wins when present; video only if banner is empty.
+  const image = mapResponsiveImage(hero.image) ?? mapResponsiveImage(hero.bgImage);
+  const videoUrl = image
+    ? undefined
+    : getCmsAssetUrl(resolveCmsMediaUrl(hero.heroVideo?.heroVideo));
 
   return {
-    title: cleanText(hero.title) ?? fallback.title,
-    image: {
-      desktopUrl,
-      mobileUrl,
-      alt: fromImage.alt ?? fromBg.alt ?? fallback.image.alt,
-    },
+    title,
+    image,
+    ...(videoUrl ? { videoUrl } : {}),
   };
 };
 
 const mapInfoCards = (
   section?: StrapiContactSupportSection | null,
 ): NormalizedContactInfoCard[] => {
-  if (!section || !resolveSectionActive(section.isActive)) {
-    return fallbackInfoCards();
+  if (!section || !resolveSectionActive(section.isActive, section.showField)) {
+    return [];
   }
 
   const rawOptions = section.contactOptions ?? [];
-  const phoneFallback =
-    rawOptions
-      .map((option) => {
-        if (!resolveSectionActive(option?.isActive)) return null;
-        const type = cleanText(option?.type)?.toLowerCase();
-        const value = cleanText(option?.value);
-        if (type === "phone" && value) return value;
-        if (value && /^[\d+\s()-]+$/.test(value) && !value.includes("@")) return value;
-        return null;
-      })
-      .find((value): value is string => Boolean(value)) ?? null;
 
-  const cards = rawOptions
-    .map((option) => mapContactOption(option, phoneFallback))
+  return rawOptions
+    .map((option) => mapContactOption(option))
     .filter((card): card is NormalizedContactInfoCard => card != null);
-
-  return cards.length > 0 ? cards : fallbackInfoCards();
 };
 
-const mapForm = (section?: StrapiContactFormSection | null): NormalizedContactForm => {
-  const fallback = contactPageContent.form;
-  const cmsForm: StrapiContactGenericForm | null | undefined = section?.form;
+const mapForm = (section?: StrapiContactFormSection | null): NormalizedContactForm | null => {
+  if (!section || !resolveSectionActive(section.isActive, section.showField)) return null;
+
+  const cmsForm: StrapiContactGenericForm | null | undefined = section.form;
+  const formTag = cleanText(cmsForm?.formTag);
+  const title = cleanText(section.heading) ?? cleanText(cmsForm?.formName);
+  const submitLabel = cleanText(cmsForm?.submitButtonText);
+
+  if (!formTag || !title || !submitLabel) return null;
+
   const fields = cmsForm?.dynamicFields;
 
   const nameField = findField(
@@ -336,129 +450,108 @@ const mapForm = (section?: StrapiContactFormSection | null): NormalizedContactFo
       fieldType === "dropdown" &&
       (label.includes("reason") || label.includes("purpose") || label.includes("contact")),
   );
-  const messageField = findField(
-    fields,
-    (label, fieldType) =>
+  const messageField = fields?.find((field) => {
+    if (isDropdownField(field)) return false;
+    const label = cleanText(field.label)?.toLowerCase() ?? "";
+    const fieldType = cleanText(field.fieldType)?.toLowerCase() ?? "";
+    return (
       (fieldType === "textarea" || fieldType === "text") &&
-      (label.includes("message") || label.includes("note") || label.includes("describe")),
-  );
+      (label.includes("message") || label.includes("note") || label.includes("describe"))
+    );
+  });
 
-  const reasonOptions = mapFieldOptions(reasonField);
-  const sectionActive = !section || resolveSectionActive(section.isActive);
+  const dropdownFields = mapDropdownFields(fields);
+  const primaryDropdown = dropdownFields[0];
+  const reasonOptions =
+    mapFieldOptions(reasonField).length > 0
+      ? mapFieldOptions(reasonField)
+      : (primaryDropdown?.options ?? []);
+  const consentLabel = cleanText(cmsForm?.consentLabel);
+  const requiresConsent = cmsForm?.requiresConsent !== false && Boolean(consentLabel);
+  const namePlaceholder = cleanText(nameField?.placeholder);
+  const reasonLabel =
+    formatFieldLabel(reasonField) ??
+    (primaryDropdown
+      ? primaryDropdown.isRequired && !primaryDropdown.label.endsWith("*")
+        ? `${primaryDropdown.label}*`
+        : primaryDropdown.label
+      : undefined);
 
   return {
-    title:
-      (sectionActive ? cleanText(section?.heading) : undefined) ??
-      cleanText(cmsForm?.formName) ??
-      fallback.title,
-    formTag:
-      (sectionActive ? cleanText(cmsForm?.formTag) : undefined) ?? fallback.formTag,
-    submitLabel:
-      (sectionActive ? cleanText(cmsForm?.submitButtonText) : undefined) ??
-      fallback.submitLabel,
-    successTitle: fallback.successTitle,
-    successDescription:
-      (sectionActive ? cleanText(section?.successMessage) : undefined) ??
-      fallback.successDescription,
+    title,
+    formTag,
+    submitLabel,
+    successDescription: cleanText(section.successMessage),
     fields: {
-      nameLabel: formatFieldLabel(nameField, fallback.fields.nameLabel),
-      phoneLabel: formatFieldLabel(phoneField, fallback.fields.phoneLabel),
-      emailLabel: formatFieldLabel(emailField, fallback.fields.emailLabel),
-      reasonLabel: formatFieldLabel(reasonField, fallback.fields.reasonLabel),
+      nameLabel: formatFieldLabel(nameField),
+      phoneLabel: formatFieldLabel(phoneField),
+      emailLabel: formatFieldLabel(emailField),
+      reasonLabel,
       reasonPlaceholder:
-        cleanText(reasonField?.placeholder) ?? fallback.fields.reasonPlaceholder,
-      mobileReasonPlaceholder: fallback.fields.mobileReasonPlaceholder,
-      messageLabel: formatFieldLabel(messageField, fallback.fields.messageLabel),
-      messagePlaceholder:
-        cleanText(messageField?.placeholder) ?? fallback.fields.messagePlaceholder,
-      mobileMessagePlaceholder: fallback.fields.mobileMessagePlaceholder,
-      mobileFieldPlaceholder: fallback.fields.mobileFieldPlaceholder,
+        cleanText(reasonField?.placeholder) ?? primaryDropdown?.placeholder,
+      messageLabel: formatFieldLabel(messageField),
+      messagePlaceholder: cleanText(messageField?.placeholder),
+      namePlaceholder,
+      phonePlaceholder: cleanText(phoneField?.placeholder),
+      emailPlaceholder: cleanText(emailField?.placeholder),
+      fieldPlaceholder: namePlaceholder,
     },
-    reasonOptions: reasonOptions.length > 0 ? reasonOptions : [...fallback.reasonOptions],
-    consentPrefix: fallback.consentPrefix,
-    consentSuffix: fallback.consentSuffix,
-    mobileConsentSuffix: fallback.mobileConsentSuffix,
-    termsLabel: fallback.termsLabel,
-    mobileTermsLabel: fallback.mobileTermsLabel,
-    privacyLabel: fallback.privacyLabel,
-    mobilePrivacyLabel: fallback.mobilePrivacyLabel,
-    consentError: fallback.consentError,
+    dropdownFields,
+    orderedFields: mapOrderedFields(fields),
+    reasonOptions,
+    requiresConsent,
+    ...(consentLabel ? { consentLabel } : {}),
   };
 };
 
-const mapVisitUs = (section?: StrapiContactVisitSection | null): NormalizedVisitUsSection => {
-  const fallback: NormalizedVisitUsSection = {
-    title: contactPageContent.visitUs.title,
-    description: contactPageContent.visitUs.description,
-    // Shared PDP Visit Us asset — not contact-only static files.
-    imageSrc: VISIT_US_FALLBACK.imageSrc,
-    mobileImageSrc: VISIT_US_FALLBACK.mobileImageSrc,
-    imageAlt: contactPageContent.visitUs.imageAlt,
-    ctaLabel: contactPageContent.visitUs.ctaLabel,
-  };
-
-  if (!section || section.showField === false) {
-    return fallback;
+/**
+ * Contact Visit Us — fields matching CMS editor only:
+ * title, welcomeNote, backgroundImage (or image if present), cta, showField.
+ * Ignores leftover API `description` (not in Contact Visit CMS UI).
+ * CTA opens Book a Visit panel (same as PDP when cta.url is null).
+ */
+const mapVisitUs = (
+  section?: StrapiContactVisitSection | null,
+): NormalizedVisitUsSection | null => {
+  if (!section || !resolveSectionActive(section.isActive, section.showField)) {
+    return null;
   }
 
-  const sectionImage = mapImageAsset(section.image);
-  const showroomImage = mapShowroomVisitImage(section.showrooms);
+  const title = cleanText(section.sectionTitle);
+  if (!title) return null;
 
-  const desktopUrl =
-    sectionImage.desktopUrl ??
-    showroomImage.desktopUrl ??
-    sectionImage.mobileUrl ??
-    showroomImage.mobileUrl;
-  const mobileUrl =
-    sectionImage.mobileUrl ??
-    showroomImage.mobileUrl ??
-    sectionImage.desktopUrl ??
-    showroomImage.desktopUrl;
+  const welcomeNote = cleanText(section.welcomeNote);
 
-  const imageSrc = desktopUrl ?? mobileUrl ?? fallback.imageSrc;
-  const ctaLabel = cleanText(section.cta?.label) ?? fallback.ctaLabel;
-  const ctaUrl = cleanText(section.cta?.url);
+  // Prefer explicit `image` if CMS sets it; else section `backgroundImage`.
+  const sectionImage =
+    mapResponsiveImage(section.image) ?? mapResponsiveImage(section.backgroundImage);
+  const imageSrc = sectionImage?.desktopUrl || sectionImage?.mobileUrl || "";
+  const mobileImageSrc =
+    sectionImage?.mobileUrl && sectionImage.mobileUrl !== imageSrc
+      ? sectionImage.mobileUrl
+      : undefined;
+  const imageAlt = sectionImage?.desktopAlt || sectionImage?.mobileAlt || "";
+
+  const ctaLabel = cleanText(section.appointmentLabel);
+  // Contact Visit CTA matches PDP Book a Visit: open panel (label only — no URL / openInNewTab).
+  const bookVisitFormTag = cleanText(section.formCta?.modalTag);
 
   return {
-    title: cleanText(section.sectionTitle) ?? fallback.title,
-    description: cleanText(section.description) ?? fallback.description,
+    isActive: true,
+    title,
+    // Do not map API `description` — not exposed in Contact Visit CMS UI.
+    description: "",
+    ...(welcomeNote ? { welcomeNote } : {}),
     imageSrc,
-    mobileImageSrc: mobileUrl ?? fallback.mobileImageSrc,
-    imageAlt:
-      sectionImage.alt ??
-      showroomImage.alt ??
-      fallback.imageAlt,
-    ctaLabel,
-    ...(ctaUrl ? { ctaUrl } : {}),
+    ...(mobileImageSrc ? { mobileImageSrc } : {}),
+    ...(imageAlt ? { imageAlt } : {}),
+    ctaLabel: ctaLabel ?? "",
+    ...(bookVisitFormTag ? { bookVisitFormTag } : {}),
   };
-};
-
-const mapShowroomVisitImage = (
-  showrooms?: StrapiContactVisitShowroom[] | null,
-): { desktopUrl?: string; mobileUrl?: string; alt?: string } => {
-  const active = (showrooms ?? [])
-    .filter((showroom) => showroom && showroom.isActive !== false)
-    .slice()
-    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
-
-  for (const showroom of active) {
-    const mapped = mapImageAsset(showroom.image);
-    if (mapped.desktopUrl || mapped.mobileUrl) {
-      return {
-        ...mapped,
-        alt:
-          mapped.alt ??
-          cleanText(showroom.name) ??
-          undefined,
-      };
-    }
-  }
-
-  return {};
 };
 
 const mapSeo = (seo?: StrapiContactSeo | null): NormalizedContactSeo | null => {
-  if (!seo || seo.showField === false) return null;
+  if (!seo || !resolveSectionActive(seo.isActive, seo.showField)) return null;
 
   const metaTitle = cleanText(seo.metaTitle);
   const metaDescription = cleanText(seo.metaDescription);
@@ -474,27 +567,27 @@ const mapSeo = (seo?: StrapiContactSeo | null): NormalizedContactSeo | null => {
       ? canonical.startsWith("/")
         ? canonical
         : `/${canonical}`
-      : "/contact",
+      : "",
     metaKeywords: cleanText(seo.metaKeywords),
     ...(ogImageUrl ? { ogImageUrl } : {}),
   };
 };
 
 export function mapContactPage(raw?: StrapiContactPage | null): NormalizedContactPage {
-  const introText = cleanText(raw?.introText);
+  if (!raw) return EMPTY_CONTACT_PAGE;
+
+  const introText = cleanText(raw.introText);
 
   return {
-    hero: mapHero(raw?.heroSection),
-    intro: {
-      description: introText ?? contactPageContent.intro.description,
-      mobileDescription: introText ?? contactPageContent.intro.mobileDescription,
-    },
-    infoCards: mapInfoCards(raw?.contactSection),
-    form: mapForm(raw?.formSection),
-    visitUs: mapVisitUs(raw?.visitSection),
-    seo: mapSeo(raw?.seo),
+    hero: mapHero(raw.heroSection),
+    intro: introText
+      ? { description: introText, mobileDescription: introText }
+      : null,
+    infoCards: mapInfoCards(raw.contactSection),
+    form: mapForm(raw.formSection),
+    visitUs: mapVisitUs(raw.visitSection),
+    seo: mapSeo(raw.seo),
   };
 }
 
-/** Static defaults when CMS is unavailable (e.g. Public role 403). */
-export const EMPTY_CONTACT_PAGE: NormalizedContactPage = mapContactPage(null);
+export { EMPTY_CONTACT_PAGE };

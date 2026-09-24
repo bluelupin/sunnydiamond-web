@@ -9,6 +9,9 @@ export type MockOffer = {
   discountLabel: string;
   categoryLabel: string;
   iconVariant: MockOfferIconVariant;
+  /** UI preview — replace with API-calculated discount later. */
+  discountPercent?: number;
+  discountFixed?: number;
 };
 
 export type MockGiftCard = {
@@ -27,6 +30,7 @@ export const mockAvailableOffers: MockOffer[] = [
     discountLabel: "12% off",
     categoryLabel: "Bank Offer",
     iconVariant: "bank",
+    discountPercent: 12,
   },
   {
     id: "offer-sunny10",
@@ -37,6 +41,7 @@ export const mockAvailableOffers: MockOffer[] = [
     discountLabel: "10% off",
     categoryLabel: "Bank Offer",
     iconVariant: "coupon",
+    discountPercent: 10,
   },
   {
     id: "offer-welcome500",
@@ -47,6 +52,7 @@ export const mockAvailableOffers: MockOffer[] = [
     discountLabel: "₹500 off",
     categoryLabel: "Bank Offer",
     iconVariant: "coupon",
+    discountFixed: 500,
   },
   {
     id: "offer-festive15",
@@ -57,6 +63,7 @@ export const mockAvailableOffers: MockOffer[] = [
     discountLabel: "15% off",
     categoryLabel: "Bank Offer",
     iconVariant: "coupon",
+    discountPercent: 15,
   },
 ];
 
@@ -67,6 +74,26 @@ export const mockGiftCards: MockGiftCard[] = [
 
 export const findMockOfferByCode = (code: string) =>
   mockAvailableOffers.find((offer) => offer.code.toLowerCase() === code.trim().toLowerCase());
+
+export const findMockOfferById = (id: string) =>
+  mockAvailableOffers.find((offer) => offer.id === id);
+
+/** UI-only preview discount until Magento coupon API is wired. */
+export const getMockOfferDiscountAmount = (offer: MockOffer, subtotal: number) => {
+  if (subtotal <= 0) {
+    return 0;
+  }
+
+  if (offer.discountFixed != null) {
+    return Math.min(offer.discountFixed, subtotal);
+  }
+
+  if (offer.discountPercent != null) {
+    return Math.round((subtotal * offer.discountPercent) / 100);
+  }
+
+  return 0;
+};
 
 export const findMockGiftCardByCode = (code: string) =>
   mockGiftCards.find((card) => card.code.toLowerCase() === code.trim().toLowerCase());

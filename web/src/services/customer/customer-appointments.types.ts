@@ -4,13 +4,27 @@ export type CustomerAppointmentShowroom = {
   slug: string;
   city: string;
   state: string;
+  address: string;
+  mapUrl: string;
+  pincode: string;
+};
+
+export type CustomerAppointmentProduct = {
+  documentId: string;
+  productId: string | null;
+  productName: string | null;
+  requestedDate: string;
+  selectedTimeSlot: string;
+  workflowStatus: string;
 };
 
 export type CustomerAppointment = {
   documentId: string;
+  appointmentGroupId: string | null;
   formTag: string;
   productName: string | null;
   productId: string | null;
+  products: CustomerAppointmentProduct[];
   customerName: string;
   customerPhone: string;
   customerEmail: string;
@@ -18,6 +32,8 @@ export type CustomerAppointment = {
   selectedTimeSlot: string;
   workflowStatus: string;
   customerMessage: string | null;
+  /** Dedicated purpose field when CMS returns one; otherwise parsed from customerMessage. */
+  purposeOfVisit: string | null;
   addressLine1: string | null;
   addressLine2: string | null;
   pincode: string | null;
@@ -42,13 +58,29 @@ export type StrapiCustomerAppointmentShowroom = {
   slug?: string | null;
   city?: string | null;
   state?: string | null;
+  address?: string | null;
+  mapUrl?: string | null;
+  directionsUrl?: string | null;
+  pincode?: string | null;
+  phone?: string | null;
+};
+
+export type StrapiCustomerAppointmentProduct = {
+  documentId?: string | null;
+  productId?: string | number | null;
+  productName?: string | null;
+  requestedDate?: string | null;
+  selectedTimeSlot?: string | null;
+  workflowStatus?: string | null;
 };
 
 export type StrapiCustomerAppointment = {
   documentId?: string | null;
+  appointmentGroupId?: string | null;
   formTag?: string | null;
   productName?: string | null;
-  productId?: string | null;
+  productId?: string | number | null;
+  products?: StrapiCustomerAppointmentProduct[] | null;
   customerName?: string | null;
   customerPhone?: string | null;
   customerEmail?: string | null;
@@ -59,6 +91,8 @@ export type StrapiCustomerAppointment = {
   notes?: string | null;
   message?: string | null;
   customerMessage?: string | null;
+  purposeOfVisit?: string | null;
+  purpose?: string | null;
   addressLine1?: string | null;
   addressLine2?: string | null;
   pincode?: string | null;
@@ -78,5 +112,19 @@ export type StrapiCustomerAppointmentsResponse = {
       pageCount?: number | null;
       total?: number | null;
     } | null;
+  } | null;
+};
+
+export type StrapiAppointmentMutationResponse = {
+  data?: {
+    documentId?: string | null;
+    appointmentGroupId?: string | null;
+    requestedDate?: string | null;
+    selectedTimeSlot?: string | null;
+    workflowStatus?: string | null;
+    affectedProductDocumentIds?: string[] | null;
+  } | null;
+  meta?: {
+    changed?: boolean | null;
   } | null;
 };

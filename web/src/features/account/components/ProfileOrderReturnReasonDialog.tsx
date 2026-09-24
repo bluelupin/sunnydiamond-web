@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/shared/ui/dialog";
 import { profileTabsContent } from "../data/profileContent";
+import FormFieldError from "@/shared/ui/FormFieldError";
 
 type ProfileOrderReturnReasonDialogProps = {
   open: boolean;
@@ -61,7 +62,7 @@ export function ProfileOrderReturnReasonDialog({
       >
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between gap-4">
-            <DialogTitle className="font-larken text-32 font-light leading-110 text-darkblack">
+            <DialogTitle className="font-larken lg:text-32 text-2xl font-light leading-110 text-darkblack">
               {dialog.title}
             </DialogTitle>
             <button
@@ -121,11 +122,7 @@ export function ProfileOrderReturnReasonDialog({
           </p>
         ) : null}
 
-        {errorMessage ? (
-          <p className="font-gill text-sm font-light leading-110 text-red-700" role="alert">
-            {errorMessage}
-          </p>
-        ) : null}
+        <FormFieldError message={errorMessage ?? undefined} />
 
         <DetailDarkButton
           type="button"

@@ -5,16 +5,13 @@ import CareersJobPageHeader from "./CareersJobPageHeader";
 
 type CareersApplicationJobHeaderProps = {
   job: CareerJob;
-  shareLabel?: string;
-  onShare?: () => void;
   postedAt?: string;
   className?: string;
 };
 
+/** Application form header — no Share control (Figma apply form). Job detail keeps Share. */
 const CareersApplicationJobHeader = ({
   job,
-  shareLabel = "Share",
-  onShare,
   postedAt,
   className,
 }: CareersApplicationJobHeaderProps) => {
@@ -22,12 +19,7 @@ const CareersApplicationJobHeader = ({
 
   return (
     <div className={className}>
-      <CareersJobPageHeader
-        job={jobWithPosted}
-        titleId="careers-application-title"
-        shareLabel={shareLabel}
-        onShare={onShare}
-      />
+      <CareersJobPageHeader job={jobWithPosted} titleId="careers-application-title" />
 
       <div className="mt-6 h-px w-full bg-neutral300" aria-hidden />
     </div>

@@ -358,13 +358,46 @@ function mapMagentoOrderDiscounts(
     }));
 }
 
-function mapMagentoOrderComments(comments: MagentoOrderComment[] | null | undefined): TrackedOrderComment[] {
-  return (comments ?? [])
-    .filter((comment) => comment.message?.trim())
-    .map((comment) => ({
-      message: comment.message!.trim(),
+/** Normalize comment text so GraphQL and REST history entries dedupe reliably. */
+export function normalizeOrderCommentKey(message: string): string {
+  return message
+    .trim()
+    .replace(/\r\n/g, "\n")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/\n{3,}/g, "\n\n");
+}
+
+export function dedupeTrackedOrderComments(
+  comments: TrackedOrderComment[],
+): TrackedOrderComment[] {
+  const seen = new Set<string>();
+  const deduped: TrackedOrderComment[] = [];
+
+  for (const comment of comments) {
+    const key = normalizeOrderCommentKey(comment.message);
+    if (!key || seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    deduped.push({
+      message: comment.message.trim(),
       timestamp: comment.timestamp ?? null,
-    }));
+    });
+  }
+
+  return deduped;
+}
+
+function mapMagentoOrderComments(comments: MagentoOrderComment[] | null | undefined): TrackedOrderComment[] {
+  return dedupeTrackedOrderComments(
+    (comments ?? [])
+      .filter((comment) => comment.message?.trim())
+      .map((comment) => ({
+        message: comment.message!.trim(),
+        timestamp: comment.timestamp ?? null,
+      })),
+  );
 }
 
 function mapMagentoPaymentMethods(

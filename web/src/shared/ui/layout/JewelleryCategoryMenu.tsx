@@ -31,7 +31,7 @@ const VARIANT_CONFIG = {
     imageSizes: "(max-width: 1440px) 25vw, 300px",
     imageCoverClassName: "object-cover transition-transform duration-300 group-hover:scale-105",
     labelClassName:
-      "font-gill text-xl leading-110 text-darkblack transition-opacity group-hover:opacity-70",
+      "font-gill text-xl leading-110 text-darkblack transition-opacity",
   },
   mobile: {
     rowsClassName: "flex flex-col gap-3",

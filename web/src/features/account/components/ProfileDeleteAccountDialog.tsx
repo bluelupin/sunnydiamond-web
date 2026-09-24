@@ -39,12 +39,12 @@ export function ProfileDeleteAccountDialog({
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent
           side="bottom"
-          overlayClassName="bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
-          className="w-full gap-0 rounded-none border-0 bg-white p-0 sm:max-w-full [&>button]:hidden"
+          overlayClassName="z-[90] bg-[rgba(30,30,30,0.75)] backdrop-blur-[4.5px]"
+          className="z-[90] w-full gap-0 rounded-none border-0 bg-white p-0 sm:max-w-full [&>button]:hidden"
         >
           <div className="px-4 pt-6">
             <div className="flex items-center justify-between gap-4">
-              <SheetTitle className="font-larken text-2xl font-light leading-110 text-darkblack">
+              <SheetTitle className="font-larken lg:text-32 text-2xl font-light leading-110 text-darkblack">
                 {dialog.title}
               </SheetTitle>
               <button
@@ -86,13 +86,14 @@ export function ProfileDeleteAccountDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
+        elevated
         hideCloseButton
         className="max-w-[520px] gap-6 border-neutral300 bg-white p-6 sm:rounded-none"
       >
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between gap-4">
             <DialogTitle className="font-larken text-32 font-light leading-110 text-darkblack">
-              {dialog.title}
+              <span className="lg:text-32 text-2xl">{dialog.title}</span>
             </DialogTitle>
             <button
               type="button"

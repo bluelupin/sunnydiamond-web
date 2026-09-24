@@ -17,8 +17,9 @@ import FormFieldError from "@/shared/ui/FormFieldError";
 import { AmexLogo, MastercardLogo, VisaLogo } from "@/shared/ui/PaymentLogos";
 import { INDIAN_STATES } from "@/features/checkout/constants/indianStates";
 import type { CheckoutFormData, CheckoutPaymentData } from "../types/checkout.types";
+import type { CustomerAddress } from "@/services/customer/customer-account.types";
 import type { CheckoutFormField, CheckoutPaymentField } from "@/shared/utils/formValidation";
-import { isCheckoutEmailContact, isCodAvailableForOrderTotal } from "@/shared/utils/formValidation";
+import { isCheckoutEmailContact } from "@/shared/utils/formValidation";
 
 type CheckoutFormValidationProps = {
   errors: Partial<Record<CheckoutFormField, string | undefined>>;
@@ -39,11 +40,15 @@ type CheckoutFormStepProps = {
   onVerifyPhone: () => void;
   /** Guest contact VERIFY affordance — pass false when checkout OTP is disabled. */
   showVerify?: boolean;
+  /** Mobile sign-in is off, so the guest contact field takes an email address only. */
+  emailOnly?: boolean;
   /** Guest email blur — checks if the account already exists. */
   onContactBlur?: () => void;
   validation: CheckoutFormValidationProps;
   isAuthenticated?: boolean;
   hasSavedDeliveryAddress?: boolean;
+  savedAddresses?: CustomerAddress[];
+  onSelectSavedShippingAddress?: (addressUid: string) => void;
   fieldsDisabled?: boolean;
 };
 
@@ -55,6 +60,7 @@ type AddressFieldConfig = {
   city: CheckoutFormField;
   state: CheckoutFormField;
   phone: CheckoutFormField;
+  countryCode: keyof CheckoutFormData;
 };
 
 const SHIPPING_ADDRESS_FIELDS: AddressFieldConfig = {
@@ -65,6 +71,7 @@ const SHIPPING_ADDRESS_FIELDS: AddressFieldConfig = {
   city: "city",
   state: "state",
   phone: "shippingPhone",
+  countryCode: "shippingCountryCode",
 };
 
 const BILLING_ADDRESS_FIELDS: AddressFieldConfig = {
@@ -75,6 +82,7 @@ const BILLING_ADDRESS_FIELDS: AddressFieldConfig = {
   city: "billingCity",
   state: "billingState",
   phone: "billingPhone",
+  countryCode: "billingCountryCode",
 };
 
 const CheckoutAddressFields = ({
@@ -167,6 +175,8 @@ const CheckoutAddressFields = ({
       value={form[fields.phone] as string}
       onChange={(value) => onChange(fields.phone, value)}
       onBlur={() => validation.markTouched(fields.phone)}
+      countryCode={form[fields.countryCode] as string}
+      onCountryCodeChange={(code) => onChange(fields.countryCode, code)}
       showVerify={false}
       invalid={validation.showError(fields.phone)}
       error={validation.showError(fields.phone) ? validation.errors[fields.phone] : undefined}
@@ -182,6 +192,7 @@ const buildAddressLines = ({
   state,
   pincode,
   phone,
+  countryCode = "+91",
 }: {
   addressLine1: string;
   addressLine2: string;
@@ -189,12 +200,13 @@ const buildAddressLines = ({
   state: string;
   pincode: string;
   phone: string;
+  countryCode?: string;
 }) =>
   [
     addressLine1,
     addressLine2,
     `${city}, ${state}, ${pincode}`,
-    phone ? `+91 ${phone}` : "",
+    phone ? `${countryCode} ${phone}` : "",
   ].filter(Boolean);
 
 export const CheckoutFormStep = ({
@@ -203,22 +215,18 @@ export const CheckoutFormStep = ({
   phoneVerified,
   onVerifyPhone,
   showVerify = true,
+  emailOnly = false,
   onContactBlur,
   validation,
   isAuthenticated = false,
   hasSavedDeliveryAddress = true,
+  savedAddresses = [],
+  onSelectSavedShippingAddress,
   fieldsDisabled = false,
 }: CheckoutFormStepProps) => (
   <div className="flex flex-col gap-6">
     <CheckoutSectionCard>
-      <h2 className="font-gill text-xl font-normal leading-110 text-darkblack lg:text-2xl">
-        Personal Information
-      </h2>
-      {isAuthenticated ? (
-        <p className="font-gill text-sm font-light leading-110 text-neutral500">
-          Signed in to your Sunny Diamonds account.
-        </p>
-      ) : null}
+      <CheckoutSectionHeading>Personal Information</CheckoutSectionHeading>
       <CheckoutField
         id="checkout-name"
         label="Your Name*"
@@ -244,14 +252,16 @@ export const CheckoutFormStep = ({
       ) : (
         <CheckoutPhoneField
           id="checkout-phone-email"
-          label="PhoneNo / Email ID"
-          mode="phoneOrEmail"
+          label={emailOnly ? "Email ID*" : "PhoneNo / Email ID"}
+          mode={emailOnly ? "email" : "phoneOrEmail"}
           value={form.phoneOrEmail}
           onChange={(value) => onChange("phoneOrEmail", value)}
           onBlur={() => {
             validation.markTouched("phoneOrEmail");
             onContactBlur?.();
           }}
+          countryCode={form.contactCountryCode}
+          onCountryCodeChange={(code) => onChange("contactCountryCode", code)}
           verified={phoneVerified}
           onVerify={onVerifyPhone}
           showVerify={showVerify}
@@ -263,7 +273,7 @@ export const CheckoutFormStep = ({
     </CheckoutSectionCard>
 
     <CheckoutSectionCard gapClassName="lg:gap-8 gap-6">
-      <CheckoutSubheading>Delivery Address</CheckoutSubheading>
+      <CheckoutSectionHeading>Delivery Address</CheckoutSectionHeading>
       {isAuthenticated && !hasSavedDeliveryAddress ? (
         <p
           id="checkout-delivery-address-required"
@@ -278,13 +288,21 @@ export const CheckoutFormStep = ({
         </p>
       ) : (
         <>
-          {isAuthenticated ? (
-            <p className="font-gill text-sm font-light leading-130 text-neutral500">
-              Prefilled from your saved address. Any changes here apply to this order only.
-            </p>
-          ) : null}
+          {/* {isAuthenticated && savedAddresses.length > 1 ? (
+            <CheckoutSelectField
+              id="checkout-saved-shipping-address"
+              label="Saved Address"
+              value={form.selectedShippingAddressUid ?? ""}
+              onChange={(value) => onSelectSavedShippingAddress?.(value)}
+              options={savedAddresses.map((address) => ({
+                value: address.uid,
+                label: `${address.fullName} — ${address.city}`,
+              }))}
+              disabled={fieldsDisabled}
+            />
+          ) : null} */}
           <div className="space-y-6">
-            <CheckoutSubheading className="lg:text-xl text-base">SHIPPING ADDRESS</CheckoutSubheading>
+            <CheckoutSubheading>SHIPPING ADDRESS</CheckoutSubheading>
             <CheckoutAddressFields
               idPrefix="checkout-shipping"
               fields={SHIPPING_ADDRESS_FIELDS}
@@ -296,7 +314,7 @@ export const CheckoutFormStep = ({
           </div>
 
           <div className="lg:space-y-6 space-y-4">
-            <CheckoutSubheading className="lg:text-xl text-base">BILLING ADDRESS</CheckoutSubheading>
+            <CheckoutSubheading>BILLING ADDRESS</CheckoutSubheading>
             <CheckoutCheckbox
               checked={form.billingSameAsShipping}
               onChange={(checked) => onChange("billingSameAsShipping", checked)}
@@ -324,9 +342,10 @@ export const CheckoutFormStep = ({
 type CheckoutPaymentStepProps = {
   form: CheckoutFormData;
   payment: CheckoutPaymentData;
-  orderTotal: number;
   /** Backend removes cod-family payment methods when the cart holds engraved items. */
   hasEngravedItems?: boolean;
+  /** Whether Magento offers a cod-family method for this cart. The only COD gate. */
+  codOffered: boolean;
   onPaymentChange: (field: keyof CheckoutPaymentData, value: CheckoutPaymentData["method"]) => void;
   onEditPersonal: () => void;
   onEditDelivery: () => void;
@@ -360,8 +379,8 @@ const PaymentCardLogos = () => (
 export const CheckoutPaymentStep = ({
   form,
   payment,
-  orderTotal,
   hasEngravedItems = false,
+  codOffered,
   onPaymentChange,
   onEditPersonal,
   onEditDelivery,
@@ -378,6 +397,7 @@ export const CheckoutPaymentStep = ({
     state: form.state,
     pincode: form.pincode,
     phone: form.shippingPhone,
+    countryCode: form.shippingCountryCode,
   });
 
   const billingLines = form.billingSameAsShipping
@@ -389,13 +409,17 @@ export const CheckoutPaymentStep = ({
       state: form.billingState,
       pincode: form.billingPincode,
       phone: form.billingPhone,
+      countryCode: form.billingCountryCode,
     });
 
   const billingName = form.billingSameAsShipping
     ? form.shippingName || form.name
     : form.billingName || form.name;
 
-  const isCodAvailable = !hasEngravedItems && isCodAvailableForOrderTotal(orderTotal);
+  // Magento decides, not us: it applies the configured COD order minimum and
+  // maximum and the engraved-item rule, and a second opinion here could only
+  // ever disagree with it. hasEngravedItems is kept for the wording, not the gate.
+  const isCodAvailable = codOffered;
 
   return (
     <div className="flex flex-col lg:gap-[33px] gap-6">
@@ -408,7 +432,7 @@ export const CheckoutPaymentStep = ({
           {form.phoneOrEmail
             ? isCheckoutEmailContact(form.phoneOrEmail)
               ? `, ${form.phoneOrEmail}`
-              : `, +91 ${form.phoneOrEmail}`
+              : `, ${form.contactCountryCode} ${form.phoneOrEmail}`
             : ""}
         </CheckoutSummaryText>
       </CheckoutSectionCard>
@@ -418,11 +442,11 @@ export const CheckoutPaymentStep = ({
           Delivery Address
         </CheckoutSectionHeading>
         <div className="flex flex-col gap-4">
-          <CheckoutSubheading className="lg:text-xl text-base">SHIPPING ADDRESS</CheckoutSubheading>
+          <CheckoutSubheading>SHIPPING ADDRESS</CheckoutSubheading>
           <CheckoutAddressBlock name={form.shippingName || form.name} lines={shippingLines} />
         </div>
         <div className="flex flex-col gap-4">
-          <CheckoutSubheading className="lg:text-xl text-base">BILLING ADDRESS</CheckoutSubheading>
+          <CheckoutSubheading>BILLING ADDRESS</CheckoutSubheading>
           <CheckoutCheckbox
             checked={form.billingSameAsShipping}
             onChange={() => undefined}
@@ -437,7 +461,7 @@ export const CheckoutPaymentStep = ({
 
       <CheckoutSectionCard gapClassName="gap-6">
         <CheckoutSectionHeading onEdit={onEditPayment} editDisabled={editDisabled}>
-          Payment Mehtod
+          Payment Method
         </CheckoutSectionHeading>
 
         <div id="checkout-payment-methods" className="flex flex-col gap-6">
@@ -487,10 +511,10 @@ export const CheckoutPaymentStep = ({
                     )}
                   >
                     {isCodAvailable
-                      ? "*for orders up to ₹40,000"
+                      ? "Pay in cash when your order arrives"
                       : hasEngravedItems
                         ? "Not available for engraved items"
-                        : "Not available for orders above ₹40,000"}
+                        : "Not available for this order value"}
                   </span>
                 </span>
               }

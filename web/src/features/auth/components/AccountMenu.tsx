@@ -6,6 +6,7 @@ import UserIcon from "@/assets/Icons/UserIcon";
 import { AccountAvatarIcon } from "./AccountAvatarIcon";
 import { useAuth } from "../context/AuthContext";
 import { useRequestAuth } from "../hooks/useRequestAuth";
+import { useMounted } from "@/shared/hooks/use-mounted";
 
 type AccountMenuProps = {
   className?: string;
@@ -19,10 +20,11 @@ type AccountMenuProps = {
 /** Header account icon: opens login for guests, navigates to profile when signed in. */
 const AccountMenu = ({ className, onNavigate, onProfileOpen, returnUrl }: AccountMenuProps) => {
   const pathname = usePathname() ?? "/";
+  const mounted = useMounted();
   const { status, customer } = useAuth();
   const { requestAuth } = useRequestAuth();
 
-  if (status !== "authenticated" || !customer) {
+  if (!mounted || status !== "authenticated" || !customer) {
     return (
       <button
         type="button"

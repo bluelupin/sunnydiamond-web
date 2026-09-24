@@ -1,4 +1,4 @@
-/** Figma nodes 1049:49593, 1049:49826, 1049:50059, delivery & success screens */
+/** Figma nodes 1049:49593, 1049:49826, 1049:50059, 4903:106197, 4903:100405 */
 export const giftCardFlowContent = {
   title: "Gift Card",
   cardTypes: {
@@ -18,24 +18,22 @@ export const giftCardFlowContent = {
   occasion: {
     label: "Occasion*",
     placeholder: "Select Occasion",
-    options: [
-      { label: "Wedding", value: "wedding" },
-      { label: "Anniversary", value: "anniversary" },
-      { label: "Birthday", value: "birthday" },
-      { label: "Festive", value: "festive" },
-    ],
+  },
+  date: {
+    label: "Date*",
+    placeholder: "DD / MM / YYYY",
   },
   message: {
     label: "Add a Message",
     placeholder: "Write a personalised note here",
   },
   details: {
-    senderHeading: "Sender's Address",
-    receiverHeading: "Receiver's Address",
-    sameAsSenderLabel: "Same address as sender's details",
+    senderHeading: "Sender's Details",
+    receiverHeading: "Receiver's Details",
+    sameAsSenderLabel: "Same as Sender",
     fullNameLabel: "Full Name*",
     phoneLabel: "Phone No.*",
-    emailLabel: "Email ID",
+    emailLabel: "Email ID*",
     placeholder: "Enter",
   },
   address: {
@@ -53,13 +51,13 @@ export const giftCardFlowContent = {
     payNowLabel: "PAY NOW",
   },
   success: {
-    title: "Gift Card Confirmed",
+    title: "Your Gift Card Is on Its Way",
     physicalMessage:
       "Your physical gift card order has been placed and will be delivered to the recipient by",
     digitalMessage:
       "Your digital gift card has been sent to the recipient and will be available shortly.",
     image: {
-      src: "/images/gifting/gift-cards.png",
+      src: "/images/gifting/gift-card-success.png",
       alt: "Sunny Diamonds gift card",
     },
     trackOrderLabel: "TRACK ORDER",
@@ -68,5 +66,7 @@ export const giftCardFlowContent = {
   },
   cta: {
     addDetails: "ADD DETAILS",
+    addAddress: "ADD ADDRESS",
+    payNow: "PAY NOW",
   },
 };

@@ -2,7 +2,10 @@
 
 import Image from "next/image";
 import type { StaticImageData } from "next/image";
-import { Check, ShoppingBag } from "lucide-react";
+import { Check } from "lucide-react";
+import ShoppingBagIcon from "@/assets/Icons/ShoppingBagIcon";
+import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { formatJewelleryPrice } from "@/features/jewellery-product/utils/formatPrice";
 import type { Product } from "@/features/products/data/products";
 import {
@@ -12,12 +15,15 @@ import {
 } from "@/features/products/utils/tryAtHomeBooking";
 import { DetailDarkButton, DetailOutlineButton } from "./shared";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 
 type TryAtHomeSuccessStepProps = {
   product: Product;
   productImage: string | StaticImageData;
   booking: TryAtHomeBookingSummary;
   additionalItemsCount?: number;
+  successMessage?: string;
   onClose: () => void;
   onViewBooking: () => void;
   onContinueShopping: () => void;
@@ -28,6 +34,7 @@ const TryAtHomeSuccessStep = ({
   productImage,
   booking,
   additionalItemsCount = 0,
+  successMessage = "Item added to your Try at Home booking!",
   onClose,
   onViewBooking,
   onContinueShopping,
@@ -36,8 +43,9 @@ const TryAtHomeSuccessStep = ({
 
   return (
     <>
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-        <div className="flex flex-col gap-6 px-4 pb-72 pt-6 lg:px-8 lg:pt-8">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain DrawerVerticleScrollbar">
+        <div className={cn("flex flex-col gap-6 pb-72", RIGHT_PANEL_HEADER_PADDING_CLASS, "lg:px-8 lg:pt-8")}>
           <div className="flex flex-col gap-6">
             <div className="grid w-full [&>*]:col-start-1 [&>*]:row-start-1">
               <div className="flex justify-center">
@@ -45,24 +53,15 @@ const TryAtHomeSuccessStep = ({
                   <Check size={22} strokeWidth={2} aria-hidden className="text-white" />
                 </span>
               </div>
-              <button
-                type="button"
+              <RightPanelCloseButton
                 onClick={onClose}
-                aria-label="Close try at home success panel"
-                className="inline-flex size-6 shrink-0 items-center justify-self-end"
-              >
-                <Image
-                  src="/icons/menu-close.svg"
-                  alt=""
-                  width={24}
-                  height={24}
-                  aria-hidden
-                />
-              </button>
+                aria-label="Close booking success panel"
+                className="justify-self-end"
+              />
             </div>
 
             <p className="text-center font-gill text-base font-light leading-110 text-darkblack">
-              Item added to your try at home booking !
+              {successMessage}
             </p>
           </div>
 
@@ -93,7 +92,14 @@ const TryAtHomeSuccessStep = ({
                 />
               </div>
               <div className="flex min-w-0 flex-1 flex-col gap-4 pl-3">
-                <p className="font-gill text-base leading-110 text-darkblack">{product.name}</p>
+                <p
+                  className={cn(
+                    "font-gill text-base leading-110 text-darkblack",
+                    productNameDisplayClassName,
+                  )}
+                >
+                  {product.name}
+                </p>
                 <p className="font-gill text-base leading-110 text-darkblack">
                   ₹{formatJewelleryPrice(product.price)}
                 </p>
@@ -102,7 +108,7 @@ const TryAtHomeSuccessStep = ({
 
             {additionalItemsCount > 0 ? (
               <div className="flex items-center gap-1">
-                <ShoppingBag size={20} strokeWidth={1.25} aria-hidden className="shrink-0 text-darkblack" />
+                <ShoppingBagIcon className="size-5 shrink-0 text-darkblack" />
                 <p className="font-gill text-base font-light leading-110 text-darkblack">
                   Your booking has {additionalItemsCount} more{" "}
                   {additionalItemsCount === 1 ? "item" : "items"}
@@ -119,6 +125,7 @@ const TryAtHomeSuccessStep = ({
           Continue Shopping
         </DetailOutlineButton>
       </PanelFooter>
+      </div>
     </>
   );
 };

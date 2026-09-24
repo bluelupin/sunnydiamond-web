@@ -13,21 +13,35 @@ import {
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useLoginModal } from "@/features/auth/context/LoginModalContext";
-import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
-import WishlistMovedToast from "@/features/wishlist/components/WishlistMovedToast";
-import { WISHLIST_STORAGE_KEY } from "@/features/wishlist/constants";
-import { wishlistMovedToastDurationMs, wishlistPageContent } from "@/features/wishlist/data/content";
+import AppStatusToast, { AppStatusToastAction } from "@/shared/ui/AppStatusToast";
+import {
+  clearGuestWishlistStorage,
+  readGuestWishlistFromStorage,
+  writeGuestWishlistToStorage,
+} from "@/features/wishlist/utils/guestWishlistStorage";
+import {
+  wishlistMovedToastDurationMs,
+  wishlistPageContent,
+  wishlistRemovedToastDurationMs,
+} from "@/features/wishlist/data/content";
 import {
   addCustomerWishlistSku,
   getCustomerWishlist,
   removeCustomerWishlistSku,
 } from "@/services/customer/customer-wishlist.client";
 
+type WishlistMutationOptions = {
+  showMovedToast?: boolean;
+  showRemovedToast?: boolean;
+};
+
 interface WishlistContextType {
   wishlistedIds: string[];
   totalItems: number;
   isWishlisted: (productSku: string) => boolean;
   toggleWishlist: (productSku: string) => void;
+  addToWishlist: (productSku: string, options?: WishlistMutationOptions) => Promise<void>;
+  removeFromWishlist: (productSku: string, options?: WishlistMutationOptions) => Promise<void>;
 }
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
@@ -46,6 +60,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   const [isMovedToastOpen, setIsMovedToastOpen] = useState(false);
   const movedToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isRemovedToastOpen, setIsRemovedToastOpen] = useState(false);
+  const [removedSkuForUndo, setRemovedSkuForUndo] = useState<string | null>(null);
   const removedToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   wishlistedIdsRef.current = wishlistedIds;
@@ -73,16 +88,63 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       removedToastTimeoutRef.current = null;
     }
     setIsRemovedToastOpen(false);
+    setRemovedSkuForUndo(null);
   }, []);
 
-  const showRemovedToast = useCallback(() => {
+  const showRemovedToast = useCallback(
+    (sku: string) => {
+      dismissRemovedToast();
+      setRemovedSkuForUndo(sku);
+      setIsRemovedToastOpen(true);
+      removedToastTimeoutRef.current = setTimeout(() => {
+        setIsRemovedToastOpen(false);
+        setRemovedSkuForUndo(null);
+        removedToastTimeoutRef.current = null;
+      }, wishlistRemovedToastDurationMs);
+    },
+    [dismissRemovedToast],
+  );
+
+  const undoRemovedFromWishlist = useCallback(() => {
+    const sku = removedSkuForUndo?.trim();
+    if (!sku) {
+      return;
+    }
+
     dismissRemovedToast();
-    setIsRemovedToastOpen(true);
-    removedToastTimeoutRef.current = setTimeout(() => {
-      setIsRemovedToastOpen(false);
-      removedToastTimeoutRef.current = null;
-    }, appStatusToastDurationMs);
-  }, [dismissRemovedToast]);
+
+    if (status === "guest") {
+      setWishlistedIds((current) => {
+        const next = current.includes(sku) ? current : [...current, sku];
+        writeGuestWishlistToStorage(next);
+        return next;
+      });
+      return;
+    }
+
+    const undoGeneration = ++toggleGenerationRef.current;
+    lastLocalMutationAtRef.current = Date.now();
+
+    setWishlistedIds((current) => (current.includes(sku) ? current : [...current, sku]));
+
+    void (async () => {
+      try {
+        const wishlist = await addCustomerWishlistSku(sku);
+
+        if (undoGeneration !== toggleGenerationRef.current) {
+          return;
+        }
+
+        setWishlistedIds(wishlist.skus);
+      } catch {
+        if (undoGeneration !== toggleGenerationRef.current) {
+          return;
+        }
+
+        setWishlistedIds((current) => current.filter((id) => id !== sku));
+      }
+    })();
+  }, [dismissRemovedToast, removedSkuForUndo, status]);
 
   useEffect(() => {
     return () => {
@@ -105,8 +167,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     }
 
     if (status === "guest") {
-      setWishlistedIds([]);
-      window.localStorage.removeItem(WISHLIST_STORAGE_KEY);
+      setWishlistedIds(readGuestWishlistFromStorage());
       return;
     }
 
@@ -128,92 +189,132 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         }
 
         setWishlistedIds(wishlist.skus);
+        clearGuestWishlistStorage();
       })
       .catch(() => {
         setWishlistedIds([]);
       });
   }, [hasLoaded, status]);
 
-  useEffect(() => {
-    if (!hasLoaded || status !== "authenticated") {
-      return;
-    }
-
-    window.localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(wishlistedIds));
-  }, [wishlistedIds, hasLoaded, status]);
-
   const isWishlisted = useCallback(
-    (productSku: string) => {
-      if (status !== "authenticated") {
-        return false;
-      }
-
-      return wishlistedIds.includes(productSku.trim());
-    },
-    [wishlistedIds, status],
+    (productSku: string) => wishlistedIds.includes(productSku.trim()),
+    [wishlistedIds],
   );
 
-  const toggleWishlist = useCallback(
-    (productSku: string) => {
+  const mutateWishlist = useCallback(
+    async (
+      productSku: string,
+      action: "add" | "remove",
+      options: WishlistMutationOptions = {},
+    ): Promise<void> => {
       const normalizedSku = productSku.trim();
       if (!normalizedSku) {
         return;
       }
 
-      if (status !== "authenticated") {
-        openLoginModal({ returnUrl: pathname });
+      if (status === "guest") {
+        const current = wishlistedIdsRef.current;
+        const isCurrentlyWishlisted = current.includes(normalizedSku);
+
+        if (action === "add" && isCurrentlyWishlisted) {
+          return;
+        }
+
+        if (action === "remove" && !isCurrentlyWishlisted) {
+          return;
+        }
+
+        const next =
+          action === "add"
+            ? [...current, normalizedSku]
+            : current.filter((id) => id !== normalizedSku);
+
+        lastLocalMutationAtRef.current = Date.now();
+        setWishlistedIds(next);
+        writeGuestWishlistToStorage(next);
+
+        if (action === "add") {
+          if (options.showMovedToast !== false) {
+            dismissRemovedToast();
+            showMovedToast();
+          }
+        } else if (options.showRemovedToast !== false) {
+          dismissMovedToast();
+          showRemovedToast(normalizedSku);
+        }
+
         return;
       }
 
+      if (status !== "authenticated") {
+        openLoginModal({ returnUrl: pathname });
+        throw new Error("Authentication required");
+      }
+
       if (inflightSkusRef.current.has(normalizedSku)) {
-        return;
+        throw new Error("Wishlist update in progress");
       }
 
       const current = wishlistedIdsRef.current;
       const isCurrentlyWishlisted = current.includes(normalizedSku);
+
+      if (action === "add" && isCurrentlyWishlisted) {
+        return;
+      }
+
+      if (action === "remove" && !isCurrentlyWishlisted) {
+        return;
+      }
+
       const previous = current;
-      const next = isCurrentlyWishlisted
-        ? current.filter((id) => id !== normalizedSku)
-        : [...current, normalizedSku];
+      const next =
+        action === "add"
+          ? [...current, normalizedSku]
+          : current.filter((id) => id !== normalizedSku);
 
       inflightSkusRef.current.add(normalizedSku);
       const toggleGeneration = ++toggleGenerationRef.current;
       lastLocalMutationAtRef.current = Date.now();
       setWishlistedIds(next);
 
-      if (!isCurrentlyWishlisted) {
-        dismissRemovedToast();
-        showMovedToast();
-      } else {
+      if (action === "add") {
+        if (options.showMovedToast !== false) {
+          dismissRemovedToast();
+          showMovedToast();
+        }
+      } else if (options.showRemovedToast !== false) {
         dismissMovedToast();
-        showRemovedToast();
+        showRemovedToast(normalizedSku);
       }
 
-      void (async () => {
-        try {
-          const wishlist = isCurrentlyWishlisted
-            ? await removeCustomerWishlistSku(normalizedSku)
-            : await addCustomerWishlistSku(normalizedSku);
+      try {
+        const wishlist =
+          action === "add"
+            ? await addCustomerWishlistSku(normalizedSku)
+            : await removeCustomerWishlistSku(normalizedSku);
 
-          if (toggleGeneration !== toggleGenerationRef.current) {
-            return;
-          }
-
-          setWishlistedIds(wishlist.skus);
-        } catch {
-          if (toggleGeneration !== toggleGenerationRef.current) {
-            return;
-          }
-
-          setWishlistedIds(previous);
-
-          if (isCurrentlyWishlisted) {
-            dismissRemovedToast();
-          }
-        } finally {
-          inflightSkusRef.current.delete(normalizedSku);
+        if (toggleGeneration !== toggleGenerationRef.current) {
+          return;
         }
-      })();
+
+        setWishlistedIds(wishlist.skus);
+      } catch (error) {
+        if (toggleGeneration !== toggleGenerationRef.current) {
+          throw error;
+        }
+
+        setWishlistedIds(previous);
+
+        if (action === "add") {
+          dismissMovedToast();
+        } else if (options.showRemovedToast !== false) {
+          dismissRemovedToast();
+        }
+
+        throw error;
+      } finally {
+        inflightSkusRef.current.delete(normalizedSku);
+      }
     },
     [
       dismissMovedToast,
@@ -226,23 +327,76 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     ],
   );
 
+  const addToWishlist = useCallback(
+    (productSku: string, options?: WishlistMutationOptions) =>
+      mutateWishlist(productSku, "add", options),
+    [mutateWishlist],
+  );
+
+  const removeFromWishlist = useCallback(
+    (productSku: string, options?: WishlistMutationOptions) =>
+      mutateWishlist(productSku, "remove", options),
+    [mutateWishlist],
+  );
+
+  const toggleWishlist = useCallback(
+    (productSku: string) => {
+      const normalizedSku = productSku.trim();
+      if (!normalizedSku) {
+        return;
+      }
+
+      if (status === "guest") {
+        const isCurrentlyWishlisted = wishlistedIdsRef.current.includes(normalizedSku);
+        void mutateWishlist(normalizedSku, isCurrentlyWishlisted ? "remove" : "add");
+        return;
+      }
+
+      if (status !== "authenticated") {
+        openLoginModal({ returnUrl: pathname });
+        return;
+      }
+
+      const isCurrentlyWishlisted = wishlistedIdsRef.current.includes(normalizedSku);
+      void mutateWishlist(normalizedSku, isCurrentlyWishlisted ? "remove" : "add");
+    },
+    [mutateWishlist, openLoginModal, pathname, status],
+  );
+
   const value = useMemo(
     () => ({
       wishlistedIds,
-      totalItems: status === "authenticated" ? wishlistedIds.length : 0,
+      totalItems: wishlistedIds.length,
       isWishlisted,
       toggleWishlist,
+      addToWishlist,
+      removeFromWishlist,
     }),
-    [isWishlisted, status, toggleWishlist, wishlistedIds],
+    [addToWishlist, isWishlisted, removeFromWishlist, status, toggleWishlist, wishlistedIds],
   );
 
   return (
     <WishlistContext.Provider value={value}>
       {children}
-      <WishlistMovedToast open={isMovedToastOpen} onClose={dismissMovedToast} />
+      <AppStatusToast
+        open={isMovedToastOpen}
+        message={wishlistPageContent.movedToWishlistMessage}
+        action={
+          <AppStatusToastAction href={wishlistPageContent.movedToWishlistHref} onClick={dismissMovedToast}>
+            {wishlistPageContent.movedToWishlistViewLabel}
+          </AppStatusToastAction>
+        }
+      />
       <AppStatusToast
         open={isRemovedToastOpen}
         message={wishlistPageContent.removedFromWishlistMessage}
+        action={
+          removedSkuForUndo ? (
+            <AppStatusToastAction onClick={undoRemovedFromWishlist}>
+              {wishlistPageContent.removedFromWishlistUndoLabel}
+            </AppStatusToastAction>
+          ) : undefined
+        }
       />
     </WishlistContext.Provider>
   );

@@ -1,0 +1,153 @@
+{
+  "generatedAt": "2026-09-17T08:11:29.779Z",
+  "baseUrl": "http://localhost:3001",
+  "summary": {
+    "total": 28,
+    "pass": 27,
+    "fail": 1,
+    "partial": 0,
+    "blocked": 0
+  },
+  "results": {
+    "LAD-001": {
+      "status": "Fail",
+      "actual": "HTTP error: The operation was aborted due to timeout",
+      "testedAt": "2026-09-17T08:11:29.777Z"
+    },
+    "LAD-002": {
+      "status": "Pass",
+      "actual": "GET /education → 308",
+      "testedAt": "2026-09-17T08:10:59.774Z"
+    },
+    "LAD-003": {
+      "status": "Pass",
+      "actual": "Suspense skeleton",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-004": {
+      "status": "Pass",
+      "actual": "ISR revalidate 300",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-005": {
+      "status": "Pass",
+      "actual": "CMS empty fallback",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-006": {
+      "status": "Pass",
+      "actual": "generateMetadata wired",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-008": {
+      "status": "Pass",
+      "actual": "JSON-LD builder",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-009": {
+      "status": "Pass",
+      "actual": "Metadata fallback",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-010": {
+      "status": "Pass",
+      "actual": "Hero section wired",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-011": {
+      "status": "Pass",
+      "actual": "Hero null guard",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-012": {
+      "status": "Pass",
+      "actual": "Hero load animation hook",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-013": {
+      "status": "Pass",
+      "actual": "Four Cs intro",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-014": {
+      "status": "Pass",
+      "actual": "Intro null guard",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-015": {
+      "status": "Pass",
+      "actual": "Four Cs panels",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-019": {
+      "status": "Pass",
+      "actual": "Panel texture asset",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-020": {
+      "status": "Pass",
+      "actual": "Certificate section",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-021": {
+      "status": "Pass",
+      "actual": "Certificate null guard",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-022": {
+      "status": "Pass",
+      "actual": "Learn more section",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-023": {
+      "status": "Pass",
+      "actual": "Anatomy scroll sync",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-024": {
+      "status": "Pass",
+      "actual": "Discover CTA section",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-025": {
+      "status": "Pass",
+      "actual": "Discover journey panel",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-026": {
+      "status": "Pass",
+      "actual": "FAQ section",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-027": {
+      "status": "Pass",
+      "actual": "FAQ null guard",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-028": {
+      "status": "Pass",
+      "actual": "CMS page service",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-029": {
+      "status": "Pass",
+      "actual": "Page mapper",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-030": {
+      "status": "Pass",
+      "actual": "Deep populate query",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-031": {
+      "status": "Pass",
+      "actual": "Nav uses learnAboutDiamondsRoute",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    },
+    "LAD-007": {
+      "status": "Pass",
+      "actual": "SEO metadata resolver",
+      "testedAt": "2026-09-17T08:10:59.710Z"
+    }
+  }
+}

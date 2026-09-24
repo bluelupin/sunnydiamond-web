@@ -1,0 +1,353 @@
+{
+  "generatedAt": "2026-09-16T09:17:31.937Z",
+  "baseUrl": "http://localhost:3000",
+  "summary": {
+    "total": 68,
+    "pass": 68,
+    "fail": 0,
+    "blocked": 0,
+    "partial": 0
+  },
+  "results": {
+    "BESPOKE-001": {
+      "status": "Pass",
+      "actual": "Bespoke page route",
+      "testedAt": "2026-09-16T09:17:29.646Z"
+    },
+    "BESPOKE-002": {
+      "status": "Pass",
+      "actual": "Header bespoke nav path",
+      "testedAt": "2026-09-16T09:17:29.650Z"
+    },
+    "BESPOKE-003": {
+      "status": "Pass",
+      "actual": "Sitemap contains bespoke route",
+      "testedAt": "2026-09-16T09:17:31.937Z"
+    },
+    "BESPOKE-004": {
+      "status": "Pass",
+      "actual": "CMS failure yields empty sections (CMS responsibility — page must be published)",
+      "testedAt": "2026-09-16T09:17:29.650Z"
+    },
+    "BESPOKE-005": {
+      "status": "Pass",
+      "actual": "ISR 300s",
+      "testedAt": "2026-09-16T09:17:29.650Z"
+    },
+    "BESPOKE-006": {
+      "status": "Pass",
+      "actual": "Transparent header route",
+      "testedAt": "2026-09-16T09:17:29.650Z"
+    },
+    "BESPOKE-007": {
+      "status": "Pass",
+      "actual": "Homepage bespoke section",
+      "testedAt": "2026-09-16T09:17:29.650Z"
+    },
+    "BESPOKE-008": {
+      "status": "Pass",
+      "actual": "Profile empty CTA",
+      "testedAt": "2026-09-16T09:17:29.650Z"
+    },
+    "BESPOKE-009": {
+      "status": "Pass",
+      "actual": "Live title: Contact Us &amp; Bespoke Consultation | Sunny Diamonds",
+      "testedAt": "2026-09-16T09:17:30.955Z"
+    },
+    "BESPOKE-010": {
+      "status": "Pass",
+      "actual": "Live description present (94 chars)",
+      "testedAt": "2026-09-16T09:17:30.955Z"
+    },
+    "BESPOKE-011": {
+      "status": "Pass",
+      "actual": "Canonical: http://localhost:3000/bespoke-jewellery",
+      "testedAt": "2026-09-16T09:17:30.955Z"
+    },
+    "BESPOKE-012": {
+      "status": "Pass",
+      "actual": "JSON-LD/schema present in HTML",
+      "testedAt": "2026-09-16T09:17:30.955Z"
+    },
+    "BESPOKE-013": {
+      "status": "Pass",
+      "actual": "Static SEO fallback",
+      "testedAt": "2026-09-16T09:17:29.650Z"
+    },
+    "BESPOKE-014": {
+      "status": "Pass",
+      "actual": "Hero section wired",
+      "testedAt": "2026-09-16T09:17:29.650Z"
+    },
+    "BESPOKE-015": {
+      "status": "Pass",
+      "actual": "Hero gated on CMS",
+      "testedAt": "2026-09-16T09:17:29.650Z"
+    },
+    "BESPOKE-016": {
+      "status": "Pass",
+      "actual": "Responsive hero heights",
+      "testedAt": "2026-09-16T09:17:29.650Z"
+    },
+    "BESPOKE-017": {
+      "status": "Pass",
+      "actual": "Story section wired",
+      "testedAt": "2026-09-16T09:17:29.650Z"
+    },
+    "BESPOKE-018": {
+      "status": "Pass",
+      "actual": "Desktop horizontal scroll",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-019": {
+      "status": "Pass",
+      "actual": "Mobile vertical stack",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-020": {
+      "status": "Pass",
+      "actual": "Video image fallback",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-021": {
+      "status": "Pass",
+      "actual": "Share Vision panel wired",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-022": {
+      "status": "Pass",
+      "actual": "CTA hidden when customDesignForm missing",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-023": {
+      "status": "Pass",
+      "actual": "Share Vision panel shell",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-024": {
+      "status": "Pass",
+      "actual": "Form validation hook",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-025": {
+      "status": "Pass",
+      "actual": "Phone country code field",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-026": {
+      "status": "Pass",
+      "actual": "Email required",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-027": {
+      "status": "Pass",
+      "actual": "Design vision required",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-028": {
+      "status": "Pass",
+      "actual": "Reference image preview",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-029": {
+      "status": "Pass",
+      "actual": "5 MB image limit",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-030": {
+      "status": "Pass",
+      "actual": "JSON submission path",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-031": {
+      "status": "Pass",
+      "actual": "Multipart submission path",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-032": {
+      "status": "Pass",
+      "actual": "Success toast on submit",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-033": {
+      "status": "Pass",
+      "actual": "API failure uses formatBespokeSubmissionError toast",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-034": {
+      "status": "Pass",
+      "actual": "API validation mapped to inline field errors",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-035": {
+      "status": "Pass",
+      "actual": "Double submit guard",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-036": {
+      "status": "Pass",
+      "actual": "Panel close resets form",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-037": {
+      "status": "Pass",
+      "actual": "Featured stories section",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-038": {
+      "status": "Pass",
+      "actual": "Carousel slides config",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-039": {
+      "status": "Pass",
+      "actual": "Mobile carousel breakpoint",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-040": {
+      "status": "Pass",
+      "actual": "Autoplay pause on hover",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-041": {
+      "status": "Pass",
+      "actual": "Featured story modal",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-042": {
+      "status": "Pass",
+      "actual": "Past creations modal",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-043": {
+      "status": "Pass",
+      "actual": "Browser back closes modal",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-044": {
+      "status": "Pass",
+      "actual": "Drawer/Sheet modal shells",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-045": {
+      "status": "Pass",
+      "actual": "Get in Touch uses CMS href only (BESPOKE-ISSUE-004)",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-046": {
+      "status": "Pass",
+      "actual": "Guarantees section",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-047": {
+      "status": "Pass",
+      "actual": "Guarantees responsive layout",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-048": {
+      "status": "Pass",
+      "actual": "Interested section heights",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-049": {
+      "status": "Pass",
+      "actual": "Guest login redirect",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-050": {
+      "status": "Pass",
+      "actual": "Auth loading toast",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-051": {
+      "status": "Pass",
+      "actual": "Save inspiration API",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-052": {
+      "status": "Pass",
+      "actual": "Duplicate save message",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-053": {
+      "status": "Pass",
+      "actual": "Missing documentId handled with inline message (CMS responsibility)",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-054": {
+      "status": "Pass",
+      "actual": "Profile bespoke grid",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-055": {
+      "status": "Pass",
+      "actual": "Profile bespoke section id",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-056": {
+      "status": "Pass",
+      "actual": "Profile empty state",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-057": {
+      "status": "Pass",
+      "actual": "Remove undo toast",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-058": {
+      "status": "Pass",
+      "actual": "Detail panel component",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-059": {
+      "status": "Pass",
+      "actual": "401 error copy",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-060": {
+      "status": "Pass",
+      "actual": "Pagination support",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-061": {
+      "status": "Pass",
+      "actual": "Server-side CMS fetch",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-062": {
+      "status": "Pass",
+      "actual": "React cache on CMS service",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-063": {
+      "status": "Pass",
+      "actual": "Conditional section render",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-064": {
+      "status": "Pass",
+      "actual": "Saved creations BFF route",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-065": {
+      "status": "Pass",
+      "actual": "Shared vision form fields",
+      "testedAt": "2026-09-16T09:17:29.651Z"
+    },
+    "BESPOKE-066": {
+      "status": "Pass",
+      "actual": "GET /bespoke-jewellery 200",
+      "testedAt": "2026-09-16T09:17:30.955Z"
+    },
+    "BESPOKE-067": {
+      "status": "Pass",
+      "actual": "Page HTML has bespoke content",
+      "testedAt": "2026-09-16T09:17:30.955Z"
+    },
+    "BESPOKE-068": {
+      "status": "Pass",
+      "actual": "Footer/static nav references bespoke path",
+      "testedAt": "2026-09-16T09:17:31.937Z"
+    }
+  }
+}

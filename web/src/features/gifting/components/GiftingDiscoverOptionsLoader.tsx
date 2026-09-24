@@ -18,10 +18,7 @@ const GiftingDiscoverOptionsLoader = async ({
     prefetchJewelleryListing(null),
   ]);
 
-  const discoverOptions =
-    nav && listing?.facets
-      ? mapGiftingDiscoverOptions(nav, listing.facets)
-      : undefined;
+  const discoverOptions = mapGiftingDiscoverOptions(nav, listing?.facets);
 
   return (
     <GiftingDiscoverSection

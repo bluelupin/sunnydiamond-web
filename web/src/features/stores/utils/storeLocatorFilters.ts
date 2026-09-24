@@ -1,4 +1,7 @@
 import type { BookStoreVisitStore } from "@/features/products/data/bookStoreVisitContent";
+import {
+  storeLocatorInvalidPincodeMessage,
+} from "@/features/stores/data/storeLocatorContent";
 
 const INDIAN_PINCODE_PATTERN = /\b(\d{6})\b/;
 const INDIAN_STATES = [
@@ -57,7 +60,31 @@ function normalizeFilterText(value?: string | null): string {
 }
 
 function getStoreState(store: BookStoreVisitStore): string {
-  return normalizeFilterText(store.state ?? inferStateFromAddress(store.address));
+  const raw = store.state?.trim() || inferStateFromAddress(store.address);
+  const normalized = normalizeFilterText(raw);
+  // CMS may store "Delhi" while the location filter label is "New Delhi".
+  if (normalized === "delhi") return "new delhi";
+  return normalized;
+}
+
+/**
+ * State tabs match showroom `state` (and `city` when the tab is a place name
+ * like "New Delhi"). Exact match only — substring checks caused false hits
+ * (e.g. `"".includes` / `"maharashtra".includes("")`).
+ */
+function storeMatchesStateFilter(
+  store: BookStoreVisitStore,
+  stateFilter: string,
+): boolean {
+  if (!stateFilter) return true;
+
+  const storeState = getStoreState(store);
+  if (storeState && storeState === stateFilter) return true;
+
+  const city = normalizeFilterText(store.city);
+  if (city && city === stateFilter) return true;
+
+  return false;
 }
 
 function getStoreSearchHaystack(store: BookStoreVisitStore): string {
@@ -88,11 +115,8 @@ export function filterBookStoreVisitStores(
   const applyStateFilter = Boolean(stateFilter) && !query;
 
   return stores.filter((store) => {
-    if (applyStateFilter) {
-      const storeState = getStoreState(store);
-      if (storeState !== stateFilter && !storeState.includes(stateFilter)) {
-        return false;
-      }
+    if (applyStateFilter && !storeMatchesStateFilter(store, stateFilter)) {
+      return false;
     }
 
     if (!query) {
@@ -130,6 +154,7 @@ function isValidIndianPincode(query: string): boolean {
  */
 export function getStoreLocatorPincodeSearchError(
   searchQuery: string,
+  invalidPincodeMessage?: string | null,
 ): string | undefined {
   if (!isStoreLocatorPincodeSearchQuery(searchQuery)) {
     return undefined;
@@ -137,7 +162,7 @@ export function getStoreLocatorPincodeSearchError(
 
   const query = searchQuery.trim();
   if (!isValidIndianPincode(query)) {
-    return "Invalid Pincode";
+    return invalidPincodeMessage?.trim() || storeLocatorInvalidPincodeMessage;
   }
 
   return undefined;

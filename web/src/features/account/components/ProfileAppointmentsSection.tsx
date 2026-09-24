@@ -1,22 +1,27 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import type { StaticImageData } from "next/image";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   CartOutlineButton,
 } from "@/features/cart/components/CartFlowUi";
 import { useMagentoWishlistProducts } from "@/hooks/magento/useMagentoWishlistProducts";
-import { useToast } from "@/shared/hooks/use-toast";
+import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
+import { cancelCustomerAppointment } from "@/services/customer/customer-appointments.client";
 import { profileTabsContent } from "../data/profileContent";
 import { useCustomerAppointments } from "../hooks/useCustomerAppointments";
-import type { AppointmentFilterKey } from "../types/profileUi.types";
+import type { AppointmentFilterKey, ProfileAppointmentUi } from "../types/profileUi.types";
+import { clubProfileAppointments } from "../utils/clubCustomerAppointments";
+import { buildMagentoProductImageBySku } from "../utils/orderItemImage.utils";
 import { mapCustomerAppointmentToProfileUi } from "../utils/profileDisplayMappers";
 import { ProfileAppointmentCard } from "./ProfileAppointmentCard";
 import { ProfileAppointmentCancelDialog } from "./ProfileAppointmentCancelDialog";
+import { ProfileAppointmentReschedulePanel } from "./ProfileAppointmentReschedulePanel";
 import { ProfileAppointmentsEmptyState } from "./ProfileAppointmentsEmptyState";
+import { ProfileAppointmentsListingSkeleton } from "./ProfileAppointmentsListingSkeleton";
 import {
   ProfileFilterChips,
 } from "./profileUi";
+import FormFieldError from "@/shared/ui/FormFieldError";
 
 const content = profileTabsContent.appointments;
 
@@ -26,175 +31,271 @@ const FILTER_OPTIONS: { key: AppointmentFilterKey; label: string }[] = [
   { key: "store_visit", label: content.filters.storeVisit },
 ];
 
-function listingImageUrl(image: string | StaticImageData): string {
-  return typeof image === "string" ? image : image.src;
-}
-
-function AppointmentsSkeleton() {
-  return (
-    <div className="space-y-4" aria-busy="true" aria-label="Loading appointments">
-      {Array.from({ length: 2 }).map((_, index) => (
-        <div key={index} className="h-64 animate-pulse bg-gray300 p-6" />
-      ))}
-    </div>
-  );
-}
-
 const ProfileAppointmentsSection = () => {
-  const { toast } = useToast();
-  const { data, isLoading, error, page, setPage } = useCustomerAppointments(true);
-  const [activeFilter, setActiveFilter] = useState<AppointmentFilterKey>("video_call");
+  const { data, isLoading, error, page, setPage, refresh } = useCustomerAppointments(true);
+  const [activeFilter, setActiveFilter] = useState<AppointmentFilterKey | null>(null);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
-
-  const appointmentSkus = useMemo(
-    () =>
-      (data?.appointments ?? [])
-        .map((appointment) => {
-          const productId = appointment.productId;
-          if (typeof productId === "string") {
-            return productId.trim();
-          }
-          if (productId == null) {
-            return "";
-          }
-          return String(productId).trim();
-        })
-        .filter(Boolean),
-    [data],
+  const [selectedAppointment, setSelectedAppointment] = useState<ProfileAppointmentUi | null>(
+    null,
   );
+  const [rescheduleAppointment, setRescheduleAppointment] = useState<ProfileAppointmentUi | null>(
+    null,
+  );
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [cancelledAppointmentIds, setCancelledAppointmentIds] = useState<Set<string>>(
+    () => new Set(),
+  );
+  const [statusToastMessage, setStatusToastMessage] = useState<string | null>(null);
+  const statusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const dismissStatusToast = useCallback(() => {
+    if (statusToastTimeoutRef.current) {
+      clearTimeout(statusToastTimeoutRef.current);
+      statusToastTimeoutRef.current = null;
+    }
+    setStatusToastMessage(null);
+  }, []);
+
+  const showStatusToast = useCallback(
+    (message: string) => {
+      dismissStatusToast();
+      setStatusToastMessage(message);
+      statusToastTimeoutRef.current = setTimeout(() => {
+        setStatusToastMessage(null);
+        statusToastTimeoutRef.current = null;
+      }, appStatusToastDurationMs);
+    },
+    [dismissStatusToast],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (statusToastTimeoutRef.current) {
+        clearTimeout(statusToastTimeoutRef.current);
+      }
+    };
+  }, []);
+  const appointmentSkus = useMemo(() => {
+    const skus = new Set<string>();
+
+    for (const appointment of data?.appointments ?? []) {
+      for (const product of appointment.products ?? []) {
+        const sku = product.productId?.trim();
+        if (sku) skus.add(sku);
+      }
+
+      const fallback = appointment.productId?.trim();
+      if (fallback) skus.add(fallback);
+    }
+
+    return Array.from(skus);
+  }, [data]);
 
   const { products: magentoProducts, isLoading: isProductImagesLoading } =
     useMagentoWishlistProducts(appointmentSkus);
 
-  const productImageBySku = useMemo(() => {
-    const images: Record<string, string> = {};
-
-    for (const product of magentoProducts) {
-      const sku = product.sku?.trim();
-      if (!sku) {
-        continue;
-      }
-
-      images[sku] = listingImageUrl(product.primaryImage);
-    }
-
-    return images;
-  }, [magentoProducts]);
+  const productImageBySku = useMemo(
+    () => buildMagentoProductImageBySku(magentoProducts),
+    [magentoProducts],
+  );
 
   const appointments = useMemo(() => {
     if (!data?.appointments.length) {
       return [];
     }
 
-    return data.appointments
+    const mapped = data.appointments
       .map((appointment) =>
         mapCustomerAppointmentToProfileUi(appointment, productImageBySku),
       )
-      .filter((appointment): appointment is NonNullable<typeof appointment> => appointment != null);
-  }, [data, productImageBySku]);
+      .filter((appointment): appointment is NonNullable<typeof appointment> => appointment != null)
+      .map((appointment) => {
+        if (!cancelledAppointmentIds.has(appointment.id)) {
+          return appointment;
+        }
 
-  const filteredAppointments = useMemo(
-    () => appointments.filter((appointment) => appointment.type === activeFilter),
-    [appointments, activeFilter],
-  );
+        // Immediately after cancel (before list refresh settles), both actions stay off.
+        return {
+          ...appointment,
+          canCancel: false,
+          canReschedule: false,
+        };
+      });
+
+    // CMS already groups try-at-home via products[]; FE clubbing covers legacy / store-visit rows.
+    return clubProfileAppointments(mapped);
+  }, [cancelledAppointmentIds, data, productImageBySku]);
+
+  const filteredAppointments = useMemo(() => {
+    if (activeFilter === null) {
+      return appointments;
+    }
+
+    return appointments.filter((appointment) => appointment.type === activeFilter);
+  }, [appointments, activeFilter]);
+
+  const showRescheduleSuccessToast = useCallback(() => {
+    showStatusToast(content.reschedulePanel.successToast);
+  }, [showStatusToast]);
+
+  const openReschedulePanel = useCallback((appointment: ProfileAppointmentUi) => {
+    setCancelDialogOpen(false);
+    setSelectedAppointment(null);
+    setRescheduleAppointment(appointment);
+  }, []);
 
   const handleReschedule = () => {
-    toast({
-      title: content.cancelDialog.unavailableTitle,
-      description: content.cancelDialog.unavailableDescription,
-    });
-    setCancelDialogOpen(false);
+    if (selectedAppointment?.canReschedule) {
+      openReschedulePanel(selectedAppointment);
+    }
   };
 
   const handleConfirmCancel = () => {
-    toast({
-      title: content.cancelDialog.unavailableTitle,
-      description: content.cancelDialog.unavailableDescription,
-    });
-    setCancelDialogOpen(false);
+    if (!selectedAppointment || isCancelling) {
+      return;
+    }
+
+    void (async () => {
+      setIsCancelling(true);
+      try {
+        // Guide: use top-level listing documentId once — CMS cancels the whole group.
+        await cancelCustomerAppointment(selectedAppointment.id);
+        setCancelledAppointmentIds((current) => {
+          const next = new Set(current);
+          next.add(selectedAppointment.id);
+          for (const id of selectedAppointment.clubbedAppointmentIds ?? []) {
+            next.add(id);
+          }
+          return next;
+        });
+        setCancelDialogOpen(false);
+        setSelectedAppointment(null);
+        refresh();
+        showStatusToast(content.cancelDialog.cancelSuccessToast);
+      } catch {
+        showStatusToast(content.cancelDialog.cancelErrorToast);
+      } finally {
+        setIsCancelling(false);
+      }
+    })();
   };
 
+  const statusToast = (
+    <AppStatusToast open={Boolean(statusToastMessage)} message={statusToastMessage ?? ""} />
+  );
+
   if (isLoading || (appointmentSkus.length > 0 && isProductImagesLoading)) {
-    return <AppointmentsSkeleton />;
+    return (
+      <>
+        {statusToast}
+        <ProfileAppointmentsListingSkeleton />
+      </>
+    );
   }
 
   if (error) {
     return (
-      <p className="font-gill text-sm font-light leading-110 text-red-700" role="alert">
-        {error}
-      </p>
+      <>
+        {statusToast}
+        <FormFieldError message={error} />
+      </>
     );
   }
 
   if (!data || data.appointments.length === 0) {
-    return <ProfileAppointmentsEmptyState />;
+    return (
+      <>
+        {statusToast}
+        <ProfileAppointmentsEmptyState />
+      </>
+    );
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <p className="shrink-0 font-gill text-base font-normal leading-110 text-darkblack">
-          {content.filterLabel}
-        </p>
-        <ProfileFilterChips
-          options={FILTER_OPTIONS}
-          activeKey={activeFilter}
-          onChange={setActiveFilter}
-          scrollOnMobile
+    <>
+      {statusToast}
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <p className="shrink-0 font-gill text-base font-normal leading-110 text-darkblack">
+            {content.filterLabel}
+          </p>
+          <ProfileFilterChips
+            options={FILTER_OPTIONS}
+            activeKey={activeFilter}
+            onChange={setActiveFilter}
+            scrollOnMobile
+          />
+        </div>
+
+        {filteredAppointments.length === 0 ? (
+          <p className="font-gill text-base font-light leading-110 text-neutral500">
+            {content.emptyFilterMessage}
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-6">
+            {filteredAppointments.map((appointment) => (
+              <li key={appointment.id}>
+                <ProfileAppointmentCard
+                  appointment={appointment}
+                  onReschedule={() => openReschedulePanel(appointment)}
+                  onCancel={() => {
+                    setSelectedAppointment(appointment);
+                    setCancelDialogOpen(true);
+                  }}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {data && data.totalPages > 1 ? (
+          <div className="flex items-center justify-between gap-4 pt-2">
+            <CartOutlineButton
+              type="button"
+              className="w-auto min-w-[120px]"
+              disabled={page <= 1}
+              onClick={() => setPage(page - 1)}
+            >
+              Previous
+            </CartOutlineButton>
+            <p className="font-gill text-sm font-light leading-110 text-neutral500">
+              Page {data.currentPage} of {data.totalPages}
+            </p>
+            <CartOutlineButton
+              type="button"
+              className="w-auto min-w-[120px]"
+              disabled={page >= data.totalPages}
+              onClick={() => setPage(page + 1)}
+            >
+              Next
+            </CartOutlineButton>
+          </div>
+        ) : null}
+
+        <ProfileAppointmentCancelDialog
+          open={cancelDialogOpen}
+          onOpenChange={(open) => {
+            setCancelDialogOpen(open);
+            if (!open) {
+              setSelectedAppointment(null);
+            }
+          }}
+          canReschedule={selectedAppointment?.canReschedule ?? false}
+          onReschedule={handleReschedule}
+          onConfirmCancel={handleConfirmCancel}
+        />
+
+        <ProfileAppointmentReschedulePanel
+          open={rescheduleAppointment !== null}
+          appointment={rescheduleAppointment}
+          onClose={() => setRescheduleAppointment(null)}
+          onRescheduled={() => {
+            refresh();
+            showRescheduleSuccessToast();
+          }}
         />
       </div>
-
-      {filteredAppointments.length === 0 ? (
-        <p className="font-gill text-base font-light leading-110 text-neutral500">
-          {content.emptyFilterMessage}
-        </p>
-      ) : (
-        <ul className="flex flex-col gap-6">
-          {filteredAppointments.map((appointment) => (
-            <li key={appointment.id}>
-              <ProfileAppointmentCard
-                appointment={appointment}
-                onReschedule={handleReschedule}
-                onCancel={() => {
-                  setCancelDialogOpen(true);
-                }}
-              />
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {data && data.totalPages > 1 ? (
-        <div className="flex items-center justify-between gap-4 pt-2">
-          <CartOutlineButton
-            type="button"
-            className="w-auto min-w-[120px]"
-            disabled={page <= 1}
-            onClick={() => setPage(page - 1)}
-          >
-            Previous
-          </CartOutlineButton>
-          <p className="font-gill text-sm font-light leading-110 text-neutral500">
-            Page {data.currentPage} of {data.totalPages}
-          </p>
-          <CartOutlineButton
-            type="button"
-            className="w-auto min-w-[120px]"
-            disabled={page >= data.totalPages}
-            onClick={() => setPage(page + 1)}
-          >
-            Next
-          </CartOutlineButton>
-        </div>
-      ) : null}
-
-      <ProfileAppointmentCancelDialog
-        open={cancelDialogOpen}
-        onOpenChange={setCancelDialogOpen}
-        onReschedule={handleReschedule}
-        onConfirmCancel={handleConfirmCancel}
-      />
-    </div>
+    </>
   );
 };
 

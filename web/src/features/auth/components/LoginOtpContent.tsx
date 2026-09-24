@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { KeyboardEvent, MutableRefObject } from "react";
-import FormFieldErrorIcon from "@/assets/Icons/FormFieldErrorIcon";
+import FormFieldError from "@/shared/ui/FormFieldError";
 import LeftArrow from "@/assets/Icons/LeftArrow";
 import { CartDivider } from "@/features/cart/components/CartFlowUi";
 import { DetailTextLink } from "@/features/products/components/detail/shared";
@@ -23,6 +23,7 @@ type LoginOtpContentProps = {
   otp: string[];
   otpError?: string;
   secondsLeft: number;
+  submitting: boolean;
   inputRefs: MutableRefObject<Array<HTMLInputElement | null>>;
   onDigitChange: (index: number, value: string) => void;
   onKeyDown: (index: number, event: KeyboardEvent<HTMLInputElement>) => void;
@@ -62,6 +63,7 @@ const LoginOtpContent = ({
   otp,
   otpError,
   secondsLeft,
+  submitting,
   inputRefs,
   onDigitChange,
   onKeyDown,
@@ -167,13 +169,15 @@ const LoginOtpContent = ({
 
           {hasError ? (
             <div className="flex w-full items-center justify-between gap-4">
-              <div className="flex min-w-0 flex-1 items-center gap-2">
-                <FormFieldErrorIcon className="size-6 shrink-0 text-[#F91616]" />
-                <p className="font-gill text-base font-normal leading-110 text-[#F91616]">
-                  {otpError}
+              <FormFieldError message={otpError} className="min-w-0 flex-1" />
+              {secondsLeft > 0 ? (
+                <p className="shrink-0 text-right font-gill text-base font-light leading-110 text-darkblack">
+                  Resend code in{" "}
+                  <span className="font-normal">{formatCountdown(secondsLeft)}</span>
                 </p>
-              </div>
-              <DetailTextLink onClick={onResend}>RESEND CODE</DetailTextLink>
+              ) : (
+                <DetailTextLink onClick={onResend}>RESEND CODE</DetailTextLink>
+              )}
             </div>
           ) : (
             <p className="w-full text-right font-gill text-base font-light leading-110 text-darkblack">
@@ -208,14 +212,14 @@ const LoginOtpContent = ({
         ) : (
           <button
             type="submit"
-            disabled={!isComplete}
+            disabled={!isComplete || submitting}
             className={cn(
               "inline-flex h-14 w-full items-center justify-center px-7 py-5 font-gill text-sm uppercase leading-110 text-white",
               "btn-dark-slide border border-black",
-              !isComplete && "cursor-not-allowed opacity-50",
+              (!isComplete || submitting) && "cursor-not-allowed opacity-50",
             )}
           >
-            <span className="relative z-10">LOG IN</span>
+            <span className="relative z-10">{submitting ? "VERIFYING..." : "LOG IN"}</span>
           </button>
         )}
 

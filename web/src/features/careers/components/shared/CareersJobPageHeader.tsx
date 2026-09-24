@@ -49,7 +49,7 @@ const CareersJobPageHeader = ({
         <CareersJobMetaRow job={job} className="w-full" />
 
         <div className="flex items-center justify-between gap-4">
-          <CareersJobIdChip jobCode={job.jobCode} alwaysInline surface="listing" />
+          <CareersJobIdChip jobCode={job.jobCode} alwaysInline surface="muted" />
           <CareersPostedLabel
             postedAt={job.postedAt}
             className="shrink-0 font-gill text-sm font-light leading-110 text-neutral500"
@@ -61,12 +61,13 @@ const CareersJobPageHeader = ({
       <div className="hidden md:flex md:w-full md:items-start md:justify-between md:gap-6">
         <div className="flex min-w-0 flex-col gap-6">
           <div className="flex w-full max-w-[571px] flex-wrap items-center justify-between gap-4">
-            <h1
-              id={titleId}
+            <p
+              role="heading"
+              aria-level={1}
               className="font-larken text-32 font-light leading-110 text-darkblack"
             >
               {job.title}
-            </h1>
+            </p>
 
             <div className="flex items-center gap-3">
               <CareersJobIdChip jobCode={job.jobCode} alwaysInline surface="muted" />

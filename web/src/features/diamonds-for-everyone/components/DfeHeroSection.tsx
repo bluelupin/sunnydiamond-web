@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
-import { PLP_HERO_IMAGE_QUALITY } from "@/features/jewellery-product/utils/jewelleryPlpImage";
+import HeroBackgroundMedia from "@/features/cms/components/home/HeroBackgroundMedia";
+import MediaContentOverlay from "@/shared/ui/MediaContentOverlay";
 import type { NormalizedDfeHero } from "@/services/diamonds-for-everyone/diamonds-for-everyone-page.types";
 
 type DfeHeroSectionProps = {
@@ -9,38 +9,36 @@ type DfeHeroSectionProps = {
 };
 
 const DfeHeroSection = ({ hero }: DfeHeroSectionProps) => {
+  const heroImage = hero.image;
+  const hasHeroImage = Boolean(
+    heroImage?.desktopUrl?.trim() || heroImage?.mobileUrl?.trim(),
+  );
+  const imageAlt = heroImage?.alt?.trim() || "";
+
   return (
     <section
       aria-labelledby="dfe-hero-title"
-      className="relative left-1/2 grid h-[240px] w-screen max-w-none -translate-x-1/2 overflow-hidden md:h-320"
+      className="relative grid h-[240px] w-full overflow-hidden bg-white md:h-320"
     >
-      <div className="relative col-start-1 row-start-1 size-full overflow-hidden">
-        <Image
-          src={hero.image.mobileUrl}
-          alt={hero.image.alt}
-          fill
-          priority
-          quality={PLP_HERO_IMAGE_QUALITY}
-          sizes="100vw"
-          className="object-cover object-center md:hidden"
-        />
-        <Image
-          src={hero.image.desktopUrl}
-          alt={hero.image.alt}
-          fill
-          priority
-          quality={PLP_HERO_IMAGE_QUALITY}
-          sizes="100vw"
-          className="hidden object-cover object-center md:block"
-        />
-        <div className="absolute inset-0 bg-black/40" aria-hidden />
+      {hasHeroImage ? (
+        <div className="relative col-start-1 row-start-1 size-full [&_img]:object-[62%_38%] md:[&_img]:object-[58%_42%] [&_video]:object-[62%_38%] md:[&_video]:object-[58%_42%]">
+          <HeroBackgroundMedia
+            desktopImageUrl={heroImage!.desktopUrl}
+            mobileImageUrl={heroImage!.mobileUrl}
+            desktopAlt={imageAlt}
+            mobileAlt={imageAlt}
+          />
+          <MediaContentOverlay gradient="bottom-strong" />
+        </div>
+      ) : null}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-10 lg:pb-16">
+        <h1
+          id="dfe-hero-title"
+          className="w-full text-center font-larken font-light leading-none text-white lg:text-5xl md:text-4xl text-32"
+        >
+          {hero.title}
+        </h1>
       </div>
-      <h1
-        id="dfe-hero-title"
-        className="absolute left-1/2 top-[calc(50%+42px)] z-10 -translate-x-1/2 whitespace-nowrap text-center font-larken text-32 font-light leading-110 text-white md:static md:col-start-1 md:row-start-1 md:translate-x-0 md:self-start md:justify-self-center md:pt-[203px] md:text-5xl"
-      >
-        {hero.title}
-      </h1>
     </section>
   );
 };

@@ -1,6 +1,8 @@
 export type CheckoutFormData = {
   name: string;
   phoneOrEmail: string;
+  /** Dial code for `phoneOrEmail` when the contact value is a phone number. */
+  contactCountryCode: string;
   shippingName: string;
   addressLine1: string;
   addressLine2: string;
@@ -8,6 +10,7 @@ export type CheckoutFormData = {
   city: string;
   state: string;
   shippingPhone: string;
+  shippingCountryCode: string;
   billingSameAsShipping: boolean;
   billingName: string;
   billingAddressLine1: string;
@@ -16,6 +19,9 @@ export type CheckoutFormData = {
   billingCity: string;
   billingState: string;
   billingPhone: string;
+  billingCountryCode: string;
+  /** Saved profile address uid when checkout shipping matches a saved address. */
+  selectedShippingAddressUid: string | null;
 };
 
 /**
@@ -31,6 +37,7 @@ export type CheckoutStep = "form" | "payment" | "success";
 export const createEmptyCheckoutForm = (): CheckoutFormData => ({
   name: "",
   phoneOrEmail: "",
+  contactCountryCode: "+91",
   shippingName: "",
   addressLine1: "",
   addressLine2: "",
@@ -38,6 +45,7 @@ export const createEmptyCheckoutForm = (): CheckoutFormData => ({
   city: "",
   state: "",
   shippingPhone: "",
+  shippingCountryCode: "+91",
   billingSameAsShipping: true,
   billingName: "",
   billingAddressLine1: "",
@@ -46,6 +54,8 @@ export const createEmptyCheckoutForm = (): CheckoutFormData => ({
   billingCity: "",
   billingState: "",
   billingPhone: "",
+  billingCountryCode: "+91",
+  selectedShippingAddressUid: null,
 });
 
 export const createEmptyPaymentForm = (): CheckoutPaymentData => ({

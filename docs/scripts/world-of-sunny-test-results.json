@@ -1,0 +1,243 @@
+{
+  "generatedAt": "2026-09-17T09:33:40.106Z",
+  "baseUrl": "http://localhost:3001",
+  "summary": {
+    "total": 46,
+    "pass": 35,
+    "fail": 10,
+    "blocked": 0,
+    "partial": 1
+  },
+  "results": {
+    "WOS-002": {
+      "status": "Pass",
+      "actual": "/about returned redirect status 308",
+      "testedAt": "2026-09-17T09:33:38.960Z"
+    },
+    "WOS-003": {
+      "status": "Pass",
+      "actual": "/world-of-sunny found in sitemap.xml",
+      "testedAt": "2026-09-17T09:33:39.733Z"
+    },
+    "WOS-006": {
+      "status": "Pass",
+      "actual": "JSON-LD script tag present in HTML",
+      "testedAt": "2026-09-17T09:33:39.734Z"
+    },
+    "WOS-007": {
+      "status": "Pass",
+      "actual": "Service returns EMPTY_ABOUT_PAGE on failure",
+      "testedAt": "2026-09-17T09:33:35.314Z"
+    },
+    "WOS-008": {
+      "status": "Pass",
+      "actual": "About page skeleton component exists",
+      "testedAt": "2026-09-17T09:33:35.314Z"
+    },
+    "WOS-009": {
+      "status": "Pass",
+      "actual": "WORLD_OF_SUNNY_PATH defined",
+      "testedAt": "2026-09-17T09:33:35.314Z"
+    },
+    "WOS-011": {
+      "status": "Pass",
+      "actual": "Navigation resolves about us label",
+      "testedAt": "2026-09-17T09:33:35.314Z"
+    },
+    "WOS-017": {
+      "status": "Pass",
+      "actual": "AboutPage composes hero first",
+      "testedAt": "2026-09-17T09:33:35.314Z"
+    },
+    "WOS-020": {
+      "status": "Pass",
+      "actual": "h1 present in rendered HTML",
+      "testedAt": "2026-09-17T09:33:39.734Z"
+    },
+    "WOS-025": {
+      "status": "Fail",
+      "actual": "Hero titleStyle animation is commented out — scroll title animation not applied (SD-6)",
+      "testedAt": "2026-09-17T09:33:40.105Z"
+    },
+    "WOS-026": {
+      "status": "Pass",
+      "actual": "Hero respects reduced motion",
+      "testedAt": "2026-09-17T09:33:35.314Z"
+    },
+    "WOS-029": {
+      "status": "Pass",
+      "actual": "Crafting brilliance respects reduced motion",
+      "testedAt": "2026-09-17T09:33:35.315Z"
+    },
+    "WOS-030": {
+      "status": "Pass",
+      "actual": "about-brilliance content found in HTML",
+      "testedAt": "2026-09-17T09:33:39.734Z"
+    },
+    "WOS-037": {
+      "status": "Pass",
+      "actual": "Mapper filters placeholder copy",
+      "testedAt": "2026-09-17T09:33:35.315Z"
+    },
+    "WOS-040": {
+      "status": "Pass",
+      "actual": "about-since-1997 content found in HTML",
+      "testedAt": "2026-09-17T09:33:39.734Z"
+    },
+    "WOS-041": {
+      "status": "Pass",
+      "actual": "Since 1997 gallery captions visible: Mr. P.P. Sunny…, At an event…, P.P. Sunny attending (browser)",
+      "testedAt": "2026-09-17T09:33:40.106Z"
+    },
+    "WOS-050": {
+      "status": "Pass",
+      "actual": "about-faces content found in HTML",
+      "testedAt": "2026-09-17T09:33:39.734Z"
+    },
+    "WOS-052": {
+      "status": "Pass",
+      "actual": "Mobile: all face cards show name + role without hover (browser)",
+      "testedAt": "2026-09-17T09:33:40.106Z"
+    },
+    "WOS-053": {
+      "status": "Fail",
+      "actual": "Desktop hover: card ~477px wide but image container 719px — over-zoom/crop (browser measured)",
+      "testedAt": "2026-09-17T09:33:40.106Z"
+    },
+    "WOS-060": {
+      "status": "Pass",
+      "actual": "about-handcrafted content found in HTML",
+      "testedAt": "2026-09-17T09:33:39.734Z"
+    },
+    "WOS-061": {
+      "status": "Partial",
+      "actual": "Handcrafted text tiles render titles but CMS has duplicate titles (Pinnacle… x2, Highest Level… x2) (browser)",
+      "testedAt": "2026-09-17T09:33:40.106Z"
+    },
+    "WOS-063": {
+      "status": "Pass",
+      "actual": "Handcrafted mobile divider matches Figma 2556:36067 (186px, 12px gap)",
+      "testedAt": "2026-09-17T09:33:35.315Z"
+    },
+    "WOS-066": {
+      "status": "Fail",
+      "actual": "Text tiles use font-gill on mobile vs font-larken on md+ — icon/text alignment risk (SD-133)",
+      "testedAt": "2026-09-17T09:33:40.106Z"
+    },
+    "WOS-070": {
+      "status": "Pass",
+      "actual": "timeline content found in HTML",
+      "testedAt": "2026-09-17T09:33:39.734Z"
+    },
+    "WOS-071": {
+      "status": "Pass",
+      "actual": "Live timeline defaults to 1997 with current CMS order (browser); code still uses years[0] — fragile (SD-5)",
+      "testedAt": "2026-09-17T09:33:40.106Z"
+    },
+    "WOS-072": {
+      "status": "Pass",
+      "actual": "Timeline year 1997 active on load; aria-live region present (browser)",
+      "testedAt": "2026-09-17T09:33:40.106Z"
+    },
+    "WOS-076": {
+      "status": "Pass",
+      "actual": "Timeline hook handles reduced motion",
+      "testedAt": "2026-09-17T09:33:35.316Z"
+    },
+    "WOS-079": {
+      "status": "Pass",
+      "actual": "Mobile timeline year dropdown button with aria-expanded (browser)",
+      "testedAt": "2026-09-17T09:33:40.106Z"
+    },
+    "WOS-080": {
+      "status": "Pass",
+      "actual": "Guarantees bar renders 5 badges (browser)",
+      "testedAt": "2026-09-17T09:33:40.106Z"
+    },
+    "WOS-090": {
+      "status": "Pass",
+      "actual": "brand tagline content found in HTML",
+      "testedAt": "2026-09-17T09:33:39.735Z"
+    },
+    "WOS-101": {
+      "status": "Pass",
+      "actual": "Sections gated by isActive === true",
+      "testedAt": "2026-09-17T09:33:35.316Z"
+    },
+    "WOS-104": {
+      "status": "Fail",
+      "actual": "CMS SEO canonicalUrl not normalized to site domain (browser)",
+      "testedAt": "2026-09-17T09:33:40.106Z"
+    },
+    "WOS-108": {
+      "status": "Pass",
+      "actual": "Hero provides primary h1",
+      "testedAt": "2026-09-17T09:33:35.316Z"
+    },
+    "WOS-110": {
+      "status": "Pass",
+      "actual": "Below-fold sections lazy loaded",
+      "testedAt": "2026-09-17T09:33:35.317Z"
+    },
+    "WOS-112": {
+      "status": "Pass",
+      "actual": "Timeline year controls are buttons (keyboard activatable)",
+      "testedAt": "2026-09-17T09:33:35.317Z"
+    },
+    "WOS-001": {
+      "status": "Pass",
+      "actual": "GET /world-of-sunny returned 200",
+      "testedAt": "2026-09-17T09:33:38.955Z"
+    },
+    "WOS-005": {
+      "status": "Pass",
+      "actual": "Meta description present",
+      "testedAt": "2026-09-17T09:33:39.734Z"
+    },
+    "WOS-004": {
+      "status": "Fail",
+      "actual": "Canonical points to sunnydiamonds-cms-dev.on-forge.com/world-of-sunny — wrong domain for production SEO (browser)",
+      "testedAt": "2026-09-17T09:33:40.106Z"
+    },
+    "WOS-016": {
+      "status": "Fail",
+      "actual": "GET /world-of-sunny-invalid returned 200",
+      "testedAt": "2026-09-17T09:33:40.105Z"
+    },
+    "WOS-071-CODE": {
+      "status": "Fail",
+      "actual": "Mapper sets defaultYear: years[0] — not explicitly 1997; breaks if CMS reorders milestones (SD-5)",
+      "testedAt": "2026-09-17T09:33:40.105Z"
+    },
+    "WOS-041-CODE": {
+      "status": "Fail",
+      "actual": "Code: gallery caption only when image+caption; description field ignored when image present (SD-2, SD-3 risk)",
+      "testedAt": "2026-09-17T09:33:40.106Z"
+    },
+    "WOS-010": {
+      "status": "Pass",
+      "actual": "Header nav World of Sunny link present with current state on /world-of-sunny (browser)",
+      "testedAt": "2026-09-17T09:33:40.106Z"
+    },
+    "WOS-012": {
+      "status": "Pass",
+      "actual": "Footer World of Sunny link present (browser)",
+      "testedAt": "2026-09-17T09:33:40.106Z"
+    },
+    "WOS-014": {
+      "status": "Pass",
+      "actual": "World of Sunny shown as active in header nav (browser)",
+      "testedAt": "2026-09-17T09:33:40.106Z"
+    },
+    "WOS-NEW-001": {
+      "status": "Fail",
+      "actual": "Timeline milestone copy contains duplicate phrase: 'for those for those' (browser/CMS)",
+      "testedAt": "2026-09-17T09:33:40.106Z"
+    },
+    "WOS-NEW-002": {
+      "status": "Fail",
+      "actual": "Since 1997 story copy grammar issue: 'primarily because we the fine craftsmanship' (browser/CMS)",
+      "testedAt": "2026-09-17T09:33:40.106Z"
+    }
+  }
+}

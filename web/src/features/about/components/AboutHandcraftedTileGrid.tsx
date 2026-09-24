@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
+import MediaContentOverlay from "@/shared/ui/MediaContentOverlay";
 import { LazyInView } from "@/shared/ui/LazyInView";
 import { cn } from "@/shared/utils/cn";
 import type { NormalizedCraftCard } from "@/services/about/about-page.types";
@@ -64,26 +65,38 @@ function CraftPhotoTile({
   imageUrl,
   mobileImageUrl,
   imageAlt,
+  title,
 }: {
   className?: string;
   imageUrl?: string;
   mobileImageUrl?: string;
   imageAlt?: string;
+  title?: string;
 }) {
   const resolvedUrl = imageUrl ?? mobileImageUrl;
-  if (!resolvedUrl) {
-    return null;
-  }
+  const overlayLabel = imageAlt?.trim() || title?.trim();
 
   return (
     <div className={cn("relative overflow-hidden", className)}>
-      <Image
-        src={resolvedUrl}
-        alt={imageAlt?.trim() || ""}
-        fill
-        className="object-cover object-center"
-        sizes="(max-width: 768px) 50vw, 25vw"
-      />
+      {resolvedUrl ? (
+        <Image
+          src={resolvedUrl}
+          alt={imageAlt?.trim() || ""}
+          fill
+          className="object-cover object-center"
+          sizes="(max-width: 768px) 50vw, 25vw"
+        />
+      ) : (
+        <>
+          <div aria-hidden className="absolute inset-0 bg-gray200" />
+          <MediaContentOverlay gradient="bottom-strong" className="opacity-100" />
+          {overlayLabel ? (
+            <p className="absolute bottom-0 left-0 z-10 w-full px-3 py-4 text-center font-gill text-sm leading-110 text-white md:px-4 md:py-5 md:text-base">
+              {overlayLabel}
+            </p>
+          ) : null}
+        </>
+      )}
     </div>
   );
 }
@@ -100,7 +113,7 @@ function CraftTextTile({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center sm:gap-3 gap-2 bg-chalkCard p-2",
+        "flex flex-col items-center justify-center sm:gap-3 gap-2 bg-chalkCard p-1",
         className,
       )}
     >
@@ -110,11 +123,11 @@ function CraftTextTile({
         width={16}
         height={15}
         aria-hidden
-        className="md:h-[15px] md:w-[15px] w-3 h-3 shrink-0"
+        className="md:h-5 h-4 md:w-5 w-4 shrink-0"
       />
       <Reveal as="h3" direction="up"
         className={cn(
-          "text-center font-larken font-light leading-110 text-darkblack",
+          "text-center md:font-larken font-gill font-light leading-110 text-darkblack",
           compact
             ? "max-w-[79.73%] text-sm md:text-base lg:text-xl xl:text-2xl"
             : "text-sm md:text-base lg:text-xl xl:text-2xl",
@@ -159,13 +172,14 @@ function AboutHandcraftedTileGridInner({ cards }: AboutHandcraftedTileGridProps)
       );
     }
 
-    if (card?.type === "image" && (card.imageUrl || card.mobileImageUrl)) {
+    if (card?.type === "image") {
       return (
         <CraftPhotoTile
           className={className}
           imageUrl={card.imageUrl}
           mobileImageUrl={card.mobileImageUrl}
           imageAlt={card.imageAlt}
+          title={card.title}
         />
       );
     }

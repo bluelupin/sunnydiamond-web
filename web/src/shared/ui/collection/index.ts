@@ -4,4 +4,3 @@ export type {
   AlankaraCollectionProduct,
   AlankaraCollectionProps,
 } from "./alankaraCollection.types";
-export { ALANKARA_FALLBACKS } from "./alankaraCollection.types";

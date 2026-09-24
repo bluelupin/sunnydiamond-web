@@ -9,7 +9,7 @@ type BlogsPageProps = {
 const BlogsPage = ({ page }: BlogsPageProps) => {
   return (
     <>
-      <BlogsHeroSection hero={page.hero} />
+      {page.hero ? <BlogsHeroSection hero={page.hero} /> : null}
       <BlogsListingSection
         filterLabel={page.filterLabel}
         categories={page.categories}

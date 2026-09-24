@@ -74,6 +74,8 @@ export const bespokeFeaturedStoriesFigmaSpec = {
   ctaHeight: 56,
   ctaFontSize: 14,
   overlayHorizontal: "rgba(0, 0, 0, 0.3)",
+  overlayHorizontalGradient:
+    "linear-gradient(90deg, #000000 0%, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.3) 10%)",
   overlayVertical: "linear-gradient(0deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 53.563%)",
   bottomGradient: "linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.8) 100%)",
 } as const;
@@ -93,6 +95,7 @@ export const bespokeFeaturedStoryModalFigmaSpec = {
   paginationDotSize: 6,
   slideDurationMs: 400,
   swipeThresholdPx: 48,
+  saveInspirationLabel: "Save as Inspiration",
 } as const;
 
 /** Figma — Past Creations full-screen masonry gallery */

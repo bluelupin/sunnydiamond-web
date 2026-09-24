@@ -3,14 +3,14 @@ export const blogsPageContent = {
   hero: {
     title: "The Diamond Guide",
   },
-  filterLabel: "Filter by:",
+  filterLabel: "Explore Topics",
   loadMore: {
     buttonLabel: "LOAD MORE",
   },
   featured: {
     readNowLabel: "READ NOW",
   },
-  /** Preferred filter chip order when categories are inferred from posts. */
+  /** Figma filter chip order. Known ids stay in this sequence; new CMS categories append after. */
   categoryOrder: [
     "bridal",
     "buying-guides",

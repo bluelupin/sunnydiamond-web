@@ -23,6 +23,7 @@ type LoginCreateAccountContentProps = {
   emailError?: string;
   termsError?: string;
   formError?: string;
+  submitting: boolean;
   onFullNameChange: (value: string) => void;
   onEmailChange: (value: string) => void;
   onTermsAcceptedChange: (value: boolean) => void;
@@ -51,6 +52,7 @@ const LoginCreateAccountContent = ({
   emailError,
   termsError,
   formError,
+  submitting,
   onFullNameChange,
   onEmailChange,
   onTermsAcceptedChange,
@@ -202,9 +204,9 @@ const LoginCreateAccountContent = ({
       <CartPrimaryButton
         type="submit"
         className="w-full uppercase disabled:cursor-not-allowed disabled:opacity-50"
-        disabled={!canSubmit}
+        disabled={!canSubmit || submitting}
       >
-        CREATE ACCOUNT
+        {submitting ? "CREATING ACCOUNT..." : "CREATE ACCOUNT"}
       </CartPrimaryButton>
     </form>
   );

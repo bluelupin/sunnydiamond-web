@@ -1,78 +1,77 @@
 "use client";
 
+import { useId } from "react";
 import Image from "next/image";
 import type { StaticImageData } from "next/image";
-import { resolveEngravingPreviewTypography } from "@/features/products/constants/engraving";
-import { getImageSrc } from "@/shared/utils/image";
-import { cn } from "@/shared/utils/cn";
+import {
+  RING_ENGRAVING_PREVIEW_VIEWBOX,
+  RING_ENGRAVING_TEXT_ARC_PATH,
+  resolveEngravingPreviewFontSize,
+  resolveEngravingPreviewImage,
+  resolveEngravingPreviewTypography,
+} from "@/features/products/constants/engraving";
 
 type EngravingPreviewImageProps = {
-  /** Magento engraving preview asset (ring close-up). */
+  /** Magento engraving preview asset (ring close-up). Falls back to Figma ring image. */
   previewImage?: string | StaticImageData;
-  /** Current PDP product image — background context for the engraving. */
-  productImage?: string | StaticImageData;
   text: string;
   font: string;
 };
 
 const EngravingPreviewImage = ({
   previewImage,
-  productImage,
   text,
   font,
 }: EngravingPreviewImageProps) => {
   const displayText = text.trim();
   const typography = resolveEngravingPreviewTypography(font);
-
-  const productSrc = productImage ? getImageSrc(productImage) : null;
-  const previewSrc = previewImage ? getImageSrc(previewImage) : null;
-  const layeredPreview = Boolean(productSrc && previewSrc && productSrc !== previewSrc);
+  const arcId = useId().replace(/:/g, "");
+  const imageSrc =
+    typeof previewImage === "string"
+      ? resolveEngravingPreviewImage(previewImage)
+      : previewImage ?? resolveEngravingPreviewImage();
+  const fontSize = resolveEngravingPreviewFontSize(displayText);
 
   return (
     <div
-      className="relative h-250 w-full shrink-0 overflow-hidden bg-aboutInactive"
+      className="relative h-214 w-full shrink-0 overflow-hidden bg-aboutInactive"
       aria-label={displayText ? `Engraving preview: ${displayText}` : "Engraving preview"}
     >
-      {productImage ? (
-        <Image
-          src={productImage}
-          alt=""
-          fill
-          className="object-cover object-center"
-          sizes="(max-width: 1024px) 100vw, 424px"
-        />
-      ) : null}
-
-      {layeredPreview && previewImage ? (
-        <Image
-          src={previewImage}
-          alt=""
-          fill
-          className="object-cover object-center"
-          sizes="(max-width: 1024px) 100vw, 424px"
-        />
-      ) : !productImage && previewImage ? (
-        <Image
-          src={previewImage}
-          alt=""
-          fill
-          className="object-cover object-center"
-          sizes="(max-width: 1024px) 100vw, 424px"
-        />
-      ) : null}
+      <Image
+        src={imageSrc}
+        alt=""
+        fill
+        className="object-cover object-center"
+        sizes="(max-width: 1024px) 100vw, 424px"
+      />
 
       {displayText ? (
-        <p
-          className={cn(
-            "pointer-events-none absolute left-1/2 top-[58%] z-10 w-full max-w-[85%] -translate-x-1/2 -translate-y-1/2 truncate text-center leading-none tracking-[0.02em] text-darkblack",
-            typography.className,
-            displayText.length <= 7 ? "text-2xl" : "text-xl",
-          )}
-          style={typography.style}
+        <svg
+          className="pointer-events-none absolute inset-0 z-10 h-full w-full"
+          viewBox={`0 0 ${RING_ENGRAVING_PREVIEW_VIEWBOX.width} ${RING_ENGRAVING_PREVIEW_VIEWBOX.height}`}
+          preserveAspectRatio="xMidYMid slice"
           aria-hidden
         >
-          {displayText}
-        </p>
+          <defs>
+            <path id={arcId} d={RING_ENGRAVING_TEXT_ARC_PATH} fill="none" />
+            <filter id={`${arcId}-etch`} x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="0.4" stdDeviation="0" floodColor="#ffffff" floodOpacity="0.35" />
+              <feDropShadow dx="0" dy="-0.3" stdDeviation="0" floodColor="#000000" floodOpacity="0.35" />
+            </filter>
+          </defs>
+          <text
+            fill="#434343"
+            fontSize={fontSize}
+            fontWeight={500}
+            letterSpacing="0.02em"
+            style={{ fontFamily: typography.style.fontFamily }}
+            filter={`url(#${arcId}-etch)`}
+          >
+            <textPath href={`#${arcId}`} startOffset="50%" textAnchor="middle">
+              {displayText}
+            </textPath>
+          </text>
+        </svg>
       ) : null}
     </div>
   );

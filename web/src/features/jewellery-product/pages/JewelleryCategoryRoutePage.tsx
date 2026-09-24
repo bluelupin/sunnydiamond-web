@@ -13,9 +13,12 @@ import { prefetchJewelleryListing } from "@/lib/magento/prefetchMagento";
 import JewelleryProductPage from "@/features/jewellery-product/components/JewelleryProductPage";
 import {
   isJewelleryCategoryUrlKey,
+  shouldNoIndexJewelleryCategoryQueryParam,
 } from "@/features/jewellery-product/utils/jewelleryRoutes";
+import type { JewelleryListingPrefetchFilters } from "@/lib/magento/prefetchMagento";
 import { hasGiftFinderSearchParams } from "@/features/gifting/utils/giftFinderRoutes";
 import JsonLd from "@/shared/lib/seo/JsonLd";
+import { preloadPlpHeroLcpImages } from "@/lib/preloadPlpHeroLcpImages";
 import { resolveImageSrcString } from "@/shared/utils/image";
 
 type JewelleryCategoryRoutePageProps = {
@@ -24,9 +27,11 @@ type JewelleryCategoryRoutePageProps = {
     occasion?: string;
     diamondShape?: string;
     fancyColour?: string;
+    collection?: string;
     category?: string;
     minPrice?: string;
     maxPrice?: string;
+    sort?: string;
   }>;
 };
 
@@ -53,7 +58,8 @@ export async function generateJewelleryCategoryMetadata({
     canonicalPath,
     keywords,
     ...(image ? { image } : {}),
-    noIndex: hasGiftFinderSearchParams(query) || Boolean(query.category),
+    noIndex:
+      hasGiftFinderSearchParams(query) || shouldNoIndexJewelleryCategoryQueryParam(query),
   });
 }
 
@@ -69,12 +75,23 @@ export async function JewelleryCategoryRoutePage({
   }
 
   const [initialListing, page, nav] = await Promise.all([
-    hasGiftFinderSearchParams(query)
-      ? Promise.resolve(undefined)
-      : prefetchJewelleryListing(categoryUrlKey),
+    prefetchJewelleryListing(categoryUrlKey, {
+      collection: query.collection,
+      occasion: query.occasion,
+      diamondShape: query.diamondShape,
+      fancyColour: query.fancyColour,
+      minPrice: query.minPrice,
+      maxPrice: query.maxPrice,
+      sort: query.sort,
+    } satisfies JewelleryListingPrefetchFilters),
     getProductLandingPage(),
     getMagentoJewelleryNavCategories(),
   ]);
+
+  preloadPlpHeroLcpImages({
+    desktopUrl: page.hero?.image?.desktopUrl,
+    mobileUrl: page.hero?.image?.mobileUrl,
+  });
 
   const category = nav.categories.find((item) => item.urlKey === categoryUrlKey);
   const seo = resolveJewelleryCategorySeoMetadata(page, categoryUrlKey, category?.label);
@@ -108,6 +125,8 @@ export async function JewelleryCategoryRoutePage({
         <JewelleryProductPage
           initialListing={initialListing}
           prefetchedCategoryUrlKey={initialListing ? categoryUrlKey : undefined}
+          hero={page.hero}
+          trustBadges={page.trustBadges}
         />
       </Suspense>
     </>

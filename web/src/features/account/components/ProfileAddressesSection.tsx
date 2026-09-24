@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CartOutlineButton } from "@/features/cart/components/CartFlowUi";
 import {
   DetailDarkButton,
   DetailOutlineButton,
@@ -14,16 +13,13 @@ import type {
 } from "@/services/customer/customer-account.types";
 import { profileTabsContent } from "../data/profileContent";
 import { useCustomerAddresses } from "../hooks/useCustomerAddresses";
+import { ProfileAddressesEmptyState } from "./ProfileAddressesEmptyState";
 import { ProfileAddressesListingSkeleton } from "./ProfileAddressesListingSkeleton";
 import { ProfileAddressFormSheet } from "./ProfileAddressFormSheet";
 import { ProfileDeleteAddressDialog } from "./ProfileDeleteAddressDialog";
-import { useProfileDefaultAddressToast } from "./ProfileDefaultAddressToast";
-import {
-  ProfileAddAddressCard,
-  ProfileCard,
-  ProfileEmptyState,
-} from "./profileUi";
-import { useToast } from "@/shared/hooks/use-toast";
+import { ProfileAddAddressCard, ProfileCard } from "./profileUi";
+import FormFieldError from "@/shared/ui/FormFieldError";
+import { useProfileAddressToastController } from "../hooks/useProfileAddressToastController";
 
 const addressContent = profileTabsContent.addresses;
 
@@ -41,31 +37,28 @@ function AddressCard({
   onMarkAsDefault: () => void;
 }) {
   const isDefaultShipping = address.isDefaultShipping;
-  const isDefaultBilling = address.isDefaultBilling;
-  const showDefaultLabel = isDefaultShipping || isDefaultBilling;
-  const defaultLabel = isDefaultShipping
-    ? addressContent.defaultShippingLabel
-    : addressContent.defaultBillingLabel;
 
   const addressLines = [
     ...address.streetLines.filter(Boolean),
     [address.city, address.pincode].filter(Boolean).join(", "),
   ].filter(Boolean);
 
-  if (showDefaultLabel) {
+  if (isDefaultShipping) {
     return (
       <ProfileCard className="flex flex-col gap-6">
-        <div className="flex flex-col gap-3 font-gill text-base leading-110 text-darkblack">
-          <p className="font-normal">{address.fullName}</p>
-          <div className="font-light leading-[145%]">
-            {addressLines.map((line) => (
-              <p key={line}>{line}</p>
-            ))}
+        <div className="flex flex-col md:gap-6 gap-4">
+          <div className="flex flex-col gap-3 font-gill text-base leading-110 text-darkblack">
+            <p className="font-normal">{address.fullName}</p>
+            <div className="font-light leading-[145%]">
+              {addressLines.map((line) => (
+                <p key={line}>{line}</p>
+              ))}
+            </div>
           </div>
+          <p className="font-gill text-base font-normal leading-110 text-gold500">
+            {addressContent.defaultShippingLabel}
+          </p>
         </div>
-        <p className="font-gill text-base font-normal leading-110 text-gold500">
-          {defaultLabel}
-        </p>
         <div className="flex items-center gap-4">
           <DetailOutlineButton
             type="button"
@@ -127,9 +120,7 @@ function AddressCard({
 }
 
 const ProfileAddressesSection = () => {
-  const { toast } = useToast();
-  const { showDefaultAddressChangedToast, toast: defaultAddressToast } =
-    useProfileDefaultAddressToast();
+  const { show: showAddressToast, node: addressToast } = useProfileAddressToastController();
   const {
     addresses,
     isLoading,
@@ -138,6 +129,7 @@ const ProfileAddressesSection = () => {
     createAddress,
     updateAddress,
     deleteAddress,
+    setDefaultShippingAddress,
   } = useCustomerAddresses(true);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingUid, setEditingUid] = useState<string | null>(null);
@@ -164,7 +156,14 @@ const ProfileAddressesSection = () => {
   };
 
   const handleCreate = async (input: CustomerAddressInput) => {
-    await createAddress(input);
+    const shouldBeDefault =
+      addresses.length === 0 || !addresses.some((address) => address.isDefaultShipping);
+
+    await createAddress({
+      ...input,
+      defaultShipping: shouldBeDefault,
+      defaultBilling: false,
+    });
     closeForm();
   };
 
@@ -173,7 +172,11 @@ const ProfileAddressesSection = () => {
       return;
     }
 
-    await updateAddress(editingUid, input);
+    await updateAddress(editingUid, {
+      ...input,
+      defaultShipping: editingAddress?.isDefaultShipping ?? false,
+      defaultBilling: false,
+    });
     closeForm();
   };
 
@@ -194,12 +197,8 @@ const ProfileAddressesSection = () => {
       }
 
       setDeleteUid(null);
-    } catch (error) {
-      toast({
-        title: addressContent.deleteDialog.errorTitle,
-        description: error instanceof Error ? error.message : "Please try again.",
-        variant: "destructive",
-      });
+    } catch {
+      // Errors surface via FormFieldError from useCustomerAddresses.
     }
   };
 
@@ -213,35 +212,17 @@ const ProfileAddressesSection = () => {
     );
 
     try {
-      const input = mapCustomerAddressToFormInput(address);
-      await updateAddress(address.uid, { ...input, defaultShipping: true });
+      await setDefaultShippingAddress(address.uid);
 
-      showDefaultAddressChangedToast({
+      showAddressToast(addressContent.defaultAddressChangedMessage, {
         onUndo: previousDefault
           ? async () => {
-              try {
-                const undoInput = mapCustomerAddressToFormInput(previousDefault);
-                await updateAddress(previousDefault.uid, {
-                  ...undoInput,
-                  defaultShipping: true,
-                });
-              } catch (undoError) {
-                toast({
-                  title: addressContent.markAsDefaultErrorTitle,
-                  description:
-                    undoError instanceof Error ? undoError.message : "Please try again.",
-                  variant: "destructive",
-                });
-              }
-            }
+            await setDefaultShippingAddress(previousDefault.uid);
+          }
           : undefined,
       });
-    } catch (error) {
-      toast({
-        title: addressContent.markAsDefaultErrorTitle,
-        description: error instanceof Error ? error.message : "Please try again.",
-        variant: "destructive",
-      });
+    } catch {
+      // Errors surface via FormFieldError from useCustomerAddresses.
     }
   };
 
@@ -252,28 +233,13 @@ const ProfileAddressesSection = () => {
   return (
     <div className="flex flex-col gap-6">
       {error ? (
-        <p className="font-gill text-sm font-light leading-110 text-red-700" role="alert">
-          {error}
-        </p>
+        <FormFieldError message={error} />
       ) : null}
 
       {addresses.length === 0 && !sheetOpen ? (
-        <ProfileEmptyState
-          title={addressContent.emptyTitle}
-          description={addressContent.emptyDescription}
-          action={
-            <CartOutlineButton
-              type="button"
-              className="w-full max-w-xs"
-              onClick={openAddForm}
-              disabled={isSaving}
-            >
-              {addressContent.emptyCta}
-            </CartOutlineButton>
-          }
-        />
+        <ProfileAddressesEmptyState onAddAddress={openAddForm} isSaving={isSaving} />
       ) : (
-        <div className="grid grid-cols-1 lg:gap-6 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 lg:gap-6 gap-4 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
           {!sheetOpen ? (
             <ProfileAddAddressCard
               label={addressContent.addCardLabel}
@@ -297,6 +263,10 @@ const ProfileAddressesSection = () => {
       <ProfileAddressFormSheet
         open={sheetOpen}
         onOpenChange={(open) => {
+          if (!open && isSaving) {
+            return;
+          }
+
           if (!open) {
             closeForm();
           } else {
@@ -327,7 +297,7 @@ const ProfileAddressesSection = () => {
         isDeleting={isSaving}
       />
 
-      {defaultAddressToast}
+      {addressToast}
     </div>
   );
 };

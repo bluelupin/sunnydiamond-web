@@ -1,49 +1,52 @@
 "use client";
 
-import { useEffect, useState, type KeyboardEvent } from "react";
+import { useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
-  clampEngravingText,
   DEFAULT_ENGRAVING_MAX_CHARACTERS,
-  ENGRAVING_TEXT_SANITIZE_PATTERN,
   isCartLineEngravingEnabled,
+  resolveProductEngravingConfig,
+  type EngravingSelection,
 } from "@/features/products/constants/engraving";
-import FormFieldError from "@/shared/ui/FormFieldError";
 import OptimizedImage from "@/shared/ui/OptimizedImage";
 import { cn } from "@/shared/utils/cn";
+import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import { useWishlist } from "@/features/wishlist/context/WishlistContext";
-import { useAuth } from "@/features/auth/context/AuthContext";
 import { useCart } from "../context/CartContext";
 import type { CartLineItem, CartLineOptions } from "../types/cart.types";
 import { formatCartLineMeta, formatCartPrice, getCartLineDisplayTotal } from "../utils/formatCartLine";
-import { getCartItemGiftNote, type CartGiftNoteDisplay } from "../utils/cartGiftNotes";
 import { useCartUI } from "../context/CartUIContext";
 import { useCartCheckout } from "../hooks/useCartCheckout";
 import {
+  CartActionLink,
   CartDivider,
   CartGiftBadge,
   CartGiftCheckbox,
   CartMetaRow,
   CartOutlineButton,
-  CartTextLink,
 } from "./CartFlowUi";
 import DeleteIcon from "@/assets/Icons/DeleteIcon";
-import { getProductEditHref } from "@/features/products/utils/productRoutes";
+import { GiftingCheckboxLabelRow } from "@/shared/ui/GiftingCheckboxLabelRow";
+import { getProductEditHref, getProductHref } from "@/features/products/utils/productRoutes";
+import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
+
+const MetalEngravingPanel = dynamic(
+  () => import("@/features/products/components/detail/MetalEngravingPanel"),
+  { ssr: false },
+);
 
 interface CartItemProps {
   item: CartLineItem;
-  giftNoteDisplay: CartGiftNoteDisplay;
-  onUpdateQuantity: (lineItemId: string, quantity: number) => void;
   onRemove: (lineItemId: string) => void;
   onUpdateOptions: (lineItemId: string, options: Partial<CartLineOptions>) => Promise<void>;
 }
 
 const ENGRAVING_EMPTY_LABEL = "Metal Engraving (Optional)";
 
-const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItemProps) => {
-  const { buyNow } = useCart();
-  const { toggleWishlist, isWishlisted } = useWishlist();
-  const { status } = useAuth();
+const CartItem = ({ item, onRemove, onUpdateOptions }: CartItemProps) => {
+  const { buyNow, getLineItemMetadata, removeItem, showCartStatusToast } = useCart();
+  const { isWishlisted, addToWishlist } = useWishlist();
   const { clearGiftingOptionsExplored } = useCartUI();
   const { navigateToCheckout, isNavigatingToCheckout } = useCartCheckout();
   const { product, quantity, options } = item;
@@ -51,89 +54,97 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
   const wishlisted = isWishlisted(product.id);
   const isGift =
     options.isGift === false ? false : Boolean(options.isGift || item.gifting);
-  const supportsEngraving = isCartLineEngravingEnabled(options);
+  const lineMetadata = getLineItemMetadata(item.id);
+  const supportsEngraving = isCartLineEngravingEnabled(
+    options,
+    product.customOptions ?? lineMetadata?.productCustomOptions,
+  );
   const engravingMaxCharacters = options.engravingMaxCharacters ?? DEFAULT_ENGRAVING_MAX_CHARACTERS;
   const hasEngraving = Boolean(options.engraving?.trim());
-  const itemGiftNote = getCartItemGiftNote(item, giftNoteDisplay);
-  const [isEditingEngraving, setIsEditingEngraving] = useState(false);
-  const [engravingDraft, setEngravingDraft] = useState(options.engraving ?? "");
-  const [engravingError, setEngravingError] = useState<string | null>(null);
+  const [isEngravingOpen, setIsEngravingOpen] = useState(false);
   const [isSavingEngraving, setIsSavingEngraving] = useState(false);
   const [movedToWishlist, setMovedToWishlist] = useState(false);
   const [isBuyingNow, setIsBuyingNow] = useState(false);
+  const [isMovingToWishlist, setIsMovingToWishlist] = useState(false);
 
   const engravingFont = options.engravingFont?.trim();
-  const engravingErrorId = `cart-engraving-error-${item.id}`;
+  const fontLabels =
+    product.customOptions?.engravingFont?.labels ??
+    lineMetadata?.productCustomOptions?.engravingFont?.labels ??
+    [];
+  const availableEngravingFonts =
+    engravingFont && !fontLabels.includes(engravingFont)
+      ? [engravingFont, ...fontLabels]
+      : fontLabels;
+  const engravingConfig = useMemo(
+    () => resolveProductEngravingConfig(product),
+    [product],
+  );
 
-  const clampDraft = (value: string) =>
-    engravingMaxCharacters ? clampEngravingText(value, engravingMaxCharacters) : value;
-
-  const sanitizeDraft = (value: string) =>
-    clampDraft(value.replace(ENGRAVING_TEXT_SANITIZE_PATTERN, ""));
-
-  useEffect(() => {
-    if (!isEditingEngraving) {
-      setEngravingDraft(options.engraving ?? "");
+  const initialEngravingSelection = useMemo<EngravingSelection | null>(() => {
+    if (!hasEngraving) {
+      return null;
     }
-  }, [options.engraving, isEditingEngraving]);
 
-  const handleEngravingAction = () => {
-    if (isNavigatingToCheckout) {
+    return {
+      text: options.engraving!.trim(),
+      font: engravingFont || availableEngravingFonts[0] || "",
+    };
+  }, [
+    availableEngravingFonts,
+    engravingFont,
+    hasEngraving,
+    options.engraving,
+  ]);
+
+  const openEngravingDrawer = () => {
+    if (isNavigatingToCheckout || isSavingEngraving) {
       return;
     }
 
-    if (!isEditingEngraving) {
-      setEngravingDraft(options.engraving ?? "");
-      setEngravingError(null);
-      setIsEditingEngraving(true);
-      return;
-    }
-
-    if (isSavingEngraving) {
-      return;
-    }
-
-    const trimmed = clampDraft(engravingDraft.trim());
-    setIsSavingEngraving(true);
-    void (async () => {
-      try {
-        await onUpdateOptions(item.id, { engraving: trimmed });
-        setEngravingError(null);
-        setIsEditingEngraving(false);
-      } catch (error) {
-        // Keep the edit row open so the shopper can correct and retry.
-        setEngravingError(
-          error instanceof Error && error.message.trim()
-            ? error.message.trim()
-            : "Could not save the engraving. Please try again.",
-        );
-      } finally {
-        setIsSavingEngraving(false);
-      }
-    })();
+    setIsEngravingOpen(true);
   };
 
-  const handleEngravingKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      handleEngravingAction();
-    }
+  const handleEngravingSave = async (value: EngravingSelection | null) => {
+    const trimmed = value?.text?.trim() ?? "";
+    const nextFont = value?.font?.trim() ?? "";
+    const fontChanged =
+      trimmed !== "" && nextFont !== "" && nextFont !== (engravingFont ?? "");
 
-    if (event.key === "Escape") {
-      setEngravingDraft(options.engraving ?? "");
-      setEngravingError(null);
-      setIsEditingEngraving(false);
+    setIsSavingEngraving(true);
+
+    try {
+      await onUpdateOptions(item.id, {
+        engraving: trimmed,
+        ...(fontChanged ? { engravingFont: nextFont } : {}),
+      });
+    } catch (error) {
+      showCartStatusToast(
+        error instanceof Error && error.message.trim()
+          ? error.message.trim()
+          : "Could not save the engraving. Please try again.",
+      );
+      throw error;
+    } finally {
+      setIsSavingEngraving(false);
     }
   };
 
   const handleMoveToWishlist = () => {
-    if (isNavigatingToCheckout) return;
-    toggleWishlist(product.id);
-    if (status !== "authenticated") {
-      return;
-    }
-    onRemove(item.id);
-    setMovedToWishlist(true);
+    if (isNavigatingToCheckout || isMovingToWishlist) return;
+
+    void (async () => {
+      setIsMovingToWishlist(true);
+      try {
+        await addToWishlist(product.id);
+        await removeItem(item.id, { showToast: false });
+        setMovedToWishlist(true);
+      } catch {
+        // Login modal or API failure — keep the cart line unchanged.
+      } finally {
+        setIsMovingToWishlist(false);
+      }
+    })();
   };
 
   const handleBuyNow = () => {
@@ -149,18 +160,19 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
     })();
   };
 
-  const productHref = getProductEditHref(product, item.id);
-
+  const productViewHref = getProductHref(product);
+  const productEditHref = getProductEditHref(product, item.id);
+  const { windows } = useUiPlatform();
   return (
     <article className="relative flex flex-col gap-4 bg-white px-4 lg:gap-6 lg:px-6 py-6">
-      {/* {isGift ? (
-        <CartGiftBadge variant="cart" className="absolute left-0 top-0 z-10" />
-      ) : null} */}
+      {isGift ? (
+        <CartGiftBadge className="absolute left-0 top-0 z-10" />
+      ) : null}
 
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 flex-1 gap-4 lg:max-w-[499.5px] lg:gap-6">
           <Link
-            href={productHref}
+            href={productViewHref}
             onClick={(event) => {
               if (isNavigatingToCheckout) event.preventDefault();
             }}
@@ -180,16 +192,17 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
             />
           </Link>
 
-          <div className="flex min-w-0 flex-1 flex-col lg:w-[176px] lg:max-w-[176px] gap-8">
-            <div className="flex flex-col gap-2 lg:gap-3">
+          <div className="flex min-w-0 flex-1 flex-col items-start gap-8 lg:w-[300px] lg:max-w-[300px]">
+            <div className="flex flex-col items-start gap-3">
               <Link
-                href={productHref}
+                href={productViewHref}
                 onClick={(event) => {
                   if (isNavigatingToCheckout) event.preventDefault();
                 }}
                 aria-disabled={isNavigatingToCheckout || undefined}
                 className={cn(
-                  "font-gill text-sm leading-110 text-darkblack transition-colors hover:text-darkMagenta lg:text-base",
+                  "font-gill text-base font-normal leading-110 text-darkblack transition-colors hover:text-darkMagenta",
+                  productNameDisplayClassName,
                   isNavigatingToCheckout && "pointer-events-none",
                 )}
               >
@@ -198,40 +211,27 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
 
               <CartMetaRow parts={meta} />
 
-              {/* {itemGiftNote ? (
-                <p className="font-gill text-sm font-light leading-110 text-neutral500 lg:text-base">
-                  <span className="font-normal text-darkblack">Gift note:</span> {itemGiftNote}
-                </p>
-              ) : null} */}
-
               {quantity > 1 ? (
                 <p className="font-gill text-sm font-light leading-110 text-neutral500">
                   Qty: {quantity}
                 </p>
               ) : null}
 
-              <p className="font-gill text-sm leading-110 text-darkblack lg:text-base">
+              <p className="font-gill text-base font-normal leading-110 text-darkblack">
                 {formatCartPrice(getCartLineDisplayTotal(item))}
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-4">
-              <CartTextLink href={productHref} disabled={isNavigatingToCheckout}>EDIT</CartTextLink>
-              {/* {movedToWishlist ? (
-                <span className="font-gill text-sm uppercase leading-110 text-neutral500 lg:text-base">
-                  Moved to Wishlist
-                </span>
-              ) : (
-                <CartTextLink onClick={handleMoveToWishlist}>
-                  {wishlisted ? "IN WISHLIST" : "MOVE TO WISHLIST"}
-                </CartTextLink>
-              )} */}
-              <CartTextLink onClick={handleMoveToWishlist} disabled={isNavigatingToCheckout}>
-                {!wishlisted && "MOVE TO WISHLIST"}
-              </CartTextLink>
-              {/* <CartTextLink onClick={handleBuyNow} className={isBuyingNow ? "opacity-50" : ""}>
-                BUY NOW
-              </CartTextLink> */}
+            <div className="flex items-start gap-4">
+              <CartActionLink href={productEditHref} disabled={isNavigatingToCheckout}>
+                Edit
+              </CartActionLink>
+              <CartActionLink
+                onClick={handleMoveToWishlist}
+                disabled={isNavigatingToCheckout || isMovingToWishlist}
+              >
+                Move to wishlist
+              </CartActionLink>
             </div>
           </div>
         </div>
@@ -246,27 +246,34 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
           aria-label={`Remove ${product.name}`}
           className="shrink-0 text-darkblack transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <DeleteIcon className="size-6" />
+          <DeleteIcon className={cn(!windows && "-translate-y-1", "size-6")} />
         </button>
       </div>
 
       <CartDivider weight={0.5} />
 
-      <label className={cn("inline-flex w-fit items-center gap-2", isNavigatingToCheckout ? "cursor-not-allowed" : "cursor-pointer")}>
-        <CartGiftCheckbox
-          checked={isGift}
-          disabled={isNavigatingToCheckout}
-          onChange={(checked) => {
-            if (isNavigatingToCheckout) return;
-            if (checked) {
-              clearGiftingOptionsExplored();
-            }
-            void onUpdateOptions(item.id, { isGift: checked });
-          }}
+      <label
+        className={cn(
+          isNavigatingToCheckout ? "cursor-not-allowed" : "cursor-pointer",
+        )}
+      >
+        <GiftingCheckboxLabelRow
+          gap={2}
+          checkbox={
+            <CartGiftCheckbox
+              checked={isGift}
+              disabled={isNavigatingToCheckout}
+              onChange={(checked) => {
+                if (isNavigatingToCheckout) return;
+                if (checked) {
+                  clearGiftingOptionsExplored();
+                }
+                void onUpdateOptions(item.id, { isGift: checked });
+              }}
+            />
+          }
+          label="Mark this as a gift"
         />
-        <span className="font-gill text-sm leading-4 text-darkblack lg:text-base lg:leading-5">
-          Mark this as a gift
-        </span>
       </label>
 
       {supportsEngraving ? (
@@ -274,69 +281,48 @@ const CartItem = ({ item, giftNoteDisplay, onRemove, onUpdateOptions }: CartItem
           <CartDivider weight={0.5} />
 
           <div className="flex flex-col gap-2 self-stretch">
-            <div className="flex items-center justify-between gap-4">
-              <p className="font-gill text-base font-normal leading-110 text-darkblack lg:text-xl">
-                Engraving
-              </p>
-              {isEditingEngraving && engravingMaxCharacters ? (
-                <span className="font-gill text-sm font-light leading-110 text-neutral500">
-                  {engravingDraft.length}/{engravingMaxCharacters}
-                </span>
-              ) : null}
-            </div>
+            <p className="font-gill text-base font-normal leading-110 text-darkblack lg:text-xl">
+              Engraving
+            </p>
 
             <div className="flex gap-2 self-stretch">
               <div className="flex h-14 min-w-0 flex-1 items-center bg-aboutInactive px-3">
-                {isEditingEngraving ? (
-                  <input
-                    type="text"
-                    value={engravingDraft}
-                    disabled={isNavigatingToCheckout}
-                    onChange={(event) => {
-                      if (isNavigatingToCheckout) return;
-                      setEngravingDraft(sanitizeDraft(event.target.value));
-                      setEngravingError(null);
-                    }}
-                    onKeyDown={handleEngravingKeyDown}
-                    maxLength={engravingMaxCharacters}
-                    aria-label="Engraving text"
-                    aria-invalid={engravingError ? true : undefined}
-                    aria-describedby={engravingError ? engravingErrorId : undefined}
-                    autoFocus
-                    className="h-full w-full min-w-0 border-0 bg-transparent font-gill text-sm leading-110 text-darkblack outline-none placeholder:text-neutral500 disabled:cursor-not-allowed lg:text-base"
-                  />
-                ) : (
-                  <p
-                    className={
-                      hasEngraving
-                        ? "truncate font-gill text-sm leading-110 text-darkblack lg:text-base"
-                        : "truncate font-gill text-sm leading-110 text-neutral500 lg:text-base"
-                    }
-                  >
-                    {hasEngraving ? options.engraving!.trim() : ENGRAVING_EMPTY_LABEL}
-                  </p>
-                )}
+                <p
+                  className={
+                    hasEngraving
+                      ? "truncate font-gill text-sm leading-110 text-darkblack lg:text-base"
+                      : "truncate font-gill text-sm leading-110 text-neutral500 lg:text-base"
+                  }
+                >
+                  {hasEngraving ? options.engraving!.trim() : ENGRAVING_EMPTY_LABEL}
+                </p>
               </div>
               <CartOutlineButton
                 type="button"
-                onClick={handleEngravingAction}
+                onClick={openEngravingDrawer}
                 disabled={isSavingEngraving || isNavigatingToCheckout}
                 className="h-14 w-auto shrink-0 px-5 uppercase lg:px-7"
               >
-                {isEditingEngraving ? "Save" : hasEngraving ? "Modify" : "Add"}
+                {hasEngraving ? "Modify" : "Add"}
               </CartOutlineButton>
             </div>
 
-            {engravingError ? (
-              <FormFieldError id={engravingErrorId} message={engravingError} />
-            ) : null}
-
-            {hasEngraving && engravingFont ? (
+            {/* {hasEngraving && engravingFont ? (
               <p className="font-gill text-sm font-light leading-110 text-neutral500 lg:text-base">
                 <span className="font-normal text-darkblack">Font:</span> {engravingFont}
               </p>
-            ) : null}
+            ) : null} */}
           </div>
+
+          <MetalEngravingPanel
+            open={isEngravingOpen}
+            onClose={() => setIsEngravingOpen(false)}
+            previewImage={engravingConfig?.previewImage}
+            fonts={engravingConfig?.fonts ?? availableEngravingFonts}
+            maxCharacters={engravingConfig?.maxCharacters ?? engravingMaxCharacters}
+            initialValue={initialEngravingSelection}
+            onSave={handleEngravingSave}
+          />
         </>
       ) : null}
     </article>

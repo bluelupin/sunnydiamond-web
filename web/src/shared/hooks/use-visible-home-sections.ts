@@ -1,24 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { homeSections } from "@/features/cms/data/content";
+import { useHomeSidebarNavigation } from "@/hooks/homepage/useHomeSidebarNavigation";
+import type { HomeSidebarNavSection } from "@/shared/lib/shellNavigation";
 
-export type HomeSection = (typeof homeSections)[number];
-
-function getSectionsInDom(): HomeSection[] {
+function getSectionsInDom(navSections: readonly HomeSidebarNavSection[]): HomeSidebarNavSection[] {
   if (typeof document === "undefined") return [];
-  return homeSections.filter((section) => document.getElementById(section.id) != null);
+  return navSections.filter((section) => document.getElementById(section.sectionId) != null);
 }
 
-/** Nav anchors limited to sections currently rendered in the DOM (CMS-driven visibility). */
+/** Nav anchors limited to CMS sidebar sections currently rendered in the DOM. */
 export function useVisibleHomeSections() {
-  const [visibleSections, setVisibleSections] = useState<HomeSection[]>([]);
+  const navSections = useHomeSidebarNavigation();
+  const [visibleSections, setVisibleSections] = useState<HomeSidebarNavSection[]>([]);
 
   useEffect(() => {
     let debounceId: ReturnType<typeof setTimeout> | undefined;
 
     const sync = () => {
-      setVisibleSections(getSectionsInDom());
+      setVisibleSections(getSectionsInDom(navSections));
     };
 
     const debouncedSync = () => {
@@ -43,7 +43,7 @@ export function useVisibleHomeSections() {
       if (debounceId) clearTimeout(debounceId);
       hydrationTimers.forEach((timer) => window.clearTimeout(timer));
     };
-  }, []);
+  }, [navSections]);
 
   return visibleSections;
 }

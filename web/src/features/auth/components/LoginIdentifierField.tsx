@@ -1,8 +1,9 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
-import { APPOINTMENT_COUNTRY_CODES, DEFAULT_COUNTRY_CODE } from "@/shared/constants/appointmentForm";
+import type { RefObject } from "react";
+import { DEFAULT_COUNTRY_CODE } from "@/shared/constants/appointmentForm";
 import FormFieldError from "@/shared/ui/FormFieldError";
+import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
 import { cn } from "@/shared/utils/cn";
 import { sanitizePhoneInput } from "@/shared/utils/formValidation";
 import { isEmailIdentifier } from "../utils/authValidation";
@@ -12,6 +13,7 @@ type LoginIdentifierFieldProps = {
   countryCode: string;
   error?: string;
   emailOnly?: boolean;
+  inputRef?: RefObject<HTMLInputElement | null>;
   onIdentifierChange: (value: string) => void;
   onCountryCodeChange: (value: string) => void;
 };
@@ -21,6 +23,7 @@ const LoginIdentifierField = ({
   countryCode,
   error,
   emailOnly = false,
+  inputRef,
   onIdentifierChange,
   onCountryCodeChange,
 }: LoginIdentifierFieldProps) => {
@@ -34,6 +37,7 @@ const LoginIdentifierField = ({
 
       {isEmailMode ? (
         <input
+          ref={inputRef}
           id="login-identifier"
           type="email"
           inputMode="email"
@@ -56,30 +60,16 @@ const LoginIdentifierField = ({
             error && "border-[#F91616] bg-[#FEDCDC]",
           )}
         >
-          <div className="relative flex shrink-0 items-center">
-            <select
-              value={countryCode || DEFAULT_COUNTRY_CODE}
-              onChange={(event) => {
-                onCountryCodeChange(event.target.value);
-                onIdentifierChange(sanitizePhoneInput(identifier, event.target.value));
-              }}
-              aria-label="Country code"
-              className="appearance-none bg-transparent pr-5 font-gill text-base leading-110 text-darkblack outline-none"
-            >
-              {APPOINTMENT_COUNTRY_CODES.map((entry) => (
-                <option key={entry.code} value={entry.code}>
-                  {entry.code}
-                </option>
-              ))}
-            </select>
-            <ChevronDown
-              size={16}
-              strokeWidth={1.5}
-              aria-hidden
-              className="pointer-events-none absolute right-0 text-darkblack"
-            />
-          </div>
+          <PhoneCountryCodeSelect
+            id="login-country-code"
+            value={countryCode || DEFAULT_COUNTRY_CODE}
+            onChange={(nextCode) => {
+              onCountryCodeChange(nextCode);
+              onIdentifierChange(sanitizePhoneInput(identifier, nextCode));
+            }}
+          />
           <input
+            ref={inputRef}
             id="login-identifier"
             type="tel"
             inputMode="numeric"

@@ -33,23 +33,28 @@ async function loadMagentoProductDetailCore(
     return null;
   }
 
-  const data = await magentoGraphqlFetch<MagentoProductByUrlKeyResponse>({
-    query: MAGENTO_PRODUCT_BY_URL_KEY_QUERY,
-    variables: { urlKey: normalizedUrlKey },
-    signal,
-  });
+  try {
+    const data = await magentoGraphqlFetch<MagentoProductByUrlKeyResponse>({
+      query: MAGENTO_PRODUCT_BY_URL_KEY_QUERY,
+      variables: { urlKey: normalizedUrlKey },
+      signal,
+    });
 
-  const item = data.products?.items?.[0];
-  if (!item) {
+    const item = data.products?.items?.[0];
+    if (!item) {
+      return null;
+    }
+
+    const product = mapMagentoProductDetailToProduct(item);
+    if (!product) {
+      return null;
+    }
+
+    return { item, product };
+  } catch {
+    // Magento unreachable / network TypeError — keep PDP from hard-crashing.
     return null;
   }
-
-  const product = mapMagentoProductDetailToProduct(item);
-  if (!product) {
-    return null;
-  }
-
-  return { item, product };
 }
 
 /** Request-scoped dedupe for PDP metadata + page body (single Magento product query). */

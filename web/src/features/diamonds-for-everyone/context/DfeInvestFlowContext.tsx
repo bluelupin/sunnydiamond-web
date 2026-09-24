@@ -15,6 +15,7 @@ export type DfeInvestStep = "intro" | "kyc" | "nominee" | "review" | "success";
 type DfeInvestFlowContextValue = {
   monthlyAmount: number;
   setMonthlyAmount: (value: number) => void;
+  cancelButtonLabel?: string;
   step: DfeInvestStep;
   idType: string;
   idNumber: string;
@@ -44,9 +45,11 @@ const STEP_ORDER: DfeInvestStep[] = ["intro", "kyc", "nominee", "review", "succe
 
 export function DfeInvestFlowProvider({
   initialMonthlyAmount,
+  cancelButtonLabel,
   children,
 }: {
   initialMonthlyAmount: number;
+  cancelButtonLabel?: string;
   children: ReactNode;
 }) {
   const { investment, monthsPaid, totalMonths } = {
@@ -109,6 +112,7 @@ export function DfeInvestFlowProvider({
     () => ({
       monthlyAmount,
       setMonthlyAmount,
+      cancelButtonLabel,
       step,
       idType,
       idNumber,
@@ -134,6 +138,7 @@ export function DfeInvestFlowProvider({
     [
       monthlyAmount,
       setMonthlyAmount,
+      cancelButtonLabel,
       step,
       idType,
       idNumber,

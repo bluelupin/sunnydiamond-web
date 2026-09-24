@@ -19,6 +19,8 @@ export const STRAPI_ENDPOINTS = {
   diamondsForEveryonePage: "api/diamonds-for-everyone-page",
   /** Gifting marketing page — hero, occasions, gift finder, gift card, trust badges, SEO. */
   giftingPage: "api/gifting-page",
+  /** Profile page — side tabs, hero background, trust badge promo strip. */
+  profilePage: "api/profile-page",
   occasions: "api/occasions",
   /** PDP size dropdown + chart drawer — fetch all, match by `name` / category */
   sizeGuides: "api/size-guides",
@@ -32,10 +34,12 @@ export const STRAPI_ENDPOINTS = {
   productSubmissionsSubmit: "api/product-submissions/submit",
   /** Custom creation submit — JSON or multipart `data` + `referenceImage`. */
   bespokeSubmissionsSubmit: "api/bespoke-submissions/submit",
-  /** Authenticated customer appointments (Bearer Magento customer token). */
+  /** Authenticated customer appointments (CMS API token + magentoCustomerId). */
   customerAppointments: "api/customer/appointments",
   /** Authenticated customer saved bespoke creations. */
   customerSavedCreations: "api/customer/saved-creations",
+  /** Showroom collection — address, mapUrl, city (used to enrich appointment preferredShowroom). */
+  showrooms: "api/showrooms",
   careerLandingPage: "api/career-landing-page",
   careerListingPage: "api/career-listing-page",
   careerOpenings: "api/career-openings",

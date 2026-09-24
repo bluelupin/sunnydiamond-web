@@ -1,23 +1,35 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/shared/utils/cn";
 import { useMobileStickyFooterClearance } from "@/shared/hooks/use-mobile-sticky-footer-clearance";
 import { MobileStickyFooterSpacer } from "@/shared/ui/layout/MobileStickyFooterSpacer";
 import CartBenefitsSection from "@/features/cart/components/CartBenefitsSection";
-import CartGlobalGiftNote from "@/features/cart/components/CartGlobalGiftNote";
 import CartItem from "@/features/cart/components/CartItem";
 import CartMobileStickyFooter from "@/features/cart/components/CartMobileStickyFooter";
 import CartPriceDetails from "@/features/cart/components/CartPriceDetails";
 import { useCart } from "@/features/cart/context/CartContext";
-import { resolveCartGiftNoteDisplay } from "@/features/cart/utils/cartGiftNotes";
 import { useCartCheckout } from "@/features/cart/hooks/useCartCheckout";
+import type { NormalizedProductDisplayStrip } from "@/services/product-display/product-display-page.types";
 import { CartPrimaryLink } from "./CartFlowUi";
+import CartRefreshErrorState from "./CartRefreshErrorState";
+import CartPageSkeleton from "./skeletons/CartPageSkeleton";
 
-const CartPage = () => {
-  const { items, isHydrating, refreshCart, updateQuantity, removeItem, updateLineItemOptions } = useCart();
+type CartPageProps = {
+  benefitsStrip: NormalizedProductDisplayStrip;
+};
+
+const CartPage = ({ benefitsStrip }: CartPageProps) => {
+  const {
+    items,
+    isHydrating,
+    isUpdating,
+    cartRefreshError,
+    refreshCart,
+    removeItem,
+    updateLineItemOptions,
+  } = useCart();
   const { isNavigatingToCheckout } = useCartCheckout();
-  const giftNoteDisplay = useMemo(() => resolveCartGiftNoteDisplay(items), [items]);
   const [offersOpen, setOffersOpen] = useState(false);
   const [priceBreakupOpen, setPriceBreakupOpen] = useState(false);
   const { footerRef, clearancePx } = useMobileStickyFooterClearance();
@@ -28,13 +40,17 @@ const CartPage = () => {
     }
   }, [isHydrating, refreshCart]);
 
+  const handleRetryCartRefresh = () => {
+    void refreshCart();
+  };
+
   if (isHydrating) {
+    return <CartPageSkeleton />;
+  }
+
+  if (cartRefreshError && items.length === 0) {
     return (
-      <section className="flex min-h-[60vh] flex-col items-center justify-center bg-gray300 px-4 py-20 text-center">
-        <p className="sr-only" aria-live="polite">
-          Loading your shopping bag
-        </p>
-      </section>
+      <CartRefreshErrorState message={cartRefreshError} onRetry={handleRetryCartRefresh} />
     );
   }
 
@@ -68,34 +84,38 @@ const CartPage = () => {
             Your Shopping Bag
           </h1>
 
+          {cartRefreshError ? (
+            <div className="mb-6">
+              <CartRefreshErrorState
+                variant="banner"
+                message={cartRefreshError}
+                onRetry={handleRetryCartRefresh}
+              />
+            </div>
+          ) : null}
+
           <div
             className={cn(
-              "grid grid-cols-1 gap-6 md:max-lg:portrait:grid-cols-[minmax(0,1fr)_minmax(0,360px)] md:max-lg:landscape:grid-cols-2 md:max-lg:items-start lg:grid-cols-2 lg:gap-6",
+              "grid grid-cols-1 gap-6 md:max-lg:portrait:grid-cols-[minmax(0,1fr)_minmax(0,360px)] md:max-lg:landscape:grid-cols-2 md:max-lg:items-start lg:grid-cols-[minmax(0,783fr)_minmax(0,553fr)] lg:gap-6",
               isNavigatingToCheckout && "pointer-events-none",
             )}
-            aria-busy={isNavigatingToCheckout || undefined}
+            aria-busy={isNavigatingToCheckout || isUpdating || undefined}
           >
             <div
               className="flex min-w-0 flex-col gap-6"
               {...(isNavigatingToCheckout ? { inert: true } : {})}
             >
-              {giftNoteDisplay.globalNote ? (
-                <CartGlobalGiftNote note={giftNoteDisplay.globalNote} />
-              ) : null}
-
               {items.map((item) => (
                 <CartItem
                   key={item.id}
                   item={item}
-                  giftNoteDisplay={giftNoteDisplay}
-                  onUpdateQuantity={updateQuantity}
                   onRemove={removeItem}
                   onUpdateOptions={updateLineItemOptions}
                 />
               ))}
 
               <div className="pt-4 md:hidden">
-                <CartBenefitsSection />
+                <CartBenefitsSection strip={benefitsStrip} />
               </div>
 
               <MobileStickyFooterSpacer height={clearancePx} />
@@ -103,7 +123,7 @@ const CartPage = () => {
 
             <aside className="hidden h-fit w-full min-w-0 flex-col gap-0 md:max-lg:sticky md:max-lg:top-12 md:max-lg:flex lg:sticky lg:top-12 lg:flex">
               <CartPriceDetails />
-              <CartBenefitsSection />
+              <CartBenefitsSection strip={benefitsStrip} />
             </aside>
           </div>
         </div>

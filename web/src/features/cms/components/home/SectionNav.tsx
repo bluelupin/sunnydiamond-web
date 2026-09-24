@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { homeSections } from "@/features/cms/data/content";
+import { useHomeSidebarNavigation } from "@/hooks/homepage/useHomeSidebarNavigation";
 import { useScrollSpy } from "@/shared/hooks/use-scroll-spy";
 import { SectionNavProgressIndicator } from "@/features/cms/components/home/SectionNavProgressIndicator";
 import { saveHomeActiveSection } from "@/shared/lib/browserBackScrollRestore";
@@ -11,18 +11,17 @@ import { cn } from "@/shared/utils/cn";
 
 const NAV_GRADIENT = "/icons/section-nav-gradient.svg";
 
-const NAV_START_SECTION_ID = "alankara";
-
-const navSections = homeSections.slice(
-  Math.max(0, homeSections.findIndex((section) => section.id === NAV_START_SECTION_ID)),
-);
-
-const sectionIds = navSections.map((section) => section.id);
-
 const SectionNav = () => {
+  const navSections = useHomeSidebarNavigation();
+  const sectionIds = useMemo(
+    () => navSections.map((section) => section.sectionId),
+    [navSections],
+  );
+  const navStartSectionId = sectionIds[0];
+
   const { activeId, isVisible, progress } = useScrollSpy({
     sectionIds,
-    navStartSectionId: NAV_START_SECTION_ID,
+    navStartSectionId,
   });
   const [isFooterIntersecting, setIsFooterIntersecting] = useState(false);
 
@@ -44,14 +43,18 @@ const SectionNav = () => {
   const showNav = isVisible && !isFooterIntersecting;
 
   const activeIndex = useMemo(
-    () => navSections.findIndex((section) => section.id === activeId),
+    () => navSections.findIndex((section) => section.sectionId === activeId),
     [activeId, navSections],
   );
 
-  const handleClick = (id: string) => {
-    saveHomeActiveSection(id);
-    scrollToHomeSection(id);
+  const handleClick = (sectionId: string) => {
+    saveHomeActiveSection(sectionId);
+    scrollToHomeSection(sectionId);
   };
+
+  if (navSections.length === 0) {
+    return null;
+  }
 
   return (
     <div
@@ -83,14 +86,14 @@ const SectionNav = () => {
         </div>
 
         {navSections.map((section, index) => {
-          const isActive = activeId === section.id;
+          const isActive = activeId === section.sectionId;
           const isComplete = activeIndex >= 0 && index < activeIndex;
 
           return (
             <button
               key={section.id}
               type="button"
-              onClick={() => handleClick(section.id)}
+              onClick={() => handleClick(section.sectionId)}
               aria-label={`Scroll to ${section.label}`}
               aria-current={isActive ? "true" : undefined}
               className={cn(
@@ -102,7 +105,7 @@ const SectionNav = () => {
             >
               <span className="relative inline-flex size-4 shrink-0 items-center justify-center">
                 <SectionNavProgressIndicator
-                  progress={progress[section.id] ?? 0}
+                  progress={progress[section.sectionId] ?? 0}
                   isActive={isActive}
                   isComplete={isComplete}
                 />

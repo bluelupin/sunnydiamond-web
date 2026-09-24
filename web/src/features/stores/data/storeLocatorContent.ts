@@ -36,30 +36,29 @@ export const storeLocatorSearchMobileFigmaSpec = {
   stateLabelSize: 14,
 } as const;
 
-/** Figma State 1 — default list eyebrow. */
-export const storeLocatorDefaultListCopy = {
-  title: "Explore Our Showrooms",
-} as const;
+/** Figma — default list heading (default + invalid states). */
+export const storeLocatorExploreShowroomsTitle = "Explore Our Showrooms";
 
-/** Figma State 2 — store found after search. */
-export const storeLocatorFoundCopy = {
-  search: "STORE FOUND FOR YOUR SEARCH",
-} as const;
+/** Figma / Spec — pincode match list heading. */
+export const storeLocatorSearchMatchMessage = "We Found a Showroom Near You";
 
-/** Figma State 4 — valid area search with no local showroom. */
-export const storeLocatorNearbySuggestionsCopy = {
-  title: "NO SHOWROOM IN THIS AREA YET",
-  subtitle: "Explore the nearest Sunny Diamonds showrooms and plan your visit with ease.",
-} as const;
+/** Figma desktop — label above non-matched stores after a search hit. */
+export const storeLocatorExploreNearbyStoresLabel = "Explore nearby stores";
 
-/** @deprecated Use storeLocatorFoundCopy.search — kept for existing pincode-match imports. */
-export const storeLocatorPincodeMatchCopy = {
-  title: storeLocatorFoundCopy.search,
-  nearbySubtitle: storeLocatorNearbySuggestionsCopy.subtitle,
-} as const;
+/** Figma / Spec — valid pincode with no showroom match. */
+export const storeLocatorNoAreaTitle = "NO SHOWROOM IN THIS AREA YET";
+export const storeLocatorNoAreaSubtitle =
+  "Explore the nearest Sunny Diamonds showrooms and plan your visit with ease.";
 
-export const storeLocatorStatusEyebrowClassName =
-  "font-gill text-sm font-normal uppercase leading-110 text-[#5F6F3E] lg:text-base";
+/** Figma / Spec — malformed pincode under the search field. */
+export const storeLocatorInvalidPincodeMessage = "Please enter a valid pin code";
+
+/** Match / explore heading styling (Figma — dark title, not green eyebrow). */
+export const storeLocatorListHeadingClassName =
+  "font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl";
+
+/** @deprecated kept for imports — use storeLocatorListHeadingClassName */
+export const storeLocatorStatusEyebrowClassName = storeLocatorListHeadingClassName;
 
 /** UI model for location filter chips (CMS icons preferred). */
 export type StoreLocatorStateFilter = {
@@ -68,14 +67,8 @@ export type StoreLocatorStateFilter = {
   /** CMS icon URL — when set, sprite crop fields are unused. */
   iconUrl?: string | null;
   iconAlt?: string;
-  spriteSrc?: string;
   iconWidth: number;
   iconHeight: number;
   mobileIconWidth?: number;
   mobileIconHeight?: number;
-  imageWidthPct?: number;
-  imageHeightPct?: number;
-  imageLeftPct?: number;
-  imageTopPct?: number;
 };
-

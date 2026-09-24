@@ -8,7 +8,6 @@ import type {
   NormalizedPolicyCertificationsPage,
   PolicyPageSeo,
   PolicySupportContent,
-  StrapiLegalPage,
   StrapiPolicy,
   StrapiPolicyAccordionItem,
   StrapiPolicyCertificationsPage,
@@ -22,8 +21,32 @@ function cleanText(value: unknown): string | undefined {
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
-function sortByOrder<T extends { sortOrder?: number | null }>(items: T[]): T[] {
-  return [...items].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+/** CMS sections may use `isActive` or `showField`; default visible when unset. */
+function resolveSectionActive(
+  isActive?: boolean | null,
+  showField?: boolean | null,
+): boolean {
+  if (typeof isActive === "boolean") return isActive;
+  if (typeof showField === "boolean") return showField;
+  return true;
+}
+
+/** CMS drag order: sort by `sortOrder` when set; otherwise keep API array order. */
+function sortByCmsOrder<T extends { sortOrder?: number | null; id?: number | string }>(
+  items: T[],
+): T[] {
+  return items
+    .map((item, index) => ({ item, index }))
+    .sort((a, b) => {
+      const aOrder = a.item.sortOrder;
+      const bOrder = b.item.sortOrder;
+      const aHas = typeof aOrder === "number";
+      const bHas = typeof bOrder === "number";
+      if (aHas && bHas && aOrder !== bOrder) return aOrder - bOrder;
+      if (aHas !== bHas) return aHas ? -1 : 1;
+      return a.index - b.index;
+    })
+    .map(({ item }) => item);
 }
 
 function toNavLabel(title: string): string {
@@ -56,6 +79,8 @@ function parseAnswerToSection(
   item: StrapiPolicyAccordionItem,
   index: number,
 ): PolicyAccordionSection | null {
+  if (!resolveSectionActive(item.isActive, item.showField)) return null;
+
   const title = cleanText(item.question);
   const answer = cleanText(item.answer);
   if (!title || !answer) return null;
@@ -90,131 +115,86 @@ function parseAnswerToSection(
   };
 }
 
-function stripMarkdownLight(value: string): string {
-  return value
-    .replace(/!\[[^\]]*]\([^)]*\)/g, "")
-    .replace(/\[([^\]]+)]\([^)]*\)/g, "$1")
-    .replace(/\*\*([^*]+)\*\*/g, "$1")
-    .replace(/\*([^*]+)\*/g, "$1")
-    .replace(/`([^`]+)`/g, "$1")
-    .trim();
-}
-
-function slugify(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 80);
-}
-
-function mapLegalBodyToSections(legal: StrapiLegalPage): PolicyAccordionSection[] {
-  const body = cleanText(legal.body);
-  const summary = cleanText(legal.summary);
-  if (!body && !summary) return [];
-
-  if (!body) {
-    return [
-      {
-        id: `${legal.slug ?? "legal"}-summary`,
-        title: cleanText(legal.title) ?? "Overview",
-        body: summary,
-      },
-    ];
-  }
-
-  const parts = body.split(/\n(?=##\s+)/);
-  const intro = parts[0]?.startsWith("## ") ? "" : (parts[0] ?? "");
-  const sectionParts = parts[0]?.startsWith("## ") ? parts : parts.slice(1);
-  const sections: PolicyAccordionSection[] = [];
-
-  if (summary || cleanText(intro)) {
-    sections.push({
-      id: `${legal.slug ?? "legal"}-overview`,
-      title: "Overview",
-      ...(summary ? { intro: summary } : {}),
-      ...(cleanText(intro) ? { body: stripMarkdownLight(intro) } : {}),
-    });
-  }
-
-  for (const part of sectionParts) {
-    const match = part.match(/^##\s+(.+?)(?:\n|$)([\s\S]*)$/);
-    if (!match) continue;
-    const title = stripMarkdownLight(match[1]);
-    const content = stripMarkdownLight(match[2] ?? "");
-    if (!title || !content) continue;
-    sections.push({
-      id: slugify(title),
-      title,
-      body: content,
-    });
-  }
-
-  if (sections.length === 0) {
-    sections.push({
-      id: `${legal.slug ?? "legal"}-body`,
-      title: cleanText(legal.title) ?? "Details",
-      body: stripMarkdownLight(body),
-    });
-  }
-
-  return sections;
-}
-
-function mapCmsPolicyToDocument(
-  policy: StrapiPolicy,
-  legalBySlug: Map<string, StrapiLegalPage>,
-): PolicyDocument | null {
+function mapCmsPolicyToDocument(policy: StrapiPolicy): PolicyDocument | null {
   const slug = cleanText(policy.slug);
   const title = cleanText(policy.title);
-  if (!slug || !title || policy.isActive === false) return null;
+  if (!slug || !title || !resolveSectionActive(policy.isActive, policy.showField)) {
+    return null;
+  }
 
-  const accordionSections = sortByOrder(policy.accordionItems ?? [])
+  const sections = sortByCmsOrder(policy.accordionItems ?? [])
     .map((item, index) => parseAnswerToSection(item, index))
     .filter((section): section is PolicyAccordionSection => Boolean(section));
 
-  const legal = legalBySlug.get(slug);
-  const legalSections = legal ? mapLegalBodyToSections(legal) : [];
+  // No static / legal-page content fallback — hide policies with no CMS accordion items.
+  if (sections.length === 0) return null;
 
   return {
     id: slug,
     navLabel: toNavLabel(title),
     contentTitle: title,
-    sections: accordionSections.length > 0 ? accordionSections : legalSections,
+    sections,
   };
+}
+
+function toTelHref(value: string): string {
+  if (/^tel:/i.test(value)) return value;
+  const digits = value.replace(/[^\d+]/g, "");
+  return digits ? `tel:${digits}` : "";
+}
+
+function toMailtoHref(value: string): string {
+  if (/^mailto:/i.test(value)) return value;
+  const email = value.replace(/^mailto:/i, "").trim();
+  return email ? `mailto:${email}` : "";
 }
 
 function mapSupport(
   options: StrapiPolicyContactOption[] | null | undefined,
 ): PolicySupportContent {
-  const active = sortByOrder(
-    (options ?? []).filter((option) => option.isActive !== false),
+  const active = sortByCmsOrder(options ?? []).filter((option) =>
+    resolveSectionActive(option.isActive, option.showField),
   );
 
   const phone = active.find((option) => cleanText(option.type)?.toLowerCase() === "phone");
   const email = active.find((option) => cleanText(option.type)?.toLowerCase() === "email");
 
-  const phoneValue = cleanText(phone?.value) ?? "";
-  const emailValue = cleanText(email?.value) ?? "";
-  const phoneDigits = phoneValue.replace(/[^\d+]/g, "");
+  const phoneLabel =
+    cleanText(phone?.cta?.label) ??
+    cleanText(phone?.buttonLabel) ??
+    cleanText(phone?.value) ??
+    "";
+  const phoneUrl =
+    cleanText(phone?.cta?.url) ?? cleanText(phone?.value) ?? "";
+  const phoneHref = phoneUrl ? toTelHref(phoneUrl) : "";
+
+  const emailLabel =
+    cleanText(email?.cta?.label) ??
+    cleanText(email?.buttonLabel) ??
+    cleanText(email?.value) ??
+    "";
+  const emailUrl =
+    cleanText(email?.cta?.url) ?? cleanText(email?.value) ?? "";
+  const emailHref = emailUrl ? toMailtoHref(emailUrl) : "";
 
   return {
-    callTitle: cleanText(phone?.heading) ?? "Call Us",
-    emailTitle: cleanText(email?.heading) ?? "Email Us",
+    callTitle: cleanText(phone?.heading) ?? "",
+    emailTitle: cleanText(email?.heading) ?? "",
     emailDescription: cleanText(email?.description) ?? "",
-    contactCtaLabel: cleanText(phone?.buttonLabel) ?? "CONTACT US",
-    contactHref: "/contact",
-    emailCtaLabel: cleanText(email?.buttonLabel) ?? "SEND AN EMAIL",
-    emailHref: emailValue ? `mailto:${emailValue}` : "",
-    phoneLabel: phoneValue,
-    phoneHref: phoneDigits ? `tel:${phoneDigits}` : "",
-    emailLabel: emailValue,
-    hours: parseAvailabilityHours(phone?.availability),
+    contactCtaLabel: phoneLabel,
+    contactHref: phoneHref,
+    emailCtaLabel: emailLabel,
+    emailHref,
+    phoneLabel,
+    phoneHref,
+    emailLabel,
+    // CMS removed `availability`; Call Us hours now live on `description` (same key as email).
+    hours: parseAvailabilityHours(phone?.description ?? phone?.availability),
   };
 }
 
 function mapSeo(seo: StrapiPolicySeo | null | undefined): PolicyPageSeo | null {
-  if (!seo) return null;
+  if (!seo || !resolveSectionActive(seo.isActive, seo.showField)) return null;
 
   const metaTitle = cleanText(seo.metaTitle);
   const metaDescription = cleanText(seo.metaDescription);
@@ -222,7 +202,9 @@ function mapSeo(seo: StrapiPolicySeo | null | undefined): PolicyPageSeo | null {
   const keywords = cleanText(seo.metaKeywords);
   const ogImageUrl = resolveCmsMediaUrl(seo.ogImage);
 
-  if (!metaTitle && !metaDescription && !canonicalUrl && !keywords && !ogImageUrl) return null;
+  if (!metaTitle && !metaDescription && !canonicalUrl && !keywords && !ogImageUrl) {
+    return null;
+  }
 
   let canonicalPath: string | undefined;
   if (canonicalUrl) {
@@ -245,16 +227,16 @@ function mapSeo(seo: StrapiPolicySeo | null | undefined): PolicyPageSeo | null {
 }
 
 export const EMPTY_POLICY_CERTIFICATIONS_PAGE: NormalizedPolicyCertificationsPage = {
-  pageTitle: "Policy & Certifications",
-  searchPlaceholder: "Search keywords",
-  emptySearchLabel: "No matching policies found.",
+  pageTitle: "",
+  searchPlaceholder: "",
+  emptySearchLabel: "",
   support: {
-    callTitle: "Call Us",
-    emailTitle: "Email Us",
+    callTitle: "",
+    emailTitle: "",
     emailDescription: "",
-    contactCtaLabel: "CONTACT US",
-    contactHref: "/contact",
-    emailCtaLabel: "SEND AN EMAIL",
+    contactCtaLabel: "",
+    contactHref: "",
+    emailCtaLabel: "",
     emailHref: "",
     phoneLabel: "",
     phoneHref: "",
@@ -262,36 +244,31 @@ export const EMPTY_POLICY_CERTIFICATIONS_PAGE: NormalizedPolicyCertificationsPag
     hours: [],
   },
   navGroups: [],
-  defaultPolicyId: "privacy-policy",
+  defaultPolicyId: "",
   seo: null,
 };
 
-export function mapPolicyCertificationsPage(input: {
-  landing: StrapiPolicyCertificationsPage | null;
-  legalPages: StrapiLegalPage[];
-}): NormalizedPolicyCertificationsPage {
-  const landing = input.landing;
+export function mapPolicyCertificationsPage(
+  landing: StrapiPolicyCertificationsPage | null,
+): NormalizedPolicyCertificationsPage {
   if (!landing) {
     return EMPTY_POLICY_CERTIFICATIONS_PAGE;
   }
 
-  const legalBySlug = new Map<string, StrapiLegalPage>();
-  for (const page of input.legalPages) {
-    const slug = cleanText(page.slug);
-    if (!slug || page.isActive === false) continue;
-    legalBySlug.set(slug, page);
-  }
+  const headerActive = resolveSectionActive(
+    landing.headerSection?.isActive,
+    landing.headerSection?.showField,
+  );
 
-  const navGroups = sortByOrder(
-    (landing.policyCategories ?? []).filter((category) => category.isActive !== false),
-  )
+  const navGroups = sortByCmsOrder(landing.policyCategories ?? [])
+    .filter((category) => resolveSectionActive(category.isActive, category.showField))
     .map((category) => {
       const id = cleanText(category.slug);
       const label = cleanText(category.title);
       if (!id || !label) return null;
 
-      const items = sortByOrder(category.policies ?? [])
-        .map((policy) => mapCmsPolicyToDocument(policy, legalBySlug))
+      const items = sortByCmsOrder(category.policies ?? [])
+        .map((policy) => mapCmsPolicyToDocument(policy))
         .filter((policy): policy is PolicyDocument => Boolean(policy));
 
       if (!items.length) return null;
@@ -301,25 +278,24 @@ export function mapPolicyCertificationsPage(input: {
     .filter((group): group is PolicyNavGroup => Boolean(group));
 
   const allPolicies = navGroups.flatMap((group) => group.items);
-  const defaultPolicyId = allPolicies.some((policy) => policy.id === "privacy-policy")
-    ? "privacy-policy"
-    : (allPolicies[0]?.id ?? "privacy-policy");
+  const defaultPolicyId = allPolicies[0]?.id ?? "";
+
+  const contactActive = resolveSectionActive(
+    landing.contactSection?.isActive,
+    landing.contactSection?.showField,
+  );
 
   return {
-    pageTitle:
-      cleanText(landing.headerSection?.heading) ??
-      EMPTY_POLICY_CERTIFICATIONS_PAGE.pageTitle,
-    searchPlaceholder:
-      cleanText(landing.headerSection?.searchPlaceholder) ??
-      EMPTY_POLICY_CERTIFICATIONS_PAGE.searchPlaceholder,
-    emptySearchLabel:
-      cleanText(landing.headerSection?.emptySearchMessage) ??
-      EMPTY_POLICY_CERTIFICATIONS_PAGE.emptySearchLabel,
-    support: mapSupport(
-      landing.contactSection?.isActive === false
-        ? []
-        : landing.contactSection?.contactOptions,
-    ),
+    pageTitle: headerActive
+      ? (cleanText(landing.headerSection?.heading) ?? "")
+      : "",
+    searchPlaceholder: headerActive
+      ? (cleanText(landing.headerSection?.searchPlaceholder) ?? "")
+      : "",
+    emptySearchLabel: headerActive
+      ? (cleanText(landing.headerSection?.emptySearchMessage) ?? "")
+      : "",
+    support: mapSupport(contactActive ? landing.contactSection?.contactOptions : []),
     navGroups,
     defaultPolicyId,
     seo: mapSeo(landing.seo),

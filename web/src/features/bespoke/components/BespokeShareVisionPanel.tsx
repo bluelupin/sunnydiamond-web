@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import { Check, Info, X } from "lucide-react";
+import { Info, X } from "lucide-react";
+import { useAppStatusToastController } from "@/shared/hooks/useAppStatusToastController";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import ShareYourVisionFields from "@/shared/ui/ShareYourVisionFields";
 import {
@@ -10,11 +11,20 @@ import {
   appointmentLabelClassName,
 } from "@/shared/constants/appointmentForm";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
-import { DetailDarkButton } from "@/features/products/components/detail/shared";
+import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
+import { cn } from "@/shared/utils/cn";
+import { DetailDarkButton, DetailTextLink } from "@/features/products/components/detail/shared";
 import { ProductDetailSidePanelShell } from "@/features/products/components/detail/ProductDetailSidePanelShell";
 import { createBespokeSubmission } from "@/services/bespoke/bespoke-submission.service";
 import type { NormalizedBespokeCustomDesignForm } from "@/services/bespoke/contact-bespoke-page.types";
+import {
+  formatBespokeSubmissionError,
+  parseBespokeSubmissionFieldErrors,
+} from "@/features/bespoke/utils/formatBespokeSubmissionError";
 import { wishlistMovedToastDurationMs } from "@/features/wishlist/data/content";
+import FormFieldError from "@/shared/ui/FormFieldError";
+import type { AppointmentContactField } from "@/shared/utils/formValidation";
 
 const MAX_REFERENCE_IMAGE_BYTES = 5 * 1024 * 1024;
 
@@ -34,10 +44,15 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
   const [referenceImageName, setReferenceImageName] = useState<string | null>(null);
   const [referenceImagePreviewUrl, setReferenceImagePreviewUrl] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [statusToastMessage, setStatusToastMessage] = useState<string | null>(null);
+  const [apiFieldErrors, setApiFieldErrors] = useState<
+    Partial<Record<AppointmentContactField, string>>
+  >({});
+  const [referenceImageError, setReferenceImageError] = useState<string | null>(null);
+  const { show: showStatusToast, node: statusToast } = useAppStatusToastController(
+    wishlistMovedToastDurationMs,
+  );
   const referenceImageInputRef = useRef<HTMLInputElement>(null);
   const referenceImagePreviewUrlRef = useRef<string | null>(null);
-  const statusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const formValues = useMemo(
     () => ({ name, countryCode, phone, email, date: "", note }),
@@ -52,6 +67,28 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
   const { isValid, submitted, errors, markTouched, showError, validateSubmit, resetValidation } =
     useAppointmentFormValidation(formValues, validationOptions);
 
+  const displayErrors = useMemo(
+    () => ({ ...errors, ...apiFieldErrors }),
+    [apiFieldErrors, errors],
+  );
+
+  const showFieldError = useCallback(
+    (field: AppointmentContactField) => Boolean(apiFieldErrors[field]) || showError(field),
+    [apiFieldErrors, showError],
+  );
+
+  const clearApiFieldError = useCallback((field: AppointmentContactField) => {
+    setApiFieldErrors((current) => {
+      if (!current[field]) {
+        return current;
+      }
+
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
+  }, []);
+
   const clearReferenceImage = () => {
     if (referenceImagePreviewUrlRef.current) {
       URL.revokeObjectURL(referenceImagePreviewUrlRef.current);
@@ -60,6 +97,7 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
     setReferenceImagePreviewUrl(null);
     setReferenceImage(null);
     setReferenceImageName(null);
+    setReferenceImageError(null);
     if (referenceImageInputRef.current) {
       referenceImageInputRef.current.value = "";
     }
@@ -73,24 +111,9 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
     setNote("");
     clearReferenceImage();
     setIsSubmitting(false);
+    setApiFieldErrors({});
+    setReferenceImageError(null);
     resetValidation();
-  };
-
-  const dismissStatusToast = () => {
-    if (statusToastTimeoutRef.current) {
-      clearTimeout(statusToastTimeoutRef.current);
-      statusToastTimeoutRef.current = null;
-    }
-    setStatusToastMessage(null);
-  };
-
-  const showStatusToast = (message: string) => {
-    dismissStatusToast();
-    setStatusToastMessage(message);
-    statusToastTimeoutRef.current = setTimeout(() => {
-      setStatusToastMessage(null);
-      statusToastTimeoutRef.current = null;
-    }, wishlistMovedToastDurationMs);
   };
 
   useEffect(() => {
@@ -98,9 +121,6 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
       if (referenceImagePreviewUrlRef.current) {
         URL.revokeObjectURL(referenceImagePreviewUrlRef.current);
         referenceImagePreviewUrlRef.current = null;
-      }
-      if (statusToastTimeoutRef.current) {
-        clearTimeout(statusToastTimeoutRef.current);
       }
     };
   }, []);
@@ -125,10 +145,23 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
             referenceImage,
           });
 
-          showStatusToast(form.successToast.title || "Request submitted");
+          showStatusToast(form.successToast.title);
           handleClose();
-        } catch {
-          showStatusToast("Could not submit request");
+        } catch (error) {
+          const { fieldErrors, referenceImageError: imageError } =
+            parseBespokeSubmissionFieldErrors(error);
+
+          if (Object.keys(fieldErrors).length > 0) {
+            setApiFieldErrors(fieldErrors);
+            return;
+          }
+
+          if (imageError) {
+            setReferenceImageError(imageError);
+            return;
+          }
+
+          showStatusToast(formatBespokeSubmissionError(error));
         } finally {
           setIsSubmitting(false);
         }
@@ -140,7 +173,7 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
     const file = event.target.files?.[0] ?? null;
 
     if (file && file.size > MAX_REFERENCE_IMAGE_BYTES) {
-      showStatusToast("Image must be 5 MB or smaller");
+      setReferenceImageError("Image must be 5 MB or smaller");
       if (referenceImageInputRef.current) {
         referenceImageInputRef.current.value = "";
       }
@@ -157,20 +190,8 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
     setReferenceImagePreviewUrl(previewUrl);
     setReferenceImage(file);
     setReferenceImageName(file?.name ?? null);
+    setReferenceImageError(null);
   };
-
-  const statusToast = statusToastMessage ? (
-    <div
-      role="status"
-      aria-live="polite"
-      className="pointer-events-auto fixed left-1/2 top-16 z-[80] w-[calc(100%-2rem)] max-w-[300px] -translate-x-1/2 animate-in fade-in slide-in-from-top-2 duration-300 md:top-104"
-    >
-      <div className="flex w-full items-center gap-2 bg-darkblack px-4 py-3">
-        <Check size={18} strokeWidth={1.25} aria-hidden className="shrink-0 text-white" />
-        <p className="font-gill text-sm font-light leading-110 text-white">{statusToastMessage}</p>
-      </div>
-    </div>
-  ) : null;
 
   if (!open) {
     return statusToast;
@@ -182,30 +203,18 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
       <ProductDetailSidePanelShell
         open={open}
         onClose={handleClose}
-        overlayAriaLabel={form.closeAriaLabel}
+        overlayAriaLabel={form.dialogAriaLabel}
         dialogAriaLabel={form.dialogAriaLabel}
       >
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-          <div className="flex flex-col gap-6 px-4 pt-6 lg:px-6 lg:pt-10">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain DrawerVerticleScrollbar">
+            <div className={cn("flex flex-col gap-6", RIGHT_PANEL_HEADER_PADDING_CLASS)}>
             <div className="flex flex-col gap-6">
               <div className="flex items-center justify-between gap-4">
                 <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
                   {form.title}
                 </h2>
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  aria-label={form.closeAriaLabel}
-                  className="inline-flex size-6 shrink-0 items-center justify-center"
-                >
-                  <Image
-                    src="/icons/menu-close.svg"
-                    alt=""
-                    width={24}
-                    height={24}
-                    aria-hidden
-                  />
-                </button>
+                <RightPanelCloseButton onClick={handleClose} aria-label={form.dialogAriaLabel} />
               </div>
               <div className="h-px w-full bg-neutral300" aria-hidden />
             </div>
@@ -219,21 +228,35 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
                 email={email}
                 date=""
                 note={note}
-                onNameChange={setName}
-                onCountryCodeChange={setCountryCode}
-                onPhoneChange={setPhone}
-                onEmailChange={setEmail}
+                onNameChange={(value) => {
+                  clearApiFieldError("name");
+                  setName(value);
+                }}
+                onCountryCodeChange={(value) => {
+                  clearApiFieldError("phone");
+                  setCountryCode(value);
+                }}
+                onPhoneChange={(value) => {
+                  clearApiFieldError("phone");
+                  setPhone(value);
+                }}
+                onEmailChange={(value) => {
+                  clearApiFieldError("email");
+                  setEmail(value);
+                }}
                 onDateChange={() => undefined}
-                onNoteChange={setNote}
-                errors={errors}
-                showError={showError}
+                onNoteChange={(value) => {
+                  clearApiFieldError("note");
+                  setNote(value);
+                }}
+                errors={displayErrors}
+                showError={showFieldError}
                 markTouched={markTouched}
                 showDate={false}
                 showTimeSlots={false}
                 nameLabel={form.fullNameLabel}
                 emailLabel={form.emailLabel}
                 noteLabel={form.visionLabel}
-                notePlaceholder={form.visionPlaceholder}
                 noteLabelClassName={appointmentLabelClassName}
                 noteTextareaClassName="font-gill text-base leading-110"
                 labelClassName={appointmentLabelClassName}
@@ -284,32 +307,28 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
                         {referenceImageName}
                       </p>
                       <div className="flex flex-wrap items-center gap-3">
-                        <button
-                          type="button"
+                        <DetailTextLink
                           onClick={() => referenceImageInputRef.current?.click()}
-                          className="text-link-underline inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
                         >
                           Replace Image
-                        </button>
-                        <button
-                          type="button"
+                        </DetailTextLink>
+                        <DetailTextLink
                           onClick={clearReferenceImage}
-                          className="text-link-underline inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm leading-110 text-darkblack"
                         >
                           Remove
-                        </button>
+                        </DetailTextLink>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={() => referenceImageInputRef.current?.click()}
-                    className="text-link-underline inline-flex w-fit border-b-[1.5px] border-darkblack pb-1 font-gill text-sm uppercase leading-110 text-darkblack"
-                  >
+                  <DetailTextLink onClick={() => referenceImageInputRef.current?.click()}>
                     {form.referenceImageButtonText}
-                  </button>
+                  </DetailTextLink>
                 )}
+                <FormFieldError
+                  id="bespoke-reference-image-error"
+                  message={referenceImageError ?? undefined}
+                />
               </div>
             </div>
           </div>
@@ -328,6 +347,7 @@ const BespokeShareVisionPanel = ({ open, onClose, form }: BespokeShareVisionPane
             {isSubmitting ? "SUBMITTING..." : form.submitButtonText}
           </DetailDarkButton>
         </PanelFooter>
+        </div>
       </ProductDetailSidePanelShell>
     </>
   );

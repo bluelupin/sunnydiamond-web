@@ -43,12 +43,8 @@ export type FeaturedCollectionSection = {
   slug?: string | null;
   cta?: CategoryNavigationCta | null;
   label?: { label?: string | null } | null;
-  /** Legacy CMS product image cards (pre-SKU). */
+  /** Legacy CMS product image cards. */
   products?: FeaturedCollectionImage[] | null;
-  /** Magento SKUs from Strapi `productSkus` (CMS order). */
-  productSkus?: string[] | null;
-  /** Preferred default/active Magento SKU. */
-  featuredProductSku?: string | null;
   backgroundImage?: StrapiMedia | null;
   primaryImage?: CategoryNavigationImage | StrapiMedia | null;
   image?: CategoryNavigationImage | StrapiMedia | null;
@@ -62,6 +58,9 @@ export type GiftingBanner = {
   mobileDescription?: string | null;
   mobileSubtitle?: string | null;
   isActive?: boolean | null;
+  /** Magento `sd_collection` or `sd_occasions` slug for PLP Shop Now CTAs. */
+  filterSlug?: string | null;
+  filterType?: "collection" | "occasion" | null;
   primaryCta?: CategoryNavigationCta | null;
   secondaryCta?: CategoryNavigationCta | null;
   cta?: CategoryNavigationCta | null;

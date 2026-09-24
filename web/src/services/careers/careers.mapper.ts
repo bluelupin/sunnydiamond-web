@@ -1,4 +1,5 @@
 import type { CareerBenefit, CareerJobType } from "@/features/careers/types";
+import { formatCareerJobTitle } from "@/features/careers/utils/careersFormatting";
 import { extractStrapiImage, resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import type {
   NormalizedCareerApplicationFlow,
@@ -125,14 +126,7 @@ const mapResponsiveImage = (
   return {
     desktopUrl: desktopUrl ?? mobileUrl!,
     mobileUrl: mobileUrl ?? desktopUrl!,
-    alt:
-      resolveCmsAltText(media.desktopImage) ??
-      resolveCmsAltText(media.mobileImage) ??
-      cleanText(desktopFile?.alternativeText) ??
-      cleanText(mobileFile?.alternativeText) ??
-      cleanText(media.altText) ??
-      cleanText(media.caption) ??
-      "",
+    alt: resolveCmsAltText(media.desktopImage) ?? "",
     width: desktopFile?.width ?? mobileFile?.width ?? undefined,
     height: desktopFile?.height ?? mobileFile?.height ?? undefined,
   };
@@ -146,6 +140,10 @@ const resolveCtaLabel = (
     return cleanText(cta);
   }
   return cleanText(cta?.label) ?? cleanText(fallback);
+};
+
+const resolveCtaUrl = (cta?: StrapiCareerCtaButton | null): string | undefined => {
+  return cleanText(cta?.url);
 };
 
 const mapFilterOptions = (
@@ -199,13 +197,15 @@ const mapSeo = (seo?: StrapiCareerSeo | null): NormalizedCareerSeo | null => {
 };
 
 const mapHero = (hero?: StrapiCareerHero | null): NormalizedCareerHero | null => {
-  const title = cleanText(hero?.title);
-  const ctaLabel =
-    cleanText(hero?.ctaLabel) ?? cleanText(hero?.CtaLable);
-  const image =
-    mapResponsiveImage(hero?.backgroundImage) ?? mapResponsiveImage(hero?.image);
+  if (!hero || hero.isActive === false) return null;
 
-  if (!title || !ctaLabel || !image) return null;
+  const title = cleanText(hero.title);
+  const ctaLabel =
+    cleanText(hero.ctaLabel) ?? cleanText(hero.CtaLable);
+  const image =
+    mapResponsiveImage(hero.backgroundImage) ?? mapResponsiveImage(hero.image);
+
+  if (!title || !ctaLabel) return null;
 
   return { title, ctaLabel, image };
 };
@@ -260,7 +260,8 @@ export const mapCareerOpening = (
 ): NormalizedCareerJob | null => {
   const slug = cleanText(opening.slug);
   const id = resolveOpeningId(opening);
-  const title = cleanText(opening.jobTitle) ?? cleanText(opening.title);
+  const rawTitle = cleanText(opening.jobTitle) ?? cleanText(opening.title);
+  const title = rawTitle ? formatCareerJobTitle(rawTitle) : undefined;
   const jobCode = cleanText(opening.jobID) ?? cleanText(opening.jobId);
   const location = cleanText(opening.location);
   const department = cleanText(opening.department);
@@ -324,6 +325,8 @@ export const mapCareerOpening = (
     .map((item) => cleanText(item))
     .filter(Boolean) as string[];
 
+  const linkedinApplyUrl = resolveCtaUrl(opening.linkedinCta);
+
   return {
     id,
     slug: slug ?? id,
@@ -366,7 +369,12 @@ export const mapCareerOpening = (
       resolveCtaLabel(opening.applyCta) ??
       cleanText(opening.applyCtaLabel) ??
       cleanText(opening.applyLabel),
-    sortOrder: typeof opening.sortOrder === "number" ? opening.sortOrder : 0,
+    ...(linkedinApplyUrl
+      ? {
+          linkedinApplyUrl,
+          linkedinApplyOpenInNewTab: opening.linkedinCta?.openInNewTab === true,
+        }
+      : {}),
     isActive: opening.isActive !== false,
     isFeatured: opening.isFeatured === true,
     isNew: opening.isNew === true,
@@ -378,19 +386,13 @@ export const mapCareerOpenings = (
 ): NormalizedCareerJob[] => {
   return coerceArray<StrapiCareerOpeningEntity>(openings)
     .map(mapCareerOpening)
-    .filter(Boolean)
-    .sort((a, b) => {
-      if (a!.sortOrder !== b!.sortOrder) {
-        return a!.sortOrder - b!.sortOrder;
-      }
-      return b!.postedAt.localeCompare(a!.postedAt);
-    }) as NormalizedCareerJob[];
+    .filter(Boolean) as NormalizedCareerJob[];
 };
 
 const mapOpeningsSection = (
   section?: StrapiCareerOpeningsSection | null,
 ): NormalizedCareerOpeningsSection | null => {
-  if (!section) return null;
+  if (!section || section.isActive === false) return null;
 
   const title =
     cleanText(section.OpeningTitle) ??
@@ -430,7 +432,7 @@ const mapOpeningsSection = (
 const mapLifeSection = (
   section?: StrapiCareerLifeSection | null,
 ): NormalizedCareerLifeSection | null => {
-  if (!section) return null;
+  if (!section || section.isActive === false) return null;
 
   const title =
     cleanText(section.featuredTitle) ??
@@ -440,6 +442,7 @@ const mapLifeSection = (
     cleanText(section.featuredBody) ??
     cleanText(section.description) ??
     cleanText(section.content);
+  const additionalDescription = cleanText(section.additionalFeatureBody) ?? undefined;
   const quote = cleanText(section.featuredDescription) ?? cleanText(section.quote);
   const featuredImages = coerceArray<StrapiCareerResponsiveImage>(section.featuredImages)
     .map(mapResponsiveImage)
@@ -462,6 +465,7 @@ const mapLifeSection = (
   return {
     title,
     description,
+    ...(additionalDescription ? { additionalDescription } : {}),
     quote,
     leftImage,
     rightImage,
@@ -507,7 +511,7 @@ const mapBenefitFeatureImage = (
 const mapBenefitsSection = (
   section?: StrapiCareerBenefitsSection | null,
 ): NormalizedCareerBenefitsSection | null => {
-  if (!section) return null;
+  if (!section || section.isActive === false) return null;
 
   const title =
     cleanText(section.InvestingTitle) ??
@@ -520,7 +524,6 @@ const mapBenefitsSection = (
   const image =
     mapResponsiveImage(section.sectionImage) ??
     mapResponsiveImage(section.image) ??
-    features.map(mapBenefitFeatureImage).find(Boolean) ??
     null;
 
   if (!title || items.length === 0) return null;
@@ -543,7 +546,7 @@ const mapFaqItem = (item: StrapiCareerFaqItem, index: number) => {
 const mapFaqSection = (
   section?: StrapiCareerFaqSection | null,
 ): NormalizedCareerFaqSection | null => {
-  if (!section) return null;
+  if (!section || section.isActive === false) return null;
 
   const title =
     cleanText(section.sectionHeading) ?? cleanText(section.heading);
@@ -559,7 +562,7 @@ const mapFaqSection = (
 const mapDiscoverSection = (
   section?: StrapiCareerDiscoverSection | null,
 ): NormalizedCareerDiscoverSection | null => {
-  if (!section) return null;
+  if (!section || section.isActive === false) return null;
 
   const title = cleanText(section.title) ?? cleanText(section.heading);
   const ctaLabel =
@@ -704,6 +707,8 @@ const mapApplicationFlow = (
       viewJobLabel: requiredStrings.viewJobLabel!,
       applyModal: {
         title: requiredStrings.applyModalTitle!,
+        subtitle:
+          cleanText(section.applyModalSubtitle) ?? "Choose how you'd like to apply.",
         autofillResumeLabel: requiredStrings.autofillResumeLabel!,
         applyManuallyLabel: requiredStrings.applyManuallyLabel!,
         applyLinkedInLabel: requiredStrings.applyLinkedInLabel!,
@@ -778,35 +783,6 @@ export const mapCareerLandingPage = (
   };
 };
 
-const mergeCareerOpenings = (
-  primary?: StrapiCareerOpeningEntity[] | null,
-  embedded?: StrapiCareerOpeningEntity[] | null,
-): NormalizedCareerJob[] => {
-  const combined = [
-    ...coerceArray<StrapiCareerOpeningEntity>(primary),
-    ...coerceArray<StrapiCareerOpeningEntity>(embedded),
-  ];
-
-  const byKey = new Map<string, NormalizedCareerJob>();
-
-  for (const opening of combined) {
-    if (opening.isActive === false) continue;
-    const mapped = mapCareerOpening(opening);
-    if (!mapped) continue;
-    const key = mapped.slug || mapped.id;
-    if (!byKey.has(key)) {
-      byKey.set(key, mapped);
-    }
-  }
-
-  return [...byKey.values()].sort((a, b) => {
-    if (a.sortOrder !== b.sortOrder) {
-      return a.sortOrder - b.sortOrder;
-    }
-    return b.postedAt.localeCompare(a.postedAt);
-  });
-};
-
 const deriveFilterOptionsFromJobs = (jobs: readonly NormalizedCareerJob[]) => ({
   locations: [...new Set(jobs.map((job) => job.location))].sort(),
   departments: [...new Set(jobs.map((job) => job.department))].sort(),
@@ -836,7 +812,7 @@ const mapFilterSectionLabel = (
 const mapListingFilterSection = (
   filterSection?: StrapiCareerListingFilterSection | null,
 ) => {
-  if (!filterSection) {
+  if (!filterSection || filterSection.isActive === false) {
     return null;
   }
 
@@ -934,13 +910,7 @@ export const mapCareersPageData = ({
 }): NormalizedCareersPageData => {
   const mappedLanding = mapCareerLandingPage(landing);
   const mappedListing = mapCareerListingPage(listing);
-  const embeddedOpenings =
-    landing?.openingsSection?.career_openings ??
-    landing?.openingsSection?.careerOpenings ??
-    landing?.openingsSection?.relatedCareerOpenings ??
-    landing?.currentOpeningsSection?.relatedCareerOpenings ??
-    null;
-  const mappedJobs = mergeCareerOpenings(openings, embeddedOpenings);
+  const mappedJobs = mapCareerOpenings(openings);
 
   const derivedFilters = deriveFilterOptionsFromJobs(mappedJobs);
   const listingWithFilters =

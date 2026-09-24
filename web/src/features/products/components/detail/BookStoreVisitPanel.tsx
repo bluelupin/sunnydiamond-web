@@ -2,53 +2,71 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   ChevronLeft,
-  Check,
 } from "lucide-react";
+import { useAppStatusToastController } from "@/shared/hooks/useAppStatusToastController";
+import { AppStatusToastAction } from "@/shared/ui/AppStatusToast";
+import { buildProfileSectionHref } from "@/features/account/utils/profileSectionNavigation";
 import { useHomepageEditorialBlocks } from "@/hooks/homepage/useHomepageEditorialBlocks";
-import { resolveBookStoreVisitStores } from "@/features/products/utils/bookStoreVisitStores";
 import {
-  storeLocatorDefaultListCopy,
-  storeLocatorFoundCopy,
-  storeLocatorNearbySuggestionsCopy,
-  storeLocatorStatusEyebrowClassName,
+  getDefaultBookStoreVisitStoreId,
+  resolveBookStoreVisitStoresForPanel,
+} from "@/features/products/utils/bookStoreVisitStores";
+import {
+  storeLocatorExploreShowroomsTitle,
+  storeLocatorListHeadingClassName,
+  storeLocatorNoAreaSubtitle,
+  storeLocatorNoAreaTitle,
+  storeLocatorSearchMatchMessage,
 } from "@/features/stores/data/storeLocatorContent";
 import {
   filterBookStoreVisitStores,
   getStoreLocatorPincodeSearchError,
+  shouldShowPincodeMatchResults,
   shouldSuggestNearbyStores,
 } from "@/features/stores/utils/storeLocatorFilters";
+import type { NormalizedStoreLocatorListCopy } from "@/services/store-locator/store-locator-page.types";
 import { BookStoreVisitLocationDetails } from "./BookStoreVisitLocationDetails";
-import { StoreLocatorMapView } from "@/features/stores/components/StoreLocatorMapView";
+import {
+  mapBookStoreVisitStoreToLayoutItem,
+  ShowroomsLayout,
+} from "@/features/stores/components/ShowroomsLayout";
 import { cn } from "@/shared/utils/cn";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
+import {
+  getAppointmentContactLocks,
+  getAuthLoginIdentifierKind,
+} from "@/features/auth/utils/authLoginIdentifier";
 import {
   appointmentFieldClassName,
   appointmentLabelClassName,
   APPOINTMENT_TIME_SLOTS,
 } from "@/shared/constants/appointmentForm";
 import {
-  BOOK_STORE_VISIT_STORES,
   type BookStoreVisitStore,
 } from "@/features/products/data/bookStoreVisitContent";
 import {
-  createGenericSubmission,
-  getGenericFormByTag,
-} from "@/services/forms/generic-form.service";
-import { createProductSubmission } from "@/services/forms/product-form.service";
+  createProductSubmission,
+  getProductFormByTag,
+} from "@/services/forms/product-form.service";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import { wishlistMovedToastDurationMs } from "@/features/wishlist/data/content";
 import { DetailDarkButton } from "./shared";
 import { PanelFooter } from "@/shared/ui/PanelFooter";
+import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
 import {
-  productDetailSidePanelAsideClassName,
-  productDetailSidePanelOverlayClassName,
+  ProductDetailSidePanelShell,
 } from "./ProductDetailSidePanelShell";
 
-const SHOWROOM_VISIT_FORM_TAG = "showroom-visit";
+const PRODUCT_STORE_VISIT_FORM_TAG = "product-store-visit";
+/** Fallback product identity when booking outside PDP (store locator / nav). */
+const STORE_VISIT_PRODUCT_NAME = "Store Visit";
+const STORE_VISIT_PRODUCT_ID = "store-visit";
 
 type StoreLocatorListStatus = "default" | "search-match" | "no-area";
 
@@ -61,12 +79,15 @@ type BookStoreVisitPanelProps = {
   storeStateFilter?: string | null;
   /** Prefetched showrooms from `/api/store-locator-page` (page variant). */
   initialStores?: BookStoreVisitStore[];
+  /** Shows showroom layout skeleton while store-locator data is loading. */
+  isShowroomsLoading?: boolean;
   getDirectionsLabel?: string | null;
   noResultsMessage?: string | null;
+  invalidPincodeMessage?: string | null;
+  listCopy?: NormalizedStoreLocatorListCopy | null;
   /**
-   * PDP Visit Us only. When set (e.g. `product-store-visit`), submit via
-   * product-submissions so the booking appears under My Appointments.
-   * Store locator / mobile nav omit this — existing generic flow unchanged.
+   * Overrides the default `product-store-visit` form tag.
+   * Submit always uses product-submissions (My Appointments).
    */
   submissionFormTag?: string;
   productName?: string;
@@ -83,12 +104,16 @@ const BookStoreVisitPanel = ({
   storeSearchQuery = "",
   storeStateFilter = null,
   initialStores,
+  isShowroomsLoading = false,
   getDirectionsLabel,
   noResultsMessage,
+  invalidPincodeMessage,
+  listCopy,
   submissionFormTag,
   productName,
   productId,
 }: BookStoreVisitPanelProps) => {
+  const router = useRouter();
   const profileEnabled = variant !== "modal" || open;
   const { customer } = useAuth();
   const { contact: profileContact } = useCustomerProfileContact(profileEnabled);
@@ -97,12 +122,11 @@ const BookStoreVisitPanel = ({
     () => editorialData?.showroomSection?.showrooms ?? [],
     [editorialData?.showroomSection?.showrooms],
   );
+  const [isResolvingStores, setIsResolvingStores] = useState(
+    () => !(initialStores && initialStores.length > 0),
+  );
   const [step, setStep] = useState<BookVisitStep>("select-store");
-  const [stores, setStores] = useState<BookStoreVisitStore[]>(() => {
-    if (initialStores && initialStores.length > 0) return initialStores;
-    if (variant === "page") return [];
-    return BOOK_STORE_VISIT_STORES;
-  });
+  const [stores, setStores] = useState<BookStoreVisitStore[]>(() => initialStores ?? []);
   const [timeSlots, setTimeSlots] = useState<readonly string[]>(APPOINTMENT_TIME_SLOTS);
   const [purposeOptions, setPurposeOptions] = useState<readonly string[]>([]);
   const [formTitle, setFormTitle] = useState("Book Your Store Visit");
@@ -118,12 +142,12 @@ const BookStoreVisitPanel = ({
   const [notesLabel, setNotesLabel] = useState("Describe more about your visit");
   const [notesPlaceholder, setNotesPlaceholder] = useState("Enter");
   const [submitButtonText, setSubmitButtonText] = useState("BOOK A VISIT");
-  const [formTag, setFormTag] = useState(submissionFormTag ?? SHOWROOM_VISIT_FORM_TAG);
+  const [formTag, setFormTag] = useState(
+    submissionFormTag ?? PRODUCT_STORE_VISIT_FORM_TAG,
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedStoreId, setSelectedStoreId] = useState(
-    () =>
-      initialStores?.[0]?.id ??
-      (variant === "page" ? "" : BOOK_STORE_VISIT_STORES[0]?.id ?? ""),
+    () => getDefaultBookStoreVisitStoreId(initialStores ?? []),
   );
   const [name, setName] = useState("");
   const [countryCode, setCountryCode] = useState("+91");
@@ -134,33 +158,9 @@ const BookStoreVisitPanel = ({
   const [purpose, setPurpose] = useState("");
   const [note, setNote] = useState("");
   const [hasAppliedProfilePrefill, setHasAppliedProfilePrefill] = useState(false);
-  const [statusToastMessage, setStatusToastMessage] = useState<string | null>(null);
-  const statusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const dismissStatusToast = () => {
-    if (statusToastTimeoutRef.current) {
-      clearTimeout(statusToastTimeoutRef.current);
-      statusToastTimeoutRef.current = null;
-    }
-    setStatusToastMessage(null);
-  };
-
-  const showStatusToast = (message: string) => {
-    dismissStatusToast();
-    setStatusToastMessage(message);
-    statusToastTimeoutRef.current = setTimeout(() => {
-      setStatusToastMessage(null);
-      statusToastTimeoutRef.current = null;
-    }, wishlistMovedToastDurationMs);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (statusToastTimeoutRef.current) {
-        clearTimeout(statusToastTimeoutRef.current);
-      }
-    };
-  }, []);
+  const { show: showStatusToast, node: statusToast } = useAppStatusToastController(
+    wishlistMovedToastDurationMs,
+  );
 
   const { displayStores, listStatus, matchedStores } =
     useMemo(() => {
@@ -175,18 +175,35 @@ const BookStoreVisitPanel = ({
       }
 
       const query = storeSearchQuery.trim();
-      const filtered = filterBookStoreVisitStores(stores, storeSearchQuery, storeStateFilter);
       const allStores = filterBookStoreVisitStores(stores, "", null);
+      const stateMatched = storeStateFilter
+        ? filterBookStoreVisitStores(stores, "", storeStateFilter)
+        : [];
+      const searchMatched = filterBookStoreVisitStores(
+        stores,
+        storeSearchQuery,
+        null,
+      );
 
-      if (getStoreLocatorPincodeSearchError(storeSearchQuery)) {
+      if (getStoreLocatorPincodeSearchError(storeSearchQuery, invalidPincodeMessage)) {
+        // Empty state tab still uses no-area UX; invalid message stays under the field.
+        if (storeStateFilter?.trim() && stateMatched.length === 0) {
+          return {
+            displayStores: allStores,
+            listStatus: "no-area" as StoreLocatorListStatus,
+            matchedStores: [] as BookStoreVisitStore[],
+          };
+        }
+
         return {
-          displayStores: filterBookStoreVisitStores(stores, "", storeStateFilter),
+          displayStores: allStores,
           listStatus: "default" as StoreLocatorListStatus,
-          matchedStores: [] as BookStoreVisitStore[],
+          // Keep full list; highlight state tab match in place when selected.
+          matchedStores: stateMatched,
         };
       }
 
-      if (shouldSuggestNearbyStores(storeSearchQuery, filtered.length)) {
+      if (shouldSuggestNearbyStores(storeSearchQuery, searchMatched.length)) {
         return {
           displayStores: allStores,
           listStatus: "no-area" as StoreLocatorListStatus,
@@ -194,56 +211,90 @@ const BookStoreVisitPanel = ({
         };
       }
 
-      if (query && filtered.length > 0) {
-        const matchedIds = new Set(filtered.map((store) => store.id));
-        const rest = allStores.filter((store) => !matchedIds.has(store.id));
+      const isPincodeMatch = shouldShowPincodeMatchResults(
+        storeSearchQuery,
+        searchMatched.length,
+      );
+      const isLocationNameMatch =
+        Boolean(query) && !/^\d+$/.test(query) && searchMatched.length > 0;
+
+      if (isPincodeMatch || isLocationNameMatch) {
         return {
-          displayStores: [...filtered, ...rest],
+          displayStores: allStores,
           listStatus: "search-match" as StoreLocatorListStatus,
-          matchedStores: filtered,
+          matchedStores: searchMatched,
         };
       }
 
-      return {
-        displayStores: filtered,
-        listStatus: "default" as StoreLocatorListStatus,
-        matchedStores: [] as BookStoreVisitStore[],
-      };
-    }, [stores, storeSearchQuery, storeStateFilter, variant]);
-
-  // Keep selection inside the filtered list synchronously so search/pincode
-  // results expand immediately (useEffect-only sync left a stale id briefly).
-  const activeStoreId = useMemo(() => {
-    if (matchedStores.length > 0) {
-      if (matchedStores.some((store) => store.id === selectedStoreId)) {
-        return selectedStoreId;
+      // Text location search with no hits (e.g. "dehradun") — same no-area UX as
+      // a pincode miss. Do not fall through to a sticky state tab (which was
+      // wrongly showing "Explore Our Showrooms" + that state's store active).
+      if (Boolean(query) && !/^\d+$/.test(query) && searchMatched.length === 0) {
+        return {
+          displayStores: allStores,
+          listStatus: "no-area" as StoreLocatorListStatus,
+          matchedStores: [] as BookStoreVisitStore[],
+        };
       }
-      return matchedStores[0]?.id ?? "";
-    }
 
+      // Empty state tab (Karnataka / Telangana / Maharashtra / New Delhi, etc.) —
+      // same UX as valid pincode miss: no-area copy + full default listing.
+      if (storeStateFilter?.trim() && stateMatched.length === 0) {
+        return {
+          displayStores: allStores,
+          listStatus: "no-area" as StoreLocatorListStatus,
+          matchedStores: [] as BookStoreVisitStore[],
+        };
+      }
+
+      // State tab (or idle): never remove locations — only activate matches in place.
+      return {
+        displayStores: allStores,
+        listStatus: "default" as StoreLocatorListStatus,
+        matchedStores: stateMatched,
+      };
+    }, [stores, storeSearchQuery, storeStateFilter, variant, invalidPincodeMessage]);
+
+  // Honor any in-list selection so nearby / non-matched rows stay clickable.
+  // Fall back to the first match (or first listed store) only when the current id is gone.
+  const activeStoreId = useMemo(() => {
     if (displayStores.some((store) => store.id === selectedStoreId)) {
       return selectedStoreId;
     }
+
+    if (matchedStores.length > 0) {
+      return matchedStores[0]?.id ?? "";
+    }
+
     return displayStores[0]?.id ?? (variant === "page" ? "" : selectedStoreId);
   }, [displayStores, matchedStores, selectedStoreId, variant]);
 
   const selectedStore =
     displayStores.find((store) => store.id === activeStoreId) ??
     displayStores[0] ??
-    stores[0] ??
-    (variant === "page" ? undefined : BOOK_STORE_VISIT_STORES[0]);
+    stores[0];
 
+  // When search/state filter changes, activate the first match in place.
+  // Do not lock selection to matches — clicking Coimbatore (or any nearby row) must stick.
   useEffect(() => {
     if (variant !== "page") {
       return;
     }
 
-    if (selectedStoreId === activeStoreId) {
+    if (matchedStores.length > 0) {
+      setSelectedStoreId((current) =>
+        matchedStores.some((store) => store.id === current)
+          ? current
+          : (matchedStores[0]?.id ?? current),
+      );
       return;
     }
 
-    setSelectedStoreId(activeStoreId);
-  }, [activeStoreId, selectedStoreId, variant]);
+    // State tab with no showrooms: don't leave another state's store expanded.
+    if (storeStateFilter?.trim()) {
+      setSelectedStoreId(displayStores[0]?.id ?? "");
+    }
+  }, [variant, storeSearchQuery, storeStateFilter, matchedStores, displayStores]);
 
   // Prefill from My Profile once when available; never overwrite fields the user already typed.
   useEffect(() => {
@@ -277,27 +328,26 @@ const BookStoreVisitPanel = ({
 
     void (async () => {
       try {
-        const form = await getGenericFormByTag(SHOWROOM_VISIT_FORM_TAG, controller.signal);
+        const activeFormTag = submissionFormTag ?? PRODUCT_STORE_VISIT_FORM_TAG;
+        const form = await getProductFormByTag(activeFormTag, controller.signal);
+        const resolvedStores = resolveBookStoreVisitStoresForPanel(
+          variant,
+          initialStores,
+          [],
+          editorialShowrooms,
+        );
+
         if (!form) {
-          const resolvedStores =
-            variant === "page"
-              ? (initialStores ?? [])
-              : initialStores && initialStores.length > 0
-                ? initialStores
-                : resolveBookStoreVisitStores([], editorialShowrooms);
           setStores(resolvedStores);
           setSelectedStoreId((current) =>
             resolvedStores.some((store) => store.id === current)
               ? current
-              : resolvedStores[0]?.id ?? (variant === "page" ? "" : BOOK_STORE_VISIT_STORES[0].id),
+              : getDefaultBookStoreVisitStoreId(resolvedStores),
           );
           return;
         }
 
-        // Keep PDP submission tag; only adopt CMS tag for generic Book a Visit.
-        if (!submissionFormTag) {
-          setFormTag(form.formTag || SHOWROOM_VISIT_FORM_TAG);
-        }
+        setFormTag(form.formTag || activeFormTag);
         if (form.formName) {
           setFormTitle(form.formName);
         }
@@ -306,9 +356,6 @@ const BookStoreVisitPanel = ({
         }
         if (form.timeSlots.length > 0) {
           setTimeSlots(form.timeSlots);
-        }
-        if (form.purposeOptions.length > 0) {
-          setPurposeOptions(form.purposeOptions);
         }
         if (form.nameLabel) {
           setNameLabel(form.nameLabel);
@@ -331,12 +378,6 @@ const BookStoreVisitPanel = ({
         if (form.dateLabel) {
           setDateLabel(form.dateLabel);
         }
-        if (form.purposeLabel) {
-          setPurposeLabel(form.purposeLabel);
-        }
-        if (form.purposePlaceholder) {
-          setPurposePlaceholder(form.purposePlaceholder);
-        }
         if (form.notesLabel) {
           setNotesLabel(form.notesLabel);
         }
@@ -344,31 +385,27 @@ const BookStoreVisitPanel = ({
           setNotesPlaceholder(form.notesPlaceholder);
         }
 
-        const resolvedStores =
-          variant === "page"
-            ? (initialStores ?? [])
-            : initialStores && initialStores.length > 0
-              ? initialStores
-              : resolveBookStoreVisitStores(form.showrooms, editorialShowrooms);
         setStores(resolvedStores);
         setSelectedStoreId((current) =>
           resolvedStores.some((store) => store.id === current)
             ? current
-            : resolvedStores[0]?.id ?? (variant === "page" ? "" : BOOK_STORE_VISIT_STORES[0].id),
+            : getDefaultBookStoreVisitStoreId(resolvedStores),
         );
       } catch {
-        const resolvedStores =
-          variant === "page"
-            ? (initialStores ?? [])
-            : initialStores && initialStores.length > 0
-              ? initialStores
-              : resolveBookStoreVisitStores([], editorialShowrooms);
+        const resolvedStores = resolveBookStoreVisitStoresForPanel(
+          variant,
+          initialStores,
+          [],
+          editorialShowrooms,
+        );
         setStores(resolvedStores);
         setSelectedStoreId((current) =>
           resolvedStores.some((store) => store.id === current)
             ? current
-            : resolvedStores[0]?.id ?? (variant === "page" ? "" : BOOK_STORE_VISIT_STORES[0].id),
+            : getDefaultBookStoreVisitStoreId(resolvedStores),
         );
+      } finally {
+        setIsResolvingStores(false);
       }
     })();
 
@@ -376,9 +413,7 @@ const BookStoreVisitPanel = ({
   }, [open, variant, editorialShowrooms, submissionFormTag, initialStores]);
 
   useEffect(() => {
-    if (submissionFormTag) {
-      setFormTag(submissionFormTag);
-    }
+    setFormTag(submissionFormTag ?? PRODUCT_STORE_VISIT_FORM_TAG);
   }, [submissionFormTag]);
 
   useEffect(() => {
@@ -416,7 +451,7 @@ const BookStoreVisitPanel = ({
     setSelectedStoreId((current) =>
       stores.some((store) => store.id === current)
         ? current
-        : (stores[0]?.id ?? (variant === "page" ? "" : BOOK_STORE_VISIT_STORES[0].id)),
+        : getDefaultBookStoreVisitStoreId(stores),
     );
   };
 
@@ -455,49 +490,35 @@ const BookStoreVisitPanel = ({
       const preferredShowroom =
         selectedStore.documentId ?? selectedStore.id;
 
-      // PDP Visit Us only — store locator / mobile nav keep generic-submissions.
-      const isProductStoreVisit =
-        Boolean(submissionFormTag) &&
-        Boolean(productName?.trim()) &&
-        Boolean(productId?.trim());
+      await createProductSubmission({
+        formTag: formTag || PRODUCT_STORE_VISIT_FORM_TAG,
+        productName: productName?.trim() || STORE_VISIT_PRODUCT_NAME,
+        productId: productId?.trim() || STORE_VISIT_PRODUCT_ID,
+        customerName: name.trim(),
+        customerPhone: `${countryCode} ${phone}`.trim(),
+        customerEmail: email.trim() || undefined,
+        ...(customer?.id != null ? { magentoCustomerId: customer.id } : {}),
+        requestDetails: composedNotes || undefined,
+        requestedDate: date || undefined,
+        selectedTimeSlot: selectedSlot ?? undefined,
+        preferredShowroom,
+        sourcePage:
+          typeof window !== "undefined" ? window.location.pathname : undefined,
+        consentAccepted: true,
+        workflowStatus: "New",
+      });
 
-      if (isProductStoreVisit) {
-        await createProductSubmission({
-          formTag: submissionFormTag!,
-          productName: productName!.trim(),
-          productId: productId!.trim(),
-          customerName: name.trim(),
-          customerPhone: `${countryCode} ${phone}`.trim(),
-          customerEmail: email.trim() || undefined,
-          ...(customer?.id != null ? { magentoCustomerId: customer.id } : {}),
-          requestDetails: composedNotes || undefined,
-          requestedDate: date || undefined,
-          selectedTimeSlot: selectedSlot ?? undefined,
-          preferredShowroom,
-          sourcePage:
-            typeof window !== "undefined" ? window.location.pathname : undefined,
-          consentAccepted: true,
-          workflowStatus: "New",
-        });
-      } else {
-        await createGenericSubmission({
-          formTag,
-          fullName: name.trim(),
-          email: email.trim() || undefined,
-          phone: `${countryCode} ${phone}`.trim(),
-          preferredShowroom,
-          preferredDate: date || undefined,
-          selectedTimeSlot: selectedSlot ?? undefined,
-          notes: composedNotes || undefined,
-          ...(customer?.id != null ? { magentoCustomerId: customer.id } : {}),
-          sourcePage:
-            typeof window !== "undefined" ? window.location.pathname : "/store-locator",
-          consentAccepted: true,
-          workflowStatus: "New",
-        });
-      }
-
-      showStatusToast("Visit booked");
+      showStatusToast("Visit booked successfully.", {
+        action: (
+          <AppStatusToastAction
+            onClick={() => {
+              router.push(buildProfileSectionHref("appointments"));
+            }}
+          >
+            View Here
+          </AppStatusToastAction>
+        ),
+      });
       handleClose();
     } catch {
       showStatusToast("Could not book visit");
@@ -505,19 +526,6 @@ const BookStoreVisitPanel = ({
       setIsSubmitting(false);
     }
   };
-
-  const statusToast = statusToastMessage ? (
-    <div
-      role="status"
-      aria-live="polite"
-      className="pointer-events-auto fixed left-1/2 top-16 z-[80] w-[calc(100%-2rem)] max-w-[300px] -translate-x-1/2 animate-in fade-in slide-in-from-top-2 duration-300 md:top-104"
-    >
-      <div className="flex w-full items-center gap-2 bg-darkblack px-4 py-3">
-        <Check size={18} strokeWidth={1.25} aria-hidden className="shrink-0 text-white" />
-        <p className="font-gill text-sm font-light leading-110 text-white">{statusToastMessage}</p>
-      </div>
-    </div>
-  ) : null;
 
   if (!open && variant !== "page") {
     return statusToast;
@@ -537,7 +545,9 @@ const BookStoreVisitPanel = ({
         showBack={showStoreSelectionBack}
         getDirectionsLabel={getDirectionsLabel}
         noResultsMessage={noResultsMessage}
+        listCopy={listCopy}
         listStatus={listStatus}
+        isShowroomsLoading={isShowroomsLoading || isResolvingStores}
       />
     ) : (
       <BookingFormStep
@@ -598,18 +608,9 @@ const BookStoreVisitPanel = ({
   }
 
   const panelContent = (
-    <aside
-      role="dialog"
-      aria-modal={variant !== "page"}
-      aria-label="Book your store visit"
-      className={cn(
-        "flex flex-col overflow-hidden bg-white",
-        variant === "page" && "mx-auto min-h-[calc(100vh-4rem)] w-full max-w-480",
-        variant === "modal" && cn("shadow-2xl", productDetailSidePanelAsideClassName),
-      )}
-    >
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
       {panelBody}
-    </aside>
+    </div>
   );
 
   if (variant === "page") {
@@ -622,7 +623,7 @@ const BookStoreVisitPanel = ({
           <aside
             role="dialog"
             aria-label="Book your store visit"
-            className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-480 flex-col overflow-hidden bg-white"
+            className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-472 flex-col overflow-hidden bg-white"
           >
             {panelBody}
           </aside>
@@ -634,15 +635,14 @@ const BookStoreVisitPanel = ({
   return (
     <>
       {statusToast}
-      <div className="fixed inset-0 z-[70] flex max-md:flex-col md:justify-end">
-        <button
-          type="button"
-          aria-label="Close book a visit"
-          className={productDetailSidePanelOverlayClassName}
-          onClick={handleClose}
-        />
+      <ProductDetailSidePanelShell
+        open={open}
+        onClose={handleClose}
+        overlayAriaLabel="Close book a visit"
+        dialogAriaLabel="Book your store visit"
+      >
         {panelContent}
-      </div>
+      </ProductDetailSidePanelShell>
     </>
   );
 };
@@ -659,100 +659,52 @@ type StoreSelectionStepProps = {
   showBack?: boolean;
   getDirectionsLabel?: string | null;
   noResultsMessage?: string | null;
+  listCopy?: NormalizedStoreLocatorListCopy | null;
   listStatus?: StoreLocatorListStatus;
+  isShowroomsLoading?: boolean;
 };
 
-function StoreLocatorListStatusHeader({ status }: { status: StoreLocatorListStatus }) {
+function StoreLocatorListStatusHeader({
+  status,
+  listCopy,
+}: {
+  status: StoreLocatorListStatus;
+  listCopy?: NormalizedStoreLocatorListCopy | null;
+}) {
   if (status === "no-area") {
+    const title = listCopy?.noAreaTitle?.trim() || storeLocatorNoAreaTitle;
+    const subtitle = listCopy?.noAreaSubtitle?.trim() || storeLocatorNoAreaSubtitle;
+
     return (
-      <div className="flex flex-col gap-2 px-4 pt-6 lg:px-10 lg:pt-0">
+      <div className="flex flex-col gap-2 pt-6 lg:pt-0">
         <p className="font-gill text-base font-normal uppercase leading-110 text-darkblack">
-          {storeLocatorNearbySuggestionsCopy.title}
+          {title}
         </p>
         <p className="font-gill text-base font-normal leading-110 text-darkblack">
-          {storeLocatorNearbySuggestionsCopy.subtitle}
+          {subtitle}
         </p>
       </div>
     );
   }
 
-  const title =
-    status === "search-match"
-      ? storeLocatorFoundCopy.search
-      : storeLocatorDefaultListCopy.title;
+  if (status === "search-match") {
+    const storeFoundMessage =
+      listCopy?.storeFoundMessage?.trim() || storeLocatorSearchMatchMessage;
 
-  const isFoundState = status === "search-match";
-
-  return (
-    <div className="flex flex-col gap-4 px-4 pt-6 lg:px-10 lg:pt-0">
-      <p
-        className={
-          isFoundState
-            ? storeLocatorStatusEyebrowClassName
-            : "font-gill text-sm font-normal leading-110 text-neutral500 lg:text-base"
-        }
-      >
-        {title}
-      </p>
-    </div>
-  );
-}
-
-const storeListTitleClassName =
-  "font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl";
-
-const selectedStoreCardClassName =
-  "flex flex-col gap-4 bg-gray300 px-4 py-6 lg:px-10 lg:py-8";
-
-const unselectedStoreButtonClassName =
-  "flex w-full items-center px-4 py-6 text-left font-larken text-xl font-light leading-110 text-darkblack lg:px-10 lg:py-8 lg:text-2xl";
-
-function renderStoreRow({
-  store,
-  isSelected,
-  onSelectStore,
-  getDirectionsLabel,
-}: {
-  store: BookStoreVisitStore;
-  isSelected: boolean;
-  onSelectStore: (storeId: string) => void;
-  getDirectionsLabel?: string | null;
-}) {
-  if (isSelected) {
     return (
-      <div className={selectedStoreCardClassName}>
-        <p className={storeListTitleClassName}>{store.storeName}</p>
-        <div className="h-px w-full bg-neutral300" aria-hidden />
-        {store.heroImage ? (
-          <div className="relative aspect-[2500/1797] w-full overflow-hidden lg:hidden">
-            <Image
-              src={store.heroImage}
-              alt=""
-              fill
-              className="object-cover"
-              sizes="100vw"
-              aria-hidden
-            />
-          </div>
-        ) : null}
-        <BookStoreVisitLocationDetails
-          store={store}
-          size="page"
-          directionsLabel={getDirectionsLabel}
-        />
+      <div className="flex flex-col gap-4 pt-6 lg:pt-0">
+        <p className={storeLocatorListHeadingClassName}>{storeFoundMessage}</p>
       </div>
     );
   }
 
+  // Default + invalid pincode fallback listing (Figma).
   return (
-    <button
-      type="button"
-      aria-pressed={false}
-      onClick={() => onSelectStore(store.id)}
-      className={unselectedStoreButtonClassName}
-    >
-      {store.storeName}
-    </button>
+    <div className="flex flex-col gap-4 pt-6 lg:pt-0">
+      <p className={storeLocatorListHeadingClassName}>
+        {storeLocatorExploreShowroomsTitle}
+      </p>
+    </div>
   );
 }
 
@@ -768,151 +720,141 @@ const StoreSelectionStep = ({
   showBack = false,
   getDirectionsLabel,
   noResultsMessage,
+  listCopy,
   listStatus = "default",
+  isShowroomsLoading = false,
 }: StoreSelectionStepProps) => {
-  const selectedStore =
-    stores.find((store) => store.id === selectedStoreId) ?? stores[0] ?? null;
-
-  const storeList =
-    stores.length === 0 ? (
-      <p className="px-4 py-6 font-gill text-base font-light leading-110 text-neutral500 lg:px-10 lg:py-8">
-        {noResultsMessage?.trim() ||
-          "No showrooms match your search. Try another location or state."}
-      </p>
-    ) : (
-      stores.map((store) => (
-        <div key={store.id} className="w-full">
-          {renderStoreRow({
-            store,
-            isSelected: store.id === selectedStoreId,
-            onSelectStore,
-            getDirectionsLabel,
-          })}
-        </div>
-      ))
+  if (layout === "page") {
+    const listHeader = (
+      <StoreLocatorListStatusHeader status={listStatus} listCopy={listCopy} />
     );
 
-  if (layout === "page") {
     return (
-      <>
-        <section className="mx-auto w-full max-w-1440 pb-26 pt-0 lg:pt-10">
-          <div className="flex flex-col items-start gap-6 lg:flex-row">
-            <div
-              className="w-full shrink-0 lg:w-[593px] lg:border-r lg:border-neutral300"
-              aria-label="Showroom locations"
-            >
-              <StoreLocatorListStatusHeader status={listStatus} />
-              <div className={listStatus === "default" ? undefined : "mt-4"}>{storeList}</div>
-            </div>
-
-            {selectedStore ? (
-              <div className="hidden min-w-0 flex-1 self-stretch lg:block">
-                <StoreLocatorMapView store={selectedStore} />
-              </div>
-            ) : null}
-          </div>
-        </section>
-      </>
+      <ShowroomsLayout
+        locations={stores.map(mapBookStoreVisitStoreToLayoutItem)}
+        activeId={selectedStoreId || null}
+        onSelect={onSelectStore}
+        getDirectionsLabel={getDirectionsLabel ?? undefined}
+        listHeader={listHeader}
+        isLoading={isShowroomsLoading}
+        emptyMessage={noResultsMessage?.trim() || undefined}
+      />
     );
   }
 
+  const selectedStore =
+    stores.find((store) => store.id === selectedStoreId) ?? stores[0] ?? null;
+  const heroImage = selectedStore?.heroImage || selectedStore?.mobileHeroImage;
+
   return (
-  <>
-    <div className="min-h-0 flex-1 overflow-y-auto">
-      <div className="px-4 pt-6 lg:px-6 lg:pt-10">
-        <div className="flex flex-col gap-6">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex min-w-0 items-center gap-2">
-              {showBack ? (
-                <button
-                  type="button"
-                  onClick={onBack}
-                  aria-label="Go back"
-                  className="inline-flex size-6 shrink-0 items-center justify-center"
-                >
-                  <ChevronLeft size={24} strokeWidth={1.25} aria-hidden className="text-darkblack" />
-                </button>
-              ) : null}
-              <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
-                {formTitle}
-              </h2>
-            </div>
-            {onClose ? (
-              <button
-                type="button"
-                onClick={onClose}
-                aria-label="Close"
-                className="inline-flex size-6 shrink-0 items-center justify-center"
-              >
-                <Image
-                  src="/icons/menu-close.svg"
-                  alt=""
-                  width={24}
-                  height={24}
-                  aria-hidden
-                />
-              </button>
-            ) : null}
-          </div>
-          <div className="h-px w-full bg-neutral300" aria-hidden />
-        </div>
-
-        <div
-          className="mt-6 flex flex-col border-r border-neutral300 pb-72"
-          aria-label="Showroom locations"
-        >
-          {stores.length === 0 ? (
-            <p className="px-4 py-8 font-gill text-base font-light leading-110 text-neutral500 lg:px-10">
-              {noResultsMessage?.trim() || "No showrooms match your search. Try another location or state."}
-            </p>
-          ) : (
-            stores.map((store) => {
-            const isSelected = store.id === selectedStoreId;
-
-            return (
-              <div key={store.id} className="w-full">
-                {isSelected ? (
-                  <div className={selectedStoreCardClassName}>
-                    <p className={storeListTitleClassName}>{store.storeName}</p>
-                    <div className="h-px w-full bg-neutral300" aria-hidden />
-                    {store.heroImage ? (
-                      <div className="relative aspect-[2500/1797] w-full overflow-hidden">
-                        <Image
-                          src={store.heroImage}
-                          alt=""
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 480px) 100vw, 480px"
-                          aria-hidden
-                        />
-                      </div>
-                    ) : null}
-                    <BookStoreVisitLocationDetails store={store} size="page" directionsLabel={getDirectionsLabel} />
-                  </div>
-                ) : (
+    <>
+      <div className="min-h-0 flex-1 overflow-y-auto DrawerVerticleScrollbar">
+        <div className={cn(RIGHT_PANEL_HEADER_PADDING_CLASS)}>
+          <div className="flex flex-col gap-6">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex min-w-0 items-center gap-2">
+                {showBack ? (
                   <button
                     type="button"
-                    aria-pressed={false}
-                    onClick={() => onSelectStore(store.id)}
-                    className={unselectedStoreButtonClassName}
+                    onClick={onBack}
+                    aria-label="Go back"
+                    className="inline-flex size-6 shrink-0 items-center justify-center"
                   >
-                    {store.storeName}
+                    <ChevronLeft size={24} strokeWidth={1.25} aria-hidden className="text-darkblack" />
                   </button>
-                )}
+                ) : null}
+                <h2 className="font-larken text-2xl font-light leading-110 text-darkblack">
+                  {formTitle}
+                </h2>
               </div>
-            );
-          })
-          )}
+              {onClose ? (
+                <RightPanelCloseButton onClick={onClose} aria-label="Close" />
+              ) : null}
+            </div>
+            <div className="h-px w-full bg-neutral300" aria-hidden />
+          </div>
+
+          <div className="mt-6 flex flex-col gap-6 pb-72" aria-label="Showroom locations">
+            {isShowroomsLoading ? (
+              <div className="flex flex-col gap-4" aria-busy="true" aria-label="Loading showrooms">
+                <div className="h-8 animate-pulse bg-gray300" />
+                <div className="aspect-[4/5] animate-pulse bg-gray300" />
+              </div>
+            ) : stores.length === 0 ? (
+              noResultsMessage?.trim() ? (
+                <p className="py-8 font-gill text-base font-light leading-110 text-neutral500">
+                  {noResultsMessage.trim()}
+                </p>
+              ) : null
+            ) : (
+              <>
+                <div
+                  role="tablist"
+                  aria-label="Store locations"
+                  className="flex gap-6 overflow-x-auto horizontalScrollbar"
+                >
+                  {stores.map((store) => {
+                    const isSelected = store.id === (selectedStore?.id ?? "");
+                    return (
+                      <button
+                        key={store.id}
+                        type="button"
+                        role="tab"
+                        aria-selected={isSelected}
+                        onClick={() => onSelectStore(store.id)}
+                        className={cn(
+                          "shrink-0 border-b-[1.5px] pb-2 font-gill text-sm font-normal uppercase leading-110 tracking-normal transition-colors",
+                          isSelected
+                            ? "border-linkGold text-linkGold"
+                            : "border-transparent text-darkblack",
+                        )}
+                      >
+                        {store.tabLabel || store.storeName.toUpperCase()}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {selectedStore ? (
+                  <div className="relative w-full">
+                    {heroImage ? (
+                      <div className="relative aspect-[3/4] min-h-[420px] w-full">
+                        <Image
+                          src={heroImage}
+                          alt={selectedStore.imageAlt || selectedStore.storeName}
+                          fill
+                          className="object-cover object-center"
+                          sizes="(max-width: 480px) 100vw, 480px"
+                        />
+                      </div>
+                    ) : (
+                      <div className="aspect-[3/4] min-h-[420px] w-full bg-gray300" aria-hidden />
+                    )}
+                    <div className="absolute inset-x-0 bottom-0 bg-gray300 px-4 py-6 lg:px-6">
+                      <div className="flex flex-col gap-4">
+                        <p className="font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">
+                          {selectedStore.storeName}
+                        </p>
+                        <BookStoreVisitLocationDetails
+                          store={selectedStore}
+                          directionsLabel={getDirectionsLabel}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+              </>
+            )}
+          </div>
         </div>
       </div>
-    </div>
 
-    <PanelFooter>
-      <DetailDarkButton onClick={onProceed} disabled={stores.length === 0}>
-        PROCEED WITH THIS STORE
-      </DetailDarkButton>
-    </PanelFooter>
-  </>
+      <PanelFooter>
+        <DetailDarkButton onClick={onProceed} disabled={stores.length === 0}>
+          PROCEED WITH THIS STORE
+        </DetailDarkButton>
+      </PanelFooter>
+    </>
   );
 };
 
@@ -995,20 +937,28 @@ const BookingFormStep = ({
   onNoteChange,
   onSubmit,
 }: BookingFormStepProps) => {
-  const formValues = useMemo(
-    () => ({ name, countryCode, phone, email, date, note, purpose }),
-    [name, countryCode, phone, email, date, note, purpose],
+  const { phoneLocked, emailLocked } = getAppointmentContactLocks(
+    getAuthLoginIdentifierKind(),
   );
+
+  const formValues = useMemo(
+    () => ({ name, countryCode, phone, email, date, note, purpose, selectedSlot }),
+    [name, countryCode, phone, email, date, note, purpose, selectedSlot],
+  );
+
+  const hasTimeSlots = timeSlots.length > 0;
 
   const { isValid, errors, markTouched, showError, validateSubmit } =
     useAppointmentFormValidation(formValues, {
       validatePurpose: purposeOptions.length > 0,
+      dateRequired: true,
+      selectedSlotRequired: hasTimeSlots,
     });
 
   return (
     <>
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <div className="px-4 pt-6 lg:px-6 lg:pt-10">
+      <div className="min-h-0 flex-1 overflow-y-auto DrawerVerticleScrollbar">
+        <div className={cn(RIGHT_PANEL_HEADER_PADDING_CLASS)}>
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4">
               <div className="flex min-w-0 items-center gap-2">
@@ -1025,20 +975,7 @@ const BookingFormStep = ({
                 </h2>
               </div>
               {onClose ? (
-                <button
-                  type="button"
-                  onClick={onClose}
-                  aria-label="Close"
-                  className="inline-flex size-6 shrink-0 items-center justify-center"
-                >
-                  <Image
-                    src="/icons/menu-close.svg"
-                    alt=""
-                    width={24}
-                    height={24}
-                    aria-hidden
-                  />
-                </button>
+                <RightPanelCloseButton onClick={onClose} aria-label="Close" />
               ) : null}
             </div>
             <div className="h-px w-full bg-neutral300" aria-hidden />
@@ -1088,10 +1025,14 @@ const BookingFormStep = ({
                 emailLabel={emailLabel}
                 emailPlaceholder={emailPlaceholder}
                 dateLabel={dateLabel}
+                dateRequired
+                timeSlotRequired={hasTimeSlots}
                 purposeLabel={purposeLabel}
                 purposePlaceholder={purposePlaceholder}
                 noteLabel={notesLabel}
                 notePlaceholder={notesPlaceholder}
+                phoneLocked={phoneLocked}
+                emailLocked={emailLocked}
               />
             </div>
           </div>

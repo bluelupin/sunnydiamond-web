@@ -2,6 +2,7 @@ import { magentoGraphqlFetch } from "@/services/magento/graphqlClient";
 import {
   MAGENTO_CREATE_CUSTOMER_ADDRESS_MUTATION,
   MAGENTO_CUSTOMER_ADDRESSES_QUERY,
+  MAGENTO_CUSTOMER_LATEST_ORDER_SHIPPING_QUERY,
   MAGENTO_CUSTOMER_ORDERS_QUERY,
   MAGENTO_DELETE_CUSTOMER_ADDRESS_MUTATION,
   MAGENTO_UPDATE_CUSTOMER_ADDRESS_MUTATION,
@@ -9,9 +10,12 @@ import {
   SUNNY_DELETE_CUSTOMER_MUTATION,
 } from "./customer.gql";
 import {
+  doesCustomerAddressMatchInput,
   mapCustomerAddressInputToMagento,
+  mapCustomerAddressToFormInput,
   mapMagentoCustomerAddresses,
   mapMagentoCustomerOrders,
+  mapOrderShippingAddressToCustomerAddressInput,
   type MagentoCustomerAddressesResponse,
   type MagentoCustomerOrdersResponse,
 } from "./customer-account.mapper";
@@ -76,6 +80,54 @@ export async function updateCustomerAddress(
   return fetchCustomerAddresses(authToken);
 }
 
+/** Mark one address as the sole default shipping address (never default billing). */
+export async function setCustomerDefaultShippingAddress(
+  authToken: string,
+  uid: string,
+): Promise<CustomerAddress[]> {
+  const addresses = await fetchCustomerAddresses(authToken);
+  const target = addresses.find((address) => address.uid === uid);
+
+  if (!target) {
+    throw new Error("Address not found");
+  }
+
+  if (target.isDefaultShipping) {
+    return addresses;
+  }
+
+  const previousDefault = addresses.find(
+    (address) => address.isDefaultShipping && address.uid !== uid,
+  );
+
+  await updateCustomerAddress(authToken, uid, {
+    ...mapCustomerAddressToFormInput(target),
+    defaultShipping: true,
+    defaultBilling: false,
+  });
+
+  if (!previousDefault) {
+    return fetchCustomerAddresses(authToken);
+  }
+
+  const refreshed = await fetchCustomerAddresses(authToken);
+  const previousStillDefault = refreshed.some(
+    (address) => address.uid === previousDefault.uid && address.isDefaultShipping,
+  );
+
+  if (!previousStillDefault) {
+    return refreshed;
+  }
+
+  await updateCustomerAddress(authToken, previousDefault.uid, {
+    ...mapCustomerAddressToFormInput(previousDefault),
+    defaultShipping: false,
+    defaultBilling: false,
+  });
+
+  return fetchCustomerAddresses(authToken);
+}
+
 export async function deleteCustomerAddress(
   authToken: string,
   uid: string,
@@ -87,6 +139,59 @@ export async function deleteCustomerAddress(
   });
 
   return fetchCustomerAddresses(authToken);
+}
+
+type MagentoLatestOrderShippingResponse = {
+  customer?: {
+    orders?: {
+      items?: Array<{
+        number?: string | null;
+        shipping_address?: {
+          firstname?: string | null;
+          lastname?: string | null;
+          street?: string[] | null;
+          city?: string | null;
+          region?: string | null;
+          postcode?: string | null;
+          telephone?: string | null;
+        } | null;
+      }> | null;
+    } | null;
+  } | null;
+};
+
+/**
+ * When a guest later signs in, their checkout address may exist only on the order.
+ * Backfill the profile address book from the most recent order when it is missing.
+ */
+export async function syncCustomerAddressFromLatestOrder(
+  authToken: string,
+): Promise<CustomerAddress[]> {
+  const existingAddresses = await fetchCustomerAddresses(authToken);
+  const data = await magentoGraphqlFetch<MagentoLatestOrderShippingResponse>({
+    query: MAGENTO_CUSTOMER_LATEST_ORDER_SHIPPING_QUERY,
+    authToken,
+    cache: "no-store",
+  });
+
+  const shippingAddress = data.customer?.orders?.items?.[0]?.shipping_address ?? null;
+  const input = mapOrderShippingAddressToCustomerAddressInput(shippingAddress);
+
+  if (!input) {
+    return existingAddresses;
+  }
+
+  if (existingAddresses.some((address) => doesCustomerAddressMatchInput(input, address))) {
+    return existingAddresses;
+  }
+
+  const isFirstAddress = existingAddresses.length === 0;
+
+  return createCustomerAddress(authToken, {
+    ...input,
+    defaultShipping: isFirstAddress || !existingAddresses.some((address) => address.isDefaultShipping),
+    defaultBilling: false,
+  });
 }
 
 export async function updateCustomerName(

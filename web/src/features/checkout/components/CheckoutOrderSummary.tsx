@@ -33,7 +33,7 @@ const CheckoutOrderSummary = ({
         className,
       )}
     >
-      <div className="flex flex-col gap-6 bg-white p-6">
+      <div className="flex flex-col gap-6 bg-white lg:p-6 md:p-5 p-6">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-6">
             <h2 className="font-larken text-xl font-light leading-110 text-darkblack lg:text-2xl">

@@ -1,0 +1,43 @@
+const ContactPageSkeleton = () => (
+  <div aria-busy="true" aria-label="Loading contact page">
+    <section className="relative h-[240px] w-full overflow-hidden md:h-320">
+      <div className="absolute inset-0 animate-pulse bg-gray200" aria-hidden />
+      <div className="absolute inset-x-0 bottom-0 z-10 flex justify-center px-5 pb-10 lg:pb-16">
+        <div className="h-10 w-48 animate-pulse rounded bg-white/30" aria-hidden />
+      </div>
+    </section>
+
+    <div className="pt-16">
+      <div className="w-full px-4 md:px-10 md:pb-104 lg:px-[100px] xl:px-[120px]">
+        <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-16 md:gap-104">
+      <section className="w-full">
+        <div className="mx-auto flex w-full flex-col items-center gap-10">
+          <div className="h-6 w-full max-w-[606px] animate-pulse rounded bg-gray200" aria-hidden />
+          <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3">
+            {[0, 1, 2].map((index) => (
+              <div key={index} className="h-48 animate-pulse rounded bg-gray200" aria-hidden />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="w-full">
+        <div className="flex w-full flex-col items-center gap-8">
+          <div className="h-8 w-64 animate-pulse rounded bg-gray200" aria-hidden />
+          <div className="flex w-full flex-col gap-4">
+            {[0, 1, 2, 3, 4].map((index) => (
+              <div key={index} className="h-14 w-full animate-pulse rounded bg-gray200" aria-hidden />
+            ))}
+          </div>
+          <div className="h-14 w-full animate-pulse rounded bg-gray200 md:w-[308px]" aria-hidden />
+        </div>
+      </section>
+        </div>
+      </div>
+
+      <section className="h-[320px] w-full animate-pulse bg-gray200 md:h-[387px]" aria-hidden />
+    </div>
+  </div>
+);
+
+export default ContactPageSkeleton;

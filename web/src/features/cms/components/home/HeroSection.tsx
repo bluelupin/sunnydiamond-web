@@ -1,18 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import TrustBadgeSection from "../common/TrustBadges";
+import { HomepageTrustBadgeSection } from "../common/TrustBadges";
 import HeroBackgroundMedia from "./HeroBackgroundMedia";
 import HeroSectionOverlay from "./HeroSectionOverlay";
+import { HeroDiamondIcon } from "./HeroDiamondIcon";
 import type { ResolvedHeroContent } from "@/lib/homepage/resolveHomepageAboveFold";
-
-const HERO_FALLBACK = (
-  <section className="relative flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden">
-    <div className="relative min-h-0 flex-1 overflow-hidden">
-      <div className="absolute inset-0 animate-pulse bg-gray200" aria-hidden />
-    </div>
-    <TrustBadgeSection />
-  </section>
-);
 
 type HeroSectionProps = {
   id?: string;
@@ -21,7 +13,7 @@ type HeroSectionProps = {
 
 const HeroSection = ({ id, hero }: HeroSectionProps) => {
   if (!hero) {
-    return HERO_FALLBACK;
+    return null;
   }
 
   return (
@@ -33,28 +25,17 @@ const HeroSection = ({ id, hero }: HeroSectionProps) => {
         <HeroBackgroundMedia
           desktopImageUrl={hero.desktopImageUrl}
           mobileImageUrl={hero.mobileImageUrl}
-          alt={hero.heroAlt}
+          desktopAlt={hero.desktopHeroAlt}
+          mobileAlt={hero.mobileHeroAlt}
           cmsVideoUrl={hero.heroVideoUrl}
         />
         <HeroSectionOverlay />
-        <div className="container relative flex h-full items-end justify-center md:py-16 sm:py-12 py-11 md:px-6 px-4">
+        <div className="container relative flex h-full items-end justify-center md:py-16 sm:py-10 py-6 md:px-6 px-4">
           <div className="flex w-full max-w-886 animate-fade-in flex-col items-center md:gap-8 gap-6 text-center">
             <div className="flex flex-col items-center gap-4">
-              <div className="inline-flex items-center gap-2 font-gill text-base font-semibold leading-110 text-white">
-                <span className="relative size-6 shrink-0 overflow-clip" aria-hidden>
-                  <span className="absolute inset-[12.5%_4.17%_15.63%_8.33%]">
-                    <span className="absolute inset-[-2.9%_-2.38%]">
-                      <Image
-                        src="/images/home/hero-eyebrow-diamond.svg"
-                        alt=""
-                        width={24}
-                        height={24}
-                        className="block size-full max-w-none"
-                      />
-                    </span>
-                  </span>
-                </span>
-                <span>{hero.eyebrow}</span>
+              <div className="inline-flex items-center gap-2">
+                <HeroDiamondIcon />
+                <span className="font-gill text-base font-semibold leading-110 text-white">{hero.eyebrow}</span>
               </div>
               <h1 className="max-w-886 font-larken xl:text-6xl md:text-5xl sm:text-4xl text-32 font-light leading-110 text-white">
                 {hero.titleLines.map((line, index) => (
@@ -64,7 +45,7 @@ const HeroSection = ({ id, hero }: HeroSectionProps) => {
                 ))}
               </h1>
             </div>
-            {hero.primaryCtaUrl ? (
+            {hero.primaryCtaUrl && hero.primaryCtaLabel ? (
               <Link
                 href={hero.primaryCtaUrl}
                 className="bg-white relative flex items-center justify-center px-7 h-14 overflow-hidden font-gill text-sm font-normal uppercase leading-110 group w-fit"
@@ -78,7 +59,7 @@ const HeroSection = ({ id, hero }: HeroSectionProps) => {
           </div>
         </div>
       </div>
-      <TrustBadgeSection />
+      <HomepageTrustBadgeSection />
     </section>
   );
 };

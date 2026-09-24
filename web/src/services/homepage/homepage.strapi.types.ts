@@ -6,6 +6,7 @@ import type { FooterLinkGroup, HeaderNavLink } from "@/shared/lib/shellNavigatio
 export type StrapiHomepageCta = {
   id?: number;
   label?: string | null;
+  additionalLabel?: string | null;
   url?: string | null;
   targetType?: string | null;
   openInNewTab?: boolean | null;
@@ -49,8 +50,17 @@ export type StrapiFooterTickerItem = {
   showField?: boolean | null;
 };
 
+export type StrapiSidebarNavigationItem = {
+  id?: number;
+  label?: string | null;
+  sectionId?: string | null;
+  isActive?: boolean | null;
+  sortOrder?: number | null;
+};
+
 export type StrapiGlobalShell = {
   headerNavigationLinks?: HeaderNavLink[] | null;
+  sidebarNavigation?: StrapiSidebarNavigationItem[] | null;
   footerLinkGroups?: FooterLinkGroup[] | null;
   footerCopyright?: string | null;
   socialLinks?: unknown[] | null;
@@ -82,11 +92,6 @@ export type StrapiCategoryCard = {
   cta?: StrapiHomepageCta | null;
 };
 
-export type StrapiProductSkuItem = {
-  id?: number;
-  sku?: string | null;
-};
-
 export type StrapiEditorialCollection = {
   id?: number;
   documentId?: string;
@@ -94,11 +99,9 @@ export type StrapiEditorialCollection = {
   title?: string | null;
   slug?: string | null;
   description?: string | null;
-  featuredProductSku?: string | null;
   sortOrder?: number | null;
   isActive?: boolean | null;
   cta?: StrapiHomepageCta | null;
-  productSkus?: StrapiProductSkuItem[] | null;
   backgroundImage?: StrapiResponsiveImageBlock | null;
 };
 
@@ -140,6 +143,8 @@ export type StrapiGiftingBanner = {
   subtitle?: string | null;
   mobileDescription?: string | null;
   mobileSubtitle?: string | null;
+  filterSlug?: string | null;
+  filterType?: "collection" | "occasion" | null;
   isActive?: boolean | null;
   showField?: boolean | null;
   cta?: StrapiHomepageCta | null;
@@ -183,6 +188,14 @@ export type StrapiCraftsmanshipStep = {
   image?: unknown;
 };
 
+export type StrapiSavingsPlanStep = {
+  id?: number;
+  label?: string | null;
+  description?: string | null;
+  highlightedText?: string | null;
+  isActive?: boolean | null;
+};
+
 export type StrapiTextSection = {
   id?: number;
   title?: string | null;
@@ -204,6 +217,26 @@ export type StrapiTextSection = {
   steps?: StrapiCraftsmanshipStep[] | null;
 };
 
+export type StrapiHomepageShowroom = {
+  id?: number | string;
+  documentId?: string | null;
+  name?: string | null;
+  slug?: string | null;
+  address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  pincode?: string | null;
+  mapUrl?: string | null;
+  directionsUrl?: string | null;
+  openingHours?: string | null;
+  sortOrder?: number | null;
+  isActive?: boolean | null;
+  showField?: boolean | null;
+  image?: StrapiResponsiveImageBlock | null;
+};
+
 export type StrapiShowroomSection = {
   id?: number;
   sectionTitle?: string | null;
@@ -212,7 +245,7 @@ export type StrapiShowroomSection = {
   showField?: boolean | null;
   cta?: StrapiHomepageCta | null;
   image?: StrapiResponsiveImageBlock | null;
-  showrooms?: unknown[] | null;
+  showrooms?: StrapiHomepageShowroom[] | null;
   sortOrder?: number | null;
 };
 
@@ -230,7 +263,6 @@ export type StrapiOccasionCard = {
   description?: string | null;
   subtitle?: string | null;
   slug?: string | null;
-  filterSlug?: string | null;
   sortOrder?: number | null;
   isActive?: boolean | null;
   showField?: boolean | null;

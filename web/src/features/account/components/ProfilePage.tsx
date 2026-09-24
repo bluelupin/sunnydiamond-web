@@ -1,8 +1,10 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { mapProfileNavItems } from "@/services/profile/profile-page.mapper";
+import { useProfilePageCms } from "@/shared/lib/providers/ProfilePageCmsProvider";
 import {
   DEFAULT_PROFILE_SECTION,
   getProfileSectionMobileTitle,
@@ -11,6 +13,11 @@ import {
 import type { ProfileSectionId } from "../types";
 import { PROFILE_ORDER_QUERY_PARAM } from "../utils/profileOrderNavigation";
 import { ProfileBespokeToastProvider } from "../context/ProfileBespokeToastContext";
+import {
+  ProfileSectionEmptyStateProvider,
+  useProfileSectionIsEmpty,
+  useResetProfileSectionEmptyState,
+} from "../context/ProfileSectionEmptyStateContext";
 import ProfileAuthGate from "./ProfileAuthGate";
 import ProfileHeroSection from "./ProfileHeroSection";
 import { ProfileMobileSectionHeader } from "./ProfileMobileSectionHeader";
@@ -20,11 +27,17 @@ import ProfileSidebar from "./ProfileSidebar";
 import ProfileSupportFaqSection from "./ProfileSupportFaqSection";
 import { cn } from "@/shared/utils/cn";
 
-const ProfilePage = () => {
+function ProfilePageContent() {
   const { customer } = useAuth();
-  const router = useRouter();
-  const pathname = usePathname() ?? "/profile";
   const searchParams = useSearchParams();
+  const profilePage = useProfilePageCms();
+  const isSectionEmpty = useProfileSectionIsEmpty();
+  const resetSectionEmpty = useResetProfileSectionEmptyState();
+
+  const navItems = useMemo(
+    () => mapProfileNavItems(profilePage?.sideTabs ?? []),
+    [profilePage?.sideTabs],
+  );
 
   const activeSection = useMemo<ProfileSectionId>(() => {
     const requested = searchParams?.get("section");
@@ -38,58 +51,67 @@ const ProfilePage = () => {
 
   const showMobileSectionHeader = useMemo(() => {
     const orderNumber = searchParams?.get(PROFILE_ORDER_QUERY_PARAM)?.trim();
-    return activeSection !== "orders" || !orderNumber;
-  }, [activeSection, searchParams]);
+    return (activeSection !== "orders" || !orderNumber) && !isSectionEmpty;
+  }, [activeSection, isSectionEmpty, searchParams]);
 
-  const handleSectionChange = useCallback(
-    (section: ProfileSectionId) => {
-      const params = new URLSearchParams(searchParams?.toString() ?? "");
-      params.delete(PROFILE_ORDER_QUERY_PARAM);
-      if (section === DEFAULT_PROFILE_SECTION) {
-        params.delete("section");
-      } else {
-        params.set("section", section);
-      }
+  useEffect(() => {
+    resetSectionEmpty?.();
+  }, [activeSection, resetSectionEmpty]);
 
-      const query = params.toString();
-      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
-    },
-    [pathname, router, searchParams],
-  );
+  if (!customer) {
+    return null;
+  }
 
   return (
-    <ProfileAuthGate>
-      {customer &&
-        <ProfileBespokeToastProvider>
-          <ProfileHeroSection firstName={customer.firstname} />
-          <div
-            className={cn(
-              "lg:pt-20 md:pt-14 pt-10 2xl:max-w-1920 max-w-1440",
-              activeSection === "wishlist"
-                ? "2xl:px-[60px] lg:px-10"
-                : "2xl:px-[60px] lg:px-10 md:px-8 px-4",
-              activeSection === "support" ? "pb-0" : "lg:pb-100 md:pb-20 pb-10",
-            )}
-          >
-            {showMobileSectionHeader && <ProfileMobileSectionHeader title={mobileSectionTitle} />}
-            <div className="lg:grid lg:grid-cols-[437px_minmax(0,1fr)] lg:gap-6">
-              <aside className="hidden lg:block">
-                <ProfileSidebar
-                  activeSection={activeSection}
-                  onSectionChange={handleSectionChange}
+    <ProfileBespokeToastProvider>
+      <ProfileHeroSection
+        firstName={customer.firstname}
+        backgroundImage={profilePage?.backgroundImage ?? null}
+      />
+      <div
+        className={cn(
+          "lg:pt-16 md:pt-14 pt-10 2xl:max-w-1920 max-w-1440",
+          activeSection === "wishlist"
+            ? "2xl:px-[60px] lg:px-10 lg:!pb-100 md:!pb-20 !pb-0"
+            : "2xl:px-[60px] lg:px-10 md:px-8 px-4",
+          activeSection === "support" ? "pb-0" : "lg:pb-100 md:pb-20 pb-10",
+        )}
+      >
+        {
+          activeSection !== "diamonds_for_everyone" && (
+            <>
+              {showMobileSectionHeader && (
+                <ProfileMobileSectionHeader
+                  title={mobileSectionTitle}
+                  align={activeSection === "wishlist" ? "center" : "left"}
                 />
-              </aside>
-              <div className="min-w-0">
-                <ProfileSectionContent section={activeSection} customer={customer} />
-              </div>
-            </div>
+              )}
+            </>
+          )
+        }
+        <div className="lg:grid xl:grid-cols-[437px_minmax(0,1fr)] lg:grid-cols-[400px_minmax(0,1fr)] lg:gap-6">
+          <aside className="relative hidden lg:block">
+            <ProfileSidebar activeSection={activeSection} navItems={navItems} />
+          </aside>
+          <div className="min-w-0">
+            <ProfileSectionContent section={activeSection} customer={customer} />
           </div>
-          {activeSection === "support" ? <ProfileSupportFaqSection /> : null}
-          {activeSection !== "support" ? <ProfilePromoStrip /> : null}
-        </ProfileBespokeToastProvider>
-      }
-    </ProfileAuthGate>
+        </div>
+      </div>
+      {activeSection === "support" ? <ProfileSupportFaqSection /> : null}
+      {activeSection !== "support" ? (
+        <ProfilePromoStrip trustBadges={profilePage?.trustBadges ?? []} />
+      ) : null}
+    </ProfileBespokeToastProvider>
   );
-};
+}
+
+const ProfilePage = () => (
+  <ProfileAuthGate>
+    <ProfileSectionEmptyStateProvider>
+      <ProfilePageContent />
+    </ProfileSectionEmptyStateProvider>
+  </ProfileAuthGate>
+);
 
 export default ProfilePage;

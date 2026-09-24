@@ -22,7 +22,9 @@ export type ProfileTimelineStep = {
 export type ProfileOrderItemUi = {
   id: string;
   name: string;
-  imageSrc: string;
+  imageSrc?: string;
+  /** Gift card variant label, e.g. "Digital Card" / "Physical Card" (Figma 4858:124116). */
+  subtitle?: string;
   size?: string;
   metal?: string;
   engraving?: string;
@@ -86,6 +88,7 @@ export type ProfileOrderDetailUi = {
   /** Invoice button stays visible but inert until Magento has an invoice. */
   invoiceDisabled?: boolean;
   showCancelNote: boolean;
+  isDummyPreview?: boolean;
 };
 
 export type ProfileOrderUi = {
@@ -115,21 +118,25 @@ export type ProfileOrderUi = {
   /** Invoice button stays visible but inert until Magento has an invoice. */
   invoiceDisabled?: boolean;
   showCancelNote: boolean;
+  /** UI-only preview row — disables order mutations (gift card dummy orders). */
+  isDummyPreview?: boolean;
 };
 
 export type ProfileAppointmentProductUi = {
   id: string;
   name: string;
-  imageSrc: string;
+  imageSrc?: string;
 };
 
 export type ProfileAppointmentUi = {
   id: string;
+  formTag: string;
   type: AppointmentFilterKey;
   typeLabel: string;
   customerName: string;
   customerPhone: string;
   customerEmail: string;
+  requestedDate: string;
   products: ProfileAppointmentProductUi[];
   appointmentAddress?: {
     name: string;
@@ -142,6 +149,7 @@ export type ProfileAppointmentUi = {
   };
   storeVisit?: {
     city: string;
+    storeName: string;
     lines: string[];
     directionsHref?: string;
   };
@@ -149,16 +157,21 @@ export type ProfileAppointmentUi = {
   bookingTime: string;
   notesLabel: string;
   notes: string;
+  /** Store-visit note layout (Figma): purpose + requirement. */
+  purposeOfVisit?: string;
+  yourRequirement?: string;
   rescheduleNote?: string;
   canReschedule: boolean;
   canCancel: boolean;
+  /** When clubbed, cancel/reschedule applies to all underlying appointment ids. */
+  clubbedAppointmentIds?: string[];
 };
 
 export type ProfileBespokeItemUi = {
   id: string;
   creationDocumentId: string;
   title: string;
-  imageSrc: string;
+  imageSrc?: string;
   /** Cover + gallery URLs for the detail panel carousel. */
   images: string[];
   size?: string;

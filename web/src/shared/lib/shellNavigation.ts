@@ -1,8 +1,12 @@
-import { siteConfig } from "@/shared/lib/siteConfig";
+import { resolveFooterLinkHref } from "@/features/cms/utils/policyCertificationsRoutes";
 
 export type HeaderNavLink = {
+  id?: string | number;
   label: string;
   url: string;
+  isActive?: boolean | null;
+  showField?: boolean | null;
+  sortOrder?: number | null;
 };
 
 export type FooterLink = {
@@ -21,31 +25,21 @@ export type FooterLinkGroup = {
   sortOrder?: number | null;
 };
 
-export function getFallbackHeaderLinks(): HeaderNavLink[] {
-  return siteConfig.navigation.main.map(({ label, to }) => ({
-    label,
-    url: to,
-  }));
-}
+export type SidebarNavigationItem = {
+  id?: string | number;
+  label?: string | null;
+  sectionId?: string | null;
+  isActive?: boolean | null;
+  sortOrder?: number | null;
+};
 
-export function getFallbackFooterLinkGroups(): FooterLinkGroup[] {
-  return siteConfig.navigation.footer.columns.map((column, columnIndex) => ({
-    id: columnIndex,
-    title: column.heading,
-    links: column.links.map((link, linkIndex) => ({
-      id: `${columnIndex}-${linkIndex}`,
-      label: link.label,
-      url: link.to,
-    })),
-  }));
-}
+export type HomeSidebarNavSection = {
+  id: string | number;
+  label: string;
+  sectionId: string;
+};
 
 const REMOVED_HEADER_NAV_LABELS = new Set(["collection"]);
-
-const DEFAULT_APPOINTMENT_LINK: HeaderNavLink = {
-  label: "Book an Appointment",
-  url: "/book-an-appointment",
-};
 
 export function isBookAppointmentNavLink(link: HeaderNavLink): boolean {
   const label = link.label.trim().toLowerCase();
@@ -54,27 +48,61 @@ export function isBookAppointmentNavLink(link: HeaderNavLink): boolean {
 }
 
 function filterHeaderLinks(links: readonly HeaderNavLink[]): HeaderNavLink[] {
-  return links.filter(
-    (link) => !REMOVED_HEADER_NAV_LABELS.has(link.label.trim().toLowerCase()),
-  );
+  return [...links]
+    .filter(
+      (link) =>
+        link.isActive !== false &&
+        link.showField !== false &&
+        Boolean(link.label?.trim()) &&
+        Boolean(link.url?.trim()) &&
+        !REMOVED_HEADER_NAV_LABELS.has(link.label.trim().toLowerCase()),
+    )
+    .map((link) => ({
+      id: link.id,
+      label: link.label.trim(),
+      url: link.url.trim(),
+    }));
 }
 
 export function resolveShellHeaderLinks(
   cmsLinks: readonly HeaderNavLink[] | null | undefined,
 ): HeaderNavLink[] {
-  if (cmsLinks?.length) return filterHeaderLinks(cmsLinks);
-  return filterHeaderLinks(getFallbackHeaderLinks());
+  if (!cmsLinks?.length) {
+    return [];
+  }
+
+  return filterHeaderLinks(cmsLinks);
 }
 
 /** Primary nav links with Book an Appointment extracted for the dedicated CTA slot. */
 export function splitShellHeaderNavLinks(links: readonly HeaderNavLink[]): {
   primaryLinks: HeaderNavLink[];
-  appointmentLink: HeaderNavLink;
+  appointmentLink?: HeaderNavLink;
 } {
-  const appointmentLink =
-    links.find((link) => isBookAppointmentNavLink(link)) ?? DEFAULT_APPOINTMENT_LINK;
+  const appointmentLink = links.find((link) => isBookAppointmentNavLink(link));
   const primaryLinks = links.filter((link) => !isBookAppointmentNavLink(link));
   return { primaryLinks, appointmentLink };
+}
+
+export function resolveShellSidebarNavigation(
+  items: readonly SidebarNavigationItem[] | null | undefined,
+): HomeSidebarNavSection[] {
+  if (!items?.length) {
+    return [];
+  }
+
+  return items
+    .filter(
+      (item) =>
+        item.isActive !== false &&
+        Boolean(item.label?.trim()) &&
+        Boolean(item.sectionId?.trim()),
+    )
+    .map((item) => ({
+      id: item.id ?? item.sectionId!.trim(),
+      label: item.label!.trim(),
+      sectionId: item.sectionId!.trim(),
+    }));
 }
 
 export function resolveShellFooterLinkGroups(
@@ -86,22 +114,20 @@ export function resolveShellFooterLinkGroups(
 
   return [...cmsGroups]
     .filter((group) => group.isActive !== false)
-    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
     .map((group) => ({
       id: group.id,
       title: group.title,
-      links: [...group.links]
+      links: group.links
         .filter(
           (link) =>
             link.isActive !== false &&
             Boolean(link.label?.trim()) &&
             Boolean(link.url?.trim()),
         )
-        .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
         .map((link) => ({
           id: link.id,
           label: link.label.trim(),
-          url: link.url.trim(),
+          url: resolveFooterLinkHref(link.url.trim()),
         })),
     }))
     .filter((group) => group.links.length > 0);

@@ -1,8 +1,11 @@
 import { buildOccasionCardHref } from "@/features/jewellery-product/utils/occasionListing";
-import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
+import {
+  extractStrapiImage,
+  resolveCmsAltText,
+  resolveCmsMediaUrl,
+} from "@/shared/utils/strapiMedia";
 import {
   EMPTY_GIFTING_PAGE,
-  type NormalizedGiftingCta,
   type NormalizedGiftingFinishingTouch,
   type NormalizedGiftingGiftCard,
   type NormalizedGiftingGiftFinder,
@@ -15,7 +18,6 @@ import {
   type NormalizedGiftingResponsiveImage,
   type NormalizedGiftingSeo,
   type NormalizedGiftingTrustBadge,
-  type StrapiGiftingCta,
   type StrapiGiftingFinishingTouchSection,
   type StrapiGiftingGiftCardSection,
   type StrapiGiftingGiftFinderSection,
@@ -34,7 +36,12 @@ const cleanText = (value?: string | null): string | undefined => {
   return trimmed || undefined;
 };
 
-const resolveSectionActive = (showField?: boolean | null): boolean => {
+/** CMS sections may use `isActive` or `showField`; default visible when unset. */
+const resolveSectionActive = (
+  isActive?: boolean | null,
+  showField?: boolean | null,
+): boolean => {
+  if (typeof isActive === "boolean") return isActive;
   if (typeof showField === "boolean") return showField;
   return true;
 };
@@ -42,6 +49,8 @@ const resolveSectionActive = (showField?: boolean | null): boolean => {
 const mapResponsiveImage = (
   image?: StrapiGiftingResponsiveImage | null,
 ): NormalizedGiftingResponsiveImage | null => {
+  const desktopFile = extractStrapiImage(image?.desktopImage);
+  const mobileFile = extractStrapiImage(image?.mobileImage);
   const desktopUrl =
     resolveCmsMediaUrl(image?.desktopImage) ?? resolveCmsMediaUrl(image?.mobileImage);
   const mobileUrl =
@@ -49,21 +58,16 @@ const mapResponsiveImage = (
   if (!desktopUrl && !mobileUrl) return null;
 
   return {
-    desktopUrl: desktopUrl ?? mobileUrl ?? "",
-    mobileUrl: mobileUrl ?? desktopUrl ?? "",
+    desktopUrl: desktopUrl ?? mobileUrl!,
+    mobileUrl: mobileUrl ?? desktopUrl!,
     alt:
+      cleanText(image?.altText) ??
       resolveCmsAltText(image?.desktopImage) ??
       resolveCmsAltText(image?.mobileImage) ??
-      cleanText(image?.altText) ??
       "",
+    width: desktopFile?.width ?? mobileFile?.width ?? undefined,
+    height: desktopFile?.height ?? mobileFile?.height ?? undefined,
   };
-};
-
-const mapCta = (cta?: StrapiGiftingCta | null): NormalizedGiftingCta | null => {
-  const label = cleanText(cta?.label);
-  const url = cleanText(cta?.url) ?? cleanText(cta?.to);
-  if (!label || !url) return null;
-  return { label, url };
 };
 
 const mapSeo = (seo?: StrapiGiftingSeo | null): NormalizedGiftingSeo | null => {
@@ -90,30 +94,30 @@ const mapSeo = (seo?: StrapiGiftingSeo | null): NormalizedGiftingSeo | null => {
 };
 
 const mapHero = (hero?: StrapiGiftingHeroSection | null): NormalizedGiftingHero | null => {
-  if (!hero || !resolveSectionActive(hero.showField)) return null;
+  if (!hero || !resolveSectionActive(hero.isActive, hero.showField)) return null;
 
   const title = cleanText(hero.title);
-  const image = mapResponsiveImage(hero.backgroundImage);
-  if (!title || !image) return null;
+  if (!title) return null;
 
   return {
     title,
-    eyebrow: cleanText(hero.eyebrow),
-    image,
+    image: mapResponsiveImage(hero.backgroundImage),
   };
 };
 
 const mapIntro = (
   section?: StrapiGiftingIntroSection | null,
 ): NormalizedGiftingIntro | null => {
-  if (!section || !resolveSectionActive(section.showField)) return null;
+  if (!section || !resolveSectionActive(section.isActive, section.showField)) return null;
 
   const title = cleanText(section.title);
   if (!title) return null;
 
+  const description = cleanText(section.description);
+
   return {
     title,
-    description: cleanText(section.description),
+    ...(description ? { description } : {}),
     background: mapResponsiveImage(section.backgroundImage),
   };
 };
@@ -121,26 +125,20 @@ const mapIntro = (
 const mapOccasionGrid = (
   section?: StrapiGiftingOccasionGridSection | null,
 ): NormalizedGiftingOccasionGrid | null => {
-  if (!section || !resolveSectionActive(section.showField)) return null;
+  if (!section || !resolveSectionActive(section.isActive, section.showField)) return null;
 
   const cards = [...(section.occasions ?? [])]
-    .filter((occasion) => resolveSectionActive(occasion?.showField))
     .sort((a, b) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
+    .filter((occasion) => resolveSectionActive(occasion?.isActive, occasion?.showField))
     .map((occasion, index): NormalizedGiftingOccasionCard | null => {
       const title = cleanText(occasion?.title);
       const image = mapResponsiveImage(occasion?.image);
       if (!title || !image) return null;
 
-      const filterSlug = cleanText(occasion?.filterSlug);
-      const cta = mapCta(occasion?.cta);
-      // Same resolution as homepage OccasionsTeaserSection:
-      // prefer real CMS deep links; for generic `/products` use filterSlug → /jewellery?occasion=
-      const href = buildOccasionCardHref({
-        title,
-        slug: filterSlug,
-        filterSlug,
-        ctaUrl: cta?.url ?? cleanText(occasion?.cta?.url) ?? cleanText(occasion?.cta?.to),
-      });
+      const ctaUrl = cleanText(occasion?.cta?.url) ?? cleanText(occasion?.cta?.to);
+      if (!ctaUrl) return null;
+
+      const href = buildOccasionCardHref({ ctaUrl });
 
       return {
         id:
@@ -149,7 +147,7 @@ const mapOccasionGrid = (
         title,
         description: cleanText(occasion?.description),
         href,
-        ctaLabel: cta?.label ?? "View Collection",
+        ctaLabel: cleanText(occasion?.cta?.additionalLabel),
         image,
       };
     })
@@ -162,7 +160,7 @@ const mapOccasionGrid = (
 const mapPerfectGift = (
   section?: StrapiGiftingPerfectGiftSection | null,
 ): NormalizedGiftingPerfectGift | null => {
-  if (!section || !resolveSectionActive(section.showField)) return null;
+  if (!section || !resolveSectionActive(undefined, section.showField)) return null;
 
   const title = cleanText(section.title);
   if (!title) return null;
@@ -176,15 +174,17 @@ const mapPerfectGift = (
 const mapGiftFinder = (
   section?: StrapiGiftingGiftFinderSection | null,
 ): NormalizedGiftingGiftFinder | null => {
-  if (!section || !resolveSectionActive(section.showField)) return null;
+  if (!section || !resolveSectionActive(section.isActive, section.showField)) return null;
 
   const title = cleanText(section.title);
   if (!title) return null;
 
+  const submitLabel = cleanText(section.submitLabel);
+
   return {
     title,
     description: cleanText(section.description),
-    submitLabel: cleanText(section.submitLabel),
+    ...(submitLabel ? { submitLabel } : {}),
     image: mapResponsiveImage(section.image),
   };
 };
@@ -192,17 +192,17 @@ const mapGiftFinder = (
 const mapGiftCard = (
   section?: StrapiGiftingGiftCardSection | null,
 ): NormalizedGiftingGiftCard | null => {
-  if (!section || !resolveSectionActive(section.showField)) return null;
+  if (!section || !resolveSectionActive(section.isActive, section.showField)) return null;
 
   const title = cleanText(section.title);
-  const cta = mapCta(section.cta);
-  if (!title || !cta) return null;
+  if (!title) return null;
+
+  const buttonLabel = cleanText(section.buttonLabel);
 
   return {
     title,
-    eyebrow: cleanText(section.eyebrow),
     description: cleanText(section.description),
-    cta,
+    ...(buttonLabel ? { buttonLabel } : {}),
     background: mapResponsiveImage(section.backgroundImage),
     image: mapResponsiveImage(section.cutOutImage),
   };
@@ -211,7 +211,7 @@ const mapGiftCard = (
 const mapFinishingTouch = (
   section?: StrapiGiftingFinishingTouchSection | null,
 ): NormalizedGiftingFinishingTouch | null => {
-  if (!section || !resolveSectionActive(section.showField)) return null;
+  if (!section || !resolveSectionActive(section.isActive, section.showField)) return null;
 
   const title = cleanText(section.title);
   if (!title) return null;
@@ -222,10 +222,13 @@ const mapFinishingTouch = (
       const serviceTitle = cleanText(service?.title);
       const image = mapResponsiveImage(service?.image);
       if (!serviceTitle || !image) return null;
+
+      const description = cleanText(service?.description);
+
       return {
         id: service?.id != null ? String(service.id) : `finishing-${index + 1}`,
         title: serviceTitle,
-        description: cleanText(service?.description),
+        ...(description ? { description } : {}),
         image,
       };
     })
@@ -233,28 +236,41 @@ const mapFinishingTouch = (
 
   if (items.length === 0) return null;
 
+  const description = cleanText(section.description);
+
   return {
     title,
-    description: cleanText(section.description),
+    ...(description ? { description } : {}),
     items,
   };
 };
 
+const isTrustBadgesSectionActive = (section?: StrapiGiftingTrustBadgesSection | null): boolean =>
+  section?.isActive === true;
+
 const mapTrustBadges = (
   section?: StrapiGiftingTrustBadgesSection | null,
-): NormalizedGiftingTrustBadge[] =>
-  (section?.trustBadge ?? [])
+): NormalizedGiftingTrustBadge[] => {
+  if (!isTrustBadgesSectionActive(section)) return [];
+
+  return (section?.trustBadge ?? [])
+    .filter((badge) => badge?.isActive !== false)
     .map((badge) => {
       const label = cleanText(badge?.label);
       const icon = mapResponsiveImage(badge?.icon);
       if (!label || !icon) return null;
+
       return {
-          label,
-          iconSrc: icon.desktopUrl || icon.mobileUrl,
-          alt: icon.alt || cleanText(badge?.iconAltText) || "",
-        };
+        label,
+        icon: {
+          desktopUrl: icon.desktopUrl,
+          mobileUrl: icon.mobileUrl,
+          alt: cleanText(badge?.iconAltText) ?? icon.alt,
+        },
+      };
     })
     .filter((badge): badge is NormalizedGiftingTrustBadge => badge != null);
+};
 
 export function mapGiftingPage(
   raw?: StrapiGiftingPage | null,

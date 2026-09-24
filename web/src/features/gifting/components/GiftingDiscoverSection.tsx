@@ -3,20 +3,27 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { cn } from "@/shared/utils/cn";
-import CareersChevronDownIcon from "@/features/careers/components/shared/CareersChevronDownIcon";
-import { careersFormSelectChevronClassName } from "@/features/careers/constants/careersApplicationForm";
+import {
+  CAREERS_SELECT_EMPTY_VALUE,
+  careersSelectTriggerClassName,
+} from "@/features/careers/components/shared/CareersSelectField";
+import { careersFormLabelClassName } from "@/features/careers/constants/careersApplicationForm";
+import { careersDarkCtaClassName } from "@/features/careers/constants/careersCtaStyles";
 import Reveal from "@/shared/Animation/Reveal";
+import { cn } from "@/shared/utils/cn";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import type { NormalizedGiftingGiftFinder } from "@/services/gifting/gifting-page.types";
 import { giftingPageContent } from "../data/content";
 import {
   buildGiftFinderHref,
   type GiftingDiscoverOptions,
 } from "../utils/giftFinderRoutes";
-
-const fieldLabelClass = "font-gill text-base font-normal leading-110 text-[#2B2B2B]";
-const fieldSelectClass =
-  "h-14 w-full appearance-none bg-aboutInactive p-3 pr-10 font-gill text-base font-normal leading-110 text-darkblack outline-none";
 
 type GiftingDiscoverFieldProps = {
   id: string;
@@ -36,21 +43,33 @@ const GiftingDiscoverField = ({
   options,
 }: GiftingDiscoverFieldProps) => (
   <div className="flex flex-col gap-2">
-    <label className={fieldLabelClass} htmlFor={id}>{label}</label>
-    <div className="relative">
-      <select
+    <label className={careersFormLabelClassName} htmlFor={id}>
+      {label}
+    </label>
+    <Select
+      value={value || undefined}
+      onValueChange={(next) => {
+        onChange(next === CAREERS_SELECT_EMPTY_VALUE ? "" : next);
+      }}
+    >
+      <SelectTrigger
         id={id}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className={cn(fieldSelectClass, !value && "text-gray600")}
+        className={cn(
+          careersSelectTriggerClassName,
+          !value && "!text-[#999999]",
+        )}
       >
-        <option value="">{placeholder}</option>
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>{option.label}</option>
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent className="z-[80]">
+        <SelectItem value={CAREERS_SELECT_EMPTY_VALUE}>{placeholder}</SelectItem>
+        {options.map((option, index) => (
+          <SelectItem key={`${option.value}-${index}`} value={option.value}>
+            {option.label}
+          </SelectItem>
         ))}
-      </select>
-      <CareersChevronDownIcon className={careersFormSelectChevronClassName} />
-    </div>
+      </SelectContent>
+    </Select>
   </div>
 );
 
@@ -68,9 +87,9 @@ const GiftingDiscoverSection = ({
 
   const title = giftFinder.title;
   const description = giftFinder.description;
-  const submitLabel = giftFinder.submitLabel ?? "FIND PRODUCTS";
-  const imageSrc = giftFinder.image?.desktopUrl;
-  const imageAlt = giftFinder.image?.alt ?? "";
+  const submitLabel = giftFinder.submitLabel?.trim() || "FIND PRODUCTS";
+  const imageSrc = giftFinder.image?.desktopUrl ?? giftFinder.image?.mobileUrl;
+  const imageAlt = giftFinder.image?.alt?.trim() || title;
 
   const options = useMemo(
     () =>
@@ -86,7 +105,13 @@ const GiftingDiscoverSection = ({
   const [priceRangeLabel, setPriceRangeLabel] = useState("");
   const [occasion, setOccasion] = useState("");
 
+  const hasAnySelection = Boolean(
+    category.trim() || priceRangeLabel.trim() || occasion.trim(),
+  );
+
   const handleSubmit = () => {
+    if (!hasAnySelection) return;
+
     const selectedPriceRange = options.priceRanges.find(
       (range) => range.label === priceRangeLabel,
     );
@@ -115,7 +140,7 @@ const GiftingDiscoverSection = ({
       {imageSrc &&
         <Reveal
           direction="up"
-          className="relative h-[320px] w-full shrink-0 md:h-[521px] xl:w-[732px] md:w-3/5 md:block hidden"
+          className="relative h-[320px] w-full shrink-0 md:h-[521px] xl:w-[732px] lg:w-3/5 md:w-1/2 md:block hidden"
         >
           <Image
             src={imageSrc}
@@ -127,7 +152,7 @@ const GiftingDiscoverSection = ({
         </Reveal>
       }
 
-      <div className="flex w-full xl:max-w-[530px] md:max-w-2/5 flex-col gap-6 px-4 md:gap-10 md:px-0">
+      <div className="flex w-full xl:max-w-[530px] lg:max-w-2/5 w-1/2 flex-col gap-6 px-4 md:gap-10 md:px-0">
         <div className="flex flex-col gap-6 lg:gap-10 gap-8">
           <div className="flex flex-col gap-3 md:gap-4">
             <Reveal
@@ -166,21 +191,24 @@ const GiftingDiscoverSection = ({
               onChange={setPriceRangeLabel}
               options={priceOptions}
             />
-            <GiftingDiscoverField
-              id="gifting-finder-occasion"
-              label={discover.occasionLabel}
-              placeholder={discover.occasionPlaceholder}
-              value={occasion}
-              onChange={setOccasion}
-              options={options.occasions}
-            />
+            {options.occasions.length > 0 ? (
+              <GiftingDiscoverField
+                id="gifting-finder-occasion"
+                label={discover.occasionLabel}
+                placeholder={discover.occasionPlaceholder}
+                value={occasion}
+                onChange={setOccasion}
+                options={options.occasions}
+              />
+            ) : null}
           </div>
         </div>
         <Reveal direction="up">
           <button
             type="button"
+            disabled={!hasAnySelection}
             onClick={handleSubmit}
-            className="btn-dark-slide inline-flex h-14 items-center justify-center self-start border border-darkblack px-7 font-gill text-sm font-normal uppercase leading-110 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-darkblack focus-visible:ring-offset-2 md:w-full md:self-auto"
+            className={cn(careersDarkCtaClassName, "self-start md:w-full md:self-auto")}
           >
             <span className="relative z-10">{submitLabel}</span>
           </button>

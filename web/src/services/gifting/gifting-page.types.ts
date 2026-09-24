@@ -16,6 +16,7 @@ export type StrapiGiftingResponsiveImage = {
 export type StrapiGiftingCta = {
   id?: number;
   label?: string | null;
+  additionalLabel?: string | null;
   url?: string | null;
   to?: string | null;
   targetType?: string | null;
@@ -24,8 +25,8 @@ export type StrapiGiftingCta = {
 
 export type StrapiGiftingHeroSection = {
   id?: number;
-  eyebrow?: string | null;
   title?: string | null;
+  isActive?: boolean | null;
   showField?: boolean | null;
   backgroundImage?: StrapiGiftingResponsiveImage | null;
 };
@@ -34,6 +35,7 @@ export type StrapiGiftingIntroSection = {
   id?: number;
   title?: string | null;
   description?: string | null;
+  isActive?: boolean | null;
   showField?: boolean | null;
   backgroundImage?: StrapiGiftingResponsiveImage | null;
 };
@@ -44,14 +46,15 @@ export type StrapiGiftingOccasion = {
   title?: string | null;
   description?: string | null;
   sortOrder?: number | null;
+  isActive?: boolean | null;
   showField?: boolean | null;
-  filterSlug?: string | null;
   cta?: StrapiGiftingCta | null;
   image?: StrapiGiftingResponsiveImage | null;
 };
 
 export type StrapiGiftingOccasionGridSection = {
   id?: number;
+  isActive?: boolean | null;
   showField?: boolean | null;
   occasions?: StrapiGiftingOccasion[] | null;
 };
@@ -68,18 +71,18 @@ export type StrapiGiftingGiftFinderSection = {
   title?: string | null;
   description?: string | null;
   submitLabel?: string | null;
-  resultsUrl?: string | null;
+  isActive?: boolean | null;
   showField?: boolean | null;
   image?: StrapiGiftingResponsiveImage | null;
 };
 
 export type StrapiGiftingGiftCardSection = {
   id?: number;
-  eyebrow?: string | null;
   title?: string | null;
   description?: string | null;
+  buttonLabel?: string | null;
+  isActive?: boolean | null;
   showField?: boolean | null;
-  cta?: StrapiGiftingCta | null;
   backgroundImage?: StrapiGiftingResponsiveImage | null;
   cutOutImage?: StrapiGiftingResponsiveImage | null;
 };
@@ -89,7 +92,6 @@ export type StrapiGiftingFinishingService = {
   title?: string | null;
   description?: string | null;
   sortOrder?: number | null;
-  cta?: StrapiGiftingCta | null;
   image?: StrapiGiftingResponsiveImage | null;
 };
 
@@ -97,6 +99,7 @@ export type StrapiGiftingFinishingTouchSection = {
   id?: number;
   title?: string | null;
   description?: string | null;
+  isActive?: boolean | null;
   showField?: boolean | null;
   services?: StrapiGiftingFinishingService[] | null;
 };
@@ -105,11 +108,13 @@ export type StrapiGiftingTrustBadge = {
   id?: number;
   label?: string | null;
   iconAltText?: string | null;
+  isActive?: boolean | null;
   icon?: StrapiGiftingResponsiveImage | null;
 };
 
 export type StrapiGiftingTrustBadgesSection = {
   id?: number;
+  isActive?: boolean | null;
   trustBadge?: StrapiGiftingTrustBadge[] | null;
 };
 
@@ -141,6 +146,8 @@ export type NormalizedGiftingResponsiveImage = {
   desktopUrl: string;
   mobileUrl: string;
   alt: string;
+  width?: number;
+  height?: number;
 };
 
 export type NormalizedGiftingCta = {
@@ -149,9 +156,8 @@ export type NormalizedGiftingCta = {
 };
 
 export type NormalizedGiftingHero = {
-  eyebrow?: string;
   title: string;
-  image: NormalizedGiftingResponsiveImage;
+  image: NormalizedGiftingResponsiveImage | null;
 };
 
 export type NormalizedGiftingIntro = {
@@ -165,7 +171,7 @@ export type NormalizedGiftingOccasionCard = {
   title: string;
   description?: string;
   href: string;
-  ctaLabel: string;
+  ctaLabel?: string;
   image: NormalizedGiftingResponsiveImage;
 };
 
@@ -186,10 +192,9 @@ export type NormalizedGiftingGiftFinder = {
 };
 
 export type NormalizedGiftingGiftCard = {
-  eyebrow?: string;
   title: string;
   description?: string;
-  cta: NormalizedGiftingCta;
+  buttonLabel?: string;
   background: NormalizedGiftingResponsiveImage | null;
   image: NormalizedGiftingResponsiveImage | null;
 };
@@ -208,9 +213,8 @@ export type NormalizedGiftingFinishingTouch = {
 };
 
 export type NormalizedGiftingTrustBadge = {
-  iconSrc: string;
   label: string;
-  alt: string;
+  icon: NormalizedGiftingResponsiveImage;
 };
 
 export type NormalizedGiftingSeo = {

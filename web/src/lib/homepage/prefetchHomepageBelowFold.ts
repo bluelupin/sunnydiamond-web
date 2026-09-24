@@ -1,25 +1,16 @@
 import type { PrefetchedAlankaraCollection } from "@/features/products/services/prefetchProductDetailAlankara";
-import { getHomepageOccasions } from "@/services/homepage/homepageOccasions.service";
 import type { HomepageShoppingBlocksData } from "@/types/homepage/categoryNavigation";
-import type { HomepageEditorialBlocksData } from "@/types/homepage/editorialBlocks";
-import type { OccasionCard } from "@/types/homepage/occasionSection";
-import { getMagentoProductsBySkus } from "@/services/magento/products/products.service";
+import { ALANKARA_PRODUCT_COUNT } from "@/shared/ui/collection/alankaraCollection.types";
+import { getMagentoProductsByCollection } from "@/services/magento/products/collectionProducts.service";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import {
-  mapMagentoProductsToAlankaraCollection,
+  mapMagentoProductsToAlankaraCollectionList,
   resolveAlankaraCollectionSection,
 } from "@/shared/utils/resolveAlankaraCollectionSection";
-import type { HomepagePrefetchedCms } from "./cmsCache";
 
 export type HomepageBelowFoldPrefetch = {
   alankara?: PrefetchedAlankaraCollection | null;
-  standaloneOccasions?: OccasionCard[];
 };
-
-function hasEmbeddedOccasions(editorial?: HomepageEditorialBlocksData | null): boolean {
-  const occasions = editorial?.occasionSection?.occasions ?? [];
-  return occasions.some((card) => card?.isActive !== false);
-}
 
 export async function prefetchAlankaraCollectionFromShopping(
   shoppingData?: HomepageShoppingBlocksData | null,
@@ -33,7 +24,8 @@ export async function prefetchAlankaraCollectionFromShopping(
     return null;
   }
 
-  if (collectionProps.productSkus.length === 0) {
+  const magentoCollectionSlug = collectionProps.magentoCollectionSlug;
+  if (!magentoCollectionSlug) {
     return {
       products: null,
       defaultActiveIndex: collectionProps.defaultActiveIndex,
@@ -41,47 +33,30 @@ export async function prefetchAlankaraCollectionFromShopping(
   }
 
   try {
-    const items = await getMagentoProductsBySkus(collectionProps.productSkus);
-    const mapped = mapMagentoProductsToAlankaraCollection(items, collectionProps.productSkus, {
-      featuredProductSku: collectionProps.featuredProductSku,
+    const items = await getMagentoProductsByCollection(
+      magentoCollectionSlug,
+      ALANKARA_PRODUCT_COUNT,
+    );
+    const mapped = mapMagentoProductsToAlankaraCollectionList(items, {
+      ctaLabel: collectionProps.productCtaLabel,
     });
 
     return {
-      products: mapped.products.length > 0 ? mapped.products : null,
-      defaultActiveIndex: mapped.defaultActiveIndex,
+      products: mapped.length > 0 ? mapped : null,
+      defaultActiveIndex: collectionProps.defaultActiveIndex,
     };
   } catch {
     return {
       products: null,
       defaultActiveIndex: collectionProps.defaultActiveIndex,
     };
-  }
-}
-
-async function prefetchStandaloneOccasions(
-  editorial?: HomepageEditorialBlocksData | null,
-): Promise<OccasionCard[] | undefined> {
-  if (hasEmbeddedOccasions(editorial)) {
-    return undefined;
-  }
-
-  try {
-    return await getHomepageOccasions();
-  } catch {
-    return undefined;
   }
 }
 
 export async function prefetchHomepageBelowFold(
-  cms: HomepagePrefetchedCms,
+  cms: { shopping?: HomepageShoppingBlocksData | null },
 ): Promise<HomepageBelowFoldPrefetch> {
-  const [alankara, standaloneOccasions] = await Promise.all([
-    prefetchAlankaraCollectionFromShopping(cms.shopping),
-    prefetchStandaloneOccasions(cms.editorial),
-  ]);
+  const alankara = await prefetchAlankaraCollectionFromShopping(cms.shopping);
 
-  return {
-    alankara,
-    ...(standaloneOccasions !== undefined ? { standaloneOccasions } : {}),
-  };
+  return { alankara };
 }

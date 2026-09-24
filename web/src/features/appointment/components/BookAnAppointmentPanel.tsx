@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
+import { useMemo, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { useToast } from "@/shared/hooks/use-toast";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
 import { PanelFooter, PanelFooterDualActions } from "@/shared/ui/PanelFooter";
+import { RIGHT_PANEL_HEADER_PADDING_CLASS } from "@/shared/ui/rightPanel";
+import { RightPanelCloseButton } from "@/shared/ui/RightPanelCloseButton";
+import { ProductDetailSidePanelShell } from "@/features/products/components/detail/ProductDetailSidePanelShell";
 
 const labelClassName = "font-gill text-sm leading-110 text-darkblack";
 const fieldClassName =
@@ -47,24 +49,6 @@ const BookAnAppointmentPanel = ({
   const { isValid, submitted, errors, markTouched, showError, validateSubmit, resetValidation } =
     useAppointmentFormValidation(formValues);
 
-  useEffect(() => {
-    if (variant !== "modal" || !open) return;
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose?.();
-      }
-    };
-
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open, onClose, variant]);
-
   const handleClear = () => {
     setName("");
     setPhone("");
@@ -91,8 +75,14 @@ const BookAnAppointmentPanel = ({
 
   const formContent = (
     <>
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <div className={cn(variant === "page" ? "mx-auto w-full max-w-[480px] px-4 pt-8 lg:px-8 lg:pt-10" : "px-4 pt-6")}>
+      <div className="min-h-0 flex-1 overflow-y-auto DrawerVerticleScrollbar">
+        <div
+          className={cn(
+            variant === "page"
+              ? "mx-auto w-full max-w-[480px] px-4 pt-8 lg:px-8 lg:pt-10"
+              : RIGHT_PANEL_HEADER_PADDING_CLASS,
+          )}
+        >
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4">
               <div className="flex min-w-0 items-center gap-2">
@@ -111,20 +101,10 @@ const BookAnAppointmentPanel = ({
                 </h1>
               </div>
               {showClose ? (
-                <button
-                  type="button"
-                  onClick={onClose}
+                <RightPanelCloseButton
+                  onClick={() => onClose?.()}
                   aria-label="Close"
-                  className="inline-flex size-6 shrink-0 items-center justify-center"
-                >
-                  <Image
-                    src="/icons/menu-close.svg"
-                    alt=""
-                    width={24}
-                    height={24}
-                    aria-hidden
-                  />
-                </button>
+                />
               ) : null}
             </div>
             <div className="h-px w-full bg-neutral300" aria-hidden />
@@ -211,26 +191,15 @@ const BookAnAppointmentPanel = ({
   }
 
   return (
-    <div className="fixed inset-0 z-[70]">
-      <button
-        type="button"
-        aria-label="Close book an appointment"
-        className="absolute inset-0 bg-[rgba(0,0,0,0.3)] backdrop-blur-[9px] animate-in fade-in duration-300"
-        onClick={onClose}
-      />
-      <aside
-        role="dialog"
-        aria-modal="true"
-        aria-label="Book an appointment"
-        className={cn(
-          "absolute flex flex-col overflow-hidden bg-white shadow-2xl",
-          "inset-x-0 bottom-0 top-12 max-md:animate-in max-md:slide-in-from-bottom max-md:duration-300",
-          "md:inset-x-auto md:inset-y-0 md:right-0 md:top-0 md:w-full md:max-w-[480px] md:animate-in md:slide-in-from-right md:duration-300",
-        )}
-      >
-        {formContent}
-      </aside>
-    </div>
+    <ProductDetailSidePanelShell
+      open={open}
+      onClose={onClose ?? (() => undefined)}
+      overlayAriaLabel="Close book an appointment"
+      dialogAriaLabel="Book an appointment"
+      overlayClassName="bg-[rgba(0,0,0,0.3)] backdrop-blur-[9px]"
+    >
+      {formContent}
+    </ProductDetailSidePanelShell>
   );
 };
 

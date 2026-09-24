@@ -11,6 +11,7 @@ import {
   careersOutlineCtaClassName,
 } from "@/features/careers/constants/careersCtaStyles";
 import { cn } from "@/shared/utils/cn";
+import FormFieldError from "@/shared/ui/FormFieldError";
 
 type CareersSubmitConfirmationModalProps = {
   confirmSubmissionModal: NormalizedCareerApplicationFlow["applicationForm"]["confirmSubmissionModal"];
@@ -84,7 +85,7 @@ function ConfirmSubmissionActions({
 
   if (variant === "mobile") {
     return (
-      <div className="shrink-0 border-t border-neutral300 px-4 py-6">
+      <div className="shrink-0  border-neutral300 px-4 py-6">
         <div className="flex w-full flex-col gap-4">
           {submitButton}
           {goBackButton}
@@ -145,11 +146,7 @@ function ConfirmSubmissionContent({
         </DrawerDescription>
       )}
 
-      {errorMessage ? (
-        <p className="font-gill text-sm leading-110 text-red-600" role="alert">
-          {errorMessage}
-        </p>
-      ) : null}
+      <FormFieldError message={errorMessage ?? undefined} />
 
       {variant === "desktop" ? (
         <ConfirmSubmissionActions
@@ -219,7 +216,7 @@ const CareersSubmitConfirmationModal = ({
     <>
       <Drawer open={showMobileDrawer} onOpenChange={handleOpenChange} shouldScaleBackground={false}>
         <DrawerContent className="z-[80] flex max-h-[90vh] min-h-0 flex-col overflow-hidden rounded-none border-0 bg-white p-0 [&>div:first-child]:hidden">
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-6">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-6 DrawerVerticleScrollbar">
             <ConfirmSubmissionContent
               {...contentProps}
               titleElement="drawer"

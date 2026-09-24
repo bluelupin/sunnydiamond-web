@@ -1,4 +1,8 @@
-import type { MagentoMediaGalleryItem } from "../products/magentoProduct.types";
+import type {
+  MagentoCustomAttributeItem,
+  MagentoMediaGalleryItem,
+} from "../products/magentoProduct.types";
+import type { MagentoProductCustomOption } from "../products/productCustomOptions.mapper";
 
 export type MagentoCartProduct = {
   sku?: string | null;
@@ -6,6 +10,10 @@ export type MagentoCartProduct = {
   url_key?: string | null;
   image?: { url?: string | null } | null;
   media_gallery?: MagentoMediaGalleryItem[] | null;
+  custom_attributesV2?: {
+    items?: MagentoCustomAttributeItem[] | null;
+  } | null;
+  options?: MagentoProductCustomOption[] | null;
 };
 
 export type MagentoCartCustomizableOption = {
@@ -151,6 +159,8 @@ export type MagentoCartAddressInput = {
   country_code: string;
   region_id: number;
   telephone: string;
+  /** When false, Magento must not persist this cart address to the customer address book. */
+  save_in_address_book?: boolean;
 };
 
 export type MagentoEstimateAddressInput = {

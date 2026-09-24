@@ -41,13 +41,19 @@ import {
   type CartLineMetadata,
   type StoredCartLineMetadata,
 } from "@/services/magento/cart/cartSession";
-import { findCartItemUidBySku, computeCartTotalQuantity } from "@/services/magento/cart/cart.mapper";
+import {
+  applyCartLineDisplayImage,
+  findCartItemUidBySku,
+  computeCartTotalQuantity,
+} from "@/services/magento/cart/cart.mapper";
+import { getImageSrc } from "@/shared/utils/image";
 import { readStoredCartLines, writeStoredCartLines } from "@/features/cart/utils/cartProduct.utils";
 import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 import {
   DEFAULT_ENGRAVING_MAX_CHARACTERS,
   ENGRAVING_CHARSET_MESSAGE,
   ENGRAVING_TEXT_PATTERN,
+  ensureEngravingCartLineOptions,
   isCartLineEngravingCapable,
   mergeCartLineOptions,
 } from "@/features/products/constants/engraving";
@@ -66,6 +72,7 @@ import {
   mapMagentoCartCustomizableOptions,
 } from "@/services/magento/cart/cartLineCustomOptions.mapper";
 import { assignCartLineInstance } from "@/features/cart/utils/cartLineInstance.utils";
+import { formatCartRefreshError } from "@/features/cart/utils/formatCartRefreshError";
 
 /** @deprecated Use CartLineItem from cart.types */
 export type CartItem = CartLineItem;
@@ -78,6 +85,7 @@ interface CartContextType {
   items: CartLineItem[];
   isHydrating: boolean;
   isUpdating: boolean;
+  cartRefreshError: string | null;
   addItem: (payload: AddToBagPayload | Product) => Promise<AddItemResult>;
   removeItem: (lineItemId: string, options?: RemoveItemOptions) => Promise<void>;
   updateQuantity: (lineItemId: string, quantity: number) => Promise<void>;
@@ -99,8 +107,13 @@ interface CartContextType {
   appliedLocalGiftCardCode: string | null;
   applyLocalGiftCard: (code: string, balance: number) => void;
   removeLocalGiftCard: () => void;
+  localOfferDiscount: number;
+  appliedLocalOfferId: string | null;
+  applyLocalOffer: (offerId: string) => void;
+  removeLocalOffer: () => void;
   replaceLineItem: (lineItemId: string, payload: AddToBagPayload) => Promise<AddItemResult>;
   buyNow: (lineItemId: string) => Promise<void>;
+  showCartStatusToast: (message: string) => void;
   getLineItemMetadata: (lineItemId: string) => CartLineMetadata | undefined;
   shippingMethods: MagentoShippingMethodOption[];
   estimatedShippingMethods: MagentoShippingMethodOption[];
@@ -117,6 +130,45 @@ const normalizePayload = (payload: AddToBagPayload | Product): AddToBagPayload =
   isAddToBagPayload(payload)
     ? payload
     : { product: payload, options: {}, productCustomOptions: payload.customOptions };
+
+/**
+ * Only the two cart reads ask Magento for each line's product options; the
+ * mutations leave them out to keep their payloads small. Carry what is already
+ * known for a SKU into the next state so a quantity change or an address save
+ * cannot blank the engraving font list. Pure — it runs inside a state updater.
+ */
+function withKnownProductCustomOptions(
+  previous: GuestCartState | null,
+  next: GuestCartState,
+): GuestCartState {
+  const knownBySku = new Map<string, ProductCustomOptions>();
+  for (const item of previous?.items ?? []) {
+    if (item.product.customOptions) {
+      knownBySku.set(item.product.id, item.product.customOptions);
+    }
+  }
+
+  if (knownBySku.size === 0) {
+    return next;
+  }
+
+  let changed = false;
+  const items = next.items.map((item) => {
+    if (item.product.customOptions) {
+      return item;
+    }
+
+    const known = knownBySku.get(item.product.id);
+    if (!known) {
+      return item;
+    }
+
+    changed = true;
+    return { ...item, product: { ...item.product, customOptions: known } };
+  });
+
+  return changed ? { ...next, items } : next;
+}
 
 function resolveLineUidForSku(state: GuestCartState, sku: string): string | null {
   const fromCart = findCartItemUidBySku(state.cart, sku);
@@ -144,6 +196,13 @@ function resolveAddedLineUid(
     );
     if (matchingInstance) {
       return matchingInstance.id;
+    }
+  }
+
+  if (lineInstance && newLines.length > 0) {
+    const skuMatches = newLines.filter((item) => item.product.id === sku);
+    if (skuMatches.length === 1) {
+      return skuMatches[0].id;
     }
   }
 
@@ -187,6 +246,7 @@ function upsertLineMetadata(
   options: CartLineOptions,
   productCustomOptions?: ProductCustomOptions,
   displayPrice?: number,
+  displayImage?: string,
 ): StoredCartLineMetadata {
   const previous = current[lineUid] ?? { options: {} };
 
@@ -197,6 +257,7 @@ function upsertLineMetadata(
       options: { ...previous.options, ...options },
       productCustomOptions: productCustomOptions ?? previous.productCustomOptions,
       ...(displayPrice != null && Number.isFinite(displayPrice) ? { displayPrice } : {}),
+      ...(displayImage?.trim() ? { displayImage: displayImage.trim() } : {}),
     },
   };
 }
@@ -227,9 +288,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   >([]);
   const [isHydrating, setIsHydrating] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [cartRefreshError, setCartRefreshError] = useState<string | null>(null);
   const [cartStatusToastMessage, setCartStatusToastMessage] = useState<string | null>(null);
   const [localGiftCardDiscount, setLocalGiftCardDiscount] = useState(0);
   const [appliedLocalGiftCardCode, setAppliedLocalGiftCardCode] = useState<string | null>(null);
+  const [localOfferDiscount, setLocalOfferDiscount] = useState(0);
+  const [appliedLocalOfferId, setAppliedLocalOfferId] = useState<string | null>(null);
   const cartStatusToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lineMetadataRef = useRef(lineMetadata);
   const initRef = useRef(false);
@@ -303,7 +367,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const applyCartState = useCallback(
     (nextState: GuestCartState) => {
-      setCartState(nextState);
+      setCartState((previous) => withKnownProductCustomOptions(previous, nextState));
       void refreshShippingEstimate(nextState);
     },
     [refreshShippingEstimate],
@@ -392,11 +456,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
         }
 
         await refreshCart(cartId);
-      } catch {
+      } catch (error) {
+        console.error("Failed to initialize cart:", error);
         clearGuestCartId();
         shippingEstimateRequestRef.current += 1;
         setCartState(null);
         setEstimatedShippingMethods([]);
+        setCartRefreshError(formatCartRefreshError());
       } finally {
         setIsHydrating(false);
       }
@@ -412,9 +478,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
       productCustomOptions = product.customOptions,
       configurableOptionUids,
     } = normalized;
-    const options = assignCartLineInstance(
-      normalized.options ?? {},
+    const incomingOptions = normalized.options ?? {};
+    const options = ensureEngravingCartLineOptions(
+      assignCartLineInstance(
+        incomingOptions.lineInstance?.trim()
+          ? incomingOptions
+          : { ...incomingOptions, lineInstance: undefined },
+        productCustomOptions,
+      ),
       productCustomOptions,
+      product.engraving,
     );
     const sku = product.id.trim();
 
@@ -423,6 +496,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
 
     const displayPrice = getProductDisplayPrice(product);
+    const displayImage = getImageSrc(product.image) ?? undefined;
 
     assertResolvableCartLineOptions({
       lineOptions: options,
@@ -453,6 +527,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           options,
           productCustomOptions,
           displayPrice,
+          displayImage,
         );
         lineMetadataRef.current = nextMetadata;
         writeCartLineMetadata(nextMetadata);
@@ -468,6 +543,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
                 ...item,
                 options: { ...item.options, ...options },
                 displayPrice,
+                product: applyCartLineDisplayImage(item.product, displayImage),
               }
               : item,
           ),
@@ -527,7 +603,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       applyCartState(nextState);
 
       if (existingItem) {
-        trackEvent("remove_from_cart", {
+      trackEvent("remove_from_cart", {
           currency: nextState.totals.currency,
           value: existingItem.product.price * existingItem.quantity,
           items: [
@@ -594,6 +670,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setLocalGiftCardDiscount(0);
   }, []);
 
+  const applyLocalOffer = useCallback((offerId: string) => {
+    const normalizedId = offerId.trim();
+    if (!normalizedId) {
+      return;
+    }
+
+    // Bank offers are a payment preference only — applied at the gateway, not in cart totals.
+    setAppliedLocalOfferId(normalizedId);
+  }, []);
+
+  const removeLocalOffer = useCallback(() => {
+    setAppliedLocalOfferId(null);
+    setLocalOfferDiscount(0);
+  }, []);
+
   const updateQuantity = useCallback(
     async (lineItemId: string, quantity: number) => {
       if (quantity <= 0) {
@@ -631,9 +722,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const nextOptions: CartLineOptions = { ...baseOptions, ...options };
       const clearingGift = options.isGift === false;
       const togglingGift = typeof options.isGift === "boolean";
+      // The catalog options come back with the cart itself, so they are right on
+      // any device; stored metadata only covers lines added in this browser.
+      const productCustomOptions =
+        cartLine?.product.customOptions ?? storedMeta?.productCustomOptions;
       const engravingContext = {
         options: baseOptions,
-        productCustomOptions: storedMeta?.productCustomOptions,
+        productCustomOptions,
       };
 
       if ("engraving" in options && isCartLineEngravingCapable(engravingContext)) {
@@ -665,7 +760,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           // native font option — a fontless product stays fontless.
           nextOptions.engravingFont =
             baseOptions.engravingFont?.trim() ||
-            storedMeta?.productCustomOptions?.engravingFont?.labels?.[0] ||
+            productCustomOptions?.engravingFont?.labels?.[0] ||
             undefined;
         }
       }
@@ -673,7 +768,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const nextLine: CartLineMetadata = {
         ...(storedMeta ?? { options: {} }),
         options: nextOptions,
-        productCustomOptions: storedMeta?.productCustomOptions,
+        productCustomOptions,
       };
 
       if (clearingGift) {
@@ -819,6 +914,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
                   ...(lineMeta.displayPrice != null && Number.isFinite(lineMeta.displayPrice)
                     ? { displayPrice: lineMeta.displayPrice }
                     : {}),
+                  product: applyCartLineDisplayImage(item.product, lineMeta.displayImage),
                 }
                 : item,
             ),
@@ -941,6 +1037,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [applyCartState]);
 
   const refreshCartFromMagento = useCallback(async () => {
+    setCartRefreshError(null);
+
     if (isAuthenticated) {
       setIsUpdating(true);
 
@@ -949,6 +1047,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         applyCartState(nextState);
       } catch (error) {
         console.error("Failed to refresh customer cart:", error);
+        setCartRefreshError(formatCartRefreshError());
       } finally {
         setIsUpdating(false);
       }
@@ -966,6 +1065,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       await refreshCart(cartId);
     } catch (error) {
       console.error("Failed to refresh guest cart:", error);
+      setCartRefreshError(formatCartRefreshError());
     } finally {
       setIsUpdating(false);
     }
@@ -1025,6 +1125,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       items,
       isHydrating,
       isUpdating,
+      cartRefreshError,
       addItem,
       removeItem,
       updateQuantity,
@@ -1046,8 +1147,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       appliedLocalGiftCardCode,
       applyLocalGiftCard,
       removeLocalGiftCard,
+      localOfferDiscount,
+      appliedLocalOfferId,
+      applyLocalOffer,
+      removeLocalOffer,
       replaceLineItem,
       buyNow,
+      showCartStatusToast,
       getLineItemMetadata,
       shippingMethods,
       estimatedShippingMethods,
@@ -1060,6 +1166,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       refreshCartFromMagento,
       clearCart,
       estimatedShippingMethods,
+      cartRefreshError,
       isHydrating,
       isUpdating,
       items,
@@ -1074,8 +1181,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       appliedLocalGiftCardCode,
       applyLocalGiftCard,
       removeLocalGiftCard,
+      localOfferDiscount,
+      appliedLocalOfferId,
+      applyLocalOffer,
+      removeLocalOffer,
       replaceLineItem,
       buyNow,
+      showCartStatusToast,
       getLineItemMetadata,
       shippingMethods,
       paymentMethods,

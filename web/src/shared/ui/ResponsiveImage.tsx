@@ -7,6 +7,8 @@ interface ResponsiveImageProps {
   mobileSrc?: string | StaticImageData;
   retinaSrc?: string | StaticImageData;
   alt: string;
+  desktopAlt?: string;
+  mobileAlt?: string;
   width?: number;
   height?: number;
   /** Fill a `position: relative` / sized parent (Visit Us hero backgrounds). */
@@ -22,6 +24,8 @@ const ResponsiveImage = ({
   mobileSrc,
   retinaSrc,
   alt,
+  desktopAlt,
+  mobileAlt,
   width,
   height,
   fill = false,
@@ -61,11 +65,13 @@ const ResponsiveImage = ({
       <>
         <Image
           {...commonProps}
+          alt={mobileAlt ?? alt}
           src={mobileImage}
           className={cn(imageClassName, "md:hidden")}
         />
         <Image
           {...commonProps}
+          alt={desktopAlt ?? alt}
           src={hasDistinctRetina ? retinaImage! : desktopImage}
           className={cn(imageClassName, "hidden md:block")}
         />

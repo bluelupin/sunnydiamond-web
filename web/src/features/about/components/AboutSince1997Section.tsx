@@ -2,21 +2,26 @@
 
 import { useRef } from "react";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
+import MediaContentOverlay from "@/shared/ui/MediaContentOverlay";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import { cn } from "@/shared/utils/cn";
-import type { NormalizedAboutLegacy } from "@/services/about/about-page.types";
+import type {
+  NormalizedLegacyGalleryItem,
+  NormalizedResponsiveImage,
+} from "@/services/about/about-page.types";
 import { useSince1997HorizontalScroll } from "../hooks/useSince1997HorizontalScroll";
 import Reveal from "@/shared/Animation/Reveal";
 
-type AboutSince1997SectionProps = NormalizedAboutLegacy;
+type AboutSince1997SectionProps = {
+  title: string;
+  story?: string;
+  gallery: NormalizedLegacyGalleryItem[];
+};
 
 type GalleryImageProps = {
-  desktopUrl: string;
-  mobileUrl: string;
-  alt: string;
+  image?: NormalizedResponsiveImage | null;
   caption?: string;
-  imageWidth?: number;
-  imageHeight?: number;
+  description?: string;
   sizes: string;
   figureClassName?: string;
   frameClassName?: string;
@@ -25,37 +30,58 @@ type GalleryImageProps = {
 };
 
 function GalleryImage({
-  desktopUrl,
-  mobileUrl,
-  alt,
+  image,
   caption,
-  imageWidth,
-  imageHeight,
+  description,
   sizes,
   figureClassName,
   frameClassName,
   captionClassName,
   dataSince1997Last,
 }: GalleryImageProps) {
+  const overlayLabel = caption;
+
   return (
     <figure
       className={cn("flex shrink-0 flex-col gap-3", figureClassName)}
       {...(dataSince1997Last ? { "data-since1997-last-image": true } : {})}
     >
-      <div className={cn("overflow-hidden", frameClassName)}>
-        <ResponsiveImage
-          desktopSrc={desktopUrl}
-          mobileSrc={mobileUrl}
-          alt={alt}
-          width={imageWidth}
-          height={imageHeight}
-          quality={80}
-          sizes={sizes}
-          className="size-full object-cover"
-        />
+      <div className={cn("relative overflow-hidden", frameClassName)}>
+        {image ? (
+          <ResponsiveImage
+            desktopSrc={image.desktopUrl}
+            mobileSrc={image.mobileUrl}
+            alt={image.alt}
+            width={image.width}
+            height={image.height}
+            quality={80}
+            sizes={sizes}
+            className="size-full object-cover"
+          />
+        ) : (
+          <>
+            <div aria-hidden className="size-full bg-gray200" />
+            <MediaContentOverlay
+              gradient="bottom-strong"
+              className="opacity-100"
+            />
+            {overlayLabel ? (
+              <figcaption
+                className={cn(
+                  "absolute bottom-0 left-0 z-10 w-full px-6 py-8 font-gill leading-110 text-white md:px-8 md:py-10",
+                  captionClassName,
+                )}
+              >
+                {overlayLabel}
+              </figcaption>
+            ) : null}
+          </>
+        )}
       </div>
-      {caption ? (
-        <figcaption className={cn("font-gill leading-110 text-darkblack", captionClassName)}>
+      {image && caption ? (
+        <figcaption
+          className={cn("font-gill leading-110 text-darkblack", captionClassName)}
+        >
           {caption}
         </figcaption>
       ) : null}
@@ -89,7 +115,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
               {title}
             </Reveal>
           </PageContainer>
-          <PageContainer className="xl:pb-100 pb-16 pr-0">
+          <PageContainer data-since1997-page-container className="xl:pb-100 pb-16 pr-0">
             <Reveal direction="up" className="flex min-h-0 flex-1 flex-col">
               <div data-since1997-viewport className="min-h-0 flex-1 w-full overflow-x-hidden overflow-y-visible">
                 <div
@@ -98,45 +124,36 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                 >
                   <article className="flex shrink-0 items-center lg:gap-8 md:gap-6 gap-10">
                     <GalleryImage
-                      desktopUrl={founder.image.desktopUrl}
-                      mobileUrl={founder.image.mobileUrl}
-                      alt={founder.image.alt}
+                      image={founder.image}
                       caption={founder.caption}
-                      imageWidth={founder.image.width}
-                      imageHeight={founder.image.height}
+                      description={founder.description}
                       sizes="549px"
                       figureClassName="w-[549px]"
                       frameClassName="h-600 w-[549px]"
                       captionClassName="text-base"
                     />
-                    {story ? (
+                    {story &&
                       <p className="max-w-358 font-gill lg:text-xl md:text-lg text-base font-light leading-110 text-neutral500">
                         {story}
                       </p>
-                    ) : null}
+                    }
                   </article>
 
-                  {hasHorizontalGallery ? (
+                  {hasHorizontalGallery &&
                     <div className="flex items-center justify-center gap-4 lg:gap-5 2xl:gap-8">
                       <GalleryImage
-                        desktopUrl={event!.image.desktopUrl}
-                        mobileUrl={event!.image.mobileUrl}
-                        alt={event!.image.alt}
+                        image={event!.image}
                         caption={event!.caption}
-                        imageWidth={event!.image.width}
-                        imageHeight={event!.image.height}
+                        description={event!.description}
                         sizes="320px"
                         figureClassName="w-[320px]"
                         frameClassName="h-[417px]"
                         captionClassName="text-base"
                       />
                       <GalleryImage
-                        desktopUrl={attending!.image.desktopUrl}
-                        mobileUrl={attending!.image.mobileUrl}
-                        alt={attending!.image.alt}
+                        image={attending!.image}
                         caption={attending!.caption}
-                        imageWidth={attending!.image.width}
-                        imageHeight={attending!.image.height}
+                        description={attending!.description}
                         sizes="463px"
                         figureClassName="w-[463px]"
                         frameClassName="h-600"
@@ -144,7 +161,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                         dataSince1997Last
                       />
                     </div>
-                  ) : null}
+                  }
                 </div>
               </div>
             </Reveal>
@@ -158,7 +175,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
 
       {/* Mobile / tablet — original vertical layout; images 2+3 slide on scroll */}
       <div data-since1997-mode="mobile" className="md:hidden">
-        <div className="py-16 md:py-20">
+        <div className="py-6 sm:py-10 md:py-16 lg:py-20">
           <PageContainer className="pb-0">
             <div className="mb-8 space-y-3">
               <Reveal as="h2" direction="up" className="font-larken text-32 font-light leading-110 text-darkblack md:text-40">
@@ -172,16 +189,12 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
             </div>
           </PageContainer>
 
-          {/* <PageContainer className="!pr-0 pl-5 pt-0"> */}
           <Reveal direction="up" className="md:px-8 px-4">
             <article className="flex w-full shrink-0 items-center gap-6">
               <GalleryImage
-                desktopUrl={founder.image.desktopUrl}
-                mobileUrl={founder.image.mobileUrl}
-                alt={founder.image.alt}
+                image={founder.image}
                 caption={founder.caption}
-                imageWidth={founder.image.width}
-                imageHeight={founder.image.height}
+                description={founder.description}
                 sizes="549px"
                 figureClassName="w-full"
                 frameClassName="md:h-600 h-[426px] w-full"
@@ -189,37 +202,30 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
               />
             </article>
           </Reveal>
-          {/* </PageContainer> */}
         </div>
 
         {hasHorizontalGallery ? (
           <Reveal direction="up" data-since1997-scroll-zone className="relative">
-            <div className="sticky sm:top-0 top-[120px] bg-white pb-16 md:pb-20">
-              <PageContainer className="!pr-0 pl-5 pt-0">
+            <div className="sticky sm:top-0 top-10 bg-white pb-16 md:pb-20">
+              <PageContainer data-since1997-page-container className="!pr-0 pl-5 pt-0">
                 <div data-since1997-viewport className="overflow-x-hidden overflow-y-visible">
                   <div
                     data-since1997-track
                     className="flex w-full shrink-0 items-start gap-3 will-change-transform motion-reduce:transform-none sm:gap-12"
                   >
                     <GalleryImage
-                      desktopUrl={event!.image.desktopUrl}
-                      mobileUrl={event!.image.mobileUrl}
-                      alt={event!.image.alt}
+                      image={event!.image}
                       caption={event!.caption}
-                      imageWidth={event!.image.width}
-                      imageHeight={event!.image.height}
+                      description={event!.description}
                       sizes="320px"
-                      figureClassName="w-[256px] min-w-[256px] sm:w-[550px] lg:w-[400px] lg:min-w-[400px]"
+                      figureClassName="w-[256px] min-w-[256px] sm:w-[550px] lg:w-[400px] lg:min-w-[400px] mt-[19px]"
                       frameClassName="lg:h-[240px] md:h-[500px] sm:h-[400px] h-[240px]"
                       captionClassName="text-base"
                     />
                     <GalleryImage
-                      desktopUrl={attending!.image.desktopUrl}
-                      mobileUrl={attending!.image.mobileUrl}
-                      alt={attending!.image.alt}
+                      image={attending!.image}
                       caption={attending!.caption}
-                      imageWidth={attending!.image.width}
-                      imageHeight={attending!.image.height}
+                      description={attending!.description}
                       sizes="463px"
                       figureClassName="w-[256px] min-w-[256px] sm:w-[550px] lg:w-[400px] lg:min-w-[400px]"
                       frameClassName="lg:h-[277px] md:h-[560px] sm:h-[520px] h-[277px]"
@@ -230,7 +236,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
                 </div>
               </PageContainer>
             </div>
-            <div data-since1997-scroll-spacer aria-hidden className="h-[70vh]" />
+            <div data-since1997-scroll-spacer aria-hidden className="!h-[10vh]" />
           </Reveal>
         ) : null}
       </div>

@@ -1,24 +1,3 @@
-export const profileHeroSpec = {
-  image: {
-    src: "/images/profile/hero.png",
-    alt: "Sunny Diamonds profile banner",
-    width: 1440,
-    height: 800,
-  },
-  /** Figma 1480:18126 — mobile hero crop anchors bottom-right ring box */
-  imageCrop: {
-    mobile: "80% 70%",
-    desktop: "50% 30%",
-  },
-  overlayOpacity: {
-    mobile: 0.6,
-    desktop: 0.4,
-  },
-  height: {
-    mobile: 240,
-    desktop: 320,
-  },
-} as const;
 
 export const profileDetailsContent = {
   sectionTitle: "Personal Details",
@@ -28,6 +7,7 @@ export const profileDetailsContent = {
     phone: "Phone No.",
   },
   verifyLabel: "VERIFY",
+  verifiedLabel: "Verified",
   saveLabel: "SAVE",
   cancelLabel: "CANCEL",
   phoneInfo:
@@ -43,7 +23,7 @@ export const profileDetailsContent = {
   deleteAccount: {
     title: "Delete Account",
     description:
-      "Deleting your Sunny Diamonds account will permanently remove your profile and saved addresses, and you will lose access to your orders, wishlist, and plan details. This action cannot be undone.",
+      "Deleting your Sunny Diamonds account will permanently remove your profile, saved addresses, orders, wishlist, and plan details. This action cannot be undone.",
     ctaLabel: "DELETE MY ACCOUNT",
     contactHref: "/contact",
     dialog: {
@@ -54,8 +34,11 @@ export const profileDetailsContent = {
       confirmLabel: "DELETE",
     },
     reasonDialog: {
-      title: "Delete Account",
+      title: "Delete Account?",
+      titleMobile: "Delete Account",
       description:
+        "We're sorry to see you cancel. Please share your reason so we can serve you better next time.",
+      descriptionMobile:
         "We're sorry to see you go. Please share your reason so we can serve you better next time.",
       reasonLabel: "Select Reason",
       reasons: [
@@ -81,27 +64,10 @@ export const profileDetailsContent = {
     title: "Logout",
     description: "You will need to log in again to access your account and orders.",
     ctaLabel: "LOGOUT",
+    loggingOutLabel: "LOGGING OUT",
   },
 } as const;
 
-export const profilePromoContent = {
-  help: {
-    title: "We're Here To Help",
-    description:
-      "Reach out to our experts for support with your orders, plans, or jewellery care.",
-    phoneLabel: "+91 9744355555",
-    callHref: "tel:+919744355555",
-    emailLabel: "EMAIL US",
-    emailHref: "mailto:customerservice@sunnydiamonds.com",
-  },
-  returns: {
-    title: "15-Day Return Policy",
-    description:
-      "Hassle-free returns available within 15 days of delivery on eligible orders.",
-    ctaLabel: "SEE RETURN POLICY",
-    ctaHref: "/policy-and-certifications?policy=15-day-return-policy",
-  },
-} as const;
 
 export const profileTabsContent = {
   orders: {
@@ -283,9 +249,13 @@ export const profileTabsContent = {
     editFormTitle: "Edit Address",
     useCurrentLocationLabel: "USE CURRENT LOCATION",
     saveLabel: "SAVE",
+    savingLabel: "SAVING...",
+    addSuccessToast: "New Address is Added Successfully",
+    editSuccessToast: "Address updated successfully",
+    deleteSuccessToast: "Address deleted successfully",
+    saveErrorToast: "We could not save your address. Please try again.",
     fullNameLabel: "Full Name",
     defaultShippingLabel: "Default Shipping Address",
-    defaultBillingLabel: "Default Billing Address",
     editLabel: "EDIT",
     removeLabel: "REMOVE",
     markAsDefaultLabel: "MARK AS DEFAULT",
@@ -293,7 +263,7 @@ export const profileTabsContent = {
     defaultAddressUndoLabel: "UNDO",
     markAsDefaultErrorTitle: "Unable to update default address",
     deleteDialog: {
-      title: "Delete Address",
+      title: "Delete Address?",
       description:
         "Deleting this address will permanently remove it from your account. This action cannot be reversed.",
       cancelLabel: "CANCEL",
@@ -301,20 +271,22 @@ export const profileTabsContent = {
       errorTitle: "Unable to delete address",
     },
     emptyTitle: "No Addresses Yet",
-    emptyDescription: "Add a delivery address to speed up checkout on your next purchase.",
-    emptyCta: "Add New Address",
+    emptyDescription: "You haven't added any addresses yet.",
+    emptyCta: "ADD NEW ADDRESS",
+    emptySecondaryCta: "CONTINUE SHOPPING",
+    emptySecondaryCtaHref: "/jewellery",
   },
   wishlist: {
     emptyTitle: "Your Wishlist Is Empty",
-    emptyDescriptionPrimary: "You haven't saved any pieces yet.",
-    emptyDescriptionSecondary: "Add your favourites here to revisit them anytime.",
+    emptyDescription:
+      "Your wishlist is waiting. Save the pieces you love and come back to them whenever you're ready.",
     emptyPrimaryCta: "START EXPLORING",
     emptyPrimaryCtaHref: "/jewellery",
     emptySecondaryCta: "DISCOVER JEWELLERY",
     emptySecondaryCtaHref: "/jewellery",
   },
   diamondsForEveryone: {
-    pageTitle: "Your Instalment Summary",
+    pageTitle: "Your Plan Summary",
     accountHolderTitle: "Account Holder",
     fullNameLabel: "Full Name",
     phoneLabel: "Phone No.",
@@ -333,11 +305,11 @@ export const profileTabsContent = {
     nomineeRelationshipLabel: "Relationship",
     nomineePhoneLabel: "Phone No.*",
     nomineeEmailLabel: "Email ID",
-    emptyTitle: "No Active Savings Plan",
-    emptyDescription:
-      "Start your Diamonds for Everyone journey with monthly instalments from ₹1,000 and enjoy the 12th instalment free.",
-    emptyCta: "START INVESTING",
-    emptyCtaHref: "/diamonds-for-everyone",
+    emptyTitle: "NO DFE Plans",
+    emptyDescriptionLine1: "You haven't started a monthly plan yet.",
+    emptyDescriptionLine2: "Save every month towards your dream diamond piece",
+    emptyCta: "START MONTHLY PLAN",
+    emptyCtaHref: "/diamonds-for-everyone/invest",
     payNowLabel: "PAY NOW",
     payNowUnavailableTitle: "Instalment payment",
     payNowUnavailableDescription: "Online instalment payments will be available soon.",
@@ -357,9 +329,19 @@ export const profileTabsContent = {
     bookingDateLabel: "Date",
     bookingTimeLabel: "Time Slot",
     notesLabel: "Note",
+    purposeOfVisitLabel: "Purpose of Visit",
+    yourRequirementLabel: "Your Requirement",
     rescheduleLabel: "RESCHEDULE",
     cancelLabel: "CANCEL APPOINTMENT",
-    rescheduleNotePlaceholder: "Appointment can be rescheduled before 14 June 2026",
+    rescheduleNoteTemplate: "Appointment can be rescheduled before {date}",
+    reschedulePanel: {
+      title: "Reschedule Appointment",
+      submitLabel: "SAVE",
+      savingLabel: "SAVING...",
+      successToast: "Appointment rescheduled",
+      errorToast: "Could not reschedule appointment",
+      footerNote: "Our representative will get in touch with you soon",
+    },
     getDirectionsLabel: "GET DIRECTIONS",
     cancelDialog: {
       title: "Cancel Appointment?",
@@ -370,10 +352,13 @@ export const profileTabsContent = {
       unavailableTitle: "Appointment updates",
       unavailableDescription:
         "Rescheduling and cancellation will be available soon. Please contact support for assistance.",
+      unavailableToastMessage: "Appointment cancelled",
+      cancelSuccessToast: "Appointment cancelled",
+      cancelErrorToast: "Could not cancel appointment",
     },
     emptyTitle: "No Appointments Yet",
-    emptyDescription: "You haven't booked any appointments yet.",
-    emptyDescriptionSecondary: "Schedule a visit for personalised jewellery guidance.",
+    emptyDescription:
+      "You haven't booked any appointments yet. Schedule a visit, and we'll help you find the piece that's right for you.",
     emptyCta: "BOOK AN APPOINTMENT",
     emptyCtaHref: "/book-an-appointment",
     bookAnotherLabel: "BOOK ANOTHER",
@@ -388,11 +373,14 @@ export const profileTabsContent = {
     removedUndoLabel: "UNDO",
     removeErrorTitle: "Remove failed",
     emptyTitle: "No Inspirations Saved",
-    emptyDescription: "You haven't saved any bespoke inspirations yet.",
-    emptyDescriptionSecondary: "Save styles you love to shape your custom creation.",
-    emptyCta: "Explore Bespoke",
-    emptyCtaHref: "/bespoke-jewellery",
-    emptySecondaryCta: "Browse Bespoke Creations",
+    emptyDescription:
+      "You haven't saved any bespoke inspirations yet. Save the styles you love and use them to shape your own creation.",
+    emptyPrimaryCta: "START BESPOKE JOURNEY",
+    emptyPrimaryCtaHref: "/bespoke-jewellery",
+    emptyMobilePrimaryCta: "EXPLORE INSPIRATIONS",
+    emptyMobilePrimaryCtaHref: "/bespoke-jewellery",
+    emptySecondaryCta: "START BESPOKE JOURNEY",
+    emptySecondaryCtaHref: "/bespoke-jewellery",
     viewLabel: "VIEW BESPOKE",
     shareUnavailableTitle: "Share",
     shareUnavailableDescription: "Sharing will be available soon.",

@@ -34,6 +34,16 @@ function isEngravingTextLabel(label: string): boolean {
   return classifyCustomOptionLabel(label) === "engravingText";
 }
 
+/**
+ * Size lives under four titles — Ring Size, Bangle Size, Bracelet Size and Chain
+ * Length. Ask the canonical classifier rather than keeping a second pattern list
+ * here: the local list matched only "size", so a necklace's chain length was
+ * dropped and My Orders showed no size at all for necklaces.
+ */
+function isSizeLabel(label: string): boolean {
+  return classifyCustomOptionLabel(label) === "ringSize";
+}
+
 function detectBespoke(item: CustomerOrderItem, options: CustomerOrderItemOption[]): boolean {
   const sku = item.productSku?.toLowerCase() ?? "";
   const name = item.productName.toLowerCase();
@@ -56,7 +66,7 @@ export function mapCustomerOrderItemToDisplayFields(
   giftMetadata?: OrderGiftMetadata,
 ) {
   const options = getAllOptions(item);
-  const size = findOptionValue(options, ["ring size", "size"]);
+  const size = options.find((option) => isSizeLabel(option.label))?.value.trim();
   const metalRaw = findOptionValue(options, ["metal color", "metal", "color"]);
   const metal = metalRaw ? formatMetalColorLabel(metalRaw) || metalRaw : undefined;
   const engraving = item.enteredOptions

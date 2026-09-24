@@ -1,21 +1,22 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
+import { useEffect } from "react";
 import { cn } from "@/shared/utils/cn";
 import {
-  APPOINTMENT_COUNTRY_CODES,
   APPOINTMENT_TIME_SLOTS,
   appointmentFieldClassName,
   appointmentLabelClassName,
 } from "@/shared/constants/appointmentForm";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import InlineCustomSelect from "@/shared/ui/InlineCustomSelect";
+import PhoneCountryCodeSelect from "@/shared/ui/PhoneCountryCodeSelect";
 import AppointmentDateField from "@/shared/ui/AppointmentDateField";
 import {
   getMaxSelectableDate,
   getMinSelectableDate,
   invalidFieldClassName,
   invalidFieldContainerClassName,
+  formatRequiredFieldLabel,
   sanitizePhoneInput,
   type AppointmentContactField,
 } from "@/shared/utils/formValidation";
@@ -43,6 +44,7 @@ type AppointmentContactFieldsProps = {
   markTouched: (field: AppointmentContactField) => void;
   labelClassName?: string;
   fieldClassName?: string;
+  showContactDetails?: boolean;
   showDate?: boolean;
   showTimeSlots?: boolean;
   timeSlots?: readonly string[];
@@ -57,12 +59,19 @@ type AppointmentContactFieldsProps = {
   phonePlaceholder?: string;
   emailLabel?: string;
   emailPlaceholder?: string;
+  emailRequired?: boolean;
   dateLabel?: string;
+  dateRequired?: boolean;
   timeSlotsLabel?: string;
+  timeSlotRequired?: boolean;
   noteLabel?: string;
   notePlaceholder?: string;
   noteLabelClassName?: string;
   noteTextareaClassName?: string;
+  phoneLocked?: boolean;
+  emailLocked?: boolean;
+  /** Prefill-only mode (e.g. reschedule): contact + note are visible but not editable. */
+  detailsReadOnly?: boolean;
 };
 
 const AppointmentContactFields = ({
@@ -88,6 +97,7 @@ const AppointmentContactFields = ({
   markTouched,
   labelClassName = appointmentLabelClassName,
   fieldClassName = appointmentFieldClassName,
+  showContactDetails = true,
   showDate = true,
   showTimeSlots = true,
   timeSlots,
@@ -102,20 +112,40 @@ const AppointmentContactFields = ({
   phonePlaceholder,
   emailLabel = "Email",
   emailPlaceholder = "Enter",
+  emailRequired = false,
   dateLabel = "Date",
+  dateRequired = false,
   timeSlotsLabel = "Time Slots",
+  timeSlotRequired = false,
   noteLabel = "Describe more about your visit",
   notePlaceholder = "Enter",
   noteLabelClassName,
   noteTextareaClassName = "font-gill text-base leading-110",
+  phoneLocked = false,
+  emailLocked = false,
+  detailsReadOnly = false,
 }: AppointmentContactFieldsProps) => {
   const minDate = getMinSelectableDate();
   const maxDate = getMaxSelectableDate();
   // Explicit `[]` means no slots (CMS empty). Only default when prop is omitted.
   const slots = timeSlots ?? APPOINTMENT_TIME_SLOTS;
+  const isPhoneLocked = phoneLocked || detailsReadOnly;
+  const isEmailLocked = emailLocked || detailsReadOnly;
+  const phoneMaxLength =
+    countryCode.trim() === "+44" || countryCode.trim() === "44" ? 11 : 10;
+
+  // Cap prefilled / pasted values that bypassed onChange sanitization.
+  useEffect(() => {
+    const next = sanitizePhoneInput(phone, countryCode);
+    if (next !== phone) {
+      onPhoneChange(next);
+    }
+  }, [phone, countryCode, onPhoneChange]);
 
   return (
     <>
+      {showContactDetails ? (
+      <>
       <div className="flex flex-col gap-2">
         <label htmlFor={`${idPrefix}-name`} className={labelClassName}>
           {nameLabel}
@@ -128,10 +158,13 @@ const AppointmentContactFields = ({
           onBlur={() => markTouched("name")}
           placeholder={namePlaceholder}
           autoComplete="name"
+          readOnly={detailsReadOnly}
+          aria-readonly={detailsReadOnly || undefined}
           aria-invalid={showError("name") || undefined}
           aria-describedby={showError("name") ? `${idPrefix}-name-error` : undefined}
           className={cn(
             fieldClassName,
+            detailsReadOnly && "cursor-not-allowed opacity-70",
             showError("name")
               ? invalidFieldClassName
               : "border border-transparent focus:border-darkblack",
@@ -150,42 +183,35 @@ const AppointmentContactFields = ({
             showError("phone") && invalidFieldContainerClassName,
           )}
         >
-          <div className="relative flex shrink-0 items-center">
-            <select
-              value={countryCode}
-              onChange={(event) => {
-                onCountryCodeChange(event.target.value);
-                onPhoneChange(sanitizePhoneInput(phone, event.target.value));
-                markTouched("phone");
-              }}
-              aria-label="Country code"
-              className="appearance-none bg-transparent pr-5 font-gill text-base leading-110 text-darkblack outline-none"
-            >
-              {APPOINTMENT_COUNTRY_CODES.map((entry) => (
-                <option key={entry.code} value={entry.code}>
-                  {entry.code}
-                </option>
-              ))}
-            </select>
-            <ChevronDown
-              size={16}
-              strokeWidth={1.5}
-              aria-hidden
-              className="pointer-events-none absolute right-0 text-darkblack"
-            />
-          </div>
+          <PhoneCountryCodeSelect
+            id={`${idPrefix}-country-code`}
+            value={countryCode}
+            onChange={(nextCode) => {
+              onCountryCodeChange(nextCode);
+              onPhoneChange(sanitizePhoneInput(phone, nextCode));
+              markTouched("phone");
+            }}
+            onBlur={() => markTouched("phone")}
+            disabled={isPhoneLocked}
+          />
           <input
             id={`${idPrefix}-phone`}
             type="tel"
             inputMode="numeric"
+            maxLength={phoneMaxLength}
             value={phone}
             onChange={(event) => onPhoneChange(sanitizePhoneInput(event.target.value, countryCode))}
             onBlur={() => markTouched("phone")}
             placeholder={phonePlaceholder}
             autoComplete="tel-national"
+            readOnly={isPhoneLocked}
+            aria-readonly={isPhoneLocked || undefined}
             aria-invalid={showError("phone") || undefined}
             aria-describedby={showError("phone") ? `${idPrefix}-phone-error` : undefined}
-            className="min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:text-[#999999]"
+            className={cn(
+              "min-w-0 flex-1 bg-transparent font-gill text-base leading-110 text-darkblack outline-none placeholder:text-[#999999]",
+              isPhoneLocked && "cursor-not-allowed opacity-70",
+            )}
           />
         </div>
         <FormFieldError id={`${idPrefix}-phone-error`} message={showError("phone") ? errors.phone : undefined} />
@@ -193,7 +219,7 @@ const AppointmentContactFields = ({
 
       <div className="flex flex-col gap-2">
         <label htmlFor={`${idPrefix}-email`} className={labelClassName}>
-          {emailLabel}
+          {emailRequired ? formatRequiredFieldLabel(emailLabel) : emailLabel}
         </label>
         <input
           id={`${idPrefix}-email`}
@@ -203,17 +229,26 @@ const AppointmentContactFields = ({
           onBlur={() => markTouched("email")}
           placeholder={emailPlaceholder}
           autoComplete="email"
+          readOnly={isEmailLocked}
+          aria-readonly={isEmailLocked || undefined}
           aria-invalid={showError("email") || undefined}
+          aria-required={emailRequired || undefined}
           aria-describedby={showError("email") ? `${idPrefix}-email-error` : undefined}
-          className={cn(fieldClassName, showError("email") && invalidFieldClassName)}
+          className={cn(
+            fieldClassName,
+            isEmailLocked && "cursor-not-allowed opacity-70",
+            showError("email") && invalidFieldClassName,
+          )}
         />
         <FormFieldError id={`${idPrefix}-email-error`} message={showError("email") ? errors.email : undefined} />
       </div>
+      </>
+      ) : null}
 
       {showDate ? (
         <div className="flex flex-col gap-2">
           <label htmlFor={`${idPrefix}-date`} className={labelClassName}>
-            {dateLabel}
+            {dateRequired ? formatRequiredFieldLabel(dateLabel) : dateLabel}
           </label>
           <AppointmentDateField
             id={`${idPrefix}-date`}
@@ -232,8 +267,15 @@ const AppointmentContactFields = ({
 
       {showTimeSlots && onSelectedSlotChange && slots.length > 0 ? (
         <div className="flex flex-col gap-2">
-          <span className={labelClassName}>{timeSlotsLabel}</span>
-          <div className="flex flex-col gap-3">
+          <span className={labelClassName}>
+            {timeSlotRequired ? formatRequiredFieldLabel(timeSlotsLabel) : timeSlotsLabel}
+          </span>
+          <div
+            className="flex flex-col gap-3"
+            role="group"
+            aria-invalid={showError("selectedSlot") || undefined}
+            aria-describedby={showError("selectedSlot") ? `${idPrefix}-time-slot-error` : undefined}
+          >
             {Array.from({ length: Math.ceil(slots.length / 2) }, (_, row) => (
               <div key={row} className="flex gap-2">
                 {[slots[row * 2], slots[row * 2 + 1]].filter(Boolean).map((slot) => {
@@ -253,7 +295,10 @@ const AppointmentContactFields = ({
                           ? selectedSlotStyle === "gold"
                             ? "bg-[#DECAA0] font-normal text-darkblack"
                             : "bg-darkblack font-normal text-white"
-                          : "bg-[#F2F2F2] font-light text-darkblack",
+                          : cn(
+                              "bg-[#F2F2F2] font-light text-darkblack",
+                              showError("selectedSlot") && invalidFieldContainerClassName,
+                            ),
                       )}
                     >
                       {slot}
@@ -290,6 +335,7 @@ const AppointmentContactFields = ({
         </div>
       ) : null}
 
+      {showContactDetails ? (
       <div className="flex flex-col gap-2">
         <label htmlFor={`${idPrefix}-note`} className={noteLabelClassName ?? labelClassName}>
           {noteLabel}
@@ -302,16 +348,20 @@ const AppointmentContactFields = ({
           placeholder={notePlaceholder}
           rows={4}
           maxLength={500}
+          readOnly={detailsReadOnly}
+          aria-readonly={detailsReadOnly || undefined}
           aria-invalid={showError("note") || undefined}
           aria-describedby={showError("note") ? `${idPrefix}-note-error` : undefined}
           className={cn(
             "h-[100px] w-full resize-none bg-[#F2F2F2] p-3 text-darkblack placeholder:text-[#999999] outline-none",
             noteTextareaClassName,
+            detailsReadOnly && "cursor-not-allowed opacity-70",
             showError("note") && invalidFieldClassName,
           )}
         />
         <FormFieldError id={`${idPrefix}-note-error`} message={showError("note") ? errors.note : undefined} />
       </div>
+      ) : null}
     </>
   );
 };

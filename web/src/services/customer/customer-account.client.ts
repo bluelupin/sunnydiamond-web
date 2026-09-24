@@ -111,3 +111,47 @@ export async function removeCustomerAddress(uid: string): Promise<CustomerAddres
   const payload = (await response.json()) as { addresses: CustomerAddress[] };
   return payload.addresses;
 }
+
+export async function setCustomerDefaultShippingAddress(uid: string): Promise<CustomerAddress[]> {
+  const response = await fetch(`/api/customer/addresses/${encodeURIComponent(uid)}/default`, {
+    method: "POST",
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response));
+  }
+
+  const payload = (await response.json()) as { addresses: CustomerAddress[] };
+  return payload.addresses;
+}
+
+/** Backfill profile addresses from the customer's most recent order shipping address. */
+export async function syncCustomerAddressFromLatestOrder(
+  signal?: AbortSignal,
+): Promise<CustomerAddress[] | null> {
+  try {
+    const response = await fetch("/api/customer/addresses/sync-from-order", {
+      method: "POST",
+      cache: "no-store",
+      signal,
+    });
+
+    if (response.status === 401) {
+      return null;
+    }
+
+    if (!response.ok) {
+      throw new Error(await parseApiError(response));
+    }
+
+    const payload = (await response.json()) as { addresses: CustomerAddress[] };
+    return payload.addresses;
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw error;
+    }
+
+    return null;
+  }
+}
