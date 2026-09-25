@@ -6,9 +6,6 @@ const MAX_RESUME_BYTES = 5 * 1024 * 1024;
 const PARSE_MIME_BY_EXTENSION: Record<string, string> = {
   pdf: "application/pdf",
   docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  jpg: "image/jpeg",
-  jpeg: "image/jpeg",
-  png: "image/png",
 };
 
 export async function POST(request: Request) {
@@ -29,7 +26,7 @@ export async function POST(request: Request) {
   const expectedMime = PARSE_MIME_BY_EXTENSION[extension];
   const docxZipMime = extension === "docx" && ["application/zip", "application/x-zip-compressed"].includes(file.type);
   if (!expectedMime || (file.type && file.type !== expectedMime && !docxZipMime)) {
-    return NextResponse.json({ error: "Autofill accepts PDF, DOCX, JPG, or PNG files." }, { status: 415 });
+    return NextResponse.json({ error: "Autofill accepts PDF or DOCX files." }, { status: 415 });
   }
   if (!file.size || file.size > MAX_RESUME_BYTES) {
     return NextResponse.json({ error: "Resume must be 5 MB or smaller." }, { status: 413 });

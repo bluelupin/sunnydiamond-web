@@ -15,6 +15,7 @@ import { cn } from "@/shared/utils/cn";
 import { CAREERS_AUTOFILL_RESUME_ACCEPT } from "@/features/careers/constants/careersApplicationForm";
 import CareersJobIdChip from "./CareersJobIdChip";
 import CareersJobMetaRow from "./CareersJobMetaRow";
+import CareersResumeAutofillLoading from "./CareersResumeAutofillLoading";
 
 type CareersApplyOptionsModalProps = {
   job: CareerJob;
@@ -172,6 +173,7 @@ const CareersApplyOptionsModal = ({
   onApplyLinkedIn,
 }: CareersApplyOptionsModalProps) => {
   const resumeInputRef = useRef<HTMLInputElement>(null);
+  const [isNavigatingToAutofill, setIsNavigatingToAutofill] = useState(false);
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window === "undefined") {
       return false;
@@ -199,8 +201,9 @@ const CareersApplyOptionsModal = ({
     }
 
     event.target.value = "";
-    onAutofillResume(file);
+    setIsNavigatingToAutofill(true);
     onOpenChange(false);
+    onAutofillResume(file);
   };
 
   const handleAutofillClick = () => {
@@ -229,6 +232,7 @@ const CareersApplyOptionsModal = ({
   return (
     <>
       {hiddenResumeInput}
+      {isNavigatingToAutofill ? <CareersResumeAutofillLoading /> : null}
       <Drawer
         open={showMobileDrawer}
         onOpenChange={onOpenChange}

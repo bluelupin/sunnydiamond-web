@@ -23,6 +23,11 @@ function stripLeadingRequiredMarker(text: string): string {
   return text.replace(/^\*\s*/, "").trim();
 }
 
+function resolveResumeHint(value: string, fallback: string): string {
+  const hint = stripLeadingRequiredMarker(withFallback(value, fallback));
+  return /\b(?:zip|jpe?g|png)\b/i.test(hint) ? fallback : hint;
+}
+
 function normalizeApplicationFieldLabel(
   key: keyof NormalizedCareerApplicationFlow["applicationForm"]["fields"],
   label: string,
@@ -69,7 +74,7 @@ const APPLICATION_FLOW_FALLBACKS: NormalizedCareerApplicationFlow = {
   applicationForm: {
     title: "Application Form",
     resumeHeading: "Resume",
-    resumeHint: "*File up to 5 mb and (ZIP, PDF, JPEG, JPG) Format Supported.",
+    resumeHint: "Files up to 5 MB. PDF, DOC, or DOCX only.",
     resumeUploadLabel: "Upload Resume",
     resumeRemoveLabel: "Remove",
     uploadResumeModal: {
@@ -135,12 +140,7 @@ export function resolveCareerApplicationFlow(
         applicationFlow.applicationForm.resumeHeading,
         fallback.applicationForm.resumeHeading,
       ),
-      resumeHint: stripLeadingRequiredMarker(
-        withFallback(
-          applicationFlow.applicationForm.resumeHint,
-          fallback.applicationForm.resumeHint,
-        ),
-      ),
+      resumeHint: resolveResumeHint(applicationFlow.applicationForm.resumeHint, fallback.applicationForm.resumeHint),
       resumeUploadLabel: withFallback(
         applicationFlow.applicationForm.resumeUploadLabel,
         fallback.applicationForm.resumeUploadLabel,
