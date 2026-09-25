@@ -108,9 +108,13 @@ export const careersFormFieldGridClassName =
 /** Oldest DOB allowed in the careers date picker (years before today). */
 export const CAREERS_DOB_MAX_AGE_YEARS = 100;
 
+/** Youngest applicant age allowed (legal working age). */
+export const CAREERS_DOB_MIN_AGE_YEARS = 18;
+
 /**
- * DOB must be strictly before today (today / future dates are invalid).
- * Picker max is yesterday so those dates cannot be selected.
+ * DOB calendar bounds for legal working age:
+ * - maxDate = today minus 18 years (cannot select a date that makes the applicant under 18)
+ * - minDate = today minus 100 years
  */
 export function getCareersBirthDateBounds(
   referenceDate = new Date(),
@@ -119,7 +123,7 @@ export function getCareersBirthDateBounds(
   today.setHours(0, 0, 0, 0);
 
   const max = new Date(today);
-  max.setDate(max.getDate() - 1);
+  max.setFullYear(max.getFullYear() - CAREERS_DOB_MIN_AGE_YEARS);
 
   const min = new Date(today);
   min.setFullYear(min.getFullYear() - CAREERS_DOB_MAX_AGE_YEARS);
@@ -134,7 +138,7 @@ export function getCareersBirthDateBounds(
   return { minDate: toDateValue(min), maxDate: toDateValue(max) };
 }
 
-/** Returns an error message when DOB is missing or not strictly before today. */
+/** Returns an error message when DOB is missing or outside legal working-age bounds. */
 export function getCareersDateOfBirthError(
   value: string,
   referenceDate = new Date(),
@@ -149,16 +153,16 @@ export function getCareersDateOfBirthError(
     return "Enter a valid date of birth";
   }
 
-  const today = new Date(referenceDate);
-  today.setHours(0, 0, 0, 0);
   parsed.setHours(0, 0, 0, 0);
 
-  if (parsed.getTime() >= today.getTime()) {
-    return "Date of birth must be before today";
+  const { minDate, maxDate } = getCareersBirthDateBounds(referenceDate);
+  const min = new Date(`${minDate}T00:00:00`);
+  const max = new Date(`${maxDate}T00:00:00`);
+
+  if (parsed.getTime() > max.getTime()) {
+    return `You must be at least ${CAREERS_DOB_MIN_AGE_YEARS} years old`;
   }
 
-  const { minDate } = getCareersBirthDateBounds(referenceDate);
-  const min = new Date(`${minDate}T00:00:00`);
   if (parsed.getTime() < min.getTime()) {
     return "Enter a valid date of birth";
   }

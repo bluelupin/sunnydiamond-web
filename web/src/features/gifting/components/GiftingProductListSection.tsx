@@ -9,14 +9,12 @@ import {
 import { useMagentoTrendingProducts } from "@/hooks/magento/useMagentoTrendingProducts";
 import { mapJewelleryListingToFeaturedCarouselItems } from "@/services/magento/products/trendingProducts.service";
 import type { NormalizedGiftingPerfectGift } from "@/services/gifting/gifting-page.types";
-import { giftingPageContent } from "../data/content";
 
 type GiftingProductListSectionProps = {
   perfectGift: NormalizedGiftingPerfectGift;
 };
 
 const GiftingProductListSection = ({ perfectGift }: GiftingProductListSectionProps) => {
-  const { products: section } = giftingPageContent;
   const { data: trendingProducts, isLoading } = useMagentoTrendingProducts();
 
   const items = useMemo(
@@ -49,9 +47,9 @@ const GiftingProductListSection = ({ perfectGift }: GiftingProductListSectionPro
         ) : (
           <FeaturedProductsCarousel
             items={items}
-            ctaLabel={section.ctaLabel}
+            ctaLabel=""
             sectionLabel={perfectGift.title}
-            showCta={Boolean(section.ctaLabel)}
+            showCta={false}
           />
         )}
       </div>

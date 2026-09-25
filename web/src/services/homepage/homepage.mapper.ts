@@ -376,23 +376,26 @@ function mapDiamondsForEveryoneSteps(
 ): SavingsPlanStep[] {
   if (!Array.isArray(rawSteps)) return [];
 
-  return rawSteps
+  const steps: SavingsPlanStep[] = [];
+
+  rawSteps
     .filter((step) => step?.isActive !== false)
-    .map((step, index) => {
+    .forEach((step, index) => {
       const label = cleanText(step.label);
       const description = cleanText(step.description);
 
-      if (!label && !description) return null;
+      if (!label && !description) return;
 
-      return {
+      steps.push({
         id: step.id,
         label,
         description,
         stepNumber: index + 1,
         isActive: step.isActive ?? true,
-      };
-    })
-    .filter((step): step is SavingsPlanStep => step != null);
+      });
+    });
+
+  return steps;
 }
 
 function mapTextSectionToDiamondsForEveryone(

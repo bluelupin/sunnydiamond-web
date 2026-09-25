@@ -116,7 +116,11 @@ export function filterCareerJobs(
       return true;
     }
 
-    const haystack = job.title.toLowerCase();
+    // Case-insensitive match on role title and location (e.g. Cochin / cochin / COCHIN).
+    const haystack = [job.title, job.location]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
     return haystack.includes(normalized);
   });
 }
