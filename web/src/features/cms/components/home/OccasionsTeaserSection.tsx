@@ -103,7 +103,7 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
     return (
       <section
         id={id}
-        className="md:min-h-[700px] flex w-full flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 md:px-0 md:py-100"
+        className="md:min-h-[700px] h-auto flex w-full flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 md:px-0 md:py-100"
         aria-busy="true"
         aria-label="Occasions"
       >
@@ -139,7 +139,7 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
     <section
       id={id}
       aria-label={sectionTitle || "Occasions"}
-      className="md:min-h-[700px] flex w-full flex-col items-center gap-8 bg-white md:gap-6 px-0 md:pt-104 pt-16"
+      className="md:min-h-[700px] h-auto flex w-full flex-col items-center gap-8 bg-white md:gap-6 px-0 md:pt-104 pt-16"
     >
       {sectionTitle ? (
         <ScrollReveal as="h2" delayMs={0} className="max-w-sm text-center font-larken font-light leading-110 text-darkblack md:max-w-none lg:text-5xl md:text-4xl text-32 lg:whitespace-nowrap">

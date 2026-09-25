@@ -44,31 +44,16 @@ const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
   const imageAlt = sectionImages.alt;
   const hasSectionImage = Boolean(desktopImageUrl || mobileImageUrl);
 
-  if (!isSectionActive(sectionData.isActive)) return null;
+  const isSectionVisible =
+    sectionData.fromCms &&
+    sectionData.showField !== false &&
+    isSectionActive(sectionData.isActive);
 
-  if (isLoading) {
-    return (
-      <section
-        id={id}
-        className="relative h-[100dvh] min-h-[100dvh] w-full overflow-hidden bg-gray300 md:h-auto md:min-h-[804px]"
-        aria-busy="true"
-        aria-label="Bespoke For You"
-      >
-        <div className="absolute inset-x-0 bottom-16 flex w-full flex-col items-center gap-6 px-4">
-          <div className="flex w-full flex-col items-center gap-3">
-            <div className="h-9 w-56 rounded bg-white/20" aria-hidden />
-            <div className="h-9 w-[257px] max-w-full rounded bg-white/20" aria-hidden />
-          </div>
-          <div className="flex flex-col items-center gap-6">
-            <div className="h-14 w-[140px] rounded bg-white/20" aria-hidden />
-            <div className="h-5 w-28 rounded bg-white/20" aria-hidden />
-          </div>
-        </div>
-      </section>
-    );
+  if (isLoading || !isSectionVisible) {
+    return null;
   }
 
-  if (!sectionData.fromCms || !sectionTitle) {
+  if (!sectionTitle) {
     return null;
   }
 
@@ -77,7 +62,7 @@ const BespokeForYouSection = ({ id }: BespokeForYouSectionProps) => {
       id={id}
       aria-label={sectionTitle}
       className={cn(
-        "relative h-[100dvh] min-h-[100dvh] w-full overflow-hidden md:h-auto md:min-h-[804px]",
+        "relative h-[100dvh] min-h-[100dvh] w-full overflow-hidden",
         !hasSectionImage && "bg-darkblack",
       )}
     >

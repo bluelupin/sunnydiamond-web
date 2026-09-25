@@ -82,17 +82,21 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
   );
 
   const isCarouselLoading = isTrendingLoading && items.length === 0;
-  const showSectionShell = !isShoppingLoading || Boolean(sectionTitle || description);
 
-  if (!isSectionActive(featuredProductsData?.isActive)) {
+  const isSectionVisible =
+    featuredProductsData != null &&
+    featuredProductsData.showField !== false &&
+    isSectionActive(featuredProductsData.isActive);
+
+  if (isShoppingLoading || !isSectionVisible) {
     return null;
   }
 
-  if (!showSectionShell && isCarouselLoading) {
+  if (isCarouselLoading) {
     return (
       <section
         id={id}
-        className="overflow-visible px-4 py-16 md:px-10 md:py-104"
+        className="overflow-visible px-4 py-16 md:px-10 md:py-104 md:min-h-[600px] min-h-auto"
         aria-label="Featured diamond carousel"
         aria-busy="true"
       >
@@ -107,31 +111,26 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
     );
   }
 
-  if (!isCarouselLoading && items.length === 0) {
+  if (items.length === 0) {
     return null;
   }
 
   return (
     <section
       id={id}
-      className="overflow-x-clip px-0 py-16 md:py-104"
+      className="overflow-x-clip px-0 py-16 md:py-104 md:min-h-[600px] min-h-auto"
       aria-label="Featured diamond carousel"
-      aria-busy={isCarouselLoading}
     >
       <div className="flex w-full max-w-full flex-col items-center gap-10 overflow-x-clip">
         {sectionTitle || description ? (
           <FeaturedProductsHeader title={sectionTitle} description={description} />
         ) : null}
-        {isCarouselLoading ? (
-          <FeaturedCarouselSkeleton />
-        ) : (
-          <FeaturedProductsCarousel
-            items={items}
-            ctaLabel={ctaLabel}
-            sectionLabel={sectionTitle || "Featured products"}
-            showCta={Boolean(ctaLabel)}
-          />
-        )}
+        <FeaturedProductsCarousel
+          items={items}
+          ctaLabel={ctaLabel}
+          sectionLabel={sectionTitle || "Featured products"}
+          showCta={Boolean(ctaLabel)}
+        />
       </div>
     </section>
   );

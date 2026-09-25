@@ -6,6 +6,7 @@ import type {
 
 export type ResolvedBespokeForYouSection = {
   isActive?: boolean;
+  showField?: boolean;
   sectionTitle?: string;
   subtitle?: string;
   image?: BespokeForYouSectionData["image"];
@@ -21,6 +22,7 @@ export function resolveBespokeForYouSection(
 
   return {
     isActive: section?.isActive,
+    showField: section?.showField,
     sectionTitle: section?.sectionTitle,
     subtitle: section?.subtitle ?? section?.description,
     image: section?.image,

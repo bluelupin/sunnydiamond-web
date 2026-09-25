@@ -59,24 +59,13 @@ const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
     }
   }, [shouldLoadVideo]);
 
-  if (!isSectionActive(sunnyPromiseData?.isActive)) return null;
+  const isSectionVisible =
+    sunnyPromiseData != null &&
+    sunnyPromiseData.showField !== false &&
+    isSectionActive(sunnyPromiseData.isActive);
 
-  if (isEditorialLoading) {
-    return (
-      <section
-        id={id}
-        className="flex flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 lg:gap-10 lg:px-10 lg:py-100"
-        aria-busy="true"
-        aria-label="The Sunny Promise"
-      >
-        <div className="h-10 w-[min(320px,80%)] rounded bg-gray200" aria-hidden />
-        <div className="h-[670px] w-full max-w-[1360px] bg-gray200 md:h-[700px]" aria-hidden />
-        <div className="flex flex-col items-center gap-6">
-          <div className="h-5 w-[min(384px,90%)] rounded bg-gray200" aria-hidden />
-          <div className="h-5 w-36 rounded bg-gray200" aria-hidden />
-        </div>
-      </section>
-    );
+  if (isEditorialLoading || !isSectionVisible) {
+    return null;
   }
 
   const videoMimeType = videoUrl ? getVideoMimeType(videoUrl) : undefined;
@@ -85,7 +74,7 @@ const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
     <section
       id={id}
       aria-label={sectionTitle ?? "The Sunny Promise"}
-      className="flex flex-col items-center gap-8 bg-white px-4 py-16 lg:gap-10 lg:px-10 lg:py-100"
+      className="min-h-[480px] flex flex-col items-center gap-8 bg-white px-4 lg:gap-10 lg:px-10 lg:py-100 md:py-20 py-16"
     >
       {sectionTitle ? (
         <Reveal as="h2" direction="up" className="text-center font-larken font-light leading-110 text-darkblack lg:text-5xl md:text-4xl text-32 lg:whitespace-nowrap">
@@ -94,7 +83,7 @@ const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
       ) : null}
 
       {videoUrl ? (
-        <Reveal direction="up" className="relative h-[670px] w-full max-w-[1360px] shrink-0 overflow-hidden md:h-[700px]">
+        <Reveal direction="up" className="relative w-full max-w-[1360px] shrink-0 overflow-hidden lg:h-[600px] md:h-[500px] h-[400px]">
           <video
             ref={videoRef}
             className="absolute inset-0 size-full object-cover object-center"

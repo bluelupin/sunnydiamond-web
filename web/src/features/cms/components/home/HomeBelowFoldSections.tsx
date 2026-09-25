@@ -78,23 +78,23 @@ export default function HomeBelowFoldSections() {
         <FeaturedCollectionSection id="alankara" />
       </LazyHomeSection>
 
-      <LazyHomeSection featureName="OccasionsTeaserSection" minHeight="h-auto">
+      <LazyHomeSection featureName="OccasionsTeaserSection" minHeight="">
         <OccasionsTeaserSection id="categories" />
       </LazyHomeSection>
 
-      <LazyHomeSection featureName="FeaturedProductsSection" minHeight="md:min-h-[600px] min-h-auto">
+      <LazyHomeSection featureName="FeaturedProductsSection" minHeight="">
         <FeaturedProductsSection id="diamond-awaits" />
       </LazyHomeSection>
 
-      <LazyHomeSection featureName="ForYourValentineSection" minHeight="md:min-h-[700px] h-auto">
+      <LazyHomeSection featureName="ForYourValentineSection" minHeight="">
         <ForYourValentineSection id="valentine" />
       </LazyHomeSection>
 
-      <LazyHomeSection featureName="SunnyPromiseSection" minHeight="min-h-[480px]">
+      <LazyHomeSection featureName="SunnyPromiseSection" minHeight="">
         <SunnyPromiseSection id="promise" />
       </LazyHomeSection>
 
-      <LazyHomeSection featureName="BespokeForYouSection" minHeight="md:min-h-[700px] h-auto">
+      <LazyHomeSection featureName="BespokeForYouSection" minHeight="">
         <BespokeForYouSection id="bespoke-for-you" />
       </LazyHomeSection>
 

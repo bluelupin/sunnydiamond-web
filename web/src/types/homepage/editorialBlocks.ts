@@ -12,6 +12,7 @@ export type SunnyPromiseSectionData = {
   sectionTitle?: string | null;
   description?: string | null;
   isActive?: boolean | null;
+  showField?: boolean;
   cta?: CategoryNavigationCta | null;
   posterImage?: StrapiMedia | null;
   videoUrl?: string | null;

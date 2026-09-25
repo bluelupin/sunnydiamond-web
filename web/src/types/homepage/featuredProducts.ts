@@ -13,6 +13,7 @@ export type FeaturedProductsSection = {
   sectionTitle?: string;
   description?: string;
   isActive?: boolean | null;
+  showField?: boolean;
   cta?: { label?: string; to?: string; url?: string };
   products?: FeaturedProduct[];
 };

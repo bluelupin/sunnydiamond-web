@@ -249,6 +249,8 @@ function mapFeaturedProducts(
 ): FeaturedProductsSection | null {
   if (!raw) return null;
 
+  if (raw.showField === false) return null;
+
   const isActive = resolveSectionActive(raw.isActive, raw.showField);
   if (isActive === false) return null;
 
@@ -257,6 +259,7 @@ function mapFeaturedProducts(
     sectionTitle: cleanText(raw.sectionTitle) ?? cleanText(raw.title),
     description: cleanText(raw.description) ?? cleanText(raw.subtitle),
     isActive,
+    showField: raw.showField ?? undefined,
     cta: mapCta(raw.cta),
     products: Array.isArray(raw.products)
       ? (raw.products as FeaturedProductsSection["products"])
@@ -266,6 +269,8 @@ function mapFeaturedProducts(
 
 function mapGiftingBanner(raw?: StrapiGiftingBanner | null): GiftingBanner | null {
   if (!raw) return null;
+
+  if (raw.showField === false) return null;
 
   const isActive = resolveSectionActive(raw.isActive, raw.showField);
   if (isActive === false) return null;
@@ -283,6 +288,7 @@ function mapGiftingBanner(raw?: StrapiGiftingBanner | null): GiftingBanner | nul
         ? raw.filterType
         : undefined,
     isActive,
+    showField: raw.showField ?? undefined,
     cta: mapCta(raw.cta),
     primaryCta: mapCta(raw.primaryCta ?? raw.cta),
     secondaryCta: mapCta(raw.secondaryCta ?? raw.secondary),
@@ -347,6 +353,8 @@ export function mapHomepageShoppingBlocksData(
 function mapTextSectionToBespoke(raw?: StrapiTextSection | null): BespokeForYouSectionData | null {
   if (!raw) return null;
 
+  if (raw.showField === false) return null;
+
   const isActive = resolveSectionActive(raw.isActive, raw.showField);
   if (isActive === false) return null;
 
@@ -356,6 +364,7 @@ function mapTextSectionToBespoke(raw?: StrapiTextSection | null): BespokeForYouS
     subtitle: cleanText(raw.subtitle) ?? cleanText(raw.description),
     description: cleanText(raw.description),
     isActive,
+    showField: raw.showField ?? undefined,
     primaryCta: mapCta(raw.primaryCta ?? raw.cta),
     secondaryCta: mapCta(raw.secondaryCta),
     image: pickResponsiveImage(raw.backgroundImage, raw.image) as BespokeForYouSectionData["image"],
@@ -418,6 +427,8 @@ function mapTextSectionToDiamondsForEveryone(
 function mapSunnyPromise(raw?: StrapiTextSection | null): SunnyPromiseSectionData | null {
   if (!raw) return null;
 
+  if (raw.showField === false) return null;
+
   const isActive = resolveSectionActive(raw.isActive, raw.showField);
   if (isActive === false) return null;
 
@@ -426,6 +437,7 @@ function mapSunnyPromise(raw?: StrapiTextSection | null): SunnyPromiseSectionDat
     sectionTitle: cleanText(raw.sectionTitle) ?? cleanText(raw.title),
     description: cleanText(raw.description),
     isActive,
+    showField: raw.showField ?? undefined,
     cta: mapCta(raw.cta),
     posterImage: raw.posterImage as SunnyPromiseSectionData["posterImage"],
     videoUrl: resolveCmsMediaUrl(raw.video?.heroVideo),

@@ -21,6 +21,7 @@ export type BespokeForYouSectionData = {
   primaryCta?: BespokeForYouSectionCta;
   secondaryCta?: BespokeForYouSectionCta;
   isActive?: boolean;
+  showField?: boolean;
 };
 
 export type BespokeForYouSectionResponse = {
