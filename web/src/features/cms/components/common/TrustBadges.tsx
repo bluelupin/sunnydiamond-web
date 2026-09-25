@@ -27,7 +27,7 @@ function resolveHomepageTrustMarqueeItems(
     shoppingData?.homepage?.trustBadges ?? shoppingData?.trustBadges ?? [];
 
   return cmsTrustBadges
-    .filter((badge) => badge?.isActive !== false)
+    .filter((badge) => badge?.showField === true)
     .map((badge) => ({
       id: badge.id,
       label: badge.label?.trim() ?? "",
@@ -47,6 +47,27 @@ function resolveFooterTrustMarqueeItems(
     .filter((item) => item.label);
 }
 
+function TrustBadgeMarqueeItem({
+  item,
+  itemClassName,
+  showSeparator,
+}: {
+  item: TrustMarqueeItem;
+  itemClassName: string;
+  showSeparator: boolean;
+}) {
+  return (
+    <div className="flex items-center font-normal text-sm tracking-[0%] leading-110 uppercase font-gill">
+      <span className={cn("text-neutral500", itemClassName)}>{item.label}</span>
+      {showSeparator ? (
+        <span className="px-60 text-gray600" aria-hidden>
+          •
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
 function TrustBadgeMarquee({
   id,
   itemClassName = "text-gray500",
@@ -55,10 +76,14 @@ function TrustBadgeMarquee({
 }: TrustBadgeMarqueeProps) {
   const pathName = usePathname();
 
-  const marqueeItems = useMemo(() => [...items, ...items], [items]);
-  const showSkeleton = isLoading && marqueeItems.length === 0;
+  const isSingleItem = items.length === 1;
+  const marqueeItems = useMemo(
+    () => (isSingleItem ? items : [...items, ...items]),
+    [items, isSingleItem],
+  );
+  const showSkeleton = isLoading && items.length === 0;
 
-  if (!showSkeleton && marqueeItems.length === 0) {
+  if (!showSkeleton && items.length === 0) {
     return null;
   }
 
@@ -70,46 +95,57 @@ function TrustBadgeMarquee({
         "shrink-0 overflow-hidden border-t border-ivory/10 text-ivory",
       )}
     >
-      <div className="relative flex h-[64px] overflow-hidden">
-        <div className="flex shrink-0 animate-marquee items-center whitespace-nowrap">
-          {showSkeleton ? (
-            <div className="flex items-center gap-12 pr-12 whitespace-nowrap">
-              <div className="h-3 w-40 bg-gray500/20 rounded animate-pulse" />
-              <div className="h-3 w-32 bg-gray500/20 rounded animate-pulse" />
-              <div className="h-3 w-44 bg-gray500/20 rounded animate-pulse" />
-            </div>
-          ) : (
-            marqueeItems.map((item, idx) => (
-              <div
-                key={`marquee-a-${item.id ?? item.label}-${idx}`}
-                className="flex items-center font-normal text-xs md:text-sm tracking-[1.8%] uppercase font-gill"
-              >
-                <span className={cn("text-neutral500", itemClassName)}>{item.label}</span>
-                <span className="px-60 text-gray600" aria-hidden>
-                  •
-                </span>
-              </div>
-            ))
-          )}
-        </div>
-        <div
-          aria-hidden
-          className="flex shrink-0 animate-marquee items-center whitespace-nowrap"
-        >
-          {showSkeleton
-            ? null
-            : marqueeItems.map((item, idx) => (
-                <div
-                  key={`marquee-b-${item.id ?? item.label}-${idx}`}
-                  className="flex items-center font-normal text-xs md:text-sm tracking-[1.8%] uppercase font-gill"
-                >
-                  <span className={cn("text-neutral500", itemClassName)}>{item.label}</span>
-                  <span className="px-60 text-gray600" aria-hidden>
-                    •
-                  </span>
+      <div
+        className={cn(
+          "relative flex h-[64px] overflow-hidden",
+          isSingleItem && "justify-center",
+        )}
+      >
+        {isSingleItem && !showSkeleton ? (
+          <div className="flex items-center whitespace-nowrap">
+            <TrustBadgeMarqueeItem
+              item={items[0]}
+              itemClassName={itemClassName}
+              showSeparator={false}
+            />
+          </div>
+        ) : (
+          <>
+            <div className="flex shrink-0 animate-marquee items-center whitespace-nowrap">
+              {showSkeleton ? (
+                <div className="flex items-center gap-12 pr-12 whitespace-nowrap">
+                  <div className="h-3 w-40 bg-gray500/20 rounded animate-pulse" />
+                  <div className="h-3 w-32 bg-gray500/20 rounded animate-pulse" />
+                  <div className="h-3 w-44 bg-gray500/20 rounded animate-pulse" />
                 </div>
-              ))}
-        </div>
+              ) : (
+                marqueeItems.map((item, idx) => (
+                  <TrustBadgeMarqueeItem
+                    key={`marquee-a-${item.id ?? item.label}-${idx}`}
+                    item={item}
+                    itemClassName={itemClassName}
+                    showSeparator
+                  />
+                ))
+              )}
+            </div>
+            {!showSkeleton ? (
+              <div
+                aria-hidden
+                className="flex shrink-0 animate-marquee items-center whitespace-nowrap"
+              >
+                {marqueeItems.map((item, idx) => (
+                  <TrustBadgeMarqueeItem
+                    key={`marquee-b-${item.id ?? item.label}-${idx}`}
+                    item={item}
+                    itemClassName={itemClassName}
+                    showSeparator
+                  />
+                ))}
+              </div>
+            ) : null}
+          </>
+        )}
       </div>
     </section>
   );

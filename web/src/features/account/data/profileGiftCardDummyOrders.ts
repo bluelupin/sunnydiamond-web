@@ -10,7 +10,7 @@ import type {
 /** Toggle off when gift card orders are returned by Magento. */
 export const PROFILE_GIFT_CARD_USE_DUMMY_ORDERS = true;
 
-const GIFT_CARD_IMAGE_SRC = "/images/gifting/gift-card-success.png";
+const GIFT_CARD_IMAGE_SRC = "/images/gift-card-success.png";
 
 const ordersContent = profileTabsContent.orders;
 

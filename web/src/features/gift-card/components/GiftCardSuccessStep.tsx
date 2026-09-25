@@ -89,7 +89,7 @@ const GiftCardSuccessStep = ({ onClose }: GiftCardSuccessStepProps) => {
 
         <div className="relative md:max-[424px] max-w[343px] aspect-[424/265] w-full shrink-0 overflow-hidden">
           <Image
-            src="/images/gifting/gift-card-success.png"
+            src="/images/gift-card-success.png"
             alt={success.image.alt}
             fill
             className="w-full h-full object-cover object-center"

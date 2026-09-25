@@ -37,6 +37,7 @@ const CraftingRarityCategoryCard = ({ category }: CraftingRarityCategoryCardProp
     category?.cta?.url ??
     category?.cta?.to ??
     (parsedCategory ? buildJewelleryHref(parsedCategory) : "");
+  const openInNewTab = category?.cta?.openInNewTab === true;
 
   const {
     title,
@@ -99,7 +100,9 @@ const CraftingRarityCategoryCard = ({ category }: CraftingRarityCategoryCardProp
   return (
     <Link
       href={categoryLink}
-      className="group relative flex aspect-square h-full w-full flex-col items-center justify-between overflow-hidden bg-gray300"
+      target={openInNewTab ? "_blank" : undefined}
+      rel={openInNewTab ? "noopener noreferrer" : undefined}
+      className={cn("lg:px-6 hover:lg:px-0 px-4 hover:px-0 lg:pt-12 md:pt-8 pt-4", "group relative flex aspect-square h-full w-full flex-col items-center justify-between overflow-hidden bg-gray300")}
       onPointerEnter={hasDistinctHover ? prefetchHoverImage : undefined}
       onFocus={hasDistinctHover ? prefetchHoverImage : undefined}
     >
@@ -118,12 +121,12 @@ const CraftingRarityCategoryCard = ({ category }: CraftingRarityCategoryCardProp
             "absolute inset-0 z-0 h-full w-full object-cover opacity-0",
             "motion-safe:transition-opacity motion-safe:ease-in-out",
             canCrossfade &&
-              "motion-safe:duration-[400ms] group-hover:opacity-100 group-hover:delay-150 group-focus-visible:opacity-100 group-focus-visible:delay-150",
+            "motion-safe:duration-[400ms] group-hover:opacity-100 group-hover:delay-150 group-focus-visible:opacity-100 group-focus-visible:delay-150",
           )}
         />
       ) : null}
 
-      <div className="relative z-10 flex min-h-0 flex-1 items-center justify-center overflow-hidden px-4 pt-4 max-h-[303px] max-w-[303px] lg:px-6 lg:pt-6">
+      <div className="relative z-10 flex min-h-0 flex-1 items-center justify-center overflow-hidden lg:max-h-[303px] md:max-h-[250px] lg:max-w-[303px] md:max-w-[250px] max-h-[176px] max-w-[133px] h-full w-full">
         {hasProductImage && desktopImageUrl ? (
           <ResponsiveImage
             desktopSrc={desktopImageUrl}
@@ -139,7 +142,7 @@ const CraftingRarityCategoryCard = ({ category }: CraftingRarityCategoryCardProp
               "max-h-full max-w-full object-contain",
               "motion-safe:transition-opacity motion-safe:ease-out",
               canCrossfade &&
-                "motion-safe:duration-[250ms] group-hover:opacity-0 group-focus-visible:opacity-0",
+              "motion-safe:duration-[250ms] group-hover:opacity-0 group-focus-visible:opacity-0",
             )}
           />
         ) : null}
@@ -149,7 +152,7 @@ const CraftingRarityCategoryCard = ({ category }: CraftingRarityCategoryCardProp
           aria-hidden
           className="pointer-events-none absolute inset-x-0 -top-3 bottom-0 -z-10 w-full bg-gradient-to-t from-black/80 via-black/45 to-transparent opacity-0 motion-safe:transition-opacity motion-safe:duration-700 motion-safe:ease-in-out group-hover:opacity-100 group-focus-visible:opacity-100"
         />
-        <span className="relative block text-center font-gill text-base font-normal leading-110 text-darkblack motion-safe:transition-colors motion-safe:duration-700 motion-safe:ease-in-out group-hover:text-white group-focus-visible:text-white lg:text-xl">
+        <span className="relative block text-center font-gill lg:text-xl md:text-lg text-base font-normal leading-110 text-darkblack motion-safe:transition-colors motion-safe:duration-700 motion-safe:ease-in-out group-hover:text-white group-focus-visible:text-white">
           {title}
         </span>
       </div>
@@ -163,7 +166,7 @@ type CraftingRarityCategoryGridProps = {
 };
 
 const CategoryGridSkeleton = () => (
-  <div className="mt-8 grid w-full grid-cols-2 gap-3 px-4 md:mt-10 md:grid-cols-4 md:gap-3 md:px-0 lg:mt-12">
+  <div className="grid w-full grid-cols-2 gap-3 px-4 md:grid-cols-4 md:px-0 lg:mt-12 md:mt-10 mt-8">
     {[0, 1, 2, 3].map((index) => (
       <div key={index} className="aspect-square animate-pulse bg-gray200" aria-hidden />
     ))}
@@ -178,20 +181,22 @@ const CraftingRarityCategoryGrid = ({
     return <CategoryGridSkeleton />;
   }
 
-  if (categories.length === 0) {
+  const visibleCategories = categories.filter((category) => category?.showField !== false);
+
+  if (visibleCategories.length === 0) {
     return null;
   }
 
   return (
     <LazyInView
-      className="mt-8 grid w-full grid-cols-2 gap-3 px-4 md:mt-10 md:grid-cols-4 md:gap-3 md:px-0 lg:mt-12"
+      className="grid w-full grid-cols-2 gap-3 px-4 md:grid-cols-4 md:px-0 lg:mt-12 md:mt-10 mt-8"
       fallback={<CategoryGridSkeleton />}
     >
-      {categories.map((category) => (
+      {visibleCategories.map((category) => (
         <Reveal
           direction="up"
           key={category?.id ?? category?.slug ?? category?.title}
-          className="aspect-square w-full xl:h-[424px] h-[226px]"
+          className="aspect-square w-full xl:h-[424px] lg:h-[380px] md:h-[250px] h-[226px]"
         >
           <CraftingRarityCategoryCard category={category} />
         </Reveal>

@@ -112,6 +112,7 @@ function mapCta(cta?: StrapiHomepageCta | null): CategoryNavigationCta | undefin
     label,
     url,
     to: url,
+    openInNewTab: cta.openInNewTab === true,
   };
 }
 
@@ -189,6 +190,7 @@ function mapCategoryCard(card: StrapiCategoryCard): CategoryNavigationItem {
     slug: cleanText(card.slug),
     sortOrder: card.sortOrder ?? undefined,
     isActive: card.isActive ?? undefined,
+    showField: card.showField ?? undefined,
     image: mapResponsiveImage(card.image),
     cutoutImage: mapResponsiveImage(card.cutoutImage),
     hoverImage: mapResponsiveImage(card.hoverImage),
@@ -296,12 +298,17 @@ function mapGiftingBanner(raw?: StrapiGiftingBanner | null): GiftingBanner | nul
   };
 }
 
-function mapTrustBadge(badge: StrapiTrustBadge): TrustBadge {
+function mapTrustBadge(badge: StrapiTrustBadge): TrustBadge | null {
+  if (badge.showField !== true) return null;
+
+  const label = cleanText(badge.label);
+  if (!label) return null;
+
   return {
     id: badge.id,
-    label: cleanText(badge.label),
+    label,
     sortOrder: badge.sortOrder ?? undefined,
-    isActive: badge.isActive ?? undefined,
+    showField: true,
   };
 }
 
@@ -312,7 +319,9 @@ export function mapHomepageShoppingBlocksData(
 
   const categorySource = raw.categoryNavigation ?? raw.categoryCards ?? [];
   const categoryNavigation = categorySource.map(mapCategoryCard);
-  const trustBadges = (raw.trustBadges ?? []).map(mapTrustBadge);
+  const trustBadges = (raw.trustBadges ?? [])
+    .map(mapTrustBadge)
+    .filter((badge): badge is TrustBadge => badge != null);
   const featuredCollectionSection = mapFeaturedCollection(
     raw.featuredCollectionSection ?? raw.featuredCollection,
   );
@@ -544,8 +553,14 @@ function mapCraftingBrillianceSection(
 ): CraftingBrillianceSectionData | null {
   if (!raw) return null;
 
+  if (raw.showField === false) {
+    return { isActive: false, showField: false };
+  }
+
   const isActive = resolveSectionActive(raw.isActive, raw.showField);
-  if (isActive === false) return null;
+  if (isActive === false) {
+    return { isActive: false, showField: raw.showField ?? undefined };
+  }
 
   const title = cleanText(raw.title) ?? cleanText(raw.sectionTitle);
   if (!title) return null;
@@ -554,6 +569,7 @@ function mapCraftingBrillianceSection(
     id: raw.id,
     title,
     isActive,
+    showField: raw.showField ?? undefined,
     cta: mapCta(raw.cta),
     backgroundImage: pickResponsiveImage(raw.backgroundImage),
     cutoutImage: pickResponsiveImage(raw.cutoutImage),

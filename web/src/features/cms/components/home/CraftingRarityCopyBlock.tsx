@@ -8,12 +8,14 @@ type CraftingRarityCopyBlockProps = {
   subtitleLines: string[];
   secondaryCtaUrl: string;
   secondaryCtaLabel: string;
+  secondaryCtaOpenInNewTab?: boolean;
 };
 
 export default function CraftingRarityCopyBlock({
   subtitleLines,
   secondaryCtaUrl,
   secondaryCtaLabel,
+  secondaryCtaOpenInNewTab,
 }: CraftingRarityCopyBlockProps) {
   return (
     <PageContainer className="relative z-10 px-4 md:px-8 lg:px-10 2xl:px-[60px]">
@@ -31,6 +33,8 @@ export default function CraftingRarityCopyBlock({
         {secondaryCtaUrl && secondaryCtaLabel ? (
           <Link
             href={secondaryCtaUrl}
+            target={secondaryCtaOpenInNewTab ? "_blank" : undefined}
+            rel={secondaryCtaOpenInNewTab ? "noopener noreferrer" : undefined}
             className="text-tertiary-cta-underline shrink-0 cursor-pointer pb-1 font-gill text-sm font-normal uppercase leading-110 text-darkblack sm:pb-1"
           >
             {secondaryCtaLabel}
