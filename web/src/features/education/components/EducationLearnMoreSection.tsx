@@ -4,9 +4,8 @@ import { useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
-import FeaturedProductsCarousel, {
-  type FeaturedCarouselItem,
-} from "@/features/cms/components/home/FeaturedProductsCarousel";
+import type { FeaturedCarouselItem } from "@/features/cms/components/home/FeaturedProductsCarousel";
+import EducationCenterModeSlider from "@/features/education/components/EducationCenterModeSlider";
 import { cn } from "@/shared/utils/cn";
 import { useLearnAnatomySectionSync } from "@/features/education/hooks/useLearnAnatomySectionSync";
 import type {
@@ -94,10 +93,9 @@ const LearnCarouselPanel = ({
 
   return (
     <div className="flex w-full max-w-full min-w-0 flex-col items-center overflow-x-clip">
-      <FeaturedProductsCarousel
+      <EducationCenterModeSlider
         items={items}
         ctaLabel={tab.ctaLabel ?? ""}
-        sectionLabel={tab.label}
         showCta={hasPerSlideCta}
       />
     </div>
