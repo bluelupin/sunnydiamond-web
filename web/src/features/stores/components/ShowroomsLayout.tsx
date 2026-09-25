@@ -401,7 +401,7 @@ export function ShowroomsLayout({
 
   return (
     <section
-      className={cn("bg-white lg:pt-16 lg:pb-100 pb-16", className)}
+      className={cn("bg-white lg:pt-16 lg:pb-104 pb-16", className)}
     >
       <ShowroomsMobileAccordion
         locations={locations}

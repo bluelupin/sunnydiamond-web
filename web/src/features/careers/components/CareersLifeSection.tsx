@@ -16,7 +16,7 @@ const CareersLifeSection = ({ lifeAt }: CareersLifeSectionProps) => {
       aria-labelledby="careers-life-title"
       className="md:bg-gray300"
     >
-      <div className="flex w-full 2xl:max-w-1920 mx-auto max-w-1440 2xl:px-[60px] lg:px-10 md:px-8 px-4 md:pt-100 pt-10 md:pb-100 mt-0 pb-16 flex-col gap-6 lg:flex-row lg:items-stretch lg:gap-10">
+      <div className="flex w-full 2xl:max-w-1920 mx-auto max-w-1440 2xl:px-[60px] lg:px-10 md:px-8 px-4 md:pt-104 pt-10 md:pb-104 mt-0 pb-16 flex-col gap-6 lg:flex-row lg:items-stretch lg:gap-10">
         <div className="flex w-full flex-col gap-6 xl:max-w-[474px] max-w-[300px] lg:shrink-0 lg:gap-10">
           <Reveal direction="up">
             <h2

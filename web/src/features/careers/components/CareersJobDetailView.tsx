@@ -122,7 +122,7 @@ const CareersJobDetailView = ({
     <section
       id="job-details"
       aria-labelledby="careers-job-detail-title"
-      className="bg-white md:pt-10 pt-6 md:pb-100 pb-16 max-w-[1040px] px-4 mx-auto"
+      className="bg-white md:pt-10 pt-6 md:pb-104 pb-16 max-w-[1040px] px-4 mx-auto"
     >
       <div className="flex w-full flex-col md:gap-10 gap-6">
         <Reveal direction="up">

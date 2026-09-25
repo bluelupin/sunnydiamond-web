@@ -72,9 +72,9 @@ function ProfilePageContent() {
         className={cn(
           "lg:pt-16 md:pt-14 pt-10 2xl:max-w-1920 max-w-1440",
           activeSection === "wishlist"
-            ? "2xl:px-[60px] lg:px-10 lg:!pb-100 md:!pb-20 !pb-0"
+            ? "2xl:px-[60px] lg:px-10 lg:!pb-104 md:!pb-20 !pb-0"
             : "2xl:px-[60px] lg:px-10 md:px-8 px-4",
-          activeSection === "support" ? "pb-0" : "lg:pb-100 md:pb-20 pb-10",
+          activeSection === "support" ? "pb-0" : "lg:pb-104 md:pb-20 pb-10",
         )}
       >
         {

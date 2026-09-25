@@ -64,7 +64,7 @@ const EducationDiscoverSection = ({ ctaBanner }: EducationDiscoverSectionProps) 
         <Reveal
           direction="up"
           className={cn(
-            "relative z-10 md:order-2 order-1 w-full max-w-640 lg:justify-start justify-center lg:pt-100 lg:pb-100 pt-16 lg:px-0 px-4 md:mx-0 mx-auto py-10",
+            "relative z-10 md:order-2 order-1 w-full max-w-640 lg:justify-start justify-center lg:pt-104 lg:pb-104 pt-16 lg:px-0 px-4 md:mx-0 mx-auto py-10",
             !hasImage && "md:col-span-2",
           )}
         >

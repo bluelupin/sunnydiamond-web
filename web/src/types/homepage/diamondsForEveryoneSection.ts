@@ -1,8 +1,8 @@
 export type SavingsPlanStep = {
   id?: number;
   stepNumber?: number;
+  label?: string;
   description?: string;
-  highlightedText?: string;
   sortOrder?: number;
   isActive?: boolean;
 };
@@ -22,6 +22,7 @@ export type DiamondsForEveryoneSectionData = {
   steps?: SavingsPlanStep[];
   cta?: DiamondsForEveryoneSectionCta;
   isActive?: boolean;
+  showField?: boolean;
   backgroundImage?: {
     desktopImage?: unknown;
     mobileImage?: unknown;

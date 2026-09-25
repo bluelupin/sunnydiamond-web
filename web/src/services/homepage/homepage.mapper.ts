@@ -371,42 +371,36 @@ function mapTextSectionToBespoke(raw?: StrapiTextSection | null): BespokeForYouS
   };
 }
 
-function parseSavingsPlanStepNumber(label: string | undefined, index: number): number {
-  if (!label) return index + 1;
-  const digits = label.replace(/\D/g, "");
-  const parsed = Number.parseInt(digits, 10);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : index + 1;
-}
-
 function mapDiamondsForEveryoneSteps(
   rawSteps?: StrapiSavingsPlanStep[] | null,
 ): SavingsPlanStep[] {
   if (!Array.isArray(rawSteps)) return [];
 
-  const steps: SavingsPlanStep[] = [];
+  return rawSteps
+    .filter((step) => step?.isActive !== false)
+    .map((step, index) => {
+      const label = cleanText(step.label);
+      const description = cleanText(step.description);
 
-  rawSteps.forEach((step, index) => {
-    if (step?.isActive === false) return;
+      if (!label && !description) return null;
 
-    const description = cleanText(step.description);
-    if (!description) return;
-
-    steps.push({
-      id: step.id,
-      description,
-      highlightedText: cleanText(step.highlightedText),
-      stepNumber: parseSavingsPlanStepNumber(cleanText(step.label), index),
-      isActive: step.isActive ?? true,
-    });
-  });
-
-  return steps;
+      return {
+        id: step.id,
+        label,
+        description,
+        stepNumber: index + 1,
+        isActive: step.isActive ?? true,
+      };
+    })
+    .filter((step): step is SavingsPlanStep => step != null);
 }
 
 function mapTextSectionToDiamondsForEveryone(
   raw?: StrapiTextSection | null,
 ): DiamondsForEveryoneSectionData | null {
   if (!raw) return null;
+
+  if (raw.showField === false) return null;
 
   const isActive = resolveSectionActive(raw.isActive, raw.showField);
   if (isActive === false) return null;
@@ -418,6 +412,7 @@ function mapTextSectionToDiamondsForEveryone(
     subtitle: cleanText(raw.subtitle),
     description: cleanText(raw.description),
     isActive,
+    showField: raw.showField ?? undefined,
     backgroundImage: pickResponsiveImage(raw.backgroundImage) as DiamondsForEveryoneSectionData["backgroundImage"],
     steps: mapDiamondsForEveryoneSteps(raw.steps as StrapiSavingsPlanStep[] | null | undefined),
     cta: mapCta(raw.cta ?? raw.primaryCta),

@@ -15,7 +15,7 @@ const AboutHeirloomQuoteSection = ({ quote, iconUrl }: AboutHeirloomQuoteSection
 
   return (
     <section aria-labelledby="about-heirloom-quote" className="bg-white">
-      <PageContainer className="py-16 md:py-20 desktop:py-100">
+      <PageContainer className="py-16 md:py-20 desktop:py-104">
         <Reveal direction="up" className="flex flex-col items-center justify-center gap-4 lg:flex-row">
           <Image
             src="/icons/flourishIcon.svg"

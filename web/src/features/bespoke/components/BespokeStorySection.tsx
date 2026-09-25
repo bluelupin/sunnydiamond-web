@@ -162,7 +162,7 @@ const BespokeStorySection = ({ story, customDesignForm }: BespokeStorySectionPro
     <section
       ref={sectionRef}
       aria-labelledby="bespoke-story-title"
-      className="relative bg-white lg:py-100 py-16 mx-auto w-full pl-4 lg:pl-8 lg:pl-10 2xl:max-w-1920 2xl:pl-[60px] lg:pr-0 pr-4"
+      className="relative bg-white lg:py-104 py-16 mx-auto w-full pl-4 lg:pl-8 lg:pl-10 2xl:max-w-1920 2xl:pl-[60px] lg:pr-0 pr-4"
     >
       <div className="lg:mb-12 mb-6 mx-auto max-w-[720px] lg:hidden flex w-full flex-col gap-4">
         <Reveal

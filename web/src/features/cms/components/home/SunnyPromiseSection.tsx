@@ -74,7 +74,7 @@ const SunnyPromiseSection = ({ id }: SunnyPromiseSectionProps) => {
     <section
       id={id}
       aria-label={sectionTitle ?? "The Sunny Promise"}
-      className="min-h-[480px] flex flex-col items-center gap-8 bg-white px-4 lg:gap-10 lg:px-10 lg:py-100 md:py-20 py-16"
+      className="min-h-[480px] flex flex-col items-center gap-8 bg-white px-4 lg:gap-10 lg:px-10 lg:py-104 md:py-20 py-16"
     >
       {sectionTitle ? (
         <Reveal as="h2" direction="up" className="text-center font-larken font-light leading-110 text-darkblack lg:text-5xl md:text-4xl text-32 lg:whitespace-nowrap">

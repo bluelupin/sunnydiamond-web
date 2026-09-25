@@ -135,7 +135,7 @@ const GiftingDiscoverSection = ({
     <section
       id="discover-ideal-gift"
       aria-labelledby="gifting-discover-title"
-      className="flex flex-col md:flex-row md:items-center md:justify-between md:pl-0 lg:pr-10 md:pr-6 md:pb-100  pb-16 lg:gap-0 gap-4"
+      className="flex flex-col md:flex-row md:items-center md:justify-between md:pl-0 lg:pr-10 md:pr-6 md:pb-104  pb-16 lg:gap-0 gap-4"
     >
       {imageSrc &&
         <Reveal

@@ -90,7 +90,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
                 className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-white to-transparent"
               />
             </div>
-            <div className="relative container h-full py-16 md:py-100 flex flex-col items-center justify-center text-center">
+            <div className="relative container h-full py-16 md:py-104 flex flex-col items-center justify-center text-center">
               {gifUrl ? (
                 <Reveal direction="up">
                   <ResponsiveImage
@@ -143,7 +143,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
                 className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-white to-transparent"
               />
             </div>
-            <div className="relative container h-full py-16 md:py-100 flex flex-col items-center justify-center text-center">
+            <div className="relative container h-full py-16 md:py-104 flex flex-col items-center justify-center text-center">
               <div className="w-16 h-16 bg-gray200 rounded-full" />
               <div className="mt-6 h-10 w-[min(520px,90%)] bg-gray200 rounded" />
               <div className="mt-10 h-72 w-72 bg-gray200 rounded-full" />

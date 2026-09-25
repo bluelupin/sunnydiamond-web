@@ -25,7 +25,7 @@ const AboutBrillianceSection = ({
     <section
       ref={sectionRef}
       aria-labelledby="about-crafting-rarity-title"
-      className="bg-white py-10 sm:py-16 lg:py-100"
+      className="bg-white py-10 sm:py-16 lg:py-104"
     >
       <PageContainer className="flex w-full justify-center">
         <div className="flex w-full lg:max-w-[950px] max-w-[700px] flex-col items-center text-center">

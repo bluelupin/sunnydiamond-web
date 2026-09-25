@@ -8,11 +8,11 @@ const AboutSince1997Skeleton = () => (
       aria-label="Loading legacy section"
       className="relative hidden bg-white md:block"
     >
-      <div className="sticky top-0 flex h-screen flex-col overflow-hidden bg-white pt-100">
+      <div className="sticky top-0 flex h-screen flex-col overflow-hidden bg-white pt-104">
         <PageContainer className="shrink-0 pb-10">
           <Skeleton className="h-12 w-48 rounded-md bg-gray200" aria-hidden />
         </PageContainer>
-        <PageContainer className="flex min-h-0 flex-1 flex-col pb-100 pt-0">
+        <PageContainer className="flex min-h-0 flex-1 flex-col pb-104 pt-0">
           <div className="flex min-h-0 flex-1 items-center gap-20 overflow-hidden">
             <Skeleton className="h-600 w-[549px] shrink-0 rounded-md bg-gray200" aria-hidden />
             <Skeleton className="hidden h-600 w-358 shrink-0 rounded-md bg-gray200 md:block" aria-hidden />

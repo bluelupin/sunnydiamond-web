@@ -103,7 +103,7 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
     return (
       <section
         id={id}
-        className="md:min-h-[700px] h-auto flex w-full flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 md:px-0 md:py-100"
+        className="md:min-h-[700px] h-auto flex w-full flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 md:px-0 md:py-104"
         aria-busy="true"
         aria-label="Occasions"
       >

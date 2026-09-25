@@ -115,7 +115,7 @@ const AboutSince1997Section = ({ title, story, gallery }: AboutSince1997SectionP
               {title}
             </Reveal>
           </PageContainer>
-          <PageContainer data-since1997-page-container className="xl:pb-100 pb-16 pr-0">
+          <PageContainer data-since1997-page-container className="xl:pb-104 pb-16 pr-0">
             <Reveal direction="up" className="flex min-h-0 flex-1 flex-col">
               <div data-since1997-viewport className="min-h-0 flex-1 w-full overflow-x-hidden overflow-y-visible">
                 <div

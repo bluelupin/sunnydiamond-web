@@ -37,7 +37,7 @@ const GiftingPromiseSection = ({ finishingTouch }: GiftingPromiseSectionProps) =
     <section
       id="the-finishing-touch"
       aria-labelledby="gifting-finishing-title"
-      className="relative z-30 isolate flex flex-col gap-6 bg-gray200 pt-16 pb-16 md:gap-10 md:py-100 md:px-0 px-2"
+      className="relative z-30 isolate flex flex-col gap-6 bg-gray200 pt-16 pb-16 md:gap-10 md:py-104 md:px-0 px-2"
     >
       <div className="mx-auto flex w-full max-w-1440 flex-col items-center gap-6 px-0 md:gap-10 md:px-10">
         <div className="flex w-full flex-col items-center gap-4 text-center">

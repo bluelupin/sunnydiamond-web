@@ -14,7 +14,7 @@ export function ShowroomsLayoutSkeleton({
 }: ShowroomsLayoutSkeletonProps) {
   return (
     <section
-      className={cn("bg-white lg:pt-16 lg:pb-100 pb-16 lg:h-846 md:h-auto h-auto", className)}
+      className={cn("bg-white lg:pt-16 lg:pb-104 pb-16 lg:h-846 md:h-auto h-auto", className)}
       aria-busy="true"
       aria-label="Loading showrooms"
     >

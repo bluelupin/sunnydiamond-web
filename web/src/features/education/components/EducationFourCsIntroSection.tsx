@@ -15,7 +15,7 @@ const EducationFourCsIntroSection = ({ intro }: EducationFourCsIntroSectionProps
   return (
     <section
       aria-labelledby="education-four-cs-intro-title"
-      className="bg-white px-4 md:px-8 lg:px-10 lg:py-100 py-16"
+      className="bg-white px-4 md:px-8 lg:px-10 lg:py-104 py-16"
     >
       <div className="mx-auto flex w-full max-w-760 flex-col items-center">
         <ScrollReveal

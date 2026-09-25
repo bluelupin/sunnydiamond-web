@@ -14,7 +14,7 @@ const SupportContactOptionsSection = ({ options }: SupportContactOptionsSectionP
   return (
     <section
       aria-label="Contact options"
-      className="bg-white px-4 py-16 md:px-8 lg:px-10 lg:py-100"
+      className="bg-white px-4 py-16 md:px-8 lg:px-10 lg:py-104"
     >
       <div className="mx-auto grid w-full max-w-[910px] gap-10 md:grid-cols-2 md:gap-16">
         {options.map((option, index) => (

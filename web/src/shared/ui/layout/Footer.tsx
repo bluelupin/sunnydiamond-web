@@ -132,7 +132,7 @@ const Footer = ({ className }: { className?: string }) => {
   return (
     <footer className={cn(pathName === "/cart" || pathName === "/checkout" ? "bg-gray200" : "bg-gray300", className)}>
       <FooterTrustBadgeSection />
-      <PageContainer className="flex flex-col gap-20 lg:gap-[120px] lg:py-100 py-16">
+      <PageContainer className="flex flex-col gap-20 lg:gap-[120px] lg:py-104 py-16">
         <div className="flex flex-col items-center xl:gap-12 md:gap-10 gap-8 lg:flex-row lg:items-start lg:justify-start">
           <Reveal direction="up" className="shrink-0">
             <Link href="/" aria-label="Sunny Diamonds">

@@ -15,7 +15,7 @@ const BlogMoreToReadSection = ({ posts }: BlogMoreToReadSectionProps) => {
   return (
     <section
       aria-labelledby="blog-more-to-read-title"
-      className="bg-white w-full mx-auto 2xl:max-w-1992 max-w-1440 2xl:px-[60px] lg:px-10 md:px-8 px-4 pb-16 md:px-10 md:pb-100"
+      className="bg-white w-full mx-auto 2xl:max-w-1992 max-w-1440 2xl:px-[60px] lg:px-10 md:px-8 px-4 pb-16 md:px-10 md:pb-104"
     >
       <h2
         id="blog-more-to-read-title"

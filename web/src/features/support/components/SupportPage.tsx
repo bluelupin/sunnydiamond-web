@@ -15,7 +15,7 @@ const SupportPage = ({ page }: SupportPageProps) => {
       {(page.title || page.subtitle) && (
         <section
           aria-labelledby={page.title ? "support-page-title" : undefined}
-          className="px-4 pt-16 md:px-8 lg:px-10 lg:pt-100"
+          className="px-4 pt-16 md:px-8 lg:px-10 lg:pt-104"
         >
           <div className="mx-auto flex max-w-[910px] flex-col items-center gap-4 text-center">
             {page.title ? (

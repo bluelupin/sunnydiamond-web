@@ -19,7 +19,7 @@ type ProfileSupportFaqSkeletonProps = {
 export function ProfileSupportFaqSkeleton({ itemCount = 5 }: ProfileSupportFaqSkeletonProps) {
   return (
     <section
-      className="bg-white px-4 py-16 md:px-10 lg:py-100"
+      className="bg-white px-4 py-16 md:px-10 lg:py-104"
       aria-busy="true"
       aria-label="Loading frequently asked questions"
     >

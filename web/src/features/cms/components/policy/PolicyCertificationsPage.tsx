@@ -503,7 +503,7 @@ const PolicyCertificationsPage = ({
 
   return (
     <React.Fragment>
-      <section className="mx-auto 2xl:max-w-1920 max-w-1440 2xl:px-[60px] lg:px-10 md:px-8 px-4 md:pt-10 pt-8 md:pb-100 pb-16">
+      <section className="mx-auto 2xl:max-w-1920 max-w-1440 2xl:px-[60px] lg:px-10 md:px-8 px-4 md:pt-10 pt-8 md:pb-104 pb-16">
         <div className="flex flex-col gap-[29px] lg:hidden">
           {mobileShowDetail ? (
             <PolicyMobileDetailPanel

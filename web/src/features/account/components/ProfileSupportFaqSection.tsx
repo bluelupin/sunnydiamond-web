@@ -37,7 +37,7 @@ const ProfileSupportFaqSection = () => {
   return (
     <section
       aria-labelledby="profile-support-faq"
-      className="bg-white px-4 py-16 md:px-10 lg:py-100"
+      className="bg-white px-4 py-16 md:px-10 lg:py-104"
     >
       <div className="mx-auto flex w-full max-w-[910px] flex-col gap-8 lg:items-center lg:gap-10">
         {title ? (

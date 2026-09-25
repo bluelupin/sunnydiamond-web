@@ -46,7 +46,7 @@ const SupportFaqSection = ({ faq }: SupportFaqSectionProps) => {
     <section
       aria-labelledby={faq.title ? "support-faq-title" : undefined}
       aria-label={faq.title ? undefined : "Frequently asked questions"}
-      className="bg-white px-4 pb-16 md:px-8 lg:px-10 lg:pb-100"
+      className="bg-white px-4 pb-16 md:px-8 lg:px-10 lg:pb-104"
     >
       <div className="mx-auto flex max-w-[910px] flex-col items-center">
         {faq.title ? (

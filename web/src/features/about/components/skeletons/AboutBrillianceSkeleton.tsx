@@ -2,7 +2,7 @@ import PageContainer from "@/shared/ui/layout/PageContainer";
 import { Skeleton } from "@/shared/ui/skeleton";
 
 const AboutBrillianceSkeleton = () => (
-  <section aria-busy="true" aria-label="Loading brilliance section" className="bg-white pt-14 sm:pt-16 lg:pt-100">
+  <section aria-busy="true" aria-label="Loading brilliance section" className="bg-white pt-14 sm:pt-16 lg:pt-104">
     <PageContainer className="flex w-full justify-center">
       <div className="flex w-full max-w-[950px] flex-col items-center text-center">
         <Skeleton className="mx-auto mb-8 h-12 w-full max-w-[640px] rounded-md bg-gray200 lg:mb-12 md:mb-9 sm:h-14 lg:h-20" aria-hidden />

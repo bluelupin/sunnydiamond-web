@@ -9,14 +9,9 @@ import type {
   NormalizedDfeBenefitStep,
   NormalizedDfeBenefits,
 } from "@/services/diamonds-for-everyone/diamonds-for-everyone-page.types";
+import { cn } from "@/shared/utils/cn";
+import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 
-const savingsPlanStepCircleClassName =
-  "relative z-10 box-border flex size-10 shrink-0 items-center justify-center rounded-full border-[0.571px] border-solid border-darkblack bg-lightGold";
-
-const savingsPlanStepCircleNumberClassName =
-  "font-gill text-xl font-light tracking-[0.2px] text-darkblack";
-
-/** Figma 4453:34199 — radial vignette over the bangles photo (70% opacity). */
 const SAVINGS_PLAN_DESKTOP_VIGNETTE =
   "radial-gradient(ellipse 90% 80% at 62% 58%, rgba(244,243,238,0) 0%, rgba(244,243,238,1) 100%)";
 
@@ -85,7 +80,7 @@ const DfeSavingsPlanSection = ({ benefits }: DfeSavingsPlanSectionProps) => {
   const hasBackground = Boolean(desktopBg || mobileBg);
   const ctaLabel = benefits.cta?.label?.trim();
   const ctaUrl = benefits.cta?.url?.trim();
-
+  const { windows } = useUiPlatform();
   return (
     <section
       aria-labelledby="dfe-savings-plan-title"
@@ -198,8 +193,8 @@ const DfeSavingsPlanSection = ({ benefits }: DfeSavingsPlanSectionProps) => {
                     <StepCircle
                       key={step.id}
                       number={step.stepNumber}
-                      className={savingsPlanStepCircleClassName}
-                      numberClassName={savingsPlanStepCircleNumberClassName}
+                      className="relative z-10 box-border flex size-10 shrink-0 items-center justify-center rounded-full border-[0.571px] border-solid border-darkblack bg-lightGold"
+                      numberClassName={cn(!windows && "translate-y-0.5", "font-gill text-xl font-light tracking-[0.2px] text-darkblack")}
                     />
                   ))}
                 </div>
@@ -226,8 +221,8 @@ const DfeSavingsPlanSection = ({ benefits }: DfeSavingsPlanSectionProps) => {
                 >
                   <StepCircle
                     number={step.stepNumber}
-                    className={savingsPlanStepCircleClassName}
-                    numberClassName={savingsPlanStepCircleNumberClassName}
+                    className="relative z-10 box-border flex size-10 shrink-0 items-center justify-center rounded-full border-[0.571px] border-solid border-darkblack bg-lightGold"
+                    numberClassName={cn(!windows && "translate-y-0.5", "font-gill text-xl font-light tracking-[0.2px] text-darkblack")}
                   />
                   <StepContent step={step} variant="mobile" />
                 </ScrollReveal>

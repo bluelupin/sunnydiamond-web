@@ -10,6 +10,8 @@ import { isSectionActive } from "@/shared/utils/cmsSection";
 import { resolveDiamondsForEveryoneSection } from "@/shared/utils/resolveDiamondsForEveryoneSection";
 import Reveal from "@/shared/Animation/Reveal";
 import { StepCircle } from "@/shared/ui/StepCircle";
+import { cn } from "@/shared/utils/cn";
+import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 
 interface DiamondsForEveryoneSectionProps {
   id?: string;
@@ -28,14 +30,10 @@ const StepDescription = ({
   step: SavingsPlanStep;
   className?: string;
 }) => (
-  <p className={className}>
-    {step.highlightedText ? (
-      <>
-        <span className="font-light">{step.description}</span>
-        <span className="font-normal">{step.highlightedText}</span>
-      </>
-    ) : (
-      <span className="font-light">{step.description}</span>
+  <p className={cn(className)}>
+    {step.label && <span className="font-light">{step.label}</span>}
+    {step.description && (
+      <span className={step.label ? "font-normal pl-2" : "font-light pl-2"}>{step.description}</span>
     )}
   </p>
 );
@@ -65,40 +63,31 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
   const steps = useMemo(() => {
     const cmsSteps = (sectionData.steps ?? []) as SavingsPlanStep[];
     return cmsSteps
-      .filter((step) => step?.isActive !== false && step?.description?.trim())
+      .filter(
+        (step) =>
+          step?.isActive !== false &&
+          Boolean(step?.label?.trim() || step?.description?.trim()),
+      )
       .map((step, index) => ({
         ...step,
-        stepNumber: step.stepNumber ?? index + 1,
+        stepNumber: index + 1,
       }));
   }, [sectionData.steps]);
 
-  if (!isSectionActive(sectionData.isActive)) return null;
+  const isSectionVisible =
+    sectionData.fromCms &&
+    sectionData.showField !== false &&
+    isSectionActive(sectionData.isActive);
 
-  if (isLoading) {
-    return (
-      <section
-        id={id}
-        className="relative w-full overflow-hidden bg-chalkCard py-16 md:bg-gray300 md:py-104"
-        aria-busy="true"
-        aria-label="Diamonds for Everyone"
-      >
-        <div className="relative mx-auto flex w-full max-w-[1360px] flex-col items-center gap-8 px-4 md:gap-10 md:px-10">
-          <div className="flex w-full flex-col items-center gap-6 md:max-w-[510px]">
-            <div className="h-4 w-40 rounded bg-black/10" aria-hidden />
-            <div className="flex w-full flex-col items-center gap-3 md:gap-4">
-              <div className="h-10 w-full max-w-[320px] rounded bg-black/10" aria-hidden />
-              <div className="h-5 w-full max-w-[280px] rounded bg-black/10" aria-hidden />
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (!sectionData.fromCms || !sectionTitle || steps.length === 0) {
+  if (isLoading || !isSectionVisible) {
     return null;
   }
 
+  if (!sectionTitle || steps.length === 0) {
+    return null;
+  }
+
+  const { windows } = useUiPlatform();
   return (
     <section
       id={id}
@@ -147,7 +136,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
                   key={step.stepNumber}
                   number={step.stepNumber ?? 0}
                   className={savingsPlanStepCircleClassName}
-                  numberClassName={savingsPlanStepCircleNumberClassName}
+                  numberClassName={cn(!windows && "translate-y-0.5", "font-gill text-xl font-light tracking-[0.2px] text-darkblack")}
                 />
               ))}
             </div>
@@ -174,7 +163,7 @@ const DiamondsForEveryoneSection = ({ id }: DiamondsForEveryoneSectionProps) => 
               <StepCircle
                 number={step.stepNumber ?? 0}
                 className={savingsPlanStepCircleClassName}
-                numberClassName={savingsPlanStepCircleNumberClassName}
+                numberClassName={cn(!windows && "translate-y-0.5", "font-gill text-xl font-light tracking-[0.2px] text-darkblack")}
               />
               <StepDescription
                 step={step}

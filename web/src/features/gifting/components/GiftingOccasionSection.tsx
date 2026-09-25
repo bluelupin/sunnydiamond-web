@@ -41,7 +41,7 @@ const GiftingOccasionSection = ({ cards }: GiftingOccasionSectionProps) => {
     <section
       id="occasion-led-gifts"
       aria-label={sectionTitle}
-      className="flex w-full flex-col items-center gap-8 bg-white px-0 pt-16 md:gap-10 md:pt-100"
+      className="flex w-full flex-col items-center gap-8 bg-white px-0 pt-16 md:gap-10 md:pt-104"
     >
       {/* <ScrollReveal
         as="h2"

@@ -410,7 +410,7 @@ const EducationLearnMoreSection = ({ learnMore }: EducationLearnMoreSectionProps
   return (
     <section
       aria-labelledby="education-learn-more-title"
-      className={cn("bg-white py-16 md:py-100", isCarousel && "overflow-x-clip")}
+      className={cn("bg-white py-16 md:py-104", isCarousel && "overflow-x-clip")}
     >
       <div className="flex w-full max-w-full flex-col items-center overflow-x-clip max-md:gap-6 md:gap-10">
         {isAnatomyDetail && anatomyDetail ? (

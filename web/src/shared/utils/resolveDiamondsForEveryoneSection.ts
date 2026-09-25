@@ -7,6 +7,7 @@ import { resolveResponsiveCmsImage } from "@/shared/utils/responsiveCmsImage";
 
 export type ResolvedDiamondsForEveryoneSection = {
   isActive?: boolean;
+  showField?: boolean;
   eyebrow?: string;
   sectionTitle?: string;
   subtitle?: string;
@@ -30,6 +31,7 @@ export function resolveDiamondsForEveryoneSection(
 
   return {
     isActive: section?.isActive,
+    showField: section?.showField,
     eyebrow: section?.eyebrow,
     sectionTitle: section?.sectionTitle,
     subtitle: section?.subtitle ?? section?.description,

@@ -19,7 +19,7 @@ import BlogsFeaturedSection from "./BlogsFeaturedSection";
 import BlogsLoadMore from "./BlogsLoadMore";
 
 const blogsGridSectionClassName =
-  "mx-auto w-full 2xl:max-w-1920 max-w-1440 px-4 md:px-8 lg:px-10 2xl:px-[60px] md:bg-gray200 md:pt-10 pt-0 lg:pb-100 pb-16";
+  "mx-auto w-full 2xl:max-w-1920 max-w-1440 px-4 md:px-8 lg:px-10 2xl:px-[60px] md:bg-gray200 md:pt-10 pt-0 lg:pb-104 pb-16";
 
 type BlogsListingClientProps = {
   filterLabel: string;
@@ -81,7 +81,7 @@ const BlogsListingClient = ({
     <>
       <BlogsFilterBar filterLabel={filterLabel} categories={categories} />
       {showFeatured && firstRowPosts.length > 0 ? (
-        <section className="mx-auto w-full 2xl:max-w-1920 max-w-1440 px-4 md:px-8 lg:px-10 2xl:px-[60px] md:bg-gray200 md:pt-10 pt-0 lg:pb-100 pb-16">
+        <section className="mx-auto w-full 2xl:max-w-1920 max-w-1440 px-4 md:px-8 lg:px-10 2xl:px-[60px] md:bg-gray200 md:pt-10 pt-0 lg:pb-104 pb-16">
           <BlogsCardGrid posts={firstRowPosts} />
         </section>
       ) : null}
@@ -93,8 +93,8 @@ const BlogsListingClient = ({
         <section
           className={
             showFeatured
-              ? "mx-auto w-full 2xl:max-w-1920 max-w-1440 px-4 md:px-8 lg:px-10 2xl:px-[60px] md:bg-gray200 lg:py-100 py-16"
-              : "mx-auto w-full 2xl:max-w-1920 max-w-1440 px-4 md:px-8 lg:px-10 2xl:px-[60px] md:bg-gray200 md:pt-10 pt-0 lg:pb-100 pb-16"
+              ? "mx-auto w-full 2xl:max-w-1920 max-w-1440 px-4 md:px-8 lg:px-10 2xl:px-[60px] md:bg-gray200 lg:py-104 py-16"
+              : "mx-auto w-full 2xl:max-w-1920 max-w-1440 px-4 md:px-8 lg:px-10 2xl:px-[60px] md:bg-gray200 md:pt-10 pt-0 lg:pb-104 pb-16"
           }
         >
           <div className="w-full flex flex-col items-center gap-16">
