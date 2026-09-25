@@ -514,7 +514,7 @@ function ProductCarouselPanel({
             </div>
           </div>
 
-          <div className="flex shrink-0 flex-col items-center gap-3 desktop:gap-4">
+          <div className="flex shrink-0 flex-col items-center gap-4 md:gap-6">
             <p
               className={cn(
                 "max-w-full truncate px-2 text-center font-gill text-sm font-normal leading-110 text-darkblack md:text-base lg:text-xl",

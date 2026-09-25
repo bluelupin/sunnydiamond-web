@@ -35,7 +35,7 @@ const HeroSection = ({ id, hero }: HeroSectionProps) => {
             <div className="flex flex-col items-center gap-4">
               <div className="inline-flex items-center gap-2">
                 <HeroDiamondIcon />
-                <span className="font-gill text-base font-semibold leading-110 text-white">{hero.eyebrow}</span>
+                <span className="font-gill md:text-base text-sm font-semibold leading-110 text-white">{hero.eyebrow}</span>
               </div>
               <h1 className="max-w-886 font-larken xl:text-6xl md:text-5xl sm:text-4xl text-32 font-light leading-110 text-white">
                 {hero.titleLines.map((line, index) => (
@@ -48,6 +48,8 @@ const HeroSection = ({ id, hero }: HeroSectionProps) => {
             {hero.primaryCtaUrl && hero.primaryCtaLabel ? (
               <Link
                 href={hero.primaryCtaUrl}
+                target={hero.primaryCtaOpenInNewTab ? "_blank" : undefined}
+                rel={hero.primaryCtaOpenInNewTab ? "noopener noreferrer" : undefined}
                 className="bg-white relative flex items-center justify-center px-7 h-14 overflow-hidden font-gill text-sm font-normal uppercase leading-110 group w-fit"
               >
                 <div className="absolute left-0 top-full z-0 h-14 w-full bg-darkblack transition-all duration-300 group-hover:top-0" />

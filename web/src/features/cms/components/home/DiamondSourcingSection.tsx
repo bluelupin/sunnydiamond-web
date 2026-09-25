@@ -44,7 +44,10 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
     backgroundImages.mobileUrl || backgroundImages.desktopUrl || "";
   const hasBackgroundImage = Boolean(backgroundDesktopSrc || backgroundMobileSrc);
 
-  if (!isSectionActive(diamondSourcedDataSection?.isActive)) {
+  if (
+    diamondSourcedDataSection?.showField === false ||
+    !isSectionActive(diamondSourcedDataSection?.isActive)
+  ) {
     return null;
   }
 
@@ -59,7 +62,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
           <section
             id={id}
             aria-label={sectionTitle || "Internally flawless diamonds"}
-            className="relative h-auto overflow-hidden bg-white"
+            className="relative h-auto overflow-hidden bg-white min-h-[520px]"
           >
             <div className="absolute inset-0 -z-0 will-change-transform" ref={bgParallax}>
               {hasBackgroundImage ? (
@@ -89,22 +92,22 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
             </div>
             <div className="relative container h-full py-16 md:py-100 flex flex-col items-center justify-center text-center">
               {gifUrl ? (
-              <Reveal direction="up">
-                <ResponsiveImage
-                  desktopSrc={gifUrl}
-                  alt={imageAlt}
-                  width={64}
-                  height={64}
-                  quality={75}
-                  className="w-10 h-10 mx-auto"
-                />
-              </Reveal>
+                <Reveal direction="up">
+                  <ResponsiveImage
+                    desktopSrc={gifUrl}
+                    alt={imageAlt}
+                    width={64}
+                    height={64}
+                    quality={75}
+                    className="w-10 h-10 mx-auto"
+                  />
+                </Reveal>
               ) : null}
               <Reveal as="h2" direction="up" className="md:mt-6 mt-4 lg:text-5xl md:text-4xl text-32 font-light text-darkblack font-larken max-w-2xl leading-tight tracking-[0%]">
                 {sectionTitle}
               </Reveal>
               {hasDiamondImage ? (
-                <Reveal direction="up" className="md:mt-26 mt-76 md:w-290 md:h-290 w-[243px] h-[293px]">
+                <Reveal direction="up" className="md:mt-[22px] mt-[111px] w-[299px] h-[300px]">
                   <div ref={diamondParallax} className="size-full">
                     <ResponsiveImage
                       desktopSrc={desktopImageUrl || mobileImageUrl || ""}
@@ -127,7 +130,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
             id={id}
             aria-label="Internally flawless diamonds"
             aria-busy="true"
-            className="relative h-auto overflow-hidden"
+            className="relative h-auto overflow-hidden min-h-[520px]"
           >
             <div className="absolute inset-0 -z-0">
               <div className="w-full h-full bg-gray100" />

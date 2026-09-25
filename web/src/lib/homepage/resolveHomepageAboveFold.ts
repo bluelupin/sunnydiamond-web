@@ -12,6 +12,7 @@ export type ResolvedHeroContent = {
   titleLines: string[];
   primaryCtaUrl: string;
   primaryCtaLabel: string;
+  primaryCtaOpenInNewTab?: boolean;
   desktopImageUrl: string;
   mobileImageUrl?: string;
   desktopHeroAlt: string;
@@ -24,6 +25,7 @@ export type ResolvedCraftingRarityContent = {
   subtitleLines: string[];
   secondaryCtaUrl: string;
   secondaryCtaLabel: string;
+  secondaryCtaOpenInNewTab?: boolean;
   categories: CategoryNavigationItem[];
   cutoutDesktopUrl?: string;
   cutoutMobileUrl?: string;
@@ -86,8 +88,9 @@ export function resolveHeroContent(
   return {
     eyebrow: hero.eyebrow ?? "",
     titleLines: splitHeroTitleLines(hero.title ?? ""),
-    primaryCtaUrl: hero.primaryCta?.url ?? "",
+    primaryCtaUrl: hero.primaryCta?.url ?? hero.primaryCta?.to ?? "",
     primaryCtaLabel: hero.primaryCta?.label ?? "",
+    primaryCtaOpenInNewTab: hero.primaryCta?.openInNewTab === true,
     desktopImageUrl,
     mobileImageUrl,
     desktopHeroAlt,
@@ -103,7 +106,7 @@ function resolveCraftingCategories(
     shopping?.homepage?.categoryNavigation ?? shopping?.categoryNavigation;
   if (!Array.isArray(items)) return [];
 
-  return items.filter((item) => item?.isActive !== false);
+  return items.filter((item) => item?.isActive !== false && item?.showField !== false);
 }
 
 export function resolveCraftingRarityContent(
@@ -112,6 +115,28 @@ export function resolveCraftingRarityContent(
   shopping?: HomepageShoppingBlocksData | null,
 ): ResolvedCraftingRarityContent {
   const craftingBrilliance = editorial?.craftingBrillianceSection ?? null;
+
+  if (craftingBrilliance?.showField === false) {
+    const categories = resolveCraftingCategories(shopping);
+
+    return {
+      isActive: categories.length > 0 ? true : false,
+      subtitleLines: [],
+      secondaryCtaUrl: "",
+      secondaryCtaLabel: "",
+      categories,
+    };
+  }
+
+  if (craftingBrilliance?.isActive === false) {
+    return {
+      isActive: false,
+      subtitleLines: [],
+      secondaryCtaUrl: "",
+      secondaryCtaLabel: "",
+      categories: [],
+    };
+  }
 
   const titleSource = craftingBrilliance?.title?.trim() || "";
 
@@ -123,6 +148,7 @@ export function resolveCraftingRarityContent(
     secondaryCtaUrl:
       craftingBrilliance?.cta?.url ?? craftingBrilliance?.cta?.to ?? "",
     secondaryCtaLabel: craftingBrilliance?.cta?.label?.trim() ?? "",
+    secondaryCtaOpenInNewTab: craftingBrilliance?.cta?.openInNewTab === true,
     categories: resolveCraftingCategories(shopping),
     ...(cutoutImages.desktopUrl || cutoutImages.mobileUrl
       ? {

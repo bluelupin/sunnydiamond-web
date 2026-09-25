@@ -21,6 +21,7 @@ export type DiamondSourcingSectionData = {
   id?: number | null;
   sectionTitle?: string | null;
   isActive?: boolean | null;
+  showField?: boolean;
   image?: StrapiMedia & {
     desktopImage?: StrapiMedia;
     mobileImage?: StrapiMedia;

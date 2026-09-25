@@ -2,7 +2,7 @@ export type TrustBadge = {
   id?: number;
   label?: string;
   sortOrder?: number;
-  isActive?: boolean;
+  showField?: boolean;
 };
 
 export type TrustBadgesData = {

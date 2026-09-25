@@ -112,6 +112,7 @@ function mapCta(cta?: StrapiHomepageCta | null): CategoryNavigationCta | undefin
     label,
     url,
     to: url,
+    openInNewTab: cta.openInNewTab === true,
   };
 }
 
@@ -189,6 +190,7 @@ function mapCategoryCard(card: StrapiCategoryCard): CategoryNavigationItem {
     slug: cleanText(card.slug),
     sortOrder: card.sortOrder ?? undefined,
     isActive: card.isActive ?? undefined,
+    showField: card.showField ?? undefined,
     image: mapResponsiveImage(card.image),
     cutoutImage: mapResponsiveImage(card.cutoutImage),
     hoverImage: mapResponsiveImage(card.hoverImage),
@@ -201,21 +203,22 @@ function mapFeaturedCollection(
 ): FeaturedCollectionSection | null {
   if (!raw) return null;
 
+  const sectionIsActive = resolveSectionActive(raw.isActive, raw.showField);
+  if (sectionIsActive === false) return null;
+
   // New shape: collection-showcase-section with editorial-collection relations
   const collections = Array.isArray(raw.collections) ? raw.collections : [];
   if (collections.length > 0) {
     const activeCollections = collections.filter((item) => item?.isActive !== false);
-
-    const selected = activeCollections[0] ?? collections[0];
+    const selected = activeCollections[0];
 
     if (!selected) return null;
-    if (selected.isActive === false) return null;
 
     return {
       id: selected.id ?? raw.id,
       sectionTitle: cleanText(selected.title) ?? cleanText(selected.collectionName),
       description: cleanText(selected.description),
-      isActive: true,
+      isActive: sectionIsActive,
       slug: cleanText(selected.slug),
       cta: mapCta(selected.cta),
       primaryImage: selected.backgroundImage as FeaturedCollectionSection["primaryImage"],
@@ -226,14 +229,11 @@ function mapFeaturedCollection(
   }
 
   // Legacy flat featured-collection block
-  const isActive = resolveSectionActive(raw.isActive, raw.showField);
-  if (isActive === false) return null;
-
   return {
     id: raw.id,
     sectionTitle: cleanText(raw.sectionTitle) ?? cleanText(raw.title),
     description: cleanText(raw.description),
-    isActive,
+    isActive: sectionIsActive,
     cta: mapCta(raw.cta),
     primaryImage: pickResponsiveImage(raw.primaryImage, raw.image, raw.backgroundImage),
     backgroundImage: raw.backgroundImage as FeaturedCollectionSection["backgroundImage"],
@@ -296,12 +296,17 @@ function mapGiftingBanner(raw?: StrapiGiftingBanner | null): GiftingBanner | nul
   };
 }
 
-function mapTrustBadge(badge: StrapiTrustBadge): TrustBadge {
+function mapTrustBadge(badge: StrapiTrustBadge): TrustBadge | null {
+  if (badge.showField !== true) return null;
+
+  const label = cleanText(badge.label);
+  if (!label) return null;
+
   return {
     id: badge.id,
-    label: cleanText(badge.label),
+    label,
     sortOrder: badge.sortOrder ?? undefined,
-    isActive: badge.isActive ?? undefined,
+    showField: true,
   };
 }
 
@@ -312,7 +317,9 @@ export function mapHomepageShoppingBlocksData(
 
   const categorySource = raw.categoryNavigation ?? raw.categoryCards ?? [];
   const categoryNavigation = categorySource.map(mapCategoryCard);
-  const trustBadges = (raw.trustBadges ?? []).map(mapTrustBadge);
+  const trustBadges = (raw.trustBadges ?? [])
+    .map(mapTrustBadge)
+    .filter((badge): badge is TrustBadge => badge != null);
   const featuredCollectionSection = mapFeaturedCollection(
     raw.featuredCollectionSection ?? raw.featuredCollection,
   );
@@ -428,6 +435,8 @@ function mapSunnyPromise(raw?: StrapiTextSection | null): SunnyPromiseSectionDat
 function mapDiamondSourcing(raw?: StrapiTextSection | null): DiamondSourcingSectionData | null {
   if (!raw) return null;
 
+  if (raw.showField === false) return null;
+
   const isActive = resolveSectionActive(raw.isActive, raw.showField);
   if (isActive === false) return null;
 
@@ -435,6 +444,7 @@ function mapDiamondSourcing(raw?: StrapiTextSection | null): DiamondSourcingSect
     id: raw.id,
     sectionTitle: cleanText(raw.sectionTitle) ?? cleanText(raw.title),
     isActive,
+    showField: raw.showField ?? undefined,
     image: pickResponsiveImage(raw.cutoutImage, raw.image) as DiamondSourcingSectionData["image"],
     gifOrImage: pickResponsiveImage(raw.gifOrImage) as DiamondSourcingSectionData["gifOrImage"],
     backgroundImage: pickResponsiveImage(raw.backgroundImage) as DiamondSourcingSectionData["backgroundImage"],
@@ -488,6 +498,8 @@ function mapCraftsmanshipSection(
 function mapOccasionSection(raw?: StrapiOccasionSection | null): OccasionSection | null {
   if (!raw) return null;
 
+  if (raw.showField === false) return null;
+
   const isActive = resolveSectionActive(raw.isActive, raw.showField);
   if (isActive === false) return null;
 
@@ -499,12 +511,15 @@ function mapOccasionSection(raw?: StrapiOccasionSection | null): OccasionSection
     id: raw.id,
     sectionTitle: cleanText(raw.sectionTitle),
     isActive,
+    showField: raw.showField ?? undefined,
     occasions: embedded.length > 0 ? embedded : null,
   };
 }
 
 export function mapOccasionCard(raw?: StrapiOccasionCard | null): OccasionCard | null {
   if (!raw) return null;
+
+  if (raw.showField === false) return null;
 
   const isActive = resolveSectionActive(raw.isActive, raw.showField);
   if (isActive === false) return null;
@@ -523,6 +538,7 @@ export function mapOccasionCard(raw?: StrapiOccasionCard | null): OccasionCard |
       slugifyOccasionTitle(title),
     sortOrder: raw.sortOrder ?? undefined,
     isActive,
+    showField: raw.showField ?? undefined,
     ctaLabel: cleanText(raw.cta?.label),
     cta: mapCta(raw.cta),
     image: pickResponsiveImage(raw.image),
@@ -544,8 +560,14 @@ function mapCraftingBrillianceSection(
 ): CraftingBrillianceSectionData | null {
   if (!raw) return null;
 
+  if (raw.showField === false) {
+    return { isActive: false, showField: false };
+  }
+
   const isActive = resolveSectionActive(raw.isActive, raw.showField);
-  if (isActive === false) return null;
+  if (isActive === false) {
+    return { isActive: false, showField: raw.showField ?? undefined };
+  }
 
   const title = cleanText(raw.title) ?? cleanText(raw.sectionTitle);
   if (!title) return null;
@@ -554,6 +576,7 @@ function mapCraftingBrillianceSection(
     id: raw.id,
     title,
     isActive,
+    showField: raw.showField ?? undefined,
     cta: mapCta(raw.cta),
     backgroundImage: pickResponsiveImage(raw.backgroundImage),
     cutoutImage: pickResponsiveImage(raw.cutoutImage),

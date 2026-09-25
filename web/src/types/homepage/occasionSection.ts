@@ -7,6 +7,7 @@ export type OccasionCard = {
   description?: string | null;
   subtitle?: string | null;
   isActive?: boolean | null;
+  showField?: boolean;
   sortOrder?: number | null;
   /** Homepage occasion card CTA label from CMS `cta.label`. */
   ctaLabel?: string | null;
@@ -18,6 +19,7 @@ export type OccasionSection = {
   id?: number | null;
   sectionTitle?: string | null;
   isActive?: boolean | null;
+  showField?: boolean;
   occasions?: OccasionCard[] | null;
 };
 

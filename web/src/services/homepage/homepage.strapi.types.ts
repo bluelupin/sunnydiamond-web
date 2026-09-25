@@ -86,6 +86,7 @@ export type StrapiCategoryCard = {
   slug?: string | null;
   sortOrder?: number | null;
   isActive?: boolean | null;
+  showField?: boolean | null;
   image?: StrapiResponsiveImageBlock | null;
   cutoutImage?: StrapiResponsiveImageBlock | null;
   hoverImage?: StrapiResponsiveImageBlock | null;
@@ -164,6 +165,7 @@ export type StrapiTrustBadge = {
   label?: string | null;
   sortOrder?: number | null;
   isActive?: boolean | null;
+  showField?: boolean | null;
   icon?: unknown;
 };
 

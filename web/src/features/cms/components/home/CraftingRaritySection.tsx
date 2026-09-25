@@ -18,6 +18,7 @@ const CraftingRaritySection = ({ id, content }: CraftingRaritySectionProps) => {
     subtitleLines,
     secondaryCtaUrl,
     secondaryCtaLabel,
+    secondaryCtaOpenInNewTab,
     categories,
     cutoutDesktopUrl,
     cutoutMobileUrl,
@@ -29,49 +30,52 @@ const CraftingRaritySection = ({ id, content }: CraftingRaritySectionProps) => {
   const hasCmsCutout = Boolean(cutoutDesktopUrl || cutoutMobileUrl);
   const hasCopy = subtitleLines.length > 0;
   const hasCategories = categories.length > 0;
+  const showBrillianceBlock = hasCopy || hasCmsCutout;
 
   if (!isSectionActive(isActive)) {
     return null;
   }
 
-  if (!hasCopy && !hasCategories && !hasCmsCutout) {
+  if (!showBrillianceBlock && !hasCategories) {
     return null;
   }
 
   return (
-    <section id={id} className="w-full bg-white md:pb-12 pb-16">
-      <div className="relative overflow-hidden h-390 md:h-420 lg:h-432">
-        {hasCmsCutout ? (
-          <Reveal
-            direction="up"
-            className="pointer-events-none absolute right-[-29px] sm:top-[-83px] top-[-100px] z-0 lg:right-[2%] lg:top-[-204px] lg:w-[600px] lg:h-[850px] md:w-[550px] md:h-[560px] sm:w-[550px] sm:h-[560px] w-full h-[435px]"
-          >
-            <div className="relative h-full w-full rotate-[-13.91deg]">
-              <ResponsiveImage
-                desktopSrc={cutoutDesktopUrl || cutoutMobileUrl || ""}
-                mobileSrc={cutoutMobileUrl}
-                alt={cutoutDesktopAlt ?? cutoutAlt ?? ""}
-                desktopAlt={cutoutDesktopAlt}
-                mobileAlt={cutoutMobileAlt}
-                width={664}
-                height={850}
-                quality={IMAGE_QUALITY}
-                sizes="(max-width: 1024px) 346px, 664px"
-                className="size-full object-contain"
-              />
-            </div>
-          </Reveal>
-        ) : null}
-        {hasCopy ? (
-          <CraftingRarityCopyBlock
-            subtitleLines={subtitleLines}
-            secondaryCtaUrl={secondaryCtaUrl}
-            secondaryCtaLabel={secondaryCtaLabel}
-          />
-        ) : null}
-      </div>
-
-      <CraftingRarityCategoryGrid categories={categories} />
+    <section id={id} className="w-full bg-white md:pb-0 pb-16">
+      {showBrillianceBlock ? (
+        <div className="relative overflow-hidden h-390 md:h-420 lg:h-432">
+          {hasCmsCutout ? (
+            <Reveal
+              direction="up"
+              className="pointer-events-none absolute right-[-29px] sm:top-[-83px] top-[-100px] z-0 lg:right-[2%] lg:top-[-204px] lg:w-[600px] lg:h-[850px] md:w-[550px] md:h-[560px] sm:w-[550px] sm:h-[560px] w-full h-[435px]"
+            >
+              <div className="relative h-full w-full rotate-[-13.91deg]">
+                <ResponsiveImage
+                  desktopSrc={cutoutDesktopUrl || cutoutMobileUrl || ""}
+                  mobileSrc={cutoutMobileUrl}
+                  alt={cutoutDesktopAlt ?? cutoutAlt ?? ""}
+                  desktopAlt={cutoutDesktopAlt}
+                  mobileAlt={cutoutMobileAlt}
+                  width={664}
+                  height={850}
+                  quality={IMAGE_QUALITY}
+                  sizes="(max-width: 1024px) 346px, 664px"
+                  className="size-full object-contain"
+                />
+              </div>
+            </Reveal>
+          ) : null}
+          {hasCopy ? (
+            <CraftingRarityCopyBlock
+              subtitleLines={subtitleLines}
+              secondaryCtaUrl={secondaryCtaUrl}
+              secondaryCtaLabel={secondaryCtaLabel}
+              secondaryCtaOpenInNewTab={secondaryCtaOpenInNewTab}
+            />
+          ) : null}
+        </div>
+      ) : null}
+      {hasCategories ? <CraftingRarityCategoryGrid categories={categories} /> : null}
     </section>
   );
 };

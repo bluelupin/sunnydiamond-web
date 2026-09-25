@@ -11,6 +11,7 @@ export type CategoryNavigationCta = {
   label?: string;
   url?: string;
   to?: string;
+  openInNewTab?: boolean;
 };
 
 export type CategoryNavigationItem = {
@@ -19,6 +20,7 @@ export type CategoryNavigationItem = {
   label?: string | null;
   slug?: string | null;
   isActive?: boolean | null;
+  showField?: boolean;
   sortOrder?: number | null;
   image?: CategoryNavigationImage | StrapiMedia | null;
   cutoutImage?: CategoryNavigationImage | StrapiMedia | null;

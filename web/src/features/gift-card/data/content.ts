@@ -57,7 +57,7 @@ export const giftCardFlowContent = {
     digitalMessage:
       "Your digital gift card has been sent to the recipient and will be available shortly.",
     image: {
-      src: "/images/gifting/gift-card-success.png",
+      src: "/images/gift-card-success.png",
       alt: "Sunny Diamonds gift card",
     },
     trackOrderLabel: "TRACK ORDER",
