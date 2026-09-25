@@ -717,6 +717,8 @@ export function mapStrapiBlogPostToDetail(
     slug,
     title,
     author,
+    authorName: authorName?.replace(/^by\s+/i, "") ?? null,
+    publishedDate: cleanText(post.publishedDate) ?? null,
     date: formatBlogDate(post.publishedDate),
     readTime: formatReadTime(post),
     heroImage: {

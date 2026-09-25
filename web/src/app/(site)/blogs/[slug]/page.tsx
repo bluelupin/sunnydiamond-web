@@ -6,6 +6,8 @@ import {
   getBlogDetailBySlug,
 } from "@/services/blogs/blogs.service";
 import { constructMetadata } from "@/shared/lib/seo/metadata";
+import { getAbsoluteUrl } from "@/shared/lib/seo/siteConfig";
+import JsonLd from "@/shared/lib/seo/JsonLd";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -64,7 +66,26 @@ export default async function Page({ params }: PageProps) {
     notFound();
   }
 
+  const { detail } = result;
+  const articleUrl = getAbsoluteUrl(`/blogs/${encodeURIComponent(detail.slug)}`);
+  const imageUrl = detail.heroImage.desktopUrl ?? detail.heroImage.mobileUrl;
+  const articleMarkup = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: detail.title,
+    mainEntityOfPage: articleUrl,
+    author: detail.authorName
+      ? { "@type": "Person", name: detail.authorName }
+      : { "@type": "Organization", name: "Sunny Diamonds" },
+    publisher: { "@type": "Organization", name: "Sunny Diamonds" },
+    ...(detail.publishedDate ? { datePublished: detail.publishedDate } : {}),
+    ...(imageUrl ? { image: getAbsoluteUrl(imageUrl) } : {}),
+  };
+
   return (
-    <BlogDetailPage detail={result.detail} relatedPosts={result.relatedPosts} />
+    <>
+      <JsonLd id="blog-posting-jsonld" data={articleMarkup} />
+      <BlogDetailPage detail={detail} relatedPosts={result.relatedPosts} />
+    </>
   );
 }

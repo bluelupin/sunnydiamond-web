@@ -70,6 +70,9 @@ export type BlogDetail = {
   slug: string;
   title: string;
   author: string;
+  /** Unformatted CMS values used by article structured data. */
+  authorName?: string | null;
+  publishedDate?: string | null;
   date: string;
   readTime: string;
   /** Detail banner — CMS `heroImage` (desktop + mobile). Landing cards use `coverImage`. */

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LoaderCircle, X } from "lucide-react";
+import { X } from "lucide-react";
 import AppStatusToast, { appStatusToastDurationMs } from "@/shared/ui/AppStatusToast";
 import FormFieldError from "@/shared/ui/FormFieldError";
 import AppointmentDateField from "@/shared/ui/AppointmentDateField";
@@ -17,6 +17,7 @@ import {
   validateRequiredName,
 } from "@/shared/utils/formValidation";
 import { useCareersJobs } from "@/features/careers/context/CareersJobsContext";
+import CareersResumeAutofillLoading from "./CareersResumeAutofillLoading";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useCustomerProfileContact } from "@/shared/hooks/use-customer-profile-contact";
 import { submitCareerApplication } from "@/services/careers/career-submission.service";
@@ -25,7 +26,6 @@ import {
   getAutofillPhone,
   getRelevantExperienceOption,
   parseCareerResume,
-  type ParsedResumePosition,
 } from "@/services/careers/career-resume-parser.service";
 import { resolveCareerApplicationFlow } from "@/services/careers/resolveCareerApplicationFlow";
 import {
@@ -163,6 +163,7 @@ const CareersApplicationForm = () => {
   const [resumeParseError, setResumeParseError] = useState<string | null>(null);
   const [resumeParseWarnings, setResumeParseWarnings] = useState<string[]>([]);
   const parseAbortRef = useRef<AbortController | null>(null);
+  const pendingAutofillTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const autofillNextFileRef = useRef(false);
   const [submitted, setSubmitted] = useState(false);
   const [touched, setTouched] = useState<Partial<Record<ApplicationField, boolean>>>({});
@@ -254,6 +255,9 @@ const CareersApplicationForm = () => {
       if (resumeValidationToastTimeoutRef.current) {
         clearTimeout(resumeValidationToastTimeoutRef.current);
       }
+      if (pendingAutofillTimerRef.current) {
+        clearTimeout(pendingAutofillTimerRef.current);
+      }
       parseAbortRef.current?.abort();
     };
   }, []);
@@ -282,10 +286,19 @@ const CareersApplicationForm = () => {
 
     if (applicationEntry === "resume") {
       if (isCareersAutofillFileSupported(pendingResumeFile)) {
-        void autofillFromResume(pendingResumeFile);
+        // Wait until mount effects settle so a development remount cannot upload twice.
+        if (pendingAutofillTimerRef.current) {
+          clearTimeout(pendingAutofillTimerRef.current);
+        }
+        pendingAutofillTimerRef.current = setTimeout(() => {
+          pendingAutofillTimerRef.current = null;
+          clearPendingResume();
+          void autofillFromResume(pendingResumeFile);
+        }, 0);
+        return;
       } else {
         setIsParsingResume(false);
-        setResumeParseError("Autofill accepts PDF, DOCX, JPG, or PNG. Your resume is attached; complete the form manually.");
+        setResumeParseError("Autofill accepts PDF or DOCX. Your resume is attached; complete the form manually.");
       }
     }
     clearPendingResume();
@@ -396,6 +409,10 @@ const CareersApplicationForm = () => {
     if (!file) {
       return;
     }
+    if (pendingAutofillTimerRef.current) {
+      clearTimeout(pendingAutofillTimerRef.current);
+      pendingAutofillTimerRef.current = null;
+    }
     parseAbortRef.current?.abort();
     setIsParsingResume(false);
     setResumeAutofillComplete(false);
@@ -417,7 +434,7 @@ const CareersApplicationForm = () => {
       if (isCareersAutofillFileSupported(file)) {
         void autofillFromResume(file);
       } else {
-        setResumeParseError("Autofill accepts PDF, DOCX, JPG, or PNG. Your resume is attached; complete the form manually.");
+        setResumeParseError("Autofill accepts PDF or DOCX. Your resume is attached; complete the form manually.");
       }
     } else {
       parseAbortRef.current?.abort();
@@ -434,6 +451,10 @@ const CareersApplicationForm = () => {
   };
 
   const removeResume = () => {
+    if (pendingAutofillTimerRef.current) {
+      clearTimeout(pendingAutofillTimerRef.current);
+      pendingAutofillTimerRef.current = null;
+    }
     parseAbortRef.current?.abort();
     setIsParsingResume(false);
     setResumeFile(null);
@@ -571,15 +592,7 @@ const CareersApplicationForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-10" noValidate>
-      {isParsingResume ? (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-white/90 px-6" role="status" aria-live="polite">
-          <div className="flex flex-col items-center gap-4 text-center text-darkblack">
-            <LoaderCircle className="size-10 animate-spin" aria-hidden="true" />
-            <p className="font-larken text-2xl">Reading your resume</p>
-            <p className="font-gill text-sm">Preparing your application fields…</p>
-          </div>
-        </div>
-      ) : null}
+      {isParsingResume ? <CareersResumeAutofillLoading /> : null}
       <CareersApplicationJobHeader job={selectedJob} />
 
       <div className="flex flex-col gap-6">
