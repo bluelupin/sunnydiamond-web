@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Slider, { type Settings } from "react-slick";
-import type { FeaturedCarouselItem } from "@/features/cms/components/home/FeaturedProductsCarousel";
+import type { FeaturedCarouselItem } from "@/types/homepage/featuredCarousel";
 import { cn } from "@/shared/utils/cn";
 import { productNameDisplayClassName } from "@/shared/utils/productNameDisplay";
 import "slick-carousel/slick/slick.css";

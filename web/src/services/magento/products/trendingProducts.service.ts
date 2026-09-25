@@ -1,4 +1,4 @@
-import type { FeaturedCarouselItem } from "@/features/cms/components/home/FeaturedProductsCarousel";
+import type { FeaturedCarouselItem } from "@/types/homepage/featuredCarousel";
 import type { JewelleryListingProduct } from "@/features/jewellery-product/types";
 import { resolveImageSrcString } from "@/shared/utils/image";
 import { magentoGraphqlFetch } from "../graphqlClient";

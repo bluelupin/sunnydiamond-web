@@ -1,7 +1,7 @@
 "use client";
 
 import FeaturedProductsCenterModeSlider from "@/features/cms/components/home/FeaturedProductsCenterModeSlider";
-import type { FeaturedCarouselItem } from "@/features/cms/components/home/FeaturedProductsCarousel";
+import type { FeaturedCarouselItem } from "@/types/homepage/featuredCarousel";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import type { MoreForYouCarouselItem } from "@/features/products/data/moreForYouContent";
 

@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import ScrollReveal from "@/shared/ui/ScrollReveal";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
-import type { FeaturedCarouselItem } from "@/features/cms/components/home/FeaturedProductsCarousel";
+import type { FeaturedCarouselItem } from "@/types/homepage/featuredCarousel";
 import EducationCenterModeSlider from "@/features/education/components/EducationCenterModeSlider";
 import { cn } from "@/shared/utils/cn";
 import { useLearnAnatomySectionSync } from "@/features/education/hooks/useLearnAnatomySectionSync";
