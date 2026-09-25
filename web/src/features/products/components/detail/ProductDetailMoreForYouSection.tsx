@@ -1,8 +1,7 @@
 "use client";
 
-import FeaturedProductsCarousel, {
-  type FeaturedCarouselItem,
-} from "@/features/cms/components/home/FeaturedProductsCarousel";
+import FeaturedProductsCenterModeSlider from "@/features/cms/components/home/FeaturedProductsCenterModeSlider";
+import type { FeaturedCarouselItem } from "@/features/cms/components/home/FeaturedProductsCarousel";
 import PageContainer from "@/shared/ui/layout/PageContainer";
 import type { MoreForYouCarouselItem } from "@/features/products/data/moreForYouContent";
 
@@ -47,10 +46,10 @@ const ProductDetailMoreForYouSection = ({ items, title }: ProductDetailMoreForYo
           </div>
         ) : null}
 
-        <FeaturedProductsCarousel
+        <FeaturedProductsCenterModeSlider
           items={carouselItems}
           ctaLabel={MORE_FOR_YOU_CTA_LABEL}
-          sectionLabel={sectionTitle}
+          showCta
         />
       </div>
     </section>

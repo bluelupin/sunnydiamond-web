@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import FeaturedProductsCarousel from "@/features/cms/components/home/FeaturedProductsCarousel";
+import FeaturedProductsCenterModeSlider from "@/features/cms/components/home/FeaturedProductsCenterModeSlider";
 import {
   FeaturedCarouselSkeleton,
   FeaturedProductsHeader,
@@ -45,10 +45,9 @@ const GiftingProductListSection = ({ perfectGift }: GiftingProductListSectionPro
         {isCarouselLoading ? (
           <FeaturedCarouselSkeleton />
         ) : (
-          <FeaturedProductsCarousel
+          <FeaturedProductsCenterModeSlider
             items={items}
             ctaLabel=""
-            sectionLabel={perfectGift.title}
             showCta={false}
           />
         )}

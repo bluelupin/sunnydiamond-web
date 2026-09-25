@@ -5,7 +5,7 @@ import { useHomepageShoppingBlocks } from "@/hooks/homepage/useHomepageShoppingB
 import { useMagentoTrendingProducts } from "@/hooks/magento/useMagentoTrendingProducts";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import Reveal from "@/shared/Animation/Reveal";
-import FeaturedProductsCarousel from "@/features/cms/components/home/FeaturedProductsCarousel";
+import FeaturedProductsCenterModeSlider from "@/features/cms/components/home/FeaturedProductsCenterModeSlider";
 import { mapJewelleryListingToFeaturedCarouselItems } from "@/services/magento/products/trendingProducts.service";
 
 /** Recommended transparent product PNG/WebP for CMS uploads. */
@@ -119,16 +119,15 @@ const FeaturedProductsSection = ({ id }: FeaturedProductsSectionProps) => {
     <section
       id={id}
       className="overflow-x-clip px-0 py-16 md:py-104 md:min-h-[600px] min-h-auto"
-      aria-label="Featured diamond carousel"
+      aria-label={sectionTitle || "Featured diamond carousel"}
     >
       <div className="flex w-full max-w-full flex-col items-center gap-10 overflow-x-clip">
         {sectionTitle || description ? (
           <FeaturedProductsHeader title={sectionTitle} description={description} />
         ) : null}
-        <FeaturedProductsCarousel
+        <FeaturedProductsCenterModeSlider
           items={items}
           ctaLabel={ctaLabel}
-          sectionLabel={sectionTitle || "Featured products"}
           showCta={Boolean(ctaLabel)}
         />
       </div>

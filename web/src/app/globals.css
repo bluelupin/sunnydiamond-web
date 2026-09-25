@@ -958,3 +958,10 @@
     background: linear-gradient(to bottom, rgb(246 239 227 / 18%) 0%, transparent 32%);
   }
 }
+
+
+
+.centerModeSliderComponent .slick-arrow.slick-prev,
+.slick-arrow.slick-next {
+  display: none !important;
+}
