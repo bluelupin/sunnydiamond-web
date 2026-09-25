@@ -22,6 +22,8 @@ export type CheckoutFormData = {
   billingCountryCode: string;
   /** Saved profile address uid when checkout shipping matches a saved address. */
   selectedShippingAddressUid: string | null;
+  /** Signed-in customers opt in to storing the checkout addresses in their address book. */
+  saveAddressToProfile: boolean;
 };
 
 /**
@@ -56,6 +58,7 @@ export const createEmptyCheckoutForm = (): CheckoutFormData => ({
   billingPhone: "",
   billingCountryCode: "+91",
   selectedShippingAddressUid: null,
+  saveAddressToProfile: false,
 });
 
 export const createEmptyPaymentForm = (): CheckoutPaymentData => ({

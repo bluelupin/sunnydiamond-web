@@ -333,6 +333,15 @@ export const CheckoutFormStep = ({
               disabled={fieldsDisabled}
             />
           ) : null}
+
+          {isAuthenticated ? (
+            <CheckoutCheckbox
+              checked={form.saveAddressToProfile}
+              onChange={(checked) => onChange("saveAddressToProfile", checked)}
+              label="Save this address to my profile"
+              disabled={fieldsDisabled}
+            />
+          ) : null}
         </>
       )}
     </CheckoutSectionCard>

@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { getCustomerToken } from "@/services/auth/session";
+import { getCustomerTokenFromRequest } from "@/services/auth/session";
 import { fetchCustomerOrders } from "@/services/customer/customer-account.service";
 
 export async function GET(request: Request) {
-  const token = await getCustomerToken();
+  const token = await getCustomerTokenFromRequest(request);
 
   if (!token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

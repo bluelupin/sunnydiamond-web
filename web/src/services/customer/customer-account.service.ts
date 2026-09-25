@@ -194,6 +194,17 @@ export async function syncCustomerAddressFromLatestOrder(
   });
 }
 
+/** Saves the account mobile number (E.164, or "" to clear) without SMS verification. */
+export async function updateCustomerPhone(authToken: string, phone: string): Promise<void> {
+  await magentoGraphqlFetch({
+    query: MAGENTO_UPDATE_CUSTOMER_MUTATION,
+    variables: {
+      input: { custom_attributes: [{ attribute_code: "mobile_number", value: phone }] },
+    },
+    authToken,
+  });
+}
+
 export async function updateCustomerName(
   authToken: string,
   input: { firstname: string; lastname: string },

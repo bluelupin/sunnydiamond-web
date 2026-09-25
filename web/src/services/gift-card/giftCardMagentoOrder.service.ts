@@ -48,6 +48,7 @@ function mapGiftCardPayloadToCheckoutForm(payload: GiftCardOrderPayload): Checko
     billingPhone: payload.sender.phone.trim(),
     billingCountryCode: "+91",
     selectedShippingAddressUid: null,
+    saveAddressToProfile: false,
   };
 }
 

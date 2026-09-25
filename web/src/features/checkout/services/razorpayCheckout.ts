@@ -218,8 +218,7 @@ export async function resetRazorpayCart(orderNumber: string): Promise<boolean> {
 
 export type RazorpayPaymentOutcome =
   | { status: "paid"; paymentId: string; signature: string }
-  | { status: "dismissed" }
-  | { status: "failed" };
+  | { status: "dismissed" };
 
 /**
  * Runs the full Razorpay checkout for an already-placed Magento order:
@@ -301,9 +300,11 @@ export async function collectRazorpayPayment(input: {
       },
     });
 
-    razorpay.on("payment.failed", () => {
-      settle({ status: "failed" });
-    });
+    // A failed attempt is not the end: Razorpay keeps its modal open with a
+    // retry, and a later success still reaches `handler`. Settling here tore
+    // the Magento order down mid-retry, so the retry's success was rejected
+    // (QA bug #31). Closing the modal without paying settles via ondismiss.
+    razorpay.on("payment.failed", () => {});
 
     razorpay.open();
   });

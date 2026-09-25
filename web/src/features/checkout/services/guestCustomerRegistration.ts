@@ -1,4 +1,4 @@
-import { createCustomerAccount } from "@/features/auth/services/auth.service";
+import { createCustomerAccount, type OtpTarget } from "@/features/auth/services/auth.service";
 import { resolveGuestCheckoutEmail } from "@/services/magento/cart/checkoutAddress.mapper";
 import type { CheckoutFormData } from "../types/checkout.types";
 
@@ -23,16 +23,22 @@ export async function registerGuestCustomerAfterOrder(
   form: CheckoutFormData,
   otp: string,
 ): Promise<boolean> {
+  const contact = form.phoneOrEmail.trim();
   const phone = getCheckoutPhoneDigits(form);
   const otpCode = otp.trim();
   const fullName = getCheckoutRegistrationName(form);
 
-  if (!phone || phone.length < 10 || !otpCode || !fullName) {
+  // The OTP was sent to the contact field: an email address, or a mobile number.
+  const target: OtpTarget = contact.includes("@")
+    ? { kind: "email", email: contact.toLowerCase() }
+    : { kind: "phone", phone };
+
+  if ((target.kind === "phone" && phone.length < 10) || !otpCode || !fullName) {
     return false;
   }
 
   const result = await createCustomerAccount({
-    target: { kind: "phone", phone },
+    target,
     otp: otpCode,
     fullName,
     email: getCheckoutRegistrationEmail(form),

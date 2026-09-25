@@ -10,8 +10,11 @@ export const profileDetailsContent = {
   verifiedLabel: "Verified",
   saveLabel: "SAVE",
   cancelLabel: "CANCEL",
-  phoneInfo:
-    "Phone number is linked to your login and cannot be changed here. Contact support for assistance.",
+  phoneInfo: "Enter a 10-digit Indian mobile number. It can be used to sign in with an OTP.",
+  phonePlaceholder: "10-digit mobile number",
+  phoneInvalidMessage: "Enter a valid 10-digit mobile number.",
+  phoneSuccessToastMessage: "Your mobile number has been updated.",
+  phoneErrorToastMessage: "We could not update your mobile number. Please try again.",
   saveUnavailableTitle: "Profile updates",
   saveUnavailableDescription:
     "To update your details, please contact our support team or visit a showroom.",

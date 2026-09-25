@@ -102,6 +102,36 @@ export async function requestLoginOtp(target: OtpTarget): Promise<RequestOtpResu
   };
 }
 
+/** Sends the SMS code that links a new mobile number to the signed-in account. */
+export async function requestPhoneLinkOtp(phone: string): Promise<RequestOtpResult> {
+  const { ok, data } = await postJson("/api/customer/phone", { phone });
+
+  if (!ok || !data?.ok) {
+    return {
+      success: false,
+      error: (data?.error as string) ?? "We could not send the code. Please try again.",
+    };
+  }
+
+  return {
+    success: true,
+    resendAfterSeconds: (data.resendAfterSeconds as number) ?? 60,
+    channel: "sms",
+    maskedDestination: null,
+  };
+}
+
+/** Verifies the link code and saves the mobile number on the signed-in account. */
+export async function verifyPhoneLink(phone: string, code: string): Promise<VerifyOtpResult> {
+  const { ok, data } = await postJson("/api/customer/phone", { phone, otp: code });
+
+  if (!ok || !data?.ok) {
+    return { success: false, error: (data?.error as string) ?? "Incorrect code" };
+  }
+
+  return { success: true, requiresAccountSetup: false };
+}
+
 /** Verifies the OTP for passwordless sign in against Magento. */
 export async function verifyLoginOtp(
   target: OtpTarget,

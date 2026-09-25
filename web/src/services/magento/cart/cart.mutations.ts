@@ -98,6 +98,17 @@ export const MAGENTO_SET_GUEST_EMAIL_ON_CART_MUTATION = `
   }
 ` as const;
 
+/** SunnyDiamonds_OrderFlow: like setGuestEmailOnCart, but allowed on customer carts. */
+export const MAGENTO_SET_CART_CONTACT_EMAIL_MUTATION = `
+  mutation MagentoSetCartContactEmail($cartId: String!, $email: String!) {
+    sunnySetCartContactEmail(input: { cart_id: $cartId, email: $email }) {
+      cart {
+        id
+      }
+    }
+  }
+` as const;
+
 export const MAGENTO_SET_SHIPPING_ADDRESSES_ON_CART_MUTATION = `
   mutation MagentoSetShippingAddressesOnCart(
     $cartId: String!

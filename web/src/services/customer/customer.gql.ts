@@ -34,6 +34,12 @@ export const MAGENTO_CUSTOMER_ME_QUERY = `
       firstname
       lastname
       email
+      custom_attributes(attributeCodes: ["mobile_number"]) {
+        code
+        ... on AttributeValue {
+          value
+        }
+      }
     }
   }
 ` as const;

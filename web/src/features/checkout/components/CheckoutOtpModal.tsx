@@ -4,7 +4,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { CartPrimaryButton } from "@/features/cart/components/CartFlowUi";
 import {
   requestLoginOtp,
+  requestPhoneLinkOtp,
   verifyLoginOtp,
+  verifyPhoneLink,
+  type OtpTarget,
 } from "@/features/auth/services/auth.service";
 import {
   Drawer,
@@ -28,7 +31,10 @@ export type CheckoutOtpVerifyResult = {
 
 type CheckoutOtpModalProps = {
   open: boolean;
+  /** The contact being verified: a mobile number, or an email address (contains "@"). */
   phone: string;
+  /** "login" (default) signs the guest in; "link" attaches the number to the signed-in account. */
+  purpose?: "login" | "link";
   onClose: () => void;
   onVerify: (result: CheckoutOtpVerifyResult) => void;
 };
@@ -37,6 +43,10 @@ const OTP_LENGTH = 6;
 const RESEND_SECONDS = 30;
 
 const maskPhone = (phone: string) => {
+  if (phone.includes("@")) {
+    const [user, domain] = phone.trim().split("@");
+    return `${user.slice(0, 2)}****@${domain}`;
+  }
   const digits = phone.replace(/\D/g, "");
   if (digits.length < 4) return "+91 ******";
   return `+91 ${digits.slice(0, 2)}******${digits.slice(-2)}`;
@@ -189,7 +199,13 @@ const CheckoutOtpDesktopPanel = ({
   </div>
 );
 
-const CheckoutOtpModal = ({ open, phone, onClose, onVerify }: CheckoutOtpModalProps) => {
+const CheckoutOtpModal = ({
+  open,
+  phone,
+  purpose = "login",
+  onClose,
+  onVerify,
+}: CheckoutOtpModalProps) => {
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
   const [otpError, setOtpError] = useState<string | undefined>();
@@ -198,15 +214,21 @@ const CheckoutOtpModal = ({ open, phone, onClose, onVerify }: CheckoutOtpModalPr
   const { showMobileShell } = useResponsiveOverlayShell(open, CHECKOUT_OTP_MOBILE_QUERY);
 
   const phoneDigits = phone.replace(/\D/g, "");
+  const isEmail = phone.includes("@");
+  const target: OtpTarget = isEmail
+    ? { kind: "email", email: phone.trim().toLowerCase() }
+    : { kind: "phone", phone: phoneDigits };
 
   const sendOtp = useCallback(async () => {
-    if (phoneDigits.length < 10) {
+    if (!isEmail && phoneDigits.length < 10) {
       setOtpError("Enter a valid phone number before requesting an OTP.");
       return;
     }
 
-    // Checkout only ever verifies a mobile number, never an email address.
-    const result = await requestLoginOtp({ kind: "phone", phone: phoneDigits });
+    const result =
+      purpose === "link"
+        ? await requestPhoneLinkOtp(phoneDigits)
+        : await requestLoginOtp(target);
     if (!result.success) {
       setOtpError(result.error);
       return;
@@ -214,7 +236,8 @@ const CheckoutOtpModal = ({ open, phone, onClose, onVerify }: CheckoutOtpModalPr
 
     setOtpError(undefined);
     setSecondsLeft(result.resendAfterSeconds);
-  }, [phoneDigits]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `target` derives from `phone`
+  }, [phone, phoneDigits, isEmail, purpose]);
 
   useEffect(() => {
     if (!open) {
@@ -263,7 +286,10 @@ const CheckoutOtpModal = ({ open, phone, onClose, onVerify }: CheckoutOtpModalPr
     setIsVerifying(true);
     setOtpError(undefined);
 
-    const result = await verifyLoginOtp({ kind: "phone", phone: phoneDigits }, otp.join(""));
+    const result =
+      purpose === "link"
+        ? await verifyPhoneLink(phoneDigits, otp.join(""))
+        : await verifyLoginOtp(target, otp.join(""));
     setIsVerifying(false);
 
     if (!result.success) {

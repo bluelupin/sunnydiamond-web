@@ -8,6 +8,7 @@ type AuthMePayload = {
     firstname: string;
     lastname: string;
     email: string;
+    phone?: string | null;
   } | null;
 };
 
@@ -61,6 +62,14 @@ export async function getCustomerProfileContact(
       phone: null,
       countryCode: null,
     };
+
+    // The account's own mobile number wins; the address-book phone is a fallback.
+    const accountDigits = customer.phone?.replace(/\D/g, "") ?? "";
+    if (accountDigits.length >= 10) {
+      contact.phone = accountDigits.slice(-10);
+      contact.countryCode = `+${accountDigits.slice(0, -10) || "91"}`;
+      return contact;
+    }
 
     try {
       const addressesResponse = await fetch("/api/customer/addresses", {

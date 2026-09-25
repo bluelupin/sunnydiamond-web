@@ -154,7 +154,7 @@ type CheckoutPhoneFieldProps = {
   verified?: boolean;
   onVerify?: () => void;
   showVerify?: boolean;
-  /** "email" locks the field to an address — no country prefix, no VERIFY, no phone parsing. */
+  /** "email" locks the field to an address — no country prefix, no phone parsing. */
   mode?: "phone" | "phoneOrEmail" | "email";
   error?: string;
   invalid?: boolean;
@@ -179,7 +179,7 @@ export const CheckoutPhoneField = ({
   disabled = false,
 }: CheckoutPhoneFieldProps) => {
   const isEmailInput = mode === "email" || (mode === "phoneOrEmail" && /[a-zA-Z@]/.test(value));
-  const shouldShowVerify = showVerify && !isEmailInput;
+  const shouldShowVerify = showVerify;
 
   return (
   <div className="flex flex-col gap-2">

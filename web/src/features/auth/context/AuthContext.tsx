@@ -19,6 +19,8 @@ export type AuthCustomer = {
   firstname: string;
   lastname: string;
   email: string;
+  /** E.164 mobile number linked to the account, or null when none is set. */
+  phone?: string | null;
 };
 
 type AuthStatus = "loading" | "guest" | "authenticated";

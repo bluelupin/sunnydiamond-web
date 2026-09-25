@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import InformationIcon from "@/assets/Icons/InformationIcon";
 import { useAuth, type AuthCustomer } from "@/features/auth/context/AuthContext";
+import { useAuthFeatures } from "@/features/auth/context/AuthFeaturesContext";
+import CheckoutOtpModal from "@/features/checkout/components/CheckoutOtpModal";
 import { validateRequiredName } from "@/shared/utils/formValidation";
 import {
   DetailDarkButton,
@@ -34,6 +36,7 @@ type ProfileDetailsSectionProps = {
 /** Figma 1480:20341 — profile personal details, delete account, and logout mobile layout */
 const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
   const { logout, refresh } = useAuth();
+  const { otpLoginEnabled } = useAuthFeatures();
   const { contact } = useCustomerProfileContact(true);
   const content = profileDetailsContent;
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -78,6 +81,8 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
   );
 
   const [fullName, setFullName] = useState(initialFullName);
+  const [phone, setPhone] = useState("");
+  const [phoneOtpOpen, setPhoneOtpOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -89,16 +94,26 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
     setIsEmailVerified(isProfileEmailVerified(customer.id, initialEmail));
   }, [customer.id, initialEmail]);
 
-  const phoneDisplay = useMemo(() => {
-    if (!contact?.phone) return "";
-    const prefix = contact.countryCode ?? "";
-    return `${prefix}${contact.phone}`;
-  }, [contact]);
+  // Account mobile number first (refreshed after a save); address-book phone as fallback.
+  const initialPhone = useMemo(
+    () => customer.phone?.replace(/\D/g, "").slice(-10) || contact?.phone?.slice(-10) || "",
+    [customer.phone, contact?.phone],
+  );
 
-  const hasChanges = fullName.trim() !== initialFullName.trim();
+  // Re-sync the field when the stored number changes (initial load, post-save refresh).
+  const [syncedPhone, setSyncedPhone] = useState(initialPhone);
+  if (syncedPhone !== initialPhone) {
+    setSyncedPhone(initialPhone);
+    setPhone(initialPhone);
+  }
+
+  const nameChanged = fullName.trim() !== initialFullName.trim();
+  const phoneChanged = phone !== initialPhone;
+  const hasChanges = nameChanged || phoneChanged;
 
   const handleCancel = () => {
     setFullName(initialFullName);
+    setPhone(initialPhone);
   };
 
   const handleLogout = () => {
@@ -117,29 +132,58 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
       return;
     }
 
+    if (phoneChanged && phone && phone.length !== 10) {
+      showStatusToast(content.phoneInvalidMessage);
+      return;
+    }
+
     void (async () => {
       setIsSaving(true);
 
       try {
-        const response = await fetch("/api/customer/profile", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ fullName: fullName.trim() }),
-        });
-        const payload = (await response.json()) as { error?: string };
+        if (nameChanged) {
+          await patchProfile({ fullName: fullName.trim() }, content.saveErrorToastMessage);
+        }
 
-        if (!response.ok) {
-          throw new Error(payload.error || content.saveErrorToastMessage);
+        if (phoneChanged) {
+          // With SMS OTP on, the number must be verified before it is linked.
+          if (otpLoginEnabled && phone) {
+            if (nameChanged) {
+              await refresh();
+            }
+            setPhoneOtpOpen(true);
+            return;
+          }
+          await patchProfile({ phone }, content.phoneErrorToastMessage);
         }
 
         await refresh();
-        showStatusToast(content.saveSuccessToastMessage);
-      } catch {
-        showStatusToast(content.saveErrorToastMessage);
+        showStatusToast(
+          phoneChanged ? content.phoneSuccessToastMessage : content.saveSuccessToastMessage,
+        );
+      } catch (error) {
+        showStatusToast(error instanceof Error ? error.message : content.saveErrorToastMessage);
       } finally {
         setIsSaving(false);
       }
     })();
+  };
+
+  const handlePhoneLinked = () => {
+    setPhoneOtpOpen(false);
+    void refresh().then(() => showStatusToast(content.phoneSuccessToastMessage));
+  };
+
+  const patchProfile = async (body: Record<string, string>, fallbackError: string) => {
+    const response = await fetch("/api/customer/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const payload = (await response.json()) as { error?: string };
+    if (!response.ok) {
+      throw new Error(payload.error || fallbackError);
+    }
   };
 
   const handleVerifyEmail = () => {
@@ -183,6 +227,13 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
       <AppStatusToast
         open={Boolean(statusToastMessage)}
         message={statusToastMessage ?? ""}
+      />
+      <CheckoutOtpModal
+        open={phoneOtpOpen}
+        phone={phone}
+        purpose="link"
+        onClose={() => setPhoneOtpOpen(false)}
+        onVerify={handlePhoneLinked}
       />
 
       <div className="flex flex-col gap-6">
@@ -228,9 +279,11 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
               </div>
             </div>
 
-            <div className="flex flex-col gap-2 opacity-50">
+            <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <span className={appointmentLabelClassName}>{content.fields.phone}</span>
+                <label htmlFor="profile-phone" className={appointmentLabelClassName}>
+                  {content.fields.phone}
+                </label>
                 <button
                   type="button"
                   className="text-darkblack"
@@ -242,9 +295,12 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
               </div>
               <input
                 id="profile-phone"
-                type="text"
-                value={phoneDisplay}
-                readOnly
+                type="tel"
+                inputMode="numeric"
+                value={phone}
+                onChange={(event) => setPhone(event.target.value.replace(/\D/g, "").slice(0, 10))}
+                placeholder={content.phonePlaceholder}
+                autoComplete="tel-national"
                 className={appointmentFieldClassName}
               />
             </div>

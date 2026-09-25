@@ -7,6 +7,7 @@ import {
   MAGENTO_REMOVE_ITEM_FROM_CART_MUTATION,
   MAGENTO_SET_BILLING_ADDRESS_ON_CART_MUTATION,
   MAGENTO_SET_GUEST_EMAIL_ON_CART_MUTATION,
+  MAGENTO_SET_CART_CONTACT_EMAIL_MUTATION,
   MAGENTO_SET_PAYMENT_METHOD_ON_CART_MUTATION,
   MAGENTO_SET_SHIPPING_ADDRESSES_ON_CART_MUTATION,
   MAGENTO_SET_SHIPPING_METHODS_ON_CART_MUTATION,
@@ -601,6 +602,23 @@ export async function setGuestEmailOnCart(
   });
 }
 
+/**
+ * Signed-in customers may order under a different address than their account
+ * email; the order confirmation goes to what they typed (QA bug #28).
+ */
+export async function setCartContactEmail(
+  cartId: string,
+  email: string,
+  signal?: AbortSignal,
+): Promise<void> {
+  await magentoGraphqlFetch({
+    query: MAGENTO_SET_CART_CONTACT_EMAIL_MUTATION,
+    variables: { cartId, email },
+    signal,
+    cache: "no-store",
+  });
+}
+
 export async function setGuestShippingAddress(
   cartId: string,
   address: MagentoCartAddressInput,
@@ -694,6 +712,8 @@ export async function applyCheckoutAddresses(
 ): Promise<GuestCartState> {
   if (!options.isAuthenticated) {
     await setGuestEmailOnCart(cartId, resolveGuestCheckoutEmail(form.phoneOrEmail), signal);
+  } else if (form.phoneOrEmail.includes("@")) {
+    await setCartContactEmail(cartId, form.phoneOrEmail.trim(), signal);
   }
 
   const shippingAddressInput = options.isAuthenticated

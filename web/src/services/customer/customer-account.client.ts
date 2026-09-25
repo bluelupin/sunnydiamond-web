@@ -46,7 +46,10 @@ export async function getCustomerOrders(
       throw error;
     }
 
-    return null;
+    // Only a 401 means "signed out" (null). Anything else is a real failure the
+    // caller should show as such — collapsing it to null made every Magento or
+    // network hiccup read as "please sign in again" (QA bug #30).
+    throw error instanceof Error ? error : new Error("Failed to load orders");
   }
 }
 

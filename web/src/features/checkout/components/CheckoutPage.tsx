@@ -82,7 +82,7 @@ const CheckoutPage = () => {
   const { refresh: refreshAuth } = useAuth();
   const { toast } = useToast();
   const { openLoginModal } = useLoginModal();
-  const { otpLoginEnabled } = useAuthFeatures();
+  const { otpLoginEnabled, emailOtpLoginEnabled } = useAuthFeatures();
   /**
    * With SMS sign-in off there is no mobile identity to take, so the contact field is an
    * email address and nothing else — offering "PhoneNo / Email ID" would accept a number
@@ -318,7 +318,9 @@ const CheckoutPage = () => {
         }
       }
 
-      if (accountReady) {
+      // Just-registered guests get their first address book entries; signed-in
+      // customers only when they ticked "Save this address to my profile".
+      if (accountReady && (!input.wasAuthenticated || input.orderForm.saveAddressToProfile)) {
         await persistGuestCheckoutAddresses(input.orderForm);
       }
     },
@@ -492,7 +494,7 @@ const CheckoutPage = () => {
   }
 
   const handleVerifyPhone = () => {
-    if (checkoutLockedRef.current || isCheckoutEmailContact(form.phoneOrEmail)) {
+    if (checkoutLockedRef.current) {
       return;
     }
 
@@ -516,7 +518,7 @@ const CheckoutPage = () => {
       setOrderSuccessAuthenticated(true);
     }
 
-    toast({ title: "Phone verified", description: "Your phone number has been verified." });
+    toast({ title: "Verified", description: "Your contact details have been verified." });
   };
 
   /**
@@ -572,11 +574,16 @@ const CheckoutPage = () => {
       const submittedForm = { ...form };
       const contactIsEmail = isCheckoutEmailContact(submittedForm.phoneOrEmail);
 
-      if (otpLoginEnabled && !isAuthenticated && !contactIsEmail && !phoneVerified) {
+      // Guests prove they own the contact they typed — SMS OTP for a number,
+      // email OTP for an address — before the order is placed under it.
+      const contactOtpEnabled = contactIsEmail ? emailOtpLoginEnabled : otpLoginEnabled;
+      if (contactOtpEnabled && !isAuthenticated && !phoneVerified) {
         setShowOtpModal(true);
         toast({
           title: "Verification required",
-          description: "Please verify your phone number before continuing.",
+          description: contactIsEmail
+            ? "Please verify your email address before continuing."
+            : "Please verify your phone number before continuing.",
         });
         return;
       }
@@ -723,7 +730,7 @@ const CheckoutPage = () => {
               },
             });
 
-            if (outcome.status === "dismissed" || outcome.status === "failed") {
+            if (outcome.status === "dismissed") {
               const paidPending = getPaidPendingCheckoutPayment();
               if (!paidPending?.paymentId || !paidPending.signature) {
                 clearPendingCheckoutPayment();
@@ -932,7 +939,9 @@ const CheckoutPage = () => {
                 onChange={handleFormChange}
                 phoneVerified={phoneVerified}
                 onVerifyPhone={handleVerifyPhone}
-                showVerify={otpLoginEnabled}
+                showVerify={
+                  isCheckoutEmailContact(form.phoneOrEmail) ? emailOtpLoginEnabled : otpLoginEnabled
+                }
                 emailOnly={contactEmailOnly}
                 onContactBlur={handleGuestContactBlur}
                 validation={formValidation}
@@ -999,7 +1008,7 @@ const CheckoutPage = () => {
         ctaDisabled={ctaDisabled}
       />
 
-      {otpLoginEnabled ? (
+      {otpLoginEnabled || emailOtpLoginEnabled ? (
         <CheckoutOtpModal
           open={showOtpModal}
           phone={form.phoneOrEmail}

@@ -12,6 +12,8 @@ export type AuthMeResponse = {
     firstname: string;
     lastname: string;
     email: string;
+    /** E.164 mobile number linked to the account (custom attribute), or null. */
+    phone: string | null;
   } | null;
   /** Present when customer is null — useful in Network tab while debugging auth. */
   reason?: string;
@@ -57,6 +59,7 @@ export async function GET() {
         firstname: string;
         lastname: string;
         email: string;
+        custom_attributes?: Array<{ code: string; value?: string | null }> | null;
       };
     }>({
       query: MAGENTO_CUSTOMER_ME_QUERY,
@@ -94,6 +97,9 @@ export async function GET() {
         firstname,
         lastname,
         email: customer.email,
+        phone:
+          customer.custom_attributes?.find((attribute) => attribute.code === "mobile_number")
+            ?.value || null,
       },
     } satisfies AuthMeResponse);
   } catch (error) {

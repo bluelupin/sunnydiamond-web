@@ -27,3 +27,20 @@ export const MAGENTO_VERIFY_LOGIN_OTP_MUTATION = `
     }
   }
 ` as const;
+
+export const MAGENTO_REQUEST_PHONE_LINK_OTP_MUTATION = `
+  mutation MagentoRequestPhoneLinkOtp($input: RequestPhoneLinkOtpInput!) {
+    requestPhoneLinkOtp(input: $input) {
+      success
+      resend_after_seconds
+    }
+  }
+` as const;
+
+export const MAGENTO_VERIFY_PHONE_LINK_MUTATION = `
+  mutation MagentoVerifyPhoneLink($input: VerifyPhoneLinkInput!) {
+    verifyPhoneLink(input: $input) {
+      success
+    }
+  }
+` as const;

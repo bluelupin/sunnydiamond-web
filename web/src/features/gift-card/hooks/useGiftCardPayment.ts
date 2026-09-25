@@ -68,10 +68,6 @@ export function useGiftCardPayment() {
         return true;
       }
 
-      if (outcome.status === "failed") {
-        showStatusToast("Payment failed. Please try again or use another payment method.");
-      }
-
       return false;
     } catch (error) {
       showStatusToast(
