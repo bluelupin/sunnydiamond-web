@@ -12,6 +12,7 @@ import {
   careersOutlineCtaClassName,
 } from "@/features/careers/constants/careersCtaStyles";
 import { cn } from "@/shared/utils/cn";
+import { CAREERS_AUTOFILL_RESUME_ACCEPT } from "@/features/careers/constants/careersApplicationForm";
 import CareersJobIdChip from "./CareersJobIdChip";
 import CareersJobMetaRow from "./CareersJobMetaRow";
 
@@ -24,9 +25,6 @@ type CareersApplyOptionsModalProps = {
   onApplyManually: () => void;
   onApplyLinkedIn: () => void;
 };
-
-const RESUME_ACCEPT =
-  ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
 const primaryButtonClass = cn(careersDarkCtaClassName, "w-full");
 
@@ -200,14 +198,9 @@ const CareersApplyOptionsModal = ({
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      event.target.value = "";
-      return;
-    }
-
+    event.target.value = "";
     onAutofillResume(file);
     onOpenChange(false);
-    event.target.value = "";
   };
 
   const handleAutofillClick = () => {
@@ -218,7 +211,7 @@ const CareersApplyOptionsModal = ({
     <input
       ref={resumeInputRef}
       type="file"
-      accept={RESUME_ACCEPT}
+      accept={CAREERS_AUTOFILL_RESUME_ACCEPT}
       className="hidden"
       onChange={handleResumeChange}
     />

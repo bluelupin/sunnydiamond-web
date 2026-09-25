@@ -17,7 +17,7 @@ function readStrapiErrorMessage(payload: unknown, fallback: string): string {
 }
 
 /**
- * Browser → same-origin BFF → Strapi `POST /api/submissions-job-openings/parse-resume`.
+ * Browser → same-origin BFF → Strapi `POST /api/careers/parse-resume`.
  * Forwards multipart as-is (`resume` file).
  */
 export async function POST(request: Request) {
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing resume file" }, { status: 400 });
   }
 
-  const url = `${getStrapiBaseUrl()}/${STRAPI_ENDPOINTS.jobOpeningSubmissionsParseResume}`;
+  const url = `${getStrapiBaseUrl()}/${STRAPI_ENDPOINTS.careerResumeParse}`;
 
   try {
     const upstreamFormData = new FormData();
