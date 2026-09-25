@@ -19,7 +19,8 @@
     "test:wishlist": "node scripts/run-wishlist-test-cases.mjs",
     "test:homepage": "node scripts/run-homepage-test-cases.mjs",
     "test:learn-about-diamonds": "node scripts/run-learn-about-diamonds-test-cases.mjs",
-    "test:careers": "node scripts/run-careers-test-cases.mjs"
+    "test:careers": "node scripts/run-careers-test-cases.mjs",
+    "test:dfe-config": "node --experimental-strip-types --no-warnings scripts/check-dfe-investment-config.mjs"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.3",

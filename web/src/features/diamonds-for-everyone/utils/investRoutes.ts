@@ -1,19 +1,19 @@
 import { diamondsForEveryonePageContent } from "../data/content";
+import { clampDfeMonthlyAmount, type DfeInvestmentConfig } from "./investmentConfig";
 
-const { investment } = diamondsForEveryonePageContent;
+const { investPath } = diamondsForEveryonePageContent.investment;
 
-export function buildDfeInvestUrl(monthlyAmount: number): string {
-  const clamped = Math.min(
-    investment.maxMonthly,
-    Math.max(investment.minMonthly, monthlyAmount),
-  );
-  return `${investment.investPath}?amount=${clamped}`;
+export function buildDfeInvestUrl(monthlyAmount: number, config: DfeInvestmentConfig): string {
+  return `${investPath}?amount=${clampDfeMonthlyAmount(monthlyAmount, config)}`;
 }
 
-export function parseDfeInvestAmount(raw: string | null | undefined): number {
+export function parseDfeInvestAmount(
+  raw: string | null | undefined,
+  config: DfeInvestmentConfig,
+): number {
   const parsed = Number(raw);
-  if (!Number.isFinite(parsed)) {
-    return investment.defaultMonthly;
+  if (!raw?.trim() || !Number.isFinite(parsed)) {
+    return config.defaultMonthly;
   }
-  return Math.min(investment.maxMonthly, Math.max(investment.minMonthly, parsed));
+  return clampDfeMonthlyAmount(parsed, config);
 }

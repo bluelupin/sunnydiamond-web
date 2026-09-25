@@ -7,6 +7,7 @@ import type {
   NormalizedDfeStepperStep,
   NormalizedDfeSuccessScreen,
 } from "@/services/diamonds-for-everyone/diamonds-for-everyone-page.types";
+import type { DfeInvestmentConfig } from "../../utils/investmentConfig";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import DfeInvestAuthGate from "./DfeInvestAuthGate";
 import DfeInvestKycStep from "./DfeInvestKycStep";
@@ -55,6 +56,7 @@ function DfeInvestStepContent({
 
 type DfeInvestPageContentProps = {
   monthlyAmount: number;
+  investment: DfeInvestmentConfig;
   investmentPlannerImage: NormalizedDfeResponsiveImage | null;
   accountSetup: NormalizedDfeAccountSetup | null;
   stepperSteps: NormalizedDfeStepperStep[];
@@ -63,6 +65,7 @@ type DfeInvestPageContentProps = {
 
 const DfeInvestPageContent = ({
   monthlyAmount,
+  investment,
   investmentPlannerImage,
   accountSetup,
   stepperSteps,
@@ -71,6 +74,7 @@ const DfeInvestPageContent = ({
   return (
     <DfeInvestFlowProvider
       initialMonthlyAmount={monthlyAmount}
+      investment={investment}
       cancelButtonLabel={accountSetup?.cancelButtonLabel}
     >
       <DfeInvestPageLayout
@@ -189,6 +193,7 @@ function DfeInvestPageLayout({
 
 type DfeInvestPageProps = {
   monthlyAmount: number;
+  investment: DfeInvestmentConfig;
   investmentPlannerImage: NormalizedDfeResponsiveImage | null;
   accountSetup: NormalizedDfeAccountSetup | null;
   stepperSteps: NormalizedDfeStepperStep[];
@@ -197,6 +202,7 @@ type DfeInvestPageProps = {
 
 const DfeInvestPage = ({
   monthlyAmount,
+  investment,
   investmentPlannerImage,
   accountSetup,
   stepperSteps,
@@ -206,6 +212,7 @@ const DfeInvestPage = ({
     <DfeInvestAuthGate>
       <DfeInvestPageContent
         monthlyAmount={monthlyAmount}
+        investment={investment}
         investmentPlannerImage={investmentPlannerImage}
         accountSetup={accountSetup}
         stepperSteps={stepperSteps}

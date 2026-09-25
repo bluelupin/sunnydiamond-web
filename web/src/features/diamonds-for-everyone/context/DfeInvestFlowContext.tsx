@@ -9,6 +9,11 @@ import {
   type ReactNode,
 } from "react";
 import { diamondsForEveryonePageContent } from "../data/content";
+import {
+  clampDfeMonthlyAmount,
+  computeDfeInvestmentSummary,
+  type DfeInvestmentConfig,
+} from "../utils/investmentConfig";
 
 export type DfeInvestStep = "intro" | "kyc" | "nominee" | "review" | "success";
 
@@ -35,7 +40,9 @@ type DfeInvestFlowContextValue = {
   completeEnrollment: () => void;
   goNext: () => void;
   goBack: () => void;
+  investment: DfeInvestmentConfig;
   contribution: number;
+  bonus: number;
   totalValue: number;
 };
 
@@ -45,22 +52,19 @@ const STEP_ORDER: DfeInvestStep[] = ["intro", "kyc", "nominee", "review", "succe
 
 export function DfeInvestFlowProvider({
   initialMonthlyAmount,
+  investment,
   cancelButtonLabel,
   children,
 }: {
   initialMonthlyAmount: number;
+  investment: DfeInvestmentConfig;
   cancelButtonLabel?: string;
   children: ReactNode;
 }) {
-  const { investment, monthsPaid, totalMonths } = {
-    investment: diamondsForEveryonePageContent.investment,
-    monthsPaid: diamondsForEveryonePageContent.investment.monthsPaid,
-    totalMonths: diamondsForEveryonePageContent.investment.totalMonths,
-  };
-
-  const clampMonthlyAmount = useCallback((value: number) => {
-    return Math.min(investment.maxMonthly, Math.max(investment.minMonthly, value));
-  }, [investment.maxMonthly, investment.minMonthly]);
+  const clampMonthlyAmount = useCallback(
+    (value: number) => clampDfeMonthlyAmount(value, investment),
+    [investment],
+  );
 
   const [monthlyAmount, setMonthlyAmountState] = useState(() =>
     clampMonthlyAmount(initialMonthlyAmount),
@@ -83,8 +87,7 @@ export function DfeInvestFlowProvider({
     [clampMonthlyAmount],
   );
 
-  const contribution = monthlyAmount * monthsPaid;
-  const totalValue = monthlyAmount * totalMonths;
+  const { contribution, bonus, totalValue } = computeDfeInvestmentSummary(monthlyAmount, investment);
 
   const goToStep = useCallback((nextStep: DfeInvestStep) => {
     setStep(nextStep);
@@ -132,7 +135,9 @@ export function DfeInvestFlowProvider({
       completeEnrollment,
       goNext,
       goBack,
+      investment,
       contribution,
+      bonus,
       totalValue,
     }),
     [
@@ -151,7 +156,9 @@ export function DfeInvestFlowProvider({
       completeEnrollment,
       goNext,
       goBack,
+      investment,
       contribution,
+      bonus,
       totalValue,
     ],
   );

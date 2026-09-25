@@ -8,6 +8,7 @@ import { formatCustomerFullName } from "@/shared/utils/customerName";
 import { diamondsForEveryonePageContent } from "../../data/content";
 import { useDfeInvestFlow } from "../../context/DfeInvestFlowContext";
 import { formatInr } from "../../utils/formatInr";
+import { clampDfeMonthlyAmount } from "../../utils/investmentConfig";
 import { maskIdNumber } from "../../utils/maskIdNumber";
 import { useUiPlatform } from "@/shared/hooks/use-ui-platform";
 import { cn } from "@/shared/utils/cn";
@@ -77,13 +78,14 @@ function SectionEditHeader({
 }
 
 const DfeInvestReviewStep = () => {
-  const { investment } = diamondsForEveryonePageContent;
   const { review, payLabel } = diamondsForEveryonePageContent.investFlow;
   const { customer } = useAuth();
   const {
     monthlyAmount,
     setMonthlyAmount,
+    investment,
     contribution,
+    bonus,
     totalValue,
     idType,
     idNumber,
@@ -97,16 +99,14 @@ const DfeInvestReviewStep = () => {
     cancelButtonLabel,
   } = useDfeInvestFlow();
 
-  const bonus = monthlyAmount;
-
   const sliderFillPercent = useMemo(() => {
     const range = investment.maxMonthly - investment.minMonthly;
     if (range <= 0) return 0;
     return ((monthlyAmount - investment.minMonthly) / range) * 100;
   }, [investment.maxMonthly, investment.minMonthly, monthlyAmount]);
 
-  const clampAmount = (value: number) =>
-    Math.min(investment.maxMonthly, Math.max(investment.minMonthly, value));
+  const clampAmount = (value: number) => clampDfeMonthlyAmount(value, investment);
+  const summaryTitle = review.summarySectionTitle(investment.totalMonths);
 
   const accountFullName = customer
     ? formatCustomerFullName(customer.firstname, customer.lastname)
@@ -138,7 +138,7 @@ const DfeInvestReviewStep = () => {
       <div className="flex w-full flex-col gap-6 self-stretch lg:min-h-[366px] lg:justify-between">
         <h3 className="font-gill text-xl font-normal leading-110 text-darkblack">
           <span className="lg:hidden">{review.instalmentAmountTitle}</span>
-          <span className="hidden lg:inline">{review.summarySectionTitle}</span>
+          <span className="hidden lg:inline">{summaryTitle}</span>
         </h3>
 
         <div className="flex flex-col gap-4">
@@ -205,7 +205,7 @@ const DfeInvestReviewStep = () => {
 
         <div className="flex flex-col gap-4">
           <p className="font-gill text-base font-normal leading-110 text-[#2B2B2B]">
-            {review.summarySectionTitle}
+            {summaryTitle}
           </p>
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-3 font-gill text-base leading-110 text-darkblack">

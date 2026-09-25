@@ -7,7 +7,6 @@ import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useLoginModal } from "@/features/auth/context/LoginModalContext";
 import type { NormalizedDfeInvestmentPlanner } from "@/services/diamonds-for-everyone/diamonds-for-everyone-page.types";
-import { diamondsForEveryonePageContent } from "../data/content";
 import { buildDfeInvestUrl } from "../utils/investRoutes";
 import DfeInvestmentCalculator from "./DfeInvestmentCalculator";
 
@@ -16,14 +15,14 @@ type DfeInvestmentSectionProps = {
 };
 
 const DfeInvestmentSection = ({ investmentPlanner }: DfeInvestmentSectionProps) => {
-  const { investment } = diamondsForEveryonePageContent;
+  const { investment } = investmentPlanner;
   const { status } = useAuth();
   const { openLoginModal } = useLoginModal();
   const router = useRouter();
   const [monthlyAmount, setMonthlyAmount] = useState<number>(investment.defaultMonthly);
 
   const handleStartInvesting = () => {
-    const investUrl = buildDfeInvestUrl(monthlyAmount);
+    const investUrl = buildDfeInvestUrl(monthlyAmount, investment);
     if (status === "authenticated") {
       router.push(investUrl);
       return;
@@ -83,6 +82,7 @@ const DfeInvestmentSection = ({ investmentPlanner }: DfeInvestmentSectionProps) 
             </Reveal>
             <Reveal direction="up">
               <DfeInvestmentCalculator
+                investment={investment}
                 monthlyAmount={monthlyAmount}
                 onMonthlyAmountChange={setMonthlyAmount}
                 monthlyDescription={monthlyDescription}

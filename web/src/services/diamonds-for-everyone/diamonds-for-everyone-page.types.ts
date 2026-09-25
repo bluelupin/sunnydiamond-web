@@ -1,3 +1,8 @@
+import type {
+  DfeInvestmentConfig,
+  DfeInvestmentConfigInput,
+} from "@/features/diamonds-for-everyone/utils/investmentConfig";
+
 /** Raw Strapi media file */
 export type StrapiDfeMediaFile = {
   url?: string | null;
@@ -51,7 +56,7 @@ export type StrapiDfeStepperStep = {
   label?: string | null;
 };
 
-export type StrapiDfeInvestmentPlannerSection = {
+export type StrapiDfeInvestmentPlannerSection = DfeInvestmentConfigInput & {
   id?: number;
   title?: string | null;
   description?: string | null;
@@ -206,6 +211,8 @@ export type NormalizedDfeInvestmentPlanner = {
   backgroundImage: NormalizedDfeResponsiveImage | null;
   accountSetup: NormalizedDfeAccountSetup | null;
   stepperSteps: NormalizedDfeStepperStep[];
+  /** Simulator numbers from Strapi, already validated against the built-in defaults. */
+  investment: DfeInvestmentConfig;
 };
 
 export type NormalizedDfeBenefitStep = {

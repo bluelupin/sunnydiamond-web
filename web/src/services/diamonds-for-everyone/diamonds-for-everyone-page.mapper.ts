@@ -1,3 +1,5 @@
+import { diamondsForEveryonePageContent } from "@/features/diamonds-for-everyone/data/content";
+import { resolveDfeInvestmentConfig } from "@/features/diamonds-for-everyone/utils/investmentConfig";
 import {
   extractStrapiImage,
   resolveCmsAltText,
@@ -223,6 +225,7 @@ const mapInvestmentPlanner = (
     backgroundImage: mapResponsiveImage(section.backgroundImage),
     accountSetup: mapAccountSetup(section),
     stepperSteps: mapStepperSteps(section.stepperSteps),
+    investment: resolveDfeInvestmentConfig(section, diamondsForEveryonePageContent.investment),
   };
 };
 

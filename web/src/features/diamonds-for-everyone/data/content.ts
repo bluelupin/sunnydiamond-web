@@ -58,7 +58,7 @@ export const diamondsForEveryonePageContent = {
       phoneLabel: "Phone No.",
       emailLabel: "Email ID",
       instalmentAmountTitle: "Instalment Amount",
-      summarySectionTitle: "Your 12-Month Summary",
+      summarySectionTitle: (months: number) => `Your ${months}-Month Summary`,
       reminderText:
         "We'll send you a reminder every month on your registered email before your installment is due.",
       contributionLabel: "Your Contribution",
