@@ -43,6 +43,7 @@ export type DiamondSourcingSectionData = {
 export type CraftsmanshipSectionData = CraftsmanshipStepsSection & {
   sectionTitle?: string | null;
   isActive?: boolean | null;
+  showField?: boolean;
   image?: StrapiMedia & {
     desktopImage?: StrapiMedia;
     mobileImage?: StrapiMedia;
@@ -95,6 +96,7 @@ export type ShowroomSectionData = {
   sectionTitle?: string | null;
   description?: string | null;
   isActive?: boolean | null;
+  showField?: boolean;
   showrooms?: ShowroomSectionLocation[] | null;
 };
 

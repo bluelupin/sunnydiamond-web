@@ -102,11 +102,11 @@ export default function HomeBelowFoldSections() {
         <DiamondsForEveryoneSection id="diamonds-for-everyone" />
       </LazyHomeSection>
 
-      <LazyHomeSection featureName="CraftsmanshipProcess" minHeight="min-h-[520px]">
+      <LazyHomeSection featureName="CraftsmanshipProcess" minHeight="">
         <CraftsmanshipProcess id="craftsmanship" />
       </LazyHomeSection>
 
-      <LazyHomeSection featureName="ShowroomsSection" minHeight="min-h-[480px]">
+      <LazyHomeSection featureName="ShowroomsSection" minHeight="">
         <ShowroomsSection id="showrooms" />
       </LazyHomeSection>
     </>

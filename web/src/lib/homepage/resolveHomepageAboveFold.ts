@@ -50,24 +50,21 @@ export function splitHeroTitleLines(title: string): string[] {
   return [heroTitle];
 }
 
-export function splitCraftingTitleLines(title: string): string[] {
-  const trimmed = title.trim();
-  if (!trimmed) return [];
+/** Splits a title on CMS line breaks (`\n` or literal `\n`); single-line titles are unchanged. */
+export function splitTitleLinesOnNewline(title: string): string[] {
+  const normalized = title.replace(/\\n/g, "\n").trim();
+  if (!normalized) return [];
 
-  if (trimmed.includes("\n")) {
-    return trimmed
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean);
+  if (!/\r?\n/.test(normalized)) {
+    return [normalized];
   }
 
-  const breakAfter = "Crafting Rarity";
-  if (trimmed.toLowerCase().startsWith(breakAfter.toLowerCase())) {
-    const remainder = trimmed.slice(breakAfter.length).trim();
-    return remainder ? [breakAfter, remainder] : [trimmed];
-  }
+  const lines = normalized
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
 
-  return [trimmed];
+  return lines.length > 0 ? lines : [normalized];
 }
 
 export function resolveHeroContent(
@@ -144,7 +141,7 @@ export function resolveCraftingRarityContent(
 
   return {
     isActive: craftingBrilliance?.isActive,
-    subtitleLines: splitCraftingTitleLines(titleSource),
+    subtitleLines: splitTitleLinesOnNewline(titleSource),
     secondaryCtaUrl:
       craftingBrilliance?.cta?.url ?? craftingBrilliance?.cta?.to ?? "",
     secondaryCtaLabel: craftingBrilliance?.cta?.label?.trim() ?? "",

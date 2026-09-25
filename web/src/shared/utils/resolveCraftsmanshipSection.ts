@@ -4,6 +4,7 @@ import { resolveResponsiveCmsImage } from "@/shared/utils/responsiveCmsImage";
 
 export type ResolvedCraftsmanshipSection = {
   isActive?: boolean | null;
+  showField?: boolean;
   sectionTitle: string;
   steps: CraftsmanshipStep[];
   desktopImageUrl?: string;
@@ -41,6 +42,7 @@ export function resolveCraftsmanshipSection(
 
   return {
     isActive: section?.isActive,
+    showField: section?.showField,
     sectionTitle,
     steps: resolveCraftsmanshipSteps(section?.steps),
     desktopImageUrl: imageMedia.desktopUrl,

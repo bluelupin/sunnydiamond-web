@@ -194,47 +194,17 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
   const rotateX = 18 - progress * 36;
   const rotateZ = Math.sin(progress * Math.PI * 2) * 8;
 
-  if (!isSectionActive(craftsmanship.isActive)) {
+  const isSectionVisible =
+    craftsmanship.fromCms &&
+    craftsmanship.showField !== false &&
+    isSectionActive(craftsmanship.isActive);
+
+  if (isEditorialLoading || !isSectionVisible) {
     return null;
   }
 
-  if (!isEditorialLoading && (!sectionTitle.trim() || stepCount === 0)) {
+  if (!sectionTitle.trim() || stepCount === 0) {
     return null;
-  }
-
-  if (isEditorialLoading) {
-    return (
-      <section
-        id={id}
-        ref={containerRef}
-        style={{ height: `calc(2 * var(--craftsmanship-vh-unit, 100vh))` }}
-        aria-label="Craftsmanship"
-        className="craftsmanship-process-section [--craftsmanship-vh-unit:100vh] md:max-lg:portrait:[--craftsmanship-vh-unit:72vh] bg-gray200 py-16 md:py-0 md:pt-20 md:max-lg:portrait:pt-12"
-        aria-busy="true"
-      >
-        <div className="sticky md:top-24 top-10 h-screen overflow-hidden bg-gray200 md:max-lg:portrait:h-[85vh]">
-          <CraftsmanshipBackground
-            desktopSrc={silkDesktopSrc}
-            mobileSrc={silkMobileSrc}
-            alt={silkAlt}
-          />
-          <div className="container relative z-10 h-full">
-            <div className="flex h-full flex-col lg:grid lg:grid-cols-12 lg:gap-12">
-              <div className="flex shrink-0 flex-col gap-8 lg:col-span-5 xl:justify-start lg:justify-start xl:gap-[138px] lg:gap-20">
-                <div className="h-10 w-72 bg-gray300 rounded mx-auto lg:mx-0" aria-hidden />
-                <div className="space-y-12 md:space-y-16 relative">
-                  <div className="h-24 w-full bg-gray300/70 rounded" aria-hidden />
-                  <div className="h-24 w-full bg-gray300/50 rounded" aria-hidden />
-                </div>
-              </div>
-              <div className="relative mt-auto flex flex-1 items-end justify-center lg:col-span-7 lg:mt-0 lg:items-center">
-                <div className="w-[80%] aspect-square bg-gray300/70 rounded-full" aria-hidden />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
   }
 
   return (
@@ -243,7 +213,7 @@ const CraftsmanshipProcess = ({ id }: CraftsmanshipProcessProps) => {
       ref={containerRef}
       style={{ height: `calc(${stepCount + 1} * var(--craftsmanship-vh-unit, 100vh))` }}
       aria-label={sectionTitle}
-      className="craftsmanship-process-section [--craftsmanship-vh-unit:100vh] md:max-lg:portrait:[--craftsmanship-vh-unit:72vh] bg-gray200 py-16 md:py-0 md:pt-20 md:max-lg:portrait:pt-12"
+      className="min-h-[520px] craftsmanship-process-section [--craftsmanship-vh-unit:100vh] md:max-lg:portrait:[--craftsmanship-vh-unit:72vh] bg-gray200 py-16 md:py-0 md:pt-20 md:max-lg:portrait:pt-12"
     >
       <div className="sticky lg:top-24 top-10 h-screen overflow-hidden bg-gray200 md:max-lg:portrait:h-[85vh]">
         <CraftsmanshipBackground

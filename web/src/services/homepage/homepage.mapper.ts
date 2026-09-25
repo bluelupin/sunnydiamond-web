@@ -485,6 +485,8 @@ function mapCraftsmanshipSection(
 ): HomepageEditorialBlocksData["craftsmanshipSection"] {
   if (!raw) return null;
 
+  if (raw.showField === false) return null;
+
   const isActive = resolveSectionActive(raw.isActive, raw.showField);
   if (isActive === false) return null;
 
@@ -492,6 +494,7 @@ function mapCraftsmanshipSection(
     id: raw.id,
     sectionTitle: cleanText(raw.sectionTitle) ?? cleanText(raw.title),
     isActive,
+    showField: raw.showField ?? undefined,
     image: pickResponsiveImage(raw.image) as NonNullable<
       HomepageEditorialBlocksData["craftsmanshipSection"]
     >["image"],
@@ -597,7 +600,7 @@ const sortShowroomsByOrder = <T extends { sortOrder?: number | null }>(items: T[
 function mapShowroomSectionLocation(
   showroom?: StrapiHomepageShowroom | null,
 ): ShowroomSectionLocation | null {
-  if (!showroom || resolveSectionActive(showroom.isActive, showroom.showField) === false) {
+  if (!showroom || showroom.showField === false || showroom.isActive === false) {
     return null;
   }
 
@@ -622,13 +625,15 @@ function mapShowroomSectionLocation(
     mapUrl,
     directionsUrl: mapUrl,
     sortOrder: showroom.sortOrder ?? undefined,
-    isActive: true,
+    isActive: showroom.isActive ?? true,
     ...(image ? { image } : {}),
   };
 }
 
 function mapShowroomSection(raw?: StrapiShowroomSection | null): ShowroomSectionData | null {
   if (!raw) return null;
+
+  if (raw.showField === false) return null;
 
   const isActive = resolveSectionActive(raw.isActive, raw.showField);
   if (isActive === false) return null;
@@ -644,6 +649,7 @@ function mapShowroomSection(raw?: StrapiShowroomSection | null): ShowroomSection
     sectionTitle: cleanText(raw.sectionTitle),
     description: cleanText(raw.description),
     isActive,
+    showField: raw.showField ?? undefined,
     showrooms: showrooms.length > 0 ? showrooms : null,
   };
 }

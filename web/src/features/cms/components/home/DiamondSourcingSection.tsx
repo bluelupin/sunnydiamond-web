@@ -7,6 +7,7 @@ import { resolveResponsiveCmsImage } from "@/shared/utils/responsiveCmsImage";
 import { isSectionActive } from "@/shared/utils/cmsSection";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import Reveal from "@/shared/Animation/Reveal";
+import { splitTitleLinesOnNewline } from "@/lib/homepage/resolveHomepageAboveFold";
 
 interface DiamondSourcingSectionProps {
   id?: string;
@@ -19,6 +20,10 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
   const { data: editorialData, isLoading: isEditorialLoading } = useHomepageEditorialBlocks();
   const diamondSourcedDataSection = editorialData?.diamondSourcingSection ?? null;
   const sectionTitle = diamondSourcedDataSection?.sectionTitle?.trim();
+  const sectionTitleLines = useMemo(
+    () => splitTitleLinesOnNewline(sectionTitle ?? ""),
+    [sectionTitle],
+  );
   const diamondImages = useMemo(
     () => resolveResponsiveCmsImage(diamondSourcedDataSection?.image),
     [diamondSourcedDataSection?.image],
@@ -61,7 +66,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
         !isEditorialLoading ?
           <section
             id={id}
-            aria-label={sectionTitle || "Internally flawless diamonds"}
+            aria-label={sectionTitleLines.join(" ") || "Internally flawless diamonds"}
             className="relative h-auto overflow-hidden bg-white min-h-[520px]"
           >
             <div className="absolute inset-0 -z-0 will-change-transform" ref={bgParallax}>
@@ -103,8 +108,12 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
                   />
                 </Reveal>
               ) : null}
-              <Reveal as="h2" direction="up" className="md:mt-6 mt-4 lg:text-5xl md:text-4xl text-32 font-light text-darkblack font-larken max-w-2xl leading-tight tracking-[0%]">
-                {sectionTitle}
+              <Reveal as="h2" direction="up" className="md:mt-6 mt-4 lg:text-5xl md:text-4xl text-32 font-light text-darkblack font-larken leading-tight tracking-[0%]">
+                {sectionTitleLines.map((line, index) => (
+                  <span key={`${line}-${index}`} className="block">
+                    {line}
+                  </span>
+                ))}
               </Reveal>
               {hasDiamondImage ? (
                 <Reveal direction="up" className="md:mt-[22px] mt-[111px] w-[299px] h-[300px]">
