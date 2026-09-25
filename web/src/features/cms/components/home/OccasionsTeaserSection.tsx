@@ -64,7 +64,7 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
   const sectionTitle = occasionSection?.sectionTitle?.trim() || undefined;
 
   const occasions = (occasionSection?.occasions ?? []).filter(
-    (card) => card?.isActive !== false,
+    (card) => card?.isActive !== false && card?.showField !== false,
   );
 
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -92,7 +92,10 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
     }
   };
 
-  if (!isSectionActive(occasionSection?.isActive)) {
+  if (
+    occasionSection?.showField === false ||
+    !isSectionActive(occasionSection?.isActive)
+  ) {
     return null;
   }
 
@@ -100,7 +103,7 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
     return (
       <section
         id={id}
-        className="flex w-full flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 md:px-0 md:py-100"
+        className="md:min-h-[700px] flex w-full flex-col items-center gap-8 bg-white px-4 py-16 md:gap-10 md:px-0 md:py-100"
         aria-busy="true"
         aria-label="Occasions"
       >
@@ -136,7 +139,7 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
     <section
       id={id}
       aria-label={sectionTitle || "Occasions"}
-      className="flex w-full flex-col items-center gap-8 bg-white pt-16 md:gap-10 px-0 md:pt-100"
+      className="md:min-h-[700px] flex w-full flex-col items-center gap-8 bg-white md:gap-6 px-0 md:pt-104 pt-16"
     >
       {sectionTitle ? (
         <ScrollReveal as="h2" delayMs={0} className="max-w-sm text-center font-larken font-light leading-110 text-darkblack md:max-w-none lg:text-5xl md:text-4xl text-32 lg:whitespace-nowrap">
@@ -151,7 +154,7 @@ const OccasionsTeaserSection = ({ id }: OccasionsTeaserSectionProps) => {
         aria-label={sectionTitle || "Occasions"}
         tabIndex={-1}
         onKeyDownCapture={handleCarouselKeyDown}
-        className="scrollbar-none relative left-1/2 flex w-screen max-w-none -translate-x-1/2 snap-x snap-mandatory gap-3 overflow-x-auto scroll-pl-4 scroll-pr-4 pb-2 md:grid md:grid-cols-2 md:gap-1 md:overflow-visible md:px-0 pl-4 md:pb-0 md:snap-none md:outline-none"
+        className="scrollbar-none relative left-1/2 flex w-screen max-w-none -translate-x-1/2 snap-x snap-mandatory gap-3 overflow-x-auto scroll-pl-4 scroll-pr-4 md:grid md:grid-cols-2 md:gap-1 md:overflow-visible md:px-0 pl-4 md:snap-none md:outline-none"
       >
         {visibleOccasions.map((card, index) => (
           <ScrollReveal

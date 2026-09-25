@@ -70,7 +70,7 @@ function LazyHomeSection({ featureName, minHeight, animate = false, children }: 
 export default function HomeBelowFoldSections() {
   return (
     <>
-      <LazyHomeSection featureName="DiamondSourcingSection" minHeight="min-h-[520px] bg-white">
+      <LazyHomeSection featureName="DiamondSourcingSection" minHeight="bg-white">
         <DiamondSourcingSection id="flawless" />
       </LazyHomeSection>
 
@@ -78,7 +78,7 @@ export default function HomeBelowFoldSections() {
         <FeaturedCollectionSection id="alankara" />
       </LazyHomeSection>
 
-      <LazyHomeSection featureName="OccasionsTeaserSection" minHeight="md:min-h-[700px] h-auto">
+      <LazyHomeSection featureName="OccasionsTeaserSection" minHeight="h-auto">
         <OccasionsTeaserSection id="categories" />
       </LazyHomeSection>
 

@@ -44,7 +44,10 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
     backgroundImages.mobileUrl || backgroundImages.desktopUrl || "";
   const hasBackgroundImage = Boolean(backgroundDesktopSrc || backgroundMobileSrc);
 
-  if (!isSectionActive(diamondSourcedDataSection?.isActive)) {
+  if (
+    diamondSourcedDataSection?.showField === false ||
+    !isSectionActive(diamondSourcedDataSection?.isActive)
+  ) {
     return null;
   }
 
@@ -59,7 +62,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
           <section
             id={id}
             aria-label={sectionTitle || "Internally flawless diamonds"}
-            className="relative h-auto overflow-hidden bg-white"
+            className="relative h-auto overflow-hidden bg-white min-h-[520px]"
           >
             <div className="absolute inset-0 -z-0 will-change-transform" ref={bgParallax}>
               {hasBackgroundImage ? (
@@ -127,7 +130,7 @@ const DiamondSourcingSection = ({ id }: DiamondSourcingSectionProps) => {
             id={id}
             aria-label="Internally flawless diamonds"
             aria-busy="true"
-            className="relative h-auto overflow-hidden"
+            className="relative h-auto overflow-hidden min-h-[520px]"
           >
             <div className="absolute inset-0 -z-0">
               <div className="w-full h-full bg-gray100" />

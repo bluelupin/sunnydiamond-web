@@ -99,8 +99,8 @@ export default function OccasionLedCard({
         </div>
       </div>
 
-      <div className={cn("absolute bottom-0 z-10 hidden max-w-[418px] flex-col-reverse items-start text-white md:flex",
-        pathname === "/gifting" ? "md:left-8 left-4" : "md:left-10 left-4",
+      <div className={cn("absolute bottom-0 z-10 hidden max-w-[418px] w-full flex-col-reverse items-start text-white md:flex",
+        pathname === "/gifting" ? "md:left-8 left-4" : "md:left-0 left-0 lg:px-10 md:px-8 px-4",
       )}>
         {ctaLabel ? (
           <div className="inline-flex max-h-0 w-fit flex-col items-start overflow-hidden pb-0 pt-0 opacity-0 motion-safe:transition-[max-height,padding,opacity] motion-safe:duration-500 motion-safe:ease-out group-hover:max-h-[72px] group-hover:pb-16 group-hover:opacity-100 group-focus-visible:max-h-[72px] group-focus-visible:pb-16 group-focus-visible:opacity-100">
