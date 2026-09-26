@@ -3,15 +3,18 @@ import { isIP } from "node:net";
 /**
  * Real client IP for per-IP rate caps (Magento OTP, CMS forms).
  *
- * CF-Connecting-IP comes first because Cloudflare fronts staging and production:
- * behind it, nginx's peer is a Cloudflare edge address, so x-real-ip and the
- * rightmost x-forwarded-for entry both resolve to the PoP rather than the
- * customer — which would put everyone routed through Mumbai in one bucket.
- * Cloudflare overwrites this header on every request, so it cannot be spoofed
- * from outside; the nginx-set values remain the fallback for direct origin hits.
+ * Behind Cloudflare, nginx's peer is a Cloudflare edge address, so x-real-ip and
+ * the rightmost x-forwarded-for entry resolve to the PoP rather than the customer,
+ * which would put everyone routed through Mumbai in one bucket; CF-Connecting-IP
+ * is used instead. It is trusted only when TRUST_CLOUDFLARE_IP=true: Cloudflare
+ * overwrites it, but where Cloudflare is not in front (dev) anyone can send it and
+ * rotate a made-up IP past the OTP and form caps. Otherwise the nginx-set values.
  */
 export function resolveClientIp(request: Request): string | null {
-  const cloudflareIp = request.headers.get("cf-connecting-ip")?.trim();
+  const cloudflareIp =
+    process.env.TRUST_CLOUDFLARE_IP === "true"
+      ? request.headers.get("cf-connecting-ip")?.trim()
+      : undefined;
   if (cloudflareIp && isIP(cloudflareIp)) {
     return cloudflareIp;
   }
