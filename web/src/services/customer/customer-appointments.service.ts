@@ -2,9 +2,12 @@ import { getStrapiApiToken, getStrapiBaseUrl } from "@/api/config";
 import { STRAPI_ENDPOINTS } from "@/api/endpoints";
 import { mapCustomerAppointment, mapCustomerAppointmentsPage } from "./customer-appointments.mapper";
 import type {
+  AddPieceToCustomerAppointmentInput,
+  AddPieceToCustomerAppointmentResult,
   CustomerAppointment,
   CustomerAppointmentShowroom,
   CustomerAppointmentsPage,
+  CustomerOpenAppointment,
   StrapiAppointmentMutationResponse,
   StrapiCustomerAppointment,
   StrapiCustomerAppointmentsResponse,
@@ -341,4 +344,61 @@ export async function cancelCustomerAppointment(
   } catch {
     return null;
   }
+}
+
+/** Upcoming store visits / video calls that can still take a piece (CMS caps at 5). */
+export async function getOpenCustomerAppointments(
+  magentoCustomerId: number,
+  signal?: AbortSignal,
+): Promise<CustomerOpenAppointment[]> {
+  const params = new URLSearchParams({ magentoCustomerId: String(magentoCustomerId) });
+  const url = `${getStrapiBaseUrl()}/${STRAPI_ENDPOINTS.customerAppointments}/open?${params.toString()}`;
+  const response = await fetch(url, {
+    method: "GET",
+    headers: cmsAuthHeaders(),
+    cache: "no-store",
+    signal,
+  });
+
+  if (!response.ok) {
+    throw new CustomerAppointmentsApiError(await parseErrorMessage(response), response.status);
+  }
+
+  const payload = (await response.json()) as { data?: CustomerOpenAppointment[] | null };
+  return payload.data ?? [];
+}
+
+export async function addPieceToCustomerAppointment(
+  magentoCustomerId: number,
+  documentId: string,
+  input: AddPieceToCustomerAppointmentInput,
+  signal?: AbortSignal,
+): Promise<AddPieceToCustomerAppointmentResult> {
+  const safeId = documentId.trim();
+
+  if (!safeId) {
+    throw new CustomerAppointmentsApiError("Missing appointment id", 400);
+  }
+
+  const url = `${getStrapiBaseUrl()}/${STRAPI_ENDPOINTS.customerAppointments}/${encodeURIComponent(safeId)}/pieces`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: cmsAuthHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify({
+      data: {
+        magentoCustomerId,
+        productId: input.productId,
+        productName: input.productName,
+        productPath: input.productPath,
+      },
+    }),
+    cache: "no-store",
+    signal,
+  });
+
+  if (!response.ok) {
+    throw new CustomerAppointmentsApiError(await parseErrorMessage(response), response.status);
+  }
+
+  return (await response.json()) as AddPieceToCustomerAppointmentResult;
 }

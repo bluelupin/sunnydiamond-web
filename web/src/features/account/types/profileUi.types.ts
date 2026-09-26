@@ -162,6 +162,8 @@ export type ProfileAppointmentUi = {
   yourRequirement?: string;
   rescheduleNote?: string;
   canReschedule: boolean;
+  /** Reschedule limit (2) used up — hide RESCHEDULE and show the contact-us note. */
+  rescheduleLimitReached: boolean;
   canCancel: boolean;
   /** When clubbed, cancel/reschedule applies to all underlying appointment ids. */
   clubbedAppointmentIds?: string[];

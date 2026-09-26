@@ -119,6 +119,7 @@ const ProfileAppointmentsSection = () => {
           ...appointment,
           canCancel: false,
           canReschedule: false,
+          rescheduleLimitReached: false,
         };
       });
 
@@ -281,6 +282,7 @@ const ProfileAppointmentsSection = () => {
             }
           }}
           canReschedule={selectedAppointment?.canReschedule ?? false}
+          rescheduleLimitReached={selectedAppointment?.rescheduleLimitReached ?? false}
           onReschedule={handleReschedule}
           onConfirmCancel={handleConfirmCancel}
         />

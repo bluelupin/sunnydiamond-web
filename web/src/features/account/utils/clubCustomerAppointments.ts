@@ -90,6 +90,9 @@ export function clubProfileAppointments(
     if (appointment.canReschedule === false) {
       existing.canReschedule = false;
     }
+    if (appointment.rescheduleLimitReached) {
+      existing.rescheduleLimitReached = true;
+    }
   }
 
   return Array.from(grouped.values());

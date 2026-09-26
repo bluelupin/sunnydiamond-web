@@ -330,17 +330,26 @@ export function ProfileAppointmentCard({
   const yourRequirement = appointment.yourRequirement?.trim() ?? notesText;
   const showNoteSection = Boolean(purposeOfVisit || yourRequirement || notesText);
   const { windows } = useUiPlatform();
+  const canAddPiece =
+    appointment.canCancel &&
+    (appointment.type === "store_visit" || appointment.type === "video_call");
   return (
     <ProfileCard className="relative flex flex-col gap-6 !py-6 md:!px-6 px-4">
       <div className={cn("absolute left-0 top-0 bg-mauve300 px-3 py-2 font-gill text-base font-normal whitespace-nowrap text-darkblack")}>
         <span className={cn(!windows && "-translate-y-0.5")}>{appointment.typeLabel}</span>
       </div>
 
-      {appointment.type !== "store_visit" && appointment.products.length > 0 ? (
+      {appointment.products.length > 0 ? (
         <ProductGallery products={appointment.products} />
       ) : (
         null
       )}
+
+      {canAddPiece ? (
+        <DetailTextLink href={content.addPieceHref} className="self-center">
+          {content.addPieceLabel}
+        </DetailTextLink>
+      ) : null}
 
       <ProfileAppointmentPersonalDetails
         title={content.personalDetailsTitle}
@@ -387,7 +396,12 @@ export function ProfileAppointmentCard({
       ) : null}
 
       <div className="flex flex-col gap-4">
-        <div className="grid md:grid-cols-2 gap-4 md:gap-6">
+        <div
+          className={cn(
+            "grid gap-4 md:gap-6",
+            !appointment.rescheduleLimitReached && "md:grid-cols-2",
+          )}
+        >
           <DetailOutlineButton
             type="button"
             className="w-full disabled:cursor-not-allowed disabled:opacity-50"
@@ -396,17 +410,21 @@ export function ProfileAppointmentCard({
           >
             {content.cancelLabel}
           </DetailOutlineButton>
-          <DetailDarkButton
-            type="button"
-            className="w-full disabled:cursor-not-allowed disabled:opacity-50"
-            onClick={onReschedule}
-            disabled={!appointment.canReschedule}
-          >
-            {content.rescheduleLabel}
-          </DetailDarkButton>
+          {appointment.rescheduleLimitReached ? null : (
+            <DetailDarkButton
+              type="button"
+              className="w-full disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={onReschedule}
+              disabled={!appointment.canReschedule}
+            >
+              {content.rescheduleLabel}
+            </DetailDarkButton>
+          )}
         </div>
 
-        {appointment.canReschedule && appointment.rescheduleNote ? (
+        {appointment.rescheduleLimitReached ? (
+          <ProfileInfoNote>{content.rescheduleLimitNote}</ProfileInfoNote>
+        ) : appointment.canReschedule && appointment.rescheduleNote ? (
           <ProfileInfoNote>{appointment.rescheduleNote}</ProfileInfoNote>
         ) : null}
       </div>

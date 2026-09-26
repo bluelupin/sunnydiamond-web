@@ -361,6 +361,8 @@ export function mapCustomerAppointment(
     city: addressFields.city,
     state: addressFields.state,
     preferredShowroom: mapShowroom(normalized.preferredShowroom),
+    reschedulesLeft:
+      typeof normalized.reschedulesLeft === "number" ? normalized.reschedulesLeft : null,
     createdAt: cleanText(normalized.createdAt),
     updatedAt: cleanText(normalized.updatedAt),
   };

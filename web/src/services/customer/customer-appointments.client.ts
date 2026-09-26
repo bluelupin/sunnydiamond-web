@@ -1,6 +1,9 @@
 import type {
+  AddPieceToCustomerAppointmentInput,
+  AddPieceToCustomerAppointmentResult,
   CustomerAppointment,
   CustomerAppointmentsPage,
+  CustomerOpenAppointment,
 } from "./customer-appointments.types";
 import type { RescheduleCustomerAppointmentInput } from "./customer-appointments.service";
 
@@ -102,4 +105,51 @@ export async function cancelCustomerAppointment(
   }
 
   return JSON.parse(text) as CustomerAppointment;
+}
+
+export async function getOpenCustomerAppointments(
+  signal?: AbortSignal,
+): Promise<CustomerOpenAppointment[] | null> {
+  const response = await fetch("/api/customer/appointments/open", {
+    cache: "no-store",
+    credentials: "same-origin",
+    signal,
+  });
+
+  if (response.status === 401) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response));
+  }
+
+  const payload = (await response.json()) as { data?: CustomerOpenAppointment[] };
+  return payload.data ?? [];
+}
+
+export async function addPieceToCustomerAppointment(
+  documentId: string,
+  input: AddPieceToCustomerAppointmentInput,
+): Promise<AddPieceToCustomerAppointmentResult> {
+  const response = await fetch(
+    `/api/customer/appointments/${encodeURIComponent(documentId)}/pieces`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+      cache: "no-store",
+      credentials: "same-origin",
+    },
+  );
+
+  if (response.status === 401) {
+    throw new Error("Please sign in again to add this piece to your appointment.");
+  }
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response));
+  }
+
+  return (await response.json()) as AddPieceToCustomerAppointmentResult;
 }

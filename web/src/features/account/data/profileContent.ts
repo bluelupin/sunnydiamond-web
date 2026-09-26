@@ -337,6 +337,10 @@ export const profileTabsContent = {
     rescheduleLabel: "RESCHEDULE",
     cancelLabel: "CANCEL APPOINTMENT",
     rescheduleNoteTemplate: "Appointment can be rescheduled before {date}",
+    rescheduleLimitNote:
+      "You have already rescheduled this appointment twice. Please contact us to change it.",
+    addPieceLabel: "ADD A PIECE",
+    addPieceHref: "/jewellery",
     reschedulePanel: {
       title: "Reschedule Appointment",
       submitLabel: "SAVE",

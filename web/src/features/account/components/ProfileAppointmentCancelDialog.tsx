@@ -13,6 +13,7 @@ import {
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/shared/ui/sheet";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { profileTabsContent } from "../data/profileContent";
+import { ProfileInfoNote } from "./profileUi";
 
 type ProfileAppointmentCancelDialogProps = {
   open: boolean;
@@ -21,6 +22,8 @@ type ProfileAppointmentCancelDialogProps = {
   onConfirmCancel: () => void;
   /** When false, Reschedule in this popup stays disabled (same as the card button). */
   canReschedule?: boolean;
+  /** Reschedule limit used up — hide Reschedule and show the contact-us note instead. */
+  rescheduleLimitReached?: boolean;
 };
 
 /** Figma 1480:20323 — cancel appointment bottom sheet on mobile */
@@ -30,9 +33,13 @@ export function ProfileAppointmentCancelDialog({
   onReschedule,
   onConfirmCancel,
   canReschedule = true,
+  rescheduleLimitReached = false,
 }: ProfileAppointmentCancelDialogProps) {
   const isMobile = useIsMobile();
   const content = profileTabsContent.appointments.cancelDialog;
+  const rescheduleLimitNote = rescheduleLimitReached ? (
+    <ProfileInfoNote>{profileTabsContent.appointments.rescheduleLimitNote}</ProfileInfoNote>
+  ) : null;
 
   if (isMobile) {
     return (
@@ -69,14 +76,17 @@ export function ProfileAppointmentCancelDialog({
               <DetailDarkButton type="button" className="w-full" onClick={onConfirmCancel}>
                 {content.confirmLabel}
               </DetailDarkButton>
-              <DetailOutlineButton
-                type="button"
-                className="w-full disabled:cursor-not-allowed disabled:opacity-50"
-                onClick={onReschedule}
-                disabled={!canReschedule}
-              >
-                {content.rescheduleLabel}
-              </DetailOutlineButton>
+              {rescheduleLimitReached ? null : (
+                <DetailOutlineButton
+                  type="button"
+                  className="w-full disabled:cursor-not-allowed disabled:opacity-50"
+                  onClick={onReschedule}
+                  disabled={!canReschedule}
+                >
+                  {content.rescheduleLabel}
+                </DetailOutlineButton>
+              )}
+              {rescheduleLimitNote}
             </div>
           </div>
         </SheetContent>
@@ -111,18 +121,22 @@ export function ProfileAppointmentCancelDialog({
         </p>
 
         <div className="flex flex-col gap-4 sm:flex-row">
-          <DetailOutlineButton
-            type="button"
-            className="w-full sm:flex-1 disabled:cursor-not-allowed disabled:opacity-50"
-            onClick={onReschedule}
-            disabled={!canReschedule}
-          >
-            {content.rescheduleLabel}
-          </DetailOutlineButton>
+          {rescheduleLimitReached ? null : (
+            <DetailOutlineButton
+              type="button"
+              className="w-full sm:flex-1 disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={onReschedule}
+              disabled={!canReschedule}
+            >
+              {content.rescheduleLabel}
+            </DetailOutlineButton>
+          )}
           <DetailDarkButton type="button" className="w-full sm:flex-1" onClick={onConfirmCancel}>
             {content.confirmLabel}
           </DetailDarkButton>
         </div>
+
+        {rescheduleLimitNote}
       </DialogContent>
     </Dialog>
   );

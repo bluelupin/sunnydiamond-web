@@ -40,8 +40,32 @@ export type CustomerAppointment = {
   city: string | null;
   state: string | null;
   preferredShowroom: CustomerAppointmentShowroom | null;
+  /** Null when the CMS does not send it (older CMS) — treat as allowed. */
+  reschedulesLeft: number | null;
   createdAt: string;
   updatedAt: string;
+};
+
+/** Upcoming store visit / video call that can still take an added piece. */
+export type CustomerOpenAppointment = {
+  documentId: string;
+  appointmentId: string;
+  formTag: "product-store-visit" | "product-video-call";
+  requestedDate: string;
+  selectedTimeSlot: string;
+  showroomCity: string | null;
+  productIds: string[];
+};
+
+export type AddPieceToCustomerAppointmentInput = {
+  productId: string;
+  productName: string;
+  productPath: string;
+};
+
+export type AddPieceToCustomerAppointmentResult = {
+  data: { documentId: string; appointmentId: string; productIds: string[] };
+  meta: { changed: boolean };
 };
 
 export type CustomerAppointmentsPage = {
@@ -99,6 +123,7 @@ export type StrapiCustomerAppointment = {
   city?: string | null;
   state?: string | null;
   preferredShowroom?: StrapiCustomerAppointmentShowroom | null;
+  reschedulesLeft?: number | null;
   createdAt?: string | null;
   updatedAt?: string | null;
 };

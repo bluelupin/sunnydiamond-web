@@ -294,6 +294,8 @@ function mapStoreVisitDetails(
   };
 }
 
+const GENERAL_STORE_VISIT_PRODUCT_ID = "store-visit";
+
 function inferAppointmentType(formTag: string): AppointmentFilterKey {
   const normalized = formTag.toLowerCase();
 
@@ -528,9 +530,13 @@ export function mapCustomerAppointmentToProfileUi(
         ? typeLabels.tryAtHome
         : typeLabels.storeVisit;
 
+  // General store visits carry a "store-visit" placeholder product (BookStoreVisitPanel) — not a piece.
+  const pieces = appointment.products.filter(
+    (product) => product.productId !== GENERAL_STORE_VISIT_PRODUCT_ID,
+  );
   const products =
-    appointment.products.length > 0
-      ? appointment.products.map((product, index) => {
+    pieces.length > 0
+      ? pieces.map((product, index) => {
           const productSku = product.productId?.trim() ?? "";
           const productImage =
             productSku && productImageBySku?.[productSku]
@@ -548,7 +554,12 @@ export function mapCustomerAppointmentToProfileUi(
           };
         })
       : (() => {
-          if (!appointment.productName) return [];
+          if (
+            !appointment.productName ||
+            appointment.productId === GENERAL_STORE_VISIT_PRODUCT_ID
+          ) {
+            return [];
+          }
           const productSku = appointment.productId?.trim() ?? "";
           const productImage =
             productSku && productImageBySku?.[productSku]
@@ -565,8 +576,11 @@ export function mapCustomerAppointmentToProfileUi(
 
   const workflowStatus = resolveAppointmentWorkflowStatus(appointment);
   const canModify = canModifyAppointment(workflowStatus);
+  const rescheduleLimitReached = canModify && appointment.reschedulesLeft === 0;
   const canReschedule =
-    canModify && canModifyAppointmentBeforeDeadline(appointment.requestedDate);
+    canModify &&
+    !rescheduleLimitReached &&
+    canModifyAppointmentBeforeDeadline(appointment.requestedDate);
   const canCancel =
     canModify &&
     canCancelAppointmentUntilOneMinuteBefore(
@@ -604,6 +618,7 @@ export function mapCustomerAppointmentToProfileUi(
         )
       : undefined,
     canReschedule,
+    rescheduleLimitReached,
     canCancel,
   };
 

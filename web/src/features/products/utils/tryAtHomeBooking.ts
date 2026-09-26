@@ -116,7 +116,7 @@ export const formatTryAtHomeBookingLabel = ({
 };
 
 /** Success screen: show "9:00 AM" from "9:00 AM - 10:00 AM". */
-function formatSuccessBookingStartTime(selectedSlot: string | null | undefined): string {
+export function formatSuccessBookingStartTime(selectedSlot: string | null | undefined): string {
   const trimmed = selectedSlot?.trim() ?? "";
   if (!trimmed) {
     return "";
