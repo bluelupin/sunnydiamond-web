@@ -3,12 +3,12 @@ import { isIP } from "node:net";
 /**
  * Real client IP for per-IP rate caps (Magento OTP, CMS forms).
  *
- * Behind Cloudflare, nginx's peer is a Cloudflare edge address, so x-real-ip and
- * the rightmost x-forwarded-for entry resolve to the PoP rather than the customer,
- * which would put everyone routed through Mumbai in one bucket; CF-Connecting-IP
- * is used instead. It is trusted only when TRUST_CLOUDFLARE_IP=true: Cloudflare
- * overwrites it, but where Cloudflare is not in front (dev) anyone can send it and
- * rotate a made-up IP past the OTP and form caps. Otherwise the nginx-set values.
+ * Forge's nginx (conf.d/cloudflare.conf: set_real_ip_from Cloudflare ranges +
+ * real_ip_header X-Forwarded-For) already turns the Cloudflare edge into the
+ * shopper's address, so x-real-ip is the shopper. CF-Connecting-IP is a fallback
+ * for a server without that config, trusted only when TRUST_CLOUDFLARE_IP=true:
+ * without Cloudflare in front anyone can send it and rotate a made-up IP past the
+ * OTP and form caps.
  */
 export function resolveClientIp(request: Request): string | null {
   const cloudflareIp =
