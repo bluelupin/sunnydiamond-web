@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getStrapiBaseUrl } from "@/api/config";
 import { STRAPI_ENDPOINTS } from "@/api/endpoints";
+import { cmsForwardedIpHeaders } from "@/services/http/clientIp";
 
 const MAX_RESUME_BYTES = 5 * 1024 * 1024;
 const PARSE_MIME_BY_EXTENSION: Record<string, string> = {
@@ -40,7 +41,7 @@ export async function POST(request: Request) {
   try {
     const response = await fetch(`${getStrapiBaseUrl()}/${STRAPI_ENDPOINTS.careerResumeParse}`, {
       method: "POST",
-      headers: { Accept: "application/json" },
+      headers: { Accept: "application/json", ...cmsForwardedIpHeaders(request) },
       body: forward,
       cache: "no-store",
       signal: request.signal,

@@ -247,6 +247,8 @@ export async function rescheduleCustomerAppointment(
   magentoCustomerId: number,
   documentId: string,
   input: RescheduleCustomerAppointmentInput,
+  /** Shopper IP headers for CMS rate limits (`cmsForwardedIpHeaders`). */
+  clientHeaders: Record<string, string> = {},
   signal?: AbortSignal,
 ): Promise<CustomerAppointment | StrapiAppointmentMutationResponse["data"]> {
   const safeId = documentId.trim();
@@ -258,7 +260,7 @@ export async function rescheduleCustomerAppointment(
   const url = `${getStrapiBaseUrl()}/${STRAPI_ENDPOINTS.customerAppointments}/${encodeURIComponent(safeId)}/reschedule`;
   const response = await fetch(url, {
     method: "POST",
-    headers: cmsAuthHeaders({ "Content-Type": "application/json" }),
+    headers: cmsAuthHeaders({ "Content-Type": "application/json", ...clientHeaders }),
     body: JSON.stringify({
       data: {
         magentoCustomerId,
@@ -301,6 +303,7 @@ export async function rescheduleCustomerAppointment(
 export async function cancelCustomerAppointment(
   magentoCustomerId: number,
   documentId: string,
+  clientHeaders: Record<string, string> = {},
   signal?: AbortSignal,
 ): Promise<CustomerAppointment | StrapiAppointmentMutationResponse["data"] | null> {
   const safeId = documentId.trim();
@@ -312,7 +315,7 @@ export async function cancelCustomerAppointment(
   const url = `${getStrapiBaseUrl()}/${STRAPI_ENDPOINTS.customerAppointments}/${encodeURIComponent(safeId)}/cancel`;
   const response = await fetch(url, {
     method: "POST",
-    headers: cmsAuthHeaders({ "Content-Type": "application/json" }),
+    headers: cmsAuthHeaders({ "Content-Type": "application/json", ...clientHeaders }),
     body: JSON.stringify({
       data: {
         magentoCustomerId,
@@ -372,6 +375,7 @@ export async function addPieceToCustomerAppointment(
   magentoCustomerId: number,
   documentId: string,
   input: AddPieceToCustomerAppointmentInput,
+  clientHeaders: Record<string, string> = {},
   signal?: AbortSignal,
 ): Promise<AddPieceToCustomerAppointmentResult> {
   const safeId = documentId.trim();
@@ -383,7 +387,7 @@ export async function addPieceToCustomerAppointment(
   const url = `${getStrapiBaseUrl()}/${STRAPI_ENDPOINTS.customerAppointments}/${encodeURIComponent(safeId)}/pieces`;
   const response = await fetch(url, {
     method: "POST",
-    headers: cmsAuthHeaders({ "Content-Type": "application/json" }),
+    headers: cmsAuthHeaders({ "Content-Type": "application/json", ...clientHeaders }),
     body: JSON.stringify({
       data: {
         magentoCustomerId,

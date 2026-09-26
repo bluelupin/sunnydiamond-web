@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSessionMagentoCustomerId } from "@/services/auth/getSessionMagentoCustomerId";
+import { cmsForwardedIpHeaders } from "@/services/http/clientIp";
 import {
   CustomerAppointmentsApiError,
   cancelCustomerAppointment,
@@ -43,7 +44,11 @@ export async function POST(request: Request, context: RouteContext) {
   }
 
   try {
-    const appointment = await cancelCustomerAppointment(magentoCustomerId, id);
+    const appointment = await cancelCustomerAppointment(
+      magentoCustomerId,
+      id,
+      cmsForwardedIpHeaders(request),
+    );
     if (!appointment) {
       return new NextResponse(null, { status: 204 });
     }

@@ -35,6 +35,9 @@ export async function getProductFormByTag(
  *
  * BFF → POST /api/product-submissions/submit (multipart data + uploadedImage).
  */
+/** The CMS refused the booking with a reason written for the customer (HTTP 400). */
+export class ProductSubmissionRefusedError extends Error {}
+
 export async function createProductSubmission(
   payload: ProductSubmissionPayload,
   signal?: AbortSignal,
@@ -80,7 +83,7 @@ export async function createProductSubmission(
     } catch {
       // ignore parse errors
     }
-    throw new Error(message);
+    throw response.status === 400 ? new ProductSubmissionRefusedError(message) : new Error(message);
   }
 }
 

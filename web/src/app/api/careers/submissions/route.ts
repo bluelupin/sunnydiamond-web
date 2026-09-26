@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getStrapiBaseUrl } from "@/api/config";
 import { STRAPI_ENDPOINTS } from "@/api/endpoints";
+import { cmsForwardedIpHeaders } from "@/services/http/clientIp";
 
 function readStrapiErrorMessage(payload: unknown, fallback: string): string {
   if (
@@ -41,6 +42,7 @@ export async function POST(request: Request) {
       method: "POST",
       headers: {
         Accept: "application/json",
+        ...cmsForwardedIpHeaders(request),
       },
       body: formData,
       cache: "no-store",

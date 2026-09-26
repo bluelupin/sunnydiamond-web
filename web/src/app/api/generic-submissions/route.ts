@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getStrapiBaseUrl } from "@/api/config";
 import { STRAPI_ENDPOINTS } from "@/api/endpoints";
+import { cmsForwardedIpHeaders } from "@/services/http/clientIp";
 
 /**
  * Browser → same-origin BFF → Strapi `POST /api/generic-submissions`.
@@ -50,6 +51,7 @@ export async function POST(request: Request) {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
+        ...cmsForwardedIpHeaders(request),
       },
       body: JSON.stringify(stripMagentoCustomerId(body)),
       cache: "no-store",

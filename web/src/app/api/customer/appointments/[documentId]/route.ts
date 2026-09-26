@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSessionMagentoCustomerId } from "@/services/auth/getSessionMagentoCustomerId";
+import { cmsForwardedIpHeaders } from "@/services/http/clientIp";
 import {
   CustomerAppointmentsApiError,
   rescheduleCustomerAppointment,
@@ -93,7 +94,12 @@ export async function PATCH(request: Request, context: RouteContext) {
   }
 
   try {
-    const appointment = await rescheduleCustomerAppointment(magentoCustomerId, id, input);
+    const appointment = await rescheduleCustomerAppointment(
+      magentoCustomerId,
+      id,
+      input,
+      cmsForwardedIpHeaders(request),
+    );
     return NextResponse.json(appointment);
   } catch (error) {
     if (error instanceof CustomerAppointmentsApiError) {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getStrapiApiToken, getStrapiBaseUrl } from "@/api/config";
 import { STRAPI_ENDPOINTS } from "@/api/endpoints";
+import { cmsForwardedIpHeaders } from "@/services/http/clientIp";
 import { getSessionMagentoCustomerId } from "@/services/auth/getSessionMagentoCustomerId";
 
 const AUTH_REQUIRED_FORM_TAGS = new Set([
@@ -68,6 +69,7 @@ export async function POST(request: Request) {
       headers: {
         Accept: "application/json",
         Authorization: `Bearer ${getStrapiApiToken()}`,
+        ...cmsForwardedIpHeaders(request),
       },
       body: formData,
       cache: "no-store",

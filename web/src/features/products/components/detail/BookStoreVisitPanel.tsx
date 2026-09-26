@@ -50,6 +50,7 @@ import {
 } from "@/features/products/data/bookStoreVisitContent";
 import {
   createProductSubmission,
+  ProductSubmissionRefusedError,
   getProductFormByTag,
 } from "@/services/forms/product-form.service";
 import { useAuth } from "@/features/auth/context/AuthContext";
@@ -520,8 +521,11 @@ const BookStoreVisitPanel = ({
         ),
       });
       handleClose();
-    } catch {
-      showStatusToast("Could not book visit");
+    } catch (error) {
+      // CMS refusals (e.g. a visit already booked for this showroom and slot) explain what to do.
+      showStatusToast(
+        error instanceof ProductSubmissionRefusedError && error.message ? error.message : "Could not book visit",
+      );
     } finally {
       setIsSubmitting(false);
     }
