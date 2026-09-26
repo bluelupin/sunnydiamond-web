@@ -26,13 +26,13 @@ export const profileDetailsContent = {
   deleteAccount: {
     title: "Delete Account",
     description:
-      "Deleting your Sunny Diamonds account will permanently remove your profile, saved addresses, orders, wishlist, and plan details. This action cannot be undone.",
+      "Your account is deleted 30 days after you ask. Signing in during those 30 days keeps it. After that, your profile, saved addresses, wishlist and plan details are removed; order records are kept for tax purposes without your contact details.",
     ctaLabel: "DELETE MY ACCOUNT",
     contactHref: "/contact",
     dialog: {
       title: "Delete Account",
       description:
-        "Once your account is deleted, you will lose access to your orders, savings plans, saved preferences, and account history permanently.",
+        "You will be signed out now and your account will be deleted in 30 days. Once it is deleted, you lose access to your orders, savings plans, saved preferences and account history.",
       cancelLabel: "CANCEL",
       confirmLabel: "DELETE",
     },
@@ -54,9 +54,9 @@ export const profileDetailsContent = {
       confirmLabel: "CONFIRM",
     },
     successDialog: {
-      title: "Account Deleted",
+      title: "Account Deletion Scheduled",
       description:
-        "Your Sunny Diamonds account has been deleted. Thank you for being with us — you are always welcome back.",
+        "Your account will be deleted in 30 days. We've emailed you the date. Changed your mind? Just sign in before then.",
       ctaLabel: "OK",
     },
     activeOrdersMessage:

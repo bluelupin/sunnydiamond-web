@@ -214,7 +214,7 @@ const ProfileDetailsSection = ({ customer }: ProfileDetailsSectionProps) => {
     }
   };
 
-  // The account is already gone server-side — dismissing only clears local state.
+  // Deletion is scheduled and every token revoked server-side — dismissing only clears local state.
   // The dialog stays mounted while `logout` hard-navigates home.
   const handleSuccessOpenChange = (open: boolean) => {
     if (!open) {
