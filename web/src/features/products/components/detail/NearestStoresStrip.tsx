@@ -42,7 +42,7 @@ const NearestStoresStrip = ({ productName, productId, hereForYou }: NearestStore
   const [pin, setPin] = useState("");
   const [pinError, setPinError] = useState<string | null>(null);
   const [bookingStoreId, setBookingStoreId] = useState<string | null>(null);
-  const { state, lookupPin, locate } = useNearbySearchPoint();
+  const { state, lookupPin, locate, reset } = useNearbySearchPoint();
 
   // Showroom list (with coordinates), fetched once when needed; a failure allows a later retry.
   const loadStores = useCallback(() => {
@@ -97,6 +97,7 @@ const NearestStoresStrip = ({ productName, productId, hereForYou }: NearestStore
     const validation = validateIndianPincode(value);
     if (!validation.valid) {
       setPinError(validation.error ?? "Enter a valid 6-digit pincode");
+      reset(); // an earlier result must not sit under the new error
       return;
     }
     setPinError(null);
