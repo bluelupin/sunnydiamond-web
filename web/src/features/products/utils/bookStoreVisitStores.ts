@@ -35,6 +35,9 @@ export function mapStoreLocatorShowroomToBookStoreVisit(
     pincode:
       showroom.pincode ??
       extractPincodeFromAddress(showroom.address),
+    ...(showroom.openingHours ? { openingHours: showroom.openingHours } : {}),
+    latitude: showroom.latitude,
+    longitude: showroom.longitude,
   };
 }
 

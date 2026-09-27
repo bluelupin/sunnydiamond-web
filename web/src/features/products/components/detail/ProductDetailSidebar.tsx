@@ -50,6 +50,7 @@ import {
 } from "@/features/products/utils/productVariant.utils";
 import {
   resolveHereForYouButtonVariant,
+  PDP_HERE_FOR_YOU_ANCHOR,
   resolveHereForYouPanelAction,
   resolvePersonaliseButtonVariant,
   type HereForYouPanelAction,
@@ -698,6 +699,7 @@ const ProductDetailSidebar = ({
 
       {hereForYou.isActive ? (
         <section
+          id={PDP_HERE_FOR_YOU_ANCHOR}
           aria-label="Customer support"
           className="flex items-center overflow-hidden bg-supportSurface md:px-6 px-4 py-6"
         >

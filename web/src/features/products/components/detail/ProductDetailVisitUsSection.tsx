@@ -2,16 +2,20 @@
 
 import { useState } from "react";
 import BookStoreVisitPanel from "./BookStoreVisitPanel";
+import NearestStoresStrip from "./NearestStoresStrip";
 import { DetailTextLink } from "./shared";
 import ResponsiveImage from "@/shared/ui/ResponsiveImage";
 import { cn } from "@/shared/utils/cn";
 import type { NormalizedVisitUsSection } from "@/services/product-display/product-display-page.service";
+import type { NormalizedProductDisplayCard } from "@/services/product-display/product-display-page.types";
 
 type ProductDetailVisitUsSectionProps = {
   visitUs: NormalizedVisitUsSection;
   productName?: string;
   productId?: string;
   variant?: "pdp" | "contact";
+  /** PDP only: video call / try at home fallbacks for the nearest-stores strip. */
+  hereForYou?: NormalizedProductDisplayCard;
 };
 
 const ProductDetailVisitUsSection = ({
@@ -19,6 +23,7 @@ const ProductDetailVisitUsSection = ({
   productName,
   productId,
   variant = "pdp",
+  hereForYou,
 }: ProductDetailVisitUsSectionProps) => {
   const [isBookVisitOpen, setIsBookVisitOpen] = useState(false);
   const isContactVariant = variant === "contact";
@@ -133,6 +138,14 @@ const ProductDetailVisitUsSection = ({
           </div>
         )}
       </section>
+
+      {!isContactVariant && hereForYou ? (
+        <NearestStoresStrip
+          productName={productName}
+          productId={productId}
+          hereForYou={hereForYou}
+        />
+      ) : null}
 
       <BookStoreVisitPanel
         open={isBookVisitOpen}

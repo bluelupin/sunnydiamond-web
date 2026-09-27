@@ -12,7 +12,12 @@ import {
   shouldShowPincodeMatchResults,
   shouldSuggestNearbyStores,
 } from "@/features/stores/utils/storeLocatorFilters";
-import type { NormalizedStoreLocatorPage } from "@/services/store-locator/store-locator-page.types";
+import {
+  DEFAULT_NEAREST_STORE_RADIUS_KM,
+  type NormalizedStoreLocatorPage,
+} from "@/services/store-locator/store-locator-page.types";
+import { useNearbySearchPoint } from "@/features/stores/hooks/useNearbySearchPoint";
+import { nearestStores } from "@/features/stores/utils/geo";
 
 type BookStoreVisitPageContentProps = {
   page?: NormalizedStoreLocatorPage | null;
@@ -31,6 +36,31 @@ const BookStoreVisitPageContent = ({
     () => (page?.showrooms ?? []).map(mapStoreLocatorShowroomToBookStoreVisit),
     [page?.showrooms],
   );
+
+  const radiusKm = page?.nearestStoreRadiusKm ?? DEFAULT_NEAREST_STORE_RADIUS_KM;
+  const { state: nearbyPoint, lookupPin, reset: resetNearbyPoint } = useNearbySearchPoint();
+
+  // State 4 (valid PIN, no text match): measure real distances from the PIN.
+  const handleSearchQueryChange = (query: string) => {
+    setSearchQuery(query);
+    const textMatches = filterBookStoreVisitStores(initialStores, query, null).length;
+    if (shouldSuggestNearbyStores(query, textMatches)) {
+      void lookupPin(query.trim());
+    } else {
+      resetNearbyPoint();
+    }
+  };
+
+  const nearbyStores = useMemo(() => {
+    const heading = `Showrooms near ${searchQuery.trim()}`;
+    if (nearbyPoint.status === "loading") return { loading: true, results: [], heading };
+    if (nearbyPoint.status !== "found") return undefined;
+    return {
+      loading: false,
+      results: nearestStores(initialStores, nearbyPoint.point, radiusKm),
+      heading,
+    };
+  }, [nearbyPoint, initialStores, radiusKm, searchQuery]);
 
   const pincodeError = useMemo(
     () => getStoreLocatorPincodeSearchError(searchQuery, page?.invalidPincodeMessage),
@@ -84,7 +114,7 @@ const BookStoreVisitPageContent = ({
         <StoreLocatorSearchSection
           searchQuery={searchQuery}
           selectedState={selectedState}
-          onSearchQueryChange={setSearchQuery}
+          onSearchQueryChange={handleSearchQueryChange}
           onSelectedStateChange={handleSelectedStateChange}
           searchPlaceholder={page?.searchPlaceholder}
           locationFilters={page?.locationFilters}
@@ -102,6 +132,7 @@ const BookStoreVisitPageContent = ({
         noResultsMessage={page?.noResultsMessage}
         invalidPincodeMessage={page?.invalidPincodeMessage}
         listCopy={page?.listCopy}
+        nearbyStores={nearbyStores}
       />
     </>
   );

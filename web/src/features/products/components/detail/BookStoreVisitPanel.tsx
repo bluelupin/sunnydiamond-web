@@ -33,6 +33,10 @@ import {
   mapBookStoreVisitStoreToLayoutItem,
   ShowroomsLayout,
 } from "@/features/stores/components/ShowroomsLayout";
+import NearbyStoresList, {
+  NearbyStoresSkeleton,
+} from "@/features/stores/components/NearbyStoresList";
+import type { StoreWithDistance } from "@/features/stores/utils/geo";
 import { cn } from "@/shared/utils/cn";
 import { useAppointmentFormValidation } from "@/shared/hooks/use-appointment-form-validation";
 import AppointmentContactFields from "@/shared/ui/AppointmentContactFields";
@@ -93,6 +97,15 @@ type BookStoreVisitPanelProps = {
   submissionFormTag?: string;
   productName?: string;
   productId?: string;
+  /** Opens straight on the booking form for this store (must be in `initialStores`). */
+  initialStoreId?: string;
+  /** Store locator State 4: showrooms within the radius of a PIN with no text match. */
+  nearbyStores?: {
+    loading: boolean;
+    results: StoreWithDistance<BookStoreVisitStore>[];
+    /** e.g. "Showrooms near 682035" — these stores did not match the text search. */
+    heading: string;
+  };
 };
 
 type BookVisitStep = "select-store" | "form";
@@ -113,6 +126,8 @@ const BookStoreVisitPanel = ({
   submissionFormTag,
   productName,
   productId,
+  initialStoreId,
+  nearbyStores,
 }: BookStoreVisitPanelProps) => {
   const router = useRouter();
   const profileEnabled = variant !== "modal" || open;
@@ -126,7 +141,7 @@ const BookStoreVisitPanel = ({
   const [isResolvingStores, setIsResolvingStores] = useState(
     () => !(initialStores && initialStores.length > 0),
   );
-  const [step, setStep] = useState<BookVisitStep>("select-store");
+  const [step, setStep] = useState<BookVisitStep>(initialStoreId ? "form" : "select-store");
   const [stores, setStores] = useState<BookStoreVisitStore[]>(() => initialStores ?? []);
   const [timeSlots, setTimeSlots] = useState<readonly string[]>(APPOINTMENT_TIME_SLOTS);
   const [purposeOptions, setPurposeOptions] = useState<readonly string[]>([]);
@@ -148,7 +163,7 @@ const BookStoreVisitPanel = ({
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedStoreId, setSelectedStoreId] = useState(
-    () => getDefaultBookStoreVisitStoreId(initialStores ?? []),
+    () => initialStoreId ?? getDefaultBookStoreVisitStoreId(initialStores ?? []),
   );
   const [name, setName] = useState("");
   const [countryCode, setCountryCode] = useState("+91");
@@ -552,6 +567,11 @@ const BookStoreVisitPanel = ({
         listCopy={listCopy}
         listStatus={listStatus}
         isShowroomsLoading={isShowroomsLoading || isResolvingStores}
+        nearbyStores={nearbyStores}
+        onBookNearbyStore={(storeId) => {
+          setSelectedStoreId(storeId);
+          setStep("form");
+        }}
       />
     ) : (
       <BookingFormStep
@@ -666,15 +686,39 @@ type StoreSelectionStepProps = {
   listCopy?: NormalizedStoreLocatorListCopy | null;
   listStatus?: StoreLocatorListStatus;
   isShowroomsLoading?: boolean;
+  nearbyStores?: BookStoreVisitPanelProps["nearbyStores"];
+  onBookNearbyStore?: (storeId: string) => void;
 };
 
 function StoreLocatorListStatusHeader({
   status,
   listCopy,
+  nearbyStores,
+  onBookNearbyStore,
 }: {
   status: StoreLocatorListStatus;
   listCopy?: NormalizedStoreLocatorListCopy | null;
+  nearbyStores?: BookStoreVisitPanelProps["nearbyStores"];
+  onBookNearbyStore?: (storeId: string) => void;
 }) {
+  // State 4 with a resolved PIN: real distances instead of the generic no-area copy.
+  if (status === "no-area" && nearbyStores?.loading) {
+    return (
+      <div className="pt-6 lg:pt-0">
+        <NearbyStoresSkeleton />
+      </div>
+    );
+  }
+
+  if (status === "no-area" && nearbyStores && nearbyStores.results.length > 0 && onBookNearbyStore) {
+    return (
+      <div className="flex flex-col gap-6 pt-6 lg:pt-0">
+        <p className={storeLocatorListHeadingClassName}>{nearbyStores.heading}</p>
+        <NearbyStoresList results={nearbyStores.results} onBook={onBookNearbyStore} />
+      </div>
+    );
+  }
+
   if (status === "no-area") {
     const title = listCopy?.noAreaTitle?.trim() || storeLocatorNoAreaTitle;
     const subtitle = listCopy?.noAreaSubtitle?.trim() || storeLocatorNoAreaSubtitle;
@@ -727,10 +771,17 @@ const StoreSelectionStep = ({
   listCopy,
   listStatus = "default",
   isShowroomsLoading = false,
+  nearbyStores,
+  onBookNearbyStore,
 }: StoreSelectionStepProps) => {
   if (layout === "page") {
     const listHeader = (
-      <StoreLocatorListStatusHeader status={listStatus} listCopy={listCopy} />
+      <StoreLocatorListStatusHeader
+        status={listStatus}
+        listCopy={listCopy}
+        nearbyStores={nearbyStores}
+        onBookNearbyStore={onBookNearbyStore}
+      />
     );
 
     return (

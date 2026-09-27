@@ -1,3 +1,6 @@
+/** Id of the PDP sidebar "here for you" section, linked from the nearest-stores strip. */
+export const PDP_HERE_FOR_YOU_ANCHOR = "pdp-here-for-you";
+
 export type HereForYouPanelAction = "video-call" | "try-at-home" | "personalise";
 
 export type HereForYouButtonVariant = "primary" | "secondary";

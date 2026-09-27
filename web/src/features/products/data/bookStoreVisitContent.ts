@@ -13,4 +13,8 @@ export type BookStoreVisitStore = {
   city?: string;
   state?: string;
   pincode?: string;
+  openingHours?: string;
+  /** Store-locator showrooms only; absent coordinates keep a store out of distance results. */
+  latitude?: number | null;
+  longitude?: number | null;
 };

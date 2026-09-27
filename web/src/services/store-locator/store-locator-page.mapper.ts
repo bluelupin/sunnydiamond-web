@@ -1,6 +1,7 @@
 import { resolveCmsAltText, resolveCmsMediaUrl } from "@/shared/utils/strapiMedia";
 import { extractPincodeFromAddress } from "@/features/stores/utils/storeLocatorFilters";
 import {
+  DEFAULT_NEAREST_STORE_RADIUS_KM,
   EMPTY_STORE_LOCATOR_PAGE,
   type NormalizedStoreLocatorCta,
   type NormalizedStoreLocatorHero,
@@ -31,6 +32,12 @@ const resolveSectionActive = (
   if (typeof isActive === "boolean") return isActive;
   if (typeof showField === "boolean") return showField;
   return true;
+};
+
+const toCoordinate = (value?: number | string | null): number | null => {
+  if (value == null || value === "") return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
 };
 
 const sortByOrder = <T extends { sortOrder?: number | null }>(items: T[]): T[] =>
@@ -179,6 +186,8 @@ const mapShowroom = (
     mapUrl,
     mapEmbed: cleanText(showroom.mapEmbed) ?? null,
     openingHours: cleanText(showroom.openingHours) ?? null,
+    latitude: toCoordinate(showroom.latitude),
+    longitude: toCoordinate(showroom.longitude),
     desktopImageUrl,
     mobileImageUrl,
     imageAlt: image.alt,
@@ -222,6 +231,10 @@ export function mapStoreLocatorPage(
     invalidPincodeMessage: cleanText(raw.invalidPincodeMessage) ?? null,
     listCopy: mapListCopy(raw),
     showrooms,
+    nearestStoreRadiusKm:
+      typeof raw.nearestStoreRadiusKm === "number" && raw.nearestStoreRadiusKm > 0
+        ? raw.nearestStoreRadiusKm
+        : DEFAULT_NEAREST_STORE_RADIUS_KM,
     seo: mapSeo(raw.seo),
   };
 }

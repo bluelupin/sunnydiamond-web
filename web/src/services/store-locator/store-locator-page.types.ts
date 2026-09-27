@@ -70,6 +70,9 @@ export type StrapiStoreLocatorShowroom = {
   mapEmbed?: string | null;
   directionsUrl?: string | null;
   openingHours?: string | null;
+  /** Strapi decimals may arrive as strings. */
+  latitude?: number | string | null;
+  longitude?: number | string | null;
   sortOrder?: number | null;
   isActive?: boolean | null;
   showField?: boolean | null;
@@ -99,6 +102,7 @@ export type StrapiStoreLocatorPage = {
   noAreaTitle?: string | null;
   noAreaSubtitle?: string | null;
   showrooms?: StrapiStoreLocatorShowroom[] | null;
+  nearestStoreRadiusKm?: number | null;
   seo?: StrapiStoreLocatorSeo | null;
   locale?: string | null;
 };
@@ -142,6 +146,9 @@ export type NormalizedStoreLocatorShowroom = {
   mapUrl: string;
   mapEmbed: string | null;
   openingHours: string | null;
+  /** Null when the showroom has no coordinates — excluded from distance results only. */
+  latitude: number | null;
+  longitude: number | null;
   desktopImageUrl: string;
   mobileImageUrl: string;
   imageAlt: string;
@@ -171,8 +178,11 @@ export type NormalizedStoreLocatorPage = {
   invalidPincodeMessage: string | null;
   listCopy: NormalizedStoreLocatorListCopy | null;
   showrooms: NormalizedStoreLocatorShowroom[];
+  nearestStoreRadiusKm: number;
   seo: NormalizedStoreLocatorSeo | null;
 };
+
+export const DEFAULT_NEAREST_STORE_RADIUS_KM = 50;
 
 export const EMPTY_STORE_LOCATOR_PAGE: NormalizedStoreLocatorPage = {
   hero: null,
@@ -184,5 +194,6 @@ export const EMPTY_STORE_LOCATOR_PAGE: NormalizedStoreLocatorPage = {
   invalidPincodeMessage: null,
   listCopy: null,
   showrooms: [],
+  nearestStoreRadiusKm: DEFAULT_NEAREST_STORE_RADIUS_KM,
   seo: null,
 };
