@@ -5,11 +5,29 @@
  * With --base it also checks the PIN lookup route on that deployed site.
  */
 import assert from "node:assert/strict";
+import { register } from "node:module";
 import {
   formatDistanceKm,
   haversineKm,
   nearestStores,
 } from "../src/features/stores/utils/geo.ts";
+
+// Lets Node load the app's own TS modules: "@/..." → src/..., extensionless → .ts / .tsx.
+const aliasHooks = `
+import { statSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+const SRC = ${JSON.stringify(new URL("../src/", import.meta.url).href)};
+const isFile = (url) => { try { return statSync(fileURLToPath(url)).isFile(); } catch { return false; } };
+export async function resolve(specifier, context, next) {
+  const aliased = specifier.startsWith("@/");
+  if (!aliased && !specifier.startsWith(".")) return next(specifier, context);
+  const base = aliased ? new URL(specifier.slice(2), SRC).href : new URL(specifier, context.parentURL).href;
+  for (const suffix of ["", ".ts", ".tsx", "/index.ts"]) {
+    if (isFile(base + suffix)) return next(base + suffix, context);
+  }
+  return next(specifier, context);
+}`;
+register(`data:text/javascript,${encodeURIComponent(aliasHooks)}`);
 
 const stores = [
   { id: "kochi", latitude: 9.9784983, longitude: 76.2824039 },
@@ -54,6 +72,67 @@ assert.equal(formatDistanceKm(9.96), "10 km away");
 assert.equal(formatDistanceKm(12.4), "12 km away");
 
 console.log("nearest-store: distance checks passed");
+
+// The strip's own conversion on a real-shaped /api/store-locator/showrooms payload (captured
+// from dev, 27 Sep): coordinates must survive mapStoreLocatorShowroomToBookStoreVisit.
+const { mapStoreLocatorShowroomToBookStoreVisit } = await import(
+  "../src/features/products/utils/bookStoreVisitStores.ts"
+);
+const showroomsPayload = {
+  nearestStoreRadiusKm: 50,
+  showrooms: [
+    {
+      id: "36",
+      documentId: "su5xgmp3mlywbh377z8trkxa",
+      name: "Kochi",
+      slug: "kochi",
+      address: "Sunny Diamonds Kochi 40/9134 B & C, Rajaji Rd, Ernakulam, Kerala",
+      city: "Kochi",
+      state: "Kerala",
+      phone: "+91 97443 55555",
+      email: "sd-showroom-kochi@yopmail.com",
+      pincode: "682035",
+      mapUrl: "https://maps.google.com/?q=Sunny+Diamonds+Kochi",
+      mapEmbed: null,
+      openingHours: "Mon-Sat: 10:00 AM - 8:00 PM",
+      latitude: 9.9784983,
+      longitude: 76.2824039,
+      desktopImageUrl: "https://d1gf9vo4d2b63b.cloudfront.net/cms/Frame_2147226283_2ccc2e762d.png",
+      mobileImageUrl: "https://d1gf9vo4d2b63b.cloudfront.net/cms/Frame_2147226283_2ccc2e762d.png",
+      imageAlt: "Kochi Location Store",
+    },
+    {
+      id: "52",
+      documentId: "rs8gu2cx01c87cuv4h1bsk18",
+      name: "Thrissur",
+      slug: "thrissur",
+      address: "Sunny Diamonds Thrissur, Kerala",
+      city: "Thrissur",
+      state: "Kerala",
+      phone: "+91 97443 55555",
+      email: null,
+      pincode: "680004",
+      mapUrl: "https://maps.google.com/?q=Sunny+Diamonds+Thrissur",
+      mapEmbed: null,
+      openingHours: "Mon-Sat: 10:00 AM - 8:00 PM",
+      latitude: 10.5223913,
+      longitude: 76.2019176,
+      desktopImageUrl: "https://d1gf9vo4d2b63b.cloudfront.net/cms/showroom_thrissur_3639ed8c84.jpg",
+      mobileImageUrl: "https://d1gf9vo4d2b63b.cloudfront.net/cms/showroom_thrissur_3639ed8c84.jpg",
+      imageAlt: "Thrissur Store Location",
+    },
+  ],
+};
+// Same round trip the browser does: JSON over the wire, then the strip's map.
+const convertedStores = JSON.parse(JSON.stringify(showroomsPayload)).showrooms.map(
+  mapStoreLocatorShowroomToBookStoreVisit,
+);
+assert.equal(convertedStores[0].latitude, 9.9784983);
+assert.equal(convertedStores[0].longitude, 76.2824039);
+const fromConverted = nearestStores(convertedStores, kochiPoint, showroomsPayload.nearestStoreRadiusKm);
+assert.deepEqual(fromConverted.map((result) => result.store.storeName), ["Kochi"]);
+
+console.log("nearest-store: showroom conversion checks passed");
 
 const baseIndex = process.argv.indexOf("--base");
 const base = baseIndex > -1 ? process.argv[baseIndex + 1]?.replace(/\/+$/, "") : "";
